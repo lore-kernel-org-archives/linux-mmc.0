@@ -1,78 +1,44 @@
-From: John Calixto <john.calixto@modsystems.com>
-Subject: Re: [PATCH v4] mmc: Add ioctl to let userspace apps send ACMDs
-Date: Tue, 12 Apr 2011 14:51:47 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1104121450420.8483@peruna>
-References: <alpine.DEB.2.00.1104111424140.32082@peruna> <alpine.DEB.2.00.1104111450340.32082@peruna> <BANLkTimn3vB1JaBfboOL0ayG2FpXsUMe7w@mail.gmail.com>
+From: Cyril Hrubis <metan@ucw.cz>
+Subject: Re: zaurus: mmcblk0: error -110
+Date: Wed, 13 Apr 2011 00:43:33 +0200
+Message-ID: <20110412224333.GA22640@atrey.karlin.mff.cuni.cz>
+References: <20110412151547.GC20815@atrey.karlin.mff.cuni.cz> <m3aafvz30t.fsf@pullcord.laptop.org> <20110412193944.GC2665@atrey.karlin.mff.cuni.cz> <m3oc4bxne1.fsf@pullcord.laptop.org> <20110412205421.GD2665@atrey.karlin.mff.cuni.cz> <m3fwpnxj1w.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-1463811328-279189751-1302645114=:8483"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from elasmtp-galgo.atl.sa.earthlink.net ([209.86.89.61]:35693 "EHLO
-	elasmtp-galgo.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932332Ab1DLVv7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 17:51:59 -0400
-In-Reply-To: <BANLkTimn3vB1JaBfboOL0ayG2FpXsUMe7w@mail.gmail.com>
+Received: from ksp.mff.cuni.cz ([195.113.26.206]:34767 "EHLO
+	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753277Ab1DLWnf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 18:43:35 -0400
+Content-Disposition: inline
+In-Reply-To: <m3fwpnxj1w.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>, Andrei Warkentin <andreiw@motorola.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: pavel@ucw.cz, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, eric.y.miao@gmail.com, utx@penguin.cz, zaurus-devel@lists.linuxtogo.org, marek.vasut@gmail.com, linux-mmc@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi!
+> > Tried 2.6.39-rc3 both with and without CONFIG_MMC_UNSAFE_RESUME and the
+> > insert/remove detection works but both with and without unsafe resume, if the
+> > card is removed for more than second or two it fails to recognize the card
+> > after insertion failing with:
+> >
+> > mmc0: error -95 whilst initialising SD card
+> 
+> That's interesting.  Would you mind trying to bisect?  (Knowing whether
+> 2.6.38 final does it, for example, would be very helpful.)
 
----1463811328-279189751-1302645114=:8483
-Content-Type: TEXT/PLAIN; charset=ISO-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+It may need one or two tries on 2.6.38 but it's there too.
 
-On Tue, 12 Apr 2011, Micha=B3 Miros=B3aw wrote:
-> 2011/4/11 John Calixto <john.calixto@modsystems.com>:
-> [...]
-> > --- /dev/null
-> > +++ b/include/linux/mmc/ioctl.h
-> > @@ -0,0 +1,32 @@
-> > +#ifndef _MMC_IOCTL_H
-> > +#define _MMC_IOCTL_H
-> > +struct mmc_ioc_cmd {
-> > + =A0 =A0 =A0 /* implies direction of data. =A0true =3D write, false =
-=3D read */
-> > + =A0 =A0 =A0 int write_flag;
-> > +
-> > + =A0 =A0 =A0 __u32 opcode;
-> > + =A0 =A0 =A0 __u32 arg;
-> > + =A0 =A0 =A0 __u32 response[4]; =A0/* CMD response */
-> > + =A0 =A0 =A0 unsigned int flags;
-> > + =A0 =A0 =A0 unsigned int blksz;
-> > + =A0 =A0 =A0 unsigned int blocks;
-> > +
-> > + =A0 =A0 =A0 /*
-> > + =A0 =A0 =A0 =A0* Sleep at least postsleep_min_us useconds, and at mos=
-t
-> > + =A0 =A0 =A0 =A0* postsleep_max_us useconds *after* issuing command. =
-=A0Needed for some
-> > + =A0 =A0 =A0 =A0* read commands for which cards have no other way of i=
-ndicating
-> > + =A0 =A0 =A0 =A0* they're ready for the next command (i.e. there is no=
- equivalent of a
-> > + =A0 =A0 =A0 =A0* "busy" indicator for read operations).
-> > + =A0 =A0 =A0 =A0*/
-> > + =A0 =A0 =A0 unsigned int postsleep_min_us;
-> > + =A0 =A0 =A0 unsigned int postsleep_max_us;
-> > +
-> > + =A0 =A0 =A0 /*
-> > + =A0 =A0 =A0 =A0* Override driver-computed timeouts. =A0Note the diffe=
-rence in units!
-> > + =A0 =A0 =A0 =A0*/
-> > + =A0 =A0 =A0 unsigned int data_timeout_ns;
-> > + =A0 =A0 =A0 unsigned int cmd_timeout_ms;
-> > + =A0 =A0 =A0 __u64 data_ptr; =A0/* DAT buffer */
->=20
-> This will be more natural if you have an anonymous union here:
-> union {
->   __u64 data_ptr_l;
->   void *data_ptr;
-> };
->=20
+> There aren't many -EOPNOTSUPP returns in the stack.  I see:
+> 
+> card/block.c: mmc_blk_issue_secdiscard_rq and mmc_blk_issue_discard_rq
+> card/core.c: mmc_erase
+> core/sd_ops.c: mmc_app_cmd
+> 
+> Mind doing some instrumentation to figure out which it is?
 
-Ah, but of course!  Thanks!
+Fails in the mmc_app_cmd.
 
-John
----1463811328-279189751-1302645114=:8483--
+-- 
+metan
