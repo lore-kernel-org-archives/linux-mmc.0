@@ -1,75 +1,67 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: SanDisk 4.3+ iNAND eMMC devices TRIM bug workaround.
-Date: Tue, 12 Apr 2011 13:06:48 -0500
-Message-ID: <BANLkTi=N75ATcXHqbjDMpCMJ1bGnJggqog@mail.gmail.com>
-References: <1302560441-10565-1-git-send-email-andreiw@motorola.com>
-	<m34o631k6t.fsf@pullcord.laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: zaurus: mmcblk0: error -110
+Date: Tue, 12 Apr 2011 15:24:34 -0400
+Message-ID: <m3aafvz30t.fsf@pullcord.laptop.org>
+References: <20110412151547.GC20815@atrey.karlin.mff.cuni.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og108.obsmtp.com ([64.18.0.186]:44318 "EHLO
-	exprod5og108.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757788Ab1DLSIT convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 14:08:19 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3CI6TAa006065
-	for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2011 14:06:29 -0400 (EDT)
-Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3CHoQKB027164
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2011 14:06:29 -0400 (EDT)
-Received: by mail-ww0-f46.google.com with SMTP id 28so7786480wwb.3
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2011 11:08:17 -0700 (PDT)
-In-Reply-To: <m34o631k6t.fsf@pullcord.laptop.org>
+Received: from void.printf.net ([89.145.121.20]:49524 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753885Ab1DLTTz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 12 Apr 2011 15:19:55 -0400
+In-Reply-To: <20110412151547.GC20815@atrey.karlin.mff.cuni.cz> (Cyril Hrubis's
+	message of "Tue, 12 Apr 2011 17:15:48 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: Cyril Hrubis <metan@ucw.cz>
+Cc: pavel@ucw.cz, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, eric.y.miao@gmail.com, utx@penguin.cz, zaurus-devel@lists.linuxtogo.org, marek.vasut@gmail.com, linux-mmc@vger.kernel.org
 
-On Tue, Apr 12, 2011 at 11:57 AM, Chris Ball <cjb@laptop.org> wrote:
-> Hi Andrei,
->
-> On Mon, Apr 11 2011, Andrei Warkentin wrote:
->> This fixes the out-of-spec erase/trim support. CMD38 argument
->> is passed through an EXT_CSD byte instead of as the command
->> argument. This has the effect that trims act as group erases,
->> erasing more data than necessary. Secure trims/erases were also affe=
-cted.
->>
->> N.B. This depends on the mmc_switch patch from the earlier boot part=
-ition
->> patchset (MMC: Allow setting CMD timeout for CMD6 (SWITCH)). This al=
-so
->> depends on the update core/quirks.c code.
->>
->> ToC:
->> [PATCH 1/2] MMC: Support for block quirks.
->> [PATCH 2/2] MMC: Fix erase/trim for certain SanDisk cards.
->
-> Looks like these are missing your new timeout arg to mmc_switch():
->
-> drivers/mmc/card/block.c: In function =91mmc_blk_issue_discard_rq=92:
-> drivers/mmc/card/block.c:371:6: error: too few arguments to function =
-=91mmc_switch=92
-> include/linux/mmc/core.h:138:12: note: declared here
-> drivers/mmc/card/block.c: In function =91mmc_blk_issue_secdiscard_rq=92=
-:
-> drivers/mmc/card/block.c:410:6: error: too few arguments to function =
-=91mmc_switch=92
-> include/linux/mmc/core.h:138:12: note: declared here
-> drivers/mmc/card/block.c:419:7: error: too few arguments to function =
-=91mmc_switch=92
->
-> Thanks,
->
-> - Chris.
-> --
-> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
-> One Laptop Per Child
->
+Hi,
 
-I'm sorry about that. I was sure I had rebased it appropriately, but I
-had not. I will repush it.
+(Adding linux-mmc@.)
 
-A
+On Tue, Apr 12 2011, Cyril Hrubis wrote:
+> Hi!
+> When I insert the mmc card to zaurus, it gets properly detected and prints some
+> info into console. Mounting reading/writing files works fine.
+>
+> However when the card is removed (doesn't need to be mounted before), the
+> removal is most likely not detected, so when I insert it again, no info is
+> printed into console and moreover when I try to mount it zaurus goes into
+> infinite loop printing:
+>
+> Buffer I/O error on device mmcblk0p1, logical block 9
+> mmcblk0: error -110 sending status command
+> mmcblk0: error -110 sending read/write command, response 0xb00, card status 0xb00
+> end_request: I/O error, dev mmcblk0, sector 257
+> Buffer I/O error on device mmcblk0p1, logical block 10
+> ...
+>
+> Related part of the .config:
+>
+> #
+> # OTG and related infrastructure
+> #
+> # CONFIG_USB_GPIO_VBUS is not set
+> # CONFIG_USB_ULPI is not set
+> # CONFIG_NOP_USB_XCEIV is not set
+> CONFIG_MMC=y
+> # CONFIG_MMC_DEBUG is not set
+> CONFIG_MMC_UNSAFE_RESUME=y
+
+Your symptoms match the bug that was fixed by:
+
+bad3babace2ee4d ("mmc: fix CONFIG_MMC_UNSAFE_RESUME regression")
+
+but this fix made it into 2.6.38, so if you're using 2.6.38 final then
+you shouldn't be seeing this.  Could you confirm that you have this
+patch?
+
+If so, could you try building a kernel with CONFIG_MMC_UNSAFE_RESUME=n
+and see if you still have the same problem?
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
