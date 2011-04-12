@@ -1,52 +1,45 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH -next] mmc quirks: fix truncation warnings
-Date: Tue, 12 Apr 2011 13:03:23 -0400
-Message-ID: <m339ln1jxg.fsf@pullcord.laptop.org>
-References: <20110412151408.b80a3afb.sfr@canb.auug.org.au>
-	<20110412091735.f41a3d44.randy.dunlap@oracle.com>
+Subject: Re: [RFC] mmc: sdhci: work around broken dma boundary behavior
+Date: Tue, 12 Apr 2011 13:29:49 -0400
+Message-ID: <m3y63fz8c2.fsf@pullcord.laptop.org>
+References: <20110314172129.GA20654@pengutronix.de>
+	<1301388814-10931-1-git-send-email-mmvinni@yahoo.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20110412091735.f41a3d44.randy.dunlap@oracle.com> (Randy Dunlap's
-	message of "Tue, 12 Apr 2011 09:17:35 -0700")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Randy Dunlap <randy.dunlap@oracle.com>
-Cc: Stephen Rothwell <sfr@canb.auug.org.au>, linux-next@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:60943 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753914Ab1DLRZA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 12 Apr 2011 13:25:00 -0400
+In-Reply-To: <1301388814-10931-1-git-send-email-mmvinni@yahoo.com> (Mikko
+	Vinni's message of "Tue, 29 Mar 2011 11:53:34 +0300")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Mikko Vinni <mmvinni@yahoo.com>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org
 
-Hi,
+Hi Mikko,
 
-On Tue, Apr 12 2011, Randy Dunlap wrote:
-> From: Randy Dunlap <randy.dunlap@oracle.com>
+On Tue, Mar 29 2011, Mikko Vinni wrote:
+> Some SD host controllers (noticed on an integrated JMicron
+> SD reader on an HP Pavilion dv5-1250eo laptop) don't update
+> the dma address register before signaling a dma interrupt due
+> to a dma boundary. Update the register manually to the next
+> boundary (by default 512KiB), at which the transfer stopped.
 >
-> Fix data truncation warnings: .manfid is not unsigned long:
+> As long as each transfer is at most 512KiB in size (guaranteed
+> by a BUG_ON in sdhci_prepare_data()) and the boundary is kept
+> at the default value, this fix is needed at most once per
+> transfer. Smaller boundaries are taken care of by counting
+> the transferred bytes.
 >
-> drivers/mmc/core/quirks.c:36: warning: large integer implicitly truncated to unsigned type
-> drivers/mmc/core/quirks.c:40: warning: large integer implicitly truncated to unsigned type
-> drivers/mmc/core/quirks.c:43: warning: large integer implicitly truncated to unsigned type
-> drivers/mmc/core/quirks.c:46: warning: large integer implicitly truncated to unsigned type
+> Fixes: https://bugzilla.kernel.org/show_bug.cgi?id=28462
 >
-> Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
-> Cc:	Chris Ball <cjb@laptop.org>
-> Cc:	linux-mmc@vger.kernel.org
-> ---
->  include/linux/mmc/card.h |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> --- linux-next-20110412.orig/include/linux/mmc/card.h
-> +++ linux-next-20110412/include/linux/mmc/card.h
-> @@ -180,7 +180,7 @@ struct mmc_fixup {
->  	int data;
->  };
->  
-> -#define CID_MANFID_ANY (-1ul)
-> +#define CID_MANFID_ANY (-1u)
->  #define CID_OEMID_ANY ((unsigned short) -1)
->  #define CID_NAME_ANY (NULL)
->  
->
+> Signed-off-by: Mikko Vinni <mmvinni@yahoo.com>
 
-Thanks very much, Randy, I've pushed this to mmc-next.
+I know you posted this as an RFC, but I've pushed it to mmc-next for
+testing now, and will plan on merging it for .40 if everything goes well.
+Thanks very much!
 
 - Chris.
 -- 
