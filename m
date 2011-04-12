@@ -1,46 +1,60 @@
-From: Randy Dunlap <randy.dunlap@oracle.com>
-Subject: [PATCH -next] mmc quirks: fix truncation warnings
-Date: Tue, 12 Apr 2011 09:17:35 -0700
-Message-ID: <20110412091735.f41a3d44.randy.dunlap@oracle.com>
-References: <20110412151408.b80a3afb.sfr@canb.auug.org.au>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: SanDisk 4.3+ iNAND eMMC devices TRIM bug workaround.
+Date: Tue, 12 Apr 2011 12:57:46 -0400
+Message-ID: <m34o631k6t.fsf@pullcord.laptop.org>
+References: <1302560441-10565-1-git-send-email-andreiw@motorola.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rcsinet10.oracle.com ([148.87.113.121]:50903 "EHLO
-	rcsinet10.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757970Ab1DLQSF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 12:18:05 -0400
-In-Reply-To: <20110412151408.b80a3afb.sfr@canb.auug.org.au>
+Received: from void.printf.net ([89.145.121.20]:33275 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754684Ab1DLQwz convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 12:52:55 -0400
+In-Reply-To: <1302560441-10565-1-git-send-email-andreiw@motorola.com> (Andrei
+	Warkentin's message of "Mon, 11 Apr 2011 17:20:39 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Rothwell <sfr@canb.auug.org.au>, Chris Ball <cjb@laptop.org>
-Cc: linux-next@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-mmc@vger.kernel.org
 
-From: Randy Dunlap <randy.dunlap@oracle.com>
+Hi Andrei,
 
-Fix data truncation warnings: .manfid is not unsigned long:
+On Mon, Apr 11 2011, Andrei Warkentin wrote:
+> This fixes the out-of-spec erase/trim support. CMD38 argument
+> is passed through an EXT_CSD byte instead of as the command
+> argument. This has the effect that trims act as group erases,
+> erasing more data than necessary. Secure trims/erases were also affec=
+ted.
+>
+> N.B. This depends on the mmc_switch patch from the earlier boot parti=
+tion
+> patchset (MMC: Allow setting CMD timeout for CMD6 (SWITCH)). This als=
+o
+> depends on the update core/quirks.c code.
+>
+> ToC:
+> [PATCH 1/2] MMC: Support for block quirks.
+> [PATCH 2/2] MMC: Fix erase/trim for certain SanDisk cards.
 
-drivers/mmc/core/quirks.c:36: warning: large integer implicitly truncated to unsigned type
-drivers/mmc/core/quirks.c:40: warning: large integer implicitly truncated to unsigned type
-drivers/mmc/core/quirks.c:43: warning: large integer implicitly truncated to unsigned type
-drivers/mmc/core/quirks.c:46: warning: large integer implicitly truncated to unsigned type
+Looks like these are missing your new timeout arg to mmc_switch():
 
-Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
-Cc:	Chris Ball <cjb@laptop.org>
-Cc:	linux-mmc@vger.kernel.org
----
- include/linux/mmc/card.h |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_issue_discard_rq=
+=E2=80=99:
+drivers/mmc/card/block.c:371:6: error: too few arguments to function =E2=
+=80=98mmc_switch=E2=80=99
+include/linux/mmc/core.h:138:12: note: declared here
+drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_issue_secdiscard=
+_rq=E2=80=99:
+drivers/mmc/card/block.c:410:6: error: too few arguments to function =E2=
+=80=98mmc_switch=E2=80=99
+include/linux/mmc/core.h:138:12: note: declared here
+drivers/mmc/card/block.c:419:7: error: too few arguments to function =E2=
+=80=98mmc_switch=E2=80=99
 
---- linux-next-20110412.orig/include/linux/mmc/card.h
-+++ linux-next-20110412/include/linux/mmc/card.h
-@@ -180,7 +180,7 @@ struct mmc_fixup {
- 	int data;
- };
- 
--#define CID_MANFID_ANY (-1ul)
-+#define CID_MANFID_ANY (-1u)
- #define CID_OEMID_ANY ((unsigned short) -1)
- #define CID_NAME_ANY (NULL)
- 
+Thanks,
+
+- Chris.
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
