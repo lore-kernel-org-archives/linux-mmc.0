@@ -1,66 +1,57 @@
-From: John Calixto <john.calixto@modsystems.com>
-Subject: Re: [PATCH v3] mmc: Add ioctl to let userspace apps send ACMDs
-Date: Mon, 11 Apr 2011 16:32:42 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1104111626060.32082@peruna>
-References: <alpine.DEB.2.00.1104071816270.10238@peruna> <m3ipuka3dm.fsf@pullcord.laptop.org>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [RFC] mmc: sdhci: work around broken dma boundary behavior
+Date: Tue, 12 Apr 2011 06:56:34 +0200
+Message-ID: <20110412045634.GA25956@pengutronix.de>
+References: <20110314172129.GA20654@pengutronix.de>
+ <1301388814-10931-1-git-send-email-mmvinni@yahoo.com>
+ <m3tye4a48n.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-1463811328-1126771776-1302564769=:32082"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="IS0zKkzwUGydFO0o"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from elasmtp-banded.atl.sa.earthlink.net ([209.86.89.70]:40249 "EHLO
-	elasmtp-banded.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753424Ab1DKXcu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2011 19:32:50 -0400
-In-Reply-To: <m3ipuka3dm.fsf@pullcord.laptop.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:42529 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751078Ab1DLE4h (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2011 00:56:37 -0400
+Content-Disposition: inline
+In-Reply-To: <m3tye4a48n.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+Cc: Mikko Vinni <mmvinni@yahoo.com>, linux-mmc@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
 
----1463811328-1126771776-1302564769=:32082
-Content-Type: TEXT/PLAIN; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+--IS0zKkzwUGydFO0o
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, 11 Apr 2011, Chris Ball wrote:
-> This adds two gcc warnings here (compiling for ARM):
+> > In my opinion this is more risky than the original patch because this
+> > will affect the behavior on all controllers that use sdhci, and not
+> > just on those ones that don't update SDHCI_DMA_ADDRESS themselves.
+> > Comments welcome!
 >=20
->   CC      drivers/mmc/card/block.o
-> drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_ioctl_copy_from_us=
-er=E2=80=99:
-> drivers/mmc/card/block.c:199:33: warning: cast to pointer from integer of=
- different size [-Wint-to-pointer-cast]
-> drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_ioctl_acmd=E2=80=
-=99:
-> drivers/mmc/card/block.c:308:20: warning: cast to pointer from integer of=
- different size [-Wint-to-pointer-cast]
->=20
-> ...
-> > +=09if (copy_from_user(idata->buf, (u8 *) user->data_ptr, idata->buf_by=
-tes)) {
-> > +=09=09err =3D -EFAULT;
-> > +=09=09goto copy_err;
-> > +=09}
-> ...
-> > +=09=09if (copy_to_user((u8 *) ic_ptr->data_ptr, idata->buf, idata->buf=
-_bytes)) {
-> > +=09=09=09err =3D -EFAULT;
-> > +=09=09=09goto acmd_rel_host;
-> > +=09=09}
-> ...
->=20
+> Any thoughts on which of the two approaches you prefer?
 
-Hrmmm...  So, what's the correct way to do this compat_ioctl() stuff?
-My first attempt at a compat_ioctl() implementation in v2 used a 32bit
-version of the structure to marshall the data.  That was shot down as
-being unnecessarily complicated since the buffer pointer was the only
-thing that was not compat friendly.  It was recommended that I could
-just make this a 64bit int field and let the callers do the appropriate
-casting.  However, this latter solution (implemented in v3) causes the
-compiler warning that you describe above.
+Thanks for the ping. I prefer the latter approach but it should be given en=
+ough
+time testing in -next.
 
-Should I revert to the v2 implementation?
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
-John
----1463811328-1126771776-1302564769=:32082--
+--IS0zKkzwUGydFO0o
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAk2j24IACgkQD27XaX1/VRvj7wCeI4veo7R3U1pOXaL8ZPExYQCa
+DbgAoJfpCXwp2hZdjfyYlNU8hMKfv/jA
+=CDH8
+-----END PGP SIGNATURE-----
+
+--IS0zKkzwUGydFO0o--
