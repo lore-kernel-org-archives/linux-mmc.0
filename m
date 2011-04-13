@@ -1,52 +1,51 @@
-From: John Calixto <john.calixto@modsystems.com>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: [PATCH] MMC: Fix use of uninitialized data in mmc_cmd_app.
-Date: Wed, 13 Apr 2011 14:04:57 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1104131400420.13863@peruna>
+Date: Wed, 13 Apr 2011 17:40:43 -0400
+Message-ID: <m362qhvnhg.fsf@pullcord.laptop.org>
 References: <1302726792-4733-1-git-send-email-andreiw@motorola.com>
+	<alpine.DEB.2.00.1104131400420.13863@peruna>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from elasmtp-banded.atl.sa.earthlink.net ([209.86.89.70]:41996 "EHLO
-	elasmtp-banded.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932296Ab1DMVFK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2011 17:05:10 -0400
-In-Reply-To: <1302726792-4733-1-git-send-email-andreiw@motorola.com>
+Received: from void.printf.net ([89.145.121.20]:56532 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933010Ab1DMVgC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 13 Apr 2011 17:36:02 -0400
+In-Reply-To: <alpine.DEB.2.00.1104131400420.13863@peruna> (John Calixto's
+	message of "Wed, 13 Apr 2011 14:04:57 -0700 (PDT)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: John Calixto <john.calixto@modsystems.com>
+Cc: Andrei Warkentin <andreiw@motorola.com>, linux-mmc@vger.kernel.org
 
-On Wed, 13 Apr 2011, Andrei Warkentin wrote:
+Hi,
 
-> mmc_cmd_app did not zero out mmc_command on stack.
-> 
-> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
-> ---
->  drivers/mmc/core/sd_ops.c |    2 ++
->  1 files changed, 2 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-> index 76af349..71fdb07 100644
-> --- a/drivers/mmc/core/sd_ops.c
-> +++ b/drivers/mmc/core/sd_ops.c
-> @@ -29,6 +29,8 @@ static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
->  	BUG_ON(!host);
->  	BUG_ON(card && (card->host != host));
->  
-> +	memset(&cmd, 0, sizeof(struct mmc_command));
-> +
->  	cmd.opcode = MMC_APP_CMD;
->  
->  	if (card) {
-> -- 
+On Wed, Apr 13 2011, John Calixto wrote:
+> Out of curiosity, why is:
+>
+> 	memset(&cmd, 0, sizeof(struct mmc_command));
+>
+> preferred over:
+>
+> 	struct mmc_command cmd = {0};
 
-Out of curiosity, why is:
+Thanks for the question.  I asked around, the verdict seems to be that
+it *isn't* preferred, that the compiler can actually (theoretically)
+do better with the zero initializer, and the memsets are probably
+just holdover from when dynamic initialization of aggregates wasn't
+available in C.
 
-	memset(&cmd, 0, sizeof(struct mmc_command));
+An even stronger benefit of the zero initializer is, of course, that
+you can do a single-line grep to find out whether someone forgot to
+initialize any of them.  (And it's a line shorter, too.)
 
-preferred over:
+So, now I'm thinking about a patch to convert all of our uses of
+memset(.., 0, struct ..) over to { 0 } initializers.  Yell if
+anyone has strong opinions.
 
-	struct mmc_command cmd = {0};
+Thanks,
 
-
-John
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
