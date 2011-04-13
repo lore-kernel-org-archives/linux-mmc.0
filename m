@@ -1,59 +1,51 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH 0/5] consolidate sdhci pltfm & OF drivers and get them
- self registered
-Date: Wed, 13 Apr 2011 14:26:06 +0800
-Message-ID: <20110413062605.GA1310@S2100-06.ap.freescale.net>
-References: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
- <m38vvvz1p6.fsf@pullcord.laptop.org>
+From: Mikko Vinni <mmvinni@yahoo.com>
+Subject: Re: [RFC] mmc: sdhci: work around broken dma boundary behavior
+Date: Wed, 13 Apr 2011 00:04:57 -0700 (PDT)
+Message-ID: <699629.28764.qm@web161807.mail.bf1.yahoo.com>
+References: <20110314172129.GA20654@pengutronix.de> <1301388814-10931-1-git-send-email-mmvinni@yahoo.com> <m3y63fz8c2.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:37498
-	"EHLO VA3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751126Ab1DMGWd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2011 02:22:33 -0400
-Content-Disposition: inline
-In-Reply-To: <m38vvvz1p6.fsf@pullcord.laptop.org>
+Received: from nm1.bullet.mail.bf1.yahoo.com ([98.139.212.160]:21326 "HELO
+	nm1.bullet.mail.bf1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1756898Ab1DMHE6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2011 03:04:58 -0400
+In-Reply-To: <m3y63fz8c2.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Shawn Guo <shawn.guo@linaro.org>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, sameo@linux.intel.com, linaro-dev@lists.linaro.org, patches@linaro.org
+Cc: Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+>From Chris Ball:
 
-On Thu, Mar 31, 2011 at 12:36:53PM -0400, Chris Ball wrote:
-> Hi Wolfram,
-> 
-> On Fri, Mar 25 2011, Shawn Guo wrote:
-> > Here are what the patch set does.
+> > Some SD host  controllers (noticed on an integrated JMicron
+> > SD reader on an HP  Pavilion dv5-1250eo laptop) don't update
+> > the dma address register before  signaling a dma interrupt due
+> > to a dma boundary. Update the register  manually to the next
+> > boundary (by default 512KiB), at which the transfer  stopped.
 > >
-> > * Remove .probe and .remove hooks from sdhci-pltfm.c and make it be
-> >   a pure common helper function providers.
-> > * Add .probe and .remove hooks for sdhci pltfm drivers sdhci-cns3xxx,
-> >   sdhci-dove, sdhci-tegra, and sdhci-esdhc-imx to make them self
-> >   registered with calling helper functions created above.
-> > * Migrate the use of sdhci_of_host and sdhci_of_data to
-> >   sdhci_pltfm_host and sdhci_pltfm_data, so that OF version host and
-> >   data structure works can be saved, and pltfm version works for both
-> >   cases.
-> > * Add OF common helper stuff into sdhci-pltfm.c, and make OF version
-> >   sdhci drivers sdhci-of-esdhc and sdhci-of-hlwd become self
-> >   registered as well, so that sdhci-of-core.c and sdhci-of.h can be
-> >   removed.
-> > * Consolidate the OF and pltfm esdhc drivers into one with sharing
-> >   the same pair of .probe and .remove hooks.  As a result,
-> >   sdhci-esdhc-imx.c and sdhci-of-esdhc.c go away, while
-> >   sdhci-esdhc.c comes in and works for both MPCxxx and i.MX.
-> > * Eliminate include/linux/mmc/sdhci-pltfm.h with moving stuff into
-> >   drivers/mmc/host/sdhci-pltfm.h.
+> > As long as each transfer is at most 512KiB in size  (guaranteed
+> > by a BUG_ON in sdhci_prepare_data()) and the boundary is  kept
+> > at the default value, this fix is needed at most once per
+> >  transfer. Smaller boundaries are taken care of by counting
+> > the  transferred bytes.
+> >
+> > Fixes: https://bugzilla.kernel.org/show_bug.cgi?id=28462
+> >
+> >  Signed-off-by: Mikko Vinni <mmvinni@yahoo.com>
 > 
-> If you get time, would appreciate getting an ACK from you on the patch
-> changes (including Grant's review).  Thanks very much!
+> I know you  posted this as an RFC, but I've pushed it to mmc-next for
+> testing now, and  will plan on merging it for .40 if everything goes well.
+
+Ok, thanks.
+
+Mikko
+
+
+> Thanks very  much!
 > 
-Can you please take some time to help review?  I know you are on ELC
-this week :)  What about next couple of weeks?
+> - Chris.
+> 
 
--- 
-Regards,
-Shawn
 
+      
