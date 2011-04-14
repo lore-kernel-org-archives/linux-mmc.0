@@ -1,153 +1,270 @@
 From: Andrei Warkentin <andreiw@motorola.com>
-Subject: [RFC 2/3] MMC: Implement MMC_CAP_CMD23 for SDHCI.
-Date: Wed, 13 Apr 2011 19:38:42 -0500
-Message-ID: <1302741523-22276-3-git-send-email-andreiw@motorola.com>
+Subject: [RFC 1/3] MMC: use CMD23 for multiblock transfers when we can.
+Date: Wed, 13 Apr 2011 19:38:41 -0500
+Message-ID: <1302741523-22276-2-git-send-email-andreiw@motorola.com>
 References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og110.obsmtp.com ([64.18.0.20]:46974 "EHLO
-	exprod5og110.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752818Ab1DNAAD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2011 20:00:03 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.168])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3E00PTO019547
-	for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2011 20:00:26 -0400 (EDT)
-Received: from mail-yx0-f170.google.com (mail-yx0-f170.google.com [209.85.213.170])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3E00LQ6019516
-	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2011 20:00:25 -0400 (EDT)
-Received: by mail-yx0-f170.google.com with SMTP id 11so816882yxi.15
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2011 17:00:01 -0700 (PDT)
+Received: from exprod5og105.obsmtp.com ([64.18.0.180]:35102 "EHLO
+	exprod5og105.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750901Ab1DNAAA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2011 20:00:00 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.168])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3DNwA7T008781
+	for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2011 19:58:10 -0400 (EDT)
+Received: from mail-gw0-f42.google.com (mail-gw0-f42.google.com [74.125.83.42])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3DNw9WT008773
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2011 19:58:09 -0400 (EDT)
+Received: by gwb17 with SMTP id 17so816886gwb.15
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2011 16:59:58 -0700 (PDT)
 In-Reply-To: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: arnd@arndb.de, cjb@laptop.org, Andrei Warkentin <andreiw@motorola.com>
 
-Implements support for multiblock transfers bounded
-by SET_BLOCK_COUNT (CMD23).
+CMD23-prefixed instead of open-ended multiblock transfers
+have a performance advantage on some MMC cards.
 
 Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
 ---
- drivers/mmc/host/sdhci.c |   60 +++++++++++++++++++++++++++++++++------------
- 1 files changed, 44 insertions(+), 16 deletions(-)
+ drivers/mmc/card/block.c |   89 ++++++++++++++++++++++++++++++---------------
+ include/linux/mmc/core.h |    1 +
+ include/linux/mmc/host.h |    6 +++
+ include/linux/mmc/mmc.h  |    6 +++
+ 4 files changed, 72 insertions(+), 30 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 94793f2..0b71ce8 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -822,9 +822,10 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index c209953..282e6ef 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -55,10 +55,6 @@ MODULE_ALIAS("mmc:block");
+ #define INAND_CMD38_ARG_SECTRIM1 0x81
+ #define INAND_CMD38_ARG_SECTRIM2 0x88
+ 
+-#define REL_WRITES_SUPPORTED(card) (mmc_card_mmc((card)) &&	\
+-    (((card)->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||	\
+-     ((card)->ext_csd.rel_sectors)))
+-
+ static DEFINE_MUTEX(block_mutex);
+ 
+ /*
+@@ -85,6 +81,10 @@ struct mmc_blk_data {
+ 	struct mmc_queue queue;
+ 	struct list_head part;
+ 
++	unsigned int	flags;
++#define MMC_BLK_CMD23	(1 << 0)	/* Can do SET_BLOCK_COUNT for multiblock */
++#define MMC_BLK_REL_WR	(1 << 1)	/* MMC Reliable write support */
++
+ 	unsigned int	usage;
+ 	unsigned int	read_only;
+ 	unsigned int	part_type;
+@@ -225,6 +225,7 @@ static const struct block_device_operations mmc_bdops = {
+ 
+ struct mmc_blk_request {
+ 	struct mmc_request	mrq;
++	struct mmc_command	sbc;
+ 	struct mmc_command	cmd;
+ 	struct mmc_command	stop;
+ 	struct mmc_data		data;
+@@ -455,13 +456,10 @@ static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
+  * reliable write can handle, thus finish the request in
+  * partial completions.
+  */
+-static inline int mmc_apply_rel_rw(struct mmc_blk_request *brq,
+-				   struct mmc_card *card,
+-				   struct request *req)
++static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
++				    struct mmc_card *card,
++				    struct request *req)
+ {
+-	int err;
+-	struct mmc_command set_count;
+-
+ 	if (!(card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN)) {
+ 		/* Legacy mode imposes restrictions on transfers. */
+ 		if (!IS_ALIGNED(brq->cmd.arg, card->ext_csd.rel_sectors))
+@@ -472,16 +470,6 @@ static inline int mmc_apply_rel_rw(struct mmc_blk_request *brq,
+ 		else if (brq->data.blocks < card->ext_csd.rel_sectors)
+ 			brq->data.blocks = 1;
+ 	}
+-
+-	memset(&set_count, 0, sizeof(struct mmc_command));
+-	set_count.opcode = MMC_SET_BLOCK_COUNT;
+-	set_count.arg = brq->data.blocks | (1 << 31);
+-	set_count.flags = MMC_RSP_R1 | MMC_CMD_AC;
+-	err = mmc_wait_for_cmd(card->host, &set_count, 0);
+-	if (err)
+-		printk(KERN_ERR "%s: error %d SET_BLOCK_COUNT\n",
+-		       req->rq_disk->disk_name, err);
+-	return err;
  }
  
- static void sdhci_set_transfer_mode(struct sdhci_host *host,
--	struct mmc_data *data)
-+	struct mmc_command *cmd)
- {
- 	u16 mode;
-+	struct mmc_data *data = cmd->data;
+ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+@@ -498,7 +486,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 	bool do_rel_wr = ((req->cmd_flags & REQ_FUA) ||
+ 			  (req->cmd_flags & REQ_META)) &&
+ 		(rq_data_dir(req) == WRITE) &&
+-		REL_WRITES_SUPPORTED(card);
++		(md->flags & MMC_BLK_REL_WR);
  
- 	if (data == NULL)
- 		return;
-@@ -832,11 +833,17 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 	WARN_ON(!host->data);
+ 	do {
+ 		struct mmc_command cmd;
+@@ -536,11 +524,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
  
- 	mode = SDHCI_TRNS_BLK_CNT_EN;
--	if (data->blocks > 1) {
--		if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
--			mode |= SDHCI_TRNS_MULTI | SDHCI_TRNS_ACMD12;
--		else
--			mode |= SDHCI_TRNS_MULTI;
-+	if (mmc_op_multi(cmd->opcode) ||
-+	    data->blocks > 1) {
-+		mode |= SDHCI_TRNS_MULTI;
+ 		if (brq.data.blocks > 1 || do_rel_wr) {
+ 			/* SPI multiblock writes terminate using a special
+-			 * token, not a STOP_TRANSMISSION request. Reliable
+-			 * writes use SET_BLOCK_COUNT and do not use a
+-			 * STOP_TRANSMISSION request either.
++			 * token, not a STOP_TRANSMISSION request.
+ 			 */
+-			if ((!mmc_host_is_spi(card->host) && !do_rel_wr) ||
++			if (!mmc_host_is_spi(card->host) ||
+ 			    rq_data_dir(req) == READ)
+ 				brq.mrq.stop = &brq.stop;
+ 			readcmd = MMC_READ_MULTIPLE_BLOCK;
+@@ -558,8 +544,32 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 			brq.data.flags |= MMC_DATA_WRITE;
+ 		}
+ 
+-		if (do_rel_wr && mmc_apply_rel_rw(&brq, card, req))
+-			goto cmd_err;
++		if (do_rel_wr)
++			mmc_apply_rel_rw(&brq, card, req);
 +
 +		/*
-+		 * If we are sending CMD23, CMD12 never gets sent
-+		 * on successful completion.
++		 * Pre-defined multi-block transfers are preferable to
++		 * open ended-ones (and necessary for reliable writes).
++		 * However, it is not sufficient to just send CMD23,
++		 * and avoid the final CMD12, as on an error condition
++		 * CMD12 (stop) needs to be sent anyway. This, coupled
++		 * with Auto-CMD23 enhancements provided by some
++		 * hosts, means that the complexity of dealing
++		 * with this is best left to the host. If CMD23 is
++		 * supported by card and host, we'll fill sbc in and let
++		 * the host deal with handling it correctly. This means
++		 * that for hosts that don't expose MMC_CAP_CMD23, no
++		 * change of behavior will be observed.
 +		 */
-+		if (!host->mrq->sbc &&
-+		    host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
-+			mode |= SDHCI_TRNS_ACMD12;
- 	}
- 	if (data->flags & MMC_DATA_READ)
- 		mode |= SDHCI_TRNS_READ;
-@@ -877,7 +884,15 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 	else
- 		data->bytes_xfered = data->blksz * data->blocks;
- 
--	if (data->stop) {
-+	/*
-+	 * Need to send CMD12 if -
-+	 * a) open-ended multiblock transfer (no CMD23)
-+	 * b) error in multiblock transfer
-+	 */
-+	if (data->stop &&
-+	    (data->error ||
-+	     !host->mrq->sbc)) {
 +
- 		/*
- 		 * The controller needs a reset of internal state machines
- 		 * upon error conditions.
-@@ -933,7 +948,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
++		if ((md->flags & MMC_BLK_CMD23) &&
++		    mmc_op_multi(brq.cmd.opcode)) {
++			brq.sbc.opcode = MMC_SET_BLOCK_COUNT;
++			brq.sbc.arg = brq.data.blocks |
++				(do_rel_wr ? (1 << 31) : 0);
++			brq.sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
++			brq.mrq.sbc = &brq.sbc;
++		}
  
- 	sdhci_writel(host, cmd->arg, SDHCI_ARGUMENT);
+ 		mmc_set_data_timeout(&brq.data, card);
  
--	sdhci_set_transfer_mode(host, cmd->data);
-+	sdhci_set_transfer_mode(host, cmd);
+@@ -596,7 +606,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 		 * until later as we need to wait for the card to leave
+ 		 * programming mode even when things go wrong.
+ 		 */
+-		if (brq.cmd.error || brq.data.error || brq.stop.error) {
++		if (brq.sbc.error || brq.cmd.error ||
++		    brq.data.error || brq.stop.error) {
+ 			if (brq.data.blocks > 1 && rq_data_dir(req) == READ) {
+ 				/* Redo read one sector at a time */
+ 				printk(KERN_WARNING "%s: retrying using single "
+@@ -607,6 +618,13 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 			status = get_card_status(card, req);
+ 		}
  
- 	if ((cmd->flags & MMC_RSP_136) && (cmd->flags & MMC_RSP_BUSY)) {
- 		printk(KERN_ERR "%s: Unsupported response type!\n",
-@@ -986,13 +1001,21 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 
- 	host->cmd->error = 0;
- 
--	if (host->data && host->data_early)
--		sdhci_finish_data(host);
-+	/* Finished CMD23, now send actual command. */
-+	if (host->cmd == host->mrq->sbc) {
-+		host->cmd = NULL;
-+		sdhci_send_command(host, host->mrq->cmd);
-+	} else {
- 
--	if (!host->cmd->data)
--		tasklet_schedule(&host->finish_tasklet);
-+		/* Processed actual command. */
-+		if (host->data && host->data_early)
-+			sdhci_finish_data(host);
- 
--	host->cmd = NULL;
-+		if (!host->cmd->data)
-+			tasklet_schedule(&host->finish_tasklet);
++		if (brq.sbc.error) {
++			printk(KERN_ERR "%s: error %d sending SET_BLOCK_COUNT "
++			       "command, response %#x, card status %#x\n",
++			       req->rq_disk->disk_name, brq.sbc.error,
++			       brq.sbc.resp[0], status);
++		}
 +
-+		host->cmd = NULL;
-+	}
- }
- 
- static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
-@@ -1159,8 +1182,13 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
- 		host->mrq->cmd->error = -ENOMEDIUM;
- 		tasklet_schedule(&host->finish_tasklet);
--	} else
--		sdhci_send_command(host, mrq->cmd);
-+	} else {
-+
-+		if (mrq->sbc)
-+			sdhci_send_command(host, mrq->sbc);
-+		else
-+			sdhci_send_command(host, mrq->cmd);
-+	}
- 
- 	mmiowb();
- 	spin_unlock_irqrestore(&host->lock, flags);
-@@ -1909,7 +1937,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
- 
- 	mmc->f_max = host->max_clk;
--	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE;
-+	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
+ 		if (brq.cmd.error) {
+ 			printk(KERN_ERR "%s: error %d sending read/write "
+ 			       "command, response %#x, card status %#x\n",
+@@ -804,8 +822,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	md->disk->queue = md->queue.queue;
+ 	md->disk->driverfs_dev = parent;
+ 	set_disk_ro(md->disk, md->read_only || default_ro);
+-	if (REL_WRITES_SUPPORTED(card))
+-		blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
  
  	/*
- 	 * A controller may support 8-bit width, but the board itself
+ 	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
+@@ -829,6 +845,19 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 
+ 	blk_queue_logical_block_size(md->queue.queue, 512);
+ 	set_capacity(md->disk, size);
++
++	if (mmc_host_cmd23(card->host) &&
++	    mmc_card_mmc(card))
++		md->flags |= MMC_BLK_CMD23;
++
++	if (mmc_card_mmc(card) &&
++	    md->flags & MMC_BLK_CMD23 &&
++	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
++	     card->ext_csd.rel_sectors)) {
++		md->flags |= MMC_BLK_REL_WR;
++		blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
++	}
++
+ 	return md;
+ 
+  err_putdisk:
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index f8e4bcb..55d7fde 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -120,6 +120,7 @@ struct mmc_data {
+ };
+ 
+ struct mmc_request {
++	struct mmc_command	*sbc;		/* SET_BLOCK_COUNT for multiblock */
+ 	struct mmc_command	*cmd;
+ 	struct mmc_data		*data;
+ 	struct mmc_command	*stop;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 4f705eb..ba34fc5 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -173,6 +173,7 @@ struct mmc_host {
+ 						/* DDR mode at 1.2V */
+ #define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off after boot */
+ #define MMC_CAP_BUS_WIDTH_TEST	(1 << 14)	/* CMD14/CMD19 bus width ok */
++#define MMC_CAP_CMD23		(1 << 15)	/* CMD23 supported */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
+@@ -330,5 +331,10 @@ static inline int mmc_card_wake_sdio_irq(struct mmc_host *host)
+ {
+ 	return host->pm_flags & MMC_PM_WAKE_SDIO_IRQ;
+ }
++
++static inline int mmc_host_cmd23(struct mmc_host *host)
++{
++	return host->caps & MMC_CAP_CMD23;
++}
+ #endif
+ 
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 373b2bf..ea74168 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -82,6 +82,12 @@
+ #define MMC_APP_CMD              55   /* ac   [31:16] RCA        R1  */
+ #define MMC_GEN_CMD              56   /* adtc [0] RD/WR          R1  */
+ 
++static inline bool mmc_op_multi(u32 opcode)
++{
++	return opcode == MMC_WRITE_MULTIPLE_BLOCK ||
++		opcode == MMC_READ_MULTIPLE_BLOCK;
++}
++
+ /*
+  * MMC_SWITCH argument format:
+  *
 -- 
 1.7.0.4
 
