@@ -1,98 +1,64 @@
-From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Subject: RE: SET_BLOCK_COUNT-bounded multiblock transfers
-Date: Thu, 14 Apr 2011 17:05:25 +0800
-Message-ID: <CE761E84DADF2947A4AF22FB8D97A473571F5610@shsmsx501.ccr.corp.intel.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: SET_BLOCK_COUNT-bounded multiblock transfers
+Date: Thu, 14 Apr 2011 17:58:45 -0500
+Message-ID: <BANLkTikDaPq56UBkNtmKApBXZ6dgMKgo6Q@mail.gmail.com>
 References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
- <BANLkTikFWhDhCjGKBBE4PP9sNa2ynVEOtg@mail.gmail.com>
+	<BANLkTikFWhDhCjGKBBE4PP9sNa2ynVEOtg@mail.gmail.com>
+	<CE761E84DADF2947A4AF22FB8D97A473571F5610@shsmsx501.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:4046 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932181Ab1DNJF4 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Apr 2011 05:05:56 -0400
-In-Reply-To: <BANLkTikFWhDhCjGKBBE4PP9sNa2ynVEOtg@mail.gmail.com>
-Content-Language: en-US
+Received: from exprod5og107.obsmtp.com ([64.18.0.184]:60288 "EHLO
+	exprod5og107.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754158Ab1DNW6s (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Apr 2011 18:58:48 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3EMutwL025026
+	for <linux-mmc@vger.kernel.org>; Thu, 14 Apr 2011 18:56:55 -0400 (EDT)
+Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3EMuadp024957
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Thu, 14 Apr 2011 18:56:55 -0400 (EDT)
+Received: by mail-ww0-f46.google.com with SMTP id 28so2459620wwb.3
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Apr 2011 15:58:45 -0700 (PDT)
+In-Reply-To: <CE761E84DADF2947A4AF22FB8D97A473571F5610@shsmsx501.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "arnd@arndb.de" <arnd@arndb.de>, "cjb@laptop.org" <cjb@laptop.org>
+To: "Gao, Yunpeng" <yunpeng.gao@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, "cjb@laptop.org" <cjb@laptop.org>
 
->-----Original Message-----
->From: linux-mmc-owner@vger.kernel.org
->[mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Andrei Warkentin
->Sent: Thursday, April 14, 2011 8:04 AM
->To: linux-mmc@vger.kernel.org
->Cc: arnd@arndb.de; cjb@laptop.org; Gao, Yunpeng
->Subject: Re: SET_BLOCK_COUNT-bounded multiblock transfers
+On Thu, Apr 14, 2011 at 4:05 AM, Gao, Yunpeng <yunpeng.gao@intel.com> wrote:
 >
->On Wed, Apr 13, 2011 at 7:38 PM, Andrei Warkentin
-><andreiw@motorola.com> wrote:
->> This is a request for comments for a patch set that enables
->> predefined multiblock transfers if these are supported.
->>
->> Before this patch set, all multiblock transfers look like (for example)
->>
->> CMD25 -> [block] [block] [block] [block] -> CMD12 (stop)
->>
->> ...or for controllers with Auto-CMD12
->>
->> CMD25 -> [block] [block] [block] [block] (host sends CMD12 itself).
->>
->> We want to enable -
->>
->> CMD23(4 blocks) CMD25 [data] [data] [data] [data]
->>
->> ...and for controllers with Auto-CMD23 -
->>
->> (Host sends CMD23(4 blocks)) CMD25 [data] [data] [data] [data]
->>
->> The interrupt overhead is the same, but for cards that optimize for
->predefined transfers
->> we can see better transfer rates. I've tested this on a Sandisk eMMC where I
->saw as good as
->> a 50% improvement on writes, and on a Toshiba eMMC where I saw no
->improvement at all. Also,
->> reliable writes use CMD23, so this cleans up that code path as well. Note,
->that if a transfer
->> fails, CMD12 must still be sent, so it is not sufficient to just not fill the
->mrq->stop field
->> while doing a CMD23-enabled transfer. Due to this error handling and
->off-loads of Auto-CMD23
->> (and interaction with Auto-CMD12) handling of SET_BLOCK_COUNT, just like
->STOP, is left to the host driver.
->> Host driver now exposes MMC_CAP_CMD23 if it has been changed to
->handle the new "sbc" field in struct mmc_request.
->> If a host doesn't expose this capability, open-ended transfers are used, and
->all functionality
->> relying on CMD23 (such as reliable writes) is disabled.
->>
->> The third patch has been only tested on SD cards that don't expose CMD23.
->Still need to get an SDXC
->> card and test it out, but I wanted to get eyes on this patch set anyway :-).
->>
->> I had a fourth patch enabling Auto-CMD23 for SDHCI, but I'll hold off until I
->can verify it.
->>
->> Thoughts?
->>
->> Table of Contents:
->> [RFC 1/3] MMC: use CMD23 for multiblock transfers when we can.
->> [RFC 2/3] MMC: Implement MMC_CAP_CMD23 for SDHCI.
->> [RFC 3/3] MMC: Block CMD23 support for UHS104/SDXC cards.
->>
->> A
->>
+> Thanks for add me in the loop. I'm fine with the 3 patches.
 >
->+ Yunpeng
+> And just think that maybe it's not necessary to enable the Auto-CMD23 for SDHCI,
+> because I have an impression that some Silicon bugs related to Auto-CMD12/Auto-CMD23
+> existed in some vendor's SDHCI host controller IP, and I'm not sure they have been fixed or not by now.
+>
 
-Thanks for add me in the loop. I'm fine with the 3 patches.
+That's why I didn't send a patch for that :-). When I get some SDHCI
+silicon with working Auto-CMD12/Auto-CMD23 I'll come back to that
+code path.
 
-And just think that maybe it's not necessary to enable the Auto-CMD23 for SDHCI,
-because I have an impression that some Silicon bugs related to Auto-CMD12/Auto-CMD23
-existed in some vendor's SDHCI host controller IP, and I'm not sure they have been fixed or not by now.
+I actually thought about this some more and I decided to decouple
+CMD23 support and CMD23 use for multiblock writes. Will add a new
+md->flags bit.
+This will allow cards where for whatever reason CMD23-bounded
+transfers are slower to use CMD12 instead, while retaining CMD23 use
+for things like reliable writes and all those other features you've
+mentioned that are in the still not public eMMC 4.5.
 
-Regards,
-Yunpeng
+The question to Arnd and Chris - should by default use of CMD23 for
+multiblock writes be disabled, and enabled per known-good card using
+add_flag quirk support? Or should CMD23 for multiblock writes be
+enabled by default, and then disabled for known-bad cards?
 
+First approach is safer from the point of view of regressions. People
+who upgrade to 2.6.40 won't suddenly see worse I/O performance if they
+have some silicon bugs or if use of CMD23 nullifies some internal
+optimizations for sequential writes. On the other hand, at some point
+hopefully everybody fixes their silicon such that CMD23 always means
+better performance.
+
+Thoughts?
+A
