@@ -1,382 +1,216 @@
-From: John Calixto <john.calixto@modsystems.com>
-Subject: [PATCH v6] mmc: Add mmc CMD+ACMD passthrough ioctl
-Date: Wed, 13 Apr 2011 17:38:40 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1104131737280.15392@peruna>
-References: <alpine.DEB.2.00.1104131713570.15392@peruna>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Chris Ball <cjb@laptop.org>
+Subject: [PATCH 2/3] mmc: initialize struct mmc_data at declaration time
+Date: Wed, 13 Apr 2011 23:57:42 -0400
+Message-ID: <1302753463-31005-2-git-send-email-cjb@laptop.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from elasmtp-curtail.atl.sa.earthlink.net ([209.86.89.64]:45519 "EHLO
-	elasmtp-curtail.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752822Ab1DNAiv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2011 20:38:51 -0400
-In-Reply-To: <alpine.DEB.2.00.1104131713570.15392@peruna>
+Received: from pullcord.laptop.org ([18.85.46.20]:50586 "EHLO
+	pullcord.laptop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751410Ab1DNDxH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2011 23:53:07 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: John Calixto <john.calixto@modsystems.com>
-Cc: linux-mmc@vger.kernel.org, Andrei Warkentin <andreiw@motorola.com>, =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>
 
-Allows appropriately-privileged applications to send CMD (normal) and
-ACMD (application-specific; preceded with CMD55) commands to
-cards/devices on the mmc bus.  This is primarily useful for enabling the
-security functionality built in to every SD card.
+Converts from:
+	struct mmc_data data;
+	memset(&data, 0, sizeof(struct mmc_data));
 
-It can also be used as a generic passthrough (e.g. to enable virtual
-machines to control mmc bus devices directly).  However, this use case
-has not been tested rigorously.  Generic passthrough testing was only
-conducted for a few non-security opcodes to prove the feasibility of the
-passthrough.
+to:
+	struct mmc_data data = {0};
 
-Since any opcode can be sent using this passthrough, it is very possible
-to render the card/device unusable.  Applications that use this ioctl
-must have CAP_SYS_RAWIO.
+because it's shorter, as performant, and easier to work out whether
+initialization has happened.
 
-Security commands tested on TI PCIxx12 (SDHCI), Sigma Designs SMP8652
-SoC, TI OMAP3621 SoC, TI OMAP3630 SoC, Samsung S5PC110 SoC, Qualcomm
-MSM7200A SoC.
-
-Signed-off-by: John Calixto <john.calixto@modsystems.com>
-Reviewed-by: Andrei Warkentin <andreiw@motorola.com>
+Signed-off-by: Chris Ball <cjb@laptop.org>
 ---
- drivers/mmc/card/block.c  |  201 +++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/sd_ops.c |    3 +-
- include/linux/Kbuild      |    1 +
- include/linux/mmc/Kbuild  |    1 +
- include/linux/mmc/core.h  |    1 +
- include/linux/mmc/ioctl.h |   46 ++++++++++
- 6 files changed, 252 insertions(+), 1 deletions(-)
- create mode 100644 include/linux/mmc/Kbuild
- create mode 100644 include/linux/mmc/ioctl.h
+ drivers/mmc/card/block.c    |    4 +---
+ drivers/mmc/card/mmc_test.c |    9 +++------
+ drivers/mmc/core/mmc_ops.c  |    6 ++----
+ drivers/mmc/core/sd_ops.c   |    9 +++------
+ drivers/mmc/core/sdio_ops.c |    3 +--
+ 5 files changed, 10 insertions(+), 21 deletions(-)
 
 diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 61d233a..19b7bb1 100644
+index 93a7efc..fb387c8 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -31,7 +31,11 @@
- #include <linux/mutex.h>
- #include <linux/scatterlist.h>
- #include <linux/string_helpers.h>
-+#include <linux/delay.h>
-+#include <linux/capability.h>
-+#include <linux/compat.h>
+@@ -261,7 +261,7 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
  
-+#include <linux/mmc/ioctl.h>
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
-@@ -158,11 +162,208 @@ mmc_blk_getgeo(struct block_device *bdev, struct hd_geometry *geo)
- 	return 0;
- }
- 
-+struct mmc_blk_ioc_data {
-+	struct mmc_ioc_cmd ic;
-+	unsigned char *buf;
-+	u64 buf_bytes;
-+	void __user *buf_user;
-+};
-+
-+static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
-+	struct mmc_ioc_cmd __user *user)
-+{
-+	struct mmc_blk_ioc_data *idata;
-+	int err;
-+
-+	idata = kzalloc(sizeof(*idata), GFP_KERNEL);
-+	if (!idata) {
-+		err = -ENOMEM;
-+		goto copy_err;
-+	}
-+
-+	if (copy_from_user(&idata->ic, user, sizeof(idata->ic))) {
-+		err = -EFAULT;
-+		goto copy_err;
-+	}
-+
-+	idata->buf_bytes = (u64) idata->ic.blksz * idata->ic.blocks;
-+	if (idata->buf_bytes > MMC_IOC_MAX_BYTES) {
-+		err = -EOVERFLOW;
-+		goto copy_err;
-+	}
-+
-+	idata->buf = kzalloc(idata->buf_bytes, GFP_KERNEL);
-+	if (!idata->buf) {
-+		err = -ENOMEM;
-+		goto copy_err;
-+	}
-+
-+	memcpy(&idata->buf_user, &idata->ic.data_ptr, idata->ic.data_ptr_size);
-+	if (copy_from_user(idata->buf, idata->buf_user, idata->buf_bytes)) {
-+		err = -EFAULT;
-+		goto copy_err;
-+	}
-+
-+	return idata;
-+
-+copy_err:
-+	kfree(idata->buf);
-+	kfree(idata);
-+	return ERR_PTR(err);
-+
-+}
-+
-+static int mmc_blk_ioctl_cmd(struct block_device *bdev,
-+	struct mmc_ioc_cmd __user *ic_ptr)
-+{
-+	struct mmc_blk_ioc_data *idata;
-+	struct mmc_blk_data *md;
-+	struct mmc_card *card;
-+	struct mmc_command cmd = {0};
+ 	struct mmc_request mrq;
+ 	struct mmc_command cmd = {0};
+-	struct mmc_data data;
 +	struct mmc_data data = {0};
-+	struct mmc_request mrq = {0};
-+	struct scatterlist sg;
-+	int err;
-+
-+	/*
-+	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-+	 * whole block device, not on a partition.  This prevents overspray
-+	 * between sibling partitions.
-+	 */
-+	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
-+		return -EPERM;
-+
-+	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
-+	if (IS_ERR(idata))
-+		return PTR_ERR(idata);
-+
-+	cmd.opcode = idata->ic.opcode;
-+	cmd.arg = idata->ic.arg;
-+	cmd.flags = idata->ic.flags;
-+
-+	data.sg = &sg;
-+	data.sg_len = 1;
-+	data.blksz = idata->ic.blksz;
-+	data.blocks = idata->ic.blocks;
-+
-+	sg_init_one(data.sg, idata->buf, idata->buf_bytes);
-+
-+	if (idata->ic.write_flag)
-+		data.flags = MMC_DATA_WRITE;
-+	else
-+		data.flags = MMC_DATA_READ;
-+
-+	mrq.cmd = &cmd;
-+	mrq.data = &data;
-+
-+	md = mmc_blk_get(bdev->bd_disk);
-+	if (!md) {
-+		err = -EINVAL;
-+		goto cmd_done;
-+	}
-+
-+	card = md->queue.card;
-+	if (IS_ERR(card)) {
-+		err = PTR_ERR(card);
-+		goto cmd_done;
-+	}
-+
-+	mmc_claim_host(card->host);
-+
-+	if (idata->ic.is_acmd) {
-+		err = mmc_app_cmd(card->host, card);
-+		if (err)
-+			goto cmd_rel_host;
-+	}
-+
-+	/* data.flags must already be set before doing this. */
-+	mmc_set_data_timeout(&data, card);
-+	/* Allow overriding the timeout_ns for empirical tuning. */
-+	if (idata->ic.data_timeout_ns)
-+		data.timeout_ns = idata->ic.data_timeout_ns;
-+
-+	if ((cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
-+		/*
-+		 * Pretend this is a data transfer and rely on the host driver
-+		 * to compute timeout.  When all host drivers support
-+		 * cmd.cmd_timeout for R1B, this can be changed to:
-+		 *
-+		 *     mrq.data = NULL;
-+		 *     cmd.cmd_timeout = idata->ic.cmd_timeout_ms;
-+		 */
-+		data.timeout_ns = idata->ic.cmd_timeout_ms * 1000000;
-+	}
-+
-+	mmc_wait_for_req(card->host, &mrq);
-+
-+	if (cmd.error) {
-+		dev_err(mmc_dev(card->host), "%s: cmd error %d\n",
-+						__func__, cmd.error);
-+		err = cmd.error;
-+		goto cmd_rel_host;
-+	}
-+	if (data.error) {
-+		dev_err(mmc_dev(card->host), "%s: data error %d\n",
-+						__func__, data.error);
-+		err = data.error;
-+		goto cmd_rel_host;
-+	}
-+
-+	/*
-+	 * According to the SD specs, some commands require a delay after
-+	 * issuing the command.
-+	 */
-+	if (idata->ic.postsleep_min_us)
-+		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
-+
-+	if (copy_to_user(&(ic_ptr->response), cmd.resp, sizeof(cmd.resp))) {
-+		err = -EFAULT;
-+		goto cmd_rel_host;
-+	}
-+
-+	if (!idata->ic.write_flag) {
-+		if (copy_to_user(idata->buf_user, idata->buf, idata->buf_bytes)) {
-+			err = -EFAULT;
-+			goto cmd_rel_host;
-+		}
-+	}
-+
-+cmd_rel_host:
-+	mmc_release_host(card->host);
-+
-+cmd_done:
-+	mmc_blk_put(md);
-+	kfree(idata->buf);
-+	kfree(idata);
-+	return err;
-+}
-+
-+static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
-+	unsigned int cmd, unsigned long arg)
-+{
-+	int ret = -EINVAL;
-+	if (cmd == MMC_IOC_CMD)
-+		ret = mmc_blk_ioctl_cmd(bdev, (struct mmc_ioc_cmd __user *)arg);
-+	return ret;
-+}
-+
-+#ifdef CONFIG_COMPAT
-+static int mmc_blk_compat_ioctl(struct block_device *bdev, fmode_t mode,
-+	unsigned int cmd, unsigned long arg)
-+{
-+	return mmc_blk_ioctl(bdev, mode, cmd, (unsigned long) compat_ptr(arg));
-+}
-+#endif
-+
- static const struct block_device_operations mmc_bdops = {
- 	.open			= mmc_blk_open,
- 	.release		= mmc_blk_release,
- 	.getgeo			= mmc_blk_getgeo,
- 	.owner			= THIS_MODULE,
-+	.ioctl			= mmc_blk_ioctl,
-+#ifdef CONFIG_COMPAT
-+	.compat_ioctl		= mmc_blk_compat_ioctl,
-+#endif
- };
+ 	unsigned int timeout_us;
  
- struct mmc_blk_request {
+ 	struct scatterlist sg;
+@@ -282,8 +282,6 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
+ 	cmd.arg = 0;
+ 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+ 
+-	memset(&data, 0, sizeof(struct mmc_data));
+-
+ 	data.timeout_ns = card->csd.tacc_ns * 100;
+ 	data.timeout_clks = card->csd.tacc_clks * 100;
+ 
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index cc09be8..d2eb5b1 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -249,12 +249,11 @@ static int mmc_test_buffer_transfer(struct mmc_test_card *test,
+ 	struct mmc_request mrq;
+ 	struct mmc_command cmd = {0};
+ 	struct mmc_command stop = {0};
+-	struct mmc_data data;
++	struct mmc_data data = {0};
+ 
+ 	struct scatterlist sg;
+ 
+ 	memset(&mrq, 0, sizeof(struct mmc_request));
+-	memset(&data, 0, sizeof(struct mmc_data));
+ 
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
+@@ -732,10 +731,9 @@ static int mmc_test_simple_transfer(struct mmc_test_card *test,
+ 	struct mmc_request mrq;
+ 	struct mmc_command cmd = {0};
+ 	struct mmc_command stop = {0};
+-	struct mmc_data data;
++	struct mmc_data data = {0};
+ 
+ 	memset(&mrq, 0, sizeof(struct mmc_request));
+-	memset(&data, 0, sizeof(struct mmc_data));
+ 
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
+@@ -760,12 +758,11 @@ static int mmc_test_broken_transfer(struct mmc_test_card *test,
+ 	struct mmc_request mrq;
+ 	struct mmc_command cmd = {0};
+ 	struct mmc_command stop = {0};
+-	struct mmc_data data;
++	struct mmc_data data = {0};
+ 
+ 	struct scatterlist sg;
+ 
+ 	memset(&mrq, 0, sizeof(struct mmc_request));
+-	memset(&data, 0, sizeof(struct mmc_data));
+ 
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 3631ed6..6156c79 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -235,7 +235,7 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
+ {
+ 	struct mmc_request mrq;
+ 	struct mmc_command cmd = {0};
+-	struct mmc_data data;
++	struct mmc_data data = {0};
+ 	struct scatterlist sg;
+ 	void *data_buf;
+ 
+@@ -247,7 +247,6 @@ mmc_send_cxd_data(struct mmc_card *card, struct mmc_host *host,
+ 		return -ENOMEM;
+ 
+ 	memset(&mrq, 0, sizeof(struct mmc_request));
+-	memset(&data, 0, sizeof(struct mmc_data));
+ 
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
+@@ -459,7 +458,7 @@ mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
+ {
+ 	struct mmc_request mrq;
+ 	struct mmc_command cmd = {0};
+-	struct mmc_data data;
++	struct mmc_data data = {0};
+ 	struct scatterlist sg;
+ 	u8 *data_buf;
+ 	u8 *test_buf;
+@@ -489,7 +488,6 @@ mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
+ 		memcpy(data_buf, test_buf, len);
+ 
+ 	memset(&mrq, 0, sizeof(struct mmc_request));
+-	memset(&data, 0, sizeof(struct mmc_data));
+ 
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
 diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index 797cdb5..990dd43 100644
+index dfe9a9c..8023f58 100644
 --- a/drivers/mmc/core/sd_ops.c
 +++ b/drivers/mmc/core/sd_ops.c
-@@ -20,7 +20,7 @@
- #include "core.h"
- #include "sd_ops.h"
- 
--static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
-+int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
- {
+@@ -245,7 +245,7 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
  	int err;
- 	struct mmc_command cmd;
-@@ -48,6 +48,7 @@ static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+ 	struct mmc_request mrq;
+ 	struct mmc_command cmd = {0};
+-	struct mmc_data data;
++	struct mmc_data data = {0};
+ 	struct scatterlist sg;
+ 	void *data_buf;
  
- 	return 0;
- }
-+EXPORT_SYMBOL_GPL(mmc_app_cmd);
+@@ -267,7 +267,6 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr)
+ 		return -ENOMEM;
  
- /**
-  *	mmc_wait_for_app_cmd - start an application command and wait for
-diff --git a/include/linux/Kbuild b/include/linux/Kbuild
-index 75cf611..ed38527 100644
---- a/include/linux/Kbuild
-+++ b/include/linux/Kbuild
-@@ -4,6 +4,7 @@ header-y += caif/
- header-y += dvb/
- header-y += hdlc/
- header-y += isdn/
-+header-y += mmc/
- header-y += nfsd/
- header-y += raid/
- header-y += spi/
-diff --git a/include/linux/mmc/Kbuild b/include/linux/mmc/Kbuild
-new file mode 100644
-index 0000000..1fb2644
---- /dev/null
-+++ b/include/linux/mmc/Kbuild
-@@ -0,0 +1 @@
-+header-y += ioctl.h
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 07f27af..bfc6127 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -133,6 +133,7 @@ struct mmc_card;
+ 	memset(&mrq, 0, sizeof(struct mmc_request));
+-	memset(&data, 0, sizeof(struct mmc_data));
  
- extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
- extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
-+extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
- extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
- 	struct mmc_command *, int);
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
+@@ -307,7 +306,7 @@ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+ {
+ 	struct mmc_request mrq;
+ 	struct mmc_command cmd = {0};
+-	struct mmc_data data;
++	struct mmc_data data = {0};
+ 	struct scatterlist sg;
  
-diff --git a/include/linux/mmc/ioctl.h b/include/linux/mmc/ioctl.h
-new file mode 100644
-index 0000000..ad6a871
---- /dev/null
-+++ b/include/linux/mmc/ioctl.h
-@@ -0,0 +1,46 @@
-+#ifndef _MMC_IOCTL_H
-+#define _MMC_IOCTL_H
-+struct mmc_ioc_cmd {
-+	/* Implies direction of data.  true = write, false = read */
-+	int write_flag;
-+
-+	/* Application-specific command.  true = precede with CMD55 */
-+	int is_acmd;
-+
-+	__u32 opcode;
-+	__u32 arg;
-+	__u32 response[4];  /* CMD response */
-+	unsigned int flags;
-+	unsigned int blksz;
-+	unsigned int blocks;
-+
-+	/*
-+	 * Sleep at least postsleep_min_us useconds, and at most
-+	 * postsleep_max_us useconds *after* issuing command.  Needed for some
-+	 * read commands for which cards have no other way of indicating
-+	 * they're ready for the next command (i.e. there is no equivalent of a
-+	 * "busy" indicator for read operations).
-+	 */
-+	unsigned int postsleep_min_us;
-+	unsigned int postsleep_max_us;
-+
-+	/*
-+	 * Override driver-computed timeouts.  Note the difference in units!
-+	 */
-+	unsigned int data_timeout_ns;
-+	unsigned int cmd_timeout_ms;
-+
-+	/* DAT buffer */
-+	__u32 data_ptr_size;  /* size of the *pointer* */
-+	__u64 data_ptr;
-+};
-+#define MMC_IOC_CMD _IOWR(MMC_BLOCK_MAJOR, 0, struct mmc_ioc_cmd)
-+
-+/*
-+ * Since this ioctl is only meant to enhance (and not replace) normal access to
-+ * the mmc bus device, an upper data transfer limit of MMC_IOC_MAX_BYTES is
-+ * enforced per ioctl call.  For larger data transfers, use the normal block
-+ * device operations.
-+ */
-+#define MMC_IOC_MAX_BYTES  (512L * 256)
-+#endif  /* _MMC_IOCTL_H */
+ 	BUG_ON(!card);
+@@ -319,7 +318,6 @@ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+ 	value &= 0xF;
+ 
+ 	memset(&mrq, 0, sizeof(struct mmc_request));
+-	memset(&data, 0, sizeof(struct mmc_data));
+ 
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
+@@ -355,7 +353,7 @@ int mmc_app_sd_status(struct mmc_card *card, void *ssr)
+ 	int err;
+ 	struct mmc_request mrq;
+ 	struct mmc_command cmd = {0};
+-	struct mmc_data data;
++	struct mmc_data data = {0};
+ 	struct scatterlist sg;
+ 
+ 	BUG_ON(!card);
+@@ -369,7 +367,6 @@ int mmc_app_sd_status(struct mmc_card *card, void *ssr)
+ 		return err;
+ 
+ 	memset(&mrq, 0, sizeof(struct mmc_request));
+-	memset(&data, 0, sizeof(struct mmc_data));
+ 
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
+diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
+index f77b1bc..147dfc1 100644
+--- a/drivers/mmc/core/sdio_ops.c
++++ b/drivers/mmc/core/sdio_ops.c
+@@ -123,7 +123,7 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ {
+ 	struct mmc_request mrq;
+ 	struct mmc_command cmd = {0};
+-	struct mmc_data data;
++	struct mmc_data data = {0};
+ 	struct scatterlist sg;
+ 
+ 	BUG_ON(!card);
+@@ -137,7 +137,6 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 		return -EINVAL;
+ 
+ 	memset(&mrq, 0, sizeof(struct mmc_request));
+-	memset(&data, 0, sizeof(struct mmc_data));
+ 
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
 -- 
-1.7.4.1
+1.7.0.1
 
