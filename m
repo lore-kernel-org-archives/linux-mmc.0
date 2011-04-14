@@ -1,74 +1,78 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: SET_BLOCK_COUNT-bounded multiblock transfers
-Date: Wed, 13 Apr 2011 19:03:35 -0500
-Message-ID: <BANLkTikFWhDhCjGKBBE4PP9sNa2ynVEOtg@mail.gmail.com>
-References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
+From: John Calixto <john.calixto@modsystems.com>
+Subject: v6 changelog for mmc ioctl patch
+Date: Wed, 13 Apr 2011 17:34:27 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1104131713570.15392@peruna>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: MULTIPART/MIXED; BOUNDARY="-1463811328-1023074918-1302741275=:15392"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og117.obsmtp.com ([64.18.0.149]:57338 "EHLO
-	exprod5og117.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750871Ab1DNADh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2011 20:03:37 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.168])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3E01kWa009845
-	for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2011 20:01:46 -0400 (EDT)
-Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3E008k8009450
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2011 20:01:46 -0400 (EDT)
-Received: by mail-wy0-f170.google.com with SMTP id 34so1538201wyb.15
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2011 17:03:35 -0700 (PDT)
-In-Reply-To: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
+Received: from elasmtp-spurfowl.atl.sa.earthlink.net ([209.86.89.66]:50166
+	"EHLO elasmtp-spurfowl.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757116Ab1DNAei (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2011 20:34:38 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: arnd@arndb.de, cjb@laptop.org, "Gao, Yunpeng" <yunpeng.gao@intel.com>
+Cc: Andrei Warkentin <andreiw@motorola.com>, =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>
 
-On Wed, Apr 13, 2011 at 7:38 PM, Andrei Warkentin <andreiw@motorola.com> wrote:
-> This is a request for comments for a patch set that enables
-> predefined multiblock transfers if these are supported.
->
-> Before this patch set, all multiblock transfers look like (for example)
->
-> CMD25 -> [block] [block] [block] [block] -> CMD12 (stop)
->
-> ...or for controllers with Auto-CMD12
->
-> CMD25 -> [block] [block] [block] [block] (host sends CMD12 itself).
->
-> We want to enable -
->
-> CMD23(4 blocks) CMD25 [data] [data] [data] [data]
->
-> ...and for controllers with Auto-CMD23 -
->
-> (Host sends CMD23(4 blocks)) CMD25 [data] [data] [data] [data]
->
-> The interrupt overhead is the same, but for cards that optimize for predefined transfers
-> we can see better transfer rates. I've tested this on a Sandisk eMMC where I saw as good as
-> a 50% improvement on writes, and on a Toshiba eMMC where I saw no improvement at all. Also,
-> reliable writes use CMD23, so this cleans up that code path as well. Note, that if a transfer
-> fails, CMD12 must still be sent, so it is not sufficient to just not fill the mrq->stop field
-> while doing a CMD23-enabled transfer. Due to this error handling and off-loads of Auto-CMD23
-> (and interaction with Auto-CMD12) handling of SET_BLOCK_COUNT, just like STOP, is left to the host driver.
-> Host driver now exposes MMC_CAP_CMD23 if it has been changed to handle the new "sbc" field in struct mmc_request.
-> If a host doesn't expose this capability, open-ended transfers are used, and all functionality
-> relying on CMD23 (such as reliable writes) is disabled.
->
-> The third patch has been only tested on SD cards that don't expose CMD23. Still need to get an SDXC
-> card and test it out, but I wanted to get eyes on this patch set anyway :-).
->
-> I had a fourth patch enabling Auto-CMD23 for SDHCI, but I'll hold off until I can verify it.
->
-> Thoughts?
->
-> Table of Contents:
-> [RFC 1/3] MMC: use CMD23 for multiblock transfers when we can.
-> [RFC 2/3] MMC: Implement MMC_CAP_CMD23 for SDHCI.
-> [RFC 3/3] MMC: Block CMD23 support for UHS104/SDXC cards.
->
-> A
->
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-+ Yunpeng
+---1463811328-1023074918-1302741275=:15392
+Content-Type: TEXT/PLAIN; charset=ISO-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+
+The changes in this version are mostly to address Arnd's comments on v4.
+
+Arnd, I added a flag to allow the caller to select between normal CMDs
+and ACMDs.  This really makes it a generic passthrough.  However, I only
+tested a few commands to see that passthrough was working.  I did not
+try any advanced handshaking CMDs.  Hopefully this generic passthrough
+is more useful to you than previous incarnations.
+
+I chose not to create higher-level ioctl operations specifically for the
+security functions because they don't really buy us anything.  At most,
+I could make a function for each security opcode that would specify the
+numeric opcode directly (instead of having it come from userspace).  On
+the back end, all of these functions would have the same functionality
+of packing the opcode and arguments into the appropriate structures,
+then issuing the request - essentially the same behaviour as my current
+mmc_blk_ioctl_cmd().  The "higher-level" then just becomes an opcode
+filter, and that was already deemed to be undesirable by Andrei and
+Micha=B3 in the v2 thread.  As I explained in the past, I can't implement
+any more of the security functionality in the kernel than that.
+
+Anyway, here's the full patch history:
+
+- v6
+    - refix 32+64 compat pointer for better portability
+    - copy userspace pointer *before* using
+    - apply upper limit to data buffer size
+    - add flag to allow normal CMD opcodes as well as ACMD opcodes
+    - remove unnecessary mutex grab
+
+- v5
+    - fix 32-bit compiler warning about the 32+64 compat pointer
+
+- v4
+    - replace postsleep udelay() with usleep_range()
+    - add cmd_timeout_ms field for R1B commands
+
+- v3
+    - copy data from userspace before claiming host
+    - break out copy from userspace into its own function
+    - verify that caller has CAP_SYS_RAWIO
+    - rename ``struct sd_ioc_cmd`` to ``struct mmc_ioc_cmd`` because it
+      applies generally, not just to SD
+    - make struct mmc_ioc_cmd the same between 32-bit and 64-bit to
+      simplify compat_ioctl()
+    - export include/linux/mmc/ioctl.h when you ``make headers_install``
+
+- v2
+    - make initialization of struct declarations match kernel style
+    - only allow ioctl() on whole block device, not partition
+    - remove extraneous printks
+    - implement compat_ioctl()
+    - remove version field from ``struct sd_ioc_cmd``
+
+John
+---1463811328-1023074918-1302741275=:15392--
