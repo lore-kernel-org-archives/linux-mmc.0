@@ -1,61 +1,75 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v3 00/12] add support for host controller v3.00
-Date: Fri, 15 Apr 2011 09:06:40 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300EB443D6C@SAUSEXMBP01.amd.com>
-References: <1302863942-1774-1-git-send-email-arindam.nath@amd.com>
- <m3bp07txrb.fsf@pullcord.laptop.org>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: SET_BLOCK_COUNT-bounded multiblock transfers
+Date: Fri, 15 Apr 2011 12:29:36 -0500
+Message-ID: <BANLkTimDsWGJEcODuK_TA8otA+GhTt53XQ@mail.gmail.com>
+References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
+	<BANLkTikFWhDhCjGKBBE4PP9sNa2ynVEOtg@mail.gmail.com>
+	<CE761E84DADF2947A4AF22FB8D97A473571F5610@shsmsx501.ccr.corp.intel.com>
+	<BANLkTikDaPq56UBkNtmKApBXZ6dgMKgo6Q@mail.gmail.com>
+	<m3k4ewto9t.fsf@pullcord.laptop.org>
+	<BANLkTinuUXnhqCRrGyiyv7hdA1SBHVFbLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:51934 "EHLO
-	TX2EHSOBE008.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751425Ab1DOOGs convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2011 10:06:48 -0400
-In-Reply-To: <m3bp07txrb.fsf@pullcord.laptop.org>
-Content-Language: en-US
+Received: from exprod5og107.obsmtp.com ([64.18.0.184]:42812 "EHLO
+	exprod5og107.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753471Ab1DOR3j convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2011 13:29:39 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.168])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3FHRlaU014647
+	for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2011 13:27:47 -0400 (EDT)
+Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3FHROwC014498
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2011 13:27:47 -0400 (EDT)
+Received: by mail-wy0-f170.google.com with SMTP id 34so3947518wyb.15
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2011 10:29:36 -0700 (PDT)
+In-Reply-To: <BANLkTinuUXnhqCRrGyiyv7hdA1SBHVFbLw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "prakity@marvell.com" <prakity@marvell.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Arindam Nath <arindam.nath@amd.com>
+Cc: "Gao, Yunpeng" <yunpeng.gao@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, Chris Ball <cjb@laptop.org>
 
-Hi Chris,
++Arindam (This is the patch set I mentioned)
 
-
-> -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org]
-> Sent: Friday, April 15, 2011 7:36 PM
-> To: Nath, Arindam
-> Cc: linux-mmc@vger.kernel.org; subhashj@codeaurora.org;
-> prakity@marvell.com; zhangfei.gao@gmail.com; Su, Henry; Lu, Aaron;
-> anath.amd@gmail.com
-> Subject: Re: [PATCH v3 00/12] add support for host controller v3.00
-> 
-> Hi Arindam,
-> 
-> On Fri, Apr 15 2011, Arindam Nath wrote:
-> > V3
-> 
-> Thanks very much for reposting this!  I know it's a lot of work to keep
-> track of so many comments and changes.
-> 
-> I've checked that this applies to mmc-next and doesn't add any compile
-> warnings, and the patch quality (particularly your use of comments)
-> looks excellent.  I'll wait a week for further comments and Tested-bys,
-> and then look at whether we should push the series to mmc-next as-is
-> or wait for another revision.
-
-Thanks for the feedback.
-
-Regards,
-Arindam
-
-> 
-> Thanks,
-> 
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-
-
+On Fri, Apr 15, 2011 at 2:10 AM, Andrei Warkentin <andreiw@motorola.com=
+> wrote:
+> On Thu, Apr 14, 2011 at 6:18 PM, Chris Ball <cjb@laptop.org> wrote:
+>>
+>> If we've seen a card that freaks out and loses significant bandwidth=
+, that
+>> would be a good reason to start with a whitelist. =A0If all the data=
+ we have
+>> suggests that it's performance-wise either a win or a no-op, that's =
+a fine
+>> reason to push it to mmc-next with a blacklist approach and change o=
+ur
+>> minds later if our knowledge gets updated. =A0Does that help?
+>>
+>
+> Yes, it does, thanks! Basically so far -
+>
+> (a) amazing boost for Sandisk eMMCs
+> (b) synthetic tests showed no-op for Toshiba (a derivative of Arnd's
+> flashbench, I'll put it up on GitHub as soon as my hands get to it),
+> but more realistic test (via SQLite transactions on top of fs) showed
+> slight deterioration. I'm bringing it up with the vendor to get a
+> clear picture why and if they are doing anything to address it.
+> (c) I am going to try to dig up some discrete MMCs (hard beasts to
+> come by these days) and try with that.
+> (d) I am going to dig up a few SDXCs and try them out.
+>
+> My current theory is that the CMD23 for multiblock should have no
+> effect on the really braindead cards, and could have deterioration on
+> cards that somehow optimize the CMD12 path (for example, the T eMMC
+> optimize consecutive multiblock writes).
+>
+> At any rate, I'll decouple CMD23 support from multiblock CMD23 use...
+>
+> Yunpeng, I'm curious, what vendors did you have in mind when you
+> suggested in your original email to use the CMD23 multiblock stuff?
+>
+> Thanks again,
+> A
+>
