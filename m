@@ -1,69 +1,45 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: SET_BLOCK_COUNT-bounded multiblock transfers
-Date: Fri, 15 Apr 2011 02:10:45 -0500
-Message-ID: <BANLkTinuUXnhqCRrGyiyv7hdA1SBHVFbLw@mail.gmail.com>
-References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
-	<BANLkTikFWhDhCjGKBBE4PP9sNa2ynVEOtg@mail.gmail.com>
-	<CE761E84DADF2947A4AF22FB8D97A473571F5610@shsmsx501.ccr.corp.intel.com>
-	<BANLkTikDaPq56UBkNtmKApBXZ6dgMKgo6Q@mail.gmail.com>
-	<m3k4ewto9t.fsf@pullcord.laptop.org>
+From: David Vrabel <david.vrabel@csr.com>
+Subject: Re: [PATCH v2 01/12] mmc: add none blocking mmc request function
+Date: Fri, 15 Apr 2011 11:34:42 +0100
+Message-ID: <4DA81F42.3070208@csr.com>
+References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org> <1302116833-24540-2-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og110.obsmtp.com ([64.18.0.20]:53398 "EHLO
-	exprod5og110.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754692Ab1DOHKr convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2011 03:10:47 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3F78s5A026148
-	for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2011 03:08:55 -0400 (EDT)
-Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3F7840d025834
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2011 03:08:54 -0400 (EDT)
-Received: by mail-wy0-f170.google.com with SMTP id 34so3279816wyb.15
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2011 00:10:45 -0700 (PDT)
-In-Reply-To: <m3k4ewto9t.fsf@pullcord.laptop.org>
+Received: from cluster-d.mailcontrol.com ([85.115.60.190]:44318 "EHLO
+	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753859Ab1DOKfR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2011 06:35:17 -0400
+In-Reply-To: <1302116833-24540-2-git-send-email-per.forlin@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "Gao, Yunpeng" <yunpeng.gao@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>
 
-On Thu, Apr 14, 2011 at 6:18 PM, Chris Ball <cjb@laptop.org> wrote:
->
-> If we've seen a card that freaks out and loses significant bandwidth,=
- that
-> would be a good reason to start with a whitelist. =A0If all the data =
-we have
-> suggests that it's performance-wise either a win or a no-op, that's a=
- fine
-> reason to push it to mmc-next with a blacklist approach and change ou=
-r
-> minds later if our knowledge gets updated. =A0Does that help?
->
+On 06/04/11 20:07, Per Forlin wrote:
+> Previously there has only been one function mmc_wait_for_req
+> to start and wait for a request. This patch adds
+>  * mmc_start_req - starts a request wihtout waiting
+>  * mmc_wait_for_req_done - waits until request is done
+>  * mmc_pre_req - asks the host driver to prepare for the next job
+>  * mmc_post_req - asks the host driver to clean up after a completed job
 
-Yes, it does, thanks! Basically so far -
+If MMC core had a queue of requests internally you wouldn't need to
+provide mmc_pre_req() and mmc_post_req() functions outside of the core.
+ i.e., the mmc block driver would just need to queue up two mmc requests
+and the core would take care of calling pre_req and post_req at the
+correct time.
 
-(a) amazing boost for Sandisk eMMCs
-(b) synthetic tests showed no-op for Toshiba (a derivative of Arnd's
-flashbench, I'll put it up on GitHub as soon as my hands get to it),
-but more realistic test (via SQLite transactions on top of fs) showed
-slight deterioration. I'm bringing it up with the vendor to get a
-clear picture why and if they are doing anything to address it.
-(c) I am going to try to dig up some discrete MMCs (hard beasts to
-come by these days) and try with that.
-(d) I am going to dig up a few SDXCs and try them out.
+Using a MMC request queue has other benefits -- it allows multiple users
+without having to claim/release the host.  This would be useful for
+(especially multi-function) SDIO.
 
-My current theory is that the CMD23 for multiblock should have no
-effect on the really braindead cards, and could have deterioration on
-cards that somehow optimize the CMD12 path (for example, the T eMMC
-optimize consecutive multiblock writes).
+David
+-- 
+David Vrabel, Senior Software Engineer, Drivers
+CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
+Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
 
-At any rate, I'll decouple CMD23 support from multiblock CMD23 use...
 
-Yunpeng, I'm curious, what vendors did you have in mind when you
-suggested in your original email to use the CMD23 multiblock stuff?
-
-Thanks again,
-A
+Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
