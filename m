@@ -1,51 +1,53 @@
 From: Cyril Hrubis <metan@ucw.cz>
-Subject: Re: zaurus: mmcblk0: error -110
-Date: Fri, 15 Apr 2011 23:33:15 +0200
-Message-ID: <20110415213315.GA4420@atrey.karlin.mff.cuni.cz>
-References: <20110412151547.GC20815@atrey.karlin.mff.cuni.cz> <m3aafvz30t.fsf@pullcord.laptop.org> <20110412193944.GC2665@atrey.karlin.mff.cuni.cz> <m3oc4bxne1.fsf@pullcord.laptop.org> <20110412205421.GD2665@atrey.karlin.mff.cuni.cz> <m3fwpnxj1w.fsf@pullcord.laptop.org> <20110412224333.GA22640@atrey.karlin.mff.cuni.cz> <m339lnxes6.fsf@pullcord.laptop.org>
+Subject: Re: [patchv3 2/4] MMC: SDHCI R1B command handling + MMC_CAP_ERASE.
+Date: Fri, 15 Apr 2011 23:34:07 +0200
+Message-ID: <20110415213407.GB4420@atrey.karlin.mff.cuni.cz>
+References: <BANLkTikA56sD_A6VVPF15SgA-AnKOZ2ZXw@mail.gmail.com> <1302556424-21951-2-git-send-email-andreiw@motorola.com> <5D8008F58939784290FAB48F54975198389075A5E9@shsmsx502.ccr.corp.intel.com> <BANLkTin6Aya3KpY6NUYtHTWRpg7azO5nOg@mail.gmail.com> <5D8008F58939784290FAB48F5497519838C3288867@shsmsx502.ccr.corp.intel.com> <BANLkTiksXp7fgjkeNcGbh+HTMxjtBbo=xA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ksp.mff.cuni.cz ([195.113.26.206]:38168 "EHLO
+Received: from ksp.mff.cuni.cz ([195.113.26.206]:38188 "EHLO
 	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1756907Ab1DOVdQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2011 17:33:16 -0400
+	by vger.kernel.org with ESMTP id S1757160Ab1DOVeI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2011 17:34:08 -0400
 Content-Disposition: inline
-In-Reply-To: <m339lnxes6.fsf@pullcord.laptop.org>
+In-Reply-To: <BANLkTiksXp7fgjkeNcGbh+HTMxjtBbo=xA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: pavel@ucw.cz, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, eric.y.miao@gmail.com, utx@penguin.cz, zaurus-devel@lists.linuxtogo.org, marek.vasut@gmail.com, linux-mmc@vger.kernel.org
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, "cjb@laptop.org" <cjb@laptop.org>
 
 Hi!
-> >> > mmc0: error -95 whilst initialising SD card
-> >> 
-> >> That's interesting.  Would you mind trying to bisect?  (Knowing whether
-> >> 2.6.38 final does it, for example, would be very helpful.)
-> >
-> > It may need one or two tries on 2.6.38 but it's there too.
-> >
-> >> There aren't many -EOPNOTSUPP returns in the stack.  I see:
-> >> 
-> >> card/block.c: mmc_blk_issue_secdiscard_rq and mmc_blk_issue_discard_rq
-> >> card/core.c: mmc_erase
-> >> core/sd_ops.c: mmc_app_cmd
-> >> 
-> >> Mind doing some instrumentation to figure out which it is?
-> >
-> > Fails in the mmc_app_cmd.
+> > Yes, if all the consumers of mmc_command memset the structure to 0, there
+> > will be no problem. But just reviewed the code, and found mmc_app_cmd() (in
+> > sd_ops.c) didn't memset the command structure. So I think if we can make
+> > sure all the command structures will be initialized before using it, that
+> > would be better.
+>
+> I would say that CMD55 is not a command that utilizes the DAT line,
+> again, so not setting cmd_timeout itself is not a problem.
 > 
-> Okay.  mmc_app_cmd() hasn't changed for years, so I'm afraid I don't
-> have any strong leads for you -- further bisection (you're pretty
-> sure this is a regression?) would be very useful.
+> However, using uninitialized data is nasty, and can lead to problems
+> if cmd->data ever happens to be not NULL.
+> I'll send a patch for this tomorrow. Thanks for catching this. I'm
+> curious if this is the reason behind Cyril's problem.
+> 
+> Cyril can you try modifying mmc_app_cmd like this? Does that do
+> anything for you?
+> 
+> static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
+> {
+>         int err;
+>         struct mmc_command cmd;
+> 
+>         BUG_ON(!host);
+>         BUG_ON(card && (card->host != host));
+> 
+> +      memset(&cmd, 0, sizeof(struct mmc_command));
+>         cmd.opcode = MMC_APP_CMD;
+>
 
-Well, I was using some old kernel there and updated to the 2.6.38 recently so
-only clue I do have is that it was working on like 2 years old kernel.
-
-And bisection is quite complicated, as number of kernel images simply doesn't
-boot there. :(
-
-I will look on this next week (hopefully) thanks anyway for your help so far.
+Not really, it behaves same regardless the memset().
 
 -- 
-metan
+metan 
