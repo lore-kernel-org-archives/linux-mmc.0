@@ -1,75 +1,35 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: SET_BLOCK_COUNT-bounded multiblock transfers
-Date: Fri, 15 Apr 2011 12:29:36 -0500
-Message-ID: <BANLkTimDsWGJEcODuK_TA8otA+GhTt53XQ@mail.gmail.com>
-References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
-	<BANLkTikFWhDhCjGKBBE4PP9sNa2ynVEOtg@mail.gmail.com>
-	<CE761E84DADF2947A4AF22FB8D97A473571F5610@shsmsx501.ccr.corp.intel.com>
-	<BANLkTikDaPq56UBkNtmKApBXZ6dgMKgo6Q@mail.gmail.com>
-	<m3k4ewto9t.fsf@pullcord.laptop.org>
-	<BANLkTinuUXnhqCRrGyiyv7hdA1SBHVFbLw@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/3] mmc: initialize struct mmc_command at declaration time
+Date: Fri, 15 Apr 2011 14:06:45 -0400
+Message-ID: <m3zknrs822.fsf@pullcord.laptop.org>
+References: <1302753463-31005-1-git-send-email-cjb@laptop.org>
+	<alpine.LFD.2.00.1104141931100.24613@xanadu.home>
+	<m3fwpktdhp.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og107.obsmtp.com ([64.18.0.184]:42812 "EHLO
-	exprod5og107.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753471Ab1DOR3j convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2011 13:29:39 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.168])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3FHRlaU014647
-	for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2011 13:27:47 -0400 (EDT)
-Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3FHROwC014498
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2011 13:27:47 -0400 (EDT)
-Received: by mail-wy0-f170.google.com with SMTP id 34so3947518wyb.15
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2011 10:29:36 -0700 (PDT)
-In-Reply-To: <BANLkTinuUXnhqCRrGyiyv7hdA1SBHVFbLw@mail.gmail.com>
+Received: from void.printf.net ([89.145.121.20]:46187 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755639Ab1DOSCJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 15 Apr 2011 14:02:09 -0400
+In-Reply-To: <m3fwpktdhp.fsf@pullcord.laptop.org> (Chris Ball's message of
+	"Thu, 14 Apr 2011 23:11:46 -0400")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arindam Nath <arindam.nath@amd.com>
-Cc: "Gao, Yunpeng" <yunpeng.gao@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, Chris Ball <cjb@laptop.org>
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: linux-mmc@vger.kernel.org
 
-+Arindam (This is the patch set I mentioned)
+Hi,
 
-On Fri, Apr 15, 2011 at 2:10 AM, Andrei Warkentin <andreiw@motorola.com=
-> wrote:
-> On Thu, Apr 14, 2011 at 6:18 PM, Chris Ball <cjb@laptop.org> wrote:
->>
->> If we've seen a card that freaks out and loses significant bandwidth=
-, that
->> would be a good reason to start with a whitelist. =A0If all the data=
- we have
->> suggests that it's performance-wise either a win or a no-op, that's =
-a fine
->> reason to push it to mmc-next with a blacklist approach and change o=
-ur
->> minds later if our knowledge gets updated. =A0Does that help?
->>
->
-> Yes, it does, thanks! Basically so far -
->
-> (a) amazing boost for Sandisk eMMCs
-> (b) synthetic tests showed no-op for Toshiba (a derivative of Arnd's
-> flashbench, I'll put it up on GitHub as soon as my hands get to it),
-> but more realistic test (via SQLite transactions on top of fs) showed
-> slight deterioration. I'm bringing it up with the vendor to get a
-> clear picture why and if they are doing anything to address it.
-> (c) I am going to try to dig up some discrete MMCs (hard beasts to
-> come by these days) and try with that.
-> (d) I am going to dig up a few SDXCs and try them out.
->
-> My current theory is that the CMD23 for multiblock should have no
-> effect on the really braindead cards, and could have deterioration on
-> cards that somehow optimize the CMD12 path (for example, the T eMMC
-> optimize consecutive multiblock writes).
->
-> At any rate, I'll decouple CMD23 support from multiblock CMD23 use...
->
-> Yunpeng, I'm curious, what vendors did you have in mind when you
-> suggested in your original email to use the CMD23 multiblock stuff?
->
-> Thanks again,
-> A
->
+On Thu, Apr 14 2011, Chris Ball wrote:
+> Here's a sample disassembly of one function on ARM with gcc-4.6.0, and
+> diff -y.  Explicit memset (which calls __memzero) on the left, and {0}
+> initializer (which calls memset) on the right:
+
+(I checked on x86_64 too, and the code's identical -- it's inlined into
+a "rep stos %eax,%es:(%rdi)" either way.)
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
