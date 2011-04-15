@@ -1,105 +1,99 @@
 From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH v3 06/12] mmc: sd: add support for uhs bus speed mode selection
-Date: Fri, 15 Apr 2011 16:08:56 +0530
-Message-ID: <1302863942-1774-7-git-send-email-arindam.nath@amd.com>
+Subject: [PATCH v3 07/12] mmc: sd: set current limit for uhs cards
+Date: Fri, 15 Apr 2011 16:08:57 +0530
+Message-ID: <1302863942-1774-8-git-send-email-arindam.nath@amd.com>
 References: <1302863942-1774-1-git-send-email-arindam.nath@amd.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:35630 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755621Ab1DOKlS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2011 06:41:18 -0400
-Received: by pwi15 with SMTP id 15so1032862pwi.19
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2011 03:41:17 -0700 (PDT)
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:58389 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755658Ab1DOKl2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2011 06:41:28 -0400
+Received: by pvg12 with SMTP id 12so1008425pvg.19
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2011 03:41:27 -0700 (PDT)
 In-Reply-To: <1302863942-1774-1-git-send-email-arindam.nath@amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org
 Cc: linux-mmc@vger.kernel.org, subhashj@codeaurora.org, prakity@marvell.com, zhangfei.gao@gmail.com, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com, Arindam Nath <arindam.nath@amd.com>
 
-This patch adds support for setting UHS-I bus speed mode during UHS-I
-initialization procedure. Since both the host and card can support
-more than one bus speed, we select the highest speed based on both of
-their capabilities. First we set the bus speed mode for the card using
-CMD6 mode 1, and then we program the host controller to support the
-required speed mode. We also set High Speed Enable in case one of the
-UHS-I modes is selected. We take care to reset SD clock before setting
-UHS mode in the Host Control2 register, and then re-enable it as per
-the Host Controller spec v3.00. We then set the clock frequency for
-the UHS-I mode selected.
+We decide on the current limit to be set for the card based on the
+Capability of Host Controller to provide current at 1.8V signalling,
+and the maximum current limit of the card as indicated by CMD6
+mode 0. We then set the current limit for the card using CMD6 mode 1.
+As per the Physical Layer Spec v3.01, the current limit switch is
+only applicable for SDR50, SDR104, and DDR50 bus speed modes. For
+other UHS-I modes, we set the default current limit of 200mA.
 
 Signed-off-by: Arindam Nath <arindam.nath@amd.com>
 ---
- drivers/mmc/core/sd.c    |   65 ++++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c |   40 ++++++++++++++++++++++++++--
- drivers/mmc/host/sdhci.h |    6 ++++
- include/linux/mmc/card.h |   19 +++++++++++++
- include/linux/mmc/host.h |    5 +++
- 5 files changed, 132 insertions(+), 3 deletions(-)
+ drivers/mmc/core/sd.c    |   63 ++++++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.c |   10 +++++++
+ include/linux/mmc/card.h |    9 ++++++
+ include/linux/mmc/host.h |    4 +++
+ 4 files changed, 86 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index dd0ae2c..bf5710c 100644
+index bf5710c..001d2e8 100644
 --- a/drivers/mmc/core/sd.c
 +++ b/drivers/mmc/core/sd.c
-@@ -460,6 +460,66 @@ static int sd_select_driver_type(struct mmc_card *card, u8 *status)
+@@ -520,6 +520,64 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
  	return 0;
  }
  
-+static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
++static int sd_set_current_limit(struct mmc_card *card, u8 *status)
 +{
-+	unsigned int bus_speed = 0, timing = 0;
++	int current_limit = 0;
 +	int err;
 +
 +	/*
-+	 * If the host doesn't support any of the UHS-I modes, fallback on
-+	 * default speed.
++	 * Current limit switch is only defined for SDR50, SDR104, and DDR50
++	 * bus speed modes. For other bus speed modes, we set the default
++	 * current limit of 200mA.
 +	 */
-+	if (!(card->host->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
-+	    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_DDR50)))
-+		return 0;
++	if ((card->sd_bus_speed == UHS_SDR50_BUS_SPEED) ||
++	    (card->sd_bus_speed == UHS_SDR104_BUS_SPEED) ||
++	    (card->sd_bus_speed == UHS_DDR50_BUS_SPEED)) {
++		if (card->host->caps & MMC_CAP_MAX_CURRENT_800) {
++			if (card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_800)
++				current_limit = SD_SET_CURRENT_LIMIT_800;
++			else if (card->sw_caps.sd3_curr_limit &
++					SD_MAX_CURRENT_600)
++				current_limit = SD_SET_CURRENT_LIMIT_600;
++			else if (card->sw_caps.sd3_curr_limit &
++					SD_MAX_CURRENT_400)
++				current_limit = SD_SET_CURRENT_LIMIT_400;
++			else if (card->sw_caps.sd3_curr_limit &
++					SD_MAX_CURRENT_200)
++				current_limit = SD_SET_CURRENT_LIMIT_200;
++		} else if (card->host->caps & MMC_CAP_MAX_CURRENT_600) {
++			if (card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_600)
++				current_limit = SD_SET_CURRENT_LIMIT_600;
++			else if (card->sw_caps.sd3_curr_limit &
++					SD_MAX_CURRENT_400)
++				current_limit = SD_SET_CURRENT_LIMIT_400;
++			else if (card->sw_caps.sd3_curr_limit &
++					SD_MAX_CURRENT_200)
++				current_limit = SD_SET_CURRENT_LIMIT_200;
++		} else if (card->host->caps & MMC_CAP_MAX_CURRENT_400) {
++			if (card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_400)
++				current_limit = SD_SET_CURRENT_LIMIT_400;
++			else if (card->sw_caps.sd3_curr_limit &
++					SD_MAX_CURRENT_200)
++				current_limit = SD_SET_CURRENT_LIMIT_200;
++		} else if (card->host->caps & MMC_CAP_MAX_CURRENT_200) {
++			if (card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_200)
++				current_limit = SD_SET_CURRENT_LIMIT_200;
++		}
++	} else
++		current_limit = SD_SET_CURRENT_LIMIT_200;
 +
-+	if ((card->host->caps & MMC_CAP_UHS_SDR104) &&
-+	    (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR104)) {
-+			bus_speed = UHS_SDR104_BUS_SPEED;
-+			timing = MMC_TIMING_UHS_SDR104;
-+			card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
-+	} else if ((card->host->caps & MMC_CAP_UHS_DDR50) &&
-+		   (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_DDR50)) {
-+			bus_speed = UHS_DDR50_BUS_SPEED;
-+			timing = MMC_TIMING_UHS_DDR50;
-+			card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
-+	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
-+		    MMC_CAP_UHS_SDR50)) && (card->sw_caps.sd3_bus_mode &
-+		    SD_MODE_UHS_SDR50)) {
-+			bus_speed = UHS_SDR50_BUS_SPEED;
-+			timing = MMC_TIMING_UHS_SDR50;
-+			card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
-+	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
-+		    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25)) &&
-+		   (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR25)) {
-+			bus_speed = UHS_SDR25_BUS_SPEED;
-+			timing = MMC_TIMING_UHS_SDR25;
-+			card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
-+	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
-+		    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25 |
-+		    MMC_CAP_UHS_SDR12)) && (card->sw_caps.sd3_bus_mode &
-+		    SD_MODE_UHS_SDR12)) {
-+			bus_speed = UHS_SDR12_BUS_SPEED;
-+			timing = MMC_TIMING_UHS_SDR12;
-+			card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
-+	}
-+
-+	card->sd_bus_speed = bus_speed;
-+	err = mmc_sd_switch(card, 1, 0, bus_speed, status);
++	err = mmc_sd_switch(card, 1, 3, current_limit, status);
 +	if (err)
 +		return err;
 +
-+	if ((status[16] & 0xF) != bus_speed)
-+		printk(KERN_WARNING "%s: Problem setting bus speed mode!\n",
++	if (((status[15] >> 4) & 0x0F) != current_limit)
++		printk(KERN_WARNING "%s: Problem setting current limit!\n",
 +			mmc_hostname(card->host));
-+	else {
-+		mmc_set_timing(card->host, timing);
-+		mmc_set_clock(card->host, card->sw_caps.uhs_max_dtr);
-+	}
 +
 +	return 0;
 +}
@@ -107,153 +101,73 @@ index dd0ae2c..bf5710c 100644
  /*
   * UHS-I specific initialization procedure
   */
-@@ -493,6 +553,11 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
+@@ -558,6 +616,11 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
  
- 	/* Set the driver strength for the card */
- 	err = sd_select_driver_type(card, status);
+ 	/* Set bus speed mode of the card */
+ 	err = sd_set_bus_speed_mode(card, status);
 +	if (err)
 +		goto out;
 +
-+	/* Set bus speed mode of the card */
-+	err = sd_set_bus_speed_mode(card, status);
++	/* Set current limit for the card */
++	err = sd_set_current_limit(card, status);
  
  out:
  	kfree(status);
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 858cdb8..7a4fcb5 100644
+index 7a4fcb5..21b2290 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1287,7 +1287,16 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		ctrl &= ~SDHCI_CTRL_HISPD;
+@@ -2240,6 +2240,16 @@ int sdhci_add_host(struct sdhci_host *host)
  
- 	if (host->version >= SDHCI_SPEC_300) {
--		u16 ctrl_2;
-+		u16 clk, ctrl_2;
-+		unsigned int clock;
+ 		if (max_current_180 > 150)
+ 			mmc->caps |= MMC_CAP_SET_XPC_180;
 +
-+		/* In case of UHS-I modes, set High Speed Enable */
-+		if ((ios->timing == MMC_TIMING_UHS_SDR50) ||
-+		    (ios->timing == MMC_TIMING_UHS_SDR104) ||
-+		    (ios->timing == MMC_TIMING_UHS_DDR50) ||
-+		    (ios->timing == MMC_TIMING_UHS_SDR25) ||
-+		    (ios->timing == MMC_TIMING_UHS_SDR12))
-+			ctrl |= SDHCI_CTRL_HISPD;
++		/* Maximum current capabilities of the host at 1.8V */
++		if (max_current_180 >= 800)
++			mmc->caps |= MMC_CAP_MAX_CURRENT_800;
++		else if (max_current_180 >= 600)
++			mmc->caps |= MMC_CAP_MAX_CURRENT_600;
++		else if (max_current_180 >= 400)
++			mmc->caps |= MMC_CAP_MAX_CURRENT_400;
++		else
++			mmc->caps |= MMC_CAP_MAX_CURRENT_200;
+ 	}
  
- 		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 		if (!(ctrl_2 & SDHCI_CTRL_PRESET_VAL_ENABLE)) {
-@@ -1310,8 +1319,6 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			 * need to reset SD Clock Enable before changing High
- 			 * Speed Enable to avoid generating clock gliches.
- 			 */
--			u16 clk;
--			unsigned int clock;
- 
- 			/* Reset SD Clock Enable */
- 			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-@@ -1325,6 +1332,33 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			host->clock = 0;
- 			sdhci_set_clock(host, clock);
- 		}
-+
-+		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+
-+		/* Select Bus Speed Mode for host */
-+		ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-+		if (ios->timing == MMC_TIMING_UHS_SDR12)
-+			ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
-+		else if (ios->timing == MMC_TIMING_UHS_SDR25)
-+			ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
-+		else if (ios->timing == MMC_TIMING_UHS_SDR50)
-+			ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
-+		else if (ios->timing == MMC_TIMING_UHS_SDR104)
-+			ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
-+		else if (ios->timing == MMC_TIMING_UHS_DDR50)
-+			ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
-+
-+		/* Reset SD Clock Enable */
-+		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+		clk &= ~SDHCI_CLOCK_CARD_EN;
-+		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+
-+		sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+
-+		/* Re-enable SD Clock */
-+		clock = host->clock;
-+		host->clock = 0;
-+		sdhci_set_clock(host, clock);
- 	} else
- 		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 4a64ee0..c60d5ca 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -151,6 +151,12 @@
- #define SDHCI_ACMD12_ERR	0x3C
- 
- #define SDHCI_HOST_CONTROL2		0x3E
-+#define  SDHCI_CTRL_UHS_MASK		0x0007
-+#define   SDHCI_CTRL_UHS_SDR12		0x0000
-+#define   SDHCI_CTRL_UHS_SDR25		0x0001
-+#define   SDHCI_CTRL_UHS_SDR50		0x0002
-+#define   SDHCI_CTRL_UHS_SDR104		0x0003
-+#define   SDHCI_CTRL_UHS_DDR50		0x0004
- #define  SDHCI_CTRL_VDD_180		0x0008
- #define  SDHCI_CTRL_DRV_TYPE_MASK	0x0030
- #define   SDHCI_CTRL_DRV_TYPE_B		0x0000
+ 	mmc->ocr_avail = ocr_avail;
 diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 3356b06..6a47d35 100644
+index 6a47d35..d7f81a7 100644
 --- a/include/linux/mmc/card.h
 +++ b/include/linux/mmc/card.h
-@@ -84,7 +84,24 @@ struct sd_ssr {
- 
- struct sd_switch_caps {
- 	unsigned int		hs_max_dtr;
-+	unsigned int		uhs_max_dtr;
-+#define UHS_SDR104_MAX_DTR	208000000
-+#define UHS_SDR50_MAX_DTR	100000000
-+#define UHS_DDR50_MAX_DTR	50000000
-+#define UHS_SDR25_MAX_DTR	UHS_DDR50_MAX_DTR
-+#define UHS_SDR12_MAX_DTR	25000000
- 	unsigned int		sd3_bus_mode;
-+#define UHS_SDR12_BUS_SPEED	0
-+#define UHS_SDR25_BUS_SPEED	1
-+#define UHS_SDR50_BUS_SPEED	2
-+#define UHS_SDR104_BUS_SPEED	3
-+#define UHS_DDR50_BUS_SPEED	4
+@@ -108,6 +108,15 @@ struct sd_switch_caps {
+ #define SD_DRIVER_TYPE_C	0x04
+ #define SD_DRIVER_TYPE_D	0x08
+ 	unsigned int		sd3_curr_limit;
++#define SD_SET_CURRENT_LIMIT_200	0
++#define SD_SET_CURRENT_LIMIT_400	1
++#define SD_SET_CURRENT_LIMIT_600	2
++#define SD_SET_CURRENT_LIMIT_800	3
 +
-+#define SD_MODE_UHS_SDR12	(1 << UHS_SDR12_BUS_SPEED)
-+#define SD_MODE_UHS_SDR25	(1 << UHS_SDR25_BUS_SPEED)
-+#define SD_MODE_UHS_SDR50	(1 << UHS_SDR50_BUS_SPEED)
-+#define SD_MODE_UHS_SDR104	(1 << UHS_SDR104_BUS_SPEED)
-+#define SD_MODE_UHS_DDR50	(1 << UHS_DDR50_BUS_SPEED)
- 	unsigned int		sd3_drv_type;
- #define SD_DRIVER_TYPE_B	0x01
- #define SD_DRIVER_TYPE_A	0x02
-@@ -169,6 +186,8 @@ struct mmc_card {
- 	const char		**info;		/* info strings */
- 	struct sdio_func_tuple	*tuples;	/* unknown common tuples */
- 
-+	unsigned int		sd_bus_speed;	/* Bus Speed Mode set for the card */
-+
- 	struct dentry		*debugfs_root;
++#define SD_MAX_CURRENT_200	(1 << SD_SET_CURRENT_LIMIT_200)
++#define SD_MAX_CURRENT_400	(1 << SD_SET_CURRENT_LIMIT_400)
++#define SD_MAX_CURRENT_600	(1 << SD_SET_CURRENT_LIMIT_600)
++#define SD_MAX_CURRENT_800	(1 << SD_SET_CURRENT_LIMIT_800)
  };
  
+ struct sdio_cccr {
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 5625206..2f20eb5 100644
+index 2f20eb5..1a73e38 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -50,6 +50,11 @@ struct mmc_ios {
- #define MMC_TIMING_LEGACY	0
- #define MMC_TIMING_MMC_HS	1
- #define MMC_TIMING_SD_HS	2
-+#define MMC_TIMING_UHS_SDR12	MMC_TIMING_LEGACY
-+#define MMC_TIMING_UHS_SDR25	MMC_TIMING_SD_HS
-+#define MMC_TIMING_UHS_SDR50	3
-+#define MMC_TIMING_UHS_SDR104	4
-+#define MMC_TIMING_UHS_DDR50	5
+@@ -203,6 +203,10 @@ struct mmc_host {
+ #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
+ #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
+ #define MMC_CAP_DRIVER_TYPE_D	(1 << 25)	/* Host supports Driver Type D */
++#define MMC_CAP_MAX_CURRENT_200	(1 << 26)	/* Host max current limit is 200mA */
++#define MMC_CAP_MAX_CURRENT_400	(1 << 27)	/* Host max current limit is 400mA */
++#define MMC_CAP_MAX_CURRENT_600	(1 << 28)	/* Host max current limit is 600mA */
++#define MMC_CAP_MAX_CURRENT_800	(1 << 29)	/* Host max current limit is 800mA */
  
- 	unsigned char	ddr;			/* dual data rate used */
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
  
 -- 
 1.7.1
