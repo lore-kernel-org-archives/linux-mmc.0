@@ -1,125 +1,93 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [patchv3 4/5] MMC: Block CMD23 support for UHS104/SDXC cards.
-Date: Sat, 16 Apr 2011 11:19:27 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300EB44438C@SAUSEXMBP01.amd.com>
-References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
- <1302950458-1969-5-git-send-email-andreiw@motorola.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH] dw_mmc: add support for pre_req and post_req
+Date: Sun, 17 Apr 2011 00:16:35 +0800
+Message-ID: <20110416161634.GB17935@S2100-06.ap.freescale.net>
+References: <4D9D7024.2030404@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.186]:25517
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752165Ab1DPQT3 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 16 Apr 2011 12:19:29 -0400
-In-Reply-To: <1302950458-1969-5-git-send-email-andreiw@motorola.com>
-Content-Language: en-US
+Received: from am1ehsobe001.messaging.microsoft.com ([213.199.154.204]:2141
+	"EHLO AM1EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754205Ab1DPQ17 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Apr 2011 12:27:59 -0400
+Content-Disposition: inline
+In-Reply-To: <4D9D7024.2030404@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "arnd@arndb.de" <arnd@arndb.de>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@linaro.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Andrei,
+Hi Jaehoon,
 
-
-> -----Original Message-----
-> From: Andrei Warkentin [mailto:andreiw@motorola.com]
-> Sent: Saturday, April 16, 2011 4:11 PM
-> To: linux-mmc@vger.kernel.org
-> Cc: Nath, Arindam; Andrei Warkentin; cjb@laptop.org; arnd@arndb.de
-> Subject: [patchv3 4/5] MMC: Block CMD23 support for UHS104/SDXC cards.
-> 
-> SD cards operating at UHS104 or better support SET_BLOCK_COUNT.
-> 
-> Cc: arindam.nath@amd.com
-> Cc: cjb@laptop.org
-> Cc: arnd@arndb.de
-> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
-> ---
->  drivers/mmc/card/block.c |    9 ++++++---
->  drivers/mmc/core/sd.c    |    1 +
->  include/linux/mmc/card.h |    1 +
->  include/linux/mmc/sd.h   |    1 +
->  4 files changed, 9 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 4b1a58e..23da6e6 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -851,9 +851,12 @@ static struct mmc_blk_data
-> *mmc_blk_alloc_req(struct mmc_card *card,
->  	blk_queue_logical_block_size(md->queue.queue, 512);
->  	set_capacity(md->disk, size);
-> 
-> -	if (mmc_host_cmd23(card->host) &&
-> -	    mmc_card_mmc(card))
-> -		md->flags |= MMC_BLK_CMD23;
-> +	if (mmc_host_cmd23(card->host)) {
-> +		if (mmc_card_mmc(card) ||
-> +		    (mmc_card_sd(card) &&
-> +		     card->scr.cmds & SCR_CMDS_CMD23))
-> +			md->flags |= MMC_BLK_CMD23;
+On Thu, Apr 07, 2011 at 05:04:52PM +0900, Jaehoon Chung wrote:
+[...]
+> +static unsigned int dw_mci_pre_dma_transfer(struct dw_mci *host,
+> +			struct mmc_data *data, struct dw_mci_next *next)
+> +{
+> +	unsigned int sg_len;
+> +
+> +	BUG_ON(next && data->host_cookie);
+> +	BUG_ON(!next && data->host_cookie &&
+> +			data->host_cookie != host->next_data.cookie);
+> +
+> +	if (!next && data->host_cookie &&
+> +			data->host_cookie != host->next_data.cookie) {
+> +		data->host_cookie = 0;
 > +	}
-> 
->  	if (mmc_card_mmc(card) &&
->  	    md->flags & MMC_BLK_CMD23 &&
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 6dac89f..16a1f10 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -195,6 +195,7 @@ static int mmc_decode_scr(struct mmc_card *card)
->  	else
->  		card->erased_byte = 0x0;
-> 
-> +	scr->cmds = UNSTUFF_BITS(resp, 32, 2);
+> +
+I'm unsure if the 'if' statement makes any sense here, since the
+exactly same conditions have been caught by the BUG_ON just above
+it.
 
-Since support for CMD20 and CMD23 have been added in Physical Layer Spec v3.01, IMO it is better to set scr->cmds based on the spec version, rather than doing it unconditionally. Something like,
+> +	if (next ||
+> +		(!next && data->host_cookie != host->next_data.cookie)) {
+> +		sg_len = dma_map_sg(&host->pdev->dev, data->sg,
+> +				data->sg_len, ((data->flags & MMC_DATA_WRITE)
+> +			      ? DMA_TO_DEVICE : DMA_FROM_DEVICE));
+> +	} else {
+> +		sg_len = host->next_data.sg_len;
+> +		host->next_data.sg_len = 0;
+> +	}
+> +
+> +	if (sg_len == 0)
+> +		return -EINVAL;
+> +
+> +	if (next) {
+> +		next->sg_len = sg_len;
+> +		data->host_cookie = ++next->cookie < 0 ? 1 : next->cookie;
+> +	} else
+> +		data->sg_len = sg_len;
+> +
+> +	return sg_len;
+> +}
+> +
+Function dw_mci_pre_dma_transfer() returns non-zero value anyway,
+either -EINVAL or sg_len ...
 
-+       if (scr->sda_vsn == SCR_SPEC_VER_2) {
-+               /* Check if Physical Layer Spec v3.0 is supported*/
-+               scr->sda_spec3 = UNSTUFF_BITS(resp, 47, 1);
-+               if (scr->sda_spec3)
-+                       scr->cmds = UNSTUFF_BITS(resp, 32, 2);
-+       }
+[...]
+> +static void dw_mci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq,
+> +		bool is_first_req)
+> +{
+> +	struct dw_mci_slot *slot = mmc_priv(mmc);
+> +	struct mmc_data *data = mrq->data;
+> +
+> +	if (!data)
+> +		return;
+> +
+> +	BUG_ON(mrq->data->host_cookie);
+> +
+> +	if (slot->host->use_dma) {
+> +		if (dw_mci_pre_dma_transfer(slot->host, mrq->data,
+> +					&slot->host->next_data))
+> +			mrq->data->host_cookie = 0;
+... while it steps back to old blocking way by setting
+data->host_cookie 0 when dw_mci_pre_dma_transfer returns non-zero.
 
->  	return 0;
->  }
-> 
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index c758181..b33186a 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -70,6 +70,7 @@ struct sd_scr {
->  	unsigned char		bus_widths;
->  #define SD_SCR_BUS_WIDTH_1	(1<<0)
->  #define SD_SCR_BUS_WIDTH_4	(1<<2)
-> +	unsigned char		cmds;
->  };
+Per my understanding, it means the non-blocking optimization will
+always get bypassed anyway, so I doubt the patch can really gain
+performance improvement.  Did you get the chance to measure?
 
-How about...
-
-struct sd_scr {
-       unsigned char           sda_vsn;
-+       unsigned char           sda_spec3;
-       unsigned char           bus_widths;
- #define SD_SCR_BUS_WIDTH_1     (1<<0)
- #define SD_SCR_BUS_WIDTH_4     (1<<2)
-+       unsigned char           cmds;
-+#define SD_SCR_CMD20_SUPPORT   (1<<0)
-+#define SD_SCR_CMD23_SUPPORT   (1<<1)
- };
-
-This way we can let go of...
-
-> diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
-> index 3fd85e0..81ba37b 100644
-> --- a/include/linux/mmc/sd.h
-> +++ b/include/linux/mmc/sd.h
-> +#define SCR_CMDS_CMD23		(1 << 1) /* Supports CMD23 */
-
-Thanks,
-Arindam
- 
-
+-- 
+Regards,
+Shawn
 
