@@ -1,101 +1,51 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: 2.6.38.3 ss boot problem and crash
-Date: Sat, 16 Apr 2011 18:05:07 -0400
-Message-ID: <m38vv9svho.fsf@pullcord.laptop.org>
-References: <web-506418104@zbackend1.aha.ru>
-	<20110416213927.GA23518@mtj.dyndns.org>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [patchv3 4/5] MMC: Block CMD23 support for UHS104/SDXC cards.
+Date: Sat, 16 Apr 2011 18:00:23 -0500
+Message-ID: <BANLkTi=BPfmCZp_1Y+prorVAvxdfnOJDLg@mail.gmail.com>
+References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
+	<1302950458-1969-5-git-send-email-andreiw@motorola.com>
+	<6C03668EAF45B747AF947A1603D1B300EB44438C@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34641 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759127Ab1DPWCE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 16 Apr 2011 18:02:04 -0400
-In-Reply-To: <20110416213927.GA23518@mtj.dyndns.org> (Tejun Heo's message of
-	"Sun, 17 Apr 2011 06:39:27 +0900")
+Received: from exprod5og111.obsmtp.com ([64.18.0.22]:58499 "EHLO
+	exprod5og111.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759203Ab1DPXA1 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Apr 2011 19:00:27 -0400
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.129.42])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3GN0mcX016015
+	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 19:00:48 -0400 (EDT)
+Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3GN0kTU016009
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 19:00:48 -0400 (EDT)
+Received: by wwb28 with SMTP id 28so4126342wwb.3
+        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 16:00:23 -0700 (PDT)
+In-Reply-To: <6C03668EAF45B747AF947A1603D1B300EB44438C@SAUSEXMBP01.amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tejun Heo <tj@kernel.org>
-Cc: werner <w.landgraf@ru.ru>, James.Bottomley@HansenPartnership.com, mingo@elte.hu, Andrew Morton <akpm@linux-foundation.org>, gregkh@suse.de, randy.dunlap@oracle.com, linux-scsi@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>
+To: "Nath, Arindam" <Arindam.Nath@amd.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "arnd@arndb.de" <arnd@arndb.de>
 
-Hi Werner,
-
-(adding Marek and Linus W)
-
-On Sat, Apr 16 2011, Tejun Heo wrote:
-> Duplicate sysfs creation from mmc code.  Cc'ing linux-mmc and quoting
-> whole body.
+On Sat, Apr 16, 2011 at 11:19 AM, Nath, Arindam <Arindam.Nath@amd.com> =
+wrote:
+> Hi Andrei,
+> Since support for CMD20 and CMD23 have been added in Physical Layer S=
+pec v3.01, IMO it is better to set scr->cmds based on the spec version,=
+ rather than doing it unconditionally. Something like,
 >
-> On Sat, Apr 16, 2011 at 03:11:02PM -0400, werner wrote:
->> sdhci: Secure Digital Host Controller Interface driver
->> sdhci: Copyright(c) Pierre Ossman
->> sdhci-pci 0000:02:0b.4: SDHCI controller found [104c:8034] (rev 0)
->> sdhci-pci 0000:02:0b.4: enabling device (0000 -> 0002)
->> sdhci-pci 0000:02:0b.4: PCI INT D -> Link[LNKD] -> GSI 11 (level,
->> low) -> IRQ 11
->> _regulator_get: 0000:02:0b.4 supply vmmc not found, using dummy
->> regulator
->> Registered led device: mmc0::
->> mmc0: SDHCI controller on PCI [0000:02:0b.4] using DMA
->> _regulator_get: 0000:02:0b.4 supply vmmc not found, using dummy
->> regulator
->> ------------[ cut here ]------------
->> WARNING: at fs/sysfs/dir.c:455 sysfs_add_one+0x83/0x95()
->> Hardware name: Qosmio E10
->> sysfs: cannot create duplicate filename '/devices/pci0000:00/0000:00:1e.0/0000:02:0b.4/microamps_requested_vmmc'
->> Modules linked in:
->> Pid: 1, comm: swapper Not tainted 2.6.38.3 #1
->> Call Trace:
->>  [<c111ff03>] ? sysfs_add_one+0x83/0x95
->>  [<c103cfc7>] ? warn_slowpath_common+0x7a/0x8f
->>  [<c111ff03>] ? sysfs_add_one+0x83/0x95
->>  [<c103d067>] ? warn_slowpath_fmt+0x33/0x35
->>  [<c111ff03>] ? sysfs_add_one+0x83/0x95
->>  [<c111f903>] ? sysfs_add_file_mode+0x4a/0x72
->>  [<c111f943>] ? sysfs_add_file+0x18/0x1c
->>  [<c111f9de>] ? sysfs_create_file+0x25/0x27
->>  [<c1753adb>] ? device_create_file+0x18/0x1a
->>  [<c165b957>] ? _regulator_get+0x224/0x3b7
->>  [<c107a02f>] ? request_threaded_irq+0xb9/0xe5
->>  [<c165bb0d>] ? regulator_get+0xf/0x11
->>  [<c1c39b53>] ? sdhci_add_host+0x580/0x6cb
->>  [<c156d3ec>] ? pci_ioremap_bar+0x5b/0x5f
->>  [<c1da4754>] ? sdhci_pci_probe+0x339/0x3e2
->>  [<c156d609>] ? local_pci_probe+0x41/0x85
->>  [<c156e17e>] ? pci_device_probe+0x48/0x6b
->>  [<c1755c6c>] ? driver_probe_device+0x9c/0x145
->>  [<c156d5a3>] ? pci_match_device+0x96/0x9c
->>  [<c1dbab2a>] ? _cond_resched+0x8/0x47
->>  [<c1755d5d>] ? __driver_attach+0x48/0x64
->>  [<c17555ad>] ? bus_for_each_dev+0x42/0x6c
->>  [<c1755af5>] ? driver_attach+0x1e/0x20
->>  [<c1755d15>] ? __driver_attach+0x0/0x64
->>  [<c1754fc2>] ? bus_add_driver+0xc6/0x20a
->>  [<c1755fef>] ? driver_register+0x98/0xf8
->>  [<c1755fef>] ? driver_register+0x98/0xf8
->>  [<c165d19a>] ? tty_register_driver+0x15e/0x1e2
->>  [<c156e36b>] ? __pci_register_driver+0x3d/0x96
->>  [<c1dba0d5>] ? printk+0x1d/0x1f
->>  [<c23255b7>] ? sdhci_drv_init+0x14/0x16
->>  [<c100117e>] ? do_one_initcall+0x8c/0x142
->>  [<c1079038>] ? irq_to_desc+0x8/0x1e
->>  [<c23255a3>] ? sdhci_drv_init+0x0/0x16
->>  [<c22c4380>] ? kernel_init+0x101/0x19a
->>  [<c22c427f>] ? kernel_init+0x0/0x19a
->>  [<c1003b46>] ? kernel_thread_helper+0x6/0x10
->> ---[ end trace 120ecbe82d809816 ]---
->> create_regulator: dummy: could not add regulator_dev requested
->> microamps sysfs entry
+> + =A0 =A0 =A0 if (scr->sda_vsn =3D=3D SCR_SPEC_VER_2) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Check if Physical Layer Spec v3.0 is=
+ supported*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 scr->sda_spec3 =3D UNSTUFF_BITS(resp, 4=
+7, 1);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (scr->sda_spec3)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 scr->cmds =3D UNSTUFF_B=
+ITS(resp, 32, 2);
+> + =A0 =A0 =A0 }
+>
 
-Looks like you have CONFIG_REGULATOR_DUMMY=y turned on.  Could you try
-booting without it?
+Sounds good.
 
-Perhaps we have a problem with regulator handling when the vmmc is a
-dummy regulator?  I'll try this out locally.
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+A
