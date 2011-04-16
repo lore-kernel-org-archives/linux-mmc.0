@@ -1,100 +1,318 @@
 From: Andrei Warkentin <andreiw@motorola.com>
-Subject: [patchv3 1/5] MMC: Add/remove quirks conditional support.
-Date: Sat, 16 Apr 2011 05:40:54 -0500
-Message-ID: <1302950458-1969-2-git-send-email-andreiw@motorola.com>
+Subject: [patchv3 2/5] MMC: Use CMD23 for multiblock transfers when we can.
+Date: Sat, 16 Apr 2011 05:40:55 -0500
+Message-ID: <1302950458-1969-3-git-send-email-andreiw@motorola.com>
 References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og110.obsmtp.com ([64.18.0.20]:41661 "EHLO
-	exprod5og110.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750802Ab1DPKCh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Apr 2011 06:02:37 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.168])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3GA2xj2006158
-	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 06:03:00 -0400 (EDT)
-Received: from mail-yi0-f42.google.com (mail-yi0-f42.google.com [209.85.218.42])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3GA2x6X006150
+Received: from exprod5og109.obsmtp.com ([64.18.0.188]:42647 "EHLO
+	exprod5og109.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750802Ab1DPKCj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Apr 2011 06:02:39 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3GA0m5S028829
+	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 06:00:48 -0400 (EDT)
+Received: from mail-yw0-f42.google.com (mail-yw0-f42.google.com [209.85.213.42])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3GA0lgB028823
 	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 06:02:59 -0400 (EDT)
-Received: by yib12 with SMTP id 12so2355953yib.15
-        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 03:02:35 -0700 (PDT)
+	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 06:00:47 -0400 (EDT)
+Received: by ywh1 with SMTP id 1so1629736ywh.15
+        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 03:02:37 -0700 (PDT)
 In-Reply-To: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: arindam.nath@amd.com, Andrei Warkentin <andreiw@motorola.com>, cjb@laptop.org
+Cc: arindam.nath@amd.com, Andrei Warkentin <andreiw@motorola.com>, cjb@laptop.org, arnd@arndb.de
 
-Conditional add/remove quirks for MMC and SD.
+CMD23-prefixed instead of open-ended multiblock transfers
+have a performance advantage on some MMC cards.
 
+Cc: arindam.nath@amd.com
 Cc: cjb@laptop.org
+Cc: arnd@arndb.de
 Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
 ---
- include/linux/mmc/card.h |   40 ++++++++++++++++++++++++++++++++++++----
- 1 files changed, 36 insertions(+), 4 deletions(-)
+ drivers/mmc/card/block.c |  114 ++++++++++++++++++++++++++++++++++------------
+ include/linux/mmc/card.h |    1 +
+ include/linux/mmc/core.h |    1 +
+ include/linux/mmc/host.h |    6 ++
+ include/linux/mmc/mmc.h  |    6 ++
+ 5 files changed, 98 insertions(+), 30 deletions(-)
 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 72a9868..6a4ed2a 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -233,16 +233,14 @@ struct mmc_fixup {
- 		    card->cid.month)
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index c209953..4b1a58e 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -55,10 +55,6 @@ MODULE_ALIAS("mmc:block");
+ #define INAND_CMD38_ARG_SECTRIM1 0x81
+ #define INAND_CMD38_ARG_SECTRIM2 0x88
+ 
+-#define REL_WRITES_SUPPORTED(card) (mmc_card_mmc((card)) &&	\
+-    (((card)->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||	\
+-     ((card)->ext_csd.rel_sectors)))
+-
+ static DEFINE_MUTEX(block_mutex);
  
  /*
-- * This hook just adds a quirk unconditionally.
-+ * Unconditionally quirk add/remove.
-  */
+@@ -85,6 +81,10 @@ struct mmc_blk_data {
+ 	struct mmc_queue queue;
+ 	struct list_head part;
+ 
++	unsigned int	flags;
++#define MMC_BLK_CMD23	(1 << 0)	/* Can do SET_BLOCK_COUNT for multiblock */
++#define MMC_BLK_REL_WR	(1 << 1)	/* MMC Reliable write support */
 +
- static inline void __maybe_unused add_quirk(struct mmc_card *card, int data)
+ 	unsigned int	usage;
+ 	unsigned int	read_only;
+ 	unsigned int	part_type;
+@@ -225,6 +225,7 @@ static const struct block_device_operations mmc_bdops = {
+ 
+ struct mmc_blk_request {
+ 	struct mmc_request	mrq;
++	struct mmc_command	sbc;
+ 	struct mmc_command	cmd;
+ 	struct mmc_command	stop;
+ 	struct mmc_data		data;
+@@ -455,13 +456,10 @@ static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
+  * reliable write can handle, thus finish the request in
+  * partial completions.
+  */
+-static inline int mmc_apply_rel_rw(struct mmc_blk_request *brq,
+-				   struct mmc_card *card,
+-				   struct request *req)
++static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
++				    struct mmc_card *card,
++				    struct request *req)
  {
- 	card->quirks |= data;
+-	int err;
+-	struct mmc_command set_count;
+-
+ 	if (!(card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN)) {
+ 		/* Legacy mode imposes restrictions on transfers. */
+ 		if (!IS_ALIGNED(brq->cmd.arg, card->ext_csd.rel_sectors))
+@@ -472,16 +470,6 @@ static inline int mmc_apply_rel_rw(struct mmc_blk_request *brq,
+ 		else if (brq->data.blocks < card->ext_csd.rel_sectors)
+ 			brq->data.blocks = 1;
+ 	}
+-
+-	memset(&set_count, 0, sizeof(struct mmc_command));
+-	set_count.opcode = MMC_SET_BLOCK_COUNT;
+-	set_count.arg = brq->data.blocks | (1 << 31);
+-	set_count.flags = MMC_RSP_R1 | MMC_CMD_AC;
+-	err = mmc_wait_for_cmd(card->host, &set_count, 0);
+-	if (err)
+-		printk(KERN_ERR "%s: error %d SET_BLOCK_COUNT\n",
+-		       req->rq_disk->disk_name, err);
+-	return err;
  }
  
--/*
-- * This hook just removes a quirk unconditionally.
-- */
- static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- {
- 	card->quirks &= ~data;
-@@ -264,6 +262,40 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
- #define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
+ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+@@ -498,7 +486,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 	bool do_rel_wr = ((req->cmd_flags & REQ_FUA) ||
+ 			  (req->cmd_flags & REQ_META)) &&
+ 		(rq_data_dir(req) == WRITE) &&
+-		REL_WRITES_SUPPORTED(card);
++		(md->flags & MMC_BLK_REL_WR);
  
-+/*
-+ * Quirk add/remove for MMC products.
-+ */
+ 	do {
+ 		struct mmc_command cmd;
+@@ -536,11 +524,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 
+ 		if (brq.data.blocks > 1 || do_rel_wr) {
+ 			/* SPI multiblock writes terminate using a special
+-			 * token, not a STOP_TRANSMISSION request. Reliable
+-			 * writes use SET_BLOCK_COUNT and do not use a
+-			 * STOP_TRANSMISSION request either.
++			 * token, not a STOP_TRANSMISSION request.
+ 			 */
+-			if ((!mmc_host_is_spi(card->host) && !do_rel_wr) ||
++			if (!mmc_host_is_spi(card->host) ||
+ 			    rq_data_dir(req) == READ)
+ 				brq.mrq.stop = &brq.stop;
+ 			readcmd = MMC_READ_MULTIPLE_BLOCK;
+@@ -558,8 +544,37 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 			brq.data.flags |= MMC_DATA_WRITE;
+ 		}
+ 
+-		if (do_rel_wr && mmc_apply_rel_rw(&brq, card, req))
+-			goto cmd_err;
++		if (do_rel_wr)
++			mmc_apply_rel_rw(&brq, card, req);
 +
-+static inline void __maybe_unused add_quirk_mmc(struct mmc_card *card, int data)
-+{
-+	if (mmc_card_mmc(card))
-+		card->quirks |= data;
-+}
++		/*
++		 * Pre-defined multi-block transfers are preferable to
++		 * open ended-ones (and necessary for reliable writes).
++		 * However, it is not sufficient to just send CMD23,
++		 * and avoid the final CMD12, as on an error condition
++		 * CMD12 (stop) needs to be sent anyway. This, coupled
++		 * with Auto-CMD23 enhancements provided by some
++		 * hosts, means that the complexity of dealing
++		 * with this is best left to the host. If CMD23 is
++		 * supported by card and host, we'll fill sbc in and let
++		 * the host deal with handling it correctly. This means
++		 * that for hosts that don't expose MMC_CAP_CMD23, no
++		 * change of behavior will be observed.
++		 *
++		 * N.B: Some MMC cards experience perf degradation.
++		 * We'll avoid using CMD23-bounded multiblock writes for
++		 * these, while retaining features like reliable writes.
++		 */
 +
-+static inline void __maybe_unused remove_quirk_mmc(struct mmc_card *card,
-+						   int data)
-+{
-+	if (mmc_card_mmc(card))
-+		card->quirks &= ~data;
-+}
++		if ((md->flags & MMC_BLK_CMD23) &&
++		    mmc_op_multi(brq.cmd.opcode) &&
++		    (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO_CMD23))) {
++			brq.sbc.opcode = MMC_SET_BLOCK_COUNT;
++			brq.sbc.arg = brq.data.blocks |
++				(do_rel_wr ? (1 << 31) : 0);
++			brq.sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
++			brq.mrq.sbc = &brq.sbc;
++		}
+ 
+ 		mmc_set_data_timeout(&brq.data, card);
+ 
+@@ -596,7 +611,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 		 * until later as we need to wait for the card to leave
+ 		 * programming mode even when things go wrong.
+ 		 */
+-		if (brq.cmd.error || brq.data.error || brq.stop.error) {
++		if (brq.sbc.error || brq.cmd.error ||
++		    brq.data.error || brq.stop.error) {
+ 			if (brq.data.blocks > 1 && rq_data_dir(req) == READ) {
+ 				/* Redo read one sector at a time */
+ 				printk(KERN_WARNING "%s: retrying using single "
+@@ -607,6 +623,13 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 			status = get_card_status(card, req);
+ 		}
+ 
++		if (brq.sbc.error) {
++			printk(KERN_ERR "%s: error %d sending SET_BLOCK_COUNT "
++			       "command, response %#x, card status %#x\n",
++			       req->rq_disk->disk_name, brq.sbc.error,
++			       brq.sbc.resp[0], status);
++		}
 +
-+/*
-+ * Quirk add/remove for SD products.
-+ */
+ 		if (brq.cmd.error) {
+ 			printk(KERN_ERR "%s: error %d sending read/write "
+ 			       "command, response %#x, card status %#x\n",
+@@ -804,8 +827,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	md->disk->queue = md->queue.queue;
+ 	md->disk->driverfs_dev = parent;
+ 	set_disk_ro(md->disk, md->read_only || default_ro);
+-	if (REL_WRITES_SUPPORTED(card))
+-		blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
+ 
+ 	/*
+ 	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
+@@ -829,6 +850,19 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 
+ 	blk_queue_logical_block_size(md->queue.queue, 512);
+ 	set_capacity(md->disk, size);
 +
-+static inline void __maybe_unused add_quirk_sd(struct mmc_card *card, int data)
-+{
-+	if (mmc_card_sd(card))
-+		card->quirks |= data;
-+}
++	if (mmc_host_cmd23(card->host) &&
++	    mmc_card_mmc(card))
++		md->flags |= MMC_BLK_CMD23;
 +
-+static inline void __maybe_unused remove_quirk_sd(struct mmc_card *card,
-+						   int data)
-+{
-+	if (mmc_card_sd(card))
-+		card->quirks &= ~data;
-+}
++	if (mmc_card_mmc(card) &&
++	    md->flags & MMC_BLK_CMD23 &&
++	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
++	     card->ext_csd.rel_sectors)) {
++		md->flags |= MMC_BLK_REL_WR;
++		blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
++	}
 +
- static inline int mmc_card_lenient_fn0(const struct mmc_card *c)
+ 	return md;
+ 
+  err_putdisk:
+@@ -982,6 +1016,26 @@ static const struct mmc_fixup blk_fixups[] =
+ 	MMC_FIXUP("SEM08G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
+ 	MMC_FIXUP("SEM16G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
+ 	MMC_FIXUP("SEM32G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
++
++	/*
++	 * Some MMC cards experience performance degradation with CMD23
++	 * instead of CMD12-bounded multiblock transfers. For now we'll
++	 * white list what's good:
++	 * 1) Certain SanDisk eMMCs with the old MMCA manfid.
++	 * 2) All new SanDisk products.
++	 *
++	 * N.B. This doesn't affect SD cards.
++	 */
++	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_ANY, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_BLK_NO_CMD23),
++	MMC_FIXUP("SEM04G", 0x2, 0x100, remove_quirk_mmc, MMC_QUIRK_BLK_NO_CMD23),
++	MMC_FIXUP("SEM08G", 0x2, 0x100, remove_quirk_mmc, MMC_QUIRK_BLK_NO_CMD23),
++	MMC_FIXUP("SEM16G", 0x2, 0x100, remove_quirk_mmc, MMC_QUIRK_BLK_NO_CMD23),
++	MMC_FIXUP("SEM32G", 0x2, 0x100, remove_quirk_mmc, MMC_QUIRK_BLK_NO_CMD23),
++	MMC_FIXUP("SEM02G", 0x2, 0x100, remove_quirk_mmc, MMC_QUIRK_BLK_NO_CMD23),
++	MMC_FIXUP(CID_NAME_ANY, 0x45, CID_OEMID_ANY,
++		  remove_quirk_mmc, MMC_QUIRK_BLK_NO_CMD23),
++
+ 	END_FIXUP
+ };
+ 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 6a4ed2a..c758181 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -134,6 +134,7 @@ struct mmc_card {
+ #define MMC_QUIRK_NONSTD_FUNC_IF (1<<4)		/* SDIO card has nonstd function interfaces */
+ #define MMC_QUIRK_DISABLE_CD	(1<<5)		/* disconnect CD/DAT[3] resistor */
+ #define MMC_QUIRK_INAND_CMD38	(1<<6)		/* iNAND devices have broken CMD38 */
++#define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular multiblock */
+ 
+ 	unsigned int		erase_size;	/* erase size in sectors */
+  	unsigned int		erase_shift;	/* if erase unit is power 2 */
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index f8e4bcb..55d7fde 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -120,6 +120,7 @@ struct mmc_data {
+ };
+ 
+ struct mmc_request {
++	struct mmc_command	*sbc;		/* SET_BLOCK_COUNT for multiblock */
+ 	struct mmc_command	*cmd;
+ 	struct mmc_data		*data;
+ 	struct mmc_command	*stop;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 4f705eb..ba34fc5 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -173,6 +173,7 @@ struct mmc_host {
+ 						/* DDR mode at 1.2V */
+ #define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off after boot */
+ #define MMC_CAP_BUS_WIDTH_TEST	(1 << 14)	/* CMD14/CMD19 bus width ok */
++#define MMC_CAP_CMD23		(1 << 15)	/* CMD23 supported */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
+@@ -330,5 +331,10 @@ static inline int mmc_card_wake_sdio_irq(struct mmc_host *host)
  {
- 	return c->quirks & MMC_QUIRK_LENIENT_FN0;
+ 	return host->pm_flags & MMC_PM_WAKE_SDIO_IRQ;
+ }
++
++static inline int mmc_host_cmd23(struct mmc_host *host)
++{
++	return host->caps & MMC_CAP_CMD23;
++}
+ #endif
+ 
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 373b2bf..ea74168 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -82,6 +82,12 @@
+ #define MMC_APP_CMD              55   /* ac   [31:16] RCA        R1  */
+ #define MMC_GEN_CMD              56   /* adtc [0] RD/WR          R1  */
+ 
++static inline bool mmc_op_multi(u32 opcode)
++{
++	return opcode == MMC_WRITE_MULTIPLE_BLOCK ||
++		opcode == MMC_READ_MULTIPLE_BLOCK;
++}
++
+ /*
+  * MMC_SWITCH argument format:
+  *
 -- 
 1.7.0.4
 
