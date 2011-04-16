@@ -1,80 +1,77 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [PATCH v3 01/12] mmc: sdhci: add support for auto CMD23
-Date: Sat, 16 Apr 2011 05:04:30 -0500
-Message-ID: <BANLkTikc1x5K7X+tZ-rHLYeO+frZ7YXJkg@mail.gmail.com>
-References: <1302863942-1774-1-git-send-email-arindam.nath@amd.com>
-	<1302863942-1774-2-git-send-email-arindam.nath@amd.com>
-	<BANLkTimZGonC+D0czjiY4i7pFFW=upj_qw@mail.gmail.com>
-	<6C03668EAF45B747AF947A1603D1B300EB443FB6@SAUSEXMBP01.amd.com>
-	<BANLkTimEKQceSiuL=dX2yhMw+MLu7BzLvQ@mail.gmail.com>
-	<BANLkTimfQo7wJ3_ecs64VSp7xKJrjYdJ3w@mail.gmail.com>
-	<BANLkTikoAWEMGOAHrxJT4jNknVFtyuhdqw@mail.gmail.com>
-	<6C03668EAF45B747AF947A1603D1B300EB44434B@SAUSEXMBP01.amd.com>
-	<BANLkTimUrvnkg5dxiSh6cmToR_QTpYtnyw@mail.gmail.com>
-	<6C03668EAF45B747AF947A1603D1B300EB44436E@SAUSEXMBP01.amd.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH v2 00/12] mmc: use nonblock mmc requests to minimize
+ latency
+Date: Sat, 16 Apr 2011 23:48:41 +0800
+Message-ID: <20110416154841.GA17935@S2100-06.ap.freescale.net>
+References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og108.obsmtp.com ([64.18.0.186]:46581 "EHLO
-	exprod5og108.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750802Ab1DPKEd convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Apr 2011 06:04:33 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.168])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3GA4tEp006389
-	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 06:04:55 -0400 (EDT)
-Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3GA4coD006378
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 06:04:54 -0400 (EDT)
-Received: by mail-wy0-f170.google.com with SMTP id 34so4665843wyb.15
-        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 03:04:30 -0700 (PDT)
-In-Reply-To: <6C03668EAF45B747AF947A1603D1B300EB44436E@SAUSEXMBP01.amd.com>
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:13272 "EHLO
+	TX2EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755891Ab1DPPo5 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Apr 2011 11:44:57 -0400
+Content-Disposition: inline
+In-Reply-To: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Nath, Arindam" <Arindam.Nath@amd.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>
 
-On Sat, Apr 16, 2011 at 4:40 AM, Nath, Arindam <Arindam.Nath@amd.com> wrote:
-> Hi Andrei,
->
->
->> -----Original Message-----
->> From: Andrei Warkentin [mailto:andreiw@motorola.com]
->> Sent: Saturday, April 16, 2011 2:38 PM
->> To: Nath, Arindam
->> Cc: linux-mmc@vger.kernel.org
->> Subject: Re: [PATCH v3 01/12] mmc: sdhci: add support for auto CMD23
->>
->> On Sat, Apr 16, 2011 at 12:25 AM, Nath, Arindam <Arindam.Nath@amd.com>
->> wrote:
->> > Hi Andrei,
->> >
->> > I saw in one of the community threads that you also have a patch
->> ready for supporting Auto CMD23 for SDHCI. Can you share the same with
->> us? I would like to take a look at your patch first before deciding
->> whether it would make sense for controllers which comply with Host
->> Controller Spec v3.00.
->> >
->>
->> Will send updated patch set in a few. You and Subhash are on the Cc.
->> Once again, the Auto-CMD23 is completely untested. I would be
->> extremely grateful if you can verify it.
->
-> Yes, I can do that. On that note, I have a suggestion. Since the Auto CMD23 feature is separate and none of my other patches depend on this, I would rather re-submit V3 patches except for the Auto CMD23 feature. Then once your patches have been accepted and tested, we can enable Auto CMD23 feature in the kernel. Let me know what you think.
+Hi Per,
 
-Sure, great! I've just mailed the v3 of my patch set, so I'm looking
-forward to any comments you have and any problems you uncover with
-Auto-CMD23.
+On Wed, Apr 06, 2011 at 09:07:01PM +0200, Per Forlin wrote:
+[...]
+>=20
+> Per Forlin (12):
+>   mmc: add none blocking mmc request function
+>   mmc: mmc_test: add debugfs file to list all tests
+>   mmc: mmc_test: add test for none blocking transfers
+>   mmc: add member in mmc queue struct to hold request data
+>   mmc: add a block request prepare function
+>   mmc: move error code in mmc_block_issue_rw_rq to a separate functio=
+n.
+>   mmc: add a second mmc queue request member
+>   mmc: add handling for two parallel block requests in issue_rw_rq
+>   mmc: test: add random fault injection in core.c
+>   omap_hsmmc: use original sg_len for dma_unmap_sg
+>   omap_hsmmc: add support for pre_req and post_req
+>   mmci: implement pre_req() and post_req()
+>=20
+>  drivers/mmc/card/block.c      |  493 +++++++++++++++++++++++++++----=
+----------
+>  drivers/mmc/card/mmc_test.c   |  342 ++++++++++++++++++++++++++++-
+>  drivers/mmc/card/queue.c      |  171 +++++++++------
+>  drivers/mmc/card/queue.h      |   31 ++-
+>  drivers/mmc/core/core.c       |  132 ++++++++++-
+>  drivers/mmc/core/debugfs.c    |    5 +
+>  drivers/mmc/host/mmci.c       |  146 +++++++++++-
+>  drivers/mmc/host/mmci.h       |    8 +
+>  drivers/mmc/host/omap_hsmmc.c |   90 +++++++-
+>  include/linux/mmc/core.h      |    9 +-
+>  include/linux/mmc/host.h      |   13 +-
+>  lib/Kconfig.debug             |   11 +
+>  12 files changed, 1172 insertions(+), 279 deletions(-)
+>=20
+I'm playing the patch set and seeing the following warnings.
 
->
->> Is there any kind of error injection mechanism you guys use to verify
->> the error paths for Auto 12/23?
->
-> None in particular.
->
+  CC      drivers/mmc/card/block.o
+drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_issue_rq=E2=80=99=
+:
+drivers/mmc/card/block.c:429:6: warning: =E2=80=98status=E2=80=99 may b=
+e used uninitialized in this function
 
-I am starting to wish I had a "fake" MMC or SD card I could program to
-fail in various spectacular ways...
+  CC      drivers/mmc/core/core.o
+drivers/mmc/core/core.c: In function =E2=80=98mmc_request_done=E2=80=99=
+:
+drivers/mmc/core/core.c:163:3: warning: passing argument 2 of =E2=80=98=
+mmc_should_fail_request=E2=80=99 from incompatible pointer type
+drivers/mmc/core/core.c:129:20: note: expected =E2=80=98struct mmc_data=
+ *=E2=80=99 but argument is of type =E2=80=98struct mmc_request *=E2=80=
+=99
 
-A
+--=20
+Regards,
+Shawn
+
