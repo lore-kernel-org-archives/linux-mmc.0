@@ -1,77 +1,125 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH v2 00/12] mmc: use nonblock mmc requests to minimize
- latency
-Date: Sat, 16 Apr 2011 23:48:41 +0800
-Message-ID: <20110416154841.GA17935@S2100-06.ap.freescale.net>
-References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [patchv3 4/5] MMC: Block CMD23 support for UHS104/SDXC cards.
+Date: Sat, 16 Apr 2011 11:19:27 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B300EB44438C@SAUSEXMBP01.amd.com>
+References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
+ <1302950458-1969-5-git-send-email-andreiw@motorola.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:13272 "EHLO
-	TX2EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755891Ab1DPPo5 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Apr 2011 11:44:57 -0400
-Content-Disposition: inline
-In-Reply-To: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
+Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.186]:25517
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752165Ab1DPQT3 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 16 Apr 2011 12:19:29 -0400
+In-Reply-To: <1302950458-1969-5-git-send-email-andreiw@motorola.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>
+To: Andrei Warkentin <andreiw@motorola.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "arnd@arndb.de" <arnd@arndb.de>
 
-Hi Per,
+Hi Andrei,
 
-On Wed, Apr 06, 2011 at 09:07:01PM +0200, Per Forlin wrote:
-[...]
->=20
-> Per Forlin (12):
->   mmc: add none blocking mmc request function
->   mmc: mmc_test: add debugfs file to list all tests
->   mmc: mmc_test: add test for none blocking transfers
->   mmc: add member in mmc queue struct to hold request data
->   mmc: add a block request prepare function
->   mmc: move error code in mmc_block_issue_rw_rq to a separate functio=
-n.
->   mmc: add a second mmc queue request member
->   mmc: add handling for two parallel block requests in issue_rw_rq
->   mmc: test: add random fault injection in core.c
->   omap_hsmmc: use original sg_len for dma_unmap_sg
->   omap_hsmmc: add support for pre_req and post_req
->   mmci: implement pre_req() and post_req()
->=20
->  drivers/mmc/card/block.c      |  493 +++++++++++++++++++++++++++----=
-----------
->  drivers/mmc/card/mmc_test.c   |  342 ++++++++++++++++++++++++++++-
->  drivers/mmc/card/queue.c      |  171 +++++++++------
->  drivers/mmc/card/queue.h      |   31 ++-
->  drivers/mmc/core/core.c       |  132 ++++++++++-
->  drivers/mmc/core/debugfs.c    |    5 +
->  drivers/mmc/host/mmci.c       |  146 +++++++++++-
->  drivers/mmc/host/mmci.h       |    8 +
->  drivers/mmc/host/omap_hsmmc.c |   90 +++++++-
->  include/linux/mmc/core.h      |    9 +-
->  include/linux/mmc/host.h      |   13 +-
->  lib/Kconfig.debug             |   11 +
->  12 files changed, 1172 insertions(+), 279 deletions(-)
->=20
-I'm playing the patch set and seeing the following warnings.
 
-  CC      drivers/mmc/card/block.o
-drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_issue_rq=E2=80=99=
-:
-drivers/mmc/card/block.c:429:6: warning: =E2=80=98status=E2=80=99 may b=
-e used uninitialized in this function
+> -----Original Message-----
+> From: Andrei Warkentin [mailto:andreiw@motorola.com]
+> Sent: Saturday, April 16, 2011 4:11 PM
+> To: linux-mmc@vger.kernel.org
+> Cc: Nath, Arindam; Andrei Warkentin; cjb@laptop.org; arnd@arndb.de
+> Subject: [patchv3 4/5] MMC: Block CMD23 support for UHS104/SDXC cards.
+> 
+> SD cards operating at UHS104 or better support SET_BLOCK_COUNT.
+> 
+> Cc: arindam.nath@amd.com
+> Cc: cjb@laptop.org
+> Cc: arnd@arndb.de
+> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
+> ---
+>  drivers/mmc/card/block.c |    9 ++++++---
+>  drivers/mmc/core/sd.c    |    1 +
+>  include/linux/mmc/card.h |    1 +
+>  include/linux/mmc/sd.h   |    1 +
+>  4 files changed, 9 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 4b1a58e..23da6e6 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -851,9 +851,12 @@ static struct mmc_blk_data
+> *mmc_blk_alloc_req(struct mmc_card *card,
+>  	blk_queue_logical_block_size(md->queue.queue, 512);
+>  	set_capacity(md->disk, size);
+> 
+> -	if (mmc_host_cmd23(card->host) &&
+> -	    mmc_card_mmc(card))
+> -		md->flags |= MMC_BLK_CMD23;
+> +	if (mmc_host_cmd23(card->host)) {
+> +		if (mmc_card_mmc(card) ||
+> +		    (mmc_card_sd(card) &&
+> +		     card->scr.cmds & SCR_CMDS_CMD23))
+> +			md->flags |= MMC_BLK_CMD23;
+> +	}
+> 
+>  	if (mmc_card_mmc(card) &&
+>  	    md->flags & MMC_BLK_CMD23 &&
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 6dac89f..16a1f10 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -195,6 +195,7 @@ static int mmc_decode_scr(struct mmc_card *card)
+>  	else
+>  		card->erased_byte = 0x0;
+> 
+> +	scr->cmds = UNSTUFF_BITS(resp, 32, 2);
 
-  CC      drivers/mmc/core/core.o
-drivers/mmc/core/core.c: In function =E2=80=98mmc_request_done=E2=80=99=
-:
-drivers/mmc/core/core.c:163:3: warning: passing argument 2 of =E2=80=98=
-mmc_should_fail_request=E2=80=99 from incompatible pointer type
-drivers/mmc/core/core.c:129:20: note: expected =E2=80=98struct mmc_data=
- *=E2=80=99 but argument is of type =E2=80=98struct mmc_request *=E2=80=
-=99
+Since support for CMD20 and CMD23 have been added in Physical Layer Spec v3.01, IMO it is better to set scr->cmds based on the spec version, rather than doing it unconditionally. Something like,
 
---=20
-Regards,
-Shawn
++       if (scr->sda_vsn == SCR_SPEC_VER_2) {
++               /* Check if Physical Layer Spec v3.0 is supported*/
++               scr->sda_spec3 = UNSTUFF_BITS(resp, 47, 1);
++               if (scr->sda_spec3)
++                       scr->cmds = UNSTUFF_BITS(resp, 32, 2);
++       }
+
+>  	return 0;
+>  }
+> 
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index c758181..b33186a 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -70,6 +70,7 @@ struct sd_scr {
+>  	unsigned char		bus_widths;
+>  #define SD_SCR_BUS_WIDTH_1	(1<<0)
+>  #define SD_SCR_BUS_WIDTH_4	(1<<2)
+> +	unsigned char		cmds;
+>  };
+
+How about...
+
+struct sd_scr {
+       unsigned char           sda_vsn;
++       unsigned char           sda_spec3;
+       unsigned char           bus_widths;
+ #define SD_SCR_BUS_WIDTH_1     (1<<0)
+ #define SD_SCR_BUS_WIDTH_4     (1<<2)
++       unsigned char           cmds;
++#define SD_SCR_CMD20_SUPPORT   (1<<0)
++#define SD_SCR_CMD23_SUPPORT   (1<<1)
+ };
+
+This way we can let go of...
+
+> diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
+> index 3fd85e0..81ba37b 100644
+> --- a/include/linux/mmc/sd.h
+> +++ b/include/linux/mmc/sd.h
+> +#define SCR_CMDS_CMD23		(1 << 1) /* Supports CMD23 */
+
+Thanks,
+Arindam
+ 
+
 
