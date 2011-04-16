@@ -1,7 +1,7 @@
 From: Andrei Warkentin <andreiw@motorola.com>
 Subject: Re: [PATCH v3 01/12] mmc: sdhci: add support for auto CMD23
-Date: Sat, 16 Apr 2011 03:20:49 -0500
-Message-ID: <BANLkTimVQwbDt9OSe63miCwsErt=wKQKCA@mail.gmail.com>
+Date: Sat, 16 Apr 2011 04:07:59 -0500
+Message-ID: <BANLkTimUrvnkg5dxiSh6cmToR_QTpYtnyw@mail.gmail.com>
 References: <1302863942-1774-1-git-send-email-arindam.nath@amd.com>
 	<1302863942-1774-2-git-send-email-arindam.nath@amd.com>
 	<BANLkTimZGonC+D0czjiY4i7pFFW=upj_qw@mail.gmail.com>
@@ -9,54 +9,49 @@ References: <1302863942-1774-1-git-send-email-arindam.nath@amd.com>
 	<BANLkTimEKQceSiuL=dX2yhMw+MLu7BzLvQ@mail.gmail.com>
 	<BANLkTimfQo7wJ3_ecs64VSp7xKJrjYdJ3w@mail.gmail.com>
 	<BANLkTikoAWEMGOAHrxJT4jNknVFtyuhdqw@mail.gmail.com>
-	<000001cbfbfd$efa6e120$cef4a360$@org>
-	<6C03668EAF45B747AF947A1603D1B300EB444353@SAUSEXMBP01.amd.com>
-	<001601cbfc00$b87eac20$297c0460$@org>
-	<6C03668EAF45B747AF947A1603D1B300EB444355@SAUSEXMBP01.amd.com>
+	<6C03668EAF45B747AF947A1603D1B300EB44434B@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og109.obsmtp.com ([64.18.0.188]:53104 "EHLO
-	exprod5og109.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752112Ab1DPIUx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Apr 2011 04:20:53 -0400
+Received: from exprod5og113.obsmtp.com ([64.18.0.26]:60692 "EHLO
+	exprod5og113.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750819Ab1DPJID convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Apr 2011 05:08:03 -0400
 Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.168])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3G8J1Oc020350
-	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 04:19:01 -0400 (EDT)
-Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3G8J0N6020343
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3G96Bb8024673
+	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 05:06:11 -0400 (EDT)
+Received: from mail-ww0-f42.google.com (mail-ww0-f42.google.com [74.125.82.42])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3G96AiO024666
 	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 04:19:01 -0400 (EDT)
-Received: by wwb28 with SMTP id 28so3735414wwb.3
-        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 01:20:49 -0700 (PDT)
-In-Reply-To: <6C03668EAF45B747AF947A1603D1B300EB444355@SAUSEXMBP01.amd.com>
+	for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 05:06:11 -0400 (EDT)
+Received: by wwk4 with SMTP id 4so349941wwk.3
+        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2011 02:07:59 -0700 (PDT)
+In-Reply-To: <6C03668EAF45B747AF947A1603D1B300EB44434B@SAUSEXMBP01.amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "Nath, Arindam" <Arindam.Nath@amd.com>
-Cc: Subhash Jadavani <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Sat, Apr 16, 2011 at 1:43 AM, Nath, Arindam <Arindam.Nath@amd.com> wrote:
->> and
->> then sending the CMD23 for multi block read/write. MMC cards also
->> supports
->> CMD23 so in that case again you have to check MMC EXT_CSD register for
->> CMD23
+On Sat, Apr 16, 2011 at 12:25 AM, Nath, Arindam <Arindam.Nath@amd.com> wrote:
+> Hi Andrei,
 >
-> Yes, you are right. I followed the Physical Layer Spec v3.01 as is, so in case the support is needed for MMC cards, we will need to take care of that too.
-
-It's already done. In the block layer. All you need to do is honor
-mmc_request->sbc and set Auto-CMD23 and the CMD23 argument.
-
->> support. All this logic is better be in core/block layer and let
->> core/block
->> layer inform host controller when to send CMD23 and when not to.
+> I saw in one of the community threads that you also have a patch ready for supporting Auto CMD23 for SDHCI. Can you share the same with us? I would like to take a look at your patch first before deciding whether it would make sense for controllers which comply with Host Controller Spec v3.00.
 >
-> Well in that case, Auto CMD23 will never make sense.
 
-I am unsure why you think that. All Auto CMD23 means is that instead
-of manually sending CMD23 (and incurring the extra interrupt penalty),
-I have the host automatically do it. But this feature should only be
-enabled when upper layers care to enabled it. This is what the CMD23
-support plumbed in.
+Will send updated patch set in a few. You and Subhash are on the Cc.
+Once again, the Auto-CMD23 is completely untested. I would be
+extremely grateful if you can verify it.
+Is there any kind of error injection mechanism you guys use to verify
+the error paths for Auto 12/23?
+
+By the way -
+
++       /* If the host can perform ADMA operation, we reset SDMA flag */
++       if (host->flags & SDHCI_USE_ADMA)
++               host->flags &= ~SDHCI_USE_SDMA;
+
+This seems completely unnecessary, as the code already prefers ADMA to
+SDMA. What do you think?
 
 A
