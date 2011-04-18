@@ -1,46 +1,34 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] dw_mmc: add support for pre_req and post_req
-Date: Mon, 18 Apr 2011 14:10:55 +0900
-Message-ID: <4DABC7DF.6020809@samsung.com>
-References: <4D9D7024.2030404@samsung.com>
- <20110416161634.GB17935@S2100-06.ap.freescale.net>
- <4DABC42F.30405@samsung.com> <20110418051022.GC18623@S2100-06.ap.freescale.net>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v4] mmc: Add ioctl to let userspace apps send ACMDs
+Date: Mon, 18 Apr 2011 16:39:48 +0200
+Message-ID: <201104181639.48730.arnd@arndb.de>
+References: <alpine.DEB.2.00.1104111424140.32082@peruna> <201104130100.39810.arnd@arndb.de> <alpine.DEB.2.00.1104121604220.8483@peruna>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:32583 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751911Ab1DRFNA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2011 01:13:00 -0400
-Received: from epmmp2 (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LJU00MO815MAN40@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 18 Apr 2011 14:12:58 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LJU004RX15MV0@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 18 Apr 2011 14:12:58 +0900 (KST)
-In-reply-to: <20110418051022.GC18623@S2100-06.ap.freescale.net>
+Received: from moutng.kundenserver.de ([212.227.126.187]:55372 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753258Ab1DROkA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2011 10:40:00 -0400
+In-Reply-To: <alpine.DEB.2.00.1104121604220.8483@peruna>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@linaro.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>
+To: John Calixto <john.calixto@modsystems.com>
+Cc: =?utf-8?q?Micha=C5=82_Miros=C5=82aw?= <mirqus@gmail.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Andrei Warkentin <andreiw@motorola.com>
 
-Hi Shawn,
-
-Shawn Guo wrote:
-> 
-> 	if (slot->host->use_dma) {
-> 		if (dw_mci_pre_dma_transfer(slot->host, mrq->data,
-> 					&slot->host->next_data) < 0)
-> 			mrq->data->host_cookie = 0;
+On Wednesday 13 April 2011, John Calixto wrote:
+> Gah!  OK, so much for the v5 I just sent then.  What do you think about
+> the compat_ioctl that I sent in v2?  It means having the extra 32-bit
+> compat structure, but at least all the compat overhead is conditional
+> upon CONFIG_COMPAT.  If you're not using CONFIG_COMPAT, you don't get
+> any compat cruft.
 > 
 
-Ok..I understood yours..:) i'll check and test..
-Thanks for your comment.
+A single __u64 is sufficient, because the user space will do the correct
+conversion from pointer to 64-bit integer then. The only conversion
+you need to worry about is the actual pointer to the main structure,
+which needs the compat_ptr() magic.
 
-Regards,
-Jaehoon Chung
-
+	Arnd
