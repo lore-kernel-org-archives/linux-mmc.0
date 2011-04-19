@@ -1,65 +1,60 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: [PATCH] mmc: sdhci: Fix SDHCI_QUIRK_TIMEOUT_USES_SDCLK
-Date: Tue, 19 Apr 2011 18:44:17 +0100
-Message-ID: <1303235057-4745-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 0/5] consolidate sdhci pltfm & OF drivers and get them
+ self registered
+Date: Tue, 19 Apr 2011 19:47:12 +0200
+Message-ID: <20110419174712.GA29314@pengutronix.de>
+References: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
+ <20110419102031.GA4164@pengutronix.de>
+ <BANLkTinfhb3vejJSM4y-C=3vk5RE76gPjQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="5vNYLRcllDrimb99"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:43874 "EHLO
-	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752378Ab1DSRp5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 13:45:57 -0400
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:35223 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752378Ab1DSRrU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 13:47:20 -0400
+Content-Disposition: inline
+In-Reply-To: <BANLkTinfhb3vejJSM4y-C=3vk5RE76gPjQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Andrei Warkentin <andreiw@motorola.com>, patches@opensource.wolfsonmicro.com
-Cc: linux-mmc@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>
+To: Kyungmin Park <kmpark@infradead.org>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-dev@lists.linaro.org, sameo@linux.intel.com, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, =?utf-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>
 
-Commit 373e6a (mmc: sdhci: R1B command handling + MMC_CAP_ERASE) moved the
-handling of SDHCI_QUIRK_TIMEOUT_USES_SDCLK from sdhci_calc_timeout() to
-sdhci_add_host(). This causes division by zero errors on at least the S3C
-SDHCI controller as the quirk implementation needs host->clock set to work
-but host->clock has not been set when sdhci_add_host() is called.
 
-Fix this by backing out that portion of the change, the clock may vary at
-runtime anyway. It does occur to me that we may want to move the quirk to
-where we set the clock but this seems more invasive and I'm concerned
-about undesirable side effects.
+--5vNYLRcllDrimb99
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
----
- drivers/mmc/host/sdhci.c |    7 ++++---
- 1 files changed, 4 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index f79dead..da57bdb 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -616,6 +616,9 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 		target_timeout = data->timeout_ns / 1000 +
- 			data->timeout_clks / host->clock;
- 
-+	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
-+		host->timeout_clk = host->clock / 1000;
-+
- 	/*
- 	 * Figure out needed cycles.
- 	 * We do this in steps in order to fit inside a 32 bit int.
-@@ -626,6 +629,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 	 *     =>
- 	 *     (1) / (2) > 2^6
- 	 */
-+	BUG_ON(!host->timeout_clk);
- 	count = 0;
- 	current_timeout = (1 << 13) * 1000 / host->timeout_clk;
- 	while (current_timeout < target_timeout) {
-@@ -1894,9 +1898,6 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (caps & SDHCI_TIMEOUT_CLK_UNIT)
- 		host->timeout_clk *= 1000;
- 
--	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
--		host->timeout_clk = host->clock / 1000;
--
- 	/*
- 	 * Set host parameters.
- 	 */
--- 
-1.7.4.1
+> BTW, Are there reason to omit the sdhci-s3c.c? Maybe Mr. Jung will handle=
+ it.
 
+The difference is that sdhci-s3c.c was more like a fork of sdhci-pltfm while
+the others were users of it. With the new interface, s3c can be converted u=
+sing
+pltfm more easily. If somebody is willing to do that, this is very much
+welcome. I'd suggest waiting for Shawn's interface to stabilize, though.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--5vNYLRcllDrimb99
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAk2tyqAACgkQD27XaX1/VRtDNACfT4IWD0wLs38e/nFIJLqwSiq4
+VF8AoMBpBAt1Y4R4K3xSnr+A6UQbcYuS
+=5iwB
+-----END PGP SIGNATURE-----
+
+--5vNYLRcllDrimb99--
