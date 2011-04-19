@@ -1,87 +1,123 @@
-From: Tony Olech <tony.olech@elandigitalsystems.com>
-Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
- Re-Resubmission
-Date: Tue, 19 Apr 2011 10:05:52 +0100
-Message-ID: <1303203952.1622.19.camel@apple-mac>
-References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536>
-	 <1295607004.1816.6.camel@apple-mac> <1299773604.1682.21.camel@apple-mac>
-	 <201103151723.32942.arnd@arndb.de>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 0/5] consolidate sdhci pltfm & OF drivers and get them
+ self registered
+Date: Tue, 19 Apr 2011 12:20:31 +0200
+Message-ID: <20110419102031.GA4164@pengutronix.de>
+References: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="BXVAT5kNtrzKuDFl"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:61018 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751793Ab1DSJGB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 05:06:01 -0400
-In-Reply-To: <201103151723.32942.arnd@arndb.de>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:51345 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754681Ab1DSKU0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 06:20:26 -0400
+Content-Disposition: inline
+In-Reply-To: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
-
-On Tue, 2011-03-15 at 17:23 +0100, Arnd Bergmann wrote:
-> On Thursday 10 March 2011, Tony Olech wrote:
-...
-> > +static ssize_t __show_operating_mode(struct vub300_mmc_host *vub300,
-> > +                                   struct mmc_host *mmc, char *buf)
-> > +{
-> > +       int usb_packet_size = vub300->large_usb_packets ? 512 : 64;
-> > +       if (vub300->vub_name[0])
-> > +               return sprintf(buf, "VUB %s %s %d MHz %s %d byte USB packets"
-> > +                               " using %s\n",
-> > +                      (mmc->caps & MMC_CAP_SDIO_IRQ) ? "IRQs" : "POLL",
-> > +                      (mmc->caps & MMC_CAP_4_BIT_DATA) ? "4-bit" : "1-bit",
-> > +                      mmc->f_max / 1000000,
-> > +                      pad_input_to_usb_pkt ? "padding input data to" : "with",
-> > +                      usb_packet_size, vub300->vub_name);
-> > +       else
-> > +               return sprintf(buf, "VUB %s %s %d MHz %s %d byte USB packets"
-> > +                               " and no offload processing\n",
-> > +                      (mmc->caps & MMC_CAP_SDIO_IRQ) ? "IRQs" : "POLL",
-> > +                      (mmc->caps & MMC_CAP_4_BIT_DATA) ? "4-bit" : "1-bit",
-> > +                      mmc->f_max / 1000000,
-> > +                      pad_input_to_usb_pkt ? "padding input data to" : "with",
-> > +                      usb_packet_size);
-> > +}
-> > +
-> > +static ssize_t show_operating_mode(struct device *dev,
-> > +                                 struct device_attribute *attr, char *buf)
-> > +{
-> > +       struct mmc_host *mmc = container_of(dev, struct mmc_host, class_dev);
-> > +       if (mmc) {
-> > +               struct vub300_mmc_host *vub300 = mmc_priv(mmc);
-> > +               return __show_operating_mode(vub300, mmc, buf);
-> > +       } else {
-> > +               return sprintf(buf, "VUB driver has no attached device");
-> > +       }
-> > +}
-> 
-> This sysfs attribute is rather hard to parse from user space, it looks
-> like it's designed only to be read by humans. I think it would be better
-> to use multiple attributes, each of which has only a single piece
-> of information in it.
-> 
-> Some of these attributes however don't really belong into this driver
-> but into the core, like the 1-bit / 4-bit mode. Please leave this out
-> of your driver, and submit a separate patch to the mmc core if you
-> think it's reasonable.
-
-The purpose of this read-only interface is for VUB300 support
-staff to obtain information from our customers. Our customers
-are not like the people on this list. If you have ever tried
-to do telephone support you would appreciate the difficulty
-of getting a non-technical person to first of all find the
-log files and then to extract the correct lines. It therefore
-follows that if the 1 or 4 bit mode is useful info for the 
-VUB300 support staff, then this read-only interface is the
-appropriate single place for it to be provided. The overhead
-of providing such an interface is negligible and the existance
-of such an interface demonstrates that linux is no longer
-designed only for geeks.
-
-Tony Olech
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, patches@linaro.org, linaro-dev@lists.linaro.org, linux-kernel@vger.kernel.org, sameo@linux.intel.com
 
 
+--BXVAT5kNtrzKuDFl
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
+Hi Shawn,
 
+On Fri, Mar 25, 2011 at 04:48:46PM +0800, Shawn Guo wrote:
+> Here are what the patch set does.
+>=20
+> * Remove .probe and .remove hooks from sdhci-pltfm.c and make it be
+>   a pure common helper function providers.
+> * Add .probe and .remove hooks for sdhci pltfm drivers sdhci-cns3xxx,
+>   sdhci-dove, sdhci-tegra, and sdhci-esdhc-imx to make them self
+>   registered with calling helper functions created above.
+> * Migrate the use of sdhci_of_host and sdhci_of_data to
+>   sdhci_pltfm_host and sdhci_pltfm_data, so that OF version host and
+>   data structure works can be saved, and pltfm version works for both
+>   cases.
+> * Add OF common helper stuff into sdhci-pltfm.c, and make OF version
+>   sdhci drivers sdhci-of-esdhc and sdhci-of-hlwd become self
+>   registered as well, so that sdhci-of-core.c and sdhci-of.h can be
+>   removed.
+> * Consolidate the OF and pltfm esdhc drivers into one with sharing
+>   the same pair of .probe and .remove hooks.  As a result,
+>   sdhci-esdhc-imx.c and sdhci-of-esdhc.c go away, while
+>   sdhci-esdhc.c comes in and works for both MPCxxx and i.MX.
+> * Eliminate include/linux/mmc/sdhci-pltfm.h with moving stuff into
+>   drivers/mmc/host/sdhci-pltfm.h.
+>=20
+> And the benefits we gain from the changes are:
+>=20
+> * Get the sdhci device driver follow the Linux trend that driver
+>   makes the registration by its own.
+> * sdhci-pltfm.c becomes simple and clean as it only has common helper
+>   stuff there now.
+> * All sdhci device specific things are going back its own driver.
+> * The dt and non-dt drivers are consolidated to use the same pair of
+>   .probe and .remove hooks.
+> * SDHCI driver for Freescale eSDHC controller found on both MPCxxx
+>   and i.MX platforms is consolidated to use the same one .probe
+>   function.
+>=20
+> The patch set works against the tree below, and was only tested on
+> i.mx51 babbage board, all other targets were build tested.
+>=20
+>   git://git.secretlab.ca/git/linux-2.6.git devicetree/test
+>=20
+> Comments are welcomed and appreciated.
+
+First of all, thanks _a lot_ for doing this! Many people have promised
+to do such an approach, but you finally made it!
+
+Sorry for the long delay in reviewing it, I didn't want to rush a review
+so I needed some time for it which I didn't have much in the last weeks.
+Let's hope my battery will have enough power on my flight back to
+Germany ;) So, this is for now a purely "visual" review. I hope I can
+check V2 on real hardware then.
+
+The approach seems sensible, so have a look at my (mostly minor)
+comments inside the patches. However, there is one bigger piece missing.
+You converted all the drivers which had a seperate source-file and
+hooked into sdhci-pltfm.c. However, those are only those users which
+need additional code to work around the quirks. There are also users
+which can take the plain pltfm-driver with a properly set
+platform_data (check the thread "[PATCH] mmc: add SDHCI driver for STM
+platforms (V2)" for an example). Those have to be converted, too.
+Now the discussion could be if every of those users gets its own
+pltfm-<something>.c or if we create something similat to
+sdhci-pltfm-generic, which can also be setup with platform_data like the
+old driver (/me likes the latter a bit more. If we don't change the name
+of the driver (not talking about the sourcefile) and keep it
+"sdhci-pltfm", then you wouldn't need to change all those users if you
+ensured it behaves the same.
+
+Also, I think the next version of this series should have all makers of
+a sdhci-pltfm user CCed so we give them a chance to report breakage. Or
+donate acks or tested-by.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--BXVAT5kNtrzKuDFl
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk2tYe8ACgkQD27XaX1/VRsCRgCgkp+BmJJsLsKllKL0OI/BnO9F
+PRkAn1BpnXBv1exnkJFlqFAPe5O2Yt8w
+=GSqA
+-----END PGP SIGNATURE-----
+
+--BXVAT5kNtrzKuDFl--
