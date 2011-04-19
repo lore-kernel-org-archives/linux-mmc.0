@@ -1,51 +1,100 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver Re-Resubmission
-Date: Tue, 19 Apr 2011 15:21:52 +0200
-Message-ID: <201104191521.53127.arnd@arndb.de>
-References: <20B0EAA71DD7413A9A29D0493C6C1D87@AN00536> <201104191410.42177.arnd@arndb.de> <1303216358.1622.27.camel@apple-mac>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
+Date: Tue, 19 Apr 2011 15:23:37 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1104191505230.16641@axis700.grange>
+References: <Pine.LNX.4.64.1104191230150.16641@axis700.grange>
+ <BANLkTinQv1u243d+YBriVdvVRMT5oe9aYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:57745 "EHLO
+Received: from moutng.kundenserver.de ([212.227.17.10]:61633 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754231Ab1DSNWA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 09:22:00 -0400
-In-Reply-To: <1303216358.1622.27.camel@apple-mac>
+	with ESMTP id S1755066Ab1DSNYD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 09:24:03 -0400
+In-Reply-To: <BANLkTinQv1u243d+YBriVdvVRMT5oe9aYQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Olech <tony.olech@elandigitalsystems.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-mmc@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, "Rafael J. Wysocki" <rjw@sisk.pl>
 
-On Tuesday 19 April 2011, Tony Olech wrote:
-> What is wrong in wanting to support non-technical users?
-> Especially since there are no backward compatible issues
-> involved at all.
+On Tue, 19 Apr 2011, Ohad Ben-Cohen wrote:
 
-It's good to support non-technical users. Things that are
-bad about your patch are:
+> On Tue, Apr 19, 2011 at 1:46 PM, Guennadi Liakhovetski
+> <g.liakhovetski@gmx.de> wrote:
+> > MMC bus PM operations implement a .runtime_idle() method, which calls
+> > pm_runtime_suspend(), but this call is not balanced by a resume
+> > counterpart,
+> 
+> What's the exact flow you refer to ?
 
-* Have interfaces that work only for your customers. If a
-  specific interface is a good thing to have, it certainly
-  is good to have it for everyone.
+Seeing a "struct dev_pm_ops" instance with .runtime_suspend(), 
+.runtime_resume(), and .runtime_idle() methods I understand, that 
+"suspend" and "resume" are two counterparts, that balance each other. Now 
+with "idle" I am not sure which method should balance it. With platform 
+devices in the generic case idle ends up calling 
+pm_generic_runtime_idle(), which then calls pm_runtime_suspend(). So, 
+there should be a balancing pm_runtime_resume() somewhere?
 
-* Fragmentation between drivers. In addition, if someone
-  else needs a similar interface and introduces it in another
-  driver, we can end up with incompatible ways of getting
-  the same information, which is an absolute support nightmare
-  for people that want to support all users.
+> > which causes problems with repeated card-plug and driver-load
+> > cycles.
+> 
+> Can you please be more specific ? What are you trying to achieve, what
+> are the problems you encounter ?
 
-* Not following the interface standards. You don't get to
-  make the decision which interfaces are helpful and which
-  ones are not, they have to be agreed upon. The files you were
-  suggesting violate the rules about how they should look
-  like, in particular having one value per file. Doing something
-  else is very confusing to users that have reasonable expectations
-  about the contents.
+See this patch:
 
-So even though you had the intentions to make support easier
-for some people, you end up with a situation that makes it harder
-to support for everyone.
+http://article.gmane.org/gmane.linux.ports.sh.devel/10724
 
-	Arnd
+The purpose of that patch is to (1) implement runtime PM in a way, that 
+whenever the driver is unloaded or the card is ejected the interface is 
+powered down, and (2) implement system-wide PM. For (1) doing the usual
+
+probe()
+{
+	...
+	pm_runtime_enable();
+	pm_runtime_resume();
+	...
+}
+
+remove()
+{
+	...
+	pm_runtime_suspend();
+	pm_runtime_dieabls();
+	...
+}
+
+set_ios()
+{
+	...
+	if (power_down)
+		pm_runtime_put();
+	if (power_up)
+		pm_runtime_get_sync();
+	...
+}
+
+Doesn't work: some internal MMC counters become disbalanced and after one 
+card replug or driver reloading the interface gets stuck with power either 
+permanently on or off.
+
+> >  Removing this method fixes the disbalance.
+> 
+> I'm not sure which disbalance you're referring to, but if you'll
+> remove this method you will break MMC/SDIO runtime PM.
+> 
+> More specifically, without having this ->runtime_idle() handler, the
+> last user giving up its power usage_count (e.g. by calling
+> pm_runtime_put{_sync}) will not end up powering down the MMC card.
+
+How do they work then? Who does the pm_runtime_resume() to undo the 
+effects of the pm_runtime_suspend(), or is it the platform runtime-pm, 
+that is implementing the "idle" method wrongly?
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
