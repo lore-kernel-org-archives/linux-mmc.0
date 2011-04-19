@@ -1,54 +1,50 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH 5/5] mmc: sdhci: merge two sdhci-pltfm.h into one
-Date: Tue, 19 Apr 2011 12:21:26 +0200
-Message-ID: <20110419102126.GF4164@pengutronix.de>
-References: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
- <1301042931-4869-6-git-send-email-shawn.guo@linaro.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
+Date: Tue, 19 Apr 2011 12:46:20 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1104191230150.16641@axis700.grange>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="gdTfX7fkYsEEjebm"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:51416 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754705Ab1DSKVS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 06:21:18 -0400
-Content-Disposition: inline
-In-Reply-To: <1301042931-4869-6-git-send-email-shawn.guo@linaro.org>
+Received: from moutng.kundenserver.de ([212.227.126.171]:65396 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754423Ab1DSKqY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 06:46:24 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, patches@linaro.org, linaro-dev@lists.linaro.org, linux-kernel@vger.kernel.org, sameo@linux.intel.com
+To: linux-mmc@vger.kernel.org
+Cc: Alan Stern <stern@rowland.harvard.edu>, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, "Rafael J. Wysocki" <rjw@sisk.pl>
 
+MMC bus PM operations implement a .runtime_idle() method, which calls 
+pm_runtime_suspend(), but this call is not balanced by a resume 
+counterpart, which causes problems with repeated card-plug and driver-load 
+cycles. Removing this method fixes the disbalance.
 
---gdTfX7fkYsEEjebm
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
 
-On Fri, Mar 25, 2011 at 04:48:51PM +0800, Shawn Guo wrote:
-> The structure sdhci_pltfm_data is not necessarily to be in a public
-> header like include/linux/mmc/sdhci-pltfm.h, so the patch moves it
-> into drivers/mmc/host/sdhci-pltfm.h and eliminates the former one.
->=20
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+With this patch and with v2 of the MMCIF PM patch, that I'll be posting 
+shortly, I can load / unload the driver, insert and remove the card and 
+suspend and wake up the system multiple times and each time the full PM 
+cycle is performed, going down to the platform callbacks. However, it 
+might well be, that there's a more correct way to achieve the same.
 
-Reviewed-by: Wolfram Sang <w.sang@pengutronix.de>
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---gdTfX7fkYsEEjebm
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk2tYiYACgkQD27XaX1/VRtyJgCgtEKqdat1hW9wRBOf65j3diql
-WIcAoJN0XjGYUkhpB64fHj8n1m32JXTH
-=p0MJ
------END PGP SIGNATURE-----
-
---gdTfX7fkYsEEjebm--
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 63667a8..44866a6 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -158,15 +158,9 @@ static int mmc_runtime_resume(struct device *dev)
+ 	return mmc_power_restore_host(card->host);
+ }
+ 
+-static int mmc_runtime_idle(struct device *dev)
+-{
+-	return pm_runtime_suspend(dev);
+-}
+-
+ static const struct dev_pm_ops mmc_bus_pm_ops = {
+ 	.runtime_suspend	= mmc_runtime_suspend,
+ 	.runtime_resume		= mmc_runtime_resume,
+-	.runtime_idle		= mmc_runtime_idle,
+ };
+ 
+ #define MMC_PM_OPS_PTR	(&mmc_bus_pm_ops)
