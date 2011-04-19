@@ -1,33 +1,44 @@
-From: smae.inc@msn.com
-Subject: =?UTF-8?Q?Ditt l=C3=A5n?=
-Date: Tue, 19 Apr 2011 08:56:59 +0200
-Message-ID: <932097cdb96a3e8f112ca899574c3aec@darioevittoria.it>
-Reply-To: smae.inc@msn.com
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [patchv3 2/5] MMC: Use CMD23 for multiblock transfers when we can.
+Date: Tue, 19 Apr 2011 09:39:19 +0200
+Message-ID: <201104190939.19905.arnd@arndb.de>
+References: <1302741523-22276-1-git-send-email-andreiw@motorola.com> <201104171923.31039.arnd@arndb.de> <BANLkTimErvCyAOVW=DgHvRqDZg9EF9QKeg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 138.160.173.62.host.static.ip.kpnqwest.it ([62.173.160.138]:1577
-	"EHLO mail2.monforte.it" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752217Ab1DSHJ4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 03:09:56 -0400
+Received: from moutng.kundenserver.de ([212.227.17.10]:55885 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751422Ab1DSHjW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 03:39:22 -0400
+In-Reply-To: <BANLkTimErvCyAOVW=DgHvRqDZg9EF9QKeg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-mmc@vger.kernel.org, arindam.nath@amd.com, cjb@laptop.org
 
-Hello,
-  Please contact us for your secure and unsecure Loan at an interest ra=
-te of 3.75%
-=2E............
-Hej,
-  =C3=84r sv=C3=A5righeter i ekonomin som drabbat dig, =C3=A4r din bank=
- v=C3=A4grar att ge dig ett l=C3=A5n?
-  Om ditt svar =C3=A4r ett ja, d=C3=A5 du beh=C3=B6ver ett l=C3=A5n. Ja=
-g =C3=A4r Dr Sallie Mae =C3=A4garen av Sallie Mae International. Vi erb=
-juder s=C3=A4kra och os=C3=A4kra l=C3=A5n till en r=C3=A4nta p=C3=A5 3,=
-75%.
-  V=C3=A4nligen komma tillbaka till oss genom denna mail adress:
-smae.inc@msn.com
-  Vi lovar en 100% garanti att du f=C3=A5r ditt l=C3=A5n vid slutet av =
-detta l=C3=A5n transaktion.
-  Ingen s=C3=A4kerhetskontroll, ingen kreditupplysning
+On Tuesday 19 April 2011, Andrei Warkentin wrote:
 
+> So maybe this should be a blacklist for known bad cards. And the
+> entire support should be a "default-N" compile option for MMCs (not
+> SDs). That way someone who just does an "make oldconfig" will see
+> "CONFIG_MMC_BLK_CMD23 - I/O performance improvement for newer eMMC
+> cards, may cause degradation on older cards". What do you think?
+
+I'm not sure if I understand the distinction between MMC and SD
+here. Do you suggest we always enable it for SD but make it compile-time
+selected for MMC?
+
+I generally argue against compile time options. A distribution
+integrator needs to choose a reasonable default, and giving them
+an option makes it possible to get it wrong.
+
+I believe the best way would be trying to warn people against
+regressions while going forward with this enabled unconditionally,
+unless we hear back from people that actually got regressions.
+
+We could perhaps key enabling the feature by the production date
+on the card, so it only gets turned on for new cards.
+
+	Arnd
