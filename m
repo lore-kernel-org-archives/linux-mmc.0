@@ -1,124 +1,77 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: MMC Quirks Clarification and Shared Data Pins SDHCI Host Controller Driver
-Date: Tue, 19 Apr 2011 10:02:55 +0800
-Message-ID: <BANLkTimgVe_CBiEPfxo7R=YMbKb848TCSw@mail.gmail.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [patchv3 5/5] MMC: SDHCI AutoCMD23 support.
+Date: Mon, 18 Apr 2011 22:05:58 -0500
+Message-ID: <BANLkTimDhyQPOubC72xPc9FPHO2fooC9ag@mail.gmail.com>
+References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
+	<1302950458-1969-6-git-send-email-andreiw@motorola.com>
+	<201104171925.10929.arnd@arndb.de>
+	<BANLkTi=C=d=OLdKek9T4zpj4Z2dxH9MjqA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:46135 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753010Ab1DSCDP convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2011 22:03:15 -0400
-Received: by pwi15 with SMTP id 15so2519444pwi.19
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2011 19:03:15 -0700 (PDT)
+Received: from exprod5og115.obsmtp.com ([64.18.0.246]:39990 "EHLO
+	exprod5og115.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754273Ab1DSDGC convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2011 23:06:02 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.168])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3J347Qr008335
+	for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2011 23:04:07 -0400 (EDT)
+Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3J346PO008324
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2011 23:04:06 -0400 (EDT)
+Received: by wyb34 with SMTP id 34so7606003wyb.15
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2011 20:05:58 -0700 (PDT)
+In-Reply-To: <BANLkTi=C=d=OLdKek9T4zpj4Z2dxH9MjqA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: bin.shi@csr.com
+To: arindam.nath@amd.com
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, subhashj@codeaurora.org, Arnd Bergmann <arnd@arndb.de>
 
-Barry Song <21cnbao@gmail.com> on behalf of Shi bin <bin.shi@csr.com>
+Arindam,
 
+On Sun, Apr 17, 2011 at 2:31 PM, Andrei Warkentin <andreiw@motorola.com=
+> wrote:
+> Hi Arnd,
 >
+> On Sun, Apr 17, 2011 at 12:25 PM, Arnd Bergmann <arnd@arndb.de> wrote=
+:
+>> On Saturday 16 April 2011, Andrei Warkentin wrote:
+>>> @@ -68,6 +68,15 @@ config MMC_SDHCI_PCI
+>>>
+>>> =A0 =A0 =A0 =A0 =A0 If unsure, say N.
+>>>
+>>> +config MMC_SDHCI_AUTO_CMD23
+>>> + =A0 =A0 =A0 tristate "SDHCI 3.0 Auto-CMD23 support (EXPERIMENTAL)=
+"
+>>> + =A0 =A0 =A0 depends on MMC_SDHCI && EXPERIMENTAL
+>>> + =A0 =A0 =A0 help
+>>> + =A0 =A0 =A0 =A0 This enables the Auto-CMD23 optimization for mult=
+iblock
+>>> + =A0 =A0 =A0 =A0 transfers where a CMD23 would be sent
+>>> +
+>>> + =A0 =A0 =A0 =A0 If unsure, say N.
+>>> +
+>>> =A0config MMC_RICOH_MMC
+>>> =A0 =A0 =A0 =A0 bool "Ricoh MMC Controller Disabler =A0(EXPERIMENTA=
+L)"
+>>> =A0 =A0 =A0 =A0 depends on MMC_SDHCI_PCI
+>>
+>> Does this need to be a Konfig option? We are already asking too many
+>> questions here IMHO.
+>
+> Sorry, I should have clarified - I made this an experimental option
+> because I couldn't vouch for the correct functionality (no SDHCI 3.0
+> hardware around me) and I posted it only because Arindam wanted to tr=
+y
+> it out and see if it worked alright. As soon as we're clear it works
+> fine I'll take the Kconfig out.
+>
+> A
 >
 
-Hi, list,
+Any update? Have you tried this out?
 
-I=E2=80=99m new to here for investigating sd/mmc driver in our Cortex-A=
-9
-Single core platform board. Our sd/mmc host controller is fully
-compatible with standard SD specification 2.0 but one specific
-feature: slot 0 and slot 2 shared 8 bits data pins, which means at one
-time, only one slot could be accessed through 8 bits data pins with a
-switch defined in controller register.
-
-I have researched in SDHCI driver in Linux kernel and don=E2=80=99t fin=
-d any
-codes dealing with the feature I mentioned, right? What I consider
-about is, high layer send r/w request to mmc core, and sdhci_request
-in lower driver be fired, I just add logic about switch 8 bits data
-pins here. Other defined functions or callbacks seems could not
-handler this thing, eg platform_8bit_width() and
-platform_send_init_74_clocks(). Our sd/mmc host controller driver is a
-wrapper on standard SDHCI driver.
-
-So, all in all, I apply additional new quirks(occupy last bit 31) and
-sdhci_ops callback shared_data_bus as below.
-
-Index: include/linux/mmc/sdhci.h
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
---- include/linux/mmc/sdhci.h   (revision 4482)
-+++ include/linux/mmc/sdhci.h                (working copy)
-@@ -85,8 +85,6 @@
- #define SDHCI_QUIRK_NO_HISPD_BIT
-          (1<<29)
- /* Controller treats ADMA descriptors with length 0000h incorrectly */
- #define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC                          =
-  (1<<30)
-+/* Controller share 8 bits data pins */
-+#define SDHCI_QUIRK_SHARE_DATA_PINS
-   (1<<31)
-
-                int irq;                   /* Device IRQ */
-                void __iomem *ioaddr; /* Mapped address */
-Index: drivers/mmc/host/sdhci.h
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
---- drivers/mmc/host/sdhci.h     (revision 4481)
-+++ drivers/mmc/host/sdhci.h  (working copy)
-@@ -222,8 +222,6 @@
-                void (*platform_send_init_74_clocks)(struct sdhci_host =
-*host,
-
-              u8 power_mode);
-                unsigned int    (*get_ro)(struct sdhci_host *host);
-+             void                       (*shared_data_bus)(struct
-sdhci_host *host,
-+
-              int acquire);
- };
-
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-Index: drivers/mmc/host/sdhci.c
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
---- drivers/mmc/host/sdhci.c     (revision 4485)
-+++ drivers/mmc/host/sdhci.c  (working copy)
-@@ -1124,9 +1124,6 @@
-
-                host =3D mmc_priv(mmc);
-
-+             if (host->quirks & SDHCI_QUIRK_SHARE_DATA_PINS)
-+                             host->ops->shared_data_bus(host, 1);
-+
-                spin_lock_irqsave(&host->lock, flags);
-
-                WARN_ON(host->mrq !=3D NULL);
-@@ -1381,9 +1378,6 @@
-                spin_unlock_irqrestore(&host->lock, flags);
-
-                mmc_request_done(host->mmc, mrq);
-+
-+             if (host->quirks & SDHCI_QUIRK_SHARE_DATA_PINS)
-+                             host->ops->shared_data_bus(host, 0);
- }
-
- static void sdhci_timeout_timer(unsigned long data)
-
-
-My questions is
-1)	What=E2=80=99s purpose of quirks? For lots of sd/mmc host controller
-different feature and IC bugs?
-2)	My patch has modified kernel mmc core codes to achieve my
-purpose(shared 8 data pins on runtime), is it acceptable?
-
-Any suggestion and comment will be welcome!
-
-
-
-Best Regards,
-Shi Bin
+Thanks,
+A
