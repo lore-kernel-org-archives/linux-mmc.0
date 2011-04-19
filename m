@@ -1,41 +1,49 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci: Fix SDHCI_QUIRK_TIMEOUT_USES_SDCLK
-Date: Tue, 19 Apr 2011 18:14:44 -0400
-Message-ID: <m31v0xq46j.fsf@pullcord.laptop.org>
-References: <1303235057-4745-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
+Date: Wed, 20 Apr 2011 00:59:31 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1104200030370.16641@axis700.grange>
+References: <Pine.LNX.4.44L0.1104191015340.1835-100000@iolanthe.rowland.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:45379 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752349Ab1DSWKe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 19 Apr 2011 18:10:34 -0400
-In-Reply-To: <1303235057-4745-1-git-send-email-broonie@opensource.wolfsonmicro.com>
-	(Mark Brown's message of "Tue, 19 Apr 2011 18:44:17 +0100")
+Received: from moutng.kundenserver.de ([212.227.17.8]:58387 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751347Ab1DSW7f (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 18:59:35 -0400
+In-Reply-To: <Pine.LNX.4.44L0.1104191015340.1835-100000@iolanthe.rowland.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Andrei Warkentin <andreiw@motorola.com>, patches@opensource.wolfsonmicro.com, linux-mmc@vger.kernel.org
+To: Alan Stern <stern@rowland.harvard.edu>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, "Rafael J. Wysocki" <rjw@sisk.pl>
 
-Hi Mark,
+Thanks to all for clarifications. Since everyone is convinced, that that 
+idle function in mmc bus.c is appropriate, I restored it and managed to 
+achieve my goals also without it by adjusting the platform runtime pm and 
+power domain prototype support.
 
-On Tue, Apr 19 2011, Mark Brown wrote:
-> Commit 373e6a (mmc: sdhci: R1B command handling + MMC_CAP_ERASE) moved the
-> handling of SDHCI_QUIRK_TIMEOUT_USES_SDCLK from sdhci_calc_timeout() to
-> sdhci_add_host(). This causes division by zero errors on at least the S3C
-> SDHCI controller as the quirk implementation needs host->clock set to work
-> but host->clock has not been set when sdhci_add_host() is called.
->
-> Fix this by backing out that portion of the change, the clock may vary at
-> runtime anyway. It does occur to me that we may want to move the quirk to
-> where we set the clock but this seems more invasive and I'm concerned
-> about undesirable side effects.
->
-> Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+But I still need those "cheating" calls to
 
-Thanks for catching this, pushed to mmc-next for .40.
+	pm_runtime_put_noidle(&pdev->dev);
+and
+	pm_runtime_get_noresume(&pdev->dev);
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+in the sh_mmcif.c driver. If I use the patch as posted at
+
+http://article.gmane.org/gmane.linux.ports.sh.devel/10724
+
+but without those two calls, and load and unload the driver, while a card 
+is plugged in, unloading the driver doesn't power down the interface, 
+because the usage_count == 1 also after the kernel has soft-ejected the 
+card
+
+mmc0: card 0001 removed
+
+With my put_noidle() / get_noresume() hack all cases of modprobe / rmmod, 
+card insert / eject work correctly.
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
