@@ -1,83 +1,50 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
- Re-Re-Resubmission
-Date: Wed, 20 Apr 2011 04:07:08 +0200
-Message-ID: <20110420020708.GA2231@pengutronix.de>
-References: <1303231971.1622.33.camel@apple-mac>
+From: Kyungmin Park <kmpark-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Subject: Re: [PATCH 0/5] consolidate sdhci pltfm & OF drivers and get them
+	self registered
+Date: Wed, 20 Apr 2011 13:23:04 +0900
+Message-ID: <BANLkTinv84Ci1BUAGAXSDc-VYWGs8fC4fA@mail.gmail.com>
+References: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
+	<20110419102031.GA4164@pengutronix.de>
+	<BANLkTinfhb3vejJSM4y-C=3vk5RE76gPjQ@mail.gmail.com>
+	<20110419174712.GA29314@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="+HP7ph2BbKc20aGI"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:52444 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752812Ab1DTCHf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 22:07:35 -0400
-Content-Disposition: inline
-In-Reply-To: <1303231971.1622.33.camel@apple-mac>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Tony Olech <tony.olech@elandigitalsystems.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, arnd@arndb.de
-
-
---+HP7ph2BbKc20aGI
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Type: text/plain; charset="iso-8859-1"
 Content-Transfer-Encoding: quoted-printable
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <20110419174712.GA29314-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+To: Wolfram Sang <w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, =?UTF-8?B?7KCV7J6s7ZuI?= <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+List-Id: linux-mmc@vger.kernel.org
 
-Hi Tony,
-
-> Add a driver for Elan Digital System's VUB300 chip
-> which is a USB connected SDIO/SDmem/MMC host controller.
-> A VUB300 chip enables a USB 2.0 or USB 1.1 connected host
-> computer to use SDIO/SD/MMC cards without the need for
-> a directly connected, for example via PCI, SDIO host
-> controller.
->=20
-> Signed-off-by: Anthony F Olech <tony.olech@elandigitalsystems.com>
-> ---
-> This is the forth submission attempt.
-
-Looks to me that the concerns have not been addressed since last submission.
-I had a few a while ago, but Arnd added to it and summed it up nicely:
-
-	http://ns3.spinics.net/lists/linux-mmc/msg06693.html
-
-> There are no errors reported by scripts/checkpatch.pl
-
-Just to make sure:  This only means that there are no obvious (=3D detectab=
-le by
-a script) flaws. That makes it ready for submission, not necessarily for
-inclusion. So, just resending will not be enough.
-
-> This driver has been tested on
-> a) 32bit x86
-> b) 64bit x86
-> c) dual processor
-> d) PowerPC
-
-The test coverage is great, yet the driver needs to comply to the kernel co=
-ding
-rules. I'd suggest to look at Arnd's review and fix the issues.
-
-Regards,
-
-  Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---+HP7ph2BbKc20aGI
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAk2uP8wACgkQD27XaX1/VRuDvQCdEED7H/BPbMuPFwnjgKBkUo/3
-8GgAoLlxQbdr443Tq/Mcgull+QFfCEXb
-=ypzH
------END PGP SIGNATURE-----
-
---+HP7ph2BbKc20aGI--
+On Wed, Apr 20, 2011 at 2:47 AM, Wolfram Sang <w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org> wrote:
+>
+>> BTW, Are there reason to omit the sdhci-s3c.c? Maybe Mr. Jung will handl=
+e it.
+>
+> The difference is that sdhci-s3c.c was more like a fork of sdhci-pltfm wh=
+ile
+> the others were users of it. With the new interface, s3c can be converted=
+ using
+> pltfm more easily. If somebody is willing to do that, this is very much
+> welcome. I'd suggest waiting for Shawn's interface to stabilize, though.
+Okay Thanks, we will prepare it.
+>
+> Regards,
+>
+> =A0 Wolfram
+>
+> --
+> Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | Wo=
+lfram Sang =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|
+> Industrial Linux Solutions =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | http://www.p=
+engutronix.de/ =A0|
+>
