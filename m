@@ -1,61 +1,71 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH] mmc: mxs-mmc: add support for pre_req and post_req
-Date: Wed, 20 Apr 2011 22:01:21 +0800
-Message-ID: <20110420140120.GF1965@S2100-06.ap.freescale.net>
-References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
- <1303058010-30256-1-git-send-email-shawn.guo@linaro.org>
- <20110417164830.GE17935@S2100-06.ap.freescale.net>
- <BANLkTimwvX633UaUoc4P4DD1xnpLbMTrZA@mail.gmail.com>
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
+Date: Wed, 20 Apr 2011 10:22:58 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1104201011100.2159-100000@iolanthe.rowland.org>
+References: <Pine.LNX.4.64.1104200030370.16641@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:25095
-	"EHLO VA3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755083Ab1DTN51 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Apr 2011 09:57:27 -0400
-Content-Disposition: inline
-In-Reply-To: <BANLkTimwvX633UaUoc4P4DD1xnpLbMTrZA@mail.gmail.com>
+Received: from iolanthe.rowland.org ([192.131.102.54]:35690 "HELO
+	iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1753842Ab1DTOXG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 10:23:06 -0400
+In-Reply-To: <Pine.LNX.4.64.1104200030370.16641@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-kernel@lists.linaro.org, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, "Rafael J. Wysocki" <rjw@sisk.pl>
 
-On Wed, Apr 20, 2011 at 10:01:22AM +0200, Per Forlin wrote:
-> On 17 April 2011 18:48, Shawn Guo <shawn.guo@freescale.com> wrote:
-> > On Mon, Apr 18, 2011 at 12:33:30AM +0800, Shawn Guo wrote:
-> >> pre_req() runs dma_map_sg() post_req() runs dma_unmap_sg.
-> >> If not calling pre_req() before mxs_mmc_request(), request()
-> >> will prepare the cache just like it did it before.
-> >> It is optional to use pre_req() and post_req().
-> >>
-> >> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> >> ---
-> >> =A0drivers/mmc/host/mxs-mmc.c | =A0 75 +++++++++++++++++++++++++++=
-+++++++++++++++--
-> >> =A01 files changed, 72 insertions(+), 3 deletions(-)
-> >>
-> >
-> > Here is the result of mmc_test case 37 ~ 40, which are designed to =
-see
-> > the performance improvement introduced by non-blocking changes.
-> >
-> > Honestly, the improvement is not so impressive. =A0Not sure if the =
-patch
-> > for mxs-mmc pre_req and post_req support was correctly produced. =A0=
-So
-> > please help review ...
-> My guess is that dma_unmap is not run in parallel with transfer.
-> Please look at my patch reply.
->=20
-Got it fixed in v2 posted just now.  Please take another look.
-Unfortunately, I do not see noticeable difference than v1 in terms
-of mmc_test result.
+On Wed, 20 Apr 2011, Guennadi Liakhovetski wrote:
 
-Do you have omap_hsmmc and mmci mmc_test result data to share?
+> Thanks to all for clarifications. Since everyone is convinced, that that 
+> idle function in mmc bus.c is appropriate, I restored it and managed to 
+> achieve my goals also without it by adjusting the platform runtime pm and 
+> power domain prototype support.
+> 
+> But I still need those "cheating" calls to
+> 
+> 	pm_runtime_put_noidle(&pdev->dev);
+> and
+> 	pm_runtime_get_noresume(&pdev->dev);
+> 
+> in the sh_mmcif.c driver. If I use the patch as posted at
+> 
+> http://article.gmane.org/gmane.linux.ports.sh.devel/10724
+> 
+> but without those two calls, and load and unload the driver, while a card 
+> is plugged in, unloading the driver doesn't power down the interface, 
+> because the usage_count == 1 also after the kernel has soft-ejected the 
+> card
 
---=20
-Regards,
-Shawn
+You haven't explained why you want the interface to be powered down
+when the driver is unloaded.  Normally, unloading a driver is pretty
+much the exact reverse of loading it -- if the interface wasn't powered
+down before the driver was loaded originally then it shouldn't be
+powered down after the driver is unloaded.
+
+Conversely, if the interface _was_ powered down before the driver was 
+loaded originally, then making unload the exact reverse of load will 
+naturally leave the interface powered down, with no need for any extra 
+"cheating" calls.
+
+> mmc0: card 0001 removed
+> 
+> With my put_noidle() / get_noresume() hack all cases of modprobe / rmmod, 
+> card insert / eject work correctly.
+
+Depending on the subsystem, those calls may not be "cheating" at all.  
+When a subsystem has to deal with a variety of device drivers, some of
+which may not support runtime PM, a standard trick is for the subsystem
+to increment the usage_count value before probing.  Drivers that aren't
+runtime-PM-aware will leave the usage_count alone and therefore the
+device won't ever be runtime-suspended.  Drivers that _are_
+runtime-PM-aware will know to decrement the usage_count in their probe
+routine and increment it in their remove routine.
+
+However this involves calling pm_runtime_put_noidle() during probe and
+pm_runtime_get_noresume() during remove -- not during module
+initialization and module unloading.
+
+Alan Stern
 
