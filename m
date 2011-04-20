@@ -1,7 +1,7 @@
 From: Per Forlin <per.forlin@linaro.org>
 Subject: Re: [PATCH] mmc: mxs-mmc: add support for pre_req and post_req
-Date: Wed, 20 Apr 2011 17:22:34 +0200
-Message-ID: <BANLkTi=UR4NDEGjFkTnp_2UG4T1qUEPATw@mail.gmail.com>
+Date: Wed, 20 Apr 2011 17:30:22 +0200
+Message-ID: <BANLkTimzk89VC1Vti4CZ60TTJ20e2YpwNg@mail.gmail.com>
 References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
 	<1303058010-30256-1-git-send-email-shawn.guo@linaro.org>
 	<20110417164830.GE17935@S2100-06.ap.freescale.net>
@@ -11,12 +11,12 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:53778 "EHLO
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:48587 "EHLO
 	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755159Ab1DTPWf convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 11:22:35 -0400
-Received: by qwk3 with SMTP id 3so410468qwk.19
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Apr 2011 08:22:35 -0700 (PDT)
+	with ESMTP id S1753449Ab1DTPaW convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 11:30:22 -0400
+Received: by qwk3 with SMTP id 3so414629qwk.19
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Apr 2011 08:30:22 -0700 (PDT)
 In-Reply-To: <20110420140120.GF1965@S2100-06.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -55,15 +55,11 @@ So
 > Unfortunately, I do not see noticeable difference than v1 in terms
 > of mmc_test result.
 >
-> Do you have omap_hsmmc and mmci mmc_test result data to share?
->
-I keep the here:
-https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async=
--req
+Remove dma_map and dma_unmap from your host driver and run the tests
+(obviously nonblocking and blocking will have the same results). If
+there is still no performance gain the cache penalty is very small on
+your platform and therefore nonblocking doesn't improve things much.
+Please let me know the result.
 
-> --
-> Regards,
-> Shawn
->
->
-/Per
+BR,
+Per
