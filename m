@@ -1,43 +1,48 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
-Date: Wed, 20 Apr 2011 22:06:14 +0200
-Message-ID: <201104202206.14240.rjw@sisk.pl>
-References: <Pine.LNX.4.44L0.1104201104230.2159-100000@iolanthe.rowland.org>
+From: John Calixto <john.calixto@modsystems.com>
+Subject: Re: [PATCH v6] mmc: Add mmc CMD+ACMD passthrough ioctl
+Date: Wed, 20 Apr 2011 13:47:16 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1104201341430.28361@peruna>
+References: <alpine.DEB.2.00.1104131713570.15392@peruna> <BANLkTi=Ni+GZN3Ah4k-pMheZR7PTrwQDYg@mail.gmail.com> <alpine.DEB.2.00.1104201131080.28361@peruna> <201104202117.14463.arnd@arndb.de> <BANLkTim4V9J1VahxynPQp_hv+r5j2-yK6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: MULTIPART/MIXED; BOUNDARY="-1463811328-1404909235-1303332444=:28361"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:39498 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753973Ab1DTUFu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Apr 2011 16:05:50 -0400
-In-Reply-To: <Pine.LNX.4.44L0.1104201104230.2159-100000@iolanthe.rowland.org>
+Received: from elasmtp-dupuy.atl.sa.earthlink.net ([209.86.89.62]:50895 "EHLO
+	elasmtp-dupuy.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752225Ab1DTUr1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 16:47:27 -0400
+In-Reply-To: <BANLkTim4V9J1VahxynPQp_hv+r5j2-yK6w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Stern <stern@rowland.harvard.edu>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Linux PM mailing list <linux-pm@lists.linux-foundation.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Andrei Warkentin <andreiw@motorola.com>
 
-[Added linux-pm to the CC list.]
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-On Wednesday, April 20, 2011, Alan Stern wrote:
-> On Wed, 20 Apr 2011, Guennadi Liakhovetski wrote:
-...
-> Ah, now I see the problem.  It looks like we did not give sufficient
-> thought to the case where a device starts off (and therefore should
-> finish up) in a powered-down state.  Calling pm_runtime_put_sync()
-> after unbinding the device driver seems a little futile -- with no
-> driver, the subsystem may not be able to power-down the device!
-> 
-> Rafael, how do you think we should handle this?  Get rid of the 
-> pm_runtime_get_no_resume() and pm_runtime_put_sync() calls in 
-> dd.c:__device_release_driver()?
+---1463811328-1404909235-1303332444=:28361
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 
-I think we need pm_runtime_barrier() in there.  Otherwise we risk
-removing the driver while there's a runtime PM request pending.
+On Wed, 20 Apr 2011, Micha=C5=82 Miros=C5=82aw wrote:
+> >> I'm okay with the anon union + ``compat_ptr(*(u32 *))`` part of your
+> >> solution. =C2=A0If everyone else thinks it is reasonable, I'll submit =
+a v7
+> >> with it.
+> > No need for a union or a ptr_size member in the struct. Just use
+> > a single __u64 and let the user cast the pointer to that. This
+> > will work on all architectures.
+>=20
+> Union is just hiding this cast (it will be done in kernel) and allows
+> cleaner code for userspace (there's a single kernel and possibly
+> multiple applications that will implement this call).
+>=20
 
-But we can move the pm_runtime_put_sync() before driver_sysfs_remove().
+Chris,
 
-Would that help?
+Do you have a preference here?  I do not have a preference.  On the one
+hand, not having the union makes for a cleaner-to-read struct.  On the
+other hand, not having to cast the pointer in 32-bit userspace is nice
+especially since I foresee using this ioctl on a lot of ARM SoCs.
 
-Rafael
+John
+---1463811328-1404909235-1303332444=:28361--
