@@ -1,83 +1,128 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH v2 00/12] mmc: use nonblock mmc requests to minimize latency
-Date: Wed, 20 Apr 2011 10:19:17 +0200
-Message-ID: <BANLkTi=c6Fh24W6u-ikRfnfV922OuJnJ9A@mail.gmail.com>
-References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
-	<20110416154841.GA17935@S2100-06.ap.freescale.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Arindam Nath <arindam.nath@amd.com>
+Subject: [PATCH v3 00/11] add support for host controller v3.00
+Date: Wed, 20 Apr 2011 15:00:50 +0530
+Message-ID: <1303291861-1788-1-git-send-email-arindam.nath@amd.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:55922 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750768Ab1DTITS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 04:19:18 -0400
-In-Reply-To: <20110416154841.GA17935@S2100-06.ap.freescale.net>
+Received: from mail-px0-f179.google.com ([209.85.212.179]:46142 "EHLO
+	mail-px0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753445Ab1DTJbU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 05:31:20 -0400
+Received: by pxi2 with SMTP id 2so445901pxi.10
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Apr 2011 02:31:19 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, prakity@marvell.com, subhashj@codeaurora.org, zhangfei.gao@gmail.com, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com, Arindam Nath <arindam.nath@amd.com>
 
-On 16 April 2011 17:48, Shawn Guo <shawn.guo@freescale.com> wrote:
-> Hi Per,
->
-> On Wed, Apr 06, 2011 at 09:07:01PM +0200, Per Forlin wrote:
-> [...]
->>
->> Per Forlin (12):
->> =A0 mmc: add none blocking mmc request function
->> =A0 mmc: mmc_test: add debugfs file to list all tests
->> =A0 mmc: mmc_test: add test for none blocking transfers
->> =A0 mmc: add member in mmc queue struct to hold request data
->> =A0 mmc: add a block request prepare function
->> =A0 mmc: move error code in mmc_block_issue_rw_rq to a separate func=
-tion.
->> =A0 mmc: add a second mmc queue request member
->> =A0 mmc: add handling for two parallel block requests in issue_rw_rq
->> =A0 mmc: test: add random fault injection in core.c
->> =A0 omap_hsmmc: use original sg_len for dma_unmap_sg
->> =A0 omap_hsmmc: add support for pre_req and post_req
->> =A0 mmci: implement pre_req() and post_req()
->>
->> =A0drivers/mmc/card/block.c =A0 =A0 =A0| =A0493 ++++++++++++++++++++=
-+++++++--------------
->> =A0drivers/mmc/card/mmc_test.c =A0 | =A0342 ++++++++++++++++++++++++=
-++++-
->> =A0drivers/mmc/card/queue.c =A0 =A0 =A0| =A0171 +++++++++------
->> =A0drivers/mmc/card/queue.h =A0 =A0 =A0| =A0 31 ++-
->> =A0drivers/mmc/core/core.c =A0 =A0 =A0 | =A0132 ++++++++++-
->> =A0drivers/mmc/core/debugfs.c =A0 =A0| =A0 =A05 +
->> =A0drivers/mmc/host/mmci.c =A0 =A0 =A0 | =A0146 +++++++++++-
->> =A0drivers/mmc/host/mmci.h =A0 =A0 =A0 | =A0 =A08 +
->> =A0drivers/mmc/host/omap_hsmmc.c | =A0 90 +++++++-
->> =A0include/linux/mmc/core.h =A0 =A0 =A0| =A0 =A09 +-
->> =A0include/linux/mmc/host.h =A0 =A0 =A0| =A0 13 +-
->> =A0lib/Kconfig.debug =A0 =A0 =A0 =A0 =A0 =A0 | =A0 11 +
->> =A012 files changed, 1172 insertions(+), 279 deletions(-)
->>
-> I'm playing the patch set and seeing the following warnings.
->
-> =A0CC =A0 =A0 =A0drivers/mmc/card/block.o
-> drivers/mmc/card/block.c: In function =91mmc_blk_issue_rq=92:
-> drivers/mmc/card/block.c:429:6: warning: =91status=92 may be used uni=
-nitialized in this function
->
-My bad, it should be:
-+ int status =3D 0;
+V3
+----
+[01/11]: Set bit 24 and bit 28 of OCR within mmc_sd_get_cid(),
+         and only retry sending ACMD41 with bit 24 reset in case
+         signal voltage switch procedure fails.
+[01/11]: Change (*rocr & 0x41000000) to ((*rocr & 0x41000000) ==
+         0x41000000) to check for both CCS and S18A to be set in
+         the response of ACMD41.
+[01/11]: Change the condition if (err == -EAGAIN) to if (err), in
+         order to retry sending ACMD41 because of any error during
+         signal voltage switch procedure.
+[01/11]: Add a new variable signal_voltage to struct mmc_ios,
+         which holds whether the request is to change to 1.8V or
+         3.3V signalling voltage.
+[02/11]: Remove redundant code to find bus speed modes for SD2.0
+         and SD3.0 cards separately.
+[02/11]: Change the variable names from uhs_* to sd3_* to make
+         them appropriate to the context of their usage.
+[03/11]: Change variable names from *_set_drv_type to *_drv_type.
+[03/11]: Set driver type even when the default driver type B is
+         used.
+[03/11]: Clear bits 05-04 of Host Control 2 register before
+         setting the new driver strength.
+[04/11]: Use sdhci_set_clock() to make sure the clock is stable
+         before re-enabling SD clock.
+[05/11]: Initialize bus_speed and timing to 0 at the beginning of
+         sd_set_bus_speed_mode() to avoid compiler warning.
+[06/11]: Initialize current_limit to 0 to avoid compiler warning.
+[06/11]: Remove usage of get_max_current_180() and replace this
+         with MMC_CAP_MAX_CURRENT_*.
+[06/11]: Set the current limit even for the default current limit
+         of 200mA.
+[06/11]: Set the current limit only for SDR50, SDR104, and DDR50
+         UHS-I modes, otherwise set the default current limit.
+[07/11]: Change mmc_*_ultrahighspeed() to mmc_sd_*_uhs().
+[08/11]: Re-read Host Control 2 register before clearing
+         *_TUNED_CLK and *_EXEC_TUNING.
+[08/11]: Make sdhci_execute_tuning() return 'int' rather than
+         'void' so that we can check for error conditions during
+         tuning failure.
+[08/11]: Make sure to return 0 for controllers which provide
+         support for retuning even if tuning fails. For other
+         controllers, return error code.
+[09/11]: Disable using Preset Value when a new card is inserted,
+         and enable its use only after a successfull UHS-I
+         initializaton.
+[11/11]: Remove sdhci_start_retuning_timer() completely, and start
+         the re-tuning timer from within sdhci_execute_tuning()
+         the very first time it is executed.
 
-> =A0CC =A0 =A0 =A0drivers/mmc/core/core.o
-> drivers/mmc/core/core.c: In function =91mmc_request_done=92:
-> drivers/mmc/core/core.c:163:3: warning: passing argument 2 of =91mmc_=
-should_fail_request=92 from incompatible pointer type
-> drivers/mmc/core/core.c:129:20: note: expected =91struct mmc_data *=92=
- but argument is of type =91struct mmc_request *=92
-The function within #ifdef CONFIG_FAIL_MMC_REQUEST is the correct one.
-I will update this in the next version.
+V2
+----
+[01/12]: Make saved_abort_cmd part of struct sdhci_host rather
+         than global variable.
+[01/12]: Clear SDHCI_USE_SDMA _iff_ SDHCI_USE_ADMA is set.
+[01/12]: Set either Auto CMD23 or Auto CMD12, but not both, in
+         the Transfer Mode register.
+[02/12]: Check host controller version before reading
+         SDHCI_CAPABILITIES_1.
+[02/12]: Remove spinlock from sdhci_start_signal_voltage_switch
+         and use usleep_range() rather than mdelay().
+[02/12]: Set S18R in OCR to 1 for all UHS-I modes.
+[02/12]: NULL pointer check for start_signal_voltage_switch().
+[02/12]: Set MMC_CAP_UHS_SDR50 if MMC_CAP_UHS_SDR104 is set.
+[06/12]: Add checking for SDR25 in sd_set_bus_speed_mode().
+[09/12]: Remove checking for MMC_SEND_TUNING_BLOCK within
+         sdhci_set_transfer_mode(), since cmd.data is set to
+         NULL inside sdhci_execute_tuning().
+[11/12]: Correctly set clk to SDHCI_PROG_CLOCK_MODE when host
+         controller supports Programmable Clock Mode.
 
+V1
+----
+The patches below add support for Host Controller v3.00 as per the
+spec v3.00. It also adds support for UHS-I cards as per Physical
+Layer Specification v3.01.
 
->
-> --
-> Regards,
-> Shawn
-Thanks,
-Per
+Thanks for review.
+
+Regards,
+Arindam
+
+Arindam Nath (11):
+  [PATCH 01/11] mmc: sd: add support for signal voltage switch procedure
+  [PATCH 02/11] mmc: sd: query function modes for uhs cards
+  [PATCH 03/11] mmc: sd: add support for driver type selection
+  [PATCH 04/11] mmc: sdhci: reset sdclk before setting high speed enable
+  [PATCH 05/11] mmc: sd: add support for uhs bus speed mode selection
+  [PATCH 06/11] mmc: sd: set current limit for uhs cards
+  [PATCH 07/11] mmc: sd: report correct speed and capacity of uhs cards
+  [PATCH 08/11] mmc: sd: add support for tuning during uhs initialization
+  [PATCH 09/11] mmc: sdhci: enable preset value after uhs initialization
+  [PATCH 10/11] mmc: sdhci: add support for programmable clock mode
+  [PATCH 11/11] mmc: sdhci: add support for retuning mode 1
+
+ drivers/mmc/core/bus.c    |   11 +-
+ drivers/mmc/core/core.c   |    9 +
+ drivers/mmc/core/core.h   |    1 +
+ drivers/mmc/core/sd.c     |  405 ++++++++++++++++++++++++---
+ drivers/mmc/core/sd.h     |    3 +-
+ drivers/mmc/core/sd_ops.c |   34 +++
+ drivers/mmc/core/sd_ops.h |    1 +
+ drivers/mmc/core/sdio.c   |    3 +-
+ drivers/mmc/host/sdhci.c  |  689 ++++++++++++++++++++++++++++++++++++++++++---
+ drivers/mmc/host/sdhci.h  |   45 +++-
+ include/linux/mmc/card.h  |   43 +++
+ include/linux/mmc/host.h  |   36 +++
+ include/linux/mmc/mmc.h   |    1 +
+ include/linux/mmc/sd.h    |    1 +
+ include/linux/mmc/sdhci.h |   11 +
+ 15 files changed, 1211 insertions(+), 82 deletions(-)
+
