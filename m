@@ -1,50 +1,75 @@
-From: Kyungmin Park <kmpark-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Subject: Re: [PATCH 0/5] consolidate sdhci pltfm & OF drivers and get them
-	self registered
-Date: Wed, 20 Apr 2011 13:23:04 +0900
-Message-ID: <BANLkTinv84Ci1BUAGAXSDc-VYWGs8fC4fA@mail.gmail.com>
-References: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
-	<20110419102031.GA4164@pengutronix.de>
-	<BANLkTinfhb3vejJSM4y-C=3vk5RE76gPjQ@mail.gmail.com>
-	<20110419174712.GA29314@pengutronix.de>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH v2 01/12] mmc: add none blocking mmc request function
+Date: Wed, 20 Apr 2011 09:17:23 +0200
+Message-ID: <BANLkTimaTe0qD5sbEJj88YRv2DZv=1oxTQ@mail.gmail.com>
+References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
+	<1302116833-24540-2-git-send-email-per.forlin@linaro.org>
+	<4DA81F42.3070208@csr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <20110419174712.GA29314-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Wolfram Sang <w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, =?UTF-8?B?7KCV7J6s7ZuI?= <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:55941 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753489Ab1DTHRZ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 03:17:25 -0400
+In-Reply-To: <4DA81F42.3070208@csr.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: David Vrabel <david.vrabel@csr.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>
 
-On Wed, Apr 20, 2011 at 2:47 AM, Wolfram Sang <w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org> wrote:
+Hi,
+
+On 15 April 2011 12:34, David Vrabel <david.vrabel@csr.com> wrote:
+> On 06/04/11 20:07, Per Forlin wrote:
+>> Previously there has only been one function mmc_wait_for_req
+>> to start and wait for a request. This patch adds
+>> =A0* mmc_start_req - starts a request wihtout waiting
+>> =A0* mmc_wait_for_req_done - waits until request is done
+>> =A0* mmc_pre_req - asks the host driver to prepare for the next job
+>> =A0* mmc_post_req - asks the host driver to clean up after a complet=
+ed job
 >
->> BTW, Are there reason to omit the sdhci-s3c.c? Maybe Mr. Jung will handl=
-e it.
+> If MMC core had a queue of requests internally you wouldn't need to
+> provide mmc_pre_req() and mmc_post_req() functions outside of the cor=
+e.
+> =A0i.e., the mmc block driver would just need to queue up two mmc req=
+uests
+> and the core would take care of calling pre_req and post_req at the
+> correct time.
 >
-> The difference is that sdhci-s3c.c was more like a fork of sdhci-pltfm wh=
-ile
-> the others were users of it. With the new interface, s3c can be converted=
- using
-> pltfm more easily. If somebody is willing to do that, this is very much
-> welcome. I'd suggest waiting for Shawn's interface to stabilize, though.
-Okay Thanks, we will prepare it.
+Sorry for late response I have been out of office a couple of days.
+Yes, it would be nice to not expose those hooks outside the core. I
+will look into this in detail to see what it would take to implement
+this and if there are any complications.
+
+> Using a MMC request queue has other benefits -- it allows multiple us=
+ers
+> without having to claim/release the host. =A0This would be useful for
+> (especially multi-function) SDIO.
+You mean claim and release would be done only within the mmc core. The
+timed saved here would equal the time it takes to release and claim
+the host.
+Claim and release can also be used for power management to indicate if
+any client is using the host, if not the power can be switched off.
+
+> (especially multi-function) SDIO.
+I just want to make sure I understand the multi-function SDIO case, I
+haven't done any work with SDIO.
+Can the SDIO functions compete over the same claim_host at the same tim=
+e?
+Example: if function 1 claims the host, function 2 and function 3 also
+want to claim the host but have to wait for function 1 to release the
+host.
+What is the extra benefit of having the internal request queue for
+multi function SDIO?
+The functions must still wait for request completion before
+acknowledge the SDIO client? Or could the functions acknowledge
+immediately after the request is queued up in mmc core?
+
 >
-> Regards,
->
-> =A0 Wolfram
->
+> David
 > --
-> Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | Wo=
-lfram Sang =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|
-> Industrial Linux Solutions =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | http://www.p=
-engutronix.de/ =A0|
->
+Thanks for your feedback,
+Per
