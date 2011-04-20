@@ -1,106 +1,69 @@
-From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
-Date: Wed, 20 Apr 2011 11:12:54 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1104201104230.2159-100000@iolanthe.rowland.org>
-References: <Pine.LNX.4.64.1104201629030.18555@axis700.grange>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH] mmc: mxs-mmc: add support for pre_req and post_req
+Date: Wed, 20 Apr 2011 17:22:34 +0200
+Message-ID: <BANLkTi=UR4NDEGjFkTnp_2UG4T1qUEPATw@mail.gmail.com>
+References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
+	<1303058010-30256-1-git-send-email-shawn.guo@linaro.org>
+	<20110417164830.GE17935@S2100-06.ap.freescale.net>
+	<BANLkTimwvX633UaUoc4P4DD1xnpLbMTrZA@mail.gmail.com>
+	<20110420140120.GF1965@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from iolanthe.rowland.org ([192.131.102.54]:36990 "HELO
-	iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1754083Ab1DTPM4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 11:12:56 -0400
-In-Reply-To: <Pine.LNX.4.64.1104201629030.18555@axis700.grange>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:53778 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755159Ab1DTPWf convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 11:22:35 -0400
+Received: by qwk3 with SMTP id 3so410468qwk.19
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Apr 2011 08:22:35 -0700 (PDT)
+In-Reply-To: <20110420140120.GF1965@S2100-06.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, "Rafael J. Wysocki" <rjw@sisk.pl>
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-kernel@lists.linaro.org, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-On Wed, 20 Apr 2011, Guennadi Liakhovetski wrote:
+On 20 April 2011 16:01, Shawn Guo <shawn.guo@freescale.com> wrote:
+> On Wed, Apr 20, 2011 at 10:01:22AM +0200, Per Forlin wrote:
+>> On 17 April 2011 18:48, Shawn Guo <shawn.guo@freescale.com> wrote:
+>> > On Mon, Apr 18, 2011 at 12:33:30AM +0800, Shawn Guo wrote:
+>> >> pre_req() runs dma_map_sg() post_req() runs dma_unmap_sg.
+>> >> If not calling pre_req() before mxs_mmc_request(), request()
+>> >> will prepare the cache just like it did it before.
+>> >> It is optional to use pre_req() and post_req().
+>> >>
+>> >> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+>> >> ---
+>> >> =A0drivers/mmc/host/mxs-mmc.c | =A0 75 ++++++++++++++++++++++++++=
+++++++++++++++++--
+>> >> =A01 files changed, 72 insertions(+), 3 deletions(-)
+>> >>
+>> >
+>> > Here is the result of mmc_test case 37 ~ 40, which are designed to=
+ see
+>> > the performance improvement introduced by non-blocking changes.
+>> >
+>> > Honestly, the improvement is not so impressive. =A0Not sure if the=
+ patch
+>> > for mxs-mmc pre_req and post_req support was correctly produced. =A0=
+So
+>> > please help review ...
+>> My guess is that dma_unmap is not run in parallel with transfer.
+>> Please look at my patch reply.
+>>
+> Got it fixed in v2 posted just now. =A0Please take another look.
+> Unfortunately, I do not see noticeable difference than v1 in terms
+> of mmc_test result.
+>
+> Do you have omap_hsmmc and mmci mmc_test result data to share?
+>
+I keep the here:
+https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async=
+-req
 
-> As I said above - I did mean probe() and remove(). Now, I have now traced 
-> down the cause of my problem. In dd.c::driver_probe_device():
-> 
-> 	pm_runtime_get_noresume(dev);
-> 	pm_runtime_barrier(dev);
-> 	ret = really_probe(dev, drv);
-> 	pm_runtime_put_sync(dev);
-> 
-> Which means, if originally 
-> 
-> 	usage_count = 0
-> 	disable_depth = 1
-> 
-> the first get_noresume() increments
-> 
-> 	usage_count = 1
-> 
-> In probe() we do enable(), which decrements
-> 
-> 	disable_depth = 0
-> 
-> and resume(), which poweres everything up. If we now return from probe(), 
-> put_sync() will power down and decrement
-> 
-> 	usage_count = 0
-> 
-> which is ok for sh_mmcif.c. If there is no card in the slot, we keep 
-> interface powered down, card polling works also in powered down mode if 
-> there's a GPIO, or the MMC core will wake us up every time to check for a 
-> new card. Next, let's say, a card has been inserted, and we rmmod the 
-> driver. dd.c::__device_release_driver() does
-> 
-> 	pm_runtime_get_noresume(dev);
-> 	pm_runtime_barrier(dev);
-> 	.remove();
-> 	pm_runtime_put_sync(dev);
-> 
-> the first get_noresume() increments
-> 
-> 	usage_count = 1
-> 
-> Then if we go the "exact inverse" route, we do suspend(), which does 
-> nothing, because usage_count > 0, then we do disable(), which increments
-> 
-> 	disable_depth = 1
-> 
-> After returning from .remove() pm_runtime_put_sync() is executed, but also 
-> it does nothing, because disable_depth > 0. The interface stays powered 
-> on. So, as you see, the problem is on the .remove() path. I work around it 
-> by doing
-> 
-> 	pm_runtime_put_sync(&pdev->dev);
-> 	pm_runtime_disable(&pdev->dev);
-> 	pm_runtime_get_noresume(&pdev->dev);
-> 
-> in the driver. This way the first call decrements
-> 
-> 	usage_count = 0
-> 
-> and powers down, the second one increments
-> 
-> 	disable_depth = 1
-> 
-> the third one
-> 
-> 	usage_count = 1
-> 
-> Then, back in dd.c again
-> 
-> 	usage_count = 0
-> 
-> and all is happy:-) But the above triplet looks kinda ugly to me. Is this 
-> really how it is supposed to work?...
-
-Ah, now I see the problem.  It looks like we did not give sufficient
-thought to the case where a device starts off (and therefore should
-finish up) in a powered-down state.  Calling pm_runtime_put_sync()
-after unbinding the device driver seems a little futile -- with no
-driver, the subsystem may not be able to power-down the device!
-
-Rafael, how do you think we should handle this?  Get rid of the 
-pm_runtime_get_no_resume() and pm_runtime_put_sync() calls in 
-dd.c:__device_release_driver()?
-
-Alan Stern
-
+> --
+> Regards,
+> Shawn
+>
+>
+/Per
