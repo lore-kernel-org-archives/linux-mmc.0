@@ -1,55 +1,70 @@
-From: Per Forlin <per.forlin@linaro.org>
+From: Shawn Guo <shawn.guo@freescale.com>
 Subject: Re: [PATCH] mmc: mxs-mmc: add support for pre_req and post_req
-Date: Wed, 20 Apr 2011 10:01:22 +0200
-Message-ID: <BANLkTimwvX633UaUoc4P4DD1xnpLbMTrZA@mail.gmail.com>
+Date: Wed, 20 Apr 2011 16:17:00 +0800
+Message-ID: <20110420081700.GA1517@S2100-06.ap.freescale.net>
 References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
-	<1303058010-30256-1-git-send-email-shawn.guo@linaro.org>
-	<20110417164830.GE17935@S2100-06.ap.freescale.net>
+ <1303058010-30256-1-git-send-email-shawn.guo@linaro.org>
+ <BANLkTikGEUj-J2kOcd3gjVAtGhm+88DJKQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:43308 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750750Ab1DTIBX convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 04:01:23 -0400
-Received: by qyk7 with SMTP id 7so2103648qyk.19
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Apr 2011 01:01:23 -0700 (PDT)
-In-Reply-To: <20110417164830.GE17935@S2100-06.ap.freescale.net>
+Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:20296 "EHLO
+	TX2EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750695Ab1DTINH convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 04:13:07 -0400
+Content-Disposition: inline
+In-Reply-To: <BANLkTikGEUj-J2kOcd3gjVAtGhm+88DJKQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-kernel@lists.linaro.org, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-kernel@lists.linaro.org, patches@linaro.org, cjb@laptop.org
 
-On 17 April 2011 18:48, Shawn Guo <shawn.guo@freescale.com> wrote:
-> On Mon, Apr 18, 2011 at 12:33:30AM +0800, Shawn Guo wrote:
->> pre_req() runs dma_map_sg() post_req() runs dma_unmap_sg.
->> If not calling pre_req() before mxs_mmc_request(), request()
->> will prepare the cache just like it did it before.
->> It is optional to use pre_req() and post_req().
->>
->> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
->> ---
->> =A0drivers/mmc/host/mxs-mmc.c | =A0 75 +++++++++++++++++++++++++++++=
-+++++++++++++--
->> =A01 files changed, 72 insertions(+), 3 deletions(-)
->>
->
-> Here is the result of mmc_test case 37 ~ 40, which are designed to se=
-e
-> the performance improvement introduced by non-blocking changes.
->
-> Honestly, the improvement is not so impressive. =A0Not sure if the pa=
-tch
-> for mxs-mmc pre_req and post_req support was correctly produced. =A0S=
-o
-> please help review ...
-My guess is that dma_unmap is not run in parallel with transfer.
-Please look at my patch reply.
+On Wed, Apr 20, 2011 at 09:58:48AM +0200, Per Forlin wrote:
+> > =A0static struct dma_async_tx_descriptor *mxs_mmc_prep_dma(
+> > =A0 =A0 =A0 =A0struct mxs_mmc_host *host, unsigned int append)
+> > =A0{
+> > @@ -312,8 +342,8 @@ static struct dma_async_tx_descriptor *mxs_mmc_=
+prep_dma(
+> >
+> > =A0 =A0 =A0 =A0if (data) {
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* data */
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 dma_map_sg(mmc_dev(host->mmc), data->=
+sg,
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0data->sg_len, =
+host->dma_dir);
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mxs_mmc_prep_dma_data(host, data,=
+ NULL))
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return NULL;
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sgl =3D data->sg;
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sg_len =3D data->sg_len;
+> > =A0 =A0 =A0 =A0} else {
+> > @@ -328,9 +358,11 @@ static struct dma_async_tx_descriptor *mxs_mmc=
+_prep_dma(
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0desc->callback =3D mxs_mmc_dma_irq_c=
+allback;
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0desc->callback_param =3D host;
+> > =A0 =A0 =A0 =A0} else {
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (data)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (data) {
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dma_unmap_sg(mmc_dev=
+(host->mmc), data->sg,
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 data->sg_len, host->dma_dir);
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 data->host_cookie =3D=
+ 0;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> When is dma_unmap_sg called? If host_cookie is set dma_unmap() should
+> only be called from post_req.
+> My guess is
+> + if (data && !data->host_cookie) {
+> It looks like only dma_map is run in parallel with transfer but not
+> dma_unmap. This may explain the numbers.
 
->
-> --
-> Regards,
-> Shawn
+Good catch.  I forgot patching mxs_mmc_request_done where dma_unmap_sg
+is called.  Will correct and retest ...
+
+--=20
 Regards,
-Per
+Shawn
+
