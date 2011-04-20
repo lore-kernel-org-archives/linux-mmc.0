@@ -1,569 +1,513 @@
 From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH v3 01/11] mmc: sd: add support for signal voltage switch procedure
-Date: Wed, 20 Apr 2011 15:00:51 +0530
-Message-ID: <1303291861-1788-2-git-send-email-arindam.nath@amd.com>
+Subject: [PATCH v3 03/11] mmc: sd: add support for driver type selection
+Date: Wed, 20 Apr 2011 15:00:53 +0530
+Message-ID: <1303291861-1788-4-git-send-email-arindam.nath@amd.com>
 References: <1303291861-1788-1-git-send-email-arindam.nath@amd.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-px0-f179.google.com ([209.85.212.179]:46142 "EHLO
 	mail-px0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753871Ab1DTJbl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 05:31:41 -0400
+	with ESMTP id S1753664Ab1DTJcE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 05:32:04 -0400
 Received: by mail-px0-f179.google.com with SMTP id 2so445901pxi.10
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Apr 2011 02:31:40 -0700 (PDT)
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Apr 2011 02:32:04 -0700 (PDT)
 In-Reply-To: <1303291861-1788-1-git-send-email-arindam.nath@amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org
 Cc: linux-mmc@vger.kernel.org, prakity@marvell.com, subhashj@codeaurora.org, zhangfei.gao@gmail.com, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com, Arindam Nath <arindam.nath@amd.com>
 
-Host Controller v3.00 adds another Capabilities register. Apart
-from other things, this new register indicates whether the Host
-Controller supports SDR50, SDR104, and DDR50 UHS-I modes. The spec
-doesn't mention about explicit support for SDR12 and SDR25 UHS-I
-modes, so the Host Controller v3.00 should support them by default.
-Also if the controller supports SDR104 mode, it will also support
-SDR50 mode as well. So depending on the host support, we set the
-corresponding MMC_CAP_* flags. One more new register. Host Control2
-is added in v3.00, which is used during Signal Voltage Switch
-procedure described below.
+This patch adds support for setting driver strength during UHS-I
+initialization prcedure. Since UHS-I cards set S18A (bit 24) in
+response to ACMD41, we use this as a base for UHS-I initialization.
+We modify the parameter list of mmc_sd_get_cid() so that we can
+save the ROCR from ACMD41 to check whether bit 24 is set.
 
-Since as per v3.00 spec, UHS-I supported hosts should set S18R
-to 1, we set S18R (bit 24) of OCR before sending ACMD41. We also
-need to set XPC (bit 28) of OCR in case the host can supply >150mA.
-This support is indicated by the Maximum Current Capabilities
-register of the Host Controller.
-
-If the response of ACMD41 has both CCS and S18A set, we start the
-signal voltage switch procedure, which if successfull, will switch
-the card from 3.3V signalling to 1.8V signalling. Signal voltage
-switch procedure adds support for a new command CMD11 in the
-Physical Layer Spec v3.01. As part of this procedure, we need to
-set 1.8V Signalling Enable (bit 3) of Host Control2 register, which
-if remains set after 5ms, means the switch to 1.8V signalling is
-successfull. Otherwise, we clear bit 24 of OCR and retry the
-initialization sequence. When we remove the card, and insert the
-same or another card, we need to make sure that we start with 3.3V
-signalling voltage. So we call mmc_set_signal_voltage() with
-MMC_SIGNAL_VOLTAGE_330 set so that we are back to 3.3V signalling
-voltage before we actually start initializing the card.
+We decide whether the Host Controller supports A, C, or D driver
+type depending on the Capabilities register. Driver type B is
+suported by default. We then set the appropriate driver type for
+the card using CMD6 mode 1. As per Host Controller spec v3.00, we
+set driver type for the host only if Preset Value Enable in the
+Host Control2 register is not set. SDHCI_HOST_CONTROL has been
+renamed to SDHCI_HOST_CONTROL1 to conform to the spec.
 
 Signed-off-by: Arindam Nath <arindam.nath@amd.com>
 ---
- drivers/mmc/core/sd.c     |   34 ++++++++-
- drivers/mmc/core/sd_ops.c |   34 ++++++++
- drivers/mmc/core/sd_ops.h |    1 +
- drivers/mmc/host/sdhci.c  |  194 ++++++++++++++++++++++++++++++++++++++++++---
- drivers/mmc/host/sdhci.h  |   18 ++++-
- include/linux/mmc/host.h  |   15 ++++
- include/linux/mmc/sd.h    |    1 +
- 7 files changed, 281 insertions(+), 16 deletions(-)
+ drivers/mmc/core/core.c  |    9 +++
+ drivers/mmc/core/core.h  |    1 +
+ drivers/mmc/core/sd.c    |  153 ++++++++++++++++++++++++++++++++++++++--------
+ drivers/mmc/core/sd.h    |    3 +-
+ drivers/mmc/core/sdio.c  |    3 +-
+ drivers/mmc/host/sdhci.c |   49 +++++++++++---
+ drivers/mmc/host/sdhci.h |   11 +++-
+ include/linux/mmc/card.h |    4 +
+ include/linux/mmc/host.h |   10 +++
+ 9 files changed, 203 insertions(+), 40 deletions(-)
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 1dbc185..4766b0c 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -952,6 +952,15 @@ void mmc_set_timing(struct mmc_host *host, unsigned int timing)
+ }
+ 
+ /*
++ * Select appropriate driver type for host.
++ */
++void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type)
++{
++	host->ios.drv_type = drv_type;
++	mmc_set_ios(host);
++}
++
++/*
+  * Apply power to the MMC stack.  This is a two-stage process.
+  * First, we enable power to the card without the clock running.
+  * We then wait a bit for the power to stabilise.  Finally,
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index ca1fdde..6114ca5 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -42,6 +42,7 @@ void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width,
+ 			   unsigned int ddr);
+ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
+ void mmc_set_timing(struct mmc_host *host, unsigned int timing);
++void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
+ 
+ static inline void mmc_delay(unsigned int ms)
+ {
 diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 6dac89f..98aed60 100644
+index 8b25047..08f5011 100644
 --- a/drivers/mmc/core/sd.c
 +++ b/drivers/mmc/core/sd.c
-@@ -403,6 +403,7 @@ struct device_type sd_type = {
- int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
- {
- 	int err;
-+	u32 rocr;
+@@ -405,6 +405,98 @@ out:
+ 	return err;
+ }
  
- 	/*
- 	 * Since we're changing the OCR value, we seem to
-@@ -422,10 +423,36 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
- 	if (!err)
- 		ocr |= 1 << 30;
- 
--	err = mmc_send_app_op_cond(host, ocr, NULL);
-+	/*
-+	 * If the host supports one of UHS-I modes, request the card
-+	 * to switch to 1.8V signaling level.
-+	 */
-+	if (host->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
-+	    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_DDR50))
-+		ocr |= 1 << 24;
++static int sd_select_driver_type(struct mmc_card *card, u8 *status)
++{
++	int host_drv_type = 0, card_drv_type = 0;
++	int err;
 +
-+	/* If the host can supply more than 150mA, XPC should be set to 1. */
-+	if (host->caps & (MMC_CAP_SET_XPC_330 | MMC_CAP_SET_XPC_300 |
-+	    MMC_CAP_SET_XPC_180))
-+		ocr |= 1 << 28;
-+
-+try_again:
-+	err = mmc_send_app_op_cond(host, ocr, &rocr);
- 	if (err)
- 		return err;
- 
 +	/*
-+	 * In case CCS and S18A in the response is set, start Signal Voltage
-+	 * Switch procedure. SPI mode doesn't support CMD11.
++	 * If the host doesn't support any of the Driver Types A,C or D,
++	 * default Driver Type B is used.
 +	 */
-+	if (!mmc_host_is_spi(host) && ((rocr & 0x41000000) == 0x41000000)) {
-+		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
-+		if (err) {
-+			ocr &= ~(1 << 24);
-+			goto try_again;
-+		}
++	if (!(card->host->caps & (MMC_CAP_DRIVER_TYPE_A | MMC_CAP_DRIVER_TYPE_C
++	    | MMC_CAP_DRIVER_TYPE_D)))
++		return 0;
++
++	if (card->host->caps & MMC_CAP_DRIVER_TYPE_A) {
++		host_drv_type = MMC_SET_DRIVER_TYPE_A;
++		if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_A)
++			card_drv_type = MMC_SET_DRIVER_TYPE_A;
++		else if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_B)
++			card_drv_type = MMC_SET_DRIVER_TYPE_B;
++		else if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
++			card_drv_type = MMC_SET_DRIVER_TYPE_C;
++	} else if (card->host->caps & MMC_CAP_DRIVER_TYPE_C) {
++		host_drv_type = MMC_SET_DRIVER_TYPE_C;
++		if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
++			card_drv_type = MMC_SET_DRIVER_TYPE_C;
++	} else if (!(card->host->caps & MMC_CAP_DRIVER_TYPE_D)) {
++		/*
++		 * If we are here, that means only the default driver type
++		 * B is supported by the host.
++		 */
++		host_drv_type = MMC_SET_DRIVER_TYPE_B;
++		if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_B)
++			card_drv_type = MMC_SET_DRIVER_TYPE_B;
++		else if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
++			card_drv_type = MMC_SET_DRIVER_TYPE_C;
 +	}
 +
- 	if (mmc_host_is_spi(host))
- 		err = mmc_send_cid(host, cid);
- 	else
-@@ -781,6 +808,11 @@ int mmc_attach_sd(struct mmc_host *host)
- 	if (host->ocr_avail_sd)
- 		host->ocr_avail = host->ocr_avail_sd;
- 
-+	/* Make sure we are at 3.3V signalling voltage */
-+	err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
++	err = mmc_sd_switch(card, 1, 2, card_drv_type, status);
 +	if (err)
 +		return err;
 +
- 	/*
- 	 * We need to get OCR a different way for SPI.
- 	 */
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index a206aea..9be0d4c 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -145,6 +145,40 @@ int mmc_app_set_bus_width(struct mmc_card *card, int width)
- 	return 0;
- }
- 
-+int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
-+{
-+	struct mmc_command cmd;
-+	int err = 0;
-+
-+	BUG_ON(!host);
-+
-+	/*
-+	 * Send CMD11 only if the request is to switch the card to
-+	 * 1.8V signalling.
-+	 */
-+	if (signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
-+		memset(&cmd, 0, sizeof(struct mmc_command));
-+
-+		cmd.opcode = SD_SWITCH_VOLTAGE;
-+		cmd.arg = 0;
-+		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+
-+		err = mmc_wait_for_cmd(host, &cmd, 0);
-+		if (err)
-+			return err;
-+
-+		if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR))
-+			return -EIO;
++	if ((status[15] & 0xF) != card_drv_type) {
++		printk(KERN_WARNING "%s: Problem setting driver strength!\n",
++			mmc_hostname(card->host));
++		return 0;
 +	}
 +
-+	host->ios.signal_voltage = signal_voltage;
++	mmc_set_driver_type(card->host, host_drv_type);
 +
-+	if (host->ops->start_signal_voltage_switch)
-+		err = host->ops->start_signal_voltage_switch(host, &host->ios);
++	return 0;
++}
++
++/*
++ * UHS-I specific initialization procedure
++ */
++static int mmc_sd_init_uhs_card(struct mmc_card *card)
++{
++	int err;
++	u8 *status;
++
++	if (!card->scr.sda_spec3)
++		return 0;
++
++	if (!(card->csd.cmdclass & CCC_SWITCH))
++		return 0;
++
++	status = kmalloc(64, GFP_KERNEL);
++	if (!status) {
++		printk(KERN_ERR "%s: could not allocate a buffer for "
++			"switch capabilities.\n", mmc_hostname(card->host));
++		return -ENOMEM;
++	}
++
++	/* Set 4-bit bus width */
++	if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
++	    (card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
++		err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
++		if (err)
++			goto out;
++
++		mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
++	}
++
++	/* Set the driver strength for the card */
++	err = sd_select_driver_type(card, status);
++
++out:
++	kfree(status);
 +
 +	return err;
 +}
 +
- int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ MMC_DEV_ATTR(cid, "%08x%08x%08x%08x\n", card->raw_cid[0], card->raw_cid[1],
+ 	card->raw_cid[2], card->raw_cid[3]);
+ MMC_DEV_ATTR(csd, "%08x%08x%08x%08x\n", card->raw_csd[0], card->raw_csd[1],
+@@ -453,10 +545,10 @@ struct device_type sd_type = {
+ /*
+  * Fetch CID from card.
+  */
+-int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
++int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid,
++	u32 *rocr)
  {
- 	struct mmc_command cmd = {0};
-diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
-index ffc2305..d5bdda5 100644
---- a/drivers/mmc/core/sd_ops.h
-+++ b/drivers/mmc/core/sd_ops.h
-@@ -20,6 +20,7 @@ int mmc_app_send_scr(struct mmc_card *card, u32 *scr);
- int mmc_sd_switch(struct mmc_card *card, int mode, int group,
- 	u8 value, u8 *resp);
- int mmc_app_sd_status(struct mmc_card *card, void *ssr);
-+int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
- 
- #endif
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index f31077d..56efd94 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -83,6 +83,8 @@ static void sdhci_dumpregs(struct sdhci_host *host)
- 	printk(KERN_DEBUG DRIVER_NAME ": Cmd:      0x%08x | Max curr: 0x%08x\n",
- 		sdhci_readw(host, SDHCI_COMMAND),
- 		sdhci_readl(host, SDHCI_MAX_CURRENT));
-+	printk(KERN_DEBUG DRIVER_NAME ": Host ctl2: 0x%08x\n",
-+		sdhci_readw(host, SDHCI_HOST_CONTROL2));
- 
- 	if (host->flags & SDHCI_USE_ADMA)
- 		printk(KERN_DEBUG DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x\n",
-@@ -1297,11 +1299,116 @@ out:
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
-+static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-+	struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host;
-+	u8 pwr;
-+	u16 clk, ctrl;
-+	u32 present_state;
-+
-+	host = mmc_priv(mmc);
-+
-+	/*
-+	 * Signal Voltage Switching is only applicable for Host Controllers
-+	 * v3.00 and above.
-+	 */
-+	if (host->version < SDHCI_SPEC_300)
-+		return 0;
-+
-+	/*
-+	 * We first check whether the request is to set signalling voltage
-+	 * to 3.3V. If so, we change the voltage to 3.3V and return quickly.
-+	 */
-+	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	if ((ctrl & SDHCI_CTRL_VDD_180) &&
-+	   (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)) {
-+		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
-+		ctrl &= ~SDHCI_CTRL_VDD_180;
-+		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+
-+		/* Wait for 5ms */
-+		usleep_range(5000, 5500);
-+
-+		/* 3.3V regulator output should be stable within 5 ms */
-+		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		if (!(ctrl & SDHCI_CTRL_VDD_180))
-+			return 0;
-+		else {
-+			printk(KERN_INFO DRIVER_NAME ": Switching to 3.3V "
-+				"signalling voltage failed\n");
-+			return -EIO;
-+		}
-+	} else if (!(ctrl & SDHCI_CTRL_VDD_180) &&
-+		  (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180)) {
-+		/* Stop SDCLK */
-+		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+		clk &= ~SDHCI_CLOCK_CARD_EN;
-+		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+
-+		/* Check whether DAT[3:0] is 0000 */
-+		present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
-+		if (!((present_state & SDHCI_DATA_LVL_MASK) >>
-+		       SDHCI_DATA_LVL_SHIFT)) {
-+			/*
-+			 * Enable 1.8V Signal Enable in the Host Control2
-+			 * register
-+			 */
-+			ctrl |= SDHCI_CTRL_VDD_180;
-+			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+
-+			/* Wait for 5ms */
-+			usleep_range(5000, 5500);
-+
-+			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+			if (ctrl & SDHCI_CTRL_VDD_180) {
-+				/* Provide SDCLK again and wait for 1ms*/
-+				clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+				clk |= SDHCI_CLOCK_CARD_EN;
-+				sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+				usleep_range(1000, 1500);
-+
-+				/*
-+				 * If DAT[3:0] level is 1111b, then the card
-+				 * was successfully switched to 1.8V signaling.
-+				 */
-+				present_state = sdhci_readl(host,
-+							SDHCI_PRESENT_STATE);
-+				if ((present_state & SDHCI_DATA_LVL_MASK) ==
-+				     SDHCI_DATA_LVL_MASK) {
-+					return 0;
-+				}
-+			}
-+		}
-+
-+		/*
-+		 * If we are here, that means the switch to 1.8V signaling
-+		 * failed. We power cycle the card, and retry initialization
-+		 * sequence by setting S18R to 0.
-+		 */
-+		pwr = sdhci_readb(host, SDHCI_POWER_CONTROL);
-+		pwr &= ~SDHCI_POWER_ON;
-+		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
-+
-+		/* Wait for 1ms as per the spec */
-+		usleep_range(1000, 1500);
-+		pwr |= SDHCI_POWER_ON;
-+		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
-+
-+		printk(KERN_INFO DRIVER_NAME ": Switching to 1.8V signalling "
-+			"voltage failed, retrying with S18R set to 0\n");
-+		return -EAGAIN;
-+	} else
-+		/* No signal voltage switch required */
-+		return 0;
-+}
-+
- static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
- 	.set_ios	= sdhci_set_ios,
- 	.get_ro		= sdhci_get_ro,
- 	.enable_sdio_irq = sdhci_enable_sdio_irq,
-+	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
- };
- 
- /*****************************************************************************\
-@@ -1775,7 +1882,9 @@ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
- int sdhci_add_host(struct sdhci_host *host)
- {
- 	struct mmc_host *mmc;
--	unsigned int caps, ocr_avail;
-+	u32 caps[2];
-+	u32 max_current_caps;
-+	unsigned int ocr_avail;
- 	int ret;
- 
- 	WARN_ON(host == NULL);
-@@ -1798,12 +1907,15 @@ int sdhci_add_host(struct sdhci_host *host)
- 			host->version);
- 	}
- 
--	caps = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
-+	caps[0] = (host->quirks & SDHCI_QUIRK_MISSING_CAPS) ? host->caps :
- 		sdhci_readl(host, SDHCI_CAPABILITIES);
- 
-+	caps[1] = (host->version >= SDHCI_SPEC_300) ?
-+		sdhci_readl(host, SDHCI_CAPABILITIES_1) : 0;
-+
- 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
- 		host->flags |= SDHCI_USE_SDMA;
--	else if (!(caps & SDHCI_CAN_DO_SDMA))
-+	else if (!(caps[0] & SDHCI_CAN_DO_SDMA))
- 		DBG("Controller doesn't have SDMA capability\n");
- 	else
- 		host->flags |= SDHCI_USE_SDMA;
-@@ -1814,7 +1926,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 		host->flags &= ~SDHCI_USE_SDMA;
- 	}
- 
--	if ((host->version >= SDHCI_SPEC_200) && (caps & SDHCI_CAN_DO_ADMA2))
-+	if ((host->version >= SDHCI_SPEC_200) &&
-+		(caps[0] & SDHCI_CAN_DO_ADMA2))
- 		host->flags |= SDHCI_USE_ADMA;
- 
- 	if ((host->quirks & SDHCI_QUIRK_BROKEN_ADMA) &&
-@@ -1864,10 +1977,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 	}
- 
- 	if (host->version >= SDHCI_SPEC_300)
--		host->max_clk = (caps & SDHCI_CLOCK_V3_BASE_MASK)
-+		host->max_clk = (caps[0] & SDHCI_CLOCK_V3_BASE_MASK)
- 			>> SDHCI_CLOCK_BASE_SHIFT;
- 	else
--		host->max_clk = (caps & SDHCI_CLOCK_BASE_MASK)
-+		host->max_clk = (caps[0] & SDHCI_CLOCK_BASE_MASK)
- 			>> SDHCI_CLOCK_BASE_SHIFT;
- 
- 	host->max_clk *= 1000000;
-@@ -1883,7 +1996,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	}
- 
- 	host->timeout_clk =
--		(caps & SDHCI_TIMEOUT_CLK_MASK) >> SDHCI_TIMEOUT_CLK_SHIFT;
-+		(caps[0] & SDHCI_TIMEOUT_CLK_MASK) >> SDHCI_TIMEOUT_CLK_SHIFT;
- 	if (host->timeout_clk == 0) {
- 		if (host->ops->get_timeout_clock) {
- 			host->timeout_clk = host->ops->get_timeout_clock(host);
-@@ -1895,7 +2008,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 			return -ENODEV;
- 		}
- 	}
--	if (caps & SDHCI_TIMEOUT_CLK_UNIT)
-+	if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
- 		host->timeout_clk *= 1000;
+ 	int err;
+-	u32 rocr;
  
  	/*
-@@ -1922,21 +2035,76 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
- 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 	 * Since we're changing the OCR value, we seem to
+@@ -490,7 +582,7 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid)
+ 		ocr |= 1 << 28;
  
--	if (caps & SDHCI_CAN_DO_HISPD)
-+	if (caps[0] & SDHCI_CAN_DO_HISPD)
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+ try_again:
+-	err = mmc_send_app_op_cond(host, ocr, &rocr);
++	err = mmc_send_app_op_cond(host, ocr, rocr);
+ 	if (err)
+ 		return err;
  
- 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
- 	    mmc_card_is_removable(mmc))
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+@@ -498,7 +590,8 @@ try_again:
+ 	 * In case CCS and S18A in the response is set, start Signal Voltage
+ 	 * Switch procedure. SPI mode doesn't support CMD11.
+ 	 */
+-	if (!mmc_host_is_spi(host) && ((rocr & 0x41000000) == 0x41000000)) {
++	if (!mmc_host_is_spi(host) && rocr &&
++	   ((*rocr & 0x41000000) == 0x41000000)) {
+ 		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
+ 		if (err) {
+ 			ocr &= ~(1 << 24);
+@@ -633,11 +726,12 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+ 	struct mmc_card *card;
+ 	int err;
+ 	u32 cid[4];
++	u32 rocr = 0;
  
-+	/* UHS-I mode(s) supported by the host controller. */
-+	if (host->version >= SDHCI_SPEC_300)
-+		mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
+ 	BUG_ON(!host);
+ 	WARN_ON(!host->claimed);
+ 
+-	err = mmc_sd_get_cid(host, ocr, cid);
++	err = mmc_sd_get_cid(host, ocr, cid, &rocr);
+ 	if (err)
+ 		return err;
+ 
+@@ -690,30 +784,37 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+ 	if (err)
+ 		goto free_card;
+ 
+-	/*
+-	 * Attempt to change to high-speed (if supported)
+-	 */
+-	err = mmc_sd_switch_hs(card);
+-	if (err > 0)
+-		mmc_sd_go_highspeed(card);
+-	else if (err)
+-		goto free_card;
+-
+-	/*
+-	 * Set bus speed.
+-	 */
+-	mmc_set_clock(host, mmc_sd_get_max_clock(card));
+-
+-	/*
+-	 * Switch to wider bus (if supported).
+-	 */
+-	if ((host->caps & MMC_CAP_4_BIT_DATA) &&
+-		(card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
+-		err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
++	/* Initialization sequence for UHS-I cards */
++	if (rocr & (1 << 24)) {
++		err = mmc_sd_init_uhs_card(card);
+ 		if (err)
+ 			goto free_card;
++	} else {
++		/*
++		 * Attempt to change to high-speed (if supported)
++		 */
++		err = mmc_sd_switch_hs(card);
++		if (err > 0)
++			mmc_sd_go_highspeed(card);
++		else if (err)
++			goto free_card;
 +
-+	/* SDR104 supports also implies SDR50 support */
-+	if (caps[1] & SDHCI_SUPPORT_SDR104)
-+		mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
-+	else if (caps[1] & SDHCI_SUPPORT_SDR50)
-+		mmc->caps |= MMC_CAP_UHS_SDR50;
++		/*
++		 * Set bus speed.
++		 */
++		mmc_set_clock(host, mmc_sd_get_max_clock(card));
+ 
+-		mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
++		/*
++		 * Switch to wider bus (if supported).
++		 */
++		if ((host->caps & MMC_CAP_4_BIT_DATA) &&
++			(card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
++			err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
++			if (err)
++				goto free_card;
 +
-+	if (caps[1] & SDHCI_SUPPORT_DDR50)
-+		mmc->caps |= MMC_CAP_UHS_DDR50;
++			mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
++		}
+ 	}
+ 
+ 	host->card = card;
+diff --git a/drivers/mmc/core/sd.h b/drivers/mmc/core/sd.h
+index 3d8800f..5106b44 100644
+--- a/drivers/mmc/core/sd.h
++++ b/drivers/mmc/core/sd.h
+@@ -5,7 +5,8 @@
+ 
+ extern struct device_type sd_type;
+ 
+-int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid);
++int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid,
++	u32 *rocr);
+ int mmc_sd_get_csd(struct mmc_host *host, struct mmc_card *card);
+ void mmc_decode_cid(struct mmc_card *card);
+ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 1e60959..c4a6614 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -370,7 +370,8 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 	}
+ 
+ 	if (ocr & R4_MEMORY_PRESENT
+-	    && mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid) == 0) {
++	    && mmc_sd_get_cid(host, host->ocr & ocr, card->raw_cid,
++	    NULL) == 0) {
+ 		card->type = MMC_TYPE_SD_COMBO;
+ 
+ 		if (oldcard && (oldcard->type != MMC_TYPE_SD_COMBO ||
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 56efd94..faf332f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -61,7 +61,7 @@ static void sdhci_dumpregs(struct sdhci_host *host)
+ 		sdhci_readw(host, SDHCI_TRANSFER_MODE));
+ 	printk(KERN_DEBUG DRIVER_NAME ": Present:  0x%08x | Host ctl: 0x%08x\n",
+ 		sdhci_readl(host, SDHCI_PRESENT_STATE),
+-		sdhci_readb(host, SDHCI_HOST_CONTROL));
++		sdhci_readb(host, SDHCI_HOST_CONTROL1));
+ 	printk(KERN_DEBUG DRIVER_NAME ": Power:    0x%08x | Blk gap:  0x%08x\n",
+ 		sdhci_readb(host, SDHCI_POWER_CONTROL),
+ 		sdhci_readb(host, SDHCI_BLOCK_GAP_CONTROL));
+@@ -214,18 +214,18 @@ static void sdhci_activate_led(struct sdhci_host *host)
+ {
+ 	u8 ctrl;
+ 
+-	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
++	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL1);
+ 	ctrl |= SDHCI_CTRL_LED;
+-	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
+ }
+ 
+ static void sdhci_deactivate_led(struct sdhci_host *host)
+ {
+ 	u8 ctrl;
+ 
+-	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
++	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL1);
+ 	ctrl &= ~SDHCI_CTRL_LED;
+-	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
+ }
+ 
+ #ifdef SDHCI_USE_LEDS_CLASS
+@@ -797,14 +797,14 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 	 * is ADMA.
+ 	 */
+ 	if (host->version >= SDHCI_SPEC_200) {
+-		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
++		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL1);
+ 		ctrl &= ~SDHCI_CTRL_DMA_MASK;
+ 		if ((host->flags & SDHCI_REQ_USE_DMA) &&
+ 			(host->flags & SDHCI_USE_ADMA))
+ 			ctrl |= SDHCI_CTRL_ADMA32;
+ 		else
+ 			ctrl |= SDHCI_CTRL_SDMA;
+-		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
+ 	}
+ 
+ 	if (!(host->flags & SDHCI_REQ_USE_DMA)) {
+@@ -1212,7 +1212,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (host->ops->platform_8bit_width)
+ 		host->ops->platform_8bit_width(host, ios->bus_width);
+ 	else {
+-		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
++		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL1);
+ 		if (ios->bus_width == MMC_BUS_WIDTH_8) {
+ 			ctrl &= ~SDHCI_CTRL_4BITBUS;
+ 			if (host->version >= SDHCI_SPEC_300)
+@@ -1225,10 +1225,10 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			else
+ 				ctrl &= ~SDHCI_CTRL_4BITBUS;
+ 		}
+-		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
+ 	}
+ 
+-	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
++	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL1);
+ 
+ 	if ((ios->timing == MMC_TIMING_SD_HS ||
+ 	     ios->timing == MMC_TIMING_MMC_HS)
+@@ -1237,7 +1237,26 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	else
+ 		ctrl &= ~SDHCI_CTRL_HISPD;
+ 
+-	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
++
++	if (host->version >= SDHCI_SPEC_300) {
++		u16 ctrl_2;
++
++		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++		if (!(ctrl_2 & SDHCI_CTRL_PRESET_VAL_ENABLE)) {
++			/*
++			 * We only need to set Driver Strength if the
++			 * preset value enable is not set.
++			 */
++			ctrl_2 &= ~SDHCI_CTRL_DRV_TYPE_MASK;
++			if (ios->drv_type == MMC_SET_DRIVER_TYPE_A)
++				ctrl_2 |= SDHCI_CTRL_DRV_TYPE_A;
++			else if (ios->drv_type == MMC_SET_DRIVER_TYPE_C)
++				ctrl_2 |= SDHCI_CTRL_DRV_TYPE_C;
++
++			sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
++		}
++	}
+ 
+ 	/*
+ 	 * Some (ENE) controllers go apeshit on some ios operation,
+@@ -2055,6 +2074,14 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (caps[1] & SDHCI_SUPPORT_DDR50)
+ 		mmc->caps |= MMC_CAP_UHS_DDR50;
+ 
++	/* Driver Type(s) (A, C, D) supported by the host */
++	if (caps[1] & SDHCI_DRIVER_TYPE_A)
++		mmc->caps |= MMC_CAP_DRIVER_TYPE_A;
++	if (caps[1] & SDHCI_DRIVER_TYPE_C)
++		mmc->caps |= MMC_CAP_DRIVER_TYPE_C;
++	if (caps[1] & SDHCI_DRIVER_TYPE_D)
++		mmc->caps |= MMC_CAP_DRIVER_TYPE_D;
 +
  	ocr_avail = 0;
--	if (caps & SDHCI_CAN_VDD_330)
-+	/*
-+	 * According to SD Host Controller spec v3.00, if the Host System
-+	 * can afford more than 150mA, Host Driver should set XPC to 1. Also
-+	 * the value is meaningful only if Voltage Support in the Capabilities
-+	 * register is set. The actual current value is 4 times the register
-+	 * value.
-+	 */
-+	max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
-+
-+	if (caps[0] & SDHCI_CAN_VDD_330) {
-+		int max_current_330;
-+
- 		ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
--	if (caps & SDHCI_CAN_VDD_300)
-+
-+		max_current_330 = ((max_current_caps &
-+				   SDHCI_MAX_CURRENT_330_MASK) >>
-+				   SDHCI_MAX_CURRENT_330_SHIFT) *
-+				   SDHCI_MAX_CURRENT_MULTIPLIER;
-+
-+		if (max_current_330 > 150)
-+			mmc->caps |= MMC_CAP_SET_XPC_330;
-+	}
-+	if (caps[0] & SDHCI_CAN_VDD_300) {
-+		int max_current_300;
-+
- 		ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
--	if (caps & SDHCI_CAN_VDD_180)
-+
-+		max_current_300 = ((max_current_caps &
-+				   SDHCI_MAX_CURRENT_300_MASK) >>
-+				   SDHCI_MAX_CURRENT_300_SHIFT) *
-+				   SDHCI_MAX_CURRENT_MULTIPLIER;
-+
-+		if (max_current_300 > 150)
-+			mmc->caps |= MMC_CAP_SET_XPC_300;
-+	}
-+	if (caps[0] & SDHCI_CAN_VDD_180) {
-+		int max_current_180;
-+
- 		ocr_avail |= MMC_VDD_165_195;
- 
-+		max_current_180 = ((max_current_caps &
-+				   SDHCI_MAX_CURRENT_180_MASK) >>
-+				   SDHCI_MAX_CURRENT_180_SHIFT) *
-+				   SDHCI_MAX_CURRENT_MULTIPLIER;
-+
-+		if (max_current_180 > 150)
-+			mmc->caps |= MMC_CAP_SET_XPC_180;
-+	}
-+
- 	mmc->ocr_avail = ocr_avail;
- 	mmc->ocr_avail_sdio = ocr_avail;
- 	if (host->ocr_avail_sdio)
-@@ -1996,7 +2164,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (host->quirks & SDHCI_QUIRK_FORCE_BLK_SZ_2048) {
- 		mmc->max_blk_size = 2;
- 	} else {
--		mmc->max_blk_size = (caps & SDHCI_MAX_BLOCK_MASK) >>
-+		mmc->max_blk_size = (caps[0] & SDHCI_MAX_BLOCK_MASK) >>
- 				SDHCI_MAX_BLOCK_SHIFT;
- 		if (mmc->max_blk_size >= 3) {
- 			printk(KERN_WARNING "%s: Invalid maximum block size, "
+ 	/*
+ 	 * According to SD Host Controller spec v3.00, if the Host System
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 85750a9..4f00b31 100644
+index 4f00b31..03c1df9 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -68,6 +68,8 @@
- #define  SDHCI_DATA_AVAILABLE	0x00000800
- #define  SDHCI_CARD_PRESENT	0x00010000
- #define  SDHCI_WRITE_PROTECT	0x00080000
-+#define  SDHCI_DATA_LVL_MASK	0x00F00000
-+#define   SDHCI_DATA_LVL_SHIFT	20
+@@ -71,7 +71,7 @@
+ #define  SDHCI_DATA_LVL_MASK	0x00F00000
+ #define   SDHCI_DATA_LVL_SHIFT	20
  
- #define SDHCI_HOST_CONTROL 	0x28
+-#define SDHCI_HOST_CONTROL 	0x28
++#define SDHCI_HOST_CONTROL1	0x28
  #define  SDHCI_CTRL_LED		0x01
-@@ -146,7 +148,8 @@
+ #define  SDHCI_CTRL_4BITBUS	0x02
+ #define  SDHCI_CTRL_HISPD	0x04
+@@ -150,6 +150,12 @@
  
- #define SDHCI_ACMD12_ERR	0x3C
- 
--/* 3E-3F reserved */
-+#define SDHCI_HOST_CONTROL2		0x3E
-+#define  SDHCI_CTRL_VDD_180		0x0008
+ #define SDHCI_HOST_CONTROL2		0x3E
+ #define  SDHCI_CTRL_VDD_180		0x0008
++#define  SDHCI_CTRL_DRV_TYPE_MASK	0x0030
++#define   SDHCI_CTRL_DRV_TYPE_B		0x0000
++#define   SDHCI_CTRL_DRV_TYPE_A		0x0010
++#define   SDHCI_CTRL_DRV_TYPE_C		0x0020
++#define   SDHCI_CTRL_DRV_TYPE_D		0x0030
++#define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
  
  #define SDHCI_CAPABILITIES	0x40
  #define  SDHCI_TIMEOUT_CLK_MASK	0x0000003F
-@@ -167,9 +170,20 @@
- #define  SDHCI_CAN_VDD_180	0x04000000
- #define  SDHCI_CAN_64BIT	0x10000000
+@@ -173,6 +179,9 @@
+ #define  SDHCI_SUPPORT_SDR50	0x00000001
+ #define  SDHCI_SUPPORT_SDR104	0x00000002
+ #define  SDHCI_SUPPORT_DDR50	0x00000004
++#define  SDHCI_DRIVER_TYPE_A	0x00000010
++#define  SDHCI_DRIVER_TYPE_C	0x00000020
++#define  SDHCI_DRIVER_TYPE_D	0x00000040
  
-+#define  SDHCI_SUPPORT_SDR50	0x00000001
-+#define  SDHCI_SUPPORT_SDR104	0x00000002
-+#define  SDHCI_SUPPORT_DDR50	0x00000004
-+
  #define SDHCI_CAPABILITIES_1	0x44
  
--#define SDHCI_MAX_CURRENT	0x48
-+#define SDHCI_MAX_CURRENT		0x48
-+#define  SDHCI_MAX_CURRENT_330_MASK	0x0000FF
-+#define  SDHCI_MAX_CURRENT_330_SHIFT	0
-+#define  SDHCI_MAX_CURRENT_300_MASK	0x00FF00
-+#define  SDHCI_MAX_CURRENT_300_SHIFT	8
-+#define  SDHCI_MAX_CURRENT_180_MASK	0xFF0000
-+#define  SDHCI_MAX_CURRENT_180_SHIFT	16
-+#define   SDHCI_MAX_CURRENT_MULTIPLIER	4
- 
- /* 4C-4F reserved for more max current */
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 56f4d92..5393272 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -83,6 +83,10 @@ struct sd_switch_caps {
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		sd3_bus_mode;
+ 	unsigned int		sd3_drv_type;
++#define SD_DRIVER_TYPE_B	0x01
++#define SD_DRIVER_TYPE_A	0x02
++#define SD_DRIVER_TYPE_C	0x04
++#define SD_DRIVER_TYPE_D	0x08
+ 	unsigned int		sd3_curr_limit;
+ };
  
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 0fffa5c..bde5a0b 100644
+index bde5a0b..949e4d5 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -56,6 +56,11 @@ struct mmc_ios {
- #define MMC_SDR_MODE		0
- #define MMC_1_2V_DDR_MODE	1
- #define MMC_1_8V_DDR_MODE	2
+@@ -61,6 +61,13 @@ struct mmc_ios {
+ 
+ #define MMC_SIGNAL_VOLTAGE_330	0
+ #define MMC_SIGNAL_VOLTAGE_180	1
 +
-+	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
++	unsigned char	drv_type;		/* driver type (A, B, C, D) */
 +
-+#define MMC_SIGNAL_VOLTAGE_330	0
-+#define MMC_SIGNAL_VOLTAGE_180	1
++#define MMC_SET_DRIVER_TYPE_B	0
++#define MMC_SET_DRIVER_TYPE_A	1
++#define MMC_SET_DRIVER_TYPE_C	2
++#define MMC_SET_DRIVER_TYPE_D	3
  };
  
  struct mmc_host_ops {
-@@ -117,6 +122,8 @@ struct mmc_host_ops {
- 
- 	/* optional callback for HC quirks */
- 	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
-+
-+	int	(*start_signal_voltage_switch)(struct mmc_host *host, struct mmc_ios *ios);
- };
- 
- struct mmc_card;
-@@ -173,6 +180,14 @@ struct mmc_host {
- 						/* DDR mode at 1.2V */
- #define MMC_CAP_POWER_OFF_CARD	(1 << 13)	/* Can power off after boot */
- #define MMC_CAP_BUS_WIDTH_TEST	(1 << 14)	/* CMD14/CMD19 bus width ok */
-+#define MMC_CAP_UHS_SDR12	(1 << 15)	/* Host supports UHS SDR12 mode */
-+#define MMC_CAP_UHS_SDR25	(1 << 16)	/* Host supports UHS SDR25 mode */
-+#define MMC_CAP_UHS_SDR50	(1 << 17)	/* Host supports UHS SDR50 mode */
-+#define MMC_CAP_UHS_SDR104	(1 << 18)	/* Host supports UHS SDR104 mode */
-+#define MMC_CAP_UHS_DDR50	(1 << 19)	/* Host supports UHS DDR50 mode */
-+#define MMC_CAP_SET_XPC_330	(1 << 20)	/* Host supports >150mA current at 3.3V */
-+#define MMC_CAP_SET_XPC_300	(1 << 21)	/* Host supports >150mA current at 3.0V */
-+#define MMC_CAP_SET_XPC_180	(1 << 22)	/* Host supports >150mA current at 1.8V */
+@@ -188,6 +195,9 @@ struct mmc_host {
+ #define MMC_CAP_SET_XPC_330	(1 << 20)	/* Host supports >150mA current at 3.3V */
+ #define MMC_CAP_SET_XPC_300	(1 << 21)	/* Host supports >150mA current at 3.0V */
+ #define MMC_CAP_SET_XPC_180	(1 << 22)	/* Host supports >150mA current at 1.8V */
++#define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
++#define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
++#define MMC_CAP_DRIVER_TYPE_D	(1 << 25)	/* Host supports Driver Type D */
  
  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
  
-diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
-index 3fd85e0..835b715 100644
---- a/include/linux/mmc/sd.h
-+++ b/include/linux/mmc/sd.h
-@@ -17,6 +17,7 @@
- /* This is basically the same command as for MMC with some quirks. */
- #define SD_SEND_RELATIVE_ADDR     3   /* bcr                     R6  */
- #define SD_SEND_IF_COND           8   /* bcr  [11:0] See below   R7  */
-+#define SD_SWITCH_VOLTAGE         11  /* ac                      R1  */
- 
-   /* class 10 */
- #define SD_SWITCH                 6   /* adtc [31:0] See below   R1  */
 -- 
 1.7.1
 
