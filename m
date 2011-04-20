@@ -1,75 +1,54 @@
 From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH v2 01/12] mmc: add none blocking mmc request function
-Date: Wed, 20 Apr 2011 09:17:23 +0200
-Message-ID: <BANLkTimaTe0qD5sbEJj88YRv2DZv=1oxTQ@mail.gmail.com>
+Subject: Re: [PATCH v2 03/12] mmc: mmc_test: add test for none blocking transfers
+Date: Wed, 20 Apr 2011 09:30:16 +0200
+Message-ID: <BANLkTik126o7w0+97iLL4p51h=0M-26dDg@mail.gmail.com>
 References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
-	<1302116833-24540-2-git-send-email-per.forlin@linaro.org>
-	<4DA81F42.3070208@csr.com>
+	<1302116833-24540-4-git-send-email-per.forlin@linaro.org>
+	<97D3A72708D04647A5AC84A04996E5B5125FB8@039-SN1MPN1-006.039d.mgd.msft.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:55941 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753489Ab1DTHRZ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 03:17:25 -0400
-In-Reply-To: <4DA81F42.3070208@csr.com>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:46283 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752924Ab1DTHaR convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2011 03:30:17 -0400
+In-Reply-To: <97D3A72708D04647A5AC84A04996E5B5125FB8@039-SN1MPN1-006.039d.mgd.msft.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Vrabel <david.vrabel@csr.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>
+To: Lin Tony-B19295 <B19295@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linaro-dev@lists.linaro.org" <linaro-dev@lists.linaro.org>, Chris Ball <cjb@laptop.org>
 
-Hi,
-
-On 15 April 2011 12:34, David Vrabel <david.vrabel@csr.com> wrote:
-> On 06/04/11 20:07, Per Forlin wrote:
->> Previously there has only been one function mmc_wait_for_req
->> to start and wait for a request. This patch adds
->> =A0* mmc_start_req - starts a request wihtout waiting
->> =A0* mmc_wait_for_req_done - waits until request is done
->> =A0* mmc_pre_req - asks the host driver to prepare for the next job
->> =A0* mmc_post_req - asks the host driver to clean up after a complet=
-ed job
+On 17 April 2011 09:09, Lin Tony-B19295 <B19295@freescale.com> wrote:
+> Hi Per
 >
-> If MMC core had a queue of requests internally you wouldn't need to
-> provide mmc_pre_req() and mmc_post_req() functions outside of the cor=
-e.
-> =A0i.e., the mmc block driver would just need to queue up two mmc req=
-uests
-> and the core would take care of calling pre_req and post_req at the
-> correct time.
+> =A0 =A0 =A0 =A0Just have a glance of your patch, good thinking. But I=
+ have a question about this patch. You modified mmc_test to test your d=
+river. Does it mean your driver's performance enhancement depends on ap=
+plication?
+I added those tests in mmc_test to compare the performance between
+blocking and none blocking. Basically it tests performance gain if
+running dma_map and dma_unmap in parallel with the transfer, compared
+to running dma_map and dma_unmap in serial with the transfer.
+
+> The caller must have to know the next request so that could make driv=
+er prepare next during current transfer?
+mmc_test tests the ideal performance gain (all request are linked toget=
+her).
+
+> So testing your driver with blocking request & non blocking request w=
+ill have different throughput due to different application mechanism.
+Yes.
+I added support for mmc non blocking in the mmc block device but the
+performance gain here depends on how the FS-requests are propagated
+down to the mmc block device. If the request are added one by one,
+waiting for the last request to complete before adding the new
+request, there will be no performance gain.
+To test the mmc block performance I have run IOZone in user space.
+
+> =A0 =A0 =A0 =A0Thanks
 >
-Sorry for late response I have been out of office a couple of days.
-Yes, it would be nice to not expose those hooks outside the core. I
-will look into this in detail to see what it would take to implement
-this and if there are any complications.
-
-> Using a MMC request queue has other benefits -- it allows multiple us=
-ers
-> without having to claim/release the host. =A0This would be useful for
-> (especially multi-function) SDIO.
-You mean claim and release would be done only within the mmc core. The
-timed saved here would equal the time it takes to release and claim
-the host.
-Claim and release can also be used for power management to indicate if
-any client is using the host, if not the power can be switched off.
-
-> (especially multi-function) SDIO.
-I just want to make sure I understand the multi-function SDIO case, I
-haven't done any work with SDIO.
-Can the SDIO functions compete over the same claim_host at the same tim=
-e?
-Example: if function 1 claims the host, function 2 and function 3 also
-want to claim the host but have to wait for function 1 to release the
-host.
-What is the extra benefit of having the internal request queue for
-multi function SDIO?
-The functions must still wait for request completion before
-acknowledge the SDIO client? Or could the functions acknowledge
-immediately after the request is queued up in mmc core?
-
->
-> David
-> --
-Thanks for your feedback,
+> BR
+> Tony
+BR
 Per
