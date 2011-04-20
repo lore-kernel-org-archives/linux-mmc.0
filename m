@@ -1,49 +1,83 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
-Date: Wed, 20 Apr 2011 00:59:31 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1104200030370.16641@axis700.grange>
-References: <Pine.LNX.4.44L0.1104191015340.1835-100000@iolanthe.rowland.org>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
+ Re-Re-Resubmission
+Date: Wed, 20 Apr 2011 04:07:08 +0200
+Message-ID: <20110420020708.GA2231@pengutronix.de>
+References: <1303231971.1622.33.camel@apple-mac>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="+HP7ph2BbKc20aGI"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:58387 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751347Ab1DSW7f (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 18:59:35 -0400
-In-Reply-To: <Pine.LNX.4.44L0.1104191015340.1835-100000@iolanthe.rowland.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:52444 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752812Ab1DTCHf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2011 22:07:35 -0400
+Content-Disposition: inline
+In-Reply-To: <1303231971.1622.33.camel@apple-mac>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Stern <stern@rowland.harvard.edu>
-Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, "Rafael J. Wysocki" <rjw@sisk.pl>
+To: Tony Olech <tony.olech@elandigitalsystems.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, arnd@arndb.de
 
-Thanks to all for clarifications. Since everyone is convinced, that that 
-idle function in mmc bus.c is appropriate, I restored it and managed to 
-achieve my goals also without it by adjusting the platform runtime pm and 
-power domain prototype support.
 
-But I still need those "cheating" calls to
+--+HP7ph2BbKc20aGI
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-	pm_runtime_put_noidle(&pdev->dev);
-and
-	pm_runtime_get_noresume(&pdev->dev);
+Hi Tony,
 
-in the sh_mmcif.c driver. If I use the patch as posted at
+> Add a driver for Elan Digital System's VUB300 chip
+> which is a USB connected SDIO/SDmem/MMC host controller.
+> A VUB300 chip enables a USB 2.0 or USB 1.1 connected host
+> computer to use SDIO/SD/MMC cards without the need for
+> a directly connected, for example via PCI, SDIO host
+> controller.
+>=20
+> Signed-off-by: Anthony F Olech <tony.olech@elandigitalsystems.com>
+> ---
+> This is the forth submission attempt.
 
-http://article.gmane.org/gmane.linux.ports.sh.devel/10724
+Looks to me that the concerns have not been addressed since last submission.
+I had a few a while ago, but Arnd added to it and summed it up nicely:
 
-but without those two calls, and load and unload the driver, while a card 
-is plugged in, unloading the driver doesn't power down the interface, 
-because the usage_count == 1 also after the kernel has soft-ejected the 
-card
+	http://ns3.spinics.net/lists/linux-mmc/msg06693.html
 
-mmc0: card 0001 removed
+> There are no errors reported by scripts/checkpatch.pl
 
-With my put_noidle() / get_noresume() hack all cases of modprobe / rmmod, 
-card insert / eject work correctly.
+Just to make sure:  This only means that there are no obvious (=3D detectab=
+le by
+a script) flaws. That makes it ready for submission, not necessarily for
+inclusion. So, just resending will not be enough.
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+> This driver has been tested on
+> a) 32bit x86
+> b) 64bit x86
+> c) dual processor
+> d) PowerPC
+
+The test coverage is great, yet the driver needs to comply to the kernel co=
+ding
+rules. I'd suggest to look at Arnd's review and fix the issues.
+
+Regards,
+
+  Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--+HP7ph2BbKc20aGI
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAk2uP8wACgkQD27XaX1/VRuDvQCdEED7H/BPbMuPFwnjgKBkUo/3
+8GgAoLlxQbdr443Tq/Mcgull+QFfCEXb
+=ypzH
+-----END PGP SIGNATURE-----
+
+--+HP7ph2BbKc20aGI--
