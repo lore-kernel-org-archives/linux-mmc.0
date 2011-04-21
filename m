@@ -1,58 +1,126 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH] mmc: mxs-mmc: add support for pre_req and post_req
-Date: Thu, 21 Apr 2011 10:46:18 +0200
-Message-ID: <BANLkTimq8_R-CJmryTvRWHZ+-2vqj-Y6cQ@mail.gmail.com>
-References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
-	<1303058010-30256-1-git-send-email-shawn.guo@linaro.org>
-	<20110417164830.GE17935@S2100-06.ap.freescale.net>
-	<BANLkTimwvX633UaUoc4P4DD1xnpLbMTrZA@mail.gmail.com>
-	<20110420140120.GF1965@S2100-06.ap.freescale.net>
-	<BANLkTimzk89VC1Vti4CZ60TTJ20e2YpwNg@mail.gmail.com>
-	<20110421062924.GB4024@S2100-06.ap.freescale.net>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH 4/5] mmc: sdhci: consolidate sdhci-of-esdhc and
+ sdhci-esdhc-imx
+Date: Thu, 21 Apr 2011 16:53:17 +0800
+Message-ID: <20110421085316.GG4024@S2100-06.ap.freescale.net>
+References: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
+ <1301042931-4869-5-git-send-email-shawn.guo@linaro.org>
+ <20110419102110.GE4164@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:36516 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750799Ab1DUIqT convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 04:46:19 -0400
-Received: by qwk3 with SMTP id 3so740597qwk.19
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2011 01:46:19 -0700 (PDT)
-In-Reply-To: <20110421062924.GB4024@S2100-06.ap.freescale.net>
+Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:50124
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752268Ab1DUItV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 04:49:21 -0400
+Content-Disposition: inline
+In-Reply-To: <20110419102110.GE4164@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-kernel@lists.linaro.org, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-dev@lists.linaro.org, sameo@linux.intel.com, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 21 April 2011 08:29, Shawn Guo <shawn.guo@freescale.com> wrote:
-> On Wed, Apr 20, 2011 at 05:30:22PM +0200, Per Forlin wrote:
+On Tue, Apr 19, 2011 at 12:21:10PM +0200, Wolfram Sang wrote:
+> >  config MMC_SDHCI_ESDHC_IMX
+> > -	bool "SDHCI platform support for the Freescale eSDHC i.MX controller"
+> > +	bool "SDHCI support for the Freescale eSDHC i.MX controller"
+> >  	depends on ARCH_MX25 || ARCH_MX35 || ARCH_MX5
+> >  	depends on MMC_SDHCI
+> > -	select MMC_SDHCI_PLTFM
+> > +	select MMC_SDHCI_ESDHC
+> >  	select MMC_SDHCI_IO_ACCESSORS
+> >  	help
+> > -	  This selects the Freescale eSDHC controller support on the platform
+> > -	  bus, found on platforms like mx35/51.
+> > +	  This selects the Freescale eSDHC controller support on platforms
+> > +	  like mx35/51.
+> 
+> While we are at it, mx25 could be added and mx53 (and you know better
+> what else will be coming ;))
+> 
+It's a direct copy.  Will update it properly.
+
+> > diff --git a/drivers/mmc/host/sdhci-esdhc.c b/drivers/mmc/host/sdhci-esdhc.c
+> > new file mode 100644
+> > index 0000000..b3d1bc1
+> > --- /dev/null
+> > +++ b/drivers/mmc/host/sdhci-esdhc.c
+> > @@ -0,0 +1,413 @@
+> > +/*
+> > + * Freescale eSDHC controller driver for MPCxxx and i.MX.
+> > + *
+> > + * Copyright (c) 2007 Freescale Semiconductor, Inc.
+> > + *   Author: Xiaobo Xie <X.Xie@freescale.com>
+> > + *
+> > + * Copyright (c) 2009 MontaVista Software, Inc.
+> > + *   Author: Anton Vorontsov <avorontsov@ru.mvista.com>
+> > + *
+> > + * Copyright (c) 2010 Pengutronix e.K.
+> > + *   Author: Wolfram Sang <w.sang@pengutronix.de>
+> > + *
+> > + * This program is free software; you can redistribute it and/or modify
+> > + * it under the terms of the GNU General Public License as published by
+> > + * the Free Software Foundation; either version 2 of the License.
+> > + */
+> > +
+> > +#include <linux/io.h>
+> > +#include <linux/delay.h>
+> > +#include <linux/err.h>
+> > +#include <linux/clk.h>
+> > +#include <linux/mmc/host.h>
+> > +#include <linux/mmc/sdhci-pltfm.h>
+> > +#ifdef CONFIG_MMC_SDHCI_ESDHC_IMX
+> > +#include <mach/hardware.h>
+> > +#endif
+> > +#include "sdhci.h"
+> > +#include "sdhci-pltfm.h"
+> > +
+> > +/*
+> > + * Ops and quirks for the Freescale eSDHC controller.
+> > + */
+> > +
+> > +#define ESDHC_DEFAULT_QUIRKS	(SDHCI_QUIRK_FORCE_BLK_SZ_2048 | \
+> > +				SDHCI_QUIRK_BROKEN_CARD_DETECTION | \
+> > +				SDHCI_QUIRK_NO_BUSY_IRQ | \
+> > +				SDHCI_QUIRK_NONSTANDARD_CLOCK | \
+> > +				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
+> > +				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
+> > +				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET | \
+> > +				SDHCI_QUIRK_NO_CARD_NO_RESET)
+> 
+> These are not the current quirks. Meanwhile BROKEN_CARD_DETECTION is
+> gone as well as NO_CARD_NO_RESET (at least for imx). My additions to use
+> GPIOs for card detect and write protect are also not in this version.
+> 
+Next version will be based on mmc-next.
+
 > [...]
->> Remove dma_map and dma_unmap from your host driver and run the tests
->> (obviously nonblocking and blocking will have the same results). If
->> there is still no performance gain the cache penalty is very small o=
-n
->> your platform and therefore nonblocking doesn't improve things much.
->> Please let me know the result.
->>
-> Sorry, I could not understand. =A0What's the point to run the test wh=
-en
-> the driver is even broken. =A0The removal of =A0dma_map_sg and
-> dma_unmap_sg makes mxs-mmc host driver broken.
-The point is only to get a measurement of the cost of handling
-dma_map_sg and dma_unmap_sg, this is the maximum time mmc nonblocking
-can save.
-The nonblocking mmc_test should save the total time of dma_map_sg and
-dma_unmap_sg, if the pre_req and post_req hooks are implemented
-correctly.
-Running without dma_map_sg and dma_unmap_sg will confirm if the
-pre_req and post_req hooks are implemented correctly.
+> 
+> > +static struct sdhci_pltfm_data sdhci_esdhc_mpc_pdata = {
+> > +	.quirks = ESDHC_DEFAULT_QUIRKS,
+> > +	.ops = &sdhci_esdhc_mpc_ops,
+> > +};
+> > +#endif
+> 
+> Please mark the #endif with comments of the expression they are
+> depending on, e.g.
+> 
+> #endif /* CONFIG_MMC_SDHCI_ESDHC_MPC */
+> 
+> if it is not immediately visible. That helps readability.
+> 
+Ok, since you like it :)
 
->
-> --
-> Regards,
-> Shawn
->
->
+> [...]
+> 
+> Phew, due to all these hardware bugs, the driver will get messy, even if
+> we try hard. Any chances that future revisions of the core will be
+> updated? :)
+> 
+I doubt all these quirks are design bugs but some designs not fully
+compliant to SDHC specification, which you still can say bugs :)
+
+-- 
 Regards,
-Per
+Shawn
+
