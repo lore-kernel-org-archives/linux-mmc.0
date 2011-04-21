@@ -1,126 +1,94 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH 4/5] mmc: sdhci: consolidate sdhci-of-esdhc and
- sdhci-esdhc-imx
-Date: Thu, 21 Apr 2011 16:53:17 +0800
-Message-ID: <20110421085316.GG4024@S2100-06.ap.freescale.net>
-References: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
- <1301042931-4869-5-git-send-email-shawn.guo@linaro.org>
- <20110419102110.GE4164@pengutronix.de>
+From: Barry Song <21cnbao@gmail.com>
+Subject: [PATCH] sdhci: add quirk to support shared bus controller
+Date: Thu, 21 Apr 2011 01:51:03 -0700
+Message-ID: <BANLkTi=7h_gBQ1CGqYgUUhZabcwVuoRhCw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:50124
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752268Ab1DUItV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 04:49:21 -0400
-Content-Disposition: inline
-In-Reply-To: <20110419102110.GE4164@pengutronix.de>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:35662 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750784Ab1DUIvX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 04:51:23 -0400
+Received: by qwk3 with SMTP id 3so742499qwk.19
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2011 01:51:23 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-dev@lists.linaro.org, sameo@linux.intel.com, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: bin.shi@csr.com, Binghua.Duan@csr.com
 
-On Tue, Apr 19, 2011 at 12:21:10PM +0200, Wolfram Sang wrote:
-> >  config MMC_SDHCI_ESDHC_IMX
-> > -	bool "SDHCI platform support for the Freescale eSDHC i.MX controller"
-> > +	bool "SDHCI support for the Freescale eSDHC i.MX controller"
-> >  	depends on ARCH_MX25 || ARCH_MX35 || ARCH_MX5
-> >  	depends on MMC_SDHCI
-> > -	select MMC_SDHCI_PLTFM
-> > +	select MMC_SDHCI_ESDHC
-> >  	select MMC_SDHCI_IO_ACCESSORS
-> >  	help
-> > -	  This selects the Freescale eSDHC controller support on the platform
-> > -	  bus, found on platforms like mx35/51.
-> > +	  This selects the Freescale eSDHC controller support on platforms
-> > +	  like mx35/51.
-> 
-> While we are at it, mx25 could be added and mx53 (and you know better
-> what else will be coming ;))
-> 
-It's a direct copy.  Will update it properly.
+From: Bin Shi <bin.shi@csr.com>
 
-> > diff --git a/drivers/mmc/host/sdhci-esdhc.c b/drivers/mmc/host/sdhci-esdhc.c
-> > new file mode 100644
-> > index 0000000..b3d1bc1
-> > --- /dev/null
-> > +++ b/drivers/mmc/host/sdhci-esdhc.c
-> > @@ -0,0 +1,413 @@
-> > +/*
-> > + * Freescale eSDHC controller driver for MPCxxx and i.MX.
-> > + *
-> > + * Copyright (c) 2007 Freescale Semiconductor, Inc.
-> > + *   Author: Xiaobo Xie <X.Xie@freescale.com>
-> > + *
-> > + * Copyright (c) 2009 MontaVista Software, Inc.
-> > + *   Author: Anton Vorontsov <avorontsov@ru.mvista.com>
-> > + *
-> > + * Copyright (c) 2010 Pengutronix e.K.
-> > + *   Author: Wolfram Sang <w.sang@pengutronix.de>
-> > + *
-> > + * This program is free software; you can redistribute it and/or modify
-> > + * it under the terms of the GNU General Public License as published by
-> > + * the Free Software Foundation; either version 2 of the License.
-> > + */
-> > +
-> > +#include <linux/io.h>
-> > +#include <linux/delay.h>
-> > +#include <linux/err.h>
-> > +#include <linux/clk.h>
-> > +#include <linux/mmc/host.h>
-> > +#include <linux/mmc/sdhci-pltfm.h>
-> > +#ifdef CONFIG_MMC_SDHCI_ESDHC_IMX
-> > +#include <mach/hardware.h>
-> > +#endif
-> > +#include "sdhci.h"
-> > +#include "sdhci-pltfm.h"
-> > +
-> > +/*
-> > + * Ops and quirks for the Freescale eSDHC controller.
-> > + */
-> > +
-> > +#define ESDHC_DEFAULT_QUIRKS	(SDHCI_QUIRK_FORCE_BLK_SZ_2048 | \
-> > +				SDHCI_QUIRK_BROKEN_CARD_DETECTION | \
-> > +				SDHCI_QUIRK_NO_BUSY_IRQ | \
-> > +				SDHCI_QUIRK_NONSTANDARD_CLOCK | \
-> > +				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
-> > +				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
-> > +				SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET | \
-> > +				SDHCI_QUIRK_NO_CARD_NO_RESET)
-> 
-> These are not the current quirks. Meanwhile BROKEN_CARD_DETECTION is
-> gone as well as NO_CARD_NO_RESET (at least for imx). My additions to use
-> GPIOs for card detect and write protect are also not in this version.
-> 
-Next version will be based on mmc-next.
+some controllers share data bus or other pins between
+multi-controllers and need to switch the functions of shared pins
+runtime
+this patch requested those shared pins before actual hardware access
+and release them after access
 
-> [...]
-> 
-> > +static struct sdhci_pltfm_data sdhci_esdhc_mpc_pdata = {
-> > +	.quirks = ESDHC_DEFAULT_QUIRKS,
-> > +	.ops = &sdhci_esdhc_mpc_ops,
-> > +};
-> > +#endif
-> 
-> Please mark the #endif with comments of the expression they are
-> depending on, e.g.
-> 
-> #endif /* CONFIG_MMC_SDHCI_ESDHC_MPC */
-> 
-> if it is not immediately visible. That helps readability.
-> 
-Ok, since you like it :)
+Signed-off-by: Bin Shi <bin.shi@csr.com>
+Cc: Binghua Duan <binghua.duan@csr.com>
+Signed-off-by: Barry Song <21cnbao@gmail.com>
+---
+ drivers/mmc/host/sdhci.c  |   13 +++++++++++++
+ drivers/mmc/host/sdhci.h  |    2 ++
+ include/linux/mmc/sdhci.h |    2 ++
+ 3 files changed, 17 insertions(+), 0 deletions(-)
 
-> [...]
-> 
-> Phew, due to all these hardware bugs, the driver will get messy, even if
-> we try hard. Any chances that future revisions of the core will be
-> updated? :)
-> 
-I doubt all these quirks are design bugs but some designs not fully
-compliant to SDHC specification, which you still can say bugs :)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index f31077d..7b07152 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1379,6 +1379,13 @@ static void sdhci_tasklet_finish(unsigned long param)
+ 		sdhci_reset(host, SDHCI_RESET_DATA);
+ 	}
 
++	/*
++	 * some controllers share data bus or other pins between multi-controller
++	 * and need to switch the function of pins runtime
++	 */
++	if (host->quirks & SDHCI_QUIRK_SHARED_PINS)
++		host->ops->get_shared_pins(host);
++
+ 	host->mrq = NULL;
+ 	host->cmd = NULL;
+ 	host->data = NULL;
+@@ -1391,6 +1398,12 @@ static void sdhci_tasklet_finish(unsigned long param)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+
+ 	mmc_request_done(host->mmc, mrq);
++
++	/*
++	 * release shared pins so that other controllers can use them
++	 */
++	if (host->quirks & SDHCI_QUIRK_SHARED_PINS)
++		host->ops->get_shared_pins(host);
+ }
+
+ static void sdhci_timeout_timer(unsigned long data)
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 85750a9..9d918a5 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -229,6 +229,8 @@ struct sdhci_ops {
+ 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
+ 					     u8 power_mode);
+ 	unsigned int    (*get_ro)(struct sdhci_host *host);
++	unsigned int    (*get_shared_pins)(struct sdhci_host *host);
++	unsigned int    (*put_shared_pins)(struct sdhci_host *host);
+ };
+
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 83bd9f7..32ab422 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -85,6 +85,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_NO_HISPD_BIT			(1<<29)
+ /* Controller treats ADMA descriptors with length 0000h incorrectly */
+ #define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC		(1<<30)
++/* Controller shared data bus or other pins with other controllers */
++#define SDHCI_QUIRK_SHARED_PINS                         (1<<31)
+
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
-Regards,
-Shawn
-
+1.7.1
