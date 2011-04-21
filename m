@@ -1,45 +1,41 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v6] mmc: Add mmc CMD+ACMD passthrough ioctl
-Date: Thu, 21 Apr 2011 14:39:14 +0200
-Message-ID: <201104211439.14510.arnd@arndb.de>
-References: <alpine.DEB.2.00.1104131713570.15392@peruna> <201104211315.51984.arnd@arndb.de> <BANLkTikTBK+0_KLjcB_sk4kF+a_vdaOckQ@mail.gmail.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [RESEND PATCH 4/4] mmc_spi.c: add support for the regulator
+ framework
+Date: Thu, 21 Apr 2011 13:40:41 +0100
+Message-ID: <20110421124041.GF11788@opensource.wolfsonmicro.com>
+References: <1300733202-27316-1-git-send-email-ospite@studenti.unina.it>
+ <1303388873-15467-1-git-send-email-ospite@studenti.unina.it>
+ <1303388873-15467-5-git-send-email-ospite@studenti.unina.it>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:61785 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750884Ab1DUMj3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 08:39:29 -0400
-In-Reply-To: <BANLkTikTBK+0_KLjcB_sk4kF+a_vdaOckQ@mail.gmail.com>
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:52157 "EHLO
+	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1750884Ab1DUMko (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 08:40:44 -0400
+Content-Disposition: inline
+In-Reply-To: <1303388873-15467-5-git-send-email-ospite@studenti.unina.it>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?iso-8859-2?q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
-Cc: John Calixto <john.calixto@modsystems.com>, linux-mmc@vger.kernel.org, Andrei Warkentin <andreiw@motorola.com>, Chris Ball <cjb@laptop.org>
+To: Antonio Ospite <ospite@studenti.unina.it>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, openezx-devel@lists.openezx.org, spi-devel-general@lists.sourceforge.net
 
-On Thursday 21 April 2011, Micha=B3 Miros=B3aw wrote:
-> W dniu 21 kwietnia 2011 13:15 u=BFytkownik Arnd Bergmann <arnd@arndb.=
-de> napisa=B3:
+On Thu, Apr 21, 2011 at 02:27:53PM +0200, Antonio Ospite wrote:
 
-> static int mmc_blk_compat_ioctl(struct block_device *bdev, fmode_t mo=
-de,
->     unsigned int cmd, unsigned long arg)
-> {
->   struct mmc_ioc_cmd blk;
->=20
->   if (cmd !=3D MMC_IOC_CMD)
->     return -EINVAL;
->=20
->   copy_from_user(compat_ptr(arg), &blk) ...
->   blk.data_ptr =3D compat_ptr(blk.__data_ptr_storage32);
->=20
->   return mmc_blk_ioctl_cmd(bdev, &blk);
-> }
+> +#ifdef CONFIG_REGULATOR
+> +	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
+> +
+> +	if (IS_ERR(host->vcc)) {
+> +		host->vcc = NULL;
+> +	} else {
+> +		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
+> +		if (host->pdata && host->pdata->ocr_mask)
+> +			dev_warn(mmc_dev(host->mmc),
+> +				"ocr_mask/setpower will not be used\n");
+>  	}
+> +#endif
 
-Yes, this works, but it requires having a compat_ioctl() handler functi=
-on that
-knows about the data structure, which we generally try to avoid.
-The same method would even work if you only had a pointer member in the
-structure and did not even attempt to make the structure compatible.
-
-	Arnd
+Why is this code conditional?  The regulator API will stub itself out
+(by returning a null pointer, which plays well with your use of null) if
+it's disabled.  I'm also not seeing any corresponding code to release
+the regulator.
