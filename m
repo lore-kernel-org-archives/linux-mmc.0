@@ -1,105 +1,58 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH 1/5] mmc: sdhci: make sdhci-pltfm device drivers self
- registered
-Date: Thu, 21 Apr 2011 16:03:22 +0800
-Message-ID: <20110421080322.GD4024@S2100-06.ap.freescale.net>
+From: Shawn Guo <shawn.guo-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Subject: Re: [PATCH 2/5] mmc: sdhci: eliminate sdhci_of_host and sdhci_of_data
+Date: Thu, 21 Apr 2011 16:10:39 +0800
+Message-ID: <20110421081038.GE4024@S2100-06.ap.freescale.net>
 References: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
- <1301042931-4869-2-git-send-email-shawn.guo@linaro.org>
- <20110419102042.GB4164@pengutronix.de>
+	<1301042931-4869-3-git-send-email-shawn.guo@linaro.org>
+	<20110419102053.GC4164@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:23721 "EHLO
-	TX2EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751318Ab1DUH70 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 03:59:26 -0400
+Content-Transfer-Encoding: 7bit
+Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20110419102042.GB4164@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <20110419102053.GC4164-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
+List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
+Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: Wolfram Sang <w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-dev@lists.linaro.org, sameo@linux.intel.com, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Tue, Apr 19, 2011 at 12:20:42PM +0200, Wolfram Sang wrote:
-> 
-> On Fri, Mar 25, 2011 at 04:48:47PM +0800, Shawn Guo wrote:
-> > The patch turns the common stuff in sdhci-pltfm.c into functions, and
-> > add device drivers their own .probe and .remove which in turn call
-> > into the common functions, so that those sdhci-pltfm device drivers
-> > register itself and keep all device specific things away from common
-> > sdhci-pltfm file.
+On Tue, Apr 19, 2011 at 12:20:53PM +0200, Wolfram Sang wrote:
+> On Fri, Mar 25, 2011 at 04:48:48PM +0800, Shawn Guo wrote:
+> > The patch is to migrate the use of sdhci_of_host and sdhci_of_data
+> > to sdhci_pltfm_host and sdhci_pltfm_data, so that the former pair can
+> > be eliminated.
 > > 
-> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> > Signed-off-by: Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > > ---
-> 
-> I'll second the comments from Grant (with one slight exception which is
-> noted below)
-> 
-> > +static int __devexit sdhci_dove_remove(struct platform_device *pdev)
-> > +{
-> > +	struct sdhci_host *host = platform_get_drvdata(pdev);
-> > +	int dead = 0;
-> > +	u32 scratch;
-> > +
-> > +	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
-> > +	if (scratch == (u32)-1)
-> > +		dead = 1;
-> 
-> I'd prefer
-> 
-> 	dead = (readl() == 0xffffffff);
-> 
-> (or (u32)-1 if you prefer). But keeping a variable 'dead' is more
-> descriptive than keeping 'scratch'.
-> 
-Ok.
-
-> > +MODULE_LICENSE("GPL v2");
-> 
-> Just to be sure: Did you double-check if the original licenses were v2
-> or v2+?
-> 
-It seems to me that sdhci-cns3xxx.c, sdhci-dove.c, sdhci-esdhc-imx.c
-and sdhci-tegra.c all use v2.
-
-Actually I do not even know how v2+ is stated.  Do you have an example
-for me to refer?
-
-> > --- a/drivers/mmc/host/sdhci-pltfm.c
-> > +++ b/drivers/mmc/host/sdhci-pltfm.c
 > 
 > [...]
 > 
-> > -err_add_host:
-> > -	if (pdata && pdata->exit)
-> > -		pdata->exit(host);
-> > -err_plat_init:
-> > -	iounmap(host->ioaddr);
-> >  err_remap:
-> >  	release_mem_region(iomem->start, resource_size(iomem));
-> >  err_request:
-> >  	sdhci_free_host(host);
-> >  err:
-> > -	printk(KERN_ERR"Probing of sdhci-pltfm failed: %d\n", ret);
-> > -	return ret;
-> > +	pr_err("%s failed %d\n", __func__, ret);
+> > diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+> > index a3e4be0..12afe86 100644
+> > --- a/drivers/mmc/host/sdhci-pltfm.h
+> > +++ b/drivers/mmc/host/sdhci-pltfm.h
+> > @@ -19,6 +19,10 @@
+> >  struct sdhci_pltfm_host {
+> >  	struct clk *clk;
+> >  	u32 scratchpad; /* to handle quirks across io-accessor calls */
+> > +
+> > +	/* migrate from sdhci_of_host */
+> > +	unsigned int clock;
+> > +	u16 xfer_mode_shadow;
 > 
-> dev_err?
+> xfer_mode_shadow can be merged into scratchpad. They both fix the same
+> issue.
 > 
-Good catch.
-
-> > +	return NULL;
-> >  }
-> >  
-> 
-> I didn't pay much attention to the OF version of the tegra driver, since
-> it still is not upstream yet, right?
-> 
-Do not worry about that.  You will not see that in the next version,
-which will be based on mmc-next.  And tegra OF support should be in
-another patch.
+Yeah.
 
 -- 
 Regards,
 Shawn
-
