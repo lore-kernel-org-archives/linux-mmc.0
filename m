@@ -1,74 +1,313 @@
-From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
-Date: Thu, 21 Apr 2011 09:58:28 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1104210945470.1939-100000@iolanthe.rowland.org>
-References: <201104202344.43652.rjw@sisk.pl>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH 1/2] Add OF binding helpers for MMC drivers
+Date: Thu, 21 Apr 2011 08:14:50 -0600
+Message-ID: <20110421141450.GB32725@ponder.secretlab.ca>
+References: <20110421131957.GB15194@dandreoli.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from iolanthe.rowland.org ([192.131.102.54]:43613 "HELO
-	iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1752150Ab1DUN6b (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 09:58:31 -0400
-In-Reply-To: <201104202344.43652.rjw@sisk.pl>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:55984 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752561Ab1DUOOw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 10:14:52 -0400
+Received: by pzk9 with SMTP id 9so880839pzk.19
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2011 07:14:52 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <20110421131957.GB15194@dandreoli.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Linux PM mailing list <linux-pm@lists.linux-foundation.org>
+To: devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, spi-devel-general@lists.sourceforge.net
 
-On Wed, 20 Apr 2011, Rafael J. Wysocki wrote:
-
-> On Wednesday, April 20, 2011, Alan Stern wrote:
-> > On Wed, 20 Apr 2011, Rafael J. Wysocki wrote:
-> > 
-> > > On Wednesday, April 20, 2011, Alan Stern wrote:
-> > > > On Wed, 20 Apr 2011, Guennadi Liakhovetski wrote:
-> > > ...
-> > > > Ah, now I see the problem.  It looks like we did not give sufficient
-> > > > thought to the case where a device starts off (and therefore should
-> > > > finish up) in a powered-down state.  Calling pm_runtime_put_sync()
-> > > > after unbinding the device driver seems a little futile -- with no
-> > > > driver, the subsystem may not be able to power-down the device!
-> > > > 
-> > > > Rafael, how do you think we should handle this?  Get rid of the 
-> > > > pm_runtime_get_no_resume() and pm_runtime_put_sync() calls in 
-> > > > dd.c:__device_release_driver()?
-> > > 
-> > > I think we need pm_runtime_barrier() in there.  Otherwise we risk
-> > > removing the driver while there's a runtime PM request pending.
-> > > 
-> > > But we can move the pm_runtime_put_sync() before driver_sysfs_remove().
-> > 
-> > What happens if another runtime PM request is queued between the
-> > put_sync() and the remove callback?  We may need a safe way to prevent
-> > async runtime PM requests while still allowing synchronous requests.
+On Thu, Apr 21, 2011 at 03:19:57PM +0200, Domenico Andreoli wrote:
+> From: Domenico Andreoli <cavokz@gmail.com>
 > 
-> What about making a rule that it is invalid to schedule a future suspend
-> or queue a resume request of a device whose driver is being removed?
+> This patch adds helpers to manage OF binding of MMC DeviceTree configs.
+> They don't cover all the MMC configuration cases, indeed are only a
+> slight generalization of those found in the MMC-over-SPI driver. More
+> will come later.
+
+Can the mmc-over-spi driver be generalized to use this code too?
+
 > 
-> Arguably, we can't prevent people from shooting themselves in the foot this
-> way or another and I'm not sure if this particular case is worth additional
-> handling.
+> Signed-off-by: Domenico Andreoli <cavokz@gmail.com>
+> ---
+>  drivers/of/Kconfig     |    4 +
+>  drivers/of/Makefile    |    1 +
+>  drivers/of/of_mmc.c    |  165 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/of_mmc.h |   50 +++++++++++++++
 
-After thinking about this, I tend to agree.  The synchronization 
-issues, combined with the unknown needs of the driver, make this very 
-difficult to handle in the PM core.
+Personally I think it makes more sense for this code to live in drivers/mmc/core.
 
-Here's another possible approach: If a driver wants to leave its device 
-in a powered-down state after unbinding then it can invoke its own 
-runtime_suspend callback directly, in the following way:
+>  4 files changed, 220 insertions(+)
+> 
+> Index: b/drivers/of/Kconfig
+> ===================================================================
+> --- a/drivers/of/Kconfig
+> +++ b/drivers/of/Kconfig
+> @@ -59,6 +59,10 @@ config OF_I2C
+>  	help
+>  	  OpenFirmware I2C accessors
+>  
+> +config OF_MMC
+> +	depends on MMC
+> +	def_bool y
+> +
+>  config OF_NET
+>  	depends on NETDEVICES
+>  	def_bool y
+> Index: b/drivers/of/Makefile
+> ===================================================================
+> --- a/drivers/of/Makefile
+> +++ b/drivers/of/Makefile
+> @@ -7,6 +7,7 @@ obj-$(CONFIG_OF_DEVICE) += device.o plat
+>  obj-$(CONFIG_OF_GPIO)   += gpio.o
+>  obj-$(CONFIG_OF_CLOCK)	+= clock.o
+>  obj-$(CONFIG_OF_I2C)	+= of_i2c.o
+> +obj-$(CONFIG_OF_MMC)	+= of_mmc.o
+>  obj-$(CONFIG_OF_NET)	+= of_net.o
+>  obj-$(CONFIG_OF_SPI)	+= of_spi.o
+>  obj-$(CONFIG_OF_MDIO)	+= of_mdio.o
+> Index: b/drivers/of/of_mmc.c
+> ===================================================================
+> --- /dev/null
+> +++ b/drivers/of/of_mmc.c
+> @@ -0,0 +1,165 @@
+> +/*
+> + * OF helpers for the MMC API
+> + *
+> + * Copyright (c) 2011 Domenico Andreoli
+> + *
+> + * Heavily inspired by the OF support to the MMC-over-SPI driver made
+> + * by Anton Vorontsov
+> + *
+> + * This program is free software; you can redistribute  it and/or modify it
+> + * under  the terms of  the GNU General  Public License as published by the
+> + * Free Software Foundation;  either version 2 of the  License, or (at your
+> + * option) any later version.
+> + */
+> +
+> +#include <linux/kernel.h>
+> +#include <linux/module.h>
+> +#include <linux/device.h>
+> +#include <linux/err.h>
+> +#include <linux/slab.h>
+> +#include <linux/mmc/core.h>
+> +#include <linux/gpio.h>
+> +#include <linux/of.h>
+> +#include <linux/of_mmc.h>
+> +#include <linux/of_gpio.h>
+> +
+> +static int of_read_mmc_gpio(struct of_mmc_crg *crg, int gpio_num)
+> +{
+> +	int value, active_low;
+> +
+> +	BUG_ON(gpio_num >= NUM_MMC_GPIOS);
+> +
+> +	/* hitting this means that DeviceTree left this gpio unspecified
+> +	 * by purpose but driver didn't take any measure to define its
+> +	 * behavior (i.e. aborting probe phase or disabling the feature).
+> +	 * driver needs to call of_is_valid_mmc_crg() for each expected
+> +	 * gpio to detect this case.
+> +	 */
+> +	if (WARN_ON(crg->gpios[gpio_num] < 0))
+> +		return -1;
+> +
+> +	value = gpio_get_value(crg->gpios[gpio_num]);
+> +	active_low = crg->alow_gpios[gpio_num];
+> +	return value ^ active_low;
+> +}
+> +
+> +int of_get_mmc_cd_gpio(struct of_mmc_crg *crg)
+> +{
+> +	return of_read_mmc_gpio(crg, CD_MMC_GPIO);
+> +}
+> +EXPORT_SYMBOL(of_get_mmc_cd_gpio);
+> +
+> +int of_get_mmc_ro_gpio(struct of_mmc_crg *crg)
+> +{
+> +	return of_read_mmc_gpio(crg, WP_MMC_GPIO);
+> +}
+> +EXPORT_SYMBOL(of_get_mmc_ro_gpio);
+> +
+> +int of_is_valid_mmc_crg(struct of_mmc_crg *crg, int gpio_num)
+> +{
+> +	BUG_ON(gpio_num >= NUM_MMC_GPIOS);
+> +	return gpio_is_valid(crg->gpios[gpio_num]);
+> +}
+> +EXPORT_SYMBOL(of_is_valid_mmc_crg);
+> +
+> +int of_get_mmc_crg(struct device *dev, struct device_node *np,
+> +                   int cd_off, struct of_mmc_crg *crg)
+> +{
+> +	int *gpio, *alow;
+> +	int i, ret;
+> +
+> +	memset(crg, 0, sizeof(*crg));
+> +	crg->cd_irq = -1;
+> +
+> +	gpio = crg->gpios;
+> +	alow = crg->alow_gpios;
+> +	for (i = 0; i < NUM_MMC_GPIOS; i++, gpio++, alow++) {
+> +		enum of_gpio_flags gpio_flags;
+> +		*gpio = of_get_gpio_flags(np, cd_off+i, &gpio_flags);
+> +		*alow = !!(gpio_flags & OF_GPIO_ACTIVE_LOW);
+> +
+> +		if (*gpio == -EEXIST || *gpio == -ENOENT) {
+> +			/* driver needs to define proper meaning of this missing
+> +			   gpio (i.e. abort probe or disable the feature) */
+> +			pr_debug("%s: gpio #%d is not specified\n", __func__, i);
+> +			continue;
+> +		}
+> +		if (*gpio < 0) {
+> +			pr_debug("%s: invalid configuration\n", __func__);
+> +			ret = *gpio;
+> +			break;
+> +		}
+> +		if (!gpio_is_valid(*gpio)) {
+> +			pr_debug("%s: gpio #%d is not valid: %d\n", __func__, i, *gpio);
+> +			ret = -EINVAL;
+> +			break;
+> +		}
+> +		ret = gpio_request(*gpio, dev_name(dev));
+> +		if (ret < 0) {
+> +			pr_debug("%s: gpio #%d is not available: %d\n", __func__, i, *gpio);
+> +			break;
+> +		}
+> +	}
+> +
+> +	if (i < NUM_MMC_GPIOS) {
+> +		while (--gpio >= crg->gpios)
+> +			if (gpio_is_valid(*gpio))
+> +				gpio_free(*gpio);
+> +		return ret;
+> +	}
+> +
+> +	if (gpio_is_valid(crg->gpios[CD_MMC_GPIO])) {
+> +		gpio_direction_input(crg->gpios[CD_MMC_GPIO]);
+> +		crg->cd_irq = gpio_to_irq(crg->gpios[CD_MMC_GPIO]);
+> +		if (crg->cd_irq < 0)
+> +			pr_debug("%s: cannot get cd irq number\n", __func__);
+> +	}
+> +	if (gpio_is_valid(crg->gpios[WP_MMC_GPIO]))
+> +		gpio_direction_input(crg->gpios[WP_MMC_GPIO]);
+> +
+> +	return 0;
+> +}
+> +EXPORT_SYMBOL(of_get_mmc_crg);
+> +
+> +void of_put_mmc_crg(struct of_mmc_crg *crg)
+> +{
+> +	int i;
+> +	for (i = 0; i < NUM_MMC_GPIOS; i++)
+> +		if (gpio_is_valid(crg->gpios[i]))
+> +			gpio_free(crg->gpios[i]);
+> +}
+> +EXPORT_SYMBOL(of_put_mmc_crg);
+> +
+> +u32 of_get_mmc_ocr_mask(struct device_node *np)
+> +{
+> +	const u32 *voltage_ranges;
+> +	int num_ranges;
+> +	u32 ocr_mask;
+> +	int i, j;
+> +
+> +	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
+> +	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
+> +	if (!voltage_ranges || !num_ranges) {
+> +		pr_debug("%s: voltage-ranges unspecified\n", __func__);
+> +		return 0;
+> +	}
+> +
+> +	ocr_mask = 0;
+> +	for (i = 0, j = 0; i < num_ranges; i++) {
+> +		int vdd_min = be32_to_cpup(voltage_ranges++);
+> +		int vdd_max = be32_to_cpup(voltage_ranges++);
+> +		u32 mask = mmc_vddrange_to_ocrmask(vdd_min, vdd_max);
+> +
+> +		if (!mask) {
+> +			pr_debug("%s: voltage-range #%d is invalid\n", __func__, i);
+> +			return 0;
+> +		}
+> +		ocr_mask |= mask;
+> +	}
+> +
+> +	return ocr_mask;
+> +}
+> +EXPORT_SYMBOL(of_get_mmc_ocr_mask);
+> +
+> +MODULE_AUTHOR("Domenico Andreoli <cavok@gmail.com>");
+> +MODULE_LICENSE("GPL");
+> Index: b/include/linux/of_mmc.h
+> ===================================================================
+> --- /dev/null
+> +++ b/include/linux/of_mmc.h
+> @@ -0,0 +1,50 @@
+> +/*
+> + * OF helpers for the MMC API
+> + *
+> + * Copyright (c) 2011 Domenico Andreoli
+> + *
+> + * Heavily inspired by the OF support to the MMC-over-SPI driver made
+> + * by Anton Vorontsov
+> + *
+> + * This program is free software; you can redistribute  it and/or modify it
+> + * under  the terms of  the GNU General  Public License as published by the
+> + * Free Software Foundation;  either version 2 of the  License, or (at your
+> + * option) any later version.
+> + */
+> +
+> +#ifndef __LINUX_OF_MMC_H
+> +#define __LINUX_OF_MMC_H
+> +
+> +#include <linux/of.h>
+> +#include <linux/gpio.h>
+> +
+> +#ifdef CONFIG_OF_MMC
+> +
+> +enum {
+> +	CD_MMC_GPIO = 0,
+> +	WP_MMC_GPIO,
+> +	NUM_MMC_GPIOS,
+> +};
+> +
+> +/* Card detect and Read only Gpio data */
+> +struct of_mmc_crg {
+> +	int gpios[NUM_MMC_GPIOS];
+> +	int alow_gpios[NUM_MMC_GPIOS];
+> +	int cd_irq;
+> +};
 
-	... unregister all child devices below dev ...
-	pm_runtime_disable(dev);
-	if (dev->power.runtime_status != RPM_SUSPENDED) {
-		pm_set_suspended(dev);
-		my_runtime_suspend_callback(dev);
-	}
+Many drivers currently provide this data via a platform_data.  It
+would probably be more useful and require less code if both DT and
+non-DT users shared the same structure for MMC gpios.  The structure
+could both be embedded in pdata and populated by this DT parsing code.
+It would also mean that each driver wouldn't need separate DT and
+non-DT code for consuming the information.
 
-There may be issues regarding coordination with the subsystem or the
-power domain; at the moment it's not clear what should be done.  Maybe
-the runtime-PM core should include an API for directly invoking the
-appropriate callbacks.
-
-Alan Stern
-
+> +
+> +extern u32 of_get_mmc_ocr_mask(struct device_node *);
+> +extern int of_get_mmc_crg(struct device *, struct device_node *,
+> +                          int cd_off, struct of_mmc_crg *);
+> +
+> +/* if board does not use cd interrupts, driver can optimize polling
+> +   using this function. */
+> +extern int of_get_mmc_cd_gpio(struct of_mmc_crg *);
+> +/* sense switch on sd cards */
+> +extern int of_get_mmc_ro_gpio(struct of_mmc_crg *);
+> +extern int of_is_valid_mmc_crg(struct of_mmc_crg *, int gpio_num);
+> +extern void of_put_mmc_crg(struct of_mmc_crg *);
+> +
+> +#endif /* CONFIG_OF_MMC */
+> +
+> +#endif /* __LINUX_OF_MMC_H */
+> 
+> ------------------------------------------------------------------------------
+> Benefiting from Server Virtualization: Beyond Initial Workload 
+> Consolidation -- Increasing the use of server virtualization is a top
+> priority.Virtualization can reduce costs, simplify management, and improve 
+> application availability and disaster protection. Learn more about boosting 
+> the value of server virtualization. http://p.sf.net/sfu/vmware-sfdev2dev
+> _______________________________________________
+> spi-devel-general mailing list
+> spi-devel-general@lists.sourceforge.net
+> https://lists.sourceforge.net/lists/listinfo/spi-devel-general
