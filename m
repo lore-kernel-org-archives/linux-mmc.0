@@ -1,41 +1,59 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: CMD23 plumbing and support patchset.
-Date: Wed, 20 Apr 2011 21:44:53 -0400
-Message-ID: <m3pqogbcoa.fsf@pullcord.laptop.org>
-References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
-	<1302950458-1969-1-git-send-email-andreiw@motorola.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [patchv3 4/4] MMC: MMC boot partitions support.
+Date: Thu, 21 Apr 2011 13:31:12 +0900
+Message-ID: <4DAFB310.6030502@samsung.com>
+References: <BANLkTikA56sD_A6VVPF15SgA-AnKOZ2ZXw@mail.gmail.com>
+ <1302556424-21951-4-git-send-email-andreiw@motorola.com>
+ <m31v0wcson.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41765 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751398Ab1DUBkp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Apr 2011 21:40:45 -0400
-In-Reply-To: <1302950458-1969-1-git-send-email-andreiw@motorola.com> (Andrei
-	Warkentin's message of "Sat, 16 Apr 2011 05:40:53 -0500")
+Received: from mailout4.samsung.com ([203.254.224.34]:9641 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750860Ab1DUEdZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 00:33:25 -0400
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LJZ00C9XJBKIV80@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 21 Apr 2011 13:33:23 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LJZ00F5GJBNO3@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 21 Apr 2011 13:33:23 +0900 (KST)
+In-reply-to: <m31v0wcson.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org, arindam.nath@amd.com
+To: Chris Ball <cjb@laptop.org>
+Cc: Andrei Warkentin <andreiw@motorola.com>, linux-mmc@vger.kernel.org, arnd@arndb.de
 
-Hi,
+Hi Chris.
 
-On Sat, Apr 16 2011, Andrei Warkentin wrote:
-> This is the third version of the CMD23 plumbing and host driver support
-> patch set.
->
-> Changes:
-> 1) CMD23 support (used for features such as reliable writes) is decoupled
->    from general multiblock trans through use of a quirk for affected cards.
-> 2) Newer Sandisk MMC products are whitelisted along with some known good ones. All other
->    MMC products do not use CMD23 for general transfers (seems like safest choice for now).
->    SD products unaffected.
+Chris Ball wrote:
+> Hi Andrei,
+> 
+> On Mon, Apr 11 2011, Andrei Warkentin wrote:
+>> Allows device MMC boot partitions to be accessed. MMC partitions
+>> are treated effectively as separate block devices on the same
+>> MMC card.
+> 
+> Booted this with a Sandisk SEM04G eMMC:
+> 
+> [    2.469921] mmcblk0boot0: mmc2:0001 SEM04G partition 1 1.00 MiB
+> [    2.475905] mmcblk0boot1: mmc2:0001 SEM04G partition 2 1.00 MiB
+> [    2.489403]  mmcblk0boot1: unknown partition table
+> [    2.495921]  mmcblk0boot0: unknown partition table
+> 
+> I haven't set up any boot partitions explicitly, so I guess the two 1MiB
+> boot partitions might be the factory-default setting.  Out of curiosity,
+> does that match your experience with Sandisk eMMCs? 
 
-Just gave this a try on SEM04G, which is in the whitelist, but didn't
-see a performance increase (or decrease).  What are you using for a
-testcase?  I'm a little wary of running mmc_test on it.  :)
+in my experience, Sandisk set up boot partition with each 1MiB. (default setting)
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Regards,
+Jaehoon Chung
+
+> 
+> - Chris.
+
