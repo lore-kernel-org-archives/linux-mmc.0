@@ -1,72 +1,58 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH 3/5] mmc: sdhci: make sdhci-of device drivers self
- registered
-Date: Thu, 21 Apr 2011 16:17:49 +0800
-Message-ID: <20110421081749.GF4024@S2100-06.ap.freescale.net>
-References: <1301042931-4869-1-git-send-email-shawn.guo@linaro.org>
- <1301042931-4869-4-git-send-email-shawn.guo@linaro.org>
- <20110419102101.GD4164@pengutronix.de>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [RFC] MMC: Block: Ensure hardware partitions don't mess with
+ mmcblk device naming.
+Date: Thu, 21 Apr 2011 03:17:25 -0500
+Message-ID: <BANLkTi=eZBEHrxAP36QAP8M7bkhw88uNGQ@mail.gmail.com>
+References: <BANLkTik9s49HDYzmmeeFuaWU8bLYf67Cbg@mail.gmail.com>
+	<1303366079-2196-1-git-send-email-andreiw@motorola.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1outboundpool.messaging.microsoft.com ([216.32.181.184]:27589
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751318Ab1DUINx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 04:13:53 -0400
-Content-Disposition: inline
-In-Reply-To: <20110419102101.GD4164@pengutronix.de>
+Received: from exprod5og109.obsmtp.com ([64.18.0.188]:40981 "EHLO
+	exprod5og109.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753504Ab1DUIR1 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 04:17:27 -0400
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.168])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3L8Hp2O013991
+	for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2011 04:17:51 -0400 (EDT)
+Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3L89MBA011326
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2011 04:17:50 -0400 (EDT)
+Received: by mail-ww0-f46.google.com with SMTP id 28so1672725wwb.3
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2011 01:17:25 -0700 (PDT)
+In-Reply-To: <1303366079-2196-1-git-send-email-andreiw@motorola.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Shawn Guo <shawn.guo@linaro.org>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, patches@linaro.org, linaro-dev@lists.linaro.org, linux-kernel@vger.kernel.org, sameo@linux.intel.com
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, Andrei Warkentin <andreiw@motorola.com>
 
-On Tue, Apr 19, 2011 at 12:21:01PM +0200, Wolfram Sang wrote:
-> 
-> > +static int __devinit sdhci_esdhc_probe(struct platform_device *pdev)
-> > +{
-> > +	struct sdhci_host *host;
-> > +	int ret;
-> > +
-> > +	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata);
-> > +	if (!host)
-> > +		return -ENOMEM;
-> 
-> Just noticed: Since pltfm_init may fail due to various reasons, maybe
-> ERRPTR might be a good idea?
-> 
-Ok.
+On Thu, Apr 21, 2011 at 1:07 AM, Andrei Warkentin <andreiw@motorola.com=
+> wrote:
+> With the hardware partitions support (which represent additional logi=
+cal devices
+> present on MMC), devidx does not correspond with index used to form
+> /dev/mmcblkX names. So use an additional allocated index for device n=
+ames.
+>
+> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
+> ---
+> =A0drivers/mmc/card/block.c | =A0 24 +++++++++++++++++-------
+> =A01 files changed, 17 insertions(+), 7 deletions(-)
 
-> [...]
-> 
-> > +static int __init sdhci_hlwd_init(void)
-> > +{
-> > +	return platform_driver_register(&sdhci_hlwd_driver);
-> > +}
-> > +module_init(sdhci_hlwd_init);
-> > +
-> > +static void __exit sdhci_hlwd_exit(void)
-> > +{
-> > +	platform_driver_unregister(&sdhci_hlwd_driver);
-> > +}
-> > +module_exit(sdhci_hlwd_exit);
-> > +
-> > +MODULE_DESCRIPTION("Secure Digital Host Controller Interface OF driver");
-> > +MODULE_AUTHOR("Xiaobo Xie <X.Xie@freescale.com>, "
-> > +	      "Anton Vorontsov <avorontsov@ru.mvista.com>");
-> > +MODULE_LICENSE("GPL v2");
-> 
-> Please double check the authors. It is based on the fsl driver, but the
-> copyright should go to
-> 
->  * Copyright (C) 2009 The GameCube Linux Team
->  * Copyright (C) 2009 Albert Herranz
-> 
-> I think.
-> 
-Sorry, I misread the current copyright in sdhci-of-hlwd.c.  You are
-right.
+The alternative is to borrow from a previous suggestion by Stephen
+Warren, but instead of using card->host->index in place of devidx, use
+card->host->index in place of an additional name_index used to form
+/dev/mmcblkX device names.
 
--- 
-Regards,
-Shawn
+Using card->host->index for devidx doesn't work when you have multiple
+logical devices per host (because MMC card contains HW partitions).
 
+Chris, unfortunately I am working OOF for next couple of days(I am
+happy I took my eMMC board with me), so I was not able to test second
+card (laptop only has 1 slot). Tested on your mmc tree with SDHCI and
+my MMC08G card. Would you mind testing above RFC change? Sorry again
+for the regression, grrrr.
+
+A
