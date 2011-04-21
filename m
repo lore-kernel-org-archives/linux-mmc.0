@@ -1,131 +1,45 @@
-From: Antonio Ospite <ospite@studenti.unina.it>
-Subject: [RESEND PATCH 4/4] mmc_spi.c: add support for the regulator framework
-Date: Thu, 21 Apr 2011 14:27:53 +0200
-Message-ID: <1303388873-15467-5-git-send-email-ospite@studenti.unina.it>
-References: <1300733202-27316-1-git-send-email-ospite@studenti.unina.it>
- <1303388873-15467-1-git-send-email-ospite@studenti.unina.it>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v6] mmc: Add mmc CMD+ACMD passthrough ioctl
+Date: Thu, 21 Apr 2011 14:39:14 +0200
+Message-ID: <201104211439.14510.arnd@arndb.de>
+References: <alpine.DEB.2.00.1104131713570.15392@peruna> <201104211315.51984.arnd@arndb.de> <BANLkTikTBK+0_KLjcB_sk4kF+a_vdaOckQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: Text/Plain; charset=iso-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp204.alice.it ([82.57.200.100]:58234 "EHLO smtp204.alice.it"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752121Ab1DUM2D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Apr 2011 08:28:03 -0400
-In-Reply-To: <1303388873-15467-1-git-send-email-ospite@studenti.unina.it>
+Received: from moutng.kundenserver.de ([212.227.126.171]:61785 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750884Ab1DUMj3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 08:39:29 -0400
+In-Reply-To: <BANLkTikTBK+0_KLjcB_sk4kF+a_vdaOckQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Antonio Ospite <ospite@studenti.unina.it>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, openezx-devel@lists.openezx.org, spi-devel-general@lists.sourceforge.net
+To: =?iso-8859-2?q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+Cc: John Calixto <john.calixto@modsystems.com>, linux-mmc@vger.kernel.org, Andrei Warkentin <andreiw@motorola.com>, Chris Ball <cjb@laptop.org>
 
-Add support for powering up SD cards driven by regulators.
-This makes the mmc_spi driver work also with the Motorola A910 phone.
+On Thursday 21 April 2011, Micha=B3 Miros=B3aw wrote:
+> W dniu 21 kwietnia 2011 13:15 u=BFytkownik Arnd Bergmann <arnd@arndb.=
+de> napisa=B3:
 
-Signed-off-by: Antonio Ospite <ospite@studenti.unina.it>
----
- drivers/mmc/host/mmc_spi.c |   61 +++++++++++++++++++++++++++++++++++--------
- 1 files changed, 49 insertions(+), 12 deletions(-)
+> static int mmc_blk_compat_ioctl(struct block_device *bdev, fmode_t mo=
+de,
+>     unsigned int cmd, unsigned long arg)
+> {
+>   struct mmc_ioc_cmd blk;
+>=20
+>   if (cmd !=3D MMC_IOC_CMD)
+>     return -EINVAL;
+>=20
+>   copy_from_user(compat_ptr(arg), &blk) ...
+>   blk.data_ptr =3D compat_ptr(blk.__data_ptr_storage32);
+>=20
+>   return mmc_blk_ioctl_cmd(bdev, &blk);
+> }
 
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 0f3672d..acc2ec8 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -31,6 +31,7 @@
- #include <linux/dma-mapping.h>
- #include <linux/crc7.h>
- #include <linux/crc-itu-t.h>
-+#include <linux/regulator/consumer.h>
- #include <linux/scatterlist.h>
- 
- #include <linux/mmc/host.h>
-@@ -150,11 +151,13 @@ struct mmc_spi_host {
- 	 */
- 	void			*ones;
- 	dma_addr_t		ones_dma;
-+
-+	struct regulator	*vcc;
- };
- 
- static inline int mmc_spi_canpower(struct mmc_spi_host *host)
- {
--	return host->pdata && host->pdata->setpower;
-+	return (host->pdata && host->pdata->setpower) || host->vcc;
- }
- 
- /****************************************************************************/
-@@ -1225,17 +1228,35 @@ static inline int mmc_spi_setpower(struct mmc_spi_host *host,
- 					unsigned char power_mode,
- 					unsigned int vdd)
- {
-+	if (!mmc_spi_canpower(host))
-+		return -ENOSYS;
-+
- 	/* switch power on/off if possible, accounting for
- 	 * max 250msec powerup time if needed.
- 	 */
--	if (mmc_spi_canpower(host)) {
--		switch (power_mode) {
--		case MMC_POWER_OFF:
--		case MMC_POWER_UP:
-+	switch (power_mode) {
-+	case MMC_POWER_OFF:
-+		if (host->vcc) {
-+			int ret = mmc_regulator_set_ocr(host->mmc,
-+							host->vcc, 0);
-+			if (ret)
-+				return ret;
-+		} else {
-+			host->pdata->setpower(&host->spi->dev, vdd);
-+		}
-+		break;
-+
-+	case MMC_POWER_UP:
-+		if (host->vcc) {
-+			int ret = mmc_regulator_set_ocr(host->mmc,
-+							host->vcc, vdd);
-+			if (ret)
-+				return ret;
-+		} else {
- 			host->pdata->setpower(&host->spi->dev, vdd);
--			if (power_mode == MMC_POWER_UP)
--				msleep(host->powerup_msecs);
- 		}
-+		msleep(host->powerup_msecs);
-+		break;
- 	}
- 
- 	return 0;
-@@ -1420,12 +1441,28 @@ static int mmc_spi_probe(struct spi_device *spi)
- 	 * and power switching gpios.
- 	 */
- 	host->pdata = mmc_spi_get_pdata(spi);
--	if (host->pdata)
--		mmc->ocr_avail = host->pdata->ocr_mask;
--	if (!mmc->ocr_avail) {
--		dev_warn(&spi->dev, "ASSUMING 3.2-3.4 V slot power\n");
--		mmc->ocr_avail = MMC_VDD_32_33|MMC_VDD_33_34;
-+#ifdef CONFIG_REGULATOR
-+	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
-+
-+	if (IS_ERR(host->vcc)) {
-+		host->vcc = NULL;
-+	} else {
-+		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
-+		if (host->pdata && host->pdata->ocr_mask)
-+			dev_warn(mmc_dev(host->mmc),
-+				"ocr_mask/setpower will not be used\n");
- 	}
-+#endif
-+	if (host->vcc == NULL) {
-+		/* fall-back to platform data */
-+		if (host->pdata)
-+			mmc->ocr_avail = host->pdata->ocr_mask;
-+		if (!mmc->ocr_avail) {
-+			dev_warn(&spi->dev, "ASSUMING 3.2-3.4 V slot power\n");
-+			mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-+		}
-+	}
-+
- 	if (mmc_spi_canpower(host)) {
- 		host->powerup_msecs = host->pdata->powerup_msecs;
- 		if (!host->powerup_msecs || host->powerup_msecs > 250)
--- 
-1.7.4.4
+Yes, this works, but it requires having a compat_ioctl() handler functi=
+on that
+knows about the data structure, which we generally try to avoid.
+The same method would even work if you only had a pointer member in the
+structure and did not even attempt to make the structure compatible.
 
+	Arnd
