@@ -1,59 +1,92 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
+From: Philip Rakity <prakity@marvell.com>
 Subject: Re: [patchv3 4/4] MMC: MMC boot partitions support.
-Date: Thu, 21 Apr 2011 13:31:12 +0900
-Message-ID: <4DAFB310.6030502@samsung.com>
+Date: Wed, 20 Apr 2011 22:09:07 -0700
+Message-ID: <3C4AA76A-EBCA-47D2-B1BA-DF98DCB105FE@marvell.com>
 References: <BANLkTikA56sD_A6VVPF15SgA-AnKOZ2ZXw@mail.gmail.com>
  <1302556424-21951-4-git-send-email-andreiw@motorola.com>
- <m31v0wcson.fsf@pullcord.laptop.org>
+ <m31v0wcson.fsf@pullcord.laptop.org> <m3tydsbdd0.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:9641 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750860Ab1DUEdZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 00:33:25 -0400
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LJZ00C9XJBKIV80@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 21 Apr 2011 13:33:23 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LJZ00F5GJBNO3@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 21 Apr 2011 13:33:23 +0900 (KST)
-In-reply-to: <m31v0wcson.fsf@pullcord.laptop.org>
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:38237 "EHLO
+	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752147Ab1DUFKk convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 21 Apr 2011 01:10:40 -0400
+In-Reply-To: <m3tydsbdd0.fsf@pullcord.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: Andrei Warkentin <andreiw@motorola.com>, linux-mmc@vger.kernel.org, arnd@arndb.de
+Cc: Andrei Warkentin <andreiw@motorola.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>
 
-Hi Chris.
 
-Chris Ball wrote:
-> Hi Andrei,
+Chris,
+
+I have also seen this on mmc-next.  
+
+>> [    2.489403]  mmcblk0boot1: unknown partition table
+>> [    2.495921]  mmcblk0boot0: unknown partition table
+
+
+Aren't these the "hidden" partitions ?  Only available at boot time?
+
+I need to apply my patch to reset the boot partition --  or is that now in mmc-next to see
+if the problem still happens.
+
+
+Philip
+
+On Apr 20, 2011, at 6:30 PM, Chris Ball wrote:
+
+> Hi,
 > 
-> On Mon, Apr 11 2011, Andrei Warkentin wrote:
->> Allows device MMC boot partitions to be accessed. MMC partitions
->> are treated effectively as separate block devices on the same
->> MMC card.
+> On Wed, Apr 20 2011, Chris Ball wrote:
+>> On Mon, Apr 11 2011, Andrei Warkentin wrote:
+>>> Allows device MMC boot partitions to be accessed. MMC partitions
+>>> are treated effectively as separate block devices on the same
+>>> MMC card.
+>> 
+>> Booted this with a Sandisk SEM04G eMMC:
+>> 
+>> [    2.469921] mmcblk0boot0: mmc2:0001 SEM04G partition 1 1.00 MiB
+>> [    2.475905] mmcblk0boot1: mmc2:0001 SEM04G partition 2 1.00 MiB
+>> [    2.489403]  mmcblk0boot1: unknown partition table
+>> [    2.495921]  mmcblk0boot0: unknown partition table
+>> 
+>> I haven't set up any boot partitions explicitly, so I guess the two 1MiB
+>> boot partitions might be the factory-default setting.  Out of curiosity,
+>> does that match your experience with Sandisk eMMCs? 
 > 
-> Booted this with a Sandisk SEM04G eMMC:
+> Also, on inserting an external SD card I see:
 > 
-> [    2.469921] mmcblk0boot0: mmc2:0001 SEM04G partition 1 1.00 MiB
-> [    2.475905] mmcblk0boot1: mmc2:0001 SEM04G partition 2 1.00 MiB
-> [    2.489403]  mmcblk0boot1: unknown partition table
-> [    2.495921]  mmcblk0boot0: unknown partition table
+> [    2.485079] mmcblk0: mmc2:0001 SEM04G 3.68 GiB 
+> [    2.489681] mmcblk0boot0: mmc2:0001 SEM04G partition 1 1.00 MiB
+> [    2.495681] mmcblk0boot1: mmc2:0001 SEM04G partition 2 1.00 MiB
+> [    2.503756]  mmcblk0: p1 p2
+> [    2.509303]  mmcblk0boot1: unknown partition table
+> [    2.515343]  mmcblk0boot0: unknown partition table
+> [    4.828326] EXT3-fs (mmcblk0p2): warning: maximal mount count reached, running e2fsc
+> k is recommended
+> [    4.845214] EXT3-fs (mmcblk0p2): using internal journal
+> [    4.845223] EXT3-fs (mmcblk0p2): recovery complete
+> [    4.857131] EXT3-fs (mmcblk0p2): mounted filesystem with ordered data mode
+> [   20.886514] mmc0: new high speed SDHC card at address d555
+> [   20.904282] mmcblk3: mmc0:d555 SD04G 3.79 GiB 
+> [   20.906926]  mmcblk3: p1
 > 
-> I haven't set up any boot partitions explicitly, so I guess the two 1MiB
-> boot partitions might be the factory-default setting.  Out of curiosity,
-> does that match your experience with Sandisk eMMCs? 
-
-in my experience, Sandisk set up boot partition with each 1MiB. (default setting)
-
-Regards,
-Jaehoon Chung
-
+> But I would have expected this to be mmcblk1 -- might the boot partitions
+> be using up mmcblk1/2 somehow?
+> 
+> Thanks,
 > 
 > - Chris.
+> -- 
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
