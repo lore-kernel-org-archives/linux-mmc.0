@@ -1,58 +1,58 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [RFC] MMC: Block: Ensure hardware partitions don't mess with
- mmcblk device naming.
-Date: Thu, 21 Apr 2011 03:17:25 -0500
-Message-ID: <BANLkTi=eZBEHrxAP36QAP8M7bkhw88uNGQ@mail.gmail.com>
-References: <BANLkTik9s49HDYzmmeeFuaWU8bLYf67Cbg@mail.gmail.com>
-	<1303366079-2196-1-git-send-email-andreiw@motorola.com>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH] mmc: mxs-mmc: add support for pre_req and post_req
+Date: Thu, 21 Apr 2011 10:46:18 +0200
+Message-ID: <BANLkTimq8_R-CJmryTvRWHZ+-2vqj-Y6cQ@mail.gmail.com>
+References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
+	<1303058010-30256-1-git-send-email-shawn.guo@linaro.org>
+	<20110417164830.GE17935@S2100-06.ap.freescale.net>
+	<BANLkTimwvX633UaUoc4P4DD1xnpLbMTrZA@mail.gmail.com>
+	<20110420140120.GF1965@S2100-06.ap.freescale.net>
+	<BANLkTimzk89VC1Vti4CZ60TTJ20e2YpwNg@mail.gmail.com>
+	<20110421062924.GB4024@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og109.obsmtp.com ([64.18.0.188]:40981 "EHLO
-	exprod5og109.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753504Ab1DUIR1 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 04:17:27 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.168])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3L8Hp2O013991
-	for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2011 04:17:51 -0400 (EDT)
-Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3L89MBA011326
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2011 04:17:50 -0400 (EDT)
-Received: by mail-ww0-f46.google.com with SMTP id 28so1672725wwb.3
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2011 01:17:25 -0700 (PDT)
-In-Reply-To: <1303366079-2196-1-git-send-email-andreiw@motorola.com>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:36516 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750799Ab1DUIqT convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 04:46:19 -0400
+Received: by qwk3 with SMTP id 3so740597qwk.19
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2011 01:46:19 -0700 (PDT)
+In-Reply-To: <20110421062924.GB4024@S2100-06.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, Andrei Warkentin <andreiw@motorola.com>
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-kernel@lists.linaro.org, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-On Thu, Apr 21, 2011 at 1:07 AM, Andrei Warkentin <andreiw@motorola.com=
-> wrote:
-> With the hardware partitions support (which represent additional logi=
-cal devices
-> present on MMC), devidx does not correspond with index used to form
-> /dev/mmcblkX names. So use an additional allocated index for device n=
-ames.
+On 21 April 2011 08:29, Shawn Guo <shawn.guo@freescale.com> wrote:
+> On Wed, Apr 20, 2011 at 05:30:22PM +0200, Per Forlin wrote:
+> [...]
+>> Remove dma_map and dma_unmap from your host driver and run the tests
+>> (obviously nonblocking and blocking will have the same results). If
+>> there is still no performance gain the cache penalty is very small o=
+n
+>> your platform and therefore nonblocking doesn't improve things much.
+>> Please let me know the result.
+>>
+> Sorry, I could not understand. =A0What's the point to run the test wh=
+en
+> the driver is even broken. =A0The removal of =A0dma_map_sg and
+> dma_unmap_sg makes mxs-mmc host driver broken.
+The point is only to get a measurement of the cost of handling
+dma_map_sg and dma_unmap_sg, this is the maximum time mmc nonblocking
+can save.
+The nonblocking mmc_test should save the total time of dma_map_sg and
+dma_unmap_sg, if the pre_req and post_req hooks are implemented
+correctly.
+Running without dma_map_sg and dma_unmap_sg will confirm if the
+pre_req and post_req hooks are implemented correctly.
+
 >
-> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
-> ---
-> =A0drivers/mmc/card/block.c | =A0 24 +++++++++++++++++-------
-> =A01 files changed, 17 insertions(+), 7 deletions(-)
-
-The alternative is to borrow from a previous suggestion by Stephen
-Warren, but instead of using card->host->index in place of devidx, use
-card->host->index in place of an additional name_index used to form
-/dev/mmcblkX device names.
-
-Using card->host->index for devidx doesn't work when you have multiple
-logical devices per host (because MMC card contains HW partitions).
-
-Chris, unfortunately I am working OOF for next couple of days(I am
-happy I took my eMMC board with me), so I was not able to test second
-card (laptop only has 1 slot). Tested on your mmc tree with SDHCI and
-my MMC08G card. Would you mind testing above RFC change? Sorry again
-for the regression, grrrr.
-
-A
+> --
+> Regards,
+> Shawn
+>
+>
+Regards,
+Per
