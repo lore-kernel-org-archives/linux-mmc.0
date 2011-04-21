@@ -1,48 +1,82 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: Fix read-only detection with JMicron 388 chip
-Date: Thu, 21 Apr 2011 13:36:03 -0400
-Message-ID: <m3y6338q2k.fsf@pullcord.laptop.org>
-References: <s5hoc3zd27i.wl%tiwai@suse.de>
-	<m339lba77p.fsf@pullcord.laptop.org> <s5hmxjjil9r.wl%tiwai@suse.de>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
+Date: Thu, 21 Apr 2011 20:00:29 +0200
+Message-ID: <201104212000.29754.rjw@sisk.pl>
+References: <Pine.LNX.4.44L0.1104210945470.1939-100000@iolanthe.rowland.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:53873 "EHLO void.printf.net"
+Received: from ogre.sisk.pl ([217.79.144.158]:42690 "EHLO ogre.sisk.pl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755384Ab1DURb7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Apr 2011 13:31:59 -0400
-In-Reply-To: <s5hmxjjil9r.wl%tiwai@suse.de> (Takashi Iwai's message of "Thu,
-	21 Apr 2011 19:09:36 +0200")
+	id S1750948Ab1DUR75 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 21 Apr 2011 13:59:57 -0400
+In-Reply-To: <Pine.LNX.4.44L0.1104210945470.1939-100000@iolanthe.rowland.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Takashi Iwai <tiwai@suse.de>
-Cc: Aries Lee <arieslee@jmicron.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Alan Stern <stern@rowland.harvard.edu>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Linux PM mailing list <linux-pm@lists.linux-foundation.org>
 
-Hi Takashi,
+On Thursday, April 21, 2011, Alan Stern wrote:
+> On Wed, 20 Apr 2011, Rafael J. Wysocki wrote:
+> 
+> > On Wednesday, April 20, 2011, Alan Stern wrote:
+> > > On Wed, 20 Apr 2011, Rafael J. Wysocki wrote:
+> > > 
+> > > > On Wednesday, April 20, 2011, Alan Stern wrote:
+> > > > > On Wed, 20 Apr 2011, Guennadi Liakhovetski wrote:
+> > > > ...
+> > > > > Ah, now I see the problem.  It looks like we did not give sufficient
+> > > > > thought to the case where a device starts off (and therefore should
+> > > > > finish up) in a powered-down state.  Calling pm_runtime_put_sync()
+> > > > > after unbinding the device driver seems a little futile -- with no
+> > > > > driver, the subsystem may not be able to power-down the device!
+> > > > > 
+> > > > > Rafael, how do you think we should handle this?  Get rid of the 
+> > > > > pm_runtime_get_no_resume() and pm_runtime_put_sync() calls in 
+> > > > > dd.c:__device_release_driver()?
+> > > > 
+> > > > I think we need pm_runtime_barrier() in there.  Otherwise we risk
+> > > > removing the driver while there's a runtime PM request pending.
+> > > > 
+> > > > But we can move the pm_runtime_put_sync() before driver_sysfs_remove().
+> > > 
+> > > What happens if another runtime PM request is queued between the
+> > > put_sync() and the remove callback?  We may need a safe way to prevent
+> > > async runtime PM requests while still allowing synchronous requests.
+> > 
+> > What about making a rule that it is invalid to schedule a future suspend
+> > or queue a resume request of a device whose driver is being removed?
+> > 
+> > Arguably, we can't prevent people from shooting themselves in the foot this
+> > way or another and I'm not sure if this particular case is worth additional
+> > handling.
+> 
+> After thinking about this, I tend to agree.  The synchronization 
+> issues, combined with the unknown needs of the driver, make this very 
+> difficult to handle in the PM core.
+> 
+> Here's another possible approach: If a driver wants to leave its device 
+> in a powered-down state after unbinding then it can invoke its own 
+> runtime_suspend callback directly, in the following way:
+> 
+> 	... unregister all child devices below dev ...
+> 	pm_runtime_disable(dev);
+> 	if (dev->power.runtime_status != RPM_SUSPENDED) {
+> 		pm_set_suspended(dev);
+> 		my_runtime_suspend_callback(dev);
+> 	}
 
-On Thu, Apr 21 2011, Takashi Iwai wrote:
->> I don't like overwriting ops here -- it's too magical, and now we have
->> to maintain the ops table in two places.  A quirk seems justified here,
->> even though we're trying to reduce them in general.
->
-> Well, I also used quirk bit in my very first version I worked for
-> 2.6.32 kernel.  But when I looked at 2.6.39, quirks are almost full --
-> only the last one bit is left for bit 31.  So I didn't want to finish
-> it :)
->
->>  Can anyone find a better solution?
->  
-> One way would be to copy the ops table itself in struct sdhci_host
-> instead of keeping the ops table pointer.  Then you can overwrite only
-> the specific op in each probe_slot callback.
+I think this would work too, but then possibly many drivers would have to
+do the same thing in their "remove" routines.
 
-I think I'd rather not touch ops at all and keep the code simple --
-if you don't mind, please post a version with quirks, and I'll work
-on freeing up a few bits.
+> There may be issues regarding coordination with the subsystem or the
+> power domain; at the moment it's not clear what should be done.  Maybe
+> the runtime-PM core should include an API for directly invoking the
+> appropriate callbacks.
 
-Thanks,
+If we choose this approach, then yes, we should provide a suitable API, but
+I'm still thinking it would be simpler to move the pm_runtime_put_sync() before driver_sysfs_remove() and make the rule as I said previously. :-)
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Rafael
