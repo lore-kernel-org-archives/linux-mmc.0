@@ -1,77 +1,81 @@
-From: Domenico Andreoli <cavokz@gmail.com>
-Subject: Re: [PATCH 1/2] Add OF binding helpers for MMC drivers
-Date: Fri, 22 Apr 2011 11:02:30 +0200
-Message-ID: <BANLkTinOip+px9J1-NkbGiWG9NTqmKjhBw@mail.gmail.com>
-References: <20110421131957.GB15194@dandreoli.com>
-	<20110421141450.GB32725@ponder.secretlab.ca>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: sdhci: add support for pre_req and post_req
+Date: Fri, 22 Apr 2011 20:01:45 +0900
+Message-ID: <4DB16019.8000800@samsung.com>
+References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
+ <1302972516-8673-1-git-send-email-shawn.guo@linaro.org>
+ <BANLkTi=pqGyijbfuHD=uQzPnaYvNOQyzdg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:43010 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752718Ab1DVJCb convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2011 05:02:31 -0400
-Received: by qyg14 with SMTP id 14so229480qyg.19
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2011 02:02:30 -0700 (PDT)
-In-Reply-To: <20110421141450.GB32725@ponder.secretlab.ca>
+Received: from mailout3.samsung.com ([203.254.224.33]:54849 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754474Ab1DVLEC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2011 07:04:02 -0400
+Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LK100HP5W2OD940@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 22 Apr 2011 20:04:00 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LK1000HDW2O7R@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 22 Apr 2011 20:04:00 +0900 (KST)
+In-reply-to: <BANLkTi=pqGyijbfuHD=uQzPnaYvNOQyzdg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>, Kukjin Kim <kgene.kim@samsung.com>, Ben Dooks <ben-linux@fluff.org>
-Cc: devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, spi-devel-general@lists.sourceforge.net
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-kernel@lists.linaro.org, patches@linaro.org, cjb@laptop.org, per.forlin@linaro.org, Kyungmin Park <kyungmin.park@samsung.com>
 
-On Thu, Apr 21, 2011 at 4:14 PM, Grant Likely <grant.likely@secretlab.c=
-a> wrote:
-> On Thu, Apr 21, 2011 at 03:19:57PM +0200, Domenico Andreoli wrote:
->> From: Domenico Andreoli <cavokz@gmail.com>
->>
->> This patch adds helpers to manage OF binding of MMC DeviceTree confi=
-gs.
->> They don't cover all the MMC configuration cases, indeed are only a
->> slight generalization of those found in the MMC-over-SPI driver. Mor=
-e
->> will come later.
->
-> Can the mmc-over-spi driver be generalized to use this code too?
+Hi Andrei..
 
-I made a mess with the patches... the second one of this set _is_ mmc-o=
-ver-spi
-converted to this generalization. Instead I sent GPIO OF stuff... sorry=
-=2E
-
->> +/* Card detect and Read only Gpio data */
->> +struct of_mmc_crg {
->> + =A0 =A0 int gpios[NUM_MMC_GPIOS];
->> + =A0 =A0 int alow_gpios[NUM_MMC_GPIOS];
->> + =A0 =A0 int cd_irq;
->> +};
->
-> Many drivers currently provide this data via a platform_data. =A0It
-> would probably be more useful and require less code if both DT and
-> non-DT users shared the same structure for MMC gpios. =A0The structur=
-e
-> could both be embedded in pdata and populated by this DT parsing code=
-=2E
-> It would also mean that each driver wouldn't need separate DT and
-> non-DT code for consuming the information.
-
-I agree, indeed I'm not able to use these helpers within the s3c-mmc dr=
-iver
-without duplicating and writing ugly code.
-
-I made some "research" so I have few patches of tries which made me lea=
-rn
-a bit. There is not a common management of these as well as of the
-set_power() callbacks, to say those I learned about looking at S3C MMC.
-
-In practice also MMC platform datas require some consolidation.
-
-Kgene, Ben, do you plan to work on the S3C MCI driver? Can I spend some
-time on it without duplicating the effort of anybody?
+Did you test this patch with ADMA?
+I wonder that be increased performance or others..
 
 Regards,
-Domenico
+Jaehoon Chung
 
------[ Domenico Andreoli, aka cavok
-=A0--[ http://cavokz.wordpress.com/gpgkey/
-=A0=A0 ---[ 3A0F 2F80 F79C 678A 8936=A0 4FEE 0677 9033 A20E BC50
+Andrei Warkentin wrote:
+> Hi Shawn,
+> 
+> On Sat, Apr 16, 2011 at 11:48 AM, Shawn Guo <shawn.guo@linaro.org> wrote:
+>> pre_req() runs dma_map_sg() post_req() runs dma_unmap_sg.
+>> If not calling pre_req() before sdhci_request(), request()
+>> will prepare the cache just like it did it before.
+>> It is optional to use pre_req() and post_req().
+>>
+>> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+>> ---
+>> I worked out the patch by referring to Per's patch below.
+>>
+>>  omap_hsmmc: add support for pre_req and post_req
+>>
+>> It adds pre_req and post_req support for sdhci based host drivers to
+>> work with Per's non-blocking optimization.  But I only have imx esdhc
+>> based hardware to test.  Unfortunately, I can not measure the
+>> performance gain using mmc_test, because the current esdhc driver on
+>> mainline fails on the test.  So I just did a quick test using 'dd',
+>> but sadly, I did not see noticeable performance gain here.  The
+>> followings are possible reasons I can think of right away.
+>>
+>> * The patch did not add pre_req and post_req correctly.  Please help
+>>  review to catch the mistakes if any.
+>> * The imx esdhc driver uses SDHCI_SDMA (max_segs is 1) than SDHCI_ADAM
+>>  (max_segs is 128), due to the broken ADMA support on imx esdhc.  So
+>>  can people holding other sdhci based hardware give a try on the
+>>  patch?
+>>
+>> Hopefully, I can find some time to have a close look at the mmc_test
+>> failure and the broken ADMA with imx esdhc.
+>>
+> 
+> I'll try it out...
+> 
+> A
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
