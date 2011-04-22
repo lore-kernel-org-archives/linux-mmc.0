@@ -1,17 +1,17 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH] sdhci: sdhci-pxa.c: Add post reset processing for chip
- specific registers
-Date: Fri, 22 Apr 2011 13:18:33 -0700
-Message-ID: <D43E6B6B-8A75-4DA3-89AB-059B18D9272C@marvell.com>
+Subject: [PATCH] sdhci: sdhci-pxa.c enable CAP support for cards marked
+ permanent
+Date: Fri, 22 Apr 2011 13:17:59 -0700
+Message-ID: <C9816D50-7A48-4A2E-BECA-F461C7AAF176@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:50530 "EHLO
-	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756340Ab1DVUSh convert rfc822-to-8bit
+Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:44509 "EHLO
+	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756240Ab1DVUU4 convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Apr 2011 16:18:37 -0400
+	Fri, 22 Apr 2011 16:20:56 -0400
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -19,77 +19,32 @@ To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Cc: Zhangfei Gao <zgao6@marvell.com>
 
 
-RESET_ALL resets chips private registers.
-Reset to values specified in board file.
+eMMC and Wifi cards that are fixed to the board are marked
+permanent in the developemnt board files (eg brownstone.c for mmp2)
 
-depends on board specific mach-mmp/plat-pxa sdhci.h definitions
+The platform specific code nows informs the mmc layer about this.
 
 Signed-off-by: Philip Rakity <prakity@marvell.com>
 ---
- drivers/mmc/host/sdhci-pxa.c |   42 ++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 42 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-pxa.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
-index c8abf0f..1dc0988 100644
+index ec70d14..c8abf0f 100644
 --- a/drivers/mmc/host/sdhci-pxa.c
 +++ b/drivers/mmc/host/sdhci-pxa.c
-@@ -29,6 +29,13 @@
+@@ -131,6 +131,11 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
+ 	if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
+ 		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
  
- #define DRIVER_NAME	"sdhci-pxa"
- 
-+#define SD_CLOCK_AND_BURST_SIZE_SETUP   0x10A
-+#define SDCLK_DELAY_MASK     0x1F
-+#define SDCLK_SEL_MASK       0x1
-+#define SDCLK_DELAY_SHIFT    9
-+#define SDCLK_SEL_SHIFT      8
-+
-+
- struct sdhci_pxa {
- 	struct sdhci_host		*host;
- 	struct sdhci_pxa_platdata	*pdata;
-@@ -53,7 +60,42 @@ static void enable_clock(struct sdhci_host *host)
- 	}
- }
- 
-+static void set_clock_and_burst_size(struct sdhci_host *host)
-+{
-+	u16 tmp;
-+	struct sdhci_pxa *pxa = sdhci_priv(host);
-+
-+	pr_debug("%s:%s: adjust = %d\n",
-+		__func__, mmc_hostname(host->mmc), pxa->pdata->adjust_clocks);
-+
-+	if (pxa->pdata->adjust_clocks) {
-+		tmp = readw(host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
-+		pr_debug("%s:%s: (B) SD_CLOCK_AND_BURST = %04X, "
-+			"delay = %d, sel = %d\n",
-+			__func__, mmc_hostname(host->mmc), tmp,
-+			pxa->pdata->clk_delay, pxa->pdata->clk_select);
-+		tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
-+		tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
-+		tmp |= (pxa->pdata->clk_delay & SDCLK_DELAY_MASK) <<
-+			SDCLK_DELAY_SHIFT;
-+		tmp |= (pxa->pdata->clk_select & SDCLK_SEL_MASK) <<
-+			SDCLK_SEL_SHIFT;
-+		writew(tmp, host->ioaddr + SD_CLOCK_AND_BURST_SIZE_SETUP);
-+		pr_debug("%s:%s: (A) SD_CLOCK_AND_BURST_SIZE_SETUP = %04X\n",
-+			__func__, mmc_hostname(host->mmc), tmp);
++	if (pdata->flags & PXA_FLAG_CARD_PERMANENT) {
++		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
++		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
 +	}
-+}
 +
-+static void platform_reset_exit(struct sdhci_host *host, u8 mask)
-+{
-+	if (mask == SDHCI_RESET_ALL) {
-+		/* reset private registers */
-+		set_clock_and_burst_size(host);
-+	}
-+}
-+
- static struct sdhci_ops sdhci_pxa_ops = {
-+	.platform_reset_exit = platform_reset_exit,
- };
+ 	/* do not rely on u-boot to enable the clocks */
+ 	enable_clock(host);
  
- /*****************************************************************************\
 -- 
 1.7.0.4
 
