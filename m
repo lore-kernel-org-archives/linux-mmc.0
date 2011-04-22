@@ -1,31 +1,148 @@
-From: Paul Parsons <lost.distance@yahoo.com>
-Subject: Re: [PATCH] MMC: tmio: fix a recent regression: restore .set_ios(MMC_POWER_UP) handling
-Date: Fri, 22 Apr 2011 12:13:02 +0100 (BST)
-Message-ID: <57837.39952.qm@web29020.mail.ird.yahoo.com>
-References: <504862.26396.qm@web29015.mail.ird.yahoo.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
+From: Antonio Ospite <ospite@studenti.unina.it>
+Subject: [PATCH v2 4/4] mmc_spi.c: add support for the regulator framework
+Date: Fri, 22 Apr 2011 14:43:11 +0200
+Message-ID: <1303476191-20663-1-git-send-email-ospite@studenti.unina.it>
+References: <20110421124041.GF11788@opensource.wolfsonmicro.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from nm13.bullet.mail.ird.yahoo.com ([77.238.189.66]:23162 "HELO
-	nm13.bullet.mail.ird.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1754832Ab1DVLNF convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Apr 2011 07:13:05 -0400
-In-Reply-To: <504862.26396.qm@web29015.mail.ird.yahoo.com>
+Received: from smtp208.alice.it ([82.57.200.104]:39257 "EHLO smtp208.alice.it"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750851Ab1DVMno (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Apr 2011 08:43:44 -0400
+In-Reply-To: <20110421124041.GF11788@opensource.wolfsonmicro.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Ian Molton <ian@mnementh.co.uk>
+To: linux-mmc@vger.kernel.org
+Cc: Antonio Ospite <ospite@studenti.unina.it>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Mark Brown <broonie@opensource.wolfsonmicro.com>, openezx-devel@lists.openezx.org, spi-devel-general@lists.sourceforge.net
 
---- On Fri, 22/4/11, Paul Parsons <lost.distance@yahoo.com> wrote:
-> As far as I can see the expression
-> 
-> (ios->clock == 0 && ios->power_mode ==
-> MMC_POWER_ON)
-> 
-> will only be true if host->f_init == 0 at the time
-> MMC_POWER_ON is invoked in mmc_power_up(). Presumably that
-> case is intentional.
+Add support for powering up SD cards driven by regulators.
+This makes the mmc_spi driver work also with the Motorola A910 phone.
 
-Sorry, ignore this; I missed the case where mmc_gate_clock() sets ios->clock = 0 before calling mmc_set_ios().
+Signed-off-by: Antonio Ospite <ospite@studenti.unina.it>
+---
+
+Changes since v1:
+  - Remove the ifdef CONFIG_REGULATOR as regulator_get() degenerates to 
+    a stub as well when the regulator framework is disabled.
+  - Release the regulator in mmc_spi_remove()
+
+Thanks,
+   Antonio
+
+ drivers/mmc/host/mmc_spi.c |   63 +++++++++++++++++++++++++++++++++++--------
+ 1 files changed, 51 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index 0f3672d..62b3b02 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -31,6 +31,7 @@
+ #include <linux/dma-mapping.h>
+ #include <linux/crc7.h>
+ #include <linux/crc-itu-t.h>
++#include <linux/regulator/consumer.h>
+ #include <linux/scatterlist.h>
+ 
+ #include <linux/mmc/host.h>
+@@ -150,11 +151,13 @@ struct mmc_spi_host {
+ 	 */
+ 	void			*ones;
+ 	dma_addr_t		ones_dma;
++
++	struct regulator	*vcc;
+ };
+ 
+ static inline int mmc_spi_canpower(struct mmc_spi_host *host)
+ {
+-	return host->pdata && host->pdata->setpower;
++	return (host->pdata && host->pdata->setpower) || host->vcc;
+ }
+ 
+ /****************************************************************************/
+@@ -1225,17 +1228,35 @@ static inline int mmc_spi_setpower(struct mmc_spi_host *host,
+ 					unsigned char power_mode,
+ 					unsigned int vdd)
+ {
++	if (!mmc_spi_canpower(host))
++		return -ENOSYS;
++
+ 	/* switch power on/off if possible, accounting for
+ 	 * max 250msec powerup time if needed.
+ 	 */
+-	if (mmc_spi_canpower(host)) {
+-		switch (power_mode) {
+-		case MMC_POWER_OFF:
+-		case MMC_POWER_UP:
++	switch (power_mode) {
++	case MMC_POWER_OFF:
++		if (host->vcc) {
++			int ret = mmc_regulator_set_ocr(host->mmc,
++							host->vcc, 0);
++			if (ret)
++				return ret;
++		} else {
++			host->pdata->setpower(&host->spi->dev, vdd);
++		}
++		break;
++
++	case MMC_POWER_UP:
++		if (host->vcc) {
++			int ret = mmc_regulator_set_ocr(host->mmc,
++							host->vcc, vdd);
++			if (ret)
++				return ret;
++		} else {
+ 			host->pdata->setpower(&host->spi->dev, vdd);
+-			if (power_mode == MMC_POWER_UP)
+-				msleep(host->powerup_msecs);
+ 		}
++		msleep(host->powerup_msecs);
++		break;
+ 	}
+ 
+ 	return 0;
+@@ -1420,12 +1441,27 @@ static int mmc_spi_probe(struct spi_device *spi)
+ 	 * and power switching gpios.
+ 	 */
+ 	host->pdata = mmc_spi_get_pdata(spi);
+-	if (host->pdata)
+-		mmc->ocr_avail = host->pdata->ocr_mask;
+-	if (!mmc->ocr_avail) {
+-		dev_warn(&spi->dev, "ASSUMING 3.2-3.4 V slot power\n");
+-		mmc->ocr_avail = MMC_VDD_32_33|MMC_VDD_33_34;
++
++	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
++	if (IS_ERR(host->vcc)) {
++		host->vcc = NULL;
++	} else {
++		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
++		if (host->pdata && host->pdata->ocr_mask)
++			dev_warn(mmc_dev(host->mmc),
++				"ocr_mask/setpower will not be used\n");
+ 	}
++
++	if (host->vcc == NULL) {
++		/* fall-back to platform data */
++		if (host->pdata)
++			mmc->ocr_avail = host->pdata->ocr_mask;
++		if (!mmc->ocr_avail) {
++			dev_warn(&spi->dev, "ASSUMING 3.2-3.4 V slot power\n");
++			mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
++		}
++	}
++
+ 	if (mmc_spi_canpower(host)) {
+ 		host->powerup_msecs = host->pdata->powerup_msecs;
+ 		if (!host->powerup_msecs || host->powerup_msecs > 250)
+@@ -1523,6 +1559,9 @@ static int __devexit mmc_spi_remove(struct spi_device *spi)
+ 		if (host->pdata && host->pdata->exit)
+ 			host->pdata->exit(&spi->dev, mmc);
+ 
++		if (host->vcc)
++			regulator_put(host->vcc);
++
+ 		mmc_remove_host(mmc);
+ 
+ 		if (host->dma_dev) {
+-- 
+1.7.4.4
+
