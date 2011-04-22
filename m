@@ -1,403 +1,83 @@
-From: John Calixto <john.calixto@modsystems.com>
-Subject: [PATCH v7] mmc: Add mmc CMD+ACMD passthrough ioctl
-Date: Thu, 21 Apr 2011 17:44:44 -0700 (PDT)
-Message-ID: <alpine.DEB.2.00.1104211743210.3919@peruna>
-References: <alpine.DEB.2.00.1104211735290.3919@peruna>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH] MMC: TMIO: add runtime PM calls to global suspend() /
+ redume() methods
+Date: Fri, 22 Apr 2011 10:13:20 +0900
+Message-ID: <20110422011320.GA22726@verge.net.au>
+References: <Pine.LNX.4.64.1104211231240.29172@axis700.grange>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from elasmtp-dupuy.atl.sa.earthlink.net ([209.86.89.62]:53520 "EHLO
-	elasmtp-dupuy.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753960Ab1DVAow (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2011 20:44:52 -0400
-In-Reply-To: <alpine.DEB.2.00.1104211735290.3919@peruna>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1104211231240.29172@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: John Calixto <john.calixto@modsystems.com>
-Cc: linux-mmc@vger.kernel.org, Andrei Warkentin <andreiw@motorola.com>, =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>
 
-Allows appropriately-privileged applications to send CMD (normal) and
-ACMD (application-specific; preceded with CMD55) commands to
-cards/devices on the mmc bus.  This is primarily useful for enabling the
-security functionality built in to every SD card.
+Hi Guennadi,
 
-It can also be used as a generic passthrough (e.g. to enable virtual
-machines to control mmc bus devices directly).  However, this use case
-has not been tested rigorously.  Generic passthrough testing was only
-conducted for a few non-security opcodes to prove the feasibility of the
-passthrough.
+On Thu, Apr 21, 2011 at 12:32:54PM +0200, Guennadi Liakhovetski wrote:
+> The TMIO MMC driver cannot generally suspend itself at runtime even
+> with no card inserted, because otherwise it wouldn't be able to detect
+> new cards. But when the system goes down for a global suspend, we can
+> use runtime PM calls to let it activate platform-specific PM hooks,
+> e.g., to switch off respective power domains.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+>  drivers/mmc/host/tmio_mmc.h     |    2 ++
+>  drivers/mmc/host/tmio_mmc_pio.c |    6 ++++++
+>  2 files changed, 8 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index 249c724..58138a2 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -52,6 +52,8 @@ struct tmio_mmc_host {
+>  	void (*set_pwr)(struct platform_device *host, int state);
+>  	void (*set_clk_div)(struct platform_device *host, int state);
+>  
+> +	int			pm_error;
 
-Since any opcode can be sent using this passthrough, it is very possible
-to render the card/device unusable.  Applications that use this ioctl
-must have CAP_SYS_RAWIO.
+I wonder if instead of adding an whole int to effectively
+store one bit we could use some of the spare space in the
+sdio_irq_enabled element, which is also an int that effectively
+stores one bit.
 
-Security commands tested on TI PCIxx12 (SDHCI), Sigma Designs SMP8652
-SoC, TI OMAP3621 SoC, TI OMAP3630 SoC, Samsung S5PC110 SoC, Qualcomm
-MSM7200A SoC.
+Perhaps a bitmask or a bitfield?
 
-Signed-off-by: John Calixto <john.calixto@modsystems.com>
-Reviewed-by: Andrei Warkentin <andreiw@motorola.com>
----
- Documentation/ioctl/ioctl-number.txt |    1 +
- drivers/mmc/card/block.c             |  201 ++++++++++++++++++++++++++++++++++
- drivers/mmc/core/sd_ops.c            |    3 +-
- include/linux/Kbuild                 |    1 +
- include/linux/mmc/Kbuild             |    1 +
- include/linux/mmc/core.h             |    1 +
- include/linux/mmc/ioctl.h            |   54 +++++++++
- 7 files changed, 261 insertions(+), 1 deletions(-)
- create mode 100644 include/linux/mmc/Kbuild
- create mode 100644 include/linux/mmc/ioctl.h
+I was thinking of doing something similar when adding support
+for multiple IRQ vectors, as my current code also needs, wait for it,
+one bit :-)
 
-diff --git a/Documentation/ioctl/ioctl-number.txt b/Documentation/ioctl/ioctl-number.txt
-index a0a5d82..2a34d82 100644
---- a/Documentation/ioctl/ioctl-number.txt
-+++ b/Documentation/ioctl/ioctl-number.txt
-@@ -304,6 +304,7 @@ Code  Seq#(hex)	Include File		Comments
- 0xB0	all	RATIO devices		in development:
- 					<mailto:vgo@ratio.de>
- 0xB1	00-1F	PPPoX			<mailto:mostrows@styx.uwaterloo.ca>
-+0xB3	00	linux/mmc/ioctl.h
- 0xC0	00-0F	linux/usb/iowarrior.h
- 0xCB	00-1F	CBM serial IEC bus	in development:
- 					<mailto:michael.klein@puffin.lb.shuttle.de>
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 61d233a..758419a 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -31,7 +31,11 @@
- #include <linux/mutex.h>
- #include <linux/scatterlist.h>
- #include <linux/string_helpers.h>
-+#include <linux/delay.h>
-+#include <linux/capability.h>
-+#include <linux/compat.h>
- 
-+#include <linux/mmc/ioctl.h>
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
-@@ -158,11 +162,208 @@ mmc_blk_getgeo(struct block_device *bdev, struct hd_geometry *geo)
- 	return 0;
- }
- 
-+struct mmc_blk_ioc_data {
-+	struct mmc_ioc_cmd ic;
-+	unsigned char *buf;
-+	u64 buf_bytes;
-+};
-+
-+static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
-+	struct mmc_ioc_cmd __user *user)
-+{
-+	struct mmc_blk_ioc_data *idata;
-+	int err;
-+
-+	idata = kzalloc(sizeof(*idata), GFP_KERNEL);
-+	if (!idata) {
-+		err = -ENOMEM;
-+		goto copy_err;
-+	}
-+
-+	if (copy_from_user(&idata->ic, user, sizeof(idata->ic))) {
-+		err = -EFAULT;
-+		goto copy_err;
-+	}
-+
-+	idata->buf_bytes = (u64) idata->ic.blksz * idata->ic.blocks;
-+	if (idata->buf_bytes > MMC_IOC_MAX_BYTES) {
-+		err = -EOVERFLOW;
-+		goto copy_err;
-+	}
-+
-+	idata->buf = kzalloc(idata->buf_bytes, GFP_KERNEL);
-+	if (!idata->buf) {
-+		err = -ENOMEM;
-+		goto copy_err;
-+	}
-+
-+	if (copy_from_user(idata->buf, (void __user *)(unsigned long)
-+					idata->ic.data_ptr, idata->buf_bytes)) {
-+		err = -EFAULT;
-+		goto copy_err;
-+	}
-+
-+	return idata;
-+
-+copy_err:
-+	kfree(idata->buf);
-+	kfree(idata);
-+	return ERR_PTR(err);
-+
-+}
-+
-+static int mmc_blk_ioctl_cmd(struct block_device *bdev,
-+	struct mmc_ioc_cmd __user *ic_ptr)
-+{
-+	struct mmc_blk_ioc_data *idata;
-+	struct mmc_blk_data *md;
-+	struct mmc_card *card;
-+	struct mmc_command cmd = {0};
-+	struct mmc_data data = {0};
-+	struct mmc_request mrq = {0};
-+	struct scatterlist sg;
-+	int err;
-+
-+	/*
-+	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-+	 * whole block device, not on a partition.  This prevents overspray
-+	 * between sibling partitions.
-+	 */
-+	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
-+		return -EPERM;
-+
-+	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
-+	if (IS_ERR(idata))
-+		return PTR_ERR(idata);
-+
-+	cmd.opcode = idata->ic.opcode;
-+	cmd.arg = idata->ic.arg;
-+	cmd.flags = idata->ic.flags;
-+
-+	data.sg = &sg;
-+	data.sg_len = 1;
-+	data.blksz = idata->ic.blksz;
-+	data.blocks = idata->ic.blocks;
-+
-+	sg_init_one(data.sg, idata->buf, idata->buf_bytes);
-+
-+	if (idata->ic.write_flag)
-+		data.flags = MMC_DATA_WRITE;
-+	else
-+		data.flags = MMC_DATA_READ;
-+
-+	mrq.cmd = &cmd;
-+	mrq.data = &data;
-+
-+	md = mmc_blk_get(bdev->bd_disk);
-+	if (!md) {
-+		err = -EINVAL;
-+		goto cmd_done;
-+	}
-+
-+	card = md->queue.card;
-+	if (IS_ERR(card)) {
-+		err = PTR_ERR(card);
-+		goto cmd_done;
-+	}
-+
-+	mmc_claim_host(card->host);
-+
-+	if (idata->ic.is_acmd) {
-+		err = mmc_app_cmd(card->host, card);
-+		if (err)
-+			goto cmd_rel_host;
-+	}
-+
-+	/* data.flags must already be set before doing this. */
-+	mmc_set_data_timeout(&data, card);
-+	/* Allow overriding the timeout_ns for empirical tuning. */
-+	if (idata->ic.data_timeout_ns)
-+		data.timeout_ns = idata->ic.data_timeout_ns;
-+
-+	if ((cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
-+		/*
-+		 * Pretend this is a data transfer and rely on the host driver
-+		 * to compute timeout.  When all host drivers support
-+		 * cmd.cmd_timeout for R1B, this can be changed to:
-+		 *
-+		 *     mrq.data = NULL;
-+		 *     cmd.cmd_timeout = idata->ic.cmd_timeout_ms;
-+		 */
-+		data.timeout_ns = idata->ic.cmd_timeout_ms * 1000000;
-+	}
-+
-+	mmc_wait_for_req(card->host, &mrq);
-+
-+	if (cmd.error) {
-+		dev_err(mmc_dev(card->host), "%s: cmd error %d\n",
-+						__func__, cmd.error);
-+		err = cmd.error;
-+		goto cmd_rel_host;
-+	}
-+	if (data.error) {
-+		dev_err(mmc_dev(card->host), "%s: data error %d\n",
-+						__func__, data.error);
-+		err = data.error;
-+		goto cmd_rel_host;
-+	}
-+
-+	/*
-+	 * According to the SD specs, some commands require a delay after
-+	 * issuing the command.
-+	 */
-+	if (idata->ic.postsleep_min_us)
-+		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
-+
-+	if (copy_to_user(&(ic_ptr->response), cmd.resp, sizeof(cmd.resp))) {
-+		err = -EFAULT;
-+		goto cmd_rel_host;
-+	}
-+
-+	if (!idata->ic.write_flag) {
-+		if (copy_to_user((void __user *)(unsigned long) idata->ic.data_ptr,
-+						idata->buf, idata->buf_bytes)) {
-+			err = -EFAULT;
-+			goto cmd_rel_host;
-+		}
-+	}
-+
-+cmd_rel_host:
-+	mmc_release_host(card->host);
-+
-+cmd_done:
-+	mmc_blk_put(md);
-+	kfree(idata->buf);
-+	kfree(idata);
-+	return err;
-+}
-+
-+static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
-+	unsigned int cmd, unsigned long arg)
-+{
-+	int ret = -EINVAL;
-+	if (cmd == MMC_IOC_CMD)
-+		ret = mmc_blk_ioctl_cmd(bdev, (struct mmc_ioc_cmd __user *)arg);
-+	return ret;
-+}
-+
-+#ifdef CONFIG_COMPAT
-+static int mmc_blk_compat_ioctl(struct block_device *bdev, fmode_t mode,
-+	unsigned int cmd, unsigned long arg)
-+{
-+	return mmc_blk_ioctl(bdev, mode, cmd, (unsigned long) compat_ptr(arg));
-+}
-+#endif
-+
- static const struct block_device_operations mmc_bdops = {
- 	.open			= mmc_blk_open,
- 	.release		= mmc_blk_release,
- 	.getgeo			= mmc_blk_getgeo,
- 	.owner			= THIS_MODULE,
-+	.ioctl			= mmc_blk_ioctl,
-+#ifdef CONFIG_COMPAT
-+	.compat_ioctl		= mmc_blk_compat_ioctl,
-+#endif
- };
- 
- struct mmc_blk_request {
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index 797cdb5..990dd43 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -20,7 +20,7 @@
- #include "core.h"
- #include "sd_ops.h"
- 
--static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
-+int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
- {
- 	int err;
- 	struct mmc_command cmd;
-@@ -48,6 +48,7 @@ static int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card)
- 
- 	return 0;
- }
-+EXPORT_SYMBOL_GPL(mmc_app_cmd);
- 
- /**
-  *	mmc_wait_for_app_cmd - start an application command and wait for
-diff --git a/include/linux/Kbuild b/include/linux/Kbuild
-index 75cf611..ed38527 100644
---- a/include/linux/Kbuild
-+++ b/include/linux/Kbuild
-@@ -4,6 +4,7 @@ header-y += caif/
- header-y += dvb/
- header-y += hdlc/
- header-y += isdn/
-+header-y += mmc/
- header-y += nfsd/
- header-y += raid/
- header-y += spi/
-diff --git a/include/linux/mmc/Kbuild b/include/linux/mmc/Kbuild
-new file mode 100644
-index 0000000..1fb2644
---- /dev/null
-+++ b/include/linux/mmc/Kbuild
-@@ -0,0 +1 @@
-+header-y += ioctl.h
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 07f27af..bfc6127 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -133,6 +133,7 @@ struct mmc_card;
- 
- extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
- extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
-+extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
- extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
- 	struct mmc_command *, int);
- 
-diff --git a/include/linux/mmc/ioctl.h b/include/linux/mmc/ioctl.h
-new file mode 100644
-index 0000000..225e1e1
---- /dev/null
-+++ b/include/linux/mmc/ioctl.h
-@@ -0,0 +1,54 @@
-+#ifndef LINUX_MMC_IOCTL_H
-+#define LINUX_MMC_IOCTL_H
-+struct mmc_ioc_cmd {
-+	/* Implies direction of data.  true = write, false = read */
-+	int write_flag;
-+
-+	/* Application-specific command.  true = precede with CMD55 */
-+	int is_acmd;
-+
-+	__u32 opcode;
-+	__u32 arg;
-+	__u32 response[4];  /* CMD response */
-+	unsigned int flags;
-+	unsigned int blksz;
-+	unsigned int blocks;
-+
-+	/*
-+	 * Sleep at least postsleep_min_us useconds, and at most
-+	 * postsleep_max_us useconds *after* issuing command.  Needed for some
-+	 * read commands for which cards have no other way of indicating
-+	 * they're ready for the next command (i.e. there is no equivalent of a
-+	 * "busy" indicator for read operations).
-+	 */
-+	unsigned int postsleep_min_us;
-+	unsigned int postsleep_max_us;
-+
-+	/*
-+	 * Override driver-computed timeouts.  Note the difference in units!
-+	 */
-+	unsigned int data_timeout_ns;
-+	unsigned int cmd_timeout_ms;
-+
-+	/*
-+	 * For 64-bit machines, the next member, ``__u64 data_ptr``, wants to
-+	 * be 8-byte aligned.  Make sure this struct is the same size when
-+	 * built for 32-bit.
-+	 */
-+	__u32 __pad;
-+
-+	/* DAT buffer */
-+	__u64 data_ptr;
-+};
-+#define mmc_ioc_cmd_set_data(ic, ptr) ic.data_ptr = (__u64)(unsigned long) ptr
-+
-+#define MMC_IOC_CMD _IOWR(MMC_BLOCK_MAJOR, 0, struct mmc_ioc_cmd)
-+
-+/*
-+ * Since this ioctl is only meant to enhance (and not replace) normal access to
-+ * the mmc bus device, an upper data transfer limit of MMC_IOC_MAX_BYTES is
-+ * enforced per ioctl call.  For larger data transfers, use the normal block
-+ * device operations.
-+ */
-+#define MMC_IOC_MAX_BYTES  (512L * 256)
-+#endif  /* LINUX_MMC_IOCTL_H */
--- 
-1.7.4.1
-
+> +
+>  	/* pio related stuff */
+>  	struct scatterlist      *sg_ptr;
+>  	struct scatterlist      *sg_orig;
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index d1791ba..26598f1 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -980,6 +980,8 @@ int tmio_mmc_host_suspend(struct device *dev)
+>  	if (!ret)
+>  		tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
+>  
+> +	host->pm_error = pm_runtime_put_sync(dev);
+> +
+>  	return ret;
+>  }
+>  EXPORT_SYMBOL(tmio_mmc_host_suspend);
+> @@ -987,6 +989,10 @@ EXPORT_SYMBOL(tmio_mmc_host_suspend);
+>  int tmio_mmc_host_resume(struct device *dev)
+>  {
+>  	struct mmc_host *mmc = dev_get_drvdata(dev);
+> +	struct tmio_mmc_host *host = mmc_priv(mmc);
+> +
+> +	if (!host->pm_error)
+> +		pm_runtime_get_sync(dev);
+>  
+>  	tmio_mmc_reset(mmc_priv(mmc));
+>  
+> -- 
+> 1.7.2.5
+> 
