@@ -1,157 +1,63 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH] mmc:  Add support for eMMC Dual Data Rate
-Date: Fri, 22 Apr 2011 13:27:26 -0700
-Message-ID: <7E008078-5B62-4418-857B-DBFF1E70E6D3@marvell.com>
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
+Date: Fri, 22 Apr 2011 17:20:51 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1104221709030.1791-100000@iolanthe.rowland.org>
+References: <201104222225.24472.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:39828 "EHLO
-	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755178Ab1DVU1c convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Apr 2011 16:27:32 -0400
-Content-Language: en-US
+Received: from iolanthe.rowland.org ([192.131.102.54]:52146 "HELO
+	iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1756240Ab1DVVUx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2011 17:20:53 -0400
+In-Reply-To: <201104222225.24472.rjw@sisk.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Arindam Nath <arindam.nath@amd.com>
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Linux PM mailing list <linux-pm@lists.linux-foundation.org>
 
+On Fri, 22 Apr 2011, Rafael J. Wysocki wrote:
 
-eMMC voltage change not required for 1.8V.  3.3V and 1.8V vcc
-are capable of doing DDR. vccq of 1.8v is not required.
+> > The barrier would not prevent the race between the notifier and runtie PM
+> > from taking place.  Why don't we do something like this instead:
+> > 
+> > ---
+> >  drivers/base/dd.c |    3 ++-
+> >  1 file changed, 2 insertions(+), 1 deletion(-)
+> > 
+> > Index: linux-2.6/drivers/base/dd.c
+> > ===================================================================
+> > --- linux-2.6.orig/drivers/base/dd.c
+> > +++ linux-2.6/drivers/base/dd.c
+> > @@ -326,6 +326,8 @@ static void __device_release_driver(stru
+> >  						     BUS_NOTIFY_UNBIND_DRIVER,
+> >  						     dev);
+> >  
+> > +		pm_runtime_put_sync(dev);
+> > +
+> 
+> In fact, I think this one may be _noidle.  If we allow the bus/driver
+> to do what they wont, we might as well let them handle the "device idle"
+> case from ->remove().
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
----
- drivers/mmc/core/core.c  |   14 ++------------
- drivers/mmc/core/core.h  |    2 --
- drivers/mmc/core/mmc.c   |   33 ++++++++++++++++++++++++++++-----
- include/linux/mmc/host.h |    1 +
- 4 files changed, 31 insertions(+), 19 deletions(-)
+Maybe...  But keeping it put_sync doesn't do any harm.  In Guennadi's 
+case, it might allow him to get rid of the pm_runtime_suspend() call in 
+the remove routine.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 91ab31f..69df00c 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -720,22 +720,12 @@ void mmc_set_bus_mode(struct mmc_host *host, unsigned int mode)
- }
- 
- /*
-- * Change data bus width and DDR mode of a host.
-- */
--void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width,
--			   unsigned int ddr)
--{
--	host->ios.bus_width = width;
--	host->ios.ddr = ddr;
--	mmc_set_ios(host);
--}
--
--/*
-  * Change data bus width of a host.
-  */
- void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
- {
--	mmc_set_bus_width_ddr(host, width, MMC_SDR_MODE);
-+	host->ios.bus_width = width;
-+	mmc_set_ios(host);
- }
- 
- /**
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 6114ca5..c5d0e8b 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -38,8 +38,6 @@ void mmc_ungate_clock(struct mmc_host *host);
- void mmc_set_ungated(struct mmc_host *host);
- void mmc_set_bus_mode(struct mmc_host *host, unsigned int mode);
- void mmc_set_bus_width(struct mmc_host *host, unsigned int width);
--void mmc_set_bus_width_ddr(struct mmc_host *host, unsigned int width,
--			   unsigned int ddr);
- u32 mmc_select_voltage(struct mmc_host *host, u32 ocr);
- void mmc_set_timing(struct mmc_host *host, unsigned int timing);
- void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index ba1c878..f4b675b 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -20,6 +20,7 @@
- #include "core.h"
- #include "bus.h"
- #include "mmc_ops.h"
-+#include "sd_ops.h"
- 
- static const unsigned int tran_exp[] = {
- 	10000,		100000,		1000000,	10000000,
-@@ -633,10 +634,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	 */
- 	if (mmc_card_highspeed(card)) {
- 		if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_8V)
--			&& (host->caps & (MMC_CAP_1_8V_DDR)))
-+			&& ((host->caps & (MMC_CAP_1_8V_DDR | MMC_CAP_UHS_DDR50))
-+				== (MMC_CAP_1_8V_DDR | MMC_CAP_UHS_DDR50)))
- 				ddr = MMC_1_8V_DDR_MODE;
- 		else if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_2V)
--			&& (host->caps & (MMC_CAP_1_2V_DDR)))
-+			&& ((host->caps & (MMC_CAP_1_2V_DDR | MMC_CAP_UHS_DDR50))
-+				== (MMC_CAP_1_2V_DDR | MMC_CAP_UHS_DDR50)))
- 				ddr = MMC_1_2V_DDR_MODE;
- 	}
- 
-@@ -670,8 +673,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 					 ext_csd_bits[idx][0],
- 					 0);
- 			if (!err) {
--				mmc_set_bus_width_ddr(card->host,
--						      bus_width, MMC_SDR_MODE);
-+				mmc_set_bus_width(card->host, bus_width);
- 				/*
- 				 * If controller can't handle bus width test,
- 				 * use the highest bus width to maintain
-@@ -697,8 +699,29 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 				1 << bus_width, ddr);
- 			goto free_card;
- 		} else if (ddr) {
-+			/*
-+			 * eMMC cards can support 3.3V to 1.2V i/o (vccq)
-+			 * signaling.
-+			 *
-+			 * EXT_CSD_CARD_TYPE_DDR_1_8V means 3.3V or 1.8V vccq.
-+			 *
-+			 * 1.8V vccq at 3.3V core voltage (vcc) is not required
-+			 * in the JEDEC spec for DDR.
-+			 *
-+			 * Do not force change in vccq since we are obviously
-+			 * working and no change to vccq is needed.
-+			 *
-+			 * WARNING: eMMC rules are NOT the same as SD DDR
-+			 */
-+			if (ddr == EXT_CSD_CARD_TYPE_DDR_1_2V) {
-+				err = mmc_set_signal_voltage(host,
-+					MMC_SIGNAL_VOLTAGE_120, 0);
-+				if (err)
-+					goto err;
-+			}
- 			mmc_card_set_ddr_mode(card);
--			mmc_set_bus_width_ddr(card->host, bus_width, ddr);
-+			mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
-+			mmc_set_bus_width(card->host, bus_width);
- 		}
- 	}
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 9beb6c5..b8942fc 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -66,6 +66,7 @@ struct mmc_ios {
- 
- #define MMC_SIGNAL_VOLTAGE_330	0
- #define MMC_SIGNAL_VOLTAGE_180	1
-+#define MMC_SIGNAL_VOLTAGE_120	2
- 
- 	unsigned char	drv_type;		/* driver type (A, B, C, D) */
- 
--- 
-1.7.0.4
+> >  		if (dev->bus && dev->bus->remove)
+> >  			dev->bus->remove(dev);
+> >  		else if (drv->remove)
+> > @@ -338,7 +340,6 @@ static void __device_release_driver(stru
+> >  						     BUS_NOTIFY_UNBOUND_DRIVER,
+> >  						     dev);
+> >  
+> > -		pm_runtime_put_sync(dev);
+> >  	}
+> >  }
 
+Basically this is okay with me, and it should allow Guennadi to avoid
+the extra put/get pair.  Do you know if any other subsystems rely on
+the usage_count being > 0 during unbinding?
+
+Alan Stern
 
