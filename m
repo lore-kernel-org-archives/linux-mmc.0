@@ -1,61 +1,50 @@
-From: Michael Meng <michael.h.meng@gmail.com>
-Subject: Send CMD12 to terminate the mmc writing request?
-Date: Sat, 23 Apr 2011 14:49:38 +0900
-Message-ID: <BANLkTi=k9fhGDJxyBkE5K2Jq9ip4-Mkpiw@mail.gmail.com>
-References: <c16c6fd4-41fa-4eb0-94d1-81477fe086bc@k3g2000prl.googlegroups.com>
-Reply-To: Michael.H.Meng@Gmail.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Rabin Vincent <rabin@rab.in>
+Subject: [PATCH] mmc: block: init force_ro sysfs attribute
+Date: Sat, 23 Apr 2011 20:52:58 +0530
+Message-ID: <1303572178-6349-1-git-send-email-rabin@rab.in>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:35067 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751430Ab1DWFtj convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Apr 2011 01:49:39 -0400
-Received: by vxi39 with SMTP id 39so814114vxi.19
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2011 22:49:38 -0700 (PDT)
-In-Reply-To: <c16c6fd4-41fa-4eb0-94d1-81477fe086bc@k3g2000prl.googlegroups.com>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:43669 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754708Ab1DWPWd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Apr 2011 11:22:33 -0400
+Received: by pwi15 with SMTP id 15so681167pwi.19
+        for <linux-mmc@vger.kernel.org>; Sat, 23 Apr 2011 08:22:33 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: cjb@laptop.org
+Cc: andreiw@motorola.com, linux-mmc@vger.kernel.org, Rabin Vincent <rabin@rab.in>
 
-Hi,
+To avoid lockdep warnings:
 
-I am a fresher to linux kernel and now trying to add some features to
-mmc driver.
+BUG: key dc90a520 not in .data!
+------------[ cut here ]------------
+WARNING: at /home/rabin/kernel/arm/kernel/lockdep.c:2701 sysfs_add_file_mode+0x4c/0xb0()
+Modules linked in:
+[<c004b5d8>] (unwind_backtrace+0x0/0xe4) from [<c0074f20>] (warn_slowpath_common+0x4c/0x64)
+[<c0074f20>] (warn_slowpath_common+0x4c/0x64) from [<c0074f50>] (warn_slowpath_null+0x18/0x1c)
+[<c0074f50>] (warn_slowpath_null+0x18/0x1c) from [<c0157fec>] (sysfs_add_file_mode+0x4c/0xb0)
+[<c0157fec>] (sysfs_add_file_mode+0x4c/0xb0) from [<c02d61e4>] (mmc_add_disk+0x40/0x64)
+[<c02d61e4>] (mmc_add_disk+0x40/0x64) from [<c02d64cc>] (mmc_blk_probe+0x188/0x1fc)
+[<c02d64cc>] (mmc_blk_probe+0x188/0x1fc) from [<c02ce820>] (mmc_bus_probe+0x14/0x18)
+...
 
-One of the features is that terminate a long time writing request(e.x.
-lasts 50ms or more), and make the following reading request run.
+Signed-off-by: Rabin Vincent <rabin@rab.in>
+---
+ drivers/mmc/card/block.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
-I read the JEDEC STANDARD and found that a writing operation could be
-terminated with sending a STOP_TRANSMISSION(CMD12).
-But I am not quite sure how I can send the command.
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 9e30cf6..179a607 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -967,6 +967,7 @@ static int mmc_add_disk(struct mmc_blk_data *md)
+ 	add_disk(md->disk);
+ 	md->force_ro.show = force_ro_show;
+ 	md->force_ro.store = force_ro_store;
++	sysfs_attr_init(&md->force_ro.attr);
+ 	md->force_ro.attr.name = "force_ro";
+ 	md->force_ro.attr.mode = S_IRUGO | S_IWUSR;
+ 	ret = device_create_file(disk_to_dev(md->disk), &md->force_ro);
+-- 
+1.7.4.1
 
-Here is the working flow I am working in:
-
-1) In the function mmc_blk_issue_rq() @ drivers/mmc/card/block.c
-=C2=A0 before mmc_wait_for_req() is called, check if the request to be
-issued is WRITE.
-=C2=A0 If it is a WRITE request, add a timer of 50ms to check whether i=
-t
-is a long time writing operation.
-2) In the timeout callback function, get the next request in the queue
-and check whether it is a READ request.
-=C2=A0 If it is a READ request, send a STOP_TRANSMISSION command with
-mmc_wait_for_cmd() to terminate the request.
-
-But I got some fault messages when I sent the STOP_TRANSMISSION
-command.
-
-It seems that without completing the WRITE request sent by
-mmc_wait_for_req(), the STOP_TRANSMISSION command(sent with
-mmc_wait_for_cmd() ) could not be accepted, because in the function of
-mmc_wait_for_cmd(), mmc_wait_for_req() is called.
-And that is why I got the fault messages.
-
-So my question is,
-How to send a STOP_TRANSMISSION command to terminate the writing
-request in my case.
-
-
-Thanks!
