@@ -1,41 +1,71 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] MMC: Block: Ensure hardware partitions don't mess with mmcblk device naming.
-Date: Fri, 22 Apr 2011 18:34:58 -0400
-Message-ID: <m3ei4tykx9.fsf@pullcord.laptop.org>
-References: <m3ipu76srt.fsf@pullcord.laptop.org>
-	<1303443973-1608-1-git-send-email-andreiw@motorola.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: John Stultz <john.stultz@linaro.org>
+Subject: [PATCH 2/6] mmc_block: Allow more than 8 partitions per card
+Date: Fri, 22 Apr 2011 18:01:38 -0700
+Message-ID: <1303520502-32171-3-git-send-email-john.stultz@linaro.org>
+References: <1303520502-32171-1-git-send-email-john.stultz@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:53259 "EHLO void.printf.net"
+Received: from e5.ny.us.ibm.com ([32.97.182.145]:49516 "EHLO e5.ny.us.ibm.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753659Ab1DVWa7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Apr 2011 18:30:59 -0400
-In-Reply-To: <1303443973-1608-1-git-send-email-andreiw@motorola.com> (Andrei
-	Warkentin's message of "Thu, 21 Apr 2011 22:46:13 -0500")
+	id S1757118Ab1DWBB4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Apr 2011 21:01:56 -0400
+Received: from d01relay06.pok.ibm.com (d01relay06.pok.ibm.com [9.56.227.116])
+	by e5.ny.us.ibm.com (8.14.4/8.13.1) with ESMTP id p3N0Zfwi028309
+	for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2011 20:35:41 -0400
+Received: from d01av04.pok.ibm.com (d01av04.pok.ibm.com [9.56.224.64])
+	by d01relay06.pok.ibm.com (8.13.8/8.13.8/NCO v10.0) with ESMTP id p3N11sj41274040
+	for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2011 21:01:54 -0400
+Received: from d01av04.pok.ibm.com (loopback [127.0.0.1])
+	by d01av04.pok.ibm.com (8.14.4/8.13.1/NCO v10.0 AVout) with ESMTP id p3N11rjv010064
+	for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2011 21:01:54 -0400
+In-Reply-To: <1303520502-32171-1-git-send-email-john.stultz@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Colin Cross <ccross@android.com>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Dima Zavin <dima@android.com>, John Stultz <john.stultz@linaro.org>
 
-Hi Andrei,
+From: Colin Cross <ccross@android.com>
 
-On Thu, Apr 21 2011, Andrei Warkentin wrote:
-> With the hardware partitions support (which represent additional logical devices
-> present on MMC), devidx does not correspond with index used to form
-> /dev/mmcblkX names. So use an additional allocated index for device names.
->
-> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
+Set the GENHD_FL_EXT_DEVT flag, which will allocate minor numbers
+in major 259 for partitions past disk->minors.
 
-Thanks, pushed to mmc-next for .40, looks good:
+Also remove the use of disk_devt to determine devidx from md->disk.
+md->disk->first_minor is always initialized from devidx and can
+always be used to recover it.
 
-[  659.127819] mmc0: new high speed SDHC card at address d555
-[  659.141704] mmcblk1: mmc0:d555 SD04G 3.79 GiB 
-[  659.147453]  mmcblk1: p1
+CC: Chris Ball <cjb@laptop.org>
+CC: Arnd Bergmann <arnd@arndb.de>
+CC: Dima Zavin <dima@android.com>
+Signed-off-by: Colin Cross <ccross@android.com>
+Signed-off-by: John Stultz <john.stultz@linaro.org>
+---
+ drivers/mmc/card/block.c |    7 ++-----
+ 1 files changed, 2 insertions(+), 5 deletions(-)
 
-(I re-wrapped the commit message and comment to <80 chars.)
-
-- Chris.
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index edac9ac..f69f948 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -102,11 +102,7 @@ static void mmc_blk_put(struct mmc_blk_data *md)
+ 	mutex_lock(&open_lock);
+ 	md->usage--;
+ 	if (md->usage == 0) {
+-		int devmaj = MAJOR(disk_devt(md->disk));
+-		int devidx = MINOR(disk_devt(md->disk)) / perdev_minors;
+-
+-		if (!devmaj)
+-			devidx = md->disk->first_minor / perdev_minors;
++		int devidx = md->disk->first_minor / perdev_minors;
+ 
+ 		blk_cleanup_queue(md->queue.queue);
+ 
+@@ -623,6 +619,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
+ 	md->disk->private_data = md;
+ 	md->disk->queue = md->queue.queue;
+ 	md->disk->driverfs_dev = &card->dev;
++	md->disk->flags = GENHD_FL_EXT_DEVT;
+ 	set_disk_ro(md->disk, md->read_only);
+ 
+ 	/*
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.3.2.146.gca209
+
