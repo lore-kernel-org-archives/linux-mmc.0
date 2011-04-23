@@ -1,54 +1,55 @@
-From: John Stultz <john.stultz@linaro.org>
-Subject: [PATCH 1/6] mmc: block: Resume multi-block reads after transient read errors.
-Date: Fri, 22 Apr 2011 18:01:37 -0700
-Message-ID: <1303520502-32171-2-git-send-email-john.stultz@linaro.org>
-References: <1303520502-32171-1-git-send-email-john.stultz@linaro.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: CMD23 plumbing and support patchset.
+Date: Fri, 22 Apr 2011 22:51:32 -0400
+Message-ID: <m3y631wuh7.fsf@pullcord.laptop.org>
+References: <1302741523-22276-1-git-send-email-andreiw@motorola.com>
+	<1302950458-1969-1-git-send-email-andreiw@motorola.com>
+	<m3pqogbcoa.fsf@pullcord.laptop.org>
+	<BANLkTik99XdFSsb7cjX0YoYHRA2d+Vn_yg@mail.gmail.com>
+	<BANLkTikDNNso=TBF-BiewTFTFeHqe1WDhw@mail.gmail.com>
+	<BANLkTi=Vj0p-=d0YLR=vk2CdSxH2GVz1+A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from e39.co.us.ibm.com ([32.97.110.160]:35687 "EHLO
-	e39.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757118Ab1DWBCB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2011 21:02:01 -0400
-Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
-	by e39.co.us.ibm.com (8.14.4/8.13.1) with ESMTP id p3N0mQYQ001400
-	for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2011 18:48:26 -0600
-Received: from d03av04.boulder.ibm.com (d03av04.boulder.ibm.com [9.17.195.170])
-	by d03relay04.boulder.ibm.com (8.13.8/8.13.8/NCO v10.0) with ESMTP id p3N12riB116610
-	for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2011 19:02:53 -0600
-Received: from d03av04.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av04.boulder.ibm.com (8.14.4/8.13.1/NCO v10.0 AVout) with ESMTP id p3N11rH6031866
-	for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2011 19:01:54 -0600
-In-Reply-To: <1303520502-32171-1-git-send-email-john.stultz@linaro.org>
+Received: from void.printf.net ([89.145.121.20]:43379 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752955Ab1DWCrk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Apr 2011 22:47:40 -0400
+In-Reply-To: <BANLkTi=Vj0p-=d0YLR=vk2CdSxH2GVz1+A@mail.gmail.com> (Andrei
+	Warkentin's message of "Thu, 21 Apr 2011 22:53:00 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: David Ding <david.j.ding@motorola.com>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Dima Zavin <dima@android.com>, Bentao Zou <bzou1@motorola.com>, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: linux-mmc@vger.kernel.org, arindam.nath@amd.com
 
-From: David Ding <david.j.ding@motorola.com>
+Hi,
 
-CC: Chris Ball <cjb@laptop.org>
-CC: Arnd Bergmann <arnd@arndb.de>
-CC: Dima Zavin <dima@android.com>
-Signed-off-by: Bentao Zou <bzou1@motorola.com>
-Signed-off-by: David Ding <david.j.ding@motorola.com>
-Signed-off-by: San Mehat <san@google.com>
-Signed-off-by: John Stultz <john.stultz@linaro.org>
----
- drivers/mmc/card/block.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+On Thu, Apr 21 2011, Andrei Warkentin wrote:
+>>> Can you give me the manufacturing date? This is pretty interesting.
+>>>
+>>> You can see an improvement even if you do something like time block
+>>> writes (O_DIRECT | O_SYNC, of course). But after all synthetic tests I
+>>> measured the time it took to do 40000 SQLite insertions and saw
+>>> something like 30% improvement.
+>>>
+>>
+>> And you're trying this on SDHCI I presume, right?
+>
+> Is this on the same board as the other log you sent? Controller is
+> SDHCI-PXA? If you give me  /sys/block/mmcblk0/device/date,
+> I'll investigate why this improvement isn't helping you out.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 61d233a..edac9ac 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -440,6 +440,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- 				continue;
- 			}
- 			status = get_card_status(card, req);
-+		} else if (disable_multi == 1) {
-+			disable_multi = 0;
- 		}
- 
- 		if (brq.cmd.error) {
+Yeah, sdhci-pxa:
+
+[root@localhost olpc]# cat /sys/block/mmcblk0/device/date
+10/2010
+
+Want to give me a benchmark script so that we can compare speeds
+directly?
+
+Thanks,
+
+- Chris.
 -- 
-1.7.3.2.146.gca209
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
