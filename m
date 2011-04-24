@@ -1,50 +1,130 @@
-From: Rabin Vincent <rabin@rab.in>
-Subject: [PATCH] mmc: block: init force_ro sysfs attribute
-Date: Sat, 23 Apr 2011 20:52:58 +0530
-Message-ID: <1303572178-6349-1-git-send-email-rabin@rab.in>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] [PATCH v2] mmc: Fix read-only detection with JMicron 388 chip
+Date: Sat, 23 Apr 2011 20:41:24 -0400
+Message-ID: <m3wrikv5u3.fsf@pullcord.laptop.org>
+References: <s5hd3kfihpd.wl%tiwai@suse.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:43669 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754708Ab1DWPWd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Apr 2011 11:22:33 -0400
-Received: by pwi15 with SMTP id 15so681167pwi.19
-        for <linux-mmc@vger.kernel.org>; Sat, 23 Apr 2011 08:22:33 -0700 (PDT)
+Received: from void.printf.net ([89.145.121.20]:55323 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757294Ab1DXAhi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 23 Apr 2011 20:37:38 -0400
+In-Reply-To: <s5hd3kfihpd.wl%tiwai@suse.de> (Takashi Iwai's message of "Thu,
+	21 Apr 2011 20:26:38 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: andreiw@motorola.com, linux-mmc@vger.kernel.org, Rabin Vincent <rabin@rab.in>
+To: Takashi Iwai <tiwai@suse.de>
+Cc: Aries Lee <arieslee@jmicron.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-To avoid lockdep warnings:
+Hi,
 
-BUG: key dc90a520 not in .data!
-------------[ cut here ]------------
-WARNING: at /home/rabin/kernel/arm/kernel/lockdep.c:2701 sysfs_add_file_mode+0x4c/0xb0()
-Modules linked in:
-[<c004b5d8>] (unwind_backtrace+0x0/0xe4) from [<c0074f20>] (warn_slowpath_common+0x4c/0x64)
-[<c0074f20>] (warn_slowpath_common+0x4c/0x64) from [<c0074f50>] (warn_slowpath_null+0x18/0x1c)
-[<c0074f50>] (warn_slowpath_null+0x18/0x1c) from [<c0157fec>] (sysfs_add_file_mode+0x4c/0xb0)
-[<c0157fec>] (sysfs_add_file_mode+0x4c/0xb0) from [<c02d61e4>] (mmc_add_disk+0x40/0x64)
-[<c02d61e4>] (mmc_add_disk+0x40/0x64) from [<c02d64cc>] (mmc_blk_probe+0x188/0x1fc)
-[<c02d64cc>] (mmc_blk_probe+0x188/0x1fc) from [<c02ce820>] (mmc_bus_probe+0x14/0x18)
-...
+On Thu, Apr 21 2011, Takashi Iwai wrote:
+> On HP laptops with JMicron 388 chip, the write-locked SD card isn't
+> detected correctly as read-only in many cases.  This is because the
+> PRESENT_STATE register becomes unsable just after plugging, and it
+> returns the WRITE_PROTECT bit wrongly at the first read.
+>
+> This patch fixes the read-only detection by adding a new sdhci quirk
+> indicating to check the register more intensively with a relatively
+> long delay.
+>
+> The patch is tested with 2.6.39-rc4 kernel.
+>
+> Cc: Aries Lee <arieslee@jmicron.com>
+> Signed-off-by: Takashi Iwai <tiwai@suse.de>
+> ---
+> v1->v2
+>  rewritten to use a quirk
+>
+>  drivers/mmc/host/sdhci-pci.c |    5 +++++
+>  drivers/mmc/host/sdhci.c     |   28 ++++++++++++++++++++++++----
+>  include/linux/mmc/sdhci.h    |    2 ++
+>  3 files changed, 31 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index a136be7..5781395 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -329,6 +329,11 @@ static int jmicron_probe(struct sdhci_pci_chip *chip)
+>  		return ret;
+>  	}
+>  
+> +	/* quirk for unsable RO-detection on JM388 chips */
+> +	if (chip->pdev->device == PCI_DEVICE_ID_JMICRON_JMB388_SD ||
+> +	    chip->pdev->device == PCI_DEVICE_ID_JMICRON_JMB388_ESD)
+> +		chip->quirks |= SDHCI_QUIRK_UNSTABLE_RO_DETECT;
+> +
+>  	return 0;
+>  }
+>  
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 9e15f41..8097171 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1237,14 +1237,11 @@ out:
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  }
+>  
+> -static int sdhci_get_ro(struct mmc_host *mmc)
+> +static int check_ro(struct sdhci_host *host)
+>  {
+> -	struct sdhci_host *host;
+>  	unsigned long flags;
+>  	int is_readonly;
+>  
+> -	host = mmc_priv(mmc);
+> -
+>  	spin_lock_irqsave(&host->lock, flags);
+>  
+>  	if (host->flags & SDHCI_DEVICE_DEAD)
+> @@ -1262,6 +1259,29 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+>  		!is_readonly : is_readonly;
+>  }
+>  
+> +#define SAMPLE_COUNT	5
+> +
+> +static int sdhci_get_ro(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host;
+> +	int i, ro_count;
+> +
+> +	host = mmc_priv(mmc);
+> +
+> +	if (!(host->quirks & SDHCI_QUIRK_UNSTABLE_RO_DETECT))
+> +		return check_ro(host);
+> + 
+> +	ro_count = 0;
+> +	for (i = 0; i < SAMPLE_COUNT; i++) {
+> +		if (check_ro(host)) {
+> +			if (++ro_count > SAMPLE_COUNT / 2)
+> +				return 1;
+> +		}
+> +		msleep(30);
+> +	}
+> +	return 0;
+> +}
+> + 
+>  static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+>  {
+>  	struct sdhci_host *host;
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index 83bd9f7..92e1c9a 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -85,6 +85,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK_NO_HISPD_BIT			(1<<29)
+>  /* Controller treats ADMA descriptors with length 0000h incorrectly */
+>  #define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC		(1<<30)
+> +/* The read-only detection via SDHCI_PRESENT_STATE register is unstable */
+> +#define SDHCI_QUIRK_UNSTABLE_RO_DETECT			(1<<31)
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
 
-Signed-off-by: Rabin Vincent <rabin@rab.in>
----
- drivers/mmc/card/block.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+Thanks, pushed to mmc-next for .39.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 9e30cf6..179a607 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -967,6 +967,7 @@ static int mmc_add_disk(struct mmc_blk_data *md)
- 	add_disk(md->disk);
- 	md->force_ro.show = force_ro_show;
- 	md->force_ro.store = force_ro_store;
-+	sysfs_attr_init(&md->force_ro.attr);
- 	md->force_ro.attr.name = "force_ro";
- 	md->force_ro.attr.mode = S_IRUGO | S_IWUSR;
- 	ret = device_create_file(disk_to_dev(md->disk), &md->force_ro);
+- Chris.
 -- 
-1.7.4.1
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
