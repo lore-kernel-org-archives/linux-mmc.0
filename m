@@ -1,60 +1,175 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: block: init force_ro sysfs attribute
-Date: Sat, 23 Apr 2011 22:25:57 -0400
-Message-ID: <m3oc3wv0zu.fsf@pullcord.laptop.org>
-References: <1303572178-6349-1-git-send-email-rabin@rab.in>
+From: Barry Song <21cnbao@gmail.com>
+Subject: Re: [PATCH] sdhci: add quirk to support shared bus controller
+Date: Mon, 25 Apr 2011 09:27:12 +0800
+Message-ID: <BANLkTikcxk6yt72pa6QC-unawseaOQ7Dfg@mail.gmail.com>
+References: <BANLkTi=7h_gBQ1CGqYgUUhZabcwVuoRhCw@mail.gmail.com> <BANLkTincOuKrTEzP3gv-d2Vk-Cih+BS4hw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:60237 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757365Ab1DXCW2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 23 Apr 2011 22:22:28 -0400
-In-Reply-To: <1303572178-6349-1-git-send-email-rabin@rab.in> (Rabin Vincent's
-	message of "Sat, 23 Apr 2011 20:52:58 +0530")
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:43898 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754057Ab1DYB1d convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2011 21:27:33 -0400
+Received: by qyk7 with SMTP id 7so528333qyk.19
+        for <linux-mmc@vger.kernel.org>; Sun, 24 Apr 2011 18:27:32 -0700 (PDT)
+In-Reply-To: <BANLkTincOuKrTEzP3gv-d2Vk-Cih+BS4hw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rabin Vincent <rabin@rab.in>
-Cc: andreiw@motorola.com, linux-mmc@vger.kernel.org
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, bin.shi@csr.com, Binghua.Duan@csr.com
 
-Hi Rabin,
-
-On Sat, Apr 23 2011, Rabin Vincent wrote:
-> To avoid lockdep warnings:
+2011/4/21 Andrei Warkentin <andreiw@motorola.com>:
+> Hi,
 >
-> BUG: key dc90a520 not in .data!
-> ------------[ cut here ]------------
-> WARNING: at /home/rabin/kernel/arm/kernel/lockdep.c:2701 sysfs_add_file_mode+0x4c/0xb0()
-> Modules linked in:
-> [<c004b5d8>] (unwind_backtrace+0x0/0xe4) from [<c0074f20>] (warn_slowpath_common+0x4c/0x64)
-> [<c0074f20>] (warn_slowpath_common+0x4c/0x64) from [<c0074f50>] (warn_slowpath_null+0x18/0x1c)
-> [<c0074f50>] (warn_slowpath_null+0x18/0x1c) from [<c0157fec>] (sysfs_add_file_mode+0x4c/0xb0)
-> [<c0157fec>] (sysfs_add_file_mode+0x4c/0xb0) from [<c02d61e4>] (mmc_add_disk+0x40/0x64)
-> [<c02d61e4>] (mmc_add_disk+0x40/0x64) from [<c02d64cc>] (mmc_blk_probe+0x188/0x1fc)
-> [<c02d64cc>] (mmc_blk_probe+0x188/0x1fc) from [<c02ce820>] (mmc_bus_probe+0x14/0x18)
-> ...
+> On Thu, Apr 21, 2011 at 3:51 AM, Barry Song <21cnbao@gmail.com> wrote=
+:
+>> From: Bin Shi <bin.shi@csr.com>
+>>
+>> some controllers share data bus or other pins between
+>> multi-controllers and need to switch the functions of shared pins
+>> runtime
+>> this patch requested those shared pins before actual hardware access
+>> and release them after access
+>>
+>> Signed-off-by: Bin Shi <bin.shi@csr.com>
+>> Cc: Binghua Duan <binghua.duan@csr.com>
+>> Signed-off-by: Barry Song <21cnbao@gmail.com>
+>> ---
+>> =C2=A0drivers/mmc/host/sdhci.c =C2=A0| =C2=A0 13 +++++++++++++
+>> =C2=A0drivers/mmc/host/sdhci.h =C2=A0| =C2=A0 =C2=A02 ++
+>> =C2=A0include/linux/mmc/sdhci.h | =C2=A0 =C2=A02 ++
+>> =C2=A03 files changed, 17 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index f31077d..7b07152 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1379,6 +1379,13 @@ static void sdhci_tasklet_finish(unsigned lon=
+g param)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0sdhci_reset(h=
+ost, SDHCI_RESET_DATA);
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0}
+>>
+>> + =C2=A0 =C2=A0 =C2=A0 /*
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0* some controllers share data bus or ot=
+her pins between multi-controller
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0* and need to switch the function of pi=
+ns runtime
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
+>> + =C2=A0 =C2=A0 =C2=A0 if (host->quirks & SDHCI_QUIRK_SHARED_PINS)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->ops->get_sh=
+ared_pins(host);
+>> +
 >
-> Signed-off-by: Rabin Vincent <rabin@rab.in>
-> ---
->  drivers/mmc/card/block.c |    1 +
->  1 files changed, 1 insertions(+), 0 deletions(-)
+> Why in tasklet_finish? Why not in sdhci_request?
+
+that is ok in sdhci_request
+
+> No need to waste a quirk flag. Just invoke if method is not NULL.
+
+i think most hardwares have no shared pins issue, it should be a quirk
+but not a generic option for all devices.
+
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 9e30cf6..179a607 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -967,6 +967,7 @@ static int mmc_add_disk(struct mmc_blk_data *md)
->  	add_disk(md->disk);
->  	md->force_ro.show = force_ro_show;
->  	md->force_ro.store = force_ro_store;
-> +	sysfs_attr_init(&md->force_ro.attr);
->  	md->force_ro.attr.name = "force_ro";
->  	md->force_ro.attr.mode = S_IRUGO | S_IWUSR;
->  	ret = device_create_file(disk_to_dev(md->disk), &md->force_ro);
+> Also, I would assume host->ops->get_shared_pins would need to
+> synchronize with other SDHCI instances
+> it shares the pins with. Since you do it after the host->lock (as you
+> should), what happens if get_shared_pins needs to wait?
 
-Thanks, pushed to mmc-next for .40.
+sorry, just due to my cross-eye while porting the patch from old
+kernel to linux-mmc tree. In fact i mean:
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+        /*
+         * some controllers share data bus or other pins between
+multi-controller
+         * and need to switch the function of pins runtime
+         */
+        if (host->quirks & SDHCI_QUIRK_SHARED_PINS)
+                host->ops->get_shared_pins(host);
+
+
+        mmc_request_done(host->mmc, mrq);
+
+        /*
+         * release shared pins so that other controllers can use them
+         */
+        if (host->quirks & SDHCI_QUIRK_SHARED_PINS)
+                host->ops->get_shared_pins(host);
+
+> Can you show the rest (sdhci driver implementing these hooks)?
+
+Yes. sdhci driver implement these hooks, special behavior of getting
+shared pins depends on special hardware, for us, we just request data
+bus mutex and set related hardware registers to switch the role of
+shared pins.
+
+>
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0host->mrq =3D NULL;
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0host->cmd =3D NULL;
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0host->data =3D NULL;
+>> @@ -1391,6 +1398,12 @@ static void sdhci_tasklet_finish(unsigned lon=
+g param)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0spin_unlock_irqrestore(&host->lock, flags=
+);
+>>
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0mmc_request_done(host->mmc, mrq);
+>> +
+>> + =C2=A0 =C2=A0 =C2=A0 /*
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0* release shared pins so that other con=
+trollers can use them
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
+>> + =C2=A0 =C2=A0 =C2=A0 if (host->quirks & SDHCI_QUIRK_SHARED_PINS)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->ops->get_sh=
+ared_pins(host);
+>> =C2=A0}
+>>
+>> =C2=A0static void sdhci_timeout_timer(unsigned long data)
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 85750a9..9d918a5 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -229,6 +229,8 @@ struct sdhci_ops {
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0void (*platform_send_init_74_clocks)(stru=
+ct sdhci_host *host,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 u8 power_mode);
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned int =C2=A0 =C2=A0(*get_ro)(struc=
+t sdhci_host *host);
+>> + =C2=A0 =C2=A0 =C2=A0 unsigned int =C2=A0 =C2=A0(*get_shared_pins)(=
+struct sdhci_host *host);
+>> + =C2=A0 =C2=A0 =C2=A0 unsigned int =C2=A0 =C2=A0(*put_shared_pins)(=
+struct sdhci_host *host);
+>> =C2=A0};
+>>
+>> =C2=A0#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+>> index 83bd9f7..32ab422 100644
+>> --- a/include/linux/mmc/sdhci.h
+>> +++ b/include/linux/mmc/sdhci.h
+>> @@ -85,6 +85,8 @@ struct sdhci_host {
+>> =C2=A0#define SDHCI_QUIRK_NO_HISPD_BIT =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 (1<<29)
+>> =C2=A0/* Controller treats ADMA descriptors with length 0000h incorr=
+ectly */
+>> =C2=A0#define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 (1<<30)
+>> +/* Controller shared data bus or other pins with other controllers =
+*/
+>> +#define SDHCI_QUIRK_SHARED_PINS =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 (1<<31)
+>>
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0int irq; =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0/* Device IRQ */
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0void __iomem *ioaddr; =C2=A0 /* Mapped ad=
+dress */
+>> --
+>> 1.7.1
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
+tml
+>>
