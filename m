@@ -1,156 +1,192 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [linux-pm] [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
-Date: Mon, 25 Apr 2011 12:29:27 +0200
-Message-ID: <201104251229.27263.rjw@sisk.pl>
-References: <Pine.LNX.4.44L0.1104221709030.1791-100000@iolanthe.rowland.org> <201104230011.48073.rjw@sisk.pl>
+From: Barry Song <21cnbao@gmail.com>
+Subject: Re: [PATCH] sdhci: add quirk to support shared bus controller
+Date: Mon, 25 Apr 2011 23:49:35 +0800
+Message-ID: <BANLkTim6V5RNtrUzz+KQiG0USW72B2xjQQ@mail.gmail.com>
+References: <BANLkTi=7h_gBQ1CGqYgUUhZabcwVuoRhCw@mail.gmail.com>
+ <BANLkTincOuKrTEzP3gv-d2Vk-Cih+BS4hw@mail.gmail.com> <BANLkTikcxk6yt72pa6QC-unawseaOQ7Dfg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:47985 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758208Ab1DYK3K (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 25 Apr 2011 06:29:10 -0400
-In-Reply-To: <201104230011.48073.rjw@sisk.pl>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:44483 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750970Ab1DYPt4 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2011 11:49:56 -0400
+Received: by qwk3 with SMTP id 3so995868qwk.19
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Apr 2011 08:49:55 -0700 (PDT)
+In-Reply-To: <BANLkTikcxk6yt72pa6QC-unawseaOQ7Dfg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-pm@lists.linux-foundation.org
-Cc: Alan Stern <stern@rowland.harvard.edu>, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, LKML <linux-kernel@vger.kernel.org>
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, bin.shi@csr.com, Binghua.Duan@csr.com
 
-On Saturday, April 23, 2011, Rafael J. Wysocki wrote:
-> On Friday, April 22, 2011, Alan Stern wrote:
-> > On Fri, 22 Apr 2011, Rafael J. Wysocki wrote:
-> > 
-> > > > The barrier would not prevent the race between the notifier and runtie PM
-> > > > from taking place.  Why don't we do something like this instead:
-> > > > 
-> > > > ---
-> > > >  drivers/base/dd.c |    3 ++-
-> > > >  1 file changed, 2 insertions(+), 1 deletion(-)
-> > > > 
-> > > > Index: linux-2.6/drivers/base/dd.c
-> > > > ===================================================================
-> > > > --- linux-2.6.orig/drivers/base/dd.c
-> > > > +++ linux-2.6/drivers/base/dd.c
-> > > > @@ -326,6 +326,8 @@ static void __device_release_driver(stru
-> > > >  						     BUS_NOTIFY_UNBIND_DRIVER,
-> > > >  						     dev);
-> > > >  
-> > > > +		pm_runtime_put_sync(dev);
-> > > > +
-> > > 
-> > > In fact, I think this one may be _noidle.  If we allow the bus/driver
-> > > to do what they wont, we might as well let them handle the "device idle"
-> > > case from ->remove().
-> > 
-> > Maybe...  But keeping it put_sync doesn't do any harm.  In Guennadi's 
-> > case, it might allow him to get rid of the pm_runtime_suspend() call in 
-> > the remove routine.
-> > 
-> > > >  		if (dev->bus && dev->bus->remove)
-> > > >  			dev->bus->remove(dev);
-> > > >  		else if (drv->remove)
-> > > > @@ -338,7 +340,6 @@ static void __device_release_driver(stru
-> > > >  						     BUS_NOTIFY_UNBOUND_DRIVER,
-> > > >  						     dev);
-> > > >  
-> > > > -		pm_runtime_put_sync(dev);
-> > > >  	}
-> > > >  }
-> > 
-> > Basically this is okay with me, and it should allow Guennadi to avoid
-> > the extra put/get pair.
-> 
-> OK, so I'm going to put the appended patch into my linux-next branch
-> (hopefully, the problem is explained sufficiently in the changelog).
+2011/4/25 Barry Song <21cnbao@gmail.com>:
+> 2011/4/21 Andrei Warkentin <andreiw@motorola.com>:
+>> Hi,
+>>
+>> On Thu, Apr 21, 2011 at 3:51 AM, Barry Song <21cnbao@gmail.com> wrot=
+e:
+>>> From: Bin Shi <bin.shi@csr.com>
+>>>
+>>> some controllers share data bus or other pins between
+>>> multi-controllers and need to switch the functions of shared pins
+>>> runtime
+>>> this patch requested those shared pins before actual hardware acces=
+s
+>>> and release them after access
+>>>
+>>> Signed-off-by: Bin Shi <bin.shi@csr.com>
+>>> Cc: Binghua Duan <binghua.duan@csr.com>
+>>> Signed-off-by: Barry Song <21cnbao@gmail.com>
+>>> ---
+>>> =C2=A0drivers/mmc/host/sdhci.c =C2=A0| =C2=A0 13 +++++++++++++
+>>> =C2=A0drivers/mmc/host/sdhci.h =C2=A0| =C2=A0 =C2=A02 ++
+>>> =C2=A0include/linux/mmc/sdhci.h | =C2=A0 =C2=A02 ++
+>>> =C2=A03 files changed, 17 insertions(+), 0 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index f31077d..7b07152 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -1379,6 +1379,13 @@ static void sdhci_tasklet_finish(unsigned lo=
+ng param)
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0sdhci_reset(=
+host, SDHCI_RESET_DATA);
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0}
+>>>
+>>> + =C2=A0 =C2=A0 =C2=A0 /*
+>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0* some controllers share data bus or o=
+ther pins between multi-controller
+>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0* and need to switch the function of p=
+ins runtime
+>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
+>>> + =C2=A0 =C2=A0 =C2=A0 if (host->quirks & SDHCI_QUIRK_SHARED_PINS)
+>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->ops->get_s=
+hared_pins(host);
+>>> +
+>>
+>> Why in tasklet_finish? Why not in sdhci_request?
+>
+> that is ok in sdhci_request
+>
+>> No need to waste a quirk flag. Just invoke if method is not NULL.
+>
+> i think most hardwares have no shared pins issue, it should be a quir=
+k
+> but not a generic option for all devices.
+>
+>>
+>> Also, I would assume host->ops->get_shared_pins would need to
+>> synchronize with other SDHCI instances
+>> it shares the pins with. Since you do it after the host->lock (as yo=
+u
+>> should), what happens if get_shared_pins needs to wait?
+>
+> sorry, just due to my cross-eye while porting the patch from old
+> kernel to linux-mmc tree. In fact i mean:
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0/*
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 * some controllers share data bus or othe=
+r pins between
+> multi-controller
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 * and need to switch the function of pins=
+ runtime
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 */
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (host->quirks & SDHCI_QUIRK_SHARED_PINS=
+)
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0host->ops->get=
+_shared_pins(host);
+>
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0mmc_request_done(host->mmc, mrq);
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0/*
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 * release shared pins so that other contr=
+ollers can use them
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 */
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (host->quirks & SDHCI_QUIRK_SHARED_PINS=
+)
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0host->ops->get=
+_shared_pins(host);
+>
 
-I thought about that a bit more and came to the conclusion that we should
-do things a bit differently in __device_release_driver().  Namely, the fact
-that the device can be resumed (either synchronously or asynchronously) after
-the pm_runtime_barrier() has returned may be problematic too, because it
-may race with the bus notifier in some cases.  For this reason, I think it
-would be better to do pm_runtime_get_sync() instead of the
-pm_runtime_get_noresume() and pm_runtime_barrier().
+In fact we request shared pins in sdhci_request() and release them in
+tasklet_finish. Then i'll send patch v2.
 
-So, I think the appended patch would be better than the previous one.
-
-Thanks,
-Rafael
-
----
-From: Rafael J. Wysocki <rjw@sisk.pl>
-Subject: PM / Runtime: Rework runtime PM handling during driver removal
-
-The driver core tries to prevent race conditions between runtime PM
-and driver removal from happening by incrementing the runtime PM
-usage counter of the device and executing pm_runtime_barrier() before
-running the bus notifier and the ->remove() callbacks provided by the
-device's subsystem or driver.  This guarantees that, if a future
-runtime suspend of the device has been scheduled or a runtime resume
-or idle request has been queued up right before the driver removal,
-it will be canceled or waited for to complete and no other
-asynchronous runtime suspend or idle requests for the device will be
-put into the PM workqueue until the ->remove() callback returns.
-However, it doesn't prevent resume requests from being queued up
-after pm_runtime_barrier() has been called and it doesn't prevent
-pm_runtime_resume() from executing the device subsystem's runtime
-resume callback.  Morever, it prevents the device's subsystem or
-driver from putting the device into the suspended state by calling
-pm_runtime_suspend() from its ->remove() routine.  This turns out to
-be a major inconvenience for some subsystems and drivers that want to
-leave the devices they handle in the suspended state.
-
-To really prevent runtime PM callbacks from racing with the bus
-notifier callback in __device_release_driver(), which is necessary,
-because the notifier is used by some subsystems to carry out
-operations affecting the runtime PM functionality, use
-pm_runtime_get_sync() instead of the combination of
-pm_runtime_get_noresume() and pm_runtime_barrier().  This will resume
-the device if it's in the suspended state and will prevent it from
-being suspended again until pm_runtime_put_*() is called.
-
-To allow subsystems and drivers to put devices into the suspended
-state by calling pm_runtime_suspend() from their ->remove() routines,
-execute pm_runtime_put_sync() after running the bus notifier in
-__device_release_driver().  This will require subsystems and drivers
-to make their ->remove() callbacks avoid races with runtime PM
-directly, but it will allow of more flexibility in the handling of
-devices during the removal of their drivers.
-
-Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
----
- drivers/base/dd.c |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-Index: linux-2.6/drivers/base/dd.c
-===================================================================
---- linux-2.6.orig/drivers/base/dd.c
-+++ linux-2.6/drivers/base/dd.c
-@@ -316,8 +316,7 @@ static void __device_release_driver(stru
- 
- 	drv = dev->driver;
- 	if (drv) {
--		pm_runtime_get_noresume(dev);
--		pm_runtime_barrier(dev);
-+		pm_runtime_get_sync(dev);
- 
- 		driver_sysfs_remove(dev);
- 
-@@ -326,6 +325,8 @@ static void __device_release_driver(stru
- 						     BUS_NOTIFY_UNBIND_DRIVER,
- 						     dev);
- 
-+		pm_runtime_put_sync(dev);
-+
- 		if (dev->bus && dev->bus->remove)
- 			dev->bus->remove(dev);
- 		else if (drv->remove)
-@@ -338,7 +339,6 @@ static void __device_release_driver(stru
- 						     BUS_NOTIFY_UNBOUND_DRIVER,
- 						     dev);
- 
--		pm_runtime_put_sync(dev);
- 	}
- }
- 
+>> Can you show the rest (sdhci driver implementing these hooks)?
+>
+> Yes. sdhci driver implement these hooks, special behavior of getting
+> shared pins depends on special hardware, for us, we just request data
+> bus mutex and set related hardware registers to switch the role of
+> shared pins.
+>
+>>
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0host->mrq =3D NULL;
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0host->cmd =3D NULL;
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0host->data =3D NULL;
+>>> @@ -1391,6 +1398,12 @@ static void sdhci_tasklet_finish(unsigned lo=
+ng param)
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0spin_unlock_irqrestore(&host->lock, flag=
+s);
+>>>
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0mmc_request_done(host->mmc, mrq);
+>>> +
+>>> + =C2=A0 =C2=A0 =C2=A0 /*
+>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0* release shared pins so that other co=
+ntrollers can use them
+>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
+>>> + =C2=A0 =C2=A0 =C2=A0 if (host->quirks & SDHCI_QUIRK_SHARED_PINS)
+>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->ops->get_s=
+hared_pins(host);
+>>> =C2=A0}
+>>>
+>>> =C2=A0static void sdhci_timeout_timer(unsigned long data)
+>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>> index 85750a9..9d918a5 100644
+>>> --- a/drivers/mmc/host/sdhci.h
+>>> +++ b/drivers/mmc/host/sdhci.h
+>>> @@ -229,6 +229,8 @@ struct sdhci_ops {
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0void (*platform_send_init_74_clocks)(str=
+uct sdhci_host *host,
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 u8 power_mode);
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned int =C2=A0 =C2=A0(*get_ro)(stru=
+ct sdhci_host *host);
+>>> + =C2=A0 =C2=A0 =C2=A0 unsigned int =C2=A0 =C2=A0(*get_shared_pins)=
+(struct sdhci_host *host);
+>>> + =C2=A0 =C2=A0 =C2=A0 unsigned int =C2=A0 =C2=A0(*put_shared_pins)=
+(struct sdhci_host *host);
+>>> =C2=A0};
+>>>
+>>> =C2=A0#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+>>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+>>> index 83bd9f7..32ab422 100644
+>>> --- a/include/linux/mmc/sdhci.h
+>>> +++ b/include/linux/mmc/sdhci.h
+>>> @@ -85,6 +85,8 @@ struct sdhci_host {
+>>> =C2=A0#define SDHCI_QUIRK_NO_HISPD_BIT =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 (1<<29)
+>>> =C2=A0/* Controller treats ADMA descriptors with length 0000h incor=
+rectly */
+>>> =C2=A0#define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 (1<<30)
+>>> +/* Controller shared data bus or other pins with other controllers=
+ */
+>>> +#define SDHCI_QUIRK_SHARED_PINS =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 (1<<31)
+>>>
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0int irq; =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0/* Device IRQ */
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0void __iomem *ioaddr; =C2=A0 /* Mapped a=
+ddress */
+>>> --
+>>> 1.7.1
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
+" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.=
+html
+>>>
+>
