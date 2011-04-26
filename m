@@ -1,61 +1,60 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v3 00/12] add support for host controller v3.00
-Date: Tue, 26 Apr 2011 00:52:04 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300EB72D340@SAUSEXMBP01.amd.com>
-References: <1302863942-1774-1-git-send-email-arindam.nath@amd.com>
- <m3bp07txrb.fsf@pullcord.laptop.org>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH] mmc:sdhci:add support to request/free pins for
+ controllers sharing hardware bus
+Date: Tue, 26 Apr 2011 08:58:51 +0200
+Message-ID: <20110426065851.GA14534@pengutronix.de>
+References: <5EB3BFCD089AD643B9BB63439F5FD5E9A127@SHAASIEXM01.ASIA.ROOT.PRI>
+ <BANLkTinj4pnDG=cCJY3JGYGXOYoVPHtA9A@mail.gmail.com>
+ <m3d3k9u0yy.fsf@pullcord.laptop.org>
+ <BANLkTimXXirF6zqx9h9DMRSpx+o8_vb=3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="sm4nu43k4a2Rpi4c"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:4612
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753059Ab1DZFxh convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 26 Apr 2011 01:53:37 -0400
-In-Reply-To: <m3bp07txrb.fsf@pullcord.laptop.org>
-Content-Language: en-US
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:37794 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757059Ab1DZG64 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 02:58:56 -0400
+Content-Disposition: inline
+In-Reply-To: <BANLkTimXXirF6zqx9h9DMRSpx+o8_vb=3w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "prakity@marvell.com" <prakity@marvell.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
-
-Hi Chris,
-
-> -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org]
-> Sent: Friday, April 15, 2011 7:36 PM
-> To: Nath, Arindam
-> Cc: linux-mmc@vger.kernel.org; subhashj@codeaurora.org;
-> prakity@marvell.com; zhangfei.gao@gmail.com; Su, Henry; Lu, Aaron;
-> anath.amd@gmail.com
-> Subject: Re: [PATCH v3 00/12] add support for host controller v3.00
-> 
-> Hi Arindam,
-> 
-> On Fri, Apr 15 2011, Arindam Nath wrote:
-> > V3
-> 
-> Thanks very much for reposting this!  I know it's a lot of work to keep
-> track of so many comments and changes.
-> 
-> I've checked that this applies to mmc-next and doesn't add any compile
-> warnings, and the patch quality (particularly your use of comments)
-> looks excellent.  I'll wait a week for further comments and Tested-bys,
-> and then look at whether we should push the series to mmc-next as-is
-> or wait for another revision.
-
-Just a follow up on what you said. Is there any plan to merge the patches with your tree?
-
-Thanks,
-Arindam
-
-> 
-> Thanks,
-> 
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+To: Barry Song <21cnbao@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Binghua.Duan@csr.com, andreiw@motorola.com, prakity@marvell.com
 
 
+--sm4nu43k4a2Rpi4c
+Content-Type: text/plain; charset=iso-8859-15
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+> > * Where is the patch that implements the get_shared_pins() hook in
+> > =A0your driver?
+> We send the common level patch ahead to get the upstream agreement so
+> that we can maintain our bottom level sdhci codes better. We will send
+> the special driver patch after some time.
+
+Hmm, why should be there a functionality if there is no user for it? A
+reference user helps people understand how it is intended to be used.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--sm4nu43k4a2Rpi4c
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAk22bSoACgkQD27XaX1/VRuqyQCfTPvx1T2Jrpe8peSk2H7ONkM9
+4twAnjilc+eyZBU+i/+QTF8q+YhL8E1D
+=qFS0
+-----END PGP SIGNATURE-----
+
+--sm4nu43k4a2Rpi4c--
