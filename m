@@ -1,77 +1,112 @@
-From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 01/12] mmc: add none blocking mmc request function
-Date: Tue, 26 Apr 2011 16:22:12 +0200
-Message-ID: <BANLkTinVL7NJpgGF0KZAdmqgyu2pXyKFkA@mail.gmail.com>
-References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
-	<1302116833-24540-2-git-send-email-per.forlin@linaro.org>
-	<4DA81F42.3070208@csr.com>
-	<BANLkTimaTe0qD5sbEJj88YRv2DZv=1oxTQ@mail.gmail.com>
-	<4DB6C89F.10903@csr.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH] sdhci-pxa: add platform specific code for UHS signaling
+Date: Tue, 26 Apr 2011 08:24:29 -0700
+Message-ID: <E043CE35-CAF8-4D3A-987D-E2FB363FCD66@marvell.com>
+References: <95F7D594-60D3-49AA-87DA-63B5970D9787@marvell.com>
+ <6C03668EAF45B747AF947A1603D1B300EB72D365@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <4DB6C89F.10903-kQvG35nSl+M@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: David Vrabel <david.vrabel-kQvG35nSl+M@public.gmane.org>
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:58698 "EHLO
+	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753371Ab1DZPZE convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 26 Apr 2011 11:25:04 -0400
+In-Reply-To: <6C03668EAF45B747AF947A1603D1B300EB72D365@SAUSEXMBP01.amd.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Nath, Arindam" <Arindam.Nath@amd.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 26 April 2011 15:29, David Vrabel <david.vrabel-kQvG35nSl+M@public.gmane.org> wrote:
-> On 20/04/11 08:17, Per Forlin wrote:
->>
->>> Using a MMC request queue has other benefits -- it allows multiple users
->>> without having to claim/release the host. =A0This would be useful for
->>> (especially multi-function) SDIO.
->>
->> You mean claim and release would be done only within the mmc core. The
->> timed saved here would equal the time it takes to release and claim
->> the host.
->> Claim and release can also be used for power management to indicate if
->> any client is using the host, if not the power can be switched off.
->
-> Isn't there a separate runtime power management API that different from
-> claim/release?
->
-I misunderstood. I thought you meant that the claim() and release()
-were not needed if having an internal request queue in core.c.
-Please discard my comment.
 
->> I just want to make sure I understand the multi-function SDIO case, I
->> haven't done any work with SDIO.
->> Can the SDIO functions compete over the same claim_host at the same time?
->> Example: if function 1 claims the host, function 2 and function 3 also
->> want to claim the host but have to wait for function 1 to release the
->> host.
->
-> This is the case. =A0 Each function driver has to claim exclusive access
-> to the host.
->
->> What is the extra benefit of having the internal request queue for
->> multi function SDIO?
->
-> It reduces the delays between commands if multiple drivers are sending
-> commands. =A0I estimated performance improvements with 2-3% from just
-> removing the need to claim/release in one particular SDIO function
-> driver. =A0Performance improvements for multi-function cards would be a
-> bit more (5% perhaps?).
->
-Your estimates are promising.
+On Apr 25, 2011, at 11:36 PM, Nath, Arindam wrote:
 
-> The more important benefit is the simplification of the API.
-I agree. I will make a prototype for this. I don't think I will be
-able to find time for this until middle of May. I let know you when I
-have patches.
+> Hi Philip,
+> 
+> 
+>> -----Original Message-----
+>> From: Philip Rakity [mailto:prakity@marvell.com]
+>> Sent: Saturday, April 23, 2011 1:56 AM
+>> To: linux-mmc@vger.kernel.org
+>> Cc: Nath, Arindam
+>> Subject: [PATCH] sdhci-pxa: add platform specific code for UHS
+>> signaling
+>> 
+>> 
+>> Marvell controller requires 1.8V bit in UHS control register 2
+>> be set when doing UHS.  eMMC does not require 1.8V for DDR.
+>> add platform code to handle this.
+>> 
+>> Signed-off-by: Philip Rakity <prakity@marvell.com>
+>> ---
+>> drivers/mmc/host/sdhci-pxa.c |   38
+>> ++++++++++++++++++++++++++++++++++++++
+>> 1 files changed, 38 insertions(+), 0 deletions(-)
+>> 
+>> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-
+>> pxa.c
+>> index 0e64d66..279d677 100644
+>> --- a/drivers/mmc/host/sdhci-pxa.c
+>> +++ b/drivers/mmc/host/sdhci-pxa.c
+>> @@ -94,7 +94,42 @@ static void platform_reset_exit(struct sdhci_host
+>> *host, u8 mask)
+>> 	}
+>> }
+>> 
+>> +static int set_uhs_signaling(struct sdhci_host *host, unsigned int
+>> uhs)
+>> +{
+>> +	u16 ctrl_2;
+>> +
+>> +	/*
+>> +	 * Set V18_EN -- UHS modes do not work without this.
+>> +	 * does not change signaling voltage
+>> +	 */
+>> +	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>> +
+>> +		/* Select Bus Speed Mode for host */
+>> +	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
+>> +	if (uhs == MMC_TIMING_UHS_SDR12)
+>> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
+>> +	else if (uhs == MMC_TIMING_UHS_SDR25)
+>> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
+>> +	else if (uhs == MMC_TIMING_UHS_SDR50) {
+>> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
+>> +		ctrl_2 |= SDHCI_CTRL_VDD_180;
+>> +	}
+>> +	else if (uhs == MMC_TIMING_UHS_SDR104) {
+>> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
+>> +		ctrl_2 |= SDHCI_CTRL_VDD_180;
+>> +	}
+>> +	else if (uhs == MMC_TIMING_UHS_DDR50) {
+>> +		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
+>> +		ctrl_2 |= SDHCI_CTRL_VDD_180;
+>> +	}
+> 
+> Since SDR12 and SDR25 are also UHS modes, don't we need to set 1.8V signaling for them as well?
+> 
+will double check with hardware folks.
 
->
-> David
-Thanks,
-Per
+>> +	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+
+
+> 
+> I am not sure about your controller, but as per the spec, we need to reset SDCLK before enabling 1.8V, and then re-enable SDCLK. Also there is a delay of 5ms between these two. Is that a concern here?
+> 
+
+The bit must be set -- no need for 5ms delay since it does not control any power source.  Internal.
+
+>> +	pr_debug("%s:%s uhs = %d, ctrl_2 = %04X\n",
+>> +		__func__, mmc_hostname(host->mmc), uhs, ctrl_2);
+>> +	return 0;
+>> +}
+> 
+> Since, we are just returning 0 from this function, why not use *void* return type instead?
+> 
+> Thanks,
+> Arindam
+> 
+> 
+
