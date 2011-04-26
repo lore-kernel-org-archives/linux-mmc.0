@@ -1,59 +1,52 @@
 From: Sahitya Tummala <stummala@codeaurora.org>
-Subject: [PATCH 7/7] mmc: msm_sdcc: Handle dma resource not present case
-Date: Tue, 26 Apr 2011 11:04:26 +0530
-Message-ID: <1303796066-6784-7-git-send-email-stummala@codeaurora.org>
+Subject: [PATCH 6/7] mmc: msm_sdcc: Change initialization order of busclk_timer in probe
+Date: Tue, 26 Apr 2011 11:04:25 +0530
+Message-ID: <1303796066-6784-6-git-send-email-stummala@codeaurora.org>
 References: <1303796066-6784-1-git-send-email-stummala@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:22619 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752531Ab1DZFfr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 01:35:47 -0400
 In-Reply-To: <1303796066-6784-1-git-send-email-stummala@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: davidb@codeaurora.org, dwalker@fifo99.com, bryanh@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, san@google.com, Subhash Jadavani <subhashj@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: davidb@codeaurora.org, dwalker@fifo99.com, bryanh@codeaurora.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, san@google.com, Sahitya Tummala <stummala@codeaurora.org>
 
-From: Subhash Jadavani <subhashj@codeaurora.org>
+Intialize busclk_timer before it is accessed in probe.
 
-If DMA resource is not available then SDCC driver
-should atleast work in PIO data transfer mode.
-
-Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
 Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 ---
- drivers/mmc/host/msm_sdcc.c |   15 ++++++++++-----
- 1 files changed, 10 insertions(+), 5 deletions(-)
+ drivers/mmc/host/msm_sdcc.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
-index 36fded7..a7d7b5e 100644
+index 782e4cc..36fded7 100644
 --- a/drivers/mmc/host/msm_sdcc.c
 +++ b/drivers/mmc/host/msm_sdcc.c
-@@ -1233,9 +1233,13 @@ msmsdcc_probe(struct platform_device *pdev)
- 	/*
- 	 * Setup DMA
- 	 */
--	ret = msmsdcc_init_dma(host);
--	if (ret)
--		goto ioremap_free;
-+	if (host->dmares) {
-+		ret = msmsdcc_init_dma(host);
-+		if (ret)
-+			goto ioremap_free;
-+	} else {
-+		host->dma.channel = -1;
-+	}
+@@ -1209,6 +1209,10 @@ msmsdcc_probe(struct platform_device *pdev)
+ 	host->plat = plat;
+ 	host->mmc = mmc;
+ 	host->curr.cmd = NULL;
++	init_timer(&host->busclk_timer);
++	host->busclk_timer.data = (unsigned long) host;
++	host->busclk_timer.function = msmsdcc_busclk_expired;
++
  
- 	/* Get our clocks */
- 	host->pclk = clk_get(&pdev->dev, "sdc_pclk");
-@@ -1379,8 +1383,9 @@ msmsdcc_probe(struct platform_device *pdev)
-  pclk_put:
- 	clk_put(host->pclk);
- dma_free:
--	dma_free_coherent(NULL, sizeof(struct msmsdcc_nc_dmadata),
--				host->dma.nc, host->dma.nc_busaddr);
-+	if (host->dmares)
-+		dma_free_coherent(NULL, sizeof(struct msmsdcc_nc_dmadata),
-+					host->dma.nc, host->dma.nc_busaddr);
- ioremap_free:
- 	tasklet_kill(&host->dma_tlet);
- 	iounmap(host->base);
+ 	host->cmdpoll = 1;
+ 
+@@ -1326,10 +1330,6 @@ msmsdcc_probe(struct platform_device *pdev)
+ 		host->eject = !host->oldstat;
+ 	}
+ 
+-	init_timer(&host->busclk_timer);
+-	host->busclk_timer.data = (unsigned long) host;
+-	host->busclk_timer.function = msmsdcc_busclk_expired;
+-
+ 	ret = request_irq(cmd_irqres->start, msmsdcc_irq, IRQF_SHARED,
+ 			  DRIVER_NAME " (cmd)", host);
+ 	if (ret)
 -- 
 1.7.1
 
