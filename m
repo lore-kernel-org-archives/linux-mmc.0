@@ -1,34 +1,53 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 6/6] mmc: sd: Add retries in re-detection
-Date: Tue, 26 Apr 2011 15:42:08 +0200
-Message-ID: <201104261542.08353.arnd@arndb.de>
-References: <1303520502-32171-1-git-send-email-john.stultz@linaro.org> <1303520502-32171-7-git-send-email-john.stultz@linaro.org>
+Subject: Re: [PATCH v7] mmc: Add mmc CMD+ACMD passthrough ioctl
+Date: Tue, 26 Apr 2011 16:14:35 +0200
+Message-ID: <201104261614.35455.arnd@arndb.de>
+References: <alpine.DEB.2.00.1104211735290.3919@peruna> <alpine.DEB.2.00.1104211743210.3919@peruna>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
-  charset="iso-8859-15"
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:49255 "EHLO
+Received: from moutng.kundenserver.de ([212.227.126.171]:64476 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755444Ab1DZNmO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 09:42:14 -0400
-In-Reply-To: <1303520502-32171-7-git-send-email-john.stultz@linaro.org>
+	with ESMTP id S1756293Ab1DZOOl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 10:14:41 -0400
+In-Reply-To: <alpine.DEB.2.00.1104211743210.3919@peruna>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: John Stultz <john.stultz@linaro.org>
-Cc: linux-mmc@vger.kernel.org, San Mehat <san@android.com>, Chris Ball <cjb@laptop.org>, Dima Zavin <dima@android.com>
+To: John Calixto <john.calixto@modsystems.com>
+Cc: linux-mmc@vger.kernel.org, Andrei Warkentin <andreiw@motorola.com>, =?utf-8?q?Micha=C5=82_Miros=C5=82aw?= <mirqus@gmail.com>, Chris Ball <cjb@laptop.org>
 
-On Saturday 23 April 2011, John Stultz wrote:
-> From: San Mehat <san@android.com>
+On Friday 22 April 2011, John Calixto wrote:
+> Allows appropriately-privileged applications to send CMD (normal) and
+> ACMD (application-specific; preceded with CMD55) commands to
+> cards/devices on the mmc bus.  This is primarily useful for enabling the
+> security functionality built in to every SD card.
 > 
-> Signed-off-by: San Mehat <san@android.com>
+> It can also be used as a generic passthrough (e.g. to enable virtual
+> machines to control mmc bus devices directly).  However, this use case
+> has not been tested rigorously.  Generic passthrough testing was only
+> conducted for a few non-security opcodes to prove the feasibility of the
+> passthrough.
+> 
+> Since any opcode can be sent using this passthrough, it is very possible
+> to render the card/device unusable.  Applications that use this ioctl
+> must have CAP_SYS_RAWIO.
+> 
+> Security commands tested on TI PCIxx12 (SDHCI), Sigma Designs SMP8652
+> SoC, TI OMAP3621 SoC, TI OMAP3630 SoC, Samsung S5PC110 SoC, Qualcomm
+> MSM7200A SoC.
+> 
+> Signed-off-by: John Calixto <john.calixto@modsystems.com>
+> Reviewed-by: Andrei Warkentin <andreiw@motorola.com>
 
-Same comments apply as in the previous patch. Maybe San Mehat can
-comment on the intentions of this patch. Is there a specific hardware
-that is causing this trouble.
+The implementation looks good to me now,
 
-> mmc: sd: Remove debugging printk
+Reviewed-by: Arnd Bergmann <arnd@arndb.de>
 
-Stray output in changelog?
+I'll leave the final decision whether this is a good feature to have
+to Chris. I still believe that we should have per-command ioctls
+for the security feature, but getting there would require someone
+to implement it, and I'm not going to do that.
 
 	Arnd
