@@ -1,19 +1,19 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] sdhci-pxa: add platform specific code for UHS signaling
-Date: Tue, 26 Apr 2011 08:24:29 -0700
-Message-ID: <E043CE35-CAF8-4D3A-987D-E2FB363FCD66@marvell.com>
-References: <95F7D594-60D3-49AA-87DA-63B5970D9787@marvell.com>
- <6C03668EAF45B747AF947A1603D1B300EB72D365@SAUSEXMBP01.amd.com>
+Subject: Re: [PATCH] mmc: eMMC signal voltage does not use CMD11
+Date: Tue, 26 Apr 2011 08:26:30 -0700
+Message-ID: <390DC252-295C-4B82-8D5F-43E92EA5D3AF@marvell.com>
+References: <ABE44455-4F1B-45A2-AED9-150C8E5DBED0@marvell.com>
+ <6C03668EAF45B747AF947A1603D1B300EB72D36F@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:58698 "EHLO
-	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753371Ab1DZPZE convert rfc822-to-8bit
+Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:56576 "EHLO
+	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753371Ab1DZP0o convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 26 Apr 2011 11:25:04 -0400
-In-Reply-To: <6C03668EAF45B747AF947A1603D1B300EB72D365@SAUSEXMBP01.amd.com>
+	Tue, 26 Apr 2011 11:26:44 -0400
+In-Reply-To: <6C03668EAF45B747AF947A1603D1B300EB72D36F@SAUSEXMBP01.amd.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -21,7 +21,9 @@ To: "Nath, Arindam" <Arindam.Nath@amd.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
-On Apr 25, 2011, at 11:36 PM, Nath, Arindam wrote:
+Hi Arindam,
+
+On Apr 25, 2011, at 11:45 PM, Nath, Arindam wrote:
 
 > Hi Philip,
 > 
@@ -31,82 +33,97 @@ On Apr 25, 2011, at 11:36 PM, Nath, Arindam wrote:
 >> Sent: Saturday, April 23, 2011 1:56 AM
 >> To: linux-mmc@vger.kernel.org
 >> Cc: Nath, Arindam
->> Subject: [PATCH] sdhci-pxa: add platform specific code for UHS
->> signaling
+>> Subject: [PATCH] mmc: eMMC signal voltage does not use CMD11
 >> 
 >> 
->> Marvell controller requires 1.8V bit in UHS control register 2
->> be set when doing UHS.  eMMC does not require 1.8V for DDR.
->> add platform code to handle this.
+>> eMMC chips do not use CMD11 when changing voltage.  Add extra
+>> argument to call to indicate if CMD11 needs to be sent.
 >> 
 >> Signed-off-by: Philip Rakity <prakity@marvell.com>
 >> ---
->> drivers/mmc/host/sdhci-pxa.c |   38
->> ++++++++++++++++++++++++++++++++++++++
->> 1 files changed, 38 insertions(+), 0 deletions(-)
+>> drivers/mmc/core/sd.c     |    4 ++--
+>> drivers/mmc/core/sd_ops.c |    4 ++--
+>> drivers/mmc/core/sd_ops.h |    3 ++-
+>> 3 files changed, 6 insertions(+), 5 deletions(-)
 >> 
->> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-
->> pxa.c
->> index 0e64d66..279d677 100644
->> --- a/drivers/mmc/host/sdhci-pxa.c
->> +++ b/drivers/mmc/host/sdhci-pxa.c
->> @@ -94,7 +94,42 @@ static void platform_reset_exit(struct sdhci_host
->> *host, u8 mask)
->> 	}
+>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>> index ed6b11b..362716c 100644
+>> --- a/drivers/mmc/core/sd.c
+>> +++ b/drivers/mmc/core/sd.c
+>> @@ -734,7 +734,7 @@ try_again:
+>> 	 */
+>> 	if (!mmc_host_is_spi(host) && rocr &&
+>> 	   ((*rocr & 0x41000000) == 0x41000000)) {
+>> -		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
+>> +		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
+>> 1);
+>> 		if (err) {
+>> 			ocr &= ~(1 << 24);
+>> 			goto try_again;
+>> @@ -1115,7 +1115,7 @@ int mmc_attach_sd(struct mmc_host *host)
+>> 		host->ocr_avail = host->ocr_avail_sd;
+>> 
+>> 	/* Make sure we are at 3.3V signalling voltage */
+>> -	err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
+>> +	err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
+>> 	if (err)
+>> 		return err;
+>> 
+>> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+>> index fc7edc4..6fd35f6 100644
+>> --- a/drivers/mmc/core/sd_ops.c
+>> +++ b/drivers/mmc/core/sd_ops.c
+>> @@ -149,7 +149,7 @@ int mmc_app_set_bus_width(struct mmc_card *card,
+>> int width)
+>> 	return 0;
 >> }
 >> 
->> +static int set_uhs_signaling(struct sdhci_host *host, unsigned int
->> uhs)
->> +{
->> +	u16 ctrl_2;
->> +
->> +	/*
->> +	 * Set V18_EN -- UHS modes do not work without this.
->> +	 * does not change signaling voltage
->> +	 */
->> +	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->> +
->> +		/* Select Bus Speed Mode for host */
->> +	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
->> +	if (uhs == MMC_TIMING_UHS_SDR12)
->> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
->> +	else if (uhs == MMC_TIMING_UHS_SDR25)
->> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
->> +	else if (uhs == MMC_TIMING_UHS_SDR50) {
->> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
->> +		ctrl_2 |= SDHCI_CTRL_VDD_180;
->> +	}
->> +	else if (uhs == MMC_TIMING_UHS_SDR104) {
->> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
->> +		ctrl_2 |= SDHCI_CTRL_VDD_180;
->> +	}
->> +	else if (uhs == MMC_TIMING_UHS_DDR50) {
->> +		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
->> +		ctrl_2 |= SDHCI_CTRL_VDD_180;
->> +	}
+>> -int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
+>> +int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
+>> int cmd11)
+>> {
+>> 	struct mmc_command cmd;
+>> 	int err = 0;
+>> @@ -160,7 +160,7 @@ int mmc_set_signal_voltage(struct mmc_host *host,
+>> int signal_voltage)
+>> 	 * Send CMD11 only if the request is to switch the card to
+>> 	 * 1.8V signalling.
+>> 	 */
+>> -	if (signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
+>> +	if (signal_voltage != MMC_SIGNAL_VOLTAGE_330 && cmd11) {
 > 
-> Since SDR12 and SDR25 are also UHS modes, don't we need to set 1.8V signaling for them as well?
+> Since we are going to send CMD11 only to change to 1.8V signaling, and when cmd11 is set, isn't it better to have
 > 
-will double check with hardware folks.
+> 	if ((signal_voltage == MMC_SIGNAL_VOLTAGE_180) && cmd11) {
 
->> +	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-
-
-> 
-> I am not sure about your controller, but as per the spec, we need to reset SDCLK before enabling 1.8V, and then re-enable SDCLK. Also there is a delay of 5ms between these two. Is that a concern here?
-> 
-
-The bit must be set -- no need for 5ms delay since it does not control any power source.  Internal.
-
->> +	pr_debug("%s:%s uhs = %d, ctrl_2 = %04X\n",
->> +		__func__, mmc_hostname(host->mmc), uhs, ctrl_2);
->> +	return 0;
->> +}
-> 
-> Since, we are just returning 0 from this function, why not use *void* return type instead?
+I am okay with this.  Wanted to cover the possible future case for 1.2V support and CMD11.  I know eMMC does not do
+CMD11 but incase SD or SDIO ever did.   If you feel strongly will change code.
 > 
 > Thanks,
 > Arindam
+> 
+>> 		memset(&cmd, 0, sizeof(struct mmc_command));
+>> 
+>> 		cmd.opcode = SD_SWITCH_VOLTAGE;
+>> diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
+>> index d5bdda5..2670e71 100644
+>> --- a/drivers/mmc/core/sd_ops.h
+>> +++ b/drivers/mmc/core/sd_ops.h
+>> @@ -20,7 +20,8 @@ int mmc_app_send_scr(struct mmc_card *card, u32
+>> *scr);
+>> int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+>> 	u8 value, u8 *resp);
+>> int mmc_app_sd_status(struct mmc_card *card, void *ssr);
+>> -int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
+>> +int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
+>> +	int cmd11);
+>> 
+>> #endif
+>> 
+>> --
+>> 1.7.0.4
+>> 
+>> 
 > 
 > 
 
