@@ -1,65 +1,55 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: Re: [PATCH] mmc:sdhci:add support to request/free pins for
- controllers sharing hardware bus
-Date: Tue, 26 Apr 2011 15:27:28 +0800
-Message-ID: <BANLkTineayh539zJx6GfxnpgCJwJdxYy0Q@mail.gmail.com>
-References: <5EB3BFCD089AD643B9BB63439F5FD5E9A127@SHAASIEXM01.ASIA.ROOT.PRI>
- <BANLkTinj4pnDG=cCJY3JGYGXOYoVPHtA9A@mail.gmail.com> <m3d3k9u0yy.fsf@pullcord.laptop.org>
- <BANLkTimXXirF6zqx9h9DMRSpx+o8_vb=3w@mail.gmail.com> <20110426065851.GA14534@pengutronix.de>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci: add support for pre_req and post_req
+Date: Tue, 26 Apr 2011 12:21:08 +0200
+Message-ID: <BANLkTinmDS1MayqUwNvWKvhjV3LPbu1u=A@mail.gmail.com>
+References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
+	<1302972516-8673-1-git-send-email-shawn.guo@linaro.org>
+	<BANLkTi=pqGyijbfuHD=uQzPnaYvNOQyzdg@mail.gmail.com>
+	<4DB61F29.4090600@samsung.com>
+	<20110426024758.GB6145@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:36878 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757500Ab1DZH1s convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 03:27:48 -0400
-Received: by qyk7 with SMTP id 7so1056488qyk.19
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2011 00:27:48 -0700 (PDT)
-In-Reply-To: <20110426065851.GA14534@pengutronix.de>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:32949 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752897Ab1DZKVI convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 06:21:08 -0400
+Received: by iwn34 with SMTP id 34so376031iwn.19
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2011 03:21:08 -0700 (PDT)
+In-Reply-To: <20110426024758.GB6145@S2100-06.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Binghua.Duan@csr.com, andreiw@motorola.com, prakity@marvell.com
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Andrei Warkentin <andreiw@motorola.com>, Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-kernel@lists.linaro.org, patches@linaro.org, cjb@laptop.org, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Wolfram,
-
-2011/4/26 Wolfram Sang <w.sang@pengutronix.de>:
->> > * Where is the patch that implements the get_shared_pins() hook in
->> > =C2=A0your driver?
->> We send the common level patch ahead to get the upstream agreement s=
-o
->> that we can maintain our bottom level sdhci codes better. We will se=
-nd
->> the special driver patch after some time.
+On 26 April 2011 04:47, Shawn Guo <shawn.guo@freescale.com> wrote:
+> On Tue, Apr 26, 2011 at 10:26:01AM +0900, Jaehoon Chung wrote:
+>> Hi Shawn
+>>
+>> I tested using ADMA with your patch...(benchmark : IOzone)
+>> But I didn't get improvement of performance with ADMA..
+>> (i can see improvement of performance with SDMA)
+>>
+>> I want to know how you think about this..
+>>
+> It's still an open question if pre_req and post_req were correctly
+> added, even you have seen improvement of SDMA case with IOzone. =A0I
+> would leave the question to Per Forlin.
 >
-> Hmm, why should be there a functionality if there is no user for it? =
-A
-> reference user helps people understand how it is intended to be used.
+Performance numbers from user space may vary.
+Currently I am looking into how the block layer adds request to the
+mmc blockdev. I can see that if is common that one read request is
+pushed to the mmc blockdev queue after the previous request has
+already finished. For this scenario there will no improvement. If
+running IOzone with large record sizes multiple requests are queued up
+in the mmc blockdev queue and this results in increase of bandwidth.
+The mmc_test are intended to help verifying if the pre_req and
+post_req are implemented correctly and give a number of the maximum
+gain in performance.
 
-completely right. Of course this patch is based on real applications
-and SoCs. We are using ARASAN sd controller IP, it can be configurated
-to use shared pins mode in SoC design. And it looks like it is a
-common requirement to save chip footprint by sharing data bus between
-multi-controllers.
-
-Just because Our SoCs are still on the way to opensource and mainline.
-Even our arch/arm/mach-xxx hasn't been merged yet. Our target is
-syncing our codes with mainline. So as a modification to sdhci common
-level, we just get upstream's opinion for local maintaining earlier.
-
-Anyway, this patch may be applied later after our others are ready. Or
-it can be now so that other SoC companies can use this feature.
-
->
-> Regards,
->
-> =C2=A0 Wolfram
->
 > --
-> Pengutronix e.K. =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 | Wolfram Sang =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|
-> Industrial Linux Solutions =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
-=C2=A0 =C2=A0 | http://www.pengutronix.de/ =C2=A0|
->
+> Regards,
+> Shawn
+Regards,
+Per
