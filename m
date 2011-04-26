@@ -1,46 +1,55 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3 00/12] add support for host controller v3.00
-Date: Tue, 26 Apr 2011 11:41:24 -0400
-Message-ID: <m3vcy1qau3.fsf@pullcord.laptop.org>
-References: <1302863942-1774-1-git-send-email-arindam.nath@amd.com>
-	<m3bp07txrb.fsf@pullcord.laptop.org>
-	<6C03668EAF45B747AF947A1603D1B300EB72D340@SAUSEXMBP01.amd.com>
-	<m3tydlrxbc.fsf@pullcord.laptop.org>
-	<3C88931A-2E06-4894-B2ED-574BEC94758B@marvell.com>
+From: Colin Cross <ccross@android.com>
+Subject: Re: [PATCH 2/6] mmc_block: Allow more than 8 partitions per card
+Date: Tue, 26 Apr 2011 09:10:28 -0700
+Message-ID: <BANLkTinEiG5QGaZNp2hnOc8BmNhNc_SiwA@mail.gmail.com>
+References: <1303520502-32171-1-git-send-email-john.stultz@linaro.org>
+	<1303520502-32171-3-git-send-email-john.stultz@linaro.org>
+	<201104261522.22329.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43353 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753934Ab1DZPhq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 26 Apr 2011 11:37:46 -0400
-In-Reply-To: <3C88931A-2E06-4894-B2ED-574BEC94758B@marvell.com> (Philip
-	Rakity's message of "Tue, 26 Apr 2011 08:30:12 -0700")
+Received: from smtp-out.google.com ([74.125.121.67]:14086 "EHLO
+	smtp-out.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756763Ab1DZQKg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 12:10:36 -0400
+Received: from wpaz13.hot.corp.google.com (wpaz13.hot.corp.google.com [172.24.198.77])
+	by smtp-out.google.com with ESMTP id p3QGAUhA030723
+	for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2011 09:10:32 -0700
+Received: from yxd5 (yxd5.prod.google.com [10.190.1.197])
+	by wpaz13.hot.corp.google.com with ESMTP id p3QGASmt009188
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2011 09:10:29 -0700
+Received: by yxd5 with SMTP id 5so174468yxd.35
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2011 09:10:28 -0700 (PDT)
+In-Reply-To: <201104261522.22329.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "Nath, Arindam" <Arindam.Nath@amd.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: John Stultz <john.stultz@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Dima Zavin <dima@android.com>
 
-Hi,
-
-On Tue, Apr 26 2011, Philip Rakity wrote:
-> Chris,
+On Tue, Apr 26, 2011 at 6:22 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Saturday 23 April 2011, John Stultz wrote:
+>> From: Colin Cross <ccross@android.com>
+>>
+>> Set the GENHD_FL_EXT_DEVT flag, which will allocate minor numbers
+>> in major 259 for partitions past disk->minors.
+>>
+>> Also remove the use of disk_devt to determine devidx from md->disk.
+>> md->disk->first_minor is always initialized from devidx and can
+>> always be used to recover it.
+>>
+>> CC: Chris Ball <cjb@laptop.org>
+>> CC: Arnd Bergmann <arnd@arndb.de>
+>> CC: Dima Zavin <dima@android.com>
+>> Signed-off-by: Colin Cross <ccross@android.com>
+>> Signed-off-by: John Stultz <john.stultz@linaro.org>
 >
-> What is the format for this -- Can I add reviewed by as a note to all
-> the patches or is this done one-by-one ?
+> The new code looks reasonable, but wouldn't changing this be incompatible
+> with existing root file systems that contain static device nodes?
 
-Whichever you think is appropriate -- you can ask me to add your
-Reviewed-by: to each patch and I'll do that, or you can reply to
-specific ones if there's a large chunk of the patches that you
-*haven't* looked at.
-
-> I am using the code and have successfully run eMMC (DDR50) and SDIO
-> (SDR50).  Patches for SDR50 will take me a while to finish but the
-> code does work and is based on Arindam work.
-
-Great, sounds like both Reviewed-by and Tested-by might be appropriate.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+I don't think so.  Without this change, /dev/mmcblk0p1 will be (179,
+1), /dev/mmcblk0p7 will be (179, 7), and /dev/mmcblk0p8 will be
+dropped.  After this change, /dev/mmcblk0p1-7 will be the same, but
+/dev/mmcblk0p8 will be (259, <random number>).  A root file system
+with static inodes will still have access to partitions 1-7, and will
+still not have access to dynamically-assigned partition 8.
