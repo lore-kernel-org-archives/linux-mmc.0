@@ -1,92 +1,59 @@
-From: Daniel Ribeiro <drwyrm@gmail.com>
-Subject: Re: [RESEND PATCH 4/4] mmc_spi.c: add support for the regulator
- framework
-Date: Tue, 26 Apr 2011 18:21:27 -0300
-Message-ID: <1303852887.2133.50.camel@laptop>
-References: <1300733202-27316-1-git-send-email-ospite@studenti.unina.it>
-	 <1303388873-15467-1-git-send-email-ospite@studenti.unina.it>
-	 <1303388873-15467-5-git-send-email-ospite@studenti.unina.it>
-	 <20110421124041.GF11788@opensource.wolfsonmicro.com>
-	 <20110421144915.93d36d12.ospite@studenti.unina.it>
+From: John Calixto <john.calixto@modsystems.com>
+Subject: Re: [PATCH v7] mmc: Add mmc CMD+ACMD passthrough ioctl
+Date: Tue, 26 Apr 2011 15:28:02 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1104261524030.6706@peruna>
+References: <alpine.DEB.2.00.1104211735290.3919@peruna> <alpine.DEB.2.00.1104211743210.3919@peruna> <201104261614.35455.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha1"; protocol="application/pgp-signature"; boundary="=-DWzRx7bb7TtNJcLJtWrB"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw0-f46.google.com ([74.125.83.46]:53879 "EHLO
-	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932405Ab1DZVVa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 17:21:30 -0400
-Received: by gwaa18 with SMTP id a18so392288gwa.19
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2011 14:21:29 -0700 (PDT)
-In-Reply-To: <20110421144915.93d36d12.ospite@studenti.unina.it>
+Received: from elasmtp-masked.atl.sa.earthlink.net ([209.86.89.68]:53799 "EHLO
+	elasmtp-masked.atl.sa.earthlink.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758193Ab1DZW2L (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 18:28:11 -0400
+In-Reply-To: <201104261614.35455.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Antonio Ospite <ospite@studenti.unina.it>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Grant Likely <grant.likely@secretlab.ca>, openezx-devel@lists.openezx.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, spi-devel-general@lists.sourceforge.net
+To: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org, Andrei Warkentin <andreiw@motorola.com>, =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>
+
+On Tue, 26 Apr 2011, Arnd Bergmann wrote:
+> On Friday 22 April 2011, John Calixto wrote:
+> > Allows appropriately-privileged applications to send CMD (normal) and
+> > ACMD (application-specific; preceded with CMD55) commands to
+> > cards/devices on the mmc bus.  This is primarily useful for enabling the
+> > security functionality built in to every SD card.
+> > 
+> > It can also be used as a generic passthrough (e.g. to enable virtual
+> > machines to control mmc bus devices directly).  However, this use case
+> > has not been tested rigorously.  Generic passthrough testing was only
+> > conducted for a few non-security opcodes to prove the feasibility of the
+> > passthrough.
+> > 
+> > Since any opcode can be sent using this passthrough, it is very possible
+> > to render the card/device unusable.  Applications that use this ioctl
+> > must have CAP_SYS_RAWIO.
+> > 
+> > Security commands tested on TI PCIxx12 (SDHCI), Sigma Designs SMP8652
+> > SoC, TI OMAP3621 SoC, TI OMAP3630 SoC, Samsung S5PC110 SoC, Qualcomm
+> > MSM7200A SoC.
+> > 
+> > Signed-off-by: John Calixto <john.calixto@modsystems.com>
+> > Reviewed-by: Andrei Warkentin <andreiw@motorola.com>
+> 
+> The implementation looks good to me now,
+> 
+> Reviewed-by: Arnd Bergmann <arnd@arndb.de>
+> 
+> I'll leave the final decision whether this is a good feature to have
+> to Chris. I still believe that we should have per-command ioctls
+> for the security feature, but getting there would require someone
+> to implement it, and I'm not going to do that.
+> 
 
 
---=-DWzRx7bb7TtNJcLJtWrB
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Arnd - Thanks a lot for the review and your help getting the
+implementation right!
 
-Em Qui, 2011-04-21 =C3=A0s 14:49 +0200, Antonio Ospite escreveu:
-> On Thu, 21 Apr 2011 13:40:41 +0100
-> Mark Brown <broonie@opensource.wolfsonmicro.com> wrote:
->=20
-> > On Thu, Apr 21, 2011 at 02:27:53PM +0200, Antonio Ospite wrote:
-> >=20
-> > > +#ifdef CONFIG_REGULATOR
-> > > +	host->vcc =3D regulator_get(mmc_dev(host->mmc), "vmmc");
-> > > +
-> > > +	if (IS_ERR(host->vcc)) {
-> > > +		host->vcc =3D NULL;
-> > > +	} else {
-> > > +		host->mmc->ocr_avail =3D mmc_regulator_get_ocrmask(host->vcc);
-> > > +		if (host->pdata && host->pdata->ocr_mask)
-> > > +			dev_warn(mmc_dev(host->mmc),
-> > > +				"ocr_mask/setpower will not be used\n");
-> > >  	}
-> > > +#endif
-> >=20
-> > Why is this code conditional?  The regulator API will stub itself out
-> > (by returning a null pointer, which plays well with your use of null) i=
-f
-> > it's disabled.  I'm also not seeing any corresponding code to release
-> > the regulator.
-> >
->=20
-> Actually I saw this done conditionally in pxamci.c and thought it was
-> really needed. About the call to regulator_put() if was there but got
-> lost when squashing the commits into the final patch and I was still
-> reading that part in my mind even if it was not there anymore.
-> The importance of reviewers with fresh eyes.
->=20
-> I'll resubmit this forth patch with the needed changes.
+Chris - What do you think?  How should I proceed here?
 
-Hi,
-
-The #ifdefs on pxamci were needed because at the time it was written
-IS_ERR(regulator_get()) would return _false_ if CONFIG_REGULATOR is not
-defined, breaking compatibility with the older ocr_mask/setpower.
-
-I don't know if the regulator api changed it's old behaviour, see
-http://www.mail-archive.com/openezx-devel@lists.openezx.org/msg01954.html
-
-
---=20
-Daniel Ribeiro
-
---=-DWzRx7bb7TtNJcLJtWrB
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Esta =?ISO-8859-1?Q?=E9?= uma parte de mensagem
- assinada digitalmente
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEABECAAYFAk23N1cACgkQw3OYl0G0liT9CwCdE6T9TqLGPzcnZKuEqrzov9l0
-HakAoIiAsx1JYhCdl6CYQNDGGEBoO7ps
-=aSll
------END PGP SIGNATURE-----
-
---=-DWzRx7bb7TtNJcLJtWrB--
-
+John
