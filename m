@@ -1,72 +1,51 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] mmc:sdhci:add support to request/free pins for
- controllers sharing hardware bus
-Date: Tue, 26 Apr 2011 08:28:10 -0700
-Message-ID: <89D3A89E-40C7-4938-9B58-24AA8E63DB8C@marvell.com>
-References: <5EB3BFCD089AD643B9BB63439F5FD5E9A127@SHAASIEXM01.ASIA.ROOT.PRI>
- <BANLkTinj4pnDG=cCJY3JGYGXOYoVPHtA9A@mail.gmail.com>
- <m3d3k9u0yy.fsf@pullcord.laptop.org>
- <BANLkTimXXirF6zqx9h9DMRSpx+o8_vb=3w@mail.gmail.com>
- <20110426065851.GA14534@pengutronix.de>
- <BANLkTineayh539zJx6GfxnpgCJwJdxYy0Q@mail.gmail.com>
+Subject: Re: [PATCH v3 00/12] add support for host controller v3.00
+Date: Tue, 26 Apr 2011 08:30:12 -0700
+Message-ID: <3C88931A-2E06-4894-B2ED-574BEC94758B@marvell.com>
+References: <1302863942-1774-1-git-send-email-arindam.nath@amd.com>
+ <m3bp07txrb.fsf@pullcord.laptop.org>
+ <6C03668EAF45B747AF947A1603D1B300EB72D340@SAUSEXMBP01.amd.com>
+ <m3tydlrxbc.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog115.obsmtp.com ([74.125.149.238]:38097 "EHLO
-	na3sys009aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755916Ab1DZPan convert rfc822-to-8bit
+Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:40003 "EHLO
+	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755483Ab1DZPbm convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 26 Apr 2011 11:30:43 -0400
-In-Reply-To: <BANLkTineayh539zJx6GfxnpgCJwJdxYy0Q@mail.gmail.com>
+	Tue, 26 Apr 2011 11:31:42 -0400
+In-Reply-To: <m3tydlrxbc.fsf@pullcord.laptop.org>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Barry Song <21cnbao@gmail.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Binghua.Duan@csr.com" <Binghua.Duan@csr.com>, "andreiw@motorola.com" <andreiw@motorola.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: "Nath, Arindam" <Arindam.Nath@amd.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
 
-Barry,
+Chris,
 
-How are interrupts from SDIO devices handled ?   SDIO devices use one of the pins to signal a interrupt to the host when data is availabe.
+What is the format for this -- Can I add reviewed by as a note to all the patches or is this done one-by-one ?
+
+I am using the code and have successfully run eMMC (DDR50) and SDIO (SDR50).  Patches for SDR50 will take me a while to finish but the code does work and is based on Arindam work.
 
 Philip
 
-On Apr 26, 2011, at 12:27 AM, Barry Song wrote:
+On Apr 26, 2011, at 5:50 AM, Chris Ball wrote:
 
-> Hi Wolfram,
+> Hi Arindam,
 > 
-> 2011/4/26 Wolfram Sang <w.sang@pengutronix.de>:
->>>> * Where is the patch that implements the get_shared_pins() hook in
->>>>  your driver?
->>> We send the common level patch ahead to get the upstream agreement so
->>> that we can maintain our bottom level sdhci codes better. We will send
->>> the special driver patch after some time.
->> 
->> Hmm, why should be there a functionality if there is no user for it? A
->> reference user helps people understand how it is intended to be used.
+> On Tue, Apr 26 2011, Nath, Arindam wrote:
+>> Just a follow up on what you said. Is there any plan to merge the
+>> patches with your tree?
 > 
-> completely right. Of course this patch is based on real applications
-> and SoCs. We are using ARASAN sd controller IP, it can be configurated
-> to use shared pins mode in SoC design. And it looks like it is a
-> common requirement to save chip footprint by sharing data bus between
-> multi-controllers.
+> Yes, sounds good -- linux-mmc@ folks, would anyone like to give a
+> Tested- or Reviewed-by: on these patches?
 > 
-> Just because Our SoCs are still on the way to opensource and mainline.
-> Even our arch/arm/mach-xxx hasn't been merged yet. Our target is
-> syncing our codes with mainline. So as a modification to sdhci common
-> level, we just get upstream's opinion for local maintaining earlier.
+> Thanks!
 > 
-> Anyway, this patch may be applied later after our others are ready. Or
-> it can be now so that other SoC companies can use this feature.
-> 
->> 
->> Regards,
->> 
->>   Wolfram
->> 
->> --
->> Pengutronix e.K.                           | Wolfram Sang                |
->> Industrial Linux Solutions                 | http://www.pengutronix.de/  |
->> 
+> - Chris.
+> -- 
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
 
