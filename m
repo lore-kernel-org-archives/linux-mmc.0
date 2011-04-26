@@ -1,64 +1,198 @@
 From: Sahitya Tummala <stummala@codeaurora.org>
-Subject: [PATCH 3/7] mmc: msm_sdcc: Enable SDC host->clk only after setting the rate.
-Date: Tue, 26 Apr 2011 11:04:22 +0530
-Message-ID: <1303796066-6784-3-git-send-email-stummala@codeaurora.org>
+Subject: [PATCH 4/7] msm: mmc: Remove "pio_irq" resource
+Date: Tue, 26 Apr 2011 11:04:23 +0530
+Message-ID: <1303796066-6784-4-git-send-email-stummala@codeaurora.org>
 References: <1303796066-6784-1-git-send-email-stummala@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:19987 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752615Ab1DZFfY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 01:35:24 -0400
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:22607 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752531Ab1DZFfi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 01:35:38 -0400
 In-Reply-To: <1303796066-6784-1-git-send-email-stummala@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: davidb@codeaurora.org, dwalker@fifo99.com, bryanh@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, san@google.com, Sahitya Tummala <stummala@codeaurora.org>, Murali Palnati <palnatim@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, san@google.com, Sahitya Tummala <stummala@codeaurora.org>
 
-For clocks that support rates which can be set (most clocks other
-than _pclk AHB clocks), a rate must be set using clk_set_rate()
-before the clock is enabled for the first time with clk_enable().
-Subsequent calls to clk_enable() need not be preceded with the
-clk_set_rate() calls unless we wish to change the clock rate that
-is set previously.
+On some targets, MCI_IRQ_MASK1 is not routed to the MSM in which
+case only "cmd_irq" must be used even for PIO. With this change,
+all the targets will use only "cmd_irq" for both CMD and PIO.
 
-SDC host->clk is currently enabled without setting the clock rate
-even once. This patch fixes this, by ensuring that the clock rate
-for this clock is first set before enabling the clock.
-
-Signed-off-by: Murali Palnati <palnatim@codeaurora.org>
 Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 ---
- drivers/mmc/host/msm_sdcc.c |   12 ++++++------
- 1 files changed, 6 insertions(+), 6 deletions(-)
+ arch/arm/mach-msm/devices-msm7x00.c |   24 ------------------------
+ arch/arm/mach-msm/devices-qsd8x50.c |   24 ------------------------
+ drivers/mmc/host/msm_sdcc.c         |    8 ++------
+ drivers/mmc/host/msm_sdcc.h         |    1 -
+ 4 files changed, 2 insertions(+), 55 deletions(-)
 
+diff --git a/arch/arm/mach-msm/devices-msm7x00.c b/arch/arm/mach-msm/devices-msm7x00.c
+index 3ef38a5..a164830 100644
+--- a/arch/arm/mach-msm/devices-msm7x00.c
++++ b/arch/arm/mach-msm/devices-msm7x00.c
+@@ -176,12 +176,6 @@ static struct resource resources_sdc1[] = {
+ 		.name	= "cmd_irq",
+ 	},
+ 	{
+-		.start	= INT_SDC1_1,
+-		.end	= INT_SDC1_1,
+-		.flags	= IORESOURCE_IRQ,
+-		.name	= "pio_irq",
+-	},
+-	{
+ 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
+ 		.name	= "status_irq"
+ 	},
+@@ -204,12 +198,6 @@ static struct resource resources_sdc2[] = {
+ 		.flags	= IORESOURCE_IRQ,
+ 		.name	= "cmd_irq",
+ 	},
+-		{
+-		.start	= INT_SDC2_1,
+-		.end	= INT_SDC2_1,
+-		.flags	= IORESOURCE_IRQ,
+-		.name	= "pio_irq",
+-	},
+ 	{
+ 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
+ 		.name	= "status_irq"
+@@ -233,12 +221,6 @@ static struct resource resources_sdc3[] = {
+ 		.flags	= IORESOURCE_IRQ,
+ 		.name	= "cmd_irq",
+ 	},
+-		{
+-		.start	= INT_SDC3_1,
+-		.end	= INT_SDC3_1,
+-		.flags	= IORESOURCE_IRQ,
+-		.name	= "pio_irq",
+-	},
+ 	{
+ 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
+ 		.name	= "status_irq"
+@@ -262,12 +244,6 @@ static struct resource resources_sdc4[] = {
+ 		.flags	= IORESOURCE_IRQ,
+ 		.name	= "cmd_irq",
+ 	},
+-		{
+-		.start	= INT_SDC4_1,
+-		.end	= INT_SDC4_1,
+-		.flags	= IORESOURCE_IRQ,
+-		.name	= "pio_irq",
+-	},
+ 	{
+ 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
+ 		.name	= "status_irq"
+diff --git a/arch/arm/mach-msm/devices-qsd8x50.c b/arch/arm/mach-msm/devices-qsd8x50.c
+index 730982f..2292883 100644
+--- a/arch/arm/mach-msm/devices-qsd8x50.c
++++ b/arch/arm/mach-msm/devices-qsd8x50.c
+@@ -140,12 +140,6 @@ static struct resource resources_sdc1[] = {
+ 		.name	= "cmd_irq",
+ 	},
+ 	{
+-		.start	= INT_SDC1_1,
+-		.end	= INT_SDC1_1,
+-		.flags	= IORESOURCE_IRQ,
+-		.name	= "pio_irq",
+-	},
+-	{
+ 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
+ 		.name	= "status_irq"
+ 	},
+@@ -168,12 +162,6 @@ static struct resource resources_sdc2[] = {
+ 		.flags	= IORESOURCE_IRQ,
+ 		.name	= "cmd_irq",
+ 	},
+-		{
+-		.start	= INT_SDC2_1,
+-		.end	= INT_SDC2_1,
+-		.flags	= IORESOURCE_IRQ,
+-		.name	= "pio_irq",
+-	},
+ 	{
+ 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
+ 		.name	= "status_irq"
+@@ -197,12 +185,6 @@ static struct resource resources_sdc3[] = {
+ 		.flags	= IORESOURCE_IRQ,
+ 		.name	= "cmd_irq",
+ 	},
+-		{
+-		.start	= INT_SDC3_1,
+-		.end	= INT_SDC3_1,
+-		.flags	= IORESOURCE_IRQ,
+-		.name	= "pio_irq",
+-	},
+ 	{
+ 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
+ 		.name	= "status_irq"
+@@ -226,12 +208,6 @@ static struct resource resources_sdc4[] = {
+ 		.flags	= IORESOURCE_IRQ,
+ 		.name	= "cmd_irq",
+ 	},
+-		{
+-		.start	= INT_SDC4_1,
+-		.end	= INT_SDC4_1,
+-		.flags	= IORESOURCE_IRQ,
+-		.name	= "pio_irq",
+-	},
+ 	{
+ 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
+ 		.name	= "status_irq"
 diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
-index 66ef5c3..3446cdd 100644
+index 3446cdd..be45b6a 100644
 --- a/drivers/mmc/host/msm_sdcc.c
 +++ b/drivers/mmc/host/msm_sdcc.c
-@@ -1238,17 +1238,17 @@ msmsdcc_probe(struct platform_device *pdev)
- 		goto pclk_put;
+@@ -1150,7 +1150,6 @@ msmsdcc_probe(struct platform_device *pdev)
+ 	struct msmsdcc_host *host;
+ 	struct mmc_host *mmc;
+ 	struct resource *cmd_irqres = NULL;
+-	struct resource *pio_irqres = NULL;
+ 	struct resource *stat_irqres = NULL;
+ 	struct resource *memres = NULL;
+ 	struct resource *dmares = NULL;
+@@ -1175,12 +1174,10 @@ msmsdcc_probe(struct platform_device *pdev)
+ 	dmares = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+ 	cmd_irqres = platform_get_resource_byname(pdev, IORESOURCE_IRQ,
+ 						  "cmd_irq");
+-	pio_irqres = platform_get_resource_byname(pdev, IORESOURCE_IRQ,
+-						  "pio_irq");
+ 	stat_irqres = platform_get_resource_byname(pdev, IORESOURCE_IRQ,
+ 						   "status_irq");
+ 
+-	if (!cmd_irqres || !pio_irqres || !memres) {
++	if (!cmd_irqres || !memres) {
+ 		pr_err("%s: Invalid resource\n", __func__);
+ 		return -ENXIO;
+ 	}
+@@ -1210,7 +1207,6 @@ msmsdcc_probe(struct platform_device *pdev)
  	}
  
--	/* Enable clocks */
--	ret = msmsdcc_enable_clocks(host);
--	if (ret)
--		goto clk_put;
--
- 	ret = clk_set_rate(host->clk, msmsdcc_fmin);
- 	if (ret) {
- 		pr_err("%s: Clock rate set failed (%d)\n", __func__, ret);
--		goto clk_disable;
-+		goto clk_put;
- 	}
+ 	host->cmd_irqres = cmd_irqres;
+-	host->pio_irqres = pio_irqres;
+ 	host->memres = memres;
+ 	host->dmares = dmares;
+ 	spin_lock_init(&host->lock);
+@@ -1327,7 +1323,7 @@ msmsdcc_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto stat_irq_free;
  
-+	/* Enable clocks */
-+	ret = msmsdcc_enable_clocks(host);
-+	if (ret)
-+		goto clk_put;
-+
- 	host->pclk_rate = clk_get_rate(host->pclk);
- 	host->clk_rate = clk_get_rate(host->clk);
+-	ret = request_irq(pio_irqres->start, msmsdcc_pio_irq, IRQF_SHARED,
++	ret = request_irq(cmd_irqres->start, msmsdcc_pio_irq, IRQF_SHARED,
+ 			  DRIVER_NAME " (pio)", host);
+ 	if (ret)
+ 		goto cmd_irq_free;
+diff --git a/drivers/mmc/host/msm_sdcc.h b/drivers/mmc/host/msm_sdcc.h
+index 42d7bbc..fa626ed 100644
+--- a/drivers/mmc/host/msm_sdcc.h
++++ b/drivers/mmc/host/msm_sdcc.h
+@@ -202,7 +202,6 @@ struct msmsdcc_stats {
  
+ struct msmsdcc_host {
+ 	struct resource		*cmd_irqres;
+-	struct resource		*pio_irqres;
+ 	struct resource		*memres;
+ 	struct resource		*dmares;
+ 	void __iomem		*base;
 -- 
 1.7.1
 
