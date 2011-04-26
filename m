@@ -1,63 +1,55 @@
-From: David Vrabel <david.vrabel@csr.com>
-Subject: Re: [PATCH v2 01/12] mmc: add none blocking mmc request function
-Date: Tue, 26 Apr 2011 14:29:03 +0100
-Message-ID: <4DB6C89F.10903@csr.com>
-References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>	<1302116833-24540-2-git-send-email-per.forlin@linaro.org>	<4DA81F42.3070208@csr.com> <BANLkTimaTe0qD5sbEJj88YRv2DZv=1oxTQ@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 4/6] mmc: sd: Add new CONFIG_MMC_PARANOID_SD_INIT for enabling retries during SD detection
+Date: Tue, 26 Apr 2011 15:35:52 +0200
+Message-ID: <201104261535.52521.arnd@arndb.de>
+References: <1303520502-32171-1-git-send-email-john.stultz@linaro.org> <1303520502-32171-5-git-send-email-john.stultz@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cluster-d.mailcontrol.com ([85.115.60.190]:36605 "EHLO
-	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753279Ab1DZNaa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 09:30:30 -0400
-In-Reply-To: <BANLkTimaTe0qD5sbEJj88YRv2DZv=1oxTQ@mail.gmail.com>
+Received: from moutng.kundenserver.de ([212.227.17.10]:62844 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754361Ab1DZNgR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 09:36:17 -0400
+In-Reply-To: <1303520502-32171-5-git-send-email-john.stultz@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>
+To: John Stultz <john.stultz@linaro.org>
+Cc: linux-mmc@vger.kernel.org, San Mehat <san@google.com>, Chris Ball <cjb@laptop.org>, Dima Zavin <dima@android.com>
 
-On 20/04/11 08:17, Per Forlin wrote:
-> 
->> Using a MMC request queue has other benefits -- it allows multiple users
->> without having to claim/release the host.  This would be useful for
->> (especially multi-function) SDIO.
->
-> You mean claim and release would be done only within the mmc core. The
-> timed saved here would equal the time it takes to release and claim
-> the host.
-> Claim and release can also be used for power management to indicate if
-> any client is using the host, if not the power can be switched off.
+On Saturday 23 April 2011, John Stultz wrote:
+> @@ -482,7 +485,26 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+>  		/*
+>  		 * Fetch switch information from card.
+>  		 */
+> +#ifdef CONFIG_MMC_PARANOID_SD_INIT
+> +		for (retries = 1; retries <= 3; retries++) {
+> +			err = mmc_read_switch(card);
+> +			if (!err) {
+> +				if (retries > 1) {
+> +					printk(KERN_WARNING
+> +					       "%s: recovered\n",
+> +					       mmc_hostname(host));
+> +				}
+> +				break;
+> +			} else {
+> +				printk(KERN_WARNING
+> +				       "%s: read switch failed (attempt %d)\n",
+> +				       mmc_hostname(host), retries);
+> +			}
+> +		}
+> +#else
+>  		err = mmc_read_switch(card);
+> +#endif
+> +
 
-Isn't there a separate runtime power management API that different from
-claim/release?
+I see no reason to have this as a compile time option. Having retries in here
+might be useful, but a better place would be inside of mmc_read_switch()
+or mmc_sd_switch() so it is only done if the error comes from the controller,
+not for cases where we know it will fail (e.g. !(card->csd.cmdclass & CCC_SWITCH)).
 
-> I just want to make sure I understand the multi-function SDIO case, I
-> haven't done any work with SDIO.
-> Can the SDIO functions compete over the same claim_host at the same time?
-> Example: if function 1 claims the host, function 2 and function 3 also
-> want to claim the host but have to wait for function 1 to release the
-> host.
+I would also recommend being a bit less noisy, e.g. print a warning only
+after either giving up or succeeding a retry.
 
-This is the case.   Each function driver has to claim exclusive access
-to the host.
-
-> What is the extra benefit of having the internal request queue for
-> multi function SDIO?
-
-It reduces the delays between commands if multiple drivers are sending
-commands.  I estimated performance improvements with 2-3% from just
-removing the need to claim/release in one particular SDIO function
-driver.  Performance improvements for multi-function cards would be a
-bit more (5% perhaps?).
-
-The more important benefit is the simplification of the API.
-
-David
--- 
-David Vrabel, Senior Software Engineer, Drivers
-CSR, Churchill House, Cambridge Business Park,  Tel: +44 (0)1223 692562
-Cowley Road, Cambridge, CB4 0WZ                 http://www.csr.com/
-
-
-Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
+	Arnd
