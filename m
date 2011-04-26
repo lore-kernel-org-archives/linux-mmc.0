@@ -1,53 +1,77 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v7] mmc: Add mmc CMD+ACMD passthrough ioctl
-Date: Tue, 26 Apr 2011 16:14:35 +0200
-Message-ID: <201104261614.35455.arnd@arndb.de>
-References: <alpine.DEB.2.00.1104211735290.3919@peruna> <alpine.DEB.2.00.1104211743210.3919@peruna>
+From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 01/12] mmc: add none blocking mmc request function
+Date: Tue, 26 Apr 2011 16:22:12 +0200
+Message-ID: <BANLkTinVL7NJpgGF0KZAdmqgyu2pXyKFkA@mail.gmail.com>
+References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
+	<1302116833-24540-2-git-send-email-per.forlin@linaro.org>
+	<4DA81F42.3070208@csr.com>
+	<BANLkTimaTe0qD5sbEJj88YRv2DZv=1oxTQ@mail.gmail.com>
+	<4DB6C89F.10903@csr.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:64476 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756293Ab1DZOOl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 10:14:41 -0400
-In-Reply-To: <alpine.DEB.2.00.1104211743210.3919@peruna>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+In-Reply-To: <4DB6C89F.10903-kQvG35nSl+M@public.gmane.org>
+List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
+List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
+Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: David Vrabel <david.vrabel-kQvG35nSl+M@public.gmane.org>
+Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: John Calixto <john.calixto@modsystems.com>
-Cc: linux-mmc@vger.kernel.org, Andrei Warkentin <andreiw@motorola.com>, =?utf-8?q?Micha=C5=82_Miros=C5=82aw?= <mirqus@gmail.com>, Chris Ball <cjb@laptop.org>
 
-On Friday 22 April 2011, John Calixto wrote:
-> Allows appropriately-privileged applications to send CMD (normal) and
-> ACMD (application-specific; preceded with CMD55) commands to
-> cards/devices on the mmc bus.  This is primarily useful for enabling the
-> security functionality built in to every SD card.
-> 
-> It can also be used as a generic passthrough (e.g. to enable virtual
-> machines to control mmc bus devices directly).  However, this use case
-> has not been tested rigorously.  Generic passthrough testing was only
-> conducted for a few non-security opcodes to prove the feasibility of the
-> passthrough.
-> 
-> Since any opcode can be sent using this passthrough, it is very possible
-> to render the card/device unusable.  Applications that use this ioctl
-> must have CAP_SYS_RAWIO.
-> 
-> Security commands tested on TI PCIxx12 (SDHCI), Sigma Designs SMP8652
-> SoC, TI OMAP3621 SoC, TI OMAP3630 SoC, Samsung S5PC110 SoC, Qualcomm
-> MSM7200A SoC.
-> 
-> Signed-off-by: John Calixto <john.calixto@modsystems.com>
-> Reviewed-by: Andrei Warkentin <andreiw@motorola.com>
+On 26 April 2011 15:29, David Vrabel <david.vrabel-kQvG35nSl+M@public.gmane.org> wrote:
+> On 20/04/11 08:17, Per Forlin wrote:
+>>
+>>> Using a MMC request queue has other benefits -- it allows multiple users
+>>> without having to claim/release the host. =A0This would be useful for
+>>> (especially multi-function) SDIO.
+>>
+>> You mean claim and release would be done only within the mmc core. The
+>> timed saved here would equal the time it takes to release and claim
+>> the host.
+>> Claim and release can also be used for power management to indicate if
+>> any client is using the host, if not the power can be switched off.
+>
+> Isn't there a separate runtime power management API that different from
+> claim/release?
+>
+I misunderstood. I thought you meant that the claim() and release()
+were not needed if having an internal request queue in core.c.
+Please discard my comment.
 
-The implementation looks good to me now,
+>> I just want to make sure I understand the multi-function SDIO case, I
+>> haven't done any work with SDIO.
+>> Can the SDIO functions compete over the same claim_host at the same time?
+>> Example: if function 1 claims the host, function 2 and function 3 also
+>> want to claim the host but have to wait for function 1 to release the
+>> host.
+>
+> This is the case. =A0 Each function driver has to claim exclusive access
+> to the host.
+>
+>> What is the extra benefit of having the internal request queue for
+>> multi function SDIO?
+>
+> It reduces the delays between commands if multiple drivers are sending
+> commands. =A0I estimated performance improvements with 2-3% from just
+> removing the need to claim/release in one particular SDIO function
+> driver. =A0Performance improvements for multi-function cards would be a
+> bit more (5% perhaps?).
+>
+Your estimates are promising.
 
-Reviewed-by: Arnd Bergmann <arnd@arndb.de>
+> The more important benefit is the simplification of the API.
+I agree. I will make a prototype for this. I don't think I will be
+able to find time for this until middle of May. I let know you when I
+have patches.
 
-I'll leave the final decision whether this is a good feature to have
-to Chris. I still believe that we should have per-command ioctls
-for the security feature, but getting there would require someone
-to implement it, and I'm not going to do that.
-
-	Arnd
+>
+> David
+Thanks,
+Per
