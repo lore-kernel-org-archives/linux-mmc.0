@@ -1,55 +1,61 @@
-From: Sahitya Tummala <stummala@codeaurora.org>
-Subject: [PATCH 6/7] mmc: msm_sdcc: Change initialization order of busclk_timer in probe
-Date: Tue, 26 Apr 2011 11:04:25 +0530
-Message-ID: <1303796066-6784-6-git-send-email-stummala@codeaurora.org>
-References: <1303796066-6784-1-git-send-email-stummala@codeaurora.org>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH v3 00/12] add support for host controller v3.00
+Date: Tue, 26 Apr 2011 00:52:04 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B300EB72D340@SAUSEXMBP01.amd.com>
+References: <1302863942-1774-1-git-send-email-arindam.nath@amd.com>
+ <m3bp07txrb.fsf@pullcord.laptop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:22619 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752531Ab1DZFfr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2011 01:35:47 -0400
-In-Reply-To: <1303796066-6784-1-git-send-email-stummala@codeaurora.org>
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:4612
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753059Ab1DZFxh convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 26 Apr 2011 01:53:37 -0400
+In-Reply-To: <m3bp07txrb.fsf@pullcord.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: davidb@codeaurora.org, dwalker@fifo99.com, bryanh@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, san@google.com, Sahitya Tummala <stummala@codeaurora.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "prakity@marvell.com" <prakity@marvell.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
-Intialize busclk_timer before it is accessed in probe.
+Hi Chris,
 
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
----
- drivers/mmc/host/msm_sdcc.c |    8 ++++----
- 1 files changed, 4 insertions(+), 4 deletions(-)
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Friday, April 15, 2011 7:36 PM
+> To: Nath, Arindam
+> Cc: linux-mmc@vger.kernel.org; subhashj@codeaurora.org;
+> prakity@marvell.com; zhangfei.gao@gmail.com; Su, Henry; Lu, Aaron;
+> anath.amd@gmail.com
+> Subject: Re: [PATCH v3 00/12] add support for host controller v3.00
+> 
+> Hi Arindam,
+> 
+> On Fri, Apr 15 2011, Arindam Nath wrote:
+> > V3
+> 
+> Thanks very much for reposting this!  I know it's a lot of work to keep
+> track of so many comments and changes.
+> 
+> I've checked that this applies to mmc-next and doesn't add any compile
+> warnings, and the patch quality (particularly your use of comments)
+> looks excellent.  I'll wait a week for further comments and Tested-bys,
+> and then look at whether we should push the series to mmc-next as-is
+> or wait for another revision.
 
-diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
-index 782e4cc..36fded7 100644
---- a/drivers/mmc/host/msm_sdcc.c
-+++ b/drivers/mmc/host/msm_sdcc.c
-@@ -1209,6 +1209,10 @@ msmsdcc_probe(struct platform_device *pdev)
- 	host->plat = plat;
- 	host->mmc = mmc;
- 	host->curr.cmd = NULL;
-+	init_timer(&host->busclk_timer);
-+	host->busclk_timer.data = (unsigned long) host;
-+	host->busclk_timer.function = msmsdcc_busclk_expired;
-+
- 
- 	host->cmdpoll = 1;
- 
-@@ -1326,10 +1330,6 @@ msmsdcc_probe(struct platform_device *pdev)
- 		host->eject = !host->oldstat;
- 	}
- 
--	init_timer(&host->busclk_timer);
--	host->busclk_timer.data = (unsigned long) host;
--	host->busclk_timer.function = msmsdcc_busclk_expired;
--
- 	ret = request_irq(cmd_irqres->start, msmsdcc_irq, IRQF_SHARED,
- 			  DRIVER_NAME " (cmd)", host);
- 	if (ret)
--- 
-1.7.1
+Just a follow up on what you said. Is there any plan to merge the patches with your tree?
 
---
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+Thanks,
+Arindam
+
+> 
+> Thanks,
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+
+
