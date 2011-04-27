@@ -1,63 +1,70 @@
-From: Andrei Warkentin <andreiw@motorola.com>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: [PATCH 0/2] Race fixes in sdhci
-Date: Wed, 27 Apr 2011 14:33:13 -0500
-Message-ID: <BANLkTint2cr6vFwBGX1RCTYyvrTc0if=yA@mail.gmail.com>
+Date: Wed, 27 Apr 2011 16:41:27 -0400
+Message-ID: <m3y62vl954.fsf@pullcord.laptop.org>
 References: <20110427132329.GA21499@opensource.wolfsonmicro.com>
+	<BANLkTint2cr6vFwBGX1RCTYyvrTc0if=yA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og114.obsmtp.com ([64.18.0.28]:37496 "EHLO
-	exprod5og114.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752962Ab1D0TdS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2011 15:33:18 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.168])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3RJXgs1000036
-	for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2011 15:33:42 -0400 (EDT)
-Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p3RJXecI000017
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2011 15:33:42 -0400 (EDT)
-Received: by wwb28 with SMTP id 28so2115284wwb.3
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2011 12:33:14 -0700 (PDT)
-In-Reply-To: <20110427132329.GA21499@opensource.wolfsonmicro.com>
+Received: from void.printf.net ([89.145.121.20]:58272 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759093Ab1D0UiE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 27 Apr 2011 16:38:04 -0400
+In-Reply-To: <BANLkTint2cr6vFwBGX1RCTYyvrTc0if=yA@mail.gmail.com> (Andrei
+	Warkentin's message of "Wed, 27 Apr 2011 14:33:13 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>, Dimitris Papastamos <dp@opensource.wolfsonmicro.com>
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>, Dimitris Papastamos <dp@opensource.wolfsonmicro.com>
 
-On Wed, Apr 27, 2011 at 8:23 AM, Mark Brown
-<broonie@opensource.wolfsonmicro.com> wrote:
-> I've had this pair of patches sitting in my tree for a while now (I
-> believe they were previously posted) providing stability improvements=
- in
-> sdhci on my systems. =A0Having looked through the code I believe but =
-have
-> not confirmed that the issue is that the timeout is racing with an
-> actual completion of a pending task - both paths will trigger the
-> tasklet, and if you trigger a tasklet while it is running this causes=
- it
-> to be rescheduled. =A0The result will be that the tasklet gets run a
-> second time with no work pending for it.
->
-> I'm not convinced that these are the best fixes (it feels like we sho=
-uld
-> instead be closing the races down) but I don't really have time to co=
-me
-> up with something better myself right now so I'm pushing them out as-=
-is
-> for comment.
->
-> Ben Dooks (1):
-> =A0 =A0 =A0MMC: SDHCI: Check mrq->cmd in sdhci_tasklet_finish
->
-> Dimitris Papastamos (1):
-> =A0 =A0 =A0MMC: SDHCI: Check mrq !=3D NULL in sdhci_tasklet_finish
->
-> =A0drivers/mmc/host/sdhci.c | =A0 =A02 +-
-> =A01 files changed, 1 insertions(+), 1 deletions(-)
+Hi,
 
-So the timeout interrupt occurs after even though the command
-succeeds? Am I interpreting that correctly?
+On Wed, Apr 27 2011, Andrei Warkentin wrote:
+> On Wed, Apr 27, 2011 at 8:23 AM, Mark Brown
+> <broonie@opensource.wolfsonmicro.com> wrote:
+>> I've had this pair of patches sitting in my tree for a while now (I
+>> believe they were previously posted) providing stability improvements in
+>> sdhci on my systems.  Having looked through the code I believe but have
+>> not confirmed that the issue is that the timeout is racing with an
+>> actual completion of a pending task - both paths will trigger the
+>> tasklet, and if you trigger a tasklet while it is running this causes it
+>> to be rescheduled.  The result will be that the tasklet gets run a
+>> second time with no work pending for it.
+>>
+>> I'm not convinced that these are the best fixes (it feels like we should
+>> instead be closing the races down) but I don't really have time to come
+>> up with something better myself right now so I'm pushing them out as-is
+>> for comment.
+>
+> So the timeout interrupt occurs after even though the command
+> succeeds? Am I interpreting that correctly?
 
-A
+No, I think Mark's saying there's a race of:
+
+* the successful completion interrupt fires, and
+
+* the host timer fires to signify timeout due to *lack* of an interrupt
+  (via sdhci_timeout_timer()).  i.e., the completion interrupt fires
+  very close to the timeout period.
+
+Both cases call tasklet_schedule(&host->finish_tasklet), and if you
+manage to schedule a tasklet while it's already running, it runs again
+after it completes -- but during the first run we set host->mrq->cmd to
+NULL, so then it oopses on the second run.
+
+We could consider taking Mark's first patch and also adding to the top:
+
+        /*
+         * If we get scheduled twice concurrently, this tasklet will
+         * be run again afterwards but without any active request.
+         */
+        if (!host->mrq)
+                return;
+
+.. and pushing to .39 with a stable@ tag.
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
