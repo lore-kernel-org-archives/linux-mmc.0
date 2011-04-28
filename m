@@ -1,161 +1,147 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [linux-pm] [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
-Date: Fri, 29 Apr 2011 00:12:48 +0200
-Message-ID: <201104290012.48800.rjw@sisk.pl>
-References: <Pine.LNX.4.44L0.1104221709030.1791-100000@iolanthe.rowland.org> <201104230011.48073.rjw@sisk.pl> <201104251229.27263.rjw@sisk.pl>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH] mmc: eMMC signal voltage does not use CMD11
+Date: Thu, 28 Apr 2011 15:46:28 -0700
+Message-ID: <E389301A-B40E-4857-8678-DC806A710BB7@marvell.com>
+References: <ABE44455-4F1B-45A2-AED9-150C8E5DBED0@marvell.com>
+ <6C03668EAF45B747AF947A1603D1B300EB72D36F@SAUSEXMBP01.amd.com>
+ <390DC252-295C-4B82-8D5F-43E92EA5D3AF@marvell.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:33704 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932294Ab1D1WM1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Apr 2011 18:12:27 -0400
-In-Reply-To: <201104251229.27263.rjw@sisk.pl>
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:34078 "EHLO
+	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756607Ab1D1Wqd convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 28 Apr 2011 18:46:33 -0400
+In-Reply-To: <390DC252-295C-4B82-8D5F-43E92EA5D3AF@marvell.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-pm@lists.linux-foundation.org
-Cc: Alan Stern <stern@rowland.harvard.edu>, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, LKML <linux-kernel@vger.kernel.org>
-
-On Monday, April 25, 2011, Rafael J. Wysocki wrote:
-> On Saturday, April 23, 2011, Rafael J. Wysocki wrote:
-> > On Friday, April 22, 2011, Alan Stern wrote:
-> > > On Fri, 22 Apr 2011, Rafael J. Wysocki wrote:
-> > > 
-> > > > > The barrier would not prevent the race between the notifier and runtie PM
-> > > > > from taking place.  Why don't we do something like this instead:
-> > > > > 
-> > > > > ---
-> > > > >  drivers/base/dd.c |    3 ++-
-> > > > >  1 file changed, 2 insertions(+), 1 deletion(-)
-> > > > > 
-> > > > > Index: linux-2.6/drivers/base/dd.c
-> > > > > ===================================================================
-> > > > > --- linux-2.6.orig/drivers/base/dd.c
-> > > > > +++ linux-2.6/drivers/base/dd.c
-> > > > > @@ -326,6 +326,8 @@ static void __device_release_driver(stru
-> > > > >  						     BUS_NOTIFY_UNBIND_DRIVER,
-> > > > >  						     dev);
-> > > > >  
-> > > > > +		pm_runtime_put_sync(dev);
-> > > > > +
-> > > > 
-> > > > In fact, I think this one may be _noidle.  If we allow the bus/driver
-> > > > to do what they wont, we might as well let them handle the "device idle"
-> > > > case from ->remove().
-> > > 
-> > > Maybe...  But keeping it put_sync doesn't do any harm.  In Guennadi's 
-> > > case, it might allow him to get rid of the pm_runtime_suspend() call in 
-> > > the remove routine.
-> > > 
-> > > > >  		if (dev->bus && dev->bus->remove)
-> > > > >  			dev->bus->remove(dev);
-> > > > >  		else if (drv->remove)
-> > > > > @@ -338,7 +340,6 @@ static void __device_release_driver(stru
-> > > > >  						     BUS_NOTIFY_UNBOUND_DRIVER,
-> > > > >  						     dev);
-> > > > >  
-> > > > > -		pm_runtime_put_sync(dev);
-> > > > >  	}
-> > > > >  }
-> > > 
-> > > Basically this is okay with me, and it should allow Guennadi to avoid
-> > > the extra put/get pair.
-> > 
-> > OK, so I'm going to put the appended patch into my linux-next branch
-> > (hopefully, the problem is explained sufficiently in the changelog).
-> 
-> I thought about that a bit more and came to the conclusion that we should
-> do things a bit differently in __device_release_driver().  Namely, the fact
-> that the device can be resumed (either synchronously or asynchronously) after
-> the pm_runtime_barrier() has returned may be problematic too, because it
-> may race with the bus notifier in some cases.  For this reason, I think it
-> would be better to do pm_runtime_get_sync() instead of the
-> pm_runtime_get_noresume() and pm_runtime_barrier().
-> 
-> So, I think the appended patch would be better than the previous one.
-
-Well, there haven't been any objections, so I'm adding the patch below
-to my linux-next branch.
-
-Thanks,
-Rafael
+To: Arindam Nath <Arindam.Nath@amd.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
-> ---
-> From: Rafael J. Wysocki <rjw@sisk.pl>
-> Subject: PM / Runtime: Rework runtime PM handling during driver removal
+Hi Arindam,
+
+Since this mmc_set_signal_voltage() routine will be used by SDIO and MMC should the code be moved
+the code core.c ?
+
+I am not sure about drive strength or driver type since SDIO handles these differently then SD.
+
+Philip
+
+On Apr 26, 2011, at 8:26 AM, Philip Rakity wrote:
+
 > 
-> The driver core tries to prevent race conditions between runtime PM
-> and driver removal from happening by incrementing the runtime PM
-> usage counter of the device and executing pm_runtime_barrier() before
-> running the bus notifier and the ->remove() callbacks provided by the
-> device's subsystem or driver.  This guarantees that, if a future
-> runtime suspend of the device has been scheduled or a runtime resume
-> or idle request has been queued up right before the driver removal,
-> it will be canceled or waited for to complete and no other
-> asynchronous runtime suspend or idle requests for the device will be
-> put into the PM workqueue until the ->remove() callback returns.
-> However, it doesn't prevent resume requests from being queued up
-> after pm_runtime_barrier() has been called and it doesn't prevent
-> pm_runtime_resume() from executing the device subsystem's runtime
-> resume callback.  Morever, it prevents the device's subsystem or
-> driver from putting the device into the suspended state by calling
-> pm_runtime_suspend() from its ->remove() routine.  This turns out to
-> be a major inconvenience for some subsystems and drivers that want to
-> leave the devices they handle in the suspended state.
+> Hi Arindam,
 > 
-> To really prevent runtime PM callbacks from racing with the bus
-> notifier callback in __device_release_driver(), which is necessary,
-> because the notifier is used by some subsystems to carry out
-> operations affecting the runtime PM functionality, use
-> pm_runtime_get_sync() instead of the combination of
-> pm_runtime_get_noresume() and pm_runtime_barrier().  This will resume
-> the device if it's in the suspended state and will prevent it from
-> being suspended again until pm_runtime_put_*() is called.
+> On Apr 25, 2011, at 11:45 PM, Nath, Arindam wrote:
 > 
-> To allow subsystems and drivers to put devices into the suspended
-> state by calling pm_runtime_suspend() from their ->remove() routines,
-> execute pm_runtime_put_sync() after running the bus notifier in
-> __device_release_driver().  This will require subsystems and drivers
-> to make their ->remove() callbacks avoid races with runtime PM
-> directly, but it will allow of more flexibility in the handling of
-> devices during the removal of their drivers.
+>> Hi Philip,
+>> 
+>> 
+>>> -----Original Message-----
+>>> From: Philip Rakity [mailto:prakity@marvell.com]
+>>> Sent: Saturday, April 23, 2011 1:56 AM
+>>> To: linux-mmc@vger.kernel.org
+>>> Cc: Nath, Arindam
+>>> Subject: [PATCH] mmc: eMMC signal voltage does not use CMD11
+>>> 
+>>> 
+>>> eMMC chips do not use CMD11 when changing voltage.  Add extra
+>>> argument to call to indicate if CMD11 needs to be sent.
+>>> 
+>>> Signed-off-by: Philip Rakity <prakity@marvell.com>
+>>> ---
+>>> drivers/mmc/core/sd.c     |    4 ++--
+>>> drivers/mmc/core/sd_ops.c |    4 ++--
+>>> drivers/mmc/core/sd_ops.h |    3 ++-
+>>> 3 files changed, 6 insertions(+), 5 deletions(-)
+>>> 
+>>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>>> index ed6b11b..362716c 100644
+>>> --- a/drivers/mmc/core/sd.c
+>>> +++ b/drivers/mmc/core/sd.c
+>>> @@ -734,7 +734,7 @@ try_again:
+>>> 	 */
+>>> 	if (!mmc_host_is_spi(host) && rocr &&
+>>> 	   ((*rocr & 0x41000000) == 0x41000000)) {
+>>> -		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
+>>> +		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
+>>> 1);
+>>> 		if (err) {
+>>> 			ocr &= ~(1 << 24);
+>>> 			goto try_again;
+>>> @@ -1115,7 +1115,7 @@ int mmc_attach_sd(struct mmc_host *host)
+>>> 		host->ocr_avail = host->ocr_avail_sd;
+>>> 
+>>> 	/* Make sure we are at 3.3V signalling voltage */
+>>> -	err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
+>>> +	err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
+>>> 	if (err)
+>>> 		return err;
+>>> 
+>>> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+>>> index fc7edc4..6fd35f6 100644
+>>> --- a/drivers/mmc/core/sd_ops.c
+>>> +++ b/drivers/mmc/core/sd_ops.c
+>>> @@ -149,7 +149,7 @@ int mmc_app_set_bus_width(struct mmc_card *card,
+>>> int width)
+>>> 	return 0;
+>>> }
+>>> 
+>>> -int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
+>>> +int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
+>>> int cmd11)
+>>> {
+>>> 	struct mmc_command cmd;
+>>> 	int err = 0;
+>>> @@ -160,7 +160,7 @@ int mmc_set_signal_voltage(struct mmc_host *host,
+>>> int signal_voltage)
+>>> 	 * Send CMD11 only if the request is to switch the card to
+>>> 	 * 1.8V signalling.
+>>> 	 */
+>>> -	if (signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
+>>> +	if (signal_voltage != MMC_SIGNAL_VOLTAGE_330 && cmd11) {
+>> 
+>> Since we are going to send CMD11 only to change to 1.8V signaling, and when cmd11 is set, isn't it better to have
+>> 
+>> 	if ((signal_voltage == MMC_SIGNAL_VOLTAGE_180) && cmd11) {
 > 
-> Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
-> ---
->  drivers/base/dd.c |    6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+> I am okay with this.  Wanted to cover the possible future case for 1.2V support and CMD11.  I know eMMC does not do
+> CMD11 but incase SD or SDIO ever did.   If you feel strongly will change code.
+>> 
+>> Thanks,
+>> Arindam
+>> 
+>>> 		memset(&cmd, 0, sizeof(struct mmc_command));
+>>> 
+>>> 		cmd.opcode = SD_SWITCH_VOLTAGE;
+>>> diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
+>>> index d5bdda5..2670e71 100644
+>>> --- a/drivers/mmc/core/sd_ops.h
+>>> +++ b/drivers/mmc/core/sd_ops.h
+>>> @@ -20,7 +20,8 @@ int mmc_app_send_scr(struct mmc_card *card, u32
+>>> *scr);
+>>> int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+>>> 	u8 value, u8 *resp);
+>>> int mmc_app_sd_status(struct mmc_card *card, void *ssr);
+>>> -int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
+>>> +int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
+>>> +	int cmd11);
+>>> 
+>>> #endif
+>>> 
+>>> --
+>>> 1.7.0.4
+>>> 
+>>> 
+>> 
+>> 
 > 
-> Index: linux-2.6/drivers/base/dd.c
-> ===================================================================
-> --- linux-2.6.orig/drivers/base/dd.c
-> +++ linux-2.6/drivers/base/dd.c
-> @@ -316,8 +316,7 @@ static void __device_release_driver(stru
->  
->  	drv = dev->driver;
->  	if (drv) {
-> -		pm_runtime_get_noresume(dev);
-> -		pm_runtime_barrier(dev);
-> +		pm_runtime_get_sync(dev);
->  
->  		driver_sysfs_remove(dev);
->  
-> @@ -326,6 +325,8 @@ static void __device_release_driver(stru
->  						     BUS_NOTIFY_UNBIND_DRIVER,
->  						     dev);
->  
-> +		pm_runtime_put_sync(dev);
-> +
->  		if (dev->bus && dev->bus->remove)
->  			dev->bus->remove(dev);
->  		else if (drv->remove)
-> @@ -338,7 +339,6 @@ static void __device_release_driver(stru
->  						     BUS_NOTIFY_UNBOUND_DRIVER,
->  						     dev);
->  
-> -		pm_runtime_put_sync(dev);
->  	}
->  }
->  
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
