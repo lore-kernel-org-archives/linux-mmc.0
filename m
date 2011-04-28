@@ -1,127 +1,161 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH v2] arm: mach-mmp: brownstone.c support multiple sd slots
-Date: Thu, 28 Apr 2011 13:45:43 -0700
-Message-ID: <3BFCE791-3BAD-42ED-BC87-A27F40D6C77C@marvell.com>
-References: <59C2B513-EC04-4CA2-818B-9901CAF3E554@marvell.com>
- <20110427093328.GU17290@n2100.arm.linux.org.uk>
- <161C3F6C-0986-4364-B458-DBA4D08456FD@marvell.com>
- <1F336A22-BAC3-41E3-8D4E-5DF27874D1EA@marvell.com>
- <20110428095127.GX17290@n2100.arm.linux.org.uk>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [linux-pm] [PATCH/RFC] MMC: remove unbalanced pm_runtime_suspend()
+Date: Fri, 29 Apr 2011 00:12:48 +0200
+Message-ID: <201104290012.48800.rjw@sisk.pl>
+References: <Pine.LNX.4.44L0.1104221709030.1791-100000@iolanthe.rowland.org> <201104230011.48073.rjw@sisk.pl> <201104251229.27263.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:42324 "EHLO
-	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754685Ab1D1Usj convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Apr 2011 16:48:39 -0400
-In-Reply-To: <20110428095127.GX17290@n2100.arm.linux.org.uk>
-Content-Language: en-US
+Received: from ogre.sisk.pl ([217.79.144.158]:33704 "EHLO ogre.sisk.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932294Ab1D1WM1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 28 Apr 2011 18:12:27 -0400
+In-Reply-To: <201104251229.27263.rjw@sisk.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Zhangfei Gao <zgao6@marvell.com>, Eric Miao <eric.y.miao@gmail.com>
+To: linux-pm@lists.linux-foundation.org
+Cc: Alan Stern <stern@rowland.harvard.edu>, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, LKML <linux-kernel@vger.kernel.org>
+
+On Monday, April 25, 2011, Rafael J. Wysocki wrote:
+> On Saturday, April 23, 2011, Rafael J. Wysocki wrote:
+> > On Friday, April 22, 2011, Alan Stern wrote:
+> > > On Fri, 22 Apr 2011, Rafael J. Wysocki wrote:
+> > > 
+> > > > > The barrier would not prevent the race between the notifier and runtie PM
+> > > > > from taking place.  Why don't we do something like this instead:
+> > > > > 
+> > > > > ---
+> > > > >  drivers/base/dd.c |    3 ++-
+> > > > >  1 file changed, 2 insertions(+), 1 deletion(-)
+> > > > > 
+> > > > > Index: linux-2.6/drivers/base/dd.c
+> > > > > ===================================================================
+> > > > > --- linux-2.6.orig/drivers/base/dd.c
+> > > > > +++ linux-2.6/drivers/base/dd.c
+> > > > > @@ -326,6 +326,8 @@ static void __device_release_driver(stru
+> > > > >  						     BUS_NOTIFY_UNBIND_DRIVER,
+> > > > >  						     dev);
+> > > > >  
+> > > > > +		pm_runtime_put_sync(dev);
+> > > > > +
+> > > > 
+> > > > In fact, I think this one may be _noidle.  If we allow the bus/driver
+> > > > to do what they wont, we might as well let them handle the "device idle"
+> > > > case from ->remove().
+> > > 
+> > > Maybe...  But keeping it put_sync doesn't do any harm.  In Guennadi's 
+> > > case, it might allow him to get rid of the pm_runtime_suspend() call in 
+> > > the remove routine.
+> > > 
+> > > > >  		if (dev->bus && dev->bus->remove)
+> > > > >  			dev->bus->remove(dev);
+> > > > >  		else if (drv->remove)
+> > > > > @@ -338,7 +340,6 @@ static void __device_release_driver(stru
+> > > > >  						     BUS_NOTIFY_UNBOUND_DRIVER,
+> > > > >  						     dev);
+> > > > >  
+> > > > > -		pm_runtime_put_sync(dev);
+> > > > >  	}
+> > > > >  }
+> > > 
+> > > Basically this is okay with me, and it should allow Guennadi to avoid
+> > > the extra put/get pair.
+> > 
+> > OK, so I'm going to put the appended patch into my linux-next branch
+> > (hopefully, the problem is explained sufficiently in the changelog).
+> 
+> I thought about that a bit more and came to the conclusion that we should
+> do things a bit differently in __device_release_driver().  Namely, the fact
+> that the device can be resumed (either synchronously or asynchronously) after
+> the pm_runtime_barrier() has returned may be problematic too, because it
+> may race with the bus notifier in some cases.  For this reason, I think it
+> would be better to do pm_runtime_get_sync() instead of the
+> pm_runtime_get_noresume() and pm_runtime_barrier().
+> 
+> So, I think the appended patch would be better than the previous one.
+
+Well, there haven't been any objections, so I'm adding the patch below
+to my linux-next branch.
+
+Thanks,
+Rafael
 
 
-Support multiple sd/eMMC interfaces. enable mmc1, 2, and 3.
-mmc2 is used eMMC and slot is marked PERMANENT and 8 bit device.
-mmc1 is used for Wifi and slot is marked PERMANENT
-
-Note: eMMC (mmc2) is set to initialize first to workaround a problem
-where booting in logical order requires mmc create work queue
-to be multi-threaded otherwise boot process hangs.  BUG report
-send to linux-mmc and linux-kernel mailing list.
-
-Wifi (mmc1) requires we enable power on the device by toggling
-the gpio lines for power and reset.
-
-Signed-off-by: Philip Rakity <prakity@marvell.com>
----
- arch/arm/mach-mmp/brownstone.c |   52 +++++++++++++++++++++++++++++++++++++++-
- 1 files changed, 51 insertions(+), 1 deletions(-)
-
-diff --git a/arch/arm/mach-mmp/brownstone.c b/arch/arm/mach-mmp/brownstone.c
-index 7bb78fd..577e8de 100644
---- a/arch/arm/mach-mmp/brownstone.c
-+++ b/arch/arm/mach-mmp/brownstone.c
-@@ -19,6 +19,7 @@
- #include <linux/regulator/max8649.h>
- #include <linux/regulator/fixed.h>
- #include <linux/mfd/max8925.h>
-+#include <linux/delay.h>
- 
- #include <asm/mach-types.h>
- #include <asm/mach/arch.h>
-@@ -177,9 +178,56 @@ static struct i2c_board_info brownstone_twsi1_info[] = {
- };
- 
- static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc0 = {
--	.max_speed	= 25000000,
-+	.adjust_clocks	= 1,
-+	.clk_select	= 1,
-+	.clk_delay	= 31,
- };
- 
-+static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc1 = {
-+	.adjust_clocks	= 1,
-+	.clk_select	= 1,
-+	.clk_delay	= 15,
-+	.flags		= PXA_FLAG_CARD_PERMANENT,
-+};
-+
-+static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc2 = {
-+	.adjust_clocks	= 1,
-+	.clk_select	= 1,
-+	.clk_delay	= 31,
-+	.flags		= PXA_FLAG_CARD_PERMANENT |
-+				PXA_FLAG_SD_8_BIT_CAPABLE_SLOT,
-+};
-+
-+static void __init mmc_sdio_wifi(void)
-+{
-+	int poweron;
-+	int reset;
-+
-+	poweron = mfp_to_gpio(GPIO57_GPIO);
-+	reset = mfp_to_gpio(GPIO58_GPIO);
-+
-+	if (gpio_request(reset, "sd8xxx reset")) {
-+		printk(KERN_INFO "gpio %d request failed\n", reset);
-+		return;
-+	}
-+
-+	if (gpio_request(poweron, "sd8xxx PDn")) {
-+		gpio_free(reset);
-+		printk(KERN_INFO "gpio %d request failed\n", poweron);
-+		return;
-+	}
-+
-+	gpio_direction_output(poweron, 1);
-+	msleep(1);
-+	gpio_direction_output(reset, 0);
-+	msleep(1);
-+	gpio_direction_output(reset, 1);
-+	gpio_free(reset);
-+	gpio_free(poweron);
-+
-+	mmp2_add_sdhost(1, &mmp2_sdh_platdata_mmc1); /* Wifi */
-+}
-+
- static void __init brownstone_init(void)
- {
- 	mfp_config(ARRAY_AND_SIZE(brownstone_pin_config));
-@@ -188,7 +236,9 @@ static void __init brownstone_init(void)
- 	mmp2_add_uart(1);
- 	mmp2_add_uart(3);
- 	mmp2_add_twsi(1, NULL, ARRAY_AND_SIZE(brownstone_twsi1_info));
-+	mmp2_add_sdhost(2, &mmp2_sdh_platdata_mmc2); /* eMMC */
- 	mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC */
-+	mmc_sdio_wifi();
- 
- 	/* enable 5v regulator */
- 	platform_device_register(&brownstone_v_5vp_device);
--- 
-1.7.0.4
-
-
+> ---
+> From: Rafael J. Wysocki <rjw@sisk.pl>
+> Subject: PM / Runtime: Rework runtime PM handling during driver removal
+> 
+> The driver core tries to prevent race conditions between runtime PM
+> and driver removal from happening by incrementing the runtime PM
+> usage counter of the device and executing pm_runtime_barrier() before
+> running the bus notifier and the ->remove() callbacks provided by the
+> device's subsystem or driver.  This guarantees that, if a future
+> runtime suspend of the device has been scheduled or a runtime resume
+> or idle request has been queued up right before the driver removal,
+> it will be canceled or waited for to complete and no other
+> asynchronous runtime suspend or idle requests for the device will be
+> put into the PM workqueue until the ->remove() callback returns.
+> However, it doesn't prevent resume requests from being queued up
+> after pm_runtime_barrier() has been called and it doesn't prevent
+> pm_runtime_resume() from executing the device subsystem's runtime
+> resume callback.  Morever, it prevents the device's subsystem or
+> driver from putting the device into the suspended state by calling
+> pm_runtime_suspend() from its ->remove() routine.  This turns out to
+> be a major inconvenience for some subsystems and drivers that want to
+> leave the devices they handle in the suspended state.
+> 
+> To really prevent runtime PM callbacks from racing with the bus
+> notifier callback in __device_release_driver(), which is necessary,
+> because the notifier is used by some subsystems to carry out
+> operations affecting the runtime PM functionality, use
+> pm_runtime_get_sync() instead of the combination of
+> pm_runtime_get_noresume() and pm_runtime_barrier().  This will resume
+> the device if it's in the suspended state and will prevent it from
+> being suspended again until pm_runtime_put_*() is called.
+> 
+> To allow subsystems and drivers to put devices into the suspended
+> state by calling pm_runtime_suspend() from their ->remove() routines,
+> execute pm_runtime_put_sync() after running the bus notifier in
+> __device_release_driver().  This will require subsystems and drivers
+> to make their ->remove() callbacks avoid races with runtime PM
+> directly, but it will allow of more flexibility in the handling of
+> devices during the removal of their drivers.
+> 
+> Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
+> ---
+>  drivers/base/dd.c |    6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+> 
+> Index: linux-2.6/drivers/base/dd.c
+> ===================================================================
+> --- linux-2.6.orig/drivers/base/dd.c
+> +++ linux-2.6/drivers/base/dd.c
+> @@ -316,8 +316,7 @@ static void __device_release_driver(stru
+>  
+>  	drv = dev->driver;
+>  	if (drv) {
+> -		pm_runtime_get_noresume(dev);
+> -		pm_runtime_barrier(dev);
+> +		pm_runtime_get_sync(dev);
+>  
+>  		driver_sysfs_remove(dev);
+>  
+> @@ -326,6 +325,8 @@ static void __device_release_driver(stru
+>  						     BUS_NOTIFY_UNBIND_DRIVER,
+>  						     dev);
+>  
+> +		pm_runtime_put_sync(dev);
+> +
+>  		if (dev->bus && dev->bus->remove)
+>  			dev->bus->remove(dev);
+>  		else if (drv->remove)
+> @@ -338,7 +339,6 @@ static void __device_release_driver(stru
+>  						     BUS_NOTIFY_UNBOUND_DRIVER,
+>  						     dev);
+>  
+> -		pm_runtime_put_sync(dev);
+>  	}
+>  }
+>  
