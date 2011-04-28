@@ -1,19 +1,13 @@
 From: Per Forlin <per.forlin@linaro.org>
 Subject: mmc blkqueue is empty even if there are pending reads in do_generic_file_read()
-Date: Thu, 28 Apr 2011 20:30:12 +0200
-Message-ID: <BANLkTimOVO9ogfhjM-mjzTR=M0Q2LU5WGQ@mail.gmail.com>
+Date: Thu, 28 Apr 2011 20:39:00 +0200
+Message-ID: <BANLkTinhK_K1oSJDEoqD6EQK8Qy5Wy3v+g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:38489 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933248Ab1D1SaM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2011 14:30:12 -0400
-Received: by pzk9 with SMTP id 9so1794778pzk.19
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2011 11:30:12 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <owner-linux-mm@kvack.org>
+Sender: owner-linux-mm@kvack.org
+To: linux-mm@kvack.org, linux-mmc@vger.kernel.org, linaro-kernel@lists.linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linaro-kernel@lists.linaro.org, majordomo@kvack.org
 
 Hi,
 
@@ -102,3 +96,10 @@ request to the block device queue?
 
 Thanks,
 Per
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
