@@ -1,185 +1,88 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v3 08/11] mmc: sd: add support for tuning during uhs
- initialization
-Date: Thu, 28 Apr 2011 01:02:01 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300EB81A391@SAUSEXMBP01.amd.com>
-References: <1303291861-1788-1-git-send-email-arindam.nath@amd.com>
- <1303291861-1788-9-git-send-email-arindam.nath@amd.com>
- <DC43BF02-00E5-4090-A472-722156C5E136@marvell.com>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH] mmc: mxs-mmc: add support for pre_req and post_req
+Date: Thu, 28 Apr 2011 09:52:17 +0200
+Message-ID: <BANLkTikq2mu=rNiRuRPjikkpXuH6DKOsFA@mail.gmail.com>
+References: <1302116833-24540-1-git-send-email-per.forlin@linaro.org>
+	<1303058010-30256-1-git-send-email-shawn.guo@linaro.org>
+	<20110417164830.GE17935@S2100-06.ap.freescale.net>
+	<BANLkTimwvX633UaUoc4P4DD1xnpLbMTrZA@mail.gmail.com>
+	<20110420140120.GF1965@S2100-06.ap.freescale.net>
+	<BANLkTimzk89VC1Vti4CZ60TTJ20e2YpwNg@mail.gmail.com>
+	<20110421062924.GB4024@S2100-06.ap.freescale.net>
+	<BANLkTimq8_R-CJmryTvRWHZ+-2vqj-Y6cQ@mail.gmail.com>
+	<20110421091115.GH4024@S2100-06.ap.freescale.net>
+	<BANLkTim_5fsJ06CTgxAvPjrb8y5FpW=xRg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:17375
-	"EHLO VA3EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751510Ab1D1GCM convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Apr 2011 02:02:12 -0400
-In-Reply-To: <DC43BF02-00E5-4090-A472-722156C5E136@marvell.com>
-Content-Language: en-US
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:59777 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754697Ab1D1HwS convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2011 03:52:18 -0400
+Received: by iwn34 with SMTP id 34so2009430iwn.19
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2011 00:52:18 -0700 (PDT)
+In-Reply-To: <BANLkTim_5fsJ06CTgxAvPjrb8y5FpW=xRg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linaro-kernel@lists.linaro.org, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-Hi Philip,
+On 21 April 2011 11:47, Per Forlin <per.forlin@linaro.org> wrote:
+> On 21 April 2011 11:11, Shawn Guo <shawn.guo@freescale.com> wrote:
+>> On Thu, Apr 21, 2011 at 10:46:18AM +0200, Per Forlin wrote:
+>>> On 21 April 2011 08:29, Shawn Guo <shawn.guo@freescale.com> wrote:
+>>> > On Wed, Apr 20, 2011 at 05:30:22PM +0200, Per Forlin wrote:
+>>> > [...]
+>>> >> Remove dma_map and dma_unmap from your host driver and run the t=
+ests
+>>> >> (obviously nonblocking and blocking will have the same results).=
+ If
+>>> >> there is still no performance gain the cache penalty is very sma=
+ll on
+>>> >> your platform and therefore nonblocking doesn't improve things m=
+uch.
+>>> >> Please let me know the result.
+>>> >>
+>>> > Sorry, I could not understand. =A0What's the point to run the tes=
+t when
+>>> > the driver is even broken. =A0The removal of =A0dma_map_sg and
+>>> > dma_unmap_sg makes mxs-mmc host driver broken.
+>>> The point is only to get a measurement of the cost of handling
+>>> dma_map_sg and dma_unmap_sg, this is the maximum time mmc nonblocki=
+ng
+>>> can save.
+>>> The nonblocking mmc_test should save the total time of dma_map_sg a=
+nd
+>>> dma_unmap_sg, if the pre_req and post_req hooks are implemented
+>>> correctly.
+>>> Running without dma_map_sg and dma_unmap_sg will confirm if the
+>>> pre_req and post_req hooks are implemented correctly.
+>>>
+>> With dma_map_sg and dma_unmap_sg removed, the mmc_test gave very low
+>> numbers, though blocking and non-blocking numbers are same. =A0Is it
+>> an indication that pre_req and post_req hooks are not implemented
+>> correctly?
+> I think you could get the same numbers for the nonblocking with
+> dma_map and dma_unmap in place.
+>
+I wanted to test the performance without cache penalty but removing
+dma_map_sg may not work since it produces the physical mapped sg list.
+This is not as simple as I first thought. Make a copy for dma_map_sg
+(call it dma_map_sg_no_cache) and modify it to not clean/inc the
+cache. Replace dma_map_sg with dma_map_sg_no_cache in the mxs-mmc
+driver.
+Removing dma_unmap should be ok for this test case.
+Do you still get very low numbers?
 
-
-> -----Original Message-----
-> From: Philip Rakity [mailto:prakity@marvell.com]
-> Sent: Thursday, April 28, 2011 12:15 AM
-> To: Nath, Arindam
-> Cc: cjb@laptop.org; linux-mmc@vger.kernel.org; subhashj@codeaurora.org;
-> zhangfei.gao@gmail.com; Su, Henry; Lu, Aaron; anath.amd@gmail.com
-> Subject: Re: [PATCH v3 08/11] mmc: sd: add support for tuning during
-> uhs initialization
-> 
-> 
-
-[...]
-
-> > @@ -1477,12 +1481,146 @@ static int
-> sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-> > 		return 0;
-> > }
-> >
-> > +static int sdhci_execute_tuning(struct mmc_host *mmc)
-> > +{
-> > +	struct sdhci_host *host;
-> > +	u16 ctrl;
-> 	 	u32 ier;
-> > +	int tuning_loop_counter = MAX_TUNING_LOOP;
-> > +	unsigned long timeout;
-> > +	int err = 0;
-> > +
-> > +	host = mmc_priv(mmc);
-> > +
-> > +	disable_irq(host->irq);
-> > +	spin_lock(&host->lock);
-> 
-> is this needed ?  I believe we should be locked from the core/ layer.
-
-Yes, this is needed. Please note that sdhci_execute_tuning() is not only invoked during initialization, but also when re-tuning timer expires.
-
-> > +
-> > +	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> > +
-> > +	/*
-> > +	 * Host Controller needs tuning only in case of SDR104 mode
-> > +	 * and for SDR50 mode when Use Tuning for SDR50 is set in
-> > +	 * Capabilities register.
-> > +	 */
-> > +	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR104) ||
-> > +	    (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR50) &&
-> > +	    (host->flags & SDHCI_SDR50_NEEDS_TUNING)))
-> > +		ctrl |= SDHCI_CTRL_EXEC_TUNING;
-> > +	else {
-> > +		spin_unlock(&host->lock);
-> > +		enable_irq(host->irq);
-> > +		return 0;
-> > +	}
-> 
-> 
-> based on exchanges with SD Host Chair we need to set block size and
-> transfer mode.
-> Directly wriiting TRANSFER_MODE clears DMA bit.  No DMA is needed for
-> SDHCI_INT_DATA_AVAIL
-> to be signaled.
-> 
-> Suggest
-> 
-> > +	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR104) ||
-> > +	    (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR50) &&
-> > +	    (host->flags & SDHCI_SDR50_NEEDS_TUNING))) {
-> 			ctrl |= SDHCI_CTRL_EXEC_TUNING;
-> 			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
-> SDHCI_BLOCK_SIZE);
-> 			sdhci_writew(host, SDHCI_TRNS_READ,
-> SDHCI_TRANSFER_MODE);
-> 	} else {
-> > +		spin_unlock(&host->lock);
-> > +		enable_irq(host->irq);
-> > +		return 0;
-> > +	}
-> 
-
-This suggestion looks okay to me.
-
-> 
-> > +
-> > +	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> > +
-> > +	/*
-> > +	 * As per the Host Controller spec v3.00, tuning command
-> > +	 * generates Buffer Read Ready interrupt, so enable that.
-> > +	 */
-> > +	sdhci_unmask_irqs(host, SDHCI_INT_DATA_AVAIL);
-> 
-> delete line above -- it keeps the other interrupts enabled but we
-> should only
-> receive the DATA AVAIL interrupt.  We should protect against a bad
-> controller
-> 
-> change to
-> 
-> >> 	ier = sdhci_readl(host, SDHCI_INT_ENABLE);
-> >> 	sdhci_clear_set_irqs(host, ier, SDHCI_INT_DATA_AVAIL);
-> 
-> 
-> This will ONLY enable SDHCI_INT_DATA_AVAIL.
-
-Even though the spec clearly mentions that,
-
-"While the tuning sequence is being performed, the Host Controller does not generate interrupts (including Command Complete) except Buffer Read Ready and CMD19 response errors are not indicated."
-
-I think your suggestion would make sense of buggy controllers.
-
-> >
-> >
-> > +
-> > +	/*
-> > +	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the
-> number
-> > +	 * of loops reaches 40 times or a timeout of 150ms occurs.
-> > +	 */
-> > +	timeout = 150;
-> > +	do {
-> > +		u16 mode;
-> > +		struct mmc_command cmd;
-> > +		struct mmc_request mrq;
-> > +
-> > +		if (!tuning_loop_counter && !timeout)
-> > +			break;
-> > +
-> > +		memset(&cmd, 0, sizeof(struct mmc_command));
-> > +		cmd.opcode = MMC_SEND_TUNING_BLOCK;
-> > +		cmd.arg = 0;
-> > +		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-> > +
-> > +		memset(&cmd.resp, 0, sizeof(cmd.resp));
-> > +		cmd.retries = 0;
-> > +
-> > +		cmd.data = NULL;
-> > +		cmd.error = 0;
-> > +
-> > +		memset(&mrq, 0, sizeof(struct mmc_request));
-> > +		mrq.cmd = &cmd;
-> > +		host->mrq = &mrq;
-> > +
-> 
-> =====
-> > +		/* Make sure DMA Enable is set to 0 before tuning */
-> > +		mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
-> > +		if (mode & SDHCI_TRNS_DMA) {
-> > +			mode &= ~SDHCI_TRNS_DMA;
-> > +			sdhci_writew(host, mode, SDHCI_TRANSFER_MODE);
-> > +		}
->     this code should be deleted and moved up.
-
-IMO, it should better stay here. Even though there can be no data transfer commands during tuning procedure, but there can still be commands using CMD lines only, so there is a possibility of interleaving. In that case, it's better to program TRANSFER_MODE register every time before sending CMD19. Please consider re-tuning mode 1.
-
-Thanks,
-Arindam
-
-
-
+>> =A0If yes, can you please help to catch the mistakes?
+> I will take a look.
+>
+>> --
+>> Regards,
+>> Shawn
+>>
+>>
+> Regards,
+> Per
+>
