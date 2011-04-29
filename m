@@ -1,118 +1,285 @@
 From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: [PATCH 1/2] mmc: move sdhci_ops and sdhci_priv to header
-Date: Thu, 28 Apr 2011 23:56:07 -0400
-Message-ID: <BANLkTikFKq=tVEvXr8so=exNrCdyrJk-hQ@mail.gmail.com>
+Subject: [PATCH 2/2] sdhci-pxa: add call back interface to share sdhci-pxa
+Date: Thu, 28 Apr 2011 23:57:19 -0400
+Message-ID: <BANLkTimPN=GauwY7Rwh3xUEkV3=q3wfzAQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:52785 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751073Ab1D2D4I (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2011 23:56:08 -0400
-Received: by qwk3 with SMTP id 3so1553652qwk.19
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2011 20:56:07 -0700 (PDT)
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:46154 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751073Ab1D2D5T (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2011 23:57:19 -0400
+Received: by qyg14 with SMTP id 14so1786215qyg.19
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2011 20:57:19 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>
 
-Subject: [PATCH 1/2] mmc: move sdhci_ops and sdhci_priv to header
+Subject: [PATCH 2/2] sdhci-pxa: add call back interface to share sdhci-pxa
 
-	Give a chance platfrom code could access sdhci_priv and pointer ops
+	Call back functions is added to support mmp2, pxa910, and pxa955
 
 Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+Signed-off-by: RaymondWu <xywu@marvell.com>
+Signed-off-by: Jun Nie <njun@marvell.com>
 ---
- drivers/mmc/host/sdhci.h  |   30 ------------------------------
- include/linux/mmc/sdhci.h |   31 +++++++++++++++++++++++++++++++
- 2 files changed, 31 insertions(+), 30 deletions(-)
+ arch/arm/plat-pxa/include/plat/sdhci.h |   46 +++++++++++++++++
+ drivers/mmc/host/sdhci-pxa.c           |   88 +++++++++++++++++++++-----------
+ 2 files changed, 104 insertions(+), 30 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c6e25a7..3998a26 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -208,31 +208,6 @@
- #define SDHCI_DEFAULT_BOUNDARY_SIZE  (512 * 1024)
- #define SDHCI_DEFAULT_BOUNDARY_ARG   (ilog2(SDHCI_DEFAULT_BOUNDARY_SIZE) - 12)
+diff --git a/arch/arm/plat-pxa/include/plat/sdhci.h
+b/arch/arm/plat-pxa/include/plat/sdhci.h
+index 1ab332e..269dbe6 100644
+--- a/arch/arm/plat-pxa/include/plat/sdhci.h
++++ b/arch/arm/plat-pxa/include/plat/sdhci.h
+@@ -13,9 +13,14 @@
+ #ifndef __PLAT_PXA_SDHCI_H
+ #define __PLAT_PXA_SDHCI_H
 
--struct sdhci_ops {
--#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
--	u32		(*read_l)(struct sdhci_host *host, int reg);
--	u16		(*read_w)(struct sdhci_host *host, int reg);
--	u8		(*read_b)(struct sdhci_host *host, int reg);
--	void		(*write_l)(struct sdhci_host *host, u32 val, int reg);
--	void		(*write_w)(struct sdhci_host *host, u16 val, int reg);
--	void		(*write_b)(struct sdhci_host *host, u8 val, int reg);
--#endif
--
--	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
--
--	int		(*enable_dma)(struct sdhci_host *host);
--	unsigned int	(*get_max_clock)(struct sdhci_host *host);
--	unsigned int	(*get_min_clock)(struct sdhci_host *host);
--	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
--	int		(*platform_8bit_width)(struct sdhci_host *host,
--					       int width);
--	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
--					     u8 power_mode);
--	unsigned int    (*get_ro)(struct sdhci_host *host);
--	void	(*platform_reset_enter)(struct sdhci_host *host, u8 mask);
--	void	(*platform_reset_exit)(struct sdhci_host *host, u8 mask);
--};
--
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-
- static inline void sdhci_writel(struct sdhci_host *host, u32 val, int reg)
-@@ -321,11 +296,6 @@ extern struct sdhci_host *sdhci_alloc_host(struct
-device *dev,
- 	size_t priv_size);
- extern void sdhci_free_host(struct sdhci_host *host);
-
--static inline void *sdhci_priv(struct sdhci_host *host)
--{
--	return (void *)host->private;
--}
--
- extern void sdhci_card_detect(struct sdhci_host *host);
- extern int sdhci_add_host(struct sdhci_host *host);
- extern void sdhci_remove_host(struct sdhci_host *host, int dead);
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 92e1c9a..f9c9b20 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -149,4 +149,35 @@ struct sdhci_host {
-
- 	unsigned long private[0] ____cacheline_aligned;
- };
++#include <linux/mmc/sdhci.h>
++#include <linux/platform_device.h>
 +
-+struct sdhci_ops {
-+#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-+	u32		(*read_l)(struct sdhci_host *host, int reg);
-+	u16		(*read_w)(struct sdhci_host *host, int reg);
-+	u8		(*read_b)(struct sdhci_host *host, int reg);
-+	void		(*write_l)(struct sdhci_host *host, u32 val, int reg);
-+	void		(*write_w)(struct sdhci_host *host, u16 val, int reg);
-+	void		(*write_b)(struct sdhci_host *host, u8 val, int reg);
-+#endif
+ /* pxa specific flag */
+ /* Require clock free running */
+ #define PXA_FLAG_DISABLE_CLOCK_GATING (1<<0)
++/* card alwayes wired to host, like on-chip emmc */
++#define PXA_FLAG_CARD_PERMANENT	(1<<1)
+
+ /* Board design supports 8-bit data on SD/SDIO BUS */
+ #define PXA_FLAG_SD_8_BIT_CAPABLE_SLOT (1<<2)
+@@ -23,13 +28,54 @@
+ /*
+  * struct pxa_sdhci_platdata() - Platform device data for PXA SDHCI
+  * @max_speed: the maximum speed supported
++ * @host_caps: Standard MMC host capabilities bit field.
+  * @quirks: quirks of specific device
+  * @flags: flags for platform requirement
++ * @clk_delay_cycles:
++ *	mmp2: each step is roughly 100ps, 5bits width
++ *	pxa910: each step is 1ns, 4bits width
++ * @clk_delay_enable: enable clk_delay or not, used on pxa910
++ * @clk_delay_sel: select clk_delay, used on pxa910
++ *	0: choose feedback clk
++ *	1: choose feedback clk + delay value
++ *	2: choose internal clk
++ * @ext_cd_gpio: gpio pin used for external CD line
++ * @ext_cd_gpio_invert: invert values for external CD gpio line
++ * @soc_set_timing: set timing for specific soc
++ * @ext_cd_init: Initialize external card detect subsystem
++ * @ext_cd_cleanup: Cleanup external card detect subsystem
++ * @soc_set_ops: overwrite host ops with soc specific ops
+  */
++struct sdhci_pxa;
+ struct sdhci_pxa_platdata {
+ 	unsigned int	max_speed;
++	unsigned int	host_caps;
+ 	unsigned int	quirks;
+ 	unsigned int	flags;
++	unsigned int	clk_delay_cycles;
++	unsigned int	clk_delay_sel;
++	unsigned int	ext_cd_gpio;
++	bool		ext_cd_gpio_invert;
++	bool		clk_delay_enable;
 +
-+	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
-+
-+	int		(*enable_dma)(struct sdhci_host *host);
-+	unsigned int	(*get_max_clock)(struct sdhci_host *host);
-+	unsigned int	(*get_min_clock)(struct sdhci_host *host);
-+	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
-+	int		(*platform_8bit_width)(struct sdhci_host *host,
-+					       int width);
-+	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
-+					     u8 power_mode);
-+	unsigned int    (*get_ro)(struct sdhci_host *host);
-+	void	(*platform_reset_enter)(struct sdhci_host *host, u8 mask);
-+	void	(*platform_reset_exit)(struct sdhci_host *host, u8 mask);
++	void (*soc_set_timing)(struct sdhci_host *host,
++			struct sdhci_pxa_platdata *pdata);
++	int (*ext_cd_init)(void (*notify_func)(struct platform_device *dev,
++						   int state), void *data);
++	int (*ext_cd_cleanup)(void (*notify_func)(struct platform_device *dev,
++						      int state), void *data);
++	void (*soc_set_ops)(struct sdhci_pxa *pxa);
 +};
 +
-+static inline void *sdhci_priv(struct sdhci_host *host)
-+{
-+	return (void *)host->private;
-+}
++struct sdhci_pxa {
++	struct sdhci_host		*host;
++	struct sdhci_pxa_platdata	*pdata;
++	struct clk			*clk;
++	struct resource			*res;
++	struct sdhci_ops		*ops;
 +
- #endif /* __SDHCI_H */
++	u8	clk_enable;
++	u8	power_mode;
+ };
+
+ #endif /* __PLAT_PXA_SDHCI_H */
+diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
+index 5a61208..4a1b7f7 100644
+--- a/drivers/mmc/host/sdhci-pxa.c
++++ b/drivers/mmc/host/sdhci-pxa.c
+@@ -24,32 +24,22 @@
+ #include <linux/clk.h>
+ #include <linux/io.h>
+ #include <linux/err.h>
++#include <linux/slab.h>
+ #include <plat/sdhci.h>
+ #include "sdhci.h"
+
+ #define DRIVER_NAME	"sdhci-pxa"
+
+-#define SD_FIFO_PARAM		0x104
+-#define DIS_PAD_SD_CLK_GATE	0x400
+-
+-struct sdhci_pxa {
+-	struct sdhci_host		*host;
+-	struct sdhci_pxa_platdata	*pdata;
+-	struct clk			*clk;
+-	struct resource			*res;
+-
+-	u8 clk_enable;
+-};
+-
+ /*****************************************************************************\
+  *                                                                           *
+  * SDHCI core callbacks                                                      *
+  *                                                                           *
+ \*****************************************************************************/
++
+ static void set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pxa *pxa = sdhci_priv(host);
+-	u32 tmp = 0;
++	struct sdhci_pxa_platdata *pdata = pxa->pdata;
+
+ 	if (clock == 0) {
+ 		if (pxa->clk_enable) {
+@@ -57,21 +47,31 @@ static void set_clock(struct sdhci_host *host,
+unsigned int clock)
+ 			pxa->clk_enable = 0;
+ 		}
+ 	} else {
+-		if (0 == pxa->clk_enable) {
+-			if (pxa->pdata->flags & PXA_FLAG_DISABLE_CLOCK_GATING) {
+-				tmp = readl(host->ioaddr + SD_FIFO_PARAM);
+-				tmp |= DIS_PAD_SD_CLK_GATE;
+-				writel(tmp, host->ioaddr + SD_FIFO_PARAM);
+-			}
+-			clk_enable(pxa->clk);
+-			pxa->clk_enable = 1;
+-		}
++		if (pdata && pdata->soc_set_timing)
++			pdata->soc_set_timing(host, pdata);
++		clk_enable(pxa->clk);
++		pxa->clk_enable = 1;
+ 	}
+ }
+
+-static struct sdhci_ops sdhci_pxa_ops = {
+-	.set_clock = set_clock,
+-};
++static void sdhci_pxa_notify_change(struct platform_device *dev, int state)
++{
++	struct sdhci_host *host = platform_get_drvdata(dev);
++	unsigned long flags;
++
++	if (host) {
++		spin_lock_irqsave(&host->lock, flags);
++		if (state) {
++			dev_dbg(&dev->dev, "card inserted.\n");
++			host->flags &= ~SDHCI_DEVICE_DEAD;
++		} else {
++			dev_dbg(&dev->dev, "card removed.\n");
++			host->flags |= SDHCI_DEVICE_DEAD;
++		}
++		tasklet_schedule(&host->card_tasklet);
++		spin_unlock_irqrestore(&host->lock, flags);
++	}
++}
+
+ /*****************************************************************************\
+  *                                                                           *
+@@ -111,6 +111,12 @@ static int __devinit sdhci_pxa_probe(struct
+platform_device *pdev)
+ 	pxa->pdata = pdata;
+ 	pxa->clk_enable = 0;
+
++	pxa->ops = kzalloc(sizeof(struct sdhci_ops), GFP_KERNEL);
++	if (!pxa->ops) {
++		ret = -ENOMEM;
++		goto out;
++	}
++
+ 	pxa->clk = clk_get(dev, "PXA-SDHCLK");
+ 	if (IS_ERR(pxa->clk)) {
+ 		dev_err(dev, "failed to get io clock\n");
+@@ -134,32 +140,49 @@ static int __devinit sdhci_pxa_probe(struct
+platform_device *pdev)
+ 	}
+
+ 	host->hw_name = "MMC";
+-	host->ops = &sdhci_pxa_ops;
+ 	host->irq = irq;
+-	host->quirks = SDHCI_QUIRK_BROKEN_ADMA | SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
++	host->quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
++
++	if (pdata && pdata->flags & PXA_FLAG_CARD_PERMANENT) {
++		/* on-chip device */
++		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
++	}
+
+-	if (pdata->quirks)
++	if (pdata && pdata->quirks)
+ 		host->quirks |= pdata->quirks;
+
+ 	/* If slot design supports 8 bit data, indicate this to MMC. */
+ 	if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
+ 		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+
++	if (pdata && pdata->host_caps)
++		host->mmc->caps |= pdata->host_caps;
++
++	if (pdata && pdata->soc_set_ops)
++		pdata->soc_set_ops(pxa);
++
++	pxa->ops->set_clock = set_clock;
++	host->ops = pxa->ops;
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "failed to add host\n");
+ 		goto out;
+ 	}
+
+-	if (pxa->pdata->max_speed)
+-		host->mmc->f_max = pxa->pdata->max_speed;
++	if (pdata && pdata->max_speed)
++		host->mmc->f_max = pdata->max_speed;
+
++	if (pdata && pdata->ext_cd_init)
++		pdata->ext_cd_init(&sdhci_pxa_notify_change, pdata);
+ 	platform_set_drvdata(pdev, host);
+
+ 	return 0;
+ out:
+ 	if (host) {
+ 		clk_put(pxa->clk);
++		kfree(pxa->ops);
+ 		if (host->ioaddr)
+ 			iounmap(host->ioaddr);
+ 		if (pxa->res)
+@@ -173,18 +196,23 @@ out:
+
+ static int __devexit sdhci_pxa_remove(struct platform_device *pdev)
+ {
++	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
+ 	struct sdhci_pxa *pxa = sdhci_priv(host);
+ 	int dead = 0;
+ 	u32 scratch;
+
+ 	if (host) {
++		if (pdata && pdata->ext_cd_cleanup)
++			pdata->ext_cd_cleanup(&sdhci_pxa_notify_change, pdata);
++
+ 		scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
+ 		if (scratch == (u32)-1)
+ 			dead = 1;
+
+ 		sdhci_remove_host(host, dead);
+
++		kfree(pxa->ops);
+ 		if (host->ioaddr)
+ 			iounmap(host->ioaddr);
+ 		if (pxa->res)
 -- 
 1.7.0.4
