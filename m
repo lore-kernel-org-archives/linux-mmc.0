@@ -1,84 +1,78 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] dw_mmc: fixed regulator control
-Date: Fri, 29 Apr 2011 19:19:41 +0900
-Message-ID: <4DBA90BD.8070804@samsung.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH] mmc: tmio: fix PM in DMA mode
+Date: Fri, 29 Apr 2011 19:11:00 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1104291909290.17813@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:35970 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754247Ab1D2KWR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Apr 2011 06:22:17 -0400
-Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LKE005AISSZ05R0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 29 Apr 2011 19:22:15 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LKE0029ZST207@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 29 Apr 2011 19:22:14 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>
 
-This patch fixed regulator control in dw_mmc.c
-If we didn't set CONFIG_REGULATOR, always entered error condition.
-But that's not error..because we didn't use regulator framework.
+DMA mode has to be re-enabled during a resume.
 
-So when we only used CONFIG_REGULATOR, i think that need to get regulator.
-
-And In suspend function, regulator_enable() need not..
-need that in resume function.
-(i didn't know why located there...)
-
-Thanks,
-Jaehoon Chung
-
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyumgmin.park@samsung.com>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/dw_mmc.c |    8 +++++---
- 1 files changed, 5 insertions(+), 3 deletions(-)
+ drivers/mmc/host/tmio_mmc_dma.c |   21 ++++++++++++---------
+ drivers/mmc/host/tmio_mmc_pio.c |    1 +
+ 2 files changed, 13 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 87e1f57..62b900f 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1441,12 +1441,14 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	}
- #endif /* CONFIG_MMC_DW_IDMAC */
- 
-+#ifdef CONFIG_REGULATOR
- 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
- 	if (IS_ERR(host->vmmc)) {
- 		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
- 		host->vmmc = NULL;
- 	} else
- 		regulator_enable(host->vmmc);
-+#endif /* CONFIG_REGULATOR */
- 
- 	if (dw_mci_get_cd(mmc))
- 		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-@@ -1769,9 +1771,6 @@ static int dw_mci_suspend(struct platform_device *pdev, pm_message_t mesg)
- 	int i, ret;
- 	struct dw_mci *host = platform_get_drvdata(pdev);
- 
--	if (host->vmmc)
--		regulator_enable(host->vmmc);
--
- 	for (i = 0; i < host->num_slots; i++) {
- 		struct dw_mci_slot *slot = host->slot[i];
- 		if (!slot)
-@@ -1798,6 +1797,9 @@ static int dw_mci_resume(struct platform_device *pdev)
- 	int i, ret;
- 	struct dw_mci *host = platform_get_drvdata(pdev);
- 
-+	if (host->vmmc)
-+		regulator_enable(host->vmmc);
+diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+index d3de74a..25f1ad6 100644
+--- a/drivers/mmc/host/tmio_mmc_dma.c
++++ b/drivers/mmc/host/tmio_mmc_dma.c
+@@ -256,7 +256,10 @@ static bool tmio_mmc_filter(struct dma_chan *chan, void *arg)
+ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdata)
+ {
+ 	/* We can only either use DMA for both Tx and Rx or not use it at all */
+-	if (pdata->dma) {
++	if (!pdata->dma)
++		return;
 +
- 	if (host->dma_ops->init)
- 		host->dma_ops->init(host);
++	if (!host->chan_tx && !host->chan_rx) {
+ 		dma_cap_mask_t mask;
  
+ 		dma_cap_zero(mask);
+@@ -284,18 +287,18 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+ 
+ 		tasklet_init(&host->dma_complete, tmio_mmc_tasklet_fn, (unsigned long)host);
+ 		tasklet_init(&host->dma_issue, tmio_mmc_issue_tasklet_fn, (unsigned long)host);
++	}
+ 
+-		tmio_mmc_enable_dma(host, true);
++	tmio_mmc_enable_dma(host, true);
++
++	return;
+ 
+-		return;
+ ebouncebuf:
+-		dma_release_channel(host->chan_rx);
+-		host->chan_rx = NULL;
++	dma_release_channel(host->chan_rx);
++	host->chan_rx = NULL;
+ ereqrx:
+-		dma_release_channel(host->chan_tx);
+-		host->chan_tx = NULL;
+-		return;
+-	}
++	dma_release_channel(host->chan_tx);
++	host->chan_tx = NULL;
+ }
+ 
+ void tmio_mmc_release_dma(struct tmio_mmc_host *host)
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 26598f1..27fc11c 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -995,6 +995,7 @@ int tmio_mmc_host_resume(struct device *dev)
+ 		pm_runtime_get_sync(dev);
+ 
+ 	tmio_mmc_reset(mmc_priv(mmc));
++	tmio_mmc_request_dma(host, host->pdata);
+ 
+ 	return mmc_resume_host(mmc);
+ }
+-- 
+1.7.2.5
+
