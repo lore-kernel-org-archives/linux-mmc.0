@@ -1,63 +1,60 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH V2] mmc: sdhci add explicit callback to set f_max
-Date: Fri, 29 Apr 2011 13:21:29 -0700
-Message-ID: <343135FB-1668-463C-A155-359004845845@marvell.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: cjb traveling May 1 - May 10
+Date: Fri, 29 Apr 2011 16:35:08 -0400
+Message-ID: <m339l03if7.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog102.obsmtp.com ([74.125.149.69]:34826 "EHLO
-	na3sys009aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751061Ab1D2UYn convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 29 Apr 2011 16:24:43 -0400
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:35228 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932307Ab1D2Ubm convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Apr 2011 16:31:42 -0400
+Received: from pullcord.laptop.org ([18.85.46.20])
+	by void.printf.net with esmtp (Exim 4.69)
+	(envelope-from <cjb@laptop.org>)
+	id 1QFuLl-0000mD-7R
+	for linux-mmc@vger.kernel.org; Fri, 29 Apr 2011 21:31:41 +0100
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
 
+Hi,
 
-We currently have callbacks for max_clk, f_min but
-are missing the callback for f_max.
+I'll be in Uruguay for OLPC from May 1st to May 10th.  I'll be online
+there but won't have as much time to reply to list mail as usual --
+I'll catch up on mail properly after I get back.
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
----
- drivers/mmc/host/sdhci.c |    9 ++++++---
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 7 insertions(+), 3 deletions(-)
+I'm going to push the changes below to Linus early next week (after som=
+e
+more time in -next), and I'll push the next revision of Arindam's SD 3.=
+0
+patchset to mmc-next once it has a few Reviewed/Tested-by tags attached=
+=2E
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 1709f8b..7a444f7 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2364,9 +2364,12 @@ int sdhci_add_host(struct sdhci_host *host)
- 	 */
- 	mmc->ops = &sdhci_ops;
- 	mmc->f_max = host->max_clk;
--	if (host->ops->get_min_clock)
--		mmc->f_min = host->ops->get_min_clock(host);
--	else if (host->version >= SDHCI_SPEC_300) {
-+	if (host->ops->get_min_clock || host->ops->get_f_max_clock) {
-+		if (host->ops->get_min_clock)
-+			mmc->f_min = host->ops->get_min_clock(host);
-+		if (host->ops->get_f_max_clock)
-+			mmc->f_max = host->ops->get_f_max_clock(host);
-+	} else if (host->version >= SDHCI_SPEC_300) {
- 		if (host->clk_mul) {
- 			mmc->f_min = (host->max_clk * host->clk_mul) / 1024;
- 			mmc->f_max = host->max_clk * host->clk_mul;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 15cb026..7295c2a 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -264,6 +264,7 @@ struct sdhci_ops {
- 	void	(*platform_reset_enter)(struct sdhci_host *host, u8 mask);
- 	void	(*platform_reset_exit)(struct sdhci_host *host, u8 mask);
- 	int 	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
-+	unsigned int	(*get_f_max_clock)(struct sdhci_host *host);
- 
- };
- 
--- 
-1.7.0.4
+Thanks,
 
+- Chris.
+
+=3D=3D
+Ben Dooks (1):
+      mmc: sdhci: Check mrq->cmd in sdhci_tasklet_finish
+
+Chris Ball (2):
+      mmc: sdhci-pci: Fix error case in sdhci_pci_probe_slot()
+      mmc: sdhci: Check mrq !=3D NULL in sdhci_tasklet_finish
+
+Guennadi Liakhovetski (2):
+      mmc: fix a race between card-detect rescan and clock-gate work in=
+stances
+      mmc: tmio: fix .set_ios(MMC_POWER_UP) handling
+
+Michael Buesch (1):
+      mmc: omap: Fix possible NULL pointer deref
+
+Micha=C5=82 Miros=C5=82aw (1):
+      mmc: core: mmc_add_card(): fix missing break in switch statement
+
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
