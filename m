@@ -1,285 +1,67 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: [PATCH 2/2] sdhci-pxa: add call back interface to share sdhci-pxa
-Date: Thu, 28 Apr 2011 23:57:19 -0400
-Message-ID: <BANLkTimPN=GauwY7Rwh3xUEkV3=q3wfzAQ@mail.gmail.com>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [[v4] 5/5] MMC: SDHCI AutoCMD23 support.
+Date: Fri, 29 Apr 2011 00:34:32 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B300EB8DFE26@SAUSEXMBP01.amd.com>
+References: <1302950458-1969-1-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-1-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-2-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-3-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-4-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-5-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-6-git-send-email-andreiw@motorola.com>
+	<6C03668EAF45B747AF947A1603D1B300EB81997F@SAUSEXMBP01.amd.com>
+	<BANLkTim3v7DJZfZpZrZDnomiXTDx7WfWtA@mail.gmail.com>
+	<6C03668EAF45B747AF947A1603D1B300EB81998D@SAUSEXMBP01.amd.com>
+	<BANLkTikxOMeM9nxo0cbB0HAWSME8Ttq=HQ@mail.gmail.com>
+	<6C03668EAF45B747AF947A1603D1B300EB81A3EB@SAUSEXMBP01.amd.com>
+ <BANLkTinUo=E+XD+vG1+QQYRjj2E7aHHA2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:46154 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751073Ab1D2D5T (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2011 23:57:19 -0400
-Received: by qyg14 with SMTP id 14so1786215qyg.19
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2011 20:57:19 -0700 (PDT)
+Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:24872
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751435Ab1D2FfK convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Apr 2011 01:35:10 -0400
+In-Reply-To: <BANLkTinUo=E+XD+vG1+QQYRjj2E7aHHA2Q@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "arnd@arndb.de" <arnd@arndb.de>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "Xu, Suki" <Suki.Xu@amd.com>
 
-Subject: [PATCH 2/2] sdhci-pxa: add call back interface to share sdhci-pxa
+Hi Andrei,
 
-	Call back functions is added to support mmp2, pxa910, and pxa955
 
-Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
-Signed-off-by: RaymondWu <xywu@marvell.com>
-Signed-off-by: Jun Nie <njun@marvell.com>
----
- arch/arm/plat-pxa/include/plat/sdhci.h |   46 +++++++++++++++++
- drivers/mmc/host/sdhci-pxa.c           |   88 +++++++++++++++++++++-----------
- 2 files changed, 104 insertions(+), 30 deletions(-)
+> -----Original Message-----
+> From: Andrei Warkentin [mailto:andreiw@motorola.com]
+> Sent: Friday, April 29, 2011 12:40 AM
+> To: Nath, Arindam
+> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; arnd@arndb.de;
+> subhashj@codeaurora.org; Xu, Suki
+> Subject: Re: [[v4] 5/5] MMC: SDHCI AutoCMD23 support.
+> 
+> On Thu, Apr 28, 2011 at 3:34 AM, Nath, Arindam <Arindam.Nath@amd.com>
+> wrote:
+> > Hi Andrei,
+> >
+> > The controller is able to send Auto CMD23 with your patch.
+> >
+> > Thanks,
+> > Arindam
+> >
+> 
+> Whoo hoo :-). This just about made my day... Thanks a lot Arindam, I
+> really appreciate you taking your time to test this out!
+> 
+> So is that an Ack?
 
-diff --git a/arch/arm/plat-pxa/include/plat/sdhci.h
-b/arch/arm/plat-pxa/include/plat/sdhci.h
-index 1ab332e..269dbe6 100644
---- a/arch/arm/plat-pxa/include/plat/sdhci.h
-+++ b/arch/arm/plat-pxa/include/plat/sdhci.h
-@@ -13,9 +13,14 @@
- #ifndef __PLAT_PXA_SDHCI_H
- #define __PLAT_PXA_SDHCI_H
+I am not sure whether I qualify for an Acked-by, but I can give you Tested-by.
 
-+#include <linux/mmc/sdhci.h>
-+#include <linux/platform_device.h>
-+
- /* pxa specific flag */
- /* Require clock free running */
- #define PXA_FLAG_DISABLE_CLOCK_GATING (1<<0)
-+/* card alwayes wired to host, like on-chip emmc */
-+#define PXA_FLAG_CARD_PERMANENT	(1<<1)
+Tested-by: Arindam Nath <arindam.nath@amd.com>
 
- /* Board design supports 8-bit data on SD/SDIO BUS */
- #define PXA_FLAG_SD_8_BIT_CAPABLE_SLOT (1<<2)
-@@ -23,13 +28,54 @@
- /*
-  * struct pxa_sdhci_platdata() - Platform device data for PXA SDHCI
-  * @max_speed: the maximum speed supported
-+ * @host_caps: Standard MMC host capabilities bit field.
-  * @quirks: quirks of specific device
-  * @flags: flags for platform requirement
-+ * @clk_delay_cycles:
-+ *	mmp2: each step is roughly 100ps, 5bits width
-+ *	pxa910: each step is 1ns, 4bits width
-+ * @clk_delay_enable: enable clk_delay or not, used on pxa910
-+ * @clk_delay_sel: select clk_delay, used on pxa910
-+ *	0: choose feedback clk
-+ *	1: choose feedback clk + delay value
-+ *	2: choose internal clk
-+ * @ext_cd_gpio: gpio pin used for external CD line
-+ * @ext_cd_gpio_invert: invert values for external CD gpio line
-+ * @soc_set_timing: set timing for specific soc
-+ * @ext_cd_init: Initialize external card detect subsystem
-+ * @ext_cd_cleanup: Cleanup external card detect subsystem
-+ * @soc_set_ops: overwrite host ops with soc specific ops
-  */
-+struct sdhci_pxa;
- struct sdhci_pxa_platdata {
- 	unsigned int	max_speed;
-+	unsigned int	host_caps;
- 	unsigned int	quirks;
- 	unsigned int	flags;
-+	unsigned int	clk_delay_cycles;
-+	unsigned int	clk_delay_sel;
-+	unsigned int	ext_cd_gpio;
-+	bool		ext_cd_gpio_invert;
-+	bool		clk_delay_enable;
-+
-+	void (*soc_set_timing)(struct sdhci_host *host,
-+			struct sdhci_pxa_platdata *pdata);
-+	int (*ext_cd_init)(void (*notify_func)(struct platform_device *dev,
-+						   int state), void *data);
-+	int (*ext_cd_cleanup)(void (*notify_func)(struct platform_device *dev,
-+						      int state), void *data);
-+	void (*soc_set_ops)(struct sdhci_pxa *pxa);
-+};
-+
-+struct sdhci_pxa {
-+	struct sdhci_host		*host;
-+	struct sdhci_pxa_platdata	*pdata;
-+	struct clk			*clk;
-+	struct resource			*res;
-+	struct sdhci_ops		*ops;
-+
-+	u8	clk_enable;
-+	u8	power_mode;
- };
+Thanks,
+Arindam
 
- #endif /* __PLAT_PXA_SDHCI_H */
-diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
-index 5a61208..4a1b7f7 100644
---- a/drivers/mmc/host/sdhci-pxa.c
-+++ b/drivers/mmc/host/sdhci-pxa.c
-@@ -24,32 +24,22 @@
- #include <linux/clk.h>
- #include <linux/io.h>
- #include <linux/err.h>
-+#include <linux/slab.h>
- #include <plat/sdhci.h>
- #include "sdhci.h"
 
- #define DRIVER_NAME	"sdhci-pxa"
-
--#define SD_FIFO_PARAM		0x104
--#define DIS_PAD_SD_CLK_GATE	0x400
--
--struct sdhci_pxa {
--	struct sdhci_host		*host;
--	struct sdhci_pxa_platdata	*pdata;
--	struct clk			*clk;
--	struct resource			*res;
--
--	u8 clk_enable;
--};
--
- /*****************************************************************************\
-  *                                                                           *
-  * SDHCI core callbacks                                                      *
-  *                                                                           *
- \*****************************************************************************/
-+
- static void set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	struct sdhci_pxa *pxa = sdhci_priv(host);
--	u32 tmp = 0;
-+	struct sdhci_pxa_platdata *pdata = pxa->pdata;
-
- 	if (clock == 0) {
- 		if (pxa->clk_enable) {
-@@ -57,21 +47,31 @@ static void set_clock(struct sdhci_host *host,
-unsigned int clock)
- 			pxa->clk_enable = 0;
- 		}
- 	} else {
--		if (0 == pxa->clk_enable) {
--			if (pxa->pdata->flags & PXA_FLAG_DISABLE_CLOCK_GATING) {
--				tmp = readl(host->ioaddr + SD_FIFO_PARAM);
--				tmp |= DIS_PAD_SD_CLK_GATE;
--				writel(tmp, host->ioaddr + SD_FIFO_PARAM);
--			}
--			clk_enable(pxa->clk);
--			pxa->clk_enable = 1;
--		}
-+		if (pdata && pdata->soc_set_timing)
-+			pdata->soc_set_timing(host, pdata);
-+		clk_enable(pxa->clk);
-+		pxa->clk_enable = 1;
- 	}
- }
-
--static struct sdhci_ops sdhci_pxa_ops = {
--	.set_clock = set_clock,
--};
-+static void sdhci_pxa_notify_change(struct platform_device *dev, int state)
-+{
-+	struct sdhci_host *host = platform_get_drvdata(dev);
-+	unsigned long flags;
-+
-+	if (host) {
-+		spin_lock_irqsave(&host->lock, flags);
-+		if (state) {
-+			dev_dbg(&dev->dev, "card inserted.\n");
-+			host->flags &= ~SDHCI_DEVICE_DEAD;
-+		} else {
-+			dev_dbg(&dev->dev, "card removed.\n");
-+			host->flags |= SDHCI_DEVICE_DEAD;
-+		}
-+		tasklet_schedule(&host->card_tasklet);
-+		spin_unlock_irqrestore(&host->lock, flags);
-+	}
-+}
-
- /*****************************************************************************\
-  *                                                                           *
-@@ -111,6 +111,12 @@ static int __devinit sdhci_pxa_probe(struct
-platform_device *pdev)
- 	pxa->pdata = pdata;
- 	pxa->clk_enable = 0;
-
-+	pxa->ops = kzalloc(sizeof(struct sdhci_ops), GFP_KERNEL);
-+	if (!pxa->ops) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+
- 	pxa->clk = clk_get(dev, "PXA-SDHCLK");
- 	if (IS_ERR(pxa->clk)) {
- 		dev_err(dev, "failed to get io clock\n");
-@@ -134,32 +140,49 @@ static int __devinit sdhci_pxa_probe(struct
-platform_device *pdev)
- 	}
-
- 	host->hw_name = "MMC";
--	host->ops = &sdhci_pxa_ops;
- 	host->irq = irq;
--	host->quirks = SDHCI_QUIRK_BROKEN_ADMA | SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-+	host->quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-+
-+	if (pdata && pdata->flags & PXA_FLAG_CARD_PERMANENT) {
-+		/* on-chip device */
-+		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-+		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-+	}
-
--	if (pdata->quirks)
-+	if (pdata && pdata->quirks)
- 		host->quirks |= pdata->quirks;
-
- 	/* If slot design supports 8 bit data, indicate this to MMC. */
- 	if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
- 		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-
-+	if (pdata && pdata->host_caps)
-+		host->mmc->caps |= pdata->host_caps;
-+
-+	if (pdata && pdata->soc_set_ops)
-+		pdata->soc_set_ops(pxa);
-+
-+	pxa->ops->set_clock = set_clock;
-+	host->ops = pxa->ops;
-+
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_err(&pdev->dev, "failed to add host\n");
- 		goto out;
- 	}
-
--	if (pxa->pdata->max_speed)
--		host->mmc->f_max = pxa->pdata->max_speed;
-+	if (pdata && pdata->max_speed)
-+		host->mmc->f_max = pdata->max_speed;
-
-+	if (pdata && pdata->ext_cd_init)
-+		pdata->ext_cd_init(&sdhci_pxa_notify_change, pdata);
- 	platform_set_drvdata(pdev, host);
-
- 	return 0;
- out:
- 	if (host) {
- 		clk_put(pxa->clk);
-+		kfree(pxa->ops);
- 		if (host->ioaddr)
- 			iounmap(host->ioaddr);
- 		if (pxa->res)
-@@ -173,18 +196,23 @@ out:
-
- static int __devexit sdhci_pxa_remove(struct platform_device *pdev)
- {
-+	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pxa *pxa = sdhci_priv(host);
- 	int dead = 0;
- 	u32 scratch;
-
- 	if (host) {
-+		if (pdata && pdata->ext_cd_cleanup)
-+			pdata->ext_cd_cleanup(&sdhci_pxa_notify_change, pdata);
-+
- 		scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
- 		if (scratch == (u32)-1)
- 			dead = 1;
-
- 		sdhci_remove_host(host, dead);
-
-+		kfree(pxa->ops);
- 		if (host->ioaddr)
- 			iounmap(host->ioaddr);
- 		if (pxa->res)
--- 
-1.7.0.4
