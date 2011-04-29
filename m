@@ -1,78 +1,35 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] mmc: tmio: fix PM in DMA mode
-Date: Fri, 29 Apr 2011 19:11:00 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1104291909290.17813@axis700.grange>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v7] mmc: Add mmc CMD+ACMD passthrough ioctl
+Date: Fri, 29 Apr 2011 14:18:02 -0400
+Message-ID: <m3zkn8c46d.fsf@pullcord.laptop.org>
+References: <alpine.DEB.2.00.1104211735290.3919@peruna>
+	<alpine.DEB.2.00.1104211743210.3919@peruna>
+	<201104261614.35455.arnd@arndb.de>
+	<alpine.DEB.2.00.1104261524030.6706@peruna>
+	<m3aafcod1a.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-sh@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Ian Molton <ian@mnementh.co.uk>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:47220 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1760735Ab1D2SOq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Apr 2011 14:14:46 -0400
+In-Reply-To: <m3aafcod1a.fsf@pullcord.laptop.org> (Chris Ball's message of
+	"Tue, 26 Apr 2011 18:36:49 -0400")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: John Calixto <john.calixto@modsystems.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Andrei Warkentin <andreiw@motorola.com>, =?utf-8?Q?Micha=C5=82_Miros=C5=82aw?= <mirqus@gmail.com>
 
-DMA mode has to be re-enabled during a resume.
+Hi John,
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- drivers/mmc/host/tmio_mmc_dma.c |   21 ++++++++++++---------
- drivers/mmc/host/tmio_mmc_pio.c |    1 +
- 2 files changed, 13 insertions(+), 9 deletions(-)
+On Tue, Apr 26 2011, Chris Ball wrote:
+> I think I'll merge it, since I'm not going to work on abstracting the
+> security feature either.  I'll send another mail once it's in my tree.
 
-diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
-index d3de74a..25f1ad6 100644
---- a/drivers/mmc/host/tmio_mmc_dma.c
-+++ b/drivers/mmc/host/tmio_mmc_dma.c
-@@ -256,7 +256,10 @@ static bool tmio_mmc_filter(struct dma_chan *chan, void *arg)
- void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdata)
- {
- 	/* We can only either use DMA for both Tx and Rx or not use it at all */
--	if (pdata->dma) {
-+	if (!pdata->dma)
-+		return;
-+
-+	if (!host->chan_tx && !host->chan_rx) {
- 		dma_cap_mask_t mask;
- 
- 		dma_cap_zero(mask);
-@@ -284,18 +287,18 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
- 
- 		tasklet_init(&host->dma_complete, tmio_mmc_tasklet_fn, (unsigned long)host);
- 		tasklet_init(&host->dma_issue, tmio_mmc_issue_tasklet_fn, (unsigned long)host);
-+	}
- 
--		tmio_mmc_enable_dma(host, true);
-+	tmio_mmc_enable_dma(host, true);
-+
-+	return;
- 
--		return;
- ebouncebuf:
--		dma_release_channel(host->chan_rx);
--		host->chan_rx = NULL;
-+	dma_release_channel(host->chan_rx);
-+	host->chan_rx = NULL;
- ereqrx:
--		dma_release_channel(host->chan_tx);
--		host->chan_tx = NULL;
--		return;
--	}
-+	dma_release_channel(host->chan_tx);
-+	host->chan_tx = NULL;
- }
- 
- void tmio_mmc_release_dma(struct tmio_mmc_host *host)
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 26598f1..27fc11c 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -995,6 +995,7 @@ int tmio_mmc_host_resume(struct device *dev)
- 		pm_runtime_get_sync(dev);
- 
- 	tmio_mmc_reset(mmc_priv(mmc));
-+	tmio_mmc_request_dma(host, host->pdata);
- 
- 	return mmc_resume_host(mmc);
- }
+I've pushed this out to mmc-next now.
+
+- Chris.
 -- 
-1.7.2.5
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
