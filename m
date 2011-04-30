@@ -1,41 +1,57 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci: Conditionalize regulator_get() on CONFIG_REGULATOR
-Date: Sat, 30 Apr 2011 12:03:01 -0400
-Message-ID: <m3mxj720cq.fsf@pullcord.laptop.org>
-References: <m3r58k1hlc.fsf@pullcord.laptop.org> <4DBC2586.1080201@metafoo.de>
+From: zamek <zamek@vili.pmmf.hu>
+Subject: hard wired wifi chip on sdio
+Date: Sat, 30 Apr 2011 17:42:40 +0200
+Message-ID: <4DBC2DF0.30101@vili.pmmf.hu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-2; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46991 "EHLO void.printf.net"
+Received: from witch.pmmf.hu ([193.6.55.10]:42649 "EHLO witch.pmmf.hu"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752778Ab1D3P7m (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 30 Apr 2011 11:59:42 -0400
-In-Reply-To: <4DBC2586.1080201@metafoo.de> (Lars-Peter Clausen's message of
-	"Sat, 30 Apr 2011 17:06:46 +0200")
+	id S1754850Ab1D3QCI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 30 Apr 2011 12:02:08 -0400
+Received: from vili.pmmf.hu (unknown [193.6.56.12])
+	by witch.pmmf.hu (Postfix) with ESMTP id 1959F2BEA42
+	for <linux-mmc@vger.kernel.org>; Sat, 30 Apr 2011 17:43:32 +0200 (CEST)
+Received: from [192.168.0.42] (unknown [89.135.45.70])
+	by vili.pmmf.hu (Postfix) with ESMTP id 068AF1B44F6
+	for <linux-mmc@vger.kernel.org>; Sat, 30 Apr 2011 17:42:40 +0200 (CEST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lars-Peter Clausen <lars@metafoo.de>
-Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
+To: linux-mmc@vger.kernel.org
 
-Hi Lars,
+Hi All,
 
-On Sat, Apr 30 2011, Lars-Peter Clausen wrote:
-> On 04/30/2011 06:35 AM, Chris Ball wrote:
->> The regulator subsystem provides stubbed out versions of its calls that
->> are always present (so that they can be used without needing #ifdefs).
->> But the regulator_get() stub always returns an error value according
->> to IS_ERR(), which leads sdhci to print messages like "mmc0: no vmmc
->> regulator found" on every boot, even if CONFIG_REGULATOR is not set.
->> 
->> This patch fixes that (and removes the unwanted message) by having
->> the regulator_get() call occur inside an #ifdef CONFIG_REGULATOR.
->
-> Shouldn't the stubbed version of regulator_get return NULL, which is not
-> treated as an error by IS_ERR?
+I have a Freescale iMX25 based (tx25) board with a Marvell 8688 wireless 
+module on sdio bus.
+My kernel is a rel_imx_2.6.35_11.03.00 from Freescale git repository.
 
-Oops, thanks -- you're right, of course.  I withdraw the patch.
+The wireless chip is hard  wired on sdio bus, not plugged in. On end of 
+sdhci_probe_slot() function I call the 
+tasklet_schedule(&host->card_tasklet)
+to force detecting card.
 
-- Chris.
+It seems to be good, mmc0 detected well.
+
+When I try to load wifi module, it failed, cannot download helper binary 
+to chip.
+
+I tried to see the sdio bus with an oscilloscope to test it and I need a 
+lot of modprobe/rmmod sequence and I wonder, after  the n-th sequence it 
+could works well.
+
+It confirms my opinion, there should be an initialization problem, 
+because this card is a wired, not a pluggable card.
+
+What is the correct method to force insert card event?
+
+
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+  thx,
+----------------------------------
+Zoltan Zidarics programmer
+PTE-PMMFK H-7621 Pecs, Boszorkany u. 2. Hungary
+E-Mail: zamek@vili.pmmf.hu
+----------------------------------
+       
+
