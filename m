@@ -1,52 +1,56 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: cjb traveling May 1 - May 10
-Date: Fri, 29 Apr 2011 18:30:47 -0500
-Message-ID: <BANLkTimTi3hOqeo9Jx=G6yx74GvR31Rp_w@mail.gmail.com>
-References: <m339l03if7.fsf@pullcord.laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: [PATCH] mmc: sdhci: Conditionalize regulator_get() on CONFIG_REGULATOR
+Date: Sat, 30 Apr 2011 00:35:59 -0400
+Message-ID: <m3r58k1hlc.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og117.obsmtp.com ([64.18.0.149]:43397 "EHLO
-	exprod5og117.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755160Ab1D2Xau convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Apr 2011 19:30:50 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3TNSj9N002696
-	for <linux-mmc@vger.kernel.org>; Fri, 29 Apr 2011 19:28:45 -0400 (EDT)
-Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p3TNSIrD002629
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Fri, 29 Apr 2011 19:28:44 -0400 (EDT)
-Received: by mail-wy0-f170.google.com with SMTP id 34so4160609wyb.15
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Apr 2011 16:30:47 -0700 (PDT)
-In-Reply-To: <m339l03if7.fsf@pullcord.laptop.org>
+Received: from void.printf.net ([89.145.121.20]:57274 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753122Ab1D3Ech (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 30 Apr 2011 00:32:37 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi Chris,
+The regulator subsystem provides stubbed out versions of its calls that
+are always present (so that they can be used without needing #ifdefs).
+But the regulator_get() stub always returns an error value according
+to IS_ERR(), which leads sdhci to print messages like "mmc0: no vmmc
+regulator found" on every boot, even if CONFIG_REGULATOR is not set.
 
-On Fri, Apr 29, 2011 at 3:35 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> I'll be in Uruguay for OLPC from May 1st to May 10th. =A0I'll be onli=
-ne
-> there but won't have as much time to reply to list mail as usual --
-> I'll catch up on mail properly after I get back.
->
-> I'm going to push the changes below to Linus early next week (after s=
-ome
-> more time in -next), and I'll push the next revision of Arindam's SD =
-3.0
-> patchset to mmc-next once it has a few Reviewed/Tested-by tags attach=
-ed.
->
-> Thanks,
->
+This patch fixes that (and removes the unwanted message) by having
+the regulator_get() call occur inside an #ifdef CONFIG_REGULATOR.
 
-Once Arindam's changes are in, I'll rebase the CMD23 support on top of
-that and resubmit.
+Reported-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Chris Ball <cjb@laptop.org>
+---
+ drivers/mmc/host/sdhci.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-A
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index e5cfe70..e29e77a 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2059,15 +2059,17 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		mmc_hostname(mmc), host);
+ 	if (ret)
+ 		goto untasklet;
+ 
++#ifdef CONFIG_REGULATOR
+ 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
+ 	if (IS_ERR(host->vmmc)) {
+ 		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
+ 		host->vmmc = NULL;
+ 	} else {
+ 		regulator_enable(host->vmmc);
+ 	}
++#endif /* CONFIG_REGULATOR */
+ 
+ 	sdhci_init(host, 0);
+ 
+ #ifdef CONFIG_MMC_DEBUG
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
