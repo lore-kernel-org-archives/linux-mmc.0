@@ -1,194 +1,106 @@
 From: Sahitya Tummala <stummala@codeaurora.org>
-Subject: [PATCH V2 4/7] msm: mmc: Remove "pio_irq" resource
-Date: Mon,  2 May 2011 18:07:43 +0530
-Message-ID: <1304339863-8526-1-git-send-email-stummala@codeaurora.org>
-References: <1303796066-6784-4-git-send-email-stummala@codeaurora.org>
+Subject: [PATCH V2 5/7] mmc: msm_sdcc: Use MCI_INT_MASK0 for PIO interrupts
+Date: Mon,  2 May 2011 18:09:18 +0530
+Message-ID: <1304339958-8657-1-git-send-email-stummala@codeaurora.org>
+References: <1303796066-6784-5-git-send-email-stummala@codeaurora.org>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1303796066-6784-4-git-send-email-stummala@codeaurora.org>
+In-Reply-To: <1303796066-6784-5-git-send-email-stummala@codeaurora.org>
 Sender: linux-arm-msm-owner@vger.kernel.org
 To: davidb@codeaurora.org, bryanh@codeaurora.org, dwalker@fifo99.com
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, san@google.com, Sahitya Tummala <stummala@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, san@google.com, sboyd@codeaurora.org, Sahitya Tummala <stummala@codeaurora.org>, Murali Palnati <palnatim@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On some targets, MCI_IRQ_MASK1 is not routed to the MSM in which
-case only "cmd_irq" must be used even for PIO. With this change,
-all the targets will use only "cmd_irq" for both CMD and PIO.
+Not all targets have IRQ1 line routed from the SD controller to
+the processor. So we cannot rely on IRQ1 for PIO interrupts.
+This patch moves all PIO interrupts to IRQ0 and enables the PIO
+mode.
 
+Signed-off-by: Murali Palnati <palnatim@codeaurora.org>
 Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 ---
- arch/arm/mach-msm/devices-msm7x00.c |   24 ------------------------
- arch/arm/mach-msm/devices-qsd8x50.c |   24 ------------------------
- drivers/mmc/host/msm_sdcc.c         |    8 ++------
- drivers/mmc/host/msm_sdcc.h         |    1 -
- 4 files changed, 2 insertions(+), 55 deletions(-)
+ drivers/mmc/host/msm_sdcc.c |   20 ++++++++++++++++----
+ drivers/mmc/host/msm_sdcc.h |    5 +++++
+ 2 files changed, 21 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm/mach-msm/devices-msm7x00.c b/arch/arm/mach-msm/devices-msm7x00.c
-index 3ef38a5..a164830 100644
---- a/arch/arm/mach-msm/devices-msm7x00.c
-+++ b/arch/arm/mach-msm/devices-msm7x00.c
-@@ -176,12 +176,6 @@ static struct resource resources_sdc1[] = {
- 		.name	= "cmd_irq",
- 	},
- 	{
--		.start	= INT_SDC1_1,
--		.end	= INT_SDC1_1,
--		.flags	= IORESOURCE_IRQ,
--		.name	= "pio_irq",
--	},
--	{
- 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
- 		.name	= "status_irq"
- 	},
-@@ -204,12 +198,6 @@ static struct resource resources_sdc2[] = {
- 		.flags	= IORESOURCE_IRQ,
- 		.name	= "cmd_irq",
- 	},
--		{
--		.start	= INT_SDC2_1,
--		.end	= INT_SDC2_1,
--		.flags	= IORESOURCE_IRQ,
--		.name	= "pio_irq",
--	},
- 	{
- 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
- 		.name	= "status_irq"
-@@ -233,12 +221,6 @@ static struct resource resources_sdc3[] = {
- 		.flags	= IORESOURCE_IRQ,
- 		.name	= "cmd_irq",
- 	},
--		{
--		.start	= INT_SDC3_1,
--		.end	= INT_SDC3_1,
--		.flags	= IORESOURCE_IRQ,
--		.name	= "pio_irq",
--	},
- 	{
- 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
- 		.name	= "status_irq"
-@@ -262,12 +244,6 @@ static struct resource resources_sdc4[] = {
- 		.flags	= IORESOURCE_IRQ,
- 		.name	= "cmd_irq",
- 	},
--		{
--		.start	= INT_SDC4_1,
--		.end	= INT_SDC4_1,
--		.flags	= IORESOURCE_IRQ,
--		.name	= "pio_irq",
--	},
- 	{
- 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
- 		.name	= "status_irq"
-diff --git a/arch/arm/mach-msm/devices-qsd8x50.c b/arch/arm/mach-msm/devices-qsd8x50.c
-index 730982f..2292883 100644
---- a/arch/arm/mach-msm/devices-qsd8x50.c
-+++ b/arch/arm/mach-msm/devices-qsd8x50.c
-@@ -140,12 +140,6 @@ static struct resource resources_sdc1[] = {
- 		.name	= "cmd_irq",
- 	},
- 	{
--		.start	= INT_SDC1_1,
--		.end	= INT_SDC1_1,
--		.flags	= IORESOURCE_IRQ,
--		.name	= "pio_irq",
--	},
--	{
- 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
- 		.name	= "status_irq"
- 	},
-@@ -168,12 +162,6 @@ static struct resource resources_sdc2[] = {
- 		.flags	= IORESOURCE_IRQ,
- 		.name	= "cmd_irq",
- 	},
--		{
--		.start	= INT_SDC2_1,
--		.end	= INT_SDC2_1,
--		.flags	= IORESOURCE_IRQ,
--		.name	= "pio_irq",
--	},
- 	{
- 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
- 		.name	= "status_irq"
-@@ -197,12 +185,6 @@ static struct resource resources_sdc3[] = {
- 		.flags	= IORESOURCE_IRQ,
- 		.name	= "cmd_irq",
- 	},
--		{
--		.start	= INT_SDC3_1,
--		.end	= INT_SDC3_1,
--		.flags	= IORESOURCE_IRQ,
--		.name	= "pio_irq",
--	},
- 	{
- 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
- 		.name	= "status_irq"
-@@ -226,12 +208,6 @@ static struct resource resources_sdc4[] = {
- 		.flags	= IORESOURCE_IRQ,
- 		.name	= "cmd_irq",
- 	},
--		{
--		.start	= INT_SDC4_1,
--		.end	= INT_SDC4_1,
--		.flags	= IORESOURCE_IRQ,
--		.name	= "pio_irq",
--	},
- 	{
- 		.flags	= IORESOURCE_IRQ | IORESOURCE_DISABLED,
- 		.name	= "status_irq"
 diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
-index 3446cdd..be45b6a 100644
+index be45b6a..908524b 100644
 --- a/drivers/mmc/host/msm_sdcc.c
 +++ b/drivers/mmc/host/msm_sdcc.c
-@@ -1150,7 +1150,6 @@ msmsdcc_probe(struct platform_device *pdev)
- 	struct msmsdcc_host *host;
- 	struct mmc_host *mmc;
- 	struct resource *cmd_irqres = NULL;
--	struct resource *pio_irqres = NULL;
- 	struct resource *stat_irqres = NULL;
- 	struct resource *memres = NULL;
- 	struct resource *dmares = NULL;
-@@ -1175,12 +1174,10 @@ msmsdcc_probe(struct platform_device *pdev)
- 	dmares = platform_get_resource(pdev, IORESOURCE_DMA, 0);
- 	cmd_irqres = platform_get_resource_byname(pdev, IORESOURCE_IRQ,
- 						  "cmd_irq");
--	pio_irqres = platform_get_resource_byname(pdev, IORESOURCE_IRQ,
--						  "pio_irq");
- 	stat_irqres = platform_get_resource_byname(pdev, IORESOURCE_IRQ,
- 						   "status_irq");
+@@ -213,7 +213,8 @@ msmsdcc_dma_exec_func(struct msm_dmov_cmd *cmd)
+ 	msmsdcc_writel(host, host->cmd_timeout, MMCIDATATIMER);
+ 	msmsdcc_writel(host, (unsigned int)host->curr.xfer_size,
+ 		       MMCIDATALENGTH);
+-	msmsdcc_writel(host, host->cmd_pio_irqmask, MMCIMASK1);
++	msmsdcc_writel(host, (msmsdcc_readl(host, MMCIMASK0) &
++			(~MCI_IRQ_PIO)) | host->cmd_pio_irqmask, MMCIMASK0);
+ 	msmsdcc_writel(host, host->cmd_datactrl, MMCIDATACTRL);
  
--	if (!cmd_irqres || !pio_irqres || !memres) {
-+	if (!cmd_irqres || !memres) {
- 		pr_err("%s: Invalid resource\n", __func__);
- 		return -ENXIO;
- 	}
-@@ -1210,7 +1207,6 @@ msmsdcc_probe(struct platform_device *pdev)
- 	}
+ 	if (host->cmd_cmd) {
+@@ -543,7 +544,9 @@ msmsdcc_start_data(struct msmsdcc_host *host, struct mmc_data *data,
  
- 	host->cmd_irqres = cmd_irqres;
--	host->pio_irqres = pio_irqres;
- 	host->memres = memres;
- 	host->dmares = dmares;
- 	spin_lock_init(&host->lock);
-@@ -1327,7 +1323,7 @@ msmsdcc_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto stat_irq_free;
+ 		msmsdcc_writel(host, host->curr.xfer_size, MMCIDATALENGTH);
  
--	ret = request_irq(pio_irqres->start, msmsdcc_pio_irq, IRQF_SHARED,
-+	ret = request_irq(cmd_irqres->start, msmsdcc_pio_irq, IRQF_SHARED,
- 			  DRIVER_NAME " (pio)", host);
- 	if (ret)
- 		goto cmd_irq_free;
+-		msmsdcc_writel(host, pio_irqmask, MMCIMASK1);
++		msmsdcc_writel(host, (msmsdcc_readl(host, MMCIMASK0) &
++				(~MCI_IRQ_PIO)) | pio_irqmask, MMCIMASK0);
++
+ 		msmsdcc_writel(host, datactrl, MMCIDATACTRL);
+ 
+ 		if (cmd) {
+@@ -659,8 +662,13 @@ msmsdcc_pio_irq(int irq, void *dev_id)
+ {
+ 	struct msmsdcc_host	*host = dev_id;
+ 	uint32_t		status;
++	u32 mci_mask0;
+ 
+ 	status = msmsdcc_readl(host, MMCISTATUS);
++	mci_mask0 = msmsdcc_readl(host, MMCIMASK0);
++
++	if (((mci_mask0 & status) & MCI_IRQ_PIO) == 0)
++		return IRQ_NONE;
+ 
+ 	do {
+ 		unsigned long flags;
+@@ -719,10 +727,12 @@ msmsdcc_pio_irq(int irq, void *dev_id)
+ 	} while (1);
+ 
+ 	if (status & MCI_RXACTIVE && host->curr.xfer_remain < MCI_FIFOSIZE)
+-		msmsdcc_writel(host, MCI_RXDATAAVLBLMASK, MMCIMASK1);
++		msmsdcc_writel(host, (mci_mask0 & (~MCI_IRQ_PIO)) |
++					MCI_RXDATAAVLBLMASK, MMCIMASK0);
+ 
+ 	if (!host->curr.xfer_remain)
+-		msmsdcc_writel(host, 0, MMCIMASK1);
++		msmsdcc_writel(host, (mci_mask0 & (~MCI_IRQ_PIO)) | 0,
++					MMCIMASK0);
+ 
+ 	return IRQ_HANDLED;
+ }
+@@ -854,6 +864,8 @@ msmsdcc_irq(int irq, void *dev_id)
+ 	do {
+ 		status = msmsdcc_readl(host, MMCISTATUS);
+ 		status &= msmsdcc_readl(host, MMCIMASK0);
++		if ((status & (~MCI_IRQ_PIO)) == 0)
++			break;
+ 		msmsdcc_writel(host, status, MMCICLEAR);
+ 
+ 		if (status & MCI_SDIOINTR)
 diff --git a/drivers/mmc/host/msm_sdcc.h b/drivers/mmc/host/msm_sdcc.h
-index 42d7bbc..fa626ed 100644
+index fa626ed..402028d 100644
 --- a/drivers/mmc/host/msm_sdcc.h
 +++ b/drivers/mmc/host/msm_sdcc.h
-@@ -202,7 +202,6 @@ struct msmsdcc_stats {
+@@ -140,6 +140,11 @@
+ 	MCI_DATATIMEOUTMASK|MCI_TXUNDERRUNMASK|MCI_RXOVERRUNMASK|	\
+ 	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK|MCI_DATAENDMASK|MCI_PROGDONEMASK)
  
- struct msmsdcc_host {
- 	struct resource		*cmd_irqres;
--	struct resource		*pio_irqres;
- 	struct resource		*memres;
- 	struct resource		*dmares;
- 	void __iomem		*base;
++#define MCI_IRQ_PIO \
++	(MCI_RXDATAAVLBLMASK | MCI_TXDATAAVLBLMASK | MCI_RXFIFOEMPTYMASK | \
++	 MCI_TXFIFOEMPTYMASK | MCI_RXFIFOFULLMASK | MCI_TXFIFOFULLMASK | \
++	 MCI_RXFIFOHALFFULLMASK | MCI_TXFIFOHALFEMPTYMASK | \
++	 MCI_RXACTIVEMASK | MCI_TXACTIVEMASK)
+ /*
+  * The size of the FIFO in bytes.
+  */
 -- 
 1.7.1
 
