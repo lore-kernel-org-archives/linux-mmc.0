@@ -1,66 +1,70 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [GIT PULL] MMC fixes for 2.6.39-rc6
-Date: Tue, 03 May 2011 06:24:04 -0400
-Message-ID: <m31v0gqdyz.fsf@pullcord.laptop.org>
+From: Prashanth Bhat <prashanth.bhat@manipal.net>
+Subject: Re: [PATCH] mmc: mmc_add_card(): fix missing break in switch statement
+Date: Tue, 03 May 2011 16:50:52 +0530
+Message-ID: <4DBFE514.3050801@manipal.net>
+References: <20110409061647.D5DAE13909@rere.qmqm.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46311 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751726Ab1ECKVC convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2011 06:21:02 -0400
+Received: from p3plsmtpa07-06.prod.phx3.secureserver.net ([173.201.192.235]:48665
+	"HELO p3plsmtpa07-06.prod.phx3.secureserver.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1752520Ab1ECL2F (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2011 07:28:05 -0400
+In-Reply-To: <20110409061647.D5DAE13909@rere.qmqm.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-Hi Linus,
+Michal,
 
-Please pull from:
+I hope you remember the email exchange we had about a month ago. I thin=
+k=20
+I see an issue with SD-COMBO support.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+In include/linux/mmc/card.h, there are macros:
 
-to receive seven small fixes for MMC.  These have been tested in
-linux-next.  Thanks.
+> #define mmc_card_mmc(c)         ((c)->type =3D=3D MMC_TYPE_MMC)
+> #define mmc_card_sd(c)          ((c)->type =3D=3D MMC_TYPE_SD)
+> #define mmc_card_sdio(c)        ((c)->type =3D=3D MMC_TYPE_SDIO)
 
-The following changes since commit e8dad69408a9812d6bb42d03e74d2c314534=
-a4fa:
-  Linus Torvalds (1):
-        Merge branch 'fixes' of git://git.kernel.org/.../jejb/parisc-2.=
-6
+In particular, the mmc_card_sd(c) is invoked in many places, to=20
+determine whether the card is SD, and certain action is taken. Shouldn'=
+t=20
+the same be done for Combo cards, because these also have SD on them?
 
-are available in the git repository at:
+=46or instance, in drivers/mmc/core/core.c, routine=20
+mmc_set_data_timeout(), there is a call to mmc_card_sd(c).
+Also, in drivers/mmc/card/block.c, routine mmc_blk_alloc().
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+I would appreciate your opinion on this.
 
-Ben Dooks (1):
-      mmc: sdhci: Check mrq->cmd in sdhci_tasklet_finish
+Thanks,
+Prashanth
 
-Chris Ball (2):
-      mmc: sdhci-pci: Fix error case in sdhci_pci_probe_slot()
-      mmc: sdhci: Check mrq !=3D NULL in sdhci_tasklet_finish
 
-Guennadi Liakhovetski (2):
-      mmc: fix a race between card-detect rescan and clock-gate work in=
-stances
-      mmc: tmio: fix .set_ios(MMC_POWER_UP) handling
+On Saturday 09 April 2011 11:46 AM, Micha=C5=82 Miros=C5=82aw wrote:
+> Fixes a cosmetic bug that affects printk() for SD-combo cards.
+>
+> Noticed-by: Prashanth Bhat<prashanth.bhat@manipal.net>
+> Signed-off-by: Micha=C5=82 Miros=C5=82aw<mirq-linux@rere.qmqm.pl>
+> ---
+>   drivers/mmc/core/bus.c |    1 +
+>   1 files changed, 1 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index 63667a8..d6d62fd 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -284,6 +284,7 @@ int mmc_add_card(struct mmc_card *card)
+>   		type =3D "SD-combo";
+>   		if (mmc_card_blockaddr(card))
+>   			type =3D "SDHC-combo";
+> +		break;
+>   	default:
+>   		type =3D "?";
+>   		break;
+>   =20
 
-Michael Buesch (1):
-      mmc: omap: Fix possible NULL pointer deref
-
-Micha=C5=82 Miros=C5=82aw (1):
-      mmc: core: mmc_add_card(): fix missing break in switch statement
-
- drivers/mmc/core/bus.c          |    1 +
- drivers/mmc/core/host.c         |    9 ++++-----
- drivers/mmc/host/omap.c         |    2 +-
- drivers/mmc/host/sdhci-pci.c    |    1 +
- drivers/mmc/host/sdhci.c        |    9 ++++++++-
- drivers/mmc/host/tmio_mmc_pio.c |   10 +++++-----
- include/linux/mmc/host.h        |    1 -
- 7 files changed, 20 insertions(+), 13 deletions(-)
-
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
