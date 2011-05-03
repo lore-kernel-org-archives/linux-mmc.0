@@ -1,65 +1,33 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: mmc blkqueue is empty even if there are pending reads in do_generic_file_read()
-Date: Tue, 3 May 2011 15:16:28 +0200
-Message-ID: <201105031516.28907.arnd@arndb.de>
-References: <BANLkTinhK_K1oSJDEoqD6EQK8Qy5Wy3v+g@mail.gmail.com>
+From: "Martin K. Petersen" <martin.petersen@oracle.com>
+Subject: Re: Is it possible for the ext4/btrfs file system to pass some context related info to low level block driver?
+Date: Tue, 03 May 2011 09:43:29 -0400
+Message-ID: <yq1mxj32932.fsf@sermon.lab.mkp.net>
+References: <CE761E84DADF2947A4AF22FB8D97A47358E28022@shsmsx501.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:53025 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751060Ab1ECNQm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2011 09:16:42 -0400
-In-Reply-To: <BANLkTinhK_K1oSJDEoqD6EQK8Qy5Wy3v+g@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-ext4-owner@vger.kernel.org>
+In-Reply-To: <CE761E84DADF2947A4AF22FB8D97A47358E28022@shsmsx501.ccr.corp.intel.com>
+	(Yunpeng Gao's message of "Tue, 3 May 2011 10:44:07 +0800")
+Sender: linux-ext4-owner@vger.kernel.org
+To: "Gao, Yunpeng" <yunpeng.gao@intel.com>
+Cc: "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linux-mm@kvack.org, linux-mmc@vger.kernel.org, linaro-kernel@lists.linaro.org
 
-On Thursday 28 April 2011, Per Forlin wrote:
+>>>>> "Yunpeng" == Gao, Yunpeng <yunpeng.gao@intel.com> writes:
 
-> For reads on the other hand it look like this
-> root@(none):/ dd if=/dev/mmcblk0 of=/dev/null bs=4k count=256
-> 256+0 records in
-> 256+0 records out
-> root@(none):/ dmesg
-> [mmc_queue_thread] req d954cec0 blocks 32
-> [mmc_queue_thread] req   (null) blocks 0
-> [mmc_queue_thread] req   (null) blocks 0
-> [mmc_queue_thread] req d954cec0 blocks 64
-> [mmc_queue_thread] req   (null) blocks 0
-> [mmc_queue_thread] req d954cde8 blocks 128
-> [mmc_queue_thread] req   (null) blocks 0
-> [mmc_queue_thread] req d954cec0 blocks 256
-> [mmc_queue_thread] req   (null) blocks 0
+Yunpeng> So, my question is, is there any plan or discussion on
+Yunpeng> supporting this feature (passing data type info to low level
+Yunpeng> block device driver) on file system developments? Especially
+Yunpeng> for ext4/btrfs, since now they are very hot in Linux? Thanks.
 
-> There are never more than one read request in the mmc block queue. All
-> the mmc request preparations will be serialized and the cost for this
-> is roughly 10% lower bandwidth (verified on ARM platforms ux500 and
-> Pandaboard).
+Yes, I have been working on some changes that allow us to tag bios and
+pass the information out to storage. These patches have been on the back
+burner for a while due to other commitments. But I'll dig them out and
+post them later. We just discussed them a couple of weeks ago at the
+Linux Storage Workshop.
 
-After some offline discussions, I went back to look at your mail, and I think
-the explanation is much simpler than you expected:
+In the meantime: Can you point me to the relevant eMMC stuff so I can
+see how many tiers or classes we have to work with there?
 
-You have only a single process reading blocks synchronously, so the round
-trip goes all the way to user space. The block layer does some readahead,
-so it will start reading 32 blocks instead of just 8 (4KB) for the first
-read, but then the user process just sits waiting for data. After the
-mmc driver has finished reading the entire 32 blocks, the user needs a
-little time to read them from the page cache in 4 KB chunks (8 syscalls),
-during which the block layer has no clue about what the user wants to do
-next.
-
-The readahead scales up to 256 blocks, but there is still only one reader,
-so you never have additional requests in the queue.
-
-Try running multiple readers in parallel, e.g.
-
-for i in 1 2 3 4 5 ; do 
-	dd if=/dev/mmcblk0 bs=16k count=256 iflag=direct skip=$[$i * 1024] &
-done
-
-
-	Arnd
+-- 
+Martin K. Petersen	Oracle Linux Engineering
