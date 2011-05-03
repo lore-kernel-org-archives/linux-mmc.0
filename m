@@ -1,87 +1,65 @@
-From: Prashanth Bhat <prashanth.bhat@manipal.net>
-Subject: Re: [PATCH] mmc: mmc_add_card(): fix missing break in switch statement
-Date: Tue, 03 May 2011 17:00:03 +0530
-Message-ID: <4DBFE73B.8010609@manipal.net>
-References: <20110409061647.D5DAE13909@rere.qmqm.pl> <4DBFE514.3050801@manipal.net>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: mmc blkqueue is empty even if there are pending reads in do_generic_file_read()
+Date: Tue, 3 May 2011 15:16:28 +0200
+Message-ID: <201105031516.28907.arnd@arndb.de>
+References: <BANLkTinhK_K1oSJDEoqD6EQK8Qy5Wy3v+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from p3plsmtpa01-10.prod.phx3.secureserver.net ([72.167.82.90]:35703
-	"HELO p3plsmtpa01-10.prod.phx3.secureserver.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1752501Ab1ECLah (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2011 07:30:37 -0400
-In-Reply-To: <4DBFE514.3050801@manipal.net>
+Received: from moutng.kundenserver.de ([212.227.17.8]:53025 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751060Ab1ECNQm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2011 09:16:42 -0400
+In-Reply-To: <BANLkTinhK_K1oSJDEoqD6EQK8Qy5Wy3v+g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linux-mm@kvack.org, linux-mmc@vger.kernel.org, linaro-kernel@lists.linaro.org
 
-To be more specific, I would think that the code change required in=20
-include/linux/mmc/card.h is:
+On Thursday 28 April 2011, Per Forlin wrote:
 
-#define mmc_card_mmc(c)         ((c)->type =3D=3D MMC_TYPE_MMC)
-- #define mmc_card_sd(c)          ((c)->type =3D=3D MMC_TYPE_SD)
-- #define mmc_card_sdio(c)        ((c)->type =3D=3D MMC_TYPE_SDIO)
+> For reads on the other hand it look like this
+> root@(none):/ dd if=/dev/mmcblk0 of=/dev/null bs=4k count=256
+> 256+0 records in
+> 256+0 records out
+> root@(none):/ dmesg
+> [mmc_queue_thread] req d954cec0 blocks 32
+> [mmc_queue_thread] req   (null) blocks 0
+> [mmc_queue_thread] req   (null) blocks 0
+> [mmc_queue_thread] req d954cec0 blocks 64
+> [mmc_queue_thread] req   (null) blocks 0
+> [mmc_queue_thread] req d954cde8 blocks 128
+> [mmc_queue_thread] req   (null) blocks 0
+> [mmc_queue_thread] req d954cec0 blocks 256
+> [mmc_queue_thread] req   (null) blocks 0
 
-+ #define mmc_card_sd(c)          ((c)->type =3D=3D MMC_TYPE_SD || (c)-=
->type=20
-=3D=3D MMC_TYPE_SD_COMBO)
-+ #define mmc_card_sdio(c)        ((c)->type =3D=3D MMC_TYPE_SDIO ||=20
-(c)->type =3D=3D MMC_TYPE_SD_COMBO)
+> There are never more than one read request in the mmc block queue. All
+> the mmc request preparations will be serialized and the cost for this
+> is roughly 10% lower bandwidth (verified on ARM platforms ux500 and
+> Pandaboard).
 
-Thanks,
-Prashanth
+After some offline discussions, I went back to look at your mail, and I think
+the explanation is much simpler than you expected:
 
-On Tuesday 03 May 2011 04:50 PM, Prashanth Bhat wrote:
-> Michal,
->
-> I hope you remember the email exchange we had about a month ago. I=20
-> think I see an issue with SD-COMBO support.
->
-> In include/linux/mmc/card.h, there are macros:
->
->> #define mmc_card_mmc(c)         ((c)->type =3D=3D MMC_TYPE_MMC)
->> #define mmc_card_sd(c)          ((c)->type =3D=3D MMC_TYPE_SD)
->> #define mmc_card_sdio(c)        ((c)->type =3D=3D MMC_TYPE_SDIO)
->
-> In particular, the mmc_card_sd(c) is invoked in many places, to=20
-> determine whether the card is SD, and certain action is taken.=20
-> Shouldn't the same be done for Combo cards, because these also have S=
-D=20
-> on them?
->
-> For instance, in drivers/mmc/core/core.c, routine=20
-> mmc_set_data_timeout(), there is a call to mmc_card_sd(c).
-> Also, in drivers/mmc/card/block.c, routine mmc_blk_alloc().
->
-> I would appreciate your opinion on this.
->
-> Thanks,
-> Prashanth
->
->
-> On Saturday 09 April 2011 11:46 AM, Micha=C5=82 Miros=C5=82aw wrote:
->> Fixes a cosmetic bug that affects printk() for SD-combo cards.
->>
->> Noticed-by: Prashanth Bhat<prashanth.bhat@manipal.net>
->> Signed-off-by: Micha=C5=82 Miros=C5=82aw<mirq-linux@rere.qmqm.pl>
->> ---
->>   drivers/mmc/core/bus.c |    1 +
->>   1 files changed, 1 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
->> index 63667a8..d6d62fd 100644
->> --- a/drivers/mmc/core/bus.c
->> +++ b/drivers/mmc/core/bus.c
->> @@ -284,6 +284,7 @@ int mmc_add_card(struct mmc_card *card)
->>           type =3D "SD-combo";
->>           if (mmc_card_blockaddr(card))
->>               type =3D "SDHC-combo";
->> +        break;
->>       default:
->>           type =3D "?";
->>           break;
->
+You have only a single process reading blocks synchronously, so the round
+trip goes all the way to user space. The block layer does some readahead,
+so it will start reading 32 blocks instead of just 8 (4KB) for the first
+read, but then the user process just sits waiting for data. After the
+mmc driver has finished reading the entire 32 blocks, the user needs a
+little time to read them from the page cache in 4 KB chunks (8 syscalls),
+during which the block layer has no clue about what the user wants to do
+next.
 
+The readahead scales up to 256 blocks, but there is still only one reader,
+so you never have additional requests in the queue.
+
+Try running multiple readers in parallel, e.g.
+
+for i in 1 2 3 4 5 ; do 
+	dd if=/dev/mmcblk0 bs=16k count=256 iflag=direct skip=$[$i * 1024] &
+done
+
+
+	Arnd
