@@ -1,46 +1,60 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: mmc blkqueue is empty even if there are pending reads in do_generic_file_read()
-Date: Tue, 3 May 2011 22:02:42 +0200
-Message-ID: <201105032202.42662.arnd@arndb.de>
-References: <BANLkTinhK_K1oSJDEoqD6EQK8Qy5Wy3v+g@mail.gmail.com> <201105031516.28907.arnd@arndb.de> <BANLkTi=74Mp1vWBt2F-sqqqkeNfP69+9vg@mail.gmail.com>
+From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] sdio: optimized SDIO IRQ handling for single function
+Date: Tue,  3 May 2011 22:04:47 +0200
+Message-ID: <1304453087-7365-1-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:52952 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753805Ab1ECUCs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2011 16:02:48 -0400
-In-Reply-To: <BANLkTi=74Mp1vWBt2F-sqqqkeNfP69+9vg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
+List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
+Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Cc: Stefan Nilsson XK <stefan.xk.nilsson-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linux-mm@kvack.org, linux-mmc@vger.kernel.org, linaro-kernel@lists.linaro.org
 
-On Tuesday 03 May 2011 20:54:43 Per Forlin wrote:
-> >> page_not_up_to_date:
-> >> /* Get exclusive access to the page ... */
-> >> error = lock_page_killable(page);
-> > I looked at the code in do_generic_file_read(). lock_page_killable
-> > waits until the current read ahead is completed.
-> > Is it possible to configure the read ahead to push multiple read
-> > request to the block device queue?add
+From: Stefan Nilsson XK <stefan.xk.nilsson-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>
 
-I believe sleeping in __lock_page_killable is the best possible scenario.
-Most cards I've seen work best when you use at least 64KB reads, so it will
-be faster to wait there than to read smaller units.
+If there is only 1 function registered, and IRQ:s are supported and
+currently enabled, call the callback handler directly
+without checking the CCCR registers.
 
-> When I first looked at this I used dd if=/dev/mmcblk0 of=/dev/null bs=1M count=4
-> If bs is larger than read ahead, this will make the execution loop in
-> do_generic_file_read() reading 512 until 1M is read. The second time
-> in this loop it will wait on lock_page_killable.
->
-> If bs=16k the execution wont stuck at lock_page_killable.
+Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>
+Signed-off-by: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/mmc/core/sdio_irq.c |   14 ++++++++++++++
+ 1 files changed, 14 insertions(+), 0 deletions(-)
 
-submitting small 512 byte read requests is a real problem when the
-underlying page size is 16 KB. If your interpretation is right,
-we should probably find a way to make it read larger chunks
-on flash media.
-
-	Arnd
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index b300161..25291bf 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -32,6 +32,20 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
+ 	int i, ret, count;
+ 	unsigned char pending;
+ 
++	/*
++	 * If there is only 1 function registered
++	 * call irq directly without checking the CCCR registers.
++	 */
++	if ((card->host->caps & MMC_CAP_SDIO_IRQ) &&
++	    card->host->sdio_irqs && (card->sdio_funcs == 1))
++		for (i = 0; i < SDIO_MAX_FUNCS; i++) {
++			struct sdio_func *func = card->sdio_func[i];
++			if (func && func->irq_handler) {
++				func->irq_handler(func);
++				return 1;
++			}
++		}
++
+ 	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
+ 	if (ret) {
+ 		printk(KERN_DEBUG "%s: error %d reading SDIO_CCCR_INTx\n",
+-- 
+1.7.4.1
