@@ -1,49 +1,131 @@
-From: Andreas Dilger <adilger@dilger.ca>
-Subject: Re: Is it possible for the ext4/btrfs file system to pass some context related info to low level block driver?
-Date: Wed, 4 May 2011 08:51:39 -0600
-Message-ID: <60C31100-5694-4CA9-A778-91CB15915052@dilger.ca>
-References: <CE761E84DADF2947A4AF22FB8D97A47358E28022@shsmsx501.ccr.corp.intel.com> <yq1mxj32932.fsf@sermon.lab.mkp.net> <CE761E84DADF2947A4AF22FB8D97A47358EE526A@shsmsx501.ccr.corp.intel.com>
-Mime-Version: 1.0 (iPhone Mail 8H7)
-Content-Type: text/plain;
-	charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-btrfs-owner@vger.kernel.org>
-In-Reply-To: <CE761E84DADF2947A4AF22FB8D97A47358EE526A@shsmsx501.ccr.corp.intel.com>
-Sender: linux-btrfs-owner@vger.kernel.org
-To: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Cc: "Martin K. Petersen" <martin.petersen@oracle.com>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: Re: [PATCH] sdio: optimized SDIO IRQ handling for single function
+Date: Wed, 4 May 2011 11:20:08 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1105041117170.24613@xanadu.home>
+References: <1304453087-7365-1-git-send-email-per.forlin@linaro.org> <alpine.LFD.2.00.1105032339370.24613@xanadu.home> <BANLkTim_x28NyWzo-Ug3+ZprgeT=VFwEfQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:53715 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754265Ab1EDPUL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2011 11:20:11 -0400
+In-Reply-To: <BANLkTim_x28NyWzo-Ug3+ZprgeT=VFwEfQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, lkml <linux-kernel@vger.kernel.org>, linaro-dev@lists.linaro.org, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>, Ulf HANSSON <ulf.hansson@stericsson.com>
 
-On 2011-05-04, at 5:45 AM, "Gao, Yunpeng" <yunpeng.gao@intel.com> wrote:
->> Yes, I have been working on some changes that allow us to tag bios and
->> pass the information out to storage. These patches have been on the back
->> burner for a while due to other commitments. But I'll dig them out and
->> post them later. We just discussed them a couple of weeks ago at the
->> Linux Storage Workshop.
-> 
-> That's great! Thanks for the update and look forward to your patches.
-> 
->> In the meantime: Can you point me to the relevant eMMC stuff so I can
->> see how many tiers or classes we have to work with there?
->> 
-> I'm investigating on add some eMMC 4.5 features support in current Linux mmc driver (drivers/mmc).
-> The Linux mmc driver register the eMMC device as a normal Linux block device. So, it can get all the Linux block layer bio flags.
-> 
-> To below eMMC 4.5 new features:
-> 
-> Data Tag:
-> 'The mechanism permits the device to receive from the host information about specific data types (for instance file system metadata, time-stamps, configuration parameters, etc.). The information is conveyed before a write multiple blocks operation at well defined addresses. By receiving this information the device can improve the access rate during the following read and update operations and offer a more reliable and robust storage.'
-> 
-> I guess the exist block layer flag REQ_META can be used to notify the low level block driver/device to execute the Data Tag feature. But don't know why currently most of Linux file systems don't use the REQ_META flag at all (seems only gfs2 uses it now).
+On Wed, 4 May 2011, Per Forlin wrote:
 
-I was aware of REQ_META, but I didn't know there was any benefit to using it. I think it would be easy to set REQ_META on all ext4 metadata if there was a reason to do so. 
+> On 4 May 2011 05:40, Nicolas Pitre <nicolas.pitre@linaro.org> wrote:
+> > On Tue, 3 May 2011, Per Forlin wrote:
+> >
+> >> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+> >>
+> >> If there is only 1 function registered, and IRQ:s are supported and
+> >> currently enabled, call the callback handler directly
+> >> without checking the CCCR registers.
+> >>
+> >> Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+> >> Signed-off-by: Per Forlin <per.forlin@linaro.org>
+> >
+> > Acked-by: Nicolas Pitre <nicolas.pitre@linaro.org>
+> >
+> I am working o a patch version 2 after offline discussion with Ulf Hansson.
+> Instead of adding this code here.
+> Add sdio_single_func member in mmc_card. Set and reset this function
+> in sdio_claim_irq and sdio_release_irq.
+> process_sdio_pending_irqs would only check if sdio_single_func is !=
+> null and call it.
 
-> Context Management:
-> 'To better differentiate between large sequential operations and small random operations, and to improve multitasking support, contexts can be associated with groups of read or write commands ... A context can be seen as an active session, configured for a specific read/write pattern (e.g. sequential in some granularity). Multiple read or write commands are associated with this context to create some logical association between them, to allow device to optimize performance.'
-> 
-> To my understanding, to support this feature, it needs file system (or application?) to notify the low level driver that the following data access will be large sequential read/write operations.
-> And I'm not sure is it possible for file system to pass this kind of information to low level driver? Any idea?
+Yes, that's what I was about to propose after thinking about it some 
+more.
 
-A simple way to do this would be to use the inode number as the context, so writes to the same inode are grouped together. Another possibility is the PID, though that is less clearly correct (e.g. if tar is extracting a buch of files, are they all related or not).
+> This will result in a bigger patch overall but the new code in
+> process_sdio_pending_irqs will be minimal.
 
-Cheers, Andreas
+Something like this (untested) ?
+
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index b300161..4552727 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -32,6 +32,12 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
+ 	int i, ret, count;
+ 	unsigned char pending;
+ 
++	if (card->sdio_single_irq) {
++		struct sdio_func *func = card->sdio_single_irq;
++		func->irq_handler(func);
++		return 1;
++	}
++
+ 	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
+ 	if (ret) {
+ 		printk(KERN_DEBUG "%s: error %d reading SDIO_CCCR_INTx\n",
+@@ -166,6 +172,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
+ 			host->sdio_irqs--;
+ 			return err;
+ 		}
++		return 1;
+ 	}
+ 
+ 	return 0;
+@@ -183,7 +190,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
+ 		kthread_stop(host->sdio_irq_thread);
+ 	}
+ 
+-	return 0;
++	return (host->sdio_irqs == 1);
+ }
+ 
+ /**
+@@ -225,8 +232,12 @@ int sdio_claim_irq(struct sdio_func *func, sdio_irq_handler_t *handler)
+ 
+ 	func->irq_handler = handler;
+ 	ret = sdio_card_irq_get(func->card);
+-	if (ret)
++	if (ret < 0) {
+ 		func->irq_handler = NULL;
++	} else if (ret == 1) {
++		card->sdio_single_irq = func;
++		ret = 0;
++	}
+ 
+ 	return ret;
+ }
+@@ -250,7 +261,17 @@ int sdio_release_irq(struct sdio_func *func)
+ 
+ 	if (func->irq_handler) {
+ 		func->irq_handler = NULL;
+-		sdio_card_irq_put(func->card);
++		if (sdio_card_irq_put(func->card) == 1) {
++			int i;
++			for (i = 0, i < 7; i++) {
++				if (func->card->sdio_func[i].irq_handler) {
++					func->card->sdio_single_irq =
++						func->card->sdio_func[i];
++					break;
++				}
++			}
++		} else
++			func->card->sdio_single_irq = NULL;
+ 	}
+ 
+ 	ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IENx, 0, &reg);
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index adb4888..fee3df3 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -145,6 +145,7 @@ struct mmc_card {
+ 	struct sdio_cccr	cccr;		/* common card info */
+ 	struct sdio_cis		cis;		/* common tuple info */
+ 	struct sdio_func	*sdio_func[SDIO_MAX_FUNCS]; /* SDIO functions (devices) */
++	struct sdio_func	*sdio_single_irq;		/* SDIO function when only one IRQ active */
+ 	unsigned		num_info;	/* number of info strings */
+ 	const char		**info;		/* info strings */
+ 	struct sdio_func_tuple	*tuples;	/* unknown common tuples */
+
+
+Nicolas
