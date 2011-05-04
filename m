@@ -1,99 +1,96 @@
-From: Nicolas Pitre <nicolas.pitre@linaro.org>
-Subject: Re: [PATCH v2] sdio: optimized SDIO IRQ handling for single irq
-Date: Wed, 4 May 2011 16:22:53 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1105041618400.24613@xanadu.home>
-References: <1304525161-14448-1-git-send-email-per.forlin@linaro.org> <1304525161-14448-2-git-send-email-per.forlin@linaro.org> <alpine.LFD.2.00.1105041217380.24613@xanadu.home> <BANLkTik+LWiYYPTqR5pNKsZfSMGGE3xCZg@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: DRIVERS MMC card freezes at Jmicron controllers.
+Date: Wed, 04 May 2011 19:45:21 -0400
+Message-ID: <m3fwou114e.fsf@pullcord.laptop.org>
+References: <1304531944.6868.17.camel@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-1710998774-1304540573=:24613"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:58590 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752327Ab1EDUWz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2011 16:22:55 -0400
-In-Reply-To: <BANLkTik+LWiYYPTqR5pNKsZfSMGGE3xCZg@mail.gmail.com>
+Received: from void.printf.net ([89.145.121.20]:48078 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755146Ab1EDXma (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 4 May 2011 19:42:30 -0400
+In-Reply-To: <1304531944.6868.17.camel@localhost.localdomain> (Alexandre
+	Felipe Muller de Souza's message of "Wed, 04 May 2011 14:59:04 -0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, lkml <linux-kernel@vger.kernel.org>, linaro-dev@lists.linaro.org, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+To: Alexandre Felipe Muller de Souza <alexandrefm@mandriva.com.br>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+Hi Alexandre, adding linux-mmc@ to CC.  (EOF)
 
---8323328-1710998774-1304540573=:24613
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: 8BIT
+On Wed, May 04 2011, Alexandre Felipe Muller de Souza wrote:
+> Hi, all.
+> I wrote an email minutes ago and I think it could be delivered missing
+> half of the content for mistake using email editor. Sorry for that
+>
+> We have users, reporting problems with MMC cards and JMicron controller
+> devices. We have here to test more than one Pc (with Jmicron) with the
+> same problem. It freezes completely after the insert of stick. Using
+> 2.6.33 to 2.6.39 RC6 the error is the same. I tried many alternatives,
+> but with no success. If there is a idea that could make a fix on it
+> please copy me on thread.
+>
+> lspci:
+> 02:00.2 SD Host controller: JMicron Technologies, Inc. Standard SD Host
+> Controller (rev 80) (prog-if 01)
+>         Subsystem: Holco Enterprise Co, Ltd/Shuttle Computer Device
+> 2000                                
+>         Control: I/O+ Mem+ BusMaster- SpecCycle- MemWINV- VGASnoop-
+> ParErr- Stepping- SERR- FastB2B- DisINTx-
+>         Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort-
+> <TAbort- <MAbort- >SERR- <PERR- INTx- 
+>         Interrupt: pin B routed to IRQ
+> 18                                                                    
+>         Region 0: Memory at febff800 (32-bit, non-prefetchable)
+> [size=256]                                   
+>         Capabilities: [a4] Power Management version
+> 3                                                        
+>                 Flags: PMEClk- DSI- D1- D2- AuxCurrent=0mA
+> PME(D0-,D1-,D2-,D3hot-,D3cold-)                   
+>                 Status: D0 PME-Enable- DSel=0 DScale=0
+> PME-                                                  
+>         Capabilities: [80] Express (v1) Endpoint, MSI
+> 00                                                     
+>                 DevCap: MaxPayload 128 bytes, PhantFunc 0, Latency L0s
+> <64ns, L1 <1us                        
+>                         ExtTag- AttnBtn- AttnInd- PwrInd- RBE+
+> FLReset-                                      
+>                 DevCtl: Report errors: Correctable- Non-Fatal- Fatal-
+> Unsupported-                           
+>                         RlxdOrd+ ExtTag- PhantFunc- AuxPwr-
+> NoSnoop-                                         
+>                         MaxPayload 128 bytes, MaxReadReq 128
+> bytes                                           
+>                 DevSta: CorrErr- UncorrErr- FatalErr- UnsuppReq- AuxPwr-
+> TransPend-                          
+>                 LnkCap: Port #1, Speed 2.5GT/s, Width x1, ASPM L0s L1,
+> Latency L0 unlimited, L1 unlimited    
+>                         ClockPM- Surprise- LLActRep-
+> BwNot-                                                  
+>                 LnkCtl: ASPM Disabled; RCB 64 bytes Disabled- Retrain-
+> CommClk+                              
+>                         ExtSynch- ClockPM- AutWidDis- BWInt-
+> AutBWInt-                                       
+>                 LnkSta: Speed 2.5GT/s, Width x1, TrErr- Train- SlotClk+
+> DLActive- BWMgmt- ABWMgmt-           
+>         Capabilities: [94] MSI: Mask- 64bit- Count=1/1
+> Enable-                                               
+>                 Address: fffffffc  Data:
+> 0000                                                                
+>         Kernel modules: sdhci-pci
+>
+> Before death it outputs on log
+> mmc0:new MMC card at...
+> mmcblk0:mmc0 ...
+> ldm_validade_partition_table() Disk read failed
+> mmcblk0: retrying using single block read
+> error -110 transfering data, sector 0, card status nr8, 0xb00
+>
+> I'll still trying something, but if anybody knows about it warn me.
+> Thanks
+> Alexandre
 
-On Wed, 4 May 2011, Per Forlin wrote:
-
-> On 4 May 2011 19:34, Nicolas Pitre <nicolas.pitre@linaro.org> wrote:
-> > On Wed, 4 May 2011, Per Forlin wrote:
-> >
-> >> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
-> >>
-> >> If there is only 1 function registered it is possible to
-> >> improve performance by directly calling the irq handler
-> >> and avoiding the overhead of reading the CCCR registers.
-> >>
-> >> Signed-off-by: Per Forlin <per.forlin@linaro.org>
-> >> Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
-> >> ---
-> >>  drivers/mmc/core/sdio_irq.c |   30 ++++++++++++++++++++++++++++++
-> >>  include/linux/mmc/card.h    |    1 +
-> >>  2 files changed, 31 insertions(+), 0 deletions(-)
-> >>
-> >> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-> >> index b300161..64c4409 100644
-> >> --- a/drivers/mmc/core/sdio_irq.c
-> >> +++ b/drivers/mmc/core/sdio_irq.c
-> >> @@ -32,6 +32,16 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
-> >>       int i, ret, count;
-> >>       unsigned char pending;
-> >>
-> >> +     /*
-> >> +      * Optimization, if there is only 1 function registered
-> >> +      * call irq handler directly
-> >> +      */
-> >> +     if (card->sdio_single_irq && card->sdio_single_irq->irq_handler) {
-> >> +             struct sdio_func *func = card->sdio_single_irq;
-> >> +             func->irq_handler(func);
-> >
-> > I think there is little point using a func variable here, especially
-> > since you already reference the handler pointer in the if() statement.
-> > Hence:
-> >
-> >        if (card->sdio_single_irq && card->sdio_single_irq->irq_handler) {
-> >                card->sdio_single_irq->irq_handler();
-> >                return 1;
-> >        }
-> >
-> What do you think about:
-> +       struct sdio_func *func = card->sdio_single_irq;
-> +
-> +       /*
-> +        * Optimization, if there is only 1 function interrupt registered
-> +        * call irq handler directly
-> +        */
-> +       if (func) {
-> +               func->irq_handler(func);
-> +               return 1;
-> +       }
-
-Sure, but I'd move the assignment right before the if() in that case for 
-clarity:
-
-       struct sdio_func *func;
-
-       /*
-        * Optimization, if there is only 1 function interrupt registered
-        * call irq handler directly
-        */
-       func = card->sdio_single_irq;
-       if (func) {
-               func->irq_handler(func);
-               return 1;
-       }
-       [...]
-
-
-Nicolas
---8323328-1710998774-1304540573=:24613--
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
