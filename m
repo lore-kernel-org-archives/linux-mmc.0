@@ -1,76 +1,88 @@
 From: Nicolas Pitre <nicolas.pitre@linaro.org>
 Subject: Re: [PATCH v2] sdio: optimized SDIO IRQ handling for single irq
-Date: Wed, 4 May 2011 13:34:21 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1105041217380.24613@xanadu.home>
-References: <1304525161-14448-1-git-send-email-per.forlin@linaro.org> <1304525161-14448-2-git-send-email-per.forlin@linaro.org>
+Date: Wed, 4 May 2011 13:40:56 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1105041335570.24613@xanadu.home>
+References: <1304525161-14448-1-git-send-email-per.forlin@linaro.org> <1304525161-14448-2-git-send-email-per.forlin@linaro.org> <BANLkTi=LsmSepyUMbO7q2hG5-HWbRduO+Q@mail.gmail.com> <BANLkTinptOJrpdwbLOF_Th-Jz9gKj5Y6dQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-926479970-1304530857=:24613"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:43986 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753528Ab1EDReY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2011 13:34:24 -0400
-In-Reply-To: <1304525161-14448-2-git-send-email-per.forlin@linaro.org>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:43634 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753109Ab1EDRk6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2011 13:40:58 -0400
+In-Reply-To: <BANLkTinptOJrpdwbLOF_Th-Jz9gKj5Y6dQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Per Forlin <per.forlin@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+Cc: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>, linaro-dev@lists.linaro.org, linux-mmc@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>, linux-arm-kernel@lists.infradead.org
+
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
+
+--8323328-926479970-1304530857=:24613
+Content-Type: TEXT/PLAIN; charset=iso-8859-2
+Content-Transfer-Encoding: 8BIT
 
 On Wed, 4 May 2011, Per Forlin wrote:
 
-> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
-> 
-> If there is only 1 function registered it is possible to
-> improve performance by directly calling the irq handler
-> and avoiding the overhead of reading the CCCR registers.
-> 
-> Signed-off-by: Per Forlin <per.forlin@linaro.org>
-> Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
-> ---
->  drivers/mmc/core/sdio_irq.c |   30 ++++++++++++++++++++++++++++++
->  include/linux/mmc/card.h    |    1 +
->  2 files changed, 31 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-> index b300161..64c4409 100644
-> --- a/drivers/mmc/core/sdio_irq.c
-> +++ b/drivers/mmc/core/sdio_irq.c
-> @@ -32,6 +32,16 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
->  	int i, ret, count;
->  	unsigned char pending;
->  
-> +	/*
-> +	 * Optimization, if there is only 1 function registered
-> +	 * call irq handler directly
-> +	 */
-> +	if (card->sdio_single_irq && card->sdio_single_irq->irq_handler) {
-> +		struct sdio_func *func = card->sdio_single_irq;
-> +		func->irq_handler(func);
+> 2011/5/4 Micha³ Miros³aw <mirqus@gmail.com>:
+> > 2011/5/4 Per Forlin <per.forlin@linaro.org>:
+> >> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+> >>
+> >> If there is only 1 function registered it is possible to
+> >> improve performance by directly calling the irq handler
+> >> and avoiding the overhead of reading the CCCR registers.
+> >>
+> > [...]
+> >> --- a/drivers/mmc/core/sdio_irq.c
+> >> +++ b/drivers/mmc/core/sdio_irq.c
+> >> @@ -32,6 +32,16 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
+> >>        int i, ret, count;
+> >>        unsigned char pending;
+> >>
+> >> +       /*
+> >> +        * Optimization, if there is only 1 function registered
+> >> +        * call irq handler directly
+> >> +        */
+> >> +       if (card->sdio_single_irq && card->sdio_single_irq->irq_handler) {
+> >> +               struct sdio_func *func = card->sdio_single_irq;
+> >> +               func->irq_handler(func);
+> >> +               return 1;
+> >> +       }
+> > [...]
+> >
+> > The second condition can be avoided:
+> >
+> > in process_sdio_pending_irqs():
+> >
+> > if (card->sdio_irq_func)
+> >   call handler and return
+> >
+> I added the second condition as a sanity check. Same check is used in
+> the main for loop
+> >	ret = -EINVAL;
+> >			} else if (func->irq_handler) {
+> >				func->irq_handler(func);
+> Is the second check necessary here?
 
-I think there is little point using a func variable here, especially 
-since you already reference the handler pointer in the if() statement.  
-Hence:
+Yes because we want to be notified if the hardware returns pending 
+interrupt flags for interrupts we didn't claim.
 
-	if (card->sdio_single_irq && card->sdio_single_irq->irq_handler) {
-		card->sdio_single_irq->irq_handler();
-		return 1;
-	}
+> > in sdio_claim_irq():
+> >
+> >  card->func->irq_handler = ...
+> >  if (host->sdio_irqs == 1)
+> >    card->sdio_irq_func = func;
+> >  else
+> >    card->sdio_irq_func = NULL;
+> I wanted to keep it simple and use same function in claim and release.
+> Your code looks nice.
+> Is if safe to not check the condition "(card->host->caps &
+> MMC_CAP_SDIO_IRQ)". What happens if the SDIO is in polling mode?
 
-> @@ -186,6 +196,24 @@ static int sdio_card_irq_put(struct mmc_card *card)
->  	return 0;
->  }
->  
-> +/* If there is only 1 function registered set sdio_single_irq */
-> +static void sdio_single_irq_set(struct mmc_card *card)
-> +{
-
-The comment is slightly wrong.  This should say "only 1 function 
-interrupt registered..."  Nothing prevents this from working with 
-multiple functions if only one of them has claimed an interrupt. 
-
-Other than that:
-
-Reviewed-by: Nicolas Pitre <nicolas.pitre@linaro.org>
+You cannot avoid checking MMC_CAP_SDIO_IRQ.  If it isn't set the CCCr 
+register must be polled in all cases.
 
 
 Nicolas
+--8323328-926479970-1304530857=:24613--
