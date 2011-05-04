@@ -1,54 +1,69 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: [PATCH resend] sdio: optimized SDIO IRQ handling for single function
-Date: Tue,  3 May 2011 22:51:21 +0200
-Message-ID: <1304455881-10010-1-git-send-email-per.forlin@linaro.org>
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: Re: [PATCH] sdio: optimized SDIO IRQ handling for single function
+Date: Tue, 3 May 2011 23:40:23 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1105032339370.24613@xanadu.home>
+References: <1304453087-7365-1-git-send-email-per.forlin@linaro.org>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:34599 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754962Ab1ECUvq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2011 16:51:46 -0400
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:51192 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755042Ab1EDDk0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2011 23:40:26 -0400
+In-Reply-To: <1304453087-7365-1-git-send-email-per.forlin@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org
-Cc: Chris Ball <cjb@laptop.org>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>, Per Forlin <per.forlin@linaro.org>
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, lkml <linux-kernel@vger.kernel.org>, linaro-dev@lists.linaro.org, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
 
-From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+On Tue, 3 May 2011, Per Forlin wrote:
 
-If there is only 1 function registered it is possible to
-improve performance by avoiding the overhead of reading the
-CCCR registers and directly call the function handler.
+> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+> 
+> If there is only 1 function registered, and IRQ:s are supported and
+> currently enabled, call the callback handler directly
+> without checking the CCCR registers.
+> 
+> Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+> Signed-off-by: Per Forlin <per.forlin@linaro.org>
 
-Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
-Signed-off-by: Per Forlin <per.forlin@linaro.org>
----
- drivers/mmc/core/sdio_irq.c |   14 ++++++++++++++
- 1 files changed, 14 insertions(+), 0 deletions(-)
+Acked-by: Nicolas Pitre <nicolas.pitre@linaro.org>
 
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index b300161..25291bf 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -32,6 +32,20 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
- 	int i, ret, count;
- 	unsigned char pending;
- 
-+	/*
-+	 * If there is only 1 function registered
-+	 * call irq directly without checking the CCCR registers.
-+	 */
-+	if ((card->host->caps & MMC_CAP_SDIO_IRQ) &&
-+	    card->host->sdio_irqs && (card->sdio_funcs == 1))
-+		for (i = 0; i < SDIO_MAX_FUNCS; i++) {
-+			struct sdio_func *func = card->sdio_func[i];
-+			if (func && func->irq_handler) {
-+				func->irq_handler(func);
-+				return 1;
-+			}
-+		}
-+
- 	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
- 	if (ret) {
- 		printk(KERN_DEBUG "%s: error %d reading SDIO_CCCR_INTx\n",
--- 
-1.7.4.1
-
+> ---
+>  drivers/mmc/core/sdio_irq.c |   14 ++++++++++++++
+>  1 files changed, 14 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+> index b300161..25291bf 100644
+> --- a/drivers/mmc/core/sdio_irq.c
+> +++ b/drivers/mmc/core/sdio_irq.c
+> @@ -32,6 +32,20 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
+>  	int i, ret, count;
+>  	unsigned char pending;
+>  
+> +	/*
+> +	 * If there is only 1 function registered
+> +	 * call irq directly without checking the CCCR registers.
+> +	 */
+> +	if ((card->host->caps & MMC_CAP_SDIO_IRQ) &&
+> +	    card->host->sdio_irqs && (card->sdio_funcs == 1))
+> +		for (i = 0; i < SDIO_MAX_FUNCS; i++) {
+> +			struct sdio_func *func = card->sdio_func[i];
+> +			if (func && func->irq_handler) {
+> +				func->irq_handler(func);
+> +				return 1;
+> +			}
+> +		}
+> +
+>  	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
+>  	if (ret) {
+>  		printk(KERN_DEBUG "%s: error %d reading SDIO_CCCR_INTx\n",
+> -- 
+> 1.7.4.1
+> 
+> 
+> _______________________________________________
+> linaro-dev mailing list
+> linaro-dev@lists.linaro.org
+> http://lists.linaro.org/mailman/listinfo/linaro-dev
+> 
