@@ -1,88 +1,87 @@
-From: Nicolas Pitre <nicolas.pitre@linaro.org>
-Subject: Re: [PATCH v2] sdio: optimized SDIO IRQ handling for single irq
-Date: Wed, 4 May 2011 13:40:56 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1105041335570.24613@xanadu.home>
-References: <1304525161-14448-1-git-send-email-per.forlin@linaro.org> <1304525161-14448-2-git-send-email-per.forlin@linaro.org> <BANLkTi=LsmSepyUMbO7q2hG5-HWbRduO+Q@mail.gmail.com> <BANLkTinptOJrpdwbLOF_Th-Jz9gKj5Y6dQ@mail.gmail.com>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: mmc blkqueue is empty even if there are pending reads in do_generic_file_read()
+Date: Wed, 4 May 2011 21:13:10 +0200
+Message-ID: <BANLkTi=omboE=fh16KSAa__JyG=hARmw=A@mail.gmail.com>
+References: <BANLkTinhK_K1oSJDEoqD6EQK8Qy5Wy3v+g@mail.gmail.com>
+	<201105031516.28907.arnd@arndb.de>
+	<BANLkTi=74Mp1vWBt2F-sqqqkeNfP69+9vg@mail.gmail.com>
+	<201105032202.42662.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-926479970-1304530857=:24613"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:43634 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753109Ab1EDRk6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2011 13:40:58 -0400
-In-Reply-To: <BANLkTinptOJrpdwbLOF_Th-Jz9gKj5Y6dQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <201105032202.42662.arnd@arndb.de>
+Sender: owner-linux-mm@kvack.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mm@kvack.org, linux-mmc@vger.kernel.org, linaro-kernel@lists.linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirqus@gmail.com>, linaro-dev@lists.linaro.org, linux-mmc@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>, linux-arm-kernel@lists.infradead.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On 3 May 2011 22:02, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Tuesday 03 May 2011 20:54:43 Per Forlin wrote:
+>> >> page_not_up_to_date:
+>> >> /* Get exclusive access to the page ... */
+>> >> error = lock_page_killable(page);
+>> > I looked at the code in do_generic_file_read(). lock_page_killable
+>> > waits until the current read ahead is completed.
+>> > Is it possible to configure the read ahead to push multiple read
+>> > request to the block device queue?add
+>
+> I believe sleeping in __lock_page_killable is the best possible scenario.
+> Most cards I've seen work best when you use at least 64KB reads, so it will
+> be faster to wait there than to read smaller units.
+>
+Sleeping is ok but I don't wont the read execution to stop (mmc going
+to idle when there is actually more to read).
+I did an interesting discovery when I forced host mmc_req_size to 64k
+The reads now look like:
+dd if=/dev/mmcblk0 of=/dev/null bs=4k count=256
+ [mmc_queue_thread] req d955f9b0 blocks 32
+ [mmc_queue_thread] req   (null) blocks 0
+ [mmc_queue_thread] req   (null) blocks 0
+ [mmc_queue_thread] req d955f9b0 blocks 64
+ [mmc_queue_thread] req   (null) blocks 0
+ [mmc_queue_thread] req d955f8d8 blocks 128
+ [mmc_queue_thread] req   (null) blocks 0
+ [mmc_queue_thread] req d955f9b0 blocks 128
+ [mmc_queue_thread] req d955f800 blocks 128
+ [mmc_queue_thread] req d955f8d8 blocks 128
+ [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7811230
+ [mmc_queue_thread] req d955fec0 blocks 128
+ [mmc_queue_thread] req d955f800 blocks 128
+ [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7811492
+ [mmc_queue_thread] req d955f9b0 blocks 128
+ [mmc_queue_thread] req d967cd30 blocks 128
+ [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7810848
+ [mmc_queue_thread] req d967cc58 blocks 128
+ [mmc_queue_thread] req d967cb80 blocks 128
+ [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7810654
+ [mmc_queue_thread] req d967caa8 blocks 128
+ [mmc_queue_thread] req d967c9d0 blocks 128
+ [mmc_queue_thread] req d967c8f8 blocks 128
+ [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7810652
+ [mmc_queue_thread] req d967c820 blocks 128
+ [mmc_queue_thread] req d967c748 blocks 128
+ [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7810952
+ [mmc_queue_thread] req d967c670 blocks 128
+ [mmc_queue_thread] req d967c598 blocks 128
+ [mmc_queue_thread] req d967c4c0 blocks 128
+ [mmc_queue_thread] req d967c3e8 blocks 128
+ [mmc_queue_thread] req   (null) blocks 0
+ [mmc_queue_thread] req   (null) blocks 0
+The mmc queue never runs empty until end of transfer.. The requests
+are 128 blocks (64k limit set in mmc host driver) compared to 256
+blocks before. This will not improve performance much since the
+transfer now are smaller than before. The latency is minimal but
+instead there extra number of transfer cause more mmc cmd overhead.
+I added prints to print the wait time in lock_page_killable too.
+I wonder if I can achieve a none empty mmc block queue without
+compromising the mmc host driver performance.
 
---8323328-926479970-1304530857=:24613
-Content-Type: TEXT/PLAIN; charset=iso-8859-2
-Content-Transfer-Encoding: 8BIT
+Regards,
+Per
 
-On Wed, 4 May 2011, Per Forlin wrote:
-
-> 2011/5/4 Micha³ Miros³aw <mirqus@gmail.com>:
-> > 2011/5/4 Per Forlin <per.forlin@linaro.org>:
-> >> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
-> >>
-> >> If there is only 1 function registered it is possible to
-> >> improve performance by directly calling the irq handler
-> >> and avoiding the overhead of reading the CCCR registers.
-> >>
-> > [...]
-> >> --- a/drivers/mmc/core/sdio_irq.c
-> >> +++ b/drivers/mmc/core/sdio_irq.c
-> >> @@ -32,6 +32,16 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
-> >>        int i, ret, count;
-> >>        unsigned char pending;
-> >>
-> >> +       /*
-> >> +        * Optimization, if there is only 1 function registered
-> >> +        * call irq handler directly
-> >> +        */
-> >> +       if (card->sdio_single_irq && card->sdio_single_irq->irq_handler) {
-> >> +               struct sdio_func *func = card->sdio_single_irq;
-> >> +               func->irq_handler(func);
-> >> +               return 1;
-> >> +       }
-> > [...]
-> >
-> > The second condition can be avoided:
-> >
-> > in process_sdio_pending_irqs():
-> >
-> > if (card->sdio_irq_func)
-> >   call handler and return
-> >
-> I added the second condition as a sanity check. Same check is used in
-> the main for loop
-> >	ret = -EINVAL;
-> >			} else if (func->irq_handler) {
-> >				func->irq_handler(func);
-> Is the second check necessary here?
-
-Yes because we want to be notified if the hardware returns pending 
-interrupt flags for interrupts we didn't claim.
-
-> > in sdio_claim_irq():
-> >
-> >  card->func->irq_handler = ...
-> >  if (host->sdio_irqs == 1)
-> >    card->sdio_irq_func = func;
-> >  else
-> >    card->sdio_irq_func = NULL;
-> I wanted to keep it simple and use same function in claim and release.
-> Your code looks nice.
-> Is if safe to not check the condition "(card->host->caps &
-> MMC_CAP_SDIO_IRQ)". What happens if the SDIO is in polling mode?
-
-You cannot avoid checking MMC_CAP_SDIO_IRQ.  If it isn't set the CCCr 
-register must be polled in all cases.
-
-
-Nicolas
---8323328-926479970-1304530857=:24613--
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
