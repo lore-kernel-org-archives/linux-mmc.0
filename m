@@ -1,87 +1,106 @@
 From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: mmc blkqueue is empty even if there are pending reads in do_generic_file_read()
-Date: Wed, 4 May 2011 21:13:10 +0200
-Message-ID: <BANLkTi=omboE=fh16KSAa__JyG=hARmw=A@mail.gmail.com>
-References: <BANLkTinhK_K1oSJDEoqD6EQK8Qy5Wy3v+g@mail.gmail.com>
-	<201105031516.28907.arnd@arndb.de>
-	<BANLkTi=74Mp1vWBt2F-sqqqkeNfP69+9vg@mail.gmail.com>
-	<201105032202.42662.arnd@arndb.de>
+Subject: Re: [PATCH v2] sdio: optimized SDIO IRQ handling for single irq
+Date: Wed, 4 May 2011 21:48:12 +0200
+Message-ID: <BANLkTik+LWiYYPTqR5pNKsZfSMGGE3xCZg@mail.gmail.com>
+References: <1304525161-14448-1-git-send-email-per.forlin@linaro.org>
+	<1304525161-14448-2-git-send-email-per.forlin@linaro.org>
+	<alpine.LFD.2.00.1105041217380.24613@xanadu.home>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <201105032202.42662.arnd@arndb.de>
-Sender: owner-linux-mm@kvack.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-mm@kvack.org, linux-mmc@vger.kernel.org, linaro-kernel@lists.linaro.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:55705 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751764Ab1EDTsN convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2011 15:48:13 -0400
+In-Reply-To: <alpine.LFD.2.00.1105041217380.24613@xanadu.home>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Nicolas Pitre <nicolas.pitre@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
 
-On 3 May 2011 22:02, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Tuesday 03 May 2011 20:54:43 Per Forlin wrote:
->> >> page_not_up_to_date:
->> >> /* Get exclusive access to the page ... */
->> >> error = lock_page_killable(page);
->> > I looked at the code in do_generic_file_read(). lock_page_killable
->> > waits until the current read ahead is completed.
->> > Is it possible to configure the read ahead to push multiple read
->> > request to the block device queue?add
+On 4 May 2011 19:34, Nicolas Pitre <nicolas.pitre@linaro.org> wrote:
+> On Wed, 4 May 2011, Per Forlin wrote:
 >
-> I believe sleeping in __lock_page_killable is the best possible scenario.
-> Most cards I've seen work best when you use at least 64KB reads, so it will
-> be faster to wait there than to read smaller units.
+>> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+>>
+>> If there is only 1 function registered it is possible to
+>> improve performance by directly calling the irq handler
+>> and avoiding the overhead of reading the CCCR registers.
+>>
+>> Signed-off-by: Per Forlin <per.forlin@linaro.org>
+>> Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
+>> ---
+>> =A0drivers/mmc/core/sdio_irq.c | =A0 30 ++++++++++++++++++++++++++++=
+++
+>> =A0include/linux/mmc/card.h =A0 =A0| =A0 =A01 +
+>> =A02 files changed, 31 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq=
+=2Ec
+>> index b300161..64c4409 100644
+>> --- a/drivers/mmc/core/sdio_irq.c
+>> +++ b/drivers/mmc/core/sdio_irq.c
+>> @@ -32,6 +32,16 @@ static int process_sdio_pending_irqs(struct mmc_c=
+ard *card)
+>> =A0 =A0 =A0 int i, ret, count;
+>> =A0 =A0 =A0 unsigned char pending;
+>>
+>> + =A0 =A0 /*
+>> + =A0 =A0 =A0* Optimization, if there is only 1 function registered
+>> + =A0 =A0 =A0* call irq handler directly
+>> + =A0 =A0 =A0*/
+>> + =A0 =A0 if (card->sdio_single_irq && card->sdio_single_irq->irq_ha=
+ndler) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 struct sdio_func *func =3D card->sdio_sing=
+le_irq;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 func->irq_handler(func);
 >
-Sleeping is ok but I don't wont the read execution to stop (mmc going
-to idle when there is actually more to read).
-I did an interesting discovery when I forced host mmc_req_size to 64k
-The reads now look like:
-dd if=/dev/mmcblk0 of=/dev/null bs=4k count=256
- [mmc_queue_thread] req d955f9b0 blocks 32
- [mmc_queue_thread] req   (null) blocks 0
- [mmc_queue_thread] req   (null) blocks 0
- [mmc_queue_thread] req d955f9b0 blocks 64
- [mmc_queue_thread] req   (null) blocks 0
- [mmc_queue_thread] req d955f8d8 blocks 128
- [mmc_queue_thread] req   (null) blocks 0
- [mmc_queue_thread] req d955f9b0 blocks 128
- [mmc_queue_thread] req d955f800 blocks 128
- [mmc_queue_thread] req d955f8d8 blocks 128
- [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7811230
- [mmc_queue_thread] req d955fec0 blocks 128
- [mmc_queue_thread] req d955f800 blocks 128
- [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7811492
- [mmc_queue_thread] req d955f9b0 blocks 128
- [mmc_queue_thread] req d967cd30 blocks 128
- [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7810848
- [mmc_queue_thread] req d967cc58 blocks 128
- [mmc_queue_thread] req d967cb80 blocks 128
- [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7810654
- [mmc_queue_thread] req d967caa8 blocks 128
- [mmc_queue_thread] req d967c9d0 blocks 128
- [mmc_queue_thread] req d967c8f8 blocks 128
- [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7810652
- [mmc_queue_thread] req d967c820 blocks 128
- [mmc_queue_thread] req d967c748 blocks 128
- [do_generic_file_read] lock_page_killable-wait sec 0 nsec 7810952
- [mmc_queue_thread] req d967c670 blocks 128
- [mmc_queue_thread] req d967c598 blocks 128
- [mmc_queue_thread] req d967c4c0 blocks 128
- [mmc_queue_thread] req d967c3e8 blocks 128
- [mmc_queue_thread] req   (null) blocks 0
- [mmc_queue_thread] req   (null) blocks 0
-The mmc queue never runs empty until end of transfer.. The requests
-are 128 blocks (64k limit set in mmc host driver) compared to 256
-blocks before. This will not improve performance much since the
-transfer now are smaller than before. The latency is minimal but
-instead there extra number of transfer cause more mmc cmd overhead.
-I added prints to print the wait time in lock_page_killable too.
-I wonder if I can achieve a none empty mmc block queue without
-compromising the mmc host driver performance.
+> I think there is little point using a func variable here, especially
+> since you already reference the handler pointer in the if() statement=
+=2E
+> Hence:
+>
+> =A0 =A0 =A0 =A0if (card->sdio_single_irq && card->sdio_single_irq->ir=
+q_handler) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->sdio_single_irq->irq_handler();
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return 1;
+> =A0 =A0 =A0 =A0}
+>
+What do you think about:
++       struct sdio_func *func =3D card->sdio_single_irq;
++
++       /*
++        * Optimization, if there is only 1 function interrupt register=
+ed
++        * call irq handler directly
++        */
++       if (func) {
++               func->irq_handler(func);
++               return 1;
++       }
 
-Regards,
-Per
+-                       struct sdio_func *func =3D card->sdio_func[i - =
+1];
++                       func =3D card->sdio_func[i - 1];
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+>> @@ -186,6 +196,24 @@ static int sdio_card_irq_put(struct mmc_card *c=
+ard)
+>> =A0 =A0 =A0 return 0;
+>> =A0}
+>>
+>> +/* If there is only 1 function registered set sdio_single_irq */
+>> +static void sdio_single_irq_set(struct mmc_card *card)
+>> +{
+>
+> The comment is slightly wrong. =A0This should say "only 1 function
+> interrupt registered..." =A0Nothing prevents this from working with
+> multiple functions if only one of them has claimed an interrupt.
+>
+> Other than that:
+>
+> Reviewed-by: Nicolas Pitre <nicolas.pitre@linaro.org>
+>
+>
+> Nicolas
+>
