@@ -1,117 +1,48 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: [PATCH v3] sdio: optimized SDIO IRQ handling for single irq
-Date: Thu,  5 May 2011 21:14:03 +0200
-Message-ID: <1304622843-5123-2-git-send-email-per.forlin@linaro.org>
-References: <1304622843-5123-1-git-send-email-per.forlin@linaro.org>
+From: Andreas Dilger <adilger@dilger.ca>
+Subject: Re: Is it possible for the ext4/btrfs file system to pass some	context related info to low level block driver?
+Date: Thu, 5 May 2011 14:11:51 -0600
+Message-ID: <7DF5B5A9-7AD7-4EAC-9A42-DA22A814056F@dilger.ca>
+References: <CE761E84DADF2947A4AF22FB8D97A47358E28022@shsmsx501.ccr.corp.intel.com> <yq1mxj32932.fsf@sermon.lab.mkp.net> <CE761E84DADF2947A4AF22FB8D97A47358EE526A@shsmsx501.ccr.corp.intel.com> <60C31100-5694-4CA9-A778-91CB15915052@dilger.ca> <20110505181032.GA21360@parisc-linux.org>
+Mime-Version: 1.0 (Apple Message framework v1082)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ew0-f46.google.com ([209.85.215.46]:37899 "EHLO
-	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753042Ab1EETPC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2011 15:15:02 -0400
-In-Reply-To: <1304622843-5123-1-git-send-email-per.forlin@linaro.org>
+Received: from idcmail-mo2no.shaw.ca ([64.59.134.9]:43596 "EHLO
+	idcmail-mo2no.shaw.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751580Ab1EEULx convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2011 16:11:53 -0400
+In-Reply-To: <20110505181032.GA21360@parisc-linux.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org
-Cc: Chris Ball <cjb@laptop.org>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>, Per Forlin <per.forlin@linaro.org>
+To: Matthew Wilcox <matthew@wil.cx>
+Cc: "Gao, Yunpeng" <yunpeng.gao@intel.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+On May 5, 2011, at 12:10, Matthew Wilcox wrote:
+> On Wed, May 04, 2011 at 08:51:39AM -0600, Andreas Dilger wrote:
+>> I was aware of REQ_META, but I didn't know there was any benefit to
+>> using it. I think it would be easy to set REQ_META on all ext4 metadata
+>> if there was a reason to do so.
+> 
+> The CFQ ioscheduler pays attention to it (prioritising metadata accesses
+> over data accesses), and blocktrace will print an 'M' for metadata
+> requests if it's set, so I think that's two excellent reasons to set
+> REQ_META today.
+> 
+> However, ext3, ext4, and XFS already use it:
+> 
+> fs/ext4/inode.c:1500:   ll_rw_block(READ_META, 1, &bh);
+  - ext4_bread()
 
-If there is only 1 function interrupt registered it is possible to
-improve performance by directly calling the irq handler
-and avoiding the overhead of reading the CCCR registers.
+> fs/ext4/inode.c:4775:           submit_bh(READ_META, bh);
+  - __ext4_get_inode_loc()
+> fs/ext4/namei.c:924:                    ll_rw_block(READ_META, 1, &bh);
+  - ext4_find_entry()
 
-Signed-off-by: Per Forlin <per.forlin@linaro.org>
-Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
-Reviewed-by: Nicolas Pitre <nicolas.pitre@linaro.org>
----
- drivers/mmc/core/sdio_irq.c |   33 ++++++++++++++++++++++++++++++++-
- include/linux/mmc/card.h    |    1 +
- 2 files changed, 33 insertions(+), 1 deletions(-)
+Looking more closely at the code it seems that this is handling only a subset of the code.  There are many places in ext4 that are using sb_bread() instead of ext4_bread(), in particular in the extents and migration code that was developed more recently, but also in the xattr code which has been around a long time.
 
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index b300161..03ead02 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -31,6 +31,17 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
- {
- 	int i, ret, count;
- 	unsigned char pending;
-+	struct sdio_func *func;
-+
-+	/*
-+	 * Optimization, if there is only 1 function interrupt registered
-+	 * call irq handler directly
-+	 */
-+	func = card->sdio_single_irq;
-+	if (func) {
-+		func->irq_handler(func);
-+		return 1;
-+	}
- 
- 	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
- 	if (ret) {
-@@ -42,7 +53,7 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
- 	count = 0;
- 	for (i = 1; i <= 7; i++) {
- 		if (pending & (1 << i)) {
--			struct sdio_func *func = card->sdio_func[i - 1];
-+			func = card->sdio_func[i - 1];
- 			if (!func) {
- 				printk(KERN_WARNING "%s: pending IRQ for "
- 					"non-existent function\n",
-@@ -186,6 +197,24 @@ static int sdio_card_irq_put(struct mmc_card *card)
- 	return 0;
- }
- 
-+/* If there is only 1 function registered set sdio_single_irq */
-+static void sdio_single_irq_set(struct mmc_card *card)
-+{
-+	struct sdio_func *func;
-+	int i;
-+
-+	card->sdio_single_irq = NULL;
-+	if ((card->host->caps & MMC_CAP_SDIO_IRQ) &&
-+	    card->host->sdio_irqs == 1)
-+		for (i = 0; i < card->sdio_funcs; i++) {
-+		       func = card->sdio_func[i];
-+		       if (func && func->irq_handler) {
-+			       card->sdio_single_irq = func;
-+			       break;
-+		       }
-+	       }
-+}
-+
- /**
-  *	sdio_claim_irq - claim the IRQ for a SDIO function
-  *	@func: SDIO function
-@@ -227,6 +256,7 @@ int sdio_claim_irq(struct sdio_func *func, sdio_irq_handler_t *handler)
- 	ret = sdio_card_irq_get(func->card);
- 	if (ret)
- 		func->irq_handler = NULL;
-+	sdio_single_irq_set(func->card);
- 
- 	return ret;
- }
-@@ -251,6 +281,7 @@ int sdio_release_irq(struct sdio_func *func)
- 	if (func->irq_handler) {
- 		func->irq_handler = NULL;
- 		sdio_card_irq_put(func->card);
-+		sdio_single_irq_set(func->card);
- 	}
- 
- 	ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IENx, 0, &reg);
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index adb4888..0d64211 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -145,6 +145,7 @@ struct mmc_card {
- 	struct sdio_cccr	cccr;		/* common card info */
- 	struct sdio_cis		cis;		/* common tuple info */
- 	struct sdio_func	*sdio_func[SDIO_MAX_FUNCS]; /* SDIO functions (devices) */
-+	struct sdio_func	*sdio_single_irq; /* SDIO function when only one IRQ active */
- 	unsigned		num_info;	/* number of info strings */
- 	const char		**info;		/* info strings */
- 	struct sdio_func_tuple	*tuples;	/* unknown common tuples */
--- 
-1.7.4.1
+Cheers, Andreas
+
+
+
+
 
