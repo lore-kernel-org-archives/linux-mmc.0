@@ -1,215 +1,253 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH v4] mmc: add runtime and system power-management support to the MMCIF driver
-Date: Thu, 5 May 2011 23:50:33 +0200
-Message-ID: <201105052350.33332.rjw@sisk.pl>
-References: <Pine.LNX.4.64.1105051813270.29735@axis700.grange>
+From: <gregkh@suse.de>
+Subject: Patch "mmc: fix all hangs related to mmc/sd card insert/removal during suspend/resume" has been added to the 2.6.32-longterm tree
+Date: Thu, 05 May 2011 14:54:16 -0700
+Message-ID: <13046324562530@kroah.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1105051813270.29735@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>
+Content-Type: text/plain; charset=ANSI_X3.4-1968
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kroah.org ([198.145.64.141]:48542 "EHLO coco.kroah.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753537Ab1EEVyp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 5 May 2011 17:54:45 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: maximlevitsky@gmail.com, akpm@linux-foundation.org, david-b@pacbell.net, gregkh@suse.de, linux-mmc@vger.kernel.org, stern@rowland.harvard.edu, torvalds@linux-foundation.org
+Cc: stable@kernel.org, stable-commits@vger.kernel.org
 
-On Thursday, May 05, 2011, Guennadi Liakhovetski wrote:
-> Adding support for runtime power-management to the MMCIF driver allows
-> it to save power as long as no card is present. To also allow to turn
-> off the power domain at that time, we release DMA channels during that
-> time, since on some sh-mobile systems the DMA controller(s) and the
-> MMCIF block belong to the same power domain. System-wide power
-> management has been tested with experimental PM patches on AP4-based
-> systems.
-> 
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
-> 
-> This patch supersedes:
-> 
-> [PATCH 2/3 v3] MMC: add runtime and system power-management support to the MMCIF driver
-> 
-> and has been tested to work with Rafael's suspend git-tree, power-domains 
-> branch.
-> 
->  drivers/mmc/host/sh_mmcif.c |   78 ++++++++++++++++++++++++++++++++++++++-----
->  1 files changed, 69 insertions(+), 9 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index d3871b6..14f8edb 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -29,6 +29,7 @@
->  #include <linux/mmc/sh_mmcif.h>
->  #include <linux/pagemap.h>
->  #include <linux/platform_device.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/spinlock.h>
->  
->  #define DRIVER_NAME	"sh_mmcif"
-> @@ -173,6 +174,7 @@ struct sh_mmcif_host {
->  	struct completion intr_wait;
->  	enum mmcif_state state;
->  	spinlock_t lock;
-> +	bool power;
->  
->  	/* DMA support */
->  	struct dma_chan		*chan_rx;
-> @@ -877,11 +879,24 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	if (ios->power_mode == MMC_POWER_UP) {
->  		if (p->set_pwr)
->  			p->set_pwr(host->pd, ios->power_mode);
-> +		if (!host->power) {
-> +			/* See if we also get DMA */
-> +			sh_mmcif_request_dma(host, host->pd->dev.platform_data);
-> +			pm_runtime_get_sync(&host->pd->dev);
-> +			host->power = true;
-> +		}
->  	} else if (ios->power_mode == MMC_POWER_OFF || !ios->clock) {
->  		/* clock stop */
->  		sh_mmcif_clock_control(host, 0);
-> -		if (ios->power_mode == MMC_POWER_OFF && p->down_pwr)
-> -			p->down_pwr(host->pd);
-> +		if (ios->power_mode == MMC_POWER_OFF) {
-> +			if (host->power) {
-> +				pm_runtime_put(&host->pd->dev);
-> +				sh_mmcif_release_dma(host);
-> +				host->power = false;
-> +			}
-> +			if (p->down_pwr)
-> +				p->down_pwr(host->pd);
-> +		}
->  		host->state = STATE_IDLE;
->  		return;
->  	}
-> @@ -957,7 +972,7 @@ static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
->  		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, state);
->  		err = 1;
->  	} else {
-> -		dev_dbg(&host->pd->dev, "Not support int\n");
-> +		dev_dbg(&host->pd->dev, "Unsupported interrupt: 0x%x\n", state);
->  		sh_mmcif_writel(host->addr, MMCIF_CE_INT, ~state);
->  		sh_mmcif_bitclr(host, MMCIF_CE_INT_MASK, state);
->  		err = 1;
-> @@ -1053,8 +1068,12 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
->  	sh_mmcif_sync_reset(host);
->  	platform_set_drvdata(pdev, host);
->  
-> -	/* See if we also get DMA */
-> -	sh_mmcif_request_dma(host, pd);
-> +	pm_runtime_enable(&pdev->dev);
-> +	host->power = false;
-> +
-> +	ret = pm_runtime_resume(&pdev->dev);
-> +	if (ret < 0)
-> +		goto clean_up2;
->  
->  	mmc_add_host(mmc);
->  
-> @@ -1063,13 +1082,13 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
->  	ret = request_irq(irq[0], sh_mmcif_intr, 0, "sh_mmc:error", host);
->  	if (ret) {
->  		dev_err(&pdev->dev, "request_irq error (sh_mmc:error)\n");
-> -		goto clean_up2;
-> +		goto clean_up3;
->  	}
->  	ret = request_irq(irq[1], sh_mmcif_intr, 0, "sh_mmc:int", host);
->  	if (ret) {
->  		free_irq(irq[0], host);
->  		dev_err(&pdev->dev, "request_irq error (sh_mmc:int)\n");
-> -		goto clean_up2;
-> +		goto clean_up3;
->  	}
->  
->  	sh_mmcif_detect(host->mmc);
-> @@ -1079,7 +1098,11 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
->  		sh_mmcif_readl(host->addr, MMCIF_CE_VERSION) & 0x0000ffff);
->  	return ret;
->  
-> +clean_up3:
-> +	mmc_remove_host(mmc);
-> +	pm_runtime_suspend(&pdev->dev);
->  clean_up2:
-> +	pm_runtime_disable(&pdev->dev);
->  	clk_disable(host->hclk);
->  clean_up1:
->  	mmc_free_host(mmc);
-> @@ -1094,9 +1117,9 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
->  	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
->  	int irq[2];
->  
-> -	mmc_remove_host(host->mmc);
-> -	sh_mmcif_release_dma(host);
-> +	pm_runtime_get_sync(&pdev->dev);
->  
-> +	mmc_remove_host(host->mmc);
->  	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
->  
->  	if (host->addr)
-> @@ -1112,15 +1135,52 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
->  
->  	clk_disable(host->hclk);
->  	mmc_free_host(host->mmc);
-> +	pm_runtime_put_sync(&pdev->dev);
-> +	pm_runtime_disable(&pdev->dev);
->  
->  	return 0;
->  }
->  
-> +#ifdef CONFIG_PM
-> +static int sh_mmcif_suspend(struct device *dev)
-> +{
-> +	struct platform_device *pdev = to_platform_device(dev);
-> +	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
-> +	int ret = mmc_suspend_host(host->mmc);
-> +
-> +	if (!ret) {
-> +		sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
-> +		clk_disable(host->hclk);
-> +	}
-> +
-> +	return ret;
-> +}
-> +
-> +static int sh_mmcif_resume(struct device *dev)
-> +{
-> +	struct platform_device *pdev = to_platform_device(dev);
-> +	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
-> +
-> +	clk_enable(host->hclk);
-> +
-> +	return mmc_resume_host(host->mmc);
-> +}
-> +#else
-> +#define sh_mmcif_suspend	NULL
-> +#define sh_mmcif_resume		NULL
-> +#endif	/* CONFIG_PM */
-> +
-> +static const struct dev_pm_ops sh_mmcif_dev_pm_ops = {
-> +	.suspend = sh_mmcif_suspend,
-> +	.resume = sh_mmcif_resume,
-> +};
 
-So this means the driver only has system-wide suspend/resume callbacks.
-I guess hibernation is not supported by the target platform(s) yet, so
-the freeze/thaw etc. callbacks are not necessary at the moment, but in case
-they are supposed to be the same as the suspend/resume ones, it wouldn't
-hurt to use SET_SYSTEM_SLEEP_PM_OPS (as defined in include/linux/pm.h).
+This is a note to let you know that I've just added the patch titled
 
-Also, runtime PM callbacks are not present.  Is it intentional?  I thought
-they would be necessary to save/restore the device state over the power
-domain power down/power up, wouldn't they?
+    mmc: fix all hangs related to mmc/sd card insert/removal during suspend/resume
 
-> +
->  static struct platform_driver sh_mmcif_driver = {
->  	.probe		= sh_mmcif_probe,
->  	.remove		= sh_mmcif_remove,
->  	.driver		= {
->  		.name	= DRIVER_NAME,
-> +		.pm	= &sh_mmcif_dev_pm_ops,
->  	},
->  };
+to the 2.6.32-longterm tree which can be found at:
+    http://www.kernel.org/git/?p=linux/kernel/git/longterm/longterm-queue-2.6.32.git;a=summary
 
-Thanks,
-Rafael
+The filename of the patch is:
+     mmc-fix-all-hangs-related-to-mmc-sd-card-insert-remo.patch
+and it can be found in the queue-2.6.32 subdirectory.
+
+If you, or anyone else, feels it should not be added to the 2.6.32 longterm tree,
+please let <stable@kernel.org> know about it.
+
+
+>From 849d6563ac4395a9890e6a1d10573c79237d4e8f Mon Sep 17 00:00:00 2001
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+Date: Tue, 10 Aug 2010 18:01:41 -0700
+Subject: mmc: fix all hangs related to mmc/sd card insert/removal during suspend/resume
+
+From: Maxim Levitsky <maximlevitsky@gmail.com>
+
+commit 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e upstream.
+
+If you don't use CONFIG_MMC_UNSAFE_RESUME, as soon as you attempt to
+suspend, the card will be removed, therefore this patch doesn't change the
+behavior of this option.
+
+However the removal will be done by pm notifier, which runs while
+userspace is still not frozen and thus can freely use del_gendisk, without
+the risk of deadlock which would happen otherwise.
+
+Card detect workqueue is now disabled while userspace is frozen, Therefore
+if you do use CONFIG_MMC_UNSAFE_RESUME, and remove the card during
+suspend, the removal will be detected as soon as userspace is unfrozen,
+again at the moment it is safe to call del_gendisk.
+
+Tested with and without CONFIG_MMC_UNSAFE_RESUME with suspend and hibernate.
+
+[akpm@linux-foundation.org: clean up function prototype]
+[akpm@linux-foundation.org: fix CONFIG_PM-n linkage, small cleanups]
+[akpm@linux-foundation.org: coding-style fixes]
+Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: David Brownell <david-b@pacbell.net>
+Cc: Alan Stern <stern@rowland.harvard.edu>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+[bwh: Adjust for 2.6.32]
+Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+---
+ drivers/mmc/core/core.c  |   81 ++++++++++++++++++++++++++++++++---------------
+ drivers/mmc/core/host.c  |    4 ++
+ include/linux/mmc/host.h |    3 +
+ 3 files changed, 63 insertions(+), 25 deletions(-)
+
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1041,6 +1041,17 @@ void mmc_rescan(struct work_struct *work
+ 		container_of(work, struct mmc_host, detect.work);
+ 	u32 ocr;
+ 	int err;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (host->rescan_disable) {
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
++	}
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
+ 
+ 	mmc_bus_get(host);
+ 
+@@ -1247,18 +1258,6 @@ int mmc_suspend_host(struct mmc_host *ho
+ 	if (host->bus_ops && !host->bus_dead) {
+ 		if (host->bus_ops->suspend)
+ 			err = host->bus_ops->suspend(host);
+-		if (err == -ENOSYS || !host->bus_ops->resume) {
+-			/*
+-			 * We simply "remove" the card in this case.
+-			 * It will be redetected on resume.
+-			 */
+-			if (host->bus_ops->remove)
+-				host->bus_ops->remove(host);
+-			mmc_claim_host(host);
+-			mmc_detach_bus(host);
+-			mmc_release_host(host);
+-			err = 0;
+-		}
+ 	}
+ 	mmc_bus_put(host);
+ 
+@@ -1288,28 +1287,60 @@ int mmc_resume_host(struct mmc_host *hos
+ 			printk(KERN_WARNING "%s: error %d during resume "
+ 					    "(card was removed?)\n",
+ 					    mmc_hostname(host), err);
+-			if (host->bus_ops->remove)
+-				host->bus_ops->remove(host);
+-			mmc_claim_host(host);
+-			mmc_detach_bus(host);
+-			mmc_release_host(host);
+-			/* no need to bother upper layers */
+ 			err = 0;
+ 		}
+ 	}
+ 	mmc_bus_put(host);
+ 
+-	/*
+-	 * We add a slight delay here so that resume can progress
+-	 * in parallel.
+-	 */
+-	mmc_detect_change(host, 1);
+-
+ 	return err;
+ }
+-
+ EXPORT_SYMBOL(mmc_resume_host);
+ 
++/* Do the card removal on suspend if card is assumed removeable
++ * Do that in pm notifier while userspace isn't yet frozen, so we will be able
++   to sync the card.
++*/
++int mmc_pm_notify(struct notifier_block *notify_block,
++					unsigned long mode, void *unused)
++{
++	struct mmc_host *host = container_of(
++		notify_block, struct mmc_host, pm_notify);
++	unsigned long flags;
++
++
++	switch (mode) {
++	case PM_HIBERNATION_PREPARE:
++	case PM_SUSPEND_PREPARE:
++
++		spin_lock_irqsave(&host->lock, flags);
++		host->rescan_disable = 1;
++		spin_unlock_irqrestore(&host->lock, flags);
++		cancel_delayed_work_sync(&host->detect);
++
++		if (!host->bus_ops || host->bus_ops->suspend)
++			break;
++
++		mmc_claim_host(host);
++
++		if (host->bus_ops->remove)
++			host->bus_ops->remove(host);
++
++		mmc_detach_bus(host);
++		mmc_release_host(host);
++		break;
++
++	case PM_POST_SUSPEND:
++	case PM_POST_HIBERNATION:
++
++		spin_lock_irqsave(&host->lock, flags);
++		host->rescan_disable = 0;
++		spin_unlock_irqrestore(&host->lock, flags);
++		mmc_detect_change(host, 0);
++
++	}
++
++	return 0;
++}
+ #endif
+ 
+ static int __init mmc_init(void)
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -16,6 +16,7 @@
+ #include <linux/idr.h>
+ #include <linux/pagemap.h>
+ #include <linux/leds.h>
++#include <linux/suspend.h>
+ 
+ #include <linux/mmc/host.h>
+ 
+@@ -84,6 +85,7 @@ struct mmc_host *mmc_alloc_host(int extr
+ 	init_waitqueue_head(&host->wq);
+ 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+ 	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
++	host->pm_notify.notifier_call = mmc_pm_notify;
+ 
+ 	/*
+ 	 * By default, hosts do not support SGIO or large requests.
+@@ -132,6 +134,7 @@ int mmc_add_host(struct mmc_host *host)
+ #endif
+ 
+ 	mmc_start_host(host);
++	register_pm_notifier(&host->pm_notify);
+ 
+ 	return 0;
+ }
+@@ -148,6 +151,7 @@ EXPORT_SYMBOL(mmc_add_host);
+  */
+ void mmc_remove_host(struct mmc_host *host)
+ {
++	unregister_pm_notifier(&host->pm_notify);
+ 	mmc_stop_host(host);
+ 
+ #ifdef CONFIG_DEBUG_FS
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -120,6 +120,7 @@ struct mmc_host {
+ 	unsigned int		f_min;
+ 	unsigned int		f_max;
+ 	u32			ocr_avail;
++	struct notifier_block	pm_notify;
+ 
+ #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
+ #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
+@@ -177,6 +178,7 @@ struct mmc_host {
+ 
+ 	/* Only used with MMC_CAP_DISABLE */
+ 	int			enabled;	/* host is enabled */
++	int			rescan_disable;	/* disable card detection */
+ 	int			nesting_cnt;	/* "enable" nesting count */
+ 	int			en_dis_recurs;	/* detect recursion */
+ 	unsigned int		disable_delay;	/* disable delay in msecs */
+@@ -249,6 +251,7 @@ int mmc_card_can_sleep(struct mmc_host *
+ int mmc_host_enable(struct mmc_host *host);
+ int mmc_host_disable(struct mmc_host *host);
+ int mmc_host_lazy_disable(struct mmc_host *host);
++int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
+ 
+ static inline void mmc_set_disable_delay(struct mmc_host *host,
+ 					 unsigned int disable_delay)
+
+
+Patches currently in longterm-queue-2.6.32 which might be from maximlevitsky@gmail.com are
+
+/home/gregkh/linux/longterm/longterm-queue-2.6.32/queue-2.6.32/mmc-build-fix-mmc_pm_notify-is-only-available-with-c.patch
+/home/gregkh/linux/longterm/longterm-queue-2.6.32/queue-2.6.32/mmc-fix-all-hangs-related-to-mmc-sd-card-insert-remo.patch
