@@ -1,117 +1,54 @@
 From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH 11/22] mmc: omap_hsmmc: split duplicate code to calc_divisor() function
-Date: Thu,  5 May 2011 14:51:11 +0300
-Message-ID: <1304596282-4095-12-git-send-email-adrian.hunter@nokia.com>
+Subject: [PATCH 09/22] mmc: omap_hsmmc: move hardcoded frequency constants to definition block
+Date: Thu,  5 May 2011 14:51:09 +0300
+Message-ID: <1304596282-4095-10-git-send-email-adrian.hunter@nokia.com>
 References: <1304596282-4095-1-git-send-email-adrian.hunter@nokia.com>
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.nokia.com ([147.243.128.24]:62762 "EHLO mgw-da01.nokia.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753252Ab1EELwW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 5 May 2011 07:52:22 -0400
 In-Reply-To: <1304596282-4095-1-git-send-email-adrian.hunter@nokia.com>
-Sender: linux-omap-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Tony Lindgren <tony@atomide.com>
 Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>
-List-Id: linux-mmc@vger.kernel.org
 
 From: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
-There are two places where the same calculations are done. Let's split them to
-separate function.
-
-In addition the new function is simplified by usage DIV_ROUND_UP kernel macro.
+Move the min and max frequency constants to the definition block in the source
+file.
 
 Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   45 ++++++++++++++++------------------------
- 1 files changed, 18 insertions(+), 27 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 7a153af..045c581 100644
+index a1a1101..a727bf8 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -596,6 +596,20 @@ static void omap_hsmmc_disable_irq(struct omap_hsmmc_host *host)
- 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
- }
+@@ -120,6 +120,8 @@
  
-+/* Calculate divisor for the given clock frequency */
-+static u16 calc_divisor(struct mmc_ios *ios)
-+{
-+	u16 dsor = 0;
-+
-+	if (ios->clock) {
-+		dsor = DIV_ROUND_UP(OMAP_MMC_MASTER_CLOCK, ios->clock);
-+		if (dsor > 250)
-+			dsor = 250;
-+	}
-+
-+	return dsor;
-+}
-+
- #ifdef CONFIG_PM
+ #define MMC_TIMEOUT_MS		20
+ #define OMAP_MMC_MASTER_CLOCK	96000000
++#define OMAP_MMC_MIN_CLOCK	400000
++#define OMAP_MMC_MAX_CLOCK	52000000
+ #define DRIVER_NAME		"omap_hsmmc"
  
- /*
-@@ -608,7 +622,6 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
- 	struct omap_mmc_platform_data *pdata = host->pdata;
- 	int context_loss = 0;
- 	u32 hctl, capa, con;
--	u16 dsor = 0;
- 	unsigned long timeout;
+ #define DMA_TYPE_NODMA	0
+@@ -2176,8 +2178,8 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (mmc_slot(host).vcc_aux_disable_is_sleep)
+ 		mmc_slot(host).no_off = 1;
  
- 	if (pdata->get_context_loss_count) {
-@@ -687,21 +700,10 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
- 		break;
- 	}
+-	mmc->f_min	= 400000;
+-	mmc->f_max	= 52000000;
++	mmc->f_min	= OMAP_MMC_MIN_CLOCK;
++	mmc->f_max	= OMAP_MMC_MAX_CLOCK;
  
--	if (ios->clock) {
--		dsor = OMAP_MMC_MASTER_CLOCK / ios->clock;
--		if (dsor < 1)
--			dsor = 1;
--
--		if (OMAP_MMC_MASTER_CLOCK / dsor > ios->clock)
--			dsor++;
--
--		if (dsor > 250)
--			dsor = 250;
--	}
--
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) & ~CEN);
--	OMAP_HSMMC_WRITE(host->base, SYSCTL, (dsor << 6) | (DTO << 16));
-+	OMAP_HSMMC_WRITE(host->base, SYSCTL,
-+		(calc_divisor(ios) << 6) | (DTO << 16));
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
+ 	spin_lock_init(&host->irq_lock);
  
-@@ -1612,7 +1614,6 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
- static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
--	u16 dsor = 0;
- 	unsigned long regval;
- 	unsigned long timeout;
- 	u32 con;
-@@ -1676,21 +1677,11 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		}
- 	}
- 
--	if (ios->clock) {
--		dsor = OMAP_MMC_MASTER_CLOCK / ios->clock;
--		if (dsor < 1)
--			dsor = 1;
--
--		if (OMAP_MMC_MASTER_CLOCK / dsor > ios->clock)
--			dsor++;
--
--		if (dsor > 250)
--			dsor = 250;
--	}
- 	omap_hsmmc_stop_clock(host);
-+
- 	regval = OMAP_HSMMC_READ(host->base, SYSCTL);
- 	regval = regval & ~(CLKD_MASK);
--	regval = regval | (dsor << 6) | (DTO << 16);
-+	regval = regval | (calc_divisor(ios) << 6) | (DTO << 16);
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL, regval);
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
 -- 
 1.7.0.4
 
