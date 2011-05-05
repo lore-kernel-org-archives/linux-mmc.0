@@ -1,100 +1,90 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH 22/22] mmc: omap_hsmmc: add a hardware reset before initialization
-Date: Thu,  5 May 2011 14:51:22 +0300
-Message-ID: <1304596282-4095-23-git-send-email-adrian.hunter@nokia.com>
+From: Grazvydas Ignotas <notasas@gmail.com>
+Subject: Re: [PATCH 13/22] mmc: omap_hsmmc: fix few bugs when set the clock divisor
+Date: Thu, 5 May 2011 15:53:45 +0300
+Message-ID: <BANLkTikwqcgcy2dnD=2_DGUQM=0a1JtfoA@mail.gmail.com>
 References: <1304596282-4095-1-git-send-email-adrian.hunter@nokia.com>
+	<1304596282-4095-14-git-send-email-adrian.hunter@nokia.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([147.243.128.24]:63436 "EHLO mgw-da01.nokia.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753170Ab1EELwx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 May 2011 07:52:53 -0400
-In-Reply-To: <1304596282-4095-1-git-send-email-adrian.hunter@nokia.com>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:43438 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753483Ab1EEMxq convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2011 08:53:46 -0400
+In-Reply-To: <1304596282-4095-14-git-send-email-adrian.hunter@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Adrian Hunter <adrian.hunter@nokia.com>
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Tony Lindgren <tony@atomide.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
-After a warm restart, an eMMC which cannot be powered off is
-in an unknown state, so reset it to be sure it will initialize.
+On Thu, May 5, 2011 at 2:51 PM, Adrian Hunter <adrian.hunter@nokia.com>=
+ wrote:
+> From: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+>
+> There are two pieces of code which similar, but not the same. Each of=
+ them
+> contains a bug.
+>
+> The SYSCTL register should be read before write in the
+> omap_hsmmc_context_restore() to remain the state of the reserved bits=
+=2E
+>
+> Before set the clock divisor and DTO bits the value from the SYSCTL r=
+egister
+> should be masked properly. We were lucky to have no problems with DTO=
+ bits. So,
+> make sure we have clear DTO bits properly in the omap_hsmmc_set_ios()=
+=2E
+>
+> Additionally get rid of msleep(1). The actual time rare higher than 3=
+0us on
+> OMAP 3630.
+>
+> The result pieces of code are split to omap_hsmmc_set_clock() functio=
+n.
+>
+> Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+> ---
+> =A0drivers/mmc/host/omap_hsmmc.c | =A0 59 +++++++++++++++++++--------=
+-------------
+> =A01 files changed, 28 insertions(+), 31 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
+mmc.c
+> index ae6d204..3c76911 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -619,6 +619,32 @@ static u16 calc_divisor(struct mmc_ios *ios)
+> =A0 =A0 =A0 =A0return dsor;
+> =A0}
+>
+> +static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
+> +{
+> + =A0 =A0 =A0 struct mmc_ios *ios =3D &host->mmc->ios;
+> + =A0 =A0 =A0 unsigned long regval;
+> + =A0 =A0 =A0 unsigned long timeout;
+> +
+> + =A0 =A0 =A0 dev_dbg(mmc_dev(host->mmc), "Set clock to %uHz\n", ios-=
+>clock);
+> +
+> + =A0 =A0 =A0 omap_hsmmc_stop_clock(host);
+> +
+> + =A0 =A0 =A0 regval =3D OMAP_HSMMC_READ(host->base, SYSCTL);
+> + =A0 =A0 =A0 regval =3D regval & ~(CLKD_MASK | DTO_MASK);
+> + =A0 =A0 =A0 regval =3D regval | (calc_divisor(ios) << 6) | (DTO << =
+16);
+> + =A0 =A0 =A0 OMAP_HSMMC_WRITE(host->base, SYSCTL, regval);
+> + =A0 =A0 =A0 OMAP_HSMMC_WRITE(host->base, SYSCTL,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP_HSMMC_READ(host->base, SYSCTL) | I=
+CE);
+> +
+> + =A0 =A0 =A0 /* Wait till the ICS bit is set */
+> + =A0 =A0 =A0 timeout =3D jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+> + =A0 =A0 =A0 while ((OMAP_HSMMC_READ(host->base, SYSCTL) & ICS) !=3D=
+ ICS
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 && time_before(jiffies, timeout))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ;
 
-Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
----
- drivers/mmc/host/omap_hsmmc.c |   38 +++++++++++++++++++++++++++++++++++++-
- 1 files changed, 37 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 8c5e7d3..c791230 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -542,10 +542,25 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
- 	} else
- 		pdata->slots[0].gpio_wp = -EINVAL;
- 
-+	if (gpio_is_valid(pdata->slots[0].gpio_hw_reset)) {
-+		ret = gpio_request(pdata->slots[0].gpio_hw_reset,
-+				   "mmc_hw_reset");
-+		if (ret)
-+			goto err_free_wp;
-+		ret = gpio_direction_output(pdata->slots[0].gpio_hw_reset, 1);
-+		if (ret)
-+			goto err_free_hw_reset;
-+	} else
-+		pdata->slots[0].gpio_hw_reset = -EINVAL;
-+
- 	return 0;
- 
-+
-+err_free_hw_reset:
-+	gpio_free(pdata->slots[0].gpio_hw_reset);
- err_free_wp:
--	gpio_free(pdata->slots[0].gpio_wp);
-+	if (gpio_is_valid(pdata->slots[0].gpio_wp))
-+		gpio_free(pdata->slots[0].gpio_wp);
- err_free_cd:
- 	if (gpio_is_valid(pdata->slots[0].switch_pin))
- err_free_sp:
-@@ -555,6 +570,8 @@ err_free_sp:
- 
- static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
- {
-+	if (gpio_is_valid(pdata->slots[0].gpio_hw_reset))
-+		gpio_free(pdata->slots[0].gpio_hw_reset);
- 	if (gpio_is_valid(pdata->slots[0].gpio_wp))
- 		gpio_free(pdata->slots[0].gpio_wp);
- 	if (gpio_is_valid(pdata->slots[0].switch_pin))
-@@ -815,6 +832,18 @@ static void omap_hsmmc_context_save(struct omap_hsmmc_host *host)
- 
- #endif
- 
-+static void omap_hsmmc_do_hw_reset(struct omap_hsmmc_host *host)
-+{
-+	if (!gpio_is_valid(mmc_slot(host).gpio_hw_reset))
-+		return;
-+
-+	gpio_set_value_cansleep(mmc_slot(host).gpio_hw_reset, 0);
-+	udelay(9);
-+	gpio_set_value_cansleep(mmc_slot(host).gpio_hw_reset, 1);
-+	usleep_range(1000, 2000);
-+	printk(KERN_INFO "%s: hardware reset done\n", mmc_hostname(host->mmc));
-+}
-+
- /*
-  * Send init stream sequence to card
-  * before sending IDLE command
-@@ -827,6 +856,13 @@ static void send_init_stream(struct omap_hsmmc_host *host)
- 	if (host->protect_card)
- 		return;
- 
-+	/*
-+	 * After a warm restart, an eMMC which cannot be powered off is in an
-+	 * unknown state so reset it to be sure it will initialize.
-+	 */
-+	if (mmc_slot(host).no_off)
-+		omap_hsmmc_do_hw_reset(host);
-+
- 	disable_irq(host->irq);
- 
- 	OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
--- 
-1.7.0.4
-
+Since you are busywaiting now, cpu_relax() is advisable I guess.
