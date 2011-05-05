@@ -1,109 +1,189 @@
-From: Per Forlin <per.lkml@gmail.com>
-Subject: Re: [PATCH v2 1/4]enable background operations for supported eMMC card
-Date: Thu, 5 May 2011 09:50:00 +0200
-Message-ID: <BANLkTim9ZhUbmBX02YEmLYL+1PS-0d4wOw@mail.gmail.com>
-References: <20101203121338.GB18655@intel.com>
-	<BANLkTimiDjrRy_3seDLBYah8MnJMWxNZ-w@mail.gmail.com>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH v4 00/15] add support for host controller v3.00
+Date: Thu, 5 May 2011 03:18:37 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B300EBABB6E5@SAUSEXMBP01.amd.com>
+References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:43446 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751512Ab1EEHuB convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2011 03:50:01 -0400
-In-Reply-To: <BANLkTimiDjrRy_3seDLBYah8MnJMWxNZ-w@mail.gmail.com>
+Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:55893 "EHLO
+	TX2EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752215Ab1EEISq convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2011 04:18:46 -0400
+In-Reply-To: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, cjb@laptop.org, akpm@linux-foundation.org, arjan@linux.intel.com, alan@linux.intel.com, kmpark@infradead.org
+To: "cjb@laptop.org" <cjb@laptop.org>
+Cc: "prakity@marvell.com" <prakity@marvell.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
-On Mon, May 2, 2011 at 9:53 PM, Per Forlin <per.lkml@gmail.com> wrote:
-> On Fri, Dec 3, 2010 at 1:13 PM, Chuanxiao Dong <chuanxiao.dong@intel.=
-com> wrote:
->> From 984adc755cf2f7966a89e510a50f085e314fe347 Mon Sep 17 00:00:00 20=
-01
->> From: Chuanxiao Dong <chuanxiao.dong@intel.com>
->> Date: Mon, 22 Nov 2010 16:31:12 +0800
->> Subject: [PATCH 1/4] mmc: Enabled background operations feature if e=
-MMC card supports
->>
->> Background operations is a new feature defined in eMMC4.41 standard.
->> Since this feature is opertional for eMMC card, so driver only enabl=
-e
->> for those eMMC card which supports this feature
->>
->> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
->> ---
->> =A0drivers/mmc/core/mmc.c =A0 | =A0 26 ++++++++++++++++++++++++++
->> =A0include/linux/mmc/card.h | =A0 =A02 ++
->> =A0include/linux/mmc/mmc.h =A0| =A0 =A03 +++
->> =A03 files changed, 31 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 77f93c3..471ed82 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -310,6 +310,14 @@ static int mmc_read_ext_csd(struct mmc_card *ca=
-rd)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_SEC_F=
-EATURE_SUPPORT];
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->ext_csd.trim_timeout =3D 300 *
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_TRIM_=
-MULT];
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* detect whether the eMMC card suppor=
-t BKOPS */
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0=
-x1) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.bkops =3D=
- 1;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.bkops_en=
- =3D
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ext_cs=
-d[EXT_CSD_BKOPS_EN];
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> +
->> =A0 =A0 =A0 =A0}
->>
->> =A0 =A0 =A0 =A0if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
->> @@ -484,6 +492,24 @@ static int mmc_init_card(struct mmc_host *host,=
- u32 ocr,
->> =A0 =A0 =A0 =A0}
->>
->> =A0 =A0 =A0 =A0/*
->> + =A0 =A0 =A0 =A0* enable BKOPS if eMMC card supports.
->> + =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 if (card->ext_csd.bkops) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!card->ext_csd.bkops_en) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(car=
-d, EXT_CSD_CMD_SET_NORMAL,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 EXT_CSD_BKOPS_EN, 1);
-> Is it always wise to set BKOPS_EN to 1 if bkops is supported?
-> BKOPS_EN=3D1 will enable periodic background operations. The card wil=
-l
-> somehow decide periodically when to start background operations. If
-> BKOPS_EN=3D0 the background operations need to be started manually. T=
-he
-> mmc framework could make the decision when to start background
-> operations.
-BKOP_EN=3D0 means act like a pre v4.41 device.  No maintenance required=
-=2E
-Thanks Bruce for pointing this out to me.
+Hi All,
 
-> Using dynamic clock control or suspend/resume may cause the periodic
-> internal operations to be delayed since it can't run without clocking
-> or power.
-> Do you have any test results comparing periodic and manual bkops?
-> On way forward is to add support for both periodic bkops and manual
-> bkops and let the device platform_data specify what to use?
-Please discard this comment.
+The patches already have one Tested-by and Reviewed-by from Philip. Would someone else also like to give their approval?
 
-My concern is when to fire BKOPS_START.
-Would it make sense to check the BKOPS_STATUS before going to sleep
-and start bkops even if level is only "non critical"? This would defer
-sleep until bkops are completed.
+Thanks,
+Arindam
 
-Regards,
-Per
+> -----Original Message-----
+> From: Arindam Nath [mailto:anath.amd@gmail.com] On Behalf Of Arindam
+> Nath
+> Sent: Thursday, May 05, 2011 12:19 PM
+> To: cjb@laptop.org
+> Cc: prakity@marvell.com; zhangfei.gao@gmail.com;
+> subhashj@codeaurora.org; linux-mmc@vger.kernel.org; Su, Henry; Lu,
+> Aaron; anath.amd@gmail.com; Nath, Arindam
+> Subject: [PATCH v4 00/15] add support for host controller v3.00
+> 
+> V4
+> ----
+> [01/15]: Move the definition of mmc_set_signal_voltage() from
+>          sd_ops.c to core.c so that SDIO and MMC can also make
+>          use of it.
+> [01/15]: Move mmc_set_signal_voltage(..., MMC_SIGNAL_VOLTAGE_330)
+>          before mmc_send_app_op_cond().
+> [01/15]: Set 3.3V signaling voltage if ios->signal_voltage is set
+>          to MMC_SIGNAL_VOLTAGE_330.
+> [01/15]: Provided #defines for SD OCR register bits S18R (bit 24),
+>          XPC (bit 28), and CCS (bit 30).
+> [08/15]: Enable _only_ Buffer Read Ready interrupt and disable all
+>          other interrupts at the begining of sdhci_execute_tuning(),
+>          and do the reverse before exiting the function.
+> [08/15]: Set the block size to 64 before tuning.
+> [08/15]: Make sure Multi Block Select and DMA Enable in the Transfer
+>          Mode register are set to 0 before tuning.
+> [09/15]: Enable preset value registers _only_ after a successfull
+>          UHS-I initialization.
+> 
+> 
+> [12/15]: sdhci pxa add platform specific code for UHS signaling
+> [13/15]: mmc eMMC signal voltage does not use CMD11
+> [14/15]: sdhci add hooks for UHS setting by platform specific code
+> [15/15]: mmc add support for eMMC Dual Data Rate
+> 
+> V3
+> ----
+> [01/11]: Set bit 24 and bit 28 of OCR within mmc_sd_get_cid(),
+>          and only retry sending ACMD41 with bit 24 reset in case
+>          signal voltage switch procedure fails.
+> [01/11]: Change (*rocr & 0x41000000) to ((*rocr & 0x41000000) ==
+>          0x41000000) to check for both CCS and S18A to be set in
+>          the response of ACMD41.
+> [01/11]: Change the condition if (err == -EAGAIN) to if (err), in
+>          order to retry sending ACMD41 because of any error during
+>          signal voltage switch procedure.
+> [01/11]: Add a new variable signal_voltage to struct mmc_ios,
+>          which holds whether the request is to change to 1.8V or
+>          3.3V signalling voltage.
+> [02/11]: Remove redundant code to find bus speed modes for SD2.0
+>          and SD3.0 cards separately.
+> [02/11]: Change the variable names from uhs_* to sd3_* to make
+>          them appropriate to the context of their usage.
+> [03/11]: Change variable names from *_set_drv_type to *_drv_type.
+> [03/11]: Set driver type even when the default driver type B is
+>          used.
+> [03/11]: Clear bits 05-04 of Host Control 2 register before
+>          setting the new driver strength.
+> [04/11]: Use sdhci_set_clock() to make sure the clock is stable
+>          before re-enabling SD clock.
+> [05/11]: Initialize bus_speed and timing to 0 at the beginning of
+>          sd_set_bus_speed_mode() to avoid compiler warning.
+> [06/11]: Initialize current_limit to 0 to avoid compiler warning.
+> [06/11]: Remove usage of get_max_current_180() and replace this
+>          with MMC_CAP_MAX_CURRENT_*.
+> [06/11]: Set the current limit even for the default current limit
+>          of 200mA.
+> [06/11]: Set the current limit only for SDR50, SDR104, and DDR50
+>          UHS-I modes, otherwise set the default current limit.
+> [07/11]: Change mmc_*_ultrahighspeed() to mmc_sd_*_uhs().
+> [08/11]: Re-read Host Control 2 register before clearing
+>          *_TUNED_CLK and *_EXEC_TUNING.
+> [08/11]: Make sdhci_execute_tuning() return 'int' rather than
+>          'void' so that we can check for error conditions during
+>          tuning failure.
+> [08/11]: Make sure to return 0 for controllers which provide
+>          support for retuning even if tuning fails. For other
+>          controllers, return error code.
+> [09/11]: Disable using Preset Value when a new card is inserted,
+>          and enable its use only after a successfull UHS-I
+>          initializaton.
+> [11/11]: Remove sdhci_start_retuning_timer() completely, and start
+>          the re-tuning timer from within sdhci_execute_tuning()
+>          the very first time it is executed.
+> 
+> V2
+> ----
+> [01/12]: Make saved_abort_cmd part of struct sdhci_host rather
+>          than global variable.
+> [01/12]: Clear SDHCI_USE_SDMA _iff_ SDHCI_USE_ADMA is set.
+> [01/12]: Set either Auto CMD23 or Auto CMD12, but not both, in
+>          the Transfer Mode register.
+> [02/12]: Check host controller version before reading
+>          SDHCI_CAPABILITIES_1.
+> [02/12]: Remove spinlock from sdhci_start_signal_voltage_switch
+>          and use usleep_range() rather than mdelay().
+> [02/12]: Set S18R in OCR to 1 for all UHS-I modes.
+> [02/12]: NULL pointer check for start_signal_voltage_switch().
+> [02/12]: Set MMC_CAP_UHS_SDR50 if MMC_CAP_UHS_SDR104 is set.
+> [06/12]: Add checking for SDR25 in sd_set_bus_speed_mode().
+> [09/12]: Remove checking for MMC_SEND_TUNING_BLOCK within
+>          sdhci_set_transfer_mode(), since cmd.data is set to
+>          NULL inside sdhci_execute_tuning().
+> [11/12]: Correctly set clk to SDHCI_PROG_CLOCK_MODE when host
+>          controller supports Programmable Clock Mode.
+> 
+> V1
+> ----
+> The patches below add support for Host Controller v3.00 as per the
+> spec v3.00. It also adds support for UHS-I cards as per Physical
+> Layer Specification v3.01.
+> 
+> Thanks for review.
+> 
+> Regards,
+> Arindam
+> 
+> Arindam Nath (11):
+>   [PATCH 01/15] mmc: sd: add support for signal voltage switch
+> procedure
+>   [PATCH 02/15] mmc: sd: query function modes for uhs cards
+>   [PATCH 03/15] mmc: sd: add support for driver type selection
+>   [PATCH 04/15] mmc: sdhci: reset sdclk before setting high speed
+> enable
+>   [PATCH 05/15] mmc: sd: add support for uhs bus speed mode selection
+>   [PATCH 06/15] mmc: sd: set current limit for uhs cards
+>   [PATCH 07/15] mmc: sd: report correct speed and capacity of uhs cards
+>   [PATCH 08/15] mmc: sd: add support for tuning during uhs
+> initialization
+>   [PATCH 09/15] mmc: sdhci: enable preset value after uhs
+> initialization
+>   [PATCH 10/15] mmc: sdhci: add support for programmable clock mode
+>   [PATCH 11/15] mmc: sdhci: add support for retuning mode 1
+> 
+> Philip Rakity (4):
+>   [PATCH 12/15] sdhci pxa add platform specific code for UHS signaling
+>   [PATCH 13/15] mmc eMMC signal voltage does not use CMD11
+>   [PATCH 14/15] sdhci add hooks for UHS setting by platform specific
+> code
+>   [PATCH 15/15] mmc add support for eMMC Dual Data Rate
+> 
+>  drivers/mmc/core/bus.c       |   11 +-
+>  drivers/mmc/core/core.c      |   57 +++-
+>  drivers/mmc/core/core.h      |    5 +-
+>  drivers/mmc/core/mmc.c       |   35 ++-
+>  drivers/mmc/core/sd.c        |  405 ++++++++++++++++++++++--
+>  drivers/mmc/core/sd.h        |    3 +-
+>  drivers/mmc/core/sdio.c      |    3 +-
+>  drivers/mmc/host/sdhci-pxa.c |   36 +++
+>  drivers/mmc/host/sdhci.c     |  707
+> +++++++++++++++++++++++++++++++++++++++---
+>  drivers/mmc/host/sdhci.h     |   47 +++-
+>  include/linux/mmc/card.h     |   43 +++
+>  include/linux/mmc/host.h     |   37 +++
+>  include/linux/mmc/mmc.h      |    1 +
+>  include/linux/mmc/sd.h       |    7 +
+>  include/linux/mmc/sdhci.h    |   11 +
+>  15 files changed, 1307 insertions(+), 101 deletions(-)
+> 
+
+
