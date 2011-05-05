@@ -1,274 +1,86 @@
 From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH v4 11/15] mmc: sdhci: add support for retuning mode 1
-Date: Thu,  5 May 2011 12:19:07 +0530
-Message-ID: <1304578151-1775-12-git-send-email-arindam.nath@amd.com>
+Subject: [PATCH v4 12/15] sdhci pxa add platform specific code for UHS signaling
+Date: Thu,  5 May 2011 12:19:08 +0530
+Message-ID: <1304578151-1775-13-git-send-email-arindam.nath@amd.com>
 References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pv0-f174.google.com ([74.125.83.174]:53880 "EHLO
-	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751964Ab1EEGws (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2011 02:52:48 -0400
-Received: by mail-pv0-f174.google.com with SMTP id 12so837420pvg.19
-        for <linux-mmc@vger.kernel.org>; Wed, 04 May 2011 23:52:48 -0700 (PDT)
+Received: from mail-px0-f173.google.com ([209.85.212.173]:62422 "EHLO
+	mail-px0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751384Ab1EEGxC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2011 02:53:02 -0400
+Received: by pxi16 with SMTP id 16so1439619pxi.4
+        for <linux-mmc@vger.kernel.org>; Wed, 04 May 2011 23:53:02 -0700 (PDT)
 In-Reply-To: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org
 Cc: prakity@marvell.com, zhangfei.gao@gmail.com, subhashj@codeaurora.org, linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com, Arindam Nath <arindam.nath@amd.com>
 
-Host Controller v3.00 can support retuning modes 1,2 or 3 depending on
-the bits 46-47 of the Capabilities register. Also, the timer count for
-retuning is indicated by bits 40-43 of the same register. We initialize
-timer_list for retuning the first time we execute tuning procedure. This
-condition is indicated by SDHCI_NEEDS_RETUNING not being set. Since
-retuning mode 1 sets a limit of 4MB on the maximum data length, we set
-max_blk_count appropriately. Once the tuning timer expires, we set
-SDHCI_NEEDS_RETUNING flag, and if the flag is set, we execute tuning
-procedure before sending the next command. We need to restore mmc_request
-structure after executing retuning procedure since host->mrq is used
-inside the procedure to send CMD19. We also disable and re-enable this
-flag during suspend and resume respectively, as per the spec v3.00.
+Marvell controller requires 1.8V bit in UHS control register 2
+be set when doing UHS.  eMMC does not require 1.8V for DDR.
+add platform code to handle this.
 
-Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-Reviewed-by: Philip Rakity <prakity@marvell.com>
-Tested-by: Philip Rakity <prakity@marvell.com>
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+Reviewed-by: Arindam Nath <arindam.nath@amd.com>
 ---
- drivers/mmc/host/sdhci.c  |  113 ++++++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci.h  |    6 ++-
- include/linux/mmc/sdhci.h |    6 ++
- 3 files changed, 122 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-pxa.c |   36 ++++++++++++++++++++++++++++++++++++
+ 1 files changed, 36 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 8ed2e1b..3c04547 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -46,6 +46,8 @@ static void sdhci_finish_data(struct sdhci_host *);
- 
- static void sdhci_send_command(struct sdhci_host *, struct mmc_command *);
- static void sdhci_finish_command(struct sdhci_host *);
-+static int sdhci_execute_tuning(struct mmc_host *mmc);
-+static void sdhci_tuning_timer(unsigned long data);
- 
- static void sdhci_dumpregs(struct sdhci_host *host)
- {
-@@ -1206,8 +1208,28 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
- 		host->mrq->cmd->error = -ENOMEDIUM;
- 		tasklet_schedule(&host->finish_tasklet);
--	} else
-+	} else {
-+		u32 present_state;
-+
-+		present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
-+		/*
-+		 * Check if the re-tuning timer has already expired and there
-+		 * is no on-going data transfer. If so, we need to execute
-+		 * tuning procedure before sending command.
-+		 */
-+		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
-+		    !(present_state & (SDHCI_DOING_WRITE |
-+		     SDHCI_DOING_READ))) {
-+			spin_unlock_irqrestore(&host->lock, flags);
-+			sdhci_execute_tuning(mmc);
-+			spin_lock_irqsave(&host->lock, flags);
-+
-+			/* Restore original mmc_request structure */
-+			host->mrq = mrq;
-+		}
-+
- 		sdhci_send_command(host, mrq->cmd);
-+	}
- 
- 	mmiowb();
- 	spin_unlock_irqrestore(&host->lock, flags);
-@@ -1679,6 +1701,37 @@ static int sdhci_execute_tuning(struct mmc_host *mmc)
+diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
+index 5a61208..b52c3e6 100644
+--- a/drivers/mmc/host/sdhci-pxa.c
++++ b/drivers/mmc/host/sdhci-pxa.c
+@@ -69,7 +69,40 @@ static void set_clock(struct sdhci_host *host, unsigned int clock)
  	}
- 
- out:
-+	/*
-+	 * If this is the very first time we are here, we start the retuning
-+	 * timer. Since only during the first time, SDHCI_NEEDS_RETUNING
-+	 * flag won't be set, we check this condition before actually starting
-+	 * the timer.
-+	 */
-+	if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuning_count &&
-+	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
-+		mod_timer(&host->tuning_timer, jiffies + host->tuning_count *
-+			HZ);
-+		/* Tuning mode 1 limits the maximum data length to 4MB */
-+		mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
-+	} else {
-+		host->flags &= ~SDHCI_NEEDS_RETUNING;
-+		/* Reload the new initial value for timer */
-+		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
-+			mod_timer(&host->tuning_timer, jiffies +
-+				host->tuning_count * HZ);
-+	}
-+
-+	/*
-+	 * In case tuning fails, host controllers which support re-tuning can
-+	 * try tuning again at a later time, when the re-tuning timer expires.
-+	 * So for these controllers, we return 0. Since there might be other
-+	 * controllers who do not have this capability, we return error for
-+	 * them.
-+	 */
-+	if (err && host->tuning_count &&
-+	    (host->tuning_mode == SDHCI_TUNING_MODE_1))
-+		err = 0;
-+
- 	sdhci_clear_set_irqs(host, SDHCI_INT_DATA_AVAIL, ier);
- 	spin_unlock(&host->lock);
- 	enable_irq(host->irq);
-@@ -1781,6 +1834,10 @@ static void sdhci_tasklet_finish(unsigned long param)
- 
- 	del_timer(&host->timer);
- 
-+	if (host->version >= SDHCI_SPEC_300)
-+		del_timer(&host->tuning_timer);
-+
-+
- 	mrq = host->mrq;
- 
- 	/*
-@@ -1854,6 +1911,20 @@ static void sdhci_timeout_timer(unsigned long data)
- 	spin_unlock_irqrestore(&host->lock, flags);
  }
  
-+static void sdhci_tuning_timer(unsigned long data)
++static int set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
 +{
-+	struct sdhci_host *host;
-+	unsigned long flags;
++	u16 ctrl_2;
 +
-+	host = (struct sdhci_host *)data;
++	/*
++	 * Set V18_EN -- UHS modes do not work without this.
++	 * does not change signaling voltage
++	 */
++	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
 +
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	host->flags |= SDHCI_NEEDS_RETUNING;
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
++		/* Select Bus Speed Mode for host */
++	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
++	if (uhs == MMC_TIMING_UHS_SDR12)
++		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
++	else if (uhs == MMC_TIMING_UHS_SDR25)
++		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
++	else if (uhs == MMC_TIMING_UHS_SDR50) {
++		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
++		ctrl_2 |= SDHCI_CTRL_VDD_180;
++	} else if (uhs == MMC_TIMING_UHS_SDR104) {
++		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
++		ctrl_2 |= SDHCI_CTRL_VDD_180;
++	} else if (uhs == MMC_TIMING_UHS_DDR50) {
++		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
++		ctrl_2 |= SDHCI_CTRL_VDD_180;
++	}
++	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
++	pr_debug("%s:%s uhs = %d, ctrl_2 = %04X\n",
++		__func__, mmc_hostname(host->mmc), uhs, ctrl_2);
++	return 0;
 +}
 +
- /*****************************************************************************\
-  *                                                                           *
-  * Interrupt handling                                                        *
-@@ -2128,6 +2199,15 @@ int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state)
- 
- 	sdhci_disable_card_detection(host);
- 
-+	/* Disable tuning since we are suspending */
-+	if ((host->version >= SDHCI_SPEC_300) &&
-+	    host->tuning_count &&
-+	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
-+		host->flags &= ~SDHCI_NEEDS_RETUNING;
-+		mod_timer(&host->tuning_timer, jiffies +
-+			host->tuning_count * HZ);
-+	}
-+
- 	ret = mmc_suspend_host(host->mmc);
- 	if (ret)
- 		return ret;
-@@ -2169,6 +2249,12 @@ int sdhci_resume_host(struct sdhci_host *host)
- 	ret = mmc_resume_host(host->mmc);
- 	sdhci_enable_card_detection(host);
- 
-+	/* Set the re-tuning expiration flag */
-+	if ((host->version >= SDHCI_SPEC_300) &&
-+	    host->tuning_count &&
-+	    (host->tuning_mode == SDHCI_TUNING_MODE_1))
-+		host->flags |= SDHCI_NEEDS_RETUNING;
-+
- 	return ret;
- }
- 
-@@ -2420,6 +2506,21 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (caps[1] & SDHCI_DRIVER_TYPE_D)
- 		mmc->caps |= MMC_CAP_DRIVER_TYPE_D;
- 
-+	/* Initial value for re-tuning timer count */
-+	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
-+			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
-+
-+	/*
-+	 * In case Re-tuning Timer is not disabled, the actual value of
-+	 * re-tuning timer will be 2 ^ (n - 1).
-+	 */
-+	if (host->tuning_count)
-+		host->tuning_count = 1 << (host->tuning_count - 1);
-+
-+	/* Re-tuning mode supported by the Host Controller */
-+	host->tuning_mode = (caps[1] & SDHCI_RETUNING_MODE_MASK) >>
-+			     SDHCI_RETUNING_MODE_SHIFT;
-+
- 	ocr_avail = 0;
- 	/*
- 	 * According to SD Host Controller spec v3.00, if the Host System
-@@ -2565,9 +2666,15 @@ int sdhci_add_host(struct sdhci_host *host)
- 
- 	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned long)host);
- 
--	if (host->version >= SDHCI_SPEC_300)
-+	if (host->version >= SDHCI_SPEC_300) {
- 		init_waitqueue_head(&host->buf_ready_int);
- 
-+		/* Initialize re-tuning timer */
-+		init_timer(&host->tuning_timer);
-+		host->tuning_timer.data = (unsigned long)host;
-+		host->tuning_timer.function = sdhci_tuning_timer;
-+	}
-+
- 	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
- 		mmc_hostname(mmc), host);
- 	if (ret)
-@@ -2661,6 +2768,8 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 	free_irq(host->irq, host);
- 
- 	del_timer_sync(&host->timer);
-+	if (host->version >= SDHCI_SPEC_300)
-+		del_timer_sync(&host->tuning_timer);
- 
- 	tasklet_kill(&host->card_tasklet);
- 	tasklet_kill(&host->finish_tasklet);
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 0208164..fb74dc6 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -191,7 +191,11 @@
- #define  SDHCI_DRIVER_TYPE_A	0x00000010
- #define  SDHCI_DRIVER_TYPE_C	0x00000020
- #define  SDHCI_DRIVER_TYPE_D	0x00000040
--#define  SDHCI_USE_SDR50_TUNING	0x00002000
-+#define  SDHCI_RETUNING_TIMER_COUNT_MASK	0x00000F00
-+#define  SDHCI_RETUNING_TIMER_COUNT_SHIFT	8
-+#define  SDHCI_USE_SDR50_TUNING			0x00002000
-+#define  SDHCI_RETUNING_MODE_MASK		0x0000C000
-+#define  SDHCI_RETUNING_MODE_SHIFT		14
- #define  SDHCI_CLOCK_MUL_MASK	0x00FF0000
- #define  SDHCI_CLOCK_MUL_SHIFT	16
- 
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index a88a799..e902618 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -112,6 +112,7 @@ struct sdhci_host {
- #define SDHCI_REQ_USE_DMA	(1<<2)	/* Use DMA for this req. */
- #define SDHCI_DEVICE_DEAD	(1<<3)	/* Device unresponsive */
- #define SDHCI_SDR50_NEEDS_TUNING (1<<4)	/* SDR50 needs tuning */
-+#define SDHCI_NEEDS_RETUNING	(1<<5)	/* Host needs retuning */
- 
- 	unsigned int version;	/* SDHCI spec. version */
- 
-@@ -152,6 +153,11 @@ struct sdhci_host {
- 	wait_queue_head_t	buf_ready_int;	/* Waitqueue for Buffer Read Ready interrupt */
- 	unsigned int		tuning_done;	/* Condition flag set when CMD19 succeeds */
- 
-+	unsigned int		tuning_count;	/* Timer count for re-tuning */
-+	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
-+#define SDHCI_TUNING_MODE_1	0
-+	struct timer_list	tuning_timer;	/* Timer for tuning */
-+
- 	unsigned long private[0] ____cacheline_aligned;
+ static struct sdhci_ops sdhci_pxa_ops = {
++	.set_uhs_signaling = set_uhs_signaling,
+ 	.set_clock = set_clock,
  };
- #endif /* __SDHCI_H */
+ 
+@@ -141,6 +174,9 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
+ 	if (pdata->quirks)
+ 		host->quirks |= pdata->quirks;
+ 
++	/* enable 1/8V DDR capable */
++	host->mmc->caps |= MMC_CAP_1_8V_DDR;
++
+ 	/* If slot design supports 8 bit data, indicate this to MMC. */
+ 	if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
+ 		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
 -- 
 1.7.1
 
