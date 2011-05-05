@@ -1,52 +1,30 @@
-From: Matthew Wilcox <matthew@wil.cx>
-Subject: Re: Is it possible for the ext4/btrfs file system to pass some
-	context related info to low level block driver?
-Date: Thu, 5 May 2011 12:10:32 -0600
-Message-ID: <20110505181032.GA21360@parisc-linux.org>
-References: <CE761E84DADF2947A4AF22FB8D97A47358E28022@shsmsx501.ccr.corp.intel.com> <yq1mxj32932.fsf@sermon.lab.mkp.net> <CE761E84DADF2947A4AF22FB8D97A47358EE526A@shsmsx501.ccr.corp.intel.com> <60C31100-5694-4CA9-A778-91CB15915052@dilger.ca>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-ext4-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <60C31100-5694-4CA9-A778-91CB15915052@dilger.ca>
-Sender: linux-ext4-owner@vger.kernel.org
-To: Andreas Dilger <adilger@dilger.ca>
-Cc: "Gao, Yunpeng" <yunpeng.gao@intel.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: [PATCH v3] sdio: optimized SDIO IRQ handling for single irq
+Date: Thu,  5 May 2011 21:14:02 +0200
+Message-ID: <1304622843-5123-1-git-send-email-per.forlin@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:41961 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751798Ab1EETOt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2011 15:14:49 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org
+Cc: Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@linaro.org>
 
-On Wed, May 04, 2011 at 08:51:39AM -0600, Andreas Dilger wrote:
-> I was aware of REQ_META, but I didn't know there was any benefit to
-> using it. I think it would be easy to set REQ_META on all ext4 metadata
-> if there was a reason to do so.
+Optimize performance for single irq
 
-The CFQ ioscheduler pays attention to it (prioritising metadata accesses
-over data accesses), and blocktrace will print an 'M' for metadata
-requests if it's set, so I think that's two excellent reasons to set
-REQ_META today.
+Changes since v2.
+ * Clarify comment in process_sdio_pending_irqs
+ * Simplify sdio_single_irq if-condition
 
-However, ext3, ext4, and XFS already use it:
+Stefan Nilsson XK (1):
+  sdio: optimized SDIO IRQ handling for single irq
 
-fs/ext3/inode.c:1105:   ll_rw_block(READ_META, 1, &bh);
-fs/ext3/inode.c:2754:           submit_bh(READ_META, bh);
-fs/ext3/namei.c:924:                                    ll_rw_block(READ_META, 1, &bh);
-fs/ext4/inode.c:1500:   ll_rw_block(READ_META, 1, &bh);
-fs/ext4/inode.c:4775:           submit_bh(READ_META, bh);
-fs/ext4/namei.c:924:                                    ll_rw_block(READ_META, 1, &bh);
-fs/gfs2/log.c:597:              submit_bh(WRITE_SYNC | REQ_META, bh);
-fs/gfs2/log.c:599:              submit_bh(WRITE_FLUSH_FUA | REQ_META, bh);
-fs/gfs2/meta_io.c:39:   int write_op = REQ_META |
-fs/gfs2/meta_io.c:228:  submit_bh(READ_SYNC | REQ_META, bh);
-fs/gfs2/meta_io.c:435:          ll_rw_block(READ_SYNC | REQ_META, 1, &first_bh);
-fs/gfs2/ops_fstype.c:221:       submit_bio(READ_SYNC | REQ_META, bio);
-fs/gfs2/quota.c:710:            ll_rw_block(READ_META, 1, &bh);
-fs/xfs/linux-2.6/xfs_buf.c:1321:                rw = (bp->b_flags & XBF_WRITE) ? WRITE_META : READ_META;
-include/linux/fs.h:164:#define READ_META                (READ | REQ_META)
-include/linux/fs.h:168:#define WRITE_META               (WRITE | REQ_META)
-
-btrfs seems to not use REQ_META yet.  *poke* *poke* :-)
+ drivers/mmc/core/sdio_irq.c |   33 ++++++++++++++++++++++++++++++++-
+ include/linux/mmc/card.h    |    1 +
+ 2 files changed, 33 insertions(+), 1 deletions(-)
 
 -- 
-Matthew Wilcox				Intel Open Source Technology Centre
-"Bill, look, we understand that you're interested in selling us this
-operating system, but compare it to ours.  We can't possibly take such
-a retrograde step."
+1.7.4.1
+
