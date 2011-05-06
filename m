@@ -1,100 +1,72 @@
-From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH V2 16/16] mmc: omap_hsmmc: add a hardware reset before initialization
-Date: Fri,  6 May 2011 12:14:15 +0300
-Message-ID: <1304673255-31634-17-git-send-email-adrian.hunter@nokia.com>
-References: <1304673255-31634-1-git-send-email-adrian.hunter@nokia.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: fixed wrong SD card detection
+Date: Fri, 06 May 2011 18:38:48 +0900
+Message-ID: <4DC3C1A8.1050104@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([147.243.128.24]:41065 "EHLO mgw-da01.nokia.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753711Ab1EFJSQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 6 May 2011 05:18:16 -0400
-In-Reply-To: <1304673255-31634-1-git-send-email-adrian.hunter@nokia.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:35798 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753766Ab1EFJiq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 May 2011 05:38:46 -0400
+Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LKR001YKPGIIWO0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 06 May 2011 18:38:44 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LKR00AQ3PGK8C@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 06 May 2011 18:38:44 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Adrian Hunter <adrian.hunter@nokia.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-After a warm restart, an eMMC which cannot be powered off is
-in an unknown state, so reset it to be sure it will initialize.
+This patch added mmc_power_off after mmc_attach_sd()
 
-Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+i found that didn't detect the second card insert.(using SDHCI)
+you can see the below log.
+
+i want to know that somebody know this issue...
+
+->first card inserted (correct card detect)
+# mmc1: new SDHC card at address e624
+mmcblk1: mmc1:e624 SU04G 3.69 GiB
+ mmcblk1: p1
+#
+# mmc1: card e624 removed
+-> second card inserted
+mmc1: error -110 whilst initialising SD card
+mmc1: Card removed during transfer!
+mmc1: Resetting controller.
+-> third card inserted 
+mmc1: new SDHC card at address e624
+mmcblk1: mmc1:e624 SU04G 3.69 GiB
+ mmcblk1: p1
+
+I added mmc_power_off() after only mmc_attach_sd().
+
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   38 +++++++++++++++++++++++++++++++++++++-
- 1 files changed, 37 insertions(+), 1 deletions(-)
+ drivers/mmc/core/core.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index e1c9017..70b8ef8 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -530,10 +530,25 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
- 	} else
- 		pdata->slots[0].gpio_wp = -EINVAL;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 1dbc185..d5d8ac0 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1522,8 +1522,10 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ 	/* Order's important: probe SDIO, then SD, then MMC */
+ 	if (!mmc_attach_sdio(host))
+ 		return 0;
+-	if (!mmc_attach_sd(host))
++	if (!mmc_attach_sd(host)) {
++		mmc_power_off(host);
+ 		return 0;
++	}
+ 	if (!mmc_attach_mmc(host))
+ 		return 0;
  
-+	if (gpio_is_valid(pdata->slots[0].gpio_hw_reset)) {
-+		ret = gpio_request(pdata->slots[0].gpio_hw_reset,
-+				   "mmc_hw_reset");
-+		if (ret)
-+			goto err_free_wp;
-+		ret = gpio_direction_output(pdata->slots[0].gpio_hw_reset, 1);
-+		if (ret)
-+			goto err_free_hw_reset;
-+	} else
-+		pdata->slots[0].gpio_hw_reset = -EINVAL;
-+
- 	return 0;
- 
-+
-+err_free_hw_reset:
-+	gpio_free(pdata->slots[0].gpio_hw_reset);
- err_free_wp:
--	gpio_free(pdata->slots[0].gpio_wp);
-+	if (gpio_is_valid(pdata->slots[0].gpio_wp))
-+		gpio_free(pdata->slots[0].gpio_wp);
- err_free_cd:
- 	if (gpio_is_valid(pdata->slots[0].switch_pin))
- err_free_sp:
-@@ -543,6 +558,8 @@ err_free_sp:
- 
- static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
- {
-+	if (gpio_is_valid(pdata->slots[0].gpio_hw_reset))
-+		gpio_free(pdata->slots[0].gpio_hw_reset);
- 	if (gpio_is_valid(pdata->slots[0].gpio_wp))
- 		gpio_free(pdata->slots[0].gpio_wp);
- 	if (gpio_is_valid(pdata->slots[0].switch_pin))
-@@ -803,6 +820,18 @@ static void omap_hsmmc_context_save(struct omap_hsmmc_host *host)
- 
- #endif
- 
-+static void omap_hsmmc_do_hw_reset(struct omap_hsmmc_host *host)
-+{
-+	if (!gpio_is_valid(mmc_slot(host).gpio_hw_reset))
-+		return;
-+
-+	gpio_set_value_cansleep(mmc_slot(host).gpio_hw_reset, 0);
-+	udelay(9);
-+	gpio_set_value_cansleep(mmc_slot(host).gpio_hw_reset, 1);
-+	usleep_range(1000, 2000);
-+	printk(KERN_INFO "%s: hardware reset done\n", mmc_hostname(host->mmc));
-+}
-+
- /*
-  * Send init stream sequence to card
-  * before sending IDLE command
-@@ -815,6 +844,13 @@ static void send_init_stream(struct omap_hsmmc_host *host)
- 	if (host->protect_card)
- 		return;
- 
-+	/*
-+	 * After a warm restart, an eMMC which cannot be powered off is in an
-+	 * unknown state so reset it to be sure it will initialize.
-+	 */
-+	if (mmc_slot(host).no_off)
-+		omap_hsmmc_do_hw_reset(host);
-+
- 	disable_irq(host->irq);
- 
- 	OMAP_HSMMC_WRITE(host->base, IE, INT_EN_MASK);
--- 
-1.7.0.4
-
