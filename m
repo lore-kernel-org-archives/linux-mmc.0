@@ -1,104 +1,40 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH 08/22] mmc: omap_hsmmc: correct debug report error status
-	mnemonics
-Date: Fri, 6 May 2011 14:05:44 +0530
-Message-ID: <BANLkTim963pDi_awSYefAqMwPSi5L3k_mA@mail.gmail.com>
-References: <1304596282-4095-1-git-send-email-adrian.hunter@nokia.com>
-	<1304596282-4095-9-git-send-email-adrian.hunter@nokia.com>
+From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?=
+	<u.kleine-koenig@pengutronix.de>
+Subject: Re: [PATCH v2 7/7] ARM: mxc: remove esdhc.h and use the public one
+Date: Fri, 6 May 2011 10:39:59 +0200
+Message-ID: <20110506083959.GS11574@pengutronix.de>
+References: <1304601778-13837-1-git-send-email-shawn.guo@linaro.org>
+ <1304601778-13837-8-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1304596282-4095-9-git-send-email-adrian.hunter@nokia.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Tony Lindgren <tony@atomide.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:60981 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754537Ab1EFIkH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 May 2011 04:40:07 -0400
+Content-Disposition: inline
+In-Reply-To: <1304601778-13837-8-git-send-email-shawn.guo@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, sameo@linux.intel.com, Arnd Bergmann <arnd@arndb.de>, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, Saeed Bishara <saeed@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>, Grant Likely <grant.likely@secretlab.ca>, Xiaobo Xie <X.Xie@freescale.com>, kernel@pengutronix.de, Mike Rapoport <mike@compulab.co.il>, Olof Johansson <olof@lixom.net>, Anton Vorontsov <avorontsov@ru.mvista.com>, linuxppc-dev@lists.ozlabs.org, Albert Herranz <albert_herranz@yahoo.es>, linux-arm-kernel@lists.infradead.org
 
-On Thu, May 5, 2011 at 5:21 PM, Adrian Hunter <adrian.hunter@nokia.com> wro=
-te:
-> CERR and BADA were in the wrong place and there are only
-> 32 not 35.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+Hello Shawn,
+
+On Thu, May 05, 2011 at 09:22:58PM +0800, Shawn Guo wrote:
+> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
 > ---
-> =A0drivers/mmc/host/omap_hsmmc.c | =A0 19 +++++++++++--------
-> =A01 files changed, 11 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index bd52849..a1a1101 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -982,14 +982,14 @@ static void omap_hsmmc_dma_cleanup(struct omap_hsmm=
-c_host *host, int errno)
-> =A0* Readable error output
-> =A0*/
-> =A0#ifdef CONFIG_MMC_DEBUG
-> -static void omap_hsmmc_report_irq(struct omap_hsmmc_host *host, u32 stat=
-us)
-> +static void omap_hsmmc_dbg_report_irq(struct omap_hsmmc_host *host, u32 =
-status)
-> =A0{
-> =A0 =A0 =A0 =A0/* --- means reserved bit without definition at documentat=
-ion */
-> =A0 =A0 =A0 =A0static const char *omap_hsmmc_status_bits[] =3D {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 "CC", "TC", "BGE", "---", "BWR", "BRR", "--=
--", "---", "CIRQ",
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 "OBI", "---", "---", "---", "---", "---", "=
-ERRI", "CTO", "CCRC",
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 "CEB", "CIE", "DTO", "DCRC", "DEB", "---", =
-"ACE", "---",
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 "---", "---", "---", "CERR", "CERR", "BADA"=
-, "---", "---", "---"
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 "CC" =A0, "TC" =A0, "BGE", "---", "BWR" , "=
-BRR" , "---" , "---" ,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 "CIRQ", "OBI" , "---", "---", "---" , "---"=
- , "---" , "ERRI",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 "CTO" , "CCRC", "CEB", "CIE", "DTO" , "DCRC=
-", "DEB" , "---" ,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 "ACE" , "---" , "---", "---", "CERR", "BADA=
-", "---" , "---"
-> =A0 =A0 =A0 =A0};
-> =A0 =A0 =A0 =A0char res[256];
-> =A0 =A0 =A0 =A0char *buf =3D res;
-> @@ -1006,6 +1006,11 @@ static void omap_hsmmc_report_irq(struct omap_hsmm=
-c_host *host, u32 status)
->
-> =A0 =A0 =A0 =A0dev_dbg(mmc_dev(host->mmc), "%s\n", res);
-> =A0}
-> +#else
-> +static inline void omap_hsmmc_dbg_report_irq(struct omap_hsmmc_host *hos=
-t,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0u32 status)
-> +{
-> +}
-> =A0#endif =A0/* CONFIG_MMC_DEBUG */
->
-> =A0/*
-> @@ -1064,9 +1069,7 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_hos=
-t *host, int status)
-> =A0 =A0 =A0 =A0dev_dbg(mmc_dev(host->mmc), "IRQ Status is %x\n", status);
->
-> =A0 =A0 =A0 =A0if (status & ERR) {
-> -#ifdef CONFIG_MMC_DEBUG
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_hsmmc_report_irq(host, status);
-> -#endif
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_hsmmc_dbg_report_irq(host, status);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if ((status & CMD_TIMEOUT) ||
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(status & CMD_CRC)) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (host->cmd) {
-> --
-> 1.7.0.4
->
-I checked against the TRM and you are right.
-FWIW,
- Reviewed-by: Venkatraman S <svenkatr@ti.com>
+>  .../plat-mxc/devices/platform-sdhci-esdhc-imx.c    |    1 -
+>  arch/arm/plat-mxc/include/mach/devices-common.h    |    2 +-
+what about removing arch/arm/plat-mxc/include/mach/esdhc.h in this
+patch as advertised in the subject?
+
+Best regards
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig        =
+    |
+Industrial Linux Solutions                 | http://www.pengutronix.de/=
+  |
