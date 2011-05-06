@@ -1,20 +1,20 @@
 From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH v4 11/15] mmc: sdhci: add support for retuning mode 1
-Date: Fri, 6 May 2011 06:40:51 -0400
-Message-ID: <BANLkTi=sZZxhDY603Rx_219WZxCU+bJqLg@mail.gmail.com>
+Subject: Re: [PATCH v4 05/15] mmc: sd: add support for uhs bus speed mode selection
+Date: Fri, 6 May 2011 06:41:37 -0400
+Message-ID: <BANLkTinbxfKC_Msrov6Ds1UkRSeasho2sw@mail.gmail.com>
 References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
-	<1304578151-1775-12-git-send-email-arindam.nath@amd.com>
+	<1304578151-1775-6-git-send-email-arindam.nath@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:61120 "EHLO
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:62654 "EHLO
 	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752276Ab1EFKkv convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 May 2011 06:40:51 -0400
-Received: by mail-vx0-f174.google.com with SMTP id 39so3291153vxi.19
-        for <linux-mmc@vger.kernel.org>; Fri, 06 May 2011 03:40:51 -0700 (PDT)
-In-Reply-To: <1304578151-1775-12-git-send-email-arindam.nath@amd.com>
+	with ESMTP id S1751974Ab1EFKli convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 May 2011 06:41:38 -0400
+Received: by vxi39 with SMTP id 39so3293366vxi.19
+        for <linux-mmc@vger.kernel.org>; Fri, 06 May 2011 03:41:38 -0700 (PDT)
+In-Reply-To: <1304578151-1775-6-git-send-email-arindam.nath@amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Arindam Nath <arindam.nath@amd.com>
@@ -22,25 +22,18 @@ Cc: cjb@laptop.org, prakity@marvell.com, subhashj@codeaurora.org, linux-mmc@vger
 
 On Thu, May 5, 2011 at 2:49 AM, Arindam Nath <arindam.nath@amd.com> wro=
 te:
-> Host Controller v3.00 can support retuning modes 1,2 or 3 depending o=
-n
-> the bits 46-47 of the Capabilities register. Also, the timer count fo=
-r
-> retuning is indicated by bits 40-43 of the same register. We initiali=
-ze
-> timer_list for retuning the first time we execute tuning procedure. T=
-his
-> condition is indicated by SDHCI_NEEDS_RETUNING not being set. Since
-> retuning mode 1 sets a limit of 4MB on the maximum data length, we se=
-t
-> max_blk_count appropriately. Once the tuning timer expires, we set
-> SDHCI_NEEDS_RETUNING flag, and if the flag is set, we execute tuning
-> procedure before sending the next command. We need to restore mmc_req=
-uest
-> structure after executing retuning procedure since host->mrq is used
-> inside the procedure to send CMD19. We also disable and re-enable thi=
-s
-> flag during suspend and resume respectively, as per the spec v3.00.
+> This patch adds support for setting UHS-I bus speed mode during UHS-I
+> initialization procedure. Since both the host and card can support
+> more than one bus speed, we select the highest speed based on both of
+> their capabilities. First we set the bus speed mode for the card usin=
+g
+> CMD6 mode 1, and then we program the host controller to support the
+> required speed mode. We also set High Speed Enable in case one of the
+> UHS-I modes is selected. We take care to reset SD clock before settin=
+g
+> UHS mode in the Host Control2 register, and then re-enable it as per
+> the Host Controller spec v3.00. We then set the clock frequency for
+> the UHS-I mode selected.
 >
 > Signed-off-by: Arindam Nath <arindam.nath@amd.com>
 > Reviewed-by: Philip Rakity <prakity@marvell.com>
@@ -50,305 +43,301 @@ Acked-by: Zhangfei Gao<zhangfei.gao@marvell.com>
 Verified with Toshiba uhs card and general hs card,   on mmp2 in SDMA m=
 ode.
 > ---
-> =A0drivers/mmc/host/sdhci.c =A0| =A0113 +++++++++++++++++++++++++++++=
-+++++++++++++++-
-> =A0drivers/mmc/host/sdhci.h =A0| =A0 =A06 ++-
-> =A0include/linux/mmc/sdhci.h | =A0 =A06 ++
-> =A03 files changed, 122 insertions(+), 3 deletions(-)
+> =A0drivers/mmc/core/sd.c =A0 =A0| =A0 65 ++++++++++++++++++++++++++++=
+++++++++++++++++++
+> =A0drivers/mmc/host/sdhci.c | =A0 40 ++++++++++++++++++++++++++--
+> =A0drivers/mmc/host/sdhci.h | =A0 =A06 ++++
+> =A0include/linux/mmc/card.h | =A0 19 +++++++++++++
+> =A0include/linux/mmc/host.h | =A0 =A05 +++
+> =A05 files changed, 132 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 8ed2e1b..3c04547 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -46,6 +46,8 @@ static void sdhci_finish_data(struct sdhci_host *);
->
-> =A0static void sdhci_send_command(struct sdhci_host *, struct mmc_com=
-mand *);
-> =A0static void sdhci_finish_command(struct sdhci_host *);
-> +static int sdhci_execute_tuning(struct mmc_host *mmc);
-> +static void sdhci_tuning_timer(unsigned long data);
->
-> =A0static void sdhci_dumpregs(struct sdhci_host *host)
-> =A0{
-> @@ -1206,8 +1208,28 @@ static void sdhci_request(struct mmc_host *mmc=
-, struct mmc_request *mrq)
-> =A0 =A0 =A0 =A0if (!present || host->flags & SDHCI_DEVICE_DEAD) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->mrq->cmd->error =3D -ENOMEDIUM;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0tasklet_schedule(&host->finish_tasklet=
-);
-> - =A0 =A0 =A0 } else
-> + =A0 =A0 =A0 } else {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 u32 present_state;
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 present_state =3D sdhci_readl(host, SDH=
-CI_PRESENT_STATE);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Check if the re-tuning timer has a=
-lready expired and there
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* is no on-going data transfer. If s=
-o, we need to execute
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* tuning procedure before sending co=
-mmand.
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((host->flags & SDHCI_NEEDS_RETUNING=
-) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 !(present_state & (SDHCI_DOING_=
-WRITE |
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0SDHCI_DOING_READ))) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_unlock_irqrestore(=
-&host->lock, flags);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_execute_tuning(mm=
-c);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_lock_irqsave(&host=
-->lock, flags);
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Restore original mmc=
-_request structure */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->mrq =3D mrq;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> +
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sdhci_send_command(host, mrq->cmd);
-> + =A0 =A0 =A0 }
->
-> =A0 =A0 =A0 =A0mmiowb();
-> =A0 =A0 =A0 =A0spin_unlock_irqrestore(&host->lock, flags);
-> @@ -1679,6 +1701,37 @@ static int sdhci_execute_tuning(struct mmc_hos=
-t *mmc)
-> =A0 =A0 =A0 =A0}
->
-> =A0out:
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* If this is the very first time we are here, we sta=
-rt the retuning
-> + =A0 =A0 =A0 =A0* timer. Since only during the first time, SDHCI_NEE=
-DS_RETUNING
-> + =A0 =A0 =A0 =A0* flag won't be set, we check this condition before =
-actually starting
-> + =A0 =A0 =A0 =A0* the timer.
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuni=
-ng_count &&
-> + =A0 =A0 =A0 =A0 =A0 (host->tuning_mode =3D=3D SDHCI_TUNING_MODE_1))=
- {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mod_timer(&host->tuning_timer, jiffies =
-+ host->tuning_count *
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 HZ);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Tuning mode 1 limits the maximum dat=
-a length to 4MB */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_blk_count =3D (4 * 1024 * 1024=
-) / mmc->max_blk_size;
-> + =A0 =A0 =A0 } else {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->flags &=3D ~SDHCI_NEEDS_RETUNING;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Reload the new initial value for tim=
-er */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->tuning_mode =3D=3D SDHCI_TUNI=
-NG_MODE_1)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mod_timer(&host->tuning=
-_timer, jiffies +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->t=
-uning_count * HZ);
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* In case tuning fails, host controllers which suppo=
-rt re-tuning can
-> + =A0 =A0 =A0 =A0* try tuning again at a later time, when the re-tuni=
-ng timer expires.
-> + =A0 =A0 =A0 =A0* So for these controllers, we return 0. Since there=
- might be other
-> + =A0 =A0 =A0 =A0* controllers who do not have this capability, we re=
-turn error for
-> + =A0 =A0 =A0 =A0* them.
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 if (err && host->tuning_count &&
-> + =A0 =A0 =A0 =A0 =A0 (host->tuning_mode =3D=3D SDHCI_TUNING_MODE_1))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D 0;
-> +
-> =A0 =A0 =A0 =A0sdhci_clear_set_irqs(host, SDHCI_INT_DATA_AVAIL, ier);
-> =A0 =A0 =A0 =A0spin_unlock(&host->lock);
-> =A0 =A0 =A0 =A0enable_irq(host->irq);
-> @@ -1781,6 +1834,10 @@ static void sdhci_tasklet_finish(unsigned long=
- param)
->
-> =A0 =A0 =A0 =A0del_timer(&host->timer);
->
-> + =A0 =A0 =A0 if (host->version >=3D SDHCI_SPEC_300)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 del_timer(&host->tuning_timer);
-> +
-> +
-> =A0 =A0 =A0 =A0mrq =3D host->mrq;
->
-> =A0 =A0 =A0 =A0/*
-> @@ -1854,6 +1911,20 @@ static void sdhci_timeout_timer(unsigned long =
-data)
-> =A0 =A0 =A0 =A0spin_unlock_irqrestore(&host->lock, flags);
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index a6fa52f..0491978 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -457,6 +457,66 @@ static int sd_select_driver_type(struct mmc_card=
+ *card, u8 *status)
+> =A0 =A0 =A0 =A0return 0;
 > =A0}
 >
-> +static void sdhci_tuning_timer(unsigned long data)
+> +static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
 > +{
-> + =A0 =A0 =A0 struct sdhci_host *host;
-> + =A0 =A0 =A0 unsigned long flags;
+> + =A0 =A0 =A0 unsigned int bus_speed =3D 0, timing =3D 0;
+> + =A0 =A0 =A0 int err;
 > +
-> + =A0 =A0 =A0 host =3D (struct sdhci_host *)data;
+> + =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0* If the host doesn't support any of the UHS-I modes=
+, fallback on
+> + =A0 =A0 =A0 =A0* default speed.
+> + =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 if (!(card->host->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_U=
+HS_SDR25 |
+> + =A0 =A0 =A0 =A0 =A0 MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 | MMC_CA=
+P_UHS_DDR50)))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return 0;
 > +
-> + =A0 =A0 =A0 spin_lock_irqsave(&host->lock, flags);
+> + =A0 =A0 =A0 if ((card->host->caps & MMC_CAP_UHS_SDR104) &&
+> + =A0 =A0 =A0 =A0 =A0 (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR10=
+4)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 bus_speed =3D UHS_SDR10=
+4_BUS_SPEED;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timing =3D MMC_TIMING_U=
+HS_SDR104;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->sw_caps.uhs_max_d=
+tr =3D UHS_SDR104_MAX_DTR;
+> + =A0 =A0 =A0 } else if ((card->host->caps & MMC_CAP_UHS_DDR50) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(card->sw_caps.sd3_bus_mode & SD=
+_MODE_UHS_DDR50)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 bus_speed =3D UHS_DDR50=
+_BUS_SPEED;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timing =3D MMC_TIMING_U=
+HS_DDR50;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->sw_caps.uhs_max_d=
+tr =3D UHS_DDR50_MAX_DTR;
+> + =A0 =A0 =A0 } else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 MMC_CAP_UHS_SDR50)) && (card->s=
+w_caps.sd3_bus_mode &
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 SD_MODE_UHS_SDR50)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 bus_speed =3D UHS_SDR50=
+_BUS_SPEED;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timing =3D MMC_TIMING_U=
+HS_SDR50;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->sw_caps.uhs_max_d=
+tr =3D UHS_SDR50_MAX_DTR;
+> + =A0 =A0 =A0 } else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 MMC_CAP_UHS_SDR50 | MMC_CAP_UHS=
+_SDR25)) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(card->sw_caps.sd3_bus_mode & SD=
+_MODE_UHS_SDR25)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 bus_speed =3D UHS_SDR25=
+_BUS_SPEED;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timing =3D MMC_TIMING_U=
+HS_SDR25;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->sw_caps.uhs_max_d=
+tr =3D UHS_SDR25_MAX_DTR;
+> + =A0 =A0 =A0 } else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 MMC_CAP_UHS_SDR50 | MMC_CAP_UHS=
+_SDR25 |
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 MMC_CAP_UHS_SDR12)) && (card->s=
+w_caps.sd3_bus_mode &
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 SD_MODE_UHS_SDR12)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 bus_speed =3D UHS_SDR12=
+_BUS_SPEED;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timing =3D MMC_TIMING_U=
+HS_SDR12;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->sw_caps.uhs_max_d=
+tr =3D UHS_SDR12_MAX_DTR;
+> + =A0 =A0 =A0 }
 > +
-> + =A0 =A0 =A0 host->flags |=3D SDHCI_NEEDS_RETUNING;
+> + =A0 =A0 =A0 card->sd_bus_speed =3D bus_speed;
+> + =A0 =A0 =A0 err =3D mmc_sd_switch(card, 1, 0, bus_speed, status);
+> + =A0 =A0 =A0 if (err)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return err;
 > +
-> + =A0 =A0 =A0 spin_unlock_irqrestore(&host->lock, flags);
+> + =A0 =A0 =A0 if ((status[16] & 0xF) !=3D bus_speed)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_WARNING "%s: Problem settin=
+g bus speed mode!\n",
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hostname(card->host=
+));
+> + =A0 =A0 =A0 else {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_set_timing(card->host, timing);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_set_clock(card->host, card->sw_caps=
+=2Euhs_max_dtr);
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 return 0;
 > +}
 > +
-> =A0/*****************************************************************=
-************\
-> =A0* =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 *
-> =A0* Interrupt handling =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*
-> @@ -2128,6 +2199,15 @@ int sdhci_suspend_host(struct sdhci_host *host=
-, pm_message_t state)
+> =A0/*
+> =A0* UHS-I specific initialization procedure
+> =A0*/
+> @@ -490,6 +550,11 @@ static int mmc_sd_init_uhs_card(struct mmc_card =
+*card)
 >
-> =A0 =A0 =A0 =A0sdhci_disable_card_detection(host);
->
-> + =A0 =A0 =A0 /* Disable tuning since we are suspending */
-> + =A0 =A0 =A0 if ((host->version >=3D SDHCI_SPEC_300) &&
-> + =A0 =A0 =A0 =A0 =A0 host->tuning_count &&
-> + =A0 =A0 =A0 =A0 =A0 (host->tuning_mode =3D=3D SDHCI_TUNING_MODE_1))=
- {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->flags &=3D ~SDHCI_NEEDS_RETUNING;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mod_timer(&host->tuning_timer, jiffies =
-+
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->tuning_count * HZ=
-);
-> + =A0 =A0 =A0 }
+> =A0 =A0 =A0 =A0/* Set the driver strength for the card */
+> =A0 =A0 =A0 =A0err =3D sd_select_driver_type(card, status);
+> + =A0 =A0 =A0 if (err)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
 > +
-> =A0 =A0 =A0 =A0ret =3D mmc_suspend_host(host->mmc);
-> =A0 =A0 =A0 =A0if (ret)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return ret;
-> @@ -2169,6 +2249,12 @@ int sdhci_resume_host(struct sdhci_host *host)
-> =A0 =A0 =A0 =A0ret =3D mmc_resume_host(host->mmc);
-> =A0 =A0 =A0 =A0sdhci_enable_card_detection(host);
+> + =A0 =A0 =A0 /* Set bus speed mode of the card */
+> + =A0 =A0 =A0 err =3D sd_set_bus_speed_mode(card, status);
 >
-> + =A0 =A0 =A0 /* Set the re-tuning expiration flag */
-> + =A0 =A0 =A0 if ((host->version >=3D SDHCI_SPEC_300) &&
-> + =A0 =A0 =A0 =A0 =A0 host->tuning_count &&
-> + =A0 =A0 =A0 =A0 =A0 (host->tuning_mode =3D=3D SDHCI_TUNING_MODE_1))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->flags |=3D SDHCI_NEEDS_RETUNING;
+> =A0out:
+> =A0 =A0 =A0 =A0kfree(status);
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 309240c..de7e6e9 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1244,7 +1244,16 @@ static void sdhci_set_ios(struct mmc_host *mmc=
+, struct mmc_ios *ios)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ctrl &=3D ~SDHCI_CTRL_HISPD;
+>
+> =A0 =A0 =A0 =A0if (host->version >=3D SDHCI_SPEC_300) {
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 u16 ctrl_2;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 u16 clk, ctrl_2;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned int clock;
 > +
-> =A0 =A0 =A0 =A0return ret;
-> =A0}
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* In case of UHS-I modes, set High Spe=
+ed Enable */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((ios->timing =3D=3D MMC_TIMING_UHS_=
+SDR50) ||
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (ios->timing =3D=3D MMC_TIMING_=
+UHS_SDR104) ||
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (ios->timing =3D=3D MMC_TIMING_=
+UHS_DDR50) ||
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (ios->timing =3D=3D MMC_TIMING_=
+UHS_SDR25) ||
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (ios->timing =3D=3D MMC_TIMING_=
+UHS_SDR12))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D SDHCI_CTRL_HI=
+SPD;
 >
-> @@ -2420,6 +2506,21 @@ int sdhci_add_host(struct sdhci_host *host)
-> =A0 =A0 =A0 =A0if (caps[1] & SDHCI_DRIVER_TYPE_D)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_DRIVER_TYPE_D;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ctrl_2 =3D sdhci_readw(host, SDHCI_HOS=
+T_CONTROL2);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (!(ctrl_2 & SDHCI_CTRL_PRESET_VAL_E=
+NABLE)) {
+> @@ -1267,8 +1276,6 @@ static void sdhci_set_ios(struct mmc_host *mmc,=
+ struct mmc_ios *ios)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * need to reset SD Cl=
+ock Enable before changing High
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * Speed Enable to avo=
+id generating clock gliches.
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 u16 clk;
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned int clock;
 >
-> + =A0 =A0 =A0 /* Initial value for re-tuning timer count */
-> + =A0 =A0 =A0 host->tuning_count =3D (caps[1] & SDHCI_RETUNING_TIMER_=
-COUNT_MASK) >>
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 SDHCI_RETUN=
-ING_TIMER_COUNT_SHIFT;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Reset SD Clock Enab=
+le */
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk =3D sdhci_readw(ho=
+st, SDHCI_CLOCK_CONTROL);
+> @@ -1282,6 +1289,33 @@ static void sdhci_set_ios(struct mmc_host *mmc=
+, struct mmc_ios *ios)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->clock =3D 0;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sdhci_set_clock(host, =
+clock);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
 > +
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* In case Re-tuning Timer is not disabled, the actua=
-l value of
-> + =A0 =A0 =A0 =A0* re-tuning timer will be 2 ^ (n - 1).
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 if (host->tuning_count)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->tuning_count =3D 1 << (host->tuni=
-ng_count - 1);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 =3D sdhci_readw(host, SDHCI_HOST=
+_CONTROL2);
 > +
-> + =A0 =A0 =A0 /* Re-tuning mode supported by the Host Controller */
-> + =A0 =A0 =A0 host->tuning_mode =3D (caps[1] & SDHCI_RETUNING_MODE_MA=
-SK) >>
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0SDHCI_RETUNI=
-NG_MODE_SHIFT;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Select Bus Speed Mode for host */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 &=3D ~SDHCI_CTRL_UHS_MASK;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ios->timing =3D=3D MMC_TIMING_UHS_S=
+DR12)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_=
+UHS_SDR12;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (ios->timing =3D=3D MMC_TIMING_=
+UHS_SDR25)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_=
+UHS_SDR25;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (ios->timing =3D=3D MMC_TIMING_=
+UHS_SDR50)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_=
+UHS_SDR50;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (ios->timing =3D=3D MMC_TIMING_=
+UHS_SDR104)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_=
+UHS_SDR104;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (ios->timing =3D=3D MMC_TIMING_=
+UHS_DDR50)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_=
+UHS_DDR50;
 > +
-> =A0 =A0 =A0 =A0ocr_avail =3D 0;
-> =A0 =A0 =A0 =A0/*
-> =A0 =A0 =A0 =A0 * According to SD Host Controller spec v3.00, if the =
-Host System
-> @@ -2565,9 +2666,15 @@ int sdhci_add_host(struct sdhci_host *host)
->
-> =A0 =A0 =A0 =A0setup_timer(&host->timer, sdhci_timeout_timer, (unsign=
-ed long)host);
->
-> - =A0 =A0 =A0 if (host->version >=3D SDHCI_SPEC_300)
-> + =A0 =A0 =A0 if (host->version >=3D SDHCI_SPEC_300) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0init_waitqueue_head(&host->buf_ready_i=
-nt);
->
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Initialize re-tuning timer */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 init_timer(&host->tuning_timer);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->tuning_timer.data =3D (unsigned l=
-ong)host;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->tuning_timer.function =3D sdhci_t=
-uning_timer;
-> + =A0 =A0 =A0 }
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Reset SD Clock Enable */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 clk =3D sdhci_readw(host, SDHCI_CLOCK_C=
+ONTROL);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 clk &=3D ~SDHCI_CLOCK_CARD_EN;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writew(host, clk, SDHCI_CLOCK_CON=
+TROL);
 > +
-> =A0 =A0 =A0 =A0ret =3D request_irq(host->irq, sdhci_irq, IRQF_SHARED,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_hostname(mmc), host);
-> =A0 =A0 =A0 =A0if (ret)
-> @@ -2661,6 +2768,8 @@ void sdhci_remove_host(struct sdhci_host *host,=
- int dead)
-> =A0 =A0 =A0 =A0free_irq(host->irq, host);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writew(host, ctrl_2, SDHCI_HOST_C=
+ONTROL2);
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Re-enable SD Clock */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 clock =3D host->clock;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->clock =3D 0;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_set_clock(host, clock);
+> =A0 =A0 =A0 =A0} else
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sdhci_writeb(host, ctrl, SDHCI_HOST_CO=
+NTROL1);
 >
-> =A0 =A0 =A0 =A0del_timer_sync(&host->timer);
-> + =A0 =A0 =A0 if (host->version >=3D SDHCI_SPEC_300)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 del_timer_sync(&host->tuning_timer);
->
-> =A0 =A0 =A0 =A0tasklet_kill(&host->card_tasklet);
-> =A0 =A0 =A0 =A0tasklet_kill(&host->finish_tasklet);
 > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 0208164..fb74dc6 100644
+> index 04c41a4..5b12793 100644
 > --- a/drivers/mmc/host/sdhci.h
 > +++ b/drivers/mmc/host/sdhci.h
-> @@ -191,7 +191,11 @@
-> =A0#define =A0SDHCI_DRIVER_TYPE_A =A0 0x00000010
-> =A0#define =A0SDHCI_DRIVER_TYPE_C =A0 0x00000020
-> =A0#define =A0SDHCI_DRIVER_TYPE_D =A0 0x00000040
-> -#define =A0SDHCI_USE_SDR50_TUNING =A0 =A0 =A0 =A00x00002000
-> +#define =A0SDHCI_RETUNING_TIMER_COUNT_MASK =A0 =A0 =A0 0x00000F00
-> +#define =A0SDHCI_RETUNING_TIMER_COUNT_SHIFT =A0 =A0 =A08
-> +#define =A0SDHCI_USE_SDR50_TUNING =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A00x00002000
-> +#define =A0SDHCI_RETUNING_MODE_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A00x000=
-0C000
-> +#define =A0SDHCI_RETUNING_MODE_SHIFT =A0 =A0 =A0 =A0 =A0 =A0 14
-> =A0#define =A0SDHCI_CLOCK_MUL_MASK =A00x00FF0000
-> =A0#define =A0SDHCI_CLOCK_MUL_SHIFT 16
+> @@ -149,6 +149,12 @@
+> =A0#define SDHCI_ACMD12_ERR =A0 =A0 =A0 0x3C
 >
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index a88a799..e902618 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -112,6 +112,7 @@ struct sdhci_host {
-> =A0#define SDHCI_REQ_USE_DMA =A0 =A0 =A0(1<<2) =A0/* Use DMA for this=
- req. */
-> =A0#define SDHCI_DEVICE_DEAD =A0 =A0 =A0(1<<3) =A0/* Device unrespons=
-ive */
-> =A0#define SDHCI_SDR50_NEEDS_TUNING (1<<4) =A0 =A0 =A0 =A0/* SDR50 ne=
-eds tuning */
-> +#define SDHCI_NEEDS_RETUNING =A0 (1<<5) =A0/* Host needs retuning */
+> =A0#define SDHCI_HOST_CONTROL2 =A0 =A0 =A0 =A0 =A0 =A00x3E
+> +#define =A0SDHCI_CTRL_UHS_MASK =A0 =A0 =A0 =A0 =A0 0x0007
+> +#define =A0 SDHCI_CTRL_UHS_SDR12 =A0 =A0 =A0 =A0 0x0000
+> +#define =A0 SDHCI_CTRL_UHS_SDR25 =A0 =A0 =A0 =A0 0x0001
+> +#define =A0 SDHCI_CTRL_UHS_SDR50 =A0 =A0 =A0 =A0 0x0002
+> +#define =A0 SDHCI_CTRL_UHS_SDR104 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x0=
+003
+> +#define =A0 SDHCI_CTRL_UHS_DDR50 =A0 =A0 =A0 =A0 0x0004
+> =A0#define =A0SDHCI_CTRL_VDD_180 =A0 =A0 =A0 =A0 =A0 =A00x0008
+> =A0#define =A0SDHCI_CTRL_DRV_TYPE_MASK =A0 =A0 =A00x0030
+> =A0#define =A0 SDHCI_CTRL_DRV_TYPE_B =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00=
+x0000
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 5393272..4ef6ded 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -81,7 +81,24 @@ struct sd_ssr {
 >
-> =A0 =A0 =A0 =A0unsigned int version; =A0 /* SDHCI spec. version */
->
-> @@ -152,6 +153,11 @@ struct sdhci_host {
-> =A0 =A0 =A0 =A0wait_queue_head_t =A0 =A0 =A0 buf_ready_int; =A0/* Wai=
-tqueue for Buffer Read Ready interrupt */
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0tuning_done; =A0 =A0=
-/* Condition flag set when CMD19 succeeds */
->
-> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0tuning_count; =A0 /=
-* Timer count for re-tuning */
-> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0tuning_mode; =A0 =A0=
-/* Re-tuning mode supported by host */
-> +#define SDHCI_TUNING_MODE_1 =A0 =A00
-> + =A0 =A0 =A0 struct timer_list =A0 =A0 =A0 tuning_timer; =A0 /* Time=
-r for tuning */
+> =A0struct sd_switch_caps {
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0hs_max_dtr;
+> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0uhs_max_dtr;
+> +#define UHS_SDR104_MAX_DTR =A0 =A0 208000000
+> +#define UHS_SDR50_MAX_DTR =A0 =A0 =A0100000000
+> +#define UHS_DDR50_MAX_DTR =A0 =A0 =A050000000
+> +#define UHS_SDR25_MAX_DTR =A0 =A0 =A0UHS_DDR50_MAX_DTR
+> +#define UHS_SDR12_MAX_DTR =A0 =A0 =A025000000
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0sd3_bus_mode;
+> +#define UHS_SDR12_BUS_SPEED =A0 =A00
+> +#define UHS_SDR25_BUS_SPEED =A0 =A01
+> +#define UHS_SDR50_BUS_SPEED =A0 =A02
+> +#define UHS_SDR104_BUS_SPEED =A0 3
+> +#define UHS_DDR50_BUS_SPEED =A0 =A04
 > +
-> =A0 =A0 =A0 =A0unsigned long private[0] ____cacheline_aligned;
+> +#define SD_MODE_UHS_SDR12 =A0 =A0 =A0(1 << UHS_SDR12_BUS_SPEED)
+> +#define SD_MODE_UHS_SDR25 =A0 =A0 =A0(1 << UHS_SDR25_BUS_SPEED)
+> +#define SD_MODE_UHS_SDR50 =A0 =A0 =A0(1 << UHS_SDR50_BUS_SPEED)
+> +#define SD_MODE_UHS_SDR104 =A0 =A0 (1 << UHS_SDR104_BUS_SPEED)
+> +#define SD_MODE_UHS_DDR50 =A0 =A0 =A0(1 << UHS_DDR50_BUS_SPEED)
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0sd3_drv_type;
+> =A0#define SD_DRIVER_TYPE_B =A0 =A0 =A0 0x01
+> =A0#define SD_DRIVER_TYPE_A =A0 =A0 =A0 0x02
+> @@ -166,6 +183,8 @@ struct mmc_card {
+> =A0 =A0 =A0 =A0const char =A0 =A0 =A0 =A0 =A0 =A0 =A0**info; =A0 =A0 =
+=A0 =A0 /* info strings */
+> =A0 =A0 =A0 =A0struct sdio_func_tuple =A0*tuples; =A0 =A0 =A0 =A0/* u=
+nknown common tuples */
+>
+> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0sd_bus_speed; =A0 /=
+* Bus Speed Mode set for the card */
+> +
+> =A0 =A0 =A0 =A0struct dentry =A0 =A0 =A0 =A0 =A0 *debugfs_root;
 > =A0};
-> =A0#endif /* __SDHCI_H */
+>
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 949e4d5..6237599 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -50,6 +50,11 @@ struct mmc_ios {
+> =A0#define MMC_TIMING_LEGACY =A0 =A0 =A00
+> =A0#define MMC_TIMING_MMC_HS =A0 =A0 =A01
+> =A0#define MMC_TIMING_SD_HS =A0 =A0 =A0 2
+> +#define MMC_TIMING_UHS_SDR12 =A0 MMC_TIMING_LEGACY
+> +#define MMC_TIMING_UHS_SDR25 =A0 MMC_TIMING_SD_HS
+> +#define MMC_TIMING_UHS_SDR50 =A0 3
+> +#define MMC_TIMING_UHS_SDR104 =A04
+> +#define MMC_TIMING_UHS_DDR50 =A0 5
+>
+> =A0 =A0 =A0 =A0unsigned char =A0 ddr; =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0/* dual data rate used */
+>
 > --
 > 1.7.1
 >
