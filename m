@@ -1,103 +1,36 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 4/4] mmc: sdhi: support up to 3 interrupt sources
-Date: Fri, 6 May 2011 13:02:45 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1105061301030.10445@axis700.grange>
-References: <Pine.LNX.4.64.1105061244120.10445@axis700.grange>
+From: "Varadarajan, Charulatha" <charu@ti.com>
+Subject: Re: [PATCH V2 04/16] mmc: omap_hsmmc: reduce a bit the error handlers
+ in probe()
+Date: Fri, 6 May 2011 17:04:36 +0530
+Message-ID: <BANLkTi=wiC13bh5vO6rouzCwZCO+-cxbuQ@mail.gmail.com>
+References: <1304673255-31634-1-git-send-email-adrian.hunter@nokia.com> <1304673255-31634-5-git-send-email-adrian.hunter@nokia.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:55062 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755005Ab1EFLC4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 May 2011 07:02:56 -0400
-In-Reply-To: <Pine.LNX.4.64.1105061244120.10445@axis700.grange>
+Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:49837 "EHLO
+	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755056Ab1EFLfR convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 6 May 2011 07:35:17 -0400
+In-Reply-To: <1304673255-31634-5-git-send-email-adrian.hunter@nokia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-sh@vger.kernel.org
-Cc: cjb@laptop.org, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>, horms@verge.net.au, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Tony Lindgren <tony@atomide.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
-From: Magnus Damm <damm@opensource.se>
+On Fri, May 6, 2011 at 14:44, Adrian Hunter <adrian.hunter@nokia.com> w=
+rote:
+> From: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+>
 
-Convert the SDHI code to support more than a single
-interrupt source. Needed to support hardware that
-uses GIC instead of INTC as interrupt controller.
+Add patch description here.
 
-Will also allow us to remove the irq forwarding
-workaround from the INTC code in the future.
+> Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+> ---
+> =A0drivers/mmc/host/omap_hsmmc.c | =A0 17 ++++++-----------
+> =A01 files changed, 6 insertions(+), 11 deletions(-)
+>
 
-Signed-off-by: Simon Horman <horms@verge.net.au>
-Signed-off-by: Magnus Damm <damm@opensource.se>
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- drivers/mmc/host/sh_mobile_sdhi.c |   39 ++++++++++++++++++++++++++----------
- 1 files changed, 28 insertions(+), 11 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 2bd235b..d264bbe 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -62,7 +62,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
- 	struct tmio_mmc_host *host;
- 	char clk_name[8];
--	int irq, ret;
-+	int i, irq, ret;
- 
- 	priv = kzalloc(sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
- 	if (priv == NULL) {
-@@ -116,16 +116,27 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	if (ret < 0)
- 		goto eprobe;
- 
--	irq = platform_get_irq(pdev, 0);
--	if (irq < 0) {
--		ret = irq;
--		goto eirq;
-+	for (i = 0; i < 3; i++) {
-+		irq = platform_get_irq(pdev, i);
-+		if (irq < 0) {
-+			if (i) {
-+				continue;
-+			} else {
-+				ret = irq;
-+				goto eirq;
-+			}
-+		}
-+		ret = request_irq(irq, tmio_mmc_irq, 0,
-+				  dev_name(&pdev->dev), host);
-+		if (ret) {
-+			while (i--) {
-+				irq = platform_get_irq(pdev, i);
-+				if (irq >= 0)
-+					free_irq(irq, host);
-+			}
-+			goto eirq;
-+		}
- 	}
--
--	ret = request_irq(irq, tmio_mmc_irq, 0, dev_name(&pdev->dev), host);
--	if (ret)
--		goto eirq;
--
- 	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
- 		 mmc_hostname(host->mmc), (unsigned long)
- 		 (platform_get_resource(pdev,IORESOURCE_MEM, 0)->start),
-@@ -148,8 +159,14 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
- 	struct mmc_host *mmc = platform_get_drvdata(pdev);
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
- 	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
-+	int i, irq;
-+
-+	for (i = 0; i < 3; i++) {
-+		irq = platform_get_irq(pdev, i);
-+		if (irq >= 0)
-+			free_irq(irq, host);
-+	}
- 
--	free_irq(platform_get_irq(pdev, 0), host);
- 	tmio_mmc_host_remove(host);
- 	clk_disable(priv->clk);
- 	clk_put(priv->clk);
--- 
-1.7.2.5
-
+<<snip>>
