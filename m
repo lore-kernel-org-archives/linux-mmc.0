@@ -1,125 +1,129 @@
 From: Adrian Hunter <adrian.hunter@nokia.com>
-Subject: [PATCH V2 12/16] mmc: omap_hsmmc: fix oops in omap_hsmmc_dma_cb
-Date: Fri,  6 May 2011 12:14:11 +0300
-Message-ID: <1304673255-31634-13-git-send-email-adrian.hunter@nokia.com>
+Subject: [PATCH V2 07/16] mmc: omap_hsmmc: fix few bugs when set the clock divisor
+Date: Fri,  6 May 2011 12:14:06 +0300
+Message-ID: <1304673255-31634-8-git-send-email-adrian.hunter@nokia.com>
 References: <1304673255-31634-1-git-send-email-adrian.hunter@nokia.com>
 Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <1304673255-31634-1-git-send-email-adrian.hunter@nokia.com>
 Sender: linux-omap-owner@vger.kernel.org
 To: Tony Lindgren <tony@atomide.com>
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-In the case of an I/O error, the DMA will have been
-cleaned up in the MMC interrupt and the request
-structure pointer will be null.
+From: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
-In that case, it is essential to check if the DMA
-DMA is over before dereferencing host->mrq->data.
+There are two pieces of code which similar, but not the same. Each of them
+contains a bug.
 
-Oops as follows:
+The SYSCTL register should be read before write in the
+omap_hsmmc_context_restore() to remain the state of the reserved bits.
 
-<3>[ 2293.695281] wl1271: ERROR sdio read failed (-110)
-<1>[ 2293.695739] Unable to handle kernel NULL pointer dereference at virtual
-address 00000004
-<1>[ 2293.703094] pgd = b0004000
-<1>[ 2293.705780] [00000004] *pgd=00000000
-<0>[ 2293.709381] Internal error: Oops: 17 [#1] PREEMPT
-<0>[ 2293.714080] last sysfs file:
-/sys/devices/platform/omapdss/manager0/cpr_enable
-<4>[ 2293.721313] Modules linked in: ext2 dm_crypt xt_NFLOG xt_rateest
-xt_RATEEST xt_condition iptable_filter ip_tables dm_mod xt_IDLETIMER
-nfnetlink_log nfnetlink as3645a ad58xx smiapp smiapp_power omap3_isp iovmm
-omap3_iommu iommu2 iommu wl12xx_spi bnep omaplfb bridgedriver g_file_storage
-cmt_speech ssi_protocol phonet hsi_char wl12xx_sdio wl12xx pvrsrvkm omap_ssi
-mailbox_mach vibra_spi radio_wl1273 mailbox bcm4751_gps lis3lv02d_i2c ak8975
-lis3lv02d leds_lp5521 apds990x pn544 rtc_twl4030 twl4030_keypad
-twl4030_pwrbutton cmt twl5031_aci hci_h4p
-<4>[ 2293.769287] CPU: 0    Not tainted  (2.6.32.36-dfl61-20111603 #1)
-<4>[ 2293.775329] PC is at omap_hsmmc_dma_cb+0x18/0x140
-<4>[ 2293.780029] LR is at omap2_dma_irq_handler+0x244/0x28c
-<4>[ 2293.785156] pc : [<b024e180>]    lr : [<b0049ed0>]    psr: a00001d3
-<4>[ 2293.785186] sp : edfb3c48  ip : edfb3bf8  fp : edfb3d3c
-<4>[ 2293.796661] r10: fa05632c  r9 : fa056000  r8 : ee4889c0
-<4>[ 2293.801910] r7 : 00000020  r6 : 00000001  r5 : edfb2000  r4 : ee53e1c0
-<4>[ 2293.808441] r3 : 00000000  r2 : edfb3c48  r1 : 00000020  r0 : 00000007
-<4>[ 2293.814971] Flags: NzCv  IRQs off  FIQs off  Mode SVC_32  ISA ARM
-Segment kernel
-<4>[ 2293.822479] Control: 10c5387d  Table: bc9f4019  DAC: 00000017
-<0>[ 2293.828247] Process phy0 (pid: 313, stack limit = 0xedfb22e8)
-<0>[ 2293.833984] Stack: (0xedfb3c48 to 0xedfb4000)
-...
-<4>[ 2294.084320] [<b024e180>] (omap_hsmmc_dma_cb+0x18/0x140) from [<b0049ed0>]
-(omap2_dma_irq_handler+0x244/0x28c)
-<4>[ 2294.094268] [<b0049ed0>] (omap2_dma_irq_handler+0x244/0x28c) from
-[<b0093d44>] (handle_IRQ_event+0x34/0xf0)
-<4>[ 2294.104034] [<b0093d44>] (handle_IRQ_event+0x34/0xf0) from [<b0095bec>]
-(handle_level_irq+0xcc/0x170)
-<4>[ 2294.113250] [<b0095bec>] (handle_level_irq+0xcc/0x170) from [<b002c068>]
-(asm_do_IRQ+0x68/0x84)
-<4>[ 2294.121978] [<b002c068>] (asm_do_IRQ+0x68/0x84) from [<b002ca84>]
-(__irq_svc+0x44/0xa8)
-<4>[ 2294.129974] Exception stack(0xedfb3cc0 to 0xedfb3d08)
-<4>[ 2294.135040] 3cc0: 0021d5cd 00000000 3d20cc2d 00000002 edf7dd40 edfb2000
-edf7dee8 edf7ddd8
-<4>[ 2294.143249] 3ce0: 00000001 00000000 ee516080 edfb3d3c b04880b8 edfb3d08
-b0059e5c b0344184
-<4>[ 2294.151428] 3d00: 00000053 ffffffff
-<4>[ 2294.154968] [<b002ca84>] (__irq_svc+0x44/0xa8) from [<b0344184>]
-(schedule+0x248/0x3a8)
-<4>[ 2294.162963] [<b0344184>] (schedule+0x248/0x3a8) from [<b03448ac>]
-(schedule_timeout+0x1c/0x224)
-<4>[ 2294.171691] [<b03448ac>] (schedule_timeout+0x1c/0x224) from [<b0344738>]
-(wait_for_common+0xe8/0x1a8)
-<4>[ 2294.180938] [<b0344738>] (wait_for_common+0xe8/0x1a8) from [<b02459f8>]
-(mmc_wait_for_req+0x110/0x120)
-<4>[ 2294.190277] [<b02459f8>] (mmc_wait_for_req+0x110/0x120) from [<b0249bac>]
-(mmc_io_rw_extended+0x178/0x1e0)
-<4>[ 2294.199951] [<b0249bac>] (mmc_io_rw_extended+0x178/0x1e0) from
-[<b024ab54>] (sdio_io_rw_ext_helper+0x164/0x190)
-<4>[ 2294.210052] [<b024ab54>] (sdio_io_rw_ext_helper+0x164/0x190) from
-[<b024aba0>] (sdio_writesb+0x20/0x24)
-<4>[ 2294.219512] [<b024aba0>] (sdio_writesb+0x20/0x24) from [<af0d50e0>]
-(wl1271_sdio_raw_write+0x64/0xa4 [wl12xx_sdio])
-<4>[ 2294.230041] [<af0d50e0>] (wl1271_sdio_raw_write+0x64/0xa4 [wl12xx_sdio])
-from [<af0bd4bc>] (wl1271_tx_work_locked+0x548/0x5fc [wl12xx])
-<4>[ 2294.242218] [<af0bd4bc>] (wl1271_tx_work_locked+0x548/0x5fc [wl12xx])
-from [<af0ba944>] (wl1271_irq_work+0x230/0x314 [wl12xx])
-<4>[ 2294.253631] [<af0ba944>] (wl1271_irq_work+0x230/0x314 [wl12xx]) from
-[<b00725ac>] (worker_thread+0x174/0x224)
-<4>[ 2294.263519] [<b00725ac>] (worker_thread+0x174/0x224) from [<b0075bac>]
-(kthread+0x7c/0x84)
-<4>[ 2294.271820] [<b0075bac>] (kthread+0x7c/0x84) from [<b002d950>]
-(kernel_thread_exit+0x0/0x8)
-<0>[ 2294.280181] Code: e5923008 e1a0200d e3c25d7f e3c5503f (e5936004)
-<4>[ 2294.286529] ---[ end trace e8fb05c679bd87ff ]---
+Before set the clock divisor and DTO bits the value from the SYSCTL register
+should be masked properly. We were lucky to have no problems with DTO bits. So,
+make sure we have clear DTO bits properly in the omap_hsmmc_set_ios().
 
+Additionally get rid of msleep(1). The actual time rare higher than 30us on
+OMAP 3630.
+
+The result pieces of code are split to omap_hsmmc_set_clock() function.
+
+Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   59 +++++++++++++++++++---------------------
+ 1 files changed, 28 insertions(+), 31 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 8aa9440..ee57b9b 100644
+index 915d08b..dd0d9d5 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1364,7 +1364,7 @@ static void omap_hsmmc_config_dma_params(struct omap_hsmmc_host *host,
- static void omap_hsmmc_dma_cb(int lch, u16 ch_status, void *cb_data)
- {
- 	struct omap_hsmmc_host *host = cb_data;
--	struct mmc_data *data = host->mrq->data;
-+	struct mmc_data *data;
- 	int dma_ch, req_in_progress;
+@@ -607,6 +607,32 @@ static u16 calc_divisor(struct mmc_ios *ios)
+ 	return dsor;
+ }
  
- 	if (!(ch_status & OMAP_DMA_BLOCK_IRQ)) {
-@@ -1379,6 +1379,7 @@ static void omap_hsmmc_dma_cb(int lch, u16 ch_status, void *cb_data)
- 		return;
++static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
++{
++	struct mmc_ios *ios = &host->mmc->ios;
++	unsigned long regval;
++	unsigned long timeout;
++
++	dev_dbg(mmc_dev(host->mmc), "Set clock to %uHz\n", ios->clock);
++
++	omap_hsmmc_stop_clock(host);
++
++	regval = OMAP_HSMMC_READ(host->base, SYSCTL);
++	regval = regval & ~(CLKD_MASK | DTO_MASK);
++	regval = regval | (calc_divisor(ios) << 6) | (DTO << 16);
++	OMAP_HSMMC_WRITE(host->base, SYSCTL, regval);
++	OMAP_HSMMC_WRITE(host->base, SYSCTL,
++		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
++
++	/* Wait till the ICS bit is set */
++	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
++	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & ICS) != ICS
++		&& time_before(jiffies, timeout))
++		cpu_relax();
++
++	omap_hsmmc_start_clock(host);
++}
++
+ #ifdef CONFIG_PM
+ 
+ /*
+@@ -697,19 +723,7 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+ 		break;
  	}
  
-+	data = host->mrq->data;
- 	host->dma_sg_idx++;
- 	if (host->dma_sg_idx < host->dma_len) {
- 		/* Fire up the next transfer. */
+-	omap_hsmmc_stop_clock(host);
+-
+-	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+-		(calc_divisor(ios) << 6) | (DTO << 16));
+-	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+-		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
+-
+-	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+-	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & ICS) != ICS
+-		&& time_before(jiffies, timeout))
+-		;
+-
+-	omap_hsmmc_start_clock(host);
++	omap_hsmmc_set_clock(host);
+ 
+ 	con = OMAP_HSMMC_READ(host->base, CON);
+ 	if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN)
+@@ -1540,8 +1554,6 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
+ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+-	unsigned long regval;
+-	unsigned long timeout;
+ 	u32 con;
+ 	int do_send_init_stream = 0;
+ 
+@@ -1603,22 +1615,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		}
+ 	}
+ 
+-	omap_hsmmc_stop_clock(host);
+-
+-	regval = OMAP_HSMMC_READ(host->base, SYSCTL);
+-	regval = regval & ~(CLKD_MASK);
+-	regval = regval | (calc_divisor(ios) << 6) | (DTO << 16);
+-	OMAP_HSMMC_WRITE(host->base, SYSCTL, regval);
+-	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+-		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
+-
+-	/* Wait till the ICS bit is set */
+-	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+-	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & ICS) != ICS
+-		&& time_before(jiffies, timeout))
+-		msleep(1);
+-
+-	omap_hsmmc_start_clock(host);
++	omap_hsmmc_set_clock(host);
+ 
+ 	if (do_send_init_stream)
+ 		send_init_stream(host);
 -- 
 1.7.0.4
 
