@@ -1,40 +1,30 @@
-From: <gregkh@suse.de>
-Subject: Patch "mmc: fix all hangs related to mmc/sd card insert/removal during suspend/resume" has been added to the 2.6.32-longterm tree
-Date: Thu, 05 May 2011 14:54:16 -0700
-Message-ID: <13046324562530@kroah.org>
+From: Greg KH <gregkh@suse.de>
+Subject: [106/143] mmc: fix all hangs related to mmc/sd card
+	insert/removal during suspend/resume
+Date: Thu, 05 May 2011 17:21:31 -0700
+Message-ID: <20110506002215.642830578@clark.kroah.org>
+References: <20110506002311.GA15354@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kroah.org ([198.145.64.141]:48542 "EHLO coco.kroah.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753537Ab1EEVyp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 May 2011 17:54:45 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <stable-bounces@linux.kernel.org>
+In-Reply-To: <20110506002311.GA15354@kroah.com>
+List-Unsubscribe: <http://linux.kernel.org/mailman/options/stable>,
+	<mailto:stable-request@linux.kernel.org?subject=unsubscribe>
+List-Archive: <http://linux.kernel.org/mailman/private/stable/>
+List-Post: <mailto:stable@linux.kernel.org>
+List-Help: <mailto:stable-request@linux.kernel.org?subject=help>
+List-Subscribe: <http://linux.kernel.org/mailman/listinfo/stable>,
+	<mailto:stable-request@linux.kernel.org?subject=subscribe>
+Sender: stable-bounces@linux.kernel.org
+Errors-To: stable-bounces@linux.kernel.org
+To: linux-kernel@vger.kernel.org, stable@kernel.org
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, linux-mmc@vger.kernel.org, David Brownell <david-b@pacbell.net>, Alan Stern <stern@rowland.harvard.edu>, akpm@linux-foundation.org, torvalds@linux-foundation.org, stable-review@kernel.org, alan@lxorguk.ukuu.org.uk
 List-Id: linux-mmc@vger.kernel.org
-To: maximlevitsky@gmail.com, akpm@linux-foundation.org, david-b@pacbell.net, gregkh@suse.de, linux-mmc@vger.kernel.org, stern@rowland.harvard.edu, torvalds@linux-foundation.org
-Cc: stable@kernel.org, stable-commits@vger.kernel.org
 
+2.6.32-longterm review patch.  If anyone has any objections, please let us know.
 
-This is a note to let you know that I've just added the patch titled
-
-    mmc: fix all hangs related to mmc/sd card insert/removal during suspend/resume
-
-to the 2.6.32-longterm tree which can be found at:
-    http://www.kernel.org/git/?p=linux/kernel/git/longterm/longterm-queue-2.6.32.git;a=summary
-
-The filename of the patch is:
-     mmc-fix-all-hangs-related-to-mmc-sd-card-insert-remo.patch
-and it can be found in the queue-2.6.32 subdirectory.
-
-If you, or anyone else, feels it should not be added to the 2.6.32 longterm tree,
-please let <stable@kernel.org> know about it.
-
-
->From 849d6563ac4395a9890e6a1d10573c79237d4e8f Mon Sep 17 00:00:00 2001
-From: Maxim Levitsky <maximlevitsky@gmail.com>
-Date: Tue, 10 Aug 2010 18:01:41 -0700
-Subject: mmc: fix all hangs related to mmc/sd card insert/removal during suspend/resume
+------------------
 
 From: Maxim Levitsky <maximlevitsky@gmail.com>
 
@@ -247,7 +237,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
  					 unsigned int disable_delay)
 
 
-Patches currently in longterm-queue-2.6.32 which might be from maximlevitsky@gmail.com are
-
-/home/gregkh/linux/longterm/longterm-queue-2.6.32/queue-2.6.32/mmc-build-fix-mmc_pm_notify-is-only-available-with-c.patch
-/home/gregkh/linux/longterm/longterm-queue-2.6.32/queue-2.6.32/mmc-fix-all-hangs-related-to-mmc-sd-card-insert-remo.patch
+_______________________________________________
+stable mailing list
+stable@linux.kernel.org
+http://linux.kernel.org/mailman/listinfo/stable
