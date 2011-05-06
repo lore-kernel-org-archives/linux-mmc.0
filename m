@@ -1,79 +1,104 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: Patch "mmc: fix all hangs related to mmc/sd card insert/removal
- during suspend/resume" has been added to the 2.6.32-longterm tree
-Date: Fri, 6 May 2011 09:37:46 +0300
-Message-ID: <BANLkTi=gQnAUOGZ-FOxmcyrDaffxUVF9+w@mail.gmail.com>
-References: <13046324562530@kroah.org>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH 08/22] mmc: omap_hsmmc: correct debug report error status
+	mnemonics
+Date: Fri, 6 May 2011 14:05:44 +0530
+Message-ID: <BANLkTim963pDi_awSYefAqMwPSi5L3k_mA@mail.gmail.com>
+References: <1304596282-4095-1-git-send-email-adrian.hunter@nokia.com>
+	<1304596282-4095-9-git-send-email-adrian.hunter@nokia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:48414 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751331Ab1EFGiI convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 May 2011 02:38:08 -0400
-In-Reply-To: <13046324562530@kroah.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1304596282-4095-9-git-send-email-adrian.hunter@nokia.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Tony Lindgren <tony@atomide.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Madhusudhan Chikkature <madhu.cr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: gregkh@suse.de
-Cc: maximlevitsky@gmail.com, akpm@linux-foundation.org, david-b@pacbell.net, linux-mmc@vger.kernel.org, stern@rowland.harvard.edu, torvalds@linux-foundation.org, stable@kernel.org, stable-commits@vger.kernel.org
 
-On Fri, May 6, 2011 at 12:54 AM,  <gregkh@suse.de> wrote:
+On Thu, May 5, 2011 at 5:21 PM, Adrian Hunter <adrian.hunter@nokia.com> wro=
+te:
+> CERR and BADA were in the wrong place and there are only
+> 32 not 35.
 >
-> This is a note to let you know that I've just added the patch titled
+> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+> ---
+> =A0drivers/mmc/host/omap_hsmmc.c | =A0 19 +++++++++++--------
+> =A01 files changed, 11 insertions(+), 8 deletions(-)
 >
-> =A0 =A0mmc: fix all hangs related to mmc/sd card insert/removal durin=
-g suspend/resume
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index bd52849..a1a1101 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -982,14 +982,14 @@ static void omap_hsmmc_dma_cleanup(struct omap_hsmm=
+c_host *host, int errno)
+> =A0* Readable error output
+> =A0*/
+> =A0#ifdef CONFIG_MMC_DEBUG
+> -static void omap_hsmmc_report_irq(struct omap_hsmmc_host *host, u32 stat=
+us)
+> +static void omap_hsmmc_dbg_report_irq(struct omap_hsmmc_host *host, u32 =
+status)
+> =A0{
+> =A0 =A0 =A0 =A0/* --- means reserved bit without definition at documentat=
+ion */
+> =A0 =A0 =A0 =A0static const char *omap_hsmmc_status_bits[] =3D {
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 "CC", "TC", "BGE", "---", "BWR", "BRR", "--=
+-", "---", "CIRQ",
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 "OBI", "---", "---", "---", "---", "---", "=
+ERRI", "CTO", "CCRC",
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 "CEB", "CIE", "DTO", "DCRC", "DEB", "---", =
+"ACE", "---",
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 "---", "---", "---", "CERR", "CERR", "BADA"=
+, "---", "---", "---"
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 "CC" =A0, "TC" =A0, "BGE", "---", "BWR" , "=
+BRR" , "---" , "---" ,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 "CIRQ", "OBI" , "---", "---", "---" , "---"=
+ , "---" , "ERRI",
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 "CTO" , "CCRC", "CEB", "CIE", "DTO" , "DCRC=
+", "DEB" , "---" ,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 "ACE" , "---" , "---", "---", "CERR", "BADA=
+", "---" , "---"
+> =A0 =A0 =A0 =A0};
+> =A0 =A0 =A0 =A0char res[256];
+> =A0 =A0 =A0 =A0char *buf =3D res;
+> @@ -1006,6 +1006,11 @@ static void omap_hsmmc_report_irq(struct omap_hsmm=
+c_host *host, u32 status)
 >
-> to the 2.6.32-longterm tree
-
-That patch introduced a suspend/resume regression, so please also add
-the one that fixed it:
-
-commit 1c8cf9c997a4a6b36e907c7ede5f048aeaab1644
-Author: Ohad Ben-Cohen <ohad@wizery.com>
-Date:   Wed Oct 13 09:31:56 2010 +0200
-
-    mmc: sdio: fix SDIO suspend/resume regression
-
-    Fix SDIO suspend/resume regression introduced by 4c2ef25fe0b "mmc: =
-fix
-    all hangs related to mmc/sd card insert/removal during suspend/resu=
-me":
-
-      PM: Syncing filesystems ... done.
-      Freezing user space processes ... (elapsed 0.01 seconds) done.
-      Freezing remaining freezable tasks ... (elapsed 0.01 seconds) don=
-e.
-      Suspending console(s) (use no_console_suspend to debug)
-      pm_op(): platform_pm_suspend+0x0/0x5c returns -38
-      PM: Device pxa2xx-mci.0 failed to suspend: error -38
-      PM: Some devices failed to suspend
-
-    4c2ef25fe0b moved the card removal/insertion mechanism out of MMC's
-    suspend/resume path and into pm notifiers (mmc_pm_notify), and that
-    broke SDIO's expectation that mmc_suspend_host() will remove the ca=
-rd,
-    and squash the error, in case -ENOSYS is returned from the bus susp=
-end
-    handler (mmc_sdio_suspend() in this case).
-
-    mmc_sdio_suspend() is using this whenever at least one of the card'=
-s SDIO
-    function drivers does not have suspend/resume handlers - in that ca=
-se
-    it is agreed to force removal of the entire card.
-
-    This patch fixes this regression by trivially bringing back that pa=
-rt of
-    mmc_suspend_host(), which was removed by 4c2ef25fe0b.
-
-    Reported-and-tested-by: Sven Neumann <s.neumann@raumfeld.com>
-    Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
-    Cc: Maxim Levitsky <maximlevitsky@gmail.com>
-    Cc: <stable@kernel.org>
-    Acked-by: Nicolas Pitre <nico@fluxnic.net>
-    Signed-off-by: Chris Ball <cjb@laptop.org>
-
-Thanks,
-Ohad.
+> =A0 =A0 =A0 =A0dev_dbg(mmc_dev(host->mmc), "%s\n", res);
+> =A0}
+> +#else
+> +static inline void omap_hsmmc_dbg_report_irq(struct omap_hsmmc_host *hos=
+t,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0u32 status)
+> +{
+> +}
+> =A0#endif =A0/* CONFIG_MMC_DEBUG */
+>
+> =A0/*
+> @@ -1064,9 +1069,7 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_hos=
+t *host, int status)
+> =A0 =A0 =A0 =A0dev_dbg(mmc_dev(host->mmc), "IRQ Status is %x\n", status);
+>
+> =A0 =A0 =A0 =A0if (status & ERR) {
+> -#ifdef CONFIG_MMC_DEBUG
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_hsmmc_report_irq(host, status);
+> -#endif
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_hsmmc_dbg_report_irq(host, status);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if ((status & CMD_TIMEOUT) ||
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(status & CMD_CRC)) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (host->cmd) {
+> --
+> 1.7.0.4
+>
+I checked against the TRM and you are right.
+FWIW,
+ Reviewed-by: Venkatraman S <svenkatr@ti.com>
