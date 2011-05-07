@@ -1,56 +1,58 @@
-From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 10/12] omap_hsmmc: use original sg_len for dma_unmap_sg
-Date: Sat,  7 May 2011 21:15:04 +0200
-Message-ID: <1304795706-27308-11-git-send-email-per.forlin@linaro.org>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH v3 02/12] mmc: mmc_test: add debugfs file to list all tests
+Date: Sun, 8 May 2011 01:18:36 +0300
+Message-ID: <BANLkTim2k_hb0Bw_cYeTUv-dMzyWVPO+gA@mail.gmail.com>
 References: <1304795706-27308-1-git-send-email-per.forlin@linaro.org>
+	<1304795706-27308-3-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <1304795706-27308-1-git-send-email-per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1304795706-27308-3-git-send-email-per.forlin@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Don't use the returned sg_len from dma_map_sg() as inparameter
-to dma_unmap_sg(). Use the original sg_len for both dma_map_sg
-and dma_unmap_sg.
+On Sat, May 7, 2011 at 10:14 PM, Per Forlin <per.forlin@linaro.org> wro=
+te:
+> Add a debugfs file "testlist" to print all available tests
+>
+> Signed-off-by: Per Forlin <per.forlin@linaro.org>
+> ---
+> =C2=A0drivers/mmc/card/mmc_test.c | =C2=A0 30 +++++++++++++++++++++++=
++++++++
+> =C2=A01 files changed, 30 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.=
+c
+> index abc1a63..c1c3c5a 100644
+> --- a/drivers/mmc/card/mmc_test.c
+> +++ b/drivers/mmc/card/mmc_test.c
 
-Signed-off-by: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/mmc/host/omap_hsmmc.c |    5 +++--
- 1 files changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 259ece0..ad3731a 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -959,7 +959,8 @@ static void omap_hsmmc_dma_cleanup(struct omap_hsmmc_host *host, int errno)
- 	spin_unlock(&host->irq_lock);
- 
- 	if (host->use_dma && dma_ch != -1) {
--		dma_unmap_sg(mmc_dev(host->mmc), host->data->sg, host->dma_len,
-+		dma_unmap_sg(mmc_dev(host->mmc), host->data->sg,
-+			host->data->sg_len,
- 			omap_hsmmc_get_dma_dir(host, host->data));
- 		omap_free_dma(dma_ch);
- 	}
-@@ -1343,7 +1344,7 @@ static void omap_hsmmc_dma_cb(int lch, u16 ch_status, void *cb_data)
- 		return;
- 	}
- 
--	dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->dma_len,
-+	dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
- 		omap_hsmmc_get_dma_dir(host, data));
- 
- 	req_in_progress = host->req_in_progress;
--- 
-1.7.4.1
+> @@ -2476,6 +2502,10 @@ static int mmc_test_register_file_test(struct =
+mmc_card *card)
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0file =3D debug=
+fs_create_file("test", S_IWUSR | S_IRUGO,
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0card->debugfs_root, card, &mmc_test_fops_test);
+>
+> + =C2=A0 =C2=A0 =C2=A0 if (card->debugfs_root)
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 file =3D debugfs_c=
+reate_file("testlist", S_IRUGO,
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 card->debugfs_root, card, &mmc_test_fops_testlist);
+> +
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (IS_ERR_OR_NULL(file)) {
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0dev_err(&card-=
+>dev,
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0"Can't create file. Perhaps debugfs is disabled.\n");
+I think you also need to use similar error path for both files: test
+and testlist.
+
+
+--=20
+With Best Regards,
+Andy Shevchenko
