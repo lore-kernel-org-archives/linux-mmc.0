@@ -1,103 +1,108 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH 6/6] mmc: sdhi: support up to 3 interrupt sources
-Date: Mon,  9 May 2011 09:55:16 +0900
-Message-ID: <1304902516-14150-7-git-send-email-horms@verge.net.au>
-References: <1304902516-14150-1-git-send-email-horms@verge.net.au>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH v3 00/12] mmc: use nonblock mmc requests to minimize
+ latency
+Date: Sun, 8 May 2011 19:05:14 -0700
+Message-ID: <0F831E97-0168-4CD5-985C-4965BFF816A0@marvell.com>
+References: <1304795706-27308-1-git-send-email-per.forlin@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:50170 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756558Ab1EIAzh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 May 2011 20:55:37 -0400
-In-Reply-To: <1304902516-14150-1-git-send-email-horms@verge.net.au>
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:56305 "EHLO
+	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932156Ab1EICFu convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 8 May 2011 22:05:50 -0400
+In-Reply-To: <1304795706-27308-1-git-send-email-per.forlin@linaro.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>
-Cc: Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Simon Horman <horms@verge.net.au>
+To: Per Forlin <per.forlin@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linaro-dev@lists.linaro.org" <linaro-dev@lists.linaro.org>, Chris Ball <cjb@laptop.org>
 
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Convert the SDHI code to support more than a single
-interrupt source. Needed to support hardware that
-uses GIC instead of INTC as interrupt controller.
+Hi Per,
 
-Will also allow us to remove the irq forwarding
-workaround from the INTC code in the future.
+We noticed on some of our systems if we ADMA or SDMA and a bounce buffer it is significantly faster then SDMA.
 
-Based on work by Simon Horman and Magnus Damm.
+I believe ADMA will do large transfers.  Another data point.
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-[horms@verge.net.au: edited commit message and cleaned up sob lines]
-Signed-off-by: Simon Horman <horms@verge.net.au>
----
- drivers/mmc/host/sh_mobile_sdhi.c |   39 ++++++++++++++++++++++++++----------
- 1 files changed, 28 insertions(+), 11 deletions(-)
+Philip
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 2bd235b..d264bbe 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -62,7 +62,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
- 	struct tmio_mmc_host *host;
- 	char clk_name[8];
--	int irq, ret;
-+	int i, irq, ret;
- 
- 	priv = kzalloc(sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
- 	if (priv == NULL) {
-@@ -116,16 +116,27 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	if (ret < 0)
- 		goto eprobe;
- 
--	irq = platform_get_irq(pdev, 0);
--	if (irq < 0) {
--		ret = irq;
--		goto eirq;
-+	for (i = 0; i < 3; i++) {
-+		irq = platform_get_irq(pdev, i);
-+		if (irq < 0) {
-+			if (i) {
-+				continue;
-+			} else {
-+				ret = irq;
-+				goto eirq;
-+			}
-+		}
-+		ret = request_irq(irq, tmio_mmc_irq, 0,
-+				  dev_name(&pdev->dev), host);
-+		if (ret) {
-+			while (i--) {
-+				irq = platform_get_irq(pdev, i);
-+				if (irq >= 0)
-+					free_irq(irq, host);
-+			}
-+			goto eirq;
-+		}
- 	}
--
--	ret = request_irq(irq, tmio_mmc_irq, 0, dev_name(&pdev->dev), host);
--	if (ret)
--		goto eirq;
--
- 	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
- 		 mmc_hostname(host->mmc), (unsigned long)
- 		 (platform_get_resource(pdev,IORESOURCE_MEM, 0)->start),
-@@ -148,8 +159,14 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
- 	struct mmc_host *mmc = platform_get_drvdata(pdev);
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
- 	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
-+	int i, irq;
-+
-+	for (i = 0; i < 3; i++) {
-+		irq = platform_get_irq(pdev, i);
-+		if (irq >= 0)
-+			free_irq(irq, host);
-+	}
- 
--	free_irq(platform_get_irq(pdev, 0), host);
- 	tmio_mmc_host_remove(host);
- 	clk_disable(priv->clk);
- 	clk_put(priv->clk);
--- 
-1.7.4.4
+On May 7, 2011, at 12:14 PM, Per Forlin wrote:
+
+> How significant is the cache maintenance over head?
+> It depends, the eMMC are much faster now
+> compared to a few years ago and cache maintenance cost more due to
+> multiple cache levels and speculative cache pre-fetch. In relation the
+> cost for handling the caches have increased and is now a bottle neck
+> dealing with fast eMMC together with DMA.
+> 
+> The intention for introducing none blocking mmc requests is to minimize the
+> time between a mmc request ends and another mmc request starts. In the
+> current implementation the MMC controller is idle when dma_map_sg and
+> dma_unmap_sg is processing. Introducing none blocking mmc request makes it
+> possible to prepare the caches for next job parallel with an active
+> mmc request.
+> 
+> This is done by making the issue_rw_rq() none blocking.
+> The increase in throughput is proportional to the time it takes to
+> prepare (major part of preparations is dma_map_sg and dma_unmap_sg)
+> a request and how fast the memory is. The faster the MMC/SD is
+> the more significant the prepare request time becomes. Measurements on U5500
+> and Panda on eMMC and SD shows significant performance gain for for large
+> reads when running DMA mode. In the PIO case the performance is unchanged.
+> 
+> There are two optional hooks pre_req() and post_req() that the host driver
+> may implement in order to move work to before and after the actual mmc_request
+> function is called. In the DMA case pre_req() may do dma_map_sg() and prepare
+> the dma descriptor and post_req runs the dma_unmap_sg.
+> 
+> Details on measurements from IOZone and mmc_test:
+> https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async-req
+> 
+> Under consideration:
+> * Make pre_req and post_req private to core.c.
+> * Generalize implementation and make it available for SDIO. 
+> 
+> Changes since v2:
+> * Fix compile warnings in core.c and block.c
+> * Simplify max transfer size in mmc_test
+> * set TASK_RUNNING in queue.c before issue_req()
+> 
+> Per Forlin (12):
+>  mmc: add none blocking mmc request function
+>  mmc: mmc_test: add debugfs file to list all tests
+>  mmc: mmc_test: add test for none blocking transfers
+>  mmc: add member in mmc queue struct to hold request data
+>  mmc: add a block request prepare function
+>  mmc: move error code in mmc_block_issue_rw_rq to a separate function.
+>  mmc: add a second mmc queue request member
+>  mmc: add handling for two parallel block requests in issue_rw_rq
+>  mmc: test: add random fault injection in core.c
+>  omap_hsmmc: use original sg_len for dma_unmap_sg
+>  omap_hsmmc: add support for pre_req and post_req
+>  mmci: implement pre_req() and post_req()
+> 
+> drivers/mmc/card/block.c      |  493 +++++++++++++++++++++++++++--------------
+> drivers/mmc/card/mmc_test.c   |  340 +++++++++++++++++++++++++++-
+> drivers/mmc/card/queue.c      |  180 ++++++++++------
+> drivers/mmc/card/queue.h      |   31 ++-
+> drivers/mmc/core/core.c       |  132 ++++++++++-
+> drivers/mmc/core/debugfs.c    |    5 +
+> drivers/mmc/host/mmci.c       |  146 +++++++++++-
+> drivers/mmc/host/mmci.h       |    8 +
+> drivers/mmc/host/omap_hsmmc.c |   90 +++++++-
+> include/linux/mmc/core.h      |    9 +-
+> include/linux/mmc/host.h      |   13 +-
+> lib/Kconfig.debug             |   11 +
+> 12 files changed, 1174 insertions(+), 284 deletions(-)
+> 
+> -- 
+> 1.7.4.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
