@@ -1,40 +1,51 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 2/2] mmci: fixup sg buffer handling in mmci_pio_irq.
-Date: Sun, 8 May 2011 22:13:29 +0200
-Message-ID: <BANLkTi=KswoqCqb_favD7EdX0NE47rM7Ew@mail.gmail.com>
-References: <1304594063-19408-1-git-send-email-linus.walleij@stericsson.com>
-	<20110508102219.GG27807@n2100.arm.linux.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH 4/6] mmc: sdhi: no need for special interrupt flags
+Date: Mon,  9 May 2011 09:55:14 +0900
+Message-ID: <1304902516-14150-5-git-send-email-horms@verge.net.au>
+References: <1304902516-14150-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:36814 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750753Ab1EHUNa convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 May 2011 16:13:30 -0400
-Received: by qwk3 with SMTP id 3so2708266qwk.19
-        for <linux-mmc@vger.kernel.org>; Sun, 08 May 2011 13:13:30 -0700 (PDT)
-In-Reply-To: <20110508102219.GG27807@n2100.arm.linux.org.uk>
+Received: from kirsty.vergenet.net ([202.4.237.240]:50155 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756411Ab1EIAzf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 May 2011 20:55:35 -0400
+In-Reply-To: <1304902516-14150-1-git-send-email-horms@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Linus Walleij <linus.walleij@stericsson.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>, Dmitry Tarnyagin <dmitry.tarnyagin@stericsson.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>
+Cc: Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>
 
-On Sun, May 8, 2011 at 12:22 PM, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Thu, May 05, 2011 at 01:14:23PM +0200, Linus Walleij wrote:
->> The patch fix the problem by checking result of mmci_pio_write().
->>
->> The fault was introduced in the change:
->> =A0 =A0 =A0 I2e506ec1f5a7fadf9780c18d8d31573eaf048273
->> =A0 =A0 =A0 MMCI: Fixup sg buffer handling in pio_write
->
-> I assume this isn't for mainline as that commit isn't present.
+From: Magnus Damm <damm@opensource.se>
 
-No I screwed up, I will post a combined patch with both and an
-explanation instead, only relates to SDIO FWIW.
+Modify the SDHI driver to get rid of unwanted irq flags.
 
-Thanks for your patience.
+IRQF_DISABLED unused, see include/linux/interrupt.h
+IRQF_TRIGGER_FALLING only relevant on external IRQ pins,
+but since SDHI is internal in the SoC this can go away.
 
-Yours,
-Linus Walleij
+Needed to support SDHI on sh73a0 that comes with a GIC
+that errors out with the IRQF_TRIGGER_FALLING setting.
+
+Signed-off-by: Magnus Damm <damm@opensource.se>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Reviewed-by: Simon Horman <horms@verge.net.au>
+---
+ drivers/mmc/host/sh_mobile_sdhi.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 9ee51ac..c489547 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -122,8 +122,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eirq;
+ 	}
+ 
+-	ret = request_irq(irq, tmio_mmc_irq, IRQF_DISABLED |
+-			  IRQF_TRIGGER_FALLING, dev_name(&pdev->dev), host);
++	ret = request_irq(irq, tmio_mmc_irq, 0, dev_name(&pdev->dev), host);
+ 	if (ret)
+ 		goto eirq;
+ 
+-- 
+1.7.4.4
+
