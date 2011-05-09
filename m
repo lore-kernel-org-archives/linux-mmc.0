@@ -1,224 +1,184 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH 3/6] mmc: tmio / sdhi: break out interrupt request/free
-Date: Mon,  9 May 2011 09:55:13 +0900
-Message-ID: <1304902516-14150-4-git-send-email-horms@verge.net.au>
+Subject: [PATCH 1/6] MMC: protect the tmio_mmc driver against a theoretical race
+Date: Mon,  9 May 2011 09:55:11 +0900
+Message-ID: <1304902516-14150-2-git-send-email-horms@verge.net.au>
 References: <1304902516-14150-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:50159 "EHLO
+Received: from kirsty.vergenet.net ([202.4.237.240]:50156 "EHLO
 	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756431Ab1EIAzf (ORCPT
+	with ESMTP id S1756525Ab1EIAzf (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 May 2011 20:55:35 -0400
 In-Reply-To: <1304902516-14150-1-git-send-email-horms@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>
-Cc: Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Simon Horman <horms@verge.net.au>
+Cc: Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org
 
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Move request_irq()/free_irq() from the shared code
-in tmio_mmc.c into the SDHI/tmio specific portion
-in sh_mobile_sdhi.c and tmio_mmc_pio.c.
-
-This is ground work to allow us to adjust the SDHI
-code with IRQ flags and number of interupt sources.
-
-Based on work by Magnus Damm.
+The MMC subsystem does not guarantee, that host driver .request() and
+.set_ios() callbacks are serialised. Such concurrent calls, however,
+do not have to be meaningfully supported, drivers just have to make
+sure to avoid any severe problems.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-[horms@verge.net.au: edited changelog, cleaned up sob lines]
-Signed-off-by: Simon Horman <horms@verge.net.au>
+Reviewed-by: Simon Horman <horms@verge.net.au>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c |   18 ++++++++++++++++--
- drivers/mmc/host/tmio_mmc.c       |   21 ++++++++++++++++++---
- drivers/mmc/host/tmio_mmc.h       |    2 +-
- drivers/mmc/host/tmio_mmc_pio.c   |   17 ++---------------
- 4 files changed, 37 insertions(+), 21 deletions(-)
+ drivers/mmc/host/tmio_mmc.h     |    1 +
+ drivers/mmc/host/tmio_mmc_pio.c |   62 +++++++++++++++++++++++++++++++++++----
+ 2 files changed, 57 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index f60e954..9ee51ac 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -62,7 +62,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
- 	struct tmio_mmc_host *host;
- 	char clk_name[8];
--	int ret;
-+	int irq, ret;
- 
- 	priv = kzalloc(sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
- 	if (priv == NULL) {
-@@ -116,11 +116,24 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	if (ret < 0)
- 		goto eprobe;
- 
-+	irq = platform_get_irq(pdev, 0);
-+	if (irq < 0) {
-+		ret = irq;
-+		goto eirq;
-+	}
-+
-+	ret = request_irq(irq, tmio_mmc_irq, IRQF_DISABLED |
-+			  IRQF_TRIGGER_FALLING, dev_name(&pdev->dev), host);
-+	if (ret)
-+		goto eirq;
-+
- 	pr_info("%s at 0x%08lx irq %d\n", mmc_hostname(host->mmc),
--		(unsigned long)host->ctl, host->irq);
-+		(unsigned long)host->ctl, irq);
- 
- 	return ret;
- 
-+eirq:
-+	tmio_mmc_host_remove(host);
- eprobe:
- 	clk_disable(priv->clk);
- 	clk_put(priv->clk);
-@@ -135,6 +148,7 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
- 	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
- 
-+	free_irq(platform_get_irq(pdev, 0), host);
- 	tmio_mmc_host_remove(host);
- 	clk_disable(priv->clk);
- 	clk_put(priv->clk);
-diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index be739f7..14479f9 100644
---- a/drivers/mmc/host/tmio_mmc.c
-+++ b/drivers/mmc/host/tmio_mmc.c
-@@ -64,7 +64,7 @@ static int __devinit tmio_mmc_probe(struct platform_device *pdev)
- 	const struct mfd_cell *cell = mfd_get_cell(pdev);
- 	struct tmio_mmc_data *pdata;
- 	struct tmio_mmc_host *host;
--	int ret = -EINVAL;
-+	int ret = -EINVAL, irq;
- 
- 	if (pdev->num_resources != 2)
- 		goto out;
-@@ -73,6 +73,12 @@ static int __devinit tmio_mmc_probe(struct platform_device *pdev)
- 	if (!pdata || !pdata->hclk)
- 		goto out;
- 
-+	irq = platform_get_irq(pdev, 0);
-+	if (irq < 0) {
-+		ret = irq;
-+		goto out;
-+	}
-+
- 	/* Tell the MFD core we are ready to be enabled */
- 	if (cell->enable) {
- 		ret = cell->enable(pdev);
-@@ -84,11 +90,18 @@ static int __devinit tmio_mmc_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto cell_disable;
- 
-+	ret = request_irq(irq, tmio_mmc_irq, IRQF_DISABLED |
-+			  IRQF_TRIGGER_FALLING, dev_name(&pdev->dev), host);
-+	if (ret)
-+		goto host_remove;
-+
- 	pr_info("%s at 0x%08lx irq %d\n", mmc_hostname(host->mmc),
--		(unsigned long)host->ctl, host->irq);
-+		(unsigned long)host->ctl, irq);
- 
- 	return 0;
- 
-+host_remove:
-+	tmio_mmc_host_remove(host);
- cell_disable:
- 	if (cell->disable)
- 		cell->disable(pdev);
-@@ -104,7 +117,9 @@ static int __devexit tmio_mmc_remove(struct platform_device *pdev)
- 	platform_set_drvdata(pdev, NULL);
- 
- 	if (mmc) {
--		tmio_mmc_host_remove(mmc_priv(mmc));
-+		struct tmio_mmc_host *host = mmc_priv(mmc);
-+		free_irq(platform_get_irq(pdev, 0), host);
-+		tmio_mmc_host_remove(host);
- 		if (cell->disable)
- 			cell->disable(pdev);
- 	}
 diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 58138a2..c6bf726 100644
+index 099ed49..f353624 100644
 --- a/drivers/mmc/host/tmio_mmc.h
 +++ b/drivers/mmc/host/tmio_mmc.h
-@@ -45,7 +45,6 @@ struct tmio_mmc_host {
- 	struct mmc_request      *mrq;
- 	struct mmc_data         *data;
- 	struct mmc_host         *mmc;
--	int                     irq;
- 	unsigned int		sdio_irq_enabled;
+@@ -19,6 +19,7 @@
+ #include <linux/highmem.h>
+ #include <linux/mmc/tmio.h>
+ #include <linux/pagemap.h>
++#include <linux/spinlock.h>
  
- 	/* Callbacks for clock / power control */
-@@ -86,6 +85,7 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host);
- 
- void tmio_mmc_enable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
- void tmio_mmc_disable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
-+irqreturn_t tmio_mmc_irq(int irq, void *devid);
- 
- static inline char *tmio_mmc_kmap_atomic(struct scatterlist *sg,
- 					 unsigned long *flags)
+ /* Definitions for values the CTRL_SDIO_STATUS register can take. */
+ #define TMIO_SDIO_STAT_IOIRQ	0x0001
 diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index fb1d990..6337424 100644
+index 722cdbb..b4aef53 100644
 --- a/drivers/mmc/host/tmio_mmc_pio.c
 +++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -564,7 +564,7 @@ out:
- 	spin_unlock(&host->lock);
+@@ -243,8 +243,12 @@ static void tmio_mmc_reset_work(struct work_struct *work)
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	mrq = host->mrq;
+ 
+-	/* request already finished */
+-	if (!mrq
++	/*
++	 * is request already finished? Since we use a non-blocking
++	 * cancel_delayed_work(), it can happen, that a .set_ios() call preempts
++	 * us, so, have to check for IS_ERR(host->mrq)
++	 */
++	if (IS_ERR_OR_NULL(mrq)
+ 	    || time_is_after_jiffies(host->last_req_ts +
+ 		msecs_to_jiffies(2000))) {
+ 		spin_unlock_irqrestore(&host->lock, flags);
+@@ -264,16 +268,19 @@ static void tmio_mmc_reset_work(struct work_struct *work)
+ 
+ 	host->cmd = NULL;
+ 	host->data = NULL;
+-	host->mrq = NULL;
+ 	host->force_pio = false;
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+ 	tmio_mmc_reset(host);
+ 
++	/* Ready for new calls */
++	host->mrq = NULL;
++
+ 	mmc_request_done(host->mmc, mrq);
  }
  
--static irqreturn_t tmio_mmc_irq(int irq, void *devid)
-+irqreturn_t tmio_mmc_irq(int irq, void *devid)
++/* called with host->lock held, interrupts disabled */
+ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
  {
- 	struct tmio_mmc_host *host = devid;
- 	struct tmio_mmc_data *pdata = host->pdata;
-@@ -659,6 +659,7 @@ static irqreturn_t tmio_mmc_irq(int irq, void *devid)
- out:
- 	return IRQ_HANDLED;
+ 	struct mmc_request *mrq = host->mrq;
+@@ -281,13 +288,15 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
+ 	if (!mrq)
+ 		return;
+ 
+-	host->mrq = NULL;
+ 	host->cmd = NULL;
+ 	host->data = NULL;
+ 	host->force_pio = false;
+ 
+ 	cancel_delayed_work(&host->delayed_reset_work);
+ 
++	host->mrq = NULL;
++
++	/* FIXME: mmc_request_done() can schedule! */
+ 	mmc_request_done(host->mmc, mrq);
  }
-+EXPORT_SYMBOL(tmio_mmc_irq);
  
- static int tmio_mmc_start_data(struct tmio_mmc_host *host,
- 	struct mmc_data *data)
-@@ -893,21 +894,10 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 	tmio_mmc_clk_stop(_host);
- 	tmio_mmc_reset(_host);
+@@ -685,15 +694,27 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
+ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
++	unsigned long flags;
+ 	int ret;
  
--	ret = platform_get_irq(pdev, 0);
--	if (ret < 0)
--		goto pm_suspend;
--
--	_host->irq = ret;
--
- 	tmio_mmc_disable_mmc_irqs(_host, TMIO_MASK_ALL);
- 	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
- 		tmio_mmc_enable_sdio_irq(mmc, 0);
+-	if (host->mrq)
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (host->mrq) {
+ 		pr_debug("request not null\n");
++		if (IS_ERR(host->mrq)) {
++			spin_unlock_irqrestore(&host->lock, flags);
++			mrq->cmd->error = -EAGAIN;
++			mmc_request_done(mmc, mrq);
++			return;
++		}
++	}
  
--	ret = request_irq(_host->irq, tmio_mmc_irq, IRQF_DISABLED |
--		IRQF_TRIGGER_FALLING, dev_name(&pdev->dev), _host);
--	if (ret)
--		goto pm_suspend;
--
- 	spin_lock_init(&_host->lock);
+ 	host->last_req_ts = jiffies;
+ 	wmb();
+ 	host->mrq = mrq;
  
- 	/* Init delayed work for request timeouts */
-@@ -933,8 +923,6 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
++	spin_unlock_irqrestore(&host->lock, flags);
++
+ 	if (mrq->data) {
+ 		ret = tmio_mmc_start_data(host, mrq->data);
+ 		if (ret)
+@@ -708,8 +729,8 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	}
  
- 	return 0;
+ fail:
+-	host->mrq = NULL;
+ 	host->force_pio = false;
++	host->mrq = NULL;
+ 	mrq->cmd->error = ret;
+ 	mmc_request_done(mmc, mrq);
+ }
+@@ -723,6 +744,29 @@ fail:
+ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++	if (host->mrq) {
++		if (IS_ERR(host->mrq)) {
++			dev_dbg(&host->pdev->dev,
++				"%s.%d: concurrent .set_ios(), clk %u, mode %u\n",
++				current->comm, task_pid_nr(current),
++				ios->clock, ios->power_mode);
++			host->mrq = ERR_PTR(-EINTR);
++		} else {
++			dev_dbg(&host->pdev->dev,
++				"%s.%d: CMD%u active since %lu, now %lu!\n",
++				current->comm, task_pid_nr(current),
++				host->mrq->cmd->opcode, host->last_req_ts, jiffies);
++		}
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
++	}
++
++	host->mrq = ERR_PTR(-EBUSY);
++
++	spin_unlock_irqrestore(&host->lock, flags);
  
--pm_suspend:
--	pm_runtime_suspend(&pdev->dev);
- pm_disable:
- 	pm_runtime_disable(&pdev->dev);
- 	iounmap(_host->ctl);
-@@ -952,7 +940,6 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
- 	mmc_remove_host(host->mmc);
- 	cancel_delayed_work_sync(&host->delayed_reset_work);
- 	tmio_mmc_release_dma(host);
--	free_irq(host->irq, host);
- 	iounmap(host->ctl);
- 	mmc_free_host(host->mmc);
+ 	if (ios->clock)
+ 		tmio_mmc_set_clock(host, ios->clock);
+@@ -753,6 +797,12 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  
+ 	/* Let things settle. delay taken from winCE driver */
+ 	udelay(140);
++	if (PTR_ERR(host->mrq) == -EINTR)
++		dev_dbg(&host->pdev->dev,
++			"%s.%d: IOS interrupted: clk %u, mode %u",
++			current->comm, task_pid_nr(current),
++			ios->clock, ios->power_mode);
++	host->mrq = NULL;
+ }
+ 
+ static int tmio_mmc_get_ro(struct mmc_host *mmc)
 -- 
 1.7.4.4
 
