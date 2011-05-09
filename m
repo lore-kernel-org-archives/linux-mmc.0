@@ -1,48 +1,42 @@
-From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Subject: Two eMMC4.5 new featurs - 'Larger Sector size' and 'Packed
- commands'
-Date: Mon, 9 May 2011 15:59:14 +0800
-Message-ID: <CE761E84DADF2947A4AF22FB8D97A47358F60E68@shsmsx501.ccr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Eliad Peller <eliad@wizery.com>
+Subject: [PATCH] mmc: clear MMC_PM_KEEP_POWER flag on resume
+Date: Mon,  9 May 2011 11:32:31 +0300
+Message-ID: <1304929951-30326-1-git-send-email-eliad@wizery.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:37045 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752740Ab1EIH7m convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 May 2011 03:59:42 -0400
-Content-Language: en-US
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:39718 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750959Ab1EIIcX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 May 2011 04:32:23 -0400
+Received: by wya21 with SMTP id 21so3686469wya.19
+        for <linux-mmc@vger.kernel.org>; Mon, 09 May 2011 01:32:22 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>
 
-Hi,
+Since the MMC_PM_KEEP_POWER flag should be set on each suspend,
+it should also cleared on each resume.
 
-I'm investigating on eMMC 4.5 new features and have some concerns on below new features:
+Upon resuming, we have to know if power was kept
+(for re-initialization, etc.), so clear it just after resuming.
 
-1. Large sector size (Native 4KB sector behavior)
-	The eMMC4.5 Spec says 'All devices with capacities higher than 256GB shall have native sector size of 4KB'.
-	And it also requires that in the Native 4KB sector size mode, data transfers still use 512B CC-protected blocks,
-	but data shall be transferred in multiple of 8 such blocks (always multiples of 4KB).
+Signed-off-by: Eliad Peller <eliad@wizery.com>
+---
+ drivers/mmc/core/core.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
-	Since current kernel block layer uses 512B sector, then we have to pad the eMMC device read/write access to 4KB aligned if the block layer request sectors are not 4KB aligned.
-	For example, if kernel block layer only wants to read 1 sector (512 byte) from the eMMC device, then the mmc driver has to read 8 sectors first and then return only the requested 1 	sector. I think this will slow down mmc driver performance.
-
-	So, I'm not sure whether it makes any sense to implement this feature. Any idea?
-
-2. Packed commands
-	The eMMC 4.5 Spec allows 'Read and write commands can be packed in groups of commands (either all read or all write) that transfer the data for all commands in the group in one 	transfer on the bus, to reduce overheads.'
-
-	For both packed read/write command, the driver needs to first issue a CMD23 with the PACKED flag set and then a CMD25 to send a 'packed command header'. Then driver can 	read/write multiple data blocks with the CMD18/CMD25.
-
-	To my understanding, in current kernel mmc driver, how many sectors/blocks can be transferred in one request is decided by the kernel block layer. In most of the popular platforms, I 	believe it will not transfer more than 512K bytes in one request. And there's no problem for transferring 512KB data in one CMD18/CMD25.
-
-	So, only single CMD18/CMD25 is enough for current MMC driver and I don't see any benefits by implementing the packed commands in current MMC driver. Any comments?
-
-
-Thanks.
-
-Regards,
-Yunpeng
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index c2350e4..99941eb 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1789,6 +1789,7 @@ int mmc_resume_host(struct mmc_host *host)
+ 			err = 0;
+ 		}
+ 	}
++	host->pm_flags &= ~MMC_PM_KEEP_POWER;
+ 	mmc_bus_put(host);
+ 
+ 	return err;
+-- 
+1.7.0.4
 
