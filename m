@@ -1,63 +1,56 @@
-From: Julia Lawall <julia@diku.dk>
-Subject: Re: [PATCH] drivers/mmc/card/block.c: fix potential null dereference
- 'idata'
-Date: Mon, 9 May 2011 18:12:05 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1105091811320.15483@pc-004.diku.dk>
-References: <4DC7F4AB.90607@gmail.com> <Pine.LNX.4.64.1105091631400.15483@pc-004.diku.dk>
- <4DC802C0.9040302@gmail.com> <Pine.LNX.4.64.1105091713080.15483@pc-004.diku.dk>
- <4DC8117C.7060200@gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Antonio Ospite <ospite@studenti.unina.it>
+Subject: [PATCH] pxamci: remove an ifdef about CONFIG_REGULATOR
+Date: Mon,  9 May 2011 22:11:09 +0200
+Message-ID: <1304971869-20161-1-git-send-email-ospite@studenti.unina.it>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mgw2.diku.dk ([130.225.96.92]:38548 "EHLO mgw2.diku.dk"
+Received: from smtp207.alice.it ([82.57.200.103]:44387 "EHLO smtp207.alice.it"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751837Ab1EIQMM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 9 May 2011 12:12:12 -0400
-In-Reply-To: <4DC8117C.7060200@gmail.com>
+	id S1752413Ab1EIULX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 9 May 2011 16:11:23 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vladimir Motyka <vladimir.motyka@gmail.com>
-Cc: cjb@laptop.org, kernel-janitors@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Antonio Ospite <ospite@studenti.unina.it>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, openezx-devel@lists.openezx.org, linux-arm-kernel@lists.infradead.org
 
-I guess there is also a point at which idata has been successfully 
-allocated but idata->buf has not.
+Don't wrap regulator_get() inside an #ifdef CONFIG_REGULATOR anymore, as
+now (since be1a50d) it correctly degenerates and returns NULL when the
+regulator framework is disabled.
 
-julia
+Signed-off-by: Antonio Ospite <ospite@studenti.unina.it>
+---
 
+This comes after the discussion at 
+http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg07443.html and 
+following.
 
-On Mon, 9 May 2011, Vladimir Motyka wrote:
+Regards,
+   Antonio Ospite
+   http://ao2.it
 
-> When allocation of idata fails there was a null dereference.
-> 
-> Signed-off-by: Vladimir Motyka <vladimir.motyka@gmail.com>
-> ---
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 407836d..a03cdc6 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -237,7 +237,7 @@ static struct mmc_blk_ioc_data
-> *mmc_blk_ioctl_copy_from_user(
->  	idata = kzalloc(sizeof(*idata), GFP_KERNEL);
->  	if (!idata) {
->  		err = -ENOMEM;
-> -		goto copy_err;
-> +		goto alloc_err;
->  	}
-> 
->  	if (copy_from_user(&idata->ic, user, sizeof(idata->ic))) {
-> @@ -268,8 +268,8 @@ static struct mmc_blk_ioc_data
-> *mmc_blk_ioctl_copy_from_user(
->  copy_err:
->  	kfree(idata->buf);
->  	kfree(idata);
-> +alloc_err:
->  	return ERR_PTR(err);
-> -
->  }
-> 
->  static int mmc_blk_ioctl_cmd(struct block_device *bdev,
-> --
-> To unsubscribe from this list: send the line "unsubscribe kernel-janitors" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+ drivers/mmc/host/pxamci.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index 7257738..07e1f22 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -79,7 +79,6 @@ struct pxamci_host {
+ 
+ static inline void pxamci_init_ocr(struct pxamci_host *host)
+ {
+-#ifdef CONFIG_REGULATOR
+ 	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
+ 
+ 	if (IS_ERR(host->vcc))
+@@ -90,7 +89,7 @@ static inline void pxamci_init_ocr(struct pxamci_host *host)
+ 			dev_warn(mmc_dev(host->mmc),
+ 				"ocr_mask/setpower will not be used\n");
+ 	}
+-#endif
++
+ 	if (host->vcc == NULL) {
+ 		/* fall-back to platform data */
+ 		host->mmc->ocr_avail = host->pdata ?
+-- 
+1.7.5.1
+
