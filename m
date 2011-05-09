@@ -1,108 +1,101 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH v3 00/12] mmc: use nonblock mmc requests to minimize
- latency
-Date: Sun, 8 May 2011 19:05:14 -0700
-Message-ID: <0F831E97-0168-4CD5-985C-4965BFF816A0@marvell.com>
-References: <1304795706-27308-1-git-send-email-per.forlin@linaro.org>
+From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
+Subject: RE: Is it possible for the ext4/btrfs file system to pass some
+ context related info to low level block driver?
+Date: Mon, 9 May 2011 13:50:46 +0800
+Message-ID: <CE761E84DADF2947A4AF22FB8D97A47358F60CB1@shsmsx501.ccr.corp.intel.com>
+References: <CE761E84DADF2947A4AF22FB8D97A47358E28022@shsmsx501.ccr.corp.intel.com>
+ <yq1mxj32932.fsf@sermon.lab.mkp.net>
+ <CE761E84DADF2947A4AF22FB8D97A47358EE526A@shsmsx501.ccr.corp.intel.com>
+ <60C31100-5694-4CA9-A778-91CB15915052@dilger.ca>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:56305 "EHLO
-	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932156Ab1EICFu convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 8 May 2011 22:05:50 -0400
-In-Reply-To: <1304795706-27308-1-git-send-email-per.forlin@linaro.org>
+Received: from mga09.intel.com ([134.134.136.24]:65115 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751381Ab1EIFvJ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 May 2011 01:51:09 -0400
+In-Reply-To: <60C31100-5694-4CA9-A778-91CB15915052@dilger.ca>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linaro-dev@lists.linaro.org" <linaro-dev@lists.linaro.org>, Chris Ball <cjb@laptop.org>
+To: Andreas Dilger <adilger@dilger.ca>
+Cc: "Martin K. Petersen" <martin.petersen@oracle.com>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+>-----Original Message-----
+>From: Andreas Dilger [mailto:adilger@dilger.ca]
+>Sent: Wednesday, May 04, 2011 10:52 PM
+>To: Gao, Yunpeng
+>Cc: Martin K. Petersen; linux-btrfs@vger.kernel.org;
+>linux-ext4@vger.kernel.org; linux-fsdevel@vger.kernel.org;
+>linux-mmc@vger.kernel.org
+>Subject: Re: Is it possible for the ext4/btrfs file system to pass some context
+>related info to low level block driver?
+>
+>On 2011-05-04, at 5:45 AM, "Gao, Yunpeng" <yunpeng.gao@intel.com>
+>wrote:
+>>> Yes, I have been working on some changes that allow us to tag bios and
+>>> pass the information out to storage. These patches have been on the back
+>>> burner for a while due to other commitments. But I'll dig them out and
+>>> post them later. We just discussed them a couple of weeks ago at the
+>>> Linux Storage Workshop.
+>>
+>> That's great! Thanks for the update and look forward to your patches.
+>>
+>>> In the meantime: Can you point me to the relevant eMMC stuff so I can
+>>> see how many tiers or classes we have to work with there?
+>>>
+>> I'm investigating on add some eMMC 4.5 features support in current Linux
+>mmc driver (drivers/mmc).
+>> The Linux mmc driver register the eMMC device as a normal Linux block
+>device. So, it can get all the Linux block layer bio flags.
+>>
+>> To below eMMC 4.5 new features:
+>>
+>> Data Tag:
+>> 'The mechanism permits the device to receive from the host information
+>about specific data types (for instance file system metadata, time-stamps,
+>configuration parameters, etc.). The information is conveyed before a write
+>multiple blocks operation at well defined addresses. By receiving this
+>information the device can improve the access rate during the following read
+>and update operations and offer a more reliable and robust storage.'
+>>
+>> I guess the exist block layer flag REQ_META can be used to notify the low
+>level block driver/device to execute the Data Tag feature. But don't know why
+>currently most of Linux file systems don't use the REQ_META flag at all (seems
+>only gfs2 uses it now).
+>
+>I was aware of REQ_META, but I didn't know there was any benefit to using it.
+>I think it would be easy to set REQ_META on all ext4 metadata if there was a
+>reason to do so.
 
-Hi Per,
+To NAND-flash based storage device, such as eMMC card, it's possible that the REQ_META tag can be used to notify the low level eMMC card - 'Hi, the following data is important meta data, it should be stored into some more reliable area of the NAND flash media'. For example, stored the meta data into SLC NAND partition/area inside of the eMMC card. Of course, it depends on the card vendor's implementation.
 
-We noticed on some of our systems if we ADMA or SDMA and a bounce buffer it is significantly faster then SDMA.
+>> Context Management:
+>> 'To better differentiate between large sequential operations and small
+>random operations, and to improve multitasking support, contexts can be
+>associated with groups of read or write commands ... A context can be seen
+>as an active session, configured for a specific read/write pattern (e.g.
+>sequential in some granularity). Multiple read or write commands are
+>associated with this context to create some logical association between them,
+>to allow device to optimize performance.'
+>>
+>> To my understanding, to support this feature, it needs file system (or
+>application?) to notify the low level driver that the following data access will
+>be large sequential read/write operations.
+>> And I'm not sure is it possible for file system to pass this kind of information
+>to low level driver? Any idea?
+>
+>A simple way to do this would be to use the inode number as the context, so
+>writes to the same inode are grouped together. Another possibility is the PID,
+>though that is less clearly correct (e.g. if tar is extracting a buch of files, are
+>they all related or not).
 
-I believe ADMA will do large transfers.  Another data point.
+Thanks a lot for the suggestions. I'm not sure whether they're feasible, but will look into it and do more investigations.
 
-Philip
+Thanks.
 
-On May 7, 2011, at 12:14 PM, Per Forlin wrote:
+Regards,
+Yunpeng
 
-> How significant is the cache maintenance over head?
-> It depends, the eMMC are much faster now
-> compared to a few years ago and cache maintenance cost more due to
-> multiple cache levels and speculative cache pre-fetch. In relation the
-> cost for handling the caches have increased and is now a bottle neck
-> dealing with fast eMMC together with DMA.
-> 
-> The intention for introducing none blocking mmc requests is to minimize the
-> time between a mmc request ends and another mmc request starts. In the
-> current implementation the MMC controller is idle when dma_map_sg and
-> dma_unmap_sg is processing. Introducing none blocking mmc request makes it
-> possible to prepare the caches for next job parallel with an active
-> mmc request.
-> 
-> This is done by making the issue_rw_rq() none blocking.
-> The increase in throughput is proportional to the time it takes to
-> prepare (major part of preparations is dma_map_sg and dma_unmap_sg)
-> a request and how fast the memory is. The faster the MMC/SD is
-> the more significant the prepare request time becomes. Measurements on U5500
-> and Panda on eMMC and SD shows significant performance gain for for large
-> reads when running DMA mode. In the PIO case the performance is unchanged.
-> 
-> There are two optional hooks pre_req() and post_req() that the host driver
-> may implement in order to move work to before and after the actual mmc_request
-> function is called. In the DMA case pre_req() may do dma_map_sg() and prepare
-> the dma descriptor and post_req runs the dma_unmap_sg.
-> 
-> Details on measurements from IOZone and mmc_test:
-> https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async-req
-> 
-> Under consideration:
-> * Make pre_req and post_req private to core.c.
-> * Generalize implementation and make it available for SDIO. 
-> 
-> Changes since v2:
-> * Fix compile warnings in core.c and block.c
-> * Simplify max transfer size in mmc_test
-> * set TASK_RUNNING in queue.c before issue_req()
-> 
-> Per Forlin (12):
->  mmc: add none blocking mmc request function
->  mmc: mmc_test: add debugfs file to list all tests
->  mmc: mmc_test: add test for none blocking transfers
->  mmc: add member in mmc queue struct to hold request data
->  mmc: add a block request prepare function
->  mmc: move error code in mmc_block_issue_rw_rq to a separate function.
->  mmc: add a second mmc queue request member
->  mmc: add handling for two parallel block requests in issue_rw_rq
->  mmc: test: add random fault injection in core.c
->  omap_hsmmc: use original sg_len for dma_unmap_sg
->  omap_hsmmc: add support for pre_req and post_req
->  mmci: implement pre_req() and post_req()
-> 
-> drivers/mmc/card/block.c      |  493 +++++++++++++++++++++++++++--------------
-> drivers/mmc/card/mmc_test.c   |  340 +++++++++++++++++++++++++++-
-> drivers/mmc/card/queue.c      |  180 ++++++++++------
-> drivers/mmc/card/queue.h      |   31 ++-
-> drivers/mmc/core/core.c       |  132 ++++++++++-
-> drivers/mmc/core/debugfs.c    |    5 +
-> drivers/mmc/host/mmci.c       |  146 +++++++++++-
-> drivers/mmc/host/mmci.h       |    8 +
-> drivers/mmc/host/omap_hsmmc.c |   90 +++++++-
-> include/linux/mmc/core.h      |    9 +-
-> include/linux/mmc/host.h      |   13 +-
-> lib/Kconfig.debug             |   11 +
-> 12 files changed, 1174 insertions(+), 284 deletions(-)
-> 
-> -- 
-> 1.7.4.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
