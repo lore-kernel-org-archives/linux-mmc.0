@@ -1,30 +1,67 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH] pxamci: remove an ifdef about CONFIG_REGULATOR
-Date: Mon, 9 May 2011 22:36:12 +0200
-Message-ID: <20110509203612.GC21323@opensource.wolfsonmicro.com>
-References: <1304971869-20161-1-git-send-email-ospite@studenti.unina.it>
- <20110509202325.GD16919@n2100.arm.linux.org.uk>
+From: Vladimir Motyka <vladimir.motyka@gmail.com>
+Subject: Re: [PATCH] drivers/mmc/card/block.c: fix potential null dereference
+ 'idata'
+Date: Mon, 09 May 2011 22:37:21 +0200
+Message-ID: <4DC85081.9090105@gmail.com>
+References: <4DC7F4AB.90607@gmail.com> <Pine.LNX.4.64.1105091631400.15483@pc-004.diku.dk> <4DC802C0.9040302@gmail.com> <Pine.LNX.4.64.1105091713080.15483@pc-004.diku.dk> <4DC8117C.7060200@gmail.com> <Pine.LNX.4.64.1105091811320.15483@pc-004.diku.dk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:42543 "EHLO
-	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754624Ab1EIUgI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 May 2011 16:36:08 -0400
-Content-Disposition: inline
-In-Reply-To: <20110509202325.GD16919@n2100.arm.linux.org.uk>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:49108 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751417Ab1EIUiO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 May 2011 16:38:14 -0400
+In-Reply-To: <Pine.LNX.4.64.1105091811320.15483@pc-004.diku.dk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Antonio Ospite <ospite@studenti.unina.it>, linux-mmc@vger.kernel.org, openezx-devel@lists.openezx.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+To: Julia Lawall <julia@diku.dk>
+Cc: cjb@laptop.org, kernel-janitors@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Mon, May 09, 2011 at 09:23:25PM +0100, Russell King - ARM Linux wrote:
+On 05/09/2011 06:12 PM, Julia Lawall wrote:
+> I guess there is also a point at which idata has been successfully 
+> allocated but idata->buf has not.
+> 
+> julia
+> 
+Yes there is. Thank You for pointing out.
 
-> NAK.  This has been proposed before, and rejected.  See the comments
-> against the original proposal:
+Vladimir Motyka
 
-> http://www.arm.linux.org.uk/developer/patches/viewpatch.php?id=6525/1
+> On Mon, 9 May 2011, Vladimir Motyka wrote:
+> 
+>> When allocation of idata fails there was a null dereference.
+>>
+>> Signed-off-by: Vladimir Motyka <vladimir.motyka@gmail.com>
+>> ---
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 407836d..a03cdc6 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -237,7 +237,7 @@ static struct mmc_blk_ioc_data
+>> *mmc_blk_ioctl_copy_from_user(
+>>  	idata = kzalloc(sizeof(*idata), GFP_KERNEL);
+>>  	if (!idata) {
+>>  		err = -ENOMEM;
+>> -		goto copy_err;
+>> +		goto alloc_err;
+>>  	}
+>>
+>>  	if (copy_from_user(&idata->ic, user, sizeof(idata->ic))) {
+>> @@ -268,8 +268,8 @@ static struct mmc_blk_ioc_data
+>> *mmc_blk_ioctl_copy_from_user(
+>>  copy_err:
+>>  	kfree(idata->buf);
+>>  	kfree(idata);
+>> +alloc_err:
+>>  	return ERR_PTR(err);
+>> -
+>>  }
+>>
+>>  static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe kernel-janitors" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 
-Hrm, this looks like the bodge we're doing for !REGULATOR isn't actually
-helping here unless we do a NULL || IS_ERR() in the error check.  The
-ifdefs are certainly fail.
