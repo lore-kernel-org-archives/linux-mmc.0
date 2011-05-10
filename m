@@ -1,127 +1,284 @@
 From: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
-Subject: [PATCHv2.1] mmc: omap_hsmmc: split duplicate code to calc_divisor() function
-Date: Tue, 10 May 2011 15:51:54 +0300
-Message-ID: <5a2a0ae8f9ee7cfe8df507d7288d99c0e9ac7156.1305030690.git.ext-andriy.shevchenko@nokia.com>
-References: <1304673255-31634-6-git-send-email-adrian.hunter@nokia.com>
+Subject: [PATCHv1] mmc_test: minor clean up, use t = &test.area everywhere
+Date: Tue, 10 May 2011 15:59:01 +0300
+Message-ID: <be7436a045a4706e31660c92bb8f48cd043facfc.1305030615.git.ext-andriy.shevchenko@nokia.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([147.243.128.26]:51344 "EHLO mgw-da02.nokia.com"
+Received: from smtp.nokia.com ([147.243.1.48]:52891 "EHLO mgw-sa02.nokia.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751426Ab1EJMr0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 May 2011 08:47:26 -0400
-In-Reply-To: <1304673255-31634-6-git-send-email-adrian.hunter@nokia.com>
+	id S1751880Ab1EJMyH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 May 2011 08:54:07 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: Tony Lindgren <tony@atomide.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>, Adrian Hunter <adrian.hunter@nokia.com>
-
-There are two places where the same calculations are done. Let's split them to
-separate function.
-
-In addition the new function is simplified by usage DIV_ROUND_UP kernel macro.
+To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Tony Lindgren <tony@atomide.com>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
 Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
-Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   46 +++++++++++++++++------------------------
- 1 files changed, 19 insertions(+), 27 deletions(-)
+ drivers/mmc/card/mmc_test.c |   75 +++++++++++++++++++++++++------------------
+ 1 files changed, 44 insertions(+), 31 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index b9200ef..8787ba8 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -17,6 +17,7 @@
- 
- #include <linux/module.h>
- #include <linux/init.h>
-+#include <linux/kernel.h>
- #include <linux/debugfs.h>
- #include <linux/seq_file.h>
- #include <linux/interrupt.h>
-@@ -584,6 +585,20 @@ static void omap_hsmmc_disable_irq(struct omap_hsmmc_host *host)
- 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index 35252c1..233cdfa 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -1386,8 +1386,9 @@ static int mmc_test_area_io(struct mmc_test_card *test, unsigned long sz,
+  */
+ static int mmc_test_area_fill(struct mmc_test_card *test)
+ {
+-	return mmc_test_area_io(test, test->area.max_tfr, test->area.dev_addr,
+-				1, 0, 0);
++	struct mmc_test_area *t = &test->area;
++
++	return mmc_test_area_io(test, t->max_tfr, t->dev_addr, 1, 0, 0);
  }
  
-+/* Calculate divisor for the given clock frequency */
-+static u16 calc_divisor(struct mmc_ios *ios)
-+{
-+	u16 dsor = 0;
+ /*
+@@ -1400,7 +1401,7 @@ static int mmc_test_area_erase(struct mmc_test_card *test)
+ 	if (!mmc_can_erase(test->card))
+ 		return 0;
+ 
+-	return mmc_erase(test->card, t->dev_addr, test->area.max_sz >> 9,
++	return mmc_erase(test->card, t->dev_addr, t->max_sz >> 9,
+ 			 MMC_ERASE_ARG);
+ }
+ 
+@@ -1527,8 +1528,10 @@ static int mmc_test_area_prepare_fill(struct mmc_test_card *test)
+ static int mmc_test_best_performance(struct mmc_test_card *test, int write,
+ 				     int max_scatter)
+ {
+-	return mmc_test_area_io(test, test->area.max_tfr, test->area.dev_addr,
+-				write, max_scatter, 1);
++	struct mmc_test_area *t = &test->area;
 +
-+	if (ios->clock) {
-+		dsor = DIV_ROUND_UP(OMAP_MMC_MASTER_CLOCK, ios->clock);
-+		if (dsor > 250)
-+			dsor = 250;
-+	}
-+
-+	return dsor;
-+}
-+
- #ifdef CONFIG_PM
++	return mmc_test_area_io(test, t->max_tfr, t->dev_addr, write,
++				max_scatter, 1);
+ }
  
  /*
-@@ -596,7 +611,6 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
- 	struct omap_mmc_platform_data *pdata = host->pdata;
- 	int context_loss = 0;
- 	u32 hctl, capa, con;
--	u16 dsor = 0;
- 	unsigned long timeout;
- 
- 	if (pdata->get_context_loss_count) {
-@@ -675,21 +689,10 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
- 		break;
- 	}
- 
--	if (ios->clock) {
--		dsor = OMAP_MMC_MASTER_CLOCK / ios->clock;
--		if (dsor < 1)
--			dsor = 1;
--
--		if (OMAP_MMC_MASTER_CLOCK / dsor > ios->clock)
--			dsor++;
--
--		if (dsor > 250)
--			dsor = 250;
--	}
--
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) & ~CEN);
--	OMAP_HSMMC_WRITE(host->base, SYSCTL, (dsor << 6) | (DTO << 16));
-+	OMAP_HSMMC_WRITE(host->base, SYSCTL,
-+		(calc_divisor(ios) << 6) | (DTO << 16));
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
- 
-@@ -1527,7 +1530,6 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
- static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+@@ -1568,18 +1571,19 @@ static int mmc_test_best_write_perf_max_scatter(struct mmc_test_card *test)
+  */
+ static int mmc_test_profile_read_perf(struct mmc_test_card *test)
  {
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
--	u16 dsor = 0;
- 	unsigned long regval;
- 	unsigned long timeout;
- 	u32 con;
-@@ -1591,21 +1593,11 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		}
- 	}
++	struct mmc_test_area *t = &test->area;
+ 	unsigned long sz;
+ 	unsigned int dev_addr;
+ 	int ret;
  
--	if (ios->clock) {
--		dsor = OMAP_MMC_MASTER_CLOCK / ios->clock;
--		if (dsor < 1)
--			dsor = 1;
--
--		if (OMAP_MMC_MASTER_CLOCK / dsor > ios->clock)
--			dsor++;
--
--		if (dsor > 250)
--			dsor = 250;
--	}
- 	omap_hsmmc_stop_clock(host);
+-	for (sz = 512; sz < test->area.max_tfr; sz <<= 1) {
+-		dev_addr = test->area.dev_addr + (sz >> 9);
++	for (sz = 512; sz < t->max_tfr; sz <<= 1) {
++		dev_addr = t->dev_addr + (sz >> 9);
+ 		ret = mmc_test_area_io(test, sz, dev_addr, 0, 0, 1);
+ 		if (ret)
+ 			return ret;
+ 	}
+-	sz = test->area.max_tfr;
+-	dev_addr = test->area.dev_addr;
++	sz = t->max_tfr;
++	dev_addr = t->dev_addr;
+ 	return mmc_test_area_io(test, sz, dev_addr, 0, 0, 1);
+ }
+ 
+@@ -1588,6 +1592,7 @@ static int mmc_test_profile_read_perf(struct mmc_test_card *test)
+  */
+ static int mmc_test_profile_write_perf(struct mmc_test_card *test)
+ {
++	struct mmc_test_area *t = &test->area;
+ 	unsigned long sz;
+ 	unsigned int dev_addr;
+ 	int ret;
+@@ -1595,8 +1600,8 @@ static int mmc_test_profile_write_perf(struct mmc_test_card *test)
+ 	ret = mmc_test_area_erase(test);
+ 	if (ret)
+ 		return ret;
+-	for (sz = 512; sz < test->area.max_tfr; sz <<= 1) {
+-		dev_addr = test->area.dev_addr + (sz >> 9);
++	for (sz = 512; sz < t->max_tfr; sz <<= 1) {
++		dev_addr = t->dev_addr + (sz >> 9);
+ 		ret = mmc_test_area_io(test, sz, dev_addr, 1, 0, 1);
+ 		if (ret)
+ 			return ret;
+@@ -1604,8 +1609,8 @@ static int mmc_test_profile_write_perf(struct mmc_test_card *test)
+ 	ret = mmc_test_area_erase(test);
+ 	if (ret)
+ 		return ret;
+-	sz = test->area.max_tfr;
+-	dev_addr = test->area.dev_addr;
++	sz = t->max_tfr;
++	dev_addr = t->dev_addr;
+ 	return mmc_test_area_io(test, sz, dev_addr, 1, 0, 1);
+ }
+ 
+@@ -1614,6 +1619,7 @@ static int mmc_test_profile_write_perf(struct mmc_test_card *test)
+  */
+ static int mmc_test_profile_trim_perf(struct mmc_test_card *test)
+ {
++	struct mmc_test_area *t = &test->area;
+ 	unsigned long sz;
+ 	unsigned int dev_addr;
+ 	struct timespec ts1, ts2;
+@@ -1625,8 +1631,8 @@ static int mmc_test_profile_trim_perf(struct mmc_test_card *test)
+ 	if (!mmc_can_erase(test->card))
+ 		return RESULT_UNSUP_HOST;
+ 
+-	for (sz = 512; sz < test->area.max_sz; sz <<= 1) {
+-		dev_addr = test->area.dev_addr + (sz >> 9);
++	for (sz = 512; sz < t->max_sz; sz <<= 1) {
++		dev_addr = t->dev_addr + (sz >> 9);
+ 		getnstimeofday(&ts1);
+ 		ret = mmc_erase(test->card, dev_addr, sz >> 9, MMC_TRIM_ARG);
+ 		if (ret)
+@@ -1634,7 +1640,7 @@ static int mmc_test_profile_trim_perf(struct mmc_test_card *test)
+ 		getnstimeofday(&ts2);
+ 		mmc_test_print_rate(test, sz, &ts1, &ts2);
+ 	}
+-	dev_addr = test->area.dev_addr;
++	dev_addr = t->dev_addr;
+ 	getnstimeofday(&ts1);
+ 	ret = mmc_erase(test->card, dev_addr, sz >> 9, MMC_TRIM_ARG);
+ 	if (ret)
+@@ -1646,12 +1652,13 @@ static int mmc_test_profile_trim_perf(struct mmc_test_card *test)
+ 
+ static int mmc_test_seq_read_perf(struct mmc_test_card *test, unsigned long sz)
+ {
++	struct mmc_test_area *t = &test->area;
+ 	unsigned int dev_addr, i, cnt;
+ 	struct timespec ts1, ts2;
+ 	int ret;
+ 
+-	cnt = test->area.max_sz / sz;
+-	dev_addr = test->area.dev_addr;
++	cnt = t->max_sz / sz;
++	dev_addr = t->dev_addr;
+ 	getnstimeofday(&ts1);
+ 	for (i = 0; i < cnt; i++) {
+ 		ret = mmc_test_area_io(test, sz, dev_addr, 0, 0, 0);
+@@ -1669,20 +1676,22 @@ static int mmc_test_seq_read_perf(struct mmc_test_card *test, unsigned long sz)
+  */
+ static int mmc_test_profile_seq_read_perf(struct mmc_test_card *test)
+ {
++	struct mmc_test_area *t = &test->area;
+ 	unsigned long sz;
+ 	int ret;
+ 
+-	for (sz = 512; sz < test->area.max_tfr; sz <<= 1) {
++	for (sz = 512; sz < t->max_tfr; sz <<= 1) {
+ 		ret = mmc_test_seq_read_perf(test, sz);
+ 		if (ret)
+ 			return ret;
+ 	}
+-	sz = test->area.max_tfr;
++	sz = t->max_tfr;
+ 	return mmc_test_seq_read_perf(test, sz);
+ }
+ 
+ static int mmc_test_seq_write_perf(struct mmc_test_card *test, unsigned long sz)
+ {
++	struct mmc_test_area *t = &test->area;
+ 	unsigned int dev_addr, i, cnt;
+ 	struct timespec ts1, ts2;
+ 	int ret;
+@@ -1690,8 +1699,8 @@ static int mmc_test_seq_write_perf(struct mmc_test_card *test, unsigned long sz)
+ 	ret = mmc_test_area_erase(test);
+ 	if (ret)
+ 		return ret;
+-	cnt = test->area.max_sz / sz;
+-	dev_addr = test->area.dev_addr;
++	cnt = t->max_sz / sz;
++	dev_addr = t->dev_addr;
+ 	getnstimeofday(&ts1);
+ 	for (i = 0; i < cnt; i++) {
+ 		ret = mmc_test_area_io(test, sz, dev_addr, 1, 0, 0);
+@@ -1709,15 +1718,16 @@ static int mmc_test_seq_write_perf(struct mmc_test_card *test, unsigned long sz)
+  */
+ static int mmc_test_profile_seq_write_perf(struct mmc_test_card *test)
+ {
++	struct mmc_test_area *t = &test->area;
+ 	unsigned long sz;
+ 	int ret;
+ 
+-	for (sz = 512; sz < test->area.max_tfr; sz <<= 1) {
++	for (sz = 512; sz < t->max_tfr; sz <<= 1) {
+ 		ret = mmc_test_seq_write_perf(test, sz);
+ 		if (ret)
+ 			return ret;
+ 	}
+-	sz = test->area.max_tfr;
++	sz = t->max_tfr;
+ 	return mmc_test_seq_write_perf(test, sz);
+ }
+ 
+@@ -1726,6 +1736,7 @@ static int mmc_test_profile_seq_write_perf(struct mmc_test_card *test)
+  */
+ static int mmc_test_profile_seq_trim_perf(struct mmc_test_card *test)
+ {
++	struct mmc_test_area *t = &test->area;
+ 	unsigned long sz;
+ 	unsigned int dev_addr, i, cnt;
+ 	struct timespec ts1, ts2;
+@@ -1737,15 +1748,15 @@ static int mmc_test_profile_seq_trim_perf(struct mmc_test_card *test)
+ 	if (!mmc_can_erase(test->card))
+ 		return RESULT_UNSUP_HOST;
+ 
+-	for (sz = 512; sz <= test->area.max_sz; sz <<= 1) {
++	for (sz = 512; sz <= t->max_sz; sz <<= 1) {
+ 		ret = mmc_test_area_erase(test);
+ 		if (ret)
+ 			return ret;
+ 		ret = mmc_test_area_fill(test);
+ 		if (ret)
+ 			return ret;
+-		cnt = test->area.max_sz / sz;
+-		dev_addr = test->area.dev_addr;
++		cnt = t->max_sz / sz;
++		dev_addr = t->dev_addr;
+ 		getnstimeofday(&ts1);
+ 		for (i = 0; i < cnt; i++) {
+ 			ret = mmc_erase(test->card, dev_addr, sz >> 9,
+@@ -1808,11 +1819,12 @@ static int mmc_test_rnd_perf(struct mmc_test_card *test, int write, int print,
+ 
+ static int mmc_test_random_perf(struct mmc_test_card *test, int write)
+ {
++	struct mmc_test_area *t = &test->area;
+ 	unsigned int next;
+ 	unsigned long sz;
+ 	int ret;
+ 
+-	for (sz = 512; sz < test->area.max_tfr; sz <<= 1) {
++	for (sz = 512; sz < t->max_tfr; sz <<= 1) {
+ 		/*
+ 		 * When writing, try to get more consistent results by running
+ 		 * the test twice with exactly the same I/O but outputting the
+@@ -1829,7 +1841,7 @@ static int mmc_test_random_perf(struct mmc_test_card *test, int write)
+ 		if (ret)
+ 			return ret;
+ 	}
+-	sz = test->area.max_tfr;
++	sz = t->max_tfr;
+ 	if (write) {
+ 		next = rnd_next;
+ 		ret = mmc_test_rnd_perf(test, write, 0, sz);
+@@ -1859,17 +1871,18 @@ static int mmc_test_random_write_perf(struct mmc_test_card *test)
+ static int mmc_test_seq_perf(struct mmc_test_card *test, int write,
+ 			     unsigned int tot_sz, int max_scatter)
+ {
++	struct mmc_test_area *t = &test->area;
+ 	unsigned int dev_addr, i, cnt, sz, ssz;
+ 	struct timespec ts1, ts2;
+ 	int ret;
+ 
+-	sz = test->area.max_tfr;
++	sz = t->max_tfr;
 +
- 	regval = OMAP_HSMMC_READ(host->base, SYSCTL);
- 	regval = regval & ~(CLKD_MASK);
--	regval = regval | (dsor << 6) | (DTO << 16);
-+	regval = regval | (calc_divisor(ios) << 6) | (DTO << 16);
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL, regval);
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 		OMAP_HSMMC_READ(host->base, SYSCTL) | ICE);
+ 	/*
+ 	 * In the case of a maximally scattered transfer, the maximum transfer
+ 	 * size is further limited by using PAGE_SIZE segments.
+ 	 */
+ 	if (max_scatter) {
+-		struct mmc_test_area *t = &test->area;
+ 		unsigned long max_tfr;
+ 
+ 		if (t->max_seg_sz >= PAGE_SIZE)
 -- 
 1.6.3.3
 
