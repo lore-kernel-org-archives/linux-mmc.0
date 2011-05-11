@@ -1,143 +1,127 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: RE: [PATCH] MMC: fix a race between card-detect rescan and clock-gate
- work instances
-Date: Wed, 11 May 2011 14:26:25 +0200 (CEST)
-Message-ID: <alpine.DEB.2.00.1105111423360.15787@axis700.grange>
-References: <Pine.LNX.4.64.1104152006110.18593@axis700.grange> <5D8008F58939784290FAB48F549751983DB52B1EEF@shsmsx502.ccr.corp.intel.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v4 12/15] sdhci pxa add platform specific code for UHS signaling
+Date: Wed, 11 May 2011 05:28:02 -0400
+Message-ID: <BANLkTikRynkL0vLZ4oJyAkafM27qKc6-xQ@mail.gmail.com>
+References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
+	<1304578151-1775-13-git-send-email-arindam.nath@amd.com>
+	<BANLkTikdwJ3KOhxtJu9Msq6G-SmutGaSHg@mail.gmail.com>
+	<1D15C758-EA6C-446C-9A49-2F7279806697@marvell.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:51511 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755840Ab1EKQhH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 May 2011 12:37:07 -0400
-In-Reply-To: <5D8008F58939784290FAB48F549751983DB52B1EEF@shsmsx502.ccr.corp.intel.com>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:46974 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752954Ab1EKQih convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 May 2011 12:38:37 -0400
+Received: by vxi39 with SMTP id 39so482319vxi.19
+        for <linux-mmc@vger.kernel.org>; Wed, 11 May 2011 09:38:36 -0700 (PDT)
+In-Reply-To: <1D15C758-EA6C-446C-9A49-2F7279806697@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Arindam Nath <arindam.nath@amd.com>, "cjb@laptop.org" <cjb@laptop.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "henry.su@amd.com" <henry.su@amd.com>, "aaron.lu@amd.com" <aaron.lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
-Hi
+On Wed, May 11, 2011 at 4:52 AM, Philip Rakity <prakity@marvell.com> wr=
+ote:
+>
+> \
+> On May 11, 2011, at 1:48 AM, zhangfei gao wrote:
+>
+>> On Thu, May 5, 2011 at 2:49 AM, Arindam Nath <arindam.nath@amd.com> =
+wrote:
+>>> Marvell controller requires 1.8V bit in UHS control register 2
+>>> be set when doing UHS. =A0eMMC does not require 1.8V for DDR.
+>>> add platform code to handle this.
+>>>
+>>> Signed-off-by: Philip Rakity <prakity@marvell.com>
+>>> Reviewed-by: Arindam Nath <arindam.nath@amd.com>
+>>> ---
+>>> =A0drivers/mmc/host/sdhci-pxa.c | =A0 36 ++++++++++++++++++++++++++=
+++++++++++
+>>> =A01 files changed, 36 insertions(+), 0 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-=
+pxa.c
+>>> index 5a61208..b52c3e6 100644
+>>> --- a/drivers/mmc/host/sdhci-pxa.c
+>>> +++ b/drivers/mmc/host/sdhci-pxa.c
+>>> @@ -69,7 +69,40 @@ static void set_clock(struct sdhci_host *host, u=
+nsigned int clock)
+>>> =A0 =A0 =A0 =A0}
+>>> =A0}
+>>>
+>>> +static int set_uhs_signaling(struct sdhci_host *host, unsigned int=
+ uhs)
+>>> +{
+>>> + =A0 =A0 =A0 u16 ctrl_2;
+>>> +
+>>> + =A0 =A0 =A0 /*
+>>> + =A0 =A0 =A0 =A0* Set V18_EN -- UHS modes do not work without this=
+=2E
+>>> + =A0 =A0 =A0 =A0* does not change signaling voltage
+>>> + =A0 =A0 =A0 =A0*/
+>>> + =A0 =A0 =A0 ctrl_2 =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>>> +
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Select Bus Speed Mode for host */
+>>> + =A0 =A0 =A0 ctrl_2 &=3D ~SDHCI_CTRL_UHS_MASK;
+>>> + =A0 =A0 =A0 if (uhs =3D=3D MMC_TIMING_UHS_SDR12)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR12;
+>>> + =A0 =A0 =A0 else if (uhs =3D=3D MMC_TIMING_UHS_SDR25)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR25;
+>>> + =A0 =A0 =A0 else if (uhs =3D=3D MMC_TIMING_UHS_SDR50) {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR50;
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
+>>> + =A0 =A0 =A0 } else if (uhs =3D=3D MMC_TIMING_UHS_SDR104) {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR104;
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
+>>> + =A0 =A0 =A0 } else if (uhs =3D=3D MMC_TIMING_UHS_DDR50) {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_DDR50;
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
+>>> + =A0 =A0 =A0 }
+>>> + =A0 =A0 =A0 sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+>>> + =A0 =A0 =A0 pr_debug("%s:%s uhs =3D %d, ctrl_2 =3D %04X\n",
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 __func__, mmc_hostname(host->mmc), uh=
+s, ctrl_2);
+>>> + =A0 =A0 =A0 return 0;
+>>> +}
+>>
+>> Why move common register accessing from sdhci.c to specific driver?
+>
+> In general case you do not know what the specific host controller wor=
+k arounds are required.
+> on mmp2 this code works (no need for V18 for low speed UHS)
+> but other controllers it could be different
 
-On Wed, 11 May 2011, Dong, Chuanxiao wrote:
+Sorry, not understand, the patch is for sd uhs card or for emmc?
+=46or sd uhs card, no workaround is needed on mmp2, but require externa=
+l
+pmic to provide 1.8v io voltage.
 
-> Hello Liakhovetski,
-> 
-> Right now I am facing some problem during kernel booting which indicate 
-> caused by MMC driver. So I think I encountered the race condition you 
-> mentioned below.
-
-Which kernel are you using? With my patch or without it? What makes you 
-think, that your problem is caused by a race in MMC? Races rarely occur 
-reproducibly, so, it seems a bit unlikely to me during the boot process.
-
-> I have gone through MMC stack code, seems sdhci_set_ios already wrapped 
-> by spin lock/unlock, so I am a little not understanding why there is 
-> still a race condition?
-
-Again, are you referring to the kernel before my patch or after?
-
-Thanks
-Guennadi
-
-> Is this race condition caused by sdhci_set_ios function reenter or 
-> something else?
-> 
-> Thanks for your help on this.
-> 
-> BR
-> Chuanxiao
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Guennadi Liakhovetski
-> Sent: Saturday, April 16, 2011 2:08 AM
-> To: linux-sh@vger.kernel.org
-> Cc: linux-mmc@vger.kernel.org; Magnus Damm; Simon Horman; Linus Walleij
-> Subject: [PATCH] MMC: fix a race between card-detect rescan and clock-gate work instances
-> 
-> Currently there is a race in the MMC core between a card-detect
-> rescan work and the clock-gating work, scheduled from a command
-> completion. Fix it by removing the dedicated clock-gating mutex and
-> using the MMC standard locking mechanism instead.
-> 
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> Cc: Simon Horman <horms@verge.net.au>
-> Cc: Magnus Damm <damm@opensource.se>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/core/host.c  |    9 ++++-----
->  include/linux/mmc/host.h |    1 -
->  2 files changed, 4 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 461e6a1..2b200c1 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -94,7 +94,7 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
->  		spin_unlock_irqrestore(&host->clk_lock, flags);
->  		return;
->  	}
-> -	mutex_lock(&host->clk_gate_mutex);
-> +	mmc_claim_host(host);
->  	spin_lock_irqsave(&host->clk_lock, flags);
->  	if (!host->clk_requests) {
->  		spin_unlock_irqrestore(&host->clk_lock, flags);
-> @@ -104,7 +104,7 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
->  		pr_debug("%s: gated MCI clock\n", mmc_hostname(host));
->  	}
->  	spin_unlock_irqrestore(&host->clk_lock, flags);
-> -	mutex_unlock(&host->clk_gate_mutex);
-> +	mmc_release_host(host);
->  }
->  
->  /*
-> @@ -130,7 +130,7 @@ void mmc_host_clk_ungate(struct mmc_host *host)
->  {
->  	unsigned long flags;
->  
-> -	mutex_lock(&host->clk_gate_mutex);
-> +	mmc_claim_host(host);
->  	spin_lock_irqsave(&host->clk_lock, flags);
->  	if (host->clk_gated) {
->  		spin_unlock_irqrestore(&host->clk_lock, flags);
-> @@ -140,7 +140,7 @@ void mmc_host_clk_ungate(struct mmc_host *host)
->  	}
->  	host->clk_requests++;
->  	spin_unlock_irqrestore(&host->clk_lock, flags);
-> -	mutex_unlock(&host->clk_gate_mutex);
-> +	mmc_release_host(host);
->  }
->  
->  /**
-> @@ -215,7 +215,6 @@ static inline void mmc_host_clk_init(struct mmc_host *host)
->  	host->clk_gated = false;
->  	INIT_WORK(&host->clk_gate_work, mmc_host_clk_gate_work);
->  	spin_lock_init(&host->clk_lock);
-> -	mutex_init(&host->clk_gate_mutex);
->  }
->  
->  /**
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index bcb793e..eb792cb 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -183,7 +183,6 @@ struct mmc_host {
->  	struct work_struct	clk_gate_work; /* delayed clock gate */
->  	unsigned int		clk_old;	/* old clock value cache */
->  	spinlock_t		clk_lock;	/* lock for clk fields */
-> -	struct mutex		clk_gate_mutex;	/* mutex for clock gating */
->  #endif
->  
->  	/* host specific block data */
-> -- 
-> 1.7.2.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+>
+>>
+>>> +
+>>> =A0static struct sdhci_ops sdhci_pxa_ops =3D {
+>>> + =A0 =A0 =A0 .set_uhs_signaling =3D set_uhs_signaling,
+>>> =A0 =A0 =A0 =A0.set_clock =3D set_clock,
+>>> =A0};
+>>>
+>>> @@ -141,6 +174,9 @@ static int __devinit sdhci_pxa_probe(struct pla=
+tform_device *pdev)
+>>> =A0 =A0 =A0 =A0if (pdata->quirks)
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->quirks |=3D pdata->quirks;
+>>>
+>>> + =A0 =A0 =A0 /* enable 1/8V DDR capable */
+>>> + =A0 =A0 =A0 host->mmc->caps |=3D MMC_CAP_1_8V_DDR;
+>>> +
+>>> =A0 =A0 =A0 =A0/* If slot design supports 8 bit data, indicate this=
+ to MMC. */
+>>> =A0 =A0 =A0 =A0if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->mmc->caps |=3D MMC_CAP_8_BIT_D=
+ATA;
+>>> --
+>>> 1.7.1
+>>>
+>>>
+>
+>
