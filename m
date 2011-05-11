@@ -1,101 +1,56 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v4 12/15] sdhci pxa add platform specific code for UHS signaling
-Date: Tue, 10 May 2011 21:54:57 -0400
-Message-ID: <m339km6lxq.fsf@pullcord.laptop.org>
-References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
-	<1304578151-1775-13-git-send-email-arindam.nath@amd.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] dw_mmc: fixed regulator control
+Date: Wed, 11 May 2011 12:00:33 +0900
+Message-ID: <4DC9FBD1.2000803@samsung.com>
+References: <4DBA90BD.8070804@samsung.com> <m3iptv2027.fsf@pullcord.laptop.org>
+ <4DBE62FE.6020402@samsung.com> <m3boza6neb.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51415 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752718Ab1EKBwa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 May 2011 21:52:30 -0400
-In-Reply-To: <1304578151-1775-13-git-send-email-arindam.nath@amd.com> (Arindam
-	Nath's message of "Thu, 5 May 2011 12:19:08 +0530")
+Received: from mailout4.samsung.com ([203.254.224.34]:61546 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753838Ab1EKDA2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2011 23:00:28 -0400
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LL0003U8GCQPOI0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 11 May 2011 12:00:26 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LL000DX0GCP5R@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 11 May 2011 12:00:25 +0900 (KST)
+In-reply-to: <m3boza6neb.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arindam Nath <arindam.nath@amd.com>
-Cc: prakity@marvell.com, zhangfei.gao@gmail.com, subhashj@codeaurora.org, linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com
+To: Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>, Lars-Peter Clausen <lars@metafoo.de>
 
-Hi,
+Chris Ball wrote:
+> Hi Jaehoon,
+> 
+> On Mon, May 02 2011, Jaehoon Chung wrote:
+>> Hi Chris..
+>>
+>> Thanks for comments...
+>> I think that could confuse that message when didn't set CONFIG_REGULATOR.
+> 
+> The message *does not appear* when CONFIG_REGULATOR is unset, because
+> NULL -- which the regulator subsystem returns via the regulator_get()
+> stub -- is not an IS_ERR().  Do you agree?
 
-On Thu, May 05 2011, Arindam Nath wrote:
-> Marvell controller requires 1.8V bit in UHS control register 2
-> be set when doing UHS.  eMMC does not require 1.8V for DDR.
-> add platform code to handle this.
->
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
-> Reviewed-by: Arindam Nath <arindam.nath@amd.com>
-> ---
->  drivers/mmc/host/sdhci-pxa.c |   36 ++++++++++++++++++++++++++++++++++++
->  1 files changed, 36 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
-> index 5a61208..b52c3e6 100644
-> --- a/drivers/mmc/host/sdhci-pxa.c
-> +++ b/drivers/mmc/host/sdhci-pxa.c
-> @@ -69,7 +69,40 @@ static void set_clock(struct sdhci_host *host, unsigned int clock)
->  	}
->  }
->  
-> +static int set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
-> +{
-> +	u16 ctrl_2;
-> +
-> +	/*
-> +	 * Set V18_EN -- UHS modes do not work without this.
-> +	 * does not change signaling voltage
-> +	 */
-> +	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +
-> +		/* Select Bus Speed Mode for host */
-> +	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
+Thanks, I agreed that.
+I'm interesting mailing's discussion about "[PATCH] pxamci: remove an ifdef about CONFIG_REGULATOR "
+(in this case, i think similar case)
 
-There's something wrong with the tabbing for the comment above.
+> 
+>> And i wonder how do you think about regulator control in suspend (dw_mmc.c)?
+> 
+> Yes, that patch looks correct, although I can't test it myself.  Please
+> send it separately.
 
-> +	if (uhs == MMC_TIMING_UHS_SDR12)
-> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
-> +	else if (uhs == MMC_TIMING_UHS_SDR25)
-> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
-> +	else if (uhs == MMC_TIMING_UHS_SDR50) {
-> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
-> +		ctrl_2 |= SDHCI_CTRL_VDD_180;
-> +	} else if (uhs == MMC_TIMING_UHS_SDR104) {
-> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
-> +		ctrl_2 |= SDHCI_CTRL_VDD_180;
-> +	} else if (uhs == MMC_TIMING_UHS_DDR50) {
-> +		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
-> +		ctrl_2 |= SDHCI_CTRL_VDD_180;
-> +	}
+Ok. i will send that separately patch.
 
-Maybe a switch-case here would be easier on the eyes?
-
-> +	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> +	pr_debug("%s:%s uhs = %d, ctrl_2 = %04X\n",
-> +		__func__, mmc_hostname(host->mmc), uhs, ctrl_2);
-> +	return 0;
-> +}
-> +
->  static struct sdhci_ops sdhci_pxa_ops = {
-> +	.set_uhs_signaling = set_uhs_signaling,
->  	.set_clock = set_clock,
->  };
->  
-> @@ -141,6 +174,9 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
->  	if (pdata->quirks)
->  		host->quirks |= pdata->quirks;
->  
-> +	/* enable 1/8V DDR capable */
-> +	host->mmc->caps |= MMC_CAP_1_8V_DDR;
-> +
->  	/* If slot design supports 8 bit data, indicate this to MMC. */
->  	if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
->  		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Regards,
+Jaehoon Chung
