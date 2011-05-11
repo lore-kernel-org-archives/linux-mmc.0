@@ -1,107 +1,104 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH v4 12/15] sdhci pxa add platform specific code for UHS
- signaling
-Date: Wed, 11 May 2011 01:52:53 -0700
-Message-ID: <1D15C758-EA6C-446C-9A49-2F7279806697@marvell.com>
-References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
- <1304578151-1775-13-git-send-email-arindam.nath@amd.com>
- <BANLkTikdwJ3KOhxtJu9Msq6G-SmutGaSHg@mail.gmail.com>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH] sdhci-s3c: fixed compiler error for renamed register
+Date: Wed, 11 May 2011 08:53:04 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B300EBE0327C@SAUSEXMBP01.amd.com>
+References: <4DCA3B54.3000607@samsung.com>
+ <m3liyd2vl1.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:60549 "EHLO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753830Ab1EKPiU convert rfc822-to-8bit
+Received: from db3ehsobe006.messaging.microsoft.com ([213.199.154.144]:6102
+	"EHLO DB3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753015Ab1EKPie convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 May 2011 11:38:20 -0400
-In-Reply-To: <BANLkTikdwJ3KOhxtJu9Msq6G-SmutGaSHg@mail.gmail.com>
+	Wed, 11 May 2011 11:38:34 -0400
+In-Reply-To: <m3liyd2vl1.fsf@pullcord.laptop.org>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Arindam Nath <arindam.nath@amd.com>, "cjb@laptop.org" <cjb@laptop.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "henry.su@amd.com" <henry.su@amd.com>, "aaron.lu@amd.com" <aaron.lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ben Dooks <ben-linux@fluff.org>, Kyungmin Park <kyungmin.park@samsung.com>
+
+Hi Chris,
 
 
-\
-On May 11, 2011, at 1:48 AM, zhangfei gao wrote:
-
-> On Thu, May 5, 2011 at 2:49 AM, Arindam Nath <arindam.nath@amd.com> wrote:
->> Marvell controller requires 1.8V bit in UHS control register 2
->> be set when doing UHS.  eMMC does not require 1.8V for DDR.
->> add platform code to handle this.
->> 
->> Signed-off-by: Philip Rakity <prakity@marvell.com>
->> Reviewed-by: Arindam Nath <arindam.nath@amd.com>
->> ---
->>  drivers/mmc/host/sdhci-pxa.c |   36 ++++++++++++++++++++++++++++++++++++
->>  1 files changed, 36 insertions(+), 0 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
->> index 5a61208..b52c3e6 100644
->> --- a/drivers/mmc/host/sdhci-pxa.c
->> +++ b/drivers/mmc/host/sdhci-pxa.c
->> @@ -69,7 +69,40 @@ static void set_clock(struct sdhci_host *host, unsigned int clock)
->>        }
->>  }
->> 
->> +static int set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
->> +{
->> +       u16 ctrl_2;
->> +
->> +       /*
->> +        * Set V18_EN -- UHS modes do not work without this.
->> +        * does not change signaling voltage
->> +        */
->> +       ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->> +
->> +               /* Select Bus Speed Mode for host */
->> +       ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
->> +       if (uhs == MMC_TIMING_UHS_SDR12)
->> +               ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
->> +       else if (uhs == MMC_TIMING_UHS_SDR25)
->> +               ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
->> +       else if (uhs == MMC_TIMING_UHS_SDR50) {
->> +               ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
->> +               ctrl_2 |= SDHCI_CTRL_VDD_180;
->> +       } else if (uhs == MMC_TIMING_UHS_SDR104) {
->> +               ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
->> +               ctrl_2 |= SDHCI_CTRL_VDD_180;
->> +       } else if (uhs == MMC_TIMING_UHS_DDR50) {
->> +               ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
->> +               ctrl_2 |= SDHCI_CTRL_VDD_180;
->> +       }
->> +       sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
->> +       pr_debug("%s:%s uhs = %d, ctrl_2 = %04X\n",
->> +               __func__, mmc_hostname(host->mmc), uhs, ctrl_2);
->> +       return 0;
->> +}
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Wednesday, May 11, 2011 7:22 PM
+> To: Jaehoon Chung
+> Cc: linux-mmc@vger.kernel.org; Ben Dooks; Kyungmin Park; Nath, Arindam
+> Subject: Re: [PATCH] sdhci-s3c: fixed compiler error for renamed
+> register
 > 
-> Why move common register accessing from sdhci.c to specific driver?
+> Hi,
+> 
+> On Wed, May 11 2011, Jaehoon Chung wrote:
+> > In Arindam Nath's patch "mmc:sd: add support for driver type
+> selection"
+> > included renamed SDHCI_HOST_CONTROL1.
+> >
+> > In sdhci-s3c, we used SDHCI_HOST_CONTROL in
+> sdhci_s3c_platform_8bit_width().
+> > Also we need to use the renamed register in sdhci-s3c.c
+> >
+> > Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> > ---
+> >  drivers/mmc/host/sdhci-s3c.c |    4 ++--
+> >  1 files changed, 2 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-
+> s3c.c
+> > index 69e3ee3..15a6195 100644
+> > --- a/drivers/mmc/host/sdhci-s3c.c
+> > +++ b/drivers/mmc/host/sdhci-s3c.c
+> > @@ -289,7 +289,7 @@ static int sdhci_s3c_platform_8bit_width(struct
+> sdhci_host *host, int width)
+> >  {
+> >  	u8 ctrl;
+> >
+> > -	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> > +	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL1);
+> >
+> >  	switch (width) {
+> >  	case MMC_BUS_WIDTH_8:
+> > @@ -304,7 +304,7 @@ static int sdhci_s3c_platform_8bit_width(struct
+> sdhci_host *host, int width)
+> >  		break;
+> >  	}
+> >
+> > -	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> > +	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL1);
+> >
+> >  	return 0;
+> >  }
+> >
+> 
+> Thanks, this affects other drivers too:
+> 
+> sdhci-esdhc-imx.c:      case SDHCI_HOST_CONTROL:
+> sdhci-of-esdhc.c:       if (reg == SDHCI_HOST_CONTROL)
+> sdhci-s3c.c:    ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> sdhci-s3c.c:    sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> sdhci-tegra.c:  ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> sdhci-tegra.c:  sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> 
+> Arindam, is there any problem with continuing to use SDHCI_HOST_CONTROL
+> for the first register, and adding SDHCI_HOST_CONTROL2 for the second?
+> I think that would be better than modifying all of the drivers.
 
-In general case you do not know what the specific host controller work arounds are required.
-on mmp2 this code works (no need for V18 for low speed UHS)
-but other controllers it could be different
+I am okay with your suggestion. I just changed the name as per the SDHC3.0 spec.
+
+Thanks,
+Arindam
 
 > 
->> +
->>  static struct sdhci_ops sdhci_pxa_ops = {
->> +       .set_uhs_signaling = set_uhs_signaling,
->>        .set_clock = set_clock,
->>  };
->> 
->> @@ -141,6 +174,9 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
->>        if (pdata->quirks)
->>                host->quirks |= pdata->quirks;
->> 
->> +       /* enable 1/8V DDR capable */
->> +       host->mmc->caps |= MMC_CAP_1_8V_DDR;
->> +
->>        /* If slot design supports 8 bit data, indicate this to MMC. */
->>        if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
->>                host->mmc->caps |= MMC_CAP_8_BIT_DATA;
->> --
->> 1.7.1
->> 
->> 
+> Thanks,
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+
 
