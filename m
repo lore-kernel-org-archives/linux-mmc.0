@@ -1,85 +1,79 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 2/3] mmc: sdhi: allow platforms to power down the controller
- with no card inserted
-Date: Wed, 11 May 2011 18:51:15 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1105111850200.5557@axis700.grange>
+Subject: [PATCH 3/3] ARM: arch-shmobile: support SDHI card detection on
+ mackerel, using a GPIO
+Date: Wed, 11 May 2011 18:51:20 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1105111850410.5557@axis700.grange>
 References: <Pine.LNX.4.64.1105111843290.5557@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:63993 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755409Ab1EKQvV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 May 2011 12:51:21 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <Pine.LNX.4.64.1105111843290.5557@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Magnus Damm <damm@opensource.se>, Ian Molton <ian@mnementh.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-Supply a link to TMIO private data for platforms to implement own
-card detection.
+On sh7372 the card-detection pin of SDHI0 can also produce interrupts,
+when configured as GPIO. Use this feature to power down SDHI0, when no
+card is plugged in.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c  |    6 ++++++
- include/linux/mmc/sh_mobile_sdhi.h |    4 ++++
- 2 files changed, 10 insertions(+), 0 deletions(-)
+ arch/arm/mach-shmobile/board-mackerel.c |   20 ++++++++++++++++++++
+ 1 files changed, 20 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index d264bbe..b365429 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -71,6 +71,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	}
+diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
+index b20dd6f..48fd2fe 100644
+--- a/arch/arm/mach-shmobile/board-mackerel.c
++++ b/arch/arm/mach-shmobile/board-mackerel.c
+@@ -39,6 +39,7 @@
+ #include <linux/mtd/mtd.h>
+ #include <linux/mtd/partitions.h>
+ #include <linux/mtd/physmap.h>
++#include <linux/pm_runtime.h>
+ #include <linux/smsc911x.h>
+ #include <linux/sh_intc.h>
+ #include <linux/tca6416_keypad.h>
+@@ -670,6 +671,17 @@ static int slot_cn7_get_cd(struct platform_device *pdev)
+ }
  
- 	mmc_data = &priv->mmc_data;
-+	p->pdata = mmc_data;
- 
- 	snprintf(clk_name, sizeof(clk_name), "sdhi%d", pdev->id);
- 	priv->clk = clk_get(&pdev->dev, clk_name);
-@@ -159,8 +160,11 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
- 	struct mmc_host *mmc = platform_get_drvdata(pdev);
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
- 	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
-+	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
- 	int i, irq;
- 
-+	p->pdata = NULL;
+ /* SDHI0 */
++static irqreturn_t mackerel_sdhi0_gpio_cd(int irq, void *arg)
++{
++	struct device *dev = arg;
++	struct sh_mobile_sdhi_info *info = dev->platform_data;
++	struct tmio_mmc_data *pdata = info->pdata;
 +
- 	for (i = 0; i < 3; i++) {
- 		irq = platform_get_irq(pdev, i);
- 		if (irq >= 0)
-@@ -178,6 +182,8 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
- static const struct dev_pm_ops tmio_mmc_dev_pm_ops = {
- 	.suspend = tmio_mmc_host_suspend,
- 	.resume = tmio_mmc_host_resume,
-+	.runtime_suspend = tmio_mmc_host_runtime_suspend,
-+	.runtime_resume = tmio_mmc_host_runtime_resume,
- };
- 
- static struct platform_driver sh_mobile_sdhi_driver = {
-diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-index c981b95..faf32b6 100644
---- a/include/linux/mmc/sh_mobile_sdhi.h
-+++ b/include/linux/mmc/sh_mobile_sdhi.h
-@@ -3,12 +3,16 @@
- 
- #include <linux/types.h>
- 
-+struct platform_device;
-+struct tmio_mmc_data;
++	tmio_mmc_cd_wakeup(pdata);
 +
- struct sh_mobile_sdhi_info {
- 	int dma_slave_tx;
- 	int dma_slave_rx;
- 	unsigned long tmio_flags;
- 	unsigned long tmio_caps;
- 	u32 tmio_ocr_mask;	/* available MMC voltages */
-+	struct tmio_mmc_data *pdata;
- 	void (*set_pwr)(struct platform_device *pdev, int state);
- 	int (*get_cd)(struct platform_device *pdev);
- };
++	return IRQ_HANDLED;
++}
++
+ static struct sh_mobile_sdhi_info sdhi0_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
+@@ -1040,6 +1052,7 @@ static void __init mackerel_init(void)
+ {
+ 	u32 srcr4;
+ 	struct clk *clk;
++	int ret;
+ 
+ 	sh7372_pinmux_init();
+ 
+@@ -1144,6 +1157,13 @@ static void __init mackerel_init(void)
+ 	gpio_request(GPIO_FN_SDHID0_1, NULL);
+ 	gpio_request(GPIO_FN_SDHID0_0, NULL);
+ 
++	ret = request_irq(evt2irq(0x3340), mackerel_sdhi0_gpio_cd,
++			  IRQF_TRIGGER_FALLING, "sdhi0 cd", &sdhi0_device.dev);
++	if (!ret)
++		sdhi0_info.tmio_flags |= TMIO_MMC_HAS_COLD_CD;
++	else
++		pr_err("Cannot get IRQ #%d: %d\n", evt2irq(0x3340), ret);
++
+ #if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
+ 	/* enable SDHI1 */
+ 	gpio_request(GPIO_FN_SDHICMD1, NULL);
 -- 
 1.7.2.5
 
