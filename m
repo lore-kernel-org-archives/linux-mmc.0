@@ -1,128 +1,75 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3] sdio: optimized SDIO IRQ handling for single irq
-Date: Tue, 10 May 2011 23:51:12 -0400
-Message-ID: <m3aaet51zj.fsf@pullcord.laptop.org>
-References: <1304622843-5123-1-git-send-email-per.forlin@linaro.org>
-	<1304622843-5123-2-git-send-email-per.forlin@linaro.org>
+Subject: Re: [PATCH] mmc: fixed wrong SD card detection
+Date: Tue, 10 May 2011 23:54:16 -0400
+Message-ID: <m362ph51uf.fsf@pullcord.laptop.org>
+References: <4DC3C1A8.1050104@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35498 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:35545 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754118Ab1EKDsv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 May 2011 23:48:51 -0400
-In-Reply-To: <1304622843-5123-2-git-send-email-per.forlin@linaro.org> (Per
-	Forlin's message of "Thu, 5 May 2011 21:14:03 +0200")
+	id S1754134Ab1EKDvs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 May 2011 23:51:48 -0400
+In-Reply-To: <4DC3C1A8.1050104@samsung.com> (Jaehoon Chung's message of "Fri,
+	06 May 2011 18:38:48 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Per,
+Hi Jaehoon,
 
-On Thu, May 05 2011, Per Forlin wrote:
-> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+On Fri, May 06 2011, Jaehoon Chung wrote:
+> This patch added mmc_power_off after mmc_attach_sd()
 >
-> If there is only 1 function interrupt registered it is possible to
-> improve performance by directly calling the irq handler
-> and avoiding the overhead of reading the CCCR registers.
+> i found that didn't detect the second card insert.(using SDHCI)
+> you can see the below log.
 >
-> Signed-off-by: Per Forlin <per.forlin@linaro.org>
-> Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
-> Reviewed-by: Nicolas Pitre <nicolas.pitre@linaro.org>
+> i want to know that somebody know this issue...
+>
+> ->first card inserted (correct card detect)
+> # mmc1: new SDHC card at address e624
+> mmcblk1: mmc1:e624 SU04G 3.69 GiB
+>  mmcblk1: p1
+> #
+> # mmc1: card e624 removed
+> -> second card inserted
+> mmc1: error -110 whilst initialising SD card
+> mmc1: Card removed during transfer!
+> mmc1: Resetting controller.
+> -> third card inserted 
+> mmc1: new SDHC card at address e624
+> mmcblk1: mmc1:e624 SU04G 3.69 GiB
+>  mmcblk1: p1
+>
+> I added mmc_power_off() after only mmc_attach_sd().
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
 > ---
->  drivers/mmc/core/sdio_irq.c |   33 ++++++++++++++++++++++++++++++++-
->  include/linux/mmc/card.h    |    1 +
->  2 files changed, 33 insertions(+), 1 deletions(-)
+>  drivers/mmc/core/core.c |    4 +++-
+>  1 files changed, 3 insertions(+), 1 deletions(-)
 >
-> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-> index b300161..03ead02 100644
-> --- a/drivers/mmc/core/sdio_irq.c
-> +++ b/drivers/mmc/core/sdio_irq.c
-> @@ -31,6 +31,17 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
->  {
->  	int i, ret, count;
->  	unsigned char pending;
-> +	struct sdio_func *func;
-> +
-> +	/*
-> +	 * Optimization, if there is only 1 function interrupt registered
-> +	 * call irq handler directly
-> +	 */
-> +	func = card->sdio_single_irq;
-> +	if (func) {
-> +		func->irq_handler(func);
-> +		return 1;
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 1dbc185..d5d8ac0 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1522,8 +1522,10 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+>  	/* Order's important: probe SDIO, then SD, then MMC */
+>  	if (!mmc_attach_sdio(host))
+>  		return 0;
+> -	if (!mmc_attach_sd(host))
+> +	if (!mmc_attach_sd(host)) {
+> +		mmc_power_off(host);
+>  		return 0;
 > +	}
+>  	if (!mmc_attach_mmc(host))
+>  		return 0;
 >  
->  	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
->  	if (ret) {
-> @@ -42,7 +53,7 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
->  	count = 0;
->  	for (i = 1; i <= 7; i++) {
->  		if (pending & (1 << i)) {
-> -			struct sdio_func *func = card->sdio_func[i - 1];
-> +			func = card->sdio_func[i - 1];
->  			if (!func) {
->  				printk(KERN_WARNING "%s: pending IRQ for "
->  					"non-existent function\n",
-> @@ -186,6 +197,24 @@ static int sdio_card_irq_put(struct mmc_card *card)
->  	return 0;
->  }
->  
-> +/* If there is only 1 function registered set sdio_single_irq */
-> +static void sdio_single_irq_set(struct mmc_card *card)
-> +{
-> +	struct sdio_func *func;
-> +	int i;
-> +
-> +	card->sdio_single_irq = NULL;
-> +	if ((card->host->caps & MMC_CAP_SDIO_IRQ) &&
-> +	    card->host->sdio_irqs == 1)
-> +		for (i = 0; i < card->sdio_funcs; i++) {
-> +		       func = card->sdio_func[i];
-> +		       if (func && func->irq_handler) {
-> +			       card->sdio_single_irq = func;
-> +			       break;
-> +		       }
-> +	       }
-> +}
-> +
->  /**
->   *	sdio_claim_irq - claim the IRQ for a SDIO function
->   *	@func: SDIO function
-> @@ -227,6 +256,7 @@ int sdio_claim_irq(struct sdio_func *func, sdio_irq_handler_t *handler)
->  	ret = sdio_card_irq_get(func->card);
->  	if (ret)
->  		func->irq_handler = NULL;
-> +	sdio_single_irq_set(func->card);
->  
->  	return ret;
->  }
-> @@ -251,6 +281,7 @@ int sdio_release_irq(struct sdio_func *func)
->  	if (func->irq_handler) {
->  		func->irq_handler = NULL;
->  		sdio_card_irq_put(func->card);
-> +		sdio_single_irq_set(func->card);
->  	}
->  
->  	ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IENx, 0, &reg);
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index adb4888..0d64211 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -145,6 +145,7 @@ struct mmc_card {
->  	struct sdio_cccr	cccr;		/* common card info */
->  	struct sdio_cis		cis;		/* common tuple info */
->  	struct sdio_func	*sdio_func[SDIO_MAX_FUNCS]; /* SDIO functions (devices) */
-> +	struct sdio_func	*sdio_single_irq; /* SDIO function when only one IRQ active */
->  	unsigned		num_info;	/* number of info strings */
->  	const char		**info;		/* info strings */
->  	struct sdio_func_tuple	*tuples;	/* unknown common tuples */
 
-This patch doesn't apply cleanly -- please re-send against mmc-next.
-
-Thanks,
+It looks to me like this patch says "if we successfully attach/power up
+an SD card, then power it back off again immediately".  Why would that
+make sense?
 
 - Chris.
 -- 
