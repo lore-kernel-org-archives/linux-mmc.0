@@ -1,35 +1,58 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] sdhci-s3c: fixed compiler error for renamed register
-Date: Wed, 11 May 2011 10:35:11 -0400
-Message-ID: <m3hb912tls.fsf@pullcord.laptop.org>
-References: <4DCA3B54.3000607@samsung.com>
-	<m3liyd2vl1.fsf@pullcord.laptop.org>
-	<6C03668EAF45B747AF947A1603D1B300EBE0327C@SAUSEXMBP01.amd.com>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH v4 00/15] add support for host controller v3.00
+Date: Wed, 11 May 2011 01:13:59 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B300EBE0305F@SAUSEXMBP01.amd.com>
+References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
+ <m3ei4552d2.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57201 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754706Ab1EKPpf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 May 2011 11:45:35 -0400
-In-Reply-To: <6C03668EAF45B747AF947A1603D1B300EBE0327C@SAUSEXMBP01.amd.com>
-	(Arindam Nath's message of "Wed, 11 May 2011 08:53:04 -0500")
+Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:16250
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754961Ab1EKPqK convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 11 May 2011 11:46:10 -0400
+In-Reply-To: <m3ei4552d2.fsf@pullcord.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Nath, Arindam" <Arindam.Nath@amd.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ben Dooks <ben-linux@fluff.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: "prakity@marvell.com" <prakity@marvell.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
-Hi,
+Hi Chris,
 
-On Wed, May 11 2011, Nath, Arindam wrote:
-> I am okay with your suggestion. I just changed the name as per the
-> SDHC3.0 spec.
 
-Great, okay.  I've rebased "mmc: sd: add support for driver type
-selection" to remove that HOST_CONTROL->HOST_CONTROL1 change, and
-pushed it out to mmc-next now.
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Wednesday, May 11, 2011 9:13 AM
+> To: Nath, Arindam
+> Cc: prakity@marvell.com; zhangfei.gao@gmail.com;
+> subhashj@codeaurora.org; linux-mmc@vger.kernel.org; Su, Henry; Lu,
+> Aaron; anath.amd@gmail.com
+> Subject: Re: [PATCH v4 00/15] add support for host controller v3.00
+> 
+> Hi Arindam,
+> 
+> On Thu, May 05 2011, Arindam Nath wrote:
+> > The patches below add support for Host Controller v3.00 as per the
+> > spec v3.00. It also adds support for UHS-I cards as per Physical
+> > Layer Specification v3.01.
+> 
+> I've pushed 01-11 to mmc-next now, and will push 12-15 once they're
+> resubmitted with authorship status resolved.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks to you for taking time out to make the necessary changes, and pushing it to mmc-next. I will contact Philip to resolve the authorship issues with the rest of the patches, and then re-submit them soon.
+
+Thanks,
+Arindam
+
+> 
+> Thanks very much for all of your hard work on this patchset!
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+
+
