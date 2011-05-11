@@ -1,35 +1,92 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH] pxamci: remove an ifdef about CONFIG_REGULATOR
-Date: Tue, 10 May 2011 22:36:30 +0200
-Message-ID: <20110510203629.GB8726@opensource.wolfsonmicro.com>
-References: <1304971869-20161-1-git-send-email-ospite@studenti.unina.it>
- <20110509202325.GD16919@n2100.arm.linux.org.uk>
- <20110509203612.GC21323@opensource.wolfsonmicro.com>
- <20110510220214.916621d1.ospite@studenti.unina.it>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: tmio: fix PM in DMA mode
+Date: Tue, 10 May 2011 21:20:37 -0400
+Message-ID: <m3fwom6niy.fsf@pullcord.laptop.org>
+References: <Pine.LNX.4.64.1104291909290.17813@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:51200 "EHLO
-	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751137Ab1EJUgZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2011 16:36:25 -0400
-Content-Disposition: inline
-In-Reply-To: <20110510220214.916621d1.ospite@studenti.unina.it>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1104291909290.17813@axis700.grange> (Guennadi
+	Liakhovetski's message of "Fri, 29 Apr 2011 19:11:00 +0200 (CEST)")
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: Antonio Ospite <ospite@studenti.unina.it>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-mmc@vger.kernel.org, openezx-devel@lists.openezx.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>
 
-On Tue, May 10, 2011 at 10:02:14PM +0200, Antonio Ospite wrote:
+Hi Guennadi,
 
-> So, I am going to remove the ifdefs anyway but use IS_ERR_OR_NULL();
-> how does that sound? Am I still missing anything?
+On Fri, Apr 29 2011, Guennadi Liakhovetski wrote:
+> DMA mode has to be re-enabled during a resume.
+>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+>  drivers/mmc/host/tmio_mmc_dma.c |   21 ++++++++++++---------
+>  drivers/mmc/host/tmio_mmc_pio.c |    1 +
+>  2 files changed, 13 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+> index d3de74a..25f1ad6 100644
+> --- a/drivers/mmc/host/tmio_mmc_dma.c
+> +++ b/drivers/mmc/host/tmio_mmc_dma.c
+> @@ -256,7 +256,10 @@ static bool tmio_mmc_filter(struct dma_chan *chan, void *arg)
+>  void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdata)
+>  {
+>  	/* We can only either use DMA for both Tx and Rx or not use it at all */
+> -	if (pdata->dma) {
+> +	if (!pdata->dma)
+> +		return;
+> +
+> +	if (!host->chan_tx && !host->chan_rx) {
+>  		dma_cap_mask_t mask;
+>  
+>  		dma_cap_zero(mask);
+> @@ -284,18 +287,18 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+>  
+>  		tasklet_init(&host->dma_complete, tmio_mmc_tasklet_fn, (unsigned long)host);
+>  		tasklet_init(&host->dma_issue, tmio_mmc_issue_tasklet_fn, (unsigned long)host);
+> +	}
+>  
+> -		tmio_mmc_enable_dma(host, true);
+> +	tmio_mmc_enable_dma(host, true);
+> +
+> +	return;
+>  
+> -		return;
+>  ebouncebuf:
+> -		dma_release_channel(host->chan_rx);
+> -		host->chan_rx = NULL;
+> +	dma_release_channel(host->chan_rx);
+> +	host->chan_rx = NULL;
+>  ereqrx:
+> -		dma_release_channel(host->chan_tx);
+> -		host->chan_tx = NULL;
+> -		return;
+> -	}
+> +	dma_release_channel(host->chan_tx);
+> +	host->chan_tx = NULL;
+>  }
+>  
+>  void tmio_mmc_release_dma(struct tmio_mmc_host *host)
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index 26598f1..27fc11c 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -995,6 +995,7 @@ int tmio_mmc_host_resume(struct device *dev)
+>  		pm_runtime_get_sync(dev);
+>  
+>  	tmio_mmc_reset(mmc_priv(mmc));
+> +	tmio_mmc_request_dma(host, host->pdata);
+>  
+>  	return mmc_resume_host(mmc);
+>  }
 
-Looks good to me.
+This patch doesn't apply against current mmc-next.
 
-> Or changing the regulator_get() stub to return an error (-ENOSYS?) might
-> be worth it?
+Please could you send a full patchset against mmc-next for tmio for .40?
 
-No, the whole point of stubbing out the API is that it allows most
-consumers which just do simple enables and disables to run without
-needing to worry if the regulator API is compiled in or not.
+Thanks!
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
