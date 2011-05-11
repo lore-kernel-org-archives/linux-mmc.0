@@ -1,58 +1,63 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v4 00/15] add support for host controller v3.00
-Date: Wed, 11 May 2011 01:13:59 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300EBE0305F@SAUSEXMBP01.amd.com>
-References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
- <m3ei4552d2.fsf@pullcord.laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] dw_mmc: fixed wrong regulator_enable in suspend/resume
+Date: Wed, 11 May 2011 09:46:06 -0400
+Message-ID: <m3pqnp2vvl.fsf@pullcord.laptop.org>
+References: <4DCA3237.3080609@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:16250
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754961Ab1EKPqK convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 May 2011 11:46:10 -0400
-In-Reply-To: <m3ei4552d2.fsf@pullcord.laptop.org>
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:57203 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754646Ab1EKPph (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 11 May 2011 11:45:37 -0400
+In-Reply-To: <4DCA3237.3080609@samsung.com> (Jaehoon Chung's message of "Wed,
+	11 May 2011 15:52:39 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "prakity@marvell.com" <prakity@marvell.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Su, Henry" <Henry.Su@amd.com>, "Lu, Aaron" <Aaron.Lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Chris,
+Hi,
 
+On Wed, May 11 2011, Jaehoon Chung wrote:
+> In suspend function, regulator_enable() need not.
+> regulator_enable() should be locate in resume function.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c |    6 +++---
+>  1 files changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 87e1f57..66dcddb 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1769,9 +1769,6 @@ static int dw_mci_suspend(struct platform_device *pdev, pm_message_t mesg)
+>  	int i, ret;
+>  	struct dw_mci *host = platform_get_drvdata(pdev);
+>  
+> -	if (host->vmmc)
+> -		regulator_enable(host->vmmc);
+> -
+>  	for (i = 0; i < host->num_slots; i++) {
+>  		struct dw_mci_slot *slot = host->slot[i];
+>  		if (!slot)
+> @@ -1798,6 +1795,9 @@ static int dw_mci_resume(struct platform_device *pdev)
+>  	int i, ret;
+>  	struct dw_mci *host = platform_get_drvdata(pdev);
+>  
+> +	if (host->vmmc)
+> +		regulator_enable(host->vmmc);
+> +
+>  	if (host->dma_ops->init)
+>  		host->dma_ops->init(host);
+>  
+>
 
-> -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org]
-> Sent: Wednesday, May 11, 2011 9:13 AM
-> To: Nath, Arindam
-> Cc: prakity@marvell.com; zhangfei.gao@gmail.com;
-> subhashj@codeaurora.org; linux-mmc@vger.kernel.org; Su, Henry; Lu,
-> Aaron; anath.amd@gmail.com
-> Subject: Re: [PATCH v4 00/15] add support for host controller v3.00
-> 
-> Hi Arindam,
-> 
-> On Thu, May 05 2011, Arindam Nath wrote:
-> > The patches below add support for Host Controller v3.00 as per the
-> > spec v3.00. It also adds support for UHS-I cards as per Physical
-> > Layer Specification v3.01.
-> 
-> I've pushed 01-11 to mmc-next now, and will push 12-15 once they're
-> resubmitted with authorship status resolved.
+Should the regulator be being disabled in the suspend function, then?
 
-Thanks to you for taking time out to make the necessary changes, and pushing it to mmc-next. I will contact Philip to resolve the authorship issues with the rest of the patches, and then re-submit them soon.
-
-Thanks,
-Arindam
-
-> 
-> Thanks very much for all of your hard work on this patchset!
-> 
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-
-
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
