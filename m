@@ -1,296 +1,88 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCHv1] mmc_test: minor clean up, use t = &test.area everywhere
-Date: Wed, 11 May 2011 00:07:19 -0400
-Message-ID: <m3tyd13mo8.fsf@pullcord.laptop.org>
-References: <be7436a045a4706e31660c92bb8f48cd043facfc.1305030615.git.ext-andriy.shevchenko@nokia.com>
+From: Huang Changming-R66093 <R66093@freescale.com>
+Subject: RE: [PATCH] mmc: fixed wrong SD card detection
+Date: Wed, 11 May 2011 10:30:21 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F1154BAB5@039-SN1MPN1-005.039d.mgd.msft.net>
+References: <4DC3C1A8.1050104@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57202 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752172Ab1EKPpg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 May 2011 11:45:36 -0400
-In-Reply-To: <be7436a045a4706e31660c92bb8f48cd043facfc.1305030615.git.ext-andriy.shevchenko@nokia.com>
-	(Andy Shevchenko's message of "Tue, 10 May 2011 15:59:01 +0300")
+Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:17747 "EHLO
+	TX2EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754878Ab1EKPqe convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 May 2011 11:46:34 -0400
+In-Reply-To: <4DC3C1A8.1050104@samsung.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@nokia.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Andy, (adding Adrian to CC)
+I don't see this.
+Maybe that is your hardware issue.
 
-On Tue, May 10 2011, Andy Shevchenko wrote:
-> Signed-off-by: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+Thanks and Best Regards
+Jerry Huang
+
+
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Jaehoon Chung
+> Sent: Friday, May 06, 2011 5:39 PM
+> To: linux-mmc@vger.kernel.org
+> Cc: Chris Ball; Kyungmin Park
+> Subject: [PATCH] mmc: fixed wrong SD card detection
+> 
+> This patch added mmc_power_off after mmc_attach_sd()
+> 
+> i found that didn't detect the second card insert.(using SDHCI) you can
+> see the below log.
+> 
+> i want to know that somebody know this issue...
+> 
+> ->first card inserted (correct card detect)
+> # mmc1: new SDHC card at address e624
+> mmcblk1: mmc1:e624 SU04G 3.69 GiB
+>  mmcblk1: p1
+> #
+> # mmc1: card e624 removed
+> -> second card inserted
+> mmc1: error -110 whilst initialising SD card
+> mmc1: Card removed during transfer!
+> mmc1: Resetting controller.
+> -> third card inserted
+> mmc1: new SDHC card at address e624
+> mmcblk1: mmc1:e624 SU04G 3.69 GiB
+>  mmcblk1: p1
+> 
+> I added mmc_power_off() after only mmc_attach_sd().
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
 > ---
->  drivers/mmc/card/mmc_test.c |   75 +++++++++++++++++++++++++------------------
->  1 files changed, 44 insertions(+), 31 deletions(-)
->
-> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-> index 35252c1..233cdfa 100644
-> --- a/drivers/mmc/card/mmc_test.c
-> +++ b/drivers/mmc/card/mmc_test.c
-> @@ -1386,8 +1386,9 @@ static int mmc_test_area_io(struct mmc_test_card *test, unsigned long sz,
->   */
->  static int mmc_test_area_fill(struct mmc_test_card *test)
->  {
-> -	return mmc_test_area_io(test, test->area.max_tfr, test->area.dev_addr,
-> -				1, 0, 0);
-> +	struct mmc_test_area *t = &test->area;
-> +
-> +	return mmc_test_area_io(test, t->max_tfr, t->dev_addr, 1, 0, 0);
->  }
->  
->  /*
-> @@ -1400,7 +1401,7 @@ static int mmc_test_area_erase(struct mmc_test_card *test)
->  	if (!mmc_can_erase(test->card))
+>  drivers/mmc/core/core.c |    4 +++-
+>  1 files changed, 3 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
+> 1dbc185..d5d8ac0 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1522,8 +1522,10 @@ static int mmc_rescan_try_freq(struct mmc_host
+> *host, unsigned freq)
+>  	/* Order's important: probe SDIO, then SD, then MMC */
+>  	if (!mmc_attach_sdio(host))
 >  		return 0;
->  
-> -	return mmc_erase(test->card, t->dev_addr, test->area.max_sz >> 9,
-> +	return mmc_erase(test->card, t->dev_addr, t->max_sz >> 9,
->  			 MMC_ERASE_ARG);
->  }
->  
-> @@ -1527,8 +1528,10 @@ static int mmc_test_area_prepare_fill(struct mmc_test_card *test)
->  static int mmc_test_best_performance(struct mmc_test_card *test, int write,
->  				     int max_scatter)
->  {
-> -	return mmc_test_area_io(test, test->area.max_tfr, test->area.dev_addr,
-> -				write, max_scatter, 1);
-> +	struct mmc_test_area *t = &test->area;
-> +
-> +	return mmc_test_area_io(test, t->max_tfr, t->dev_addr, write,
-> +				max_scatter, 1);
->  }
->  
->  /*
-> @@ -1568,18 +1571,19 @@ static int mmc_test_best_write_perf_max_scatter(struct mmc_test_card *test)
->   */
->  static int mmc_test_profile_read_perf(struct mmc_test_card *test)
->  {
-> +	struct mmc_test_area *t = &test->area;
->  	unsigned long sz;
->  	unsigned int dev_addr;
->  	int ret;
->  
-> -	for (sz = 512; sz < test->area.max_tfr; sz <<= 1) {
-> -		dev_addr = test->area.dev_addr + (sz >> 9);
-> +	for (sz = 512; sz < t->max_tfr; sz <<= 1) {
-> +		dev_addr = t->dev_addr + (sz >> 9);
->  		ret = mmc_test_area_io(test, sz, dev_addr, 0, 0, 1);
->  		if (ret)
->  			return ret;
->  	}
-> -	sz = test->area.max_tfr;
-> -	dev_addr = test->area.dev_addr;
-> +	sz = t->max_tfr;
-> +	dev_addr = t->dev_addr;
->  	return mmc_test_area_io(test, sz, dev_addr, 0, 0, 1);
->  }
->  
-> @@ -1588,6 +1592,7 @@ static int mmc_test_profile_read_perf(struct mmc_test_card *test)
->   */
->  static int mmc_test_profile_write_perf(struct mmc_test_card *test)
->  {
-> +	struct mmc_test_area *t = &test->area;
->  	unsigned long sz;
->  	unsigned int dev_addr;
->  	int ret;
-> @@ -1595,8 +1600,8 @@ static int mmc_test_profile_write_perf(struct mmc_test_card *test)
->  	ret = mmc_test_area_erase(test);
->  	if (ret)
->  		return ret;
-> -	for (sz = 512; sz < test->area.max_tfr; sz <<= 1) {
-> -		dev_addr = test->area.dev_addr + (sz >> 9);
-> +	for (sz = 512; sz < t->max_tfr; sz <<= 1) {
-> +		dev_addr = t->dev_addr + (sz >> 9);
->  		ret = mmc_test_area_io(test, sz, dev_addr, 1, 0, 1);
->  		if (ret)
->  			return ret;
-> @@ -1604,8 +1609,8 @@ static int mmc_test_profile_write_perf(struct mmc_test_card *test)
->  	ret = mmc_test_area_erase(test);
->  	if (ret)
->  		return ret;
-> -	sz = test->area.max_tfr;
-> -	dev_addr = test->area.dev_addr;
-> +	sz = t->max_tfr;
-> +	dev_addr = t->dev_addr;
->  	return mmc_test_area_io(test, sz, dev_addr, 1, 0, 1);
->  }
->  
-> @@ -1614,6 +1619,7 @@ static int mmc_test_profile_write_perf(struct mmc_test_card *test)
->   */
->  static int mmc_test_profile_trim_perf(struct mmc_test_card *test)
->  {
-> +	struct mmc_test_area *t = &test->area;
->  	unsigned long sz;
->  	unsigned int dev_addr;
->  	struct timespec ts1, ts2;
-> @@ -1625,8 +1631,8 @@ static int mmc_test_profile_trim_perf(struct mmc_test_card *test)
->  	if (!mmc_can_erase(test->card))
->  		return RESULT_UNSUP_HOST;
->  
-> -	for (sz = 512; sz < test->area.max_sz; sz <<= 1) {
-> -		dev_addr = test->area.dev_addr + (sz >> 9);
-> +	for (sz = 512; sz < t->max_sz; sz <<= 1) {
-> +		dev_addr = t->dev_addr + (sz >> 9);
->  		getnstimeofday(&ts1);
->  		ret = mmc_erase(test->card, dev_addr, sz >> 9, MMC_TRIM_ARG);
->  		if (ret)
-> @@ -1634,7 +1640,7 @@ static int mmc_test_profile_trim_perf(struct mmc_test_card *test)
->  		getnstimeofday(&ts2);
->  		mmc_test_print_rate(test, sz, &ts1, &ts2);
->  	}
-> -	dev_addr = test->area.dev_addr;
-> +	dev_addr = t->dev_addr;
->  	getnstimeofday(&ts1);
->  	ret = mmc_erase(test->card, dev_addr, sz >> 9, MMC_TRIM_ARG);
->  	if (ret)
-> @@ -1646,12 +1652,13 @@ static int mmc_test_profile_trim_perf(struct mmc_test_card *test)
->  
->  static int mmc_test_seq_read_perf(struct mmc_test_card *test, unsigned long sz)
->  {
-> +	struct mmc_test_area *t = &test->area;
->  	unsigned int dev_addr, i, cnt;
->  	struct timespec ts1, ts2;
->  	int ret;
->  
-> -	cnt = test->area.max_sz / sz;
-> -	dev_addr = test->area.dev_addr;
-> +	cnt = t->max_sz / sz;
-> +	dev_addr = t->dev_addr;
->  	getnstimeofday(&ts1);
->  	for (i = 0; i < cnt; i++) {
->  		ret = mmc_test_area_io(test, sz, dev_addr, 0, 0, 0);
-> @@ -1669,20 +1676,22 @@ static int mmc_test_seq_read_perf(struct mmc_test_card *test, unsigned long sz)
->   */
->  static int mmc_test_profile_seq_read_perf(struct mmc_test_card *test)
->  {
-> +	struct mmc_test_area *t = &test->area;
->  	unsigned long sz;
->  	int ret;
->  
-> -	for (sz = 512; sz < test->area.max_tfr; sz <<= 1) {
-> +	for (sz = 512; sz < t->max_tfr; sz <<= 1) {
->  		ret = mmc_test_seq_read_perf(test, sz);
->  		if (ret)
->  			return ret;
->  	}
-> -	sz = test->area.max_tfr;
-> +	sz = t->max_tfr;
->  	return mmc_test_seq_read_perf(test, sz);
->  }
->  
->  static int mmc_test_seq_write_perf(struct mmc_test_card *test, unsigned long sz)
->  {
-> +	struct mmc_test_area *t = &test->area;
->  	unsigned int dev_addr, i, cnt;
->  	struct timespec ts1, ts2;
->  	int ret;
-> @@ -1690,8 +1699,8 @@ static int mmc_test_seq_write_perf(struct mmc_test_card *test, unsigned long sz)
->  	ret = mmc_test_area_erase(test);
->  	if (ret)
->  		return ret;
-> -	cnt = test->area.max_sz / sz;
-> -	dev_addr = test->area.dev_addr;
-> +	cnt = t->max_sz / sz;
-> +	dev_addr = t->dev_addr;
->  	getnstimeofday(&ts1);
->  	for (i = 0; i < cnt; i++) {
->  		ret = mmc_test_area_io(test, sz, dev_addr, 1, 0, 0);
-> @@ -1709,15 +1718,16 @@ static int mmc_test_seq_write_perf(struct mmc_test_card *test, unsigned long sz)
->   */
->  static int mmc_test_profile_seq_write_perf(struct mmc_test_card *test)
->  {
-> +	struct mmc_test_area *t = &test->area;
->  	unsigned long sz;
->  	int ret;
->  
-> -	for (sz = 512; sz < test->area.max_tfr; sz <<= 1) {
-> +	for (sz = 512; sz < t->max_tfr; sz <<= 1) {
->  		ret = mmc_test_seq_write_perf(test, sz);
->  		if (ret)
->  			return ret;
->  	}
-> -	sz = test->area.max_tfr;
-> +	sz = t->max_tfr;
->  	return mmc_test_seq_write_perf(test, sz);
->  }
->  
-> @@ -1726,6 +1736,7 @@ static int mmc_test_profile_seq_write_perf(struct mmc_test_card *test)
->   */
->  static int mmc_test_profile_seq_trim_perf(struct mmc_test_card *test)
->  {
-> +	struct mmc_test_area *t = &test->area;
->  	unsigned long sz;
->  	unsigned int dev_addr, i, cnt;
->  	struct timespec ts1, ts2;
-> @@ -1737,15 +1748,15 @@ static int mmc_test_profile_seq_trim_perf(struct mmc_test_card *test)
->  	if (!mmc_can_erase(test->card))
->  		return RESULT_UNSUP_HOST;
->  
-> -	for (sz = 512; sz <= test->area.max_sz; sz <<= 1) {
-> +	for (sz = 512; sz <= t->max_sz; sz <<= 1) {
->  		ret = mmc_test_area_erase(test);
->  		if (ret)
->  			return ret;
->  		ret = mmc_test_area_fill(test);
->  		if (ret)
->  			return ret;
-> -		cnt = test->area.max_sz / sz;
-> -		dev_addr = test->area.dev_addr;
-> +		cnt = t->max_sz / sz;
-> +		dev_addr = t->dev_addr;
->  		getnstimeofday(&ts1);
->  		for (i = 0; i < cnt; i++) {
->  			ret = mmc_erase(test->card, dev_addr, sz >> 9,
-> @@ -1808,11 +1819,12 @@ static int mmc_test_rnd_perf(struct mmc_test_card *test, int write, int print,
->  
->  static int mmc_test_random_perf(struct mmc_test_card *test, int write)
->  {
-> +	struct mmc_test_area *t = &test->area;
->  	unsigned int next;
->  	unsigned long sz;
->  	int ret;
->  
-> -	for (sz = 512; sz < test->area.max_tfr; sz <<= 1) {
-> +	for (sz = 512; sz < t->max_tfr; sz <<= 1) {
->  		/*
->  		 * When writing, try to get more consistent results by running
->  		 * the test twice with exactly the same I/O but outputting the
-> @@ -1829,7 +1841,7 @@ static int mmc_test_random_perf(struct mmc_test_card *test, int write)
->  		if (ret)
->  			return ret;
->  	}
-> -	sz = test->area.max_tfr;
-> +	sz = t->max_tfr;
->  	if (write) {
->  		next = rnd_next;
->  		ret = mmc_test_rnd_perf(test, write, 0, sz);
-> @@ -1859,17 +1871,18 @@ static int mmc_test_random_write_perf(struct mmc_test_card *test)
->  static int mmc_test_seq_perf(struct mmc_test_card *test, int write,
->  			     unsigned int tot_sz, int max_scatter)
->  {
-> +	struct mmc_test_area *t = &test->area;
->  	unsigned int dev_addr, i, cnt, sz, ssz;
->  	struct timespec ts1, ts2;
->  	int ret;
->  
-> -	sz = test->area.max_tfr;
-> +	sz = t->max_tfr;
-> +
->  	/*
->  	 * In the case of a maximally scattered transfer, the maximum transfer
->  	 * size is further limited by using PAGE_SIZE segments.
->  	 */
->  	if (max_scatter) {
-> -		struct mmc_test_area *t = &test->area;
->  		unsigned long max_tfr;
->  
->  		if (t->max_seg_sz >= PAGE_SIZE)
+> -	if (!mmc_attach_sd(host))
+> +	if (!mmc_attach_sd(host)) {
+> +		mmc_power_off(host);
+>  		return 0;
+> +	}
+>  	if (!mmc_attach_mmc(host))
+>  		return 0;
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
 
-Thanks, pushed to mmc-next for .40.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
