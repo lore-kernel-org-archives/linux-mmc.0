@@ -1,83 +1,75 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 1/2] pxamci: remove the ifdef CONFIG_REGULATOR
-Date: Wed, 11 May 2011 10:41:43 -0400
-Message-ID: <m38vud2taw.fsf@pullcord.laptop.org>
-References: <20110510203629.GB8726@opensource.wolfsonmicro.com>
-	<1305109145-16567-1-git-send-email-ospite@studenti.unina.it>
+From: <Chang-Ming.Huang@freescale.com>
+Subject: [PATCH 1/3] SDHCI: add sdhci_get_cd callback to detect the card
+Date: Wed, 11 May 2011 17:32:09 +0800
+Message-ID: <1305106331-21280-1-git-send-email-Chang-Ming.Huang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1305109145-16567-1-git-send-email-ospite@studenti.unina.it>
-	(Antonio Ospite's message of "Wed, 11 May 2011 12:19:05 +0200")
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Antonio Ospite <ospite@studenti.unina.it>
-Cc: openezx-devel@lists.openezx.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Mark Brown <broonie@opensource.wolfsonmicro.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:10443 "EHLO
+	TX2EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751476Ab1EKPfK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 May 2011 11:35:10 -0400
+Received: from mail141-tx2 (localhost.localdomain [127.0.0.1])	by
+ mail141-tx2-R.bigfish.com (Postfix) with ESMTP id B0CD0125831E	for
+ <linux-mmc@vger.kernel.org>; Wed, 11 May 2011 10:18:59 +0000 (UTC)
+Received: from TX2EHSMHS043.bigfish.com (unknown [10.9.14.254])	by
+ mail141-tx2.bigfish.com (Postfix) with ESMTP id 55DD016A0050	for
+ <linux-mmc@vger.kernel.org>; Wed, 11 May 2011 10:18:59 +0000 (UTC)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linuxppc-dev@linux.freescale.net, Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Hi Antonio,
+From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-On Wed, May 11 2011, Antonio Ospite wrote:
-> Don't wrap regulator_get() inside an ifdef CONFIG_REGULATOR anymore, as
-> now it degenerates and returns NULL when the regulator framework is
-> disabled (since commit be1a50d: regulator: Let drivers know when they
-> use the stub API); and use IS_ERR_OR_NULL() to handle the stub function 
-> correctly.
->
-> Signed-off-by: Antonio Ospite <ospite@studenti.unina.it>
-> ---
->
-> Changes since v1:
->   - Use IS_ERR_OR_NULL() to correctly handle the stub regulator_get()
->   - Put the short commit message of be1a50d so it is easier to see what it is 
->     about, for the long commit and the actual code changes the git history can 
->     be queried.
->
-> Thanks,
->    Antonio Ospite
->    http://ao2.it
->
->  drivers/mmc/host/pxamci.c |    5 ++---
->  1 files changed, 2 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-> index 7257738..3a89fb2 100644
-> --- a/drivers/mmc/host/pxamci.c
-> +++ b/drivers/mmc/host/pxamci.c
-> @@ -79,10 +79,9 @@ struct pxamci_host {
->  
->  static inline void pxamci_init_ocr(struct pxamci_host *host)
->  {
-> -#ifdef CONFIG_REGULATOR
->  	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
->  
-> -	if (IS_ERR(host->vcc))
-> +	if (IS_ERR_OR_NULL(host->vcc))
->  		host->vcc = NULL;
->  	else {
->  		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
-> @@ -90,7 +89,7 @@ static inline void pxamci_init_ocr(struct pxamci_host *host)
->  			dev_warn(mmc_dev(host->mmc),
->  				"ocr_mask/setpower will not be used\n");
->  	}
-> -#endif
-> +
->  	if (host->vcc == NULL) {
->  		/* fall-back to platform data */
->  		host->mmc->ocr_avail = host->pdata ?
+Add callback function sdhci_get_cd to detect the card.
 
-Thanks, I've merged this and squashed the 2/2 punctuation patch into it;
-it didn't seem worth having a separate patch when both touch the same code.
+In order to check if the card is present,
+we will read the PRESENT STATE register and check the bit15.
 
-- Chris.
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+---
+ drivers/mmc/host/sdhci.c |   19 +++++++++++++++++++
+ 1 files changed, 19 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9e15f41..2e60372 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1262,6 +1262,24 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+ 		!is_readonly : is_readonly;
+ }
+ 
++static int sdhci_get_cd(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	unsigned long flags;
++	int present;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (host->flags & SDHCI_DEVICE_DEAD)
++		present = 0;
++	else
++		present = sdhci_readl(host, SDHCI_PRESENT_STATE);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return present & SDHCI_CARD_PRESENT;
++}
++
+ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ {
+ 	struct sdhci_host *host;
+@@ -1288,6 +1306,7 @@ static const struct mmc_host_ops sdhci_ops = {
+ 	.request	= sdhci_request,
+ 	.set_ios	= sdhci_set_ios,
+ 	.get_ro		= sdhci_get_ro,
++	.get_cd		= sdhci_get_cd,
+ 	.enable_sdio_irq = sdhci_enable_sdio_irq,
+ };
+ 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.4.1
+
+
