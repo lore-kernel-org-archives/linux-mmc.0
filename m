@@ -1,123 +1,119 @@
-From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v5] sdio: optimized SDIO IRQ handling for single irq
-Date: Wed, 11 May 2011 17:48:05 +0200
-Message-ID: <1305128885-21275-2-git-send-email-per.forlin@linaro.org>
-References: <1305128885-21275-1-git-send-email-per.forlin@linaro.org>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCH] MMC: fix a race between card-detect rescan and
+ clock-gate work instances
+Date: Wed, 11 May 2011 20:15:26 +0800
+Message-ID: <5D8008F58939784290FAB48F549751983DB52B1EEF@shsmsx502.ccr.corp.intel.com>
+References: <Pine.LNX.4.64.1104152006110.18593@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <1305128885-21275-1-git-send-email-per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Stefan Nilsson XK <stefan.xk.nilsson-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([143.182.124.37]:9304 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755482Ab1EKPuF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 May 2011 11:50:05 -0400
+In-Reply-To: <Pine.LNX.4.64.1104152006110.18593@axis700.grange>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-From: Stefan Nilsson XK <stefan.xk.nilsson-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>
+Hello Liakhovetski,
 
-If there is only 1 function interrupt registered it is possible to
-improve performance by directly calling the irq handler
-and avoiding the overhead of reading the CCCR registers.
+Right now I am facing some problem during kernel booting which indicate caused by MMC driver. So I think I encountered the race condition you mentioned below.
+I have gone through MMC stack code, seems sdhci_set_ios already wrapped by spin lock/unlock, so I am a little not understanding why there is still a race condition?
+Is this race condition caused by sdhci_set_ios function reenter or something else?
 
-Signed-off-by: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Acked-by: Ulf Hansson <ulf.hansson-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>
-Reviewed-by: Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Thanks for your help on this.
+
+BR
+Chuanxiao
+-----Original Message-----
+From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Guennadi Liakhovetski
+Sent: Saturday, April 16, 2011 2:08 AM
+To: linux-sh@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org; Magnus Damm; Simon Horman; Linus Walleij
+Subject: [PATCH] MMC: fix a race between card-detect rescan and clock-gate work instances
+
+Currently there is a race in the MMC core between a card-detect
+rescan work and the clock-gating work, scheduled from a command
+completion. Fix it by removing the dedicated clock-gating mutex and
+using the MMC standard locking mechanism instead.
+
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Simon Horman <horms@verge.net.au>
+Cc: Magnus Damm <damm@opensource.se>
+Cc: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/core/sdio_irq.c |   33 ++++++++++++++++++++++++++++++++-
- include/linux/mmc/card.h    |    1 +
- 2 files changed, 33 insertions(+), 1 deletions(-)
+ drivers/mmc/core/host.c  |    9 ++++-----
+ include/linux/mmc/host.h |    1 -
+ 2 files changed, 4 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index bb192f9..a0890ac 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -31,6 +31,17 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
- {
- 	int i, ret, count;
- 	unsigned char pending;
-+	struct sdio_func *func;
-+
-+	/*
-+	 * Optimization, if there is only 1 function interrupt registered
-+	 * call irq handler directly
-+	 */
-+	func = card->sdio_single_irq;
-+	if (func) {
-+		func->irq_handler(func);
-+		return 1;
-+	}
- 
- 	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
- 	if (ret) {
-@@ -42,7 +53,7 @@ static int process_sdio_pending_irqs(struct mmc_card *card)
- 	count = 0;
- 	for (i = 1; i <= 7; i++) {
- 		if (pending & (1 << i)) {
--			struct sdio_func *func = card->sdio_func[i - 1];
-+			func = card->sdio_func[i - 1];
- 			if (!func) {
- 				printk(KERN_WARNING "%s: pending IRQ for "
- 					"non-existant function\n",
-@@ -186,6 +197,24 @@ static int sdio_card_irq_put(struct mmc_card *card)
- 	return 0;
- }
- 
-+/* If there is only 1 function registered set sdio_single_irq */
-+static void sdio_single_irq_set(struct mmc_card *card)
-+{
-+	struct sdio_func *func;
-+	int i;
-+
-+	card->sdio_single_irq = NULL;
-+	if ((card->host->caps & MMC_CAP_SDIO_IRQ) &&
-+	    card->host->sdio_irqs == 1)
-+		for (i = 0; i < card->sdio_funcs; i++) {
-+		       func = card->sdio_func[i];
-+		       if (func && func->irq_handler) {
-+			       card->sdio_single_irq = func;
-+			       break;
-+		       }
-+	       }
-+}
-+
- /**
-  *	sdio_claim_irq - claim the IRQ for a SDIO function
-  *	@func: SDIO function
-@@ -227,6 +256,7 @@ int sdio_claim_irq(struct sdio_func *func, sdio_irq_handler_t *handler)
- 	ret = sdio_card_irq_get(func->card);
- 	if (ret)
- 		func->irq_handler = NULL;
-+	sdio_single_irq_set(func->card);
- 
- 	return ret;
- }
-@@ -251,6 +281,7 @@ int sdio_release_irq(struct sdio_func *func)
- 	if (func->irq_handler) {
- 		func->irq_handler = NULL;
- 		sdio_card_irq_put(func->card);
-+		sdio_single_irq_set(func->card);
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 461e6a1..2b200c1 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -94,7 +94,7 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
+ 		spin_unlock_irqrestore(&host->clk_lock, flags);
+ 		return;
  	}
+-	mutex_lock(&host->clk_gate_mutex);
++	mmc_claim_host(host);
+ 	spin_lock_irqsave(&host->clk_lock, flags);
+ 	if (!host->clk_requests) {
+ 		spin_unlock_irqrestore(&host->clk_lock, flags);
+@@ -104,7 +104,7 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
+ 		pr_debug("%s: gated MCI clock\n", mmc_hostname(host));
+ 	}
+ 	spin_unlock_irqrestore(&host->clk_lock, flags);
+-	mutex_unlock(&host->clk_gate_mutex);
++	mmc_release_host(host);
+ }
  
- 	ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IENx, 0, &reg);
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index d8dffc9..4910dec 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -191,6 +191,7 @@ struct mmc_card {
- 	struct sdio_cccr	cccr;		/* common card info */
- 	struct sdio_cis		cis;		/* common tuple info */
- 	struct sdio_func	*sdio_func[SDIO_MAX_FUNCS]; /* SDIO functions (devices) */
-+	struct sdio_func	*sdio_single_irq; /* SDIO function when only one IRQ active */
- 	unsigned		num_info;	/* number of info strings */
- 	const char		**info;		/* info strings */
- 	struct sdio_func_tuple	*tuples;	/* unknown common tuples */
+ /*
+@@ -130,7 +130,7 @@ void mmc_host_clk_ungate(struct mmc_host *host)
+ {
+ 	unsigned long flags;
+ 
+-	mutex_lock(&host->clk_gate_mutex);
++	mmc_claim_host(host);
+ 	spin_lock_irqsave(&host->clk_lock, flags);
+ 	if (host->clk_gated) {
+ 		spin_unlock_irqrestore(&host->clk_lock, flags);
+@@ -140,7 +140,7 @@ void mmc_host_clk_ungate(struct mmc_host *host)
+ 	}
+ 	host->clk_requests++;
+ 	spin_unlock_irqrestore(&host->clk_lock, flags);
+-	mutex_unlock(&host->clk_gate_mutex);
++	mmc_release_host(host);
+ }
+ 
+ /**
+@@ -215,7 +215,6 @@ static inline void mmc_host_clk_init(struct mmc_host *host)
+ 	host->clk_gated = false;
+ 	INIT_WORK(&host->clk_gate_work, mmc_host_clk_gate_work);
+ 	spin_lock_init(&host->clk_lock);
+-	mutex_init(&host->clk_gate_mutex);
+ }
+ 
+ /**
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index bcb793e..eb792cb 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -183,7 +183,6 @@ struct mmc_host {
+ 	struct work_struct	clk_gate_work; /* delayed clock gate */
+ 	unsigned int		clk_old;	/* old clock value cache */
+ 	spinlock_t		clk_lock;	/* lock for clk fields */
+-	struct mutex		clk_gate_mutex;	/* mutex for clock gating */
+ #endif
+ 
+ 	/* host specific block data */
 -- 
-1.7.4.1
+1.7.2.5
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
