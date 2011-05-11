@@ -1,56 +1,102 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] dw_mmc: fixed regulator control
-Date: Wed, 11 May 2011 12:00:33 +0900
-Message-ID: <4DC9FBD1.2000803@samsung.com>
-References: <4DBA90BD.8070804@samsung.com> <m3iptv2027.fsf@pullcord.laptop.org>
- <4DBE62FE.6020402@samsung.com> <m3boza6neb.fsf@pullcord.laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v4 01/15] mmc: sd: add support for signal voltage switch procedure
+Date: Tue, 10 May 2011 23:34:08 -0400
+Message-ID: <m3wrhx52rz.fsf@pullcord.laptop.org>
+References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
+	<1304578151-1775-2-git-send-email-arindam.nath@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:61546 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753838Ab1EKDA2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2011 23:00:28 -0400
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LL0003U8GCQPOI0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 11 May 2011 12:00:26 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LL000DX0GCP5R@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 11 May 2011 12:00:25 +0900 (KST)
-In-reply-to: <m3boza6neb.fsf@pullcord.laptop.org>
+Received: from void.printf.net ([89.145.121.20]:38188 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754145Ab1EKDbp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 May 2011 23:31:45 -0400
+In-Reply-To: <1304578151-1775-2-git-send-email-arindam.nath@amd.com> (Arindam
+	Nath's message of "Thu, 5 May 2011 12:18:57 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>, Lars-Peter Clausen <lars@metafoo.de>
+To: Arindam Nath <arindam.nath@amd.com>
+Cc: prakity@marvell.com, zhangfei.gao@gmail.com, subhashj@codeaurora.org, linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com
 
-Chris Ball wrote:
-> Hi Jaehoon,
-> 
-> On Mon, May 02 2011, Jaehoon Chung wrote:
->> Hi Chris..
->>
->> Thanks for comments...
->> I think that could confuse that message when didn't set CONFIG_REGULATOR.
-> 
-> The message *does not appear* when CONFIG_REGULATOR is unset, because
-> NULL -- which the regulator subsystem returns via the regulator_get()
-> stub -- is not an IS_ERR().  Do you agree?
+Hi,
 
-Thanks, I agreed that.
-I'm interesting mailing's discussion about "[PATCH] pxamci: remove an ifdef about CONFIG_REGULATOR "
-(in this case, i think similar case)
+On Thu, May 05 2011, Arindam Nath wrote:
+> Host Controller v3.00 adds another Capabilities register. Apart
+> from other things, this new register indicates whether the Host
+> Controller supports SDR50, SDR104, and DDR50 UHS-I modes. The spec
+> doesn't mention about explicit support for SDR12 and SDR25 UHS-I
+> modes, so the Host Controller v3.00 should support them by default.
+> Also if the controller supports SDR104 mode, it will also support
+> SDR50 mode as well. So depending on the host support, we set the
+> corresponding MMC_CAP_* flags. One more new register. Host Control2
+> is added in v3.00, which is used during Signal Voltage Switch
+> procedure described below.
+>
+> Since as per v3.00 spec, UHS-I supported hosts should set S18R
+> to 1, we set S18R (bit 24) of OCR before sending ACMD41. We also
+> need to set XPC (bit 28) of OCR in case the host can supply >150mA.
+> This support is indicated by the Maximum Current Capabilities
+> register of the Host Controller.
+>
+> If the response of ACMD41 has both CCS and S18A set, we start the
+> signal voltage switch procedure, which if successfull, will switch
+> the card from 3.3V signalling to 1.8V signalling. Signal voltage
+> switch procedure adds support for a new command CMD11 in the
+> Physical Layer Spec v3.01. As part of this procedure, we need to
+> set 1.8V Signalling Enable (bit 3) of Host Control2 register, which
+> if remains set after 5ms, means the switch to 1.8V signalling is
+> successfull. Otherwise, we clear bit 24 of OCR and retry the
+> initialization sequence. When we remove the card, and insert the
+> same or another card, we need to make sure that we start with 3.3V
+> signalling voltage. So we call mmc_set_signal_voltage() with
+> MMC_SIGNAL_VOLTAGE_330 set so that we are back to 3.3V signalling
+> voltage before we actually start initializing the card.
+>
+> Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+> Reviewed-by: Philip Rakity <prakity@marvell.com>
+> Tested-by: Philip Rakity <prakity@marvell.com>
 
-> 
->> And i wonder how do you think about regulator control in suspend (dw_mmc.c)?
-> 
-> Yes, that patch looks correct, although I can't test it myself.  Please
-> send it separately.
+Thanks, pushed to mmc-next for .40 with the trivial changes below:
 
-Ok. i will send that separately patch.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index ea5c28d..5005a63 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -944,7 +944,7 @@ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr)
+ 
+ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
+ {
+-	struct mmc_command cmd;
++	struct mmc_command cmd = {0};
+ 	int err = 0;
+ 
+ 	BUG_ON(!host);
+@@ -954,8 +954,6 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage)
+ 	 * 1.8V signalling.
+ 	 */
+ 	if (signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
+-		memset(&cmd, 0, sizeof(struct mmc_command));
+-
+ 		cmd.opcode = SD_SWITCH_VOLTAGE;
+ 		cmd.arg = 0;
+ 		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 52faa50..7fffc5e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1400,9 +1400,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 				present_state = sdhci_readl(host,
+ 							SDHCI_PRESENT_STATE);
+ 				if ((present_state & SDHCI_DATA_LVL_MASK) ==
+-				     SDHCI_DATA_LVL_MASK) {
++				     SDHCI_DATA_LVL_MASK)
+ 					return 0;
+-				}
+ 			}
+ 		}
+ 
 
-Regards,
-Jaehoon Chung
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
