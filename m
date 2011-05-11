@@ -1,59 +1,104 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] dw_mmc: fixed wrong regulator_enable in suspend/resume
-Date: Wed, 11 May 2011 15:52:39 +0900
-Message-ID: <4DCA3237.3080609@samsung.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v4 12/15] sdhci pxa add platform specific code for UHS signaling
+Date: Wed, 11 May 2011 04:48:23 -0400
+Message-ID: <BANLkTikdwJ3KOhxtJu9Msq6G-SmutGaSHg@mail.gmail.com>
+References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
+	<1304578151-1775-13-git-send-email-arindam.nath@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:49070 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754477Ab1EKRCy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 May 2011 13:02:54 -0400
-Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LL0003LQR3JFZ90@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 11 May 2011 15:52:32 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LL000I0OR3K5L@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 11 May 2011 15:52:32 +0900 (KST)
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:61778 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751345Ab1EKSLL convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 May 2011 14:11:11 -0400
+Received: by vxi39 with SMTP id 39so553869vxi.19
+        for <linux-mmc@vger.kernel.org>; Wed, 11 May 2011 11:11:10 -0700 (PDT)
+In-Reply-To: <1304578151-1775-13-git-send-email-arindam.nath@amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>
+To: Arindam Nath <arindam.nath@amd.com>
+Cc: cjb@laptop.org, prakity@marvell.com, subhashj@codeaurora.org, linux-mmc@vger.kernel.org, henry.su@amd.com, aaron.lu@amd.com, anath.amd@gmail.com
 
-In suspend function, regulator_enable() need not.
-regulator_enable() should be locate in resume function.
+On Thu, May 5, 2011 at 2:49 AM, Arindam Nath <arindam.nath@amd.com> wro=
+te:
+> Marvell controller requires 1.8V bit in UHS control register 2
+> be set when doing UHS. =A0eMMC does not require 1.8V for DDR.
+> add platform code to handle this.
+>
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> Reviewed-by: Arindam Nath <arindam.nath@amd.com>
+> ---
+> =A0drivers/mmc/host/sdhci-pxa.c | =A0 36 ++++++++++++++++++++++++++++=
+++++++++
+> =A01 files changed, 36 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-px=
+a.c
+> index 5a61208..b52c3e6 100644
+> --- a/drivers/mmc/host/sdhci-pxa.c
+> +++ b/drivers/mmc/host/sdhci-pxa.c
+> @@ -69,7 +69,40 @@ static void set_clock(struct sdhci_host *host, uns=
+igned int clock)
+> =A0 =A0 =A0 =A0}
+> =A0}
+>
+> +static int set_uhs_signaling(struct sdhci_host *host, unsigned int u=
+hs)
+> +{
+> + =A0 =A0 =A0 u16 ctrl_2;
+> +
+> + =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0* Set V18_EN -- UHS modes do not work without this.
+> + =A0 =A0 =A0 =A0* does not change signaling voltage
+> + =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 ctrl_2 =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Select Bus Speed Mode for host */
+> + =A0 =A0 =A0 ctrl_2 &=3D ~SDHCI_CTRL_UHS_MASK;
+> + =A0 =A0 =A0 if (uhs =3D=3D MMC_TIMING_UHS_SDR12)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR12;
+> + =A0 =A0 =A0 else if (uhs =3D=3D MMC_TIMING_UHS_SDR25)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR25;
+> + =A0 =A0 =A0 else if (uhs =3D=3D MMC_TIMING_UHS_SDR50) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR50;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
+> + =A0 =A0 =A0 } else if (uhs =3D=3D MMC_TIMING_UHS_SDR104) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR104;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
+> + =A0 =A0 =A0 } else if (uhs =3D=3D MMC_TIMING_UHS_DDR50) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_DDR50;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
+> + =A0 =A0 =A0 }
+> + =A0 =A0 =A0 sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+> + =A0 =A0 =A0 pr_debug("%s:%s uhs =3D %d, ctrl_2 =3D %04X\n",
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 __func__, mmc_hostname(host->mmc), uhs,=
+ ctrl_2);
+> + =A0 =A0 =A0 return 0;
+> +}
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
+Why move common register accessing from sdhci.c to specific driver?
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 87e1f57..66dcddb 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1769,9 +1769,6 @@ static int dw_mci_suspend(struct platform_device *pdev, pm_message_t mesg)
- 	int i, ret;
- 	struct dw_mci *host = platform_get_drvdata(pdev);
- 
--	if (host->vmmc)
--		regulator_enable(host->vmmc);
--
- 	for (i = 0; i < host->num_slots; i++) {
- 		struct dw_mci_slot *slot = host->slot[i];
- 		if (!slot)
-@@ -1798,6 +1795,9 @@ static int dw_mci_resume(struct platform_device *pdev)
- 	int i, ret;
- 	struct dw_mci *host = platform_get_drvdata(pdev);
- 
-+	if (host->vmmc)
-+		regulator_enable(host->vmmc);
-+
- 	if (host->dma_ops->init)
- 		host->dma_ops->init(host);
- 
+> +
+> =A0static struct sdhci_ops sdhci_pxa_ops =3D {
+> + =A0 =A0 =A0 .set_uhs_signaling =3D set_uhs_signaling,
+> =A0 =A0 =A0 =A0.set_clock =3D set_clock,
+> =A0};
+>
+> @@ -141,6 +174,9 @@ static int __devinit sdhci_pxa_probe(struct platf=
+orm_device *pdev)
+> =A0 =A0 =A0 =A0if (pdata->quirks)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->quirks |=3D pdata->quirks;
+>
+> + =A0 =A0 =A0 /* enable 1/8V DDR capable */
+> + =A0 =A0 =A0 host->mmc->caps |=3D MMC_CAP_1_8V_DDR;
+> +
+> =A0 =A0 =A0 =A0/* If slot design supports 8 bit data, indicate this t=
+o MMC. */
+> =A0 =A0 =A0 =A0if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->mmc->caps |=3D MMC_CAP_8_BIT_DAT=
+A;
+> --
+> 1.7.1
+>
+>
