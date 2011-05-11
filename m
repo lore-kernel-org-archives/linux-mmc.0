@@ -1,54 +1,168 @@
-From: Tony Olech <tony.olech@elandigitalsystems.com>
-Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver
- Re-Re-Re-Resubmission
-Date: Wed, 11 May 2011 14:32:03 +0100
-Message-ID: <1305120723.1722.61.camel@apple-mac>
-References: <1303231971.1622.33.camel@apple-mac>
-	 <1305117866.1722.14.camel@apple-mac>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCH] MMC: fix a race between card-detect rescan and
+ clock-gate work instances
+Date: Wed, 11 May 2011 20:51:53 +0800
+Message-ID: <5D8008F58939784290FAB48F549751983DB52B1EF7@shsmsx502.ccr.corp.intel.com>
+References: <Pine.LNX.4.64.1104152006110.18593@axis700.grange>
+ <5D8008F58939784290FAB48F549751983DB52B1EEF@shsmsx502.ccr.corp.intel.com>
+ <alpine.DEB.2.00.1105111423360.15787@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:49335 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755303Ab1EKQQe convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 May 2011 12:16:34 -0400
-In-Reply-To: <1305117866.1722.14.camel@apple-mac>
+Received: from mga02.intel.com ([134.134.136.20]:12988 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755303Ab1EKQQa convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 May 2011 12:16:30 -0400
+In-Reply-To: <alpine.DEB.2.00.1105111423360.15787@axis700.grange>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Arnd Bergmann <arnd@arndb.de>
-Cc: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-With reference to Arnd's summation of issues with the
-previous version of the patch which can be found at
-"http://ns3.spinics.net/lists/linux-mmc/msg06693.html"
-I have made nearly all of the changes requested.
 
-I have not removed of the __packed keyword from those
-structures that map onto the adapter=E2=80=99s hardware, the
-reason for Arnd's request, as I understand it, is that
-there is a compiler issue with other architectures
-that result in slightly slower code. Since those
-structures exist for translation to/from the adapter
-the efficiency of inserting or extracting data can
-not possibly be an issue. I do not see how having
-the structures marked with the __packed keyword is
-anything but good programming practice since if
-clearly distinguishes those structures from ordinary
-working structures.
+> -----Original Message-----
+> From: Guennadi Liakhovetski [mailto:g.liakhovetski@gmx.de]
+> Sent: Wednesday, May 11, 2011 8:26 PM
+> To: Dong, Chuanxiao
+> Cc: linux-mmc@vger.kernel.org
+> Subject: RE: [PATCH] MMC: fix a race between card-detect rescan and clock-gate
+> work instances
+> 
+> Hi
+> 
+> On Wed, 11 May 2011, Dong, Chuanxiao wrote:
+> 
+> > Hello Liakhovetski,
+> >
+> > Right now I am facing some problem during kernel booting which indicate
+> > caused by MMC driver. So I think I encountered the race condition you
+> > mentioned below.
+> 
+> Which kernel are you using? With my patch or without it? What makes you
+> think, that your problem is caused by a race in MMC? Races rarely occur
+> reproducibly, so, it seems a bit unlikely to me during the boot process.
+I am using the kernel without your patch, so you can say my kernel is before your patch.
+After applied your patch, I never encountered booting failure. So this makes me think I encountered the race condition between card-detect rescan and clock-gate thread.
 
-There are 2 "if then else if .." decision branches
-that I cannot replace with a single "switch case .."
-statement because there is not a single unique
-expression those value is tested against constant
-values.
+But I am not quiet understanding what race it is actually. Can you just introduce what race you faced? Is this race condition caused by sdhci_set_ios reenter or something else?
 
-I have not chopped the void function "send_command"
-into 2 as Arnd requested, as the function, in spite
-of being 291 lines long is logically very simple
-and any split would be wholly arbitrary and in my
-view just make it more opaque.
-
-Tony Olech
-Elan Digital Systems Limited
-
+Thanks
+Chuanxiao
+> 
+> > I have gone through MMC stack code, seems sdhci_set_ios already wrapped
+> > by spin lock/unlock, so I am a little not understanding why there is
+> > still a race condition?
+> 
+> Again, are you referring to the kernel before my patch or after?
+> 
+> Thanks
+> Guennadi
+> 
+> > Is this race condition caused by sdhci_set_ios function reenter or
+> > something else?
+> >
+> > Thanks for your help on this.
+> >
+> > BR
+> > Chuanxiao
+> > -----Original Message-----
+> > From: linux-mmc-owner@vger.kernel.org
+> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Guennadi Liakhovetski
+> > Sent: Saturday, April 16, 2011 2:08 AM
+> > To: linux-sh@vger.kernel.org
+> > Cc: linux-mmc@vger.kernel.org; Magnus Damm; Simon Horman; Linus Walleij
+> > Subject: [PATCH] MMC: fix a race between card-detect rescan and clock-gate
+> work instances
+> >
+> > Currently there is a race in the MMC core between a card-detect
+> > rescan work and the clock-gating work, scheduled from a command
+> > completion. Fix it by removing the dedicated clock-gating mutex and
+> > using the MMC standard locking mechanism instead.
+> >
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > Cc: Simon Horman <horms@verge.net.au>
+> > Cc: Magnus Damm <damm@opensource.se>
+> > Cc: Linus Walleij <linus.walleij@linaro.org>
+> > ---
+> >  drivers/mmc/core/host.c  |    9 ++++-----
+> >  include/linux/mmc/host.h |    1 -
+> >  2 files changed, 4 insertions(+), 6 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> > index 461e6a1..2b200c1 100644
+> > --- a/drivers/mmc/core/host.c
+> > +++ b/drivers/mmc/core/host.c
+> > @@ -94,7 +94,7 @@ static void mmc_host_clk_gate_delayed(struct mmc_host
+> *host)
+> >  		spin_unlock_irqrestore(&host->clk_lock, flags);
+> >  		return;
+> >  	}
+> > -	mutex_lock(&host->clk_gate_mutex);
+> > +	mmc_claim_host(host);
+> >  	spin_lock_irqsave(&host->clk_lock, flags);
+> >  	if (!host->clk_requests) {
+> >  		spin_unlock_irqrestore(&host->clk_lock, flags);
+> > @@ -104,7 +104,7 @@ static void mmc_host_clk_gate_delayed(struct
+> mmc_host *host)
+> >  		pr_debug("%s: gated MCI clock\n", mmc_hostname(host));
+> >  	}
+> >  	spin_unlock_irqrestore(&host->clk_lock, flags);
+> > -	mutex_unlock(&host->clk_gate_mutex);
+> > +	mmc_release_host(host);
+> >  }
+> >
+> >  /*
+> > @@ -130,7 +130,7 @@ void mmc_host_clk_ungate(struct mmc_host *host)
+> >  {
+> >  	unsigned long flags;
+> >
+> > -	mutex_lock(&host->clk_gate_mutex);
+> > +	mmc_claim_host(host);
+> >  	spin_lock_irqsave(&host->clk_lock, flags);
+> >  	if (host->clk_gated) {
+> >  		spin_unlock_irqrestore(&host->clk_lock, flags);
+> > @@ -140,7 +140,7 @@ void mmc_host_clk_ungate(struct mmc_host *host)
+> >  	}
+> >  	host->clk_requests++;
+> >  	spin_unlock_irqrestore(&host->clk_lock, flags);
+> > -	mutex_unlock(&host->clk_gate_mutex);
+> > +	mmc_release_host(host);
+> >  }
+> >
+> >  /**
+> > @@ -215,7 +215,6 @@ static inline void mmc_host_clk_init(struct mmc_host
+> *host)
+> >  	host->clk_gated = false;
+> >  	INIT_WORK(&host->clk_gate_work, mmc_host_clk_gate_work);
+> >  	spin_lock_init(&host->clk_lock);
+> > -	mutex_init(&host->clk_gate_mutex);
+> >  }
+> >
+> >  /**
+> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> > index bcb793e..eb792cb 100644
+> > --- a/include/linux/mmc/host.h
+> > +++ b/include/linux/mmc/host.h
+> > @@ -183,7 +183,6 @@ struct mmc_host {
+> >  	struct work_struct	clk_gate_work; /* delayed clock gate */
+> >  	unsigned int		clk_old;	/* old clock value cache */
+> >  	spinlock_t		clk_lock;	/* lock for clk fields */
+> > -	struct mutex		clk_gate_mutex;	/* mutex for clock gating */
+> >  #endif
+> >
+> >  	/* host specific block data */
+> > --
+> > 1.7.2.5
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> 
+> ---
+> Guennadi Liakhovetski, Ph.D.
+> Freelance Open-Source Software Developer
+> http://www.open-technology.de/
