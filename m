@@ -1,141 +1,111 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3 00/12] mmc: use nonblock mmc requests to minimize latency
-Date: Thu, 12 May 2011 13:28:09 +0900
-Message-ID: <4DCB61D9.5050508@samsung.com>
-References: <1304795706-27308-1-git-send-email-per.forlin@linaro.org>
- <0F831E97-0168-4CD5-985C-4965BFF816A0@marvell.com>
- <BANLkTikid1yHh6AdgOeqy7NqS8D=W0SWTw@mail.gmail.com>
- <5D6BC6C8-D3C6-4987-B8AF-523A500D8309@marvell.com>
+Subject: Re: [PATCH] mmc: fixed wrong SD card detection
+Date: Thu, 12 May 2011 14:14:22 +0900
+Message-ID: <4DCB6CAE.4010607@samsung.com>
+References: <4DC3C1A8.1050104@samsung.com>
+ <8A2FC72B45BB5A4C9F801431E06AE48F1154BAB5@039-SN1MPN1-005.039d.mgd.msft.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:65014 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751118Ab1ELE2E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 00:28:04 -0400
-In-reply-to: <5D6BC6C8-D3C6-4987-B8AF-523A500D8309@marvell.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:8659 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752775Ab1ELFOQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 01:14:16 -0400
+Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LL2002O7H7GOBJ0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 12 May 2011 14:14:14 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LL200FF3H7QYY@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 12 May 2011 14:14:14 +0900 (KST)
+In-reply-to: <8A2FC72B45BB5A4C9F801431E06AE48F1154BAB5@039-SN1MPN1-005.039d.mgd.msft.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Per Forlin <per.forlin@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linaro-dev@lists.linaro.org" <linaro-dev@lists.linaro.org>, Chris Ball <cjb@laptop.org>
+To: Huang Changming-R66093 <R66093@freescale.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Philip..
+Hi Huang.
 
-I have something question..did you test SDMA and ADMA?
+Thanks for your comments. but this is not my hardware issue. :)
+But i found out your patch "[PATCH 3/3] SDHC/MMC: add f_min to mmc_power_on"
 
-Actually i didn't test [patch v3] but i tested patch v2 before Per sent.
-I got that SDMA is faster than ADMA. (using bounce buffer and sdhci)
+I think that related with this problem.
+I will test then share the results
 
-How do you think about that? I want to know your thought.
-And if you can share the results, i want to know them.
-
-Regards,
+Best regards,
 Jaehoon Chung
 
-
-Philip Rakity wrote:
-> On May 9, 2011, at 5:34 AM, Per Forlin wrote:
+Huang Changming-R66093 wrote:
+> I don't see this.
+> Maybe that is your hardware issue.
 > 
->> On 9 May 2011 04:05, Philip Rakity <prakity@marvell.com> wrote:
->>> Hi Per,
->>>
->>> We noticed on some of our systems if we ADMA or SDMA and a bounce buffer it is significantly faster then SDMA.
->>>
->> I have not done work with ADMA or SDMA. Where should I look to read
->> more about it?
->> Are these the right places. DMA iop-dma.c and imx-sdma.c, MMC: sdhci.c.
+> Thanks and Best Regards
+> Jerry Huang
 > 
-> sdhci.c for ADMA and SDMA
 > 
-> spec is at
-> http://www.sdcard.org/developers/tech/sdcard/pls/simplified_specs/
-> 
-> version 3 discusses ADMA
-> 
->>> I believe ADMA will do large transfers.  Another data point.
->>>
->>> Philip
->> Thanks,
->> Per
+>> -----Original Message-----
+>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+>> owner@vger.kernel.org] On Behalf Of Jaehoon Chung
+>> Sent: Friday, May 06, 2011 5:39 PM
+>> To: linux-mmc@vger.kernel.org
+>> Cc: Chris Ball; Kyungmin Park
+>> Subject: [PATCH] mmc: fixed wrong SD card detection
 >>
->>> On May 7, 2011, at 12:14 PM, Per Forlin wrote:
->>>
->>>> How significant is the cache maintenance over head?
->>>> It depends, the eMMC are much faster now
->>>> compared to a few years ago and cache maintenance cost more due to
->>>> multiple cache levels and speculative cache pre-fetch. In relation the
->>>> cost for handling the caches have increased and is now a bottle neck
->>>> dealing with fast eMMC together with DMA.
->>>>
->>>> The intention for introducing none blocking mmc requests is to minimize the
->>>> time between a mmc request ends and another mmc request starts. In the
->>>> current implementation the MMC controller is idle when dma_map_sg and
->>>> dma_unmap_sg is processing. Introducing none blocking mmc request makes it
->>>> possible to prepare the caches for next job parallel with an active
->>>> mmc request.
->>>>
->>>> This is done by making the issue_rw_rq() none blocking.
->>>> The increase in throughput is proportional to the time it takes to
->>>> prepare (major part of preparations is dma_map_sg and dma_unmap_sg)
->>>> a request and how fast the memory is. The faster the MMC/SD is
->>>> the more significant the prepare request time becomes. Measurements on U5500
->>>> and Panda on eMMC and SD shows significant performance gain for for large
->>>> reads when running DMA mode. In the PIO case the performance is unchanged.
->>>>
->>>> There are two optional hooks pre_req() and post_req() that the host driver
->>>> may implement in order to move work to before and after the actual mmc_request
->>>> function is called. In the DMA case pre_req() may do dma_map_sg() and prepare
->>>> the dma descriptor and post_req runs the dma_unmap_sg.
->>>>
->>>> Details on measurements from IOZone and mmc_test:
->>>> https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async-req
->>>>
->>>> Under consideration:
->>>> * Make pre_req and post_req private to core.c.
->>>> * Generalize implementation and make it available for SDIO.
->>>>
->>>> Changes since v2:
->>>> * Fix compile warnings in core.c and block.c
->>>> * Simplify max transfer size in mmc_test
->>>> * set TASK_RUNNING in queue.c before issue_req()
->>>>
->>>> Per Forlin (12):
->>>>  mmc: add none blocking mmc request function
->>>>  mmc: mmc_test: add debugfs file to list all tests
->>>>  mmc: mmc_test: add test for none blocking transfers
->>>>  mmc: add member in mmc queue struct to hold request data
->>>>  mmc: add a block request prepare function
->>>>  mmc: move error code in mmc_block_issue_rw_rq to a separate function.
->>>>  mmc: add a second mmc queue request member
->>>>  mmc: add handling for two parallel block requests in issue_rw_rq
->>>>  mmc: test: add random fault injection in core.c
->>>>  omap_hsmmc: use original sg_len for dma_unmap_sg
->>>>  omap_hsmmc: add support for pre_req and post_req
->>>>  mmci: implement pre_req() and post_req()
->>>>
->>>> drivers/mmc/card/block.c      |  493 +++++++++++++++++++++++++++--------------
->>>> drivers/mmc/card/mmc_test.c   |  340 +++++++++++++++++++++++++++-
->>>> drivers/mmc/card/queue.c      |  180 ++++++++++------
->>>> drivers/mmc/card/queue.h      |   31 ++-
->>>> drivers/mmc/core/core.c       |  132 ++++++++++-
->>>> drivers/mmc/core/debugfs.c    |    5 +
->>>> drivers/mmc/host/mmci.c       |  146 +++++++++++-
->>>> drivers/mmc/host/mmci.h       |    8 +
->>>> drivers/mmc/host/omap_hsmmc.c |   90 +++++++-
->>>> include/linux/mmc/core.h      |    9 +-
->>>> include/linux/mmc/host.h      |   13 +-
->>>> lib/Kconfig.debug             |   11 +
->>>> 12 files changed, 1174 insertions(+), 284 deletions(-)
->>>>
->>>> --
->>>> 1.7.4.1
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
+>> This patch added mmc_power_off after mmc_attach_sd()
+>>
+>> i found that didn't detect the second card insert.(using SDHCI) you can
+>> see the below log.
+>>
+>> i want to know that somebody know this issue...
+>>
+>> ->first card inserted (correct card detect)
+>> # mmc1: new SDHC card at address e624
+>> mmcblk1: mmc1:e624 SU04G 3.69 GiB
+>>  mmcblk1: p1
+>> #
+>> # mmc1: card e624 removed
+>> -> second card inserted
+>> mmc1: error -110 whilst initialising SD card
+>> mmc1: Card removed during transfer!
+>> mmc1: Resetting controller.
+>> -> third card inserted
+>> mmc1: new SDHC card at address e624
+>> mmcblk1: mmc1:e624 SU04G 3.69 GiB
+>>  mmcblk1: p1
+>>
+>> I added mmc_power_off() after only mmc_attach_sd().
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
+>> ---
+>>  drivers/mmc/core/core.c |    4 +++-
+>>  1 files changed, 3 insertions(+), 1 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
+>> 1dbc185..d5d8ac0 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1522,8 +1522,10 @@ static int mmc_rescan_try_freq(struct mmc_host
+>> *host, unsigned freq)
+>>  	/* Order's important: probe SDIO, then SD, then MMC */
+>>  	if (!mmc_attach_sdio(host))
+>>  		return 0;
+>> -	if (!mmc_attach_sd(host))
+>> +	if (!mmc_attach_sd(host)) {
+>> +		mmc_power_off(host);
+>>  		return 0;
+>> +	}
+>>  	if (!mmc_attach_mmc(host))
+>>  		return 0;
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org More majordomo info at
+>> http://vger.kernel.org/majordomo-info.html
+> 
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
