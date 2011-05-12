@@ -1,76 +1,101 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH V2 15/16] OMAP: hsmmc: add platform data for eMMC
- hardware reset gpio
-Date: Thu, 12 May 2011 03:38:27 -0700
-Message-ID: <20110512103827.GK31483@atomide.com>
-References: <1304673255-31634-1-git-send-email-adrian.hunter@nokia.com>
- <1304673255-31634-16-git-send-email-adrian.hunter@nokia.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: duplicated trial with same freq when
+ mmc_rescan_try_freq()
+Date: Thu, 12 May 2011 20:18:27 +0900
+Message-ID: <4DCBC203.5070102@samsung.com>
+References: <4DCB97F3.9060704@samsung.com>
+ <8A2FC72B45BB5A4C9F801431E06AE48F1154C484@039-SN1MPN1-005.039d.mgd.msft.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1304673255-31634-16-git-send-email-adrian.hunter@nokia.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:8473 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753728Ab1ELLSV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 07:18:21 -0400
+Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LL200APZY2I4J20@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 12 May 2011 20:18:19 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LL200GIXY2JZY@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 12 May 2011 20:18:19 +0900 (KST)
+In-reply-to: <8A2FC72B45BB5A4C9F801431E06AE48F1154C484@039-SN1MPN1-005.039d.mgd.msft.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Huang Changming-R66093 <R66093@freescale.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, "andy.ross@windriver.com" <andy.ross@windriver.com>
 
-* Adrian Hunter <adrian.hunter@nokia.com> [110506 02:11]:
-> eMMC may have a hardware reset line connected to a gpio,
-> so pass it to the driver.
+This patch didn't point that..
+
+Huang Changming-R66093 wrote:
+> The required min frequency (f_min) is 400KHz during identify stage, is it necessary to use the  frequency table (freqs[], including 300KHz, 200KHz and 100KHz)?
+
+i known that some card needs lower than 400KHz..so this approach is not problem..
+But i mentions that try to init two times with same frequency.
+
+Regards,
+Jaehoon Chung
+
 > 
-> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
-
-This looks safe to merge via MMC list:
-
-Acked-by: Tony Lindgren <tony@atomide.com>
-
-> ---
->  arch/arm/mach-omap2/hsmmc.c           |    5 +++++
->  arch/arm/mach-omap2/hsmmc.h           |    1 +
->  arch/arm/plat-omap/include/plat/mmc.h |    1 +
->  3 files changed, 7 insertions(+), 0 deletions(-)
+> Thanks and Best Regards
+> Jerry Huang
 > 
-> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-> index c37ba4f..a8078c1 100644
-> --- a/arch/arm/mach-omap2/hsmmc.c
-> +++ b/arch/arm/mach-omap2/hsmmc.c
-> @@ -472,6 +472,11 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
->  	mmc->slots[0].switch_pin = c->gpio_cd;
->  	mmc->slots[0].gpio_wp = c->gpio_wp;
->  
-> +	if (c->gpio_hw_reset)
-> +		mmc->slots[0].gpio_hw_reset = c->gpio_hw_reset;
-> +	else
-> +		mmc->slots[0].gpio_hw_reset = -EINVAL;
-> +
->  	mmc->slots[0].remux = c->remux;
->  	mmc->slots[0].init_card = c->init_card;
->  
-> diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
-> index 0f2a87e..b78ed41 100644
-> --- a/arch/arm/mach-omap2/hsmmc.h
-> +++ b/arch/arm/mach-omap2/hsmmc.h
-> @@ -22,6 +22,7 @@ struct omap2_hsmmc_info {
->  	bool    nomux;          /* No default muxing for this slot */
->  	int	gpio_cd;	/* or -EINVAL */
->  	int	gpio_wp;	/* or -EINVAL */
-> +	int     gpio_hw_reset;  /* hardware reset */
->  	char	*name;		/* or NULL for default */
->  	struct device *dev;	/* returned: pointer to mmc adapter */
->  	int	ocr_mask;	/* temporary HACK */
-> diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
-> index e3c9b20..9b69b7e 100644
-> --- a/arch/arm/plat-omap/include/plat/mmc.h
-> +++ b/arch/arm/plat-omap/include/plat/mmc.h
-> @@ -119,6 +119,7 @@ struct omap_mmc_platform_data {
->  
->  		int switch_pin;			/* gpio (card detect) */
->  		int gpio_wp;			/* gpio (write protect) */
-> +		int gpio_hw_reset;              /* gpio (hardware reset) */
->  
->  		int (*set_bus_mode)(struct device *dev, int slot, int bus_mode);
->  		int (*set_power)(struct device *dev, int slot,
-> -- 
-> 1.7.0.4
 > 
+>> -----Original Message-----
+>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+>> owner@vger.kernel.org] On Behalf Of Jaehoon Chung
+>> Sent: Thursday, May 12, 2011 4:19 PM
+>> To: linux-mmc@vger.kernel.org
+>> Cc: Chris Ball; Kyungmin Park; andy.ross@windriver.com
+>> Subject: [PATCH] mmc: duplicated trial with same freq when
+>> mmc_rescan_try_freq()
+>>
+>> when running mmc_rescan_try_freq(), try to init two times with last
+>> frequency.
+>> For example, assume that host->f_min is 400KHz, we can find the below
+>> message.
+>>
+>> mmc1: mmc_rescan_try_freq: trying to init card at 400000 Hz
+>> mmc1: mmc_rescan_try_freq: trying to init card at 400000 Hz
+>>
+>> i didn't find to mention about this..why try to init the two times with
+>> same frequency?
+>> Is there any reason? If i missed the history, plz let me know them.
+>>
+>> I think that trial is not necessary. Trial needs to running with other
+>> frequency.
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>> ---
+>>  drivers/mmc/core/core.c |    2 +-
+>>  1 files changed, 1 insertions(+), 1 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
+>> 61c6c0b..a330c58 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1618,7 +1618,7 @@ void mmc_rescan(struct work_struct *work)
+>>  	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
+>>  		if (!mmc_rescan_try_freq(host, max(freqs[i], host->f_min)))
+>>  			break;
+>> -		if (freqs[i] < host->f_min)
+>> +		if (freqs[i] <= host->f_min)
+>>  			break;
+>>  	}
+>>  	mmc_release_host(host);
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org More majordomo info at
+>> http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
