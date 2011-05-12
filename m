@@ -1,62 +1,69 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: tmio: fix PM in DMA mode
-Date: Thu, 12 May 2011 12:19:10 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1105121212120.24486@axis700.grange>
-References: <Pine.LNX.4.64.1104291909290.17813@axis700.grange>
- <m3fwom6niy.fsf@pullcord.laptop.org> <Pine.LNX.4.64.1105121015490.24486@axis700.grange>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH V2 13/16] OMAP: hsmmc: implement clock switcher
+Date: Thu, 12 May 2011 03:37:23 -0700
+Message-ID: <20110512103723.GJ31483@atomide.com>
+References: <1304673255-31634-1-git-send-email-adrian.hunter@nokia.com>
+ <1304673255-31634-14-git-send-email-adrian.hunter@nokia.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1105121015490.24486@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Ian Molton <ian@mnementh.co.uk>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:60872 "EHLO
+	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1756023Ab1ELKh2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 06:37:28 -0400
+Content-Disposition: inline
+In-Reply-To: <1304673255-31634-14-git-send-email-adrian.hunter@nokia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@nokia.com>
+Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 
-On Thu, 12 May 2011, Guennadi Liakhovetski wrote:
-
-> Hi Chris
+* Adrian Hunter <adrian.hunter@nokia.com> [110506 02:13]:
+> From: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
 > 
-> On Tue, 10 May 2011, Chris Ball wrote:
+> There are 3 new platform data methods which should help us to do a clock
+> switching when notification is happened or request is started.
 > 
-> > Hi Guennadi,
-> > 
-> > On Fri, Apr 29 2011, Guennadi Liakhovetski wrote:
-> > > DMA mode has to be re-enabled during a resume.
-> > >
-> > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > > ---
-> > >  drivers/mmc/host/tmio_mmc_dma.c |   21 ++++++++++++---------
-> > >  drivers/mmc/host/tmio_mmc_pio.c |    1 +
-> > >  2 files changed, 13 insertions(+), 9 deletions(-)
-> 
-> [snip]
-> 
-> > Please could you send a full patchset against mmc-next for tmio for .40?
-> 
-> Can I also base my patches on next-2.6? I need both - latest mmc and pm, 
-> so, using next would make it much easier.
+> The purpose of the patch is to avoid high frequency of MMC controller on low
+> OPPs due to an HW bug in OMAP 3630.
+...
 
-I rebased my stack on top of today's next, no changes were required, so, 
-here's the order, I have the patches in my tree:
+> +static int hsmmc_clk_notifier(struct notifier_block *nb, unsigned long event,
+> +			      void *data)
+> +{
+> +	struct cpufreq_freqs *freqs = data;
+> +	unsigned int threshold = 400000; /* between opp1 and opp2 */
+> +
+> +	switch (event) {
+> +	case CPUFREQ_PRECHANGE:
+> +		if (freqs->new < threshold && freqs->old >= threshold) {
+> +			/* opp2 -> opp1 */
+> +			hsmmc_max_freq = HSMMC_MAX_FREQ >> 1;
+> +
+> +			/* Timeout is 1 sec */
+> +			if (!wait_event_timeout(hsmmc_max_freq_wq,
+> +						hsmmc_max_freq_ok(),
+> +						msecs_to_jiffies(1000)))
+> +				pr_err("MMC violates maximum frequency "
+> +				       "constraint\n");
+> +		}
+> +		break;
+> +	case CPUFREQ_POSTCHANGE:
+> +		if (freqs->old < threshold && freqs->new >= threshold) {
+> +			/* opp1 -> opp2 */
+> +			hsmmc_max_freq = HSMMC_MAX_FREQ;
+> +		}
+> +		break;
+> +	default:
+> +		break;
+> +	}
+> +
+> +	return NOTIFY_DONE;
+> +}
 
-https://patchwork.kernel.org/patch/711251/
-https://patchwork.kernel.org/patch/757602/
-https://patchwork.kernel.org/patch/757612/
-https://patchwork.kernel.org/patch/724081/
-https://patchwork.kernel.org/patch/761882/
-https://patchwork.kernel.org/patch/761902/
-https://patchwork.kernel.org/patch/761922/
-https://patchwork.kernel.org/patch/761942/
-https://patchwork.kernel.org/patch/777232/
-https://patchwork.kernel.org/patch/777262/
+I think the cpufreq notifier code should be in the driver, the platform
+init code should just prepare things for the driver.
 
-As long as we manage to get these in 2.6.40 merge window early enough, 
-we'll be able to push related arch patches via shmobile trees.
+Regards,
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Tony
