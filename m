@@ -1,33 +1,52 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: duplicated trial with same freq when mmc_rescan_try_freq()
-Date: Thu, 12 May 2011 10:04:20 -0400
-Message-ID: <m3fwokypzv.fsf@pullcord.laptop.org>
-References: <4DCB97F3.9060704@samsung.com>
-	<8A2FC72B45BB5A4C9F801431E06AE48F1154C484@039-SN1MPN1-005.039d.mgd.msft.net>
+Subject: [Bug 35002] New: SDHC memory card causes divide error: 0000 [#1] PREEMPT SMP
+Date: Thu, 12 May 2011 11:32:18 -0400
+Message-ID: <m339kkylx9.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33846 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:34235 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752851Ab1ELOCG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 May 2011 10:02:06 -0400
-In-Reply-To: <8A2FC72B45BB5A4C9F801431E06AE48F1154C484@039-SN1MPN1-005.039d.mgd.msft.net>
-	(Huang Changming-R's message of "Thu, 12 May 2011 08:57:45 +0000")
+	id S1756164Ab1ELP34 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 12 May 2011 11:29:56 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Changming-R66093 <R66093@freescale.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, "andy.ross@windriver.com" <andy.ross@windriver.com>
+To: linux-mmc@vger.kernel.org, s.jansen@gmail.com
 
-Hi,
+Forwarding to linux-mmc@.
 
-On Thu, May 12 2011, Huang Changming-R66093 wrote:
-> The required min frequency (f_min) is 400KHz during identify stage, is
-> it necessary to use the frequency table (freqs[], including 300KHz,
-> 200KHz and 100KHz)?
+From: bugzilla-daemon@bugzilla.kernel.org
+Subject: [Bug 35002] New: SDHC memory card causes divide error: 0000 [#1]
+ PREEMPT SMP
 
-Yes.  Some hardware is buggy/out of compliance with the spec.
+https://bugzilla.kernel.org/show_bug.cgi?id=35002
 
-- Chris.
+           Summary: SDHC memory card causes divide error: 0000 [#1]
+                    PREEMPT SMP
+           Product: Drivers
+           Version: 2.5
+    Kernel Version: 2.6.38.6
+          Platform: All
+        OS/Version: Linux
+              Tree: Mainline
+            Status: NEW
+          Severity: normal
+          Priority: P1
+         Component: MMC/SD
+        AssignedTo: drivers_mmc-sd@kernel-bugs.osdl.org
+        ReportedBy: s.jansen@gmail.com
+        Regression: No
+
+
+Created an attachment (id=57592)
+ --> (https://bugzilla.kernel.org/attachment.cgi?id=57592)
+Full kernel log from boot
+
+When inserting a sdhc memory card or when coming out of suspend kernel crashesh
+with divide error: 0000 [#1] PREEMPT SMP.
+
+Please see full log and trace for details
+
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
