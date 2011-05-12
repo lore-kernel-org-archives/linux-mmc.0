@@ -1,115 +1,75 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: fixed wrong SD card detection
-Date: Thu, 12 May 2011 14:14:22 +0900
-Message-ID: <4DCB6CAE.4010607@samsung.com>
-References: <4DC3C1A8.1050104@samsung.com>
- <8A2FC72B45BB5A4C9F801431E06AE48F1154BAB5@039-SN1MPN1-005.039d.mgd.msft.net>
+From: <r66093@freescale.com>
+Subject: [PATCH 1/3] SDHCI: add sdhci_get_cd callback to detect the card
+Date: Thu, 12 May 2011 13:24:15 +0800
+Message-ID: <1305177857-4017-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:8659 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752775Ab1ELFOQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 01:14:16 -0400
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LL2002O7H7GOBJ0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 12 May 2011 14:14:14 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LL200FF3H7QYY@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 12 May 2011 14:14:14 +0900 (KST)
-In-reply-to: <8A2FC72B45BB5A4C9F801431E06AE48F1154BAB5@039-SN1MPN1-005.039d.mgd.msft.net>
+Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:54339
+	"EHLO VA3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755045Ab1ELGLR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 02:11:17 -0400
+Received: from mail26-va3 (localhost.localdomain [127.0.0.1])	by
+ mail26-va3-R.bigfish.com (Postfix) with ESMTP id 470923081B3	for
+ <linux-mmc@vger.kernel.org>; Thu, 12 May 2011 06:11:16 +0000 (UTC)
+Received: from VA3EHSMHS016.bigfish.com (unknown [10.7.14.249])	by
+ mail26-va3.bigfish.com (Postfix) with ESMTP id EE096C6004F	for
+ <linux-mmc@vger.kernel.org>; Thu, 12 May 2011 06:11:15 +0000 (UTC)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Changming-R66093 <R66093@freescale.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: linux-mmc@vger.kernel.org
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Hi Huang.
+From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Thanks for your comments. but this is not my hardware issue. :)
-But i found out your patch "[PATCH 3/3] SDHC/MMC: add f_min to mmc_power_on"
+Add callback function sdhci_get_cd to detect the card.
 
-I think that related with this problem.
-I will test then share the results
+In order to check if the card is present,
+we will read the PRESENT STATE register and check the bit15.
 
-Best regards,
-Jaehoon Chung
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+---
+ drivers/mmc/host/sdhci.c |   19 +++++++++++++++++++
+ 1 files changed, 19 insertions(+), 0 deletions(-)
 
-Huang Changming-R66093 wrote:
-> I don't see this.
-> Maybe that is your hardware issue.
-> 
-> Thanks and Best Regards
-> Jerry Huang
-> 
-> 
->> -----Original Message-----
->> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
->> owner@vger.kernel.org] On Behalf Of Jaehoon Chung
->> Sent: Friday, May 06, 2011 5:39 PM
->> To: linux-mmc@vger.kernel.org
->> Cc: Chris Ball; Kyungmin Park
->> Subject: [PATCH] mmc: fixed wrong SD card detection
->>
->> This patch added mmc_power_off after mmc_attach_sd()
->>
->> i found that didn't detect the second card insert.(using SDHCI) you can
->> see the below log.
->>
->> i want to know that somebody know this issue...
->>
->> ->first card inserted (correct card detect)
->> # mmc1: new SDHC card at address e624
->> mmcblk1: mmc1:e624 SU04G 3.69 GiB
->>  mmcblk1: p1
->> #
->> # mmc1: card e624 removed
->> -> second card inserted
->> mmc1: error -110 whilst initialising SD card
->> mmc1: Card removed during transfer!
->> mmc1: Resetting controller.
->> -> third card inserted
->> mmc1: new SDHC card at address e624
->> mmcblk1: mmc1:e624 SU04G 3.69 GiB
->>  mmcblk1: p1
->>
->> I added mmc_power_off() after only mmc_attach_sd().
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
->> ---
->>  drivers/mmc/core/core.c |    4 +++-
->>  1 files changed, 3 insertions(+), 1 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
->> 1dbc185..d5d8ac0 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -1522,8 +1522,10 @@ static int mmc_rescan_try_freq(struct mmc_host
->> *host, unsigned freq)
->>  	/* Order's important: probe SDIO, then SD, then MMC */
->>  	if (!mmc_attach_sdio(host))
->>  		return 0;
->> -	if (!mmc_attach_sd(host))
->> +	if (!mmc_attach_sd(host)) {
->> +		mmc_power_off(host);
->>  		return 0;
->> +	}
->>  	if (!mmc_attach_mmc(host))
->>  		return 0;
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org More majordomo info at
->> http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9e15f41..2e60372 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1262,6 +1262,24 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+ 		!is_readonly : is_readonly;
+ }
+ 
++static int sdhci_get_cd(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	unsigned long flags;
++	int present;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (host->flags & SDHCI_DEVICE_DEAD)
++		present = 0;
++	else
++		present = sdhci_readl(host, SDHCI_PRESENT_STATE);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return present & SDHCI_CARD_PRESENT;
++}
++
+ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ {
+ 	struct sdhci_host *host;
+@@ -1288,6 +1306,7 @@ static const struct mmc_host_ops sdhci_ops = {
+ 	.request	= sdhci_request,
+ 	.set_ios	= sdhci_set_ios,
+ 	.get_ro		= sdhci_get_ro,
++	.get_cd		= sdhci_get_cd,
+ 	.enable_sdio_irq = sdhci_enable_sdio_irq,
+ };
+ 
+-- 
+1.7.4.1
+
 
