@@ -1,67 +1,125 @@
-From: <r66093@freescale.com>
-Subject: [PATCH 3/3] SDHC/MMC: add f_min to mmc_power_on
-Date: Thu, 12 May 2011 13:24:17 +0800
-Message-ID: <1305177857-4017-3-git-send-email-r66093@freescale.com>
-References: <1305177857-4017-1-git-send-email-r66093@freescale.com>
- <1305177857-4017-2-git-send-email-r66093@freescale.com>
+From: Huang Changming-R66093 <R66093@freescale.com>
+Subject: RE: [PATCH] mmc: fixed wrong SD card detection
+Date: Thu, 12 May 2011 06:17:24 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F1154C31A@039-SN1MPN1-005.039d.mgd.msft.net>
+References: <4DC3C1A8.1050104@samsung.com>
+ <8A2FC72B45BB5A4C9F801431E06AE48F1154BAB5@039-SN1MPN1-005.039d.mgd.msft.net>
+ <4DCB6CAE.4010607@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:36197 "EHLO
-	TX2EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755045Ab1ELGM3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 02:12:29 -0400
-Received: from mail44-tx2 (localhost.localdomain [127.0.0.1])	by
- mail44-tx2-R.bigfish.com (Postfix) with ESMTP id 3EB1C10506C4	for
- <linux-mmc@vger.kernel.org>; Thu, 12 May 2011 06:12:25 +0000 (UTC)
-Received: from TX2EHSMHS017.bigfish.com (unknown [10.9.14.245])	by
- mail44-tx2.bigfish.com (Postfix) with ESMTP id 53155FD017B	for
- <linux-mmc@vger.kernel.org>; Thu, 12 May 2011 06:11:19 +0000 (UTC)
-In-Reply-To: <1305177857-4017-2-git-send-email-r66093@freescale.com>
+Received: from am1ehsobe006.messaging.microsoft.com ([213.199.154.209]:29511
+	"EHLO AM1EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754723Ab1ELGR3 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 12 May 2011 02:17:29 -0400
+In-Reply-To: <4DCB6CAE.4010607@samsung.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+I didn't see my patch :(
+I use the f_min to replace the f_init when f_init is zero and that is used for get_cd callback function.
 
-1. when f_init is zero, the SDHC can't work correctly, so f_min will replace it.
-2. Before running get_cd recall function to detect if the card is present,
-   must make sure the power is up.
+Thanks and Best Regards
+Jerry Huang
 
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
----
- drivers/mmc/core/core.c |    7 ++++++-
- 1 files changed, 6 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 1f453ac..5a22b85 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -993,7 +993,10 @@ static void mmc_power_up(struct mmc_host *host)
- 	 */
- 	mmc_delay(10);
- 
--	host->ios.clock = host->f_init;
-+	if (host->f_init)
-+		host->ios.clock = host->f_init;
-+	else
-+		host->ios.clock = host->f_min;
- 
- 	host->ios.power_mode = MMC_POWER_ON;
- 	mmc_set_ios(host);
-@@ -1571,8 +1574,10 @@ void mmc_rescan(struct work_struct *work)
- 	 */
- 	mmc_bus_put(host);
- 
-+	mmc_power_up(host);
- 	if (host->ops->get_cd && host->ops->get_cd(host) == 0)
- 		goto out;
-+	mmc_power_off(host);
- 
- 	mmc_claim_host(host);
- 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
--- 
-1.7.4.1
+> -----Original Message-----
+> From: Jaehoon Chung [mailto:jh80.chung@samsung.com]
+> Sent: Thursday, May 12, 2011 1:14 PM
+> To: Huang Changming-R66093
+> Cc: Jaehoon Chung; linux-mmc@vger.kernel.org; Chris Ball; Kyungmin Park
+> Subject: Re: [PATCH] mmc: fixed wrong SD card detection
+> 
+> Hi Huang.
+> 
+> Thanks for your comments. but this is not my hardware issue. :) But i
+> found out your patch "[PATCH 3/3] SDHC/MMC: add f_min to mmc_power_on"
+> 
+> I think that related with this problem.
+> I will test then share the results
+> 
+> Best regards,
+> Jaehoon Chung
+> 
+> Huang Changming-R66093 wrote:
+> > I don't see this.
+> > Maybe that is your hardware issue.
+> >
+> > Thanks and Best Regards
+> > Jerry Huang
+> >
+> >
+> >> -----Original Message-----
+> >> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> >> owner@vger.kernel.org] On Behalf Of Jaehoon Chung
+> >> Sent: Friday, May 06, 2011 5:39 PM
+> >> To: linux-mmc@vger.kernel.org
+> >> Cc: Chris Ball; Kyungmin Park
+> >> Subject: [PATCH] mmc: fixed wrong SD card detection
+> >>
+> >> This patch added mmc_power_off after mmc_attach_sd()
+> >>
+> >> i found that didn't detect the second card insert.(using SDHCI) you
+> >> can see the below log.
+> >>
+> >> i want to know that somebody know this issue...
+> >>
+> >> ->first card inserted (correct card detect)
+> >> # mmc1: new SDHC card at address e624
+> >> mmcblk1: mmc1:e624 SU04G 3.69 GiB
+> >>  mmcblk1: p1
+> >> #
+> >> # mmc1: card e624 removed
+> >> -> second card inserted
+> >> mmc1: error -110 whilst initialising SD card
+> >> mmc1: Card removed during transfer!
+> >> mmc1: Resetting controller.
+> >> -> third card inserted
+> >> mmc1: new SDHC card at address e624
+> >> mmcblk1: mmc1:e624 SU04G 3.69 GiB
+> >>  mmcblk1: p1
+> >>
+> >> I added mmc_power_off() after only mmc_attach_sd().
+> >>
+> >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> >> Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
+> >> ---
+> >>  drivers/mmc/core/core.c |    4 +++-
+> >>  1 files changed, 3 insertions(+), 1 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
+> >> 1dbc185..d5d8ac0 100644
+> >> --- a/drivers/mmc/core/core.c
+> >> +++ b/drivers/mmc/core/core.c
+> >> @@ -1522,8 +1522,10 @@ static int mmc_rescan_try_freq(struct mmc_host
+> >> *host, unsigned freq)
+> >>  	/* Order's important: probe SDIO, then SD, then MMC */
+> >>  	if (!mmc_attach_sdio(host))
+> >>  		return 0;
+> >> -	if (!mmc_attach_sd(host))
+> >> +	if (!mmc_attach_sd(host)) {
+> >> +		mmc_power_off(host);
+> >>  		return 0;
+> >> +	}
+> >>  	if (!mmc_attach_mmc(host))
+> >>  		return 0;
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> >> in the body of a message to majordomo@vger.kernel.org More majordomo
+> >> info at http://vger.kernel.org/majordomo-info.html
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> >
+> 
 
 
