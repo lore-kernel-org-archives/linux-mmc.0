@@ -1,52 +1,50 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: [Bug 35002] New: SDHC memory card causes divide error: 0000 [#1] PREEMPT SMP
-Date: Thu, 12 May 2011 11:32:18 -0400
-Message-ID: <m339kkylx9.fsf@pullcord.laptop.org>
+Subject: Re: [PATCH] mmc: tmio: fix PM in DMA mode
+Date: Thu, 12 May 2011 18:12:35 -0400
+Message-ID: <m3oc37woto.fsf@pullcord.laptop.org>
+References: <Pine.LNX.4.64.1104291909290.17813@axis700.grange>
+	<m3fwom6niy.fsf@pullcord.laptop.org>
+	<Pine.LNX.4.64.1105121015490.24486@axis700.grange>
+	<Pine.LNX.4.64.1105121212120.24486@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34235 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756164Ab1ELP34 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 May 2011 11:29:56 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1105121212120.24486@axis700.grange> (Guennadi
+	Liakhovetski's message of "Thu, 12 May 2011 12:19:10 +0200 (CEST)")
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, s.jansen@gmail.com
 
-Forwarding to linux-mmc@.
+Hi Guennadi,
 
-From: bugzilla-daemon@bugzilla.kernel.org
-Subject: [Bug 35002] New: SDHC memory card causes divide error: 0000 [#1]
- PREEMPT SMP
+On Thu, May 12 2011, Guennadi Liakhovetski wrote:
+>> > Please could you send a full patchset against mmc-next for tmio for .40?
+>> 
+>> Can I also base my patches on next-2.6? I need both - latest mmc and pm, 
+>> so, using next would make it much easier.
+>
+> I rebased my stack on top of today's next, no changes were required, so, 
+> here's the order, I have the patches in my tree:
+>
+> https://patchwork.kernel.org/patch/711251/
+> https://patchwork.kernel.org/patch/757602/
+> https://patchwork.kernel.org/patch/757612/
+> https://patchwork.kernel.org/patch/724081/
+> https://patchwork.kernel.org/patch/761882/
+> https://patchwork.kernel.org/patch/761902/
+> https://patchwork.kernel.org/patch/761922/
+> https://patchwork.kernel.org/patch/761942/
+> https://patchwork.kernel.org/patch/777232/
+> https://patchwork.kernel.org/patch/777262/
+>
+> As long as we manage to get these in 2.6.40 merge window early enough, 
+> we'll be able to push related arch patches via shmobile trees.
 
-https://bugzilla.kernel.org/show_bug.cgi?id=35002
+Thanks, all looks good to me -- pushed to mmc-next, and I'll try to
+merge early in .40.
 
-           Summary: SDHC memory card causes divide error: 0000 [#1]
-                    PREEMPT SMP
-           Product: Drivers
-           Version: 2.5
-    Kernel Version: 2.6.38.6
-          Platform: All
-        OS/Version: Linux
-              Tree: Mainline
-            Status: NEW
-          Severity: normal
-          Priority: P1
-         Component: MMC/SD
-        AssignedTo: drivers_mmc-sd@kernel-bugs.osdl.org
-        ReportedBy: s.jansen@gmail.com
-        Regression: No
-
-
-Created an attachment (id=57592)
- --> (https://bugzilla.kernel.org/attachment.cgi?id=57592)
-Full kernel log from boot
-
-When inserting a sdhc memory card or when coming out of suspend kernel crashesh
-with divide error: 0000 [#1] PREEMPT SMP.
-
-Please see full log and trace for details
-
+- Chris.
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
