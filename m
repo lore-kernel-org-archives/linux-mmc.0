@@ -1,69 +1,76 @@
 From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH V2 13/16] OMAP: hsmmc: implement clock switcher
-Date: Thu, 12 May 2011 03:37:23 -0700
-Message-ID: <20110512103723.GJ31483@atomide.com>
+Subject: Re: [PATCH V2 15/16] OMAP: hsmmc: add platform data for eMMC
+ hardware reset gpio
+Date: Thu, 12 May 2011 03:38:27 -0700
+Message-ID: <20110512103827.GK31483@atomide.com>
 References: <1304673255-31634-1-git-send-email-adrian.hunter@nokia.com>
- <1304673255-31634-14-git-send-email-adrian.hunter@nokia.com>
+ <1304673255-31634-16-git-send-email-adrian.hunter@nokia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:60872 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1756023Ab1ELKh2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 06:37:28 -0400
+Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1304673255-31634-14-git-send-email-adrian.hunter@nokia.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <1304673255-31634-16-git-send-email-adrian.hunter@nokia.com>
+Sender: linux-omap-owner@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@nokia.com>
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+Cc: Madhusudhan Chikkature <madhu.cr@ti.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>
+List-Id: linux-mmc@vger.kernel.org
 
-* Adrian Hunter <adrian.hunter@nokia.com> [110506 02:13]:
-> From: Andy Shevchenko <ext-andriy.shevchenko@nokia.com>
+* Adrian Hunter <adrian.hunter@nokia.com> [110506 02:11]:
+> eMMC may have a hardware reset line connected to a gpio,
+> so pass it to the driver.
 > 
-> There are 3 new platform data methods which should help us to do a clock
-> switching when notification is happened or request is started.
+> Signed-off-by: Adrian Hunter <adrian.hunter@nokia.com>
+
+This looks safe to merge via MMC list:
+
+Acked-by: Tony Lindgren <tony@atomide.com>
+
+> ---
+>  arch/arm/mach-omap2/hsmmc.c           |    5 +++++
+>  arch/arm/mach-omap2/hsmmc.h           |    1 +
+>  arch/arm/plat-omap/include/plat/mmc.h |    1 +
+>  3 files changed, 7 insertions(+), 0 deletions(-)
 > 
-> The purpose of the patch is to avoid high frequency of MMC controller on low
-> OPPs due to an HW bug in OMAP 3630.
-...
-
-> +static int hsmmc_clk_notifier(struct notifier_block *nb, unsigned long event,
-> +			      void *data)
-> +{
-> +	struct cpufreq_freqs *freqs = data;
-> +	unsigned int threshold = 400000; /* between opp1 and opp2 */
+> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+> index c37ba4f..a8078c1 100644
+> --- a/arch/arm/mach-omap2/hsmmc.c
+> +++ b/arch/arm/mach-omap2/hsmmc.c
+> @@ -472,6 +472,11 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+>  	mmc->slots[0].switch_pin = c->gpio_cd;
+>  	mmc->slots[0].gpio_wp = c->gpio_wp;
+>  
+> +	if (c->gpio_hw_reset)
+> +		mmc->slots[0].gpio_hw_reset = c->gpio_hw_reset;
+> +	else
+> +		mmc->slots[0].gpio_hw_reset = -EINVAL;
 > +
-> +	switch (event) {
-> +	case CPUFREQ_PRECHANGE:
-> +		if (freqs->new < threshold && freqs->old >= threshold) {
-> +			/* opp2 -> opp1 */
-> +			hsmmc_max_freq = HSMMC_MAX_FREQ >> 1;
-> +
-> +			/* Timeout is 1 sec */
-> +			if (!wait_event_timeout(hsmmc_max_freq_wq,
-> +						hsmmc_max_freq_ok(),
-> +						msecs_to_jiffies(1000)))
-> +				pr_err("MMC violates maximum frequency "
-> +				       "constraint\n");
-> +		}
-> +		break;
-> +	case CPUFREQ_POSTCHANGE:
-> +		if (freqs->old < threshold && freqs->new >= threshold) {
-> +			/* opp1 -> opp2 */
-> +			hsmmc_max_freq = HSMMC_MAX_FREQ;
-> +		}
-> +		break;
-> +	default:
-> +		break;
-> +	}
-> +
-> +	return NOTIFY_DONE;
-> +}
-
-I think the cpufreq notifier code should be in the driver, the platform
-init code should just prepare things for the driver.
-
-Regards,
-
-Tony
+>  	mmc->slots[0].remux = c->remux;
+>  	mmc->slots[0].init_card = c->init_card;
+>  
+> diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+> index 0f2a87e..b78ed41 100644
+> --- a/arch/arm/mach-omap2/hsmmc.h
+> +++ b/arch/arm/mach-omap2/hsmmc.h
+> @@ -22,6 +22,7 @@ struct omap2_hsmmc_info {
+>  	bool    nomux;          /* No default muxing for this slot */
+>  	int	gpio_cd;	/* or -EINVAL */
+>  	int	gpio_wp;	/* or -EINVAL */
+> +	int     gpio_hw_reset;  /* hardware reset */
+>  	char	*name;		/* or NULL for default */
+>  	struct device *dev;	/* returned: pointer to mmc adapter */
+>  	int	ocr_mask;	/* temporary HACK */
+> diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+> index e3c9b20..9b69b7e 100644
+> --- a/arch/arm/plat-omap/include/plat/mmc.h
+> +++ b/arch/arm/plat-omap/include/plat/mmc.h
+> @@ -119,6 +119,7 @@ struct omap_mmc_platform_data {
+>  
+>  		int switch_pin;			/* gpio (card detect) */
+>  		int gpio_wp;			/* gpio (write protect) */
+> +		int gpio_hw_reset;              /* gpio (hardware reset) */
+>  
+>  		int (*set_bus_mode)(struct device *dev, int slot, int bus_mode);
+>  		int (*set_power)(struct device *dev, int slot,
+> -- 
+> 1.7.0.4
+> 
