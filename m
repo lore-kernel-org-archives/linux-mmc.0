@@ -1,46 +1,145 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] dw_mmc: fixed wrong regulator_enable in suspend/resume
-Date: Wed, 11 May 2011 23:46:17 -0400
-Message-ID: <m3tyd0zily.fsf@pullcord.laptop.org>
-References: <4DCA3237.3080609@samsung.com>
-	<m3pqnp2vvl.fsf@pullcord.laptop.org> <4DCB4D9B.8050706@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v3 00/12] mmc: use nonblock mmc requests to minimize latency
+Date: Thu, 12 May 2011 13:28:09 +0900
+Message-ID: <4DCB61D9.5050508@samsung.com>
+References: <1304795706-27308-1-git-send-email-per.forlin@linaro.org>
+ <0F831E97-0168-4CD5-985C-4965BFF816A0@marvell.com>
+ <BANLkTikid1yHh6AdgOeqy7NqS8D=W0SWTw@mail.gmail.com>
+ <5D6BC6C8-D3C6-4987-B8AF-523A500D8309@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37997 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751090Ab1ELDn5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 May 2011 23:43:57 -0400
-In-Reply-To: <4DCB4D9B.8050706@samsung.com> (Jaehoon Chung's message of "Thu,
-	12 May 2011 12:01:47 +0900")
+Received: from mailout1.samsung.com ([203.254.224.24]:65014 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751118Ab1ELE2E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 00:28:04 -0400
+In-reply-to: <5D6BC6C8-D3C6-4987-B8AF-523A500D8309@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, will.newton@imgtec.com, Kyungmin Park <kyungmin.park@samsung.com>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Per Forlin <per.forlin@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linaro-dev@lists.linaro.org" <linaro-dev@lists.linaro.org>, Chris Ball <cjb@laptop.org>
 
-Hi,
+Hi Philip..
 
-On Wed, May 11 2011, Jaehoon Chung wrote:
-> Hi Chris..
->
-> I think you're confused something because my explanation.
->
-> My means..if we use the regulator, regulator is enabled when probing.
-> Then regulator is enabling until we don't disable..
->
-> In order to power-save, disabled the regulator when entered suspend.
-> Already in suspend function, located "regulator_disable()".
-> but also located "regulator_enable()" in suspend function.
->
-> So i think right that "regulator_enable()" is located in resume function.
-> not in suspend function.
+I have something question..did you test SDMA and ADMA?
 
-Thanks, I agree.  I hadn't looked at the suspend function, but now I see
-that it already has the disable.
+Actually i didn't test [patch v3] but i tested patch v2 before Per sent.
+I got that SDMA is faster than ADMA. (using bounce buffer and sdhci)
 
-Will, want to ACK this before I merge it?
+How do you think about that? I want to know your thought.
+And if you can share the results, i want to know them.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Regards,
+Jaehoon Chung
+
+
+Philip Rakity wrote:
+> On May 9, 2011, at 5:34 AM, Per Forlin wrote:
+> 
+>> On 9 May 2011 04:05, Philip Rakity <prakity@marvell.com> wrote:
+>>> Hi Per,
+>>>
+>>> We noticed on some of our systems if we ADMA or SDMA and a bounce buffer it is significantly faster then SDMA.
+>>>
+>> I have not done work with ADMA or SDMA. Where should I look to read
+>> more about it?
+>> Are these the right places. DMA iop-dma.c and imx-sdma.c, MMC: sdhci.c.
+> 
+> sdhci.c for ADMA and SDMA
+> 
+> spec is at
+> http://www.sdcard.org/developers/tech/sdcard/pls/simplified_specs/
+> 
+> version 3 discusses ADMA
+> 
+>>> I believe ADMA will do large transfers.  Another data point.
+>>>
+>>> Philip
+>> Thanks,
+>> Per
+>>
+>>> On May 7, 2011, at 12:14 PM, Per Forlin wrote:
+>>>
+>>>> How significant is the cache maintenance over head?
+>>>> It depends, the eMMC are much faster now
+>>>> compared to a few years ago and cache maintenance cost more due to
+>>>> multiple cache levels and speculative cache pre-fetch. In relation the
+>>>> cost for handling the caches have increased and is now a bottle neck
+>>>> dealing with fast eMMC together with DMA.
+>>>>
+>>>> The intention for introducing none blocking mmc requests is to minimize the
+>>>> time between a mmc request ends and another mmc request starts. In the
+>>>> current implementation the MMC controller is idle when dma_map_sg and
+>>>> dma_unmap_sg is processing. Introducing none blocking mmc request makes it
+>>>> possible to prepare the caches for next job parallel with an active
+>>>> mmc request.
+>>>>
+>>>> This is done by making the issue_rw_rq() none blocking.
+>>>> The increase in throughput is proportional to the time it takes to
+>>>> prepare (major part of preparations is dma_map_sg and dma_unmap_sg)
+>>>> a request and how fast the memory is. The faster the MMC/SD is
+>>>> the more significant the prepare request time becomes. Measurements on U5500
+>>>> and Panda on eMMC and SD shows significant performance gain for for large
+>>>> reads when running DMA mode. In the PIO case the performance is unchanged.
+>>>>
+>>>> There are two optional hooks pre_req() and post_req() that the host driver
+>>>> may implement in order to move work to before and after the actual mmc_request
+>>>> function is called. In the DMA case pre_req() may do dma_map_sg() and prepare
+>>>> the dma descriptor and post_req runs the dma_unmap_sg.
+>>>>
+>>>> Details on measurements from IOZone and mmc_test:
+>>>> https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async-req
+>>>>
+>>>> Under consideration:
+>>>> * Make pre_req and post_req private to core.c.
+>>>> * Generalize implementation and make it available for SDIO.
+>>>>
+>>>> Changes since v2:
+>>>> * Fix compile warnings in core.c and block.c
+>>>> * Simplify max transfer size in mmc_test
+>>>> * set TASK_RUNNING in queue.c before issue_req()
+>>>>
+>>>> Per Forlin (12):
+>>>>  mmc: add none blocking mmc request function
+>>>>  mmc: mmc_test: add debugfs file to list all tests
+>>>>  mmc: mmc_test: add test for none blocking transfers
+>>>>  mmc: add member in mmc queue struct to hold request data
+>>>>  mmc: add a block request prepare function
+>>>>  mmc: move error code in mmc_block_issue_rw_rq to a separate function.
+>>>>  mmc: add a second mmc queue request member
+>>>>  mmc: add handling for two parallel block requests in issue_rw_rq
+>>>>  mmc: test: add random fault injection in core.c
+>>>>  omap_hsmmc: use original sg_len for dma_unmap_sg
+>>>>  omap_hsmmc: add support for pre_req and post_req
+>>>>  mmci: implement pre_req() and post_req()
+>>>>
+>>>> drivers/mmc/card/block.c      |  493 +++++++++++++++++++++++++++--------------
+>>>> drivers/mmc/card/mmc_test.c   |  340 +++++++++++++++++++++++++++-
+>>>> drivers/mmc/card/queue.c      |  180 ++++++++++------
+>>>> drivers/mmc/card/queue.h      |   31 ++-
+>>>> drivers/mmc/core/core.c       |  132 ++++++++++-
+>>>> drivers/mmc/core/debugfs.c    |    5 +
+>>>> drivers/mmc/host/mmci.c       |  146 +++++++++++-
+>>>> drivers/mmc/host/mmci.h       |    8 +
+>>>> drivers/mmc/host/omap_hsmmc.c |   90 +++++++-
+>>>> include/linux/mmc/core.h      |    9 +-
+>>>> include/linux/mmc/host.h      |   13 +-
+>>>> lib/Kconfig.debug             |   11 +
+>>>> 12 files changed, 1174 insertions(+), 284 deletions(-)
+>>>>
+>>>> --
+>>>> 1.7.4.1
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
