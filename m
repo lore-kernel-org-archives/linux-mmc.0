@@ -1,53 +1,41 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] dw_mmc: fixed wrong regulator_enable in suspend/resume
-Date: Thu, 12 May 2011 10:01:49 +0100
-Message-ID: <BANLkTiksx+C+6F-C5kcrzUXTquvm2NuzTQ@mail.gmail.com>
-References: <4DCA3237.3080609@samsung.com>
-	<m3pqnp2vvl.fsf@pullcord.laptop.org>
-	<4DCB4D9B.8050706@samsung.com>
-	<m3tyd0zily.fsf@pullcord.laptop.org>
+From: Huang Changming-R66093 <R66093@freescale.com>
+Subject: About the get_cd callback function
+Date: Thu, 12 May 2011 09:13:05 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F1154C50F@039-SN1MPN1-005.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:56021 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752174Ab1ELJBu convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 05:01:50 -0400
-Received: by iyb14 with SMTP id 14so1054106iyb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 12 May 2011 02:01:50 -0700 (PDT)
-In-Reply-To: <m3tyd0zily.fsf@pullcord.laptop.org>
+Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:20198 "EHLO
+	TX2EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755362Ab1ELJNM convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 05:13:12 -0400
+Received: from mail96-tx2 (localhost.localdomain [127.0.0.1])	by
+ mail96-tx2-R.bigfish.com (Postfix) with ESMTP id 7D6AEAC026C	for
+ <linux-mmc@vger.kernel.org>; Thu, 12 May 2011 09:13:11 +0000 (UTC)
+Received: from TX2EHSMHS045.bigfish.com (unknown [10.9.14.239])	by
+ mail96-tx2.bigfish.com (Postfix) with ESMTP id 602B0858051	for
+ <linux-mmc@vger.kernel.org>; Thu, 12 May 2011 09:13:09 +0000 (UTC)
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thu, May 12, 2011 at 4:46 AM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Wed, May 11 2011, Jaehoon Chung wrote:
->> Hi Chris..
->>
->> I think you're confused something because my explanation.
->>
->> My means..if we use the regulator, regulator is enabled when probing=
-=2E
->> Then regulator is enabling until we don't disable..
->>
->> In order to power-save, disabled the regulator when entered suspend.
->> Already in suspend function, located "regulator_disable()".
->> but also located "regulator_enable()" in suspend function.
->>
->> So i think right that "regulator_enable()" is located in resume func=
-tion.
->> not in suspend function.
->
-> Thanks, I agree. =A0I hadn't looked at the suspend function, but now =
-I see
-> that it already has the disable.
->
-> Will, want to ACK this before I merge it?
+Hi all,
+I just posted three patches to use get_cd to detect the card (somebody has saw them, But I didn't receive them from Linux-mmc, I don't know why):
+[PATCH 1/3] SDHCI: add sdhci_get_cd callback to detect the card
+[PATCH 2/3] MMC/SD: add callback function to detect card
+[PATCH 3/3] SDHC/MMC: add f_min to mmc_power_on
 
-Looks ok to me, although I don't have suitable hardware to test it.
+I had posted them last year, but them were not accepted :(
+Now I will express my reason to add this function and welcome give your comment.
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+"mmc_send_status" (that is used to check if the card has been removed, in file sd.c and mmc.c) will timeout when there is not SD/MMC card in slot, system will generate too many interrupts; even if the SD/MMC card present, there will generate many interrupts to return the card status from the SD/MMC card. Which will downgrade the performance of the system because system will take many time to handle these interrupts.
+Therefore, I use the callback function "get_cd" to read the Present State register and check the bit CINS, if the SD card present, which will be 1, otherwise it will be 0.
+
+
+Thanks and Best Regards
+Jerry Huang
+
+
+
