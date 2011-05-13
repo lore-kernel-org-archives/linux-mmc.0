@@ -1,30 +1,60 @@
-From: Andy Ross <andy.ross@windriver.com>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: [PATCH] mmc: duplicated trial with same freq when mmc_rescan_try_freq()
-Date: Fri, 13 May 2011 09:18:59 -0700
-Message-ID: <4DCD59F3.2030105@windriver.com>
-References: <4DCB97F3.9060704@samsung.com> <8A2FC72B45BB5A4C9F801431E06AE48F1154C484@039-SN1MPN1-005.039d.mgd.msft.net> <m3fwokypzv.fsf@pullcord.laptop.org> <4DCC9464.3020806@samsung.com>
+Date: Fri, 13 May 2011 12:48:40 -0400
+Message-ID: <m3k4duo8bb.fsf@pullcord.laptop.org>
+References: <4DCB97F3.9060704@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from li44-10.members.linode.com ([72.14.181.10]:39327 "EHLO
-	plausible.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759041Ab1EMQ0R (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 13 May 2011 12:26:17 -0400
-In-Reply-To: <4DCC9464.3020806@samsung.com>
+Received: from void.printf.net ([89.145.121.20]:56454 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759634Ab1EMQqd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 13 May 2011 12:46:33 -0400
+In-Reply-To: <4DCB97F3.9060704@samsung.com> (Jaehoon Chung's message of "Thu,
+	12 May 2011 17:18:59 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Huang Changming-R66093 <R66093@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, andy.ross@windriver.com
 
-On 05/12/2011 07:16 PM, Jaehoon Chung wrote:
-> In other words, first init card with 400KHZ, 
-> but second/third to init with 300KHz. 
-> i think not necessary that try to initialize the two times with 300KHz.
+Hi Jaehoon,
 
-This sounds like a correct patch to me.  Presumably the board I was
-using had a f_min that didn't match one of the table entries exactly,
-so I didn't see the mixed up equality condition.  Unfortunately that
-board is gone now, so I can't test.  But the logic looks fine.
+On Thu, May 12 2011, Jaehoon Chung wrote:
+> when running mmc_rescan_try_freq(), try to init two times with last frequency.
+> For example, assume that host->f_min is 400KHz, we can find the below message.
+>
+> mmc1: mmc_rescan_try_freq: trying to init card at 400000 Hz
+> mmc1: mmc_rescan_try_freq: trying to init card at 400000 Hz
+>
+> i didn't find to mention about this..why try to init the two times with same frequency?
+> Is there any reason? If i missed the history, plz let me know them.
+>
+> I think that trial is not necessary. Trial needs to running with other frequency.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/core/core.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 61c6c0b..a330c58 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1618,7 +1618,7 @@ void mmc_rescan(struct work_struct *work)
+>  	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
+>  		if (!mmc_rescan_try_freq(host, max(freqs[i], host->f_min)))
+>  			break;
+> -		if (freqs[i] < host->f_min)
+> +		if (freqs[i] <= host->f_min)
+>  			break;
+>  	}
+>  	mmc_release_host(host);
+>
 
-Andy
+Thanks, merged to mmc-next for .40.
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
