@@ -1,20 +1,39 @@
-From: Arindam Nath <arindam.nath@amd.com>
-Subject: [PATCH v2 4/4] mmc add support for eMMC Dual Data Rate
-Date: Fri, 13 May 2011 11:17:18 +0530
-Message-ID: <1305265638-1572-5-git-send-email-arindam.nath@amd.com>
+From: Sachin Nikam <Snikam@nvidia.com>
+Subject: RE: [PATCH v2 4/4] mmc add support for eMMC Dual Data Rate
+Date: Fri, 13 May 2011 11:35:07 +0530
+Message-ID: <723849F6A4B5A3408299DF1FFE37CA776C09CFC1FB@BGMAIL02.nvidia.com>
 References: <1305265638-1572-1-git-send-email-arindam.nath@amd.com>
+ <1305265638-1572-5-git-send-email-arindam.nath@amd.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:60304 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751261Ab1EMFtE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 May 2011 01:49:04 -0400
-Received: by pwi15 with SMTP id 15so1037734pwi.19
-        for <linux-mmc@vger.kernel.org>; Thu, 12 May 2011 22:49:04 -0700 (PDT)
-In-Reply-To: <1305265638-1572-1-git-send-email-arindam.nath@amd.com>
+Received: from hqemgate03.nvidia.com ([216.228.121.140]:19799 "EHLO
+	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750874Ab1EMGFO convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 May 2011 02:05:14 -0400
+In-Reply-To: <1305265638-1572-5-git-send-email-arindam.nath@amd.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Arindam Nath' <arindam.nath@amd.com>, "cjb@laptop.org" <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "prakity@marvell.com" <prakity@marvell.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>
+
+Hello Folks,
+
+Sorry for interruption.
+I wanted to know when and which version of kernel mmc driver will have SD 4.0(UHS-II) support?
+
+Regards,
+Sachin Nikam.
+NVIDIA.
+
+-----Original Message-----
+From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Arindam Nath
+Sent: Friday, May 13, 2011 11:17 AM
 To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, prakity@marvell.com, zhangfei.gao@gmail.com, Arindam Nath <arindam.nath@amd.com>
+Cc: linux-mmc@vger.kernel.org; prakity@marvell.com; zhangfei.gao@gmail.com; Arindam Nath
+Subject: [PATCH v2 4/4] mmc add support for eMMC Dual Data Rate
 
 From: Philip Rakity <prakity@marvell.com>
 
@@ -157,3 +176,13 @@ index 6716bd1..de32e6a 100644
 -- 
 1.7.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-----------------------------------------------------------------------------------
+This email message is for the sole use of the intended recipient(s) and may contain
+confidential information.  Any unauthorized review, use, disclosure or distribution
+is prohibited.  If you are not the intended recipient, please contact the sender by
+reply email and destroy all copies of the original message.
+-----------------------------------------------------------------------------------
