@@ -1,63 +1,81 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: duplicated trial with same freq when
- mmc_rescan_try_freq()
-Date: Fri, 13 May 2011 11:16:04 +0900
-Message-ID: <4DCC9464.3020806@samsung.com>
-References: <4DCB97F3.9060704@samsung.com>
- <8A2FC72B45BB5A4C9F801431E06AE48F1154C484@039-SN1MPN1-005.039d.mgd.msft.net>
- <m3fwokypzv.fsf@pullcord.laptop.org>
+From: Sachin Nikam <Snikam@nvidia.com>
+Subject: RE: [Bug 35002] New: SDHC memory card causes divide error: 0000
+ [#1] PREEMPT SMP
+Date: Fri, 13 May 2011 10:37:07 +0530
+Message-ID: <723849F6A4B5A3408299DF1FFE37CA776C09CFC1FA@BGMAIL02.nvidia.com>
+References: <m339kkylx9.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:36842 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752817Ab1EMCQE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2011 22:16:04 -0400
-Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LL40038G3MB8A80@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 13 May 2011 11:15:55 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LL4007CY3MKXB@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 13 May 2011 11:15:56 +0900 (KST)
-In-reply-to: <m3fwokypzv.fsf@pullcord.laptop.org>
+Received: from hqemgate03.nvidia.com ([216.228.121.140]:15611 "EHLO
+	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755180Ab1EMFHM convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 May 2011 01:07:12 -0400
+In-Reply-To: <m339kkylx9.fsf@pullcord.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Huang Changming-R66093 <R66093@freescale.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, "andy.ross@windriver.com" <andy.ross@windriver.com>
+To: 'Chris Ball' <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "s.jansen@gmail.com" <s.jansen@gmail.com>
 
-Hi Chris..
-
-My question is others..I agreed the using frequency table..
-
-But my questions is this...
-For example, if f_min is 300KHz, you can the below message.
-
-mmc1: mmc_rescan_try_freq: trying to init card at 400000 Hz
-mmc1: mmc_rescan_try_freq: trying to init card at 300000 Hz
-mmc1: mmc_rescan_try_freq: trying to init card at 300000 Hz
-
-In other words, first init card with 400KHZ, 
-but second/third to init with 300KHz. 
-i think not necessary that try to initialize the two times with 300KHz.
-
-I want to know your opinion..
+Hello Folks,
+Sorry for interruption.
+I wanted to know when and which version of mmc driver will have SD 4.0(UHS-II) support?
 
 Regards,
-Jaehoon Chung
+Sachin Nikam.
+NVIDIA.
 
-Chris Ball wrote:
-> Hi,
-> 
-> On Thu, May 12 2011, Huang Changming-R66093 wrote:
->> The required min frequency (f_min) is 400KHz during identify stage, is
->> it necessary to use the frequency table (freqs[], including 300KHz,
->> 200KHz and 100KHz)?
-> 
-> Yes.  Some hardware is buggy/out of compliance with the spec.
-> 
-> - Chris.
+-----Original Message-----
+From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
+Sent: Thursday, May 12, 2011 9:02 PM
+To: linux-mmc@vger.kernel.org; s.jansen@gmail.com
+Subject: [Bug 35002] New: SDHC memory card causes divide error: 0000 [#1] PREEMPT SMP
 
+Forwarding to linux-mmc@.
+
+From: bugzilla-daemon@bugzilla.kernel.org
+Subject: [Bug 35002] New: SDHC memory card causes divide error: 0000 [#1]
+ PREEMPT SMP
+
+https://bugzilla.kernel.org/show_bug.cgi?id=35002
+
+           Summary: SDHC memory card causes divide error: 0000 [#1]
+                    PREEMPT SMP
+           Product: Drivers
+           Version: 2.5
+    Kernel Version: 2.6.38.6
+          Platform: All
+        OS/Version: Linux
+              Tree: Mainline
+            Status: NEW
+          Severity: normal
+          Priority: P1
+         Component: MMC/SD
+        AssignedTo: drivers_mmc-sd@kernel-bugs.osdl.org
+        ReportedBy: s.jansen@gmail.com
+        Regression: No
+
+
+Created an attachment (id=57592)
+ --> (https://bugzilla.kernel.org/attachment.cgi?id=57592)
+Full kernel log from boot
+
+When inserting a sdhc memory card or when coming out of suspend kernel crashesh
+with divide error: 0000 [#1] PREEMPT SMP.
+
+Please see full log and trace for details
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-----------------------------------------------------------------------------------
+This email message is for the sole use of the intended recipient(s) and may contain
+confidential information.  Any unauthorized review, use, disclosure or distribution
+is prohibited.  If you are not the intended recipient, please contact the sender by
+reply email and destroy all copies of the original message.
+-----------------------------------------------------------------------------------
