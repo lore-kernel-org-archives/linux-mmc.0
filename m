@@ -1,81 +1,38 @@
-From: Sachin Nikam <Snikam@nvidia.com>
-Subject: RE: [Bug 35002] New: SDHC memory card causes divide error: 0000
- [#1] PREEMPT SMP
-Date: Fri, 13 May 2011 10:37:07 +0530
-Message-ID: <723849F6A4B5A3408299DF1FFE37CA776C09CFC1FA@BGMAIL02.nvidia.com>
-References: <m339kkylx9.fsf@pullcord.laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Arindam Nath <arindam.nath@amd.com>
+Subject: [PATCH v2 0/4] eMMC DDR support
+Date: Fri, 13 May 2011 11:17:14 +0530
+Message-ID: <1305265638-1572-1-git-send-email-arindam.nath@amd.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:15611 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755180Ab1EMFHM convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 May 2011 01:07:12 -0400
-In-Reply-To: <m339kkylx9.fsf@pullcord.laptop.org>
-Content-Language: en-US
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:64349 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756064Ab1EMFsA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 May 2011 01:48:00 -0400
+Received: by pvg12 with SMTP id 12so1016801pvg.19
+        for <linux-mmc@vger.kernel.org>; Thu, 12 May 2011 22:48:00 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "s.jansen@gmail.com" <s.jansen@gmail.com>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, prakity@marvell.com, zhangfei.gao@gmail.com, Arindam Nath <arindam.nath@amd.com>
 
-Hello Folks,
-Sorry for interruption.
-I wanted to know when and which version of mmc driver will have SD 4.0(UHS-II) support?
+V2
+----
+[PATCH 1/4]: Fixed tabbing for comment.
+[PATCH 2/4]: Use switch-case instead of if-else.
+[PATCH 3/4]: Use bool type for argument *cmd11* instead of int.
 
-Regards,
-Sachin Nikam.
-NVIDIA.
+Philip Rakity (4):
+  [PATCH 1/4]: sdhci add hooks for UHS setting by platform specific code
+  [PATCH 2/4]: sdhci-pxa add platform specific code for UHS signaling
+  [PATCH 3/4]: mmc eMMC signal voltage does not use CMD11
+  [PATCH 4/4]: mmc add support for eMMC Dual Data Rate
 
------Original Message-----
-From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
-Sent: Thursday, May 12, 2011 9:02 PM
-To: linux-mmc@vger.kernel.org; s.jansen@gmail.com
-Subject: [Bug 35002] New: SDHC memory card causes divide error: 0000 [#1] PREEMPT SMP
+ drivers/mmc/core/core.c      |   19 +++++--------------
+ drivers/mmc/core/core.h      |    5 ++---
+ drivers/mmc/core/mmc.c       |   35 ++++++++++++++++++++++++++++++-----
+ drivers/mmc/core/sd.c        |    5 +++--
+ drivers/mmc/host/sdhci-pxa.c |   41 +++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.c     |   33 ++++++++++++++++++---------------
+ drivers/mmc/host/sdhci.h     |    2 ++
+ include/linux/mmc/host.h     |    1 +
+ 8 files changed, 102 insertions(+), 39 deletions(-)
 
-Forwarding to linux-mmc@.
-
-From: bugzilla-daemon@bugzilla.kernel.org
-Subject: [Bug 35002] New: SDHC memory card causes divide error: 0000 [#1]
- PREEMPT SMP
-
-https://bugzilla.kernel.org/show_bug.cgi?id=35002
-
-           Summary: SDHC memory card causes divide error: 0000 [#1]
-                    PREEMPT SMP
-           Product: Drivers
-           Version: 2.5
-    Kernel Version: 2.6.38.6
-          Platform: All
-        OS/Version: Linux
-              Tree: Mainline
-            Status: NEW
-          Severity: normal
-          Priority: P1
-         Component: MMC/SD
-        AssignedTo: drivers_mmc-sd@kernel-bugs.osdl.org
-        ReportedBy: s.jansen@gmail.com
-        Regression: No
-
-
-Created an attachment (id=57592)
- --> (https://bugzilla.kernel.org/attachment.cgi?id=57592)
-Full kernel log from boot
-
-When inserting a sdhc memory card or when coming out of suspend kernel crashesh
-with divide error: 0000 [#1] PREEMPT SMP.
-
-Please see full log and trace for details
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
---
-To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
------------------------------------------------------------------------------------
-This email message is for the sole use of the intended recipient(s) and may contain
-confidential information.  Any unauthorized review, use, disclosure or distribution
-is prohibited.  If you are not the intended recipient, please contact the sender by
-reply email and destroy all copies of the original message.
------------------------------------------------------------------------------------
