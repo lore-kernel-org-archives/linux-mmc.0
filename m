@@ -1,94 +1,90 @@
-From: =?ISO-8859-1?Q?Ren=E9_K=F6cher?= <shirk@bitspin.org>
-Subject: Can't get SDHC in MacBookPro8,2 to work
-Date: Sun, 15 May 2011 18:58:13 +0200
-Message-ID: <BANLkTimNC17ET689uLg-az2DwjUP5NK29A@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH 2/2] sdhci-pxa: add call back interface to share
+ sdhci-pxa
+Date: Sun, 15 May 2011 14:32:04 -0700
+Message-ID: <2E9C2F3E-F19D-4580-9739-E33E9C70B102@marvell.com>
+References: <BANLkTimPN=GauwY7Rwh3xUEkV3=q3wfzAQ@mail.gmail.com>
+ <m34o4zwo8t.fsf@pullcord.laptop.org>
+ <487EBCAC-1795-4C69-ACDF-99EC9D7BF604@marvell.com>
+ <m3ei42vhir.fsf@pullcord.laptop.org>
+ <BANLkTinOaVziLLun7RyNVCFx=_=DcVXomA@mail.gmail.com>
+ <583E304B-0E60-4F3E-8D92-0DE0B737A415@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:61156 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751212Ab1EOQ6d convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 May 2011 12:58:33 -0400
-Received: by gxk21 with SMTP id 21so1308853gxk.19
-        for <linux-mmc@vger.kernel.org>; Sun, 15 May 2011 09:58:33 -0700 (PDT)
+Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:40107 "EHLO
+	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752135Ab1EOVcN convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 15 May 2011 17:32:13 -0400
+In-Reply-To: <583E304B-0E60-4F3E-8D92-0DE0B737A415@marvell.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, "arnd@arndb.de Bergmann" <arnd@arndb.de>, Zhangfei Gao <zhangfei.gao@gmail.com>
 
-Hi,
+resend
 
-I'm experiencing serious trouble in getting the SDXC Slot working in
-my MacBookPro8,2.
-The built in controller is a Broadcom NetXtreme with included SD Host
-Controller:
+On May 14, 2011, at 10:01 AM, Philip Rakity wrote:
 
-02:00.0 Ethernet controller [0200]: Broadcom Corporation NetXtreme
-BCM57765 Gigabit Ethernet PCIe [14e4:16b4] (rev 10)
-02:00.1 SD Host controller [0805]: Broadcom Corporation Device
-[14e4:16bc] (rev 10)
+> 
+> On May 13, 2011, at 10:11 PM, zhangfei gao wrote:
+> 
+>> On Fri, May 13, 2011 at 9:47 PM, Chris Ball <cjb@laptop.org> wrote:
+>>> Hi,
+>>> 
+>>> On Thu, May 12 2011, Philip Rakity wrote:
+>>>> All other platform specific code is in the host/ directory.
+>>>> 
+>>>> This moves it to arch/arm
+>>>> 
+>>>> If that is the direction the group wants to go in --> then the patch
+>>>> is fine provided the mmc group can review the patches.  Otherwise they
+>>>> are handled by the arm maintainer.
+>>> 
+>>> Thanks.  Wolfram, do you have any ideas on what the best design is for
+>>> these SoC-specific changes to sdhci-pxa?
+>>> 
+>>> - Chris.
+>> 
+>> The code in arch/arm is
+>> 1. Accessing private register, take pxa910 and mmp2 we want to support
+>> as example, there are several private registers differece, though they
+>> are same ip, with same issues and quirk.
+>> 2. Handle platform difference, for example, mmp2 used in two different
+>> platform, one use wp pin, the other does not.
+> 
+> The situation is a little more complicated.
+> 
+> pxa168 and pxa910 share (almost) the same IP  The are both based on SD 2.0
+> controller spec with extensions.  The pxa910 controller has fixes to the
+> pxa168 controller.  They share the same private registers that allow support
+> for clock gating and timing adjustments.  
+> 
+> mmp2 is based on SD 3.0 spec.  The private register space is different.
+> 
+> mmc/host/Kconfig takes no account of these differences.  mmp2 and pxa168/910
+> cannot co-exist.   What is currently submitted does not work.  One cannot
+> compile mmp2 and pxa910  nor would they work if one could.  
+> 
+> Mark Brown and I submitted patches to fix this.  We added code to the host/ directory
+> that took into account these differences.   It provided a common interface layer
+> that then used platform specific code in the host/ directory to handle the different
+> behavior.  
+> 
+> Arng Bergmann provided advice and reviewed the patches to allow explicit selection of the
+> pxa familty controller and board.  Based on this comments we submitted a patch
+> to allow selection if the appropriate SoC. 
+> 
+> These are two approaches. 
+> 
+>> 
+>> Thanks
+>>> --
+>>> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+>>> One Laptop Per Child
+>>> 
+> 
 
-=46ollowing a few reports (on several forums, including Ubuntu) this
-controller should work
-out-of-the-box - which unfortunately it doesn't.
-
-I'm running Gentoo Linux 64bit using a 2.6.39-rc6-git4 kernel with a fe=
-w patches
-applied to fix pure EFI boot on =A0MacBookPros.
-
-Inspecting dmesg I get this info:
-
-[ =A0 53.769305] sdhci: Secure Digital Host Controller Interface driver
-[ =A0 53.769307] sdhci: Copyright(c) Pierre Ossman
-[ =A0 53.775061] sdhci-pci 0000:02:00.1: SDHCI controller found
-[14e4:16bc] (rev 10)
-[ =A0 53.775096] sdhci-pci 0000:02:00.1: found 1 slot(s)
-[ =A0 53.775109] sdhci-pci 0000:02:00.1: PCI INT B -> GSI 17 (level,
-low) -> IRQ 17
-[ =A0 53.775111] sdhci-pci 0000:02:00.1: Invalid iomem size. You may
-experience problems.
-[ =A0 53.775186] sdhci-pci 0000:02:00.1: setting latency timer to 64
-
-The "Invalid iomem size." seems to be a problem (.. i think?..).
-If a card is plugged in I get the following messages:
-
-[ .. ] mmc0: Card removed during transfer!
-[ .. ] mmc0: Resetting controller.
-=2E. a few seconds later
-[ .. ] mmc0: Timeout waiting for hardware interrupt.
-
-Compiling with CONFIG_MMC_DEBUG results in (lots) of failed commands:
-
-[ 1617.272622] mmc0: starting CMD5 arg 00000000 flags 000002e1
-[ 1627.286136] mmc0: Timeout waiting for hardware interrupt.
-[ 1627.286146] sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D REGISTER DUMP (=
-mmc0)=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-[ 1627.286186] sdhci: Sys addr: 0x00000000 | Version: =A00x00001502
-[ 1627.286195] sdhci: Blk size: 0x00000000 | Blk cnt: =A00x00000000
-[ 1627.286204] sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
-[ 1627.286212] sdhci: Present: =A00x1eff0001 | Host ctl: 0x00000001
-[ 1627.286229] sdhci: Power: =A0 =A00x0000000f | Blk gap: =A00x00000000
-[ 1627.286234] sdhci: Wake-up: =A00x00000000 | Clock: =A0 =A00x0000fa07
-[ 1627.286238] sdhci: Timeout: =A00x00000000 | Int stat: 0x00000000
-[ 1627.286243] sdhci: Int enab: 0x00ff00c3 | Sig enab: 0x00ff00c3
-[ 1627.286249] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
-[ 1627.286253] sdhci: Caps: =A0 =A0 0x176ec8b0 | Caps_1: =A0 0x03002177
-[ 1627.286258] sdhci: Cmd: =A0 =A0 =A00x00000502 | Max curr: 0x00000000
-[ 1627.286264] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x00000000
-[ 1627.286265] sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D
-[ 1627.288335] mmc0: req failed (CMD5): -110, retrying...
-
-Commands range from CMD5,8,52 up to 55.
-
-The SDHC I'm using is working fine in MacOS and in Win7 so it doesn't s=
-eem to
-be some card related issue.
-
-Please be kind as this is my first post to the kernel lists.
-Any help is more than welcome.
-
---
-Cheers,
-Rene'
