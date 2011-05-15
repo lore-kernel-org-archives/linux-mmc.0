@@ -1,42 +1,123 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: USB SDIO/SD/MMC Host Controller (VUB300) driver Re-Re-Re-Resubmission
-Date: Sat, 14 May 2011 17:37:25 -0400
-Message-ID: <m3tycxklpm.fsf@pullcord.laptop.org>
-References: <1303231971.1622.33.camel@apple-mac>
-	<1305117866.1722.14.camel@apple-mac>
-	<1305120723.1722.61.camel@apple-mac>
-	<m3zkmrv9ll.fsf@pullcord.laptop.org>
+From: "Paul Parsons" <lost.distance@yahoo.com>
+Subject: [PATCH] mmc: tmio: Fix race condition resulting in spurious interrupts
+Date: Sun, 15 May 2011 13:24:41 +0000
+Message-ID: <E1QLbJK-0007cv-An@outmx05.plus.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:38443 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758885Ab1ENVfT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 14 May 2011 17:35:19 -0400
-In-Reply-To: <m3zkmrv9ll.fsf@pullcord.laptop.org> (Chris Ball's message of
-	"Thu, 12 May 2011 18:26:46 -0400")
+Received: from relay.pcl-ipout02.plus.net ([212.159.7.100]:63056 "EHLO
+	relay.pcl-ipout02.plus.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753343Ab1EONYo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 May 2011 09:24:44 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Olech <tony.olech@elandigitalsystems.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ian@mnementh.co.uk
 
-Hi,
+There is a race condition in the tmio_mmc_irq() interrupt handler, caused by the presence of a while loop, which results in warnings of spurious interrupts. This was found on an HP iPAQ hx4700 whose HTC ASIC3 reportedly incorporates the Toshiba TC6380AF controller.
 
-On Thu, May 12 2011, Chris Ball wrote:
-> Since the remaining objections are minor style issues, I think it makes
-> sense to merge this to mmc-next now and deal with further improvements
-> as patches on top of this one (which could get rebased into the original
-> patch later, or not).  Would any reviewers like to provide their
-> Reviewed-by before I do so?
+Towards the end of a multiple read (CMD18) operation the handler clears the final RXRDY status bit in the first loop iteration, sees the DATAEND status bit at the bottom of the loop, and so clears the DATAEND status bit in the second loop iteration. However the DATAEND interrupt is still queued in the system somewhere and can't be delivered until the handler has returned. This second interrupt is then reported as spurious in the next call to the handler. Likewise for single read (CMD17) operations. And something similar occurs for multiple write (CMD25) and single write (CMD24) operations, where CMDRESPEND and TXRQ status bits are cleared in a single call.
 
-I've pushed the vub300 patch to mmc-next now for testing, and will
-continue accepting Reviewed-bys to add to it.  I'm also going to make
-some small further style changes and send them to Tony to ACK, and
-then fold them into the original patch before sending it to mainline.
+In these cases the interrupt handler clears two separate interrupts when it should only clear the one interrupt for which it was invoked. The fix is to remove the while loop.
 
-Thanks!
+Signed-off-by: Paul Parsons <lost.distance@yahoo.com>
+---
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Interestingly a comment in tmio_mmc_pio.c regarding a problem on the SuperH concludes that "waiting for one more interrupt fixes the problem". Is that problem caused by the same race condition? And if so will this patch fix that too?
+
+diff -uprN clean-2.6.39-rc7/drivers/mmc/host/tmio_mmc_pio.c linux-2.6.39-rc7/drivers/mmc/host/tmio_mmc_pio.c
+--- clean-2.6.39-rc7/drivers/mmc/host/tmio_mmc_pio.c	2011-05-11 00:54:17.651289833 +0100
++++ linux-2.6.39-rc7/drivers/mmc/host/tmio_mmc_pio.c	2011-05-14 17:45:06.699829896 +0100
+@@ -593,58 +593,46 @@ static irqreturn_t tmio_mmc_irq(int irq,
+ 	pr_debug_status(status);
+ 	pr_debug_status(ireg);
+ 
+-	if (!ireg) {
+-		tmio_mmc_disable_mmc_irqs(host, status & ~irq_mask);
+-
+-		pr_warning("tmio_mmc: Spurious irq, disabling! "
+-			"0x%08x 0x%08x 0x%08x\n", status, irq_mask, ireg);
+-		pr_debug_status(status);
+-
++	/* Card insert / remove attempts */
++	if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
++		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
++			TMIO_STAT_CARD_REMOVE);
++		mmc_detect_change(host->mmc, msecs_to_jiffies(100));
+ 		goto out;
+ 	}
+ 
+-	while (ireg) {
+-		/* Card insert / remove attempts */
+-		if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
+-			tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
+-				TMIO_STAT_CARD_REMOVE);
+-			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
+-		}
+-
+-		/* CRC and other errors */
+-/*		if (ireg & TMIO_STAT_ERR_IRQ)
+- *			handled |= tmio_error_irq(host, irq, stat);
++	/* CRC and other errors */
++/*	if (ireg & TMIO_STAT_ERR_IRQ)
++ *		handled |= tmio_error_irq(host, irq, stat);
+  */
+ 
+-		/* Command completion */
+-		if (ireg & (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT)) {
+-			tmio_mmc_ack_mmc_irqs(host,
+-				     TMIO_STAT_CMDRESPEND |
+-				     TMIO_STAT_CMDTIMEOUT);
+-			tmio_mmc_cmd_irq(host, status);
+-		}
+-
+-		/* Data transfer */
+-		if (ireg & (TMIO_STAT_RXRDY | TMIO_STAT_TXRQ)) {
+-			tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_RXRDY | TMIO_STAT_TXRQ);
+-			tmio_mmc_pio_irq(host);
+-		}
+-
+-		/* Data transfer completion */
+-		if (ireg & TMIO_STAT_DATAEND) {
+-			tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_DATAEND);
+-			tmio_mmc_data_irq(host);
+-		}
+-
+-		/* Check status - keep going until we've handled it all */
+-		status = sd_ctrl_read32(host, CTL_STATUS);
+-		irq_mask = sd_ctrl_read32(host, CTL_IRQ_MASK);
+-		ireg = status & TMIO_MASK_IRQ & ~irq_mask;
++	/* Command completion */
++	if (ireg & (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT)) {
++		tmio_mmc_ack_mmc_irqs(host,
++			     TMIO_STAT_CMDRESPEND |
++			     TMIO_STAT_CMDTIMEOUT);
++		tmio_mmc_cmd_irq(host, status);
++		goto out;
++	}
++
++	/* Data transfer */
++	if (ireg & (TMIO_STAT_RXRDY | TMIO_STAT_TXRQ)) {
++		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_RXRDY | TMIO_STAT_TXRQ);
++		tmio_mmc_pio_irq(host);
++		goto out;
++	}
+ 
+-		pr_debug("Status at end of loop: %08x\n", status);
+-		pr_debug_status(status);
++	/* Data transfer completion */
++	if (ireg & TMIO_STAT_DATAEND) {
++		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_DATAEND);
++		tmio_mmc_data_irq(host);
++		goto out;
+ 	}
+-	pr_debug("MMC IRQ end\n");
++
++	pr_warning("tmio_mmc: Spurious irq, disabling! "
++		"0x%08x 0x%08x 0x%08x\n", status, irq_mask, ireg);
++	pr_debug_status(status);
++	tmio_mmc_disable_mmc_irqs(host, status & ~irq_mask);
+ 
+ out:
+ 	return IRQ_HANDLED;
+
