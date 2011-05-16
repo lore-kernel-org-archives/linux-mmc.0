@@ -1,76 +1,44 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: tmio: Fix build errors
-Date: Mon, 16 May 2011 23:07:06 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1105162306110.29373@axis700.grange>
-References: <E1QLbJV-0007eN-AF@outmx05.plus.net>
+From: Paul Parsons <lost.distance@yahoo.com>
+Subject: Re: [PATCH] mmc: tmio: Fix race condition resulting in spurious interrupts
+Date: Mon, 16 May 2011 22:35:05 +0100 (BST)
+Message-ID: <753789.33501.qm@web29017.mail.ird.yahoo.com>
+References: <Pine.LNX.4.64.1105162258510.29373@axis700.grange>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:57688 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752923Ab1EPVHJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 May 2011 17:07:09 -0400
-In-Reply-To: <E1QLbJV-0007eN-AF@outmx05.plus.net>
+Received: from nm3.bullet.mail.ird.yahoo.com ([77.238.189.60]:46786 "HELO
+	nm3.bullet.mail.ird.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1753297Ab1EPVfH convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 16 May 2011 17:35:07 -0400
+In-Reply-To: <Pine.LNX.4.64.1105162258510.29373@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Parsons <lost.distance@yahoo.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: linux-mmc@vger.kernel.org, ian@mnementh.co.uk
 
-On Sun, 15 May 2011, Paul Parsons wrote:
+> I wouldn't call this a "race."
 
-> Conditional code in tmio_mmc.h selects dummy tmio_mmc_start_dma(), 
-> tmio_mmc_request_dma() and tmio_mmc_release_dma() inline functions 
-> instead of the required declarations. This breaks the build of 
-> tmio_mmc_dma.c
-> 
-> Signed-off-by: Paul Parsons <lost.distance@yahoo.com>
+If the hardware sets the next status bit before the interrupt handler reaches the bottom of the loop, then the loop repeats, and the subsequent interrupt is reported as spurious.
 
-NAK. Are you trying to use DMA with TMIO on your platform? Then this is a 
-wrong fix. Otherwise tmio_mmc_dma.c shouldn't be compiled on your arch at 
-all.
+If the interrupt handler reaches the bottom of the loop before the hardware sets the next status bit, then the handler returns, and the subsequent interrupt is handled normally.
 
-Thanks
-Guennadi
+Thus the handler is racing the hardware.
 
-> ---
-> diff -uprN clean-2.6.39-rc7/drivers/mmc/host/tmio_mmc.h linux-2.6.39-rc7/drivers/mmc/host/tmio_mmc.h
-> --- clean-2.6.39-rc7/drivers/mmc/host/tmio_mmc.h	2011-05-11 00:54:17.647289808 +0100
-> +++ linux-2.6.39-rc7/drivers/mmc/host/tmio_mmc.h	2011-05-14 16:30:47.208267896 +0100
-> @@ -98,26 +98,8 @@ static inline void tmio_mmc_kunmap_atomi
->  	local_irq_restore(*flags);
->  }
->  
-> -#if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
->  void tmio_mmc_start_dma(struct tmio_mmc_host *host, struct mmc_data *data);
->  void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdata);
->  void tmio_mmc_release_dma(struct tmio_mmc_host *host);
-> -#else
-> -static inline void tmio_mmc_start_dma(struct tmio_mmc_host *host,
-> -			       struct mmc_data *data)
-> -{
-> -}
-> -
-> -static inline void tmio_mmc_request_dma(struct tmio_mmc_host *host,
-> -				 struct tmio_mmc_data *pdata)
-> -{
-> -	host->chan_tx = NULL;
-> -	host->chan_rx = NULL;
-> -}
-> -
-> -static inline void tmio_mmc_release_dma(struct tmio_mmc_host *host)
-> -{
-> -}
-> -#endif
->  
->  #endif
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> Sorry, don't understand. Isn't a spurious interrupt
+> reported per "nobody 
+> cared" if an ISR returns IRQ_NONE? And the TMIO ISR never
+> does this. Is 
+> the IRQ number, reported as spurious, that of TMIO? Is it
+> shared?
 
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+tmio_mmc: Spurious irq, disabling! 0x00800780 0x833f0304 0x00000000
+tmio_mmc: Spurious irq, disabling! 0x00800780 0x833f0304 0x00000000
+tmio_mmc: Spurious irq, disabling! 0x00800780 0x833f0304 0x00000000
+tmio_mmc: Spurious irq, disabling! 0x00800780 0x833f0304 0x00000000
+tmio_mmc: Spurious irq, disabling! 0x00800780 0x833f0304 0x00000000
+etc...
+
+Regards,
+Paul
