@@ -1,100 +1,185 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH 4/6] mmc: vub300: loop cleanup
-Date: Sun, 15 May 2011 20:21:46 -0400
-Message-ID: <1305505308-8767-4-git-send-email-cjb@laptop.org>
-References: <1305505308-8767-1-git-send-email-cjb@laptop.org>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v4 12/15] sdhci pxa add platform specific code for UHS signaling
+Date: Mon, 16 May 2011 01:57:53 -0400
+Message-ID: <BANLkTimE2R-Gz802zM7ijPuuBtw4ptZ9tg@mail.gmail.com>
+References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
+	<1304578151-1775-13-git-send-email-arindam.nath@amd.com>
+	<BANLkTikdwJ3KOhxtJu9Msq6G-SmutGaSHg@mail.gmail.com>
+	<1D15C758-EA6C-446C-9A49-2F7279806697@marvell.com>
+	<BANLkTikRynkL0vLZ4oJyAkafM27qKc6-xQ@mail.gmail.com>
+	<BE2CEC2C-53ED-4D80-974F-6552107C2B66@marvell.com>
+	<BANLkTimA9RwuCie3+0yuS+WVgieLOi_-mg@mail.gmail.com>
+	<535744D3-3D69-4D6D-9AE7-E8885EBFC6CD@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pullcord.laptop.org ([18.85.46.20]:37134 "EHLO
-	pullcord.laptop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751396Ab1EPAT4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 May 2011 20:19:56 -0400
-In-Reply-To: <1305505308-8767-1-git-send-email-cjb@laptop.org>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:37997 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751183Ab1EPF5y convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 May 2011 01:57:54 -0400
+Received: by vxi39 with SMTP id 39so2918754vxi.19
+        for <linux-mmc@vger.kernel.org>; Sun, 15 May 2011 22:57:53 -0700 (PDT)
+In-Reply-To: <535744D3-3D69-4D6D-9AE7-E8885EBFC6CD@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Tony Olech <tony.olech@elandigitalsystems.com>
-Cc: Chris Ball <cjb@laptop.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Arindam Nath <arindam.nath@amd.com>, "cjb@laptop.org" <cjb@laptop.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "henry.su@amd.com" <henry.su@amd.com>, "aaron.lu@amd.com" <aaron.lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
 
-For loops that start with i=0, re-use a single counter int.
+On Sun, May 15, 2011 at 5:42 PM, Philip Rakity <prakity@marvell.com> wr=
+ote:
+>
+> On May 13, 2011, at 1:03 AM, zhangfei gao wrote:
+>
+>> On Wed, May 11, 2011 at 5:47 AM, Philip Rakity <prakity@marvell.com>=
+ wrote:
+>>>
+>>> On May 11, 2011, at 2:28 AM, zhangfei gao wrote:
+>>>
+>>>> On Wed, May 11, 2011 at 4:52 AM, Philip Rakity <prakity@marvell.co=
+m> wrote:
+>>>>>
+>>>>> \
+>>>>> On May 11, 2011, at 1:48 AM, zhangfei gao wrote:
+>>>>>
+>>>>>> On Thu, May 5, 2011 at 2:49 AM, Arindam Nath <arindam.nath@amd.c=
+om> wrote:
+>>>>>>> Marvell controller requires 1.8V bit in UHS control register 2
+>>>>>>> be set when doing UHS. =A0eMMC does not require 1.8V for DDR.
+>>>>>>> add platform code to handle this.
+>>>>>>>
+>>>>>>> Signed-off-by: Philip Rakity <prakity@marvell.com>
+>>>>>>> Reviewed-by: Arindam Nath <arindam.nath@amd.com>
+>>>>>>> ---
+>>>>>>> =A0drivers/mmc/host/sdhci-pxa.c | =A0 36 ++++++++++++++++++++++=
+++++++++++++++
+>>>>>>> =A01 files changed, 36 insertions(+), 0 deletions(-)
+>>>>>>>
+>>>>>>> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sd=
+hci-pxa.c
+>>>>>>> index 5a61208..b52c3e6 100644
+>>>>>>> --- a/drivers/mmc/host/sdhci-pxa.c
+>>>>>>> +++ b/drivers/mmc/host/sdhci-pxa.c
+>>>>>>> @@ -69,7 +69,40 @@ static void set_clock(struct sdhci_host *hos=
+t, unsigned int clock)
+>>>>>>> =A0 =A0 =A0 =A0}
+>>>>>>> =A0}
+>>>>>>>
+>>>>>>> +static int set_uhs_signaling(struct sdhci_host *host, unsigned=
+ int uhs)
+>>>>>>> +{
+>>>>>>> + =A0 =A0 =A0 u16 ctrl_2;
+>>>>>>> +
+>>>>>>> + =A0 =A0 =A0 /*
+>>>>>>> + =A0 =A0 =A0 =A0* Set V18_EN -- UHS modes do not work without =
+this.
+>>>>>>> + =A0 =A0 =A0 =A0* does not change signaling voltage
+>>>>>>> + =A0 =A0 =A0 =A0*/
+>>>>>>> + =A0 =A0 =A0 ctrl_2 =3D sdhci_readw(host, SDHCI_HOST_CONTROL2)=
+;
+>>>>>>> +
+>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Select Bus Speed Mode for host=
+ */
+>>>>>>> + =A0 =A0 =A0 ctrl_2 &=3D ~SDHCI_CTRL_UHS_MASK;
+>>>>>>> + =A0 =A0 =A0 if (uhs =3D=3D MMC_TIMING_UHS_SDR12)
+>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR12;
+>>>>>>> + =A0 =A0 =A0 else if (uhs =3D=3D MMC_TIMING_UHS_SDR25)
+>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR25;
+>>>>>>> + =A0 =A0 =A0 else if (uhs =3D=3D MMC_TIMING_UHS_SDR50) {
+>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR50;
+>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
+>>>>>>> + =A0 =A0 =A0 } else if (uhs =3D=3D MMC_TIMING_UHS_SDR104) {
+>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR104=
+;
+>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
+>>>>>>> + =A0 =A0 =A0 } else if (uhs =3D=3D MMC_TIMING_UHS_DDR50) {
+>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_DDR50;
+>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
+>>>>>>> + =A0 =A0 =A0 }
+>>>>>>> + =A0 =A0 =A0 sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+>>>>>>> + =A0 =A0 =A0 pr_debug("%s:%s uhs =3D %d, ctrl_2 =3D %04X\n",
+>>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 __func__, mmc_hostname(host->mmc)=
+, uhs, ctrl_2);
+>>>>>>> + =A0 =A0 =A0 return 0;
+>>>>>>> +}
+>>>>>>
+>>>>>> Why move common register accessing from sdhci.c to specific driv=
+er?
+>>>>>
+>>>>> In general case you do not know what the specific host controller=
+ work arounds are required.
+>>>>> on mmp2 this code works (no need for V18 for low speed UHS)
+>>>>> but other controllers it could be different
+>>>>
+>>>> Sorry, not understand, the patch is for sd uhs card or for emmc?
+>>>> For sd uhs card, no workaround is needed on mmp2, but require exte=
+rnal
+>>>> pmic to provide 1.8v io voltage.
+>>>
+>>>
+>>> require 1.8V when setting UHS modes. =A0See latest MMP2 Documentati=
+on.
+>>
+>> Do you mean set SDHCI_CTRL_VDD_180?
+>> It is already set in sdhci_start_signal_voltage_switch, so does not
+>> required in specific driver.
+>
+>
+> eMMC voltages are fixed. =A0DDR support is available at 3.3v vcc and =
+3.3v vccq.
+> There is no voltage switch necessary. =A0The card type value indicate=
+s that 3.3 vccq
+> or 1.8v vccq is available. =A0Since we are communicating with the car=
+d DDR must
+> be available without a 1.8v vccq voltage switch.
+>
+> mmp2 has the requirement that to do DDR at any vccq we must set the V=
+DD_180 bit.
+> This bit set + DDR mode bit enables DDR. =A0DDR mode bit on its own i=
+s not sufficient.
 
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
- drivers/mmc/host/vub300.c |   33 ++++++++++++++-------------------
- 1 files changed, 14 insertions(+), 19 deletions(-)
+It's fine to mmp2 for emmc ddr50 mode.
+Just concern other controller also need to set SDHCI_CTRL_VDD_180 via
+the call back , since "UHS Mode Select" description is "UHS-I mode is
+effective when SDHCI_CTRL_VDD_180 is set to 1", regardless of DDR50
+mode work at 3.3v or 1.8v.
 
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index ac2fa06..0463921 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -905,6 +905,7 @@ static void send_command(struct vub300_mmc_host *vub300)
- 	struct mmc_command *cmd = vub300->cmd;
- 	struct mmc_data *data = vub300->data;
- 	int retval;
-+	int i;
- 	u8 response_type;
- 	if (vub300->app_spec) {
- 		switch (cmd->opcode) {
-@@ -1014,14 +1015,11 @@ static void send_command(struct vub300_mmc_host *vub300)
- 			vub300->resp_len = 0;
- 			break;
- 		case 16:
--		{
--			int i;
- 			for (i = 0; i < ARRAY_SIZE(vub300->fbs); i++)
- 				vub300->fbs[i] = 0xFFFF & cmd->arg;
- 			response_type = SDRT_1;
- 			vub300->resp_len = 6;
- 			break;
--		}
- 		case 17:
- 		case 18:
- 		case 24:
-@@ -2215,33 +2213,30 @@ static int vub300_probe(struct usb_interface *interface,
- 	vub300->command_res_urb = command_res_urb;
- 	vub300->usb_timed_out = 0;
- 	vub300->dynamic_register_count = 0;
--	{
--		int i;
--		for (i = 0; i < ARRAY_SIZE(vub300->fn); i++) {
--			vub300->fn[i].offload_point = 0;
--			vub300->fn[i].offload_count = 0;
--		}
-+
-+	for (i = 0; i < ARRAY_SIZE(vub300->fn); i++) {
-+		vub300->fn[i].offload_point = 0;
-+		vub300->fn[i].offload_count = 0;
- 	}
-+
- 	vub300->total_offload_count = 0;
- 	vub300->irq_enabled = 0;
- 	vub300->irq_disabled = 0;
- 	vub300->irqs_queued = 0;
--	{
--		int i;
--		for (i = 0; i < ARRAY_SIZE(vub300->sdio_register); i++)
--			vub300->sdio_register[i++].activate = 0;
--	}
-+
-+	for (i = 0; i < ARRAY_SIZE(vub300->sdio_register); i++)
-+		vub300->sdio_register[i++].activate = 0;
-+
- 	vub300->udev = udev;
- 	vub300->interface = interface;
- 	vub300->cmnd_res_ep = 0;
- 	vub300->cmnd_out_ep = 0;
- 	vub300->data_inp_ep = 0;
- 	vub300->data_out_ep = 0;
--	{
--		int i;
--		for (i = 0; i < ARRAY_SIZE(vub300->fbs); i++)
--			vub300->fbs[i] = 512;
--	}
-+
-+	for (i = 0; i < ARRAY_SIZE(vub300->fbs); i++)
-+		vub300->fbs[i] = 512;
-+
- 	/*
- 	 *      set up the endpoint information
- 	 *
--- 
-1.7.0.1
-
+>
+>
+>
+>
+>
+>>
+>>>>
+>>>>>
+>>>>>>
+>>>>>>> +
+>>>>>>> =A0static struct sdhci_ops sdhci_pxa_ops =3D {
+>>>>>>> + =A0 =A0 =A0 .set_uhs_signaling =3D set_uhs_signaling,
+>>>>>>> =A0 =A0 =A0 =A0.set_clock =3D set_clock,
+>>>>>>> =A0};
+>>>>>>>
+>>>>>>> @@ -141,6 +174,9 @@ static int __devinit sdhci_pxa_probe(struct=
+ platform_device *pdev)
+>>>>>>> =A0 =A0 =A0 =A0if (pdata->quirks)
+>>>>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->quirks |=3D pdata->quirks;
+>>>>>>>
+>>>>>>> + =A0 =A0 =A0 /* enable 1/8V DDR capable */
+>>>>>>> + =A0 =A0 =A0 host->mmc->caps |=3D MMC_CAP_1_8V_DDR;
+>>>>>>> +
+>>>>>>> =A0 =A0 =A0 =A0/* If slot design supports 8 bit data, indicate =
+this to MMC. */
+>>>>>>> =A0 =A0 =A0 =A0if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLO=
+T)
+>>>>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->mmc->caps |=3D MMC_CAP_8_B=
+IT_DATA;
+>>>>>>> --
+>>>>>>> 1.7.1
+>>>>>>>
+>>>>>>>
+>>>>>
+>>>>>
+>>>
+>>>
+>
+>
