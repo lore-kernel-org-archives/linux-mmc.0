@@ -1,44 +1,167 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: kernel 2.6.38.6 MMC controller problem (fwd)
-Date: Mon, 16 May 2011 19:56:08 +0200
-Message-ID: <BANLkTiky5W=AW=TPe_rQ9QZw=6c5hjexag@mail.gmail.com>
-References: <Pine.LNX.4.64.1105160830420.4131@axis700.grange>
-	<BANLkTinbJfDLp5nfkq-VTYLJvihT1thXvA@mail.gmail.com>
-	<Pine.LNX.4.64.1105161044260.4131@axis700.grange>
-	<m3d3jik88n.fsf@pullcord.laptop.org>
-	<BANLkTin-wiP9ukmPJPo3n5SWqsd=j9rjBg@mail.gmail.com>
-	<m38vu6k5b0.fsf@pullcord.laptop.org>
-	<Pine.LNX.4.64.1105161801100.28668@axis700.grange>
-	<m34o4uk3f5.fsf@pullcord.laptop.org>
-	<Pine.LNX.4.64.1105161841420.28668@axis700.grange>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH] mmc: tmio: Fix race condition resulting in spurious
+ interrupts
+Date: Mon, 16 May 2011 23:01:43 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1105162258510.29373@axis700.grange>
+References: <E1QLbJK-0007cv-An@outmx05.plus.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:64573 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753664Ab1EPR4J (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 May 2011 13:56:09 -0400
-Received: by iwn34 with SMTP id 34so4129162iwn.19
-        for <linux-mmc@vger.kernel.org>; Mon, 16 May 2011 10:56:09 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1105161841420.28668@axis700.grange>
+Received: from moutng.kundenserver.de ([212.227.126.187]:63043 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751129Ab1EPVBw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 May 2011 17:01:52 -0400
+In-Reply-To: <E1QLbJK-0007cv-An@outmx05.plus.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Chris Ball <cjb@laptop.org>, David Strobach <lalochcz@gmail.com>, linux-mmc@vger.kernel.org, Greg KH <greg@kroah.com>, horms@verge.net.au, damm@opensource.se, Andrei Warkentin <andreiw@motorola.com>
+To: Paul Parsons <lost.distance@yahoo.com>
+Cc: linux-mmc@vger.kernel.org, ian@mnementh.co.uk
 
-2011/5/16 Guennadi Liakhovetski <g.liakhovetski@gmx.de>:
-> On Mon, 16 May 2011, Chris Ball wrote:
->> My intuition is that we should revert it now -- it's been a week since
->> the final -rc, so you'd expect .39 to be released today, and we can
->> always add your patch back into stable via .40-rc1 if it's not related
->> to the crashes.
->
-> Ok, let's revert it then. Just we have to not forget to work on this
-> problem and find a proper fix.
+On Sun, 15 May 2011, Paul Parsons wrote:
 
-I'm still baffled by the whole thing, the solution seems so intuitively
-correct. :-(
+> There is a race condition in the tmio_mmc_irq() interrupt handler, 
+> caused by the presence of a while loop, which results in warnings of 
+> spurious interrupts. This was found on an HP iPAQ hx4700 whose HTC ASIC3 
+> reportedly incorporates the Toshiba TC6380AF controller.
 
-Is there something strange in the semantics of mmc_claim_host()?
+I wouldn't call this a "race."
 
-Linus Walleij
+> Towards the end of a multiple read (CMD18) operation the handler clears 
+> the final RXRDY status bit in the first loop iteration, sees the DATAEND 
+> status bit at the bottom of the loop, and so clears the DATAEND status 
+> bit in the second loop iteration. However the DATAEND interrupt is still 
+> queued in the system somewhere and can't be delivered until the handler 
+> has returned. This second interrupt is then reported as spurious in the 
+> next call to the handler. Likewise for single read (CMD17) operations. 
+> And something similar occurs for multiple write (CMD25) and single write 
+> (CMD24) operations, where CMDRESPEND and TXRQ status bits are cleared in 
+> a single call.
+> 
+> In these cases the interrupt handler clears two separate interrupts when 
+> it should only clear the one interrupt for which it was invoked. The fix 
+> is to remove the while loop.
+
+Sorry, don't understand. Isn't a spurious interrupt reported per "nobody 
+cared" if an ISR returns IRQ_NONE? And the TMIO ISR never does this. Is 
+the IRQ number, reported as spurious, that of TMIO? Is it shared?
+
+> Signed-off-by: Paul Parsons <lost.distance@yahoo.com>
+> ---
+> 
+> Interestingly a comment in tmio_mmc_pio.c regarding a problem on the 
+> SuperH concludes that "waiting for one more interrupt fixes the 
+> problem". Is that problem caused by the same race condition? And if so 
+> will this patch fix that too?
+
+Don't think so, that comment only applies to the DMA case.
+
+Thanks
+Guennadi
+
+> 
+> diff -uprN clean-2.6.39-rc7/drivers/mmc/host/tmio_mmc_pio.c linux-2.6.39-rc7/drivers/mmc/host/tmio_mmc_pio.c
+> --- clean-2.6.39-rc7/drivers/mmc/host/tmio_mmc_pio.c	2011-05-11 00:54:17.651289833 +0100
+> +++ linux-2.6.39-rc7/drivers/mmc/host/tmio_mmc_pio.c	2011-05-14 17:45:06.699829896 +0100
+> @@ -593,58 +593,46 @@ static irqreturn_t tmio_mmc_irq(int irq,
+>  	pr_debug_status(status);
+>  	pr_debug_status(ireg);
+>  
+> -	if (!ireg) {
+> -		tmio_mmc_disable_mmc_irqs(host, status & ~irq_mask);
+> -
+> -		pr_warning("tmio_mmc: Spurious irq, disabling! "
+> -			"0x%08x 0x%08x 0x%08x\n", status, irq_mask, ireg);
+> -		pr_debug_status(status);
+> -
+> +	/* Card insert / remove attempts */
+> +	if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
+> +		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
+> +			TMIO_STAT_CARD_REMOVE);
+> +		mmc_detect_change(host->mmc, msecs_to_jiffies(100));
+>  		goto out;
+>  	}
+>  
+> -	while (ireg) {
+> -		/* Card insert / remove attempts */
+> -		if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
+> -			tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
+> -				TMIO_STAT_CARD_REMOVE);
+> -			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
+> -		}
+> -
+> -		/* CRC and other errors */
+> -/*		if (ireg & TMIO_STAT_ERR_IRQ)
+> - *			handled |= tmio_error_irq(host, irq, stat);
+> +	/* CRC and other errors */
+> +/*	if (ireg & TMIO_STAT_ERR_IRQ)
+> + *		handled |= tmio_error_irq(host, irq, stat);
+>   */
+>  
+> -		/* Command completion */
+> -		if (ireg & (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT)) {
+> -			tmio_mmc_ack_mmc_irqs(host,
+> -				     TMIO_STAT_CMDRESPEND |
+> -				     TMIO_STAT_CMDTIMEOUT);
+> -			tmio_mmc_cmd_irq(host, status);
+> -		}
+> -
+> -		/* Data transfer */
+> -		if (ireg & (TMIO_STAT_RXRDY | TMIO_STAT_TXRQ)) {
+> -			tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_RXRDY | TMIO_STAT_TXRQ);
+> -			tmio_mmc_pio_irq(host);
+> -		}
+> -
+> -		/* Data transfer completion */
+> -		if (ireg & TMIO_STAT_DATAEND) {
+> -			tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_DATAEND);
+> -			tmio_mmc_data_irq(host);
+> -		}
+> -
+> -		/* Check status - keep going until we've handled it all */
+> -		status = sd_ctrl_read32(host, CTL_STATUS);
+> -		irq_mask = sd_ctrl_read32(host, CTL_IRQ_MASK);
+> -		ireg = status & TMIO_MASK_IRQ & ~irq_mask;
+> +	/* Command completion */
+> +	if (ireg & (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT)) {
+> +		tmio_mmc_ack_mmc_irqs(host,
+> +			     TMIO_STAT_CMDRESPEND |
+> +			     TMIO_STAT_CMDTIMEOUT);
+> +		tmio_mmc_cmd_irq(host, status);
+> +		goto out;
+> +	}
+> +
+> +	/* Data transfer */
+> +	if (ireg & (TMIO_STAT_RXRDY | TMIO_STAT_TXRQ)) {
+> +		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_RXRDY | TMIO_STAT_TXRQ);
+> +		tmio_mmc_pio_irq(host);
+> +		goto out;
+> +	}
+>  
+> -		pr_debug("Status at end of loop: %08x\n", status);
+> -		pr_debug_status(status);
+> +	/* Data transfer completion */
+> +	if (ireg & TMIO_STAT_DATAEND) {
+> +		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_DATAEND);
+> +		tmio_mmc_data_irq(host);
+> +		goto out;
+>  	}
+> -	pr_debug("MMC IRQ end\n");
+> +
+> +	pr_warning("tmio_mmc: Spurious irq, disabling! "
+> +		"0x%08x 0x%08x 0x%08x\n", status, irq_mask, ireg);
+> +	pr_debug_status(status);
+> +	tmio_mmc_disable_mmc_irqs(host, status & ~irq_mask);
+>  
+>  out:
+>  	return IRQ_HANDLED;
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
