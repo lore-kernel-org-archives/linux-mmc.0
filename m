@@ -1,49 +1,33 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: tmio: Fix build errors
-Date: Tue, 17 May 2011 00:01:42 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1105162359510.29373@axis700.grange>
-References: <642193.81570.qm@web29001.mail.ird.yahoo.com>
+From: Paul Parsons <lost.distance@yahoo.com>
+Subject: Re: [PATCH] mmc: tmio: Fix race condition resulting in spurious interrupts
+Date: Mon, 16 May 2011 23:08:34 +0100 (BST)
+Message-ID: <76514.92506.qm@web29001.mail.ird.yahoo.com>
+References: <Pine.LNX.4.64.1105162353450.29373@axis700.grange>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:54881 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753700Ab1EPWBo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 May 2011 18:01:44 -0400
-In-Reply-To: <642193.81570.qm@web29001.mail.ird.yahoo.com>
+Received: from nm15-vm0.bullet.mail.ird.yahoo.com ([77.238.189.216]:23457 "HELO
+	nm15-vm0.bullet.mail.ird.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1752860Ab1EPWIg convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 16 May 2011 18:08:36 -0400
+In-Reply-To: <Pine.LNX.4.64.1105162353450.29373@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Parsons <lost.distance@yahoo.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: linux-mmc@vger.kernel.org, ian@mnementh.co.uk
 
-On Mon, 16 May 2011, Paul Parsons wrote:
+> > tmio_mmc: Spurious irq, disabling! 0x00800780
+> 0x833f0304 0x00000000
+> 
+> Aha, ok, that's a different one, sorry. Also interesting,
+> that the kernel 
+> is failing to disable it... Ok, then I understand, what
+> your patch is 
+> addressing.
 
-> > NAK. Are you trying to use DMA with TMIO on your platform?
-> 
-> Not that I am aware of.
-> 
-> > Then this is a 
-> > wrong fix. Otherwise tmio_mmc_dma.c shouldn't be compiled
-> > on your arch at 
-> > all.
-> 
-> Then this must be is a config or Makefile bug, because the build is 
-> certainly trying to compile tmio_mmc_dma.c
-> 
-> Looking at drivers/mmc/host/Makefile:
-> 
-> ifneq ($(CONFIG_MMC_SDHI),n)
-> tmio_mmc_core-y                 += tmio_mmc_dma.o
-> endif
-> 
-> My config doesn't define CONFIG_MMC_SDHI at all, thus the Makefile adds tmio_mmc_dma.o to the build?
+Perhaps the driver's warning is somewhat misleading; the interrupt is not so much spurious as late. That's why the kernel is failing to disable it; the interrupt is valid for the tmio_mmc driver, just late.
 
-hm, interesting... Then yes, then this is a bug and should be fixed:( 
-Although I'm sure I tested a non-SDHI build... confused.
-
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Regards,
+Paul
