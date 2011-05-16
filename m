@@ -1,115 +1,41 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 2/2] sdhci-pxa: add call back interface to share
- sdhci-pxa
-Date: Mon, 16 May 2011 06:51:01 -0700
-Message-ID: <D8BA9376-7982-42BC-A6C1-60B8C33B9D2B@marvell.com>
-References: <BANLkTimPN=GauwY7Rwh3xUEkV3=q3wfzAQ@mail.gmail.com>
- <m34o4zwo8t.fsf@pullcord.laptop.org>
- <487EBCAC-1795-4C69-ACDF-99EC9D7BF604@marvell.com>
- <m3ei42vhir.fsf@pullcord.laptop.org>
- <BANLkTinOaVziLLun7RyNVCFx=_=DcVXomA@mail.gmail.com>
- <583E304B-0E60-4F3E-8D92-0DE0B737A415@marvell.com>
- <BANLkTi=kYTF0bbcQN8uC_BLW8CQT6ucEkg@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: kernel 2.6.38.6 MMC controller problem (fwd)
+Date: Mon, 16 May 2011 10:52:56 -0400
+Message-ID: <m3d3jik88n.fsf@pullcord.laptop.org>
+References: <Pine.LNX.4.64.1105160830420.4131@axis700.grange>
+	<BANLkTinbJfDLp5nfkq-VTYLJvihT1thXvA@mail.gmail.com>
+	<Pine.LNX.4.64.1105161044260.4131@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog102.obsmtp.com ([74.125.149.69]:42900 "EHLO
-	na3sys009aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755414Ab1EPNwo convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 16 May 2011 09:52:44 -0400
-In-Reply-To: <BANLkTi=kYTF0bbcQN8uC_BLW8CQT6ucEkg@mail.gmail.com>
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:54252 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756107Ab1EPOvV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 16 May 2011 10:51:21 -0400
+In-Reply-To: <Pine.LNX.4.64.1105161044260.4131@axis700.grange> (Guennadi
+	Liakhovetski's message of "Mon, 16 May 2011 10:45:28 +0200 (CEST)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, "arnd@arndb.de Bergmann" <arnd@arndb.de>, Mark Brown <mark.brown314@gmail.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: David Strobach <lalochcz@gmail.com>, linux-mmc@vger.kernel.org, Greg KH <greg@kroah.com>, horms@verge.net.au, damm@opensource.se, Andrei Warkentin <andreiw@motorola.com>, Linus Walleij <linus.walleij@linaro.org>
 
+Hi,
 
-On May 15, 2011, at 11:26 PM, zhangfei gao wrote:
+On Mon, May 16 2011, Guennadi Liakhovetski wrote:
+> "divide error"???... hmmm, maybe one of SDHCI maintainers has to look at 
+> it?:)
 
-> On Sat, May 14, 2011 at 1:01 PM, Philip Rakity <prakity@marvell.com> wrote:
->> 
->> On May 13, 2011, at 10:11 PM, zhangfei gao wrote:
->> 
->>> On Fri, May 13, 2011 at 9:47 PM, Chris Ball <cjb@laptop.org> wrote:
->>>> Hi,
->>>> 
->>>> On Thu, May 12 2011, Philip Rakity wrote:
->>>>> All other platform specific code is in the host/ directory.
->>>>> 
->>>>> This moves it to arch/arm
->>>>> 
->>>>> If that is the direction the group wants to go in --> then the patch
->>>>> is fine provided the mmc group can review the patches.  Otherwise they
->>>>> are handled by the arm maintainer.
->>>> 
->>>> Thanks.  Wolfram, do you have any ideas on what the best design is for
->>>> these SoC-specific changes to sdhci-pxa?
->>>> 
->>>> - Chris.
->>> 
->>> The code in arch/arm is
->>> 1. Accessing private register, take pxa910 and mmp2 we want to support
->>> as example, there are several private registers differece, though they
->>> are same ip, with same issues and quirk.
->>> 2. Handle platform difference, for example, mmp2 used in two different
->>> platform, one use wp pin, the other does not.
->> 
->> The situation is a little more complicated.
-> 
-> The interface is used for long time among mmp2, pxa910 and mmp3.
-> Also could be used for new controller with minor register difference
-> but same ip, without adding new specific driver.
+Just tried to reproduce this, and can't.  David, could you share your
+.config please?
 
-applies to both approaches.  The mmp2 specific code can be applied to other marvell
-platforms that share the same controller.  Just change Kconfig and the Makefile to use
-the mmp2 code.  The name of the file is not the important thing.  It is what it does.
+I can't see any obvious candidates for a divide error.  Guennadi, do you
+think we should back out your patch while investigating?  Is anyone else
+able to reproduce the bug?
 
-The pxa168 and pxa910 code are a little less sharable due to io accessors and some
-other quirks. 
+(Jaehoon's report looks to me like it could be unrelated, since there's
+no divide error there..)
 
-For other following the discussion we are probably talking about 100 liens of code.
-
-The philosophical location of where the code belongs for host specific drivers is 
-to me more important. 
-
-Is it in arch/arm and not directly visible to the mmc list or is it like all other platform drivers
-in drivers/mmc/host.
-
-
-
-> 
->> 
->> pxa168 and pxa910 share (almost) the same IP  The are both based on SD 2.0
->> controller spec with extensions.  The pxa910 controller has fixes to the
->> pxa168 controller.  They share the same private registers that allow support
->> for clock gating and timing adjustments.
->> 
->> mmp2 is based on SD 3.0 spec.  The private register space is different.
->> 
->> mmc/host/Kconfig takes no account of these differences.  mmp2 and pxa168/910
->> cannot co-exist.   What is currently submitted does not work.  One cannot
->> compile mmp2 and pxa910  nor would they work if one could.
->> 
->> Mark Brown and I submitted patches to fix this.  We added code to the host/ directory
->> that took into account these differences.   It provided a common interface layer
->> that then used platform specific code in the host/ directory to handle the different
->> behavior.
->> 
->> Arng Bergmann provided advice and reviewed the patches to allow explicit selection of the
->> pxa familty controller and board.  Based on this comments we submitted a patch
->> to allow selection if the appropriate SoC.
->> 
->> These are two approaches.
->> 
->>> 
->>> Thanks
->>>> --
->>>> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
->>>> One Laptop Per Child
->>>> 
->> 
->> 
-
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
