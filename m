@@ -1,185 +1,109 @@
 From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH v4 12/15] sdhci pxa add platform specific code for UHS signaling
-Date: Mon, 16 May 2011 01:57:53 -0400
-Message-ID: <BANLkTimE2R-Gz802zM7ijPuuBtw4ptZ9tg@mail.gmail.com>
-References: <1304578151-1775-1-git-send-email-arindam.nath@amd.com>
-	<1304578151-1775-13-git-send-email-arindam.nath@amd.com>
-	<BANLkTikdwJ3KOhxtJu9Msq6G-SmutGaSHg@mail.gmail.com>
-	<1D15C758-EA6C-446C-9A49-2F7279806697@marvell.com>
-	<BANLkTikRynkL0vLZ4oJyAkafM27qKc6-xQ@mail.gmail.com>
-	<BE2CEC2C-53ED-4D80-974F-6552107C2B66@marvell.com>
-	<BANLkTimA9RwuCie3+0yuS+WVgieLOi_-mg@mail.gmail.com>
-	<535744D3-3D69-4D6D-9AE7-E8885EBFC6CD@marvell.com>
+Subject: Re: [PATCH 2/2] sdhci-pxa: add call back interface to share sdhci-pxa
+Date: Mon, 16 May 2011 02:26:18 -0400
+Message-ID: <BANLkTi=kYTF0bbcQN8uC_BLW8CQT6ucEkg@mail.gmail.com>
+References: <BANLkTimPN=GauwY7Rwh3xUEkV3=q3wfzAQ@mail.gmail.com>
+	<m34o4zwo8t.fsf@pullcord.laptop.org>
+	<487EBCAC-1795-4C69-ACDF-99EC9D7BF604@marvell.com>
+	<m3ei42vhir.fsf@pullcord.laptop.org>
+	<BANLkTinOaVziLLun7RyNVCFx=_=DcVXomA@mail.gmail.com>
+	<583E304B-0E60-4F3E-8D92-0DE0B737A415@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:37997 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751183Ab1EPF5y convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 May 2011 01:57:54 -0400
-Received: by vxi39 with SMTP id 39so2918754vxi.19
-        for <linux-mmc@vger.kernel.org>; Sun, 15 May 2011 22:57:53 -0700 (PDT)
-In-Reply-To: <535744D3-3D69-4D6D-9AE7-E8885EBFC6CD@marvell.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:46051 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751681Ab1EPG0T convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 May 2011 02:26:19 -0400
+Received: by vws1 with SMTP id 1so2909824vws.19
+        for <linux-mmc@vger.kernel.org>; Sun, 15 May 2011 23:26:18 -0700 (PDT)
+In-Reply-To: <583E304B-0E60-4F3E-8D92-0DE0B737A415@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Philip Rakity <prakity@marvell.com>
-Cc: Arindam Nath <arindam.nath@amd.com>, "cjb@laptop.org" <cjb@laptop.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "henry.su@amd.com" <henry.su@amd.com>, "aaron.lu@amd.com" <aaron.lu@amd.com>, "anath.amd@gmail.com" <anath.amd@gmail.com>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, "arnd@arndb.de Bergmann" <arnd@arndb.de>
 
-On Sun, May 15, 2011 at 5:42 PM, Philip Rakity <prakity@marvell.com> wr=
+On Sat, May 14, 2011 at 1:01 PM, Philip Rakity <prakity@marvell.com> wr=
 ote:
 >
-> On May 13, 2011, at 1:03 AM, zhangfei gao wrote:
+> On May 13, 2011, at 10:11 PM, zhangfei gao wrote:
 >
->> On Wed, May 11, 2011 at 5:47 AM, Philip Rakity <prakity@marvell.com>=
- wrote:
+>> On Fri, May 13, 2011 at 9:47 PM, Chris Ball <cjb@laptop.org> wrote:
+>>> Hi,
 >>>
->>> On May 11, 2011, at 2:28 AM, zhangfei gao wrote:
->>>
->>>> On Wed, May 11, 2011 at 4:52 AM, Philip Rakity <prakity@marvell.co=
-m> wrote:
->>>>>
->>>>> \
->>>>> On May 11, 2011, at 1:48 AM, zhangfei gao wrote:
->>>>>
->>>>>> On Thu, May 5, 2011 at 2:49 AM, Arindam Nath <arindam.nath@amd.c=
-om> wrote:
->>>>>>> Marvell controller requires 1.8V bit in UHS control register 2
->>>>>>> be set when doing UHS. =A0eMMC does not require 1.8V for DDR.
->>>>>>> add platform code to handle this.
->>>>>>>
->>>>>>> Signed-off-by: Philip Rakity <prakity@marvell.com>
->>>>>>> Reviewed-by: Arindam Nath <arindam.nath@amd.com>
->>>>>>> ---
->>>>>>> =A0drivers/mmc/host/sdhci-pxa.c | =A0 36 ++++++++++++++++++++++=
-++++++++++++++
->>>>>>> =A01 files changed, 36 insertions(+), 0 deletions(-)
->>>>>>>
->>>>>>> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sd=
-hci-pxa.c
->>>>>>> index 5a61208..b52c3e6 100644
->>>>>>> --- a/drivers/mmc/host/sdhci-pxa.c
->>>>>>> +++ b/drivers/mmc/host/sdhci-pxa.c
->>>>>>> @@ -69,7 +69,40 @@ static void set_clock(struct sdhci_host *hos=
-t, unsigned int clock)
->>>>>>> =A0 =A0 =A0 =A0}
->>>>>>> =A0}
->>>>>>>
->>>>>>> +static int set_uhs_signaling(struct sdhci_host *host, unsigned=
- int uhs)
->>>>>>> +{
->>>>>>> + =A0 =A0 =A0 u16 ctrl_2;
->>>>>>> +
->>>>>>> + =A0 =A0 =A0 /*
->>>>>>> + =A0 =A0 =A0 =A0* Set V18_EN -- UHS modes do not work without =
-this.
->>>>>>> + =A0 =A0 =A0 =A0* does not change signaling voltage
->>>>>>> + =A0 =A0 =A0 =A0*/
->>>>>>> + =A0 =A0 =A0 ctrl_2 =3D sdhci_readw(host, SDHCI_HOST_CONTROL2)=
-;
->>>>>>> +
->>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Select Bus Speed Mode for host=
- */
->>>>>>> + =A0 =A0 =A0 ctrl_2 &=3D ~SDHCI_CTRL_UHS_MASK;
->>>>>>> + =A0 =A0 =A0 if (uhs =3D=3D MMC_TIMING_UHS_SDR12)
->>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR12;
->>>>>>> + =A0 =A0 =A0 else if (uhs =3D=3D MMC_TIMING_UHS_SDR25)
->>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR25;
->>>>>>> + =A0 =A0 =A0 else if (uhs =3D=3D MMC_TIMING_UHS_SDR50) {
->>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR50;
->>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
->>>>>>> + =A0 =A0 =A0 } else if (uhs =3D=3D MMC_TIMING_UHS_SDR104) {
->>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_SDR104=
-;
->>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
->>>>>>> + =A0 =A0 =A0 } else if (uhs =3D=3D MMC_TIMING_UHS_DDR50) {
->>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_UHS_DDR50;
->>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl_2 |=3D SDHCI_CTRL_VDD_180;
->>>>>>> + =A0 =A0 =A0 }
->>>>>>> + =A0 =A0 =A0 sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
->>>>>>> + =A0 =A0 =A0 pr_debug("%s:%s uhs =3D %d, ctrl_2 =3D %04X\n",
->>>>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 __func__, mmc_hostname(host->mmc)=
-, uhs, ctrl_2);
->>>>>>> + =A0 =A0 =A0 return 0;
->>>>>>> +}
->>>>>>
->>>>>> Why move common register accessing from sdhci.c to specific driv=
-er?
->>>>>
->>>>> In general case you do not know what the specific host controller=
- work arounds are required.
->>>>> on mmp2 this code works (no need for V18 for low speed UHS)
->>>>> but other controllers it could be different
+>>> On Thu, May 12 2011, Philip Rakity wrote:
+>>>> All other platform specific code is in the host/ directory.
 >>>>
->>>> Sorry, not understand, the patch is for sd uhs card or for emmc?
->>>> For sd uhs card, no workaround is needed on mmp2, but require exte=
-rnal
->>>> pmic to provide 1.8v io voltage.
+>>>> This moves it to arch/arm
+>>>>
+>>>> If that is the direction the group wants to go in --> then the pat=
+ch
+>>>> is fine provided the mmc group can review the patches. =A0Otherwis=
+e they
+>>>> are handled by the arm maintainer.
 >>>
+>>> Thanks. =A0Wolfram, do you have any ideas on what the best design i=
+s for
+>>> these SoC-specific changes to sdhci-pxa?
 >>>
->>> require 1.8V when setting UHS modes. =A0See latest MMP2 Documentati=
-on.
+>>> - Chris.
 >>
->> Do you mean set SDHCI_CTRL_VDD_180?
->> It is already set in sdhci_start_signal_voltage_switch, so does not
->> required in specific driver.
+>> The code in arch/arm is
+>> 1. Accessing private register, take pxa910 and mmp2 we want to suppo=
+rt
+>> as example, there are several private registers differece, though th=
+ey
+>> are same ip, with same issues and quirk.
+>> 2. Handle platform difference, for example, mmp2 used in two differe=
+nt
+>> platform, one use wp pin, the other does not.
 >
->
-> eMMC voltages are fixed. =A0DDR support is available at 3.3v vcc and =
-3.3v vccq.
-> There is no voltage switch necessary. =A0The card type value indicate=
-s that 3.3 vccq
-> or 1.8v vccq is available. =A0Since we are communicating with the car=
-d DDR must
-> be available without a 1.8v vccq voltage switch.
->
-> mmp2 has the requirement that to do DDR at any vccq we must set the V=
-DD_180 bit.
-> This bit set + DDR mode bit enables DDR. =A0DDR mode bit on its own i=
-s not sufficient.
+> The situation is a little more complicated.
 
-It's fine to mmp2 for emmc ddr50 mode.
-Just concern other controller also need to set SDHCI_CTRL_VDD_180 via
-the call back , since "UHS Mode Select" description is "UHS-I mode is
-effective when SDHCI_CTRL_VDD_180 is set to 1", regardless of DDR50
-mode work at 3.3v or 1.8v.
+The interface is used for long time among mmp2, pxa910 and mmp3.
+Also could be used for new controller with minor register difference
+but same ip, without adding new specific driver.
 
 >
+> pxa168 and pxa910 share (almost) the same IP =A0The are both based on=
+ SD 2.0
+> controller spec with extensions. =A0The pxa910 controller has fixes t=
+o the
+> pxa168 controller. =A0They share the same private registers that allo=
+w support
+> for clock gating and timing adjustments.
 >
+> mmp2 is based on SD 3.0 spec. =A0The private register space is differ=
+ent.
 >
+> mmc/host/Kconfig takes no account of these differences. =A0mmp2 and p=
+xa168/910
+> cannot co-exist. =A0 What is currently submitted does not work. =A0On=
+e cannot
+> compile mmp2 and pxa910 =A0nor would they work if one could.
 >
+> Mark Brown and I submitted patches to fix this. =A0We added code to t=
+he host/ directory
+> that took into account these differences. =A0 It provided a common in=
+terface layer
+> that then used platform specific code in the host/ directory to handl=
+e the different
+> behavior.
+>
+> Arng Bergmann provided advice and reviewed the patches to allow expli=
+cit selection of the
+> pxa familty controller and board. =A0Based on this comments we submit=
+ted a patch
+> to allow selection if the appropriate SoC.
+>
+> These are two approaches.
 >
 >>
->>>>
->>>>>
->>>>>>
->>>>>>> +
->>>>>>> =A0static struct sdhci_ops sdhci_pxa_ops =3D {
->>>>>>> + =A0 =A0 =A0 .set_uhs_signaling =3D set_uhs_signaling,
->>>>>>> =A0 =A0 =A0 =A0.set_clock =3D set_clock,
->>>>>>> =A0};
->>>>>>>
->>>>>>> @@ -141,6 +174,9 @@ static int __devinit sdhci_pxa_probe(struct=
- platform_device *pdev)
->>>>>>> =A0 =A0 =A0 =A0if (pdata->quirks)
->>>>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->quirks |=3D pdata->quirks;
->>>>>>>
->>>>>>> + =A0 =A0 =A0 /* enable 1/8V DDR capable */
->>>>>>> + =A0 =A0 =A0 host->mmc->caps |=3D MMC_CAP_1_8V_DDR;
->>>>>>> +
->>>>>>> =A0 =A0 =A0 =A0/* If slot design supports 8 bit data, indicate =
-this to MMC. */
->>>>>>> =A0 =A0 =A0 =A0if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLO=
-T)
->>>>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->mmc->caps |=3D MMC_CAP_8_B=
-IT_DATA;
->>>>>>> --
->>>>>>> 1.7.1
->>>>>>>
->>>>>>>
->>>>>
->>>>>
->>>
+>> Thanks
+>>> --
+>>> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+>>> One Laptop Per Child
 >>>
 >
 >
