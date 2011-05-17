@@ -1,84 +1,214 @@
 From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [RFC]mmc: fix dead lock issue when system entering S3
-Date: Tue, 17 May 2011 18:03:26 +0800
-Message-ID: <5D8008F58939784290FAB48F54975198419F75426B@shsmsx502.ccr.corp.intel.com>
-References: <20110517075352.GA3992@intel.com>
+Subject: RE: [RFC] MMC: Request for comments attempt at dealing with
+ removeable suspend/resume.
+Date: Tue, 17 May 2011 18:15:03 +0800
+Message-ID: <5D8008F58939784290FAB48F54975198419F754279@shsmsx502.ccr.corp.intel.com>
+References: <BANLkTikMmf-d1BVG6ZMUV-L-nB05ytQVYw@mail.gmail.com>
+ <1301949069-13283-1-git-send-email-andreiw@motorola.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:35524 "EHLO mga14.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:12675 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754075Ab1EQKDa convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2011 06:03:30 -0400
-In-Reply-To: <20110517075352.GA3992@intel.com>
+	id S1752084Ab1EQKQ4 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2011 06:16:56 -0400
+In-Reply-To: <1301949069-13283-1-git-send-email-andreiw@motorola.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "He, Bo" <bo.he@intel.com>
+To: Andrei Warkentin <andreiw@motorola.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Just found Andrei Warkentin also submitted a RFC patch, which included more fix for mounted root file system media. Please ignore this thread.
+
 
 > -----Original Message-----
 > From: linux-mmc-owner@vger.kernel.org
-> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
-> Sent: Tuesday, May 17, 2011 3:54 PM
+> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Andrei Warkentin
+> Sent: Tuesday, April 05, 2011 4:31 AM
 > To: linux-mmc@vger.kernel.org
-> Cc: He, Bo
-> Subject: [RFC]mmc: fix dead lock issue when system entering S3
+> Cc: Andrei Warkentin
+> Subject: [RFC] MMC: Request for comments attempt at dealing with removeable
+> suspend/resume.
 > 
-> Hi all,
->    I encountered a dead lock issue. Two threads try to claim host, unfortunately
->    one thread needs to sync with the other. I encountered this issue with SD
->    card when testing system entering S3. Does anybody encounter the same
-> issue?
+> Is there any value to doing something like this in order to be able to
+> suspend/resume
+> with a (manually, or rootfs) mounted filesystem on mmcblk?
 > 
-> Environment:
-> 1. without CONFIG_MMC_UNSAFE_RESUME operation
-> 2. the SD card mounted
+> Thoughts?
+Hi Andrei,
+I also encountered the same issue with you when system is suspending. And the modification in core.c actually can fix my issue.
+For the mounted root file system, I think it makes sense for such medias to use MMC_UNSAFE_RESUME. Is there some use case need to remove root file system media?
+
 > 
-> During system tried to enter S3, mmc_pm_notifier will be called first to remove
-> SD card. So calling sequence in SD remove thread is like this:
-> 	mmc_claim_host
-> 	bus_ops->remove
-> 	....
-> 	....
-> 	mmc_cleanup_queue
-> 	kthread_stop(mq->thread)
-> 	...
-> 	...
-> 
-> Mean while, mmc_cleanup_queue wakes up mq->thread, the calling sequence in
-> mq->thread is
-> like this:
-> 	mmc_queue_thread
-> 	mq->issue_fn (mmc_blk_issue_rq)
-> 	mmc_claim_host (dead lock)
-> 	....
-> 	....
-> 
-> Since mmc_claim_host is called in mq->thread (not SD remove thread) again,
-> unfortunately right now host is already claimed by SD remove thread which is
-> also waiting for mq->thread finished, so cause a dead lock here.
-> 
-> Move the mmc_claim_host(in mmc_pm_notifier) after bus_ops->remove can
-> resolve
-> this dead lock. mmc_suspend_host() is using the same way to claim host.
-> 
-> Need to know your suggestions.
-> 
-> Signed-off-by: He Bo <bo.he@intel.com>
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
 > ---
->  drivers/mmc/core/core.c |    3 +--
->  1 files changed, 1 insertions(+), 2 deletions(-)
+>  drivers/mmc/card/block.c |   76
+> +++++++++++++++++++++++++++++++++++++++++----
+>  drivers/mmc/core/core.c  |    3 +-
+>  2 files changed, 70 insertions(+), 9 deletions(-)
 > 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index ee8f7a9..19eb5b6 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -53,6 +53,9 @@ MODULE_ALIAS("mmc:block");
+>       ((card)->ext_csd.rel_sectors)))
+> 
+>  static DEFINE_MUTEX(block_mutex);
+> +static DEFINE_MUTEX(orphan_mutex);
+> +
+> +struct list_head orphans = LIST_HEAD_INIT(orphans);
+> 
+>  /*
+>   * The defaults come from config options but can be overriden by module
+> @@ -77,6 +80,7 @@ struct mmc_blk_data {
+>  	struct gendisk	*disk;
+>  	struct mmc_queue queue;
+>  	struct list_head part;
+> +	struct list_head orphan;
+> 
+>  	unsigned int	usage;
+>  	unsigned int	read_only;
+> @@ -88,6 +92,7 @@ struct mmc_blk_data {
+>  	 * track of the current selected device partition.
+>  	 */
+>  	unsigned int	part_curr;
+> +	u32		raw_cid[4];
+>  	struct device_attribute force_ro;
+>  };
+> 
+> @@ -126,10 +131,12 @@ static void mmc_blk_put(struct mmc_blk_data *md)
+>  	mutex_lock(&open_lock);
+>  	md->usage--;
+>  	if (md->usage == 0) {
+> -		int devidx = mmc_get_devidx(md->disk);
+> -		blk_cleanup_queue(md->queue.queue);
+> +		mutex_lock(&orphan_mutex);
+> +		list_del(&md->orphan);
+> +		mutex_unlock(&orphan_mutex);
+> 
+> -		__clear_bit(devidx, dev_use);
+> +		blk_cleanup_queue(md->queue.queue);
+> +		__clear_bit(mmc_get_devidx(md->disk), dev_use);
+> 
+>  		put_disk(md->disk);
+>  		kfree(md);
+> @@ -718,6 +725,49 @@ static inline int mmc_blk_readonly(struct mmc_card
+> *card)
+>  	       !(card->csd.cmdclass & CCC_BLOCK_WRITE);
+>  }
+> 
+> +static inline struct mmc_blk_data *mmc_lookup_orphan(struct mmc_card *card,
+> +						     struct device *parent,
+> +						     unsigned int part_type,
+> +						     sector_t size)
+> +{
+> +	int ret;
+> +	struct list_head *pos, *q;
+> +	struct mmc_blk_data *md;
+> +	bool found = false;
+> +
+> +	mutex_lock(&orphan_mutex);
+> +	list_for_each_safe(pos, q, &orphans) {
+> +		md = list_entry(pos, struct mmc_blk_data, orphan);
+> +		if (!memcmp(md->raw_cid, card->raw_cid, sizeof(md->raw_cid)) &&
+> +		    md->part_type == part_type) {
+> +			list_del(pos);
+> +			found = true;
+> +			mmc_blk_get(md->disk);
+> +			break;
+> +		}
+> +	}
+> +	mutex_unlock(&orphan_mutex);
+> +
+> +	if (!found)
+> +		return NULL;
+> +
+> +	ret = mmc_init_queue(&md->queue, card, &md->lock);
+> +	if (ret)
+> +		return NULL;
+> +
+> +	INIT_LIST_HEAD(&md->part);
+> +	md->disk->driverfs_dev = parent;
+> +	md->queue.issue_fn = mmc_blk_issue_rq;
+> +	md->queue.data = md;
+> +	md->disk->queue = md->queue.queue;
+> +	if (REL_WRITES_SUPPORTED(card))
+> +		blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
+> +	blk_queue_logical_block_size(md->queue.queue, 512);
+> +	set_capacity(md->disk, size);
+> +	printk("set cap to %x\n", (unsigned int) get_capacity(md->disk));
+> +	return md;
+> +}
+> +
+>  static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>  					      struct device *parent,
+>  					      sector_t size,
+> @@ -752,7 +802,9 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct
+> mmc_card *card,
+> 
+>  	spin_lock_init(&md->lock);
+>  	INIT_LIST_HEAD(&md->part);
+> +	INIT_LIST_HEAD(&md->orphan);
+>  	md->usage = 1;
+> +	memcpy(md->raw_cid, card->raw_cid, sizeof(card->raw_cid));
+> 
+>  	ret = mmc_init_queue(&md->queue, card, &md->lock);
+>  	if (ret)
+> @@ -822,7 +874,9 @@ static struct mmc_blk_data *mmc_blk_alloc(struct
+> mmc_card *card)
+>  		size = card->csd.capacity << (card->csd.read_blkbits - 9);
+>  	}
+> 
+> -	md = mmc_blk_alloc_req(card, &card->dev, size, false, NULL);
+> +	md = mmc_lookup_orphan(card, &card->dev, 0, size);
+> +	if (!md)
+> +		md = mmc_blk_alloc_req(card, &card->dev, size, false, NULL);
+>  	return md;
+>  }
+> 
+> @@ -836,8 +890,10 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
+>  	char cap_str[10];
+>  	struct mmc_blk_data *part_md;
+> 
+> -	part_md = mmc_blk_alloc_req(card, disk_to_dev(md->disk), size, default_ro,
+> -				    subname);
+> +	part_md = mmc_lookup_orphan(card, disk_to_dev(md->disk), part_type, size);
+> +	if (!part_md)
+> +		part_md = mmc_blk_alloc_req(card, disk_to_dev(md->disk), size,
+> +					    default_ro, subname);
+>  	if (IS_ERR(part_md))
+>  		return PTR_ERR(part_md);
+>  	part_md->part_type = part_type;
+> @@ -906,6 +962,10 @@ static void mmc_blk_remove_req(struct mmc_blk_data
+> *md)
+> 
+>  		/* Then flush out any already in there */
+>  		mmc_cleanup_queue(&md->queue);
+> +
+> +		mutex_lock(&orphan_mutex);
+> +		list_add(&md->orphan, &orphans);
+> +		mutex_unlock(&orphan_mutex);
+>  		mmc_blk_put(md);
+>  	}
+>  }
+> @@ -933,8 +993,10 @@ static int mmc_add_disk(struct mmc_blk_data *md)
+>  	md->force_ro.attr.name = "force_ro";
+>  	md->force_ro.attr.mode = S_IRUGO | S_IWUSR;
+>  	ret = device_create_file(disk_to_dev(md->disk), &md->force_ro);
+> -	if (ret)
+> +	if (ret) {
+>  		del_gendisk(md->disk);
+> +		return ret;
+> +	}
+> 
+>  	return ret;
+>  }
 > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 68091dd..1e27588 100644
+> index 85ef72c..87c4af7 100644
 > --- a/drivers/mmc/core/core.c
 > +++ b/drivers/mmc/core/core.c
-> @@ -1850,11 +1850,10 @@ int mmc_pm_notify(struct notifier_block
+> @@ -1823,11 +1823,10 @@ int mmc_pm_notify(struct notifier_block
 > *notify_block,
 >  		if (!host->bus_ops || host->bus_ops->suspend)
 >  			break;
@@ -93,7 +223,7 @@ Just found Andrei Warkentin also submitted a RFC patch, which included more fix 
 >  		mmc_release_host(host);
 >  		host->pm_flags = 0;
 > --
-> 1.7.3.4
+> 1.7.0.4
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
