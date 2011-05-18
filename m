@@ -1,55 +1,51 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: kernel 2.6.38.6 MMC controller problem (fwd)
-Date: Wed, 18 May 2011 14:01:47 +0800
-Message-ID: <5D8008F58939784290FAB48F54975198419F75461E@shsmsx502.ccr.corp.intel.com>
-References: <Pine.LNX.4.64.1105160830420.4131@axis700.grange>
-	<BANLkTinbJfDLp5nfkq-VTYLJvihT1thXvA@mail.gmail.com>
-	<Pine.LNX.4.64.1105161044260.4131@axis700.grange>
-	<m3d3jik88n.fsf@pullcord.laptop.org>
-	<BANLkTin-wiP9ukmPJPo3n5SWqsd=j9rjBg@mail.gmail.com>
-	<m38vu6k5b0.fsf@pullcord.laptop.org>
-	<Pine.LNX.4.64.1105161801100.28668@axis700.grange>
-	<m34o4uk3f5.fsf@pullcord.laptop.org>
-	<Pine.LNX.4.64.1105161841420.28668@axis700.grange>
-	<BANLkTiky5W=AW=TPe_rQ9QZw=6c5hjexag@mail.gmail.com>
-	<5D8008F58939784290FAB48F54975198419F754247@shsmsx502.ccr.corp.intel.com>
- <BANLkTi=M+8nBZGzUOvEa67nb2LuTbQwx=Q@mail.gmail.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [RFC]mmc: fix dead lock issue when system entering S3
+Date: Wed, 18 May 2011 02:58:00 -0500
+Message-ID: <BANLkTi=H5NR4vzkD+X4fZXw-PPFYwO51ow@mail.gmail.com>
+References: <20110517075352.GA3992@intel.com>
+	<5D8008F58939784290FAB48F54975198419F75426B@shsmsx502.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:58630 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752592Ab1ERGBy convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 May 2011 02:01:54 -0400
-In-Reply-To: <BANLkTi=M+8nBZGzUOvEa67nb2LuTbQwx=Q@mail.gmail.com>
-Content-Language: en-US
+Received: from exprod5og104.obsmtp.com ([64.18.0.178]:50255 "EHLO
+	exprod5og104.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754316Ab1ERIB7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 May 2011 04:01:59 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4I7xeDF007206
+	for <linux-mmc@vger.kernel.org>; Wed, 18 May 2011 03:59:40 -0400 (EDT)
+Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4I7thKA005406
+	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Wed, 18 May 2011 03:55:44 -0400 (EDT)
+Received: by wyb34 with SMTP id 34so1174877wyb.15
+        for <linux-mmc@vger.kernel.org>; Wed, 18 May 2011 00:58:01 -0700 (PDT)
+In-Reply-To: <5D8008F58939784290FAB48F54975198419F75426B@shsmsx502.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, David Strobach <lalochcz@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Greg KH <greg@kroah.com>, "horms@verge.net.au" <horms@verge.net.au>, "damm@opensource.se" <damm@opensource.se>, Andrei Warkentin <andreiw@motorola.com>
+To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "He, Bo" <bo.he@intel.com>
 
+Hey,
 
+On Tue, May 17, 2011 at 5:03 AM, Dong, Chuanxiao
+<chuanxiao.dong@intel.com> wrote:
+> Just found Andrei Warkentin also submitted a RFC patch, which included more fix for mounted root file system media. Please ignore this thread.
 
-> -----Original Message-----
-> From: linus.ml.walleij@gmail.com [mailto:linus.ml.walleij@gmail.com] On Behalf Of
-> Linus Walleij
-> Sent: Wednesday, May 18, 2011 1:30 PM
-> To: Dong, Chuanxiao
-> Cc: Guennadi Liakhovetski; Chris Ball; David Strobach; linux-mmc@vger.kernel.org;
-> Greg KH; horms@verge.net.au; damm@opensource.se; Andrei Warkentin
-> Subject: Re: kernel 2.6.38.6 MMC controller problem (fwd)
-> 
-> 2011/5/17 Dong, Chuanxiao <chuanxiao.dong@intel.com>:
-> 
-> > mmc clock gating thread may be delayed for a long time in some scenarios.
-> > Since mmc_claim_host will be also used by other thread. I think this will
-> > possibly happen.
-> 
-> That shouldn't matter? host->lock will make sure the requests are
-> serialized will it not?
-If mmc clock gating thread is scheduled when calling mmc_claim_host, host->clock is unlocked. And maybe when it is scheduled back, host was already claimed by other thread. If it is possible happened, then host->clock cannot make this serialized.
+I submitted an RFC patch as an idea up for discussion, but certainly
+the issue never went away :-).. Your patch will not quite work. If you
+have a filesystem it will not unmount, so mmc0 (for example) will
+never release, so when a new (or same) card re-enumerates, it will be
+mmc1...
 
+I believe my patch basically created "md orphans" which would be
+reconnected on resume, which is bit of a really nasty hack... I'm not
+sure if there is a better way. I could have sworn I saw a patch a week
+ago that attempted to resolve the suspend/resume with mounted fs issue
+by deferring removal until resume, but I don't see it now, and I'm not
+sure if it dealt well with the whole attempting to unmount fs in mmc
+block cleanup path...
 
-> 
-> Linus Walleij
+I guess I can resubmit...
+
+A
