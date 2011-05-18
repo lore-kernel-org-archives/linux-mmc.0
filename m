@@ -1,121 +1,142 @@
-From: Antonio Ospite <ospite@studenti.unina.it>
-Subject: [PATCH] mmc: fix handling NULL returned from regulator_get()
-Date: Wed, 18 May 2011 23:37:44 +0200
-Message-ID: <1305754664-2917-1-git-send-email-ospite@studenti.unina.it>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: fix handling NULL returned from regulator_get()
+Date: Wed, 18 May 2011 17:47:22 -0400
+Message-ID: <m3vcx7el5h.fsf@pullcord.laptop.org>
+References: <1305754664-2917-1-git-send-email-ospite@studenti.unina.it>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp207.alice.it ([82.57.200.103]:47035 "EHLO smtp207.alice.it"
+Received: from void.printf.net ([89.145.121.20]:56274 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755936Ab1ERVig (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 18 May 2011 17:38:36 -0400
+	id S1754743Ab1ERVpv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 18 May 2011 17:45:51 -0400
+In-Reply-To: <1305754664-2917-1-git-send-email-ospite@studenti.unina.it>
+	(Antonio Ospite's message of "Wed, 18 May 2011 23:37:44 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Antonio Ospite <ospite@studenti.unina.it>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>, Linus Walleij <linus.walleij@stericsson.com>, Rabin Vincent <rabin.vincent@stericsson.com>, Sascha Hauer <s.hauer@pengutronix.de>, Madhusudhan Chikkature <madhu.cr@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Antonio Ospite <ospite@studenti.unina.it>
+Cc: linux-mmc@vger.kernel.org, Will Newton <will.newton@gmail.com>, Linus Walleij <linus.walleij@stericsson.com>, Rabin Vincent <rabin.vincent@stericsson.com>, Sascha Hauer <s.hauer@pengutronix.de>, Madhusudhan Chikkature <madhu.cr@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-When regulator_get() is stubbed down it returns NULL, handle this case
-when deciding whether the driver can use the regulator or not.
+Hi Antonio, thanks for doing this,
 
-Remember: IS_ERR(NULL) is false, see also this discussion for more
-insight: http://comments.gmane.org/gmane.linux.kernel.mmc/7934
+On Wed, May 18 2011, Antonio Ospite wrote:
+> When regulator_get() is stubbed down it returns NULL, handle this case
+> when deciding whether the driver can use the regulator or not.
+>
+> Remember: IS_ERR(NULL) is false, see also this discussion for more
+> insight: http://comments.gmane.org/gmane.linux.kernel.mmc/7934
+>
+> Now that regulator_get() is handled correctly, the ifdef on
+> CONFIG_REGULATOR in mmci.c can go away as well.
+>
+> Signed-off-by: Antonio Ospite <ospite@studenti.unina.it>
+> ---
+>
+>  drivers/mmc/host/dw_mmc.c     |    2 +-
+>  drivers/mmc/host/mmci.c       |    4 +---
+>  drivers/mmc/host/mxcmmc.c     |    2 +-
+>  drivers/mmc/host/omap_hsmmc.c |    4 ++--
+>  drivers/mmc/host/sdhci.c      |    2 +-
+>  5 files changed, 6 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 87e1f57..5be1325 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1442,7 +1442,7 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  #endif /* CONFIG_MMC_DW_IDMAC */
+>  
+>  	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
+> -	if (IS_ERR(host->vmmc)) {
+> +	if (IS_ERR_OR_NULL(host->vmmc)) {
+>  		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
+>  		host->vmmc = NULL;
+>  	} else
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index b4a7e4f..6fac353 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -1058,10 +1058,9 @@ static int __devinit mmci_probe(struct amba_device *dev,
+>  		mmc->f_max = min(host->mclk, fmax);
+>  	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
+>  
+> -#ifdef CONFIG_REGULATOR
+>  	/* If we're using the regulator framework, try to fetch a regulator */
+>  	host->vcc = regulator_get(&dev->dev, "vmmc");
+> -	if (IS_ERR(host->vcc))
+> +	if (IS_ERR_OR_NULL(host->vcc))
+>  		host->vcc = NULL;
+>  	else {
+>  		int mask = mmc_regulator_get_ocrmask(host->vcc);
+> @@ -1077,7 +1076,6 @@ static int __devinit mmci_probe(struct amba_device *dev,
+>  				 "(using regulator instead)\n");
+>  		}
+>  	}
+> -#endif
+>  	/* Fall back to platform data if no regulator is found */
+>  	if (host->vcc == NULL)
+>  		mmc->ocr_avail = plat->ocr_mask;
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index cc20e02..a9152da 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -155,7 +155,7 @@ static inline void mxcmci_init_ocr(struct mxcmci_host *host)
+>  {
+>  	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
+>  
+> -	if (IS_ERR(host->vcc)) {
+> +	if (IS_ERR_OR_NULL(host->vcc)) {
+>  		host->vcc = NULL;
+>  	} else {
+>  		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 259ece0..45fd4fe 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -405,7 +405,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+>  	}
+>  
+>  	reg = regulator_get(host->dev, "vmmc");
+> -	if (IS_ERR(reg)) {
+> +	if (IS_ERR_OR_NULL(reg)) {
+>  		dev_dbg(host->dev, "vmmc regulator missing\n");
+>  		/*
+>  		* HACK: until fixed.c regulator is usable,
+> @@ -433,7 +433,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+>  
+>  		/* Allow an aux regulator */
+>  		reg = regulator_get(host->dev, "vmmc_aux");
+> -		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
+> +		host->vcc_aux = IS_ERR_OR_NULL(reg) ? NULL : reg;
+>  
+>  		/*
+>  		* UGLY HACK:  workaround regulator framework bugs.
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 5d20661..d3585d4 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2004,7 +2004,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>  		goto untasklet;
+>  
+>  	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
+> -	if (IS_ERR(host->vmmc)) {
+> +	if (IS_ERR_OR_NULL(host->vmmc)) {
+>  		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
+>  		host->vmmc = NULL;
+>  	} else {
 
-Now that regulator_get() is handled correctly, the ifdef on
-CONFIG_REGULATOR in mmci.c can go away as well.
+I think I like this change for every driver *except* sdhci -- users who
+compile with CONFIG_REGULATOR=n (i.e. most distros) will start seeing
+"mmc0: no vmmc regulator found" when they boot their x86 laptops, and
+printing a cryptic regulator error message when regulator support isn't
+even compiled in seems uncalled for.
 
-Signed-off-by: Antonio Ospite <ospite@studenti.unina.it>
----
+So, I think my suggestion is to merge all but the last hunk of the
+patch.  How do others feel about it?
 
- drivers/mmc/host/dw_mmc.c     |    2 +-
- drivers/mmc/host/mmci.c       |    4 +---
- drivers/mmc/host/mxcmmc.c     |    2 +-
- drivers/mmc/host/omap_hsmmc.c |    4 ++--
- drivers/mmc/host/sdhci.c      |    2 +-
- 5 files changed, 6 insertions(+), 8 deletions(-)
+Thanks,
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 87e1f57..5be1325 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1442,7 +1442,7 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- #endif /* CONFIG_MMC_DW_IDMAC */
- 
- 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
--	if (IS_ERR(host->vmmc)) {
-+	if (IS_ERR_OR_NULL(host->vmmc)) {
- 		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
- 		host->vmmc = NULL;
- 	} else
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index b4a7e4f..6fac353 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1058,10 +1058,9 @@ static int __devinit mmci_probe(struct amba_device *dev,
- 		mmc->f_max = min(host->mclk, fmax);
- 	dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
- 
--#ifdef CONFIG_REGULATOR
- 	/* If we're using the regulator framework, try to fetch a regulator */
- 	host->vcc = regulator_get(&dev->dev, "vmmc");
--	if (IS_ERR(host->vcc))
-+	if (IS_ERR_OR_NULL(host->vcc))
- 		host->vcc = NULL;
- 	else {
- 		int mask = mmc_regulator_get_ocrmask(host->vcc);
-@@ -1077,7 +1076,6 @@ static int __devinit mmci_probe(struct amba_device *dev,
- 				 "(using regulator instead)\n");
- 		}
- 	}
--#endif
- 	/* Fall back to platform data if no regulator is found */
- 	if (host->vcc == NULL)
- 		mmc->ocr_avail = plat->ocr_mask;
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index cc20e02..a9152da 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -155,7 +155,7 @@ static inline void mxcmci_init_ocr(struct mxcmci_host *host)
- {
- 	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
- 
--	if (IS_ERR(host->vcc)) {
-+	if (IS_ERR_OR_NULL(host->vcc)) {
- 		host->vcc = NULL;
- 	} else {
- 		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 259ece0..45fd4fe 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -405,7 +405,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 	}
- 
- 	reg = regulator_get(host->dev, "vmmc");
--	if (IS_ERR(reg)) {
-+	if (IS_ERR_OR_NULL(reg)) {
- 		dev_dbg(host->dev, "vmmc regulator missing\n");
- 		/*
- 		* HACK: until fixed.c regulator is usable,
-@@ -433,7 +433,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 
- 		/* Allow an aux regulator */
- 		reg = regulator_get(host->dev, "vmmc_aux");
--		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
-+		host->vcc_aux = IS_ERR_OR_NULL(reg) ? NULL : reg;
- 
- 		/*
- 		* UGLY HACK:  workaround regulator framework bugs.
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 5d20661..d3585d4 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2004,7 +2004,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		goto untasklet;
- 
- 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
--	if (IS_ERR(host->vmmc)) {
-+	if (IS_ERR_OR_NULL(host->vmmc)) {
- 		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
- 		host->vmmc = NULL;
- 	} else {
+- Chris.
 -- 
-1.7.5.1
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
