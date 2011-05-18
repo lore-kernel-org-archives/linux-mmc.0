@@ -1,111 +1,287 @@
-From: Antonio Ospite <ospite@studenti.unina.it>
-Subject: Re: [PATCH v3] mmc_spi.c: add support for the regulator framework
-Date: Wed, 18 May 2011 19:23:20 +0200
-Message-ID: <20110518192320.9dd69cb5.ospite@studenti.unina.it>
-References: <1303476191-20663-1-git-send-email-ospite@studenti.unina.it>
-	<1305110379-17218-1-git-send-email-ospite@studenti.unina.it>
-	<20110511130852.GB12469@opensource.wolfsonmicro.com>
-	<20110511225337.094839a2.ospite@studenti.unina.it>
-	<20110511205703.GA24486@opensource.wolfsonmicro.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [RFC v2] mmc: Non Default UHS Drive Strength must use board
+ specific code
+Date: Wed, 18 May 2011 11:36:48 -0700
+Message-ID: <83A5E60B-8471-4F25-94FB-FB9A2C9750D4@marvell.com>
+References: <D2C557E7-F39F-4EC5-84F8-F851AA00CE6C@marvell.com>
+ <6C03668EAF45B747AF947A1603D1B300011B9F5A38@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pgp-signature";
- micalg="PGP-SHA1";
- boundary="Signature=_Wed__18_May_2011_19_23_20_+0200_dTQ=7Gv38V.xphyG"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp208.alice.it ([82.57.200.104]:55491 "EHLO smtp208.alice.it"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932791Ab1ERRXb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 18 May 2011 13:23:31 -0400
-In-Reply-To: <20110511205703.GA24486@opensource.wolfsonmicro.com>
+Received: from na3sys009aog102.obsmtp.com ([74.125.149.69]:34903 "EHLO
+	na3sys009aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933485Ab1ERSvt convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 18 May 2011 14:51:49 -0400
+In-Reply-To: <6C03668EAF45B747AF947A1603D1B300011B9F5A38@SAUSEXMBP01.amd.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, openezx-devel@lists.openezx.org, spi-devel-general@lists.sourceforge.net
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Arindam Nath <Arindam.Nath@amd.com>
 
---Signature=_Wed__18_May_2011_19_23_20_+0200_dTQ=7Gv38V.xphyG
-Content-Type: text/plain; charset=US-ASCII
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+incorporates comments by Arindam -- additional feedback please
 
-On Wed, 11 May 2011 22:57:04 +0200
-Mark Brown <broonie@opensource.wolfsonmicro.com> wrote:
+Philiip
 
-> On Wed, May 11, 2011 at 10:53:37PM +0200, Antonio Ospite wrote:
->=20
-> > OK, avoiding some duplication will be good, I agree.
->=20
-> > I am resending a v4 with the equivalent code:
-> >=20
-> > 	if (host->vcc) {
-> > 		int ret;
-> >=20
-> > 		if (power_mode =3D=3D MMC_POWER_OFF)
-> > 			vdd =3D 0;
-> >=20
->=20
-> This isn't really what I meant - what I meant was that all this logic
-> looks like it's generic to multiple drivers.  We either set a regulator
-> or call a pdata callback to set power, both of which are completely
-> external to the controller.
->
+v2
+---
+host.h
+revert DRIVE_STRENGTH to values vs bit mask.  add comment.
+add new defines for bit mask to allow multiple values
+to be selected.
 
-So you mean something like the following:
+sd.c
+fix accidental edit in sd.c (sd_set_bus_speed_mode)
+change to explicitly use _MASK for passing drive strengths
+to mmc_select_drive_strength (sd_select_driver_type)
 
-mmc_regulator_set_power(...)
-{
-	if (host->vcc) {
-		...
-	}
+core.c
+add comment to mmc_select_drive_strength to explicitly
+indicate it returns one value vs a mask of values.
 
-	if (host->pdata && host->pdata->setpower)
-		host->pdata->setpower(mmc_dev(host->mmc), vdd);
-}
+---
+SD 3.0 introduced additional drive strengths for UHS.
+The card and the host can indicate 4 drive strengths as a bit
+mask.  Without local design knowledge of the board it is not
+possible to select the correct drive strength.  Unfortunately
+there is not the equivalent of ethernet auto-negotiate in the
+SD 3.0 Physical Spec at this time.
 
-I like  the idea, the only concern I have is that the mmc host drivers=20
-can call 'vcc' and 'pdata' and 'setpower' with arbitrary names, what is=20
-the kernel practice in cases like this where we want to use some common=20
-code accessing driver-specific structures? I can think to three=20
-alternatives right now:
+We punt the problem by asking any platform specific code to
+handle the drive strength problem.  If non is defined we default
+the drive strength to the manadory TYPE_B value.
 
-  1. Consider only code currently in mainline (names are consistently=20
-     vcc, pdata and setpower) and use a _macro_ based on that, assuming=20
-     than future patches are going to copy the var names anyways.
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+---
+ drivers/mmc/core/core.c  |   16 +++++++++++
+ drivers/mmc/core/core.h  |    5 +++
+ drivers/mmc/core/sd.c    |   63 ++++++++++++++++++++++++----------------------
+ drivers/mmc/host/sdhci.c |   16 +++++++++++
+ drivers/mmc/host/sdhci.h |    5 +++
+ include/linux/mmc/host.h |   11 ++++++++
+ 6 files changed, 86 insertions(+), 30 deletions(-)
 
-  2. Add a proper function with all the needed parameters to abstract
-     the actual var names, this would be something like:
-     mmc_regulator_set_power(mmc, power_mode, vdd, vcc, pdata)
-     and yet checking for pdata->setpower can be tricky as 'setpower'=20
-     is an arbitrary name.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 68091dd..636bfc9 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -964,6 +964,22 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11
+ 	return err;
+ }
+ 
++/* returns MMC_SET_DRIVER_TYPE_X (one value) not mask */
++unsigned int mmc_select_drive_strength(struct mmc_host *host,
++			unsigned int bus_mode,
++			unsigned int max_dtr,
++			unsigned int host_drv_type,
++			unsigned int card_drv_type)
++{
++	if (host->ops->select_drive_strength)
++		return host->ops->select_drive_strength(host,
++			bus_mode, max_dtr,
++			host_drv_type, card_drv_type);
++
++	/* return default strength if no handler in driver */
++	return MMC_SET_DRIVER_TYPE_B;
++}
++
+ /*
+  * Select timing parameters for host.
+  */
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index d9411ed..8bc289c 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -43,6 +43,11 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
+ 			   bool cmd11);
+ void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
++unsigned int mmc_select_drive_strength(struct mmc_host *host,
++			unsigned int bus_mode,
++			unsigned int max_dtr,
++			unsigned int host_drv_type,
++			unsigned int card_drv_type);
+ 
+ static inline void mmc_delay(unsigned int ms)
+ {
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 596d0b9..bb5cd54 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -405,54 +405,57 @@ out:
+ 	return err;
+ }
+ 
++
+ static int sd_select_driver_type(struct mmc_card *card, u8 *status)
+ {
+-	int host_drv_type = 0, card_drv_type = 0;
++	unsigned int host_drv_type = MMC_DRIVER_TYPE_B_MASK;
++	unsigned int card_drv_type = MMC_DRIVER_TYPE_B_MASK;
+ 	int err;
++	unsigned char drive_strength;
+ 
+ 	/*
+ 	 * If the host doesn't support any of the Driver Types A,C or D,
+-	 * default Driver Type B is used.
++	 * or there is no board specific handler then default Driver
++	 * Type B is used.
+ 	 */
+ 	if (!(card->host->caps & (MMC_CAP_DRIVER_TYPE_A | MMC_CAP_DRIVER_TYPE_C
+ 	    | MMC_CAP_DRIVER_TYPE_D)))
+ 		return 0;
+ 
+-	if (card->host->caps & MMC_CAP_DRIVER_TYPE_A) {
+-		host_drv_type = MMC_SET_DRIVER_TYPE_A;
+-		if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_A)
+-			card_drv_type = MMC_SET_DRIVER_TYPE_A;
+-		else if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_B)
+-			card_drv_type = MMC_SET_DRIVER_TYPE_B;
+-		else if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
+-			card_drv_type = MMC_SET_DRIVER_TYPE_C;
+-	} else if (card->host->caps & MMC_CAP_DRIVER_TYPE_C) {
+-		host_drv_type = MMC_SET_DRIVER_TYPE_C;
+-		if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
+-			card_drv_type = MMC_SET_DRIVER_TYPE_C;
+-	} else if (!(card->host->caps & MMC_CAP_DRIVER_TYPE_D)) {
+-		/*
+-		 * If we are here, that means only the default driver type
+-		 * B is supported by the host.
+-		 */
+-		host_drv_type = MMC_SET_DRIVER_TYPE_B;
+-		if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_B)
+-			card_drv_type = MMC_SET_DRIVER_TYPE_B;
+-		else if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
+-			card_drv_type = MMC_SET_DRIVER_TYPE_C;
+-	}
++	if (card->host->caps & MMC_CAP_DRIVER_TYPE_A)
++		host_drv_type |= MMC_DRIVER_TYPE_A_MASK;
++
++	if (card->host->caps & MMC_CAP_DRIVER_TYPE_C)
++		host_drv_type |= MMC_DRIVER_TYPE_C_MASK;
++
++	if (card->host->caps & MMC_CAP_DRIVER_TYPE_D)
++		host_drv_type |= MMC_DRIVER_TYPE_D_MASK;
+ 
+-	err = mmc_sd_switch(card, 1, 2, card_drv_type, status);
++	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_A)
++		card_drv_type |= MMC_DRIVER_TYPE_A_MASK;
++
++	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
++		card_drv_type |= MMC_DRIVER_TYPE_C_MASK;
++
++	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_D)
++		card_drv_type |= MMC_DRIVER_TYPE_D_MASK;
++
++	drive_strength = mmc_select_drive_strength(card->host,
++		card->sw_caps.sd3_bus_mode,
++		card->sw_caps.uhs_max_dtr,
++		host_drv_type, card_drv_type);
++
++	err = mmc_sd_switch(card, 1, 2, drive_strength, status);
+ 	if (err)
+ 		return err;
+ 
+-	if ((status[15] & 0xF) != card_drv_type) {
+-		printk(KERN_WARNING "%s: Problem setting driver strength!\n",
+-			mmc_hostname(card->host));
++	if ((status[15] & 0xF) != drive_strength) {
++		printk(KERN_WARNING "%s: Problem setting driver strength %d\n",
++			mmc_hostname(card->host), drive_strength);
+ 		return 0;
+ 	}
+ 
+-	mmc_set_driver_type(card->host, host_drv_type);
++	mmc_set_driver_type(card->host, drive_strength);
+ 
+ 	return 0;
+ }
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index cc63f5e..ebeb986 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1766,6 +1766,21 @@ static void sdhci_enable_preset_value(struct mmc_host *mmc, bool enable)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
++static unsigned int sdhci_select_drive_strength(struct mmc_host *host,
++			unsigned int bus_mode,
++			unsigned int max_dtr,
++			unsigned int host_drv_type,
++			unsigned int card_drv_type)
++{
++	if (host->ops->select_drive_strength)
++		return host->ops->select_drive_strength(host,
++			bus_mode, max_dtr,
++			host_drv_type, card_drv_type);
++
++	/* return default strength if no handler in driver */
++	return MMC_SET_DRIVER_TYPE_B;
++}
++
+ static const struct mmc_host_ops sdhci_ops = {
+ 	.request	= sdhci_request,
+ 	.set_ios	= sdhci_set_ios,
+@@ -1774,6 +1789,7 @@ static const struct mmc_host_ops sdhci_ops = {
+ 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
+ 	.execute_tuning			= sdhci_execute_tuning,
+ 	.enable_preset_value		= sdhci_enable_preset_value,
++	.select_drive_strength		= sdhci_select_drive_strength,
+ };
+ 
+ /*****************************************************************************\
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 7e28eec..8f48aca 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -271,6 +271,11 @@ struct sdhci_ops {
+ 	void	(*platform_reset_enter)(struct sdhci_host *host, u8 mask);
+ 	void	(*platform_reset_exit)(struct sdhci_host *host, u8 mask);
+ 	int	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
++	unsigned int	(*select_drive_strength)(struct sdhci_host *host,
++			unsigned int bus_mode,
++			unsigned int max_dtr,
++			unsigned int host_drv_type,
++			unsigned int card_drv_type);
+ 
+ };
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index de32e6a..d4bcf9c 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -70,10 +70,16 @@ struct mmc_ios {
+ 
+ 	unsigned char	drv_type;		/* driver type (A, B, C, D) */
+ 
++/* Driver Strength Function Name */
+ #define MMC_SET_DRIVER_TYPE_B	0
+ #define MMC_SET_DRIVER_TYPE_A	1
+ #define MMC_SET_DRIVER_TYPE_C	2
+ #define MMC_SET_DRIVER_TYPE_D	3
++
++#define MMC_DRIVER_TYPE_B_MASK	(1<<MMC_SET_DRIVER_TYPE_B)
++#define MMC_DRIVER_TYPE_A_MASK	(1<<MMC_SET_DRIVER_TYPE_A)
++#define MMC_DRIVER_TYPE_C_MASK	(1<<MMC_SET_DRIVER_TYPE_C)
++#define MMC_DRIVER_TYPE_D_MASK	(1<<MMC_SET_DRIVER_TYPE_D)
+ };
+ 
+ struct mmc_host_ops {
+@@ -139,6 +145,11 @@ struct mmc_host_ops {
+ 	int	(*start_signal_voltage_switch)(struct mmc_host *host, struct mmc_ios *ios);
+ 	int	(*execute_tuning)(struct mmc_host *host);
+ 	void	(*enable_preset_value)(struct mmc_host *host, bool enable);
++	unsigned int	(*select_drive_strength)(struct mmc_host *host,
++			unsigned int bus_mode,
++			unsigned int max_dtr,
++			unsigned int host_drv_type,
++			unsigned int card_drv_type);
+ };
+ 
+ struct mmc_card;
+-- 
+1.7.0.4
 
-  3. Move stuff from driver structures to subsystem structures, which I=20
-     don't think is needed in this case.
 
-  4. (The hidden lazy one) make the code equal across all the drivers
-     so new drivers copying it will be consistent, but still leave it=20
-     duplicate.
-
-Regards,
-   Antonio
-
---=20
-Antonio Ospite
-http://ao2.it
-
-PGP public key ID: 0x4553B001
-
-A: Because it messes up the order in which people normally read text.
-   See http://en.wikipedia.org/wiki/Posting_style
-Q: Why is top-posting such a bad thing?
-
---Signature=_Wed__18_May_2011_19_23_20_+0200_dTQ=7Gv38V.xphyG
-Content-Type: application/pgp-signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAk3UAIgACgkQ5xr2akVTsAGF/gCdE7NOA9H5YJyXiX+K8p1eKLOm
-8SsAn26KNQda6n5x93ZbueeP4wggzIH6
-=yK2I
------END PGP SIGNATURE-----
-
---Signature=_Wed__18_May_2011_19_23_20_+0200_dTQ=7Gv38V.xphyG--
