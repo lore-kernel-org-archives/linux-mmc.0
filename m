@@ -1,60 +1,51 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH v2 0/7] Consolidate sdhci pltfm & OF drivers and get them
- self registered
-Date: Fri, 20 May 2011 00:09:02 +0800
-Message-ID: <20110519160901.GC26816@S2100-06.ap.freescale.net>
-References: <1304601778-13837-1-git-send-email-shawn.guo@linaro.org>
- <20110519094046.GA2219@pengutronix.de>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [[v4] 2/5] MMC: Use CMD23 for multiblock transfers when we can.
+Date: Thu, 19 May 2011 12:01:22 -0500
+Message-ID: <BANLkTi=yJuEtN-SSokhp5CE_mCz9D9D5SA@mail.gmail.com>
+References: <1302950458-1969-1-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-1-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-2-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-3-git-send-email-andreiw@motorola.com>
+	<4DD48273.4060402@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:22293
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932336Ab1ESQEn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 12:04:43 -0400
-Content-Disposition: inline
-In-Reply-To: <20110519094046.GA2219@pengutronix.de>
+Received: from exprod5og116.obsmtp.com ([64.18.0.147]:52791 "EHLO
+	exprod5og116.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933550Ab1ESRBZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 13:01:25 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4JGx4nw012545
+	for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 12:59:04 -0400 (EDT)
+Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4JGwopo012396
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 12:59:03 -0400 (EDT)
+Received: by mail-ww0-f46.google.com with SMTP id 28so3061087wwb.3
+        for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 10:01:22 -0700 (PDT)
+In-Reply-To: <4DD48273.4060402@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linuxppc-dev@lists.ozlabs.org, devicetree-discuss@lists.ozlabs.org, Olof Johansson <olof@lixom.net>, Saeed Bishara <saeed@marvell.com>, Mike Rapoport <mike@compulab.co.il>, Anton Vorontsov <avorontsov@ru.mvista.com>, Xiaobo Xie <X.Xie@freescale.com>, Albert Herranz <albert_herranz@yahoo.es>, Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, kernel@pengutronix.de, sameo@linux.intel.com, Chris Ball <cjb@laptop.org>, patches@linaro.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, arindam.nath@amd.com, cjb@laptop.org, arnd@arndb.de, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Wolfram,
+On Wed, May 18, 2011 at 9:37 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi Andrei
+>
+> Andrei Warkentin wrote:
+>> CMD23-prefixed instead of open-ended multiblock transfers
+>> have a performance advantage on some MMC cards.
+>>
+> you mentioned about "some MMC cards".
+> Conversely, that means the some card didn't have a performance advantage?
+>
+> Did you find the performance advantage?
+> if you found the advantage and you can tell me,
+> i want to know what do you have the some MMC cards..
+>
 
-On Thu, May 19, 2011 at 11:40:46AM +0200, Wolfram Sang wrote:
-> Hi Shawn,
-> 
-> > Changes since v1:
-> >  * Rebase on cjb's mmc-next tree
-> 
-> Is it maybe possible that you get access to
-> http://opensource.freescale.com/git or another machine? A branch to pull
-> from would be more convenient, because the series does not apply to
-> mmc-next anymore, so an extra step to go "back in time" is needed.
-> 
-> (minor) When applying I got:
-> 
-> Applying: mmc: sdhci: make sdhci-pltfm device drivers self registered
-> /home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:384: trailing whitespace.
-> /home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:817: space before tab in indent.
->  	struct tegra_sdhci_platform_data *plat;
-> /home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:867: trailing whitespace.
-> 
-> Applying: sdhci: rename sdhci-esdhc-imx.c to sdhci-esdhc.c
-> /home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:780: trailing whitespace.
-> 
-> See later comments for further issues.
-> 
-Should I go for v3 right now to address the patch applying problems
-and that ESDHC_IMX build issue, or hold for a while to see if you
-have more comments on v2?
+I've tested this on a Sandisk eMMC where I saw as good as
+a 50% improvement on writes (30% real-life use cases). This was a
+SEM32G 4.3+ part.
 
-And what is your position on patch #5 which merges esdhc imx and mpc
-support into one?  As Anton has voted a NO there, I would probably
-drop the patch if there is another person has strong opinion to get
-imx and mpc stay separated.
-
--- 
-Regards,
-Shawn
-
+A
