@@ -1,30 +1,29 @@
 From: Andrei Warkentin <andreiw@motorola.com>
-Subject: [v5 3/5] MMC: Implement MMC_CAP_CMD23 for SDHCI.
-Date: Thu, 19 May 2011 16:46:28 -0500
-Message-ID: <1305841590-26963-4-git-send-email-andreiw@motorola.com>
+Subject: [v5 4/5] MMC: Block CMD23 support for UHS104/SDXC cards.
+Date: Thu, 19 May 2011 16:46:29 -0500
+Message-ID: <1305841590-26963-5-git-send-email-andreiw@motorola.com>
 References: <1303870235-29041-1-git-send-email-andreiw@motorola.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og113.obsmtp.com ([64.18.0.26]:47272 "EHLO
-	exprod5og113.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753842Ab1ESVMt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 17:12:49 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.176.130.20])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4JLARDN001116
-	for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 17:10:28 -0400 (EDT)
-Received: from mail-gw0-f42.google.com (mail-gw0-f42.google.com [74.125.83.42])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4JL5Bsm028668
+Received: from exprod5og111.obsmtp.com ([64.18.0.22]:41815 "EHLO
+	exprod5og111.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932627Ab1ESVMy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 17:12:54 -0400
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.129.42])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p4JLDMQn025057
+	for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 17:13:22 -0400 (EDT)
+Received: from mail-yx0-f170.google.com (mail-yx0-f170.google.com [209.85.213.170])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p4JLDL7B025046
 	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 17:10:27 -0400 (EDT)
-Received: by mail-gw0-f42.google.com with SMTP id 17so1479912gwb.15
-        for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 14:12:47 -0700 (PDT)
+	for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 17:13:22 -0400 (EDT)
+Received: by yxi11 with SMTP id 11so1482203yxi.15
+        for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 14:12:51 -0700 (PDT)
 In-Reply-To: <1303870235-29041-1-git-send-email-andreiw@motorola.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: cjb@laptop.org, Andrei Warkentin <andreiw@motorola.com>, arindam.nath@amd.com, arnd@arndb.de, malchev@google.com
 
-Implements support for multiblock transfers bounded
-by SET_BLOCK_COUNT (CMD23).
+SD cards operating at UHS104 or better support SET_BLOCK_COUNT.
 
 Cc: arindam.nath@amd.com
 Cc: cjb@laptop.org
@@ -32,152 +31,77 @@ Cc: arnd@arndb.de
 Cc: malchev@google.com
 Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
 ---
- drivers/mmc/host/sdhci.c  |   66 ++++++++++++++++++++++++++++++++++-----------
- include/linux/mmc/sdhci.h |    1 +
- 2 files changed, 51 insertions(+), 16 deletions(-)
+ drivers/mmc/card/block.c |    9 ++++++---
+ drivers/mmc/core/sd.c    |    7 +++++++
+ include/linux/mmc/card.h |    3 +++
+ include/linux/mmc/sd.h   |    2 +-
+ 4 files changed, 17 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index cc63f5e..1138b55 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -838,9 +838,10 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- }
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index a380acc..71da564 100755
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1057,9 +1057,12 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	blk_queue_logical_block_size(md->queue.queue, 512);
+ 	set_capacity(md->disk, size);
  
- static void sdhci_set_transfer_mode(struct sdhci_host *host,
--	struct mmc_data *data)
-+	struct mmc_command *cmd)
- {
- 	u16 mode;
-+	struct mmc_data *data = cmd->data;
- 
- 	if (data == NULL)
- 		return;
-@@ -848,11 +849,17 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 	WARN_ON(!host->data);
- 
- 	mode = SDHCI_TRNS_BLK_CNT_EN;
--	if (data->blocks > 1) {
--		if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
--			mode |= SDHCI_TRNS_MULTI | SDHCI_TRNS_ACMD12;
--		else
--			mode |= SDHCI_TRNS_MULTI;
-+	if (mmc_op_multi(cmd->opcode) ||
-+	    data->blocks > 1) {
-+		mode |= SDHCI_TRNS_MULTI;
-+
-+		/*
-+		 * If we are sending CMD23, CMD12 never gets sent
-+		 * on successful completion (so no Auto-CMD12).
-+		 */
-+		if (!host->mrq->sbc &&
-+		    host->flags & SDHCI_ACMD12)
-+			mode |= SDHCI_TRNS_ACMD12;
- 	}
- 	if (data->flags & MMC_DATA_READ)
- 		mode |= SDHCI_TRNS_READ;
-@@ -893,7 +900,15 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 	else
- 		data->bytes_xfered = data->blksz * data->blocks;
- 
--	if (data->stop) {
-+	/*
-+	 * Need to send CMD12 if -
-+	 * a) open-ended multiblock transfer (no CMD23)
-+	 * b) error in multiblock transfer
-+	 */
-+	if (data->stop &&
-+	    (data->error ||
-+	     !host->mrq->sbc)) {
-+
- 		/*
- 		 * The controller needs a reset of internal state machines
- 		 * upon error conditions.
-@@ -949,7 +964,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 
- 	sdhci_writel(host, cmd->arg, SDHCI_ARGUMENT);
- 
--	sdhci_set_transfer_mode(host, cmd->data);
-+	sdhci_set_transfer_mode(host, cmd);
- 
- 	if ((cmd->flags & MMC_RSP_136) && (cmd->flags & MMC_RSP_BUSY)) {
- 		printk(KERN_ERR "%s: Unsupported response type!\n",
-@@ -1004,13 +1019,21 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 
- 	host->cmd->error = 0;
- 
--	if (host->data && host->data_early)
--		sdhci_finish_data(host);
-+	/* Finished CMD23, now send actual command. */
-+	if (host->cmd == host->mrq->sbc) {
-+		host->cmd = NULL;
-+		sdhci_send_command(host, host->mrq->cmd);
-+	} else {
- 
--	if (!host->cmd->data)
--		tasklet_schedule(&host->finish_tasklet);
-+		/* Processed actual command. */
-+		if (host->data && host->data_early)
-+			sdhci_finish_data(host);
- 
--	host->cmd = NULL;
-+		if (!host->cmd->data)
-+			tasklet_schedule(&host->finish_tasklet);
-+
-+		host->cmd = NULL;
+-	if (mmc_host_cmd23(card->host) &&
+-	    mmc_card_mmc(card))
+-		md->flags |= MMC_BLK_CMD23;
++	if (mmc_host_cmd23(card->host)) {
++		if (mmc_card_mmc(card) ||
++		    (mmc_card_sd(card) &&
++		     card->scr.cmds & SD_SCR_CMD23_SUPPORT))
++			md->flags |= MMC_BLK_CMD23;
 +	}
+ 
+ 	if (mmc_card_mmc(card) &&
+ 	    md->flags & MMC_BLK_CMD23 &&
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 596d0b9..efff41d 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -203,6 +203,13 @@ static int mmc_decode_scr(struct mmc_card *card)
+ 	else
+ 		card->erased_byte = 0x0;
+ 
++	if (scr->sda_vsn == SCR_SPEC_VER_2) {
++
++		/* Check if Physical Layer Spec v3.0X is supported. */
++		scr->sda_spec3 = UNSTUFF_BITS(resp, 47, 1);
++		if (scr->sda_spec3)
++			scr->cmds = UNSTUFF_BITS(resp, 32, 2);
++	}
+ 	return 0;
  }
  
- static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
-@@ -1189,7 +1212,12 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- #ifndef SDHCI_USE_LEDS_CLASS
- 	sdhci_activate_led(host);
- #endif
--	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12) {
-+
-+	/*
-+	 * Ensure we don't send the STOP for non-SET_BLOCK_COUNTED
-+	 * requests if Auto-CMD12 is enabled.
-+	 */
-+	if (!mrq->sbc && (host->flags & SDHCI_ACMD12)) {
- 		if (mrq->stop) {
- 			mrq->data->stop = NULL;
- 			mrq->stop = NULL;
-@@ -1227,7 +1255,10 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 			host->mrq = mrq;
- 		}
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 4a0e27b..c6927a4 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -72,6 +72,9 @@ struct sd_scr {
+ 	unsigned char		bus_widths;
+ #define SD_SCR_BUS_WIDTH_1	(1<<0)
+ #define SD_SCR_BUS_WIDTH_4	(1<<2)
++	unsigned char		cmds;
++#define SD_SCR_CMD20_SUPPORT   (1<<0)
++#define SD_SCR_CMD23_SUPPORT   (1<<1)
+ };
  
--		sdhci_send_command(host, mrq->cmd);
-+		if (mrq->sbc)
-+			sdhci_send_command(host, mrq->sbc);
-+		else
-+			sdhci_send_command(host, mrq->cmd);
- 	}
+ struct sd_ssr {
+diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
+index c648878..7d35d52 100644
+--- a/include/linux/mmc/sd.h
++++ b/include/linux/mmc/sd.h
+@@ -66,7 +66,7 @@
  
- 	mmiowb();
-@@ -2455,7 +2486,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 	} else
- 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
+ #define SCR_SPEC_VER_0		0	/* Implements system specification 1.0 - 1.01 */
+ #define SCR_SPEC_VER_1		1	/* Implements system specification 1.10 */
+-#define SCR_SPEC_VER_2		2	/* Implements system specification 2.00 */
++#define SCR_SPEC_VER_2		2	/* Implements system specification 2.00-3.0X */
  
--	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE;
-+	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
-+
-+	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
-+		host->flags |= SDHCI_ACMD12;
- 
- 	/*
- 	 * A controller may support 8-bit width, but the board itself
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index e902618..d70de9d 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -113,6 +113,7 @@ struct sdhci_host {
- #define SDHCI_DEVICE_DEAD	(1<<3)	/* Device unresponsive */
- #define SDHCI_SDR50_NEEDS_TUNING (1<<4)	/* SDR50 needs tuning */
- #define SDHCI_NEEDS_RETUNING	(1<<5)	/* Host needs retuning */
-+#define SDHCI_ACMD12		(1<<6)	/* Auto CMD12 support */
- 
- 	unsigned int version;	/* SDHCI spec. version */
- 
+ /*
+  * SD bus widths
 -- 
 1.7.0.4
 
