@@ -1,70 +1,87 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH v2 5/7] mmc: sdhci: consolidate sdhci-of-esdhc and
- sdhci-esdhc-imx
-Date: Thu, 19 May 2011 11:48:42 +0200
-Message-ID: <20110519094841.GB2219@pengutronix.de>
-References: <1304601778-13837-1-git-send-email-shawn.guo@linaro.org>
- <1304601778-13837-6-git-send-email-shawn.guo@linaro.org>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH 2/2] sdhci-pxa: add call back interface to share sdhci-pxa
+Date: Thu, 19 May 2011 07:34:29 -0400
+Message-ID: <BANLkTinGQLPD4LmjiSjtswqJ19xtvimjUw@mail.gmail.com>
+References: <BANLkTimPN=GauwY7Rwh3xUEkV3=q3wfzAQ@mail.gmail.com>
+	<08119C91-F5AA-4E6A-99D4-CFB253B1AE7B@marvell.com>
+	<BANLkTikVM7QbRJ2Lo2Ef3T9oGAmZ4SJzMQ@mail.gmail.com>
+	<201105182238.45614.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="i9LlY+UWpKt15+FH"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:54548 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932870Ab1ESJsq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 05:48:46 -0400
-Content-Disposition: inline
-In-Reply-To: <1304601778-13837-6-git-send-email-shawn.guo@linaro.org>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:56708 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753831Ab1ESLe3 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 07:34:29 -0400
+Received: by vxi39 with SMTP id 39so1818079vxi.19
+        for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 04:34:29 -0700 (PDT)
+In-Reply-To: <201105182238.45614.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linuxppc-dev@lists.ozlabs.org, devicetree-discuss@lists.ozlabs.org, Olof Johansson <olof@lixom.net>, Saeed Bishara <saeed@marvell.com>, Mike Rapoport <mike@compulab.co.il>, Anton Vorontsov <avorontsov@ru.mvista.com>, Xiaobo Xie <X.Xie@freescale.com>, Albert Herranz <albert_herranz@yahoo.es>, Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, kernel@pengutronix.de, sameo@linux.intel.com, Chris Ball <cjb@laptop.org>, patches@linaro.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Mark Brown <mark.brown314@gmail.com>
 
+On Wed, May 18, 2011 at 4:38 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Tuesday 17 May 2011, zhangfei gao wrote:
+>> >> The code handle several register difference are located at
+>> >> arch/arm/mach-mmp/mmp2.c is for mmp2
+>> >> arch/arm/mach-mmp/pxa910.c is for pxa910 serious,
+>> >> arch/arm/mach-mmp/mmp3.c is for mmp3 serious, considering there m=
+ay
+>> >> still registers changing.
+>> >>
+>> >> The board difference are directly put in board.c
+>> >> For example ttc_dkb do not use wp pin, so get_ro is provided.
+>> >
+>> > embedding the code in these chip files stops code sharing. =A0For =
+example,
+>> > mmp3 has same controller as mmp2.
+>>
+>> If register are totally same, they can share.
+>> If there is minor difference with chip upgrading, they can put in
+>> different file.
+>
+> When we talked about similar problems in drivers during the Linaro De=
+veloper
+> Summit, the broad consensus was to move code from arch/arm into indiv=
+idual
+> device drivers, and I think this should be done for this driver too.
+>
+> My recommendation here would be to have no callbacks in the platform
+> data at all, but instead have the code for all variants in the
+> sdhci-pxa driver itself. You can still have a structure to describe
+> the differences using function pointers, but it's better if that is
+> part of the driver itself. In the platform data, provide a way
+> to identify the variant of the controller (e.g. using an enum)
+> and point to the base addresses as required.
+>
+> =A0 =A0 =A0 =A0Arnd
+>
+Hi, Arnd
 
---i9LlY+UWpKt15+FH
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Thanks for your suggestion.
 
+To make sdhci-pxa easy to maintain, we still prefer put platform
+specific difference under platform code.
 
-> +config MMC_SDHCI_ESDHC
-> +	bool
-> +	depends on MMC_SDHCI
-> +	select MMC_SDHCI_PLTFM
-> +	help
-> +	  This selects SDHCI driver for Freescale eSDHC controller.
+"Identify controller from platform data" looks to me is same as using #=
+ifdef.
+The method is used in our another driver before.
+More and more workaround comes when more and more platform need to
+support, making the driver bigger and bigger and not easy to maintain.
+Nobody remember what's the workaround purpose several years later.
+So the result is we have to re-write the driver again to make it simple=
+ :(
 
-bool is not a good choice here, because if ESDHC_IMX is selected as a
-module (-m), it will get converted here to built-in (-y). Same goes for
-MMC_SDHCI_PLTFM. If I change both into tristate and then compile, I get
-a build error:
+Currently, the ip is shared among mmp2, pxa910, pxa168 etc, pxa910
+maintainer does not care what workaround is used on pxa168.
+When mmp3 wants to reuse the ip, it's easier to not care what's the
+history at all.
 
-ERROR: "sdhci_pltfm_suspend" [drivers/mmc/host/sdhci-esdhc.ko] undefined!
-ERROR: "sdhci_get_of_property" [drivers/mmc/host/sdhci-esdhc.ko] undefined!
-ERROR: "sdhci_pltfm_init" [drivers/mmc/host/sdhci-esdhc.ko] undefined!
-ERROR: "sdhci_pltfm_free" [drivers/mmc/host/sdhci-esdhc.ko] undefined!
+So we still prefer keep driver as simple as possible, while specific
+platform self-maintain specific workaround , which is not aware to
+other platform.
 
-So, the module-support seems to be missing for the library.
-
-Regards,
-
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---i9LlY+UWpKt15+FH
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk3U53kACgkQD27XaX1/VRtYigCfaUQ0Zm6JgulAx7GPts/7nUwP
-pi8AoKgWBD6yoBCrQblL/2kel4qUhfy/
-=1g4j
------END PGP SIGNATURE-----
-
---i9LlY+UWpKt15+FH--
+Thanks
+>
