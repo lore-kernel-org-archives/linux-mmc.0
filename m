@@ -1,51 +1,67 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [[v4] 2/5] MMC: Use CMD23 for multiblock transfers when we can.
-Date: Thu, 19 May 2011 12:01:22 -0500
-Message-ID: <BANLkTi=yJuEtN-SSokhp5CE_mCz9D9D5SA@mail.gmail.com>
-References: <1302950458-1969-1-git-send-email-andreiw@motorola.com>
-	<1303870235-29041-1-git-send-email-andreiw@motorola.com>
-	<1303870235-29041-2-git-send-email-andreiw@motorola.com>
-	<1303870235-29041-3-git-send-email-andreiw@motorola.com>
-	<4DD48273.4060402@samsung.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH v2 0/7] Consolidate sdhci pltfm & OF drivers and get them
+ self registered
+Date: Thu, 19 May 2011 19:05:48 +0200
+Message-ID: <20110519170548.GA1075@pengutronix.de>
+References: <1304601778-13837-1-git-send-email-shawn.guo@linaro.org>
+ <20110519094046.GA2219@pengutronix.de>
+ <20110519160901.GC26816@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="3V7upXqbjpZ4EhLz"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og116.obsmtp.com ([64.18.0.147]:52791 "EHLO
-	exprod5og116.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933550Ab1ESRBZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 13:01:25 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4JGx4nw012545
-	for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 12:59:04 -0400 (EDT)
-Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4JGwopo012396
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 12:59:03 -0400 (EDT)
-Received: by mail-ww0-f46.google.com with SMTP id 28so3061087wwb.3
-        for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 10:01:22 -0700 (PDT)
-In-Reply-To: <4DD48273.4060402@samsung.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:45387 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756209Ab1ESRF5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 13:05:57 -0400
+Content-Disposition: inline
+In-Reply-To: <20110519160901.GC26816@S2100-06.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, arindam.nath@amd.com, cjb@laptop.org, arnd@arndb.de, Kyungmin Park <kyungmin.park@samsung.com>
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linuxppc-dev@lists.ozlabs.org, devicetree-discuss@lists.ozlabs.org, Olof Johansson <olof@lixom.net>, Saeed Bishara <saeed@marvell.com>, Mike Rapoport <mike@compulab.co.il>, Anton Vorontsov <avorontsov@ru.mvista.com>, Xiaobo Xie <X.Xie@freescale.com>, Albert Herranz <albert_herranz@yahoo.es>, Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, kernel@pengutronix.de, sameo@linux.intel.com, Chris Ball <cjb@laptop.org>, patches@linaro.org
 
-On Wed, May 18, 2011 at 9:37 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi Andrei
->
-> Andrei Warkentin wrote:
->> CMD23-prefixed instead of open-ended multiblock transfers
->> have a performance advantage on some MMC cards.
->>
-> you mentioned about "some MMC cards".
-> Conversely, that means the some card didn't have a performance advantage?
->
-> Did you find the performance advantage?
-> if you found the advantage and you can tell me,
-> i want to know what do you have the some MMC cards..
->
 
-I've tested this on a Sandisk eMMC where I saw as good as
-a 50% improvement on writes (30% real-life use cases). This was a
-SEM32G 4.3+ part.
+--3V7upXqbjpZ4EhLz
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-A
+Hi Shawn,
+
+> Should I go for v3 right now to address the patch applying problems
+> and that ESDHC_IMX build issue, or hold for a while to see if you
+> have more comments on v2?
+
+Please wait a little bit more.
+
+> And what is your position on patch #5 which merges esdhc imx and mpc
+> support into one?  As Anton has voted a NO there, I would probably
+> drop the patch if there is another person has strong opinion to get
+> imx and mpc stay separated.
+
+This was the other main issue I spotted so far. I wanted to have another lo=
+ok
+tomorrow, yet the tendency is that I agree with Anton.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--3V7upXqbjpZ4EhLz
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAk3VTewACgkQD27XaX1/VRvEVQCgoMGHWdXFq4VEDCKT4inZMq7b
+/UEAnjZoFTYmmWA06EPFIGVIRqEvbO7A
+=MmT8
+-----END PGP SIGNATURE-----
+
+--3V7upXqbjpZ4EhLz--
