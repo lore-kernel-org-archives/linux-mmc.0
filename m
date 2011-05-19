@@ -1,118 +1,92 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: [v5 5/5] MMC: SDHCI AutoCMD23 support.
-Date: Thu, 19 May 2011 16:46:30 -0500
-Message-ID: <1305841590-26963-6-git-send-email-andreiw@motorola.com>
-References: <1303870235-29041-1-git-send-email-andreiw@motorola.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH] sdhci: Enable BUS WIDTH testing for MMC/eMMC cards
+Date: Thu, 19 May 2011 14:32:34 -0700
+Message-ID: <CB69738F-30B5-4409-84B3-73D655B22FAC@marvell.com>
+References: <162BA714-31AB-44B8-901A-5324E4F49F4C@marvell.com>
+ <m3wrhmbjz2.fsf@pullcord.laptop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og107.obsmtp.com ([64.18.0.184]:37557 "EHLO
-	exprod5og107.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932892Ab1ESVM5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 17:12:57 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.168])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4JLAarH001307
-	for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 17:10:36 -0400 (EDT)
-Received: from mail-gw0-f42.google.com (mail-gw0-f42.google.com [74.125.83.42])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4JLAZbk001278
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 17:10:36 -0400 (EDT)
-Received: by gwb17 with SMTP id 17so1482237gwb.15
-        for <linux-mmc@vger.kernel.org>; Thu, 19 May 2011 14:12:55 -0700 (PDT)
-In-Reply-To: <1303870235-29041-1-git-send-email-andreiw@motorola.com>
+Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:59111 "EHLO
+	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S934614Ab1ESVfY convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 19 May 2011 17:35:24 -0400
+In-Reply-To: <m3wrhmbjz2.fsf@pullcord.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, Andrei Warkentin <andreiw@motorola.com>, arindam.nath@amd.com, arnd@arndb.de, subhashj@codeaurora.org, malchev@google.com
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Enables Auto-CMD23 support where available (SDHCI 3.0 controllers)
 
-Cc: arindam.nath@amd.com
-Cc: cjb@laptop.org
-Cc: arnd@arndb.de
-Cc: subhashj@codeaurora.org
-Cc: malchev@google.com
-Tested-by: Arindam Nath <arindam.nath@amd.com>
-Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
----
- drivers/mmc/host/sdhci.c  |   17 ++++++++++++++++-
- drivers/mmc/host/sdhci.h  |    2 ++
- include/linux/mmc/sdhci.h |    1 +
- 3 files changed, 19 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 1138b55..d79b2d0 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -860,7 +860,13 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 		if (!host->mrq->sbc &&
- 		    host->flags & SDHCI_ACMD12)
- 			mode |= SDHCI_TRNS_ACMD12;
-+		else if (host->mrq->sbc &&
-+			 host->flags & SDHCI_ACMD23) {
-+			mode |= SDHCI_TRNS_ACMD23;
-+			sdhci_writel(host, host->mrq->sbc->arg, SDHCI_ARGUMENT2);
-+		}
- 	}
-+
- 	if (data->flags & MMC_DATA_READ)
- 		mode |= SDHCI_TRNS_READ;
- 	if (host->flags & SDHCI_REQ_USE_DMA)
-@@ -1255,7 +1261,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 			host->mrq = mrq;
- 		}
- 
--		if (mrq->sbc)
-+		if (mrq->sbc && !(host->flags & SDHCI_ACMD23))
- 			sdhci_send_command(host, mrq->sbc);
- 		else
- 			sdhci_send_command(host, mrq->cmd);
-@@ -2491,6 +2497,15 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
- 		host->flags |= SDHCI_ACMD12;
- 
-+	/* Auto-CMD23 stuff only works in ADMA or PIO. */
-+	if ((host->version == SDHCI_SPEC_300) &&
-+	    ((host->flags & SDHCI_USE_ADMA) ||
-+	     !(host->flags & SDHCI_REQ_USE_DMA))) {
-+		host->flags |= SDHCI_ACMD23;
-+		printk(KERN_INFO "%s: Auto-CMD23 available\n", mmc_hostname(mmc));
-+	} else
-+		printk(KERN_INFO "%s: Auto-CMD23 unavailable\n", mmc_hostname(mmc));
-+
- 	/*
- 	 * A controller may support 8-bit width, but the board itself
- 	 * might not have the pins brought out.  Boards that support
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 7e28eec..713caf0 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -25,6 +25,7 @@
-  */
- 
- #define SDHCI_DMA_ADDRESS	0x00
-+#define SDHCI_ARGUMENT2		0x00
- 
- #define SDHCI_BLOCK_SIZE	0x04
- #define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) | (blksz & 0xFFF))
-@@ -37,6 +38,7 @@
- #define  SDHCI_TRNS_DMA		0x01
- #define  SDHCI_TRNS_BLK_CNT_EN	0x02
- #define  SDHCI_TRNS_ACMD12	0x04
-+#define  SDHCI_TRNS_ACMD23	0x08
- #define  SDHCI_TRNS_READ	0x10
- #define  SDHCI_TRNS_MULTI	0x20
- 
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index d70de9d..d0db8ae 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -114,6 +114,7 @@ struct sdhci_host {
- #define SDHCI_SDR50_NEEDS_TUNING (1<<4)	/* SDR50 needs tuning */
- #define SDHCI_NEEDS_RETUNING	(1<<5)	/* Host needs retuning */
- #define SDHCI_ACMD12		(1<<6)	/* Auto CMD12 support */
-+#define SDHCI_ACMD23		(1<<7)	/* Auto CMD23 support */
- 
- 	unsigned int version;	/* SDHCI spec. version */
- 
--- 
-1.7.0.4
+Chris,
+
+This is the reason why I did the other patch for bus width testing !  Some hardware does not work.
+
+Philip
+
+On May 19, 2011, at 11:53 AM, Chris Ball wrote:
+
+> Hi Philip,
+> 
+> On Fri, Jan 21 2011, Philip Rakity wrote:
+>> The PXA family of controllers (PXA168/PXA910/MMP2) support CMD14/CMD19
+>> transactions that are used to test the MMC/eMMC bus width for 1, 4, or
+>> 8 bits.
+>> 
+>> Indicate to the mmc layer that it is safe to do bus width testing.
+>> 
+>> Signed-off-by: Philip Rakity <prakity@marvell.com>
+>> ---
+>> drivers/mmc/host/sdhci-pxa.c |    3 +++
+>> 1 files changed, 3 insertions(+), 0 deletions(-)
+>> 
+>> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
+>> index ed044a8..0afc763 100644
+>> --- a/drivers/mmc/host/sdhci-pxa.c
+>> +++ b/drivers/mmc/host/sdhci-pxa.c
+>> @@ -121,6 +121,9 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
+>> 	host->irq = irq;
+>> 	host->quirks = SDHCI_QUIRK_BROKEN_ADMA | SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+>> 
+>> +	/* enable mmc bus width testing */
+>> +	host->mmc->caps |= MMC_CAP_BUS_WIDTH_TEST;
+>> +
+>> 	/* If slot design supports 8 bit data, indicate this to MMC. */
+>> 	if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
+>> 		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+> 
+> This patch causes a 10 second boot time delay here, on XO-1.75/MMP2:
+> 
+> [  625.245478] Waiting for root device /dev/mmcblk0p2...
+> [  634.877598] mmc2: Timeout waiting for hardware interrupt.
+> [  634.882966] sdhci: =========== REGISTER DUMP (mmc2)===========
+> [  634.888756] sdhci: Sys addr: 0x1cfc7864 | Version:  0x00000002
+> [  634.888756] sdhci: Blk size: 0x00007004 | Blk cnt:  0x00000000
+> [  634.894544] sdhci: Argument: 0x00000000 | Trn mode: 0x00000003
+> [  634.900334] sdhci: Present:  0x01fa0000 | Host ctl: 0x00000007
+> [  634.911913] sdhci: Power:    0x0000000b | Blk gap:  0x00000000
+> [  634.911913] sdhci: Wake-up:  0x00000000 | Clock:    0x00000207
+> [  634.917703] sdhci: Timeout:  0x0000000e | Int stat: 0x00000000
+> [  634.929283] sdhci: Int enab: 0x02ff000b | Sig enab: 0x02ff000b
+> [  634.929283] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
+> [  634.935071] sdhci: Caps:     0x25fcc8b2 | Caps_1:   0x00002f77
+> [  634.940861] sdhci: Cmd:      0x0000133a | Max curr: 0x00000000
+> [  634.946651] sdhci: Host ctl2: 0x00000000
+> [  634.952438] sdhci: ===========================================
+> [  634.962269] mmc2: new high speed DDR MMC card at address 0001
+> 
+> Everything seems to work after the delay, though.  Any ideas?
+> Doesn't seem to happen with CONFIG_MMC_DEBUG=y.
+> (Maybe you can test on an XO?)
+> 
+> Thanks,
+> 
+> - Chris.
+> -- 
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
 
