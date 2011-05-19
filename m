@@ -1,51 +1,73 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 2/2] sdhci-pxa: add call back interface to share sdhci-pxa
-Date: Wed, 18 May 2011 22:38:45 +0200
-Message-ID: <201105182238.45614.arnd@arndb.de>
-References: <BANLkTimPN=GauwY7Rwh3xUEkV3=q3wfzAQ@mail.gmail.com> <08119C91-F5AA-4E6A-99D4-CFB253B1AE7B@marvell.com> <BANLkTikVM7QbRJ2Lo2Ef3T9oGAmZ4SJzMQ@mail.gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH v2 0/7] Consolidate sdhci pltfm & OF drivers and get
+ them self registered
+Date: Thu, 19 May 2011 11:40:46 +0200
+Message-ID: <20110519094046.GA2219@pengutronix.de>
+References: <1304601778-13837-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="sdtB3X0nJg68CQEu"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:61738 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756378Ab1ESHxe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 03:53:34 -0400
-In-Reply-To: <BANLkTikVM7QbRJ2Lo2Ef3T9oGAmZ4SJzMQ@mail.gmail.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:49996 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932864Ab1ESJk5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 05:40:57 -0400
+Content-Disposition: inline
+In-Reply-To: <1304601778-13837-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Mark Brown <mark.brown314@gmail.com>
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linuxppc-dev@lists.ozlabs.org, devicetree-discuss@lists.ozlabs.org, Olof Johansson <olof@lixom.net>, Saeed Bishara <saeed@marvell.com>, Mike Rapoport <mike@compulab.co.il>, Anton Vorontsov <avorontsov@ru.mvista.com>, Xiaobo Xie <X.Xie@freescale.com>, Albert Herranz <albert_herranz@yahoo.es>, Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, kernel@pengutronix.de, sameo@linux.intel.com, Chris Ball <cjb@laptop.org>, patches@linaro.org
 
-On Tuesday 17 May 2011, zhangfei gao wrote:
-> >> The code handle several register difference are located at
-> >> arch/arm/mach-mmp/mmp2.c is for mmp2
-> >> arch/arm/mach-mmp/pxa910.c is for pxa910 serious,
-> >> arch/arm/mach-mmp/mmp3.c is for mmp3 serious, considering there may
-> >> still registers changing.
-> >>
-> >> The board difference are directly put in board.c
-> >> For example ttc_dkb do not use wp pin, so get_ro is provided.
-> >
-> > embedding the code in these chip files stops code sharing.  For example,
-> > mmp3 has same controller as mmp2.
-> 
-> If register are totally same, they can share.
-> If there is minor difference with chip upgrading, they can put in
-> different file.
 
-When we talked about similar problems in drivers during the Linaro Developer
-Summit, the broad consensus was to move code from arch/arm into individual
-device drivers, and I think this should be done for this driver too.
+--sdtB3X0nJg68CQEu
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-My recommendation here would be to have no callbacks in the platform
-data at all, but instead have the code for all variants in the
-sdhci-pxa driver itself. You can still have a structure to describe
-the differences using function pointers, but it's better if that is
-part of the driver itself. In the platform data, provide a way
-to identify the variant of the controller (e.g. using an enum)
-and point to the base addresses as required.
+Hi Shawn,
 
-	Arnd
+> Changes since v1:
+>  * Rebase on cjb's mmc-next tree
 
+Is it maybe possible that you get access to
+http://opensource.freescale.com/git or another machine? A branch to pull
+=66rom would be more convenient, because the series does not apply to
+mmc-next anymore, so an extra step to go "back in time" is needed.
+
+(minor) When applying I got:
+
+Applying: mmc: sdhci: make sdhci-pltfm device drivers self registered
+/home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:384: trailing whitespace.
+/home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:817: space before tab in=
+ indent.
+ 	struct tegra_sdhci_platform_data *plat;
+/home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:867: trailing whitespace.
+
+Applying: sdhci: rename sdhci-esdhc-imx.c to sdhci-esdhc.c
+/home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:780: trailing whitespace.
+
+See later comments for further issues.
+
+Thanks,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--sdtB3X0nJg68CQEu
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk3U5Z4ACgkQD27XaX1/VRvTrACfeBXJzoQO911nMrx10wtlkXDw
+p1EAmwYXFQH6XMdjXZLuJRLA5pDE3h9o
+=tg5z
+-----END PGP SIGNATURE-----
+
+--sdtB3X0nJg68CQEu--
