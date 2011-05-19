@@ -1,44 +1,60 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [RFC] mmc_test: how use mmc_test on only eMMC board
-Date: Thu, 19 May 2011 10:58:29 -0400
-Message-ID: <m3vcx6d9ey.fsf@pullcord.laptop.org>
-References: <4DD4A23F.10400@samsung.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH v2 0/7] Consolidate sdhci pltfm & OF drivers and get them
+ self registered
+Date: Fri, 20 May 2011 00:09:02 +0800
+Message-ID: <20110519160901.GC26816@S2100-06.ap.freescale.net>
+References: <1304601778-13837-1-git-send-email-shawn.guo@linaro.org>
+ <20110519094046.GA2219@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:40732 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932363Ab1ESO4q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 19 May 2011 10:56:46 -0400
-In-Reply-To: <4DD4A23F.10400@samsung.com> (Jaehoon Chung's message of "Thu, 19
-	May 2011 13:53:19 +0900")
+Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:22293
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932336Ab1ESQEn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 12:04:43 -0400
+Content-Disposition: inline
+In-Reply-To: <20110519094046.GA2219@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linuxppc-dev@lists.ozlabs.org, devicetree-discuss@lists.ozlabs.org, Olof Johansson <olof@lixom.net>, Saeed Bishara <saeed@marvell.com>, Mike Rapoport <mike@compulab.co.il>, Anton Vorontsov <avorontsov@ru.mvista.com>, Xiaobo Xie <X.Xie@freescale.com>, Albert Herranz <albert_herranz@yahoo.es>, Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, kernel@pengutronix.de, sameo@linux.intel.com, Chris Ball <cjb@laptop.org>, patches@linaro.org
 
-Hi,
+Hi Wolfram,
 
-On Thu, May 19 2011, Jaehoon Chung wrote:
-> Hi mailing..
->
-> I want to know how use mmc_test..
->
-> In my case, i used only eMMC board.
-> So i didn't use unbind/bind for mmc_test.
->
-> echo mmc0:0001 > /sys/bus/mmc/drivers/mmcblk/unbind
-> then rootfs of my board has be broken 
+On Thu, May 19, 2011 at 11:40:46AM +0200, Wolfram Sang wrote:
+> Hi Shawn,
+> 
+> > Changes since v1:
+> >  * Rebase on cjb's mmc-next tree
+> 
+> Is it maybe possible that you get access to
+> http://opensource.freescale.com/git or another machine? A branch to pull
+> from would be more convenient, because the series does not apply to
+> mmc-next anymore, so an extra step to go "back in time" is needed.
+> 
+> (minor) When applying I got:
+> 
+> Applying: mmc: sdhci: make sdhci-pltfm device drivers self registered
+> /home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:384: trailing whitespace.
+> /home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:817: space before tab in indent.
+>  	struct tegra_sdhci_platform_data *plat;
+> /home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:867: trailing whitespace.
+> 
+> Applying: sdhci: rename sdhci-esdhc-imx.c to sdhci-esdhc.c
+> /home/wsa/Kernel/linux-2.6/.git/rebase-apply/patch:780: trailing whitespace.
+> 
+> See later comments for further issues.
+> 
+Should I go for v3 right now to address the patch applying problems
+and that ESDHC_IMX build issue, or hold for a while to see if you
+have more comments on v2?
 
-mmc_test destroys the data on the card being tested, so there is no way
-to use it on your active rootfs.
+And what is your position on patch #5 which merges esdhc imx and mpc
+support into one?  As Anton has voted a NO there, I would probably
+drop the patch if there is another person has strong opinion to get
+imx and mpc stay separated.
 
-You would have to boot from external SD (or USB, or network, or
-something else) in order to run it on your internal eMMC.  If you do
-this, first make sure your eMMC doesn't contain any data needed to boot
-your system far enough to be able to boot a kernel from another device.
-
-- Chris.
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Regards,
+Shawn
+
