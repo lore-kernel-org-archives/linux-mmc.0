@@ -1,72 +1,72 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [v5 5/5] MMC: SDHCI AutoCMD23 support.
-Date: Fri, 20 May 2011 05:46:15 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300011BEA693A@SAUSEXMBP01.amd.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [v5 5/5] MMC: SDHCI AutoCMD23 support.
+Date: Fri, 20 May 2011 13:08:18 -0500
+Message-ID: <BANLkTikVg1V908jvO5Ss4xnj0tLq+pyf9w@mail.gmail.com>
 References: <1303870235-29041-1-git-send-email-andreiw@motorola.com>
- <1305841590-26963-6-git-send-email-andreiw@motorola.com>
+	<1305841590-26963-6-git-send-email-andreiw@motorola.com>
+	<6C03668EAF45B747AF947A1603D1B300011BEA693A@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:34061
-	"EHLO VA3EHSOBE009.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S934080Ab1ETKq3 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 20 May 2011 06:46:29 -0400
-In-Reply-To: <1305841590-26963-6-git-send-email-andreiw@motorola.com>
-Content-Language: en-US
+Received: from exprod5og105.obsmtp.com ([64.18.0.180]:52782 "EHLO
+	exprod5og105.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757241Ab1ETSIW convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 May 2011 14:08:22 -0400
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.129.42])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p4KI8pXB026844
+	for <linux-mmc@vger.kernel.org>; Fri, 20 May 2011 14:08:51 -0400 (EDT)
+Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p4KI8nnu026822
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Fri, 20 May 2011 14:08:51 -0400 (EDT)
+Received: by wwb28 with SMTP id 28so4203828wwb.3
+        for <linux-mmc@vger.kernel.org>; Fri, 20 May 2011 11:08:18 -0700 (PDT)
+In-Reply-To: <6C03668EAF45B747AF947A1603D1B300011BEA693A@SAUSEXMBP01.amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "arnd@arndb.de" <arnd@arndb.de>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "malchev@google.com" <malchev@google.com>
+To: "Nath, Arindam" <Arindam.Nath@amd.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "arnd@arndb.de" <arnd@arndb.de>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, "malchev@google.com" <malchev@google.com>
 
-Hi Andrei,
+Hi Arindam,
 
-[...]
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 7e28eec..713caf0 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -25,6 +25,7 @@
->   */
-> 
->  #define SDHCI_DMA_ADDRESS	0x00
-> +#define SDHCI_ARGUMENT2		0x00
+On Fri, May 20, 2011 at 5:46 AM, Nath, Arindam <Arindam.Nath@amd.com> w=
+rote:
+> Hi Andrei,
+>
+> [...]
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 7e28eec..713caf0 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -25,6 +25,7 @@
+>> =A0 */
+>>
+>> =A0#define SDHCI_DMA_ADDRESS =A0 =A00x00
+>> +#define SDHCI_ARGUMENT2 =A0 =A0 =A0 =A0 =A0 =A0 =A00x00
+>
+> Since SDHCI_DMA_ADDRESS and SDHCI_ARGUMENT2 in actually the same regi=
+ster, probably ...
+>
+> #define SDHCI_ARGUMENT2 =A0 =A0 =A0 =A0 SDHCI_DMA_ADDRESS
 
-Since SDHCI_DMA_ADDRESS and SDHCI_ARGUMENT2 in actually the same register, probably ...
+Sure.
 
-#define SDHCI_ARGUMENT2		SDHCI_DMA_ADDRESS
+>> =A0#define =A0SDHCI_TRNS_ACMD12 =A0 0x04
+>> +#define =A0SDHCI_TRNS_ACMD23 =A0 0x08
+>
+> How about changing these names explicitly to _AUTO_CMD12 and _AUTO_CM=
+D23? That way we are less likely to get confused with App commands with=
+ same names.
 
-is a good idea?
+Sounds good.
 
-> 
->  #define SDHCI_BLOCK_SIZE	0x04
->  #define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) | (blksz &
-> 0xFFF))
-> @@ -37,6 +38,7 @@
->  #define  SDHCI_TRNS_DMA		0x01
->  #define  SDHCI_TRNS_BLK_CNT_EN	0x02
->  #define  SDHCI_TRNS_ACMD12	0x04
-> +#define  SDHCI_TRNS_ACMD23	0x08
+>> =A0#define SDHCI_ACMD12 =A0 =A0 =A0 =A0 (1<<6) =A0/* Auto CMD12 supp=
+ort */
+>> +#define SDHCI_ACMD23 =A0 =A0 =A0 =A0 (1<<7) =A0/* Auto CMD23 suppor=
+t */
+>
 
-How about changing these names explicitly to _AUTO_CMD12 and _AUTO_CMD23? That way we are less likely to get confused with App commands with same names.
+Ok, will clean it up.
 
->  #define  SDHCI_TRNS_READ	0x10
->  #define  SDHCI_TRNS_MULTI	0x20
-> 
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index d70de9d..d0db8ae 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -114,6 +114,7 @@ struct sdhci_host {
->  #define SDHCI_SDR50_NEEDS_TUNING (1<<4)	/* SDR50 needs tuning */
->  #define SDHCI_NEEDS_RETUNING	(1<<5)	/* Host needs retuning */
->  #define SDHCI_ACMD12		(1<<6)	/* Auto CMD12 support */
-> +#define SDHCI_ACMD23		(1<<7)	/* Auto CMD23 support */
-
-Same comment as above.
-
-Thanks,
-Arindam
-
-
+A
