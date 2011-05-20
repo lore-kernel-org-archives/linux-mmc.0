@@ -1,92 +1,61 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] sdhci: Enable BUS WIDTH testing for MMC/eMMC cards
-Date: Thu, 19 May 2011 14:32:34 -0700
-Message-ID: <CB69738F-30B5-4409-84B3-73D655B22FAC@marvell.com>
-References: <162BA714-31AB-44B8-901A-5324E4F49F4C@marvell.com>
- <m3wrhmbjz2.fsf@pullcord.laptop.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC] mmc_test: how use mmc_test on only eMMC board
+Date: Fri, 20 May 2011 10:39:11 +0900
+Message-ID: <4DD5C63F.6030405@samsung.com>
+References: <4DD4A23F.10400@samsung.com> <m3vcx6d9ey.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:59111 "EHLO
-	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S934614Ab1ESVfY convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 19 May 2011 17:35:24 -0400
-In-Reply-To: <m3wrhmbjz2.fsf@pullcord.laptop.org>
-Content-Language: en-US
+Received: from mailout3.samsung.com ([203.254.224.33]:54158 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934674Ab1ETBjP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2011 21:39:15 -0400
+Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LLH002FM0L4EQ10@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 20 May 2011 10:39:14 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LLH003QU0LDP2@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 20 May 2011 10:39:13 +0900 (KST)
+In-reply-to: <m3vcx6d9ey.fsf@pullcord.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
+Hi,
 
-
-Chris,
-
-This is the reason why I did the other patch for bus width testing !  Some hardware does not work.
-
-Philip
-
-On May 19, 2011, at 11:53 AM, Chris Ball wrote:
-
-> Hi Philip,
+Chris Ball wrote:
+> Hi,
 > 
-> On Fri, Jan 21 2011, Philip Rakity wrote:
->> The PXA family of controllers (PXA168/PXA910/MMP2) support CMD14/CMD19
->> transactions that are used to test the MMC/eMMC bus width for 1, 4, or
->> 8 bits.
->> 
->> Indicate to the mmc layer that it is safe to do bus width testing.
->> 
->> Signed-off-by: Philip Rakity <prakity@marvell.com>
->> ---
->> drivers/mmc/host/sdhci-pxa.c |    3 +++
->> 1 files changed, 3 insertions(+), 0 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci-pxa.c b/drivers/mmc/host/sdhci-pxa.c
->> index ed044a8..0afc763 100644
->> --- a/drivers/mmc/host/sdhci-pxa.c
->> +++ b/drivers/mmc/host/sdhci-pxa.c
->> @@ -121,6 +121,9 @@ static int __devinit sdhci_pxa_probe(struct platform_device *pdev)
->> 	host->irq = irq;
->> 	host->quirks = SDHCI_QUIRK_BROKEN_ADMA | SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->> 
->> +	/* enable mmc bus width testing */
->> +	host->mmc->caps |= MMC_CAP_BUS_WIDTH_TEST;
->> +
->> 	/* If slot design supports 8 bit data, indicate this to MMC. */
->> 	if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
->> 		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+> On Thu, May 19 2011, Jaehoon Chung wrote:
+>> Hi mailing..
+>>
+>> I want to know how use mmc_test..
+>>
+>> In my case, i used only eMMC board.
+>> So i didn't use unbind/bind for mmc_test.
+>>
+>> echo mmc0:0001 > /sys/bus/mmc/drivers/mmcblk/unbind
+>> then rootfs of my board has be broken 
 > 
-> This patch causes a 10 second boot time delay here, on XO-1.75/MMP2:
+> mmc_test destroys the data on the card being tested, so there is no way
+> to use it on your active rootfs.
 > 
-> [  625.245478] Waiting for root device /dev/mmcblk0p2...
-> [  634.877598] mmc2: Timeout waiting for hardware interrupt.
-> [  634.882966] sdhci: =========== REGISTER DUMP (mmc2)===========
-> [  634.888756] sdhci: Sys addr: 0x1cfc7864 | Version:  0x00000002
-> [  634.888756] sdhci: Blk size: 0x00007004 | Blk cnt:  0x00000000
-> [  634.894544] sdhci: Argument: 0x00000000 | Trn mode: 0x00000003
-> [  634.900334] sdhci: Present:  0x01fa0000 | Host ctl: 0x00000007
-> [  634.911913] sdhci: Power:    0x0000000b | Blk gap:  0x00000000
-> [  634.911913] sdhci: Wake-up:  0x00000000 | Clock:    0x00000207
-> [  634.917703] sdhci: Timeout:  0x0000000e | Int stat: 0x00000000
-> [  634.929283] sdhci: Int enab: 0x02ff000b | Sig enab: 0x02ff000b
-> [  634.929283] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
-> [  634.935071] sdhci: Caps:     0x25fcc8b2 | Caps_1:   0x00002f77
-> [  634.940861] sdhci: Cmd:      0x0000133a | Max curr: 0x00000000
-> [  634.946651] sdhci: Host ctl2: 0x00000000
-> [  634.952438] sdhci: ===========================================
-> [  634.962269] mmc2: new high speed DDR MMC card at address 0001
+> You would have to boot from external SD (or USB, or network, or
+> something else) in order to run it on your internal eMMC.  If you do
+> this, first make sure your eMMC doesn't contain any data needed to boot
+> your system far enough to be able to boot a kernel from another device.
 > 
-> Everything seems to work after the delay, though.  Any ideas?
-> Doesn't seem to happen with CONFIG_MMC_DEBUG=y.
-> (Maybe you can test on an XO?)
-> 
-> Thanks,
-> 
-> - Chris.
-> -- 
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+Thanks for your comment. i know that i can use SD-boot in order to use mmc_test.
+but if there is other method, i want to know them.
+I try to boot with SD-card..
+
+Thanks Chris. :)
+
+Regards,
+Jaehoon Chung
 
