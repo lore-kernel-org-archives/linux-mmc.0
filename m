@@ -1,364 +1,47 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [v5 2/5] MMC: Use CMD23 for multiblock transfers when we can.
-Date: Fri, 20 May 2011 19:29:52 +0900
-Message-ID: <4DD642A0.1040608@samsung.com>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [v5 4/5] MMC: Block CMD23 support for UHS104/SDXC cards.
+Date: Fri, 20 May 2011 05:38:22 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B300011BEA692F@SAUSEXMBP01.amd.com>
 References: <1303870235-29041-1-git-send-email-andreiw@motorola.com>
- <1305841590-26963-3-git-send-email-andreiw@motorola.com>
+ <1305841590-26963-5-git-send-email-andreiw@motorola.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:64889 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751846Ab1ETK36 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 May 2011 06:29:58 -0400
-Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LLH00E56P5WMSH0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 20 May 2011 19:29:56 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LLH000GGP5WMX@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 20 May 2011 19:29:56 +0900 (KST)
-In-reply-to: <1305841590-26963-3-git-send-email-andreiw@motorola.com>
+Received: from am1ehsobe006.messaging.microsoft.com ([213.199.154.209]:15452
+	"EHLO AM1EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S934962Ab1ETKic convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 20 May 2011 06:38:32 -0400
+In-Reply-To: <1305841590-26963-5-git-send-email-andreiw@motorola.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, arindam.nath@amd.com, arnd@arndb.de, malchev@google.com, Kyungmin Park <kyungmin.park@samsung.com>
+To: Andrei Warkentin <andreiw@motorola.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "arnd@arndb.de" <arnd@arndb.de>, "malchev@google.com" <malchev@google.com>
 
-Hi Andrei.
+Hi Andrei,
 
-I have some question..
-In mmc_blk_issue_rw_rq() of block.c, there is the below code.
 
-static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
-{
-	struct mmc_blk_data *md = mq->data;
-	struct mmc_card *card = md->queue.card;
-	struct mmc_blk_request brq;
-	int ret = 1, disable_multi = 0;
-
-	/*
-	 * Reliable writes are used to implement Forced Unit Access and
-	 * REQ_META accesses, and are supported only on MMCs.
-	 */
-	bool do_rel_wr = ((req->cmd_flags & REQ_FUA) ||
-			  (req->cmd_flags & REQ_META)) &&
-		(rq_data_dir(req) == WRITE) &&
-		REL_WRITES_SUPPORTED(card);
-
-	do {
-		struct mmc_command cmd = {0};
-		u32 readcmd, writecmd, status = 0;
-
-		memset(&brq, 0, sizeof(struct mmc_blk_request));
-		brq.mrq.cmd = &brq.cmd;
-		brq.mrq.data = &brq.data;
-
-		brq.cmd.arg = blk_rq_pos(req);
-		if (!mmc_card_blockaddr(card))
-			brq.cmd.arg <<= 9;
-		brq.cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-		brq.data.blksz = 512;
-		brq.stop.opcode = MMC_STOP_TRANSMISSION;
-		brq.stop.arg = 0;
-		brq.stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-		brq.data.blocks = blk_rq_sectors(req);
-
-There is "brq.stop.opcode = MMC_STOP_TRANSMISSION".
-If we use CMD23, this line didn't need? Actually i don't know, so i ask to you.
-
-Regards,
-Jaehoon Chung
-
-Andrei Warkentin wrote:
-> CMD23-prefixed instead of open-ended multiblock transfers
-> have a performance advantage on some MMC cards.
+[...]
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 596d0b9..efff41d 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -203,6 +203,13 @@ static int mmc_decode_scr(struct mmc_card *card)
+>  	else
+>  		card->erased_byte = 0x0;
 > 
-> Cc: arindam.nath@amd.com
-> Cc: cjb@laptop.org
-> Cc: arnd@arndb.de
-> Cc: malchev@google.com
-> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
-> ---
->  drivers/mmc/card/block.c |  108 +++++++++++++++++++++++++++++++++------------
->  include/linux/mmc/card.h |    1 +
->  include/linux/mmc/core.h |    1 +
->  include/linux/mmc/host.h |    6 +++
->  include/linux/mmc/mmc.h  |    6 +++
->  5 files changed, 93 insertions(+), 29 deletions(-)
->  mode change 100644 => 100755 drivers/mmc/card/block.c
-> 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> old mode 100644
-> new mode 100755
-> index 126c7f4..a380acc
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -59,10 +59,6 @@ MODULE_ALIAS("mmc:block");
->  #define INAND_CMD38_ARG_SECTRIM1 0x81
->  #define INAND_CMD38_ARG_SECTRIM2 0x88
->  
-> -#define REL_WRITES_SUPPORTED(card) (mmc_card_mmc((card)) &&	\
-> -    (((card)->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||	\
-> -     ((card)->ext_csd.rel_sectors)))
-> -
->  static DEFINE_MUTEX(block_mutex);
->  
->  /*
-> @@ -90,6 +86,10 @@ struct mmc_blk_data {
->  	struct mmc_queue queue;
->  	struct list_head part;
->  
-> +	unsigned int	flags;
-> +#define MMC_BLK_CMD23	(1 << 0)	/* Can do SET_BLOCK_COUNT for multiblock */
-> +#define MMC_BLK_REL_WR	(1 << 1)	/* MMC Reliable write support */
+> +	if (scr->sda_vsn == SCR_SPEC_VER_2) {
 > +
->  	unsigned int	usage;
->  	unsigned int	read_only;
->  	unsigned int	part_type;
-> @@ -429,6 +429,7 @@ static const struct block_device_operations mmc_bdops = {
->  
->  struct mmc_blk_request {
->  	struct mmc_request	mrq;
-> +	struct mmc_command	sbc;
->  	struct mmc_command	cmd;
->  	struct mmc_command	stop;
->  	struct mmc_data		data;
-> @@ -652,13 +653,10 @@ static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
->   * reliable write can handle, thus finish the request in
->   * partial completions.
->   */
-> -static inline int mmc_apply_rel_rw(struct mmc_blk_request *brq,
-> -				   struct mmc_card *card,
-> -				   struct request *req)
-> +static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
-> +				    struct mmc_card *card,
-> +				    struct request *req)
->  {
-> -	int err;
-> -	struct mmc_command set_count = {0};
-> -
->  	if (!(card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN)) {
->  		/* Legacy mode imposes restrictions on transfers. */
->  		if (!IS_ALIGNED(brq->cmd.arg, card->ext_csd.rel_sectors))
-> @@ -669,15 +667,6 @@ static inline int mmc_apply_rel_rw(struct mmc_blk_request *brq,
->  		else if (brq->data.blocks < card->ext_csd.rel_sectors)
->  			brq->data.blocks = 1;
->  	}
-> -
-> -	set_count.opcode = MMC_SET_BLOCK_COUNT;
-> -	set_count.arg = brq->data.blocks | (1 << 31);
-> -	set_count.flags = MMC_RSP_R1 | MMC_CMD_AC;
-> -	err = mmc_wait_for_cmd(card->host, &set_count, 0);
-> -	if (err)
-> -		printk(KERN_ERR "%s: error %d SET_BLOCK_COUNT\n",
-> -		       req->rq_disk->disk_name, err);
-> -	return err;
->  }
->  
->  static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
-> @@ -694,7 +683,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
->  	bool do_rel_wr = ((req->cmd_flags & REQ_FUA) ||
->  			  (req->cmd_flags & REQ_META)) &&
->  		(rq_data_dir(req) == WRITE) &&
-> -		REL_WRITES_SUPPORTED(card);
-> +		(md->flags & MMC_BLK_REL_WR);
->  
->  	do {
->  		struct mmc_command cmd = {0};
-> @@ -732,11 +721,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
->  
->  		if (brq.data.blocks > 1 || do_rel_wr) {
->  			/* SPI multiblock writes terminate using a special
-> -			 * token, not a STOP_TRANSMISSION request. Reliable
-> -			 * writes use SET_BLOCK_COUNT and do not use a
-> -			 * STOP_TRANSMISSION request either.
-> +			 * token, not a STOP_TRANSMISSION request.
->  			 */
-> -			if ((!mmc_host_is_spi(card->host) && !do_rel_wr) ||
-> +			if (!mmc_host_is_spi(card->host) ||
->  			    rq_data_dir(req) == READ)
->  				brq.mrq.stop = &brq.stop;
->  			readcmd = MMC_READ_MULTIPLE_BLOCK;
-> @@ -754,8 +741,37 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
->  			brq.data.flags |= MMC_DATA_WRITE;
->  		}
->  
-> -		if (do_rel_wr && mmc_apply_rel_rw(&brq, card, req))
-> -			goto cmd_err;
-> +		if (do_rel_wr)
-> +			mmc_apply_rel_rw(&brq, card, req);
-> +
-> +		/*
-> +		 * Pre-defined multi-block transfers are preferable to
-> +		 * open ended-ones (and necessary for reliable writes).
-> +		 * However, it is not sufficient to just send CMD23,
-> +		 * and avoid the final CMD12, as on an error condition
-> +		 * CMD12 (stop) needs to be sent anyway. This, coupled
-> +		 * with Auto-CMD23 enhancements provided by some
-> +		 * hosts, means that the complexity of dealing
-> +		 * with this is best left to the host. If CMD23 is
-> +		 * supported by card and host, we'll fill sbc in and let
-> +		 * the host deal with handling it correctly. This means
-> +		 * that for hosts that don't expose MMC_CAP_CMD23, no
-> +		 * change of behavior will be observed.
-> +		 *
-> +		 * N.B: Some MMC cards experience perf degradation.
-> +		 * We'll avoid using CMD23-bounded multiblock writes for
-> +		 * these, while retaining features like reliable writes.
-> +		 */
-> +
-> +		if ((md->flags & MMC_BLK_CMD23) &&
-> +		    mmc_op_multi(brq.cmd.opcode) &&
-> +		    (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO_CMD23))) {
-> +			brq.sbc.opcode = MMC_SET_BLOCK_COUNT;
-> +			brq.sbc.arg = brq.data.blocks |
-> +				(do_rel_wr ? (1 << 31) : 0);
-> +			brq.sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
-> +			brq.mrq.sbc = &brq.sbc;
-> +		}
->  
->  		mmc_set_data_timeout(&brq.data, card);
->  
-> @@ -792,7 +808,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
->  		 * until later as we need to wait for the card to leave
->  		 * programming mode even when things go wrong.
->  		 */
-> -		if (brq.cmd.error || brq.data.error || brq.stop.error) {
-> +		if (brq.sbc.error || brq.cmd.error ||
-> +		    brq.data.error || brq.stop.error) {
->  			if (brq.data.blocks > 1 && rq_data_dir(req) == READ) {
->  				/* Redo read one sector at a time */
->  				printk(KERN_WARNING "%s: retrying using single "
-> @@ -803,6 +820,13 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
->  			status = get_card_status(card, req);
->  		}
->  
-> +		if (brq.sbc.error) {
-> +			printk(KERN_ERR "%s: error %d sending SET_BLOCK_COUNT "
-> +			       "command, response %#x, card status %#x\n",
-> +			       req->rq_disk->disk_name, brq.sbc.error,
-> +			       brq.sbc.resp[0], status);
-> +		}
-> +
->  		if (brq.cmd.error) {
->  			printk(KERN_ERR "%s: error %d sending read/write "
->  			       "command, response %#x, card status %#x\n",
-> @@ -1014,8 +1038,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->  	md->disk->queue = md->queue.queue;
->  	md->disk->driverfs_dev = parent;
->  	set_disk_ro(md->disk, md->read_only || default_ro);
-> -	if (REL_WRITES_SUPPORTED(card))
-> -		blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
->  
->  	/*
->  	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
-> @@ -1034,6 +1056,19 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->  
->  	blk_queue_logical_block_size(md->queue.queue, 512);
->  	set_capacity(md->disk, size);
-> +
-> +	if (mmc_host_cmd23(card->host) &&
-> +	    mmc_card_mmc(card))
-> +		md->flags |= MMC_BLK_CMD23;
-> +
-> +	if (mmc_card_mmc(card) &&
-> +	    md->flags & MMC_BLK_CMD23 &&
-> +	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
-> +	     card->ext_csd.rel_sectors)) {
-> +		md->flags |= MMC_BLK_REL_WR;
-> +		blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
+> +		/* Check if Physical Layer Spec v3.0X is supported. */
+> +		scr->sda_spec3 = UNSTUFF_BITS(resp, 47, 1);
+> +		if (scr->sda_spec3)
+> +			scr->cmds = UNSTUFF_BITS(resp, 32, 2);
 > +	}
-> +
->  	return md;
->  
->   err_putdisk:
-> @@ -1189,6 +1224,21 @@ static const struct mmc_fixup blk_fixups[] =
->  	MMC_FIXUP("SEM08G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
->  	MMC_FIXUP("SEM16G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
->  	MMC_FIXUP("SEM32G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
-> +
-> +	/*
-> +	 * Some MMC cards experience performance degradation with CMD23
-> +	 * instead of CMD12-bounded multiblock transfers. For now we'll
-> +	 * black list what's bad...
-> +	 * - Certain Toshiba cards.
-> +	 *
-> +	 * N.B. This doesn't affect SD cards.
-> +	 */
-> +	MMC_FIXUP("MMC08G", 0x11, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_BLK_NO_CMD23),
-> +	MMC_FIXUP("MMC16G", 0x11, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_BLK_NO_CMD23),
-> +	MMC_FIXUP("MMC32G", 0x11, CID_OEMID_ANY, add_quirk_mmc,
-> +		  MMC_QUIRK_BLK_NO_CMD23),
->  	END_FIXUP
->  };
->  
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 7190aa2..4a0e27b 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -171,6 +171,7 @@ struct mmc_card {
->  #define MMC_QUIRK_NONSTD_FUNC_IF (1<<4)		/* SDIO card has nonstd function interfaces */
->  #define MMC_QUIRK_DISABLE_CD	(1<<5)		/* disconnect CD/DAT[3] resistor */
->  #define MMC_QUIRK_INAND_CMD38	(1<<6)		/* iNAND devices have broken CMD38 */
-> +#define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular multiblock */
->  
->  	unsigned int		erase_size;	/* erase size in sectors */
->   	unsigned int		erase_shift;	/* if erase unit is power 2 */
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index cbe8d55..b6718e5 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -120,6 +120,7 @@ struct mmc_data {
->  };
->  
->  struct mmc_request {
-> +	struct mmc_command	*sbc;		/* SET_BLOCK_COUNT for multiblock */
->  	struct mmc_command	*cmd;
->  	struct mmc_data		*data;
->  	struct mmc_command	*stop;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index de32e6a..e946bd1 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -210,6 +210,7 @@ struct mmc_host {
->  #define MMC_CAP_MAX_CURRENT_400	(1 << 27)	/* Host max current limit is 400mA */
->  #define MMC_CAP_MAX_CURRENT_600	(1 << 28)	/* Host max current limit is 600mA */
->  #define MMC_CAP_MAX_CURRENT_800	(1 << 29)	/* Host max current limit is 800mA */
-> +#define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
->  
->  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->  
-> @@ -366,5 +367,10 @@ static inline int mmc_card_wake_sdio_irq(struct mmc_host *host)
->  {
->  	return host->pm_flags & MMC_PM_WAKE_SDIO_IRQ;
->  }
-> +
-> +static inline int mmc_host_cmd23(struct mmc_host *host)
-> +{
-> +	return host->caps & MMC_CAP_CMD23;
-> +}
->  #endif
->  
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 9fa5a73..848aab2 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -83,6 +83,12 @@
->  #define MMC_APP_CMD              55   /* ac   [31:16] RCA        R1  */
->  #define MMC_GEN_CMD              56   /* adtc [0] RD/WR          R1  */
->  
-> +static inline bool mmc_op_multi(u32 opcode)
-> +{
-> +	return opcode == MMC_WRITE_MULTIPLE_BLOCK ||
-> +		opcode == MMC_READ_MULTIPLE_BLOCK;
-> +}
-> +
->  /*
->   * MMC_SWITCH argument format:
->   *
+
+There is already this condition checking (== SCR_SPEC_VER_2) in mmc_decode_scr(). So can you please make your changes appropriately?
+
+Thanks,
+Arindam
 
