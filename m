@@ -1,118 +1,51 @@
 From: Andrei Warkentin <andreiw@motorola.com>
-Subject: [v6 5/5] MMC: SDHCI AutoCMD23 support.
-Date: Mon, 23 May 2011 15:06:39 -0500
-Message-ID: <1306181199-13915-6-git-send-email-andreiw@motorola.com>
-References: <1305841590-26963-1-git-send-email-andreiw@motorola.com>
+Subject: Re: [[v4] 2/5] MMC: Use CMD23 for multiblock transfers when we can.
+Date: Mon, 23 May 2011 14:34:56 -0500
+Message-ID: <BANLkTiksX6G_AfTvAFPW9mTv1yTwmh=bMw@mail.gmail.com>
+References: <1302950458-1969-1-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-1-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-2-git-send-email-andreiw@motorola.com>
+	<1303870235-29041-3-git-send-email-andreiw@motorola.com>
+	<4DD48273.4060402@samsung.com>
+	<BANLkTi=yJuEtN-SSokhp5CE_mCz9D9D5SA@mail.gmail.com>
+	<4DD5F045.90001@samsung.com>
+	<BANLkTik72KgftDWz6aNn=zGDqj1uMpwnYw@mail.gmail.com>
+	<BANLkTi=mpibUJLJTCcf+i7=PgPBUFecgRw@mail.gmail.com>
+	<4DDA55B6.3040708@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og112.obsmtp.com ([64.18.0.24]:56321 "EHLO
-	exprod5og112.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932368Ab1EWTdd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2011 15:33:33 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.167])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p4NJY3AC024256
-	for <linux-mmc@vger.kernel.org>; Mon, 23 May 2011 15:34:03 -0400 (EDT)
-Received: from mail-pw0-f42.google.com (mail-pw0-f42.google.com [209.85.160.42])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p4NJXhhb024088
-	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Mon, 23 May 2011 15:34:02 -0400 (EDT)
-Received: by mail-pw0-f42.google.com with SMTP id 3so3491829pwj.15
-        for <linux-mmc@vger.kernel.org>; Mon, 23 May 2011 12:33:30 -0700 (PDT)
-In-Reply-To: <1305841590-26963-1-git-send-email-andreiw@motorola.com>
+Received: from exprod5og106.obsmtp.com ([64.18.0.182]:54939 "EHLO
+	exprod5og106.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756703Ab1EWTe7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2011 15:34:59 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4NJWYVF023493
+	for <linux-mmc@vger.kernel.org>; Mon, 23 May 2011 15:32:34 -0400 (EDT)
+Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4NJWWe4023477
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Mon, 23 May 2011 15:32:33 -0400 (EDT)
+Received: by wwb28 with SMTP id 28so6390112wwb.3
+        for <linux-mmc@vger.kernel.org>; Mon, 23 May 2011 12:34:56 -0700 (PDT)
+In-Reply-To: <4DDA55B6.3040708@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, Andrei Warkentin <andreiw@motorola.com>, arindam.nath@amd.com, arnd@arndb.de, subhashj@codeaurora.org, malchev@google.com
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, arindam.nath@amd.com, cjb@laptop.org, arnd@arndb.de, Kyungmin Park <kyungmin.park@samsung.com>, "Gao, Yunpeng" <yunpeng.gao@intel.com>
 
-Enables Auto-CMD23 support where available (SDHCI 3.0 controllers)
+On Mon, May 23, 2011 at 7:40 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi A..
+>
+> I tested your patch..(using CMD23)
+> my environment is the below.
+> eMMC card : Sandisk SEM8G (eMMC 4.3+)
+> buswidth : 4bit (SDR)
+> AP : C110
+> benchmark : IOzone
+>
 
-Cc: arindam.nath@amd.com
-Cc: cjb@laptop.org
-Cc: arnd@arndb.de
-Cc: subhashj@codeaurora.org
-Cc: malchev@google.com
-Tested-by: Arindam Nath <arindam.nath@amd.com>
-Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
----
- drivers/mmc/host/sdhci.c  |   17 ++++++++++++++++-
- drivers/mmc/host/sdhci.h  |    2 ++
- include/linux/mmc/sdhci.h |    1 +
- 3 files changed, 19 insertions(+), 1 deletions(-)
+Knowing what controller you are on is helpful too. Unless you are on
+SDHCI, you will see no effect.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 3a53512..fbb1842 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -860,7 +860,13 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 		if (!host->mrq->sbc &&
- 		    host->flags & SDHCI_AUTO_CMD12)
- 			mode |= SDHCI_TRNS_AUTO_CMD12;
-+		else if (host->mrq->sbc &&
-+			 host->flags & SDHCI_AUTO_CMD23) {
-+			mode |= SDHCI_TRNS_AUTO_CMD23;
-+			sdhci_writel(host, host->mrq->sbc->arg, SDHCI_ARGUMENT2);
-+		}
- 	}
-+
- 	if (data->flags & MMC_DATA_READ)
- 		mode |= SDHCI_TRNS_READ;
- 	if (host->flags & SDHCI_REQ_USE_DMA)
-@@ -1255,7 +1261,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 			host->mrq = mrq;
- 		}
- 
--		if (mrq->sbc)
-+		if (mrq->sbc && !(host->flags & SDHCI_AUTO_CMD23))
- 			sdhci_send_command(host, mrq->sbc);
- 		else
- 			sdhci_send_command(host, mrq->cmd);
-@@ -2491,6 +2497,15 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
- 		host->flags |= SDHCI_AUTO_CMD12;
- 
-+	/* Auto-CMD23 stuff only works in ADMA or PIO. */
-+	if ((host->version == SDHCI_SPEC_300) &&
-+	    ((host->flags & SDHCI_USE_ADMA) ||
-+	     !(host->flags & SDHCI_REQ_USE_DMA))) {
-+		host->flags |= SDHCI_AUTO_CMD23;
-+		printk(KERN_INFO "%s: Auto-CMD23 available\n", mmc_hostname(mmc));
-+	} else
-+		printk(KERN_INFO "%s: Auto-CMD23 unavailable\n", mmc_hostname(mmc));
-+
- 	/*
- 	 * A controller may support 8-bit width, but the board itself
- 	 * might not have the pins brought out.  Boards that support
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 2c3fbc5..745c42f 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -25,6 +25,7 @@
-  */
- 
- #define SDHCI_DMA_ADDRESS	0x00
-+#define SDHCI_ARGUMENT2		SDHCI_DMA_ADDRESS
- 
- #define SDHCI_BLOCK_SIZE	0x04
- #define  SDHCI_MAKE_BLKSZ(dma, blksz) (((dma & 0x7) << 12) | (blksz & 0xFFF))
-@@ -37,6 +38,7 @@
- #define  SDHCI_TRNS_DMA		0x01
- #define  SDHCI_TRNS_BLK_CNT_EN	0x02
- #define  SDHCI_TRNS_AUTO_CMD12	0x04
-+#define  SDHCI_TRNS_AUTO_CMD23	0x08
- #define  SDHCI_TRNS_READ	0x10
- #define  SDHCI_TRNS_MULTI	0x20
- 
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 73e27ba..6a68c4e 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -114,6 +114,7 @@ struct sdhci_host {
- #define SDHCI_SDR50_NEEDS_TUNING (1<<4)	/* SDR50 needs tuning */
- #define SDHCI_NEEDS_RETUNING	(1<<5)	/* Host needs retuning */
- #define SDHCI_AUTO_CMD12	(1<<6)	/* Auto CMD12 support */
-+#define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
- 
- 	unsigned int version;	/* SDHCI spec. version */
- 
--- 
-1.7.0.4
-
+A
