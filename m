@@ -1,41 +1,47 @@
-From: Wanlong Gao <wanlong.gao@gmail.com>
-Subject: [PATCH] drivers:mmc:add the NO_IRQ define to of_mmc_spi.c
-Date: Tue, 24 May 2011 21:03:22 +0800
-Message-ID: <1306242202-9252-1-git-send-email-wanlong.gao@gmail.com>
+From: "Robert P. J. Day" <rpjday@crashcourse.ca>
+Subject: why would an SD card, after 12 hours, start to fail recording
+ video?
+Date: Tue, 24 May 2011 13:11:48 -0400 (EDT)
+Message-ID: <alpine.DEB.2.00.1105241307400.3975@localhost6.localdomain6>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-px0-f173.google.com ([209.85.212.173]:64766 "EHLO
-	mail-px0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756112Ab1EXNDm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 May 2011 09:03:42 -0400
+Received: from astoria.ccjclearline.com ([64.235.106.9]:40186 "EHLO
+	astoria.ccjclearline.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752677Ab1EXRus (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 May 2011 13:50:48 -0400
+Received: from cpe0017c5097975-cm001cea397c84.cpe.net.cable.rogers.com ([99.246.178.102] helo=crashcourse.ca)
+	by astoria.ccjclearline.com with esmtpsa (TLSv1:AES256-SHA:256)
+	(Exim 4.69)
+	(envelope-from <rpjday@crashcourse.ca>)
+	id 1QOv97-0008Eu-7Y
+	for linux-mmc@vger.kernel.org; Tue, 24 May 2011 13:11:53 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Wanlong Gao <wanlong.gao@gmail.com>
+To: linux-mmc@vger.kernel.org
 
-For archs that don't support NO_IRQ (such as mips),
-provide a dummy value. Fix the build error for mips.
 
-Signed-off-by: Wanlong Gao <wanlong.gao@gmail.com>
----
- drivers/mmc/host/of_mmc_spi.c |    5 +++++
- 1 files changed, 5 insertions(+), 0 deletions(-)
+  a maddeningly vague question -- i'm currently after more information
+-- but i've been told about an issue where someone is recording video
+to an SD card and, after 12 hours, the units begin to "fail."  that's
+all the info i have at the moment, i hope to get more so i don't even
+know what the definition of "fail" is here, or the brands or models or
+vendors involved, only what you read above.
 
-diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index e2aecb7..ab66f24 100644
---- a/drivers/mmc/host/of_mmc_spi.c
-+++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -25,6 +25,11 @@
- #include <linux/mmc/core.h>
- #include <linux/mmc/host.h>
- 
-+/* For archs that don't support NO_IRQ (such as mips), provide a dummy value */
-+#ifndef NO_IRQ
-+#define NO_IRQ 0
-+#endif
-+
- MODULE_LICENSE("GPL");
- 
- enum {
+  has anyone run across something like this before?  again, i realize
+this is annoyingly vague but if i had a hint as to what might be
+going on, i might be able to offer some advice.  what could possibly
+cause properly recording SD cards to start misbehaving after several
+hours?  thanks for any wildly speculative guesses.
+
+rday
+
 -- 
-1.7.4.1
 
+========================================================================
+Robert P. J. Day                                 Ottawa, Ontario, CANADA
+                        http://crashcourse.ca
+
+Twitter:                                       http://twitter.com/rpjday
+LinkedIn:                               http://ca.linkedin.com/in/rpjday
+========================================================================
