@@ -1,47 +1,31 @@
-From: "Robert P. J. Day" <rpjday@crashcourse.ca>
-Subject: why would an SD card, after 12 hours, start to fail recording
- video?
-Date: Tue, 24 May 2011 13:11:48 -0400 (EDT)
-Message-ID: <alpine.DEB.2.00.1105241307400.3975@localhost6.localdomain6>
+From: =?ISO-8859-1?Q?Marc=2DAndr=E9_H=E9bert?=
+	<hebert.marcandre@gmail.com>
+Subject: Stopping mmc clock between transfers
+Date: Tue, 24 May 2011 14:42:32 -0400
+Message-ID: <BANLkTikbm_OjtwB4fhwj1Mc0HAsNPH3CVg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from astoria.ccjclearline.com ([64.235.106.9]:40186 "EHLO
-	astoria.ccjclearline.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752677Ab1EXRus (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 May 2011 13:50:48 -0400
-Received: from cpe0017c5097975-cm001cea397c84.cpe.net.cable.rogers.com ([99.246.178.102] helo=crashcourse.ca)
-	by astoria.ccjclearline.com with esmtpsa (TLSv1:AES256-SHA:256)
-	(Exim 4.69)
-	(envelope-from <rpjday@crashcourse.ca>)
-	id 1QOv97-0008Eu-7Y
-	for linux-mmc@vger.kernel.org; Tue, 24 May 2011 13:11:53 -0400
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:35847 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757287Ab1EXSmc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 May 2011 14:42:32 -0400
+Received: by ywe9 with SMTP id 9so2528049ywe.19
+        for <linux-mmc@vger.kernel.org>; Tue, 24 May 2011 11:42:32 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
 
+Hello,
 
-  a maddeningly vague question -- i'm currently after more information
--- but i've been told about an issue where someone is recording video
-to an SD card and, after 12 hours, the units begin to "fail."  that's
-all the info i have at the moment, i hope to get more so i don't even
-know what the definition of "fail" is here, or the brands or models or
-vendors involved, only what you read above.
+We are using a OMAPL108 with 2.6.33 and noticed that the mmc clock
+signal stays active when idle. This doesn't seem very power efficient
+and we wondered if there was a reason for this. Before trying to fix
+this on our side I had a few questions regarding this:
+-Is this behavior the same in more recent versions?
+-Was this designed to be this way?
+-Would stopping the clock be a responsibility of the core (set_ios) or
+the host controller (between requests)?
 
-  has anyone run across something like this before?  again, i realize
-this is annoyingly vague but if i had a hint as to what might be
-going on, i might be able to offer some advice.  what could possibly
-cause properly recording SD cards to start misbehaving after several
-hours?  thanks for any wildly speculative guesses.
-
-rday
-
--- 
-
-========================================================================
-Robert P. J. Day                                 Ottawa, Ontario, CANADA
-                        http://crashcourse.ca
-
-Twitter:                                       http://twitter.com/rpjday
-LinkedIn:                               http://ca.linkedin.com/in/rpjday
-========================================================================
+Regards
+Marc
