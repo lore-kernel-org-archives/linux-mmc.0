@@ -1,58 +1,57 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [[v4] 2/5] MMC: Use CMD23 for multiblock transfers when we can.
-Date: Tue, 24 May 2011 09:07:02 +0900
-Message-ID: <4DDAF6A6.1030608@samsung.com>
-References: <1302950458-1969-1-git-send-email-andreiw@motorola.com>
- <1303870235-29041-1-git-send-email-andreiw@motorola.com>
- <1303870235-29041-2-git-send-email-andreiw@motorola.com>
- <1303870235-29041-3-git-send-email-andreiw@motorola.com>
- <4DD48273.4060402@samsung.com>
- <BANLkTi=yJuEtN-SSokhp5CE_mCz9D9D5SA@mail.gmail.com>
- <4DD5F045.90001@samsung.com>
- <BANLkTik72KgftDWz6aNn=zGDqj1uMpwnYw@mail.gmail.com>
- <BANLkTi=mpibUJLJTCcf+i7=PgPBUFecgRw@mail.gmail.com>
- <4DDA55B6.3040708@samsung.com>
- <BANLkTiksX6G_AfTvAFPW9mTv1yTwmh=bMw@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH V2] mmc: eMMC bus width may not work on all platforms
+Date: Tue, 24 May 2011 00:42:52 -0400
+Message-ID: <m3wrhgaeur.fsf@pullcord.laptop.org>
+References: <2FBABAF6-BFF6-46C9-BE6C-D4CA1EE9BD03@marvell.com>
+	<1482D9D127C1754E8684047CF53F7660622B177DBE@pgsmsx505.gar.corp.intel.com>
+	<m3fwo7r0nc.fsf@pullcord.laptop.org>
+	<15864FE4-25CB-46BC-ACC2-FC24C2E6E241@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:57770 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751883Ab1EXAHf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2011 20:07:35 -0400
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LLO00L1GB0LSO60@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 24 May 2011 09:07:33 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LLO00HXKAZRJA@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 24 May 2011 09:07:03 +0900 (KST)
-In-reply-to: <BANLkTiksX6G_AfTvAFPW9mTv1yTwmh=bMw@mail.gmail.com>
+Received: from void.printf.net ([89.145.121.20]:60873 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751127Ab1EXElr convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 May 2011 00:41:47 -0400
+In-Reply-To: <15864FE4-25CB-46BC-ACC2-FC24C2E6E241@marvell.com> (Philip
+	Rakity's message of "Sun, 22 May 2011 10:30:44 -0700")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <andreiw@motorola.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, arindam.nath@amd.com, cjb@laptop.org, arnd@arndb.de, Kyungmin Park <kyungmin.park@samsung.com>, "Gao, Yunpeng" <yunpeng.gao@intel.com>
+To: Philip Rakity <prakity@marvell.com>
+Cc: "Mok, Tze Siong" <tze.siong.mok@intel.com>, Tomoya MORINAGA <tomoya-linux@dsn.okisemi.com>, Takashi Iwai <tiwai@suse.de>, Mark Brown <mark.brown314@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Andrei Warkentin wrote:
-> On Mon, May 23, 2011 at 7:40 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Hi A..
->>
->> I tested your patch..(using CMD23)
->> my environment is the below.
->> eMMC card : Sandisk SEM8G (eMMC 4.3+)
->> buswidth : 4bit (SDR)
->> AP : C110
->> benchmark : IOzone
->>
-> 
-> Knowing what controller you are on is helpful too. Unless you are on
-> SDHCI, you will see no effect.
-> 
-I'm using SDHCI controller and tested with them.
-I'll try to test with your comment and share the results.
+Hi Philip,
 
-Regards,
-Jaehoon Chung
+On Sun, May 22 2011, Philip Rakity wrote:
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index baab027..6db91d6 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -174,14 +174,17 @@ static int mmc_decode_csd(struct mmc_card *card=
+)
+>  }
+> =20
+>  /*
+> - * Read and decode extended CSD.
+> + * Read extended CSD.
+>   */
+> -static int mmc_read_ext_csd(struct mmc_card *card)
+> +static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+
+This one doesn't work -- you're missing the half of the patch that hook=
+s
+up the rest of mmc.c to the new code, which was in v1.  As-is, we get:
+
+drivers/mmc/core/mmc.c: In function =E2=80=98mmc_init_card=E2=80=99:
+drivers/mmc/core/mmc.c:621:3: error: too few arguments to function =E2=80=
+=98mmc_read_ext_csd=E2=80=99
+drivers/mmc/core/mmc.c:240:12: note: declared here
+drivers/mmc/core/mmc.c: At top level:
+drivers/mmc/core/mmc.c:404:12: warning: =E2=80=98mmc_compare_ext_csds=E2=
+=80=99 defined but not used [-Wunused-function]
+
+- Chris.
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
