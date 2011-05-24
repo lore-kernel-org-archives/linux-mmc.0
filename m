@@ -1,31 +1,49 @@
-From: =?ISO-8859-1?Q?Marc=2DAndr=E9_H=E9bert?=
-	<hebert.marcandre@gmail.com>
-Subject: Stopping mmc clock between transfers
-Date: Tue, 24 May 2011 14:42:32 -0400
-Message-ID: <BANLkTikbm_OjtwB4fhwj1Mc0HAsNPH3CVg@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: why would an SD card, after 12 hours, start to fail recording video?
+Date: Tue, 24 May 2011 21:24:13 +0200
+Message-ID: <201105242124.13856.arnd@arndb.de>
+References: <alpine.DEB.2.00.1105241307400.3975@localhost6.localdomain6>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:35847 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757287Ab1EXSmc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 May 2011 14:42:32 -0400
-Received: by ywe9 with SMTP id 9so2528049ywe.19
-        for <linux-mmc@vger.kernel.org>; Tue, 24 May 2011 11:42:32 -0700 (PDT)
+Received: from moutng.kundenserver.de ([212.227.17.10]:55406 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753832Ab1EXTYT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 May 2011 15:24:19 -0400
+In-Reply-To: <alpine.DEB.2.00.1105241307400.3975@localhost6.localdomain6>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
+To: "Robert P. J. Day" <rpjday@crashcourse.ca>
+Cc: linux-mmc@vger.kernel.org
 
-Hello,
+On Tuesday 24 May 2011 19:11:48 Robert P. J. Day wrote:
+>   a maddeningly vague question -- i'm currently after more information
+> -- but i've been told about an issue where someone is recording video
+> to an SD card and, after 12 hours, the units begin to "fail."  that's
+> all the info i have at the moment, i hope to get more so i don't even
+> know what the definition of "fail" is here, or the brands or models or
+> vendors involved, only what you read above.
+> 
+>   has anyone run across something like this before?  again, i realize
+> this is annoyingly vague but if i had a hint as to what might be
+> going on, i might be able to offer some advice.  what could possibly
+> cause properly recording SD cards to start misbehaving after several
+> hours?  thanks for any wildly speculative guesses.
 
-We are using a OMAPL108 with 2.6.33 and noticed that the mmc clock
-signal stays active when idle. This doesn't seem very power efficient
-and we wondered if there was a reason for this. Before trying to fix
-this on our side I had a few questions regarding this:
--Is this behavior the same in more recent versions?
--Was this designed to be this way?
--Would stopping the clock be a responsibility of the core (set_ios) or
-the host controller (between requests)?
+There are many reasons why this could happen:
 
-Regards
-Marc
+* You used a Kingston (or other cheap) SD card with a file system other
+  than FAT32
+
+* The partition is not aligned to 4 MB
+
+* The cluster size is less than 16 KB
+
+* You have multiple partitions on the card
+
+If any of these are true, you have destroyed the card by writing a
+lot of data to it.
+
+	Arnd
