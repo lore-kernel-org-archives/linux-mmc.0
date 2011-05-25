@@ -1,933 +1,711 @@
 From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH v3 1/4] mmc: sdhci: make sdhci-pltfm device drivers self registered
-Date: Wed, 25 May 2011 19:01:51 +0800
-Message-ID: <1306321314-2493-2-git-send-email-shawn.guo@linaro.org>
+Subject: [PATCH v3 3/4] mmc: sdhci: make sdhci-of device drivers self registered
+Date: Wed, 25 May 2011 19:01:53 +0800
+Message-ID: <1306321314-2493-4-git-send-email-shawn.guo@linaro.org>
 References: <1306321314-2493-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:4412 "EHLO
-	TX2EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751454Ab1EYK6m (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 May 2011 06:58:42 -0400
+Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:21669 "EHLO
+	TX2EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751454Ab1EYK6y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 May 2011 06:58:54 -0400
 In-Reply-To: <1306321314-2493-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, linuxppc-dev@lists.ozlabs.org, devicetree-discuss@lists.ozlabs.org, Olof Johansson <olof@lixom.net>, Saeed Bishara <saeed@marvell.com>, Mike Rapoport <mike@compulab.co.il>, Anton Vorontsov <cbouatmailru@gmail.com>, Xiaobo Xie <X.Xie@freescale.com>, Albert Herranz <albert_herranz@yahoo.es>, Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, Wolfram Sang <w.sang@pengutronix.de>, kernel@pengutronix.de, sameo@linux.intel.com, Chris Ball <cjb@laptop.org>, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>
 
-The patch turns the common stuff in sdhci-pltfm.c into functions, and
-add device drivers their own .probe and .remove which in turn call
-into the common functions, so that those sdhci-pltfm device drivers
-register itself and keep all device specific things away from common
-sdhci-pltfm file.
+The patch turns the sdhci-of-core common stuff into helper functions
+added into sdhci-pltfm.c, and makes sdhci-of device drviers self
+registered using the same pair of .probe and .remove used by
+sdhci-pltfm device drivers.
+
+As a result, sdhci-of-core.c and sdhci-of.h can be eliminated with
+those common things merged into sdhci-pltfm.c and sdhci-pltfm.h
+respectively.
 
 Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-Reviewed-by: Grant Likely <grant.likely@secretlab.ca>
-Acked-by: Arnd Bergmann <arnd@arndb.de>
 Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+Reviewed-by: Wolfram Sang <w.sang@pengutronix.de>
 ---
- drivers/mmc/host/Kconfig           |   32 ++++----
- drivers/mmc/host/Makefile          |   11 +--
- drivers/mmc/host/sdhci-cns3xxx.c   |   42 +++++++++-
- drivers/mmc/host/sdhci-dove.c      |   42 +++++++++-
- drivers/mmc/host/sdhci-esdhc-imx.c |  113 +++++++++++++++++++-------
- drivers/mmc/host/sdhci-pltfm.c     |  157 +++++++++---------------------------
- drivers/mmc/host/sdhci-pltfm.h     |   17 +++-
- drivers/mmc/host/sdhci-tegra.c     |  116 ++++++++++++++++++--------
- include/linux/mmc/sdhci-pltfm.h    |    6 --
- 9 files changed, 317 insertions(+), 219 deletions(-)
+ drivers/mmc/host/Kconfig          |   15 +--
+ drivers/mmc/host/Makefile         |    7 +-
+ drivers/mmc/host/sdhci-of-core.c  |  251 -------------------------------------
+ drivers/mmc/host/sdhci-of-esdhc.c |   53 ++++++++-
+ drivers/mmc/host/sdhci-of-hlwd.c  |   50 +++++++-
+ drivers/mmc/host/sdhci-of.h       |   33 -----
+ drivers/mmc/host/sdhci-pltfm.c    |  111 ++++++++++++++++-
+ drivers/mmc/host/sdhci-pltfm.h    |   12 ++
+ 8 files changed, 227 insertions(+), 305 deletions(-)
+ delete mode 100644 drivers/mmc/host/sdhci-of-core.c
+ delete mode 100644 drivers/mmc/host/sdhci-of.h
 
 diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index b981715..799e935 100644
+index 799e935..fdd20ad 100644
 --- a/drivers/mmc/host/Kconfig
 +++ b/drivers/mmc/host/Kconfig
-@@ -113,28 +113,27 @@ config MMC_SDHCI_OF_HLWD
- 	  If unsure, say N.
+@@ -81,19 +81,11 @@ config MMC_RICOH_MMC
  
- config MMC_SDHCI_PLTFM
--	tristate "SDHCI support on the platform specific bus"
-+	bool
- 	depends on MMC_SDHCI
- 	help
--	  This selects the platform specific bus support for Secure Digital Host
--	  Controller Interface.
--
--	  If you have a controller with this interface, say Y or M here.
+ 	  If unsure, say Y.
+ 
+-config MMC_SDHCI_OF
+-	tristate "SDHCI support on OpenFirmware platforms"
+-	depends on MMC_SDHCI && OF
+-	help
+-	  This selects the OF support for Secure Digital Host Controller
+-	  Interfaces.
 -
 -	  If unsure, say N.
-+	  This selects the platform common function support for Secure Digital
-+	  Host Controller Interface.
- 
- config MMC_SDHCI_CNS3XXX
--	bool "SDHCI support on the Cavium Networks CNS3xxx SoC"
-+	tristate "SDHCI support on the Cavium Networks CNS3xxx SoC"
- 	depends on ARCH_CNS3XXX
--	depends on MMC_SDHCI_PLTFM
+-
+ config MMC_SDHCI_OF_ESDHC
+ 	bool "SDHCI OF support for the Freescale eSDHC controller"
+-	depends on MMC_SDHCI_OF
 +	depends on MMC_SDHCI
+ 	depends on PPC_OF
 +	select MMC_SDHCI_PLTFM
+ 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
  	help
- 	  This selects the SDHCI support for CNS3xxx System-on-Chip devices.
+ 	  This selects the Freescale eSDHC controller support.
+@@ -102,8 +94,9 @@ config MMC_SDHCI_OF_ESDHC
  
- 	  If unsure, say N.
- 
- config MMC_SDHCI_ESDHC_IMX
--	bool "SDHCI platform support for the Freescale eSDHC i.MX controller"
--	depends on MMC_SDHCI_PLTFM && (ARCH_MX25 || ARCH_MX35 || ARCH_MX5)
-+	tristate "SDHCI platform support for the Freescale eSDHC i.MX controller"
-+	depends on ARCH_MX25 || ARCH_MX35 || ARCH_MX5
+ config MMC_SDHCI_OF_HLWD
+ 	bool "SDHCI OF support for the Nintendo Wii SDHCI controllers"
+-	depends on MMC_SDHCI_OF
 +	depends on MMC_SDHCI
+ 	depends on PPC_OF
 +	select MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
+ 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
  	help
- 	  This selects the Freescale eSDHC controller support on the platform
-@@ -143,9 +142,10 @@ config MMC_SDHCI_ESDHC_IMX
- 	  If unsure, say N.
- 
- config MMC_SDHCI_DOVE
--	bool "SDHCI support on Marvell's Dove SoC"
-+	tristate "SDHCI support on Marvell's Dove SoC"
- 	depends on ARCH_DOVE
--	depends on MMC_SDHCI_PLTFM
-+	depends on MMC_SDHCI
-+	select MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	help
- 	  This selects the Secure Digital Host Controller Interface in
-@@ -154,8 +154,10 @@ config MMC_SDHCI_DOVE
- 	  If unsure, say N.
- 
- config MMC_SDHCI_TEGRA
--	bool "SDHCI platform support for the Tegra SD/MMC Controller"
--	depends on MMC_SDHCI_PLTFM && ARCH_TEGRA
-+	tristate "SDHCI platform support for the Tegra SD/MMC Controller"
-+	depends on ARCH_TEGRA
-+	depends on MMC_SDHCI
-+	select MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	help
- 	  This selects the Tegra SD/MMC controller. If you have a Tegra
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
 diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 4f1df0a..95fddb8 100644
+index 95fddb8..01d38a1 100644
 --- a/drivers/mmc/host/Makefile
 +++ b/drivers/mmc/host/Makefile
-@@ -43,12 +43,11 @@ obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
- obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
- obj-$(CONFIG_MMC_USHC)		+= ushc.o
- 
--obj-$(CONFIG_MMC_SDHCI_PLTFM)			+= sdhci-platform.o
--sdhci-platform-y				:= sdhci-pltfm.o
--sdhci-platform-$(CONFIG_MMC_SDHCI_CNS3XXX)	+= sdhci-cns3xxx.o
--sdhci-platform-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
--sdhci-platform-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
--sdhci-platform-$(CONFIG_MMC_SDHCI_TEGRA)	+= sdhci-tegra.o
-+obj-$(CONFIG_MMC_SDHCI_PLTFM)		+= sdhci-pltfm.o
-+obj-$(CONFIG_MMC_SDHCI_CNS3XXX)		+= sdhci-cns3xxx.o
-+obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
-+obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
-+obj-$(CONFIG_MMC_SDHCI_TEGRA)		+= sdhci-tegra.o
- 
- obj-$(CONFIG_MMC_SDHCI_OF)	+= sdhci-of.o
- sdhci-of-y				:= sdhci-of-core.o
-diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
-index 9ebd1d7..ac4b26f 100644
---- a/drivers/mmc/host/sdhci-cns3xxx.c
-+++ b/drivers/mmc/host/sdhci-cns3xxx.c
-@@ -86,7 +86,7 @@ static struct sdhci_ops sdhci_cns3xxx_ops = {
- 	.set_clock	= sdhci_cns3xxx_set_clock,
- };
- 
--struct sdhci_pltfm_data sdhci_cns3xxx_pdata = {
-+static struct sdhci_pltfm_data sdhci_cns3xxx_pdata = {
- 	.ops = &sdhci_cns3xxx_ops,
- 	.quirks = SDHCI_QUIRK_BROKEN_DMA |
- 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-@@ -95,3 +95,43 @@ struct sdhci_pltfm_data sdhci_cns3xxx_pdata = {
- 		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
- 		  SDHCI_QUIRK_NONSTANDARD_CLOCK,
- };
-+
-+static int __devinit sdhci_cns3xxx_probe(struct platform_device *pdev)
-+{
-+	return sdhci_pltfm_register(pdev, &sdhci_cns3xxx_pdata);
-+}
-+
-+static int __devexit sdhci_cns3xxx_remove(struct platform_device *pdev)
-+{
-+	return sdhci_pltfm_unregister(pdev);
-+}
-+
-+static struct platform_driver sdhci_cns3xxx_driver = {
-+	.driver		= {
-+		.name	= "sdhci-cns3xxx",
-+		.owner	= THIS_MODULE,
-+	},
-+	.probe		= sdhci_cns3xxx_probe,
-+	.remove		= __devexit_p(sdhci_cns3xxx_remove),
-+#ifdef CONFIG_PM
-+	.suspend	= sdhci_pltfm_suspend,
-+	.resume		= sdhci_pltfm_resume,
-+#endif
-+};
-+
-+static int __init sdhci_cns3xxx_init(void)
-+{
-+	return platform_driver_register(&sdhci_cns3xxx_driver);
-+}
-+module_init(sdhci_cns3xxx_init);
-+
-+static void __exit sdhci_cns3xxx_exit(void)
-+{
-+	platform_driver_unregister(&sdhci_cns3xxx_driver);
-+}
-+module_exit(sdhci_cns3xxx_exit);
-+
-+MODULE_DESCRIPTION("SDHCI driver for CNS3xxx");
-+MODULE_AUTHOR("Scott Shu, "
-+	      "Anton Vorontsov <avorontsov@mvista.com>");
-+MODULE_LICENSE("GPL v2");
-diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
-index 2aeef4f..49aa533 100644
---- a/drivers/mmc/host/sdhci-dove.c
-+++ b/drivers/mmc/host/sdhci-dove.c
-@@ -61,10 +61,50 @@ static struct sdhci_ops sdhci_dove_ops = {
- 	.read_l	= sdhci_dove_readl,
- };
- 
--struct sdhci_pltfm_data sdhci_dove_pdata = {
-+static struct sdhci_pltfm_data sdhci_dove_pdata = {
- 	.ops	= &sdhci_dove_ops,
- 	.quirks	= SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
- 		  SDHCI_QUIRK_NO_BUSY_IRQ |
- 		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
- 		  SDHCI_QUIRK_FORCE_DMA,
- };
-+
-+static int __devinit sdhci_dove_probe(struct platform_device *pdev)
-+{
-+	return sdhci_pltfm_register(pdev, &sdhci_dove_pdata);
-+}
-+
-+static int __devexit sdhci_dove_remove(struct platform_device *pdev)
-+{
-+	return sdhci_pltfm_unregister(pdev);
-+}
-+
-+static struct platform_driver sdhci_dove_driver = {
-+	.driver		= {
-+		.name	= "sdhci-dove",
-+		.owner	= THIS_MODULE,
-+	},
-+	.probe		= sdhci_dove_probe,
-+	.remove		= __devexit_p(sdhci_dove_remove),
-+#ifdef CONFIG_PM
-+	.suspend	= sdhci_pltfm_suspend,
-+	.resume		= sdhci_pltfm_resume,
-+#endif
-+};
-+
-+static int __init sdhci_dove_init(void)
-+{
-+	return platform_driver_register(&sdhci_dove_driver);
-+}
-+module_init(sdhci_dove_init);
-+
-+static void __exit sdhci_dove_exit(void)
-+{
-+	platform_driver_unregister(&sdhci_dove_driver);
-+}
-+module_exit(sdhci_dove_exit);
-+
-+MODULE_DESCRIPTION("SDHCI driver for Dove");
-+MODULE_AUTHOR("Saeed Bishara <saeed@marvell.com>, "
-+	      "Mike Rapoport <mike@compulab.co.il>");
-+MODULE_LICENSE("GPL v2");
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index a19967d..e27ccbb 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -191,16 +191,6 @@ static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_host *host)
- 	return clk_get_rate(pltfm_host->clk) / 256 / 16;
- }
- 
--static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
--{
--	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
+@@ -48,11 +48,8 @@ obj-$(CONFIG_MMC_SDHCI_CNS3XXX)		+= sdhci-cns3xxx.o
+ obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
+ obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
+ obj-$(CONFIG_MMC_SDHCI_TEGRA)		+= sdhci-tegra.o
 -
--	if (boarddata && gpio_is_valid(boarddata->wp_gpio))
--		return gpio_get_value(boarddata->wp_gpio);
--	else
--		return -ENOSYS;
+-obj-$(CONFIG_MMC_SDHCI_OF)	+= sdhci-of.o
+-sdhci-of-y				:= sdhci-of-core.o
+-sdhci-of-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
+-sdhci-of-$(CONFIG_MMC_SDHCI_OF_HLWD)	+= sdhci-of-hlwd.o
++obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
++obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
+ 
+ ifeq ($(CONFIG_CB710_DEBUG),y)
+ 	CFLAGS-cb710-mmc	+= -DDEBUG
+diff --git a/drivers/mmc/host/sdhci-of-core.c b/drivers/mmc/host/sdhci-of-core.c
+deleted file mode 100644
+index bca7062..0000000
+--- a/drivers/mmc/host/sdhci-of-core.c
++++ /dev/null
+@@ -1,251 +0,0 @@
+-/*
+- * OpenFirmware bindings for Secure Digital Host Controller Interface.
+- *
+- * Copyright (c) 2007 Freescale Semiconductor, Inc.
+- * Copyright (c) 2009 MontaVista Software, Inc.
+- *
+- * Authors: Xiaobo Xie <X.Xie@freescale.com>
+- *	    Anton Vorontsov <avorontsov@ru.mvista.com>
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or (at
+- * your option) any later version.
+- */
+-
+-#include <linux/err.h>
+-#include <linux/module.h>
+-#include <linux/init.h>
+-#include <linux/io.h>
+-#include <linux/interrupt.h>
+-#include <linux/delay.h>
+-#include <linux/of.h>
+-#include <linux/of_platform.h>
+-#include <linux/of_address.h>
+-#include <linux/of_irq.h>
+-#include <linux/mmc/host.h>
+-#ifdef CONFIG_PPC
+-#include <asm/machdep.h>
+-#endif
+-#include "sdhci-of.h"
+-#include "sdhci.h"
+-
+-#ifdef CONFIG_MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
+-
+-/*
+- * These accessors are designed for big endian hosts doing I/O to
+- * little endian controllers incorporating a 32-bit hardware byte swapper.
+- */
+-
+-u32 sdhci_be32bs_readl(struct sdhci_host *host, int reg)
+-{
+-	return in_be32(host->ioaddr + reg);
 -}
 -
- static struct sdhci_ops sdhci_esdhc_ops = {
- 	.read_l = esdhc_readl_le,
- 	.read_w = esdhc_readw_le,
-@@ -212,6 +202,24 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.get_min_clock = esdhc_pltfm_get_min_clock,
- };
- 
-+static struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
-+	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_ADMA
-+			| SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-+	/* ADMA has issues. Might be fixable */
-+	.ops = &sdhci_esdhc_ops,
-+};
-+
-+static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
-+{
-+	struct esdhc_platform_data *boarddata =
-+			host->mmc->parent->platform_data;
-+
-+	if (boarddata && gpio_is_valid(boarddata->wp_gpio))
-+		return gpio_get_value(boarddata->wp_gpio);
-+	else
-+		return -ENOSYS;
-+}
-+
- static irqreturn_t cd_irq(int irq, void *data)
- {
- 	struct sdhci_host *sdhost = (struct sdhci_host *)data;
-@@ -220,30 +228,35 @@ static irqreturn_t cd_irq(int irq, void *data)
- 	return IRQ_HANDLED;
- };
- 
--static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pdata)
-+static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
- {
+-u16 sdhci_be32bs_readw(struct sdhci_host *host, int reg)
+-{
+-	return in_be16(host->ioaddr + (reg ^ 0x2));
+-}
+-
+-u8 sdhci_be32bs_readb(struct sdhci_host *host, int reg)
+-{
+-	return in_8(host->ioaddr + (reg ^ 0x3));
+-}
+-
+-void sdhci_be32bs_writel(struct sdhci_host *host, u32 val, int reg)
+-{
+-	out_be32(host->ioaddr + reg, val);
+-}
+-
+-void sdhci_be32bs_writew(struct sdhci_host *host, u16 val, int reg)
+-{
 -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct sdhci_host *host;
-+	struct esdhc_platform_data *boarddata;
- 	struct clk *clk;
- 	int err;
- 	struct pltfm_imx_data *imx_data;
- 
-+	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata);
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	pltfm_host = sdhci_priv(host);
-+
-+	imx_data = kzalloc(sizeof(struct pltfm_imx_data), GFP_KERNEL);
-+	if (!imx_data)
-+		return -ENOMEM;
-+	pltfm_host->priv = imx_data;
-+
- 	clk = clk_get(mmc_dev(host->mmc), NULL);
- 	if (IS_ERR(clk)) {
- 		dev_err(mmc_dev(host->mmc), "clk err\n");
--		return PTR_ERR(clk);
-+		err = PTR_ERR(clk);
-+		goto err_clk_get;
- 	}
- 	clk_enable(clk);
- 	pltfm_host->clk = clk;
- 
--	imx_data = kzalloc(sizeof(struct pltfm_imx_data), GFP_KERNEL);
--	if (!imx_data) {
--		clk_disable(pltfm_host->clk);
--		clk_put(pltfm_host->clk);
--		return -ENOMEM;
+-	int base = reg & ~0x3;
+-	int shift = (reg & 0x2) * 8;
+-
+-	switch (reg) {
+-	case SDHCI_TRANSFER_MODE:
+-		/*
+-		 * Postpone this write, we must do it together with a
+-		 * command write that is down below.
+-		 */
+-		pltfm_host->xfer_mode_shadow = val;
+-		return;
+-	case SDHCI_COMMAND:
+-		sdhci_be32bs_writel(host,
+-				    val << 16 | pltfm_host->xfer_mode_shadow,
+-				    SDHCI_TRANSFER_MODE);
+-		return;
 -	}
--	pltfm_host->priv = imx_data;
+-	clrsetbits_be32(host->ioaddr + base, 0xffff << shift, val << shift);
+-}
 -
- 	if (!cpu_is_mx25())
- 		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
- 
-@@ -257,6 +270,7 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 	if (!(cpu_is_mx25() || cpu_is_mx35() || cpu_is_mx51()))
- 		imx_data->flags |= ESDHC_FLAG_MULTIBLK_NO_INT;
- 
-+	boarddata = host->mmc->parent->platform_data;
- 	if (boarddata) {
- 		err = gpio_request_one(boarddata->wp_gpio, GPIOF_IN, "ESDHC_WP");
- 		if (err) {
-@@ -289,6 +303,10 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
- 	}
- 
-+	err = sdhci_add_host(host);
-+	if (err)
-+		goto err_add_host;
-+
- 	return 0;
- 
-  no_card_detect_irq:
-@@ -297,14 +315,23 @@ static int esdhc_pltfm_init(struct sdhci_host *host, struct sdhci_pltfm_data *pd
- 	boarddata->cd_gpio = err;
-  not_supported:
- 	kfree(imx_data);
--	return 0;
-+ err_add_host:
-+	clk_disable(pltfm_host->clk);
-+	clk_put(pltfm_host->clk);
-+ err_clk_get:
-+	sdhci_pltfm_free(pdev);
-+	return err;
- }
- 
--static void esdhc_pltfm_exit(struct sdhci_host *host)
-+static int __devexit sdhci_esdhc_imx_remove(struct platform_device *pdev)
- {
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
- 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
-+
-+	sdhci_remove_host(host, dead);
- 
- 	if (boarddata && gpio_is_valid(boarddata->wp_gpio))
- 		gpio_free(boarddata->wp_gpio);
-@@ -319,13 +346,37 @@ static void esdhc_pltfm_exit(struct sdhci_host *host)
- 	clk_disable(pltfm_host->clk);
- 	clk_put(pltfm_host->clk);
- 	kfree(imx_data);
-+
-+	sdhci_pltfm_free(pdev);
-+
-+	return 0;
- }
- 
--struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
--	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_ADMA
--			| SDHCI_QUIRK_BROKEN_CARD_DETECTION,
--	/* ADMA has issues. Might be fixable */
--	.ops = &sdhci_esdhc_ops,
--	.init = esdhc_pltfm_init,
--	.exit = esdhc_pltfm_exit,
-+static struct platform_driver sdhci_esdhc_imx_driver = {
-+	.driver		= {
-+		.name	= "sdhci-esdhc-imx",
-+		.owner	= THIS_MODULE,
-+	},
-+	.probe		= sdhci_esdhc_imx_probe,
-+	.remove		= __devexit_p(sdhci_esdhc_imx_remove),
-+#ifdef CONFIG_PM
-+	.suspend	= sdhci_pltfm_suspend,
-+	.resume		= sdhci_pltfm_resume,
-+#endif
- };
-+
-+static int __init sdhci_esdhc_imx_init(void)
-+{
-+	return platform_driver_register(&sdhci_esdhc_imx_driver);
-+}
-+module_init(sdhci_esdhc_imx_init);
-+
-+static void __exit sdhci_esdhc_imx_exit(void)
-+{
-+	platform_driver_unregister(&sdhci_esdhc_imx_driver);
-+}
-+module_exit(sdhci_esdhc_imx_exit);
-+
-+MODULE_DESCRIPTION("SDHCI driver for Freescale i.MX eSDHC");
-+MODULE_AUTHOR("Wolfram Sang <w.sang@pengutronix.de>");
-+MODULE_LICENSE("GPL v2");
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index dbab040..8ccf256 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -22,48 +22,22 @@
-  * Inspired by sdhci-pci.c, by Pierre Ossman
-  */
- 
--#include <linux/delay.h>
--#include <linux/highmem.h>
--#include <linux/mod_devicetable.h>
--#include <linux/platform_device.h>
+-void sdhci_be32bs_writeb(struct sdhci_host *host, u8 val, int reg)
+-{
+-	int base = reg & ~0x3;
+-	int shift = (reg & 0x3) * 8;
 -
--#include <linux/mmc/host.h>
+-	clrsetbits_be32(host->ioaddr + base , 0xff << shift, val << shift);
+-}
+-#endif /* CONFIG_MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER */
 -
--#include <linux/io.h>
--#include <linux/mmc/sdhci-pltfm.h>
-+#include <linux/err.h>
- 
- #include "sdhci.h"
- #include "sdhci-pltfm.h"
- 
--/*****************************************************************************\
-- *                                                                           *
-- * SDHCI core callbacks                                                      *
-- *                                                                           *
--\*****************************************************************************/
+-#ifdef CONFIG_PM
 -
- static struct sdhci_ops sdhci_pltfm_ops = {
- };
- 
--/*****************************************************************************\
-- *                                                                           *
-- * Device probing/removal                                                    *
-- *                                                                           *
--\*****************************************************************************/
+-static int sdhci_of_suspend(struct platform_device *ofdev, pm_message_t state)
+-{
+-	struct sdhci_host *host = dev_get_drvdata(&ofdev->dev);
 -
--static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
-+struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
-+				    struct sdhci_pltfm_data *pdata)
- {
--	const struct platform_device_id *platid = platform_get_device_id(pdev);
+-	return mmc_suspend_host(host->mmc);
+-}
+-
+-static int sdhci_of_resume(struct platform_device *ofdev)
+-{
+-	struct sdhci_host *host = dev_get_drvdata(&ofdev->dev);
+-
+-	return mmc_resume_host(host->mmc);
+-}
+-
+-#else
+-
+-#define sdhci_of_suspend NULL
+-#define sdhci_of_resume NULL
+-
+-#endif
+-
+-static bool __devinit sdhci_of_wp_inverted(struct device_node *np)
+-{
+-	if (of_get_property(np, "sdhci,wp-inverted", NULL))
+-		return true;
+-
+-	/* Old device trees don't have the wp-inverted property. */
+-#ifdef CONFIG_PPC
+-	return machine_is(mpc837x_rdb) || machine_is(mpc837x_mds);
+-#else
+-	return false;
+-#endif
+-}
+-
+-static int __devinit sdhci_of_probe(struct platform_device *ofdev)
+-{
+-	struct device_node *np = ofdev->dev.of_node;
 -	struct sdhci_pltfm_data *pdata;
- 	struct sdhci_host *host;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct resource *iomem;
- 	int ret;
- 
--	if (platid && platid->driver_data)
--		pdata = (void *)platid->driver_data;
--	else
--		pdata = pdev->dev.platform_data;
+-	struct sdhci_host *host;
+-	struct sdhci_of_host *of_host;
+-	const __be32 *clk;
+-	int size;
+-	int ret;
 -
- 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!iomem) {
- 		ret = -ENOMEM;
-@@ -71,8 +45,7 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- 	}
- 
- 	if (resource_size(iomem) < 0x100)
--		dev_err(&pdev->dev, "Invalid iomem size. You may "
--			"experience problems.\n");
-+		dev_err(&pdev->dev, "Invalid iomem size!\n");
- 
- 	/* Some PCI-based MFD need the parent here */
- 	if (pdev->dev.parent != &platform_bus)
-@@ -87,7 +60,7 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- 
- 	pltfm_host = sdhci_priv(host);
- 
--	host->hw_name = "platform";
-+	host->hw_name = dev_name(&pdev->dev);
- 	if (pdata && pdata->ops)
- 		host->ops = pdata->ops;
- 	else
-@@ -110,126 +83,70 @@ static int __devinit sdhci_pltfm_probe(struct platform_device *pdev)
- 		goto err_remap;
- 	}
- 
--	if (pdata && pdata->init) {
--		ret = pdata->init(host, pdata);
--		if (ret)
--			goto err_plat_init;
+-	if (!ofdev->dev.of_match)
+-		return -EINVAL;
+-	pdata = ofdev->dev.of_match->data;
+-
+-	if (!of_device_is_available(np))
+-		return -ENODEV;
+-
+-	host = sdhci_alloc_host(&ofdev->dev, sizeof(*pltfm_host));
+-	if (IS_ERR(host))
+-		return -ENOMEM;
+-
+-	pltfm_host = sdhci_priv(host);
+-	dev_set_drvdata(&ofdev->dev, host);
+-
+-	host->ioaddr = of_iomap(np, 0);
+-	if (!host->ioaddr) {
+-		ret = -ENOMEM;
+-		goto err_addr_map;
 -	}
+-
+-	host->irq = irq_of_parse_and_map(np, 0);
+-	if (!host->irq) {
+-		ret = -EINVAL;
+-		goto err_no_irq;
+-	}
+-
+-	host->hw_name = dev_name(&ofdev->dev);
+-	if (pdata) {
+-		host->quirks = pdata->quirks;
+-		host->ops = &pdata->ops;
+-	}
+-
+-	if (of_get_property(np, "sdhci,auto-cmd12", NULL))
+-		host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+-
+-
+-	if (of_get_property(np, "sdhci,1-bit-only", NULL))
+-		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
+-
+-	if (sdhci_of_wp_inverted(np))
+-		host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
+-
+-	clk = of_get_property(np, "clock-frequency", &size);
+-	if (clk && size == sizeof(*clk) && *clk)
+-		pltfm_host->clock = be32_to_cpup(clk);
 -
 -	ret = sdhci_add_host(host);
 -	if (ret)
 -		goto err_add_host;
 -
- 	platform_set_drvdata(pdev, host);
- 
 -	return 0;
-+	return host;
- 
+-
 -err_add_host:
--	if (pdata && pdata->exit)
--		pdata->exit(host);
--err_plat_init:
+-	irq_dispose_mapping(host->irq);
+-err_no_irq:
 -	iounmap(host->ioaddr);
- err_remap:
- 	release_mem_region(iomem->start, resource_size(iomem));
- err_request:
- 	sdhci_free_host(host);
- err:
--	printk(KERN_ERR"Probing of sdhci-pltfm failed: %d\n", ret);
+-err_addr_map:
+-	sdhci_free_host(host);
 -	return ret;
-+	dev_err(&pdev->dev, "%s failed %d\n", __func__, ret);
-+	return ERR_PTR(ret);
- }
- 
--static int __devexit sdhci_pltfm_remove(struct platform_device *pdev)
-+void sdhci_pltfm_free(struct platform_device *pdev)
- {
--	struct sdhci_pltfm_data *pdata = pdev->dev.platform_data;
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	int dead;
--	u32 scratch;
+-}
 -
--	dead = 0;
--	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
--	if (scratch == (u32)-1)
--		dead = 1;
- 
--	sdhci_remove_host(host, dead);
--	if (pdata && pdata->exit)
--		pdata->exit(host);
- 	iounmap(host->ioaddr);
- 	release_mem_region(iomem->start, resource_size(iomem));
- 	sdhci_free_host(host);
- 	platform_set_drvdata(pdev, NULL);
-+}
- 
+-static int __devexit sdhci_of_remove(struct platform_device *ofdev)
+-{
+-	struct sdhci_host *host = dev_get_drvdata(&ofdev->dev);
+-
+-	sdhci_remove_host(host, 0);
+-	sdhci_free_host(host);
+-	irq_dispose_mapping(host->irq);
+-	iounmap(host->ioaddr);
 -	return 0;
-+int sdhci_pltfm_register(struct platform_device *pdev,
-+			 struct sdhci_pltfm_data *pdata)
-+{
-+	struct sdhci_host *host;
-+	int ret = 0;
-+
-+	host = sdhci_pltfm_init(pdev, pdata);
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	ret = sdhci_add_host(host);
-+	if (ret)
-+		sdhci_pltfm_free(pdev);
-+
-+	return ret;
- }
- 
--static const struct platform_device_id sdhci_pltfm_ids[] = {
--	{ "sdhci", },
--#ifdef CONFIG_MMC_SDHCI_CNS3XXX
--	{ "sdhci-cns3xxx", (kernel_ulong_t)&sdhci_cns3xxx_pdata },
--#endif
--#ifdef CONFIG_MMC_SDHCI_ESDHC_IMX
--	{ "sdhci-esdhc-imx", (kernel_ulong_t)&sdhci_esdhc_imx_pdata },
--#endif
--#ifdef CONFIG_MMC_SDHCI_DOVE
--	{ "sdhci-dove", (kernel_ulong_t)&sdhci_dove_pdata },
--#endif
--#ifdef CONFIG_MMC_SDHCI_TEGRA
--	{ "sdhci-tegra", (kernel_ulong_t)&sdhci_tegra_pdata },
--#endif
--	{ },
--};
--MODULE_DEVICE_TABLE(platform, sdhci_pltfm_ids);
-+int sdhci_pltfm_unregister(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
-+
-+	sdhci_remove_host(host, dead);
-+	sdhci_pltfm_free(pdev);
-+
-+	return 0;
-+}
- 
- #ifdef CONFIG_PM
--static int sdhci_pltfm_suspend(struct platform_device *dev, pm_message_t state)
-+int sdhci_pltfm_suspend(struct platform_device *dev, pm_message_t state)
- {
- 	struct sdhci_host *host = platform_get_drvdata(dev);
- 
- 	return sdhci_suspend_host(host, state);
- }
- 
--static int sdhci_pltfm_resume(struct platform_device *dev)
-+int sdhci_pltfm_resume(struct platform_device *dev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(dev);
- 
- 	return sdhci_resume_host(host);
- }
--#else
--#define sdhci_pltfm_suspend	NULL
--#define sdhci_pltfm_resume	NULL
- #endif	/* CONFIG_PM */
+-}
 -
--static struct platform_driver sdhci_pltfm_driver = {
+-static const struct of_device_id sdhci_of_match[] = {
+-#ifdef CONFIG_MMC_SDHCI_OF_ESDHC
+-	{ .compatible = "fsl,mpc8379-esdhc", .data = &sdhci_esdhc_pdata, },
+-	{ .compatible = "fsl,mpc8536-esdhc", .data = &sdhci_esdhc_pdata, },
+-	{ .compatible = "fsl,esdhc", .data = &sdhci_esdhc_pdata, },
+-#endif
+-#ifdef CONFIG_MMC_SDHCI_OF_HLWD
+-	{ .compatible = "nintendo,hollywood-sdhci", .data = &sdhci_hlwd_pdata, },
+-#endif
+-	{ .compatible = "generic-sdhci", },
+-	{},
+-};
+-MODULE_DEVICE_TABLE(of, sdhci_of_match);
+-
+-static struct platform_driver sdhci_of_driver = {
 -	.driver = {
--		.name	= "sdhci",
--		.owner	= THIS_MODULE,
+-		.name = "sdhci-of",
+-		.owner = THIS_MODULE,
+-		.of_match_table = sdhci_of_match,
 -	},
--	.probe		= sdhci_pltfm_probe,
--	.remove		= __devexit_p(sdhci_pltfm_remove),
--	.id_table	= sdhci_pltfm_ids,
--	.suspend	= sdhci_pltfm_suspend,
--	.resume		= sdhci_pltfm_resume,
+-	.probe = sdhci_of_probe,
+-	.remove = __devexit_p(sdhci_of_remove),
+-	.suspend = sdhci_of_suspend,
+-	.resume	= sdhci_of_resume,
 -};
 -
--/*****************************************************************************\
-- *                                                                           *
-- * Driver init/exit                                                          *
-- *                                                                           *
--\*****************************************************************************/
--
--static int __init sdhci_drv_init(void)
+-static int __init sdhci_of_init(void)
 -{
--	return platform_driver_register(&sdhci_pltfm_driver);
+-	return platform_driver_register(&sdhci_of_driver);
 -}
+-module_init(sdhci_of_init);
 -
--static void __exit sdhci_drv_exit(void)
+-static void __exit sdhci_of_exit(void)
 -{
--	platform_driver_unregister(&sdhci_pltfm_driver);
+-	platform_driver_unregister(&sdhci_of_driver);
 -}
+-module_exit(sdhci_of_exit);
 -
--module_init(sdhci_drv_init);
--module_exit(sdhci_drv_exit);
+-MODULE_DESCRIPTION("Secure Digital Host Controller Interface OF driver");
+-MODULE_AUTHOR("Xiaobo Xie <X.Xie@freescale.com>, "
+-	      "Anton Vorontsov <avorontsov@ru.mvista.com>");
+-MODULE_LICENSE("GPL");
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 492bcd7..2db6a45 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -16,7 +16,7 @@
+ #include <linux/io.h>
+ #include <linux/delay.h>
+ #include <linux/mmc/host.h>
+-#include "sdhci-of.h"
++#include "sdhci-pltfm.h"
+ #include "sdhci.h"
+ #include "sdhci-esdhc.h"
+ 
+@@ -85,9 +85,58 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.get_min_clock = esdhc_of_get_min_clock,
+ };
+ 
+-struct sdhci_pltfm_data sdhci_esdhc_pdata = {
++static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
+ 	/* card detection could be handled via GPIO */
+ 	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_CARD_DETECTION
+ 		| SDHCI_QUIRK_NO_CARD_NO_RESET,
+ 	.ops = &sdhci_esdhc_ops,
+ };
++
++static int __devinit sdhci_esdhc_probe(struct platform_device *pdev)
++{
++	return sdhci_pltfm_register(pdev, &sdhci_esdhc_pdata);
++}
++
++static int __devexit sdhci_esdhc_remove(struct platform_device *pdev)
++{
++	return sdhci_pltfm_unregister(pdev);
++}
++
++static const struct of_device_id sdhci_esdhc_of_match[] = {
++	{ .compatible = "fsl,mpc8379-esdhc" },
++	{ .compatible = "fsl,mpc8536-esdhc" },
++	{ .compatible = "fsl,esdhc" },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, sdhci_esdhc_of_match);
++
++static struct platform_driver sdhci_esdhc_driver = {
++	.driver = {
++		.name = "sdhci-esdhc",
++		.owner = THIS_MODULE,
++		.of_match_table = sdhci_esdhc_of_match,
++	},
++	.probe = sdhci_esdhc_probe,
++	.remove = __devexit_p(sdhci_esdhc_remove),
++#ifdef CONFIG_PM
++	.suspend = sdhci_pltfm_suspend,
++	.resume = sdhci_pltfm_resume,
++#endif
++};
++
++static int __init sdhci_esdhc_init(void)
++{
++	return platform_driver_register(&sdhci_esdhc_driver);
++}
++module_init(sdhci_esdhc_init);
++
++static void __exit sdhci_esdhc_exit(void)
++{
++	platform_driver_unregister(&sdhci_esdhc_driver);
++}
++module_exit(sdhci_esdhc_exit);
++
++MODULE_DESCRIPTION("SDHCI OF driver for Freescale MPC eSDHC");
++MODULE_AUTHOR("Xiaobo Xie <X.Xie@freescale.com>, "
++	      "Anton Vorontsov <avorontsov@ru.mvista.com>");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/mmc/host/sdhci-of-hlwd.c b/drivers/mmc/host/sdhci-of-hlwd.c
+index 380e896..faedfce 100644
+--- a/drivers/mmc/host/sdhci-of-hlwd.c
++++ b/drivers/mmc/host/sdhci-of-hlwd.c
+@@ -21,7 +21,7 @@
+ 
+ #include <linux/delay.h>
+ #include <linux/mmc/host.h>
+-#include "sdhci-of.h"
++#include "sdhci-pltfm.h"
+ #include "sdhci.h"
+ 
+ /*
+@@ -60,8 +60,54 @@ static struct sdhci_ops sdhci_hlwd_ops = {
+ 	.write_b = sdhci_hlwd_writeb,
+ };
+ 
+-struct sdhci_pltfm_data sdhci_hlwd_pdata = {
++static struct sdhci_pltfm_data sdhci_hlwd_pdata = {
+ 	.quirks = SDHCI_QUIRK_32BIT_DMA_ADDR |
+ 		  SDHCI_QUIRK_32BIT_DMA_SIZE,
+ 	.ops = &sdhci_hlwd_ops,
+ };
++
++static int __devinit sdhci_hlwd_probe(struct platform_device *pdev)
++{
++	return sdhci_pltfm_register(pdev, &sdhci_hlwd_pdata);
++}
++
++static int __devexit sdhci_hlwd_remove(struct platform_device *pdev)
++{
++	return sdhci_pltfm_unregister(pdev);
++}
++
++static const struct of_device_id sdhci_hlwd_of_match[] = {
++	{ .compatible = "nintendo,hollywood-sdhci" },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, sdhci_hlwd_of_match);
++
++static struct platform_driver sdhci_hlwd_driver = {
++	.driver = {
++		.name = "sdhci-hlwd",
++		.owner = THIS_MODULE,
++		.of_match_table = sdhci_hlwd_of_match,
++	},
++	.probe = sdhci_hlwd_probe,
++	.remove = __devexit_p(sdhci_hlwd_remove),
++#ifdef CONFIG_PM
++	.suspend = sdhci_pltfm_suspend,
++	.resume = sdhci_pltfm_resume,
++#endif
++};
++
++static int __init sdhci_hlwd_init(void)
++{
++	return platform_driver_register(&sdhci_hlwd_driver);
++}
++module_init(sdhci_hlwd_init);
++
++static void __exit sdhci_hlwd_exit(void)
++{
++	platform_driver_unregister(&sdhci_hlwd_driver);
++}
++module_exit(sdhci_hlwd_exit);
++
++MODULE_DESCRIPTION("Nintendo Wii SDHCI OF driver");
++MODULE_AUTHOR("The GameCube Linux Team, Albert Herranz");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/mmc/host/sdhci-of.h b/drivers/mmc/host/sdhci-of.h
+deleted file mode 100644
+index 5bdb5e7..0000000
+--- a/drivers/mmc/host/sdhci-of.h
++++ /dev/null
+@@ -1,33 +0,0 @@
+-/*
+- * OpenFirmware bindings for Secure Digital Host Controller Interface.
+- *
+- * Copyright (c) 2007 Freescale Semiconductor, Inc.
+- * Copyright (c) 2009 MontaVista Software, Inc.
+- *
+- * Authors: Xiaobo Xie <X.Xie@freescale.com>
+- *	    Anton Vorontsov <avorontsov@ru.mvista.com>
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or (at
+- * your option) any later version.
+- */
 -
--MODULE_DESCRIPTION("Secure Digital Host Controller Interface platform driver");
--MODULE_AUTHOR("Mocean Laboratories <info@mocean-labs.com>");
--MODULE_LICENSE("GPL v2");
+-#ifndef __SDHCI_OF_H
+-#define __SDHCI_OF_H
+-
+-#include <linux/types.h>
+-#include "sdhci.h"
+-#include "sdhci-pltfm.h"
+-
+-extern u32 sdhci_be32bs_readl(struct sdhci_host *host, int reg);
+-extern u16 sdhci_be32bs_readw(struct sdhci_host *host, int reg);
+-extern u8 sdhci_be32bs_readb(struct sdhci_host *host, int reg);
+-extern void sdhci_be32bs_writel(struct sdhci_host *host, u32 val, int reg);
+-extern void sdhci_be32bs_writew(struct sdhci_host *host, u16 val, int reg);
+-extern void sdhci_be32bs_writeb(struct sdhci_host *host, u8 val, int reg);
+-
+-extern struct sdhci_pltfm_data sdhci_esdhc_pdata;
+-extern struct sdhci_pltfm_data sdhci_hlwd_pdata;
+-
+-#endif /* __SDHCI_OF_H */
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index 8ccf256..041b0e2 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -2,6 +2,12 @@
+  * sdhci-pltfm.c Support for SDHCI platform devices
+  * Copyright (c) 2009 Intel Corporation
+  *
++ * Copyright (c) 2007 Freescale Semiconductor, Inc.
++ * Copyright (c) 2009 MontaVista Software, Inc.
++ *
++ * Authors: Xiaobo Xie <X.Xie@freescale.com>
++ *	    Anton Vorontsov <avorontsov@ru.mvista.com>
++ *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License version 2 as
+  * published by the Free Software Foundation.
+@@ -23,13 +29,114 @@
+  */
+ 
+ #include <linux/err.h>
+-
++#include <linux/of.h>
++#ifdef CONFIG_PPC
++#include <asm/machdep.h>
++#endif
+ #include "sdhci.h"
+ #include "sdhci-pltfm.h"
+ 
+ static struct sdhci_ops sdhci_pltfm_ops = {
+ };
+ 
++#ifdef CONFIG_MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
++/*
++ * These accessors are designed for big endian hosts doing I/O to
++ * little endian controllers incorporating a 32-bit hardware byte swapper.
++ */
++u32 sdhci_be32bs_readl(struct sdhci_host *host, int reg)
++{
++	return in_be32(host->ioaddr + reg);
++}
++
++u16 sdhci_be32bs_readw(struct sdhci_host *host, int reg)
++{
++	return in_be16(host->ioaddr + (reg ^ 0x2));
++}
++
++u8 sdhci_be32bs_readb(struct sdhci_host *host, int reg)
++{
++	return in_8(host->ioaddr + (reg ^ 0x3));
++}
++
++void sdhci_be32bs_writel(struct sdhci_host *host, u32 val, int reg)
++{
++	out_be32(host->ioaddr + reg, val);
++}
++
++void sdhci_be32bs_writew(struct sdhci_host *host, u16 val, int reg)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int base = reg & ~0x3;
++	int shift = (reg & 0x2) * 8;
++
++	switch (reg) {
++	case SDHCI_TRANSFER_MODE:
++		/*
++		 * Postpone this write, we must do it together with a
++		 * command write that is down below.
++		 */
++		pltfm_host->xfer_mode_shadow = val;
++		return;
++	case SDHCI_COMMAND:
++		sdhci_be32bs_writel(host,
++				    val << 16 | pltfm_host->xfer_mode_shadow,
++				    SDHCI_TRANSFER_MODE);
++		return;
++	}
++	clrsetbits_be32(host->ioaddr + base, 0xffff << shift, val << shift);
++}
++
++void sdhci_be32bs_writeb(struct sdhci_host *host, u8 val, int reg)
++{
++	int base = reg & ~0x3;
++	int shift = (reg & 0x3) * 8;
++
++	clrsetbits_be32(host->ioaddr + base , 0xff << shift, val << shift);
++}
++#endif /* CONFIG_MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER */
++
++#ifdef CONFIG_OF
++static bool sdhci_of_wp_inverted(struct device_node *np)
++{
++	if (of_get_property(np, "sdhci,wp-inverted", NULL))
++		return true;
++
++	/* Old device trees don't have the wp-inverted property. */
++#ifdef CONFIG_PPC
++	return machine_is(mpc837x_rdb) || machine_is(mpc837x_mds);
++#else
++	return false;
++#endif /* CONFIG_PPC */
++}
++
++void sdhci_get_of_property(struct platform_device *pdev)
++{
++	struct device_node *np = pdev->dev.of_node;
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	const __be32 *clk;
++	int size;
++
++	if (of_device_is_available(np)) {
++		if (of_get_property(np, "sdhci,auto-cmd12", NULL))
++			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
++
++		if (of_get_property(np, "sdhci,1-bit-only", NULL))
++			host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
++
++		if (sdhci_of_wp_inverted(np))
++			host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
++
++		clk = of_get_property(np, "clock-frequency", &size);
++		if (clk && size == sizeof(*clk) && *clk)
++			pltfm_host->clock = be32_to_cpup(clk);
++	}
++}
++#else
++void sdhci_get_of_property(struct platform_device *pdev) {}
++#endif /* CONFIG_OF */
++
+ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+ 				    struct sdhci_pltfm_data *pdata)
+ {
+@@ -117,6 +224,8 @@ int sdhci_pltfm_register(struct platform_device *pdev,
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+ 
++	sdhci_get_of_property(pdev);
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		sdhci_pltfm_free(pdev);
 diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index 2b37016..ff4b7eb 100644
+index 3cac450..fe27b83 100644
 --- a/drivers/mmc/host/sdhci-pltfm.h
 +++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -13,6 +13,7 @@
- 
- #include <linux/clk.h>
+@@ -15,6 +15,7 @@
  #include <linux/types.h>
-+#include <linux/platform_device.h>
+ #include <linux/platform_device.h>
  #include <linux/mmc/sdhci-pltfm.h>
++#include <linux/mmc/sdhci.h>
  
  struct sdhci_pltfm_host {
-@@ -20,9 +21,17 @@ struct sdhci_pltfm_host {
- 	void *priv; /* to handle quirks across io-accessor calls */
- };
- 
--extern struct sdhci_pltfm_data sdhci_cns3xxx_pdata;
--extern struct sdhci_pltfm_data sdhci_esdhc_imx_pdata;
--extern struct sdhci_pltfm_data sdhci_dove_pdata;
--extern struct sdhci_pltfm_data sdhci_tegra_pdata;
-+extern struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
-+					   struct sdhci_pltfm_data *pdata);
-+extern void sdhci_pltfm_free(struct platform_device *pdev);
-+
-+extern int sdhci_pltfm_register(struct platform_device *pdev,
-+				struct sdhci_pltfm_data *pdata);
-+extern int sdhci_pltfm_unregister(struct platform_device *pdev);
-+
-+#ifdef CONFIG_PM
-+extern int sdhci_pltfm_suspend(struct platform_device *dev, pm_message_t state);
-+extern int sdhci_pltfm_resume(struct platform_device *dev);
-+#endif
- 
- #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 343c97e..1f66aca 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -116,20 +116,42 @@ static int tegra_sdhci_8bit(struct sdhci_host *host, int bus_width)
- 	return 0;
- }
- 
-+static struct sdhci_ops tegra_sdhci_ops = {
-+	.get_ro     = tegra_sdhci_get_ro,
-+	.read_l     = tegra_sdhci_readl,
-+	.read_w     = tegra_sdhci_readw,
-+	.write_l    = tegra_sdhci_writel,
-+	.platform_8bit_width = tegra_sdhci_8bit,
-+};
-+
-+static struct sdhci_pltfm_data sdhci_tegra_pdata = {
-+	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-+		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
-+		  SDHCI_QUIRK_NO_HISPD_BIT |
-+		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
-+	.ops  = &tegra_sdhci_ops,
-+};
- 
--static int tegra_sdhci_pltfm_init(struct sdhci_host *host,
--				  struct sdhci_pltfm_data *pdata)
-+static int __devinit sdhci_tegra_probe(struct platform_device *pdev)
- {
--	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
-+	struct sdhci_pltfm_host *pltfm_host;
- 	struct tegra_sdhci_platform_data *plat;
-+	struct sdhci_host *host;
  	struct clk *clk;
- 	int rc;
+@@ -25,6 +26,17 @@ struct sdhci_pltfm_host {
+ 	u16 xfer_mode_shadow;
+ };
  
-+	host = sdhci_pltfm_init(pdev, &sdhci_tegra_pdata);
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	pltfm_host = sdhci_priv(host);
-+
- 	plat = pdev->dev.platform_data;
-+
- 	if (plat == NULL) {
- 		dev_err(mmc_dev(host->mmc), "missing platform data\n");
--		return -ENXIO;
-+		rc = -ENXIO;
-+		goto err_no_plat;
- 	}
- 
- 	if (gpio_is_valid(plat->power_gpio)) {
-@@ -137,7 +159,7 @@ static int tegra_sdhci_pltfm_init(struct sdhci_host *host,
- 		if (rc) {
- 			dev_err(mmc_dev(host->mmc),
- 				"failed to allocate power gpio\n");
--			goto out;
-+			goto err_power_req;
- 		}
- 		tegra_gpio_enable(plat->power_gpio);
- 		gpio_direction_output(plat->power_gpio, 1);
-@@ -148,7 +170,7 @@ static int tegra_sdhci_pltfm_init(struct sdhci_host *host,
- 		if (rc) {
- 			dev_err(mmc_dev(host->mmc),
- 				"failed to allocate cd gpio\n");
--			goto out_power;
-+			goto err_cd_req;
- 		}
- 		tegra_gpio_enable(plat->cd_gpio);
- 		gpio_direction_input(plat->cd_gpio);
-@@ -159,7 +181,7 @@ static int tegra_sdhci_pltfm_init(struct sdhci_host *host,
- 
- 		if (rc)	{
- 			dev_err(mmc_dev(host->mmc), "request irq error\n");
--			goto out_cd;
-+			goto err_cd_irq_req;
- 		}
- 
- 	}
-@@ -169,7 +191,7 @@ static int tegra_sdhci_pltfm_init(struct sdhci_host *host,
- 		if (rc) {
- 			dev_err(mmc_dev(host->mmc),
- 				"failed to allocate wp gpio\n");
--			goto out_irq;
-+			goto err_wp_req;
- 		}
- 		tegra_gpio_enable(plat->wp_gpio);
- 		gpio_direction_input(plat->wp_gpio);
-@@ -179,7 +201,7 @@ static int tegra_sdhci_pltfm_init(struct sdhci_host *host,
- 	if (IS_ERR(clk)) {
- 		dev_err(mmc_dev(host->mmc), "clk err\n");
- 		rc = PTR_ERR(clk);
--		goto out_wp;
-+		goto err_clk_get;
- 	}
- 	clk_enable(clk);
- 	pltfm_host->clk = clk;
-@@ -189,38 +211,47 @@ static int tegra_sdhci_pltfm_init(struct sdhci_host *host,
- 	if (plat->is_8bit)
- 		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
- 
-+	rc = sdhci_add_host(host);
-+	if (rc)
-+		goto err_add_host;
-+
- 	return 0;
- 
--out_wp:
-+err_add_host:
-+	clk_disable(pltfm_host->clk);
-+	clk_put(pltfm_host->clk);
-+err_clk_get:
- 	if (gpio_is_valid(plat->wp_gpio)) {
- 		tegra_gpio_disable(plat->wp_gpio);
- 		gpio_free(plat->wp_gpio);
- 	}
--
--out_irq:
-+err_wp_req:
- 	if (gpio_is_valid(plat->cd_gpio))
- 		free_irq(gpio_to_irq(plat->cd_gpio), host);
--out_cd:
-+err_cd_irq_req:
- 	if (gpio_is_valid(plat->cd_gpio)) {
- 		tegra_gpio_disable(plat->cd_gpio);
- 		gpio_free(plat->cd_gpio);
- 	}
--
--out_power:
-+err_cd_req:
- 	if (gpio_is_valid(plat->power_gpio)) {
- 		tegra_gpio_disable(plat->power_gpio);
- 		gpio_free(plat->power_gpio);
- 	}
--
--out:
-+err_power_req:
-+err_no_plat:
-+	sdhci_pltfm_free(pdev);
- 	return rc;
- }
- 
--static void tegra_sdhci_pltfm_exit(struct sdhci_host *host)
-+static int __devexit sdhci_tegra_remove(struct platform_device *pdev)
- {
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
- 	struct tegra_sdhci_platform_data *plat;
-+	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
-+
-+	sdhci_remove_host(host, dead);
- 
- 	plat = pdev->dev.platform_data;
- 
-@@ -242,22 +273,37 @@ static void tegra_sdhci_pltfm_exit(struct sdhci_host *host)
- 
- 	clk_disable(pltfm_host->clk);
- 	clk_put(pltfm_host->clk);
-+
-+	sdhci_pltfm_free(pdev);
-+
-+	return 0;
- }
- 
--static struct sdhci_ops tegra_sdhci_ops = {
--	.get_ro     = tegra_sdhci_get_ro,
--	.read_l     = tegra_sdhci_readl,
--	.read_w     = tegra_sdhci_readw,
--	.write_l    = tegra_sdhci_writel,
--	.platform_8bit_width = tegra_sdhci_8bit,
-+static struct platform_driver sdhci_tegra_driver = {
-+	.driver		= {
-+		.name	= "sdhci-tegra",
-+		.owner	= THIS_MODULE,
-+	},
-+	.probe		= sdhci_tegra_probe,
-+	.remove		= __devexit_p(sdhci_tegra_remove),
-+#ifdef CONFIG_PM
-+	.suspend	= sdhci_pltfm_suspend,
-+	.resume		= sdhci_pltfm_resume,
++#ifdef CONFIG_MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
++extern u32 sdhci_be32bs_readl(struct sdhci_host *host, int reg);
++extern u16 sdhci_be32bs_readw(struct sdhci_host *host, int reg);
++extern u8 sdhci_be32bs_readb(struct sdhci_host *host, int reg);
++extern void sdhci_be32bs_writel(struct sdhci_host *host, u32 val, int reg);
++extern void sdhci_be32bs_writew(struct sdhci_host *host, u16 val, int reg);
++extern void sdhci_be32bs_writeb(struct sdhci_host *host, u8 val, int reg);
 +#endif
- };
- 
--struct sdhci_pltfm_data sdhci_tegra_pdata = {
--	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
--		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
--		  SDHCI_QUIRK_NO_HISPD_BIT |
--		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
--	.ops  = &tegra_sdhci_ops,
--	.init = tegra_sdhci_pltfm_init,
--	.exit = tegra_sdhci_pltfm_exit,
--};
-+static int __init sdhci_tegra_init(void)
-+{
-+	return platform_driver_register(&sdhci_tegra_driver);
-+}
-+module_init(sdhci_tegra_init);
 +
-+static void __exit sdhci_tegra_exit(void)
-+{
-+	platform_driver_unregister(&sdhci_tegra_driver);
-+}
-+module_exit(sdhci_tegra_exit);
++extern void sdhci_get_of_property(struct platform_device *pdev);
 +
-+MODULE_DESCRIPTION("SDHCI driver for Tegra");
-+MODULE_AUTHOR(" Google, Inc.");
-+MODULE_LICENSE("GPL v2");
-diff --git a/include/linux/mmc/sdhci-pltfm.h b/include/linux/mmc/sdhci-pltfm.h
-index 548d59d..f1c2ac3 100644
---- a/include/linux/mmc/sdhci-pltfm.h
-+++ b/include/linux/mmc/sdhci-pltfm.h
-@@ -15,21 +15,15 @@
- #define _SDHCI_PLTFM_H
- 
- struct sdhci_ops;
--struct sdhci_host;
- 
- /**
-  * struct sdhci_pltfm_data - SDHCI platform-specific information & hooks
-  * @ops: optional pointer to the platform-provided SDHCI ops
-  * @quirks: optional SDHCI quirks
-- * @init: optional hook that is called during device probe, before the
-- *        driver tries to access any SDHCI registers
-- * @exit: optional hook that is called during device removal
-  */
- struct sdhci_pltfm_data {
- 	struct sdhci_ops *ops;
- 	unsigned int quirks;
--	int (*init)(struct sdhci_host *host, struct sdhci_pltfm_data *pdata);
--	void (*exit)(struct sdhci_host *host);
- };
- 
- #endif /* _SDHCI_PLTFM_H */
+ extern struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+ 					   struct sdhci_pltfm_data *pdata);
+ extern void sdhci_pltfm_free(struct platform_device *pdev);
 -- 
 1.7.4.1
 
