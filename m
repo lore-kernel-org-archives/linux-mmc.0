@@ -1,63 +1,89 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH v2 5/7] mmc: sdhci: consolidate sdhci-of-esdhc and
- sdhci-esdhc-imx
-Date: Wed, 25 May 2011 17:36:02 +0800
-Message-ID: <20110525093601.GA2070@S2100-06.ap.freescale.net>
-References: <1304601778-13837-1-git-send-email-shawn.guo@linaro.org>
- <1304601778-13837-6-git-send-email-shawn.guo@linaro.org>
- <20110524194054.GC25727@pengutronix.de>
- <20110525060637.GA30583@S2100-06.ap.freescale.net>
- <20110525064619.GI9774@pengutronix.de>
+From: Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v3 0/4] Consolidate sdhci pltfm & OF drivers and get them self
+	registered
+Date: Wed, 25 May 2011 19:01:50 +0800
+Message-ID: <1306321314-2493-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:21912
-	"EHLO DB3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752350Ab1EYJci convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 25 May 2011 05:32:38 -0400
-Content-Disposition: inline
-In-Reply-To: <20110525064619.GI9774@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Anton Vorontsov <cbouatmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Saeed Bishara <saeed-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Xiaobo Xie <X.Xie-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, Mike Rapoport <mike-UTxiZqZC01RS1MOuV/RT9w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linuxppc-dev@lists.ozlabs.org, devicetree-discuss@lists.ozlabs.org, Olof Johansson <olof@lixom.net>, Saeed Bishara <saeed@marvell.com>, Mike Rapoport <mike@compulab.co.il>, Anton Vorontsov <avorontsov@ru.mvista.com>, Xiaobo Xie <X.Xie@freescale.com>, Albert Herranz <albert_herranz@yahoo.es>, Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, kernel@pengutronix.de, sameo@linux.intel.com, Chris Ball <cjb@laptop.org>, patches@linaro.org
 
-Hi Uwe,
+Here are what the patch set does.
 
-On Wed, May 25, 2011 at 08:46:19AM +0200, Uwe Kleine-K=F6nig wrote:
-> Hello Shawn,
->=20
-> > > > +#ifndef CONFIG_MMC_SDHCI_ESDHC_IMX
-> > > > +#define cpu_is_mx25()	(0)
-> > > > +#define cpu_is_mx35()	(0)
-> > > > +#define cpu_is_mx51()	(0)
-> > > > +#define cpu_is_imx()	(0)
-> > > > +#else
-> > > > +#define cpu_is_imx()	(1)
-> > > > +#endif
-> > >=20
-> > > ... e.g. that looks a bit frightening.
-> > >=20
-> > Agree.
-> >=20
-> > The use of cpu_is_mx..() in the driver itself seems a churn to me
-> > even without this consolidation patch.  Is it possible for us to
-> > eliminate them by using pdata, and eventually device tree?  When we
-> > are there, I might want to revisit the consolidation again.
-> An alternative that allows letting the logic in the driver and still
-> getting rid of the cpu_is_ stuff is using platform ids. See
-> drivers/spi/spi_imx.c for an example. Instead of an index into an arr=
-ay
-> (as it's for the imx-spi driver) driver_data can hold flags, too, whi=
-ch
-> should be enough most of the time.
->=20
-Yeah, this is definitely a solution I can try later.  But for now, I
-would drop the esdhc consolidation patch.
+* Remove .probe and .remove hooks from sdhci-pltfm.c and make it be
+  a pure common helper function providers.
+* Add .probe and .remove hooks for sdhci pltfm drivers sdhci-cns3xxx,
+  sdhci-dove, sdhci-tegra, and sdhci-esdhc-imx to make them self
+  registered with calling helper functions created above.
+* Migrate the use of sdhci_of_host and sdhci_of_data to
+  sdhci_pltfm_host and sdhci_pltfm_data, so that OF version host and
+  data structure works can be saved, and pltfm version works for both
+  cases.
+* Add OF common helper stuff into sdhci-pltfm.c, and make OF version
+  sdhci drivers sdhci-of-esdhc and sdhci-of-hlwd become self
+  registered as well, so that sdhci-of-core.c and sdhci-of.h can be
+  removed.
+* Eliminate include/linux/mmc/sdhci-pltfm.h with moving stuff into
+  drivers/mmc/host/sdhci-pltfm.h.
 
---=20
+And the benefits we gain from the changes are:
+
+* Get the sdhci device driver follow the Linux trend that driver
+  makes the registration by its own.
+* sdhci-pltfm.c becomes simple and clean as it only has common helper
+  stuff there now.
+* All sdhci device specific things are going back its own driver.
+* The dt and non-dt drivers are consolidated to use the same pair of
+  .probe and .remove hooks.
+
+Changes since v2:
+* Drop imx mpc esdhc consolidation
+* Fix checkpatch errors
+* Add sdhci-of-core.c copyright into sdhci-pltfm.c
+
+Changes since v1:
+* Rebase on cjb's mmc-next tree
+* Introduce helper function pair sdhci_pltfm_register and
+  sdhci_pltfm_unregister
+* Eliminate variable 'scratch' in .remove hook to make the code
+  look simple
+* Return ERR_PTR in sdhci_pltfm_init and use IS_ERR/PTR_ERR to check
+  return value in .probe hooks
+* Correct MODULE_AUTHOR statement
+* Split esdhc conlidation patch to ease reviewing
+
+Shawn Guo (4):
+      mmc: sdhci: make sdhci-pltfm device drivers self registered
+      mmc: sdhci: eliminate sdhci_of_host and sdhci_of_data
+      mmc: sdhci: make sdhci-of device drivers self registered
+      mmc: sdhci: merge two sdhci-pltfm.h into one
+
+ drivers/mmc/host/Kconfig           |   47 +++----
+ drivers/mmc/host/Makefile          |   18 +--
+ drivers/mmc/host/sdhci-cns3xxx.c   |   43 ++++++-
+ drivers/mmc/host/sdhci-dove.c      |   42 ++++++-
+ drivers/mmc/host/sdhci-esdhc-imx.c |  114 +++++++++++-----
+ drivers/mmc/host/sdhci-of-core.c   |  250 ---------------------------------
+ drivers/mmc/host/sdhci-of-esdhc.c  |   85 +++++++++---
+ drivers/mmc/host/sdhci-of-hlwd.c   |   66 ++++++++--
+ drivers/mmc/host/sdhci-of.h        |   42 ------
+ drivers/mmc/host/sdhci-pltfm.c     |  266 ++++++++++++++++++++----------------
+ drivers/mmc/host/sdhci-pltfm.h     |   39 +++++-
+ drivers/mmc/host/sdhci-tegra.c     |  116 +++++++++++-----
+ include/linux/mmc/sdhci-pltfm.h    |   35 -----
+ 13 files changed, 578 insertions(+), 585 deletions(-)
+
 Regards,
 Shawn
-
