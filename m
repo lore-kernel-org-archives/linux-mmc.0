@@ -1,58 +1,82 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?=
-	<u.kleine-koenig@pengutronix.de>
-Subject: Re: [PATCH v2 5/7] mmc: sdhci: consolidate sdhci-of-esdhc and
- sdhci-esdhc-imx
-Date: Wed, 25 May 2011 08:46:19 +0200
-Message-ID: <20110525064619.GI9774@pengutronix.de>
-References: <1304601778-13837-1-git-send-email-shawn.guo@linaro.org>
- <1304601778-13837-6-git-send-email-shawn.guo@linaro.org>
- <20110524194054.GC25727@pengutronix.de>
- <20110525060637.GA30583@S2100-06.ap.freescale.net>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: [PATCH] MMC: SDHCI Auto-CMD23 fixes.
+Date: Wed, 25 May 2011 01:47:40 -0500
+Message-ID: <BANLkTikD4D4W0xTi=wbP0Qx3D8oZi2pzoA@mail.gmail.com>
+References: <m3aaeby3xr.fsf@pullcord.laptop.org>
+	<1306307623-8610-1-git-send-email-andreiw@motorola.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:47439 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752130Ab1EYGq0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 May 2011 02:46:26 -0400
-Content-Disposition: inline
-In-Reply-To: <20110525060637.GA30583@S2100-06.ap.freescale.net>
+Received: from exprod5og104.obsmtp.com ([64.18.0.178]:37295 "EHLO
+	exprod5og104.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752096Ab1EYGrn convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 May 2011 02:47:43 -0400
+Received: from il93mgrg01.am.mot-mobility.com ([10.22.94.168])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4P6jIqS015259
+	for <linux-mmc@vger.kernel.org>; Wed, 25 May 2011 02:45:18 -0400 (EDT)
+Received: from mail-ww0-f46.google.com (mail-ww0-f46.google.com [74.125.82.46])
+	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p4P6iXjr014674
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Wed, 25 May 2011 02:45:17 -0400 (EDT)
+Received: by mail-ww0-f46.google.com with SMTP id 28so7903866wwb.3
+        for <linux-mmc@vger.kernel.org>; Tue, 24 May 2011 23:47:40 -0700 (PDT)
+In-Reply-To: <1306307623-8610-1-git-send-email-andreiw@motorola.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linuxppc-dev@lists.ozlabs.org, devicetree-discuss@lists.ozlabs.org, Olof Johansson <olof@lixom.net>, Saeed Bishara <saeed@marvell.com>, Mike Rapoport <mike@compulab.co.il>, Anton Vorontsov <avorontsov@ru.mvista.com>, Xiaobo Xie <X.Xie@freescale.com>, Albert Herranz <albert_herranz@yahoo.es>, Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, kernel@pengutronix.de, sameo@linux.intel.com, Chris Ball <cjb@laptop.org>, patches@linaro.org
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, Andrei Warkentin <andreiw@motorola.com>
 
-Hello Shawn,
+Chris,
 
-> > > +#ifndef CONFIG_MMC_SDHCI_ESDHC_IMX
-> > > +#define cpu_is_mx25()	(0)
-> > > +#define cpu_is_mx35()	(0)
-> > > +#define cpu_is_mx51()	(0)
-> > > +#define cpu_is_imx()	(0)
-> > > +#else
-> > > +#define cpu_is_imx()	(1)
-> > > +#endif
-> >=20
-> > ... e.g. that looks a bit frightening.
-> >=20
-> Agree.
->=20
-> The use of cpu_is_mx..() in the driver itself seems a churn to me
-> even without this consolidation patch.  Is it possible for us to
-> eliminate them by using pdata, and eventually device tree?  When we
-> are there, I might want to revisit the consolidation again.
-An alternative that allows letting the logic in the driver and still
-getting rid of the cpu_is_ stuff is using platform ids. See
-drivers/spi/spi_imx.c for an example. Instead of an index into an array
-(as it's for the imx-spi driver) driver_data can hold flags, too, which
-should be enough most of the time.
+On Wed, May 25, 2011 at 2:13 AM, Andrei Warkentin <andreiw@motorola.com=
+> wrote:
+> Fixes bugs in Auto-CMD23 feature enable decision. Auto-CMD23
+> shoud be enabled if host is >=3D v3, and SDMA is not in use.
+>
+> USE_ADMA | USE_SDMA | Auto-CMD23
+> ---------+----------+-----------
+> =A0 =A00 =A0 =A0| =A0 =A00 =A0 =A0 | =A0 =A0 1
+> ---------+----------+-----------
+> =A0 =A00 =A0 =A0| =A0 =A01 =A0 =A0 | =A0 =A0 0
+> ---------+----------+-----------
+> =A0 =A01 =A0 =A0| =A0 =A00 =A0 =A0 | =A0 =A0 1
+> ---------+----------+-----------
+> =A0 =A01 =A0 =A0| =A0 =A01 =A0 =A0 | =A0 =A0 1
+>
+> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
+> ---
+> =A0drivers/mmc/host/sdhci.c | =A0 =A04 ++--
+> =A01 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index fbb1842..a4e64b0 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2498,9 +2498,9 @@ int sdhci_add_host(struct sdhci_host *host)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->flags |=3D SDHCI_AUTO_CMD12;
+>
+> =A0 =A0 =A0 =A0/* Auto-CMD23 stuff only works in ADMA or PIO. */
+> - =A0 =A0 =A0 if ((host->version =3D=3D SDHCI_SPEC_300) &&
+> + =A0 =A0 =A0 if ((host->version >=3D SDHCI_SPEC_300) &&
+> =A0 =A0 =A0 =A0 =A0 =A0((host->flags & SDHCI_USE_ADMA) ||
+> - =A0 =A0 =A0 =A0 =A0 =A0!(host->flags & SDHCI_REQ_USE_DMA))) {
+> + =A0 =A0 =A0 =A0 =A0 =A0!(host->flags & SDHCI_USE_SDMA))) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->flags |=3D SDHCI_AUTO_CMD23;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0printk(KERN_INFO "%s: Auto-CMD23 avail=
+able\n", mmc_hostname(mmc));
+> =A0 =A0 =A0 =A0} else
+> --
+> 1.7.0.4
+>
+>
 
-Best regards
-Uwe
+The reason the older logic didn't work correctly is because
+SDHCI_REQ_USE_DMA is not set in sdhci_add_host, but set in
+sdhci_prepare_data. That means if you didn't have USE_ADMA, but had
+USE_SDMA, it would still enable AUTO_CMD23, since the
+SDHCI_REQ_USE_DMA bit would always be 0. I would be very grateful if
+you can try it out on your XO. I unfortunately can't test this out
+right now.
 
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig        =
-    |
-Industrial Linux Solutions                 | http://www.pengutronix.de/=
-  |
+A
