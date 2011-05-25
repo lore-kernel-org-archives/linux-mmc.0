@@ -1,100 +1,311 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: [v6 5/5] MMC: SDHCI AutoCMD23 support.
-Date: Tue, 24 May 2011 19:37:34 -0500
-Message-ID: <BANLkTinPfqAJ_QqimSipUGvs87sdodL5ZQ@mail.gmail.com>
-References: <1305841590-26963-1-git-send-email-andreiw@motorola.com>
-	<1306181199-13915-6-git-send-email-andreiw@motorola.com>
-	<m3oc2ry90h.fsf@pullcord.laptop.org>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH V2] mmc: eMMC bus width may not work on all platforms
+Date: Tue, 24 May 2011 18:14:58 -0700
+Message-ID: <2FB34057-4156-4BCA-A896-733203F90DA3@marvell.com>
+References: <2FBABAF6-BFF6-46C9-BE6C-D4CA1EE9BD03@marvell.com>
+ <1482D9D127C1754E8684047CF53F7660622B177DBE@pgsmsx505.gar.corp.intel.com>
+ <m3fwo7r0nc.fsf@pullcord.laptop.org>
+ <15864FE4-25CB-46BC-ACC2-FC24C2E6E241@marvell.com>
+ <m3wrhgaeur.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og116.obsmtp.com ([64.18.0.147]:34526 "EHLO
-	exprod5og116.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757124Ab1EYAhi convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 May 2011 20:37:38 -0400
-Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.176.130.20])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p4P0c7IF000253
-	for <linux-mmc@vger.kernel.org>; Tue, 24 May 2011 20:38:07 -0400 (EDT)
-Received: from mail-wy0-f170.google.com (mail-wy0-f170.google.com [74.125.82.170])
-	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p4P0c6YC000234
-	(version=TLSv1/SSLv3 cipher=RC4-MD5 bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Tue, 24 May 2011 20:38:07 -0400 (EDT)
-Received: by wyb34 with SMTP id 34so6710883wyb.15
-        for <linux-mmc@vger.kernel.org>; Tue, 24 May 2011 17:37:34 -0700 (PDT)
-In-Reply-To: <m3oc2ry90h.fsf@pullcord.laptop.org>
+Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:43528 "EHLO
+	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753979Ab1EYBP1 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 24 May 2011 21:15:27 -0400
+In-Reply-To: <m3wrhgaeur.fsf@pullcord.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, arindam.nath@amd.com, arnd@arndb.de, subhashj@codeaurora.org, malchev@google.com, Philip Rakity <prakity@marvell.com>, zhangfei.gao@gmail.com
+Cc: "Mok, Tze Siong" <tze.siong.mok@intel.com>, Tomoya MORINAGA <tomoya-linux@dsn.okisemi.com>, Takashi Iwai <tiwai@suse.de>, Mark Brown <mark.brown314@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Chris,
 
-On Tue, May 24, 2011 at 6:27 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi Andrei,
->
-> On Mon, May 23 2011, Andrei Warkentin wrote:
->> Enables Auto-CMD23 support where available (SDHCI 3.0 controllers)
->>
->> Cc: arindam.nath@amd.com
->> Cc: cjb@laptop.org
->> Cc: arnd@arndb.de
->> Cc: subhashj@codeaurora.org
->> Cc: malchev@google.com
->> Tested-by: Arindam Nath <arindam.nath@amd.com>
->> Signed-off-by: Andrei Warkentin <andreiw@motorola.com>
->
-> Looks like this patch is breaking boot on my XO-1.75/Marvell MMP2 A2
-> with SD 3.0 controller. =A0:/
->
-> [ =A0 =A01.217156] sdhci: Secure Digital Host Controller Interface dr=
-iver
-> [ =A0 =A01.223361] sdhci: Copyright(c) Pierre Ossman
-> [ =A0 =A01.227793] mmc0: Auto-CMD23 available
-> [ =A0 =A01.227793] mmc0: no vmmc regulator found
-> [ =A0 =A01.242557] mmc0: SDHCI controller on MMC [sdhci-pxa.0] using =
-DMA
-> [ =A0 =A01.248748] mmc1: Auto-CMD23 available
-> [ =A0 =A01.252479] mmc1: no vmmc regulator found
-> [ =A0 =A01.256599] mmc1: SDHCI controller on MMC [sdhci-pxa.1] using =
-DMA
-> [ =A0 =A01.262694] mmc2: Auto-CMD23 available
-> [ =A0 =A01.266571] mmc2: no vmmc regulator found
-> [ =A0 =A01.270655] mmc2: SDHCI controller on MMC [sdhci-pxa.2] using =
-DMA
-> [ =A0 =A01.656280] mmc1: new SDIO card at address 0001
-> [ =A0 =A02.423849] libertas: 20:7c:8f:4a:79:c5, fw 9.70.7p0, cap 0x00=
-0003a3
-> [ =A0 =A02.432951] libertas: wlan0: Marvell WLAN 802.11 adapter
-> [ =A0 =A02.438262] Waiting for root device /dev/mmcblk0p2...
-> [ =A0 =A02.528607] mmc2: new high speed DDR MMC card at address 0001
-> [ =A0 =A02.534597] mmcblk0: mmc2:0001 SEM04G 3.68 GiB
-> [ =A0 =A02.539198] mmcblk0boot0: mmc2:0001 SEM04G partition 1 1.00 Mi=
-B
-> [ =A0 =A02.545166] mmcblk0boot1: mmc2:0001 SEM04G partition 2 1.00 Mi=
-B
-> [ =A0 =A02.555985] =A0mmcblk0: unknown partition table
-> ^^^^^
-> [ =A0 =A02.562610] =A0mmcblk0boot1: unknown partition table
-> [ =A0 =A02.569715] =A0mmcblk0boot0: unknown partition table
-> [ =A0 =A02.663264] VFS: Cannot open root device "mmcblk0p2" or unknow=
-n-block(179,2)
->
-> With the patch reverted, mmcblk0 comes up with partitions 1 and 2 and
-> mmcblk0p2 is mounted. =A0In this log, we fail to find a partition tab=
-le
-> and panic.
->
-> Any ideas/suggestions? =A0I'm surprised that we enabled Auto-CMD23 on=
- this
-> hardware; it is a v3 controller, but it has SDHCI_QUIRK_BROKEN_ADMA s=
-et..
->
+resend=20
 
-Looks like I am not honoring the broken ADMA flag :(. I was under the
-impression that it would have resulted in clearing the ADMA flag
-earlier, but looks like I was wrong.
+Note:  I cannot test test for a few days.  Following Chris
+suggestion posting to list.
 
-Will resend tomorrow.
+version 2
+---
+return -EINVAL when compare of ext_csd_fails
+combine two compare routines into one per suggestion
+from Chris.
 
-A
+---
+version 1
+
+CMD19 -- The offical way to validate bus widths from the
+JEDEC spec does not work on all platforms.  Some platforms
+that use PCI/PCIe to connect their SD controllers are known
+to fail.
+
+If the quirk MMC_BUS_WIDTH_TEST is not defined we try
+to figure out the bus width by reading the ext_csd at different
+bus widths and compare this against the ext_csd read in 1 bit
+mode.  If no ext_csd is available we default to 1 bit operations.
+
+Code has been tested on mmp2 against 8 bit eMMC and Transcend 2GB
+card that is known to not work in 4 bit mode.  The physical
+pins on the card are not present to support 4 bit operation.
+
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+---
+ drivers/mmc/core/mmc.c |  113 ++++++++++++++++++++++++++++++++++++++++=
++++----
+ 1 files changed, 103 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index baab027..6db91d6 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -174,14 +174,17 @@ static int mmc_decode_csd(struct mmc_card *card)
+ }
+=20
+ /*
+- * Read and decode extended CSD.
++ * Read extended CSD.
+  */
+-static int mmc_read_ext_csd(struct mmc_card *card)
++static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
+ {
+ 	int err;
+ 	u8 *ext_csd;
+=20
+ 	BUG_ON(!card);
++	BUG_ON(!new_ext_csd);
++
++	*new_ext_csd =3D NULL;
+=20
+ 	if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
+ 		return 0;
+@@ -199,12 +202,15 @@ static int mmc_read_ext_csd(struct mmc_card *card=
+)
+=20
+ 	err =3D mmc_send_ext_csd(card, ext_csd);
+ 	if (err) {
++		kfree(ext_csd);
++		*new_ext_csd =3D NULL;
++
+ 		/* If the host or the card can't do the switch,
+ 		 * fail more gracefully. */
+ 		if ((err !=3D -EINVAL)
+ 		 && (err !=3D -ENOSYS)
+ 		 && (err !=3D -EFAULT))
+-			goto out;
++			return err;
+=20
+ 		/*
+ 		 * High capacity cards should have this "magic" size
+@@ -222,9 +228,23 @@ static int mmc_read_ext_csd(struct mmc_card *card)
+ 				mmc_hostname(card->host));
+ 			err =3D 0;
+ 		}
++	} else
++		*new_ext_csd =3D ext_csd;
+=20
+-		goto out;
+-	}
++	return err;
++}
++
++/*
++ * Decode extended CSD.
++ */
++static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
++{
++	int err =3D 0;
++
++	BUG_ON(!card);
++
++	if (!ext_csd)
++		return 0;
+=20
+ 	/* Version is coded in the CSD_STRUCTURE byte in the EXT_CSD register=
+ */
+ 	if (card->csd.structure =3D=3D 3) {
+@@ -372,8 +392,70 @@ static int mmc_read_ext_csd(struct mmc_card *card)
+ 		card->erased_byte =3D 0x0;
+=20
+ out:
++	return err;
++}
++
++static inline void mmc_free_ext_csd(u8 *ext_csd)
++{
+ 	kfree(ext_csd);
++}
++
+=20
++static int mmc_compare_ext_csds(struct mmc_card *card, u8 *ext_csd,
++			unsigned bus_width)
++{
++	u8 *bw_ext_csd;
++	int err;
++
++	err =3D mmc_get_ext_csd(card, &bw_ext_csd);
++	if (err)
++		return err;
++
++	if ((ext_csd =3D=3D NULL || bw_ext_csd =3D=3D NULL)) {
++		if (bus_width !=3D MMC_BUS_WIDTH_1)
++			err =3D -EINVAL;
++		goto out;
++	}
++
++	if (bus_width =3D=3D MMC_BUS_WIDTH_1)
++		goto out;
++
++	/* only compare read only fields */
++
++	err =3D	(!(ext_csd[EXT_CSD_PARTITION_SUPPORT] =3D=3D
++			bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
++		(ext_csd[EXT_CSD_ERASED_MEM_CONT] =3D=3D
++			bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
++		(ext_csd[EXT_CSD_REV] =3D=3D
++			bw_ext_csd[EXT_CSD_REV]) &&
++		(ext_csd[EXT_CSD_STRUCTURE] =3D=3D
++			bw_ext_csd[EXT_CSD_STRUCTURE]) &&
++		(ext_csd[EXT_CSD_CARD_TYPE] =3D=3D
++			bw_ext_csd[EXT_CSD_CARD_TYPE]) &&
++		(ext_csd[EXT_CSD_S_A_TIMEOUT] =3D=3D
++			bw_ext_csd[EXT_CSD_S_A_TIMEOUT]) &&
++		(ext_csd[EXT_CSD_HC_WP_GRP_SIZE] =3D=3D
++			bw_ext_csd[EXT_CSD_HC_WP_GRP_SIZE]) &&
++		(ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT] =3D=3D
++			bw_ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT]) &&
++		(ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE] =3D=3D
++			bw_ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE]) &&
++		(ext_csd[EXT_CSD_SEC_TRIM_MULT] =3D=3D
++			bw_ext_csd[EXT_CSD_SEC_TRIM_MULT]) &&
++		(ext_csd[EXT_CSD_SEC_ERASE_MULT] =3D=3D
++			bw_ext_csd[EXT_CSD_SEC_ERASE_MULT]) &&
++		(ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT] =3D=3D
++			bw_ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT]) &&
++		(ext_csd[EXT_CSD_TRIM_MULT] =3D=3D
++			bw_ext_csd[EXT_CSD_TRIM_MULT]) &&
++		memcmp(&ext_csd[EXT_CSD_SEC_CNT],
++			&bw_ext_csd[EXT_CSD_SEC_CNT],
++			4) !=3D 0);
++	if (err)
++		err =3D -EINVAL;
++
++out:
++	mmc_free_ext_csd(bw_ext_csd);
+ 	return err;
+ }
+=20
+@@ -438,6 +520,7 @@ static int mmc_init_card(struct mmc_host *host, u32=
+ ocr,
+ 	u32 cid[4];
+ 	unsigned int max_dtr;
+ 	u32 rocr;
++	u8 *ext_csd =3D NULL;
+=20
+ 	BUG_ON(!host);
+ 	WARN_ON(!host->claimed);
+@@ -536,7 +619,11 @@ static int mmc_init_card(struct mmc_host *host, u3=
+2 ocr,
+ 		/*
+ 		 * Fetch and process extended CSD.
+ 		 */
+-		err =3D mmc_read_ext_csd(card);
++
++		err =3D mmc_get_ext_csd(card, &ext_csd);
++		if (err)
++			goto free_card;
++		err =3D mmc_read_ext_csd(card, ext_csd);
+ 		if (err)
+ 			goto free_card;
+=20
+@@ -676,14 +763,18 @@ static int mmc_init_card(struct mmc_host *host, u=
+32 ocr,
+ 					 0);
+ 			if (!err) {
+ 				mmc_set_bus_width(card->host, bus_width);
++
+ 				/*
+ 				 * If controller can't handle bus width test,
+-				 * use the highest bus width to maintain
+-				 * compatibility with previous MMC behavior.
++				 * compare ext_csd previously read in 1 bit mode
++				 * against ext_csd at new bus width
+ 				 */
+ 				if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
+-					break;
+-				err =3D mmc_bus_test(card, bus_width);
++					err =3D mmc_compare_ext_csds(card,
++						ext_csd,
++						bus_width);
++				else
++					err =3D mmc_bus_test(card, bus_width);
+ 				if (!err)
+ 					break;
+ 			}
+@@ -730,12 +821,14 @@ static int mmc_init_card(struct mmc_host *host, u=
+32 ocr,
+ 	if (!oldcard)
+ 		host->card =3D card;
+=20
++	mmc_free_ext_csd(ext_csd);
+ 	return 0;
+=20
+ free_card:
+ 	if (!oldcard)
+ 		mmc_remove_card(card);
+ err:
++	mmc_free_ext_csd(ext_csd);
+=20
+ 	return err;
+ }
+--=20
+1.7.0.4
+
+
+
+On May 23, 2011, at 9:42 PM, Chris Ball wrote:
+
+> Hi Philip,
+>=20
+> On Sun, May 22 2011, Philip Rakity wrote:
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index baab027..6db91d6 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -174,14 +174,17 @@ static int mmc_decode_csd(struct mmc_card *car=
+d)
+>> }
+>>=20
+>> /*
+>> - * Read and decode extended CSD.
+>> + * Read extended CSD.
+>>  */
+>> -static int mmc_read_ext_csd(struct mmc_card *card)
+>> +static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>=20
+> This one doesn't work -- you're missing the half of the patch that ho=
+oks
+> up the rest of mmc.c to the new code, which was in v1.  As-is, we get=
+:
+>=20
+> drivers/mmc/core/mmc.c: In function =91mmc_init_card=92:
+> drivers/mmc/core/mmc.c:621:3: error: too few arguments to function =91=
+mmc_read_ext_csd=92
+> drivers/mmc/core/mmc.c:240:12: note: declared here
+> drivers/mmc/core/mmc.c: At top level:
+> drivers/mmc/core/mmc.c:404:12: warning: =91mmc_compare_ext_csds=92 de=
+fined but not used [-Wunused-function]
+>=20
+> - Chris.
+> --=20
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
