@@ -1,34 +1,31 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: how to unbind current mmc driver to bind mmc-test driver?
-Date: Thu, 26 May 2011 00:44:16 +0100
-Message-ID: <20110525234416.GA31518@void.printf.net>
-References: <alpine.DEB.2.00.1105251346490.12045@localhost6.localdomain6> <20110525231132.GA30458@void.printf.net> <alpine.DEB.2.00.1105251935170.4225@localhost6.localdomain6>
+Subject: Re: [PATCH] mmc: tmio: fix PM in DMA mode
+Date: Thu, 26 May 2011 02:24:11 +0100
+Message-ID: <20110526012410.GA874@void.printf.net>
+References: <Pine.LNX.4.64.1104291909290.17813@axis700.grange> <m3fwom6niy.fsf@pullcord.laptop.org> <Pine.LNX.4.64.1105121015490.24486@axis700.grange> <Pine.LNX.4.64.1105121212120.24486@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36224 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:57051 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756650Ab1EYXoV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 25 May 2011 19:44:21 -0400
+	id S1754231Ab1EZBYQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 25 May 2011 21:24:16 -0400
 Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1105251935170.4225@localhost6.localdomain6>
+In-Reply-To: <Pine.LNX.4.64.1105121212120.24486@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Robert P. J. Day" <rpjday@crashcourse.ca>
-Cc: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Ian Molton <ian@mnementh.co.uk>
 
-Hi,
+Hi Guennadi,
 
-On Wed, May 25, 2011 at 07:35:56PM -0400, Robert P. J. Day wrote:
-> > You don't actually have a drivers/mmc device, then -- a controller
-> > somewhere is making your SD slot look like a mass storage device,
-> > in hardware.  The drivers/mmc stack is for devices that aren't
-> > being mediated in this way.
-> 
->   i should ask, of course, whether there's a way to still use the
-> mmc_test module in this situation, but i'm guessing there isn't.
+On Thu, May 12, 2011 at 12:19:10PM +0200, Guennadi Liakhovetski wrote:
+> As long as we manage to get these in 2.6.40 merge window early enough, 
+> we'll be able to push related arch patches via shmobile trees.
 
-Correct, it's not possible.
+Linus has pulled the MMC merge now; fire away.
+
+Thanks,
 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
