@@ -1,32 +1,55 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: tmio: fix PM in DMA mode
-Date: Thu, 26 May 2011 02:24:11 +0100
-Message-ID: <20110526012410.GA874@void.printf.net>
-References: <Pine.LNX.4.64.1104291909290.17813@axis700.grange> <m3fwom6niy.fsf@pullcord.laptop.org> <Pine.LNX.4.64.1105121015490.24486@axis700.grange> <Pine.LNX.4.64.1105121212120.24486@axis700.grange>
+From: Patrick Fu <Patrick.Fu@Atheros.com>
+Subject: RE: why would an SD card, after 12 hours, start to fail recording
+ video?
+Date: Thu, 26 May 2011 12:50:57 +0800
+Message-ID: <6AAC4214B9104E409FF4885ACB62A96101A78AD977@SHEXMB-01.global.atheros.com>
+References: <alpine.DEB.2.00.1105241307400.3975@localhost6.localdomain6>
+ <201105242124.13856.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57051 "EHLO void.printf.net"
+Received: from mail.atheros.com ([12.19.149.2]:36079 "EHLO mail.atheros.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754231Ab1EZBYQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 25 May 2011 21:24:16 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1105121212120.24486@axis700.grange>
+	id S1751054Ab1EZEwE convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 May 2011 00:52:04 -0400
+Received: from mail.atheros.com ([10.10.20.108])
+	by sidewinder.atheros.com
+	for <linux-mmc@vger.kernel.org>; Wed, 25 May 2011 21:51:33 -0700
+In-Reply-To: <201105242124.13856.arnd@arndb.de>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <damm@opensource.se>, Simon Horman <horms@verge.net.au>, Ian Molton <ian@mnementh.co.uk>
+To: Arnd Bergmann <arnd@arndb.de>, "Robert P. J. Day" <rpjday@crashcourse.ca>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Guennadi,
+Hi Arnd,
 
-On Thu, May 12, 2011 at 12:19:10PM +0200, Guennadi Liakhovetski wrote:
-> As long as we manage to get these in 2.6.40 merge window early enough, 
-> we'll be able to push related arch patches via shmobile trees.
+Arnd Bergmann wrote:
+> On Tuesday 24 May 2011 19:11:48 Robert P. J. Day wrote:
+> >   a maddeningly vague question -- i'm currently after more information
+> > -- but i've been told about an issue where someone is recording video
+> > to an SD card and, after 12 hours, the units begin to "fail."  that's
+> > all the info i have at the moment, i hope to get more so i don't even
+> > know what the definition of "fail" is here, or the brands or models or
+> > vendors involved, only what you read above.
+> >
+> >   has anyone run across something like this before?  again, i realize
+> > this is annoyingly vague but if i had a hint as to what might be going
+> > on, i might be able to offer some advice.  what could possibly cause
+> > properly recording SD cards to start misbehaving after several hours?
+> > thanks for any wildly speculative guesses.
+> 
+> There are many reasons why this could happen:
+> 
+> * You used a Kingston (or other cheap) SD card with a file system other
+>   than FAT32
+> 
 
-Linus has pulled the MMC merge now; fire away.
+I'm just curious. How could this thing (file system type) affect read/write operations? 
+Could you explain it a little?
+
 
 Thanks,
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Patrick
