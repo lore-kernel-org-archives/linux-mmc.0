@@ -1,106 +1,92 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH] omap: hsmmc: fix ocr mask usage
-Date: Thu, 26 May 2011 16:15:39 +0530
-Message-ID: <BANLkTimySE+Lo2p-_4D_cagfVemHMiyGhQ@mail.gmail.com>
-References: <1298268437-17989-1-git-send-email-gadiyar@ti.com>
-	<AANLkTi=n98uzQ_VgJfGmqdRCZmb=cdoQunB2SN97NrjF@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH/RFC] mmc: sh_mmcif: maximize power saving
+Date: Thu, 26 May 2011 15:33:30 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1105261524120.9307@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:58581 "EHLO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751981Ab1EZKpk convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 26 May 2011 06:45:40 -0400
-Received: by mail-vx0-f182.google.com with SMTP id 34so584333vxc.13
-        for <linux-mmc@vger.kernel.org>; Thu, 26 May 2011 03:45:39 -0700 (PDT)
-In-Reply-To: <AANLkTi=n98uzQ_VgJfGmqdRCZmb=cdoQunB2SN97NrjF@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Anand Gadiyar <gadiyar@ti.com>, linux-mmc@vger.kernel.org, Kishore Kadiyala <kishore.kadiyala@ti.com>, Tony Lindgren <tony@atomide.com>, Madhusudhan Chikkature <madhu.cr@ti.com>
 
-On Mon, Feb 21, 2011 at 9:40 PM, Kishore Kadiyala
-<kishorek.kadiyala@gmail.com> wrote:
-> On Mon, Feb 21, 2011 at 11:37 AM, Anand Gadiyar <gadiyar@ti.com> wrot=
-e:
->> The OMAP HSMMC driver uses an ocr_mask to determine the
->> list of voltages supported by the card. It populates this
->> mask based on the list of voltages supported by the
->> regulator that supplies the voltage.
->>
->> Commit 64be97822b (omap4 hsmmc: Update ocr mask for MMC2 for
->> regulator to use) passed a fixed ocr_mask from the OMAP4 SDP
->> board file to limit the voltage to 2.9-3.0 Volts, and updated
->> the driver to use this mask if provided, instead of using the
->> regulator's supported voltages.
->>
->> However the commit is buggy - the ocr_mask is overridden
->> by the regulator's capabilities anyway. Fix this.
->>
->> (The bug shows up when a system-wide suspend is attempted
->> on the OMAP4 SDP/Blaze platforms. The eMMC card comes up
->> at 3V, but drops to 1.65V after the system resumes).
->>
->> Signed-off-by: Anand Gadiyar <gadiyar@ti.com>
->
-> Tested this patch on OMAP4430SDP & OMAP4 Blaze.
->
-> Tested-by: =A0Kishore Kadiyala <kishore.kadiyala@ti.com>
->
-Acked-by: Balaji T K <balajitk@ti.com>
+This patch uses runtime PM to allow the system to power down the MMC
+controller, when the MMC closk is switched off.
 
-Can you this patch be queued?
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
 
->> Cc: Kishore Kadiyala <kishore.kadiyala@ti.com>
->> Cc: Tony Lindgren <tony@atomide.com>
->> Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
->> Cc: Chris Ball <cjb@laptop.org>
->> ---
->> Tony, Chris,
->>
->> This is only a partial fix. It fixes the obvious bug introduced
->> in the commit I noted above, however it is not the final
->> fix. I'm not convinced the way the regulators are handled
->> in this driver is correct - I'm still studying the code and
->> will come up with a proper fix later.
->>
->> However, this does fix a real bug and I believe the bug is
->> obvious. Would be nice to get this into the -rc series if
->> we still can.
->>
->> - Anand
->>
->> =A0drivers/mmc/host/omap_hsmmc.c | =A0 =A01 -
->> =A01 file changed, 1 deletion(-)
->>
->> Index: linux-2.6/drivers/mmc/host/omap_hsmmc.c
->> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> --- linux-2.6.orig/drivers/mmc/host/omap_hsmmc.c
->> +++ linux-2.6/drivers/mmc/host/omap_hsmmc.c
->> @@ -413,7 +413,6 @@ static int omap_hsmmc_reg_get(struct oma
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0retur=
-n -EINVAL;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_slot(host).ocr_mask =3D mmc_regula=
-tor_get_ocrmask(reg);
->>
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Allow an aux regulator */
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0reg =3D regulator_get(host->dev, "vmm=
-c_aux");
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+Patches have been submitted earlier for SDHCI to accomplish something 
+similar, but they have complicated dependencies upon other different 
+subsystems, especially on PCI. MMCIF is easier - it only exists in 
+different SoCs, so, this change should also be easier to review, verify 
+and test.
+
+ drivers/mmc/host/sh_mmcif.c |   27 ++++++++++++++++++---------
+ 1 files changed, 18 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 14f8edb..557886b 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -175,6 +175,7 @@ struct sh_mmcif_host {
+ 	enum mmcif_state state;
+ 	spinlock_t lock;
+ 	bool power;
++	bool card_present;
+ 
+ 	/* DMA support */
+ 	struct dma_chan		*chan_rx;
+@@ -877,23 +878,23 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+ 	if (ios->power_mode == MMC_POWER_UP) {
+-		if (p->set_pwr)
+-			p->set_pwr(host->pd, ios->power_mode);
+-		if (!host->power) {
++		if (!host->card_present) {
+ 			/* See if we also get DMA */
+ 			sh_mmcif_request_dma(host, host->pd->dev.platform_data);
+-			pm_runtime_get_sync(&host->pd->dev);
+-			host->power = true;
++			host->card_present = true;
+ 		}
+ 	} else if (ios->power_mode == MMC_POWER_OFF || !ios->clock) {
+ 		/* clock stop */
+ 		sh_mmcif_clock_control(host, 0);
+ 		if (ios->power_mode == MMC_POWER_OFF) {
+-			if (host->power) {
+-				pm_runtime_put(&host->pd->dev);
++			if (host->card_present) {
+ 				sh_mmcif_release_dma(host);
+-				host->power = false;
++				host->card_present = false;
+ 			}
++		}
++		if (host->power) {
++			pm_runtime_put(&host->pd->dev);
++			host->power = false;
+ 			if (p->down_pwr)
+ 				p->down_pwr(host->pd);
+ 		}
+@@ -901,8 +902,16 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		return;
+ 	}
+ 
+-	if (ios->clock)
++	if (ios->clock) {
++		if (!host->power) {
++			if (p->set_pwr)
++				p->set_pwr(host->pd, ios->power_mode);
++			pm_runtime_get_sync(&host->pd->dev);
++			host->power = true;
++			sh_mmcif_sync_reset(host);
++		}
+ 		sh_mmcif_clock_control(host, ios->clock);
++	}
+ 
+ 	host->bus_width = ios->bus_width;
+ 	host->state = STATE_IDLE;
+-- 
+1.7.2.5
+
