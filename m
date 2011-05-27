@@ -1,8 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 1/3] mmc: tmio: fix for platforms, where CONFIG_ZONE_DMA is
- not defined
-Date: Fri, 27 May 2011 12:44:50 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1105271242300.25265@axis700.grange>
+Subject: [PATCH 2/3] sh: add coherent DMA mask for SDHI devices
+Date: Fri, 27 May 2011 12:44:53 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1105271243110.25265@axis700.grange>
 References: <Pine.LNX.4.64.1105271235230.25265@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
@@ -13,67 +12,133 @@ To: linux-sh@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-On platforms, not defining CONFIG_ZONE_DMA, GFP_DMA cannot be used,
-switch to using the dma_alloc_coherent() / dma_free_coherent() API.
+It is now required, because the SDHI / TMIO driver is using
+dma_alloc_coherent() to allocate the DMA bounce buffer.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/tmio_mmc.h     |    2 ++
- drivers/mmc/host/tmio_mmc_dma.c |    7 +++++--
- 2 files changed, 7 insertions(+), 2 deletions(-)
+ arch/sh/boards/board-sh7757lcr.c     |    3 ++-
+ arch/sh/boards/mach-ap325rxa/setup.c |    6 ++++--
+ arch/sh/boards/mach-ecovec24/setup.c |    6 ++++--
+ arch/sh/boards/mach-kfr2r09/setup.c  |    3 ++-
+ arch/sh/boards/mach-migor/setup.c    |    3 ++-
+ arch/sh/boards/mach-se/7724/setup.c  |    6 ++++--
+ 6 files changed, 18 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 8260bc2..f105006 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -20,6 +20,7 @@
- #include <linux/mmc/tmio.h>
- #include <linux/pagemap.h>
- #include <linux/spinlock.h>
-+#include <linux/types.h>
+diff --git a/arch/sh/boards/board-sh7757lcr.c b/arch/sh/boards/board-sh7757lcr.c
+index fa2a208..e40f82c 100644
+--- a/arch/sh/boards/board-sh7757lcr.c
++++ b/arch/sh/boards/board-sh7757lcr.c
+@@ -256,7 +256,8 @@ static struct platform_device sdhi_device = {
+ 	.resource       = sdhi_resources,
+ 	.id             = 0,
+ 	.dev	= {
+-		.platform_data	= &sdhi_info,
++		.platform_data		= &sdhi_info,
++		.coherent_dma_mask	= 0xffffffff,
+ 	},
+ };
  
- /* Definitions for values the CTRL_SDIO_STATUS register can take. */
- #define TMIO_SDIO_STAT_IOIRQ	0x0001
-@@ -70,6 +71,7 @@ struct tmio_mmc_host {
- 	struct tasklet_struct	dma_issue;
- 	struct scatterlist	bounce_sg;
- 	u8			*bounce_buf;
-+	dma_addr_t		bounce_dma;
- 
- 	/* Track lost interrupts */
- 	struct delayed_work	delayed_reset_work;
-diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
-index 25f1ad6..7fed4c3 100644
---- a/drivers/mmc/host/tmio_mmc_dma.c
-+++ b/drivers/mmc/host/tmio_mmc_dma.c
-@@ -11,6 +11,7 @@
-  */
- 
- #include <linux/device.h>
-+#include <linux/dma-mapping.h>
- #include <linux/dmaengine.h>
- #include <linux/mfd/tmio.h>
- #include <linux/mmc/host.h>
-@@ -281,7 +282,8 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
- 		if (!host->chan_rx)
- 			goto ereqrx;
- 
--		host->bounce_buf = (u8 *)__get_free_page(GFP_KERNEL | GFP_DMA);
-+		host->bounce_buf = dma_alloc_coherent(&host->pdev->dev,
-+					PAGE_SIZE, &host->bounce_dma, GFP_KERNEL);
- 		if (!host->bounce_buf)
- 			goto ebouncebuf;
- 
-@@ -314,7 +316,8 @@ void tmio_mmc_release_dma(struct tmio_mmc_host *host)
- 		dma_release_channel(chan);
- 	}
- 	if (host->bounce_buf) {
--		free_pages((unsigned long)host->bounce_buf, 0);
-+		dma_free_coherent(&host->pdev->dev, PAGE_SIZE,
-+				  host->bounce_buf, host->bounce_dma);
- 		host->bounce_buf = NULL;
- 	}
- }
+diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
+index 618bd56..c3e80cf 100644
+--- a/arch/sh/boards/mach-ap325rxa/setup.c
++++ b/arch/sh/boards/mach-ap325rxa/setup.c
+@@ -458,7 +458,8 @@ static struct platform_device sdhi0_cn3_device = {
+ 	.num_resources	= ARRAY_SIZE(sdhi0_cn3_resources),
+ 	.resource	= sdhi0_cn3_resources,
+ 	.dev = {
+-		.platform_data = &sdhi0_cn3_data,
++		.platform_data		= &sdhi0_cn3_data,
++		.coherent_dma_mask	= 0xffffffff,
+ 	},
+ 	.archdata = {
+ 		.hwblk_id = HWBLK_SDHI0,
+@@ -488,7 +489,8 @@ static struct platform_device sdhi1_cn7_device = {
+ 	.num_resources	= ARRAY_SIZE(sdhi1_cn7_resources),
+ 	.resource	= sdhi1_cn7_resources,
+ 	.dev = {
+-		.platform_data = &sdhi1_cn7_data,
++		.platform_data		= &sdhi1_cn7_data,
++		.coherent_dma_mask	= 0xffffffff,
+ 	},
+ 	.archdata = {
+ 		.hwblk_id = HWBLK_SDHI1,
+diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
+index bb13d0e..5b4e3c9 100644
+--- a/arch/sh/boards/mach-ecovec24/setup.c
++++ b/arch/sh/boards/mach-ecovec24/setup.c
+@@ -515,7 +515,8 @@ static struct platform_device sdhi0_device = {
+ 	.resource       = sdhi0_resources,
+ 	.id             = 0,
+ 	.dev	= {
+-		.platform_data	= &sdhi0_info,
++		.platform_data		= &sdhi0_info,
++		.coherent_dma_mask	= 0xffffffff,
+ 	},
+ 	.archdata = {
+ 		.hwblk_id = HWBLK_SDHI0,
+@@ -555,7 +556,8 @@ static struct platform_device sdhi1_device = {
+ 	.resource       = sdhi1_resources,
+ 	.id             = 1,
+ 	.dev	= {
+-		.platform_data	= &sdhi1_info,
++		.platform_data		= &sdhi1_info,
++		.coherent_dma_mask	= 0xffffffff,
+ 	},
+ 	.archdata = {
+ 		.hwblk_id = HWBLK_SDHI1,
+diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
+index 8b4abbb..76d9d08 100644
+--- a/arch/sh/boards/mach-kfr2r09/setup.c
++++ b/arch/sh/boards/mach-kfr2r09/setup.c
+@@ -375,7 +375,8 @@ static struct platform_device kfr2r09_sh_sdhi0_device = {
+ 	.num_resources  = ARRAY_SIZE(kfr2r09_sh_sdhi0_resources),
+ 	.resource       = kfr2r09_sh_sdhi0_resources,
+ 	.dev = {
+-		.platform_data	= &sh7724_sdhi0_data,
++		.platform_data		= &sh7724_sdhi0_data,
++		.coherent_dma_mask	= 0xffffffff,
+ 	},
+ 	.archdata = {
+ 		.hwblk_id = HWBLK_SDHI0,
+diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
+index 184fde1..e89a599 100644
+--- a/arch/sh/boards/mach-migor/setup.c
++++ b/arch/sh/boards/mach-migor/setup.c
+@@ -419,7 +419,8 @@ static struct platform_device sdhi_cn9_device = {
+ 	.num_resources	= ARRAY_SIZE(sdhi_cn9_resources),
+ 	.resource	= sdhi_cn9_resources,
+ 	.dev = {
+-		.platform_data	= &sh7724_sdhi_data,
++		.platform_data		= &sh7724_sdhi_data,
++		.coherent_dma_mask	= 0xffffffff,
+ 	},
+ 	.archdata = {
+ 		.hwblk_id = HWBLK_SDHI,
+diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
+index 1235767..4caa846 100644
+--- a/arch/sh/boards/mach-se/7724/setup.c
++++ b/arch/sh/boards/mach-se/7724/setup.c
+@@ -477,7 +477,8 @@ static struct platform_device sdhi0_cn7_device = {
+ 	.num_resources  = ARRAY_SIZE(sdhi0_cn7_resources),
+ 	.resource       = sdhi0_cn7_resources,
+ 	.dev = {
+-		.platform_data	= &sh7724_sdhi0_data,
++		.platform_data		= &sh7724_sdhi0_data,
++		.coherent_dma_mask	= 0xffffffff,
+ 	},
+ 	.archdata = {
+ 		.hwblk_id = HWBLK_SDHI0,
+@@ -509,7 +510,8 @@ static struct platform_device sdhi1_cn8_device = {
+ 	.num_resources  = ARRAY_SIZE(sdhi1_cn8_resources),
+ 	.resource       = sdhi1_cn8_resources,
+ 	.dev = {
+-		.platform_data	= &sh7724_sdhi1_data,
++		.platform_data		= &sh7724_sdhi1_data,
++		.coherent_dma_mask	= 0xffffffff,
+ 	},
+ 	.archdata = {
+ 		.hwblk_id = HWBLK_SDHI1,
 -- 
 1.7.2.5
 
