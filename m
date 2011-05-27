@@ -1,39 +1,71 @@
-From: Shawn Guo <shawn.guo-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Subject: Re: [PATCH v3 0/4] Consolidate sdhci pltfm & OF drivers and get them
-	self registered
-Date: Fri, 27 May 2011 17:07:39 +0800
-Message-ID: <20110527090738.GC30146@S2100-06.ap.freescale.net>
-References: <1306321314-2493-1-git-send-email-shawn.guo@linaro.org>
-	<20110527072647.GE31953@ponder.secretlab.ca>
-	<20110527080650.GA11592@pengutronix.de>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH/RFC] mmc: sh_mmcif: maximize power saving
+Date: Fri, 27 May 2011 18:51:01 +0900
+Message-ID: <BANLkTinaDmLCvPB4_2konsomPYJhNFXzhg@mail.gmail.com>
+References: <Pine.LNX.4.64.1105261524120.9307@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20110527080650.GA11592-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Wolfram Sang <w.sang-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Anton Vorontsov <cbouatmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Saeed Bishara <saeed-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Xiaobo Xie <X.Xie-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, Mike Rapoport <mike-UTxiZqZC01RS1MOuV/RT9w@public.gmane.org>, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, Albert Herranz <albert_herranz-mRCrAkd8dF0@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:37914 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752590Ab1E0JvD convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 May 2011 05:51:03 -0400
+In-Reply-To: <Pine.LNX.4.64.1105261524120.9307@axis700.grange>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>
 
-On Fri, May 27, 2011 at 10:06:50AM +0200, Wolfram Sang wrote:
-> 
-> > Any chance we can get this series into $NEXT_KERNEL?
-> 
-> From the looks, I think it still has problems being a module. Will try
-> to test it today.
-> 
-Sorry.  I forgot testing module build.  I'm fixing it.
+Hi Guennadi,
 
--- 
-Regards,
-Shawn
+On Thu, May 26, 2011 at 10:33 PM, Guennadi Liakhovetski
+<g.liakhovetski@gmx.de> wrote:
+> This patch uses runtime PM to allow the system to power down the MMC
+> controller, when the MMC closk is switched off.
+>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+>
+> Patches have been submitted earlier for SDHCI to accomplish something
+> similar, but they have complicated dependencies upon other different
+> subsystems, especially on PCI. MMCIF is easier - it only exists in
+> different SoCs, so, this change should also be easier to review, veri=
+fy
+> and test.
+
+Nice to see improved Power Management for the MMCIF driver!
+
+> @@ -901,8 +902,16 @@ static void sh_mmcif_set_ios(struct mmc_host *mm=
+c, struct mmc_ios *ios)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return;
+> =A0 =A0 =A0 =A0}
+>
+> - =A0 =A0 =A0 if (ios->clock)
+> + =A0 =A0 =A0 if (ios->clock) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!host->power) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (p->set_pwr)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 p->set_=
+pwr(host->pd, ios->power_mode);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pm_runtime_get_sync(&ho=
+st->pd->dev);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->power =3D true;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 sh_mmcif_sync_reset(hos=
+t);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sh_mmcif_clock_control(host, ios->cloc=
+k);
+
+You seem to be resetting the MMCIF block regardless if the power has
+been cut or not. This may work well, but perhaps your code can be
+improved to not reset when only clocks have been stopped? Resetting
+when not needed will only result in unnecessary overhead. I believe
+the Runtime PM suspend/resume callbacks can be used for determining if
+the power has been cut or not.
+
+Please make a V2 on top of Rafael's power domain control code later
+when 2.6.40-rc has been released.
+
+Thanks!
+
+/ magnus
