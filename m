@@ -1,58 +1,65 @@
-From: "Robert P. J. Day" <rpjday@crashcourse.ca>
-Subject: Re: [PATCH] MMC: Standardize header file multiple inclusion
- checks.
-Date: Fri, 27 May 2011 12:51:05 -0400 (EDT)
-Message-ID: <alpine.DEB.2.00.1105271250300.9194@localhost6.localdomain6>
-References: <alpine.DEB.2.00.1105270803340.3939@localhost6.localdomain6> <m3aae8rswu.fsf@pullcord.laptop.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: RE: [PATCH 3/3] ARM: mach-shmobile: add coherent DMA mask for SDHI
+ devices
+Date: Fri, 27 May 2011 18:51:25 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1105271848190.30635@axis700.grange>
+References: <Pine.LNX.4.64.1105271235230.25265@axis700.grange>
+ <Pine.LNX.4.64.1105271243390.25265@axis700.grange>
+ <0D753D10438DA54287A00B027084269764D331AB17@AUSP01VMBX24.collaborationhost.net>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from astoria.ccjclearline.com ([64.235.106.9]:37485 "EHLO
-	astoria.ccjclearline.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754433Ab1E0QvL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 May 2011 12:51:11 -0400
-In-Reply-To: <m3aae8rswu.fsf@pullcord.laptop.org>
+Received: from moutng.kundenserver.de ([212.227.126.186]:50549 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754433Ab1E0Qv3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 May 2011 12:51:29 -0400
+In-Reply-To: <0D753D10438DA54287A00B027084269764D331AB17@AUSP01VMBX24.collaborationhost.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: H Hartley Sweeten <hartleys@visionengravers.com>
+Cc: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>
 
-On Fri, 27 May 2011, Chris Ball wrote:
+On Fri, 27 May 2011, H Hartley Sweeten wrote:
 
-> Hi,
->
-> On Fri, May 27 2011, Robert P. J. Day wrote:
-> > Standardize the form of MMC header file inclusion checks, add missing
-> > comments at end, fix one incorrect comment at end of file.
+> On Friday, May 27, 2011 3:45 AM, Guennadi Liakhovetski wrote:
 > >
-> > Signed-off-by: Robert P. J. Day <rpjday@crashcourse.ca>
+> > It is now required, because the SDHI / TMIO driver is using
+> > dma_alloc_coherent() to allocate the DMA bounce buffer.
 > >
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > > ---
+> >  arch/arm/mach-shmobile/board-ag5evm.c   |    6 ++++--
+> >  arch/arm/mach-shmobile/board-ap4evb.c   |    6 ++++--
+> >  arch/arm/mach-shmobile/board-mackerel.c |    9 ++++++---
+> >  3 files changed, 14 insertions(+), 7 deletions(-)
 > >
-> >   obviously just aesthetic changes but they do conform to the norm for
-> > header file inclusion checks.  someone here can decide whether or not
-> > to apply them.  not compile-tested as they are all fairly
-> > self-evident.
->
-> Thanks, works for me.  Your two-spaces-after-endif style is not the
-> norm, though -- want to resubmit with that changed to one space?
->
-> ~/git/mmc/include/linux% git grep "endif /*" | wc -l
-> 1497
-> ~/git/mmc/include/linux% git grep "endif  /*" | wc -l
-> 24
+> > diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
+> > index c95258c..a5a737c 100644
+> > --- a/arch/arm/mach-shmobile/board-ag5evm.c
+> > +++ b/arch/arm/mach-shmobile/board-ag5evm.c
+> > @@ -372,7 +372,8 @@ static struct platform_device sdhi0_device = {
+> >  	.num_resources	= ARRAY_SIZE(sdhi0_resources),
+> >  	.resource	= sdhi0_resources,
+> >  	.dev	= {
+> > -		.platform_data	= &sdhi0_info,
+> > +		.platform_data		= &sdhi0_info,
+> > +		.coherent_dma_mask	= 0xffffffff,
+> 
+> I think these should all be
+> 
+> 		.coherent_dma_mask	= DMA_BIT_MASK(32),
 
-  i was actually trying to remember the norm, and thought it was two
-spaces.  easy enough to fix.  coming soon.
+Yes, you're right, I looked at a bad example:( Will post v2 next week. 
+Thanks for spotting.
 
-rday
+> Also, don't you need the .dma_mask also?
 
--- 
+It works without it:) Not sure, if it's needed for some kind of academic 
+correctness though.
 
-========================================================================
-Robert P. J. Day                                 Ottawa, Ontario, CANADA
-                        http://crashcourse.ca
-
-Twitter:                                       http://twitter.com/rpjday
-LinkedIn:                               http://ca.linkedin.com/in/rpjday
-========================================================================
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
