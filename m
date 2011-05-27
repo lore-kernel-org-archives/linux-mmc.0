@@ -1,54 +1,47 @@
-From: H Hartley Sweeten <hartleys@visionengravers.com>
-Subject: RE: [PATCH 3/3] ARM: mach-shmobile: add coherent DMA mask for SDHI
- devices
-Date: Fri, 27 May 2011 11:27:28 -0500
-Message-ID: <0D753D10438DA54287A00B027084269764D331AB17@AUSP01VMBX24.collaborationhost.net>
-References: <Pine.LNX.4.64.1105271235230.25265@axis700.grange>
- <Pine.LNX.4.64.1105271243390.25265@axis700.grange>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [Q] mmc host cleanup sequence - how to prevent races
+Date: Fri, 27 May 2011 18:45:11 +0200 (CEST)
+Message-ID: <alpine.DEB.2.00.1105271755260.29976@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail132.messagelabs.com ([216.82.242.115]:6588 "EHLO
-	mail132.messagelabs.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752138Ab1E0Q1h convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 May 2011 12:27:37 -0400
-In-Reply-To: <Pine.LNX.4.64.1105271243390.25265@axis700.grange>
-Content-Language: en-US
+Received: from moutng.kundenserver.de ([212.227.17.9]:53229 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752078Ab1E0QpN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 May 2011 12:45:13 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by axis700.grange (Postfix) with ESMTP id 9BD5B189B6B
+	for <linux-mmc@vger.kernel.org>; Fri, 27 May 2011 18:45:11 +0200 (CEST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>
+To: linux-mmc@vger.kernel.org
 
-On Friday, May 27, 2011 3:45 AM, Guennadi Liakhovetski wrote:
->
-> It is now required, because the SDHI / TMIO driver is using
-> dma_alloc_coherent() to allocate the DMA bounce buffer.
->
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
->  arch/arm/mach-shmobile/board-ag5evm.c   |    6 ++++--
->  arch/arm/mach-shmobile/board-ap4evb.c   |    6 ++++--
->  arch/arm/mach-shmobile/board-mackerel.c |    9 ++++++---
->  3 files changed, 14 insertions(+), 7 deletions(-)
->
-> diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
-> index c95258c..a5a737c 100644
-> --- a/arch/arm/mach-shmobile/board-ag5evm.c
-> +++ b/arch/arm/mach-shmobile/board-ag5evm.c
-> @@ -372,7 +372,8 @@ static struct platform_device sdhi0_device = {
->  	.num_resources	= ARRAY_SIZE(sdhi0_resources),
->  	.resource	= sdhi0_resources,
->  	.dev	= {
-> -		.platform_data	= &sdhi0_info,
-> +		.platform_data		= &sdhi0_info,
-> +		.coherent_dma_mask	= 0xffffffff,
+Hi all
 
-I think these should all be
+I am uncertain about the correct mmc host clean up order, namely what 
+should happen first: interrupt handlers freed or mmc_remove_host() called?
 
-		.coherent_dma_mask	= DMA_BIT_MASK(32),
+First freeing interrupts doesn't seem to be a good idea. mmc_remove_host() 
+can be waiting for interrupts, which then deadlocks. So, interrupts must 
+be freed after mmc_remove_host(). But that creates a window, during which 
+if an interrupt occurs, bad things can happen(TM). But normal MMC 
+interrupts are not supposed to happen after mmc_remove_host() returns - no 
+more requests will be flying. But there are two more kinds of interrupts, 
+that still can happen in that window: hotplug and SDIO. To prevent 
+hotplug, e.g., the sdhci driver, calls sdhci_disable_card_detection(). 
+That helps against that race, but - what if we then miss a card eject 
+between that call and mmc_remove_host()? Won't the core then try to 
+communicate with a card, that's gone?
 
-Also, don't you need the .dma_mask also?
+And then SDIO. We could do a similar thing - prohibit processing of SDIO 
+interrupts before calling mmc_remove_host(). But could it be the case, 
+that a higher level kernel driver is waiting for that SDIO interrupt, and 
+then mmc_remove_host() will be waiting for that driver to release the card 
+(if anything like that is happening in mmc?), and they will deadlock?
 
-Regards,
-Hartley
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
