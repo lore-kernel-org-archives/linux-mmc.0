@@ -1,52 +1,63 @@
-From: Dan Carpenter <error27@gmail.com>
-Subject: [smatch stuff] mmv/VUB300: null dereferences in error handling
-Date: Thu, 26 May 2011 20:14:55 +0300
-Message-ID: <20110526171455.GJ14591@shale.localdomain>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: Enable MMC card reader for RICOH [1180:e823]
+Date: Thu, 26 May 2011 23:01:04 -0400
+Message-ID: <m3fwo0u9sf.fsf@pullcord.laptop.org>
+References: <1306426745-3636-1-git-send-email-manoj.iyer@canonical.com>
+	<1306426745-3636-2-git-send-email-manoj.iyer@canonical.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:56187 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752693Ab1EZRPW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 May 2011 13:15:22 -0400
-Received: by bwz15 with SMTP id 15so597059bwz.19
-        for <linux-mmc@vger.kernel.org>; Thu, 26 May 2011 10:15:20 -0700 (PDT)
-Content-Disposition: inline
+Received: from void.printf.net ([89.145.121.20]:42928 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753085Ab1E0DAA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 26 May 2011 23:00:00 -0400
+In-Reply-To: <1306426745-3636-2-git-send-email-manoj.iyer@canonical.com>
+	(Manoj Iyer's message of "Thu, 26 May 2011 11:19:05 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: tony.olech@elandigitalsystems.com
-Cc: linux-mmc@vger.kernel.org
+To: Manoj Iyer <manoj.iyer@canonical.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, philipl@overt.org, w.sang@pengutronix.de
 
+Hi Manoj,
 
-In vub300_probe() from drivers/mmc/host/vub300.c we dereference
-vub300 when it's a NULL variable.  Btw, let's remove the bogus
-initialization to NULL so that gcc will complain if the bug gets
-introduced again.
+On Thu, May 26 2011, Manoj Iyer wrote:
+> Signed-off-by: Manoj Iyer <manoj.iyer@canonical.com>
+> ---
+>  drivers/pci/quirks.c    |    2 ++
+>  include/linux/pci_ids.h |    1 +
+>  2 files changed, 3 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
+> index e8a1406..02145e9 100644
+> --- a/drivers/pci/quirks.c
+> +++ b/drivers/pci/quirks.c
+> @@ -2761,6 +2761,8 @@ static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
+>  }
+>  DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
+>  DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
+> +DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5CE823, ricoh_mmc_fixup_r5c832);
+> +DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5CE823, ricoh_mmc_fixup_r5c832);
+>  #endif /*CONFIG_MMC_RICOH_MMC*/
+>  
+>  #if defined(CONFIG_DMAR) || defined(CONFIG_INTR_REMAP)
+> diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
+> index 24787b7..2269dac 100644
+> --- a/include/linux/pci_ids.h
+> +++ b/include/linux/pci_ids.h
+> @@ -1537,6 +1537,7 @@
+>  #define PCI_DEVICE_ID_RICOH_RL5C476	0x0476
+>  #define PCI_DEVICE_ID_RICOH_RL5C478	0x0478
+>  #define PCI_DEVICE_ID_RICOH_R5C822	0x0822
+> +#define PCI_DEVICE_ID_RICOH_R5CE823	0xe823
+>  #define PCI_DEVICE_ID_RICOH_R5C832	0x0832
+>  #define PCI_DEVICE_ID_RICOH_R5C843	0x0843
 
-  2119          if (!command_out_urb) {
-  2120                  retval = -ENOMEM;
-  2121                  dev_err(&vub300->udev->dev,
-                                 ^^^^^^^^^^^^
-  2122                          "not enough memory for the command_out_urb\n");
-  2123                  goto error0;
-  2124          }
-  2125          command_res_urb = usb_alloc_urb(0, GFP_KERNEL);
-  2126          if (!command_res_urb) {
-  2127                  retval = -ENOMEM;
-  2128                  dev_err(&vub300->udev->dev,
-                                 ^^^^^^^^^^^^
-  2129                          "not enough memory for the command_res_urb\n");
-  2130                  goto error1;
-  2131          }
-  2132          /* this also allocates memory for our VUB300 mmc host device */
-  2133          mmc = mmc_alloc_host(sizeof(struct vub300_mmc_host), &udev->dev);
-  2134          if (!mmc) {
-  2135                  retval = -ENOMEM;
-  2136                  dev_err(&vub300->udev->dev,
-                                 ^^^^^^^^^^^^
-  2137                          "not enough memory for the mmc_host\n");
-  2138                  goto error4;
-  2139          }
+Do you not need a corresponding entry in drivers/mmc/host/sdhci-pci.c's
+pci_device_id struct?
 
-regards,
-dan carpenter
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
