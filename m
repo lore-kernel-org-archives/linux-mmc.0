@@ -1,17 +1,17 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci: Replace SDHCI_QUIRK_FORCE_BLK_SZ_2048 with a pklatform hook.
-Date: Sat, 28 May 2011 22:27:41 -0400
-Message-ID: <m3mxi6p7fm.fsf@pullcord.laptop.org>
-References: <m31v3lofm1.fsf@pullcord.laptop.org>
+Subject: Re: [PATCH 2/2] mmc: sdhci: Replace SDHCI_QUIRK_NO_MULTIBLOCK with a platform hook.
+Date: Sat, 28 May 2011 22:28:09 -0400
+Message-ID: <m3ipsup7eu.fsf@pullcord.laptop.org>
+References: <m3zkq9n115.fsf@pullcord.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33198 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:33202 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751003Ab1E2C0l (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 28 May 2011 22:26:41 -0400
-In-Reply-To: <m31v3lofm1.fsf@pullcord.laptop.org> (Chris Ball's message of
-	"Sun, 06 Feb 2011 01:13:10 -0500")
+	id S1751015Ab1E2C1D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 28 May 2011 22:27:03 -0400
+In-Reply-To: <m3zkq9n115.fsf@pullcord.laptop.org> (Chris Ball's message of
+	"Sun, 06 Feb 2011 01:13:26 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
