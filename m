@@ -1,74 +1,48 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: support sdhci-mmp2
-Date: Sat, 28 May 2011 21:04:12 +0200
-Message-ID: <201105282104.12552.arnd@arndb.de>
-References: <1306156882-12124-1-git-send-email-zhangfei.gao@marvell.com> <201105281052.39803.arnd@arndb.de> <A68B8B3A-AED9-407D-ABD7-0A0FA63F30B8@marvell.com>
+From: Prashanth Bhat <prashanth.bhat@manipal.net>
+Subject: Possible bug in sdio.c?
+Date: Sun, 29 May 2011 07:26:00 +0530
+Message-ID: <4DE1A7B0.7000600@manipal.net>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:59829 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754591Ab1E1TEo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 28 May 2011 15:04:44 -0400
-In-Reply-To: <A68B8B3A-AED9-407D-ABD7-0A0FA63F30B8@marvell.com>
+Received: from smtpauth19.prod.mesa1.secureserver.net ([64.202.165.30]:60584
+	"HELO smtpauth19.prod.mesa1.secureserver.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1750804Ab1E2CC5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 28 May 2011 22:02:57 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Zhangfei Gao <zgao6@marvell.com>, Nicolas Pitre <nico@fluxnic.net>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Mark Brown <mark.brown314@gmail.com>, Shawn Guo <shawn.guo@linaro.org>
+To: =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-On Saturday 28 May 2011 18:25:00 Philip Rakity wrote:
-> On May 28, 2011, at 1:52 AM, Arnd Bergmann wrote:
-> > I would actually prefer in general if the Kconfig file listed only
-> > the strictly necessary dependencies for building the driver.
-> > If this driver can be built anywhere, I would list no dependency at
-> > all. If it depends on something ARM specific, I'd make it depend
-> > on CONFIG_ARM.
-> > 
-> > Then change the defconfig for the particular board to enable the
-> > driver.
-> > 
-> > The main advantage of this is to increase build coverage on test
-> > building machines doing an allyesconfig and randconfig once we
-> > get there (right now, these have too many build errors, but we
-> > have plans to work on that). 
-> 
-> The controller is built into the mmp2 SoC.  No build error could
-> occur if once the SoC is determined it selected the type of
-> controller available (in the arch/arm).  Like the patch you
-> helped me with a while ago (which never was accepted).
+Hi Micha=C5=82,
 
-My point was not avoiding build errors in this driver, which is
-fairly easy and obviously needs to happen. I want to enable the
-driver (and most others) to be built in all cases that don't
-cause a build error, instead of limiting them to very few
-configurations.
+In mmc/core/sdio.c, routine mmc_enable_4bit_bus():
 
-> The Kconfig entry for MMP2 in drivers/mmc/host would
-> add the line 
-> depends on 
-> 
-> This is not a general as depending on ARM but at least
-> the code would work.
-> 
-> The best solution would be far more general and involve
-> generic probing and registration but that is a lot of work and
-> should be done for all of the arm/ directory. 
+I think:
 
-We actually do all the generic probing based on the machine
-type already. Any place where we don't do that and hardcode
-the presence of a device based on a compile-time option should
-be considered a bug.
+     if (card->type =3D=3D MMC_TYPE_SDIO)
+               return sdio_enable_wide(card);
 
-> > I guess the idea was to be able to free the structure later. I already
-> > commented that it should be statically allocation instead of kzalloc,
-> > so that would make the pointer unnecessary.
-> 
-> I do not understand why pxa->ops is needed at all.  More general 
-> question.
+should really be:
 
-pxa->ops is the same as host->ops, which is required by the base
-sdhci driver.
+     if (card->type =3D=3D MMC_TYPE_SDIO || card->type =3D=3D MMC_TYPE_=
+SD_COMBO )
+                return sdio_enable_wide(card);
 
-	Arnd
+Otherwise, the SDIO component of the SD Combo card will not operate in=20
+wide mode. What do you think?
+
+Perhaps a similar change is needed in the sdio_enable_hs() routine too.
+
+Thanks,
+Prashanth
+
+ps: I am sorry to be emailing you directly with questions/bug reports.=20
+What is the formal process of reporting suggestions for code change?
+
+
+
+
+
+
