@@ -1,151 +1,193 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: MMC runtime PM patches break libertas probe
-Date: Sun, 29 May 2011 17:21:01 +0100
-Message-ID: <BANLkTikpciJnTudOeSLM_O7AAD4GGkbbOw@mail.gmail.com>
-References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com>
-	<AANLkTinEes6Er6-WW_t8esjazrLWZ0Z7jvYJDSZL9PNG@mail.gmail.com>
-	<AANLkTinJ2K2cz9PSdyNoNGUS8GWfLpqRBH2C3XjO5vjO@mail.gmail.com>
-	<AANLkTi=VAU=9Q+Ga7yQyu3aL7gV0vbzymQ-2uJAg1jf8@mail.gmail.com>
-	<AANLkTi=QT6_zyddRz=3f6GDx-RVoiROOumhegm8pFuHU@mail.gmail.com>
-	<AANLkTimfp0pPqpO03-R4yBsADQ27RLQ_PxLTfBAMfPGk@mail.gmail.com>
-	<AANLkTi=gFmq47Xq+CxnU18aHyhcaF78WrWYDhga4Xf2X@mail.gmail.com>
-	<AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com>
-	<AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
-	<AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
-	<AANLkTi=8Xd1xTfFvAJkicR_89JOu4P2uwyoMHvXCBKv8@mail.gmail.com>
-	<AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v2 1/3] mmc: support sdhci-mmp2
+Date: Mon, 30 May 2011 01:42:04 -0400
+Message-ID: <BANLkTi=S=Q+AdKECCHg2u6X=VWEOtEox_w@mail.gmail.com>
+References: <1306315367-15602-1-git-send-email-zhangfei.gao@marvell.com>
+	<201105271746.04775.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=bcaec51f8f8785921e04a46c8e09
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-px0-f179.google.com ([209.85.212.179]:50002 "EHLO
-	mail-px0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753972Ab1E2QVB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 May 2011 12:21:01 -0400
-Received: by pxi2 with SMTP id 2so2041893pxi.10
-        for <linux-mmc@vger.kernel.org>; Sun, 29 May 2011 09:21:01 -0700 (PDT)
-In-Reply-To: <AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:33081 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752617Ab1E3FmF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2011 01:42:05 -0400
+Received: by vws1 with SMTP id 1so2443737vws.19
+        for <linux-mmc@vger.kernel.org>; Sun, 29 May 2011 22:42:04 -0700 (PDT)
+In-Reply-To: <201105271746.04775.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Zhangfei Gao <zhangfei.gao@marvell.com>, Nicolas Pitre <nico@fluxnic.net>, Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Qiming Wu <wuqm@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
---bcaec51f8f8785921e04a46c8e09
-Content-Type: text/plain; charset=ISO-8859-1
-
-Hi Ohad,
-
-On 31 October 2010 19:06, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> OK, as expected.
+On Fri, May 27, 2011 at 11:46 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Wednesday 25 May 2011, Zhangfei Gao wrote:
+>> =A0 =A0 =A0 Instead of sharing sdhci-pxa.c, use sdhci-mmp2.c specifi=
+clly for mmp2.
+>> =A0 =A0 =A0 sdhci-pxa.c is used to share among pxa serious, like pxa=
+910, mmp2, etc.
+>> =A0 =A0 =A0 The platfrom difference are put under arch/arm, while is=
+ not easy to track.
+>>
+>> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+>> ---
+>> =A0arch/arm/plat-pxa/include/plat/sdhci.h | =A0 43 ++++-
+>> =A0drivers/mmc/host/Kconfig =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0 11 +-
+>> =A0drivers/mmc/host/Makefile =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A02 +=
+-
+>> =A0drivers/mmc/host/sdhci-mmp2.c =A0 =A0 =A0 =A0 =A0| =A0303 +++++++=
++++++++++++++++++++++++++
+>> =A0drivers/mmc/host/sdhci-pxa.c =A0 =A0 =A0 =A0 =A0 | =A0303 -------=
+-------------------------
+>> =A05 files changed, 349 insertions(+), 313 deletions(-)
+>> =A0create mode 100644 drivers/mmc/host/sdhci-mmp2.c
+>> =A0delete mode 100644 drivers/mmc/host/sdhci-pxa.c
 >
-> So to summarize:
-> 1. Card is powered up at boot, and successfully initialized
-> 2. After mmc + sdio devices are added to the device tree, power is
-> (seemingly) taken down by runtime PM
-> 3. When the driver is loaded, card is powered up again, but doesn't
-> respond to CMD3
+> Yes, looks good for the most part. I was rather confused by the fact =
+that the old
+> and new file are both 303 lines, so I assumed they would be identical=
+, when they
+> are really completely different.
 >
-> The only explanation I can think of why the card doesn't respond to
-> CMD3, after its power is brought up again, is that we didn't have a
-> full reset here (i.e. mmc_power_off() didn't completely power off
-> everything).
+> There is a little room for simplification, I think:
+>
+>> +static unsigned int mmp2_get_ro(struct sdhci_host *host)
+>> +{
+>> + =A0 =A0 /* Micro SD does not support write-protect feature */
+>> + =A0 =A0 return 0;
+>> +}
+>
+> You shouldn't need to provide an empty get_ro function, the
+> default is that there is no write-protect.
 
-I have investigated this again, as we'd like runtime PM to work.
+Thanks Arnd for review.
+The reason to put get_ro here is some board use micro sd, while some
+board design is general sd card.
+The micro sd do not use write-protect, while SDHCI_WRITE_PROTECT will
+return 1 in our controller, so it shows read only.
+So add one call back for the board with micro sd card via flag.
 
-It's certainly possible that there's something weird about the
-hardware in question, but we *are* able to successfully power down and
-up the card with a hacky rfkill driver that calls mmc_stop_host /
-mmc_start_host. So I went around finding out what the difference was
-between these functions and the runtime PM implementation.
+>
+>> +static void mmp2_set_clock(struct sdhci_host *host, unsigned int cl=
+ock)
+>> +{
+>> + =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+>> + =A0 =A0 struct sdhci_pxa *pxa =3D pltfm_host->priv;
+>> +
+>> + =A0 =A0 if (clock)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 mmp2_soc_set_timing(host, pxa->pdata);
+>> +}
+>
+> The mmp2_soc_set_timing() function is only called here, so you can ea=
+sily
+> merge the two into one, starting with
+>
+> =A0 =A0 =A0 =A0if (!clock)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return;
+OK, thanks,
+>
+>> +static int __devinit sdhci_mmp2_probe(struct platform_device *pdev)
+>> +{
+>> + =A0 =A0 struct sdhci_pltfm_host *pltfm_host;
+>> + =A0 =A0 struct sdhci_pxa_platdata *pdata =3D pdev->dev.platform_da=
+ta;
+>> + =A0 =A0 struct device *dev =3D &pdev->dev;
+>> + =A0 =A0 struct sdhci_host *host =3D NULL;
+>> + =A0 =A0 struct sdhci_pxa *pxa =3D NULL;
+>> + =A0 =A0 int ret;
+>> + =A0 =A0 struct clk *clk;
+>
+> The probe and release functions for mmp2 and pxa910 are almost identi=
+cal.
+> I'd suggest you leave them in sdhci-pxa.c as a library, and export th=
+em
+> using EXPORT_SYMBOL_GPL. Then you can call them from the respective
+> probe functions, e.g.
+>
+> static struct sdhci_mmp2_ops =3D {
+> =A0 =A0 =A0 =A0.set_clock =3D mmp2_set_clock,
+> =A0 =A0 =A0 =A0.set_uhs_signaling =3D mmp2_set_uhs_signaling,
+> =A0 =A0 =A0 =A0.get_ro =3D mmp2_get_ro,
+> };
+> static int __devinit sdhci_mmp2_probe(struct platform_device *pdev)
+> {
+> =A0 =A0 =A0 =A0 unsigned int quirks =3D SDHCI_QUIRK_BROKEN_ADMA
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| SDHCI_QUIRK_32BIT_DMA_ADDR
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| SDHCI_QUIRK_32BIT_DMA_SIZE
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| SDHCI_QUIRK_32BIT_ADMA_SIZE
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
+>
+> =A0 =A0 =A0 =A0return sdhci_pxa_probe(pdev, quirks, sdhci_mmp2_ops);
+> }
+>
+>> + =A0 =A0 pxa =3D kzalloc(sizeof(struct sdhci_pxa), GFP_KERNEL);
+>> + =A0 =A0 if (!pxa) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -ENOMEM;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+>> + =A0 =A0 }
+>> + =A0 =A0 pxa->ops =3D kzalloc(sizeof(struct sdhci_ops), GFP_KERNEL)=
+;
+>> + =A0 =A0 if (!pxa->ops) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -ENOMEM;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+>> + =A0 =A0 }
+>
+> I think you really shouldn't allocate the sdhci_ops dynamically.
+> In fact, it would be much better if we were able to mark them
+> as const in all drivers.
 
-Through this comparison I think mmc_power_save_host() does almost
-exactly the same as mmc_stop_host() (good), but
-mmc_power_restore_host() lacks some steps which would otherwise be
-taken by mmc_start_host(). These are:
+We found some issues when supporting multi-slot, each slot may have
+different ops.
+So use the method of allocating the sdhci_ops dynamically instead of
+using static ops.
+=46or example, emmc has 74_clocks call back, while mmc and sdio slot
+does not have such ops.
+If not dynamically allocate sdhci_ops, all slot ops may become same,
+and 74_clocks may be called for every slot.
+Also, some board may have get_ro, while other board may not, so
+transfer the ops via flags.
 
-in mmc_rescan_try_freq():
+Not sure whether it is worthy to add additional common files to share
+probe and remove function.
+Also the init the ops part are different.
 
-	/*
-	 * sdio_reset sends CMD52 to reset card.  Since we do not know
-	 * if the card is being re-initialized, just send it.  CMD52
-	 * should be ignored by SD/eMMC cards.
-	 */
-	sdio_reset(host);
-	mmc_go_idle(host);
+>
+>> +
+>> +#ifdef CONFIG_PM
+>> +static int sdhci_mmp2_suspend(struct platform_device *dev, pm_messa=
+ge_t state)
+>> +{
+>> + =A0 =A0 struct sdhci_host *host =3D platform_get_drvdata(dev);
+>> +
+>> + =A0 =A0 return sdhci_suspend_host(host, state);
+>> +}
+>> +
+>> +static int sdhci_mmp2_resume(struct platform_device *dev)
+>> +{
+>> + =A0 =A0 struct sdhci_host *host =3D platform_get_drvdata(dev);
+>> +
+>> + =A0 =A0 return sdhci_resume_host(host);
+>> +}
+>> +#else
+>> +#define sdhci_mmp2_suspend =A0 NULL
+>> +#define sdhci_mmp2_resume =A0 =A0NULL
+>> +#endif
+>
+> Similarly, I think it would be good if sdhci-pltfm.c would simply
+> export these functions so you could refer to them in your driver.
+> There is no need to have identical copies in each variant.
+>
 
-	mmc_send_if_cond(host, host->ocr_avail);
+There are some additional code for suspend and resume, so
+sdhci_pltfm_suspend may not enough.
+=46or example, when enable wifi host sleep feature, additional register
+have to be configured.
 
-
-In mmc_attach_sdio():
-
-	err = mmc_send_io_op_cond(host, 0, &ocr);
-	if (err)
-		return err;
-
-	mmc_attach_bus(host, &mmc_sdio_ops);
-	if (host->ocr_avail_sdio)
-		host->ocr_avail = host->ocr_avail_sdio;
-
-	/*
-	 * Sanity check the voltages that the card claims to
-	 * support.
-	 */
-	if (ocr & 0x7F) {
-		printk(KERN_WARNING "%s: card claims to support voltages "
-		       "below the defined range. These will be ignored.\n",
-		       mmc_hostname(host));
-		ocr &= ~0x7F;
-	}
-
-	host->ocr = mmc_select_voltage(host, ocr);
-
-	/*
-	 * Can we support the voltage(s) of the card(s)?
-	 */
-	if (!host->ocr) {
-		err = -EINVAL;
-		goto err;
-	}
-
-
-Should anything in those code snippets be running during runtime PM resume?
-
-I went ahead and ran the obvious test by putting those bits of code in
-the runtime PM resume path... the first snippet doesn't seem to
-improve or hurt anything, but the second snippet fixes the problem. At
-least it means I can boot, the card gets powered down during boot,
-then I load the module and it powers up and initialises correctly.
-Patch attached for clarity.
-
-Any thoughts?
-
-Thanks,
-Daniel
-
---bcaec51f8f8785921e04a46c8e09
-Content-Type: text/plain; charset=US-ASCII; name="fix-sdio-power-restore.txt"
-Content-Disposition: attachment; filename="fix-sdio-power-restore.txt"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_goa77p9i0
-
-ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvc2Rpby5jIGIvZHJpdmVycy9tbWMvY29yZS9z
-ZGlvLmMKaW5kZXggNGQwYzE1Yi4uM2IwNjM3OSAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvY29y
-ZS9zZGlvLmMKKysrIGIvZHJpdmVycy9tbWMvY29yZS9zZGlvLmMKQEAgLTY5MSwxNSArNjkxLDQ3
-IEBAIHN0YXRpYyBpbnQgbW1jX3NkaW9fcmVzdW1lKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCkKIHN0
-YXRpYyBpbnQgbW1jX3NkaW9fcG93ZXJfcmVzdG9yZShzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QpCiB7
-CiAJaW50IHJldDsKKwl1MzIgb2NyOwogCiAJQlVHX09OKCFob3N0KTsKIAlCVUdfT04oIWhvc3Qt
-PmNhcmQpOwogCiAJbW1jX2NsYWltX2hvc3QoaG9zdCk7CisKKwlyZXQgPSBtbWNfc2VuZF9pb19v
-cF9jb25kKGhvc3QsIDAsICZvY3IpOworCWlmIChyZXQpCisJCWdvdG8gb3V0OworCisJaWYgKGhv
-c3QtPm9jcl9hdmFpbF9zZGlvKQorCQlob3N0LT5vY3JfYXZhaWwgPSBob3N0LT5vY3JfYXZhaWxf
-c2RpbzsKKworCS8qCisJICogU2FuaXR5IGNoZWNrIHRoZSB2b2x0YWdlcyB0aGF0IHRoZSBjYXJk
-IGNsYWltcyB0bworCSAqIHN1cHBvcnQuCisJICovCisJaWYgKG9jciAmIDB4N0YpIHsKKwkJcHJp
-bnRrKEtFUk5fV0FSTklORyAiJXM6IGNhcmQgY2xhaW1zIHRvIHN1cHBvcnQgdm9sdGFnZXMgIgor
-CQkgICAgICAgImJlbG93IHRoZSBkZWZpbmVkIHJhbmdlLiBUaGVzZSB3aWxsIGJlIGlnbm9yZWQu
-XG4iLAorCQkgICAgICAgbW1jX2hvc3RuYW1lKGhvc3QpKTsKKwkJb2NyICY9IH4weDdGOworCX0K
-KworCWhvc3QtPm9jciA9IG1tY19zZWxlY3Rfdm9sdGFnZShob3N0LCBvY3IpOworCisJLyoKKwkg
-KiBDYW4gd2Ugc3VwcG9ydCB0aGUgdm9sdGFnZShzKSBvZiB0aGUgY2FyZChzKT8KKwkgKi8KKwlp
-ZiAoIWhvc3QtPm9jcikgeworCQlyZXQgPSAtRUlOVkFMOworCQlnb3RvIG91dDsKKwl9CisKIAly
-ZXQgPSBtbWNfc2Rpb19pbml0X2NhcmQoaG9zdCwgaG9zdC0+b2NyLCBob3N0LT5jYXJkLAogCQkJ
-CW1tY19jYXJkX2tlZXBfcG93ZXIoaG9zdCkpOwogCWlmICghcmV0ICYmIGhvc3QtPnNkaW9faXJx
-cykKIAkJbW1jX3NpZ25hbF9zZGlvX2lycShob3N0KTsKKworb3V0OgogCW1tY19yZWxlYXNlX2hv
-c3QoaG9zdCk7CiAKIAlyZXR1cm4gcmV0Owo=
---bcaec51f8f8785921e04a46c8e09--
+> =A0 =A0 =A0 =A0Arnd
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
