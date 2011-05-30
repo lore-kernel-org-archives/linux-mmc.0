@@ -1,71 +1,42 @@
-From: Daniel J Blueman <daniel.blueman@gmail.com>
-Subject: Re: [PATCH] sdhci: fix undue iomem warning
-Date: Mon, 30 May 2011 21:27:09 +0800
-Message-ID: <BANLkTinL3ZvaNhYnsRMZQ4zBRLx6_F-O6Q@mail.gmail.com>
-References: <1306758796-4254-1-git-send-email-daniel.blueman@gmail.com>
-	<20110530125822.GD3409@pengutronix.de>
+From: Daniel Drake <dsd@laptop.org>
+Subject: -ENOSYS suspend-powerdown regression
+Date: Mon, 30 May 2011 15:26:19 +0100
+Message-ID: <BANLkTimdp2n1qhLQmTk+k_M5_WowhJqPyQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20110530125822.GD3409@pengutronix.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:63440 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752105Ab1E3O0T (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2011 10:26:19 -0400
+Received: by pvg12 with SMTP id 12so1632744pvg.19
+        for <linux-mmc@vger.kernel.org>; Mon, 30 May 2011 07:26:19 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+Hi,
 
-On 30 May 2011 20:58, Wolfram Sang <w.sang@pengutronix.de> wrote:
-> Hi Daniel,
->
->> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-p=
-ci.c
->> index 936bbca..ae948b0 100644
->> --- a/drivers/mmc/host/sdhci-pci.c
->> +++ b/drivers/mmc/host/sdhci-pci.c
->> @@ -918,8 +918,9 @@ static struct sdhci_pci_slot * __devinit sdhci_p=
-ci_probe_slot(
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ERR_PTR(-ENODEV);
->> =A0 =A0 =A0 }
->>
->> - =A0 =A0 if (pci_resource_len(pdev, bar) !=3D 0x100) {
->> - =A0 =A0 =A0 =A0 =A0 =A0 dev_err(&pdev->dev, "Invalid iomem size. Y=
-ou may "
->> + =A0 =A0 int len =3D pci_resource_len(pdev, bar);
->> + =A0 =A0 if (len !=3D 0x100 && len !=3D 0x200) {
->
-> Hmmm,
->
-> a) SDHC Specs (even v3) only mention 0x100, so this _is_ the standard=
-=2E
-> =A0 Do the new cards (which ones?) have anything located in the extra
-> =A0 area?
+The libertas_sdio driver has a suspend routine which returns -ENOSYS
+when the card should effectively be removed and powered during
+suspend, to be re-probed during resume.
 
-This controller is a dual-slot one, so has two register sets (though
-one set of pins aren't wired to a socket).
+This is broken in linus master. Everything appears somewhat normal
+going down into suspend:
 
-> b) your approach won't scale very well
+[   70.217948] libertas_sdio mmc1:0001:1: mmc1:0001:1: suspend: PM flags = 0x3
+[   70.225588] uhci_hcd 0000:00:10.0: PCI INT A disabled
+[   70.231140] viafb 0000:00:01.0: PCI INT A disabled
+[   70.236233] libertas_sdio mmc1:0001:1: Suspend without wake params
+-- powering down
+[   70.244588] mmc1: card 0001 removed
 
-True - a more scalable test would be to check for non-zero length and
-a multiple of 256 bytes, would you say?
+but the "remove" routine of libertas_sdio is never called, meaning
+that things get very confused during resume.
 
-This would be in-tune with page 2 of:
-http://www.sdcard.org/developers/tech/host_controller/simple_spec/Simpl=
-ified_SD_Host_Controller_Spec.pdf
+It was definitely working before (although I couldn't pinpoint exactly when).
 
-> so, I'd say it is better to keep the old way.
->
->> + =A0 =A0 =A0 =A0 =A0 =A0 dev_warn(&pdev->dev, "Invalid iomem size. =
-You may "
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "experience problems.\n"=
-);
->
-> I second turning the message into a warning, though.
-
-If the latter method is preferred, I'll adjust the patch and resend.
+Any ideas?
 
 Thanks,
-  Daniel
---=20
-Daniel J Blueman
+Daniel
