@@ -1,77 +1,124 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: MMC runtime PM patches break libertas probe
-Date: Mon, 30 May 2011 08:01:41 +0100
-Message-ID: <BANLkTi=kqnnGf3ezS=cSXCcHpmK3JxwXtg@mail.gmail.com>
-References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com>
-	<AANLkTinEes6Er6-WW_t8esjazrLWZ0Z7jvYJDSZL9PNG@mail.gmail.com>
-	<AANLkTinJ2K2cz9PSdyNoNGUS8GWfLpqRBH2C3XjO5vjO@mail.gmail.com>
-	<AANLkTi=VAU=9Q+Ga7yQyu3aL7gV0vbzymQ-2uJAg1jf8@mail.gmail.com>
-	<AANLkTi=QT6_zyddRz=3f6GDx-RVoiROOumhegm8pFuHU@mail.gmail.com>
-	<AANLkTimfp0pPqpO03-R4yBsADQ27RLQ_PxLTfBAMfPGk@mail.gmail.com>
-	<AANLkTi=gFmq47Xq+CxnU18aHyhcaF78WrWYDhga4Xf2X@mail.gmail.com>
-	<AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com>
-	<AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
-	<AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
-	<AANLkTi=8Xd1xTfFvAJkicR_89JOu4P2uwyoMHvXCBKv8@mail.gmail.com>
-	<AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com>
-	<BANLkTikpciJnTudOeSLM_O7AAD4GGkbbOw@mail.gmail.com>
-	<BANLkTikQC+u5yyU+YBAZ5JpFDRFHrHNOoA@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2 1/3] mmc: support sdhci-mmp2
+Date: Mon, 30 May 2011 09:11:53 +0200
+Message-ID: <201105300911.54084.arnd@arndb.de>
+References: <1306315367-15602-1-git-send-email-zhangfei.gao@marvell.com> <201105271746.04775.arnd@arndb.de> <BANLkTi=S=Q+AdKECCHg2u6X=VWEOtEox_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-px0-f179.google.com ([209.85.212.179]:48586 "EHLO
-	mail-px0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751949Ab1E3HBm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2011 03:01:42 -0400
-Received: by pxi2 with SMTP id 2so2293260pxi.10
-        for <linux-mmc@vger.kernel.org>; Mon, 30 May 2011 00:01:42 -0700 (PDT)
-In-Reply-To: <BANLkTikQC+u5yyU+YBAZ5JpFDRFHrHNOoA@mail.gmail.com>
+Received: from moutng.kundenserver.de ([212.227.126.171]:63565 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752729Ab1E3HL5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2011 03:11:57 -0400
+In-Reply-To: <BANLkTi=S=Q+AdKECCHg2u6X=VWEOtEox_w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: Zhangfei Gao <zhangfei.gao@marvell.com>, Nicolas Pitre <nico@fluxnic.net>, Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Qiming Wu <wuqm@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-On 30 May 2011 07:52, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> On Sun, May 29, 2011 at 7:21 PM, Daniel Drake <dsd@laptop.org> wrote:
->> It's certainly possible that there's something weird about the
->> hardware in question, but we *are* able to successfully power down and
->> up the card with a hacky rfkill driver that calls mmc_stop_host /
->> mmc_start_host.
->
-> Are we talking about the XO-1.5 and the sd8686 ?
+On Monday 30 May 2011 07:42:04 zhangfei gao wrote:
+> On Fri, May 27, 2011 at 11:46 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> > On Wednesday 25 May 2011, Zhangfei Gao wrote:
+> >> +static unsigned int mmp2_get_ro(struct sdhci_host *host)
+> >> +{
+> >> +     /* Micro SD does not support write-protect feature */
+> >> +     return 0;
+> >> +}
+> >
+> > You shouldn't need to provide an empty get_ro function, the
+> > default is that there is no write-protect.
+> 
+> Thanks Arnd for review.
+> The reason to put get_ro here is some board use micro sd, while some
+> board design is general sd card.
+> The micro sd do not use write-protect, while SDHCI_WRITE_PROTECT will
+> return 1 in our controller, so it shows read only.
+> So add one call back for the board with micro sd card via flag.
 
-Yes.
+Ok, I see.
+ 
+> >> +     pxa = kzalloc(sizeof(struct sdhci_pxa), GFP_KERNEL);
+> >> +     if (!pxa) {
+> >> +             ret = -ENOMEM;
+> >> +             goto out;
+> >> +     }
+> >> +     pxa->ops = kzalloc(sizeof(struct sdhci_ops), GFP_KERNEL);
+> >> +     if (!pxa->ops) {
+> >> +             ret = -ENOMEM;
+> >> +             goto out;
+> >> +     }
+> >
+> > I think you really shouldn't allocate the sdhci_ops dynamically.
+> > In fact, it would be much better if we were able to mark them
+> > as const in all drivers.
+> 
+> We found some issues when supporting multi-slot, each slot may have
+> different ops.
+> So use the method of allocating the sdhci_ops dynamically instead of
+> using static ops.
+> For example, emmc has 74_clocks call back, while mmc and sdio slot
+> does not have such ops.
+> If not dynamically allocate sdhci_ops, all slot ops may become same,
+> and 74_clocks may be called for every slot.
+> Also, some board may have get_ro, while other board may not, so
+> transfer the ops via flags.
+> 
+> Not sure whether it is worthy to add additional common files to share
+> probe and remove function.
+> Also the init the ops part are different.
 
-> Last we talked, we found out runtime PM didn't work because the sd8686
-> required an additional manipulation of an external reset gpio line,
-> and that the only reason OLPC could power it down/up was this patch:
->
-> http://dev.laptop.org/git/olpc-2.6/commit/?h=olpc-2.6.35&id=e9bee721fb0cc303286d1fe5df4930ce79b0b1e0
+IMHO, we should try much harder to keep the ops constant. For the
+two examples you gave, I would probably put a flag into private data for
+the get_ro operation to signify that it's never read-only, and provide
+a second set of operations for emmc, so that in the probe function
+you check the type of device and then set the appropriate one.
 
-My further investigation here suggests that this change is not
-necessary. It was added in response to a separate (hard-to-reproduce)
-issue and it was never known if it would actually fix that issue, it
-was more of a guess. We don't have any convincing evidence that it
-helps, so it will be dropped in future.
+You could also do the same for all three cases:
 
-Anyway, just to be sure, I tried combining this hack with runtime PM,
-and also as a regulator, and it didn't help anything. runtime PM still
-fails to power up the card.
+	if (emmc)
+		host->ops = &sdhci_mmp2_emmc_ops;
+	else if (!has_ro_switch)
+		host->ops = &sdhci_mmp2_rw_ops;
+	else
+		host->ops = &sdhci_mmp2_default_ops;
 
-Sorry for leading you down the wrong path there.
+> >> +
+> >> +#ifdef CONFIG_PM
+> >> +static int sdhci_mmp2_suspend(struct platform_device *dev, pm_message_t state)
+> >> +{
+> >> +     struct sdhci_host *host = platform_get_drvdata(dev);
+> >> +
+> >> +     return sdhci_suspend_host(host, state);
+> >> +}
+> >> +
+> >> +static int sdhci_mmp2_resume(struct platform_device *dev)
+> >> +{
+> >> +     struct sdhci_host *host = platform_get_drvdata(dev);
+> >> +
+> >> +     return sdhci_resume_host(host);
+> >> +}
+> >> +#else
+> >> +#define sdhci_mmp2_suspend   NULL
+> >> +#define sdhci_mmp2_resume    NULL
+> >> +#endif
+> >
+> > Similarly, I think it would be good if sdhci-pltfm.c would simply
+> > export these functions so you could refer to them in your driver.
+> > There is no need to have identical copies in each variant.
+> >
+> 
+> There are some additional code for suspend and resume, so
+> sdhci_pltfm_suspend may not enough.
+> For example, when enable wifi host sleep feature, additional register
+> have to be configured.
 
-> does mmc_stop_host+mmc_start_host
-> work for you without manipulating that reset gpio ?
+Well, not all drivers would have to use the common functions, but
+right now there are a number of identical copies, so it's certainly
+worth sharing.
 
-Yes.
+Note that this comment wasn't directed at your patch as much as at
+the overall design of the sdhci sub-drivers.
 
-...
-> Otherwise, submit :)
-
-Thanks for reviewing, I'll go ahead and clean it up.
-
-You didn't comment on the added mmc_select_voltage() call. Is that one
-also sensible?
-
-Thanks,
-Daniel
+	Arnd
