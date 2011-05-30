@@ -1,65 +1,63 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 1/2] ARM: OMAP4: MMC: increase delay for pbias
-Date: Mon, 30 May 2011 19:55:33 +0530
-Message-ID: <1306765534-20103-2-git-send-email-balajitk@ti.com>
-References: <1306765534-20103-1-git-send-email-balajitk@ti.com>
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: Re: SDIO single IRQ optimization breaks libertas
+Date: Mon, 30 May 2011 10:38:56 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1105301028310.30544@xanadu.home>
+References: <BANLkTi=xWwWh2z2r3THvf5DzvhUCX_ZB7A@mail.gmail.com> <BANLkTi=Y3rq_xnq5m6wj97uHHi5+ZCpURQ@mail.gmail.com> <loom.20110530T111921-497@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:40453 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756238Ab1E3O1N (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 30 May 2011 10:27:13 -0400
-In-Reply-To: <1306765534-20103-1-git-send-email-balajitk@ti.com>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:55998 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756653Ab1E3OjB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2011 10:39:01 -0400
+Received: by qwk3 with SMTP id 3so1698307qwk.19
+        for <linux-mmc@vger.kernel.org>; Mon, 30 May 2011 07:39:00 -0700 (PDT)
+In-Reply-To: <loom.20110530T111921-497@post.gmane.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: tony@atomide.com, linux-omap@vger.kernel.org, cjb@laptop.org
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, madhu.cr@ti.com, Balaji T K <balajitk@ti.com>
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-4 micro seconds is not enough for PBIAS if MMC regulator is
-enabled from MMC regulator OFF.
-Increase the delay for PBIAS to stabilize.
-Wait for PBIAS and timeout if not.
+On Mon, 30 May 2011, Per Forlin wrote:
 
-Resolves MMC/SD failure on OMAP4
-"Pbias Voltage is not same as LDO"
+> Hi Daniel,
+> 
+> > 
+> > On 29 May 2011 15:26, Daniel Drake <dsd <at> laptop.org> wrote:
+> > > Hi,
+> > >
+> > > The following commit in 2.6.39 causes instant death for libertas_sdio
+> > > when it receives its first interrupt during initialization:
+> > >
+> > > commit 06e8935febe687e2a561707d4c7ca4245d261dbe
+> > 
+> > The crash happens on this line of code in if_sdio_interrupt:
+> > 
+> > cause = sdio_readb(card->func, IF_SDIO_H_INT_STATUS, &ret);
+> > 
+> > card is NULL here
+> Thanks for you detailed report. It fails due to sdio_get_drvdata() returns NULL.
+> 
+> I am thinking of if the timing has changed due to this "single irq" patch or if
+> the functionality is broken.
+> To answer that I have a question on the if_sdio.c in libertas.
+> 
+> if_sdio.c
+>  sdio_claim_host();
+>  sdio_claim_irq()
+>  ...
+>  sdio_release_host()
+>  sdio_set_drvdata(func, card)
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
- arch/arm/mach-omap2/hsmmc.c |   13 ++++++++++---
- 1 files changed, 10 insertions(+), 3 deletions(-)
+This looks wrong to me.  the driver must be ready to receive interrupts 
+the moment it registers for it, or make sure the hardware is not 
+generating any.
 
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index b2f30be..3f8dc16 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -145,6 +145,7 @@ static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
- 				 int power_on, int vdd)
- {
- 	u32 reg;
-+	unsigned long timeout;
- 
- 	if (power_on) {
- 		reg = omap4_ctrl_pad_readl(control_pbias_offset);
-@@ -157,9 +158,15 @@ static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
- 			OMAP4_MMC1_PWRDNZ_MASK |
- 			OMAP4_USBC1_ICUSB_PWRDNZ_MASK);
- 		omap4_ctrl_pad_writel(reg, control_pbias_offset);
--		/* 4 microsec delay for comparator to generate an error*/
--		udelay(4);
--		reg = omap4_ctrl_pad_readl(control_pbias_offset);
-+
-+		timeout = jiffies + msecs_to_jiffies(5);
-+		do {
-+			reg = omap4_ctrl_pad_readl(control_pbias_offset);
-+			if (!(reg & OMAP4_MMC1_PBIASLITE_VMODE_ERROR_MASK))
-+				break;
-+			udelay(100);
-+		} while (!time_after(jiffies, timeout));
-+
- 		if (reg & OMAP4_MMC1_PBIASLITE_VMODE_ERROR_MASK) {
- 			pr_err("Pbias Voltage is not same as LDO\n");
- 			/* Caution : On VMODE_ERROR Power Down MMC IO */
--- 
-1.7.0.4
+> Just a sanity question, can the interrupt occur before sdio_set_drvdata()?
 
+What might be happening here is that for some reasons the card is 
+asserting the interrupt line, but none of the function bits in CCCR_INTx 
+is set.
+
+
+Nicolas
