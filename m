@@ -1,173 +1,325 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] mmc: support sdhci-mmp2
-Date: Tue, 31 May 2011 08:57:05 -0700
-Message-ID: <82677173-FCCF-4A3B-9563-517CF4E56D56@marvell.com>
-References: <1306156882-12124-1-git-send-email-zhangfei.gao@marvell.com>
- <F4CA7B04-7898-4C6A-814E-DE84588E3C94@marvell.com>
- <BANLkTi=0VRXmqFrf-HuAoj4JAdg8KiF4qA@mail.gmail.com>
- <47E8F95D-7537-40D5-AD51-694EE4DCEEC3@marvell.com>
- <BANLkTikJU-WvOJ0yzKb0WUz+cNS7dDz3_g@mail.gmail.com>
+Subject: Re: [PATCH V2] mmc: eMMC bus width may not work on all platforms
+Date: Tue, 31 May 2011 11:11:04 -0700
+Message-ID: <C698A0E4-BA6E-4CED-8147-C806391CBF2A@marvell.com>
+References: <2FBABAF6-BFF6-46C9-BE6C-D4CA1EE9BD03@marvell.com>
+ <1482D9D127C1754E8684047CF53F7660622B177DBE@pgsmsx505.gar.corp.intel.com>
+ <m3fwo7r0nc.fsf@pullcord.laptop.org>
+ <15864FE4-25CB-46BC-ACC2-FC24C2E6E241@marvell.com>
+ <m3wrhgaeur.fsf@pullcord.laptop.org>
+ <2FB34057-4156-4BCA-A896-733203F90DA3@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:57625 "EHLO
-	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932161Ab1EaP5S convert rfc822-to-8bit
+Received: from na3sys009aog112.obsmtp.com ([74.125.149.207]:57816 "EHLO
+	na3sys009aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757794Ab1EaSOV convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 31 May 2011 11:57:18 -0400
-In-Reply-To: <BANLkTikJU-WvOJ0yzKb0WUz+cNS7dDz3_g@mail.gmail.com>
+	Tue, 31 May 2011 14:14:21 -0400
+In-Reply-To: <2FB34057-4156-4BCA-A896-733203F90DA3@marvell.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Zhangfei Gao <zgao6@marvell.com>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Mark Brown <mark.brown314@gmail.com>, Shawn Guo <shawn.guo@linaro.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: "Mok, Tze Siong" <tze.siong.mok@intel.com>, Tomoya MORINAGA <tomoya-linux@dsn.okisemi.com>, Takashi Iwai <tiwai@suse.de>, Mark Brown <mark.brown314@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
-Hi Zhangfei,
+Chris,
 
-<Snip>
->>>> 
->>>> It is probably better to NOT name the file sdhci-mmp2.c but
->>>> something like sdchi-pxaV3.c since other SoC's may use this controller.
->>> fine
->> 
->> The same renaming change is needed for the pxa9xx patch.
-> Do you mean use sdhci-pxa9xx.c to replace sdhci-pxa910.c, pxa955 do
-> not use the same driver, but it does not matter.
+Just tested the mod on brownstone.  Works.
 
-Give it a name that is not chip specific so the driver can be reused.
-the name in the probe definition should be changed as well.
+Philip
 
->>>>> +static struct platform_driver sdhci_mmp2_driver = {
->>>>> +       .driver         = {
->>>>> +               .name   = "sdhci-mmp2",
+On May 24, 2011, at 6:14 PM, Philip Rakity wrote:
 
-change to sdhci-pxaV3
-
->>>>> +               .owner  = THIS_MODULE,
->>>>> +       },
->>>>> +       .probe          = sdhci_mmp2_probe,
->>>>> +       .remove         = __devexit_p(sdhci_mmp2_remove),
->>>>> +#ifdef CONFIG_PM
->>>>> +       .suspend        = sdhci_mmp2_suspend,
->>>>> +       .resume         = sdhci_mmp2_resume,
->>>>> +#endif
->>>>> +};
-
-for pxa910 and for pxa168 they use a sdhci-pxav2 controller and the code should be updated accordingly.
-
->>>>> \
->> 
->>> 
->>>>> +               | SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
->>> This quirk also not must?
->> 
->> It is NOT a must but it saves a needless memory access per ADMA transfer to fetch a
->> descriptor that says ADMA is done.  Since you are concerned about  the time 74 clocks
->> takes this quirk makes everything faster.
-> For pxa955, this quirk must be set, otherwise it is not work properly.
-> For mmp2, ADMA work well regardless of this quirk, it is OK if you
-> think add this quirk would be efficiently,
-> One general question is quirk should be added only for chip limitation?
-
-The code is backwards in sdhci.c.  The original code assumed a extra descriptor was needed.
-The quirk removed the limitation.  Strange use for a quirk to make things work as they should 
-but preserved original behavior.
-
->> 
->>>>> +
->>>>> +       /* enable 1/8V DDR capable */
->>>>> +       host->mmc->caps |= MMC_CAP_1_8V_DDR;
->>>> 
->>>> 
->>>> missing cap for bus width testing CMD19 works on MMP2
->>> Will do the test of CMD19.
-> Test CMD19 on mmp2 A2 with MMC_CAP_BUS_WIDTH_TEST, timeout occurs here.
-
-check the chip revision that you have.  This is fixed in newer silicon.
-
->>>>> +       if (pdata && pdata->flags & PXA_FLAG_DISABLE_CLOCK_GATING) {
->>>>> +               u32 tmp = 0;
->>>>> +
->>>>> +               tmp = readl(host->ioaddr + MMP2_SD_FIFO_PARAM);
->>>>> +               tmp |= MMP2_DIS_PAD_SD_CLK_GATE;
->>>>> +               writel(tmp, host->ioaddr + MMP2_SD_FIFO_PARAM);
->>>>> +       }
->>>>> +}
->>>> 
->>>> One cannot know what card if being inserted or removed by a user
->>>> so the safest choice is to leave clock gating OFF by default.
->>>> 
->>>> PXA_FLAG_DISABLE_CLOCK_GATING should be renamed
->>>> to
->>>> PXA_FLAG_ENABLE_CLOCK_GATING.
->>>> 
->>>> If you have a card which is permanent then the flags should be used
->>>> to ENABLE clock gating.  Otherwise clock gating should be left OFF by default.
-> Fine,
-> My understanding is it is not a question, user have to know which slot
-> should open/close clock gating, and set flag accordingly.
-> Currently only 8787 require clock free running.
-
-NO USER can know if a card requires clock gating or not.  There are other cards
-that require no clock gating 8688 for example.
-
-
-
-> Since you have add one workaround to use mmc_compare_ext_csds, so same
-> result adding caps or not, timeout and use 1bit mode.
-
-CMD19 maps the standard.  If no ext_csd they bus width test will make card work in 1 bit mode
-when CMD19 might make it run in 4 or 8 bit mode.  CMD19 is best if supported.
-
->> \
->> not clear in my question.  Have you confirmed that when the controller is DEAD that
->> -1 is read from the INT STATUS register ?  I have never seen this.
->> Maybe there is a private register that can help.
-> not see -1 either, not impact function.
-> if you want to make sure, we can make the controller DEAD to have a try.
-
-Thank You
-
->>>> +}
->>>> +
->>>> 
->> 
->> is the 740 us delay important  once per card insert ?  The code works as submitted and was tested
->> with the silicon design team.  The other option would be to enable the interrupt rather then wait but
->> in that case you will need to plumb the interrupt in.  Did not want to touch base code and
->> was not concerned about 740 us.
->> 
->> The mmc_delay value is WAY too high and should be lowered.
-> mmc_delay will schedule out, so the value has no defect.
-
-Not really -- it delays the start up time for the device with a value that is this high.  It does not effect the other
-components.
-
-> Finish 74 clocks during mmc_delay time could make the code simple, and
-> solve the silicon issue.
-> It is OK if you want to use polling, function is OK.
-
-thank you -- in practice it just delays and never polls.  The code completes.  If you are concerned about the
-time you can try lowering the 74 uSec delay.  at 400KHz the code takes 185 uSec rather than 740.  I wanted
-to be safe with the value.  
-> 
->> 
->> The 74 clock code is needed for any slot where a card can be plugged in.   You cannot assume it is
->> SD.  It could be mmc (or sdio) or combo.
-
-
-
-
->> 
->>>>> 
->>>> 
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>> 
->> 
->> 
+>=20
+> resend=20
+>=20
+> Note:  I cannot test test for a few days.  Following Chris
+> suggestion posting to list.
+>=20
+> version 2
+> ---
+> return -EINVAL when compare of ext_csd_fails
+> combine two compare routines into one per suggestion
+> from Chris.
+>=20
+> ---
+> version 1
+>=20
+> CMD19 -- The offical way to validate bus widths from the
+> JEDEC spec does not work on all platforms.  Some platforms
+> that use PCI/PCIe to connect their SD controllers are known
+> to fail.
+>=20
+> If the quirk MMC_BUS_WIDTH_TEST is not defined we try
+> to figure out the bus width by reading the ext_csd at different
+> bus widths and compare this against the ext_csd read in 1 bit
+> mode.  If no ext_csd is available we default to 1 bit operations.
+>=20
+> Code has been tested on mmp2 against 8 bit eMMC and Transcend 2GB
+> card that is known to not work in 4 bit mode.  The physical
+> pins on the card are not present to support 4 bit operation.
+>=20
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> ---
+> drivers/mmc/core/mmc.c |  113 +++++++++++++++++++++++++++++++++++++++=
+++++----
+> 1 files changed, 103 insertions(+), 10 deletions(-)
+>=20
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index baab027..6db91d6 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -174,14 +174,17 @@ static int mmc_decode_csd(struct mmc_card *card=
+)
+> }
+>=20
+> /*
+> - * Read and decode extended CSD.
+> + * Read extended CSD.
+>  */
+> -static int mmc_read_ext_csd(struct mmc_card *card)
+> +static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
+> {
+> 	int err;
+> 	u8 *ext_csd;
+>=20
+> 	BUG_ON(!card);
+> +	BUG_ON(!new_ext_csd);
+> +
+> +	*new_ext_csd =3D NULL;
+>=20
+> 	if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
+> 		return 0;
+> @@ -199,12 +202,15 @@ static int mmc_read_ext_csd(struct mmc_card *ca=
+rd)
+>=20
+> 	err =3D mmc_send_ext_csd(card, ext_csd);
+> 	if (err) {
+> +		kfree(ext_csd);
+> +		*new_ext_csd =3D NULL;
+> +
+> 		/* If the host or the card can't do the switch,
+> 		 * fail more gracefully. */
+> 		if ((err !=3D -EINVAL)
+> 		 && (err !=3D -ENOSYS)
+> 		 && (err !=3D -EFAULT))
+> -			goto out;
+> +			return err;
+>=20
+> 		/*
+> 		 * High capacity cards should have this "magic" size
+> @@ -222,9 +228,23 @@ static int mmc_read_ext_csd(struct mmc_card *car=
+d)
+> 				mmc_hostname(card->host));
+> 			err =3D 0;
+> 		}
+> +	} else
+> +		*new_ext_csd =3D ext_csd;
+>=20
+> -		goto out;
+> -	}
+> +	return err;
+> +}
+> +
+> +/*
+> + * Decode extended CSD.
+> + */
+> +static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+> +{
+> +	int err =3D 0;
+> +
+> +	BUG_ON(!card);
+> +
+> +	if (!ext_csd)
+> +		return 0;
+>=20
+> 	/* Version is coded in the CSD_STRUCTURE byte in the EXT_CSD registe=
+r */
+> 	if (card->csd.structure =3D=3D 3) {
+> @@ -372,8 +392,70 @@ static int mmc_read_ext_csd(struct mmc_card *car=
+d)
+> 		card->erased_byte =3D 0x0;
+>=20
+> out:
+> +	return err;
+> +}
+> +
+> +static inline void mmc_free_ext_csd(u8 *ext_csd)
+> +{
+> 	kfree(ext_csd);
+> +}
+> +
+>=20
+> +static int mmc_compare_ext_csds(struct mmc_card *card, u8 *ext_csd,
+> +			unsigned bus_width)
+> +{
+> +	u8 *bw_ext_csd;
+> +	int err;
+> +
+> +	err =3D mmc_get_ext_csd(card, &bw_ext_csd);
+> +	if (err)
+> +		return err;
+> +
+> +	if ((ext_csd =3D=3D NULL || bw_ext_csd =3D=3D NULL)) {
+> +		if (bus_width !=3D MMC_BUS_WIDTH_1)
+> +			err =3D -EINVAL;
+> +		goto out;
+> +	}
+> +
+> +	if (bus_width =3D=3D MMC_BUS_WIDTH_1)
+> +		goto out;
+> +
+> +	/* only compare read only fields */
+> +
+> +	err =3D	(!(ext_csd[EXT_CSD_PARTITION_SUPPORT] =3D=3D
+> +			bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
+> +		(ext_csd[EXT_CSD_ERASED_MEM_CONT] =3D=3D
+> +			bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
+> +		(ext_csd[EXT_CSD_REV] =3D=3D
+> +			bw_ext_csd[EXT_CSD_REV]) &&
+> +		(ext_csd[EXT_CSD_STRUCTURE] =3D=3D
+> +			bw_ext_csd[EXT_CSD_STRUCTURE]) &&
+> +		(ext_csd[EXT_CSD_CARD_TYPE] =3D=3D
+> +			bw_ext_csd[EXT_CSD_CARD_TYPE]) &&
+> +		(ext_csd[EXT_CSD_S_A_TIMEOUT] =3D=3D
+> +			bw_ext_csd[EXT_CSD_S_A_TIMEOUT]) &&
+> +		(ext_csd[EXT_CSD_HC_WP_GRP_SIZE] =3D=3D
+> +			bw_ext_csd[EXT_CSD_HC_WP_GRP_SIZE]) &&
+> +		(ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT] =3D=3D
+> +			bw_ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT]) &&
+> +		(ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE] =3D=3D
+> +			bw_ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE]) &&
+> +		(ext_csd[EXT_CSD_SEC_TRIM_MULT] =3D=3D
+> +			bw_ext_csd[EXT_CSD_SEC_TRIM_MULT]) &&
+> +		(ext_csd[EXT_CSD_SEC_ERASE_MULT] =3D=3D
+> +			bw_ext_csd[EXT_CSD_SEC_ERASE_MULT]) &&
+> +		(ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT] =3D=3D
+> +			bw_ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT]) &&
+> +		(ext_csd[EXT_CSD_TRIM_MULT] =3D=3D
+> +			bw_ext_csd[EXT_CSD_TRIM_MULT]) &&
+> +		memcmp(&ext_csd[EXT_CSD_SEC_CNT],
+> +			&bw_ext_csd[EXT_CSD_SEC_CNT],
+> +			4) !=3D 0);
+> +	if (err)
+> +		err =3D -EINVAL;
+> +
+> +out:
+> +	mmc_free_ext_csd(bw_ext_csd);
+> 	return err;
+> }
+>=20
+> @@ -438,6 +520,7 @@ static int mmc_init_card(struct mmc_host *host, u=
+32 ocr,
+> 	u32 cid[4];
+> 	unsigned int max_dtr;
+> 	u32 rocr;
+> +	u8 *ext_csd =3D NULL;
+>=20
+> 	BUG_ON(!host);
+> 	WARN_ON(!host->claimed);
+> @@ -536,7 +619,11 @@ static int mmc_init_card(struct mmc_host *host, =
+u32 ocr,
+> 		/*
+> 		 * Fetch and process extended CSD.
+> 		 */
+> -		err =3D mmc_read_ext_csd(card);
+> +
+> +		err =3D mmc_get_ext_csd(card, &ext_csd);
+> +		if (err)
+> +			goto free_card;
+> +		err =3D mmc_read_ext_csd(card, ext_csd);
+> 		if (err)
+> 			goto free_card;
+>=20
+> @@ -676,14 +763,18 @@ static int mmc_init_card(struct mmc_host *host,=
+ u32 ocr,
+> 					 0);
+> 			if (!err) {
+> 				mmc_set_bus_width(card->host, bus_width);
+> +
+> 				/*
+> 				 * If controller can't handle bus width test,
+> -				 * use the highest bus width to maintain
+> -				 * compatibility with previous MMC behavior.
+> +				 * compare ext_csd previously read in 1 bit mode
+> +				 * against ext_csd at new bus width
+> 				 */
+> 				if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
+> -					break;
+> -				err =3D mmc_bus_test(card, bus_width);
+> +					err =3D mmc_compare_ext_csds(card,
+> +						ext_csd,
+> +						bus_width);
+> +				else
+> +					err =3D mmc_bus_test(card, bus_width);
+> 				if (!err)
+> 					break;
+> 			}
+> @@ -730,12 +821,14 @@ static int mmc_init_card(struct mmc_host *host,=
+ u32 ocr,
+> 	if (!oldcard)
+> 		host->card =3D card;
+>=20
+> +	mmc_free_ext_csd(ext_csd);
+> 	return 0;
+>=20
+> free_card:
+> 	if (!oldcard)
+> 		mmc_remove_card(card);
+> err:
+> +	mmc_free_ext_csd(ext_csd);
+>=20
+> 	return err;
+> }
+> --=20
+> 1.7.0.4
+>=20
+>=20
+>=20
+> On May 23, 2011, at 9:42 PM, Chris Ball wrote:
+>=20
+>> Hi Philip,
+>>=20
+>> On Sun, May 22 2011, Philip Rakity wrote:
+>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>> index baab027..6db91d6 100644
+>>> --- a/drivers/mmc/core/mmc.c
+>>> +++ b/drivers/mmc/core/mmc.c
+>>> @@ -174,14 +174,17 @@ static int mmc_decode_csd(struct mmc_card *ca=
+rd)
+>>> }
+>>>=20
+>>> /*
+>>> - * Read and decode extended CSD.
+>>> + * Read extended CSD.
+>>> */
+>>> -static int mmc_read_ext_csd(struct mmc_card *card)
+>>> +static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>>=20
+>> This one doesn't work -- you're missing the half of the patch that h=
+ooks
+>> up the rest of mmc.c to the new code, which was in v1.  As-is, we ge=
+t:
+>>=20
+>> drivers/mmc/core/mmc.c: In function =91mmc_init_card=92:
+>> drivers/mmc/core/mmc.c:621:3: error: too few arguments to function =91=
+mmc_read_ext_csd=92
+>> drivers/mmc/core/mmc.c:240:12: note: declared here
+>> drivers/mmc/core/mmc.c: At top level:
+>> drivers/mmc/core/mmc.c:404:12: warning: =91mmc_compare_ext_csds=92 d=
+efined but not used [-Wunused-function]
+>>=20
+>> - Chris.
+>> --=20
+>> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+>> One Laptop Per Child
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
 
