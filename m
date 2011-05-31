@@ -1,78 +1,37 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: SDIO single IRQ optimization breaks libertas
-Date: Tue, 31 May 2011 17:03:20 +0200
-Message-ID: <BANLkTi=EuDmUnOdW0dQVtHUPEq9AGqbZKA@mail.gmail.com>
-References: <BANLkTi=xWwWh2z2r3THvf5DzvhUCX_ZB7A@mail.gmail.com>
-	<BANLkTi=Y3rq_xnq5m6wj97uHHi5+ZCpURQ@mail.gmail.com>
-	<loom.20110530T111921-497@post.gmane.org>
-	<alpine.LFD.2.00.1105301028310.30544@xanadu.home>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: Enable MMC card reader for RICOH [1180:e823]
+Date: Tue, 31 May 2011 11:05:55 -0400
+Message-ID: <m3d3iyoqp8.fsf@pullcord.laptop.org>
+References: <1306426745-3636-1-git-send-email-manoj.iyer@canonical.com>
+	<1306426745-3636-2-git-send-email-manoj.iyer@canonical.com>
+	<m3fwo0u9sf.fsf@pullcord.laptop.org>
+	<alpine.DEB.2.02.1105310958460.4067@sleepy>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:62947 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751265Ab1EaPDX convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2011 11:03:23 -0400
-Received: by iwn34 with SMTP id 34so3690520iwn.19
-        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2011 08:03:22 -0700 (PDT)
-In-Reply-To: <alpine.LFD.2.00.1105301028310.30544@xanadu.home>
+Received: from void.printf.net ([89.145.121.20]:53086 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752827Ab1EaPFO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 31 May 2011 11:05:14 -0400
+In-Reply-To: <alpine.DEB.2.02.1105310958460.4067@sleepy> (Manoj Iyer's message
+	of "Tue, 31 May 2011 10:01:00 -0500 (CDT)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Pitre <nicolas.pitre@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+To: Manoj Iyer <manoj.iyer@canonical.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, philipl@overt.org, w.sang@pengutronix.de
 
-On 30 May 2011 16:38, Nicolas Pitre <nicolas.pitre@linaro.org> wrote:
-> On Mon, 30 May 2011, Per Forlin wrote:
->
->> Hi Daniel,
->>
->> >
->> > On 29 May 2011 15:26, Daniel Drake <dsd <at> laptop.org> wrote:
->> > > Hi,
->> > >
->> > > The following commit in 2.6.39 causes instant death for libertas=
-_sdio
->> > > when it receives its first interrupt during initialization:
->> > >
->> > > commit 06e8935febe687e2a561707d4c7ca4245d261dbe
->> >
->> > The crash happens on this line of code in if_sdio_interrupt:
->> >
->> > cause =3D sdio_readb(card->func, IF_SDIO_H_INT_STATUS, &ret);
->> >
->> > card is NULL here
->> Thanks for you detailed report. It fails due to sdio_get_drvdata() r=
-eturns NULL.
->>
->> I am thinking of if the timing has changed due to this "single irq" =
-patch or if
->> the functionality is broken.
->> To answer that I have a question on the if_sdio.c in libertas.
->>
->> if_sdio.c
->> =A0sdio_claim_host();
->> =A0sdio_claim_irq()
->> =A0...
->> =A0sdio_release_host()
->> =A0sdio_set_drvdata(func, card)
->
-> This looks wrong to me. =A0the driver must be ready to receive interr=
-upts
-> the moment it registers for it, or make sure the hardware is not
-> generating any.
->
->> Just a sanity question, can the interrupt occur before sdio_set_drvd=
-ata()?
->
-> What might be happening here is that for some reasons the card is
-> asserting the interrupt line, but none of the function bits in CCCR_I=
-NTx
-> is set.
->
-I think your assumption is correct. I didn't know this could happen.
-I propose to let the client decide whether use make sdio_irq_single or
-not, default is no. I'll make patch for it.
+Hi,
 
-Thanks,
-Per
+On Tue, May 31 2011, Manoj Iyer wrote:
+>> Do you not need a corresponding entry in drivers/mmc/host/sdhci-pci.c's
+>> pci_device_id struct?
+>
+> I believe there is an entry there already, introduced by this patch:
+> https://lkml.org/lkml/2011/2/11/309
+
+I see, thanks; patch is queued for 3.0 with a stable@ tag.
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
