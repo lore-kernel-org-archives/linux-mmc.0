@@ -1,92 +1,105 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH 1/2] ARM: OMAP4: MMC: increase delay for pbias
-Date: Wed, 1 Jun 2011 14:48:33 +0530
-Message-ID: <BANLkTikZv7tTv357c+g494tq3stBrYmmgQ@mail.gmail.com>
-References: <1306765534-20103-1-git-send-email-balajitk@ti.com>
-	<1306765534-20103-2-git-send-email-balajitk@ti.com>
-	<20110601074134.GX11352@atomide.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH v2 2/2] ARM: OMAP4: MMC: no regulator off during probe for eMMC
+Date: Wed, 1 Jun 2011 16:45:23 +0530
+Message-ID: <1306926923-3398-3-git-send-email-balajitk@ti.com>
+References: <1306926923-3398-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:39397 "EHLO
-	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751625Ab1FAJSe convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 1 Jun 2011 05:18:34 -0400
-In-Reply-To: <20110601074134.GX11352@atomide.com>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:58165 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758731Ab1FALRP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 1 Jun 2011 07:17:15 -0400
+In-Reply-To: <1306926923-3398-1-git-send-email-balajitk@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, madhu.cr@ti.com
+To: tony@atomide.com, linux-omap@vger.kernel.org, cjb@laptop.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, madhu.cr@ti.com, Balaji T K <balajitk@ti.com>
 
-On Wed, Jun 1, 2011 at 1:11 PM, Tony Lindgren <tony@atomide.com> wrote:
-> * Balaji T K <balajitk@ti.com> [110530 07:23]:
->> 4 micro seconds is not enough for PBIAS if MMC regulator is
->> enabled from MMC regulator OFF.
->> Increase the delay for PBIAS to stabilize.
->> Wait for PBIAS and timeout if not.
->>
->> Resolves MMC/SD failure on OMAP4
->> "Pbias Voltage is not same as LDO"
->>
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->> ---
->> =A0arch/arm/mach-omap2/hsmmc.c | =A0 13 ++++++++++---
->> =A01 files changed, 10 insertions(+), 3 deletions(-)
->>
->> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc=
-=2Ec
->> index b2f30be..3f8dc16 100644
->> --- a/arch/arm/mach-omap2/hsmmc.c
->> +++ b/arch/arm/mach-omap2/hsmmc.c
->> @@ -145,6 +145,7 @@ static void omap4_hsmmc1_after_set_reg(struct de=
-vice *dev, int slot,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int p=
-ower_on, int vdd)
->> =A0{
->> =A0 =A0 =A0 u32 reg;
->> + =A0 =A0 unsigned long timeout;
->>
->> =A0 =A0 =A0 if (power_on) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap4_ctrl_pad_readl(control_pbi=
-as_offset);
->> @@ -157,9 +158,15 @@ static void omap4_hsmmc1_after_set_reg(struct d=
-evice *dev, int slot,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK |
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_USBC1_ICUSB_PWRDNZ=
-_MASK);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap4_ctrl_pad_writel(reg, control_pbias=
-_offset);
->> - =A0 =A0 =A0 =A0 =A0 =A0 /* 4 microsec delay for comparator to gene=
-rate an error*/
->> - =A0 =A0 =A0 =A0 =A0 =A0 udelay(4);
->> - =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap4_ctrl_pad_readl(control_pbias=
-_offset);
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 timeout =3D jiffies + msecs_to_jiffies(5);
->> + =A0 =A0 =A0 =A0 =A0 =A0 do {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap4_ctrl_pad_rea=
-dl(control_pbias_offset);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!(reg & OMAP4_MMC1_PBI=
-ASLITE_VMODE_ERROR_MASK))
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 udelay(100);
->> + =A0 =A0 =A0 =A0 =A0 =A0 } while (!time_after(jiffies, timeout));
->> +
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (reg & OMAP4_MMC1_PBIASLITE_VMODE_ERR=
-OR_MASK) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("Pbias Voltage is=
- not same as LDO\n");
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Caution : On VMODE_ER=
-ROR Power Down MMC IO */
->
-> Actually, can you check if you can use usleep_range here as recommend=
-ed
-> by checkpatch.pl?
+eMMC does not handle power off when not in sleep state,
+Skip regulator disable during probe when eMMC is
+not in known state - state left by bootloader.
 
-sure, fixing it in v2
+Resolves eMMC failure on OMAP4
+mmc0: error -110 whilst initialising MMC card
 
->
-> Tony
->
+Signed-off-by: Balaji T K <balajitk@ti.com>
+Tested-by:  Kishore Kadiyala <kishore.kadiyala@ti.com>
+Acked-by:  Kishore Kadiyala <kishore.kadiyala@ti.com>
+---
+ arch/arm/mach-omap2/board-4430sdp.c   |    1 +
+ arch/arm/mach-omap2/hsmmc.c           |    3 +++
+ arch/arm/mach-omap2/hsmmc.h           |    1 +
+ arch/arm/plat-omap/include/plat/mmc.h |    3 +++
+ drivers/mmc/host/omap_hsmmc.c         |    3 +++
+ 5 files changed, 11 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
+index 73fa90b..b324605 100644
+--- a/arch/arm/mach-omap2/board-4430sdp.c
++++ b/arch/arm/mach-omap2/board-4430sdp.c
+@@ -322,6 +322,7 @@ static struct omap2_hsmmc_info mmc[] = {
+ 		.gpio_wp	= -EINVAL,
+ 		.nonremovable   = true,
+ 		.ocr_mask	= MMC_VDD_29_30,
++		.no_off_init	= true,
+ 	},
+ 	{
+ 		.mmc		= 1,
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index 24f25c7..66868c5 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -338,6 +338,9 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+ 	if (c->no_off)
+ 		mmc->slots[0].no_off = 1;
+ 
++	if (c->no_off_init)
++		mmc->slots[0].no_regulator_off_init = c->no_off_init;
++
+ 	if (c->vcc_aux_disable_is_sleep)
+ 		mmc->slots[0].vcc_aux_disable_is_sleep = 1;
+ 
+diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+index f119348..f757e78 100644
+--- a/arch/arm/mach-omap2/hsmmc.h
++++ b/arch/arm/mach-omap2/hsmmc.h
+@@ -18,6 +18,7 @@ struct omap2_hsmmc_info {
+ 	bool	nonremovable;	/* Nonremovable e.g. eMMC */
+ 	bool	power_saving;	/* Try to sleep or power off when possible */
+ 	bool	no_off;		/* power_saving and power is not to go off */
++	bool	no_off_init;	/* no power off when not in MMC sleep state */
+ 	bool	vcc_aux_disable_is_sleep; /* Regulator off remapped to sleep */
+ 	int	gpio_cd;	/* or -EINVAL */
+ 	int	gpio_wp;	/* or -EINVAL */
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index f38fef9..c7b8741 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -101,6 +101,9 @@ struct omap_mmc_platform_data {
+ 		/* If using power_saving and the MMC power is not to go off */
+ 		unsigned no_off:1;
+ 
++		/* eMMC does not handle power off when not in sleep state */
++		unsigned no_regulator_off_init:1;
++
+ 		/* Regulator off remapped to sleep */
+ 		unsigned vcc_aux_disable_is_sleep:1;
+ 
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 259ece0..5b2e215 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -435,6 +435,9 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 		reg = regulator_get(host->dev, "vmmc_aux");
+ 		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
+ 
++		/* For eMMC do not power off when not in sleep state */
++		if (mmc_slot(host).no_regulator_off_init)
++			return 0;
+ 		/*
+ 		* UGLY HACK:  workaround regulator framework bugs.
+ 		* When the bootloader leaves a supply active, it's
+-- 
+1.7.0.4
+
