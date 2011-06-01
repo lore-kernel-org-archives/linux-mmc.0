@@ -1,40 +1,39 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 0/2] sdio: add quirk for spurious SDIO IRQ
-Date: Wed, 01 Jun 2011 13:00:02 -0400
-Message-ID: <m3hb894hd9.fsf@pullcord.laptop.org>
+From: Troy Kisky <troy.kisky@boundarydevices.com>
+Subject: Re: [PATCH v2 1/2] sdio: add quirk to handle pending IRQ in case
+	of none	CCCR_INTx bits
+Date: Wed, 01 Jun 2011 14:36:40 -0700
+Message-ID: <4DE6B0E8.9050306@boundarydevices.com>
 References: <1306918113-23872-1-git-send-email-per.forlin@stericsson.com>
-	<alpine.LFD.2.00.1106011157000.30544@xanadu.home>
+	<1306918113-23872-2-git-send-email-per.forlin@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:40055 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753286Ab1FAQ7S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 1 Jun 2011 12:59:18 -0400
-In-Reply-To: <alpine.LFD.2.00.1106011157000.30544@xanadu.home> (Nicolas
-	Pitre's message of "Wed, 1 Jun 2011 11:59:25 -0400 (EDT)")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1306918113-23872-2-git-send-email-per.forlin@stericsson.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Per Forlin <per.forlin@stericsson.com>
+Cc: Nicolas Pitre <nicolas.pitre@linaro.org>, linaro-dev@lists.linaro.org, Daniel Drake <dsd@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Per Forlin <per.forlin@linaro.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Pitre <nicolas.pitre@linaro.org>
-Cc: Per Forlin <per.forlin@stericsson.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-dev@lists.linaro.org, Daniel Drake <dsd@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, Per Forlin <per.forlin@linaro.org>
 
-Hi,
+On 6/1/2011 1:48 AM, Per Forlin wrote:
+> From: Per Forlin <per.forlin@linaro.org>
 
-On Wed, Jun 01 2011, Nicolas Pitre wrote:
->> This patchset adds a quirk to support this spurious IRQ issue and also report
->> a warning if an SDIO interrupt is raised but none CCCR_INTx bits are set.
->
-> Given that the issue can be fixed locally to the libertas driver, I'd 
-> suggest not merging this series until truly unfixable issues come up, as 
-> Daniel said.
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 7b4fd7b..852021c 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -175,6 +175,7 @@ struct mmc_card {
+>  #define MMC_QUIRK_DISABLE_CD	(1<<5)		/* disconnect CD/DAT[3] resistor */
+>  #define MMC_QUIRK_INAND_CMD38	(1<<6)		/* iNAND devices have broken CMD38 */
+>  #define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular multiblock */
+> +#define MMC_QUIRK_SDIO_IRQ_CCCR_INTX_0 (1<<7)	/* SDIO card has IRQ even if CCCR_INTx is 0 */
 
-Yep, agreed.  Dan, please go ahead and submit the libertas patch and
-let us know if there are any problems getting it in for 3.0.  (Ideally
-by the next -rc!)
-
-Thanks very much, everyone,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Using the same value as MMC_QUIRK_BLK_NO_CMD23 looks odd...
