@@ -1,32 +1,62 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v2 1/2] ARM: OMAP4: MMC: increase delay for pbias
-Date: Wed, 1 Jun 2011 04:49:29 -0700
-Message-ID: <20110601114929.GB11352@atomide.com>
-References: <1306926923-3398-1-git-send-email-balajitk@ti.com>
- <1306926923-3398-2-git-send-email-balajitk@ti.com>
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: Re: [PATCH 0/2] sdio: make sdio_single_irq optional due to suprious
+ IRQ
+Date: Wed, 1 Jun 2011 10:29:31 -0400 (EDT)
+Message-ID: <alpine.LFD.2.00.1106011027580.30544@xanadu.home>
+References: <1306874008-28867-1-git-send-email-per.forlin@linaro.org> <BANLkTimRB8z16wjyH1fuXbiybQuaJL4Qug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-04-ewr.mailhop.org ([204.13.248.74]:59874 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1162600Ab1FALtd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2011 07:49:33 -0400
-Content-Disposition: inline
-In-Reply-To: <1306926923-3398-2-git-send-email-balajitk@ti.com>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:44994 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755553Ab1FAO3e (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2011 10:29:34 -0400
+Received: by qwk3 with SMTP id 3so2607613qwk.19
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2011 07:29:33 -0700 (PDT)
+In-Reply-To: <BANLkTimRB8z16wjyH1fuXbiybQuaJL4Qug@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, madhu.cr@ti.com
+To: Daniel Drake <dsd@laptop.org>
+Cc: Per Forlin <per.forlin@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-dev@lists.linaro.org, Chris Ball <cjb@laptop.org>
 
-* Balaji T K <balajitk@ti.com> [110601 04:13]:
-> 4 micro seconds is not enough for PBIAS if MMC regulator is
-> enabled from MMC regulator OFF.
-> Increase the delay for PBIAS to stabilize.
-> Wait for PBIAS and timeout if not.
+On Tue, 31 May 2011, Daniel Drake wrote:
+
+> On 31 May 2011 21:33, Per Forlin <per.forlin@linaro.org> wrote:
+> > Daniel Drake reported an issue in the libertas sdio client that was
+> > triggered by the sdio_single_irq functionality. His SDIO device seems to
+> > raise an interrupt even though there are no bits set in the CCCR_INTx
+> > register. This behaviour is not supported by the sdio_single_irq feature nor
+> > the SDIO spec. The purpose of the sdio_single_irq feature is to avoid the
+> > overhead of checking the CCCR_INTx registers, this result in no error
+> > handling of the case if there is a pending IRQ with none CCCR_INTx bits set.
 > 
-> Resolves MMC/SD failure on OMAP4
-> "Pbias Voltage is not same as LDO"
+> Thanks a lot for diagnosing this and nice work on figuring out the
+> root cause presumably without even having access to the hardware!
+> 
+> I've looked further, based on your findings, and have found that you
+> are correct. During initialisation, exactly one interrupt is received
+> with CCCR_INTx=0. Previously the mmc stack threw this interrupt away,
+> after the optimization it now calls into libertas before it is ready
+> to handle interrupts, leading to the crash. From that point, all other
+> interrupts that come in are "normal".
+> 
+> This is definitely a weird hardware issue, and it would annoy me for
+> this hardware to cause a second generic mmc layer feature be disabled
+> by default! And actually it is not much work to harden up the libertas
+> driver to be able to accept that spurious IRQ, and during the process
+> of fixing that it actually made the spurious IRQ go away completely.
+> 
+> Patch attached.
+> 
+> So, I vote for that we work around this little hardware issue in the
+> libertas driver, and leave this optimization enabled by default until
+> we find a hardware issue that is more difficult to workaround. I can
+> take on submission of the libertas patch.
+> 
+> Thoughts?
 
-Thanks for updating this, applying to devel-fixes.
+This is definitively the best approach.  Thanks for fixing the root 
+cause.
 
-Tony
+
+Nicolas
