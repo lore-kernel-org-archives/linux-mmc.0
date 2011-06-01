@@ -1,68 +1,64 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH 1/2] mmc: sdhci: Replace SDHCI_QUIRK_FORCE_BLK_SZ_2048
- with a pklatform hook.
-Date: Wed, 1 Jun 2011 06:00:50 +0200
-Message-ID: <20110601040050.GA24330@pengutronix.de>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/2] mmc: sdhci: Replace SDHCI_QUIRK_FORCE_BLK_SZ_2048 with a platform hook.
+Date: Wed, 01 Jun 2011 00:42:02 -0400
+Message-ID: <m3sjru40yt.fsf_-_@pullcord.laptop.org>
 References: <m31v3lofm1.fsf@pullcord.laptop.org>
- <m3mxi6p7fm.fsf@pullcord.laptop.org>
+	<m3mxi6p7fm.fsf@pullcord.laptop.org>
+	<20110601040050.GA24330@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="9jxsPFA5p3P2qPhR"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:53245 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750717Ab1FAEAx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2011 00:00:53 -0400
-Content-Disposition: inline
-In-Reply-To: <m3mxi6p7fm.fsf@pullcord.laptop.org>
+Received: from void.printf.net ([89.145.121.20]:48022 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750923Ab1FAElH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 1 Jun 2011 00:41:07 -0400
+In-Reply-To: <20110601040050.GA24330@pengutronix.de> (Wolfram Sang's message
+	of "Wed, 1 Jun 2011 06:00:50 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, Anton Vorontsov <cbouatmailru@gmail.com>, Nicolas Pitre <nico@fluxnic.net>
 
+Hi Wolfram, Nico,
 
---9jxsPFA5p3P2qPhR
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Wed, Jun 01 2011, Wolfram Sang wrote:
+> :( I still like the io-accessor-method a lot better.
 
-On Sat, May 28, 2011 at 10:27:41PM -0400, Chris Ball wrote:
-> Hi,
->=20
-> On Sun, Feb 06 2011, Chris Ball wrote:
-> > Part of a quirk cleanup run.  This quirk was only used by sdhci-esdhc.
-> > This patch is untested.
-> >
-> > Signed-off-by: Chris Ball <cjb@laptop.org>
-> > Cc: Anton Vorontsov <cbouatmailru@gmail.com>
-> > Cc: Wolfram Sang <w.sang@pengutronix.de>
->=20
-> I've queued this patch now, since we're out of quirk bits and didn't come
-> up with any alternative patches.  (Feel free to improve on it later.)
+That's okay -- nothing's final yet, I just wanted to get things moving
+again since we're out of quirk space now.  I'm still happy to take a
+patch from you instead if we decide it's the better way to go.
 
-:( I still like the io-accessor-method a lot better. I would have created a
-patch if I had got some feedback on my suggestion[1] (and will still do).
+> I would have created a patch if I had got some feedback on my
+> suggestion[1] (and will still do).
+>
+> [1] http://thread.gmane.org/gmane.linux.kernel.mmc/5742/focus=5768
 
-Regards,
+Sorry for not replying.  I'm still mildly in favor of having it handled
+as a platform check in the obvious place in sdhci.c, because I can
+recall when I didn't know what IO-accessors were, and if I were trying
+to track down a bug with with max_blk_size I would have found my way to
+sdhci.c but not thought to look at a different part of the host driver
+for code that had overloaded sdhci_readl() to mean something non-obvious.
 
-   Wolfram
+In short, I want the code to be maintainable even by hackers who don't
+yet understand how MMC chooses to organize itself, and I feel that your
+proposal eventually results in code that seems "magic" and can't easily
+be followed by a kernel hacker who happens to be unfamiliar with which
+functions we tend to make override-able; someone doing a board bringup,
+say.  I'm willing to change my mind, though.
 
-[1] http://thread.gmane.org/gmane.linux.kernel.mmc/5742/focus=3D5768
+You can counter-argue that my approach eventually pollutes sdhci.c with
+a bunch of potential calls into platform code, such that people have to
+spend time working out whether their platform is or isn't overwriting
+any particular function.  That's certainly true.
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Perhaps it comes down to preferred coding style -- maybe we can get
+someone else to act as a tie-breaker?  :)  CC'ing Nico in case he's
+interested.
 
---9jxsPFA5p3P2qPhR
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+Thanks!
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAk3luXIACgkQD27XaX1/VRsfywCfYsjGJNBXPNmp179nWPM/7SeH
-IvMAnj4U4PiFGMILj5kgmbM60V18qut+
-=BRA3
------END PGP SIGNATURE-----
-
---9jxsPFA5p3P2qPhR--
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
