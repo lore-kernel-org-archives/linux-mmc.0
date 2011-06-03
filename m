@@ -1,31 +1,38 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v3 1/4] mmc: support sdhci-pxav3.c
-Date: Fri, 3 Jun 2011 18:14:26 +0200
-Message-ID: <201106031814.26414.arnd@arndb.de>
-References: <1307094572-8378-1-git-send-email-zhangfei.gao@marvell.com>
+Subject: Re: [PATCH v3 2/4] mmc: support sdhci-pxav2.c
+Date: Fri, 3 Jun 2011 18:15:49 +0200
+Message-ID: <201106031815.50064.arnd@arndb.de>
+References: <1307094606-8692-1-git-send-email-zhangfei.gao@marvell.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:62364 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750965Ab1FCQOf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2011 12:14:35 -0400
-In-Reply-To: <1307094572-8378-1-git-send-email-zhangfei.gao@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1307094606-8692-1-git-send-email-zhangfei.gao@marvell.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Zhangfei Gao <zhangfei.gao@marvell.com>
-Cc: Nicolas Pitre <nico@fluxnic.net>, Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Qiming Wu <wuqm@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+Cc: Philip Rakity <prakity@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, Nicolas Pitre <nico@fluxnic.net>, Qiming Wu <wuqm@marvell.com>, Jun Nie <njun@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>, Haojian Zhuang <haojian.zhuang@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Raymond Wu <xywu@marvell.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+List-Id: linux-mmc@vger.kernel.org
 
 On Friday 03 June 2011, Zhangfei Gao wrote:
->         Instead of sharing sdhci-pxa.c, use sdhci-pxav3.c for mmp2.
->         The original method is not easy to track, which is share sdhci-pxa.c among pxa serious, like pxa910, mmp2, etc,
->         and put the platfrom difference under arch/arm.
+>         SDHCI driver for pxav2 SoCs, such as pxa910, the driver based on sdhci-pltfm to handle resource etc.
 > 
 > Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
-
-Looks very good now,
+> Signed-off-by: Jun Nie <njun@marvell.com>
+> Signed-off-by: Qiming Wu <wuqm@marvell.com>
+> ---
+>  drivers/mmc/host/Kconfig       |   11 ++
+>  drivers/mmc/host/Makefile      |    1 +
+>  drivers/mmc/host/sdhci-pxav2.c |  261 ++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 273 insertions(+), 0 deletions(-)
+>  create mode 100644 drivers/mmc/host/sdhci-pxav2.c
+> 
 
 Reviewed-by: Arnd Bergmann <arnd@arndb.de>
