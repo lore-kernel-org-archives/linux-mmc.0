@@ -1,167 +1,84 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: -ENOSYS suspend-powerdown regression
-Date: Sat, 4 Jun 2011 12:10:30 +0100
-Message-ID: <BANLkTi=07mHM8Mf7+p_YLgeb=gL8bko2rw@mail.gmail.com>
-References: <BANLkTimdp2n1qhLQmTk+k_M5_WowhJqPyQ@mail.gmail.com>
-	<BANLkTimRWqo1M7OOQmdWOxSQvqiNx48Ftg@mail.gmail.com>
-	<BANLkTinQ_H6eseqHkcmc7MUa+d4cdxwr_g@mail.gmail.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH] mmc: sdhci: change sdhci-pltfm into a module
+Date: Sat, 4 Jun 2011 20:08:23 +0800
+Message-ID: <20110604120821.GA19972@S2100-06.ap.freescale.net>
+References: <20110601130431.59f4f0d4.sfr@canb.auug.org.au>
+ <1306983470-18588-1-git-send-email-shawn.guo@linaro.org>
+ <20110603200316.GB17972@ponder.secretlab.ca>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=bcaec5314cc11297f004a4e0eb95
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:48043 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756490Ab1FDLKb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Jun 2011 07:10:31 -0400
-Received: by pwi15 with SMTP id 15so1368139pwi.19
-        for <linux-mmc@vger.kernel.org>; Sat, 04 Jun 2011 04:10:30 -0700 (PDT)
-In-Reply-To: <BANLkTinQ_H6eseqHkcmc7MUa+d4cdxwr_g@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-next-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20110603200316.GB17972@ponder.secretlab.ca>
+Sender: linux-next-owner@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-next@vger.kernel.org, linux-kernel@vger.kernel.org, cbouatmailru@gmail.com, w.sang@pengutronix.de, cjb@laptop.org, arnd@arndb.de, sfr@canb.auug.org.au, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org
 
---bcaec5314cc11297f004a4e0eb95
-Content-Type: text/plain; charset=ISO-8859-1
+Hi Grant,
 
-On 4 June 2011 11:33, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> It means runtime PM is disabled for your device.
->
-> Which doesn't make sense, assuming you had MMC_CAP_POWER_OFF_CARD
-> configured (if you didn't, you wouldn't end up calling runtime PM api
-> at all).
->
-> If you post your entire diff, I might be able to spot what's wrong.
+On Fri, Jun 03, 2011 at 02:03:16PM -0600, Grant Likely wrote:
+> On Thu, Jun 02, 2011 at 10:57:50AM +0800, Shawn Guo wrote:
+> > From: Shawn Guo <shawn.guo@freescale.com>
+> > 
+> > There are a couple of problems left from the sdhci pltfm and OF
+> > consolidation changes.
+> > 
+> > * When building more than one sdhci-pltfm based drivers in the same
+> >   image, linker will give multiple definition error on the sdhci-pltfm
+> >   helper functions.  For example right now, building sdhci-of-esdhc
+> >   and sdhci-of-hlwd together is a valid combination from Kconfig view.
+> > 
+> > * With the current build method, there is error with building the
+> >   drivers as module, but module installation fails with modprobe.
+> > 
+> > The patch fixes above problems by changing sdhci-pltfm into a module.
+> > To avoid EXPORT_SYMBOL on so many big endian IO accessors, it moves
+> > these accessors into sdhci-pltfm.h as the 'static inline' functions.
+> > As a result, sdhci.h needs to be included in sdhci-pltfm.h, and in
+> > turn can be removed from individual drivers which already include
+> > sdhci-pltfm.h.
+> 
+> Mostly looks good.  One comment below about a static inline, but
+> otherwise you can add my:
+> 
+> Acked-by: Grant Likely <grant.likely@secretlab.ca>
+> 
+> > +static inline void sdhci_be32bs_writew(struct sdhci_host *host,
+> > +				       u16 val, int reg)
+> > +{
+> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > +	int base = reg & ~0x3;
+> > +	int shift = (reg & 0x2) * 8;
+> > +
+> > +	switch (reg) {
+> > +	case SDHCI_TRANSFER_MODE:
+> > +		/*
+> > +		 * Postpone this write, we must do it together with a
+> > +		 * command write that is down below.
+> > +		 */
+> > +		pltfm_host->xfer_mode_shadow = val;
+> > +		return;
+> > +	case SDHCI_COMMAND:
+> > +		sdhci_be32bs_writel(host,
+> > +				    val << 16 | pltfm_host->xfer_mode_shadow,
+> > +				    SDHCI_TRANSFER_MODE);
+> > +		return;
+> > +	}
+> > +	clrsetbits_be32(host->ioaddr + base, 0xffff << shift, val << shift);
+> > +}
+> 
+> This is really too big to be a static inline.  Go ahead and make it an
+> exported symbol.  Personally, I wouldn't worry about it and just exporting all
+> of these accessors.  Making them inline doesn't buy much anyway since
+> they are used to initialize an ops table, and making them inline
+> forces each driver to instantiate its own copy.
+> 
+Thanks for the comment.  Since Chris had picked the patch up, I would
+not send another update for this, unless Chris asks me to do.  I
+actually like to see all these accessors implemented in the same way
+and in the same place.
 
-Its not really different from what I posted before. Just with some
-added printks and a hack to enable POWER_OFF_CARD for sdhci. Attaching
-it anyway.
-
-Is it possible that there is confusion as to whether runtime PM is
-enabled or disabled for the device because we are so late at this
-point in device teardown?
-
-Daniel
-
---bcaec5314cc11297f004a4e0eb95
-Content-Type: text/plain; charset=US-ASCII; name="runtime-pm.txt"
-Content-Disposition: attachment; filename="runtime-pm.txt"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_goigo75v0
-
-Y29tbWl0IDI0NjBlZWU3MTdjYmFlNGU2ODNlZGViMTdmZmU0NDhiMGMzMmZkMjgKQXV0aG9yOiBE
-YW5pZWwgRHJha2UgPGRzZEBsYXB0b3Aub3JnPgpEYXRlOiAgIFR1ZSBNYXkgMzEgMTI6NTE6Mzkg
-MjAxMSArMDEwMAoKICAgIHJ1bnRpbWUgc3VzcGVuZCBXSVAKCmRpZmYgLS1naXQgYS9kcml2ZXJz
-L2Jhc2UvcG93ZXIvcnVudGltZS5jIGIvZHJpdmVycy9iYXNlL3Bvd2VyL3J1bnRpbWUuYwppbmRl
-eCAwZDQ1ODdiLi5kZGIwYWU1IDEwMDY0NAotLS0gYS9kcml2ZXJzL2Jhc2UvcG93ZXIvcnVudGlt
-ZS5jCisrKyBiL2RyaXZlcnMvYmFzZS9wb3dlci9ydW50aW1lLmMKQEAgLTQ1Miw3ICs0NTIsNyBA
-QCBzdGF0aWMgaW50IHJwbV9yZXN1bWUoc3RydWN0IGRldmljZSAqZGV2LCBpbnQgcnBtZmxhZ3Mp
-CiAJc3RydWN0IGRldmljZSAqcGFyZW50ID0gTlVMTDsKIAlpbnQgcmV0dmFsID0gMDsKIAotCWRl
-dl9kYmcoZGV2LCAiJXMgZmxhZ3MgMHgleFxuIiwgX19mdW5jX18sIHJwbWZsYWdzKTsKKwlkZXZf
-d2FybihkZXYsICIlcyBmbGFncyAweCV4XG4iLCBfX2Z1bmNfXywgcnBtZmxhZ3MpOwogCiAgcmVw
-ZWF0OgogCWlmIChkZXYtPnBvd2VyLnJ1bnRpbWVfZXJyb3IpCmRpZmYgLS1naXQgYS9kcml2ZXJz
-L21tYy9jb3JlL2NvcmUuYyBiL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jCmluZGV4IDY4MDkxZGQu
-LjhhNTkwNzIgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jCisrKyBiL2RyaXZl
-cnMvbW1jL2NvcmUvY29yZS5jCkBAIC0xNjY0LDYgKzE2NjQsNyBAQCBpbnQgbW1jX3Bvd2VyX3Nh
-dmVfaG9zdChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QpCiAJaW50IHJldCA9IDA7CiAKIAltbWNfYnVz
-X2dldChob3N0KTsKK3ByaW50aygibW1jX3Bvd2VyX3NhdmVfaG9zdCAlc1xuIiwgbW1jX2hvc3Ru
-YW1lKGhvc3QpKTsKIAogCWlmICghaG9zdC0+YnVzX29wcyB8fCBob3N0LT5idXNfZGVhZCB8fCAh
-aG9zdC0+YnVzX29wcy0+cG93ZXJfcmVzdG9yZSkgewogCQltbWNfYnVzX3B1dChob3N0KTsKQEAg
-LTE2ODYsNiArMTY4Nyw3IEBAIGludCBtbWNfcG93ZXJfcmVzdG9yZV9ob3N0KHN0cnVjdCBtbWNf
-aG9zdCAqaG9zdCkKIAlpbnQgcmV0OwogCiAJbW1jX2J1c19nZXQoaG9zdCk7CitwcmludGsoIm1t
-Y19wb3dlcl9yZXN0b3JlX2hvc3QgJXNcbiIsIG1tY19ob3N0bmFtZShob3N0KSk7CiAKIAlpZiAo
-IWhvc3QtPmJ1c19vcHMgfHwgaG9zdC0+YnVzX2RlYWQgfHwgIWhvc3QtPmJ1c19vcHMtPnBvd2Vy
-X3Jlc3RvcmUpIHsKIAkJbW1jX2J1c19wdXQoaG9zdCk7CkBAIC0xNzUxLDYgKzE3NTMsOCBAQCBp
-bnQgbW1jX3N1c3BlbmRfaG9zdChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QpCiB7CiAJaW50IGVyciA9
-IDA7CiAKKwlwcmludGsoIm1tY19zdXNwZW5kX2hvc3QgJXNcbiIsIG1tY19ob3N0bmFtZShob3N0
-KSk7CisKIAlpZiAoaG9zdC0+Y2FwcyAmIE1NQ19DQVBfRElTQUJMRSkKIAkJY2FuY2VsX2RlbGF5
-ZWRfd29yaygmaG9zdC0+ZGlzYWJsZSk7CiAJY2FuY2VsX2RlbGF5ZWRfd29yaygmaG9zdC0+ZGV0
-ZWN0KTsKZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvc2Rpby5jIGIvZHJpdmVycy9tbWMv
-Y29yZS9zZGlvLmMKaW5kZXggNGQwYzE1Yi4uYTI0MTE3NiAxMDA2NDQKLS0tIGEvZHJpdmVycy9t
-bWMvY29yZS9zZGlvLmMKKysrIGIvZHJpdmVycy9tbWMvY29yZS9zZGlvLmMKQEAgLTUzNywxMSAr
-NTM3LDE0IEBAIHN0YXRpYyB2b2lkIG1tY19zZGlvX3JlbW92ZShzdHJ1Y3QgbW1jX2hvc3QgKmhv
-c3QpCiB7CiAJaW50IGk7CiAKKwlwcmludGsoIm1tY19zZGlvX3JlbW92ZSAlc1xuIiwgbW1jX2hv
-c3RuYW1lKGhvc3QpKTsKKwogCUJVR19PTighaG9zdCk7CiAJQlVHX09OKCFob3N0LT5jYXJkKTsK
-IAogCWZvciAoaSA9IDA7aSA8IGhvc3QtPmNhcmQtPnNkaW9fZnVuY3M7aSsrKSB7CiAJCWlmICho
-b3N0LT5jYXJkLT5zZGlvX2Z1bmNbaV0pIHsKKwkJCXByaW50aygicmVtb3ZlIGZ1bmMgJWRcbiIs
-IGkpOwogCQkJc2Rpb19yZW1vdmVfZnVuYyhob3N0LT5jYXJkLT5zZGlvX2Z1bmNbaV0pOwogCQkJ
-aG9zdC0+Y2FyZC0+c2Rpb19mdW5jW2ldID0gTlVMTDsKIAkJfQpAQCAtNjQ3LDYgKzY1MCw4IEBA
-IHN0YXRpYyBpbnQgbW1jX3NkaW9fcmVzdW1lKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCkKIAlCVUdf
-T04oIWhvc3QpOwogCUJVR19PTighaG9zdC0+Y2FyZCk7CiAKK3ByaW50aygibW1jX3NkaW9fcmVz
-dW1lICVzXG4iLCBtbWNfaG9zdG5hbWUoaG9zdCkpOworCiAJLyogQmFzaWMgY2FyZCByZWluaXRp
-YWxpemF0aW9uLiAqLwogCW1tY19jbGFpbV9ob3N0KGhvc3QpOwogCkBAIC02OTEsMTUgKzY5Niw0
-NyBAQCBzdGF0aWMgaW50IG1tY19zZGlvX3Jlc3VtZShzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QpCiBz
-dGF0aWMgaW50IG1tY19zZGlvX3Bvd2VyX3Jlc3RvcmUoc3RydWN0IG1tY19ob3N0ICpob3N0KQog
-ewogCWludCByZXQ7CisJdTMyIG9jcjsKIAogCUJVR19PTighaG9zdCk7CiAJQlVHX09OKCFob3N0
-LT5jYXJkKTsKIAogCW1tY19jbGFpbV9ob3N0KGhvc3QpOworCisJcmV0ID0gbW1jX3NlbmRfaW9f
-b3BfY29uZChob3N0LCAwLCAmb2NyKTsKKwlpZiAocmV0KQorCQlnb3RvIG91dDsKKworCWlmICho
-b3N0LT5vY3JfYXZhaWxfc2RpbykKKwkJaG9zdC0+b2NyX2F2YWlsID0gaG9zdC0+b2NyX2F2YWls
-X3NkaW87CisKKwkvKgorCSAqIFNhbml0eSBjaGVjayB0aGUgdm9sdGFnZXMgdGhhdCB0aGUgY2Fy
-ZCBjbGFpbXMgdG8KKwkgKiBzdXBwb3J0LgorCSAqLworCWlmIChvY3IgJiAweDdGKSB7CisJCXBy
-aW50ayhLRVJOX1dBUk5JTkcgIiVzOiBjYXJkIGNsYWltcyB0byBzdXBwb3J0IHZvbHRhZ2VzICIK
-KwkJICAgICAgICJiZWxvdyB0aGUgZGVmaW5lZCByYW5nZS4gVGhlc2Ugd2lsbCBiZSBpZ25vcmVk
-LlxuIiwKKwkJICAgICAgIG1tY19ob3N0bmFtZShob3N0KSk7CisJCW9jciAmPSB+MHg3RjsKKwl9
-CisKKwlob3N0LT5vY3IgPSBtbWNfc2VsZWN0X3ZvbHRhZ2UoaG9zdCwgb2NyKTsKKworCS8qCisJ
-ICogQ2FuIHdlIHN1cHBvcnQgdGhlIHZvbHRhZ2Uocykgb2YgdGhlIGNhcmQocyk/CisJICovCisJ
-aWYgKCFob3N0LT5vY3IpIHsKKwkJcmV0ID0gLUVJTlZBTDsKKwkJZ290byBvdXQ7CisJfQorCiAJ
-cmV0ID0gbW1jX3NkaW9faW5pdF9jYXJkKGhvc3QsIGhvc3QtPm9jciwgaG9zdC0+Y2FyZCwKIAkJ
-CQltbWNfY2FyZF9rZWVwX3Bvd2VyKGhvc3QpKTsKIAlpZiAoIXJldCAmJiBob3N0LT5zZGlvX2ly
-cXMpCiAJCW1tY19zaWduYWxfc2Rpb19pcnEoaG9zdCk7CisKK291dDoKIAltbWNfcmVsZWFzZV9o
-b3N0KGhvc3QpOwogCiAJcmV0dXJuIHJldDsKZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUv
-c2Rpb19idXMuYyBiL2RyaXZlcnMvbW1jL2NvcmUvc2Rpb19idXMuYwppbmRleCBkMjliOWMzLi5m
-ZTMzMmRlIDEwMDY0NAotLS0gYS9kcml2ZXJzL21tYy9jb3JlL3NkaW9fYnVzLmMKKysrIGIvZHJp
-dmVycy9tbWMvY29yZS9zZGlvX2J1cy5jCkBAIC0xNjYsMTMgKzE2NiwxNyBAQCBzdGF0aWMgaW50
-IHNkaW9fYnVzX3JlbW92ZShzdHJ1Y3QgZGV2aWNlICpkZXYpCiAJc3RydWN0IHNkaW9fZnVuYyAq
-ZnVuYyA9IGRldl90b19zZGlvX2Z1bmMoZGV2KTsKIAlpbnQgcmV0ID0gMDsKIAorZGV2X3dhcm4o
-ZGV2LCAic2Rpb19idXNfcmVtb3ZlXG4iKTsKKwogCS8qIE1ha2Ugc3VyZSBjYXJkIGlzIHBvd2Vy
-ZWQgYmVmb3JlIGludm9raW5nIC0+cmVtb3ZlKCkgKi8KIAlpZiAoZnVuYy0+Y2FyZC0+aG9zdC0+
-Y2FwcyAmIE1NQ19DQVBfUE9XRVJfT0ZGX0NBUkQpIHsKIAkJcmV0ID0gcG1fcnVudGltZV9nZXRf
-c3luYyhkZXYpOworcHJpbnRrKCJnZXRfc3luYyAlZFxuIiwgcmV0KTsKIAkJaWYgKHJldCA8IDAp
-CiAJCQlnb3RvIG91dDsKIAl9CiAKK3ByaW50aygiQ0FMTCBSRU1PVkVcbiIpOwogCWRydi0+cmVt
-b3ZlKGZ1bmMpOwogCiAJaWYgKGZ1bmMtPmlycV9oYW5kbGVyKSB7CkBAIC0zMTQsOSArMzE4LDEx
-IEBAIGludCBzZGlvX2FkZF9mdW5jKHN0cnVjdCBzZGlvX2Z1bmMgKmZ1bmMpCiAgKi8KIHZvaWQg
-c2Rpb19yZW1vdmVfZnVuYyhzdHJ1Y3Qgc2Rpb19mdW5jICpmdW5jKQogeworCXByaW50aygic2Rp
-b19yZW1vdmVfZnVuY1xuIik7CiAJaWYgKCFzZGlvX2Z1bmNfcHJlc2VudChmdW5jKSkKIAkJcmV0
-dXJuOwogCisJZGV2X3dhcm4oJmZ1bmMtPmRldiwgImRvIGRldmljZV9kZWxcbiIpOwogCWRldmlj
-ZV9kZWwoJmZ1bmMtPmRldik7CiAJcHV0X2RldmljZSgmZnVuYy0+ZGV2KTsKIH0KZGlmZiAtLWdp
-dCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYwpp
-bmRleCA1OGQ1NDM2Li5jZTNlMmUyIDEwMDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNp
-LmMKKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jCkBAIC0yNDg4LDcgKzI0ODgsNyBAQCBp
-bnQgc2RoY2lfYWRkX2hvc3Qoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QpCiAJfSBlbHNlCiAJCW1t
-Yy0+Zl9taW4gPSBob3N0LT5tYXhfY2xrIC8gU0RIQ0lfTUFYX0RJVl9TUEVDXzIwMDsKIAotCW1t
-Yy0+Y2FwcyB8PSBNTUNfQ0FQX1NESU9fSVJRIHwgTU1DX0NBUF9FUkFTRSB8IE1NQ19DQVBfQ01E
-MjM7CisJbW1jLT5jYXBzIHw9IE1NQ19DQVBfU0RJT19JUlEgfCBNTUNfQ0FQX0VSQVNFIHwgTU1D
-X0NBUF9DTUQyMyB8IE1NQ19DQVBfUE9XRVJfT0ZGX0NBUkQ7CiAKIAlpZiAoaG9zdC0+cXVpcmtz
-ICYgU0RIQ0lfUVVJUktfTVVMVElCTE9DS19SRUFEX0FDTUQxMikKIAkJaG9zdC0+ZmxhZ3MgfD0g
-U0RIQ0lfQVVUT19DTUQxMjsKZGlmZiAtLWdpdCBhL2RyaXZlcnMvbmV0L3dpcmVsZXNzL2xpYmVy
-dGFzL2lmX3NkaW8uYyBiL2RyaXZlcnMvbmV0L3dpcmVsZXNzL2xpYmVydGFzL2lmX3NkaW8uYwpp
-bmRleCAyMjRlOTg1Li5kMmIwNzdiIDEwMDY0NAotLS0gYS9kcml2ZXJzL25ldC93aXJlbGVzcy9s
-aWJlcnRhcy9pZl9zZGlvLmMKKysrIGIvZHJpdmVycy9uZXQvd2lyZWxlc3MvbGliZXJ0YXMvaWZf
-c2Rpby5jCkBAIC05NDYsNyArOTQ2LDcgQEAgc3RhdGljIGludCBpZl9zZGlvX3Byb2JlKHN0cnVj
-dCBzZGlvX2Z1bmMgKmZ1bmMsCiAJdW5zaWduZWQgaW50IG1vZGVsOwogCXN0cnVjdCBpZl9zZGlv
-X3BhY2tldCAqcGFja2V0OwogCXN0cnVjdCBtbWNfaG9zdCAqaG9zdCA9IGZ1bmMtPmNhcmQtPmhv
-c3Q7Ci0KK3ByaW50aygiaWZfc2Rpb19wcm9iZSAlcFxuIiwgJmZ1bmMtPmRldik7CiAJbGJzX2Rl
-Yl9lbnRlcihMQlNfREVCX1NESU8pOwogCiAJZm9yIChpID0gMDtpIDwgZnVuYy0+Y2FyZC0+bnVt
-X2luZm87aSsrKSB7CkBAIC0xMTI0LDYgKzExMjQsNyBAQCBzdGF0aWMgaW50IGlmX3NkaW9fcHJv
-YmUoc3RydWN0IHNkaW9fZnVuYyAqZnVuYywKIG91dDoKIAlsYnNfZGViX2xlYXZlX2FyZ3MoTEJT
-X0RFQl9TRElPLCAicmV0ICVkIiwgcmV0KTsKIAorcHJpbnRrKCJpZl9zZGlvX3Byb2JlIGRvbmUg
-JWRcbiIsIHJldCk7CiAJcmV0dXJuIHJldDsKIAogZXJyX2FjdGl2YXRlX2NhcmQ6CkBAIC0xMTU5
-LDYgKzExNjAsOCBAQCBzdGF0aWMgdm9pZCBpZl9zZGlvX3JlbW92ZShzdHJ1Y3Qgc2Rpb19mdW5j
-ICpmdW5jKQogCXN0cnVjdCBpZl9zZGlvX2NhcmQgKmNhcmQ7CiAJc3RydWN0IGlmX3NkaW9fcGFj
-a2V0ICpwYWNrZXQ7CiAKK3ByaW50aygiaWZfc2Rpb19yZW1vdmVcbiIpOworZHVtcF9zdGFjaygp
-OwogCWxic19kZWJfZW50ZXIoTEJTX0RFQl9TRElPKTsKIAogCWNhcmQgPSBzZGlvX2dldF9kcnZk
-YXRhKGZ1bmMpOwpAQCAtMTIwNCw2ICsxMjA3LDcgQEAgc3RhdGljIHZvaWQgaWZfc2Rpb19yZW1v
-dmUoc3RydWN0IHNkaW9fZnVuYyAqZnVuYykKIAkJa2ZyZWUoY2FyZC0+ZmlybXdhcmUpOwogCWtm
-cmVlKGNhcmQpOwogCitwcmludGsoImlmX3NkaW9fcmVtb3ZlIGRvbmVcbiIpOwogCWxic19kZWJf
-bGVhdmUoTEJTX0RFQl9TRElPKTsKIH0KIApAQCAtMTIxMiw4ICsxMjE2LDggQEAgc3RhdGljIGlu
-dCBpZl9zZGlvX3N1c3BlbmQoc3RydWN0IGRldmljZSAqZGV2KQogCXN0cnVjdCBzZGlvX2Z1bmMg
-KmZ1bmMgPSBkZXZfdG9fc2Rpb19mdW5jKGRldik7CiAJaW50IHJldDsKIAlzdHJ1Y3QgaWZfc2Rp
-b19jYXJkICpjYXJkID0gc2Rpb19nZXRfZHJ2ZGF0YShmdW5jKTsKLQogCW1tY19wbV9mbGFnX3Qg
-ZmxhZ3MgPSBzZGlvX2dldF9ob3N0X3BtX2NhcHMoZnVuYyk7CitwcmludGsoImlmX3NkaW9fc3Vz
-cGVuZCAlcFxuIiwgZGV2KTsKIAogCWRldl9pbmZvKGRldiwgIiVzOiBzdXNwZW5kOiBQTSBmbGFn
-cyA9IDB4JXhcbiIsCiAJCSBzZGlvX2Z1bmNfaWQoZnVuYyksIGZsYWdzKTsKQEAgLTEyNDksNiAr
-MTI1Myw3IEBAIHN0YXRpYyBpbnQgaWZfc2Rpb19yZXN1bWUoc3RydWN0IGRldmljZSAqZGV2KQog
-CXN0cnVjdCBpZl9zZGlvX2NhcmQgKmNhcmQgPSBzZGlvX2dldF9kcnZkYXRhKGZ1bmMpOwogCWlu
-dCByZXQ7CiAKK3ByaW50aygiaWZfc2Rpb19yZXN1bWUgJXBcbiIsIGRldik7CiAJZGV2X2luZm8o
-ZGV2LCAiJXM6IHJlc3VtZTogd2UncmUgYmFja1xuIiwgc2Rpb19mdW5jX2lkKGZ1bmMpKTsKIAog
-CXJldCA9IGxic19yZXN1bWUoY2FyZC0+cHJpdik7Cg==
---bcaec5314cc11297f004a4e0eb95--
+-- 
+Regards,
+Shawn
