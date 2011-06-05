@@ -1,61 +1,53 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: [PATCH] mmc: sdio: reset card during power_restore
-Date: Sun,  5 Jun 2011 13:38:52 +0100 (BST)
-Message-ID: <20110605123852.BC6F39D401C@zog.reactivated.net>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
+Date: Sun, 5 Jun 2011 16:48:25 +0300
+Message-ID: <BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com>
+References: <20110605123852.BC6F39D401C@zog.reactivated.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mtaout02-winn.ispmail.ntl.com ([81.103.221.48]:26860 "EHLO
-	mtaout02-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756017Ab1FEMi6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jun 2011 08:38:58 -0400
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:45608 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754079Ab1FENsq convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jun 2011 09:48:46 -0400
+Received: by wya21 with SMTP id 21so2257847wya.19
+        for <linux-mmc@vger.kernel.org>; Sun, 05 Jun 2011 06:48:45 -0700 (PDT)
+In-Reply-To: <20110605123852.BC6F39D401C@zog.reactivated.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ohad@wizery.com
+To: Daniel Drake <dsd@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-mmc_sdio_power_restore() skips some steps that are performed in other
-power-related codepaths which are necessary to fully reset the card.
-Without this, the card can't be powered up and probe fails.
+Hi Daniel,
 
-All these steps are needed, to satisfy the cases of both normal
-runtime PM and also suspend/resume situations.
+On Sun, Jun 5, 2011 at 3:38 PM, Daniel Drake <dsd@laptop.org> wrote:
+> @@ -706,10 +706,25 @@ static int mmc_sdio_power_restore(struct mmc_ho=
+st *host)
+> =A0 =A0 =A0 =A0BUG_ON(!host->card);
+>
+> =A0 =A0 =A0 =A0mmc_claim_host(host);
+> +
+> + =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0* Reset the card by performing the same steps that a=
+re taken by
+> + =A0 =A0 =A0 =A0* mmc_rescan_try_freq() and mmc_attach_sdio() during=
+ a "normal" probe
+> + =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 sdio_reset(host);
 
-Tested on sd8686 libertas wifi on XO-1.5.
+Sending a reset is necessary only if we are re-initing a powered on
+card, but in this case, we know that we just powered the card up, so
+this is not needed.
 
-Signed-off-by: Daniel Drake <dsd@laptop.org>
----
- drivers/mmc/core/sdio.c |   15 +++++++++++++++
- 1 files changed, 15 insertions(+), 0 deletions(-)
++       ret =3D mmc_send_io_op_cond(host, 0, NULL);
++       if (ret)
++               goto out;
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 8af3330..9170ea2 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -706,10 +706,25 @@ static int mmc_sdio_power_restore(struct mmc_host *host)
- 	BUG_ON(!host->card);
- 
- 	mmc_claim_host(host);
-+
-+	/*
-+	 * Reset the card by performing the same steps that are taken by
-+	 * mmc_rescan_try_freq() and mmc_attach_sdio() during a "normal" probe
-+	 */
-+	sdio_reset(host);
-+	mmc_go_idle(host);
-+	mmc_send_if_cond(host, host->ocr_avail);
-+
-+	ret = mmc_send_io_op_cond(host, 0, NULL);
-+	if (ret)
-+		goto out;
-+
- 	ret = mmc_sdio_init_card(host, host->ocr, host->card,
- 				mmc_card_keep_power(host));
- 	if (!ret && host->sdio_irqs)
- 		mmc_signal_sdio_irq(host);
-+
-+out:
- 	mmc_release_host(host);
- 
- 	return ret;
--- 
-1.7.5.2
+Can you please add this under a card quirk ?
 
+The spec does not require this for embedded sdio cards, and we would
+like to skip this for wl12xx.
+
+Thanks,
+Ohad.
