@@ -1,72 +1,31 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH] mmc: sdhci: change sdhci-pltfm into a module
-Date: Sun, 5 Jun 2011 08:56:39 +0200
-Message-ID: <20110605065638.GA30268@pengutronix.de>
-References: <20110601130431.59f4f0d4.sfr@canb.auug.org.au>
- <1306983470-18588-1-git-send-email-shawn.guo@linaro.org>
+From: Daniel Drake <dsd@laptop.org>
+Subject: Re: -ENOSYS suspend-powerdown regression
+Date: Sun, 5 Jun 2011 13:31:57 +0100
+Message-ID: <BANLkTimKYKX=k2U1_WyhaWZ1wRpWUF6pMQ@mail.gmail.com>
+References: <BANLkTimdp2n1qhLQmTk+k_M5_WowhJqPyQ@mail.gmail.com>
+	<BANLkTimRWqo1M7OOQmdWOxSQvqiNx48Ftg@mail.gmail.com>
+	<BANLkTikvP3hc+CHEwrUEDqN6McwswikS-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="ew6BAiZeqk4r7MaW"
-Return-path: <linux-next-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1306983470-18588-1-git-send-email-shawn.guo@linaro.org>
-Sender: linux-next-owner@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-next@vger.kernel.org, linux-kernel@vger.kernel.org, cbouatmailru@gmail.com, cjb@laptop.org, grant.likely@secretlab.ca, arnd@arndb.de, sfr@canb.auug.org.au, patches@linaro.org, Shawn Guo <shawn.guo@freescale.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:36447 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756017Ab1FEMb6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jun 2011 08:31:58 -0400
+Received: by pzk9 with SMTP id 9so1456326pzk.19
+        for <linux-mmc@vger.kernel.org>; Sun, 05 Jun 2011 05:31:57 -0700 (PDT)
+In-Reply-To: <BANLkTikvP3hc+CHEwrUEDqN6McwswikS-Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-mmc@vger.kernel.org
 
+On 5 June 2011 00:08, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+> We can stop checking the return value of pm_runtime_get_sync in
+> sdio_bus_remove, like pci_device_remove is doing, but I don't think
+> that's enough: I guess libertas' if_sdio_remove won't be so happy
+> dealing with a powered off card.
+>
+> Can you try the following please (untested):
 
---ew6BAiZeqk4r7MaW
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Thu, Jun 02, 2011 at 10:57:50AM +0800, Shawn Guo wrote:
-> From: Shawn Guo <shawn.guo@freescale.com>
->=20
-> There are a couple of problems left from the sdhci pltfm and OF
-> consolidation changes.
->=20
-> * When building more than one sdhci-pltfm based drivers in the same
->   image, linker will give multiple definition error on the sdhci-pltfm
->   helper functions.  For example right now, building sdhci-of-esdhc
->   and sdhci-of-hlwd together is a valid combination from Kconfig view.
->=20
-> * With the current build method, there is error with building the
->   drivers as module, but module installation fails with modprobe.
->=20
-> The patch fixes above problems by changing sdhci-pltfm into a module.
-> To avoid EXPORT_SYMBOL on so many big endian IO accessors, it moves
-> these accessors into sdhci-pltfm.h as the 'static inline' functions.
-> As a result, sdhci.h needs to be included in sdhci-pltfm.h, and in
-> turn can be removed from individual drivers which already include
-> sdhci-pltfm.h.
->=20
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-
-I am a bit confused how to review this patch and patch 1/4 from Shawn's
-original series. As Chris does rebase his mmc-next anyway, does it make sen=
-se
-to squash this into the old ones to prevent the broken inbetween state?
-
-Regards,
-
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---ew6BAiZeqk4r7MaW
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAk3rKKYACgkQD27XaX1/VRvyuwCgxE/tKTg/JuKDrd5G/4ZOlBf6
-EwoAn0FtSGBH97xgcggNI5oQmUUbsa3E
-=tOLJ
------END PGP SIGNATURE-----
-
---ew6BAiZeqk4r7MaW--
+Thanks, that seems to be working.
