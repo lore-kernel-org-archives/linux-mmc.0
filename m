@@ -1,31 +1,61 @@
 From: Daniel Drake <dsd@laptop.org>
-Subject: Re: -ENOSYS suspend-powerdown regression
-Date: Sun, 5 Jun 2011 13:31:57 +0100
-Message-ID: <BANLkTimKYKX=k2U1_WyhaWZ1wRpWUF6pMQ@mail.gmail.com>
-References: <BANLkTimdp2n1qhLQmTk+k_M5_WowhJqPyQ@mail.gmail.com>
-	<BANLkTimRWqo1M7OOQmdWOxSQvqiNx48Ftg@mail.gmail.com>
-	<BANLkTikvP3hc+CHEwrUEDqN6McwswikS-Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Subject: [PATCH] mmc: sdio: reset card during power_restore
+Date: Sun,  5 Jun 2011 13:38:52 +0100 (BST)
+Message-ID: <20110605123852.BC6F39D401C@zog.reactivated.net>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:36447 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756017Ab1FEMb6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jun 2011 08:31:58 -0400
-Received: by pzk9 with SMTP id 9so1456326pzk.19
-        for <linux-mmc@vger.kernel.org>; Sun, 05 Jun 2011 05:31:57 -0700 (PDT)
-In-Reply-To: <BANLkTikvP3hc+CHEwrUEDqN6McwswikS-Q@mail.gmail.com>
+Received: from mtaout02-winn.ispmail.ntl.com ([81.103.221.48]:26860 "EHLO
+	mtaout02-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756017Ab1FEMi6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jun 2011 08:38:58 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ohad@wizery.com
 
-On 5 June 2011 00:08, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> We can stop checking the return value of pm_runtime_get_sync in
-> sdio_bus_remove, like pci_device_remove is doing, but I don't think
-> that's enough: I guess libertas' if_sdio_remove won't be so happy
-> dealing with a powered off card.
->
-> Can you try the following please (untested):
+mmc_sdio_power_restore() skips some steps that are performed in other
+power-related codepaths which are necessary to fully reset the card.
+Without this, the card can't be powered up and probe fails.
 
-Thanks, that seems to be working.
+All these steps are needed, to satisfy the cases of both normal
+runtime PM and also suspend/resume situations.
+
+Tested on sd8686 libertas wifi on XO-1.5.
+
+Signed-off-by: Daniel Drake <dsd@laptop.org>
+---
+ drivers/mmc/core/sdio.c |   15 +++++++++++++++
+ 1 files changed, 15 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 8af3330..9170ea2 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -706,10 +706,25 @@ static int mmc_sdio_power_restore(struct mmc_host *host)
+ 	BUG_ON(!host->card);
+ 
+ 	mmc_claim_host(host);
++
++	/*
++	 * Reset the card by performing the same steps that are taken by
++	 * mmc_rescan_try_freq() and mmc_attach_sdio() during a "normal" probe
++	 */
++	sdio_reset(host);
++	mmc_go_idle(host);
++	mmc_send_if_cond(host, host->ocr_avail);
++
++	ret = mmc_send_io_op_cond(host, 0, NULL);
++	if (ret)
++		goto out;
++
+ 	ret = mmc_sdio_init_card(host, host->ocr, host->card,
+ 				mmc_card_keep_power(host));
+ 	if (!ret && host->sdio_irqs)
+ 		mmc_signal_sdio_irq(host);
++
++out:
+ 	mmc_release_host(host);
+ 
+ 	return ret;
+-- 
+1.7.5.2
+
