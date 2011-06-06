@@ -1,41 +1,61 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: sdhci-pci fails on 3.0.0-rc1 on Dell E6510
-Date: Mon, 06 Jun 2011 15:56:49 -0400
-Message-ID: <m3hb82wx6m.fsf@pullcord.laptop.org>
-References: <4DEBCA3F.8050205@hartkopp.net>
-	<BANLkTin_WHuy5MExNBHdeLiDmdmn7SZYkg@mail.gmail.com>
-	<4DED05C4.7050903@hartkopp.net>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: UHS-I bus speed mode should be set last in UHS initialization
+Date: Mon, 6 Jun 2011 15:44:10 -0700 (PDT)
+Message-ID: <1cf840ce9d2fa852cb8d4e0e1bf9b559.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37711 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754049Ab1FFT5N (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 6 Jun 2011 15:57:13 -0400
-In-Reply-To: <4DED05C4.7050903@hartkopp.net> (Oliver Hartkopp's message of
-	"Mon, 06 Jun 2011 18:52:20 +0200")
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:50953 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758431Ab1FFWoL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2011 18:44:11 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Oliver Hartkopp <socketcan@hartkopp.net>
-Cc: "S, Venkatraman" <svenkatr@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
 
-Hi Oliver,
+Hi Chris, Arindam,
 
-On Mon, Jun 06 2011, Oliver Hartkopp wrote:
->>> dmesg is a bit more detailed:
->>> [    6.242510] sdhci-pci 0000:03:00.1: SDHCI controller found [1180:e822] (rev 3)
->>> [    6.244168] sdhci-pci 0000:03:00.1: PCI INT B -> GSI 19 (level, low) -> IRQ 19
->>> [    6.245788] sdhci-pci 0000:03:00.1: BAR 0 is not iomem. Aborting.
->>> [    6.247609] sdhci-pci 0000:03:00.1: PCI INT B disabled
+mmc_sd_init_uhs_card function sets the driver type, current limit and bus
+speed mode on card as well as on host controller side. Currently bus speed
+mode is set by sending CMD6 to card and setting timing mode in host
+controller and then before initiating tuning sequence, it also tries to
+set current limit by sending CMD6 to card which fails on our host
+controller (due to data CRC or timeout errors) if bus speed mode is
+SDR50/SDR104 mode.
 
-If you get a chance to do some bisecting, that would be extremely
-helpful -- even just building 3.0 from *before* the MMC tree was
-merged would help a lot, since if the problem still happens before
-the MMC merge we might be looking at some kind of generic PCI bug.
+So basically bus speed mode should be set only after current limit is set
+in the card and immediately after setting the bus speed mode, tuning
+sequence should be initiated. So following changes is needed. If it looks
+fine then I can send you this change in patch.
 
-Thanks!
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
+0da37eb..19634d5 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -610,13 +610,13 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
+        if (err)
+                goto out;
 
-- Chris.
+-       /* Set bus speed mode of the card */
+-       err = sd_set_bus_speed_mode(card, status);
++       /* Set current limit for the card */
++       err = sd_set_current_limit(card, status);
+        if (err)
+                goto out;
+
+-       /* Set current limit for the card */
+-       err = sd_set_current_limit(card, status);
++       /* Set bus speed mode of the card */
++       err = sd_set_bus_speed_mode(card, status);
+        if (err)
+                goto out;
+
+Regards,
+Subhash
+
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+
+
