@@ -1,49 +1,49 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH v2 3/3] mmc: mxs-mmc: call dmaengine API to set mmc->max_segs
-Date: Mon,  6 Jun 2011 15:30:14 +0800
-Message-ID: <1307345414-26872-3-git-send-email-shawn.guo@linaro.org>
+From: FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>
+Subject: Re: [PATCH v2 1/3] dmaengine: add new dma API for
+ max_segment_number
+Date: Mon, 6 Jun 2011 17:06:03 +0900
+Message-ID: <20110606170420I.fujita.tomonori@lab.ntt.co.jp>
 References: <1307345414-26872-1-git-send-email-shawn.guo@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-px0-f179.google.com ([209.85.212.179]:42458 "EHLO
-	mail-px0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756637Ab1FFHXC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2011 03:23:02 -0400
+Mime-Version: 1.0
+Content-Type: Text/Plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1307345414-26872-1-git-send-email-shawn.guo@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: shawn.guo@linaro.org
+Cc: linux-kernel@vger.kernel.org, vinod.koul@intel.com, dan.j.williams@intel.com, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, gregkh@suse.de
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: vinod.koul@intel.com, dan.j.williams@intel.com, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>
 
-With dmaengine API dma_get_max_seg_number added, we now can call
-the API to get and number and then set mmc->max_segs instead of
-hard-coding it.
+On Mon,  6 Jun 2011 15:30:12 +0800
+Shawn Guo <shawn.guo@linaro.org> wrote:
 
-Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
----
- drivers/mmc/host/mxs-mmc.c |    6 +++++-
- 1 files changed, 5 insertions(+), 1 deletions(-)
+> Like dma_set(get)_max_seg_size for max_segment_size, the patch adds
+> max_segment_number into device_dma_parameters and creates the
+> corresponding dmaengine API dma_set(get)_max_seg_number for it.
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 99d39a6..d783af3 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -745,11 +745,15 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	mmc->f_max = 288000000;
- 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
- 
--	mmc->max_segs = 52;
- 	mmc->max_blk_size = 1 << 0xf;
- 	mmc->max_blk_count = (ssp_is_old()) ? 0xff : 0xffffff;
- 	mmc->max_req_size = (ssp_is_old()) ? 0xffff : 0xffffffff;
- 	mmc->max_seg_size = dma_get_max_seg_size(host->dmach->device->dev);
-+	/*
-+	 * Reserve one segment for carrying on pio words to get dma engine
-+	 * program mmc controller registers
-+	 */
-+	mmc->max_segs = dma_get_max_seg_number(host->dmach->device->dev) - 1;
- 
- 	platform_set_drvdata(pdev, mmc);
- 
--- 
-1.7.4.1
+As I wrote in another mail, dma_get|set_max_seg_size and
+dma_get|set_seg_boundary are added to the dma mapping API. That is,
+they enable the drivers (or subsystems) to tell IOMMUs about the
+device dma limitations. When IOMMUs merge scatter list entries, they
+look at the limitations.
 
+
+> Here is the user story that tells the need of the new api.  The
+> mxs-mmc is the mmc host controller for Freescale MXS architecture.
+> There are a pair of  mmc host specific parameters max_seg_size and
+> max_segs that mxs-mmc host driver needs to tell mmc core, so that
+> mmc core can know how big each data segment could be and how many
+> segments could be handled one time in a scatter list by host driver.
+> 
+> The mxs-mmc driver is one user of dmaengine mxs-dma, and it will call
+> mxs-dma to transfer data in scatter list.  That is to say mxs-mmc has
+> no idea of what max_seg_size and max_segs should be, because they are
+> all mxs-dma capability parameters, and mxs-mmc needs to query them
+> from mxs-dma.
+
+max_segs isn't unrelated with the dma mapping API. I explained above,
+IOMMUs doesn't increase the number of segments (could decrease the
+number of segments by merging).
+
+The limitation about the number of segment already lives elsewhere
+(e.g. queue's limits.max_segments).
