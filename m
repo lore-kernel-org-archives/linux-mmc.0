@@ -1,49 +1,54 @@
-From: FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
 Subject: Re: [PATCH v2 1/3] dmaengine: add new dma API for
- max_segment_number
-Date: Mon, 6 Jun 2011 17:06:03 +0900
-Message-ID: <20110606170420I.fujita.tomonori@lab.ntt.co.jp>
-References: <1307345414-26872-1-git-send-email-shawn.guo@linaro.org>
+	max_segment_number
+Date: Mon, 6 Jun 2011 10:14:10 +0100
+Message-ID: <20110606091410.GB10508@n2100.arm.linux.org.uk>
+References: <1307345414-26872-1-git-send-email-shawn.guo@linaro.org> <20110606170420I.fujita.tomonori@lab.ntt.co.jp>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1307345414-26872-1-git-send-email-shawn.guo@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: shawn.guo@linaro.org
-Cc: linux-kernel@vger.kernel.org, vinod.koul@intel.com, dan.j.williams@intel.com, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, gregkh@suse.de
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:43584 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753116Ab1FFJOs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2011 05:14:48 -0400
+Content-Disposition: inline
+In-Reply-To: <20110606170420I.fujita.tomonori@lab.ntt.co.jp>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>
+Cc: shawn.guo@linaro.org, patches@linaro.org, vinod.koul@intel.com, gregkh@suse.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, dan.j.williams@intel.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
 
-On Mon,  6 Jun 2011 15:30:12 +0800
-Shawn Guo <shawn.guo@linaro.org> wrote:
-
-> Like dma_set(get)_max_seg_size for max_segment_size, the patch adds
-> max_segment_number into device_dma_parameters and creates the
-> corresponding dmaengine API dma_set(get)_max_seg_number for it.
-
-As I wrote in another mail, dma_get|set_max_seg_size and
-dma_get|set_seg_boundary are added to the dma mapping API. That is,
-they enable the drivers (or subsystems) to tell IOMMUs about the
-device dma limitations. When IOMMUs merge scatter list entries, they
-look at the limitations.
-
-
-> Here is the user story that tells the need of the new api.  The
-> mxs-mmc is the mmc host controller for Freescale MXS architecture.
-> There are a pair of  mmc host specific parameters max_seg_size and
-> max_segs that mxs-mmc host driver needs to tell mmc core, so that
-> mmc core can know how big each data segment could be and how many
-> segments could be handled one time in a scatter list by host driver.
+On Mon, Jun 06, 2011 at 05:06:03PM +0900, FUJITA Tomonori wrote:
+> max_segs isn't unrelated with the dma mapping API. I explained above,
+> IOMMUs doesn't increase the number of segments (could decrease the
+> number of segments by merging).
 > 
-> The mxs-mmc driver is one user of dmaengine mxs-dma, and it will call
-> mxs-dma to transfer data in scatter list.  That is to say mxs-mmc has
-> no idea of what max_seg_size and max_segs should be, because they are
-> all mxs-dma capability parameters, and mxs-mmc needs to query them
-> from mxs-dma.
+> The limitation about the number of segment already lives elsewhere
+> (e.g. queue's limits.max_segments).
 
-max_segs isn't unrelated with the dma mapping API. I explained above,
-IOMMUs doesn't increase the number of segments (could decrease the
-number of segments by merging).
+I think you're missing the point entirely.
 
-The limitation about the number of segment already lives elsewhere
-(e.g. queue's limits.max_segments).
+Lets take the problem at hand: you have two devices.  One of them is
+handled by the DMA engine code.  One of them is a block device.
+
+The block layer needs to know the various parameters of what is
+allowable for DMA, including such things as the maximum size of a
+segment, and the _number_ of segments that can be placed into any
+one request.
+
+As the DMA provider is _entirely_ separate and unknown to the block
+device driver, the block device driver has no way to sanely provide
+these parameters to the block layer - they are not a property of the
+block device driver, but of the DMA provider.
+
+However, the DMA provider can't know that it'll be interacting with
+the block layer, so there's no way for the DMA provider to tell the
+block layer about its parameters.
+
+The only way this can happen is for there to be some way for the DMA
+provider to export this information to the block device driver, so
+the block device driver can then inform its upper layers what the DMA
+capabilities are.
+
+So to say that "it lives elsewhere" is completely missing the problem
+trying to be addressed by these patches.
