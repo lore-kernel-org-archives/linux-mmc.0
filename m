@@ -1,116 +1,368 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: Re: [PATCH v2 1/3] dmaengine: add new dma API for max_segment_number
-Date: Mon, 6 Jun 2011 11:48:56 -0700
-Message-ID: <BANLkTin7mqqTsosPHbztaPfL7s_TUGT1qg@mail.gmail.com>
-References: <20110606091410.GB10508@n2100.arm.linux.org.uk>
-	<20110606183925D.fujita.tomonori@lab.ntt.co.jp>
-	<20110606094751.GC10508@n2100.arm.linux.org.uk>
-	<20110606191041U.fujita.tomonori@lab.ntt.co.jp>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH v3 2/4] mmc: support sdhci-pxav2.c
+Date: Mon, 6 Jun 2011 12:39:38 -0700
+Message-ID: <1E53FF9F-5C6A-4AA2-B441-DD712C5D6715@marvell.com>
+References: <1307094606-8692-1-git-send-email-zhangfei.gao@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:38887 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751308Ab1FFSs6 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2011 14:48:58 -0400
-In-Reply-To: <20110606191041U.fujita.tomonori@lab.ntt.co.jp>
+Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:56968 "EHLO
+	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754616Ab1FFTjv convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 Jun 2011 15:39:51 -0400
+In-Reply-To: <1307094606-8692-1-git-send-email-zhangfei.gao@marvell.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>
-Cc: linux@arm.linux.org.uk, cjb@laptop.org, patches@linaro.org, vinod.koul@intel.com, gregkh@suse.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.guo@linaro.org, linux-arm-kernel@lists.infradead.org
+Cc: Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Qiming Wu <wuqm@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Zhangfei Gao <zgao6@marvell.com>
 
-On Mon, Jun 6, 2011 at 3:12 AM, FUJITA Tomonori
-<fujita.tomonori@lab.ntt.co.jp> wrote:
-> On Mon, 6 Jun 2011 10:47:51 +0100
-> Russell King - ARM Linux <linux@arm.linux.org.uk> wrote:
->
->> On Mon, Jun 06, 2011 at 06:41:09PM +0900, FUJITA Tomonori wrote:
->> > On Mon, 6 Jun 2011 10:14:10 +0100
->> > Russell King - ARM Linux <linux@arm.linux.org.uk> wrote:
->> >
->> > > On Mon, Jun 06, 2011 at 05:06:03PM +0900, FUJITA Tomonori wrote:
->> > > > max_segs isn't unrelated with the dma mapping API. I explained=
- above,
->> > > > IOMMUs doesn't increase the number of segments (could decrease=
- the
->> > > > number of segments by merging).
->> > > >
->> > > > The limitation about the number of segment already lives elsew=
-here
->> > > > (e.g. queue's limits.max_segments).
->> > >
->> > > I think you're missing the point entirely.
->> > >
->> > > Lets take the problem at hand: you have two devices. =A0One of t=
-hem is
->> > > handled by the DMA engine code. =A0One of them is a block device=
-=2E
->> > >
->> > > The block layer needs to know the various parameters of what is
->> > > allowable for DMA, including such things as the maximum size of =
-a
->> > > segment, and the _number_ of segments that can be placed into an=
-y
->> > > one request.
->> > >
->> > > As the DMA provider is _entirely_ separate and unknown to the bl=
-ock
->> > > device driver, the block device driver has no way to sanely prov=
-ide
->> > > these parameters to the block layer - they are not a property of=
- the
->> > > block device driver, but of the DMA provider.
->> >
->> > struct device_dma_parameters is used for a property of the block
->> > device drivers (and scsi HBA drivers, etc). Not DMA provider. Righ=
-t?
->>
->> Wrong. =A0struct device_dma_parameters is a property of the _DMA_ _p=
-rovider_.
->> It has to be. =A0Read what I said above and think about it.
->
-> I think that it's up to your definition of DMA provider.
->
->> In many cases, it so happens that the DMA provider and the block dev=
-ice
->> driver are the same entity, and so it may appear that device_dma_par=
-ameters
->
-> But could be the different entities, right? If so, the value should b=
-e
-> smaller one? Who is responsible for setting the correct value? The
-> proposed API blindly set the value (just overwrite). The API would be
-> better to set a new value only when the new value is smaller? Or
-> having a separate structure and selecting the smallest value?
->
-> struct device_dma_parameters assumes that the DMA provider and the
-> block (and SCSI, etc) device driver are the same entity.
->
->> is a property of the block device driver. =A0As soon as you have to =
-start
->> dealing with DMA providers being separate from the block device driv=
-er
->> then your eyes will be opened and you'll see that it can't work the =
-way
->> you seem to want it to.
->>
->> The DMA parameters have to come from the DMA provider or they're a t=
-otal
->> nonsense.
->
-> I don't think that I claim that the DMA parameters don't come from th=
-e
-> DMA provider. It depends on the definition of the DMA provider,
-> though.
 
-dmaengine expands the class of dma providers to include standalone dma
-agents on a host bus (or elsewhere) in addition to the traditional bus
-mastering host-bus-adapters that the existing api understands.  So in
-the case of slave dma the dma capabilities of the block-device are
-irrelevant because another agent will do the transfer on behalf of the
-block-device driver.  So the value should be whatever the dma device
-driver says it is.
+On Jun 3, 2011, at 2:50 AM, Zhangfei Gao wrote:
 
---
-Dan
+> 	SDHCI driver for pxav2 SoCs, such as pxa910, the driver based on sdhci-pltfm to handle resource etc.
+> 
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+> Signed-off-by: Jun Nie <njun@marvell.com>
+> Signed-off-by: Qiming Wu <wuqm@marvell.com>
+> ---
+> drivers/mmc/host/Kconfig       |   11 ++
+> drivers/mmc/host/Makefile      |    1 +
+> drivers/mmc/host/sdhci-pxav2.c |  261 ++++++++++++++++++++++++++++++++++++++++
+> 3 files changed, 273 insertions(+), 0 deletions(-)
+> create mode 100644 drivers/mmc/host/sdhci-pxav2.c
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 4ee869a..1a53d59 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -192,6 +192,17 @@ config MMC_SDHCI_PXAV3
+> 
+> 	  If unsure, say N.
+> 
+> +config MMC_SDHCI_PXAV2
+> +	tristate "Marvell PXAV2 SD Host Controller support"
+> +	select MMC_SDHCI
+> +	select MMC_SDHCI_PLTFM
+> +	help
+> +	  This selects the Marvell(R) PXAV2 SD Host Controller.
+> +	  If you have a PXAV2 platform (such as pxa910) with SD Host Controller
+> +	  and a card slot, say Y or M here.
+> +
+> +	  If unsure, say N.
+> +
+
+The following might be a better approach.  This way we preserve the existing SDHCI_PXA definition
+and allow users to see what CPU's are supported.
+
+config MMC_SDHCI_PXA
+>       tristate "Marvell MMP SD Host Controller support"
+>       depends on ARCH_MMP2
+>      select MMC_SDHCI_PXAV3
+
+
+> config MMC_SDHCI_PXA168
+>       tristate "Marvell PXA168 SD Host Controller support"
+>       depends on ARCH_PXA
+>      select MMC_SDHCI_PXAV2
+> 
+> config MMC_SDHCI_PXA9XX
+>       tristate "Marvell PXA910 SD Host Controller support"
+>       depends on ARCH_PXA
+>      select MMC_SDHCI_PXAV3
+> 
+> config MMC_SDHCI_MMP2
+>       tristate "Marvell MMP SD Host Controller support"
+>       depends on ARCH_MMP2
+>      select MMC_SDHCI_PXAV3
+
+
+====
+
+> 3config MMC_SDHCI_SPEAR
+> 	tristate "SDHCI support on ST SPEAr platform"
+> 	depends on MMC_SDHCI && PLAT_SPEAR
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 9131a27..cf95330 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -10,6 +10,7 @@ obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
+> obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
+> obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
+> obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
+> +obj-$(CONFIG_MMC_SDHCI_PXAV2)	+= sdhci-pxav2.o
+> obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
+> obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
+> obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
+> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+> new file mode 100644
+> index 0000000..759f526
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-pxav2.c
+> @@ -0,0 +1,261 @@
+> +/*
+> + * Copyright (C) 2010 Marvell International Ltd.
+> + *		Zhangfei Gao <zhangfei.gao@marvell.com>
+> + *		Kevin Wang <dwang4@marvell.com>
+> + *		Jun Nie <njun@marvell.com>
+> + *		Qiming Wu <wuqm@marvell.com>
+> + *		Philip Rakity <prakity@marvell.com>
+> + *
+> + * This software is licensed under the terms of the GNU General Public
+> + * License version 2, as published by the Free Software Foundation, and
+> + * may be copied, distributed, and modified under those terms.
+> + *
+> + * This program is distributed in the hope that it will be useful,
+> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> + * GNU General Public License for more details.
+> + *
+> + */
+> +
+> +#include <linux/err.h>
+> +#include <linux/init.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/clk.h>
+> +#include <linux/io.h>
+> +#include <linux/gpio.h>
+> +#include <linux/mmc/card.h>
+> +#include <linux/mmc/host.h>
+> +#include <plat/sdhci.h>
+> +#include <linux/slab.h>
+> +#include "sdhci.h"
+> +#include "sdhci-pltfm.h"
+> +
+> +#define SD_FIFO_PARAM		0xe0
+> +#define DIS_PAD_SD_CLK_GATE	0x0400 /* Turn on/off Dynamic SD Clock Gating */
+> +#define CLK_GATE_ON		0x0200 /* Disable/enable Clock Gate */
+> +#define CLK_GATE_CTL		0x0100 /* Clock Gate Control */
+> +#define CLK_GATE_SETTING_BITS	(DIS_PAD_SD_CLK_GATE | \
+> +		CLK_GATE_ON | CLK_GATE_CTL)
+> +
+> +#define SD_CLOCK_BURST_SIZE_SETUP	0xe6
+> +#define SDCLK_SEL_SHIFT		8
+> +#define SDCLK_SEL_MASK		0x3
+> +#define SDCLK_DELAY_SHIFT	10
+> +#define SDCLK_DELAY_MASK	0x3c
+> +
+> +#define SDHCI_HOST_CONTROL	0x28
+> +#define  SDHCI_CTRL_4BITBUS	0x02
+> +
+> +#define SD_CE_ATA_2		0xea
+> +#define MMC_CARD		0x1000
+> +#define MMC_WIDTH		0x0100
+> +
+> +static void pxav2_set_private_registers(struct sdhci_host *host, u8 mask)
+> +{
+> +	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
+> +	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+> +
+> +	if (mask == SDHCI_RESET_ALL) {
+> +		u16 tmp = 0;
+> +
+> +		/*
+> +		 * tune timing of read data/command when crc error happen
+> +		 * no performance impact
+> +		 */
+> +		if (pdata->clk_delay_sel == 1) {
+> +			tmp = readw(host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+> +
+> +			tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
+> +			tmp |= (pdata->clk_delay_cycles & SDCLK_DELAY_MASK)
+> +				<< SDCLK_DELAY_SHIFT;
+> +			tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
+> +			tmp |= (1 & SDCLK_SEL_MASK) << SDCLK_SEL_SHIFT;
+> +
+> +			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+> +		}
+> +
+> +		if (pdata->flags & PXA_FLAG_ENABLE_CLOCK_GATING) {
+> +			tmp = readw(host->ioaddr + SD_FIFO_PARAM);
+> +			tmp &= ~CLK_GATE_SETTING_BITS;
+> +			writew(tmp, host->ioaddr + SD_FIFO_PARAM);
+> +		} else {
+> +			tmp = readw(host->ioaddr + SD_FIFO_PARAM);
+> +			tmp &= ~CLK_GATE_SETTING_BITS;
+> +			tmp |= CLK_GATE_SETTING_BITS;
+> +			writew(tmp, host->ioaddr + SD_FIFO_PARAM);
+> +		}
+> +	}
+> +}
+> +
+> +static int pxav2_mmc_set_width(struct sdhci_host *host, int width)
+> +{
+> +	u8 ctrl;
+> +	u16 tmp;
+> +
+> +	ctrl = readb(host->ioaddr + SDHCI_HOST_CONTROL);
+> +	tmp = readw(host->ioaddr + SD_CE_ATA_2);
+> +	if (width == MMC_BUS_WIDTH_8) {
+> +		ctrl &= ~SDHCI_CTRL_4BITBUS;
+> +		tmp |= MMC_CARD | MMC_WIDTH;
+> +	} else {
+> +		tmp &= ~(MMC_CARD | MMC_WIDTH);
+> +		if (width == MMC_BUS_WIDTH_4)
+> +			ctrl |= SDHCI_CTRL_4BITBUS;
+> +		else
+> +			ctrl &= ~SDHCI_CTRL_4BITBUS;
+> +	}
+> +	writew(tmp, host->ioaddr + SD_CE_ATA_2);
+> +	writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
+> +
+> +	return 0;
+> +}
+> +
+> +static unsigned int pxav2_get_ro(struct sdhci_host *host)
+> +{
+> +	/* Micro SD does not support write-protect feature */
+> +	return 0;
+> +}
+> +
+> +static u32 pxav2_get_max_clock(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +
+> +	return clk_get_rate(pltfm_host->clk);
+> +}
+> +
+> +static struct sdhci_ops pxav2_sdhci_ops = {
+> +	.get_ro = pxav2_get_ro,
+> +	.get_max_clock = pxav2_get_max_clock,
+> +	.platform_reset_exit = pxav2_set_private_registers,
+> +	.platform_8bit_width = pxav2_mmc_set_width,
+> +};
+> +
+> +static int __devinit sdhci_pxav2_probe(struct platform_device *pdev)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host;
+> +	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+> +	struct device *dev = &pdev->dev;
+> +	struct sdhci_host *host = NULL;
+> +	struct sdhci_pxa *pxa = NULL;
+> +	int ret;
+> +	struct clk *clk;
+> +
+> +	pxa = kzalloc(sizeof(struct sdhci_pxa), GFP_KERNEL);
+> +	if (!pxa)
+> +		return -ENOMEM;
+> +
+> +	host = sdhci_pltfm_init(pdev, NULL);
+> +	if (IS_ERR(host)) {
+> +		kfree(pxa);
+> +		return PTR_ERR(host);
+> +	}
+> +	pltfm_host = sdhci_priv(host);
+> +	pltfm_host->priv = pxa;
+> +
+> +	clk = clk_get(dev, "PXA-SDHCLK");
+> +	if (IS_ERR(clk)) {
+> +		dev_err(dev, "failed to get io clock\n");
+> +		ret = PTR_ERR(clk);
+> +		goto err_clk_get;
+> +	}
+> +	pltfm_host->clk = clk;
+> +	clk_enable(clk);
+> +
+> +	host->quirks = SDHCI_QUIRK_BROKEN_ADMA
+> +		| SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+> +		| SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
+> +
+> +	if (pdata) {
+> +		if (pdata->flags & PXA_FLAG_CARD_PERMANENT) {
+> +			/* on-chip device */
+> +			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> +			host->mmc->caps |= MMC_CAP_NONREMOVABLE;
+> +		}
+> +
+> +		/* If slot design supports 8 bit data, indicate this to MMC. */
+> +		if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
+> +			host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+> +
+> +		if (pdata->quirks)
+> +			host->quirks |= pdata->quirks;
+> +		if (pdata->host_caps)
+> +			host->mmc->caps |= pdata->host_caps;
+> +		if (pdata->pm_caps)
+> +			host->mmc->pm_caps |= pdata->pm_caps;
+> +	}
+> +
+> +	host->ops = &pxav2_sdhci_ops;
+> +
+> +	ret = sdhci_add_host(host);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "failed to add host\n");
+> +		goto err_add_host;
+> +	}
+> +
+> +	if (pdata && pdata->max_speed) {
+> +		host->mmc->f_max = pdata->max_speed;
+> +		if (!(host->mmc->f_max > 25000000))
+> +			host->mmc->caps &= ~(MMC_CAP_SD_HIGHSPEED |
+> +					MMC_CAP_MMC_HIGHSPEED);
+> +	}
+> +
+> +	platform_set_drvdata(pdev, host);
+> +
+> +	return 0;
+> +
+> +err_add_host:
+> +	clk_disable(clk);
+> +	clk_put(clk);
+> +err_clk_get:
+> +	sdhci_pltfm_free(pdev);
+> +	kfree(pxa);
+> +	return ret;
+> +}
+> +
+> +static int __devexit sdhci_pxav2_remove(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_pxa *pxa = pltfm_host->priv;
+> +
+> +	sdhci_remove_host(host, 1);
+> +
+> +	clk_disable(pltfm_host->clk);
+> +	clk_put(pltfm_host->clk);
+> +	sdhci_pltfm_free(pdev);
+> +	kfree(pxa);
+> +
+> +	platform_set_drvdata(pdev, NULL);
+> +
+> +	return 0;
+> +}
+> +
+> +static struct platform_driver sdhci_pxav2_driver = {
+> +	.driver		= {
+> +		.name	= "sdhci-pxav2",
+> +		.owner	= THIS_MODULE,
+> +	},
+> +	.probe		= sdhci_pxav2_probe,
+> +	.remove		= __devexit_p(sdhci_pxav2_remove),
+> +#ifdef CONFIG_PM
+> +	.suspend	= sdhci_pltfm_suspend,
+> +	.resume		= sdhci_pltfm_resume,
+> +#endif
+> +};
+> +static int __init sdhci_pxav2_init(void)
+> +{
+> +	return platform_driver_register(&sdhci_pxav2_driver);
+> +}
+> +
+> +static void __exit sdhci_pxav2_exit(void)
+> +{
+> +	platform_driver_unregister(&sdhci_pxav2_driver);
+> +}
+> +
+> +module_init(sdhci_pxav2_init);
+> +module_exit(sdhci_pxav2_exit);
+> +
+> +MODULE_DESCRIPTION("SDHCI driver for pxav2");
+> +MODULE_AUTHOR("Marvell International Ltd.");
+> +MODULE_LICENSE("GPL v2");
+> +
+> -- 
+> 1.7.0.4
+> 
+
