@@ -1,42 +1,61 @@
-From: Arnd Hannemann <arnd@arndnet.de>
-Subject: Re: MMC runtime PM patches break libertas probe
-Date: Tue, 07 Jun 2011 16:34:43 +0200
-Message-ID: <4DEE3703.2070600@arndnet.de>
-References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com> <AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com> <AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com> <AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com> <AANLkTi=8Xd1xTfFvAJkicR_89JOu4P2uwyoMHvXCBKv8@mail.gmail.com> <AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com> <BANLkTikpciJnTudOeSLM_O7AAD4GGkbbOw@mail.gmail.com> <BANLkTikQC+u5yyU+YBAZ5JpFDRFHrHNOoA@mail.gmail.com> <BANLkTi=kqnnGf3ezS=cSXCcHpmK3JxwXtg@mail.gmail.com> <BANLkTi=o6Hgb=icinjmZqVx09dx+cp-enw@mail.gmail.com> <BANLkTimuLrCd3oHeWOC73scuQ6ydvuwpvw@mail.gmail.com> <BANLkTimmSu33PTDn9ybOSbAfObPe4C-rZA@mail.gmail.com> <477F20668A386D41ADCC57781B1F704307FD0BF3B1@SC-VEXCH1.marvell.com> <BANLkTi=nz8c9P2qi9FWE+QU
- 0XzSFddUAhA@mail.gmail.com> <477F20668A386D41ADCC57781B1F704307FD0BF3BE@SC-VEXCH1.marvell.com> <BANLkTi=qR7bbsnzsCpV=b2C4Ha5Hdb94gQ@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH v3 2/4] mmc: support sdhci-pxav2.c
+Date: Tue, 7 Jun 2011 08:04:57 -0700
+Message-ID: <A5ADAC80-98EE-4184-A958-965A3EC275F9@marvell.com>
+References: <1307094606-8692-1-git-send-email-zhangfei.gao@marvell.com>
+ <1E53FF9F-5C6A-4AA2-B441-DD712C5D6715@marvell.com>
+ <BANLkTik9an1N8914nC5MVL7+nHh+NhDNAA@mail.gmail.com>
+ <201106070917.41691.arnd@arndb.de>
+ <BANLkTinsk0AzBYd+fO9Oz1RO9smNzJTsTA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from slowhand.arndnet.de ([88.198.19.76]:32776 "EHLO mail.unitix.de"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753399Ab1FGOzZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Jun 2011 10:55:25 -0400
-In-Reply-To: <BANLkTi=qR7bbsnzsCpV=b2C4Ha5Hdb94gQ@mail.gmail.com>
+Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:36836 "EHLO
+	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755402Ab1FGPFw convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Jun 2011 11:05:52 -0400
+In-Reply-To: <BANLkTinsk0AzBYd+fO9Oz1RO9smNzJTsTA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: Bing Zhao <bzhao@marvell.com>, zhangfei gao <zhangfei.gao@gmail.com>, Daniel Drake <dsd@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Rapoport <mike@compulab.co.il>, Zhangfei Gao <zgao6@marvell.com>
+To: Eric Miao <eric.y.miao@gmail.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, zhangfei gao <zhangfei.gao@gmail.com>, Zhangfei Gao <zgao6@marvell.com>, Shawn Guo <shawn.guo@linaro.org>, Nicolas Pitre <nico@fluxnic.net>, Qiming Wu <wuqm@marvell.com>, Jun Nie <njun@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>, Haojian Zhuang <haojian.zhuang@gmail.com>, Raymond Wu <xywu@marvell.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-Hi Ohad,
 
-Am 04.06.2011 00:52, schrieb Ohad Ben-Cohen:
-> (cc'ing Arnd Hannermann)
+On Jun 7, 2011, at 12:31 AM, Eric Miao wrote:
+
+>> How about changing the title of the option though? A user will
+>> usually not know if he is using the v2 or v3 controller without
+>> reading the help text. If you change it to
+>> 
+>> config MMC_SDHCI_PXAV2
+>>        tristate "Marvell PXA168 SD Host Controller support (PXAV2)"
+>>        default CPU_PXA168
+
+change to
+>>        tristate "Marvell PXA9xx SD Host Controller support (PXAV2)"
+
+the pxa168 will not work in all cases with the V2 code.  It needs IO_ACCESSORS for readw and
+a callback to sdhci.c to delay then time between transfers.  Once V2 code is mainline
+I will resubmit the pxa168 code.
+
+
+>> 
+>> config MMC_SDHCI_PXAV3
+>>        tristate "Marvell MMP2/PX9XX SD Host Controller support (PXAV3)"
+>>        default CPU_MMP2 || CPU_PXA910
+>> 
 > 
-> On Sat, Jun 4, 2011 at 1:28 AM, Bing Zhao <bzhao@marvell.com> wrote:
->> "CMD5 Arg=0" refers to the very first CMD5 sent from host during initialization sequence.
->> This is required because our state machine always expects two CMD5 from host (5, 5, 3, 7, ...).
+> Yeah, the above is much cleaner/simpler.
 > 
-> Great, thanks for confirming this !
-> 
-> Arnd, you have reported SDIO runtime pm issues with the b43 in the
-> past. If you're still interested and have some free cycles, you might
-> want to check out Daniel's patch and see if that fixes the issues you
-> had too. With Daniel's patch we're now following the spec more
-> strictly, and the change is particularly relevant for removable SDIO
-> cards like the one you were using.
+>> you increase the chances of users getting the configuration right.
+>> 
+>>        Arnd
+>> 
+>> BTW, both of you: Please always remove the lines that you don't refer to
+>> when you reply to an email. It's very annoying having to scroll through
+>> dozens of lines of citations to see what you are actually writing.
+>> 
 
-Sorry, I don't have the hardware anymore so I'm not able to check this.
-
-Best regards
-Arnd
