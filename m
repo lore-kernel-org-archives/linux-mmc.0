@@ -1,50 +1,120 @@
-From: Eric Miao <eric.y.miao@gmail.com>
-Subject: Re: [PATCH v3 2/4] mmc: support sdhci-pxav2.c
-Date: Tue, 7 Jun 2011 15:31:48 +0800
-Message-ID: <BANLkTinsk0AzBYd+fO9Oz1RO9smNzJTsTA@mail.gmail.com>
-References: <1307094606-8692-1-git-send-email-zhangfei.gao@marvell.com>
- <1E53FF9F-5C6A-4AA2-B441-DD712C5D6715@marvell.com> <BANLkTik9an1N8914nC5MVL7+nHh+NhDNAA@mail.gmail.com>
- <201106070917.41691.arnd@arndb.de>
+From: Richard Zhu <richard.zhu@linaro.org>
+Subject: [PATCH V1] mmc: Enable the ADMA on esdhc imx driver
+Date: Tue, 7 Jun 2011 17:37:04 +0800
+Message-ID: <1307439424-3549-1-git-send-email-richard.zhu@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:38669 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751660Ab1FGHcJ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 03:32:09 -0400
-Received: by vws1 with SMTP id 1so3351531vws.19
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2011 00:32:08 -0700 (PDT)
-In-Reply-To: <201106070917.41691.arnd@arndb.de>
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:9202 "EHLO
+	TX2EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752178Ab1FGJmN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 05:42:13 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: zhangfei gao <zhangfei.gao@gmail.com>, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zgao6@marvell.com>, Shawn Guo <shawn.guo@linaro.org>, Nicolas Pitre <nico@fluxnic.net>, Qiming Wu <wuqm@marvell.com>, Jun Nie <njun@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>, Haojian Zhuang <haojian.zhuang@gmail.com>, Raymond Wu <xywu@marvell.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+To: linux-arm-kernel@lists.infradead.org
+Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, w.sang@pengutronix.de, eric.miao@linaro.org, Richard Zhu <richard.zhu@linaro.org>
 
-> How about changing the title of the option though? A user will
-> usually not know if he is using the v2 or v3 controller without
-> reading the help text. If you change it to
->
-> config MMC_SDHCI_PXAV2
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0tristate "Marvell PXA168 SD Host Controlle=
-r support (PXAV2)"
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0default CPU_PXA168
->
-> config MMC_SDHCI_PXAV3
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0tristate "Marvell MMP2/PX9XX SD Host Contr=
-oller support (PXAV3)"
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0default CPU_MMP2 || CPU_PXA910
->
+Eanble the ADMA2 mode on freescale esdhc imx driver,
+tested on MX51 and MX53.
 
-Yeah, the above is much cleaner/simpler.
+Only ADMA2 mode is enabled, MX25/35 can't support the ADMA2 mode.
+So this patch is only used for MX51/53.
+The ADMA2 mode supported or not can be distinguished by the
+Capability Register(offset 0x40) of eSDHC module.
+Up to now, only MX51/MX53 set the ADMA2 supported bit(Bit20) in the
+Capability Register.
 
-> you increase the chances of users getting the configuration right.
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0Arnd
->
-> BTW, both of you: Please always remove the lines that you don't refer=
- to
-> when you reply to an email. It's very annoying having to scroll throu=
-gh
-> dozens of lines of citations to see what you are actually writing.
->
+Signed-off-by: Richard Zhu <richard.zhu@linaro.org>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |   36 +++++++++++++++++++++++++++++++-----
+ 1 files changed, 31 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index a19967d..8015e1a 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -31,6 +31,8 @@
+ #define SDHCI_VENDOR_SPEC		0xC0
+ #define  SDHCI_VENDOR_SPEC_SDIO_QUIRK	0x00000002
+ 
++#define  SDHCI_SPEC_INT_ADMA_ERR	0x10000000
++
+ #define ESDHC_FLAG_GPIO_FOR_CD_WP	(1 << 0)
+ /*
+  * The CMDTYPE of the CMD register (offset 0xE) should be set to
+@@ -80,6 +82,20 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ 			val |= SDHCI_CARD_PRESENT;
+ 	}
+ 
++	if (unlikely(reg == SDHCI_CAPABILITIES)) {
++		if (val & SDHCI_CAN_DO_ADMA1) {
++			val &= ~SDHCI_CAN_DO_ADMA1;
++			val |= SDHCI_CAN_DO_ADMA2;
++		}
++	}
++
++	if (unlikely(reg == SDHCI_INT_STATUS)) {
++		if (val & SDHCI_SPEC_INT_ADMA_ERR) {
++			val &= ~SDHCI_SPEC_INT_ADMA_ERR;
++			val |= SDHCI_INT_ADMA_ERROR;
++		}
++	}
++
+ 	return val;
+ }
+ 
+@@ -105,6 +121,13 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ 			writel(v, host->ioaddr + SDHCI_VENDOR_SPEC);
+ 	}
+ 
++	if (unlikely((reg == SDHCI_INT_ENABLE)
++				|| (reg == SDHCI_SIGNAL_ENABLE))) {
++		if (val & SDHCI_INT_ADMA_ERROR) {
++			val &= ~SDHCI_INT_ADMA_ERROR;
++			val |= SDHCI_SPEC_INT_ADMA_ERR;
++		}
++	}
+ 	writel(val, host->ioaddr + reg);
+ }
+ 
+@@ -154,7 +177,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 
+ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
+ {
+-	u32 new_val;
++	u16 new_val;
+ 
+ 	switch (reg) {
+ 	case SDHCI_POWER_CONTROL:
+@@ -168,10 +191,12 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
+ 		new_val = val & (SDHCI_CTRL_LED | SDHCI_CTRL_4BITBUS);
+ 		/* ensure the endianess */
+ 		new_val |= ESDHC_HOST_CONTROL_LE;
+-		/* DMA mode bits are shifted */
+-		new_val |= (val & SDHCI_CTRL_DMA_MASK) << 5;
++		if (val & SDHCI_CTRL_DMA_MASK)
++			/* DMA mode bits are shifted */
++			new_val |= (val & SDHCI_CTRL_DMA_MASK) << 5;
+ 
+ 		esdhc_clrset_le(host, 0xffff, new_val, reg);
++
+ 		return;
+ 	}
+ 	esdhc_clrset_le(host, 0xff, val, reg);
+@@ -322,9 +347,10 @@ static void esdhc_pltfm_exit(struct sdhci_host *host)
+ }
+ 
+ struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+-	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_ADMA
++	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_NO_HISPD_BIT
++			| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
++			| SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC
+ 			| SDHCI_QUIRK_BROKEN_CARD_DETECTION,
+-	/* ADMA has issues. Might be fixable */
+ 	.ops = &sdhci_esdhc_ops,
+ 	.init = esdhc_pltfm_init,
+ 	.exit = esdhc_pltfm_exit,
+-- 
+1.7.1
+
+
