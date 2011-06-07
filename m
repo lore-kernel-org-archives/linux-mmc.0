@@ -1,61 +1,68 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: UHS-I bus speed mode should be set last in UHS initialization
-Date: Mon, 6 Jun 2011 15:44:10 -0700 (PDT)
-Message-ID: <1cf840ce9d2fa852cb8d4e0e1bf9b559.squirrel@www.codeaurora.org>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v3 0/3] provide sdhci driver for mmp2 and pxa910
+Date: Tue, 7 Jun 2011 13:26:45 +0800
+Message-ID: <BANLkTimefL_HHtvXc0af43dDv=B12roevA@mail.gmail.com>
+References: <BANLkTikP72ybaqa8zDgNjBQg8Q6SH5fMdw@mail.gmail.com>
+	<201106031820.51922.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:50953 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758431Ab1FFWoL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2011 18:44:11 -0400
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:41881 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750775Ab1FGF0q convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 01:26:46 -0400
+Received: by vws1 with SMTP id 1so3306206vws.19
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Jun 2011 22:26:46 -0700 (PDT)
+In-Reply-To: <201106031820.51922.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Nicolas Pitre <nico@fluxnic.net>, Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Qiming Wu <wuqm@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-Hi Chris, Arindam,
+On Sat, Jun 4, 2011 at 12:20 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Friday 03 June 2011, zhangfei gao wrote:
+>> Here are patches to provide separate sdhci driver for mmp2 and pxa91=
+0
+>> based on sdhci-platfm.
+>> Rename to sdhci-pxav3.c and sdhci-pxav2.c
+>> Remove sdhci-pxa.c, which is used to share among pxa serious, since
+>> under this method, platform difference have to be put under arch/arm=
+,
+>> which is not easy to track.
+>> As a result, mmp2 mmc resource should be updated accordingly.
+>
+> Looks all good content-wise. I do have a few comments regarding the
+> style of submission, please follow that the next time:
+>
+> * Make all patches a reply to the =A0[PATCH 0/x] email, so they show =
+up
+> =A0as a single thread. This helps finding the emails when your mail
+> =A0client sorts threads by last reply. The option in git-send-email
+> =A0is '--thread --no-chain-reply'.
+>
+> * The changelog has extra spaces in it that shouldn't be there. I ass=
+ume
+> =A0they come from using git-show instead of git-format-patch to creat=
+e
+> =A0the emails.
+>
+> * Make sure a series is bisectable. This means that each patch result=
+s
+> =A0in a working kernel without regressions when you apply only part o=
+f
+> =A0the series. There are multiple ways to get there. In this case, yo=
+u
+> =A0could fold the patch that updates the resources into the patch tha=
+t
+> =A0changes the format. Alternatively, you could first create the new =
+driver
+> =A0in the new format, then change the resources, and finally remove t=
+he
+> =A0now obsolete driver.
+>
+> =A0 =A0 =A0 =A0Arnd
 
-mmc_sd_init_uhs_card function sets the driver type, current limit and bus
-speed mode on card as well as on host controller side. Currently bus speed
-mode is set by sending CMD6 to card and setting timing mode in host
-controller and then before initiating tuning sequence, it also tries to
-set current limit by sending CMD6 to card which fails on our host
-controller (due to data CRC or timeout errors) if bus speed mode is
-SDR50/SDR104 mode.
-
-So basically bus speed mode should be set only after current limit is set
-in the card and immediately after setting the bus speed mode, tuning
-sequence should be initiated. So following changes is needed. If it looks
-fine then I can send you this change in patch.
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
-0da37eb..19634d5 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -610,13 +610,13 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
-        if (err)
-                goto out;
-
--       /* Set bus speed mode of the card */
--       err = sd_set_bus_speed_mode(card, status);
-+       /* Set current limit for the card */
-+       err = sd_set_current_limit(card, status);
-        if (err)
-                goto out;
-
--       /* Set current limit for the card */
--       err = sd_set_current_limit(card, status);
-+       /* Set bus speed mode of the card */
-+       err = sd_set_bus_speed_mode(card, status);
-        if (err)
-                goto out;
-
-Regards,
-Subhash
-
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
-
-
+Thanks Arnd for your patient explanation, will take more care next time=
+=2E
+>
