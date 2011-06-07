@@ -1,42 +1,90 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
-Date: Tue, 7 Jun 2011 23:52:40 +0300
-Message-ID: <BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com>
-References: <20110605123852.BC6F39D401C@zog.reactivated.net>
- <BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com> <BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: Re: sdhci-pci fails on 3.0.0-rc1 on Dell E6510
+Date: Tue, 07 Jun 2011 15:18:53 -0700
+Message-ID: <4DEEA3CD.30507@kernel.org>
+References: <4DEBCA3F.8050205@hartkopp.net>	<BANLkTin_WHuy5MExNBHdeLiDmdmn7SZYkg@mail.gmail.com>	<4DED05C4.7050903@hartkopp.net> <m3hb82wx6m.fsf@pullcord.laptop.org> <4DEE6FC6.9040308@hartkopp.net> <4DEE84AD.6050104@hartkopp.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:62335 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756914Ab1FGWBD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 18:01:03 -0400
-Received: by wya21 with SMTP id 21so3902289wya.19
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2011 15:01:02 -0700 (PDT)
-In-Reply-To: <BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
+Received: from rcsinet10.oracle.com ([148.87.113.121]:29362 "EHLO
+	rcsinet10.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751803Ab1FGWTo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 18:19:44 -0400
+In-Reply-To: <4DEE84AD.6050104@hartkopp.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: Oliver Hartkopp <socketcan@hartkopp.net>
+Cc: Jesse Barnes <jbarnes@virtuousgeek.org>, Chris Ball <cjb@laptop.org>, "S, Venkatraman" <svenkatr@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Ram Pai <linuxram@us.ibm.com>
 
-On Tue, Jun 7, 2011 at 7:41 PM, Daniel Drake <dsd@laptop.org> wrote:
-> On 5 June 2011 14:48, Ohad Ben-Cohen <ohad@wizery.com> wrote:
->> Sending a reset is necessary only if we are re-initing a powered on
->> card, but in this case, we know that we just powered the card up, so
->> this is not needed.
->
-> Don't ask me for an explanation, but this is required here
+thanks.
 
-Uhm, strange. Maybe this has something to do with the sd8686's reset
-line which you are not toggling ?
+second report.
 
-Btw, the previous patch which you sent didn't have this reset command,
-and the patch did work for you. What has changed in this respect ?
+can you send out whole boot log.
 
->  Are you suggesting that a quirk is used to enable this reset, or
-> to disable it?
+Yinghai
 
-To disable the CMD5 arg=0. it's not mandatory by the spec, and some
-cards don't need it. It's not harmful either way, but it's just
-cleaner for those cards (and it's really just adding 1 'if'
-statement..).
+On 06/07/2011 01:06 PM, Oliver Hartkopp wrote:
+> On 07.06.2011 20:36, Oliver Hartkopp wrote:
+> Hi all,
+> 
+> the commit "PCI: update bridge resources to get more big ranges when allocating space (again)"
+> 
+> http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=da7822e5ad71ec9b745b412639f1e5e0ba795a20
+> 
+> kills my SD-Card and the PCMCIA slot on a Dell E6510 with the latest 3.0.0-rc2 ...
+> 
+> When i revert the commit both the MMC/SD stuff and the PCMCIA re-appears.
+> 
+> Any idea?
+> 
+> See my attached boot.diff / kernel config 
+> 
+> Regards,
+> Oliver
+> 
+> 
+> 
+> 
+>> On 06.06.2011 21:56, Chris Ball wrote:
+>>> Hi Oliver,
+>>>
+>>> On Mon, Jun 06 2011, Oliver Hartkopp wrote:
+>>>>>> dmesg is a bit more detailed:
+>>>>>> [    6.242510] sdhci-pci 0000:03:00.1: SDHCI controller found [1180:e822] (rev 3)
+>>>>>> [    6.244168] sdhci-pci 0000:03:00.1: PCI INT B -> GSI 19 (level, low) -> IRQ 19
+>>>>>> [    6.245788] sdhci-pci 0000:03:00.1: BAR 0 is not iomem. Aborting.
+>>>>>> [    6.247609] sdhci-pci 0000:03:00.1: PCI INT B disabled
+>>>
+>>> If you get a chance to do some bisecting, that would be extremely
+>>> helpful -- even just building 3.0 from *before* the MMC tree was
+>>> merged would help a lot, since if the problem still happens before
+>>> the MMC merge we might be looking at some kind of generic PCI bug.
+>>>
+>>
+>>
+>> Hi Chris,
+>>
+>> i just reverted this pull of your merge window patches in my 3.0.0-rc2 tree:
+>>
+>> http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=8c1c77ff9be27137fa7cbbf51efedef1a2ae915b;hp=f3ae1c75203535f65448517e46c8dd70a56b6c71
+>>
+>> And you were right: The problem still exists. So it might be from the PCI subsystem :-(
+>>
+>> [    6.167106] sdhci: Secure Digital Host Controller Interface driver
+>> [    6.167108] sdhci: Copyright(c) Pierre Ossman
+>> [    6.194731] ehci_hcd 0000:00:1a.0: cache line size of 64 is not supported
+>> [    6.195140] ehci_hcd 0000:00:1a.0: irq 16, io mem 0xf6970000
+>> [    6.196423] sdhci-pci 0000:03:00.1: SDHCI controller found [1180:e822] (rev 3)
+>> [    6.196429] sdhci-pci 0000:03:00.1: found 1 slot(s)
+>> [    6.196447] sdhci-pci 0000:03:00.1: PCI INT B -> GSI 19 (level, low) -> IRQ 19
+>> [    6.196451] sdhci-pci 0000:03:00.1: BAR 0 is not iomem. Aborting.
+>> [    6.196459] sdhci-pci 0000:03:00.1: PCI INT B disabled
+>>
+>> Well then, i'll reset my tree and look for differences in the PCI boot messages.
+>>
+>> Thanks,
+>> Oliver
+> 
+
