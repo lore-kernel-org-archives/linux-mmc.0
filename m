@@ -1,53 +1,36 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH v2 1/2] sdio: add quirk to handle pending IRQ in case of
- none CCCR_INTx bits
-Date: Tue, 7 Jun 2011 08:49:48 +0200
-Message-ID: <BANLkTi=Dmntzb=4BBptwqZ5WfBMQYbaTGA@mail.gmail.com>
-References: <1306918113-23872-1-git-send-email-per.forlin@stericsson.com>
-	<1306918113-23872-2-git-send-email-per.forlin@stericsson.com>
-	<4DE6B0E8.9050306@boundarydevices.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v3 0/3] provide sdhci driver for mmp2 and pxa910
+Date: Tue, 7 Jun 2011 09:00:27 +0200
+Message-ID: <201106070900.27637.arnd@arndb.de>
+References: <BANLkTikP72ybaqa8zDgNjBQg8Q6SH5fMdw@mail.gmail.com> <FDBC7F85-3643-4C3C-9E4B-2006D56F24C9@marvell.com> <BANLkTimkk3JfuVmhuBAw4Op93oDtjKdoXw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:41124 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750801Ab1FGGtt convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 02:49:49 -0400
-Received: by qyk7 with SMTP id 7so1172858qyk.19
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Jun 2011 23:49:48 -0700 (PDT)
-In-Reply-To: <4DE6B0E8.9050306@boundarydevices.com>
+Received: from moutng.kundenserver.de ([212.227.126.187]:60215 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750910Ab1FGHAe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 03:00:34 -0400
+In-Reply-To: <BANLkTimkk3JfuVmhuBAw4Op93oDtjKdoXw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Troy Kisky <troy.kisky@boundarydevices.com>
-Cc: Per Forlin <per.forlin@stericsson.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linaro-dev@lists.linaro.org, Daniel Drake <dsd@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <cjb@laptop.org>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: Philip Rakity <prakity@marvell.com>, Nicolas Pitre <nico@fluxnic.net>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Qiming Wu <wuqm@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-On 1 June 2011 23:36, Troy Kisky <troy.kisky@boundarydevices.com> wrote=
-:
-> On 6/1/2011 1:48 AM, Per Forlin wrote:
->> From: Per Forlin <per.forlin@linaro.org>
->
->> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
->> index 7b4fd7b..852021c 100644
->> --- a/include/linux/mmc/card.h
->> +++ b/include/linux/mmc/card.h
->> @@ -175,6 +175,7 @@ struct mmc_card {
->> =A0#define MMC_QUIRK_DISABLE_CD (1<<5) =A0 =A0 =A0 =A0 =A0/* disconn=
-ect CD/DAT[3] resistor */
->> =A0#define MMC_QUIRK_INAND_CMD38 =A0 =A0 =A0 =A0(1<<6) =A0 =A0 =A0 =A0=
- =A0/* iNAND devices have broken CMD38 */
->> =A0#define MMC_QUIRK_BLK_NO_CMD23 =A0 =A0 =A0 (1<<7) =A0 =A0 =A0 =A0=
- =A0/* Avoid CMD23 for regular multiblock */
->> +#define MMC_QUIRK_SDIO_IRQ_CCCR_INTX_0 (1<<7) =A0 =A0 =A0 =A0/* SDI=
-O card has IRQ even if CCCR_INTx is 0 */
->
-> Using the same value as MMC_QUIRK_BLK_NO_CMD23 looks odd...
->
-Thanks for your observation.
-Typo, it should be (1 << 8)
-I'll update the patch but I don't plan post a new version yet. The
-root cause issue in the libertas is resolved. If the fix turns out to
-be needed later on I resend it.
+On Tuesday 07 June 2011 07:44:42 zhangfei gao wrote:
+> On Sat, Jun 4, 2011 at 5:08 AM, Philip Rakity <prakity@marvell.com> wrote:
+> >
+> > Please update mmp2 and pxa defconfigs.
+> 
+> The trend is replacing defconfig with device tree, it may not
+> acceptable to update defconfig.
 
-Thanks,
-Per
+Actually, the defconfigs are not going away, at least not directly.
+
+The device tree will replace the need for individual board files,
+but not for defconfig files. As a side-effect, the number of
+defconfig files can get reduced, but we should still maintain
+them.
+
+	Arnd
