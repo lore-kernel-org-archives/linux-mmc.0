@@ -1,36 +1,56 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v3 0/3] provide sdhci driver for mmp2 and pxa910
-Date: Tue, 7 Jun 2011 09:00:27 +0200
-Message-ID: <201106070900.27637.arnd@arndb.de>
-References: <BANLkTikP72ybaqa8zDgNjBQg8Q6SH5fMdw@mail.gmail.com> <FDBC7F85-3643-4C3C-9E4B-2006D56F24C9@marvell.com> <BANLkTimkk3JfuVmhuBAw4Op93oDtjKdoXw@mail.gmail.com>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH 2/2] sdio: report error if pending IRQ but none function bits
+Date: Tue, 7 Jun 2011 09:02:58 +0200
+Message-ID: <BANLkTimhzdAoXSCD0xfGwOMDE9+gbrt53A@mail.gmail.com>
+References: <1306874008-28867-1-git-send-email-per.forlin@linaro.org>
+	<1306874008-28867-3-git-send-email-per.forlin@linaro.org>
+	<alpine.LFD.2.00.1106011029390.30544@xanadu.home>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:60215 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750910Ab1FGHAe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 03:00:34 -0400
-In-Reply-To: <BANLkTimkk3JfuVmhuBAw4Op93oDtjKdoXw@mail.gmail.com>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:50828 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750910Ab1FGHC7 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 03:02:59 -0400
+Received: by qyk7 with SMTP id 7so1176609qyk.19
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2011 00:02:58 -0700 (PDT)
+In-Reply-To: <alpine.LFD.2.00.1106011029390.30544@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Philip Rakity <prakity@marvell.com>, Nicolas Pitre <nico@fluxnic.net>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Qiming Wu <wuqm@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+To: Nicolas Pitre <nicolas.pitre@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-dev@lists.linaro.org, Daniel Drake <dsd@laptop.org>, Chris Ball <cjb@laptop.org>
 
-On Tuesday 07 June 2011 07:44:42 zhangfei gao wrote:
-> On Sat, Jun 4, 2011 at 5:08 AM, Philip Rakity <prakity@marvell.com> wrote:
-> >
-> > Please update mmp2 and pxa defconfigs.
-> 
-> The trend is replacing defconfig with device tree, it may not
-> acceptable to update defconfig.
+On 1 June 2011 16:30, Nicolas Pitre <nicolas.pitre@linaro.org> wrote:
+> On Tue, 31 May 2011, Per Forlin wrote:
+>
+>> Return error in case of pending IRQ but none functions bits
+>> in CCCR_INTx is set.
+>>
+>> Signed-off-by: Per Forlin <per.forlin@linaro.org>
+>> ---
+>> =A0drivers/mmc/core/sdio_irq.c | =A0 =A05 +++++
+>> =A01 files changed, 5 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq=
+=2Ec
+>> index 2f81ddc..8184b6e 100644
+>> --- a/drivers/mmc/core/sdio_irq.c
+>> +++ b/drivers/mmc/core/sdio_irq.c
+>> @@ -50,6 +50,11 @@ static int process_sdio_pending_irqs(struct mmc_c=
+ard *card)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
+>> =A0 =A0 =A0 }
+>>
+>> + =A0 =A0 if (!pending) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_WARNING "%s: pending IRQ but n=
+one function bits\n",
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_card_id(card));
+>> + =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -EINVAL;
+>> + =A0 =A0 }
+>
+> Nope, this won't work with the polled interrupt mode.
+I'll drop this patch.
 
-Actually, the defconfigs are not going away, at least not directly.
-
-The device tree will replace the need for individual board files,
-but not for defconfig files. As a side-effect, the number of
-defconfig files can get reduced, but we should still maintain
-them.
-
-	Arnd
+Thanks for your comment,
+Per
