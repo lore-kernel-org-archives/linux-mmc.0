@@ -1,61 +1,81 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH v3 2/4] mmc: support sdhci-pxav2.c
-Date: Tue, 7 Jun 2011 08:04:57 -0700
-Message-ID: <A5ADAC80-98EE-4184-A958-965A3EC275F9@marvell.com>
-References: <1307094606-8692-1-git-send-email-zhangfei.gao@marvell.com>
- <1E53FF9F-5C6A-4AA2-B441-DD712C5D6715@marvell.com>
- <BANLkTik9an1N8914nC5MVL7+nHh+NhDNAA@mail.gmail.com>
- <201106070917.41691.arnd@arndb.de>
- <BANLkTinsk0AzBYd+fO9Oz1RO9smNzJTsTA@mail.gmail.com>
+From: Daniel Drake <dsd@laptop.org>
+Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
+Date: Tue, 7 Jun 2011 17:41:18 +0100
+Message-ID: <BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
+References: <20110605123852.BC6F39D401C@zog.reactivated.net>
+	<BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:36836 "EHLO
-	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755402Ab1FGPFw convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Jun 2011 11:05:52 -0400
-In-Reply-To: <BANLkTinsk0AzBYd+fO9Oz1RO9smNzJTsTA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:62579 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756589Ab1FGQlS convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 12:41:18 -0400
+Received: by pzk9 with SMTP id 9so2614792pzk.19
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2011 09:41:18 -0700 (PDT)
+In-Reply-To: <BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Eric Miao <eric.y.miao@gmail.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, zhangfei gao <zhangfei.gao@gmail.com>, Zhangfei Gao <zgao6@marvell.com>, Shawn Guo <shawn.guo@linaro.org>, Nicolas Pitre <nico@fluxnic.net>, Qiming Wu <wuqm@marvell.com>, Jun Nie <njun@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>, Haojian Zhuang <haojian.zhuang@gmail.com>, Raymond Wu <xywu@marvell.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-mmc@vger.kernel.org
 
+On 5 June 2011 14:48, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+>> +
+>> + =A0 =A0 =A0 /*
+>> + =A0 =A0 =A0 =A0* Reset the card by performing the same steps that =
+are taken by
+>> + =A0 =A0 =A0 =A0* mmc_rescan_try_freq() and mmc_attach_sdio() durin=
+g a "normal" probe
+>> + =A0 =A0 =A0 =A0*/
+>> + =A0 =A0 =A0 sdio_reset(host);
+>
+> Sending a reset is necessary only if we are re-initing a powered on
+> card, but in this case, we know that we just powered the card up, so
+> this is not needed.
 
-On Jun 7, 2011, at 12:31 AM, Eric Miao wrote:
+Don't ask me for an explanation, but this is required here, for the
+following scenario:
 
->> How about changing the title of the option though? A user will
->> usually not know if he is using the v2 or v3 controller without
->> reading the help text. If you change it to
->> 
->> config MMC_SDHCI_PXAV2
->>        tristate "Marvell PXA168 SD Host Controller support (PXAV2)"
->>        default CPU_PXA168
+1. Power up and probe
+2. Power down via runtime pm
+3. Power up
 
-change to
->>        tristate "Marvell PXA9xx SD Host Controller support (PXAV2)"
+step 3 needs the reset (even though it wasnt needed in step 1),
+otherwise mmc_send_io_op_cond() fails with a timeout.
 
-the pxa168 will not work in all cases with the V2 code.  It needs IO_ACCESSORS for readw and
-a callback to sdhci.c to delay then time between transfers.  Once V2 code is mainline
-I will resubmit the pxa168 code.
+It is also needed for:
 
+1. Power up
+2. Suspend, libertas handler returns -ENOSYS so card gets powered down
+3. System resume
+4. Reprobe needs to power up card
 
->> 
->> config MMC_SDHCI_PXAV3
->>        tristate "Marvell MMP2/PX9XX SD Host Controller support (PXAV3)"
->>        default CPU_MMP2 || CPU_PXA910
->> 
-> 
-> Yeah, the above is much cleaner/simpler.
-> 
->> you increase the chances of users getting the configuration right.
->> 
->>        Arnd
->> 
->> BTW, both of you: Please always remove the lines that you don't refer to
->> when you reply to an email. It's very annoying having to scroll through
->> dozens of lines of citations to see what you are actually writing.
->> 
+Step 4 fails without this reset.
 
+> + =A0 =A0 =A0 ret =3D mmc_send_io_op_cond(host, 0, NULL);
+> + =A0 =A0 =A0 if (ret)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+>
+> Can you please add this under a card quirk ?
+>
+> The spec does not require this for embedded sdio cards, and we would
+> like to skip this for wl12xx.
+
+I could do this if it is required for merge, but I don't agree with
+it. Are you suggesting that a quirk is used to enable this reset, or
+to disable it? It seems overkill for something that is going to be
+trivial and harmless to your setup.
+
+Also, the most frustrating thing when working on this issue is that
+the codepaths for powering up a SD card between the following 3
+situations are significantly different:
+ 1. Power up and probe during boot
+ 2. Resume from suspend
+ 3. Power up after runtime suspend
+
+It feels like there should be a lot more in common here. My patch is
+adding some coherence to the process (and there is still plenty of
+room for improvement, but adding quirks won't help...).
+
+Daniel
