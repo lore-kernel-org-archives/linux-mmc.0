@@ -1,12 +1,16 @@
-From: Daniel Drake <dsd-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+From: Daniel Drake <dsd@laptop.org>
 Subject: [PATCH] libertas: add sd8686 reset_card support
 Date: Tue,  7 Jun 2011 18:15:57 +0100 (BST)
-Message-ID: <20110607171557.7F65D9D401C@zog.reactivated.net>
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org, dcbw-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, libertas-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Message-ID: <20110607171557.7F65D9D401C__2741.60774793035$1307468183$gmane$org@zog.reactivated.net>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from queueout04-winn.ispmail.ntl.com ([81.103.221.58]:35429 "EHLO
+	queueout04-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753745Ab1FGRgP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 13:36:15 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linville@tuxdriver.com, dcbw@redhat.com
+Cc: linux-wireless@vger.kernel.org, libertas-dev@lists.infradead.org, linux-mmc@vger.kernel.org
 
 At http://dev.laptop.org/ticket/10748 we are seeing a case of the
 libertas firmware randomly stopping responding to commands after
@@ -17,7 +21,7 @@ Work around this issue by adding a reset_card method; this is
 automatically called when command timeouts are detected and provides an
 instant recovery to this situation.
 
-Signed-off-by: Daniel Drake <dsd-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Daniel Drake <dsd@laptop.org>
 ---
  drivers/net/wireless/libertas/if_sdio.c |   34 +++++++++++++++++++++++++++++++
  1 files changed, 34 insertions(+), 0 deletions(-)
@@ -89,7 +93,3 @@ index a7b5cb0..13c9dbe 100644
 -- 
 1.7.5.2
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
