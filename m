@@ -1,65 +1,35 @@
-From: yingchun li <sword.l.dragon@gmail.com>
-Subject: sdhci.c after suspend, my sd host controller cannot work normally,
-Date: Tue, 7 Jun 2011 21:38:20 +0800
-Message-ID: <BANLkTi=swa+FCvVMnDn3PpqEOtJPS_m0VA@mail.gmail.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: MMC runtime PM patches break libertas probe
+Date: Tue, 7 Jun 2011 17:45:21 +0300
+Message-ID: <BANLkTi=tWqVxWiHeG78+6kko5NxJQgrbQA@mail.gmail.com>
+References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com>
+ <AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com>
+ <AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
+ <AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
+ <AANLkTi=8Xd1xTfFvAJkicR_89JOu4P2uwyoMHvXCBKv8@mail.gmail.com>
+ <AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com>
+ <BANLkTikpciJnTudOeSLM_O7AAD4GGkbbOw@mail.gmail.com> <BANLkTikQC+u5yyU+YBAZ5JpFDRFHrHNOoA@mail.gmail.com>
+ <BANLkTi=kqnnGf3ezS=cSXCcHpmK3JxwXtg@mail.gmail.com> <BANLkTi=o6Hgb=icinjmZqVx09dx+cp-enw@mail.gmail.com>
+ <BANLkTimuLrCd3oHeWOC73scuQ6ydvuwpvw@mail.gmail.com> <BANLkTimmSu33PTDn9ybOSbAfObPe4C-rZA@mail.gmail.com>
+ <477F20668A386D41ADCC57781B1F704307FD0BF3B1@SC-VEXCH1.marvell.com>
+ <BANLkTi=nz8c9P2qi9FWE+QU0XzSFddUAhA@mail.gmail.com> <477F20668A386D41ADCC57781B1F704307FD0BF3BE@SC-VEXCH1.marvell.com>
+ <BANLkTi=qR7bbsnzsCpV=b2C4Ha5Hdb94gQ@mail.gmail.com> <4DEE3703.2070600@arndnet.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:56538 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753899Ab1FGNiW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 09:38:22 -0400
-Received: by wya21 with SMTP id 21so3560133wya.19
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2011 06:38:21 -0700 (PDT)
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:39602 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755323Ab1FGOpm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 10:45:42 -0400
+Received: by wwa36 with SMTP id 36so5009935wwa.1
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2011 07:45:41 -0700 (PDT)
+In-Reply-To: <4DEE3703.2070600@arndnet.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Arnd Hannemann <arnd@arndnet.de>
+Cc: Bing Zhao <bzhao@marvell.com>, zhangfei gao <zhangfei.gao@gmail.com>, Daniel Drake <dsd@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Rapoport <mike@compulab.co.il>, Zhangfei Gao <zgao6@marvell.com>
 
-Hi,
-     I have an android box, and the kernel is 2.6.32. and my sd card
- host driver use the sdhci driver.
-    now I have a problem when sdhost suspend and resume.
->From the log,  after the system suspend,  just before sdhost resume,
-there is  a sdhci_request io happen. in the sdhci_request, it still
-call sdhci_send_command to issue a command, but here the sdhost
-is in the suspend state and the card has been power off, so the
-command  fails.
+On Tue, Jun 7, 2011 at 5:34 PM, Arnd Hannemann <arnd@arndnet.de> wrote:
+> Sorry, I don't have the hardware anymore so I'm not able to check this.
 
-   I want to know is this a power manage bug or sdhost bug?
-does the sd card io request that happens between suspend and resume
-is possible? or the sdhci_request should check more sd host state
-before send command?
-
- In sdhci_request
-     if (!present || host->flags & SDHCI_DEVICE_DEAD) {
-               host->mrq->cmd->error = -ENOMEDIUM;
-               tasklet_schedule(&host->finish_tasklet);
-    } else
-              sdhci_send_command(host, mrq->cmd);
-In my case the __present__ is true and SDHCI device is not dead,
-because my sdcard has the quirk
- 'SDHCI_QUIRK_NO_CARD_NO_RESET' and the card
-is always in the slot.
-
-could you expert give me some advice? thanks a lot.
-below are the config of my sd card:
-
-CONFIG_MMC=y
-CONFIG_MMC_DEBUG=y
-CONFIG_MMC_UNSAFE_RESUME=y
-# CONFIG_MMC_EMBEDDED_SDIO is not set
-# CONFIG_MMC_PARANOID_SD_INIT is not set
-
-#
-# MMC/SD/SDIO Card Drivers
-#
-CONFIG_MMC_BLOCK=y
-CONFIG_MMC_BLOCK_BOUNCE=y
-CONFIG_MMC_BLOCK_DEFERRED_RESUME=y
-# CONFIG_SDIO_UART is not set
-# CONFIG_MMC_TEST is not set
-
-#
-# MMC/SD/SDIO Host Controller Drivers
-#
-CONFIG_MMC_SDHCI=y
+Ok, thanks for the reply !
