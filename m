@@ -1,74 +1,61 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: Re: [PATCH v2 1/3] dmaengine: add new dma API for max_segment_number
-Date: Tue, 7 Jun 2011 15:35:51 -0700
-Message-ID: <BANLkTi=-t9HVc6U6QY07su+c3WztsGoq3Q@mail.gmail.com>
-References: <1307345414-26872-1-git-send-email-shawn.guo@linaro.org>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH v2 1/3] mmc: support sdhci-mmp2
+Date: Tue, 7 Jun 2011 16:51:07 -0700
+Message-ID: <86F2B225-A55D-41D9-B805-41C639C1882C@marvell.com>
+References: <1306315367-15602-1-git-send-email-zhangfei.gao@marvell.com>
+ <201105271746.04775.arnd@arndb.de>
+ <BANLkTi=S=Q+AdKECCHg2u6X=VWEOtEox_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f42.google.com ([74.125.82.42]:44185 "EHLO
-	mail-ww0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756995Ab1FGWfx convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 18:35:53 -0400
-In-Reply-To: <1307345414-26872-1-git-send-email-shawn.guo@linaro.org>
+Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:38662 "EHLO
+	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751920Ab1FGXvZ convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Jun 2011 19:51:25 -0400
+In-Reply-To: <BANLkTi=S=Q+AdKECCHg2u6X=VWEOtEox_w@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-kernel@vger.kernel.org, patches@linaro.org, vinod.koul@intel.com, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Zhangfei Gao <zgao6@marvell.com>, Nicolas Pitre <nico@fluxnic.net>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Qiming Wu <wuqm@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-On Mon, Jun 6, 2011 at 12:30 AM, Shawn Guo <shawn.guo@linaro.org> wrote=
-:
-> Like dma_set(get)_max_seg_size for max_segment_size, the patch adds
-> max_segment_number into device_dma_parameters and creates the
-> corresponding dmaengine API dma_set(get)_max_seg_number for it.
->
-> Here is the user story that tells the need of the new api. =A0The
-> mxs-mmc is the mmc host controller for Freescale MXS architecture.
-> There are a pair of =A0mmc host specific parameters max_seg_size and
-> max_segs that mxs-mmc host driver needs to tell mmc core, so that
-> mmc core can know how big each data segment could be and how many
-> segments could be handled one time in a scatter list by host driver.
->
-> The mxs-mmc driver is one user of dmaengine mxs-dma, and it will call
-> mxs-dma to transfer data in scatter list. =A0That is to say mxs-mmc h=
-as
-> no idea of what max_seg_size and max_segs should be, because they are
-> all mxs-dma capability parameters, and mxs-mmc needs to query them
-> from mxs-dma.
->
-> Right now, there is well defined dma api (dma_get_max_seg_size) for
-> mmc to query max_seg_size from dma driver, but the one for max_segs
-> is missing. =A0That's why mxs-mmc driver has to hard-code it.
->
-> The mxs-mmc is just one example to demonstrate the need of the new
-> api, and there are other mmc host drivers (mxcmmc on imx-dma is
-> another example) and possibly even other dmaengine users need this
-> new api to know the maximum segments that dma driver can handle per
-> dma call.
->
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> ---
-> Changes since v1:
-> =A0* Update commit message to explain why the new api is needed
->
-> =A0include/linux/device.h =A0 =A0 =A0| =A0 =A01 +
-> =A0include/linux/dma-mapping.h | =A0 15 +++++++++++++++
-> =A02 files changed, 16 insertions(+), 0 deletions(-)
->
-> diff --git a/include/linux/device.h b/include/linux/device.h
-> index c66111a..44cb2528 100644
-> --- a/include/linux/device.h
-> +++ b/include/linux/device.h
-> @@ -487,6 +487,7 @@ struct device_dma_parameters {
-> =A0 =A0 =A0 =A0 * sg limitations.
-> =A0 =A0 =A0 =A0 */
 
-Given the discussion seems like this patch is missing an update to the
-documentation of the struct to clarify the definition of dma provider.
- I.e. that this info belongs to the device doing the dma, and that is
-is not necessarily the same as the device that is requesting dma
-service.
+On May 29, 2011, at 10:42 PM, zhangfei gao wrote:
 
-Other than that seems like a natural extension of the existing usage
-of device_dma_parameters in drivers/dma/.
+>> 
+>> There is a little room for simplification, I think:
+>> 
+>>> +static unsigned int mmp2_get_ro(struct sdhci_host *host)
+>>> +{
+>>> +     /* Micro SD does not support write-protect feature */
+>>> +     return 0;
+>>> +}
+>> 
+>> You shouldn't need to provide an empty get_ro function, the
+>> default is that there is no write-protect.
+> 
+> Thanks Arnd for review.
+> The reason to put get_ro here is some board use micro sd, while some
+> board design is general sd card.
+> The micro sd do not use write-protect, while SDHCI_WRITE_PROTECT will
+> return 1 in our controller, so it shows read only.
+> So add one call back for the board with micro sd card via flag.
+
+
+
+The code sets get_ro is for all the controllers.   Some board designs may connect the WP signal.
+
+The host->ops field should be filled in using information in the board
+file using a flag such as the example with  PXA_FLAG_CARD_PERMANENT.
+
+eg
+
+	if (pdata && pdata->flags & PXA_FLAG_NO_WP) {
+		***** etc ****
+	}
+
+
+
+
