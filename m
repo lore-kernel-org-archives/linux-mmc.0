@@ -1,56 +1,79 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH 2/2] sdio: report error if pending IRQ but none function bits
-Date: Tue, 7 Jun 2011 09:02:58 +0200
-Message-ID: <BANLkTimhzdAoXSCD0xfGwOMDE9+gbrt53A@mail.gmail.com>
-References: <1306874008-28867-1-git-send-email-per.forlin@linaro.org>
-	<1306874008-28867-3-git-send-email-per.forlin@linaro.org>
-	<alpine.LFD.2.00.1106011029390.30544@xanadu.home>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v3 2/4] mmc: support sdhci-pxav2.c
+Date: Tue, 7 Jun 2011 09:17:41 +0200
+Message-ID: <201106070917.41691.arnd@arndb.de>
+References: <1307094606-8692-1-git-send-email-zhangfei.gao@marvell.com> <1E53FF9F-5C6A-4AA2-B441-DD712C5D6715@marvell.com> <BANLkTik9an1N8914nC5MVL7+nHh+NhDNAA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:50828 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750910Ab1FGHC7 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 03:02:59 -0400
-Received: by qyk7 with SMTP id 7so1176609qyk.19
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2011 00:02:58 -0700 (PDT)
-In-Reply-To: <alpine.LFD.2.00.1106011029390.30544@xanadu.home>
+Received: from moutng.kundenserver.de ([212.227.17.8]:61886 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750885Ab1FGHRo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2011 03:17:44 -0400
+In-Reply-To: <BANLkTik9an1N8914nC5MVL7+nHh+NhDNAA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Pitre <nicolas.pitre@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-dev@lists.linaro.org, Daniel Drake <dsd@laptop.org>, Chris Ball <cjb@laptop.org>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zgao6@marvell.com>, Shawn Guo <shawn.guo@linaro.org>, Eric Miao <eric.y.miao@gmail.com>, Nicolas Pitre <nico@fluxnic.net>, Qiming Wu <wuqm@marvell.com>, Jun Nie <njun@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>, Haojian Zhuang <haojian.zhuang@gmail.com>, Raymond Wu <xywu@marvell.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-On 1 June 2011 16:30, Nicolas Pitre <nicolas.pitre@linaro.org> wrote:
-> On Tue, 31 May 2011, Per Forlin wrote:
->
->> Return error in case of pending IRQ but none functions bits
->> in CCCR_INTx is set.
->>
->> Signed-off-by: Per Forlin <per.forlin@linaro.org>
->> ---
->> =A0drivers/mmc/core/sdio_irq.c | =A0 =A05 +++++
->> =A01 files changed, 5 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq=
-=2Ec
->> index 2f81ddc..8184b6e 100644
->> --- a/drivers/mmc/core/sdio_irq.c
->> +++ b/drivers/mmc/core/sdio_irq.c
->> @@ -50,6 +50,11 @@ static int process_sdio_pending_irqs(struct mmc_c=
-ard *card)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 return ret;
->> =A0 =A0 =A0 }
->>
->> + =A0 =A0 if (!pending) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_WARNING "%s: pending IRQ but n=
-one function bits\n",
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_card_id(card));
->> + =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -EINVAL;
->> + =A0 =A0 }
->
-> Nope, this won't work with the polled interrupt mode.
-I'll drop this patch.
+On Tuesday 07 June 2011 08:08:27 zhangfei gao wrote:
+> >> +config MMC_SDHCI_PXAV2
+> >> +     tristate "Marvell PXAV2 SD Host Controller support"
+> >> +     select MMC_SDHCI
+> >> +     select MMC_SDHCI_PLTFM
+> >> +     help
+> >> +       This selects the Marvell(R) PXAV2 SD Host Controller.
+> >> +       If you have a PXAV2 platform (such as pxa910) with SD Host Controller
+> >> +       and a card slot, say Y or M here.
+> >> +
+> >> +       If unsure, say N.
+> >> +
+> >
+> > The following might be a better approach.  This way we preserve the existing SDHCI_PXA definition
+> > and allow users to see what CPU's are supported.
+> >
+> > config MMC_SDHCI_PXA
+> >>       tristate "Marvell MMP SD Host Controller support"
+> >>       depends on ARCH_MMP2
+> >>      select MMC_SDHCI_PXAV3
+> >
+> >
+> >> config MMC_SDHCI_PXA168
+> >>       tristate "Marvell PXA168 SD Host Controller support"
+> >>       depends on ARCH_PXA
+> >>      select MMC_SDHCI_PXAV2
+> >>
+> >> config MMC_SDHCI_PXA9XX
+> >>       tristate "Marvell PXA910 SD Host Controller support"
+> >>       depends on ARCH_PXA
+> >>      select MMC_SDHCI_PXAV3
+> >>
+> >> config MMC_SDHCI_MMP2
+> >>       tristate "Marvell MMP SD Host Controller support"
+> >>       depends on ARCH_MMP2
+> >>      select MMC_SDHCI_PXAV3
+> >
+> Still prefer the original method, it is simple and no dependence.
+> >
 
-Thanks for your comment,
-Per
+How about changing the title of the option though? A user will
+usually not know if he is using the v2 or v3 controller without
+reading the help text. If you change it to
+
+config MMC_SDHCI_PXAV2
+	tristate "Marvell PXA168 SD Host Controller support (PXAV2)"
+	default CPU_PXA168
+
+config MMC_SDHCI_PXAV3
+	tristate "Marvell MMP2/PX9XX SD Host Controller support (PXAV3)"
+	default CPU_MMP2 || CPU_PXA910
+
+you increase the chances of users getting the configuration right.
+
+	Arnd
+
+BTW, both of you: Please always remove the lines that you don't refer to
+when you reply to an email. It's very annoying having to scroll through
+dozens of lines of citations to see what you are actually writing.
