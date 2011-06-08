@@ -1,22 +1,58 @@
-From: aliciahamed20@live.com
-Subject: =?UTF-8?Q?HELLO MY DEAREST FRIEND?=
-Date: Wed, 08 Jun 2011 22:47:22 +0200
-Message-ID: <5406257891.75@euromail>
+From: Daniel Drake <dsd@laptop.org>
+Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
+Date: Wed, 8 Jun 2011 21:58:50 +0100
+Message-ID: <BANLkTinhRwr+qxujeFhy3C4LBkA5p2+ph_e1sy6vcuCiD_vKUA@mail.gmail.com>
+References: <20110605123852.BC6F39D401C@zog.reactivated.net>
+	<BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com>
+	<BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
+	<BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com>
+	<BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
+	<BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com>
+	<BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
+	<BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com>
+	<BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
+	<BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/plain; CHARSET=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from euromail.hu ([77.111.88.194]:36956 "EHLO
-	hkvirtual00.humankraft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754417Ab1FHUrd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2011 16:47:33 -0400
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:63657 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755274Ab1FHU6u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2011 16:58:50 -0400
+Received: by pwi15 with SMTP id 15so428932pwi.19
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Jun 2011 13:58:50 -0700 (PDT)
+In-Reply-To: <BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: aliciahamed20@live.com
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-mmc@vger.kernel.org
 
-hello
-My name is Alicia,I am a loving, romantic and caring angle. I got your contact while searching for a truly and caring person then I decide to drop a word of love to you. I really want to have a good relationship with you. so you can reach me through my e-mailid hear(aliciahamed20@live.com) I hope to hear from you soon and I will send my beautiful pictures to you and also tell you more about my self.I know age will not be a barrier to our relationship, what I need is just your love and caring.and I will give you my best, have a nice
-day Alicia,
+On 8 June 2011 21:05, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+> We have 3 power-on paths here: on boot, on insmod, and and resume.
+>
+> I understand the first one succeeds (naturally), and the last one
+> failed, but now I'm confused what was the outcome of the 2nd (without
+> sending a reset cmd) ?
 
+Not really sure what you're asking. Unless its the test below?
 
+>>> 3. what if you do a series of insmod+rmmod ? does this work ? (power
+>>> should be taken down and up every time)
+>>
+>> rmmod doesn't appear to take down the power.
+>
+> Let's nail this one first. if we get it right, the rest will immediately follow.
+>
+> Please reboot, and immediately after booting (without insmoding the
+> driver) tell me what's the output of :
+>
+> mount -t debugfs none /sys/kernel/debug
+> cat /sys/kernel/debug/mmc1/ios
+>
+> Then insmod the driver, and tell me again what's the output of
+> /sys/.../mmc1/ios.
 
+Which base kernel setup should I run these tests on?
 
+Thanks,
+Daniel
