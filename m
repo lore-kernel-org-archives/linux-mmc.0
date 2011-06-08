@@ -1,103 +1,316 @@
 From: Zhangfei Gao <zhangfei.gao@marvell.com>
-Subject: [PATCH v4 3/5] ARM: mmp2: update mmp2 mmc resource
-Date: Wed,  8 Jun 2011 17:41:59 +0800
-Message-ID: <1307526121-12059-4-git-send-email-zhangfei.gao@marvell.com>
+Subject: [PATCH v4 2/5] mmc: support sdhci-pxav2.c
+Date: Wed,  8 Jun 2011 17:41:58 +0800
+Message-ID: <1307526121-12059-3-git-send-email-zhangfei.gao@marvell.com>
 References: <1307526121-12059-1-git-send-email-zhangfei.gao@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from dakia2.marvell.com ([65.219.4.35]:32967 "EHLO
+Received: from dakia2.marvell.com ([65.219.4.35]:32943 "EHLO
 	dakia2.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752429Ab1FHJmO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2011 05:42:14 -0400
+	with ESMTP id S1752429Ab1FHJmM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2011 05:42:12 -0400
 In-Reply-To: <1307526121-12059-1-git-send-email-zhangfei.gao@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, linux-mmc@vg
-Cc: Zhangfei Gao <zhangfei.gao@marvell.com>
+Cc: Zhangfei Gao <zhangfei.gao@marvell.com>, Jun Nie <njun@marvell.com>, Qiming Wu <wuqm@marvell.com>
 
-	mmp2 mmc driver name update to sdhci-pxav3 according to sdhci-pxav3.c
+	SDHCI driver for PXAV2 SoCs, such as pxa910, the driver based on sdhci-pltfm to handle resource etc.
 
 Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+Signed-off-by: Jun Nie <njun@marvell.com>
+Signed-off-by: Qiming Wu <wuqm@marvell.com>
 ---
- arch/arm/mach-mmp/brownstone.c |   10 +++++++++-
- arch/arm/mach-mmp/jasper.c     |    2 +-
- arch/arm/mach-mmp/mmp2.c       |   16 ++++++++--------
- 3 files changed, 18 insertions(+), 10 deletions(-)
+ drivers/mmc/host/Kconfig       |   12 ++
+ drivers/mmc/host/Makefile      |    1 +
+ drivers/mmc/host/sdhci-pxav2.c |  244 ++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 257 insertions(+), 0 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-pxav2.c
 
-diff --git a/arch/arm/mach-mmp/brownstone.c b/arch/arm/mach-mmp/brownstone.c
-index 7bb78fd..c79162a 100644
---- a/arch/arm/mach-mmp/brownstone.c
-+++ b/arch/arm/mach-mmp/brownstone.c
-@@ -177,9 +177,16 @@ static struct i2c_board_info brownstone_twsi1_info[] = {
- };
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 6525a04..97b8322 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -205,6 +205,18 @@ config MMC_SDHCI_PXAV3
  
- static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc0 = {
--	.max_speed	= 25000000,
-+	.clk_delay_cycles = 0x1f,
- };
+ 	  If unsure, say N.
  
-+static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc2 = {
-+	.clk_delay_cycles = 0x1f,
-+	.flags = PXA_FLAG_CARD_PERMANENT
-+		| PXA_FLAG_SD_8_BIT_CAPABLE_SLOT,
++config MMC_SDHCI_PXAV2
++	tristate "Marvell PXA9XX SD Host Controller support (PXAV2)"
++	select MMC_SDHCI
++	select MMC_SDHCI_PLTFM
++	default CPU_PXA910
++	help
++	  This selects the Marvell(R) PXAV2 SD Host Controller.
++	  If you have a PXA9XX platform with SD Host Controller
++	  and a card slot, say Y or M here.
++
++	  If unsure, say N.
++
+ config MMC_SDHCI_SPEAR
+ 	tristate "SDHCI support on ST SPEAr platform"
+ 	depends on MMC_SDHCI && PLAT_SPEAR
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 688cc52..99f7d79 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -11,6 +11,7 @@ obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
+ obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
+ obj-$(CONFIG_MMC_SDHCI_PXA)	+= sdhci-pxa.o
+ obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
++obj-$(CONFIG_MMC_SDHCI_PXAV2)	+= sdhci-pxav2.o
+ obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
+ obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
+ obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+new file mode 100644
+index 0000000..7a6fa8c
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -0,0 +1,244 @@
++/*
++ * Copyright (C) 2010 Marvell International Ltd.
++ *		Zhangfei Gao <zhangfei.gao@marvell.com>
++ *		Kevin Wang <dwang4@marvell.com>
++ *		Jun Nie <njun@marvell.com>
++ *		Qiming Wu <wuqm@marvell.com>
++ *		Philip Rakity <prakity@marvell.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <linux/err.h>
++#include <linux/init.h>
++#include <linux/platform_device.h>
++#include <linux/clk.h>
++#include <linux/io.h>
++#include <linux/gpio.h>
++#include <linux/mmc/card.h>
++#include <linux/mmc/host.h>
++#include <plat/sdhci.h>
++#include <linux/slab.h>
++#include "sdhci.h"
++#include "sdhci-pltfm.h"
++
++#define SD_FIFO_PARAM		0xe0
++#define DIS_PAD_SD_CLK_GATE	0x0400 /* Turn on/off Dynamic SD Clock Gating */
++#define CLK_GATE_ON		0x0200 /* Disable/enable Clock Gate */
++#define CLK_GATE_CTL		0x0100 /* Clock Gate Control */
++#define CLK_GATE_SETTING_BITS	(DIS_PAD_SD_CLK_GATE | \
++		CLK_GATE_ON | CLK_GATE_CTL)
++
++#define SD_CLOCK_BURST_SIZE_SETUP	0xe6
++#define SDCLK_SEL_SHIFT		8
++#define SDCLK_SEL_MASK		0x3
++#define SDCLK_DELAY_SHIFT	10
++#define SDCLK_DELAY_MASK	0x3c
++
++#define SD_CE_ATA_2		0xea
++#define MMC_CARD		0x1000
++#define MMC_WIDTH		0x0100
++
++static void pxav2_set_private_registers(struct sdhci_host *host, u8 mask)
++{
++	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
++	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
++
++	if (mask == SDHCI_RESET_ALL) {
++		u16 tmp = 0;
++
++		/*
++		 * tune timing of read data/command when crc error happen
++		 * no performance impact
++		 */
++		if (pdata->clk_delay_sel == 1) {
++			tmp = readw(host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
++
++			tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
++			tmp |= (pdata->clk_delay_cycles & SDCLK_DELAY_MASK)
++				<< SDCLK_DELAY_SHIFT;
++			tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
++			tmp |= (1 & SDCLK_SEL_MASK) << SDCLK_SEL_SHIFT;
++
++			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
++		}
++
++		if (pdata->flags & PXA_FLAG_ENABLE_CLOCK_GATING) {
++			tmp = readw(host->ioaddr + SD_FIFO_PARAM);
++			tmp &= ~CLK_GATE_SETTING_BITS;
++			writew(tmp, host->ioaddr + SD_FIFO_PARAM);
++		} else {
++			tmp = readw(host->ioaddr + SD_FIFO_PARAM);
++			tmp &= ~CLK_GATE_SETTING_BITS;
++			tmp |= CLK_GATE_SETTING_BITS;
++			writew(tmp, host->ioaddr + SD_FIFO_PARAM);
++		}
++	}
++}
++
++static int pxav2_mmc_set_width(struct sdhci_host *host, int width)
++{
++	u8 ctrl;
++	u16 tmp;
++
++	ctrl = readb(host->ioaddr + SDHCI_HOST_CONTROL);
++	tmp = readw(host->ioaddr + SD_CE_ATA_2);
++	if (width == MMC_BUS_WIDTH_8) {
++		ctrl &= ~SDHCI_CTRL_4BITBUS;
++		tmp |= MMC_CARD | MMC_WIDTH;
++	} else {
++		tmp &= ~(MMC_CARD | MMC_WIDTH);
++		if (width == MMC_BUS_WIDTH_4)
++			ctrl |= SDHCI_CTRL_4BITBUS;
++		else
++			ctrl &= ~SDHCI_CTRL_4BITBUS;
++	}
++	writew(tmp, host->ioaddr + SD_CE_ATA_2);
++	writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
++
++	return 0;
++}
++
++static u32 pxav2_get_max_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++
++	return clk_get_rate(pltfm_host->clk);
++}
++
++static struct sdhci_ops pxav2_sdhci_ops = {
++	.get_max_clock = pxav2_get_max_clock,
++	.platform_reset_exit = pxav2_set_private_registers,
++	.platform_8bit_width = pxav2_mmc_set_width,
 +};
 +
++static int __devinit sdhci_pxav2_probe(struct platform_device *pdev)
++{
++	struct sdhci_pltfm_host *pltfm_host;
++	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
++	struct device *dev = &pdev->dev;
++	struct sdhci_host *host = NULL;
++	struct sdhci_pxa *pxa = NULL;
++	int ret;
++	struct clk *clk;
 +
- static void __init brownstone_init(void)
- {
- 	mfp_config(ARRAY_AND_SIZE(brownstone_pin_config));
-@@ -189,6 +196,7 @@ static void __init brownstone_init(void)
- 	mmp2_add_uart(3);
- 	mmp2_add_twsi(1, NULL, ARRAY_AND_SIZE(brownstone_twsi1_info));
- 	mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC */
-+	mmp2_add_sdhost(2, &mmp2_sdh_platdata_mmc2); /* eMMC */
- 
- 	/* enable 5v regulator */
- 	platform_device_register(&brownstone_v_5vp_device);
-diff --git a/arch/arm/mach-mmp/jasper.c b/arch/arm/mach-mmp/jasper.c
-index 24172a0..5d6421d 100644
---- a/arch/arm/mach-mmp/jasper.c
-+++ b/arch/arm/mach-mmp/jasper.c
-@@ -154,7 +154,7 @@ static struct i2c_board_info jasper_twsi1_info[] = {
- };
- 
- static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc0 = {
--	.max_speed	= 25000000,
-+	.clk_delay_cycles = 0x1f,
- };
- 
- static void __init jasper_init(void)
-diff --git a/arch/arm/mach-mmp/mmp2.c b/arch/arm/mach-mmp/mmp2.c
-index 8e6c3ac..079c188 100644
---- a/arch/arm/mach-mmp/mmp2.c
-+++ b/arch/arm/mach-mmp/mmp2.c
-@@ -168,10 +168,10 @@ static struct clk_lookup mmp2_clkregs[] = {
- 	INIT_CLKREG(&clk_twsi5, "pxa2xx-i2c.4", NULL),
- 	INIT_CLKREG(&clk_twsi6, "pxa2xx-i2c.5", NULL),
- 	INIT_CLKREG(&clk_nand, "pxa3xx-nand", NULL),
--	INIT_CLKREG(&clk_sdh0, "sdhci-pxa.0", "PXA-SDHCLK"),
--	INIT_CLKREG(&clk_sdh1, "sdhci-pxa.1", "PXA-SDHCLK"),
--	INIT_CLKREG(&clk_sdh2, "sdhci-pxa.2", "PXA-SDHCLK"),
--	INIT_CLKREG(&clk_sdh3, "sdhci-pxa.3", "PXA-SDHCLK"),
-+	INIT_CLKREG(&clk_sdh0, "sdhci-pxav3.0", "PXA-SDHCLK"),
-+	INIT_CLKREG(&clk_sdh1, "sdhci-pxav3.1", "PXA-SDHCLK"),
-+	INIT_CLKREG(&clk_sdh2, "sdhci-pxav3.2", "PXA-SDHCLK"),
-+	INIT_CLKREG(&clk_sdh3, "sdhci-pxav3.3", "PXA-SDHCLK"),
- };
- 
- static int __init mmp2_init(void)
-@@ -222,8 +222,8 @@ MMP2_DEVICE(twsi4, "pxa2xx-i2c", 3, TWSI4, 0xd4033000, 0x70);
- MMP2_DEVICE(twsi5, "pxa2xx-i2c", 4, TWSI5, 0xd4033800, 0x70);
- MMP2_DEVICE(twsi6, "pxa2xx-i2c", 5, TWSI6, 0xd4034000, 0x70);
- MMP2_DEVICE(nand, "pxa3xx-nand", -1, NAND, 0xd4283000, 0x100, 28, 29);
--MMP2_DEVICE(sdh0, "sdhci-pxa", 0, MMC, 0xd4280000, 0x120);
--MMP2_DEVICE(sdh1, "sdhci-pxa", 1, MMC2, 0xd4280800, 0x120);
--MMP2_DEVICE(sdh2, "sdhci-pxa", 2, MMC3, 0xd4281000, 0x120);
--MMP2_DEVICE(sdh3, "sdhci-pxa", 3, MMC4, 0xd4281800, 0x120);
-+MMP2_DEVICE(sdh0, "sdhci-pxav3", 0, MMC, 0xd4280000, 0x120);
-+MMP2_DEVICE(sdh1, "sdhci-pxav3", 1, MMC2, 0xd4280800, 0x120);
-+MMP2_DEVICE(sdh2, "sdhci-pxav3", 2, MMC3, 0xd4281000, 0x120);
-+MMP2_DEVICE(sdh3, "sdhci-pxav3", 3, MMC4, 0xd4281800, 0x120);
- 
++	pxa = kzalloc(sizeof(struct sdhci_pxa), GFP_KERNEL);
++	if (!pxa)
++		return -ENOMEM;
++
++	host = sdhci_pltfm_init(pdev, NULL);
++	if (IS_ERR(host)) {
++		kfree(pxa);
++		return PTR_ERR(host);
++	}
++	pltfm_host = sdhci_priv(host);
++	pltfm_host->priv = pxa;
++
++	clk = clk_get(dev, "PXA-SDHCLK");
++	if (IS_ERR(clk)) {
++		dev_err(dev, "failed to get io clock\n");
++		ret = PTR_ERR(clk);
++		goto err_clk_get;
++	}
++	pltfm_host->clk = clk;
++	clk_enable(clk);
++
++	host->quirks = SDHCI_QUIRK_BROKEN_ADMA
++		| SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
++		| SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
++
++	if (pdata) {
++		if (pdata->flags & PXA_FLAG_CARD_PERMANENT) {
++			/* on-chip device */
++			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++			host->mmc->caps |= MMC_CAP_NONREMOVABLE;
++		}
++
++		/* If slot design supports 8 bit data, indicate this to MMC. */
++		if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
++			host->mmc->caps |= MMC_CAP_8_BIT_DATA;
++
++		if (pdata->quirks)
++			host->quirks |= pdata->quirks;
++		if (pdata->host_caps)
++			host->mmc->caps |= pdata->host_caps;
++		if (pdata->pm_caps)
++			host->mmc->pm_caps |= pdata->pm_caps;
++	}
++
++	host->ops = &pxav2_sdhci_ops;
++
++	ret = sdhci_add_host(host);
++	if (ret) {
++		dev_err(&pdev->dev, "failed to add host\n");
++		goto err_add_host;
++	}
++
++	platform_set_drvdata(pdev, host);
++
++	return 0;
++
++err_add_host:
++	clk_disable(clk);
++	clk_put(clk);
++err_clk_get:
++	sdhci_pltfm_free(pdev);
++	kfree(pxa);
++	return ret;
++}
++
++static int __devexit sdhci_pxav2_remove(struct platform_device *pdev)
++{
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_pxa *pxa = pltfm_host->priv;
++
++	sdhci_remove_host(host, 1);
++
++	clk_disable(pltfm_host->clk);
++	clk_put(pltfm_host->clk);
++	sdhci_pltfm_free(pdev);
++	kfree(pxa);
++
++	platform_set_drvdata(pdev, NULL);
++
++	return 0;
++}
++
++static struct platform_driver sdhci_pxav2_driver = {
++	.driver		= {
++		.name	= "sdhci-pxav2",
++		.owner	= THIS_MODULE,
++	},
++	.probe		= sdhci_pxav2_probe,
++	.remove		= __devexit_p(sdhci_pxav2_remove),
++#ifdef CONFIG_PM
++	.suspend	= sdhci_pltfm_suspend,
++	.resume		= sdhci_pltfm_resume,
++#endif
++};
++static int __init sdhci_pxav2_init(void)
++{
++	return platform_driver_register(&sdhci_pxav2_driver);
++}
++
++static void __exit sdhci_pxav2_exit(void)
++{
++	platform_driver_unregister(&sdhci_pxav2_driver);
++}
++
++module_init(sdhci_pxav2_init);
++module_exit(sdhci_pxav2_exit);
++
++MODULE_DESCRIPTION("SDHCI driver for pxav2");
++MODULE_AUTHOR("Marvell International Ltd.");
++MODULE_LICENSE("GPL v2");
++
 -- 
 1.7.0.4
 
