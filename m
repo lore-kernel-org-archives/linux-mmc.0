@@ -1,71 +1,59 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
-Date: Wed, 8 Jun 2011 15:21:30 +0100
-Message-ID: <BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
-References: <20110605123852.BC6F39D401C@zog.reactivated.net>
-	<BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com>
-	<BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
-	<BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com>
-	<BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
-	<BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com>
-	<BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
-	<BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: MMC runtime PM patches break libertas probe
+Date: Wed, 8 Jun 2011 17:34:01 +0300
+Message-ID: <BANLkTimZ+Emm6GrTztEaGnjRu92Pam13mQ@mail.gmail.com>
+References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com>
+ <AANLkTinEes6Er6-WW_t8esjazrLWZ0Z7jvYJDSZL9PNG@mail.gmail.com>
+ <AANLkTinJ2K2cz9PSdyNoNGUS8GWfLpqRBH2C3XjO5vjO@mail.gmail.com>
+ <AANLkTi=VAU=9Q+Ga7yQyu3aL7gV0vbzymQ-2uJAg1jf8@mail.gmail.com>
+ <AANLkTi=QT6_zyddRz=3f6GDx-RVoiROOumhegm8pFuHU@mail.gmail.com>
+ <AANLkTimfp0pPqpO03-R4yBsADQ27RLQ_PxLTfBAMfPGk@mail.gmail.com>
+ <AANLkTi=gFmq47Xq+CxnU18aHyhcaF78WrWYDhga4Xf2X@mail.gmail.com>
+ <AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com>
+ <AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
+ <AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
+ <AANLkTi=8Xd1xTfFvAJkicR_89JOu4P2uwyoMHvXCBKv8@mail.gmail.com>
+ <AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com>
+ <BANLkTikpciJnTudOeSLM_O7AAD4GGkbbOw@mail.gmail.com> <BANLkTikQC+u5yyU+YBAZ5JpFDRFHrHNOoA@mail.gmail.com>
+ <BANLkTi=kqnnGf3ezS=cSXCcHpmK3JxwXtg@mail.gmail.com> <BANLkTi=o6Hgb=icinjmZqVx09dx+cp-enw@mail.gmail.com>
+ <BANLkTimuLrCd3oHeWOC73scuQ6ydvuwpvw@mail.gmail.com> <BANLkTimmSu33PTDn9ybOSbAfObPe4C-rZA@mail.gmail.com>
+ <477F20668A386D41ADCC57781B1F704307FD0BF3B1@SC-VEXCH1.marvell.com>
+ <BANLkTi=nz8c9P2qi9FWE+QU0XzSFddUAhA@mail.gmail.com> <477F20668A386D41ADCC57781B1F704307FD0BF3BE@SC-VEXCH1.marvell.com>
+ <BANLkTi=qR7bbsnzsCpV=b2C4Ha5Hdb94gQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-px0-f179.google.com ([209.85.212.179]:40457 "EHLO
-	mail-px0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754959Ab1FHOVb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2011 10:21:31 -0400
-Received: by pxi2 with SMTP id 2so403252pxi.10
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Jun 2011 07:21:30 -0700 (PDT)
-In-Reply-To: <BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:55737 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753628Ab1FHOeX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2011 10:34:23 -0400
+Received: by wya21 with SMTP id 21so402321wya.19
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Jun 2011 07:34:22 -0700 (PDT)
+In-Reply-To: <BANLkTi=qR7bbsnzsCpV=b2C4Ha5Hdb94gQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org
+To: Bing Zhao <bzhao@marvell.com>
+Cc: zhangfei gao <zhangfei.gao@gmail.com>, Daniel Drake <dsd@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Rapoport <mike@compulab.co.il>, Zhangfei Gao <zgao6@marvell.com>
 
-On 8 June 2011 15:02, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> On Wed, Jun 8, 2011 at 4:36 PM, Daniel Drake <dsd@laptop.org> wrote:
->> If I add the reset (shown commented-out in the patch), it matches the
->> behaviour of other known-good codepaths and also solves the problem.
+Hi Bing,
+
+On Sat, Jun 4, 2011 at 1:52 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+> On Sat, Jun 4, 2011 at 1:28 AM, Bing Zhao <bzhao@marvell.com> wrote:
+>> "CMD5 Arg=0" refers to the very first CMD5 sent from host during initialization sequence.
+>> This is required because our state machine always expects two CMD5 from host (5, 5, 3, 7, ...).
 >
-> Yeah, but we don't know why. And we may very well be covering a
-> different bug if we just take it as-is.
->
-> Don't get me wrong, I have no objection to have this if it's needed,
-> but we shouldn't do this just "because it works".
->
-> So I'll try to look at the logs you provided a bit more later, but the
-> main questions I have are:
->
-> 1. How come power off+on works for you in the first time, but doesn't
-> work in the second time ?
+> Great, thanks for confirming this !
 
-I assume it is because a different codepath was taken in order to
-power up the device the first time, before it then got powered down,
-compared to the codepath that failed to power it up the 2nd time. My
-efforts so far have been based around eliminating the differences in
-those codepaths, and this approach seems to be successful.
+I have another question please.
 
-> 2. Was the card really powered off in this 2nd-time failed scenario ?
+Does the sd8686 require an SDIO I/O reset (CMD52 setting bit 3 of
+address 0x6 of the CCCR) to it after powering it on ?
 
-How do you suggest I check that? I believe it was, since
-mmc_stop_host() got called, and colleagues with proper equipment
-measured the difference in power usage a while back.
+Daniel (cc'ed) is trying to power it off and back on, and it does seem
+to work in the first time, without sending a reset. In the second
+time, though, the card doesn't answer CMD5 anymore, unless Daniel is
+sending it an SDIO I/O reset. I was wondering whether this is an
+sd8686 requirement, or whether we have some other issue at hand.
 
-> 3. what if you do a series of insmod+rmmod ? does this work ? (power
-> should be taken down and up every time)
-
-rmmod doesn't appear to take down the power.
-
-> 4. Are you also interested in powering off the card when the wlan
-> interface is down (i.e. coupling the power of the card with the state
-> of the interface) too ? it should be easy to debug.
-
-Yes, and I have a patch ready that does that. But first it depends on
-getting the power on/off routines working reliably.
-
-Thanks for your help.
-
-Daniel
+Thanks,
+Ohad.
