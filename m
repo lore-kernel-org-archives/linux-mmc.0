@@ -1,32 +1,22 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH v2 1/3] dmaengine: add new dma API for
-	max_segment_number
-Date: Wed, 8 Jun 2011 21:41:27 +0100
-Message-ID: <20110608204127.GC13151@n2100.arm.linux.org.uk>
-References: <BANLkTin7mqqTsosPHbztaPfL7s_TUGT1qg@mail.gmail.com> <20110608142121T.fujita.tomonori@lab.ntt.co.jp> <BANLkTi=FcNncT_6HpvB_6OnQ94f0_sz7Gw@mail.gmail.com> <20110608160844E.fujita.tomonori@lab.ntt.co.jp> <BANLkTikFKr+3Qph+CR40SUV-DCir1v=KBg@mail.gmail.com>
+From: aliciahamed20@live.com
+Subject: =?UTF-8?Q?HELLO MY DEAREST FRIEND?=
+Date: Wed, 08 Jun 2011 22:47:22 +0200
+Message-ID: <5406257891.75@euromail>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/plain; CHARSET=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:36006 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751228Ab1FHUl7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2011 16:41:59 -0400
-Content-Disposition: inline
-In-Reply-To: <BANLkTikFKr+3Qph+CR40SUV-DCir1v=KBg@mail.gmail.com>
+Received: from euromail.hu ([77.111.88.194]:36956 "EHLO
+	hkvirtual00.humankraft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754417Ab1FHUrd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2011 16:47:33 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Williams <dan.j.williams@intel.com>
-Cc: FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>, cjb@laptop.org, patches@linaro.org, vinod.koul@intel.com, gregkh@suse.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.guo@linaro.org, linux-arm-kernel@lists.infradead.org
+To: aliciahamed20@live.com
 
-On Wed, Jun 08, 2011 at 01:05:57PM -0700, Dan Williams wrote:
-> Even if that were the case it would be same situation that the scsi device
-> driver reports maximum parameters, but the subsystem opts for
-> something tighter.  Whether the maximal parameters come from the scsi
-> device or the dma channel is moot.
+hello
+My name is Alicia,I am a loving, romantic and caring angle. I got your contact while searching for a truly and caring person then I decide to drop a word of love to you. I really want to have a good relationship with you. so you can reach me through my e-mailid hear(aliciahamed20@live.com) I hope to hear from you soon and I will send my beautiful pictures to you and also tell you more about my self.I know age will not be a barrier to our relationship, what I need is just your love and caring.and I will give you my best, have a nice
+day Alicia,
 
-Except for the small issue that many DMA-engine using devices do not
-have _any_ DMA capabilities of their own, which means they don't have
-anything to put in their own struct device's DMA parameters.  We can't
-go around making up random insane parameters in the hope that they'll
-exceed whatever DMA-engine is being used with the device - that's a
-hack not a solution.
+
+
+
