@@ -1,36 +1,60 @@
-From: FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>
-Subject: Re: [PATCH v2 1/3] dmaengine: add new dma API for
- max_segment_number
-Date: Wed, 8 Jun 2011 14:23:27 +0900
-Message-ID: <20110608142121T.fujita.tomonori@lab.ntt.co.jp>
-References: <20110606094751.GC10508@n2100.arm.linux.org.uk>
-	<20110606191041U.fujita.tomonori@lab.ntt.co.jp>
-	<BANLkTin7mqqTsosPHbztaPfL7s_TUGT1qg@mail.gmail.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v2 1/3] mmc: support sdhci-mmp2
+Date: Wed, 8 Jun 2011 14:08:33 +0800
+Message-ID: <BANLkTi=DOHLt1uv-Oz=qnQCE-qmNAVahcg@mail.gmail.com>
+References: <1306315367-15602-1-git-send-email-zhangfei.gao@marvell.com>
+	<201105271746.04775.arnd@arndb.de>
+	<BANLkTi=S=Q+AdKECCHg2u6X=VWEOtEox_w@mail.gmail.com>
+	<86F2B225-A55D-41D9-B805-41C639C1882C@marvell.com>
+	<BANLkTinTKV3DwVdi8p-BYCZ4ON_ce4T74g@mail.gmail.com>
+	<6B2AC372-8A17-41B9-AA5F-BBE5189D17C4@marvell.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sh.osrg.net ([192.16.179.4]:48675 "EHLO sh.osrg.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751435Ab1FHFYU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Jun 2011 01:24:20 -0400
-In-Reply-To: <BANLkTin7mqqTsosPHbztaPfL7s_TUGT1qg@mail.gmail.com>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:34030 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751223Ab1FHGIe convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2011 02:08:34 -0400
+Received: by vxi39 with SMTP id 39so122383vxi.19
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2011 23:08:33 -0700 (PDT)
+In-Reply-To: <6B2AC372-8A17-41B9-AA5F-BBE5189D17C4@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dan.j.williams@intel.com
-Cc: fujita.tomonori@lab.ntt.co.jp, linux@arm.linux.org.uk, cjb@laptop.org, patches@linaro.org, vinod.koul@intel.com, gregkh@suse.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.guo@linaro.org, linux-arm-kernel@lists.infradead.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Zhangfei Gao <zgao6@marvell.com>, Nicolas Pitre <nico@fluxnic.net>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Qiming Wu <wuqm@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-On Mon, 6 Jun 2011 11:48:56 -0700
-Dan Williams <dan.j.williams@intel.com> wrote:
+>>
+>> This method is used in v1,
+>> The method makes sdhci_ops non-const and have to dynamically alloc
+>> sdhci_ops, since host->ops is pointer.
+>> Will keep use const sdhci_ops, recommended by Arnd.
+>
+>
+> Not acceptable.
+>
+>
+> There are =A03 cases for =A0WP signal
+>
+> a) They are connected to the controller using GPIO
+> b( They are NOT connected and the corresponding =A0pin is not used
+> c) They are NOT connected and the corresponding =A0pin is used by som=
+ething else.
+>
+> case a)
+> =A0 =A0 =A0 =A0program GPIO as is done today in brownstone and aspen
+>
+> case b)
+> =A0 =A0 =A0 =A0configure the MFP pin to be pull high/low to indicate =
+NO WP. =A0The pin cannot be left floating
 
-> dmaengine expands the class of dma providers to include standalone dma
-> agents on a host bus (or elsewhere) in addition to the traditional bus
-> mastering host-bus-adapters that the existing api understands.  So in
-> the case of slave dma the dma capabilities of the block-device are
-> irrelevant because another agent will do the transfer on behalf of the
-> block-device driver.  So the value should be whatever the dma device
-> driver says it is.
-
-The dma parameter restriction could be due to software (HBA drivers,
-or subsystem). The value should be whatever the dma device driver says
-it is in such case?
+Thanks, configure WP pin to LOW should be work for micro sd card.
+>
+> case c)
+> =A0 =A0 =A0 =A0you need a quirk and the call back.
+>
+>
+>
+>
+>
+>
