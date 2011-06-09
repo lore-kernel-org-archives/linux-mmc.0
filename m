@@ -1,73 +1,53 @@
-From: FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>
-Subject: Re: [PATCH v2 1/3] dmaengine: add new dma API for
- max_segment_number
-Date: Thu, 9 Jun 2011 09:07:02 +0900
-Message-ID: <20110609090403I.fujita.tomonori@lab.ntt.co.jp>
-References: <BANLkTi=FcNncT_6HpvB_6OnQ94f0_sz7Gw@mail.gmail.com>
-	<20110608160844E.fujita.tomonori@lab.ntt.co.jp>
-	<BANLkTikFKr+3Qph+CR40SUV-DCir1v=KBg@mail.gmail.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
+Date: Thu, 9 Jun 2011 06:23:59 +0300
+Message-ID: <BANLkTimhPWxQ57L0JD_r8wXp6o8FdpqJ8w@mail.gmail.com>
+References: <20110605123852.BC6F39D401C@zog.reactivated.net>
+ <BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com> <BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
+ <BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com> <BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
+ <BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com> <BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
+ <BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com> <BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
+ <BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com> <BANLkTinhRwr+qxujeFhy3C4LBkA5p2+ph_e1sy6vcuCiD_vKUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sh.osrg.net ([192.16.179.4]:58932 "EHLO sh.osrg.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751092Ab1FIAHm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Jun 2011 20:07:42 -0400
-In-Reply-To: <BANLkTikFKr+3Qph+CR40SUV-DCir1v=KBg@mail.gmail.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:50119 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755140Ab1FIDYU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2011 23:24:20 -0400
+Received: by wwa36 with SMTP id 36so1223468wwa.1
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Jun 2011 20:24:19 -0700 (PDT)
+In-Reply-To: <BANLkTinhRwr+qxujeFhy3C4LBkA5p2+ph_e1sy6vcuCiD_vKUA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dan.j.williams@intel.com
-Cc: fujita.tomonori@lab.ntt.co.jp, cjb@laptop.org, linux@arm.linux.org.uk, patches@linaro.org, vinod.koul@intel.com, gregkh@suse.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shawn.guo@linaro.org, linux-arm-kernel@lists.infradead.org
+To: Daniel Drake <dsd@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-On Wed, 8 Jun 2011 13:05:57 -0700
-Dan Williams <dan.j.williams@intel.com> wrote:
+On Wed, Jun 8, 2011 at 11:58 PM, Daniel Drake <dsd@laptop.org> wrote:
+>> Please reboot, and immediately after booting (without insmoding the
+>> driver) tell me what's the output of :
+>>
+>> mount -t debugfs none /sys/kernel/debug
+>> cat /sys/kernel/debug/mmc1/ios
+>
+> Which base kernel setup should I run these tests on?
 
-> Perhaps, but this sounds like the reverse of what happens today where
-> scsi device drivers with knowledge of their own hardware will tell the
-> midlayer/subsystem the restriction.  The change with regard to this
-> patch is that the scsi device driver (for example) will recognize that
-> the device it is driving will not be a bus master and will arrange to
-> allocate a dma channel from dmaengine.  When said scsi driver reports
-> the dma restrictions to the subsystem it will borrow the parameters
-> from the dma channel, not the scsi device.  So yes, I still think it
-> should be whatever the dma channel says.
-> 
-> Although, you've been doing scsi work longer than I, so maybe I'm
-> overlooking something...?
-> 
-> Are there any cases today where the subsystem imposes tighter
-> restrictions on the dma geometry than what the device reports?  Even
+Vanilla, with your temporary patch below.
 
-Yeah, there are already lots.
+Without this patch, mmc1 (I assume this what drives sd8686 in your
+setup) should be powered on. With it, it should be powered off.
 
-SCSI-mid layer set the max sg entries to 128 on many architectures
-(see SCSI_MAX_SG_CHAIN_SEGMENTS).
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 58d5436..ce3e2e2 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2488,7 +2488,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	} else
+ 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
 
-SCSI HBA drivers stores the max sg entries in scsi_host structure.
+-	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
++	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23 |
+MMC_CAP_POWER_OFF_CARD;
 
-SCSI-mid layer sets the tighter one (see __scsi_alloc_queue).
-
-	blk_queue_max_segments(q, min_t(unsigned short, shost->sg_tablesize,
-					SCSI_MAX_SG_CHAIN_SEGMENTS));
-
-As you know, modern SCSI HBA can handle more sg entries than 128.
-
-
-> if that were the case it would be same situation that the scsi device
-> driver reports maximum parameters, but the subsystem opts for
-> something tighter.  Whether the maximal parameters come from the scsi
-> device or the dma channel is moot.
-
-If only you convert all the SCSI HBA drivers to store the limit of sg
-entries in struct device_dma_parameters and use the proposed API.
-
-I can't find any description in this patchset about how we will
-convert software that already set the limit of max sg entries in a
-different way.
-
-I don't think that this patchset needs to convert the SCSI (and other
-software layers setting the limit of max sg entries). But I think that
-we need a new rule, the data structure, and the API about how and
-where everyone sets the dma restrictions and tells them to the upper
-software layers.
+ 	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
+ 		host->flags |= SDHCI_AUTO_CMD12;
