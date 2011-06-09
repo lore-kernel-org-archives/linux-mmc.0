@@ -1,102 +1,68 @@
-From: Richard Zhu <richard.zhu@linaro.org>
-Subject: [PATCH V2] mmc: Enable the ADMA on esdhc imx driver
-Date: Thu, 9 Jun 2011 13:37:59 +0800
-Message-ID: <1307597879-6326-1-git-send-email-richard.zhu@linaro.org>
+From: Daniel Drake <dsd@laptop.org>
+Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
+Date: Thu, 9 Jun 2011 16:51:33 +0100
+Message-ID: <BANLkTim2NfCcfRRmcVXepLA0evusZoTJGA@mail.gmail.com>
+References: <20110605123852.BC6F39D401C@zog.reactivated.net>
+	<BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com>
+	<BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
+	<BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com>
+	<BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
+	<BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com>
+	<BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
+	<BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com>
+	<BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
+	<BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe005.messaging.microsoft.com ([213.199.154.143]:1335
-	"EHLO DB3EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750953Ab1FIFjE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2011 01:39:04 -0400
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:47531 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753938Ab1FIPvd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2011 11:51:33 -0400
+Received: by pwi15 with SMTP id 15so802314pwi.19
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Jun 2011 08:51:33 -0700 (PDT)
+In-Reply-To: <BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: kernel@pengutronix.de, linux-mmc@vger.kernel.org, cjb@laptop.org, avorontsov@ru.mvista.com, w.sang@pengutronix.de, eric.miao@linaro.org, Richard Zhu <richard.zhu@linaro.org>
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-mmc@vger.kernel.org
 
-Eanble the ADMA2 mode on freescale esdhc imx driver,
-tested on MX51 and MX53.
+On 8 June 2011 21:05, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+> Please reboot, and immediately after booting (without insmoding the
+> driver) tell me what's the output of :
+>
+> mount -t debugfs none /sys/kernel/debug
+> cat /sys/kernel/debug/mmc1/ios
+>
+> Then insmod the driver, and tell me again what's the output of
+> /sys/.../mmc1/ios.
 
-Only ADMA2 mode is enabled, MX25/35 can't support the ADMA2 mode.
-So this patch is only used for MX51/53.
-The ADMA2 mode supported or not can be distinguished by the
-Capability Register(offset 0x40) of eSDHC module.
-Up to now, only MX51/MX53 set the ADMA2 supported bit(Bit20) in the
-Capability Register.
+bash-4.1# mount -t debugfs none /sys/kernel/debug
+bash-4.1# cat /sys/kernel/debug/mmc1/ios
+clock:		0 Hz
+vdd:		0 (invalid)
+bus mode:	1 (open drain)
+chip select:	0 (don't care)
+power mode:	0 (off)
+bus width:	0 (1 bits)
+timing spec:	0 (legacy)
+bash-4.1# insmod /media/4E11-1D7C/libertas_sdio.ko
+[   67.917748] libertas_sdio: Libertas SDIO driver
+[   67.922976] libertas_sdio: Copyright Pierre Ossman
+[   67.972073] libertas_sdio: probe of mmc1:0001:1 failed with error -16
+bash-4.1# cat /sys/kernel/debug/mmc1/ios
+clock:		400000 Hz
+vdd:		21 (3.3 ~ 3.4 V)
+bus mode:	1 (open drain)
+chip select:	0 (don't care)
+power mode:	2 (on)
+bus width:	0 (1 bits)
+timing spec:	0 (legacy)
 
-Signed-off-by: Richard Zhu <richard.zhu@linaro.org>
----
- drivers/mmc/host/sdhci-esdhc-imx.c |   34 ++++++++++++++++++++++++++++++++--
- 1 files changed, 32 insertions(+), 2 deletions(-)
+> Please send a contiguous terminal session of these steps (incl. the
+> boot messages), thanks !
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index a19967d..0696e36 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -31,6 +31,14 @@
- #define SDHCI_VENDOR_SPEC		0xC0
- #define  SDHCI_VENDOR_SPEC_SDIO_QUIRK	0x00000002
- 
-+/*
-+ * There is INT DMA ERR mis-match between eSDHC and STD SDHC SPEC
-+ * Bit25 is used in STD SPEC, and is reserved in fsl eSDHC design,
-+ * but bit28 is used as the INT DMA ERR in fsl eSDHC design.
-+ * Define this macro DMA error INT for fsl eSDHC
-+ */
-+#define  SDHCI_INT_VENDOR_SPEC_DMA_ERR	0x10000000
-+
- #define ESDHC_FLAG_GPIO_FOR_CD_WP	(1 << 0)
- /*
-  * The CMDTYPE of the CMD register (offset 0xE) should be set to
-@@ -80,6 +88,20 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
- 			val |= SDHCI_CARD_PRESENT;
- 	}
- 
-+	if (unlikely(reg == SDHCI_CAPABILITIES)) {
-+		if (val & SDHCI_CAN_DO_ADMA1) {
-+			val &= ~SDHCI_CAN_DO_ADMA1;
-+			val |= SDHCI_CAN_DO_ADMA2;
-+		}
-+	}
-+
-+	if (unlikely(reg == SDHCI_INT_STATUS)) {
-+		if (val & SDHCI_INT_VENDOR_SPEC_DMA_ERR) {
-+			val &= ~SDHCI_INT_VENDOR_SPEC_DMA_ERR;
-+			val |= SDHCI_INT_ADMA_ERROR;
-+		}
-+	}
-+
- 	return val;
- }
- 
-@@ -105,6 +127,13 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- 			writel(v, host->ioaddr + SDHCI_VENDOR_SPEC);
- 	}
- 
-+	if (unlikely((reg == SDHCI_INT_ENABLE)
-+				|| (reg == SDHCI_SIGNAL_ENABLE))) {
-+		if (val & SDHCI_INT_ADMA_ERROR) {
-+			val &= ~SDHCI_INT_ADMA_ERROR;
-+			val |= SDHCI_INT_VENDOR_SPEC_DMA_ERR;
-+		}
-+	}
- 	writel(val, host->ioaddr + reg);
- }
- 
-@@ -322,9 +351,10 @@ static void esdhc_pltfm_exit(struct sdhci_host *host)
- }
- 
- struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
--	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_BROKEN_ADMA
-+	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_NO_HISPD_BIT
-+			| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
-+			| SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC
- 			| SDHCI_QUIRK_BROKEN_CARD_DETECTION,
--	/* ADMA has issues. Might be fixable */
- 	.ops = &sdhci_esdhc_ops,
- 	.init = esdhc_pltfm_init,
- 	.exit = esdhc_pltfm_exit,
--- 
-1.7.1
+Full log: http://dev.laptop.org/~dsd/20110609/sd-pwr-debug1.txt
 
-
+Thanks
+Daniel
