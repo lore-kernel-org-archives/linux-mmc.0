@@ -1,53 +1,51 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
-Date: Thu, 9 Jun 2011 06:23:59 +0300
-Message-ID: <BANLkTimhPWxQ57L0JD_r8wXp6o8FdpqJ8w@mail.gmail.com>
-References: <20110605123852.BC6F39D401C@zog.reactivated.net>
- <BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com> <BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
- <BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com> <BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
- <BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com> <BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
- <BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com> <BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
- <BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com> <BANLkTinhRwr+qxujeFhy3C4LBkA5p2+ph_e1sy6vcuCiD_vKUA@mail.gmail.com>
+From: Sachin Nikam <Snikam@nvidia.com>
+Subject: RE: [PATCH v4 5/5] ARM: mmp2: update mmp2_defconfig to support mmc
+Date: Thu, 9 Jun 2011 10:06:35 +0530
+Message-ID: <723849F6A4B5A3408299DF1FFE37CA776C09CFC260@BGMAIL02.nvidia.com>
+References: <1307526121-12059-1-git-send-email-zhangfei.gao@marvell.com>
+ <1307526121-12059-6-git-send-email-zhangfei.gao@marvell.com>
+ <723849F6A4B5A3408299DF1FFE37CA776C09CFC25F@BGMAIL02.nvidia.com>
+ <201106081700.48447.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:50119 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755140Ab1FIDYU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2011 23:24:20 -0400
-Received: by wwa36 with SMTP id 36so1223468wwa.1
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Jun 2011 20:24:19 -0700 (PDT)
-In-Reply-To: <BANLkTinhRwr+qxujeFhy3C4LBkA5p2+ph_e1sy6vcuCiD_vKUA@mail.gmail.com>
+Received: from hqemgate03.nvidia.com ([216.228.121.140]:14140 "EHLO
+	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750960Ab1FIEgs convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2011 00:36:48 -0400
+In-Reply-To: <201106081700.48447.arnd@arndb.de>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: 'Arnd Bergmann' <arnd@arndb.de>
+Cc: 'Zhangfei Gao' <zhangfei.gao@marvell.com>, Nicolas Pitre <nico@fluxnic.net>, Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Qiming Wu <wuqm@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-On Wed, Jun 8, 2011 at 11:58 PM, Daniel Drake <dsd@laptop.org> wrote:
->> Please reboot, and immediately after booting (without insmoding the
->> driver) tell me what's the output of :
->>
->> mount -t debugfs none /sys/kernel/debug
->> cat /sys/kernel/debug/mmc1/ios
->
-> Which base kernel setup should I run these tests on?
+Thanks for the reply Arnd.
+Sure I will start posting the patches.
+Regards,
+Sachin Nikam.
 
-Vanilla, with your temporary patch below.
+-----Original Message-----
+From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Arnd Bergmann
+Sent: Wednesday, June 08, 2011 8:31 PM
+To: Sachin Nikam
+Cc: 'Zhangfei Gao'; Nicolas Pitre; Philip Rakity; Wolfram Sang; Chris Ball; linux-mmc@vger.kernel.org; Jun Nie; Raymond Wu; Haojian Zhuang; Qiming Wu; Eric Miao; linux-arm-kernel
+Subject: Re: [PATCH v4 5/5] ARM: mmp2: update mmp2_defconfig to support mmc
 
-Without this patch, mmc1 (I assume this what drives sd8686 in your
-setup) should be powered on. With it, it should be powered off.
+On Wednesday 08 June 2011, Sachin Nikam wrote:
+> 
+> Does anybody knows which kernel version will have the SD 4.0 (UHS-II) support?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 58d5436..ce3e2e2 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2488,7 +2488,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	} else
- 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
+The SD 4.0 standard is not yet available, so it cannot be implemented.
+I would assume that support will be in the kernel version following the
+release of the spec, or one release later if the timing is bad.
 
--	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
-+	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23 |
-MMC_CAP_POWER_OFF_CARD;
+If you already have access to the spec, feel free to post patches so
+we can include it earlier.
 
- 	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
- 		host->flags |= SDHCI_AUTO_CMD12;
+	Arnd
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
