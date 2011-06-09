@@ -1,53 +1,51 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
-Date: Fri, 10 Jun 2011 02:27:24 +0300
-Message-ID: <BANLkTi=6Fa66QYay_R6vkmREPcb1Bw_FRw@mail.gmail.com>
-References: <20110605123852.BC6F39D401C@zog.reactivated.net>
- <BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com> <BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
- <BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com> <BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
- <BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com> <BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
- <BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com> <BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
- <BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com> <BANLkTim2NfCcfRRmcVXepLA0evusZoTJGA@mail.gmail.com>
- <BANLkTimg08VnOMrUwnH6dKzXPJO1fpOh6w@mail.gmail.com> <BANLkTinfeGUADyi1dTSjPRMnbP+TCtN0dQ@mail.gmail.com>
- <BANLkTimbxSA_86a=2QH1pEGg1-O9neEyhw@mail.gmail.com> <BANLkTimQUkf9ZsanZ-czqtYnyRSSSch4nQ@mail.gmail.com>
- <BANLkTi=jsPYEQOnRDyoXD_EzKdqby-QhYw@mail.gmail.com> <BANLkTi=VWUcCQJaBChnitVq1_TT1huE30A@mail.gmail.com>
- <BANLkTinG-CmEh9yXL9Sp+W7PyatvEdOhZQ@mail.gmail.com> <BANLkTi=zuMosw68EMSYjrVi+0dBQkNicJw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:38717 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752715Ab1FIX1p (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2011 19:27:45 -0400
-Received: by wwa36 with SMTP id 36so2199325wwa.1
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Jun 2011 16:27:44 -0700 (PDT)
-In-Reply-To: <BANLkTi=zuMosw68EMSYjrVi+0dBQkNicJw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] mmc: sdio: fix runtime PM path during driver removal
+Date: Fri, 10 Jun 2011 02:40:27 +0300
+Message-ID: <1307662827-16618-1-git-send-email-ohad@wizery.com>
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: linux-mmc@vger.kernel.org
 
-On Thu, Jun 9, 2011 at 10:55 PM, Daniel Drake <dsd@laptop.org> wrote:
-> On 9 June 2011 19:25, Ohad Ben-Cohen <ohad@wizery.com> wrote:
->> let's update that patch. I'd send you an updated one, but I have to go
->> for awhile, so here's the quick change you need to do.
->
-> Unfortunately it doesn't help.
+After commit e1866b3 "PM / Runtime: Rework runtime PM handling
+during driver removal" was introduced, the driver core stopped
+incrementing the runtime PM usage counter of the device during
+the invocation of the ->remove() callback.
 
-That's ok. Let's go back to small steps now.
+This indirectly broke SDIO's runtime PM path during driver removal,
+because no one calls _put_sync() anymore after ->remove() completes.
 
-We have cyclic rmmod/insmod working, and that's good: it means there's
-no hw issue.
+This means that the power of runtime-PM-managed SDIO cards is kept
+high after their driver is removed (even if it was powered down
+beforehand).
 
-The next step to have working now is really the ifconfig up/down/up
-scenario. That should come before suspend/resume. And this
-step-by-step approach is even more relevant to libertas_sdio, because
-I suspect there's some if_sdio.c refactoring needed to get it right,
-but let's see.
+Fix that by directly calling _put_sync() when the last usage
+counter is downref'ed by the SDIO bus.
 
-The expected result you want to get is:
+Reported-and-tested-by: Daniel Drake <dsd-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+---
+ drivers/mmc/core/sdio_bus.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-- boot, power is off
-- insmod, power is still off
-- ifconfig up, power is on
-- ifconfig down or rmmod, power is back off
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index d29b9c3..d2565df 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -189,7 +189,7 @@ static int sdio_bus_remove(struct device *dev)
+ 
+ 	/* Then undo the runtime PM settings in sdio_bus_probe() */
+ 	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
+-		pm_runtime_put_noidle(dev);
++		pm_runtime_put_sync(dev);
+ 
+ out:
+ 	return ret;
+-- 
+1.7.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
