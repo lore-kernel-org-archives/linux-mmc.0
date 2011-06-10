@@ -1,60 +1,51 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: MMC runtime PM patches break libertas probe
-Date: Fri, 10 Jun 2011 07:28:41 +0300
-Message-ID: <BANLkTinDe6fOavZZ+1c1OKS7XMf_J5YhaA@mail.gmail.com>
-References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com>
- <AANLkTinEes6Er6-WW_t8esjazrLWZ0Z7jvYJDSZL9PNG@mail.gmail.com>
- <AANLkTinJ2K2cz9PSdyNoNGUS8GWfLpqRBH2C3XjO5vjO@mail.gmail.com>
- <AANLkTi=VAU=9Q+Ga7yQyu3aL7gV0vbzymQ-2uJAg1jf8@mail.gmail.com>
- <AANLkTi=QT6_zyddRz=3f6GDx-RVoiROOumhegm8pFuHU@mail.gmail.com>
- <AANLkTimfp0pPqpO03-R4yBsADQ27RLQ_PxLTfBAMfPGk@mail.gmail.com>
- <AANLkTi=gFmq47Xq+CxnU18aHyhcaF78WrWYDhga4Xf2X@mail.gmail.com>
- <AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com>
- <AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
- <AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
- <AANLkTi=8Xd1xTfFvAJkicR_89JOu4P2uwyoMHvXCBKv8@mail.gmail.com>
- <AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com>
- <BANLkTikpciJnTudOeSLM_O7AAD4GGkbbOw@mail.gmail.com> <BANLkTikQC+u5yyU+YBAZ5JpFDRFHrHNOoA@mail.gmail.com>
- <BANLkTi=kqnnGf3ezS=cSXCcHpmK3JxwXtg@mail.gmail.com> <BANLkTi=o6Hgb=icinjmZqVx09dx+cp-enw@mail.gmail.com>
- <BANLkTimuLrCd3oHeWOC73scuQ6ydvuwpvw@mail.gmail.com> <BANLkTimmSu33PTDn9ybOSbAfObPe4C-rZA@mail.gmail.com>
- <477F20668A386D41ADCC57781B1F704307FD0BF3B1@SC-VEXCH1.marvell.com>
- <BANLkTi=nz8c9P2qi9FWE+QU0XzSFddUAhA@mail.gmail.com> <477F20668A386D41ADCC57781B1F704307FD0BF3BE@SC-VEXCH1.marvell.com>
- <BANLkTi=qR7bbsnzsCpV=b2C4Ha5Hdb94gQ@mail.gmail.com> <BANLkTimZ+Emm6GrTztEaGnjRu92Pam13mQ@mail.gmail.com>
- <BANLkTi=KjP9sUD0+QjDrJro0JXW4A+zOKg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: [PATCH 0/4] Extend sdhci-esdhc-imx card_detect and write_protect support for mx5
+Date: Fri, 10 Jun 2011 18:42:48 +0800
+Message-ID: <1307702572-22066-1-git-send-email-shawn.guo@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:64126 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751371Ab1FJE3C (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jun 2011 00:29:02 -0400
-Received: by wya21 with SMTP id 21so1585012wya.19
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Jun 2011 21:29:01 -0700 (PDT)
-In-Reply-To: <BANLkTi=KjP9sUD0+QjDrJro0JXW4A+zOKg@mail.gmail.com>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:41956 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753498Ab1FJKdz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jun 2011 06:33:55 -0400
+Received: by pwi15 with SMTP id 15so1166470pwi.19
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Jun 2011 03:33:55 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Bing Zhao <bzhao@marvell.com>, Daniel Drake <dsd@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Rapoport <mike@compulab.co.il>, Zhangfei Gao <zgao6@marvell.com>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Eric Benard <eric@eukrea.com>, Arnaud Patard <arnaud.patard@rtp-net.org>, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-Hi Zhangfei,
+The card-present polling within sdhci based driver is very expensive
+in terms of the impact to system performance.  We observe a few
+system performance issues from Freescale and Linaro on mx5 platforms,
+which have been proved card polling related.
 
-On Fri, Jun 10, 2011 at 5:02 AM, zhangfei gao <zhangfei.gao@gmail.com> wrote:
-> Here is answer got from the sd8686 maintainer.
->
-> For 8686, the SDIO state machine can only handle init sequence (CMD5,
-> 5, 3, 7) from host once. If host sends another init sequence, it will
-> not be able to handle CMD5 and causes the SDIO block to hang. Chips
-> that are newer than 8686 will be able to handle multiple init sequence
-> from host.
+The patch set extends the current sdhci-esdhc-imx card_detect and
+write_protect support to cover mx5 platforms, and solves above
+performance issues.
 
-Thanks for the reply !
+Shawn Guo (4):
+      mmc: sdhci: fix interrupt storm from card detection
+      mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not get cleared
+      mmc: sdhci-esdhc-imx: remove "WP" from flag ESDHC_FLAG_GPIO_FOR_CD_WP
+      mmc: sdhci-esdhc-imx: extend card_detect and write_protect support
 
-> So yes, for 8686, an IO reset is needed before host can send a new set
-> of init sequence.
-
-But if we're powering down and up the device first, then the init
-sequence is considered the first one, and then we don't need an IO
-reset, right ? That was what we wondered about.
-
-Thanks,
-Ohad.
+ arch/arm/mach-imx/eukrea_mbimxsd25-baseboard.c |    3 +-
+ arch/arm/mach-imx/eukrea_mbimxsd35-baseboard.c |    3 +-
+ arch/arm/mach-imx/mach-mx25_3ds.c              |    2 +
+ arch/arm/mach-imx/mach-mx35_3ds.c              |    7 +-
+ arch/arm/mach-imx/mach-pcm043.c                |    2 +
+ arch/arm/mach-imx/mach-vpr200.c                |    7 +-
+ arch/arm/mach-mx5/board-mx51_3ds.c             |    7 +-
+ arch/arm/mach-mx5/board-mx51_babbage.c         |   27 +++++-
+ arch/arm/mach-mx5/board-mx51_efikamx.c         |    7 +-
+ arch/arm/mach-mx5/board-mx51_efikasb.c         |    7 +-
+ arch/arm/mach-mx5/board-mx53_evk.c             |   14 +++-
+ arch/arm/mach-mx5/board-mx53_loco.c            |   14 +++-
+ arch/arm/mach-mx5/board-mx53_smd.c             |   21 ++++-
+ arch/arm/mach-mx5/eukrea_mbimx51-baseboard.c   |   14 +++-
+ arch/arm/mach-mx5/eukrea_mbimxsd-baseboard.c   |    7 +-
+ arch/arm/mach-mx5/mx51_efika.c                 |    7 +-
+ arch/arm/plat-mxc/include/mach/esdhc.h         |   25 ++++-
+ drivers/mmc/host/sdhci-esdhc-imx.c             |  117 +++++++++++++----------
+ drivers/mmc/host/sdhci.c                       |   13 ++-
+ 19 files changed, 225 insertions(+), 79 deletions(-)
