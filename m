@@ -1,57 +1,73 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: MMC runtime PM patches break libertas probe
-Date: Sat, 11 Jun 2011 12:03:27 +0300
-Message-ID: <BANLkTi=BjOrT-Arg+KzYpFbfk6vAO1sKHQ@mail.gmail.com>
-References: <AANLkTim+Ez8FonyZDu42u4NX-KKV0YS_J-Ya-zT-Gf9q@mail.gmail.com>
- <AANLkTinEes6Er6-WW_t8esjazrLWZ0Z7jvYJDSZL9PNG@mail.gmail.com>
- <AANLkTinJ2K2cz9PSdyNoNGUS8GWfLpqRBH2C3XjO5vjO@mail.gmail.com>
- <AANLkTi=VAU=9Q+Ga7yQyu3aL7gV0vbzymQ-2uJAg1jf8@mail.gmail.com>
- <AANLkTi=QT6_zyddRz=3f6GDx-RVoiROOumhegm8pFuHU@mail.gmail.com>
- <AANLkTimfp0pPqpO03-R4yBsADQ27RLQ_PxLTfBAMfPGk@mail.gmail.com>
- <AANLkTi=gFmq47Xq+CxnU18aHyhcaF78WrWYDhga4Xf2X@mail.gmail.com>
- <AANLkTimqFBBsDCCDNOq22fuqjw7pezizZ9At+1ucGZ-j@mail.gmail.com>
- <AANLkTi=RP0i5cWO4AogGJx-sQ+17YKuiptQWi0ypYVnA@mail.gmail.com>
- <AANLkTiktD13-UC8=gwWhp9oR9_vGcM98VpRQ9i0CQg_-@mail.gmail.com>
- <AANLkTi=8Xd1xTfFvAJkicR_89JOu4P2uwyoMHvXCBKv8@mail.gmail.com>
- <AANLkTi=cPURFAitedD=mjkNiD_=ZCjakkMN6z7ecqv6k@mail.gmail.com>
- <BANLkTikpciJnTudOeSLM_O7AAD4GGkbbOw@mail.gmail.com> <BANLkTikQC+u5yyU+YBAZ5JpFDRFHrHNOoA@mail.gmail.com>
- <BANLkTi=kqnnGf3ezS=cSXCcHpmK3JxwXtg@mail.gmail.com> <BANLkTi=o6Hgb=icinjmZqVx09dx+cp-enw@mail.gmail.com>
- <BANLkTimuLrCd3oHeWOC73scuQ6ydvuwpvw@mail.gmail.com> <BANLkTimmSu33PTDn9ybOSbAfObPe4C-rZA@mail.gmail.com>
- <477F20668A386D41ADCC57781B1F704307FD0BF3B1@SC-VEXCH1.marvell.com>
- <BANLkTi=nz8c9P2qi9FWE+QU0XzSFddUAhA@mail.gmail.com> <477F20668A386D41ADCC57781B1F704307FD0BF3BE@SC-VEXCH1.marvell.com>
- <BANLkTi=qR7bbsnzsCpV=b2C4Ha5Hdb94gQ@mail.gmail.com> <BANLkTimZ+Emm6GrTztEaGnjRu92Pam13mQ@mail.gmail.com>
- <BANLkTi=KjP9sUD0+QjDrJro0JXW4A+zOKg@mail.gmail.com> <BANLkTinDe6fOavZZ+1c1OKS7XMf_J5YhaA@mail.gmail.com>
- <BANLkTinyU5x5QFbDs2bqbZ0ebpRhe+aSSw@mail.gmail.com>
+From: =?ISO-8859-1?Q?Ren=E9_K=F6cher?= <shirk@bitspin.org>
+Subject: Support for NetXtreme BCM57765 Memory Card Reader?
+Date: Sat, 11 Jun 2011 13:15:05 +0200
+Message-ID: <1307790907.3615.8.camel@horo.kamakura>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:58901 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751357Ab1FKJDs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 11 Jun 2011 05:03:48 -0400
-Received: by wya21 with SMTP id 21so2307940wya.19
-        for <linux-mmc@vger.kernel.org>; Sat, 11 Jun 2011 02:03:47 -0700 (PDT)
-In-Reply-To: <BANLkTinyU5x5QFbDs2bqbZ0ebpRhe+aSSw@mail.gmail.com>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:53680 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752122Ab1FKJPK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 11 Jun 2011 05:15:10 -0400
+Received: by fxm17 with SMTP id 17so1983016fxm.19
+        for <linux-mmc@vger.kernel.org>; Sat, 11 Jun 2011 02:15:09 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Bing Zhao <bzhao@marvell.com>, Daniel Drake <dsd@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Rapoport <mike@compulab.co.il>, Zhangfei Gao <zgao6@marvell.com>, Benson Chau <bchau@marvell.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Sat, Jun 11, 2011 at 5:33 AM, zhangfei gao <zhangfei.gao@gmail.com> wrote:
-> If you power down and up the device, then IO reset is not needed and
-> 8686 can process host init sequence correctly.
+The card reader mentioned in the subject is part of the Broadcom
+NetXtreme BCM57765 chip which provides a card reader as well as a
+network interface[=C2=B9].
 
-Thanks, that's what I thought.
+It is recognized by the sdhci-pci driver however it won't read any card
+(tested with different SD, SDHC, SDXC cards).
 
-Daniel, this ultimately means that whenever sending a reset is
-required to re-init the 8686, we can surely say that the chip wasn't
-really powered off beforehand, and that something went wrong in the
-software, leading us to think the chip is powered off when it is
-really not.
+I'm not sure if it is recognized by its advertised features or if it's
+really supported (unlikely).
 
-But I think we also demonstrated this with the simple
-insmod/rmmod/insmod scenario, where every insmod successfully
-re-initialized the chip without sending an sdio reset.
+lspci -v / lspci -vn
+> (02:00.0 0200: 14e4:16b4 (rev 10))
+> (        Subsystem: 14e4:16b4)
+>=20
+> 02:00.0 Ethernet controller: Broadcom Corporation NetXtreme BCM57765 =
+Gigabit Ethernet PCIe (rev 10)
+>         Subsystem: Broadcom Corporation NetXtreme BCM57765 Gigabit Et=
+hernet PCIe
+>         Flags: bus master, fast devsel, latency 0, IRQ 16
+>         Memory at b0400000 (64-bit, prefetchable) [size=3D64K]
+>         Memory at b0410000 (64-bit, prefetchable) [size=3D64K]
+>         Capabilities: [48] Power Management version 3
+>         Capabilities: [58] MSI: Enable- Count=3D1/8 Maskable- 64bit+
+>         Capabilities: [a0] MSI-X: Enable- Count=3D6 Masked-
+>         Capabilities: [ac] Express Endpoint, MSI 00
+>         Capabilities: [100] Advanced Error Reporting
+>         Capabilities: [13c] Device Serial Number XX-XX-XX-XX-XX-XX-XX=
+-XX
+>         Capabilities: [150] Power Budgeting <?>
+>         Capabilities: [160] Virtual Channel
+>         Kernel driver in use: tg3
 
-Thanks,
-Ohad.
+> (02:00.1 0805: 14e4:16bc (rev 10) (prog-if 01))
+> (        Subsystem: 14e4:0000)
+>=20
+> 02:00.1 SD Host controller: Broadcom Corporation Device 16bc (rev 10)=
+ (prog-if 01)
+>         Subsystem: Broadcom Corporation Device 0000
+>         Flags: bus master, fast devsel, latency 0, IRQ 17
+>         Memory at b0420000 (64-bit, prefetchable) [size=3D64K]
+>         Capabilities: [48] Power Management version 3
+>         Capabilities: [58] MSI: Enable- Count=3D1/1 Maskable- 64bit+
+>         Capabilities: [ac] Express Endpoint, MSI 00
+>         Capabilities: [100] Advanced Error Reporting
+>         Capabilities: [150] Power Budgeting <?>
+>         Capabilities: [160] Virtual Channel
+>         Kernel driver in use: sdhci-pci
+>         Kernel modules: sdhci-pci
+
+[=C2=B9] http://www.broadcom.com/products/Ethernet-Controllers/Enterpri=
+se-Client/BCM57765
+
+Cheers,
+
+
