@@ -1,73 +1,61 @@
-From: =?ISO-8859-1?Q?Ren=E9_K=F6cher?= <shirk@bitspin.org>
-Subject: Support for NetXtreme BCM57765 Memory Card Reader?
-Date: Sat, 11 Jun 2011 13:15:05 +0200
-Message-ID: <1307790907.3615.8.camel@horo.kamakura>
+From: Arnaud Patard (Rtp) <arnaud.patard@rtp-net.org>
+Subject: Re: [PATCH 4/4] mmc: sdhci-esdhc-imx: extend card_detect and write_protect support
+Date: Sat, 11 Jun 2011 11:30:42 +0200
+Message-ID: <87boy4lnp9.fsf@lebrac.rtp-net.org>
+References: <1307702572-22066-1-git-send-email-shawn.guo@linaro.org>
+	<1307702572-22066-5-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:53680 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752122Ab1FKJPK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 11 Jun 2011 05:15:10 -0400
-Received: by fxm17 with SMTP id 17so1983016fxm.19
-        for <linux-mmc@vger.kernel.org>; Sat, 11 Jun 2011 02:15:09 -0700 (PDT)
+Received: from lebrac.rtp-net.org ([88.191.135.105]:49606 "EHLO
+	lebrac.rtp-net.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753495Ab1FKJgu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 11 Jun 2011 05:36:50 -0400
+In-Reply-To: <1307702572-22066-5-git-send-email-shawn.guo@linaro.org> (Shawn
+	Guo's message of "Fri, 10 Jun 2011 18:42:52 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Eric Benard <eric@eukrea.com>, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-The card reader mentioned in the subject is part of the Broadcom
-NetXtreme BCM57765 chip which provides a card reader as well as a
-network interface[=C2=B9].
+Shawn Guo <shawn.guo@linaro.org> writes:
 
-It is recognized by the sdhci-pci driver however it won't read any card
-(tested with different SD, SDHC, SDXC cards).
+Hi,
 
-I'm not sure if it is recognized by its advertised features or if it's
-really supported (unlikely).
+> The patch extends card_detect and write_protect support to get mx5
+> family and more scenarios supported.  The changes include:
+>
+>  * Turn platform_data from optional to mandatory
+>  * Add cd_types and wp_types into platform_data to cover more use
+>    cases
+>  * Remove the use of flag ESDHC_FLAG_GPIO_FOR_CD
+>  * Adjust machine codes to adopt the platform_data changes
 
-lspci -v / lspci -vn
-> (02:00.0 0200: 14e4:16b4 (rev 10))
-> (        Subsystem: 14e4:16b4)
->=20
-> 02:00.0 Ethernet controller: Broadcom Corporation NetXtreme BCM57765 =
-Gigabit Ethernet PCIe (rev 10)
->         Subsystem: Broadcom Corporation NetXtreme BCM57765 Gigabit Et=
-hernet PCIe
->         Flags: bus master, fast devsel, latency 0, IRQ 16
->         Memory at b0400000 (64-bit, prefetchable) [size=3D64K]
->         Memory at b0410000 (64-bit, prefetchable) [size=3D64K]
->         Capabilities: [48] Power Management version 3
->         Capabilities: [58] MSI: Enable- Count=3D1/8 Maskable- 64bit+
->         Capabilities: [a0] MSI-X: Enable- Count=3D6 Masked-
->         Capabilities: [ac] Express Endpoint, MSI 00
->         Capabilities: [100] Advanced Error Reporting
->         Capabilities: [13c] Device Serial Number XX-XX-XX-XX-XX-XX-XX=
--XX
->         Capabilities: [150] Power Budgeting <?>
->         Capabilities: [160] Virtual Channel
->         Kernel driver in use: tg3
-
-> (02:00.1 0805: 14e4:16bc (rev 10) (prog-if 01))
-> (        Subsystem: 14e4:0000)
->=20
-> 02:00.1 SD Host controller: Broadcom Corporation Device 16bc (rev 10)=
- (prog-if 01)
->         Subsystem: Broadcom Corporation Device 0000
->         Flags: bus master, fast devsel, latency 0, IRQ 17
->         Memory at b0420000 (64-bit, prefetchable) [size=3D64K]
->         Capabilities: [48] Power Management version 3
->         Capabilities: [58] MSI: Enable- Count=3D1/1 Maskable- 64bit+
->         Capabilities: [ac] Express Endpoint, MSI 00
->         Capabilities: [100] Advanced Error Reporting
->         Capabilities: [150] Power Budgeting <?>
->         Capabilities: [160] Virtual Channel
->         Kernel driver in use: sdhci-pci
->         Kernel modules: sdhci-pci
-
-[=C2=B9] http://www.broadcom.com/products/Ethernet-Controllers/Enterpri=
-se-Client/BCM57765
-
-Cheers,
+Before I go and test theses patches, I'd like to get some
+clarification. From what I see, you've modified all over the place the
+code to provide a platform_data, setting wp/cd type to type "NONE", as
+if it was the default you choose. Why this default and not considerer
+the "SIGNAL" type being the default ? Is this choice the safest one when
+one doesn't know what type to choose or can it have some bad side
+effects ?
+Also, why didn't you modify the imx*_add_sdhci_esdhc_imx() functions to
+provide the default platform_data by themselves that if the 2nd argument
+was NULL instead of modifying all theses machines files ?
 
 
+Last comment: How did you choose the platform_data values ? I mean, for
+that the cases I'm mainly take care of (efika mx and sb platforms), you
+choose NONE type, while the code has :
+
+        MX51_PAD_GPIO1_0__SD1_CD,
+        MX51_PAD_GPIO1_1__SD1_WP,
+        MX51_PAD_GPIO1_7__SD2_WP,
+        MX51_PAD_GPIO1_8__SD2_CD,
+
+which means that it would rather be the SIGNAL type if I got it
+right. Does this mean that you've set the type to NONE for all platforms
+you didn't know what the answer was ? (I guess/hope that theses 2
+questions will be answered by your answers to my previous questions tbh).
+
+Thanks,
+Arnaud
