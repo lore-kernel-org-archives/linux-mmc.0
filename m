@@ -1,105 +1,122 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH v2 1/3] dmaengine: add new dma API for max_segment_number
-Date: Sun, 12 Jun 2011 23:28:20 +0800
-Message-ID: <20110612152819.GA29737@S2100-06.ap.freescale.net>
-References: <1307345414-26872-1-git-send-email-shawn.guo@linaro.org>
- <BANLkTi=-t9HVc6U6QY07su+c3WztsGoq3Q@mail.gmail.com>
+From: Ram Pai <linuxram@us.ibm.com>
+Subject: Re: sdhci-pci fails on 3.0.0-rc1 on Dell E6510
+Date: Sun, 12 Jun 2011 13:44:07 -0700
+Message-ID: <20110612204406.GC30738@ram-laptop>
+References: <4DEBCA3F.8050205@hartkopp.net>
+ <BANLkTin_WHuy5MExNBHdeLiDmdmn7SZYkg@mail.gmail.com>
+ <4DED05C4.7050903@hartkopp.net>
+ <m3hb82wx6m.fsf@pullcord.laptop.org>
+ <4DEE6FC6.9040308@hartkopp.net>
+ <4DEE84AD.6050104@hartkopp.net>
+ <4DEEA3CD.30507@kernel.org>
+ <4DEF1606.5030803@hartkopp.net>
+Reply-To: Ram Pai <linuxram@us.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from e6.ny.us.ibm.com ([32.97.182.146]:59843 "EHLO e6.ny.us.ibm.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751208Ab1FLUoU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 12 Jun 2011 16:44:20 -0400
 Content-Disposition: inline
-In-Reply-To: <BANLkTi=-t9HVc6U6QY07su+c3WztsGoq3Q@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dan Williams <dan.j.williams@intel.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linux-kernel@vger.kernel.org, patches@linaro.org, vinod.koul@intel.com, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
+In-Reply-To: <4DEF1606.5030803@hartkopp.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Oliver Hartkopp <socketcan@hartkopp.net>
+Cc: Yinghai Lu <yinghai@kernel.org>, Jesse Barnes <jbarnes@virtuousgeek.org>, Chris Ball <cjb@laptop.org>, "S, Venkatraman" <svenkatr@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-On Tue, Jun 07, 2011 at 03:35:51PM -0700, Dan Williams wrote:
-> On Mon, Jun 6, 2011 at 12:30 AM, Shawn Guo <shawn.guo@linaro.org> wro=
-te:
-> > Like dma_set(get)_max_seg_size for max_segment_size, the patch adds
-> > max_segment_number into device_dma_parameters and creates the
-> > corresponding dmaengine API dma_set(get)_max_seg_number for it.
-> >
-> > Here is the user story that tells the need of the new api. =A0The
-> > mxs-mmc is the mmc host controller for Freescale MXS architecture.
-> > There are a pair of =A0mmc host specific parameters max_seg_size an=
-d
-> > max_segs that mxs-mmc host driver needs to tell mmc core, so that
-> > mmc core can know how big each data segment could be and how many
-> > segments could be handled one time in a scatter list by host driver=
-=2E
-> >
-> > The mxs-mmc driver is one user of dmaengine mxs-dma, and it will ca=
-ll
-> > mxs-dma to transfer data in scatter list. =A0That is to say mxs-mmc=
- has
-> > no idea of what max_seg_size and max_segs should be, because they a=
-re
-> > all mxs-dma capability parameters, and mxs-mmc needs to query them
-> > from mxs-dma.
-> >
-> > Right now, there is well defined dma api (dma_get_max_seg_size) for
-> > mmc to query max_seg_size from dma driver, but the one for max_segs
-> > is missing. =A0That's why mxs-mmc driver has to hard-code it.
-> >
-> > The mxs-mmc is just one example to demonstrate the need of the new
-> > api, and there are other mmc host drivers (mxcmmc on imx-dma is
-> > another example) and possibly even other dmaengine users need this
-> > new api to know the maximum segments that dma driver can handle per
-> > dma call.
-> >
-> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> > ---
-> > Changes since v1:
-> > =A0* Update commit message to explain why the new api is needed
-> >
-> > =A0include/linux/device.h =A0 =A0 =A0| =A0 =A01 +
-> > =A0include/linux/dma-mapping.h | =A0 15 +++++++++++++++
-> > =A02 files changed, 16 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/include/linux/device.h b/include/linux/device.h
-> > index c66111a..44cb2528 100644
-> > --- a/include/linux/device.h
-> > +++ b/include/linux/device.h
-> > @@ -487,6 +487,7 @@ struct device_dma_parameters {
-> > =A0 =A0 =A0 =A0 * sg limitations.
-> > =A0 =A0 =A0 =A0 */
->=20
-> Given the discussion seems like this patch is missing an update to th=
-e
-> documentation of the struct to clarify the definition of dma provider=
-=2E
->  I.e. that this info belongs to the device doing the dma, and that is
-> is not necessarily the same as the device that is requesting dma
-> service.
->=20
-What about the following?
+On Wed, Jun 08, 2011 at 08:26:14AM +0200, Oliver Hartkopp wrote:
+> On 08.06.2011 00:18, Yinghai Lu wrote:
+> > thanks.
+> > 
+> > second report.
+> > 
+> > can you send out whole boot log.
+> 
+> See attached dmesg output. The 'dirty' is due to the revert test of the sd/mmc
+> stuff (see below) - the rest is plain 3.0.0-rc2.
+> 
+> Good luck :-)
 
-/*
- * device_dma_parameters is a property of DMA provider, and it belongs =
-to the
- * 'struct device' that actually provides DMA service, typically the dr=
-ivers
- * under drivers/dma, although in some cases the DMA provider and block=
- device
- * uses DMA service happen to be the same 'struct device'.
- *
- * It's not necessary for every single DMA providers to have this struc=
-ture,
- * because some DMA providers simply do not have these parameters/limit=
-ations.
- * For those do have, the DMA providers should be responsible for setti=
-ng the
- * parameters up.
- */
-struct device_dma_parameters {
-        unsigned int max_segment_size;
-        unsigned int max_segment_number;
-        unsigned long segment_boundary_mask;
-};
+Looks like the kernel; by default, tries to allocate mem resource of size
+0x4000000 each to the BARs of the cardbus bridge. This cannot be satisfied
+meeting all the constraints. The BIOS had not allocated the resource to
+begin with.
 
---=20
-Regards,
-Shawn
+Anyone knows if the default value can be reduced to something smaller?
+Or Should the resource requirements of cardbus bridge be made nice-to-have?
+
+> 
+> Oliver
+> 
+> > 
+> > On 06/07/2011 01:06 PM, Oliver Hartkopp wrote:
+> >> On 07.06.2011 20:36, Oliver Hartkopp wrote:
+> >> Hi all,
+> >>
+> >> the commit "PCI: update bridge resources to get more big ranges when allocating space (again)"
+> >>
+> >> http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=da7822e5ad71ec9b745b412639f1e5e0ba795a20
+> >>
+> >> kills my SD-Card and the PCMCIA slot on a Dell E6510 with the latest 3.0.0-rc2 ...
+> >>
+
+....
+RP
+> >> When i revert the commit both the MMC/SD stuff and the PCMCIA re-appears.
+> >>
+> >> Any idea?
+> >>
+> >> See my attached boot.diff / kernel config 
+> >>
+> >> Regards,
+> >> Oliver
+> >>
+> >>
+> >>
+> >>
+> >>> On 06.06.2011 21:56, Chris Ball wrote:
+> >>>> Hi Oliver,
+> >>>>
+> >>>> On Mon, Jun 06 2011, Oliver Hartkopp wrote:
+> >>>>>>> dmesg is a bit more detailed:
+> >>>>>>> [    6.242510] sdhci-pci 0000:03:00.1: SDHCI controller found [1180:e822] (rev 3)
+> >>>>>>> [    6.244168] sdhci-pci 0000:03:00.1: PCI INT B -> GSI 19 (level, low) -> IRQ 19
+> >>>>>>> [    6.245788] sdhci-pci 0000:03:00.1: BAR 0 is not iomem. Aborting.
+> >>>>>>> [    6.247609] sdhci-pci 0000:03:00.1: PCI INT B disabled
+> >>>>
+> >>>> If you get a chance to do some bisecting, that would be extremely
+> >>>> helpful -- even just building 3.0 from *before* the MMC tree was
+> >>>> merged would help a lot, since if the problem still happens before
+> >>>> the MMC merge we might be looking at some kind of generic PCI bug.
+> >>>>
+> >>>
+> >>>
+> >>> Hi Chris,
+> >>>
+> >>> i just reverted this pull of your merge window patches in my 3.0.0-rc2 tree:
+> >>>
+> >>> http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=8c1c77ff9be27137fa7cbbf51efedef1a2ae915b;hp=f3ae1c75203535f65448517e46c8dd70a56b6c71
+> >>>
+> >>> And you were right: The problem still exists. So it might be from the PCI subsystem :-(
+> >>>
+> >>> [    6.167106] sdhci: Secure Digital Host Controller Interface driver
+> >>> [    6.167108] sdhci: Copyright(c) Pierre Ossman
+> >>> [    6.194731] ehci_hcd 0000:00:1a.0: cache line size of 64 is not supported
+> >>> [    6.195140] ehci_hcd 0000:00:1a.0: irq 16, io mem 0xf6970000
+> >>> [    6.196423] sdhci-pci 0000:03:00.1: SDHCI controller found [1180:e822] (rev 3)
+> >>> [    6.196429] sdhci-pci 0000:03:00.1: found 1 slot(s)
+> >>> [    6.196447] sdhci-pci 0000:03:00.1: PCI INT B -> GSI 19 (level, low) -> IRQ 19
+> >>> [    6.196451] sdhci-pci 0000:03:00.1: BAR 0 is not iomem. Aborting.
+> >>> [    6.196459] sdhci-pci 0000:03:00.1: PCI INT B disabled
+> >>>
+> >>> Well then, i'll reset my tree and look for differences in the PCI boot messages.
+> >>>
+> >>> Thanks,
+> >>> Oliver
+> >>
+> > 
+> 
+
+...snip...
+RP
