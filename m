@@ -1,62 +1,49 @@
-From: =?ISO-8859-1?Q?Ren=E9_K=F6cher?= <shirk@bitspin.org>
-Subject: Re: Support for NetXtreme BCM57765 Memory Card Reader?
-Date: Mon, 13 Jun 2011 18:13:51 +0200
-Message-ID: <1307981633.11567.2.camel@horo.kamakura>
-References: <1307790907.3615.8.camel@horo.kamakura>
-	 <m21uyz96bc.fsf@bob.laptop.org>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
+Date: Mon, 13 Jun 2011 22:52:52 +0300
+Message-ID: <BANLkTino3hz9NCfjtqM2UYtncYa6y_k=Qg@mail.gmail.com>
+References: <20110605123852.BC6F39D401C@zog.reactivated.net>
+ <BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com> <BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
+ <BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com> <BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
+ <BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com> <BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
+ <BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com> <BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
+ <BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com> <BANLkTim2NfCcfRRmcVXepLA0evusZoTJGA@mail.gmail.com>
+ <BANLkTimg08VnOMrUwnH6dKzXPJO1fpOh6w@mail.gmail.com> <BANLkTinfeGUADyi1dTSjPRMnbP+TCtN0dQ@mail.gmail.com>
+ <BANLkTimbxSA_86a=2QH1pEGg1-O9neEyhw@mail.gmail.com> <BANLkTimQUkf9ZsanZ-czqtYnyRSSSch4nQ@mail.gmail.com>
+ <BANLkTi=jsPYEQOnRDyoXD_EzKdqby-QhYw@mail.gmail.com> <BANLkTi=VWUcCQJaBChnitVq1_TT1huE30A@mail.gmail.com>
+ <BANLkTinG-CmEh9yXL9Sp+W7PyatvEdOhZQ@mail.gmail.com> <BANLkTi=zuMosw68EMSYjrVi+0dBQkNicJw@mail.gmail.com>
+ <BANLkTi=6Fa66QYay_R6vkmREPcb1Bw_FRw@mail.gmail.com> <BANLkTimOVsSe=mPOZ=ArGfy4w2QrYgLA+Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:65157 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751083Ab1FMQN4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2011 12:13:56 -0400
-Received: by fxm17 with SMTP id 17so2758410fxm.19
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2011 09:13:54 -0700 (PDT)
-In-Reply-To: <m21uyz96bc.fsf@bob.laptop.org>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:61045 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751188Ab1FMTxO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2011 15:53:14 -0400
+Received: by wwa36 with SMTP id 36so5172913wwa.1
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2011 12:53:13 -0700 (PDT)
+In-Reply-To: <BANLkTimOVsSe=mPOZ=ArGfy4w2QrYgLA+Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Daniel Drake <dsd@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Ok,
+On Fri, Jun 10, 2011 at 7:15 PM, Daniel Drake <dsd@laptop.org> wrote:
+> Done. Without bringing suspend/resume into the picture, this is
+> working fine. Power is removed when the interface goes down, and is
+> restored when the interface is brought up. ios values look fine at
+> every stage. Wireless card works fine after several power cycles.
 
-looks like Majordomo didn't like my previous post..
+That sounds great.
 
-On Sat, 2011-06-11 at 21:39 -0400, Chris Ball wrote:
-> Hi,
->=20
-> On Sat, Jun 11 2011, Ren=C3=A9 K=C3=B6cher wrote:
-> > The card reader mentioned in the subject is part of the Broadcom
-> > NetXtreme BCM57765 chip which provides a card reader as well as a
-> > network interface[=C2=B9].
-> >
-> > It is recognized by the sdhci-pci driver however it won't read any =
-card
-> > (tested with different SD, SDHC, SDXC cards).
-> >
-> > I'm not sure if it is recognized by its advertised features or if i=
-t's
-> > really supported (unlikely).
->=20
-> I expect there's not much we can do without access to the hardware, b=
-ut
-> could you post dmesg output with CONFIG_MMC_DEBUG=3Dy?
->=20
-> Thanks,
->=20
-> - Chris.
+> Patches here: http://dev.laptop.org/~dsd/20110610/
+> The most relevant ones for this discussion are 6 and 7.
+>
+> What next?
 
-I created a pastebin: http://pastebin.com/pP1ZmqDL showing the=20
-requested logs.
+We need to debug the suspend/resume path. Now that we have the other
+runtime pm paths working, we can pretty much tell there's no hw issue
+at hand.
 
-In addition I had a talk with a nice gui with broadcom-knowledge=E2=84=A2=
-=2E
-It looks like this card has an additional (private) mmio-block above th=
-e
-normal 0x100 bytes in the PCI bar.
-
-Cheers,
-Ren=C3=A9
-
+I definitely plan to help you nail this, but I'm a little tied up with
+some tight schedule for a little while.
