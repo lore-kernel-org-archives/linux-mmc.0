@@ -1,24 +1,36 @@
-From: Stephen Warren <swarren@nvidia.com>
+From: "Sukesh Srikakula" <sukeshs@broadcom.com>
 Subject: RE: Resume issue with brcmfmac *not* loaded
-Date: Tue, 14 Jun 2011 08:58:15 -0700
-Message-ID: <74CDBE0F657A3D45AFBB94109FB122FF04992C034F@HQMAIL01.nvidia.com>
+Date: Tue, 14 Jun 2011 10:17:52 -0700
+Message-ID: <400C43189542CE41BC0A5B252FC90136A911D82CE6@SJEXCHCCR02.corp.ad.broadcom.com>
 References: <74CDBE0F657A3D45AFBB94109FB122FF04992C026B@HQMAIL01.nvidia.com>
-	<BANLkTimJXtFB5Qi9sjVOWhrKVfuE5O1p-uhGMq_WmnJPJcugpg@mail.gmail.com>
+ <BANLkTimJXtFB5Qi9sjVOWhrKVfuE5O1p-uhGMq_WmnJPJcugpg@mail.gmail.com>
  <BANLkTinAXsHYBZ0uSY4ZtTd=f=7LNQM+_9o_FcLLYs1iPfL=YQ@mail.gmail.com>
+ <74CDBE0F657A3D45AFBB94109FB122FF04992C034F@HQMAIL01.nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate04.nvidia.com ([216.228.121.35]:9209 "EHLO
-	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751244Ab1FNP6i convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 11:58:38 -0400
-In-Reply-To: <BANLkTinAXsHYBZ0uSY4ZtTd=f=7LNQM+_9o_FcLLYs1iPfL=YQ@mail.gmail.com>
+Received: from mms2.broadcom.com ([216.31.210.18]:3382 "EHLO mms2.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752442Ab1FNRSH convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 13:18:07 -0400
+In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF04992C034F@HQMAIL01.nvidia.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>, Grant Grundler <grundler@chromium.org>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "Greg KH (gregkh@suse.de)" <gregkh@suse.de>, "vrao@broadcom.com" <vrao@broadcom.com>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Olof Johansson <olofj@chromium.org>, Sukesh Srikakula <sukeshs@broadcom.com>
+To: Stephen Warren <swarren@nvidia.com>, Olof Johansson <olof@lixom.net>, Grant Grundler <grundler@chromium.org>, Sandeep Kumar <sandeepm@broadcom.com>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, "Greg KH (gregkh@suse.de)" <gregkh@suse.de>, Venkat Rao <vrao@broadcom.com>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Olof Johansson <olofj@chromium.org>
+
++Sandeep
+
+-----Original Message-----
+=46rom: Stephen Warren [mailto:swarren@nvidia.com]=20
+Sent: Tuesday, June 14, 2011 8:58 AM
+To: Olof Johansson; Grant Grundler
+Cc: cjb@laptop.org; Greg KH (gregkh@suse.de); Venkat Rao; devel@driverd=
+ev.osuosl.org; linux-mmc@vger.kernel.org; Olof Johansson; Sukesh Srikak=
+ula
+Subject: RE: Resume issue with brcmfmac *not* loaded
 
 Olof Johansson wrote at Monday, June 13, 2011 7:13 PM:
 > Hi,
@@ -159,4 +171,6 @@ Thanks.
 
 --=20
 nvpublic
+
+
 
