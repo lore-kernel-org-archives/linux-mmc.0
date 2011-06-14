@@ -1,106 +1,71 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH v4 2/5] mmc: support sdhci-pxav2.c
-Date: Mon, 13 Jun 2011 14:35:26 -0700
-Message-ID: <0059AEB1-3536-4540-924A-A95C7F3AD21A@marvell.com>
-References: <1307526121-12059-1-git-send-email-zhangfei.gao@marvell.com>
- <1307526121-12059-3-git-send-email-zhangfei.gao@marvell.com>
+From: Andrei Warkentin <andreiw@motorola.com>
+Subject: Re: irq flood with mmc boot partitions on s3c2416 with 3.0rc1
+Date: Mon, 13 Jun 2011 19:09:06 -0500
+Message-ID: <BANLkTi=YvSL_yzku6v3tsJaaLTL=fBXShg@mail.gmail.com>
+References: <201106022149.47936.heiko@sntech.de>
+	<BANLkTi=xVzdLDq5wbzLtQFu+nz=8G9SbKQ@mail.gmail.com>
+	<201106030956.43174.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog111.obsmtp.com ([74.125.149.205]:45708 "EHLO
-	na3sys009aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753516Ab1FMVfn convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Jun 2011 17:35:43 -0400
-In-Reply-To: <1307526121-12059-3-git-send-email-zhangfei.gao@marvell.com>
-Content-Language: en-US
+Received: from exprod5og114.obsmtp.com ([64.18.0.28]:41307 "EHLO
+	exprod5og114.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755122Ab1FNAJJ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2011 20:09:09 -0400
+Received: from DE01MGRG01.AM.MOT-MOBILITY.COM ([10.22.94.168])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p5E09hTo005209
+	for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2011 20:09:43 -0400 (EDT)
+Received: from mail-px0-f169.google.com (mail-px0-f169.google.com [209.85.212.169])
+	by DE01MGRG01.AM.MOT-MOBILITY.COM (8.14.3/8.14.3) with ESMTP id p5E09dMJ005199
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
+	for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2011 20:09:43 -0400 (EDT)
+Received: by mail-px0-f169.google.com with SMTP id 9so3388467pxi.0
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2011 17:09:07 -0700 (PDT)
+In-Reply-To: <201106030956.43174.heiko@sntech.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jun Nie <njun@marvell.com>, Raymond Wu <xywu@marvell.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Qiming Wu <wuqm@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Zhangfei Gao <zgao6@marvell.com>
+To: =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>
+Cc: Kyungmin Park <kmpark@infradead.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
+Hi Everybody,
 
-On Jun 8, 2011, at 2:41 AM, Zhangfei Gao wrote:
+On Fri, Jun 3, 2011 at 2:56 AM, Heiko St=FCbner <heiko@sntech.de> wrote=
+:
+>
+> Hi,
+>
+> Am Freitag 03 Juni 2011, 01:48:05 schrieb Kyungmin Park:
+> > As I don't have the s3c2416 user manaul, I'm not sure it's support
+> > AUTO CMD12 or not. but at least it's support at s3c6410 and later.
+> According to the manual, the 2416 supports AUTO CMD12.
+>
+> As I wrote disabling auto cmd12 only works sometimes and other times =
+the irq
+> storm happens like with auto cmd12 enabled - always after the first r=
+eboot.
+> So it seems auto cmd12 is not the real reason for the error.
+>
+> Do you also encounter the second error later on (for me in udev stage=
+):
+> > =A0mmcblk1boot0: retrying using single block read
+> > =A0mmc1: ADMA error
+> > =A0mmcblk1boot0: error -5 transferring data, sector 448, nr 32, car=
+d status
+> > 0x900
+> > =A0end_request: I/O error, dev mmcblk1boot0, sector 448
+> > =A0Buffer I/O error on device mmcblk1boot0, logical block 56
+> > =A0mmcblk1boot1: retrying using single block read
+> > =A0mmc1: ADMA error
+> > =A0mmcblk1boot1: error -5 transferring data, sector 448, nr 32, car=
+d status
+> > 0x900
+> > =A0end_request: I/O error, dev mmcblk1boot1, sector 448
+>
+>
 
-> 	SDHCI driver for PXAV2 SoCs, such as pxa910, the driver based on sdhci-pltfm to handle resource etc.
-> 
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
-> Signed-off-by: Jun Nie <njun@marvell.com>
-> Signed-off-by: Qiming Wu <wuqm@marvell.com>
-> ---
+I recently came back from vacation (which is why I didn't pitch in
+before). Has there been any further update on this? I want to exclude
+my EMMC partitioning changes as the possible culprit here.
 
-> +++ b/drivers/mmc/host/sdhci-pxav2.c
-> +
-> +#define SD_FIFO_PARAM		0xe0
-> +#define DIS_PAD_SD_CLK_GATE	0x0400 /* Turn on/off Dynamic SD Clock Gating */
-> +#define CLK_GATE_ON		0x0200 /* Disable/enable Clock Gate */
-> +#define CLK_GATE_CTL		0x0100 /* Clock Gate Control */
-> +#define CLK_GATE_SETTING_BITS	(DIS_PAD_SD_CLK_GATE | \
-> +		CLK_GATE_ON | CLK_GATE_CTL)
-> +
-> +#define SD_CLOCK_BURST_SIZE_SETUP	0xe6
-> +#define SDCLK_SEL_SHIFT		8
-> +#define SDCLK_SEL_MASK		0x3
-> +#define SDCLK_DELAY_SHIFT	10
-> +#define SDCLK_DELAY_MASK	0x3c
-> +
-> +#define SD_CE_ATA_2		0xea
-> +#define MMC_CARD		0x1000
-> +#define MMC_WIDTH		0x0100
-> +
-> +static void pxav2_set_private_registers(struct sdhci_host *host, u8 mask)
-> +{
-> +	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
-> +	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
-> +
-> +	if (mask == SDHCI_RESET_ALL) {
-> +		u16 tmp = 0;
-> +
-> +		/*
-> +		 * tune timing of read data/command when crc error happen
-> +		 * no performance impact
-> +		 */
-> +		if (pdata->clk_delay_sel == 1) {
-> +			tmp = readw(host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
-> +
-> +			tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
-> +			tmp |= (pdata->clk_delay_cycles & SDCLK_DELAY_MASK)
-> +				<< SDCLK_DELAY_SHIFT;
-> +			tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
-> +			tmp |= (1 & SDCLK_SEL_MASK) << SDCLK_SEL_SHIFT;
-> +
-> +			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
-> +		}
-
-There are 3 possible value for clk_delay_sel.
-
-0  == do not use clk_delay_cycles
-1 == use programmed clk_delay_cycles value (the code above)
-all other values use the sd_clk which was used to drive the output
-
-The code about only handles 2 of the 3 cases
-
-suggest
-
-	(if (pdata->clk_delay_sel) {
-> +		if (pdata->clk_delay_sel == 1) {
-> +			tmp = readw(host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
-> +
-> +			tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
-> +			tmp |= (pdata->clk_delay_cycles & SDCLK_DELAY_MASK)
-> +				<< SDCLK_DELAY_SHIFT;
-> +			tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
-> +			tmp |= 1 << SDCLK_SEL_SHIFT;
-> +
-> +			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
-> +		} else {
-
-> +			tmp = readw(host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
-> +			tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
-> +			tmp |= 2  << SDCLK_SEL_SHIFT;
-> +			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
-	           }
-         }
-
-Philip and Mark
-> 
+A
