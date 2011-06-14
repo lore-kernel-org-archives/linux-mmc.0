@@ -1,83 +1,96 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH 0/4] Extend sdhci-esdhc-imx card_detect and write_protect
- support for mx5
-Date: Tue, 14 Jun 2011 21:12:24 +0800
-Message-ID: <20110614131223.GI30295@S2100-06.ap.freescale.net>
-References: <1307702572-22066-1-git-send-email-shawn.guo@linaro.org>
- <20110614064841.GB30295@S2100-06.ap.freescale.net>
- <87ei2wk6na.fsf@lebrac.rtp-net.org>
- <20110614113902.GD30295@S2100-06.ap.freescale.net>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH v2 4/4] mmc: sdhci-esdhc-imx: extend card_detect and
+ write_protect support for mx5
+Date: Tue, 14 Jun 2011 15:55:20 +0200
+Message-ID: <20110614135520.GH5043@pengutronix.de>
+References: <1307702572-22066-5-git-send-email-shawn.guo@linaro.org>
+ <1308034059-4014-1-git-send-email-shawn.guo@linaro.org>
+ <20110614095129.GD5043@pengutronix.de>
+ <20110614130610.GH30295@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="hAW+M2+FUO+onfmf"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe002.messaging.microsoft.com ([213.199.154.140]:53070
-	"EHLO DB3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751824Ab1FNNI1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 09:08:27 -0400
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:36277 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752842Ab1FNNz1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 09:55:27 -0400
 Content-Disposition: inline
-In-Reply-To: <20110614113902.GD30295@S2100-06.ap.freescale.net>
+In-Reply-To: <20110614130610.GH30295@S2100-06.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnaud Patard <arnaud.patard@rtp-net.org>
-Cc: Eric Benard <eric@eukrea.com>, patches@linaro.org, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, kernel@pengutronix.de, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Eric Benard <eric@eukrea.com>, Arnaud Patard <arnaud.patard@rtp-net.org>, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-On Tue, Jun 14, 2011 at 07:39:03PM +0800, Shawn Guo wrote:
-> On Tue, Jun 14, 2011 at 01:13:29PM +0200, Arnaud Patard wrote:
-> > Shawn Guo <shawn.guo@freescale.com> writes:
-> > 
-> > Hi,
-> > 
-> > > On Fri, Jun 10, 2011 at 06:42:48PM +0800, Shawn Guo wrote:
-> > >> The card-present polling within sdhci based driver is very expensive
-> > >> in terms of the impact to system performance.  We observe a few
-> > >> system performance issues from Freescale and Linaro on mx5 platforms,
-> > >> which have been proved card polling related.
-> > >> 
-> > >> The patch set extends the current sdhci-esdhc-imx card_detect and
-> > >> write_protect support to cover mx5 platforms, and solves above
-> > >> performance issues.
-> > >> 
-> > >> Shawn Guo (4):
-> > >>       mmc: sdhci: fix interrupt storm from card detection
-> > >>       mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not get cleared
-> > >>       mmc: sdhci-esdhc-imx: remove "WP" from flag ESDHC_FLAG_GPIO_FOR_CD_WP
-> > >>       mmc: sdhci-esdhc-imx: extend card_detect and write_protect support
-> > >> 
-> > > Hi Arnaud,
-> > >
-> > > Any chance to play with it yet?
-> > 
-> > I tried applying the patch 4 (v2) on mmc git and Sascha Hauer's for-next
-> > branch and failed. Can you please tell me on which tree should I apply
-> > it ?
-> > 
-> Sascha really should not picked up the following 3 patches.  They are
-> nonsense when driver is not even ready for the support.  These 3
-> patches have conflict with my patch set.  You should be able to
-> apply with these 3 removed.
-> 
-> commit 954548c68c2d478bf8ec0ca9d9eea2a7c45a4fcd
-> Author: Andre Silva <andre.silva@freescale.com>
-> 
->     ARM:mach-mx5/board-mx51_babbage: Add CD and WP GPIOs
-> 
-> commit ba0c5064cb55aaac4cb5202ecad5afe9385139fc
-> Author: Andre Silva <andre.silva@freescale.com>
-> 
->     ARM:mach-mx5/board-mx53_loco: Add CD and WP GPIOs
-> 
-> commit fabef7b7c62ba58604da22b6f79b7e9ad5ae8d74
-> Author: Andre Silva <andre.silva@freescale.com>
-> 
->     ARM: mach-mx5/mx53_ard: Add support for i.MX53 ARD board
-> 
-Sascha,
 
-Since these 3 patches are still sitting on top of your tree, would
-you mind backing out them?  Or you want me to do a rebase on your
-tree?  I'm fine with either one.
+--hAW+M2+FUO+onfmf
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
--- 
+
+> important issue needs to be fixed in the release.  Please find some
+> time to do a full review, if possible.  We need your ack to know if
+> the patch stands :) =20
+
+Huh, my ack is needed for the linaro-kernel? :) Isn't it possible to
+replace a V1 patch with a V2 patch in later kernels?
+
+> > > diff --git a/arch/arm/plat-mxc/include/mach/esdhc.h b/arch/arm/plat-m=
+xc/include/mach/esdhc.h
+> > > index 86003f4..fced348 100644
+> > > --- a/arch/arm/plat-mxc/include/mach/esdhc.h
+> > > +++ b/arch/arm/plat-mxc/include/mach/esdhc.h
+> > > @@ -10,17 +10,32 @@
+> > >  #ifndef __ASM_ARCH_IMX_ESDHC_H
+> > >  #define __ASM_ARCH_IMX_ESDHC_H
+> > > =20
+> > > +enum wp_types {
+> > > +	ESDHC_WP_NONE,		/* no WP, neither signal nor gpio */
+> > > +	ESDHC_WP_SIGNAL,	/* mmc internal WP signal */
+> >=20
+> > I think SIGNAL is not descriptive enough. Maybe
+> >=20
+> We have the document telling it's internal.
+>=20
+> > ESDHC_WP_INTERNAL		/* WP routed directly to mmc controller */
+> >=20
+> I thought about that.  If we use ESDHC_WP_INTERNAL, ESDHC_WP_GPIO
+> should probably be the ESDHC_WP_EXTERNAL for the couple naming.  But
+> I like ESDHC_WP_GPIO over ESDHC_WP_EXTERNAL, so chose the couple
+> naming of ESDHC_WP_GPIO vs. ESDHC_WP_SIGNAL.
+
+ESDHC_WP_CONTROLLER? Or ESDHC_WP_CORE?
+
+> > ? It should be mentioned on which SoCs this is not available?
+> >=20
+> From SoC/controller POV, it's all available.  It's really a board
+> design choice to connect card CD/WP to the pads or not, which the
+> controller CD/WP signal/function is available on.
+
+For mx25/35, I tried to find muxer settings but couldn't find them. It
+seemed to me, GPIO is the only option there (I think I even asked
+Richard). Can you route them on mx25/35, too?
+
 Regards,
-Shawn
 
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--hAW+M2+FUO+onfmf
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk33aEgACgkQD27XaX1/VRuOHgCbBKaGRPbt/rVvDqK3tDk85FTJ
+/UoAoKD1wPz+/6MEx6NbWP3fDY1Qp2MI
+=mk0k
+-----END PGP SIGNATURE-----
+
+--hAW+M2+FUO+onfmf--
