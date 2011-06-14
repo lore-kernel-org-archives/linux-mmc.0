@@ -1,96 +1,66 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH v2 4/4] mmc: sdhci-esdhc-imx: extend card_detect and
- write_protect support for mx5
-Date: Tue, 14 Jun 2011 15:55:20 +0200
-Message-ID: <20110614135520.GH5043@pengutronix.de>
-References: <1307702572-22066-5-git-send-email-shawn.guo@linaro.org>
- <1308034059-4014-1-git-send-email-shawn.guo@linaro.org>
- <20110614095129.GD5043@pengutronix.de>
- <20110614130610.GH30295@S2100-06.ap.freescale.net>
+From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: irq flood with mmc boot partitions on s3c2416 with 3.0rc1
+Date: Tue, 14 Jun 2011 16:10:39 +0200
+Message-ID: <201106141610.42700.heiko@sntech.de>
+References: <201106022149.47936.heiko@sntech.de> <201106030956.43174.heiko@sntech.de> <BANLkTi=YvSL_yzku6v3tsJaaLTL=fBXShg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="hAW+M2+FUO+onfmf"
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:36277 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752842Ab1FNNz1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 09:55:27 -0400
-Content-Disposition: inline
-In-Reply-To: <20110614130610.GH30295@S2100-06.ap.freescale.net>
+Received: from s15407518.onlinehome-server.info ([82.165.136.167]:44233 "EHLO
+	s15407518.onlinehome-server.info" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750864Ab1FNOLF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 10:11:05 -0400
+In-Reply-To: <BANLkTi=YvSL_yzku6v3tsJaaLTL=fBXShg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Eric Benard <eric@eukrea.com>, Arnaud Patard <arnaud.patard@rtp-net.org>, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: Kyungmin Park <kmpark@infradead.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+
+Hi Andrei,
+
+Am Dienstag 14 Juni 2011 schrieb Andrei Warkentin:
+> I recently came back from vacation (which is why I didn't pitch in
+> before). Has there been any further update on this? I want to exclude
+> my EMMC partitioning changes as the possible culprit here.
+
+nope, no updates yet. The flood also only starts when udev wants to
+create its device nodes, meaning the initial detection seems not to
+produce this problem
+
+But when I disable the whole boot partition stuff, it works as before
+without irq storms.
+
+As there don't seem to exist reports from other emmc users about this
+I guess the problem lays somewhere between the boot-partitions-patch
+and the sdhci-s3c driver (for s3c2416 at least).
+
+As my knowledge about the whole mmc-subsystem is quite spare I also
+don't really know where to start looking for the culprit yet.
+
+Heiko
 
 
---hAW+M2+FUO+onfmf
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 71da564..32290c5 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1136,7 +1136,7 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+ 
+ 	if (!mmc_card_mmc(card))
+ 		return 0;
+-
++/*
+ 	if (card->ext_csd.boot_size) {
+ 		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT0,
+ 					 card->ext_csd.boot_size >> 9,
+@@ -1151,7 +1151,7 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+ 		if (ret)
+ 			return ret;
+ 	}
+-
++*/
+ 	return ret;
+ }
 
-
-> important issue needs to be fixed in the release.  Please find some
-> time to do a full review, if possible.  We need your ack to know if
-> the patch stands :) =20
-
-Huh, my ack is needed for the linaro-kernel? :) Isn't it possible to
-replace a V1 patch with a V2 patch in later kernels?
-
-> > > diff --git a/arch/arm/plat-mxc/include/mach/esdhc.h b/arch/arm/plat-m=
-xc/include/mach/esdhc.h
-> > > index 86003f4..fced348 100644
-> > > --- a/arch/arm/plat-mxc/include/mach/esdhc.h
-> > > +++ b/arch/arm/plat-mxc/include/mach/esdhc.h
-> > > @@ -10,17 +10,32 @@
-> > >  #ifndef __ASM_ARCH_IMX_ESDHC_H
-> > >  #define __ASM_ARCH_IMX_ESDHC_H
-> > > =20
-> > > +enum wp_types {
-> > > +	ESDHC_WP_NONE,		/* no WP, neither signal nor gpio */
-> > > +	ESDHC_WP_SIGNAL,	/* mmc internal WP signal */
-> >=20
-> > I think SIGNAL is not descriptive enough. Maybe
-> >=20
-> We have the document telling it's internal.
->=20
-> > ESDHC_WP_INTERNAL		/* WP routed directly to mmc controller */
-> >=20
-> I thought about that.  If we use ESDHC_WP_INTERNAL, ESDHC_WP_GPIO
-> should probably be the ESDHC_WP_EXTERNAL for the couple naming.  But
-> I like ESDHC_WP_GPIO over ESDHC_WP_EXTERNAL, so chose the couple
-> naming of ESDHC_WP_GPIO vs. ESDHC_WP_SIGNAL.
-
-ESDHC_WP_CONTROLLER? Or ESDHC_WP_CORE?
-
-> > ? It should be mentioned on which SoCs this is not available?
-> >=20
-> From SoC/controller POV, it's all available.  It's really a board
-> design choice to connect card CD/WP to the pads or not, which the
-> controller CD/WP signal/function is available on.
-
-For mx25/35, I tried to find muxer settings but couldn't find them. It
-seemed to me, GPIO is the only option there (I think I even asked
-Richard). Can you route them on mx25/35, too?
-
-Regards,
-
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---hAW+M2+FUO+onfmf
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk33aEgACgkQD27XaX1/VRuOHgCbBKaGRPbt/rVvDqK3tDk85FTJ
-/UoAoKD1wPz+/6MEx6NbWP3fDY1Qp2MI
-=mk0k
------END PGP SIGNATURE-----
-
---hAW+M2+FUO+onfmf--
