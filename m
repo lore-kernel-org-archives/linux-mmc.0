@@ -1,126 +1,113 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: Resume issue with brcmfmac *not* loaded
-Date: Mon, 13 Jun 2011 18:12:32 -0700
-Message-ID: <BANLkTinAXsHYBZ0uSY4ZtTd=f=7LNQM+_9o_FcLLYs1iPfL=YQ@mail.gmail.com>
-References: <74CDBE0F657A3D45AFBB94109FB122FF04992C026B@HQMAIL01.nvidia.com>
-	<BANLkTimJXtFB5Qi9sjVOWhrKVfuE5O1p-uhGMq_WmnJPJcugpg@mail.gmail.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v4 2/5] mmc: support sdhci-pxav2.c
+Date: Tue, 14 Jun 2011 14:07:53 +0800
+Message-ID: <BANLkTimeb-Ax99rQDYckLsVSncxhrh7amg@mail.gmail.com>
+References: <1307526121-12059-1-git-send-email-zhangfei.gao@marvell.com>
+	<1307526121-12059-3-git-send-email-zhangfei.gao@marvell.com>
+	<0059AEB1-3536-4540-924A-A95C7F3AD21A@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f52.google.com ([209.85.161.52]:63771 "EHLO
-	mail-fx0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752497Ab1FNBMd convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2011 21:12:33 -0400
-Received: by fxm6 with SMTP id 6so4770078fxm.11
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2011 18:12:32 -0700 (PDT)
-In-Reply-To: <BANLkTimJXtFB5Qi9sjVOWhrKVfuE5O1p-uhGMq_WmnJPJcugpg@mail.gmail.com>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:38745 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752150Ab1FNGHy convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 02:07:54 -0400
+Received: by vxi39 with SMTP id 39so4195086vxi.19
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2011 23:07:53 -0700 (PDT)
+In-Reply-To: <0059AEB1-3536-4540-924A-A95C7F3AD21A@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Grundler <grundler@chromium.org>
-Cc: Stephen Warren <swarren@nvidia.com>, "cjb@laptop.org" <cjb@laptop.org>, "Greg KH (gregkh@suse.de)" <gregkh@suse.de>, "vrao@broadcom.com" <vrao@broadcom.com>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Olof Johansson <olofj@chromium.org>, Sukesh Srikakula <sukeshs@broadcom.com>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Zhangfei Gao <zgao6@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, Qiming Wu <wuqm@marvell.com>, Jun Nie <njun@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>, Haojian Zhuang <haojian.zhuang@gmail.com>, Raymond Wu <xywu@marvell.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-Hi,
+>> +static void pxav2_set_private_registers(struct sdhci_host *host, u8=
+ mask)
+>> +{
+>> + =A0 =A0 struct platform_device *pdev =3D to_platform_device(mmc_de=
+v(host->mmc));
+>> + =A0 =A0 struct sdhci_pxa_platdata *pdata =3D pdev->dev.platform_da=
+ta;
+>> +
+>> + =A0 =A0 if (mask =3D=3D SDHCI_RESET_ALL) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 u16 tmp =3D 0;
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 /*
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* tune timing of read data/command when=
+ crc error happen
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* no performance impact
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (pdata->clk_delay_sel =3D=3D 1) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp =3D readw(host->ioaddr=
+ + SD_CLOCK_BURST_SIZE_SETUP);
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp &=3D ~(SDCLK_DELAY_MAS=
+K << SDCLK_DELAY_SHIFT);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp |=3D (pdata->clk_delay=
+_cycles & SDCLK_DELAY_MASK)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 << SDCLK_D=
+ELAY_SHIFT;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp &=3D ~(SDCLK_SEL_MASK =
+<< SDCLK_SEL_SHIFT);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp |=3D (1 & SDCLK_SEL_MA=
+SK) << SDCLK_SEL_SHIFT;
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 writew(tmp, host->ioaddr +=
+ SD_CLOCK_BURST_SIZE_SETUP);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 }
+>
+> There are 3 possible value for clk_delay_sel.
+>
+> 0 =A0=3D=3D do not use clk_delay_cycles
+> 1 =3D=3D use programmed clk_delay_cycles value (the code above)
+> all other values use the sd_clk which was used to drive the output
+>
+> The code about only handles 2 of the 3 cases
 
-=46irst, the below were pure guesses on my behalf, but browsing around
-the sources for a few minutes seems to confirm that caps are... well,
-caps. flags are currently active flags.
+pxa910/920 only require two cases.
+1, clk_delay_sel =3D 1 with delay value.
+2, use default setting and directly use sd_clk. clk_delay_sel =3D 3.
 
-On Mon, Jun 13, 2011 at 5:26 PM, Grant Grundler <grundler@chromium.org>=
- wrote:
->> When the driver is loaded, suspend and resume (echo mem > /sys/state=
-/power)
->> work fine.
+>
+> suggest
+>
+> =A0 =A0 =A0 =A0(if (pdata->clk_delay_sel) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if (pdata->clk_delay_sel =3D=3D 1) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp =3D readw(host->ioaddr=
+ + SD_CLOCK_BURST_SIZE_SETUP);
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp &=3D ~(SDCLK_DELAY_MAS=
+K << SDCLK_DELAY_SHIFT);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp |=3D (pdata->clk_delay=
+_cycles & SDCLK_DELAY_MASK)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 << SDCLK_D=
+ELAY_SHIFT;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp &=3D ~(SDCLK_SEL_MASK =
+<< SDCLK_SEL_SHIFT);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp |=3D 1 << SDCLK_SEL_SH=
+IFT;
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 writew(tmp, host->ioaddr +=
+ SD_CLOCK_BURST_SIZE_SETUP);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 } else {
+>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp =3D readw(host->ioaddr=
+ + SD_CLOCK_BURST_SIZE_SETUP);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp &=3D ~(SDCLK_SEL_MASK =
+<< SDCLK_SEL_SHIFT);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 tmp |=3D 2 =A0<< SDCLK_SEL=
+_SHIFT;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 writew(tmp, host->ioaddr +=
+ SD_CLOCK_BURST_SIZE_SETUP);
+The else is default setting on pxa910 after reset.
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> =A0 =A0 =A0 =A0 }
+>
+> Philip and Mark
 >>
->> However, without the driver loaded, resume works, but 10 seconds lat=
-er,
->> the kernel hangs a little, and spits out the errors quoted at the en=
-d of
->> this email. The hangs interfere with other devices on the system; e.=
-g.
->> audio DMA gets starved and causes audible artifacts.
->>
->> I tracked this down to brcmfmac's suspend function wl_cfg80211_suspe=
-nd()
->> calling sdioh_sdio_set_host_pm_flags(MMC_PM_KEEP_POWER).
 >
-> Broadcom and/or Olofj might have insight in this. It's not clear to m=
-e
-> why loading the driver on resume would break this. =A0Loading the dri=
-ver
-> at boot time works fine for me and should essentially be exercising
-> the same code path from the driver PoV.
-
-Sounds to me like loading the driver isn't what is breaking things,
-it's the suspend/resume without a driver at all.
-
-That slot lacks a CD GPIO, which means that the MMC code will poll for
-cards present. It seems like one of those polls are what's causing
-problem in this case.
-
-The wifi adapter will stay powered across the suspend/resume (external
-power feed, not part of MMC). So the MMC interface will go down but
-the card will remain powered.
-
->> I note that the MMC controller suspend/resume path are influenced by
->> MMC_PM_KEEP_POWER, but only when the driver for the attached SDIO de=
-vice
->> specify that flag, hence it's in host->pm_flags and not just in
->> host->pm_caps.
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 >
-> Sorry, I don't know the difference and assume Olof does.
->
->
->> If I hack all the MMC core code to look for (host->pm_caps &
->> MMC_PM_KEEP_POWER) instead of (host->pm_flags & MMC_PM_KEEP_POWER), =
-then
->> suspend/resume works fine even without the brcmfmac driver loaded.
->
-> Olof (just walked by) suspects pm_caps means it's supported and
-> pm_flags indicates state (enabled).
-
-Right -- it sounds to me like checking caps at resume time is the
-wrong way to go about it -- caps are just caps, and flags are the
-current actual setting.
-
->> I imagine such a change isn't blanket appropriate for the MMC core. =
-Can
->> anyone clue me in on:
->>
->> * Is the call to sdioh_sdio_set_host_pm_flags() just something that =
-masks
->> a somewhat unrelated problem that should be investigated, or a direc=
-t fix
->> for this issue?
-
-Sounds to me like there's another problem going on here. I wonder if
-the card gets confused if the host goes away and comes back without it
-having been power cycled as well.
-
-This should be simple for Broadcom to reproduce, and they are the ones
-with the knowledge of how their adapter behaves. So I'd like to hear
-from them about this.
-
->> Note that the call to sdioh_sdio_set_host_pm_flags() was introduced =
-to
->> staging-2.6.git in commit 6b5a5a3eb77ea69382da9d2a64d74107e49cedaa
->> "STAGING: brcm80211 v2 keep power on in suspend state".
-
-Reverting that change won't make a difference in this case, will it?
-
-
-Sounds like the solution here might instead be:
-
-* Specify the power_gpio properly for the slot in question (it does
-have one wired up if I'm reading the right schematics, it's just not
-specified in the board file)
-* Add a suspend/resume function to the sdhci-tegra driver currently
-not in use, that disables power to the slot during suspend if the
-pm_flags don't have MMC_KEEP_POWER set.
-
-
-That should take care of this issue, but it would also be good to hear
-from Broadcom above as to why the current behavior causes problems.
-
-
--Olof
