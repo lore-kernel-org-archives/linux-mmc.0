@@ -1,69 +1,102 @@
-From: Arnaud Patard (Rtp) <arnaud.patard@rtp-net.org>
-Subject: Re: [PATCH 0/4] Extend sdhci-esdhc-imx card_detect and write_protect support for mx5
-Date: Tue, 14 Jun 2011 16:29:57 +0200
-Message-ID: <87lix4iize.fsf@lebrac.rtp-net.org>
-References: <1307702572-22066-1-git-send-email-shawn.guo@linaro.org>
-	<20110614064841.GB30295@S2100-06.ap.freescale.net>
-	<87ei2wk6na.fsf@lebrac.rtp-net.org>
-	<20110614113902.GD30295@S2100-06.ap.freescale.net>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH v4 2/5] mmc: support sdhci-pxav2.c
+Date: Tue, 14 Jun 2011 08:00:01 -0700
+Message-ID: <5BEA9179-AA1B-4C49-A090-1DC78B1DE5A1@marvell.com>
+References: <1307526121-12059-1-git-send-email-zhangfei.gao@marvell.com>
+ <1307526121-12059-3-git-send-email-zhangfei.gao@marvell.com>
+ <0059AEB1-3536-4540-924A-A95C7F3AD21A@marvell.com>
+ <BANLkTimeb-Ax99rQDYckLsVSncxhrh7amg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lebrac.rtp-net.org ([88.191.135.105]:38085 "EHLO
-	lebrac.rtp-net.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751273Ab1FNOaK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 10:30:10 -0400
-In-Reply-To: <20110614113902.GD30295@S2100-06.ap.freescale.net> (Shawn Guo's
-	message of "Tue, 14 Jun 2011 19:39:03 +0800")
+Received: from na3sys009aog104.obsmtp.com ([74.125.149.73]:55801 "EHLO
+	na3sys009aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751574Ab1FNPDX convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 14 Jun 2011 11:03:23 -0400
+In-Reply-To: <BANLkTimeb-Ax99rQDYckLsVSncxhrh7amg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Eric Benard <eric@eukrea.com>, patches@linaro.org, linux-mmc@vger.kernel.org, kernel@pengutronix.de, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: Zhangfei Gao <zgao6@marvell.com>, Eric Miao <eric.y.miao@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, Qiming Wu <wuqm@marvell.com>, Jun Nie <njun@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>, Haojian Zhuang <haojian.zhuang@gmail.com>, Raymond Wu <xywu@marvell.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Mark Brown <mark.brown314@gmail.com>
 
-Shawn Guo <shawn.guo@freescale.com> writes:
 
-> On Tue, Jun 14, 2011 at 01:13:29PM +0200, Arnaud Patard wrote:
->> Shawn Guo <shawn.guo@freescale.com> writes:
+On Jun 13, 2011, at 11:07 PM, zhangfei gao wrote:
+
+>>> +static void pxav2_set_private_registers(struct sdhci_host *host, u8 mask)
+>>> +{
+>>> +     struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
+>>> +     struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+>>> +
+>>> +     if (mask == SDHCI_RESET_ALL) {
+>>> +             u16 tmp = 0;
+>>> +
+>>> +             /*
+>>> +              * tune timing of read data/command when crc error happen
+>>> +              * no performance impact
+>>> +              */
+>>> +             if (pdata->clk_delay_sel == 1) {
+>>> +                     tmp = readw(host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+>>> +
+>>> +                     tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
+>>> +                     tmp |= (pdata->clk_delay_cycles & SDCLK_DELAY_MASK)
+>>> +                             << SDCLK_DELAY_SHIFT;
+>>> +                     tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
+>>> +                     tmp |= (1 & SDCLK_SEL_MASK) << SDCLK_SEL_SHIFT;
+>>> +
+>>> +                     writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+>>> +             }
 >> 
->> Hi,
+>> There are 3 possible value for clk_delay_sel.
 >> 
->> > On Fri, Jun 10, 2011 at 06:42:48PM +0800, Shawn Guo wrote:
->> >> The card-present polling within sdhci based driver is very expensive
->> >> in terms of the impact to system performance.  We observe a few
->> >> system performance issues from Freescale and Linaro on mx5 platforms,
->> >> which have been proved card polling related.
->> >> 
->> >> The patch set extends the current sdhci-esdhc-imx card_detect and
->> >> write_protect support to cover mx5 platforms, and solves above
->> >> performance issues.
->> >> 
->> >> Shawn Guo (4):
->> >>       mmc: sdhci: fix interrupt storm from card detection
->> >>       mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not get cleared
->> >>       mmc: sdhci-esdhc-imx: remove "WP" from flag ESDHC_FLAG_GPIO_FOR_CD_WP
->> >>       mmc: sdhci-esdhc-imx: extend card_detect and write_protect support
->> >> 
->> > Hi Arnaud,
->> >
->> > Any chance to play with it yet?
+>> 0  == do not use clk_delay_cycles
+>> 1 == use programmed clk_delay_cycles value (the code above)
+>> all other values use the sd_clk which was used to drive the output
 >> 
->> I tried applying the patch 4 (v2) on mmc git and Sascha Hauer's for-next
->> branch and failed. Can you please tell me on which tree should I apply
->> it ?
+>> The code about only handles 2 of the 3 cases
+> 
+> pxa910/920 only require two cases.
+> 1, clk_delay_sel = 1 with delay value.
+> 2, use default setting and directly use sd_clk. clk_delay_sel = 3.
+> 
 >> 
-> Sascha really should not picked up the following 3 patches.  They are
-> nonsense when driver is not even ready for the support.  These 3
-> patches have conflict with my patch set.  You should be able to
-> apply with these 3 removed.
+>> suggest
+>> 
+>>        (if (pdata->clk_delay_sel) {
+>>> +             if (pdata->clk_delay_sel == 1) {
+>>> +                     tmp = readw(host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+>>> +
+>>> +                     tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
+>>> +                     tmp |= (pdata->clk_delay_cycles & SDCLK_DELAY_MASK)
+>>> +                             << SDCLK_DELAY_SHIFT;
+>>> +                     tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
+>>> +                     tmp |= 1 << SDCLK_SEL_SHIFT;
+>>> +
+>>> +                     writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+>>> +             } else {
+>> 
+>>> +                     tmp = readw(host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+>>> +                     tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
+>>> +                     tmp |= 2  << SDCLK_SEL_SHIFT;
+>>> +                     writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+> The else is default setting on pxa910 after reset.
+>>                   }
+>>         }
+>> 
+>> Philip and Mark
 
-They're still not applying. It's failing to failing
-sdhci-esdhc-imx.c. I'm currently trying t make sure I didn't miss
-something but it looks like the patch is not against for-next. For
-instance, look at :
-http://git.pengutronix.de/?p=imx/linux-2.6.git;a=blob;f=drivers/mmc/host/sdhci-esdhc-imx.c;h=a19967d0bfc48b0ce8216de0d1a727093ee9fa03;hb=refs/heads/for-next
+If you are comfortable not support mode 0 then I am okay with this patch set.
 
-It's already adding a esdhc_pltfm_get_ro() function, so I fail to see
-how a patch adding a function with same name can work.
+Acked-by: Philip Rakity <prakity@marvell.com>
+Acked-by: Mark F. Brown <mark.brown314@gmail.com>
 
-Thanks,
-Arnaud
+>>> 
+>> 
+>> _______________________________________________
+>> linux-arm-kernel mailing list
+>> linux-arm-kernel@lists.infradead.org
+>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+>> 
+
