@@ -1,62 +1,50 @@
-From: Sourav Poddar <sourav.poddar@ti.com>
-Subject: [PATCH v2] omap: hsmmc: fix ocr mask usage
-Date: Tue, 14 Jun 2011 15:59:59 +0530
-Message-ID: <1308047399-8537-1-git-send-email-sourav.poddar@ti.com>
+From: Arnaud Patard (Rtp) <arnaud.patard@rtp-net.org>
+Subject: Re: [PATCH 0/4] Extend sdhci-esdhc-imx card_detect and write_protect support for mx5
+Date: Tue, 14 Jun 2011 13:13:29 +0200
+Message-ID: <87ei2wk6na.fsf@lebrac.rtp-net.org>
+References: <1307702572-22066-1-git-send-email-shawn.guo@linaro.org>
+	<20110614064841.GB30295@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:42941 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755872Ab1FNKag (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 14 Jun 2011 06:30:36 -0400
+Received: from lebrac.rtp-net.org ([88.191.135.105]:51133 "EHLO
+	lebrac.rtp-net.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752952Ab1FNLNk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 07:13:40 -0400
+In-Reply-To: <20110614064841.GB30295@S2100-06.ap.freescale.net> (Shawn Guo's
+	message of "Tue, 14 Jun 2011 14:48:42 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: tony@atomide.com, madhu.cr@ti.com, kishore.kadiyala@ti.com, cjb@laptop.org, gadiyar@ti.com, Sourav Poddar <sourav.poddar@ti.com>
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, Eric Benard <eric@eukrea.com>, patches@linaro.org, linux-mmc@vger.kernel.org, kernel@pengutronix.de, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-From: Anand Gadiyar <gadiyar@ti.com>
+Shawn Guo <shawn.guo@freescale.com> writes:
 
-The OMAP HSMMC driver uses an ocr_mask to determine the
-list of voltages supported by the card. It populates this
-mask based on the list of voltages supported by the
-regulator that supplies the voltage.
+Hi,
 
-Commit 64be97822b (omap4 hsmmc: Update ocr mask for MMC2 for
-regulator to use) passed a fixed ocr_mask from the OMAP4 SDP
-board file to limit the voltage to 2.9-3.0 Volts, and updated
-the driver to use this mask if provided, instead of using the
-regulator's supported voltages.
+> On Fri, Jun 10, 2011 at 06:42:48PM +0800, Shawn Guo wrote:
+>> The card-present polling within sdhci based driver is very expensive
+>> in terms of the impact to system performance.  We observe a few
+>> system performance issues from Freescale and Linaro on mx5 platforms,
+>> which have been proved card polling related.
+>> 
+>> The patch set extends the current sdhci-esdhc-imx card_detect and
+>> write_protect support to cover mx5 platforms, and solves above
+>> performance issues.
+>> 
+>> Shawn Guo (4):
+>>       mmc: sdhci: fix interrupt storm from card detection
+>>       mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not get cleared
+>>       mmc: sdhci-esdhc-imx: remove "WP" from flag ESDHC_FLAG_GPIO_FOR_CD_WP
+>>       mmc: sdhci-esdhc-imx: extend card_detect and write_protect support
+>> 
+> Hi Arnaud,
+>
+> Any chance to play with it yet?
 
-However the commit is buggy - the ocr_mask is overridden
-by the regulator's capabilities anyway. Fix this.
+I tried applying the patch 4 (v2) on mmc git and Sascha Hauer's for-next
+branch and failed. Can you please tell me on which tree should I apply
+it ?
 
-(The bug shows up when a system-wide suspend is attempted
-on the OMAP4 SDP/Blaze platforms. The eMMC card comes up
-at 3V, but drops to 1.65V after the system resumes).
-
-Signed-off-by: Anand Gadiyar <gadiyar@ti.com>
-Acked-by: Balaji T K <balajitk@ti.com>
-Tested-by:  Kishore Kadiyala <kishore.kadiyala@ti.com>
-Signed-off-by: Sourav Poddar <sourav.poddar@ti.com>
----
- v2: Rebase to latest kernel(Linux 3.0-rc3)
- v1: https://patchwork.kernel.org/patch/576871/
-
- drivers/mmc/host/omap_hsmmc.c |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 5b2e215..8707bcd 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -429,7 +429,6 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 				return -EINVAL;
- 			}
- 		}
--		mmc_slot(host).ocr_mask = mmc_regulator_get_ocrmask(reg);
- 
- 		/* Allow an aux regulator */
- 		reg = regulator_get(host->dev, "vmmc_aux");
--- 
-1.7.0.4
-
+Thanks,
+Arnaud
