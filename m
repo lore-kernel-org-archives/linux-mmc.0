@@ -1,55 +1,44 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH 1/4] mmc: sdhci: fix interrupt storm from card detection
-Date: Tue, 14 Jun 2011 11:24:10 +0200
-Message-ID: <20110614092410.GB5043@pengutronix.de>
+Subject: Re: [PATCH 3/4] mmc: sdhci-esdhc-imx: remove "WP" from flag
+ ESDHC_FLAG_GPIO_FOR_CD_WP
+Date: Tue, 14 Jun 2011 11:28:13 +0200
+Message-ID: <20110614092812.GC5043@pengutronix.de>
 References: <1307702572-22066-1-git-send-email-shawn.guo@linaro.org>
- <1307702572-22066-2-git-send-email-shawn.guo@linaro.org>
+ <1307702572-22066-4-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="V0207lvV8h4k8FAm"
+	protocol="application/pgp-signature"; boundary="t0UkRYy7tHLRMCai"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:60184 "EHLO
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:54783 "EHLO
 	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753257Ab1FNJY1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 05:24:27 -0400
+	with ESMTP id S1754593Ab1FNJ2Q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 05:28:16 -0400
 Content-Disposition: inline
-In-Reply-To: <1307702572-22066-2-git-send-email-shawn.guo@linaro.org>
+In-Reply-To: <1307702572-22066-4-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shawn Guo <shawn.guo@linaro.org>
 Cc: linux-mmc@vger.kernel.org, Eric Benard <eric@eukrea.com>, patches@linaro.org, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, Chris Ball <cjb@laptop.org>, Arnaud Patard <arnaud.patard@rtp-net.org>
 
 
---V0207lvV8h4k8FAm
+--t0UkRYy7tHLRMCai
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, Jun 10, 2011 at 06:42:49PM +0800, Shawn Guo wrote:
-> The issue was initially found by Eric Benard as below.
->=20
-> http://permalink.gmane.org/gmane.linux.ports.arm.kernel/108031
->=20
-> Not sure about other SDHCI based controller, but on Freescale eSDHC,
-> the SDHCI_INT_CARD_INSERT bits will be immediately set again when it
-> gets cleared, if a card is inserted. The driver need to mask the irq
-> to prevent interrupt storm which will freeze the system.  And the
-> SDHCI_INT_CARD_REMOVE gets the same situation.
->=20
-> The patch fixes the problem based on the initial idea from
-> Eric Benard.
+On Fri, Jun 10, 2011 at 06:42:51PM +0800, Shawn Guo wrote:
+> The use of flag ESDHC_FLAG_GPIO_FOR_CD_WP is all CD related.  It does
+> not necessarily need to bother WP in the flag name.
 >=20
 > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> Cc: Eric Benard <eric@eukrea.com>
 
-Hmm, that should get enough testing on non-imx (and even non-ARM)
-devices. And a comment describing the situation.
+I'd just squash it into the next one?
 
 --=20
 Pengutronix e.K.                           | Wolfram Sang                |
 Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
---V0207lvV8h4k8FAm
+--t0UkRYy7tHLRMCai
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 Content-Disposition: inline
@@ -57,9 +46,9 @@ Content-Disposition: inline
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk33KLoACgkQD27XaX1/VRs72QCgjnmh0y7YYehy5vZbq62Eprcc
-dVMAnRiJnrZoMfPC/BR4h5/I43ES+1ns
-=KsKA
+iEYEARECAAYFAk33KawACgkQD27XaX1/VRt5GACffqVdpNR6LCycASRRPfoR8Mia
+GVgAnjpxVuM43SxSTnZxszt5JLAPhXMW
+=/+KF
 -----END PGP SIGNATURE-----
 
---V0207lvV8h4k8FAm--
+--t0UkRYy7tHLRMCai--
