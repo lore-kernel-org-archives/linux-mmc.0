@@ -1,189 +1,87 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: UHS-I bus speed mode should be set last in UHS initialization
-Date: Tue, 14 Jun 2011 22:00:00 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300015F9F47DD@SAUSEXMBP01.amd.com>
-References: <000a01cc2a04$09c9d600$1d5d8200$@org>
- <6C03668EAF45B747AF947A1603D1B300015F91E376@SAUSEXMBP01.amd.com>
- <000001cc2aee$dd8a8e90$989fabb0$@org>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH v2 4/4] mmc: sdhci-esdhc-imx: extend card_detect and
+ write_protect support for mx5
+Date: Wed, 15 Jun 2011 11:10:00 +0800
+Message-ID: <20110615030959.GA31191@S2100-06.ap.freescale.net>
+References: <1307702572-22066-5-git-send-email-shawn.guo@linaro.org>
+ <1308034059-4014-1-git-send-email-shawn.guo@linaro.org>
+ <20110614095129.GD5043@pengutronix.de>
+ <20110614130610.GH30295@S2100-06.ap.freescale.net>
+ <20110614135520.GH5043@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:38494
-	"EHLO CH1EHSOBE014.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753965Ab1FODDS convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 14 Jun 2011 23:03:18 -0400
-In-Reply-To: <000001cc2aee$dd8a8e90$989fabb0$@org>
-Content-Language: en-US
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:53177 "EHLO
+	TX2EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753965Ab1FODEd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2011 23:04:33 -0400
+Content-Disposition: inline
+In-Reply-To: <20110614135520.GH5043@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "subhashj@codeaurora.org" <subhashj@codeaurora.org>
-Cc: 'Philip Rakity' <prakity@marvell.com>, 'zhangfei gao' <zhangfei.gao@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Lu, Aaron" <Aaron.Lu@amd.com>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Eric Benard <eric@eukrea.com>, Arnaud Patard <arnaud.patard@rtp-net.org>, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-Hi Philip,
+On Tue, Jun 14, 2011 at 03:55:20PM +0200, Wolfram Sang wrote:
+> 
+> > important issue needs to be fixed in the release.  Please find some
+> > time to do a full review, if possible.  We need your ack to know if
+> > the patch stands :)  
+> 
+> Huh, my ack is needed for the linaro-kernel? :) Isn't it possible to
+> replace a V1 patch with a V2 patch in later kernels?
+> 
+The linaro-kernel tree only accepts patches that have been on upstream
+or are on the way to upstream (sitting on 'next' is a good proving).
+Also since we are touching sdhci.c a little bit, it should be good for
+us to get the patch on 'next' as early as we can, so that people can
+start testing it.
 
-Can you please confirm what should be the correct implementation?
+Anyway, I will post v2 shortly.  Please help do a full review if
+possible.  I'd appreciate it.
 
-Thanks,
-Arindam
+> > > > diff --git a/arch/arm/plat-mxc/include/mach/esdhc.h b/arch/arm/plat-mxc/include/mach/esdhc.h
+> > > > index 86003f4..fced348 100644
+> > > > --- a/arch/arm/plat-mxc/include/mach/esdhc.h
+> > > > +++ b/arch/arm/plat-mxc/include/mach/esdhc.h
+> > > > @@ -10,17 +10,32 @@
+> > > >  #ifndef __ASM_ARCH_IMX_ESDHC_H
+> > > >  #define __ASM_ARCH_IMX_ESDHC_H
+> > > >  
+> > > > +enum wp_types {
+> > > > +	ESDHC_WP_NONE,		/* no WP, neither signal nor gpio */
+> > > > +	ESDHC_WP_SIGNAL,	/* mmc internal WP signal */
+> > > 
+> > > I think SIGNAL is not descriptive enough. Maybe
+> > > 
+> > We have the document telling it's internal.
+> > 
+> > > ESDHC_WP_INTERNAL		/* WP routed directly to mmc controller */
+> > > 
+> > I thought about that.  If we use ESDHC_WP_INTERNAL, ESDHC_WP_GPIO
+> > should probably be the ESDHC_WP_EXTERNAL for the couple naming.  But
+> > I like ESDHC_WP_GPIO over ESDHC_WP_EXTERNAL, so chose the couple
+> > naming of ESDHC_WP_GPIO vs. ESDHC_WP_SIGNAL.
+> 
+> ESDHC_WP_CONTROLLER? Or ESDHC_WP_CORE?
+> 
+Ok, going ESDHC_WP_CONTROLLER
 
-> -----Original Message-----
-> From: subhashj@codeaurora.org [mailto:subhashj@codeaurora.org]
-> Sent: Wednesday, June 15, 2011 5:28 AM
-> To: Nath, Arindam
-> Cc: 'Philip Rakity'; 'zhangfei gao'; cjb@laptop.org; linux-
-> mmc@vger.kernel.org; Lu, Aaron
-> Subject: RE: UHS-I bus speed mode should be set last in UHS
-> initialization
+> > > ? It should be mentioned on which SoCs this is not available?
+> > > 
+> > From SoC/controller POV, it's all available.  It's really a board
+> > design choice to connect card CD/WP to the pads or not, which the
+> > controller CD/WP signal/function is available on.
 > 
-> Hi Arindam,
+> For mx25/35, I tried to find muxer settings but couldn't find them. It
+> seemed to me, GPIO is the only option there (I think I even asked
+> Richard). Can you route them on mx25/35, too?
 > 
-> > -----Original Message-----
-> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > owner@vger.kernel.org] On Behalf Of Nath, Arindam
-> > Sent: Tuesday, June 14, 2011 12:00 AM
-> > To: subhashj@codeaurora.org
-> > Cc: Philip Rakity; zhangfei gao; cjb@laptop.org; linux-
-> > mmc@vger.kernel.org; Lu, Aaron
-> > Subject: RE: UHS-I bus speed mode should be set last in UHS
-> > initialization
-> >
-> > Adding Philip and Zhangfei.
-> >
-> > Hi Subhash,
-> >
-> > Does your controller follow some non-standard steps for
-> initialization?
-> > I referred to Figure 3-14, section 3.9.4 of Physical Layer Spec
-> v3.01,
-> > and it shows the order, setting Driver Strength Select, Bus Speed
-> Mode,
-> > and then Current Limit. So please confirm back.
-> 
-> Sorry, I don't know what do you mean by non standard steps for
-> initialization. Nowhere in v3.01 spec, it is mentioned that Bus speed
-> mode
-> **must** be set before current limit. Figure 3-14 also doesn't indicate
-> this.
-> 
-> If you set the bus speed mode in sd_set_bus_speed_mode(), you are
-> changing
-> the host controller timings as well and if it's SDR50/SDR104 mode, then
-> immediately after setting the host controller timing mode, we have to
-> execute tuning sequence but here before executing tuning sequence, you
-> are
-> sending the CMD6 which involves the read data transfer from card which
-> is
-> bound to fail without tuning and it does fail with our host controller.
-> 
-> Do let me know if this explanation make sense.
-> 
-> Regards,
-> Subhash
-> 
-> >
-> > Thanks,
-> > Arindam
-> >
-> > > -----Original Message-----
-> > > From: subhashj@codeaurora.org [mailto:subhashj@codeaurora.org]
-> > > Sent: Tuesday, June 14, 2011 1:27 AM
-> > > To: Nath, Arindam
-> > > Subject: FW: UHS-I bus speed mode should be set last in UHS
-> > > initialization
-> > >
-> > > Hi Arindam,
-> > >
-> > > Does this change make sense for you? If yes, then I can go ahead
-> and
-> > > post a
-> > > patch for this.
-> > >
-> > > Regards,
-> > > Subhash
-> > >
-> > > -----Original Message-----
-> > > From: linux-mmc-owner@vger.kernel.org
-> > > [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Subhash
-> > Jadavani
-> > > Sent: Monday, June 06, 2011 3:44 PM
-> > > To: linux-mmc@vger.kernel.org
-> > > Subject: UHS-I bus speed mode should be set last in UHS
-> > initialization
-> > >
-> > > Hi Chris, Arindam,
-> > >
-> > > mmc_sd_init_uhs_card function sets the driver type, current limit
-> and
-> > > bus
-> > > speed mode on card as well as on host controller side. Currently
-> bus
-> > > speed
-> > > mode is set by sending CMD6 to card and setting timing mode in host
-> > > controller and then before initiating tuning sequence, it also
-> tries
-> > to
-> > > set current limit by sending CMD6 to card which fails on our host
-> > > controller (due to data CRC or timeout errors) if bus speed mode is
-> > > SDR50/SDR104 mode.
-> > >
-> > > So basically bus speed mode should be set only after current limit
-> is
-> > > set
-> > > in the card and immediately after setting the bus speed mode,
-> tuning
-> > > sequence should be initiated. So following changes is needed. If it
-> > > looks
-> > > fine then I can send you this change in patch.
-> > >
-> > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
-> > > 0da37eb..19634d5 100644
-> > > --- a/drivers/mmc/core/sd.c
-> > > +++ b/drivers/mmc/core/sd.c
-> > > @@ -610,13 +610,13 @@ static int mmc_sd_init_uhs_card(struct
-> mmc_card
-> > > *card)
-> > >         if (err)
-> > >                 goto out;
-> > >
-> > > -       /* Set bus speed mode of the card */
-> > > -       err = sd_set_bus_speed_mode(card, status);
-> > > +       /* Set current limit for the card */
-> > > +       err = sd_set_current_limit(card, status);
-> > >         if (err)
-> > >                 goto out;
-> > >
-> > > -       /* Set current limit for the card */
-> > > -       err = sd_set_current_limit(card, status);
-> > > +       /* Set bus speed mode of the card */
-> > > +       err = sd_set_bus_speed_mode(card, status);
-> > >         if (err)
-> > >                 goto out;
-> > >
-> > > Regards,
-> > > Subhash
-> > >
-> > > --
-> > > Sent by a consultant of the Qualcomm Innovation Center, Inc.
-> > > The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
-> > > Forum.
-> > >
-> > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-
-> mmc"
-> > in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > >
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Sorry for confusion here.  It's all available from eSDHC controller
+POV.  But no, it's not available on mx25/35 from SoC pinmux POV.  So
+you are right.
 
+-- 
+Regards,
+Shawn
 
