@@ -1,57 +1,110 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: sdhci-esdhc-imx -- MMC 10x slower than it should be
-Date: Wed, 15 Jun 2011 19:24:34 +0800
-Message-ID: <20110615112433.GB3579@S2100-06.ap.freescale.net>
-References: <20110615094001.GA21137@pma.sysgo.com>
- <20110615105318.GB3097@pengutronix.de>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: [PATCH v3] dmaengine: add new dma API for max_segment_number
+Date: Wed, 15 Jun 2011 20:08:41 +0800
+Message-ID: <1308139721-4008-1-git-send-email-shawn.guo@linaro.org>
+References: <BANLkTi=-t9HVc6U6QY07su+c3WztsGoq3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe006.messaging.microsoft.com ([213.199.154.144]:6104
-	"EHLO DB3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754312Ab1FOLTI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2011 07:19:08 -0400
-Content-Disposition: inline
-In-Reply-To: <20110615105318.GB3097@pengutronix.de>
+Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:50627
+	"EHLO CH1EHSOBE017.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1750771Ab1FOMDO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2011 08:03:14 -0400
+In-Reply-To: <BANLkTi=-t9HVc6U6QY07su+c3WztsGoq3Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Pavel Machek <pma@sysgo.com>, linux-mmc@vger.kernel.org, pba@sysgo.com, cjb@laptop.org, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org
+To: linux-kernel@vger.kernel.org
+Cc: Dan Williams <dan.j.williams@intel.com>, vinod.koul@intel.com, Russell King - ARM Linux <linux@arm.linux.org.uk>, FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>, cjb@laptop.org, gregkh@suse.de, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>
 
-On Wed, Jun 15, 2011 at 12:53:18PM +0200, Wolfram Sang wrote:
-> Hi,
-> 
-> > We are seeing issues with sdhci-esdhc-imx in 2.6.39; performance is
-> > not what it should be; it is about 10x lower in fact.
-> 
-> Which SoC? 25/35/51/53?
-> 
-> > ...any idea what this comment means? I'd like to eventualy support
-> > 8BITBUS...
-> 
-> 8-Bit bus is not specified in the standard, so it cannot be detected.
-> Check other drivers where they use MMC_CAP_8_BIT_DATA.
-> 
-> > Part of the problem is that esdhc_writeb_le() does translation of bits
-> > into breescale format; but readb() does not do translation back, and
-> > core code uses read-modify-write on the register, for example when
-> > turning on the LED. What to do there? Translate back? Add shadow
-> > variable? Get rid of read-modify-write?
-> 
-> Probably the least ugly solution :/
-> 
-> > Any ideas why it is slow?
-> 
-> Your board polls for card-detect, Shawn recently sent a series which
-> lets you fix that for mx5.
-> 
-> ADMA is marked broken in mainline, cause it didn't work with a number of
-> cards. Richard sent a patch recently.
-> 
-The ADMA support is recently added into Freescale BSP.  IOW, the ADMA
-does not play on kernel "2.6.34 -with-freescale-patches" either.
+Like dma_set(get)_max_seg_size for max_segment_size, the patch adds
+max_segment_number into device_dma_parameters and creates the
+corresponding dmaengine API dma_set(get)_max_seg_number for it.
 
+Here is the user story that tells the need of the new api.  The
+mxs-mmc is the mmc host controller for Freescale MXS architecture.
+There are a pair of  mmc host specific parameters max_seg_size and
+max_segs that mxs-mmc host driver needs to tell mmc core, so that
+mmc core can know how big each data segment could be and how many
+segments could be handled one time in a scatter list by host driver.
+
+The mxs-mmc driver is one user of dmaengine mxs-dma, and it will call
+mxs-dma to transfer data in scatter list.  That is to say mxs-mmc has
+no idea of what max_seg_size and max_segs should be, because they are
+all mxs-dma capability parameters, and mxs-mmc needs to query them
+from mxs-dma.
+
+Right now, there is well defined dma api (dma_get_max_seg_size) for
+mmc to query max_seg_size from dma driver, but the one for max_segs
+is missing.  That's why mxs-mmc driver has to hard-code it.
+
+The mxs-mmc is just one example to demonstrate the need of the new
+api, and there are other mmc host drivers (mxcmmc on imx-dma is
+another example) and possibly even other dmaengine users need this
+new api to know the maximum segments that dma driver can handle per
+dma call.
+
+Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+---
+ include/linux/device.h      |   16 ++++++++++++----
+ include/linux/dma-mapping.h |   15 +++++++++++++++
+ 2 files changed, 27 insertions(+), 4 deletions(-)
+
+diff --git a/include/linux/device.h b/include/linux/device.h
+index c66111a..f1152c5 100644
+--- a/include/linux/device.h
++++ b/include/linux/device.h
+@@ -481,12 +481,20 @@ extern int devres_release_group(struct device *dev, void *id);
+ extern void *devm_kzalloc(struct device *dev, size_t size, gfp_t gfp);
+ extern void devm_kfree(struct device *dev, void *p);
+ 
++/*
++ * device_dma_parameters is a property of DMA provider, and it belongs to the
++ * 'struct device' that actually provides DMA service, typically the drivers
++ * under drivers/dma, although in some cases the DMA provider and block device
++ * uses DMA service happen to be the same 'struct device'.
++ *
++ * It's not necessary for every single DMA providers to have this structure,
++ * because some DMA providers simply do not have these parameters/limitations.
++ * For those do have, the DMA providers should be responsible for setting the
++ * parameters up.
++ */
+ struct device_dma_parameters {
+-	/*
+-	 * a low level driver may set these to teach IOMMU code about
+-	 * sg limitations.
+-	 */
+ 	unsigned int max_segment_size;
++	unsigned int max_segment_number;
+ 	unsigned long segment_boundary_mask;
+ };
+ 
+diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
+index ba8319a..fd314f4 100644
+--- a/include/linux/dma-mapping.h
++++ b/include/linux/dma-mapping.h
+@@ -131,6 +131,21 @@ static inline unsigned int dma_set_max_seg_size(struct device *dev,
+ 		return -EIO;
+ }
+ 
++static inline unsigned int dma_get_max_seg_number(struct device *dev)
++{
++	return dev->dma_parms ? dev->dma_parms->max_segment_number : 1;
++}
++
++static inline unsigned int dma_set_max_seg_number(struct device *dev,
++						  unsigned int number)
++{
++	if (dev->dma_parms) {
++		dev->dma_parms->max_segment_number = number;
++		return 0;
++	} else
++		return -EIO;
++}
++
+ static inline unsigned long dma_get_seg_boundary(struct device *dev)
+ {
+ 	return dev->dma_parms ?
 -- 
-Regards,
-Shawn
+1.7.4.1
+
 
