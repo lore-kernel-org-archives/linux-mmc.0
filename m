@@ -1,54 +1,57 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH v2 0/4] Extend sdhci-esdhc-imx card_detect and write_protect support for mx5
-Date: Wed, 15 Jun 2011 19:15:18 +0800
-Message-ID: <1308136522-3403-1-git-send-email-shawn.guo@linaro.org>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: sdhci-esdhc-imx -- MMC 10x slower than it should be
+Date: Wed, 15 Jun 2011 19:24:34 +0800
+Message-ID: <20110615112433.GB3579@S2100-06.ap.freescale.net>
+References: <20110615094001.GA21137@pma.sysgo.com>
+ <20110615105318.GB3097@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe001.messaging.microsoft.com ([213.199.154.204]:56256
-	"EHLO AM1EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754402Ab1FOLOn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2011 07:14:43 -0400
+Received: from db3ehsobe006.messaging.microsoft.com ([213.199.154.144]:6104
+	"EHLO DB3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754312Ab1FOLTI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2011 07:19:08 -0400
+Content-Disposition: inline
+In-Reply-To: <20110615105318.GB3097@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Arnaud Patard <arnaud.patard@rtp-net.org>, Eric Benard <eric@eukrea.com>, Pavel Machek <pma@sysgo.com>, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Pavel Machek <pma@sysgo.com>, linux-mmc@vger.kernel.org, pba@sysgo.com, cjb@laptop.org, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org
 
-The card-present polling for sdhci based driver is very expensive
-in terms of the impact to system performance.  We observe a few
-system performance issues from Freescale and Linaro on mx5 platforms,
-which have been proved card polling related.
+On Wed, Jun 15, 2011 at 12:53:18PM +0200, Wolfram Sang wrote:
+> Hi,
+> 
+> > We are seeing issues with sdhci-esdhc-imx in 2.6.39; performance is
+> > not what it should be; it is about 10x lower in fact.
+> 
+> Which SoC? 25/35/51/53?
+> 
+> > ...any idea what this comment means? I'd like to eventualy support
+> > 8BITBUS...
+> 
+> 8-Bit bus is not specified in the standard, so it cannot be detected.
+> Check other drivers where they use MMC_CAP_8_BIT_DATA.
+> 
+> > Part of the problem is that esdhc_writeb_le() does translation of bits
+> > into breescale format; but readb() does not do translation back, and
+> > core code uses read-modify-write on the register, for example when
+> > turning on the LED. What to do there? Translate back? Add shadow
+> > variable? Get rid of read-modify-write?
+> 
+> Probably the least ugly solution :/
+> 
+> > Any ideas why it is slow?
+> 
+> Your board polls for card-detect, Shawn recently sent a series which
+> lets you fix that for mx5.
+> 
+> ADMA is marked broken in mainline, cause it didn't work with a number of
+> cards. Richard sent a patch recently.
+> 
+The ADMA support is recently added into Freescale BSP.  IOW, the ADMA
+does not play on kernel "2.6.34 -with-freescale-patches" either.
 
-The patch set extends the current sdhci-esdhc-imx card_detect and
-write_protect support to cover mx5 platforms, and solves above
-performance issues.
-
-Changes since v1:
- * Rebase on today's linux-next
- * Take the suggestion from Arnaud Patard to add default pdata in
-   imx_add_sdhci_esdhc_imx(), to avoid touching every single board
-   file for the platform_data changes
- * Add comment for sdhci.c change
- * Change ESDHC_CD(WP)_SIGNAL to ESDHC_CD(WP)_CONTROLLER for a more
-   descriptive name
- * Add missing NONE case handling in esdhc_pltfm_get_ro
- * Improve a couple comment wording per suggestion from Wolfram Sang
-
-Shawn Guo (4):
-      mmc: sdhci: fix interrupt storm from card detection
-      mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not get cleared
-      mmc: sdhci-esdhc-imx: remove "WP" from flag ESDHC_FLAG_GPIO_FOR_CD_WP
-      mmc: sdhci-esdhc-imx: extend card_detect and write_protect support for mx5
-
- arch/arm/mach-imx/eukrea_mbimxsd25-baseboard.c     |    3 +-
- arch/arm/mach-imx/eukrea_mbimxsd35-baseboard.c     |    3 +-
- arch/arm/mach-imx/mach-mx25_3ds.c                  |    2 +
- arch/arm/mach-imx/mach-pcm043.c                    |    2 +
- arch/arm/mach-mx5/board-mx51_babbage.c             |   14 ++-
- arch/arm/mach-mx5/board-mx53_loco.c                |    4 +
- .../plat-mxc/devices/platform-sdhci-esdhc-imx.c    |   12 ++
- arch/arm/plat-mxc/include/mach/esdhc.h             |   25 ++++-
- drivers/mmc/host/sdhci-esdhc-imx.c                 |  123 ++++++++++++--------
- drivers/mmc/host/sdhci.c                           |   23 +++-
- 10 files changed, 145 insertions(+), 66 deletions(-)
+-- 
+Regards,
+Shawn
 
