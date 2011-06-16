@@ -1,73 +1,62 @@
-From: Andrei Warkentin <andreiw@motorola.com>
-Subject: Re: irq flood with mmc boot partitions on s3c2416 with 3.0rc1
-Date: Thu, 16 Jun 2011 15:35:52 -0500
-Message-ID: <BANLkTin3knd8CUP4wSrXYio-asrM+Omrhg@mail.gmail.com>
-References: <201106022149.47936.heiko@sntech.de>
-	<201106141610.42700.heiko@sntech.de>
-	<BANLkTimzxUQnVn5VC8EOaJeHq=wifUhZ4A@mail.gmail.com>
-	<201106162214.11084.heiko@sntech.de>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
+Date: Fri, 17 Jun 2011 00:22:16 +0300
+Message-ID: <BANLkTi=2EFMDNjOdmfqkWD1pQJthgR4uKQ@mail.gmail.com>
+References: <20110605123852.BC6F39D401C@zog.reactivated.net>
+ <BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com> <BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
+ <BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com> <BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
+ <BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com> <BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
+ <BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com> <BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
+ <BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com> <BANLkTim2NfCcfRRmcVXepLA0evusZoTJGA@mail.gmail.com>
+ <BANLkTimg08VnOMrUwnH6dKzXPJO1fpOh6w@mail.gmail.com> <BANLkTinfeGUADyi1dTSjPRMnbP+TCtN0dQ@mail.gmail.com>
+ <BANLkTimbxSA_86a=2QH1pEGg1-O9neEyhw@mail.gmail.com> <BANLkTimQUkf9ZsanZ-czqtYnyRSSSch4nQ@mail.gmail.com>
+ <BANLkTi=jsPYEQOnRDyoXD_EzKdqby-QhYw@mail.gmail.com> <BANLkTi=VWUcCQJaBChnitVq1_TT1huE30A@mail.gmail.com>
+ <BANLkTinG-CmEh9yXL9Sp+W7PyatvEdOhZQ@mail.gmail.com> <BANLkTi=zuMosw68EMSYjrVi+0dBQkNicJw@mail.gmail.com>
+ <BANLkTi=6Fa66QYay_R6vkmREPcb1Bw_FRw@mail.gmail.com> <BANLkTimOVsSe=mPOZ=ArGfy4w2QrYgLA+Q@mail.gmail.com>
+ <BANLkTino3hz9NCfjtqM2UYtncYa6y_k=Qg@mail.gmail.com> <BANLkTi==drxM8Y4BffQwDSzraWXQ3-ta0g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og107.obsmtp.com ([64.18.0.184]:33162 "EHLO
-	exprod5og107.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757062Ab1FPUfz convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2011 16:35:55 -0400
-Received: from il93mgrg01.am.mot-mobility.com ([10.176.129.42])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p5GKX8nW002462
-	for <linux-mmc@vger.kernel.org>; Thu, 16 Jun 2011 16:33:08 -0400 (EDT)
-Received: from mail-pw0-f42.google.com (mail-pw0-f42.google.com [209.85.160.42])
-	by il93mgrg01.am.mot-mobility.com (8.14.3/8.14.3) with ESMTP id p5GKQkSw029045
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=OK)
-	for <linux-mmc@vger.kernel.org>; Thu, 16 Jun 2011 16:33:07 -0400 (EDT)
-Received: by mail-pw0-f42.google.com with SMTP id 4so110180pwi.15
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Jun 2011 13:35:52 -0700 (PDT)
-In-Reply-To: <201106162214.11084.heiko@sntech.de>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:33436 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932608Ab1FPVWh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2011 17:22:37 -0400
+Received: by wya21 with SMTP id 21so1346570wya.19
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Jun 2011 14:22:36 -0700 (PDT)
+In-Reply-To: <BANLkTi==drxM8Y4BffQwDSzraWXQ3-ta0g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>
-Cc: Kyungmin Park <kmpark@infradead.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Daniel Drake <dsd@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Hi,
+On Thu, Jun 16, 2011 at 8:27 PM, Daniel Drake <dsd@laptop.org> wrote:
+> Why is there so much power flipping going on during resume?
 
-On Thu, Jun 16, 2011 at 3:14 PM, Heiko St=FCbner <heiko@sntech.de> wrot=
-e:
-> Am Dienstag 14 Juni 2011, 22:32:41 schrieb Andrei Warkentin:
->> Hi Heiko,
->>
->> On Tue, Jun 14, 2011 at 9:10 AM, Heiko St=FCbner <heiko@sntech.de> w=
-rote:
->> > nope, no updates yet. The flood also only starts when udev wants t=
-o
->> > create its device nodes, meaning the initial detection seems not t=
-o
->> > produce this problem
->> >
->> > But when I disable the whole boot partition stuff, it works as bef=
-ore
->> > without irq storms.
->> >
->> > As there don't seem to exist reports from other emmc users about t=
-his
->> > I guess the problem lays somewhere between the boot-partitions-pat=
-ch
->> > and the sdhci-s3c driver (for s3c2416 at least).
->>
->> Alright. Curious. Can you let me know what eMMC device you are
->> connecting to the controller? What is the eMMC revision?
-> hmm ... how do I find these?
+There isn't.
 
-The simplest is probably knowing what part is in your platform. The
-slightly more involved is adding a relevant printk for
-card->ext_csd.rev inside drivers/mmc/core/mmc.c.
+You see this with libertas, because it doesn't really suspend/resume cleanly.
 
-> The real device providing the storage is a 2GB NAND Flash from Hynix.
->
-> And sadly both of your patches didn't change anything.
->
+Instead, it uses a pretty awkward (in my opinion) mechanism to remove
+the card on suspend, and then let the system re-probe it on resume.
 
-Can you provide me dmesg for both patches?
+> But even if that gets fixed, we still need to fix the case where the
+> network interface is brought down then up immediately (another way to
+> trigger the issue).
 
-Thanks again,
-A
+Could you also trigger this with the previous power off/on mechanism
+you used (an rfkill driver IIRC) ? if not, what's the difference ? did
+you have just enough delay there which didn't trigger this problem ?
+
+> Would you suggest a card quirk for that? Adding
+> another 250ms to the already-slow libertas powerup routine would be a
+> bit painful, would you support the added complexity needed to make the
+> 250ms delay only occur when >250ms has passed since it was powered
+> off?
+
+First, I suggest to understand where does this requirement come from.
+Is this a rigid hardware requirement ? Does it always require waiting
+250ms before powering it on again ?
+
+If yes, then why not let the relevant regulator take care of it ? this
+way you never have to care. you just power it off and on as you
+please, and things just work.
