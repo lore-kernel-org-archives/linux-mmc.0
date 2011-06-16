@@ -1,67 +1,64 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
-Date: Thu, 16 Jun 2011 18:27:29 +0100
-Message-ID: <BANLkTi==drxM8Y4BffQwDSzraWXQ3-ta0g@mail.gmail.com>
-References: <20110605123852.BC6F39D401C@zog.reactivated.net>
-	<BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com>
-	<BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
-	<BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com>
-	<BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
-	<BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com>
-	<BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
-	<BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com>
-	<BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
-	<BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com>
-	<BANLkTim2NfCcfRRmcVXepLA0evusZoTJGA@mail.gmail.com>
-	<BANLkTimg08VnOMrUwnH6dKzXPJO1fpOh6w@mail.gmail.com>
-	<BANLkTinfeGUADyi1dTSjPRMnbP+TCtN0dQ@mail.gmail.com>
-	<BANLkTimbxSA_86a=2QH1pEGg1-O9neEyhw@mail.gmail.com>
-	<BANLkTimQUkf9ZsanZ-czqtYnyRSSSch4nQ@mail.gmail.com>
-	<BANLkTi=jsPYEQOnRDyoXD_EzKdqby-QhYw@mail.gmail.com>
-	<BANLkTi=VWUcCQJaBChnitVq1_TT1huE30A@mail.gmail.com>
-	<BANLkTinG-CmEh9yXL9Sp+W7PyatvEdOhZQ@mail.gmail.com>
-	<BANLkTi=zuMosw68EMSYjrVi+0dBQkNicJw@mail.gmail.com>
-	<BANLkTi=6Fa66QYay_R6vkmREPcb1Bw_FRw@mail.gmail.com>
-	<BANLkTimOVsSe=mPOZ=ArGfy4w2QrYgLA+Q@mail.gmail.com>
-	<BANLkTino3hz9NCfjtqM2UYtncYa6y_k=Qg@mail.gmail.com>
+From: Arnaud Patard (Rtp) <arnaud.patard@rtp-net.org>
+Subject: Re: [PATCH 0/4] Extend sdhci-esdhc-imx card_detect and write_protect
+	support for mx5
+Date: Thu, 16 Jun 2011 20:32:33 +0200
+Message-ID: <87lix1hbjy.fsf@lebrac.rtp-net.org>
+References: <1307702572-22066-1-git-send-email-shawn.guo@linaro.org>
+	<20110614064841.GB30295@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:48325 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753192Ab1FPR1a (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2011 13:27:30 -0400
-Received: by pzk9 with SMTP id 9so1192107pzk.19
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Jun 2011 10:27:29 -0700 (PDT)
-In-Reply-To: <BANLkTino3hz9NCfjtqM2UYtncYa6y_k=Qg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20110614064841.GB30295@S2100-06.ap.freescale.net> (Shawn Guo's
+	message of "Tue, 14 Jun 2011 14:48:42 +0800")
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: Eric Benard <eric@eukrea.com>, patches@linaro.org, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, kernel@pengutronix.de, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org
 
-On 13 June 2011 20:52, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> We need to debug the suspend/resume path. Now that we have the other
-> runtime pm paths working, we can pretty much tell there's no hw issue
-> at hand.
+Shawn Guo <shawn.guo@freescale.com> writes:
 
-Found it. It's a timing issue. In our other tests we had not yet hit
-the case when power is removed then immediately restored.  However,
-during resume, the card is powered up, powered down, powered up, and
-then probed by libertas.
+Hi,
 
-A msleep(250) is needed during power_restore. Then the reset works fine.
+> On Fri, Jun 10, 2011 at 06:42:48PM +0800, Shawn Guo wrote:
+>> The card-present polling within sdhci based driver is very expensive
+>> in terms of the impact to system performance.  We observe a few
+>> system performance issues from Freescale and Linaro on mx5 platforms,
+>> which have been proved card polling related.
+>> 
+>> The patch set extends the current sdhci-esdhc-imx card_detect and
+>> write_protect support to cover mx5 platforms, and solves above
+>> performance issues.
+>> 
+>> Shawn Guo (4):
+>>       mmc: sdhci: fix interrupt storm from card detection
+>>       mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not get cleared
+>>       mmc: sdhci-esdhc-imx: remove "WP" from flag ESDHC_FLAG_GPIO_FOR_CD_WP
+>>       mmc: sdhci-esdhc-imx: extend card_detect and write_protect support
+>> 
+> Hi Arnaud,
+>
+> Any chance to play with it yet?
 
-Why is there so much power flipping going on during resume? Is this a
-bug? Shouldn't it power it up, realise it has a driver already loaded,
-and go straight into probe?
+Finally managed to build a kernel with this version of the
+patchset. While I'm not polling anymore, I'm getting a lot of interrupts
+if the card is not inserted. Theses interrupts are not happening if the
+card is inserted. I can see things like this in the logs :
+sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000080
 
-But even if that gets fixed, we still need to fix the case where the
-network interface is brought down then up immediately (another way to
-trigger the issue). Would you suggest a card quirk for that? Adding
-another 250ms to the already-slow libertas powerup routine would be a
-bit painful, would you support the added complexity needed to make the
-250ms delay only occur when >250ms has passed since it was powered
-off?
+[ of course, the bit of the present state register indicating card
+presence is equal to 0 ]
+
+I've tested the SIGNAL case only. Don't know if switch to GPIO may help.
+Do you have same kind of issue on your side ?
 
 Thanks,
-Daniel
+Arnaud
