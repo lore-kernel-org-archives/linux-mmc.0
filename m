@@ -1,174 +1,73 @@
-From: Pavel Machek <pma@sysgo.com>
-Subject: Re: sdhci-esdhc-imx -- MMC 10x slower than it should be
-Date: Thu, 16 Jun 2011 14:14:11 +0200
-Message-ID: <20110616121411.GE31375@pma.sysgo.com>
-References: <20110615094001.GA21137@pma.sysgo.com>
- <20110615105318.GB3097@pengutronix.de>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH V2] mmc: Enable the ADMA on esdhc imx driver
+Date: Thu, 16 Jun 2011 14:19:42 +0200
+Message-ID: <20110616121942.GD23579@pengutronix.de>
+References: <20110615082223.GA28798@atrey.karlin.mff.cuni.cz>
+ <20110616115133.GC31375@pma.sysgo.com>
+ <20110616120009.GA23579@pengutronix.de>
+ <20110616120629.GD31375@pma.sysgo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="PHCdUe6m4AxPMzOu"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.sysgo.com ([195.145.229.155]:54671 "EHLO mail.sysgo.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756846Ab1FPMON (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 16 Jun 2011 08:14:13 -0400
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:51883 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754356Ab1FPMTy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2011 08:19:54 -0400
 Content-Disposition: inline
-In-Reply-To: <20110615105318.GB3097@pengutronix.de>
+In-Reply-To: <20110616120629.GD31375@pma.sysgo.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, pba@sysgo.com, cjb@laptop.org, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org, shawn.guo@freescale.com
-
-Hi!
-
-> > We are seeing issues with sdhci-esdhc-imx in 2.6.39; performance is
-> > not what it should be; it is about 10x lower in fact.
-> 
-> Which SoC? 25/35/51/53?
-
-25.
-
-> > ...any idea what this comment means? I'd like to eventualy support
-> > 8BITBUS...
-> 
-> 8-Bit bus is not specified in the standard, so it cannot be detected.
-> Check other drivers where they use MMC_CAP_8_BIT_DATA.
-
-I came up with patch below... but could not get it to
-work. Read-modify-write of on upper layer means  
-
-> > Any ideas why it is slow?
-> 
-> Your board polls for card-detect, Shawn recently sent a series which
-> lets you fix that for mx5.
-
-Thanks... 1/4+2/4 should be enough to fix that, right? (I'd have to
-figure out GPIO of card detect for the rest; I don't need that just
-now.) That did not change the performance.
-
-> ADMA is marked broken in mainline, cause it didn't work with a number of
-> cards. Richard sent a patch recently.
-
-I tried that one, and it breaks MMC for me.
-
-> Both series could need some more testing :)
-
-Mostly done :-).
+To: Pavel Machek <pma@sysgo.com>
+Cc: Richard Zhu <richard.zhu@linaro.org>, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, linux-mmc@vger.kernel.org, eric.miao@linaro.org, kernel@pengutronix.de, avorontsov@ru.mvista.com, pba@sysgo.com
 
 
-									Pavel
-(hand edited patch)
+--PHCdUe6m4AxPMzOu
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Index: sdhci-esdhc-imx.c
-===================================================================
-RCS file: /home/keeper/repos/10255-TQ-Rittal/bsp-cmc-tc-pu3/linux-2.6.39/drivers/mmc/host/sdhci-esdhc-imx.c,v
-retrieving revision 1.1
-diff -u -r1.1 sdhci-esdhc-imx.c
---- sdhci-esdhc-imx.c	14 Jun 2011 13:04:27 -0000	1.1
-+++ sdhci-esdhc-imx.c	16 Jun 2011 10:47:28 -0000
-@@ -164,11 +166,24 @@
- 		 */
- 		return;
- 	case SDHCI_HOST_CONTROL:
--		/* FSL messed up here, so we can just keep those two */
--		new_val = val & (SDHCI_CTRL_LED | SDHCI_CTRL_4BITBUS);
-+		if (val & 4)
-+			printk("enabling 8bit access\n");
-+//	  	new_val = val & (SDHCI_CTRL_LED | SDHCI_CTRL_4BITBUS | 4);
-+	  	new_val = val & (SDHCI_CTRL_LED | SDHCI_CTRL_4BITBUS);
-+
-+#if 0
-+//		if (val & SDHCI_CTRL_8BITBUS) {
-+			new_val &= ~SDHCI_CTRL_4BITBUS;
-+			new_val |= 4; /* fixme -- 4 for real 8bit */
-+//		}
-+		printk("Setting bus width: %lx requested %lx..\n", new_val, val);
-+#endif
- 		/* ensure the endianess */
- 		new_val |= ESDHC_HOST_CONTROL_LE;
- 		/* DMA mode bits are shifted */
-+
-+		/* FIXME: this si broken, because upper layer does
-+		 * read-modify-write cycles */
- 		new_val |= (val & SDHCI_CTRL_DMA_MASK) << 5;
- 
- 		esdhc_clrset_le(host, 0xffff, new_val, reg);
-@@ -177,10 +192,11 @@
- 	esdhc_clrset_le(host, 0xff, val, reg);
- }
- 
-+/* labeled "max clock", but it actually specifies base clock frequency */
- static unsigned int esdhc_pltfm_get_max_clock(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--
-+	
- 	return clk_get_rate(pltfm_host->clk);
- }
- 
-@@ -201,15 +217,51 @@
-+
-+static int esdhc_8bit(struct sdhci_host *host, int bus_width)
-+{
-+        u32 ctrl;
-+
-+        ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+        if (bus_width == MMC_BUS_WIDTH_8) {
-+		printk("asked for 8bits\n");
-+                ctrl &= ~SDHCI_CTRL_4BITBUS;
-+                ctrl |= 4;
-+        } else {
-+                ctrl &= ~4;
-+                if (bus_width == MMC_BUS_WIDTH_4) {
-+			printk("asked for 4bits\n");
-+                        ctrl |= SDHCI_CTRL_4BITBUS;
-+                } else {
-+			printk("asked for 1bit\n");
-+                        ctrl &= ~SDHCI_CTRL_4BITBUS;
-+		}
-+        }
-+	printk("8bit: want bus width %d, code %x\n", bus_width, ctrl);
-+        sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+        return 0;
-+}
-+
-+
- static struct sdhci_ops sdhci_esdhc_ops = {
- 	.read_l = esdhc_readl_le,
- 	.read_w = esdhc_readw_le,
- 	.write_l = esdhc_writel_le,
- 	.write_w = esdhc_writew_le,
- 	.write_b = esdhc_writeb_le,
--	.set_clock = esdhc_set_clock,
-+	.set_clock = esdhc_set_clock2,
- 	.get_max_clock = esdhc_pltfm_get_max_clock,
- 	.get_min_clock = esdhc_pltfm_get_min_clock,
-+	.platform_8bit_width = esdhc_8bit,
- };
- 
- static irqreturn_t cd_irq(int irq, void *data)
-@@ -289,6 +341,7 @@
- 		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
- 	}
- 
-+//	host->mmc->caps |= MMC_CAP_8_BIT_DATA;
- 	return 0;
- 
-  no_card_detect_irq:
-Index: sdhci.c
-===================================================================
-RCS file: /home/keeper/repos/10255-TQ-Rittal/bsp-cmc-tc-pu3/linux-2.6.39/drivers/mmc/host/sdhci.c,v
-retrieving revision 1.1
-diff -u -r1.1 sdhci.c
---- sdhci.c	14 Jun 2011 14:14:49 -0000	1.1
-+++ sdhci.c	16 Jun 2011 10:47:28 -0000
-@@ -213,6 +213,8 @@
- {
- 	u8 ctrl;
- 
-+	/* FIXME: this reads host control registers then writes it back.
-+	   But we do nasty processing in esdhc_writeb_le() */
- 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
- 	ctrl |= SDHCI_CTRL_LED;
- 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+On Thu, Jun 16, 2011 at 02:06:29PM +0200, Pavel Machek wrote:
+> On Thu 2011-06-16 14:00:09, Wolfram Sang wrote:
+> >=20
+> > > Unfortunately register differences are common. Is there better
+> > > approach than patching it in low level functions like this?
+> >=20
+> > I am all ears for suggestions...
+>=20
+> One way would be to move functions such as=20
+>=20
+> sdhci_activate_led()
+>=20
+> to the low level driver,
 
+There is no "low level driver" if the controller is done right.
 
+> and introduce functions such as write_host_control() -- with no
+> corresponding read_host_control, so that translation is easy to do...
+
+So, a seperate function for every register which differs from the
+standard? There are a lot of SoCs out there, and even more to come...
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--PHCdUe6m4AxPMzOu
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk359N4ACgkQD27XaX1/VRuIRgCfd0tlPumJeur7981y7DE1H9n3
+XwEAoMrUmdFKr5cs3cdrt5hXSKl24oWU
+=XnHO
+-----END PGP SIGNATURE-----
+
+--PHCdUe6m4AxPMzOu--
