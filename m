@@ -1,73 +1,112 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH V2] mmc: Enable the ADMA on esdhc imx driver
-Date: Thu, 16 Jun 2011 14:19:42 +0200
-Message-ID: <20110616121942.GD23579@pengutronix.de>
-References: <20110615082223.GA28798@atrey.karlin.mff.cuni.cz>
- <20110616115133.GC31375@pma.sysgo.com>
- <20110616120009.GA23579@pengutronix.de>
- <20110616120629.GD31375@pma.sysgo.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="PHCdUe6m4AxPMzOu"
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: [PATCH v3 RESEND] dma-mapping: add new API for max_segment_number
+Date: Thu, 16 Jun 2011 20:30:53 +0800
+Message-ID: <1308227453-2034-1-git-send-email-shawn.guo@linaro.org>
+References: <BANLkTi=-t9HVc6U6QY07su+c3WztsGoq3Q@mail.gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:51883 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754356Ab1FPMTy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2011 08:19:54 -0400
-Content-Disposition: inline
-In-Reply-To: <20110616120629.GD31375@pma.sysgo.com>
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:64336 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757827Ab1FPMWV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2011 08:22:21 -0400
+In-Reply-To: <BANLkTi=-t9HVc6U6QY07su+c3WztsGoq3Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pma@sysgo.com>
-Cc: Richard Zhu <richard.zhu@linaro.org>, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, linux-mmc@vger.kernel.org, eric.miao@linaro.org, kernel@pengutronix.de, avorontsov@ru.mvista.com, pba@sysgo.com
+To: linux-kernel@vger.kernel.org
+Cc: linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Russell King - ARM Linux <linux@arm.linux.org.uk>, vinod.koul@intel.com, gregkh@suse.de, FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>, Dan Williams <dan.j.williams@intel.com>, cjb@laptop.org, Per Forlin <per.forlin@linaro.org>, Shawn Guo <shawn.guo@linaro.org>
 
+Like dma_set(get)_max_seg_size for max_segment_size, the patch adds
+max_segment_number into device_dma_parameters and creates the
+corresponding API dma_set(get)_max_seg_number for it.
 
---PHCdUe6m4AxPMzOu
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Here is the user story that tells the need of the new api.  The
+mxs-mmc is the mmc host controller for Freescale MXS architecture.
+There are a pair of  mmc host specific parameters max_seg_size and
+max_segs that mxs-mmc host driver needs to tell mmc core, so that
+mmc core can know how big each data segment could be and how many
+segments could be handled one time in a scatter list by host driver.
 
-On Thu, Jun 16, 2011 at 02:06:29PM +0200, Pavel Machek wrote:
-> On Thu 2011-06-16 14:00:09, Wolfram Sang wrote:
-> >=20
-> > > Unfortunately register differences are common. Is there better
-> > > approach than patching it in low level functions like this?
-> >=20
-> > I am all ears for suggestions...
->=20
-> One way would be to move functions such as=20
->=20
-> sdhci_activate_led()
->=20
-> to the low level driver,
+The mxs-mmc driver is one user of dmaengine mxs-dma, and it will call
+mxs-dma to transfer data in scatter list.  That is to say mxs-mmc has
+no idea of what max_seg_size and max_segs should be, because they are
+all mxs-dma capability parameters, and mxs-mmc needs to query them
+from mxs-dma.
 
-There is no "low level driver" if the controller is done right.
+Right now, there is well defined dma api (dma_get_max_seg_size) for
+mmc to query max_seg_size from dma driver, but the one for max_segs
+is missing.  That's why mxs-mmc driver has to hard-code it.
 
-> and introduce functions such as write_host_control() -- with no
-> corresponding read_host_control, so that translation is easy to do...
+The mxs-mmc is just one example to demonstrate the need of the new
+api, and there are other mmc host drivers (mxcmmc on imx-dma is
+another example) and possibly even other dmaengine users need this
+new api to know the maximum segments that dma driver can handle per
+dma call.
 
-So, a seperate function for every register which differs from the
-standard? There are a lot of SoCs out there, and even more to come...
+Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+---
+Reasons for resend:
+ * Cc linux-scsi for comment, per request from FUJITA Tomonori
+ * Take suggestion from Per Forlin to change patch subject to
+   dma-mapping
 
-Regards,
+ include/linux/device.h      |   16 ++++++++++++----
+ include/linux/dma-mapping.h |   15 +++++++++++++++
+ 2 files changed, 27 insertions(+), 4 deletions(-)
 
-   Wolfram
+diff --git a/include/linux/device.h b/include/linux/device.h
+index c66111a..f1152c5 100644
+--- a/include/linux/device.h
++++ b/include/linux/device.h
+@@ -481,12 +481,20 @@ extern int devres_release_group(struct device *dev, void *id);
+ extern void *devm_kzalloc(struct device *dev, size_t size, gfp_t gfp);
+ extern void devm_kfree(struct device *dev, void *p);
+ 
++/*
++ * device_dma_parameters is a property of DMA provider, and it belongs to the
++ * 'struct device' that actually provides DMA service, typically the drivers
++ * under drivers/dma, although in some cases the DMA provider and block device
++ * uses DMA service happen to be the same 'struct device'.
++ *
++ * It's not necessary for every single DMA providers to have this structure,
++ * because some DMA providers simply do not have these parameters/limitations.
++ * For those do have, the DMA providers should be responsible for setting the
++ * parameters up.
++ */
+ struct device_dma_parameters {
+-	/*
+-	 * a low level driver may set these to teach IOMMU code about
+-	 * sg limitations.
+-	 */
+ 	unsigned int max_segment_size;
++	unsigned int max_segment_number;
+ 	unsigned long segment_boundary_mask;
+ };
+ 
+diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
+index ba8319a..fd314f4 100644
+--- a/include/linux/dma-mapping.h
++++ b/include/linux/dma-mapping.h
+@@ -131,6 +131,21 @@ static inline unsigned int dma_set_max_seg_size(struct device *dev,
+ 		return -EIO;
+ }
+ 
++static inline unsigned int dma_get_max_seg_number(struct device *dev)
++{
++	return dev->dma_parms ? dev->dma_parms->max_segment_number : 1;
++}
++
++static inline unsigned int dma_set_max_seg_number(struct device *dev,
++						  unsigned int number)
++{
++	if (dev->dma_parms) {
++		dev->dma_parms->max_segment_number = number;
++		return 0;
++	} else
++		return -EIO;
++}
++
+ static inline unsigned long dma_get_seg_boundary(struct device *dev)
+ {
+ 	return dev->dma_parms ?
+-- 
+1.7.4.1
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---PHCdUe6m4AxPMzOu
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk359N4ACgkQD27XaX1/VRuIRgCfd0tlPumJeur7981y7DE1H9n3
-XwEAoMrUmdFKr5cs3cdrt5hXSKl24oWU
-=XnHO
------END PGP SIGNATURE-----
-
---PHCdUe6m4AxPMzOu--
