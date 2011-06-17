@@ -1,97 +1,96 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: UHS-I bus speed mode should be set last in UHS initialization
-Date: Fri, 17 Jun 2011 04:35:07 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300015FACD0C6@SAUSEXMBP01.amd.com>
-References: <000a01cc2a04$09c9d600$1d5d8200$@org>
-	<6C03668EAF45B747AF947A1603D1B300015F91E376@SAUSEXMBP01.amd.com>
-	<000001cc2aee$dd8a8e90$989fabb0$@org>
- <BANLkTiktPU3K4OaeFQmwO=jfF7RM1_zxwg@mail.gmail.com>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH v4 03/12] omap_hsmmc: add support for pre_req and post_req
+Date: Fri, 17 Jun 2011 12:15:55 +0200
+Message-ID: <BANLkTikk14y_tweX45JdDb+qqYtOTuMnbg@mail.gmail.com>
+References: <1306360653-6196-1-git-send-email-per.forlin@linaro.org>
+	<1306360653-6196-4-git-send-email-per.forlin@linaro.org>
+	<BANLkTikP8pveKPPG+_h6_hBenh91vAi4mQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:21601 "EHLO
-	TX2EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752425Ab1FQJgR convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jun 2011 05:36:17 -0400
-In-Reply-To: <BANLkTiktPU3K4OaeFQmwO=jfF7RM1_zxwg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <BANLkTikP8pveKPPG+_h6_hBenh91vAi4mQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-kernel <linux-kernel@vger.kernel.org>, linaro-dev <linaro-dev@lists.linaro.org>, David Vrabel <david.vrabel@csr.com>
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei gao <zhangfei.gao@gmail.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>
-Cc: Philip Rakity <prakity@marvell.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Lu, Aaron" <Aaron.Lu@amd.com>
 
-Hi Zhangfei,
+On 16 June 2011 15:14, S, Venkatraman <svenkatr@ti.com> wrote:
+> On Thu, May 26, 2011 at 3:27 AM, Per Forlin <per.forlin@linaro.org> w=
+rote:
+>> pre_req() runs dma_map_sg(), post_req() runs dma_unmap_sg.
+>> If not calling pre_req() before omap_hsmmc_request()
+>> dma_map_sg will be issued before starting the transfer.
+>> It is optional to use pre_req(). If issuing pre_req()
+>> post_req() must be to be called as well.
+>>
+>> Signed-off-by: Per Forlin <per.forlin@linaro.org>
+>> ---
+>> =A0drivers/mmc/host/omap_hsmmc.c | =A0 87 ++++++++++++++++++++++++++=
++++++++++++++--
+>> =A01 files changed, 83 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_h=
+smmc.c
+>> index ad3731a..2116c09 100644
+>> --- a/drivers/mmc/host/omap_hsmmc.c
+>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>> @@ -141,6 +141,11 @@
+>> =A0#define OMAP_HSMMC_WRITE(base, reg, val) \
+>> =A0 =A0 =A0 =A0__raw_writel((val), (base) + OMAP_HSMMC_##reg)
+>>
+>> +struct omap_hsmmc_next {
+>> + =A0 =A0 =A0 unsigned int =A0 =A0dma_len;
+>> + =A0 =A0 =A0 s32 =A0 =A0 =A0 =A0 =A0 =A0 cookie;
+>> +};
+>> +
+>> =A0struct omap_hsmmc_host {
+>> =A0 =A0 =A0 =A0struct =A0device =A0 =A0 =A0 =A0 =A0*dev;
+>> =A0 =A0 =A0 =A0struct =A0mmc_host =A0 =A0 =A0 =A0*mmc;
+>> @@ -184,6 +189,7 @@ struct omap_hsmmc_host {
+>> =A0 =A0 =A0 =A0int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reqs_bloc=
+ked;
+>> =A0 =A0 =A0 =A0int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 use_reg;
+>> =A0 =A0 =A0 =A0int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 req_in_pr=
+ogress;
+>> + =A0 =A0 =A0 struct omap_hsmmc_next =A0next_data;
+>>
+>> =A0 =A0 =A0 =A0struct =A0omap_mmc_platform_data =A0*pdata;
+>> =A0};
+>> @@ -1344,8 +1350,9 @@ static void omap_hsmmc_dma_cb(int lch, u16 ch_=
+status, void *cb_data)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return;
+>> =A0 =A0 =A0 =A0}
+>>
+>> - =A0 =A0 =A0 dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_le=
+n,
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_hsmmc_get_dma_dir(host, data));
+>> + =A0 =A0 =A0 if (!data->host_cookie)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 dma_unmap_sg(mmc_dev(host->mmc), data-=
+>sg, data->sg_len,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0omap_hsmmc_=
+get_dma_dir(host, data));
+>>
+>> =A0 =A0 =A0 =A0req_in_progress =3D host->req_in_progress;
+>> =A0 =A0 =A0 =A0dma_ch =3D host->dma_ch;
+>> @@ -1363,6 +1370,45 @@ static void omap_hsmmc_dma_cb(int lch, u16 ch=
+_status, void *cb_data)
+>> =A0 =A0 =A0 =A0}
+>> =A0}
+>>
+>> +static int omap_hsmmc_pre_dma_transfer(struct omap_hsmmc_host *host=
+,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0struct mmc_data *data,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0struct omap_hsmmc_next *next)
+>> +{
+>
+> As you are passing &host->next_data into next, next will always be a
+> valid pointer. So..
+>
+omap_hsmmc_pre_dma_transfer() is called from two places. in pre_req()
+and start_dma_transfer().
+next is NULL if called from start_dma_transfer.
 
-
-> -----Original Message-----
-> From: zhangfei gao [mailto:zhangfei.gao@gmail.com]
-> Sent: Friday, June 17, 2011 12:15 PM
-> To: subhashj@codeaurora.org; Nath, Arindam
-> Cc: Philip Rakity; cjb@laptop.org; linux-mmc@vger.kernel.org; Lu, Aaron
-> Subject: Re: UHS-I bus speed mode should be set last in UHS
-> initialization
-> 
-> On Wed, Jun 15, 2011 at 7:57 AM,  <subhashj@codeaurora.org> wrote:
-> > Hi Arindam,
-> >
-> >> -----Original Message-----
-> >> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> >> owner@vger.kernel.org] On Behalf Of Nath, Arindam
-> >> Sent: Tuesday, June 14, 2011 12:00 AM
-> >> To: subhashj@codeaurora.org
-> >> Cc: Philip Rakity; zhangfei gao; cjb@laptop.org; linux-
-> >> mmc@vger.kernel.org; Lu, Aaron
-> >> Subject: RE: UHS-I bus speed mode should be set last in UHS
-> >> initialization
-> >>
-> >> Adding Philip and Zhangfei.
-> >>
-> >> Hi Subhash,
-> >>
-> >> Does your controller follow some non-standard steps for
-> initialization?
-> >> I referred to Figure 3-14, section 3.9.4 of Physical Layer Spec
-> v3.01,
-> >> and it shows the order, setting Driver Strength Select, Bus Speed
-> Mode,
-> >> and then Current Limit. So please confirm back.
-> >
-> > Sorry, I don't know what do you mean by non standard steps for
-> > initialization. Nowhere in v3.01 spec, it is mentioned that Bus speed
-> mode
-> > **must** be set before current limit. Figure 3-14 also doesn't
-> indicate
-> > this.
-> >
-> > If you set the bus speed mode in sd_set_bus_speed_mode(), you are
-> changing
-> > the host controller timings as well and if it's SDR50/SDR104 mode,
-> then
-> > immediately after setting the host controller timing mode, we have to
-> > execute tuning sequence but here before executing tuning sequence,
-> you are
-> > sending the CMD6 which involves the read data transfer from card
-> which is
-> > bound to fail without tuning and it does fail with our host
-> controller.
-> >
-> > Do let me know if this explanation make sense.
-> 
-> I think the concern does make sense.
-> 
-> Though Figure 3-14 and 4-6 describe Bus Speed Mode is selected ahead
-> of Current limit, the controller timing is changed in
-> sd_set_bus_speed_mode, which may cause following cmd6 fail.
-> 
-> However, the test here shows mmp2 does not care the sequence of
-> speed_mode and current_limit.
-> 
-> Thanks
-
-We also verified that the changes suggested by Subhash's patch does not break things for our controller. But I am still waiting for Philip's confirmation.
-
-Thanks,
-Arindam
-
-
+/Per
