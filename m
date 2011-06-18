@@ -1,46 +1,49 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: SD8686 fast power-cycle problems
-Date: Sat, 18 Jun 2011 10:37:10 +0100
-Message-ID: <BANLkTim1rai5pv+hW3mMxXieq5289oYJSg@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: RE: SD8686 fast power-cycle problems
+Date: Sat, 18 Jun 2011 08:36:05 -0700
+Message-ID: <43E4817426ED174AA81263BCECB4351D134B85BBCB@sc-vexch3.marvell.com>
 References: <BANLkTimsjb_cvcDKQpuqN_GxNWnyA0ebRg@mail.gmail.com>
+	<1E37377F-AC54-43BC-AF01-53CA9FDE3A10@marvell.com>,<BANLkTiko7eZDhhyk_BxGN8haS37yCxihZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:58274 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750914Ab1FRJhL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Jun 2011 05:37:11 -0400
-Received: by pzk9 with SMTP id 9so2366592pzk.19
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Jun 2011 02:37:10 -0700 (PDT)
-In-Reply-To: <BANLkTimsjb_cvcDKQpuqN_GxNWnyA0ebRg@mail.gmail.com>
+Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:51409 "EHLO
+	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755985Ab1FRPnC convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 18 Jun 2011 11:43:02 -0400
+In-Reply-To: <BANLkTiko7eZDhhyk_BxGN8haS37yCxihZQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei.gao@marvell.com, bzhao@marvell.com, bchau@marvell.com
-Cc: linux-mmc@vger.kernel.org, Ohad Ben-Cohen <ohad@wizery.com>
+To: Daniel Drake <dsd@laptop.org>
+Cc: Zhangfei Gao <zgao6@marvell.com>, Bing Zhao <bzhao@marvell.com>, Benson Chau <bchau@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 17 June 2011 17:39, Daniel Drake <dsd@laptop.org> wrote:
-> If we power down the card, and then *immediately* power it on again
-> (and performing the CMD5,5,3,7 init sequence), the card fails to
-> respond to the first CMD5.
+
+________________________________________
+From: dsd.olpc@gmail.com [dsd.olpc@gmail.com] On Behalf Of Daniel Drake [dsd@laptop.org]
+Sent: Saturday, June 18, 2011 2:33 AM
+To: Philip Rakity
+Cc: Zhangfei Gao; Bing Zhao; Benson Chau; linux-mmc@vger.kernel.org
+Subject: Re: SD8686 fast power-cycle problems
+
+On 17 June 2011 19:49, Philip Rakity <prakity@marvell.com> wrote:
 >
-> We have identified two workarounds to this problem:
-> 1. If we wait 300ms after powering off the card before turning it on
-> again, it works fine.
+> sdio_reset is harmless to non-sdio devices.  Especially since it is in the main power up path.
 >
-> 2. If we perform a SDIO I/O reset after powering on, before starting
-> the 5,5,3,7 sequence, it works fine.
+> I see no reason this should be done.  Can you prepare a patch ?
 
-I would still be interested in any comments you have on this issue,
-but actually it appears that it is probably related to the way that
-the SD8686 power line is wired up on our motherboard.
+A patch to remove the sdio_reset() call from mmc_rescan_try_freq()? If
+my understanding is correct, that one is needed, as you will need to
+do a reset after failing to probe at one freq and then trying another
+one.
 
-OLPC's hardware team apologetically says "There are no turn-off clamps
-on the WLAN power. What that means is that when you turn off the power
-there isn't anything that will quickly pull the voltage down to zero
-or near zero.  So when you turn off the power it takes time for the
-voltage to decay. With the amount of capacitance on that rail 300ms
-decay time doesn't sound unreasonable. You will have to delay or use
-the SDIO reset method."
+Or do you mean a patch to add sdio_reset() into the runtime PM powerup
+path? That would be harmless, would increase consistency between the
+codepaths, and would solve this issue, so naturally has my vote :)
 
-Thanks,
+
+Add sdio_reset() !!  To the code path
+Thanks
 Daniel
