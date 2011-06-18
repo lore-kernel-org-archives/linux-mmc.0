@@ -1,333 +1,295 @@
-From: Sebastian Rasmussen <sebras@gmail.com>
-Subject: [PATCH 3/3] MMC: Fix checkpatch complaints about long lines
-Date: Sat, 18 Jun 2011 19:50:37 +0200
-Message-ID: <1308419437-18306-1-git-send-email-sebras@gmail.com>
+From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: irq flood with mmc boot partitions on s3c2416 with 3.0rc1
+Date: Sat, 18 Jun 2011 22:20:23 +0200
+Message-ID: <201106182220.24848.heiko@sntech.de>
+References: <201106022149.47936.heiko@sntech.de> <201106162214.11084.heiko@sntech.de> <BANLkTin3knd8CUP4wSrXYio-asrM+Omrhg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: Multipart/Mixed;
+  boundary="Boundary-00=_IiQ/N7NoNTjZ5v3"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.df.lth.se ([194.47.250.12]:53547 "EHLO mail.df.lth.se"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751795Ab1FRRul (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 18 Jun 2011 13:50:41 -0400
+Received: from s15407518.onlinehome-server.info ([82.165.136.167]:34250 "EHLO
+	s15407518.onlinehome-server.info" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750876Ab1FRUUd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Jun 2011 16:20:33 -0400
+In-Reply-To: <BANLkTin3knd8CUP4wSrXYio-asrM+Omrhg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Sebastian Rasmussen <sebras@gmail.com>
+To: Andrei Warkentin <andreiw@motorola.com>
+Cc: Kyungmin Park <kmpark@infradead.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Signed-off-by: Sebastian Rasmussen <sebras@gmail.com>
----
- drivers/mmc/card/block.c    |   26 ++++++++++++++++----------
- drivers/mmc/card/queue.c    |    3 ++-
- drivers/mmc/card/queue.h    |    3 ++-
- drivers/mmc/core/bus.c      |    3 ++-
- drivers/mmc/core/bus.h      |   13 +++++++------
- drivers/mmc/core/core.c     |    6 ++++--
- drivers/mmc/core/mmc.c      |    7 ++++---
- drivers/mmc/core/sd.c       |    3 ++-
- drivers/mmc/core/sdio.c     |    6 ++++--
- drivers/mmc/core/sdio_bus.c |    7 ++++---
- drivers/mmc/core/sdio_io.c  |    6 ++++--
- drivers/mmc/core/sdio_irq.c |    3 ++-
- 12 files changed, 53 insertions(+), 33 deletions(-)
+--Boundary-00=_IiQ/N7NoNTjZ5v3
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 48cf063..7dd71b5 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -87,7 +87,7 @@ struct mmc_blk_data {
- 	struct list_head part;
- 
- 	unsigned int	flags;
--#define MMC_BLK_CMD23	(1 << 0)	/* Can do SET_BLOCK_COUNT for multiblock */
-+#define MMC_BLK_CMD23	(1 << 0)	/* Can SET_BLOCK_COUNT for multiblock */
- #define MMC_BLK_REL_WR	(1 << 1)	/* MMC Reliable write support */
- 
- 	unsigned int	usage;
-@@ -374,7 +374,8 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	 * issuing the command.
- 	 */
- 	if (idata->ic.postsleep_min_us)
--		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
-+		usleep_range(idata->ic.postsleep_min_us,
-+				idata->ic.postsleep_max_us);
- 
- 	if (copy_to_user(&(ic_ptr->response), cmd.resp, sizeof(cmd.resp))) {
- 		err = -EFAULT;
-@@ -382,8 +383,9 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	}
- 
- 	if (!idata->ic.write_flag) {
--		if (copy_to_user((void __user *)(unsigned long) idata->ic.data_ptr,
--						idata->buf, idata->buf_bytes)) {
-+		if (copy_to_user((void __user *)(unsigned long)
-+					idata->ic.data_ptr, idata->buf,
-+					idata->buf_bytes)) {
- 			err = -EFAULT;
- 			goto cmd_rel_host;
- 		}
-@@ -890,7 +892,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- 				 * read a single sector.
- 				 */
- 				spin_lock_irq(&md->lock);
--				ret = __blk_end_request(req, -EIO, brq.data.blksz);
-+				ret = __blk_end_request(req, -EIO,
-+					brq.data.blksz);
- 				spin_unlock_irq(&md->lock);
- 				continue;
- 			}
-@@ -1114,8 +1117,8 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
- 	char cap_str[10];
- 	struct mmc_blk_data *part_md;
- 
--	part_md = mmc_blk_alloc_req(card, disk_to_dev(md->disk), size, default_ro,
--				    subname);
-+	part_md = mmc_blk_alloc_req(card, disk_to_dev(md->disk), size,
-+				    default_ro, subname);
- 	if (IS_ERR(part_md))
- 		return PTR_ERR(part_md);
- 	part_md->part_type = part_type;
-@@ -1137,13 +1140,15 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
- 		return 0;
- 
- 	if (card->ext_csd.boot_size) {
--		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT0,
-+		ret = mmc_blk_alloc_part(card, md,
-+					 EXT_CSD_PART_CONFIG_ACC_BOOT0,
- 					 card->ext_csd.boot_size >> 9,
- 					 true,
- 					 "boot0");
- 		if (ret)
- 			return ret;
--		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT1,
-+		ret = mmc_blk_alloc_part(card, md,
-+					 EXT_CSD_PART_CONFIG_ACC_BOOT1,
- 					 card->ext_csd.boot_size >> 9,
- 					 true,
- 					 "boot1");
-@@ -1176,7 +1181,8 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
- {
- 	if (md) {
- 		if (md->disk->flags & GENHD_FL_UP) {
--			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
-+			device_remove_file(disk_to_dev(md->disk),
-+			&md->force_ro);
- 
- 			/* Stop new requests from getting into the queue */
- 			del_gendisk(md->disk);
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 2c10e61..3cbac80 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -109,7 +109,8 @@ static void mmc_request(struct request_queue *q)
-  *
-  * Initialise a MMC card request queue.
-  */
--int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card, spinlock_t *lock)
-+int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
-+		spinlock_t *lock)
- {
- 	struct mmc_host *host = card->host;
- 	u64 limit = BLK_BOUNCE_HIGH;
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 64e66e0..e2c9d9f 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -10,7 +10,8 @@ struct mmc_queue {
- 	struct semaphore	thread_sem;
- 	unsigned int		flags;
- 	struct request		*req;
--	int			(*issue_fn)(struct mmc_queue *, struct request *);
-+	int			(*issue_fn)(struct mmc_queue *,
-+					struct request *);
- 	void			*data;
- 	struct request_queue	*queue;
- 	struct scatterlist	*sg;
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index a7245b7..3655344 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -263,7 +263,8 @@ int mmc_add_card(struct mmc_card *card)
- 	int ret;
- 	const char *type;
- 
--	dev_set_name(&card->dev, "%s:%04x", mmc_hostname(card->host), card->rca);
-+	dev_set_name(&card->dev, "%s:%04x", mmc_hostname(card->host),
-+		card->rca);
- 
- 	switch (card->type) {
- 	case MMC_TYPE_MMC:
-diff --git a/drivers/mmc/core/bus.h b/drivers/mmc/core/bus.h
-index 8b4d1cc..52e3a4b 100644
---- a/drivers/mmc/core/bus.h
-+++ b/drivers/mmc/core/bus.h
-@@ -11,12 +11,13 @@
- #ifndef _MMC_CORE_BUS_H
- #define _MMC_CORE_BUS_H
- 
--#define MMC_DEV_ATTR(name, fmt, args...)					\
--static ssize_t mmc_##name##_show(struct device *dev, struct device_attribute *attr, char *buf)	\
--{										\
--	struct mmc_card *card = mmc_dev_to_card(dev);				\
--	return sprintf(buf, fmt, args);						\
--}										\
-+#define MMC_DEV_ATTR(name, fmt, args...)				\
-+static ssize_t mmc_##name##_show(struct device *dev,			\
-+		struct device_attribute *attr, char *buf)		\
-+{									\
-+	struct mmc_card *card = mmc_dev_to_card(dev);			\
-+	return sprintf(buf, fmt, args);					\
-+}									\
- static DEVICE_ATTR(name, S_IRUGO, mmc_##name##_show, NULL)
- 
- struct mmc_card *mmc_alloc_card(struct mmc_host *host,
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index b03ae56..cac0b43 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -232,7 +232,8 @@ EXPORT_SYMBOL(mmc_wait_for_req);
-  *	to complete.  Return any error that occurred while the command
-  *	was executing.  Do not attempt to parse the response.
-  */
--int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int retries)
-+int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
-+		int retries)
- {
- 	struct mmc_request mrq = {0};
- 
-@@ -927,7 +928,8 @@ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr)
- 	return ocr;
- }
- 
--int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, bool cmd11)
-+int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage,
-+		bool cmd11)
- {
- 	struct mmc_command cmd = {0};
- 	int err = 0;
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 20f1ec3..dac1b49 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -312,7 +312,8 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		card->ext_csd.part_config = ext_csd[EXT_CSD_PART_CONFIG];
- 
- 		/* EXT_CSD value is in units of 10ms, but we store in ms */
--		card->ext_csd.part_time = 10 * ext_csd[EXT_CSD_PART_SWITCH_TIME];
-+		card->ext_csd.part_time =
-+			10 * ext_csd[EXT_CSD_PART_SWITCH_TIME];
- 
- 		/* Sleep / awake timeout in 100ns units */
- 		if (sa_shift > 0 && sa_shift <= 0x17)
-@@ -674,8 +675,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	 */
- 	if (card->ext_csd.part_config & EXT_CSD_PART_CONFIG_ACC_MASK) {
- 		card->ext_csd.part_config &= ~EXT_CSD_PART_CONFIG_ACC_MASK;
--		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_PART_CONFIG,
--				 card->ext_csd.part_config,
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+				EXT_CSD_PART_CONFIG, card->ext_csd.part_config,
- 				 card->ext_csd.part_time);
- 		if (err && err != -EBADMSG)
- 			goto free_card;
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index d4a4fda..4803769 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -727,7 +727,8 @@ try_again:
- 	 */
- 	if (!mmc_host_is_spi(host) && rocr &&
- 	   ((*rocr & 0x41000000) == 0x41000000)) {
--		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180, true);
-+		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
-+				true);
- 		if (err) {
- 			ocr &= ~SD_OCR_S18R;
- 			goto try_again;
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index acfa56d..d8aa12d 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -46,7 +46,8 @@ static int sdio_read_fbr(struct sdio_func *func)
- 
- 	if (data == 0x0f) {
- 		ret = mmc_io_rw_direct(func->card, 0, 0,
--			SDIO_FBR_BASE(func->num) + SDIO_FBR_STD_IF_EXT, 0, &data);
-+			SDIO_FBR_BASE(func->num) + SDIO_FBR_STD_IF_EXT, 0,
-+			&data);
- 		if (ret)
- 			goto out;
- 	}
-@@ -374,7 +375,8 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
- 		card->type = MMC_TYPE_SD_COMBO;
- 
- 		if (oldcard && (oldcard->type != MMC_TYPE_SD_COMBO ||
--		    memcmp(card->raw_cid, oldcard->raw_cid, sizeof(card->raw_cid)) != 0)) {
-+		    memcmp(card->raw_cid, oldcard->raw_cid,
-+			    sizeof(card->raw_cid)) != 0)) {
- 			mmc_remove_card(card);
- 			return -ENOENT;
- 		}
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index b1a4484..2addfb6 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -25,8 +25,8 @@
- 
- /* show configuration fields */
- #define sdio_config_attr(field, format_string)				\
--static ssize_t								\
--field##_show(struct device *dev, struct device_attribute *attr, char *buf)				\
-+static ssize_t field##_show(struct device *dev,				\
-+	struct device_attribute *attr, char *buf)			\
- {									\
- 	struct sdio_func *func;						\
- 									\
-@@ -38,7 +38,8 @@ sdio_config_attr(class, "0x%02x\n");
- sdio_config_attr(vendor, "0x%04x\n");
- sdio_config_attr(device, "0x%04x\n");
- 
--static ssize_t modalias_show(struct device *dev, struct device_attribute *attr, char *buf)
-+static ssize_t modalias_show(struct device *dev,
-+	struct device_attribute *attr, char *buf)
- {
- 	struct sdio_func *func = dev_to_sdio_func(dev);
- 
-diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-index 0f687cd..9215cf2 100644
---- a/drivers/mmc/core/sdio_io.c
-+++ b/drivers/mmc/core/sdio_io.c
-@@ -79,7 +79,8 @@ int sdio_enable_func(struct sdio_func *func)
- 	timeout = jiffies + msecs_to_jiffies(func->enable_timeout);
- 
- 	while (1) {
--		ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IORx, 0, &reg);
-+		ret = mmc_io_rw_direct(func->card, 0, 0, SDIO_CCCR_IORx, 0,
-+			&reg);
- 		if (ret)
- 			goto err;
- 		if (reg & (1 << func->num))
-@@ -659,7 +660,8 @@ void sdio_f0_writeb(struct sdio_func *func, unsigned char b, unsigned int addr,
- 
- 	BUG_ON(!func);
- 
--	if ((addr < 0xF0 || addr > 0xFF) && (!mmc_card_lenient_fn0(func->card))) {
-+	if ((addr < 0xF0 || addr > 0xFF) &&
-+			(!mmc_card_lenient_fn0(func->card))) {
- 		if (err_ret)
- 			*err_ret = -EINVAL;
- 		return;
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index 45bd33c..86889a8 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -236,7 +236,8 @@ int sdio_claim_irq(struct sdio_func *func, sdio_irq_handler_t *handler)
- 	pr_debug("SDIO: Enabling IRQ for %s...\n", sdio_func_id(func));
- 
- 	if (func->irq_handler) {
--		pr_debug("SDIO: IRQ for %s already in use.\n", sdio_func_id(func));
-+		pr_debug("SDIO: IRQ for %s already in use.\n",
-+			sdio_func_id(func));
- 		return -EBUSY;
- 	}
- 
--- 
-1.7.4.1
+Hi again,
 
+Am Donnerstag 16 Juni 2011, 22:35:52 schrieb Andrei Warkentin:
+> On Thu, Jun 16, 2011 at 3:14 PM, Heiko St=FCbner <heiko@sntech.de> wrote:
+> > Am Dienstag 14 Juni 2011, 22:32:41 schrieb Andrei Warkentin:
+> >> Hi Heiko,
+> >>=20
+> >> On Tue, Jun 14, 2011 at 9:10 AM, Heiko St=FCbner <heiko@sntech.de> wro=
+te:
+> >> > nope, no updates yet. The flood also only starts when udev wants to
+> >> > create its device nodes, meaning the initial detection seems not to
+> >> > produce this problem
+> >> >=20
+> >> > But when I disable the whole boot partition stuff, it works as before
+> >> > without irq storms.
+> >> >=20
+> >> > As there don't seem to exist reports from other emmc users about this
+> >> > I guess the problem lays somewhere between the boot-partitions-patch
+> >> > and the sdhci-s3c driver (for s3c2416 at least).
+> >>=20
+> >> Alright. Curious. Can you let me know what eMMC device you are
+> >> connecting to the controller? What is the eMMC revision?
+> >=20
+> > hmm ... how do I find these?
+>=20
+> The simplest is probably knowing what part is in your platform. The
+> slightly more involved is adding a relevant printk for
+> card->ext_csd.rev inside drivers/mmc/core/mmc.c.
+
+ext_csd.rev is 3
+
+> Can you provide me dmesg for both patches?
+
+I've attached a dmesg from booting with both of your patches. To get=20
+meaningful output I disabled the "got data interrupt xxx even though no dat=
+a=20
+=2E.." message flood.
+But it seems your code isn't called (I'm not seeing the ">>>" line)
+
+But I did find other peculiarities after enabling mmc-debugging - a log ful=
+l of=20
+the following three lines repeating endlessly: (i.e. it never stops)
+
+[...]
+mmc1: starting CMD13 arg 00010000 flags 00000195
+sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
+mmc1: req done (CMD13): 0: 00000e00 00000000 00000000 00000000
+[...]
+repeat exactly the same lines over and over
+
+
+As I wrote, this whole thing happens when udev starts and if I let it run l=
+ong=20
+enough udev produces the following error messages:
+
+udevadm settle - timeout of 180 seconds reached, the event queue contains:
+  /sys/devices/platform/s3c-
+sdhci.1/mmc_host/mmc1/mmc1:0001/block/mmcblk1/mmcblk1boot0 (470)
+  /sys/devices/platform/s3c-
+sdhci.1/mmc_host/mmc1/mmc1:0001/block/mmcblk1/mmcblk1boot1 (471)
+  /sys/devices/platform/s3c-
+sdhci.1/mmc_host/mmc1/mmc1:0001/block/mmcblk1/mmcblk1p1 (472)
+  /sys/devices/platform/s3c-
+sdhci.1/mmc_host/mmc1/mmc1:0001/block/mmcblk1/mmcblk1p2 (473)
+  /sys/devices/platform/s3c-
+sdhci.1/mmc_host/mmc1/mmc1:0001/block/mmcblk1/mmcblk1p3 (474)
+
+udevd[362]: worker [379] unexpectedly returned with status 0x0100
+
+udevd[362]: worker [379] failed while handling '/devices/platform/s3c-
+sdhci.1/mmc_host/mmc1/mmc1:0001/block/mmcblk1/mmcblk1boot0'
+
+
+Heiko
+
+--Boundary-00=_IiQ/N7NoNTjZ5v3
+Content-Type: text/plain;
+  charset="UTF-8";
+  name="dmesg_20110618.txt"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+	filename="dmesg_20110618.txt"
+
+Linux version 3.0.0-rc1+ (hstuebner@marty) (gcc version 4.3.5 (Debian 4.3.5-2) ) #134 Sat Jun 18 21:22:31 CEST 2011
+CPU: ARM926EJ-S [41069265] revision 5 (ARMv5TEJ), cr=00053177
+CPU: VIVT data cache, VIVT instruction cache
+Machine: SG060
+Ignoring unrecognised tag 0x23520001
+Ignoring unrecognised tag 0x23520002
+Ignoring unrecognised tag 0x23520003
+Ignoring unrecognised tag 0x23520004
+Memory policy: ECC disabled, Data cache writeback
+CPU S3C2416/S3C2450 (id 0x32450003)
+S3C24XX Clocks, Copyright 2004 Simtec Electronics
+CPU: MPLL on 800.000 MHz, cpu 400.000 MHz, mem 133.333 MHz, pclk 66.666 MHz
+CPU: EPLL on 96.000 MHz, usb-bus 48.000 MHz
+ i2sepll_div 96.000 MHz, i2s 96.000 MHz, iis 66.666 MHz
+On node 0 totalpages: 32768
+free_area_init_node: node 0, pgdat c02bebec, node_mem_map c02eb000
+  Normal zone: 256 pages used for memmap
+  Normal zone: 0 pages reserved
+  Normal zone: 32512 pages, LIFO batch:7
+pcpu-alloc: s0 r0 d32768 u32768 alloc=1*32768
+pcpu-alloc: [0] 0 
+Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 32512
+Kernel command line: root=/dev/nfs nfsroot=192.168.0.200:/home/devel/hstuebner/debianroot ip=192.168.0.202:192.168.0.200:192.168.0.200:255.255.255.0:ezx:usb0:off rootdelay=5 console=ttySAC0,115200 ro init=/sbin/init
+PID hash table entries: 512 (order: -1, 2048 bytes)
+Dentry cache hash table entries: 16384 (order: 4, 65536 bytes)
+Inode-cache hash table entries: 8192 (order: 3, 32768 bytes)
+Memory: 128MB = 128MB total
+Memory: 125112k/125112k available, 5960k reserved, 0K highmem
+Virtual kernel memory layout:
+    vector  : 0xffff0000 - 0xffff1000   (   4 kB)
+    fixmap  : 0xfff00000 - 0xfffe0000   ( 896 kB)
+    DMA     : 0xffc00000 - 0xffe00000   (   2 MB)
+    vmalloc : 0xc8800000 - 0xf6000000   ( 728 MB)
+    lowmem  : 0xc0000000 - 0xc8000000   ( 128 MB)
+    modules : 0xbf000000 - 0xc0000000   (  16 MB)
+      .init : 0xc0008000 - 0xc0026000   ( 120 kB)
+      .text : 0xc0026000 - 0xc02a5000   (2556 kB)
+      .data : 0xc02a6000 - 0xc02c1180   ( 109 kB)
+SLUB: Genslabs=13, HWalign=32, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+NR_IRQS:99
+irq: clearing pending ext status 00000200
+irq: clearing subpending status 00000402
+irq: clearing subpending status 00000002
+timer tcon=00500000, tcnt d902, tcfg 00000200,00000000, usec 0000170a
+Console: colour dummy device 80x30
+console [ttySAC0] enabled
+Calibrating delay loop... 199.47 BogoMIPS (lpj=498688)
+pid_max: default: 32768 minimum: 301
+Mount-cache hash table entries: 512
+CPU: Testing write buffer coherency: ok
+devtmpfs: initialized
+print_constraints: dummy: 
+NET: Registered protocol family 16
+s3c2416_spi_set_info: Invalid SPI configuration
+S3C Power Management, Copyright 2004 Simtec Electronics
+S3C2416: Initializing architecture
+S3C2416: IRQ Support
+S3C24XX DMA Driver, Copyright 2003-2006 Simtec Electronics
+DMA channel 0 at c8804000, irq 88
+DMA channel 1 at c8804100, irq 89
+DMA channel 2 at c8804200, irq 90
+DMA channel 3 at c8804300, irq 91
+DMA channel 4 at c8804400, irq 92
+DMA channel 5 at c8804500, irq 93
+s3c-adc s3c24xx-adc: attached adc driver
+bio: create slab <bio-0> at 0
+SCSI subsystem initialized
+NET: Registered protocol family 2
+IP route cache hash table entries: 1024 (order: 0, 4096 bytes)
+TCP established hash table entries: 4096 (order: 3, 32768 bytes)
+TCP bind hash table entries: 4096 (order: 2, 16384 bytes)
+TCP: Hash tables configured (established 4096 bind 4096)
+TCP reno registered
+UDP hash table entries: 256 (order: 0, 4096 bytes)
+UDP-Lite hash table entries: 256 (order: 0, 4096 bytes)
+NET: Registered protocol family 1
+Trying to unpack rootfs image as initramfs...
+Freeing initrd memory: 1784K
+msgmni has been set to 247
+Block layer SCSI generic (bsg) driver version 0.4 loaded (major 254)
+io scheduler noop registered
+io scheduler deadline registered (default)
+s3c2440-uart.0: ttySAC0 at MMIO 0x50000000 (irq = 70) is a S3C2440
+s3c2440-uart.1: ttySAC1 at MMIO 0x50004000 (irq = 73) is a S3C2440
+s3c2440-uart.2: ttySAC2 at MMIO 0x50008000 (irq = 76) is a S3C2440
+brd: module loaded
+gpio-vbus gpio-vbus: can't get vbus_draw regulator, err: -19
+mousedev: PS/2 mouse device common for all mice
+sdhci: Secure Digital Host Controller Interface driver
+sdhci: Copyright(c) Pierre Ossman
+s3c-sdhci s3c-sdhci.0: clock source 0: hsmmc (133333333 Hz)
+s3c-sdhci s3c-sdhci.0: clock source 1: hsmmc (133333333 Hz)
+s3c-sdhci s3c-sdhci.0: clock source 2: hsmmc-if (96000000 Hz)
+mmc0: no vmmc regulator found
+Registered led device: mmc0::
+mmc0: SDHCI controller on samsung-hsmmc [s3c-sdhci.0] using ADMA
+s3c-sdhci s3c-sdhci.1: clock source 0: hsmmc (133333333 Hz)
+s3c-sdhci s3c-sdhci.1: clock source 1: hsmmc (133333333 Hz)
+s3c-sdhci s3c-sdhci.1: clock source 2: hsmmc-if (96000000 Hz)
+mmc1: no vmmc regulator found
+Registered led device: mmc1::
+mmc1: SDHCI controller on samsung-hsmmc [s3c-sdhci.1] using ADMA
+TCP cubic registered
+NET: Registered protocol family 17
+VFP support v0.3: not present
+Kernel not built with RTC support, ALARM timers will not wake from suspend
+Freeing init memory: 120K
+mmc0: new SDHC card at address 9c57
+mmcblk0: mmc0:9c57 SU04G 3.69 GiB 
+ mmcblk0: p1 p2
+mmc1: found EXT_CSD revision 3
+mmc1: new high speed MMC card at address 0001
+mmcblk1: mmc1:0001 HYNIX  1.88 GiB 
+mmcblk1boot0: mmc1:0001 HYNIX  partition 1 256 KiB
+mmcblk1boot1: mmc1:0001 HYNIX  partition 2 256 KiB
+ mmcblk1: p1 p2 p3
+ mmcblk1boot1: unknown partition table
+ mmcblk1boot0: unknown partition table
+udevd (32): /proc/32/oom_adj is deprecated, please use /proc/32/oom_score_adj instead.
+EXT3-fs: barriers not enabled
+kjournald starting.  Commit interval 5 seconds
+EXT3-fs (mmcblk0p2): using internal journal
+EXT3-fs (mmcblk0p2): mounted filesystem with ordered data mode
+udev: starting version 154
+s3c-i2c s3c2410-i2c: slave address 0x10
+s3c-i2c s3c2410-i2c: bus frequency set to 378 KHz
+s3c-i2c s3c2410-i2c: i2c-0: S3C I2C adapter
+Registered led device: led4
+Registered led device: led5
+Registered led device: led6
+Registered led device: led7
+s3c64xx-spi s3c64xx-spi.0: Board init must call s3c64xx_spi_set_info()
+s3c64xx-spi: probe of s3c64xx-spi.0 failed with error -22
+input: auo_pixcir_ts as /devices/platform/s3c2410-i2c/i2c-0/0-005c/input/input0
+auo_pixcir_ts: Firmware Version is 0x14
+snd-soc-dummy snd-soc-dummy: platform register snd-soc-dummy
+Registered platform 'snd-soc-dummy'
+samsung-audio samsung-audio: platform register samsung-audio
+Registered platform 'samsung-audio'
+samsung-i2s samsung-i2s: dai register samsung-i2s
+Registered DAI 'samsung-i2s'
+alc562x-codec 0-0018: Found codec id : alc5620
+alc562x-codec 0-0018: codec register 0-0018
+alc562x-codec 0-0018: dai register 0-0018 #1
+Registered DAI 'alc5624-hifi'
+Registered codec 'alc562x-codec.0-0018'
+EXT3-fs (mmcblk0p2): using internal journal
+g_ether gadget: using random self ethernet address
+g_ether gadget: using random host ethernet address
+usb0: MAC 1e:96:62:b4:93:dd
+usb0: HOST MAC a2:91:d0:61:f0:a5
+g_ether gadget: adding config #2 'RNDIS'/bf0b9378
+g_ether gadget: adding 'rndis'/c79fbd80 to config 'RNDIS'/bf0b9378
+rndis_register: configNr = 0
+rndis_set_param_medium: 0 0
+g_ether gadget: RNDIS: dual speed IN/ep1in OUT/ep2out NOTIFY/ep3in
+g_ether gadget: cfg 2/bf0b9378 speeds: high full
+g_ether gadget:   interface 0 = rndis/c79fbd80
+g_ether gadget:   interface 1 = rndis/c79fbd80
+g_ether gadget: adding config #1 'CDC Ethernet (ECM)'/bf0b9308
+g_ether gadget: adding 'cdc_ethernet'/c79fbb40 to config 'CDC Ethernet (ECM)'/bf0b9308
+g_ether gadget: CDC Ethernet: dual speed IN/ep1in OUT/ep2out NOTIFY/ep3in
+g_ether gadget: cfg 1/bf0b9308 speeds: high full
+g_ether gadget:   interface 0 = cdc_ethernet/c79fbb40
+g_ether gadget:   interface 1 = cdc_ethernet/c79fbb40
+g_ether gadget: Ethernet Gadget, version: Memorial Day 2008
+g_ether gadget: g_ether ready
+g_ether gadget: suspend
+s3c-hsudc s3c-hsudc: bound driver g_ether
+g_ether gadget: suspend
+usbcore: registered new interface driver usbfs
+usbcore: registered new interface driver hub
+usbcore: registered new device driver usb
+ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+g_ether gadget: high speed config #1: CDC Ethernet (ECM)
+g_ether gadget: init ecm
+g_ether gadget: notify connect false
+g_ether gadget: notify speed 425984000
+g_ether gadget: activate ecm
+usb0: qlen 10
+g_ether gadget: ecm_close
+usb0: eth_open
+usb0: eth_start
+g_ether gadget: ecm_open
+NET: Registered protocol family 10
+usb0: no IPv6 routers present
+
+--Boundary-00=_IiQ/N7NoNTjZ5v3--
