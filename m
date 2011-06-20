@@ -1,56 +1,36 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: protect a sequence of request and request-done.
-Date: Mon, 20 Jun 2011 17:24:16 +0900
-Message-ID: <1308558256-20824-1-git-send-email-tgih.jun@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ganesha.gnumonks.org ([213.95.27.120]:57863 "EHLO
-	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750844Ab1FTIbX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 04:31:23 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH] mmc: dw_mmc: set the card_width bit per card.
+Date: Mon, 20 Jun 2011 17:23:53 +0900
+Message-ID: <1308558233-20545-1-git-send-email-tgih.jun@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
 Cc: akpm@linux-foundation.org, cjb@laptop.org, kgene.kim@samsung.com, Seungwon Jeon <tgih.jun@samsung.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Response timeout(RTO), Response crc error(RCRC) and Response error(RE)
-signals come with command done(CD) and can be raised preceding command
-done(CD). That is these error interrupts and CD can be handled in
-separate dw_mci_interrupt(). If mmc_request_done() is called because of
-response timeout before command done is occured, next request can be
-sent, but CD of current request is not finished. This can bring about
-a broken sequence of request and request-done.
+This patch sets the card_width bit of CTYPE for the corresponding card.
 
-And Data error interrupt(DRTO, DCRC, SBE, EBE) and data transfer
-over(DTO) are same reanson.
+CTYPE[31] and CTYPE[16] correspond respectively to card[15] and card[0]
+for 8-bit mode. And CTYPE[15] and CTYPE[0] correspond respectively to
+card[15] and CTYPE[0] for 1-bit or 4-bit mode.
 
 Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/host/dw_mmc.c |    5 +++--
- 1 files changed, 3 insertions(+), 2 deletions(-)
+ drivers/mmc/host/dw_mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1ca830c..22be372 100644
+index 66dcddb..1ca830c 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -1202,7 +1202,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 			host->cmd_status = status;
- 			smp_wmb();
- 			set_bit(EVENT_CMD_COMPLETE, &host->pending_events);
--			tasklet_schedule(&host->tasklet);
- 		}
+@@ -574,7 +574,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+ 	}
  
- 		if (pending & DW_MCI_DATA_ERROR_FLAGS) {
-@@ -1211,7 +1210,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 			host->data_status = status;
- 			smp_wmb();
- 			set_bit(EVENT_DATA_ERROR, &host->pending_events);
--			tasklet_schedule(&host->tasklet);
-+			if (!(pending & (SDMMC_INT_DTO | SDMMC_INT_DCRC |
-+					 SDMMC_INT_SBE | SDMMC_INT_EBE)))
-+				tasklet_schedule(&host->tasklet);
- 		}
+ 	/* Set the current slot bus width */
+-	mci_writel(host, CTYPE, slot->ctype);
++	mci_writel(host, CTYPE, (slot->ctype << slot->id));
+ }
  
- 		if (pending & SDMMC_INT_DATA_OVER) {
+ static void dw_mci_start_request(struct dw_mci *host,
 -- 
 1.7.1
-
