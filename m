@@ -1,34 +1,48 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: Re: [PATCH 3/3] MMC: Fix checkpatch complaints about long lines
-Date: Mon, 20 Jun 2011 09:58:45 +0200
-Message-ID: <4DFEFDB5.9070805@atmel.com>
-References: <1308419437-18306-1-git-send-email-sebras@gmail.com> <20110619065048.GC1632@pengutronix.de>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: add dependence in Kconfig for pxav2/pxav3
+Date: Mon, 20 Jun 2011 10:07:33 +0200
+Message-ID: <201106201007.33908.arnd@arndb.de>
+References: <1308552287-18752-1-git-send-email-zhangfei.gao@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:51441 "EHLO
-	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750717Ab1FTH7G (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 03:59:06 -0400
-In-Reply-To: <20110619065048.GC1632@pengutronix.de>
+Received: from moutng.kundenserver.de ([212.227.17.9]:55431 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751540Ab1FTIH7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 04:07:59 -0400
+In-Reply-To: <1308552287-18752-1-git-send-email-zhangfei.gao@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sebastian Rasmussen <sebras@gmail.com>, linux-mmc@vger.kernel.org
-Cc: Wolfram Sang <w.sang@pengutronix.de>
+To: Zhangfei Gao <zhangfei.gao@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Stephen Rothwell <sfr@canb.auug.org.au>
 
-Le 19/06/2011 08:50, Wolfram Sang :
-> On Sat, Jun 18, 2011 at 07:50:37PM +0200, Sebastian Rasmussen wrote:
->> Signed-off-by: Sebastian Rasmussen <sebras@gmail.com>
+On Monday 20 June 2011 08:44:47 Zhangfei Gao wrote:
+>         Without depends, MMC_SDHCI_PXAV3/2 can be chosen in other platfrom.
+>         Build error will occur since plat/sdhci.h is located at arch/arm/plat-pxa/
 > 
-> I don't think it improves readability, so not worth the change IMO.
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+> ---
+>  drivers/mmc/host/Kconfig |    2 ++
+>  1 files changed, 2 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 198ddda..d33a3e2 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -183,6 +183,7 @@ config MMC_SDHCI_S3C
+>  
+>  config MMC_SDHCI_PXAV3
+>         tristate "Marvell MMP2 SD Host Controller support (PXAV3)"
+> +       depends on ARCH_MMP
+>         select MMC_SDHCI
+>         select MMC_SDHCI_PLTFM
+>         default CPU_MMP2
 
-I have the same feeling: can't we be more tolerant with this soft limit
-requirement?
+Why not just move the header file to include/linux/platform_data/?
 
-And for sure changing existing code only for this is a bad idea.
+Then you can build the driver on all platforms, which improves the
+build test coverage.
 
-Bye,
--- 
-Nicolas Ferre
-
+	Arnd
