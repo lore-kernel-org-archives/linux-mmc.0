@@ -1,41 +1,52 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH 0/5 v2] mmc: sdhi: Allow waiting for idle
-Date: Tue, 21 Jun 2011 08:00:07 +0900
-Message-ID: <1308610812-3479-1-git-send-email-horms@verge.net.au>
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
-Cc: Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>
+Subject: [PATCH 4/5] ARM: mach-shmobile: ag5evm: consistently name sdhi info structures
+Date: Tue, 21 Jun 2011 08:00:11 +0900
+Message-ID: <1308610812-3479-5-git-send-email-horms@verge.net.au>
+References: <1308610812-3479-1-git-send-email-horms@verge.net.au>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:60666 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755994Ab1FTXAW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 19:00:22 -0400
+In-Reply-To: <1308610812-3479-1-git-send-email-horms@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Cc: Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>, Simon Horman <horms@verge.net.au>
 
-Some SDHI controllers require waiting for the SD bus to become
-idle before writing to some registers. This series allows
-this to occur by:
-	* ensuring all relevant accesses are made via sd_ctrl_write16()
-	* Adding a hook to sd_ctrl_write16()
-	* Supplying a hook that implements waiting for idle
+Name the SDHI1 instance sh_sdhi1_info to be consistent with sh_sdhi0_info.
 
-The series also includes some clean-ups of related code.
+Signed-off-by: Simon Horman <horms@verge.net.au>
 
-The first three patches are intended for the mmc tree
-	* [PATCH 1/5] mmc: tmio: name 0xd8 as CTL_DMA_ENABLE
-	* [PATCH 2/5] mmc: tmio: Share register access functions
-	* [PATCH 3/5] mmc: sdhi: Add write16_hook
+---
 
-The remaining two patches are intended for the rmobile tree
-	* [PATCH 4/5] ARM: mach-shmobile: ag5evm: consistently name sdhi info
-	* [PATCH 5/5] ARM: mach-shmobile: ag5evm: SDHI requires waiting for
+Dependencies: None known
+---
+ arch/arm/mach-shmobile/board-ag5evm.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
-I am not aware of any dependencies on patches outside this series.
-Dependencies on patches within the series are noted inline.
-
-This is v2 of this patch series, issues addressed since v1 are
-all in [PATCH 3/5] mmc: sdhi: Add write16_hook:
-	* Include linux/delay.h instead of asm/delay.h
-	* Skip write if sh_mobile_sdhi_wait_idle() times out
-	  - The bus will probably be in an inconsistent state and writing
-	    may lock up the bus
-	* Only set hook if TMIO_MMC_HAS_IDLE_WAIT is set in platform data
-	  rather than checking for TMIO_MMC_HAS_IDLE_WAIT each time the
-	  hook is called.
+diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
+index 1e2aba2..ce5c251 100644
+--- a/arch/arm/mach-shmobile/board-ag5evm.c
++++ b/arch/arm/mach-shmobile/board-ag5evm.c
+@@ -381,7 +381,7 @@ void ag5evm_sdhi1_set_pwr(struct platform_device *pdev, int state)
+ 	gpio_set_value(GPIO_PORT114, state);
+ }
+ 
+-static struct sh_mobile_sdhi_info sh_sdhi1_platdata = {
++static struct sh_mobile_sdhi_info sh_sdhi1_info = {
+ 	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
+ 	.tmio_caps	= MMC_CAP_NONREMOVABLE | MMC_CAP_SDIO_IRQ,
+ 	.tmio_ocr_mask	= MMC_VDD_32_33 | MMC_VDD_33_34,
+@@ -413,7 +413,7 @@ static struct platform_device sdhi1_device = {
+ 	.name		= "sh_mobile_sdhi",
+ 	.id		= 1,
+ 	.dev		= {
+-		.platform_data	= &sh_sdhi1_platdata,
++		.platform_data	= &sh_sdhi1_info,
+ 	},
+ 	.num_resources	= ARRAY_SIZE(sdhi1_resources),
+ 	.resource	= sdhi1_resources,
+-- 
+1.7.4.4
 
