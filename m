@@ -1,63 +1,43 @@
 From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH v3 0/4] Extend sdhci-esdhc-imx card_detect and write_protect
-	support for mx5
-Date: Mon, 20 Jun 2011 18:38:41 +0800
-Message-ID: <1308566325-11600-1-git-send-email-shawn.guo@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org
-Cc: patches@linaro.org, Wolfram Sang <w.sang@pengutronix.de>, Arnaud Patard <arnaud.patard@rtp-net.org>, Eric Benard <eric@eukrea.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+Subject: [PATCH v3 2/4] mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not get cleared
+Date: Mon, 20 Jun 2011 18:38:43 +0800
+Message-ID: <1308566325-11600-3-git-send-email-shawn.guo@linaro.org>
+References: <1308566325-11600-1-git-send-email-shawn.guo@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:37917 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753206Ab1FTK3N (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 06:29:13 -0400
+Received: by mail-iw0-f174.google.com with SMTP id 6so1058030iwn.19
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jun 2011 03:29:13 -0700 (PDT)
+In-Reply-To: <1308566325-11600-1-git-send-email-shawn.guo@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Arnaud Patard <arnaud.patard@rtp-net.org>, Eric Benard <eric@eukrea.com>, linux-arm-kernel@lists.infradead.org, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>
 
-The card-present polling for sdhci based driver is very expensive
-in terms of the impact to system performance.  We observe a few
-system performance issues from Freescale and Linaro on mx5 platforms,
-which have been proved card polling related.
+The function esdhc_readl_le intends to clear bit SDHCI_CARD_PRESENT,
+when the card detect gpio tells there is no card.  But it does not
+clear the bit actually.  The patch gives a fix on that.
 
-The patch set extends the current sdhci-esdhc-imx card_detect and
-write_protect support to cover mx5 platforms, and solves above
-performance issues.
+Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Changes since v2:
- * Fix the issue reported by Arnaud Patard:
-   http://article.gmane.org/gmane.linux.ports.arm.kernel/120790
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 248b8e5..94097c0 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -84,7 +84,7 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ 		if (boarddata && gpio_is_valid(boarddata->cd_gpio)
+ 				&& gpio_get_value(boarddata->cd_gpio))
+ 			/* no card, if a valid gpio says so... */
+-			val &= SDHCI_CARD_PRESENT;
++			val &= ~SDHCI_CARD_PRESENT;
+ 		else
+ 			/* ... in all other cases assume card is present */
+ 			val |= SDHCI_CARD_PRESENT;
+-- 
+1.7.4.1
 
-Changes since v1:
- * Rebase on today's linux-next
- * Take the suggestion from Arnaud Patard to add default pdata in
-   imx_add_sdhci_esdhc_imx(), to avoid touching every single board
-   file for the platform_data changes
- * Add comment for sdhci.c change
- * Change ESDHC_CD(WP)_SIGNAL to ESDHC_CD(WP)_CONTROLLER for a more
-   descriptive name
- * Add missing NONE case handling in esdhc_pltfm_get_ro
- * Improve a couple comment wording per suggestion from Wolfram Sang
-
-Shawn Guo (4):
-      mmc: sdhci: fix interrupt storm from card detection
-      mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not get cleared
-      mmc: sdhci-esdhc-imx: remove "WP" from flag ESDHC_FLAG_GPIO_FOR_CD_WP
-      mmc: sdhci-esdhc-imx: extend card_detect and write_protect support for mx5
-
- arch/arm/mach-imx/eukrea_mbimxsd25-baseboard.c     |    3 +-
- arch/arm/mach-imx/eukrea_mbimxsd35-baseboard.c     |    3 +-
- arch/arm/mach-imx/mach-mx25_3ds.c                  |    2 +
- arch/arm/mach-imx/mach-pcm043.c                    |    2 +
- arch/arm/mach-mx5/board-mx51_babbage.c             |   14 +-
- arch/arm/mach-mx5/board-mx53_loco.c                |    4 +
- .../plat-mxc/devices/platform-sdhci-esdhc-imx.c    |   12 ++
- arch/arm/plat-mxc/include/mach/esdhc.h             |   25 +++-
- drivers/mmc/host/sdhci-esdhc-imx.c                 |  136 ++++++++++++--------
- drivers/mmc/host/sdhci.c                           |   27 ++++-
- 10 files changed, 161 insertions(+), 67 deletions(-)
