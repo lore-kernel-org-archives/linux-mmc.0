@@ -1,87 +1,41 @@
-From: Ram Pai <linuxram@us.ibm.com>
-Subject: [PATCH 4/4] PCI: make cardbus-bridge resources nice-to-have
-Date: Mon, 20 Jun 2011 15:47:17 -0700
-Message-ID: <1308610037-6261-5-git-send-email-linuxram@us.ibm.com>
-References: <1308610037-6261-1-git-send-email-linuxram@us.ibm.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1308610037-6261-1-git-send-email-linuxram@us.ibm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: jbarnes@virtuousgeek.org
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, svenkatr@ti.com, yinghai@kernel.org, cjb@laptop.org, linux-pci@vger.kernel.org, linux-net-drivers@solarflare.com, bhutchings@solarflare.com, Ram Pai <linuxram@us.ibm.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH 0/5 v2] mmc: sdhi: Allow waiting for idle
+Date: Tue, 21 Jun 2011 08:00:07 +0900
+Message-ID: <1308610812-3479-1-git-send-email-horms@verge.net.au>
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Cc: Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Allocate resources to cardbus bridge only after all other genuine
-resources requests are satisfied. Dont retry if resource allocation
-for cardbus-bridge fails.
+Some SDHI controllers require waiting for the SD bus to become
+idle before writing to some registers. This series allows
+this to occur by:
+	* ensuring all relevant accesses are made via sd_ctrl_write16()
+	* Adding a hook to sd_ctrl_write16()
+	* Supplying a hook that implements waiting for idle
 
-Tested-by: Oliver Hartkopp <socketcan@hartkopp.net>
-Signed-off-by: Ram Pai <linuxram@us.ibm.com>
----
- drivers/pci/setup-bus.c |   20 +++++++++++++-------
- 1 files changed, 13 insertions(+), 7 deletions(-)
+The series also includes some clean-ups of related code.
 
-diff --git a/drivers/pci/setup-bus.c b/drivers/pci/setup-bus.c
-index 4f8873e..023fc9c 100644
---- a/drivers/pci/setup-bus.c
-+++ b/drivers/pci/setup-bus.c
-@@ -742,7 +742,8 @@ static int pbus_size_mem(struct pci_bus *bus, unsigned long mask,
- 	return 1;
- }
- 
--static void pci_bus_size_cardbus(struct pci_bus *bus)
-+static void pci_bus_size_cardbus(struct pci_bus *bus,
-+			struct resource_list_x *add_head)
- {
- 	struct pci_dev *bridge = bus->self;
- 	struct resource *b_res = &bridge->resource[PCI_BRIDGE_RESOURCES];
-@@ -753,12 +754,14 @@ static void pci_bus_size_cardbus(struct pci_bus *bus)
- 	 * a fixed amount of bus space for CardBus bridges.
- 	 */
- 	b_res[0].start = 0;
--	b_res[0].end = pci_cardbus_io_size - 1;
-+	b_res[0].end = 0;
- 	b_res[0].flags |= IORESOURCE_IO | IORESOURCE_SIZEALIGN;
-+	add_to_list(add_head, bridge, b_res, pci_cardbus_io_size - 1, 1);
- 
- 	b_res[1].start = 0;
--	b_res[1].end = pci_cardbus_io_size - 1;
-+	b_res[1].end = 0;
- 	b_res[1].flags |= IORESOURCE_IO | IORESOURCE_SIZEALIGN;
-+	add_to_list(add_head, bridge, b_res+1, pci_cardbus_io_size - 1, 1);
- 
- 	/*
- 	 * Check whether prefetchable memory is supported
-@@ -778,16 +781,19 @@ static void pci_bus_size_cardbus(struct pci_bus *bus)
- 	 */
- 	if (ctrl & PCI_CB_BRIDGE_CTL_PREFETCH_MEM0) {
- 		b_res[2].start = 0;
--		b_res[2].end = pci_cardbus_mem_size - 1;
-+		b_res[2].end = 0;
- 		b_res[2].flags |= IORESOURCE_MEM | IORESOURCE_PREFETCH | IORESOURCE_SIZEALIGN;
-+		add_to_list(add_head, bridge, b_res+2, pci_cardbus_mem_size - 1, 1);
- 
- 		b_res[3].start = 0;
--		b_res[3].end = pci_cardbus_mem_size - 1;
-+		b_res[3].end = 0;
- 		b_res[3].flags |= IORESOURCE_MEM | IORESOURCE_SIZEALIGN;
-+		add_to_list(add_head, bridge, b_res+3, pci_cardbus_mem_size - 1, 1);
- 	} else {
- 		b_res[3].start = 0;
--		b_res[3].end = pci_cardbus_mem_size * 2 - 1;
-+		b_res[3].end = 0;
- 		b_res[3].flags |= IORESOURCE_MEM | IORESOURCE_SIZEALIGN;
-+		add_to_list(add_head, bridge, b_res+3, pci_cardbus_mem_size * 2 - 1, 1);
- 	}
- }
- 
-@@ -805,7 +811,7 @@ void __ref __pci_bus_size_bridges(struct pci_bus *bus,
- 
- 		switch (dev->class >> 8) {
- 		case PCI_CLASS_BRIDGE_CARDBUS:
--			pci_bus_size_cardbus(b);
-+			pci_bus_size_cardbus(b, add_head);
- 			break;
- 
- 		case PCI_CLASS_BRIDGE_PCI:
--- 
-1.7.0.4
+The first three patches are intended for the mmc tree
+	* [PATCH 1/5] mmc: tmio: name 0xd8 as CTL_DMA_ENABLE
+	* [PATCH 2/5] mmc: tmio: Share register access functions
+	* [PATCH 3/5] mmc: sdhi: Add write16_hook
+
+The remaining two patches are intended for the rmobile tree
+	* [PATCH 4/5] ARM: mach-shmobile: ag5evm: consistently name sdhi info
+	* [PATCH 5/5] ARM: mach-shmobile: ag5evm: SDHI requires waiting for
+
+I am not aware of any dependencies on patches outside this series.
+Dependencies on patches within the series are noted inline.
+
+This is v2 of this patch series, issues addressed since v1 are
+all in [PATCH 3/5] mmc: sdhi: Add write16_hook:
+	* Include linux/delay.h instead of asm/delay.h
+	* Skip write if sh_mobile_sdhi_wait_idle() times out
+	  - The bus will probably be in an inconsistent state and writing
+	    may lock up the bus
+	* Only set hook if TMIO_MMC_HAS_IDLE_WAIT is set in platform data
+	  rather than checking for TMIO_MMC_HAS_IDLE_WAIT each time the
+	  hook is called.
+
