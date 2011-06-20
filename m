@@ -1,82 +1,192 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH v3 1/4] mmc: sdhci: fix interrupt storm from card
- detection
-Date: Mon, 20 Jun 2011 08:59:38 -0700
-Message-ID: <AA2705EE-033E-4340-8CF1-774F444E143E@marvell.com>
-References: <1308566325-11600-1-git-send-email-shawn.guo@linaro.org>
- <1308566325-11600-2-git-send-email-shawn.guo@linaro.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH v2] mmc: tmio: fix recursive spinlock, don't schedule with
+ interrupts disabled
+Date: Mon, 20 Jun 2011 18:27:50 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1106201803520.11365@axis700.grange>
+References: <Pine.LNX.4.64.1106151549050.23363@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:43274 "EHLO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751956Ab1FTQCT convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 20 Jun 2011 12:02:19 -0400
-In-Reply-To: <1308566325-11600-2-git-send-email-shawn.guo@linaro.org>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1106151549050.23363@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Ball <cjb@laptop.org>, Magnus Damm <damm@opensource.se>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Arnaud Patard <arnaud.patard@rtp-net.org>, Eric Benard <eric@eukrea.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "patches@linaro.org" <patches@linaro.org>
 
+Calling mmc_request_done() under a spinlock with interrupts disabled
+leads to a recursive spin-lock on request retry path and to
+scheduling in atomic context. This patch fixes both these problems
+by moving mmc_request_done() to the scheduler workqueue.
 
-On Jun 20, 2011, at 3:38 AM, Shawn Guo wrote:
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
 
-> The issue was initially found by Eric Benard as below.
-> 
-> http://permalink.gmane.org/gmane.linux.ports.arm.kernel/108031
-> 
-> Not sure about other SDHCI based controller, but on Freescale eSDHC,
-> the SDHCI_INT_CARD_INSERT bits will be immediately set again when it
-> gets cleared, if a card is inserted. The driver need to mask the irq
-> to prevent interrupt storm which will freeze the system.  And the
-> SDHCI_INT_CARD_REMOVE gets the same situation.
-> 
-> The patch fixes the problem based on the initial idea from
-> Eric Benard.
-> 
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> Cc: Eric Benard <eric@eukrea.com>
-> ---
-> drivers/mmc/host/sdhci.c |   27 +++++++++++++++++++++++----
-> 1 files changed, 23 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 91d9892..d94e2b4 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -127,7 +127,9 @@ static void sdhci_mask_irqs(struct sdhci_host *host, u32 irqs)
-> 
-> static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
-> {
-> -	u32 irqs = SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT;
-> +	u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
-> +		      SDHCI_CARD_PRESENT;
-> +	u32 irqs = present ? SDHCI_INT_CARD_REMOVE : SDHCI_INT_CARD_INSERT;
-> 
-> 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-> 		return;
+This is a bug-fix: without it the system Oopses with LOCKDEP enabled, so, 
+it should really go in 3.0. OTOH it is pretty intrusine and non-trivial, 
+so, reviews and tests are highly appreciated! Also, unfortunately, I 
+wasn't able to test it well enough with SDIO, because the driver for the 
+only SDIO card, that I have, reproducibly crashes the kernel:
 
+http://www.spinics.net/lists/kernel/msg1203334.html
 
-Accessing off chip registers is slow.  It would be better to check for the quirk first
-and then read the present state register.
+So, mainly tested with SD-cards and only lightly with SDIO.
 
-eg
-	
-	u32 present;
-	u32 irqs;	
+v2:
 
-> 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-> 		return;
+1. added a mutex to properly complete each .set_ios() call instead of 
+returning an error, when racing with another one. 
 
->  	present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
-> 		      SDHCI_CARD_PRESENT;
+2. oritect data inside tmio_mmc_finish_request()
 
+3. don't reschedule card detection, if one is already pending
 
-> 	irqs = present ? SDHCI_INT_CARD_REMOVE : SDHCI_INT_CARD_INSERT;
+ drivers/mmc/host/tmio_mmc.h     |    6 +++++-
+ drivers/mmc/host/tmio_mmc_pio.c |   35 +++++++++++++++++++++++++++++------
+ 2 files changed, 34 insertions(+), 7 deletions(-)
 
-
-Philip
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 8260bc2..5b83e46 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -18,6 +18,7 @@
+ 
+ #include <linux/highmem.h>
+ #include <linux/mmc/tmio.h>
++#include <linux/mutex.h>
+ #include <linux/pagemap.h>
+ #include <linux/spinlock.h>
+ 
+@@ -73,8 +74,11 @@ struct tmio_mmc_host {
+ 
+ 	/* Track lost interrupts */
+ 	struct delayed_work	delayed_reset_work;
+-	spinlock_t		lock;
++	struct work_struct	done;
++
++	spinlock_t		lock;		/* protect host private data */
+ 	unsigned long		last_req_ts;
++	struct mutex		ios_lock;	/* protect set_ios() context */
+ };
+ 
+ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 0b09e82..eabda39 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -284,10 +284,16 @@ static void tmio_mmc_reset_work(struct work_struct *work)
+ /* called with host->lock held, interrupts disabled */
+ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
+ {
+-	struct mmc_request *mrq = host->mrq;
++	struct mmc_request *mrq;
++	unsigned long flags;
+ 
+-	if (!mrq)
++	spin_lock_irqsave(&host->lock, flags);
++
++	mrq = host->mrq;
++	if (IS_ERR_OR_NULL(mrq)) {
++		spin_unlock_irqrestore(&host->lock, flags);
+ 		return;
++	}
+ 
+ 	host->cmd = NULL;
+ 	host->data = NULL;
+@@ -296,11 +302,18 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
+ 	cancel_delayed_work(&host->delayed_reset_work);
+ 
+ 	host->mrq = NULL;
++	spin_unlock_irqrestore(&host->lock, flags);
+ 
+-	/* FIXME: mmc_request_done() can schedule! */
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
++static void tmio_mmc_done_work(struct work_struct *work)
++{
++	struct tmio_mmc_host *host = container_of(work, struct tmio_mmc_host,
++						  done);
++	tmio_mmc_finish_request(host);
++}
++
+ /* These are the bitmasks the tmio chip requires to implement the MMC response
+  * types. Note that R1 and R6 are the same in this scheme. */
+ #define APP_CMD        0x0040
+@@ -467,7 +480,7 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
+ 			BUG();
+ 	}
+ 
+-	tmio_mmc_finish_request(host);
++	schedule_work(&host->done);
+ }
+ 
+ static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
+@@ -557,7 +570,7 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
+ 				tasklet_schedule(&host->dma_issue);
+ 		}
+ 	} else {
+-		tmio_mmc_finish_request(host);
++		schedule_work(&host->done);
+ 	}
+ 
+ out:
+@@ -618,7 +631,8 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
+ 		if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
+ 			tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
+ 				TMIO_STAT_CARD_REMOVE);
+-			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
++			if (!work_pending(&host->mmc->detect.work))
++				mmc_detect_change(host->mmc, msecs_to_jiffies(100));
+ 		}
+ 
+ 		/* CRC and other errors */
+@@ -749,6 +763,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	struct tmio_mmc_data *pdata = host->pdata;
+ 	unsigned long flags;
+ 
++	mutex_lock(&host->ios_lock);
++
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	if (host->mrq) {
+ 		if (IS_ERR(host->mrq)) {
+@@ -764,6 +780,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 				host->mrq->cmd->opcode, host->last_req_ts, jiffies);
+ 		}
+ 		spin_unlock_irqrestore(&host->lock, flags);
++
++		mutex_unlock(&host->ios_lock);
+ 		return;
+ 	}
+ 
+@@ -817,6 +835,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			current->comm, task_pid_nr(current),
+ 			ios->clock, ios->power_mode);
+ 	host->mrq = NULL;
++
++	mutex_unlock(&host->ios_lock);
+ }
+ 
+ static int tmio_mmc_get_ro(struct mmc_host *mmc)
+@@ -913,9 +933,11 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 		tmio_mmc_enable_sdio_irq(mmc, 0);
+ 
+ 	spin_lock_init(&_host->lock);
++	mutex_init(&_host->ios_lock);
+ 
+ 	/* Init delayed work for request timeouts */
+ 	INIT_DELAYED_WORK(&_host->delayed_reset_work, tmio_mmc_reset_work);
++	INIT_WORK(&_host->done, tmio_mmc_done_work);
+ 
+ 	/* See if we also get DMA */
+ 	tmio_mmc_request_dma(_host, pdata);
+@@ -963,6 +985,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+ 		pm_runtime_get_sync(&pdev->dev);
+ 
+ 	mmc_remove_host(host->mmc);
++	cancel_work_sync(&host->done);
+ 	cancel_delayed_work_sync(&host->delayed_reset_work);
+ 	tmio_mmc_release_dma(host);
+ 
+-- 
+1.7.2.5
 
