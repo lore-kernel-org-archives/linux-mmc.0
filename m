@@ -1,84 +1,34 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 3/5] mmc: sdhi: Add write16_hook
-Date: Mon, 20 Jun 2011 16:04:04 +0900
-Message-ID: <BANLkTikfMgR5AMZtq7wGKJ4LRP6yjtjhOA@mail.gmail.com>
-References: <1308550015-15717-1-git-send-email-horms@verge.net.au>
-	<1308550015-15717-4-git-send-email-horms@verge.net.au>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: Re: [PATCH 3/3] MMC: Fix checkpatch complaints about long lines
+Date: Mon, 20 Jun 2011 09:58:45 +0200
+Message-ID: <4DFEFDB5.9070805@atmel.com>
+References: <1308419437-18306-1-git-send-email-sebras@gmail.com> <20110619065048.GC1632@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1308550015-15717-4-git-send-email-horms@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from newsmtp5.atmel.com ([204.2.163.5]:51441 "EHLO
+	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750717Ab1FTH7G (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 03:59:06 -0400
+In-Reply-To: <20110619065048.GC1632@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sebastian Rasmussen <sebras@gmail.com>, linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <w.sang@pengutronix.de>
 
-On Mon, Jun 20, 2011 at 3:06 PM, Simon Horman <horms@verge.net.au> wrot=
-e:
-> Some controllers require waiting for the bus to become idle
-> before writing to some registers. I have implemented this
-> by adding a hook to sd_ctrl_write16() and implementing
-> a hook for SDHI which waits for the bus to become idle.
->
-> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> Cc: Magnus Damm <magnus.damm@gmail.com>
-> Signed-off-by: Simon Horman <horms@verge.net.au>
->
-> ---
+Le 19/06/2011 08:50, Wolfram Sang :
+> On Sat, Jun 18, 2011 at 07:50:37PM +0200, Sebastian Rasmussen wrote:
+>> Signed-off-by: Sebastian Rasmussen <sebras@gmail.com>
+> 
+> I don't think it improves readability, so not worth the change IMO.
 
-Hi Simon,
+I have the same feeling: can't we be more tolerant with this soft limit
+requirement?
 
-Thanks for your work on this!
+And for sure changing existing code only for this is a bad idea.
 
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -55,6 +57,37 @@ static int sh_mobile_sdhi_get_cd(struct platform_d=
-evice *pdev)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return -ENOSYS;
-> =A0}
->
-> +static void sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
-> +{
-> + =A0 =A0 =A0 int timeout =3D 1000;
-> +
-> + =A0 =A0 =A0 while (--timeout && !(sd_ctrl_read16(host, CTL_STATUS2)=
- & (1 << 13)))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 udelay(1);
-> +
-> + =A0 =A0 =A0 if (!timeout)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_warn(host->pdata->dev, "timeout wai=
-ting for SD bus idle\n");
-> +
-> +}
-> +
-> +static void sh_mobile_sdhi_write16_hook(struct tmio_mmc_host *host, =
-int addr)
-> +{
-> + =A0 =A0 =A0 if (!(host->pdata->flags & TMIO_MMC_HAS_IDLE_WAIT))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
+Bye,
+-- 
+Nicolas Ferre
 
-and
-
-> @@ -86,6 +119,7 @@ static int __devinit sh_mobile_sdhi_probe(struct p=
-latform_device *pdev)
-> =A0 =A0 =A0 =A0mmc_data->hclk =3D clk_get_rate(priv->clk);
-> =A0 =A0 =A0 =A0mmc_data->set_pwr =3D sh_mobile_sdhi_set_pwr;
-> =A0 =A0 =A0 =A0mmc_data->get_cd =3D sh_mobile_sdhi_get_cd;
-> + =A0 =A0 =A0 mmc_data->write16_hook =3D sh_mobile_sdhi_write16_hook;
-> =A0 =A0 =A0 =A0mmc_data->capabilities =3D MMC_CAP_MMC_HIGHSPEED;
-> =A0 =A0 =A0 =A0if (p) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_data->flags =3D p->tmio_flags;
-
-Doesn't it make more sense to do:
-
-if (!(host->pdata->flags & TMIO_MMC_HAS_IDLE_WAIT))
-  mmc_data->write16_hook =3D sh_mobile_sdhi_write16_hook;
-
-and skip the check inside the sh_mobile_sdhi_write16_hook() function?
-
-No need to do that check on every register access unless really needed.
-
-Thanks,
-
-/ magnus
