@@ -1,62 +1,36 @@
-From: Andrew Lutomirski <luto@mit.edu>
-Subject: SDHCI I/O errors
-Date: Mon, 20 Jun 2011 14:49:01 -0400
-Message-ID: <BANLkTik5wsSaLp_U1uCkoo5D68zBzH31PA@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: dw_mmc: set the card_width bit per card.
+Date: Mon, 20 Jun 2011 14:57:45 -0400
+Message-ID: <m2boxsz5xy.fsf@bob.laptop.org>
+References: <1308558233-20545-1-git-send-email-tgih.jun@samsung.com>
+	<BANLkTimUSAFF+P=ykHfG=GzbAjjaaxe_fA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pv0-f174.google.com ([74.125.83.174]:51503 "EHLO
-	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751801Ab1FTStX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 14:49:23 -0400
-Received: by pvg12 with SMTP id 12so965218pvg.19
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Jun 2011 11:49:22 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <BANLkTimUSAFF+P=ykHfG=GzbAjjaaxe_fA@mail.gmail.com> (Will
+	Newton's message of "Mon, 20 Jun 2011 10:15:29 +0100")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Will Newton <will.newton@gmail.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, akpm@linux-foundation.org, kgene.kim@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-I have an SDHC card that works fine in a camera and in several
-different USB-based readers.  On my sdhci reader (the integrated one
-on a Lenovo X220), though, it spews stuff like:
+Hi,
 
-[  306.103556] mmcblk0: error -110 sending read/write command,
-response 0x0, card status 0x400b00
-[  306.103559] end_request: I/O error, dev mmcblk0, sector 410272
-[  306.103595] mmc0: Got data interrupt 0x00600000 even though no data
-operation was in progress.
-[  306.103597] sdhci: =========== REGISTER DUMP (mmc0)===========
-[  306.103602] sdhci: Sys addr: 0xf9253200 | Version:  0x00000502
-[  306.103607] sdhci: Blk size: 0x00007200 | Blk cnt:  0x00000001
-[  306.103613] sdhci: Argument: 0x000642a1 | Trn mode: 0x00000013
-[  306.103618] sdhci: Present:  0x01cf0000 | Host ctl: 0x00000003
-[  306.103623] sdhci: Power:    0x0000000f | Blk gap:  0x00000000
-[  306.103628] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
-[  306.103634] sdhci: Timeout:  0x00000009 | Int stat: 0x00000000
-[  306.103639] sdhci: Int enab: 0x02ff00cb | Sig enab: 0x02ff00cb
-[  306.103644] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
-[  306.103649] sdhci: Caps:     0x21e8c8b2 | Caps_1:   0x00008073
-[  306.103654] sdhci: Cmd:      0x0000113a | Max curr: 0x00000040
-[  306.103655] sdhci: ===========================================
+On Mon, Jun 20 2011, Will Newton wrote:
+> On Mon, Jun 20, 2011 at 9:23 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> This patch sets the card_width bit of CTYPE for the corresponding card.
+>>
+>> CTYPE[31] and CTYPE[16] correspond respectively to card[15] and card[0]
+>> for 8-bit mode. And CTYPE[15] and CTYPE[0] correspond respectively to
+>> card[15] and CTYPE[0] for 1-bit or 4-bit mode.
+>>
+>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>
+> Acked-by: Will Newton <will.newton@imgtec.com>
 
-all over the logs and fails some (but not all) attempts to read it.
-The startup messages are:
+Pushed to mmc-next for 3.1, thanks.
 
-[  830.308403] sdhci-pci 0000:0d:00.0: SDHCI controller found
-[1180:e823] (rev 4)
-[  830.308632] sdhci-pci 0000:0d:00.0: PCI INT A -> GSI 16 (level,
-low) -> IRQ 16
-[  830.308720] sdhci-pci 0000:0d:00.0: setting latency timer to 64
-[  830.308730] mmc0: no vmmc regulator found
-[  830.308802] Registered led device: mmc0::
-[  830.309059] mmc0: SDHCI controller on PCI [0000:0d:00.0] using DMA
-
-and lspci says:
-
-0d:00.0 System peripheral: Ricoh Co Ltd Device e823 (rev 04)
-
-I see this on 2.6.39.1 and 3.0 git from today.
-
-Any ideas?
-
-Thanks,
-Andy
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
