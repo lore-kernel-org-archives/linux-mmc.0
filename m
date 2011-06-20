@@ -1,36 +1,29 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: set the card_width bit per card.
-Date: Mon, 20 Jun 2011 17:23:53 +0900
-Message-ID: <1308558233-20545-1-git-send-email-tgih.jun@samsung.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: protect a sequence of request and request-done.
+Date: Mon, 20 Jun 2011 10:15:03 +0100
+Message-ID: <BANLkTin1p20oOAft+cfKYcxUVE6Fh065UA@mail.gmail.com>
+References: <1308558256-20824-1-git-send-email-tgih.jun@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1308558256-20824-1-git-send-email-tgih.jun@samsung.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: akpm@linux-foundation.org, cjb@laptop.org, kgene.kim@samsung.com, Seungwon Jeon <tgih.jun@samsung.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, akpm@linux-foundation.org, cjb@laptop.org, kgene.kim@samsung.com
 List-Id: linux-mmc@vger.kernel.org
 
-This patch sets the card_width bit of CTYPE for the corresponding card.
+On Mon, Jun 20, 2011 at 9:24 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> Response timeout(RTO), Response crc error(RCRC) and Response error(RE)
+> signals come with command done(CD) and can be raised preceding command
+> done(CD). That is these error interrupts and CD can be handled in
+> separate dw_mci_interrupt(). If mmc_request_done() is called because of
+> response timeout before command done is occured, next request can be
+> sent, but CD of current request is not finished. This can bring about
+> a broken sequence of request and request-done.
+>
+> And Data error interrupt(DRTO, DCRC, SBE, EBE) and data transfer
+> over(DTO) are same reanson.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-CTYPE[31] and CTYPE[16] correspond respectively to card[15] and card[0]
-for 8-bit mode. And CTYPE[15] and CTYPE[0] correspond respectively to
-card[15] and CTYPE[0] for 1-bit or 4-bit mode.
-
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 66dcddb..1ca830c 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -574,7 +574,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
- 	}
- 
- 	/* Set the current slot bus width */
--	mci_writel(host, CTYPE, slot->ctype);
-+	mci_writel(host, CTYPE, (slot->ctype << slot->id));
- }
- 
- static void dw_mci_start_request(struct dw_mci *host,
--- 
-1.7.1
+Acked-by: Will Newton <will.newton@imgtec.com>
