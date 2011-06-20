@@ -1,52 +1,62 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] mmc: sdhci-pxa move platform data to
- include/linux/platform_data
-Date: Mon, 20 Jun 2011 10:48:38 -0700
-Message-ID: <FF568A6B-4BC3-477E-BADC-FA1E28B2BE6A@marvell.com>
-References: <1308579112-5027-1-git-send-email-zhangfei.gao@marvell.com>
- <201106201829.09485.arnd@arndb.de>
+From: Andrew Lutomirski <luto@mit.edu>
+Subject: SDHCI I/O errors
+Date: Mon, 20 Jun 2011 14:49:01 -0400
+Message-ID: <BANLkTik5wsSaLp_U1uCkoo5D68zBzH31PA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:50330 "EHLO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755388Ab1FTRtI convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 20 Jun 2011 13:49:08 -0400
-In-Reply-To: <201106201829.09485.arnd@arndb.de>
-Content-Language: en-US
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:51503 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751801Ab1FTStX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 14:49:23 -0400
+Received: by pvg12 with SMTP id 12so965218pvg.19
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jun 2011 11:49:22 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhangfei Gao <zgao6@marvell.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Stephen Rothwell <sfr@canb.auug.org.au>, Arnd Bergmann <arnd@arndb.de>
+To: linux-mmc@vger.kernel.org
 
+I have an SDHC card that works fine in a camera and in several
+different USB-based readers.  On my sdhci reader (the integrated one
+on a Lenovo X220), though, it spews stuff like:
 
-Zhangfei,
+[  306.103556] mmcblk0: error -110 sending read/write command,
+response 0x0, card status 0x400b00
+[  306.103559] end_request: I/O error, dev mmcblk0, sector 410272
+[  306.103595] mmc0: Got data interrupt 0x00600000 even though no data
+operation was in progress.
+[  306.103597] sdhci: =========== REGISTER DUMP (mmc0)===========
+[  306.103602] sdhci: Sys addr: 0xf9253200 | Version:  0x00000502
+[  306.103607] sdhci: Blk size: 0x00007200 | Blk cnt:  0x00000001
+[  306.103613] sdhci: Argument: 0x000642a1 | Trn mode: 0x00000013
+[  306.103618] sdhci: Present:  0x01cf0000 | Host ctl: 0x00000003
+[  306.103623] sdhci: Power:    0x0000000f | Blk gap:  0x00000000
+[  306.103628] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[  306.103634] sdhci: Timeout:  0x00000009 | Int stat: 0x00000000
+[  306.103639] sdhci: Int enab: 0x02ff00cb | Sig enab: 0x02ff00cb
+[  306.103644] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
+[  306.103649] sdhci: Caps:     0x21e8c8b2 | Caps_1:   0x00008073
+[  306.103654] sdhci: Cmd:      0x0000113a | Max curr: 0x00000040
+[  306.103655] sdhci: ===========================================
 
-Would you mind posting the patch to the mmc mailing list.  It has not shown up in my inbox.
+all over the logs and fails some (but not all) attempts to read it.
+The startup messages are:
 
-Philip
-On Jun 20, 2011, at 9:29 AM, Arnd Bergmann wrote:
+[  830.308403] sdhci-pci 0000:0d:00.0: SDHCI controller found
+[1180:e823] (rev 4)
+[  830.308632] sdhci-pci 0000:0d:00.0: PCI INT A -> GSI 16 (level,
+low) -> IRQ 16
+[  830.308720] sdhci-pci 0000:0d:00.0: setting latency timer to 64
+[  830.308730] mmc0: no vmmc regulator found
+[  830.308802] Registered led device: mmc0::
+[  830.309059] mmc0: SDHCI controller on PCI [0000:0d:00.0] using DMA
 
-> On Monday 20 June 2011, Zhangfei Gao wrote:
->> 
->>        As suggested by Arnd, move platform data to include/linux/platform_data,
->>        Add 'depends on CLKDEV_LOOKUP' since clk API is used,
->>        As a result driver could be built on all platforms which support CLKDEV_LOOKUP
->>        This can improve the build test coverage
->> 
->> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
->> CC: Arnd Bergmann <arnd@arndb.de>
-> 
-> Acked-by: Arnd Bergmann <arnd@arndb.de>
-> 
-> BTW, For some reason, your changelog text above is still indented funny. This should
-> not happen if you use git-format-patch rather than git-show.
-> 
-> 	Arnd
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+and lspci says:
 
+0d:00.0 System peripheral: Ricoh Co Ltd Device e823 (rev 04)
+
+I see this on 2.6.39.1 and 3.0 git from today.
+
+Any ideas?
+
+Thanks,
+Andy
