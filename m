@@ -1,322 +1,55 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: [PATCH v6 11/11] mmc: add handling for two parallel block requests in issue_rw_rq
-Date: Sun, 19 Jun 2011 23:17:37 +0200
-Message-ID: <1308518257-9783-12-git-send-email-per.forlin@linaro.org>
-References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:50256 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754763Ab1FSVUp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Jun 2011 17:20:45 -0400
-Received: by mail-bw0-f46.google.com with SMTP id 15so1810968bwz.19
-        for <linux-mmc@vger.kernel.org>; Sun, 19 Jun 2011 14:20:44 -0700 (PDT)
-In-Reply-To: <1308518257-9783-1-git-send-email-per.forlin@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH 1/5] mmc: tmio: name 0xd8 as CTL_DMA_ENABLE
+Date: Mon, 20 Jun 2011 15:06:51 +0900
+Message-ID: <1308550015-15717-2-git-send-email-horms@verge.net.au>
+References: <1308550015-15717-1-git-send-email-horms@verge.net.au>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1308550015-15717-1-git-send-email-horms@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Cc: Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linaro-dev@lists.linaro.org, Venkatraman S <svenkatr@ti.com>
-Cc: Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@linaro.org>
 
-Change mmc_blk_issue_rw_rq() to become asynchronous.
-The execution flow looks like this:
-The mmc-queue calls issue_rw_rq(), which sends the request
-to the host and returns back to the mmc-queue. The mmc-queue calls
-issue_rw_rq() again with a new request. This new request is prepared,
-in isuue_rw_rq(), then it waits for the active request to complete before
-pushing it to the host. When to mmc-queue is empty it will call
-isuue_rw_rq() with req=NULL to finish off the active request
-without starting a new request.
+This reflects at least the current usage of this register
+and I think it improves the readability of the code ever so slightly.
 
-Signed-off-by: Per Forlin <per.forlin@linaro.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Magnus Damm <magnus.damm@gmail.com>
+Signed-off-by: Simon Horman <horms@verge.net.au>
+
 ---
- drivers/mmc/card/block.c |  121 +++++++++++++++++++++++++++++++++-------------
- drivers/mmc/card/queue.c |   17 +++++--
- drivers/mmc/card/queue.h |    1 +
- 3 files changed, 101 insertions(+), 38 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 6a84a75..66db77a 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -108,6 +108,7 @@ static DEFINE_MUTEX(open_lock);
- 
- enum mmc_blk_status {
- 	MMC_BLK_SUCCESS = 0,
-+	MMC_BLK_PARTIAL,
- 	MMC_BLK_RETRY,
- 	MMC_BLK_DATA_ERR,
- 	MMC_BLK_CMD_ERR,
-@@ -668,14 +669,16 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
- 	}
- }
- 
--static enum mmc_blk_status mmc_blk_err_check(struct mmc_blk_request *brq,
--					     struct request *req,
--					     struct mmc_card *card,
--					     struct mmc_blk_data *md)
-+static int mmc_blk_err_check(struct mmc_card *card,
-+			     struct mmc_async_req *areq)
+Dependencies: none known
+---
+ drivers/mmc/host/tmio_mmc_dma.c |    2 +-
+ include/linux/mmc/tmio.h        |    1 +
+ 2 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+index 25f1ad6..9c4da66 100644
+--- a/drivers/mmc/host/tmio_mmc_dma.c
++++ b/drivers/mmc/host/tmio_mmc_dma.c
+@@ -26,7 +26,7 @@ static void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
  {
- 	struct mmc_command cmd;
- 	u32 status = 0;
- 	enum mmc_blk_status ret = MMC_BLK_SUCCESS;
-+	struct mmc_queue_req *mq_mrq = container_of(areq, struct mmc_queue_req,
-+						    mmc_active);
-+	struct mmc_blk_request *brq = &mq_mrq->brq;
-+	struct request *req = mq_mrq->req;
- 
- 	/*
- 	 * Check for errors here, but don't jump to cmd_err
-@@ -770,7 +773,11 @@ static enum mmc_blk_status mmc_blk_err_check(struct mmc_blk_request *brq,
- 		else
- 			ret = MMC_BLK_DATA_ERR;
- 	}
--out:
-+
-+	if (ret == MMC_BLK_SUCCESS &&
-+	    blk_rq_bytes(req) != brq->data.bytes_xfered)
-+		ret = MMC_BLK_PARTIAL;
-+ out:
- 	return ret;
+ #if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
+ 	/* Switch DMA mode on or off - SuperH specific? */
+-	writew(enable ? 2 : 0, host->ctl + (0xd8 << host->bus_shift));
++	writew(enable ? 2 : 0, host->ctl + (CTL_DMA_ENABLE << host->bus_shift));
+ #endif
  }
  
-@@ -901,27 +908,59 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 		brq->data.sg_len = i;
- 	}
- 
-+	mqrq->mmc_active.mrq = &brq->mrq;
-+	mqrq->mmc_active.err_check = mmc_blk_err_check;
-+
- 	mmc_queue_bounce_pre(mqrq);
- }
- 
--static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
-+static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- {
- 	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
--	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
--	int ret = 1, disable_multi = 0;
-+	struct mmc_blk_request *brq;
-+	int ret = 1;
-+	int disable_multi = 0;
- 	enum mmc_blk_status status;
-+	struct mmc_queue_req *mq_rq;
-+	struct request *req;
-+	struct mmc_async_req *areq;
-+
-+	if (!rqc && !mq->mqrq_prev->req)
-+		goto out;
- 
- 	do {
--		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, disable_multi, mq);
--		mmc_wait_for_req(card->host, &brq->mrq);
-+		if (rqc) {
-+			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
-+			areq = &mq->mqrq_cur->mmc_active;
-+		} else
-+			areq = NULL;
-+		areq = mmc_start_req(card->host, areq, (int *) &status);
-+		if (!areq)
-+			goto out;
- 
--		mmc_queue_bounce_post(mq->mqrq_cur);
--		status = mmc_blk_err_check(brq, req, card, md);
-+		mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
-+		brq = &mq_rq->brq;
-+		req = mq_rq->req;
-+		mmc_queue_bounce_post(mq_rq);
- 
- 		switch (status) {
--		case MMC_BLK_CMD_ERR:
--			goto cmd_err;
-+		case MMC_BLK_SUCCESS:
-+		case MMC_BLK_PARTIAL:
-+			/*
-+			 * A block was successfully transferred.
-+			 */
-+			spin_lock_irq(&md->lock);
-+			ret = __blk_end_request(req, 0,
-+						brq->data.bytes_xfered);
-+			spin_unlock_irq(&md->lock);
-+			if (status == MMC_BLK_SUCCESS && ret) {
-+				/* If this happen it is a bug */
-+				printk(KERN_ERR "%s BUG rq_tot %d d_xfer %d\n",
-+				       __func__, blk_rq_bytes(req),
-+				       brq->data.bytes_xfered);
-+				goto cmd_err;
-+			}
- 			break;
- 		case MMC_BLK_RETRY:
- 			disable_multi = 1;
-@@ -934,36 +973,41 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- 			 * read a single sector.
- 			 */
- 			spin_lock_irq(&md->lock);
--			ret = __blk_end_request(req, -EIO,
--						brq->data.blksz);
-+			ret = __blk_end_request(req, -EIO, brq->data.blksz);
- 			spin_unlock_irq(&md->lock);
--
-+			if (!ret)
-+				goto start_new_req;
- 			break;
--		case MMC_BLK_SUCCESS:
-+		case MMC_BLK_CMD_ERR:
-+			ret = 1;
-+			goto cmd_err;
-+			break;
-+		}
-+
-+		if (ret) {
- 			/*
--			 * A block was successfully transferred.
-+			 * In case of a none complete request
-+			 * prepare it again and resend.
- 			 */
--			spin_lock_irq(&md->lock);
--			ret = __blk_end_request(req, 0, brq->data.bytes_xfered);
--			spin_unlock_irq(&md->lock);
--			break;
-+			mmc_blk_rw_rq_prep(mq_rq, card, disable_multi, mq);
-+			mmc_start_req(card->host, &mq_rq->mmc_active, NULL);
- 		}
- 	} while (ret);
- 
- 	return 1;
--
-+ out:
-+	return 0;
-  cmd_err:
-- 	/*
-- 	 * If this is an SD card and we're writing, we can first
-- 	 * mark the known good sectors as ok.
-- 	 *
-+	/*
-+	 * If this is an SD card and we're writing, we can first
-+	 * mark the known good sectors as ok.
-+	 *
- 	 * If the card is not SD, we can still ok written sectors
- 	 * as reported by the controller (which might be less than
- 	 * the real number of written sectors, but never more).
- 	 */
- 	if (mmc_card_sd(card)) {
- 		u32 blocks;
--
- 		blocks = mmc_sd_num_wr_blocks(card);
- 		if (blocks != (u32)-1) {
- 			spin_lock_irq(&md->lock);
-@@ -981,6 +1025,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- 		ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
- 	spin_unlock_irq(&md->lock);
- 
-+ start_new_req:
-+	if (rqc) {
-+		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
-+		mmc_start_req(card->host, &mq->mqrq_cur->mmc_active, NULL);
-+	}
-+
- 	return 0;
- }
- 
-@@ -990,26 +1040,31 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
- 
--	mmc_claim_host(card->host);
-+	if (req && !mq->mqrq_prev->req)
-+		/* claim host only for the first request */
-+		mmc_claim_host(card->host);
-+
- 	ret = mmc_blk_part_switch(card, md);
- 	if (ret) {
- 		ret = 0;
- 		goto out;
- 	}
- 
--	if (req->cmd_flags & REQ_DISCARD) {
-+	if (req && req->cmd_flags & REQ_DISCARD) {
- 		if (req->cmd_flags & REQ_SECURE)
- 			ret = mmc_blk_issue_secdiscard_rq(mq, req);
- 		else
- 			ret = mmc_blk_issue_discard_rq(mq, req);
--	} else if (req->cmd_flags & REQ_FLUSH) {
-+	} else if (req && req->cmd_flags & REQ_FLUSH) {
- 		ret = mmc_blk_issue_flush(mq, req);
- 	} else {
- 		ret = mmc_blk_issue_rw_rq(mq, req);
- 	}
- 
- out:
--	mmc_release_host(card->host);
-+	if (!req)
-+		/* release host only when there are no more requests */
-+		mmc_release_host(card->host);
- 	return ret;
- }
- 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 0757a39..2d6696a 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -52,6 +52,7 @@ static int mmc_queue_thread(void *d)
- 	down(&mq->thread_sem);
- 	do {
- 		struct request *req = NULL;
-+		struct mmc_queue_req *tmp;
- 
- 		spin_lock_irq(q->queue_lock);
- 		set_current_state(TASK_INTERRUPTIBLE);
-@@ -59,7 +60,10 @@ static int mmc_queue_thread(void *d)
- 		mq->mqrq_cur->req = req;
- 		spin_unlock_irq(q->queue_lock);
- 
--		if (!req) {
-+		if (req || mq->mqrq_prev->req) {
-+			set_current_state(TASK_RUNNING);
-+			mq->issue_fn(mq, req);
-+		} else {
- 			if (kthread_should_stop()) {
- 				set_current_state(TASK_RUNNING);
- 				break;
-@@ -67,11 +71,14 @@ static int mmc_queue_thread(void *d)
- 			up(&mq->thread_sem);
- 			schedule();
- 			down(&mq->thread_sem);
--			continue;
- 		}
--		set_current_state(TASK_RUNNING);
- 
--		mq->issue_fn(mq, req);
-+		/* Current request becomes previous request and vice versa. */
-+		mq->mqrq_prev->brq.mrq.data = NULL;
-+		mq->mqrq_prev->req = NULL;
-+		tmp = mq->mqrq_prev;
-+		mq->mqrq_prev = mq->mqrq_cur;
-+		mq->mqrq_cur = tmp;
- 	} while (1);
- 	up(&mq->thread_sem);
- 
-@@ -97,7 +104,7 @@ static void mmc_request(struct request_queue *q)
- 		return;
- 	}
- 
--	if (!mq->mqrq_cur->req)
-+	if (!mq->mqrq_cur->req && !mq->mqrq_prev->req)
- 		wake_up_process(mq->thread);
- }
- 
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index c8fb2dc..f937538 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -19,6 +19,7 @@ struct mmc_queue_req {
- 	char			*bounce_buf;
- 	struct scatterlist	*bounce_sg;
- 	unsigned int		bounce_sg_len;
-+	struct mmc_async_req	mmc_active;
- };
- 
- struct mmc_queue {
+diff --git a/include/linux/mmc/tmio.h b/include/linux/mmc/tmio.h
+index 19490b9..0a6e40d 100644
+--- a/include/linux/mmc/tmio.h
++++ b/include/linux/mmc/tmio.h
+@@ -30,6 +30,7 @@
+ #define CTL_TRANSACTION_CTL 0x34
+ #define CTL_SDIO_STATUS 0x36
+ #define CTL_SDIO_IRQ_MASK 0x38
++#define CTL_DMA_ENABLE 0xd8
+ #define CTL_RESET_SD 0xe0
+ #define CTL_SDIO_REGS 0x100
+ #define CTL_CLK_AND_WAIT_CTL 0x138
 -- 
-1.7.4.1
+1.7.4.4
 
