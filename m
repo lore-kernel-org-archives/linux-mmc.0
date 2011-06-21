@@ -1,47 +1,56 @@
-From: FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>
-Subject: Re: [PATCH v3 RESEND] dma-mapping: add new API for
-	max_segment_number
-Date: Wed, 22 Jun 2011 02:44:47 +0900
-Message-ID: <20110622023929W.fujita.tomonori@lab.ntt.co.jp>
-References: <BANLkTi=-t9HVc6U6QY07su+c3WztsGoq3Q@mail.gmail.com>
-	<1308227453-2034-1-git-send-email-shawn.guo@linaro.org>
-	<20110617124035.GA19693@parisc-linux.org>
+From: Jesse Barnes <jbarnes@virtuousgeek.org>
+Subject: Re: [PATCH 4/4] PCI: make cardbus-bridge resources nice-to-have
+Date: Tue, 21 Jun 2011 11:50:43 -0700
+Message-ID: <20110621115043.064871db@jbarnes-desktop>
+References: <1308610037-6261-1-git-send-email-linuxram@us.ibm.com>
+	<1308610037-6261-5-git-send-email-linuxram@us.ibm.com>
+	<20110621075659.GA4620@comet.dominikbrodowski.net>
+	<20110621162321.GB22917@ram-laptop>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sh.osrg.net ([192.16.179.4]:41308 "EHLO sh.osrg.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756977Ab1FURpl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Jun 2011 13:45:41 -0400
-In-Reply-To: <20110617124035.GA19693@parisc-linux.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <20110621162321.GB22917@ram-laptop>
+Sender: linux-pci-owner@vger.kernel.org
+To: Ram Pai <linuxram@us.ibm.com>
+Cc: Dominik Brodowski <linux@dominikbrodowski.net>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, svenkatr@ti.com, yinghai@kernel.org, cjb@laptop.org, linux-pci@vger.kernel.org, linux-net-drivers@solarflare.com, bhutchings@solarflare.com
 List-Id: linux-mmc@vger.kernel.org
-To: matthew@wil.cx
-Cc: shawn.guo@linaro.org, linux-kernel@vger.kernel.org, linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk, vinod.koul@intel.com, gregkh@suse.de, fujita.tomonori@lab.ntt.co.jp, dan.j.williams@intel.com, cjb@laptop.org, per.forlin@linaro.org
 
-On Fri, 17 Jun 2011 06:40:35 -0600
-Matthew Wilcox <matthew@wil.cx> wrote:
+On Tue, 21 Jun 2011 09:23:21 -0700
+Ram Pai <linuxram@us.ibm.com> wrote:
 
-> On Thu, Jun 16, 2011 at 08:30:53PM +0800, Shawn Guo wrote:
-> > Here is the user story that tells the need of the new api.  The
-> > mxs-mmc is the mmc host controller for Freescale MXS architecture.
-> > There are a pair of  mmc host specific parameters max_seg_size and
-> > max_segs that mxs-mmc host driver needs to tell mmc core, so that
-> > mmc core can know how big each data segment could be and how many
-> > segments could be handled one time in a scatter list by host driver.
+> On Tue, Jun 21, 2011 at 09:57:00AM +0200, Dominik Brodowski wrote:
+> > On Mon, Jun 20, 2011 at 03:47:17PM -0700, Ram Pai wrote:
+> > > Allocate resources to cardbus bridge only after all other genuine
+> > > resources requests are satisfied. Dont retry if resource allocation
+> > > for cardbus-bridge fails.
 > > 
-> > The mxs-mmc driver is one user of dmaengine mxs-dma, and it will call
-> > mxs-dma to transfer data in scatter list.  That is to say mxs-mmc has
-> > no idea of what max_seg_size and max_segs should be, because they are
-> > all mxs-dma capability parameters, and mxs-mmc needs to query them
-> > from mxs-dma.
+> > Well, for those who use cardbus cards, cardbus resources aren't "nice to
+> > have", they are absolutely required. Of course, not all cardbus cards need
+> > as many resources as are currently assigned, so I wouldn't oppose a patch
+> > which marks _some_ of the currently assigned resources as "nice to have".
+> > But this approach -- 0 required, all "nice to have" -- seems wrong to me.
 > 
-> This approach would make sense if mxs-mmc were generic, but it's tied to
-> mxs-dma, so it can just as well call mxs-dma to find out how many segments
-> it supports.
+> Do you know how much minimal resource is good enough?  The value, before
+> this patch, was 256 for IO ports and  64M for memory.
+> 
+> BTW: If the BIOS has already assigned enough resources for all the devices on
+> the system, no devices will be starved including the cardbus. The OS intervenes
+> and is forced to make this hard choice only when it sees unassigned resources to
+> some devices along with resource contention.
 
-SCSI HBA drivers stores the max number of sg entries in
-host->sg_tablesize (and scsi-ml tells the block layer about the
-limit)? So if we have the generic API to handle the value, scsi HBA
-drivers (and scsi-ml) could use it too?
+I just know this is going to trigger regressions, so I think Dominik's
+concern is valid.  We'll have some existing machine with a device whose
+resource was never assigned, but we didn't care because it was unused.
+Now this code will try to give it some address space at the expense of
+something that *is* being used.
+
+But OTOH this will at least try to allocate *some* space to cardbus, we
+just won't try as hard as with some other resources.  I'd mainly like
+to avoid the situation Dominik pointed out, where we have perfectly
+good cardbus resources assigned (unlike in Oliver's case) but they're
+stolen for a bridge that may get a hotplugged device or some other
+device that didn't have a BIOS assignment.
+
+-- 
+Jesse Barnes, Intel Open Source Technology Center
