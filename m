@@ -1,64 +1,96 @@
 From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH v4 0/4] Extend sdhci-esdhc-imx card_detect and write_protect support for mx5
-Date: Tue, 21 Jun 2011 22:41:47 +0800
-Message-ID: <1308667311-1855-1-git-send-email-shawn.guo@linaro.org>
+Subject: [PATCH v4 1/4] mmc: sdhci: fix interrupt storm from card detection
+Date: Tue, 21 Jun 2011 22:41:48 +0800
+Message-ID: <1308667311-1855-2-git-send-email-shawn.guo@linaro.org>
+References: <1308667311-1855-1-git-send-email-shawn.guo@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:40062 "EHLO
-	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756747Ab1FUOc2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 10:32:28 -0400
-Received: by iwn6 with SMTP id 6so2107825iwn.19
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Jun 2011 07:32:28 -0700 (PDT)
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:51517 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756747Ab1FUOcm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 10:32:42 -0400
+Received: by iyb12 with SMTP id 12so2891665iyb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Jun 2011 07:32:42 -0700 (PDT)
+In-Reply-To: <1308667311-1855-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Arnaud Patard <arnaud.patard@rtp-net.org>, Eric Benard <eric@eukrea.com>, Philip Rakity <prakity@marvell.com>, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Arnaud Patard <arnaud.patard@rtp-net.org>, Eric Benard <eric@eukrea.com>, Philip Rakity <prakity@marvell.com>, linux-arm-kernel@lists.infradead.org, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>
 
-The card-present polling for sdhci based driver is very expensive
-in terms of the impact to system performance.  We observe a few
-system performance issues from Freescale and Linaro on mx5 platforms,
-which have been proved card polling related.
+The issue was initially found by Eric Benard as below.
 
-The patch set extends the current sdhci-esdhc-imx card_detect and
-write_protect support to cover mx5 platforms, and solves above
-performance issues.
+http://permalink.gmane.org/gmane.linux.ports.arm.kernel/108031
 
-Changes since v3:
- * Address comment from Philip Rakity on sdhci_set_card_detection
- * Change a couple of dev_warn to dev_err in sdhci-esdhc-imx.c per
-   Arnaud Patard's comment
- * Add Arnaud Patard's Test-by
- * Add missing Acked-by, Cc stable on patch #2
+Not sure about other SDHCI based controller, but on Freescale eSDHC,
+the SDHCI_INT_CARD_INSERT bits will be immediately set again when it
+gets cleared, if a card is inserted. The driver need to mask the irq
+to prevent interrupt storm which will freeze the system.  And the
+SDHCI_INT_CARD_REMOVE gets the same situation.
 
-Changes since v2:
- * Fix the issue reported by Arnaud Patard:
-   http://article.gmane.org/gmane.linux.ports.arm.kernel/120790
+The patch fixes the problem based on the initial idea from
+Eric Benard.
 
-Changes since v1:
- * Rebase on today's linux-next
- * Take the suggestion from Arnaud Patard to add default pdata in
-   imx_add_sdhci_esdhc_imx(), to avoid touching every single board
-   file for the platform_data changes
- * Add comment for sdhci.c change
- * Change ESDHC_CD(WP)_SIGNAL to ESDHC_CD(WP)_CONTROLLER for a more
-   descriptive name
- * Add missing NONE case handling in esdhc_pltfm_get_ro
- * Improve a couple comment wording per suggestion from Wolfram Sang
+Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+Cc: Eric Benard <eric@eukrea.com>
+Tested-by: Arnaud Patard <arnaud.patard@rtp-net.org>
+---
+ drivers/mmc/host/sdhci.c |   29 +++++++++++++++++++++++++----
+ 1 files changed, 25 insertions(+), 4 deletions(-)
 
-Shawn Guo (4):
-      mmc: sdhci: fix interrupt storm from card detection
-      mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not get cleared
-      mmc: sdhci-esdhc-imx: remove "WP" from flag ESDHC_FLAG_GPIO_FOR_CD_WP
-      mmc: sdhci-esdhc-imx: extend card_detect and write_protect support for mx5
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 91d9892..790f959 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -127,11 +127,15 @@ static void sdhci_mask_irqs(struct sdhci_host *host, u32 irqs)
+ 
+ static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
+ {
+-	u32 irqs = SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT;
++	u32 present, irqs;
+ 
+ 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+ 		return;
+ 
++	present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
++			      SDHCI_CARD_PRESENT;
++	irqs = present ? SDHCI_INT_CARD_REMOVE : SDHCI_INT_CARD_INSERT;
++
+ 	if (enable)
+ 		sdhci_unmask_irqs(host, irqs);
+ 	else
+@@ -2154,13 +2158,30 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 		mmc_hostname(host->mmc), intmask);
+ 
+ 	if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
++		u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
++			      SDHCI_CARD_PRESENT;
++
++		/*
++		 * There is a observation on i.mx esdhc.  INSERT bit will be
++		 * immediately set again when it gets cleared, if a card is
++		 * inserted.  We have to mask the irq to prevent interrupt
++		 * storm which will freeze the system.  And the REMOVE gets
++		 * the same situation.
++		 *
++		 * More testing are needed here to ensure it works for other
++		 * platforms though.
++		 */
++		sdhci_mask_irqs(host, present ? SDHCI_INT_CARD_INSERT :
++						SDHCI_INT_CARD_REMOVE);
++		sdhci_unmask_irqs(host, present ? SDHCI_INT_CARD_REMOVE :
++						  SDHCI_INT_CARD_INSERT);
++
+ 		sdhci_writel(host, intmask & (SDHCI_INT_CARD_INSERT |
+-			SDHCI_INT_CARD_REMOVE), SDHCI_INT_STATUS);
++			     SDHCI_INT_CARD_REMOVE), SDHCI_INT_STATUS);
++		intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
+ 		tasklet_schedule(&host->card_tasklet);
+ 	}
+ 
+-	intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
+-
+ 	if (intmask & SDHCI_INT_CMD_MASK) {
+ 		sdhci_writel(host, intmask & SDHCI_INT_CMD_MASK,
+ 			SDHCI_INT_STATUS);
+-- 
+1.7.4.1
 
- arch/arm/mach-imx/eukrea_mbimxsd25-baseboard.c     |    3 +-
- arch/arm/mach-imx/eukrea_mbimxsd35-baseboard.c     |    3 +-
- arch/arm/mach-imx/mach-mx25_3ds.c                  |    2 +
- arch/arm/mach-imx/mach-pcm043.c                    |    2 +
- arch/arm/mach-mx5/board-mx51_babbage.c             |   14 +-
- arch/arm/mach-mx5/board-mx53_loco.c                |    4 +
- .../plat-mxc/devices/platform-sdhci-esdhc-imx.c    |   12 ++
- arch/arm/plat-mxc/include/mach/esdhc.h             |   25 +++-
- drivers/mmc/host/sdhci-esdhc-imx.c                 |  140 ++++++++++++--------
- drivers/mmc/host/sdhci.c                           |   29 ++++-
- 10 files changed, 165 insertions(+), 69 deletions(-)
