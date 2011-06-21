@@ -1,7 +1,7 @@
 From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v7 03/11] mmci: implement pre_req() and post_req()
-Date: Wed, 22 Jun 2011 01:38:33 +0200
-Message-ID: <1308699521-20556-4-git-send-email-per.forlin@linaro.org>
+Subject: [PATCH v7 05/11] mmc: mmc_test: add test for non-blocking transfers
+Date: Wed, 22 Jun 2011 01:38:35 +0200
+Message-ID: <1308699521-20556-6-git-send-email-per.forlin@linaro.org>
 References: <1308699521-20556-1-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -20,276 +20,463 @@ Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
 To: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Venkatraman S <sve>
 List-Id: linux-mmc@vger.kernel.org
 
-pre_req() runs dma_map_sg() and prepares the dma descriptor
-for the next mmc data transfer. post_req() runs dma_unmap_sg.
-If not calling pre_req() before mmci_request(), mmci_request()
-will prepare the cache and dma just like it did it before.
-It is optional to use pre_req() and post_req() for mmci.
+Add four tests for read and write performance per
+different transfer size, 4k to 4M.
+ * Read using blocking mmc request
+ * Read using non-blocking mmc request
+ * Write using blocking mmc request
+ * Write using non-blocking mmc request
+
+The host dirver must support pre_req() and post_req()
+in order to run the non-blocking test cases.
 
 Signed-off-by: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/mmc/host/mmci.c |  146 ++++++++++++++++++++++++++++++++++++++++++----
- drivers/mmc/host/mmci.h |    8 +++
- 2 files changed, 141 insertions(+), 13 deletions(-)
+ drivers/mmc/card/mmc_test.c |  322 +++++++++++++++++++++++++++++++++++++++++--
+ 1 files changed, 313 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 6e27433..f8c837b 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -322,7 +322,8 @@ static void mmci_dma_unmap(struct mmci_host *host, struct mmc_data *data)
- 		dir = DMA_FROM_DEVICE;
- 	}
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index e8508e9..5325049 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -22,6 +22,7 @@
+ #include <linux/debugfs.h>
+ #include <linux/uaccess.h>
+ #include <linux/seq_file.h>
++#include <linux/random.h>
  
--	dma_unmap_sg(chan->device->dev, data->sg, data->sg_len, dir);
-+	if (!data->host_cookie)
-+		dma_unmap_sg(chan->device->dev, data->sg, data->sg_len, dir);
+ #define RESULT_OK		0
+ #define RESULT_FAIL		1
+@@ -51,10 +52,12 @@ struct mmc_test_pages {
+  * struct mmc_test_mem - allocated memory.
+  * @arr: array of allocations
+  * @cnt: number of allocations
++ * @size_min_cmn: lowest common size in array of allocations
+  */
+ struct mmc_test_mem {
+ 	struct mmc_test_pages *arr;
+ 	unsigned int cnt;
++	unsigned int size_min_cmn;
+ };
  
- 	/*
- 	 * Use of DMA with scatter-gather is impossible.
-@@ -340,7 +341,8 @@ static void mmci_dma_data_error(struct mmci_host *host)
- 	dmaengine_terminate_all(host->dma_current);
- }
+ /**
+@@ -148,6 +151,26 @@ struct mmc_test_card {
+ 	struct mmc_test_general_result	*gr;
+ };
  
--static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
-+static int mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
-+			      struct mmci_host_next *next)
- {
- 	struct variant_data *variant = host->variant;
- 	struct dma_slave_config conf = {
-@@ -351,13 +353,20 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 		.src_maxburst = variant->fifohalfsize >> 2, /* # of words */
- 		.dst_maxburst = variant->fifohalfsize >> 2, /* # of words */
- 	};
--	struct mmc_data *data = host->data;
- 	struct dma_chan *chan;
- 	struct dma_device *device;
- 	struct dma_async_tx_descriptor *desc;
- 	int nr_sg;
- 
--	host->dma_current = NULL;
-+	/* Check if next job is already prepared */
-+	if (data->host_cookie && !next &&
-+	    host->dma_current && host->dma_desc_current)
-+		return 0;
-+
-+	if (!next) {
-+		host->dma_current = NULL;
-+		host->dma_desc_current = NULL;
-+	}
- 
- 	if (data->flags & MMC_DATA_READ) {
- 		conf.direction = DMA_FROM_DEVICE;
-@@ -372,7 +381,7 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 		return -EINVAL;
- 
- 	/* If less than or equal to the fifo size, don't bother with DMA */
--	if (host->size <= variant->fifosize)
-+	if (data->blksz * data->blocks <= variant->fifosize)
- 		return -EINVAL;
- 
- 	device = chan->device;
-@@ -386,14 +395,38 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 	if (!desc)
- 		goto unmap_exit;
- 
--	/* Okay, go for it. */
--	host->dma_current = chan;
-+	if (next) {
-+		next->dma_chan = chan;
-+		next->dma_desc = desc;
-+	} else {
-+		host->dma_current = chan;
-+		host->dma_desc_current = desc;
-+	}
-+
-+	return 0;
- 
-+ unmap_exit:
-+	if (!next)
-+		dmaengine_terminate_all(chan);
-+	dma_unmap_sg(device->dev, data->sg, data->sg_len, conf.direction);
-+	return -ENOMEM;
-+}
-+
-+static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
-+{
-+	int ret;
-+	struct mmc_data *data = host->data;
-+
-+	ret = mmci_dma_prep_data(host, host->data, NULL);
-+	if (ret)
-+		return ret;
-+
-+	/* Okay, go for it. */
- 	dev_vdbg(mmc_dev(host->mmc),
- 		 "Submit MMCI DMA job, sglen %d blksz %04x blks %04x flags %08x\n",
- 		 data->sg_len, data->blksz, data->blocks, data->flags);
--	dmaengine_submit(desc);
--	dma_async_issue_pending(chan);
-+	dmaengine_submit(host->dma_desc_current);
-+	dma_async_issue_pending(host->dma_current);
- 
- 	datactrl |= MCI_DPSM_DMAENABLE;
- 
-@@ -408,14 +441,90 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
- 	writel(readl(host->base + MMCIMASK0) | MCI_DATAENDMASK,
- 	       host->base + MMCIMASK0);
- 	return 0;
-+}
- 
--unmap_exit:
--	dmaengine_terminate_all(chan);
--	dma_unmap_sg(device->dev, data->sg, data->sg_len, conf.direction);
--	return -ENOMEM;
-+static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
-+{
-+	struct mmci_host_next *next = &host->next_data;
-+
-+	if (data->host_cookie && data->host_cookie != next->cookie) {
-+		printk(KERN_WARNING "[%s] invalid cookie: data->host_cookie %d"
-+		       " host->next_data.cookie %d\n",
-+		       __func__, data->host_cookie, host->next_data.cookie);
-+		data->host_cookie = 0;
-+	}
-+
-+	if (!data->host_cookie)
-+		return;
-+
-+	host->dma_desc_current = next->dma_desc;
-+	host->dma_current = next->dma_chan;
-+
-+	next->dma_desc = NULL;
-+	next->dma_chan = NULL;
- }
-+
-+static void mmci_pre_request(struct mmc_host *mmc, struct mmc_request *mrq,
-+			     bool is_first_req)
-+{
-+	struct mmci_host *host = mmc_priv(mmc);
-+	struct mmc_data *data = mrq->data;
-+	struct mmci_host_next *nd = &host->next_data;
-+
-+	if (!data)
-+		return;
-+
-+	if (data->host_cookie) {
-+		data->host_cookie = 0;
-+		return;
-+	}
-+
-+	/* if config for dma */
-+	if (((data->flags & MMC_DATA_WRITE) && host->dma_tx_channel) ||
-+	    ((data->flags & MMC_DATA_READ) && host->dma_rx_channel)) {
-+		if (mmci_dma_prep_data(host, data, nd))
-+			data->host_cookie = 0;
-+		else
-+			data->host_cookie = ++nd->cookie < 0 ? 1 : nd->cookie;
-+	}
-+}
-+
-+static void mmci_post_request(struct mmc_host *mmc, struct mmc_request *mrq,
-+			      int err)
-+{
-+	struct mmci_host *host = mmc_priv(mmc);
-+	struct mmc_data *data = mrq->data;
-+	struct dma_chan *chan;
-+	enum dma_data_direction dir;
-+
-+	if (!data)
-+		return;
-+
-+	if (data->flags & MMC_DATA_READ) {
-+		dir = DMA_FROM_DEVICE;
-+		chan = host->dma_rx_channel;
-+	} else {
-+		dir = DMA_TO_DEVICE;
-+		chan = host->dma_tx_channel;
-+	}
-+
-+
-+	/* if config for dma */
-+	if (chan) {
-+		if (err)
-+			dmaengine_terminate_all(chan);
-+		if (err || data->host_cookie)
-+			dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-+				     data->sg_len, dir);
-+		mrq->data->host_cookie = 0;
-+	}
-+}
-+
- #else
- /* Blank functions if the DMA engine is not available */
-+static void mmci_get_next_data(struct mmci_host *host, struct mmc_data *data)
-+{
-+}
- static inline void mmci_dma_setup(struct mmci_host *host)
- {
- }
-@@ -436,6 +545,10 @@ static inline int mmci_dma_start_data(struct mmci_host *host, unsigned int datac
- {
- 	return -ENOSYS;
- }
-+
-+#define mmci_pre_request NULL
-+#define mmci_post_request NULL
-+
- #endif
- 
- static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
-@@ -854,6 +967,9 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	host->mrq = mrq;
- 
-+	if (mrq->data)
-+		mmci_get_next_data(host, mrq->data);
-+
- 	if (mrq->data && mrq->data->flags & MMC_DATA_READ)
- 		mmci_start_data(host, mrq->data);
- 
-@@ -968,6 +1084,8 @@ static irqreturn_t mmci_cd_irq(int irq, void *dev_id)
- 
- static const struct mmc_host_ops mmci_ops = {
- 	.request	= mmci_request,
-+	.pre_req	= mmci_pre_request,
-+	.post_req	= mmci_post_request,
- 	.set_ios	= mmci_set_ios,
- 	.get_ro		= mmci_get_ro,
- 	.get_cd		= mmci_get_cd,
-@@ -1005,6 +1123,8 @@ static int __devinit mmci_probe(struct amba_device *dev,
- 	host->gpio_cd = -ENOSYS;
- 	host->gpio_cd_irq = -1;
- 
-+	host->next_data.cookie = 1;
-+
- 	host->hw_designer = amba_manf(dev);
- 	host->hw_revision = amba_rev(dev);
- 	dev_dbg(mmc_dev(mmc), "designer ID = 0x%02x\n", host->hw_designer);
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index bb32e21..8591560 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -163,6 +163,12 @@ struct clk;
- struct variant_data;
- struct dma_chan;
- 
-+struct mmci_host_next {
-+	struct dma_async_tx_descriptor	*dma_desc;
-+	struct dma_chan			*dma_chan;
-+	s32				cookie;
++enum mmc_test_prep_media {
++	MMC_TEST_PREP_NONE = 0,
++	MMC_TEST_PREP_WRITE_FULL = 1 << 0,
++	MMC_TEST_PREP_ERASE = 1 << 1,
 +};
 +
- struct mmci_host {
- 	phys_addr_t		phybase;
- 	void __iomem		*base;
-@@ -200,6 +206,8 @@ struct mmci_host {
- 	struct dma_chan		*dma_current;
- 	struct dma_chan		*dma_rx_channel;
- 	struct dma_chan		*dma_tx_channel;
-+	struct dma_async_tx_descriptor	*dma_desc_current;
-+	struct mmci_host_next	next_data;
++struct mmc_test_multiple_rw {
++	unsigned int *bs;
++	unsigned int len;
++	unsigned int size;
++	bool do_write;
++	bool do_nonblock_req;
++	enum mmc_test_prep_media prepare;
++};
++
++struct mmc_test_async_req {
++	struct mmc_async_req areq;
++	struct mmc_test_card *test;
++};
++
+ /*******************************************************************/
+ /*  General helper functions                                       */
+ /*******************************************************************/
+@@ -302,6 +325,7 @@ static struct mmc_test_mem *mmc_test_alloc_mem(unsigned long min_sz,
+ 	unsigned long max_seg_page_cnt = DIV_ROUND_UP(max_seg_sz, PAGE_SIZE);
+ 	unsigned long page_cnt = 0;
+ 	unsigned long limit = nr_free_buffer_pages() >> 4;
++	unsigned int min_cmn = 0;
+ 	struct mmc_test_mem *mem;
  
- #define dma_inprogress(host)	((host)->dma_current)
- #else
+ 	if (max_page_cnt > limit)
+@@ -345,6 +369,12 @@ static struct mmc_test_mem *mmc_test_alloc_mem(unsigned long min_sz,
+ 		mem->arr[mem->cnt].page = page;
+ 		mem->arr[mem->cnt].order = order;
+ 		mem->cnt += 1;
++		if (!min_cmn)
++			min_cmn = PAGE_SIZE << order;
++		else
++			min_cmn = min(min_cmn,
++				      (unsigned int) (PAGE_SIZE << order));
++
+ 		if (max_page_cnt <= (1UL << order))
+ 			break;
+ 		max_page_cnt -= 1UL << order;
+@@ -355,6 +385,7 @@ static struct mmc_test_mem *mmc_test_alloc_mem(unsigned long min_sz,
+ 			break;
+ 		}
+ 	}
++	mem->size_min_cmn = min_cmn;
+ 
+ 	return mem;
+ 
+@@ -381,7 +412,6 @@ static int mmc_test_map_sg(struct mmc_test_mem *mem, unsigned long sz,
+ 	do {
+ 		for (i = 0; i < mem->cnt; i++) {
+ 			unsigned long len = PAGE_SIZE << mem->arr[i].order;
+-
+ 			if (len > sz)
+ 				len = sz;
+ 			if (len > max_seg_sz)
+@@ -661,7 +691,7 @@ static void mmc_test_prepare_broken_mrq(struct mmc_test_card *test,
+  * Checks that a normal transfer didn't have any errors
+  */
+ static int mmc_test_check_result(struct mmc_test_card *test,
+-	struct mmc_request *mrq)
++				 struct mmc_request *mrq)
+ {
+ 	int ret;
+ 
+@@ -685,6 +715,16 @@ static int mmc_test_check_result(struct mmc_test_card *test,
+ 	return ret;
+ }
+ 
++
++static int mmc_test_check_result_async(struct mmc_card *card,
++				       struct mmc_async_req *areq)
++{
++	struct mmc_test_async_req *test_async =
++		container_of(areq, struct mmc_test_async_req, areq);
++
++	return mmc_test_check_result(test_async->test, areq->mrq);
++}
++
+ /*
+  * Checks that a "short transfer" behaved as expected
+  */
+@@ -720,6 +760,89 @@ static int mmc_test_check_broken_result(struct mmc_test_card *test,
+ }
+ 
+ /*
++ * Tests nonblock transfer with certain parameters
++ */
++static void mmc_test_nonblock_reset(struct mmc_request *mrq,
++				    struct mmc_command *cmd,
++				    struct mmc_command *stop,
++				    struct mmc_data *data)
++{
++	memset(mrq, 0, sizeof(struct mmc_request));
++	memset(cmd, 0, sizeof(struct mmc_command));
++	memset(data, 0, sizeof(struct mmc_data));
++	memset(stop, 0, sizeof(struct mmc_command));
++
++	mrq->cmd = cmd;
++	mrq->data = data;
++	mrq->stop = stop;
++}
++static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
++				      struct scatterlist *sg, unsigned sg_len,
++				      unsigned dev_addr, unsigned blocks,
++				      unsigned blksz, int write, int count)
++{
++	struct mmc_request mrq1;
++	struct mmc_command cmd1;
++	struct mmc_command stop1;
++	struct mmc_data data1;
++
++	struct mmc_request mrq2;
++	struct mmc_command cmd2;
++	struct mmc_command stop2;
++	struct mmc_data data2;
++
++	struct mmc_test_async_req test_areq[2];
++	struct mmc_async_req *done_areq;
++	struct mmc_async_req *cur_areq = &test_areq[0].areq;
++	struct mmc_async_req *other_areq = &test_areq[1].areq;
++	int i;
++	int ret;
++
++	test_areq[0].test = test;
++	test_areq[1].test = test;
++
++	if (!test->card->host->ops->pre_req ||
++		!test->card->host->ops->post_req)
++		return -RESULT_UNSUP_HOST;
++
++	mmc_test_nonblock_reset(&mrq1, &cmd1, &stop1, &data1);
++	mmc_test_nonblock_reset(&mrq2, &cmd2, &stop2, &data2);
++
++	cur_areq->mrq = &mrq1;
++	cur_areq->err_check = mmc_test_check_result_async;
++	other_areq->mrq = &mrq2;
++	other_areq->err_check = mmc_test_check_result_async;
++
++	for (i = 0; i < count; i++) {
++		mmc_test_prepare_mrq(test, cur_areq->mrq, sg, sg_len, dev_addr,
++				     blocks, blksz, write);
++		done_areq = mmc_start_req(test->card->host, cur_areq, &ret);
++
++		if (ret || (!done_areq && i > 0))
++			goto err;
++
++		if (done_areq) {
++			if (done_areq->mrq == &mrq2)
++				mmc_test_nonblock_reset(&mrq2, &cmd2,
++							&stop2, &data2);
++			else
++				mmc_test_nonblock_reset(&mrq1, &cmd1,
++							&stop1, &data1);
++		}
++		done_areq = cur_areq;
++		cur_areq = other_areq;
++		other_areq = done_areq;
++		dev_addr += blocks;
++	}
++
++	done_areq = mmc_start_req(test->card->host, NULL, &ret);
++
++	return ret;
++err:
++	return ret;
++}
++
++/*
+  * Tests a basic transfer with certain parameters
+  */
+ static int mmc_test_simple_transfer(struct mmc_test_card *test,
+@@ -1336,14 +1459,17 @@ static int mmc_test_area_transfer(struct mmc_test_card *test,
+ }
+ 
+ /*
+- * Map and transfer bytes.
++ * Map and transfer bytes for multiple transfers.
+  */
+-static int mmc_test_area_io(struct mmc_test_card *test, unsigned long sz,
+-			    unsigned int dev_addr, int write, int max_scatter,
+-			    int timed)
++static int mmc_test_area_io_seq(struct mmc_test_card *test, unsigned long sz,
++				unsigned int dev_addr, int write,
++				int max_scatter, int timed, int count,
++				bool nonblock)
+ {
+ 	struct timespec ts1, ts2;
+-	int ret;
++	int ret = 0;
++	int i;
++	struct mmc_test_area *t = &test->area;
+ 
+ 	/*
+ 	 * In the case of a maximally scattered transfer, the maximum transfer
+@@ -1367,8 +1493,15 @@ static int mmc_test_area_io(struct mmc_test_card *test, unsigned long sz,
+ 
+ 	if (timed)
+ 		getnstimeofday(&ts1);
++	if (nonblock)
++		ret = mmc_test_nonblock_transfer(test, t->sg, t->sg_len,
++				 dev_addr, t->blocks, 512, write, count);
++	else
++		for (i = 0; i < count && ret == 0; i++) {
++			ret = mmc_test_area_transfer(test, dev_addr, write);
++			dev_addr += sz >> 9;
++		}
+ 
+-	ret = mmc_test_area_transfer(test, dev_addr, write);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -1376,11 +1509,19 @@ static int mmc_test_area_io(struct mmc_test_card *test, unsigned long sz,
+ 		getnstimeofday(&ts2);
+ 
+ 	if (timed)
+-		mmc_test_print_rate(test, sz, &ts1, &ts2);
++		mmc_test_print_avg_rate(test, sz, count, &ts1, &ts2);
+ 
+ 	return 0;
+ }
+ 
++static int mmc_test_area_io(struct mmc_test_card *test, unsigned long sz,
++			    unsigned int dev_addr, int write, int max_scatter,
++			    int timed)
++{
++	return mmc_test_area_io_seq(test, sz, dev_addr, write, max_scatter,
++				    timed, 1, false);
++}
++
+ /*
+  * Write the test area entirely.
+  */
+@@ -1954,6 +2095,142 @@ static int mmc_test_large_seq_write_perf(struct mmc_test_card *test)
+ 	return mmc_test_large_seq_perf(test, 1);
+ }
+ 
++static int mmc_test_rw_multiple(struct mmc_test_card *test,
++				struct mmc_test_multiple_rw *tdata,
++				unsigned int reqsize, unsigned int size)
++{
++	unsigned int dev_addr;
++	struct mmc_test_area *t = &test->area;
++	int ret = 0;
++
++	/* Set up test area */
++	if (size > mmc_test_capacity(test->card) / 2 * 512)
++		size = mmc_test_capacity(test->card) / 2 * 512;
++	if (reqsize > t->max_tfr)
++		reqsize = t->max_tfr;
++	dev_addr = mmc_test_capacity(test->card) / 4;
++	if ((dev_addr & 0xffff0000))
++		dev_addr &= 0xffff0000; /* Round to 64MiB boundary */
++	else
++		dev_addr &= 0xfffff800; /* Round to 1MiB boundary */
++	if (!dev_addr)
++		goto err;
++
++	/* prepare test area */
++	if (mmc_can_erase(test->card) &&
++	    tdata->prepare & MMC_TEST_PREP_ERASE) {
++		ret = mmc_erase(test->card, dev_addr,
++				size / 512, MMC_SECURE_ERASE_ARG);
++		if (ret)
++			ret = mmc_erase(test->card, dev_addr,
++					size / 512, MMC_ERASE_ARG);
++		if (ret)
++			goto err;
++	}
++
++	/* Run test */
++	ret = mmc_test_area_io_seq(test, reqsize, dev_addr,
++				   tdata->do_write, 0, 1, size / reqsize,
++				   tdata->do_nonblock_req);
++	if (ret)
++		goto err;
++
++	return ret;
++ err:
++	printk(KERN_INFO "[%s] error\n", __func__);
++	return ret;
++}
++
++static int mmc_test_rw_multiple_size(struct mmc_test_card *test,
++				     struct mmc_test_multiple_rw *rw)
++{
++	int ret = 0;
++	int i;
++
++	for (i = 0 ; i < rw->len && ret == 0; i++) {
++		ret = mmc_test_rw_multiple(test, rw, rw->bs[i], rw->size);
++		if (ret)
++			break;
++	}
++	return ret;
++}
++
++/*
++ * Multiple blocking write 4k to 4 MB chunks
++ */
++static int mmc_test_profile_mult_write_blocking_perf(struct mmc_test_card *test)
++{
++	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
++			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
++	struct mmc_test_multiple_rw test_data = {
++		.bs = bs,
++		.size = 128*1024*1024,
++		.len = ARRAY_SIZE(bs),
++		.do_write = true,
++		.do_nonblock_req = false,
++		.prepare = MMC_TEST_PREP_ERASE,
++	};
++
++	return mmc_test_rw_multiple_size(test, &test_data);
++};
++
++/*
++ * Multiple non-blocking write 4k to 4 MB chunks
++ */
++static int mmc_test_profile_mult_write_nonblock_perf(struct mmc_test_card *test)
++{
++	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
++			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
++	struct mmc_test_multiple_rw test_data = {
++		.bs = bs,
++		.size = 128*1024*1024,
++		.len = ARRAY_SIZE(bs),
++		.do_write = true,
++		.do_nonblock_req = true,
++		.prepare = MMC_TEST_PREP_ERASE,
++	};
++
++	return mmc_test_rw_multiple_size(test, &test_data);
++}
++
++/*
++ * Multiple blocking read 4k to 4 MB chunks
++ */
++static int mmc_test_profile_mult_read_blocking_perf(struct mmc_test_card *test)
++{
++	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
++			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
++	struct mmc_test_multiple_rw test_data = {
++		.bs = bs,
++		.size = 128*1024*1024,
++		.len = ARRAY_SIZE(bs),
++		.do_write = false,
++		.do_nonblock_req = false,
++		.prepare = MMC_TEST_PREP_NONE,
++	};
++
++	return mmc_test_rw_multiple_size(test, &test_data);
++}
++
++/*
++ * Multiple non-blocking read 4k to 4 MB chunks
++ */
++static int mmc_test_profile_mult_read_nonblock_perf(struct mmc_test_card *test)
++{
++	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
++			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
++	struct mmc_test_multiple_rw test_data = {
++		.bs = bs,
++		.size = 128*1024*1024,
++		.len = ARRAY_SIZE(bs),
++		.do_write = false,
++		.do_nonblock_req = true,
++		.prepare = MMC_TEST_PREP_NONE,
++	};
++
++	return mmc_test_rw_multiple_size(test, &test_data);
++}
++
+ static const struct mmc_test_case mmc_test_cases[] = {
+ 	{
+ 		.name = "Basic write (no data verification)",
+@@ -2221,6 +2498,33 @@ static const struct mmc_test_case mmc_test_cases[] = {
+ 		.cleanup = mmc_test_area_cleanup,
+ 	},
+ 
++	{
++		.name = "Write performance with blocking req 4k to 4MB",
++		.prepare = mmc_test_area_prepare,
++		.run = mmc_test_profile_mult_write_blocking_perf,
++		.cleanup = mmc_test_area_cleanup,
++	},
++
++	{
++		.name = "Write performance with non-blocking req 4k to 4MB",
++		.prepare = mmc_test_area_prepare,
++		.run = mmc_test_profile_mult_write_nonblock_perf,
++		.cleanup = mmc_test_area_cleanup,
++	},
++
++	{
++		.name = "Read performance with blocking req 4k to 4MB",
++		.prepare = mmc_test_area_prepare,
++		.run = mmc_test_profile_mult_read_blocking_perf,
++		.cleanup = mmc_test_area_cleanup,
++	},
++
++	{
++		.name = "Read performance with non-blocking req 4k to 4MB",
++		.prepare = mmc_test_area_prepare,
++		.run = mmc_test_profile_mult_read_nonblock_perf,
++		.cleanup = mmc_test_area_cleanup,
++	},
+ };
+ 
+ static DEFINE_MUTEX(mmc_test_lock);
 -- 
 1.7.4.1
