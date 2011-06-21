@@ -1,58 +1,32 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH v3 2/4] mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not
- get cleared
-Date: Tue, 21 Jun 2011 13:52:36 +0200
-Message-ID: <20110621115236.GA14004@pengutronix.de>
-References: <1308566325-11600-1-git-send-email-shawn.guo@linaro.org>
- <1308566325-11600-3-git-send-email-shawn.guo@linaro.org>
+From: Pawel Moll <pawel.moll@arm.com>
+Subject: Re: [PATCH 0/3] Improve MMC error handling (3rd rev)
+Date: Tue, 21 Jun 2011 14:38:51 +0100
+Message-ID: <1308663531.14198.22.camel@hornet.cambridge.arm.com>
+References: <20110620190945.GK26089@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="nFreZHaLTZJo0R7j"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:45943 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752505Ab1FULwk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 07:52:40 -0400
-Content-Disposition: inline
-In-Reply-To: <1308566325-11600-3-git-send-email-shawn.guo@linaro.org>
+Received: from service87.mimecast.com ([94.185.240.25]:46248 "HELO
+	service87.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1756560Ab1FUNi5 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 09:38:57 -0400
+In-Reply-To: <20110620190945.GK26089@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Arnaud Patard <arnaud.patard@rtp-net.org>, Eric Benard <eric@eukrea.com>, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+
+On Mon, 2011-06-20 at 20:09 +0100, Russell King - ARM Linux wrote:
+> This is the third revision of my improvements to the MMC block
+> device error handling, which makes error handling more robust
+> and permits MMC/SD to continue working in the presence of
+> not-quite-perfect setups.
+
+Tested-by: Pawel Moll <pawel.moll@arm.com>
+
+Cheers!
+
+Pawe=C5=82
 
 
---nFreZHaLTZJo0R7j
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Mon, Jun 20, 2011 at 06:38:43PM +0800, Shawn Guo wrote:
-> The function esdhc_readl_le intends to clear bit SDHCI_CARD_PRESENT,
-> when the card detect gpio tells there is no card.  But it does not
-> clear the bit actually.  The patch gives a fix on that.
->=20
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-
-For the third time ;)
-
-Acked-by: Wolfram Sang <w.sang@pengutronix.de>
-
-Should go to stable.
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---nFreZHaLTZJo0R7j
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAk4AhgQACgkQD27XaX1/VRvDogCeOvBpMxfNkON23eSd2kJmdqC6
-IZQAnRXLA3renXLmEVi/bJWCkO0ybjH2
-=jiy7
------END PGP SIGNATURE-----
-
---nFreZHaLTZJo0R7j--
