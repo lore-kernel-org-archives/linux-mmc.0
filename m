@@ -1,77 +1,137 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH v3 0/4] Extend sdhci-esdhc-imx card_detect and
- write_protect support for mx5
-Date: Tue, 21 Jun 2011 09:39:06 +0800
-Message-ID: <20110621013905.GB6294@S2101-09.ap.freescale.net>
-References: <1308566325-11600-1-git-send-email-shawn.guo@linaro.org>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH 3/5] mmc: sdhi: Add write16_hook
+Date: Tue, 21 Jun 2011 10:36:05 +0900
+Message-ID: <BANLkTike6dkPPet5miiSzVGjRPCKoM7cyg@mail.gmail.com>
+References: <1308610812-3479-1-git-send-email-horms@verge.net.au>
+	<1308610812-3479-4-git-send-email-horms@verge.net.au>
+	<BANLkTikh9D=uaGmZ5BCMPmESexjDSczwhg@mail.gmail.com>
+	<20110621005020.GB16230@verge.net.au>
+	<BANLkTimRUnaMtk_zhLAquAKQre4E8ZJUJQ@mail.gmail.com>
+	<20110621011257.GD16230@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe001.messaging.microsoft.com ([216.32.180.11]:9482 "EHLO
-	VA3EHSOBE008.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932079Ab1FUB3B (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 21:29:01 -0400
-Content-Disposition: inline
-In-Reply-To: <1308566325-11600-1-git-send-email-shawn.guo@linaro.org>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:55553 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932079Ab1FUBgG convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 21:36:06 -0400
+In-Reply-To: <20110621011257.GD16230@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnaud Patard <arnaud.patard@rtp-net.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Eric Benard <eric@eukrea.com>, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+To: Simon Horman <horms@verge.net.au>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>
 
-Hi Arnaud,
+Hi Simon,
 
-Would you please give a test on the series, as it fixed the issue
-you reported?  TIA.
+On Tue, Jun 21, 2011 at 10:13 AM, Simon Horman <horms@verge.net.au> wro=
+te:
+> On Tue, Jun 21, 2011 at 09:59:37AM +0900, Magnus Damm wrote:
+>> On Tue, Jun 21, 2011 at 9:50 AM, Simon Horman <horms@verge.net.au> w=
+rote:
+>> > On Tue, Jun 21, 2011 at 09:36:03AM +0900, Magnus Damm wrote:
+>> >> On Tue, Jun 21, 2011 at 8:00 AM, Simon Horman <horms@verge.net.au=
+> wrote:
+>
+> [snip]
+>
+>> >> > index 5a90266..0dc9804 100644
+>> >> > --- a/include/linux/mfd/tmio.h
+>> >> > +++ b/include/linux/mfd/tmio.h
+>> >> > @@ -94,6 +101,7 @@ struct tmio_mmc_data {
+>> >> > =A0 =A0 =A0 =A0void (*set_pwr)(struct platform_device *host, in=
+t state);
+>> >> > =A0 =A0 =A0 =A0void (*set_clk_div)(struct platform_device *host=
+, int state);
+>> >> > =A0 =A0 =A0 =A0int (*get_cd)(struct platform_device *host);
+>> >> > + =A0 =A0 =A0 int (*write16_hook)(struct tmio_mmc_host *host, i=
+nt addr);
+>> >> > =A0};
+>> >> >
+>> >> > =A0static inline void tmio_mmc_cd_wakeup(struct tmio_mmc_data *=
+pdata)
+>> >>
+>> >> What's the reason behind passing "struct tmio_mmc_host *" =A0as a=
+n
+>> >> argument to the new hook? Performance? All other callbacks seem t=
+o
+>> >> take a "struct platform_device *", so being consistent here may b=
+e
+>> >> good unless it comes with too much overhead.
+>> >
+>> > The reason is that
+>> > 1) The hook is called from sd_ctrl_write16 which takes
+>> > =A0 struct tmio_mmc_host * as its first argument and;
+>> > 2) The hook that has been implemented calls sd_ctrl_read16() which=
+ takes a
+>> > =A0 struct tmio_mmc_host * as its first argument.
+>> > So it seemed logical to pass that down.
+>> >
+>> > In the caes of 1) we can get the struct platform_device * using ho=
+st->pdev.
+>> > However, in the case of 2) is it less clear to me how we can get t=
+he
+>> > struct tmio_mmc_host * from a struct platform_device *.
+>>
+>> Have a look at the code in tmio_mmc_host_suspend() for some code tha=
+t
+>> does struct device * -> struct tmio_mmc_host *:
+>> int tmio_mmc_host_suspend(struct device *dev)
+>> {
+>> =A0 =A0 =A0 struct mmc_host *mmc =3D dev_get_drvdata(dev);
+>> =A0 =A0 =A0 struct tmio_mmc_host *host =3D mmc_priv(mmc);
+>>
+>> You can easily change the dev_get_drvdata() to platform_get_drvdata(=
+),
+>> see include/linux/platform_device.h
+>
+> Thanks, I'm happy to make that change if you think it is worth it.
+> (I will need to re-test on AG5, which I could do this afternoon
+> =A0if it is free)
 
--- 
-Regards,
-Shawn
+Hm, perhaps it can be done with incremental patches in the future?
 
-On Mon, Jun 20, 2011 at 06:38:41PM +0800, Shawn Guo wrote:
-> The card-present polling for sdhci based driver is very expensive
-> in terms of the impact to system performance.  We observe a few
-> system performance issues from Freescale and Linaro on mx5 platforms,
-> which have been proved card polling related.
-> 
-> The patch set extends the current sdhci-esdhc-imx card_detect and
-> write_protect support to cover mx5 platforms, and solves above
-> performance issues.
-> 
-> Changes since v2:
->  * Fix the issue reported by Arnaud Patard:
->    http://article.gmane.org/gmane.linux.ports.arm.kernel/120790
-> 
-> Changes since v1:
->  * Rebase on today's linux-next
->  * Take the suggestion from Arnaud Patard to add default pdata in
->    imx_add_sdhci_esdhc_imx(), to avoid touching every single board
->    file for the platform_data changes
->  * Add comment for sdhci.c change
->  * Change ESDHC_CD(WP)_SIGNAL to ESDHC_CD(WP)_CONTROLLER for a more
->    descriptive name
->  * Add missing NONE case handling in esdhc_pltfm_get_ro
->  * Improve a couple comment wording per suggestion from Wolfram Sang
-> 
-> Shawn Guo (4):
->       mmc: sdhci: fix interrupt storm from card detection
->       mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not get cleared
->       mmc: sdhci-esdhc-imx: remove "WP" from flag ESDHC_FLAG_GPIO_FOR_CD_WP
->       mmc: sdhci-esdhc-imx: extend card_detect and write_protect support for mx5
-> 
->  arch/arm/mach-imx/eukrea_mbimxsd25-baseboard.c     |    3 +-
->  arch/arm/mach-imx/eukrea_mbimxsd35-baseboard.c     |    3 +-
->  arch/arm/mach-imx/mach-mx25_3ds.c                  |    2 +
->  arch/arm/mach-imx/mach-pcm043.c                    |    2 +
->  arch/arm/mach-mx5/board-mx51_babbage.c             |   14 +-
->  arch/arm/mach-mx5/board-mx53_loco.c                |    4 +
->  .../plat-mxc/devices/platform-sdhci-esdhc-imx.c    |   12 ++
->  arch/arm/plat-mxc/include/mach/esdhc.h             |   25 +++-
->  drivers/mmc/host/sdhci-esdhc-imx.c                 |  136 ++++++++++++--------
->  drivers/mmc/host/sdhci.c                           |   27 ++++-
->  10 files changed, 161 insertions(+), 67 deletions(-)
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+I think it's good to be consistent and use the same argument passing
+style as other callbacks, but at the same time I'm not 100% sure if
+passing a platform data pointer is the best approach. It probably made
+sense with the old tmio_mmc driver that only hooked up to MFD, but I'm
+not sure if that's the case anymore. I'm sure there is room for plenty
+of cleanups - but exactly what to do I don't know. =3D)
 
+At least passing a struct tmio_mmc_host * requires little conversion
+which should add minimal overhead.
+
+>> I guess a similar conversion can be done in tmio_mmc_enable_dma() to
+>> move from writew() to sd_ctrl_write16()?
+>
+> Are you proposing changing tmio_mmc_enable_dma() to take
+> a struct platform_device * as its first argument?
+
+No, not at all. I just recall someone pointing out that
+tmio_mmc_enable_dma() skipped the tmio_mmc specific I/O routines and
+used writew() directly. I suspected the reason behind this was the
+difficulty of converting between different pointer types, but that may
+not be true.
+
+> tmio_mmc_enable_dma() is already altered in one of the
+> patches in this series to use sd_ctrl_write16() without
+> altering the arguments taht tmio_mmc_enable_dma() takes.
+
+Ok, that's good.
+
+> static void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enab=
+le)
+> {
+> #if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
+> =A0 =A0 =A0 =A0/* Switch DMA mode on or off - SuperH specific? */
+> =A0 =A0 =A0 =A0sd_ctrl_write16(host, enable ? 2 : 0, CTL_DMA_ENABLE);
+> #endif
+> }
+
+Hm, perhaps it's my mail setup that's the issue, but the version of
+"[PATCH 1/5] mmc: tmio: name 0xd8 as CTL_DMA_ENABLE" that I'm looking
+at is still using writew().
+
+Cheers,
+
+/ magnus
