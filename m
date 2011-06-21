@@ -1,62 +1,45 @@
-From: Kishore Kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH v6 02/11] omap_hsmmc: add support for pre_req and post_req
-Date: Tue, 21 Jun 2011 19:26:36 +0530
-Message-ID: <BANLkTi=UzZtKQU+-7iicEH2Jk7XED9yRRQ@mail.gmail.com>
-References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org>
- <1308518257-9783-3-git-send-email-per.forlin@linaro.org> <BANLkTi=+o496k8Uz_k33AH=Zr8+MaFOEig@mail.gmail.com>
- <BANLkTinNG2h747MggWfoJfMp4wOSTaTKSg@mail.gmail.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH v3 2/4] mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not
+ get cleared
+Date: Tue, 21 Jun 2011 22:10:34 +0800
+Message-ID: <20110621141033.GC9228@S2101-09.ap.freescale.net>
+References: <1308566325-11600-1-git-send-email-shawn.guo@linaro.org>
+ <1308566325-11600-3-git-send-email-shawn.guo@linaro.org>
+ <20110621115236.GA14004@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:58089 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753210Ab1FUN44 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 09:56:56 -0400
-Received: by gxk21 with SMTP id 21so735315gxk.19
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Jun 2011 06:56:56 -0700 (PDT)
-In-Reply-To: <BANLkTinNG2h747MggWfoJfMp4wOSTaTKSg@mail.gmail.com>
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:41710 "EHLO
+	TX2EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751344Ab1FUOAX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 10:00:23 -0400
+Content-Disposition: inline
+In-Reply-To: <20110621115236.GA14004@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linaro-dev@lists.linaro.org, Venkatraman S <svenkatr@ti.com>, Chris Ball <cjb@laptop.org>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Arnaud Patard <arnaud.patard@rtp-net.org>, Eric Benard <eric@eukrea.com>, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-Hi Per,
+On Tue, Jun 21, 2011 at 01:52:36PM +0200, Wolfram Sang wrote:
+> On Mon, Jun 20, 2011 at 06:38:43PM +0800, Shawn Guo wrote:
+> > The function esdhc_readl_le intends to clear bit SDHCI_CARD_PRESENT,
+> > when the card detect gpio tells there is no card.  But it does not
+> > clear the bit actually.  The patch gives a fix on that.
+> > 
+> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> 
+> For the third time ;)
+> 
+> Acked-by: Wolfram Sang <w.sang@pengutronix.de>
+> 
+Sorry, my bad.  Will add in v4.
 
-On Tue, Jun 21, 2011 at 12:21 PM, Per Forlin <per.forlin@linaro.org> wr=
-ote:
-> On 21 June 2011 07:41, Kishore Kadiyala <kishorek.kadiyala@gmail.com>=
- wrote:
->> <snip>
->>
->>> +
->>> +static void omap_hsmmc_pre_req(struct mmc_host *mmc, struct mmc_re=
-quest *mrq,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bool i=
-s_first_req)
->>
->> I don't see the usage of "is_first_req" below.
->> Is it required?
->>
-> It is not required. It is only an indication that this request is the
-> first in a series of request. The host driver may do various
-> optimisations based on this information. The first request in a serie=
-s
-> of jobs can't be prepared in parallel to the previous job. The host
-> driver can do the following to minimise latency for the first job.
-> =A0* Preparing the cache while the MMC read/write cmd is being
-> processed. In this case the pre_req could do nothing and the job is
-> instead run in parallel to the read/write cmd being sent. If the
-> is_first_req is false pre_req will run in parallel to an active
-> transfer, in this case it is more efficient to prepare the request in
-> pre_req.
-> =A0* Run PIO mode instead of DMA
-> =A0* Maybe there can be power related optimisations based on if it is
-> one single transfer or multiple ones.
+> Should go to stable.
+> 
+I suppose that Chris will take care of it, otherwise please let me
+know what I should do.  (I'm still new to the process)
 
-Ok, thanks for making things clear.
-
-<snip>
-
+-- 
 Regards,
-Kishore
+Shawn
+
