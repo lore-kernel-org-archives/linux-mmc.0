@@ -1,56 +1,66 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH 5/5] ARM: mach-shmobile: ag5evm: SDHI requires waiting for idle
-Date: Tue, 21 Jun 2011 08:00:12 +0900
-Message-ID: <1308610812-3479-6-git-send-email-horms@verge.net.au>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH 3/5] mmc: sdhi: Add write16_hook
+Date: Tue, 21 Jun 2011 09:36:03 +0900
+Message-ID: <BANLkTikh9D=uaGmZ5BCMPmESexjDSczwhg@mail.gmail.com>
 References: <1308610812-3479-1-git-send-email-horms@verge.net.au>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:60678 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756058Ab1FTXAX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 19:00:23 -0400
-In-Reply-To: <1308610812-3479-1-git-send-email-horms@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
+	<1308610812-3479-4-git-send-email-horms@verge.net.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1308610812-3479-4-git-send-email-horms@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
-Cc: Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>, Simon Horman <horms@verge.net.au>
 
-The SDHI block on the ag5evm requires waiting for idle
-before writing to some registers.
+On Tue, Jun 21, 2011 at 8:00 AM, Simon Horman <horms@verge.net.au> wrot=
+e:
+> Some controllers require waiting for the bus to become idle
+> before writing to some registers. I have implemented this
+> by adding a hook to sd_ctrl_write16() and implementing
+> a hook for SDHI which waits for the bus to become idle.
+>
+> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Cc: Magnus Damm <magnus.damm@gmail.com>
+> Signed-off-by: Simon Horman <horms@verge.net.au>
+>
+> ---
+>
+> Dependencies: "mmc: tmio: Share register access functions"
+>
+> v2:
+> * Include linux/delay.h instead of asm/delay.h
+> * Skip write if sh_mobile_sdhi_wait_idle() times out
+> =A0- The bus will probably be in an inconsistent state and writing
+> =A0 =A0may lock up the bus
+> * Only set hook if TMIO_MMC_HAS_IDLE_WAIT is set in platform data
+> =A0rather than checking for TMIO_MMC_HAS_IDLE_WAIT each time the
+> =A0hook is called.
+> ---
 
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Magnus Damm <magnus.damm@gmail.com>
-Signed-off-by: Simon Horman <horms@verge.net.au>
+Thanks Simon, this version looks much better!
 
----
+> index 5a90266..0dc9804 100644
+> --- a/include/linux/mfd/tmio.h
+> +++ b/include/linux/mfd/tmio.h
+> @@ -94,6 +101,7 @@ struct tmio_mmc_data {
+> =A0 =A0 =A0 =A0void (*set_pwr)(struct platform_device *host, int stat=
+e);
+> =A0 =A0 =A0 =A0void (*set_clk_div)(struct platform_device *host, int =
+state);
+> =A0 =A0 =A0 =A0int (*get_cd)(struct platform_device *host);
+> + =A0 =A0 =A0 int (*write16_hook)(struct tmio_mmc_host *host, int add=
+r);
+> =A0};
+>
+> =A0static inline void tmio_mmc_cd_wakeup(struct tmio_mmc_data *pdata)
 
-Dependencies:
-	"mmc: sdhi: Add write16_hook"
-	"ARM: mach-shmobile: ag5evm: consistently name sdhi info structures"
----
- arch/arm/mach-shmobile/board-ag5evm.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
+What's the reason behind passing "struct tmio_mmc_host *"  as an
+argument to the new hook? Performance? All other callbacks seem to
+take a "struct platform_device *", so being consistent here may be
+good unless it comes with too much overhead.
 
-diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
-index ce5c251..cdfdd62 100644
---- a/arch/arm/mach-shmobile/board-ag5evm.c
-+++ b/arch/arm/mach-shmobile/board-ag5evm.c
-@@ -341,6 +341,7 @@ static struct platform_device mipidsi0_device = {
- static struct sh_mobile_sdhi_info sdhi0_info = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
-+	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
- 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED,
- 	.tmio_ocr_mask	= MMC_VDD_27_28 | MMC_VDD_28_29,
- };
-@@ -382,7 +383,7 @@ void ag5evm_sdhi1_set_pwr(struct platform_device *pdev, int state)
- }
- 
- static struct sh_mobile_sdhi_info sh_sdhi1_info = {
--	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
-+	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE | TMIO_MMC_HAS_IDLE_WAIT,
- 	.tmio_caps	= MMC_CAP_NONREMOVABLE | MMC_CAP_SDIO_IRQ,
- 	.tmio_ocr_mask	= MMC_VDD_32_33 | MMC_VDD_33_34,
- 	.set_pwr	= ag5evm_sdhi1_set_pwr,
--- 
-1.7.4.4
+Thanks,
 
+/ magnus
