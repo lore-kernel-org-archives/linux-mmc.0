@@ -1,99 +1,85 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 3/5] mmc: sdhi: Add write16_hook
-Date: Tue, 21 Jun 2011 10:13:03 +0900
-Message-ID: <20110621011257.GD16230@verge.net.au>
-References: <1308610812-3479-1-git-send-email-horms@verge.net.au>
- <1308610812-3479-4-git-send-email-horms@verge.net.au>
- <BANLkTikh9D=uaGmZ5BCMPmESexjDSczwhg@mail.gmail.com>
- <20110621005020.GB16230@verge.net.au>
- <BANLkTimRUnaMtk_zhLAquAKQre4E8ZJUJQ@mail.gmail.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH v3 1/4] mmc: sdhci: fix interrupt storm from card
+ detection
+Date: Tue, 21 Jun 2011 09:34:17 +0800
+Message-ID: <20110621013416.GA6294@S2101-09.ap.freescale.net>
+References: <1308566325-11600-1-git-send-email-shawn.guo@linaro.org>
+ <1308566325-11600-2-git-send-email-shawn.guo@linaro.org>
+ <AA2705EE-033E-4340-8CF1-774F444E143E@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:46138 "EHLO
+	TX2EHSOBE009.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S932123Ab1FUBYM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2011 21:24:12 -0400
 Content-Disposition: inline
-In-Reply-To: <BANLkTimRUnaMtk_zhLAquAKQre4E8ZJUJQ@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>
+In-Reply-To: <AA2705EE-033E-4340-8CF1-774F444E143E@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Arnaud Patard <arnaud.patard@rtp-net.org>, Eric Benard <eric@eukrea.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "patches@linaro.org" <patches@linaro.org>
 
-On Tue, Jun 21, 2011 at 09:59:37AM +0900, Magnus Damm wrote:
-> On Tue, Jun 21, 2011 at 9:50 AM, Simon Horman <horms@verge.net.au> wr=
-ote:
-> > On Tue, Jun 21, 2011 at 09:36:03AM +0900, Magnus Damm wrote:
-> >> On Tue, Jun 21, 2011 at 8:00 AM, Simon Horman <horms@verge.net.au>=
- wrote:
+On Mon, Jun 20, 2011 at 08:59:38AM -0700, Philip Rakity wrote:
+> 
+> On Jun 20, 2011, at 3:38 AM, Shawn Guo wrote:
+> 
+> > The issue was initially found by Eric Benard as below.
+> > 
+> > http://permalink.gmane.org/gmane.linux.ports.arm.kernel/108031
+> > 
+> > Not sure about other SDHCI based controller, but on Freescale eSDHC,
+> > the SDHCI_INT_CARD_INSERT bits will be immediately set again when it
+> > gets cleared, if a card is inserted. The driver need to mask the irq
+> > to prevent interrupt storm which will freeze the system.  And the
+> > SDHCI_INT_CARD_REMOVE gets the same situation.
+> > 
+> > The patch fixes the problem based on the initial idea from
+> > Eric Benard.
+> > 
+> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> > Cc: Eric Benard <eric@eukrea.com>
+> > ---
+> > drivers/mmc/host/sdhci.c |   27 +++++++++++++++++++++++----
+> > 1 files changed, 23 insertions(+), 4 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 91d9892..d94e2b4 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -127,7 +127,9 @@ static void sdhci_mask_irqs(struct sdhci_host *host, u32 irqs)
+> > 
+> > static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
+> > {
+> > -	u32 irqs = SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT;
+> > +	u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+> > +		      SDHCI_CARD_PRESENT;
+> > +	u32 irqs = present ? SDHCI_INT_CARD_REMOVE : SDHCI_INT_CARD_INSERT;
+> > 
+> > 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+> > 		return;
+> 
+> 
+> Accessing off chip registers is slow.  It would be better to check for the quirk first
+> and then read the present state register.
+> 
+> eg
+> 	
+> 	u32 present;
+> 	u32 irqs;	
+> 
+> > 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+> > 		return;
+> 
+> >  	present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+> > 		      SDHCI_CARD_PRESENT;
+> 
+> 
+> > 	irqs = present ? SDHCI_INT_CARD_REMOVE : SDHCI_INT_CARD_INSERT;
+> 
+Makes sense.  Will do.
 
-[snip]
+-- 
+Regards,
+Shawn
 
-> >> > index 5a90266..0dc9804 100644
-> >> > --- a/include/linux/mfd/tmio.h
-> >> > +++ b/include/linux/mfd/tmio.h
-> >> > @@ -94,6 +101,7 @@ struct tmio_mmc_data {
-> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0void (*set_pwr)(struct platform_devic=
-e *host, int state);
-> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0void (*set_clk_div)(struct platform_d=
-evice *host, int state);
-> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0int (*get_cd)(struct platform_device =
-*host);
-> >> > + =C2=A0 =C2=A0 =C2=A0 int (*write16_hook)(struct tmio_mmc_host =
-*host, int addr);
-> >> > =C2=A0};
-> >> >
-> >> > =C2=A0static inline void tmio_mmc_cd_wakeup(struct tmio_mmc_data=
- *pdata)
-> >>
-> >> What's the reason behind passing "struct tmio_mmc_host *" =C2=A0as=
- an
-> >> argument to the new hook? Performance? All other callbacks seem to
-> >> take a "struct platform_device *", so being consistent here may be
-> >> good unless it comes with too much overhead.
-> >
-> > The reason is that
-> > 1) The hook is called from sd_ctrl_write16 which takes
-> > =C2=A0 struct tmio_mmc_host * as its first argument and;
-> > 2) The hook that has been implemented calls sd_ctrl_read16() which =
-takes a
-> > =C2=A0 struct tmio_mmc_host * as its first argument.
-> > So it seemed logical to pass that down.
-> >
-> > In the caes of 1) we can get the struct platform_device * using hos=
-t->pdev.
-> > However, in the case of 2) is it less clear to me how we can get th=
-e
-> > struct tmio_mmc_host * from a struct platform_device *.
->=20
-> Have a look at the code in tmio_mmc_host_suspend() for some code that
-> does struct device * -> struct tmio_mmc_host *:
-> int tmio_mmc_host_suspend(struct device *dev)
-> {
-> 	struct mmc_host *mmc =3D dev_get_drvdata(dev);
-> 	struct tmio_mmc_host *host =3D mmc_priv(mmc);
->=20
-> You can easily change the dev_get_drvdata() to platform_get_drvdata()=
-,
-> see include/linux/platform_device.h
-
-Thanks, I'm happy to make that change if you think it is worth it.
-(I will need to re-test on AG5, which I could do this afternoon
- if it is free)
-
-> I guess a similar conversion can be done in tmio_mmc_enable_dma() to
-> move from writew() to sd_ctrl_write16()?
-
-Are you proposing changing tmio_mmc_enable_dma() to take
-a struct platform_device * as its first argument?
-
-tmio_mmc_enable_dma() is already altered in one of the
-patches in this series to use sd_ctrl_write16() without
-altering the arguments taht tmio_mmc_enable_dma() takes.
-
-static void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable=
-)
-{
-#if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
-	/* Switch DMA mode on or off - SuperH specific? */
-	sd_ctrl_write16(host, enable ? 2 : 0, CTL_DMA_ENABLE);
-#endif
-}
