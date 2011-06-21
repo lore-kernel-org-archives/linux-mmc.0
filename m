@@ -1,47 +1,32 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/3] Improve MMC error handling (3rd rev)
-Date: Tue, 21 Jun 2011 12:23:30 -0400
-Message-ID: <m2y60vrw59.fsf@bob.laptop.org>
-References: <20110620190945.GK26089@n2100.arm.linux.org.uk>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH 5/5] ARM: mach-shmobile: ag5evm: SDHI requires waiting for idle
+Date: Wed, 22 Jun 2011 01:27:36 +0900
+Message-ID: <20110621162735.GL7920@linux-sh.org>
+References: <1308610812-3479-1-git-send-email-horms@verge.net.au> <1308610812-3479-6-git-send-email-horms@verge.net.au> <m2aadbtbbl.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54150 "EHLO void.printf.net"
+Received: from linux-sh.org ([111.68.239.195]:37187 "EHLO linux-sh.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756881Ab1FUQXk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Jun 2011 12:23:40 -0400
-In-Reply-To: <20110620190945.GK26089@n2100.arm.linux.org.uk> (Russell King's
-	message of "Mon, 20 Jun 2011 20:09:45 +0100")
+	id S1753018Ab1FUQ2T (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 21 Jun 2011 12:28:19 -0400
+Content-Disposition: inline
+In-Reply-To: <m2aadbtbbl.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Simon Horman <horms@verge.net.au>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Hi Russell,
-
-On Mon, Jun 20 2011, Russell King - ARM Linux wrote:
-> This is the third revision of my improvements to the MMC block
-> device error handling, which makes error handling more robust
-> and permits MMC/SD to continue working in the presence of
-> not-quite-perfect setups.
->
-> Without this, my Versatile Express tends to fail to mount its rootfs
-> on SD.  With this, it can successfully read and write data from the
-> card in the presence of FIFO overruns and underruns, and also sensibly
-> recover from command channel errors.
->
-> There is more to come, but this is the "safer" bits of the improvements.
->
->  drivers/mmc/card/block.c |  279 ++++++++++++++++++++++++++++++++++-----------
->  include/linux/mmc/mmc.h  |   10 ++
->  2 files changed, 221 insertions(+), 68 deletions(-)
-
-Thanks, pushed to mmc-next for 3.1.
-
-(I'll do some more testing myself and let you know if I find anything
-unexpected.)
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+On Tue, Jun 21, 2011 at 12:10:22PM -0400, Chris Ball wrote:
+> On Mon, Jun 20 2011, Simon Horman wrote:
+> > Dependencies:
+> > 	"mmc: sdhi: Add write16_hook"
+> > 	"ARM: mach-shmobile: ag5evm: consistently name sdhi info structures"
+> 
+> Could I get your ACK for this one, so that I can merge patches 1/2/3/5
+> together via the MMC tree?
+> 
+Well, this has a dependency on 4/5 which I've already applied. I was
+simply going to wait for 1-3 to be merged via your tree and then roll in
+this last one on top of that. If you want to take them all that's ok too,
+git should be able to deal with any merge conflicts fine.
