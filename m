@@ -1,79 +1,176 @@
-From: Nicolas Pitre <nicolas.pitre@linaro.org>
-Subject: Re: [PATCH v6 02/11] omap_hsmmc: add support for pre_req and
- post_req
-Date: Tue, 21 Jun 2011 16:29:10 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.1106211624400.2142@xanadu.home>
-References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org> <1308518257-9783-3-git-send-email-per.forlin@linaro.org> <BANLkTi=+o496k8Uz_k33AH=Zr8+MaFOEig@mail.gmail.com> <BANLkTinNG2h747MggWfoJfMp4wOSTaTKSg@mail.gmail.com> <alpine.LFD.2.00.1106211515270.2142@xanadu.home>
- <BANLkTi=AgOmwkJkVAON5AFTr+ytqkAGP4w@mail.gmail.com>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH v6 11/11] mmc: add handling for two parallel block
+ requests in issue_rw_rq
+Date: Tue, 21 Jun 2011 23:01:10 +0200
+Message-ID: <BANLkTinZs4Jae84jFbfkfPCg31a4ba2m9g@mail.gmail.com>
+References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org>
+	<1308518257-9783-12-git-send-email-per.forlin@linaro.org>
+	<BANLkTi=+di-5yciD7KVx3LySHVj-L1yfrg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-1858902173-1308688151=:2142"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:49632 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756736Ab1FUU3N (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 16:29:13 -0400
-Received: by qwk3 with SMTP id 3so70985qwk.19
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Jun 2011 13:29:12 -0700 (PDT)
-In-Reply-To: <BANLkTi=AgOmwkJkVAON5AFTr+ytqkAGP4w@mail.gmail.com>
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:59630 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750991Ab1FUVBL convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 17:01:11 -0400
+Received: by qyk9 with SMTP id 9so101268qyk.19
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Jun 2011 14:01:10 -0700 (PDT)
+In-Reply-To: <BANLkTi=+di-5yciD7KVx3LySHVj-L1yfrg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: Kishore Kadiyala <kishorek.kadiyala@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-dev@lists.linaro.org, Venkatraman S <svenkatr@ti.com>, Chris Ball <cjb@laptop.org>
+To: Kishore Kadiyala <kishorek.kadiyala@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linaro-dev@lists.linaro.org, Venkatraman S <svenkatr@ti.com>, Chris Ball <cjb@laptop.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On 20 June 2011 17:17, Kishore Kadiyala <kishorek.kadiyala@gmail.com> w=
+rote:
+> On Mon, Jun 20, 2011 at 2:47 AM, Per Forlin <per.forlin@linaro.org> w=
+rote:
+>> Change mmc_blk_issue_rw_rq() to become asynchronous.
+>> The execution flow looks like this:
+>> The mmc-queue calls issue_rw_rq(), which sends the request
+>> to the host and returns back to the mmc-queue. The mmc-queue calls
+>> issue_rw_rq() again with a new request. This new request is prepared=
+,
+>> in isuue_rw_rq(), then it waits for the active request to complete b=
+efore
+>> pushing it to the host. When to mmc-queue is empty it will call
+>> isuue_rw_rq() with req=3DNULL to finish off the active request
+>> without starting a new request.
+>>
+>> Signed-off-by: Per Forlin <per.forlin@linaro.org>
+>> ---
+>> =A0drivers/mmc/card/block.c | =A0121 +++++++++++++++++++++++++++++++=
+++-------------
+>> =A0drivers/mmc/card/queue.c | =A0 17 +++++--
+>> =A0drivers/mmc/card/queue.h | =A0 =A01 +
+>> =A03 files changed, 101 insertions(+), 38 deletions(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 6a84a75..66db77a 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -108,6 +108,7 @@ static DEFINE_MUTEX(open_lock);
+>>
+>> =A0enum mmc_blk_status {
+>> =A0 =A0 =A0 =A0MMC_BLK_SUCCESS =3D 0,
+>> + =A0 =A0 =A0 MMC_BLK_PARTIAL,
+>> =A0 =A0 =A0 =A0MMC_BLK_RETRY,
+>> =A0 =A0 =A0 =A0MMC_BLK_DATA_ERR,
+>> =A0 =A0 =A0 =A0MMC_BLK_CMD_ERR,
+>> @@ -668,14 +669,16 @@ static inline void mmc_apply_rel_rw(struct mmc=
+_blk_request *brq,
+>> =A0 =A0 =A0 =A0}
+>> =A0}
+>>
+>> -static enum mmc_blk_status mmc_blk_err_check(struct mmc_blk_request=
+ *brq,
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0struct request *req,
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0struct mmc_card *card,
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0struct mmc_blk_data *md)
+>> +static int mmc_blk_err_check(struct mmc_card *card,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct mmc_=
+async_req *areq)
+>> =A0{
+>> =A0 =A0 =A0 =A0struct mmc_command cmd;
+>> =A0 =A0 =A0 =A0u32 status =3D 0;
+>> =A0 =A0 =A0 =A0enum mmc_blk_status ret =3D MMC_BLK_SUCCESS;
+>> + =A0 =A0 =A0 struct mmc_queue_req *mq_mrq =3D container_of(areq, st=
+ruct mmc_queue_req,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_active);
+>> + =A0 =A0 =A0 struct mmc_blk_request *brq =3D &mq_mrq->brq;
+>> + =A0 =A0 =A0 struct request *req =3D mq_mrq->req;
+>>
+>> =A0 =A0 =A0 =A0/*
+>> =A0 =A0 =A0 =A0 * Check for errors here, but don't jump to cmd_err
+>> @@ -770,7 +773,11 @@ static enum mmc_blk_status mmc_blk_err_check(st=
+ruct mmc_blk_request *brq,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0else
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D MMC_BLK_DATA_=
+ERR;
+>> =A0 =A0 =A0 =A0}
+>> -out:
+>> +
+>> + =A0 =A0 =A0 if (ret =3D=3D MMC_BLK_SUCCESS &&
+>> + =A0 =A0 =A0 =A0 =A0 blk_rq_bytes(req) !=3D brq->data.bytes_xfered)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D MMC_BLK_PARTIAL;
+>> + out:
+>> =A0 =A0 =A0 =A0return ret;
+>> =A0}
+>>
+>> @@ -901,27 +908,59 @@ static void mmc_blk_rw_rq_prep(struct mmc_queu=
+e_req *mqrq,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->data.sg_len =3D i;
+>> =A0 =A0 =A0 =A0}
+>>
+>> + =A0 =A0 =A0 mqrq->mmc_active.mrq =3D &brq->mrq;
+>> + =A0 =A0 =A0 mqrq->mmc_active.err_check =3D mmc_blk_err_check;
+>> +
+>> =A0 =A0 =A0 =A0mmc_queue_bounce_pre(mqrq);
+>> =A0}
+>>
+>> -static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request=
+ *req)
+>> +static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request=
+ *rqc)
+>> =A0{
+>> =A0 =A0 =A0 =A0struct mmc_blk_data *md =3D mq->data;
+>> =A0 =A0 =A0 =A0struct mmc_card *card =3D md->queue.card;
+>> - =A0 =A0 =A0 struct mmc_blk_request *brq =3D &mq->mqrq_cur->brq;
+>> - =A0 =A0 =A0 int ret =3D 1, disable_multi =3D 0;
+>> + =A0 =A0 =A0 struct mmc_blk_request *brq;
+>> + =A0 =A0 =A0 int ret =3D 1;
+>> + =A0 =A0 =A0 int disable_multi =3D 0;
+>> =A0 =A0 =A0 =A0enum mmc_blk_status status;
+>> + =A0 =A0 =A0 struct mmc_queue_req *mq_rq;
+>> + =A0 =A0 =A0 struct request *req;
+>> + =A0 =A0 =A0 struct mmc_async_req *areq;
+>> +
+>> + =A0 =A0 =A0 if (!rqc && !mq->mqrq_prev->req)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+>>
+>> =A0 =A0 =A0 =A0do {
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_blk_rw_rq_prep(mq->mqrq_cur, card,=
+ disable_multi, mq);
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_wait_for_req(card->host, &brq->mrq=
+);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (rqc) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_blk_rw_rq_prep(mq-=
+>mqrq_cur, card, 0, mq);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 areq =3D &mq->mqrq_cur=
+->mmc_active;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 areq =3D NULL;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 areq =3D mmc_start_req(card->host, are=
+q, (int *) &status);
+>
+> I think 'status' is used uninitialized.
+> With this struct mmc_async_req *mmc_start_req in your first patch
+> if (error)
+> =A0 =A0 =A0 =A0*error =3D err;
+> return data;
+> condition which always passes.
+It's valid to pass in NULL as status.
+Do you suggest to make the status pointer mandatory?
 
---8323328-1858902173-1308688151=:2142
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: 8BIT
+>
+> You can have
+> enum mmc_blk_status status =3D MMC_BLK_SUCCESS;
+>
+status will be set to MMC_BLK_SUCCESS for the first iteration of the
+do-while loop.
+It may look like:
+MMC_BLK_RETRY
+MMC_BLK_PARTIAL
+MMC_BLK_PARTIAL
+MMC_BLK_PARTIAL
+MMC_BLK_SUCCESS
 
-On Tue, 21 Jun 2011, Per Forlin wrote:
+This means mmc_start_req needs to return MMC_BLK_SUCCESS.
 
-> On 21 June 2011 21:18, Nicolas Pitre <nicolas.pitre@linaro.org> wrote:
-> > On Tue, 21 Jun 2011, Per Forlin wrote:
-> >
-> >> On 21 June 2011 07:41, Kishore Kadiyala <kishorek.kadiyala@gmail.com> wrote:
-> >> > <snip>
-> >> >
-> >> >> +
-> >> >> +static void omap_hsmmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
-> >> >> +                              bool is_first_req)
-> >> >
-> >> > I don't see the usage of "is_first_req" below.
-> >> > Is it required?
-> >> >
-> >> It is not required. It is only an indication that this request is the
-> >> first in a series of request. The host driver may do various
-> >> optimisations based on this information. The first request in a series
-> >> of jobs can't be prepared in parallel to the previous job. The host
-> >> driver can do the following to minimise latency for the first job.
-> >>  * Preparing the cache while the MMC read/write cmd is being
-> >> processed. In this case the pre_req could do nothing and the job is
-> >> instead run in parallel to the read/write cmd being sent. If the
-> >> is_first_req is false pre_req will run in parallel to an active
-> >> transfer, in this case it is more efficient to prepare the request in
-> >> pre_req.
-> >>  * Run PIO mode instead of DMA
-> >
-> > That is never going to be a good tradeoff.  If the CPU is busy doing
-> > PIO, it won't have a chance to prepare a subsequent request in parallel
-> > to the first transfer.
-> >
-> If you have two CPUs and the MMC interrupts are scheduled on the CPU
-> 1, CPU 0 can prepare the next one.
-
-Well, it is true that in theory the PIO operation shouldn't take all the 
-CPU anyway, so maybe there are some cycles left in between FIFO 
-interrupts.
-
-The danger here is of course to be presented with a trickle of single 
-requests.  Doing them all with PIO is going to waste more power or 
-prevent other tasks from running with 100% CPU which might impact the 
-system latency more than the latency we're trying to avoid here.
-
-In other words this is something that should be evaluated and not 
-applied freely.
-
-
-Nicolas
---8323328-1858902173-1308688151=:2142--
+Regards,
+Per
