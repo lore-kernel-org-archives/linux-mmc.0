@@ -1,46 +1,45 @@
-From: Arnaud Patard (Rtp) <arnaud.patard@rtp-net.org>
-Subject: Re: [PATCH v3 0/4] Extend sdhci-esdhc-imx card_detect and write_protect support for mx5
-Date: Tue, 21 Jun 2011 11:44:00 +0200
-Message-ID: <87oc1ra59b.fsf@lebrac.rtp-net.org>
-References: <1308566325-11600-1-git-send-email-shawn.guo@linaro.org>
-	<20110621013905.GB6294@S2101-09.ap.freescale.net>
+From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
+Subject: Re: [PATCH] cb710: fix #ifdef HAVE_EFFICIENT_UNALIGNED_ACCESS
+Date: Tue, 21 Jun 2011 12:17:25 +0200
+Message-ID: <20110621101725.GA670@rere.qmqm.pl>
+References: <BANLkTikMc1WfJMJ2NeBr1E62dGjCj1Cd_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lebrac.rtp-net.org ([88.191.135.105]:44239 "EHLO
-	lebrac.rtp-net.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752360Ab1FUJoP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 05:44:15 -0400
-In-Reply-To: <20110621013905.GB6294@S2101-09.ap.freescale.net> (Shawn Guo's
-	message of "Tue, 21 Jun 2011 09:39:06 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <BANLkTikMc1WfJMJ2NeBr1E62dGjCj1Cd_w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: James Hogan <james@albanarts.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Eric Benard <eric@eukrea.com>, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-Shawn Guo <shawn.guo@freescale.com> writes:
+On Tue, Jun 21, 2011 at 10:55:34AM +0100, James Hogan wrote:
+> HAVE_EFFICIENT_UNALIGNED_ACCESS is a config option, therefore it need=
+s
+> the CONFIG_ before it when used by the preprocessor.
+>=20
+> Signed-off-by: James Hogan <james@albanarts.com>
+> ---
+>  drivers/misc/cb710/sgbuf2.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+>=20
+> diff --git a/drivers/misc/cb710/sgbuf2.c b/drivers/misc/cb710/sgbuf2.=
+c
+> index d019746..2a40d0e 100644
+> --- a/drivers/misc/cb710/sgbuf2.c
+> +++ b/drivers/misc/cb710/sgbuf2.c
+> @@ -47,7 +47,7 @@ static uint32_t sg_dwiter_read_buffer(struct
+> sg_mapping_iter *miter)
+>=20
+>  static inline bool needs_unaligned_copy(const void *ptr)
+>  {
+> -#ifdef HAVE_EFFICIENT_UNALIGNED_ACCESS
+> +#ifdef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
+>  	return false;
+>  #else
+>  	return ((ptr - NULL) & 3) !=3D 0;
 
-> Hi Arnaud,
+Acked-by: Micha=B3 Miros=B3aw <mirq-linux@rere.qmqm.pl>
 
-Hi,
-
->
-> Would you please give a test on the series, as it fixed the issue
-> you reported?  TIA.
-
-I've tested it yesterday on my efika platforms and the issue is
-gone. Moreover, the differents card slot on theses platforms are using
-each card detect type (internally connected, gpio, no card detect) and
-they are all working as expected. I'm a little bit annoyed by the
-polling on the slot without card detect but this has nothing to do with
-this patchset.
-
-Side note: turns out that the driver is using dev_warn when failing to
-get cd gpio/irq. Given that in theses cases, it jumps to
-no_card_detect_pin and makes the probe fail, maybe a dev_err would be
-better ? 
-
-Tested-by: Arnaud Patard <arnaud.patard@rtp-net.org>
-
-Thanks,
-Arnaud
+[Cc: linux-mmc]
