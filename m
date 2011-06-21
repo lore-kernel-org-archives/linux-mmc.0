@@ -1,45 +1,58 @@
-From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-Subject: Re: [PATCH] cb710: fix #ifdef HAVE_EFFICIENT_UNALIGNED_ACCESS
-Date: Tue, 21 Jun 2011 12:17:25 +0200
-Message-ID: <20110621101725.GA670@rere.qmqm.pl>
-References: <BANLkTikMc1WfJMJ2NeBr1E62dGjCj1Cd_w@mail.gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH v3 2/4] mmc: sdhci-esdhc-imx: SDHCI_CARD_PRESENT does not
+ get cleared
+Date: Tue, 21 Jun 2011 13:52:36 +0200
+Message-ID: <20110621115236.GA14004@pengutronix.de>
+References: <1308566325-11600-1-git-send-email-shawn.guo@linaro.org>
+ <1308566325-11600-3-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="nFreZHaLTZJo0R7j"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:45943 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752505Ab1FULwk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 07:52:40 -0400
 Content-Disposition: inline
-In-Reply-To: <BANLkTikMc1WfJMJ2NeBr1E62dGjCj1Cd_w@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: James Hogan <james@albanarts.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+In-Reply-To: <1308566325-11600-3-git-send-email-shawn.guo@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Arnaud Patard <arnaud.patard@rtp-net.org>, Eric Benard <eric@eukrea.com>, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-On Tue, Jun 21, 2011 at 10:55:34AM +0100, James Hogan wrote:
-> HAVE_EFFICIENT_UNALIGNED_ACCESS is a config option, therefore it need=
-s
-> the CONFIG_ before it when used by the preprocessor.
->=20
-> Signed-off-by: James Hogan <james@albanarts.com>
-> ---
->  drivers/misc/cb710/sgbuf2.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
->=20
-> diff --git a/drivers/misc/cb710/sgbuf2.c b/drivers/misc/cb710/sgbuf2.=
-c
-> index d019746..2a40d0e 100644
-> --- a/drivers/misc/cb710/sgbuf2.c
-> +++ b/drivers/misc/cb710/sgbuf2.c
-> @@ -47,7 +47,7 @@ static uint32_t sg_dwiter_read_buffer(struct
-> sg_mapping_iter *miter)
->=20
->  static inline bool needs_unaligned_copy(const void *ptr)
->  {
-> -#ifdef HAVE_EFFICIENT_UNALIGNED_ACCESS
-> +#ifdef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
->  	return false;
->  #else
->  	return ((ptr - NULL) & 3) !=3D 0;
 
-Acked-by: Micha=B3 Miros=B3aw <mirq-linux@rere.qmqm.pl>
+--nFreZHaLTZJo0R7j
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-[Cc: linux-mmc]
+On Mon, Jun 20, 2011 at 06:38:43PM +0800, Shawn Guo wrote:
+> The function esdhc_readl_le intends to clear bit SDHCI_CARD_PRESENT,
+> when the card detect gpio tells there is no card.  But it does not
+> clear the bit actually.  The patch gives a fix on that.
+>=20
+> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+
+For the third time ;)
+
+Acked-by: Wolfram Sang <w.sang@pengutronix.de>
+
+Should go to stable.
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--nFreZHaLTZJo0R7j
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAk4AhgQACgkQD27XaX1/VRvDogCeOvBpMxfNkON23eSd2kJmdqC6
+IZQAnRXLA3renXLmEVi/bJWCkO0ybjH2
+=jiy7
+-----END PGP SIGNATURE-----
+
+--nFreZHaLTZJo0R7j--
