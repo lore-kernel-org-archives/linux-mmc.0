@@ -1,36 +1,29 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH v6 00/11] mmc: use nonblock mmc requests to minimize latency
-Date: Tue, 21 Jun 2011 10:09:16 +0200
-Message-ID: <BANLkTikOA3G0Gt4Cxua3EDnAzbFKLAk6Yw@mail.gmail.com>
-References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org>
-	<20110621075319.GN26089@n2100.arm.linux.org.uk>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH 4/5] ARM: mach-shmobile: ag5evm: consistently name sdhi info structures
+Date: Tue, 21 Jun 2011 17:50:44 +0900
+Message-ID: <20110621085044.GH7920@linux-sh.org>
+References: <1308610812-3479-1-git-send-email-horms@verge.net.au> <1308610812-3479-5-git-send-email-horms@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:58820 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754164Ab1FUIJQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 04:09:16 -0400
-Received: by qyk29 with SMTP id 29so1934030qyk.19
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Jun 2011 01:09:16 -0700 (PDT)
-In-Reply-To: <20110621075319.GN26089@n2100.arm.linux.org.uk>
+Received: from linux-sh.org ([111.68.239.195]:44261 "EHLO linux-sh.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751317Ab1FUIvI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 21 Jun 2011 04:51:08 -0400
+Content-Disposition: inline
+In-Reply-To: <1308610812-3479-5-git-send-email-horms@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linaro-dev@lists.linaro.org, Venkatraman S <svenkatr@ti.com>, Chris Ball <cjb@laptop.org>
+To: Simon Horman <horms@verge.net.au>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>
 
-On 21 June 2011 09:53, Russell King - ARM Linux <linux@arm.linux.org.uk> wrote:
-> On Sun, Jun 19, 2011 at 11:17:26PM +0200, Per Forlin wrote:
->> How significant is the cache maintenance over head?
->
-> Per,
->
-> Can you measure how much difference this has before and after your
-> patch set please?
-Absolutely, I can run the mmc_tests to get the measurement. The cache
-affect is greater the faster the flash memory is. Currently I only
-have access to a SD card (20 MiB/S). By the end of this week I can run
-on eMMC (45 MiB/s) if this will be needed.
+On Tue, Jun 21, 2011 at 08:00:11AM +0900, Simon Horman wrote:
+> Name the SDHI1 instance sh_sdhi1_info to be consistent with sh_sdhi0_info.
+> 
+> Signed-off-by: Simon Horman <horms@verge.net.au>
+> 
+> ---
+> 
+> Dependencies: None known
 
-Thanks for your input,
-Per
+Applied, thanks.
