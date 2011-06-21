@@ -1,43 +1,76 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 5/5] ARM: mach-shmobile: ag5evm: SDHI requires waiting for idle
-Date: Tue, 21 Jun 2011 12:37:56 -0400
-Message-ID: <m2tybjrvh7.fsf@bob.laptop.org>
-References: <1308610812-3479-1-git-send-email-horms@verge.net.au>
-	<1308610812-3479-6-git-send-email-horms@verge.net.au>
-	<m2aadbtbbl.fsf@bob.laptop.org> <20110621162735.GL7920@linux-sh.org>
+From: James Hogan <james@albanarts.com>
+Subject: Re: [PATCH] cb710: fix #ifdef HAVE_EFFICIENT_UNALIGNED_ACCESS
+Date: Tue, 21 Jun 2011 17:40:53 +0100
+Message-ID: <BANLkTik7CqKJUGNbvTO-WbfzVR2MxT=j3A@mail.gmail.com>
+References: <BANLkTikMc1WfJMJ2NeBr1E62dGjCj1Cd_w@mail.gmail.com>
+	<20110621101725.GA670@rere.qmqm.pl>
+	<m239j3tb3w.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20110621162735.GL7920@linux-sh.org> (Paul Mundt's message of
-	"Wed, 22 Jun 2011 01:27:36 +0900")
-Sender: linux-sh-owner@vger.kernel.org
-To: Paul Mundt <lethal@linux-sh.org>
-Cc: Simon Horman <horms@verge.net.au>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:54635 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756993Ab1FUQkz convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 12:40:55 -0400
+In-Reply-To: <m239j3tb3w.fsf@bob.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
 Hi,
 
-On Tue, Jun 21 2011, Paul Mundt wrote:
-> On Tue, Jun 21, 2011 at 12:10:22PM -0400, Chris Ball wrote:
->> On Mon, Jun 20 2011, Simon Horman wrote:
->> > Dependencies:
->> > 	"mmc: sdhi: Add write16_hook"
->> > 	"ARM: mach-shmobile: ag5evm: consistently name sdhi info structures"
->> 
->> Could I get your ACK for this one, so that I can merge patches 1/2/3/5
->> together via the MMC tree?
->> 
-> Well, this has a dependency on 4/5 which I've already applied. I was
-> simply going to wait for 1-3 to be merged via your tree and then roll in
-> this last one on top of that. If you want to take them all that's ok too,
-> git should be able to deal with any merge conflicts fine.
+2011/6/21 Chris Ball <cjb@laptop.org>:
+> Hi,
+>
+> On Tue, Jun 21 2011, Micha=C5=82 Miros=C5=82aw wrote:
+>> On Tue, Jun 21, 2011 at 10:55:34AM +0100, James Hogan wrote:
+>>> HAVE_EFFICIENT_UNALIGNED_ACCESS is a config option, therefore it ne=
+eds
+>>> the CONFIG_ before it when used by the preprocessor.
+>>>
+>>> Signed-off-by: James Hogan <james@albanarts.com>
+>>> ---
+>>> =C2=A0drivers/misc/cb710/sgbuf2.c | =C2=A0 =C2=A02 +-
+>>> =C2=A01 files changed, 1 insertions(+), 1 deletions(-)
+>>>
+>>> diff --git a/drivers/misc/cb710/sgbuf2.c b/drivers/misc/cb710/sgbuf=
+2.c
+>>> index d019746..2a40d0e 100644
+>>> --- a/drivers/misc/cb710/sgbuf2.c
+>>> +++ b/drivers/misc/cb710/sgbuf2.c
+>>> @@ -47,7 +47,7 @@ static uint32_t sg_dwiter_read_buffer(struct
+>>> sg_mapping_iter *miter)
+>>>
+>>> =C2=A0static inline bool needs_unaligned_copy(const void *ptr)
+>>> =C2=A0{
+>>> -#ifdef HAVE_EFFICIENT_UNALIGNED_ACCESS
+>>> +#ifdef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
+>>> =C2=A0 =C2=A0 =C2=A0return false;
+>>> =C2=A0#else
+>>> =C2=A0 =C2=A0 =C2=A0return ((ptr - NULL) & 3) !=3D 0;
+>>
+>> Acked-by: Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmqm.pl>
+>
+> Thanks, pushed to mmc-next for 3.0.
+>
+> (James, your patch was corrupt due to a hard line break on the @@
+> line -- please fix that next time around.)
 
-Ah, okay -- I've pushed 1-3 now to mmc-next for 3.1, you can take 4-5.
+Ahh, sorry about that Chris, I thought I had that problem sorted!
 
-(I was thinking I should try to avoid requiring you to wait for Linus
-to pull MMC before you can send sh to him.)
+Thanks
+James
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+>
+> - Chris.
+> --
+> Chris Ball =C2=A0 <cjb@laptop.org> =C2=A0 <http://printf.net/>
+> One Laptop Per Child
+>
+
+
+
+--=20
+James Hogan
