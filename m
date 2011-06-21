@@ -1,29 +1,29 @@
-From: Paul Mundt <lethal@linux-sh.org>
-Subject: Re: [PATCH 4/5] ARM: mach-shmobile: ag5evm: consistently name sdhi info structures
-Date: Tue, 21 Jun 2011 17:50:44 +0900
-Message-ID: <20110621085044.GH7920@linux-sh.org>
-References: <1308610812-3479-1-git-send-email-horms@verge.net.au> <1308610812-3479-5-git-send-email-horms@verge.net.au>
+From: Dominik Brodowski <linux@dominikbrodowski.net>
+Subject: Re: [PATCH 4/4] PCI: make cardbus-bridge resources nice-to-have
+Date: Tue, 21 Jun 2011 09:57:00 +0200
+Message-ID: <20110621075659.GA4620@comet.dominikbrodowski.net>
+References: <1308610037-6261-1-git-send-email-linuxram@us.ibm.com>
+ <1308610037-6261-5-git-send-email-linuxram@us.ibm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from linux-sh.org ([111.68.239.195]:44261 "EHLO linux-sh.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751317Ab1FUIvI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Jun 2011 04:51:08 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1308610812-3479-5-git-send-email-horms@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1308610037-6261-5-git-send-email-linuxram@us.ibm.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ram Pai <linuxram@us.ibm.com>
+Cc: jbarnes@virtuousgeek.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, svenkatr@ti.com, yinghai@kernel.org, cjb@laptop.org, linux-pci@vger.kernel.org, linux-net-drivers@solarflare.com, bhutchings@solarflare.com
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>
 
-On Tue, Jun 21, 2011 at 08:00:11AM +0900, Simon Horman wrote:
-> Name the SDHI1 instance sh_sdhi1_info to be consistent with sh_sdhi0_info.
-> 
-> Signed-off-by: Simon Horman <horms@verge.net.au>
-> 
-> ---
-> 
-> Dependencies: None known
+On Mon, Jun 20, 2011 at 03:47:17PM -0700, Ram Pai wrote:
+> Allocate resources to cardbus bridge only after all other genuine
+> resources requests are satisfied. Dont retry if resource allocation
+> for cardbus-bridge fails.
 
-Applied, thanks.
+Well, for those who use cardbus cards, cardbus resources aren't "nice to
+have", they are absolutely required. Of course, not all cardbus cards need
+as many resources as are currently assigned, so I wouldn't oppose a patch
+which marks _some_ of the currently assigned resources as "nice to have".
+But this approach -- 0 required, all "nice to have" -- seems wrong to me.
+
+Best,
+	Dominik
