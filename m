@@ -1,70 +1,62 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 5/5] ARM: mach-shmobile: ag5evm: SDHI requires waiting for idle
-Date: Tue, 21 Jun 2011 12:10:22 -0400
-Message-ID: <m2aadbtbbl.fsf@bob.laptop.org>
-References: <1308610812-3479-1-git-send-email-horms@verge.net.au>
-	<1308610812-3479-6-git-send-email-horms@verge.net.au>
+Subject: Re: [PATCH] cb710: fix #ifdef HAVE_EFFICIENT_UNALIGNED_ACCESS
+Date: Tue, 21 Jun 2011 12:14:59 -0400
+Message-ID: <m239j3tb3w.fsf@bob.laptop.org>
+References: <BANLkTikMc1WfJMJ2NeBr1E62dGjCj1Cd_w@mail.gmail.com>
+	<20110621101725.GA670@rere.qmqm.pl>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:32911 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:55853 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751559Ab1FUQKh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Jun 2011 12:10:37 -0400
-In-Reply-To: <1308610812-3479-6-git-send-email-horms@verge.net.au> (Simon
-	Horman's message of "Tue, 21 Jun 2011 08:00:12 +0900")
+	id S1753673Ab1FUQPH convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2011 12:15:07 -0400
+In-Reply-To: <20110621101725.GA670@rere.qmqm.pl> (=?utf-8?Q?=22Micha=C5=82?=
+ =?utf-8?Q?_Miros=C5=82aw=22's?= message
+	of "Tue, 21 Jun 2011 12:17:25 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Paul Mundt <lethal@linux-sh.org>
+To: =?utf-8?Q?Micha=C5=82_Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
+Cc: James Hogan <james@albanarts.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi Paul,
+Hi,
 
-On Mon, Jun 20 2011, Simon Horman wrote:
-> The SDHI block on the ag5evm requires waiting for idle
-> before writing to some registers.
+On Tue, Jun 21 2011, Micha=C5=82 Miros=C5=82aw wrote:
+> On Tue, Jun 21, 2011 at 10:55:34AM +0100, James Hogan wrote:
+>> HAVE_EFFICIENT_UNALIGNED_ACCESS is a config option, therefore it nee=
+ds
+>> the CONFIG_ before it when used by the preprocessor.
+>>=20
+>> Signed-off-by: James Hogan <james@albanarts.com>
+>> ---
+>>  drivers/misc/cb710/sgbuf2.c |    2 +-
+>>  1 files changed, 1 insertions(+), 1 deletions(-)
+>>=20
+>> diff --git a/drivers/misc/cb710/sgbuf2.c b/drivers/misc/cb710/sgbuf2=
+=2Ec
+>> index d019746..2a40d0e 100644
+>> --- a/drivers/misc/cb710/sgbuf2.c
+>> +++ b/drivers/misc/cb710/sgbuf2.c
+>> @@ -47,7 +47,7 @@ static uint32_t sg_dwiter_read_buffer(struct
+>> sg_mapping_iter *miter)
+>>=20
+>>  static inline bool needs_unaligned_copy(const void *ptr)
+>>  {
+>> -#ifdef HAVE_EFFICIENT_UNALIGNED_ACCESS
+>> +#ifdef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
+>>  	return false;
+>>  #else
+>>  	return ((ptr - NULL) & 3) !=3D 0;
 >
-> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> Cc: Magnus Damm <magnus.damm@gmail.com>
-> Signed-off-by: Simon Horman <horms@verge.net.au>
->
-> ---
->
-> Dependencies:
-> 	"mmc: sdhi: Add write16_hook"
-> 	"ARM: mach-shmobile: ag5evm: consistently name sdhi info structures"
-> ---
->  arch/arm/mach-shmobile/board-ag5evm.c |    3 ++-
->  1 files changed, 2 insertions(+), 1 deletions(-)
->
-> diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
-> index ce5c251..cdfdd62 100644
-> --- a/arch/arm/mach-shmobile/board-ag5evm.c
-> +++ b/arch/arm/mach-shmobile/board-ag5evm.c
-> @@ -341,6 +341,7 @@ static struct platform_device mipidsi0_device = {
->  static struct sh_mobile_sdhi_info sdhi0_info = {
->  	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
->  	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
-> +	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
->  	.tmio_caps	= MMC_CAP_SD_HIGHSPEED,
->  	.tmio_ocr_mask	= MMC_VDD_27_28 | MMC_VDD_28_29,
->  };
-> @@ -382,7 +383,7 @@ void ag5evm_sdhi1_set_pwr(struct platform_device *pdev, int state)
->  }
->  
->  static struct sh_mobile_sdhi_info sh_sdhi1_info = {
-> -	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE,
-> +	.tmio_flags	= TMIO_MMC_WRPROTECT_DISABLE | TMIO_MMC_HAS_IDLE_WAIT,
->  	.tmio_caps	= MMC_CAP_NONREMOVABLE | MMC_CAP_SDIO_IRQ,
->  	.tmio_ocr_mask	= MMC_VDD_32_33 | MMC_VDD_33_34,
->  	.set_pwr	= ag5evm_sdhi1_set_pwr,
+> Acked-by: Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmqm.pl>
 
-Could I get your ACK for this one, so that I can merge patches 1/2/3/5
-together via the MMC tree?
+Thanks, pushed to mmc-next for 3.0.
 
-Thanks,
+(James, your patch was corrupt due to a hard line break on the @@
+line -- please fix that next time around.)
 
 - Chris.
--- 
+--=20
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
