@@ -1,350 +1,94 @@
-From: Kevin Hilman <khilman@ti.com>
-Subject: Re: [PATCH 2/3] MMC: OMAP: HSMMC: add runtime pm support
-Date: Wed, 22 Jun 2011 11:38:07 -0700
-Message-ID: <874o3hr9tc.fsf@ti.com>
-References: <1308752314-32079-1-git-send-email-balajitk@ti.com>
-	<1308752314-32079-3-git-send-email-balajitk@ti.com>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [PATCH 4/5] pm: move pm notifiers into suspend.h
+Date: Wed, 22 Jun 2011 21:49:27 +0200
+Message-ID: <201106222149.28252.rjw@sisk.pl>
+References: <1308724522-32461-1-git-send-email-amwang@redhat.com> <1308724522-32461-5-git-send-email-amwang@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1308752314-32079-3-git-send-email-balajitk@ti.com> (Balaji
-	T. K.'s message of "Wed, 22 Jun 2011 19:48:33 +0530")
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, b-cousson@ti.com
+Content-Type: Text/Plain;
+  charset="iso-8859-2"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ogre.sisk.pl ([217.79.144.158]:51202 "EHLO ogre.sisk.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758041Ab1FVTso (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Jun 2011 15:48:44 -0400
+In-Reply-To: <1308724522-32461-5-git-send-email-amwang@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Amerigo Wang <amwang@redhat.com>
+Cc: linux-kernel@vger.kernel.org, akpm@linux-foundation.org, netdev@vger.kernel.org, Chris Ball <cjb@laptop.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Ohad Ben-Cohen <ohad@wizery.com>, Linus Walleij <linus.walleij@linaro.org>, Philip Rakity <prakity@marvell.com>, "David S. Miller" <davem@davemloft.net>, Lucas De Marchi <lucas.demarchi@profusion.mobi>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, linux-mmc@vger.kernel.org, linux-pm@lists.linux-foundation.org
 
-Balaji T K <balajitk@ti.com> writes:
-
-> add runtime pm support to HSMMC host controller
-> Use runtime pm API to enable/disable HSMMC clock
-> Use runtime autosuspend APIs to enable auto suspend delay
->
-> Based on OMAP HSMMC runtime implementation by Kevin Hilman, Kishore Kadiyala
->
-> Signed-off-by: Balaji T K <balajitk@ti.com>
+On Wednesday, June 22, 2011, Amerigo Wang wrote:
+> It is not necessary to share the same notifier.h.
+> 
+> Signed-off-by: WANG Cong <amwang@redhat.com>
+> 
 > ---
->  drivers/mmc/host/omap_hsmmc.c |  127 ++++++++++++++++++++++-------------------
->  1 files changed, 69 insertions(+), 58 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index beb3249..5b81d8b 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -33,6 +33,7 @@
->  #include <linux/semaphore.h>
->  #include <linux/gpio.h>
+>  drivers/mmc/core/core.c  |    3 +++
+>  include/linux/notifier.h |   10 ++--------
+>  include/linux/suspend.h  |    8 ++++++++
+>  3 files changed, 13 insertions(+), 8 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 68091dd..2cd4ec5 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -23,6 +23,9 @@
+>  #include <linux/log2.h>
 >  #include <linux/regulator/consumer.h>
-> +#include <linux/pm_runtime.h>
->  #include <plat/dma.h>
->  #include <mach/hardware.h>
->  #include <plat/board.h>
-> @@ -116,6 +117,7 @@
->  #define OMAP_MMC4_DEVID		3
->  #define OMAP_MMC5_DEVID		4
+>  #include <linux/pm_runtime.h>
+> +#ifdef CONFIG_PM
+> +#include <linux/suspend.h>
+> +#endif
+
+I don't think the #ifdef in necessary.  Any dependencies on CONFIG_PM
+(or CONFIG_SUSPEND etc.) should be taken care of inside of suspend.h.
+This file should be fixed if they aren't.
+
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/host.h>
+> diff --git a/include/linux/notifier.h b/include/linux/notifier.h
+> index 145c436..ae8f7d9 100644
+> --- a/include/linux/notifier.h
+> +++ b/include/linux/notifier.h
+> @@ -191,15 +191,9 @@ static inline int notifier_to_errno(int ret)
 >  
-> +#define MMC_AUTOSUSPEND_DELAY	50
->  #define MMC_TIMEOUT_MS		20
->  #define OMAP_MMC_MASTER_CLOCK	96000000
->  #define DRIVER_NAME		"omap_hsmmc"
-> @@ -1149,8 +1151,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
->  	int ret;
+>  /* reboot notifiers are defined in include/linux/reboot.h. */
 >  
->  	/* Disable the clocks */
-> -	clk_disable(host->fclk);
-> -	clk_disable(host->iclk);
-> +	pm_runtime_put_sync(host->dev);
->  	if (host->got_dbclk)
->  		clk_disable(host->dbclk);
+> -#define NETLINK_URELEASE	0x0001	/* Unicast netlink socket released */
+> +/* Hibernation and suspend events are defined in include/linux/suspend.h. */
 >  
-> @@ -1161,8 +1162,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
->  	if (!ret)
->  		ret = mmc_slot(host).set_power(host->dev, host->slot_id, 1,
->  					       vdd);
-> -	clk_enable(host->iclk);
-> -	clk_enable(host->fclk);
-> +	pm_runtime_get_sync(host->dev);
->  	if (host->got_dbclk)
->  		clk_enable(host->dbclk);
+> -/* Hibernation and suspend events */
+> -#define PM_HIBERNATION_PREPARE	0x0001 /* Going to hibernate */
+> -#define PM_POST_HIBERNATION	0x0002 /* Hibernation finished */
+> -#define PM_SUSPEND_PREPARE	0x0003 /* Going to suspend the system */
+> -#define PM_POST_SUSPEND		0x0004 /* Suspend finished */
+> -#define PM_RESTORE_PREPARE	0x0005 /* Going to restore a saved image */
+> -#define PM_POST_RESTORE		0x0006 /* Restore failed */
+> +#define NETLINK_URELEASE	0x0001	/* Unicast netlink socket released */
 >  
-> @@ -1528,7 +1528,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	u32 con;
->  	int do_send_init_stream = 0;
+>  /* Console keyboard events.
+>   * Note: KBD_KEYCODE is always sent before KBD_UNBOUND_KEYCODE, KBD_UNICODE and
+> diff --git a/include/linux/suspend.h b/include/linux/suspend.h
+> index 083ffea..95bc81c 100644
+> --- a/include/linux/suspend.h
+> +++ b/include/linux/suspend.h
+> @@ -260,6 +260,14 @@ static inline int hibernate(void) { return -ENOSYS; }
+>  static inline bool system_entering_hibernation(void) { return false; }
+>  #endif /* CONFIG_HIBERNATION */
 >  
-> -	mmc_host_enable(host->mmc);
-> +	pm_runtime_get_sync(host->dev);
->  
->  	if (ios->power_mode != host->power_mode) {
->  		switch (ios->power_mode) {
-> @@ -1623,8 +1623,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	else
->  		OMAP_HSMMC_WRITE(host->base, CON, con & ~OD);
->  
-> -	if (host->power_mode == MMC_POWER_OFF)
-> -		mmc_host_disable(host->mmc);
-> +	pm_runtime_put_autosuspend(host->dev);
->  }
->  
->  static int omap_hsmmc_get_cd(struct mmc_host *mmc)
-> @@ -1680,32 +1679,28 @@ static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
->  	set_sd_bus_power(host);
->  }
->  
-> -static int omap_hsmmc_enable_fclk(struct mmc_host *mmc)
-> +static int omap_hsmmc_enable(struct mmc_host *mmc)
->  {
->  	struct omap_hsmmc_host *host = mmc_priv(mmc);
-> -	int err;
->  
-> -	err = clk_enable(host->fclk);
-> -	if (err)
-> -		return err;
-> -	dev_dbg(mmc_dev(host->mmc), "mmc_fclk: enabled\n");
-> -	omap_hsmmc_context_restore(host);
-> +	pm_runtime_get_sync(host->dev);
+> +/* Hibernation and suspend events */
+> +#define PM_HIBERNATION_PREPARE	0x0001 /* Going to hibernate */
+> +#define PM_POST_HIBERNATION	0x0002 /* Hibernation finished */
+> +#define PM_SUSPEND_PREPARE	0x0003 /* Going to suspend the system */
+> +#define PM_POST_SUSPEND		0x0004 /* Suspend finished */
+> +#define PM_RESTORE_PREPARE	0x0005 /* Going to restore a saved image */
+> +#define PM_POST_RESTORE		0x0006 /* Restore failed */
 > +
->  	return 0;
->  }
->  
-> -static int omap_hsmmc_disable_fclk(struct mmc_host *mmc, int lazy)
-> +static int omap_hsmmc_disable(struct mmc_host *mmc, int lazy)
->  {
->  	struct omap_hsmmc_host *host = mmc_priv(mmc);
->  
-> -	omap_hsmmc_context_save(host);
-> -	clk_disable(host->fclk);
-> -	dev_dbg(mmc_dev(host->mmc), "mmc_fclk: disabled\n");
-> +	pm_runtime_mark_last_busy(host->dev);
-> +	pm_runtime_put_autosuspend(host->dev);
-> +
->  	return 0;
->  }
->  
->  static const struct mmc_host_ops omap_hsmmc_ops = {
-> -	.enable = omap_hsmmc_enable_fclk,
-> -	.disable = omap_hsmmc_disable_fclk,
-> +	.enable = omap_hsmmc_enable,
-> +	.disable = omap_hsmmc_disable,
->  	.request = omap_hsmmc_request,
->  	.set_ios = omap_hsmmc_set_ios,
->  	.get_cd = omap_hsmmc_get_cd,
-> @@ -1740,10 +1735,7 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
->  		return 0;
->  	}
->  
-> -	if (clk_enable(host->fclk) != 0) {
-> -		seq_printf(s, "can't read the regs\n");
-> -		return 0;
-> -	}
-> +	pm_runtime_get_sync(host->dev);
->  
->  	seq_printf(s, "SYSCONFIG:\t0x%08x\n",
->  			OMAP_HSMMC_READ(host->base, SYSCONFIG));
-> @@ -1760,7 +1752,8 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
->  	seq_printf(s, "CAPA:\t\t0x%08x\n",
->  			OMAP_HSMMC_READ(host->base, CAPA));
->  
-> -	clk_disable(host->fclk);
-> +	pm_runtime_mark_last_busy(host->dev);
-> +	pm_runtime_put_autosuspend(host->dev);
->  
->  	return 0;
->  }
-> @@ -1880,18 +1873,12 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
->  
->  	mmc->caps |= MMC_CAP_DISABLE;
->  
-> -	if (clk_enable(host->iclk) != 0) {
-> -		clk_put(host->iclk);
-> -		clk_put(host->fclk);
-> -		goto err1;
-> -	}
-> -
-> -	if (mmc_host_enable(host->mmc) != 0) {
-> -		clk_disable(host->iclk);
-> -		clk_put(host->iclk);
-> -		clk_put(host->fclk);
-> -		goto err1;
-> -	}
-> +	pm_runtime_enable(host->dev);
-> +	pm_runtime_allow(host->dev);
-> +	pm_runtime_get_sync(host->dev);
-> +	pm_runtime_set_autosuspend_delay(host->dev, MMC_AUTOSUSPEND_DELAY);
-> +	pm_runtime_use_autosuspend(host->dev);
-> +	pm_suspend_ignore_children(host->dev, 1);
+>  #ifdef CONFIG_PM_SLEEP
+>  void save_processor_state(void);
+>  void restore_processor_state(void);
+> 
 
-Why is ignore_children needed for this device?   Is this device the
-parent of other devices?   If it is, why should it ignore it's
-children?
-
->  	if (cpu_is_omap2430()) {
->  		host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
-> @@ -2018,6 +2005,8 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
->  	}
->  
->  	omap_hsmmc_debugfs(mmc);
-> +	pm_runtime_mark_last_busy(host->dev);
-> +	pm_runtime_put_autosuspend(host->dev);
->  
->  	return 0;
->  
-> @@ -2033,8 +2022,8 @@ err_reg:
->  err_irq_cd_init:
->  	free_irq(host->irq, host);
->  err_irq:
-> -	mmc_host_disable(host->mmc);
-> -	clk_disable(host->iclk);
-> +	pm_runtime_mark_last_busy(host->dev);
-> +	pm_runtime_put_autosuspend(host->dev);
->  	clk_put(host->fclk);
->  	clk_put(host->iclk);
->  	if (host->got_dbclk) {
-> @@ -2058,7 +2047,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
->  	struct resource *res;
->  
->  	if (host) {
-> -		mmc_host_enable(host->mmc);
-> +		pm_runtime_get_sync(host->dev);
->  		mmc_remove_host(host->mmc);
->  		if (host->use_reg)
->  			omap_hsmmc_reg_put(host);
-> @@ -2069,8 +2058,9 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
->  			free_irq(mmc_slot(host).card_detect_irq, host);
->  		flush_work_sync(&host->mmc_carddetect_work);
->  
-> -		mmc_host_disable(host->mmc);
-> -		clk_disable(host->iclk);
-> +		pm_runtime_put_sync(host->dev);
-> +		pm_runtime_forbid(host->dev);
-
-Why?
-
-> +		pm_runtime_disable(host->dev);
->  		clk_put(host->fclk);
->  		clk_put(host->iclk);
->  		if (host->got_dbclk) {
-> @@ -2102,6 +2092,8 @@ static int omap_hsmmc_suspend(struct device *dev)
->  		return 0;
->  
->  	if (host) {
-> +		/* FIXME: TODO move get_sync to proper dev_pm_ops function */
-
-what does this mean?  
-
-> +		pm_runtime_get_sync(host->dev);
->  		host->suspended = 1;
->  		if (host->pdata->suspend) {
->  			ret = host->pdata->suspend(&pdev->dev,
-> @@ -2116,13 +2108,11 @@ static int omap_hsmmc_suspend(struct device *dev)
->  		}
->  		cancel_work_sync(&host->mmc_carddetect_work);
->  		ret = mmc_suspend_host(host->mmc);
-> -		mmc_host_enable(host->mmc);
-> +
->  		if (ret == 0) {
->  			omap_hsmmc_disable_irq(host);
->  			OMAP_HSMMC_WRITE(host->base, HCTL,
->  				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
-> -			mmc_host_disable(host->mmc);
-> -			clk_disable(host->iclk);
->  			if (host->got_dbclk)
->  				clk_disable(host->dbclk);
->  		} else {
-> @@ -2134,8 +2124,9 @@ static int omap_hsmmc_suspend(struct device *dev)
->  					dev_dbg(mmc_dev(host->mmc),
->  						"Unmask interrupt failed\n");
->  			}
-> -			mmc_host_disable(host->mmc);
->  		}
-> +		/* FIXME: TODO move put_sync to proper dev_pm_ops function */
-
-ditto
-
-> +		pm_runtime_put_sync(host->dev);
->  
->  	}
->  	return ret;
-> @@ -2152,14 +2143,8 @@ static int omap_hsmmc_resume(struct device *dev)
->  		return 0;
->  
->  	if (host) {
-> -		ret = clk_enable(host->iclk);
-> -		if (ret)
-> -			goto clk_en_err;
-> -
-> -		if (mmc_host_enable(host->mmc) != 0) {
-> -			clk_disable(host->iclk);
-> -			goto clk_en_err;
-> -		}
-> +		/* FIXME: TODO move put_sync to proper dev_pm_ops function */
-
-comment says put_sync, code says get_sync, but again, comment doesn't
-make any sense.
-
-> +		pm_runtime_get_sync(host->dev);
->  
->  		if (host->got_dbclk)
->  			clk_enable(host->dbclk);
-> @@ -2179,14 +2164,14 @@ static int omap_hsmmc_resume(struct device *dev)
->  		ret = mmc_resume_host(host->mmc);
->  		if (ret == 0)
->  			host->suspended = 0;
-> +
-> +		/* FIXME: TODO move put_sync to proper dev_pm_ops function */
-> +		pm_runtime_mark_last_busy(host->dev);
-> +		pm_runtime_put_autosuspend(host->dev);
->  	}
->  
->  	return ret;
->  
-> -clk_en_err:
-> -	dev_dbg(mmc_dev(host->mmc),
-> -		"Failed to enable MMC clocks during resume\n");
-> -	return ret;
->  }
->  
->  #else
-> @@ -2194,9 +2179,35 @@ clk_en_err:
->  #define omap_hsmmc_resume		NULL
->  #endif
->  
-> +static int omap_hsmmc_runtime_suspend(struct device *dev)
-> +{
-> +	struct omap_hsmmc_host *host;
-> +
-> +
-
-extra blank line
-
-> +	host = platform_get_drvdata(to_platform_device(dev));
-> +	omap_hsmmc_context_save(host);
-> +	dev_dbg(mmc_dev(host->mmc), "disabled\n");
-> +
-> +	return 0;
-> +}
-> +
-> +static int omap_hsmmc_runtime_resume(struct device *dev)
-> +{
-> +	struct omap_hsmmc_host *host;
-> +
-> +
-
-extra blank line
-
-> +	host = platform_get_drvdata(to_platform_device(dev));
-> +	omap_hsmmc_context_restore(host);
-> +	dev_dbg(mmc_dev(host->mmc), "host: enabled\n");
-> +
-> +	return 0;
-> +}
-> +
->  static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
->  	.suspend	= omap_hsmmc_suspend,
->  	.resume		= omap_hsmmc_resume,
-> +	.runtime_suspend = omap_hsmmc_runtime_suspend,
-> +	.runtime_resume = omap_hsmmc_runtime_resume,
->  };
->  
->  static struct platform_driver omap_hsmmc_driver = {
-
-Kevin
+Thanks,
+Rafael
