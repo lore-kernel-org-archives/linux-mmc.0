@@ -1,186 +1,98 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH v7 01/11] mmc: add non-blocking mmc request function
-Date: Wed, 22 Jun 2011 10:45:16 +0200
-Message-ID: <BANLkTi=TY3wrH2GH1B2p+L506aUKOjg9uA@mail.gmail.com>
+From: Nickolay Nickolaev <nicknickolaev-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v7 02/11] omap_hsmmc: add support for pre_req and post_req
+Date: Wed, 22 Jun 2011 11:51:23 +0300
+Message-ID: <BANLkTikqeKg=Mr9BxVYL7x=9k_jzGeLnQQ@mail.gmail.com>
 References: <1308699521-20556-1-git-send-email-per.forlin@linaro.org>
-	<1308699521-20556-2-git-send-email-per.forlin@linaro.org>
-	<BANLkTikhZRb5GWFvTVG0bFjD6rAyJPka1w@mail.gmail.com>
+	<1308699521-20556-3-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:45460 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751398Ab1FVIpR convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2011 04:45:17 -0400
-In-Reply-To: <BANLkTikhZRb5GWFvTVG0bFjD6rAyJPka1w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============5627541367550495036=="
+Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+In-Reply-To: <1308699521-20556-3-git-send-email-per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
+List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
+Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-On 22 June 2011 09:42, Venkatraman S <svenkatr@ti.com> wrote:
-> On Wed, Jun 22, 2011 at 5:08 AM, Per Forlin <per.forlin@linaro.org> w=
-rote:
->> Previously there has only been one function mmc_wait_for_req()
->> to start and wait for a request. This patch adds
->> =A0* mmc_start_req() - starts a request wihtout waiting
->> =A0 If there is on ongoing request wait for completion
->> =A0 of that request and start the new one and return.
->> =A0 Does not wait for the new command to complete.
->>
->> This patch also adds new function members in struct mmc_host_ops
->> only called from core.c
->> =A0* pre_req - asks the host driver to prepare for the next job
->> =A0* post_req - asks the host driver to clean up after a completed j=
-ob
->>
->> The intention is to use pre_req() and post_req() to do cache mainten=
-ance
->> while a request is active. pre_req() can be called while a request i=
-s active
->> to minimize latency to start next job. post_req() can be used after =
-the next
->> job is started to clean up the request. This will minimize the host =
-driver
->> request end latency. post_req() is typically used before ending the =
-block
->> request and handing over the buffer to the block layer.
->>
->> Add a host-private member in mmc_data to be used by
->> pre_req to mark the data. The host driver will then
->> check this mark to see if the data is prepared or not.
->>
->> Signed-off-by: Per Forlin <per.forlin@linaro.org>
->> ---
->> =A0drivers/mmc/core/core.c =A0| =A0110 +++++++++++++++++++++++++++++=
-++++++++++++----
->> =A0include/linux/mmc/core.h | =A0 =A06 ++-
->> =A0include/linux/mmc/host.h | =A0 21 +++++++++
->> =A03 files changed, 126 insertions(+), 11 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 68091dd..c82fa3b 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -198,9 +198,106 @@ mmc_start_request(struct mmc_host *host, struc=
-t mmc_request *mrq)
->>
->> =A0static void mmc_wait_done(struct mmc_request *mrq)
->> =A0{
->> - =A0 =A0 =A0 complete(mrq->done_data);
->> + =A0 =A0 =A0 complete(&mrq->completion);
->> =A0}
->>
->> +static void __mmc_start_req(struct mmc_host *host, struct mmc_reque=
-st *mrq)
->> +{
->> + =A0 =A0 =A0 init_completion(&mrq->completion);
->> + =A0 =A0 =A0 mrq->done =3D mmc_wait_done;
->> + =A0 =A0 =A0 mmc_start_request(host, mrq);
->> +}
->> +
->> +static void mmc_wait_for_req_done(struct mmc_host *host,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 st=
-ruct mmc_request *mrq)
->> +{
->> + =A0 =A0 =A0 wait_for_completion(&mrq->completion);
->> +}
->> +
->> +/**
->> + * =A0 =A0 mmc_pre_req - Prepare for a new request
->> + * =A0 =A0 @host: MMC host to prepare command
->> + * =A0 =A0 @mrq: MMC request to prepare for
->> + * =A0 =A0 @is_first_req: true if there is no previous started requ=
-est
->> + * =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 that may run in parellel=
- to this call, otherwise false
->> + *
->> + * =A0 =A0 mmc_pre_req() is called in prior to mmc_start_req() to l=
-et
->> + * =A0 =A0 host prepare for the new request. Preparation of a reque=
-st may be
->> + * =A0 =A0 performed while another request is running on the host.
->> + */
->> +static void mmc_pre_req(struct mmc_host *host, struct mmc_request *=
-mrq,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bool is_first_req)
->> +{
->> + =A0 =A0 =A0 if (host->ops->pre_req)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops->pre_req(host, mrq, is_first=
-_req);
->> +}
->> +
->> +/**
->> + * =A0 =A0 mmc_post_req - Post process a completed request
->> + * =A0 =A0 @host: MMC host to post process command
->> + * =A0 =A0 @mrq: MMC request to post process for
->> + * =A0 =A0 @err: Error, if non zero, clean up any resources made in=
- pre_req
->> + *
->> + * =A0 =A0 Let the host post process a completed request. Post proc=
-essing of
->> + * =A0 =A0 a request may be performed while another reuqest is runn=
-ing.
->> + */
->> +static void mmc_post_req(struct mmc_host *host, struct mmc_request =
-*mrq,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int err)
->> +{
->> + =A0 =A0 =A0 if (host->ops->post_req)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops->post_req(host, mrq, err);
->> +}
->> +
->> +/**
->> + * =A0 =A0 mmc_start_req - start a non-blocking request
->> + * =A0 =A0 @host: MMC host to start command
->> + * =A0 =A0 @areq: async request to start
->> + * =A0 =A0 @error: out parameter returns 0 for success, otherwise n=
-on zero
->> + *
->> + * =A0 =A0 Start a new MMC custom command request for a host.
->> + * =A0 =A0 If there is on ongoing async request wait for completion
->> + * =A0 =A0 of that request and start the new one and return.
->> + * =A0 =A0 Does not wait for the new request to complete.
->> + *
->> + * =A0 =A0 Returns the completed async request, NULL in case of non=
-e completed.
->> + */
->> +struct mmc_async_req *mmc_start_req(struct mmc_host *host,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- struct mmc_async_req *areq, int *error)
->> +{
->> + =A0 =A0 =A0 int err =3D 0;
->> + =A0 =A0 =A0 struct mmc_async_req *data =3D host->areq;
->> +
->> + =A0 =A0 =A0 /* Prepare a new request */
->> + =A0 =A0 =A0 if (areq)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_pre_req(host, areq->mrq, !host->ar=
-eq);
->> +
->> + =A0 =A0 =A0 if (host->areq) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_wait_for_req_done(host, host->areq=
-->mrq);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D host->areq->err_check(host->ca=
-rd, host->areq);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_post_req(host, hos=
-t->areq->mrq, 0);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (areq)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_po=
-st_req(host, areq->mrq, -EINVAL);
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->areq =3D NULL;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
-> In this sequence, would the return value (data) have the previous are=
-q ?
-> Is that intentional - doesn't seem to fit with the description.
-It will return the data that belongs to the completed request. The
-completed request will be the same as the previous request. The
-mmc_start_req will start a new request and return data for the
-completed request, if any.
+--===============5627541367550495036==
+Content-Type: multipart/alternative; boundary=001636c5c154b666ba04a649122e
 
-Do you think I should clarify the description?
+--001636c5c154b666ba04a649122e
+Content-Type: text/plain; charset=ISO-8859-1
 
-Regards,
-Per
+Hello,
+
+this one's causing me compilation trouble troubles when CONFIG_DMA_ENGINE is
+not defined.
+
+On Wed, Jun 22, 2011 at 2:38 AM, Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+
+>
+> @@ -2077,6 +2155,7 @@ static int __init omap_hsmmc_probe(struct
+> platform_device *pdev)
+>        host->mapbase   = res->start;
+>        host->base      = ioremap(host->mapbase, SZ_4K);
+>        host->power_mode = MMC_POWER_OFF;
+> +       host->next_data.cookie = 1;
+>
+>        platform_set_drvdata(pdev, host);
+>        INIT_WORK(&host->mmc_carddetect_work, omap_hsmmc_detect);
+> --
+> 1.7.4.1
+>
+>
+>
+Maybe we can wrap it in a function as the others.
+
+regards,
+Nikolay Nikolaev
+
+--001636c5c154b666ba04a649122e
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Hello,<br><br>this one&#39;s causing me compilation trouble troubles when C=
+ONFIG_DMA_ENGINE is not defined.<br><br><div class=3D"gmail_quote">On Wed, =
+Jun 22, 2011 at 2:38 AM, Per Forlin <span dir=3D"ltr">&lt;<a href=3D"mailto=
+:per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org">per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org</a>&gt;</span> wrote:<br>
+<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
+x #ccc solid;padding-left:1ex;"><br>
+@@ -2077,6 +2155,7 @@ static int __init omap_hsmmc_probe(struct platform_de=
+vice *pdev)<br>
+ =A0 =A0 =A0 =A0host-&gt;mapbase =A0 =3D res-&gt;start;<br>
+ =A0 =A0 =A0 =A0host-&gt;base =A0 =A0 =A0=3D ioremap(host-&gt;mapbase, SZ_4=
+K);<br>
+ =A0 =A0 =A0 =A0host-&gt;power_mode =3D MMC_POWER_OFF;<br>
++ =A0 =A0 =A0 host-&gt;next_data.cookie =3D 1;<br>
+<br>
+ =A0 =A0 =A0 =A0platform_set_drvdata(pdev, host);<br>
+ =A0 =A0 =A0 =A0INIT_WORK(&amp;host-&gt;mmc_carddetect_work, omap_hsmmc_det=
+ect);<br>
+<font color=3D"#888888">--<br>
+1.7.4.1<br>
+<br>
+<br></font></blockquote><br>Maybe we can wrap it in a function as the other=
+s.<br><br>regards,<br>Nikolay Nikolaev<br></div>
+
+--001636c5c154b666ba04a649122e--
+
+
+--===============5627541367550495036==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linaro-dev mailing list
+linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+http://lists.linaro.org/mailman/listinfo/linaro-dev
+
+--===============5627541367550495036==--
