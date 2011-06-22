@@ -1,226 +1,347 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH v7 01/11] mmc: add non-blocking mmc request function
-Date: Wed, 22 Jun 2011 16:35:33 +0530
-Message-ID: <BANLkTimareJo2DCJkN9mH_oGFOuT_cZXpw@mail.gmail.com>
-References: <1308699521-20556-1-git-send-email-per.forlin@linaro.org>
-	<1308699521-20556-2-git-send-email-per.forlin@linaro.org>
-	<BANLkTikhZRb5GWFvTVG0bFjD6rAyJPka1w@mail.gmail.com>
-	<BANLkTi=TY3wrH2GH1B2p+L506aUKOjg9uA@mail.gmail.com>
-	<BANLkTinW1Wrvq6ma6L7he5iCtVCeofL-cg@mail.gmail.com>
-	<BANLkTinGRy5KRJLYmEzzeFhOm0WpngzhhA@mail.gmail.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH 1/3] MMC: OMAP: HSMMC: Remove lazy_disable
+Date: Wed, 22 Jun 2011 19:48:32 +0530
+Message-ID: <1308752314-32079-2-git-send-email-balajitk@ti.com>
+References: <1308752314-32079-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <BANLkTinGRy5KRJLYmEzzeFhOm0WpngzhhA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linaro-dev <linaro-dev@lists.linaro.org>, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-kernel <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:38562 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755582Ab1FVOT7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Jun 2011 10:19:59 -0400
+In-Reply-To: <1308752314-32079-1-git-send-email-balajitk@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: tony@atomide.com, madhu.cr@ti.com, khilman@ti.com, b-cousson@ti.com, Balaji T K <balajitk@ti.com>
 
-On Wed, Jun 22, 2011 at 2:38 PM, Per Forlin <per.forlin@linaro.org> wro=
-te:
-> On 22 June 2011 10:53, S, Venkatraman <svenkatr@ti.com> wrote:
->> On Wed, Jun 22, 2011 at 2:15 PM, Per Forlin <per.forlin@linaro.org> =
-wrote:
->>> On 22 June 2011 09:42, Venkatraman S <svenkatr@ti.com> wrote:
->>>> On Wed, Jun 22, 2011 at 5:08 AM, Per Forlin <per.forlin@linaro.org=
-> wrote:
->>>>> Previously there has only been one function mmc_wait_for_req()
->>>>> to start and wait for a request. This patch adds
->>>>> =A0* mmc_start_req() - starts a request wihtout waiting
->>>>> =A0 If there is on ongoing request wait for completion
->>>>> =A0 of that request and start the new one and return.
->>>>> =A0 Does not wait for the new command to complete.
->>>>>
->>>>> This patch also adds new function members in struct mmc_host_ops
->>>>> only called from core.c
->>>>> =A0* pre_req - asks the host driver to prepare for the next job
->>>>> =A0* post_req - asks the host driver to clean up after a complete=
-d job
->>>>>
->>>>> The intention is to use pre_req() and post_req() to do cache main=
-tenance
->>>>> while a request is active. pre_req() can be called while a reques=
-t is active
->>>>> to minimize latency to start next job. post_req() can be used aft=
-er the next
->>>>> job is started to clean up the request. This will minimize the ho=
-st driver
->>>>> request end latency. post_req() is typically used before ending t=
-he block
->>>>> request and handing over the buffer to the block layer.
->>>>>
->>>>> Add a host-private member in mmc_data to be used by
->>>>> pre_req to mark the data. The host driver will then
->>>>> check this mark to see if the data is prepared or not.
->>>>>
->>>>> Signed-off-by: Per Forlin <per.forlin@linaro.org>
->>>>> ---
->>>>> =A0drivers/mmc/core/core.c =A0| =A0110 ++++++++++++++++++++++++++=
-+++++++++++++++----
->>>>> =A0include/linux/mmc/core.h | =A0 =A06 ++-
->>>>> =A0include/linux/mmc/host.h | =A0 21 +++++++++
->>>>> =A03 files changed, 126 insertions(+), 11 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>>> index 68091dd..c82fa3b 100644
->>>>> --- a/drivers/mmc/core/core.c
->>>>> +++ b/drivers/mmc/core/core.c
->>>>> @@ -198,9 +198,106 @@ mmc_start_request(struct mmc_host *host, st=
-ruct mmc_request *mrq)
->>>>>
->>>>> =A0static void mmc_wait_done(struct mmc_request *mrq)
->>>>> =A0{
->>>>> - =A0 =A0 =A0 complete(mrq->done_data);
->>>>> + =A0 =A0 =A0 complete(&mrq->completion);
->>>>> =A0}
->>>>>
->>>>> +static void __mmc_start_req(struct mmc_host *host, struct mmc_re=
-quest *mrq)
->>>>> +{
->>>>> + =A0 =A0 =A0 init_completion(&mrq->completion);
->>>>> + =A0 =A0 =A0 mrq->done =3D mmc_wait_done;
->>>>> + =A0 =A0 =A0 mmc_start_request(host, mrq);
->>>>> +}
->>>>> +
->>>>> +static void mmc_wait_for_req_done(struct mmc_host *host,
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- struct mmc_request *mrq)
->>>>> +{
->>>>> + =A0 =A0 =A0 wait_for_completion(&mrq->completion);
->>>>> +}
->>>>> +
->>>>> +/**
->>>>> + * =A0 =A0 mmc_pre_req - Prepare for a new request
->>>>> + * =A0 =A0 @host: MMC host to prepare command
->>>>> + * =A0 =A0 @mrq: MMC request to prepare for
->>>>> + * =A0 =A0 @is_first_req: true if there is no previous started r=
-equest
->>>>> + * =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 that may run in parel=
-lel to this call, otherwise false
->>>>> + *
->>>>> + * =A0 =A0 mmc_pre_req() is called in prior to mmc_start_req() t=
-o let
->>>>> + * =A0 =A0 host prepare for the new request. Preparation of a re=
-quest may be
->>>>> + * =A0 =A0 performed while another request is running on the hos=
-t.
->>>>> + */
->>>>> +static void mmc_pre_req(struct mmc_host *host, struct mmc_reques=
-t *mrq,
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bool is_first_req)
->>>>> +{
->>>>> + =A0 =A0 =A0 if (host->ops->pre_req)
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops->pre_req(host, mrq, is_fi=
-rst_req);
->>>>> +}
->>>>> +
->>>>> +/**
->>>>> + * =A0 =A0 mmc_post_req - Post process a completed request
->>>>> + * =A0 =A0 @host: MMC host to post process command
->>>>> + * =A0 =A0 @mrq: MMC request to post process for
->>>>> + * =A0 =A0 @err: Error, if non zero, clean up any resources made=
- in pre_req
->>>>> + *
->>>>> + * =A0 =A0 Let the host post process a completed request. Post p=
-rocessing of
->>>>> + * =A0 =A0 a request may be performed while another reuqest is r=
-unning.
->>>>> + */
->>>>> +static void mmc_post_req(struct mmc_host *host, struct mmc_reque=
-st *mrq,
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int err)
->>>>> +{
->>>>> + =A0 =A0 =A0 if (host->ops->post_req)
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops->post_req(host, mrq, err)=
-;
->>>>> +}
->>>>> +
->>>>> +/**
->>>>> + * =A0 =A0 mmc_start_req - start a non-blocking request
->>>>> + * =A0 =A0 @host: MMC host to start command
->>>>> + * =A0 =A0 @areq: async request to start
->>>>> + * =A0 =A0 @error: out parameter returns 0 for success, otherwis=
-e non zero
->>>>> + *
->>>>> + * =A0 =A0 Start a new MMC custom command request for a host.
->>>>> + * =A0 =A0 If there is on ongoing async request wait for complet=
-ion
->>>>> + * =A0 =A0 of that request and start the new one and return.
->>>>> + * =A0 =A0 Does not wait for the new request to complete.
->>>>> + *
->>>>> + * =A0 =A0 Returns the completed async request, NULL in case of =
-none completed.
->>>>> + */
->>>>> +struct mmc_async_req *mmc_start_req(struct mmc_host *host,
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 struct mmc_async_req *areq, int *error)
->>>>> +{
->>>>> + =A0 =A0 =A0 int err =3D 0;
->>>>> + =A0 =A0 =A0 struct mmc_async_req *data =3D host->areq;
->>>>> +
->>>>> + =A0 =A0 =A0 /* Prepare a new request */
->>>>> + =A0 =A0 =A0 if (areq)
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_pre_req(host, areq->mrq, !host-=
->areq);
->>>>> +
->>>>> + =A0 =A0 =A0 if (host->areq) {
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_wait_for_req_done(host, host->a=
-req->mrq);
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D host->areq->err_check(host-=
->card, host->areq);
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_post_req(host, =
-host->areq->mrq, 0);
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (areq)
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc=
-_post_req(host, areq->mrq, -EINVAL);
->>>>> +
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->areq =3D NULL=
-;
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
->>>> In this sequence, would the return value (data) have the previous =
-areq ?
->>>> Is that intentional - doesn't seem to fit with the description.
->>> It will return the data that belongs to the completed request. The
->>> completed request will be the same as the previous request. The
->>> mmc_start_req will start a new request and return data for the
->>> completed request, if any.
->>>
->>
->> I meant that in case of an error (err !=3D0), data is already assign=
-ed
->> to host->areq
->> and goto out returns 'data'. So my question was 'Does returning a no=
-n-null
->> pointer for a unsuccessful request doesn't fit with the description,=
- does it ?'
->>
-> Now I get it. Thanks for your patience :)
->
->>>>> + =A0 =A0 =A0 struct mmc_async_req *data =3D host->areq;
-> ...
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_wait_for_req_done(host, host->a=
-req->mrq);
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D host->areq->err_check(host-=
->card, host->areq);
-> in case of error host->areq is returned. Basically the failing reques=
-t
-> is returned.
-> block.c needs the failing request in order to do error handling.
->
->>>>> + * =A0 =A0 @error: out parameter returns 0 for success, otherwis=
-e non zero
-> This parameter indicates error.
->
-> Returning NULL is not error. NULL is returned when starting a new
-> request and there is no ongoing (previous) request.
->
-Thanks. This comment
->>>>> + *     Returns the completed async request, NULL in case of none=
- completed.
+lazy_disable framework in OMAP HSMMC manages multiple low power states
+and Card is powered off after inactivity time of 8 seconds.
+Based on previous discussion on the list Card power(regulator)
+handling (when to power OFF/ON) should ideally be handled by core layer.
+Remove usage of lazy disable to allow core layer _only_ to handle card power.
+With the removal of lazy disable framework, MMC regulators
+are left ON until MMC_POWER_OFF via set_ios.
 
-should be modified to reflect this, otherwise the patch looks good.
-Regards,
-Venkat.
+Signed-off-by: Balaji T K <balajitk@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |  246 +----------------------------------------
+ 1 files changed, 2 insertions(+), 244 deletions(-)
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 8707bcd..beb3249 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -120,11 +120,6 @@
+ #define OMAP_MMC_MASTER_CLOCK	96000000
+ #define DRIVER_NAME		"omap_hsmmc"
+ 
+-/* Timeouts for entering power saving states on inactivity, msec */
+-#define OMAP_MMC_DISABLED_TIMEOUT	100
+-#define OMAP_MMC_SLEEP_TIMEOUT		1000
+-#define OMAP_MMC_OFF_TIMEOUT		8000
+-
+ /*
+  * One controller can have multiple slots, like on some omap boards using
+  * omap.c controller driver. Luckily this is not currently done on any known
+@@ -1630,8 +1625,6 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	if (host->power_mode == MMC_POWER_OFF)
+ 		mmc_host_disable(host->mmc);
+-	else
+-		mmc_host_lazy_disable(host->mmc);
+ }
+ 
+ static int omap_hsmmc_get_cd(struct mmc_host *mmc)
+@@ -1687,220 +1680,6 @@ static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
+ 	set_sd_bus_power(host);
+ }
+ 
+-/*
+- * Dynamic power saving handling, FSM:
+- *   ENABLED -> DISABLED -> CARDSLEEP / REGSLEEP -> OFF
+- *     ^___________|          |                      |
+- *     |______________________|______________________|
+- *
+- * ENABLED:   mmc host is fully functional
+- * DISABLED:  fclk is off
+- * CARDSLEEP: fclk is off, card is asleep, voltage regulator is asleep
+- * REGSLEEP:  fclk is off, voltage regulator is asleep
+- * OFF:       fclk is off, voltage regulator is off
+- *
+- * Transition handlers return the timeout for the next state transition
+- * or negative error.
+- */
+-
+-enum {ENABLED = 0, DISABLED, CARDSLEEP, REGSLEEP, OFF};
+-
+-/* Handler for [ENABLED -> DISABLED] transition */
+-static int omap_hsmmc_enabled_to_disabled(struct omap_hsmmc_host *host)
+-{
+-	omap_hsmmc_context_save(host);
+-	clk_disable(host->fclk);
+-	host->dpm_state = DISABLED;
+-
+-	dev_dbg(mmc_dev(host->mmc), "ENABLED -> DISABLED\n");
+-
+-	if (host->power_mode == MMC_POWER_OFF)
+-		return 0;
+-
+-	return OMAP_MMC_SLEEP_TIMEOUT;
+-}
+-
+-/* Handler for [DISABLED -> REGSLEEP / CARDSLEEP] transition */
+-static int omap_hsmmc_disabled_to_sleep(struct omap_hsmmc_host *host)
+-{
+-	int err, new_state;
+-
+-	if (!mmc_try_claim_host(host->mmc))
+-		return 0;
+-
+-	clk_enable(host->fclk);
+-	omap_hsmmc_context_restore(host);
+-	if (mmc_card_can_sleep(host->mmc)) {
+-		err = mmc_card_sleep(host->mmc);
+-		if (err < 0) {
+-			clk_disable(host->fclk);
+-			mmc_release_host(host->mmc);
+-			return err;
+-		}
+-		new_state = CARDSLEEP;
+-	} else {
+-		new_state = REGSLEEP;
+-	}
+-	if (mmc_slot(host).set_sleep)
+-		mmc_slot(host).set_sleep(host->dev, host->slot_id, 1, 0,
+-					 new_state == CARDSLEEP);
+-	/* FIXME: turn off bus power and perhaps interrupts too */
+-	clk_disable(host->fclk);
+-	host->dpm_state = new_state;
+-
+-	mmc_release_host(host->mmc);
+-
+-	dev_dbg(mmc_dev(host->mmc), "DISABLED -> %s\n",
+-		host->dpm_state == CARDSLEEP ? "CARDSLEEP" : "REGSLEEP");
+-
+-	if (mmc_slot(host).no_off)
+-		return 0;
+-
+-	if ((host->mmc->caps & MMC_CAP_NONREMOVABLE) ||
+-	    mmc_slot(host).card_detect ||
+-	    (mmc_slot(host).get_cover_state &&
+-	     mmc_slot(host).get_cover_state(host->dev, host->slot_id)))
+-		return OMAP_MMC_OFF_TIMEOUT;
+-
+-	return 0;
+-}
+-
+-/* Handler for [REGSLEEP / CARDSLEEP -> OFF] transition */
+-static int omap_hsmmc_sleep_to_off(struct omap_hsmmc_host *host)
+-{
+-	if (!mmc_try_claim_host(host->mmc))
+-		return 0;
+-
+-	if (mmc_slot(host).no_off)
+-		return 0;
+-
+-	if (!((host->mmc->caps & MMC_CAP_NONREMOVABLE) ||
+-	      mmc_slot(host).card_detect ||
+-	      (mmc_slot(host).get_cover_state &&
+-	       mmc_slot(host).get_cover_state(host->dev, host->slot_id)))) {
+-		mmc_release_host(host->mmc);
+-		return 0;
+-	}
+-
+-	mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
+-	host->vdd = 0;
+-	host->power_mode = MMC_POWER_OFF;
+-
+-	dev_dbg(mmc_dev(host->mmc), "%s -> OFF\n",
+-		host->dpm_state == CARDSLEEP ? "CARDSLEEP" : "REGSLEEP");
+-
+-	host->dpm_state = OFF;
+-
+-	mmc_release_host(host->mmc);
+-
+-	return 0;
+-}
+-
+-/* Handler for [DISABLED -> ENABLED] transition */
+-static int omap_hsmmc_disabled_to_enabled(struct omap_hsmmc_host *host)
+-{
+-	int err;
+-
+-	err = clk_enable(host->fclk);
+-	if (err < 0)
+-		return err;
+-
+-	omap_hsmmc_context_restore(host);
+-	host->dpm_state = ENABLED;
+-
+-	dev_dbg(mmc_dev(host->mmc), "DISABLED -> ENABLED\n");
+-
+-	return 0;
+-}
+-
+-/* Handler for [SLEEP -> ENABLED] transition */
+-static int omap_hsmmc_sleep_to_enabled(struct omap_hsmmc_host *host)
+-{
+-	if (!mmc_try_claim_host(host->mmc))
+-		return 0;
+-
+-	clk_enable(host->fclk);
+-	omap_hsmmc_context_restore(host);
+-	if (mmc_slot(host).set_sleep)
+-		mmc_slot(host).set_sleep(host->dev, host->slot_id, 0,
+-			 host->vdd, host->dpm_state == CARDSLEEP);
+-	if (mmc_card_can_sleep(host->mmc))
+-		mmc_card_awake(host->mmc);
+-
+-	dev_dbg(mmc_dev(host->mmc), "%s -> ENABLED\n",
+-		host->dpm_state == CARDSLEEP ? "CARDSLEEP" : "REGSLEEP");
+-
+-	host->dpm_state = ENABLED;
+-
+-	mmc_release_host(host->mmc);
+-
+-	return 0;
+-}
+-
+-/* Handler for [OFF -> ENABLED] transition */
+-static int omap_hsmmc_off_to_enabled(struct omap_hsmmc_host *host)
+-{
+-	clk_enable(host->fclk);
+-
+-	omap_hsmmc_context_restore(host);
+-	omap_hsmmc_conf_bus_power(host);
+-	mmc_power_restore_host(host->mmc);
+-
+-	host->dpm_state = ENABLED;
+-
+-	dev_dbg(mmc_dev(host->mmc), "OFF -> ENABLED\n");
+-
+-	return 0;
+-}
+-
+-/*
+- * Bring MMC host to ENABLED from any other PM state.
+- */
+-static int omap_hsmmc_enable(struct mmc_host *mmc)
+-{
+-	struct omap_hsmmc_host *host = mmc_priv(mmc);
+-
+-	switch (host->dpm_state) {
+-	case DISABLED:
+-		return omap_hsmmc_disabled_to_enabled(host);
+-	case CARDSLEEP:
+-	case REGSLEEP:
+-		return omap_hsmmc_sleep_to_enabled(host);
+-	case OFF:
+-		return omap_hsmmc_off_to_enabled(host);
+-	default:
+-		dev_dbg(mmc_dev(host->mmc), "UNKNOWN state\n");
+-		return -EINVAL;
+-	}
+-}
+-
+-/*
+- * Bring MMC host in PM state (one level deeper).
+- */
+-static int omap_hsmmc_disable(struct mmc_host *mmc, int lazy)
+-{
+-	struct omap_hsmmc_host *host = mmc_priv(mmc);
+-
+-	switch (host->dpm_state) {
+-	case ENABLED: {
+-		int delay;
+-
+-		delay = omap_hsmmc_enabled_to_disabled(host);
+-		if (lazy || delay < 0)
+-			return delay;
+-		return 0;
+-	}
+-	case DISABLED:
+-		return omap_hsmmc_disabled_to_sleep(host);
+-	case CARDSLEEP:
+-	case REGSLEEP:
+-		return omap_hsmmc_sleep_to_off(host);
+-	default:
+-		dev_dbg(mmc_dev(host->mmc), "UNKNOWN state\n");
+-		return -EINVAL;
+-	}
+-}
+-
+ static int omap_hsmmc_enable_fclk(struct mmc_host *mmc)
+ {
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+@@ -1935,17 +1714,6 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
+ 	/* NYET -- enable_sdio_irq */
+ };
+ 
+-static const struct mmc_host_ops omap_hsmmc_ps_ops = {
+-	.enable = omap_hsmmc_enable,
+-	.disable = omap_hsmmc_disable,
+-	.request = omap_hsmmc_request,
+-	.set_ios = omap_hsmmc_set_ios,
+-	.get_cd = omap_hsmmc_get_cd,
+-	.get_ro = omap_hsmmc_get_ro,
+-	.init_card = omap_hsmmc_init_card,
+-	/* NYET -- enable_sdio_irq */
+-};
+-
+ #ifdef CONFIG_DEBUG_FS
+ 
+ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
+@@ -1967,7 +1735,7 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
+ 			host->dpm_state, mmc->nesting_cnt,
+ 			host->context_loss, context_loss);
+ 
+-	if (host->suspended || host->dpm_state == OFF) {
++	if (host->suspended) {
+ 		seq_printf(s, "host suspended, can't read registers\n");
+ 		return 0;
+ 	}
+@@ -2080,10 +1848,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	platform_set_drvdata(pdev, host);
+ 	INIT_WORK(&host->mmc_carddetect_work, omap_hsmmc_detect);
+ 
+-	if (mmc_slot(host).power_saving)
+-		mmc->ops	= &omap_hsmmc_ps_ops;
+-	else
+-		mmc->ops	= &omap_hsmmc_ops;
++	mmc->ops	= &omap_hsmmc_ops;
+ 
+ 	/*
+ 	 * If regulator_disable can only put vcc_aux to sleep then there is
+@@ -2114,9 +1879,6 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	omap_hsmmc_context_save(host);
+ 
+ 	mmc->caps |= MMC_CAP_DISABLE;
+-	mmc_set_disable_delay(mmc, OMAP_MMC_DISABLED_TIMEOUT);
+-	/* we start off in DISABLED state */
+-	host->dpm_state = DISABLED;
+ 
+ 	if (clk_enable(host->iclk) != 0) {
+ 		clk_put(host->iclk);
+@@ -2239,8 +2001,6 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 
+ 	omap_hsmmc_disable_irq(host);
+ 
+-	mmc_host_lazy_disable(host->mmc);
+-
+ 	omap_hsmmc_protect_card(host);
+ 
+ 	mmc_add_host(mmc);
+@@ -2419,8 +2179,6 @@ static int omap_hsmmc_resume(struct device *dev)
+ 		ret = mmc_resume_host(host->mmc);
+ 		if (ret == 0)
+ 			host->suspended = 0;
+-
+-		mmc_host_lazy_disable(host->mmc);
+ 	}
+ 
+ 	return ret;
+-- 
+1.7.0.4
+
