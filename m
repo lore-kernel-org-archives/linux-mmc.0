@@ -1,90 +1,124 @@
-From: Ram Pai <linuxram@us.ibm.com>
-Subject: Re: [PATCH 4/4] PCI: make cardbus-bridge resources nice-to-have
-Date: Tue, 21 Jun 2011 17:48:16 -0700
-Message-ID: <20110622004816.GC22917@ram-laptop>
-References: <1308610037-6261-1-git-send-email-linuxram@us.ibm.com>
- <1308610037-6261-5-git-send-email-linuxram@us.ibm.com>
- <20110621075659.GA4620@comet.dominikbrodowski.net>
- <20110621162321.GB22917@ram-laptop>
- <20110621143622.1fae90b3@jbarnes-desktop>
- <20110621221301.GA1814@isilmar-3.linta.de>
-Reply-To: Ram Pai <linuxram@us.ibm.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH v4 1/4] mmc: sdhci: fix interrupt storm from card
+ detection
+Date: Wed, 22 Jun 2011 12:40:44 +0800
+Message-ID: <20110622044043.GA25389@S2100-06.ap.freescale.net>
+References: <1308667311-1855-1-git-send-email-shawn.guo@linaro.org>
+ <1308667311-1855-2-git-send-email-shawn.guo@linaro.org>
+ <6E4917C1-3CE0-48AD-A2B2-761488F39A2A@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from e5.ny.us.ibm.com ([32.97.182.145]:50153 "EHLO e5.ny.us.ibm.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757493Ab1FVAsV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Jun 2011 20:48:21 -0400
+Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:36403
+	"EHLO CH1EHSOBE016.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751221Ab1FVEfF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2011 00:35:05 -0400
 Content-Disposition: inline
-In-Reply-To: <20110621221301.GA1814@isilmar-3.linta.de>
+In-Reply-To: <6E4917C1-3CE0-48AD-A2B2-761488F39A2A@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dominik Brodowski <linux@dominikbrodowski.net>, Jesse Barnes <jbarnes@virtuousgeek.org>, Ram Pai <linuxram@us.ibm.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, svenka
+To: Philip Rakity <prakity@marvell.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, Arnaud Patard <arnaud.patard@rtp-net.org>, Eric Benard <eric@eukrea.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "patches@linaro.org" <patches@linaro.org>
 
-On Wed, Jun 22, 2011 at 12:13:01AM +0200, Dominik Brodowski wrote:
-> Hey,
+On Tue, Jun 21, 2011 at 09:05:25AM -0700, Philip Rakity wrote:
 > 
-> On Tue, Jun 21, 2011 at 02:36:22PM -0700, Jesse Barnes wrote:
-> > On Tue, 21 Jun 2011 09:23:21 -0700
-> > Ram Pai <linuxram@us.ibm.com> wrote:
-> > 
-> > > On Tue, Jun 21, 2011 at 09:57:00AM +0200, Dominik Brodowski wrote:
-> > > > On Mon, Jun 20, 2011 at 03:47:17PM -0700, Ram Pai wrote:
-> > > > > Allocate resources to cardbus bridge only after all other genuine
-> > > > > resources requests are satisfied. Dont retry if resource allocation
-> > > > > for cardbus-bridge fails.
-> > > > 
-> > > > Well, for those who use cardbus cards, cardbus resources aren't "nice to
-> > > > have", they are absolutely required. Of course, not all cardbus cards need
-> > > > as many resources as are currently assigned, so I wouldn't oppose a patch
-> > > > which marks _some_ of the currently assigned resources as "nice to have".
-> > > > But this approach -- 0 required, all "nice to have" -- seems wrong to me.
-> > > 
-> > > Do you know how much minimal resource is good enough?  The value, before
-> > > this patch, was 256 for IO ports and  64M for memory.
-> > > 
-> > > BTW: If the BIOS has already assigned enough resources for all the devices on
-> > > the system, no devices will be starved including the cardbus. The OS intervenes
-> > > and is forced to make this hard choice only when it sees unassigned resources to
-> > > some devices along with resource contention.
-> > 
-> > Dominik, presumably you have a few good cardbus test machines; can you
-> > give Ram's patches a try?  If we know they break existing
-> > configurations, I'm afraid we'll just have to revert the whole
-> > re-allocation patch yet again.  If your stuff survives, I'll ping Linus
-> > to see what he thinks, though he'll probably want to revert in any
-> > case...
+> On Jun 21, 2011, at 7:41 AM, Shawn Guo wrote:
 > 
-> Actually, I only have one cardbus-capable test machine, which does work in
-> very most cases, and also I do care much more about the PCMCIA side of
-> things than the PCI/CardBus side... Therefore, all I could do is some more
-> or less informed guessing about how much minimal resource we should try to
-> allocate...
+> > The issue was initially found by Eric Benard as below.
+> > 
+> > http://permalink.gmane.org/gmane.linux.ports.arm.kernel/108031
+> > 
+> > Not sure about other SDHCI based controller, but on Freescale eSDHC,
+> > the SDHCI_INT_CARD_INSERT bits will be immediately set again when it
+> > gets cleared, if a card is inserted. The driver need to mask the irq
+> > to prevent interrupt storm which will freeze the system.  And the
+> > SDHCI_INT_CARD_REMOVE gets the same situation.
+> > 
+> > The patch fixes the problem based on the initial idea from
+> > Eric Benard.
+> > 
+> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> > Cc: Eric Benard <eric@eukrea.com>
+> > Tested-by: Arnaud Patard <arnaud.patard@rtp-net.org>
+> > ---
+> > drivers/mmc/host/sdhci.c |   29 +++++++++++++++++++++++++----
+> > 1 files changed, 25 insertions(+), 4 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 91d9892..790f959 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -127,11 +127,15 @@ static void sdhci_mask_irqs(struct sdhci_host *host, u32 irqs)
+> > 
+> > static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
+> > {
+> > -	u32 irqs = SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT;
+> > +	u32 present, irqs;
+> > 
+> > 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+> > 		return;
+> > 
+> > +	present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+> > +			      SDHCI_CARD_PRESENT;
+> > +	irqs = present ? SDHCI_INT_CARD_REMOVE : SDHCI_INT_CARD_INSERT;
+> > +
+> > 	if (enable)
+> > 		sdhci_unmask_irqs(host, irqs);
+> > 	else
+> > @@ -2154,13 +2158,30 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+> > 		mmc_hostname(host->mmc), intmask);
+> > 
+> > 	if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
+> > +		u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+> > +			      SDHCI_CARD_PRESENT;
+> > +
+> > +		/*
+> > +		 * There is a observation on i.mx esdhc.  INSERT bit will be
+> > +		 * immediately set again when it gets cleared, if a card is
+> > +		 * inserted.  We have to mask the irq to prevent interrupt
+> > +		 * storm which will freeze the system.  And the REMOVE gets
+> > +		 * the same situation.
+> > +		 *
+> > +		 * More testing are needed here to ensure it works for other
+> > +		 * platforms though.
+> > +		 */
+> > +		sdhci_mask_irqs(host, present ? SDHCI_INT_CARD_INSERT :
+> > +						SDHCI_INT_CARD_REMOVE);
+> > +		sdhci_unmask_irqs(host, present ? SDHCI_INT_CARD_REMOVE :
+> > +						  SDHCI_INT_CARD_INSERT);
+> > +
+> 
+> ====
+> > 		sdhci_writel(host, intmask & (SDHCI_INT_CARD_INSERT |
+> > -			SDHCI_INT_CARD_REMOVE), SDHCI_INT_STATUS);
+> > +			     SDHCI_INT_CARD_REMOVE), SDHCI_INT_STATUS);
+> 
+> ====
+> Please keep the old formatting since code does not change anything.  Makes it easier to find
+> the real change
+> 
 
-I assume majority of the platforms will have enough resources to satisfy all
-the resource requests, and their BIOS would have done a decent job.
+I actually rewrote the body of the if-statement, and fixed one
+indentation in that specific line.
 
-Even if the BIOS has not done a decent job, and there are enough resources
-available we should not see a regression.
+> > +		intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
+> > 		tasklet_schedule(&host->card_tasklet);
+> > 	}
+> > 
+> > -	intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
+> > -
+> > 	if (intmask & SDHCI_INT_CMD_MASK) {
+> > 		sdhci_writel(host, intmask & SDHCI_INT_CMD_MASK,
+> > 			SDHCI_INT_STATUS);
+> > -- 
+> > 1.7.4.1
+> > 
+> 
+> 
+> Reviewed-by: Philip Rakity <prakity@marvell.com>
+> 
 
-The only platforms that would expose a regression is when resources are under
-contention and the BIOS has assigned enough resource to the cardbus bridge but
-not to some other device. It will be hard to find such a platform, but I am
-sure there is one out somewhere there.
+-- 
+Regards,
+Shawn
 
-I am sure we will see; some day, reports of regression because that platform
-would have the exact right characteristics to expose the issue. But then that
-platform is a highly constrained platform in the first place. Its debatable if
-that should be characterised as a regression, or a platform that was riding on
-good luck till now.
-
-Even Oliver's platform is a highly constrained platform, and we probably can
-treat his platform as 'riding on good luck till now'.
-
-We won't be able to satisfy all the platforms with resource constraints.  I
-think our probable choice is to select a solution that breaks least number of
-platforms and special case those broken platforms through kernel command line
-parameters.
-
-RP
