@@ -1,79 +1,193 @@
-From: Amerigo Wang <amwang@redhat.com>
-Subject: [PATCH 4/5] pm: move pm notifiers into suspend.h
-Date: Wed, 22 Jun 2011 14:35:21 +0800
-Message-ID: <1308724522-32461-5-git-send-email-amwang@redhat.com>
-References: <1308724522-32461-1-git-send-email-amwang@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1308724522-32461-1-git-send-email-amwang@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: akpm@linux-foundation.org, netdev@vger.kernel.org, Amerigo Wang <amwang@redhat.com>, Chris Ball <cjb@laptop.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, "Rafael J. Wysocki" <rjw@sisk.pl>, Ohad Ben-Cohen <ohad@wizery.com>, Linus Walleij <linus.walleij@linaro.org>, Philip Rakity <prakity@marvell.com>, "David S. Miller" <davem@davemloft.net>, Lucas De Marchi <lucas.demarchi@profusion.mobi>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, linux-mmc@vger.kernel.org, linux-pm@lists.linux-foundation.org
+From: Venkatraman S <svenkatr@ti.com>
+Subject: Re: [PATCH v7 01/11] mmc: add non-blocking mmc request function
+Date: Wed, 22 Jun 2011 13:12:28 +0530
+Message-ID: <BANLkTikhZRb5GWFvTVG0bFjD6rAyJPka1w@mail.gmail.com>
+References: <1308699521-20556-1-git-send-email-per.forlin@linaro.org>
+	<1308699521-20556-2-git-send-email-per.forlin@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:49228 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751056Ab1FVHma convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2011 03:42:30 -0400
+In-Reply-To: <1308699521-20556-2-git-send-email-per.forlin@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-It is not necessary to share the same notifier.h.
+On Wed, Jun 22, 2011 at 5:08 AM, Per Forlin <per.forlin@linaro.org> wro=
+te:
+> Previously there has only been one function mmc_wait_for_req()
+> to start and wait for a request. This patch adds
+> =A0* mmc_start_req() - starts a request wihtout waiting
+> =A0 If there is on ongoing request wait for completion
+> =A0 of that request and start the new one and return.
+> =A0 Does not wait for the new command to complete.
+>
+> This patch also adds new function members in struct mmc_host_ops
+> only called from core.c
+> =A0* pre_req - asks the host driver to prepare for the next job
+> =A0* post_req - asks the host driver to clean up after a completed jo=
+b
+>
+> The intention is to use pre_req() and post_req() to do cache maintena=
+nce
+> while a request is active. pre_req() can be called while a request is=
+ active
+> to minimize latency to start next job. post_req() can be used after t=
+he next
+> job is started to clean up the request. This will minimize the host d=
+river
+> request end latency. post_req() is typically used before ending the b=
+lock
+> request and handing over the buffer to the block layer.
+>
+> Add a host-private member in mmc_data to be used by
+> pre_req to mark the data. The host driver will then
+> check this mark to see if the data is prepared or not.
+>
+> Signed-off-by: Per Forlin <per.forlin@linaro.org>
+> ---
+> =A0drivers/mmc/core/core.c =A0| =A0110 ++++++++++++++++++++++++++++++=
++++++++++++----
+> =A0include/linux/mmc/core.h | =A0 =A06 ++-
+> =A0include/linux/mmc/host.h | =A0 21 +++++++++
+> =A03 files changed, 126 insertions(+), 11 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 68091dd..c82fa3b 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -198,9 +198,106 @@ mmc_start_request(struct mmc_host *host, struct=
+ mmc_request *mrq)
+>
+> =A0static void mmc_wait_done(struct mmc_request *mrq)
+> =A0{
+> - =A0 =A0 =A0 complete(mrq->done_data);
+> + =A0 =A0 =A0 complete(&mrq->completion);
+> =A0}
+>
+> +static void __mmc_start_req(struct mmc_host *host, struct mmc_reques=
+t *mrq)
+> +{
+> + =A0 =A0 =A0 init_completion(&mrq->completion);
+> + =A0 =A0 =A0 mrq->done =3D mmc_wait_done;
+> + =A0 =A0 =A0 mmc_start_request(host, mrq);
+> +}
+> +
+> +static void mmc_wait_for_req_done(struct mmc_host *host,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 str=
+uct mmc_request *mrq)
+> +{
+> + =A0 =A0 =A0 wait_for_completion(&mrq->completion);
+> +}
+> +
+> +/**
+> + * =A0 =A0 mmc_pre_req - Prepare for a new request
+> + * =A0 =A0 @host: MMC host to prepare command
+> + * =A0 =A0 @mrq: MMC request to prepare for
+> + * =A0 =A0 @is_first_req: true if there is no previous started reque=
+st
+> + * =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 that may run in parellel =
+to this call, otherwise false
+> + *
+> + * =A0 =A0 mmc_pre_req() is called in prior to mmc_start_req() to le=
+t
+> + * =A0 =A0 host prepare for the new request. Preparation of a reques=
+t may be
+> + * =A0 =A0 performed while another request is running on the host.
+> + */
+> +static void mmc_pre_req(struct mmc_host *host, struct mmc_request *m=
+rq,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bool is_first_req)
+> +{
+> + =A0 =A0 =A0 if (host->ops->pre_req)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops->pre_req(host, mrq, is_first_=
+req);
+> +}
+> +
+> +/**
+> + * =A0 =A0 mmc_post_req - Post process a completed request
+> + * =A0 =A0 @host: MMC host to post process command
+> + * =A0 =A0 @mrq: MMC request to post process for
+> + * =A0 =A0 @err: Error, if non zero, clean up any resources made in =
+pre_req
+> + *
+> + * =A0 =A0 Let the host post process a completed request. Post proce=
+ssing of
+> + * =A0 =A0 a request may be performed while another reuqest is runni=
+ng.
+> + */
+> +static void mmc_post_req(struct mmc_host *host, struct mmc_request *=
+mrq,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int err)
+> +{
+> + =A0 =A0 =A0 if (host->ops->post_req)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->ops->post_req(host, mrq, err);
+> +}
+> +
+> +/**
+> + * =A0 =A0 mmc_start_req - start a non-blocking request
+> + * =A0 =A0 @host: MMC host to start command
+> + * =A0 =A0 @areq: async request to start
+> + * =A0 =A0 @error: out parameter returns 0 for success, otherwise no=
+n zero
+> + *
+> + * =A0 =A0 Start a new MMC custom command request for a host.
+> + * =A0 =A0 If there is on ongoing async request wait for completion
+> + * =A0 =A0 of that request and start the new one and return.
+> + * =A0 =A0 Does not wait for the new request to complete.
+> + *
+> + * =A0 =A0 Returns the completed async request, NULL in case of none=
+ completed.
+> + */
+> +struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ struct mmc_async_req *areq, int *error)
+> +{
+> + =A0 =A0 =A0 int err =3D 0;
+> + =A0 =A0 =A0 struct mmc_async_req *data =3D host->areq;
+> +
+> + =A0 =A0 =A0 /* Prepare a new request */
+> + =A0 =A0 =A0 if (areq)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_pre_req(host, areq->mrq, !host->are=
+q);
+> +
+> + =A0 =A0 =A0 if (host->areq) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_wait_for_req_done(host, host->areq-=
+>mrq);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D host->areq->err_check(host->car=
+d, host->areq);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_post_req(host, host=
+->areq->mrq, 0);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (areq)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_pos=
+t_req(host, areq->mrq, -EINVAL);
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->areq =3D NULL;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+In this sequence, would the return value (data) have the previous areq =
+?
+Is that intentional - doesn't seem to fit with the description.
 
-Signed-off-by: WANG Cong <amwang@redhat.com>
-
----
- drivers/mmc/core/core.c  |    3 +++
- include/linux/notifier.h |   10 ++--------
- include/linux/suspend.h  |    8 ++++++++
- 3 files changed, 13 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 68091dd..2cd4ec5 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -23,6 +23,9 @@
- #include <linux/log2.h>
- #include <linux/regulator/consumer.h>
- #include <linux/pm_runtime.h>
-+#ifdef CONFIG_PM
-+#include <linux/suspend.h>
-+#endif
- 
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
-diff --git a/include/linux/notifier.h b/include/linux/notifier.h
-index 145c436..ae8f7d9 100644
---- a/include/linux/notifier.h
-+++ b/include/linux/notifier.h
-@@ -191,15 +191,9 @@ static inline int notifier_to_errno(int ret)
- 
- /* reboot notifiers are defined in include/linux/reboot.h. */
- 
--#define NETLINK_URELEASE	0x0001	/* Unicast netlink socket released */
-+/* Hibernation and suspend events are defined in include/linux/suspend.h. */
- 
--/* Hibernation and suspend events */
--#define PM_HIBERNATION_PREPARE	0x0001 /* Going to hibernate */
--#define PM_POST_HIBERNATION	0x0002 /* Hibernation finished */
--#define PM_SUSPEND_PREPARE	0x0003 /* Going to suspend the system */
--#define PM_POST_SUSPEND		0x0004 /* Suspend finished */
--#define PM_RESTORE_PREPARE	0x0005 /* Going to restore a saved image */
--#define PM_POST_RESTORE		0x0006 /* Restore failed */
-+#define NETLINK_URELEASE	0x0001	/* Unicast netlink socket released */
- 
- /* Console keyboard events.
-  * Note: KBD_KEYCODE is always sent before KBD_UNBOUND_KEYCODE, KBD_UNICODE and
-diff --git a/include/linux/suspend.h b/include/linux/suspend.h
-index 083ffea..95bc81c 100644
---- a/include/linux/suspend.h
-+++ b/include/linux/suspend.h
-@@ -260,6 +260,14 @@ static inline int hibernate(void) { return -ENOSYS; }
- static inline bool system_entering_hibernation(void) { return false; }
- #endif /* CONFIG_HIBERNATION */
- 
-+/* Hibernation and suspend events */
-+#define PM_HIBERNATION_PREPARE	0x0001 /* Going to hibernate */
-+#define PM_POST_HIBERNATION	0x0002 /* Hibernation finished */
-+#define PM_SUSPEND_PREPARE	0x0003 /* Going to suspend the system */
-+#define PM_POST_SUSPEND		0x0004 /* Suspend finished */
-+#define PM_RESTORE_PREPARE	0x0005 /* Going to restore a saved image */
-+#define PM_POST_RESTORE		0x0006 /* Restore failed */
-+
- #ifdef CONFIG_PM_SLEEP
- void save_processor_state(void);
- void restore_processor_state(void);
--- 
-1.7.4.4
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 if (areq)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 __mmc_start_req(host, areq->mrq);
+> +
+> + =A0 =A0 =A0 if (host->areq)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_post_req(host, host->areq->mrq, 0);
+> +
+> + =A0 =A0 =A0 host->areq =3D areq;
+> + out:
+> + =A0 =A0 =A0 if (error)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 *error =3D err;
+> + =A0 =A0 =A0 return data;
+> +}
+> +EXPORT_SYMBOL(mmc_start_req);
+> +
