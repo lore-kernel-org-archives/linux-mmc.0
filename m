@@ -1,34 +1,35 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH v6 00/11] mmc: use nonblock mmc requests to minimize
-	latency
-Date: Thu, 23 Jun 2011 14:37:02 +0100
-Message-ID: <20110623133702.GZ23234@n2100.arm.linux.org.uk>
-References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org> <20110621075319.GN26089@n2100.arm.linux.org.uk> <BANLkTikOA3G0Gt4Cxua3EDnAzbFKLAk6Yw@mail.gmail.com> <BANLkTimfxrcKWLZJmVC+1zL27th7j4uzEA@mail.gmail.com>
+From: Daniel Drake <dsd@laptop.org>
+Subject: Re: SD8686 fast power-cycle problems
+Date: Thu, 23 Jun 2011 15:29:38 +0100
+Message-ID: <BANLkTinQNA8+Wkto_Hkwo_kKrXg6EGKidQ@mail.gmail.com>
+References: <BANLkTimsjb_cvcDKQpuqN_GxNWnyA0ebRg@mail.gmail.com>
+	<BANLkTim1rai5pv+hW3mMxXieq5289oYJSg@mail.gmail.com>
+	<BANLkTimoOXZvNt_GR4EHcSX_YecOubLPbw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:46141 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753804Ab1FWNhR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2011 09:37:17 -0400
-Content-Disposition: inline
-In-Reply-To: <BANLkTimfxrcKWLZJmVC+1zL27th7j4uzEA@mail.gmail.com>
+Received: from mail-pz0-f51.google.com ([209.85.210.51]:41036 "EHLO
+	mail-pz0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759455Ab1FWO3j (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2011 10:29:39 -0400
+Received: by pzk26 with SMTP id 26so1256696pzk.10
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2011 07:29:38 -0700 (PDT)
+In-Reply-To: <BANLkTimoOXZvNt_GR4EHcSX_YecOubLPbw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linaro-dev@lists.linaro.org, Venkatraman S <svenkatr@ti.com>, Chris Ball <cjb@laptop.org>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: zhangfei.gao@marvell.com, bzhao@marvell.com, bchau@marvell.com, linux-mmc@vger.kernel.org, Ohad Ben-Cohen <ohad@wizery.com>
 
-On Tue, Jun 21, 2011 at 11:26:27AM +0200, Per Forlin wrote:
-> Here are the results.
+On 19 June 2011 14:10, zhangfei gao <zhangfei.gao@gmail.com> wrote:
+> How do you power off 8686 now?
+> Use RESETn, PDn, or directly control regulator?
+> Assume RESETn is kept high as Ohad mentioned before, do you control PDn?
 
-It looks like this patch is either a no-op or slightly worse.  As
-people have been telling me that dsb is rather expensive, and this
-patch results in less dsbs, I'm finding these results hard to believe.
-It seems to be saying that dsb is an effective no-op on your platform.
+We use mmc_power_off(), which calls mmc_set_ios() which is implemented by sdhci.
 
-So either people are wrong about dsb being expensive, the patch is
-wrong, or there's something wrong with these results/test method.
+We don't make any effort to control the specific pins, we just rely on
+what sdhci does for us, which presumably is a standard way of removing
+power from SD cards.
 
-You do have an error in the ported patch, as that hasn't updated the
-v7 cache cleaning code to remove the dsb() there, but that would only
-affect the write tests.
+Thanks,
+Daniel
