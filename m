@@ -1,94 +1,71 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH 4/5] pm: move pm notifiers into suspend.h
-Date: Wed, 22 Jun 2011 21:49:27 +0200
-Message-ID: <201106222149.28252.rjw@sisk.pl>
-References: <1308724522-32461-1-git-send-email-amwang@redhat.com> <1308724522-32461-5-git-send-email-amwang@redhat.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [RFC] sdhci: suspend code correct ?
+Date: Wed, 22 Jun 2011 17:09:11 -0700
+Message-ID: <8E5F1A83-6949-4B4C-9482-30D582B7C54C@marvell.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-2"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:51202 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758041Ab1FVTso (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 22 Jun 2011 15:48:44 -0400
-In-Reply-To: <1308724522-32461-5-git-send-email-amwang@redhat.com>
+Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:59196 "EHLO
+	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757685Ab1FWALk convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Jun 2011 20:11:40 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Amerigo Wang <amwang@redhat.com>
-Cc: linux-kernel@vger.kernel.org, akpm@linux-foundation.org, netdev@vger.kernel.org, Chris Ball <cjb@laptop.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Ohad Ben-Cohen <ohad@wizery.com>, Linus Walleij <linus.walleij@linaro.org>, Philip Rakity <prakity@marvell.com>, "David S. Miller" <davem@davemloft.net>, Lucas De Marchi <lucas.demarchi@profusion.mobi>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, linux-mmc@vger.kernel.org, linux-pm@lists.linux-foundation.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Arindam Nath <arindam.nath@amd.com>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>
 
-On Wednesday, June 22, 2011, Amerigo Wang wrote:
-> It is not necessary to share the same notifier.h.
-> 
-> Signed-off-by: WANG Cong <amwang@redhat.com>
-> 
-> ---
->  drivers/mmc/core/core.c  |    3 +++
->  include/linux/notifier.h |   10 ++--------
->  include/linux/suspend.h  |    8 ++++++++
->  3 files changed, 13 insertions(+), 8 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 68091dd..2cd4ec5 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -23,6 +23,9 @@
->  #include <linux/log2.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/pm_runtime.h>
-> +#ifdef CONFIG_PM
-> +#include <linux/suspend.h>
-> +#endif
 
-I don't think the #ifdef in necessary.  Any dependencies on CONFIG_PM
-(or CONFIG_SUSPEND etc.) should be taken care of inside of suspend.h.
-This file should be fixed if they aren't.
+Looking at suspend in sdhci.c, it appears it does not handle errors correctly.
 
->  #include <linux/mmc/card.h>
->  #include <linux/mmc/host.h>
-> diff --git a/include/linux/notifier.h b/include/linux/notifier.h
-> index 145c436..ae8f7d9 100644
-> --- a/include/linux/notifier.h
-> +++ b/include/linux/notifier.h
-> @@ -191,15 +191,9 @@ static inline int notifier_to_errno(int ret)
->  
->  /* reboot notifiers are defined in include/linux/reboot.h. */
->  
-> -#define NETLINK_URELEASE	0x0001	/* Unicast netlink socket released */
-> +/* Hibernation and suspend events are defined in include/linux/suspend.h. */
->  
-> -/* Hibernation and suspend events */
-> -#define PM_HIBERNATION_PREPARE	0x0001 /* Going to hibernate */
-> -#define PM_POST_HIBERNATION	0x0002 /* Hibernation finished */
-> -#define PM_SUSPEND_PREPARE	0x0003 /* Going to suspend the system */
-> -#define PM_POST_SUSPEND		0x0004 /* Suspend finished */
-> -#define PM_RESTORE_PREPARE	0x0005 /* Going to restore a saved image */
-> -#define PM_POST_RESTORE		0x0006 /* Restore failed */
-> +#define NETLINK_URELEASE	0x0001	/* Unicast netlink socket released */
->  
->  /* Console keyboard events.
->   * Note: KBD_KEYCODE is always sent before KBD_UNBOUND_KEYCODE, KBD_UNICODE and
-> diff --git a/include/linux/suspend.h b/include/linux/suspend.h
-> index 083ffea..95bc81c 100644
-> --- a/include/linux/suspend.h
-> +++ b/include/linux/suspend.h
-> @@ -260,6 +260,14 @@ static inline int hibernate(void) { return -ENOSYS; }
->  static inline bool system_entering_hibernation(void) { return false; }
->  #endif /* CONFIG_HIBERNATION */
->  
-> +/* Hibernation and suspend events */
-> +#define PM_HIBERNATION_PREPARE	0x0001 /* Going to hibernate */
-> +#define PM_POST_HIBERNATION	0x0002 /* Hibernation finished */
-> +#define PM_SUSPEND_PREPARE	0x0003 /* Going to suspend the system */
-> +#define PM_POST_SUSPEND		0x0004 /* Suspend finished */
-> +#define PM_RESTORE_PREPARE	0x0005 /* Going to restore a saved image */
-> +#define PM_POST_RESTORE		0x0006 /* Restore failed */
-> +
->  #ifdef CONFIG_PM_SLEEP
->  void save_processor_state(void);
->  void restore_processor_state(void);
-> 
+If suspend has an error shouldn't the code put things back to the state they were in before the suspend ?
+If we are suspending then it is not clear why we need to run the re-tune timer.  resume will cause a re-tuning.
 
-Thanks,
-Rafael
+comments please.
+
+One other issue not addressed in the code below is what error code is supposed to be returned if say sdhci-pxav3.c 
+detects that it cannot suspend because it detects say dma active?  -EBUSY ?    Will the suspend code retry or should
+the sdhci-pxa code wait for the dma to complete ?
+
+Philip
+
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 91d9892..9c85d6d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2224,20 +2224,28 @@ out:
+ int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state)
+ {
+       int ret;
++       int cantune = 0;
+
+       sdhci_disable_card_detection(host);
+
+       /* Disable tuning since we are suspending */
+       if (host->version >= SDHCI_SPEC_300 && host->tuning_count &&
+-           host->tuning_mode == SDHCI_TUNING_MODE_1) {
+-               host->flags &= ~SDHCI_NEEDS_RETUNING;
+-               mod_timer(&host->tuning_timer, jiffies +
+-                       host->tuning_count * HZ);
++               host->tuning_mode == SDHCI_TUNING_MODE_1) {
++                       host->flags &= ~SDHCI_NEEDS_RETUNING;
++                       del_timer_sync(&host->tuning_timer);
++                       cantune= 1;
+       }
+
+       ret = mmc_suspend_host(host->mmc);
+-       if (ret)
++       if (ret) {
++               if (cantune) {
++                       host->flags |= SDHCI_NEEDS_RETUNING;
++                       mod_timer(&host->tuning_timer, jiffies +
++                               host->tuning_count * HZ);
++               }
++               sdhci_enable_card_detection(host);
+               return ret;
++       }
+
+       free_irq(host->irq, host);
