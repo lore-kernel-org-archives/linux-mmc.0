@@ -1,50 +1,38 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 4/4] mmc: queue: bring discard_granularity/alignment into line with SCSI definitions
-Date: Thu, 23 Jun 2011 13:40:29 +0300
-Message-ID: <1308825629-27375-5-git-send-email-adrian.hunter@intel.com>
-References: <1308825629-27375-1-git-send-email-adrian.hunter@intel.com>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [PATCH 4/5] pm: move pm notifiers into suspend.h
+Date: Thu, 23 Jun 2011 14:04:11 +0200
+Message-ID: <201106231404.12311.rjw@sisk.pl>
+References: <1308724522-32461-1-git-send-email-amwang@redhat.com> <201106222149.28252.rjw@sisk.pl> <4E02C93A.7010601@redhat.com>
+Mime-Version: 1.0
+Content-Type: Text/Plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:21043 "EHLO mga09.intel.com"
+Received: from ogre.sisk.pl ([217.79.144.158]:52678 "EHLO ogre.sisk.pl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759157Ab1FWKlX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 23 Jun 2011 06:41:23 -0400
-In-Reply-To: <1308825629-27375-1-git-send-email-adrian.hunter@intel.com>
+	id S1753011Ab1FWMDZ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2011 08:03:25 -0400
+In-Reply-To: <4E02C93A.7010601@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Cong Wang <amwang@redhat.com>
+Cc: linux-kernel@vger.kernel.org, akpm@linux-foundation.org, netdev@vger.kernel.org, Chris Ball <cjb@laptop.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Ohad Ben-Cohen <ohad@wizery.com>, Linus Walleij <linus.walleij@linaro.org>, Philip Rakity <prakity@marvell.com>, "David S. Miller" <davem@davemloft.net>, Lucas De Marchi <lucas.demarchi@profusion.mobi>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, linux-mmc@vger.kernel.org, linux-pm@lists.linux-foundation.org
 
-SCSI defines discard alignment as the offset to the first
-optimal discard.  In the case of SD/MMC, that is always zero
-which is the default.
+On Thursday, June 23, 2011, Cong Wang wrote:
+> =E4=BA=8E 2011=E5=B9=B406=E6=9C=8823=E6=97=A5 03:49, Rafael J. Wysock=
+i =E5=86=99=E9=81=93:
+> >> +#ifdef CONFIG_PM
+> >> >  +#include<linux/suspend.h>
+> >> >  +#endif
+> > I don't think the #ifdef in necessary.  Any dependencies on CONFIG_=
+PM
+> > (or CONFIG_SUSPEND etc.) should be taken care of inside of suspend.=
+h.
+> > This file should be fixed if they aren't.
+> >
+>=20
+> Ok, please check the updated version below.
 
-SCSI defines discard granularity as a hint of a optimal
-discard size.  That is much better expressed by the MMC
-"preferred erase size" (pref_erase) field.
+That's fine by me.  Please feel free to add my ACK to the patch.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/card/queue.c |    7 +------
- 1 files changed, 1 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 3e2db1c..6413afa 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -135,12 +135,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 		mq->queue->limits.max_discard_sectors = UINT_MAX;
- 		if (card->erased_byte == 0)
- 			mq->queue->limits.discard_zeroes_data = 1;
--		if (!mmc_can_trim(card) && is_power_of_2(card->erase_size)) {
--			mq->queue->limits.discard_granularity =
--							card->erase_size << 9;
--			mq->queue->limits.discard_alignment =
--							card->erase_size << 9;
--		}
-+		mq->queue->limits.discard_granularity = card->pref_erase << 9;
- 		if (mmc_can_secure_erase_trim(card))
- 			queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD,
- 						mq->queue);
--- 
-1.7.4.4
-
+Thanks,
+Rafael
