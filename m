@@ -1,75 +1,34 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH 1/3] MMC: OMAP: HSMMC: Remove lazy_disable
-Date: Thu, 23 Jun 2011 18:01:46 +0530
-Message-ID: <BANLkTikbFbQyXkSyETd2s05q0pNLPq2f3g@mail.gmail.com>
-References: <1308752314-32079-1-git-send-email-balajitk@ti.com>
-	<1308752314-32079-2-git-send-email-balajitk@ti.com>
-	<87k4cdrace.fsf@ti.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH v6 00/11] mmc: use nonblock mmc requests to minimize
+	latency
+Date: Thu, 23 Jun 2011 14:37:02 +0100
+Message-ID: <20110623133702.GZ23234@n2100.arm.linux.org.uk>
+References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org> <20110621075319.GN26089@n2100.arm.linux.org.uk> <BANLkTikOA3G0Gt4Cxua3EDnAzbFKLAk6Yw@mail.gmail.com> <BANLkTimfxrcKWLZJmVC+1zL27th7j4uzEA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <87k4cdrace.fsf@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Kevin Hilman <khilman@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, b-cousson@ti.com, "S, Venkatraman" <svenkatr@ti.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:46141 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753804Ab1FWNhR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2011 09:37:17 -0400
+Content-Disposition: inline
+In-Reply-To: <BANLkTimfxrcKWLZJmVC+1zL27th7j4uzEA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linaro-dev@lists.linaro.org, Venkatraman S <svenkatr@ti.com>, Chris Ball <cjb@laptop.org>
 
-On Wed, Jun 22, 2011 at 11:56 PM, Kevin Hilman <khilman@ti.com> wrote:
-> Balaji T K <balajitk@ti.com> writes:
->
->> lazy_disable framework in OMAP HSMMC manages multiple low power stat=
-es
->> and Card is powered off after inactivity time of 8 seconds.
->> Based on previous discussion on the list Card power(regulator)
->
-> needs some punctuation for readability.
+On Tue, Jun 21, 2011 at 11:26:27AM +0200, Per Forlin wrote:
+> Here are the results.
 
-OK
+It looks like this patch is either a no-op or slightly worse.  As
+people have been telling me that dsb is rather expensive, and this
+patch results in less dsbs, I'm finding these results hard to believe.
+It seems to be saying that dsb is an effective no-op on your platform.
 
->
->> handling (when to power OFF/ON) should ideally be handled by core la=
-yer.
->
-> So are you working on the core layer replacement for this? =A0If not,=
- is
-> there a plan or owner for this?
+So either people are wrong about dsb being expensive, the patch is
+wrong, or there's something wrong with these results/test method.
 
-Venkat and myself are planing to start on this for MMC and SD.
-Some partial work has already been done for SDIO,
-need to consolidate this for all three of them.
-
->
->> Remove usage of lazy disable to allow core layer _only_ to handle ca=
-rd power.
->> With the removal of lazy disable framework, MMC regulators
->> are left ON until MMC_POWER_OFF via set_ios.
->>
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->
-> [...]
->
->> @@ -2080,10 +1848,7 @@ static int __init omap_hsmmc_probe(struct pla=
-tform_device *pdev)
->> =A0 =A0 =A0 platform_set_drvdata(pdev, host);
->> =A0 =A0 =A0 INIT_WORK(&host->mmc_carddetect_work, omap_hsmmc_detect)=
-;
->>
->> - =A0 =A0 if (mmc_slot(host).power_saving)
->> - =A0 =A0 =A0 =A0 =A0 =A0 mmc->ops =A0 =A0 =A0 =A0=3D &omap_hsmmc_ps=
-_ops;
->> - =A0 =A0 else
->> - =A0 =A0 =A0 =A0 =A0 =A0 mmc->ops =A0 =A0 =A0 =A0=3D &omap_hsmmc_op=
-s;
->> + =A0 =A0 mmc->ops =A0 =A0 =A0 =A0=3D &omap_hsmmc_ops;
->
-> I guess the _ps_ops struct is now completely unused so should probabl=
-y
-> be removed in this patch also.
-
-done
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+You do have an error in the ported patch, as that hasn't updated the
+v7 cache cleaning code to remove the dsb() there, but that would only
+affect the write tests.
