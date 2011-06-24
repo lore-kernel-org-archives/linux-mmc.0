@@ -1,33 +1,45 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 00/35]: System Firmware and SMBIOS Support
-Date: Fri, 24 Jun 2011 15:40:57 +0200
-Message-ID: <201106241540.57952.arnd@arndb.de>
-References: <20110623172206.27602.34306.sendpatchset@prarit.bos.redhat.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH 0/6] mmc: dw_mmc: misc fixes and improvements
+Date: Fri, 24 Jun 2011 15:53:36 +0100
+Message-ID: <BANLkTi=0Xg_w54ZaUPeb9e+A-_pcTjTg+w@mail.gmail.com>
+References: <4E0488A9.6050109@imgtec.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <20110623172206.27602.34306.sendpatchset@prarit.bos.redhat.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Prarit Bhargava <prarit@redhat.com>
-Cc: linux-kernel@vger.kernel.org, linux-ia64@vger.kernel.org, x86@kernel.org, linux-acpi@vger.kernel.org, linux-ide@vger.kernel.org, openipmi-developer@lists.sourceforge.net, platform-driver-x86@vger.kernel.org, linux-crypto@vger.kernel.org, dri-devel@lists.freedesktop.org, lm-sensors@lm-sensors.org, linux-i2c@vger.kernel.org, linux-input@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, netdev@vger.kernel.org, linux-pci@vger.kernel.org, rtc-linux@googlegroups.com, evel@driverdev.osuosl.org, linux-usb@vger.kernel.org, device-drivers-devel@blackfin.uclinux.org, linux-watchdog@vger.kernel.org, grant.likely@secretlab.ca, dz@debian.org, rpurdie@rpsys.net, eric.piel@tremplin-utc.net, abelay@mit.edu, johnpol@2ka.mipt.ru
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:58746 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754057Ab1FXOxh convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jun 2011 10:53:37 -0400
+In-Reply-To: <4E0488A9.6050109@imgtec.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, james@albanarts.com
 
-On Thursday 23 June 2011 19:22:06 Prarit Bhargava wrote:
-> This new patchset reworks the existing DMI code into two separate layers.  It is
-> based off of the feedback I received previously when discussing the SMBIOS
-> version patch on LKML.
+On Fri, Jun 24, 2011 at 1:52 PM, James Hogan <james.hogan@imgtec.com> w=
+rote:
+> Misc improvements and fixes for the Synopsys DesignWare MMC driver:
+>
+> [PATCH 1/6] mmc: dw_mmc: clear TXDR/RXDR ints before enabling
+> =A0 =A0 =A0 =A0fixes a failure to probe the next card after an unplug
+> [PATCH 2/6] mmc: dw_mmc: fix race with request and removal
+> =A0 =A0 =A0 =A0improves spinlock protection
+> [PATCH 3/6] mmc: dw_mmc: convert card tasklet to workqueue
+> =A0 =A0 =A0 =A0to allow platform callbacks to sleep
+> [PATCH 4/6] mmc: dw_mmc: brackets in register access macros
+> =A0 =A0 =A0 =A0just a small tidyup patch
+> [PATCH 5/6] mmc: dw_mmc: don't hard code fifo depth, fix usage
+> =A0 =A0 =A0 =A0improve detection of fifo depth
+> [PATCH 6/6] mmc: dw_mmc: handle unaligned buffers and sizes
+> =A0 =A0 =A0 =A0fix some mmc_test failures wrt unaligned buffer/sizes
+>
+> =A0drivers/mmc/host/dw_mmc.c =A0| =A0398 ++++++++++++++++++++++++++++=
+++++++----------
+> =A0drivers/mmc/host/dw_mmc.h =A0| =A0 17 +-
+> =A0include/linux/mmc/dw_mmc.h | =A0 20 ++-
+> =A03 files changed, 340 insertions(+), 95 deletions(-)
 
-Hi Prarit,
+All these patches:
 
-No objections to the patches, but when you send out a series as long as
-this one, please ensure that all patches are sent as replies to the
-introductory mail. Also, do not repeat the one-line patch summary in the
-body of the email.
-
-When using "git send-email --thread --no-chain-reply", this works
-automatically. It will also let you put the Cc list into the
-patch description and work out where to send each patch.
-
-	Arnd
+Acked-by: Will Newton <will.newton@imgtec.com>
