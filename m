@@ -1,61 +1,119 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH 4/4] PCI: make cardbus-bridge resources nice-to-have
-Date: Thu, 23 Jun 2011 22:42:29 +0200
-Message-ID: <201106232242.29753.rjw@sisk.pl>
-References: <1308610037-6261-1-git-send-email-linuxram@us.ibm.com> <20110622004816.GC22917@ram-laptop> <20110623133137.03c74ea4@jbarnes-desktop>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 3/4] mmc: queue: append partition subname to queue thread
+ name
+Date: Fri, 24 Jun 2011 11:44:20 +0900
+Message-ID: <4E03FA04.5090001@samsung.com>
+References: <1308825629-27375-1-git-send-email-adrian.hunter@intel.com>
+ <1308825629-27375-4-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-pci-owner@vger.kernel.org>
-In-Reply-To: <20110623133137.03c74ea4@jbarnes-desktop>
-Sender: linux-pci-owner@vger.kernel.org
-To: Jesse Barnes <jbarnes@virtuousgeek.org>
-Cc: Ram Pai <linuxram@us.ibm.com>, Dominik Brodowski <linux@dominikbrodowski.net>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, svenkatr@ti.com, yinghai@kernel.org, cjb@laptop.org, linux-pci@vger.kernel.org, linux-net-drivers@solarflare.com, bhutchings@solarflare.com, Bjorn Helgaas <bhelgaas@google.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:17843 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751209Ab1FXCol (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2011 22:44:41 -0400
+Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LN900ICTWXWG7I0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 24 Jun 2011 11:44:21 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LN900F82WXXA3@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 24 Jun 2011 11:44:21 +0900 (KST)
+In-reply-to: <1308825629-27375-4-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, Andrei Warkentin <andreiw@motorola.com>
 
-On Thursday, June 23, 2011, Jesse Barnes wrote:
-> On Tue, 21 Jun 2011 17:48:16 -0700
-> Ram Pai <linuxram@us.ibm.com> wrote:
-> > I assume majority of the platforms will have enough resources to satisfy all
-> > the resource requests, and their BIOS would have done a decent job.
-> > 
-> > Even if the BIOS has not done a decent job, and there are enough resources
-> > available we should not see a regression.
-> > 
-> > The only platforms that would expose a regression is when resources are under
-> > contention and the BIOS has assigned enough resource to the cardbus bridge but
-> > not to some other device. It will be hard to find such a platform, but I am
-> > sure there is one out somewhere there.
-> > 
-> > I am sure we will see; some day, reports of regression because that platform
-> > would have the exact right characteristics to expose the issue. But then that
-> > platform is a highly constrained platform in the first place. Its debatable if
-> > that should be characterised as a regression, or a platform that was riding on
-> > good luck till now.
-> > 
-> > Even Oliver's platform is a highly constrained platform, and we probably can
-> > treat his platform as 'riding on good luck till now'.
-> > 
-> > We won't be able to satisfy all the platforms with resource constraints.  I
-> > think our probable choice is to select a solution that breaks least number of
-> > platforms and special case those broken platforms through kernel command line
-> > parameters.
-> 
-> Another option is to hide the new allocation behavior behind a kernel
-> parameter.  I know Bjorn has opposed this in the past because really
-> this sort of thing should "just work".  But so far it hasn't, and we've
-> had to revert both Bjorn's resource tracking changes as well as the
-> re-allocation code.
-> 
-> Hiding it behind a boot option would at least let us improve things
-> over time and potentially switch over to new resource code in the
-> future...
-> 
-> Thoughts?
+Hi Adrian..
 
-Do I understand correctly that at the moment we have two set of systems,
-one of which works with the new code and doesn't work with the old code
-and the other one conversely?
+I also found this problem..
+So i confused the same mmcdq name.
 
-Rafael
+Thanks for fixed the mmcqd name.
+
+Regards,
+Jaehoon Chung
+
+Adrian Hunter wrote:
+> For example, an eMMC with 2 boot partitions will have 3 threads.
+> The names change from:
+> 
+>    40 ?        00:00:00 mmcqd/0
+>    41 ?        00:00:00 mmcqd/0
+>    42 ?        00:00:00 mmcqd/0
+> 
+> to:
+> 
+>    40 ?        00:00:00 mmcqd/0
+>    41 ?        00:00:00 mmcqd/0boot0
+>    42 ?        00:00:00 mmcqd/0boot1
+> 
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Andrei Warkentin <andreiw@motorola.com>
+> ---
+>  drivers/mmc/card/block.c |    2 +-
+>  drivers/mmc/card/queue.c |    8 +++++---
+>  drivers/mmc/card/queue.h |    3 ++-
+>  3 files changed, 8 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index d36b7ea..bee2106 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1167,7 +1167,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>  	INIT_LIST_HEAD(&md->part);
+>  	md->usage = 1;
+>  
+> -	ret = mmc_init_queue(&md->queue, card, &md->lock);
+> +	ret = mmc_init_queue(&md->queue, card, &md->lock, subname);
+>  	if (ret)
+>  		goto err_putdisk;
+>  
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index c07322c..3e2db1c 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -106,10 +106,12 @@ static void mmc_request(struct request_queue *q)
+>   * @mq: mmc queue
+>   * @card: mmc card to attach this queue
+>   * @lock: queue lock
+> + * @subname: partition subname
+>   *
+>   * Initialise a MMC card request queue.
+>   */
+> -int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card, spinlock_t *lock)
+> +int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+> +		   spinlock_t *lock, const char *subname)
+>  {
+>  	struct mmc_host *host = card->host;
+>  	u64 limit = BLK_BOUNCE_HIGH;
+> @@ -209,8 +211,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card, spinlock_t *lock
+>  
+>  	sema_init(&mq->thread_sem, 1);
+>  
+> -	mq->thread = kthread_run(mmc_queue_thread, mq, "mmcqd/%d",
+> -		host->index);
+> +	mq->thread = kthread_run(mmc_queue_thread, mq, "mmcqd/%d%s",
+> +		host->index, subname ? subname : "");
+>  
+>  	if (IS_ERR(mq->thread)) {
+>  		ret = PTR_ERR(mq->thread);
+> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+> index 64e66e0..6223ef8 100644
+> --- a/drivers/mmc/card/queue.h
+> +++ b/drivers/mmc/card/queue.h
+> @@ -19,7 +19,8 @@ struct mmc_queue {
+>  	unsigned int		bounce_sg_len;
+>  };
+>  
+> -extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *);
+> +extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
+> +			  const char *);
+>  extern void mmc_cleanup_queue(struct mmc_queue *);
+>  extern void mmc_queue_suspend(struct mmc_queue *);
+>  extern void mmc_queue_resume(struct mmc_queue *);
+
