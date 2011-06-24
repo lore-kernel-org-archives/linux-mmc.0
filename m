@@ -1,119 +1,61 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 3/4] mmc: queue: append partition subname to queue thread
- name
-Date: Fri, 24 Jun 2011 11:44:20 +0900
-Message-ID: <4E03FA04.5090001@samsung.com>
-References: <1308825629-27375-1-git-send-email-adrian.hunter@intel.com>
- <1308825629-27375-4-git-send-email-adrian.hunter@intel.com>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH v6 00/11] mmc: use nonblock mmc requests to minimize latency
+Date: Fri, 24 Jun 2011 10:58:31 +0200
+Message-ID: <BANLkTi=8Awu4Z3ESizE9WDEyWNw0r9N0ug@mail.gmail.com>
+References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org>
+	<20110621075319.GN26089@n2100.arm.linux.org.uk>
+	<BANLkTikOA3G0Gt4Cxua3EDnAzbFKLAk6Yw@mail.gmail.com>
+	<BANLkTimfxrcKWLZJmVC+1zL27th7j4uzEA@mail.gmail.com>
+	<20110623133702.GZ23234@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:17843 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751209Ab1FXCol (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2011 22:44:41 -0400
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LN900ICTWXWG7I0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 24 Jun 2011 11:44:21 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LN900F82WXXA3@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 24 Jun 2011 11:44:21 +0900 (KST)
-In-reply-to: <1308825629-27375-4-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:58777 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751958Ab1FXI6d convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jun 2011 04:58:33 -0400
+Received: by qwk3 with SMTP id 3so1243261qwk.19
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Jun 2011 01:58:32 -0700 (PDT)
+In-Reply-To: <20110623133702.GZ23234@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, Andrei Warkentin <andreiw@motorola.com>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linaro-dev@lists.linaro.org, Venkatraman S <svenkatr@ti.com>, Chris Ball <cjb@laptop.org>
 
-Hi Adrian..
+On 23 June 2011 15:37, Russell King - ARM Linux <linux@arm.linux.org.uk=
+> wrote:
+> On Tue, Jun 21, 2011 at 11:26:27AM +0200, Per Forlin wrote:
+>> Here are the results.
+>
+> It looks like this patch is either a no-op or slightly worse. =A0As
+> people have been telling me that dsb is rather expensive, and this
+> patch results in less dsbs, I'm finding these results hard to believe=
+=2E
+> It seems to be saying that dsb is an effective no-op on your platform=
+=2E
+>
+The result of your patch depends on the number of sg-elements. With
+your patch there is only on DSB per list instead of element I can
+write a test to measure performance per number of sg-element in the
+sg-list. Fixed transfer size but vary the number of sg-elements in the
+list. This test may give a better understanding of the affect.
 
-I also found this problem..
-So i confused the same mmcdq name.
+I have seen performance gain if using __raw_write instead of writel.
+Writel test includes both the cost of DSB and the outer_sync, where
+outer_sync is more expensive one I presume.
 
-Thanks for fixed the mmcqd name.
+> So either people are wrong about dsb being expensive, the patch is
+> wrong, or there's something wrong with these results/test method.
+>
+> You do have an error in the ported patch, as that hasn't updated the
+> v7 cache cleaning code to remove the dsb() there, but that would only
+> affect the write tests.
+>
+I will fix that mistake and also improve the test cases to measure the
+cost per number of sg-elements.
+
+I'll come back with new numbers on Monday.
 
 Regards,
-Jaehoon Chung
-
-Adrian Hunter wrote:
-> For example, an eMMC with 2 boot partitions will have 3 threads.
-> The names change from:
-> 
->    40 ?        00:00:00 mmcqd/0
->    41 ?        00:00:00 mmcqd/0
->    42 ?        00:00:00 mmcqd/0
-> 
-> to:
-> 
->    40 ?        00:00:00 mmcqd/0
->    41 ?        00:00:00 mmcqd/0boot0
->    42 ?        00:00:00 mmcqd/0boot1
-> 
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Andrei Warkentin <andreiw@motorola.com>
-> ---
->  drivers/mmc/card/block.c |    2 +-
->  drivers/mmc/card/queue.c |    8 +++++---
->  drivers/mmc/card/queue.h |    3 ++-
->  3 files changed, 8 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index d36b7ea..bee2106 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1167,7 +1167,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->  	INIT_LIST_HEAD(&md->part);
->  	md->usage = 1;
->  
-> -	ret = mmc_init_queue(&md->queue, card, &md->lock);
-> +	ret = mmc_init_queue(&md->queue, card, &md->lock, subname);
->  	if (ret)
->  		goto err_putdisk;
->  
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index c07322c..3e2db1c 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -106,10 +106,12 @@ static void mmc_request(struct request_queue *q)
->   * @mq: mmc queue
->   * @card: mmc card to attach this queue
->   * @lock: queue lock
-> + * @subname: partition subname
->   *
->   * Initialise a MMC card request queue.
->   */
-> -int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card, spinlock_t *lock)
-> +int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
-> +		   spinlock_t *lock, const char *subname)
->  {
->  	struct mmc_host *host = card->host;
->  	u64 limit = BLK_BOUNCE_HIGH;
-> @@ -209,8 +211,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card, spinlock_t *lock
->  
->  	sema_init(&mq->thread_sem, 1);
->  
-> -	mq->thread = kthread_run(mmc_queue_thread, mq, "mmcqd/%d",
-> -		host->index);
-> +	mq->thread = kthread_run(mmc_queue_thread, mq, "mmcqd/%d%s",
-> +		host->index, subname ? subname : "");
->  
->  	if (IS_ERR(mq->thread)) {
->  		ret = PTR_ERR(mq->thread);
-> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-> index 64e66e0..6223ef8 100644
-> --- a/drivers/mmc/card/queue.h
-> +++ b/drivers/mmc/card/queue.h
-> @@ -19,7 +19,8 @@ struct mmc_queue {
->  	unsigned int		bounce_sg_len;
->  };
->  
-> -extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *);
-> +extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
-> +			  const char *);
->  extern void mmc_cleanup_queue(struct mmc_queue *);
->  extern void mmc_queue_suspend(struct mmc_queue *);
->  extern void mmc_queue_resume(struct mmc_queue *);
-
+Per
