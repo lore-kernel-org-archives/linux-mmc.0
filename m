@@ -1,188 +1,135 @@
 From: James Hogan <james.hogan@imgtec.com>
-Subject: [PATCH 3/6] mmc: dw_mmc: convert card tasklet to workqueue
-Date: Fri, 24 Jun 2011 13:55:55 +0100
-Message-ID: <4E04895B.1070408@imgtec.com>
+Subject: [PATCH 5/6] mmc: dw_mmc: don't hard code fifo depth, fix usage
+Date: Fri, 24 Jun 2011 13:57:18 +0100
+Message-ID: <4E0489AE.2080405@imgtec.com>
 References: <4E0488A9.6050109@imgtec.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:3460 "EHLO multi.imgtec.com"
+Received: from multi.imgtec.com ([194.200.65.239]:1961 "EHLO multi.imgtec.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752161Ab1FXNMH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 24 Jun 2011 09:12:07 -0400
+	id S1753346Ab1FXNNG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 24 Jun 2011 09:13:06 -0400
 In-Reply-To: <4E0488A9.6050109@imgtec.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: James Hogan <james.hogan@imgtec.com>
 Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, james@albanarts.com
 
-Convert the card insert/remove tasklet to a workqueue, and call the
-setpower platform specific callback without the spinlock held. This
-means neither of the setpower or get_cd callbacks are called from atomic
-context which allows them to sleep.
+The FIFO_DEPTH hardware configuration parameter can be found from the
+power-on value of RX_WMark in the FIFOTH register. This is used to
+initialise the watermarks, but when calculating the number of free fifo
+spaces a preprocessor definition is used which is hard coded to 32.
+
+Fix reading the value out of FIFOTH (the default value in the RX_WMark
+field is FIFO_DEPTH-1 not FIFO_DEPTH). Allow the fifo depth to be
+overriden by platform data (since a bootloader may have changed FIFOTH
+making auto-detection unreliable). Store the fifo_depth for later use.
+Also fix the calculation to find the number of free bytes in the fifo to
+include the fifo depth in the left shift by the data shift, since the
+fifo depth is measured in fifo items not bytes.
 
 Signed-off-by: James Hogan <james.hogan@imgtec.com>
 ---
- drivers/mmc/host/dw_mmc.c  |   50 +++++++++++++++++++++++++++----------------
- include/linux/mmc/dw_mmc.h |    2 +-
- 2 files changed, 32 insertions(+), 20 deletions(-)
+ drivers/mmc/host/dw_mmc.c  |   23 ++++++++++++++++++-----
+ drivers/mmc/host/dw_mmc.h  |    1 -
+ include/linux/mmc/dw_mmc.h |    8 ++++++++
+ 3 files changed, 26 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index c4bddf6..3f610d5 100644
+index 3f610d5..3832312 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -33,6 +33,7 @@
- #include <linux/mmc/dw_mmc.h>
- #include <linux/bitops.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/workqueue.h>
+@@ -1116,8 +1116,8 @@ static void dw_mci_write_data_pio(struct dw_mci *host)
+ 	unsigned int nbytes = 0, len;
  
- #include "dw_mmc.h"
+ 	do {
+-		len = SDMMC_FIFO_SZ -
+-			(SDMMC_GET_FCNT(mci_readl(host, STATUS)) << shift);
++		len = (host->fifo_depth -
++			SDMMC_GET_FCNT(mci_readl(host, STATUS))) << shift;
+ 		if (offset + len <= sg->length) {
+ 			host->push_data(host, (void *)(buf + offset), len);
  
-@@ -100,6 +101,8 @@ struct dw_mci_slot {
- 	int			last_detect_state;
- };
- 
-+static struct workqueue_struct *dw_mci_card_workqueue;
-+
- #if defined(CONFIG_DEBUG_FS)
- static int dw_mci_req_show(struct seq_file *s, void *v)
- {
-@@ -1255,7 +1258,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 
- 		if (pending & SDMMC_INT_CD) {
- 			mci_writel(host, RINTSTS, SDMMC_INT_CD);
--			tasklet_schedule(&host->card_tasklet);
-+			queue_work(dw_mci_card_workqueue, &host->card_work);
- 		}
- 
- 	} while (pass_count++ < 5);
-@@ -1274,9 +1277,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 	return IRQ_HANDLED;
- }
- 
--static void dw_mci_tasklet_card(unsigned long data)
-+static void dw_mci_work_routine_card(struct work_struct *work)
- {
--	struct dw_mci *host = (struct dw_mci *)data;
-+	struct dw_mci *host = container_of(work, struct dw_mci, card_work);
- 	int i;
- 
- 	for (i = 0; i < host->num_slots; i++) {
-@@ -1288,22 +1291,21 @@ static void dw_mci_tasklet_card(unsigned long data)
- 
- 		present = dw_mci_get_cd(mmc);
- 		while (present != slot->last_detect_state) {
--			spin_lock(&host->lock);
--
- 			dev_dbg(&slot->mmc->class_dev, "card %s\n",
- 				present ? "inserted" : "removed");
- 
-+			/* Power up slot (before spin_lock, may sleep) */
-+			if (present != 0 && host->pdata->setpower)
-+				host->pdata->setpower(slot->id, mmc->ocr_avail);
-+
-+			spin_lock_bh(&host->lock);
-+
- 			/* Card change detected */
- 			slot->last_detect_state = present;
- 
--			/* Power up slot */
--			if (present != 0) {
--				if (host->pdata->setpower)
--					host->pdata->setpower(slot->id,
--							      mmc->ocr_avail);
--
-+			/* Mark card as present if applicable */
-+			if (present != 0)
- 				set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
--			}
- 
- 			/* Clean up queue if present */
- 			mrq = slot->mrq;
-@@ -1353,8 +1355,6 @@ static void dw_mci_tasklet_card(unsigned long data)
- 
- 			/* Power down slot */
- 			if (present == 0) {
--				if (host->pdata->setpower)
--					host->pdata->setpower(slot->id, 0);
- 				clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
- 
- 				/*
-@@ -1376,7 +1376,12 @@ static void dw_mci_tasklet_card(unsigned long data)
- 
- 			}
- 
--			spin_unlock(&host->lock);
-+			spin_unlock_bh(&host->lock);
-+
-+			/* Power down slot (after spin_unlock, may sleep) */
-+			if (present == 0 && host->pdata->setpower)
-+				host->pdata->setpower(slot->id, 0);
-+
- 			present = dw_mci_get_cd(mmc);
- 		}
- 
-@@ -1476,7 +1481,7 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	 * Card may have been plugged in prior to boot so we
- 	 * need to run the detect tasklet
+@@ -1659,8 +1659,19 @@ static int dw_mci_probe(struct platform_device *pdev)
+ 	 * FIFO threshold settings  RxMark  = fifo_size / 2 - 1,
+ 	 *                          Tx Mark = fifo_size / 2 DMA Size = 8
  	 */
--	tasklet_schedule(&host->card_tasklet);
-+	queue_work(dw_mci_card_workqueue, &host->card_work);
+-	fifo_size = mci_readl(host, FIFOTH);
+-	fifo_size = (fifo_size >> 16) & 0x7ff;
++	if (!host->pdata->fifo_depth) {
++		/*
++		 * Power-on value of RX_WMark is FIFO_DEPTH-1, but this may
++		 * have been overwritten by the bootloader, just like we're
++		 * about to do, so if you know the value for your hardware, you
++		 * should put it in the platform data.
++		 */
++		fifo_size = mci_readl(host, FIFOTH);
++		fifo_size = 1 + ((fifo_size >> 16) & 0x7ff);
++	} else {
++		fifo_size = host->pdata->fifo_depth;
++	}
++	host->fifo_depth = fifo_size;
+ 	host->fifoth_val = ((0x2 << 28) | ((fifo_size/2 - 1) << 16) |
+ 			((fifo_size/2) << 0));
+ 	mci_writel(host, FIFOTH, host->fifoth_val);
+@@ -1707,7 +1718,9 @@ static int dw_mci_probe(struct platform_device *pdev)
+ 	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE); /* Enable mci interrupt */
  
- 	return 0;
- }
-@@ -1665,12 +1670,15 @@ static int dw_mci_probe(struct platform_device *pdev)
- 	mci_writel(host, CLKSRC, 0);
+ 	dev_info(&pdev->dev, "DW MMC controller at irq %d, "
+-		 "%d bit host data width\n", irq, width);
++		 "%d bit host data width, "
++		 "%u deep fifo\n",
++		 irq, width, fifo_size);
+ 	if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
+ 		dev_info(&pdev->dev, "Internal DMAC interrupt fix enabled.\n");
  
- 	tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
--	tasklet_init(&host->card_tasklet,
--		     dw_mci_tasklet_card, (unsigned long)host);
-+	dw_mci_card_workqueue = alloc_workqueue("dw-mci-card",
-+			WQ_MEM_RECLAIM | WQ_NON_REENTRANT, 1);
-+	if (!dw_mci_card_workqueue)
-+		goto err_dmaunmap;
-+	INIT_WORK(&host->card_work, dw_mci_work_routine_card);
- 
- 	ret = request_irq(irq, dw_mci_interrupt, 0, "dw-mci", host);
- 	if (ret)
--		goto err_dmaunmap;
-+		goto err_workqueue;
- 
- 	platform_set_drvdata(pdev, host);
- 
-@@ -1714,6 +1722,9 @@ err_init_slot:
- 	}
- 	free_irq(irq, host);
- 
-+err_workqueue:
-+	destroy_workqueue(dw_mci_card_workqueue);
-+
- err_dmaunmap:
- 	if (host->use_dma && host->dma_ops->exit)
- 		host->dma_ops->exit(host);
-@@ -1753,6 +1764,7 @@ static int __exit dw_mci_remove(struct platform_device *pdev)
- 	mci_writel(host, CLKSRC, 0);
- 
- 	free_irq(platform_get_irq(pdev, 0), host);
-+	destroy_workqueue(dw_mci_card_workqueue);
- 	dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
- 
- 	if (host->use_dma && host->dma_ops->exit)
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index bb9e5de..027d377 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -118,7 +118,6 @@
+ #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
+ /* Status register defines */
+ #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FF)
+-#define SDMMC_FIFO_SZ			32
+ /* Internal DMAC interrupt defines */
+ #define SDMMC_IDMAC_INT_AI		BIT(9)
+ #define SDMMC_IDMAC_INT_NI		BIT(8)
 diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 55d9909..dea4847 100644
+index dea4847..01db1a0 100644
 --- a/include/linux/mmc/dw_mmc.h
 +++ b/include/linux/mmc/dw_mmc.h
-@@ -131,7 +131,7 @@ struct dw_mci {
- 	u32			stop_cmdr;
- 	u32			dir_status;
- 	struct tasklet_struct	tasklet;
--	struct tasklet_struct	card_tasklet;
-+	struct work_struct	card_work;
- 	unsigned long		pending_events;
- 	unsigned long		completed_events;
- 	enum dw_mci_state	state;
+@@ -74,6 +74,7 @@ struct mmc_data;
+  * @pdev: Platform device associated with the MMC controller.
+  * @pdata: Platform data associated with the MMC controller.
+  * @slot: Slots sharing this MMC controller.
++ * @fifo_depth: depth of FIFO.
+  * @data_shift: log2 of FIFO item size.
+  * @push_data: Pointer to FIFO push function.
+  * @pull_data: Pointer to FIFO pull function.
+@@ -146,6 +147,7 @@ struct dw_mci {
+ 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
+ 
+ 	/* FIFO push and pull */
++	int			fifo_depth;
+ 	int			data_shift;
+ 	void (*push_data)(struct dw_mci *host, void *buf, int cnt);
+ 	void (*pull_data)(struct dw_mci *host, void *buf, int cnt);
+@@ -196,6 +198,12 @@ struct dw_mci_board {
+ 	unsigned int bus_hz; /* Bus speed */
+ 
+ 	unsigned int caps;	/* Capabilities */
++	/*
++	 * Override fifo depth. If 0, autodetect it from the FIFOTH register,
++	 * but note that this may not be reliable after a bootloader has used
++	 * it.
++	 */
++	unsigned int fifo_depth;
+ 
+ 	/* delay in mS before detecting cards after interrupt */
+ 	u32 detect_delay_ms;
 -- 
 1.7.2.3
 
