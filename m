@@ -1,37 +1,69 @@
 From: James Hogan <james.hogan@imgtec.com>
-Subject: [PATCH 0/6] mmc: dw_mmc: misc fixes and improvements
-Date: Fri, 24 Jun 2011 13:52:57 +0100
-Message-ID: <4E0488A9.6050109@imgtec.com>
+Subject: [PATCH 1/6] mmc: dw_mmc: clear TXDR/RXDR ints before enabling
+Date: Fri, 24 Jun 2011 13:54:06 +0100
+Message-ID: <4E0488EE.5040706@imgtec.com>
+References: <4E0488A9.6050109@imgtec.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:2150 "EHLO multi.imgtec.com"
+Received: from multi.imgtec.com ([194.200.65.239]:2886 "EHLO multi.imgtec.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752959Ab1FXNJE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 24 Jun 2011 09:09:04 -0400
+	id S1752161Ab1FXNKf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 24 Jun 2011 09:10:35 -0400
+In-Reply-To: <4E0488A9.6050109@imgtec.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, James Hogan <james.hogan@imgtec.c>
-Cc: james@albanarts.com
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, james@albanarts.com
 
-Misc improvements and fixes for the Synopsys DesignWare MMC driver:
+DMA is only used for transactions exceeding a certain length, otherwise
+PIO is used. The TXDR and RXDR interrupts are masked when in DMA mode
+but still fire. When switching to PIO mode (e.g. to get SCR field when
+an SD card is inserted) these interrupts are not cleared and so they
+trigger the ISR as soon as they are unmasked. If the previous DMA did a
+write, then the ISR will handle the TXDR interrupt even if the
+transaction is a read, completing the transaction without modifying the
+read buffer.
 
-[PATCH 1/6] mmc: dw_mmc: clear TXDR/RXDR ints before enabling
-	fixes a failure to probe the next card after an unplug
-[PATCH 2/6] mmc: dw_mmc: fix race with request and removal
-	improves spinlock protection
-[PATCH 3/6] mmc: dw_mmc: convert card tasklet to workqueue
-	to allow platform callbacks to sleep
-[PATCH 4/6] mmc: dw_mmc: brackets in register access macros
-	just a small tidyup patch
-[PATCH 5/6] mmc: dw_mmc: don't hard code fifo depth, fix usage
-	improve detection of fifo depth
-[PATCH 6/6] mmc: dw_mmc: handle unaligned buffers and sizes
-	fix some mmc_test failures wrt unaligned buffer/sizes
+This is fixed primarily by clearing these two interrupts before
+unmasking them when setting up PIO mode, and also by making the ISR more
+robust by only handling TXDR/RXDR in the correct read/write direction.
+
+Signed-off-by: James Hogan <james.hogan@imgtec.com>
+---
+ drivers/mmc/host/dw_mmc.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 22be372..08c0592 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -497,6 +497,7 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
+ 		else
+ 			host->dir_status = DW_MCI_SEND_STATUS;
  
- drivers/mmc/host/dw_mmc.c  |  398 ++++++++++++++++++++++++++++++++++----------
- drivers/mmc/host/dw_mmc.h  |   17 +-
- include/linux/mmc/dw_mmc.h |   20 ++-
- 3 files changed, 340 insertions(+), 95 deletions(-)
++		mci_writel(host, RINTSTS, SDMMC_INT_TXDR | SDMMC_INT_RXDR);
+ 		temp = mci_readl(host, INTMASK);
+ 		temp |= SDMMC_INT_TXDR | SDMMC_INT_RXDR;
+ 		mci_writel(host, INTMASK, temp);
+@@ -1230,13 +1231,13 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 
+ 		if (pending & SDMMC_INT_RXDR) {
+ 			mci_writel(host, RINTSTS, SDMMC_INT_RXDR);
+-			if (host->sg)
++			if (host->dir_status == DW_MCI_RECV_STATUS && host->sg)
+ 				dw_mci_read_data_pio(host);
+ 		}
+ 
+ 		if (pending & SDMMC_INT_TXDR) {
+ 			mci_writel(host, RINTSTS, SDMMC_INT_TXDR);
+-			if (host->sg)
++			if (host->dir_status == DW_MCI_SEND_STATUS && host->sg)
+ 				dw_mci_write_data_pio(host);
+ 		}
+ 
+-- 
+1.7.2.3
+
 
