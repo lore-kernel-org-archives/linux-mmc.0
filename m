@@ -1,36 +1,42 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/4] Minor MMC fixes
-Date: Sat, 25 Jun 2011 18:54:56 -0400
-Message-ID: <m2aad5frnj.fsf@bob.laptop.org>
-References: <1308825629-27375-1-git-send-email-adrian.hunter@intel.com>
+From: Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] mmc: sdio: fix runtime PM path during driver removal
+Date: Sun, 26 Jun 2011 14:50:50 +0300
+Message-ID: <BANLkTi=JcXG04coTJCA=fvwxXzuRsYzT4Q@mail.gmail.com>
+References: <1307662827-16618-1-git-send-email-ohad@wizery.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58190 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752127Ab1FYWzD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 25 Jun 2011 18:55:03 -0400
-In-Reply-To: <1308825629-27375-1-git-send-email-adrian.hunter@intel.com>
-	(Adrian Hunter's message of "Thu, 23 Jun 2011 13:40:25 +0300")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1307662827-16618-1-git-send-email-ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Adrian,
+Hi Chris,
 
-On Thu, Jun 23 2011, Adrian Hunter wrote:
-> Here are 4 minor fixes:
+On Fri, Jun 10, 2011 at 2:40 AM, Ohad Ben-Cohen <ohad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org> wrote:
+> After commit e1866b3 "PM / Runtime: Rework runtime PM handling
+> during driver removal" was introduced, the driver core stopped
+> incrementing the runtime PM usage counter of the device during
+> the invocation of the ->remove() callback.
 >
-> Adrian Hunter (4):
->       mmc: block: switch card to User Data Area when removing the block driver
->       mmc: core: make erase timeout calculation allow for gated clock
->       mmc: queue: append partition subname to queue thread name
->       mmc: queue: bring discard_granularity/alignment into line with SCSI definitions
+> This indirectly broke SDIO's runtime PM path during driver removal,
+> because no one calls _put_sync() anymore after ->remove() completes.
+>
+> This means that the power of runtime-PM-managed SDIO cards is kept
+> high after their driver is removed (even if it was powered down
+> beforehand).
+>
+> Fix that by directly calling _put_sync() when the last usage
+> counter is downref'ed by the SDIO bus.
 
-Thanks, will push these for 3.0.
+Can you please take this 1-liner into 3.0-rc ?
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+It fixes SDIO runtime PM after a breakage was introduced in 3.0.
+
+Thanks,
+Ohad.
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
