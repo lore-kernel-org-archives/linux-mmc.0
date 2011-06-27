@@ -1,21 +1,15 @@
-From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: saeed bishara <saeed.bishara-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: [PATCH v6 00/11] mmc: use nonblock mmc requests to minimize
 	latency
-Date: Mon, 27 Jun 2011 12:21:51 +0200
-Message-ID: <BANLkTinzHPvaH_D=3irfdN72sn7Qxrc2HQ@mail.gmail.com>
+Date: Mon, 27 Jun 2011 13:34:48 +0300
+Message-ID: <BANLkTimnuEK_9RedmD1OgcunX3rPvd-O0Q@mail.gmail.com>
 References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org>
 	<20110621075319.GN26089@n2100.arm.linux.org.uk>
-	<BANLkTikOA3G0Gt4Cxua3EDnAzbFKLAk6Yw@mail.gmail.com>
-	<BANLkTimfxrcKWLZJmVC+1zL27th7j4uzEA@mail.gmail.com>
-	<20110623133702.GZ23234@n2100.arm.linux.org.uk>
-	<BANLkTi=8Awu4Z3ESizE9WDEyWNw0r9N0ug@mail.gmail.com>
-	<BANLkTinK88QT_7Zr2YF1sTAiM778Xp9rFQ@mail.gmail.com>
-	<20110627100212.GA16103@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <20110627100212.GA16103-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
+In-Reply-To: <20110621075319.GN26089-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
 List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
 	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
@@ -29,34 +23,17 @@ To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
 Cc: Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 27 June 2011 12:02, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org> wr=
-ote:
-> On Mon, Jun 27, 2011 at 11:42:52AM +0200, Per Forlin wrote:
->> Conclusion:
->> Working with mmc the relative cost of DSB is almost none. There seems
->> to be slightly higher number for mmc blocking requests with the DSB
->> patch compared to not having it.
->
-> These figures suggest that dsb is comparitively not heavy on the hardware
-> you're testing.
->
-Yes, of course.
-
-> I think I'm going to apply the patch anyway - it certainly makes stuff
-> no worse, and if someone has a platform where dsb is more expensive,
-> then they should see a greater benefit from this change.
->
-I agree.
-
-> The next thing to think about in DMA-land is whether we should total up
-> the size of the SG list and choose whether to flush the individual SG
-> elements or do a full cache flush. =A0There becomes a point where the full
-> cache flush becomes cheaper than flushing each SG element individually.
->
-Interesting.
-I have seen such optimisations in hwmem (yet another memory manager
-for multi media hardware). It would be nice to have such functionality
-in dma-mapping, to be used by anyone
-
-Regards,
-Per
+Pgo+ICtzdGF0aWMgaW5saW5lIHZvaWQgX19kbWFfc3luYyh2b2lkKQo+ICt7Cj4gKyDCoCDCoCDC
+oCBkc2IoKTsKPiArfQo+ICsKPiDCoC8qCj4gwqAqIFJldHVybiB3aGV0aGVyIHRoZSBnaXZlbiBk
+ZXZpY2UgRE1BIGFkZHJlc3MgbWFzayBjYW4gYmUgc3VwcG9ydGVkCj4gwqAqIHByb3Blcmx5LiDC
+oEZvciBleGFtcGxlLCBpZiB5b3VyIGRldmljZSBjYW4gb25seSBkcml2ZSB0aGUgbG93IDI0LWJp
+dHMKPiBAQCAtMzc4LDYgKzM4Myw3IEBAIHN0YXRpYyBpbmxpbmUgZG1hX2FkZHJfdCBkbWFfbWFw
+X3NpbmdsZShzdHJ1Y3QgZGV2aWNlICpkZXYsIHZvaWQgKmNwdV9hZGRyLAo+IMKgIMKgIMKgIMKg
+QlVHX09OKCF2YWxpZF9kbWFfZGlyZWN0aW9uKGRpcikpOwo+Cj4gwqAgwqAgwqAgwqBhZGRyID0g
+X19kbWFfbWFwX3NpbmdsZShkZXYsIGNwdV9hZGRyLCBzaXplLCBkaXIpOwo+ICsgwqAgwqAgwqAg
+X19kbWFfc3luYygpOwpSdXNzZWxsLAogIEknbSBjdXJpb3VzIGFib3V0IHRoZSBjb3JyZWN0bmVz
+cyBvZiB0aGlzIHBhdGNoIGZvciBzeXN0ZW1zIHdpdGgKb3V0ZXIgY2FjaGUuIHNob3VsZG4ndCB0
+aGUgZHNiIGJlIGlzc3VlZCBiZWZvcmUgdGhlIG91dGVyIGNhY2hlCm1haW50ZW5hbmNlPwpzYWVl
+ZAoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGluYXJv
+LWRldiBtYWlsaW5nIGxpc3QKbGluYXJvLWRldkBsaXN0cy5saW5hcm8ub3JnCmh0dHA6Ly9saXN0
+cy5saW5hcm8ub3JnL21haWxtYW4vbGlzdGluZm8vbGluYXJvLWRldgo=
