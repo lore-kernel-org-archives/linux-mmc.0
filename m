@@ -1,53 +1,87 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v6 00/11] mmc: use nonblock mmc requests to minimize latency
-Date: Mon, 27 Jun 2011 17:29:54 +0200
-Message-ID: <BANLkTi=NTqQ-U8AhL0SUYzBTs1RF==aD5g@mail.gmail.com>
-References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org>
-	<20110621075319.GN26089@n2100.arm.linux.org.uk>
-	<BANLkTikOA3G0Gt4Cxua3EDnAzbFKLAk6Yw@mail.gmail.com>
-	<BANLkTimfxrcKWLZJmVC+1zL27th7j4uzEA@mail.gmail.com>
-	<20110623133702.GZ23234@n2100.arm.linux.org.uk>
-	<BANLkTi=8Awu4Z3ESizE9WDEyWNw0r9N0ug@mail.gmail.com>
-	<BANLkTinK88QT_7Zr2YF1sTAiM778Xp9rFQ@mail.gmail.com>
-	<20110627100212.GA16103@n2100.arm.linux.org.uk>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC fixes for 3.0-rc5
+Date: Mon, 27 Jun 2011 12:15:54 -0400
+Message-ID: <m2mxh3cksl.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:33141 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751070Ab1F0P3z convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2011 11:29:55 -0400
-Received: by qyk9 with SMTP id 9so2732324qyk.19
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2011 08:29:55 -0700 (PDT)
-In-Reply-To: <20110627100212.GA16103@n2100.arm.linux.org.uk>
+Received: from void.printf.net ([89.145.121.20]:46150 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752624Ab1F0QQF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 27 Jun 2011 12:16:05 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>, Srinidhi KASAGAR <srinidhi.kasagar@stericsson.com>, vijay.kilari@stericsson.com
-Cc: Per Forlin <per.forlin@linaro.org>, Nicolas Pitre <nicolas.pitre@linaro.org>, Chris Ball <cjb@laptop.org>, linaro-dev@lists.linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Robert Fekete <robert.fekete@linaro.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Mon, Jun 27, 2011 at 12:02 PM, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
+Hi Linus,
 
-> The next thing to think about in DMA-land is whether we should total =
-up
-> the size of the SG list and choose whether to flush the individual SG
-> elements or do a full cache flush. =A0There becomes a point where the=
- full
-> cache flush becomes cheaper than flushing each SG element individuall=
-y.
+Please pull from:
 
-We noticed that even for a single (large) buffer, any cache flush opera=
-tion
-above a certain threshold flushing indiviudal lines become more expensi=
-ve
-than flushing the entire cache.
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
 
-I requested colleagues to look into implenting this threshold in the
-arch/arm/mm/cache-v7.S file. but I think they ran into trouble and
-eventually had to give up on it.
+to receive small regression fixes for MMC.  These have been tested in
+linux-next.  Thanks.
 
-Vijay or Srinidhi, can you share your findings?
 
-Thanks,
-Linus Walleij
+The following changes since commit c11760c6d80ab6aa20e383cf378a7287305f591c:
+
+  isofs: fix bh leak in isofs_fill_super() error case (2011-06-18 07:25:42 -0700)
+
+are available in the git repository at:
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+Adrian Hunter (4):
+      mmc: block: switch card to User Data Area when removing the block driver
+      mmc: core: make erase timeout calculation allow for gated clock
+      mmc: queue: append partition subname to queue thread name
+      mmc: queue: bring discard_granularity/alignment into line with SCSI
+
+Anand Gadiyar (1):
+      mmc: omap_hsmmc: fix ocr mask usage
+
+Chris Ball (1):
+      mmc: vub300: fix null dereferences in error handling
+
+Daniel Drake (1):
+      mmc: sdio: reset card during power_restore
+
+Guennadi Liakhovetski (3):
+      mmc: sdhi: fix module unloading
+      mmc: tmio: fix regression in TMIO_MMC_WRPROTECT_DISABLE handling
+      mmc: sdhi: DMA slave ID 0 is invalid
+
+James Hogan (1):
+      mmc: cb710: fix #ifdef HAVE_EFFICIENT_UNALIGNED_ACCESS
+
+Manoj Iyer (1):
+      mmc: Add PCI fixup quirks for Ricoh 1180:e823 reader
+
+Ohad Ben-Cohen (1):
+      mmc: sdio: fix runtime PM path during driver removal
+
+Per Forlin (1):
+      mmc: omap_hsmmc: use original sg_len for dma_unmap_sg
+
+Wanlong Gao (1):
+      mmc: of_mmc_spi: add NO_IRQ define to of_mmc_spi.c
+
+ drivers/misc/cb710/sgbuf2.c       |    2 +-
+ drivers/mmc/card/block.c          |    5 +++-
+ drivers/mmc/card/queue.c          |   15 +++++--------
+ drivers/mmc/card/queue.h          |    3 +-
+ drivers/mmc/core/core.c           |    2 +-
+ drivers/mmc/core/sdio.c           |   39 +++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/sdio_bus.c       |    2 +-
+ drivers/mmc/host/of_mmc_spi.c     |    5 ++++
+ drivers/mmc/host/omap_hsmmc.c     |    6 ++--
+ drivers/mmc/host/sh_mobile_sdhi.c |    5 ++-
+ drivers/mmc/host/tmio_mmc_pio.c   |    4 +-
+ drivers/mmc/host/vub300.c         |   11 +++------
+ drivers/pci/quirks.c              |    2 +
+ include/linux/pci_ids.h           |    1 +
+ 14 files changed, 74 insertions(+), 28 deletions(-)
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
