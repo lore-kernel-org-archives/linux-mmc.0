@@ -1,96 +1,53 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH 3/3] MMC: OMAP: HSMMC: Remove unused iclk
-Date: Mon, 27 Jun 2011 20:11:05 +0530
-Message-ID: <BANLkTimaPkN-ybtEmk4F=YPzsxm5xbGj5A@mail.gmail.com>
-References: <1308752314-32079-1-git-send-email-balajitk@ti.com>
-	<1308752314-32079-4-git-send-email-balajitk@ti.com>
-	<4E0217F9.9070105@ti.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v6 00/11] mmc: use nonblock mmc requests to minimize latency
+Date: Mon, 27 Jun 2011 17:29:54 +0200
+Message-ID: <BANLkTi=NTqQ-U8AhL0SUYzBTs1RF==aD5g@mail.gmail.com>
+References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org>
+	<20110621075319.GN26089@n2100.arm.linux.org.uk>
+	<BANLkTikOA3G0Gt4Cxua3EDnAzbFKLAk6Yw@mail.gmail.com>
+	<BANLkTimfxrcKWLZJmVC+1zL27th7j4uzEA@mail.gmail.com>
+	<20110623133702.GZ23234@n2100.arm.linux.org.uk>
+	<BANLkTi=8Awu4Z3ESizE9WDEyWNw0r9N0ug@mail.gmail.com>
+	<BANLkTinK88QT_7Zr2YF1sTAiM778Xp9rFQ@mail.gmail.com>
+	<20110627100212.GA16103@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:45996 "EHLO
-	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750994Ab1F0OlR convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 27 Jun 2011 10:41:17 -0400
-In-Reply-To: <4E0217F9.9070105@ti.com>
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:33141 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751070Ab1F0P3z convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2011 11:29:55 -0400
+Received: by qyk9 with SMTP id 9so2732324qyk.19
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2011 08:29:55 -0700 (PDT)
+In-Reply-To: <20110627100212.GA16103@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Cousson, Benoit" <b-cousson@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "tony@atomide.com" <tony@atomide.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "Hilman, Kevin" <khilman@ti.com>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>, Srinidhi KASAGAR <srinidhi.kasagar@stericsson.com>, vijay.kilari@stericsson.com
+Cc: Per Forlin <per.forlin@linaro.org>, Nicolas Pitre <nicolas.pitre@linaro.org>, Chris Ball <cjb@laptop.org>, linaro-dev@lists.linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Robert Fekete <robert.fekete@linaro.org>
 
-On Wed, Jun 22, 2011 at 9:57 PM, Cousson, Benoit <b-cousson@ti.com> wro=
-te:
-> On 6/22/2011 4:18 PM, Krishnamoorthy, Balaji T wrote:
->>
->> After runtime conversion to handle clk,
->> iclk node is not used
->> However fclk node is still used to get clock rate.
->>
->> Signed-off-by: Balaji T K<balajitk@ti.com>
->> ---
->> =A0drivers/mmc/host/omap_hsmmc.c | =A0 10 ----------
->> =A01 files changed, 0 insertions(+), 10 deletions(-)
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_h=
-smmc.c
->> index 5b81d8b..afcca36 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -145,7 +145,6 @@ struct omap_hsmmc_host {
->> =A0 =A0 =A0 =A0struct =A0mmc_command =A0 =A0 *cmd;
->> =A0 =A0 =A0 =A0struct =A0mmc_data =A0 =A0 =A0 =A0*data;
->> =A0 =A0 =A0 =A0struct =A0clk =A0 =A0 =A0 =A0 =A0 =A0 *fclk;
->> - =A0 =A0 =A0 struct =A0clk =A0 =A0 =A0 =A0 =A0 =A0 *iclk;
->> =A0 =A0 =A0 =A0struct =A0clk =A0 =A0 =A0 =A0 =A0 =A0 *dbclk;
->> =A0 =A0 =A0 =A0/*
->> =A0 =A0 =A0 =A0 * vcc =3D=3D configured supply
->> @@ -1855,17 +1854,10 @@ static int __init omap_hsmmc_probe(struct
->> platform_device *pdev)
->>
->> =A0 =A0 =A0 =A0spin_lock_init(&host->irq_lock);
->>
->> - =A0 =A0 =A0 host->iclk =3D clk_get(&pdev->dev, "ick");
->> - =A0 =A0 =A0 if (IS_ERR(host->iclk)) {
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D PTR_ERR(host->iclk);
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->iclk =3D NULL;
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err1;
->> - =A0 =A0 =A0 }
->> =A0 =A0 =A0 =A0host->fclk =3D clk_get(&pdev->dev, "fck");
->> =A0 =A0 =A0 =A0if (IS_ERR(host->fclk)) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D PTR_ERR(host->fclk);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->fclk =3D NULL;
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 clk_put(host->iclk);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto err1;
->> =A0 =A0 =A0 =A0}
->>
->> @@ -2025,7 +2017,6 @@ err_irq:
->> =A0 =A0 =A0 =A0pm_runtime_mark_last_busy(host->dev);
->> =A0 =A0 =A0 =A0pm_runtime_put_autosuspend(host->dev);
->> =A0 =A0 =A0 =A0clk_put(host->fclk);
->
-> Since you just have to use the clk_get_rate, you can remove as well a=
-ll the
-> clock related functions for the fck node: clk_put / clk_enable...
+On Mon, Jun 27, 2011 at 12:02 PM, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
 
-clk_enable is removed, but would prefer to keep clk_put for balancing c=
-lk_get
+> The next thing to think about in DMA-land is whether we should total =
+up
+> the size of the SG list and choose whether to flush the individual SG
+> elements or do a full cache flush. =A0There becomes a point where the=
+ full
+> cache flush becomes cheaper than flushing each SG element individuall=
+y.
 
->
->> - =A0 =A0 =A0 clk_put(host->iclk);
->> =A0 =A0 =A0 =A0if (host->got_dbclk) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_disable(host->dbclk);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_put(host->dbclk);
->> @@ -2062,7 +2053,6 @@ static int omap_hsmmc_remove(struct platform_d=
-evice
->> *pdev)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pm_runtime_forbid(host->dev);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pm_runtime_disable(host->dev);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_put(host->fclk);
->
-> Here as well.
->
-> Regards,
-> Benoit
->
+We noticed that even for a single (large) buffer, any cache flush opera=
+tion
+above a certain threshold flushing indiviudal lines become more expensi=
+ve
+than flushing the entire cache.
+
+I requested colleagues to look into implenting this threshold in the
+arch/arm/mm/cache-v7.S file. but I think they ran into trouble and
+eventually had to give up on it.
+
+Vijay or Srinidhi, can you share your findings?
+
+Thanks,
+Linus Walleij
