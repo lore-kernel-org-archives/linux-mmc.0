@@ -1,64 +1,89 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
-Date: Tue, 28 Jun 2011 17:13:22 +0800
-Message-ID: <BANLkTi=4Q3x3QFB7pOPQpRzFJ1pW6OPjvQ@mail.gmail.com>
-References: <20110605123852.BC6F39D401C@zog.reactivated.net>
-	<BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com>
-	<BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
-	<BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com>
-	<BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
-	<BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com>
-	<BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
-	<BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com>
-	<BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
-	<BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com>
-	<BANLkTim2NfCcfRRmcVXepLA0evusZoTJGA@mail.gmail.com>
-	<BANLkTimg08VnOMrUwnH6dKzXPJO1fpOh6w@mail.gmail.com>
-	<BANLkTinfeGUADyi1dTSjPRMnbP+TCtN0dQ@mail.gmail.com>
-	<BANLkTimbxSA_86a=2QH1pEGg1-O9neEyhw@mail.gmail.com>
-	<BANLkTimQUkf9ZsanZ-czqtYnyRSSSch4nQ@mail.gmail.com>
-	<BANLkTi=jsPYEQOnRDyoXD_EzKdqby-QhYw@mail.gmail.com>
-	<BANLkTi=VWUcCQJaBChnitVq1_TT1huE30A@mail.gmail.com>
-	<BANLkTinG-CmEh9yXL9Sp+W7PyatvEdOhZQ@mail.gmail.com>
-	<BANLkTi=zuMosw68EMSYjrVi+0dBQkNicJw@mail.gmail.com>
-	<BANLkTi=6Fa66QYay_R6vkmREPcb1Bw_FRw@mail.gmail.com>
-	<BANLkTimOVsSe=mPOZ=ArGfy4w2QrYgLA+Q@mail.gmail.com>
-	<BANLkTino3hz9NCfjtqM2UYtncYa6y_k=Qg@mail.gmail.com>
-	<BANLkTi==drxM8Y4BffQwDSzraWXQ3-ta0g@mail.gmail.com>
-	<BANLkTi=2EFMDNjOdmfqkWD1pQJthgR4uKQ@mail.gmail.com>
-	<BANLkTimMPXdSKf3bO8ymco+Z8D215Fy5TQ@mail.gmail.com>
-	<BANLkTinJe2wAQwSrb+V3e2Xd87d+UQzFWQ@mail.gmail.com>
-	<BANLkTinTV-0eCR+U4M+73Fo_z_izyQjGKw@mail.gmail.com>
-	<BANLkTinD-3joE8QgeW07gWMW4gBwQRNzXg@mail.gmail.com>
-	<BANLkTikkoD0vaxaFBbPd6UZa=iPJgaK2xQ@mail.gmail.com>
-	<BANLkTik+0tgbWcfbUgAt6UxgEazt5i-yfQ@mail.gmail.com>
+From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v8 12/12] mmc: block: add handling for two parallel block
+	requests in issue_rw_rq
+Date: Tue, 28 Jun 2011 11:39:41 +0200
+Message-ID: <BANLkTikkv+RQKZCX2PeZUDhM1gnVXCKO2w@mail.gmail.com>
+References: <1309248717-14606-1-git-send-email-per.forlin@linaro.org>
+	<1309248717-14606-13-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:42534 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756675Ab1F1JNY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2011 05:13:24 -0400
-Received: by qyk9 with SMTP id 9so3119124qyk.19
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Jun 2011 02:13:22 -0700 (PDT)
-In-Reply-To: <BANLkTik+0tgbWcfbUgAt6UxgEazt5i-yfQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+In-Reply-To: <1309248717-14606-13-git-send-email-per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
+List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
+Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Nickolay
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Daniel Drake <dsd@laptop.org>
 
-Hi, Ohad
+On 28 June 2011 10:11, Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> Change mmc_blk_issue_rw_rq() to become asynchronous.
+> The execution flow looks like this:
+> The mmc-queue calls issue_rw_rq(), which sends the request
+> to the host and returns back to the mmc-queue. The mmc-queue calls
+> issue_rw_rq() again with a new request. This new request is prepared,
+> in isuue_rw_rq(), then it waits for the active request to complete before
+> pushing it to the host. When to mmc-queue is empty it will call
+> isuue_rw_rq() with req=3DNULL to finish off the active request
+> without starting a new request.
+>
+> Signed-off-by: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+> =A0drivers/mmc/card/block.c | =A0 80 ++++++++++++++++++++++++++++++++++++=
++--------
+> =A0drivers/mmc/card/queue.c | =A0 17 +++++++---
+> =A0drivers/mmc/card/queue.h | =A0 =A01 +
+> =A03 files changed, 78 insertions(+), 20 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 7ed2c68..825741e 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+...
+> @@ -1066,6 +1085,13 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *m=
+q, struct request *req)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D __blk_end_request(=
+req, 0,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 =A0 =A0 =A0brq->data.bytes_xfered);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0spin_unlock_irq(&md->lock);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (status =3D=3D MMC_BLK_S=
+UCCESS && ret) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* If this =
+happen it is a bug */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN=
+_ERR "%s BUG rq_tot %d d_xfer %d\n",
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0__func__, blk_rq_bytes(req),
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0brq->data.bytes_xfered);
++ rqc =3D NULL
+If there is a new request (rqc !=3D NULL)  it will already be started
+when reaching this point.
+If rqc is set it will be started again at start_new_req.
 
-One question :(
+I wonder if this paranoia check is necessary. If "status =3D=3D
+MMC_BLK_SUCCESS" all bytes are transferred and no error returned from
+mmc layer.
+ __blk_end_request would always return 0 in this case, please comment
+if you disagree.
 
-Under pm_runtime mechanism, how to dynamically open/close wlan.
+...
+> + start_new_req:
+> + =A0 =A0 =A0 if (rqc) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, m=
+q);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_start_req(card->host, &mq->mqrq_cur->mm=
+c_active, NULL);
+> + =A0 =A0 =A0 }
+> +
+> =A0 =A0 =A0 =A0return 0;
+> =A0}
 
-If the wlan chip really power off, the firmware should be reloaded,
-since the firmware is download to ram and disappear after power off.
-So wlan probe function should be called for re-downloading, is it be
-achieved by calling pm_runtime_get_sync and mmc_power_restore_host?
-
->From Daniel's test log, "echo mem > /sys/power/state" is used to
-restart wlan, is this standard method?
-Since host->bus_ops is already not NULL, mmc_rescan will return direclty.
-
-Thanks
+/Per
