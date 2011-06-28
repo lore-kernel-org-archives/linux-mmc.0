@@ -1,56 +1,88 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [RFC] How working MMC_BUS_WIDTH_TEST??
-Date: Tue, 28 Jun 2011 19:54:27 +0900
-Message-ID: <4E09B2E3.20903@samsung.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
+Date: Tue, 28 Jun 2011 14:10:10 +0300
+Message-ID: <BANLkTinGo0V=oOj+V_PBoiOyS=aPq2tVHw@mail.gmail.com>
+References: <20110605123852.BC6F39D401C@zog.reactivated.net>
+ <BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com> <BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
+ <BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com> <BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
+ <BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com> <BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
+ <BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com> <BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
+ <BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com> <BANLkTim2NfCcfRRmcVXepLA0evusZoTJGA@mail.gmail.com>
+ <BANLkTimg08VnOMrUwnH6dKzXPJO1fpOh6w@mail.gmail.com> <BANLkTinfeGUADyi1dTSjPRMnbP+TCtN0dQ@mail.gmail.com>
+ <BANLkTimbxSA_86a=2QH1pEGg1-O9neEyhw@mail.gmail.com> <BANLkTimQUkf9ZsanZ-czqtYnyRSSSch4nQ@mail.gmail.com>
+ <BANLkTi=jsPYEQOnRDyoXD_EzKdqby-QhYw@mail.gmail.com> <BANLkTi=VWUcCQJaBChnitVq1_TT1huE30A@mail.gmail.com>
+ <BANLkTinG-CmEh9yXL9Sp+W7PyatvEdOhZQ@mail.gmail.com> <BANLkTi=zuMosw68EMSYjrVi+0dBQkNicJw@mail.gmail.com>
+ <BANLkTi=6Fa66QYay_R6vkmREPcb1Bw_FRw@mail.gmail.com> <BANLkTimOVsSe=mPOZ=ArGfy4w2QrYgLA+Q@mail.gmail.com>
+ <BANLkTino3hz9NCfjtqM2UYtncYa6y_k=Qg@mail.gmail.com> <BANLkTi==drxM8Y4BffQwDSzraWXQ3-ta0g@mail.gmail.com>
+ <BANLkTi=2EFMDNjOdmfqkWD1pQJthgR4uKQ@mail.gmail.com> <BANLkTimMPXdSKf3bO8ymco+Z8D215Fy5TQ@mail.gmail.com>
+ <BANLkTinJe2wAQwSrb+V3e2Xd87d+UQzFWQ@mail.gmail.com> <BANLkTinTV-0eCR+U4M+73Fo_z_izyQjGKw@mail.gmail.com>
+ <BANLkTinD-3joE8QgeW07gWMW4gBwQRNzXg@mail.gmail.com> <BANLkTikkoD0vaxaFBbPd6UZa=iPJgaK2xQ@mail.gmail.com>
+ <BANLkTik+0tgbWcfbUgAt6UxgEazt5i-yfQ@mail.gmail.com> <BANLkTi=4Q3x3QFB7pOPQpRzFJ1pW6OPjvQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:31285 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752988Ab1F1KyM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2011 06:54:12 -0400
-Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LNH007TIYA6UQP0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 28 Jun 2011 19:54:10 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LNH005X1YAA91@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 28 Jun 2011 19:54:10 +0900 (KST)
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:50212 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756804Ab1F1LKd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2011 07:10:33 -0400
+Received: by vws1 with SMTP id 1so56098vws.19
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Jun 2011 04:10:32 -0700 (PDT)
+In-Reply-To: <BANLkTi=4Q3x3QFB7pOPQpRzFJ1pW6OPjvQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Philip Rakity <prakity@marvell.com>, Kyungmin Park <kyungmin.park@samsung.com>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Daniel Drake <dsd@laptop.org>
 
-Hi..
+Hi Zhangfei,
 
-I found the MMC_CAP_BUS_WIDTH_TEST...
-In mailing, I read the related patches..
-but i didn't fully understand...
+On Tue, Jun 28, 2011 at 12:13 PM, zhangfei gao <zhangfei.gao@gmail.com> wrote:
+> One question :(
 
-/*
- * If controller can't handle bus width test,
- * compare ext_csd previously read in 1 bit mode
- * against ext_csd at new bus width
- */
-if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
-	err = mmc_compare_ext_csds(card,
-		ext_csd,
-		bus_width);
-else
-	err = mmc_bus_test(card, bus_width);
-if (!err)
-	break;
+Np, feel free to ask !
+(but it's usually better to start a new thread, rather then forking an
+existing one under the same subject)
 
-And i tested suspend/resume..it's failed..
-If i didn't set MMC_CAP_BUS_WIDTH_TEST, always return -EINVAL..
-(using SDHCI controller, card is eMMC4.41)
+> Under pm_runtime mechanism, how to dynamically open/close wlan.
 
-Didn't compare ext_csd's value..
+Actually it should be the other way around: when you enable/disable
+WLAN (e.g. Ifconfig up/down), you then use the runtime PM API to power
+up/down the device.
 
-So i want to know how use MMC_CAP_BUS_WIDTH_TEST..
+> If the wlan chip really power off, the firmware should be reloaded,
+> since the firmware is download to ram and disappear after power off.
+
+Right.
+
+> So wlan probe function should be called for re-downloading, is it be
+> achieved by calling pm_runtime_get_sync and mmc_power_restore_host?
+
+Not really;
+
+I assume you refer to libertas_sdio, which AFAICT, is built to power
+on the device (and configure it) on ->probe(), and then power it off
+on ->remove().
+It then seems that this model was extended to support suspend/resume
+by asking the MMC core to ->remove() the card on suspend, and then
+relying on it to re-detect and re-add the card on resume, which will
+trigger libertas' ->probe() again.
+
+IMHO this model is a little awkward; as you can see, powering on/off
+the chip requires re-probing the driver.
+
+Take a look how mac80211 drivers (and wl12xx in particular) behave:
+they are powered on (and firmware is downloaded) when the user brings
+the wlan0 interface up, and then powered off when the wlan interface
+is brought down.
+
+The runtime PM API is only being used to control the power to the
+device, but downloading the firmware and doing driver-specific
+configuration is up to the driver to do.
+
+> From Daniel's test log, "echo mem > /sys/power/state" is used to
+> restart wlan, is this standard method?
+
+That command was only used to trigger system suspend - Daniel was
+testing libertas & runtime PM behavior in that scenario.
 
 Thanks,
-Jaehoon Chung
+Ohad.
