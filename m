@@ -1,53 +1,69 @@
-From: Paul Walmsley <paul@pwsan.com>
-Subject: Re: [PATCH 2/3] MMC: OMAP: HSMMC: add runtime pm support
-Date: Tue, 28 Jun 2011 12:41:30 -0600 (MDT)
-Message-ID: <alpine.DEB.2.00.1106281240390.2874@utopia.booyaka.com>
-References: <1308752314-32079-1-git-send-email-balajitk@ti.com> <1308752314-32079-3-git-send-email-balajitk@ti.com> <alpine.DEB.2.00.1106281116530.2874@utopia.booyaka.com> <BANLkTimT6nGP_ecJjZ6201=CiddN7BrsPg@mail.gmail.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [RFC] How working MMC_BUS_WIDTH_TEST??
+Date: Tue, 28 Jun 2011 12:50:57 -0700
+Message-ID: <A143AB12-AF84-4CD9-BA9C-97651D0ED29C@marvell.com>
+References: <4E09B2E3.20903@samsung.com>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="155748971-16772951-1309286490=:2874"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from utopia.booyaka.com ([72.9.107.138]:43454 "EHLO
-	utopia.booyaka.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760649Ab1F1Slc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2011 14:41:32 -0400
-In-Reply-To: <BANLkTimT6nGP_ecJjZ6201=CiddN7BrsPg@mail.gmail.com>
+Received: from na3sys009aob106.obsmtp.com ([74.125.149.76]:41478 "EHLO
+	na3sys009aog106.obsmtp.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751117Ab1F1Tvm convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 28 Jun 2011 15:51:42 -0400
+In-Reply-To: <4E09B2E3.20903@samsung.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, khilman@ti.com, b-cousson@ti.com
-
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---155748971-16772951-1309286490=:2874
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-
-On Tue, 28 Jun 2011, T Krishnamoorthy, Balaji wrote:
-
-> On Tue, Jun 28, 2011 at 10:52 PM, Paul Walmsley <paul@pwsan.com> wrote:
-> >
-> > On Wed, 22 Jun 2011, Balaji T K wrote:
-> >
-> >> Use runtime autosuspend APIs to enable auto suspend delay
-> >
-> > Does this really need to use runtime autosuspend? =A0Seems to me that s=
-ince
-> > PM runtime is just controlling the MMC IP blocks and not the regulators=
- in
-> > this instance, this could simply use pm_runtime_put*() and just avoid t=
-he
-> > extra power wastage and complexity involved in autosuspend.
->=20
-> I have seen some instabilities if delay is very less, on some production =
-boards.
-
-Could you be more specific?  What type of instabilities did you see?
-
-> The previous implementation used 100ms delay before disabling the clocks.
-> Is there any specific issue I should be aware of, for using _autosuspend =
-?
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
 
-- Paul
---155748971-16772951-1309286490=:2874--
+On Jun 28, 2011, at 3:54 AM, Jaehoon Chung wrote:
+
+> Hi..
+> 
+> I found the MMC_CAP_BUS_WIDTH_TEST...
+> In mailing, I read the related patches..
+> but i didn't fully understand...
+> 
+> /*
+> * If controller can't handle bus width test,
+> * compare ext_csd previously read in 1 bit mode
+> * against ext_csd at new bus width
+> */
+> if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
+> 	err = mmc_compare_ext_csds(card,
+> 		ext_csd,
+> 		bus_width);
+> else
+> 	err = mmc_bus_test(card, bus_width);
+> if (!err)
+> 	break;
+> 
+> And i tested suspend/resume..it's failed..
+> If i didn't set MMC_CAP_BUS_WIDTH_TEST, always return -EINVAL..
+> (using SDHCI controller, card is eMMC4.41)
+> 
+> Didn't compare ext_csd's value..
+> 
+> So i want to know how use MMC_CAP_BUS_WIDTH_TEST..
+
+I am using eMMC and code works fine so  maybe there is issue in no ext_csd.  You will need to
+add debug code to the compare_ext_csd and see what is not right and we can adjust the code.
+I am surprised that resume fails -- code will default to 1 bit data and it is NOT possible for this to
+be wrong.  At the moment -- clueless to explain with more information.
+
+TheCMD14/ CMD19 is in JEDEC spec for bus width testing.  Sends a pattern to the card and
+based on the returned values detects the bus width.  Some controllers do NOT support this command.
+The just do not work.  You need to figure this out by enabling the quirk.  No other way to know.
+
+regards,
+
+Philip
+
+> 
+> Thanks,
+> Jaehoon Chung
+
