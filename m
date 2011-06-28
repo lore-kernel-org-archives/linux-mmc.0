@@ -1,7 +1,7 @@
 From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH 2/4] mmci: adjust calculation of f_min
-Date: Tue, 28 Jun 2011 09:57:33 +0200
-Message-ID: <1309247853-17143-1-git-send-email-linus.walleij@stericsson.com>
+Subject: [PATCH 0/4] MMCI patches for 3.1
+Date: Tue, 28 Jun 2011 09:57:13 +0200
+Message-ID: <1309247833-17061-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -16,40 +16,47 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: linux-arm-kernel-bounces@lists.infradead.org
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Linus Walleij <linus.walleij@linaro.org>, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: Dmitry Tarnyagin <dmitry.tarnyagin@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Sebastian Rasmussen <sebastian.rasmussen@stericsson.com>, Per Forlin <per.forlin@linaro.org>, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ulf Hansson <ulf.hansson@stericsson.com>
+From: Linus Walleij <linus.walleij@linaro.org>
 
-For the st_clkdiv variant f_min is too low for practical cases,
-there is a heuristic calculation that appear to set the min
-frequency to mclk rounded up with 512, for our practical use
-cases dividing by 257 gives a reasonable floor value on the
-ST Micro version of the clock divider.
+This is a collection of ST-Ericsson patches for MMCI for 3.1.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
-Reviewed-by: Sebastian Rasmussen <sebastian.rasmussen@stericsson.com>
-[Use DIV_ROUND_UP to clarify elder code]
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/host/mmci.c |    5 ++++-
- 1 files changed, 4 insertions(+), 1 deletions(-)
+They are arranged in rising controversy-order for incremental
+handling...
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index fe14072..c73d054 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1063,7 +1063,10 @@ static int __devinit mmci_probe(struct amba_device *dev,
- 	}
- 
- 	mmc->ops = &mmci_ops;
--	mmc->f_min = (host->mclk + 511) / 512;
-+	if (variant->st_clkdiv)
-+		mmc->f_min = host->mclk / 257;
-+	else
-+		mmc->f_min = DIV_ROUND_UP(host->mclk, 512);
- 	/*
- 	 * If the platform data supplies a maximum operating
- 	 * frequency, this takes precedence. Else, we fall back
+[1/4] is pretty straight-formward handling of a missing error
+ bit.
+
+[2/4] adjusts the min frequency for the card in accordance with
+ needs we have on the ST Micro based platforms.
+
+[3/4] is a reqrite of the earlier discussed patch that
+ synchronize DMA termination callbacks with the DATAEND IRQ,
+ but now we have added a timeout so that failed transactions
+ can be handled.
+
+[4/4] rewrites the pio_write function to work properly with
+ non-4-byte aligned accesses, and replaces an earlier
+ workaround. For regular MMC/SD accesses which are always
+ evenly divisible by 4 it should have no effect, the
+ difference is in the handling of odd transactions, such as
+ can be seen when processing SDIO requests.
+
+All patches have been tested on U8500, U300 and RealView
+PB1176 with mounted filesystems exercising read and write,
+so as to assure there are no obvious regressions.
+
+Ulf Hansson (4):
+  mmci: use StartBitErr to detect bad connections
+  mmci: adjust calculation of f_min
+  mmci: sync DATAEND irq with dma|pio transfer done
+  mmci: fixup sg buffer handling in pio_write
+
+ drivers/mmc/host/mmci.c |  324 +++++++++++++++++++++++++++++-----------------
+ drivers/mmc/host/mmci.h |   13 ++-
+ 2 files changed, 216 insertions(+), 121 deletions(-)
+
 -- 
 1.7.3.2
