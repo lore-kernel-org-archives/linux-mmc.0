@@ -1,263 +1,64 @@
-From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v8 12/12] mmc: block: add handling for two parallel block
-	requests in issue_rw_rq
-Date: Tue, 28 Jun 2011 10:11:57 +0200
-Message-ID: <1309248717-14606-13-git-send-email-per.forlin@linaro.org>
-References: <1309248717-14606-1-git-send-email-per.forlin@linaro.org>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
+Date: Tue, 28 Jun 2011 17:13:22 +0800
+Message-ID: <BANLkTi=4Q3x3QFB7pOPQpRzFJ1pW6OPjvQ@mail.gmail.com>
+References: <20110605123852.BC6F39D401C@zog.reactivated.net>
+	<BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com>
+	<BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
+	<BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com>
+	<BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
+	<BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com>
+	<BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
+	<BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com>
+	<BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
+	<BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com>
+	<BANLkTim2NfCcfRRmcVXepLA0evusZoTJGA@mail.gmail.com>
+	<BANLkTimg08VnOMrUwnH6dKzXPJO1fpOh6w@mail.gmail.com>
+	<BANLkTinfeGUADyi1dTSjPRMnbP+TCtN0dQ@mail.gmail.com>
+	<BANLkTimbxSA_86a=2QH1pEGg1-O9neEyhw@mail.gmail.com>
+	<BANLkTimQUkf9ZsanZ-czqtYnyRSSSch4nQ@mail.gmail.com>
+	<BANLkTi=jsPYEQOnRDyoXD_EzKdqby-QhYw@mail.gmail.com>
+	<BANLkTi=VWUcCQJaBChnitVq1_TT1huE30A@mail.gmail.com>
+	<BANLkTinG-CmEh9yXL9Sp+W7PyatvEdOhZQ@mail.gmail.com>
+	<BANLkTi=zuMosw68EMSYjrVi+0dBQkNicJw@mail.gmail.com>
+	<BANLkTi=6Fa66QYay_R6vkmREPcb1Bw_FRw@mail.gmail.com>
+	<BANLkTimOVsSe=mPOZ=ArGfy4w2QrYgLA+Q@mail.gmail.com>
+	<BANLkTino3hz9NCfjtqM2UYtncYa6y_k=Qg@mail.gmail.com>
+	<BANLkTi==drxM8Y4BffQwDSzraWXQ3-ta0g@mail.gmail.com>
+	<BANLkTi=2EFMDNjOdmfqkWD1pQJthgR4uKQ@mail.gmail.com>
+	<BANLkTimMPXdSKf3bO8ymco+Z8D215Fy5TQ@mail.gmail.com>
+	<BANLkTinJe2wAQwSrb+V3e2Xd87d+UQzFWQ@mail.gmail.com>
+	<BANLkTinTV-0eCR+U4M+73Fo_z_izyQjGKw@mail.gmail.com>
+	<BANLkTinD-3joE8QgeW07gWMW4gBwQRNzXg@mail.gmail.com>
+	<BANLkTikkoD0vaxaFBbPd6UZa=iPJgaK2xQ@mail.gmail.com>
+	<BANLkTik+0tgbWcfbUgAt6UxgEazt5i-yfQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <1309248717-14606-1-git-send-email-per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Nickolay
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:42534 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756675Ab1F1JNY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2011 05:13:24 -0400
+Received: by qyk9 with SMTP id 9so3119124qyk.19
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Jun 2011 02:13:22 -0700 (PDT)
+In-Reply-To: <BANLkTik+0tgbWcfbUgAt6UxgEazt5i-yfQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Daniel Drake <dsd@laptop.org>
 
-Change mmc_blk_issue_rw_rq() to become asynchronous.
-The execution flow looks like this:
-The mmc-queue calls issue_rw_rq(), which sends the request
-to the host and returns back to the mmc-queue. The mmc-queue calls
-issue_rw_rq() again with a new request. This new request is prepared,
-in isuue_rw_rq(), then it waits for the active request to complete before
-pushing it to the host. When to mmc-queue is empty it will call
-isuue_rw_rq() with req=NULL to finish off the active request
-without starting a new request.
+Hi, Ohad
 
-Signed-off-by: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/mmc/card/block.c |   80 +++++++++++++++++++++++++++++++++++++--------
- drivers/mmc/card/queue.c |   17 +++++++---
- drivers/mmc/card/queue.h |    1 +
- 3 files changed, 78 insertions(+), 20 deletions(-)
+One question :(
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 7ed2c68..825741e 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -822,12 +822,14 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
- 	 R1_CC_ERROR |		/* Card controller error */		\
- 	 R1_ERROR)		/* General/unknown error */
- 
--int mmc_blk_err_check(struct mmc_blk_request *brq,
--		      struct request *req,
--		      struct mmc_card *card,
--		      struct mmc_blk_data *md)
-+static int mmc_blk_err_check(struct mmc_card *card,
-+			     struct mmc_async_req *areq)
- {
--	int ret = MMC_BLK_SUCCESS;
-+	enum mmc_blk_status ret = MMC_BLK_SUCCESS;
-+	struct mmc_queue_req *mq_mrq = container_of(areq, struct mmc_queue_req,
-+						    mmc_active);
-+	struct mmc_blk_request *brq = &mq_mrq->brq;
-+	struct request *req = mq_mrq->req;
- 
- 	/*
- 	 * sbc.error indicates a problem with the set block count
-@@ -1038,24 +1040,41 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 		brq->data.sg_len = i;
- 	}
- 
-+	mqrq->mmc_active.mrq = &brq->mrq;
-+	mqrq->mmc_active.err_check = mmc_blk_err_check;
-+
- 	mmc_queue_bounce_pre(mqrq);
- }
- 
--static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
-+static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- {
- 	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
- 	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
- 	int ret = 1, disable_multi = 0, retry = 0;
- 	enum mmc_blk_status status;
-+	struct mmc_queue_req *mq_rq;
-+	struct request *req;
-+	struct mmc_async_req *areq;
- 
--	do {
--		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, disable_multi, mq);
--		mmc_wait_for_req(card->host, &brq->mrq);
-+	if (!rqc && !mq->mqrq_prev->req)
-+		return 0;
- 
--		mmc_queue_bounce_post(mq->mqrq_cur);
-+	do {
-+		if (rqc) {
-+			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
-+			areq = &mq->mqrq_cur->mmc_active;
-+		} else
-+			areq = NULL;
-+		areq = mmc_start_req(card->host, areq, (int *) &status);
-+		if (!areq)
-+			return 0;
-+
-+		mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
-+		brq = &mq_rq->brq;
-+		req = mq_rq->req;
-+		mmc_queue_bounce_post(mq_rq);
- 
--		status = mmc_blk_err_check(brq, req, card, md);
- 		switch (status) {
- 		case MMC_BLK_SUCCESS:
- 		case MMC_BLK_PARTIAL:
-@@ -1066,6 +1085,13 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- 			ret = __blk_end_request(req, 0,
- 						brq->data.bytes_xfered);
- 			spin_unlock_irq(&md->lock);
-+			if (status == MMC_BLK_SUCCESS && ret) {
-+				/* If this happen it is a bug */
-+				printk(KERN_ERR "%s BUG rq_tot %d d_xfer %d\n",
-+				       __func__, blk_rq_bytes(req),
-+				       brq->data.bytes_xfered);
-+				goto cmd_abort;
-+			}
- 			break;
- 		case MMC_BLK_CMD_ERR:
- 			goto cmd_err;
-@@ -1087,9 +1113,19 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- 			ret = __blk_end_request(req, -EIO,
- 						brq->data.blksz);
- 			spin_unlock_irq(&md->lock);
-+			if (!ret)
-+				goto start_new_req;
- 			break;
- 		}
- 
-+		if (ret) {
-+			/*
-+			 * In case of a none complete request
-+			 * prepare it again and resend.
-+			 */
-+			mmc_blk_rw_rq_prep(mq_rq, card, disable_multi, mq);
-+			mmc_start_req(card->host, &mq_rq->mmc_active, NULL);
-+		}
- 	} while (ret);
- 
- 	return 1;
-@@ -1124,6 +1160,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- 		ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
- 	spin_unlock_irq(&md->lock);
- 
-+ start_new_req:
-+	if (rqc) {
-+		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
-+		mmc_start_req(card->host, &mq->mqrq_cur->mmc_active, NULL);
-+	}
-+
- 	return 0;
- }
- 
-@@ -1133,26 +1175,34 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
- 
--	mmc_claim_host(card->host);
-+	if (req && !mq->mqrq_prev->req)
-+		/* claim host only for the first request */
-+		mmc_claim_host(card->host);
-+
- 	ret = mmc_blk_part_switch(card, md);
- 	if (ret) {
- 		ret = 0;
- 		goto out;
- 	}
- 
--	if (req->cmd_flags & REQ_DISCARD) {
-+	if (req && req->cmd_flags & REQ_DISCARD) {
-+		/* complete ongoing async transfer before issuing discard */
-+		if (card->host->areq)
-+			mmc_blk_issue_rw_rq(mq, NULL);
- 		if (req->cmd_flags & REQ_SECURE)
- 			ret = mmc_blk_issue_secdiscard_rq(mq, req);
- 		else
- 			ret = mmc_blk_issue_discard_rq(mq, req);
--	} else if (req->cmd_flags & REQ_FLUSH) {
-+	} else if (req && req->cmd_flags & REQ_FLUSH) {
- 		ret = mmc_blk_issue_flush(mq, req);
- 	} else {
- 		ret = mmc_blk_issue_rw_rq(mq, req);
- 	}
- 
- out:
--	mmc_release_host(card->host);
-+	if (!req)
-+		/* release host only when there are no more requests */
-+		mmc_release_host(card->host);
- 	return ret;
- }
- 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index d69d954..8c51a54 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -52,6 +52,7 @@ static int mmc_queue_thread(void *d)
- 	down(&mq->thread_sem);
- 	do {
- 		struct request *req = NULL;
-+		struct mmc_queue_req *tmp;
- 
- 		spin_lock_irq(q->queue_lock);
- 		set_current_state(TASK_INTERRUPTIBLE);
-@@ -59,7 +60,10 @@ static int mmc_queue_thread(void *d)
- 		mq->mqrq_cur->req = req;
- 		spin_unlock_irq(q->queue_lock);
- 
--		if (!req) {
-+		if (req || mq->mqrq_prev->req) {
-+			set_current_state(TASK_RUNNING);
-+			mq->issue_fn(mq, req);
-+		} else {
- 			if (kthread_should_stop()) {
- 				set_current_state(TASK_RUNNING);
- 				break;
-@@ -67,11 +71,14 @@ static int mmc_queue_thread(void *d)
- 			up(&mq->thread_sem);
- 			schedule();
- 			down(&mq->thread_sem);
--			continue;
- 		}
--		set_current_state(TASK_RUNNING);
- 
--		mq->issue_fn(mq, req);
-+		/* Current request becomes previous request and vice versa. */
-+		mq->mqrq_prev->brq.mrq.data = NULL;
-+		mq->mqrq_prev->req = NULL;
-+		tmp = mq->mqrq_prev;
-+		mq->mqrq_prev = mq->mqrq_cur;
-+		mq->mqrq_cur = tmp;
- 	} while (1);
- 	up(&mq->thread_sem);
- 
-@@ -97,7 +104,7 @@ static void mmc_request(struct request_queue *q)
- 		return;
- 	}
- 
--	if (!mq->mqrq_cur->req)
-+	if (!mq->mqrq_cur->req && !mq->mqrq_prev->req)
- 		wake_up_process(mq->thread);
- }
- 
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 1a637d2..d2a1eb4 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -19,6 +19,7 @@ struct mmc_queue_req {
- 	char			*bounce_buf;
- 	struct scatterlist	*bounce_sg;
- 	unsigned int		bounce_sg_len;
-+	struct mmc_async_req	mmc_active;
- };
- 
- struct mmc_queue {
--- 
-1.7.4.1
+Under pm_runtime mechanism, how to dynamically open/close wlan.
+
+If the wlan chip really power off, the firmware should be reloaded,
+since the firmware is download to ram and disappear after power off.
+So wlan probe function should be called for re-downloading, is it be
+achieved by calling pm_runtime_get_sync and mmc_power_restore_host?
+
+>From Daniel's test log, "echo mem > /sys/power/state" is used to
+restart wlan, is this standard method?
+Since host->bus_ops is already not NULL, mmc_rescan will return direclty.
+
+Thanks
