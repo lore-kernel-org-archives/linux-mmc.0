@@ -1,50 +1,91 @@
-From: saeed bishara <saeed.bishara-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v6 00/11] mmc: use nonblock mmc requests to minimize
-	latency
-Date: Tue, 28 Jun 2011 09:22:20 +0300
-Message-ID: <BANLkTin80Z34=_uQaP=Dbv7eDxU1PH_qSw@mail.gmail.com>
-References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org>
-	<20110621075319.GN26089@n2100.arm.linux.org.uk>
-	<BANLkTimnuEK_9RedmD1OgcunX3rPvd-O0Q@mail.gmail.com>
-	<20110627110234.GC16103@n2100.arm.linux.org.uk>
+From: Linus Walleij <linus.walleij@stericsson.com>
+Subject: [PATCH 1/4] mmci: use StartBitErr to detect bad connections
+Date: Tue, 28 Jun 2011 09:57:25 +0200
+Message-ID: <1309247845-17105-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <20110627110234.GC16103-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Linus Walleij <linus.walleij@linaro.org>, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gTW9uLCBKdW4gMjcsIDIwMTEgYXQgMjowMiBQTSwgUnVzc2VsbCBLaW5nIC0gQVJNIExpbnV4
-CjxsaW51eEBhcm0ubGludXgub3JnLnVrPiB3cm90ZToKPiBPbiBNb24sIEp1biAyNywgMjAxMSBh
-dCAwMTozNDo0OFBNICswMzAwLCBzYWVlZCBiaXNoYXJhIHdyb3RlOgo+PiBSdXNzZWxsLAo+PiDC
-oCBJJ20gY3VyaW91cyBhYm91dCB0aGUgY29ycmVjdG5lc3Mgb2YgdGhpcyBwYXRjaCBmb3Igc3lz
-dGVtcyB3aXRoCj4+IG91dGVyIGNhY2hlLiBzaG91bGRuJ3QgdGhlIGRzYiBiZSBpc3N1ZWQgYmVm
-b3JlIHRoZSBvdXRlciBjYWNoZQo+PiBtYWludGVuYW5jZT8KPgo+IE1heWJlIHdlIHNob3VsZCBk
-byB0d28gcGFzc2VzIG92ZXIgU0cgbGlzdHMgdGhlbiAtIG9uZSBmb3IgdGhlIGlubmVyIGFuZAo+
-IGFub3RoZXIgZm9yIHRoZSBvdXRlciBjYWNoZT8KPgo+IEluIGVmZmVjdCB3ZSBjb3VsZCBkbyB0
-aHJlZSBwYXNzZXM6Cj4KPiAxLiBDYWxjdWxhdGUgdGhlIHRvdGFsIHNpemUgb2YgdGhlIFNHIGxp
-c3QgdG8gZGV0ZXJtaW5lIHdoZXRoZXIgZnVsbAo+IMKgIGNhY2hlIGZsdXNoIGlzIG1vcmUgZWZm
-aWNpZW50Lgo+IDIuIEZsdXNoIGlubmVyIGNhY2hlCj4gwqAgVGhlbiBkc2IoKQo+IDMuIEZsdXNo
-IG91dGVyIGNhY2hlCj4gwqAgQW5vdGhlciBkc2IoKQo+Cmxvb2tpbmcgYXQgbDJ4MCBjYWNoZSwg
-aXQgc2VlbXMgdG8gbWUgdGhhdCBpdCB3b3VsZCBiZSBwb3NzaWJsZSB0byBkbwphc3luY2hyb25v
-dXMgbDIgY2FjaGUgbWFpbnRlbmFuY2UgZm9yCnJhbmdlIG9wZXJhdGlvbnMsIHNvIG1heWJlIHRo
-YXQgY2FuIGJlIHV0aWxpemVkIGluIG9yZGVyIHRvCnBhcmFsbGVsaXNtIGJldHdlZW4gaW5uZXIg
-Y2FjaGUgYW5kIG91dGVyIGNhY2hlIG1haW50ZW5hbmNlLApzbyB0aGUgZmxvdyBjYW4gYmU6CjIu
-IEZsdXNoIHNnIGJ1ZmZlciBmcm9tIGlubmVyIGNhY2hlCjMuIGRzYigpCjQuIHN0YXJ0IEZsdXNo
-IG91dGVyIGNhY2hlIGZvciB0aGF0IGJ1ZmZlcgo1LiBGbHVzaCBuZXh0IHNnIGJ1ZmZlciBmcm9t
-IGlubmVyIGNhY2hlCjYuIGRzYgo3LiBnb3RvIDQuCjguIHdoZW4gbm8gbW9yZSBidWZmZXJzIGxl
-ZnQsIHdhaXQgZm9yIG91dGVyIGNhY2hlIG9wZXJhdGlvbnMKCnNhZWVkCgpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW5hcm8tZGV2IG1haWxpbmcgbGlz
-dApsaW5hcm8tZGV2QGxpc3RzLmxpbmFyby5vcmcKaHR0cDovL2xpc3RzLmxpbmFyby5vcmcvbWFp
-bG1hbi9saXN0aW5mby9saW5hcm8tZGV2Cg==
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+
+Stresstesting insert/remove of SD-cards can trigger
+a StartBitErr. This made the driver to hang in forever
+waiting for a non ocurring data timeout.
+
+This bit and interrupt is documented in the original
+PL180 TRM, just never implemented until now.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+Reviewed-by: Linus Walleij <linus.walleij@stericsson.com>
+Reviewed-by: Jonas Aberg <jonas.aberg@stericsson.com>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/host/mmci.c |    2 ++
+ drivers/mmc/host/mmci.h |    5 ++++-
+ 2 files changed, 6 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 7721de9..fe14072 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -582,6 +582,8 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 			data->error = -EILSEQ;
+ 		} else if (status & MCI_DATATIMEOUT) {
+ 			data->error = -ETIMEDOUT;
++		} else if (status & MCI_STARTBITERR) {
++			data->error = -ECOMM;
+ 		} else if (status & MCI_TXUNDERRUN) {
+ 			data->error = -EIO;
+ 		} else if (status & MCI_RXOVERRUN) {
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index bb32e21..2164e8c 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -86,6 +86,7 @@
+ #define MCI_CMDRESPEND		(1 << 6)
+ #define MCI_CMDSENT		(1 << 7)
+ #define MCI_DATAEND		(1 << 8)
++#define MCI_STARTBITERR		(1 << 9)
+ #define MCI_DATABLOCKEND	(1 << 10)
+ #define MCI_CMDACTIVE		(1 << 11)
+ #define MCI_TXACTIVE		(1 << 12)
+@@ -112,6 +113,7 @@
+ #define MCI_CMDRESPENDCLR	(1 << 6)
+ #define MCI_CMDSENTCLR		(1 << 7)
+ #define MCI_DATAENDCLR		(1 << 8)
++#define MCI_STARTBITERRCLR	(1 << 9)
+ #define MCI_DATABLOCKENDCLR	(1 << 10)
+ /* Extended status bits for the ST Micro variants */
+ #define MCI_ST_SDIOITC		(1 << 22)
+@@ -127,6 +129,7 @@
+ #define MCI_CMDRESPENDMASK	(1 << 6)
+ #define MCI_CMDSENTMASK		(1 << 7)
+ #define MCI_DATAENDMASK		(1 << 8)
++#define MCI_STARTBITERRMASK	(1 << 9)
+ #define MCI_DATABLOCKENDMASK	(1 << 10)
+ #define MCI_CMDACTIVEMASK	(1 << 11)
+ #define MCI_TXACTIVEMASK	(1 << 12)
+@@ -150,7 +153,7 @@
+ #define MCI_IRQENABLE	\
+ 	(MCI_CMDCRCFAILMASK|MCI_DATACRCFAILMASK|MCI_CMDTIMEOUTMASK|	\
+ 	MCI_DATATIMEOUTMASK|MCI_TXUNDERRUNMASK|MCI_RXOVERRUNMASK|	\
+-	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK)
++	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK|MCI_STARTBITERRMASK)
+ 
+ /* These interrupts are directed to IRQ1 when two IRQ lines are available */
+ #define MCI_IRQ1MASK \
+-- 
+1.7.3.2
