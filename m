@@ -1,7 +1,7 @@
 From: Linus Walleij <linus.walleij@stericsson.com>
-Subject: [PATCH 1/4] mmci: use StartBitErr to detect bad connections
-Date: Tue, 28 Jun 2011 09:57:25 +0200
-Message-ID: <1309247845-17105-1-git-send-email-linus.walleij@stericsson.com>
+Subject: [PATCH 2/4] mmci: adjust calculation of f_min
+Date: Tue, 28 Jun 2011 09:57:33 +0200
+Message-ID: <1309247853-17143-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -21,71 +21,35 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ulf Hansson <ulf.hansson@stericsson.com>
 
-Stresstesting insert/remove of SD-cards can trigger
-a StartBitErr. This made the driver to hang in forever
-waiting for a non ocurring data timeout.
-
-This bit and interrupt is documented in the original
-PL180 TRM, just never implemented until now.
+For the st_clkdiv variant f_min is too low for practical cases,
+there is a heuristic calculation that appear to set the min
+frequency to mclk rounded up with 512, for our practical use
+cases dividing by 257 gives a reasonable floor value on the
+ST Micro version of the clock divider.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
-Reviewed-by: Linus Walleij <linus.walleij@stericsson.com>
-Reviewed-by: Jonas Aberg <jonas.aberg@stericsson.com>
+Reviewed-by: Sebastian Rasmussen <sebastian.rasmussen@stericsson.com>
+[Use DIV_ROUND_UP to clarify elder code]
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c |    2 ++
- drivers/mmc/host/mmci.h |    5 ++++-
- 2 files changed, 6 insertions(+), 1 deletions(-)
+ drivers/mmc/host/mmci.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 7721de9..fe14072 100644
+index fe14072..c73d054 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -582,6 +582,8 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 			data->error = -EILSEQ;
- 		} else if (status & MCI_DATATIMEOUT) {
- 			data->error = -ETIMEDOUT;
-+		} else if (status & MCI_STARTBITERR) {
-+			data->error = -ECOMM;
- 		} else if (status & MCI_TXUNDERRUN) {
- 			data->error = -EIO;
- 		} else if (status & MCI_RXOVERRUN) {
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index bb32e21..2164e8c 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -86,6 +86,7 @@
- #define MCI_CMDRESPEND		(1 << 6)
- #define MCI_CMDSENT		(1 << 7)
- #define MCI_DATAEND		(1 << 8)
-+#define MCI_STARTBITERR		(1 << 9)
- #define MCI_DATABLOCKEND	(1 << 10)
- #define MCI_CMDACTIVE		(1 << 11)
- #define MCI_TXACTIVE		(1 << 12)
-@@ -112,6 +113,7 @@
- #define MCI_CMDRESPENDCLR	(1 << 6)
- #define MCI_CMDSENTCLR		(1 << 7)
- #define MCI_DATAENDCLR		(1 << 8)
-+#define MCI_STARTBITERRCLR	(1 << 9)
- #define MCI_DATABLOCKENDCLR	(1 << 10)
- /* Extended status bits for the ST Micro variants */
- #define MCI_ST_SDIOITC		(1 << 22)
-@@ -127,6 +129,7 @@
- #define MCI_CMDRESPENDMASK	(1 << 6)
- #define MCI_CMDSENTMASK		(1 << 7)
- #define MCI_DATAENDMASK		(1 << 8)
-+#define MCI_STARTBITERRMASK	(1 << 9)
- #define MCI_DATABLOCKENDMASK	(1 << 10)
- #define MCI_CMDACTIVEMASK	(1 << 11)
- #define MCI_TXACTIVEMASK	(1 << 12)
-@@ -150,7 +153,7 @@
- #define MCI_IRQENABLE	\
- 	(MCI_CMDCRCFAILMASK|MCI_DATACRCFAILMASK|MCI_CMDTIMEOUTMASK|	\
- 	MCI_DATATIMEOUTMASK|MCI_TXUNDERRUNMASK|MCI_RXOVERRUNMASK|	\
--	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK)
-+	MCI_CMDRESPENDMASK|MCI_CMDSENTMASK|MCI_STARTBITERRMASK)
+@@ -1063,7 +1063,10 @@ static int __devinit mmci_probe(struct amba_device *dev,
+ 	}
  
- /* These interrupts are directed to IRQ1 when two IRQ lines are available */
- #define MCI_IRQ1MASK \
+ 	mmc->ops = &mmci_ops;
+-	mmc->f_min = (host->mclk + 511) / 512;
++	if (variant->st_clkdiv)
++		mmc->f_min = host->mclk / 257;
++	else
++		mmc->f_min = DIV_ROUND_UP(host->mclk, 512);
+ 	/*
+ 	 * If the platform data supplies a maximum operating
+ 	 * frequency, this takes precedence. Else, we fall back
 -- 
 1.7.3.2
