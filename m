@@ -1,18 +1,18 @@
 From: James Hogan <james.hogan@imgtec.com>
 Subject: mmc_test Correct xfer_size at write
-Date: Tue, 28 Jun 2011 11:35:30 +0100
-Message-ID: <4E09AE72.70105@imgtec.com>
+Date: Tue, 28 Jun 2011 11:37:25 +0100
+Message-ID: <4E09AEE5.4050505@imgtec.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:32211 "EHLO multi.imgtec.com"
+Received: from multi.imgtec.com ([194.200.65.239]:53757 "EHLO multi.imgtec.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756883Ab1F1Kfs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 28 Jun 2011 06:35:48 -0400
+	id S1756988Ab1F1Khb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 28 Jun 2011 06:37:31 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pierre Ossman <drzeus@drzeus.cx>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Pierre Ossman <pierre@ossman.eu>, linux-mmc <linux-mmc@vger.kernel.org>
 
 Hi,
 
