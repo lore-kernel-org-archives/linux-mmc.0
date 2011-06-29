@@ -1,90 +1,62 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 1/2] mmc: sdhci-pci: add 8-bit bus width support for mrst hc0
-Date: Wed, 29 Jun 2011 14:23:46 +0300
-Message-ID: <1309346627-32630-2-git-send-email-adrian.hunter@intel.com>
-References: <1309346627-32630-1-git-send-email-adrian.hunter@intel.com>
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: [PATCH 2/3] MMC: OMAP: HSMMC: add runtime pm support
+Date: Wed, 29 Jun 2011 19:47:28 +0530
+Message-ID: <BANLkTikni_xO7NQXQyv7XVeEH4Nowpr1Ow@mail.gmail.com>
+References: <1308752314-32079-1-git-send-email-balajitk@ti.com>
+	<1308752314-32079-3-git-send-email-balajitk@ti.com>
+	<alpine.DEB.2.00.1106281116530.2874@utopia.booyaka.com>
+	<BANLkTimT6nGP_ecJjZ6201=CiddN7BrsPg@mail.gmail.com>
+	<alpine.DEB.2.00.1106281240390.2874@utopia.booyaka.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:64578 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755046Ab1F2LYB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Jun 2011 07:24:01 -0400
-In-Reply-To: <1309346627-32630-1-git-send-email-adrian.hunter@intel.com>
+Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:38355 "EHLO
+	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755947Ab1F2OYn convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2011 10:24:43 -0400
+In-Reply-To: <alpine.DEB.2.00.1106281240390.2874@utopia.booyaka.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@marvell.com>, Major Lee <major_lee@wistron.com>, Alan Cox <alan@linux.intel.com>, Dirk Brandewie <dirk.brandewie@gmail.com>
+To: Paul Walmsley <paul@pwsan.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, khilman@ti.com, b-cousson@ti.com
 
-From: Major Lee <major_lee@wistron.com>
+On Wed, Jun 29, 2011 at 12:11 AM, Paul Walmsley <paul@pwsan.com> wrote:
+> On Tue, 28 Jun 2011, T Krishnamoorthy, Balaji wrote:
+>
+>> On Tue, Jun 28, 2011 at 10:52 PM, Paul Walmsley <paul@pwsan.com> wro=
+te:
+>> >
+>> > On Wed, 22 Jun 2011, Balaji T K wrote:
+>> >
+>> >> Use runtime autosuspend APIs to enable auto suspend delay
+>> >
+>> > Does this really need to use runtime autosuspend? =A0Seems to me t=
+hat since
+>> > PM runtime is just controlling the MMC IP blocks and not the regul=
+ators in
+>> > this instance, this could simply use pm_runtime_put*() and just av=
+oid the
+>> > extra power wastage and complexity involved in autosuspend.
+>>
+>> I have seen some instabilities if delay is very less, on some produc=
+tion boards.
+>
+> Could you be more specific? =A0What type of instabilities did you see=
+?
 
-And hook platform_8bit_width to support 8-bit bus width.
+There have been some experiments on our customer programs to reduce thi=
+s
+value to a few ms and infrequent crashes were observed (stress testing
+for several hours) while
+trying to access the controller registers.
 
-Signed-off-by: Major Lee <major_lee@wistron.com>
-Signed-off-by: Alan Cox <alan@linux.intel.com>
-Signed-off-by: Dirk Brandewie <dirk.brandewie@gmail.com>
----
- drivers/mmc/host/sdhci-pci.c |   33 +++++++++++++++++++++++++++++++++
- 1 files changed, 33 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 936bbca..e1ae855 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -143,6 +143,12 @@ static const struct sdhci_pci_fixes sdhci_cafe = {
- 			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
- };
- 
-+static int mrst_hc_probe_slot(struct sdhci_pci_slot *slot)
-+{
-+	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-+	return 0;
-+}
-+
- /*
-  * ADMA operation is disabled for Moorestown platform due to
-  * hardware bugs.
-@@ -159,6 +165,7 @@ static int mrst_hc_probe(struct sdhci_pci_chip *chip)
- 
- static const struct sdhci_pci_fixes sdhci_intel_mrst_hc0 = {
- 	.quirks		= SDHCI_QUIRK_BROKEN_ADMA | SDHCI_QUIRK_NO_HISPD_BIT,
-+	.probe_slot	= mrst_hc_probe_slot,
- };
- 
- static const struct sdhci_pci_fixes sdhci_intel_mrst_hc1_hc2 = {
-@@ -789,8 +796,34 @@ static int sdhci_pci_enable_dma(struct sdhci_host *host)
- 	return 0;
- }
- 
-+static int sdhci_pci_8bit_width(struct sdhci_host *host, int width)
-+{
-+	u8 ctrl;
-+
-+	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+
-+	switch (width) {
-+	case MMC_BUS_WIDTH_8:
-+		ctrl |= SDHCI_CTRL_8BITBUS;
-+		ctrl &= ~SDHCI_CTRL_4BITBUS;
-+		break;
-+	case MMC_BUS_WIDTH_4:
-+		ctrl |= SDHCI_CTRL_4BITBUS;
-+		ctrl &= ~SDHCI_CTRL_8BITBUS;
-+		break;
-+	default:
-+		ctrl &= ~(SDHCI_CTRL_8BITBUS | SDHCI_CTRL_4BITBUS);
-+		break;
-+	}
-+
-+	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+
-+	return 0;
-+}
-+
- static struct sdhci_ops sdhci_pci_ops = {
- 	.enable_dma	= sdhci_pci_enable_dma,
-+	.platform_8bit_width	= sdhci_pci_8bit_width,
- };
- 
- /*****************************************************************************\
--- 
-1.7.4.4
-
+>
+>> The previous implementation used 100ms delay before disabling the cl=
+ocks.
+>> Is there any specific issue I should be aware of, for using _autosus=
+pend ?
+>
+>
+> - Paul
