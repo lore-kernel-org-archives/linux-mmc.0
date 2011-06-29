@@ -1,55 +1,49 @@
 From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: [PATCH 1/2] MMC: PM: add suspend/resume in atmel-mci
-Date: Wed, 29 Jun 2011 18:54:19 +0200
-Message-ID: <1ef60c032bc39531302c1603bfcb841d2d437ccc.1309366360.git.nicolas.ferre@atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org, hans-christian.egtvedt@atmel.com
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, kernel@avr32linux.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Subject: [PATCH 2/2] MMC: remove EXPERIMENTAL from the DMA selection of atmel-mci
+Date: Wed, 29 Jun 2011 18:54:20 +0200
+Message-ID: <580de99c35694febc25e516ead3e3bdd9e041dfa.1309366360.git.nicolas.ferre@atmel.com>
+References: <1ef60c032bc39531302c1603bfcb841d2d437ccc.1309366360.git.nicolas.ferre@atmel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from newsmtp5.atmel.com ([204.2.163.5]:1322 "EHLO sjogate2.atmel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753919Ab1F2PwO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2011 11:52:14 -0400
+In-Reply-To: <1ef60c032bc39531302c1603bfcb841d2d437ccc.1309366360.git.nicolas.ferre@atmel.com>
+In-Reply-To: <1ef60c032bc39531302c1603bfcb841d2d437ccc.1309366360.git.nicolas.ferre@atmel.com>
+References: <1ef60c032bc39531302c1603bfcb841d2d437ccc.1309366360.git.nicolas.ferre@atmel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org, hans-christian.egtvedt@atmel.com
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kernel@avr32linux.org, Nicolas Ferre <nicolas.ferre@atmel.com>
 
-VGFrZSBjYXJlIG9mIHNsb3RzIHdoaWxlIGdvaW5nIHRvIHN1c3BlbmQgc3RhdGUuCgpTaWduZWQt
-b2ZmLWJ5OiBOaWNvbGFzIEZlcnJlIDxuaWNvbGFzLmZlcnJlQGF0bWVsLmNvbT4KU2lnbmVkLW9m
-Zi1ieTogVXdlIEtsZWluZS1Lw7ZuaWcgPHUua2xlaW5lLWtvZW5pZ0BwZW5ndXRyb25peC5kZT4K
-LS0tCiBkcml2ZXJzL21tYy9ob3N0L2F0bWVsLW1jaS5jIHwgICA1MSArKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysKIDEgZmlsZXMgY2hhbmdlZCwgNTEgaW5zZXJ0aW9u
-cygrKSwgMCBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L2F0bWVs
-LW1jaS5jIGIvZHJpdmVycy9tbWMvaG9zdC9hdG1lbC1tY2kuYwppbmRleCBhYTgwMzlmLi5jNDE0
-ZWJlIDEwMDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L2F0bWVsLW1jaS5jCisrKyBiL2RyaXZl
-cnMvbW1jL2hvc3QvYXRtZWwtbWNpLmMKQEAgLTE4NzgsOCArMTg3OCw1OSBAQCBzdGF0aWMgaW50
-IF9fZXhpdCBhdG1jaV9yZW1vdmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKIAlyZXR1
-cm4gMDsKIH0KIAorI2lmZGVmIENPTkZJR19QTQorc3RhdGljIGludCBhdG1jaV9zdXNwZW5kKHN0
-cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYsIHBtX21lc3NhZ2VfdCBtZXNnKQoreworCXN0cnVj
-dCBhdG1lbF9tY2kgKmhvc3QgPSBwbGF0Zm9ybV9nZXRfZHJ2ZGF0YShwZGV2KTsKKwlzdHJ1Y3Qg
-YXRtZWxfbWNpX3Nsb3QgKnNsb3Q7CisJaW50IGksIHJldDsKKworCSBmb3IgKGkgPSAwOyBpIDwg
-QVRNRUxfTUNJX01BWF9OUl9TTE9UUzsgaSsrKSB7CisJCXNsb3QgPSBob3N0LT5zbG90W2ldOwor
-CQlpZiAoIXNsb3QpCisJCQljb250aW51ZTsKKwkJcmV0ID0gbW1jX3N1c3BlbmRfaG9zdChzbG90
-LT5tbWMpOworCQlpZiAocmV0IDwgMCkgeworCQkJd2hpbGUgKC0taSA+PSAwKSB7CisJCQkJc2xv
-dCA9IGhvc3QtPnNsb3RbaV07CisJCQkJaWYgKHNsb3QpCisJCQkJCW1tY19yZXN1bWVfaG9zdCho
-b3N0LT5zbG90W2ldLT5tbWMpOworCQkJfQorCQkJcmV0dXJuIHJldDsKKwkJfQorCX0KKworCXJl
-dHVybiAwOworfQorCitzdGF0aWMgaW50IGF0bWNpX3Jlc3VtZShzdHJ1Y3QgcGxhdGZvcm1fZGV2
-aWNlICpwZGV2KQoreworCXN0cnVjdCBhdG1lbF9tY2kgKmhvc3QgPSBwbGF0Zm9ybV9nZXRfZHJ2
-ZGF0YShwZGV2KTsKKwlzdHJ1Y3QgYXRtZWxfbWNpX3Nsb3QgKnNsb3Q7CisJaW50IGksIHJldDsK
-KworCWZvciAoaSA9IDA7IGkgPCBBVE1FTF9NQ0lfTUFYX05SX1NMT1RTOyBpKyspIHsKKwkJc2xv
-dCA9IGhvc3QtPnNsb3RbaV07CisJCWlmICghc2xvdCkKKwkJCWNvbnRpbnVlOworCQlyZXQgPSBt
-bWNfcmVzdW1lX2hvc3Qoc2xvdC0+bW1jKTsKKwkJaWYgKHJldCA8IDApCisJCQlyZXR1cm4gcmV0
-OworCX0KKworCXJldHVybiAwOworfQorI2Vsc2UKKyNkZWZpbmUgYXRtY2lfc3VzcGVuZAlOVUxM
-CisjZGVmaW5lIGF0bWNpX3Jlc3VtZQlOVUxMCisjZW5kaWYKKworCisKIHN0YXRpYyBzdHJ1Y3Qg
-cGxhdGZvcm1fZHJpdmVyIGF0bWNpX2RyaXZlciA9IHsKIAkucmVtb3ZlCQk9IF9fZXhpdF9wKGF0
-bWNpX3JlbW92ZSksCisJLnN1c3BlbmQJPSBhdG1jaV9zdXNwZW5kLAorCS5yZXN1bWUJCT0gYXRt
-Y2lfcmVzdW1lLAogCS5kcml2ZXIJCT0gewogCQkubmFtZQkJPSAiYXRtZWxfbWNpIiwKIAl9LAot
-LSAKMS43LjMKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-XwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmlu
-ZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9s
-aW51eC1hcm0ta2VybmVsCg==
+This driver has been used for years with this option enabled.
+
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+---
+ drivers/mmc/host/Kconfig |    7 +++----
+ 1 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 56dbf3f..d459948 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -281,13 +281,12 @@ config MMC_ATMELMCI
+ endchoice
+ 
+ config MMC_ATMELMCI_DMA
+-	bool "Atmel MCI DMA support (EXPERIMENTAL)"
+-	depends on MMC_ATMELMCI && (AVR32 || ARCH_AT91SAM9G45) && DMA_ENGINE && EXPERIMENTAL
++	bool "Atmel MCI DMA support"
++	depends on MMC_ATMELMCI && (AVR32 || ARCH_AT91SAM9G45) && DMA_ENGINE
+ 	help
+ 	  Say Y here to have the Atmel MCI driver use a DMA engine to
+ 	  do data transfers and thus increase the throughput and
+-	  reduce the CPU utilization. Note that this is highly
+-	  experimental and may cause the driver to lock up.
++	  reduce the CPU utilization.
+ 
+ 	  If unsure, say N.
+ 
+-- 
+1.7.3
+
