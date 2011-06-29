@@ -1,38 +1,90 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
+From: Kevin Hilman <khilman@ti.com>
 Subject: Re: [PATCH 2/3] MMC: OMAP: HSMMC: add runtime pm support
-Date: Wed, 29 Jun 2011 22:04:24 +0530
-Message-ID: <BANLkTikE_CV7+oQdtzxJYirZy4JnJcQVsQ@mail.gmail.com>
+Date: Wed, 29 Jun 2011 10:39:45 -0700
+Message-ID: <87y60ksfj2.fsf@ti.com>
 References: <1308752314-32079-1-git-send-email-balajitk@ti.com>
 	<1308752314-32079-3-git-send-email-balajitk@ti.com>
 	<alpine.DEB.2.00.1106281116530.2874@utopia.booyaka.com>
 	<BANLkTimT6nGP_ecJjZ6201=CiddN7BrsPg@mail.gmail.com>
-	<alpine.DEB.2.00.1106281240390.2874@utopia.booyaka.com>
-	<BANLkTikni_xO7NQXQyv7XVeEH4Nowpr1Ow@mail.gmail.com>
-	<alpine.DEB.2.00.1106290937350.2874@utopia.booyaka.com>
+	<87ei2dy9zk.fsf@ti.com>
+	<BANLkTimccmdwXW2=jnAhv4GbzhcNPsUDQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog111.obsmtp.com ([74.125.149.205]:43818 "EHLO
-	na3sys009aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757248Ab1F2Qe1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2011 12:34:27 -0400
-In-Reply-To: <alpine.DEB.2.00.1106290937350.2874@utopia.booyaka.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <BANLkTimccmdwXW2=jnAhv4GbzhcNPsUDQA@mail.gmail.com>
+	(T. Krishnamoorthy's message of "Wed, 29 Jun 2011 20:03:58 +0530")
+Sender: linux-omap-owner@vger.kernel.org
+To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Cc: "Nayak, Rajendra" <rnayak@ti.com>, Paul Walmsley <paul@pwsan.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, b-cousson@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Walmsley <paul@pwsan.com>
-Cc: "T Krishnamoorthy, Balaji" <balajitk@ti.com>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, cjb <cjb@laptop.org>, tony <tony@atomide.com>, "madhu.cr" <madhu.cr@ti.com>, khilman <khilman@ti.com>, b-cousson <b-cousson@ti.com>
 
-On Wed, Jun 29, 2011 at 9:08 PM, Paul Walmsley <paul@pwsan.com> wrote:
-> On Wed, 29 Jun 2011, T Krishnamoorthy, Balaji wrote:
->
->> There have been some experiments on our customer programs to reduce this
->> value to a few ms and infrequent crashes were observed (stress testing
->> for several hours) while trying to access the controller registers.
->
-> By the way, could you send along a copy of the stress test script?
->
+"T Krishnamoorthy, Balaji" <balajitk@ti.com> writes:
 
-Paul, these scenarios are not scripted but end user tests with
-additional devices
-(WLAN, which is connected on the same controller) and executed 'on field' .
-One such log is here .. http://pastebin.com/nq3cfZnT
+> On Wed, Jun 29, 2011 at 2:00 AM, Kevin Hilman <khilman@ti.com> wrote:
+>> "T Krishnamoorthy, Balaji" <balajitk@ti.com> writes:
+>>
+>>> On Tue, Jun 28, 2011 at 10:52 PM, Paul Walmsley <paul@pwsan.com> wr=
+ote:
+>>>> (cc'ing Adrian also)
+>>>>
+>>>> Hi Balaji
+>>>>
+>>>> On Wed, 22 Jun 2011, Balaji T K wrote:
+>>>>
+>>>>> Use runtime autosuspend APIs to enable auto suspend delay
+>>>>
+>>>> Does this really need to use runtime autosuspend? =C2=A0Seems to m=
+e that since
+>>>> PM runtime is just controlling the MMC IP blocks and not the regul=
+ators in
+>>>> this instance, this could simply use pm_runtime_put*() and just av=
+oid the
+>>>> extra power wastage and complexity involved in autosuspend.
+>>>>
+>>>
+>>> I have seen some instabilities if delay is very less, on some produ=
+ction boards.
+>>> The previous implementation used 100ms delay before disabling the c=
+locks.
+>>
+>> And your new one is using 50ms. =C2=A0How did this value come about?
+>>
+
+> I don't have any specific affinity to this number, but when requests
+> are bursty, they arrive within a few 10s of ms within each
+> other. Didn't want to have the context/save restore penalty associate=
+d
+> with every request.
+
+Have you measured the context save/restore penalty when only the clocks
+are gated (and no regulators involved) ?
+
+In the current code, it's understandable why there were large latencies
+that were avoided because the regulators were also cut.  With only the
+clocks being cut, the latency involved will be significantly less.
+
+>> As Paul mentioned, the timeout value here is probably usecase depeen=
+d
+>>
+>
+> There is no direct relationship to the use case. Block layer buffers
+> and reworks the order of requests and they are usually queued
+> together. Having no context save / restore penalty for each request i=
+s
+> definitely desirable. =20
+
+Desirable for what?
+
+What is implied in that statement is desirable for performance.
+
+What if a different user would prefer the power savings gained by more
+aggressively cuttting clocks over the performance gains of leaving
+clocks enabled?
+
+Kevin
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
