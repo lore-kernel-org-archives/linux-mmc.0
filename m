@@ -1,33 +1,92 @@
 From: James Hogan <james.hogan@imgtec.com>
-Subject: [PATCH 0/4] mmc: dw_mmc: mmc_test related fixes
-Date: Wed, 29 Jun 2011 09:27:40 +0100
-Message-ID: <4E0AE1FC.3070201@imgtec.com>
+Subject: [PATCH 1/4] mmc: dw_mmc: fix stop when fallen back to PIO
+Date: Wed, 29 Jun 2011 09:28:43 +0100
+Message-ID: <4E0AE23B.2010107@imgtec.com>
+References: <4E0AE1FC.3070201@imgtec.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:61455 "EHLO multi.imgtec.com"
+Received: from multi.imgtec.com ([194.200.65.239]:61721 "EHLO multi.imgtec.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753713Ab1F2I1n (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Jun 2011 04:27:43 -0400
+	id S1753750Ab1F2I3P (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2011 04:29:15 -0400
+In-Reply-To: <4E0AE1FC.3070201@imgtec.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Will <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>l
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Chris Ball <cjb@laptop.org>, Will <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-More improvements and fixes for the Synopsys DesignWare MCI driver so
-that it passes the mmc_test suite:
+There are several situations when dw_mci_submit_data_dma() decides to
+fall back to PIO mode instead of using DMA, due to a short (to avoid
+overhead) or "complex" (e.g. with unaligned buffers) transaction, even
+though host->use_dma is set. However dw_mci_stop_dma() decides whether
+to stop DMA or set the EVENT_XFER_COMPLETE event based on host->use_dma.
+When falling back to PIO mode this results in data timeout errors
+getting missed and the driver locking up.
 
-[PATCH 1/4] mmc: dw_mmc: fix stop when fallen back to PIO
-	Fixes a hang after an error/timeout in PIO mode.
-[PATCH 2/4] mmc: dw_mmc: remove unnecessary error messages
-	Removes some dev_err's since an errno is sufficient.
-[PATCH 3/4] mmc: dw_mmc: handle "no CRC status" error
-	Fixes "Correct xfer_size at write" tests.
-[PATCH 4/4] mmc: dw_mmc: reset FIFO after an error
-	Fixes modified "Correct xfer_size at write" tests (3 blocks
-	instead of 2).
- 
- drivers/mmc/host/dw_mmc.c  |   41 +++++++++++++++++++++++++++++++----------
+Therefore add host->using_dma to indicate whether the current
+transaction is using dma or not, and adjust dw_mci_stop_dma() to use
+that instead.
+
+Signed-off-by: James Hogan <james.hogan@imgtec.com>
+---
+ drivers/mmc/host/dw_mmc.c  |    6 +++++-
  include/linux/mmc/dw_mmc.h |    2 ++
- 2 files changed, 33 insertions(+), 10 deletions(-)
+ 2 files changed, 7 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 10b6979..fcff3c0 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -287,7 +287,7 @@ static void send_stop_cmd(struct dw_mci *host, struct mmc_data *data)
+ /* DMA interface functions */
+ static void dw_mci_stop_dma(struct dw_mci *host)
+ {
+-	if (host->use_dma) {
++	if (host->using_dma) {
+ 		host->dma_ops->stop(host);
+ 		host->dma_ops->cleanup(host);
+ 	} else {
+@@ -435,6 +435,8 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+ 	unsigned int i, direction, sg_len;
+ 	u32 temp;
+ 
++	host->using_dma = 0;
++
+ 	/* If we don't have a channel, we can't do DMA */
+ 	if (!host->use_dma)
+ 		return -ENODEV;
+@@ -454,6 +456,8 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+ 			return -EINVAL;
+ 	}
+ 
++	host->using_dma = 1;
++
+ 	if (data->flags & MMC_DATA_READ)
+ 		direction = DMA_FROM_DEVICE;
+ 	else
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index f3f68ee..6b46819 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -48,6 +48,7 @@ struct mmc_data;
+  * @data: The data currently being transferred, or NULL if no data
+  *	transfer is in progress.
+  * @use_dma: Whether DMA channel is initialized or not.
++ * @using_dma: Whether DMA is in use for the current transfer.
+  * @sg_dma: Bus address of DMA buffer.
+  * @sg_cpu: Virtual address of DMA buffer.
+  * @dma_ops: Pointer to platform-specific DMA callbacks.
+@@ -121,6 +122,7 @@ struct dw_mci {
+ 
+ 	/* DMA interface members*/
+ 	int			use_dma;
++	int			using_dma;
+ 
+ 	dma_addr_t		sg_dma;
+ 	void			*sg_cpu;
+-- 
+1.7.2.3
+
 
