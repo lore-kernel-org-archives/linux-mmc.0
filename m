@@ -1,79 +1,83 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
-Date: Wed, 29 Jun 2011 17:19:14 +0800
-Message-ID: <BANLkTinpAc0GeB1Lccg6f-R54qXN9Rq0Uw@mail.gmail.com>
-References: <20110605123852.BC6F39D401C@zog.reactivated.net>
-	<BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com>
-	<BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
-	<BANLkTi=-ZRVLqrmriGOV7YGXHHvJHTmkzg@mail.gmail.com>
-	<BANLkTikvdm=RLoY38xrvVAF5Zo9qCSa4hg@mail.gmail.com>
-	<BANLkTinbqoPOMuL30ksmDJEtM2RebAhksQ@mail.gmail.com>
-	<BANLkTini3Oz7P3ji9rrnh75bcwf=vdyWkg@mail.gmail.com>
-	<BANLkTimngwDzxW04AMFWBNYLvYFXUhMWQQ@mail.gmail.com>
-	<BANLkTikUaKt3ESg0RKGpxCBK1t6fVvvGqx__uGzp_thPyzcmpA@mail.gmail.com>
-	<BANLkTin43tZO1s-MFCnNt0q7pKvf1XRC9w@mail.gmail.com>
-	<BANLkTim2NfCcfRRmcVXepLA0evusZoTJGA@mail.gmail.com>
-	<BANLkTimg08VnOMrUwnH6dKzXPJO1fpOh6w@mail.gmail.com>
-	<BANLkTinfeGUADyi1dTSjPRMnbP+TCtN0dQ@mail.gmail.com>
-	<BANLkTimbxSA_86a=2QH1pEGg1-O9neEyhw@mail.gmail.com>
-	<BANLkTimQUkf9ZsanZ-czqtYnyRSSSch4nQ@mail.gmail.com>
-	<BANLkTi=jsPYEQOnRDyoXD_EzKdqby-QhYw@mail.gmail.com>
-	<BANLkTi=VWUcCQJaBChnitVq1_TT1huE30A@mail.gmail.com>
-	<BANLkTinG-CmEh9yXL9Sp+W7PyatvEdOhZQ@mail.gmail.com>
-	<BANLkTi=zuMosw68EMSYjrVi+0dBQkNicJw@mail.gmail.com>
-	<BANLkTi=6Fa66QYay_R6vkmREPcb1Bw_FRw@mail.gmail.com>
-	<BANLkTimOVsSe=mPOZ=ArGfy4w2QrYgLA+Q@mail.gmail.com>
-	<BANLkTino3hz9NCfjtqM2UYtncYa6y_k=Qg@mail.gmail.com>
-	<BANLkTi==drxM8Y4BffQwDSzraWXQ3-ta0g@mail.gmail.com>
-	<BANLkTi=2EFMDNjOdmfqkWD1pQJthgR4uKQ@mail.gmail.com>
-	<BANLkTimMPXdSKf3bO8ymco+Z8D215Fy5TQ@mail.gmail.com>
-	<BANLkTinJe2wAQwSrb+V3e2Xd87d+UQzFWQ@mail.gmail.com>
-	<BANLkTinTV-0eCR+U4M+73Fo_z_izyQjGKw@mail.gmail.com>
-	<BANLkTinD-3joE8QgeW07gWMW4gBwQRNzXg@mail.gmail.com>
-	<BANLkTikkoD0vaxaFBbPd6UZa=iPJgaK2xQ@mail.gmail.com>
-	<BANLkTik+0tgbWcfbUgAt6UxgEazt5i-yfQ@mail.gmail.com>
-	<BANLkTi=4Q3x3QFB7pOPQpRzFJ1pW6OPjvQ@mail.gmail.com>
-	<BANLkTinGo0V=oOj+V_PBoiOyS=aPq2tVHw@mail.gmail.com>
-	<BANLkTim-OECxe1Y5rDKyT19UjxDDsfwsbQ@mail.gmail.com>
-	<BANLkTinAPGWH-hZiqc8zWA_Mifa_TPk3OA@mail.gmail.com>
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: [PATCHv2 2/3] MMC: OMAP: HSMMC: add runtime pm support
+Date: Wed, 29 Jun 2011 15:52:09 +0530
+Message-ID: <BANLkTimWocMSCAxMf2ruLBzqdTOi0d2OLg@mail.gmail.com>
+References: <1309282049-23739-1-git-send-email-balajitk@ti.com>
+	<1309282049-23739-3-git-send-email-balajitk@ti.com>
+	<87mxh1v8f3.fsf@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:60165 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754153Ab1F2JTP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2011 05:19:15 -0400
-Received: by qwk3 with SMTP id 3so515810qwk.19
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Jun 2011 02:19:14 -0700 (PDT)
-In-Reply-To: <BANLkTinAPGWH-hZiqc8zWA_Mifa_TPk3OA@mail.gmail.com>
+Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:49280 "EHLO
+	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752672Ab1F2KWK convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2011 06:22:10 -0400
+In-Reply-To: <87mxh1v8f3.fsf@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org, Daniel Drake <dsd@laptop.org>, Bing Zhao <bzhao@marvell.com>
+To: Kevin Hilman <khilman@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, b-cousson@ti.com, svenkatr@ti.com, "Nayak, Rajendra" <rnayak@ti.com>
 
-On Wed, Jun 29, 2011 at 4:57 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
-> On Wed, Jun 29, 2011 at 11:43 AM, zhangfei gao <zhangfei.gao@gmail.com> wrote:
->> However still not fully understand how to call ->remove to power off
->> wlan, using suspend system looks to me is only test method, which
->> counting on bus_ops->suspend returns -ENOSYS.
+On Wed, Jun 29, 2011 at 5:02 AM, Kevin Hilman <khilman@ti.com> wrote:
+> +Rajendra
 >
-> Please take a look at mac80211 and wl12xx.
+> Balaji T K <balajitk@ti.com> writes:
 >
-> We're not using ->remove, ->probe or -ENOSYS at all.
+>> add runtime pm support to HSMMC host controller
+>> Use runtime pm API to enable/disable HSMMC clock
+>> Use runtime autosuspend APIs to enable auto suspend delay
+>>
+>> Based on OMAP HSMMC runtime implementation by Kevin Hilman, Kishore =
+Kadiyala
+>>
+>> Signed-off-by: Balaji T K <balajitk@ti.com>
 >
-> When the user brings up the interface, we then power up the chip and
-> download the firmware.
-> Likewise, when the interface is brought down, we just power off the chip.
+> I tried to test this series along with Benoit's clkdm/modulemode/hwmo=
+d
+> cleanups and something strange is happening on OMAP4.
+>
+> First, this series by itself is working as I would expect, but testin=
+g
+> in combination with Benoit's series, it's different...
+>
+> First, I'm using Benoit's branch:
+>
+> =A0 =A0 =A0 git://gitorious.org/omap-pm/linux.git for_3.0.1/7_hwmod_m=
+odulemode
+>
+> in combination with your series.
+>
+> I've also reverted these two commits:
+>
+> =A0 OMAP4: PM: TEMP: Prevent l3init from idling/force sleep
+> =A0 OMAP3+: hwmod data: TEMP: Do not idle MMC1 & MMC2 after boot
+>
+> which are temporary workarounds for not having MMC runtime PM.
+>
+> I turned the dev_dbg calls in the runtime PM callbacks into dev_info
+> callbacks to see exactly when the device is enabled/disabled via runt=
+ime
+> PM.
+>
+> To my surprise, I didn't see the device being enabled/disabled when
+> writing do the device.
 
-Thanks a lot Ohad & Daniel :)
+I tried for_3.0.1/7_hwmod_modulemode as you mentioned above,
+changing dev_dbg to dev_err and I am not observing the delayed write
+during umount. Can you let me know if the files are there in MMC after
+remounting ?
 
-Enable wlan: # ifconfig up mlan0 -> power up the chip via runtime PM
--> wlan_probe download the firmware
-Disable wlan: # ifconfig down mlan0 -> power down the chip via runtime
-PM -> wlan_remove ?
+> Any ideas why the same isn't happening when used with Benoit's series=
+?
+>
+> Kevin
+>
+> P.S. note that the debug messages don't quite match. =A0One says 'hos=
+t:
+> enabled' the other says 'disabled' (without the host: prefix.) =A0mak=
+ing
+> the prefixes match would be more readable.
 
-So every time ifconfig up/down, the chip is power up/down, and
-firmware reloaded?
-
-Is this understand correct?
-Then runtime pm should also integrated into wlan driver as well.
+Ok, Will align dev_dbg prints.
