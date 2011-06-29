@@ -1,25 +1,55 @@
-From: Paul Walmsley <paul@pwsan.com>
-Subject: Re: [PATCH 2/3] MMC: OMAP: HSMMC: add runtime pm support
-Date: Wed, 29 Jun 2011 09:38:07 -0600 (MDT)
-Message-ID: <alpine.DEB.2.00.1106290937350.2874@utopia.booyaka.com>
-References: <1308752314-32079-1-git-send-email-balajitk@ti.com> <1308752314-32079-3-git-send-email-balajitk@ti.com> <alpine.DEB.2.00.1106281116530.2874@utopia.booyaka.com> <BANLkTimT6nGP_ecJjZ6201=CiddN7BrsPg@mail.gmail.com> <alpine.DEB.2.00.1106281240390.2874@utopia.booyaka.com>
- <BANLkTikni_xO7NQXQyv7XVeEH4Nowpr1Ow@mail.gmail.com>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: [PATCH 1/2] MMC: PM: add suspend/resume in atmel-mci
+Date: Wed, 29 Jun 2011 18:54:19 +0200
+Message-ID: <1ef60c032bc39531302c1603bfcb841d2d437ccc.1309366360.git.nicolas.ferre@atmel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <BANLkTikni_xO7NQXQyv7XVeEH4Nowpr1Ow@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, khilman@ti.com, b-cousson@ti.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org, hans-christian.egtvedt@atmel.com
+Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, kernel@avr32linux.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 29 Jun 2011, T Krishnamoorthy, Balaji wrote:
-
-> There have been some experiments on our customer programs to reduce this 
-> value to a few ms and infrequent crashes were observed (stress testing 
-> for several hours) while trying to access the controller registers.
-
-By the way, could you send along a copy of the stress test script?
-
-
-- Paul
+VGFrZSBjYXJlIG9mIHNsb3RzIHdoaWxlIGdvaW5nIHRvIHN1c3BlbmQgc3RhdGUuCgpTaWduZWQt
+b2ZmLWJ5OiBOaWNvbGFzIEZlcnJlIDxuaWNvbGFzLmZlcnJlQGF0bWVsLmNvbT4KU2lnbmVkLW9m
+Zi1ieTogVXdlIEtsZWluZS1Lw7ZuaWcgPHUua2xlaW5lLWtvZW5pZ0BwZW5ndXRyb25peC5kZT4K
+LS0tCiBkcml2ZXJzL21tYy9ob3N0L2F0bWVsLW1jaS5jIHwgICA1MSArKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKysrKysrKysKIDEgZmlsZXMgY2hhbmdlZCwgNTEgaW5zZXJ0aW9u
+cygrKSwgMCBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L2F0bWVs
+LW1jaS5jIGIvZHJpdmVycy9tbWMvaG9zdC9hdG1lbC1tY2kuYwppbmRleCBhYTgwMzlmLi5jNDE0
+ZWJlIDEwMDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L2F0bWVsLW1jaS5jCisrKyBiL2RyaXZl
+cnMvbW1jL2hvc3QvYXRtZWwtbWNpLmMKQEAgLTE4NzgsOCArMTg3OCw1OSBAQCBzdGF0aWMgaW50
+IF9fZXhpdCBhdG1jaV9yZW1vdmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKIAlyZXR1
+cm4gMDsKIH0KIAorI2lmZGVmIENPTkZJR19QTQorc3RhdGljIGludCBhdG1jaV9zdXNwZW5kKHN0
+cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYsIHBtX21lc3NhZ2VfdCBtZXNnKQoreworCXN0cnVj
+dCBhdG1lbF9tY2kgKmhvc3QgPSBwbGF0Zm9ybV9nZXRfZHJ2ZGF0YShwZGV2KTsKKwlzdHJ1Y3Qg
+YXRtZWxfbWNpX3Nsb3QgKnNsb3Q7CisJaW50IGksIHJldDsKKworCSBmb3IgKGkgPSAwOyBpIDwg
+QVRNRUxfTUNJX01BWF9OUl9TTE9UUzsgaSsrKSB7CisJCXNsb3QgPSBob3N0LT5zbG90W2ldOwor
+CQlpZiAoIXNsb3QpCisJCQljb250aW51ZTsKKwkJcmV0ID0gbW1jX3N1c3BlbmRfaG9zdChzbG90
+LT5tbWMpOworCQlpZiAocmV0IDwgMCkgeworCQkJd2hpbGUgKC0taSA+PSAwKSB7CisJCQkJc2xv
+dCA9IGhvc3QtPnNsb3RbaV07CisJCQkJaWYgKHNsb3QpCisJCQkJCW1tY19yZXN1bWVfaG9zdCho
+b3N0LT5zbG90W2ldLT5tbWMpOworCQkJfQorCQkJcmV0dXJuIHJldDsKKwkJfQorCX0KKworCXJl
+dHVybiAwOworfQorCitzdGF0aWMgaW50IGF0bWNpX3Jlc3VtZShzdHJ1Y3QgcGxhdGZvcm1fZGV2
+aWNlICpwZGV2KQoreworCXN0cnVjdCBhdG1lbF9tY2kgKmhvc3QgPSBwbGF0Zm9ybV9nZXRfZHJ2
+ZGF0YShwZGV2KTsKKwlzdHJ1Y3QgYXRtZWxfbWNpX3Nsb3QgKnNsb3Q7CisJaW50IGksIHJldDsK
+KworCWZvciAoaSA9IDA7IGkgPCBBVE1FTF9NQ0lfTUFYX05SX1NMT1RTOyBpKyspIHsKKwkJc2xv
+dCA9IGhvc3QtPnNsb3RbaV07CisJCWlmICghc2xvdCkKKwkJCWNvbnRpbnVlOworCQlyZXQgPSBt
+bWNfcmVzdW1lX2hvc3Qoc2xvdC0+bW1jKTsKKwkJaWYgKHJldCA8IDApCisJCQlyZXR1cm4gcmV0
+OworCX0KKworCXJldHVybiAwOworfQorI2Vsc2UKKyNkZWZpbmUgYXRtY2lfc3VzcGVuZAlOVUxM
+CisjZGVmaW5lIGF0bWNpX3Jlc3VtZQlOVUxMCisjZW5kaWYKKworCisKIHN0YXRpYyBzdHJ1Y3Qg
+cGxhdGZvcm1fZHJpdmVyIGF0bWNpX2RyaXZlciA9IHsKIAkucmVtb3ZlCQk9IF9fZXhpdF9wKGF0
+bWNpX3JlbW92ZSksCisJLnN1c3BlbmQJPSBhdG1jaV9zdXNwZW5kLAorCS5yZXN1bWUJCT0gYXRt
+Y2lfcmVzdW1lLAogCS5kcml2ZXIJCT0gewogCQkubmFtZQkJPSAiYXRtZWxfbWNpIiwKIAl9LAot
+LSAKMS43LjMKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+XwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmlu
+ZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9s
+aW51eC1hcm0ta2VybmVsCg==
