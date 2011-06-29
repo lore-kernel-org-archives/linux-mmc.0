@@ -1,45 +1,87 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: [PATCH] mmc: sdhci-s3c: Fix return value in sdhci_s3c_suspend/resume()
-Date: Wed, 29 Jun 2011 11:38:38 +0900
-Message-ID: <1309315118-16133-1-git-send-email-kgene.kim@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, Wonil Choi <wonil22.choi@samsung.com>, Minho Ban <mhban@samsung.com>, Ben Dooks <ben-linux@fluff.org>, Kukjin Kim <kgene.kim@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC] How working MMC_BUS_WIDTH_TEST??
+Date: Wed, 29 Jun 2011 13:42:36 +0900
+Message-ID: <4E0AAD3C.5040201@samsung.com>
+References: <4E09B2E3.20903@samsung.com>
+ <A143AB12-AF84-4CD9-BA9C-97651D0ED29C@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:15229 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750984Ab1F2EmM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2011 00:42:12 -0400
+Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LNJ0042YBP6MXJ0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 29 Jun 2011 13:42:10 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LNJ00CC3BQADI@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 29 Jun 2011 13:42:10 +0900 (KST)
+In-reply-to: <A143AB12-AF84-4CD9-BA9C-97651D0ED29C@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-From: Wonil Choi <wonil22.choi@samsung.com>
+Philip Rakity wrote:
+> On Jun 28, 2011, at 3:54 AM, Jaehoon Chung wrote:
+> 
+>> Hi..
+>>
+>> I found the MMC_CAP_BUS_WIDTH_TEST...
+>> In mailing, I read the related patches..
+>> but i didn't fully understand...
+>>
+>> /*
+>> * If controller can't handle bus width test,
+>> * compare ext_csd previously read in 1 bit mode
+>> * against ext_csd at new bus width
+>> */
+>> if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
+>> 	err = mmc_compare_ext_csds(card,
+>> 		ext_csd,
+>> 		bus_width);
+>> else
+>> 	err = mmc_bus_test(card, bus_width);
+>> if (!err)
+>> 	break;
+>>
+>> And i tested suspend/resume..it's failed..
+>> If i didn't set MMC_CAP_BUS_WIDTH_TEST, always return -EINVAL..
+>> (using SDHCI controller, card is eMMC4.41)
+>>
+>> Didn't compare ext_csd's value..
+>>
+>> So i want to know how use MMC_CAP_BUS_WIDTH_TEST..
+> 
+> I am using eMMC and code works fine so  maybe there is issue in no ext_csd.  You will need to
+> add debug code to the compare_ext_csd and see what is not right and we can adjust the code.
+> I am surprised that resume fails -- code will default to 1 bit data and it is NOT possible for this to
+> be wrong.  At the moment -- clueless to explain with more information.
+> 
+> TheCMD14/ CMD19 is in JEDEC spec for bus width testing.  Sends a pattern to the card and
+> based on the returned values detects the bus width.  Some controllers do NOT support this command.
+> The just do not work.  You need to figure this out by enabling the quirk.  No other way to know.
 
-Signed-off-by: Wonil Choi <wonil22.choi@samsung.com>
-Signed-off-by: Minho Ban <mhban@samsung.com>
-Cc: Ben Dooks <ben-linux@fluff.org>
-Signed-off-by: Kukjin Kim <kgene.kim@samsung.com>
----
- drivers/mmc/host/sdhci-s3c.c |    6 ++----
- 1 files changed, 2 insertions(+), 4 deletions(-)
+When card is probing, i think that need to test bus-width.
+If card is non-removable, unnecessary bus_width test during resuming.
+Because already know that support n-bit bus-width..how about this?
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 69e3ee3..460ffaf 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -612,16 +612,14 @@ static int sdhci_s3c_suspend(struct platform_device *dev, pm_message_t pm)
- {
- 	struct sdhci_host *host = platform_get_drvdata(dev);
- 
--	sdhci_suspend_host(host, pm);
--	return 0;
-+	return sdhci_suspend_host(host, pm);
- }
- 
- static int sdhci_s3c_resume(struct platform_device *dev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(dev);
- 
--	sdhci_resume_host(host);
--	return 0;
-+	return sdhci_resume_host(host);
- }
- 
- #else
--- 
-1.7.1
+> 
+> regards,
+> 
+> Philip
+> 
+>> Thanks,
+>> Jaehoon Chung
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
