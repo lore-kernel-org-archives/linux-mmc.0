@@ -1,7 +1,7 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
+From: Daniel Drake <dsd@laptop.org>
 Subject: Re: [PATCH] mmc: sdio: reset card during power_restore
-Date: Wed, 29 Jun 2011 16:43:31 +0800
-Message-ID: <BANLkTim-OECxe1Y5rDKyT19UjxDDsfwsbQ@mail.gmail.com>
+Date: Wed, 29 Jun 2011 09:56:50 +0100
+Message-ID: <BANLkTimKOY_B_gKb4miBZtcsyaKQL9y2zg@mail.gmail.com>
 References: <20110605123852.BC6F39D401C@zog.reactivated.net>
 	<BANLkTimus7C-=_b2hgdfakU6Dt9=FgzyrQ@mail.gmail.com>
 	<BANLkTin=+QGN=6_YjH8uEyZBbnTjuEXDjA@mail.gmail.com>
@@ -33,72 +33,38 @@ References: <20110605123852.BC6F39D401C@zog.reactivated.net>
 	<BANLkTikkoD0vaxaFBbPd6UZa=iPJgaK2xQ@mail.gmail.com>
 	<BANLkTik+0tgbWcfbUgAt6UxgEazt5i-yfQ@mail.gmail.com>
 	<BANLkTi=4Q3x3QFB7pOPQpRzFJ1pW6OPjvQ@mail.gmail.com>
-	<BANLkTinGo0V=oOj+V_PBoiOyS=aPq2tVHw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:47678 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753762Ab1F2Inb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2011 04:43:31 -0400
-Received: by qyk29 with SMTP id 29so2392711qyk.19
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Jun 2011 01:43:31 -0700 (PDT)
-In-Reply-To: <BANLkTinGo0V=oOj+V_PBoiOyS=aPq2tVHw@mail.gmail.com>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:47384 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753946Ab1F2I4u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2011 04:56:50 -0400
+Received: by pwj7 with SMTP id 7so687595pwj.19
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Jun 2011 01:56:50 -0700 (PDT)
+In-Reply-To: <BANLkTi=4Q3x3QFB7pOPQpRzFJ1pW6OPjvQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org, Daniel Drake <dsd@laptop.org>, Bing Zhao <bzhao@marvell.com>
+To: zhangfei gao <zhangfei.gao@gmail.com>
+Cc: linux-mmc@vger.kernel.org
 
->> So wlan probe function should be called for re-downloading, is it be
->> achieved by calling pm_runtime_get_sync and mmc_power_restore_host?
+On 28 June 2011 10:13, zhangfei gao <zhangfei.gao@gmail.com> wrote:
+> Hi, Ohad
 >
-> Not really;
+> One question :(
 >
-> I assume you refer to libertas_sdio, which AFAICT, is built to power
-> on the device (and configure it) on ->probe(), and then power it off
-> on ->remove().
-> It then seems that this model was extended to support suspend/resume
-> by asking the MMC core to ->remove() the card on suspend, and then
-> relying on it to re-detect and re-add the card on resume, which will
-> trigger libertas' ->probe() again.
+> Under pm_runtime mechanism, how to dynamically open/close wlan.
 >
-> IMHO this model is a little awkward; as you can see, powering on/off
-> the chip requires re-probing the driver.
->
-> Take a look how mac80211 drivers (and wl12xx in particular) behave:
-> they are powered on (and firmware is downloaded) when the user brings
-> the wlan0 interface up, and then powered off when the wlan interface
-> is brought down.
->
-> The runtime PM API is only being used to control the power to the
-> device, but downloading the firmware and doing driver-specific
-> configuration is up to the driver to do.
+> If the wlan chip really power off, the firmware should be reloaded,
+> since the firmware is download to ram and disappear after power off.
+> So wlan probe function should be called for re-downloading, is it be
+> achieved by calling pm_runtime_get_sync and mmc_power_restore_host?
 
-Thanks Ohad for your kind explanation.
+Here is how I'm doing it for libertas:
+http://dev.laptop.org/~dsd/20110610/
 
-However still not fully understand how to call ->remove to power off
-wlan, using suspend system looks to me is only test method, which
-counting on bus_ops->suspend returns -ENOSYS.
+See patches 6 and 7.
 
-What we do before is
-1. From user space use rfkill unblock wifi, or echo on/off > "/sys/~"
-to enable/disable wlan power, which could be replaced by pm_runtime of
-course.
-2. Explicitly call mmc_detect_change,
-when power off, mmc_rescan -> bus_ops->detect(host) -> mmc_select_card
-fail -> mmc_sdio_remove;
-when power on, mmc_rescan ->  mmc_attach_sdio->wlan probe.
+This is somewhat based off the wl1xxx example that Ohad gave.
 
-However, this is not workable if using mmc_power_save_host, since
-bus_ops->detect not workable after power off card.
-1. detect is only for !MMC_CAP_NONREMOVABLE
-2. In mmc_sdio_detect, power is provided before mmc_select_card via
-pm_runtime_get_sync.
-3. Most important, mmc_power_save_host->mmc_power_off->set clk=0 via
-set_ios, so controller will no response and timeout.
-
-How to enable/disable mac80211 at runtime from user space?
-In wl12xx/debugfs.c, gpio_power_write->wl1271_sdio_power_off? still
-unclear how remove is called.
-
-Thanks
+Daniel
