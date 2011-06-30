@@ -1,141 +1,95 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Supply clocks for both host and card.
-Date: Thu, 30 Jun 2011 15:55:12 +0900
-Message-ID: <4E0C1DD0.2040202@samsung.com>
-References: <1309402497-29191-1-git-send-email-tgih.jun@samsung.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH] mmc: tmio: fix build error if CONFIG_MMC_SDHI is not
+ configured
+Date: Thu, 30 Jun 2011 09:23:10 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1106300922110.1965@axis700.grange>
+References: <1309409956.10500.3.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1309402497-29191-1-git-send-email-tgih.jun@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:64503 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751320Ab1F3HXN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 03:23:13 -0400
+In-Reply-To: <1309409956.10500.3.camel@phoenix>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Axel Lin <axel.lin@gmail.com>
+Cc: linux-kernel@vger.kernel.org, Ian Molton <spyro@f2s.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Hi Mr.Jeon
+Hi Axel
 
-What means cclk_name/ cclk enable?
-Controlling card clock is possible?
-Sorry, i didn't understand...
-(My understanding is that if we set host clk, cclk is used with host_clk.)
+On Thu, 30 Jun 2011, Axel Lin wrote:
 
-Plz can you explain to me?
-
-Regards,
-Jaehoon Chung
-
-Seungwon Jeon wrote:
-> Add enabling clocks for both host controller and card.
+> Fix below build error:
 > 
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>   CC      drivers/mmc/host/tmio_mmc_dma.o
+> drivers/mmc/host/tmio_mmc_dma.c:192: error: redefinition of 'tmio_mmc_start_dma'
+> drivers/mmc/host/tmio_mmc.h:111: error: previous definition of 'tmio_mmc_start_dma' was here
+> drivers/mmc/host/tmio_mmc_dma.c:257: error: redefinition of 'tmio_mmc_request_dma'
+> drivers/mmc/host/tmio_mmc.h:116: error: previous definition of 'tmio_mmc_request_dma' was here
+> drivers/mmc/host/tmio_mmc_dma.c:305: error: redefinition of 'tmio_mmc_release_dma'
+> drivers/mmc/host/tmio_mmc.h:122: error: previous definition of 'tmio_mmc_release_dma' was here
+> make[3]: *** [drivers/mmc/host/tmio_mmc_dma.o] Error 1
+> make[2]: *** [drivers/mmc/host] Error 2
+> make[1]: *** [drivers/mmc] Error 2
+> make: *** [drivers] Error 2
+> 
+> Signed-off-by: Axel Lin <axel.lin@gmail.com>
+
+This is a known bug and a correct fix for it is this:
+
+http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg07999.html
+
+No idea, why it still hasn't been applied, Chris?
+
+Thanks
+Guennadi
+
 > ---
->  drivers/mmc/host/dw_mmc.c  |   33 ++++++++++++++++++++++++++++++++-
->  include/linux/mmc/dw_mmc.h |    7 +++++++
->  2 files changed, 39 insertions(+), 1 deletions(-)
+>  drivers/mmc/host/tmio_mmc_dma.c |    4 ++++
+>  1 files changed, 4 insertions(+), 0 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 10b6979..a524416 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1797,6 +1797,24 @@ static int dw_mci_probe(struct platform_device *pdev)
->  		goto err_freehost;
+> diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+> index a40fdba..4dc563a 100644
+> --- a/drivers/mmc/host/tmio_mmc_dma.c
+> +++ b/drivers/mmc/host/tmio_mmc_dma.c
+> @@ -189,6 +189,7 @@ pio:
+>  		desc, cookie);
+>  }
+>  
+> +#if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
+>  void tmio_mmc_start_dma(struct tmio_mmc_host *host,
+>  			       struct mmc_data *data)
+>  {
+> @@ -200,6 +201,7 @@ void tmio_mmc_start_dma(struct tmio_mmc_host *host,
+>  			tmio_mmc_start_dma_tx(host);
 >  	}
-> 
-> +	host->hclk = clk_get(&pdev->dev, pdata->hclk_name);
-> +	if (IS_ERR(host->hclk)) {
-> +		dev_err(&pdev->dev,
-> +			"Failed to get hclk\n");
-> +		ret = PTR_ERR(host->hclk);
-> +		goto err_freehost;
-> +	}
-> +	clk_enable(host->hclk);
-> +
-> +	host->cclk = clk_get(&pdev->dev, pdata->cclk_name);
-> +	if (IS_ERR(host->cclk)) {
-> +		dev_err(&pdev->dev,
-> +			"Failed to get cclk\n");
-> +		ret = PTR_ERR(host->cclk);
-> +		goto err_free_hclk;
-> +	}
-> +	clk_enable(host->cclk);
-> +
->  	host->bus_hz = pdata->bus_hz;
->  	host->quirks = pdata->quirks;
-> 
-> @@ -1806,7 +1824,7 @@ static int dw_mci_probe(struct platform_device *pdev)
->  	ret = -ENOMEM;
->  	host->regs = ioremap(regs->start, regs->end - regs->start + 1);
->  	if (!host->regs)
-> -		goto err_freehost;
-> +		goto err_free_cclk;
-> 
->  	host->dma_ops = pdata->dma_ops;
->  	dw_mci_init_dma(host);
-> @@ -1945,6 +1963,13 @@ err_dmaunmap:
->  		regulator_put(host->vmmc);
+>  }
+> +#endif
+>  
+>  static void tmio_mmc_issue_tasklet_fn(unsigned long priv)
+>  {
+> @@ -254,6 +256,7 @@ static bool tmio_mmc_filter(struct dma_chan *chan, void *arg)
+>  	return true;
+>  }
+>  
+> +#if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
+>  void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdata)
+>  {
+>  	/* We can only either use DMA for both Tx and Rx or not use it at all */
+> @@ -319,3 +322,4 @@ void tmio_mmc_release_dma(struct tmio_mmc_host *host)
+>  		host->bounce_buf = NULL;
 >  	}
+>  }
+> +#endif
+> -- 
+> 1.7.4.1
 > 
-> +err_free_cclk:
-> +	clk_disable(host->cclk);
-> +	clk_put(host->cclk);
-> +
-> +err_free_hclk:
-> +	clk_disable(host->hclk);
-> +	clk_put(host->hclk);
 > 
->  err_freehost:
->  	kfree(host);
-> @@ -1983,6 +2008,12 @@ static int __exit dw_mci_remove(struct platform_device *pdev)
->  		regulator_put(host->vmmc);
->  	}
 > 
-> +	clk_disable(host->cclk);
-> +	clk_put(host->cclk);
-> +
-> +	clk_disable(host->hclk);
-> +	clk_put(host->hclk);
-> +
->  	iounmap(host->regs);
-> 
->  	kfree(host);
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index f3f68ee..56b3f27 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -47,6 +47,8 @@ struct mmc_data;
->   * @cmd: The command currently being sent to the card, or NULL.
->   * @data: The data currently being transferred, or NULL if no data
->   *	transfer is in progress.
-> + * @hclk: Clock for host.
-> + * @cclk: Clock for card.
->   * @use_dma: Whether DMA channel is initialized or not.
->   * @sg_dma: Bus address of DMA buffer.
->   * @sg_cpu: Virtual address of DMA buffer.
-> @@ -118,6 +120,8 @@ struct dw_mci {
->  	struct mmc_request	*mrq;
->  	struct mmc_command	*cmd;
->  	struct mmc_data		*data;
-> +	struct clk		*hclk;
-> +	struct clk		*cclk;
-> 
->  	/* DMA interface members*/
->  	int			use_dma;
-> @@ -218,6 +222,9 @@ struct dw_mci_board {
->  	/* delay in mS before detecting cards after interrupt */
->  	u32 detect_delay_ms;
-> 
-> +	char *hclk_name;
-> +	char *cclk_name;
-> +
->  	int (*init)(u32 slot_id, irq_handler_t , void *);
->  	int (*get_ro)(u32 slot_id);
->  	int (*get_cd)(u32 slot_id);
-> --
-> 1.7.0.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
