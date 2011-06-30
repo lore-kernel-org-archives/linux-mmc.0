@@ -1,115 +1,117 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC] How working MMC_BUS_WIDTH_TEST??
-Date: Thu, 30 Jun 2011 11:12:45 +0900
-Message-ID: <4E0BDB9D.3030809@samsung.com>
-References: <4E09B2E3.20903@samsung.com>
- <A143AB12-AF84-4CD9-BA9C-97651D0ED29C@marvell.com>
- <4E0AAD3C.5040201@samsung.com>
- <AF5E05CF-CE23-49BA-8638-0FF385D0A874@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:37247 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757887Ab1F3CMq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2011 22:12:46 -0400
-Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LNK00ISGZG30130@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 30 Jun 2011 11:12:45 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LNK008J1ZH9RC@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 30 Jun 2011 11:12:45 +0900 (KST)
-In-reply-to: <AF5E05CF-CE23-49BA-8638-0FF385D0A874@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: Supply clocks for both host and card.
+Date: Thu, 30 Jun 2011 11:54:57 +0900
+Message-ID: <1309402497-29191-1-git-send-email-tgih.jun@samsung.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: linux-kernel@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Philip..
+Add enabling clocks for both host controller and card.
 
-If i didn't set MMC_CAP_BUS_WIDTH_TEST,
-entered mmc_compare_ext_csds(). right?
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c  |   33 ++++++++++++++++++++++++++++++++-
+ include/linux/mmc/dw_mmc.h |    7 +++++++
+ 2 files changed, 39 insertions(+), 1 deletions(-)
 
-i understand that mmc_compare_ext_csds() compared with previously ext_csd.
-But in source code, always previously ext_csd is NULL.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 10b6979..a524416 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1797,6 +1797,24 @@ static int dw_mci_probe(struct platform_device *pdev)
+ 		goto err_freehost;
+ 	}
 
-I didn't find where assigned ext_csd..
++	host->hclk = clk_get(&pdev->dev, pdata->hclk_name);
++	if (IS_ERR(host->hclk)) {
++		dev_err(&pdev->dev,
++			"Failed to get hclk\n");
++		ret = PTR_ERR(host->hclk);
++		goto err_freehost;
++	}
++	clk_enable(host->hclk);
++
++	host->cclk = clk_get(&pdev->dev, pdata->cclk_name);
++	if (IS_ERR(host->cclk)) {
++		dev_err(&pdev->dev,
++			"Failed to get cclk\n");
++		ret = PTR_ERR(host->cclk);
++		goto err_free_hclk;
++	}
++	clk_enable(host->cclk);
++
+ 	host->bus_hz = pdata->bus_hz;
+ 	host->quirks = pdata->quirks;
 
-I think that need to assign ext_csd..
+@@ -1806,7 +1824,7 @@ static int dw_mci_probe(struct platform_device *pdev)
+ 	ret = -ENOMEM;
+ 	host->regs = ioremap(regs->start, regs->end - regs->start + 1);
+ 	if (!host->regs)
+-		goto err_freehost;
++		goto err_free_cclk;
 
-If my point is right, i will send the patch..
+ 	host->dma_ops = pdata->dma_ops;
+ 	dw_mci_init_dma(host);
+@@ -1945,6 +1963,13 @@ err_dmaunmap:
+ 		regulator_put(host->vmmc);
+ 	}
 
-Thanks
-Jaehoon Chung
++err_free_cclk:
++	clk_disable(host->cclk);
++	clk_put(host->cclk);
++
++err_free_hclk:
++	clk_disable(host->hclk);
++	clk_put(host->hclk);
 
-Philip Rakity wrote:
-> On Jun 28, 2011, at 9:42 PM, Jaehoon Chung wrote:
-> 
->> Philip Rakity wrote:
->>> On Jun 28, 2011, at 3:54 AM, Jaehoon Chung wrote:
->>>
->>>> Hi..
->>>>
->>>> I found the MMC_CAP_BUS_WIDTH_TEST...
->>>> In mailing, I read the related patches..
->>>> but i didn't fully understand...
->>>>
->>>> /*
->>>> * If controller can't handle bus width test,
->>>> * compare ext_csd previously read in 1 bit mode
->>>> * against ext_csd at new bus width
->>>> */
->>>> if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
->>>> 	err = mmc_compare_ext_csds(card,
->>>> 		ext_csd,
->>>> 		bus_width);
->>>> else
->>>> 	err = mmc_bus_test(card, bus_width);
->>>> if (!err)
->>>> 	break;
->>>>
->>>> And i tested suspend/resume..it's failed..
->>>> If i didn't set MMC_CAP_BUS_WIDTH_TEST, always return -EINVAL..
->>>> (using SDHCI controller, card is eMMC4.41)
->>>>
->>>> Didn't compare ext_csd's value..
->>>>
->>>> So i want to know how use MMC_CAP_BUS_WIDTH_TEST..
->>> I am using eMMC and code works fine so  maybe there is issue in no ext_csd.  You will need to
->>> add debug code to the compare_ext_csd and see what is not right and we can adjust the code.
->>> I am surprised that resume fails -- code will default to 1 bit data and it is NOT possible for this to
->>> be wrong.  At the moment -- clueless to explain with more information.
->>>
->>> TheCMD14/ CMD19 is in JEDEC spec for bus width testing.  Sends a pattern to the card and
->>> based on the returned values detects the bus width.  Some controllers do NOT support this command.
->>> The just do not work.  You need to figure this out by enabling the quirk.  No other way to know.
->> When card is probing, i think that need to test bus-width.
->> If card is non-removable, unnecessary bus_width test during resuming.
-> 
-> agree not necessary but does not explain error.
-> 
-> 
->> Because already know that support n-bit bus-width..how about this?
->>
->>> regards,
->>>
->>> Philip
->>>
->>>> Thanks,
->>>> Jaehoon Chung
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+ err_freehost:
+ 	kfree(host);
+@@ -1983,6 +2008,12 @@ static int __exit dw_mci_remove(struct platform_device *pdev)
+ 		regulator_put(host->vmmc);
+ 	}
 
++	clk_disable(host->cclk);
++	clk_put(host->cclk);
++
++	clk_disable(host->hclk);
++	clk_put(host->hclk);
++
+ 	iounmap(host->regs);
+
+ 	kfree(host);
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index f3f68ee..56b3f27 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -47,6 +47,8 @@ struct mmc_data;
+  * @cmd: The command currently being sent to the card, or NULL.
+  * @data: The data currently being transferred, or NULL if no data
+  *	transfer is in progress.
++ * @hclk: Clock for host.
++ * @cclk: Clock for card.
+  * @use_dma: Whether DMA channel is initialized or not.
+  * @sg_dma: Bus address of DMA buffer.
+  * @sg_cpu: Virtual address of DMA buffer.
+@@ -118,6 +120,8 @@ struct dw_mci {
+ 	struct mmc_request	*mrq;
+ 	struct mmc_command	*cmd;
+ 	struct mmc_data		*data;
++	struct clk		*hclk;
++	struct clk		*cclk;
+
+ 	/* DMA interface members*/
+ 	int			use_dma;
+@@ -218,6 +222,9 @@ struct dw_mci_board {
+ 	/* delay in mS before detecting cards after interrupt */
+ 	u32 detect_delay_ms;
+
++	char *hclk_name;
++	char *cclk_name;
++
+ 	int (*init)(u32 slot_id, irq_handler_t , void *);
+ 	int (*get_ro)(u32 slot_id);
+ 	int (*get_cd)(u32 slot_id);
+--
+1.7.0.4
