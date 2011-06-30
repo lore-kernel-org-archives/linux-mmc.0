@@ -1,54 +1,111 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: Add the function call for board-specific initialization.
-Date: Thu, 30 Jun 2011 11:57:45 +0900
-Message-ID: <1309402665-29228-1-git-send-email-tgih.jun@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ganesha.gnumonks.org ([213.95.27.120]:37801 "EHLO
-	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754011Ab1F3D2c (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2011 23:28:32 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: [PATCHv2 2/3] MMC: OMAP: HSMMC: add runtime pm support
+Date: Thu, 30 Jun 2011 10:01:01 +0530
+Message-ID: <BANLkTim7P=91OX2R90Ewaeeb43NfM77Smw@mail.gmail.com>
+References: <1309282049-23739-1-git-send-email-balajitk@ti.com>
+	<1309282049-23739-3-git-send-email-balajitk@ti.com>
+	<87mxh1v8f3.fsf@ti.com>
+	<BANLkTimWocMSCAxMf2ruLBzqdTOi0d2OLg@mail.gmail.com>
+	<87iproserq.fsf@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <87iproserq.fsf@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Kevin Hilman <khilman@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, b-cousson@ti.com, svenkatr@ti.com, "Nayak, Rajendra" <rnayak@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: linux-kernel@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>
 
-Need to call init() function of dw_mci_board.
-It seems to be omitted to call this function.
+On Wed, Jun 29, 2011 at 11:26 PM, Kevin Hilman <khilman@ti.com> wrote:
+> "T Krishnamoorthy, Balaji" <balajitk@ti.com> writes:
+>
+>> On Wed, Jun 29, 2011 at 5:02 AM, Kevin Hilman <khilman@ti.com> wrote=
+:
+>>> +Rajendra
+>>>
+>>> Balaji T K <balajitk@ti.com> writes:
+>>>
+>>>> add runtime pm support to HSMMC host controller
+>>>> Use runtime pm API to enable/disable HSMMC clock
+>>>> Use runtime autosuspend APIs to enable auto suspend delay
+>>>>
+>>>> Based on OMAP HSMMC runtime implementation by Kevin Hilman, Kishor=
+e Kadiyala
+>>>>
+>>>> Signed-off-by: Balaji T K <balajitk@ti.com>
+>>>
+>>> I tried to test this series along with Benoit's clkdm/modulemode/hw=
+mod
+>>> cleanups and something strange is happening on OMAP4.
+>>>
+>>> First, this series by itself is working as I would expect, but test=
+ing
+>>> in combination with Benoit's series, it's different...
+>>>
+>>> First, I'm using Benoit's branch:
+>>>
+>>> =A0 =A0 =A0 git://gitorious.org/omap-pm/linux.git for_3.0.1/7_hwmod=
+_modulemode
+>>>
+>>> in combination with your series.
+>>>
+>>> I've also reverted these two commits:
+>>>
+>>> =A0 OMAP4: PM: TEMP: Prevent l3init from idling/force sleep
+>>> =A0 OMAP3+: hwmod data: TEMP: Do not idle MMC1 & MMC2 after boot
+>>>
+>>> which are temporary workarounds for not having MMC runtime PM.
+>>>
+>>> I turned the dev_dbg calls in the runtime PM callbacks into dev_inf=
+o
+>>> callbacks to see exactly when the device is enabled/disabled via ru=
+ntime
+>>> PM.
+>>>
+>>> To my surprise, I didn't see the device being enabled/disabled when
+>>> writing do the device.
+>>
+>> I tried for_3.0.1/7_hwmod_modulemode as you mentioned above,
+>> changing dev_dbg to dev_err and I am not observing the delayed write
+>> during umount. Can you let me know if the files are there in MMC aft=
+er
+>> remounting ?
+>
+> Did you also revert the above two commits?
 
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |   11 +++++++++++
- 1 files changed, 11 insertions(+), 0 deletions(-)
+yes
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index a524416..073c420 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1585,6 +1585,15 @@ static void dw_mci_work_routine_card(struct work_struct *work)
- 	}
- }
+>
+> I've pushed a 'tmp/mmc' branch to my git tree[1] which is my PM branc=
+h
+> (including various PM stuff queued for upstream) as well as Benoit's
+> series with the TEMP patches above reverted and your series on top of
+> it. =A0There's one additional patch to convert the dev_dbg into dev_i=
+nfo
+> to see the transitions.
+>
+> Testing this on my OMAP4430 ES2.2 EMU device, I still see the above
+> behavior.
 
-+static irqreturn_t dw_mci_detect_interrupt(int irq, void *dev_id)
-+{
-+	struct dw_mci_slot *slot = dev_id;
-+
-+	queue_work(dw_mci_card_workqueue, &host->card_work);
-+
-+	return IRQ_HANDLED;
-+}
-+
- static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- {
- 	struct mmc_host *mmc;
-@@ -1657,6 +1666,8 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	} else
- 		regulator_enable(host->vmmc);
+I used OMAP4430 ES2.1 GP
 
-+	host->pdata->init(id, dw_mci_detect_interrupt, host);
-+
- 	if (dw_mci_get_cd(mmc))
- 		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
- 	else
+>
+> Can you try out this branch on your board using the default
+> omap2plus_defconfig?
+
+Ok, I will retry on EMU device.
+
+>
+> Thanks,
+>
+> Kevin
+>
+> [1] git://git.kernel.org/pub/scm/linux/kernel/git/khilman/linux-omap-=
+pm.git
+>
 --
-1.7.0.4
-
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
