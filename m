@@ -1,32 +1,39 @@
-From: "PROF.MAURICE IWU" <iwumaurice900@sify.com>
-Subject: Equity Business Investment
-Date: Thu, 30 Jun 2011 19:08:00 +0200
-Message-ID: <EXCHANGE03QLVpSlSt7000005f7__46095.6408911899$1309453694$gmane$org@exchange03.2besource.com>
-Reply-To: <profmauriceiwu2221@yahoo.co.jp>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCHv3 0/3] OMAP: HSMMC: cleanup and runtime pm
+Date: Fri, 1 Jul 2011 00:34:56 +0530
+Message-ID: <1309460700-25898-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="Windows-1251"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exchange.2besource.com ([203.126.216.22]:54205 "EHLO
-	exchange03.2besource.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751122Ab1F3RID (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 13:08:03 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: tony@atomide.com, madhu.cr@ti.com, khilman@ti.com, b-cousson@ti.com, paul@pwsan.com, kishore.kadiyala@ti.com, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Equity Business Investment
->From Prof. Maurice Iwu 
+Removing the custom state machine - lazy disable framework in omap_hsmmc
+to make way for runtime pm to handle host controller
+power states.
+This allows mmc_host_enable/mmc_host_disable to be replaced by
+runtime get_sync and put_sync at host controller driver.
 
-Dear Friend,
+Enable runtime PM in omap_hsmmc
 
-I am Prof. Maurice M. Iwu, Former Chairman Independent Electoral Commission 
-(INEC).Currently, I am on compulsory terminal leave presently in UK , 
-leading up to my final retirement from public service.
+Rebased to 3.0-rc5
+Tested on OMAP4430SDP, OMAP3430SDP, OMAP2430SDP
 
-I am seeking your partnership in a mutual benefit project involving 
-investing into your company and secondly on properties and to be precise Estate Development or any other profitable venture of your great idea for our mutual benefit of Equity Market Investment.,
+MMC runtime patch has dependency on
+[PATCH 0/6] OMAP2+: hwmod framework fixes [1]
+for MMC1/MMC2 clock to get ungated after idle in OMAP4.
 
-Sincerely,
-Prof. Maurice M.Iwu.
-{INEC.}
+Without [1] patches, MMC1/MMC2 fails to get detected on OMAP4.
+
+[1] http://www.mail-archive.com/linux-omap@vger.kernel.org/msg51457.html
+
+Balaji T K (3):
+  MMC: OMAP: HSMMC: Remove lazy_disable
+  MMC: OMAP: HSMMC: add runtime pm support
+  MMC: OMAP: HSMMC: Remove unused iclk
+
+ drivers/mmc/host/omap_hsmmc.c |  365 +++++++----------------------------------
+ 1 files changed, 57 insertions(+), 308 deletions(-)
+
