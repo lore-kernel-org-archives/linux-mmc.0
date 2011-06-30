@@ -1,146 +1,68 @@
-From: James Hogan <james@albanarts.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Add the function call for board-specific initialization.
-Date: Thu, 30 Jun 2011 09:43:04 +0100
-Message-ID: <BANLkTi=r3x81sPVLG9yRAG9hHnjQuqTHCg@mail.gmail.com>
-References: <1309402665-29228-1-git-send-email-tgih.jun@samsung.com>
-	<4E0C18BD.8000608@samsung.com>
-	<BANLkTikhwh5M1XB9zRiLzMd7dL18kA_o0g@mail.gmail.com>
-	<4E0C31DF.5090200@samsung.com>
+From: Koen Beel <koen.beel.barco@gmail.com>
+Subject: [PATCH] mxs-mmc: fix clock rate setting
+Date: Thu, 30 Jun 2011 12:13:34 +0200
+Message-ID: <BANLkTinKcb-=m3sURawdEjR=vTt=ApBKaQ@mail.gmail.com>
+References: <BANLkTi==Y_MJ2H_u15DzunWusUb=GsotWg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:43802 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754539Ab1F3InF convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 04:43:05 -0400
-In-Reply-To: <4E0C31DF.5090200@samsung.com>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:34900 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751405Ab1F3KNf convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 06:13:35 -0400
+Received: by wyg8 with SMTP id 8so1431459wyg.19
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Jun 2011 03:13:34 -0700 (PDT)
+In-Reply-To: <BANLkTi==Y_MJ2H_u15DzunWusUb=GsotWg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: shawn.guo@freescale.com, w.sang@pengutronix.de
 
-Hi,
+=46ix clock rate setting on mxs-mmc driver.
+Previously, if div2 was zero the value for TIMING_CLOCK_RATE would
+have been 255 instead of 0.
+Also the limits for div1 (TIMING_CLOCK_DIVIDE) and div2
+(TIMING_CLOCK_RATE + 1) where not correctly defined.
 
-On 30 June 2011 09:20, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi James
->
-> James Hogan wrote:
->> On 30 June 2011 07:33, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>> Hi Mr.Jeon
->>>
->>> This patch is the compiler error.
->>>
->>> didn't find host->card_work..
->>>
->>> do you want this
->>> queue_work(dw_mci_card_workqueue, &slot->host->card_work); ?
->>
->> I think the patch is based on mmc-next, which has the following comm=
-it:
->> 35ba9d8 mmc: dw_mmc: convert card tasklet to workqueue
->
-> I also tested this patch based on mmc-next.
-> But my mean is that there is not host structure in dw_mci_detect_inte=
-rrupt().
->
-> drivers/mmc/host/dw_mmc.c: In function 'dw_mci_detect_interrupt':
-> drivers/mmc/host/dw_mmc.c:1592: error: 'host' undeclared (first use i=
-n this function)
-> drivers/mmc/host/dw_mmc.c:1592: error: (Each undeclared identifier is=
- reported only once
-> drivers/mmc/host/dw_mmc.c:1592: error: for each function it appears i=
-n.)
-> drivers/mmc/host/dw_mmc.c:1590: warning: unused variable 'slot'
-> make[3]: *** [drivers/mmc/host/dw_mmc.o] Error 1
-> make[2]: *** [drivers/mmc/host] Error 2
+Can easily be reproduced on mx23evk: default clock for high speed sdio
+cards is 50 MHz. With a SSP_CLK of 28.8 MHz (default), this resulted in
+an actual clock rate of about 56 kHz.
 
-Sorry, I misunderstood. You are correct.
-
-Cheers
-James
-
->
-> Did you really compile fine?
->
-> Regards,
-> Jaehoon Chung
->
->>
->> Cheers
->> James
->>
->>>
->>> Regards,
->>> Jaehoon Chung
->>>
->>>
->>> Seungwon Jeon wrote:
->>>> Need to call init() function of dw_mci_board.
->>>> It seems to be omitted to call this function.
->>>>
->>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->>>> ---
->>>> =A0drivers/mmc/host/dw_mmc.c | =A0 11 +++++++++++
->>>> =A01 files changed, 11 insertions(+), 0 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>> index a524416..073c420 100644
->>>> --- a/drivers/mmc/host/dw_mmc.c
->>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>> @@ -1585,6 +1585,15 @@ static void dw_mci_work_routine_card(struct=
- work_struct *work)
->>>> =A0 =A0 =A0 }
->>>> =A0}
->>>>
->>>> +static irqreturn_t dw_mci_detect_interrupt(int irq, void *dev_id)
->>>> +{
->>>> + =A0 =A0 struct dw_mci_slot *slot =3D dev_id;
->>>> +
->>>> + =A0 =A0 queue_work(dw_mci_card_workqueue, &host->card_work);
->>>> +
->>>> + =A0 =A0 return IRQ_HANDLED;
->>>> +}
->>>> +
->>>> =A0static int __init dw_mci_init_slot(struct dw_mci *host, unsigne=
-d int id)
->>>> =A0{
->>>> =A0 =A0 =A0 struct mmc_host *mmc;
->>>> @@ -1657,6 +1666,8 @@ static int __init dw_mci_init_slot(struct dw=
-_mci *host, unsigned int id)
->>>> =A0 =A0 =A0 } else
->>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 regulator_enable(host->vmmc);
->>>>
->>>> + =A0 =A0 host->pdata->init(id, dw_mci_detect_interrupt, host);
->>>> +
->>>> =A0 =A0 =A0 if (dw_mci_get_cd(mmc))
->>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set_bit(DW_MMC_CARD_PRESENT, &slot->fl=
-ags);
->>>> =A0 =A0 =A0 else
->>>> --
->>>> 1.7.0.4
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mm=
-c" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.ht=
-ml
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
-" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
-l
->>>
->>
->>
->>
->
->
-
-
-
---=20
-James Hogan
+Signed-off-by: Koen Beel <koen.beel.barco <at> gmail.com>
+---
+=A0drivers/mmc/host/mxs-mmc.c | =A0 12 ++++++------
+=A01 files changed, 6 insertions(+), 6 deletions(-)
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 99d39a6..3575330 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -570,22 +570,22 @@ static void mxs_mmc_set_clk_rate(struct
+mxs_mmc_host *host, unsigned int rate)
+=A0 =A0 ssp_rate =3D clk_get_rate(host->clk);
+- =A0 for (div1 =3D 2; div1 < 254; div1 +=3D 2) {
++ =A0 for (div1 =3D 2; div1 <=3D 254; div1 +=3D 2) {
+=A0 =A0 =A0 =A0 div2 =3D ssp_rate / rate / div1;
+- =A0 =A0 =A0 if (div2 < 0x100)
++ =A0 =A0 =A0 if (div2 <=3D 256)
+=A0 =A0 =A0 =A0 =A0 =A0 break;
+=A0 =A0 }
+- =A0 if (div1 >=3D 254) {
++ =A0 if (div1 > 254) {
+=A0 =A0 =A0 =A0 dev_err(mmc_dev(host->mmc),
+=A0 =A0 =A0 =A0 =A0 =A0 "%s: cannot set clock to %d\n", __func__, rate)=
+;
+=A0 =A0 =A0 =A0 return;
+=A0 =A0 }
+=A0 =A0 if (div2 =3D=3D 0)
+- =A0 =A0 =A0 bit_rate =3D ssp_rate / div1;
+- =A0 else
+- =A0 =A0 =A0 bit_rate =3D ssp_rate / div1 / div2;
++ =A0 =A0 =A0 div2 =3D 1;
++
++ =A0 bit_rate =3D ssp_rate / div1 / div2;
+=A0 =A0 val =3D readl(host->base + HW_SSP_TIMING);
+=A0 =A0 val &=3D ~(BM_SSP_TIMING_CLOCK_DIVIDE | BM_SSP_TIMING_CLOCK_RAT=
+E);
+--
+1.7.4.1
