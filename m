@@ -1,47 +1,78 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 0/4] mmc: dw_mmc: mmc_test related fixes
-Date: Thu, 30 Jun 2011 14:26:48 +0900
-Message-ID: <4E0C0918.1080006@samsung.com>
-References: <4E0AE1FC.3070201@imgtec.com>
- <BANLkTimAwoDybg8TdbMa6rjFY9H9vzGnHg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Add the function call for board-specific
+ initialization.
+Date: Thu, 30 Jun 2011 15:33:33 +0900
+Message-ID: <4E0C18BD.8000608@samsung.com>
+References: <1309402665-29228-1-git-send-email-tgih.jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:36409 "EHLO
+Received: from mailout4.samsung.com ([203.254.224.34]:14502 "EHLO
 	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753153Ab1F3F0u (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 01:26:50 -0400
-In-reply-to: <BANLkTimAwoDybg8TdbMa6rjFY9H9vzGnHg@mail.gmail.com>
+	with ESMTP id S1754229Ab1F3Gdc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 02:33:32 -0400
+In-reply-to: <1309402665-29228-1-git-send-email-tgih.jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: James Hogan <james.hogan@imgtec.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org
 
-Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
+Hi Mr.Jeon
 
-Will Newton wrote:
-> On Wed, Jun 29, 2011 at 9:27 AM, James Hogan <james.hogan@imgtec.com> wrote:
->> More improvements and fixes for the Synopsys DesignWare MCI driver so
->> that it passes the mmc_test suite:
->>
->> [PATCH 1/4] mmc: dw_mmc: fix stop when fallen back to PIO
->>        Fixes a hang after an error/timeout in PIO mode.
->> [PATCH 2/4] mmc: dw_mmc: remove unnecessary error messages
->>        Removes some dev_err's since an errno is sufficient.
->> [PATCH 3/4] mmc: dw_mmc: handle "no CRC status" error
->>        Fixes "Correct xfer_size at write" tests.
->> [PATCH 4/4] mmc: dw_mmc: reset FIFO after an error
->>        Fixes modified "Correct xfer_size at write" tests (3 blocks
->>        instead of 2).
->>
->>  drivers/mmc/host/dw_mmc.c  |   41 +++++++++++++++++++++++++++++++----------
->>  include/linux/mmc/dw_mmc.h |    2 ++
->>  2 files changed, 33 insertions(+), 10 deletions(-)
+This patch is the compiler error.
+
+didn't find host->card_work..
+
+do you want this
+queue_work(dw_mci_card_workqueue, &slot->host->card_work); ?
+
+
+Regards,
+Jaehoon Chung
+
+
+Seungwon Jeon wrote:
+> Need to call init() function of dw_mci_board.
+> It seems to be omitted to call this function.
 > 
-> These all look good to me.
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c |   11 +++++++++++
+>  1 files changed, 11 insertions(+), 0 deletions(-)
 > 
-> Acked-by: Will Newton <will.newton@imgtec.com>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index a524416..073c420 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1585,6 +1585,15 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+>  	}
+>  }
+> 
+> +static irqreturn_t dw_mci_detect_interrupt(int irq, void *dev_id)
+> +{
+> +	struct dw_mci_slot *slot = dev_id;
+> +
+> +	queue_work(dw_mci_card_workqueue, &host->card_work);
+> +
+> +	return IRQ_HANDLED;
+> +}
+> +
+>  static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  {
+>  	struct mmc_host *mmc;
+> @@ -1657,6 +1666,8 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	} else
+>  		regulator_enable(host->vmmc);
+> 
+> +	host->pdata->init(id, dw_mci_detect_interrupt, host);
+> +
+>  	if (dw_mci_get_cd(mmc))
+>  		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+>  	else
+> --
+> 1.7.0.4
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
