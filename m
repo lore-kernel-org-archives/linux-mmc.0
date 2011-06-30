@@ -1,111 +1,75 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCHv2 2/3] MMC: OMAP: HSMMC: add runtime pm support
-Date: Thu, 30 Jun 2011 10:01:01 +0530
-Message-ID: <BANLkTim7P=91OX2R90Ewaeeb43NfM77Smw@mail.gmail.com>
-References: <1309282049-23739-1-git-send-email-balajitk@ti.com>
-	<1309282049-23739-3-git-send-email-balajitk@ti.com>
-	<87mxh1v8f3.fsf@ti.com>
-	<BANLkTimWocMSCAxMf2ruLBzqdTOi0d2OLg@mail.gmail.com>
-	<87iproserq.fsf@ti.com>
+From: Axel Lin <axel.lin@gmail.com>
+Subject: [PATCH] mmc: tmio: fix build error if CONFIG_MMC_SDHI is not
+ configured
+Date: Thu, 30 Jun 2011 12:59:16 +0800
+Message-ID: <1309409956.10500.3.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <87iproserq.fsf@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Kevin Hilman <khilman@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, b-cousson@ti.com, svenkatr@ti.com, "Nayak, Rajendra" <rnayak@ti.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:51252 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750888Ab1F3E7W (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 00:59:22 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Ian Molton <spyro@f2s.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org
 
-On Wed, Jun 29, 2011 at 11:26 PM, Kevin Hilman <khilman@ti.com> wrote:
-> "T Krishnamoorthy, Balaji" <balajitk@ti.com> writes:
->
->> On Wed, Jun 29, 2011 at 5:02 AM, Kevin Hilman <khilman@ti.com> wrote=
-:
->>> +Rajendra
->>>
->>> Balaji T K <balajitk@ti.com> writes:
->>>
->>>> add runtime pm support to HSMMC host controller
->>>> Use runtime pm API to enable/disable HSMMC clock
->>>> Use runtime autosuspend APIs to enable auto suspend delay
->>>>
->>>> Based on OMAP HSMMC runtime implementation by Kevin Hilman, Kishor=
-e Kadiyala
->>>>
->>>> Signed-off-by: Balaji T K <balajitk@ti.com>
->>>
->>> I tried to test this series along with Benoit's clkdm/modulemode/hw=
-mod
->>> cleanups and something strange is happening on OMAP4.
->>>
->>> First, this series by itself is working as I would expect, but test=
-ing
->>> in combination with Benoit's series, it's different...
->>>
->>> First, I'm using Benoit's branch:
->>>
->>> =A0 =A0 =A0 git://gitorious.org/omap-pm/linux.git for_3.0.1/7_hwmod=
-_modulemode
->>>
->>> in combination with your series.
->>>
->>> I've also reverted these two commits:
->>>
->>> =A0 OMAP4: PM: TEMP: Prevent l3init from idling/force sleep
->>> =A0 OMAP3+: hwmod data: TEMP: Do not idle MMC1 & MMC2 after boot
->>>
->>> which are temporary workarounds for not having MMC runtime PM.
->>>
->>> I turned the dev_dbg calls in the runtime PM callbacks into dev_inf=
-o
->>> callbacks to see exactly when the device is enabled/disabled via ru=
-ntime
->>> PM.
->>>
->>> To my surprise, I didn't see the device being enabled/disabled when
->>> writing do the device.
->>
->> I tried for_3.0.1/7_hwmod_modulemode as you mentioned above,
->> changing dev_dbg to dev_err and I am not observing the delayed write
->> during umount. Can you let me know if the files are there in MMC aft=
-er
->> remounting ?
->
-> Did you also revert the above two commits?
+Fix below build error:
 
-yes
+  CC      drivers/mmc/host/tmio_mmc_dma.o
+drivers/mmc/host/tmio_mmc_dma.c:192: error: redefinition of 'tmio_mmc_start_dma'
+drivers/mmc/host/tmio_mmc.h:111: error: previous definition of 'tmio_mmc_start_dma' was here
+drivers/mmc/host/tmio_mmc_dma.c:257: error: redefinition of 'tmio_mmc_request_dma'
+drivers/mmc/host/tmio_mmc.h:116: error: previous definition of 'tmio_mmc_request_dma' was here
+drivers/mmc/host/tmio_mmc_dma.c:305: error: redefinition of 'tmio_mmc_release_dma'
+drivers/mmc/host/tmio_mmc.h:122: error: previous definition of 'tmio_mmc_release_dma' was here
+make[3]: *** [drivers/mmc/host/tmio_mmc_dma.o] Error 1
+make[2]: *** [drivers/mmc/host] Error 2
+make[1]: *** [drivers/mmc] Error 2
+make: *** [drivers] Error 2
 
->
-> I've pushed a 'tmp/mmc' branch to my git tree[1] which is my PM branc=
-h
-> (including various PM stuff queued for upstream) as well as Benoit's
-> series with the TEMP patches above reverted and your series on top of
-> it. =A0There's one additional patch to convert the dev_dbg into dev_i=
-nfo
-> to see the transitions.
->
-> Testing this on my OMAP4430 ES2.2 EMU device, I still see the above
-> behavior.
+Signed-off-by: Axel Lin <axel.lin@gmail.com>
+---
+ drivers/mmc/host/tmio_mmc_dma.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
 
-I used OMAP4430 ES2.1 GP
+diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+index a40fdba..4dc563a 100644
+--- a/drivers/mmc/host/tmio_mmc_dma.c
++++ b/drivers/mmc/host/tmio_mmc_dma.c
+@@ -189,6 +189,7 @@ pio:
+ 		desc, cookie);
+ }
+ 
++#if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
+ void tmio_mmc_start_dma(struct tmio_mmc_host *host,
+ 			       struct mmc_data *data)
+ {
+@@ -200,6 +201,7 @@ void tmio_mmc_start_dma(struct tmio_mmc_host *host,
+ 			tmio_mmc_start_dma_tx(host);
+ 	}
+ }
++#endif
+ 
+ static void tmio_mmc_issue_tasklet_fn(unsigned long priv)
+ {
+@@ -254,6 +256,7 @@ static bool tmio_mmc_filter(struct dma_chan *chan, void *arg)
+ 	return true;
+ }
+ 
++#if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
+ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdata)
+ {
+ 	/* We can only either use DMA for both Tx and Rx or not use it at all */
+@@ -319,3 +322,4 @@ void tmio_mmc_release_dma(struct tmio_mmc_host *host)
+ 		host->bounce_buf = NULL;
+ 	}
+ }
++#endif
+-- 
+1.7.4.1
 
->
-> Can you try out this branch on your board using the default
-> omap2plus_defconfig?
 
-Ok, I will retry on EMU device.
 
->
-> Thanks,
->
-> Kevin
->
-> [1] git://git.kernel.org/pub/scm/linux/kernel/git/khilman/linux-omap-=
-pm.git
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
