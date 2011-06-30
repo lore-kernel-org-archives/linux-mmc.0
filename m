@@ -1,122 +1,56 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCHv2 2/3] MMC: OMAP: HSMMC: add runtime pm support
-Date: Thu, 30 Jun 2011 19:43:29 +0530
-Message-ID: <BANLkTin7mQPWsiOCJ2UfxyH1OsDVfVR=2g@mail.gmail.com>
-References: <1309282049-23739-1-git-send-email-balajitk@ti.com>
-	<1309282049-23739-3-git-send-email-balajitk@ti.com>
-	<87mxh1v8f3.fsf@ti.com>
-	<BANLkTimWocMSCAxMf2ruLBzqdTOi0d2OLg@mail.gmail.com>
-	<87iproserq.fsf@ti.com>
-	<BANLkTim7P=91OX2R90Ewaeeb43NfM77Smw@mail.gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 4/4] mmci: fixup sg buffer handling in pio_write
+Date: Thu, 30 Jun 2011 15:33:38 +0100
+Message-ID: <20110630143338.GA21898@n2100.arm.linux.org.uk>
+References: <1309247869-17220-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <BANLkTim7P=91OX2R90Ewaeeb43NfM77Smw@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Kevin Hilman <khilman@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, b-cousson@ti.com, svenkatr@ti.com, "Nayak, Rajendra" <rnayak@ti.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:57649 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750852Ab1F3Odr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 10:33:47 -0400
+Content-Disposition: inline
+In-Reply-To: <1309247869-17220-1-git-send-email-linus.walleij@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Dmitry Tarnyagin <dmitry.tarnyagin@stericsson.com>
 
-On Thu, Jun 30, 2011 at 10:01 AM, T Krishnamoorthy, Balaji
-<balajitk@ti.com> wrote:
-> On Wed, Jun 29, 2011 at 11:26 PM, Kevin Hilman <khilman@ti.com> wrote=
-:
->> "T Krishnamoorthy, Balaji" <balajitk@ti.com> writes:
->>
->>> On Wed, Jun 29, 2011 at 5:02 AM, Kevin Hilman <khilman@ti.com> wrot=
-e:
->>>> +Rajendra
->>>>
->>>> Balaji T K <balajitk@ti.com> writes:
->>>>
->>>>> add runtime pm support to HSMMC host controller
->>>>> Use runtime pm API to enable/disable HSMMC clock
->>>>> Use runtime autosuspend APIs to enable auto suspend delay
->>>>>
->>>>> Based on OMAP HSMMC runtime implementation by Kevin Hilman, Kisho=
-re Kadiyala
->>>>>
->>>>> Signed-off-by: Balaji T K <balajitk@ti.com>
->>>>
->>>> I tried to test this series along with Benoit's clkdm/modulemode/h=
-wmod
->>>> cleanups and something strange is happening on OMAP4.
->>>>
->>>> First, this series by itself is working as I would expect, but tes=
-ting
->>>> in combination with Benoit's series, it's different...
->>>>
->>>> First, I'm using Benoit's branch:
->>>>
->>>> =A0 =A0 =A0 git://gitorious.org/omap-pm/linux.git for_3.0.1/7_hwmo=
-d_modulemode
->>>>
->>>> in combination with your series.
->>>>
->>>> I've also reverted these two commits:
->>>>
->>>> =A0 OMAP4: PM: TEMP: Prevent l3init from idling/force sleep
->>>> =A0 OMAP3+: hwmod data: TEMP: Do not idle MMC1 & MMC2 after boot
->>>>
->>>> which are temporary workarounds for not having MMC runtime PM.
->>>>
->>>> I turned the dev_dbg calls in the runtime PM callbacks into dev_in=
-fo
->>>> callbacks to see exactly when the device is enabled/disabled via r=
-untime
->>>> PM.
->>>>
->>>> To my surprise, I didn't see the device being enabled/disabled whe=
-n
->>>> writing do the device.
->>>
->>> I tried for_3.0.1/7_hwmod_modulemode as you mentioned above,
->>> changing dev_dbg to dev_err and I am not observing the delayed writ=
-e
->>> during umount. Can you let me know if the files are there in MMC af=
-ter
->>> remounting ?
->>
->> Did you also revert the above two commits?
->
-> yes
->
->>
->> I've pushed a 'tmp/mmc' branch to my git tree[1] which is my PM bran=
-ch
->> (including various PM stuff queued for upstream) as well as Benoit's
->> series with the TEMP patches above reverted and your series on top o=
-f
->> it. =A0There's one additional patch to convert the dev_dbg into dev_=
-info
->> to see the transitions.
->>
->> Testing this on my OMAP4430 ES2.2 EMU device, I still see the above
->> behavior.
->
-> I used OMAP4430 ES2.1 GP
->
->>
->> Can you try out this branch on your board using the default
->> omap2plus_defconfig?
->
-> Ok, I will retry on EMU device.
-Tried on ES2.1 EMU, log shared at http://pastebin.com/Umg2zF2J
+On Tue, Jun 28, 2011 at 09:57:49AM +0200, Linus Walleij wrote:
+> From: Ulf Hansson <ulf.hansson@stericsson.com>
+> 
+> Earlier code in pio_write was expecting that each
+> scatter-gather buffer was 4-bytes aligned which is
+> not always the case, especially when dealing with long
+> chains of SDIO packages. This patch fix the problem by
+> using a 4 bytes buffer to cache unaligned data between
+> each unaligned pio_write operation.
+> 
+> In the last transaction we pad the last write access
+> with zeroes.
+> 
+> Remove older fix for ST Micro since it was not a
+> variant-specific problem.
 
-Can you share your complete log?
+This is horrid, and will probably cause MMCI to underrun on ARM platforms
+where it hasn't done so previously due to all the extra overhead at the
+start of the interrupt.
 
->
->>
->> Thanks,
->>
->> Kevin
->>
->> [1] git://git.kernel.org/pub/scm/linux/kernel/git/khilman/linux-omap=
--pm.git
->>
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Therefore, I don't think this is acceptable.
+
+Plus, what exactly is it trying to solve - writesl() handles unaligned
+buffers already.
+
+> +		if (len > sg_miter->consumed)
+> +			len = sg_miter->consumed;
+> +		else
+> +			sg_miter->consumed = len;
+
+sg_miter is supposed to _always_ be written with the number of bytes
+consumed.  To start playing these games with it is inviting trouble,
+and to start return a length greater than 'remain' from mmci_pio_write
+is just silly.
+
+What is probably a better approach is to detect this condition when
+we receive the request, and copy the data into a bounce buffer.
