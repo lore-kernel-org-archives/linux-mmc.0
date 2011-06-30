@@ -1,43 +1,58 @@
-From: <Chikkature@lina0132712>, <Rajashekar@lina0132712>,
-	<Madhusudhan@lina0132712>, <madhu.cr@ti.com>
-Subject: [PATCH] OMAP: HSMMC maintainence
-Date: Thu, 30 Jun 2011 16:07:26 -0500
-Message-ID: <1309468046-17904-1-git-send-email-m-sonasath@ti.com>
+From: Kevin Hilman <khilman@ti.com>
+Subject: Re: [PATCHv3 2/3] MMC: OMAP: HSMMC: add runtime pm support
+Date: Thu, 30 Jun 2011 16:23:12 -0700
+Message-ID: <87d3hudhun.fsf@ti.com>
+References: <1309460700-25898-1-git-send-email-balajitk@ti.com>
+	<1309460700-25898-3-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1309460700-25898-3-git-send-email-balajitk@ti.com> (Balaji
+	T. K.'s message of "Fri, 1 Jul 2011 00:34:58 +0530")
 Sender: linux-omap-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org
-Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, b-cousson@ti.com, paul@pwsan.com, kishore.kadiyala@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Madhusudhan Chikkature <madhu.cr@ti.com>
+Balaji T K <balajitk@ti.com> writes:
 
-Removing the OMAP HS MMC entry from the MAINTAINERS file as I will
-no longer be able to maintain this driver.
+> add runtime pm support to HSMMC host controller
+> Use runtime pm API to enable/disable HSMMC clock
+> Use runtime autosuspend APIs to enable auto suspend delay
+>
+> Based on OMAP HSMMC runtime implementation by Kevin Hilman, Kishore Kadiyala
+>
+> Signed-off-by: Balaji T K <balajitk@ti.com>
 
-Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
----
- MAINTAINERS |    6 ------
- 1 files changed, 0 insertions(+), 6 deletions(-)
+Minor nit below...
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 0094224..96061d2 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -4306,12 +4306,6 @@ L:	linux-omap@vger.kernel.org
- S:	Maintained
- F:	drivers/mmc/host/omap.c
- 
--OMAP HS MMC SUPPORT
--M:	Madhusudhan Chikkature <madhu.cr@ti.com>
--L:	linux-omap@vger.kernel.org
--S:	Maintained
--F:	drivers/mmc/host/omap_hsmmc.c
--
- OMAP RANDOM NUMBER GENERATOR SUPPORT
- M:	Deepak Saxena <dsaxena@plexity.net>
- S:	Maintained
--- 
-1.7.0.4
+[...]
 
+> +static int omap_hsmmc_runtime_suspend(struct device *dev)
+> +{
+> +	struct omap_hsmmc_host *host;
+> +
+> +	host = platform_get_drvdata(to_platform_device(dev));
+> +	omap_hsmmc_context_save(host);
+> +	dev_dbg(mmc_dev(host->mmc), "disabled\n");
+> +
+> +	return 0;
+> +}
+> +
+> +static int omap_hsmmc_runtime_resume(struct device *dev)
+> +{
+> +	struct omap_hsmmc_host *host;
+> +
+> +	host = platform_get_drvdata(to_platform_device(dev));
+> +	omap_hsmmc_context_restore(host);
+> +	dev_dbg(mmc_dev(host->mmc), "host: enabled\n");
+
+Minor: this has a 'host: ' prefix, where as the one in
+.runtime_suspend() does not. 
+
+> +
+> +	return 0;
+> +}
+> +
+
+Kevin
