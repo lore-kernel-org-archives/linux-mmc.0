@@ -1,119 +1,146 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: Re: [PATCH 1/2] MMC: PM: add suspend/resume in atmel-mci
-Date: Thu, 30 Jun 2011 10:30:56 +0200
-Message-ID: <4E0C3440.9010802@atmel.com>
-References: <1ef60c032bc39531302c1603bfcb841d2d437ccc.1309366360.git.nicolas.ferre@atmel.com>
-	<20110629160110.GD2760@legolas.emea.dhcp.ti.com>
-	<201106292339.12402.rjw@sisk.pl>
+From: James Hogan <james@albanarts.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Add the function call for board-specific initialization.
+Date: Thu, 30 Jun 2011 09:43:04 +0100
+Message-ID: <BANLkTi=r3x81sPVLG9yRAG9hHnjQuqTHCg@mail.gmail.com>
+References: <1309402665-29228-1-git-send-email-tgih.jun@samsung.com>
+	<4E0C18BD.8000608@samsung.com>
+	<BANLkTikhwh5M1XB9zRiLzMd7dL18kA_o0g@mail.gmail.com>
+	<4E0C31DF.5090200@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-2"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <201106292339.12402.rjw@sisk.pl>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>, balbi@ti.com
-Cc: linux-mmc@vger.kernel.org, kernel@avr32linux.org, linux-kernel@vger.kernel.org, =?ISO-8859-2?Q?Uwe_Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>, cjb@laptop.org, hans-christian.egtvedt@atmel.com, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:43802 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754539Ab1F3InF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 04:43:05 -0400
+In-Reply-To: <4E0C31DF.5090200@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org
 
-Le 29/06/2011 23:39, Rafael J. Wysocki :
-> On Wednesday, June 29, 2011, Felipe Balbi wrote:
->> Hi,
->>
->> On Wed, Jun 29, 2011 at 06:54:19PM +0200, Nicolas Ferre wrote:
->>> Take care of slots while going to suspend state.
+Hi,
+
+On 30 June 2011 09:20, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi James
+>
+> James Hogan wrote:
+>> On 30 June 2011 07:33, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>> Hi Mr.Jeon
 >>>
->>> Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
->>> Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
->>> ---
->>>  drivers/mmc/host/atmel-mci.c |   51 ++++++++++++++++++++++++++++++++++=
-++++++++
->>>  1 files changed, 51 insertions(+), 0 deletions(-)
+>>> This patch is the compiler error.
 >>>
->>> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
->>> index aa8039f..c414ebe 100644
->>> --- a/drivers/mmc/host/atmel-mci.c
->>> +++ b/drivers/mmc/host/atmel-mci.c
->>> @@ -1878,8 +1878,59 @@ static int __exit atmci_remove(struct platform_d=
-evice *pdev)
->>>  	return 0;
->>>  }
->>>  =
-
->>> +#ifdef CONFIG_PM
->>> +static int atmci_suspend(struct platform_device *pdev, pm_message_t me=
-sg)
->>> +{
->>> +	struct atmel_mci *host =3D platform_get_drvdata(pdev);
->>> +	struct atmel_mci_slot *slot;
->>> +	int i, ret;
->>> +
->>> +	 for (i =3D 0; i < ATMEL_MCI_MAX_NR_SLOTS; i++) {
->>> +		slot =3D host->slot[i];
->>> +		if (!slot)
->>> +			continue;
->>> +		ret =3D mmc_suspend_host(slot->mmc);
->>> +		if (ret < 0) {
->>> +			while (--i >=3D 0) {
->>> +				slot =3D host->slot[i];
->>> +				if (slot)
->>> +					mmc_resume_host(host->slot[i]->mmc);
->>> +			}
->>> +			return ret;
->>> +		}
->>> +	}
->>> +
->>> +	return 0;
->>> +}
->>> +
->>> +static int atmci_resume(struct platform_device *pdev)
->>> +{
->>> +	struct atmel_mci *host =3D platform_get_drvdata(pdev);
->>> +	struct atmel_mci_slot *slot;
->>> +	int i, ret;
->>> +
->>> +	for (i =3D 0; i < ATMEL_MCI_MAX_NR_SLOTS; i++) {
->>> +		slot =3D host->slot[i];
->>> +		if (!slot)
->>> +			continue;
->>> +		ret =3D mmc_resume_host(slot->mmc);
->>> +		if (ret < 0)
->>> +			return ret;
->>> +	}
->>> +
->>> +	return 0;
->>> +}
->>> +#else
->>> +#define atmci_suspend	NULL
->>> +#define atmci_resume	NULL
->>> +#endif
->>> +
->>> +
->>> +
->>>  static struct platform_driver atmci_driver =3D {
->>>  	.remove		=3D __exit_p(atmci_remove),
->>> +	.suspend	=3D atmci_suspend,
->>> +	.resume		=3D atmci_resume,
+>>> didn't find host->card_work..
+>>>
+>>> do you want this
+>>> queue_work(dw_mci_card_workqueue, &slot->host->card_work); ?
 >>
->> should this be using dev_pm_ops instead ?
-> =
+>> I think the patch is based on mmc-next, which has the following comm=
+it:
+>> 35ba9d8 mmc: dw_mmc: convert card tasklet to workqueue
+>
+> I also tested this patch based on mmc-next.
+> But my mean is that there is not host structure in dw_mci_detect_inte=
+rrupt().
+>
+> drivers/mmc/host/dw_mmc.c: In function 'dw_mci_detect_interrupt':
+> drivers/mmc/host/dw_mmc.c:1592: error: 'host' undeclared (first use i=
+n this function)
+> drivers/mmc/host/dw_mmc.c:1592: error: (Each undeclared identifier is=
+ reported only once
+> drivers/mmc/host/dw_mmc.c:1592: error: for each function it appears i=
+n.)
+> drivers/mmc/host/dw_mmc.c:1590: warning: unused variable 'slot'
+> make[3]: *** [drivers/mmc/host/dw_mmc.o] Error 1
+> make[2]: *** [drivers/mmc/host] Error 2
 
-> It should.  Also, please remember to initialize the hibernate callback
-> pointers too, e.g. via the SIMPLE_DEV_PM_OPS() macro.
+Sorry, I misunderstood. You are correct.
 
-Felipe, Rafael,
-Thanks for your feedback. I will implement this in a v2 patch.
+Cheers
+James
 
-BTW, should I use #ifdef CONFIG_PM or #ifdef CONFIG_PM_SLEEP?
+>
+> Did you really compile fine?
+>
+> Regards,
+> Jaehoon Chung
+>
+>>
+>> Cheers
+>> James
+>>
+>>>
+>>> Regards,
+>>> Jaehoon Chung
+>>>
+>>>
+>>> Seungwon Jeon wrote:
+>>>> Need to call init() function of dw_mci_board.
+>>>> It seems to be omitted to call this function.
+>>>>
+>>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>>>> ---
+>>>> =A0drivers/mmc/host/dw_mmc.c | =A0 11 +++++++++++
+>>>> =A01 files changed, 11 insertions(+), 0 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>> index a524416..073c420 100644
+>>>> --- a/drivers/mmc/host/dw_mmc.c
+>>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>>> @@ -1585,6 +1585,15 @@ static void dw_mci_work_routine_card(struct=
+ work_struct *work)
+>>>> =A0 =A0 =A0 }
+>>>> =A0}
+>>>>
+>>>> +static irqreturn_t dw_mci_detect_interrupt(int irq, void *dev_id)
+>>>> +{
+>>>> + =A0 =A0 struct dw_mci_slot *slot =3D dev_id;
+>>>> +
+>>>> + =A0 =A0 queue_work(dw_mci_card_workqueue, &host->card_work);
+>>>> +
+>>>> + =A0 =A0 return IRQ_HANDLED;
+>>>> +}
+>>>> +
+>>>> =A0static int __init dw_mci_init_slot(struct dw_mci *host, unsigne=
+d int id)
+>>>> =A0{
+>>>> =A0 =A0 =A0 struct mmc_host *mmc;
+>>>> @@ -1657,6 +1666,8 @@ static int __init dw_mci_init_slot(struct dw=
+_mci *host, unsigned int id)
+>>>> =A0 =A0 =A0 } else
+>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 regulator_enable(host->vmmc);
+>>>>
+>>>> + =A0 =A0 host->pdata->init(id, dw_mci_detect_interrupt, host);
+>>>> +
+>>>> =A0 =A0 =A0 if (dw_mci_get_cd(mmc))
+>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 set_bit(DW_MMC_CARD_PRESENT, &slot->fl=
+ags);
+>>>> =A0 =A0 =A0 else
+>>>> --
+>>>> 1.7.0.4
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mm=
+c" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.ht=
+ml
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
+" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
+l
+>>>
+>>
+>>
+>>
+>
+>
 
-Best regards,
--- =
 
-Nicolas Ferre
+
+--=20
+James Hogan
