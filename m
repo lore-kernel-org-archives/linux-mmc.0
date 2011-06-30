@@ -1,56 +1,43 @@
-From: "Cousson, Benoit" <b-cousson@ti.com>
-Subject: Re: [PATCHv3 0/3] OMAP: HSMMC: cleanup and runtime pm
-Date: Thu, 30 Jun 2011 21:36:53 +0200
-Message-ID: <4E0CD055.30902@ti.com>
-References: <1309460700-25898-1-git-send-email-balajitk@ti.com>
+From: <Chikkature@lina0132712>, <Rajashekar@lina0132712>,
+	<Madhusudhan@lina0132712>, <madhu.cr@ti.com>
+Subject: [PATCH] OMAP: HSMMC maintainence
+Date: Thu, 30 Jun 2011 16:07:26 -0500
+Message-ID: <1309468046-17904-1-git-send-email-m-sonasath@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:35320 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753892Ab1F3ThA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 30 Jun 2011 15:37:00 -0400
-In-Reply-To: <1309460700-25898-1-git-send-email-balajitk@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org
+Cc: Madhusudhan Chikkature <madhu.cr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "Krishnamoorthy, Balaji T" <balajitk@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "tony@atomide.com" <tony@atomide.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "Hilman, Kevin" <khilman@ti.com>, "paul@pwsan.com" <paul@pwsan.com>, "Kadiyala, Kishore" <kishore.kadiyala@ti.com>
 
-Hi Balaji,
+From: Madhusudhan Chikkature <madhu.cr@ti.com>
 
-On 6/30/2011 9:04 PM, Krishnamoorthy, Balaji T wrote:
-> Removing the custom state machine - lazy disable framework in omap_hsmmc
-> to make way for runtime pm to handle host controller
-> power states.
-> This allows mmc_host_enable/mmc_host_disable to be replaced by
-> runtime get_sync and put_sync at host controller driver.
->
-> Enable runtime PM in omap_hsmmc
->
-> Rebased to 3.0-rc5
-> Tested on OMAP4430SDP, OMAP3430SDP, OMAP2430SDP
->
-> MMC runtime patch has dependency on
-> [PATCH 0/6] OMAP2+: hwmod framework fixes [1]
-> for MMC1/MMC2 clock to get ungated after idle in OMAP4.
->
-> Without [1] patches, MMC1/MMC2 fails to get detected on OMAP4.
+Removing the OMAP HS MMC entry from the MAINTAINERS file as I will
+no longer be able to maintain this driver.
 
-Mmm, that's weird, which one exactly is fixing the issue?
-BTW, what is the issue exactly?
+Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
+---
+ MAINTAINERS |    6 ------
+ 1 files changed, 0 insertions(+), 6 deletions(-)
 
-Benoit
-
->
-> [1] http://www.mail-archive.com/linux-omap@vger.kernel.org/msg51457.html
->
-> Balaji T K (3):
->    MMC: OMAP: HSMMC: Remove lazy_disable
->    MMC: OMAP: HSMMC: add runtime pm support
->    MMC: OMAP: HSMMC: Remove unused iclk
->
->   drivers/mmc/host/omap_hsmmc.c |  365 +++++++----------------------------------
->   1 files changed, 57 insertions(+), 308 deletions(-)
->
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 0094224..96061d2 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -4306,12 +4306,6 @@ L:	linux-omap@vger.kernel.org
+ S:	Maintained
+ F:	drivers/mmc/host/omap.c
+ 
+-OMAP HS MMC SUPPORT
+-M:	Madhusudhan Chikkature <madhu.cr@ti.com>
+-L:	linux-omap@vger.kernel.org
+-S:	Maintained
+-F:	drivers/mmc/host/omap_hsmmc.c
+-
+ OMAP RANDOM NUMBER GENERATOR SUPPORT
+ M:	Deepak Saxena <dsaxena@plexity.net>
+ S:	Maintained
+-- 
+1.7.0.4
 
