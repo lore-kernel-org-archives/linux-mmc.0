@@ -1,104 +1,79 @@
-From: Koen Beel <koen.beel.barco@gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
 Subject: Re: [PATCH] mxs-mmc: fix clock rate setting
-Date: Fri, 1 Jul 2011 14:10:00 +0200
-Message-ID: <BANLkTi=cTigrnAHY3sDNC04aNpmZOQpUsA@mail.gmail.com>
+Date: Fri, 1 Jul 2011 14:27:09 +0200
+Message-ID: <20110701122709.GJ1922@pengutronix.de>
 References: <BANLkTi==Y_MJ2H_u15DzunWusUb=GsotWg@mail.gmail.com>
-	<BANLkTinKcb-=m3sURawdEjR=vTt=ApBKaQ@mail.gmail.com>
-	<20110630145507.GG1997@pengutronix.de>
-	<20110701091753.GE1922@pengutronix.de>
+ <BANLkTinKcb-=m3sURawdEjR=vTt=ApBKaQ@mail.gmail.com>
+ <20110630145507.GG1997@pengutronix.de>
+ <20110701091753.GE1922@pengutronix.de>
+ <BANLkTi=cTigrnAHY3sDNC04aNpmZOQpUsA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="00hq2S6J2Jlg6EbK"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:51041 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755265Ab1GAMKD convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jul 2011 08:10:03 -0400
-Received: by wyg8 with SMTP id 8so2150206wyg.19
-        for <linux-mmc@vger.kernel.org>; Fri, 01 Jul 2011 05:10:01 -0700 (PDT)
-In-Reply-To: <20110701091753.GE1922@pengutronix.de>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:45345 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755199Ab1GAM1L (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jul 2011 08:27:11 -0400
+Content-Disposition: inline
+In-Reply-To: <BANLkTi=cTigrnAHY3sDNC04aNpmZOQpUsA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
+To: Koen Beel <koen.beel.barco@gmail.com>
 Cc: linux-mmc@vger.kernel.org, shawn.guo@freescale.com
 
-Hi,
 
-Think the tabs problem was due to the gmail web ui.
-Hope it's better now.
+--00hq2S6J2Jlg6EbK
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
 
-Signed-off-by: Koen Beel <koen.beel <at> barco.com>
----
- drivers/mmc/host/mxs-mmc.c |   12 ++++++------
- 1 files changed, 6 insertions(+), 6 deletions(-)
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 99d39a6..3575330 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -570,22 +570,22 @@ static void mxs_mmc_set_clk_rate(struct
-mxs_mmc_host *host, unsigned int rate)
-    ssp_rate =3D clk_get_rate(host->clk);
--   for (div1 =3D 2; div1 < 254; div1 +=3D 2) {
-+   for (div1 =3D 2; div1 <=3D 254; div1 +=3D 2) {
-        div2 =3D ssp_rate / rate / div1;
--       if (div2 < 0x100)
-+       if (div2 <=3D 256)
-            break;
-    }
--   if (div1 >=3D 254) {
-+   if (div1 > 254) {
-        dev_err(mmc_dev(host->mmc),
-            "%s: cannot set clock to %d\n", __func__, rate);
-        return;
-    }
-    if (div2 =3D=3D 0)
--       bit_rate =3D ssp_rate / div1;
--   else
--       bit_rate =3D ssp_rate / div1 / div2;
-+       div2 =3D 1;
-+
-+   bit_rate =3D ssp_rate / div1 / div2;
-    val =3D readl(host->base + HW_SSP_TIMING);
-    val &=3D ~(BM_SSP_TIMING_CLOCK_DIVIDE | BM_SSP_TIMING_CLOCK_RATE);
---
-1.7.4.1
+> Think the tabs problem was due to the gmail web ui.
+> Hope it's better now.
 
-On Fri, Jul 1, 2011 at 11:17 AM, Wolfram Sang <w.sang@pengutronix.de> w=
-rote:
-> On Thu, Jun 30, 2011 at 04:55:07PM +0200, Wolfram Sang wrote:
->> On Thu, Jun 30, 2011 at 12:13:34PM +0200, Koen Beel wrote:
->> > Fix clock rate setting on mxs-mmc driver.
->> > Previously, if div2 was zero the value for TIMING_CLOCK_RATE would
->> > have been 255 instead of 0.
->> > Also the limits for div1 (TIMING_CLOCK_DIVIDE) and div2
->> > (TIMING_CLOCK_RATE + 1) where not correctly defined.
->> >
->> > Can easily be reproduced on mx23evk: default clock for high speed =
-sdio
->> > cards is 50 MHz. With a SSP_CLK of 28.8 MHz (default), this result=
-ed in
->> > an actual clock rate of about 56 kHz.
->> >
->> > Signed-off-by: Koen Beel <koen.beel.barco <at> gmail.com>
->>
->> Looks promising, but your tabs are garbled (0xa0 0x20 here?)
->
-> Can you repost a patch which applies? I'd like to test it.
->
-> --
-> Pengutronix e.K. =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 | Wolfram Sang =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|
-> Industrial Linux Solutions =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
-=C2=A0 =C2=A0 | http://www.pengutronix.de/ =C2=A0|
->
-> -----BEGIN PGP SIGNATURE-----
-> Version: GnuPG v1.4.10 (GNU/Linux)
->
-> iEUEARECAAYFAk4NkMEACgkQD27XaX1/VRvw0QCeP4F3oeKe1Ge3SLohJICLxZre
-> LKYAmJ2sEztaKIVw4NsZMYNqCUbbwFQ=3D
-> =3DC7kg
-> -----END PGP SIGNATURE-----
->
->
+No 0xa0 anymore, but still no tabs. Oh, and lines are wrapped.
+
+Documentation/email-clients.txt says
+
+=3D=3D=3D
+
+Gmail (Web GUI)
+
+Does not work for sending patches.
+
+Gmail web client converts tabs to spaces automatically.
+
+At the same time it wraps lines every 78 chars with CRLF style line
+breaks although tab2space problem can be solved with external editor.
+
+Another problem is that Gmail will base64-encode any message that has a
+non-ASCII character. That includes things like European names.
+
+=3D=3D=3D
+
+I don't know if git-send-email can work directly with gmail, but it
+seems you need some kind of alternative approach.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--00hq2S6J2Jlg6EbK
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk4NvR0ACgkQD27XaX1/VRtjmACfQzU2j5+awQ78Ey7Ir+39uhxn
+j70AoJQG0D6tK3rYh4YeYsiyFAsLieC5
+=DqDV
+-----END PGP SIGNATURE-----
+
+--00hq2S6J2Jlg6EbK--
