@@ -1,80 +1,64 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCHv3 0/3] OMAP: HSMMC: cleanup and runtime pm
-Date: Fri, 1 Jul 2011 11:46:01 +0530
-Message-ID: <BANLkTikwEH+wFzn-7gno5tXzJSeweDvTLw@mail.gmail.com>
-References: <1309460700-25898-1-git-send-email-balajitk@ti.com>
-	<4E0CD055.30902@ti.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH] mxs-mmc: fix clock rate setting
+Date: Fri, 1 Jul 2011 11:17:53 +0200
+Message-ID: <20110701091753.GE1922@pengutronix.de>
+References: <BANLkTi==Y_MJ2H_u15DzunWusUb=GsotWg@mail.gmail.com>
+ <BANLkTinKcb-=m3sURawdEjR=vTt=ApBKaQ@mail.gmail.com>
+ <20110630145507.GG1997@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="Ns7jmDPpOpCD+GE/"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:35482 "EHLO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754792Ab1GAGQE convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 1 Jul 2011 02:16:04 -0400
-In-Reply-To: <4E0CD055.30902@ti.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:38573 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755956Ab1GAJRz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jul 2011 05:17:55 -0400
+Content-Disposition: inline
+In-Reply-To: <20110630145507.GG1997@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Cousson, Benoit" <b-cousson@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "tony@atomide.com" <tony@atomide.com>, "Chikkature Rajashekar, Madhusudhan" <madhu.cr@ti.com>, "Hilman, Kevin" <khilman@ti.com>, "paul@pwsan.com" <paul@pwsan.com>, "Kadiyala, Kishore" <kishore.kadiyala@ti.com>
-
-On Fri, Jul 1, 2011 at 1:06 AM, Cousson, Benoit <b-cousson@ti.com> wrot=
-e:
-> Hi Balaji,
->
-> On 6/30/2011 9:04 PM, Krishnamoorthy, Balaji T wrote:
->>
->> Removing the custom state machine - lazy disable framework in omap_h=
-smmc
->> to make way for runtime pm to handle host controller
->> power states.
->> This allows mmc_host_enable/mmc_host_disable to be replaced by
->> runtime get_sync and put_sync at host controller driver.
->>
->> Enable runtime PM in omap_hsmmc
->>
->> Rebased to 3.0-rc5
->> Tested on OMAP4430SDP, OMAP3430SDP, OMAP2430SDP
->>
->> MMC runtime patch has dependency on
->> [PATCH 0/6] OMAP2+: hwmod framework fixes [1]
->> for MMC1/MMC2 clock to get ungated after idle in OMAP4.
->>
->> Without [1] patches, MMC1/MMC2 fails to get detected on OMAP4.
->
-> Mmm, that's weird, which one exactly is fixing the issue?
-
-http://www.mail-archive.com/linux-omap@vger.kernel.org/msg51458.html
-[PATCH 1/6] OMAP2+: hwmod: Fix smart-standby + wakeup support
-
-http://www.mail-archive.com/linux-omap@vger.kernel.org/msg51461.html
-[PATCH 2/6] OMAP4: hwmod data: Add MSTANDBY_SMART_WKUP flag
+To: Koen Beel <koen.beel.barco@gmail.com>
+Cc: linux-mmc@vger.kernel.org, shawn.guo@freescale.com
 
 
-> BTW, what is the issue exactly?
+--Ns7jmDPpOpCD+GE/
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-with SIDLE_SMART_WKUP flag set in omap44xx_mmc_sysc,
-module got stuck after second clock enable.
-It got resolved after adding MSTANDBY_SMART_WKUP fixes
-=2E
-Removing SIDLE_SMART_WKUP also solves the issue..
+On Thu, Jun 30, 2011 at 04:55:07PM +0200, Wolfram Sang wrote:
+> On Thu, Jun 30, 2011 at 12:13:34PM +0200, Koen Beel wrote:
+> > Fix clock rate setting on mxs-mmc driver.
+> > Previously, if div2 was zero the value for TIMING_CLOCK_RATE would
+> > have been 255 instead of 0.
+> > Also the limits for div1 (TIMING_CLOCK_DIVIDE) and div2
+> > (TIMING_CLOCK_RATE + 1) where not correctly defined.
+> >=20
+> > Can easily be reproduced on mx23evk: default clock for high speed sdio
+> > cards is 50 MHz. With a SSP_CLK of 28.8 MHz (default), this resulted in
+> > an actual clock rate of about 56 kHz.
+> >=20
+> > Signed-off-by: Koen Beel <koen.beel.barco <at> gmail.com>
+>=20
+> Looks promising, but your tabs are garbled (0xa0 0x20 here?)
 
->
-> Benoit
->
->>
->> [1] http://www.mail-archive.com/linux-omap@vger.kernel.org/msg51457.=
-html
->>
->> Balaji T K (3):
->> =A0 MMC: OMAP: HSMMC: Remove lazy_disable
->> =A0 MMC: OMAP: HSMMC: add runtime pm support
->> =A0 MMC: OMAP: HSMMC: Remove unused iclk
->>
->> =A0drivers/mmc/host/omap_hsmmc.c | =A0365
->> +++++++----------------------------------
->> =A01 files changed, 57 insertions(+), 308 deletions(-)
->>
->
->
+Can you repost a patch which applies? I'd like to test it.
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--Ns7jmDPpOpCD+GE/
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEUEARECAAYFAk4NkMEACgkQD27XaX1/VRvw0QCeP4F3oeKe1Ge3SLohJICLxZre
+LKYAmJ2sEztaKIVw4NsZMYNqCUbbwFQ=
+=C7kg
+-----END PGP SIGNATURE-----
+
+--Ns7jmDPpOpCD+GE/--
