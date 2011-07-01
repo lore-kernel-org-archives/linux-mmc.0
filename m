@@ -1,7 +1,8 @@
 From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v9 10/12] mmc: queue: add a second mmc queue request member
-Date: Fri,  1 Jul 2011 18:55:31 +0200
-Message-ID: <1309539333-2606-11-git-send-email-per.forlin@linaro.org>
+Subject: [PATCH v9 12/12] mmc: block: add handling for two parallel block
+	requests in issue_rw_rq
+Date: Fri,  1 Jul 2011 18:55:33 +0200
+Message-ID: <1309539333-2606-13-git-send-email-per.forlin@linaro.org>
 References: <1309539333-2606-1-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -20,9 +21,15 @@ Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
 To: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Venkatraman S <sve>
 List-Id: linux-mmc@vger.kernel.org
 
-Add an additional mmc queue request instance to make way for
-two active block requests. One request may be active while the
-other request is being prepared.
+Change mmc_blk_issue_rw_rq() to become asynchronous.
+The execution flow looks like this:
+The mmc-queue calls issue_rw_rq(), which sends the request
+to the host and returns back to the mmc-queue. The mmc-queue calls
+issue_rw_rq() again with a new request. This new request is prepared,
+in isuue_rw_rq(), then it waits for the active request to complete before
+pushing it to the host. When to mmc-queue is empty it will call
+isuue_rw_rq() with req=NULL to finish off the active request
+without starting a new request.
 
 Signed-off-by: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Acked-by: Kyungmin Park <kyungmin.park-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
@@ -31,142 +38,237 @@ Reviewed-by: Venkatraman S <svenkatr-l0cyMroinI0@public.gmane.org>
 Tested-by: Sourav Poddar<sourav.poddar-l0cyMroinI0@public.gmane.org>
 Tested-by: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/mmc/card/queue.c |   44 ++++++++++++++++++++++++++++++++++++++++++--
- drivers/mmc/card/queue.h |    3 ++-
- 2 files changed, 44 insertions(+), 3 deletions(-)
+ drivers/mmc/card/block.c |   86 ++++++++++++++++++++++++++++++++++++++--------
+ drivers/mmc/card/queue.c |   17 ++++++---
+ drivers/mmc/card/queue.h |    1 +
+ 3 files changed, 84 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 4222e1a..d69d954 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -132,6 +132,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	u64 limit = BLK_BOUNCE_HIGH;
- 	int ret;
- 	struct mmc_queue_req *mqrq_cur = &mq->mqrq[0];
-+	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 7ed2c68..38d0149 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -822,12 +822,14 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+ 	 R1_CC_ERROR |		/* Card controller error */		\
+ 	 R1_ERROR)		/* General/unknown error */
  
- 	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
- 		limit = *mmc_dev(host)->dma_mask;
-@@ -142,7 +143,9 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 		return -ENOMEM;
+-int mmc_blk_err_check(struct mmc_blk_request *brq,
+-		      struct request *req,
+-		      struct mmc_card *card,
+-		      struct mmc_blk_data *md)
++static int mmc_blk_err_check(struct mmc_card *card,
++			     struct mmc_async_req *areq)
+ {
+-	int ret = MMC_BLK_SUCCESS;
++	enum mmc_blk_status ret = MMC_BLK_SUCCESS;
++	struct mmc_queue_req *mq_mrq = container_of(areq, struct mmc_queue_req,
++						    mmc_active);
++	struct mmc_blk_request *brq = &mq_mrq->brq;
++	struct request *req = mq_mrq->req;
  
- 	memset(&mq->mqrq_cur, 0, sizeof(mq->mqrq_cur));
-+	memset(&mq->mqrq_prev, 0, sizeof(mq->mqrq_prev));
- 	mq->mqrq_cur = mqrq_cur;
-+	mq->mqrq_prev = mqrq_prev;
- 	mq->queue->queuedata = mq;
+ 	/*
+ 	 * sbc.error indicates a problem with the set block count
+@@ -1038,24 +1040,41 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 		brq->data.sg_len = i;
+ 	}
  
- 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
-@@ -178,9 +181,17 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 					"allocate bounce cur buffer\n",
- 					mmc_card_name(card));
- 			}
-+			mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
-+			if (!mqrq_prev->bounce_buf) {
-+				printk(KERN_WARNING "%s: unable to "
-+					"allocate bounce prev buffer\n",
-+					mmc_card_name(card));
-+				kfree(mqrq_cur->bounce_buf);
-+				mqrq_cur->bounce_buf = NULL;
++	mqrq->mmc_active.mrq = &brq->mrq;
++	mqrq->mmc_active.err_check = mmc_blk_err_check;
++
+ 	mmc_queue_bounce_pre(mqrq);
+ }
+ 
+-static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
++static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ {
+ 	struct mmc_blk_data *md = mq->data;
+ 	struct mmc_card *card = md->queue.card;
+ 	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
+ 	int ret = 1, disable_multi = 0, retry = 0;
+ 	enum mmc_blk_status status;
++	struct mmc_queue_req *mq_rq;
++	struct request *req;
++	struct mmc_async_req *areq;
+ 
+-	do {
+-		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, disable_multi, mq);
+-		mmc_wait_for_req(card->host, &brq->mrq);
++	if (!rqc && !mq->mqrq_prev->req)
++		return 0;
+ 
+-		mmc_queue_bounce_post(mq->mqrq_cur);
++	do {
++		if (rqc) {
++			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
++			areq = &mq->mqrq_cur->mmc_active;
++		} else
++			areq = NULL;
++		areq = mmc_start_req(card->host, areq, (int *) &status);
++		if (!areq)
++			return 0;
++
++		mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
++		brq = &mq_rq->brq;
++		req = mq_rq->req;
++		mmc_queue_bounce_post(mq_rq);
+ 
+-		status = mmc_blk_err_check(brq, req, card, md);
+ 		switch (status) {
+ 		case MMC_BLK_SUCCESS:
+ 		case MMC_BLK_PARTIAL:
+@@ -1066,6 +1085,19 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 			ret = __blk_end_request(req, 0,
+ 						brq->data.bytes_xfered);
+ 			spin_unlock_irq(&md->lock);
++			if (status == MMC_BLK_SUCCESS && ret) {
++				/*
++				 * The blk_end_request has returned non zero
++				 * even though all data is transfered and no
++				 * erros returned by host.
++				 * If this happen it's a bug.
++				 */
++				printk(KERN_ERR "%s BUG rq_tot %d d_xfer %d\n",
++				       __func__, blk_rq_bytes(req),
++				       brq->data.bytes_xfered);
++				rqc = NULL;
++				goto cmd_abort;
 +			}
+ 			break;
+ 		case MMC_BLK_CMD_ERR:
+ 			goto cmd_err;
+@@ -1087,9 +1119,19 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 			ret = __blk_end_request(req, -EIO,
+ 						brq->data.blksz);
+ 			spin_unlock_irq(&md->lock);
++			if (!ret)
++				goto start_new_req;
+ 			break;
  		}
  
--		if (mqrq_cur->bounce_buf) {
-+		if (mqrq_cur->bounce_buf && mqrq_prev->bounce_buf) {
- 			blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_ANY);
- 			blk_queue_max_hw_sectors(mq->queue, bouncesz / 512);
- 			blk_queue_max_segments(mq->queue, bouncesz / 512);
-@@ -195,11 +206,19 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 			if (ret)
- 				goto cleanup_queue;
++		if (ret) {
++			/*
++			 * In case of a none complete request
++			 * prepare it again and resend.
++			 */
++			mmc_blk_rw_rq_prep(mq_rq, card, disable_multi, mq);
++			mmc_start_req(card->host, &mq_rq->mmc_active, NULL);
++		}
+ 	} while (ret);
  
-+			mqrq_prev->sg = mmc_alloc_sg(1, &ret);
-+			if (ret)
-+				goto cleanup_queue;
+ 	return 1;
+@@ -1124,6 +1166,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 		ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
+ 	spin_unlock_irq(&md->lock);
+ 
++ start_new_req:
++	if (rqc) {
++		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
++		mmc_start_req(card->host, &mq->mqrq_cur->mmc_active, NULL);
++	}
 +
-+			mqrq_prev->bounce_sg =
-+				mmc_alloc_sg(bouncesz / 512, &ret);
-+			if (ret)
-+				goto cleanup_queue;
- 		}
+ 	return 0;
+ }
+ 
+@@ -1133,26 +1181,34 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 	struct mmc_blk_data *md = mq->data;
+ 	struct mmc_card *card = md->queue.card;
+ 
+-	mmc_claim_host(card->host);
++	if (req && !mq->mqrq_prev->req)
++		/* claim host only for the first request */
++		mmc_claim_host(card->host);
++
+ 	ret = mmc_blk_part_switch(card, md);
+ 	if (ret) {
+ 		ret = 0;
+ 		goto out;
  	}
- #endif
  
--	if (!mqrq_cur->bounce_buf) {
-+	if (!mqrq_cur->bounce_buf && !mqrq_prev->bounce_buf) {
- 		blk_queue_bounce_limit(mq->queue, limit);
- 		blk_queue_max_hw_sectors(mq->queue,
- 			min(host->max_blk_count, host->max_req_size / 512));
-@@ -210,6 +229,10 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 		if (ret)
- 			goto cleanup_queue;
- 
-+
-+		mqrq_prev->sg = mmc_alloc_sg(host->max_segs, &ret);
-+		if (ret)
-+			goto cleanup_queue;
+-	if (req->cmd_flags & REQ_DISCARD) {
++	if (req && req->cmd_flags & REQ_DISCARD) {
++		/* complete ongoing async transfer before issuing discard */
++		if (card->host->areq)
++			mmc_blk_issue_rw_rq(mq, NULL);
+ 		if (req->cmd_flags & REQ_SECURE)
+ 			ret = mmc_blk_issue_secdiscard_rq(mq, req);
+ 		else
+ 			ret = mmc_blk_issue_discard_rq(mq, req);
+-	} else if (req->cmd_flags & REQ_FLUSH) {
++	} else if (req && req->cmd_flags & REQ_FLUSH) {
+ 		ret = mmc_blk_issue_flush(mq, req);
+ 	} else {
+ 		ret = mmc_blk_issue_rw_rq(mq, req);
  	}
  
- 	sema_init(&mq->thread_sem, 1);
-@@ -226,6 +249,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
-  free_bounce_sg:
- 	kfree(mqrq_cur->bounce_sg);
- 	mqrq_cur->bounce_sg = NULL;
-+	kfree(mqrq_prev->bounce_sg);
-+	mqrq_prev->bounce_sg = NULL;
- 
-  cleanup_queue:
- 	kfree(mqrq_cur->sg);
-@@ -233,6 +258,11 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	kfree(mqrq_cur->bounce_buf);
- 	mqrq_cur->bounce_buf = NULL;
- 
-+	kfree(mqrq_prev->sg);
-+	mqrq_prev->sg = NULL;
-+	kfree(mqrq_prev->bounce_buf);
-+	mqrq_prev->bounce_buf = NULL;
-+
- 	blk_cleanup_queue(mq->queue);
+ out:
+-	mmc_release_host(card->host);
++	if (!req)
++		/* release host only when there are no more requests */
++		mmc_release_host(card->host);
  	return ret;
  }
-@@ -242,6 +272,7 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
- 	struct request_queue *q = mq->queue;
- 	unsigned long flags;
- 	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
-+	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
  
- 	/* Make sure the queue isn't suspended, as that will deadlock */
- 	mmc_queue_resume(mq);
-@@ -264,6 +295,15 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
- 	kfree(mqrq_cur->bounce_buf);
- 	mqrq_cur->bounce_buf = NULL;
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index d69d954..8c51a54 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -52,6 +52,7 @@ static int mmc_queue_thread(void *d)
+ 	down(&mq->thread_sem);
+ 	do {
+ 		struct request *req = NULL;
++		struct mmc_queue_req *tmp;
  
-+	kfree(mqrq_prev->bounce_sg);
-+	mqrq_prev->bounce_sg = NULL;
-+
-+	kfree(mqrq_prev->sg);
-+	mqrq_prev->sg = NULL;
-+
-+	kfree(mqrq_prev->bounce_buf);
-+	mqrq_prev->bounce_buf = NULL;
-+
- 	mq->card = NULL;
+ 		spin_lock_irq(q->queue_lock);
+ 		set_current_state(TASK_INTERRUPTIBLE);
+@@ -59,7 +60,10 @@ static int mmc_queue_thread(void *d)
+ 		mq->mqrq_cur->req = req;
+ 		spin_unlock_irq(q->queue_lock);
+ 
+-		if (!req) {
++		if (req || mq->mqrq_prev->req) {
++			set_current_state(TASK_RUNNING);
++			mq->issue_fn(mq, req);
++		} else {
+ 			if (kthread_should_stop()) {
+ 				set_current_state(TASK_RUNNING);
+ 				break;
+@@ -67,11 +71,14 @@ static int mmc_queue_thread(void *d)
+ 			up(&mq->thread_sem);
+ 			schedule();
+ 			down(&mq->thread_sem);
+-			continue;
+ 		}
+-		set_current_state(TASK_RUNNING);
+ 
+-		mq->issue_fn(mq, req);
++		/* Current request becomes previous request and vice versa. */
++		mq->mqrq_prev->brq.mrq.data = NULL;
++		mq->mqrq_prev->req = NULL;
++		tmp = mq->mqrq_prev;
++		mq->mqrq_prev = mq->mqrq_cur;
++		mq->mqrq_cur = tmp;
+ 	} while (1);
+ 	up(&mq->thread_sem);
+ 
+@@ -97,7 +104,7 @@ static void mmc_request(struct request_queue *q)
+ 		return;
+ 	}
+ 
+-	if (!mq->mqrq_cur->req)
++	if (!mq->mqrq_cur->req && !mq->mqrq_prev->req)
+ 		wake_up_process(mq->thread);
  }
- EXPORT_SYMBOL(mmc_cleanup_queue);
+ 
 diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index c1a69ac..1a637d2 100644
+index 1a637d2..d2a1eb4 100644
 --- a/drivers/mmc/card/queue.h
 +++ b/drivers/mmc/card/queue.h
-@@ -29,8 +29,9 @@ struct mmc_queue {
- 	int			(*issue_fn)(struct mmc_queue *, struct request *);
- 	void			*data;
- 	struct request_queue	*queue;
--	struct mmc_queue_req	mqrq[1];
-+	struct mmc_queue_req	mqrq[2];
- 	struct mmc_queue_req	*mqrq_cur;
-+	struct mmc_queue_req	*mqrq_prev;
+@@ -19,6 +19,7 @@ struct mmc_queue_req {
+ 	char			*bounce_buf;
+ 	struct scatterlist	*bounce_sg;
+ 	unsigned int		bounce_sg_len;
++	struct mmc_async_req	mmc_active;
  };
  
- extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
+ struct mmc_queue {
 -- 
 1.7.4.1
