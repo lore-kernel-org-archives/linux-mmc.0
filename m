@@ -1,8 +1,7 @@
 From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v9 09/12] mmc: block: move error code in issue_rw_rq to a
-	separate function.
-Date: Fri,  1 Jul 2011 18:55:30 +0200
-Message-ID: <1309539333-2606-10-git-send-email-per.forlin@linaro.org>
+Subject: [PATCH v9 11/12] mmc: core: add random fault injection
+Date: Fri,  1 Jul 2011 18:55:32 +0200
+Message-ID: <1309539333-2606-12-git-send-email-per.forlin@linaro.org>
 References: <1309539333-2606-1-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,8 +20,10 @@ Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
 To: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Venkatraman S <sve>
 List-Id: linux-mmc@vger.kernel.org
 
-Break out code without functional changes. This simplifies the code and
-makes way for handle two parallel request.
+This simple fault injection proved to be very useful to
+test the error handling in the block.c rw_rq(). It may
+still be useful to test if the host driver handle
+pre_req() and post_req() correctly in case of errors.
 
 Signed-off-by: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Acked-by: Kyungmin Park <kyungmin.park-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
@@ -31,264 +32,142 @@ Reviewed-by: Venkatraman S <svenkatr-l0cyMroinI0@public.gmane.org>
 Tested-by: Sourav Poddar<sourav.poddar-l0cyMroinI0@public.gmane.org>
 Tested-by: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/mmc/card/block.c |  220 +++++++++++++++++++++++++++-------------------
- 1 files changed, 131 insertions(+), 89 deletions(-)
+ drivers/mmc/core/core.c    |   54 ++++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/debugfs.c |    5 ++++
+ include/linux/mmc/host.h   |    3 ++
+ lib/Kconfig.debug          |   11 +++++++++
+ 4 files changed, 73 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index a0a76f4..7ed2c68 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -106,6 +106,16 @@ struct mmc_blk_data {
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index d2d7239..62a8cc7 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -23,6 +23,8 @@
+ #include <linux/log2.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/pm_runtime.h>
++#include <linux/fault-inject.h>
++#include <linux/random.h>
  
- static DEFINE_MUTEX(open_lock);
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+@@ -82,6 +84,56 @@ static void mmc_flush_scheduled_work(void)
+ 	flush_workqueue(workqueue);
+ }
  
-+enum mmc_blk_status {
-+	MMC_BLK_SUCCESS = 0,
-+	MMC_BLK_PARTIAL,
-+	MMC_BLK_RETRY,
-+	MMC_BLK_RETRY_SINGLE,
-+	MMC_BLK_DATA_ERR,
-+	MMC_BLK_CMD_ERR,
-+	MMC_BLK_ABORT,
-+};
++#ifdef CONFIG_FAIL_MMC_REQUEST
 +
- module_param(perdev_minors, int, 0444);
- MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per device");
- 
-@@ -812,6 +822,95 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
- 	 R1_CC_ERROR |		/* Card controller error */		\
- 	 R1_ERROR)		/* General/unknown error */
- 
-+int mmc_blk_err_check(struct mmc_blk_request *brq,
-+		      struct request *req,
-+		      struct mmc_card *card,
-+		      struct mmc_blk_data *md)
++static DECLARE_FAULT_ATTR(fail_mmc_request);
++
++static int __init setup_fail_mmc_request(char *str)
 +{
-+	int ret = MMC_BLK_SUCCESS;
++	return setup_fault_attr(&fail_mmc_request, str);
++}
++__setup("fail_mmc_request=", setup_fail_mmc_request);
 +
-+	/*
-+	 * sbc.error indicates a problem with the set block count
-+	 * command.  No data will have been transferred.
-+	 *
-+	 * cmd.error indicates a problem with the r/w command.  No
-+	 * data will have been transferred.
-+	 *
-+	 * stop.error indicates a problem with the stop command.  Data
-+	 * may have been transferred, or may still be transferring.
-+	 */
-+	if (brq->sbc.error || brq->cmd.error || brq->stop.error) {
-+		switch (mmc_blk_cmd_recovery(card, req, brq)) {
-+		case ERR_RETRY:
-+			return MMC_BLK_RETRY;
-+		case ERR_ABORT:
-+			return MMC_BLK_ABORT;
-+		case ERR_CONTINUE:
-+			break;
-+		}
-+	}
++static void mmc_should_fail_request(struct mmc_host *host,
++				    struct mmc_request *mrq)
++{
++	struct mmc_command *cmd = mrq->cmd;
++	struct mmc_data *data = mrq->data;
++	static const int data_errors[] = {
++		-ETIMEDOUT,
++		-EILSEQ,
++		-EIO,
++	};
 +
-+	/*
-+	 * Check for errors relating to the execution of the
-+	 * initial command - such as address errors.  No data
-+	 * has been transferred.
-+	 */
-+	if (brq->cmd.resp[0] & CMD_ERRORS) {
-+		pr_err("%s: r/w command failed, status = %#x\n",
-+		       req->rq_disk->disk_name, brq->cmd.resp[0]);
-+		return MMC_BLK_ABORT;
-+	}
++	if (!data)
++		return;
 +
-+	/*
-+	 * Everything else is either success, or a data error of some
-+	 * kind.  If it was a write, we may have transitioned to
-+	 * program mode, which we have to wait for it to complete.
-+	 */
-+	if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ) {
-+		u32 status;
-+		do {
-+			int err = get_card_status(card, &status, 5);
-+			if (err) {
-+				printk(KERN_ERR "%s: error %d requesting status\n",
-+				       req->rq_disk->disk_name, err);
-+				return MMC_BLK_CMD_ERR;
-+			}
-+			/*
-+			 * Some cards mishandle the status bits,
-+			 * so make sure to check both the busy
-+			 * indication and the card state.
-+			 */
-+		} while (!(status & R1_READY_FOR_DATA) ||
-+			 (R1_CURRENT_STATE(status) == R1_STATE_PRG));
-+	}
++	if (cmd->error || data->error || !host->make_it_fail ||
++	    !should_fail(&fail_mmc_request, data->blksz * data->blocks))
++		return;
 +
-+	if (brq->data.error) {
-+		pr_err("%s: error %d transferring data, sector %u, nr %u, cmd response %#x, card status %#x\n",
-+		       req->rq_disk->disk_name, brq->data.error,
-+		       (unsigned)blk_rq_pos(req),
-+		       (unsigned)blk_rq_sectors(req),
-+		       brq->cmd.resp[0], brq->stop.resp[0]);
-+
-+		if (rq_data_dir(req) == READ) {
-+			if (brq->data.blocks > 1) {
-+				/* Redo read one sector at a time */
-+				pr_warning("%s: retrying using single block read\n",
-+					   req->rq_disk->disk_name);
-+				return MMC_BLK_RETRY_SINGLE;
-+			}
-+			return MMC_BLK_DATA_ERR;
-+		} else {
-+			return MMC_BLK_CMD_ERR;
-+		}
-+	}
-+
-+	if (ret == MMC_BLK_SUCCESS &&
-+	    blk_rq_bytes(req) != brq->data.bytes_xfered)
-+		ret = MMC_BLK_PARTIAL;
-+
-+	return ret;
++	data->error = data_errors[random32() % ARRAY_SIZE(data_errors)];
++	data->bytes_xfered = (random32() % (data->bytes_xfered >> 9)) << 9;
 +}
 +
- static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 			       struct mmc_card *card,
- 			       int disable_multi,
-@@ -948,6 +1047,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- 	struct mmc_card *card = md->queue.card;
- 	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
- 	int ret = 1, disable_multi = 0, retry = 0;
-+	enum mmc_blk_status status;
++static int __init fail_mmc_request_debugfs(void)
++{
++	return init_fault_attr_dentries(&fail_mmc_request,
++					"fail_mmc_request");
++}
++
++late_initcall(fail_mmc_request_debugfs);
++
++#else /* CONFIG_FAIL_MMC_REQUEST */
++
++static void mmc_should_fail_request(struct mmc_host *host,
++				    struct mmc_request *mrq)
++{
++}
++
++#endif /* CONFIG_FAIL_MMC_REQUEST */
++
++
+ /**
+  *	mmc_request_done - finish processing an MMC request
+  *	@host: MMC host which completed request
+@@ -108,6 +160,8 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+ 		cmd->error = 0;
+ 		host->ops->request(host, mrq);
+ 	} else {
++		mmc_should_fail_request(host, mrq);
++
+ 		led_trigger_event(host->led, LED_OFF);
  
- 	do {
- 		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, disable_multi, mq);
-@@ -955,99 +1055,41 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+ 		pr_debug("%s: req done (CMD%u): %d: %08x %08x %08x %08x\n",
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 998797e..588e76f 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -188,6 +188,11 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+ 				root, &host->clk_delay))
+ 		goto err_node;
+ #endif
++#ifdef CONFIG_FAIL_MMC_REQUEST
++	if (!debugfs_create_u8("make-it-fail", S_IRUSR | S_IWUSR,
++			       root, &host->make_it_fail))
++		goto err_node;
++#endif
+ 	return;
  
- 		mmc_queue_bounce_post(mq->mqrq_cur);
+ err_node:
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 59db6f2..0d0a48f 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -301,6 +301,9 @@ struct mmc_host {
  
--		/*
--		 * sbc.error indicates a problem with the set block count
--		 * command.  No data will have been transferred.
--		 *
--		 * cmd.error indicates a problem with the r/w command.  No
--		 * data will have been transferred.
--		 *
--		 * stop.error indicates a problem with the stop command.  Data
--		 * may have been transferred, or may still be transferring.
--		 */
--		if (brq->sbc.error || brq->cmd.error || brq->stop.error) {
--			switch (mmc_blk_cmd_recovery(card, req, brq)) {
--			case ERR_RETRY:
--				if (retry++ < 5)
--					continue;
--			case ERR_ABORT:
--				goto cmd_abort;
--			case ERR_CONTINUE:
-+		status = mmc_blk_err_check(brq, req, card, md);
-+		switch (status) {
-+		case MMC_BLK_SUCCESS:
-+		case MMC_BLK_PARTIAL:
-+			/*
-+			 * A block was successfully transferred.
-+			 */
-+			spin_lock_irq(&md->lock);
-+			ret = __blk_end_request(req, 0,
-+						brq->data.bytes_xfered);
-+			spin_unlock_irq(&md->lock);
-+			break;
-+		case MMC_BLK_CMD_ERR:
-+			goto cmd_err;
-+		case MMC_BLK_RETRY_SINGLE:
-+			disable_multi = 1;
-+			break;
-+		case MMC_BLK_RETRY:
-+			if (retry++ < 5)
- 				break;
--			}
--		}
--
--		/*
--		 * Check for errors relating to the execution of the
--		 * initial command - such as address errors.  No data
--		 * has been transferred.
--		 */
--		if (brq->cmd.resp[0] & CMD_ERRORS) {
--			pr_err("%s: r/w command failed, status = %#x\n",
--				req->rq_disk->disk_name, brq->cmd.resp[0]);
-+		case MMC_BLK_ABORT:
- 			goto cmd_abort;
-+		case MMC_BLK_DATA_ERR:
-+			/*
-+			 * After an error, we redo I/O one sector at a
-+			 * time, so we only reach here after trying to
-+			 * read a single sector.
-+			 */
-+			spin_lock_irq(&md->lock);
-+			ret = __blk_end_request(req, -EIO,
-+						brq->data.blksz);
-+			spin_unlock_irq(&md->lock);
-+			break;
- 		}
+ 	struct mmc_async_req	*areq;		/* active async req */
  
--		/*
--		 * Everything else is either success, or a data error of some
--		 * kind.  If it was a write, we may have transitioned to
--		 * program mode, which we have to wait for it to complete.
--		 */
--		if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ) {
--			u32 status;
--			do {
--				int err = get_card_status(card, &status, 5);
--				if (err) {
--					printk(KERN_ERR "%s: error %d requesting status\n",
--					       req->rq_disk->disk_name, err);
--					goto cmd_err;
--				}
--				/*
--				 * Some cards mishandle the status bits,
--				 * so make sure to check both the busy
--				 * indication and the card state.
--				 */
--			} while (!(status & R1_READY_FOR_DATA) ||
--				 (R1_CURRENT_STATE(status) == R1_STATE_PRG));
--		}
--
--		if (brq->data.error) {
--			pr_err("%s: error %d transferring data, sector %u, nr %u, cmd response %#x, card status %#x\n",
--				req->rq_disk->disk_name, brq->data.error,
--				(unsigned)blk_rq_pos(req),
--				(unsigned)blk_rq_sectors(req),
--				brq->cmd.resp[0], brq->stop.resp[0]);
--
--			if (rq_data_dir(req) == READ) {
--				if (brq->data.blocks > 1) {
--					/* Redo read one sector at a time */
--					pr_warning("%s: retrying using single block read\n",
--						req->rq_disk->disk_name);
--					disable_multi = 1;
--					continue;
--				}
--
--				/*
--				 * After an error, we redo I/O one sector at a
--				 * time, so we only reach here after trying to
--				 * read a single sector.
--				 */
--				spin_lock_irq(&md->lock);
--				ret = __blk_end_request(req, -EIO,
--							brq->data.blksz);
--				spin_unlock_irq(&md->lock);
--				continue;
--			} else {
--				goto cmd_err;
--			}
--		}
--
--		/*
--		 * A block was successfully transferred.
--		 */
--		spin_lock_irq(&md->lock);
--		ret = __blk_end_request(req, 0, brq->data.bytes_xfered);
--		spin_unlock_irq(&md->lock);
- 	} while (ret);
++#ifdef CONFIG_FAIL_MMC_REQUEST
++	u8			make_it_fail;
++#endif
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
  
- 	return 1;
+diff --git a/lib/Kconfig.debug b/lib/Kconfig.debug
+index c768bcd..330fc70 100644
+--- a/lib/Kconfig.debug
++++ b/lib/Kconfig.debug
+@@ -1057,6 +1057,17 @@ config FAIL_IO_TIMEOUT
+ 	  Only works with drivers that use the generic timeout handling,
+ 	  for others it wont do anything.
+ 
++config FAIL_MMC_REQUEST
++	bool "Fault-injection capability for MMC IO"
++	select DEBUG_FS
++	depends on FAULT_INJECTION
++	help
++	  Provide fault-injection capability for MMC IO.
++	  This will make the mmc core return data errors. This is
++	  useful for testing the error handling in the mmc block device
++	  and how the mmc host driver handle retries from
++	  the block device.
++
+ config FAULT_INJECTION_DEBUG_FS
+ 	bool "Debugfs entries for fault-injection capabilities"
+ 	depends on FAULT_INJECTION && SYSFS && DEBUG_FS
 -- 
 1.7.4.1
