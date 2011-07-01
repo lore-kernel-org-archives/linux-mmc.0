@@ -1,46 +1,43 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCHv3 2/3] MMC: OMAP: HSMMC: add runtime pm support
-Date: Fri, 1 Jul 2011 21:35:27 +0530
-Message-ID: <BANLkTikRkZkSw_dj=GTnrGEmFwgsbG2usQ@mail.gmail.com>
-References: <1309460700-25898-1-git-send-email-balajitk@ti.com>
-	<1309460700-25898-3-git-send-email-balajitk@ti.com>
-	<87d3hudhun.fsf@ti.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCHv4 0/3] OMAP: HSMMC: cleanup and runtime pm
+Date: Fri, 1 Jul 2011 22:09:33 +0530
+Message-ID: <1309538376-23260-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog111.obsmtp.com ([74.125.149.205]:33625 "EHLO
-	na3sys009aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751788Ab1GAQFb convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 1 Jul 2011 12:05:31 -0400
-In-Reply-To: <87d3hudhun.fsf@ti.com>
+Received: from comal.ext.ti.com ([198.47.26.152]:49330 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757182Ab1GAQks (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 1 Jul 2011 12:40:48 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Hilman <khilman@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, b-cousson@ti.com, paul@pwsan.com, kishore.kadiyala@ti.com
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: tony@atomide.com, madhu.cr@ti.com, khilman@ti.com, b-cousson@ti.com, paul@pwsan.com, kishore.kadiyala@ti.com, Balaji T K <balajitk@ti.com>
 
-On Fri, Jul 1, 2011 at 4:53 AM, Kevin Hilman <khilman@ti.com> wrote:
-> Balaji T K <balajitk@ti.com> writes:
->
->> +static int omap_hsmmc_runtime_resume(struct device *dev)
->> +{
->> + =A0 =A0 struct omap_hsmmc_host *host;
->> +
->> + =A0 =A0 host =3D platform_get_drvdata(to_platform_device(dev));
->> + =A0 =A0 omap_hsmmc_context_restore(host);
->> + =A0 =A0 dev_dbg(mmc_dev(host->mmc), "host: enabled\n");
->
-> Minor: this has a 'host: ' prefix, where as the one in
-> .runtime_suspend() does not.
+Removing the custom state machine - lazy disable framework in omap_hsmmc
+to make way for runtime pm to handle host controller
+power states.
+This allows mmc_host_enable/mmc_host_disable to be replaced by
+runtime get_sync and put_sync at host controller driver.
 
-=46ixing it in V4
+Enable runtime PM in omap_hsmmc
 
->
->> +
->> + =A0 =A0 return 0;
->> +}
->> +
->
-> Kevin
->
+Rebased to MMC tree : mmc-next branch
+Tested on OMAP4430SDP, OMAP3430SDP, OMAP2430SDP
+
+MMC runtime patch has dependency on
+[PATCH 0/6] OMAP2+: hwmod framework fixes [1]
+for MMC1/MMC2 clock to get ungated after idle in OMAP4.
+
+Without [1] patches, MMC1/MMC2 fails to get detected on OMAP4.
+
+[1] http://www.mail-archive.com/linux-omap@vger.kernel.org/msg51457.html
+
+Balaji T K (3):
+  MMC: OMAP: HSMMC: Remove lazy_disable
+  MMC: OMAP: HSMMC: add runtime pm support
+  MMC: OMAP: HSMMC: Remove unused iclk
+
+ drivers/mmc/host/omap_hsmmc.c |  365 +++++++----------------------------------
+ 1 files changed, 57 insertions(+), 308 deletions(-)
+
