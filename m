@@ -1,56 +1,55 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
+From: Shawn Guo <shawn.guo@freescale.com>
 Subject: Re: [PATCH] mxs-mmc: fix clock rate setting
-Date: Fri, 1 Jul 2011 16:46:11 +0200
-Message-ID: <20110701144611.GB3825@pengutronix.de>
+Date: Fri, 1 Jul 2011 23:46:29 +0800
+Message-ID: <20110701154628.GD8631@S2100-06.ap.freescale.net>
 References: <BANLkTi==Y_MJ2H_u15DzunWusUb=GsotWg@mail.gmail.com>
  <BANLkTinKcb-=m3sURawdEjR=vTt=ApBKaQ@mail.gmail.com>
  <20110630145507.GG1997@pengutronix.de>
  <20110701091753.GE1922@pengutronix.de>
- <723849F6A4B5A3408299DF1FFE37CA776C0B3DE737@BGMAIL02.nvidia.com>
- <723849F6A4B5A3408299DF1FFE37CA776C0B3DE73A@BGMAIL02.nvidia.com>
+ <BANLkTi=cTigrnAHY3sDNC04aNpmZOQpUsA@mail.gmail.com>
+ <20110701122709.GJ1922@pengutronix.de>
+ <BANLkTim5aHJHbtbw-ZWnqdjdj_nxWZuwog@mail.gmail.com>
+ <20110701144409.GA3825@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="ZfOjI3PrQbgiZnxM"
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:33459 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756621Ab1GAOqN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jul 2011 10:46:13 -0400
+Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:19164
+	"EHLO VA3EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751523Ab1GAPkV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jul 2011 11:40:21 -0400
 Content-Disposition: inline
-In-Reply-To: <723849F6A4B5A3408299DF1FFE37CA776C0B3DE73A@BGMAIL02.nvidia.com>
+In-Reply-To: <20110701144409.GA3825@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sachin Nikam <Snikam@nvidia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Koen Beel <koen.beel.barco@gmail.com>, linux-mmc@vger.kernel.org
 
+On Fri, Jul 01, 2011 at 04:44:09PM +0200, Wolfram Sang wrote:
+> Hi,
+> 
+> On Fri, Jul 01, 2011 at 03:26:39PM +0200, Koen Beel wrote:
+> > I send the patch as attachment for now.
+> 
+> Fine with me in this case...
+> 
+> > But I'll have to look into another way of doing this. Corporate mail
+> > system is adding stupid disclaimers, gmail web ui is not working ok
+> > and corporate firewalls avoid using a different smtp server...
+> 
+> Good luck with that!
+> 
+> About the patch itself: I didn't verify the formulas, but it does solve one
+> special problem here. Thanks a lot! So:
+> 
+> Tested-by: Wolfram Sang <w.sang@pengutronix.de>
+> 
+> @chris: If Shawn also likes the patch, I think this is a stable candidate.
+> 
+Thanks for the fixing, Koen.
 
---ZfOjI3PrQbgiZnxM
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Acked-by: Shawn Guo <shawn.guo@freescale.com>
 
-On Fri, Jul 01, 2011 at 08:08:48PM +0530, Sachin Nikam wrote:
+-- 
+Regards,
+Shawn
 
-> Can  read_ahead_kb can be used to increase the number of read blocks?
-
-Unless you start a _new thread_ for your question and describe your problem=
- in
-a bit more detail, you probably won't get an answer.
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---ZfOjI3PrQbgiZnxM
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAk4N3bMACgkQD27XaX1/VRvthQCgzJf1G9ogQ6HAO3iJ9s9UyjYf
-Fr8AoJHhBN9zqBlzEEoRhPbdU1Bl7QXl
-=5gSx
------END PGP SIGNATURE-----
-
---ZfOjI3PrQbgiZnxM--
