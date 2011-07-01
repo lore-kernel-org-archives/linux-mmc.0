@@ -1,55 +1,46 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH] mxs-mmc: fix clock rate setting
-Date: Fri, 1 Jul 2011 23:46:29 +0800
-Message-ID: <20110701154628.GD8631@S2100-06.ap.freescale.net>
-References: <BANLkTi==Y_MJ2H_u15DzunWusUb=GsotWg@mail.gmail.com>
- <BANLkTinKcb-=m3sURawdEjR=vTt=ApBKaQ@mail.gmail.com>
- <20110630145507.GG1997@pengutronix.de>
- <20110701091753.GE1922@pengutronix.de>
- <BANLkTi=cTigrnAHY3sDNC04aNpmZOQpUsA@mail.gmail.com>
- <20110701122709.GJ1922@pengutronix.de>
- <BANLkTim5aHJHbtbw-ZWnqdjdj_nxWZuwog@mail.gmail.com>
- <20110701144409.GA3825@pengutronix.de>
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: [PATCHv3 2/3] MMC: OMAP: HSMMC: add runtime pm support
+Date: Fri, 1 Jul 2011 21:35:27 +0530
+Message-ID: <BANLkTikRkZkSw_dj=GTnrGEmFwgsbG2usQ@mail.gmail.com>
+References: <1309460700-25898-1-git-send-email-balajitk@ti.com>
+	<1309460700-25898-3-git-send-email-balajitk@ti.com>
+	<87d3hudhun.fsf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:19164
-	"EHLO VA3EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751523Ab1GAPkV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jul 2011 11:40:21 -0400
-Content-Disposition: inline
-In-Reply-To: <20110701144409.GA3825@pengutronix.de>
+Received: from na3sys009aog111.obsmtp.com ([74.125.149.205]:33625 "EHLO
+	na3sys009aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751788Ab1GAQFb convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 1 Jul 2011 12:05:31 -0400
+In-Reply-To: <87d3hudhun.fsf@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Koen Beel <koen.beel.barco@gmail.com>, linux-mmc@vger.kernel.org
+To: Kevin Hilman <khilman@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, b-cousson@ti.com, paul@pwsan.com, kishore.kadiyala@ti.com
 
-On Fri, Jul 01, 2011 at 04:44:09PM +0200, Wolfram Sang wrote:
-> Hi,
-> 
-> On Fri, Jul 01, 2011 at 03:26:39PM +0200, Koen Beel wrote:
-> > I send the patch as attachment for now.
-> 
-> Fine with me in this case...
-> 
-> > But I'll have to look into another way of doing this. Corporate mail
-> > system is adding stupid disclaimers, gmail web ui is not working ok
-> > and corporate firewalls avoid using a different smtp server...
-> 
-> Good luck with that!
-> 
-> About the patch itself: I didn't verify the formulas, but it does solve one
-> special problem here. Thanks a lot! So:
-> 
-> Tested-by: Wolfram Sang <w.sang@pengutronix.de>
-> 
-> @chris: If Shawn also likes the patch, I think this is a stable candidate.
-> 
-Thanks for the fixing, Koen.
+On Fri, Jul 1, 2011 at 4:53 AM, Kevin Hilman <khilman@ti.com> wrote:
+> Balaji T K <balajitk@ti.com> writes:
+>
+>> +static int omap_hsmmc_runtime_resume(struct device *dev)
+>> +{
+>> + =A0 =A0 struct omap_hsmmc_host *host;
+>> +
+>> + =A0 =A0 host =3D platform_get_drvdata(to_platform_device(dev));
+>> + =A0 =A0 omap_hsmmc_context_restore(host);
+>> + =A0 =A0 dev_dbg(mmc_dev(host->mmc), "host: enabled\n");
+>
+> Minor: this has a 'host: ' prefix, where as the one in
+> .runtime_suspend() does not.
 
-Acked-by: Shawn Guo <shawn.guo@freescale.com>
+=46ixing it in V4
 
--- 
-Regards,
-Shawn
-
+>
+>> +
+>> + =A0 =A0 return 0;
+>> +}
+>> +
+>
+> Kevin
+>
