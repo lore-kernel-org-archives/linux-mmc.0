@@ -1,171 +1,172 @@
-From: =?utf-8?B?7KCE7Iq57JuQ?= <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: Add the function call for board-specific
- initialization.
-Date: Fri, 01 Jul 2011 11:27:59 +0900
-Message-ID: <008801cc3796$7eb6c0f0$7c2442d0$%jun@samsung.com>
-References: <1309402665-29228-1-git-send-email-tgih.jun@samsung.com>
- <4E0C18BD.8000608@samsung.com>
- <BANLkTikhwh5M1XB9zRiLzMd7dL18kA_o0g@mail.gmail.com>
- <4E0C31DF.5090200@samsung.com>
- <BANLkTi=r3x81sPVLG9yRAG9hHnjQuqTHCg@mail.gmail.com>
+From: =?ks_c_5601-1987?B?wPy9wr/4?= <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: dw_mmc: Supply clocks for both host and card.
+Date: Fri, 01 Jul 2011 13:05:31 +0900
+Message-ID: <008c01cc37a4$1ea4c1e0$5bee45a0$%jun@samsung.com>
+References: <1309402497-29191-1-git-send-email-tgih.jun@samsung.com>
+ <4E0C1DD0.2040202@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:24037 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754523Ab1GAC2G (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 22:28:06 -0400
-In-reply-to: <BANLkTi=r3x81sPVLG9yRAG9hHnjQuqTHCg@mail.gmail.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:62099 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750709Ab1GAEFd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jul 2011 00:05:33 -0400
+In-reply-to: <4E0C1DD0.2040202@samsung.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'James Hogan' <james@albanarts.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org, 'Kyungmin Park' <kyungmin.park@samsung.com>
 
-Hi,
-Thank you for comment.
+Hi, Mr Chung.
 
 > -----Original Message-----
 > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of James Hogan
-> Sent: Thursday, June 30, 2011 5:43 PM
-> To: Jaehoon Chung
-> Cc: Seungwon Jeon; linux-mmc@vger.kernel.org; cjb@laptop.org; linux-
-> kernel@vger.kernel.org
-> Subject: Re: [PATCH] mmc: dw_mmc: Add the function call for board-specific
-> initialization.
+> owner@vger.kernel.org] On Behalf Of Jaehoon Chung
+> Sent: Thursday, June 30, 2011 3:55 PM
+> To: Seungwon Jeon
+> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; linux-
+> kernel@vger.kernel.org; Kyungmin Park
+> Subject: Re: [PATCH] mmc: dw_mmc: Supply clocks for both host and card.
 > 
-> Hi,
+> Hi Mr.Jeon
 > 
-> On 30 June 2011 09:20, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> > Hi James
-> >
-> > James Hogan wrote:
-> >> On 30 June 2011 07:33, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> >>> Hi Mr.Jeon
-> >>>
-> >>> This patch is the compiler error.
-> >>>
-> >>> didn't find host->card_work..
-> >>>
-> >>> do you want this
-> >>> queue_work(dw_mci_card_workqueue, &slot->host->card_work); ?
-> >>
-> >> I think the patch is based on mmc-next, which has the following commit:
-> >> 35ba9d8 mmc: dw_mmc: convert card tasklet to workqueue
-> >
-> > I also tested this patch based on mmc-next.
-> > But my mean is that there is not host structure in
-> dw_mci_detect_interrupt().
-> >
-> > drivers/mmc/host/dw_mmc.c: In function 'dw_mci_detect_interrupt':
-> > drivers/mmc/host/dw_mmc.c:1592: error: 'host' undeclared (first use in
-> this function)
-> > drivers/mmc/host/dw_mmc.c:1592: error: (Each undeclared identifier is
-> reported only once
-> > drivers/mmc/host/dw_mmc.c:1592: error: for each function it appears in.)
-> > drivers/mmc/host/dw_mmc.c:1590: warning: unused variable 'slot'
-> > make[3]: *** [drivers/mmc/host/dw_mmc.o] Error 1
-> > make[2]: *** [drivers/mmc/host] Error 2
+> What means cclk_name/ cclk enable?
+> Controlling card clock is possible?
+> Sorry, i didn't understand...
+> (My understanding is that if we set host clk, cclk is used with host_clk.)
 > 
-> Sorry, I misunderstood. You are correct.
+> Plz can you explain to me?
 
-
-queue_work(dw_mci_card_workqueue, &host->card_work);
-'slot' is omitted. (&slot->host->card_work)
-
-Sorry for my mistake.
-I'll fix it.
+Yes, cclk is source clock for card I/O.
+It can be different from Host operating clock(hclk).
 
 Best regards,
-Seungwon.
+Seunwgon.
 
-
-> Cheers
-> James
+ 
+> Regards,
+> Jaehoon Chung
 > 
+> Seungwon Jeon wrote:
+> > Add enabling clocks for both host controller and card.
 > >
-> > Did you really compile fine?
+> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> > ---
+> >  drivers/mmc/host/dw_mmc.c  |   33 ++++++++++++++++++++++++++++++++-
+> >  include/linux/mmc/dw_mmc.h |    7 +++++++
+> >  2 files changed, 39 insertions(+), 1 deletions(-)
 > >
-> > Regards,
-> > Jaehoon Chung
+> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> > index 10b6979..a524416 100644
+> > --- a/drivers/mmc/host/dw_mmc.c
+> > +++ b/drivers/mmc/host/dw_mmc.c
+> > @@ -1797,6 +1797,24 @@ static int dw_mci_probe(struct platform_device
+> *pdev)
+> >  		goto err_freehost;
+> >  	}
 > >
-> >>
-> >> Cheers
-> >> James
-> >>
-> >>>
-> >>> Regards,
-> >>> Jaehoon Chung
-> >>>
-> >>>
-> >>> Seungwon Jeon wrote:
-> >>>> Need to call init() function of dw_mci_board.
-> >>>> It seems to be omitted to call this function.
-> >>>>
-> >>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> >>>> ---
-> >>>>  drivers/mmc/host/dw_mmc.c |   11 +++++++++++
-> >>>>  1 files changed, 11 insertions(+), 0 deletions(-)
-> >>>>
-> >>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> >>>> index a524416..073c420 100644
-> >>>> --- a/drivers/mmc/host/dw_mmc.c
-> >>>> +++ b/drivers/mmc/host/dw_mmc.c
-> >>>> @@ -1585,6 +1585,15 @@ static void dw_mci_work_routine_card(struct
-> work_struct *work)
-> >>>>       }
-> >>>>  }
-> >>>>
-> >>>> +static irqreturn_t dw_mci_detect_interrupt(int irq, void *dev_id)
-> >>>> +{
-> >>>> +     struct dw_mci_slot *slot = dev_id;
-> >>>> +
-> >>>> +     queue_work(dw_mci_card_workqueue, &host->card_work);
-> >>>> +
-> >>>> +     return IRQ_HANDLED;
-> >>>> +}
-> >>>> +
-> >>>>  static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int
-> id)
-> >>>>  {
-> >>>>       struct mmc_host *mmc;
-> >>>> @@ -1657,6 +1666,8 @@ static int __init dw_mci_init_slot(struct
-> dw_mci *host, unsigned int id)
-> >>>>       } else
-> >>>>               regulator_enable(host->vmmc);
-> >>>>
-> >>>> +     host->pdata->init(id, dw_mci_detect_interrupt, host);
-> >>>> +
-> >>>>       if (dw_mci_get_cd(mmc))
-> >>>>               set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-> >>>>       else
-> >>>> --
-> >>>> 1.7.0.4
-> >>>>
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> in
-> >>>> the body of a message to majordomo@vger.kernel.org
-> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>>
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> in
-> >>> the body of a message to majordomo@vger.kernel.org
-> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>
-> >>
-> >>
-> >>
+> > +	host->hclk = clk_get(&pdev->dev, pdata->hclk_name);
+> > +	if (IS_ERR(host->hclk)) {
+> > +		dev_err(&pdev->dev,
+> > +			"Failed to get hclk\n");
+> > +		ret = PTR_ERR(host->hclk);
+> > +		goto err_freehost;
+> > +	}
+> > +	clk_enable(host->hclk);
+> > +
+> > +	host->cclk = clk_get(&pdev->dev, pdata->cclk_name);
+> > +	if (IS_ERR(host->cclk)) {
+> > +		dev_err(&pdev->dev,
+> > +			"Failed to get cclk\n");
+> > +		ret = PTR_ERR(host->cclk);
+> > +		goto err_free_hclk;
+> > +	}
+> > +	clk_enable(host->cclk);
+> > +
+> >  	host->bus_hz = pdata->bus_hz;
+> >  	host->quirks = pdata->quirks;
 > >
+> > @@ -1806,7 +1824,7 @@ static int dw_mci_probe(struct platform_device
+> *pdev)
+> >  	ret = -ENOMEM;
+> >  	host->regs = ioremap(regs->start, regs->end - regs->start + 1);
+> >  	if (!host->regs)
+> > -		goto err_freehost;
+> > +		goto err_free_cclk;
+> >
+> >  	host->dma_ops = pdata->dma_ops;
+> >  	dw_mci_init_dma(host);
+> > @@ -1945,6 +1963,13 @@ err_dmaunmap:
+> >  		regulator_put(host->vmmc);
+> >  	}
+> >
+> > +err_free_cclk:
+> > +	clk_disable(host->cclk);
+> > +	clk_put(host->cclk);
+> > +
+> > +err_free_hclk:
+> > +	clk_disable(host->hclk);
+> > +	clk_put(host->hclk);
+> >
+> >  err_freehost:
+> >  	kfree(host);
+> > @@ -1983,6 +2008,12 @@ static int __exit dw_mci_remove(struct
+> platform_device *pdev)
+> >  		regulator_put(host->vmmc);
+> >  	}
+> >
+> > +	clk_disable(host->cclk);
+> > +	clk_put(host->cclk);
+> > +
+> > +	clk_disable(host->hclk);
+> > +	clk_put(host->hclk);
+> > +
+> >  	iounmap(host->regs);
+> >
+> >  	kfree(host);
+> > diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> > index f3f68ee..56b3f27 100644
+> > --- a/include/linux/mmc/dw_mmc.h
+> > +++ b/include/linux/mmc/dw_mmc.h
+> > @@ -47,6 +47,8 @@ struct mmc_data;
+> >   * @cmd: The command currently being sent to the card, or NULL.
+> >   * @data: The data currently being transferred, or NULL if no data
+> >   *	transfer is in progress.
+> > + * @hclk: Clock for host.
+> > + * @cclk: Clock for card.
+> >   * @use_dma: Whether DMA channel is initialized or not.
+> >   * @sg_dma: Bus address of DMA buffer.
+> >   * @sg_cpu: Virtual address of DMA buffer.
+> > @@ -118,6 +120,8 @@ struct dw_mci {
+> >  	struct mmc_request	*mrq;
+> >  	struct mmc_command	*cmd;
+> >  	struct mmc_data		*data;
+> > +	struct clk		*hclk;
+> > +	struct clk		*cclk;
+> >
+> >  	/* DMA interface members*/
+> >  	int			use_dma;
+> > @@ -218,6 +222,9 @@ struct dw_mci_board {
+> >  	/* delay in mS before detecting cards after interrupt */
+> >  	u32 detect_delay_ms;
+> >
+> > +	char *hclk_name;
+> > +	char *cclk_name;
+> > +
+> >  	int (*init)(u32 slot_id, irq_handler_t , void *);
+> >  	int (*get_ro)(u32 slot_id);
+> >  	int (*get_cd)(u32 slot_id);
+> > --
+> > 1.7.0.4
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > >
 > 
-> 
-> 
-> --
-> James Hogan
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
