@@ -1,159 +1,173 @@
-From: Jun Nie <niej0001@gmail.com>
-Subject: [PATCH] mmc: avoid unnecessary rescan in PM_POST_SUSPEND
-Date: Fri, 1 Jul 2011 10:27:04 +0800
-Message-ID: <BANLkTikkqFiKWK1GdBtS5mKrE=vsfawnag@mail.gmail.com>
+From: =?utf-8?B?7KCE7Iq57JuQ?= <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: dw_mmc: Add the function call for board-specific
+ initialization.
+Date: Fri, 01 Jul 2011 11:27:59 +0900
+Message-ID: <008801cc3796$7eb6c0f0$7c2442d0$%jun@samsung.com>
+References: <1309402665-29228-1-git-send-email-tgih.jun@samsung.com>
+ <4E0C18BD.8000608@samsung.com>
+ <BANLkTikhwh5M1XB9zRiLzMd7dL18kA_o0g@mail.gmail.com>
+ <4E0C31DF.5090200@samsung.com>
+ <BANLkTi=r3x81sPVLG9yRAG9hHnjQuqTHCg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=20cf3071cc8ee1a39d04a6f8c012
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:42556 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754526Ab1GAC1R (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 22:27:17 -0400
-Received: by vxb39 with SMTP id 39so2067954vxb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Jun 2011 19:27:17 -0700 (PDT)
+Received: from mailout3.samsung.com ([203.254.224.33]:24037 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754523Ab1GAC2G (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2011 22:28:06 -0400
+In-reply-to: <BANLkTi=r3x81sPVLG9yRAG9hHnjQuqTHCg@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Philip Rakity <prakity@marvell.com>
+To: 'James Hogan' <james@albanarts.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org
 
---20cf3071cc8ee1a39d04a6f8c012
-Content-Type: text/plain; charset=ISO-8859-1
+Hi,
+Thank you for comment.
 
-With this patch, we call rescan only when card insert/remove
-happens during rescan_disabled is set to avoid unnecessary mmc
-command transaction and realted wakelock holding.
-
-This patch fix below suspend retry issue on Android:
-1. System trigger suspend procedure for all wakelock are released
-2. A wakelock is hold again and suspend is aborted as a result.
-3. pm subsystem post PM_POST_SUSPEND event when exiting suspend.
-4. mmc rescan is schedlued on every mmc host when handling the event
-5. The wakelock is released just after it block suspend
-6. System trigger another suspend retry
-7. mmc rescan thread hold wakelock to dectect card
-8. System go to state 2 and enter suspend retry loop
-
-Signed-off-by: Jun Nie <njun@marvell.com>
----
- drivers/mmc/core/core.c  |   16 ++++++++++++++--
- include/linux/mmc/host.h |    1 +
- 2 files changed, 15 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 7843efe..ded7686 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1568,9 +1568,15 @@ void mmc_rescan(struct work_struct *work)
- 	struct mmc_host *host =
- 		container_of(work, struct mmc_host, detect.work);
- 	int i;
-+	unsigned long flags;
-
--	if (host->rescan_disable)
-+	spin_lock_irqsave(&host->lock, flags);
-+	if (host->rescan_disable) {
-+		host->rescan_delayed = 1;
-+		spin_unlock_irqrestore(&host->lock, flags);
- 		return;
-+	}
-+	spin_unlock_irqrestore(&host->lock, flags);
-
- 	mmc_bus_get(host);
-
-@@ -1836,6 +1842,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 	struct mmc_host *host = container_of(
- 		notify_block, struct mmc_host, pm_notify);
- 	unsigned long flags;
-+	unsigned long rescan_needed = 0;
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of James Hogan
+> Sent: Thursday, June 30, 2011 5:43 PM
+> To: Jaehoon Chung
+> Cc: Seungwon Jeon; linux-mmc@vger.kernel.org; cjb@laptop.org; linux-
+> kernel@vger.kernel.org
+> Subject: Re: [PATCH] mmc: dw_mmc: Add the function call for board-specific
+> initialization.
+> 
+> Hi,
+> 
+> On 30 June 2011 09:20, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> > Hi James
+> >
+> > James Hogan wrote:
+> >> On 30 June 2011 07:33, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> >>> Hi Mr.Jeon
+> >>>
+> >>> This patch is the compiler error.
+> >>>
+> >>> didn't find host->card_work..
+> >>>
+> >>> do you want this
+> >>> queue_work(dw_mci_card_workqueue, &slot->host->card_work); ?
+> >>
+> >> I think the patch is based on mmc-next, which has the following commit:
+> >> 35ba9d8 mmc: dw_mmc: convert card tasklet to workqueue
+> >
+> > I also tested this patch based on mmc-next.
+> > But my mean is that there is not host structure in
+> dw_mci_detect_interrupt().
+> >
+> > drivers/mmc/host/dw_mmc.c: In function 'dw_mci_detect_interrupt':
+> > drivers/mmc/host/dw_mmc.c:1592: error: 'host' undeclared (first use in
+> this function)
+> > drivers/mmc/host/dw_mmc.c:1592: error: (Each undeclared identifier is
+> reported only once
+> > drivers/mmc/host/dw_mmc.c:1592: error: for each function it appears in.)
+> > drivers/mmc/host/dw_mmc.c:1590: warning: unused variable 'slot'
+> > make[3]: *** [drivers/mmc/host/dw_mmc.o] Error 1
+> > make[2]: *** [drivers/mmc/host] Error 2
+> 
+> Sorry, I misunderstood. You are correct.
 
 
- 	switch (mode) {
-@@ -1866,8 +1873,13 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+queue_work(dw_mci_card_workqueue, &host->card_work);
+'slot' is omitted. (&slot->host->card_work)
 
- 		spin_lock_irqsave(&host->lock, flags);
- 		host->rescan_disable = 0;
-+		if (host->rescan_delayed) {
-+			rescan_needed = 1;
-+			host->rescan_delayed = 0;
-+		}
- 		spin_unlock_irqrestore(&host->lock, flags);
--		mmc_detect_change(host, 0);
-+		if (rescan_needed)
-+			mmc_detect_change(host, 0);
+Sorry for my mistake.
+I'll fix it.
 
- 	}
+Best regards,
+Seungwon.
 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 1ee4424..f05e619 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -249,6 +249,7 @@ struct mmc_host {
- 	/* Only used with MMC_CAP_DISABLE */
- 	int			enabled;	/* host is enabled */
- 	int			rescan_disable;	/* disable card detection */
-+	int			rescan_delayed;	/* card detection is delayed */
- 	int			nesting_cnt;	/* "enable" nesting count */
- 	int			en_dis_recurs;	/* detect recursion */
- 	unsigned int		disable_delay;	/* disable delay in msecs */
--- 
-1.7.0.4
 
---20cf3071cc8ee1a39d04a6f8c012
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0001-mmc-avoid-unnecessary-rescan-in-PM_POST_SUSPEND.patch"
-Content-Disposition: attachment;
-	filename="0001-mmc-avoid-unnecessary-rescan-in-PM_POST_SUSPEND.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gpkik9fk0
+> Cheers
+> James
+> 
+> >
+> > Did you really compile fine?
+> >
+> > Regards,
+> > Jaehoon Chung
+> >
+> >>
+> >> Cheers
+> >> James
+> >>
+> >>>
+> >>> Regards,
+> >>> Jaehoon Chung
+> >>>
+> >>>
+> >>> Seungwon Jeon wrote:
+> >>>> Need to call init() function of dw_mci_board.
+> >>>> It seems to be omitted to call this function.
+> >>>>
+> >>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> >>>> ---
+> >>>>  drivers/mmc/host/dw_mmc.c |   11 +++++++++++
+> >>>>  1 files changed, 11 insertions(+), 0 deletions(-)
+> >>>>
+> >>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> >>>> index a524416..073c420 100644
+> >>>> --- a/drivers/mmc/host/dw_mmc.c
+> >>>> +++ b/drivers/mmc/host/dw_mmc.c
+> >>>> @@ -1585,6 +1585,15 @@ static void dw_mci_work_routine_card(struct
+> work_struct *work)
+> >>>>       }
+> >>>>  }
+> >>>>
+> >>>> +static irqreturn_t dw_mci_detect_interrupt(int irq, void *dev_id)
+> >>>> +{
+> >>>> +     struct dw_mci_slot *slot = dev_id;
+> >>>> +
+> >>>> +     queue_work(dw_mci_card_workqueue, &host->card_work);
+> >>>> +
+> >>>> +     return IRQ_HANDLED;
+> >>>> +}
+> >>>> +
+> >>>>  static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int
+> id)
+> >>>>  {
+> >>>>       struct mmc_host *mmc;
+> >>>> @@ -1657,6 +1666,8 @@ static int __init dw_mci_init_slot(struct
+> dw_mci *host, unsigned int id)
+> >>>>       } else
+> >>>>               regulator_enable(host->vmmc);
+> >>>>
+> >>>> +     host->pdata->init(id, dw_mci_detect_interrupt, host);
+> >>>> +
+> >>>>       if (dw_mci_get_cd(mmc))
+> >>>>               set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+> >>>>       else
+> >>>> --
+> >>>> 1.7.0.4
+> >>>>
+> >>>> --
+> >>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> in
+> >>>> the body of a message to majordomo@vger.kernel.org
+> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>>
+> >>> --
+> >>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> in
+> >>> the body of a message to majordomo@vger.kernel.org
+> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>>
+> >>
+> >>
+> >>
+> >
+> >
+> 
+> 
+> 
+> --
+> James Hogan
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-RnJvbSA4OTc2ZTY3YzUwZmVlOWVhYWQ3NDJhZDA5N2I4NGZkNTUyM2VmZmVlIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBKdW4gTmllIDxuanVuQG1hcnZlbGwuY29tPgpEYXRlOiBGcmks
-IDEgSnVsIDIwMTEgMTA6MDE6NTEgKzA4MDAKU3ViamVjdDogW1BBVENIXSBtbWM6IGF2b2lkIHVu
-bmVjZXNzYXJ5IHJlc2NhbiBpbiBQTV9QT1NUX1NVU1BFTkQKCldpdGggdGhpcyBwYXRjaCwgd2Ug
-Y2FsbCByZXNjYW4gb25seSB3aGVuIGNhcmQgaW5zZXJ0L3JlbW92ZQpoYXBwZW5zIGR1cmluZyBy
-ZXNjYW5fZGlzYWJsZWQgaXMgc2V0IHRvIGF2b2lkIHVubmVjZXNzYXJ5IG1tYwpjb21tYW5kIHRy
-YW5zYWN0aW9uIGFuZCByZWFsdGVkIHdha2Vsb2NrIGhvbGRpbmcuCgpUaGlzIHBhdGNoIGZpeCBi
-ZWxvdyBzdXNwZW5kIHJldHJ5IGlzc3VlIG9uIEFuZHJvaWQ6CjEuIFN5c3RlbSB0cmlnZ2VyIHN1
-c3BlbmQgcHJvY2VkdXJlIGZvciBhbGwgd2FrZWxvY2sgYXJlIHJlbGVhc2VkCjIuIEEgd2FrZWxv
-Y2sgaXMgaG9sZCBhZ2FpbiBhbmQgc3VzcGVuZCBpcyBhYm9ydGVkIGFzIGEgcmVzdWx0LgozLiBw
-bSBzdWJzeXN0ZW0gcG9zdCBQTV9QT1NUX1NVU1BFTkQgZXZlbnQgd2hlbiBleGl0aW5nIHN1c3Bl
-bmQuCjQuIG1tYyByZXNjYW4gaXMgc2NoZWRsdWVkIG9uIGV2ZXJ5IG1tYyBob3N0IHdoZW4gaGFu
-ZGxpbmcgdGhlIGV2ZW50CjUuIFRoZSB3YWtlbG9jayBpcyByZWxlYXNlZCBqdXN0IGFmdGVyIGl0
-IGJsb2NrIHN1c3BlbmQKNi4gU3lzdGVtIHRyaWdnZXIgYW5vdGhlciBzdXNwZW5kIHJldHJ5Cjcu
-IG1tYyByZXNjYW4gdGhyZWFkIGhvbGQgd2FrZWxvY2sgdG8gZGVjdGVjdCBjYXJkCjguIFN5c3Rl
-bSBnbyB0byBzdGF0ZSAyIGFuZCBlbnRlciBzdXNwZW5kIHJldHJ5IGxvb3AKClNpZ25lZC1vZmYt
-Ynk6IEp1biBOaWUgPG5qdW5AbWFydmVsbC5jb20+Ci0tLQogZHJpdmVycy9tbWMvY29yZS9jb3Jl
-LmMgIHwgICAxNiArKysrKysrKysrKysrKy0tCiBpbmNsdWRlL2xpbnV4L21tYy9ob3N0LmggfCAg
-ICAxICsKIDIgZmlsZXMgY2hhbmdlZCwgMTUgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkK
-CmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYyBiL2RyaXZlcnMvbW1jL2NvcmUv
-Y29yZS5jCmluZGV4IDc4NDNlZmUuLmRlZDc2ODYgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2Nv
-cmUvY29yZS5jCisrKyBiL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jCkBAIC0xNTY4LDkgKzE1Njgs
-MTUgQEAgdm9pZCBtbWNfcmVzY2FuKHN0cnVjdCB3b3JrX3N0cnVjdCAqd29yaykKIAlzdHJ1Y3Qg
-bW1jX2hvc3QgKmhvc3QgPQogCQljb250YWluZXJfb2Yod29yaywgc3RydWN0IG1tY19ob3N0LCBk
-ZXRlY3Qud29yayk7CiAJaW50IGk7CisJdW5zaWduZWQgbG9uZyBmbGFnczsKIAotCWlmIChob3N0
-LT5yZXNjYW5fZGlzYWJsZSkKKwlzcGluX2xvY2tfaXJxc2F2ZSgmaG9zdC0+bG9jaywgZmxhZ3Mp
-OworCWlmIChob3N0LT5yZXNjYW5fZGlzYWJsZSkgeworCQlob3N0LT5yZXNjYW5fZGVsYXllZCA9
-IDE7CisJCXNwaW5fdW5sb2NrX2lycXJlc3RvcmUoJmhvc3QtPmxvY2ssIGZsYWdzKTsKIAkJcmV0
-dXJuOworCX0KKwlzcGluX3VubG9ja19pcnFyZXN0b3JlKCZob3N0LT5sb2NrLCBmbGFncyk7CiAK
-IAltbWNfYnVzX2dldChob3N0KTsKIApAQCAtMTgzNiw2ICsxODQyLDcgQEAgaW50IG1tY19wbV9u
-b3RpZnkoc3RydWN0IG5vdGlmaWVyX2Jsb2NrICpub3RpZnlfYmxvY2ssCiAJc3RydWN0IG1tY19o
-b3N0ICpob3N0ID0gY29udGFpbmVyX29mKAogCQlub3RpZnlfYmxvY2ssIHN0cnVjdCBtbWNfaG9z
-dCwgcG1fbm90aWZ5KTsKIAl1bnNpZ25lZCBsb25nIGZsYWdzOworCXVuc2lnbmVkIGxvbmcgcmVz
-Y2FuX25lZWRlZCA9IDA7CiAKIAogCXN3aXRjaCAobW9kZSkgewpAQCAtMTg2Niw4ICsxODczLDEz
-IEBAIGludCBtbWNfcG1fbm90aWZ5KHN0cnVjdCBub3RpZmllcl9ibG9jayAqbm90aWZ5X2Jsb2Nr
-LAogCiAJCXNwaW5fbG9ja19pcnFzYXZlKCZob3N0LT5sb2NrLCBmbGFncyk7CiAJCWhvc3QtPnJl
-c2Nhbl9kaXNhYmxlID0gMDsKKwkJaWYgKGhvc3QtPnJlc2Nhbl9kZWxheWVkKSB7CisJCQlyZXNj
-YW5fbmVlZGVkID0gMTsKKwkJCWhvc3QtPnJlc2Nhbl9kZWxheWVkID0gMDsKKwkJfQogCQlzcGlu
-X3VubG9ja19pcnFyZXN0b3JlKCZob3N0LT5sb2NrLCBmbGFncyk7Ci0JCW1tY19kZXRlY3RfY2hh
-bmdlKGhvc3QsIDApOworCQlpZiAocmVzY2FuX25lZWRlZCkKKwkJCW1tY19kZXRlY3RfY2hhbmdl
-KGhvc3QsIDApOwogCiAJfQogCmRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L21tYy9ob3N0Lmgg
-Yi9pbmNsdWRlL2xpbnV4L21tYy9ob3N0LmgKaW5kZXggMWVlNDQyNC4uZjA1ZTYxOSAxMDA2NDQK
-LS0tIGEvaW5jbHVkZS9saW51eC9tbWMvaG9zdC5oCisrKyBiL2luY2x1ZGUvbGludXgvbW1jL2hv
-c3QuaApAQCAtMjQ5LDYgKzI0OSw3IEBAIHN0cnVjdCBtbWNfaG9zdCB7CiAJLyogT25seSB1c2Vk
-IHdpdGggTU1DX0NBUF9ESVNBQkxFICovCiAJaW50CQkJZW5hYmxlZDsJLyogaG9zdCBpcyBlbmFi
-bGVkICovCiAJaW50CQkJcmVzY2FuX2Rpc2FibGU7CS8qIGRpc2FibGUgY2FyZCBkZXRlY3Rpb24g
-Ki8KKwlpbnQJCQlyZXNjYW5fZGVsYXllZDsJLyogY2FyZCBkZXRlY3Rpb24gaXMgZGVsYXllZCAq
-LwogCWludAkJCW5lc3RpbmdfY250OwkvKiAiZW5hYmxlIiBuZXN0aW5nIGNvdW50ICovCiAJaW50
-CQkJZW5fZGlzX3JlY3VyczsJLyogZGV0ZWN0IHJlY3Vyc2lvbiAqLwogCXVuc2lnbmVkIGludAkJ
-ZGlzYWJsZV9kZWxheTsJLyogZGlzYWJsZSBkZWxheSBpbiBtc2VjcyAqLwotLSAKMS43LjAuNAoK
---20cf3071cc8ee1a39d04a6f8c012--
