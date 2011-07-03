@@ -1,68 +1,41 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH v6 00/11] mmc: use nonblock mmc requests to minimize
-	latency
-Date: Sun, 3 Jul 2011 15:47:41 +0100
-Message-ID: <20110703144741.GK21898@n2100.arm.linux.org.uk>
-References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org> <20110621075319.GN26089@n2100.arm.linux.org.uk> <BANLkTimnuEK_9RedmD1OgcunX3rPvd-O0Q@mail.gmail.com> <20110627110234.GC16103@n2100.arm.linux.org.uk> <BANLkTin80Z34=_uQaP=Dbv7eDxU1PH_qSw@mail.gmail.com>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH v8 00/12] use nonblock mmc requests to minimize latency
+Date: Sun, 3 Jul 2011 22:53:45 +0200
+Message-ID: <CAJ0pr1_Rd754qJ+jP9rqbez-9NAOwbxorziQrGDA0yrSMpPsxw@mail.gmail.com>
+References: <1309248717-14606-1-git-send-email-per.forlin@linaro.org>
+	<201107011844.44058.arnd@arndb.de>
+	<20110702122938.GI21898@n2100.arm.linux.org.uk>
+	<201107022137.30138.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:38605 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753641Ab1GCOsF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2011 10:48:05 -0400
-Content-Disposition: inline
-In-Reply-To: <BANLkTin80Z34=_uQaP=Dbv7eDxU1PH_qSw@mail.gmail.com>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:44886 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752037Ab1GCUxq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2011 16:53:46 -0400
+In-Reply-To: <201107022137.30138.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: saeed bishara <saeed.bishara@gmail.com>
-Cc: Per Forlin <per.forlin@linaro.org>, Nicolas Pitre <nicolas.pitre@linaro.org>, Chris Ball <cjb@laptop.org>, linaro-dev@lists.linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linaro-dev@lists.linaro.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, Nickolay Nickolaev <nicknickolaev@gmail.com>
 
-On Tue, Jun 28, 2011 at 09:22:20AM +0300, saeed bishara wrote:
-> On Mon, Jun 27, 2011 at 2:02 PM, Russell King - ARM Linux
-> <linux@arm.linux.org.uk> wrote:
-> > On Mon, Jun 27, 2011 at 01:34:48PM +0300, saeed bishara wrote:
-> >> Russell,
-> >> =A0 I'm curious about the correctness of this patch for systems wi=
-th
-> >> outer cache. shouldn't the dsb be issued before the outer cache
-> >> maintenance?
-> >
-> > Maybe we should do two passes over SG lists then - one for the inne=
-r and
-> > another for the outer cache?
-> >
-> > In effect we could do three passes:
-> >
-> > 1. Calculate the total size of the SG list to determine whether ful=
-l
-> > =A0 cache flush is more efficient.
-> > 2. Flush inner cache
-> > =A0 Then dsb()
-> > 3. Flush outer cache
-> > =A0 Another dsb()
-> >
-> looking at l2x0 cache, it seems to me that it would be possible to do
-> asynchronous l2 cache maintenance for
-> range operations, so maybe that can be utilized in order to
-> parallelism between inner cache and outer cache maintenance,
-> so the flow can be:
-> 2. Flush sg buffer from inner cache
-> 3. dsb()
-> 4. start Flush outer cache for that buffer
-> 5. Flush next sg buffer from inner cache
-> 6. dsb
-> 7. goto 4.
-> 8. when no more buffers left, wait for outer cache operations
+On 2 July 2011 21:37, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Saturday 02 July 2011 14:29:38 Russell King - ARM Linux wrote:
+>> One other thing to be considered here is whether this idea should be
+>> limited to just MMC or whether it should be extended further, to
+>> move the DMA mapping stuff out of the hot path for other block devices
+>> too.
+>>
+>> There are ARM systems with SATA which do 28MB/s - which could be
+>> improved by this technique.
+>
+> Excellent point. We had discussed SATA items in the context of Linaro
+> work before, and the conclusion was always that we wouldn't need to
+> do any work for it in the common code. I'll make sure that we bring
+> it up at the meeting next month in Cambridge so we can officially
+> assign someone to do this.
+>
+Arnd, do you know if any of the Linaro boards have SATA?
 
-I'm not sure how practical that is given the architecture of the L2x0
-controllers - where we need to wait for the previous operation to
-complete by reading the operation specific register and then issue a
-sync.
-
-Having looked at this again, I think trying to do any optimization of
-this code will be fraught, because of the dmabounce stuff getting in
-the way.  If only dmabounce didn't exist... if only crap hardware didn'=
-t
-exist...  dmabounce really needs to die.
+Regards,
+Per
