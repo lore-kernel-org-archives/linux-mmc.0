@@ -1,76 +1,68 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH] mxs-mmc: fix clock rate setting
-Date: Sun, 3 Jul 2011 19:54:19 +0800
-Message-ID: <20110703115418.GB9938@S2100-06.ap.freescale.net>
-References: <20110630145507.GG1997@pengutronix.de>
- <20110701091753.GE1922@pengutronix.de>
- <BANLkTi=cTigrnAHY3sDNC04aNpmZOQpUsA@mail.gmail.com>
- <20110701122709.GJ1922@pengutronix.de>
- <BANLkTim5aHJHbtbw-ZWnqdjdj_nxWZuwog@mail.gmail.com>
- <20110701144409.GA3825@pengutronix.de>
- <20110701154628.GD8631@S2100-06.ap.freescale.net>
- <20110702131225.GA5478@pengutronix.de>
- <20110703092850.GA9938@S2100-06.ap.freescale.net>
- <20110703103124.GA1333@pengutronix.de>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH v6 00/11] mmc: use nonblock mmc requests to minimize
+	latency
+Date: Sun, 3 Jul 2011 15:47:41 +0100
+Message-ID: <20110703144741.GK21898@n2100.arm.linux.org.uk>
+References: <1308518257-9783-1-git-send-email-per.forlin@linaro.org> <20110621075319.GN26089@n2100.arm.linux.org.uk> <BANLkTimnuEK_9RedmD1OgcunX3rPvd-O0Q@mail.gmail.com> <20110627110234.GC16103@n2100.arm.linux.org.uk> <BANLkTin80Z34=_uQaP=Dbv7eDxU1PH_qSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe002.messaging.microsoft.com ([213.199.154.205]:32026
-	"EHLO AM1EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752565Ab1GCLsN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2011 07:48:13 -0400
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:38605 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753641Ab1GCOsF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2011 10:48:05 -0400
 Content-Disposition: inline
-In-Reply-To: <20110703103124.GA1333@pengutronix.de>
+In-Reply-To: <BANLkTin80Z34=_uQaP=Dbv7eDxU1PH_qSw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Koen Beel <koen.beel.barco@gmail.com>, linux-mmc@vger.kernel.org
+To: saeed bishara <saeed.bishara@gmail.com>
+Cc: Per Forlin <per.forlin@linaro.org>, Nicolas Pitre <nicolas.pitre@linaro.org>, Chris Ball <cjb@laptop.org>, linaro-dev@lists.linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Sun, Jul 03, 2011 at 12:31:24PM +0200, Wolfram Sang wrote:
-> On Sun, Jul 03, 2011 at 05:28:52PM +0800, Shawn Guo wrote:
-> > On Sat, Jul 02, 2011 at 03:12:25PM +0200, Wolfram Sang wrote:
-> > > On Fri, Jul 01, 2011 at 11:46:29PM +0800, Shawn Guo wrote:
-> > > > On Fri, Jul 01, 2011 at 04:44:09PM +0200, Wolfram Sang wrote:
-> > > > > Hi,
-> > > > > 
-> > > > > On Fri, Jul 01, 2011 at 03:26:39PM +0200, Koen Beel wrote:
-> > > > > > I send the patch as attachment for now.
-> > > > > 
-> > > > > Fine with me in this case...
-> > > > > 
-> > > > > > But I'll have to look into another way of doing this. Corporate mail
-> > > > > > system is adding stupid disclaimers, gmail web ui is not working ok
-> > > > > > and corporate firewalls avoid using a different smtp server...
-> > > > > 
-> > > > > Good luck with that!
-> > > > > 
-> > > > > About the patch itself: I didn't verify the formulas, but it does solve one
-> > > > > special problem here. Thanks a lot! So:
-> > > > > 
-> > > > > Tested-by: Wolfram Sang <w.sang@pengutronix.de>
-> > > > > 
-> > > > > @chris: If Shawn also likes the patch, I think this is a stable candidate.
-> > > > > 
-> > > > Thanks for the fixing, Koen.
-> > > > 
-> > > > Acked-by: Shawn Guo <shawn.guo@freescale.com>
-> > > 
-> > > Well, maybe not. My colleague complained and I think he is right that we are
-> > > mapping div2 from the range 0 to 256 (inclusive!) to an 8-bit range. This must
-> > > be wrong for one value per se.
-> > > 
-> > If you look at the context of the patch, you will find it's 'div2 - 1'
-> > than 'div2' gets written into register.
-> 
-> Exactly. The '- 1' is why Koen changed the upper limit from < 256 to <= 256.
-> The lower limit fix is currently 'if (div2 == 0) div2 == 1', which is a 2:1
-> mapping. Not good, or?
-> 
-So you are saying the patch is a right fix but not the most optimal
-one?  In that case, it does not concern me.  I acked it as an valid
-fix. 
+On Tue, Jun 28, 2011 at 09:22:20AM +0300, saeed bishara wrote:
+> On Mon, Jun 27, 2011 at 2:02 PM, Russell King - ARM Linux
+> <linux@arm.linux.org.uk> wrote:
+> > On Mon, Jun 27, 2011 at 01:34:48PM +0300, saeed bishara wrote:
+> >> Russell,
+> >> =A0 I'm curious about the correctness of this patch for systems wi=
+th
+> >> outer cache. shouldn't the dsb be issued before the outer cache
+> >> maintenance?
+> >
+> > Maybe we should do two passes over SG lists then - one for the inne=
+r and
+> > another for the outer cache?
+> >
+> > In effect we could do three passes:
+> >
+> > 1. Calculate the total size of the SG list to determine whether ful=
+l
+> > =A0 cache flush is more efficient.
+> > 2. Flush inner cache
+> > =A0 Then dsb()
+> > 3. Flush outer cache
+> > =A0 Another dsb()
+> >
+> looking at l2x0 cache, it seems to me that it would be possible to do
+> asynchronous l2 cache maintenance for
+> range operations, so maybe that can be utilized in order to
+> parallelism between inner cache and outer cache maintenance,
+> so the flow can be:
+> 2. Flush sg buffer from inner cache
+> 3. dsb()
+> 4. start Flush outer cache for that buffer
+> 5. Flush next sg buffer from inner cache
+> 6. dsb
+> 7. goto 4.
+> 8. when no more buffers left, wait for outer cache operations
 
--- 
-Regards,
-Shawn
+I'm not sure how practical that is given the architecture of the L2x0
+controllers - where we need to wait for the previous operation to
+complete by reading the operation specific register and then issue a
+sync.
 
+Having looked at this again, I think trying to do any optimization of
+this code will be fraught, because of the dmabounce stuff getting in
+the way.  If only dmabounce didn't exist... if only crap hardware didn'=
+t
+exist...  dmabounce really needs to die.
