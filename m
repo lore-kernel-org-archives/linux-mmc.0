@@ -1,69 +1,66 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH 1/2] mmc: sdhci-esdhc: simplify cd_gpio, wp_gpio
-Date: Sun, 3 Jul 2011 10:22:28 +0200
-Message-ID: <20110703082228.GA22711@pengutronix.de>
-References: <1309562019-32707-1-git-send-email-troy.kisky@boundarydevices.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH] mxs-mmc: fix clock rate setting
+Date: Sun, 3 Jul 2011 17:28:52 +0800
+Message-ID: <20110703092850.GA9938@S2100-06.ap.freescale.net>
+References: <BANLkTi==Y_MJ2H_u15DzunWusUb=GsotWg@mail.gmail.com>
+ <BANLkTinKcb-=m3sURawdEjR=vTt=ApBKaQ@mail.gmail.com>
+ <20110630145507.GG1997@pengutronix.de>
+ <20110701091753.GE1922@pengutronix.de>
+ <BANLkTi=cTigrnAHY3sDNC04aNpmZOQpUsA@mail.gmail.com>
+ <20110701122709.GJ1922@pengutronix.de>
+ <BANLkTim5aHJHbtbw-ZWnqdjdj_nxWZuwog@mail.gmail.com>
+ <20110701144409.GA3825@pengutronix.de>
+ <20110701154628.GD8631@S2100-06.ap.freescale.net>
+ <20110702131225.GA5478@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="MGYHOYXEY6WxJCY8"
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:50877 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753305Ab1GCIWh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2011 04:22:37 -0400
+Received: from db3ehsobe004.messaging.microsoft.com ([213.199.154.142]:56230
+	"EHLO DB3EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754711Ab1GCJWh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2011 05:22:37 -0400
 Content-Disposition: inline
-In-Reply-To: <1309562019-32707-1-git-send-email-troy.kisky@boundarydevices.com>
+In-Reply-To: <20110702131225.GA5478@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Troy Kisky <troy.kisky@boundarydevices.com>
-Cc: Hong-Xing.Zhu@freescale.com, cjb@laptop.org, linux-mmc@vger.kernel.org, Shawn Guo <shawn.guo@linaro.org>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Koen Beel <koen.beel.barco@gmail.com>, linux-mmc@vger.kernel.org
 
+On Sat, Jul 02, 2011 at 03:12:25PM +0200, Wolfram Sang wrote:
+> On Fri, Jul 01, 2011 at 11:46:29PM +0800, Shawn Guo wrote:
+> > On Fri, Jul 01, 2011 at 04:44:09PM +0200, Wolfram Sang wrote:
+> > > Hi,
+> > > 
+> > > On Fri, Jul 01, 2011 at 03:26:39PM +0200, Koen Beel wrote:
+> > > > I send the patch as attachment for now.
+> > > 
+> > > Fine with me in this case...
+> > > 
+> > > > But I'll have to look into another way of doing this. Corporate mail
+> > > > system is adding stupid disclaimers, gmail web ui is not working ok
+> > > > and corporate firewalls avoid using a different smtp server...
+> > > 
+> > > Good luck with that!
+> > > 
+> > > About the patch itself: I didn't verify the formulas, but it does solve one
+> > > special problem here. Thanks a lot! So:
+> > > 
+> > > Tested-by: Wolfram Sang <w.sang@pengutronix.de>
+> > > 
+> > > @chris: If Shawn also likes the patch, I think this is a stable candidate.
+> > > 
+> > Thanks for the fixing, Koen.
+> > 
+> > Acked-by: Shawn Guo <shawn.guo@freescale.com>
+> 
+> Well, maybe not. My colleague complained and I think he is right that we are
+> mapping div2 from the range 0 to 256 (inclusive!) to an 8-bit range. This must
+> be wrong for one value per se.
+> 
+If you look at the context of the patch, you will find it's 'div2 - 1'
+than 'div2' gets written into register.
 
---MGYHOYXEY6WxJCY8
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Fri, Jul 01, 2011 at 04:13:38PM -0700, Troy Kisky wrote:
-> Currently, platform data is referenced by non init functions.
-> Copy these fields into locally defined struct pltfm_imx_data.
->=20
-> The code also currently frees imx_data on troubles with
-> cd_gpio, but returns 0 anyway. Now the code ignores cd_gpio
-> and wp_gpio if the values cause an error.
->=20
-> Also, allow mx51/mx53 to use platform data.
->=20
-> Signed-off-by: Troy Kisky <troy.kisky@boundarydevices.com>
-
-Have you seen this series from Shawn?
-
-[PATCH v4 0/4] Extend sdhci-esdhc-imx card_detect and write_protect support=
- for mx5
-
-I haven't checked if you are doing the same or similar, just that you are
-changing the same code. Please CC Shawn Guo and Richard Zhu if there is ano=
-ther
-patch series needed.
-
+-- 
 Regards,
+Shawn
 
-   Wolfram
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---MGYHOYXEY6WxJCY8
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAk4QJsQACgkQD27XaX1/VRuxzQCdHguuMuKCnyzqzAR2/I7hz4hj
-RBkAnjfuqaPI4f+cgjwQTPeODvO78Erj
-=lOvZ
------END PGP SIGNATURE-----
-
---MGYHOYXEY6WxJCY8--
