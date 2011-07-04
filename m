@@ -1,98 +1,163 @@
-From: Koen Beel <koen.beel.barco@gmail.com>
-Subject: Re: [PATCH] mxs-mmc: fix clock rate setting
-Date: Mon, 4 Jul 2011 13:01:09 +0200
-Message-ID: <CAHMSPgNtOzZ=Dm1cEO9rXxc9JaoVXq2+whK_h9RSGM-COK=A2w@mail.gmail.com>
-References: <BANLkTi==Y_MJ2H_u15DzunWusUb=GsotWg@mail.gmail.com>
-	<BANLkTinKcb-=m3sURawdEjR=vTt=ApBKaQ@mail.gmail.com>
-	<20110630145507.GG1997@pengutronix.de>
-	<20110701091753.GE1922@pengutronix.de>
-	<BANLkTi=cTigrnAHY3sDNC04aNpmZOQpUsA@mail.gmail.com>
-	<20110701122709.GJ1922@pengutronix.de>
-	<BANLkTim5aHJHbtbw-ZWnqdjdj_nxWZuwog@mail.gmail.com>
-	<20110701144409.GA3825@pengutronix.de>
+From: Felipe Balbi <balbi@ti.com>
+Subject: Re: [PATCH V3] MMC: PM: add suspend/resume in atmel-mci
+Date: Mon, 4 Jul 2011 14:06:52 +0300
+Message-ID: <20110704110651.GC2820@legolas.emea.dhcp.ti.com>
+References: <1309530754.4373.3.camel@hcegtvedt.norway.atmel.com>
+ <1309779505-25509-1-git-send-email-nicolas.ferre@atmel.com>
+Reply-To: balbi@ti.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="NKoe5XOeduwbEQHU"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:49538 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753003Ab1GDLBL convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Jul 2011 07:01:11 -0400
-Received: by wyg8 with SMTP id 8so3325217wyg.19
-        for <linux-mmc@vger.kernel.org>; Mon, 04 Jul 2011 04:01:10 -0700 (PDT)
-In-Reply-To: <20110701144409.GA3825@pengutronix.de>
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:42556 "EHLO
+	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752455Ab1GDLG6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Jul 2011 07:06:58 -0400
+Content-Disposition: inline
+In-Reply-To: <1309779505-25509-1-git-send-email-nicolas.ferre@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, shawn.guo@freescale.com
-
-On Fri, Jul 1, 2011 at 4:44 PM, Wolfram Sang <w.sang@pengutronix.de> wr=
-ote:
-> Hi,
->
-> On Fri, Jul 01, 2011 at 03:26:39PM +0200, Koen Beel wrote:
->> I send the patch as attachment for now.
->
-> Fine with me in this case...
->
->> But I'll have to look into another way of doing this. Corporate mail
->> system is adding stupid disclaimers, gmail web ui is not working ok
->> and corporate firewalls avoid using a different smtp server...
->
-> Good luck with that!
->
-> About the patch itself: I didn't verify the formulas, but it does sol=
-ve one
-> special problem here. Thanks a lot! So:
-
-Does it solve any other special problem except for the wrong clock rate=
- setting?
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, hans-christian.egtvedt@atmel.com, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kernel@avr32linux.org, u.kleine-koenig@pengutronix.de
 
 
->
-> Tested-by: Wolfram Sang <w.sang@pengutronix.de>
->
-> @chris: If Shawn also likes the patch, I think this is a stable candi=
-date.
->
-> Very minor nits:
->
->> From ab610437fade5b30fdeacd9e959ddf95bc42587a Mon Sep 17 00:00:00 20=
-01
->> From: Koen Beel <koen.beel@barco.com>
->> Date: Thu, 30 Jun 2011 12:00:19 +0200
->> Subject: [PATCH] mxs-mmc: fix clock rate setting
->>
->> Fix clock rate setting on mxs-mmc driver.
->> Previously, if div2 was zero the value for TIMING_CLOCK_RATE would h=
-ave been 255 instead of 0.
->> Also the limits for div1 (TIMING_CLOCK_DIVIDE) and div2 (TIMING_CLOC=
-K_RATE + 1) where not correctly defined.
->>
->> Can easily be reproduced on mx23evk: default clock for high speed sd=
-io cards is 50 MHz.
->> With a SSP_CLK of 28.8 MHz (default), this resulted in an actual clo=
-ck rate of about 56 kHz.
->
-> Commit msg should linebreak at 72.
->
->
->> Signed-off-by: Koen beel <koen.beel@barco.com>
->
-> Capital 'B'?
+--NKoe5XOeduwbEQHU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Indeed, it should have been:
-"Signed-off-by: Koen Beel <koen.beel@barco.com>"
+Hi,
 
->
-> Regards,
->
-> =C2=A0 Wolfram
->
-> --
-> Pengutronix e.K. =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 | Wolfram Sang =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0|
-> Industrial Linux Solutions =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
-=C2=A0 =C2=A0 | http://www.pengutronix.de/ =C2=A0|
->
+On Mon, Jul 04, 2011 at 01:38:25PM +0200, Nicolas Ferre wrote:
+> Take care of slots while going to suspend state.
+>=20
+> Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+> ---
+> V3: take care of each slot SUSPENDED state
+>     (adding a status bit in the slot "flags")
+> V2: move to pm_ops
+>=20
+>  drivers/mmc/host/atmel-mci.c |   60 ++++++++++++++++++++++++++++++++++++=
+++++++
+>  1 files changed, 60 insertions(+), 0 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index aa8039f..ed63bcd 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -203,6 +203,7 @@ struct atmel_mci_slot {
+>  #define ATMCI_CARD_PRESENT	0
+>  #define ATMCI_CARD_NEED_INIT	1
+>  #define ATMCI_SHUTDOWN		2
+> +#define ATMCI_SUSPENDED		3
+> =20
+>  	int			detect_pin;
+>  	int			wp_pin;
+> @@ -1878,10 +1879,69 @@ static int __exit atmci_remove(struct platform_de=
+vice *pdev)
+>  	return 0;
+>  }
+> =20
+> +#ifdef CONFIG_PM
+> +static int atmci_suspend(struct device *dev)
+> +{
+> +	struct atmel_mci *host =3D dev_get_drvdata(dev);
+> +	int i;
+> +
+> +	 for (i =3D 0; i < ATMEL_MCI_MAX_NR_SLOTS; i++) {
+> +		struct atmel_mci_slot *slot =3D host->slot[i];
+> +		int ret;
+> +
+> +		if (!slot)
+> +			continue;
+> +		ret =3D mmc_suspend_host(slot->mmc);
+> +		if (ret < 0) {
+> +			while (--i >=3D 0) {
+> +				slot =3D host->slot[i];
+> +				if (slot
+> +				&& test_bit(ATMCI_SUSPENDED, &slot->flags)) {
+> +					mmc_resume_host(host->slot[i]->mmc);
+> +					clear_bit(ATMCI_SUSPENDED, &slot->flags);
+> +				}
+> +			}
+> +			return ret;
+> +		} else {
+> +			set_bit(ATMCI_SUSPENDED, &slot->flags);
+> +		}
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +static int atmci_resume(struct device *dev)
+> +{
+> +	struct atmel_mci *host =3D dev_get_drvdata(dev);
+> +	int i;
+> +	int ret =3D 0;
+> +
+> +	for (i =3D 0; i < ATMEL_MCI_MAX_NR_SLOTS; i++) {
+> +		struct atmel_mci_slot *slot =3D host->slot[i];
+> +		int err;
+> +
+> +		slot =3D host->slot[i];
+> +		if (!slot)
+> +			continue;
+> +		if (!test_bit(ATMCI_SUSPENDED, &slot->flags))
+> +			continue;
+> +		err =3D mmc_resume_host(slot->mmc);
+> +		if (err < 0)
+> +			ret =3D err;
+> +		else
+> +			clear_bit(ATMCI_SUSPENDED, &slot->flags);
+> +	}
+> +
+> +	return ret;
+> +}
+> +#endif
+> +static SIMPLE_DEV_PM_OPS(atmci_pm, atmci_suspend, atmci_resume);
+
+if you disable CONFIG_PM this won't work. atmci_resume and atmci_suspend
+will be undefined.
+
+>  static struct platform_driver atmci_driver =3D {
+>  	.remove		=3D __exit_p(atmci_remove),
+>  	.driver		=3D {
+>  		.name		=3D "atmel_mci",
+> +		.pm		=3D &atmci_pm,
+
+this pointer will also be invalid.
+
+what most people do is:
+
+#ifdef CONFIG_PM
+
+suspend()
+resume()
+
+static SIMPLE_DEV_PM_OPS(atmci_pm, suspend, resume);
+
+#define DEV_PM_OPS	(&atmci_pm)
+#else
+#define DEV_PM_OPS	NULL
+#endif
+
+--=20
+balbi
+
+--NKoe5XOeduwbEQHU
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iQEcBAEBAgAGBQJOEZ7LAAoJEAv8Txj19kN1XnYH/i23o2IAwgT9yjxzOH/id0ob
+x3nLkAStugXfZIeRL00l7Dh+r7tMlxgJHnOEaNUMoXo1gUND3Y2h7YZFtRHaoEOx
+Y1i3Vx9akQ4OONpHbtmXwLVmXgYy8rD7Bwl/Brc6scSLQzFZspCxXml4zknomwmw
+3CFJLztMR+gXmcy5/o/rHYoWQtboUJKclCWpNoBfsAHLarNYh8COpIx8QJL94Cgc
+mW2pCen3SOFDNs1vHwLYX+f2SRdvnXYYFiLugDQOYzS7cFxqnO+1Ebb60JSlMtxo
+IrPNX0AfsEgeyRTZwf6IJX2Us0cIgQXbZeaIKBdEOyTHZAg8WxcIum0XDs4RTuM=
+=gLEm
+-----END PGP SIGNATURE-----
+
+--NKoe5XOeduwbEQHU--
