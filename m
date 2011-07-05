@@ -1,163 +1,191 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH v3] arm: mach-mmp: brownstone.c support multiple sd slots
-Date: Tue, 5 Jul 2011 13:20:37 -0700
-Message-ID: <67F311C7-B489-41E6-BC85-C06DACC7263A@marvell.com>
-References: <59C2B513-EC04-4CA2-818B-9901CAF3E554@marvell.com>
- <20110427093328.GU17290@n2100.arm.linux.org.uk>
- <161C3F6C-0986-4364-B458-DBA4D08456FD@marvell.com>
- <1F336A22-BAC3-41E3-8D4E-5DF27874D1EA@marvell.com>
- <20110428095127.GX17290@n2100.arm.linux.org.uk>
- <3BFCE791-3BAD-42ED-BC87-A27F40D6C77C@marvell.com>
- <CAMPhdO-TTRP-k7J-zrG2_rQJsmNDRhTgpqiiX2yqW+Egf8+t2A@mail.gmail.com>
- <CAMj5BkiK17RMY-vEENDqQiDOmfG0Esnp7QDooKWVrhkQL4g6Ow@mail.gmail.com>
- <CAMPhdO-b_dpC2ueexEFujr6p_NRb2JwDc0-UEx3cfOSVcZ-d6w@mail.gmail.com>
+From: Randy Dunlap <rdunlap@xenotime.net>
+Subject: Re: [PATCH v3] mmc: documentation of mmc non-blocking request usage
+ and design.
+Date: Tue, 5 Jul 2011 13:27:06 -0700
+Message-ID: <20110705132706.f610abb0.rdunlap@xenotime.net>
+References: <1309895008-2587-1-git-send-email-per.forlin@linaro.org>
+	<1309895008-2587-2-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:53499 "EHLO
-	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753857Ab1GEUUx convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 5 Jul 2011 16:20:53 -0400
-In-Reply-To: <CAMPhdO-b_dpC2ueexEFujr6p_NRb2JwDc0-UEx3cfOSVcZ-d6w@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1309895008-2587-2-git-send-email-per.forlin@linaro.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Sourav Poddar <sourav.poddar@ti.com>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Eric Miao <eric.y.miao@gmail.com>
-Cc: zhangfei gao <zhangfei.gao@gmail.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Zhangfei Gao <zgao6@marvell.com>
 
-Subject: [PATCH V3] arm: mach-mmp: brownstone.c support multiple sd slots
+On Tue,  5 Jul 2011 21:43:28 +0200 Per Forlin wrote:
 
-V3
-==
-Change since V2 -- delete mmc3 since it was committed
-to linux next.
+> Documentation about the background and the design of mmc non-blocking.
+> Host driver guidelines to minimize request preparation overhead.
+> 
+> Signed-off-by: Per Forlin <per.forlin@linaro.org>
+> ---
 
-enable mmc1 used for wifi (8688) and marked PERMANENT.
-Wifi requires enabling of power on the device by
-toggling the gpio lines for power and reset.  Enable eMMC first to work
-around problem in booting order due to workqueue bug.
+It would be better to omit the introductory email and put all of its comments
+in this one [PATCH] email.
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
+
+>  Documentation/mmc/00-INDEX          |    2 +
+>  Documentation/mmc/mmc-async-req.txt |   86 +++++++++++++++++++++++++++++++++++
+>  2 files changed, 88 insertions(+), 0 deletions(-)
+>  create mode 100644 Documentation/mmc/mmc-async-req.txt
+> 
+> diff --git a/Documentation/mmc/00-INDEX b/Documentation/mmc/00-INDEX
+> index 93dd7a7..11bc2cf 100644
+> --- a/Documentation/mmc/00-INDEX
+> +++ b/Documentation/mmc/00-INDEX
+> @@ -4,3 +4,5 @@ mmc-dev-attrs.txt
+>          - info on SD and MMC device attributes
+>  mmc-dev-parts.txt
+>          - info on SD and MMC device partitions
+> +mmc-async-req.txt
+> +        - info on mmc asynchronous request
+
+                                      requests
+
+
+> diff --git a/Documentation/mmc/mmc-async-req.txt b/Documentation/mmc/mmc-async-req.txt
+> new file mode 100644
+> index 0000000..d7e7698
+> --- /dev/null
+> +++ b/Documentation/mmc/mmc-async-req.txt
+> @@ -0,0 +1,86 @@
+> +Rationale
+> +=========
+> +
+> +How significant is the cache maintenance overhead?
+> +It depends, fast eMMC and multiple cache levels with speculative cache
+
+   It depends:
+or
+   It depends. Fast
+
+> +pre-fetch makes the cache overhead relatively significant. If the DMA
+> +preparations for the next request are done in parallel to the current
+
+                                                          with the current
+
+> +transfer the DMA preparation overhead would not affect the MMC performance.
+
+   transfer,
+
+> +The intention of non-blocking (asynchronous) mmc requests is to minimize the
+> +time between when an mmc request ends and another mmc request begins.
+> +Using mmc_wait_for_req() the MMC controller is idle while dma_map_sg and
+
+         mmc_wait_for_req(),
+
+> +dma_unmap_sg is processing. Using non-blocking mmc requests makes it
+
+                are processing.
+
+> +possible to prepare the caches for next job in parallel to an active
+
+                                                           with an active
+
+> +mmc request.
+> +
+> +MMC block driver
+> +================
+> +
+> +The issue_rw_rq() in the mmc block driver is made non-blocking.
+
+preferably:                 MMC
+throughout the file (when not a function or data name, etc.)
+
+> +The increase in throughput is proportional to the time it takes to
+> +prepare (major part of preparations is dma_map_sg and dma_unmap_sg)
+
+                                       are
+
+> +a request and how fast the memory is. The faster the MMC/SD is
+> +the more significant the prepare request time becomes. Roughly the expected
+> +performance gain is 5% for large writes and 10% on large reads on a L2 cache
+> +platform. In power save mode, when clocks run on a lower frequency, the DMA
+> +preparation may cost even more. As long as these slower preparations are run
+> +in parallel to the transfer performance wont be affected.
+
+               with                        won't
+
+> +
+> +Details on measurements from IOZone and mmc_test
+> +================================================
+> +
+> +https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async-req
+> +
+> +MMC core API extension
+> +======================
+> +
+> +There is one new public function mmc_start_req()
+
+                                    mmc_start_req().
+
+> +It starts a new MMC command request for a host. The function isn't
+> +truly non-blocking. If there is on ongoing async request it waits
+> +for completion of that request and starts the new one and returns. It
+> +doesn't wait for the new request to complete. If there is no ongoing
+> +request it starts the new request and returns immediately.
+> +
+> +MMC host extensions
+> +===================
+> +
+> +There are two optional hooks pre_req() and post_req() that the host driver
+
+                          hooks -- pre_req() and post_req() -- that
+
+> +may implement in order to move work to before and after the actual
+> +mmc_request function is called. In the DMA case pre_req() may do
+> +dma_map_sg() and prepare the dma descriptor, and post_req runs
+
+                                DMA
+
+> +the dma_unmap_sg.
+> +
+> +Optimize for the first request
+> +==============================
+> +
+> +The first request in a series of requests can't be prepared in parallel to
+
+                                                                           with
+
+> +the previous transfer, since there is no previous request.
+> +The argument is_first_req in pre_req() indicates that there is no previous
+> +request. The host driver may optimize for this scenario to minimize
+> +the performance loss. A way to optimize for this is to split the current
+> +request in two chunks, prepare the first chunk and start the request,
+> +and finally prepare the second chunk and start the transfer.
+> +
+> +Pseudocode to handle is_first_req scenario with minimal prepare overhead:
+> +if (is_first_req && req->size > threshold)
+> +   /* start MMC transfer for the complete transfer size */
+> +   mmc_start_command(MMC_CMD_TRANSFER_FULL_SIZE)
+
+      Please use ';' at the end of each pseudo-call.
+
+> +
+> +   /*
+> +    * Begin to prepare DMA while cmd is being processed by MMC.
+> +    * The first chunk of the request should take the same time
+> +    * to prepare as the "MMC process command time".
+> +    * If prepare time exceeds MMC cmd time
+> +    * the transfer is delayed, guesstimate max 4k as first chunk size.
+> +    */
+> +    prepare_1st_chunk_for_dma(req)
+> +    /* flush pending desc to the DMAC (dmaengine.h) */
+> +    dma_issue_pending(req->dma_desc)
+> +
+> +    prepare_2nd_chunk_for_dma(req)
+> +    /*
+> +     * The second issue_pending should be called before MMC runs out
+> +     * of the first chunk. If the MMC runs out of the first data chunk
+> +     * before this call, the transfer is delayed.
+> +     */
+> +    dma_issue_pending(req->dma_desc)
+> -- 
+
+
 ---
- arch/arm/mach-mmp/brownstone.c |   41 +++++++++++++++++++++++++++++++++++++++-
- 1 files changed, 40 insertions(+), 1 deletions(-)
-
-diff --git a/arch/arm/mach-mmp/brownstone.c b/arch/arm/mach-mmp/brownstone.c
-index c79162a..940982c 100644
---- a/arch/arm/mach-mmp/brownstone.c
-+++ b/arch/arm/mach-mmp/brownstone.c
-@@ -19,6 +19,7 @@
- #include <linux/regulator/max8649.h>
- #include <linux/regulator/fixed.h>
- #include <linux/mfd/max8925.h>
-+#include <linux/delay.h>
- 
- #include <asm/mach-types.h>
- #include <asm/mach/arch.h>
-@@ -180,6 +181,11 @@ static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc0 = {
- 	.clk_delay_cycles = 0x1f,
- };
- 
-+static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc1 = {
-+	.clk_delay_cycles = 0x1f,
-+	.flags		= PXA_FLAG_CARD_PERMANENT,
-+};
-+
- static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc2 = {
- 	.clk_delay_cycles = 0x1f,
- 	.flags = PXA_FLAG_CARD_PERMANENT
-@@ -187,6 +193,38 @@ static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc2 = {
- };
- 
- 
-+static void __init mmc_sdio_wifi(void)
-+{
-+	int poweron;
-+	int reset;
-+
-+	poweron = mfp_to_gpio(GPIO57_GPIO);
-+	reset = mfp_to_gpio(GPIO58_GPIO);
-+
-+	if (gpio_request(reset, "sd8xxx reset")) {
-+		printk(KERN_INFO "gpio %d request failed\n", reset);
-+		return;
-+	}
-+
-+	if (gpio_request(poweron, "sd8xxx PDn")) {
-+		gpio_free(reset);
-+		printk(KERN_INFO "gpio %d request failed\n", poweron);
-+		return;
-+	}
-+
-+	gpio_direction_output(poweron, 0);
-+	msleep(1);
-+	gpio_direction_output(poweron, 1);
-+	msleep(1);
-+	gpio_direction_output(reset, 0);
-+	msleep(1);
-+	gpio_direction_output(reset, 1);
-+	gpio_free(reset);
-+	gpio_free(poweron);
-+
-+	mmp2_add_sdhost(1, &mmp2_sdh_platdata_mmc1); /* Wifi */
-+}
-+
- static void __init brownstone_init(void)
- {
- 	mfp_config(ARRAY_AND_SIZE(brownstone_pin_config));
-@@ -195,8 +233,9 @@ static void __init brownstone_init(void)
- 	mmp2_add_uart(1);
- 	mmp2_add_uart(3);
- 	mmp2_add_twsi(1, NULL, ARRAY_AND_SIZE(brownstone_twsi1_info));
--	mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC */
- 	mmp2_add_sdhost(2, &mmp2_sdh_platdata_mmc2); /* eMMC */
-+	mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC */
-+	mmc_sdio_wifi();
- 
- 	/* enable 5v regulator */
- 	platform_device_register(&brownstone_v_5vp_device);
--- 
-1.7.0.4
-
-
-On Jul 5, 2011, at 12:20 AM, Eric Miao wrote:
-
-> On Tue, Jul 5, 2011 at 3:05 PM, zhangfei gao <zhangfei.gao@gmail.com> wrote:
->> On Tue, Jul 5, 2011 at 2:52 PM, Eric Miao <eric.y.miao@gmail.com> wrote:
->>> On Fri, Apr 29, 2011 at 4:45 AM, Philip Rakity <prakity@marvell.com> wrote:
->>>> 
->>>> Support multiple sd/eMMC interfaces. enable mmc1, 2, and 3.
->>>> mmc2 is used eMMC and slot is marked PERMANENT and 8 bit device.
->>>> mmc1 is used for Wifi and slot is marked PERMANENT
->>>> 
->>>> Note: eMMC (mmc2) is set to initialize first to workaround a problem
->>>> where booting in logical order requires mmc create work queue
->>>> to be multi-threaded otherwise boot process hangs.  BUG report
->>>> send to linux-mmc and linux-kernel mailing list.
->>>> 
->>>> Wifi (mmc1) requires we enable power on the device by toggling
->>>> the gpio lines for power and reset.
->>>> 
->>>> Signed-off-by: Philip Rakity <prakity@marvell.com>
->>> 
->>> Applied. Though the email client was fiddling the spaces/CR-LF a bit.
->>> 
->>>> ---
->>>>  arch/arm/mach-mmp/brownstone.c |   52 +++++++++++++++++++++++++++++++++++++++-
->>>>  1 files changed, 51 insertions(+), 1 deletions(-)
->>>> 
->> 
->> Hi, Eric
->> 
->> arch/arm/mach-mmp/brownstone.c has already been modified from
->> mmc-next, here will have conflict.
->> Sorry for inconvenience.
-> 
-> 'K, I'll drop it then.
-> 
->> 
->> Thanks
->> 
-
+~Randy
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
