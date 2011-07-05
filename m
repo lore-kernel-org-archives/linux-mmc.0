@@ -1,78 +1,84 @@
 From: Roy Zang <tie-fei.zang@freescale.com>
-Subject: [PATCH 1/3] eSDHC: Access Freescale eSDHC registers by 32-bit
-Date: Tue, 5 Jul 2011 12:19:01 +0800
-Message-ID: <1309839543-6031-1-git-send-email-tie-fei.zang@freescale.com>
+Subject: [PATCH 3/3] eSDHC: fix incorrect default value of the capabilities register on P4080
+Date: Tue, 5 Jul 2011 12:19:03 +0800
+Message-ID: <1309839543-6031-3-git-send-email-tie-fei.zang@freescale.com>
+References: <1309839543-6031-1-git-send-email-tie-fei.zang@freescale.com>
+ <1309839543-6031-2-git-send-email-tie-fei.zang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe005.messaging.microsoft.com ([213.199.154.143]:56940
-	"EHLO DB3EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752674Ab1GEDkr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Jul 2011 23:40:47 -0400
+Received: from db3ehsobe004.messaging.microsoft.com ([213.199.154.142]:54954
+	"EHLO DB3EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752674Ab1GEDkx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Jul 2011 23:40:53 -0400
+In-Reply-To: <1309839543-6031-2-git-send-email-tie-fei.zang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linuxppc-dev@lists.ozlabs.org, cbouatmailru@gmail.com, akpm@linux-foundation.org, Xu lei <B33228@freescale.com>, Roy Zang <tie-fei.zang@freescale.com>, Kumar Gala <galak@kernel.crashing.org>
+Cc: linuxppc-dev@lists.ozlabs.org, cbouatmailru@gmail.com, akpm@linux-foundation.org, Roy Zang <tie-fei.zang@freescale.com>
 
-From: Xu lei <B33228@freescale.com>
+P4080 eSDHC errata 12 describes incorrect default value of the
+the host controller capabilities register.
 
-For Freescale eSDHC registers only support 32-bit accesses,
-this patch ensure that all Freescale eSDHC register accesses
-are 32-bit.
+The default value of the VS18 and VS30 fields in the host controller
+capabilities register (HOSTCAPBLT) are incorrect. The default of these bits
+should be zero instead of one in the eSDHC logic.
 
-Signed-off-by: Xu lei <B33228@freescale.com>
+This patch adds the workaround for these errata.
+
 Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
-Signed-off-by: Kumar Gala <galak@kernel.crashing.org>
 ---
- drivers/mmc/host/sdhci-of-esdhc.c |   18 ++++++++++++++----
- 1 files changed, 14 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-of-core.c |    3 +++
+ drivers/mmc/host/sdhci.c         |    6 ++++++
+ include/linux/mmc/sdhci.h        |    4 ++++
+ 3 files changed, 13 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index ba40d6d..c9a8519 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -1,7 +1,7 @@
- /*
-  * Freescale eSDHC controller driver.
-  *
-- * Copyright (c) 2007 Freescale Semiconductor, Inc.
-+ * Copyright (c) 2007, 2010 Freescale Semiconductor, Inc.
-  * Copyright (c) 2009 MontaVista Software, Inc.
-  *
-  * Authors: Xiaobo Xie <X.Xie@freescale.com>
-@@ -23,11 +23,21 @@
- static u16 esdhc_readw(struct sdhci_host *host, int reg)
- {
- 	u16 ret;
-+	int base = reg & ~0x3;
-+	int shift = (reg & 0x2) * 8;
+diff --git a/drivers/mmc/host/sdhci-of-core.c b/drivers/mmc/host/sdhci-of-core.c
+index fede43d..9bdd30d 100644
+--- a/drivers/mmc/host/sdhci-of-core.c
++++ b/drivers/mmc/host/sdhci-of-core.c
+@@ -182,6 +182,9 @@ static int __devinit sdhci_of_probe(struct platform_device *ofdev)
+ 	if (of_device_is_compatible(np, "fsl,esdhc"))
+ 		host->quirks |= SDHCI_QUIRK_QORIQ_PROCTL_WEIRD;
  
- 	if (unlikely(reg == SDHCI_HOST_VERSION))
--		ret = in_be16(host->ioaddr + reg);
-+		ret = in_be32(host->ioaddr + base) & 0xffff;
- 	else
--		ret = sdhci_be32bs_readw(host, reg);
-+		ret = (in_be32(host->ioaddr + base) >> shift) & 0xffff;
-+	return ret;
-+}
++	if (of_device_is_compatible(np, "fsl,p4080-esdhc"))
++		host->quirks |= SDHCI_QUIRK_QORIQ_HOSTCAPBLT_ONLY_VS33;
 +
-+static u8 esdhc_readb(struct sdhci_host *host, int reg)
-+{
-+	int base = reg & ~0x3;
-+	int shift = (reg & 0x3) * 8;
-+	u8 ret = (in_be32(host->ioaddr + base) >> shift) & 0xff;
- 	return ret;
- }
+ 	clk = of_get_property(np, "clock-frequency", &size);
+ 	if (clk && size == sizeof(*clk) && *clk)
+ 		of_host->clock = be32_to_cpup(clk);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 77174e5..7e0b4cd 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2396,6 +2396,12 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	caps[1] = (host->version >= SDHCI_SPEC_300) ?
+ 		sdhci_readl(host, SDHCI_CAPABILITIES_1) : 0;
  
-@@ -79,7 +89,7 @@ struct sdhci_of_data sdhci_esdhc = {
- 	.ops = {
- 		.read_l = sdhci_be32bs_readl,
- 		.read_w = esdhc_readw,
--		.read_b = sdhci_be32bs_readb,
-+		.read_b = esdhc_readb,
- 		.write_l = sdhci_be32bs_writel,
- 		.write_w = esdhc_writew,
- 		.write_b = esdhc_writeb,
++	 /* Make sure clean the VS18 and VS30 bit. P4080 incorrectly
++	  * set the voltage capability bits
++	  */
++	if (host->quirks & SDHCI_QUIRK_QORIQ_HOSTCAPBLT_ONLY_VS33)
++		caps[0] &= ~(SDHCI_CAN_VDD_180 | SDHCI_CAN_VDD_300);
++
+ 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+ 		host->flags |= SDHCI_USE_SDMA;
+ 	else if (!(caps[0] & SDHCI_CAN_DO_SDMA))
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index d87abc7..7ffd458 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -89,6 +89,10 @@ struct sdhci_host {
+ #define SDHCI_QUIRK_UNSTABLE_RO_DETECT			(1U<<31)
+ /* Controller has weird bit setting for Protocol Control Register */
+ #define SDHCI_QUIRK_QORIQ_PROCTL_WEIRD			(0x100000000U)
++/* Controller can only supports 3.3V, but the capabilities register
++ * has incorrect set 1.8V and 3.0V
++ */
++#define SDHCI_QUIRK_QORIQ_HOSTCAPBLT_ONLY_VS33		(0x200000000U)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
 1.6.0.6
 
