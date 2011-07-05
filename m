@@ -1,393 +1,301 @@
 From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH v2 1/3] mmc: sdhci-esdhc-imx: get rid of the uses of cpu_is_mx()
-Date: Tue, 5 Jul 2011 11:47:30 -0600
-Message-ID: <CACxGe6uRTDss+kn5h-VGQhQ45fWpTdGj4wNn=NczAfF_55UU5g@mail.gmail.com>
-References: <1309879568-25837-1-git-send-email-shawn.guo@linaro.org> <1309879568-25837-2-git-send-email-shawn.guo@linaro.org>
+Subject: Re: [PATCH v2 3/3] mmc: sdhci-esdhc-imx: add device tree probe support
+Date: Tue, 5 Jul 2011 11:54:34 -0600
+Message-ID: <CACxGe6sj4yt7o1yohgdgRxx0aBGrCyYxA3qHmV-npCArjNWWUw@mail.gmail.com>
+References: <1309879568-25837-1-git-send-email-shawn.guo@linaro.org> <1309879568-25837-4-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:48297 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752555Ab1GERrv convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jul 2011 13:47:51 -0400
-Received: by ywe9 with SMTP id 9so2360738ywe.19
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Jul 2011 10:47:50 -0700 (PDT)
-In-Reply-To: <1309879568-25837-2-git-send-email-shawn.guo@linaro.org>
+Received: from mail-yi0-f46.google.com ([209.85.218.46]:37976 "EHLO
+	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751444Ab1GERyy convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jul 2011 13:54:54 -0400
+Received: by yia27 with SMTP id 27so2344418yia.19
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Jul 2011 10:54:54 -0700 (PDT)
+In-Reply-To: <1309879568-25837-4-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, patches@linaro.org, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>
 
 On Tue, Jul 5, 2011 at 9:26 AM, Shawn Guo <shawn.guo@linaro.org> wrote:
-> The patch removes all the uses of cpu_is_mx(). =A0Instead, it utilize=
-s
-> platform_device_id to distinguish the esdhc differences among SoCs.
+> The patch adds device tree probe support for sdhci-esdhc-imx driver.
 >
 > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
 > Cc: Wolfram Sang <w.sang@pengutronix.de>
 > Cc: Chris Ball <cjb@laptop.org>
-
-Acked-by: Grant Likely <grant.likely@secretlab.ca>
-
+> Cc: Grant Likely <grant.likely@secretlab.ca>
 > ---
-> =A0arch/arm/mach-imx/clock-imx25.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0| =A0 =A04 +-
-> =A0arch/arm/mach-imx/clock-imx35.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0| =A0 =A06 +-
-> =A0arch/arm/mach-mx5/clock-mx51-mx53.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-| =A0 16 +++---
-> =A0arch/arm/mach-mx5/mx51_efika.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 | =A0 =A04 +-
-> =A0.../plat-mxc/devices/platform-sdhci-esdhc-imx.c =A0 =A0| =A0 17 ++=
-+---
-> =A0arch/arm/plat-mxc/include/mach/devices-common.h =A0 =A0| =A0 =A01 =
-+
+> =A0.../devicetree/bindings/mmc/fsl-imx-esdhc.txt =A0 =A0 =A0| =A0 40 =
+++++++++
 > =A0drivers/mmc/host/sdhci-esdhc-imx.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- | =A0 60 ++++++++++++++++++-
-> =A07 files changed, 81 insertions(+), 27 deletions(-)
+ | =A0102 +++++++++++++++++++-
+> =A02 files changed, 137 insertions(+), 5 deletions(-)
+> =A0create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-e=
+sdhc.txt
 >
-> diff --git a/arch/arm/mach-imx/clock-imx25.c b/arch/arm/mach-imx/cloc=
-k-imx25.c
-> index a65838f..2955afa 100644
-> --- a/arch/arm/mach-imx/clock-imx25.c
-> +++ b/arch/arm/mach-imx/clock-imx25.c
-> @@ -300,8 +300,8 @@ static struct clk_lookup lookups[] =3D {
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx2-wdt.0", NULL, wdt_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx-ssi.0", NULL, ssi1_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx-ssi.1", NULL, ssi2_clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.0", NULL, esdhc1_clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.1", NULL, esdhc2_clk)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx25.0", NULL, esdhc1_clk=
-)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx25.1", NULL, esdhc2_clk=
-)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("mx2-camera.0", NULL, csi_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK(NULL, "audmux", audmux_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("flexcan.0", NULL, can1_clk)
-> diff --git a/arch/arm/mach-imx/clock-imx35.c b/arch/arm/mach-imx/cloc=
-k-imx35.c
-> index 5a4cc1e..2f80f14 100644
-> --- a/arch/arm/mach-imx/clock-imx35.c
-> +++ b/arch/arm/mach-imx/clock-imx35.c
-> @@ -458,9 +458,9 @@ static struct clk_lookup lookups[] =3D {
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx-epit.0", NULL, epit1_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx-epit.1", NULL, epit2_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK(NULL, "esai", esai_clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.0", NULL, esdhc1_clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.1", NULL, esdhc2_clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.2", NULL, esdhc3_clk)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx35.0", NULL, esdhc1_clk=
-)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx35.1", NULL, esdhc2_clk=
-)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx35.2", NULL, esdhc3_clk=
-)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("fec.0", NULL, fec_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK(NULL, "gpio", gpio1_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK(NULL, "gpio", gpio2_clk)
-> diff --git a/arch/arm/mach-mx5/clock-mx51-mx53.c b/arch/arm/mach-mx5/=
-clock-mx51-mx53.c
-> index 699b0d2..fd60e2c 100644
-> --- a/arch/arm/mach-mx5/clock-mx51-mx53.c
-> +++ b/arch/arm/mach-mx5/clock-mx51-mx53.c
-> @@ -1453,10 +1453,10 @@ static struct clk_lookup mx51_lookups[] =3D {
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx51-ecspi.0", NULL, ecspi1_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx51-ecspi.1", NULL, ecspi2_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx51-cspi.0", NULL, cspi_clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.0", NULL, esdhc1_clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.1", NULL, esdhc2_clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.2", NULL, esdhc3_clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.3", NULL, esdhc4_clk)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx51.0", NULL, esdhc1_clk=
-)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx51.1", NULL, esdhc2_clk=
-)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx51.2", NULL, esdhc3_clk=
-)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx51.3", NULL, esdhc4_clk=
-)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK(NULL, "cpu_clk", cpu_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK(NULL, "iim_clk", iim_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx2-wdt.0", NULL, dummy_clk)
-> @@ -1480,10 +1480,10 @@ static struct clk_lookup mx53_lookups[] =3D {
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx-i2c.0", NULL, i2c1_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx-i2c.1", NULL, i2c2_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx-i2c.2", NULL, i2c3_mx53_clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.0", NULL, esdhc1_clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.1", NULL, esdhc2_mx53_=
-clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.2", NULL, esdhc3_mx53_=
-clk)
-> - =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx.3", NULL, esdhc4_mx53_=
-clk)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx53.0", NULL, esdhc1_clk=
-)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx53.1", NULL, esdhc2_mx5=
-3_clk)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx53.2", NULL, esdhc3_mx5=
-3_clk)
-> + =A0 =A0 =A0 _REGISTER_CLOCK("sdhci-esdhc-imx53.3", NULL, esdhc4_mx5=
-3_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx53-ecspi.0", NULL, ecspi1_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx53-ecspi.1", NULL, ecspi2_clk)
-> =A0 =A0 =A0 =A0_REGISTER_CLOCK("imx53-cspi.0", NULL, cspi_clk)
-> diff --git a/arch/arm/mach-mx5/mx51_efika.c b/arch/arm/mach-mx5/mx51_=
-efika.c
-> index 56739c2..4435e03 100644
-> --- a/arch/arm/mach-mx5/mx51_efika.c
-> +++ b/arch/arm/mach-mx5/mx51_efika.c
-> @@ -260,8 +260,8 @@ static struct regulator_consumer_supply vvideo_co=
-nsumers[] =3D {
-> =A0};
->
-> =A0static struct regulator_consumer_supply vsd_consumers[] =3D {
-> - =A0 =A0 =A0 REGULATOR_SUPPLY("vmmc", "sdhci-esdhc-imx.0"),
-> - =A0 =A0 =A0 REGULATOR_SUPPLY("vmmc", "sdhci-esdhc-imx.1"),
-> + =A0 =A0 =A0 REGULATOR_SUPPLY("vmmc", "sdhci-esdhc-imx51.0"),
-> + =A0 =A0 =A0 REGULATOR_SUPPLY("vmmc", "sdhci-esdhc-imx51.1"),
-> =A0};
->
-> =A0static struct regulator_consumer_supply pwgt1_consumer[] =3D {
-> diff --git a/arch/arm/plat-mxc/devices/platform-sdhci-esdhc-imx.c b/a=
-rch/arm/plat-mxc/devices/platform-sdhci-esdhc-imx.c
-> index 79d6d71..5955f5d 100644
-> --- a/arch/arm/plat-mxc/devices/platform-sdhci-esdhc-imx.c
-> +++ b/arch/arm/plat-mxc/devices/platform-sdhci-esdhc-imx.c
-> @@ -10,21 +10,22 @@
-> =A0#include <mach/devices-common.h>
-> =A0#include <mach/esdhc.h>
->
-> -#define imx_sdhci_esdhc_imx_data_entry_single(soc, _id, hwid) \
-> +#define imx_sdhci_esdhc_imx_data_entry_single(soc, _devid, _id, hwid=
-) \
-> =A0 =A0 =A0 =A0{ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- \
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .devid =3D _devid, =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0\
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.id =3D _id, =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0\
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.iobase =3D soc ## _ESDHC ## hwid ## _=
-BASE_ADDR, =A0\
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.irq =3D soc ## _INT_ESDHC ## hwid, =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 \
-> =A0 =A0 =A0 =A0}
->
-> -#define imx_sdhci_esdhc_imx_data_entry(soc, id, hwid) =A0\
-> - =A0 =A0 =A0 [id] =3D imx_sdhci_esdhc_imx_data_entry_single(soc, id,=
- hwid)
-> +#define imx_sdhci_esdhc_imx_data_entry(soc, devid, id, hwid) =A0 \
-> + =A0 =A0 =A0 [id] =3D imx_sdhci_esdhc_imx_data_entry_single(soc, dev=
-id, id, hwid)
->
-> =A0#ifdef CONFIG_SOC_IMX25
-> =A0const struct imx_sdhci_esdhc_imx_data
-> =A0imx25_sdhci_esdhc_imx_data[] __initconst =3D {
-> =A0#define imx25_sdhci_esdhc_imx_data_entry(_id, _hwid) =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 \
-> - =A0 =A0 =A0 imx_sdhci_esdhc_imx_data_entry(MX25, _id, _hwid)
-> + =A0 =A0 =A0 imx_sdhci_esdhc_imx_data_entry(MX25, "sdhci-esdhc-imx25=
-", _id, _hwid)
-> =A0 =A0 =A0 =A0imx25_sdhci_esdhc_imx_data_entry(0, 1),
-> =A0 =A0 =A0 =A0imx25_sdhci_esdhc_imx_data_entry(1, 2),
-> =A0};
-> @@ -34,7 +35,7 @@ imx25_sdhci_esdhc_imx_data[] __initconst =3D {
-> =A0const struct imx_sdhci_esdhc_imx_data
-> =A0imx35_sdhci_esdhc_imx_data[] __initconst =3D {
-> =A0#define imx35_sdhci_esdhc_imx_data_entry(_id, _hwid) =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 \
-> - =A0 =A0 =A0 imx_sdhci_esdhc_imx_data_entry(MX35, _id, _hwid)
-> + =A0 =A0 =A0 imx_sdhci_esdhc_imx_data_entry(MX35, "sdhci-esdhc-imx35=
-", _id, _hwid)
-> =A0 =A0 =A0 =A0imx35_sdhci_esdhc_imx_data_entry(0, 1),
-> =A0 =A0 =A0 =A0imx35_sdhci_esdhc_imx_data_entry(1, 2),
-> =A0 =A0 =A0 =A0imx35_sdhci_esdhc_imx_data_entry(2, 3),
-> @@ -45,7 +46,7 @@ imx35_sdhci_esdhc_imx_data[] __initconst =3D {
-> =A0const struct imx_sdhci_esdhc_imx_data
-> =A0imx51_sdhci_esdhc_imx_data[] __initconst =3D {
-> =A0#define imx51_sdhci_esdhc_imx_data_entry(_id, _hwid) =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 \
-> - =A0 =A0 =A0 imx_sdhci_esdhc_imx_data_entry(MX51, _id, _hwid)
-> + =A0 =A0 =A0 imx_sdhci_esdhc_imx_data_entry(MX51, "sdhci-esdhc-imx51=
-", _id, _hwid)
-> =A0 =A0 =A0 =A0imx51_sdhci_esdhc_imx_data_entry(0, 1),
-> =A0 =A0 =A0 =A0imx51_sdhci_esdhc_imx_data_entry(1, 2),
-> =A0 =A0 =A0 =A0imx51_sdhci_esdhc_imx_data_entry(2, 3),
-> @@ -57,7 +58,7 @@ imx51_sdhci_esdhc_imx_data[] __initconst =3D {
-> =A0const struct imx_sdhci_esdhc_imx_data
-> =A0imx53_sdhci_esdhc_imx_data[] __initconst =3D {
-> =A0#define imx53_sdhci_esdhc_imx_data_entry(_id, _hwid) =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 \
-> - =A0 =A0 =A0 imx_sdhci_esdhc_imx_data_entry(MX53, _id, _hwid)
-> + =A0 =A0 =A0 imx_sdhci_esdhc_imx_data_entry(MX53, "sdhci-esdhc-imx53=
-", _id, _hwid)
-> =A0 =A0 =A0 =A0imx53_sdhci_esdhc_imx_data_entry(0, 1),
-> =A0 =A0 =A0 =A0imx53_sdhci_esdhc_imx_data_entry(1, 2),
-> =A0 =A0 =A0 =A0imx53_sdhci_esdhc_imx_data_entry(2, 3),
-> @@ -93,6 +94,6 @@ struct platform_device *__init imx_add_sdhci_esdhc_=
-imx(
-> =A0 =A0 =A0 =A0if (!pdata)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pdata =3D &default_esdhc_pdata;
->
-> - =A0 =A0 =A0 return imx_add_platform_device("sdhci-esdhc-imx", data-=
->id, res,
-> + =A0 =A0 =A0 return imx_add_platform_device(data->devid, data->id, r=
-es,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ARRAY_SIZE(res), pdata=
-, sizeof(*pdata));
-> =A0}
-> diff --git a/arch/arm/plat-mxc/include/mach/devices-common.h b/arch/a=
-rm/plat-mxc/include/mach/devices-common.h
-> index bf93820..c9e7b66 100644
-> --- a/arch/arm/plat-mxc/include/mach/devices-common.h
-> +++ b/arch/arm/plat-mxc/include/mach/devices-common.h
-> @@ -276,6 +276,7 @@ struct platform_device *__init imx_add_mxc_w1(
->
-> =A0#include <mach/esdhc.h>
-> =A0struct imx_sdhci_esdhc_imx_data {
-> + =A0 =A0 =A0 const char *devid;
-> =A0 =A0 =A0 =A0int id;
-> =A0 =A0 =A0 =A0resource_size_t iobase;
-> =A0 =A0 =A0 =A0resource_size_t irq;
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt =
+b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> new file mode 100644
+> index 0000000..351d239
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> @@ -0,0 +1,40 @@
+> +* Freescale Enhanced Secure Digital Host Controller (eSDHC) for i.MX
+> +
+> +The Enhanced Secure Digital Host Controller on Freescale i.MX family
+> +provides an interface for MMC, SD, and SDIO types of memory cards.
+> +
+> +Required properties:
+> +- compatible : Should be "fsl,<chip>-esdhc"
+> +- reg : Should contain eSDHC registers location and length
+> +- interrupts : Should contain eSDHC interrupt
+> +- cd-type : String, card detection (CD) method. =A0Supported values =
+are:
+> + =A0 =A0"none" : No CD
+> + =A0 =A0"controller" : Uses eSDHC controller internal CD signal
+> + =A0 =A0"gpio" : Uses GPIO pin for CD
+> + =A0 =A0"permanent" : No CD because card is permanently wired to hos=
+t
+> +- wp-type : String, write protection (WP) method. =A0Supported value=
+s are:
+> + =A0 =A0"none" : No WP
+> + =A0 =A0"controller" : Uses eSDHC controller internal WP signal
+> + =A0 =A0"gpio" : Uses GPIO pin for WP
+> +- gpios : Should specify GPIOs in this order: CD GPIO, WP GPIO, if
+> + =A0properties cd-type and wp-type are "gpio".
+
+Again, be explicit in your gpios property names.  Create a different
+property for each gpio: cd-gpios and wp-gpios.
+
+As for wp-type and cd-type, I think you can drop them.  Default to
+internal controller CD and WP pins.  Use gpio if cd-gpios or wp-gpios
+is present, and define specific properties for the no-wp, no-cd and
+fixed-card cases.  (can you tell that I'm not a fan of the "*-type"
+binding for this driver?)  :-)
+
+> +
+> +Examples:
+> +
+> +esdhc@70004000 {
+> + =A0 =A0 =A0 compatible =3D "fsl,imx51-esdhc";
+> + =A0 =A0 =A0 reg =3D <0x70004000 0x4000>;
+> + =A0 =A0 =A0 interrupts =3D <1>;
+> + =A0 =A0 =A0 fsl,cd-type =3D "controller";
+> + =A0 =A0 =A0 fsl,wp-type =3D "controller";
+> +};
+> +
+> +esdhc@70008000 {
+> + =A0 =A0 =A0 compatible =3D "fsl,imx51-esdhc";
+> + =A0 =A0 =A0 reg =3D <0x70008000 0x4000>;
+> + =A0 =A0 =A0 interrupts =3D <2>;
+> + =A0 =A0 =A0 fsl,cd-type =3D "gpio";
+> + =A0 =A0 =A0 fsl,wp-type =3D "gpio";
+> + =A0 =A0 =A0 cd-gpios =3D <&gpio0 6 0>; /* GPIO1_6 */
+> + =A0 =A0 =A0 wp-gpios =3D <&gpio0 5 0>; /* GPIO1_5 */
+> +};
 > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sd=
 hci-esdhc-imx.c
-> index 3cc6f61..1edda29 100644
+> index 1edda29..593d6b9 100644
 > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -20,7 +20,6 @@
+> @@ -20,6 +20,9 @@
 > =A0#include <linux/mmc/host.h>
 > =A0#include <linux/mmc/mmc.h>
 > =A0#include <linux/mmc/sdio.h>
-> -#include <mach/hardware.h>
+> +#include <linux/of.h>
+> +#include <linux/of_device.h>
+> +#include <linux/of_gpio.h>
 > =A0#include <mach/esdhc.h>
 > =A0#include "sdhci-pltfm.h"
 > =A0#include "sdhci-esdhc.h"
-> @@ -42,11 +41,57 @@
-> =A0*/
-> =A0#define ESDHC_FLAG_MULTIBLK_NO_INT =A0 =A0 (1 << 1)
->
-> +enum imx_esdhc_type {
-> + =A0 =A0 =A0 IMX25_ESDHC,
-> + =A0 =A0 =A0 IMX35_ESDHC,
-> + =A0 =A0 =A0 IMX51_ESDHC,
-> + =A0 =A0 =A0 IMX53_ESDHC,
-> +};
-> +
-> =A0struct pltfm_imx_data {
-> =A0 =A0 =A0 =A0int flags;
-> =A0 =A0 =A0 =A0u32 scratchpad;
-> + =A0 =A0 =A0 enum imx_esdhc_type devtype;
-> +};
-> +
-> +static struct platform_device_id imx_esdhc_devtype[] =3D {
-> + =A0 =A0 =A0 {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .name =3D "sdhci-esdhc-imx25",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .driver_data =3D IMX25_ESDHC,
-> + =A0 =A0 =A0 }, {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .name =3D "sdhci-esdhc-imx35",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .driver_data =3D IMX35_ESDHC,
-> + =A0 =A0 =A0 }, {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .name =3D "sdhci-esdhc-imx51",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .driver_data =3D IMX51_ESDHC,
-> + =A0 =A0 =A0 }, {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .name =3D "sdhci-esdhc-imx53",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .driver_data =3D IMX53_ESDHC,
-> + =A0 =A0 =A0 }, {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* sentinel */
-> + =A0 =A0 =A0 }
+> @@ -72,6 +75,14 @@ static struct platform_device_id imx_esdhc_devtype=
+[] =3D {
+> =A0 =A0 =A0 =A0}
 > =A0};
 >
-> +static inline int is_imx25_esdhc(struct pltfm_imx_data *data)
-> +{
-> + =A0 =A0 =A0 return data->devtype =3D=3D IMX25_ESDHC;
-> +}
+> +static const struct of_device_id imx_esdhc_dt_ids[] =3D {
+> + =A0 =A0 =A0 { .compatible =3D "fsl,imx25-esdhc", .data =3D &imx_esd=
+hc_devtype[IMX25_ESDHC], },
+> + =A0 =A0 =A0 { .compatible =3D "fsl,imx35-esdhc", .data =3D &imx_esd=
+hc_devtype[IMX35_ESDHC], },
+> + =A0 =A0 =A0 { .compatible =3D "fsl,imx51-esdhc", .data =3D &imx_esd=
+hc_devtype[IMX51_ESDHC], },
+> + =A0 =A0 =A0 { .compatible =3D "fsl,imx53-esdhc", .data =3D &imx_esd=
+hc_devtype[IMX53_ESDHC], },
+> + =A0 =A0 =A0 { /* sentinel */ }
+> +};
 > +
-> +static inline int is_imx35_esdhc(struct pltfm_imx_data *data)
-> +{
-> + =A0 =A0 =A0 return data->devtype =3D=3D IMX35_ESDHC;
-> +}
-> +
-> +static inline int is_imx51_esdhc(struct pltfm_imx_data *data)
-> +{
-> + =A0 =A0 =A0 return data->devtype =3D=3D IMX51_ESDHC;
-> +}
-> +
-> +static inline int is_imx53_esdhc(struct pltfm_imx_data *data)
-> +{
-> + =A0 =A0 =A0 return data->devtype =3D=3D IMX53_ESDHC;
-> +}
-> +
-> =A0static unsigned int esdhc_pltfm_get_max_blk_size(struct sdhci_host=
- *host)
+> =A0static inline int is_imx25_esdhc(struct pltfm_imx_data *data)
 > =A0{
-> =A0 =A0 =A0 =A0/* Force 2048 bytes, which is the maximum supported si=
-ze in SDHCI. */
-> @@ -55,8 +100,12 @@ static unsigned int esdhc_pltfm_get_max_blk_size(=
-struct sdhci_host *host)
+> =A0 =A0 =A0 =A0return data->devtype =3D=3D IMX25_ESDHC;
+> @@ -305,24 +316,96 @@ static irqreturn_t cd_irq(int irq, void *data)
+> =A0 =A0 =A0 =A0return IRQ_HANDLED;
+> =A0};
 >
-> =A0static unsigned int esdhc_pltfm_get_max_blk_count(struct sdhci_hos=
-t *host)
+> +#ifdef CONFIG_OF
+> +static const char *cd_types[] =3D {
+> + =A0 =A0 =A0 [ESDHC_CD_NONE] =A0 =A0 =A0 =A0 =3D "none",
+> + =A0 =A0 =A0 [ESDHC_CD_CONTROLLER] =A0 =3D "controller",
+> + =A0 =A0 =A0 [ESDHC_CD_GPIO] =A0 =A0 =A0 =A0 =3D "gpio",
+> + =A0 =A0 =A0 [ESDHC_CD_PERMANENT] =A0 =A0=3D "permanent",
+> +};
+> +
+> +static const char *wp_types[] =3D {
+> + =A0 =A0 =A0 [ESDHC_WP_NONE] =A0 =A0 =A0 =A0 =3D "none",
+> + =A0 =A0 =A0 [ESDHC_WP_CONTROLLER] =A0 =3D "controller",
+> + =A0 =A0 =A0 [ESDHC_WP_GPIO] =A0 =A0 =A0 =A0 =3D "gpio",
+> +};
+> +
+> +static int __devinit sdhci_esdhc_imx_probe_dt(struct platform_device=
+ *pdev)
+> +{
+> + =A0 =A0 =A0 const struct of_device_id *of_id =3D
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 of_match_device(imx_esd=
+hc_dt_ids, &pdev->dev);
+> + =A0 =A0 =A0 struct device_node *np =3D pdev->dev.of_node;
+> + =A0 =A0 =A0 struct esdhc_platform_data *boarddata;
+> + =A0 =A0 =A0 int err, i;
+> + =A0 =A0 =A0 const char *cd, *wp;
+> +
+> + =A0 =A0 =A0 if (!np)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENODEV;
+> +
+> + =A0 =A0 =A0 boarddata =3D kzalloc(sizeof(*boarddata), GFP_KERNEL);
+> + =A0 =A0 =A0 if (!boarddata)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENOMEM;
+> + =A0 =A0 =A0 pdev->dev.platform_data =3D boarddata;
+
+This is illegal.  As far as device drivers are concerned,
+pdev->dev.platform_data is immutable and must not be changed.
+Otherwise they break the driver model.  If you need to keep around a
+platform_data structure, then it needs to be stored in the driver
+private data.  Your best option is to refactor the driver to not
+reference pdev->dev.platform_data after probe() exits.
+
+> +
+> + =A0 =A0 =A0 err =3D of_property_read_string(np, "fsl,cd-type", &cd)=
+;
+> + =A0 =A0 =A0 if (err)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return err;
+> + =A0 =A0 =A0 for (i =3D 0; i < ARRAY_SIZE(cd_types); i++)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!strcasecmp(cd, cd_types[i])) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 boarddata->cd_type =3D =
+i;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 err =3D of_property_read_string(np, "fsl,wp-type", &wp)=
+;
+> + =A0 =A0 =A0 if (err)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return err;
+> + =A0 =A0 =A0 for (i =3D 0; i < ARRAY_SIZE(wp_types); i++)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!strcasecmp(wp, wp_types[i])) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 boarddata->wp_type =3D =
+i;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 boarddata->cd_gpio =3D of_get_gpio(np, 0);
+> + =A0 =A0 =A0 boarddata->wp_gpio =3D of_get_gpio(np, 1);
+> +
+> + =A0 =A0 =A0 pdev->id_entry =3D of_id->data;
+> +
+> + =A0 =A0 =A0 return 0;
+> +}
+> +#else
+> +static inline int sdhci_esdhc_imx_probe_dt(struct platform_device *p=
+dev)
+> +{
+> + =A0 =A0 =A0 return 0;
+> +}
+> +#endif
+> +
+> =A0static int __devinit sdhci_esdhc_imx_probe(struct platform_device =
+*pdev)
 > =A0{
-> + =A0 =A0 =A0 struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host=
+> + =A0 =A0 =A0 struct device_node *np =3D pdev->dev.of_node;
+> =A0 =A0 =A0 =A0struct sdhci_pltfm_host *pltfm_host;
+> =A0 =A0 =A0 =A0struct sdhci_host *host;
+> - =A0 =A0 =A0 struct esdhc_platform_data *boarddata;
+> + =A0 =A0 =A0 struct esdhc_platform_data *boarddata =3D NULL;
+> =A0 =A0 =A0 =A0struct clk *clk;
+> =A0 =A0 =A0 =A0int err;
+> =A0 =A0 =A0 =A0struct pltfm_imx_data *imx_data;
+>
+> + =A0 =A0 =A0 err =3D sdhci_esdhc_imx_probe_dt(pdev);
+> + =A0 =A0 =A0 if (err)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return err;
+> +
+> =A0 =A0 =A0 =A0host =3D sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata=
 );
-> + =A0 =A0 =A0 struct pltfm_imx_data *imx_data =3D pltfm_host->priv;
-> +
-> =A0 =A0 =A0 =A0/* Fix errata ENGcm07207 which is present on i.MX25 an=
-d i.MX35 */
-> - =A0 =A0 =A0 return (cpu_is_mx25() || cpu_is_mx35()) ? 1 : 65535;
-> + =A0 =A0 =A0 return (is_imx25_esdhc(imx_data) || is_imx35_esdhc(imx_=
-data)) ?
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 1 : 65535;
-> =A0}
+> - =A0 =A0 =A0 if (IS_ERR(host))
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 return PTR_ERR(host);
+> + =A0 =A0 =A0 if (IS_ERR(host)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D PTR_ERR(host);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_sdhci_pltfm;
+> + =A0 =A0 =A0 }
 >
-> =A0static inline void esdhc_clrset_le(struct sdhci_host *host, u32 ma=
-sk, u32 val, int reg)
-> @@ -274,6 +323,8 @@ static int __devinit sdhci_esdhc_imx_probe(struct=
- platform_device *pdev)
+> =A0 =A0 =A0 =A0pltfm_host =3D sdhci_priv(host);
+>
 > =A0 =A0 =A0 =A0imx_data =3D kzalloc(sizeof(struct pltfm_imx_data), GF=
 P_KERNEL);
-> =A0 =A0 =A0 =A0if (!imx_data)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return -ENOMEM;
-> +
-> + =A0 =A0 =A0 imx_data->devtype =3D pdev->id_entry->driver_data;
+> - =A0 =A0 =A0 if (!imx_data)
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENOMEM;
+> + =A0 =A0 =A0 if (!imx_data) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D -ENOMEM;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_imx_data;
+> + =A0 =A0 =A0 }
+>
+> =A0 =A0 =A0 =A0imx_data->devtype =3D pdev->id_entry->driver_data;
 > =A0 =A0 =A0 =A0pltfm_host->priv =3D imx_data;
+> @@ -416,12 +499,17 @@ no_board_data:
+> =A0 =A0 =A0 =A0clk_put(pltfm_host->clk);
+> =A0err_clk_get:
+> =A0 =A0 =A0 =A0kfree(imx_data);
+> +err_imx_data:
+> =A0 =A0 =A0 =A0sdhci_pltfm_free(pdev);
+> +err_sdhci_pltfm:
+> + =A0 =A0 =A0 if (np)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 kfree(boarddata);
+> =A0 =A0 =A0 =A0return err;
+> =A0}
 >
-> =A0 =A0 =A0 =A0clk =3D clk_get(mmc_dev(host->mmc), NULL);
-> @@ -285,10 +336,10 @@ static int __devinit sdhci_esdhc_imx_probe(stru=
-ct platform_device *pdev)
-> =A0 =A0 =A0 =A0clk_enable(clk);
-> =A0 =A0 =A0 =A0pltfm_host->clk =3D clk;
+> =A0static int __devexit sdhci_esdhc_imx_remove(struct platform_device=
+ *pdev)
+> =A0{
+> + =A0 =A0 =A0 struct device_node *np =3D pdev->dev.of_node;
+> =A0 =A0 =A0 =A0struct sdhci_host *host =3D platform_get_drvdata(pdev)=
+;
+> =A0 =A0 =A0 =A0struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(hos=
+t);
+> =A0 =A0 =A0 =A0struct esdhc_platform_data *boarddata =3D host->mmc->p=
+arent->platform_data;
+> @@ -444,6 +532,9 @@ static int __devexit sdhci_esdhc_imx_remove(struc=
+t platform_device *pdev)
 >
-> - =A0 =A0 =A0 if (!cpu_is_mx25())
-> + =A0 =A0 =A0 if (!is_imx25_esdhc(imx_data))
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->quirks |=3D SDHCI_QUIRK_BROKEN_T=
-IMEOUT_VAL;
+> =A0 =A0 =A0 =A0sdhci_pltfm_free(pdev);
 >
-> - =A0 =A0 =A0 if (!(cpu_is_mx25() || cpu_is_mx35() || cpu_is_mx51()))
-> + =A0 =A0 =A0 if (is_imx53_esdhc(imx_data))
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0imx_data->flags |=3D ESDHC_FLAG_MULTIB=
-LK_NO_INT;
+> + =A0 =A0 =A0 if (np)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 kfree(boarddata);
+> +
+> =A0 =A0 =A0 =A0return 0;
+> =A0}
 >
-> =A0 =A0 =A0 =A0boarddata =3D host->mmc->parent->platform_data;
-> @@ -401,6 +452,7 @@ static struct platform_driver sdhci_esdhc_imx_dri=
+> @@ -451,6 +542,7 @@ static struct platform_driver sdhci_esdhc_imx_dri=
 ver =3D {
+> =A0 =A0 =A0 =A0.driver =A0 =A0 =A0 =A0 =3D {
 > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.name =A0 =3D "sdhci-esdhc-imx",
 > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.owner =A0=3D THIS_MODULE,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .of_match_table =3D imx_esdhc_dt_ids,
 > =A0 =A0 =A0 =A0},
-> + =A0 =A0 =A0 .id_table =A0 =A0 =A0 =3D imx_esdhc_devtype,
+> =A0 =A0 =A0 =A0.id_table =A0 =A0 =A0 =3D imx_esdhc_devtype,
 > =A0 =A0 =A0 =A0.probe =A0 =A0 =A0 =A0 =A0=3D sdhci_esdhc_imx_probe,
-> =A0 =A0 =A0 =A0.remove =A0 =A0 =A0 =A0 =3D __devexit_p(sdhci_esdhc_im=
-x_remove),
-> =A0#ifdef CONFIG_PM
 > --
 > 1.7.4.1
 >
 >
-> _______________________________________________
-> devicetree-discuss mailing list
-> devicetree-discuss@lists.ozlabs.org
-> https://lists.ozlabs.org/listinfo/devicetree-discuss
 >
 
 
