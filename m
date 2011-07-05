@@ -1,247 +1,179 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH v2 3/3] mmc: sdhci-esdhc-imx: add device tree probe support
-Date: Tue, 5 Jul 2011 23:26:08 +0800
-Message-ID: <1309879568-25837-4-git-send-email-shawn.guo@linaro.org>
-References: <1309879568-25837-1-git-send-email-shawn.guo@linaro.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: documentation of mmc non-blocking request usage and design.
+Date: Tue, 05 Jul 2011 11:24:18 -0400
+Message-ID: <m2liwc21jx.fsf@bob.laptop.org>
+References: <1309878894-2700-1-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:23729
-	"EHLO CH1EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754535Ab1GEPVn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jul 2011 11:21:43 -0400
-In-Reply-To: <1309879568-25837-1-git-send-email-shawn.guo@linaro.org>
+Received: from void.printf.net ([89.145.121.20]:48621 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752181Ab1GEPYp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 5 Jul 2011 11:24:45 -0400
+In-Reply-To: <1309878894-2700-1-git-send-email-per.forlin@linaro.org> (Per
+	Forlin's message of "Tue, 5 Jul 2011 17:14:54 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Sourav Poddar <sourav.poddar@ti.com>, Randy Dunlap <rdunlap@xenotime.net>
 
-The patch adds device tree probe support for sdhci-esdhc-imx driver.
+Hi Per, minor proofreading,
 
-Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-Cc: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Grant Likely <grant.likely@secretlab.ca>
----
- .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   40 ++++++++
- drivers/mmc/host/sdhci-esdhc-imx.c                 |  102 +++++++++++++++++++-
- 2 files changed, 137 insertions(+), 5 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+On Tue, Jul 05 2011, Per Forlin wrote:
+> Documentation about the background and the design of mmc non-blocking.
+> Host driver guide lines to minimize request preparation over head.
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-new file mode 100644
-index 0000000..351d239
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-@@ -0,0 +1,40 @@
-+* Freescale Enhanced Secure Digital Host Controller (eSDHC) for i.MX
-+
-+The Enhanced Secure Digital Host Controller on Freescale i.MX family
-+provides an interface for MMC, SD, and SDIO types of memory cards.
-+
-+Required properties:
-+- compatible : Should be "fsl,<chip>-esdhc"
-+- reg : Should contain eSDHC registers location and length
-+- interrupts : Should contain eSDHC interrupt
-+- cd-type : String, card detection (CD) method.  Supported values are:
-+    "none" : No CD
-+    "controller" : Uses eSDHC controller internal CD signal
-+    "gpio" : Uses GPIO pin for CD
-+    "permanent" : No CD because card is permanently wired to host
-+- wp-type : String, write protection (WP) method.  Supported values are:
-+    "none" : No WP
-+    "controller" : Uses eSDHC controller internal WP signal 
-+    "gpio" : Uses GPIO pin for WP
-+- gpios : Should specify GPIOs in this order: CD GPIO, WP GPIO, if
-+  properties cd-type and wp-type are "gpio".
-+
-+Examples:
-+
-+esdhc@70004000 {
-+	compatible = "fsl,imx51-esdhc";
-+	reg = <0x70004000 0x4000>;
-+	interrupts = <1>;
-+	fsl,cd-type = "controller";
-+	fsl,wp-type = "controller";
-+};
-+
-+esdhc@70008000 {
-+	compatible = "fsl,imx51-esdhc";
-+	reg = <0x70008000 0x4000>;
-+	interrupts = <2>;
-+	fsl,cd-type = "gpio";
-+	fsl,wp-type = "gpio";
-+	cd-gpios = <&gpio0 6 0>; /* GPIO1_6 */
-+	wp-gpios = <&gpio0 5 0>; /* GPIO1_5 */
-+};
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 1edda29..593d6b9 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -20,6 +20,9 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/sdio.h>
-+#include <linux/of.h>
-+#include <linux/of_device.h>
-+#include <linux/of_gpio.h>
- #include <mach/esdhc.h>
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
-@@ -72,6 +75,14 @@ static struct platform_device_id imx_esdhc_devtype[] = {
- 	}
- };
- 
-+static const struct of_device_id imx_esdhc_dt_ids[] = {
-+	{ .compatible = "fsl,imx25-esdhc", .data = &imx_esdhc_devtype[IMX25_ESDHC], },
-+	{ .compatible = "fsl,imx35-esdhc", .data = &imx_esdhc_devtype[IMX35_ESDHC], },
-+	{ .compatible = "fsl,imx51-esdhc", .data = &imx_esdhc_devtype[IMX51_ESDHC], },
-+	{ .compatible = "fsl,imx53-esdhc", .data = &imx_esdhc_devtype[IMX53_ESDHC], },
-+	{ /* sentinel */ }
-+};
-+
- static inline int is_imx25_esdhc(struct pltfm_imx_data *data)
- {
- 	return data->devtype == IMX25_ESDHC;
-@@ -305,24 +316,96 @@ static irqreturn_t cd_irq(int irq, void *data)
- 	return IRQ_HANDLED;
- };
- 
-+#ifdef CONFIG_OF
-+static const char *cd_types[] = {
-+	[ESDHC_CD_NONE]		= "none",
-+	[ESDHC_CD_CONTROLLER]	= "controller",
-+	[ESDHC_CD_GPIO]		= "gpio",
-+	[ESDHC_CD_PERMANENT]	= "permanent",
-+};
-+
-+static const char *wp_types[] = {
-+	[ESDHC_WP_NONE]		= "none",
-+	[ESDHC_WP_CONTROLLER]	= "controller",
-+	[ESDHC_WP_GPIO]		= "gpio",
-+};
-+
-+static int __devinit sdhci_esdhc_imx_probe_dt(struct platform_device *pdev)
-+{
-+	const struct of_device_id *of_id =
-+			of_match_device(imx_esdhc_dt_ids, &pdev->dev);
-+	struct device_node *np = pdev->dev.of_node;
-+	struct esdhc_platform_data *boarddata;
-+	int err, i;
-+	const char *cd, *wp;
-+
-+	if (!np)
-+		return -ENODEV;
-+
-+	boarddata = kzalloc(sizeof(*boarddata), GFP_KERNEL);
-+	if (!boarddata)
-+		return -ENOMEM;
-+	pdev->dev.platform_data = boarddata;
-+
-+	err = of_property_read_string(np, "fsl,cd-type", &cd);
-+	if (err)
-+		return err;
-+	for (i = 0; i < ARRAY_SIZE(cd_types); i++)
-+		if (!strcasecmp(cd, cd_types[i])) {
-+			boarddata->cd_type = i;
-+			break;
-+		}
-+
-+	err = of_property_read_string(np, "fsl,wp-type", &wp);
-+	if (err)
-+		return err;
-+	for (i = 0; i < ARRAY_SIZE(wp_types); i++)
-+		if (!strcasecmp(wp, wp_types[i])) {
-+			boarddata->wp_type = i;
-+			break;
-+		}
-+
-+	boarddata->cd_gpio = of_get_gpio(np, 0);
-+	boarddata->wp_gpio = of_get_gpio(np, 1);
-+
-+	pdev->id_entry = of_id->data;
-+
-+	return 0;
-+}
-+#else
-+static inline int sdhci_esdhc_imx_probe_dt(struct platform_device *pdev)
-+{
-+	return 0;
-+}
-+#endif
-+
- static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
- {
-+	struct device_node *np = pdev->dev.of_node;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_host *host;
--	struct esdhc_platform_data *boarddata;
-+	struct esdhc_platform_data *boarddata = NULL;
- 	struct clk *clk;
- 	int err;
- 	struct pltfm_imx_data *imx_data;
- 
-+	err = sdhci_esdhc_imx_probe_dt(pdev);
-+	if (err)
-+		return err;
-+
- 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata);
--	if (IS_ERR(host))
--		return PTR_ERR(host);
-+	if (IS_ERR(host)) {
-+		err = PTR_ERR(host);
-+		goto err_sdhci_pltfm;
-+	}
- 
- 	pltfm_host = sdhci_priv(host);
- 
- 	imx_data = kzalloc(sizeof(struct pltfm_imx_data), GFP_KERNEL);
--	if (!imx_data)
--		return -ENOMEM;
-+	if (!imx_data) {
-+		err = -ENOMEM;
-+		goto err_imx_data;
-+	}
- 
- 	imx_data->devtype = pdev->id_entry->driver_data;
- 	pltfm_host->priv = imx_data;
-@@ -416,12 +499,17 @@ no_board_data:
- 	clk_put(pltfm_host->clk);
- err_clk_get:
- 	kfree(imx_data);
-+err_imx_data:
- 	sdhci_pltfm_free(pdev);
-+err_sdhci_pltfm:
-+	if (np)
-+		kfree(boarddata);
- 	return err;
- }
- 
- static int __devexit sdhci_esdhc_imx_remove(struct platform_device *pdev)
- {
-+	struct device_node *np = pdev->dev.of_node;
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
-@@ -444,6 +532,9 @@ static int __devexit sdhci_esdhc_imx_remove(struct platform_device *pdev)
- 
- 	sdhci_pltfm_free(pdev);
- 
-+	if (np)
-+		kfree(boarddata);
-+
- 	return 0;
- }
- 
-@@ -451,6 +542,7 @@ static struct platform_driver sdhci_esdhc_imx_driver = {
- 	.driver		= {
- 		.name	= "sdhci-esdhc-imx",
- 		.owner	= THIS_MODULE,
-+		.of_match_table = imx_esdhc_dt_ids,
- 	},
- 	.id_table	= imx_esdhc_devtype,
- 	.probe		= sdhci_esdhc_imx_probe,
+guidelines, overhead
+
+>
+> Signed-off-by: Per Forlin <per.forlin@linaro.org>
+> ---
+>  Documentation/mmc/00-INDEX          |    2 +
+>  Documentation/mmc/mmc-async-req.txt |   85 +++++++++++++++++++++++++++++++++++
+>  2 files changed, 87 insertions(+), 0 deletions(-)
+>  create mode 100644 Documentation/mmc/mmc-async-req.txt
+>
+> diff --git a/Documentation/mmc/00-INDEX b/Documentation/mmc/00-INDEX
+> index 93dd7a7..11bc2cf 100644
+> --- a/Documentation/mmc/00-INDEX
+> +++ b/Documentation/mmc/00-INDEX
+> @@ -4,3 +4,5 @@ mmc-dev-attrs.txt
+>          - info on SD and MMC device attributes
+>  mmc-dev-parts.txt
+>          - info on SD and MMC device partitions
+> +mmc-async-req.txt
+> +        - info on mmc asynchronous request
+> diff --git a/Documentation/mmc/mmc-async-req.txt b/Documentation/mmc/mmc-async-req.txt
+> new file mode 100644
+> index 0000000..d139a51
+> --- /dev/null
+> +++ b/Documentation/mmc/mmc-async-req.txt
+> @@ -0,0 +1,85 @@
+> +Rationale
+> +=========
+> +
+> +How significant is the cache maintenance over head?
+
+overhead
+
+> +It depends, fast eMMC and multiple cache levels with speculative cache pre-fetch
+
+This line is over 80 cols.  Please wrap at around 76 cols.
+
+> +makes the cache overhead relatively significant. If the DMA preparations
+> +for the next request is done in parallel to the current transfer
+
+are done
+
+> +the DMA preparation overhead would not affect the MMC performance.
+> +The intention of non-blocking (asynchronous) mmc requests is to minimize the
+> +time between a mmc request ends and another mmc request begins.
+
+between when an
+
+> +Using mmc_wait_for_req() the MMC controller is idle when dma_map_sg and
+
+s/when/while/
+
+> +dma_unmap_sg is processing. Using non-blocking mmc request makes it
+
+requests
+
+> +possible to prepare the caches for next job in parallel to an active
+> +mmc request.
+> +
+> +MMC block driver
+> +================
+> +
+> +The issue_rw_rq() in the mmc block driver is made non-blocking.
+> +The increase in throughput is proportional to the time it takes to
+> +prepare (major part of preparations is dma_map_sg and dma_unmap_sg)
+> +a request and how fast the memory is. The faster the MMC/SD is
+> +the more significant the prepare request time becomes. Roughly the expected
+> +performance gain is 5% for large writes and 10% on large reads on a L2 cache
+> +platform. In power save mode, when clocks run on a lower frequency, the DMA
+> +preparation may cost even more. As long as these slower preparations are run
+> +in parallel to the transfer performance wont be affected.
+> +
+> +Details on measurements from IOZone and mmc_test
+> +================================================
+> +
+> +https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async-req
+> +
+> +MMC core API extension
+> +======================
+> +
+> +There is one new public function mmc_start_req()
+> +Is starts a new MMC command request for a host. The function isn't
+
+s/Is/It/
+
+> +truely non-blocking. If there is on ongoing async request it waits
+
+truly
+
+> +for completion of that request and starts the new one and return. It
+
+start
+
+> +Doesn't wait for the new request to complete. If there is no ongoing
+
+s/Doesn't/doesn't/
+
+> +request it starts the new request and returns immediately.
+> +
+> +MMC host extensions
+> +===================
+> +
+> +There are two optional hooks pre_req() and post_req() that the host driver
+> +may implement in order to move work to before and after the actual mmc_request
+> +function is called. In the DMA case pre_req() may do dma_map_sg() and prepare
+> +the dma descriptor, and post_req runs the dma_unmap_sg.
+> +
+> +Optimize for the first request
+> +==============================
+> +
+> +The first request in a series of requests can't be prepared in parallel to the
+> +previous transfer, since there is no previous request.
+> +The argument is_first_req in pre_req() indicates that there is no previous
+> +request. The host driver may optimize for this scenario to minimize
+> +the performance loss. A way to optimize for this is to split the current
+> +request in two chunks, prepare the first chunk and start the request,
+> +and finally prepare the second chunk and start the transfer.
+> +
+> +Pseudocode to handle is_first_req scenario with minimal prepare over head:
+
+overhead
+
+> +if (is_first_req && req->size > threshold)
+> +   /* start MMC transfer for the complete transfer size */
+> +   mmc_start_command(MMC_CMD_TRANSFER_FULL_SIZE)
+> +
+> +   /*
+> +    * Begin to prepare DMA while cmd is being processed by MMC.
+> +    * The first chunk of the request should take the same time
+> +    * to prepare as the "MMC process command time".
+> +    * If prepare time exceeds MMC cmd time
+> +    * the transfer is delayed, guesstimate max 4k as first chunk size.
+> +    */
+> +    prepare_1st_chunk_for_dma(req)
+> +    /* flush pending desc to the DMAC (dmaengine.h) */
+> +    dma_issue_pending(req->dma_desc);
+> +
+> +    prepare_2st_chunk_for_dma(req)
+
+2nd, not 2st
+
+> +    /*
+> +     * The second issue_pending should be called before MMC runs out
+> +     * of the first chunk. If the MMC runs out of the first data chunk before
+> +     * this call, the transfer is delayed.
+> +     */
+> +    dma_issue_pending(req->dma_desc);
+
+Thanks,
+
+- Chris.
 -- 
-1.7.4.1
-
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
