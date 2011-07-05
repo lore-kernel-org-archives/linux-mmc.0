@@ -1,98 +1,79 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCHv4 0/3] OMAP: HSMMC: cleanup and runtime pm
-Date: Mon, 4 Jul 2011 23:35:31 +0530
-Message-ID: <CANfBPZ-A8WMqjkNspvtXK1FSE1BRG_PE6JKKqmLWQerzn=h2Xw@mail.gmail.com>
-References: <1309538376-23260-1-git-send-email-balajitk@ti.com>
-	<8762nlzy1d.fsf@ti.com>
-	<CANrkHUb-i4cQmGzrDjcooZPRvyQLSd0+kqLMA04hGzgVjCT+=A@mail.gmail.com>
+From: Roy Zang <tie-fei.zang@freescale.com>
+Subject: [PATCH 1/3] eSDHC: Access Freescale eSDHC registers by 32-bit
+Date: Tue, 5 Jul 2011 12:19:01 +0800
+Message-ID: <1309839543-6031-1-git-send-email-tie-fei.zang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <CANrkHUb-i4cQmGzrDjcooZPRvyQLSd0+kqLMA04hGzgVjCT+=A@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>, Chris Ball <cjb@laptop.org>
-Cc: Madhusudhan <madhu.cr@ti.com>, Kevin Hilman <khilman@ti.com>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, Benoit Cousson <b-cousson@ti.com>, "Kadiyala, Kishore" <kishore.kadiyala@ti.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from db3ehsobe005.messaging.microsoft.com ([213.199.154.143]:56940
+	"EHLO DB3EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752674Ab1GEDkr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Jul 2011 23:40:47 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linuxppc-dev@lists.ozlabs.org, cbouatmailru@gmail.com, akpm@linux-foundation.org, Xu lei <B33228@freescale.com>, Roy Zang <tie-fei.zang@freescale.com>, Kumar Gala <galak@kernel.crashing.org>
 
-> From: Kevin Hilman <khilman@ti.com>
-> Date: Fri, Jul 1, 2011 at 11:24 PM
-> Subject: Re: [PATCHv4 0/3] OMAP: HSMMC: cleanup and runtime pm
-> To: cjb@laptop.org
-> Cc: Balaji T K <balajitk@ti.com>, linux-omap@vger.kernel.org,
-> linux-mmc@vger.kernel.org, tony@atomide.com, madhu.cr@ti.com,
-> b-cousson@ti.com, paul@pwsan.com, kishore.kadiyala@ti.com
->
->
-> Chris,
->
-> Balaji T K <balajitk@ti.com> writes:
->
->> Removing the custom state machine - lazy disable framework in
->> omap_hsmmc to make way for runtime pm to handle host controller powe=
-r
->> states.
->>
->> This allows mmc_host_enable/mmc_host_disable to be replaced
->> by runtime get_sync and put_sync at host controller driver.
->>
->> Enable runtime PM in omap_hsmmc
->>
->> Rebased to MMC tree : mmc-next branch
->> Tested on OMAP4430SDP, OMAP3430SDP, OMAP2430SDP
->
-> Reviewed-by: Kevin Hilman <khilman@ti.com>
-> Tested-by: Kevin Hilman <khilman@ti.com>
->
-> Could you queue this series for the v3.1 merge window? =A0Or, with yo=
-ur
-> ack, we are happy to take this through the OMAP tree along with the
-> other dependecies mentioned below.
->
-> I've also tested this on OMAP4430/Blaze, OMAP3630/Zoom3 and
-> OMAP3430/n900.
->
-> We have OMAP PM core code changes queued for v3.1 which require the M=
-MC
-> driver to correctly use runtime PM or we can get hangs if MMC is used
-> during boot.
->
-> Kevin
+From: Xu lei <B33228@freescale.com>
 
-Kevin,
-  Another series from Per Forlin [1] is also modifying the same file,
-and might result in merge conflict if this series is queued under OMAP
-and the other is queued by Chris.
+For Freescale eSDHC registers only support 32-bit accesses,
+this patch ensure that all Freescale eSDHC register accesses
+are 32-bit.
 
-Chris,
-  If you intend to queue [1] into mmc-next, Balaji / myself can repost
-this series on
-top of it or you'd like to practice some git merge ? Let me know if
-there is anything that I can do to help.
+Signed-off-by: Xu lei <B33228@freescale.com>
+Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
+Signed-off-by: Kumar Gala <galak@kernel.crashing.org>
+---
+ drivers/mmc/host/sdhci-of-esdhc.c |   18 ++++++++++++++----
+ 1 files changed, 14 insertions(+), 4 deletions(-)
 
-[1] https://lkml.org/lkml/2011/7/1/303
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index ba40d6d..c9a8519 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -1,7 +1,7 @@
+ /*
+  * Freescale eSDHC controller driver.
+  *
+- * Copyright (c) 2007 Freescale Semiconductor, Inc.
++ * Copyright (c) 2007, 2010 Freescale Semiconductor, Inc.
+  * Copyright (c) 2009 MontaVista Software, Inc.
+  *
+  * Authors: Xiaobo Xie <X.Xie@freescale.com>
+@@ -23,11 +23,21 @@
+ static u16 esdhc_readw(struct sdhci_host *host, int reg)
+ {
+ 	u16 ret;
++	int base = reg & ~0x3;
++	int shift = (reg & 0x2) * 8;
+ 
+ 	if (unlikely(reg == SDHCI_HOST_VERSION))
+-		ret = in_be16(host->ioaddr + reg);
++		ret = in_be32(host->ioaddr + base) & 0xffff;
+ 	else
+-		ret = sdhci_be32bs_readw(host, reg);
++		ret = (in_be32(host->ioaddr + base) >> shift) & 0xffff;
++	return ret;
++}
++
++static u8 esdhc_readb(struct sdhci_host *host, int reg)
++{
++	int base = reg & ~0x3;
++	int shift = (reg & 0x3) * 8;
++	u8 ret = (in_be32(host->ioaddr + base) >> shift) & 0xff;
+ 	return ret;
+ }
+ 
+@@ -79,7 +89,7 @@ struct sdhci_of_data sdhci_esdhc = {
+ 	.ops = {
+ 		.read_l = sdhci_be32bs_readl,
+ 		.read_w = esdhc_readw,
+-		.read_b = sdhci_be32bs_readb,
++		.read_b = esdhc_readb,
+ 		.write_l = sdhci_be32bs_writel,
+ 		.write_w = esdhc_writew,
+ 		.write_b = esdhc_writeb,
+-- 
+1.6.0.6
 
->
->> MMC runtime patch has dependency on
->> [PATCH 0/6] OMAP2+: hwmod framework fixes [1]
->> for MMC1/MMC2 clock to get ungated after idle in OMAP4.
->>
->> Without [1] patches, MMC1/MMC2 fails to get detected on OMAP4.
->>
->> [1] http://www.mail-archive.com/linux-omap@vger.kernel.org/msg51457.=
-html
->>
->> Balaji T K (3):
->> =A0 MMC: OMAP: HSMMC: Remove lazy_disable
->> =A0 MMC: OMAP: HSMMC: add runtime pm support
->> =A0 MMC: OMAP: HSMMC: Remove unused iclk
->>
->> =A0drivers/mmc/host/omap_hsmmc.c | =A0365 +++++++-------------------=
----------------
->> =A01 files changed, 57 insertions(+), 308 deletions(-)
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
