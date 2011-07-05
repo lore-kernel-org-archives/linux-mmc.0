@@ -1,179 +1,72 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: documentation of mmc non-blocking request usage and design.
-Date: Tue, 05 Jul 2011 11:24:18 -0400
-Message-ID: <m2liwc21jx.fsf@bob.laptop.org>
-References: <1309878894-2700-1-git-send-email-per.forlin@linaro.org>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci-esdhc-imx: add device tree probe support
+Date: Tue, 5 Jul 2011 23:35:10 +0800
+Message-ID: <20110705153509.GA14954@S2100-06.ap.freescale.net>
+References: <1309681851-23052-1-git-send-email-shawn.guo@linaro.org>
+ <1309681851-23052-4-git-send-email-shawn.guo@linaro.org>
+ <20110704062548.GI15152@ponder.secretlab.ca>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:48621 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752181Ab1GEPYp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 5 Jul 2011 11:24:45 -0400
-In-Reply-To: <1309878894-2700-1-git-send-email-per.forlin@linaro.org> (Per
-	Forlin's message of "Tue, 5 Jul 2011 17:14:54 +0200")
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:19230 "EHLO
+	TX2EHSOBE009.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1754322Ab1GEP2s (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jul 2011 11:28:48 -0400
+Content-Disposition: inline
+In-Reply-To: <20110704062548.GI15152@ponder.secretlab.ca>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Sourav Poddar <sourav.poddar@ti.com>, Randy Dunlap <rdunlap@xenotime.net>
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, patches@linaro.org, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>
 
-Hi Per, minor proofreading,
+On Mon, Jul 04, 2011 at 12:25:48AM -0600, Grant Likely wrote:
+> On Sun, Jul 03, 2011 at 04:30:51PM +0800, Shawn Guo wrote:
+> > The patch adds device tree probe support for sdhci-esdhc-imx driver.
+> > 
+> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> > Cc: Wolfram Sang <w.sang@pengutronix.de>
+> > Cc: Chris Ball <cjb@laptop.org>
+> > Cc: Grant Likely <grant.likely@secretlab.ca>
+> > ---
+> >  .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   40 ++++++++
+> >  drivers/mmc/host/sdhci-esdhc-imx.c                 |   99 +++++++++++++++++++-
+> >  2 files changed, 134 insertions(+), 5 deletions(-)
+> >  create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> > new file mode 100644
+> > index 0000000..e182e7c
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> > @@ -0,0 +1,40 @@
+> > +* Freescale Enhanced Secure Digital Host Controller (eSDHC) for i.MX
+> > +
+> > +The Enhanced Secure Digital Host Controller on Freescale i.MX family
+> > +provides an interface for MMC, SD, and SDIO types of memory cards.
+> > +
+> > +Required properties:
+> > +- compatible : Should be "fsl,<chip>-esdhc"
+> > +- reg : Should contain eSDHC registers location and length
+> > +- interrupts : Should contain eSDHC interrupt
+> > +- cd-type : String, card detection (CD) method.  Supported values are:
+> 
+> Similar to previous comments, use the "fsl," prefix to this property name.
+> 
+I did not know even property name could be written like this.  I tried
+it and found it works :)
 
-On Tue, Jul 05 2011, Per Forlin wrote:
-> Documentation about the background and the design of mmc non-blocking.
-> Host driver guide lines to minimize request preparation over head.
+> > +    "none" : No CD
+> > +    "controller" : Uses eSDHC controller internal CD signal
+> > +    "gpio" : Uses GPIO pin for CD
+> 
+> I would say the presence of a "cd-gpios" property would implicitly
+> mean gpio is to be used for the CD pin.
+> 
+Yes, you are right.  But I would say this is a direct translation of
+the existing platform_data.  After all, we are sharing most of code
+path between platform and dt.
 
-guidelines, overhead
-
->
-> Signed-off-by: Per Forlin <per.forlin@linaro.org>
-> ---
->  Documentation/mmc/00-INDEX          |    2 +
->  Documentation/mmc/mmc-async-req.txt |   85 +++++++++++++++++++++++++++++++++++
->  2 files changed, 87 insertions(+), 0 deletions(-)
->  create mode 100644 Documentation/mmc/mmc-async-req.txt
->
-> diff --git a/Documentation/mmc/00-INDEX b/Documentation/mmc/00-INDEX
-> index 93dd7a7..11bc2cf 100644
-> --- a/Documentation/mmc/00-INDEX
-> +++ b/Documentation/mmc/00-INDEX
-> @@ -4,3 +4,5 @@ mmc-dev-attrs.txt
->          - info on SD and MMC device attributes
->  mmc-dev-parts.txt
->          - info on SD and MMC device partitions
-> +mmc-async-req.txt
-> +        - info on mmc asynchronous request
-> diff --git a/Documentation/mmc/mmc-async-req.txt b/Documentation/mmc/mmc-async-req.txt
-> new file mode 100644
-> index 0000000..d139a51
-> --- /dev/null
-> +++ b/Documentation/mmc/mmc-async-req.txt
-> @@ -0,0 +1,85 @@
-> +Rationale
-> +=========
-> +
-> +How significant is the cache maintenance over head?
-
-overhead
-
-> +It depends, fast eMMC and multiple cache levels with speculative cache pre-fetch
-
-This line is over 80 cols.  Please wrap at around 76 cols.
-
-> +makes the cache overhead relatively significant. If the DMA preparations
-> +for the next request is done in parallel to the current transfer
-
-are done
-
-> +the DMA preparation overhead would not affect the MMC performance.
-> +The intention of non-blocking (asynchronous) mmc requests is to minimize the
-> +time between a mmc request ends and another mmc request begins.
-
-between when an
-
-> +Using mmc_wait_for_req() the MMC controller is idle when dma_map_sg and
-
-s/when/while/
-
-> +dma_unmap_sg is processing. Using non-blocking mmc request makes it
-
-requests
-
-> +possible to prepare the caches for next job in parallel to an active
-> +mmc request.
-> +
-> +MMC block driver
-> +================
-> +
-> +The issue_rw_rq() in the mmc block driver is made non-blocking.
-> +The increase in throughput is proportional to the time it takes to
-> +prepare (major part of preparations is dma_map_sg and dma_unmap_sg)
-> +a request and how fast the memory is. The faster the MMC/SD is
-> +the more significant the prepare request time becomes. Roughly the expected
-> +performance gain is 5% for large writes and 10% on large reads on a L2 cache
-> +platform. In power save mode, when clocks run on a lower frequency, the DMA
-> +preparation may cost even more. As long as these slower preparations are run
-> +in parallel to the transfer performance wont be affected.
-> +
-> +Details on measurements from IOZone and mmc_test
-> +================================================
-> +
-> +https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async-req
-> +
-> +MMC core API extension
-> +======================
-> +
-> +There is one new public function mmc_start_req()
-> +Is starts a new MMC command request for a host. The function isn't
-
-s/Is/It/
-
-> +truely non-blocking. If there is on ongoing async request it waits
-
-truly
-
-> +for completion of that request and starts the new one and return. It
-
-start
-
-> +Doesn't wait for the new request to complete. If there is no ongoing
-
-s/Doesn't/doesn't/
-
-> +request it starts the new request and returns immediately.
-> +
-> +MMC host extensions
-> +===================
-> +
-> +There are two optional hooks pre_req() and post_req() that the host driver
-> +may implement in order to move work to before and after the actual mmc_request
-> +function is called. In the DMA case pre_req() may do dma_map_sg() and prepare
-> +the dma descriptor, and post_req runs the dma_unmap_sg.
-> +
-> +Optimize for the first request
-> +==============================
-> +
-> +The first request in a series of requests can't be prepared in parallel to the
-> +previous transfer, since there is no previous request.
-> +The argument is_first_req in pre_req() indicates that there is no previous
-> +request. The host driver may optimize for this scenario to minimize
-> +the performance loss. A way to optimize for this is to split the current
-> +request in two chunks, prepare the first chunk and start the request,
-> +and finally prepare the second chunk and start the transfer.
-> +
-> +Pseudocode to handle is_first_req scenario with minimal prepare over head:
-
-overhead
-
-> +if (is_first_req && req->size > threshold)
-> +   /* start MMC transfer for the complete transfer size */
-> +   mmc_start_command(MMC_CMD_TRANSFER_FULL_SIZE)
-> +
-> +   /*
-> +    * Begin to prepare DMA while cmd is being processed by MMC.
-> +    * The first chunk of the request should take the same time
-> +    * to prepare as the "MMC process command time".
-> +    * If prepare time exceeds MMC cmd time
-> +    * the transfer is delayed, guesstimate max 4k as first chunk size.
-> +    */
-> +    prepare_1st_chunk_for_dma(req)
-> +    /* flush pending desc to the DMAC (dmaengine.h) */
-> +    dma_issue_pending(req->dma_desc);
-> +
-> +    prepare_2st_chunk_for_dma(req)
-
-2nd, not 2st
-
-> +    /*
-> +     * The second issue_pending should be called before MMC runs out
-> +     * of the first chunk. If the MMC runs out of the first data chunk before
-> +     * this call, the transfer is delayed.
-> +     */
-> +    dma_issue_pending(req->dma_desc);
-
-Thanks,
-
-- Chris.
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Regards,
+Shawn
+
