@@ -1,276 +1,146 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH 2/3] eSDHC: Fix errors when booting kernel with fsl esdhc
-Date: Tue, 5 Jul 2011 11:47:08 +0530
-Message-ID: <CANfBPZ_xXQ0ZiLOmaJ=yC=Nm9Poumb45pyTpJ7fBQ3+Zbg+ZAA@mail.gmail.com>
-References: <1309839543-6031-1-git-send-email-tie-fei.zang@freescale.com>
-	<1309839543-6031-2-git-send-email-tie-fei.zang@freescale.com>
+From: Eric Miao <eric.y.miao@gmail.com>
+Subject: Re: [PATCH v2] arm: mach-mmp: brownstone.c support multiple sd slots
+Date: Tue, 5 Jul 2011 14:52:22 +0800
+Message-ID: <CAMPhdO-TTRP-k7J-zrG2_rQJsmNDRhTgpqiiX2yqW+Egf8+t2A@mail.gmail.com>
+References: <59C2B513-EC04-4CA2-818B-9901CAF3E554@marvell.com>
+ <20110427093328.GU17290@n2100.arm.linux.org.uk> <161C3F6C-0986-4364-B458-DBA4D08456FD@marvell.com>
+ <1F336A22-BAC3-41E3-8D4E-5DF27874D1EA@marvell.com> <20110428095127.GX17290@n2100.arm.linux.org.uk>
+ <3BFCE791-3BAD-42ED-BC87-A27F40D6C77C@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:59970 "EHLO
-	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753633Ab1GEGRJ convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 5 Jul 2011 02:17:09 -0400
-Received: by mail-iw0-f180.google.com with SMTP id 9so10796275iwn.11
-        for <linux-mmc@vger.kernel.org>; Mon, 04 Jul 2011 23:17:08 -0700 (PDT)
-In-Reply-To: <1309839543-6031-2-git-send-email-tie-fei.zang@freescale.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:47686 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753775Ab1GEGwo convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jul 2011 02:52:44 -0400
+Received: by vws1 with SMTP id 1so3989880vws.19
+        for <linux-mmc@vger.kernel.org>; Mon, 04 Jul 2011 23:52:43 -0700 (PDT)
+In-Reply-To: <3BFCE791-3BAD-42ED-BC87-A27F40D6C77C@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Roy Zang <tie-fei.zang@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, cbouatmailru <cbouatmailru@gmail.com>, akpm <akpm@linux-foundation.org>, Xu lei <B33228@freescale.com>, Kumar Gala <galak@kernel.crashing.org>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Zhangfei Gao <zgao6@marvell.com>
 
-On Tue, Jul 5, 2011 at 9:49 AM, Roy Zang <tie-fei.zang@freescale.com> w=
-rote:
-> From: Xu lei <B33228@freescale.com>
+On Fri, Apr 29, 2011 at 4:45 AM, Philip Rakity <prakity@marvell.com> wr=
+ote:
 >
-> When esdhc module was enabled in p5020, there were following errors:
+> Support multiple sd/eMMC interfaces. enable mmc1, 2, and 3.
+> mmc2 is used eMMC and slot is marked PERMANENT and 8 bit device.
+> mmc1 is used for Wifi and slot is marked PERMANENT
 >
-> mmc0: Timeout waiting for hardware interrupt.
-> mmc0: error -110 whilst initialising SD card
-> mmc0: Unexpected interrupt 0x02000000.
-> mmc0: Timeout waiting for hardware interrupt.
-> mmc0: error -110 whilst initialising SD card
-> mmc0: Unexpected interrupt 0x02000000.
+> Note: eMMC (mmc2) is set to initialize first to workaround a problem
+> where booting in logical order requires mmc create work queue
+> to be multi-threaded otherwise boot process hangs. =C2=A0BUG report
+> send to linux-mmc and linux-kernel mailing list.
 >
-> It is because ESDHC controller has different bit setting for PROCTL
-> register, when kernel sets Power Control Register by method for stand=
-ard
-> SD Host Specification, it would overwritten FSL ESDHC PROCTL[DMAS];
-> when it set Host Control Registers[DMAS], it sets PROCTL[EMODE] and
-> PROCTL[D3CD]. These operations will set bad bits for PROCTL Register
-> on FSL ESDHC Controller and cause errors, so this patch will make esd=
-hc
-> driver access FSL PROCTL Register according to block guide instead of
-> standard SD Host Specification.
+> Wifi (mmc1) requires we enable power on the device by toggling
+> the gpio lines for power and reset.
 >
-> For some FSL chips, such as MPC8536/P2020, PROCTL[VOLT_SEL] and PROCT=
-L[DMAS]
-> bits are reserved and even if they are set to wrong bits there is no =
-error.
-> But considering that all FSL ESDHC Controller register map is not ful=
-ly
-> compliant to standard SD Host Specification, we put the patch to all =
-of
-> FSL ESDHC Controllers.
->
-> Signed-off-by: Lei Xu <B33228@freescale.com>
-> Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
-> Signed-off-by: Kumar Gala <galak@kernel.crashing.org>
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+
+Applied. Though the email client was fiddling the spaces/CR-LF a bit.
+
 > ---
-> =A0drivers/mmc/host/sdhci-of-core.c | =A0 =A03 ++
-> =A0drivers/mmc/host/sdhci.c =A0 =A0 =A0 =A0 | =A0 62 ++++++++++++++++=
-++++++++++++++-------
-> =A0include/linux/mmc/sdhci.h =A0 =A0 =A0 =A0| =A0 =A06 ++-
-> =A03 files changed, 57 insertions(+), 14 deletions(-)
+> =C2=A0arch/arm/mach-mmp/brownstone.c | =C2=A0 52 ++++++++++++++++++++=
++++++++++++++++++++-
+> =C2=A01 files changed, 51 insertions(+), 1 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-of-core.c b/drivers/mmc/host/sdhc=
-i-of-core.c
-> index 60e4186..fede43d 100644
-> --- a/drivers/mmc/host/sdhci-of-core.c
-> +++ b/drivers/mmc/host/sdhci-of-core.c
-> @@ -179,6 +179,9 @@ static int __devinit sdhci_of_probe(struct platfo=
-rm_device *ofdev)
-> =A0 =A0 =A0 =A0if (sdhci_of_wp_inverted(np))
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->quirks |=3D SDHCI_QUIRK_INVERTED=
-_WRITE_PROTECT;
+> diff --git a/arch/arm/mach-mmp/brownstone.c b/arch/arm/mach-mmp/brown=
+stone.c
+> index 7bb78fd..577e8de 100644
+> --- a/arch/arm/mach-mmp/brownstone.c
+> +++ b/arch/arm/mach-mmp/brownstone.c
+> @@ -19,6 +19,7 @@
+> =C2=A0#include <linux/regulator/max8649.h>
+> =C2=A0#include <linux/regulator/fixed.h>
+> =C2=A0#include <linux/mfd/max8925.h>
+> +#include <linux/delay.h>
 >
-> + =A0 =A0 =A0 if (of_device_is_compatible(np, "fsl,esdhc"))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->quirks |=3D SDHCI_QUIRK_QORIQ_PRO=
-CTL_WEIRD;
+> =C2=A0#include <asm/mach-types.h>
+> =C2=A0#include <asm/mach/arch.h>
+> @@ -177,9 +178,56 @@ static struct i2c_board_info brownstone_twsi1_in=
+fo[] =3D {
+> =C2=A0};
+>
+> =C2=A0static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc0 =3D {
+> - =C2=A0 =C2=A0 =C2=A0 .max_speed =C2=A0 =C2=A0 =C2=A0=3D 25000000,
+> + =C2=A0 =C2=A0 =C2=A0 .adjust_clocks =C2=A0=3D 1,
+> + =C2=A0 =C2=A0 =C2=A0 .clk_select =C2=A0 =C2=A0 =3D 1,
+> + =C2=A0 =C2=A0 =C2=A0 .clk_delay =C2=A0 =C2=A0 =C2=A0=3D 31,
+> =C2=A0};
+>
+> +static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc1 =3D {
+> + =C2=A0 =C2=A0 =C2=A0 .adjust_clocks =C2=A0=3D 1,
+> + =C2=A0 =C2=A0 =C2=A0 .clk_select =C2=A0 =C2=A0 =3D 1,
+> + =C2=A0 =C2=A0 =C2=A0 .clk_delay =C2=A0 =C2=A0 =C2=A0=3D 15,
+> + =C2=A0 =C2=A0 =C2=A0 .flags =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D P=
+XA_FLAG_CARD_PERMANENT,
+> +};
 > +
-> =A0 =A0 =A0 =A0clk =3D of_get_property(np, "clock-frequency", &size);
-> =A0 =A0 =A0 =A0if (clk && size =3D=3D sizeof(*clk) && *clk)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0of_host->clock =3D be32_to_cpup(clk);
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 58d5436..77174e5 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -674,7 +674,7 @@ static void sdhci_set_transfer_irqs(struct sdhci_=
-host *host)
-> =A0static void sdhci_prepare_data(struct sdhci_host *host, struct mmc=
-_command *cmd)
-> =A0{
-> =A0 =A0 =A0 =A0u8 count;
-> - =A0 =A0 =A0 u8 ctrl;
-> + =A0 =A0 =A0 u32 ctrl;
-> =A0 =A0 =A0 =A0struct mmc_data *data =3D cmd->data;
-> =A0 =A0 =A0 =A0int ret;
->
-> @@ -807,14 +807,28 @@ static void sdhci_prepare_data(struct sdhci_hos=
-t *host, struct mmc_command *cmd)
-> =A0 =A0 =A0 =A0 * is ADMA.
-> =A0 =A0 =A0 =A0 */
-> =A0 =A0 =A0 =A0if (host->version >=3D SDHCI_SPEC_200) {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl =3D sdhci_readb(host, SDHCI_HOST_C=
-ONTROL);
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl &=3D ~SDHCI_CTRL_DMA_MASK;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((host->flags & SDHCI_REQ_USE_DMA) &=
-&
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (host->flags & SDHCI_US=
-E_ADMA))
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D SDHCI_CTRL_AD=
-MA32;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D SDHCI_CTRL_SD=
-MA;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writeb(host, ctrl, SDHCI_HOST_CON=
-TROL);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->quirks & SDHCI_QUIRK_QORIQ_PR=
-OCTL_WEIRD) {
-> +#define ESDHCI_PROCTL_DMAS_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00x000=
-00300
-> +#define ESDHCI_PROCTL_ADMA32 =A0 =A0 =A0 =A0 =A0 0x00000200
-> +#define ESDHCI_PROCTL_SDMA =A0 =A0 =A0 =A0 =A0 =A0 0x00000000
-
-Breaks the code flow / readability. Can be moved to top of the file ?
-
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl =3D sdhci_readl(ho=
-st, SDHCI_HOST_CONTROL);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl &=3D ~ESDHCI_PROCT=
-L_DMAS_MASK;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((host->flags & SDHC=
-I_REQ_USE_DMA) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (host->=
-flags & SDHCI_USE_ADMA))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D=
- ESDHCI_PROCTL_ADMA32;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D=
- ESDHCI_PROCTL_SDMA;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writel(host, ctrl=
-, SDHCI_HOST_CONTROL);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl =3D sdhci_readb(ho=
-st, SDHCI_HOST_CONTROL);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl &=3D ~SDHCI_CTRL_D=
-MA_MASK;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((host->flags & SDHC=
-I_REQ_USE_DMA) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (host->=
-flags & SDHCI_USE_ADMA))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D=
- SDHCI_CTRL_ADMA32;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctrl |=3D=
- SDHCI_CTRL_SDMA;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writeb(host, ctrl=
-, SDHCI_HOST_CONTROL);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> =A0 =A0 =A0 =A0}
->
-> =A0 =A0 =A0 =A0if (!(host->flags & SDHCI_REQ_USE_DMA)) {
-> @@ -1138,19 +1152,32 @@ out:
-> =A0static void sdhci_set_power(struct sdhci_host *host, unsigned shor=
-t power)
-> =A0{
-> =A0 =A0 =A0 =A0u8 pwr =3D 0;
-> + =A0 =A0 =A0 u8 volt =3D 0;
->
-> =A0 =A0 =A0 =A0if (power !=3D (unsigned short)-1) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0switch (1 << power) {
-> +#define =A0 =A0 =A0 =A0ESDHCI_FSL_POWER_MASK =A0 0x40
-> +#define =A0 =A0 =A0 =A0ESDHCI_FSL_POWER_180 =A0 =A00x00
-> +#define =A0 =A0 =A0 =A0ESDHCI_FSL_POWER_300 =A0 =A00x40
-
-<As above>
-
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0case MMC_VDD_165_195:
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwr =3D SDHCI_POWER_180=
-;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->quirks & SDHC=
-I_QUIRK_QORIQ_PROCTL_WEIRD)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwr =3D=
- ESDHCI_FSL_POWER_180;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwr =3D=
- SDHCI_POWER_180;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0case MMC_VDD_29_30:
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0case MMC_VDD_30_31:
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwr =3D SDHCI_POWER_300=
-;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->quirks & SDHC=
-I_QUIRK_QORIQ_PROCTL_WEIRD)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwr =3D=
- ESDHCI_FSL_POWER_300;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwr =3D=
- SDHCI_POWER_300;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0case MMC_VDD_32_33:
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0case MMC_VDD_33_34:
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwr =3D SDHCI_POWER_330=
-;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->quirks & SDHC=
-I_QUIRK_QORIQ_PROCTL_WEIRD)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwr =3D=
- ESDHCI_FSL_POWER_300;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwr =3D=
- SDHCI_POWER_330;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0default:
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0BUG();
-> @@ -1162,6 +1189,17 @@ static void sdhci_set_power(struct sdhci_host =
-*host, unsigned short power)
->
-> =A0 =A0 =A0 =A0host->pwr =3D pwr;
->
-> + =A0 =A0 =A0 /* Now FSL ESDHC Controller has no Bus Power bit,
-> + =A0 =A0 =A0 =A0* and PROCTL[21] bit is for voltage selection */
-
-Multiline comment style needed..
-
-> + =A0 =A0 =A0 if (host->quirks & SDHCI_QUIRK_QORIQ_PROCTL_WEIRD) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 volt =3D sdhci_readb(host, SDHCI_POWER_=
-CONTROL);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 volt &=3D ~ESDHCI_FSL_POWER_MASK;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 volt |=3D pwr;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sdhci_writeb(host, volt, SDHCI_POWER_CO=
-NTROL);
+> +static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc2 =3D {
+> + =C2=A0 =C2=A0 =C2=A0 .adjust_clocks =C2=A0=3D 1,
+> + =C2=A0 =C2=A0 =C2=A0 .clk_select =C2=A0 =C2=A0 =3D 1,
+> + =C2=A0 =C2=A0 =C2=A0 .clk_delay =C2=A0 =C2=A0 =C2=A0=3D 31,
+> + =C2=A0 =C2=A0 =C2=A0 .flags =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D P=
+XA_FLAG_CARD_PERMANENT |
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 PXA_FLAG_SD_8_BIT_CAPABLE_SLOT,
+> +};
 > +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> + =A0 =A0 =A0 }
+> +static void __init mmc_sdio_wifi(void)
+> +{
+> + =C2=A0 =C2=A0 =C2=A0 int poweron;
+> + =C2=A0 =C2=A0 =C2=A0 int reset;
 > +
-> =A0 =A0 =A0 =A0if (pwr =3D=3D 0) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sdhci_writeb(host, 0, SDHCI_POWER_CONT=
-ROL);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return;
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index 6a68c4e..d87abc7 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -21,7 +21,7 @@ struct sdhci_host {
-> =A0 =A0 =A0 =A0/* Data set by hardware interface driver */
-> =A0 =A0 =A0 =A0const char *hw_name; =A0 =A0/* Hardware bus name */
+> + =C2=A0 =C2=A0 =C2=A0 poweron =3D mfp_to_gpio(GPIO57_GPIO);
+> + =C2=A0 =C2=A0 =C2=A0 reset =3D mfp_to_gpio(GPIO58_GPIO);
+> +
+> + =C2=A0 =C2=A0 =C2=A0 if (gpio_request(reset, "sd8xxx reset")) {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 printk(KERN_INFO "=
+gpio %d request failed\n", reset);
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return;
+> + =C2=A0 =C2=A0 =C2=A0 }
+> +
+> + =C2=A0 =C2=A0 =C2=A0 if (gpio_request(poweron, "sd8xxx PDn")) {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 gpio_free(reset);
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 printk(KERN_INFO "=
+gpio %d request failed\n", poweron);
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return;
+> + =C2=A0 =C2=A0 =C2=A0 }
+> +
+> + =C2=A0 =C2=A0 =C2=A0 gpio_direction_output(poweron, 1);
+> + =C2=A0 =C2=A0 =C2=A0 msleep(1);
+> + =C2=A0 =C2=A0 =C2=A0 gpio_direction_output(reset, 0);
+> + =C2=A0 =C2=A0 =C2=A0 msleep(1);
+> + =C2=A0 =C2=A0 =C2=A0 gpio_direction_output(reset, 1);
+> + =C2=A0 =C2=A0 =C2=A0 gpio_free(reset);
+> + =C2=A0 =C2=A0 =C2=A0 gpio_free(poweron);
+> +
+> + =C2=A0 =C2=A0 =C2=A0 mmp2_add_sdhost(1, &mmp2_sdh_platdata_mmc1); /=
+* Wifi */
+> +}
+> +
+> =C2=A0static void __init brownstone_init(void)
+> =C2=A0{
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0mfp_config(ARRAY_AND_SIZE(brownstone_pin_c=
+onfig));
+> @@ -188,7 +236,9 @@ static void __init brownstone_init(void)
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0mmp2_add_uart(1);
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0mmp2_add_uart(3);
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0mmp2_add_twsi(1, NULL, ARRAY_AND_SIZE(brow=
+nstone_twsi1_info));
+> + =C2=A0 =C2=A0 =C2=A0 mmp2_add_sdhost(2, &mmp2_sdh_platdata_mmc2); /=
+* eMMC */
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0=
+); /* SD/MMC */
+> + =C2=A0 =C2=A0 =C2=A0 mmc_sdio_wifi();
 >
-> - =A0 =A0 =A0 unsigned int quirks; =A0 =A0/* Deviations from spec. */
-> + =A0 =A0 =A0 u64 quirks; =A0 =A0 /* Deviations from spec. */
->
-> =A0/* Controller doesn't honor resets unless we touch the clock regis=
-ter */
-> =A0#define SDHCI_QUIRK_CLOCK_BEFORE_RESET =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 (1<<0)
-> @@ -86,7 +86,9 @@ struct sdhci_host {
-> =A0/* Controller treats ADMA descriptors with length 0000h incorrectl=
-y */
-> =A0#define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC =A0 =A0 =A0 =A0 =A0 (=
-1<<30)
-> =A0/* The read-only detection via SDHCI_PRESENT_STATE register is uns=
-table */
-> -#define SDHCI_QUIRK_UNSTABLE_RO_DETECT =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- (1<<31)
-> +#define SDHCI_QUIRK_UNSTABLE_RO_DETECT =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- (1U<<31)
-> +/* Controller has weird bit setting for Protocol Control Register */
-> +#define SDHCI_QUIRK_QORIQ_PROCTL_WEIRD =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- (0x100000000U)
->
-> =A0 =A0 =A0 =A0int irq; =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Device IRQ =
-*/
-> =A0 =A0 =A0 =A0void __iomem *ioaddr; =A0 /* Mapped address */
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0/* enable 5v regulator */
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0platform_device_register(&brownstone_v_5vp=
+_device);
 > --
-> 1.6.0.6
+> 1.7.0.4
+>
+>
 >
