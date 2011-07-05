@@ -1,130 +1,44 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: [PATCH v4] mmc: documentation of mmc non-blocking request usage and design.
-Date: Tue,  5 Jul 2011 23:35:32 +0200
-Message-ID: <1309901732-3735-1-git-send-email-per.forlin@linaro.org>
-Return-path: <linux-doc-owner@vger.kernel.org>
-Sender: linux-doc-owner@vger.kernel.org
-To: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.ke
-Cc: Randy Dunlap <rdunlap@xenotime.net>, Per Forlin <per.forlin@linaro.org>
+From: Randy Dunlap <rdunlap@xenotime.net>
+Subject: Re: [PATCH v4] mmc: documentation of mmc non-blocking request usage
+ and design.
+Date: Tue, 5 Jul 2011 16:27:05 -0700
+Message-ID: <20110705162705.c3081299.rdunlap@xenotime.net>
+References: <1309901732-3735-1-git-send-email-per.forlin@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from oproxy7-pub.bluehost.com ([67.222.55.9]:50570 "HELO
+	oproxy7-pub.bluehost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1754180Ab1GEX1J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jul 2011 19:27:09 -0400
+In-Reply-To: <1309901732-3735-1-git-send-email-per.forlin@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Sourav Poddar <sourav.poddar@ti.com>, Chris Ball <cjb@laptop.org>
 
-Documentation about the background and the design of mmc non-blocking.
-Host driver guidelines to minimize request preparation overhead.
+On Tue,  5 Jul 2011 23:35:32 +0200 Per Forlin wrote:
 
-Signed-off-by: Per Forlin <per.forlin@linaro.org>
+> +MMC block driver
+> +================
+> +
+> +The issue_rw_rq() in the MMC block driver is made non-blocking.
+> +The increase in throughput is proportional to the time it takes to
+> +prepare (major part of preparations are dma_map_sg and dma_unmap_sg)
+> +a request and how fast the memory is. The faster the MMC/SD is
+> +the more significant the prepare request time becomes. Roughly the expected
+> +performance gain is 5% for large writes and 10% on large reads on a L2 cache
+> +platform. In power save mode, when clocks run on a lower frequency, the DMA
+> +preparation may cost even more. As long as these slower preparations are run
+> +in parallel with the transfer performance wont be affected.
+
+                                             won't
+
+Acked-by: Randy Dunlap <rdunlap@xenotime.net>
+
+
+thanks.
 ---
-ChangeLog:
- v2: - Minor updates after proofreading comments from Chris
- v3: - Minor updates after more comments from Chris
- v4: - Minor updates after comments from Randy
-
- Documentation/mmc/00-INDEX          |    2 +
- Documentation/mmc/mmc-async-req.txt |   86 +++++++++++++++++++++++++++++++++++
- 2 files changed, 88 insertions(+), 0 deletions(-)
- create mode 100644 Documentation/mmc/mmc-async-req.txt
-
-diff --git a/Documentation/mmc/00-INDEX b/Documentation/mmc/00-INDEX
-index 93dd7a7..a9ba672 100644
---- a/Documentation/mmc/00-INDEX
-+++ b/Documentation/mmc/00-INDEX
-@@ -4,3 +4,5 @@ mmc-dev-attrs.txt
-         - info on SD and MMC device attributes
- mmc-dev-parts.txt
-         - info on SD and MMC device partitions
-+mmc-async-req.txt
-+        - info on mmc asynchronous requests
-diff --git a/Documentation/mmc/mmc-async-req.txt b/Documentation/mmc/mmc-async-req.txt
-new file mode 100644
-index 0000000..4877f29
---- /dev/null
-+++ b/Documentation/mmc/mmc-async-req.txt
-@@ -0,0 +1,86 @@
-+Rationale
-+=========
-+
-+How significant is the cache maintenance overhead?
-+It depends. Fast eMMC and multiple cache levels with speculative cache
-+pre-fetch makes the cache overhead relatively significant. If the DMA
-+preparations for the next request are done in parallel with the current
-+transfer, the DMA preparation overhead would not affect the MMC performance.
-+The intention of non-blocking (asynchronous) MMC requests is to minimize the
-+time between when an MMC request ends and another MMC request begins.
-+Using mmc_wait_for_req(), the MMC controller is idle while dma_map_sg and
-+dma_unmap_sg are processing. Using non-blocking MMC requests makes it
-+possible to prepare the caches for next job in parallel with an active
-+MMC request.
-+
-+MMC block driver
-+================
-+
-+The issue_rw_rq() in the MMC block driver is made non-blocking.
-+The increase in throughput is proportional to the time it takes to
-+prepare (major part of preparations are dma_map_sg and dma_unmap_sg)
-+a request and how fast the memory is. The faster the MMC/SD is
-+the more significant the prepare request time becomes. Roughly the expected
-+performance gain is 5% for large writes and 10% on large reads on a L2 cache
-+platform. In power save mode, when clocks run on a lower frequency, the DMA
-+preparation may cost even more. As long as these slower preparations are run
-+in parallel with the transfer performance wont be affected.
-+
-+Details on measurements from IOZone and mmc_test
-+================================================
-+
-+https://wiki.linaro.org/WorkingGroups/Kernel/Specs/StoragePerfMMC-async-req
-+
-+MMC core API extension
-+======================
-+
-+There is one new public function mmc_start_req().
-+It starts a new MMC command request for a host. The function isn't
-+truly non-blocking. If there is on ongoing async request it waits
-+for completion of that request and starts the new one and returns. It
-+doesn't wait for the new request to complete. If there is no ongoing
-+request it starts the new request and returns immediately.
-+
-+MMC host extensions
-+===================
-+
-+There are two optional hooks -- pre_req() and post_req() -- that the host
-+driver may implement in order to move work to before and after the actual
-+mmc_request function is called. In the DMA case pre_req() may do
-+dma_map_sg() and prepare the DMA descriptor, and post_req runs
-+the dma_unmap_sg.
-+
-+Optimize for the first request
-+==============================
-+
-+The first request in a series of requests can't be prepared in parallel with
-+the previous transfer, since there is no previous request.
-+The argument is_first_req in pre_req() indicates that there is no previous
-+request. The host driver may optimize for this scenario to minimize
-+the performance loss. A way to optimize for this is to split the current
-+request in two chunks, prepare the first chunk and start the request,
-+and finally prepare the second chunk and start the transfer.
-+
-+Pseudocode to handle is_first_req scenario with minimal prepare overhead:
-+if (is_first_req && req->size > threshold)
-+   /* start MMC transfer for the complete transfer size */
-+   mmc_start_command(MMC_CMD_TRANSFER_FULL_SIZE);
-+
-+   /*
-+    * Begin to prepare DMA while cmd is being processed by MMC.
-+    * The first chunk of the request should take the same time
-+    * to prepare as the "MMC process command time".
-+    * If prepare time exceeds MMC cmd time
-+    * the transfer is delayed, guesstimate max 4k as first chunk size.
-+    */
-+    prepare_1st_chunk_for_dma(req);
-+    /* flush pending desc to the DMAC (dmaengine.h) */
-+    dma_issue_pending(req->dma_desc);
-+
-+    prepare_2nd_chunk_for_dma(req);
-+    /*
-+     * The second issue_pending should be called before MMC runs out
-+     * of the first chunk. If the MMC runs out of the first data chunk
-+     * before this call, the transfer is delayed.
-+     */
-+    dma_issue_pending(req->dma_desc);
--- 
-1.7.4.1
-
+~Randy
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
