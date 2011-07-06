@@ -1,143 +1,123 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH v3] arm: mach-mmp: brownstone.c support multiple sd slots
-Date: Wed, 6 Jul 2011 15:19:34 +0800
-Message-ID: <CAMj5BkjQNQtnU1s+KqGjX0i9j+oQkbcY9cOonp1fNu=DEy-YyA@mail.gmail.com>
-References: <59C2B513-EC04-4CA2-818B-9901CAF3E554@marvell.com>
-	<20110427093328.GU17290@n2100.arm.linux.org.uk>
-	<161C3F6C-0986-4364-B458-DBA4D08456FD@marvell.com>
-	<1F336A22-BAC3-41E3-8D4E-5DF27874D1EA@marvell.com>
-	<20110428095127.GX17290@n2100.arm.linux.org.uk>
-	<3BFCE791-3BAD-42ED-BC87-A27F40D6C77C@marvell.com>
-	<CAMPhdO-TTRP-k7J-zrG2_rQJsmNDRhTgpqiiX2yqW+Egf8+t2A@mail.gmail.com>
-	<CAMj5BkiK17RMY-vEENDqQiDOmfG0Esnp7QDooKWVrhkQL4g6Ow@mail.gmail.com>
-	<CAMPhdO-b_dpC2ueexEFujr6p_NRb2JwDc0-UEx3cfOSVcZ-d6w@mail.gmail.com>
-	<67F311C7-B489-41E6-BC85-C06DACC7263A@marvell.com>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: [PATCH V4] MMC: PM: add suspend/resume in atmel-mci
+Date: Wed,  6 Jul 2011 11:31:36 +0200
+Message-ID: <1309944696-6415-1-git-send-email-nicolas.ferre@atmel.com>
+References: <4E11B57B.4040000@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:56737 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753129Ab1GFHTf convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 03:19:35 -0400
-Received: by qwk3 with SMTP id 3so3211507qwk.19
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Jul 2011 00:19:34 -0700 (PDT)
-In-Reply-To: <67F311C7-B489-41E6-BC85-C06DACC7263A@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <4E11B57B.4040000@atmel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org, hans-christian.egtvedt@atmel.com
+Cc: balbi@ti.com, kernel@avr32linux.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Nicolas Ferre <nicolas.ferre@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Eric Miao <eric.y.miao@gmail.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Zhangfei Gao <zgao6@marvell.com>
 
-On Wed, Jul 6, 2011 at 4:20 AM, Philip Rakity <prakity@marvell.com> wro=
-te:
-> Subject: [PATCH V3] arm: mach-mmp: brownstone.c support multiple sd s=
-lots
->
-> V3
-> =3D=3D
-> Change since V2 -- delete mmc3 since it was committed
-> to linux next.
->
-> enable mmc1 used for wifi (8688) and marked PERMANENT.
-> Wifi requires enabling of power on the device by
-> toggling the gpio lines for power and reset. =A0Enable eMMC first to =
-work
-> around problem in booting order due to workqueue bug.
->
-> Signed-off-by: Philip Rakity <prakity@marvell.com>
-> ---
-> =A0arch/arm/mach-mmp/brownstone.c | =A0 41 ++++++++++++++++++++++++++=
-+++++++++++++-
-> =A01 files changed, 40 insertions(+), 1 deletions(-)
->
-> diff --git a/arch/arm/mach-mmp/brownstone.c b/arch/arm/mach-mmp/brown=
-stone.c
-> index c79162a..940982c 100644
-> --- a/arch/arm/mach-mmp/brownstone.c
-> +++ b/arch/arm/mach-mmp/brownstone.c
-> @@ -19,6 +19,7 @@
-> =A0#include <linux/regulator/max8649.h>
-> =A0#include <linux/regulator/fixed.h>
-> =A0#include <linux/mfd/max8925.h>
-> +#include <linux/delay.h>
->
-> =A0#include <asm/mach-types.h>
-> =A0#include <asm/mach/arch.h>
-> @@ -180,6 +181,11 @@ static struct sdhci_pxa_platdata mmp2_sdh_platda=
-ta_mmc0 =3D {
-> =A0 =A0 =A0 =A0.clk_delay_cycles =3D 0x1f,
-> =A0};
->
-> +static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc1 =3D {
-> + =A0 =A0 =A0 .clk_delay_cycles =3D 0x1f,
-> + =A0 =A0 =A0 .flags =A0 =A0 =A0 =A0 =A0=3D PXA_FLAG_CARD_PERMANENT,
-> +};
-> +
-> =A0static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc2 =3D {
-> =A0 =A0 =A0 =A0.clk_delay_cycles =3D 0x1f,
-> =A0 =A0 =A0 =A0.flags =3D PXA_FLAG_CARD_PERMANENT
-> @@ -187,6 +193,38 @@ static struct sdhci_pxa_platdata mmp2_sdh_platda=
-ta_mmc2 =3D {
-> =A0};
->
->
-> +static void __init mmc_sdio_wifi(void)
-> +{
-> + =A0 =A0 =A0 int poweron;
-> + =A0 =A0 =A0 int reset;
-> +
-> + =A0 =A0 =A0 poweron =3D mfp_to_gpio(GPIO57_GPIO);
-> + =A0 =A0 =A0 reset =3D mfp_to_gpio(GPIO58_GPIO);
-> +
-> + =A0 =A0 =A0 if (gpio_request(reset, "sd8xxx reset")) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_INFO "gpio %d request faile=
-d\n", reset);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 if (gpio_request(poweron, "sd8xxx PDn")) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 gpio_free(reset);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_INFO "gpio %d request faile=
-d\n", poweron);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 gpio_direction_output(poweron, 0);
-> + =A0 =A0 =A0 msleep(1);
-> + =A0 =A0 =A0 gpio_direction_output(poweron, 1);
-> + =A0 =A0 =A0 msleep(1);
-> + =A0 =A0 =A0 gpio_direction_output(reset, 0);
-> + =A0 =A0 =A0 msleep(1);
-> + =A0 =A0 =A0 gpio_direction_output(reset, 1);
-> + =A0 =A0 =A0 gpio_free(reset);
-> + =A0 =A0 =A0 gpio_free(poweron);
-> +
-> + =A0 =A0 =A0 mmp2_add_sdhost(1, &mmp2_sdh_platdata_mmc1); /* Wifi */
-> +}
-> +
+Take care of slots while going to suspend state.
 
-The method keeps power on wifi chip, without dynamically
-enable/disable wifi power, which is not final solution.
-How about pushing later with dynamically control power, which is in
-debugging here.
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+---
+V4: make CONFIG_PM logic work even if not selected
+V3: take care of each slot SUSPENDED state
+    (adding a status bit in the slot "flags")
+V2: move to pm_ops
 
-> =A0static void __init brownstone_init(void)
-> =A0{
-> =A0 =A0 =A0 =A0mfp_config(ARRAY_AND_SIZE(brownstone_pin_config));
-> @@ -195,8 +233,9 @@ static void __init brownstone_init(void)
-> =A0 =A0 =A0 =A0mmp2_add_uart(1);
-> =A0 =A0 =A0 =A0mmp2_add_uart(3);
-> =A0 =A0 =A0 =A0mmp2_add_twsi(1, NULL, ARRAY_AND_SIZE(brownstone_twsi1=
-_info));
-> - =A0 =A0 =A0 mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC =
-*/
-> =A0 =A0 =A0 =A0mmp2_add_sdhost(2, &mmp2_sdh_platdata_mmc2); /* eMMC *=
-/
-> + =A0 =A0 =A0 mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC =
-*/
-> + =A0 =A0 =A0 mmc_sdio_wifi();
->
-> =A0 =A0 =A0 =A0/* enable 5v regulator */
-> =A0 =A0 =A0 =A0platform_device_register(&brownstone_v_5vp_device);
-> --
-> 1.7.0.4
+
+ drivers/mmc/host/atmel-mci.c |   63 ++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 63 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index aa8039f..fa8cae1 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -203,6 +203,7 @@ struct atmel_mci_slot {
+ #define ATMCI_CARD_PRESENT	0
+ #define ATMCI_CARD_NEED_INIT	1
+ #define ATMCI_SHUTDOWN		2
++#define ATMCI_SUSPENDED		3
+ 
+ 	int			detect_pin;
+ 	int			wp_pin;
+@@ -1878,10 +1879,72 @@ static int __exit atmci_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_PM
++static int atmci_suspend(struct device *dev)
++{
++	struct atmel_mci *host = dev_get_drvdata(dev);
++	int i;
++
++	 for (i = 0; i < ATMEL_MCI_MAX_NR_SLOTS; i++) {
++		struct atmel_mci_slot *slot = host->slot[i];
++		int ret;
++
++		if (!slot)
++			continue;
++		ret = mmc_suspend_host(slot->mmc);
++		if (ret < 0) {
++			while (--i >= 0) {
++				slot = host->slot[i];
++				if (slot
++				&& test_bit(ATMCI_SUSPENDED, &slot->flags)) {
++					mmc_resume_host(host->slot[i]->mmc);
++					clear_bit(ATMCI_SUSPENDED, &slot->flags);
++				}
++			}
++			return ret;
++		} else {
++			set_bit(ATMCI_SUSPENDED, &slot->flags);
++		}
++	}
++
++	return 0;
++}
++
++static int atmci_resume(struct device *dev)
++{
++	struct atmel_mci *host = dev_get_drvdata(dev);
++	int i;
++	int ret = 0;
++
++	for (i = 0; i < ATMEL_MCI_MAX_NR_SLOTS; i++) {
++		struct atmel_mci_slot *slot = host->slot[i];
++		int err;
++
++		slot = host->slot[i];
++		if (!slot)
++			continue;
++		if (!test_bit(ATMCI_SUSPENDED, &slot->flags))
++			continue;
++		err = mmc_resume_host(slot->mmc);
++		if (err < 0)
++			ret = err;
++		else
++			clear_bit(ATMCI_SUSPENDED, &slot->flags);
++	}
++
++	return ret;
++}
++static SIMPLE_DEV_PM_OPS(atmci_pm, atmci_suspend, atmci_resume);
++#define ATMCI_PM_OPS	(&atmci_pm)
++#else
++#define ATMCI_PM_OPS	NULL
++#endif
++
+ static struct platform_driver atmci_driver = {
+ 	.remove		= __exit_p(atmci_remove),
+ 	.driver		= {
+ 		.name		= "atmel_mci",
++		.pm		= ATMCI_PM_OPS,
+ 	},
+ };
+ 
+-- 
+1.7.3
