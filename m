@@ -1,567 +1,317 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [PATCH] mmc: enable background operations for emmc4.41 with HPI support
-Date: Wed, 6 Jul 2011 09:32:22 +0900
-Message-ID: <CAH9JG2ULqXD0-5P11jAXmWP2s900VRV99-2CiQJCWaJ58M6eiA@mail.gmail.com>
-References: <1309868840-15089-1-git-send-email-hanumath.prasad@stericsson.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH v2 3/3] mmc: sdhci-esdhc-imx: add device tree probe
+ support
+Date: Wed, 6 Jul 2011 11:31:47 +0800
+Message-ID: <20110706033146.GA26172@S2100-06.ap.freescale.net>
+References: <1309879568-25837-1-git-send-email-shawn.guo@linaro.org>
+ <1309879568-25837-4-git-send-email-shawn.guo@linaro.org>
+ <CACxGe6sj4yt7o1yohgdgRxx0aBGrCyYxA3qHmV-npCArjNWWUw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:64870 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753272Ab1GFAc0 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jul 2011 20:32:26 -0400
-Received: by vws1 with SMTP id 1so4586760vws.19
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Jul 2011 17:32:25 -0700 (PDT)
-In-Reply-To: <1309868840-15089-1-git-send-email-hanumath.prasad@stericsson.com>
+Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:2832
+	"EHLO CH1EHSOBE015.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752329Ab1GFDZa convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 5 Jul 2011 23:25:30 -0400
+Content-Disposition: inline
+In-Reply-To: <CACxGe6sj4yt7o1yohgdgRxx0aBGrCyYxA3qHmV-npCArjNWWUw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hanumath Prasad <hanumath.prasad@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, linus.walleij@stericsson.com, per.forlin@linaro.org, chuanxiao.dong@intel.com, Venkatraman S <venkat@linaro.org>, Arnd Bergmann <arnd@arndb.de>
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Shawn Guo <shawn.guo@linaro.org>, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-Hi Hanumath,
-
-=46irst thank you for working this tasks,
-HPI & BKOPS is required for eMMC performance and latency.
-
-But before implement these features. we should define what's addressed
-by these features.
-HPI is a feature to handle a higher or urgent request then pre-ongoing
-request and it's only possible when some conditions are met.
-BKOPS is a feature to give a chance to optimize the internal for next o=
-peration.
-
-Current implementation is HPI is used for BKOPS but I think HPI is
-used for Write operation to reduce the latency.
-There are some reasons.
-1. I wonder BKOPS is really required to perform frequently? Yes I know
-it's helpful to use but no need to call it frequently.
-2. Previous time only one request is handled at mmc block. so it can't
-implement the HPI for user request. but as Per Forlin implement the
-double buffering concept. it can possible to implement the HPI,
-interrupt the current write operation and do urgent read request.
-Related with this, you can find a "HPI background and one of possible
-solutions" in the mmc Spec.
-3. real use scenario, realtime class read request has too much latency
-since previous write request, (when merge operation is happened eMMC
-internally)
-
-With these reason, I hope implement the write HPI first and continue
-to work BKOPS support.
-
-Thank you,
-Kyungmin Park
-
-On Tue, Jul 5, 2011 at 9:27 PM, Hanumath Prasad
-<hanumath.prasad@stericsson.com> wrote:
-> Background operations is an optional feature defined in eMMC4.41 spec=
+On Tue, Jul 05, 2011 at 11:54:34AM -0600, Grant Likely wrote:
+> On Tue, Jul 5, 2011 at 9:26 AM, Shawn Guo <shawn.guo@linaro.org> wrot=
+e:
+> > The patch adds device tree probe support for sdhci-esdhc-imx driver=
 =2E
-> The need for BKOPS will be checked after servicing each user request
-> in R1 response. If need for BKOPS flag is set, then start BKOPS when
-> request queue is idle. Once bkops is started and meanwhile any
-> user read/write request comes then the bkops will be interrupted by
-> issuing HPI, otherwise bkops keep going =A0until it gets finished.
-> This patch is based on the four patches submitted by Chuanxiao Dong
-> to linux-mmc.
->
-> Signed-off-by: Hanumath Prasad <hanumath.prasad@stericsson.com>
-> ---
-> =A0drivers/mmc/card/block.c =A0 | =A0 14 +++++++-
-> =A0drivers/mmc/card/queue.c =A0 | =A0 =A01 +
-> =A0drivers/mmc/core/core.c =A0 =A0| =A0 75 ++++++++++++++++++++++++++=
-++++++++++++++++++
-> =A0drivers/mmc/core/mmc.c =A0 =A0 | =A0 52 ++++++++++++++++++++++++++=
-+++-
-> =A0drivers/mmc/core/mmc_ops.c | =A0 33 +++++++++++++++++++
-> =A0drivers/mmc/core/mmc_ops.h | =A0 =A01 +
-> =A0include/linux/mmc/card.h =A0 | =A0 14 ++++++++
-> =A0include/linux/mmc/core.h =A0 | =A0 =A03 +-
-> =A0include/linux/mmc/mmc.h =A0 =A0| =A0 =A06 +++
-> =A09 files changed, 195 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 71da564..26a87ca 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -799,6 +799,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue =
-*mq, struct request *req)
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_queue_bounce_pre(mq);
->
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_card_doing_bkops(card)) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_interrupt_bkops=
-(card))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto cm=
-d_err;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> +
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_wait_for_req(card->host, &brq.mrq)=
+> >
+> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> > Cc: Wolfram Sang <w.sang@pengutronix.de>
+> > Cc: Chris Ball <cjb@laptop.org>
+> > Cc: Grant Likely <grant.likely@secretlab.ca>
+> > ---
+> > =A0.../devicetree/bindings/mmc/fsl-imx-esdhc.txt =A0 =A0 =A0| =A0 4=
+0 ++++++++
+> > =A0drivers/mmc/host/sdhci-esdhc-imx.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ | =A0102 +++++++++++++++++++-
+> > =A02 files changed, 137 insertions(+), 5 deletions(-)
+> > =A0create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx=
+-esdhc.txt
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.tx=
+t b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> > new file mode 100644
+> > index 0000000..351d239
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> > @@ -0,0 +1,40 @@
+> > +* Freescale Enhanced Secure Digital Host Controller (eSDHC) for i.=
+MX
+> > +
+> > +The Enhanced Secure Digital Host Controller on Freescale i.MX fami=
+ly
+> > +provides an interface for MMC, SD, and SDIO types of memory cards.
+> > +
+> > +Required properties:
+> > +- compatible : Should be "fsl,<chip>-esdhc"
+> > +- reg : Should contain eSDHC registers location and length
+> > +- interrupts : Should contain eSDHC interrupt
+> > +- cd-type : String, card detection (CD) method. =A0Supported value=
+s are:
+> > + =A0 =A0"none" : No CD
+> > + =A0 =A0"controller" : Uses eSDHC controller internal CD signal
+> > + =A0 =A0"gpio" : Uses GPIO pin for CD
+> > + =A0 =A0"permanent" : No CD because card is permanently wired to h=
+ost
+> > +- wp-type : String, write protection (WP) method. =A0Supported val=
+ues are:
+> > + =A0 =A0"none" : No WP
+> > + =A0 =A0"controller" : Uses eSDHC controller internal WP signal
+> > + =A0 =A0"gpio" : Uses GPIO pin for WP
+> > +- gpios : Should specify GPIOs in this order: CD GPIO, WP GPIO, if
+> > + =A0properties cd-type and wp-type are "gpio".
+>=20
+> Again, be explicit in your gpios property names.  Create a different
+> property for each gpio: cd-gpios and wp-gpios.
+>=20
+Sorry. I fixed the example below.  But this one got missed.
+
+> As for wp-type and cd-type, I think you can drop them.  Default to
+> internal controller CD and WP pins.  Use gpio if cd-gpios or wp-gpios
+> is present, and define specific properties for the no-wp, no-cd and
+> fixed-card cases.  (can you tell that I'm not a fan of the "*-type"
+> binding for this driver?)  :-)
+>=20
+Ok, I'm getting to know you.
+
+> > +
+> > +Examples:
+> > +
+> > +esdhc@70004000 {
+> > + =A0 =A0 =A0 compatible =3D "fsl,imx51-esdhc";
+> > + =A0 =A0 =A0 reg =3D <0x70004000 0x4000>;
+> > + =A0 =A0 =A0 interrupts =3D <1>;
+> > + =A0 =A0 =A0 fsl,cd-type =3D "controller";
+> > + =A0 =A0 =A0 fsl,wp-type =3D "controller";
+> > +};
+> > +
+> > +esdhc@70008000 {
+> > + =A0 =A0 =A0 compatible =3D "fsl,imx51-esdhc";
+> > + =A0 =A0 =A0 reg =3D <0x70008000 0x4000>;
+> > + =A0 =A0 =A0 interrupts =3D <2>;
+> > + =A0 =A0 =A0 fsl,cd-type =3D "gpio";
+> > + =A0 =A0 =A0 fsl,wp-type =3D "gpio";
+> > + =A0 =A0 =A0 cd-gpios =3D <&gpio0 6 0>; /* GPIO1_6 */
+> > + =A0 =A0 =A0 wp-gpios =3D <&gpio0 5 0>; /* GPIO1_5 */
+> > +};
+> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/=
+sdhci-esdhc-imx.c
+> > index 1edda29..593d6b9 100644
+> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > @@ -20,6 +20,9 @@
+> > =A0#include <linux/mmc/host.h>
+> > =A0#include <linux/mmc/mmc.h>
+> > =A0#include <linux/mmc/sdio.h>
+> > +#include <linux/of.h>
+> > +#include <linux/of_device.h>
+> > +#include <linux/of_gpio.h>
+> > =A0#include <mach/esdhc.h>
+> > =A0#include "sdhci-pltfm.h"
+> > =A0#include "sdhci-esdhc.h"
+> > @@ -72,6 +75,14 @@ static struct platform_device_id imx_esdhc_devty=
+pe[] =3D {
+> > =A0 =A0 =A0 =A0}
+> > =A0};
+> >
+> > +static const struct of_device_id imx_esdhc_dt_ids[] =3D {
+> > + =A0 =A0 =A0 { .compatible =3D "fsl,imx25-esdhc", .data =3D &imx_e=
+sdhc_devtype[IMX25_ESDHC], },
+> > + =A0 =A0 =A0 { .compatible =3D "fsl,imx35-esdhc", .data =3D &imx_e=
+sdhc_devtype[IMX35_ESDHC], },
+> > + =A0 =A0 =A0 { .compatible =3D "fsl,imx51-esdhc", .data =3D &imx_e=
+sdhc_devtype[IMX51_ESDHC], },
+> > + =A0 =A0 =A0 { .compatible =3D "fsl,imx53-esdhc", .data =3D &imx_e=
+sdhc_devtype[IMX53_ESDHC], },
+> > + =A0 =A0 =A0 { /* sentinel */ }
+> > +};
+> > +
+> > =A0static inline int is_imx25_esdhc(struct pltfm_imx_data *data)
+> > =A0{
+> > =A0 =A0 =A0 =A0return data->devtype =3D=3D IMX25_ESDHC;
+> > @@ -305,24 +316,96 @@ static irqreturn_t cd_irq(int irq, void *data=
+)
+> > =A0 =A0 =A0 =A0return IRQ_HANDLED;
+> > =A0};
+> >
+> > +#ifdef CONFIG_OF
+> > +static const char *cd_types[] =3D {
+> > + =A0 =A0 =A0 [ESDHC_CD_NONE] =A0 =A0 =A0 =A0 =3D "none",
+> > + =A0 =A0 =A0 [ESDHC_CD_CONTROLLER] =A0 =3D "controller",
+> > + =A0 =A0 =A0 [ESDHC_CD_GPIO] =A0 =A0 =A0 =A0 =3D "gpio",
+> > + =A0 =A0 =A0 [ESDHC_CD_PERMANENT] =A0 =A0=3D "permanent",
+> > +};
+> > +
+> > +static const char *wp_types[] =3D {
+> > + =A0 =A0 =A0 [ESDHC_WP_NONE] =A0 =A0 =A0 =A0 =3D "none",
+> > + =A0 =A0 =A0 [ESDHC_WP_CONTROLLER] =A0 =3D "controller",
+> > + =A0 =A0 =A0 [ESDHC_WP_GPIO] =A0 =A0 =A0 =A0 =3D "gpio",
+> > +};
+> > +
+> > +static int __devinit sdhci_esdhc_imx_probe_dt(struct platform_devi=
+ce *pdev)
+> > +{
+> > + =A0 =A0 =A0 const struct of_device_id *of_id =3D
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 of_match_device(imx_e=
+sdhc_dt_ids, &pdev->dev);
+> > + =A0 =A0 =A0 struct device_node *np =3D pdev->dev.of_node;
+> > + =A0 =A0 =A0 struct esdhc_platform_data *boarddata;
+> > + =A0 =A0 =A0 int err, i;
+> > + =A0 =A0 =A0 const char *cd, *wp;
+> > +
+> > + =A0 =A0 =A0 if (!np)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENODEV;
+> > +
+> > + =A0 =A0 =A0 boarddata =3D kzalloc(sizeof(*boarddata), GFP_KERNEL)=
 ;
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_queue_bounce_post(mq);
-> @@ -897,10 +902,17 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue=
- *mq, struct request *req)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto cmd_err;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
->
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_lock_irq(&md->lock);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Check BKOPS urgency from each R1 r=
-esponse
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_card_mmc(card) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (brq.cmd.resp[0] & R1_U=
-RGENT_BKOPS))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_set_need_bkops=
-(card);
-> +
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/*
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * A block was successfully transferre=
-d.
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_lock_irq(&md->lock);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D __blk_end_request(req, 0, brq.=
-data.bytes_xfered);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0spin_unlock_irq(&md->lock);
-> =A0 =A0 =A0 =A0} while (ret);
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index c07322c..c491edd 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -64,6 +64,7 @@ static int mmc_queue_thread(void *d)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0set_cu=
-rrent_state(TASK_RUNNING);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_start_bkops(mq->car=
+> > + =A0 =A0 =A0 if (!boarddata)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENOMEM;
+> > + =A0 =A0 =A0 pdev->dev.platform_data =3D boarddata;
+>=20
+> This is illegal.  As far as device drivers are concerned,
+> pdev->dev.platform_data is immutable and must not be changed.
+> Otherwise they break the driver model.  If you need to keep around a
+> platform_data structure, then it needs to be stored in the driver
+> private data.  Your best option is to refactor the driver to not
+> reference pdev->dev.platform_data after probe() exits.
+>=20
+Ok.  I saw a patch from Troy doing this.  Will incorporate it into
+the series.
+
+Regards,
+Shawn
+
+> > +
+> > + =A0 =A0 =A0 err =3D of_property_read_string(np, "fsl,cd-type", &c=
 d);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0up(&mq->thread_sem);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0schedule();
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0down(&mq->thread_sem);
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 68091dd..e5e1d7c 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -196,6 +196,48 @@ mmc_start_request(struct mmc_host *host, struct =
-mmc_request *mrq)
-> =A0 =A0 =A0 =A0host->ops->request(host, mrq);
-> =A0}
->
-> +/**
-> + * =A0 =A0 mmc_start_bkops - start BKOPS for supported cards
-> + * =A0 =A0 @card: MMC card to start BKOPS
-> + *
-> + * =A0 =A0 Start background operations whenever requested.
-> + * =A0 =A0 when the urgent BKOPS bit is set in a R1 command response
-> + * =A0 =A0 then background operations should be started immediately.
-> + */
-> +void mmc_start_bkops(struct mmc_card *card)
-> +{
-> + =A0 =A0 =A0 int err;
-> + =A0 =A0 =A0 unsigned long flags;
-> +
-> + =A0 =A0 =A0 if (!card || !card->ext_csd.bkops_en)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* If card is already doing bkops or need for
-> + =A0 =A0 =A0 =A0* bkops flag is not set, then do nothing just
-> + =A0 =A0 =A0 =A0* return
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 if (mmc_card_doing_bkops(card)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 || !mmc_card_need_bkops=
-(card))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> +
-> + =A0 =A0 =A0 mmc_claim_host(card->host);
-> + =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 EXT_CSD_BKOPS_START, 1,=
- 0);
-> + =A0 =A0 =A0 if (err) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_ERR "error %d starting bkop=
-s\n",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_clr_need_bkops(card);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
-> + =A0 =A0 =A0 }
-> + =A0 =A0 =A0 spin_lock_irqsave(&card->host->lock, flags);
-> + =A0 =A0 =A0 mmc_card_clr_need_bkops(card);
-> + =A0 =A0 =A0 mmc_card_set_doing_bkops(card);
-> + =A0 =A0 =A0 spin_unlock_irqrestore(&card->host->lock, flags);
-> +out:
-> + =A0 =A0 =A0 mmc_release_host(card->host);
-> +}
-> +EXPORT_SYMBOL(mmc_start_bkops);
-> +
-> =A0static void mmc_wait_done(struct mmc_request *mrq)
-> =A0{
-> =A0 =A0 =A0 =A0complete(mrq->done_data);
-> @@ -254,6 +296,39 @@ int mmc_wait_for_cmd(struct mmc_host *host, stru=
-ct mmc_command *cmd, int retries
-> =A0EXPORT_SYMBOL(mmc_wait_for_cmd);
->
-> =A0/**
-> + * =A0 =A0 mmc_interrupt_bkops - interrupt ongoing BKOPS
-> + * =A0 =A0 @card: MMC card to check BKOPS
-> + *
-> + * =A0 =A0 Send HPI command to interrupt ongoing background operatio=
-ns,
-> + * =A0 =A0 to allow rapid servicing of foreground operations,e.g. re=
-ad/
-> + * =A0 =A0 writes. Wait until the card comes out of the programming =
-state
-> + * =A0 =A0 to avoid errors in servicing read/write requests.
-> + */
-> +int mmc_interrupt_bkops(struct mmc_card *card)
-> +{
-> + =A0 =A0 =A0 int err;
-> + =A0 =A0 =A0 unsigned long flags;
-> + =A0 =A0 =A0 u32 status;
-> +
-> + =A0 =A0 =A0 BUG_ON(!card);
-> +
-> + =A0 =A0 =A0 /* send HPI to interrupt BKOPS. */
-> + =A0 =A0 =A0 err =3D mmc_send_hpi_cmd(card, &status);
-> + =A0 =A0 =A0 if (err || R1_CURRENT_STATE(status) =3D=3D 7) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 do {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_send_status=
-(card, &status);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return =
-err;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } while (R1_CURRENT_STATE(status) =3D=3D=
- 7);
-> + =A0 =A0 =A0 }
-> + =A0 =A0 =A0 spin_lock_irqsave(&card->host->lock, flags);
-> + =A0 =A0 =A0 mmc_card_clr_doing_bkops(card);
-> + =A0 =A0 =A0 spin_unlock_irqrestore(&card->host->lock, flags);
-> + =A0 =A0 =A0 return 0;
-> +}
-> +EXPORT_SYMBOL(mmc_interrupt_bkops);
-> +
-> +/**
-> =A0* =A0 =A0 mmc_set_data_timeout - set the timeout for a data comman=
-d
-> =A0* =A0 =A0 @data: data phase for command
-> =A0* =A0 =A0 @card: the MMC card associated with the data transfer
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 2a7e43b..03dcbb3 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -383,9 +383,23 @@ static int mmc_read_ext_csd(struct mmc_card *car=
-d, u8 *ext_csd)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_TRIM_M=
-ULT];
-> =A0 =A0 =A0 =A0}
->
-> - =A0 =A0 =A0 if (card->ext_csd.rev >=3D 5)
-> + =A0 =A0 =A0 if (card->ext_csd.rev >=3D 5) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* check whether the eMMC card support =
-BKOPS */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x=
-1)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.bkops =3D=
- 1;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* check whether the eMMC card support =
-HPI */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1=
-) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.hpi =3D 1=
-;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ext_csd[EXT_CSD_HPI=
-_FEATURES] & 0x2)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->e=
-xt_csd.hpi_cmd =3D
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 MMC_STOP_TRANSMISSION;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->e=
-xt_csd.hpi_cmd =3D
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 MMC_SEND_STATUS;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> +
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->ext_csd.rel_param =3D ext_csd[EX=
-T_CSD_WR_REL_PARAM];
-> -
-> + =A0 =A0 =A0 }
-> =A0 =A0 =A0 =A0if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->erased_byte =3D 0xFF;
-> =A0 =A0 =A0 =A0else
-> @@ -702,6 +716,40 @@ static int mmc_init_card(struct mmc_host *host, =
-u32 ocr,
-> =A0 =A0 =A0 =A0}
->
-> =A0 =A0 =A0 =A0/*
-> + =A0 =A0 =A0 =A0* enable BKOPS feature (if supported)
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 if (card->ext_csd.bkops) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_SE=
-T_NORMAL,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 EXT_CSD_BKOPS_EN, 1, 0)=
-;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err && err !=3D -EBADMSG)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto free_card;
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_WARNING "%s=
-: Enabling BKOPS failed\n",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hos=
-tname(card->host));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D 0;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.bkops_en =
-=3D 1;
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 /*
-> + =A0 =A0 =A0 =A0* Enable HPI feature (if supported)
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 if (card->ext_csd.hpi) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_SE=
-T_NORMAL,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 EXT_CSD_HPI_MGMT, 1, 0)=
-;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err && err !=3D -EBADMSG)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto free_card;
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_WARNING "%s=
-: Enabling HPI failed\n",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hos=
-tname(card->host));
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D 0;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.hpi_en =3D=
- 1;
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 /*
-> =A0 =A0 =A0 =A0 * Compute bus speed.
-> =A0 =A0 =A0 =A0 */
-> =A0 =A0 =A0 =A0max_dtr =3D (unsigned int)-1;
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 845ce7c..a4accfb 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -398,6 +398,10 @@ int mmc_switch(struct mmc_card *card, u8 set, u8=
- index, u8 value,
-> =A0 =A0 =A0 =A0if (err)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return err;
->
-> + =A0 =A0 =A0 /* No need to check card status in case of BKOPS switch=
-*/
-> + =A0 =A0 =A0 if (index =3D=3D EXT_CSD_BKOPS_START)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return 0;
-> +
-> =A0 =A0 =A0 =A0/* Must check status to be sure of no errors */
-> =A0 =A0 =A0 =A0do {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_send_status(card, &status)=
-;
-> @@ -547,3 +551,32 @@ int mmc_bus_test(struct mmc_card *card, u8 bus_w=
-idth)
-> =A0 =A0 =A0 =A0err =3D mmc_send_bus_test(card, card->host, MMC_BUS_TE=
-ST_R, width);
-> =A0 =A0 =A0 =A0return err;
-> =A0}
-> +
-> +int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
-> +{
-> + =A0 =A0 =A0 struct mmc_command cmd;
-> + =A0 =A0 =A0 unsigned int opcode;
-> + =A0 =A0 =A0 unsigned int flags;
-> + =A0 =A0 =A0 int err;
-> +
-> + =A0 =A0 =A0 opcode =3D card->ext_csd.hpi_cmd;
-> + =A0 =A0 =A0 if (opcode =3D=3D MMC_STOP_TRANSMISSION)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 flags =3D MMC_RSP_R1B | MMC_CMD_AC;
-> + =A0 =A0 =A0 else if (opcode =3D=3D MMC_SEND_STATUS)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 flags =3D MMC_RSP_R1 | MMC_CMD_AC;
-> +
-> + =A0 =A0 =A0 memset(&cmd, 0, sizeof(struct mmc_command));
-> + =A0 =A0 =A0 cmd.opcode =3D opcode;
-> + =A0 =A0 =A0 cmd.arg =3D card->rca << 16 | 1;
-> + =A0 =A0 =A0 cmd.flags =3D flags;
-> + =A0 =A0 =A0 err =3D mmc_wait_for_cmd(card->host, &cmd, 0);
-> + =A0 =A0 =A0 if (err) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_ERR "error %d interrupting =
-operation"
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "HPI command response =A0=
-%#x\n",
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err, cm=
-d.resp[0]);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return err;
-> + =A0 =A0 =A0 }
-> + =A0 =A0 =A0 if (status)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 *status =3D cmd.resp[0];
-> + =A0 =A0 =A0 return 0;
-> +}
-> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-> index 9276946..d539f55 100644
-> --- a/drivers/mmc/core/mmc_ops.h
-> +++ b/drivers/mmc/core/mmc_ops.h
-> @@ -21,6 +21,7 @@ int mmc_set_relative_addr(struct mmc_card *card);
-> =A0int mmc_send_csd(struct mmc_card *card, u32 *csd);
-> =A0int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
-> =A0int mmc_send_status(struct mmc_card *card, u32 *status);
-> +int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status);
-> =A0int mmc_send_cid(struct mmc_host *host, u32 *cid);
-> =A0int mmc_spi_read_ocr(struct mmc_host *host, int highcap, u32 *ocrp=
-);
-> =A0int mmc_spi_set_crc(struct mmc_host *host, int use_crc);
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index c6927a4..9bbfed2 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -64,6 +64,11 @@ struct mmc_ext_csd {
-> =A0 =A0 =A0 =A0unsigned long long =A0 =A0 =A0enhanced_area_offset; =A0=
- /* Units: Byte */
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0enhanced_area_size=
-; =A0 =A0 /* Units: KB */
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0boot_size; =A0 =A0=
- =A0 =A0 =A0 =A0 =A0/* in bytes */
-> + =A0 =A0 =A0 bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bkops; =A0 =
-=A0 =A0 =A0 =A0/* background support bit */
-> + =A0 =A0 =A0 bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0bkops_en; =A0=
- =A0 =A0 /* background enable bit */
-> + =A0 =A0 =A0 bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hpi_en; =A0=
- =A0 =A0 =A0 /*HPI enablebit */
-> + =A0 =A0 =A0 bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hpi; =A0 =A0=
- =A0 =A0 =A0 =A0/* HPI support bit */
-> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0hpi_cmd; =A0 =A0 =A0=
- =A0/* cmd used as HPI */
-> =A0};
->
-> =A0struct sd_scr {
-> @@ -164,6 +169,8 @@ struct mmc_card {
-> =A0#define MMC_STATE_HIGHSPEED_DDR (1<<4) =A0 =A0 =A0 =A0 /* card is =
-in high speed mode */
-> =A0#define MMC_STATE_ULTRAHIGHSPEED (1<<5) =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0/* card is in ultra high speed mode */
-> =A0#define MMC_CARD_SDXC =A0 =A0 =A0 =A0 =A0(1<<6) =A0 =A0 =A0 =A0 =A0=
-/* card is SDXC */
-> +#define MMC_STATE_NEED_BKOPS =A0 (1<<7) =A0 =A0 =A0 =A0 =A0/* card n=
-eed to do BKOPS */
-> +#define MMC_STATE_DOING_BKOPS =A0(1<<8) =A0 =A0 =A0 =A0 =A0/* card i=
-s doing BKOPS */
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0quirks; =A0 =A0 =A0=
- =A0 /* card quirks */
-> =A0#define MMC_QUIRK_LENIENT_FN0 =A0(1<<0) =A0 =A0 =A0 =A0 =A0/* allo=
-w SDIO FN0 writes outside of the VS CCCR range */
-> =A0#define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1) =A0 /* use func->cur_=
-blksize */
-> @@ -301,6 +308,8 @@ static inline void __maybe_unused remove_quirk(st=
-ruct mmc_card *card, int data)
-> =A0#define mmc_card_ddr_mode(c) =A0 ((c)->state & MMC_STATE_HIGHSPEED=
-_DDR)
-> =A0#define mmc_sd_card_uhs(c) ((c)->state & MMC_STATE_ULTRAHIGHSPEED)
-> =A0#define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
-> +#define mmc_card_need_bkops(c) ((c)->state & MMC_STATE_NEED_BKOPS)
-> +#define mmc_card_doing_bkops(c) =A0 =A0 =A0 =A0((c)->state & MMC_STA=
-TE_DOING_BKOPS)
->
-> =A0#define mmc_card_set_present(c) =A0 =A0 =A0 =A0((c)->state |=3D MM=
-C_STATE_PRESENT)
-> =A0#define mmc_card_set_readonly(c) ((c)->state |=3D MMC_STATE_READON=
-LY)
-> @@ -309,6 +318,11 @@ static inline void __maybe_unused remove_quirk(s=
-truct mmc_card *card, int data)
-> =A0#define mmc_card_set_ddr_mode(c) ((c)->state |=3D MMC_STATE_HIGHSP=
-EED_DDR)
-> =A0#define mmc_sd_card_set_uhs(c) ((c)->state |=3D MMC_STATE_ULTRAHIG=
-HSPEED)
-> =A0#define mmc_card_set_ext_capacity(c) ((c)->state |=3D MMC_CARD_SDX=
-C)
-> +#define mmc_card_set_need_bkops(c) =A0 =A0 ((c)->state |=3D MMC_STAT=
-E_NEED_BKOPS)
-> +#define mmc_card_set_doing_bkops(c) =A0 =A0((c)->state |=3D MMC_STAT=
-E_DOING_BKOPS)
-> +
-> +#define mmc_card_clr_need_bkops(c) =A0 =A0 ((c)->state &=3D ~MMC_STA=
-TE_NEED_BKOPS)
-> +#define mmc_card_clr_doing_bkops(c) =A0 =A0((c)->state &=3D ~MMC_STA=
-TE_DOING_BKOPS)
->
-> =A0/*
-> =A0* Quirk add/remove for MMC products.
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index b6718e5..53dca10 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -132,6 +132,7 @@ struct mmc_request {
-> =A0struct mmc_host;
-> =A0struct mmc_card;
->
-> +extern int mmc_interrupt_bkops(struct mmc_card *);
-> =A0extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request=
- *);
-> =A0extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command =
-*, int);
-> =A0extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
-> @@ -155,7 +156,7 @@ extern int mmc_can_trim(struct mmc_card *card);
-> =A0extern int mmc_can_secure_erase_trim(struct mmc_card *card);
-> =A0extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned=
- int from,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 u=
-nsigned int nr);
-> -
-> +extern void mmc_start_bkops(struct mmc_card *card);
-> =A0extern int mmc_set_blocklen(struct mmc_card *card, unsigned int bl=
-ocklen);
->
-> =A0extern void mmc_set_data_timeout(struct mmc_data *, const struct m=
-mc_card *);
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index ac26a68..98aa47d 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -138,6 +138,7 @@ static inline bool mmc_op_multi(u32 opcode)
-> =A0#define R1_CURRENT_STATE(x) =A0 =A0((x & 0x00001E00) >> 9) /* sx, =
-b (4 bits) */
-> =A0#define R1_READY_FOR_DATA =A0 =A0 =A0(1 << 8) =A0 =A0 =A0 =A0/* sx=
-, a */
-> =A0#define R1_SWITCH_ERROR =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 7) =A0=
- =A0 =A0 =A0/* sx, c */
-> +#define R1_URGENT_BKOPS =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 6) =A0 =
-=A0 =A0 =A0/* sx, a */
-> =A0#define R1_APP_CMD =A0 =A0 =A0 =A0 =A0 =A0 (1 << 5) =A0 =A0 =A0 =A0=
-/* sr, c */
->
-> =A0/*
-> @@ -262,6 +263,9 @@ struct _mmc_csd {
->
-> =A0#define EXT_CSD_PARTITION_ATTRIBUTE =A0 =A0156 =A0 =A0 /* R/W */
-> =A0#define EXT_CSD_PARTITION_SUPPORT =A0 =A0 =A0160 =A0 =A0 /* RO */
-> +#define EXT_CSD_HPI_MGMT =A0 =A0 =A0 =A0 =A0 =A0 =A0 161 =A0 =A0 /* =
-R/W */
-> +#define EXT_CSD_BKOPS_EN =A0 =A0 =A0 =A0 =A0 =A0 =A0 163 =A0 =A0 /* =
-R/W */
-> +#define EXT_CSD_BKOPS_START =A0 =A0 =A0 =A0 =A0 =A0164 =A0 =A0 /* W =
-*/
-> =A0#define EXT_CSD_WR_REL_PARAM =A0 =A0 =A0 =A0 =A0 166 =A0 =A0 /* RO=
- */
-> =A0#define EXT_CSD_ERASE_GROUP_DEF =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0175=
- =A0 =A0 /* R/W */
-> =A0#define EXT_CSD_PART_CONFIG =A0 =A0 =A0 =A0 =A0 =A0179 =A0 =A0 /* =
-R/W */
-> @@ -283,6 +287,8 @@ struct _mmc_csd {
-> =A0#define EXT_CSD_SEC_ERASE_MULT =A0 =A0 =A0 =A0 230 =A0 =A0 /* RO *=
-/
-> =A0#define EXT_CSD_SEC_FEATURE_SUPPORT =A0 =A0231 =A0 =A0 /* RO */
-> =A0#define EXT_CSD_TRIM_MULT =A0 =A0 =A0 =A0 =A0 =A0 =A0232 =A0 =A0 /=
-* RO */
-> +#define EXT_CSD_BKOPS_SUPPORT =A0 =A0 =A0 =A0 =A0502 =A0 =A0 /* RO *=
-/
-> +#define EXT_CSD_HPI_FEATURES =A0 =A0 =A0 =A0 =A0 503 =A0 =A0 /* RO *=
-/
->
-> =A0/*
-> =A0* EXT_CSD field definitions
-> --
-> 1.7.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+> > + =A0 =A0 =A0 if (err)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return err;
+> > + =A0 =A0 =A0 for (i =3D 0; i < ARRAY_SIZE(cd_types); i++)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!strcasecmp(cd, cd_types[i])) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 boarddata->cd_type =3D=
+ i;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> > +
+> > + =A0 =A0 =A0 err =3D of_property_read_string(np, "fsl,wp-type", &w=
+p);
+> > + =A0 =A0 =A0 if (err)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return err;
+> > + =A0 =A0 =A0 for (i =3D 0; i < ARRAY_SIZE(wp_types); i++)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!strcasecmp(wp, wp_types[i])) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 boarddata->wp_type =3D=
+ i;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> > +
+> > + =A0 =A0 =A0 boarddata->cd_gpio =3D of_get_gpio(np, 0);
+> > + =A0 =A0 =A0 boarddata->wp_gpio =3D of_get_gpio(np, 1);
+> > +
+> > + =A0 =A0 =A0 pdev->id_entry =3D of_id->data;
+> > +
+> > + =A0 =A0 =A0 return 0;
+> > +}
+> > +#else
+> > +static inline int sdhci_esdhc_imx_probe_dt(struct platform_device =
+*pdev)
+> > +{
+> > + =A0 =A0 =A0 return 0;
+> > +}
+> > +#endif
+> > +
+> > =A0static int __devinit sdhci_esdhc_imx_probe(struct platform_devic=
+e *pdev)
+> > =A0{
+> > + =A0 =A0 =A0 struct device_node *np =3D pdev->dev.of_node;
+> > =A0 =A0 =A0 =A0struct sdhci_pltfm_host *pltfm_host;
+> > =A0 =A0 =A0 =A0struct sdhci_host *host;
+> > - =A0 =A0 =A0 struct esdhc_platform_data *boarddata;
+> > + =A0 =A0 =A0 struct esdhc_platform_data *boarddata =3D NULL;
+> > =A0 =A0 =A0 =A0struct clk *clk;
+> > =A0 =A0 =A0 =A0int err;
+> > =A0 =A0 =A0 =A0struct pltfm_imx_data *imx_data;
+> >
+> > + =A0 =A0 =A0 err =3D sdhci_esdhc_imx_probe_dt(pdev);
+> > + =A0 =A0 =A0 if (err)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return err;
+> > +
+> > =A0 =A0 =A0 =A0host =3D sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pda=
+ta);
+> > - =A0 =A0 =A0 if (IS_ERR(host))
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 return PTR_ERR(host);
+> > + =A0 =A0 =A0 if (IS_ERR(host)) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D PTR_ERR(host);
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_sdhci_pltfm;
+> > + =A0 =A0 =A0 }
+> >
+> > =A0 =A0 =A0 =A0pltfm_host =3D sdhci_priv(host);
+> >
+> > =A0 =A0 =A0 =A0imx_data =3D kzalloc(sizeof(struct pltfm_imx_data), =
+GFP_KERNEL);
+> > - =A0 =A0 =A0 if (!imx_data)
+> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENOMEM;
+> > + =A0 =A0 =A0 if (!imx_data) {
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D -ENOMEM;
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_imx_data;
+> > + =A0 =A0 =A0 }
+> >
+> > =A0 =A0 =A0 =A0imx_data->devtype =3D pdev->id_entry->driver_data;
+> > =A0 =A0 =A0 =A0pltfm_host->priv =3D imx_data;
+> > @@ -416,12 +499,17 @@ no_board_data:
+> > =A0 =A0 =A0 =A0clk_put(pltfm_host->clk);
+> > =A0err_clk_get:
+> > =A0 =A0 =A0 =A0kfree(imx_data);
+> > +err_imx_data:
+> > =A0 =A0 =A0 =A0sdhci_pltfm_free(pdev);
+> > +err_sdhci_pltfm:
+> > + =A0 =A0 =A0 if (np)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 kfree(boarddata);
+> > =A0 =A0 =A0 =A0return err;
+> > =A0}
+> >
+> > =A0static int __devexit sdhci_esdhc_imx_remove(struct platform_devi=
+ce *pdev)
+> > =A0{
+> > + =A0 =A0 =A0 struct device_node *np =3D pdev->dev.of_node;
+> > =A0 =A0 =A0 =A0struct sdhci_host *host =3D platform_get_drvdata(pde=
+v);
+> > =A0 =A0 =A0 =A0struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(h=
+ost);
+> > =A0 =A0 =A0 =A0struct esdhc_platform_data *boarddata =3D host->mmc-=
+>parent->platform_data;
+> > @@ -444,6 +532,9 @@ static int __devexit sdhci_esdhc_imx_remove(str=
+uct platform_device *pdev)
+> >
+> > =A0 =A0 =A0 =A0sdhci_pltfm_free(pdev);
+> >
+> > + =A0 =A0 =A0 if (np)
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 kfree(boarddata);
+> > +
+> > =A0 =A0 =A0 =A0return 0;
+> > =A0}
+> >
+> > @@ -451,6 +542,7 @@ static struct platform_driver sdhci_esdhc_imx_d=
+river =3D {
+> > =A0 =A0 =A0 =A0.driver =A0 =A0 =A0 =A0 =3D {
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.name =A0 =3D "sdhci-esdhc-imx",
+> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0.owner =A0=3D THIS_MODULE,
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 .of_match_table =3D imx_esdhc_dt_ids,
+> > =A0 =A0 =A0 =A0},
+> > =A0 =A0 =A0 =A0.id_table =A0 =A0 =A0 =3D imx_esdhc_devtype,
+> > =A0 =A0 =A0 =A0.probe =A0 =A0 =A0 =A0 =A0=3D sdhci_esdhc_imx_probe,
+> > --
+> > 1.7.4.1
+
