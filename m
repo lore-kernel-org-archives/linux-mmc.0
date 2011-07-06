@@ -1,142 +1,95 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH v3] arm: mach-mmp: brownstone.c support multiple sd slots
-Date: Wed, 6 Jul 2011 08:21:19 -0700
-Message-ID: <931B2731-7B03-4514-85C5-180F77D8D721@marvell.com>
-References: <59C2B513-EC04-4CA2-818B-9901CAF3E554@marvell.com>
-	<20110427093328.GU17290@n2100.arm.linux.org.uk>
-	<161C3F6C-0986-4364-B458-DBA4D08456FD@marvell.com>
-	<1F336A22-BAC3-41E3-8D4E-5DF27874D1EA@marvell.com>
-	<20110428095127.GX17290@n2100.arm.linux.org.uk>
-	<3BFCE791-3BAD-42ED-BC87-A27F40D6C77C@marvell.com>
-	<CAMPhdO-TTRP-k7J-zrG2_rQJsmNDRhTgpqiiX2yqW+Egf8+t2A@mail.gmail.com>
-	<CAMj5BkiK17RMY-vEENDqQiDOmfG0Esnp7QDooKWVrhkQL4g6Ow@mail.gmail.com>
-	<CAMPhdO-b_dpC2ueexEFujr6p_NRb2JwDc0-UEx3cfOSVcZ-d6w@mail.gmail.com>
-	<67F311C7-B489-41E6-BC85-C06DACC7263A@marvell.com>
-	<CAMj5BkjQNQtnU1s+KqGjX0i9j+oQkbcY9cOonp1fNu=DEy-YyA@mail.gmail.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCH] mmc: enable background operations for emmc4.41 with HPI support
+Date: Thu, 7 Jul 2011 00:22:08 +0900
+Message-ID: <CAH9JG2U9B+Nxcy+g3TG5-2pMnPjNdRdJwOfBrxdeihiqdj4Zpw@mail.gmail.com>
+References: <ECD438FDEF6BD742895E554C24725A4019873A5EE4@EXDCVYMBSTM005.EQ1STM.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAMj5BkjQNQtnU1s+KqGjX0i9j+oQkbcY9cOonp1fNu=DEy-YyA@mail.gmail.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: zhangfei gao <zhangfei.gao@gmail.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Eric Miao <eric.y.miao@gmail.com>, Chris Ball <cjb@laptop.org>, Zhangfei Gao <zgao6@marvell.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:35114 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753894Ab1GFPWI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 11:22:08 -0400
+Received: by vxb39 with SMTP id 39so4990547vxb.19
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Jul 2011 08:22:08 -0700 (PDT)
+In-Reply-To: <ECD438FDEF6BD742895E554C24725A4019873A5EE4@EXDCVYMBSTM005.EQ1STM.local>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sebastian RASMUSSEN <sebastian.rasmussen@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Per Forlin <per.forlin@linaro.org>, "chuanxiao.dong@intel.com" <chuanxiao.dong@intel.com>
 
+On Wed, Jul 6, 2011 at 11:40 PM, Sebastian RASMUSSEN
+<sebastian.rasmussen@stericsson.com> wrote:
+> Hi!
+>
+>> HPI is a feature to handle a higher or urgent request then pre-ongoing
+>> request and it's only possible when some conditions are met.
+>
+> Agreed, as I read the spec this would writes, erases and BKOPS
+> (eMMC spec 4.41 7.6.20 (table 20) and the 3rd paragraph in 7.6.19).
+>
+>> BKOPS is a feature to give a chance to optimize the internal
+>> for next operation.
+>
+> Yes, I believe the main reasons would be when blocks are
+> either replaced or a ERASE or TRIM operation has been issued.
+> The BKOPS feature would allow the eMMC device to clean up its
+> internal state and pre-erase any internal flash devices so
+> that the next write operation would have better performance.
+> I believe this to be the intent at least.
+>
+>> Current implementation is HPI is used for BKOPS but I think
+>> HPI is used for Write operation to reduce the latency.
+>
+> True, the focus of HPI is for Write operations, however in
+> eMMC spec 4.41 chapter 7.6.19 on background operations it
+> does state that a host may interrupt any ongoing background
+> operations by using HPI. So to me it seems as if the intent
+> from Jedec has been that it may be used in case of BKOPS
+> taking too long and so may be blocking pending requests..?
 
-On Jul 6, 2011, at 12:19 AM, zhangfei gao wrote:
+Yes right, there are some operations which doesn't have timeout. BKOPS
+is one of them.
+it have to be interrupted when user request. in that case it should use the HPI.
 
-> On Wed, Jul 6, 2011 at 4:20 AM, Philip Rakity <prakity@marvell.com> wrote:
->> Subject: [PATCH V3] arm: mach-mmp: brownstone.c support multiple sd slots
->> 
->> V3
->> ==
->> Change since V2 -- delete mmc3 since it was committed
->> to linux next.
->> 
->> enable mmc1 used for wifi (8688) and marked PERMANENT.
->> Wifi requires enabling of power on the device by
->> toggling the gpio lines for power and reset.  Enable eMMC first to work
->> around problem in booting order due to workqueue bug.
->> 
->> Signed-off-by: Philip Rakity <prakity@marvell.com>
->> ---
->>  arch/arm/mach-mmp/brownstone.c |   41 +++++++++++++++++++++++++++++++++++++++-
->>  1 files changed, 40 insertions(+), 1 deletions(-)
->> 
->> diff --git a/arch/arm/mach-mmp/brownstone.c b/arch/arm/mach-mmp/brownstone.c
->> index c79162a..940982c 100644
->> --- a/arch/arm/mach-mmp/brownstone.c
->> +++ b/arch/arm/mach-mmp/brownstone.c
->> @@ -19,6 +19,7 @@
->>  #include <linux/regulator/max8649.h>
->>  #include <linux/regulator/fixed.h>
->>  #include <linux/mfd/max8925.h>
->> +#include <linux/delay.h>
->> 
->>  #include <asm/mach-types.h>
->>  #include <asm/mach/arch.h>
->> @@ -180,6 +181,11 @@ static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc0 = {
->>        .clk_delay_cycles = 0x1f,
->>  };
->> 
->> +static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc1 = {
->> +       .clk_delay_cycles = 0x1f,
->> +       .flags          = PXA_FLAG_CARD_PERMANENT,
->> +};
->> +
->>  static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc2 = {
->>        .clk_delay_cycles = 0x1f,
->>        .flags = PXA_FLAG_CARD_PERMANENT
->> @@ -187,6 +193,38 @@ static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc2 = {
->>  };
->> 
->> 
->> +static void __init mmc_sdio_wifi(void)
->> +{
->> +       int poweron;
->> +       int reset;
->> +
->> +       poweron = mfp_to_gpio(GPIO57_GPIO);
->> +       reset = mfp_to_gpio(GPIO58_GPIO);
->> +
->> +       if (gpio_request(reset, "sd8xxx reset")) {
->> +               printk(KERN_INFO "gpio %d request failed\n", reset);
->> +               return;
->> +       }
->> +
->> +       if (gpio_request(poweron, "sd8xxx PDn")) {
->> +               gpio_free(reset);
->> +               printk(KERN_INFO "gpio %d request failed\n", poweron);
->> +               return;
->> +       }
->> +
->> +       gpio_direction_output(poweron, 0);
->> +       msleep(1);
->> +       gpio_direction_output(poweron, 1);
->> +       msleep(1);
->> +       gpio_direction_output(reset, 0);
->> +       msleep(1);
->> +       gpio_direction_output(reset, 1);
->> +       gpio_free(reset);
->> +       gpio_free(poweron);
->> +
->> +       mmp2_add_sdhost(1, &mmp2_sdh_platdata_mmc1); /* Wifi */
->> +}
->> +
-> 
-> The method keeps power on wifi chip, without dynamically
-> enable/disable wifi power, which is not final solution.
-> How about pushing later with dynamically control power, which is in
-> debugging here.
-> 
+>
+>> 1. I wonder BKOPS is really required to perform frequently?
+>> Yes I know it's helpful to use but no need to call it frequently.
+>
+> According to the spec it is advised to start bkops whenever
+> the eMMC device itself indicates an urgent need for it. In
+> what way do you think the proposed patch issues bkops too often?
+> I believe that the patch properly checks for R1_URGENT_BKOPS,
+> which seems correct..?
 
-Good Point -- Will do.  
+Right, it checks the R1_URGENT_BKOPS, I mean it called every user
+request is finished.
+>
+>> 2. Previous time only one request is handled at mmc block. so it can't
+>> implement the HPI for user request. but as Per Forlin implement the
+>> double buffering concept. it can possible to implement the HPI,
+>> interrupt the current write operation and do urgent read request.
+>
+> Yes, absolutely. Interrupting ongoing write or erase/trim operations
+> would be the other use for BKOPS. How do you feel that the addition
+> of BKOPS (and thus HPI) interferes with this? Is it just a matter
+> of in what order these two features are integrated into the kernel?
+>
+>> Related with this, you can find a "HPI background and one of possible
+>> solutions" in the mmc Spec.
+>
+> What part of the spec are you referring to?
+I refers the JDEDC v4.41 and v4.5 draft version.
+>
+>> 3. real use scenario, realtime class read request has too much
+>> latency since previous write request, (when merge operation is
+>> happened eMMC internally)
+>
+> I'm not sure what you are explaining here. Would you care to
+> describe it further/differently?
+Actually there's no big issue without HPI. but some case (as above)
+has read latency problem esp. when play movie at foreground, but some
+background heavy write case.
 
-What is the correct method to handle this ? 
-
->>  static void __init brownstone_init(void)
->>  {
->>        mfp_config(ARRAY_AND_SIZE(brownstone_pin_config));
->> @@ -195,8 +233,9 @@ static void __init brownstone_init(void)
->>        mmp2_add_uart(1);
->>        mmp2_add_uart(3);
->>        mmp2_add_twsi(1, NULL, ARRAY_AND_SIZE(brownstone_twsi1_info));
->> -       mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC */
->>        mmp2_add_sdhost(2, &mmp2_sdh_platdata_mmc2); /* eMMC */
->> +       mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC */
->> +       mmc_sdio_wifi();
->> 
->>        /* enable 5v regulator */
->>        platform_device_register(&brownstone_v_5vp_device);
->> --
->> 1.7.0.4
+Thank you,
+Kyungmin Park
