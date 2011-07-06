@@ -1,208 +1,187 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH v3 4/4] mmc: sdhci-esdhc-imx: add device tree probe support
-Date: Thu, 7 Jul 2011 00:47:50 +0800
-Message-ID: <1309970870-13336-5-git-send-email-shawn.guo@linaro.org>
-References: <1309970870-13336-1-git-send-email-shawn.guo@linaro.org>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH V2] mmc: sd.c Set Non Default Drive Strength via platform
+Date: Wed, 6 Jul 2011 12:32:05 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B30001884B99DE@SAUSEXMBP01.amd.com>
+References: <2728818A-C26F-4BF7-8115-A3A37810AE34@marvell.com>
+ <614DD9DA-4F3C-4650-8412-6CC900537836@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:40772
-	"EHLO CH1EHSOBE011.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754676Ab1GFQm0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 12:42:26 -0400
-In-Reply-To: <1309970870-13336-1-git-send-email-shawn.guo@linaro.org>
+Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:40938
+	"EHLO VA3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752031Ab1GFRcS convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 6 Jul 2011 13:32:18 -0400
+In-Reply-To: <614DD9DA-4F3C-4650-8412-6CC900537836@marvell.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>
+To: Philip Rakity <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-The patch adds device tree probe support for sdhci-esdhc-imx driver.
+Hi Philip,
 
-Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-Cc: Wolfram Sang <w.sang@pengutronix.de>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Grant Likely <grant.likely@secretlab.ca>
----
- .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   34 +++++++++
- drivers/mmc/host/sdhci-esdhc-imx.c                 |   77 +++++++++++++++++---
- 2 files changed, 102 insertions(+), 9 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-new file mode 100644
-index 0000000..ab22fe6
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-@@ -0,0 +1,34 @@
-+* Freescale Enhanced Secure Digital Host Controller (eSDHC) for i.MX
-+
-+The Enhanced Secure Digital Host Controller on Freescale i.MX family
-+provides an interface for MMC, SD, and SDIO types of memory cards.
-+
-+Required properties:
-+- compatible : Should be "fsl,<chip>-esdhc"
-+- reg : Should contain eSDHC registers location and length
-+- interrupts : Should contain eSDHC interrupt
-+
-+Optional properties:
-+- fsl,card-wired : Indicate the card is wired to host permanently
-+- fsl,cd-internal : Indicate to use controller internal card detection
-+- fsl,wp-internal : Indicate to use controller internal write protection
-+- cd-gpios : Specify GPIOs for card detection
-+- wp-gpios : Specify GPIOs for write protection
-+
-+Examples:
-+
-+esdhc@70004000 {
-+	compatible = "fsl,imx51-esdhc";
-+	reg = <0x70004000 0x4000>;
-+	interrupts = <1>;
-+	fsl,cd-internal;
-+	fsl,wp-internal;
-+};
-+
-+esdhc@70008000 {
-+	compatible = "fsl,imx51-esdhc";
-+	reg = <0x70008000 0x4000>;
-+	interrupts = <2>;
-+	cd-gpios = <&gpio0 6 0>; /* GPIO1_6 */
-+	wp-gpios = <&gpio0 5 0>; /* GPIO1_5 */
-+};
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index f3efb3b..cbdd91f 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -20,6 +20,9 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/sdio.h>
-+#include <linux/of.h>
-+#include <linux/of_device.h>
-+#include <linux/of_gpio.h>
- #include <mach/esdhc.h>
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
-@@ -73,6 +76,14 @@ static struct platform_device_id imx_esdhc_devtype[] = {
- 	}
- };
- 
-+static const struct of_device_id imx_esdhc_dt_ids[] = {
-+	{ .compatible = "fsl,imx25-esdhc", .data = &imx_esdhc_devtype[IMX25_ESDHC], },
-+	{ .compatible = "fsl,imx35-esdhc", .data = &imx_esdhc_devtype[IMX35_ESDHC], },
-+	{ .compatible = "fsl,imx51-esdhc", .data = &imx_esdhc_devtype[IMX51_ESDHC], },
-+	{ .compatible = "fsl,imx53-esdhc", .data = &imx_esdhc_devtype[IMX53_ESDHC], },
-+	{ /* sentinel */ }
-+};
-+
- static inline int is_imx25_esdhc(struct pltfm_imx_data *data)
- {
- 	return data->devtype == IMX25_ESDHC;
-@@ -307,8 +318,48 @@ static irqreturn_t cd_irq(int irq, void *data)
- 	return IRQ_HANDLED;
- };
- 
-+#ifdef CONFIG_OF
-+static int __devinit
-+sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
-+			 struct esdhc_platform_data *boarddata)
-+{
-+	struct device_node *np = pdev->dev.of_node;
-+
-+	if (!np)
-+		return -ENODEV;
-+
-+	if (of_get_property(np, "fsl,card-wired", NULL))
-+		boarddata->cd_type = ESDHC_CD_PERMANENT;
-+
-+	if (of_get_property(np, "fsl,cd-controller", NULL))
-+		boarddata->cd_type = ESDHC_CD_CONTROLLER;
-+
-+	if (of_get_property(np, "fsl,wp-controller", NULL))
-+		boarddata->wp_type = ESDHC_WP_CONTROLLER;
-+
-+	boarddata->cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
-+	if (gpio_is_valid(boarddata->cd_gpio))
-+		boarddata->cd_type = ESDHC_CD_GPIO;
-+
-+	boarddata->wp_gpio = of_get_named_gpio(np, "wp-gpios", 0);
-+	if (gpio_is_valid(boarddata->wp_gpio))
-+		boarddata->wp_type = ESDHC_WP_GPIO;
-+
-+	return 0;
-+}
-+#else
-+static inline int
-+sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
-+			 struct esdhc_platform_data *boarddata)
-+{
-+	return -ENODEV;
-+}
-+#endif
-+
- static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
- {
-+	const struct of_device_id *of_id =
-+			of_match_device(imx_esdhc_dt_ids, &pdev->dev);
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_host *host;
- 	struct esdhc_platform_data *boarddata;
-@@ -323,9 +374,13 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 	pltfm_host = sdhci_priv(host);
- 
- 	imx_data = kzalloc(sizeof(struct pltfm_imx_data), GFP_KERNEL);
--	if (!imx_data)
--		return -ENOMEM;
-+	if (!imx_data) {
-+		err = -ENOMEM;
-+		goto err_imx_data;
-+	}
- 
-+	if (of_id)
-+		pdev->id_entry = of_id->data;
- 	imx_data->devtype = pdev->id_entry->driver_data;
- 	pltfm_host->priv = imx_data;
- 
-@@ -344,14 +399,16 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 	if (is_imx53_esdhc(imx_data))
- 		imx_data->flags |= ESDHC_FLAG_MULTIBLK_NO_INT;
- 
--	if (!host->mmc->parent->platform_data) {
--		dev_err(mmc_dev(host->mmc), "no board data!\n");
--		err = -EINVAL;
--		goto no_board_data;
--	}
--	imx_data->boarddata = *((struct esdhc_platform_data *)
--				host->mmc->parent->platform_data);
- 	boarddata = &imx_data->boarddata;
-+	if (sdhci_esdhc_imx_probe_dt(pdev, boarddata) < 0) {
-+		if (!host->mmc->parent->platform_data) {
-+			dev_err(mmc_dev(host->mmc), "no board data!\n");
-+			err = -EINVAL;
-+			goto no_board_data;
-+		}
-+		imx_data->boarddata = *((struct esdhc_platform_data *)
-+					host->mmc->parent->platform_data);
-+	}
- 
- 	/* write_protect */
- 	if (boarddata->wp_type == ESDHC_WP_GPIO) {
-@@ -420,6 +477,7 @@ no_board_data:
- 	clk_put(pltfm_host->clk);
- err_clk_get:
- 	kfree(imx_data);
-+err_imx_data:
- 	sdhci_pltfm_free(pdev);
- 	return err;
- }
-@@ -455,6 +513,7 @@ static struct platform_driver sdhci_esdhc_imx_driver = {
- 	.driver		= {
- 		.name	= "sdhci-esdhc-imx",
- 		.owner	= THIS_MODULE,
-+		.of_match_table = imx_esdhc_dt_ids,
- 	},
- 	.id_table	= imx_esdhc_devtype,
- 	.probe		= sdhci_esdhc_imx_probe,
--- 
-1.7.4.1
+> -----Original Message-----
+> From: Philip Rakity [mailto:prakity@marvell.com]
+> Sent: Wednesday, July 06, 2011 9:22 PM
+> To: linux-mmc@vger.kernel.org
+> Cc: Nath, Arindam
+> Subject: [PATCH V2] mmc: sd.c Set Non Default Drive Strength via
+> platform
+> 
+> 
+> V2
+> --
+> Include host.h change for callback to select_drive_strength
+> 
+> V1
+> --
+> Non default Drive Strength cannot be set automatically.
+> It is a function of the board design and only if there
+> is a specific platform handler can it be set.  The platform
+> handler needs to take into account the board design.  Pass
+> to the platform code the necessary information.
+> 
+> For example:  The card and host controller may indicate
+> they support HIGH and LOW drive strength.  There is no way
+> to know what should be chosen without specific board knowledge.
+> Setting HIGH may lead to reflections and setting LOW may not
+> be sufficient.
+> There is no mechanism (like ethernet duplex or speed pulses)
+> to determine what should be done automatically.
+> 
+> If no platform handler is defined -- use the default value.
+> 
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> ---
+>  drivers/mmc/core/sd.c    |   68 ++++++++++++++++++++++++++------------
+> -------
+>  include/linux/mmc/host.h |    1 +
+>  2 files changed, 40 insertions(+), 29 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index ff27741..633975f 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -409,52 +409,62 @@ out:
+> 
+>  static int sd_select_driver_type(struct mmc_card *card, u8 *status)
+>  {
+> -	int host_drv_type = 0, card_drv_type = 0;
+> +	int host_drv_type = SD_DRIVER_TYPE_B;
+> +	int card_drv_type = SD_DRIVER_TYPE_B;
+> +	int drive_strength;
+>  	int err;
+> 
+>  	/*
+>  	 * If the host doesn't support any of the Driver Types A,C or D,
+> -	 * default Driver Type B is used.
+> +	 * or there is no board specific handler then default Driver
+> +	 * Type B is used.
+>  	 */
+>  	if (!(card->host->caps & (MMC_CAP_DRIVER_TYPE_A |
+> MMC_CAP_DRIVER_TYPE_C
+>  	    | MMC_CAP_DRIVER_TYPE_D)))
+>  		return 0;
+> 
+> -	if (card->host->caps & MMC_CAP_DRIVER_TYPE_A) {
+> -		host_drv_type = MMC_SET_DRIVER_TYPE_A;
+> -		if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_A)
+> -			card_drv_type = MMC_SET_DRIVER_TYPE_A;
+> -		else if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_B)
+> -			card_drv_type = MMC_SET_DRIVER_TYPE_B;
+> -		else if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
+> -			card_drv_type = MMC_SET_DRIVER_TYPE_C;
+> -	} else if (card->host->caps & MMC_CAP_DRIVER_TYPE_C) {
+> -		host_drv_type = MMC_SET_DRIVER_TYPE_C;
+> -		if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
+> -			card_drv_type = MMC_SET_DRIVER_TYPE_C;
+> -	} else if (!(card->host->caps & MMC_CAP_DRIVER_TYPE_D)) {
+> -		/*
+> -		 * If we are here, that means only the default driver type
+> -		 * B is supported by the host.
+> -		 */
+> -		host_drv_type = MMC_SET_DRIVER_TYPE_B;
+> -		if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_B)
+> -			card_drv_type = MMC_SET_DRIVER_TYPE_B;
+> -		else if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
+> -			card_drv_type = MMC_SET_DRIVER_TYPE_C;
+> -	}
+> +	if (!card->host->ops->select_drive_strength)
+> +		return 0;
+> +
+> +	if (card->host->caps & MMC_CAP_DRIVER_TYPE_A)
+> +		host_drv_type |= SD_DRIVER_TYPE_A;
+> +
+> +	if (card->host->caps & MMC_CAP_DRIVER_TYPE_C)
+> +		host_drv_type |= SD_DRIVER_TYPE_C;
+> +
+> +	if (card->host->caps & MMC_CAP_DRIVER_TYPE_D)
+> +		host_drv_type |= SD_DRIVER_TYPE_D;
+> +
+> +	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_A)
+> +		card_drv_type |= SD_DRIVER_TYPE_A;
+> +
+> +	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
+> +		card_drv_type |= SD_DRIVER_TYPE_C;
+> +
+> +	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_D)
+> +		card_drv_type |= SD_DRIVER_TYPE_D;
+> +
+> +	/*
+> +	 * The drive strength that the hardware can support
+> +	 * depends on the board design.  Pass the appropriate
+> +	 * information and let the hardware specific code
+> +	 * return what is possible given the options
+> +	 */
+> +	drive_strength = card->host->ops->select_drive_strength(
+> +		card->sw_caps.uhs_max_dtr,
+> +		host_drv_type, card_drv_type);
+> 
+> -	err = mmc_sd_switch(card, 1, 2, card_drv_type, status);
+> +	err = mmc_sd_switch(card, 1, 2, drive_strength, status);
+>  	if (err)
+>  		return err;
+> 
+> -	if ((status[15] & 0xF) != card_drv_type) {
+> -		printk(KERN_WARNING "%s: Problem setting driver
+> strength!\n",
+> +	if ((status[15] & 0xF) != drive_strength) {
+> +		printk(KERN_WARNING "%s: Problem setting drive
+> strength!\n",
+>  			mmc_hostname(card->host));
+>  		return 0;
+>  	}
+> 
+> -	mmc_set_driver_type(card->host, host_drv_type);
+> +	mmc_set_driver_type(card->host, drive_strength);
+> 
+>  	return 0;
+>  }
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index ac3fbac..4913f6c 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -139,6 +139,7 @@ struct mmc_host_ops {
+>  	int	(*start_signal_voltage_switch)(struct mmc_host *host,
+> struct mmc_ios *ios);
+>  	int	(*execute_tuning)(struct mmc_host *host);
+>  	void	(*enable_preset_value)(struct mmc_host *host, bool enable);
+> +	int	(*select_drive_strength)(unsigned int max_dtr, int
+> host_drv, int card_drv);
+>  };
+> 
+>  struct mmc_card;
+> --
+> 1.7.0.4
+> 
+> 
 
+Looks good to me.
+
+Reviewed-by: Arindam Nath <arindam.nath@amd.com>
+
+Thanks,
+Arindam
 
