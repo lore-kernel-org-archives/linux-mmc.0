@@ -1,55 +1,109 @@
-From: Sebastian RASMUSSEN <sebastian.rasmussen@stericsson.com>
-Subject: RE: [PATCH] mmc: enable background operations for emmc4.41 with HPI
- support
-Date: Wed, 6 Jul 2011 18:15:41 +0200
-Message-ID: <ECD438FDEF6BD742895E554C24725A4019873A5F9C@EXDCVYMBSTM005.EQ1STM.local>
-References: <ECD438FDEF6BD742895E554C24725A4019873A5EE4@EXDCVYMBSTM005.EQ1STM.local>
- <CAH9JG2U9B+Nxcy+g3TG5-2pMnPjNdRdJwOfBrxdeihiqdj4Zpw@mail.gmail.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: [PATCH v3 1/4] mmc: sdhci-esdhc-imx: do not reference platform data after probe
+Date: Thu, 7 Jul 2011 00:47:47 +0800
+Message-ID: <1309970870-13336-2-git-send-email-shawn.guo@linaro.org>
+References: <1309970870-13336-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:41822 "EHLO
-	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751203Ab1GFQPz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 12:15:55 -0400
-In-Reply-To: <CAH9JG2U9B+Nxcy+g3TG5-2pMnPjNdRdJwOfBrxdeihiqdj4Zpw@mail.gmail.com>
-Content-Language: en-US
+Received: from db3ehsobe005.messaging.microsoft.com ([213.199.154.143]:44170
+	"EHLO DB3EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754714Ab1GFQle (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 12:41:34 -0400
+In-Reply-To: <1309970870-13336-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kmpark@infradead.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Per Forlin <per.forlin@linaro.org>, "chuanxiao.dong@intel.com" <chuanxiao.dong@intel.com>
+To: linux-mmc@vger.kernel.org
+Cc: devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>, Troy Kisky <troy.kisky@boundarydevices.com>, Grant Likely <grant.likely@secretlab.ca>, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>
 
-SGkhDQoNCj4gPiA+IDEuIEkgd29uZGVyIEJLT1BTIGlzIHJlYWxseSByZXF1aXJlZCB0byBwZXJm
-b3JtIGZyZXF1ZW50bHk/DQo+ID4gPiBZZXMgSSBrbm93IGl0J3MgaGVscGZ1bCB0byB1c2UgYnV0
-IG5vIG5lZWQgdG8gY2FsbCBpdCBmcmVxdWVudGx5Lg0KPiA+IEkgYmVsaWV2ZSB0aGF0IHRoZSBw
-YXRjaCBwcm9wZXJseSBjaGVja3MgZm9yIFIxX1VSR0VOVF9CS09QUywNCj4gPiB3aGljaCBzZWVt
-cyBjb3JyZWN0Li4/DQoNCj4gUmlnaHQsIGl0IGNoZWNrcyB0aGUgUjFfVVJHRU5UX0JLT1BTLCBJ
-IG1lYW4gaXQgY2FsbGVkIGV2ZXJ5IHVzZXINCj4gcmVxdWVzdCBpcyBmaW5pc2hlZC4NCg0KQWhh
-LCBhcmUgeW91IHJlZmVycmluZyB0byB0aGUgbW1jX3N0YXJ0X2Jrb3BzKCkgY2FsbGVkIGZyb20N
-Cm1tY19xdWV1ZV90aHJlYWQoKT8gSWYgc28sIEkgc2hvdWxkIHBvaW50IHRvIHRoZSBjaGVjayBm
-b3Igd2hldGhlcg0KQktPUFMgYXJlIF9yZWFsbHlfIG5lZWRlZCwgbW1jX2NhcmRfbmVlZF9ia29w
-cygpLCBhdCB0aGUgYmVnaW5uaW5nDQpvZiBtbWNfc3RhcnRfYmtvcHMoKS4gVGhhdCBmbGFnIGlz
-IG9ubHkgc2V0IGlmIFIxX1VSR0VUX0JLT1BTIGlzIA0KYXNzZXJ0ZWQgYnkgdGhlIGVNTUMgZGV2
-aWNlLiBTbyBldmVuIGlmIG1tY19zdGFydF9ia29wcygpIGlzIGNhbGxlZA0KYWZ0ZXIgZXZlcnkg
-dXNlciByZXF1ZXN0IHRoYXQgZnVuY3Rpb24gd291bGQganVzdCBkbyBhbiBlYXJseSByZXR1cm4u
-DQoNCk9uZSBjb3VsZCBhcmd1ZSB0aGF0IHRoZSBjYWxsIHRvIG1tY19jYXJkX25lZWRfYmtvcHMo
-KSBzaG91bGQgYmUgaW4NCnF1ZXVlLmMsIGJlZm9yZSB0aGUgY2FsbCB0byBtbWNfc3RhcnRfYmtv
-cHMoKS4gTWF5YmUgdGhhdCBpcyBwcmVmZXJhYmxlDQphbmQgd291bGQgaGF2ZSBpbXByb3ZlZCBy
-ZWFkYWJpbGl0eS4uPw0KDQo+ID4gPiBSZWxhdGVkIHdpdGggdGhpcywgeW91IGNhbiBmaW5kIGEg
-IkhQSSBiYWNrZ3JvdW5kIGFuZCBvbmUgb2YgcG9zc2libGUNCj4gPiA+IHNvbHV0aW9ucyIgaW4g
-dGhlIG1tYyBTcGVjLg0KPiA+IFdoYXQgcGFydCBvZiB0aGUgc3BlYyBhcmUgeW91IHJlZmVycmlu
-ZyB0bz8NCg0KPiBJIHJlZmVycyB0aGUgSkRFREMgdjQuNDEgYW5kIHY0LjUgZHJhZnQgdmVyc2lv
-bi4NCg0KT2ssIHRoZW4gSSdtIG5vdCBzdXJlIEkgdW5kZXJzdGFuZCB3aGF0IHlvdSBhcmUgZ2V0
-dGluZyBhdC4NCkkgdHJpZWQgdG8gbG9vayB0aHJvdWdoIHRoZSBjaGFwdGVycyBmb3IgQktPUFMg
-YnV0IEknbSBub3QNCnNlZWluZyBhbnkgZGVzY3JpcHRpdmUgbGlzdCBvZiBzb2x1dGlvbnMgY29u
-Y2VybmluZyBIUEkgJg0KQktPUFM/DQoNCihCVFcsIGl0IHNlZW1zIGFzIGlmIDQuNSBkcmFmdCBp
-cyBub3cgZmluYWwgLS0gDQpodHRwOi8vd3d3LmplZGVjLm9yZy9zaXRlcy9kZWZhdWx0L2ZpbGVz
-L2RvY3MvamVzZDg0LUI0NS5wZGYpDQoNCj4gQWN0dWFsbHkgdGhlcmUncyBubyBiaWcgaXNzdWUg
-d2l0aG91dCBIUEkuIGJ1dCBzb21lIGNhc2UgKGFzIGFib3ZlKQ0KPiBoYXMgcmVhZCBsYXRlbmN5
-IHByb2JsZW0gZXNwLiB3aGVuIHBsYXkgbW92aWUgYXQgZm9yZWdyb3VuZCwgYnV0IA0KPiBzb21l
-IGJhY2tncm91bmQgaGVhdnkgd3JpdGUgY2FzZS4NCg0KT2ssIHNvIHdoYXQgeW91IGFyZSBsb29r
-aW5nIGZvciBpcyB0byBoYXZlIEJLT1BTIGFuZCBIUEkgaW4gc2VwYXJhdGUNCnBhdGNoZXMgYWxv
-bmcgd2l0aCBtZWFzdXJlbWVudHMgdG8gYmFja3VwIHRoYXQgdGhlIEhQSSByZWFsbHkgX2RvZXNf
-DQppbXByb3ZlIHJlcXVlc3QgbGF0ZW5jeSB3aGVuIEhQSSBpcyB1c2VkPw0KDQogLyBTZWJhc3Rp
-YW4NCg==
+The patch copies platform data into pltfm_imx_data and reference
+the data there than platform data after probe.
+
+This work is inspired by Grant Likely and Troy Kisky.
+
+Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+Cc: Troy Kisky <troy.kisky@boundarydevices.com>
+Cc: Grant Likely <grant.likely@secretlab.ca>
+Cc: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Chris Ball <cjb@laptop.org>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |   22 +++++++++++++---------
+ 1 files changed, 13 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 3cc6f61..0b0e62e 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -45,6 +45,7 @@
+ struct pltfm_imx_data {
+ 	int flags;
+ 	u32 scratchpad;
++	struct esdhc_platform_data boarddata;
+ };
+ 
+ static unsigned int esdhc_pltfm_get_max_blk_size(struct sdhci_host *host)
+@@ -69,8 +70,9 @@ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, i
+ 
+ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ {
+-	struct esdhc_platform_data *boarddata =
+-			host->mmc->parent->platform_data;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = pltfm_host->priv;
++	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+ 
+ 	/* fake CARD_PRESENT flag */
+ 	u32 val = readl(host->ioaddr + reg);
+@@ -92,8 +94,7 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+-	struct esdhc_platform_data *boarddata =
+-			host->mmc->parent->platform_data;
++	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+ 
+ 	if (unlikely((reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)
+ 			&& (boarddata->cd_type == ESDHC_CD_GPIO)))
+@@ -210,8 +211,9 @@ static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_host *host)
+ 
+ static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
+ {
+-	struct esdhc_platform_data *boarddata =
+-			host->mmc->parent->platform_data;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = pltfm_host->priv;
++	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+ 
+ 	switch (boarddata->wp_type) {
+ 	case ESDHC_WP_GPIO:
+@@ -291,12 +293,14 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	if (!(cpu_is_mx25() || cpu_is_mx35() || cpu_is_mx51()))
+ 		imx_data->flags |= ESDHC_FLAG_MULTIBLK_NO_INT;
+ 
+-	boarddata = host->mmc->parent->platform_data;
+-	if (!boarddata) {
++	if (!host->mmc->parent->platform_data) {
+ 		dev_err(mmc_dev(host->mmc), "no board data!\n");
+ 		err = -EINVAL;
+ 		goto no_board_data;
+ 	}
++	imx_data->boarddata = *((struct esdhc_platform_data *)
++				host->mmc->parent->platform_data);
++	boarddata = &imx_data->boarddata;
+ 
+ 	/* write_protect */
+ 	if (boarddata->wp_type == ESDHC_WP_GPIO) {
+@@ -373,8 +377,8 @@ static int __devexit sdhci_esdhc_imx_remove(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct esdhc_platform_data *boarddata = host->mmc->parent->platform_data;
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
++	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+ 	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
+ 
+ 	sdhci_remove_host(host, dead);
+-- 
+1.7.4.1
+
+
