@@ -1,68 +1,47 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH] mxs-mmc: fix clock rate setting
-Date: Wed, 6 Jul 2011 11:58:55 +0200
-Message-ID: <20110706095855.GE2117@pengutronix.de>
-References: <20110701144409.GA3825@pengutronix.de>
- <20110701154628.GD8631@S2100-06.ap.freescale.net>
- <20110702131225.GA5478@pengutronix.de>
- <20110703092850.GA9938@S2100-06.ap.freescale.net>
- <20110703103124.GA1333@pengutronix.de>
- <20110703115418.GB9938@S2100-06.ap.freescale.net>
- <20110704103402.GA3990@pengutronix.de>
- <CAHMSPgMxCqFzigAzMc7nbTB_0NyLcK3FrVDW8arKa0ip15TH3Q@mail.gmail.com>
- <20110706093848.GC2117@pengutronix.de>
- <CAHMSPgPZ6xJ3FQrR5wkJZiu5KCqg7k9bcxRq-ad9_TDJsyzx5g@mail.gmail.com>
+From: "Led Technology Srl" <lednews@led-shop.it>
+Subject: Lavagna luminosa a LED con telecomando e lampada per ombrelloni
+Date: Wed, 6 Jul 2011 14:29:19 +0200
+Message-ID: <13321911539921917914774@roberto-5f06a50>
+Reply-To: commerciale@led-technology.it
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="qFgkTsE6LiHkLPZw"
+Content-Type: text/plain
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:52488 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750955Ab1GFJ67 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 05:58:59 -0400
-Content-Disposition: inline
-In-Reply-To: <CAHMSPgPZ6xJ3FQrR5wkJZiu5KCqg7k9bcxRq-ad9_TDJsyzx5g@mail.gmail.com>
+Received: from smtplq-out18.aruba.it ([62.149.158.38]:42826 "HELO
+	smtplq01.aruba.it" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with SMTP id S1753311Ab1GFMgD convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 08:36:03 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Koen Beel <koen.beel.barco@gmail.com>
-Cc: Shawn Guo <shawn.guo@freescale.com>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
+Led Technology srl vi presenta questo fantastico prodotto per presentar=
+e il vostro Men=F9 in un modo pi=F9 tecnologico,
+oppure la lampada a led per illuminare i vostri tavoli sotto gli ombrel=
+loni.
 
---qFgkTsE6LiHkLPZw
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Vedi la brochure della lavagna cliccando su questo link: http://www.led=
+-technology.it/files/lavagna_luminosa.jpg
+Vedi la brochure della lampada per ombrelloni clickando su questo link:=
+  http://www.led-shop.it/luci_per_ombrelloni.jpg
 
+oppure visitate il nostro negozio online per visionare tutti i nostri p=
+rodotti a LED per illuminazione stradale,
+illuminazione architetturale, illuminazione per campi sportivi, illumin=
+azione industriale etc.
 
-> I think I misunderstood this suggestion previously. Using DIV_ROUND_UP
-> would do the rounding in the correct direction.
-> This should result in: "the actual clock is as high as possible
-> without being higher then the requested clock."
+www.led-shop.it
 
-Yes, that should be done in V2. And if you could also put the '- 1' to
-the line calculating div2, that would be an extra plus. I think it is a
-lot more readable to have the whole formula in one place, and not split
-up.
+Per acquistare la lavagna luminosa online clicca su questo link: http:/=
+/www.led-shop.it/negozio/cat066.php?n=3D1#1
+Per acquistare la lampada per ombrelloni clicca su questo link: http://=
+www.led-shop.it/negozio/cat061.php?n=3D1#1
 
-Regards,
+Contatto commerciale diretto:
+PIAZZALUNGA ROBERTO
+CELL. 345 2412480
 
-   Wolfram
+Se non vi =E8 gradita questa mail scrivete a unsubscribe@led-shop.it , =
+non sarete pi=F9 disturbati.
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---qFgkTsE6LiHkLPZw
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk4UMd8ACgkQD27XaX1/VRuVawCgp3xBgYEexOQC1+dkplJNxyh5
-1m0An2ftoTnZBGZvd9VGAXbPSnms15ud
-=lzt5
------END PGP SIGNATURE-----
-
---qFgkTsE6LiHkLPZw--
+Grazie.
