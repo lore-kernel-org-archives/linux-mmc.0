@@ -1,61 +1,35 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH] mxs-mmc: fix clock rate setting
-Date: Wed, 6 Jul 2011 11:26:41 +0200
-Message-ID: <20110706092641.GB2117@pengutronix.de>
-References: <BANLkTi==Y_MJ2H_u15DzunWusUb=GsotWg@mail.gmail.com>
- <BANLkTinKcb-=m3sURawdEjR=vTt=ApBKaQ@mail.gmail.com>
- <20110630145507.GG1997@pengutronix.de>
- <20110701091753.GE1922@pengutronix.de>
- <BANLkTi=cTigrnAHY3sDNC04aNpmZOQpUsA@mail.gmail.com>
- <20110701122709.GJ1922@pengutronix.de>
- <BANLkTim5aHJHbtbw-ZWnqdjdj_nxWZuwog@mail.gmail.com>
- <20110701144409.GA3825@pengutronix.de>
- <CAHMSPgNtOzZ=Dm1cEO9rXxc9JaoVXq2+whK_h9RSGM-COK=A2w@mail.gmail.com>
+From: James Hogan <james.hogan@imgtec.com>
+Subject: [PATCH v2 0/4] mmc: dw_mmc: mmc_test related fixes
+Date: Wed, 06 Jul 2011 10:34:08 +0100
+Message-ID: <4E142C10.3050508@imgtec.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="E39vaYmALEf/7YXx"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:33311 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754230Ab1GFJ0q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 05:26:46 -0400
-Content-Disposition: inline
-In-Reply-To: <CAHMSPgNtOzZ=Dm1cEO9rXxc9JaoVXq2+whK_h9RSGM-COK=A2w@mail.gmail.com>
+Received: from multi.imgtec.com ([194.200.65.239]:32731 "EHLO multi.imgtec.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753964Ab1GFJeO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 6 Jul 2011 05:34:14 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Koen Beel <koen.beel.barco@gmail.com>
-Cc: linux-mmc@vger.kernel.org, shawn.guo@freescale.com
+To: Chris Ball <cjb@laptop.org>, Will <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>l
 
+No changes since v1 except acked-by and tested-by
 
---E39vaYmALEf/7YXx
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+More improvements and fixes for the Synopsys DesignWare MCI driver so
+that it passes the mmc_test suite:
 
-> > About the patch itself: I didn't verify the formulas, but it does solve=
- one
-> > special problem here. Thanks a lot! So:
->=20
-> Does it solve any other special problem except for the wrong clock rate s=
-etting?
+[PATCH 1/4] mmc: dw_mmc: fix stop when fallen back to PIO
+	Fixes a hang after an error/timeout in PIO mode.
+[PATCH 2/4] mmc: dw_mmc: remove unnecessary error messages
+	Removes some dev_err's since an errno is sufficient.
+[PATCH 3/4] mmc: dw_mmc: handle "no CRC status" error
+	Fixes "Correct xfer_size at write" tests.
+[PATCH 4/4] mmc: dw_mmc: reset FIFO after an error
+	Fixes modified "Correct xfer_size at write" tests (3 blocks
+	instead of 2).
 
-Nope, but that it does :)
+ drivers/mmc/host/dw_mmc.c  |   41 +++++++++++++++++++++++++++++++----------
+ include/linux/mmc/dw_mmc.h |    2 ++
+ 2 files changed, 33 insertions(+), 10 deletions(-)
 
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---E39vaYmALEf/7YXx
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEARECAAYFAk4UKlEACgkQD27XaX1/VRsHTgCfdf6Pyfvc1B2NZtDauFstxBAT
-nkoAn30JV/r/tMdOAS4FdlZUyp328GlC
-=lBaH
------END PGP SIGNATURE-----
-
---E39vaYmALEf/7YXx--
