@@ -1,123 +1,96 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: [PATCH V4] MMC: PM: add suspend/resume in atmel-mci
-Date: Wed,  6 Jul 2011 11:31:36 +0200
-Message-ID: <1309944696-6415-1-git-send-email-nicolas.ferre@atmel.com>
+From: Felipe Balbi <balbi@ti.com>
+Subject: Re: [PATCH V4] MMC: PM: add suspend/resume in atmel-mci
+Date: Wed, 6 Jul 2011 11:28:09 +0300
+Message-ID: <20110706082808.GF10729@legolas.emea.dhcp.ti.com>
 References: <4E11B57B.4040000@atmel.com>
+ <1309944696-6415-1-git-send-email-nicolas.ferre@atmel.com>
+Reply-To: balbi@ti.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <4E11B57B.4040000@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org, hans-christian.egtvedt@atmel.com
-Cc: balbi@ti.com, kernel@avr32linux.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Nicolas Ferre <nicolas.ferre@atmel.com>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="AH+kv8CCoFf6qPuz"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog105.obsmtp.com ([74.125.149.75]:58380 "EHLO
+	na3sys009aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751614Ab1GFI2T (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 04:28:19 -0400
+Content-Disposition: inline
+In-Reply-To: <1309944696-6415-1-git-send-email-nicolas.ferre@atmel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-
-Take care of slots while going to suspend state.
-
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
----
-V4: make CONFIG_PM logic work even if not selected
-V3: take care of each slot SUSPENDED state
-    (adding a status bit in the slot "flags")
-V2: move to pm_ops
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, hans-christian.egtvedt@atmel.com, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kernel@avr32linux.org, balbi@ti.com
 
 
- drivers/mmc/host/atmel-mci.c |   63 ++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 63 insertions(+), 0 deletions(-)
+--AH+kv8CCoFf6qPuz
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index aa8039f..fa8cae1 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -203,6 +203,7 @@ struct atmel_mci_slot {
- #define ATMCI_CARD_PRESENT	0
- #define ATMCI_CARD_NEED_INIT	1
- #define ATMCI_SHUTDOWN		2
-+#define ATMCI_SUSPENDED		3
- 
- 	int			detect_pin;
- 	int			wp_pin;
-@@ -1878,10 +1879,72 @@ static int __exit atmci_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+#ifdef CONFIG_PM
-+static int atmci_suspend(struct device *dev)
-+{
-+	struct atmel_mci *host = dev_get_drvdata(dev);
-+	int i;
-+
-+	 for (i = 0; i < ATMEL_MCI_MAX_NR_SLOTS; i++) {
-+		struct atmel_mci_slot *slot = host->slot[i];
-+		int ret;
-+
-+		if (!slot)
-+			continue;
-+		ret = mmc_suspend_host(slot->mmc);
-+		if (ret < 0) {
-+			while (--i >= 0) {
-+				slot = host->slot[i];
-+				if (slot
-+				&& test_bit(ATMCI_SUSPENDED, &slot->flags)) {
-+					mmc_resume_host(host->slot[i]->mmc);
-+					clear_bit(ATMCI_SUSPENDED, &slot->flags);
-+				}
-+			}
-+			return ret;
-+		} else {
-+			set_bit(ATMCI_SUSPENDED, &slot->flags);
-+		}
-+	}
-+
-+	return 0;
-+}
-+
-+static int atmci_resume(struct device *dev)
-+{
-+	struct atmel_mci *host = dev_get_drvdata(dev);
-+	int i;
-+	int ret = 0;
-+
-+	for (i = 0; i < ATMEL_MCI_MAX_NR_SLOTS; i++) {
-+		struct atmel_mci_slot *slot = host->slot[i];
-+		int err;
-+
-+		slot = host->slot[i];
-+		if (!slot)
-+			continue;
-+		if (!test_bit(ATMCI_SUSPENDED, &slot->flags))
-+			continue;
-+		err = mmc_resume_host(slot->mmc);
-+		if (err < 0)
-+			ret = err;
-+		else
-+			clear_bit(ATMCI_SUSPENDED, &slot->flags);
-+	}
-+
-+	return ret;
-+}
-+static SIMPLE_DEV_PM_OPS(atmci_pm, atmci_suspend, atmci_resume);
-+#define ATMCI_PM_OPS	(&atmci_pm)
-+#else
-+#define ATMCI_PM_OPS	NULL
-+#endif
-+
- static struct platform_driver atmci_driver = {
- 	.remove		= __exit_p(atmci_remove),
- 	.driver		= {
- 		.name		= "atmel_mci",
-+		.pm		= ATMCI_PM_OPS,
- 	},
- };
- 
--- 
-1.7.3
+Hi,
+
+On Wed, Jul 06, 2011 at 11:31:36AM +0200, Nicolas Ferre wrote:
+> Take care of slots while going to suspend state.
+>=20
+> Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+
+FWIW:
+
+Reviewed-by: Felipe Balbi <balbi@ti.com>
+
+> @@ -1878,10 +1879,72 @@ static int __exit atmci_remove(struct platform_de=
+vice *pdev)
+>  	return 0;
+>  }
+> =20
+> +#ifdef CONFIG_PM
+> +static int atmci_suspend(struct device *dev)
+> +{
+> +	struct atmel_mci *host =3D dev_get_drvdata(dev);
+> +	int i;
+> +
+> +	 for (i =3D 0; i < ATMEL_MCI_MAX_NR_SLOTS; i++) {
+> +		struct atmel_mci_slot *slot =3D host->slot[i];
+> +		int ret;
+> +
+> +		if (!slot)
+> +			continue;
+> +		ret =3D mmc_suspend_host(slot->mmc);
+> +		if (ret < 0) {
+> +			while (--i >=3D 0) {
+> +				slot =3D host->slot[i];
+> +				if (slot
+> +				&& test_bit(ATMCI_SUSPENDED, &slot->flags)) {
+> +					mmc_resume_host(host->slot[i]->mmc);
+> +					clear_bit(ATMCI_SUSPENDED, &slot->flags);
+> +				}
+> +			}
+> +			return ret;
+> +		} else {
+> +			set_bit(ATMCI_SUSPENDED, &slot->flags);
+> +		}
+
+just one small nitpicking which you can ignore if you like, but you
+don't really need the else branch here. If you fall into if (ret < 0)
+you will return early anyway, so you can save two lines and an
+indentation level :-p
+
+--=20
+balbi
+
+--AH+kv8CCoFf6qPuz
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iQEcBAEBAgAGBQJOFByYAAoJEAv8Txj19kN1ONcH/Rg7um74zY+ZiULxkkv77bLS
+LLBa128mElCtI4PK6KN4tGuttAk9zN2mYT6RIAr+BLXXwLZkL88Fr41vZ2M990Ao
+zI2Rj1L+kzHhSvj0GVPKhAQwvatR2ecsxUntxuTXcNGKwC1UmhTE5tIxLFqBmuSr
+RHPcrrg4N/cNlO7uKPb0Wrh9dnJHUNFGsV0ztLhcqR6GM+XXHgMiWzJXxwffnt/2
+w6U0ccfcbUZIxKUkp6GBQ1paPZKIDNJ9Zb+hqDnJLxjhPZ0vlYJhYEzoi+qlI90j
+LcK32J53HdZa6RTXN6FUkLvp4wyfmu3uJvIlPNqMMk6SlS1nNHXC/vmxiaeT66Y=
+=Ja9w
+-----END PGP SIGNATURE-----
+
+--AH+kv8CCoFf6qPuz--
