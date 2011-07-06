@@ -1,47 +1,67 @@
-From: "Led Technology Srl" <lednews@led-shop.it>
-Subject: Lavagna luminosa a LED con telecomando e lampada per ombrelloni
-Date: Wed, 6 Jul 2011 14:29:19 +0200
-Message-ID: <13321911539921917914774@roberto-5f06a50>
-Reply-To: commerciale@led-technology.it
+From: Sebastian RASMUSSEN <sebastian.rasmussen@stericsson.com>
+Subject: Re: [PATCH] mmc: enable background operations for emmc4.41 with HPI
+ support
+Date: Wed, 6 Jul 2011 16:40:21 +0200
+Message-ID: <ECD438FDEF6BD742895E554C24725A4019873A5EE4@EXDCVYMBSTM005.EQ1STM.local>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtplq-out18.aruba.it ([62.149.158.38]:42826 "HELO
-	smtplq01.aruba.it" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with SMTP id S1753311Ab1GFMgD convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 08:36:03 -0400
+Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:60388 "EHLO
+	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753235Ab1GFOkz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 10:40:55 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: "kmpark@samsung.com" <kmpark@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Per Forlin <per.forlin@linaro.org>, "chuanxiao.dong@intel.com" <chuanxiao.dong@intel.com>
 
-Led Technology srl vi presenta questo fantastico prodotto per presentar=
-e il vostro Men=F9 in un modo pi=F9 tecnologico,
-oppure la lampada a led per illuminare i vostri tavoli sotto gli ombrel=
-loni.
-
-Vedi la brochure della lavagna cliccando su questo link: http://www.led=
--technology.it/files/lavagna_luminosa.jpg
-Vedi la brochure della lampada per ombrelloni clickando su questo link:=
-  http://www.led-shop.it/luci_per_ombrelloni.jpg
-
-oppure visitate il nostro negozio online per visionare tutti i nostri p=
-rodotti a LED per illuminazione stradale,
-illuminazione architetturale, illuminazione per campi sportivi, illumin=
-azione industriale etc.
-
-www.led-shop.it
-
-Per acquistare la lavagna luminosa online clicca su questo link: http:/=
-/www.led-shop.it/negozio/cat066.php?n=3D1#1
-Per acquistare la lampada per ombrelloni clicca su questo link: http://=
-www.led-shop.it/negozio/cat061.php?n=3D1#1
-
-Contatto commerciale diretto:
-PIAZZALUNGA ROBERTO
-CELL. 345 2412480
-
-Se non vi =E8 gradita questa mail scrivete a unsubscribe@led-shop.it , =
-non sarete pi=F9 disturbati.
-
-Grazie.
+SGkhDQoNCj4gSFBJIGlzIGEgZmVhdHVyZSB0byBoYW5kbGUgYSBoaWdoZXIgb3IgdXJnZW50IHJl
+cXVlc3QgdGhlbiBwcmUtb25nb2luZw0KPiByZXF1ZXN0IGFuZCBpdCdzIG9ubHkgcG9zc2libGUg
+d2hlbiBzb21lIGNvbmRpdGlvbnMgYXJlIG1ldC4NCg0KQWdyZWVkLCBhcyBJIHJlYWQgdGhlIHNw
+ZWMgdGhpcyB3b3VsZCB3cml0ZXMsIGVyYXNlcyBhbmQgQktPUFMNCihlTU1DIHNwZWMgNC40MSA3
+LjYuMjAgKHRhYmxlIDIwKSBhbmQgdGhlIDNyZCBwYXJhZ3JhcGggaW4gNy42LjE5KS4NCg0KPiBC
+S09QUyBpcyBhIGZlYXR1cmUgdG8gZ2l2ZSBhIGNoYW5jZSB0byBvcHRpbWl6ZSB0aGUgaW50ZXJu
+YWwgDQo+IGZvciBuZXh0IG9wZXJhdGlvbi4NCg0KWWVzLCBJIGJlbGlldmUgdGhlIG1haW4gcmVh
+c29ucyB3b3VsZCBiZSB3aGVuIGJsb2NrcyBhcmUgDQplaXRoZXIgcmVwbGFjZWQgb3IgYSBFUkFT
+RSBvciBUUklNIG9wZXJhdGlvbiBoYXMgYmVlbiBpc3N1ZWQuDQpUaGUgQktPUFMgZmVhdHVyZSB3
+b3VsZCBhbGxvdyB0aGUgZU1NQyBkZXZpY2UgdG8gY2xlYW4gdXAgaXRzDQppbnRlcm5hbCBzdGF0
+ZSBhbmQgcHJlLWVyYXNlIGFueSBpbnRlcm5hbCBmbGFzaCBkZXZpY2VzIHNvDQp0aGF0IHRoZSBu
+ZXh0IHdyaXRlIG9wZXJhdGlvbiB3b3VsZCBoYXZlIGJldHRlciBwZXJmb3JtYW5jZS4NCkkgYmVs
+aWV2ZSB0aGlzIHRvIGJlIHRoZSBpbnRlbnQgYXQgbGVhc3QuDQoNCj4gQ3VycmVudCBpbXBsZW1l
+bnRhdGlvbiBpcyBIUEkgaXMgdXNlZCBmb3IgQktPUFMgYnV0IEkgdGhpbmsgDQo+IEhQSSBpcyB1
+c2VkIGZvciBXcml0ZSBvcGVyYXRpb24gdG8gcmVkdWNlIHRoZSBsYXRlbmN5Lg0KDQpUcnVlLCB0
+aGUgZm9jdXMgb2YgSFBJIGlzIGZvciBXcml0ZSBvcGVyYXRpb25zLCBob3dldmVyIGluDQplTU1D
+IHNwZWMgNC40MSBjaGFwdGVyIDcuNi4xOSBvbiBiYWNrZ3JvdW5kIG9wZXJhdGlvbnMgaXQNCmRv
+ZXMgc3RhdGUgdGhhdCBhIGhvc3QgbWF5IGludGVycnVwdCBhbnkgb25nb2luZyBiYWNrZ3JvdW5k
+DQpvcGVyYXRpb25zIGJ5IHVzaW5nIEhQSS4gU28gdG8gbWUgaXQgc2VlbXMgYXMgaWYgdGhlIGlu
+dGVudA0KZnJvbSBKZWRlYyBoYXMgYmVlbiB0aGF0IGl0IG1heSBiZSB1c2VkIGluIGNhc2Ugb2Yg
+QktPUFMNCnRha2luZyB0b28gbG9uZyBhbmQgc28gbWF5IGJlIGJsb2NraW5nIHBlbmRpbmcgcmVx
+dWVzdHMuLj8NCg0KPiAxLiBJIHdvbmRlciBCS09QUyBpcyByZWFsbHkgcmVxdWlyZWQgdG8gcGVy
+Zm9ybSBmcmVxdWVudGx5PyANCj4gWWVzIEkga25vdyBpdCdzIGhlbHBmdWwgdG8gdXNlIGJ1dCBu
+byBuZWVkIHRvIGNhbGwgaXQgZnJlcXVlbnRseS4NCg0KQWNjb3JkaW5nIHRvIHRoZSBzcGVjIGl0
+IGlzIGFkdmlzZWQgdG8gc3RhcnQgYmtvcHMgd2hlbmV2ZXIgDQp0aGUgZU1NQyBkZXZpY2UgaXRz
+ZWxmIGluZGljYXRlcyBhbiB1cmdlbnQgbmVlZCBmb3IgaXQuIEluIA0Kd2hhdCB3YXkgZG8geW91
+IHRoaW5rIHRoZSBwcm9wb3NlZCBwYXRjaCBpc3N1ZXMgYmtvcHMgdG9vIG9mdGVuPw0KSSBiZWxp
+ZXZlIHRoYXQgdGhlIHBhdGNoIHByb3Blcmx5IGNoZWNrcyBmb3IgUjFfVVJHRU5UX0JLT1BTLA0K
+d2hpY2ggc2VlbXMgY29ycmVjdC4uPw0KDQo+IDIuIFByZXZpb3VzIHRpbWUgb25seSBvbmUgcmVx
+dWVzdCBpcyBoYW5kbGVkIGF0IG1tYyBibG9jay4gc28gaXQgY2FuJ3QNCj4gaW1wbGVtZW50IHRo
+ZSBIUEkgZm9yIHVzZXIgcmVxdWVzdC4gYnV0IGFzIFBlciBGb3JsaW4gaW1wbGVtZW50IHRoZQ0K
+PiBkb3VibGUgYnVmZmVyaW5nIGNvbmNlcHQuIGl0IGNhbiBwb3NzaWJsZSB0byBpbXBsZW1lbnQg
+dGhlIEhQSSwNCj4gaW50ZXJydXB0IHRoZSBjdXJyZW50IHdyaXRlIG9wZXJhdGlvbiBhbmQgZG8g
+dXJnZW50IHJlYWQgcmVxdWVzdC4NCg0KWWVzLCBhYnNvbHV0ZWx5LiBJbnRlcnJ1cHRpbmcgb25n
+b2luZyB3cml0ZSBvciBlcmFzZS90cmltIG9wZXJhdGlvbnMNCndvdWxkIGJlIHRoZSBvdGhlciB1
+c2UgZm9yIEJLT1BTLiBIb3cgZG8geW91IGZlZWwgdGhhdCB0aGUgYWRkaXRpb24NCm9mIEJLT1BT
+IChhbmQgdGh1cyBIUEkpIGludGVyZmVyZXMgd2l0aCB0aGlzPyBJcyBpdCBqdXN0IGEgbWF0dGVy
+DQpvZiBpbiB3aGF0IG9yZGVyIHRoZXNlIHR3byBmZWF0dXJlcyBhcmUgaW50ZWdyYXRlZCBpbnRv
+IHRoZSBrZXJuZWw/DQoNCj4gUmVsYXRlZCB3aXRoIHRoaXMsIHlvdSBjYW4gZmluZCBhICJIUEkg
+YmFja2dyb3VuZCBhbmQgb25lIG9mIHBvc3NpYmxlDQo+IHNvbHV0aW9ucyIgaW4gdGhlIG1tYyBT
+cGVjLg0KDQpXaGF0IHBhcnQgb2YgdGhlIHNwZWMgYXJlIHlvdSByZWZlcnJpbmcgdG8/DQoNCj4g
+My4gcmVhbCB1c2Ugc2NlbmFyaW8sIHJlYWx0aW1lIGNsYXNzIHJlYWQgcmVxdWVzdCBoYXMgdG9v
+IG11Y2ggDQo+IGxhdGVuY3kgc2luY2UgcHJldmlvdXMgd3JpdGUgcmVxdWVzdCwgKHdoZW4gbWVy
+Z2Ugb3BlcmF0aW9uIGlzIA0KPiBoYXBwZW5lZCBlTU1DIGludGVybmFsbHkpDQoNCkknbSBub3Qg
+c3VyZSB3aGF0IHlvdSBhcmUgZXhwbGFpbmluZyBoZXJlLiBXb3VsZCB5b3UgY2FyZSB0byANCmRl
+c2NyaWJlIGl0IGZ1cnRoZXIvZGlmZmVyZW50bHk/DQoNCiAvIFNlYmFzdGlhbg0KDQpQUy4gU29y
+cnkgZm9yIHBvc3NpYmx5IGJyZWFraW5nIHRoZSBtYWlsLXRocmVhZCBidXQgSSB3YXMgbm90IA0K
+c3Vic2NyaWJlZCB3aGVuIHRoZSBvcmlnaW5hbCByZXBseSB3YXMgcG9zdGVkLg0K
