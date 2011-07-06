@@ -1,67 +1,32 @@
-From: Sebastian RASMUSSEN <sebastian.rasmussen@stericsson.com>
-Subject: Re: [PATCH] mmc: enable background operations for emmc4.41 with HPI
- support
-Date: Wed, 6 Jul 2011 16:40:21 +0200
-Message-ID: <ECD438FDEF6BD742895E554C24725A4019873A5EE4@EXDCVYMBSTM005.EQ1STM.local>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH] ARM i.MX dma: Fix burstsize settings
+Date: Wed, 6 Jul 2011 08:03:57 -0700
+Message-ID: <20110706150356.GA11993@opensource.wolfsonmicro.com>
+References: <20110706091833.GT6069@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:60388 "EHLO
-	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753235Ab1GFOkz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 10:40:55 -0400
-Content-Language: en-US
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:39619 "EHLO
+	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752572Ab1GFPEE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2011 11:04:04 -0400
+Content-Disposition: inline
+In-Reply-To: <20110706091833.GT6069@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "kmpark@samsung.com" <kmpark@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Per Forlin <per.forlin@linaro.org>, "chuanxiao.dong@intel.com" <chuanxiao.dong@intel.com>
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: linux-arm-kernel@lists.infradead.org, Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Liam Girdwood <lrg@ti.com>, alsa-devel@alsa-project.org
 
-SGkhDQoNCj4gSFBJIGlzIGEgZmVhdHVyZSB0byBoYW5kbGUgYSBoaWdoZXIgb3IgdXJnZW50IHJl
-cXVlc3QgdGhlbiBwcmUtb25nb2luZw0KPiByZXF1ZXN0IGFuZCBpdCdzIG9ubHkgcG9zc2libGUg
-d2hlbiBzb21lIGNvbmRpdGlvbnMgYXJlIG1ldC4NCg0KQWdyZWVkLCBhcyBJIHJlYWQgdGhlIHNw
-ZWMgdGhpcyB3b3VsZCB3cml0ZXMsIGVyYXNlcyBhbmQgQktPUFMNCihlTU1DIHNwZWMgNC40MSA3
-LjYuMjAgKHRhYmxlIDIwKSBhbmQgdGhlIDNyZCBwYXJhZ3JhcGggaW4gNy42LjE5KS4NCg0KPiBC
-S09QUyBpcyBhIGZlYXR1cmUgdG8gZ2l2ZSBhIGNoYW5jZSB0byBvcHRpbWl6ZSB0aGUgaW50ZXJu
-YWwgDQo+IGZvciBuZXh0IG9wZXJhdGlvbi4NCg0KWWVzLCBJIGJlbGlldmUgdGhlIG1haW4gcmVh
-c29ucyB3b3VsZCBiZSB3aGVuIGJsb2NrcyBhcmUgDQplaXRoZXIgcmVwbGFjZWQgb3IgYSBFUkFT
-RSBvciBUUklNIG9wZXJhdGlvbiBoYXMgYmVlbiBpc3N1ZWQuDQpUaGUgQktPUFMgZmVhdHVyZSB3
-b3VsZCBhbGxvdyB0aGUgZU1NQyBkZXZpY2UgdG8gY2xlYW4gdXAgaXRzDQppbnRlcm5hbCBzdGF0
-ZSBhbmQgcHJlLWVyYXNlIGFueSBpbnRlcm5hbCBmbGFzaCBkZXZpY2VzIHNvDQp0aGF0IHRoZSBu
-ZXh0IHdyaXRlIG9wZXJhdGlvbiB3b3VsZCBoYXZlIGJldHRlciBwZXJmb3JtYW5jZS4NCkkgYmVs
-aWV2ZSB0aGlzIHRvIGJlIHRoZSBpbnRlbnQgYXQgbGVhc3QuDQoNCj4gQ3VycmVudCBpbXBsZW1l
-bnRhdGlvbiBpcyBIUEkgaXMgdXNlZCBmb3IgQktPUFMgYnV0IEkgdGhpbmsgDQo+IEhQSSBpcyB1
-c2VkIGZvciBXcml0ZSBvcGVyYXRpb24gdG8gcmVkdWNlIHRoZSBsYXRlbmN5Lg0KDQpUcnVlLCB0
-aGUgZm9jdXMgb2YgSFBJIGlzIGZvciBXcml0ZSBvcGVyYXRpb25zLCBob3dldmVyIGluDQplTU1D
-IHNwZWMgNC40MSBjaGFwdGVyIDcuNi4xOSBvbiBiYWNrZ3JvdW5kIG9wZXJhdGlvbnMgaXQNCmRv
-ZXMgc3RhdGUgdGhhdCBhIGhvc3QgbWF5IGludGVycnVwdCBhbnkgb25nb2luZyBiYWNrZ3JvdW5k
-DQpvcGVyYXRpb25zIGJ5IHVzaW5nIEhQSS4gU28gdG8gbWUgaXQgc2VlbXMgYXMgaWYgdGhlIGlu
-dGVudA0KZnJvbSBKZWRlYyBoYXMgYmVlbiB0aGF0IGl0IG1heSBiZSB1c2VkIGluIGNhc2Ugb2Yg
-QktPUFMNCnRha2luZyB0b28gbG9uZyBhbmQgc28gbWF5IGJlIGJsb2NraW5nIHBlbmRpbmcgcmVx
-dWVzdHMuLj8NCg0KPiAxLiBJIHdvbmRlciBCS09QUyBpcyByZWFsbHkgcmVxdWlyZWQgdG8gcGVy
-Zm9ybSBmcmVxdWVudGx5PyANCj4gWWVzIEkga25vdyBpdCdzIGhlbHBmdWwgdG8gdXNlIGJ1dCBu
-byBuZWVkIHRvIGNhbGwgaXQgZnJlcXVlbnRseS4NCg0KQWNjb3JkaW5nIHRvIHRoZSBzcGVjIGl0
-IGlzIGFkdmlzZWQgdG8gc3RhcnQgYmtvcHMgd2hlbmV2ZXIgDQp0aGUgZU1NQyBkZXZpY2UgaXRz
-ZWxmIGluZGljYXRlcyBhbiB1cmdlbnQgbmVlZCBmb3IgaXQuIEluIA0Kd2hhdCB3YXkgZG8geW91
-IHRoaW5rIHRoZSBwcm9wb3NlZCBwYXRjaCBpc3N1ZXMgYmtvcHMgdG9vIG9mdGVuPw0KSSBiZWxp
-ZXZlIHRoYXQgdGhlIHBhdGNoIHByb3Blcmx5IGNoZWNrcyBmb3IgUjFfVVJHRU5UX0JLT1BTLA0K
-d2hpY2ggc2VlbXMgY29ycmVjdC4uPw0KDQo+IDIuIFByZXZpb3VzIHRpbWUgb25seSBvbmUgcmVx
-dWVzdCBpcyBoYW5kbGVkIGF0IG1tYyBibG9jay4gc28gaXQgY2FuJ3QNCj4gaW1wbGVtZW50IHRo
-ZSBIUEkgZm9yIHVzZXIgcmVxdWVzdC4gYnV0IGFzIFBlciBGb3JsaW4gaW1wbGVtZW50IHRoZQ0K
-PiBkb3VibGUgYnVmZmVyaW5nIGNvbmNlcHQuIGl0IGNhbiBwb3NzaWJsZSB0byBpbXBsZW1lbnQg
-dGhlIEhQSSwNCj4gaW50ZXJydXB0IHRoZSBjdXJyZW50IHdyaXRlIG9wZXJhdGlvbiBhbmQgZG8g
-dXJnZW50IHJlYWQgcmVxdWVzdC4NCg0KWWVzLCBhYnNvbHV0ZWx5LiBJbnRlcnJ1cHRpbmcgb25n
-b2luZyB3cml0ZSBvciBlcmFzZS90cmltIG9wZXJhdGlvbnMNCndvdWxkIGJlIHRoZSBvdGhlciB1
-c2UgZm9yIEJLT1BTLiBIb3cgZG8geW91IGZlZWwgdGhhdCB0aGUgYWRkaXRpb24NCm9mIEJLT1BT
-IChhbmQgdGh1cyBIUEkpIGludGVyZmVyZXMgd2l0aCB0aGlzPyBJcyBpdCBqdXN0IGEgbWF0dGVy
-DQpvZiBpbiB3aGF0IG9yZGVyIHRoZXNlIHR3byBmZWF0dXJlcyBhcmUgaW50ZWdyYXRlZCBpbnRv
-IHRoZSBrZXJuZWw/DQoNCj4gUmVsYXRlZCB3aXRoIHRoaXMsIHlvdSBjYW4gZmluZCBhICJIUEkg
-YmFja2dyb3VuZCBhbmQgb25lIG9mIHBvc3NpYmxlDQo+IHNvbHV0aW9ucyIgaW4gdGhlIG1tYyBT
-cGVjLg0KDQpXaGF0IHBhcnQgb2YgdGhlIHNwZWMgYXJlIHlvdSByZWZlcnJpbmcgdG8/DQoNCj4g
-My4gcmVhbCB1c2Ugc2NlbmFyaW8sIHJlYWx0aW1lIGNsYXNzIHJlYWQgcmVxdWVzdCBoYXMgdG9v
-IG11Y2ggDQo+IGxhdGVuY3kgc2luY2UgcHJldmlvdXMgd3JpdGUgcmVxdWVzdCwgKHdoZW4gbWVy
-Z2Ugb3BlcmF0aW9uIGlzIA0KPiBoYXBwZW5lZCBlTU1DIGludGVybmFsbHkpDQoNCkknbSBub3Qg
-c3VyZSB3aGF0IHlvdSBhcmUgZXhwbGFpbmluZyBoZXJlLiBXb3VsZCB5b3UgY2FyZSB0byANCmRl
-c2NyaWJlIGl0IGZ1cnRoZXIvZGlmZmVyZW50bHk/DQoNCiAvIFNlYmFzdGlhbg0KDQpQUy4gU29y
-cnkgZm9yIHBvc3NpYmx5IGJyZWFraW5nIHRoZSBtYWlsLXRocmVhZCBidXQgSSB3YXMgbm90IA0K
-c3Vic2NyaWJlZCB3aGVuIHRoZSBvcmlnaW5hbCByZXBseSB3YXMgcG9zdGVkLg0K
+On Wed, Jul 06, 2011 at 11:18:33AM +0200, Sascha Hauer wrote:
+> dmaengine expects the maxburst parameter in words, not bytes.
+> The imxdma driver and its users do this wrong. Fix this.
+> 
+> As a side note the imx-pcm-dma-mx2 driver was 'fixed' to work
+> with imx-dma. This broke the driver with imx-sdma support which
+> correctly takes the maxburst parameter in words. This patch
+> puts the sdma based sound back to work.
+
+Acked-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+
+Probably makes sense to send via the ARM tree unless there's merge
+issues?
