@@ -1,56 +1,83 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: -ENOSYS suspend-powerdown regression
-Date: Fri, 8 Jul 2011 16:38:27 +0100
-Message-ID: <CAGq3pz52=sPGEX-8nj7cVuR5Xg=iE+mg6EcEES0DzWSmuY34bA@mail.gmail.com>
-References: <BANLkTimdp2n1qhLQmTk+k_M5_WowhJqPyQ@mail.gmail.com>
-	<BANLkTimRWqo1M7OOQmdWOxSQvqiNx48Ftg@mail.gmail.com>
-	<BANLkTikvP3hc+CHEwrUEDqN6McwswikS-Q@mail.gmail.com>
-	<BANLkTimKYKX=k2U1_WyhaWZ1wRpWUF6pMQ@mail.gmail.com>
-	<BANLkTik9y_N18EtsUTznaaa188GNusfiSA@mail.gmail.com>
-	<BANLkTinDzj4206zLK7i6K9k9vWjVC9hH0w@mail.gmail.com>
-	<BANLkTi=O4hg=ig5WOSeCWA4x03_5kAJsXw@mail.gmail.com>
-	<BANLkTimzgiXpb0v30KYsfvoPAb4iu2K5kw@mail.gmail.com>
-	<BANLkTi=fwnNVwtxOo66k7M-4Jxu=3eD2xQ@mail.gmail.com>
-	<CAGq3pz5hRQg72HMN6MyYccTisRAmfoqQmoDy5gvtiVwcjhTKhA@mail.gmail.com>
+From: Kevin Hilman <khilman@ti.com>
+Subject: Re: [PATCHv4 2/3] MMC: OMAP: HSMMC: add runtime pm support
+Date: Fri, 08 Jul 2011 11:24:17 -0700
+Message-ID: <8739ig8wby.fsf@ti.com>
+References: <1309538376-23260-1-git-send-email-balajitk@ti.com>
+	<1309538376-23260-3-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f52.google.com ([209.85.161.52]:35770 "EHLO
-	mail-fx0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750851Ab1GHPi3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jul 2011 11:38:29 -0400
-Received: by fxd18 with SMTP id 18so2152237fxd.11
-        for <linux-mmc@vger.kernel.org>; Fri, 08 Jul 2011 08:38:28 -0700 (PDT)
-In-Reply-To: <CAGq3pz5hRQg72HMN6MyYccTisRAmfoqQmoDy5gvtiVwcjhTKhA@mail.gmail.com>
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:57239 "EHLO
+	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753888Ab1GHSYW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jul 2011 14:24:22 -0400
+In-Reply-To: <1309538376-23260-3-git-send-email-balajitk@ti.com> (Balaji
+	T. K.'s message of "Fri, 1 Jul 2011 22:09:35 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: linux-mmc@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com, madhu.cr@ti.com, b-cousson@ti.com, paul@pwsan.com, kishore.kadiyala@ti.com
 
-On 6 July 2011 16:53, Daniel Drake <dsd@laptop.org> wrote:
-> Thanks, done. Sorry for the delay in getting to this.
+Balaji T K <balajitk@ti.com> writes:
+
+> add runtime pm support to HSMMC host controller
+> Use runtime pm API to enable/disable HSMMC clock
+> Use runtime autosuspend APIs to enable auto suspend delay
 >
-> Unfortunately something is still weird, this is possibly a case that
-> we missed before.
+> Based on OMAP HSMMC runtime implementation by Kevin Hilman, Kishore Kadiyala
 >
-> Even if I just do the simplistic test of booting, and then suspending
-> (without loading the libertas driver), things go wrong:
-> http://dev.laptop.org/~dsd/20110706/dmesg.txt
->
-> I added printk's in mmc_power_save_host and mmc_power_restore_host.
-> The strange thing is that it tries to resume mmc1 even though it is
-> powered down and there is no available driver, and also that it then
-> tries to power it down again (but it is already off).
+> Signed-off-by: Balaji T K <balajitk@ti.com>
 
-I tested vanilla and realised that this bug exists there too - it is
-not related to your patch. So lets ignore it for now so that we can
-get unblocked on the runtime PM work.
+It's not relevant for this merge window, but I'm exploring some future
+changes to our PM core code and have a question about how MMC works for
+system suspend.
 
-Your latest patch works fine. Card got powered down during suspend,
-and powered on,off,on during resume (as expected) and probed fine and
-continued working :)
+Basially, the question is: can the driver be reworked such that a system
+suspend does not need to runtime resume the device?  For most devices,
+we kind of expect that if the device is runtime suspended, a system
+suspend will have nothing extra to do, but this driver runtime resumes
+the device during system suspend in order to do "stuff", which I
+admitedly don't fully undestand.
 
-So I'd say we're good to go on this one and move onto the other pending stuff.
+Ideally, the "stuff" needed for runtime suspend and system suspend could
+be made to be common such that a system suspend of a runtime suspended
+device would be a noop.
 
-Thanks!
-Daniel
+Is this possible?
+
+Kevin
+
+> @@ -2100,6 +2087,7 @@ static int omap_hsmmc_suspend(struct device *dev)
+>  		return 0;
+>  
+>  	if (host) {
+> +		pm_runtime_get_sync(host->dev);
+>  		host->suspended = 1;
+>  		if (host->pdata->suspend) {
+>  			ret = host->pdata->suspend(&pdev->dev,
+> @@ -2114,13 +2102,11 @@ static int omap_hsmmc_suspend(struct device *dev)
+>  		}
+>  		cancel_work_sync(&host->mmc_carddetect_work);
+>  		ret = mmc_suspend_host(host->mmc);
+> -		mmc_host_enable(host->mmc);
+> +
+>  		if (ret == 0) {
+>  			omap_hsmmc_disable_irq(host);
+>  			OMAP_HSMMC_WRITE(host->base, HCTL,
+>  				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
+> -			mmc_host_disable(host->mmc);
+> -			clk_disable(host->iclk);
+>  			if (host->got_dbclk)
+>  				clk_disable(host->dbclk);
+>  		} else {
+> @@ -2132,9 +2118,8 @@ static int omap_hsmmc_suspend(struct device *dev)
+>  					dev_dbg(mmc_dev(host->mmc),
+>  						"Unmask interrupt failed\n");
+>  			}
+> -			mmc_host_disable(host->mmc);
+>  		}
+> -
+> +		pm_runtime_put_sync(host->dev);
+>  	}
+>  	return ret;
+>  }
