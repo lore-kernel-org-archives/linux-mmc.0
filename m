@@ -1,179 +1,122 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: Supply clocks for both host and card.
-Date: Fri, 08 Jul 2011 15:52:11 +0900
-Message-ID: <000101cc3d3b$928b28a0$b7a179e0$%jun@samsung.com>
-References: <1309402497-29191-1-git-send-email-tgih.jun@samsung.com>
- <4E0C1DD0.2040202@samsung.com>
- <008c01cc37a4$1ea4c1e0$5bee45a0$%jun@samsung.com>
+Subject: RE: mmc: dw_mmc: Add the function call for board-specific
+ initialization.
+Date: Fri, 08 Jul 2011 16:25:39 +0900
+Message-ID: <000a01cc3d40$3cc02b50$b64081f0$%jun@samsung.com>
+References: <1309763279-29862-1-git-send-email-tgih.jun@samsung.com>
+ <CAH9JG2UV2vwDF7p1MivJOa93woTRD3NYjnd++rQWv76K2NqJTg@mail.gmail.com>
+ <003301cc3a25$9fd61470$df823d50$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:37516 "EHLO
+Received: from mailout4.samsung.com ([203.254.224.34]:55341 "EHLO
 	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752258Ab1GHGwR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jul 2011 02:52:17 -0400
-In-reply-to: <008c01cc37a4$1ea4c1e0$5bee45a0$%jun@samsung.com>
+	with ESMTP id S1750985Ab1GHHZk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jul 2011 03:25:40 -0400
+Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LO000IAI79SB7M0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 08 Jul 2011 16:25:39 +0900 (KST)
+Received: from DOTGIHJUN01 (12-23-121-83.csky.net [12.23.121.83])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LO000N627AR03@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 08 Jul 2011 16:25:39 +0900 (KST)
+In-reply-to: <003301cc3a25$9fd61470$df823d50$%jun@samsung.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org, 'Kyungmin Park' <kyungmin.park@samsung.com>
+To: 'Kyungmin Park' <kmpark@infradead.org>
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>
 
-Hi, Mr Chung.
+Hi Kyungmin Park
 
-Do you have any feedback?
-I want to know how to manipulate clock for host or card on your test situation.
-I think there is no code for these clock in dw_mmc.
-Who do you think is responsible for enabling clock? Driver or platform?
-
-Any opinion/advice are welcome.
+I'd appreciate if you give me a opinion about my writing.
+If init call is not used, a checking routine is also not needed.
+How do you think?
 
 Best regards,
 Seungwon Jeon.
 
 
-Seungwon Jeon wrote:
-> Hi, Mr Chung.
-> 
+Seungwon Jeon wrote: 
+> Hi,
 > > -----Original Message-----
 > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > owner@vger.kernel.org] On Behalf Of Jaehoon Chung
-> > Sent: Thursday, June 30, 2011 3:55 PM
+> > owner@vger.kernel.org] On Behalf Of Kyungmin Park
+> > Sent: Monday, July 04, 2011 4:50 PM
 > > To: Seungwon Jeon
-> > Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; linux-
-> > kernel@vger.kernel.org; Kyungmin Park
-> > Subject: Re: [PATCH] mmc: dw_mmc: Supply clocks for both host and card.
+> > Cc: linux-mmc@vger.kernel.org; Chris Ball; Will Newton; Jaehoon Chung;
+> > James Hogan
+> > Subject: Re: mmc: dw_mmc: Add the function call for board-specific
+> > initialization.
 > >
-> > Hi Mr.Jeon
+> > Hi,
 > >
-> > What means cclk_name/ cclk enable?
-> > Controlling card clock is possible?
-> > Sorry, i didn't understand...
-> > (My understanding is that if we set host clk, cclk is used with
-> host_clk.)
-> >
-> > Plz can you explain to me?
+> > Yes it's defined and checked, but not used.
+> > Can you describe the reason why init call is required?
+> > and If required, what's the meaning?
 > 
-> Yes, cclk is source clock for card I/O.
-> It can be different from Host operating clock(hclk).
+> 
+> I think some "board specific" init-routine may be needed, e.g. external
+> IRQ for card detection.
+> But there is no call for this in dw_mmc.c currently.
+> If init function is just checked registration of definition and real call
+> is performed outside,
+> we don't need to call this function explicitly.
+> 
+> Thank you for comment
 > 
 > Best regards,
-> Seunwgon.
+> Seungwon.
 > 
 > 
-> > Regards,
-> > Jaehoon Chung
+> > Thank you,
+> > Kyungmin Park
 > >
-> > Seungwon Jeon wrote:
-> > > Add enabling clocks for both host controller and card.
+> > On Mon, Jul 4, 2011 at 4:07 PM, Seungwon Jeon <tgih.jun@samsung.com>
+> wrote:
+> > > Need to call init() function of dw_mci_board.
+> > > It seems to be omitted to call this function.
 > > >
 > > > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 > > > ---
-> > >  drivers/mmc/host/dw_mmc.c  |   33 ++++++++++++++++++++++++++++++++-
-> > >  include/linux/mmc/dw_mmc.h |    7 +++++++
-> > >  2 files changed, 39 insertions(+), 1 deletions(-)
+> > >  drivers/mmc/host/dw_mmc.c |   11 +++++++++++
+> > >  1 files changed, 11 insertions(+), 0 deletions(-)
 > > >
 > > > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > > index 10b6979..a524416 100644
+> > > index a524416..688d58a 100644
 > > > --- a/drivers/mmc/host/dw_mmc.c
 > > > +++ b/drivers/mmc/host/dw_mmc.c
-> > > @@ -1797,6 +1797,24 @@ static int dw_mci_probe(struct platform_device
-> > *pdev)
-> > >  		goto err_freehost;
-> > >  	}
+> > > @@ -1585,6 +1585,15 @@ static void dw_mci_work_routine_card(struct
+> > work_struct *work)
+> > >        }
+> > >  }
 > > >
-> > > +	host->hclk = clk_get(&pdev->dev, pdata->hclk_name);
-> > > +	if (IS_ERR(host->hclk)) {
-> > > +		dev_err(&pdev->dev,
-> > > +			"Failed to get hclk\n");
-> > > +		ret = PTR_ERR(host->hclk);
-> > > +		goto err_freehost;
-> > > +	}
-> > > +	clk_enable(host->hclk);
+> > > +static irqreturn_t dw_mci_detect_interrupt(int irq, void *dev_id)
+> > > +{
+> > > +       struct dw_mci_slot *slot = dev_id;
 > > > +
-> > > +	host->cclk = clk_get(&pdev->dev, pdata->cclk_name);
-> > > +	if (IS_ERR(host->cclk)) {
-> > > +		dev_err(&pdev->dev,
-> > > +			"Failed to get cclk\n");
-> > > +		ret = PTR_ERR(host->cclk);
-> > > +		goto err_free_hclk;
-> > > +	}
-> > > +	clk_enable(host->cclk);
+> > > +       queue_work(dw_mci_card_workqueue, &slot->host->card_work);
 > > > +
-> > >  	host->bus_hz = pdata->bus_hz;
-> > >  	host->quirks = pdata->quirks;
-> > >
-> > > @@ -1806,7 +1824,7 @@ static int dw_mci_probe(struct platform_device
-> > *pdev)
-> > >  	ret = -ENOMEM;
-> > >  	host->regs = ioremap(regs->start, regs->end - regs->start + 1);
-> > >  	if (!host->regs)
-> > > -		goto err_freehost;
-> > > +		goto err_free_cclk;
-> > >
-> > >  	host->dma_ops = pdata->dma_ops;
-> > >  	dw_mci_init_dma(host);
-> > > @@ -1945,6 +1963,13 @@ err_dmaunmap:
-> > >  		regulator_put(host->vmmc);
-> > >  	}
-> > >
-> > > +err_free_cclk:
-> > > +	clk_disable(host->cclk);
-> > > +	clk_put(host->cclk);
+> > > +       return IRQ_HANDLED;
+> > > +}
 > > > +
-> > > +err_free_hclk:
-> > > +	clk_disable(host->hclk);
-> > > +	clk_put(host->hclk);
+> > >  static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int
+> id)
+> > >  {
+> > >        struct mmc_host *mmc;
+> > > @@ -1657,6 +1666,8 @@ static int __init dw_mci_init_slot(struct dw_mci
+> > *host, unsigned int id)
+> > >        } else
+> > >                regulator_enable(host->vmmc);
 > > >
-> > >  err_freehost:
-> > >  	kfree(host);
-> > > @@ -1983,6 +2008,12 @@ static int __exit dw_mci_remove(struct
-> > platform_device *pdev)
-> > >  		regulator_put(host->vmmc);
-> > >  	}
-> > >
-> > > +	clk_disable(host->cclk);
-> > > +	clk_put(host->cclk);
+> > > +       host->pdata->init(id, dw_mci_detect_interrupt, host);
 > > > +
-> > > +	clk_disable(host->hclk);
-> > > +	clk_put(host->hclk);
-> > > +
-> > >  	iounmap(host->regs);
-> > >
-> > >  	kfree(host);
-> > > diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> > > index f3f68ee..56b3f27 100644
-> > > --- a/include/linux/mmc/dw_mmc.h
-> > > +++ b/include/linux/mmc/dw_mmc.h
-> > > @@ -47,6 +47,8 @@ struct mmc_data;
-> > >   * @cmd: The command currently being sent to the card, or NULL.
-> > >   * @data: The data currently being transferred, or NULL if no data
-> > >   *	transfer is in progress.
-> > > + * @hclk: Clock for host.
-> > > + * @cclk: Clock for card.
-> > >   * @use_dma: Whether DMA channel is initialized or not.
-> > >   * @sg_dma: Bus address of DMA buffer.
-> > >   * @sg_cpu: Virtual address of DMA buffer.
-> > > @@ -118,6 +120,8 @@ struct dw_mci {
-> > >  	struct mmc_request	*mrq;
-> > >  	struct mmc_command	*cmd;
-> > >  	struct mmc_data		*data;
-> > > +	struct clk		*hclk;
-> > > +	struct clk		*cclk;
-> > >
-> > >  	/* DMA interface members*/
-> > >  	int			use_dma;
-> > > @@ -218,6 +222,9 @@ struct dw_mci_board {
-> > >  	/* delay in mS before detecting cards after interrupt */
-> > >  	u32 detect_delay_ms;
-> > >
-> > > +	char *hclk_name;
-> > > +	char *cclk_name;
-> > > +
-> > >  	int (*init)(u32 slot_id, irq_handler_t , void *);
-> > >  	int (*get_ro)(u32 slot_id);
-> > >  	int (*get_cd)(u32 slot_id);
+> > >        if (dw_mci_get_cd(mmc))
+> > >                set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+> > >        else
 > > > --
 > > > 1.7.0.4
 > > >
@@ -183,7 +126,6 @@ Seungwon Jeon wrote:
 > > > the body of a message to majordomo@vger.kernel.org
 > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > > >
-> >
 > > --
 > > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > > the body of a message to majordomo@vger.kernel.org
