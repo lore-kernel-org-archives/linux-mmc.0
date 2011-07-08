@@ -1,294 +1,242 @@
-From: Ido Yariv <ido@wizery.com>
-Subject: [PATCH 5/5] arm: davinci: DA850: Add wl12xx expansion board support
-Date: Fri,  8 Jul 2011 00:33:10 +0300
-Message-ID: <1310074390-4277-6-git-send-email-ido@wizery.com>
-References: <1310074390-4277-1-git-send-email-ido@wizery.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH V2] mmc: Bus width testing needs to handle suspend/resume
+Date: Fri, 08 Jul 2011 10:18:37 +0900
+Message-ID: <4E165AED.6090805@samsung.com>
+References: <0281C9EE-5CAE-41B7-9A8D-4BE2F125EF2F@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:41458 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751651Ab1GGVdd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jul 2011 17:33:33 -0400
-Received: by mail-ww0-f44.google.com with SMTP id 5so1362105wwe.1
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Jul 2011 14:33:33 -0700 (PDT)
-In-Reply-To: <1310074390-4277-1-git-send-email-ido@wizery.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:49137 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752658Ab1GHBSx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jul 2011 21:18:53 -0400
+Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LNZ002EPQB2S0I0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 08 Jul 2011 10:18:41 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LNZ00LC3QB5J3@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 08 Jul 2011 10:18:41 +0900 (KST)
+In-reply-to: <0281C9EE-5CAE-41B7-9A8D-4BE2F125EF2F@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: davinci-linux-open-source@linux.davincidsp.com, linux-arm-kernel@lists.arm.linux.org.uk, linux-mmc@vger.kernel.org
-Cc: Ido Yariv <ido@wizery.com>
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-The DA850 supports an optional wl12xx based expansion board, adding WLAN
-& BT capabilities. The wl12xx is a 4-wire, 1.8V, embedded SDIO WLAN
-device with an external IRQ line and is power-controlled by a GPIO-based
-fixed regulator.
+Hi Philip.
 
-This patch adds support for the WLAN capabilities of this expansion
-board.
+It's working well on my board.
 
-Signed-off-by: Ido Yariv <ido@wizery.com>
----
- arch/arm/mach-davinci/Kconfig            |   31 +++++++
- arch/arm/mach-davinci/board-da850-evm.c  |  128 ++++++++++++++++++++++++++++++
- arch/arm/mach-davinci/da850.c            |    9 ++
- arch/arm/mach-davinci/include/mach/mux.h |   10 +++
- 4 files changed, 178 insertions(+), 0 deletions(-)
+Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-diff --git a/arch/arm/mach-davinci/Kconfig b/arch/arm/mach-davinci/Kconfig
-index c0deaca..1a9149c 100644
---- a/arch/arm/mach-davinci/Kconfig
-+++ b/arch/arm/mach-davinci/Kconfig
-@@ -192,6 +192,37 @@ config DA850_UI_RMII
- 
- endchoice
- 
-+config DA850_WL12XX
-+	bool "DA850 wl12xx expansion board"
-+	depends on MACH_DAVINCI_DA850_EVM
-+	---help---
-+	  Say Y if you want to use a wl12xx expansion board connected to the
-+	  DA850 EVM.
-+
-+choice
-+	prompt "FREF reference clock used by the wl12XX expansion board"
-+	default DA850_WL12XX_FREF_38_4
-+	depends on DA850_WL12XX
-+	help
-+	  There are currently two kinds of such daughter boards, one made by
-+	  Mistral and another by LS Research. These (and perhaps others) use
-+	  different FREF reference clocks. Select the correct one according to
-+	  the daughter board's type.
-+
-+config DA850_WL12XX_FREF_19_2
-+	bool "19.2MHz"
-+config DA850_WL12XX_FREF_26
-+	bool "26MHz"
-+config DA850_WL12XX_FREF_38_4
-+	bool "38.4MHz"
-+config DA850_WL12XX_FREF_52
-+	bool "52MHz"
-+config DA850_WL12XX_FREF_XTAL_26
-+	bool "XTAL 26MHz"
-+config DA850_WL12XX_FREF_XTAL_38_4
-+	bool "XTAL 38MHz"
-+endchoice
-+
- config GPIO_PCA953X
- 	default MACH_DAVINCI_DA850_EVM
- 
-diff --git a/arch/arm/mach-davinci/board-da850-evm.c b/arch/arm/mach-davinci/board-da850-evm.c
-index a7b41bf..a567379 100644
---- a/arch/arm/mach-davinci/board-da850-evm.c
-+++ b/arch/arm/mach-davinci/board-da850-evm.c
-@@ -31,6 +31,8 @@
- #include <linux/input/tps6507x-ts.h>
- #include <linux/spi/spi.h>
- #include <linux/spi/flash.h>
-+#include <linux/delay.h>
-+#include <linux/wl12xx.h>
- 
- #include <asm/mach-types.h>
- #include <asm/mach/arch.h>
-@@ -49,6 +51,9 @@
- #define DA850_MMCSD_CD_PIN		GPIO_TO_PIN(4, 0)
- #define DA850_MMCSD_WP_PIN		GPIO_TO_PIN(4, 1)
- 
-+#define DA850_WLAN_EN			GPIO_TO_PIN(6, 9)
-+#define DA850_WLAN_IRQ			GPIO_TO_PIN(6, 10)
-+
- #define DA850_MII_MDIO_CLKEN_PIN	GPIO_TO_PIN(2, 6)
- 
- static struct mtd_partition da850evm_spiflash_part[] = {
-@@ -1117,6 +1122,127 @@ static __init int da850_evm_init_cpufreq(void)
- static __init int da850_evm_init_cpufreq(void) { return 0; }
- #endif
- 
-+#ifdef CONFIG_DA850_WL12XX
-+
-+static int da850_wl12xx_fref = -1;
-+
-+static int __init setup_da850_wl12xx_fref(char *fref)
-+{
-+	if (!strcmp(fref, "19.2"))
-+		da850_wl12xx_fref = WL12XX_REFCLOCK_19;
-+	else if (!strcmp(fref, "26"))
-+		da850_wl12xx_fref = WL12XX_REFCLOCK_26;
-+	else if (!strcmp(fref, "38.4"))
-+		da850_wl12xx_fref = WL12XX_REFCLOCK_38;
-+	else if (!strcmp(fref, "52"))
-+		da850_wl12xx_fref = WL12XX_REFCLOCK_52;
-+	else if (!strcmp(fref, "XTAL26"))
-+		da850_wl12xx_fref = WL12XX_REFCLOCK_26_XTAL;
-+	else if (!strcmp(fref, "XTAL38.4"))
-+		da850_wl12xx_fref = WL12XX_REFCLOCK_38_XTAL;
-+	else
-+		pr_info("da850_wl12xx_fref is invalid. Valid options: "
-+			"19.2, 26, 38.4, 52, XTAL26 or XTAL38.4\n");
-+	return 0;
-+}
-+__setup("da850_wl12xx_fref=", setup_da850_wl12xx_fref);
-+
-+static void wl12xx_set_power(int slot, bool power_on)
-+{
-+	static bool power_state;
-+
-+	pr_debug("Powering %s wl12xx", (power_on ? "on" : "off"));
-+
-+	if (power_on == power_state)
-+		return;
-+	power_state = power_on;
-+
-+	if (power_on) {
-+		/* Power up sequence required for wl127x devices */
-+		gpio_set_value(DA850_WLAN_EN, 1);
-+		mdelay(15);
-+		gpio_set_value(DA850_WLAN_EN, 0);
-+		mdelay(1);
-+		gpio_set_value(DA850_WLAN_EN, 1);
-+		mdelay(70);
-+	} else {
-+		gpio_set_value(DA850_WLAN_EN, 0);
-+	}
-+}
-+
-+static struct davinci_mmc_config da850_mmc_wl12xx_config = {
-+	.get_ro		= NULL,
-+	.get_cd		= NULL,
-+	.set_power	= wl12xx_set_power,
-+	.wires		= 4,
-+	.max_freq	= 25000000,
-+	.caps		= MMC_CAP_4_BIT_DATA | MMC_CAP_NONREMOVABLE |
-+			  MMC_CAP_POWER_OFF_CARD,
-+	.version	= MMC_CTLR_VERSION_2,
-+};
-+
-+static const short da850_evm_mmc_wl12xx_pins[] __initconst = {
-+	DA850_MMCSD1_DAT_0, DA850_MMCSD1_DAT_1, DA850_MMCSD1_DAT_2,
-+	DA850_MMCSD1_DAT_3, DA850_MMCSD1_CLK, DA850_MMCSD1_CMD,
-+	DA850_GPIO6_9, DA850_GPIO6_10,
-+	-1
-+};
-+
-+static struct wl12xx_platform_data da850_wl12xx_wlan_data __initdata = {
-+	.irq			= -1,
-+#ifdef CONFIG_DA850_WL12XX_FREF_19_2
-+	.board_ref_clock	= WL12XX_REFCLOCK_19,
-+#elif defined CONFIG_DA850_WL12XX_FREF_26
-+	.board_ref_clock	= WL12XX_REFCLOCK_26,
-+#elif defined CONFIG_DA850_WL12XX_FREF_38_4
-+	.board_ref_clock	= WL12XX_REFCLOCK_38,
-+#elif defined CONFIG_DA850_WL12XX_FREF_52
-+	.board_ref_clock	= WL12XX_REFCLOCK_52,
-+#elif defined CONFIG_DA850_WL12XX_FREF_XTAL_26
-+	.board_ref_clock	= WL12XX_REFCLOCK_26_XTAL,
-+#elif defined CONFIG_DA850_WL12XX_FREF_XTAL_38_4
-+	.board_ref_clock	= WL12XX_REFCLOCK_38_XTAL,
-+#endif
-+	.platform_quirks	= WL12XX_PLATFORM_QUIRK_EDGE_IRQ,
-+};
-+
-+static void da850_wl12xx_init(void)
-+{
-+	int ret;
-+
-+	ret = davinci_cfg_reg_list(da850_evm_mmc_wl12xx_pins);
-+	if (ret)
-+		pr_warning("da850_evm_init: wl12xx/mmc mux setup failed:"
-+			   " %d\n", ret);
-+
-+	ret = da850_register_mmcsd1(&da850_mmc_wl12xx_config);
-+	if (ret)
-+		pr_warning("da850_evm_init: wl12xx/mmc registration failed:"
-+			   " %d\n", ret);
-+
-+	if (gpio_request(DA850_WLAN_EN, "wl12xx_en") ||
-+	    gpio_direction_output(DA850_WLAN_EN, 0))
-+		pr_err("Error initializing the wl12xx enable gpio\n");
-+
-+	if (gpio_request(DA850_WLAN_IRQ, "wl12xx_irq") ||
-+	    gpio_direction_input(DA850_WLAN_IRQ))
-+		pr_err("Error initializing the wl12xx irq gpio\n");
-+	else
-+		da850_wl12xx_wlan_data.irq = gpio_to_irq(DA850_WLAN_IRQ);
-+
-+	if (da850_wl12xx_fref != -1)
-+		da850_wl12xx_wlan_data.board_ref_clock = da850_wl12xx_fref;
-+
-+	if (wl12xx_set_platform_data(&da850_wl12xx_wlan_data))
-+		pr_err("Error setting wl12xx data\n");
-+}
-+
-+#else /* CONFIG_DA850_WL12XX */
-+
-+static void da850_wl12xx_init(void) { }
-+
-+#endif /* CONFIG_DA850_WL12XX */
-+
- static __init void da850_evm_init(void)
- {
- 	int ret;
-@@ -1169,6 +1295,8 @@ static __init void da850_evm_init(void)
- 		if (ret)
- 			pr_warning("da850_evm_init: mmcsd0 registration failed:"
- 					" %d\n", ret);
-+
-+		da850_wl12xx_init();
- 	}
- 
- 	davinci_serial_init(&da850_evm_uart_config);
-diff --git a/arch/arm/mach-davinci/da850.c b/arch/arm/mach-davinci/da850.c
-index 133aac4..bfe9b71 100644
---- a/arch/arm/mach-davinci/da850.c
-+++ b/arch/arm/mach-davinci/da850.c
-@@ -525,6 +525,13 @@ static const struct mux_config da850_pins[] = {
- 	MUX_CFG(DA850, MMCSD0_DAT_3,	10,	20,	15,	2,	false)
- 	MUX_CFG(DA850, MMCSD0_CLK,	10,	0,	15,	2,	false)
- 	MUX_CFG(DA850, MMCSD0_CMD,	10,	4,	15,	2,	false)
-+	/* MMC/SD1 function */
-+	MUX_CFG(DA850, MMCSD1_DAT_0,	18,	8,	15,	2,	false)
-+	MUX_CFG(DA850, MMCSD1_DAT_1,	19,	16,	15,	2,	false)
-+	MUX_CFG(DA850, MMCSD1_DAT_2,	19,	12,	15,	2,	false)
-+	MUX_CFG(DA850, MMCSD1_DAT_3,	19,	8,	15,	2,	false)
-+	MUX_CFG(DA850, MMCSD1_CLK,	18,	12,	15,	2,	false)
-+	MUX_CFG(DA850, MMCSD1_CMD,	18,	16,	15,	2,	false)
- 	/* EMIF2.5/EMIFA function */
- 	MUX_CFG(DA850, EMA_D_7,		9,	0,	15,	1,	false)
- 	MUX_CFG(DA850, EMA_D_6,		9,	4,	15,	1,	false)
-@@ -583,6 +590,8 @@ static const struct mux_config da850_pins[] = {
- 	MUX_CFG(DA850, GPIO3_13,	7,	8,	15,	8,	false)
- 	MUX_CFG(DA850, GPIO4_0,		10,	28,	15,	8,	false)
- 	MUX_CFG(DA850, GPIO4_1,		10,	24,	15,	8,	false)
-+	MUX_CFG(DA850, GPIO6_9,		13,	24,	15,	8,	false)
-+	MUX_CFG(DA850, GPIO6_10,	13,	20,	15,	8,	false)
- 	MUX_CFG(DA850, GPIO6_13,	13,	8,	15,	8,	false)
- 	MUX_CFG(DA850, RTC_ALARM,	0,	28,	15,	2,	false)
- #endif
-diff --git a/arch/arm/mach-davinci/include/mach/mux.h b/arch/arm/mach-davinci/include/mach/mux.h
-index 5d4e0fe..a7e92fc 100644
---- a/arch/arm/mach-davinci/include/mach/mux.h
-+++ b/arch/arm/mach-davinci/include/mach/mux.h
-@@ -857,6 +857,14 @@ enum davinci_da850_index {
- 	DA850_MMCSD0_CLK,
- 	DA850_MMCSD0_CMD,
- 
-+	/* MMC/SD1 function */
-+	DA850_MMCSD1_DAT_0,
-+	DA850_MMCSD1_DAT_1,
-+	DA850_MMCSD1_DAT_2,
-+	DA850_MMCSD1_DAT_3,
-+	DA850_MMCSD1_CLK,
-+	DA850_MMCSD1_CMD,
-+
- 	/* EMIF2.5/EMIFA function */
- 	DA850_EMA_D_7,
- 	DA850_EMA_D_6,
-@@ -916,6 +924,8 @@ enum davinci_da850_index {
- 	DA850_GPIO3_13,
- 	DA850_GPIO4_0,
- 	DA850_GPIO4_1,
-+	DA850_GPIO6_9,
-+	DA850_GPIO6_10,
- 	DA850_GPIO6_13,
- 	DA850_RTC_ALARM,
- };
--- 
-1.7.4.1
+Best regards,
+Jaehoon Chung
+
+Philip Rakity wrote:
+> V2
+> ==
+> Save the ext_csd information needed for bus width
+> compare when we read the ext_csd the first time (in 1 bit mode).
+> 
+> On every pass we make re-reading the ext_csd compare
+> the data against the saved ext_csd data.
+> 
+> note: unsubmitted diff (with printks) tested by
+> Jaehoon Chung  <jh80.chung@samsung.com>
+> 
+> V1
+> ==
+> We need to read the ext_csd when doing bus width testing for
+> old cards to ensure test is run correctly.
+> 
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> ---
+>  drivers/mmc/core/mmc.c   |   75 ++++++++++++++++++++++++++++++----------------
+>  include/linux/mmc/card.h |   13 ++++++++
+>  2 files changed, 62 insertions(+), 26 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 2a7e43b..afabdc3 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -247,12 +247,12 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  		return 0;
+>  
+>  	/* Version is coded in the CSD_STRUCTURE byte in the EXT_CSD register */
+> +	card->ext_csd.raw_ext_csd_structure = ext_csd[EXT_CSD_STRUCTURE];
+>  	if (card->csd.structure == 3) {
+> -		int ext_csd_struct = ext_csd[EXT_CSD_STRUCTURE];
+> -		if (ext_csd_struct > 2) {
+> +		if (card->ext_csd.raw_ext_csd_structure > 2) {
+>  			printk(KERN_ERR "%s: unrecognised EXT_CSD structure "
+>  				"version %d\n", mmc_hostname(card->host),
+> -					ext_csd_struct);
+> +					card->ext_csd.raw_ext_csd_structure);
+>  			err = -EINVAL;
+>  			goto out;
+>  		}
+> @@ -266,6 +266,10 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  		goto out;
+>  	}
+>  
+> +	card->ext_csd.raw_sectors[0] = ext_csd[EXT_CSD_SEC_CNT + 0];
+> +	card->ext_csd.raw_sectors[1] = ext_csd[EXT_CSD_SEC_CNT + 1];
+> +	card->ext_csd.raw_sectors[2] = ext_csd[EXT_CSD_SEC_CNT + 2];
+> +	card->ext_csd.raw_sectors[3] = ext_csd[EXT_CSD_SEC_CNT + 3];
+>  	if (card->ext_csd.rev >= 2) {
+>  		card->ext_csd.sectors =
+>  			ext_csd[EXT_CSD_SEC_CNT + 0] << 0 |
+> @@ -277,7 +281,7 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  		if (card->ext_csd.sectors > (2u * 1024 * 1024 * 1024) / 512)
+>  			mmc_card_set_blockaddr(card);
+>  	}
+> -
+> +	card->ext_csd.raw_card_type = ext_csd[EXT_CSD_CARD_TYPE];
+>  	switch (ext_csd[EXT_CSD_CARD_TYPE] & EXT_CSD_CARD_TYPE_MASK) {
+>  	case EXT_CSD_CARD_TYPE_DDR_52 | EXT_CSD_CARD_TYPE_52 |
+>  	     EXT_CSD_CARD_TYPE_26:
+> @@ -307,6 +311,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  			mmc_hostname(card->host));
+>  	}
+>  
+> +	card->ext_csd.raw_s_a_timeout = ext_csd[EXT_CSD_S_A_TIMEOUT];
+> +	card->ext_csd.raw_erase_timeout_mult =
+> +		ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT];
+> +	card->ext_csd.raw_hc_erase_grp_size =
+> +		ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+>  	if (card->ext_csd.rev >= 3) {
+>  		u8 sa_shift = ext_csd[EXT_CSD_S_A_TIMEOUT];
+>  		card->ext_csd.part_config = ext_csd[EXT_CSD_PART_CONFIG];
+> @@ -334,6 +343,16 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  		card->ext_csd.boot_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
+>  	}
+>  
+> +	card->ext_csd.raw_hc_erase_gap_size =
+> +		ext_csd[EXT_CSD_PARTITION_ATTRIBUTE];
+> +	card->ext_csd.raw_sec_trim_mult =
+> +			ext_csd[EXT_CSD_SEC_TRIM_MULT];
+> +	card->ext_csd.raw_sec_erase_mult =
+> +			ext_csd[EXT_CSD_SEC_ERASE_MULT];
+> +	card->ext_csd.raw_sec_feature_support =
+> +			ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT];
+> +	card->ext_csd.raw_trim_mult =
+> +			ext_csd[EXT_CSD_TRIM_MULT];
+>  	if (card->ext_csd.rev >= 4) {
+>  		/*
+>  		 * Enhanced area feature support -- check whether the eMMC
+> @@ -401,17 +420,17 @@ static inline void mmc_free_ext_csd(u8 *ext_csd)
+>  }
+>  
+>  
+> -static int mmc_compare_ext_csds(struct mmc_card *card, u8 *ext_csd,
+> -			unsigned bus_width)
+> +static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
+>  {
+>  	u8 *bw_ext_csd;
+>  	int err;
+>  
+> +	if (bus_width == MMC_BUS_WIDTH_1)
+> +		return 0;
+> +
+>  	err = mmc_get_ext_csd(card, &bw_ext_csd);
+> -	if (err)
+> -		return err;
+>  
+> -	if ((ext_csd == NULL || bw_ext_csd == NULL)) {
+> +	if (err || bw_ext_csd == NULL) {
+>  		if (bus_width != MMC_BUS_WIDTH_1)
+>  			err = -EINVAL;
+>  		goto out;
+> @@ -421,35 +440,40 @@ static int mmc_compare_ext_csds(struct mmc_card *card, u8 *ext_csd,
+>  		goto out;
+>  
+>  	/* only compare read only fields */
+> -	err = (!(ext_csd[EXT_CSD_PARTITION_SUPPORT] ==
+> +	err = (!(card->ext_csd.raw_partition_support ==
+>  			bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
+> -		(ext_csd[EXT_CSD_ERASED_MEM_CONT] ==
+> +		(card->ext_csd.raw_erased_mem_count ==
+>  			bw_ext_csd[EXT_CSD_ERASED_MEM_CONT]) &&
+> -		(ext_csd[EXT_CSD_REV] ==
+> +		(card->ext_csd.rev ==
+>  			bw_ext_csd[EXT_CSD_REV]) &&
+> -		(ext_csd[EXT_CSD_STRUCTURE] ==
+> +		(card->ext_csd.raw_ext_csd_structure ==
+>  			bw_ext_csd[EXT_CSD_STRUCTURE]) &&
+> -		(ext_csd[EXT_CSD_CARD_TYPE] ==
+> +		(card->ext_csd.raw_card_type ==
+>  			bw_ext_csd[EXT_CSD_CARD_TYPE]) &&
+> -		(ext_csd[EXT_CSD_S_A_TIMEOUT] ==
+> +		(card->ext_csd.raw_s_a_timeout ==
+>  			bw_ext_csd[EXT_CSD_S_A_TIMEOUT]) &&
+> -		(ext_csd[EXT_CSD_HC_WP_GRP_SIZE] ==
+> +		(card->ext_csd.raw_hc_erase_gap_size ==
+>  			bw_ext_csd[EXT_CSD_HC_WP_GRP_SIZE]) &&
+> -		(ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT] ==
+> +		(card->ext_csd.raw_erase_timeout_mult ==
+>  			bw_ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT]) &&
+> -		(ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE] ==
+> +		(card->ext_csd.raw_hc_erase_grp_size ==
+>  			bw_ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE]) &&
+> -		(ext_csd[EXT_CSD_SEC_TRIM_MULT] ==
+> +		(card->ext_csd.raw_sec_trim_mult ==
+>  			bw_ext_csd[EXT_CSD_SEC_TRIM_MULT]) &&
+> -		(ext_csd[EXT_CSD_SEC_ERASE_MULT] ==
+> +		(card->ext_csd.raw_sec_erase_mult ==
+>  			bw_ext_csd[EXT_CSD_SEC_ERASE_MULT]) &&
+> -		(ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT] ==
+> +		(card->ext_csd.raw_sec_feature_support ==
+>  			bw_ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT]) &&
+> -		(ext_csd[EXT_CSD_TRIM_MULT] ==
+> +		(card->ext_csd.raw_trim_mult ==
+>  			bw_ext_csd[EXT_CSD_TRIM_MULT]) &&
+> -		memcmp(&ext_csd[EXT_CSD_SEC_CNT],
+> -		       &bw_ext_csd[EXT_CSD_SEC_CNT],
+> -		       4) != 0);
+> +		(card->ext_csd.raw_sectors[0] ==
+> +			bw_ext_csd[EXT_CSD_SEC_CNT + 0]) &&
+> +		(card->ext_csd.raw_sectors[1] ==
+> +			bw_ext_csd[EXT_CSD_SEC_CNT + 1]) &&
+> +		(card->ext_csd.raw_sectors[2] ==
+> +			bw_ext_csd[EXT_CSD_SEC_CNT + 2]) &&
+> +		(card->ext_csd.raw_sectors[3] ==
+> +			bw_ext_csd[EXT_CSD_SEC_CNT + 3]));
+>  	if (err)
+>  		err = -EINVAL;
+>  
+> @@ -770,7 +794,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  				 */
+>  				if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
+>  					err = mmc_compare_ext_csds(card,
+> -						ext_csd,
+>  						bus_width);
+>  				else
+>  					err = mmc_bus_test(card, bus_width);
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 7b4fd7b..b460fc2 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -64,6 +64,19 @@ struct mmc_ext_csd {
+>  	unsigned long long	enhanced_area_offset;	/* Units: Byte */
+>  	unsigned int		enhanced_area_size;	/* Units: KB */
+>  	unsigned int		boot_size;		/* in bytes */
+> +	u8			raw_partition_support;	/* 160 */
+> +	u8			raw_erased_mem_count;	/* 181 */
+> +	u8			raw_ext_csd_structure;	/* 194 */
+> +	u8			raw_card_type;		/* 196 */
+> +	u8			raw_s_a_timeout;		/* 217 */
+> +	u8			raw_hc_erase_gap_size;	/* 221 */
+> +	u8			raw_erase_timeout_mult;	/* 223 */
+> +	u8			raw_hc_erase_grp_size;	/* 224 */
+> +	u8			raw_sec_trim_mult;	/* 229 */
+> +	u8			raw_sec_erase_mult;	/* 230 */
+> +	u8			raw_sec_feature_support;/* 231 */
+> +	u8			raw_trim_mult;		/* 232 */
+> +	u8			raw_sectors[4];		/* 212 - 4 bytes */
+>  };
+>  
+>  struct sd_scr {
 
