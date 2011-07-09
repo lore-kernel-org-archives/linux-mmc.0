@@ -1,46 +1,40 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-s3c: Fix return value in sdhci_s3c_suspend/resume()
-Date: Sat, 09 Jul 2011 16:50:09 -0400
-Message-ID: <m2vcvbkwla.fsf@bob.laptop.org>
-References: <1309315118-16133-1-git-send-email-kgene.kim@samsung.com>
+Subject: Re: [PATCH 0/4] mmc: dw_mmc: mmc_test related fixes
+Date: Sat, 09 Jul 2011 16:52:32 -0400
+Message-ID: <m2r55zkwhb.fsf@bob.laptop.org>
+References: <4E0AE1FC.3070201@imgtec.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1309315118-16133-1-git-send-email-kgene.kim@samsung.com> (Kukjin
-	Kim's message of "Wed, 29 Jun 2011 11:38:38 +0900")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>
-Cc: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Wonil Choi <wonil22.choi@samsung.com>, Minho Ban <mhban@samsung.com>, Ben Dooks <ben-linux@fluff.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:45270 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754459Ab1GIUwj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 9 Jul 2011 16:52:39 -0400
+In-Reply-To: <4E0AE1FC.3070201@imgtec.com> (James Hogan's message of "Wed, 29
+	Jun 2011 09:27:40 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Will <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org
 
-Hi Kukjin,
+Hi James,
 
-On Tue, Jun 28 2011, Kukjin Kim wrote:
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 69e3ee3..460ffaf 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -612,16 +612,14 @@ static int sdhci_s3c_suspend(struct platform_device *dev, pm_message_t pm)
->  {
->  	struct sdhci_host *host = platform_get_drvdata(dev);
->  
-> -	sdhci_suspend_host(host, pm);
-> -	return 0;
-> +	return sdhci_suspend_host(host, pm);
->  }
->  
->  static int sdhci_s3c_resume(struct platform_device *dev)
->  {
->  	struct sdhci_host *host = platform_get_drvdata(dev);
->  
-> -	sdhci_resume_host(host);
-> -	return 0;
-> +	return sdhci_resume_host(host);
->  }
->  
->  #else
+On Wed, Jun 29 2011, James Hogan wrote:
+> More improvements and fixes for the Synopsys DesignWare MCI driver so
+> that it passes the mmc_test suite:
+>
+> [PATCH 1/4] mmc: dw_mmc: fix stop when fallen back to PIO
+> 	Fixes a hang after an error/timeout in PIO mode.
+> [PATCH 2/4] mmc: dw_mmc: remove unnecessary error messages
+> 	Removes some dev_err's since an errno is sufficient.
+> [PATCH 3/4] mmc: dw_mmc: handle "no CRC status" error
+> 	Fixes "Correct xfer_size at write" tests.
+> [PATCH 4/4] mmc: dw_mmc: reset FIFO after an error
+> 	Fixes modified "Correct xfer_size at write" tests (3 blocks
+> 	instead of 2).
 
-Thanks, pushed to mmc-next for 3.1.
+All pushed to mmc-next for 3.1 with Will's ACK and Jaehoon's Tested-by,
+thanks.
 
 - Chris.
 -- 
