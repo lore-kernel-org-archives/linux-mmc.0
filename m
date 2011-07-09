@@ -1,35 +1,31 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] MMC: OMAP: change HSMMC maintainence to Orphan
-Date: Sat, 09 Jul 2011 17:07:54 -0400
-Message-ID: <m2aacnkvrp.fsf@bob.laptop.org>
-References: <1309541802-5975-1-git-send-email-khilman@ti.com>
+Subject: Re: [PATCH V2] mmc: sd.c Set Non Default Drive Strength via platform
+Date: Sat, 09 Jul 2011 18:02:00 -0400
+Message-ID: <m239ifkt9j.fsf@bob.laptop.org>
+References: <2728818A-C26F-4BF7-8115-A3A37810AE34@marvell.com>
+	<614DD9DA-4F3C-4650-8412-6CC900537836@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:53610 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:41542 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754591Ab1GIVIA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 9 Jul 2011 17:08:00 -0400
-In-Reply-To: <1309541802-5975-1-git-send-email-khilman@ti.com> (Kevin Hilman's
-	message of "Fri, 1 Jul 2011 10:36:42 -0700")
+	id S1754704Ab1GIWCG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 9 Jul 2011 18:02:06 -0400
+In-Reply-To: <614DD9DA-4F3C-4650-8412-6CC900537836@marvell.com> (Philip
+	Rakity's message of "Wed, 6 Jul 2011 08:51:32 -0700")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Hilman <khilman@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, Madhusudhan Chikkature <madhu.cr@ti.com>
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Arindam Nath <arindam.nath@amd.com>
 
-Hi Kevin,
+Hi Philip,
 
-On Fri, Jul 01 2011, Kevin Hilman wrote:
-> From: Madhusudhan Chikkature <madhu.cr@ti.com>
->
-> Update the OMAP HS MMC entry from the MAINTAINERS file as I will
-> no longer be able to maintain this driver.
->
-> Signed-off-by: Madhusudhan Chikkature <madhu.cr@ti.com>
-> [khilman@ti.com: change to Orphan rather than complete removal]
-> Signed-off-by: Kevin Hilman <khilman@ti.com>
+On Wed, Jul 06 2011, Philip Rakity wrote:
+> V2
+> --
+> Include host.h change for callback to select_drive_strength
 
-Thanks, pushed to mmc-next for 3.1.
+Thanks, pushed to mmc-next for 3.1 with Arindam's Reviewed-by.
 
 - Chris.
 -- 
