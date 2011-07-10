@@ -1,47 +1,65 @@
-From: Paul Walmsley <paul@pwsan.com>
-Subject: Re: [PATCHv4 0/3] OMAP: HSMMC: cleanup and runtime pm
-Date: Sat, 9 Jul 2011 16:33:20 -0600 (MDT)
-Message-ID: <alpine.DEB.2.00.1107091632270.15984@utopia.booyaka.com>
-References: <1309538376-23260-1-git-send-email-balajitk@ti.com> <m2d3hjjdd0.fsf@bob.laptop.org>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH v3 0/4] Add device tree probe for sdhci-esdhc-imx
+Date: Sun, 10 Jul 2011 09:37:09 +0800
+Message-ID: <20110710013708.GA14492@S2100-06.ap.freescale.net>
+References: <1309970870-13336-1-git-send-email-shawn.guo@linaro.org>
+ <m2pqljje3w.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from utopia.booyaka.com ([72.9.107.138]:49181 "EHLO
-	utopia.booyaka.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754766Ab1GIWdV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Jul 2011 18:33:21 -0400
-In-Reply-To: <m2d3hjjdd0.fsf@bob.laptop.org>
+Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:25914
+	"EHLO DB3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751467Ab1GJBai (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Jul 2011 21:30:38 -0400
+Content-Disposition: inline
+In-Reply-To: <m2pqljje3w.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: Balaji T K <balajitk@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, tony@atomide.com, madhu.cr@ti.com, khilman@ti.com, b-cousson@ti.com, kishore.kadiyala@ti.com
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
 Hi Chris,
 
-On Sat, 9 Jul 2011, Chris Ball wrote:
-
-> On Fri, Jul 01 2011, Balaji T K wrote:
-> > Balaji T K (3):
-> >   MMC: OMAP: HSMMC: Remove lazy_disable
-> >   MMC: OMAP: HSMMC: add runtime pm support
-> >   MMC: OMAP: HSMMC: Remove unused iclk
+On Sat, Jul 09, 2011 at 06:14:43PM -0400, Chris Ball wrote:
+> Hi Shawn,
 > 
-> I've merged these three patches to mmc-next for 3.1 now.
-
-Thanks.
-
-> > MMC runtime patch has dependency on
-> > [PATCH 0/6] OMAP2+: hwmod framework fixes [1]
-> > for MMC1/MMC2 clock to get ungated after idle in OMAP4.
+> On Wed, Jul 06 2011, Shawn Guo wrote:
+> > The first patch copies platform data into driver private data, and
+> > do not reference platform data after probe.  The second one removes
+> > the uses of cpu_is_mx().  The third one makes a dt related fix on
+> > sdhci-pltfm.c, and the last one adds actual device tree probe for
+> > sdhci-esdhc-imx driver.
 > >
-> > Without [1] patches, MMC1/MMC2 fails to get detected on OMAP4.
+> > Changes since v2:
+> >  * Add patch #1
+> >  * Do not use Linux details of cd-type and wp-type for binding
 > >
-> > [1] http://www.mail-archive.com/linux-omap@vger.kernel.org/msg51457.html
+> > Changes since v1:
+> >  * Address review comments given by Grant
+> >
+> > Shawn Guo (4):
+> >       mmc: sdhci-esdhc-imx: do not reference platform data after probe
+> >       mmc: sdhci-esdhc-imx: get rid of the uses of cpu_is_mx()
+> >       mmc: sdhci-pltfm: dt device does not pass parent to sdhci_alloc_host
+> >       mmc: sdhci-esdhc-imx: add device tree probe support
 > 
-> I'm assuming that these patches are going to make their way to Linus via
-> someone else's tree.
+> These don't apply against mmc-next -- what is your tree based on?
+> 
+It's based on linux-next with following patch applied.
 
-Yes - we will try to merge them through the new ARM upstream path.
+[PATCH v4 4/4] mmc: sdhci-esdhc-imx: extend card_detect and write_protect support for mx5
+http://permalink.gmane.org/gmane.linux.kernel.mmc/8748
 
+You applied the 3 of 4 patches in that series, and expect Sascha to
+send this one through his tree after you send those 3.
 
-- Paul
+Now, we got another series pending in the line.
+
+I'm wondering if it works that I create a branch off your mmc-next,
+merge Sascha's next, apply my patches on top it, and then send a pull
+request for you (and Sascha) to pull the branch.
+
+-- 
+Regards,
+Shawn
+
