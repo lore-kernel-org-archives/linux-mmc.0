@@ -1,104 +1,158 @@
-From: Koen Beel <koen.beel.barco@gmail.com>
-Subject: [PATCH v2] mxs-mmc: fix clock rate setting
-Date: Mon, 11 Jul 2011 21:52:01 +0200
-Message-ID: <CAHMSPgNWherMTU9kLDH7zLQL0N_er5SpLz2v1xjzXvgckv+C2g@mail.gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH v2] mxs-mmc: fix clock rate setting
+Date: Mon, 11 Jul 2011 22:26:21 +0200
+Message-ID: <20110711202621.GA5811@pengutronix.de>
+References: <CAHMSPgNWherMTU9kLDH7zLQL0N_er5SpLz2v1xjzXvgckv+C2g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=000e0ce0d7ce54ea4c04a7d084cf
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="FCuugMFkClbJLl1L"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:43333 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757663Ab1GKTwD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2011 15:52:03 -0400
-Received: by wyg8 with SMTP id 8so2820216wyg.19
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2011 12:52:02 -0700 (PDT)
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:33616 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750785Ab1GKU01 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2011 16:26:27 -0400
+Content-Disposition: inline
+In-Reply-To: <CAHMSPgNWherMTU9kLDH7zLQL0N_er5SpLz2v1xjzXvgckv+C2g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Shawn Guo <shawn.guo@freescale.com>, Chris Ball <cjb@laptop.org>
+To: Koen Beel <koen.beel.barco@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Shawn Guo <shawn.guo@freescale.com>, Chris Ball <cjb@laptop.org>
 
---000e0ce0d7ce54ea4c04a7d084cf
-Content-Type: text/plain; charset=UTF-8
 
-Hi,
+--FCuugMFkClbJLl1L
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-(Sorry, patch in attachment as I still don't have a decent mail setup
-at my company)
+Hi Koen,
 
-Fix clock rate setting on mxs-mmc driver.
-Previously, if div2 was zero the value for TIMING_CLOCK_RATE would
-have been 255 instead of 0.
-Also the limits for div1 (TIMING_CLOCK_DIVIDE) and div2
-(TIMING_CLOCK_RATE + 1) where not correctly defined.
+thanks for v2.
 
-Can easily be reproduced on mx23evk: default clock for high speed sdio
-cards is 50 MHz. With a SSP_CLK of 28.8 MHz default), this resulted in
-an actual clock rate of about 56 kHz.
-Tested on mx23evk.
+On Mon, Jul 11, 2011 at 09:52:01PM +0200, Koen Beel wrote:
 
-Changes in V2 patch:
-- use DIV_ROUND_UP to make sure the actual clock rate is not higher
-then the requested clock rate.
-- rename variables to reflect naming in datasheet and to make things
-more clear
+> (Sorry, patch in attachment as I still don't have a decent mail setup
+> at my company)
 
-Regards,
-Koen
+That's bad :(
 
---000e0ce0d7ce54ea4c04a7d084cf
-Content-Type: application/octet-stream;
-	name="0001-mxs-mmc-fix-clock-rate-setting.patch"
-Content-Disposition: attachment;
-	filename="0001-mxs-mmc-fix-clock-rate-setting.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gpzulhpl0
+=3D=3D=3D=3D
 
-Rml4IGNsb2NrIHJhdGUgc2V0dGluZyBvbiBteHMtbW1jIGRyaXZlci4KUHJldmlvdXNseSwgaWYg
-ZGl2MiB3YXMgemVybyB0aGUgdmFsdWUgZm9yIFRJTUlOR19DTE9DS19SQVRFIHdvdWxkCmhhdmUg
-YmVlbiAyNTUgaW5zdGVhZCBvZiAwLgpBbHNvIHRoZSBsaW1pdHMgZm9yIGRpdjEgKFRJTUlOR19D
-TE9DS19ESVZJREUpIGFuZCBkaXYyCihUSU1JTkdfQ0xPQ0tfUkFURSArIDEpIHdoZXJlIG5vdCBj
-b3JyZWN0bHkgZGVmaW5lZC4KCkNhbiBlYXNpbHkgYmUgcmVwcm9kdWNlZCBvbiBteDIzZXZrOiBk
-ZWZhdWx0IGNsb2NrIGZvciBoaWdoIHNwZWVkIHNkaW8KY2FyZHMgaXMgNTAgTUh6LiBXaXRoIGEg
-U1NQX0NMSyBvZiAyOC44IE1IeiBkZWZhdWx0KSwgdGhpcyByZXN1bHRlZCBpbgphbiBhY3R1YWwg
-Y2xvY2sgcmF0ZSBvZiBhYm91dCA1NiBrSHouClRlc3RlZCBvbiBteDIzZXZrLgoKQ2hhbmdlcyBp
-biBWMiBwYXRjaDoKLSB1c2UgRElWX1JPVU5EX1VQIHRvIG1ha2Ugc3VyZSB0aGUgYWN0dWFsIGNs
-b2NrIHJhdGUgaXMgbm90IGhpZ2hlcgp0aGVuIHRoZSByZXF1ZXN0ZWQgY2xvY2sgcmF0ZS4KLSBy
-ZW5hbWUgdmFyaWFibGVzIHRvIHJlZmxlY3QgbmFtaW5nIGluIGRhdGFzaGVldCBhbmQgdG8gbWFr
-ZSB0aGluZ3MKbW9yZSBjbGVhcgoKU2lnbmVkLW9mZi1ieTogS29lbiBCZWVsIDxrb2VuLmJlZWxA
-YmFyY28uY29tPgotLS0KIGRyaXZlcnMvbW1jL2hvc3QvbXhzLW1tYy5jIHwgICAzMCArKysrKysr
-KysrKysrKy0tLS0tLS0tLS0tLS0tLS0KIDEgZmlsZXMgY2hhbmdlZCwgMTQgaW5zZXJ0aW9ucygr
-KSwgMTYgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9teHMtbW1j
-LmMgYi9kcml2ZXJzL21tYy9ob3N0L214cy1tbWMuYwppbmRleCA5OWQzOWE2Li5kNTEzZDQ3IDEw
-MDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L214cy1tbWMuYworKysgYi9kcml2ZXJzL21tYy9o
-b3N0L214cy1tbWMuYwpAQCAtNTY0LDQwICs1NjQsMzggQEAgc3RhdGljIHZvaWQgbXhzX21tY19y
-ZXF1ZXN0KHN0cnVjdCBtbWNfaG9zdCAqbW1jLCBzdHJ1Y3QgbW1jX3JlcXVlc3QgKm1ycSkKIAog
-c3RhdGljIHZvaWQgbXhzX21tY19zZXRfY2xrX3JhdGUoc3RydWN0IG14c19tbWNfaG9zdCAqaG9z
-dCwgdW5zaWduZWQgaW50IHJhdGUpCiB7Ci0JdW5zaWduZWQgaW50IHNzcF9yYXRlLCBiaXRfcmF0
-ZTsKLQl1MzIgZGl2MSwgZGl2MjsKKwl1bnNpZ25lZCBpbnQgc3NwX2Nsaywgc3NwX3NjazsKKwl1
-MzIgY2xvY2tfZGl2aWRlLCBjbG9ja19yYXRlOwogCXUzMiB2YWw7CiAKLQlzc3BfcmF0ZSA9IGNs
-a19nZXRfcmF0ZShob3N0LT5jbGspOworCXNzcF9jbGsgPSBjbGtfZ2V0X3JhdGUoaG9zdC0+Y2xr
-KTsKIAotCWZvciAoZGl2MSA9IDI7IGRpdjEgPCAyNTQ7IGRpdjEgKz0gMikgewotCQlkaXYyID0g
-c3NwX3JhdGUgLyByYXRlIC8gZGl2MTsKLQkJaWYgKGRpdjIgPCAweDEwMCkKKwlmb3IgKGNsb2Nr
-X2RpdmlkZSA9IDI7IGNsb2NrX2RpdmlkZSA8PSAyNTQ7IGNsb2NrX2RpdmlkZSArPSAyKSB7CisJ
-CWNsb2NrX3JhdGUgPSBESVZfUk9VTkRfVVAoc3NwX2NsaywgcmF0ZSAqIGNsb2NrX2RpdmlkZSk7
-CisJCWNsb2NrX3JhdGUgPSAoY2xvY2tfcmF0ZSA+IDApID8gY2xvY2tfcmF0ZSAtIDEgOiAwOwor
-CQlpZiAoY2xvY2tfcmF0ZSA8PSAyNTUpCiAJCQlicmVhazsKIAl9CiAKLQlpZiAoZGl2MSA+PSAy
-NTQpIHsKKwlpZiAoY2xvY2tfZGl2aWRlID4gMjU0KSB7CiAJCWRldl9lcnIobW1jX2Rldihob3N0
-LT5tbWMpLAogCQkJIiVzOiBjYW5ub3Qgc2V0IGNsb2NrIHRvICVkXG4iLCBfX2Z1bmNfXywgcmF0
-ZSk7CiAJCXJldHVybjsKIAl9CiAKLQlpZiAoZGl2MiA9PSAwKQotCQliaXRfcmF0ZSA9IHNzcF9y
-YXRlIC8gZGl2MTsKLQllbHNlCi0JCWJpdF9yYXRlID0gc3NwX3JhdGUgLyBkaXYxIC8gZGl2MjsK
-Kwlzc3Bfc2NrID0gc3NwX2NsayAvIGNsb2NrX2RpdmlkZSAvICgxICsgY2xvY2tfcmF0ZSk7CiAK
-IAl2YWwgPSByZWFkbChob3N0LT5iYXNlICsgSFdfU1NQX1RJTUlORyk7CiAJdmFsICY9IH4oQk1f
-U1NQX1RJTUlOR19DTE9DS19ESVZJREUgfCBCTV9TU1BfVElNSU5HX0NMT0NLX1JBVEUpOwotCXZh
-bCB8PSBCRl9TU1AoZGl2MSwgVElNSU5HX0NMT0NLX0RJVklERSk7Ci0JdmFsIHw9IEJGX1NTUChk
-aXYyIC0gMSwgVElNSU5HX0NMT0NLX1JBVEUpOworCXZhbCB8PSBCRl9TU1AoY2xvY2tfZGl2aWRl
-LCBUSU1JTkdfQ0xPQ0tfRElWSURFKTsKKwl2YWwgfD0gQkZfU1NQKGNsb2NrX3JhdGUsIFRJTUlO
-R19DTE9DS19SQVRFKTsKIAl3cml0ZWwodmFsLCBob3N0LT5iYXNlICsgSFdfU1NQX1RJTUlORyk7
-CiAKLQlob3N0LT5jbGtfcmF0ZSA9IGJpdF9yYXRlOworCWhvc3QtPmNsa19yYXRlID0gc3NwX3Nj
-azsKIAogCWRldl9kYmcobW1jX2Rldihob3N0LT5tbWMpLAotCQkiJXM6IGRpdjEgJWQsIGRpdjIg
-JWQsIHNzcCAlZCwgYml0ICVkLCByYXRlICVkXG4iLAotCQlfX2Z1bmNfXywgZGl2MSwgZGl2Miwg
-c3NwX3JhdGUsIGJpdF9yYXRlLCByYXRlKTsKKwkJIiVzOiBjbG9ja19kaXZpZGUgJWQsIGNsb2Nr
-X3JhdGUgJWQsIHNzcF9jbGsgJWQsIHJhdGVfYWN0dWFsICVkLCByYXRlX3JlcXVlc3RlZCAlZFxu
-IiwKKwkJX19mdW5jX18sIGNsb2NrX2RpdmlkZSwgY2xvY2tfcmF0ZSwgc3NwX2Nsaywgc3NwX3Nj
-aywgcmF0ZSk7CiB9CiAKIHN0YXRpYyB2b2lkIG14c19tbWNfc2V0X2lvcyhzdHJ1Y3QgbW1jX2hv
-c3QgKm1tYywgc3RydWN0IG1tY19pb3MgKmlvcykKLS0gCjEuNy40LjEK
---000e0ce0d7ce54ea4c04a7d084cf--
+> Fix clock rate setting on mxs-mmc driver.
+> Previously, if div2 was zero the value for TIMING_CLOCK_RATE would
+> have been 255 instead of 0.
+> Also the limits for div1 (TIMING_CLOCK_DIVIDE) and div2
+> (TIMING_CLOCK_RATE + 1) where not correctly defined.
+
+Very minor nit: No paragraphs I'd say.
+
+> Can easily be reproduced on mx23evk: default clock for high speed sdio
+> cards is 50 MHz. With a SSP_CLK of 28.8 MHz default), this resulted in
+> an actual clock rate of about 56 kHz.
+> Tested on mx23evk.
+>=20
+> Changes in V2 patch:
+> - use DIV_ROUND_UP to make sure the actual clock rate is not higher
+> then the requested clock rate.
+> - rename variables to reflect naming in datasheet and to make things
+> more clear
+
+Changelogs are good, but should go below "---"
+
+>=20
+> Signed-off-by: Koen Beel <koen.beel@barco.com>
+> ---
+>  drivers/mmc/host/mxs-mmc.c |   30 ++++++++++++++----------------
+>  1 files changed, 14 insertions(+), 16 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index 99d39a6..d513d47 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -564,40 +564,38 @@ static void mxs_mmc_request(struct mmc_host *mmc, s=
+truct mmc_request *mrq)
+> =20
+>  static void mxs_mmc_set_clk_rate(struct mxs_mmc_host *host, unsigned int=
+ rate)
+>  {
+> -	unsigned int ssp_rate, bit_rate;
+> -	u32 div1, div2;
+> +	unsigned int ssp_clk, ssp_sck;
+
+ssp_sck is not really needed? Value could directly go to host->clk_rate.
+
+> +	u32 clock_divide, clock_rate;
+>  	u32 val;
+> =20
+> -	ssp_rate =3D clk_get_rate(host->clk);
+> +	ssp_clk =3D clk_get_rate(host->clk);
+> =20
+> -	for (div1 =3D 2; div1 < 254; div1 +=3D 2) {
+> -		div2 =3D ssp_rate / rate / div1;
+> -		if (div2 < 0x100)
+> +	for (clock_divide =3D 2; clock_divide <=3D 254; clock_divide +=3D 2) {
+> +		clock_rate =3D DIV_ROUND_UP(ssp_clk, rate * clock_divide);
+> +		clock_rate =3D (clock_rate > 0) ? clock_rate - 1 : 0;
+> +		if (clock_rate <=3D 255)
+>  			break;
+>  	}
+> =20
+> -	if (div1 >=3D 254) {
+> +	if (clock_divide > 254) {
+>  		dev_err(mmc_dev(host->mmc),
+>  			"%s: cannot set clock to %d\n", __func__, rate);
+
+Didn't you want to set some minimal values instead of just returning?
+Just wondering, could be a seperate patch in my book...
+
+>  		return;
+>  	}
+> =20
+> -	if (div2 =3D=3D 0)
+> -		bit_rate =3D ssp_rate / div1;
+> -	else
+> -		bit_rate =3D ssp_rate / div1 / div2;
+> +	ssp_sck =3D ssp_clk / clock_divide / (1 + clock_rate);
+> =20
+>  	val =3D readl(host->base + HW_SSP_TIMING);
+>  	val &=3D ~(BM_SSP_TIMING_CLOCK_DIVIDE | BM_SSP_TIMING_CLOCK_RATE);
+> -	val |=3D BF_SSP(div1, TIMING_CLOCK_DIVIDE);
+> -	val |=3D BF_SSP(div2 - 1, TIMING_CLOCK_RATE);
+> +	val |=3D BF_SSP(clock_divide, TIMING_CLOCK_DIVIDE);
+> +	val |=3D BF_SSP(clock_rate, TIMING_CLOCK_RATE);
+>  	writel(val, host->base + HW_SSP_TIMING);
+> =20
+> -	host->clk_rate =3D bit_rate;
+> +	host->clk_rate =3D ssp_sck;
+> =20
+>  	dev_dbg(mmc_dev(host->mmc),
+> -		"%s: div1 %d, div2 %d, ssp %d, bit %d, rate %d\n",
+> -		__func__, div1, div2, ssp_rate, bit_rate, rate);
+> +		"%s: clock_divide %d, clock_rate %d, ssp_clk %d, rate_actual %d, rate_=
+requested %d\n",
+> +		__func__, clock_divide, clock_rate, ssp_clk, ssp_sck, rate);
+>  }
+> =20
+
+Rest looks good to me, and test was also successful.
+
+Chris, if you want to take this version already:
+
+Reviewed-by: Wolfram Sang <w.sang@pengutronix.de>
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--FCuugMFkClbJLl1L
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAk4bXG0ACgkQD27XaX1/VRsXHACbB7G4eR7g1azSE6XyZWUwh8v7
+EzQAoJAnxf87l7SHDkqo6IO17kNoXrHG
+=Bv/B
+-----END PGP SIGNATURE-----
+
+--FCuugMFkClbJLl1L--
