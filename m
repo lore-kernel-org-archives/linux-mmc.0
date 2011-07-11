@@ -1,77 +1,48 @@
-From: Ido Yariv <ido@wizery.com>
-Subject: [PATCH v3 1/6] arm: davinci: Fix low level gpio irq handlers' argument
-Date: Tue, 12 Jul 2011 00:03:11 +0300
-Message-ID: <1310418191-27009-1-git-send-email-ido@wizery.com>
-References: <B85A65D85D7EB246BE421B3FB0FBB593024DA7A9DD@dbde02.ent.ti.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: [PATCH] sdhci: pxav3 controller needs 32 bit ADMA addressing
+Date: Mon, 11 Jul 2011 14:47:54 -0700
+Message-ID: <44DD7577-7CB6-42D0-9427-A8731C248612@marvell.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:38572 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757489Ab1GKVDz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2011 17:03:55 -0400
-Received: by wyg8 with SMTP id 8so2857246wyg.19
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2011 14:03:54 -0700 (PDT)
-In-Reply-To: <B85A65D85D7EB246BE421B3FB0FBB593024DA7A9DD@dbde02.ent.ti.com>
+Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:39303 "EHLO
+	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753875Ab1GKVrv convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Jul 2011 17:47:51 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>, davinci-linux-open-source@linux.davincidsp.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: Ido Yariv <ido@wizery.com>, Thomas Gleixner <tglx@linutronix.de>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Zhangfei Gao <zgao6@marvell.com>
 
-Commit 7416401 ("arm: davinci: Fix fallout from generic irq chip
-conversion") introduced a bug, causing low level interrupt handlers to
-get a bogus irq number as an argument. The gpio irq handler falsely
-assumes that the handler data is the irq base number and that is no
-longer true.
 
-Set the irq handler data to be a pointer to the corresponding gpio
-controller. The chained irq handler can then use it to extract both the
-irq base number and the gpio registers structure.
+enable the quirk.
 
-Signed-off-by: Ido Yariv <ido@wizery.com>
-CC: Thomas Gleixner <tglx@linutronix.de>
+Best used in conjunction with patch downgrading
+ADMA to SDMA when transfer is not aligned.
+
+Signed-off-by: Philip Rakity <prakity@marvell.com>
 ---
- arch/arm/mach-davinci/gpio.c |   14 +++++++++++---
- 1 files changed, 11 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-pxav3.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
 
-diff --git a/arch/arm/mach-davinci/gpio.c b/arch/arm/mach-davinci/gpio.c
-index e722139..7d64a07 100644
---- a/arch/arm/mach-davinci/gpio.c
-+++ b/arch/arm/mach-davinci/gpio.c
-@@ -254,8 +254,10 @@ gpio_irq_handler(unsigned irq, struct irq_desc *desc)
- {
- 	struct davinci_gpio_regs __iomem *g;
- 	u32 mask = 0xffff;
-+	struct davinci_gpio_controller *ctl;
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 4198dbb..fc7e4a5 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -195,7 +195,8 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
+ 	clk_enable(clk);
  
--	g = (__force struct davinci_gpio_regs __iomem *) irq_desc_get_handler_data(desc);
-+	ctl = (struct davinci_gpio_controller *)irq_desc_get_handler_data(desc);
-+	g = (struct davinci_gpio_regs __iomem *)ctl->regs;
+ 	host->quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+-		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
++		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
++		| SDHCI_QUIRK_32BIT_ADMA_SIZE;
  
- 	/* we only care about one bank */
- 	if (irq & 1)
-@@ -278,7 +280,7 @@ gpio_irq_handler(unsigned irq, struct irq_desc *desc)
- 			status >>= 16;
- 
- 		/* now demux them to the right lowlevel handler */
--		n = (int)irq_get_handler_data(irq);
-+		n = ctl->irq_base;
- 		while (status) {
- 			res = ffs(status);
- 			n += res;
-@@ -424,7 +426,13 @@ static int __init davinci_gpio_irq_setup(void)
- 
- 		/* set up all irqs in this bank */
- 		irq_set_chained_handler(bank_irq, gpio_irq_handler);
--		irq_set_handler_data(bank_irq, (__force void *)g);
-+
-+		/*
-+		 * Each chip handles 32 gpios, and each irq bank consists of 16
-+		 * gpio irqs. Pass the irq bank's corresponding controller to
-+		 * the chained irq handler.
-+		 */
-+		irq_set_handler_data(bank_irq, &chips[bank * 16 / 32]);
- 
- 		for (i = 0; i < 16 && gpio < ngpio; i++, irq++, gpio++) {
- 			irq_set_chip(irq, &gpio_irqchip);
+ 	/* enable 1/8V DDR capable */
+ 	host->mmc->caps |= MMC_CAP_1_8V_DDR;
 -- 
-1.7.4.1
+1.7.0.4
+
 
