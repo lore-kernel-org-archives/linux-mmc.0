@@ -1,117 +1,83 @@
-From: "Nori, Sekhar" <nsekhar@ti.com>
-Subject: RE: [PATCH v2 1/6] arm: davinci: Fix low level gpio irq handlers'
- argument
-Date: Mon, 11 Jul 2011 17:28:44 +0530
-Message-ID: <B85A65D85D7EB246BE421B3FB0FBB593024DA7A9DD@dbde02.ent.ti.com>
-References: <1310303679-17936-1-git-send-email-ido@wizery.com>
- <1310303679-17936-2-git-send-email-ido@wizery.com>
+From: Peter Warasin <peter@endian.com>
+Subject: damn slow SDHC card
+Date: Mon, 11 Jul 2011 19:39:29 +0200
+Message-ID: <4E1B3551.1040505@endian.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:51044 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756841Ab1GKMti convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2011 08:49:38 -0400
-In-Reply-To: <1310303679-17936-2-git-send-email-ido@wizery.com>
-Content-Language: en-US
+Received: from cerbero2.endian.it ([80.190.199.139]:49265 "EHLO
+	smtp1.endian.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1758403Ab1GKSGH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2011 14:06:07 -0400
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by solaria.endian.it (Postfix) with ESMTP id 52E9A599384
+	for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2011 19:39:40 +0200 (CEST)
+Received: from smtp1.endian.com ([127.0.0.1])
+	by localhost (solaria.endian.it [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id KhPRGxutMChI for <linux-mmc@vger.kernel.org>;
+	Mon, 11 Jul 2011 19:39:30 +0200 (CEST)
+Received: from smtp.frangart.endian.com (unknown [192.168.201.129])
+	by solaria.endian.it (Postfix) with ESMTP id CBFD1599363
+	for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2011 19:39:30 +0200 (CEST)
+Received: from localhost (localhost.localhost [127.0.0.1])
+	by smtp.frangart.endian.com (Postfix) with ESMTP id 5D329116EC3
+	for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2011 19:39:30 +0200 (CEST)
+Received: from [10.7.5.53] (unknown [10.7.5.53])
+	by smtp.frangart.endian.com (Postfix) with ESMTP id 330A6116EB9
+	for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2011 19:39:30 +0200 (CEST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ido Yariv <ido@wizery.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-ker>
-Cc: Thomas Gleixner <tglx@linutronix.de>
+To: linux-mmc@vger.kernel.org
 
-Hi Ido,
+hi guys
 
-On Sun, Jul 10, 2011 at 18:44:34, Ido Yariv wrote:
-> Commit 7416401 ("arm: davinci: Fix fallout from generic irq chip
-> conversion") introduced a bug, causing low level interrupt handlers to
-> get a bogus irq number as an argument. The gpio irq handler falsely
-> assumes that the handler data is the irq base number and that is no
-> longer true.
-> 
-> Fix this by converting gpio_irq_handler's bank_irq argument to the
-> corresponding irq base number.
-> 
-> Signed-off-by: Ido Yariv <ido@wizery.com>
-> CC: Thomas Gleixner <tglx@linutronix.de>
-> ---
->  arch/arm/mach-davinci/gpio.c |   32 ++++++++++++++++++++++++++++----
->  1 files changed, 28 insertions(+), 4 deletions(-)
-> 
-> diff --git a/arch/arm/mach-davinci/gpio.c b/arch/arm/mach-davinci/gpio.c
-> index e722139..ff43e2a 100644
-> --- a/arch/arm/mach-davinci/gpio.c
-> +++ b/arch/arm/mach-davinci/gpio.c
-> @@ -249,16 +249,40 @@ static struct irq_chip gpio_irqchip = {
->  	.flags		= IRQCHIP_SET_TYPE_MASKED,
->  };
->  
-> +static inline int bankirq_to_irqbase(unsigned int bank_irq)
-> +{
-> +	int gpio;
-> +	int index;
-> +
-> +	/* Each irq bank consists of up to 16 irqs */
-> +	gpio = 16 * (bank_irq - davinci_soc_info.gpio_irq);
-> +
-> +	/* Each controller controls 32 GPIOs */
-> +	index = gpio / 32;
-> +
-> +	if (unlikely(!davinci_soc_info.gpio_ctlrs))
-> +		return -EINVAL;
-> +
-> +	if (unlikely(index >= davinci_soc_info.gpio_ctlrs_num))
-> +		return -EINVAL;
-> +
-> +	return davinci_soc_info.gpio_ctlrs[index].irq_base;
-> +}
-> +
->  static void
-> -gpio_irq_handler(unsigned irq, struct irq_desc *desc)
-> +gpio_irq_handler(unsigned bank_irq, struct irq_desc *desc)
->  {
->  	struct davinci_gpio_regs __iomem *g;
->  	u32 mask = 0xffff;
-> +	int irqbase = bankirq_to_irqbase(bank_irq);
-> +
-> +	if (unlikely(irqbase < 0))
-> +		return;
->  
->  	g = (__force struct davinci_gpio_regs __iomem *) irq_desc_get_handler_data(desc);
->  
->  	/* we only care about one bank */
-> -	if (irq & 1)
-> +	if (bank_irq & 1)
->  		mask <<= 16;
->  
->  	/* temporarily mask (level sensitive) parent IRQ */
-> @@ -274,11 +298,11 @@ gpio_irq_handler(unsigned irq, struct irq_desc *desc)
->  		if (!status)
->  			break;
->  		__raw_writel(status, &g->intstat);
-> -		if (irq & 1)
-> +		if (bank_irq & 1)
->  			status >>= 16;
->  
->  		/* now demux them to the right lowlevel handler */
-> -		n = (int)irq_get_handler_data(irq);
-> +		n = irqbase;
->  		while (status) {
->  			res = ffs(status);
->  			n += res;
+i have /var and swap on an SD card (sandisk class4 4GB) in an embedded
+network device, which turns out to be reeeeally slow. System under
+certain circumstances freezes and in top i see iowait at 90% and
+processes which touch sd card, like kswapd, kjournald and *mmc*d are all
+on io-wait (D)
 
-Thanks for the bug fix.
+i found some help at linaro for sorting out if it is the SD card, which
+most probably is and try now to search a card which is fast enough
 
-How about setting the handler data for bank IRQ in
-davinci_gpio_irq_setup() to &chips[bank]?
+but tried also to sort out if maybe it is the kernel, because something
+is fishy there.
+can you guys help me a little on that?
 
-chips[bank].regs should give you the register base address
-(g) and chips[bank].irq_base should give you 'n'.
+the card is a high-speed card, but it is not running in highspeed mode:
 
-Also please drop the rename of irq to bank_irq as it is not
-central to the bug fix.
+cat /sys/kernel/debug/mmc0/ios
+clock:		25000000 Hz
+vdd:		20 (3.2 ~ 3.3 V)
+bus mode:	2 (push-pull)
+chip select:	0 (don't care)
+power mode:	2 (on)
+bus width:	2 (4 bits)
+timing spec:	0 (legacy)
 
-If you spin in soon enough, we may make it to v3.0
 
-Thanks,
-Sekhar
+i then forced the card setting to highspeed mode (by commenting out some
+returns in mmc_switch_hs() and found out that the card meets all
+requirements for highspeed, but
+
+card->sw_caps.hs_max_dtr is 0
+
+is that value the maximum bus speed which the card can handle?
+i assume when it is 0 it means it is limited to legacy specifications,
+which is quite slow (?)
+
+or is it regardless for performance if a SDHC card runs in legacy mode?
+
+thank you in advance
+
+kind regards,
+peter
+
+
+-- 
+:: e n d i a n
+:: open source - open minds
+
+:: peter warasin
+:: http://www.endian.com   :: peter@endian.com
