@@ -1,330 +1,104 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH] sdhci: If ADMA is broken try SDMA before PIO
-Date: Mon, 11 Jul 2011 12:19:15 -0700
-Message-ID: <7B0ED90B-2CF6-459C-B66A-55A1633C462E@marvell.com>
+From: Koen Beel <koen.beel.barco@gmail.com>
+Subject: [PATCH v2] mxs-mmc: fix clock rate setting
+Date: Mon, 11 Jul 2011 21:52:01 +0200
+Message-ID: <CAHMSPgNWherMTU9kLDH7zLQL0N_er5SpLz2v1xjzXvgckv+C2g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/mixed; boundary=000e0ce0d7ce54ea4c04a7d084cf
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog119.obsmtp.com ([74.125.149.246]:40882 "EHLO
-	na3sys009aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754477Ab1GKTT0 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Jul 2011 15:19:26 -0400
-Content-Language: en-US
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:43333 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757663Ab1GKTwD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2011 15:52:03 -0400
+Received: by wyg8 with SMTP id 8so2820216wyg.19
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2011 12:52:02 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Zhangfei Gao <zgao6@marvell.com>, Jun Nie <njun@marvell.com>
+To: linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <w.sang@pengutronix.de>, Shawn Guo <shawn.guo@freescale.com>, Chris Ball <cjb@laptop.org>
 
-Extend the fallback path for doing DMA by allowing
-SDMA to be used before PIO when doing writes.
+--000e0ce0d7ce54ea4c04a7d084cf
+Content-Type: text/plain; charset=UTF-8
 
-New quirk added to indicate ADMA needs 32 bit
-addressing.  For compatibility, the existing
-32 BIT DMA quirk indicated that both ADMA and SDMA
-address are broken.  The new quirk allows finer
-control if needed.
+Hi,
 
-When checking if for the broken xDMA quirks special
-case if both SDMA and ADMA are supported.  If SDMA is
-not broken then use that rather than PIO.
+(Sorry, patch in attachment as I still don't have a decent mail setup
+at my company)
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
----
- drivers/mmc/host/sdhci.c  |  122 ++++++++++++++++++++++++++++++++++----------
- include/linux/mmc/sdhci.h |    7 ++-
- 2 files changed, 99 insertions(+), 30 deletions(-)
+Fix clock rate setting on mxs-mmc driver.
+Previously, if div2 was zero the value for TIMING_CLOCK_RATE would
+have been 255 instead of 0.
+Also the limits for div1 (TIMING_CLOCK_DIVIDE) and div2
+(TIMING_CLOCK_RATE + 1) where not correctly defined.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 91d9892..4da6a4d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -40,6 +40,10 @@
- 
- #define MAX_TUNING_LOOP 40
- 
-+#define BROKEN_ADMA	(1<<0)
-+#define BROKEN_SDMA	(1<<1)
-+#define BROKEN_BOTH_DMA	(BROKEN_ADMA | BROKEN_SDMA)
-+
- static unsigned int debug_quirks = 0;
- 
- static void sdhci_finish_data(struct sdhci_host *);
-@@ -481,7 +485,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		if (offset) {
- 			if (data->flags & MMC_DATA_WRITE) {
- 				buffer = sdhci_kmap_atomic(sg, &flags);
--				WARN_ON(((long)buffer & PAGE_MASK) > (PAGE_SIZE - 3));
-+				WARN_ON(((long)buffer & ~PAGE_MASK) > (PAGE_SIZE - 3));
- 				memcpy(align, buffer, offset);
- 				sdhci_kunmap_atomic(buffer, &flags);
- 			}
-@@ -589,7 +593,7 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 				size = 4 - (sg_dma_address(sg) & 0x3);
- 
- 				buffer = sdhci_kmap_atomic(sg, &flags);
--				WARN_ON(((long)buffer & PAGE_MASK) > (PAGE_SIZE - 3));
-+				WARN_ON(((long)buffer & ~PAGE_MASK) > (PAGE_SIZE - 3));
- 				memcpy(buffer, align, size);
- 				sdhci_kunmap_atomic(buffer, &flags);
- 
-@@ -677,6 +681,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 	u8 ctrl;
- 	struct mmc_data *data = cmd->data;
- 	int ret;
-+	int dmaflags = 0;
- 
- 	WARN_ON(host->data);
- 
-@@ -697,34 +702,62 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 	host->data_early = 0;
- 	host->data->bytes_xfered = 0;
- 
--	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA))
-+	dmaflags = host->flags & SDHCI_USE_S_ADMA;
-+	if (dmaflags)
- 		host->flags |= SDHCI_REQ_USE_DMA;
- 
- 	/*
- 	 * FIXME: This doesn't account for merging when mapping the
- 	 * scatterlist.
-+	 * if ADMA cannot work --> try SDMA --> else PIO
- 	 */
- 	if (host->flags & SDHCI_REQ_USE_DMA) {
- 		int broken, i;
- 		struct scatterlist *sg;
- 
- 		broken = 0;
--		if (host->flags & SDHCI_USE_ADMA) {
-+		if (dmaflags & SDHCI_USE_ADMA) {
- 			if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_SIZE)
--				broken = 1;
--		} else {
-+				broken |= BROKEN_ADMA;
-+		}
-+
-+		if (dmaflags & SDHCI_USE_SDMA) {
- 			if (host->quirks & SDHCI_QUIRK_32BIT_DMA_SIZE)
--				broken = 1;
-+				broken |= BROKEN_SDMA;
- 		}
- 
- 		if (unlikely(broken)) {
- 			for_each_sg(data->sg, sg, data->sg_len, i) {
- 				if (sg->length & 0x3) {
--					DBG("Reverting to PIO because of "
--						"transfer size (%d)\n",
--						sg->length);
--					host->flags &= ~SDHCI_REQ_USE_DMA;
--					break;
-+					if ((dmaflags & SDHCI_USE_S_ADMA) ==
-+						SDHCI_USE_S_ADMA) {
-+						if ((broken & BROKEN_BOTH_DMA) ==
-+							BROKEN_ADMA) {
-+							DBG("Reverting to SDMA "
-+								"because of "
-+								"transfer size "
-+								"sg_offset = %08X, "
-+								"sg->length = %d\n",
-+								sg->offset, sg->length);
-+							dmaflags &= ~SDHCI_USE_ADMA;
-+						} else {
-+							DBG("Reverting to PIO "
-+								"because of "
-+								"transfer size "
-+								"sg_offset = %08X, "
-+								"sg->length = %d\n",
-+								sg->offset,
-+								sg->length);
-+							host->flags &= ~SDHCI_REQ_USE_DMA;
-+						}
-+					} else {
-+						DBG("Reverting to PIO because of "
-+							"transfer size "
-+							"sg_offset = %08X, "
-+							"sg->length = %d\n",
-+							sg->offset, sg->length);
-+						host->flags &= ~SDHCI_REQ_USE_DMA;
-+					}
- 				}
- 			}
- 		}
-@@ -733,39 +766,68 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 	/*
- 	 * The assumption here being that alignment is the same after
- 	 * translation to device address space.
-+	 *
-+	 * if ADMA cannot work --> try SDMA --> else PIO
- 	 */
- 	if (host->flags & SDHCI_REQ_USE_DMA) {
- 		int broken, i;
- 		struct scatterlist *sg;
- 
- 		broken = 0;
--		if (host->flags & SDHCI_USE_ADMA) {
-+		if (dmaflags & SDHCI_USE_ADMA) {
- 			/*
- 			 * As we use 3 byte chunks to work around
- 			 * alignment problems, we need to check this
- 			 * quirk.
- 			 */
- 			if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_SIZE)
--				broken = 1;
--		} else {
--			if (host->quirks & SDHCI_QUIRK_32BIT_DMA_ADDR)
--				broken = 1;
-+				broken |= BROKEN_ADMA;
-+			if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_ADDR)
-+				broken |= BROKEN_ADMA;
-+		}
-+		if (dmaflags & SDHCI_USE_SDMA) {
-+			if (host->quirks & SDHCI_QUIRK_32BIT_SDMA_ADDR)
-+				broken |= BROKEN_SDMA;
- 		}
- 
- 		if (unlikely(broken)) {
- 			for_each_sg(data->sg, sg, data->sg_len, i) {
- 				if (sg->offset & 0x3) {
--					DBG("Reverting to PIO because of "
--						"bad alignment\n");
--					host->flags &= ~SDHCI_REQ_USE_DMA;
--					break;
-+					if ((dmaflags & SDHCI_USE_S_ADMA) ==
-+						SDHCI_USE_S_ADMA) {
-+						if ((broken & BROKEN_BOTH_DMA) ==
-+							BROKEN_ADMA) {
-+							DBG("Reverting to SDMA "
-+								"because of "
-+								"bad alignment "
-+								"sg_offset = %08X, "
-+								"sg->length = %d\n",
-+								sg->offset, sg->length);
-+							dmaflags &= ~SDHCI_USE_ADMA;
-+						} else {
-+							DBG("Reverting to PIO "
-+								"because of "
-+								"bad alignment "
-+								"sg_offset = %08X, "
-+								"sg->length = %d\n",
-+								sg->offset, sg->length);
-+							host->flags &= ~SDHCI_REQ_USE_DMA;
-+						}
-+					} else {
-+						DBG("Reverting to PIO because of "
-+							"bad alignment "
-+							"sg_offset = %08X, "
-+							"sg->length = %d\n",
-+							sg->offset, sg->length);
-+						host->flags &= ~SDHCI_REQ_USE_DMA;
-+					}
- 				}
- 			}
- 		}
- 	}
- 
- 	if (host->flags & SDHCI_REQ_USE_DMA) {
--		if (host->flags & SDHCI_USE_ADMA) {
-+		if (dmaflags & SDHCI_USE_ADMA) {
- 			ret = sdhci_adma_table_pre(host, data);
- 			if (ret) {
- 				/*
-@@ -810,7 +872,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
- 		ctrl &= ~SDHCI_CTRL_DMA_MASK;
- 		if ((host->flags & SDHCI_REQ_USE_DMA) &&
--			(host->flags & SDHCI_USE_ADMA))
-+			(dmaflags & SDHCI_USE_ADMA))
- 			ctrl |= SDHCI_CTRL_ADMA32;
- 		else
- 			ctrl |= SDHCI_CTRL_SDMA;
-@@ -2260,7 +2322,7 @@ int sdhci_resume_host(struct sdhci_host *host)
- 	}
- 
- 
--	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
-+	if (host->flags & SDHCI_USE_S_ADMA) {
- 		if (host->ops->enable_dma)
- 			host->ops->enable_dma(host);
- 	}
-@@ -2381,14 +2443,13 @@ int sdhci_add_host(struct sdhci_host *host)
- 		host->flags &= ~SDHCI_USE_ADMA;
- 	}
- 
--	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
-+	if (host->flags & SDHCI_USE_S_ADMA) {
- 		if (host->ops->enable_dma) {
- 			if (host->ops->enable_dma(host)) {
- 				printk(KERN_WARNING "%s: No suitable DMA "
- 					"available. Falling back to PIO.\n",
- 					mmc_hostname(mmc));
--				host->flags &=
--					~(SDHCI_USE_SDMA | SDHCI_USE_ADMA);
-+				host->flags &= ~SDHCI_USE_S_ADMA;
- 			}
- 		}
- 	}
-@@ -2416,7 +2477,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	 * mask, but PIO does not need the hw shim so we set a new
- 	 * mask here in that case.
- 	 */
--	if (!(host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA))) {
-+	if (!(host->flags & SDHCI_USE_S_ADMA)) {
- 		host->dma_mask = DMA_BIT_MASK(64);
- 		mmc_dev(host->mmc)->dma_mask = &host->dma_mask;
- 	}
-@@ -2758,6 +2819,11 @@ int sdhci_add_host(struct sdhci_host *host)
- 		(host->flags & SDHCI_USE_ADMA) ? "ADMA" :
- 		(host->flags & SDHCI_USE_SDMA) ? "DMA" : "PIO");
- 
-+	if ((host->flags & SDHCI_USE_S_ADMA) == SDHCI_USE_S_ADMA)
-+		printk(KERN_INFO "%s: SDHCI controller on %s [%s] can also"
-+		" use SDMA\n",
-+		mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)));
-+
- 	sdhci_enable_card_detection(host);
- 
- 	return 0;
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 13c13f8..74d8cbd 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -38,7 +38,7 @@ struct sdhci_host {
- /* Controller has an unusable ADMA engine */
- #define SDHCI_QUIRK_BROKEN_ADMA				(1<<6)
- /* Controller can only DMA from 32-bit aligned addresses */
--#define SDHCI_QUIRK_32BIT_DMA_ADDR			(1<<7)
-+#define SDHCI_QUIRK_32BIT_SDMA_ADDR			(1<<7)
- /* Controller can only DMA chunk sizes that are a multiple of 32 bits */
- #define SDHCI_QUIRK_32BIT_DMA_SIZE			(1<<8)
- /* Controller can only ADMA chunks that are a multiple of 32 bits */
-@@ -64,7 +64,7 @@ struct sdhci_host {
- /* Controller losing signal/interrupt enable states after reset */
- #define SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET		(1<<19)
- /* Reclaimed, available for use */
--#define SDHCI_QUIRK_UNUSED_20				(1<<20)
-+#define SDHCI_QUIRK_32BIT_ADMA_ADDR			(1<<20)
- /* Reclaimed, available for use */
- #define SDHCI_QUIRK_UNUSED_21				(1<<21)
- /* Controller can only handle 1-bit data transfers */
-@@ -87,6 +87,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC		(1<<30)
- /* The read-only detection via SDHCI_PRESENT_STATE register is unstable */
- #define SDHCI_QUIRK_UNSTABLE_RO_DETECT			(1<<31)
-+#define SDHCI_QUIRK_32BIT_DMA_ADDR	(SDHCI_QUIRK_32BIT_SDMA_ADDR | \
-+						SDHCI_QUIRK_32BIT_ADMA_ADDR)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
-@@ -115,6 +117,7 @@ struct sdhci_host {
- #define SDHCI_NEEDS_RETUNING	(1<<5)	/* Host needs retuning */
- #define SDHCI_AUTO_CMD12	(1<<6)	/* Auto CMD12 support */
- #define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
-+#define SDHCI_USE_S_ADMA	(SDHCI_USE_SDMA | SDHCI_USE_ADMA)
- 
- 	unsigned int version;	/* SDHCI spec. version */
- 
--- 
-1.7.0.4
+Can easily be reproduced on mx23evk: default clock for high speed sdio
+cards is 50 MHz. With a SSP_CLK of 28.8 MHz default), this resulted in
+an actual clock rate of about 56 kHz.
+Tested on mx23evk.
 
+Changes in V2 patch:
+- use DIV_ROUND_UP to make sure the actual clock rate is not higher
+then the requested clock rate.
+- rename variables to reflect naming in datasheet and to make things
+more clear
 
+Regards,
+Koen
+
+--000e0ce0d7ce54ea4c04a7d084cf
+Content-Type: application/octet-stream;
+	name="0001-mxs-mmc-fix-clock-rate-setting.patch"
+Content-Disposition: attachment;
+	filename="0001-mxs-mmc-fix-clock-rate-setting.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gpzulhpl0
+
+Rml4IGNsb2NrIHJhdGUgc2V0dGluZyBvbiBteHMtbW1jIGRyaXZlci4KUHJldmlvdXNseSwgaWYg
+ZGl2MiB3YXMgemVybyB0aGUgdmFsdWUgZm9yIFRJTUlOR19DTE9DS19SQVRFIHdvdWxkCmhhdmUg
+YmVlbiAyNTUgaW5zdGVhZCBvZiAwLgpBbHNvIHRoZSBsaW1pdHMgZm9yIGRpdjEgKFRJTUlOR19D
+TE9DS19ESVZJREUpIGFuZCBkaXYyCihUSU1JTkdfQ0xPQ0tfUkFURSArIDEpIHdoZXJlIG5vdCBj
+b3JyZWN0bHkgZGVmaW5lZC4KCkNhbiBlYXNpbHkgYmUgcmVwcm9kdWNlZCBvbiBteDIzZXZrOiBk
+ZWZhdWx0IGNsb2NrIGZvciBoaWdoIHNwZWVkIHNkaW8KY2FyZHMgaXMgNTAgTUh6LiBXaXRoIGEg
+U1NQX0NMSyBvZiAyOC44IE1IeiBkZWZhdWx0KSwgdGhpcyByZXN1bHRlZCBpbgphbiBhY3R1YWwg
+Y2xvY2sgcmF0ZSBvZiBhYm91dCA1NiBrSHouClRlc3RlZCBvbiBteDIzZXZrLgoKQ2hhbmdlcyBp
+biBWMiBwYXRjaDoKLSB1c2UgRElWX1JPVU5EX1VQIHRvIG1ha2Ugc3VyZSB0aGUgYWN0dWFsIGNs
+b2NrIHJhdGUgaXMgbm90IGhpZ2hlcgp0aGVuIHRoZSByZXF1ZXN0ZWQgY2xvY2sgcmF0ZS4KLSBy
+ZW5hbWUgdmFyaWFibGVzIHRvIHJlZmxlY3QgbmFtaW5nIGluIGRhdGFzaGVldCBhbmQgdG8gbWFr
+ZSB0aGluZ3MKbW9yZSBjbGVhcgoKU2lnbmVkLW9mZi1ieTogS29lbiBCZWVsIDxrb2VuLmJlZWxA
+YmFyY28uY29tPgotLS0KIGRyaXZlcnMvbW1jL2hvc3QvbXhzLW1tYy5jIHwgICAzMCArKysrKysr
+KysrKysrKy0tLS0tLS0tLS0tLS0tLS0KIDEgZmlsZXMgY2hhbmdlZCwgMTQgaW5zZXJ0aW9ucygr
+KSwgMTYgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9teHMtbW1j
+LmMgYi9kcml2ZXJzL21tYy9ob3N0L214cy1tbWMuYwppbmRleCA5OWQzOWE2Li5kNTEzZDQ3IDEw
+MDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L214cy1tbWMuYworKysgYi9kcml2ZXJzL21tYy9o
+b3N0L214cy1tbWMuYwpAQCAtNTY0LDQwICs1NjQsMzggQEAgc3RhdGljIHZvaWQgbXhzX21tY19y
+ZXF1ZXN0KHN0cnVjdCBtbWNfaG9zdCAqbW1jLCBzdHJ1Y3QgbW1jX3JlcXVlc3QgKm1ycSkKIAog
+c3RhdGljIHZvaWQgbXhzX21tY19zZXRfY2xrX3JhdGUoc3RydWN0IG14c19tbWNfaG9zdCAqaG9z
+dCwgdW5zaWduZWQgaW50IHJhdGUpCiB7Ci0JdW5zaWduZWQgaW50IHNzcF9yYXRlLCBiaXRfcmF0
+ZTsKLQl1MzIgZGl2MSwgZGl2MjsKKwl1bnNpZ25lZCBpbnQgc3NwX2Nsaywgc3NwX3NjazsKKwl1
+MzIgY2xvY2tfZGl2aWRlLCBjbG9ja19yYXRlOwogCXUzMiB2YWw7CiAKLQlzc3BfcmF0ZSA9IGNs
+a19nZXRfcmF0ZShob3N0LT5jbGspOworCXNzcF9jbGsgPSBjbGtfZ2V0X3JhdGUoaG9zdC0+Y2xr
+KTsKIAotCWZvciAoZGl2MSA9IDI7IGRpdjEgPCAyNTQ7IGRpdjEgKz0gMikgewotCQlkaXYyID0g
+c3NwX3JhdGUgLyByYXRlIC8gZGl2MTsKLQkJaWYgKGRpdjIgPCAweDEwMCkKKwlmb3IgKGNsb2Nr
+X2RpdmlkZSA9IDI7IGNsb2NrX2RpdmlkZSA8PSAyNTQ7IGNsb2NrX2RpdmlkZSArPSAyKSB7CisJ
+CWNsb2NrX3JhdGUgPSBESVZfUk9VTkRfVVAoc3NwX2NsaywgcmF0ZSAqIGNsb2NrX2RpdmlkZSk7
+CisJCWNsb2NrX3JhdGUgPSAoY2xvY2tfcmF0ZSA+IDApID8gY2xvY2tfcmF0ZSAtIDEgOiAwOwor
+CQlpZiAoY2xvY2tfcmF0ZSA8PSAyNTUpCiAJCQlicmVhazsKIAl9CiAKLQlpZiAoZGl2MSA+PSAy
+NTQpIHsKKwlpZiAoY2xvY2tfZGl2aWRlID4gMjU0KSB7CiAJCWRldl9lcnIobW1jX2Rldihob3N0
+LT5tbWMpLAogCQkJIiVzOiBjYW5ub3Qgc2V0IGNsb2NrIHRvICVkXG4iLCBfX2Z1bmNfXywgcmF0
+ZSk7CiAJCXJldHVybjsKIAl9CiAKLQlpZiAoZGl2MiA9PSAwKQotCQliaXRfcmF0ZSA9IHNzcF9y
+YXRlIC8gZGl2MTsKLQllbHNlCi0JCWJpdF9yYXRlID0gc3NwX3JhdGUgLyBkaXYxIC8gZGl2MjsK
+Kwlzc3Bfc2NrID0gc3NwX2NsayAvIGNsb2NrX2RpdmlkZSAvICgxICsgY2xvY2tfcmF0ZSk7CiAK
+IAl2YWwgPSByZWFkbChob3N0LT5iYXNlICsgSFdfU1NQX1RJTUlORyk7CiAJdmFsICY9IH4oQk1f
+U1NQX1RJTUlOR19DTE9DS19ESVZJREUgfCBCTV9TU1BfVElNSU5HX0NMT0NLX1JBVEUpOwotCXZh
+bCB8PSBCRl9TU1AoZGl2MSwgVElNSU5HX0NMT0NLX0RJVklERSk7Ci0JdmFsIHw9IEJGX1NTUChk
+aXYyIC0gMSwgVElNSU5HX0NMT0NLX1JBVEUpOworCXZhbCB8PSBCRl9TU1AoY2xvY2tfZGl2aWRl
+LCBUSU1JTkdfQ0xPQ0tfRElWSURFKTsKKwl2YWwgfD0gQkZfU1NQKGNsb2NrX3JhdGUsIFRJTUlO
+R19DTE9DS19SQVRFKTsKIAl3cml0ZWwodmFsLCBob3N0LT5iYXNlICsgSFdfU1NQX1RJTUlORyk7
+CiAKLQlob3N0LT5jbGtfcmF0ZSA9IGJpdF9yYXRlOworCWhvc3QtPmNsa19yYXRlID0gc3NwX3Nj
+azsKIAogCWRldl9kYmcobW1jX2Rldihob3N0LT5tbWMpLAotCQkiJXM6IGRpdjEgJWQsIGRpdjIg
+JWQsIHNzcCAlZCwgYml0ICVkLCByYXRlICVkXG4iLAotCQlfX2Z1bmNfXywgZGl2MSwgZGl2Miwg
+c3NwX3JhdGUsIGJpdF9yYXRlLCByYXRlKTsKKwkJIiVzOiBjbG9ja19kaXZpZGUgJWQsIGNsb2Nr
+X3JhdGUgJWQsIHNzcF9jbGsgJWQsIHJhdGVfYWN0dWFsICVkLCByYXRlX3JlcXVlc3RlZCAlZFxu
+IiwKKwkJX19mdW5jX18sIGNsb2NrX2RpdmlkZSwgY2xvY2tfcmF0ZSwgc3NwX2Nsaywgc3NwX3Nj
+aywgcmF0ZSk7CiB9CiAKIHN0YXRpYyB2b2lkIG14c19tbWNfc2V0X2lvcyhzdHJ1Y3QgbW1jX2hv
+c3QgKm1tYywgc3RydWN0IG1tY19pb3MgKmlvcykKLS0gCjEuNy40LjEK
+--000e0ce0d7ce54ea4c04a7d084cf--
