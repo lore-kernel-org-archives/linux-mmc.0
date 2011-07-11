@@ -1,89 +1,51 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: Added quirks for Ricoh 1180:e823 lower base clock frequency
-Date: Mon, 11 Jul 2011 17:53:15 -0400
-Message-ID: <m2wrfofpro.fsf@bob.laptop.org>
-References: <1310419715-13254-1-git-send-email-manoj.iyer@canonical.com>
-	<1310419715-13254-2-git-send-email-manoj.iyer@canonical.com>
+From: Manoj Iyer <manoj.iyer@canonical.com>
+Subject: Re: [PATCH] mmc: Added quirks for Ricoh 1180:e823 lower base clock
+ frequency
+Date: Mon, 11 Jul 2011 17:55:48 -0500 (CDT)
+Message-ID: <alpine.DEB.2.02.1107111749370.14531@lazy>
+References: <1310419715-13254-1-git-send-email-manoj.iyer@canonical.com> <1310419715-13254-2-git-send-email-manoj.iyer@canonical.com> <m2wrfofpro.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35730 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751489Ab1GKVxa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Jul 2011 17:53:30 -0400
-In-Reply-To: <1310419715-13254-2-git-send-email-manoj.iyer@canonical.com>
-	(Manoj Iyer's message of "Mon, 11 Jul 2011 16:28:35 -0500")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; format=flowed; charset=US-ASCII
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <m2wrfofpro.fsf@bob.laptop.org>
+Sender: linux-pci-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Manoj Iyer <manoj.iyer@canonical.com>, Daniel Manrique <daniel.manrique@canonical.com>, linux-kernel@vger.kernel.org, jbarnes@virtuousgeek.org, matsumur@nts.ricoh.co.jp, linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Manoj Iyer <manoj.iyer@canonical.com>
-Cc: linux-kernel@vger.kernel.org, jbarnes@virtuousgeek.org, matsumur@nts.ricoh.co.jp, linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi Manoj, adding linux-mmc@,
-
-On Mon, Jul 11 2011, Manoj Iyer wrote:
-> Ricoh 1180:e823 does not recognize certain types of SD/MMC cards.
-> Lowering the SD base clock frequency from 200Mhz to 50Mhz fixes
-> this issue. This solution was suggest by Koji Matsumuro, Ricoh
-> Company,Ltd.
+>> +
+>> +		dev_notice(&dev->dev, "Controller base frequency changed to 50Mhz)\n");
 >
-> BugLink: http://launchpad.net/bugs/773524
-> Signed-off-by: Manoj Iyer <manoj.iyer@canonical.com>
-> Tested-by: Daniel Manrique <daniel.manrique@canonical.com>
-> Cc: Koji Matsumuro <matsumur@nts.ricoh.co.jp>
-> ---
->  drivers/pci/quirks.c |   24 ++++++++++++++++++++++++
->  1 files changed, 24 insertions(+), 0 deletions(-)
+> There's an erroneous ")" in this string; I'll replace it with a "." if
+> this patch goes in via my tree.  Also, let's make it "MMC controller"
+> instead of just "Controller".
+
+Oops, I can fix that and resend, or would you rather make the change 
+while (if) applying to your tree?
+
 >
-> diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-> index 02145e9..fe5bffa 100644
-> --- a/drivers/pci/quirks.c
-> +++ b/drivers/pci/quirks.c
-> @@ -2758,6 +2758,30 @@ static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
->  
->  	dev_notice(&dev->dev, "proprietary Ricoh MMC controller disabled (via firewire function)\n");
->  	dev_notice(&dev->dev, "MMC cards are now supported by standard SDHCI controller\n");
-> +
-> +	/* 
-> +	 * RICOH 0xe823 SD/MMC card reader fails to recognize 
-> +	 * certain types of SD/MMC cards. Lowering the SD base
-> +	 * clock frequency from 200Mhz to 50Mhz fixes this issue.
-> +	 *
-> +	 * 0x150 - SD2.0 mode enable for changing base clock 
-> +	 *	   frequency to 50Mhz
-> +	 * 0xe1  - Base clock frequency
-> +	 * 0x32  - 50Mhz new clock frequency
-> +	 * 0xf9  - Key register for 0x150
-> +	 * 0xfc  - key register for 0xe1
-> +	 */
-> +	if (dev->device == PCI_DEVICE_ID_RICOH_R5CE823) {
-> +		pci_write_config_byte(dev, 0xf9, 0xfc);
-> +		pci_write_config_byte(dev, 0x150, 0x10);
-> +		pci_write_config_byte(dev, 0xf9, 0x00);
-> +		pci_write_config_byte(dev, 0xfc, 0x01);
-> +		pci_write_config_byte(dev, 0xe1, 0x32);
-> +		pci_write_config_byte(dev, 0xfc, 0x00);
-> +
-> +		dev_notice(&dev->dev, "Controller base frequency changed to 50Mhz)\n");
+>> +	}
+>> +
+>>  }
+>>  DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
+>>  DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
+>
+> Have you checked to see how SD I/O performance differs after this change?
+>
+> (If this is significant, perhaps we want to try lowering the frequency
+> only after a card starts returning errors, since some cards work fine
+> at the higher frequency.)
+>
 
-There's an erroneous ")" in this string; I'll replace it with a "." if
-this patch goes in via my tree.  Also, let's make it "MMC controller"
-instead of just "Controller".
+This is something I thought about too, I can try and get some data on the 
+cards (that already works) with the patch applied. Do you have any 
+specific benchmarks in mind that you would like me to run? Or will timing 
+read and write will work?
 
-> +	}
-> +
->  }
->  DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
->  DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
-
-Have you checked to see how SD I/O performance differs after this change?
-
-(If this is significant, perhaps we want to try lowering the frequency
-only after a card starts returning errors, since some cards work fine
-at the higher frequency.)
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks a ton!
+--
+====================
+Manoj Iyer
+Ubuntu/Canonical
+Hardware Enablement
+====================
