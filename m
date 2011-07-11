@@ -1,48 +1,89 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: [PATCH] sdhci: pxav3 controller needs 32 bit ADMA addressing
-Date: Mon, 11 Jul 2011 14:47:54 -0700
-Message-ID: <44DD7577-7CB6-42D0-9427-A8731C248612@marvell.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: Added quirks for Ricoh 1180:e823 lower base clock frequency
+Date: Mon, 11 Jul 2011 17:53:15 -0400
+Message-ID: <m2wrfofpro.fsf@bob.laptop.org>
+References: <1310419715-13254-1-git-send-email-manoj.iyer@canonical.com>
+	<1310419715-13254-2-git-send-email-manoj.iyer@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:39303 "EHLO
-	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753875Ab1GKVrv convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Jul 2011 17:47:51 -0400
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:35730 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751489Ab1GKVxa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Jul 2011 17:53:30 -0400
+In-Reply-To: <1310419715-13254-2-git-send-email-manoj.iyer@canonical.com>
+	(Manoj Iyer's message of "Mon, 11 Jul 2011 16:28:35 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Zhangfei Gao <zgao6@marvell.com>
+To: Manoj Iyer <manoj.iyer@canonical.com>
+Cc: linux-kernel@vger.kernel.org, jbarnes@virtuousgeek.org, matsumur@nts.ricoh.co.jp, linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org
 
+Hi Manoj, adding linux-mmc@,
 
-enable the quirk.
+On Mon, Jul 11 2011, Manoj Iyer wrote:
+> Ricoh 1180:e823 does not recognize certain types of SD/MMC cards.
+> Lowering the SD base clock frequency from 200Mhz to 50Mhz fixes
+> this issue. This solution was suggest by Koji Matsumuro, Ricoh
+> Company,Ltd.
+>
+> BugLink: http://launchpad.net/bugs/773524
+> Signed-off-by: Manoj Iyer <manoj.iyer@canonical.com>
+> Tested-by: Daniel Manrique <daniel.manrique@canonical.com>
+> Cc: Koji Matsumuro <matsumur@nts.ricoh.co.jp>
+> ---
+>  drivers/pci/quirks.c |   24 ++++++++++++++++++++++++
+>  1 files changed, 24 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
+> index 02145e9..fe5bffa 100644
+> --- a/drivers/pci/quirks.c
+> +++ b/drivers/pci/quirks.c
+> @@ -2758,6 +2758,30 @@ static void ricoh_mmc_fixup_r5c832(struct pci_dev *dev)
+>  
+>  	dev_notice(&dev->dev, "proprietary Ricoh MMC controller disabled (via firewire function)\n");
+>  	dev_notice(&dev->dev, "MMC cards are now supported by standard SDHCI controller\n");
+> +
+> +	/* 
+> +	 * RICOH 0xe823 SD/MMC card reader fails to recognize 
+> +	 * certain types of SD/MMC cards. Lowering the SD base
+> +	 * clock frequency from 200Mhz to 50Mhz fixes this issue.
+> +	 *
+> +	 * 0x150 - SD2.0 mode enable for changing base clock 
+> +	 *	   frequency to 50Mhz
+> +	 * 0xe1  - Base clock frequency
+> +	 * 0x32  - 50Mhz new clock frequency
+> +	 * 0xf9  - Key register for 0x150
+> +	 * 0xfc  - key register for 0xe1
+> +	 */
+> +	if (dev->device == PCI_DEVICE_ID_RICOH_R5CE823) {
+> +		pci_write_config_byte(dev, 0xf9, 0xfc);
+> +		pci_write_config_byte(dev, 0x150, 0x10);
+> +		pci_write_config_byte(dev, 0xf9, 0x00);
+> +		pci_write_config_byte(dev, 0xfc, 0x01);
+> +		pci_write_config_byte(dev, 0xe1, 0x32);
+> +		pci_write_config_byte(dev, 0xfc, 0x00);
+> +
+> +		dev_notice(&dev->dev, "Controller base frequency changed to 50Mhz)\n");
 
-Best used in conjunction with patch downgrading
-ADMA to SDMA when transfer is not aligned.
+There's an erroneous ")" in this string; I'll replace it with a "." if
+this patch goes in via my tree.  Also, let's make it "MMC controller"
+instead of just "Controller".
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
----
- drivers/mmc/host/sdhci-pxav3.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
+> +	}
+> +
+>  }
+>  DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
+>  DECLARE_PCI_FIXUP_RESUME_EARLY(PCI_VENDOR_ID_RICOH, PCI_DEVICE_ID_RICOH_R5C832, ricoh_mmc_fixup_r5c832);
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 4198dbb..fc7e4a5 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -195,7 +195,8 @@ static int __devinit sdhci_pxav3_probe(struct platform_device *pdev)
- 	clk_enable(clk);
- 
- 	host->quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
--		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
-+		| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
-+		| SDHCI_QUIRK_32BIT_ADMA_SIZE;
- 
- 	/* enable 1/8V DDR capable */
- 	host->mmc->caps |= MMC_CAP_1_8V_DDR;
+Have you checked to see how SD I/O performance differs after this change?
+
+(If this is significant, perhaps we want to try lowering the frequency
+only after a card starts returning errors, since some cards work fine
+at the higher frequency.)
+
+Thanks,
+
+- Chris.
 -- 
-1.7.0.4
-
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
