@@ -1,327 +1,383 @@
-From: "Mark F. Brown" <mark.brown314@gmail.com>
+From: Philip Rakity <prakity@marvell.com>
 Subject: Re: [PATCH] sdhci: If ADMA is broken try SDMA before PIO
-Date: Mon, 11 Jul 2011 23:00:44 -0400
-Message-ID: <CACwGpOCaM9o12at6AzbjjnDma4UC-XpXeY4=7ih1u6FmVAT2Uw@mail.gmail.com>
+Date: Mon, 11 Jul 2011 20:56:30 -0700
+Message-ID: <3CC7BB8B-1215-4369-ACAA-B17AF253E8D2@marvell.com>
 References: <7B0ED90B-2CF6-459C-B66A-55A1633C462E@marvell.com>
+ <CACwGpOCaM9o12at6AzbjjnDma4UC-XpXeY4=7ih1u6FmVAT2Uw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pv0-f174.google.com ([74.125.83.174]:57964 "EHLO
-	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754968Ab1GLDAq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2011 23:00:46 -0400
-Received: by pvg12 with SMTP id 12so3403709pvg.19
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2011 20:00:45 -0700 (PDT)
-In-Reply-To: <7B0ED90B-2CF6-459C-B66A-55A1633C462E@marvell.com>
+Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:41718 "EHLO
+	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751148Ab1GLD4e convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Jul 2011 23:56:34 -0400
+In-Reply-To: <CACwGpOCaM9o12at6AzbjjnDma4UC-XpXeY4=7ih1u6FmVAT2Uw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
+To: Mark Brown <mark.brown314@gmail.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Zhangfei Gao <zgao6@marvell.com>, Jun Nie <njun@marvell.com>
 
-UGhpbGlwLAoKMS4gVGhlIGNvZGUgc2hvdWxkIHJldmVydCB0byBBRE1BIGluIHRoZSBjYXNlIHdo
-ZW4gdGhlIG9mZnNldCBoYXMKcHJvcGVyIGFsaWdubWVudCBhbmQvb3IgdHJhbnNmZXIgc2l6ZSBt
-ZWV0cyByZXF1aXJlbWVudHMuCgoyLiBUaGUgY29kZSBoZXJlIGhhcyBmb3VyIGxldmVscyBvZiBu
-ZXN0aW5nIHRyeSB0byBzaW1wbGlmeSB0aGF0LgpAQCAtNjk3LDM0ICs3MDIsNjIgQEAgc3RhdGlj
-IHZvaWQgc2RoY2lfcHJlcGFyZV9kYXRhKHN0cnVjdCBzZGhjaV9ob3N0Cipob3N0LCBzdHJ1Y3Qg
-bW1jX2NvbW1hbmQgKmNtZCkKQEAgLTczMywzOSArNzY2LDY4IEBAIHN0YXRpYyB2b2lkIHNkaGNp
-X3ByZXBhcmVfZGF0YShzdHJ1Y3Qgc2RoY2lfaG9zdAoqaG9zdCwgc3RydWN0IG1tY19jb21tYW5k
-ICpjbWQpCgogICAgICAgICAgICAgICBpZiAodW5saWtlbHkoYnJva2VuKSkgewogICAgICAgICAg
-ICAgICAgICAgICAgIGZvcl9lYWNoX3NnKGRhdGEtPnNnLCBzZywgZGF0YS0+c2dfbGVuLCBpKSB7
-CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpZiAoc2ctPmxlbmd0aCAmIDB4Mykgewot
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgREJHKCJSZXZlcnRpbmcgdG8g
-UElPIGJlY2F1c2Ugb2YgIgotICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAidHJhbnNmZXIgc2l6ZSAoJWQpXG4iLAotICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICBzZy0+bGVuZ3RoKTsKLSAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgIGhvc3QtPmZsYWdzICY9IH5TREhDSV9SRVFfVVNFX0RNQTsKLSAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJyZWFrOworICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgaWYgKChkbWFmbGFncyAmIFNESENJX1VTRV9TX0FE
-TUEpID09CisgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFNE
-SENJX1VTRV9TX0FETUEpIHsKKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgaWYgKChicm9rZW4gJgpCUk9LRU5fQk9USF9ETUEpID09CisgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgQlJPS0VOX0FETUEpIHsK
-Ck9uIE1vbiwgSnVsIDExLCAyMDExIGF0IDM6MTkgUE0sIFBoaWxpcCBSYWtpdHkgPHByYWtpdHlA
-bWFydmVsbC5jb20+IHdyb3RlOgo+IEV4dGVuZCB0aGUgZmFsbGJhY2sgcGF0aCBmb3IgZG9pbmcg
-RE1BIGJ5IGFsbG93aW5nCj4gU0RNQSB0byBiZSB1c2VkIGJlZm9yZSBQSU8gd2hlbiBkb2luZyB3
-cml0ZXMuCj4KPiBOZXcgcXVpcmsgYWRkZWQgdG8gaW5kaWNhdGUgQURNQSBuZWVkcyAzMiBiaXQK
-PiBhZGRyZXNzaW5nLiCgRm9yIGNvbXBhdGliaWxpdHksIHRoZSBleGlzdGluZwo+IDMyIEJJVCBE
-TUEgcXVpcmsgaW5kaWNhdGVkIHRoYXQgYm90aCBBRE1BIGFuZCBTRE1BCj4gYWRkcmVzcyBhcmUg
-YnJva2VuLiCgVGhlIG5ldyBxdWlyayBhbGxvd3MgZmluZXIKPiBjb250cm9sIGlmIG5lZWRlZC4K
-Pgo+IFdoZW4gY2hlY2tpbmcgaWYgZm9yIHRoZSBicm9rZW4geERNQSBxdWlya3Mgc3BlY2lhbAo+
-IGNhc2UgaWYgYm90aCBTRE1BIGFuZCBBRE1BIGFyZSBzdXBwb3J0ZWQuIKBJZiBTRE1BIGlzCj4g
-bm90IGJyb2tlbiB0aGVuIHVzZSB0aGF0IHJhdGhlciB0aGFuIFBJTy4KPgo+IFNpZ25lZC1vZmYt
-Ynk6IFBoaWxpcCBSYWtpdHkgPHByYWtpdHlAbWFydmVsbC5jb20+Cj4gLS0tCj4goGRyaXZlcnMv
-bW1jL2hvc3Qvc2RoY2kuYyCgfCCgMTIyICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KystLS0tLS0tLS0tCj4goGluY2x1ZGUvbGludXgvbW1jL3NkaGNpLmggfCCgIKA3ICsrLQo+IKAy
-IGZpbGVzIGNoYW5nZWQsIDk5IGluc2VydGlvbnMoKyksIDMwIGRlbGV0aW9ucygtKQo+Cj4gZGlm
-ZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2Ro
-Y2kuYwo+IGluZGV4IDkxZDk4OTIuLjRkYTZhNGQgMTAwNjQ0Cj4gLS0tIGEvZHJpdmVycy9tbWMv
-aG9zdC9zZGhjaS5jCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jCj4gQEAgLTQwLDYg
-KzQwLDEwIEBACj4KPiCgI2RlZmluZSBNQVhfVFVOSU5HX0xPT1AgNDAKPgo+ICsjZGVmaW5lIEJS
-T0tFTl9BRE1BIKAgoCgxPDwwKQo+ICsjZGVmaW5lIEJST0tFTl9TRE1BIKAgoCgxPDwxKQo+ICsj
-ZGVmaW5lIEJST0tFTl9CT1RIX0RNQSCgIKAgoCCgKEJST0tFTl9BRE1BIHwgQlJPS0VOX1NETUEp
-Cj4gKwo+IKBzdGF0aWMgdW5zaWduZWQgaW50IGRlYnVnX3F1aXJrcyA9IDA7Cj4KPiCgc3RhdGlj
-IHZvaWQgc2RoY2lfZmluaXNoX2RhdGEoc3RydWN0IHNkaGNpX2hvc3QgKik7Cj4gQEAgLTQ4MSw3
-ICs0ODUsNyBAQCBzdGF0aWMgaW50IHNkaGNpX2FkbWFfdGFibGVfcHJlKHN0cnVjdCBzZGhjaV9o
-b3N0ICpob3N0LAo+IKAgoCCgIKAgoCCgIKAgoGlmIChvZmZzZXQpIHsKPiCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoGlmIChkYXRhLT5mbGFncyAmIE1NQ19EQVRBX1dSSVRFKSB7Cj4goCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoGJ1ZmZlciA9IHNkaGNpX2ttYXBfYXRvbWljKHNnLCAmZmxh
-Z3MpOwo+IC0goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgV0FSTl9PTigoKGxvbmcpYnVm
-ZmVyICYgUEFHRV9NQVNLKSA+IChQQUdFX1NJWkUgLSAzKSk7Cj4gKyCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCBXQVJOX09OKCgobG9uZylidWZmZXIgJiB+UEFHRV9NQVNLKSA+IChQQUdF
-X1NJWkUgLSAzKSk7Cj4goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoG1lbWNweShhbGln
-biwgYnVmZmVyLCBvZmZzZXQpOwo+IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKBzZGhj
-aV9rdW5tYXBfYXRvbWljKGJ1ZmZlciwgJmZsYWdzKTsKPiCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oH0KPiBAQCAtNTg5LDcgKzU5Myw3IEBAIHN0YXRpYyB2b2lkIHNkaGNpX2FkbWFfdGFibGVfcG9z
-dChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwKPiCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgc2l6ZSA9IDQgLSAoc2dfZG1hX2FkZHJlc3Moc2cpICYgMHgzKTsKPgo+IKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKBidWZmZXIgPSBzZGhjaV9rbWFwX2F0b21pYyhzZywgJmZsYWdz
-KTsKPiAtIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIFdBUk5fT04oKChsb25nKWJ1ZmZl
-ciAmIFBBR0VfTUFTSykgPiAoUEFHRV9TSVpFIC0gMykpOwo+ICsgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgV0FSTl9PTigoKGxvbmcpYnVmZmVyICYgflBBR0VfTUFTSykgPiAoUEFHRV9T
-SVpFIC0gMykpOwo+IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKBtZW1jcHkoYnVmZmVy
-LCBhbGlnbiwgc2l6ZSk7Cj4goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoHNkaGNpX2t1
-bm1hcF9hdG9taWMoYnVmZmVyLCAmZmxhZ3MpOwo+Cj4gQEAgLTY3Nyw2ICs2ODEsNyBAQCBzdGF0
-aWMgdm9pZCBzZGhjaV9wcmVwYXJlX2RhdGEoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHN0cnVj
-dCBtbWNfY29tbWFuZCAqY21kKQo+IKAgoCCgIKB1OCBjdHJsOwo+IKAgoCCgIKBzdHJ1Y3QgbW1j
-X2RhdGEgKmRhdGEgPSBjbWQtPmRhdGE7Cj4goCCgIKAgoGludCByZXQ7Cj4gKyCgIKAgoCBpbnQg
-ZG1hZmxhZ3MgPSAwOwo+Cj4goCCgIKAgoFdBUk5fT04oaG9zdC0+ZGF0YSk7Cj4KPiBAQCAtNjk3
-LDM0ICs3MDIsNjIgQEAgc3RhdGljIHZvaWQgc2RoY2lfcHJlcGFyZV9kYXRhKHN0cnVjdCBzZGhj
-aV9ob3N0ICpob3N0LCBzdHJ1Y3QgbW1jX2NvbW1hbmQgKmNtZCkKPiCgIKAgoCCgaG9zdC0+ZGF0
-YV9lYXJseSA9IDA7Cj4goCCgIKAgoGhvc3QtPmRhdGEtPmJ5dGVzX3hmZXJlZCA9IDA7Cj4KPiAt
-IKAgoCCgIGlmIChob3N0LT5mbGFncyAmIChTREhDSV9VU0VfU0RNQSB8IFNESENJX1VTRV9BRE1B
-KSkKPiArIKAgoCCgIGRtYWZsYWdzID0gaG9zdC0+ZmxhZ3MgJiBTREhDSV9VU0VfU19BRE1BOwo+
-ICsgoCCgIKAgaWYgKGRtYWZsYWdzKQo+IKAgoCCgIKAgoCCgIKAgoGhvc3QtPmZsYWdzIHw9IFNE
-SENJX1JFUV9VU0VfRE1BOwo+Cj4goCCgIKAgoC8qCj4goCCgIKAgoCAqIEZJWE1FOiBUaGlzIGRv
-ZXNuJ3QgYWNjb3VudCBmb3IgbWVyZ2luZyB3aGVuIG1hcHBpbmcgdGhlCj4goCCgIKAgoCAqIHNj
-YXR0ZXJsaXN0Lgo+ICsgoCCgIKAgoCogaWYgQURNQSBjYW5ub3Qgd29yayAtLT4gdHJ5IFNETUEg
-LS0+IGVsc2UgUElPCj4goCCgIKAgoCAqLwo+IKAgoCCgIKBpZiAoaG9zdC0+ZmxhZ3MgJiBTREhD
-SV9SRVFfVVNFX0RNQSkgewo+IKAgoCCgIKAgoCCgIKAgoGludCBicm9rZW4sIGk7Cj4goCCgIKAg
-oCCgIKAgoCCgc3RydWN0IHNjYXR0ZXJsaXN0ICpzZzsKPgo+IKAgoCCgIKAgoCCgIKAgoGJyb2tl
-biA9IDA7Cj4gLSCgIKAgoCCgIKAgoCCgIGlmIChob3N0LT5mbGFncyAmIFNESENJX1VTRV9BRE1B
-KSB7Cj4gKyCgIKAgoCCgIKAgoCCgIGlmIChkbWFmbGFncyAmIFNESENJX1VTRV9BRE1BKSB7Cj4g
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKBpZiAoaG9zdC0+cXVpcmtzICYgU0RIQ0lfUVVJUktfMzJC
-SVRfQURNQV9TSVpFKQo+IC0goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgYnJva2VuID0g
-MTsKPiAtIKAgoCCgIKAgoCCgIKAgfSBlbHNlIHsKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIGJyb2tlbiB8PSBCUk9LRU5fQURNQTsKPiArIKAgoCCgIKAgoCCgIKAgfQo+ICsKPiAr
-IKAgoCCgIKAgoCCgIKAgaWYgKGRtYWZsYWdzICYgU0RIQ0lfVVNFX1NETUEpIHsKPiCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoGlmIChob3N0LT5xdWlya3MgJiBTREhDSV9RVUlSS18zMkJJVF9ETUFf
-U0laRSkKPiAtIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIGJyb2tlbiA9IDE7Cj4gKyCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBicm9rZW4gfD0gQlJPS0VOX1NETUE7Cj4goCCg
-IKAgoCCgIKAgoCCgfQo+Cj4goCCgIKAgoCCgIKAgoCCgaWYgKHVubGlrZWx5KGJyb2tlbikpIHsK
-PiCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoGZvcl9lYWNoX3NnKGRhdGEtPnNnLCBzZywgZGF0YS0+
-c2dfbGVuLCBpKSB7Cj4goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoGlmIChzZy0+bGVu
-Z3RoICYgMHgzKSB7Cj4gLSCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIERC
-RygiUmV2ZXJ0aW5nIHRvIFBJTyBiZWNhdXNlIG9mICIKPiAtIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCAidHJhbnNmZXIgc2l6ZSAoJWQpXG4iLAo+IC0goCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIHNnLT5sZW5ndGgpOwo+
-IC0goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBob3N0LT5mbGFncyAmPSB+
-U0RIQ0lfUkVRX1VTRV9ETUE7Cj4gLSCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIGJyZWFrOwo+ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBpZiAo
-KGRtYWZsYWdzICYgU0RIQ0lfVVNFX1NfQURNQSkgPT0KPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBTREhDSV9VU0VfU19BRE1BKSB7Cj4gKyCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgaWYgKChicm9rZW4gJiBCUk9L
-RU5fQk9USF9ETUEpID09Cj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCBCUk9LRU5fQURNQSkgewo+ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgREJHKCJSZXZlcnRpbmcgdG8gU0RNQSAi
-Cj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgICJiZWNhdXNlIG9mICIKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgInRyYW5zZmVyIHNpemUgIgo+ICsgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCAic2dfb2Zmc2V0ID0gJTA4WCwgIgo+ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCAic2ctPmxlbmd0aCA9ICVkXG4iLAo+ICsg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCBzZy0+b2Zmc2V0LCBzZy0+bGVuZ3RoKTsKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIGRtYWZsYWdzICY9IH5TREhDSV9VU0VfQURN
-QTsKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCB9IGVs
-c2Ugewo+ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgREJHKCJSZXZlcnRpbmcgdG8gUElPICIKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgImJlY2F1c2Ugb2YgIgo+ICsg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCAidHJhbnNmZXIgc2l6ZSAiCj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgICJzZ19vZmZzZXQgPSAlMDhYLCAiCj4gKyCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgICJzZy0+bGVuZ3RoID0gJWRcbiIsCj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIHNnLT5vZmZzZXQsCj4gKyCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIHNn
-LT5sZW5ndGgpOwo+ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgaG9zdC0+ZmxhZ3MgJj0gflNESENJX1JFUV9VU0VfRE1BOwo+ICsgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIH0KPiArIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgfSBlbHNlIHsKPiArIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBEQkcoIlJldmVydGluZyB0byBQSU8gYmVjYXVz
-ZSBvZiAiCj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCAidHJhbnNmZXIgc2l6ZSAiCj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCAic2dfb2Zmc2V0ID0gJTA4WCwgIgo+ICsgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgInNnLT5sZW5n
-dGggPSAlZFxuIiwKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIHNnLT5vZmZzZXQsIHNnLT5sZW5ndGgpOwo+ICsgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIGhvc3QtPmZsYWdzICY9IH5TREhDSV9SRVFf
-VVNFX0RNQTsKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgfQo+IKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKB9Cj4goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKB9
-Cj4goCCgIKAgoCCgIKAgoCCgfQo+IEBAIC03MzMsMzkgKzc2Niw2OCBAQCBzdGF0aWMgdm9pZCBz
-ZGhjaV9wcmVwYXJlX2RhdGEoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHN0cnVjdCBtbWNfY29t
-bWFuZCAqY21kKQo+IKAgoCCgIKAvKgo+IKAgoCCgIKAgKiBUaGUgYXNzdW1wdGlvbiBoZXJlIGJl
-aW5nIHRoYXQgYWxpZ25tZW50IGlzIHRoZSBzYW1lIGFmdGVyCj4goCCgIKAgoCAqIHRyYW5zbGF0
-aW9uIHRvIGRldmljZSBhZGRyZXNzIHNwYWNlLgo+ICsgoCCgIKAgoCoKPiArIKAgoCCgIKAqIGlm
-IEFETUEgY2Fubm90IHdvcmsgLS0+IHRyeSBTRE1BIC0tPiBlbHNlIFBJTwo+IKAgoCCgIKAgKi8K
-PiCgIKAgoCCgaWYgKGhvc3QtPmZsYWdzICYgU0RIQ0lfUkVRX1VTRV9ETUEpIHsKPiCgIKAgoCCg
-IKAgoCCgIKBpbnQgYnJva2VuLCBpOwo+IKAgoCCgIKAgoCCgIKAgoHN0cnVjdCBzY2F0dGVybGlz
-dCAqc2c7Cj4KPiCgIKAgoCCgIKAgoCCgIKBicm9rZW4gPSAwOwo+IC0goCCgIKAgoCCgIKAgoCBp
-ZiAoaG9zdC0+ZmxhZ3MgJiBTREhDSV9VU0VfQURNQSkgewo+ICsgoCCgIKAgoCCgIKAgoCBpZiAo
-ZG1hZmxhZ3MgJiBTREhDSV9VU0VfQURNQSkgewo+IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgLyoK
-PiCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCAqIEFzIHdlIHVzZSAzIGJ5dGUgY2h1bmtzIHRvIHdv
-cmsgYXJvdW5kCj4goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgKiBhbGlnbm1lbnQgcHJvYmxlbXMs
-IHdlIG5lZWQgdG8gY2hlY2sgdGhpcwo+IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgICogcXVpcmsu
-Cj4goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgKi8KPiCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoGlm
-IChob3N0LT5xdWlya3MgJiBTREhDSV9RVUlSS18zMkJJVF9BRE1BX1NJWkUpCj4gLSCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBicm9rZW4gPSAxOwo+IC0goCCgIKAgoCCgIKAgoCB9IGVs
-c2Ugewo+IC0goCCgIKAgoCCgIKAgoCCgIKAgoCCgIGlmIChob3N0LT5xdWlya3MgJiBTREhDSV9R
-VUlSS18zMkJJVF9ETUFfQUREUikKPiAtIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIGJy
-b2tlbiA9IDE7Cj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBicm9rZW4gfD0gQlJP
-S0VOX0FETUE7Cj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgaWYgKGhvc3QtPnF1aXJrcyAmIFNE
-SENJX1FVSVJLXzMyQklUX0FETUFfQUREUikKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIGJyb2tlbiB8PSBCUk9LRU5fQURNQTsKPiArIKAgoCCgIKAgoCCgIKAgfQo+ICsgoCCgIKAg
-oCCgIKAgoCBpZiAoZG1hZmxhZ3MgJiBTREhDSV9VU0VfU0RNQSkgewo+ICsgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIGlmIChob3N0LT5xdWlya3MgJiBTREhDSV9RVUlSS18zMkJJVF9TRE1BX0FERFIp
-Cj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBicm9rZW4gfD0gQlJPS0VOX1NETUE7
-Cj4goCCgIKAgoCCgIKAgoCCgfQo+Cj4goCCgIKAgoCCgIKAgoCCgaWYgKHVubGlrZWx5KGJyb2tl
-bikpIHsKPiCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoGZvcl9lYWNoX3NnKGRhdGEtPnNnLCBzZywg
-ZGF0YS0+c2dfbGVuLCBpKSB7Cj4goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoGlmIChz
-Zy0+b2Zmc2V0ICYgMHgzKSB7Cj4gLSCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIERCRygiUmV2ZXJ0aW5nIHRvIFBJTyBiZWNhdXNlIG9mICIKPiAtIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCAiYmFkIGFsaWdubWVudFxuIik7Cj4gLSCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIGhvc3QtPmZsYWdzICY9IH5TREhD
-SV9SRVFfVVNFX0RNQTsKPiAtIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-YnJlYWs7Cj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIGlmICgoZG1h
-ZmxhZ3MgJiBTREhDSV9VU0VfU19BRE1BKSA9PQo+ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIFNESENJX1VTRV9TX0FETUEpIHsKPiArIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBpZiAoKGJyb2tlbiAmIEJST0tFTl9C
-T1RIX0RNQSkgPT0KPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIEJST0tFTl9BRE1BKSB7Cj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBEQkcoIlJldmVydGluZyB0byBTRE1BICIKPiAr
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgImJlY2F1c2Ugb2YgIgo+ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCAiYmFkIGFsaWdubWVudCAiCj4gKyCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgICJz
-Z19vZmZzZXQgPSAlMDhYLCAiCj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgICJzZy0+bGVuZ3RoID0gJWRcbiIsCj4gKyCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IHNnLT5vZmZzZXQsIHNnLT5sZW5ndGgpOwo+ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgZG1hZmxhZ3MgJj0gflNESENJX1VTRV9BRE1BOwo+
-ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIH0gZWxzZSB7
-Cj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCBEQkcoIlJldmVydGluZyB0byBQSU8gIgo+ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCAiYmVjYXVzZSBvZiAiCj4gKyCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-ICJiYWQgYWxpZ25tZW50ICIKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgInNnX29mZnNldCA9ICUwOFgsICIKPiArIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-InNnLT5sZW5ndGggPSAlZFxuIiwKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgc2ctPm9mZnNldCwgc2ctPmxlbmd0aCk7Cj4g
-KyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBo
-b3N0LT5mbGFncyAmPSB+U0RIQ0lfUkVRX1VTRV9ETUE7Cj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgfQo+ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCB9IGVsc2Ugewo+ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIERCRygiUmV2ZXJ0aW5nIHRvIFBJTyBiZWNhdXNlIG9mICIKPiArIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgICJiYWQg
-YWxpZ25tZW50ICIKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgICJzZ19vZmZzZXQgPSAlMDhYLCAiCj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCAic2ctPmxlbmd0aCA9ICVkXG4iLAo+
-ICsgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-c2ctPm9mZnNldCwgc2ctPmxlbmd0aCk7Cj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgaG9zdC0+ZmxhZ3MgJj0gflNESENJX1JFUV9VU0VfRE1BOwo+ICsg
-oCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCB9Cj4goCCgIKAgoCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoH0KPiCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoH0KPiCgIKAgoCCgIKAg
-oCCgIKB9Cj4goCCgIKAgoH0KPgo+IKAgoCCgIKBpZiAoaG9zdC0+ZmxhZ3MgJiBTREhDSV9SRVFf
-VVNFX0RNQSkgewo+IC0goCCgIKAgoCCgIKAgoCBpZiAoaG9zdC0+ZmxhZ3MgJiBTREhDSV9VU0Vf
-QURNQSkgewo+ICsgoCCgIKAgoCCgIKAgoCBpZiAoZG1hZmxhZ3MgJiBTREhDSV9VU0VfQURNQSkg
-ewo+IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgcmV0ID0gc2RoY2lfYWRtYV90YWJsZV9wcmUoaG9z
-dCwgZGF0YSk7Cj4goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKBpZiAocmV0KSB7Cj4goCCgIKAgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoC8qCj4gQEAgLTgxMCw3ICs4NzIsNyBAQCBzdGF0aWMgdm9p
-ZCBzZGhjaV9wcmVwYXJlX2RhdGEoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHN0cnVjdCBtbWNf
-Y29tbWFuZCAqY21kKQo+IKAgoCCgIKAgoCCgIKAgoGN0cmwgPSBzZGhjaV9yZWFkYihob3N0LCBT
-REhDSV9IT1NUX0NPTlRST0wpOwo+IKAgoCCgIKAgoCCgIKAgoGN0cmwgJj0gflNESENJX0NUUkxf
-RE1BX01BU0s7Cj4goCCgIKAgoCCgIKAgoCCgaWYgKChob3N0LT5mbGFncyAmIFNESENJX1JFUV9V
-U0VfRE1BKSAmJgo+IC0goCCgIKAgoCCgIKAgoCCgIKAgoCCgIChob3N0LT5mbGFncyAmIFNESENJ
-X1VTRV9BRE1BKSkKPiArIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCAoZG1hZmxhZ3MgJiBTREhDSV9V
-U0VfQURNQSkpCj4goCCgIKAgoCCgIKAgoCCgIKAgoCCgIKBjdHJsIHw9IFNESENJX0NUUkxfQURN
-QTMyOwo+IKAgoCCgIKAgoCCgIKAgoGVsc2UKPiCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoGN0cmwg
-fD0gU0RIQ0lfQ1RSTF9TRE1BOwo+IEBAIC0yMjYwLDcgKzIzMjIsNyBAQCBpbnQgc2RoY2lfcmVz
-dW1lX2hvc3Qoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QpCj4goCCgIKAgoH0KPgo+Cj4gLSCgIKAg
-oCBpZiAoaG9zdC0+ZmxhZ3MgJiAoU0RIQ0lfVVNFX1NETUEgfCBTREhDSV9VU0VfQURNQSkpIHsK
-PiArIKAgoCCgIGlmIChob3N0LT5mbGFncyAmIFNESENJX1VTRV9TX0FETUEpIHsKPiCgIKAgoCCg
-IKAgoCCgIKBpZiAoaG9zdC0+b3BzLT5lbmFibGVfZG1hKQo+IKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgaG9zdC0+b3BzLT5lbmFibGVfZG1hKGhvc3QpOwo+IKAgoCCgIKB9Cj4gQEAgLTIzODEsMTQg
-KzI0NDMsMTMgQEAgaW50IHNkaGNpX2FkZF9ob3N0KHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0KQo+
-IKAgoCCgIKAgoCCgIKAgoGhvc3QtPmZsYWdzICY9IH5TREhDSV9VU0VfQURNQTsKPiCgIKAgoCCg
-fQo+Cj4gLSCgIKAgoCBpZiAoaG9zdC0+ZmxhZ3MgJiAoU0RIQ0lfVVNFX1NETUEgfCBTREhDSV9V
-U0VfQURNQSkpIHsKPiArIKAgoCCgIGlmIChob3N0LT5mbGFncyAmIFNESENJX1VTRV9TX0FETUEp
-IHsKPiCgIKAgoCCgIKAgoCCgIKBpZiAoaG9zdC0+b3BzLT5lbmFibGVfZG1hKSB7Cj4goCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKBpZiAoaG9zdC0+b3BzLT5lbmFibGVfZG1hKGhvc3QpKSB7Cj4goCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoHByaW50ayhLRVJOX1dBUk5JTkcgIiVzOiBObyBz
-dWl0YWJsZSBETUEgIgo+IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCJh
-dmFpbGFibGUuIEZhbGxpbmcgYmFjayB0byBQSU8uXG4iLAo+IKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIKAgoG1tY19ob3N0bmFtZShtbWMpKTsKPiAtIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIGhvc3QtPmZsYWdzICY9Cj4gLSCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgoCCgIH4oU0RIQ0lfVVNFX1NETUEgfCBTREhDSV9VU0VfQURNQSk7Cj4gKyCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCBob3N0LT5mbGFncyAmPSB+U0RIQ0lfVVNFX1Nf
-QURNQTsKPiCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoH0KPiCgIKAgoCCgIKAgoCCgIKB9Cj4goCCg
-IKAgoH0KPiBAQCAtMjQxNiw3ICsyNDc3LDcgQEAgaW50IHNkaGNpX2FkZF9ob3N0KHN0cnVjdCBz
-ZGhjaV9ob3N0ICpob3N0KQo+IKAgoCCgIKAgKiBtYXNrLCBidXQgUElPIGRvZXMgbm90IG5lZWQg
-dGhlIGh3IHNoaW0gc28gd2Ugc2V0IGEgbmV3Cj4goCCgIKAgoCAqIG1hc2sgaGVyZSBpbiB0aGF0
-IGNhc2UuCj4goCCgIKAgoCAqLwo+IC0goCCgIKAgaWYgKCEoaG9zdC0+ZmxhZ3MgJiAoU0RIQ0lf
-VVNFX1NETUEgfCBTREhDSV9VU0VfQURNQSkpKSB7Cj4gKyCgIKAgoCBpZiAoIShob3N0LT5mbGFn
-cyAmIFNESENJX1VTRV9TX0FETUEpKSB7Cj4goCCgIKAgoCCgIKAgoCCgaG9zdC0+ZG1hX21hc2sg
-PSBETUFfQklUX01BU0soNjQpOwo+IKAgoCCgIKAgoCCgIKAgoG1tY19kZXYoaG9zdC0+bW1jKS0+
-ZG1hX21hc2sgPSAmaG9zdC0+ZG1hX21hc2s7Cj4goCCgIKAgoH0KPiBAQCAtMjc1OCw2ICsyODE5
-LDExIEBAIGludCBzZGhjaV9hZGRfaG9zdChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCkKPiCgIKAg
-oCCgIKAgoCCgIKAoaG9zdC0+ZmxhZ3MgJiBTREhDSV9VU0VfQURNQSkgPyAiQURNQSIgOgo+IKAg
-oCCgIKAgoCCgIKAgoChob3N0LT5mbGFncyAmIFNESENJX1VTRV9TRE1BKSA/ICJETUEiIDogIlBJ
-TyIpOwo+Cj4gKyCgIKAgoCBpZiAoKGhvc3QtPmZsYWdzICYgU0RIQ0lfVVNFX1NfQURNQSkgPT0g
-U0RIQ0lfVVNFX1NfQURNQSkKPiArIKAgoCCgIKAgoCCgIKAgcHJpbnRrKEtFUk5fSU5GTyAiJXM6
-IFNESENJIGNvbnRyb2xsZXIgb24gJXMgWyVzXSBjYW4gYWxzbyIKPiArIKAgoCCgIKAgoCCgIKAg
-IiB1c2UgU0RNQVxuIiwKPiArIKAgoCCgIKAgoCCgIKAgbW1jX2hvc3RuYW1lKG1tYyksIGhvc3Qt
-Pmh3X25hbWUsIGRldl9uYW1lKG1tY19kZXYobW1jKSkpOwo+ICsKPiCgIKAgoCCgc2RoY2lfZW5h
-YmxlX2NhcmRfZGV0ZWN0aW9uKGhvc3QpOwo+Cj4goCCgIKAgoHJldHVybiAwOwo+IGRpZmYgLS1n
-aXQgYS9pbmNsdWRlL2xpbnV4L21tYy9zZGhjaS5oIGIvaW5jbHVkZS9saW51eC9tbWMvc2RoY2ku
-aAo+IGluZGV4IDEzYzEzZjguLjc0ZDhjYmQgMTAwNjQ0Cj4gLS0tIGEvaW5jbHVkZS9saW51eC9t
-bWMvc2RoY2kuaAo+ICsrKyBiL2luY2x1ZGUvbGludXgvbW1jL3NkaGNpLmgKPiBAQCAtMzgsNyAr
-MzgsNyBAQCBzdHJ1Y3Qgc2RoY2lfaG9zdCB7Cj4goC8qIENvbnRyb2xsZXIgaGFzIGFuIHVudXNh
-YmxlIEFETUEgZW5naW5lICovCj4goCNkZWZpbmUgU0RIQ0lfUVVJUktfQlJPS0VOX0FETUEgoCCg
-IKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCgxPDw2KQo+IKAvKiBDb250cm9sbGVyIGNhbiBv
-bmx5IERNQSBmcm9tIDMyLWJpdCBhbGlnbmVkIGFkZHJlc3NlcyAqLwo+IC0jZGVmaW5lIFNESENJ
-X1FVSVJLXzMyQklUX0RNQV9BRERSIKAgoCCgIKAgoCCgIKAgoCCgIKAgKDE8PDcpCj4gKyNkZWZp
-bmUgU0RIQ0lfUVVJUktfMzJCSVRfU0RNQV9BRERSIKAgoCCgIKAgoCCgIKAgoCCgIKAoMTw8NykK
-PiCgLyogQ29udHJvbGxlciBjYW4gb25seSBETUEgY2h1bmsgc2l6ZXMgdGhhdCBhcmUgYSBtdWx0
-aXBsZSBvZiAzMiBiaXRzICovCj4goCNkZWZpbmUgU0RIQ0lfUVVJUktfMzJCSVRfRE1BX1NJWkUg
-oCCgIKAgoCCgIKAgoCCgIKAgoCAoMTw8OCkKPiCgLyogQ29udHJvbGxlciBjYW4gb25seSBBRE1B
-IGNodW5rcyB0aGF0IGFyZSBhIG11bHRpcGxlIG9mIDMyIGJpdHMgKi8KPiBAQCAtNjQsNyArNjQs
-NyBAQCBzdHJ1Y3Qgc2RoY2lfaG9zdCB7Cj4goC8qIENvbnRyb2xsZXIgbG9zaW5nIHNpZ25hbC9p
-bnRlcnJ1cHQgZW5hYmxlIHN0YXRlcyBhZnRlciByZXNldCAqLwo+IKAjZGVmaW5lIFNESENJX1FV
-SVJLX1JFU1RPUkVfSVJRU19BRlRFUl9SRVNFVCCgIKAgoCCgIKAgKDE8PDE5KQo+IKAvKiBSZWNs
-YWltZWQsIGF2YWlsYWJsZSBmb3IgdXNlICovCj4gLSNkZWZpbmUgU0RIQ0lfUVVJUktfVU5VU0VE
-XzIwIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAoMTw8MjApCj4gKyNkZWZpbmUgU0RIQ0lfUVVJ
-UktfMzJCSVRfQURNQV9BRERSIKAgoCCgIKAgoCCgIKAgoCCgIKAoMTw8MjApCj4goC8qIFJlY2xh
-aW1lZCwgYXZhaWxhYmxlIGZvciB1c2UgKi8KPiCgI2RlZmluZSBTREhDSV9RVUlSS19VTlVTRURf
-MjEgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCgxPDwyMSkKPiCgLyogQ29udHJvbGxlciBjYW4g
-b25seSBoYW5kbGUgMS1iaXQgZGF0YSB0cmFuc2ZlcnMgKi8KPiBAQCAtODcsNiArODcsOCBAQCBz
-dHJ1Y3Qgc2RoY2lfaG9zdCB7Cj4goCNkZWZpbmUgU0RIQ0lfUVVJUktfQlJPS0VOX0FETUFfWkVS
-T0xFTl9ERVNDIKAgoCCgIKAgoCAoMTw8MzApCj4goC8qIFRoZSByZWFkLW9ubHkgZGV0ZWN0aW9u
-IHZpYSBTREhDSV9QUkVTRU5UX1NUQVRFIHJlZ2lzdGVyIGlzIHVuc3RhYmxlICovCj4goCNkZWZp
-bmUgU0RIQ0lfUVVJUktfVU5TVEFCTEVfUk9fREVURUNUIKAgoCCgIKAgoCCgIKAgoCAoMTw8MzEp
-Cj4gKyNkZWZpbmUgU0RIQ0lfUVVJUktfMzJCSVRfRE1BX0FERFIgoCCgIChTREhDSV9RVUlSS18z
-MkJJVF9TRE1BX0FERFIgfCBcCj4gKyCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAgoCCgIKAg
-oCCgIKAgoCCgIKAgU0RIQ0lfUVVJUktfMzJCSVRfQURNQV9BRERSKQo+Cj4goCCgIKAgoGludCBp
-cnE7IKAgoCCgIKAgoCCgIKAgoC8qIERldmljZSBJUlEgKi8KPiCgIKAgoCCgdm9pZCBfX2lvbWVt
-ICppb2FkZHI7IKAgLyogTWFwcGVkIGFkZHJlc3MgKi8KPiBAQCAtMTE1LDYgKzExNyw3IEBAIHN0
-cnVjdCBzZGhjaV9ob3N0IHsKPiCgI2RlZmluZSBTREhDSV9ORUVEU19SRVRVTklORyCgICgxPDw1
-KSCgLyogSG9zdCBuZWVkcyByZXR1bmluZyAqLwo+IKAjZGVmaW5lIFNESENJX0FVVE9fQ01EMTIg
-oCCgIKAgKDE8PDYpIKAvKiBBdXRvIENNRDEyIHN1cHBvcnQgKi8KPiCgI2RlZmluZSBTREhDSV9B
-VVRPX0NNRDIzIKAgoCCgICgxPDw3KSCgLyogQXV0byBDTUQyMyBzdXBwb3J0ICovCj4gKyNkZWZp
-bmUgU0RIQ0lfVVNFX1NfQURNQSCgIKAgoCAoU0RIQ0lfVVNFX1NETUEgfCBTREhDSV9VU0VfQURN
-QSkKPgo+IKAgoCCgIKB1bnNpZ25lZCBpbnQgdmVyc2lvbjsgoCAvKiBTREhDSSBzcGVjLiB2ZXJz
-aW9uICovCj4KPiAtLQo+IDEuNy4wLjQKPgo+Cj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbgo+IHRoZSBi
-b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpv
-cmRvbW8gaW5mbyBhdCCgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1s
-Cj4K
+
+Hi Mark,
+
+On Jul 11, 2011, at 8:00 PM, Mark F. Brown wrote:
+
+> Philip,
+>
+> 1. The code should revert to ADMA in the case when the offset has
+> proper alignment and/or transfer size meets requirements.
+
+
+It does this.  This was the reason for the introduction of dmaflags so each
+transfer could be individually checked.
+
+>
+> 2. The code here has four levels of nesting try to simplify that.
+> @@ -697,34 +702,62 @@ static void sdhci_prepare_data(struct sdhci_host
+> *host, struct mmc_command *cmd)
+> @@ -733,39 +766,68 @@ static void sdhci_prepare_data(struct sdhci_host
+> *host, struct mmc_command *cmd)
+>
+>               if (unlikely(broken)) {
+>                       for_each_sg(data->sg, sg, data->sg_len, i) {
+>                               if (sg->length & 0x3) {
+> -                                       DBG("Reverting to PIO because of "
+> -                                               "transfer size (%d)\n",
+> -                                               sg->length);
+> -                                       host->flags &= ~SDHCI_REQ_USE_DMA;
+> -                                       break;
+> +                                       if ((dmaflags & SDHCI_USE_S_ADMA) ==
+> +                                               SDHCI_USE_S_ADMA) {
+> +                                               if ((broken &
+> BROKEN_BOTH_DMA) ==
+> +                                                       BROKEN_ADMA) {
+
+will look into how to do this.
+
+Thank You.
+
+Philip
+
+
+>
+> On Mon, Jul 11, 2011 at 3:19 PM, Philip Rakity <prakity@marvell.com> wrote:
+>> Extend the fallback path for doing DMA by allowing
+>> SDMA to be used before PIO when doing writes.
+>>
+>> New quirk added to indicate ADMA needs 32 bit
+>> addressing.  For compatibility, the existing
+>> 32 BIT DMA quirk indicated that both ADMA and SDMA
+>> address are broken.  The new quirk allows finer
+>> control if needed.
+>>
+>> When checking if for the broken xDMA quirks special
+>> case if both SDMA and ADMA are supported.  If SDMA is
+>> not broken then use that rather than PIO.
+>>
+>> Signed-off-by: Philip Rakity <prakity@marvell.com>
+>> ---
+>> drivers/mmc/host/sdhci.c  |  122 ++++++++++++++++++++++++++++++++++----------
+>> include/linux/mmc/sdhci.h |    7 ++-
+>> 2 files changed, 99 insertions(+), 30 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 91d9892..4da6a4d 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -40,6 +40,10 @@
+>>
+>> #define MAX_TUNING_LOOP 40
+>>
+>> +#define BROKEN_ADMA    (1<<0)
+>> +#define BROKEN_SDMA    (1<<1)
+>> +#define BROKEN_BOTH_DMA        (BROKEN_ADMA | BROKEN_SDMA)
+>> +
+>> static unsigned int debug_quirks = 0;
+>>
+>> static void sdhci_finish_data(struct sdhci_host *);
+>> @@ -481,7 +485,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+>>               if (offset) {
+>>                       if (data->flags & MMC_DATA_WRITE) {
+>>                               buffer = sdhci_kmap_atomic(sg, &flags);
+>> -                               WARN_ON(((long)buffer & PAGE_MASK) > (PAGE_SIZE - 3));
+>> +                               WARN_ON(((long)buffer & ~PAGE_MASK) > (PAGE_SIZE - 3));
+>>                               memcpy(align, buffer, offset);
+>>                               sdhci_kunmap_atomic(buffer, &flags);
+>>                       }
+>> @@ -589,7 +593,7 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
+>>                               size = 4 - (sg_dma_address(sg) & 0x3);
+>>
+>>                               buffer = sdhci_kmap_atomic(sg, &flags);
+>> -                               WARN_ON(((long)buffer & PAGE_MASK) > (PAGE_SIZE - 3));
+>> +                               WARN_ON(((long)buffer & ~PAGE_MASK) > (PAGE_SIZE - 3));
+>>                               memcpy(buffer, align, size);
+>>                               sdhci_kunmap_atomic(buffer, &flags);
+>>
+>> @@ -677,6 +681,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>       u8 ctrl;
+>>       struct mmc_data *data = cmd->data;
+>>       int ret;
+>> +       int dmaflags = 0;
+>>
+>>       WARN_ON(host->data);
+>>
+>> @@ -697,34 +702,62 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>       host->data_early = 0;
+>>       host->data->bytes_xfered = 0;
+>>
+>> -       if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA))
+>> +       dmaflags = host->flags & SDHCI_USE_S_ADMA;
+>> +       if (dmaflags)
+>>               host->flags |= SDHCI_REQ_USE_DMA;
+>>
+>>       /*
+>>        * FIXME: This doesn't account for merging when mapping the
+>>        * scatterlist.
+>> +        * if ADMA cannot work --> try SDMA --> else PIO
+>>        */
+>>       if (host->flags & SDHCI_REQ_USE_DMA) {
+>>               int broken, i;
+>>               struct scatterlist *sg;
+>>
+>>               broken = 0;
+>> -               if (host->flags & SDHCI_USE_ADMA) {
+>> +               if (dmaflags & SDHCI_USE_ADMA) {
+>>                       if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_SIZE)
+>> -                               broken = 1;
+>> -               } else {
+>> +                               broken |= BROKEN_ADMA;
+>> +               }
+>> +
+>> +               if (dmaflags & SDHCI_USE_SDMA) {
+>>                       if (host->quirks & SDHCI_QUIRK_32BIT_DMA_SIZE)
+>> -                               broken = 1;
+>> +                               broken |= BROKEN_SDMA;
+>>               }
+>>
+>>               if (unlikely(broken)) {
+>>                       for_each_sg(data->sg, sg, data->sg_len, i) {
+>>                               if (sg->length & 0x3) {
+>> -                                       DBG("Reverting to PIO because of "
+>> -                                               "transfer size (%d)\n",
+>> -                                               sg->length);
+>> -                                       host->flags &= ~SDHCI_REQ_USE_DMA;
+>> -                                       break;
+>> +                                       if ((dmaflags & SDHCI_USE_S_ADMA) ==
+>> +                                               SDHCI_USE_S_ADMA) {
+>> +                                               if ((broken & BROKEN_BOTH_DMA) ==
+>> +                                                       BROKEN_ADMA) {
+>> +                                                       DBG("Reverting to SDMA "
+>> +                                                               "because of "
+>> +                                                               "transfer size "
+>> +                                                               "sg_offset = %08X, "
+>> +                                                               "sg->length = %d\n",
+>> +                                                               sg->offset, sg->length);
+>> +                                                       dmaflags &= ~SDHCI_USE_ADMA;
+>> +                                               } else {
+>> +                                                       DBG("Reverting to PIO "
+>> +                                                               "because of "
+>> +                                                               "transfer size "
+>> +                                                               "sg_offset = %08X, "
+>> +                                                               "sg->length = %d\n",
+>> +                                                               sg->offset,
+>> +                                                               sg->length);
+>> +                                                       host->flags &= ~SDHCI_REQ_USE_DMA;
+>> +                                               }
+>> +                                       } else {
+>> +                                               DBG("Reverting to PIO because of "
+>> +                                                       "transfer size "
+>> +                                                       "sg_offset = %08X, "
+>> +                                                       "sg->length = %d\n",
+>> +                                                       sg->offset, sg->length);
+>> +                                               host->flags &= ~SDHCI_REQ_USE_DMA;
+>> +                                       }
+>>                               }
+>>                       }
+>>               }
+>> @@ -733,39 +766,68 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>       /*
+>>        * The assumption here being that alignment is the same after
+>>        * translation to device address space.
+>> +        *
+>> +        * if ADMA cannot work --> try SDMA --> else PIO
+>>        */
+>>       if (host->flags & SDHCI_REQ_USE_DMA) {
+>>               int broken, i;
+>>               struct scatterlist *sg;
+>>
+>>               broken = 0;
+>> -               if (host->flags & SDHCI_USE_ADMA) {
+>> +               if (dmaflags & SDHCI_USE_ADMA) {
+>>                       /*
+>>                        * As we use 3 byte chunks to work around
+>>                        * alignment problems, we need to check this
+>>                        * quirk.
+>>                        */
+>>                       if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_SIZE)
+>> -                               broken = 1;
+>> -               } else {
+>> -                       if (host->quirks & SDHCI_QUIRK_32BIT_DMA_ADDR)
+>> -                               broken = 1;
+>> +                               broken |= BROKEN_ADMA;
+>> +                       if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_ADDR)
+>> +                               broken |= BROKEN_ADMA;
+>> +               }
+>> +               if (dmaflags & SDHCI_USE_SDMA) {
+>> +                       if (host->quirks & SDHCI_QUIRK_32BIT_SDMA_ADDR)
+>> +                               broken |= BROKEN_SDMA;
+>>               }
+>>
+>>               if (unlikely(broken)) {
+>>                       for_each_sg(data->sg, sg, data->sg_len, i) {
+>>                               if (sg->offset & 0x3) {
+>> -                                       DBG("Reverting to PIO because of "
+>> -                                               "bad alignment\n");
+>> -                                       host->flags &= ~SDHCI_REQ_USE_DMA;
+>> -                                       break;
+>> +                                       if ((dmaflags & SDHCI_USE_S_ADMA) ==
+>> +                                               SDHCI_USE_S_ADMA) {
+>> +                                               if ((broken & BROKEN_BOTH_DMA) ==
+>> +                                                       BROKEN_ADMA) {
+>> +                                                       DBG("Reverting to SDMA "
+>> +                                                               "because of "
+>> +                                                               "bad alignment "
+>> +                                                               "sg_offset = %08X, "
+>> +                                                               "sg->length = %d\n",
+>> +                                                               sg->offset, sg->length);
+>> +                                                       dmaflags &= ~SDHCI_USE_ADMA;
+>> +                                               } else {
+>> +                                                       DBG("Reverting to PIO "
+>> +                                                               "because of "
+>> +                                                               "bad alignment "
+>> +                                                               "sg_offset = %08X, "
+>> +                                                               "sg->length = %d\n",
+>> +                                                               sg->offset, sg->length);
+>> +                                                       host->flags &= ~SDHCI_REQ_USE_DMA;
+>> +                                               }
+>> +                                       } else {
+>> +                                               DBG("Reverting to PIO because of "
+>> +                                                       "bad alignment "
+>> +                                                       "sg_offset = %08X, "
+>> +                                                       "sg->length = %d\n",
+>> +                                                       sg->offset, sg->length);
+>> +                                               host->flags &= ~SDHCI_REQ_USE_DMA;
+>> +                                       }
+>>                               }
+>>                       }
+>>               }
+>>       }
+>>
+>>       if (host->flags & SDHCI_REQ_USE_DMA) {
+>> -               if (host->flags & SDHCI_USE_ADMA) {
+>> +               if (dmaflags & SDHCI_USE_ADMA) {
+>>                       ret = sdhci_adma_table_pre(host, data);
+>>                       if (ret) {
+>>                               /*
+>> @@ -810,7 +872,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>>               ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>>               ctrl &= ~SDHCI_CTRL_DMA_MASK;
+>>               if ((host->flags & SDHCI_REQ_USE_DMA) &&
+>> -                       (host->flags & SDHCI_USE_ADMA))
+>> +                       (dmaflags & SDHCI_USE_ADMA))
+>>                       ctrl |= SDHCI_CTRL_ADMA32;
+>>               else
+>>                       ctrl |= SDHCI_CTRL_SDMA;
+>> @@ -2260,7 +2322,7 @@ int sdhci_resume_host(struct sdhci_host *host)
+>>       }
+>>
+>>
+>> -       if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+>> +       if (host->flags & SDHCI_USE_S_ADMA) {
+>>               if (host->ops->enable_dma)
+>>                       host->ops->enable_dma(host);
+>>       }
+>> @@ -2381,14 +2443,13 @@ int sdhci_add_host(struct sdhci_host *host)
+>>               host->flags &= ~SDHCI_USE_ADMA;
+>>       }
+>>
+>> -       if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+>> +       if (host->flags & SDHCI_USE_S_ADMA) {
+>>               if (host->ops->enable_dma) {
+>>                       if (host->ops->enable_dma(host)) {
+>>                               printk(KERN_WARNING "%s: No suitable DMA "
+>>                                       "available. Falling back to PIO.\n",
+>>                                       mmc_hostname(mmc));
+>> -                               host->flags &=
+>> -                                       ~(SDHCI_USE_SDMA | SDHCI_USE_ADMA);
+>> +                               host->flags &= ~SDHCI_USE_S_ADMA;
+>>                       }
+>>               }
+>>       }
+>> @@ -2416,7 +2477,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>>        * mask, but PIO does not need the hw shim so we set a new
+>>        * mask here in that case.
+>>        */
+>> -       if (!(host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA))) {
+>> +       if (!(host->flags & SDHCI_USE_S_ADMA)) {
+>>               host->dma_mask = DMA_BIT_MASK(64);
+>>               mmc_dev(host->mmc)->dma_mask = &host->dma_mask;
+>>       }
+>> @@ -2758,6 +2819,11 @@ int sdhci_add_host(struct sdhci_host *host)
+>>               (host->flags & SDHCI_USE_ADMA) ? "ADMA" :
+>>               (host->flags & SDHCI_USE_SDMA) ? "DMA" : "PIO");
+>>
+>> +       if ((host->flags & SDHCI_USE_S_ADMA) == SDHCI_USE_S_ADMA)
+>> +               printk(KERN_INFO "%s: SDHCI controller on %s [%s] can also"
+>> +               " use SDMA\n",
+>> +               mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)));
+>> +
+>>       sdhci_enable_card_detection(host);
+>>
+>>       return 0;
+>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+>> index 13c13f8..74d8cbd 100644
+>> --- a/include/linux/mmc/sdhci.h
+>> +++ b/include/linux/mmc/sdhci.h
+>> @@ -38,7 +38,7 @@ struct sdhci_host {
+>> /* Controller has an unusable ADMA engine */
+>> #define SDHCI_QUIRK_BROKEN_ADMA                                (1<<6)
+>> /* Controller can only DMA from 32-bit aligned addresses */
+>> -#define SDHCI_QUIRK_32BIT_DMA_ADDR                     (1<<7)
+>> +#define SDHCI_QUIRK_32BIT_SDMA_ADDR                    (1<<7)
+>> /* Controller can only DMA chunk sizes that are a multiple of 32 bits */
+>> #define SDHCI_QUIRK_32BIT_DMA_SIZE                     (1<<8)
+>> /* Controller can only ADMA chunks that are a multiple of 32 bits */
+>> @@ -64,7 +64,7 @@ struct sdhci_host {
+>> /* Controller losing signal/interrupt enable states after reset */
+>> #define SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET           (1<<19)
+>> /* Reclaimed, available for use */
+>> -#define SDHCI_QUIRK_UNUSED_20                          (1<<20)
+>> +#define SDHCI_QUIRK_32BIT_ADMA_ADDR                    (1<<20)
+>> /* Reclaimed, available for use */
+>> #define SDHCI_QUIRK_UNUSED_21                          (1<<21)
+>> /* Controller can only handle 1-bit data transfers */
+>> @@ -87,6 +87,8 @@ struct sdhci_host {
+>> #define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC           (1<<30)
+>> /* The read-only detection via SDHCI_PRESENT_STATE register is unstable */
+>> #define SDHCI_QUIRK_UNSTABLE_RO_DETECT                 (1<<31)
+>> +#define SDHCI_QUIRK_32BIT_DMA_ADDR     (SDHCI_QUIRK_32BIT_SDMA_ADDR | \
+>> +                                               SDHCI_QUIRK_32BIT_ADMA_ADDR)
+>>
+>>       int irq;                /* Device IRQ */
+>>       void __iomem *ioaddr;   /* Mapped address */
+>> @@ -115,6 +117,7 @@ struct sdhci_host {
+>> #define SDHCI_NEEDS_RETUNING   (1<<5)  /* Host needs retuning */
+>> #define SDHCI_AUTO_CMD12       (1<<6)  /* Auto CMD12 support */
+>> #define SDHCI_AUTO_CMD23       (1<<7)  /* Auto CMD23 support */
+>> +#define SDHCI_USE_S_ADMA       (SDHCI_USE_SDMA | SDHCI_USE_ADMA)
+>>
+>>       unsigned int version;   /* SDHCI spec. version */
+>>
+>> --
+>> 1.7.0.4
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+
