@@ -1,383 +1,80 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] sdhci: If ADMA is broken try SDMA before PIO
-Date: Mon, 11 Jul 2011 20:56:30 -0700
-Message-ID: <3CC7BB8B-1215-4369-ACAA-B17AF253E8D2@marvell.com>
-References: <7B0ED90B-2CF6-459C-B66A-55A1633C462E@marvell.com>
- <CACwGpOCaM9o12at6AzbjjnDma4UC-XpXeY4=7ih1u6FmVAT2Uw@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [RFC] Kernel NULL pointer dereference for mmc
+Date: Tue, 12 Jul 2011 13:23:37 +0900
+Message-ID: <4E1BCC49.6050708@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:41718 "EHLO
-	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751148Ab1GLD4e convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Jul 2011 23:56:34 -0400
-In-Reply-To: <CACwGpOCaM9o12at6AzbjjnDma4UC-XpXeY4=7ih1u6FmVAT2Uw@mail.gmail.com>
-Content-Language: en-US
+Received: from mailout4.samsung.com ([203.254.224.34]:55315 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751162Ab1GLEXq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2011 00:23:46 -0400
+Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LO700G56DJ4D6I0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 12 Jul 2011 13:23:28 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LO700HA5DJ4L6@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 12 Jul 2011 13:23:28 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <mark.brown314@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Zhangfei Gao <zgao6@marvell.com>, Jun Nie <njun@marvell.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@linaro.org>, Philip Rakity <prakity@marvell.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
+Hi
 
-Hi Mark,
+When I tested MMC card with IOzone, i found this message..
+I tried to find what problem..but i didn't find yet..
 
-On Jul 11, 2011, at 8:00 PM, Mark F. Brown wrote:
+So i want to get mailing's help..Have ever seen the below message?
+(using SDHCI controller, eMMC 4.41 card, 8-bit buswidth)
 
-> Philip,
->
-> 1. The code should revert to ADMA in the case when the offset has
-> proper alignment and/or transfer size meets requirements.
+I didn't applied about post_req/pre_req in sdhci.c.
+(using latest kernel in mmc-tree)
 
+Also i will try to debug for this problem.
 
-It does this.  This was the reason for the introduction of dmaflags so each
-transfer could be individually checked.
+Plz let me know what is problem.. 
 
->
-> 2. The code here has four levels of nesting try to simplify that.
-> @@ -697,34 +702,62 @@ static void sdhci_prepare_data(struct sdhci_host
-> *host, struct mmc_command *cmd)
-> @@ -733,39 +766,68 @@ static void sdhci_prepare_data(struct sdhci_host
-> *host, struct mmc_command *cmd)
->
->               if (unlikely(broken)) {
->                       for_each_sg(data->sg, sg, data->sg_len, i) {
->                               if (sg->length & 0x3) {
-> -                                       DBG("Reverting to PIO because of "
-> -                                               "transfer size (%d)\n",
-> -                                               sg->length);
-> -                                       host->flags &= ~SDHCI_REQ_USE_DMA;
-> -                                       break;
-> +                                       if ((dmaflags & SDHCI_USE_S_ADMA) ==
-> +                                               SDHCI_USE_S_ADMA) {
-> +                                               if ((broken &
-> BROKEN_BOTH_DMA) ==
-> +                                                       BROKEN_ADMA) {
+[  103.605000] Unable to handle kernel NULL pointer dereference at virtual address 00000000
+[  103.605000] pgd = c0004000
+[  103.605000] [00000000] *pgd=00000000
+[  103.605000] Internal error: Oops: 805 [#1] PREEMPT SMP
+[  103.605000] last sysfs file: /sys/devices/virtual/vc/vcsa1/dev
+[  103.605000] Modules linked in:
+[  103.605000] CPU: 0    Not tainted  (2.6.39-rc7-00350-g0510951 #78)
+[  103.605000] PC is at wait_for_common+0x8c/0x174
+[  103.605000] LR is at wait_for_common+0x64/0x174
+[  103.605000] pc : [<c0290104>]    lr : [<c02900dc>]    psr: 40000093
+[  103.605000] sp : ed9efee0  ip : 00000000  fp : ed9eff1c
+[  103.605000] r10: ed9efef0  r9 : ed928000  r8 : 00000002
+[  103.605000] r7 : ed9f9868  r6 : ed9ee000  r5 : 7fffffff  r4 : ed9f9864
+[  103.605000] r3 : 00000000  r2 : 00000001  r1 : ed9f987c  r0 : ed9efef8
+[  103.605000] Flags: nZcv  IRQs off  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
+[  103.605000] Control: 10c5387d  Table: 6dbc004a  DAC: 00000015
+[  103.605000] Process mmcqd/0 (pid: 856, stack limit = 0xed9ee2f0)
+[  103.605000] Stack: (0xed9efee0 to 0xed9f0000)
+[  103.605000] fee0: 00000000 00000001 ed928000 c004a5d0 ed9f987c 00000000 edbb4438 ed9f8800
+[  103.605000] ff00: ed9f9958 ed9f9958 ed9eff44 ed9f9800 00000000 edbb4438 edbb4438 c027b060
+[  103.605000] ff20: ed9f9800 ed9f9818 ed9f9400 00000000 ed9f9800 c0283614 edb3ee68 00000000
+[  103.605000] ff40: ed9f9800 ed9f9818 00000000 edbb4438 ed9f9400 ed9f9818 00000000 ed9f9800
+[  103.605000] ff60: 00000000 edbb4438 00000000 c0283af8 ed9f9818 edbb4438 ed9f9818 ed9ee000
+[  103.605000] ff80: ed9f9820 edb3eb20 edbb4a20 00000000 edbb4438 c0284558 00000000 ed855d8c
+[  103.605000] ffa0: ed9f9818 ed9effc0 c02844b8 00000000 00000000 c006ae6c 00000000 ed9f9818
+[  103.605000] ffc0: 00000000 00000000 c002eb20 dead4ead ffffffff ffffffff ed9effd8 ed9effd8
+[  103.605000] ffe0: 00000000 ed855d8c c006adec c002eb20 00000013 c002eb20 fcfcfcfc fcfcfcfc
+[  103.605000] [<c0290104>] (wait_for_common+0x8c/0x174) from [<c027b060>] (mmc_start_req+0x50/0xec)
+[  103.605000] [<c027b060>] (mmc_start_req+0x50/0xec) from [<c0283614>] (mmc_blk_issue_rw_rq+0x68/0x288)
+[  103.605000] [<c0283614>] (mmc_blk_issue_rw_rq+0x68/0x288) from [<c0283af8>] (mmc_blk_issue_rq+0x2c4/0x2e4)
+[  103.605000] [<c0283af8>] (mmc_blk_issue_rq+0x2c4/0x2e4) from [<c0284558>] (mmc_queue_thread+0xa0/0x110)
+[  103.605000] [<c0284558>] (mmc_queue_thread+0xa0/0x110) from [<c006ae6c>] (kthread+0x80/0x88)
+[  103.605000] [<c006ae6c>] (kthread+0x80/0x88) from [<c002eb20>] (kernel_thread_exit+0x0/0x8)
+[  103.605000] Code: e50b9034 e3822001 e50b2038 e584a01c (e583a000)
+[  103.830000] ---[ end trace 06e246d2b7931d3a ]---
+[  103.835000] note: mmcqd/0[856] exited with preempt_count 1
 
-will look into how to do this.
-
-Thank You.
-
-Philip
-
-
->
-> On Mon, Jul 11, 2011 at 3:19 PM, Philip Rakity <prakity@marvell.com> wrote:
->> Extend the fallback path for doing DMA by allowing
->> SDMA to be used before PIO when doing writes.
->>
->> New quirk added to indicate ADMA needs 32 bit
->> addressing.  For compatibility, the existing
->> 32 BIT DMA quirk indicated that both ADMA and SDMA
->> address are broken.  The new quirk allows finer
->> control if needed.
->>
->> When checking if for the broken xDMA quirks special
->> case if both SDMA and ADMA are supported.  If SDMA is
->> not broken then use that rather than PIO.
->>
->> Signed-off-by: Philip Rakity <prakity@marvell.com>
->> ---
->> drivers/mmc/host/sdhci.c  |  122 ++++++++++++++++++++++++++++++++++----------
->> include/linux/mmc/sdhci.h |    7 ++-
->> 2 files changed, 99 insertions(+), 30 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 91d9892..4da6a4d 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -40,6 +40,10 @@
->>
->> #define MAX_TUNING_LOOP 40
->>
->> +#define BROKEN_ADMA    (1<<0)
->> +#define BROKEN_SDMA    (1<<1)
->> +#define BROKEN_BOTH_DMA        (BROKEN_ADMA | BROKEN_SDMA)
->> +
->> static unsigned int debug_quirks = 0;
->>
->> static void sdhci_finish_data(struct sdhci_host *);
->> @@ -481,7 +485,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
->>               if (offset) {
->>                       if (data->flags & MMC_DATA_WRITE) {
->>                               buffer = sdhci_kmap_atomic(sg, &flags);
->> -                               WARN_ON(((long)buffer & PAGE_MASK) > (PAGE_SIZE - 3));
->> +                               WARN_ON(((long)buffer & ~PAGE_MASK) > (PAGE_SIZE - 3));
->>                               memcpy(align, buffer, offset);
->>                               sdhci_kunmap_atomic(buffer, &flags);
->>                       }
->> @@ -589,7 +593,7 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
->>                               size = 4 - (sg_dma_address(sg) & 0x3);
->>
->>                               buffer = sdhci_kmap_atomic(sg, &flags);
->> -                               WARN_ON(((long)buffer & PAGE_MASK) > (PAGE_SIZE - 3));
->> +                               WARN_ON(((long)buffer & ~PAGE_MASK) > (PAGE_SIZE - 3));
->>                               memcpy(buffer, align, size);
->>                               sdhci_kunmap_atomic(buffer, &flags);
->>
->> @@ -677,6 +681,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->>       u8 ctrl;
->>       struct mmc_data *data = cmd->data;
->>       int ret;
->> +       int dmaflags = 0;
->>
->>       WARN_ON(host->data);
->>
->> @@ -697,34 +702,62 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->>       host->data_early = 0;
->>       host->data->bytes_xfered = 0;
->>
->> -       if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA))
->> +       dmaflags = host->flags & SDHCI_USE_S_ADMA;
->> +       if (dmaflags)
->>               host->flags |= SDHCI_REQ_USE_DMA;
->>
->>       /*
->>        * FIXME: This doesn't account for merging when mapping the
->>        * scatterlist.
->> +        * if ADMA cannot work --> try SDMA --> else PIO
->>        */
->>       if (host->flags & SDHCI_REQ_USE_DMA) {
->>               int broken, i;
->>               struct scatterlist *sg;
->>
->>               broken = 0;
->> -               if (host->flags & SDHCI_USE_ADMA) {
->> +               if (dmaflags & SDHCI_USE_ADMA) {
->>                       if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_SIZE)
->> -                               broken = 1;
->> -               } else {
->> +                               broken |= BROKEN_ADMA;
->> +               }
->> +
->> +               if (dmaflags & SDHCI_USE_SDMA) {
->>                       if (host->quirks & SDHCI_QUIRK_32BIT_DMA_SIZE)
->> -                               broken = 1;
->> +                               broken |= BROKEN_SDMA;
->>               }
->>
->>               if (unlikely(broken)) {
->>                       for_each_sg(data->sg, sg, data->sg_len, i) {
->>                               if (sg->length & 0x3) {
->> -                                       DBG("Reverting to PIO because of "
->> -                                               "transfer size (%d)\n",
->> -                                               sg->length);
->> -                                       host->flags &= ~SDHCI_REQ_USE_DMA;
->> -                                       break;
->> +                                       if ((dmaflags & SDHCI_USE_S_ADMA) ==
->> +                                               SDHCI_USE_S_ADMA) {
->> +                                               if ((broken & BROKEN_BOTH_DMA) ==
->> +                                                       BROKEN_ADMA) {
->> +                                                       DBG("Reverting to SDMA "
->> +                                                               "because of "
->> +                                                               "transfer size "
->> +                                                               "sg_offset = %08X, "
->> +                                                               "sg->length = %d\n",
->> +                                                               sg->offset, sg->length);
->> +                                                       dmaflags &= ~SDHCI_USE_ADMA;
->> +                                               } else {
->> +                                                       DBG("Reverting to PIO "
->> +                                                               "because of "
->> +                                                               "transfer size "
->> +                                                               "sg_offset = %08X, "
->> +                                                               "sg->length = %d\n",
->> +                                                               sg->offset,
->> +                                                               sg->length);
->> +                                                       host->flags &= ~SDHCI_REQ_USE_DMA;
->> +                                               }
->> +                                       } else {
->> +                                               DBG("Reverting to PIO because of "
->> +                                                       "transfer size "
->> +                                                       "sg_offset = %08X, "
->> +                                                       "sg->length = %d\n",
->> +                                                       sg->offset, sg->length);
->> +                                               host->flags &= ~SDHCI_REQ_USE_DMA;
->> +                                       }
->>                               }
->>                       }
->>               }
->> @@ -733,39 +766,68 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->>       /*
->>        * The assumption here being that alignment is the same after
->>        * translation to device address space.
->> +        *
->> +        * if ADMA cannot work --> try SDMA --> else PIO
->>        */
->>       if (host->flags & SDHCI_REQ_USE_DMA) {
->>               int broken, i;
->>               struct scatterlist *sg;
->>
->>               broken = 0;
->> -               if (host->flags & SDHCI_USE_ADMA) {
->> +               if (dmaflags & SDHCI_USE_ADMA) {
->>                       /*
->>                        * As we use 3 byte chunks to work around
->>                        * alignment problems, we need to check this
->>                        * quirk.
->>                        */
->>                       if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_SIZE)
->> -                               broken = 1;
->> -               } else {
->> -                       if (host->quirks & SDHCI_QUIRK_32BIT_DMA_ADDR)
->> -                               broken = 1;
->> +                               broken |= BROKEN_ADMA;
->> +                       if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_ADDR)
->> +                               broken |= BROKEN_ADMA;
->> +               }
->> +               if (dmaflags & SDHCI_USE_SDMA) {
->> +                       if (host->quirks & SDHCI_QUIRK_32BIT_SDMA_ADDR)
->> +                               broken |= BROKEN_SDMA;
->>               }
->>
->>               if (unlikely(broken)) {
->>                       for_each_sg(data->sg, sg, data->sg_len, i) {
->>                               if (sg->offset & 0x3) {
->> -                                       DBG("Reverting to PIO because of "
->> -                                               "bad alignment\n");
->> -                                       host->flags &= ~SDHCI_REQ_USE_DMA;
->> -                                       break;
->> +                                       if ((dmaflags & SDHCI_USE_S_ADMA) ==
->> +                                               SDHCI_USE_S_ADMA) {
->> +                                               if ((broken & BROKEN_BOTH_DMA) ==
->> +                                                       BROKEN_ADMA) {
->> +                                                       DBG("Reverting to SDMA "
->> +                                                               "because of "
->> +                                                               "bad alignment "
->> +                                                               "sg_offset = %08X, "
->> +                                                               "sg->length = %d\n",
->> +                                                               sg->offset, sg->length);
->> +                                                       dmaflags &= ~SDHCI_USE_ADMA;
->> +                                               } else {
->> +                                                       DBG("Reverting to PIO "
->> +                                                               "because of "
->> +                                                               "bad alignment "
->> +                                                               "sg_offset = %08X, "
->> +                                                               "sg->length = %d\n",
->> +                                                               sg->offset, sg->length);
->> +                                                       host->flags &= ~SDHCI_REQ_USE_DMA;
->> +                                               }
->> +                                       } else {
->> +                                               DBG("Reverting to PIO because of "
->> +                                                       "bad alignment "
->> +                                                       "sg_offset = %08X, "
->> +                                                       "sg->length = %d\n",
->> +                                                       sg->offset, sg->length);
->> +                                               host->flags &= ~SDHCI_REQ_USE_DMA;
->> +                                       }
->>                               }
->>                       }
->>               }
->>       }
->>
->>       if (host->flags & SDHCI_REQ_USE_DMA) {
->> -               if (host->flags & SDHCI_USE_ADMA) {
->> +               if (dmaflags & SDHCI_USE_ADMA) {
->>                       ret = sdhci_adma_table_pre(host, data);
->>                       if (ret) {
->>                               /*
->> @@ -810,7 +872,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->>               ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
->>               ctrl &= ~SDHCI_CTRL_DMA_MASK;
->>               if ((host->flags & SDHCI_REQ_USE_DMA) &&
->> -                       (host->flags & SDHCI_USE_ADMA))
->> +                       (dmaflags & SDHCI_USE_ADMA))
->>                       ctrl |= SDHCI_CTRL_ADMA32;
->>               else
->>                       ctrl |= SDHCI_CTRL_SDMA;
->> @@ -2260,7 +2322,7 @@ int sdhci_resume_host(struct sdhci_host *host)
->>       }
->>
->>
->> -       if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
->> +       if (host->flags & SDHCI_USE_S_ADMA) {
->>               if (host->ops->enable_dma)
->>                       host->ops->enable_dma(host);
->>       }
->> @@ -2381,14 +2443,13 @@ int sdhci_add_host(struct sdhci_host *host)
->>               host->flags &= ~SDHCI_USE_ADMA;
->>       }
->>
->> -       if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
->> +       if (host->flags & SDHCI_USE_S_ADMA) {
->>               if (host->ops->enable_dma) {
->>                       if (host->ops->enable_dma(host)) {
->>                               printk(KERN_WARNING "%s: No suitable DMA "
->>                                       "available. Falling back to PIO.\n",
->>                                       mmc_hostname(mmc));
->> -                               host->flags &=
->> -                                       ~(SDHCI_USE_SDMA | SDHCI_USE_ADMA);
->> +                               host->flags &= ~SDHCI_USE_S_ADMA;
->>                       }
->>               }
->>       }
->> @@ -2416,7 +2477,7 @@ int sdhci_add_host(struct sdhci_host *host)
->>        * mask, but PIO does not need the hw shim so we set a new
->>        * mask here in that case.
->>        */
->> -       if (!(host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA))) {
->> +       if (!(host->flags & SDHCI_USE_S_ADMA)) {
->>               host->dma_mask = DMA_BIT_MASK(64);
->>               mmc_dev(host->mmc)->dma_mask = &host->dma_mask;
->>       }
->> @@ -2758,6 +2819,11 @@ int sdhci_add_host(struct sdhci_host *host)
->>               (host->flags & SDHCI_USE_ADMA) ? "ADMA" :
->>               (host->flags & SDHCI_USE_SDMA) ? "DMA" : "PIO");
->>
->> +       if ((host->flags & SDHCI_USE_S_ADMA) == SDHCI_USE_S_ADMA)
->> +               printk(KERN_INFO "%s: SDHCI controller on %s [%s] can also"
->> +               " use SDMA\n",
->> +               mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)));
->> +
->>       sdhci_enable_card_detection(host);
->>
->>       return 0;
->> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
->> index 13c13f8..74d8cbd 100644
->> --- a/include/linux/mmc/sdhci.h
->> +++ b/include/linux/mmc/sdhci.h
->> @@ -38,7 +38,7 @@ struct sdhci_host {
->> /* Controller has an unusable ADMA engine */
->> #define SDHCI_QUIRK_BROKEN_ADMA                                (1<<6)
->> /* Controller can only DMA from 32-bit aligned addresses */
->> -#define SDHCI_QUIRK_32BIT_DMA_ADDR                     (1<<7)
->> +#define SDHCI_QUIRK_32BIT_SDMA_ADDR                    (1<<7)
->> /* Controller can only DMA chunk sizes that are a multiple of 32 bits */
->> #define SDHCI_QUIRK_32BIT_DMA_SIZE                     (1<<8)
->> /* Controller can only ADMA chunks that are a multiple of 32 bits */
->> @@ -64,7 +64,7 @@ struct sdhci_host {
->> /* Controller losing signal/interrupt enable states after reset */
->> #define SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET           (1<<19)
->> /* Reclaimed, available for use */
->> -#define SDHCI_QUIRK_UNUSED_20                          (1<<20)
->> +#define SDHCI_QUIRK_32BIT_ADMA_ADDR                    (1<<20)
->> /* Reclaimed, available for use */
->> #define SDHCI_QUIRK_UNUSED_21                          (1<<21)
->> /* Controller can only handle 1-bit data transfers */
->> @@ -87,6 +87,8 @@ struct sdhci_host {
->> #define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC           (1<<30)
->> /* The read-only detection via SDHCI_PRESENT_STATE register is unstable */
->> #define SDHCI_QUIRK_UNSTABLE_RO_DETECT                 (1<<31)
->> +#define SDHCI_QUIRK_32BIT_DMA_ADDR     (SDHCI_QUIRK_32BIT_SDMA_ADDR | \
->> +                                               SDHCI_QUIRK_32BIT_ADMA_ADDR)
->>
->>       int irq;                /* Device IRQ */
->>       void __iomem *ioaddr;   /* Mapped address */
->> @@ -115,6 +117,7 @@ struct sdhci_host {
->> #define SDHCI_NEEDS_RETUNING   (1<<5)  /* Host needs retuning */
->> #define SDHCI_AUTO_CMD12       (1<<6)  /* Auto CMD12 support */
->> #define SDHCI_AUTO_CMD23       (1<<7)  /* Auto CMD23 support */
->> +#define SDHCI_USE_S_ADMA       (SDHCI_USE_SDMA | SDHCI_USE_ADMA)
->>
->>       unsigned int version;   /* SDHCI spec. version */
->>
->> --
->> 1.7.0.4
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-
+Regards,
+Jaehoon Chung
