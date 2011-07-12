@@ -1,56 +1,38 @@
 From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH v6] mmc: documentation of mmc non-blocking request usage
- and design.
-Date: Tue, 12 Jul 2011 13:24:48 +0200
-Message-ID: <CAJ0pr1_Tru1d4Crp3_sXxrTN+PTGN+hMkMWrLKgNPVJOvdanmw@mail.gmail.com>
-References: <1310325719-2151-1-git-send-email-per.forlin@linaro.org>
-	<4E1B93CF.60700@linux.intel.com>
+Subject: Re: [RFC] Kernel NULL pointer dereference for mmc
+Date: Tue, 12 Jul 2011 13:40:23 +0200
+Message-ID: <CAJ0pr18-UvxHwfWuVFy=TfLvWSbfRwAY1CL0EBh+fPOi6KPGRw@mail.gmail.com>
+References: <4E1BCC49.6050708@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <4E1B93CF.60700@linux.intel.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: J Freyensee <james_p_freyensee@linux.intel.com>
-Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Sourav Poddar <sourav.poddar@ti.com>, Chris Ball <cjb@laptop.org>, Randy Dunlap <rdunlap@xenotime.net>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:50269 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752964Ab1GLLkY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2011 07:40:24 -0400
+Received: by qwk3 with SMTP id 3so2314584qwk.19
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2011 04:40:23 -0700 (PDT)
+In-Reply-To: <4E1BCC49.6050708@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Philip Rakity <prakity@marvell.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On 12 July 2011 02:22, J Freyensee <james_p_freyensee@linux.intel.com> =
-wrote:
-> On 07/10/2011 12:21 PM, Per Forlin wrote:
->> +MMC host extensions
->> +=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> +
->> +There are two optional members in the
->> +mmc_host_ops -- pre_req() and post_req() -- that the host
->> +driver may implement in order to move work to before and after the =
-actual
->> +mmc_host_ops.request() function is called. In the DMA case pre_req(=
-) may
->> do
->> +dma_map_sg() and prepare the DMA descriptor, and post_req() runs
->> +the dma_unmap_sg().
->> +
+On 12 July 2011 06:23, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi
 >
-> One question: Is the 'Optimize for the first request' below an exampl=
-e of
-> how to use the 'MMC host extensions' above?
-Yes.
-
-> =A0So just using 'mmc_start_req()'
-> in an MMC client driver would not be beneficial if the MMC host was n=
-ot also
-> using the MMC host extensions, right?
+> When I tested MMC card with IOzone, i found this message..
+> I tried to find what problem..but i didn't find yet..
 >
-Yes. There may be some exceptions where there is gain without any host
-driver change. For instance when using dma_bounce, the bounce_copy
-would be done in parallel with an active transfer.
-=46uture work on eMMC HPI support (Venkatraman is working on this) can
-use the new extensions to interrupt ongoing write to make way for
-higher prio read.
+> So i want to get mailing's help..Have ever seen the below message?
+> (using SDHCI controller, eMMC 4.41 card, 8-bit buswidth)
+>
+> I didn't applied about post_req/pre_req in sdhci.c.
+> (using latest kernel in mmc-tree)
+>
+It's fine to set post_req and pre_req to NULL (default value is NULL)
+Can you post the IOzone command line?
+I want to run the same IOzone command on Snowball and Pandaboard.
 
-> Thanks,
-> Jay
-
-You're welcome,
+Thanks,
 Per
