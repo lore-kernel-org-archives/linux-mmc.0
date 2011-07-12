@@ -1,237 +1,51 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: Supply clocks for both host and card.
-Date: Tue, 12 Jul 2011 16:55:56 +0900
-Message-ID: <006001cc4069$236fe060$6a4fa120$%jun@samsung.com>
-References: <1309402497-29191-1-git-send-email-tgih.jun@samsung.com>
- <4E0C1DD0.2040202@samsung.com>
- <008c01cc37a4$1ea4c1e0$5bee45a0$%jun@samsung.com>
- <000101cc3d3b$928b28a0$b7a179e0$%jun@samsung.com>
- <4E16C313.4000804@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: sdhci-s3c: add quirk about BROKEN_ADMA_ZEROLEN_DESC
+Date: Tue, 12 Jul 2011 17:30:47 +0900
+Message-ID: <4E1C0637.2090603@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:47694 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750808Ab1GLH4B (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2011 03:56:01 -0400
-In-reply-to: <4E16C313.4000804@samsung.com>
-Content-language: ko
+Received: from mailout1.samsung.com ([203.254.224.24]:16373 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751583Ab1GLIai (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2011 04:30:38 -0400
+Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LO700A2AOYYF5C0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 12 Jul 2011 17:30:36 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LO70077HOZ0QV@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 12 Jul 2011 17:30:36 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org, 'Kyungmin Park' <kyungmin.park@samsung.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Ben Dooks <ben-linux@fluff.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi
+This patch is added the quirk for Samsung SoCs.
 
-Jaehoon Chung wrote:
-> Hi
-> 
-> Seungwon Jeon wrote:
-> > Hi, Mr Chung.
-> >
-> > Do you have any feedback?
-> > I want to know how to manipulate clock for host or card on your test
-> situation.
-> 
-> Yes. i used clock for them.
-> 
-> > I think there is no code for these clock in dw_mmc.
-> > Who do you think is responsible for enabling clock? Driver or platform?
-> >
-> Right. there is no code for clock. So if we use that controller, need to
-> add clock.
-> But i didn't sure that we need to get clock's name from platdata.
-> 
-> If we can define the clock source, it's good that define standard clksrc
-> name.("dw_mmc").
+Samsung SoCs need to set QUIRK_BROKEN_ADMA_ZEROLEN_DESC.
+(If ADMA operation is more than 65535, maybe set by zero.)
 
-Yes, it is possible to define clock name in dwmmc driver.
-And I understand that you agree to add clock for host running.
-How about clock for card(SDCLK)?
-Actually, Samsung Exynos4 distinguishes host clock and card clock.
-I wonder whether clocks(host, card) are using separately in other system or not.
-Then, it may need to add clock source for card similarly.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
 
-Beset regards,
-Seungwon Jeon.
-
-> Regards,
-> Jaehoon Chung
-> 
-> > Any opinion/advice are welcome.
-> >
-> > Best regards,
-> > Seungwon Jeon.
-> >
-> >
-> > Seungwon Jeon wrote:
-> >> Hi, Mr Chung.
-> >>
-> >>> -----Original Message-----
-> >>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> >>> owner@vger.kernel.org] On Behalf Of Jaehoon Chung
-> >>> Sent: Thursday, June 30, 2011 3:55 PM
-> >>> To: Seungwon Jeon
-> >>> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; linux-
-> >>> kernel@vger.kernel.org; Kyungmin Park
-> >>> Subject: Re: [PATCH] mmc: dw_mmc: Supply clocks for both host and card.
-> >>>
-> >>> Hi Mr.Jeon
-> >>>
-> >>> What means cclk_name/ cclk enable?
-> >>> Controlling card clock is possible?
-> >>> Sorry, i didn't understand...
-> >>> (My understanding is that if we set host clk, cclk is used with
-> >> host_clk.)
-> >>> Plz can you explain to me?
-> >> Yes, cclk is source clock for card I/O.
-> >> It can be different from Host operating clock(hclk).
-> >>
-> >> Best regards,
-> >> Seunwgon.
-> >>
-> >>
-> >>> Regards,
-> >>> Jaehoon Chung
-> >>>
-> >>> Seungwon Jeon wrote:
-> >>>> Add enabling clocks for both host controller and card.
-> >>>>
-> >>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> >>>> ---
-> >>>>  drivers/mmc/host/dw_mmc.c  |   33 ++++++++++++++++++++++++++++++++-
-> >>>>  include/linux/mmc/dw_mmc.h |    7 +++++++
-> >>>>  2 files changed, 39 insertions(+), 1 deletions(-)
-> >>>>
-> >>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> >>>> index 10b6979..a524416 100644
-> >>>> --- a/drivers/mmc/host/dw_mmc.c
-> >>>> +++ b/drivers/mmc/host/dw_mmc.c
-> >>>> @@ -1797,6 +1797,24 @@ static int dw_mci_probe(struct platform_device
-> >>> *pdev)
-> >>>>  		goto err_freehost;
-> >>>>  	}
-> >>>>
-> >>>> +	host->hclk = clk_get(&pdev->dev, pdata->hclk_name);
-> >>>> +	if (IS_ERR(host->hclk)) {
-> >>>> +		dev_err(&pdev->dev,
-> >>>> +			"Failed to get hclk\n");
-> >>>> +		ret = PTR_ERR(host->hclk);
-> >>>> +		goto err_freehost;
-> >>>> +	}
-> >>>> +	clk_enable(host->hclk);
-> >>>> +
-> >>>> +	host->cclk = clk_get(&pdev->dev, pdata->cclk_name);
-> >>>> +	if (IS_ERR(host->cclk)) {
-> >>>> +		dev_err(&pdev->dev,
-> >>>> +			"Failed to get cclk\n");
-> >>>> +		ret = PTR_ERR(host->cclk);
-> >>>> +		goto err_free_hclk;
-> >>>> +	}
-> >>>> +	clk_enable(host->cclk);
-> >>>> +
-> >>>>  	host->bus_hz = pdata->bus_hz;
-> >>>>  	host->quirks = pdata->quirks;
-> >>>>
-> >>>> @@ -1806,7 +1824,7 @@ static int dw_mci_probe(struct platform_device
-> >>> *pdev)
-> >>>>  	ret = -ENOMEM;
-> >>>>  	host->regs = ioremap(regs->start, regs->end - regs->start + 1);
-> >>>>  	if (!host->regs)
-> >>>> -		goto err_freehost;
-> >>>> +		goto err_free_cclk;
-> >>>>
-> >>>>  	host->dma_ops = pdata->dma_ops;
-> >>>>  	dw_mci_init_dma(host);
-> >>>> @@ -1945,6 +1963,13 @@ err_dmaunmap:
-> >>>>  		regulator_put(host->vmmc);
-> >>>>  	}
-> >>>>
-> >>>> +err_free_cclk:
-> >>>> +	clk_disable(host->cclk);
-> >>>> +	clk_put(host->cclk);
-> >>>> +
-> >>>> +err_free_hclk:
-> >>>> +	clk_disable(host->hclk);
-> >>>> +	clk_put(host->hclk);
-> >>>>
-> >>>>  err_freehost:
-> >>>>  	kfree(host);
-> >>>> @@ -1983,6 +2008,12 @@ static int __exit dw_mci_remove(struct
-> >>> platform_device *pdev)
-> >>>>  		regulator_put(host->vmmc);
-> >>>>  	}
-> >>>>
-> >>>> +	clk_disable(host->cclk);
-> >>>> +	clk_put(host->cclk);
-> >>>> +
-> >>>> +	clk_disable(host->hclk);
-> >>>> +	clk_put(host->hclk);
-> >>>> +
-> >>>>  	iounmap(host->regs);
-> >>>>
-> >>>>  	kfree(host);
-> >>>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> >>>> index f3f68ee..56b3f27 100644
-> >>>> --- a/include/linux/mmc/dw_mmc.h
-> >>>> +++ b/include/linux/mmc/dw_mmc.h
-> >>>> @@ -47,6 +47,8 @@ struct mmc_data;
-> >>>>   * @cmd: The command currently being sent to the card, or NULL.
-> >>>>   * @data: The data currently being transferred, or NULL if no data
-> >>>>   *	transfer is in progress.
-> >>>> + * @hclk: Clock for host.
-> >>>> + * @cclk: Clock for card.
-> >>>>   * @use_dma: Whether DMA channel is initialized or not.
-> >>>>   * @sg_dma: Bus address of DMA buffer.
-> >>>>   * @sg_cpu: Virtual address of DMA buffer.
-> >>>> @@ -118,6 +120,8 @@ struct dw_mci {
-> >>>>  	struct mmc_request	*mrq;
-> >>>>  	struct mmc_command	*cmd;
-> >>>>  	struct mmc_data		*data;
-> >>>> +	struct clk		*hclk;
-> >>>> +	struct clk		*cclk;
-> >>>>
-> >>>>  	/* DMA interface members*/
-> >>>>  	int			use_dma;
-> >>>> @@ -218,6 +222,9 @@ struct dw_mci_board {
-> >>>>  	/* delay in mS before detecting cards after interrupt */
-> >>>>  	u32 detect_delay_ms;
-> >>>>
-> >>>> +	char *hclk_name;
-> >>>> +	char *cclk_name;
-> >>>> +
-> >>>>  	int (*init)(u32 slot_id, irq_handler_t , void *);
-> >>>>  	int (*get_ro)(u32 slot_id);
-> >>>>  	int (*get_cd)(u32 slot_id);
-> >>>> --
-> >>>> 1.7.0.4
-> >>>>
-> >>>> --
-> >>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> >> in
-> >>>> the body of a message to majordomo@vger.kernel.org
-> >>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >>>>
-> >>> --
-> >>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> in
-> >>> the body of a message to majordomo@vger.kernel.org
-> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 460ffaf..03da44a 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -502,6 +502,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	/* This host supports the Auto CMD12 */
+ 	host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+ 
++	/* Samsung SoCs need BROKEN_ADMA_ZEROLEN_DESC */
++	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC;
++
+ 	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
+ 	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
