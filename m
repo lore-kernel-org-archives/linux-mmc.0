@@ -1,83 +1,66 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH v3 4/4] mmc: sdhci-esdhc-imx: add device tree probe
- support
-Date: Wed, 13 Jul 2011 19:52:12 +0400
-Message-ID: <20110713155212.GB7875@oksana.dev.rtsoft.ru>
-References: <1309970870-13336-1-git-send-email-shawn.guo@linaro.org>
- <1309970870-13336-5-git-send-email-shawn.guo@linaro.org>
- <20110706210518.GD5371@ponder.secretlab.ca>
+From: Kevin Hilman <khilman@ti.com>
+Subject: Re: [PATCHv4 2/3] MMC: OMAP: HSMMC: add runtime pm support
+Date: Wed, 13 Jul 2011 08:56:26 -0700
+Message-ID: <871uxuqimt.fsf@ti.com>
+References: <1309538376-23260-1-git-send-email-balajitk@ti.com>
+	<1309538376-23260-3-git-send-email-balajitk@ti.com>
+	<8739ig8wby.fsf@ti.com>
+	<5D8008F58939784290FAB48F5497519846C4113396@shsmsx502.ccr.corp.intel.com>
+	<87sjqaql91.fsf@ti.com>
+	<CANfBPZ-M+yrZv2r3sGYFRC4vRmD5AZ1b4FfyFYENmqH+FDgCcg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:60777 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755566Ab1GMPwU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 11:52:20 -0400
-Received: by wwe5 with SMTP id 5so6123612wwe.1
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2011 08:52:19 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20110706210518.GD5371@ponder.secretlab.ca>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <CANfBPZ-M+yrZv2r3sGYFRC4vRmD5AZ1b4FfyFYENmqH+FDgCcg@mail.gmail.com>
+	(Venkatraman S.'s message of "Wed, 13 Jul 2011 21:04:14 +0530")
+Sender: linux-omap-owner@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Balaji T K <balajitk@ti.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "tony@atomide.com" <tony@atomide.com>, "madhu.cr@ti.com" <madhu.cr@ti.com>, "b-cousson@ti.com" <b-cousson@ti.com>, "paul@pwsan.com" <paul@pwsan.com>, "kishore.kadiyala@ti.com" <kishore.kadiyala@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Shawn Guo <shawn.guo@linaro.org>, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Benjamin Herrenschmidt <benh@kernel.crashing.org>, David Gibson <david@gibson.dropbear.id.au>, Segher Boessenkool <segher@kernel.crashing.org>
 
-Hi,
+"S, Venkatraman" <svenkatr@ti.com> writes:
 
-On Wed, Jul 06, 2011 at 03:05:18PM -0600, Grant Likely wrote:
-> On Thu, Jul 07, 2011 at 12:47:50AM +0800, Shawn Guo wrote:
-> > The patch adds device tree probe support for sdhci-esdhc-imx driver.
-> > 
-> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> > Cc: Wolfram Sang <w.sang@pengutronix.de>
-> > Cc: Chris Ball <cjb@laptop.org>
-> > Cc: Grant Likely <grant.likely@secretlab.ca>
-> 
-> Acked-by: Grant Likely <grant.likely@secretlab.ca>
+> On Wed, Jul 13, 2011 at 8:29 PM, Kevin Hilman <khilman@ti.com> wrote:
+
 [...]
-> > +Optional properties:
-> > +- fsl,card-wired : Indicate the card is wired to host permanently
-> > +- fsl,cd-internal : Indicate to use controller internal card detection
-> > +- fsl,wp-internal : Indicate to use controller internal write protection
-> > +- cd-gpios : Specify GPIOs for card detection
-> > +- wp-gpios : Specify GPIOs for write protection
-[...]
-> > +	cd-gpios = <&gpio0 6 0>; /* GPIO1_6 */
-> > +	wp-gpios = <&gpio0 5 0>; /* GPIO1_5 */
 
-Is there any particular reason why we started using named GPIOs
-in the device tree? To me, that's quite drastic change... should
-we start using named regs and interrupts as well? Personally, I
-don't think that the idea is great, as now you don't know where
-to expect memory resources, interrupt resources and, eventually
-GPIO resources.
+>>
+>> My basic question is this: why does this device need to be runtime
+>> resumed during system suspend? =C2=A0Why can't it just stay runtime
+>> suspended?
+>>
+>
+> From my understanding, the runtime suspend is usually implemented to =
+not
+> lose the card 'context', i.e. transactions can continue after a
+> runtime suspend /
+> resume cycle.
+>
+> For system suspend, the MMC core sends a sleep command (which, in
+> itself, is a transaction) to the card to go to sleep state, and for
+> all practical purposes, the card is treated as 'removed'. When the
+> system resumes, the card is rescanned and re-initialized.
+>
+> Hence, for system suspend, the MMC controller needs to be enabled to
+> actually send the command which puts the card to sleep (and hence the
+> resume).
 
-Just a few disadvantages off the top of my head:
+Great, this is the detail I was looking for since my MMC knowledge is
+quite limited. =20
 
-- You can't statically validate your device tree for correctness.
-  Today dtc checks #{address,size}-cells sanity for 'regs' and
-  'ranges';
-- You can't automatically convert named resources into 'struct
-  resource *', as we do for platform devices now;
-- Any pros for using named resources in the device tree? I don't
-  see any.
+So, in theory, this same sleep command could be sent during runtime
+suspend as well, so that a system suspend would not have to runtime
+resume, correct?  But I suppose it would result in a much higher latenc=
+y
+runtime resumes.  It might be worth experimenting with doing this,
+possibly in combination with longer auto-suspend delay times.
 
-So, I suggest to at least discuss this stuff a little bit more
-before polluting device trees with dubious ideas.
+Thanks for the explanation,
 
-p.s.
-
-As for this particular patch, I really don't see why we should
-use named GPIOs. For consistency, I'd suggest to reuse bindings
-from Documentation/devicetree/bindings/mmc/mmc-spi-slot.txt.
-
-Plus, fsl,cd-internal and fsl,wp-internal is not needed: either
-you specify GPIOs or not. That already signals whether driver
-should use internal detection (i.e. 'present' register) or
-external (i.e. GPIO).
-
-And also, why {cd,wp}-gpioS (plural)?
-
--- 
-Anton Vorontsov
-Email: cbouatmailru@gmail.com
+Kevin
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
