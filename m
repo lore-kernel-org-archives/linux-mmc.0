@@ -1,58 +1,58 @@
-From: Kevin Hilman <khilman@ti.com>
-Subject: Re: [PATCHv4 2/3] MMC: OMAP: HSMMC: add runtime pm support
-Date: Wed, 13 Jul 2011 07:59:54 -0700
-Message-ID: <87sjqaql91.fsf@ti.com>
-References: <1309538376-23260-1-git-send-email-balajitk@ti.com>
-	<1309538376-23260-3-git-send-email-balajitk@ti.com>
-	<8739ig8wby.fsf@ti.com>
-	<5D8008F58939784290FAB48F5497519846C4113396@shsmsx502.ccr.corp.intel.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2] mmc: tmio: fix recursive spinlock, don't schedule with interrupts disabled
+Date: Wed, 13 Jul 2011 11:00:41 -0400
+Message-ID: <m2oc0y2pk6.fsf@bob.laptop.org>
+References: <Pine.LNX.4.64.1106151549050.23363@axis700.grange>
+	<Pine.LNX.4.64.1106201803520.11365@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:57420 "EHLO
-	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754809Ab1GMPAB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 11:00:01 -0400
-In-Reply-To: <5D8008F58939784290FAB48F5497519846C4113396@shsmsx502.ccr.corp.intel.com>
-	(Chuanxiao Dong's message of "Wed, 13 Jul 2011 17:09:08 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1106201803520.11365@axis700.grange> (Guennadi
+	Liakhovetski's message of "Mon, 20 Jun 2011 18:27:50 +0200 (CEST)")
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus Damm <damm@opensource.se>
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: Balaji T K <balajitk@ti.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "tony@atomide.com" <tony@atomide.com>, "madhu.cr@ti.com" <madhu.cr@ti.com>, "b-cousson@ti.com" <b-cousson@ti.com>, "paul@pwsan.com" <paul@pwsan.com>, "kishore.kadiyala@ti.com" <kishore.kadiyala@ti.com>
 
-"Dong, Chuanxiao" <chuanxiao.dong@intel.com> writes:
+Hi Guennadi,
 
-[...]
-
->> 
->> Basially, the question is: can the driver be reworked such that a system
->> suspend does not need to runtime resume the device?  For most devices,
->> we kind of expect that if the device is runtime suspended, a system
->> suspend will have nothing extra to do, but this driver runtime resumes
->> the device during system suspend in order to do "stuff", which I
->> admitedly don't fully undestand.
->> 
->> Ideally, the "stuff" needed for runtime suspend and system suspend could
->> be made to be common such that a system suspend of a runtime suspended
->> device would be a noop.
->> 
->> Is this possible?
->> 
->> Kevin
+On Mon, Jun 20 2011, Guennadi Liakhovetski wrote:
+> Calling mmc_request_done() under a spinlock with interrupts disabled
+> leads to a recursive spin-lock on request retry path and to
+> scheduling in atomic context. This patch fixes both these problems
+> by moving mmc_request_done() to the scheduler workqueue.
 >
-> During system suspended patch, a callback named .prepare will be first
-> done before .suspend is called, and .complete callback will be called
-> after .resume is called. These two callbacks are in pair. If driver
-> can implement the .prepare and hold the usage count in this callback,
-> then runtime pm suspend/resume will not happen during device
-> suspending. So there will be no need to add pm_runtime_get* and
-> pm_runtime_put* in .suspend/.resume.
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+>
+> This is a bug-fix: without it the system Oopses with LOCKDEP enabled, so, 
+> it should really go in 3.0. OTOH it is pretty intrusine and non-trivial, 
+> so, reviews and tests are highly appreciated! Also, unfortunately, I 
+> wasn't able to test it well enough with SDIO, because the driver for the 
+> only SDIO card, that I have, reproducibly crashes the kernel:
 
-That doesn't avoid the problem, since the device is still runtime
-resumed and then re-suspended during system suspend.
+Having trouble working out how to apply this -- for example, in this hunk:
 
-My basic question is this: why does this device need to be runtime
-resumed during system suspend?  Why can't it just stay runtime
-suspended?
+> @@ -618,7 +631,8 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
+>  		if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
+>  			tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
+>  				TMIO_STAT_CARD_REMOVE);
+> -			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
+> +			if (!work_pending(&host->mmc->detect.work))
+> +				mmc_detect_change(host->mmc, msecs_to_jiffies(100));
+>  		}
+>  
+>  		/* CRC and other errors */
 
-Kevin
+In mmc-next there's a "goto out;" after the mmc_detect_change call, which
+looks like it's always been there.  Am I missing a patch this depends on?
+
+(It'd be a good time to get a full set of tmio patches for 3.1 pulled
+together, if you can do that.)
+
+Thanks!
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
