@@ -1,45 +1,53 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH v3 4/4] mmc: sdhci-esdhc-imx: add device tree probe
- support
-Date: Wed, 13 Jul 2011 20:28:12 +0400
-Message-ID: <20110713162812.GA7764@oksana.dev.rtsoft.ru>
-References: <1309970870-13336-1-git-send-email-shawn.guo@linaro.org>
- <1309970870-13336-5-git-send-email-shawn.guo@linaro.org>
- <20110706210518.GD5371@ponder.secretlab.ca>
- <20110713155212.GB7875@oksana.dev.rtsoft.ru>
- <20110713110940.460a7966@schlenkerla.am.freescale.net>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: Added quirks for Ricoh 1180:e823 lower base clock frequency
+Date: Wed, 13 Jul 2011 18:35:25 +0200
+Message-ID: <201107131835.25217.arnd@arndb.de>
+References: <1310419715-13254-1-git-send-email-manoj.iyer@canonical.com> <m2sjqa2q93.fsf@bob.laptop.org> <alpine.DEB.2.02.1107131031360.3174@lazy>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:45040 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755811Ab1GMQ2S (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 12:28:18 -0400
-Received: by wwe5 with SMTP id 5so6157027wwe.1
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2011 09:28:17 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20110713110940.460a7966@schlenkerla.am.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <alpine.DEB.2.02.1107131031360.3174@lazy>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Manoj Iyer <manoj.iyer@canonical.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org, jbarnes@virtuousgeek.org, matsumur@nts.ricoh.co.jp, linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Wood <scottwood@freescale.com>
-Cc: patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-On Wed, Jul 13, 2011 at 11:09:40AM -0500, Scott Wood wrote:
-[...]
-> > - You can't automatically convert named resources into 'struct
-> >   resource *', as we do for platform devices now;
+On Wednesday 13 July 2011, Manoj Iyer wrote:
 > 
-> So add named resource support to platform devices. :-)
+> Chris/Arnd,
+> 
+> Here is a series of test I did with the patched kernel.
 
-There are surely no technical difficulties, it's more about 'type
-safety', and as a consequence -- resources being discoverable.
+> == cold boot insert SD card ==
+> u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
+> 1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
+> 4MiB    4.96M/s
+> 2MiB    6.3M/s
+> 1MiB    6.23M/s
+> 512KiB  6.23M/s
+> 256KiB  6.26M/s
 
-If we want to use named resources, I think we should explicitly reserve
-the *-{regs,interrupts,gpios} suffixes for such purposes. And once such
-a reservation is done, we're safe again -- resources become discoverable.
+The very first one obviously triggers a garbage collection.
+Everything after that is well within measuring accuracy around 6.25MB/s
 
-Thanks,
+> On Wed, 13 Jul 2011, Chris Ball wrote:
 
--- 
-Anton Vorontsov
-Email: cbouatmailru@gmail.com
+> >
+> > That makes sense.  Do you think this explains Manoj getting a slower
+> > first file copy speed (757ms vs. 480ms) after applying his patch?
+> > (Manoj, perhaps you could retry your test without GC being needed?)
+
+Yes. For a single sample, it can easily explain differences up to 500ms.
+You have to average out file system benchmarks across a lot of files
+to be sure.
+
+> > What would we expect lowering the SD base clock frequency from 200MHz
+> > to 50MHz to do to performance theoretically?
+
+Not much. This card only has a 6MB/s write speed, which is well below
+what a 50 MHz bus can do. It mgiht be different on a fast eMMC device
+or a Sandisk Extreme Pro UHS-1 card.
+
+	Arnd
