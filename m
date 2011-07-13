@@ -1,62 +1,105 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: block: fixed NULL pointer dereference
-Date: Wed, 13 Jul 2011 17:02:16 +0900
-Message-ID: <4E1D5108.8040309@samsung.com>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCHv4 2/3] MMC: OMAP: HSMMC: add runtime pm support
+Date: Wed, 13 Jul 2011 17:09:08 +0800
+Message-ID: <5D8008F58939784290FAB48F5497519846C4113396@shsmsx502.ccr.corp.intel.com>
+References: <1309538376-23260-1-git-send-email-balajitk@ti.com>
+	<1309538376-23260-3-git-send-email-balajitk@ti.com> <8739ig8wby.fsf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:61453 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964961Ab1GMIB6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 04:01:58 -0400
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LO9003KDIAQ7NE0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 13 Jul 2011 17:01:57 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LO9009NTIB8YU@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 13 Jul 2011 17:01:56 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <8739ig8wby.fsf@ti.com>
+Content-Language: en-US
+Sender: linux-omap-owner@vger.kernel.org
+To: Kevin Hilman <khilman@ti.com>, Balaji T K <balajitk@ti.com>
+Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "tony@atomide.com" <tony@atomide.com>, "madhu.cr@ti.com" <madhu.cr@ti.com>, "b-cousson@ti.com" <b-cousson@ti.com>, "paul@pwsan.com" <paul@pwsan.com>, "kishore.kadiyala@ti.com" <kishore.kadiyala@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Per Forlin <per.forlin@linaro.org>, Philip Rakity <prakity@marvell.com>
 
-Hi.
 
-I send to mailing for [RFC] Kernel NULL pointer dereference.
-This patch is fixed it.
 
-In similar case, when discard request, check condition and
-performed mmc_blk_issue_rw_rq(mq, NULL) for ongoing async transfer.
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org
+> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Kevin Hilman
+> Sent: Saturday, July 09, 2011 2:24 AM
+> To: Balaji T K
+> Cc: linux-omap@vger.kernel.org; linux-mmc@vger.kernel.org; cjb@laptop.org;
+> tony@atomide.com; madhu.cr@ti.com; b-cousson@ti.com; paul@pwsan.com;
+> kishore.kadiyala@ti.com
+> Subject: Re: [PATCHv4 2/3] MMC: OMAP: HSMMC: add runtime pm support
+> 
+> Balaji T K <balajitk@ti.com> writes:
+> 
+> > add runtime pm support to HSMMC host controller
+> > Use runtime pm API to enable/disable HSMMC clock
+> > Use runtime autosuspend APIs to enable auto suspend delay
+> >
+> > Based on OMAP HSMMC runtime implementation by Kevin Hilman, Kishore
+> Kadiyala
+> >
+> > Signed-off-by: Balaji T K <balajitk@ti.com>
+> 
+> It's not relevant for this merge window, but I'm exploring some future
+> changes to our PM core code and have a question about how MMC works for
+> system suspend.
+> 
+> Basially, the question is: can the driver be reworked such that a system
+> suspend does not need to runtime resume the device?  For most devices,
+> we kind of expect that if the device is runtime suspended, a system
+> suspend will have nothing extra to do, but this driver runtime resumes
+> the device during system suspend in order to do "stuff", which I
+> admitedly don't fully undestand.
+> 
+> Ideally, the "stuff" needed for runtime suspend and system suspend could
+> be made to be common such that a system suspend of a runtime suspended
+> device would be a noop.
+> 
+> Is this possible?
+> 
+> Kevin
 
-But When flush request, entered the mmc_blk_issue_flush() then return.
-(then didn't complete ongoing aync transfer).
+During system suspended patch, a callback named .prepare will be first done before .suspend is called, and .complete callback will be called after .resume is called. These two callbacks are in pair. If driver can implement the .prepare and hold the usage count in this callback, then runtime pm suspend/resume will not happen during device suspending. So there will be no need to add pm_runtime_get* and pm_runtime_put* in .suspend/.resume.
+BTW, if .prepare has hold the usage count, then .complete callback need to release the usage count and put device in runtime suspended mode.
 
-I think that need to complete for ongoing aync transfer before flush request.
+Thanks
+Chuanxiao
 
-I tested with this patch, it's working fine.
-(SDHCI controller, eMMC4.41)
-
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/card/block.c |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 38d0149..1ff5486 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1200,6 +1200,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 		else
- 			ret = mmc_blk_issue_discard_rq(mq, req);
- 	} else if (req && req->cmd_flags & REQ_FLUSH) {
-+		/* complete ongoing async transfer before issuing flush */
-+		if (card->host->areq)
-+			mmc_blk_issue_rw_rq(mq, NULL);
- 		ret = mmc_blk_issue_flush(mq, req);
- 	} else {
- 		ret = mmc_blk_issue_rw_rq(mq, req);
+> 
+> > @@ -2100,6 +2087,7 @@ static int omap_hsmmc_suspend(struct device *dev)
+> >  		return 0;
+> >
+> >  	if (host) {
+> > +		pm_runtime_get_sync(host->dev);
+> >  		host->suspended = 1;
+> >  		if (host->pdata->suspend) {
+> >  			ret = host->pdata->suspend(&pdev->dev,
+> > @@ -2114,13 +2102,11 @@ static int omap_hsmmc_suspend(struct device
+> *dev)
+> >  		}
+> >  		cancel_work_sync(&host->mmc_carddetect_work);
+> >  		ret = mmc_suspend_host(host->mmc);
+> > -		mmc_host_enable(host->mmc);
+> > +
+> >  		if (ret == 0) {
+> >  			omap_hsmmc_disable_irq(host);
+> >  			OMAP_HSMMC_WRITE(host->base, HCTL,
+> >  				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
+> > -			mmc_host_disable(host->mmc);
+> > -			clk_disable(host->iclk);
+> >  			if (host->got_dbclk)
+> >  				clk_disable(host->dbclk);
+> >  		} else {
+> > @@ -2132,9 +2118,8 @@ static int omap_hsmmc_suspend(struct device *dev)
+> >  					dev_dbg(mmc_dev(host->mmc),
+> >  						"Unmask interrupt failed\n");
+> >  			}
+> > -			mmc_host_disable(host->mmc);
+> >  		}
+> > -
+> > +		pm_runtime_put_sync(host->dev);
+> >  	}
+> >  	return ret;
+> >  }
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
