@@ -1,118 +1,149 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH/RFC] mmc: sh_mmcif: maximize power saving
-Date: Thu, 14 Jul 2011 01:23:01 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1107140116150.30737@axis700.grange>
-References: <Pine.LNX.4.64.1105261524120.9307@axis700.grange>
+Subject: [PATCH] ARM: mach-shmobile: use GPIO interrupt also for card eject
+ on SDHI0 on mackerel
+Date: Thu, 14 Jul 2011 01:25:44 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1107140123070.30737@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1105261524120.9307@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>, Chris Ball <cjb@laptop.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.171]:50509 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752530Ab1GMXZq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 19:25:46 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>
 
-Hi Chris
+When we switch to transaction-based runtime PM on SDHI / TMIO MMC,
+also card eject events will have to be detected by the platform.
+This patch prepares mackerel to this switch.
 
-This patch has survived multiple runtime PM versions on sh-mobile without 
-changes, so, it should be good for the mainline. Please, queue for 3.1. We 
-might, however, eventually decide, that we don't want to be so aggressive 
-with our power savings;-) and want to add a flag to allow platforms to 
-sacrifice power and maximise performance. This would be an incremental 
-patch then.
-
-Thanks
-Guennadi
-
-On Thu, 26 May 2011, Guennadi Liakhovetski wrote:
-
-> This patch uses runtime PM to allow the system to power down the MMC
-> controller, when the MMC closk is switched off.
-> 
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
-> 
-> Patches have been submitted earlier for SDHCI to accomplish something 
-> similar, but they have complicated dependencies upon other different 
-> subsystems, especially on PCI. MMCIF is easier - it only exists in 
-> different SoCs, so, this change should also be easier to review, verify 
-> and test.
-> 
->  drivers/mmc/host/sh_mmcif.c |   27 ++++++++++++++++++---------
->  1 files changed, 18 insertions(+), 9 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 14f8edb..557886b 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -175,6 +175,7 @@ struct sh_mmcif_host {
->  	enum mmcif_state state;
->  	spinlock_t lock;
->  	bool power;
-> +	bool card_present;
->  
->  	/* DMA support */
->  	struct dma_chan		*chan_rx;
-> @@ -877,23 +878,23 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	spin_unlock_irqrestore(&host->lock, flags);
->  
->  	if (ios->power_mode == MMC_POWER_UP) {
-> -		if (p->set_pwr)
-> -			p->set_pwr(host->pd, ios->power_mode);
-> -		if (!host->power) {
-> +		if (!host->card_present) {
->  			/* See if we also get DMA */
->  			sh_mmcif_request_dma(host, host->pd->dev.platform_data);
-> -			pm_runtime_get_sync(&host->pd->dev);
-> -			host->power = true;
-> +			host->card_present = true;
->  		}
->  	} else if (ios->power_mode == MMC_POWER_OFF || !ios->clock) {
->  		/* clock stop */
->  		sh_mmcif_clock_control(host, 0);
->  		if (ios->power_mode == MMC_POWER_OFF) {
-> -			if (host->power) {
-> -				pm_runtime_put(&host->pd->dev);
-> +			if (host->card_present) {
->  				sh_mmcif_release_dma(host);
-> -				host->power = false;
-> +				host->card_present = false;
->  			}
-> +		}
-> +		if (host->power) {
-> +			pm_runtime_put(&host->pd->dev);
-> +			host->power = false;
->  			if (p->down_pwr)
->  				p->down_pwr(host->pd);
->  		}
-> @@ -901,8 +902,16 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  		return;
->  	}
->  
-> -	if (ios->clock)
-> +	if (ios->clock) {
-> +		if (!host->power) {
-> +			if (p->set_pwr)
-> +				p->set_pwr(host->pd, ios->power_mode);
-> +			pm_runtime_get_sync(&host->pd->dev);
-> +			host->power = true;
-> +			sh_mmcif_sync_reset(host);
-> +		}
->  		sh_mmcif_clock_control(host, ios->clock);
-> +	}
->  
->  	host->bus_width = ios->bus_width;
->  	host->state = STATE_IDLE;
-> -- 
-> 1.7.2.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ arch/arm/mach-shmobile/board-mackerel.c |   68 +++++++++++++++++++++++++++----
+ 1 files changed, 60 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
+index 1b30195..05f5fe7 100644
+--- a/arch/arm/mach-shmobile/board-mackerel.c
++++ b/arch/arm/mach-shmobile/board-mackerel.c
+@@ -45,6 +45,7 @@
+ #include <linux/tca6416_keypad.h>
+ #include <linux/usb/r8a66597.h>
+ #include <linux/usb/renesas_usbhs.h>
++#include <linux/workqueue.h>
+ 
+ #include <video/sh_mobile_hdmi.h>
+ #include <video/sh_mobile_lcdc.h>
+@@ -990,7 +991,7 @@ static struct platform_device fsi_ak4643_device = {
+ 
+ /*
+  * The card detect pin of the top SD/MMC slot (CN7) is active low and is
+- * connected to GPIO A22 of SH7372 (GPIO_PORT41).
++ * connected to GPIO A22 of SH7372 (GPIO_PORT41 / IRQ8).
+  */
+ static int slot_cn7_get_cd(struct platform_device *pdev)
+ {
+@@ -998,12 +999,49 @@ static int slot_cn7_get_cd(struct platform_device *pdev)
+ }
+ 
+ /* SDHI0 */
+-static irqreturn_t mackerel_sdhi0_gpio_cd(int irq, void *arg)
++struct sdhi_card_detect {
++	struct delayed_work work;
++	struct sh_mobile_sdhi_info *info;
++	int gpio_irq;
++	int gpio_port;
++	int gpio_cd;
++};
++
++static void sdhi_cd_work(struct work_struct *work)
++{
++	struct sdhi_card_detect *cd = container_of(work, struct sdhi_card_detect, work.work);
++	int ret;
++
++	if (cd->gpio_cd >= 0)
++		gpio_free(cd->gpio_cd);
++	ret = gpio_request(cd->gpio_port, NULL);
++	if (!ret) {
++		gpio_direction_input(cd->gpio_port);
++		ret = gpio_get_value(cd->gpio_port);
++		gpio_free(cd->gpio_port);
++		if (ret)
++			/* No card */
++			irq_set_irq_type(cd->gpio_irq, IRQ_TYPE_EDGE_FALLING);
++		else
++			/* Card in the slot */
++			irq_set_irq_type(cd->gpio_irq, IRQ_TYPE_EDGE_RISING);
++	}
++	if (cd->gpio_cd >= 0)
++		gpio_request(cd->gpio_cd, NULL);
++}
++
++static irqreturn_t mackerel_sdhi_gpio_cd(int irq, void *arg)
+ {
+-	struct device *dev = arg;
+-	struct sh_mobile_sdhi_info *info = dev->platform_data;
++	struct sdhi_card_detect *cd = arg;
++	struct sh_mobile_sdhi_info *info = cd->info;
+ 	struct tmio_mmc_data *pdata = info->pdata;
+ 
++	if (irq != cd->gpio_irq)
++		return IRQ_NONE;
++
++	irq_set_irq_type(irq, IRQ_TYPE_NONE);
++
++	schedule_delayed_work(&cd->work, msecs_to_jiffies(200));
+ 	tmio_mmc_cd_wakeup(pdata);
+ 
+ 	return IRQ_HANDLED;
+@@ -1015,6 +1053,14 @@ static struct sh_mobile_sdhi_info sdhi0_info = {
+ 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
+ };
+ 
++static struct sdhi_card_detect sdhi0_cd = {
++	.work		= __DELAYED_WORK_INITIALIZER(sdhi0_cd.work, sdhi_cd_work),
++	.info		= &sdhi0_info,
++	.gpio_irq	= evt2irq(0x3340),
++	.gpio_port	= GPIO_PORT172,
++	.gpio_cd	= GPIO_FN_SDHICD0,
++};
++
+ static struct resource sdhi0_resources[] = {
+ 	[0] = {
+ 		.name	= "SDHI0",
+@@ -1092,7 +1138,7 @@ static struct platform_device sdhi1_device = {
+ 
+ /*
+  * The card detect pin of the top SD/MMC slot (CN23) is active low and is
+- * connected to GPIO SCIFB_SCK of SH7372 (GPIO_PORT162).
++ * connected to GPIO SCIFB_SCK of SH7372 (GPIO_PORT162 / IRQ0).
+  */
+ static int slot_cn23_get_cd(struct platform_device *pdev)
+ {
+@@ -1500,12 +1546,18 @@ static void __init mackerel_init(void)
+ 	gpio_request(GPIO_FN_SDHID0_1, NULL);
+ 	gpio_request(GPIO_FN_SDHID0_0, NULL);
+ 
+-	ret = request_irq(evt2irq(0x3340), mackerel_sdhi0_gpio_cd,
+-			  IRQF_TRIGGER_FALLING, "sdhi0 cd", &sdhi0_device.dev);
++	/*
++	 * If the driver probes with a card plugged in, the native SDHICD0 IRQ
++	 * will trigger, when the runtime PM brings the interface up, and the
++	 * card will be detected. This interrupt is needed if there is no card
++	 * during probing and runtime PM turns the interface power off.
++	 */
++	ret = request_irq(sdhi0_cd.gpio_irq, mackerel_sdhi_gpio_cd,
++			  IRQF_TRIGGER_FALLING, "sdhi0 cd", &sdhi0_cd);
+ 	if (!ret)
+ 		sdhi0_info.tmio_flags |= TMIO_MMC_HAS_COLD_CD;
+ 	else
+-		pr_err("Cannot get IRQ #%d: %d\n", evt2irq(0x3340), ret);
++		pr_err("Cannot get IRQ #%d: %d\n", sdhi0_cd.gpio_irq, ret);
+ 
+ #if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
+ 	/* enable SDHI1 */
+-- 
+1.7.2.5
+
