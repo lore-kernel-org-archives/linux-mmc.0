@@ -1,58 +1,89 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: tmio: fix recursive spinlock, don't schedule with interrupts disabled
-Date: Wed, 13 Jul 2011 11:00:41 -0400
-Message-ID: <m2oc0y2pk6.fsf@bob.laptop.org>
-References: <Pine.LNX.4.64.1106151549050.23363@axis700.grange>
-	<Pine.LNX.4.64.1106201803520.11365@axis700.grange>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCHv4 2/3] MMC: OMAP: HSMMC: add runtime pm support
+Date: Wed, 13 Jul 2011 21:04:14 +0530
+Message-ID: <CANfBPZ-M+yrZv2r3sGYFRC4vRmD5AZ1b4FfyFYENmqH+FDgCcg@mail.gmail.com>
+References: <1309538376-23260-1-git-send-email-balajitk@ti.com>
+	<1309538376-23260-3-git-send-email-balajitk@ti.com>
+	<8739ig8wby.fsf@ti.com>
+	<5D8008F58939784290FAB48F5497519846C4113396@shsmsx502.ccr.corp.intel.com>
+	<87sjqaql91.fsf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1106201803520.11365@axis700.grange> (Guennadi
-	Liakhovetski's message of "Mon, 20 Jun 2011 18:27:50 +0200 (CEST)")
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus Damm <damm@opensource.se>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog111.obsmtp.com ([74.125.149.205]:43247 "EHLO
+	na3sys009aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755601Ab1GMPeQ convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 13 Jul 2011 11:34:16 -0400
+In-Reply-To: <87sjqaql91.fsf@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kevin Hilman <khilman@ti.com>
+Cc: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Balaji T K <balajitk@ti.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "tony@atomide.com" <tony@atomide.com>, "madhu.cr@ti.com" <madhu.cr@ti.com>, "b-cousson@ti.com" <b-cousson@ti.com>, "paul@pwsan.com" <paul@pwsan.com>, "kishore.kadiyala@ti.com" <kishore.kadiyala@ti.com>
 
-Hi Guennadi,
-
-On Mon, Jun 20 2011, Guennadi Liakhovetski wrote:
-> Calling mmc_request_done() under a spinlock with interrupts disabled
-> leads to a recursive spin-lock on request retry path and to
-> scheduling in atomic context. This patch fixes both these problems
-> by moving mmc_request_done() to the scheduler workqueue.
+On Wed, Jul 13, 2011 at 8:29 PM, Kevin Hilman <khilman@ti.com> wrote:
+> "Dong, Chuanxiao" <chuanxiao.dong@intel.com> writes:
 >
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
+> [...]
 >
-> This is a bug-fix: without it the system Oopses with LOCKDEP enabled, so, 
-> it should really go in 3.0. OTOH it is pretty intrusine and non-trivial, 
-> so, reviews and tests are highly appreciated! Also, unfortunately, I 
-> wasn't able to test it well enough with SDIO, because the driver for the 
-> only SDIO card, that I have, reproducibly crashes the kernel:
+>>>
+>>> Basially, the question is: can the driver be reworked such that a s=
+ystem
+>>> suspend does not need to runtime resume the device? =A0For most dev=
+ices,
+>>> we kind of expect that if the device is runtime suspended, a system
+>>> suspend will have nothing extra to do, but this driver runtime resu=
+mes
+>>> the device during system suspend in order to do "stuff", which I
+>>> admitedly don't fully undestand.
+>>>
+>>> Ideally, the "stuff" needed for runtime suspend and system suspend =
+could
+>>> be made to be common such that a system suspend of a runtime suspen=
+ded
+>>> device would be a noop.
+>>>
+>>> Is this possible?
+>>>
+>>> Kevin
+>>
+>> During system suspended patch, a callback named .prepare will be fir=
+st
+>> done before .suspend is called, and .complete callback will be calle=
+d
+>> after .resume is called. These two callbacks are in pair. If driver
+>> can implement the .prepare and hold the usage count in this callback=
+,
+>> then runtime pm suspend/resume will not happen during device
+>> suspending. So there will be no need to add pm_runtime_get* and
+>> pm_runtime_put* in .suspend/.resume.
+>
+> That doesn't avoid the problem, since the device is still runtime
+> resumed and then re-suspended during system suspend.
+>
+> My basic question is this: why does this device need to be runtime
+> resumed during system suspend? =A0Why can't it just stay runtime
+> suspended?
+>
 
-Having trouble working out how to apply this -- for example, in this hunk:
+=46rom my understanding, the runtime suspend is usually implemented to =
+not
+lose the card 'context', i.e. transactions can continue after a
+runtime suspend /
+resume cycle.
 
-> @@ -618,7 +631,8 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
->  		if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
->  			tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
->  				TMIO_STAT_CARD_REMOVE);
-> -			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
-> +			if (!work_pending(&host->mmc->detect.work))
-> +				mmc_detect_change(host->mmc, msecs_to_jiffies(100));
->  		}
->  
->  		/* CRC and other errors */
+=46or system suspend, the MMC core sends a sleep command (which, in its=
+elf,
+is a transaction) to the card to go to sleep state, and for all
+practical purposes,
+the card is treated as 'removed'. When the system resumes, the card is =
+rescanned
+and re-initialized.
 
-In mmc-next there's a "goto out;" after the mmc_detect_change call, which
-looks like it's always been there.  Am I missing a patch this depends on?
+Hence, for system suspend, the MMC controller needs to be enabled to ac=
+tually
+send the command which puts the card to sleep (and hence the resume).
 
-(It'd be a good time to get a full set of tmio patches for 3.1 pulled
-together, if you can do that.)
-
-Thanks!
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Best regards,
+Venkat.
