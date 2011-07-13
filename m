@@ -1,131 +1,74 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH v3 4/4] mmc: sdhci-esdhc-imx: add device tree probe support
-Date: Thu, 14 Jul 2011 01:36:39 +0900
-Message-ID: <CACxGe6t27uvsoU6ZXYakh9ncyCeCvnqwKa5d2TQ3WUwG4xW4og@mail.gmail.com>
-References: <1309970870-13336-1-git-send-email-shawn.guo@linaro.org>
- <1309970870-13336-5-git-send-email-shawn.guo@linaro.org> <20110706210518.GD5371@ponder.secretlab.ca>
- <20110713155212.GB7875@oksana.dev.rtsoft.ru>
+From: Manoj Iyer <manoj.iyer@canonical.com>
+Subject: Re: [PATCH] mmc: Added quirks for Ricoh 1180:e823 lower base clock
+ frequency
+Date: Wed, 13 Jul 2011 11:46:27 -0500 (CDT)
+Message-ID: <alpine.DEB.2.02.1107131144250.3174@lazy>
+References: <1310419715-13254-1-git-send-email-manoj.iyer@canonical.com> <m2sjqa2q93.fsf@bob.laptop.org> <alpine.DEB.2.02.1107131031360.3174@lazy> <201107131835.25217.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:35048 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756183Ab1GMQhA convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 12:37:00 -0400
-Received: by yxi11 with SMTP id 11so2483437yxi.19
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2011 09:36:59 -0700 (PDT)
-In-Reply-To: <20110713155212.GB7875@oksana.dev.rtsoft.ru>
+Received: from adelie.canonical.com ([91.189.90.139]:59977 "EHLO
+	adelie.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756255Ab1GMQqf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 12:46:35 -0400
+In-Reply-To: <201107131835.25217.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, Segher Boessenkool <segher@kernel.crashing.org>, patches@linaro.org, Benjamin Herrenschmidt <benh@kernel.crashing.org>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, David Gibson <david@gibson.dropbear.id.au>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Manoj Iyer <manoj.iyer@canonical.com>, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org, jbarnes@virtuousgeek.org, matsumur@nts.ricoh.co.jp, linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Thu, Jul 14, 2011 at 12:52 AM, Anton Vorontsov
-<cbouatmailru@gmail.com> wrote:
-> Hi,
->
-> On Wed, Jul 06, 2011 at 03:05:18PM -0600, Grant Likely wrote:
->> On Thu, Jul 07, 2011 at 12:47:50AM +0800, Shawn Guo wrote:
->> > The patch adds device tree probe support for sdhci-esdhc-imx drive=
-r.
->> >
->> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
->> > Cc: Wolfram Sang <w.sang@pengutronix.de>
->> > Cc: Chris Ball <cjb@laptop.org>
->> > Cc: Grant Likely <grant.likely@secretlab.ca>
+
+Chris,
+
+Do you think that lowering the controller speed to 50Mhz in case we have a 
+failure is a better idea than reducing the speed for all e823 ricoh 
+controllers? I can send a V2 of the patch. What do you think ?
+
+On Wed, 13 Jul 2011, Arnd Bergmann wrote:
+
+> On Wednesday 13 July 2011, Manoj Iyer wrote:
 >>
->> Acked-by: Grant Likely <grant.likely@secretlab.ca>
-> [...]
->> > +Optional properties:
->> > +- fsl,card-wired : Indicate the card is wired to host permanently
->> > +- fsl,cd-internal : Indicate to use controller internal card dete=
-ction
->> > +- fsl,wp-internal : Indicate to use controller internal write pro=
-tection
->> > +- cd-gpios : Specify GPIOs for card detection
->> > +- wp-gpios : Specify GPIOs for write protection
-> [...]
->> > + =A0 cd-gpios =3D <&gpio0 6 0>; /* GPIO1_6 */
->> > + =A0 wp-gpios =3D <&gpio0 5 0>; /* GPIO1_5 */
+>> Chris/Arnd,
+>>
+>> Here is a series of test I did with the patched kernel.
 >
-> Is there any particular reason why we started using named GPIOs
-> in the device tree? To me, that's quite drastic change... should
-> we start using named regs and interrupts as well? Personally, I
-> don't think that the idea is great, as now you don't know where
-> to expect memory resources, interrupt resources and, eventually
-> GPIO resources.
-
-No, there are no plans to move to named irqs or regs.  irq and reg
-resources tend to be a lot more regular than gpios.  It's not a
-drastic change though because existing bindings remain unaffected, and
-new bindings can still use unnamed gpios if that is more appropriate.
-
+>> == cold boot insert SD card ==
+>> u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 *
+>> 1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
+>> 4MiB    4.96M/s
+>> 2MiB    6.3M/s
+>> 1MiB    6.23M/s
+>> 512KiB  6.23M/s
+>> 256KiB  6.26M/s
 >
-> Just a few disadvantages off the top of my head:
+> The very first one obviously triggers a garbage collection.
+> Everything after that is well within measuring accuracy around 6.25MB/s
 >
-> - You can't statically validate your device tree for correctness.
-> =A0Today dtc checks #{address,size}-cells sanity for 'regs' and
-> =A0'ranges';
-
-We can. The gpio binding was extended to be in the form
-[<name>-]gpios.  Any property with the string "gpios" at the end can
-be statically validated.
-
-> - You can't automatically convert named resources into 'struct
-> =A0resource *', as we do for platform devices now;
-
-Only for irqs and regs.  gpios have never been automatically loaded
-into resources.
-
-> - Any pros for using named resources in the device tree? I don't
-> =A0see any.
-
-Human readability.  To know exactly what a gpio is intended to be used
-for.  Particularly for the case where a device might not use all the
-gpios that it could use.  Yes, the gpios property can have 'holes' in
-it, but the observation was made by several people that it is easy to
-get wrong.  I for one thing the concern was well justified.
-
-> So, I suggest to at least discuss this stuff a little bit more
-> before polluting device trees with dubious ideas.
-
-It was discussed on list quite a while ago.
-
+>> On Wed, 13 Jul 2011, Chris Ball wrote:
 >
-> p.s.
+>>>
+>>> That makes sense.  Do you think this explains Manoj getting a slower
+>>> first file copy speed (757ms vs. 480ms) after applying his patch?
+>>> (Manoj, perhaps you could retry your test without GC being needed?)
 >
-> As for this particular patch, I really don't see why we should
-> use named GPIOs. For consistency, I'd suggest to reuse bindings
-> from Documentation/devicetree/bindings/mmc/mmc-spi-slot.txt.
+> Yes. For a single sample, it can easily explain differences up to 500ms.
+> You have to average out file system benchmarks across a lot of files
+> to be sure.
 >
-> Plus, fsl,cd-internal and fsl,wp-internal is not needed: either
-> you specify GPIOs or not. That already signals whether driver
-> should use internal detection (i.e. 'present' register) or
-> external (i.e. GPIO).
-
-wp-internal and cd-internal differentiates between using the internal
-functionality and not having wp/cd at all.
-
+>>> What would we expect lowering the SD base clock frequency from 200MHz
+>>> to 50MHz to do to performance theoretically?
 >
-> And also, why {cd,wp}-gpioS (plural)?
-
-=46or consistency.  Doing it that way means that the plural "gpios" is
-always the suffix for both the "gpios" and "<name>-gpios" use cases.
-
+> Not much. This card only has a 6MB/s write speed, which is well below
+> what a 50 MHz bus can do. It mgiht be different on a fast eMMC device
+> or a Sandisk Extreme Pro UHS-1 card.
 >
-> --
-> Anton Vorontsov
-> Email: cbouatmailru@gmail.com
+> 	Arnd
 >
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 >
 
-
-
---=20
-Grant Likely, B.Sc., P.Eng.
-Secret Lab Technologies Ltd.
+--
+====================
+Manoj Iyer
+Ubuntu/Canonical
+Hardware Enablement
+====================
