@@ -1,49 +1,58 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: Added quirks for Ricoh 1180:e823 lower base clock frequency
-Date: Wed, 13 Jul 2011 10:45:44 -0400
-Message-ID: <m2sjqa2q93.fsf@bob.laptop.org>
-References: <1310419715-13254-1-git-send-email-manoj.iyer@canonical.com>
-	<alpine.DEB.2.02.1107121123140.1767@lazy>
-	<m2ei1v76f1.fsf@bob.laptop.org> <201107122000.50309.arnd@arndb.de>
+From: Kevin Hilman <khilman@ti.com>
+Subject: Re: [PATCHv4 2/3] MMC: OMAP: HSMMC: add runtime pm support
+Date: Wed, 13 Jul 2011 07:59:54 -0700
+Message-ID: <87sjqaql91.fsf@ti.com>
+References: <1309538376-23260-1-git-send-email-balajitk@ti.com>
+	<1309538376-23260-3-git-send-email-balajitk@ti.com>
+	<8739ig8wby.fsf@ti.com>
+	<5D8008F58939784290FAB48F5497519846C4113396@shsmsx502.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43559 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754548Ab1GMOp7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 13 Jul 2011 10:45:59 -0400
-In-Reply-To: <201107122000.50309.arnd@arndb.de> (Arnd Bergmann's message of
-	"Tue, 12 Jul 2011 20:00:50 +0200")
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:57420 "EHLO
+	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754809Ab1GMPAB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 11:00:01 -0400
+In-Reply-To: <5D8008F58939784290FAB48F5497519846C4113396@shsmsx502.ccr.corp.intel.com>
+	(Chuanxiao Dong's message of "Wed, 13 Jul 2011 17:09:08 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Manoj Iyer <manoj.iyer@canonical.com>, linux-kernel@vger.kernel.org, jbarnes@virtuousgeek.org, matsumur@nts.ricoh.co.jp, linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org
+To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Cc: Balaji T K <balajitk@ti.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "tony@atomide.com" <tony@atomide.com>, "madhu.cr@ti.com" <madhu.cr@ti.com>, "b-cousson@ti.com" <b-cousson@ti.com>, "paul@pwsan.com" <paul@pwsan.com>, "kishore.kadiyala@ti.com" <kishore.kadiyala@ti.com>
 
-Hi Arnd,
+"Dong, Chuanxiao" <chuanxiao.dong@intel.com> writes:
 
-On Tue, Jul 12 2011, Arnd Bergmann wrote:
-> I would very much expect that to be nonreproducible. The first row
-> in each test is the result of a single write() system call and does
-> not get averaged out. More importantly the time for each write
-> depends a lot of the state of the card before the write.
+[...]
+
+>> 
+>> Basially, the question is: can the driver be reworked such that a system
+>> suspend does not need to runtime resume the device?  For most devices,
+>> we kind of expect that if the device is runtime suspended, a system
+>> suspend will have nothing extra to do, but this driver runtime resumes
+>> the device during system suspend in order to do "stuff", which I
+>> admitedly don't fully undestand.
+>> 
+>> Ideally, the "stuff" needed for runtime suspend and system suspend could
+>> be made to be common such that a system suspend of a runtime suspended
+>> device would be a noop.
+>> 
+>> Is this possible?
+>> 
+>> Kevin
 >
-> For instance when you do a lot of random writes to a card, optionally
-> take it out and put it into a different machine, and then do a large
-> linear write, that linear write will be very slow because the
-> card has to garbage collect all the random writes that were done
-> earlier. After a few writes (usually one is enough), it gets back
-> to the full performance.
+> During system suspended patch, a callback named .prepare will be first
+> done before .suspend is called, and .complete callback will be called
+> after .resume is called. These two callbacks are in pair. If driver
+> can implement the .prepare and hold the usage count in this callback,
+> then runtime pm suspend/resume will not happen during device
+> suspending. So there will be no need to add pm_runtime_get* and
+> pm_runtime_put* in .suspend/.resume.
 
-That makes sense.  Do you think this explains Manoj getting a slower
-first file copy speed (757ms vs. 480ms) after applying his patch?
-(Manoj, perhaps you could retry your test without GC being needed?)
+That doesn't avoid the problem, since the device is still runtime
+resumed and then re-suspended during system suspend.
 
-What would we expect lowering the SD base clock frequency from 200MHz
-to 50MHz to do to performance theoretically?
+My basic question is this: why does this device need to be runtime
+resumed during system suspend?  Why can't it just stay runtime
+suspended?
 
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Kevin
