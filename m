@@ -1,142 +1,83 @@
-From: Manoj Iyer <manoj.iyer@canonical.com>
-Subject: Re: [PATCH] mmc: Added quirks for Ricoh 1180:e823 lower base clock
- frequency
-Date: Wed, 13 Jul 2011 10:42:32 -0500 (CDT)
-Message-ID: <alpine.DEB.2.02.1107131031360.3174@lazy>
-References: <1310419715-13254-1-git-send-email-manoj.iyer@canonical.com> <alpine.DEB.2.02.1107121123140.1767@lazy> <m2ei1v76f1.fsf@bob.laptop.org> <201107122000.50309.arnd@arndb.de> <m2sjqa2q93.fsf@bob.laptop.org>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH v3 4/4] mmc: sdhci-esdhc-imx: add device tree probe
+ support
+Date: Wed, 13 Jul 2011 19:52:12 +0400
+Message-ID: <20110713155212.GB7875@oksana.dev.rtsoft.ru>
+References: <1309970870-13336-1-git-send-email-shawn.guo@linaro.org>
+ <1309970870-13336-5-git-send-email-shawn.guo@linaro.org>
+ <20110706210518.GD5371@ponder.secretlab.ca>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from adelie.canonical.com ([91.189.90.139]:33294 "EHLO
-	adelie.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755452Ab1GMPml (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 11:42:41 -0400
-In-Reply-To: <m2sjqa2q93.fsf@bob.laptop.org>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:60777 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755566Ab1GMPwU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 11:52:20 -0400
+Received: by wwe5 with SMTP id 5so6123612wwe.1
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2011 08:52:19 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <20110706210518.GD5371@ponder.secretlab.ca>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Manoj Iyer <manoj.iyer@canonical.com>, linux-kernel@vger.kernel.org, jbarnes@virtuousgeek.org, matsumur@nts.ricoh.co.jp, linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Shawn Guo <shawn.guo@linaro.org>, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Benjamin Herrenschmidt <benh@kernel.crashing.org>, David Gibson <david@gibson.dropbear.id.au>, Segher Boessenkool <segher@kernel.crashing.org>
 
+Hi,
 
-Chris/Arnd,
+On Wed, Jul 06, 2011 at 03:05:18PM -0600, Grant Likely wrote:
+> On Thu, Jul 07, 2011 at 12:47:50AM +0800, Shawn Guo wrote:
+> > The patch adds device tree probe support for sdhci-esdhc-imx driver.
+> > 
+> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> > Cc: Wolfram Sang <w.sang@pengutronix.de>
+> > Cc: Chris Ball <cjb@laptop.org>
+> > Cc: Grant Likely <grant.likely@secretlab.ca>
+> 
+> Acked-by: Grant Likely <grant.likely@secretlab.ca>
+[...]
+> > +Optional properties:
+> > +- fsl,card-wired : Indicate the card is wired to host permanently
+> > +- fsl,cd-internal : Indicate to use controller internal card detection
+> > +- fsl,wp-internal : Indicate to use controller internal write protection
+> > +- cd-gpios : Specify GPIOs for card detection
+> > +- wp-gpios : Specify GPIOs for write protection
+[...]
+> > +	cd-gpios = <&gpio0 6 0>; /* GPIO1_6 */
+> > +	wp-gpios = <&gpio0 5 0>; /* GPIO1_5 */
 
-Here is a series of test I did with the patched kernel.
+Is there any particular reason why we started using named GPIOs
+in the device tree? To me, that's quite drastic change... should
+we start using named regs and interrupts as well? Personally, I
+don't think that the idea is great, as now you don't know where
+to expect memory resources, interrupt resources and, eventually
+GPIO resources.
 
+Just a few disadvantages off the top of my head:
 
-== cold boot insert SD card ==
-u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
-1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
-4MiB    4.96M/s
-2MiB    6.3M/s
-1MiB    6.23M/s
-512KiB  6.23M/s
-256KiB  6.26M/s
+- You can't statically validate your device tree for correctness.
+  Today dtc checks #{address,size}-cells sanity for 'regs' and
+  'ranges';
+- You can't automatically convert named resources into 'struct
+  resource *', as we do for platform devices now;
+- Any pros for using named resources in the device tree? I don't
+  see any.
 
-== rerun the same test 2nd time ===
-u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
-1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
-4MiB    6.28M/s
-2MiB    6.29M/s
-1MiB    6.29M/s
-512KiB  6.29M/s
-256KiB  6.26M/s
+So, I suggest to at least discuss this stuff a little bit more
+before polluting device trees with dubious ideas.
 
-== remove and reinsert the SD card ==
-u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
-1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
-4MiB    6.42M/s
-2MiB    6.28M/s
-1MiB    6.22M/s
-512KiB  6.23M/s
-256KiB  6.26M/s
+p.s.
 
-== remove and reinsert the SD card ==
-u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
-1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
-4MiB    6.42M/s
-2MiB    6.3M/s
-1MiB    6.22M/s
-512KiB  6.25M/s
-256KiB  6.24M/s
+As for this particular patch, I really don't see why we should
+use named GPIOs. For consistency, I'd suggest to reuse bindings
+from Documentation/devicetree/bindings/mmc/mmc-spi-slot.txt.
 
-== reboot, reinsert the SD card ==
-u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
-1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
-[sudo] password for u:
-4MiB    6.45M/s
-2MiB    6.33M/s
-1MiB    6.25M/s
-512KiB  6.29M/s
-256KiB  6.3M/s
-u@u:~/flash/flashbench$
+Plus, fsl,cd-internal and fsl,wp-internal is not needed: either
+you specify GPIOs or not. That already signals whether driver
+should use internal detection (i.e. 'present' register) or
+external (i.e. GPIO).
 
-== rerun the test again ==
-u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
-1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
-4MiB    6.27M/s
-2MiB    6.27M/s
-1MiB    6.28M/s
-512KiB  6.27M/s
-256KiB  6.24M/s
-u@u:~/flash/flashbench$
+And also, why {cd,wp}-gpioS (plural)?
 
-== poweroff, Poweron, insert SD card ==
-u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
-1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
-[sudo] password for u:
-4MiB    6.45M/s
-2MiB    6.33M/s
-1MiB    6.24M/s
-512KiB  6.29M/s
-256KiB  6.32M/s
-u@u:~/flash/flashbench$
-
-== rerun the test again ==
-u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
-1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
-4MiB    6.29M/s
-2MiB    6.28M/s
-1MiB    6.29M/s
-512KiB  6.28M/s
-256KiB  6.25M/s
-u@u:~/flash/flashbench$
-
-On Wed, 13 Jul 2011, Chris Ball wrote:
-
-> Hi Arnd,
->
-> On Tue, Jul 12 2011, Arnd Bergmann wrote:
->> I would very much expect that to be nonreproducible. The first row
->> in each test is the result of a single write() system call and does
->> not get averaged out. More importantly the time for each write
->> depends a lot of the state of the card before the write.
->>
->> For instance when you do a lot of random writes to a card, optionally
->> take it out and put it into a different machine, and then do a large
->> linear write, that linear write will be very slow because the
->> card has to garbage collect all the random writes that were done
->> earlier. After a few writes (usually one is enough), it gets back
->> to the full performance.
->
-> That makes sense.  Do you think this explains Manoj getting a slower
-> first file copy speed (757ms vs. 480ms) after applying his patch?
-> (Manoj, perhaps you could retry your test without GC being needed?)
->
-> What would we expect lowering the SD base clock frequency from 200MHz
-> to 50MHz to do to performance theoretically?
->
-> Thanks,
->
-> - Chris.
-> -- 
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
->
->
-
---
-====================
-Manoj Iyer
-Ubuntu/Canonical
-Hardware Enablement
-====================
+-- 
+Anton Vorontsov
+Email: cbouatmailru@gmail.com
