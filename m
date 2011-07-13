@@ -1,43 +1,118 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [GIT PULL] MMC fix for 3.0.
-Date: Wed, 13 Jul 2011 18:03:40 -0400
-Message-ID: <m239i9vnwj.fsf@bob.laptop.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH/RFC] mmc: sh_mmcif: maximize power saving
+Date: Thu, 14 Jul 2011 01:23:01 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1107140116150.30737@axis700.grange>
+References: <Pine.LNX.4.64.1105261524120.9307@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56147 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751732Ab1GMWDr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 13 Jul 2011 18:03:47 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1105261524120.9307@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Linus,
+Hi Chris
 
-Please pull from:
+This patch has survived multiple runtime PM versions on sh-mobile without 
+changes, so, it should be good for the mainline. Please, queue for 3.1. We 
+might, however, eventually decide, that we don't want to be so aggressive 
+with our power savings;-) and want to add a flag to allow platforms to 
+sacrifice power and maximise performance. This would be an incremental 
+patch then.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+Thanks
+Guennadi
 
-to receive a tested MMC regression fix against 3.0-rc1.  Thanks.
+On Thu, 26 May 2011, Guennadi Liakhovetski wrote:
 
+> This patch uses runtime PM to allow the system to power down the MMC
+> controller, when the MMC closk is switched off.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+> 
+> Patches have been submitted earlier for SDHCI to accomplish something 
+> similar, but they have complicated dependencies upon other different 
+> subsystems, especially on PCI. MMCIF is easier - it only exists in 
+> different SoCs, so, this change should also be easier to review, verify 
+> and test.
+> 
+>  drivers/mmc/host/sh_mmcif.c |   27 ++++++++++++++++++---------
+>  1 files changed, 18 insertions(+), 9 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 14f8edb..557886b 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -175,6 +175,7 @@ struct sh_mmcif_host {
+>  	enum mmcif_state state;
+>  	spinlock_t lock;
+>  	bool power;
+> +	bool card_present;
+>  
+>  	/* DMA support */
+>  	struct dma_chan		*chan_rx;
+> @@ -877,23 +878,23 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  
+>  	if (ios->power_mode == MMC_POWER_UP) {
+> -		if (p->set_pwr)
+> -			p->set_pwr(host->pd, ios->power_mode);
+> -		if (!host->power) {
+> +		if (!host->card_present) {
+>  			/* See if we also get DMA */
+>  			sh_mmcif_request_dma(host, host->pd->dev.platform_data);
+> -			pm_runtime_get_sync(&host->pd->dev);
+> -			host->power = true;
+> +			host->card_present = true;
+>  		}
+>  	} else if (ios->power_mode == MMC_POWER_OFF || !ios->clock) {
+>  		/* clock stop */
+>  		sh_mmcif_clock_control(host, 0);
+>  		if (ios->power_mode == MMC_POWER_OFF) {
+> -			if (host->power) {
+> -				pm_runtime_put(&host->pd->dev);
+> +			if (host->card_present) {
+>  				sh_mmcif_release_dma(host);
+> -				host->power = false;
+> +				host->card_present = false;
+>  			}
+> +		}
+> +		if (host->power) {
+> +			pm_runtime_put(&host->pd->dev);
+> +			host->power = false;
+>  			if (p->down_pwr)
+>  				p->down_pwr(host->pd);
+>  		}
+> @@ -901,8 +902,16 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  		return;
+>  	}
+>  
+> -	if (ios->clock)
+> +	if (ios->clock) {
+> +		if (!host->power) {
+> +			if (p->set_pwr)
+> +				p->set_pwr(host->pd, ios->power_mode);
+> +			pm_runtime_get_sync(&host->pd->dev);
+> +			host->power = true;
+> +			sh_mmcif_sync_reset(host);
+> +		}
+>  		sh_mmcif_clock_control(host, ios->clock);
+> +	}
+>  
+>  	host->bus_width = ios->bus_width;
+>  	host->state = STATE_IDLE;
+> -- 
+> 1.7.2.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-The following changes since commit 8d86e5f91440aa56a5df516bf58fe3883552ad56:
-
-  Merge branch 'merge' of git://git.kernel.org/pub/scm/linux/kernel/git/benh/powerpc (2011-07-12 14:21:19 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-Philip Rakity (1):
-      mmc: core: Bus width testing needs to handle suspend/resume
-
- drivers/mmc/core/mmc.c   |   75 ++++++++++++++++++++++++++++++----------------
- include/linux/mmc/card.h |   13 ++++++++
- 2 files changed, 62 insertions(+), 26 deletions(-)
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
