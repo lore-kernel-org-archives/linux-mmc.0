@@ -1,44 +1,142 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V2 00/16] omap_hsmmc patches
-Date: Wed, 13 Jul 2011 11:36:26 -0400
-Message-ID: <m2k4bm2nwl.fsf@bob.laptop.org>
-References: <1304673255-31634-1-git-send-email-adrian.hunter@nokia.com>
-	<CANOLnONWmYn4FpuF-UAKQR4rAA6LOgWdMfu2bMN46nna6rOxAw@mail.gmail.com>
+From: Manoj Iyer <manoj.iyer@canonical.com>
+Subject: Re: [PATCH] mmc: Added quirks for Ricoh 1180:e823 lower base clock
+ frequency
+Date: Wed, 13 Jul 2011 10:42:32 -0500 (CDT)
+Message-ID: <alpine.DEB.2.02.1107131031360.3174@lazy>
+References: <1310419715-13254-1-git-send-email-manoj.iyer@canonical.com> <alpine.DEB.2.02.1107121123140.1767@lazy> <m2ei1v76f1.fsf@bob.laptop.org> <201107122000.50309.arnd@arndb.de> <m2sjqa2q93.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41876 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755265Ab1GMPgi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 13 Jul 2011 11:36:38 -0400
-In-Reply-To: <CANOLnONWmYn4FpuF-UAKQR4rAA6LOgWdMfu2bMN46nna6rOxAw@mail.gmail.com>
-	(Grazvydas Ignotas's message of "Wed, 13 Jul 2011 13:48:08 +0300")
+Received: from adelie.canonical.com ([91.189.90.139]:33294 "EHLO
+	adelie.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755452Ab1GMPml (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 11:42:41 -0400
+In-Reply-To: <m2sjqa2q93.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grazvydas Ignotas <notasas@gmail.com>
-Cc: Tony Lindgren <tony@atomide.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, Adrian Hunter <adrian.hunter@nokia.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Manoj Iyer <manoj.iyer@canonical.com>, linux-kernel@vger.kernel.org, jbarnes@virtuousgeek.org, matsumur@nts.ricoh.co.jp, linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi,
 
-On Wed, Jul 13 2011, Grazvydas Ignotas wrote:
-> it seems this series got lost in time, at least patches 01, 02, 03,
-> 04, 05, 06, 07, 08, 12 look like valid standalone fixes and
-> improvements to me, they don't touch other trees and still apply
-> cleanly, so would be good to have.
+Chris/Arnd,
 
-Yeah.  I didn't merge them because Tony still has unanswered comments on
-the OMAP side of the patches, and they're submitted as a single patchset.
+Here is a series of test I did with the patched kernel.
 
-I've applied {2, 3, 5, 6, 7, 8, 12} to mmc-next for 3.1 now.  1 doesn't
-apply because the function doesn't exist anymore.  4 doesn't apply
-because iclk doesn't exist anymore.
 
-If someone wants to look at rebasing the rest of these against mmc-next
-and resubmitting, I think that'd be useful.
+== cold boot insert SD card ==
+u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
+1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
+4MiB    4.96M/s
+2MiB    6.3M/s
+1MiB    6.23M/s
+512KiB  6.23M/s
+256KiB  6.26M/s
 
-Thanks,
+== rerun the same test 2nd time ===
+u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
+1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
+4MiB    6.28M/s
+2MiB    6.29M/s
+1MiB    6.29M/s
+512KiB  6.29M/s
+256KiB  6.26M/s
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+== remove and reinsert the SD card ==
+u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
+1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
+4MiB    6.42M/s
+2MiB    6.28M/s
+1MiB    6.22M/s
+512KiB  6.23M/s
+256KiB  6.26M/s
+
+== remove and reinsert the SD card ==
+u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
+1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
+4MiB    6.42M/s
+2MiB    6.3M/s
+1MiB    6.22M/s
+512KiB  6.25M/s
+256KiB  6.24M/s
+
+== reboot, reinsert the SD card ==
+u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
+1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
+[sudo] password for u:
+4MiB    6.45M/s
+2MiB    6.33M/s
+1MiB    6.25M/s
+512KiB  6.29M/s
+256KiB  6.3M/s
+u@u:~/flash/flashbench$
+
+== rerun the test again ==
+u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
+1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
+4MiB    6.27M/s
+2MiB    6.27M/s
+1MiB    6.28M/s
+512KiB  6.27M/s
+256KiB  6.24M/s
+u@u:~/flash/flashbench$
+
+== poweroff, Poweron, insert SD card ==
+u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
+1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
+[sudo] password for u:
+4MiB    6.45M/s
+2MiB    6.33M/s
+1MiB    6.24M/s
+512KiB  6.29M/s
+256KiB  6.32M/s
+u@u:~/flash/flashbench$
+
+== rerun the test again ==
+u@u:~/flash/flashbench$ sudo ./flashbench -O --erasesize=$[4 * 1024 * 
+1024] --blocksize=$[256 * 1024] /dev/mmcblk0  --open-au-nr=2
+4MiB    6.29M/s
+2MiB    6.28M/s
+1MiB    6.29M/s
+512KiB  6.28M/s
+256KiB  6.25M/s
+u@u:~/flash/flashbench$
+
+On Wed, 13 Jul 2011, Chris Ball wrote:
+
+> Hi Arnd,
+>
+> On Tue, Jul 12 2011, Arnd Bergmann wrote:
+>> I would very much expect that to be nonreproducible. The first row
+>> in each test is the result of a single write() system call and does
+>> not get averaged out. More importantly the time for each write
+>> depends a lot of the state of the card before the write.
+>>
+>> For instance when you do a lot of random writes to a card, optionally
+>> take it out and put it into a different machine, and then do a large
+>> linear write, that linear write will be very slow because the
+>> card has to garbage collect all the random writes that were done
+>> earlier. After a few writes (usually one is enough), it gets back
+>> to the full performance.
+>
+> That makes sense.  Do you think this explains Manoj getting a slower
+> first file copy speed (757ms vs. 480ms) after applying his patch?
+> (Manoj, perhaps you could retry your test without GC being needed?)
+>
+> What would we expect lowering the SD base clock frequency from 200MHz
+> to 50MHz to do to performance theoretically?
+>
+> Thanks,
+>
+> - Chris.
+> -- 
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+>
+>
+
+--
+====================
+Manoj Iyer
+Ubuntu/Canonical
+Hardware Enablement
+====================
