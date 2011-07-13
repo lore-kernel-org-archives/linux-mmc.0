@@ -1,99 +1,62 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] mmc: sdhci-s3c: add quirk about BROKEN_ADMA_ZEROLEN_DESC
-Date: Tue, 12 Jul 2011 21:18:37 -0700
-Message-ID: <8CFE1B8F-6466-4A1C-983A-42FE0B094F09@marvell.com>
-References: <4E1C0637.2090603@samsung.com>
- <000c01cc4113$403a2c00$c0ae8400$%jun@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: block: fixed NULL pointer dereference
+Date: Wed, 13 Jul 2011 17:02:16 +0900
+Message-ID: <4E1D5108.8040309@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:52550 "EHLO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750703Ab1GMESp convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 13 Jul 2011 00:18:45 -0400
-In-Reply-To: <000c01cc4113$403a2c00$c0ae8400$%jun@samsung.com>
-Content-Language: en-US
+Received: from mailout4.samsung.com ([203.254.224.34]:61453 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964961Ab1GMIB6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2011 04:01:58 -0400
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LO9003KDIAQ7NE0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 13 Jul 2011 17:01:57 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LO9009NTIB8YU@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 13 Jul 2011 17:01:56 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ben Dooks <ben-linux@fluff.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Per Forlin <per.forlin@linaro.org>, Philip Rakity <prakity@marvell.com>
 
+Hi.
 
+I send to mailing for [RFC] Kernel NULL pointer dereference.
+This patch is fixed it.
 
-One use for this is as follows:
+In similar case, when discard request, check condition and
+performed mmc_blk_issue_rw_rq(mq, NULL) for ongoing async transfer.
 
-Without the QUIRK
-imagine there is one SG descriptor passed in and it is properly aligned etc.  The prepare_data function (and friends) will 
-change this to 2 ADMA descriptors.  The first descriptor will point to the data / length passed in via the SG descriptor.  The
-second descriptor will say END OF CHAIN.
+But When flush request, entered the mmc_blk_issue_flush() then return.
+(then didn't complete ongoing aync transfer).
 
-With the Quirk
-Only one ADMA descriptor will be used.  It will contain the pointer to the data/length and be marked END OF CHAIN.
+I think that need to complete for ongoing aync transfer before flush request.
 
-The quirk save a needless fetch.
+I tested with this patch, it's working fine.
+(SDHCI controller, eMMC4.41)
 
-Philip
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/card/block.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
 
-On Jul 12, 2011, at 9:13 PM, Seungwon Jeon wrote:
-
-> Hi,
-> 
-> I don't know meaning of QUIRK_BROKEN_ADMA_ZEROLEN_DESC exactly.
-> Is there any problem in ADMA descriptors?
-> Could you explain for this?
-> 
-> The following table is for ADMA length field from Host controller spec.
-> The maximum data length descriptor line is less than 64KiB.
-> Samsung also conforms this.
-> ----------------------------------
-> Length Field  | Value of Length
-> ----------------------------------
-> 0000h		| 65536 bytes
-> 0001h		| 1 byte
-> 0002h		| 2bytes
-> ... 		| ...
-> FFFFh		| 65535 bytes
-> ----------------------------------
-> 
-> Best regards,
-> Seungwon Jeon.
-> 
-> Jaehoon Chung wrote: 
->> This patch is added the quirk for Samsung SoCs.
->> 
->> Samsung SoCs need to set QUIRK_BROKEN_ADMA_ZEROLEN_DESC.
->> (If ADMA operation is more than 65535, maybe set by zero.)
->> 
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> ---
->> drivers/mmc/host/sdhci-s3c.c |    3 +++
->> 1 files changed, 3 insertions(+), 0 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
->> index 460ffaf..03da44a 100644
->> --- a/drivers/mmc/host/sdhci-s3c.c
->> +++ b/drivers/mmc/host/sdhci-s3c.c
->> @@ -502,6 +502,9 @@ static int __devinit sdhci_s3c_probe(struct
->> platform_device *pdev)
->> 	/* This host supports the Auto CMD12 */
->> 	host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
->> 
->> +	/* Samsung SoCs need BROKEN_ADMA_ZEROLEN_DESC */
->> +	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC;
->> +
->> 	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
->> 	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
->> 		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 38d0149..1ff5486 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1200,6 +1200,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		else
+ 			ret = mmc_blk_issue_discard_rq(mq, req);
+ 	} else if (req && req->cmd_flags & REQ_FLUSH) {
++		/* complete ongoing async transfer before issuing flush */
++		if (card->host->areq)
++			mmc_blk_issue_rw_rq(mq, NULL);
+ 		ret = mmc_blk_issue_flush(mq, req);
+ 	} else {
+ 		ret = mmc_blk_issue_rw_rq(mq, req);
