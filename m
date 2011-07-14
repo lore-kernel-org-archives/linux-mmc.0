@@ -1,198 +1,191 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH v3] mmc: tmio: fix recursive spinlock, don't schedule with
- interrupts disabled
-Date: Thu, 14 Jul 2011 12:12:38 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1107141209460.10688@axis700.grange>
-References: <Pine.LNX.4.64.1106151549050.23363@axis700.grange>
- <Pine.LNX.4.64.1106201803520.11365@axis700.grange>
+Subject: [PATCH v3] mmc: tmio: maximize power saving
+Date: Thu, 14 Jul 2011 12:16:59 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1107141212490.10688@axis700.grange>
+References: <Pine.LNX.4.64.1107140125460.30737@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:53660 "EHLO
+Received: from moutng.kundenserver.de ([212.227.17.9]:64069 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754164Ab1GNKNJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2011 06:13:09 -0400
-In-Reply-To: <Pine.LNX.4.64.1106201803520.11365@axis700.grange>
+	with ESMTP id S1754200Ab1GNKRm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2011 06:17:42 -0400
+In-Reply-To: <Pine.LNX.4.64.1107140125460.30737@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Ball <cjb@laptop.org>, Magnus Damm <damm@opensource.se>
+Cc: linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>, "Rafael J. Wysocki" <rjw@sisk.pl>, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>, Simon Horman <horms@verge.net.au>
 
-Calling mmc_request_done() under a spinlock with interrupts disabled
-leads to a recursive spin-lock on request retry path and to
-scheduling in atomic context. This patch fixes both these problems
-by moving mmc_request_done() to the scheduler workqueue.
+This patch uses runtime PM to allow the system to power down the MMC
+controller, when the MMC closk is switched off.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
-This is a bug-fix: without it the system Oopses with LOCKDEP enabled, so, 
-it should really go in 3.0. OTOH it is pretty intrusine and non-trivial, 
-so, reviews and tests are highly appreciated! Also, unfortunately, I 
-wasn't able to test it well enough with SDIO, because the driver for the 
-only SDIO card, that I have, reproducibly crashes the kernel:
+v3: updated on top of current mmc-next plus my earlier patch "mmc: tmio: 
+fix recursive spinlock, don't schedule with interrupts disabled"
 
-http://www.spinics.net/lists/kernel/msg1203334.html
+v2: Primarily tested on mackerel, with runtime PM and system-wide suspend, 
+updated to the current core and sh-mobile runtime PM code. To avoid 
+regression should go in after "ARM: mach-shmobile: use GPIO interrupt also 
+for card eject on SDHI0 on mackerel":
 
-So, mainly tested with SD-cards and only lightly with SDIO.
+http://article.gmane.org/gmane.linux.kernel.mmc/9230
 
-v3: no functional changes, only updated on top of current mmc-next
-
-v2:
-
-1. added a mutex to properly complete each .set_ios() call instead of 
-returning an error, when racing with another one. 
-
-2. oritect data inside tmio_mmc_finish_request()
-
-3. don't reschedule card detection, if one is already pending
-
- drivers/mmc/host/tmio_mmc.h     |    6 +++++-
- drivers/mmc/host/tmio_mmc_pio.c |   35 +++++++++++++++++++++++++++++------
- 2 files changed, 34 insertions(+), 7 deletions(-)
+ drivers/mmc/host/tmio_mmc.h     |    2 +
+ drivers/mmc/host/tmio_mmc_pio.c |   64 ++++++++++++++++++++++----------------
+ 2 files changed, 39 insertions(+), 27 deletions(-)
 
 diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 0c22df0..a2d6f9f 100644
+index a2d6f9f..551d1ef 100644
 --- a/drivers/mmc/host/tmio_mmc.h
 +++ b/drivers/mmc/host/tmio_mmc.h
-@@ -18,6 +18,7 @@
+@@ -53,6 +53,8 @@ struct tmio_mmc_host {
+ 	void (*set_clk_div)(struct platform_device *host, int state);
  
- #include <linux/highmem.h>
- #include <linux/mmc/tmio.h>
-+#include <linux/mutex.h>
- #include <linux/pagemap.h>
- #include <linux/spinlock.h>
+ 	int			pm_error;
++	/* recognise system-wide suspend in runtime PM methods */
++	bool			pm_global;
  
-@@ -73,8 +74,11 @@ struct tmio_mmc_host {
- 
- 	/* Track lost interrupts */
- 	struct delayed_work	delayed_reset_work;
--	spinlock_t		lock;
-+	struct work_struct	done;
-+
-+	spinlock_t		lock;		/* protect host private data */
- 	unsigned long		last_req_ts;
-+	struct mutex		ios_lock;	/* protect set_ios() context */
- };
- 
- int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 	/* pio related stuff */
+ 	struct scatterlist      *sg_ptr;
 diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index f7dd3b1..a2f76ad 100644
+index a2f76ad..221ffb7 100644
 --- a/drivers/mmc/host/tmio_mmc_pio.c
 +++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -250,10 +250,16 @@ static void tmio_mmc_reset_work(struct work_struct *work)
- /* called with host->lock held, interrupts disabled */
- static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
+@@ -546,6 +546,7 @@ out:
+ irqreturn_t tmio_mmc_irq(int irq, void *devid)
  {
--	struct mmc_request *mrq = host->mrq;
-+	struct mmc_request *mrq;
-+	unsigned long flags;
- 
--	if (!mrq)
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	mrq = host->mrq;
-+	if (IS_ERR_OR_NULL(mrq)) {
-+		spin_unlock_irqrestore(&host->lock, flags);
- 		return;
-+	}
- 
- 	host->cmd = NULL;
- 	host->data = NULL;
-@@ -262,11 +268,18 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
- 	cancel_delayed_work(&host->delayed_reset_work);
- 
- 	host->mrq = NULL;
-+	spin_unlock_irqrestore(&host->lock, flags);
- 
--	/* FIXME: mmc_request_done() can schedule! */
- 	mmc_request_done(host->mmc, mrq);
- }
- 
-+static void tmio_mmc_done_work(struct work_struct *work)
-+{
-+	struct tmio_mmc_host *host = container_of(work, struct tmio_mmc_host,
-+						  done);
-+	tmio_mmc_finish_request(host);
-+}
-+
- /* These are the bitmasks the tmio chip requires to implement the MMC response
-  * types. Note that R1 and R6 are the same in this scheme. */
- #define APP_CMD        0x0040
-@@ -433,7 +446,7 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
- 			BUG();
- 	}
- 
--	tmio_mmc_finish_request(host);
-+	schedule_work(&host->done);
- }
- 
- static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
-@@ -523,7 +536,7 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
- 				tasklet_schedule(&host->dma_issue);
+ 	struct tmio_mmc_host *host = devid;
++	struct mmc_host *mmc = host->mmc;
+ 	struct tmio_mmc_data *pdata = host->pdata;
+ 	unsigned int ireg, irq_mask, status;
+ 	unsigned int sdio_ireg, sdio_irq_mask, sdio_status;
+@@ -567,13 +568,13 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
+ 		if (sdio_ireg && !host->sdio_irq_enabled) {
+ 			pr_warning("tmio_mmc: Spurious SDIO IRQ, disabling! 0x%04x 0x%04x 0x%04x\n",
+ 				   sdio_status, sdio_irq_mask, sdio_ireg);
+-			tmio_mmc_enable_sdio_irq(host->mmc, 0);
++			tmio_mmc_enable_sdio_irq(mmc, 0);
+ 			goto out;
  		}
- 	} else {
--		tmio_mmc_finish_request(host);
-+		schedule_work(&host->done);
- 	}
  
- out:
-@@ -573,7 +586,8 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
+-		if (host->mmc->caps & MMC_CAP_SDIO_IRQ &&
++		if (mmc->caps & MMC_CAP_SDIO_IRQ &&
+ 			sdio_ireg & TMIO_SDIO_STAT_IOIRQ)
+-			mmc_signal_sdio_irq(host->mmc);
++			mmc_signal_sdio_irq(mmc);
+ 
+ 		if (sdio_ireg)
+ 			goto out;
+@@ -586,7 +587,9 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
  	if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
  		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
  			TMIO_STAT_CARD_REMOVE);
--		mmc_detect_change(host->mmc, msecs_to_jiffies(100));
-+		if (!work_pending(&host->mmc->detect.work))
-+			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
+-		if (!work_pending(&host->mmc->detect.work))
++		if ((((ireg & TMIO_STAT_CARD_REMOVE) && mmc->card) ||
++		     ((ireg & TMIO_STAT_CARD_INSERT) && !mmc->card)) &&
++		    !work_pending(&mmc->detect.work))
+ 			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
  		goto out;
  	}
+@@ -743,33 +746,30 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  
-@@ -703,6 +717,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	struct tmio_mmc_data *pdata = host->pdata;
- 	unsigned long flags;
+ 	spin_unlock_irqrestore(&host->lock, flags);
  
-+	mutex_lock(&host->ios_lock);
-+
- 	spin_lock_irqsave(&host->lock, flags);
- 	if (host->mrq) {
- 		if (IS_ERR(host->mrq)) {
-@@ -718,6 +734,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 				host->mrq->cmd->opcode, host->last_req_ts, jiffies);
+-	if (ios->clock)
+-		tmio_mmc_set_clock(host, ios->clock);
+-
+-	/* Power sequence - OFF -> UP -> ON */
+-	if (ios->power_mode == MMC_POWER_UP) {
+-		if ((pdata->flags & TMIO_MMC_HAS_COLD_CD) && !pdata->power) {
++	/*
++	 * pdata->power == false only if COLD_CD is available, otherwise only
++	 * in short time intervals during probing or resuming
++	 */
++	if (ios->power_mode == MMC_POWER_ON && ios->clock) {
++		if (!pdata->power) {
+ 			pm_runtime_get_sync(&host->pdev->dev);
+ 			pdata->power = true;
  		}
- 		spin_unlock_irqrestore(&host->lock, flags);
-+
-+		mutex_unlock(&host->ios_lock);
- 		return;
++		tmio_mmc_set_clock(host, ios->clock);
+ 		/* power up SD bus */
+ 		if (host->set_pwr)
+ 			host->set_pwr(host->pdev, 1);
+-	} else if (ios->power_mode == MMC_POWER_OFF || !ios->clock) {
+-		/* power down SD bus */
+-		if (ios->power_mode == MMC_POWER_OFF) {
+-			if (host->set_pwr)
+-				host->set_pwr(host->pdev, 0);
+-			if ((pdata->flags & TMIO_MMC_HAS_COLD_CD) &&
+-			    pdata->power) {
+-				pdata->power = false;
+-				pm_runtime_put(&host->pdev->dev);
+-			}
+-		}
+-		tmio_mmc_clk_stop(host);
+-	} else {
+ 		/* start bus clock */
+ 		tmio_mmc_clk_start(host);
++	} else if (ios->power_mode != MMC_POWER_UP) {
++		if (host->set_pwr)
++			host->set_pwr(host->pdev, 0);
++		if ((pdata->flags & TMIO_MMC_HAS_COLD_CD) &&
++		    pdata->power) {
++			pdata->power = false;
++			pm_runtime_put(&host->pdev->dev);
++		}
++		tmio_mmc_clk_stop(host);
  	}
  
-@@ -771,6 +789,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			current->comm, task_pid_nr(current),
- 			ios->clock, ios->power_mode);
- 	host->mrq = NULL;
-+
-+	mutex_unlock(&host->ios_lock);
- }
- 
- static int tmio_mmc_get_ro(struct mmc_host *mmc)
-@@ -867,9 +887,11 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 		tmio_mmc_enable_sdio_irq(mmc, 0);
- 
- 	spin_lock_init(&_host->lock);
-+	mutex_init(&_host->ios_lock);
- 
- 	/* Init delayed work for request timeouts */
- 	INIT_DELAYED_WORK(&_host->delayed_reset_work, tmio_mmc_reset_work);
-+	INIT_WORK(&_host->done, tmio_mmc_done_work);
- 
- 	/* See if we also get DMA */
+ 	switch (ios->bus_width) {
+@@ -897,8 +897,10 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
  	tmio_mmc_request_dma(_host, pdata);
-@@ -917,6 +939,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
- 		pm_runtime_get_sync(&pdev->dev);
  
- 	mmc_remove_host(host->mmc);
-+	cancel_work_sync(&host->done);
- 	cancel_delayed_work_sync(&host->delayed_reset_work);
- 	tmio_mmc_release_dma(host);
+ 	/* We have to keep the device powered for its card detection to work */
+-	if (!(pdata->flags & TMIO_MMC_HAS_COLD_CD))
++	if (!(pdata->flags & TMIO_MMC_HAS_COLD_CD)) {
++		pdata->power = true;
+ 		pm_runtime_get_noresume(&pdev->dev);
++	}
  
+ 	mmc_add_host(mmc);
+ 
+@@ -975,11 +977,16 @@ int tmio_mmc_host_resume(struct device *dev)
+ 	/* The MMC core will perform the complete set up */
+ 	host->pdata->power = false;
+ 
++	host->pm_global = true;
+ 	if (!host->pm_error)
+ 		pm_runtime_get_sync(dev);
+ 
+-	tmio_mmc_reset(mmc_priv(mmc));
+-	tmio_mmc_request_dma(host, host->pdata);
++	if (host->pm_global) {
++		/* Runtime PM resume callback didn't run */
++		tmio_mmc_reset(host);
++		tmio_mmc_request_dma(host, host->pdata);
++		host->pm_global = false;
++	}
+ 
+ 	return mmc_resume_host(mmc);
+ }
+@@ -1000,12 +1007,15 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
+ 	struct tmio_mmc_data *pdata = host->pdata;
+ 
+ 	tmio_mmc_reset(host);
++	tmio_mmc_request_dma(host, host->pdata);
+ 
+ 	if (pdata->power) {
+ 		/* Only entered after a card-insert interrupt */
+-		tmio_mmc_set_ios(mmc, &mmc->ios);
++		if (!mmc->card)
++			tmio_mmc_set_ios(mmc, &mmc->ios);
+ 		mmc_detect_change(mmc, msecs_to_jiffies(100));
+ 	}
++	host->pm_global = false;
+ 
+ 	return 0;
+ }
 -- 
 1.7.2.5
 
