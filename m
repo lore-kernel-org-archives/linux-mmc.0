@@ -1,90 +1,18 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH v2] mmc: tmio: fix recursive spinlock, don't schedule
- with interrupts disabled
-Date: Thu, 14 Jul 2011 12:26:16 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1107141220310.10688@axis700.grange>
-References: <Pine.LNX.4.64.1106151549050.23363@axis700.grange>
- <Pine.LNX.4.64.1106201803520.11365@axis700.grange> <m2oc0y2pk6.fsf@bob.laptop.org>
+From: vivian doe <vivian4trustsme@indiatimes.com>
+Subject: Hello
+Date: Thu, 14 Jul 2011 15:54:20 +0530 (IST)
+Message-ID: <1471290982.2346891310639060775.JavaMail.root@tilmb18.indiatimes.com>
+Reply-To: vivian doe <vivian_doe4real@yahoo.co.uk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:49372 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754280Ab1GNK0o (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2011 06:26:44 -0400
-In-Reply-To: <m2oc0y2pk6.fsf@bob.laptop.org>
+Received: from vomta6.indiatimes.com ([223.165.27.50]:31497 "EHLO
+	trx4.indiatimes.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754225Ab1GNKe7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2011 06:34:59 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus Damm <damm@opensource.se>
 
-Hi Chris
-
-On Wed, 13 Jul 2011, Chris Ball wrote:
-
-> Hi Guennadi,
-> 
-> On Mon, Jun 20 2011, Guennadi Liakhovetski wrote:
-> > Calling mmc_request_done() under a spinlock with interrupts disabled
-> > leads to a recursive spin-lock on request retry path and to
-> > scheduling in atomic context. This patch fixes both these problems
-> > by moving mmc_request_done() to the scheduler workqueue.
-> >
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > ---
-> >
-> > This is a bug-fix: without it the system Oopses with LOCKDEP enabled, so, 
-> > it should really go in 3.0. OTOH it is pretty intrusine and non-trivial, 
-> > so, reviews and tests are highly appreciated! Also, unfortunately, I 
-> > wasn't able to test it well enough with SDIO, because the driver for the 
-> > only SDIO card, that I have, reproducibly crashes the kernel:
-> 
-> Having trouble working out how to apply this -- for example, in this hunk:
-
-Right, I've been developing on top of other trees. As you probably have 
-seen, a couple of minutes ago I've updated my two patches and re-posted 
-them:
-
-[PATCH v3] mmc: tmio: fix recursive spinlock, don't schedule with interrupts disabled
-[PATCH v3] mmc: tmio: maximize power saving
-
-That's it for this merge window for tmio from me so far;-) The outstanding 
-sh-mmcif patch
-
-[PATCH/RFC] mmc: sh_mmcif: maximize power saving
-
-is no longer an RFC, should have no conflicts and requires no updates.
-
-Thanks
-Guennadi
-
-> 
-> > @@ -618,7 +631,8 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
-> >  		if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
-> >  			tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_CARD_INSERT |
-> >  				TMIO_STAT_CARD_REMOVE);
-> > -			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
-> > +			if (!work_pending(&host->mmc->detect.work))
-> > +				mmc_detect_change(host->mmc, msecs_to_jiffies(100));
-> >  		}
-> >  
-> >  		/* CRC and other errors */
-> 
-> In mmc-next there's a "goto out;" after the mmc_detect_change call, which
-> looks like it's always been there.  Am I missing a patch this depends on?
-> 
-> (It'd be a good time to get a full set of tmio patches for 3.1 pulled
-> together, if you can do that.)
-> 
-> Thanks!
-> 
-> - Chris.
-> -- 
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-> 
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Hello
+My name is Vivian, i saw your profile today and became interested in you,i will also like to know you the more,and i want you to send an email to my email address so i can give you my picture for you to know whom i am.Here is my email address (vivian_doe4real@yahoo.co.uk) believe we can move from here!I am waiting for your mail to my email address above.(Remember the distance, color or language does not matter but love matters allot in life.
