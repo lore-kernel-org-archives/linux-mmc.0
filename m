@@ -1,37 +1,76 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: Question regarding SDR104 bus speed mode
-Date: Thu, 14 Jul 2011 04:38:34 -0700 (PDT)
-Message-ID: <dd8e0dfbe0f4d466cc39fb67a2a4e4a3.squirrel@www.codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: [PATCH 11/20] ARM i.MX dma: Fix burstsize settings
+Date: Thu, 14 Jul 2011 16:04:14 +0200
+Message-ID: <1310652263-27948-11-git-send-email-s.hauer@pengutronix.de>
+References: <1310652263-27948-1-git-send-email-s.hauer@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:40099 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754509Ab1GNLiq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2011 07:38:46 -0400
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:43051 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755149Ab1GNOEd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2011 10:04:33 -0400
+In-Reply-To: <1310652263-27948-1-git-send-email-s.hauer@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, prakity@marvell.com, arindam.nath@amd.com
+To: juergen.lambrecht@gmail.com
+Cc: Wolfram Sang <w.sang@pengutronix.de>, Sascha Hauer <s.hauer@pengutronix.de>, Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Liam Girdwood <lrg@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, alsa-devel@alsa-project.org
 
-Hi Arindam, Philips and All,
+From: Wolfram Sang <w.sang@pengutronix.de>
 
-According to SD 3.0 spec (section 3.9.6), cards may require current upto
-800 mA while running in SDR104. However Max. supported current from PMIC
-regulator connected to sd card slot on my board is 600mA.
+Already upstreamed.
 
-I have these questions:
-1. So does this mean we can't support the SDR104 mode if regulator current
-driving capacity is not upto 800 mA?
+dmaengine expects the maxburst parameter in words, not bytes.
+The imxdma driver and its users do this wrong. Fix this.
 
-2. I am able to make SD card run in SDR104 mode even if the max. current
-supplied by regulator is upto 600 mA. So is this 800mA requirement is
-**must** condition to support SDR104 mode reliably?
+As a side note the imx-pcm-dma-mx2 driver was 'fixed' to work
+with imx-dma. This broke the driver with imx-sdma support which
+correctly takes the maxburst parameter in words. This patch
+puts the sdma based sound back to work.
 
-Regards,
-Subhash
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Vinod Koul <vinod.koul@intel.com>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
+Cc: Liam Girdwood <lrg@ti.com>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: alsa-devel@alsa-project.org
+---
+ drivers/dma/imx-dma.c           |    3 ++-
+ sound/soc/imx/imx-pcm-dma-mx2.c |    4 ++--
+ 2 files changed, 4 insertions(+), 3 deletions(-)
 
+diff --git a/drivers/dma/imx-dma.c b/drivers/dma/imx-dma.c
+index e18eaab..d99f71c 100644
+--- a/drivers/dma/imx-dma.c
++++ b/drivers/dma/imx-dma.c
+@@ -135,7 +135,8 @@ static int imxdma_control(struct dma_chan *chan, enum dma_ctrl_cmd cmd,
+ 		if (ret)
+ 			return ret;
+ 
+-		imx_dma_config_burstlen(imxdmac->imxdma_channel, imxdmac->watermark_level);
++		imx_dma_config_burstlen(imxdmac->imxdma_channel,
++				imxdmac->watermark_level * imxdmac->word_size);
+ 
+ 		return 0;
+ 	default:
+diff --git a/sound/soc/imx/imx-pcm-dma-mx2.c b/sound/soc/imx/imx-pcm-dma-mx2.c
+index 4173b3d..43fdc24f 100644
+--- a/sound/soc/imx/imx-pcm-dma-mx2.c
++++ b/sound/soc/imx/imx-pcm-dma-mx2.c
+@@ -110,12 +110,12 @@ static int imx_ssi_dma_alloc(struct snd_pcm_substream *substream,
+ 		slave_config.direction = DMA_TO_DEVICE;
+ 		slave_config.dst_addr = dma_params->dma_addr;
+ 		slave_config.dst_addr_width = buswidth;
+-		slave_config.dst_maxburst = dma_params->burstsize * buswidth;
++		slave_config.dst_maxburst = dma_params->burstsize;
+ 	} else {
+ 		slave_config.direction = DMA_FROM_DEVICE;
+ 		slave_config.src_addr = dma_params->dma_addr;
+ 		slave_config.src_addr_width = buswidth;
+-		slave_config.src_maxburst = dma_params->burstsize * buswidth;
++		slave_config.src_maxburst = dma_params->burstsize;
+ 	}
+ 
+ 	ret = dmaengine_slave_config(iprtd->dma_chan, &slave_config);
 -- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+1.7.5.4
 
