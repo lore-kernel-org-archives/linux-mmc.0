@@ -1,43 +1,39 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH 11/20] ARM i.MX dma: Fix burstsize settings
-Date: Thu, 14 Jul 2011 16:06:26 +0200
-Message-ID: <20110714140626.GC6069@pengutronix.de>
-References: <1310652263-27948-1-git-send-email-s.hauer@pengutronix.de>
- <1310652263-27948-11-git-send-email-s.hauer@pengutronix.de>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 1/2] mmc: tmio: fix a recently introduced bug in DMA code
+Date: Thu, 14 Jul 2011 18:39:06 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1107141838050.10688@axis700.grange>
+References: <Pine.LNX.4.64.1107141828470.10688@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:46393 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755149Ab1GNOG3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2011 10:06:29 -0400
-Content-Disposition: inline
-In-Reply-To: <1310652263-27948-11-git-send-email-s.hauer@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1107141828470.10688@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>, "Rafael J. Wysocki" <rjw@sisk.pl>, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: juergen.lambrecht@gmail.com
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Liam Girdwood <lrg@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, alsa-devel@alsa-project.org
 
-On Thu, Jul 14, 2011 at 04:04:14PM +0200, Sascha Hauer wrote:
-> From: Wolfram Sang <w.sang@pengutronix.de>
-> 
-> Already upstreamed.
-> 
-> dmaengine expects the maxburst parameter in words, not bytes.
-> The imxdma driver and its users do this wrong. Fix this.
-> 
-> As a side note the imx-pcm-dma-mx2 driver was 'fixed' to work
-> with imx-dma. This broke the driver with imx-sdma support which
-> correctly takes the maxburst parameter in words. This patch
-> puts the sdma based sound back to work.
+A recent commit "mmc: tmio: Share register access functions" has swapped
+arguments of a macro and broken DMA with TMIO MMC. This patch fixes the
+arguments back.
 
-Please ignore. I failed to make git-send-email ignore the cc list :(
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
+ drivers/mmc/host/tmio_mmc_dma.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Sascha
-
-
+diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+index f24a029..7e86662 100644
+--- a/drivers/mmc/host/tmio_mmc_dma.c
++++ b/drivers/mmc/host/tmio_mmc_dma.c
+@@ -26,7 +26,7 @@ static void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
+ {
+ #if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
+ 	/* Switch DMA mode on or off - SuperH specific? */
+-	sd_ctrl_write16(host, enable ? 2 : 0, CTL_DMA_ENABLE);
++	sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? 2 : 0);
+ #endif
+ }
+ 
 -- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+1.7.2.5
+
