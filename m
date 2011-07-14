@@ -1,45 +1,62 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/2] mmc: tmio: two bug-fixes
-Date: Thu, 14 Jul 2011 15:27:03 -0400
-Message-ID: <m2pqlcslx4.fsf@bob.laptop.org>
-References: <Pine.LNX.4.64.1107141828470.10688@axis700.grange>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: [PATCH 3/7] at91_mci: move register header to drivers
+Date: Fri, 15 Jul 2011 01:52:01 +0200
+Message-ID: <1310687525-22486-3-git-send-email-plagnioj@jcrosoft.com>
+References: <1310687525-22486-1-git-send-email-plagnioj@jcrosoft.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51652 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752804Ab1GNT1y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 14 Jul 2011 15:27:54 -0400
-In-Reply-To: <Pine.LNX.4.64.1107141828470.10688@axis700.grange> (Guennadi
-	Liakhovetski's message of "Thu, 14 Jul 2011 18:39:02 +0200 (CEST)")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1310687525-22486-1-git-send-email-plagnioj@jcrosoft.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, linux-mmc@vger.kernel.org, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>, "Rafael J. Wysocki" <rjw@sisk.pl>, Ian Molton <ian@mnementh.co.uk>, Simon Horman <horms@verge.net.au>
 
-Hi Guennadi,
+Signed-off-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Cc: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: linux-mmc@vger.kernel.org
+---
+ drivers/mmc/host/at91_mci.c                        |    3 ++-
+ .../include/mach => drivers/mmc/host}/at91_mci.h   |    2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+ rename {arch/arm/mach-at91/include/mach => drivers/mmc/host}/at91_mci.h (99%)
 
-On Thu, Jul 14 2011, Guennadi Liakhovetski wrote:
-> There go two more bug-fixes for tmio on top of my earlier patches from 
-> today, so, should still be easy enough to trace. So, to pull them 
-> together, the previous ones were
->
-> [PATCH v3] mmc: tmio: fix recursive spinlock, don't schedule with
-> interrupts disabled
-> [PATCH v3] mmc: tmio: maximize power saving
->
-> And now follow
->
-> [PATCH 1/2] mmc: tmio: fix a recently introduced bug in DMA code
-> [PATCH 2/2] mmc: tmio: fix a deadlock
-
-Pushed these four plus "mmc: sh_mmcif: maximize power saving" to
-mmc-next for 3.1.  Thanks!
-
-By the way, feel free to send me a MAINTAINERS update taking over
-TMIO if you'd like to; you've been doing the work.  :-)
-
-- Chris.
+diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
+index d3e6a96..a4aa3af 100644
+--- a/drivers/mmc/host/at91_mci.c
++++ b/drivers/mmc/host/at91_mci.c
+@@ -77,7 +77,8 @@
+ 
+ #include <mach/board.h>
+ #include <mach/cpu.h>
+-#include <mach/at91_mci.h>
++
++#include "at91_mci.h"
+ 
+ #define DRIVER_NAME "at91_mci"
+ 
+diff --git a/arch/arm/mach-at91/include/mach/at91_mci.h b/drivers/mmc/host/at91_mci.h
+similarity index 99%
+rename from arch/arm/mach-at91/include/mach/at91_mci.h
+rename to drivers/mmc/host/at91_mci.h
+index 02182c1..eec3a6b 100644
+--- a/arch/arm/mach-at91/include/mach/at91_mci.h
++++ b/drivers/mmc/host/at91_mci.h
+@@ -1,5 +1,5 @@
+ /*
+- * arch/arm/mach-at91/include/mach/at91_mci.h
++ * drivers/mmc/host/at91_mci.h
+  *
+  * Copyright (C) 2005 Ivan Kokshaysky
+  * Copyright (C) SAN People
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.5.4
