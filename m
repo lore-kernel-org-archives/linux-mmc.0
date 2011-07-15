@@ -1,57 +1,60 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 0/2] mmc: tmio: two bug-fixes
-Date: Fri, 15 Jul 2011 10:46:39 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1107150957570.22613@axis700.grange>
-References: <Pine.LNX.4.64.1107141828470.10688@axis700.grange>
- <m2pqlcslx4.fsf@bob.laptop.org>
+From: Grazvydas Ignotas <notasas@gmail.com>
+Subject: Re: [PATCH V2 00/16] omap_hsmmc patches
+Date: Fri, 15 Jul 2011 12:32:56 +0300
+Message-ID: <CANOLnOPGay+jQaeBAVD5-B3WQaWMSiPFirvhrPkeS0_ZgmX-BQ@mail.gmail.com>
+References: <1304673255-31634-1-git-send-email-adrian.hunter@nokia.com>
+	<CANOLnONWmYn4FpuF-UAKQR4rAA6LOgWdMfu2bMN46nna6rOxAw@mail.gmail.com>
+	<m2k4bm2nwl.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <m2pqlcslx4.fsf@bob.laptop.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>, "Rafael J. Wysocki" <rjw@sisk.pl>, Ian Molton <ian@mnementh.co.uk>, Simon Horman <horms@verge.net.au>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:38129 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964952Ab1GOJdH convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jul 2011 05:33:07 -0400
+In-Reply-To: <m2k4bm2nwl.fsf@bob.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Tony Lindgren <tony@atomide.com>, linux-omap Mailing List <linux-omap@vger.kernel.org>, linux-mmc Mailing List <linux-mmc@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>
 
-Hi Chris
+On Wed, Jul 13, 2011 at 6:36 PM, Chris Ball <cjb@laptop.org> wrote:
+> Hi,
+>
+> On Wed, Jul 13 2011, Grazvydas Ignotas wrote:
+>> it seems this series got lost in time, at least patches 01, 02, 03,
+>> 04, 05, 06, 07, 08, 12 look like valid standalone fixes and
+>> improvements to me, they don't touch other trees and still apply
+>> cleanly, so would be good to have.
+>
+> Yeah. =C2=A0I didn't merge them because Tony still has unanswered com=
+ments on
+> the OMAP side of the patches, and they're submitted as a single patch=
+set.
+>
+> I've applied {2, 3, 5, 6, 7, 8, 12} to mmc-next for 3.1 now. =C2=A01 =
+doesn't
+> apply because the function doesn't exist anymore. =C2=A04 doesn't app=
+ly
+> because iclk doesn't exist anymore.
+>
+> If someone wants to look at rebasing the rest of these against mmc-ne=
+xt
+> and resubmitting, I think that'd be useful.
 
-On Thu, 14 Jul 2011, Chris Ball wrote:
+Thanks! 1 and 4 seem to be unneeded any more (I was trying them on
+linux-next, not noticing it was not updated for a while), and others
+have comments pending, so it's all done.
 
-> Hi Guennadi,
-> 
-> On Thu, Jul 14 2011, Guennadi Liakhovetski wrote:
-> > There go two more bug-fixes for tmio on top of my earlier patches from 
-> > today, so, should still be easy enough to trace. So, to pull them 
-> > together, the previous ones were
-> >
-> > [PATCH v3] mmc: tmio: fix recursive spinlock, don't schedule with
-> > interrupts disabled
-> > [PATCH v3] mmc: tmio: maximize power saving
-> >
-> > And now follow
-> >
-> > [PATCH 1/2] mmc: tmio: fix a recently introduced bug in DMA code
-> > [PATCH 2/2] mmc: tmio: fix a deadlock
-> 
-> Pushed these four plus "mmc: sh_mmcif: maximize power saving" to
-> mmc-next for 3.1.  Thanks!
+>
+> Thanks,
+>
+> - Chris.
+> --
+> Chris Ball =C2=A0 <cjb@laptop.org> =C2=A0 <http://printf.net/>
+> One Laptop Per Child
+>
 
-Thanks for a fast reaction.
-
-> By the way, feel free to send me a MAINTAINERS update taking over
-> TMIO if you'd like to; you've been doing the work.  :-)
-
-Thanks for the offer, I appreciate it! I am not the only active tmio mmc 
-contributor, but yes, I could take that role upon me, if noone objects. 
-Would be good to hear, what Ian thinks? Is he maybe still planning to 
-actively working on the driver? Would he like to stay listed as a 
-co-maintainer? If I am to maintain the driver alone, it would be good to 
-have access to some non-sh-mobile hardware, using it too, at least for 
-regression testing. Any idea where to get anything like that?
-
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+--=20
+Gra=C5=BEvydas
