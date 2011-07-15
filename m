@@ -1,31 +1,40 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mxs-mmc: fix clock rate setting
-Date: Fri, 15 Jul 2011 17:40:40 -0400
-Message-ID: <m2y5zzql2f.fsf@bob.laptop.org>
-References: <CAHMSPgNWherMTU9kLDH7zLQL0N_er5SpLz2v1xjzXvgckv+C2g@mail.gmail.com>
-	<20110711202621.GA5811@pengutronix.de>
-	<CAHMSPgN433ZWj20bnAtBwkpx6gMXR0joBLYQ4aBgsw2ekh7O4w@mail.gmail.com>
+Subject: Re: [PATCH 0/2] maximum discard size
+Date: Fri, 15 Jul 2011 17:46:55 -0400
+Message-ID: <m2tyanqks0.fsf@bob.laptop.org>
+References: <1309270563-28817-1-git-send-email-adrian.hunter@intel.com>
+	<4E208E07.2050704@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:52129 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:40676 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750751Ab1GOVkr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 15 Jul 2011 17:40:47 -0400
-In-Reply-To: <CAHMSPgN433ZWj20bnAtBwkpx6gMXR0joBLYQ4aBgsw2ekh7O4w@mail.gmail.com>
-	(Koen Beel's message of "Fri, 15 Jul 2011 11:47:14 +0200")
+	id S1751395Ab1GOVrD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 15 Jul 2011 17:47:03 -0400
+In-Reply-To: <4E208E07.2050704@intel.com> (Adrian Hunter's message of "Fri, 15
+	Jul 2011 21:59:19 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Koen Beel <koen.beel.barco@gmail.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org, Shawn Guo <shawn.guo@freescale.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@marvell.com>
 
-Hi Koen,
+Hi Adrian,
 
-On Fri, Jul 15 2011, Koen Beel wrote:
-> Still need me to do something on this or is it ok?
+On Fri, Jul 15 2011, Adrian Hunter wrote:
+>> Here is a patch that sets a maximum discard size for host controllers
+>> that cannot manage large timeouts.  And another patch putting it into
+>> use for shdci.
+>
+> Can this be applied?
+>
+>> Adrian Hunter (2):
+>>        mmc: queue: let host controllers specify maximum discard timeout
+>>        mmc: sdhci: specify maximum discard timeout
 
-Pushed to mmc-next for 3.1, thanks.  Please consider Wolfram's last
-round of comments and send a follow-up patch if you agree with them.
+These two are already in mmc-next for 3.1 -- looks like I forgot to send
+an e-mail letting you know I'd merged them, sorry.
+
+Thanks,
 
 - Chris.
 -- 
