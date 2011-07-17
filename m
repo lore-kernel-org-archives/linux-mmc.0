@@ -1,66 +1,56 @@
 From: Daniel Drake <dsd@laptop.org>
-Subject: [PATCH] mmc: fix runtime PM with -ENOSYS suspend case
-Date: Sun, 17 Jul 2011 16:38:21 +0100 (BST)
-Message-ID: <20110717153821.695FC9D401C@zog.reactivated.net>
+Subject: [PATCH] mmc: enable runtime PM by default
+Date: Sun, 17 Jul 2011 16:39:14 +0100 (BST)
+Message-ID: <20110717153914.A8FB49D401C@zog.reactivated.net>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from queueout02-winn.ispmail.ntl.com ([81.103.221.56]:45847 "EHLO
 	queueout02-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753796Ab1GQQSF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Jul 2011 12:18:05 -0400
+	by vger.kernel.org with ESMTP id S1753796Ab1GQQSJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Jul 2011 12:18:09 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org
 Cc: linux-mmc@vger.kernel.org, ohad@wizery.com
 
-From: Ohad Ben-Cohen <ohad@wizery.com>
+Now that we have improved the runtime power management powerup/powerdown
+code, we believe that MMC_CAP_POWER_OFF_CARD is no longer necessary:
+runtime PM should now work everywhere.
 
-In the case where a driver returns -ENOSYS from its suspend handler
-to indicate that the device should be powered down over suspend, the
-remove routine of the driver was not being called, leading to lots of
-confusion during resume.
-
-The problem is that runtime PM is disabled during this process,
-and when we reach mmc_sdio_remove, calling the runtime PM functions here
-(validly) return errors, and this was causing us to skip the remove
-function.
-
-Fix this by ignoring the error value of pm_runtime_get_sync(), which
-can return valid errors. This also matches the behaviour of
-pci_device_remove().
+Enable this trivially for a release or two. If no problems are reported,
+we will follow up with a more extensive patch to remove this flag
+altogether. If problems are reported, we can look at whitelist/blacklist
+possibilities as before.
 
 Signed-off-by: Daniel Drake <dsd@laptop.org>
 ---
- drivers/mmc/core/sdio_bus.c |    8 ++------
- 1 files changed, 2 insertions(+), 6 deletions(-)
+ drivers/mmc/core/host.c |   11 +++++++++++
+ 1 files changed, 11 insertions(+), 0 deletions(-)
 
-For linux-3.1.
+For linux-3.2. Might cause some breakage, so it should see a full
+linux-next cycle first.
 
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index d2565df..e4e6822 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -167,11 +167,8 @@ static int sdio_bus_remove(struct device *dev)
- 	int ret = 0;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index b29d3e8..63bddd0 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -301,6 +301,17 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	host->max_blk_size = 512;
+ 	host->max_blk_count = PAGE_CACHE_SIZE / 512;
  
- 	/* Make sure card is powered before invoking ->remove() */
--	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD) {
--		ret = pm_runtime_get_sync(dev);
--		if (ret < 0)
--			goto out;
--	}
-+	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
-+		pm_runtime_get_sync(dev);
++	/*
++	 * Enable runtime power management by default. This flag was added due
++	 * to runtime power management causing disruption for some users, but
++	 * the power on/off code has been improved since then.
++	 *
++	 * We'll enable this flag by default as an experiment, and if no
++	 * problems are reported, we will follow up later and remove the flag
++	 * altogether.
++	 */
++	host->caps = MMC_CAP_POWER_OFF_CARD;
++
+ 	return host;
  
- 	drv->remove(func);
- 
-@@ -191,7 +188,6 @@ static int sdio_bus_remove(struct device *dev)
- 	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
- 		pm_runtime_put_sync(dev);
- 
--out:
- 	return ret;
- }
- 
+ free:
 -- 
 1.7.6
 
