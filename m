@@ -1,35 +1,46 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: -ENOSYS suspend-powerdown regression
-Date: Mon, 18 Jul 2011 04:53:11 +0300
-Message-ID: <CAK=WgbZ9USpkF2DvikF9C_SQ5s0+QyVOBWvFjhWqLjajT-LU0g@mail.gmail.com>
-References: <BANLkTimdp2n1qhLQmTk+k_M5_WowhJqPyQ@mail.gmail.com>
- <BANLkTimRWqo1M7OOQmdWOxSQvqiNx48Ftg@mail.gmail.com> <BANLkTikvP3hc+CHEwrUEDqN6McwswikS-Q@mail.gmail.com>
- <BANLkTimKYKX=k2U1_WyhaWZ1wRpWUF6pMQ@mail.gmail.com> <BANLkTik9y_N18EtsUTznaaa188GNusfiSA@mail.gmail.com>
- <BANLkTinDzj4206zLK7i6K9k9vWjVC9hH0w@mail.gmail.com> <BANLkTi=O4hg=ig5WOSeCWA4x03_5kAJsXw@mail.gmail.com>
- <BANLkTimzgiXpb0v30KYsfvoPAb4iu2K5kw@mail.gmail.com> <BANLkTi=fwnNVwtxOo66k7M-4Jxu=3eD2xQ@mail.gmail.com>
- <CAGq3pz5hRQg72HMN6MyYccTisRAmfoqQmoDy5gvtiVwcjhTKhA@mail.gmail.com> <CAGq3pz52=sPGEX-8nj7cVuR5Xg=iE+mg6EcEES0DzWSmuY34bA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: enable runtime PM by default
+Date: Mon, 18 Jul 2011 05:53:15 +0300
+Message-ID: <CAK=WgbZoixKQh1nj-tgERFGuDjV0O3NqCwtzad71KnmWC4_Umw@mail.gmail.com>
+References: <20110717153914.A8FB49D401C@zog.reactivated.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:56948 "EHLO
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:48312 "EHLO
 	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755899Ab1GRBxc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Jul 2011 21:53:32 -0400
-Received: by wyg8 with SMTP id 8so1784541wyg.19
-        for <linux-mmc@vger.kernel.org>; Sun, 17 Jul 2011 18:53:31 -0700 (PDT)
-In-Reply-To: <CAGq3pz52=sPGEX-8nj7cVuR5Xg=iE+mg6EcEES0DzWSmuY34bA@mail.gmail.com>
+	with ESMTP id S1751209Ab1GRCxg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Jul 2011 22:53:36 -0400
+Received: by wyg8 with SMTP id 8so1799237wyg.19
+        for <linux-mmc@vger.kernel.org>; Sun, 17 Jul 2011 19:53:35 -0700 (PDT)
+In-Reply-To: <20110717153914.A8FB49D401C@zog.reactivated.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Daniel Drake <dsd@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org
 
-On Fri, Jul 8, 2011 at 6:38 PM, Daniel Drake <dsd@laptop.org> wrote:
-> I tested vanilla and realised that this bug exists there too
+On Sun, Jul 17, 2011 at 6:39 PM, Daniel Drake <dsd@laptop.org> wrote:
+> Now that we have improved the runtime power management powerup/powerdown
+> code, we believe that MMC_CAP_POWER_OFF_CARD is no longer necessary:
+> runtime PM should now work everywhere.
 
-I'm aware of it - it's caused (indirectly) by another PM core change,
-which since then was already changed again in 3.1.
+Let's also add:
 
-Btw sorry for not being responsive - I've been mostly offline lately
-due to family getting bigger ;)
+The only hard evidence for introducing MMC_CAP_POWER_OFF_CARD was the
+Marvell sd8686 wifi chip, which was believed to require external gpio
+manipulation which wasn't supported by some boards.
 
-Thanks for pushing the patches forward.
+After further investigation it was realized (and confirmed by Marvell
+folks) that sd8686 requirements can be fulfilled by changing the reset
+sequence itself, even if no external gpio is manipulated.
+
+For further information, see the following thread:
+http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg04289.html
+
+> Enable this trivially for a release or two. If no problems are reported,
+> we will follow up with a more extensive patch to remove this flag
+> altogether. If problems are reported, we can look at whitelist/blacklist
+> possibilities as before.
+
+This is exactly how I planed to take this too, thanks.
+
+Acked-by: Ohad Ben-Cohen <ohad@wizery.com>
