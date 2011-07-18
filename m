@@ -1,57 +1,66 @@
-From: Zang Roy-R61911 <r61911@freescale.com>
-Subject: RE: [PATCH 3/3] eSDHC: fix incorrect default value of the
- capabilities register on P4080
-Date: Mon, 18 Jul 2011 05:01:15 +0000
-Message-ID: <2239AC579C7D3646A720227A37E0268116E809@039-SN1MPN1-004.039d.mgd.msft.net>
-References: <1309839543-6031-1-git-send-email-tie-fei.zang@freescale.com>
- <1309839543-6031-2-git-send-email-tie-fei.zang@freescale.com>
- <1309839543-6031-3-git-send-email-tie-fei.zang@freescale.com>
- <20110705101801.GA13052@oksana.dev.rtsoft.ru>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: Question regarding SDR104 bus speed mode
+Date: Mon, 18 Jul 2011 10:51:52 +0530
+Message-ID: <000001cc450a$9c94aac0$d5be0040$@org>
+References: <dd8e0dfbe0f4d466cc39fb67a2a4e4a3.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe002.messaging.microsoft.com ([213.199.154.140]:19638
-	"EHLO DB3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750841Ab1GRFBW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2011 01:01:22 -0400
-In-Reply-To: <20110705101801.GA13052@oksana.dev.rtsoft.ru>
-Content-Language: en-US
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:17095 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751405Ab1GRFV5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2011 01:21:57 -0400
+In-Reply-To: <dd8e0dfbe0f4d466cc39fb67a2a4e4a3.squirrel@www.codeaurora.org>
+Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <avorontsov@mvista.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>
+To: 'Subhash Jadavani' <subhashj@codeaurora.org>, linux-mmc@vger.kernel.org, prakity@marvell.com, arindam.nath@amd.com
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW50b24gVm9yb250c292
-IFttYWlsdG86YXZvcm9udHNvdkBtdmlzdGEuY29tXQ0KPiBTZW50OiBUdWVzZGF5LCBKdWx5IDA1
-LCAyMDExIDE4OjE4IFBNDQo+IFRvOiBaYW5nIFJveS1SNjE5MTENCj4gQ2M6IGxpbnV4LW1tY0B2
-Z2VyLmtlcm5lbC5vcmc7IGxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnOyBha3BtQGxpbnV4
-LQ0KPiBmb3VuZGF0aW9uLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDMvM10gZVNESEM6IGZp
-eCBpbmNvcnJlY3QgZGVmYXVsdCB2YWx1ZSBvZiB0aGUNCj4gY2FwYWJpbGl0aWVzIHJlZ2lzdGVy
-IG9uIFA0MDgwDQo+IA0KPiBPbiBUdWUsIEp1bCAwNSwgMjAxMSBhdCAxMjoxOTowM1BNICswODAw
-LCBSb3kgWmFuZyB3cm90ZToNCj4gPiBQNDA4MCBlU0RIQyBlcnJhdGEgMTIgZGVzY3JpYmVzIGlu
-Y29ycmVjdCBkZWZhdWx0IHZhbHVlIG9mIHRoZQ0KPiA+IHRoZSBob3N0IGNvbnRyb2xsZXIgY2Fw
-YWJpbGl0aWVzIHJlZ2lzdGVyLg0KPiA+DQo+ID4gVGhlIGRlZmF1bHQgdmFsdWUgb2YgdGhlIFZT
-MTggYW5kIFZTMzAgZmllbGRzIGluIHRoZSBob3N0IGNvbnRyb2xsZXINCj4gPiBjYXBhYmlsaXRp
-ZXMgcmVnaXN0ZXIgKEhPU1RDQVBCTFQpIGFyZSBpbmNvcnJlY3QuIFRoZSBkZWZhdWx0IG9mIHRo
-ZXNlIGJpdHMNCj4gPiBzaG91bGQgYmUgemVybyBpbnN0ZWFkIG9mIG9uZSBpbiB0aGUgZVNESEMg
-bG9naWMuDQo+ID4NCj4gPiBUaGlzIHBhdGNoIGFkZHMgdGhlIHdvcmthcm91bmQgZm9yIHRoZXNl
-IGVycmF0YS4NCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IFJveSBaYW5nIDx0aWUtZmVpLnphbmdA
-ZnJlZXNjYWxlLmNvbT4NCj4gPiAtLS0NCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1j
-b3JlLmMgfCAgICAzICsrKw0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLmMgICAgICAgICB8
-ICAgIDYgKysrKysrDQo+ID4gIGluY2x1ZGUvbGludXgvbW1jL3NkaGNpLmggICAgICAgIHwgICAg
-NCArKysrDQo+ID4gIDMgZmlsZXMgY2hhbmdlZCwgMTMgaW5zZXJ0aW9ucygrKSwgMCBkZWxldGlv
-bnMoLSkNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWNv
-cmUuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtDQo+IGNvcmUuYw0KPiA+IGluZGV4IGZl
-ZGU0M2QuLjliZGQzMGQgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1v
-Zi1jb3JlLmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWNvcmUuYw0KPiA+
-IEBAIC0xODIsNiArMTgyLDkgQEAgc3RhdGljIGludCBfX2RldmluaXQgc2RoY2lfb2ZfcHJvYmUo
-c3RydWN0DQo+IHBsYXRmb3JtX2RldmljZSAqb2ZkZXYpDQo+ID4gIAlpZiAob2ZfZGV2aWNlX2lz
-X2NvbXBhdGlibGUobnAsICJmc2wsZXNkaGMiKSkNCj4gPiAgCQlob3N0LT5xdWlya3MgfD0gU0RI
-Q0lfUVVJUktfUU9SSVFfUFJPQ1RMX1dFSVJEOw0KPiA+DQo+ID4gKwlpZiAob2ZfZGV2aWNlX2lz
-X2NvbXBhdGlibGUobnAsICJmc2wscDQwODAtZXNkaGMiKSkNCj4gPiArCQlob3N0LT5xdWlya3Mg
-fD0gU0RIQ0lfUVVJUktfUU9SSVFfSE9TVENBUEJMVF9PTkxZX1ZTMzM7DQo+IA0KPiBTaG91bGQg
-cmVhbGx5IHVzZSB2b2x0YWdlLXJhbmdlcywgbm90IHF1aXJrcy4NCj4gDQo+IGh0dHA6Ly93d3cu
-c3Bpbmljcy5uZXQvbGlzdHMvbGludXgtbW1jL21zZzAyNzg1Lmh0bWwNCk1ha2Ugc2Vuc2UgdG8g
-bWUuIFRoYW5rcy4NClJveQ0K
+Arindam/Philips,
+
+Can you help me with below query?
+
+Regards,
+Subhash
+
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Subhash Jadavani
+> Sent: Thursday, July 14, 2011 5:09 PM
+> To: linux-mmc@vger.kernel.org; prakity@marvell.com;
+> arindam.nath@amd.com
+> Subject: Question regarding SDR104 bus speed mode
+> 
+> Hi Arindam, Philips and All,
+> 
+> According to SD 3.0 spec (section 3.9.6), cards may require current
+> upto
+> 800 mA while running in SDR104. However Max. supported current from
+> PMIC
+> regulator connected to sd card slot on my board is 600mA.
+> 
+> I have these questions:
+> 1. So does this mean we can't support the SDR104 mode if regulator
+> current
+> driving capacity is not upto 800 mA?
+> 
+> 2. I am able to make SD card run in SDR104 mode even if the max.
+> current
+> supplied by regulator is upto 600 mA. So is this 800mA requirement is
+> **must** condition to support SDR104 mode reliably?
+> 
+> Regards,
+> Subhash
+> 
+> --
+> Sent by a consultant of the Qualcomm Innovation Center, Inc.
+> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
+> Forum.
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
