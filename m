@@ -1,46 +1,58 @@
-From: Jesse Barnes <jbarnes@virtuousgeek.org>
-Subject: Re: [PATCH] mmc: Added quirks for Ricoh 1180:e823 lower base clock
- frequency
-Date: Tue, 19 Jul 2011 07:27:58 +0800
-Message-ID: <20110719072758.20dd400e@jbarnes-e6510>
-References: <1310419715-13254-1-git-send-email-manoj.iyer@canonical.com>
-	<m2sjqa2q93.fsf@bob.laptop.org>
-	<alpine.DEB.2.02.1107131031360.3174@lazy>
-	<201107131835.25217.arnd@arndb.de>
-	<m262n62kgf.fsf@bob.laptop.org>
-	<alpine.DEB.2.02.1107131154000.3174@lazy>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v3 0/4] Add device tree probe for sdhci-esdhc-imx
+Date: Mon, 18 Jul 2011 21:51:28 -0400
+Message-ID: <m262mzavhb.fsf@bob.laptop.org>
+References: <1309970870-13336-1-git-send-email-shawn.guo@linaro.org>
+	<m2pqljje3w.fsf@bob.laptop.org>
+	<20110710013708.GA14492@S2100-06.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-pci-owner@vger.kernel.org>
-In-Reply-To: <alpine.DEB.2.02.1107131154000.3174@lazy>
-Sender: linux-pci-owner@vger.kernel.org
-To: Manoj Iyer <manoj.iyer@canonical.com>
-Cc: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, matsumur@nts.ricoh.co.jp, linux-pci@vger.kernel.org, linux-mmc@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20110710013708.GA14492@S2100-06.ap.freescale.net> (Shawn Guo's
+	message of "Sun, 10 Jul 2011 09:37:09 +0800")
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Shawn Guo <shawn.guo@freescale.com>
+Cc: patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 13 Jul 2011 11:54:40 -0500 (CDT)
-Manoj Iyer <manoj.iyer@canonical.com> wrote:
+Hi Shawn, Sascha,
 
-> 
-> > On Wed, Jul 13 2011, Arnd Bergmann wrote:
-> >> Not much. This card only has a 6MB/s write speed, which is well
-> >> below what a 50 MHz bus can do. It mgiht be different on a fast
-> >> eMMC device or a Sandisk Extreme Pro UHS-1 card.
-> >
-> > Okay, I see.  I think we're good for now, then -- hopefully anyone
-> > using a UHS card on their laptop will see the printk when wondering
-> > why their performance isn't great and get in touch with us, and we
-> > can investigate more then.
-> >
-> > I've pushed Manoj's patch to mmc-next for 3.1 now, with the printk
-> > changes and a stable@ tag.
-> >
-> 
-> Thanks Chris!
+On Sat, Jul 09 2011, Shawn Guo wrote:
+>> > Shawn Guo (4):
+>> >       mmc: sdhci-esdhc-imx: do not reference platform data after probe
+>> >       mmc: sdhci-esdhc-imx: get rid of the uses of cpu_is_mx()
+>> >       mmc: sdhci-pltfm: dt device does not pass parent to sdhci_alloc_host
+>> >       mmc: sdhci-esdhc-imx: add device tree probe support
+>> 
+>> These don't apply against mmc-next -- what is your tree based on?
+>> 
+> It's based on linux-next with following patch applied.
+>
+> [PATCH v4 4/4] mmc: sdhci-esdhc-imx: extend card_detect and
+> write_protect support for mx5
+> http://permalink.gmane.org/gmane.linux.kernel.mmc/8748
+>
+> You applied the 3 of 4 patches in that series, and expect Sascha to
+> send this one through his tree after you send those 3.
 
-Assuming you can't move the patch into the MMC driver itself, you can
-add my acked-by for the PCI quirk addition.
+I see.  In that case, either Sascha can send this new series with my:
+
+Acked-by: Chris Ball <cjb@laptop.org>
+
+or I'll send it as a second pull request after Sascha sends [4/4].
 
 Thanks,
-Jesse
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
