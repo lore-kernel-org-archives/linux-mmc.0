@@ -1,35 +1,41 @@
 From: Per Forlin <per.forlin@linaro.org>
-Subject: [PATCH v2 0/3] Make fault injection available for MMC IO
-Date: Tue, 19 Jul 2011 23:31:43 +0200
-Message-ID: <1311111106-26814-1-git-send-email-per.forlin@linaro.org>
-Return-path: <linux-doc-owner@vger.kernel.org>
-Sender: linux-doc-owner@vger.kernel.org
+Subject: [PATCH v2 1/3] fault-inject: make fault injection available for modules
+Date: Tue, 19 Jul 2011 23:31:44 +0200
+Message-ID: <1311111106-26814-2-git-send-email-per.forlin@linaro.org>
+References: <1311111106-26814-1-git-send-email-per.forlin@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1311111106-26814-1-git-send-email-per.forlin@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.ke
 Cc: Randy Dunlap <rdunlap@xenotime.net>, Per Forlin <per.forlin@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The first version of this patch is a part of mmc non-blocking v9 patchset:
-[PATCH v9 11/12] mmc: core: add random fault injection
+export symbols should_fail() and init_fault_attr_dentries() in order
+to make modules use the fault injection functionality
 
-change log:
- v2 - Resolve build issue in mmc core.c due to multiple init_module by
-      removing the fault inject module.
-    - Export fault injection functions to make them available for modules
-    - Update fault injection documentation on MMC IO  
+Signed-off-by: Per Forlin <per.forlin@linaro.org>
+---
+ lib/fault-inject.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-Per Forlin (3):
-  fault-inject: make fault injection available for modules
-  mmc: core: add random fault injection
-  fault injection: add documentation on MMC IO fault injection
-
- Documentation/fault-injection/fault-injection.txt |    5 ++
- drivers/mmc/core/core.c                           |   58 +++++++++++++++++++++
- drivers/mmc/core/debugfs.c                        |    5 ++
- include/linux/mmc/host.h                          |    3 +
- lib/Kconfig.debug                                 |   11 ++++
- lib/fault-inject.c                                |    2 +
- 6 files changed, 84 insertions(+), 0 deletions(-)
-
+diff --git a/lib/fault-inject.c b/lib/fault-inject.c
+index 7e65af7..cd28364 100644
+--- a/lib/fault-inject.c
++++ b/lib/fault-inject.c
+@@ -131,6 +131,7 @@ bool should_fail(struct fault_attr *attr, ssize_t size)
+ 
+ 	return true;
+ }
++EXPORT_SYMBOL(should_fail);
+ 
+ #ifdef CONFIG_FAULT_INJECTION_DEBUG_FS
+ 
+@@ -311,5 +312,6 @@ fail:
+ 	cleanup_fault_attr_dentries(attr);
+ 	return -ENOMEM;
+ }
++EXPORT_SYMBOL(init_fault_attr_dentries);
+ 
+ #endif /* CONFIG_FAULT_INJECTION_DEBUG_FS */
 -- 
 1.7.4.1
-
