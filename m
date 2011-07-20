@@ -1,67 +1,51 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: [PATCH v2] mmc: enable runtime PM by default
-Date: Wed, 20 Jul 2011 17:39:22 +0100 (BST)
-Message-ID: <20110720163922.859369D401C@zog.reactivated.net>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: print debug messages for runtime PM actions
+Date: Wed, 20 Jul 2011 12:44:13 -0400
+Message-ID: <m262mw9a1u.fsf@bob.laptop.org>
+References: <20110717153841.D4BF29D401C@zog.reactivated.net>
+	<m2pql79f1s.fsf@bob.laptop.org>
+	<CAGq3pz7ni49sKW2sLabAi7rof=cETEuviuQcpZPcmJOzOzmsog@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mtaout02-winn.ispmail.ntl.com ([81.103.221.48]:50512 "EHLO
-	mtaout02-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751543Ab1GTQjd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jul 2011 12:39:33 -0400
+Received: from void.printf.net ([89.145.121.20]:51170 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751691Ab1GTQoS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Jul 2011 12:44:18 -0400
+In-Reply-To: <CAGq3pz7ni49sKW2sLabAi7rof=cETEuviuQcpZPcmJOzOzmsog@mail.gmail.com>
+	(Daniel Drake's message of "Wed, 20 Jul 2011 17:36:46 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, ohad@wizery.com
+To: Daniel Drake <dsd@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Now that we have improved the runtime power management powerup/powerdown
-code, we believe that MMC_CAP_POWER_OFF_CARD is no longer necessary:
-runtime PM should now work everywhere.
+Hi,
 
-The only hard evidence for introducing MMC_CAP_POWER_OFF_CARD was the
-Marvell sd8686 wifi chip, which was believed to require external gpio
-manipulation which wasn't supported by some boards.
+On Wed, Jul 20 2011, Daniel Drake wrote:
+>>     pr_debug("%s: %s: powering down\n", mmc_hostname(host), __func__);
+>>
+>> which gets you the same CONFIG_MMC_DEBUG semantics? (The messages will
+>> be at the debug loglevel rather than info, but that sounds right to me.)
+>
+> I did, and that would probably be fine (assuming that CONFIG_MMC_DEBUG
+> would actually turn it on? I can't see where that would happen)
 
-After further investigation it was realized (and confirmed by Marvell
-folks) that sd8686 requirements can be fulfilled by changing the reset
-sequence itself, even if no external gpio is manipulated.
+It's in drivers/mmc/Makefile:
+subdir-ccflags-$(CONFIG_MMC_DEBUG) := -DDEBUG
 
-For further information, see the following thread:
-http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg04289.html
+include/linux/printk.h:
+#if defined(DEBUG)
+#define pr_debug(fmt, ...) \
+        printk(KERN_DEBUG pr_fmt(fmt), ##__VA_ARGS__)
+        
+> was trying to make it a bit more prominent and appear the same as the
+> debug message from mmc_rescan_try_freq() which does it in this way.
 
-Enable this trivially for a release or two. If no problems are reported,
-we will follow up with a more extensive patch to remove this flag
-altogether. If problems are reported, we can look at whitelist/blacklist
-possibilities as before.
+Ah, okay, seems reasonable -- I'll merge the original patch for 3.1.
 
-Signed-off-by: Daniel Drake <dsd@laptop.org>
-Acked-by: Ohad Ben-Cohen <ohad@wizery.com>
----
- drivers/mmc/core/host.c |   11 +++++++++++
- 1 files changed, 11 insertions(+), 0 deletions(-)
+Thanks!
 
-For Linux 3.2.
-
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index b29d3e8..63bddd0 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -301,6 +301,17 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	host->max_blk_size = 512;
- 	host->max_blk_count = PAGE_CACHE_SIZE / 512;
- 
-+	/*
-+	 * Enable runtime power management by default. This flag was added due
-+	 * to runtime power management causing disruption for some users, but
-+	 * the power on/off code has been improved since then.
-+	 *
-+	 * We'll enable this flag by default as an experiment, and if no
-+	 * problems are reported, we will follow up later and remove the flag
-+	 * altogether.
-+	 */
-+	host->caps = MMC_CAP_POWER_OFF_CARD;
-+
- 	return host;
- 
- free:
+- Chris.
 -- 
-1.7.6
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
