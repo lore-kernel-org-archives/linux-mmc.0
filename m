@@ -1,119 +1,112 @@
 From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH] mmc: sdhci: fix retuning timer wrongly deleted in
- sdhci_tasklet_finish
-Date: Thu, 21 Jul 2011 13:27:11 -0700
-Message-ID: <086235A9-1100-4ABB-9D4D-B2757382BF0B@marvell.com>
-References: <1310362031-8186-1-git-send-email-Aaron.Lu@amd.com>
- <6C03668EAF45B747AF947A1603D1B300018F85B9E0@SAUSEXMBP01.amd.com>
- <20110721052358.GA31584@lovegaga>
- <CAMj5BkhT2-mybTHTVxXm1TG0w=Ap34etwKgxg3QVVzohaZWupA@mail.gmail.com>
- <20110721100351.GA31886@lovegaga>
+Subject: RE:  mmc: sdio add regulator vsdio
+Date: Thu, 21 Jul 2011 16:55:09 -0700
+Message-ID: <546AA1AA-99EE-45E4-A322-6E34C7EBF63F@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog124.obsmtp.com ([74.125.149.151]:43235 "EHLO
-	na3sys009aog124.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752991Ab1GUUdM convert rfc822-to-8bit
+Received: from na3sys009aog123.obsmtp.com ([74.125.149.149]:36933 "EHLO
+	na3sys009aog123.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751607Ab1GVAA6 convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Jul 2011 16:33:12 -0400
-In-Reply-To: <20110721100351.GA31886@lovegaga>
+	Thu, 21 Jul 2011 20:00:58 -0400
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <Aaron.Lu@amd.com>
-Cc: zhangfei gao <zhangfei.gao@gmail.com>, "Nath, Arindam" <Arindam.Nath@amd.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Zhangfei Gao <zgao6@marvell.com>
+Cc: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>, Daniel Drake <dsd@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Eric Miao <eric.y.miao@gmail.com>
 
 
-Aaron,
+Hi Zhangfei,
 
-Code is fine.  Do you want to also fix the problem with suspend or should I do the patch ?
-
-When we are suspending we should kill the tuning timer.
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 4da6a4d..88c25e8 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2289,18 +2289,14 @@ int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state)
- 
- 	sdhci_disable_card_detection(host);
- 
--	/* Disable tuning since we are suspending */
--	if (host->version >= SDHCI_SPEC_300 && host->tuning_count &&
--	    host->tuning_mode == SDHCI_TUNING_MODE_1) {
--		host->flags &= ~SDHCI_NEEDS_RETUNING;
--		mod_timer(&host->tuning_timer, jiffies +
--			host->tuning_count * HZ);
--	}
--
- 	ret = mmc_suspend_host(host->mmc);
- 	if (ret)
- 		return ret;
- 
-+	/* Disable tuning since we are suspending */
-+	if (host->version >= SDHCI_SPEC_300)
-+		del_timer_sync(&host->tuning_timer);
-+
- 	free_irq(host->irq, host);
- 
- 	if (host->vmmc)
-
-
+See below.
 
 Philip
 
-On Jul 21, 2011, at 3:03 AM, Aaron Lu wrote:
+>
+>sdio client may be required power on/off dynamically.
+>With regulator vsdio, sdio client power on/off could be executed by mmc_power_up/down
+>
+>CC: Ohad Ben-Cohen <ohad@wizery.com>
+>Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
+>
+>---
+>drivers/mmc/host/sdhci.c  |   24 ++++++++++++++++++++++++
+> include/linux/mmc/sdhci.h |    2 ++
+> 2 files changed, 26 insertions(+), 0 deletions(-)
+>
+>diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>index 790f959..61fff10 100644
+>--- a/drivers/mmc/host/sdhci.c
+>+++ b/drivers/mmc/host/sdhci.c
+>@@ -1295,6 +1295,18 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> 
+> 	sdhci_set_clock(host, ios->clock);
+> 
+>+	if (host->vsdio) {
 
-> On Thu, Jul 21, 2011 at 05:35:02PM +0800, zhangfei gao wrote:
->> 
->> Does the execute_tuning is called again?
->> del_timer is not delete timer really, but deactivate the timer, which
->> could be re-activated by mod_timer.
->> So if execute_tuning is called, the mod_timer will tigger the tuning
->> timer again.
->> 
-> 
-> Hi zhangfei,
-> 
-> Thanks for the comment.
-> 
-> The execute_tuning will be called at two places:
-> 1 In mmc_sd_init_uhs_card, when host is initializing an UHS card,
-> and the re-tuning timer will be activated for the first time;
-> 2 When re-tuning timer expired
-> 
-> So if the re-tuning timer is deactivated in sdhci_tasklet_finish,
-> execute_tuning will have no chance of getting called again, and the
-> host will not be able to do the re-tuning anymore.
-> 
->>>>> 
->>>>> Signed-off-by: Aaron Lu <Aaron.Lu@amd.com>
->>>>> ---
->>>>>  drivers/mmc/host/sdhci.c |    3 ---
->>>>>  1 files changed, 0 insertions(+), 3 deletions(-)
->>>>> 
->>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>>> index 91d9892..6250bac 100644
->>>>> --- a/drivers/mmc/host/sdhci.c
->>>>> +++ b/drivers/mmc/host/sdhci.c
->>>>> @@ -1863,9 +1863,6 @@ static void sdhci_tasklet_finish(unsigned long
->>>>> param)
->>>>> 
->>>>>     del_timer(&host->timer);
->>>>> 
->>>>> -   if (host->version >= SDHCI_SPEC_300)
->>>>> -           del_timer(&host->tuning_timer);
->>>>> -
->>>>>     mrq = host->mrq;
->>>>> 
->>>>>     /*
->>>>> --
->>>>> 1.7.1
->>>> 
->>>> 
->>> 
->>> 
->> 
-> 
+Why does this code need to be specific to sdio ?  Should be generalized.
 
+>+		if (ios->power_mode != host->power_mode_old) {
+>+			if (ios->power_mode == MMC_POWER_OFF)
+>+				regulator_disable(host->vsdio);
+>+
+>+			if (ios->power_mode == MMC_POWER_UP)
+>+				regulator_enable(host->vsdio);
+>+		}
+>+
+>+		host->power_mode_old = ios->power_mode;
+
+move up inside if since if not change no need to set.
+
+if the regulator is shared between different devices will this work ?
+
+>+	}
+>+
+> 	if (ios->power_mode == MMC_POWER_OFF)
+> 		sdhci_set_power(host, -1);
+> 	else
+>@@ -2751,6 +2763,13 @@ int sdhci_add_host(struct sdhci_host *host)
+> 		regulator_enable(host->vmmc);
+> 	}
+> 
+>+	host->vsdio = regulator_get(mmc_dev(mmc), "vsdio");
+
+comment on name -- should have nothing to do with sdio.
+
+>+	if (IS_ERR(host->vsdio))
+>+		host->vsdio = NULL;
+>+	else
+>+		printk(KERN_INFO "%s: vsdio regulator found\n",
+>+			mmc_hostname(mmc));
+>+
+> 	sdhci_init(host, 0);
+> 
+> #ifdef CONFIG_MMC_DEBUG
+>@@ -2842,6 +2861,11 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+> 		regulator_put(host->vmmc);
+> 	}
+> 
+>+	if (host->vsdio) {
+>+		regulator_disable(host->vsdio);
+>+		regulator_put(host->vsdio);
+>+	}
+>+
+> 	kfree(host->adma_desc);
+> 	kfree(host->align_buffer);
+> 
+>diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+>index 13c13f8..bea07c7 100644
+>--- a/include/linux/mmc/sdhci.h
+>+++ b/include/linux/mmc/sdhci.h
+>@@ -94,6 +94,8 @@ struct sdhci_host {
+> 	const struct sdhci_ops *ops;	/* Low level hw interface */
+> 
+> 	struct regulator *vmmc;	/* Power regulator */
+>+	struct regulator *vsdio;	/* sdio Power regulator */
+>+	unsigned char power_mode_old;	/* power supply mode */
+> 
+> 	/* Internal data */
+> 	struct mmc_host *mmc;	/* MMC structure */
+>
