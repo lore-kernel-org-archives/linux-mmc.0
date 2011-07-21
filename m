@@ -1,77 +1,75 @@
-From: Aaron Lu <aaron.lu@amd.com>
-Subject: Re: [PATCH] mmc: sdhci: fix retuning timer wrongly deleted in
- sdhci_tasklet_finish
-Date: Thu, 21 Jul 2011 13:23:59 +0800
-Message-ID: <20110721052358.GA31584@lovegaga>
-References: <1310362031-8186-1-git-send-email-Aaron.Lu@amd.com>
- <6C03668EAF45B747AF947A1603D1B300018F85B9E0@SAUSEXMBP01.amd.com>
+From: Bryan Buckley <bryan.buckley@ti.com>
+Subject: [PATCH] OMAP4: MMC: fix power and audio issue, decouple USBC1 from MMC1
+Date: Thu, 21 Jul 2011 14:29:03 -0500
+Message-ID: <1311276543-9374-1-git-send-email-bryan.buckley@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe003.messaging.microsoft.com ([213.199.154.206]:52406
-	"EHLO AM1EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750804Ab1GUFYY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jul 2011 01:24:24 -0400
-Content-Disposition: inline
-In-Reply-To: <6C03668EAF45B747AF947A1603D1B300018F85B9E0@SAUSEXMBP01.amd.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Santosh Shilimkar <santosh.shilimkar@ti.com>, Balaji T Krishnamoorthy <balajitk@ti.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Moiz Sonasath <m-sonasath@ti.com>, Viswanath Puttagunta <vishp@ti.com>, Tony Lindgren <tony@atomide.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Bryan Buckley <bryan.buckley@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "Nath, Arindam" <Arindam.Nath@amd.com>, Philip Rakity <prakity@marvell.com>, zhangfei gao <zhangfei.gao@gmail.com>, subhashj@codeaurora.org
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Fri, Jul 15, 2011 at 02:51:34PM +0800, Nath, Arindam wrote:
-> Hi Philip, Zhangfei
-> 
-> Do you have any comments on this patch?
->
+Remove OMAP4_USBC1_ICUSB_PWRDNZ_MASK during enable/disable PWRDNZ mode for
+MMC1_PBIAS and associated extended-drain MMC1 I/O cell. This is in accordance
+with the control module programming guide. This fixes a bug where if trying to
+use gpio_98 or gpio_99 and MMC1 at the same time the GPIO signal will be
+affected by a changing SDMMC1_VDDS.
 
-Hi all,
+Software must keep MMC1_PBIAS cell and MMC1_IO cell PWRDNZ signals low whenever
+SDMMC1_VDDS ramps up/down or changes for cell protection purposes.
 
-This patch is sent for a while now and didn't seem to receive any
-notice yet...So, can you please take a look and give your comments?
+MMC1 is based on SDMMC1_VDDS whereas USBC1 is based on SIM_VDDS therefore
+they can operate independently.
 
-This is a bug fix for exsting code, if the re-tuning timer is deleted,
-the re-tuning will not happen again, that will cause problems for SDHC
-3.0 hosts which utilize re-tuning mode 1.
+Signed-off-by: Bryan Buckley <bryan.buckley@ti.com>
+---
+ arch/arm/mach-omap2/hsmmc.c |   12 ++++--------
+ 1 files changed, 4 insertions(+), 8 deletions(-)
 
-Thanks.
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index 3842405..a6135df 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -144,8 +144,7 @@ static void omap4_hsmmc1_before_set_reg(struct device *dev, int slot,
+ 	 */
+ 	reg = omap4_ctrl_pad_readl(control_pbias_offset);
+ 	reg &= ~(OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
+-		OMAP4_MMC1_PWRDNZ_MASK |
+-		OMAP4_USBC1_ICUSB_PWRDNZ_MASK);
++		OMAP4_MMC1_PWRDNZ_MASK);
+ 	omap4_ctrl_pad_writel(reg, control_pbias_offset);
+ }
  
-> 
-> > -----Original Message-----
-> > From: Aaron Lu [mailto:Aaron.Lu@amd.com]
-> > Sent: Monday, July 11, 2011 10:57 AM
-> > To: Chris Ball
-> > Cc: Nath, Arindam; linux-mmc@vger.kernel.org; Lu, Aaron
-> > Subject: [PATCH] mmc: sdhci: fix retuning timer wrongly deleted in
-> > sdhci_tasklet_finish
-> > 
-> > Currently, the retuning timer for retuning mode 1 will be deleted in
-> > function sdhci_tasklet_finish after a mmc request done, which will
-> make
-> > retuning timing never trigger again. This patch fixed this problem.
-> > 
-> > Signed-off-by: Aaron Lu <Aaron.Lu@amd.com>
-> > ---
-> >  drivers/mmc/host/sdhci.c |    3 ---
-> >  1 files changed, 0 insertions(+), 3 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index 91d9892..6250bac 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -1863,9 +1863,6 @@ static void sdhci_tasklet_finish(unsigned long
-> > param)
-> > 
-> >  	del_timer(&host->timer);
-> > 
-> > -	if (host->version >= SDHCI_SPEC_300)
-> > -		del_timer(&host->tuning_timer);
-> > -
-> >  	mrq = host->mrq;
-> > 
-> >  	/*
-> > --
-> > 1.7.1
-> 
-> 
+@@ -165,8 +164,7 @@ static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
+ 		else
+ 			reg |= OMAP4_MMC1_PBIASLITE_VMODE_MASK;
+ 		reg |= (OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
+-			OMAP4_MMC1_PWRDNZ_MASK |
+-			OMAP4_USBC1_ICUSB_PWRDNZ_MASK);
++			OMAP4_MMC1_PWRDNZ_MASK);
+ 		omap4_ctrl_pad_writel(reg, control_pbias_offset);
+ 		/* 4 microsec delay for comparator to generate an error*/
+ 		udelay(4);
+@@ -174,16 +172,14 @@ static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
+ 		if (reg & OMAP4_MMC1_PBIASLITE_VMODE_ERROR_MASK) {
+ 			pr_err("Pbias Voltage is not same as LDO\n");
+ 			/* Caution : On VMODE_ERROR Power Down MMC IO */
+-			reg &= ~(OMAP4_MMC1_PWRDNZ_MASK |
+-				OMAP4_USBC1_ICUSB_PWRDNZ_MASK);
++			reg &= ~(OMAP4_MMC1_PWRDNZ_MASK);
+ 			omap4_ctrl_pad_writel(reg, control_pbias_offset);
+ 		}
+ 	} else {
+ 		reg = omap4_ctrl_pad_readl(control_pbias_offset);
+ 		reg |= (OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
+ 			OMAP4_MMC1_PWRDNZ_MASK |
+-			OMAP4_MMC1_PBIASLITE_VMODE_MASK |
+-			OMAP4_USBC1_ICUSB_PWRDNZ_MASK);
++			OMAP4_MMC1_PBIASLITE_VMODE_MASK);
+ 		omap4_ctrl_pad_writel(reg, control_pbias_offset);
+ 	}
+ }
+-- 
+1.7.0.4
 
