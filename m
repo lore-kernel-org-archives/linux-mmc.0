@@ -1,47 +1,36 @@
-From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 0/3] Make fault injection available for MMC IO
-Date: Thu, 21 Jul 2011 00:01:58 +0200
-Message-ID: <1311199321-4618-1-git-send-email-per.forlin@linaro.org>
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH 1/2] sh-mobile: enable both edges GPIO interrupts on sh7372
+Date: Thu, 21 Jul 2011 16:54:32 +0900
+Message-ID: <20110721075432.GE27831@linux-sh.org>
+References: <Pine.LNX.4.64.1107140123070.30737@axis700.grange> <Pine.LNX.4.64.1107151254300.22613@axis700.grange> <Pine.LNX.4.64.1107151256380.22613@axis700.grange> <CANqRtoRin_mSERnYn8Q-dYJHc0O-kwa3YtmjCRDsUU=yEfDMEw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Nicolas Pitre <nicolas.pitre-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY@public.gmane.org
-Cc: Randy Dunlap <rdunlap-/UHa2rfvQTnk1uMJSBkQmQ@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from linux-sh.org ([111.68.239.195]:44686 "EHLO linux-sh.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752235Ab1GUHyo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 21 Jul 2011 03:54:44 -0400
+Content-Disposition: inline
+In-Reply-To: <CANqRtoRin_mSERnYn8Q-dYJHc0O-kwa3YtmjCRDsUU=yEfDMEw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <damm@opensource.se>
 
-The first version of this patch is a part of mmc non-blocking v9 patchset:
-[PATCH v9 11/12] mmc: core: add random fault injection
+On Fri, Jul 15, 2011 at 08:14:23PM +0900, Magnus Damm wrote:
+> On Fri, Jul 15, 2011 at 7:58 PM, Guennadi Liakhovetski
+> <g.liakhovetski@gmx.de> wrote:
+> > From: Magnus Damm <damm@opensource.se>
+> >
+> > IRQ-capable GPIOs on sh7372 can be configured to produce interrupts on
+> > both edges.
+> >
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > Cc: Magnus Damm <damm@opensource.se>
+> > ---
+> > ?drivers/sh/intc/chip.c | ? ?3 +++
+> > ?1 files changed, 3 insertions(+), 0 deletions(-)
+> 
+> Acked-by: Magnus Damm <damm@opensource.se>
 
-change log:
- v2 - Resolve build issue in mmc core.c due to multiple init_module by
-      removing the fault inject module.
-    - Export fault injection functions to make them available for modules
-    - Update fault injection documentation on MMC IO  
- v3 - add function descriptions in core.c
-    - use export GPL for fault injection functions
-
-Per Forlin (3):
-  fault-inject: make fault injection available for modules
-  mmc: core: add random fault injection
-  fault injection: add documentation on MMC IO fault injection
-
- Documentation/fault-injection/fault-injection.txt |    5 ++
- drivers/mmc/core/core.c                           |   69 +++++++++++++++++++++
- drivers/mmc/core/debugfs.c                        |    5 ++
- include/linux/mmc/host.h                          |    3 +
- lib/Kconfig.debug                                 |   11 +++
- lib/fault-inject.c                                |    2 +
- 6 files changed, 95 insertions(+), 0 deletions(-)
-
--- 
-1.7.4.1
+Applied, thanks.
