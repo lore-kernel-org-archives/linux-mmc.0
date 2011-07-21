@@ -1,75 +1,57 @@
-From: Bryan Buckley <bryan.buckley@ti.com>
-Subject: [PATCH] OMAP4: MMC: fix power and audio issue, decouple USBC1 from MMC1
-Date: Thu, 21 Jul 2011 14:29:03 -0500
-Message-ID: <1311276543-9374-1-git-send-email-bryan.buckley@ti.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC/RFT] MMC: CORE: eMMC in Sleep mode before suspend
+Date: Thu, 21 Jul 2011 23:12:26 +0300
+Message-ID: <4E28882A.2020405@intel.com>
+References: <1310567787-14697-1-git-send-email-balajitk@ti.com>	<CANfBPZ-dwv1e1JweRR5jFu2rLRxQCWd+ibuaN2RHv+gCZcQeOw@mail.gmail.com> <m21uxm9pym.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Santosh Shilimkar <santosh.shilimkar@ti.com>, Balaji T Krishnamoorthy <balajitk@ti.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Moiz Sonasath <m-sonasath@ti.com>, Viswanath Puttagunta <vishp@ti.com>, Tony Lindgren <tony@atomide.com>, Madhusudhan Chikkature <madhu.cr@ti.com>, Bryan Buckley <bryan.buckley@ti.com>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:49807 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752002Ab1GUUM3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 21 Jul 2011 16:12:29 -0400
+In-Reply-To: <m21uxm9pym.fsf@bob.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: "S, Venkatraman" <svenkatr@ti.com>, Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
 
-Remove OMAP4_USBC1_ICUSB_PWRDNZ_MASK during enable/disable PWRDNZ mode for
-MMC1_PBIAS and associated extended-drain MMC1 I/O cell. This is in accordance
-with the control module programming guide. This fixes a bug where if trying to
-use gpio_98 or gpio_99 and MMC1 at the same time the GPIO signal will be
-affected by a changing SDMMC1_VDDS.
+On 19/07/2011 7:48 p.m., Chris Ball wrote:
+> Hi,
+>
+> On Tue, Jul 19 2011, S, Venkatraman wrote:
+>> On Wed, Jul 13, 2011 at 8:06 PM, Balaji T K<balajitk@ti.com>  wrote:
+>>> Put MMC to sleep if it supports SLEEP/AWAKE (CMD5)
+>>> in the mmc suspend to minimize power consumption.
+>>>
+>>> Signed-off-by: Balaji T K<balajitk@ti.com>
+>> Balaji,
+>>    Would you mind reposting the patch without the RFC and s/CORE/core
+>> in subject line ?
+>> You can add my
+>> Acked-by: Venkatraman S<svenkatr@ti.com>
+> No need to resend, thanks -- pushed to mmc-next with these changes and
+> the ACK.
+>
+> Anyone object to letting this soak in mmc-next for a release and merging
+> it in 3.2?  I'm worried that we'll find card or host quirks around this,
+> and the 3.0 release is probably happening today.
 
-Software must keep MMC1_PBIAS cell and MMC1_IO cell PWRDNZ signals low whenever
-SDMMC1_VDDS ramps up/down or changes for cell protection purposes.
+eMMC often have VccQ (logic) always on (or sharing the same power as 
+SDRAM which comes to the same thing), but can switch off Vcc (NAND 
+core).  However, turning off Vcc without first putting the card to sleep 
+can result in errors i.e. you are not allowed to do it.
 
-MMC1 is based on SDMMC1_VDDS whereas USBC1 is based on SIM_VDDS therefore
-they can operate independently.
+This patch seems to be covering the "VccQ always on" case but relies on 
+CMD0 to wake up the card.
 
-Signed-off-by: Bryan Buckley <bryan.buckley@ti.com>
----
- arch/arm/mach-omap2/hsmmc.c |   12 ++++--------
- 1 files changed, 4 insertions(+), 8 deletions(-)
+If that is what is going on, then some comments to that effect are 
+needed, including within mmc_init_card to note that mmc_go_idle is 
+needed for cards that are asleep - if that is, in fact, correct.
 
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index 3842405..a6135df 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -144,8 +144,7 @@ static void omap4_hsmmc1_before_set_reg(struct device *dev, int slot,
- 	 */
- 	reg = omap4_ctrl_pad_readl(control_pbias_offset);
- 	reg &= ~(OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
--		OMAP4_MMC1_PWRDNZ_MASK |
--		OMAP4_USBC1_ICUSB_PWRDNZ_MASK);
-+		OMAP4_MMC1_PWRDNZ_MASK);
- 	omap4_ctrl_pad_writel(reg, control_pbias_offset);
- }
- 
-@@ -165,8 +164,7 @@ static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
- 		else
- 			reg |= OMAP4_MMC1_PBIASLITE_VMODE_MASK;
- 		reg |= (OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
--			OMAP4_MMC1_PWRDNZ_MASK |
--			OMAP4_USBC1_ICUSB_PWRDNZ_MASK);
-+			OMAP4_MMC1_PWRDNZ_MASK);
- 		omap4_ctrl_pad_writel(reg, control_pbias_offset);
- 		/* 4 microsec delay for comparator to generate an error*/
- 		udelay(4);
-@@ -174,16 +172,14 @@ static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
- 		if (reg & OMAP4_MMC1_PBIASLITE_VMODE_ERROR_MASK) {
- 			pr_err("Pbias Voltage is not same as LDO\n");
- 			/* Caution : On VMODE_ERROR Power Down MMC IO */
--			reg &= ~(OMAP4_MMC1_PWRDNZ_MASK |
--				OMAP4_USBC1_ICUSB_PWRDNZ_MASK);
-+			reg &= ~(OMAP4_MMC1_PWRDNZ_MASK);
- 			omap4_ctrl_pad_writel(reg, control_pbias_offset);
- 		}
- 	} else {
- 		reg = omap4_ctrl_pad_readl(control_pbias_offset);
- 		reg |= (OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
- 			OMAP4_MMC1_PWRDNZ_MASK |
--			OMAP4_MMC1_PBIASLITE_VMODE_MASK |
--			OMAP4_USBC1_ICUSB_PWRDNZ_MASK);
-+			OMAP4_MMC1_PBIASLITE_VMODE_MASK);
- 		omap4_ctrl_pad_writel(reg, control_pbias_offset);
- 	}
- }
--- 
-1.7.0.4
+Also, wouldn't it be nice to wake up the card with CMD5 which should be 
+much faster than re-initialising?
+
+> - Chris.
 
