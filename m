@@ -1,57 +1,119 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC/RFT] MMC: CORE: eMMC in Sleep mode before suspend
-Date: Thu, 21 Jul 2011 23:12:26 +0300
-Message-ID: <4E28882A.2020405@intel.com>
-References: <1310567787-14697-1-git-send-email-balajitk@ti.com>	<CANfBPZ-dwv1e1JweRR5jFu2rLRxQCWd+ibuaN2RHv+gCZcQeOw@mail.gmail.com> <m21uxm9pym.fsf@bob.laptop.org>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH] mmc: sdhci: fix retuning timer wrongly deleted in
+ sdhci_tasklet_finish
+Date: Thu, 21 Jul 2011 13:27:11 -0700
+Message-ID: <086235A9-1100-4ABB-9D4D-B2757382BF0B@marvell.com>
+References: <1310362031-8186-1-git-send-email-Aaron.Lu@amd.com>
+ <6C03668EAF45B747AF947A1603D1B300018F85B9E0@SAUSEXMBP01.amd.com>
+ <20110721052358.GA31584@lovegaga>
+ <CAMj5BkhT2-mybTHTVxXm1TG0w=Ap34etwKgxg3QVVzohaZWupA@mail.gmail.com>
+ <20110721100351.GA31886@lovegaga>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:49807 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752002Ab1GUUM3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Jul 2011 16:12:29 -0400
-In-Reply-To: <m21uxm9pym.fsf@bob.laptop.org>
+Received: from na3sys009aog124.obsmtp.com ([74.125.149.151]:43235 "EHLO
+	na3sys009aog124.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752991Ab1GUUdM convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 21 Jul 2011 16:33:12 -0400
+In-Reply-To: <20110721100351.GA31886@lovegaga>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "S, Venkatraman" <svenkatr@ti.com>, Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
+To: Aaron Lu <Aaron.Lu@amd.com>
+Cc: zhangfei gao <zhangfei.gao@gmail.com>, "Nath, Arindam" <Arindam.Nath@amd.com>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 19/07/2011 7:48 p.m., Chris Ball wrote:
-> Hi,
->
-> On Tue, Jul 19 2011, S, Venkatraman wrote:
->> On Wed, Jul 13, 2011 at 8:06 PM, Balaji T K<balajitk@ti.com>  wrote:
->>> Put MMC to sleep if it supports SLEEP/AWAKE (CMD5)
->>> in the mmc suspend to minimize power consumption.
->>>
->>> Signed-off-by: Balaji T K<balajitk@ti.com>
->> Balaji,
->>    Would you mind reposting the patch without the RFC and s/CORE/core
->> in subject line ?
->> You can add my
->> Acked-by: Venkatraman S<svenkatr@ti.com>
-> No need to resend, thanks -- pushed to mmc-next with these changes and
-> the ACK.
->
-> Anyone object to letting this soak in mmc-next for a release and merging
-> it in 3.2?  I'm worried that we'll find card or host quirks around this,
-> and the 3.0 release is probably happening today.
 
-eMMC often have VccQ (logic) always on (or sharing the same power as 
-SDRAM which comes to the same thing), but can switch off Vcc (NAND 
-core).  However, turning off Vcc without first putting the card to sleep 
-can result in errors i.e. you are not allowed to do it.
+Aaron,
 
-This patch seems to be covering the "VccQ always on" case but relies on 
-CMD0 to wake up the card.
+Code is fine.  Do you want to also fix the problem with suspend or should I do the patch ?
 
-If that is what is going on, then some comments to that effect are 
-needed, including within mmc_init_card to note that mmc_go_idle is 
-needed for cards that are asleep - if that is, in fact, correct.
+When we are suspending we should kill the tuning timer.
 
-Also, wouldn't it be nice to wake up the card with CMD5 which should be 
-much faster than re-initialising?
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 4da6a4d..88c25e8 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2289,18 +2289,14 @@ int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state)
+ 
+ 	sdhci_disable_card_detection(host);
+ 
+-	/* Disable tuning since we are suspending */
+-	if (host->version >= SDHCI_SPEC_300 && host->tuning_count &&
+-	    host->tuning_mode == SDHCI_TUNING_MODE_1) {
+-		host->flags &= ~SDHCI_NEEDS_RETUNING;
+-		mod_timer(&host->tuning_timer, jiffies +
+-			host->tuning_count * HZ);
+-	}
+-
+ 	ret = mmc_suspend_host(host->mmc);
+ 	if (ret)
+ 		return ret;
+ 
++	/* Disable tuning since we are suspending */
++	if (host->version >= SDHCI_SPEC_300)
++		del_timer_sync(&host->tuning_timer);
++
+ 	free_irq(host->irq, host);
+ 
+ 	if (host->vmmc)
 
-> - Chris.
+
+
+Philip
+
+On Jul 21, 2011, at 3:03 AM, Aaron Lu wrote:
+
+> On Thu, Jul 21, 2011 at 05:35:02PM +0800, zhangfei gao wrote:
+>> 
+>> Does the execute_tuning is called again?
+>> del_timer is not delete timer really, but deactivate the timer, which
+>> could be re-activated by mod_timer.
+>> So if execute_tuning is called, the mod_timer will tigger the tuning
+>> timer again.
+>> 
+> 
+> Hi zhangfei,
+> 
+> Thanks for the comment.
+> 
+> The execute_tuning will be called at two places:
+> 1 In mmc_sd_init_uhs_card, when host is initializing an UHS card,
+> and the re-tuning timer will be activated for the first time;
+> 2 When re-tuning timer expired
+> 
+> So if the re-tuning timer is deactivated in sdhci_tasklet_finish,
+> execute_tuning will have no chance of getting called again, and the
+> host will not be able to do the re-tuning anymore.
+> 
+>>>>> 
+>>>>> Signed-off-by: Aaron Lu <Aaron.Lu@amd.com>
+>>>>> ---
+>>>>>  drivers/mmc/host/sdhci.c |    3 ---
+>>>>>  1 files changed, 0 insertions(+), 3 deletions(-)
+>>>>> 
+>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>>> index 91d9892..6250bac 100644
+>>>>> --- a/drivers/mmc/host/sdhci.c
+>>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>>> @@ -1863,9 +1863,6 @@ static void sdhci_tasklet_finish(unsigned long
+>>>>> param)
+>>>>> 
+>>>>>     del_timer(&host->timer);
+>>>>> 
+>>>>> -   if (host->version >= SDHCI_SPEC_300)
+>>>>> -           del_timer(&host->tuning_timer);
+>>>>> -
+>>>>>     mrq = host->mrq;
+>>>>> 
+>>>>>     /*
+>>>>> --
+>>>>> 1.7.1
+>>>> 
+>>>> 
+>>> 
+>>> 
+>> 
+> 
 
