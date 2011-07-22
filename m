@@ -1,77 +1,84 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH 2/2 v2] eSDHC: Fix errors when booting kernel with fsl
- esdhc
-Date: Fri, 22 Jul 2011 14:15:12 +0400
-Message-ID: <20110722101512.GA1576@oksana.dev.rtsoft.ru>
-References: <1311329717-13954-1-git-send-email-tie-fei.zang@freescale.com>
- <1311329717-13954-2-git-send-email-tie-fei.zang@freescale.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: fix retuning timer wrongly deleted in sdhci_tasklet_finish
+Date: Fri, 22 Jul 2011 18:21:11 +0800
+Message-ID: <CAMj5BkjnskRO=HwmbPgjuOZ2VWyoVp=8ViWw8j22Y7M8oC8Kig@mail.gmail.com>
+References: <1310362031-8186-1-git-send-email-Aaron.Lu@amd.com>
+	<6C03668EAF45B747AF947A1603D1B300018F85B9E0@SAUSEXMBP01.amd.com>
+	<20110721052358.GA31584@lovegaga>
+	<CAMj5BkhT2-mybTHTVxXm1TG0w=Ap34etwKgxg3QVVzohaZWupA@mail.gmail.com>
+	<20110721100351.GA31886@lovegaga>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:54383 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753662Ab1GVKPS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jul 2011 06:15:18 -0400
-Received: by wyg8 with SMTP id 8so1389826wyg.19
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jul 2011 03:15:17 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <1311329717-13954-2-git-send-email-tie-fei.zang@freescale.com>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:50885 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753848Ab1GVKVM convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jul 2011 06:21:12 -0400
+Received: by qwk3 with SMTP id 3so1047082qwk.19
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Jul 2011 03:21:11 -0700 (PDT)
+In-Reply-To: <20110721100351.GA31886@lovegaga>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Roy Zang <tie-fei.zang@freescale.com>
-Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, akpm@linux-foundation.org, Xu lei <B33228@freescale.com>, Kumar Gala <galak@kernel.crashing.org>
+To: Aaron Lu <aaron.lu@amd.com>
+Cc: "Nath, Arindam" <Arindam.Nath@amd.com>, Philip Rakity <prakity@marvell.com>, subhashj@codeaurora.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Fri, Jul 22, 2011 at 06:15:17PM +0800, Roy Zang wrote:
-[...]
->  	if (host->version >= SDHCI_SPEC_200) {
-> -		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> -		ctrl &= ~SDHCI_CTRL_DMA_MASK;
-> -		if ((host->flags & SDHCI_REQ_USE_DMA) &&
-> -			(host->flags & SDHCI_USE_ADMA))
-> -			ctrl |= SDHCI_CTRL_ADMA32;
-> -		else
-> -			ctrl |= SDHCI_CTRL_SDMA;
-> -		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> +		if (host->quirks & SDHCI_QUIRK_QORIQ_PROCTL_WEIRD) {
-> +#define ESDHCI_PROCTL_DMAS_MASK		0x00000300
-> +#define ESDHCI_PROCTL_ADMA32		0x00000200
-> +#define ESDHCI_PROCTL_SDMA		0x00000000
-> +			ctrl = sdhci_readl(host, SDHCI_HOST_CONTROL);
-> +			ctrl &= ~ESDHCI_PROCTL_DMAS_MASK;
-> +			if ((host->flags & SDHCI_REQ_USE_DMA) &&
-> +				(host->flags & SDHCI_USE_ADMA))
-> +				ctrl |= ESDHCI_PROCTL_ADMA32;
-> +			else
-> +				ctrl |= ESDHCI_PROCTL_SDMA;
-> +			sdhci_writel(host, ctrl, SDHCI_HOST_CONTROL);
-> +		} else {
-> +			ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> +			ctrl &= ~SDHCI_CTRL_DMA_MASK;
-> +			if ((host->flags & SDHCI_REQ_USE_DMA) &&
-> +				(host->flags & SDHCI_USE_ADMA))
-> +				ctrl |= SDHCI_CTRL_ADMA32;
-> +			else
-> +				ctrl |= SDHCI_CTRL_SDMA;
-> +			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+On Thu, Jul 21, 2011 at 6:03 PM, Aaron Lu <aaron.lu@amd.com> wrote:
+> On Thu, Jul 21, 2011 at 05:35:02PM +0800, zhangfei gao wrote:
+>>
+>> Does the execute_tuning is called again?
+>> del_timer is not delete timer really, but deactivate the timer, whic=
+h
+>> could be re-activated by mod_timer.
+>> So if execute_tuning is called, the mod_timer will tigger the tuning
+>> timer again.
+>>
+>
+> Hi zhangfei,
+>
+> Thanks for the comment.
+>
+> The execute_tuning will be called at two places:
+> 1 In mmc_sd_init_uhs_card, when host is initializing an UHS card,
+> and the re-tuning timer will be activated for the first time;
+> 2 When re-tuning timer expired
+>
+> So if the re-tuning timer is deactivated in sdhci_tasklet_finish,
+> execute_tuning will have no chance of getting called again, and the
+> host will not be able to do the re-tuning anymore.
 
-We try to not pollute generic sdhci.c driver with chip-specific
-quirks.
+Thanks for explanation, looks good to me.
 
-Maybe you can do the fixups via IO accessors? Or by introducing
-some additional sdhci op?
-
-[...]
->  	if (power != (unsigned short)-1) {
->  		switch (1 << power) {
-> +#define	ESDHCI_FSL_POWER_MASK	0x40
-> +#define	ESDHCI_FSL_POWER_180	0x00
-> +#define	ESDHCI_FSL_POWER_300	0x40
-
-Same here. The driver will rot quickly if everyone would start
-putting chip-specific quirks into sdhci.c. Please don't.
-
-Thanks,
-
--- 
-Anton Vorontsov
-Email: cbouatmailru@gmail.com
+>
+>> >> >
+>> >> > Signed-off-by: Aaron Lu <Aaron.Lu@amd.com>
+>> >> > ---
+>> >> > =A0drivers/mmc/host/sdhci.c | =A0 =A03 ---
+>> >> > =A01 files changed, 0 insertions(+), 3 deletions(-)
+>> >> >
+>> >> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.=
+c
+>> >> > index 91d9892..6250bac 100644
+>> >> > --- a/drivers/mmc/host/sdhci.c
+>> >> > +++ b/drivers/mmc/host/sdhci.c
+>> >> > @@ -1863,9 +1863,6 @@ static void sdhci_tasklet_finish(unsigned=
+ long
+>> >> > param)
+>> >> >
+>> >> > =A0 =A0 del_timer(&host->timer);
+>> >> >
+>> >> > - =A0 if (host->version >=3D SDHCI_SPEC_300)
+>> >> > - =A0 =A0 =A0 =A0 =A0 del_timer(&host->tuning_timer);
+>> >> > -
+>> >> > =A0 =A0 mrq =3D host->mrq;
+>> >> >
+>> >> > =A0 =A0 /*
+>> >> > --
+>> >> > 1.7.1
+>> >>
+>> >>
+>> >
+>> >
+>>
+>
+>
