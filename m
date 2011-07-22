@@ -1,52 +1,90 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH] mmc: sdio add regulator vsdio
-Date: Fri, 22 Jul 2011 15:25:08 +0800
-Message-ID: <CAMj5BkjbWbvJwut-K0Fx-F7sx+ER-EoGdjf6B0vifhFCpT1mnA@mail.gmail.com>
-References: <1311215673-2489-1-git-send-email-zhangfei.gao@marvell.com>
-	<1311215673-2489-2-git-send-email-zhangfei.gao@marvell.com>
-	<CAGq3pz6-MQPpsyEWbDQBnnW4q2rXSKFF9qzRvTLtwmzvG+xJKw@mail.gmail.com>
+From: Roy Zang <tie-fei.zang@freescale.com>
+Subject: [PATCH 1/2 v2] eSDHC: Access Freescale eSDHC registers by 32-bit
+Date: Fri, 22 Jul 2011 18:15:16 +0800
+Message-ID: <1311329717-13954-1-git-send-email-tie-fei.zang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAGq3pz6-MQPpsyEWbDQBnnW4q2rXSKFF9qzRvTLtwmzvG+xJKw@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: Ohad Ben-Cohen <ohad@wizery.com>, frankh@marvell.com, Eric Miao <eric.y.miao@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, Bing Zhao <bzhao@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Zhangfei Gao <zhangfei.gao@marvell.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:28145
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753523Ab1GVJf5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jul 2011 05:35:57 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linuxppc-dev@lists.ozlabs.org, cbouatmailru@gmail.com, akpm@linux-foundation.org, Xu lei <B33228@freescale.com>, Roy Zang <tie-fei.zang@freescale.com>, Kumar Gala <galak@kernel.crashing.org>
 
-On Fri, Jul 22, 2011 at 2:50 PM, Daniel Drake <dsd@laptop.org> wrote:
-> On 21 July 2011 03:34, Zhangfei Gao <zhangfei.gao@marvell.com> wrote:
->> sdio client may be required power on/off dynamically.
->> With regulator vsdio, sdio client power on/off could be executed by mmc_power_up/down
->
-> I think you can/should do this with vmmc. When the device gets powered
-> down (e.g. in runtime suspend), the voltage should be cut, so it
-> should be possible to use the existing regulator.
+From: Xu lei <B33228@freescale.com>
 
-Have considered re-use vmmc before,
-Consider dynamically power control only required for sdio, so use
-vsdio to exclude potential issue to sd/mmc.
-Anyway, will try re-use vmmc.
+For Freescale eSDHC registers only support 32-bit accesses,
+this patch ensure that all Freescale eSDHC register accesses
+are 32-bit.
 
->
-> I also looked at doing this before, when it looked like we would have
-> to manipulate a GPIO reset line for SD8686. I decided that the current
-> vmmc implementation in sdhci wasn't quite complete enough, but it
-> wouldn't be much effort to correct this.
->
-> Daniel
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
->
+Signed-off-by: Xu lei <B33228@freescale.com>
+Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
+Signed-off-by: Kumar Gala <galak@kernel.crashing.org>
+---
+this patch set replaces previous patches:
+https://patchwork.kernel.org/patch/943332/
+https://patchwork.kernel.org/patch/943342/
+https://patchwork.kernel.org/patch/943322/
+
+The last one is discarded according to the comment from Anton.
+
+
+just resend with the new patch set. no change for this patch comparing
+to previous version.
+
+ drivers/mmc/host/sdhci-of-esdhc.c |   18 ++++++++++++++----
+ 1 files changed, 14 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index ba40d6d..c9a8519 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -1,7 +1,7 @@
+ /*
+  * Freescale eSDHC controller driver.
+  *
+- * Copyright (c) 2007 Freescale Semiconductor, Inc.
++ * Copyright (c) 2007, 2010 Freescale Semiconductor, Inc.
+  * Copyright (c) 2009 MontaVista Software, Inc.
+  *
+  * Authors: Xiaobo Xie <X.Xie@freescale.com>
+@@ -23,11 +23,21 @@
+ static u16 esdhc_readw(struct sdhci_host *host, int reg)
+ {
+ 	u16 ret;
++	int base = reg & ~0x3;
++	int shift = (reg & 0x2) * 8;
+ 
+ 	if (unlikely(reg == SDHCI_HOST_VERSION))
+-		ret = in_be16(host->ioaddr + reg);
++		ret = in_be32(host->ioaddr + base) & 0xffff;
+ 	else
+-		ret = sdhci_be32bs_readw(host, reg);
++		ret = (in_be32(host->ioaddr + base) >> shift) & 0xffff;
++	return ret;
++}
++
++static u8 esdhc_readb(struct sdhci_host *host, int reg)
++{
++	int base = reg & ~0x3;
++	int shift = (reg & 0x3) * 8;
++	u8 ret = (in_be32(host->ioaddr + base) >> shift) & 0xff;
+ 	return ret;
+ }
+ 
+@@ -79,7 +89,7 @@ struct sdhci_of_data sdhci_esdhc = {
+ 	.ops = {
+ 		.read_l = sdhci_be32bs_readl,
+ 		.read_w = esdhc_readw,
+-		.read_b = sdhci_be32bs_readb,
++		.read_b = esdhc_readb,
+ 		.write_l = sdhci_be32bs_writel,
+ 		.write_w = esdhc_writew,
+ 		.write_b = esdhc_writeb,
+-- 
+1.6.0.6
+
+
