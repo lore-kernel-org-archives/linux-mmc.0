@@ -1,153 +1,133 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: RE: ARM: mmp2: support sdio with regulator vsdio
-Date: Thu, 21 Jul 2011 17:12:17 -0700
-Message-ID: <95D75AEA-6086-4F45-B19B-43375EC252E0@marvell.com>
-References: <37C1B996-A455-4EA9-A916-F4ED8C034167@marvell.com>
+From: Aaron Lu <aaron.lu@amd.com>
+Subject: Re: [PATCH] mmc: sdhci: fix retuning timer wrongly deleted in
+ sdhci_tasklet_finish
+Date: Fri, 22 Jul 2011 08:58:40 +0800
+Message-ID: <20110722005837.GA32049@lovegaga>
+References: <1310362031-8186-1-git-send-email-Aaron.Lu@amd.com>
+ <6C03668EAF45B747AF947A1603D1B300018F85B9E0@SAUSEXMBP01.amd.com>
+ <20110721052358.GA31584@lovegaga>
+ <CAMj5BkhT2-mybTHTVxXm1TG0w=Ap34etwKgxg3QVVzohaZWupA@mail.gmail.com>
+ <20110721100351.GA31886@lovegaga>
+ <086235A9-1100-4ABB-9D4D-B2757382BF0B@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog126.obsmtp.com ([74.125.149.155]:40386 "EHLO
-	na3sys009aog126.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751822Ab1GVASL convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Jul 2011 20:18:11 -0400
-In-Reply-To: <37C1B996-A455-4EA9-A916-F4ED8C034167@marvell.com>
-Content-Language: en-US
+Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:40473
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751328Ab1GVBEe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jul 2011 21:04:34 -0400
+Content-Disposition: inline
+In-Reply-To: <086235A9-1100-4ABB-9D4D-B2757382BF0B@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhangfei Gao <zgao6@marvell.com>
-Cc: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>, Daniel Drake <dsd@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Bing Zhao <bzhao@marvell.com>, Frank Huang <frankh@marvell.com>
+To: Philip Rakity <prakity@marvell.com>
+Cc: zhangfei gao <zhangfei.gao@gmail.com>, "Nath, Arindam" <Arindam.Nath@amd.com>, Subhash Jadavani <subhashj@codeaurora.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
+Hi Philip,
 
-With correct subject
-
-On Jul 21, 2011, at 5:10 PM, Philip Rakity wrote:
-
-> Hi Zhangfei,
+On Thu, Jul 21, 2011 at 01:27:11PM -0700, Philip Rakity wrote:
 > 
-> Comments below.
+> Aaron,
+> 
+> Code is fine.
+Thanks.
+
+> Do you want to also fix the problem with suspend or should I do the patch ?
+> When we are suspending we should kill the tuning timer.
+Yes, that is a problem.
+
+I've another patch to add support for re-tuning mode 2 queued for
+submit which should have fixed this problem, but I didn't touch anything
+if mmc_suspend_host failed, so when I submit the other patch, please
+take you time to review it and let's see how we can fix the problem
+altogether :-)
+
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 4da6a4d..88c25e8 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2289,18 +2289,14 @@ int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state)
+>  
+>  	sdhci_disable_card_detection(host);
+>  
+> -	/* Disable tuning since we are suspending */
+> -	if (host->version >= SDHCI_SPEC_300 && host->tuning_count &&
+> -	    host->tuning_mode == SDHCI_TUNING_MODE_1) {
+> -		host->flags &= ~SDHCI_NEEDS_RETUNING;
+> -		mod_timer(&host->tuning_timer, jiffies +
+> -			host->tuning_count * HZ);
+> -	}
+> -
+>  	ret = mmc_suspend_host(host->mmc);
+>  	if (ret)
+>  		return ret;
+>  
+> +	/* Disable tuning since we are suspending */
+> +	if (host->version >= SDHCI_SPEC_300)
+> +		del_timer_sync(&host->tuning_timer);
+> +
+>  	free_irq(host->irq, host);
+>  
+>  	if (host->vmmc)
+> 
+> 
 > 
 > Philip
 > 
+> On Jul 21, 2011, at 3:03 AM, Aaron Lu wrote:
 > 
->> Add regulator vsdio, which controled by mmc core to handle sdio chip power
->> 
->> Test With CONFIG_PM_RUNTIME=y
->> 8787 power is enabled if any client module over sdio is insmod, and disbled automatically after all client modules over sdio are rmmod
->> Also 8787 power could be controled by mmc_start/stop_host
->> 
->> Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
->> 
->> ---
->> arch/arm/mach-mmp/brownstone.c |   60 ++++++++++++++++++++++++++++++++++++++-
->> 1 files changed, 58 insertions(+), 2 deletions(-)
->> 
->> diff --git a/arch/arm/mach-mmp/brownstone.c b/arch/arm/mach-mmp/brownstone.c
->> index c79162a..63315e2 100644
->> --- a/arch/arm/mach-mmp/brownstone.c
->> +++ b/arch/arm/mach-mmp/brownstone.c
->> @@ -89,6 +89,9 @@ static unsigned long brownstone_pin_config[] __initdata = {
->> 	GPIO41_MMC2_CMD | MFP_PULL_HIGH,
->> 	GPIO42_MMC2_CLK,
->> 
->> +	GPIO57_GPIO | MFP_LPM_DRIVE_HIGH | MFP_PULL_HIGH,
->> +	GPIO58_GPIO | MFP_LPM_DRIVE_HIGH | MFP_PULL_HIGH,
->> +
->> 	/* MMC2 */
->> 	GPIO165_MMC3_DAT7 | MFP_PULL_HIGH,
->> 	GPIO162_MMC3_DAT6 | MFP_PULL_HIGH,
->> @@ -180,12 +183,66 @@ static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc0 = {
->> 	.clk_delay_cycles = 0x1f,
->> };
->> 
->> +static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc1 = {
->> +	.flags = PXA_FLAG_CARD_PERMANENT,
->> +};
->> +
->> static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc2 = {
->> 	.clk_delay_cycles = 0x1f,
->> 	.flags = PXA_FLAG_CARD_PERMANENT
->> 		| PXA_FLAG_SD_8_BIT_CAPABLE_SLOT,
->> };
->> 
->> +static struct regulator_consumer_supply sdio_power_supplies[] = {
->> +	REGULATOR_SUPPLY("vsdio", "sdhci-pxav3.1"),
->> +};
->> +
->> +static struct regulator_init_data sdio_power_data = {
->> +	.constraints	= {
->> +		.valid_ops_mask		= REGULATOR_CHANGE_STATUS,
->> +	},
->> +	.num_consumer_supplies	= ARRAY_SIZE(sdio_power_supplies),
->> +	.consumer_supplies	= sdio_power_supplies,
->> +};
->> +
->> +static struct fixed_voltage_config sdio_power = {
->> +	.supply_name		= "vsdio",
->> +	.microvolts		= 3000000,
->> +	.gpio			= mfp_to_gpio(MFP_PIN_GPIO57),
->> +	.enable_high		= 1,
->> +	.enabled_at_boot	= 0,
->> +	.init_data		= &sdio_power_data,
->> +};
->> +
->> +static struct platform_device sdio_power_device = {
->> +	.name		= "reg-fixed-voltage",
->> +	.id		= 2,
->> +	.dev = {
->> +		.platform_data = &sdio_power,
->> +	},
->> +};
->> +
->> +static int __init brownstone_init_mmc(void)
->> +{
->> +	/*
->> +	 * PDn: GPIO58; RESETn: GPIO57
->> +	 * 8787, RESETn keeps high, PDn control power
->> +	 * on: PDn 1; off: PDn 0;
->> +	 */
-> 
-> Comment unclear
-> 
-> GPIO57 is power
-> GPIO58 is reset
+> > On Thu, Jul 21, 2011 at 05:35:02PM +0800, zhangfei gao wrote:
+> >> 
+> >> Does the execute_tuning is called again?
+> >> del_timer is not delete timer really, but deactivate the timer, which
+> >> could be re-activated by mod_timer.
+> >> So if execute_tuning is called, the mod_timer will tigger the tuning
+> >> timer again.
+> >> 
+> > 
+> > Hi zhangfei,
+> > 
+> > Thanks for the comment.
+> > 
+> > The execute_tuning will be called at two places:
+> > 1 In mmc_sd_init_uhs_card, when host is initializing an UHS card,
+> > and the re-tuning timer will be activated for the first time;
+> > 2 When re-tuning timer expired
+> > 
+> > So if the re-tuning timer is deactivated in sdhci_tasklet_finish,
+> > execute_tuning will have no chance of getting called again, and the
+> > host will not be able to do the re-tuning anymore.
+> > 
+> >>>>> 
+> >>>>> Signed-off-by: Aaron Lu <Aaron.Lu@amd.com>
+> >>>>> ---
+> >>>>>  drivers/mmc/host/sdhci.c |    3 ---
+> >>>>>  1 files changed, 0 insertions(+), 3 deletions(-)
+> >>>>> 
+> >>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> >>>>> index 91d9892..6250bac 100644
+> >>>>> --- a/drivers/mmc/host/sdhci.c
+> >>>>> +++ b/drivers/mmc/host/sdhci.c
+> >>>>> @@ -1863,9 +1863,6 @@ static void sdhci_tasklet_finish(unsigned long
+> >>>>> param)
+> >>>>> 
+> >>>>>     del_timer(&host->timer);
+> >>>>> 
+> >>>>> -   if (host->version >= SDHCI_SPEC_300)
+> >>>>> -           del_timer(&host->tuning_timer);
+> >>>>> -
+> >>>>>     mrq = host->mrq;
+> >>>>> 
+> >>>>>     /*
+> >>>>> --
+> >>>>> 1.7.1
+> >>>> 
+> >>>> 
+> >>> 
+> >>> 
+> >> 
+> > 
 > 
 > 
-> 
->> +	int RESETn = mfp_to_gpio(MFP_PIN_GPIO58);
->> +
->> +	if (gpio_request(RESETn, "sdio RESETn")) {
->> +		pr_err("Failed to request sdio RESETn gpio\n");
->> +		return -EIO;
->> +	}
->> +	gpio_direction_output(RESETn, 1);
->> +	gpio_free(RESETn);
-> 
-> 
-> The 8787  data sheet indicated that PDn should be inactive as well as reset before
-> initiating power up.
-> 
-> Pull PDn high.
-> 
-> 
->> +
->> +	platform_device_register(&sdio_power_device);
->> +	mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC */
->> +	mmp2_add_sdhost(1, &mmp2_sdh_platdata_mmc1); /* sdio */
->> +	mmp2_add_sdhost(2, &mmp2_sdh_platdata_mmc2); /* eMMC */
->> +}
->> 
->> static void __init brownstone_init(void)
->> {
->> @@ -195,8 +252,7 @@ static void __init brownstone_init(void)
->> 	mmp2_add_uart(1);
->> 	mmp2_add_uart(3);
->> 	mmp2_add_twsi(1, NULL, ARRAY_AND_SIZE(brownstone_twsi1_info));
->> -	mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC */
->> -	mmp2_add_sdhost(2, &mmp2_sdh_platdata_mmc2); /* eMMC */
->> +	brownstone_init_mmc();
->> 
->> 	/* enable 5v regulator */
->> 	platform_device_register(&brownstone_v_5vp_device);
 
