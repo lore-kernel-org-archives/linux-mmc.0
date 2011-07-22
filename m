@@ -1,35 +1,52 @@
-From: Daniel Drake <dsd@laptop.org>
+From: zhangfei gao <zhangfei.gao@gmail.com>
 Subject: Re: [PATCH] mmc: sdio add regulator vsdio
-Date: Fri, 22 Jul 2011 07:50:14 +0100
-Message-ID: <CAGq3pz6-MQPpsyEWbDQBnnW4q2rXSKFF9qzRvTLtwmzvG+xJKw@mail.gmail.com>
+Date: Fri, 22 Jul 2011 15:25:08 +0800
+Message-ID: <CAMj5BkjbWbvJwut-K0Fx-F7sx+ER-EoGdjf6B0vifhFCpT1mnA@mail.gmail.com>
 References: <1311215673-2489-1-git-send-email-zhangfei.gao@marvell.com>
 	<1311215673-2489-2-git-send-email-zhangfei.gao@marvell.com>
+	<CAGq3pz6-MQPpsyEWbDQBnnW4q2rXSKFF9qzRvTLtwmzvG+xJKw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f52.google.com ([209.85.161.52]:44050 "EHLO
-	mail-fx0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751288Ab1GVGuP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jul 2011 02:50:15 -0400
-Received: by fxd18 with SMTP id 18so4769549fxd.11
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Jul 2011 23:50:14 -0700 (PDT)
-In-Reply-To: <1311215673-2489-2-git-send-email-zhangfei.gao@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAGq3pz6-MQPpsyEWbDQBnnW4q2rXSKFF9qzRvTLtwmzvG+xJKw@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Daniel Drake <dsd@laptop.org>
+Cc: Ohad Ben-Cohen <ohad@wizery.com>, frankh@marvell.com, Eric Miao <eric.y.miao@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, Bing Zhao <bzhao@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Zhangfei Gao <zhangfei.gao@marvell.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Zhangfei Gao <zhangfei.gao@marvell.com>
-Cc: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Bing Zhao <bzhao@marvell.com>, Frank@marvell.com, Huang@marvell.com, frankh@marvell.com
 
-On 21 July 2011 03:34, Zhangfei Gao <zhangfei.gao@marvell.com> wrote:
-> sdio client may be required power on/off dynamically.
-> With regulator vsdio, sdio client power on/off could be executed by mmc_power_up/down
+On Fri, Jul 22, 2011 at 2:50 PM, Daniel Drake <dsd@laptop.org> wrote:
+> On 21 July 2011 03:34, Zhangfei Gao <zhangfei.gao@marvell.com> wrote:
+>> sdio client may be required power on/off dynamically.
+>> With regulator vsdio, sdio client power on/off could be executed by mmc_power_up/down
+>
+> I think you can/should do this with vmmc. When the device gets powered
+> down (e.g. in runtime suspend), the voltage should be cut, so it
+> should be possible to use the existing regulator.
 
-I think you can/should do this with vmmc. When the device gets powered
-down (e.g. in runtime suspend), the voltage should be cut, so it
-should be possible to use the existing regulator.
+Have considered re-use vmmc before,
+Consider dynamically power control only required for sdio, so use
+vsdio to exclude potential issue to sd/mmc.
+Anyway, will try re-use vmmc.
 
-I also looked at doing this before, when it looked like we would have
-to manipulate a GPIO reset line for SD8686. I decided that the current
-vmmc implementation in sdhci wasn't quite complete enough, but it
-wouldn't be much effort to correct this.
-
-Daniel
+>
+> I also looked at doing this before, when it looked like we would have
+> to manipulate a GPIO reset line for SD8686. I decided that the current
+> vmmc implementation in sdhci wasn't quite complete enough, but it
+> wouldn't be much effort to correct this.
+>
+> Daniel
+>
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+>
