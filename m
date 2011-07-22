@@ -1,84 +1,127 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: fix retuning timer wrongly deleted in sdhci_tasklet_finish
-Date: Fri, 22 Jul 2011 18:21:11 +0800
-Message-ID: <CAMj5BkjnskRO=HwmbPgjuOZ2VWyoVp=8ViWw8j22Y7M8oC8Kig@mail.gmail.com>
-References: <1310362031-8186-1-git-send-email-Aaron.Lu@amd.com>
-	<6C03668EAF45B747AF947A1603D1B300018F85B9E0@SAUSEXMBP01.amd.com>
-	<20110721052358.GA31584@lovegaga>
-	<CAMj5BkhT2-mybTHTVxXm1TG0w=Ap34etwKgxg3QVVzohaZWupA@mail.gmail.com>
-	<20110721100351.GA31886@lovegaga>
+From: Kishore Kadiyala <kishorek.kadiyala@gmail.com>
+Subject: Re: [PATCH] OMAP4: MMC: fix power and audio issue, decouple USBC1
+ from MMC1
+Date: Fri, 22 Jul 2011 18:00:29 +0530
+Message-ID: <CAF=Qhp0YO2zYnwo63ddhKZv-o+eXs2bQETrqF5wYU2EtKQ=Yqw@mail.gmail.com>
+References: <1311276543-9374-1-git-send-email-bryan.buckley@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:50885 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753848Ab1GVKVM convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jul 2011 06:21:12 -0400
-Received: by qwk3 with SMTP id 3so1047082qwk.19
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jul 2011 03:21:11 -0700 (PDT)
-In-Reply-To: <20110721100351.GA31886@lovegaga>
+Received: from mail-yi0-f46.google.com ([209.85.218.46]:33563 "EHLO
+	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753794Ab1GVMat convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jul 2011 08:30:49 -0400
+In-Reply-To: <1311276543-9374-1-git-send-email-bryan.buckley@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@amd.com>
-Cc: "Nath, Arindam" <Arindam.Nath@amd.com>, Philip Rakity <prakity@marvell.com>, subhashj@codeaurora.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Bryan Buckley <bryan.buckley@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>, Balaji T Krishnamoorthy <balajitk@ti.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Moiz Sonasath <m-sonasath@ti.com>, Viswanath Puttagunta <vishp@ti.com>, Tony Lindgren <tony@atomide.com>, Madhusudhan Chikkature <madhu.cr@ti.com>
 
-On Thu, Jul 21, 2011 at 6:03 PM, Aaron Lu <aaron.lu@amd.com> wrote:
-> On Thu, Jul 21, 2011 at 05:35:02PM +0800, zhangfei gao wrote:
->>
->> Does the execute_tuning is called again?
->> del_timer is not delete timer really, but deactivate the timer, whic=
-h
->> could be re-activated by mod_timer.
->> So if execute_tuning is called, the mod_timer will tigger the tuning
->> timer again.
->>
+On Fri, Jul 22, 2011 at 12:59 AM, Bryan Buckley <bryan.buckley@ti.com> =
+wrote:
+> Remove OMAP4_USBC1_ICUSB_PWRDNZ_MASK during enable/disable PWRDNZ mod=
+e for
+> MMC1_PBIAS and associated extended-drain MMC1 I/O cell. This is in ac=
+cordance
+> with the control module programming guide. This fixes a bug where if =
+trying to
+> use gpio_98 or gpio_99 and MMC1 at the same time the GPIO signal will=
+ be
+> affected by a changing SDMMC1_VDDS.
 >
-> Hi zhangfei,
+> Software must keep MMC1_PBIAS cell and MMC1_IO cell PWRDNZ signals lo=
+w whenever
+> SDMMC1_VDDS ramps up/down or changes for cell protection purposes.
 >
-> Thanks for the comment.
+> MMC1 is based on SDMMC1_VDDS whereas USBC1 is based on SIM_VDDS there=
+fore
+> they can operate independently.
 >
-> The execute_tuning will be called at two places:
-> 1 In mmc_sd_init_uhs_card, when host is initializing an UHS card,
-> and the re-tuning timer will be activated for the first time;
-> 2 When re-tuning timer expired
->
-> So if the re-tuning timer is deactivated in sdhci_tasklet_finish,
-> execute_tuning will have no chance of getting called again, and the
-> host will not be able to do the re-tuning anymore.
+> Signed-off-by: Bryan Buckley <bryan.buckley@ti.com>
 
-Thanks for explanation, looks good to me.
+Good catch,
 
+Acked-by:  Kishore Kadiyala <kishore.kadiyala@ti.com>
+
+> ---
+> =A0arch/arm/mach-omap2/hsmmc.c | =A0 12 ++++--------
+> =A01 files changed, 4 insertions(+), 8 deletions(-)
 >
->> >> >
->> >> > Signed-off-by: Aaron Lu <Aaron.Lu@amd.com>
->> >> > ---
->> >> > =A0drivers/mmc/host/sdhci.c | =A0 =A03 ---
->> >> > =A01 files changed, 0 insertions(+), 3 deletions(-)
->> >> >
->> >> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.=
+> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.=
 c
->> >> > index 91d9892..6250bac 100644
->> >> > --- a/drivers/mmc/host/sdhci.c
->> >> > +++ b/drivers/mmc/host/sdhci.c
->> >> > @@ -1863,9 +1863,6 @@ static void sdhci_tasklet_finish(unsigned=
- long
->> >> > param)
->> >> >
->> >> > =A0 =A0 del_timer(&host->timer);
->> >> >
->> >> > - =A0 if (host->version >=3D SDHCI_SPEC_300)
->> >> > - =A0 =A0 =A0 =A0 =A0 del_timer(&host->tuning_timer);
->> >> > -
->> >> > =A0 =A0 mrq =3D host->mrq;
->> >> >
->> >> > =A0 =A0 /*
->> >> > --
->> >> > 1.7.1
->> >>
->> >>
->> >
->> >
->>
+> index 3842405..a6135df 100644
+> --- a/arch/arm/mach-omap2/hsmmc.c
+> +++ b/arch/arm/mach-omap2/hsmmc.c
+> @@ -144,8 +144,7 @@ static void omap4_hsmmc1_before_set_reg(struct de=
+vice *dev, int slot,
+> =A0 =A0 =A0 =A0 */
+> =A0 =A0 =A0 =A0reg =3D omap4_ctrl_pad_readl(control_pbias_offset);
+> =A0 =A0 =A0 =A0reg &=3D ~(OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK |
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_USBC1_ICUSB_PWRDNZ_MASK);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK);
+> =A0 =A0 =A0 =A0omap4_ctrl_pad_writel(reg, control_pbias_offset);
+> =A0}
 >
+> @@ -165,8 +164,7 @@ static void omap4_hsmmc1_after_set_reg(struct dev=
+ice *dev, int slot,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0else
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0reg |=3D OMAP4_MMC1_PB=
+IASLITE_VMODE_MASK;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0reg |=3D (OMAP4_MMC1_PBIASLITE_PWRDNZ_=
+MASK |
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK =
+|
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_USBC1_ICUSB_PWRDN=
+Z_MASK);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK)=
+;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0omap4_ctrl_pad_writel(reg, control_pbi=
+as_offset);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* 4 microsec delay for comparator to =
+generate an error*/
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0udelay(4);
+> @@ -174,16 +172,14 @@ static void omap4_hsmmc1_after_set_reg(struct d=
+evice *dev, int slot,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (reg & OMAP4_MMC1_PBIASLITE_VMODE_E=
+RROR_MASK) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pr_err("Pbias Voltage =
+is not same as LDO\n");
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Caution : On VMODE_=
+ERROR Power Down MMC IO */
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_P=
+WRDNZ_MASK |
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_U=
+SBC1_ICUSB_PWRDNZ_MASK);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_P=
+WRDNZ_MASK);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0omap4_ctrl_pad_writel(=
+reg, control_pbias_offset);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+> =A0 =A0 =A0 =A0} else {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0reg =3D omap4_ctrl_pad_readl(control_p=
+bias_offset);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0reg |=3D (OMAP4_MMC1_PBIASLITE_PWRDNZ_=
+MASK |
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0OMAP4_MMC1_PWRDNZ_MASK=
+ |
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PBIASLITE_VM=
+ODE_MASK |
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_USBC1_ICUSB_PWRDN=
+Z_MASK);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PBIASLITE_VM=
+ODE_MASK);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0omap4_ctrl_pad_writel(reg, control_pbi=
+as_offset);
+> =A0 =A0 =A0 =A0}
+> =A0}
+> --
+> 1.7.0.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 >
