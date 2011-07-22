@@ -1,127 +1,142 @@
-From: Kishore Kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH] OMAP4: MMC: fix power and audio issue, decouple USBC1
- from MMC1
-Date: Fri, 22 Jul 2011 18:00:29 +0530
-Message-ID: <CAF=Qhp0YO2zYnwo63ddhKZv-o+eXs2bQETrqF5wYU2EtKQ=Yqw@mail.gmail.com>
-References: <1311276543-9374-1-git-send-email-bryan.buckley@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH] mmc: mmc_test: avoid stalled file in debugfs
+Date: Fri, 22 Jul 2011 16:13:36 +0300
+Message-ID: <095a90240876c249ed33aa36f2543b54a0b68fc2.1311340371.git.andriy.shevchenko@linux.intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yi0-f46.google.com ([209.85.218.46]:33563 "EHLO
-	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753794Ab1GVMat convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jul 2011 08:30:49 -0400
-In-Reply-To: <1311276543-9374-1-git-send-email-bryan.buckley@ti.com>
+Received: from mga11.intel.com ([192.55.52.93]:48212 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754203Ab1GVNOH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Jul 2011 09:14:07 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bryan Buckley <bryan.buckley@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>, Balaji T Krishnamoorthy <balajitk@ti.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Moiz Sonasath <m-sonasath@ti.com>, Viswanath Puttagunta <vishp@ti.com>, Tony Lindgren <tony@atomide.com>, Madhusudhan Chikkature <madhu.cr@ti.com>
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Per Forlin <per.forlin@linaro.org>, Chris Ball <cjb@laptop.org>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-On Fri, Jul 22, 2011 at 12:59 AM, Bryan Buckley <bryan.buckley@ti.com> =
-wrote:
-> Remove OMAP4_USBC1_ICUSB_PWRDNZ_MASK during enable/disable PWRDNZ mod=
-e for
-> MMC1_PBIAS and associated extended-drain MMC1 I/O cell. This is in ac=
-cordance
-> with the control module programming guide. This fixes a bug where if =
-trying to
-> use gpio_98 or gpio_99 and MMC1 at the same time the GPIO signal will=
- be
-> affected by a changing SDMMC1_VDDS.
->
-> Software must keep MMC1_PBIAS cell and MMC1_IO cell PWRDNZ signals lo=
-w whenever
-> SDMMC1_VDDS ramps up/down or changes for cell protection purposes.
->
-> MMC1 is based on SDMMC1_VDDS whereas USBC1 is based on SIM_VDDS there=
-fore
-> they can operate independently.
->
-> Signed-off-by: Bryan Buckley <bryan.buckley@ti.com>
+During card removal and inserting cycle the test file in the debugfs could be
+stalled until the host driver removes it. Let's keep the file in the linked
+list and destroy it when card is removed.
 
-Good catch,
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+---
+ drivers/mmc/card/mmc_test.c |   56 +++++++++++++++++++++++--------------------
+ 1 files changed, 30 insertions(+), 26 deletions(-)
 
-Acked-by:  Kishore Kadiyala <kishore.kadiyala@ti.com>
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index 006a5e9..915a221 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -2900,7 +2900,7 @@ static const struct file_operations mmc_test_fops_testlist = {
+ 	.release	= single_release,
+ };
+ 
+-static void mmc_test_free_file_test(struct mmc_card *card)
++static void mmc_test_free_dbgfs_file(struct mmc_card *card)
+ {
+ 	struct mmc_test_dbgfs_file *df, *dfs;
+ 
+@@ -2917,34 +2917,21 @@ static void mmc_test_free_file_test(struct mmc_card *card)
+ 	mutex_unlock(&mmc_test_lock);
+ }
+ 
+-static int mmc_test_register_file_test(struct mmc_card *card)
++static int __mmc_test_register_dbgfs_file(struct mmc_card *card,
++	const char *name, mode_t mode, const struct file_operations *fops)
+ {
+ 	struct dentry *file = NULL;
+ 	struct mmc_test_dbgfs_file *df;
+-	int ret = 0;
+-
+-	mutex_lock(&mmc_test_lock);
+-
+-	if (card->debugfs_root)
+-		file = debugfs_create_file("test", S_IWUSR | S_IRUGO,
+-			card->debugfs_root, card, &mmc_test_fops_test);
+-
+-	if (IS_ERR_OR_NULL(file)) {
+-		dev_err(&card->dev,
+-			"Can't create test. Perhaps debugfs is disabled.\n");
+-		ret = -ENODEV;
+-		goto err;
+-	}
+ 
+ 	if (card->debugfs_root)
+-		file = debugfs_create_file("testlist", S_IRUGO,
+-			card->debugfs_root, card, &mmc_test_fops_testlist);
++		file = debugfs_create_file(name, mode, card->debugfs_root, card,
++			fops);
+ 
+ 	if (IS_ERR_OR_NULL(file)) {
+ 		dev_err(&card->dev,
+-			"Can't create testlist. Perhaps debugfs is disabled.\n");
+-		ret = -ENODEV;
+-		goto err;
++			"Can't create %s. Perhaps debugfs is disabled.\n",
++			name);
++		return -ENODEV;
+ 	}
+ 
+ 	df = kmalloc(sizeof(struct mmc_test_dbgfs_file), GFP_KERNEL);
+@@ -2952,14 +2939,31 @@ static int mmc_test_register_file_test(struct mmc_card *card)
+ 		debugfs_remove(file);
+ 		dev_err(&card->dev,
+ 			"Can't allocate memory for internal usage.\n");
+-		ret = -ENOMEM;
+-		goto err;
++		return -ENOMEM;
+ 	}
+ 
+ 	df->card = card;
+ 	df->file = file;
+ 
+ 	list_add(&df->link, &mmc_test_file_test);
++	return 0;
++}
++
++static int mmc_test_register_dbgfs_file(struct mmc_card *card)
++{
++	int ret;
++
++	mutex_lock(&mmc_test_lock);
++
++	ret = __mmc_test_register_dbgfs_file(card, "test", S_IWUSR | S_IRUGO,
++		&mmc_test_fops_test);
++	if (ret)
++		goto err;
++
++	ret = __mmc_test_register_dbgfs_file(card, "testlist", S_IRUGO,
++		&mmc_test_fops_testlist);
++	if (ret)
++		goto err;
+ 
+ err:
+ 	mutex_unlock(&mmc_test_lock);
+@@ -2974,7 +2978,7 @@ static int mmc_test_probe(struct mmc_card *card)
+ 	if (!mmc_card_mmc(card) && !mmc_card_sd(card))
+ 		return -ENODEV;
+ 
+-	ret = mmc_test_register_file_test(card);
++	ret = mmc_test_register_dbgfs_file(card);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -2986,7 +2990,7 @@ static int mmc_test_probe(struct mmc_card *card)
+ static void mmc_test_remove(struct mmc_card *card)
+ {
+ 	mmc_test_free_result(card);
+-	mmc_test_free_file_test(card);
++	mmc_test_free_dbgfs_file(card);
+ }
+ 
+ static struct mmc_driver mmc_driver = {
+@@ -3006,7 +3010,7 @@ static void __exit mmc_test_exit(void)
+ {
+ 	/* Clear stalled data if card is still plugged */
+ 	mmc_test_free_result(NULL);
+-	mmc_test_free_file_test(NULL);
++	mmc_test_free_dbgfs_file(NULL);
+ 
+ 	mmc_unregister_driver(&mmc_driver);
+ }
+-- 
+1.7.5.4
 
-> ---
-> =A0arch/arm/mach-omap2/hsmmc.c | =A0 12 ++++--------
-> =A01 files changed, 4 insertions(+), 8 deletions(-)
->
-> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.=
-c
-> index 3842405..a6135df 100644
-> --- a/arch/arm/mach-omap2/hsmmc.c
-> +++ b/arch/arm/mach-omap2/hsmmc.c
-> @@ -144,8 +144,7 @@ static void omap4_hsmmc1_before_set_reg(struct de=
-vice *dev, int slot,
-> =A0 =A0 =A0 =A0 */
-> =A0 =A0 =A0 =A0reg =3D omap4_ctrl_pad_readl(control_pbias_offset);
-> =A0 =A0 =A0 =A0reg &=3D ~(OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK |
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_USBC1_ICUSB_PWRDNZ_MASK);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK);
-> =A0 =A0 =A0 =A0omap4_ctrl_pad_writel(reg, control_pbias_offset);
-> =A0}
->
-> @@ -165,8 +164,7 @@ static void omap4_hsmmc1_after_set_reg(struct dev=
-ice *dev, int slot,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0else
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0reg |=3D OMAP4_MMC1_PB=
-IASLITE_VMODE_MASK;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0reg |=3D (OMAP4_MMC1_PBIASLITE_PWRDNZ_=
-MASK |
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK =
-|
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_USBC1_ICUSB_PWRDN=
-Z_MASK);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK)=
-;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0omap4_ctrl_pad_writel(reg, control_pbi=
-as_offset);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* 4 microsec delay for comparator to =
-generate an error*/
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0udelay(4);
-> @@ -174,16 +172,14 @@ static void omap4_hsmmc1_after_set_reg(struct d=
-evice *dev, int slot,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (reg & OMAP4_MMC1_PBIASLITE_VMODE_E=
-RROR_MASK) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pr_err("Pbias Voltage =
-is not same as LDO\n");
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Caution : On VMODE_=
-ERROR Power Down MMC IO */
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_P=
-WRDNZ_MASK |
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_U=
-SBC1_ICUSB_PWRDNZ_MASK);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_P=
-WRDNZ_MASK);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0omap4_ctrl_pad_writel(=
-reg, control_pbias_offset);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
-> =A0 =A0 =A0 =A0} else {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0reg =3D omap4_ctrl_pad_readl(control_p=
-bias_offset);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0reg |=3D (OMAP4_MMC1_PBIASLITE_PWRDNZ_=
-MASK |
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0OMAP4_MMC1_PWRDNZ_MASK=
- |
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PBIASLITE_VM=
-ODE_MASK |
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_USBC1_ICUSB_PWRDN=
-Z_MASK);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PBIASLITE_VM=
-ODE_MASK);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0omap4_ctrl_pad_writel(reg, control_pbi=
-as_offset);
-> =A0 =A0 =A0 =A0}
-> =A0}
-> --
-> 1.7.0.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
