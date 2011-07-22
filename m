@@ -1,142 +1,69 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH] mmc: mmc_test: avoid stalled file in debugfs
-Date: Fri, 22 Jul 2011 16:13:36 +0300
-Message-ID: <095a90240876c249ed33aa36f2543b54a0b68fc2.1311340371.git.andriy.shevchenko@linux.intel.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH] mmc: sdio add regulator vsdio
+Date: Fri, 22 Jul 2011 09:05:56 -0700
+Message-ID: <09FC057A-EABC-414A-A6AE-C5309825873A@marvell.com>
+References: <1311215673-2489-1-git-send-email-zhangfei.gao@marvell.com>
+ <1311215673-2489-2-git-send-email-zhangfei.gao@marvell.com>
+ <CAGq3pz6-MQPpsyEWbDQBnnW4q2rXSKFF9qzRvTLtwmzvG+xJKw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:48212 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754203Ab1GVNOH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Jul 2011 09:14:07 -0400
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:33448 "EHLO
+	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751666Ab1GVQKF convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Jul 2011 12:10:05 -0400
+In-Reply-To: <CAGq3pz6-MQPpsyEWbDQBnnW4q2rXSKFF9qzRvTLtwmzvG+xJKw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Per Forlin <per.forlin@linaro.org>, Chris Ball <cjb@laptop.org>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: Daniel Drake <dsd@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Ohad Ben-Cohen <ohad@wizery.com>, Nicolas Pitre <nico@fluxnic.net>
+Cc: Zhangfei Gao <zgao6@marvell.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Eric Miao <eric.y.miao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Bing Zhao <bzhao@marvell.com>, "Frank@marvell.com" <Frank@marvell.com>, "Huang@marvell.com" <Huang@marvell.com>, Frank Huang <frankh@marvell.com>
 
-During card removal and inserting cycle the test file in the debugfs could be
-stalled until the host driver removes it. Let's keep the file in the linked
-list and destroy it when card is removed.
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
- drivers/mmc/card/mmc_test.c |   56 +++++++++++++++++++++++--------------------
- 1 files changed, 30 insertions(+), 26 deletions(-)
+Could we have an architecture discussion about how this is supposed to be done and a picture please !
+(a pointer to good working code would be nice)
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index 006a5e9..915a221 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -2900,7 +2900,7 @@ static const struct file_operations mmc_test_fops_testlist = {
- 	.release	= single_release,
- };
+On brownstone the SDIO 8787 power is supplied by a ldo which is dedicated to the internal SDIO chip.  
+The Power GPIO (PDn) is an on/off switch for the 8787.  It does not affect the power from the ldo.
+
+What is the responsibility of the 8787 SDIO driver for power management ?  It is obviously called at
+probe / init time.  Is it supposed to turn on power ?  I realize that it may not be aware of what device
+to power on?  Does it register a call back ?  Is it responsible for turning itself on/off at suspend/resume
+time?   Thought about open time but the firmware needs to be loaded before the device can respond.
+Is firmware loading done at the right place ?  Should it be done at open and NOT at probe? That way
+the driver could look present and open might handle firmware loading and power control.
+
+What is the responsibilty of MMC layer.  Obviously it needs to supply power to the device on the bus.
+Is there supposed to be a callback in the board file that handles these specifics ?  Would this call back
+then call then set the ldo on and turn on the 8787 ?
+
+
+regards,
+
+Philip
+
  
--static void mmc_test_free_file_test(struct mmc_card *card)
-+static void mmc_test_free_dbgfs_file(struct mmc_card *card)
- {
- 	struct mmc_test_dbgfs_file *df, *dfs;
- 
-@@ -2917,34 +2917,21 @@ static void mmc_test_free_file_test(struct mmc_card *card)
- 	mutex_unlock(&mmc_test_lock);
- }
- 
--static int mmc_test_register_file_test(struct mmc_card *card)
-+static int __mmc_test_register_dbgfs_file(struct mmc_card *card,
-+	const char *name, mode_t mode, const struct file_operations *fops)
- {
- 	struct dentry *file = NULL;
- 	struct mmc_test_dbgfs_file *df;
--	int ret = 0;
--
--	mutex_lock(&mmc_test_lock);
--
--	if (card->debugfs_root)
--		file = debugfs_create_file("test", S_IWUSR | S_IRUGO,
--			card->debugfs_root, card, &mmc_test_fops_test);
--
--	if (IS_ERR_OR_NULL(file)) {
--		dev_err(&card->dev,
--			"Can't create test. Perhaps debugfs is disabled.\n");
--		ret = -ENODEV;
--		goto err;
--	}
- 
- 	if (card->debugfs_root)
--		file = debugfs_create_file("testlist", S_IRUGO,
--			card->debugfs_root, card, &mmc_test_fops_testlist);
-+		file = debugfs_create_file(name, mode, card->debugfs_root, card,
-+			fops);
- 
- 	if (IS_ERR_OR_NULL(file)) {
- 		dev_err(&card->dev,
--			"Can't create testlist. Perhaps debugfs is disabled.\n");
--		ret = -ENODEV;
--		goto err;
-+			"Can't create %s. Perhaps debugfs is disabled.\n",
-+			name);
-+		return -ENODEV;
- 	}
- 
- 	df = kmalloc(sizeof(struct mmc_test_dbgfs_file), GFP_KERNEL);
-@@ -2952,14 +2939,31 @@ static int mmc_test_register_file_test(struct mmc_card *card)
- 		debugfs_remove(file);
- 		dev_err(&card->dev,
- 			"Can't allocate memory for internal usage.\n");
--		ret = -ENOMEM;
--		goto err;
-+		return -ENOMEM;
- 	}
- 
- 	df->card = card;
- 	df->file = file;
- 
- 	list_add(&df->link, &mmc_test_file_test);
-+	return 0;
-+}
-+
-+static int mmc_test_register_dbgfs_file(struct mmc_card *card)
-+{
-+	int ret;
-+
-+	mutex_lock(&mmc_test_lock);
-+
-+	ret = __mmc_test_register_dbgfs_file(card, "test", S_IWUSR | S_IRUGO,
-+		&mmc_test_fops_test);
-+	if (ret)
-+		goto err;
-+
-+	ret = __mmc_test_register_dbgfs_file(card, "testlist", S_IRUGO,
-+		&mmc_test_fops_testlist);
-+	if (ret)
-+		goto err;
- 
- err:
- 	mutex_unlock(&mmc_test_lock);
-@@ -2974,7 +2978,7 @@ static int mmc_test_probe(struct mmc_card *card)
- 	if (!mmc_card_mmc(card) && !mmc_card_sd(card))
- 		return -ENODEV;
- 
--	ret = mmc_test_register_file_test(card);
-+	ret = mmc_test_register_dbgfs_file(card);
- 	if (ret)
- 		return ret;
- 
-@@ -2986,7 +2990,7 @@ static int mmc_test_probe(struct mmc_card *card)
- static void mmc_test_remove(struct mmc_card *card)
- {
- 	mmc_test_free_result(card);
--	mmc_test_free_file_test(card);
-+	mmc_test_free_dbgfs_file(card);
- }
- 
- static struct mmc_driver mmc_driver = {
-@@ -3006,7 +3010,7 @@ static void __exit mmc_test_exit(void)
- {
- 	/* Clear stalled data if card is still plugged */
- 	mmc_test_free_result(NULL);
--	mmc_test_free_file_test(NULL);
-+	mmc_test_free_dbgfs_file(NULL);
- 
- 	mmc_unregister_driver(&mmc_driver);
- }
--- 
-1.7.5.4
+
+On Jul 21, 2011, at 11:50 PM, Daniel Drake wrote:
+
+> On 21 July 2011 03:34, Zhangfei Gao <zhangfei.gao@marvell.com> wrote:
+>> sdio client may be required power on/off dynamically.
+>> With regulator vsdio, sdio client power on/off could be executed by mmc_power_up/down
+> 
+> I think you can/should do this with vmmc. When the device gets powered
+> down (e.g. in runtime suspend), the voltage should be cut, so it
+> should be possible to use the existing regulator.
+> 
+> I also looked at doing this before, when it looked like we would have
+> to manipulate a GPIO reset line for SD8686. I decided that the current
+> vmmc implementation in sdhci wasn't quite complete enough, but it
+> wouldn't be much effort to correct this.
+> 
+> Daniel
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
