@@ -1,133 +1,62 @@
-From: "Nori, Sekhar" <nsekhar@ti.com>
-Subject: RE: [PATCH v2 6/6] arm: davinci: DA850: Add wl1271/wlan support
-Date: Mon, 25 Jul 2011 23:10:55 +0530
-Message-ID: <B85A65D85D7EB246BE421B3FB0FBB593024DD2CEC2__10714.8246992894$1311615708$gmane$org@dbde02.ent.ti.com>
-References: <1310303679-17936-1-git-send-email-ido@wizery.com>
- <1310303679-17936-7-git-send-email-ido@wizery.com>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH v3 2/3] mmc: core: add random fault injection
+Date: Mon, 25 Jul 2011 21:19:21 +0200
+Message-ID: <CAJ0pr1_rL8rsEbDR-PL6fs9EzyGfUMbmeUjTGk=WspvrAkdy+g@mail.gmail.com>
+References: <1311199321-4618-1-git-send-email-per.forlin@linaro.org>
+	<1311199321-4618-3-git-send-email-per.forlin@linaro.org>
+	<CAC5umyg44tQxrFEYRL-tjzBMA2+KNXjB+nQveH3KcB_LPmYVHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:52835 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752375Ab1GYRl2 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2011 13:41:28 -0400
-In-Reply-To: <1310303679-17936-7-git-send-email-ido@wizery.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <CAC5umyg44tQxrFEYRL-tjzBMA2+KNXjB+nQveH3KcB_LPmYVHw@mail.gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Akinobu Mita <akinobu.mita@gmail.com>
+Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Sourav Poddar <sourav.poddar@ti.com>, Chris Ball <cjb@laptop.org>, J Freyensee <james_p_freyensee@linux.intel.com>, Randy Dunlap <rdunlap@xenotime.net>
 List-Id: linux-mmc@vger.kernel.org
-To: Ido Yariv <ido@wizery.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-ker>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, Thomas Gleixner <tglx@linutronix.de>, "Hilman, Kevin" <khilman@ti.com>
 
-On Sun, Jul 10, 2011 at 18:44:39, Ido Yariv wrote:
-> The wl1271 daughter card for AM18x EVMs is a combo wireless connectivity
-> add-on card, based on the LS Research TiWi module with Texas
-> Instruments' wl1271 solution.
-> It is a 4-wire, 1.8V, embedded SDIO WLAN device with an external IRQ
-> line and is power-controlled by a GPIO-based fixed regulator.
-> 
-> This patch adds support for the WLAN capabilities of this expansion
-> board.
-> 
-> Signed-off-by: Ido Yariv <ido@wizery.com>
-> ---
-
-> diff --git a/arch/arm/mach-davinci/board-da850-evm.c b/arch/arm/mach-davinci/board-da850-evm.c
-> index a7b41bf..2dae1a1 100644
-> --- a/arch/arm/mach-davinci/board-da850-evm.c
-> +++ b/arch/arm/mach-davinci/board-da850-evm.c
-> @@ -31,6 +31,8 @@
-
-> +#ifdef CONFIG_DA850_WL12XX
-> +
-> +static int da850_wl12xx_fref = WL12XX_REFCLOCK_38;
-> +
-> +static int __init setup_da850_wl12xx_fref(char *fref)
-> +{
-> +	if (!strcmp(fref, "19.2"))
-> +		da850_wl12xx_fref = WL12XX_REFCLOCK_19;
-> +	else if (!strcmp(fref, "26"))
-> +		da850_wl12xx_fref = WL12XX_REFCLOCK_26;
-> +	else if (!strcmp(fref, "38.4"))
-> +		da850_wl12xx_fref = WL12XX_REFCLOCK_38;
-> +	else if (!strcmp(fref, "52"))
-> +		da850_wl12xx_fref = WL12XX_REFCLOCK_52;
-> +	else if (!strcmp(fref, "XTAL26"))
-> +		da850_wl12xx_fref = WL12XX_REFCLOCK_26_XTAL;
-> +	else if (!strcmp(fref, "XTAL38.4"))
-> +		da850_wl12xx_fref = WL12XX_REFCLOCK_38_XTAL;
-> +	else
-> +		pr_info("da850_wl12xx_fref is invalid. Valid options: "
-> +			"19.2, 26, 38.4, 52, XTAL26 or XTAL38.4\n");
-> +	return 0;
-> +}
-> +__setup("da850_wl12xx_fref=", setup_da850_wl12xx_fref);
-
-Adding a new kernel parameter requires update to
-Documentation/kernel-parameters.txt as well.
-
-I am Ccing a couple of folks in case they have ideas on
-whether there is a better way to pass this information
-to the kernel. I assume there is no way to detect
-this from hardware.
-
-> +static struct davinci_mmc_config da850_mmc_wl12xx_config = {
-> +	.get_ro		= NULL,
-> +	.get_cd		= NULL,
-
-You can get rid of these NULL initializers.
-
-> +	.set_power	= wl12xx_set_power,
-> +	.wires		= 4,
-> +	.max_freq	= 25000000,
-> +	.caps		= MMC_CAP_4_BIT_DATA | MMC_CAP_NONREMOVABLE |
-> +			  MMC_CAP_POWER_OFF_CARD,
-> +	.version	= MMC_CTLR_VERSION_2,
-> +};
-
-> +static void da850_wl12xx_init(void)
-> +{
-> +	int ret;
-> +
-> +	ret = davinci_cfg_reg_list(da850_evm_mmc_wl12xx_pins);
-> +	if (ret) {
-> +		pr_warning("da850_evm_init: wl12xx/mmc mux setup failed:"
-> +			   " %d\n", ret);
-> +		return;
-> +	}
-> +
-> +	ret = da850_register_mmcsd1(&da850_mmc_wl12xx_config);
-> +	if (ret) {
-> +		pr_warning("da850_evm_init: wl12xx/mmc registration failed:"
-> +			   " %d\n", ret);
-> +		return;
-> +	}
-> +
-> +	ret = gpio_request_one(DA850_WLAN_EN, GPIOF_OUT_INIT_LOW, "wl12xx_en");
-> +	if (ret) {
-> +		pr_err("Error initializing the wl12xx enable gpio: %d\n", ret);
-> +		return;
-> +	}
-> +
-> +	ret = gpio_request_one(DA850_WLAN_IRQ, GPIOF_IN, "wl12xx_irq");
-> +	if (ret) {
-> +		pr_err("Error initializing the wl12xx irq gpio: %d\n", ret);
-> +		gpio_free(DA850_WLAN_EN);
-> +		return;
-> +	}
-> +
-> +	da850_wl12xx_wlan_data.irq = gpio_to_irq(DA850_WLAN_IRQ);
-> +	da850_wl12xx_wlan_data.board_ref_clock = da850_wl12xx_fref;
-> +
-> +	ret = wl12xx_set_platform_data(&da850_wl12xx_wlan_data);
-> +	if (ret) {
-> +		pr_err("Error setting wl12xx data: %d\n", ret);
-> +		gpio_free(DA850_WLAN_IRQ);
-> +		gpio_free(DA850_WLAN_EN);
-
-Why not just use the traditional goto based bail out
-mechanism? You will avoid the multiple gpio_free() calls.
-
+On 25 July 2011 17:58, Akinobu Mita <akinobu.mita@gmail.com> wrote:
+> 2011/7/21 Per Forlin <per.forlin@linaro.org>:
+>> This adds support to inject data errors after a completed host trans=
+fer.
+>> The mmc core will return error even though the host transfer is succ=
+essful.
+>> This simple fault injection proved to be very useful to test the
+>> non-blocking error handling in the mmc_blk_issue_rw_rq().
+>> Random faults can also test how the host driver handles pre_req()
+>> and post_req() in case of errors.
+>
+> Looks good to me.
+>
 Thanks,
-Sekhar
 
+>> @@ -82,6 +87,66 @@ static void mmc_flush_scheduled_work(void)
+>> =A0 =A0 =A0 =A0flush_workqueue(workqueue);
+>> =A0}
+>>
+>> +#ifdef CONFIG_FAIL_MMC_REQUEST
+>> +
+>> +static DECLARE_FAULT_ATTR(fail_mmc_request);
+>
+> I think the fail_attr should be defined for each mmc_host like make_i=
+t_fail
+> in struct mmc_host and debugfs entries should also be created in a
+> subdirectory of mmc host debugfs.
+>
+I looked at blk-core.c and used the same code here. Current code
+creates the entry under the debugfs root. This means one fail_attr for
+all hosts.
+I agree, it's more clean to move the fail_attr to the
+host-debugfs-entry which require the fail_attr to be stored same way
+as make_it_fail.
+
+> And I know that init_fault_attr_dentries() can only create a
+> subdirectory in debugfs root directory. =A0But I have a patch which
+> support for creating it in arbitrary directory. =A0Could you take a l=
+ook
+> at this? (Note that this patch is based on mmotm and not yet tested)
+>
+Thanks, I will check it out.
+
+Regards,
+Per
