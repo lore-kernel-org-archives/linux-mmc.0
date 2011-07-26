@@ -1,53 +1,67 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: [RFC] mmc: new discard support at mmc v4.5
-Date: Tue, 26 Jul 2011 17:46:03 +0900
-Message-ID: <20110726084603.GA15154@july>
+From: Zang Roy-R61911 <r61911@freescale.com>
+Subject: RE: [PATCH 2/2 v2] eSDHC: Fix errors when booting kernel with fsl
+ esdhc
+Date: Tue, 26 Jul 2011 10:29:55 +0000
+Message-ID: <2239AC579C7D3646A720227A37E026811736AE@039-SN1MPN1-004.039d.mgd.msft.net>
+References: <1311329717-13954-1-git-send-email-tie-fei.zang@freescale.com>
+ <1311329717-13954-2-git-send-email-tie-fei.zang@freescale.com>
+ <20110722101512.GA1576@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:11668 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751337Ab1GZIqN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2011 04:46:13 -0400
-Received: from epcpsbgm2.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LOX00BWPN0NMKQ0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 26 Jul 2011 17:46:11 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LOX00B93N0Z95@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 26 Jul 2011 17:46:11 +0900 (KST)
-Content-disposition: inline
+Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:38696 "EHLO
+	TX2EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751848Ab1GZKca (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2011 06:32:30 -0400
+In-Reply-To: <20110722101512.GA1576@oksana.dev.rtsoft.ru>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: jh80.chung@samsung.com
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Xu Lei-B33228 <B33228@freescale.com>, Kumar Gala <galak@kernel.crashing.org>, Wood Scott-B07421 <B07421@freescale.com>
 
-At mmc v4.5, it supports the DISCARD feature.
-It's different from trim and there's no check bit. 
-currently it's only supported at v4.5.
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbW1jLW93bmVy
+QHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmdd
+DQo+IE9uIEJlaGFsZiBPZiBBbnRvbiBWb3JvbnRzb3YNCj4gU2VudDogRnJpZGF5LCBKdWx5IDIy
+LCAyMDExIDE4OjE1IFBNDQo+IFRvOiBaYW5nIFJveS1SNjE5MTENCj4gQ2M6IGxpbnV4LW1tY0B2
+Z2VyLmtlcm5lbC5vcmc7IGxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnOyBha3BtQGxpbnV4
+LQ0KPiBmb3VuZGF0aW9uLm9yZzsgWHUgTGVpLUIzMzIyODsgS3VtYXIgR2FsYQ0KPiBTdWJqZWN0
+OiBSZTogW1BBVENIIDIvMiB2Ml0gZVNESEM6IEZpeCBlcnJvcnMgd2hlbiBib290aW5nIGtlcm5l
+bCB3aXRoIGZzbCBlc2RoYw0KPiANCj4gT24gRnJpLCBKdWwgMjIsIDIwMTEgYXQgMDY6MTU6MTdQ
+TSArMDgwMCwgUm95IFphbmcgd3JvdGU6DQo+IFsuLi5dDQo+ID4gIAlpZiAoaG9zdC0+dmVyc2lv
+biA+PSBTREhDSV9TUEVDXzIwMCkgew0KPiA+IC0JCWN0cmwgPSBzZGhjaV9yZWFkYihob3N0LCBT
+REhDSV9IT1NUX0NPTlRST0wpOw0KPiA+IC0JCWN0cmwgJj0gflNESENJX0NUUkxfRE1BX01BU0s7
+DQo+ID4gLQkJaWYgKChob3N0LT5mbGFncyAmIFNESENJX1JFUV9VU0VfRE1BKSAmJg0KPiA+IC0J
+CQkoaG9zdC0+ZmxhZ3MgJiBTREhDSV9VU0VfQURNQSkpDQo+ID4gLQkJCWN0cmwgfD0gU0RIQ0lf
+Q1RSTF9BRE1BMzI7DQo+ID4gLQkJZWxzZQ0KPiA+IC0JCQljdHJsIHw9IFNESENJX0NUUkxfU0RN
+QTsNCj4gPiAtCQlzZGhjaV93cml0ZWIoaG9zdCwgY3RybCwgU0RIQ0lfSE9TVF9DT05UUk9MKTsN
+Cj4gPiArCQlpZiAoaG9zdC0+cXVpcmtzICYgU0RIQ0lfUVVJUktfUU9SSVFfUFJPQ1RMX1dFSVJE
+KSB7DQo+ID4gKyNkZWZpbmUgRVNESENJX1BST0NUTF9ETUFTX01BU0sJCTB4MDAwMDAzMDANCj4g
+PiArI2RlZmluZSBFU0RIQ0lfUFJPQ1RMX0FETUEzMgkJMHgwMDAwMDIwMA0KPiA+ICsjZGVmaW5l
+IEVTREhDSV9QUk9DVExfU0RNQQkJMHgwMDAwMDAwMA0KPiA+ICsJCQljdHJsID0gc2RoY2lfcmVh
+ZGwoaG9zdCwgU0RIQ0lfSE9TVF9DT05UUk9MKTsNCj4gPiArCQkJY3RybCAmPSB+RVNESENJX1BS
+T0NUTF9ETUFTX01BU0s7DQo+ID4gKwkJCWlmICgoaG9zdC0+ZmxhZ3MgJiBTREhDSV9SRVFfVVNF
+X0RNQSkgJiYNCj4gPiArCQkJCShob3N0LT5mbGFncyAmIFNESENJX1VTRV9BRE1BKSkNCj4gPiAr
+CQkJCWN0cmwgfD0gRVNESENJX1BST0NUTF9BRE1BMzI7DQo+ID4gKwkJCWVsc2UNCj4gPiArCQkJ
+CWN0cmwgfD0gRVNESENJX1BST0NUTF9TRE1BOw0KPiA+ICsJCQlzZGhjaV93cml0ZWwoaG9zdCwg
+Y3RybCwgU0RIQ0lfSE9TVF9DT05UUk9MKTsNCj4gPiArCQl9IGVsc2Ugew0KPiA+ICsJCQljdHJs
+ID0gc2RoY2lfcmVhZGIoaG9zdCwgU0RIQ0lfSE9TVF9DT05UUk9MKTsNCj4gPiArCQkJY3RybCAm
+PSB+U0RIQ0lfQ1RSTF9ETUFfTUFTSzsNCj4gPiArCQkJaWYgKChob3N0LT5mbGFncyAmIFNESENJ
+X1JFUV9VU0VfRE1BKSAmJg0KPiA+ICsJCQkJKGhvc3QtPmZsYWdzICYgU0RIQ0lfVVNFX0FETUEp
+KQ0KPiA+ICsJCQkJY3RybCB8PSBTREhDSV9DVFJMX0FETUEzMjsNCj4gPiArCQkJZWxzZQ0KPiA+
+ICsJCQkJY3RybCB8PSBTREhDSV9DVFJMX1NETUE7DQo+ID4gKwkJCXNkaGNpX3dyaXRlYihob3N0
+LCBjdHJsLCBTREhDSV9IT1NUX0NPTlRST0wpOw0KPiANCj4gV2UgdHJ5IHRvIG5vdCBwb2xsdXRl
+IGdlbmVyaWMgc2RoY2kuYyBkcml2ZXIgd2l0aCBjaGlwLXNwZWNpZmljDQo+IHF1aXJrcy4NCj4g
+DQo+IE1heWJlIHlvdSBjYW4gZG8gdGhlIGZpeHVwcyB2aWEgSU8gYWNjZXNzb3JzPyBPciBieSBp
+bnRyb2R1Y2luZw0KPiBzb21lIGFkZGl0aW9uYWwgc2RoY2kgb3A/DQo+IA0KPiBbLi4uXQ0KPiA+
+ICAJaWYgKHBvd2VyICE9ICh1bnNpZ25lZCBzaG9ydCktMSkgew0KPiA+ICAJCXN3aXRjaCAoMSA8
+PCBwb3dlcikgew0KPiA+ICsjZGVmaW5lCUVTREhDSV9GU0xfUE9XRVJfTUFTSwkweDQwDQo+ID4g
+KyNkZWZpbmUJRVNESENJX0ZTTF9QT1dFUl8xODAJMHgwMA0KPiA+ICsjZGVmaW5lCUVTREhDSV9G
+U0xfUE9XRVJfMzAwCTB4NDANCj4gDQo+IFNhbWUgaGVyZS4gVGhlIGRyaXZlciB3aWxsIHJvdCBx
+dWlja2x5IGlmIGV2ZXJ5b25lIHdvdWxkIHN0YXJ0DQo+IHB1dHRpbmcgY2hpcC1zcGVjaWZpYyBx
+dWlya3MgaW50byBzZGhjaS5jLiBQbGVhc2UgZG9uJ3QuDQpJTyBhY2Nlc3NvcnMgb3Igc2RoY2kg
+b3AgbWlnaHQgd29yaywgYnV0IGl0IHdpbGwgbG9vayB1Z2x5IA0KYW5kIGxlc3MgcGVyZm9ybWFu
+Y2UgZWZmaWNpZW50IGZvciBpbyBhY2Nlc3MuDQoNCklmIHlvdSBzZWFyY2ggc2RoY2kuYywgeW91
+IHdpbGwgc2VlIG90aGVyIGJvYXJkIHNwZWNpZmljIHF1aXJrcy4NClRoYW5rcy4NClJveQ0K
 
-In trim mode, the controller can perform the actual erase at a convenient time.
-however, In discard, The controller can perform partial or full the actual erase at a convenient time.
-
-So in mmc v4.5, it's better to use the discard instead of trim.
-
-Please give opinions or comments.
-
-Thank you,
-Kyungmin Park
----
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index b8b1b7a..84f35a6 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -146,6 +146,7 @@ extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
- #define MMC_ERASE_ARG		0x00000000
- #define MMC_SECURE_ERASE_ARG	0x80000000
- #define MMC_TRIM_ARG		0x00000001
-+#define MMC_DISCARD_ARG		0x00000003
- #define MMC_SECURE_TRIM1_ARG	0x80000001
- #define MMC_SECURE_TRIM2_ARG	0x80008000
- 
