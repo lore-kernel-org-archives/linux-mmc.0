@@ -1,108 +1,121 @@
 From: Zhangfei Gao <zhangfei.gao@marvell.com>
-Subject: [PATCH 1/2] mmc: sdhci move vmmc to set_ios
-Date: Tue, 26 Jul 2011 15:06:12 +0800
-Message-ID: <1311663973-23715-2-git-send-email-zhangfei.gao@marvell.com>
+Subject: [PATCH 2/2] ARM: mmp2: support sdio device 8787
+Date: Tue, 26 Jul 2011 15:06:13 +0800
+Message-ID: <1311663973-23715-3-git-send-email-zhangfei.gao@marvell.com>
 References: <1311663973-23715-1-git-send-email-zhangfei.gao@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from dakia2.marvell.com ([65.219.4.35]:39856 "EHLO
+Received: from dakia2.marvell.com ([65.219.4.35]:39878 "EHLO
 	dakia2.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752603Ab1GZHGf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2011 03:06:35 -0400
+	with ESMTP id S1753881Ab1GZHGl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2011 03:06:41 -0400
 In-Reply-To: <1311663973-23715-1-git-send-email-zhangfei.gao@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Daniel Drake <dsd@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, linux-mmc@vger.kernel.o
-Cc: Zhangfei Gao <zhangfei.gao@marvell.com>, Ohad Ben-Cohen <ohad@wizery.com>
+To: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>, Daniel Drake <dsd@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, linux-mmc@vger.kernel.o
+Cc: Zhangfei Gao <zhangfei.gao@marvell.com>
 
-Move vmmc to set_ios, as a result mmc_power_up/down handles regulator_enable/disable vmmc
-Move regulator outof spin_lock, since usually i2c operation is called
-Remove vmmc from suspend/resume function, instead vmmc is handled properly in mmc_suspend/resume_host according to mmc_card_keep_power
+Support 8787 device, provide regulator vmmc
 
-CC: Ohad Ben-Cohen <ohad@wizery.com>
+With CONFIG_PM_RUNTIME=y
+8787 power is enabled if any client module over sdio is insmod, and disbled automatically after all client modules over sdio are rmmod
+Also 8787 power could be controled by mmc_start/stop_host via debugfs
+
 Signed-off-by: Zhangfei Gao <zhangfei.gao@marvell.com>
 ---
- drivers/mmc/host/sdhci.c  |   27 +++++++++++++++------------
- include/linux/mmc/sdhci.h |    1 +
- 2 files changed, 16 insertions(+), 12 deletions(-)
+ arch/arm/mach-mmp/brownstone.c |   60 ++++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 58 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c31a334..ce4f97f 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1279,6 +1279,13 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+diff --git a/arch/arm/mach-mmp/brownstone.c b/arch/arm/mach-mmp/brownstone.c
+index c79162a..46a67b9 100644
+--- a/arch/arm/mach-mmp/brownstone.c
++++ b/arch/arm/mach-mmp/brownstone.c
+@@ -89,6 +89,9 @@ static unsigned long brownstone_pin_config[] __initdata = {
+ 	GPIO41_MMC2_CMD | MFP_PULL_HIGH,
+ 	GPIO42_MMC2_CLK,
  
- 	host = mmc_priv(mmc);
- 
-+	if (host->vmmc) {
-+		if (ios->power_mode != host->power_mode_old) {
-+			if (ios->power_mode == MMC_POWER_UP)
-+				regulator_enable(host->vmmc);
-+		}
-+	}
++	GPIO57_GPIO | MFP_LPM_DRIVE_HIGH | MFP_PULL_HIGH,
++	GPIO58_GPIO | MFP_LPM_DRIVE_HIGH | MFP_PULL_HIGH,
 +
- 	spin_lock_irqsave(&host->lock, flags);
+ 	/* MMC2 */
+ 	GPIO165_MMC3_DAT7 | MFP_PULL_HIGH,
+ 	GPIO162_MMC3_DAT6 | MFP_PULL_HIGH,
+@@ -180,12 +183,66 @@ static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc0 = {
+ 	.clk_delay_cycles = 0x1f,
+ };
  
- 	if (host->flags & SDHCI_DEVICE_DEAD)
-@@ -1426,6 +1433,14 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- out:
- 	mmiowb();
- 	spin_unlock_irqrestore(&host->lock, flags);
++static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc1 = {
++	.flags = PXA_FLAG_CARD_PERMANENT,
++};
 +
-+	if (host->vmmc) {
-+		if (ios->power_mode != host->power_mode_old) {
-+			if (ios->power_mode == MMC_POWER_OFF)
-+				regulator_disable(host->vmmc);
-+		}
-+		host->power_mode_old = ios->power_mode;
+ static struct sdhci_pxa_platdata mmp2_sdh_platdata_mmc2 = {
+ 	.clk_delay_cycles = 0x1f,
+ 	.flags = PXA_FLAG_CARD_PERMANENT
+ 		| PXA_FLAG_SD_8_BIT_CAPABLE_SLOT,
+ };
+ 
++static struct regulator_consumer_supply sdio_power_supplies[] = {
++	REGULATOR_SUPPLY("vmmc", "sdhci-pxav3.1"),
++};
++
++static struct regulator_init_data sdio_power_data = {
++	.constraints	= {
++		.valid_ops_mask		= REGULATOR_CHANGE_STATUS,
++	},
++	.num_consumer_supplies	= ARRAY_SIZE(sdio_power_supplies),
++	.consumer_supplies	= sdio_power_supplies,
++};
++
++static struct fixed_voltage_config sdio_power = {
++	.supply_name		= "vmmc",
++	.microvolts		= 3000000,
++	.gpio			= mfp_to_gpio(MFP_PIN_GPIO57),
++	.enable_high		= 1,
++	.enabled_at_boot	= 0,
++	.init_data		= &sdio_power_data,
++};
++
++static struct platform_device sdio_power_device = {
++	.name		= "reg-fixed-voltage",
++	.id		= 2,
++	.dev = {
++		.platform_data = &sdio_power,
++	},
++};
++
++static void __init brownstone_init_mmc(void)
++{
++	/*
++	 * PDn: GPIO57; RESETn: GPIO58
++	 * 8787, RESETn keeps high, PDn control power
++	 * on: PDn 1; off: PDn 0;
++	 */
++	int RESETn = mfp_to_gpio(MFP_PIN_GPIO58);
++
++	if (gpio_request(RESETn, "sdio RESETn")) {
++		pr_err("Failed to request sdio RESETn gpio\n");
++		return;
 +	}
- }
++	gpio_direction_output(RESETn, 1);
++	gpio_free(RESETn);
++
++	platform_device_register(&sdio_power_device);
++	mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC */
++	mmp2_add_sdhost(1, &mmp2_sdh_platdata_mmc1); /* sdio */
++	mmp2_add_sdhost(2, &mmp2_sdh_platdata_mmc2); /* eMMC */
++}
  
- static int check_ro(struct sdhci_host *host)
-@@ -2262,9 +2277,6 @@ int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state)
- 
- 	free_irq(host->irq, host);
- 
--	if (host->vmmc)
--		ret = regulator_disable(host->vmmc);
--
- 	return ret;
- }
- 
-@@ -2274,13 +2286,6 @@ int sdhci_resume_host(struct sdhci_host *host)
+ static void __init brownstone_init(void)
  {
- 	int ret;
+@@ -195,8 +252,7 @@ static void __init brownstone_init(void)
+ 	mmp2_add_uart(1);
+ 	mmp2_add_uart(3);
+ 	mmp2_add_twsi(1, NULL, ARRAY_AND_SIZE(brownstone_twsi1_info));
+-	mmp2_add_sdhost(0, &mmp2_sdh_platdata_mmc0); /* SD/MMC */
+-	mmp2_add_sdhost(2, &mmp2_sdh_platdata_mmc2); /* eMMC */
++	brownstone_init_mmc();
  
--	if (host->vmmc) {
--		int ret = regulator_enable(host->vmmc);
--		if (ret)
--			return ret;
--	}
--
--
- 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
- 		if (host->ops->enable_dma)
- 			host->ops->enable_dma(host);
-@@ -2749,8 +2754,6 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (IS_ERR(host->vmmc)) {
- 		printk(KERN_INFO "%s: no vmmc regulator found\n", mmc_hostname(mmc));
- 		host->vmmc = NULL;
--	} else {
--		regulator_enable(host->vmmc);
- 	}
- 
- 	sdhci_init(host, 0);
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 5666f3a..2e6e711 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -94,6 +94,7 @@ struct sdhci_host {
- 	const struct sdhci_ops *ops;	/* Low level hw interface */
- 
- 	struct regulator *vmmc;	/* Power regulator */
-+	unsigned char power_mode_old;	/* power supply mode */
- 
- 	/* Internal data */
- 	struct mmc_host *mmc;	/* MMC structure */
+ 	/* enable 5v regulator */
+ 	platform_device_register(&brownstone_v_5vp_device);
 -- 
 1.7.0.4
 
