@@ -1,44 +1,46 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: [PATCH 1/2] MMC / TMIO: Fix build issue related to struct scatterlist
-Date: Tue, 26 Jul 2011 20:50:23 +0200
-Message-ID: <201107262050.23379.rjw@sisk.pl>
-References: <201107262049.15333.rjw@sisk.pl>
+From: Per Forlin <per.forlin@linaro.org>
+Subject: Re: [PATCH v3 2/3] mmc: core: add random fault injection
+Date: Tue, 26 Jul 2011 22:01:46 +0200
+Message-ID: <CAJ0pr19E0DEHg=tWRqh97syAf89qM96MSgNz=h838UoDNgW24A@mail.gmail.com>
+References: <1311199321-4618-1-git-send-email-per.forlin@linaro.org>
+	<1311199321-4618-3-git-send-email-per.forlin@linaro.org>
+	<CAC5umyg44tQxrFEYRL-tjzBMA2+KNXjB+nQveH3KcB_LPmYVHw@mail.gmail.com>
+	<CAJ0pr1_rL8rsEbDR-PL6fs9EzyGfUMbmeUjTGk=WspvrAkdy+g@mail.gmail.com>
+	<CAJ0pr19oTmt5PQw45wbRO8qEzVi3J1OgL=w9Ma7XxX-=1A=A=A@mail.gmail.com>
+	<CAC5umyjR3V2uFtWZ7tQQtGH2B=s+-C43U1H01qYysBScYc8fxQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:51890 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753079Ab1GZSuO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 26 Jul 2011 14:50:14 -0400
-In-Reply-To: <201107262049.15333.rjw@sisk.pl>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAC5umyjR3V2uFtWZ7tQQtGH2B=s+-C43U1H01qYysBScYc8fxQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Akinobu Mita <akinobu.mita@gmail.com>
+Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Sourav Poddar <sourav.poddar@ti.com>, Chris Ball <cjb@laptop.org>, J Freyensee <james_p_freyensee@linux.intel.com>, Randy Dunlap <rdunlap@xenotime.net>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, linux-sh@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org
 
-From: Rafael J. Wysocki <rjw@sisk.pl>
-
-Fix build issue caused by undefined struct scatterlist in
-drivers/mmc/host/tmio_mmc.c.
-
-Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
----
- drivers/mmc/host/tmio_mmc.h      |    1 +
- drivers/usb/renesas_usbhs/fifo.c |    1 +
- 2 files changed, 2 insertions(+)
-
-Index: linux-2.6/drivers/mmc/host/tmio_mmc.h
-===================================================================
---- linux-2.6.orig/drivers/mmc/host/tmio_mmc.h
-+++ linux-2.6/drivers/mmc/host/tmio_mmc.h
-@@ -21,6 +21,7 @@
- #include <linux/mutex.h>
- #include <linux/pagemap.h>
- #include <linux/spinlock.h>
-+#include <linux/scatterlist.h>
- 
- /* Definitions for values the CTRL_SDIO_STATUS register can take. */
- #define TMIO_SDIO_STAT_IOIRQ	0x0001
-
+On 26 July 2011 03:41, Akinobu Mita <akinobu.mita@gmail.com> wrote:
+> 2011/7/26 Per Forlin <per.forlin@linaro.org>:
+>>>> And I know that init_fault_attr_dentries() can only create a
+>>>> subdirectory in debugfs root directory. =A0But I have a patch whic=
+h
+>>>> support for creating it in arbitrary directory. =A0Could you take =
+a look
+>>>> at this? (Note that this patch is based on mmotm and not yet teste=
+d)
+>>>>
+>> I looked at your patch and it raised two questions.
+>> I can't use FAULT_ATTR_INITIALIZER since mmc_host is allocated on th=
+e
+>> heap. It looks like setup_fault_attr(attr, str) will fail if str is
+>> NULL. How can I initialise the fault_attrs if not stack allocated?
+>> About the boot param initialisation of fault attr. There can only be
+>> one fault_mmc_request boot param for the entire kernel but there is
+>> one fault_attr per host, and there may be many hosts. It would be
+>> convenient if setup_fault_attrs would take (attr, boot_param_name),
+>> look up boot_param_name and use that otherwise set default values.
+>
+> I think you can define one default fail_attr for boot time configurat=
+ion
+> and copy it to per-host fail_attr in mmc_add_host_debugfs().
+>
+You're right. This works fine. I'll prepare a new version of my patch.
