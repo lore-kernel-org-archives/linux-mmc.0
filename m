@@ -1,28 +1,28 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: Re: [PATCH] mmc: mmc_test: avoid stalled file in debugfs
-Date: Tue, 26 Jul 2011 10:01:55 +0300
-Message-ID: <1311663715.3903.21.camel@smile>
-References: <095a90240876c249ed33aa36f2543b54a0b68fc2.1311340371.git.andriy.shevchenko@linux.intel.com>
-	 <CAJ0pr19UbhitnopWFyh19ADErn9=VQ6Gxank-Ntc1_O4rGBb-g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAJ0pr19UbhitnopWFyh19ADErn9=VQ6Gxank-Ntc1_O4rGBb-g@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>
+From: Zhangfei Gao <zhangfei.gao@marvell.com>
+Subject: [PATCH v2 0/2] set_ios handle vmmc
+Date: Tue, 26 Jul 2011 15:06:11 +0800
+Message-ID: <1311663973-23715-1-git-send-email-zhangfei.gao@marvell.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from dakia2.marvell.com ([65.219.4.35]:39826 "EHLO
+	dakia2.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752518Ab1GZHGS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2011 03:06:18 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>, Daniel Drake <dsd@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, linux-mmc@vger.kernel.o
+Cc: Zhangfei Gao <zhangfei.gao@marvell.com>
 
-On Tue, 2011-07-26 at 00:15 +0200, Per Forlin wrote: 
-> > +               file = debugfs_create_file(name, mode, card->debugfs_root,card,
-> > +                       fops);
-> Move card to next line together with fops and indent.
-> +               file = debugfs_create_file(name, mode, card->debugfs_root,
-> +                                                    card, fops);
-Hmm... Its length is exact 80 symbols which is OK for checkpatch.pl.
-Anyway, thanks for review.
+v2: reuse vmmc
 
--- 
-Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Intel Finland Oy
+vmmc is controled inside set_ios according to mmc_power_up/down
+Brownstone add support of sdio device 8787
+
+Zhangfei Gao (2):
+  mmc: sdhci move vmmc to set_ios
+  ARM: mmp2: support sdio device 8787
+
+ arch/arm/mach-mmp/brownstone.c |   60 ++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci.c       |   27 ++++++++++--------
+ include/linux/mmc/sdhci.h      |    1 +
+ 3 files changed, 74 insertions(+), 14 deletions(-)
+
