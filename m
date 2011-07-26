@@ -1,57 +1,40 @@
 From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH v3 2/3] mmc: core: add random fault injection
-Date: Tue, 26 Jul 2011 22:08:25 +0200
-Message-ID: <CAJ0pr18wJ4YiPu9emO9acLDhVpfzDm7UQB-F3C+Vzy84bnJKrQ@mail.gmail.com>
-References: <1311199321-4618-1-git-send-email-per.forlin@linaro.org>
-	<1311199321-4618-3-git-send-email-per.forlin@linaro.org>
-	<CAC5umyg44tQxrFEYRL-tjzBMA2+KNXjB+nQveH3KcB_LPmYVHw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Subject: [PATCH v4 0/3] Make fault injection available for MMC IO
+Date: Tue, 26 Jul 2011 22:11:56 +0200
+Message-ID: <1311711119-6286-1-git-send-email-per.forlin@linaro.org>
 Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <CAC5umyg44tQxrFEYRL-tjzBMA2+KNXjB+nQveH3KcB_LPmYVHw@mail.gmail.com>
 Sender: linux-doc-owner@vger.kernel.org
-To: Akinobu Mita <akinobu.mita@gmail.com>
-Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Sourav Poddar <sourav.poddar@ti.com>, Chris Ball <cjb@laptop.org>, J Freyensee <james_p_freyensee@linux.intel.com>, Randy Dunlap <rdunlap@xenotime.net>
+To: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.ke
+Cc: Randy Dunlap <rdunlap@xenotime.net>, Per Forlin <per.forlin@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 25 July 2011 17:58, Akinobu Mita <akinobu.mita@gmail.com> wrote:
-> 2011/7/21 Per Forlin <per.forlin@linaro.org>:
->> This adds support to inject data errors after a completed host trans=
-fer.
->> The mmc core will return error even though the host transfer is succ=
-essful.
->> This simple fault injection proved to be very useful to test the
->> non-blocking error handling in the mmc_blk_issue_rw_rq().
->> Random faults can also test how the host driver handles pre_req()
->> and post_req() in case of errors.
->
-> Looks good to me.
->
->> @@ -82,6 +87,66 @@ static void mmc_flush_scheduled_work(void)
->> =A0 =A0 =A0 =A0flush_workqueue(workqueue);
->> =A0}
->>
->> +#ifdef CONFIG_FAIL_MMC_REQUEST
->> +
->> +static DECLARE_FAULT_ATTR(fail_mmc_request);
->
-> I think the fail_attr should be defined for each mmc_host like make_i=
-t_fail
-> in struct mmc_host and debugfs entries should also be created in a
-> subdirectory of mmc host debugfs.
->
-> And I know that init_fault_attr_dentries() can only create a
-> subdirectory in debugfs root directory. =A0But I have a patch which
-> support for creating it in arbitrary directory. =A0Could you take a l=
-ook
-> at this? (Note that this patch is based on mmotm and not yet tested)
->
-I tested your patch on a Snowball board. I had two active mmc cards
-and did various fault injection configurations on the two cards
-together with dd. I did only test MMC IO fault injection and not any
-of the other fault injection clients.
-Tested-by: Per Forlin <per.forlin@linaro.org>
+The first version of this patch is a part of mmc non-blocking v9 patchset:
+[PATCH v9 11/12] mmc: core: add random fault injection
 
-Regards,
-Per
+change log:
+ v2 - Resolve build issue in mmc core.c due to multiple init_module by
+      removing the fault inject module.
+    - Export fault injection functions to make them available for modules
+    - Update fault injection documentation on MMC IO  
+ v3 - add function descriptions in core.c
+    - use export GPL for fault injection functions
+ v4 - make the fault_attr per host. This prepares for upcoming patch from
+      Akinobu that adds support for creating debugfs entries in
+      arbitrary directory.
+
+Per Forlin (3):
+  fault-inject: make fault injection available for modules
+  mmc: core: add random fault injection
+  fault injection: add documentation on MMC IO fault injection
+
+ Documentation/fault-injection/fault-injection.txt |    5 ++
+ drivers/mmc/core/core.c                           |   45 +++++++++++++++++++++
+ drivers/mmc/core/debugfs.c                        |   26 ++++++++++++
+ include/linux/mmc/host.h                          |    7 +++
+ lib/Kconfig.debug                                 |   11 +++++
+ lib/fault-inject.c                                |    2 +
+ 6 files changed, 96 insertions(+), 0 deletions(-)
+
+-- 
+1.7.4.1
+
