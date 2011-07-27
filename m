@@ -1,66 +1,73 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH v4 2/3] mmc: core: add random fault injection
-Date: Wed, 27 Jul 2011 11:02:12 +0200
-Message-ID: <CAJ0pr19RWjCJAvnkVR+gL7y8_X4TSFfs7JqXgydWuWMAPPb1ZQ@mail.gmail.com>
-References: <1311711119-6286-1-git-send-email-per.forlin@linaro.org>
-	<1311711119-6286-3-git-send-email-per.forlin@linaro.org>
-	<CAC5umygcfno0-=rA9G0OcxuVK2YK9UokfoYoy45qBT8w0+ytvg@mail.gmail.com>
+From: Aaron Lu <aaron.lu@amd.com>
+Subject: Re: [PATCH] mmc: sdhci: fix retuning timer wrongly deleted in
+ sdhci_tasklet_finish
+Date: Wed, 27 Jul 2011 17:15:51 +0800
+Message-ID: <20110727091549.GC3340@lovegaga>
+References: <1310362031-8186-1-git-send-email-Aaron.Lu@amd.com>
+ <6C03668EAF45B747AF947A1603D1B300018F85B9E0@SAUSEXMBP01.amd.com>
+ <20110721052358.GA31584@lovegaga>
+ <CAMj5BkhT2-mybTHTVxXm1TG0w=Ap34etwKgxg3QVVzohaZWupA@mail.gmail.com>
+ <20110721100351.GA31886@lovegaga>
+ <CAMj5BkjnskRO=HwmbPgjuOZ2VWyoVp=8ViWw8j22Y7M8oC8Kig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <CAC5umygcfno0-=rA9G0OcxuVK2YK9UokfoYoy45qBT8w0+ytvg@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Akinobu Mita <akinobu.mita@gmail.com>
-Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Sourav Poddar <sourav.poddar@ti.com>, Chris Ball <cjb@laptop.org>, J Freyensee <james_p_freyensee@linux.intel.com>, Randy Dunlap <rdunlap@xenotime.net>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:40149
+	"EHLO VA3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752766Ab1G0JQv convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 27 Jul 2011 05:16:51 -0400
+Content-Disposition: inline
+In-Reply-To: <CAMj5BkjnskRO=HwmbPgjuOZ2VWyoVp=8ViWw8j22Y7M8oC8Kig@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: zhangfei gao <zhangfei.gao@gmail.com>, Philip Rakity <prakity@marvell.com>
+Cc: "Nath, Arindam" <Arindam.Nath@amd.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On 27 July 2011 01:17, Akinobu Mita <akinobu.mita@gmail.com> wrote:
-> 2011/7/27 Per Forlin <per.forlin@linaro.org>:
->> This adds support to inject data errors after a completed host trans=
-fer.
->> The mmc core will return error even though the host transfer is succ=
-essful.
->> This simple fault injection proved to be very useful to test the
->> non-blocking error handling in the mmc_blk_issue_rw_rq().
->> Random faults can also test how the host driver handles pre_req()
->> and post_req() in case of errors.
->
-> Looks good but I have one question.
->
->> @@ -304,6 +307,10 @@ struct mmc_host {
->>
->> =A0 =A0 =A0 =A0struct mmc_async_req =A0 =A0*areq; =A0 =A0 =A0 =A0 =A0=
-/* active async req */
->>
->> +#ifdef CONFIG_FAIL_MMC_REQUEST
->> + =A0 =A0 =A0 u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0make_it_=
-fail;
->> + =A0 =A0 =A0 struct fault_attr =A0 =A0 =A0 fail_mmc_request;
->> +#endif
->> =A0 =A0 =A0 =A0unsigned long =A0 =A0 =A0 =A0 =A0 private[0] ____cach=
-eline_aligned;
->> =A0};
->
-> I think make_it_fail is not needed anymore because if fail_attr is
-> defined per-host then you can enable it by setting probability=3D0
-> or times=3D0 per-host.
->
-Yes, if there are many debugfs entries, one for each host make_if_fail
-is no longer necessary.
-There is an issue with patch v4 now when fault_attr is per-host.
-Without your patch the entry is still created at the root but there
-are many instances of fault-attr. I think it's better to wait for your
-patch to make it into the mmc-next tree before submitting my patch. I
-will prepare a patch v5 that depends on your upcoming changes in
-fault-inject with a note that states the dependency.
+On Fri, Jul 22, 2011 at 06:21:11PM +0800, zhangfei gao wrote:
+>=20
+> Thanks for explanation, looks good to me.
+>=20
 
-Would you mind adding "patch 1/3" (export_symbol_gpl) to your
-patch-set since it depends on the new function names in your patch?
-If not, I can resend the patch on top of your changes to match the new
-function names if you prefer to have this patch separate.
+Hi Philip & Zhangfei,
 
-Please let me know.
+Can I have your reviewed-by tag in the patch?
 
 Thanks,
-Per
+Aaron
+
+> >> >> >
+> >> >> > Signed-off-by: Aaron Lu <Aaron.Lu@amd.com>
+> >> >> > ---
+> >> >> > =A0drivers/mmc/host/sdhci.c | =A0 =A03 ---
+> >> >> > =A01 files changed, 0 insertions(+), 3 deletions(-)
+> >> >> >
+> >> >> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhc=
+i.c
+> >> >> > index 91d9892..6250bac 100644
+> >> >> > --- a/drivers/mmc/host/sdhci.c
+> >> >> > +++ b/drivers/mmc/host/sdhci.c
+> >> >> > @@ -1863,9 +1863,6 @@ static void sdhci_tasklet_finish(unsign=
+ed long
+> >> >> > param)
+> >> >> >
+> >> >> > =A0 =A0 del_timer(&host->timer);
+> >> >> >
+> >> >> > - =A0 if (host->version >=3D SDHCI_SPEC_300)
+> >> >> > - =A0 =A0 =A0 =A0 =A0 del_timer(&host->tuning_timer);
+> >> >> > -
+> >> >> > =A0 =A0 mrq =3D host->mrq;
+> >> >> >
+> >> >> > =A0 =A0 /*
+> >> >> > --
+> >> >> > 1.7.1
+> >> >>
+> >> >>
+> >> >
+> >> >
+> >>
+> >
+> >
+>=20
+
