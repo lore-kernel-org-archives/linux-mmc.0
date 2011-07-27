@@ -1,108 +1,80 @@
-From: Arnaud Patard (Rtp) <arnaud.patard@rtp-net.org>
-Subject: Re: [PATCH 1/1] fix card interrupt losing issue on freescale eSDHC
-Date: Wed, 27 Jul 2011 11:42:51 +0200
-Message-ID: <8762mokqjo.fsf@lebrac.rtp-net.org>
-References: <1310966402-12318-1-git-send-email-tony.lin@freescale.com>
-	<20110727074710.GS16561@pengutronix.de>
-	<97D3A72708D04647A5AC84A04996E5B5166B17@039-SN1MPN1-006.039d.mgd.msft.net>
+From: Philip Rakity <prakity@marvell.com>
+Subject: RE: [PATCH] mmc: sdhci: fix retuning timer wrongly deleted in
+ sdhci_tasklet_finish
+Date: Wed, 27 Jul 2011 07:56:53 -0700
+Message-ID: <43E4817426ED174AA81263BCECB4351D134D9ED97E@sc-vexch3.marvell.com>
+References: <1310362031-8186-1-git-send-email-Aaron.Lu@amd.com>
+ <6C03668EAF45B747AF947A1603D1B300018F85B9E0@SAUSEXMBP01.amd.com>
+ <20110721052358.GA31584@lovegaga>
+ <CAMj5BkhT2-mybTHTVxXm1TG0w=Ap34etwKgxg3QVVzohaZWupA@mail.gmail.com>
+ <20110721100351.GA31886@lovegaga>
+ <CAMj5BkjnskRO=HwmbPgjuOZ2VWyoVp=8ViWw8j22Y7M8oC8Kig@mail.gmail.com>,<20110727091549.GC3340@lovegaga>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lebrac.rtp-net.org ([88.191.135.105]:32806 "EHLO
-	lebrac.rtp-net.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752628Ab1G0JnP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2011 05:43:15 -0400
-In-Reply-To: <97D3A72708D04647A5AC84A04996E5B5166B17@039-SN1MPN1-006.039d.mgd.msft.net>
-	(Lin Tony-B's message of "Wed, 27 Jul 2011 09:27:15 +0000")
+Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:41159 "EHLO
+	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751491Ab1G0O7I convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 27 Jul 2011 10:59:08 -0400
+In-Reply-To: <20110727091549.GC3340@lovegaga>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lin Tony-B19295 <B19295@freescale.com>
-Cc: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "kernel@pengutronix.de" <kernel@pengutronix.de>
+To: Aaron Lu <aaron.lu@amd.com>, zhangfei gao <zhangfei.gao@gmail.com>
+Cc: "Nath, Arindam" <Arindam.Nath@amd.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Lin Tony-B19295 <B19295@freescale.com> writes:
 
-Hi,
+Reviewed-by: Philip Rakity  <prakity@marvell.com>
+________________________________________
+From: Aaron Lu [aaron.lu@amd.com]
+Sent: Wednesday, July 27, 2011 2:15 AM
+To: zhangfei gao; Philip Rakity
+Cc: Nath, Arindam; Chris Ball; linux-mmc@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci: fix retuning timer wrongly deleted in sdhci_tasklet_finish
 
->> -----Original Message-----
->> From: linux-arm-kernel-bounces@lists.infradead.org [mailto:linux-arm-
->> kernel-bounces@lists.infradead.org] On Behalf Of Uwe Kleine-K?nig
->> Sent: Wednesday, July 27, 2011 3:47 PM
->> To: Lin Tony-B19295
->> Cc: cjb@laptop.org; linux-mmc@vger.kernel.org; kernel@pengutronix.de;
->> linux-arm-kernel@lists.infradead.org
->> Subject: Re: [PATCH 1/1] fix card interrupt losing issue on freescale
->> eSDHC
->> 
->> Hello Tony,
->> 
->> On Mon, Jul 18, 2011 at 01:20:02PM +0800, Tony Lin wrote:
->> > apply workaround for imx eSDHC controller to avoid missing card
->> > interrupt so that SDIO function is workable
->> Fixing a few typos (but note, I'm not a native speaker):
->> 
->> 	mmc/sdhci-esdhc-imx: fix losing card interrupt
->> 
->> 	Apply workaround for the imx eSDHC controller to avoid missing a
->> 	card interrupt.
->> 
->> 	Signed-off-by: ...
->> 
->> > Signed-off-by: Tony Lin <tony.lin@freescale.com>
->> > ---
->> >  drivers/mmc/host/sdhci-esdhc-imx.c |   39 +++++++++++++++++++++++++++-
->> -------
->> >  1 files changed, 30 insertions(+), 9 deletions(-)
->> >
->> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
->> > b/drivers/mmc/host/sdhci-esdhc-imx.c
->> > index a19967d..da77cae 100644
->> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
->> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
->> > @@ -32,6 +32,8 @@
->> >  #define  SDHCI_VENDOR_SPEC_SDIO_QUIRK	0x00000002
->> >
->> >  #define ESDHC_FLAG_GPIO_FOR_CD_WP	(1 << 0)
->> > +
->> > +#define	SDHCI_CTRL_D3CD			0x08
->> >  /*
->> >   * The CMDTYPE of the CMD register (offset 0xE) should be set to
->> >   * "11" when the STOP CMD12 is issued on imx53 to abort one @@ -87,14
->> > +89,31 @@ static void esdhc_writel_le(struct sdhci_host *host, u32
->> > val, int reg)  {
->> >  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> >  	struct pltfm_imx_data *imx_data = pltfm_host->priv;
->> > -
->> > -	if (unlikely((reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)
->> > -			&& (imx_data->flags & ESDHC_FLAG_GPIO_FOR_CD_WP)))
->> > -		/*
->> > -		 * these interrupts won't work with a custom card_detect gpio
->> > -		 * (only applied to mx25/35)
->> > -		 */
->> > -		val &= ~(SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT);
->> > +	u32 data;
->> > +
->> > +	if (unlikely((reg == SDHCI_INT_ENABLE || reg ==
->> SDHCI_SIGNAL_ENABLE))) {
->> > +		if (imx_data->flags & ESDHC_FLAG_GPIO_FOR_CD_WP)
->> > +			/*
->> > +			 * these interrupts won't work with a custom
->> > +			 * card_detect gpio (only applied to mx25/35)
->> hmm, ok, this was here before, but I wonder about the "only applied to
->> mx25/35" part. How is that meant? I don't see logic to prevent other socs
->> using this workaround.
-> Sorry, not so sure about mx25/35 history. But the flag is set only if it's mx25 or mx35. 
-> You can check the code in esdhc_pltfm_init.
+On Fri, Jul 22, 2011 at 06:21:11PM +0800, zhangfei gao wrote:
+>
+> Thanks for explanation, looks good to me.
+>
 
-btw, I didn't notice when looking at the patch but this flag has been
-renamed and maybe will be gone. See :
-- latest commits on this file on mmc for-next:
-http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commitdiff;h=e8cd77e467f7bb1d4b942037c47b087334a484d4
-- last patch of the imx mmc fixes for cd/wp:
-http://lists.infradead.org/pipermail/linux-arm-kernel/2011-June/052743.html
+Hi Philip & Zhangfei,
 
-So, imho, it would be better to use an other way to check for mx25/35 as
-current one won't work (at least won't compile but won't work as
-intended if the last patch mentionned is merged. There are other systems
-using gpio for cd or wp which are not mx25/35).
+Can I have your reviewed-by tag in the patch?
 
-Arnaud
+Thanks,
+Aaron
+
+> >> >> >
+> >> >> > Signed-off-by: Aaron Lu <Aaron.Lu@amd.com>
+> >> >> > ---
+> >> >> >  drivers/mmc/host/sdhci.c |    3 ---
+> >> >> >  1 files changed, 0 insertions(+), 3 deletions(-)
+> >> >> >
+> >> >> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> >> >> > index 91d9892..6250bac 100644
+> >> >> > --- a/drivers/mmc/host/sdhci.c
+> >> >> > +++ b/drivers/mmc/host/sdhci.c
+> >> >> > @@ -1863,9 +1863,6 @@ static void sdhci_tasklet_finish(unsigned long
+> >> >> > param)
+> >> >> >
+> >> >> >     del_timer(&host->timer);
+> >> >> >
+> >> >> > -   if (host->version >= SDHCI_SPEC_300)
+> >> >> > -           del_timer(&host->tuning_timer);
+> >> >> > -
+> >> >> >     mrq = host->mrq;
+> >> >> >
+> >> >> >     /*
+> >> >> > --
+> >> >> > 1.7.1
+> >> >>
+> >> >>
+> >> >
+> >> >
+> >>
+> >
+> >
+>
+
