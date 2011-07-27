@@ -1,54 +1,63 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH v4 2/3] mmc: core: add random fault injection
-Date: Wed, 27 Jul 2011 21:46:21 +0200
-Message-ID: <CAJ0pr1_--ubHVW792iQP5juSzFFcJR2tTcnO4mLE4Sh=rX+Jhg@mail.gmail.com>
-References: <1311711119-6286-1-git-send-email-per.forlin@linaro.org>
-	<1311711119-6286-3-git-send-email-per.forlin@linaro.org>
-	<CAC5umygcfno0-=rA9G0OcxuVK2YK9UokfoYoy45qBT8w0+ytvg@mail.gmail.com>
-	<CAJ0pr19RWjCJAvnkVR+gL7y8_X4TSFfs7JqXgydWuWMAPPb1ZQ@mail.gmail.com>
-	<CAC5umygDP6WCrHmhRqMSDBmnOyB1aw+3nuCqvyz9xGXg9QeePw@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 1/2] MMC / TMIO: Fix build issue related to struct
+ scatterlist
+Date: Wed, 27 Jul 2011 22:40:14 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1107272236510.7435@axis700.grange>
+References: <201107262049.15333.rjw@sisk.pl> <201107262050.23379.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <CAC5umygDP6WCrHmhRqMSDBmnOyB1aw+3nuCqvyz9xGXg9QeePw@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Akinobu Mita <akinobu.mita@gmail.com>
-Cc: linaro-dev@lists.linaro.org, Nicolas Pitre <nicolas.pitre@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Sourav Poddar <sourav.poddar@ti.com>, Chris Ball <cjb@laptop.org>, J Freyensee <james_p_freyensee@linux.intel.com>, Randy Dunlap <rdunlap@xenotime.net>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <201107262050.23379.rjw@sisk.pl>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>, linux-sh@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 27 July 2011 18:08, Akinobu Mita <akinobu.mita@gmail.com> wrote:
-> 2011/7/27 Per Forlin <per.forlin@linaro.org>:
->
->> There is an issue with patch v4 now when fault_attr is per-host.
->> Without your patch the entry is still created at the root but there
->> are many instances of fault-attr. I think it's better to wait for yo=
-ur
->> patch to make it into the mmc-next tree before submitting my patch. =
-I
->> will prepare a patch v5 that depends on your upcoming changes in
->> fault-inject with a note that states the dependency.
->
-> Or you can prepare a patch for -mm and ask Andrew to add it to the -m=
-m
-> tree.
->
-Thanks for the tip,
+(added MMC maintainer to CC:)
 
->> Would you mind adding "patch 1/3" (export_symbol_gpl) to your
->> patch-set since it depends on the new function names in your patch?
->> If not, I can resend the patch on top of your changes to match the n=
-ew
->> function names if you prefer to have this patch separate.
->
-> I recommend it to be a part of your patchset. =A0The new function nam=
-e
-> (fault_create_debugfs_attr) is not likely to change for a time. =A0Yo=
-u can
-> add Acked-by: Akinobu Mita <akinobu.mita@gmail.com>
->
-Beside fault_create_debugfs_attr() the other function is should_fail.
-I presume this name will be changed too, and start with the fault_?
+On Tue, 26 Jul 2011, Rafael J. Wysocki wrote:
 
-Regards,
-Per
+> From: Rafael J. Wysocki <rjw@sisk.pl>
+> 
+> Fix build issue caused by undefined struct scatterlist in
+> drivers/mmc/host/tmio_mmc.c.
+> 
+> Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
+
+A nitpick, if I may: sCatterlist comes before sPinlock in my versions of 
+most popular alphabets;-) Please, fix (or maybe Chris can fix it himself), 
+after which:
+
+Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+
+Thanks
+Guennadi
+
+> ---
+>  drivers/mmc/host/tmio_mmc.h      |    1 +
+>  drivers/usb/renesas_usbhs/fifo.c |    1 +
+>  2 files changed, 2 insertions(+)
+> 
+> Index: linux-2.6/drivers/mmc/host/tmio_mmc.h
+> ===================================================================
+> --- linux-2.6.orig/drivers/mmc/host/tmio_mmc.h
+> +++ linux-2.6/drivers/mmc/host/tmio_mmc.h
+> @@ -21,6 +21,7 @@
+>  #include <linux/mutex.h>
+>  #include <linux/pagemap.h>
+>  #include <linux/spinlock.h>
+> +#include <linux/scatterlist.h>
+>  
+>  /* Definitions for values the CTRL_SDIO_STATUS register can take. */
+>  #define TMIO_SDIO_STAT_IOIRQ	0x0001
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
