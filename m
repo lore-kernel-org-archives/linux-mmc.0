@@ -1,13 +1,13 @@
 From: ludovic.desroches@atmel.com
-Subject: [RFC PATCH 3/9] mmc: atmel-mci: indentation
-Date: Thu, 28 Jul 2011 16:29:52 +0200
-Message-ID: <1311863398-31579-4-git-send-email-ludovic.desroches@atmel.com>
+Subject: [RFC PATCH 9/9] mmc: atmel-mci: fix a potential issue about pending PDC interrupts
+Date: Thu, 28 Jul 2011 16:29:58 +0200
+Message-ID: <1311863398-31579-10-git-send-email-ludovic.desroches@atmel.com>
 References: <1311863398-31579-1-git-send-email-ludovic.desroches@atmel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:26606 "EHLO
+Received: from newsmtp5.atmel.com ([204.2.163.5]:11007 "EHLO
 	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755356Ab1G1NYM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2011 09:24:12 -0400
+	with ESMTP id S1755371Ab1G1NYJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2011 09:24:09 -0400
 In-Reply-To: <1311863398-31579-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -16,187 +16,97 @@ Cc: patrice.vilchez@atmel.com, nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, L
 
 From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
+This patch fixes a potential issue about PDC interrupts. For example we have
+a ENDRX pending interrupt and a RXBUFF pending interrupt. We have received the
+RXBUFF interrupt but the transfer is not finished (so we didn't have time to
+give a new buffer to the PDC controller). Then we will compute ENDRX interrupt
+and we will give a new buffer to the PDC controller, just after we will
+compute the RXBUFF interrupt and give one or two new buffers to the PDC
+controller but we are not sure that the first buffer given has been filled. So
+in this situation we may "lost" one sg buffer. It's the same for transmission.
+
 Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 ---
- drivers/mmc/host/atmel-mci-regs.h |  136 ++++++++++++++++++------------------
- 1 files changed, 68 insertions(+), 68 deletions(-)
+ drivers/mmc/host/atmel-mci.c |   32 +++++++++++++++++---------------
+ 1 files changed, 17 insertions(+), 15 deletions(-)
 
-diff --git a/drivers/mmc/host/atmel-mci-regs.h b/drivers/mmc/host/atmel-mci-regs.h
-index 8574e91..7310b20 100644
---- a/drivers/mmc/host/atmel-mci-regs.h
-+++ b/drivers/mmc/host/atmel-mci-regs.h
-@@ -18,103 +18,103 @@
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 963e320..7108f64 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -1729,17 +1729,9 @@ static irqreturn_t atmci_interrupt(int irq, void *dev_id)
+ 			tasklet_schedule(&host->tasklet);
+ 		}
  
- /* MCI Register Definitions */
- #define ATMCI_CR			0x0000	/* Control */
--# define ATMCI_CR_MCIEN		(  1 <<  0)	/* MCI Enable */
-+# define ATMCI_CR_MCIEN			(  1 <<  0)	/* MCI Enable */
- # define ATMCI_CR_MCIDIS		(  1 <<  1)	/* MCI Disable */
--# define ATMCI_CR_PWSEN		(  1 <<  2)	/* Power Save Enable */
-+# define ATMCI_CR_PWSEN			(  1 <<  2)	/* Power Save Enable */
- # define ATMCI_CR_PWSDIS		(  1 <<  3)	/* Power Save Disable */
--# define ATMCI_CR_SWRST		(  1 <<  7)	/* Software Reset */
-+# define ATMCI_CR_SWRST			(  1 <<  7)	/* Software Reset */
- #define ATMCI_MR			0x0004	/* Mode */
--# define ATMCI_MR_CLKDIV(x)	((x) <<  0)	/* Clock Divider */
--# define ATMCI_MR_PWSDIV(x)	((x) <<  8)	/* Power Saving Divider */
-+# define ATMCI_MR_CLKDIV(x)		((x) <<  0)	/* Clock Divider */
-+# define ATMCI_MR_PWSDIV(x)		((x) <<  8)	/* Power Saving Divider */
- # define ATMCI_MR_RDPROOF		(  1 << 11)	/* Read Proof */
- # define ATMCI_MR_WRPROOF		(  1 << 12)	/* Write Proof */
--# define ATMCI_MR_PDCFBYTE	(  1 << 13)	/* Force Byte Transfer */
-+# define ATMCI_MR_PDCFBYTE		(  1 << 13)	/* Force Byte Transfer */
- # define ATMCI_MR_PDCPADV		(  1 << 14)	/* Padding Value */
- # define ATMCI_MR_PDCMODE		(  1 << 15)	/* PDC-oriented Mode */
--#define ATMCI_DTOR		0x0008	/* Data Timeout */
-+#define ATMCI_DTOR			0x0008	/* Data Timeout */
- # define ATMCI_DTOCYC(x)		((x) <<  0)	/* Data Timeout Cycles */
- # define ATMCI_DTOMUL(x)		((x) <<  4)	/* Data Timeout Multiplier */
--#define ATMCI_SDCR		0x000c	/* SD Card / SDIO */
--# define ATMCI_SDCSEL_SLOT_A	(  0 <<  0)	/* Select SD slot A */
--# define ATMCI_SDCSEL_SLOT_B	(  1 <<  0)	/* Select SD slot A */
--# define ATMCI_SDCSEL_MASK	(  3 <<  0)
--# define ATMCI_SDCBUS_1BIT	(  0 <<  6)	/* 1-bit data bus */
--# define ATMCI_SDCBUS_4BIT	(  2 <<  6)	/* 4-bit data bus */
--# define ATMCI_SDCBUS_8BIT	(  3 <<  6)	/* 8-bit data bus[2] */
--# define ATMCI_SDCBUS_MASK	(  3 <<  6)
--#define ATMCI_ARGR		0x0010	/* Command Argument */
--#define ATMCI_CMDR		0x0014	/* Command */
--# define ATMCI_CMDR_CMDNB(x)	((x) <<  0)	/* Command Opcode */
--# define ATMCI_CMDR_RSPTYP_NONE	(  0 <<  6)	/* No response */
-+#define ATMCI_SDCR			0x000c	/* SD Card / SDIO */
-+# define ATMCI_SDCSEL_SLOT_A		(  0 <<  0)	/* Select SD slot A */
-+# define ATMCI_SDCSEL_SLOT_B		(  1 <<  0)	/* Select SD slot A */
-+# define ATMCI_SDCSEL_MASK		(  3 <<  0)
-+# define ATMCI_SDCBUS_1BIT		(  0 <<  6)	/* 1-bit data bus */
-+# define ATMCI_SDCBUS_4BIT		(  2 <<  6)	/* 4-bit data bus */
-+# define ATMCI_SDCBUS_8BIT		(  3 <<  6)	/* 8-bit data bus[2] */
-+# define ATMCI_SDCBUS_MASK		(  3 <<  6)
-+#define ATMCI_ARGR			0x0010	/* Command Argument */
-+#define ATMCI_CMDR			0x0014	/* Command */
-+# define ATMCI_CMDR_CMDNB(x)		((x) <<  0)	/* Command Opcode */
-+# define ATMCI_CMDR_RSPTYP_NONE		(  0 <<  6)	/* No response */
- # define ATMCI_CMDR_RSPTYP_48BIT	(  1 <<  6)	/* 48-bit response */
- # define ATMCI_CMDR_RSPTYP_136BIT	(  2 <<  6)	/* 136-bit response */
--# define ATMCI_CMDR_SPCMD_INIT	(  1 <<  8)	/* Initialization command */
--# define ATMCI_CMDR_SPCMD_SYNC	(  2 <<  8)	/* Synchronized command */
--# define ATMCI_CMDR_SPCMD_INT	(  4 <<  8)	/* Interrupt command */
-+# define ATMCI_CMDR_SPCMD_INIT		(  1 <<  8)	/* Initialization command */
-+# define ATMCI_CMDR_SPCMD_SYNC		(  2 <<  8)	/* Synchronized command */
-+# define ATMCI_CMDR_SPCMD_INT		(  4 <<  8)	/* Interrupt command */
- # define ATMCI_CMDR_SPCMD_INTRESP	(  5 <<  8)	/* Interrupt response */
--# define ATMCI_CMDR_OPDCMD	(  1 << 11)	/* Open Drain */
--# define ATMCI_CMDR_MAXLAT_5CYC	(  0 << 12)	/* Max latency 5 cycles */
-+# define ATMCI_CMDR_OPDCMD		(  1 << 11)	/* Open Drain */
-+# define ATMCI_CMDR_MAXLAT_5CYC		(  0 << 12)	/* Max latency 5 cycles */
- # define ATMCI_CMDR_MAXLAT_64CYC	(  1 << 12)	/* Max latency 64 cycles */
--# define ATMCI_CMDR_START_XFER	(  1 << 16)	/* Start data transfer */
--# define ATMCI_CMDR_STOP_XFER	(  2 << 16)	/* Stop data transfer */
--# define ATMCI_CMDR_TRDIR_WRITE	(  0 << 18)	/* Write data */
--# define ATMCI_CMDR_TRDIR_READ	(  1 << 18)	/* Read data */
-+# define ATMCI_CMDR_START_XFER		(  1 << 16)	/* Start data transfer */
-+# define ATMCI_CMDR_STOP_XFER		(  2 << 16)	/* Stop data transfer */
-+# define ATMCI_CMDR_TRDIR_WRITE		(  0 << 18)	/* Write data */
-+# define ATMCI_CMDR_TRDIR_READ		(  1 << 18)	/* Read data */
- # define ATMCI_CMDR_BLOCK		(  0 << 19)	/* Single-block transfer */
--# define ATMCI_CMDR_MULTI_BLOCK	(  1 << 19)	/* Multi-block transfer */
--# define ATMCI_CMDR_STREAM	(  2 << 19)	/* MMC Stream transfer */
--# define ATMCI_CMDR_SDIO_BYTE	(  4 << 19)	/* SDIO Byte transfer */
--# define ATMCI_CMDR_SDIO_BLOCK	(  5 << 19)	/* SDIO Block transfer */
-+# define ATMCI_CMDR_MULTI_BLOCK		(  1 << 19)	/* Multi-block transfer */
-+# define ATMCI_CMDR_STREAM		(  2 << 19)	/* MMC Stream transfer */
-+# define ATMCI_CMDR_SDIO_BYTE		(  4 << 19)	/* SDIO Byte transfer */
-+# define ATMCI_CMDR_SDIO_BLOCK		(  5 << 19)	/* SDIO Block transfer */
- # define ATMCI_CMDR_SDIO_SUSPEND	(  1 << 24)	/* SDIO Suspend Command */
--# define ATMCI_CMDR_SDIO_RESUME	(  2 << 24)	/* SDIO Resume Command */
--#define ATMCI_BLKR		0x0018	/* Block */
--# define ATMCI_BCNT(x)		((x) <<  0)	/* Data Block Count */
-+# define ATMCI_CMDR_SDIO_RESUME		(  2 << 24)	/* SDIO Resume Command */
-+#define ATMCI_BLKR			0x0018	/* Block */
-+# define ATMCI_BCNT(x)			((x) <<  0)	/* Data Block Count */
- # define ATMCI_BLKLEN(x)		((x) << 16)	/* Data Block Length */
--#define ATMCI_CSTOR		0x001c	/* Completion Signal Timeout[2] */
-+#define ATMCI_CSTOR			0x001c	/* Completion Signal Timeout[2] */
- # define ATMCI_CSTOCYC(x)		((x) <<  0)	/* CST cycles */
- # define ATMCI_CSTOMUL(x)		((x) <<  4)	/* CST multiplier */
--#define ATMCI_RSPR		0x0020	/* Response 0 */
--#define ATMCI_RSPR1		0x0024	/* Response 1 */
--#define ATMCI_RSPR2		0x0028	/* Response 2 */
--#define ATMCI_RSPR3		0x002c	/* Response 3 */
-+#define ATMCI_RSPR			0x0020	/* Response 0 */
-+#define ATMCI_RSPR1			0x0024	/* Response 1 */
-+#define ATMCI_RSPR2			0x0028	/* Response 2 */
-+#define ATMCI_RSPR3			0x002c	/* Response 3 */
- #define ATMCI_RDR			0x0030	/* Receive Data */
- #define ATMCI_TDR			0x0034	/* Transmit Data */
- #define ATMCI_SR			0x0040	/* Status */
- #define ATMCI_IER			0x0044	/* Interrupt Enable */
- #define ATMCI_IDR			0x0048	/* Interrupt Disable */
- #define ATMCI_IMR			0x004c	/* Interrupt Mask */
--# define ATMCI_CMDRDY		(  1 <<   0)	/* Command Ready */
--# define ATMCI_RXRDY		(  1 <<   1)	/* Receiver Ready */
--# define ATMCI_TXRDY		(  1 <<   2)	/* Transmitter Ready */
--# define ATMCI_BLKE		(  1 <<   3)	/* Data Block Ended */
--# define ATMCI_DTIP		(  1 <<   4)	/* Data Transfer In Progress */
--# define ATMCI_NOTBUSY		(  1 <<   5)	/* Data Not Busy */
--# define ATMCI_SDIOIRQA		(  1 <<   8)	/* SDIO IRQ in slot A */
--# define ATMCI_SDIOIRQB		(  1 <<   9)	/* SDIO IRQ in slot B */
--# define ATMCI_RINDE		(  1 <<  16)	/* Response Index Error */
--# define ATMCI_RDIRE		(  1 <<  17)	/* Response Direction Error */
--# define ATMCI_RCRCE		(  1 <<  18)	/* Response CRC Error */
--# define ATMCI_RENDE		(  1 <<  19)	/* Response End Bit Error */
--# define ATMCI_RTOE		(  1 <<  20)	/* Response Time-Out Error */
--# define ATMCI_DCRCE		(  1 <<  21)	/* Data CRC Error */
--# define ATMCI_DTOE		(  1 <<  22)	/* Data Time-Out Error */
--# define ATMCI_OVRE		(  1 <<  30)	/* RX Overrun Error */
--# define ATMCI_UNRE		(  1 <<  31)	/* TX Underrun Error */
-+# define ATMCI_CMDRDY			(  1 <<   0)	/* Command Ready */
-+# define ATMCI_RXRDY			(  1 <<   1)	/* Receiver Ready */
-+# define ATMCI_TXRDY			(  1 <<   2)	/* Transmitter Ready */
-+# define ATMCI_BLKE			(  1 <<   3)	/* Data Block Ended */
-+# define ATMCI_DTIP			(  1 <<   4)	/* Data Transfer In Progress */
-+# define ATMCI_NOTBUSY			(  1 <<   5)	/* Data Not Busy */
-+# define ATMCI_SDIOIRQA			(  1 <<   8)	/* SDIO IRQ in slot A */
-+# define ATMCI_SDIOIRQB			(  1 <<   9)	/* SDIO IRQ in slot B */
-+# define ATMCI_RINDE			(  1 <<  16)	/* Response Index Error */
-+# define ATMCI_RDIRE			(  1 <<  17)	/* Response Direction Error */
-+# define ATMCI_RCRCE			(  1 <<  18)	/* Response CRC Error */
-+# define ATMCI_RENDE			(  1 <<  19)	/* Response End Bit Error */
-+# define ATMCI_RTOE			(  1 <<  20)	/* Response Time-Out Error */
-+# define ATMCI_DCRCE			(  1 <<  21)	/* Data CRC Error */
-+# define ATMCI_DTOE			(  1 <<  22)	/* Data Time-Out Error */
-+# define ATMCI_OVRE			(  1 <<  30)	/* RX Overrun Error */
-+# define ATMCI_UNRE			(  1 <<  31)	/* TX Underrun Error */
- #define ATMCI_DMA			0x0050	/* DMA Configuration[2] */
--# define ATMCI_DMA_OFFSET(x)	((x) <<  0)	/* DMA Write Buffer Offset */
--# define ATMCI_DMA_CHKSIZE(x)	((x) <<  4)	/* DMA Channel Read and Write Chunk Size */
--# define ATMCI_DMAEN		(  1 <<  8)	/* DMA Hardware Handshaking Enable */
-+# define ATMCI_DMA_OFFSET(x)		((x) <<  0)	/* DMA Write Buffer Offset */
-+# define ATMCI_DMA_CHKSIZE(x)		((x) <<  4)	/* DMA Channel Read and Write Chunk Size */
-+# define ATMCI_DMAEN			(  1 <<  8)	/* DMA Hardware Handshaking Enable */
- #define ATMCI_CFG			0x0054	/* Configuration[2] */
- # define ATMCI_CFG_FIFOMODE_1DATA	(  1 <<  0)	/* MCI Internal FIFO control mode */
--# define ATMCI_CFG_FERRCTRL_COR	(  1 <<  4)	/* Flow Error flag reset control mode */
-+# define ATMCI_CFG_FERRCTRL_COR		(  1 <<  4)	/* Flow Error flag reset control mode */
- # define ATMCI_CFG_HSMODE		(  1 <<  8)	/* High Speed Mode */
- # define ATMCI_CFG_LSYNC		(  1 << 12)	/* Synchronize on the last block */
--#define ATMCI_WPMR		0x00e4	/* Write Protection Mode[2] */
--# define ATMCI_WP_EN		(  1 <<  0)	/* WP Enable */
--# define ATMCI_WP_KEY		(0x4d4349 << 8)	/* WP Key */
--#define ATMCI_WPSR		0x00e8	/* Write Protection Status[2] */
--# define ATMCI_GET_WP_VS(x)	((x) & 0x0f)
--# define ATMCI_GET_WP_VSRC(x)	(((x) >> 8) & 0xffff)
--#define ATMCI_FIFO_APERTURE	0x0200	/* FIFO Aperture[2] */
-+#define ATMCI_WPMR			0x00e4	/* Write Protection Mode[2] */
-+# define ATMCI_WP_EN			(  1 <<  0)	/* WP Enable */
-+# define ATMCI_WP_KEY			(0x4d4349 << 8)	/* WP Key */
-+#define ATMCI_WPSR			0x00e8	/* Write Protection Status[2] */
-+# define ATMCI_GET_WP_VS(x)		((x) & 0x0f)
-+# define ATMCI_GET_WP_VSRC(x)		(((x) >> 8) & 0xffff)
-+#define ATMCI_FIFO_APERTURE		0x0200	/* FIFO Aperture[2] */
+-		if (pending & ATMCI_ENDTX) {
+-			atmci_writel(host, ATMCI_IDR, ATMCI_ENDTX);
+-			if (host->data_size) {
+-				atmci_pdc_set_single_buf(host,
+-						XFER_TRANSMIT, PDC_SECOND_BUF);
+-				atmci_writel(host, ATMCI_IER, ATMCI_ENDTX);
+-			}
+-		}
+-
+ 		if (pending & ATMCI_TXBUFE) {
+ 			atmci_writel(host, ATMCI_IDR, ATMCI_TXBUFE);
++			atmci_writel(host, ATMCI_IDR, ATMCI_ENDTX);
+ 			/*
+ 			 * We can receive this interruption before having configured
+ 			 * the second pdc buffer, so we need to reconfigure first and
+@@ -1747,24 +1739,24 @@ static irqreturn_t atmci_interrupt(int irq, void *dev_id)
+ 			 */
+ 			if (host->data_size) {
+ 				atmci_pdc_set_both_buf(host, XFER_TRANSMIT);
++				atmci_writel(host, ATMCI_IER, ATMCI_ENDTX);
+ 				atmci_writel(host, ATMCI_IER, ATMCI_TXBUFE);
+ 			} else {
+ 				atmci_pdc_complete(host);
+ 			}
+-		}
+-
+-		if (pending & ATMCI_ENDRX) {
+-			atmci_writel(host, ATMCI_IDR, ATMCI_ENDRX);
++		} else if (pending & ATMCI_ENDTX) {
++			atmci_writel(host, ATMCI_IDR, ATMCI_ENDTX);
  
- /* This is not including the FIFO Aperture on MCI2 */
- #define ATMCI_REGS_SIZE		0x100
+ 			if (host->data_size) {
+ 				atmci_pdc_set_single_buf(host,
+-						XFER_RECEIVE, PDC_SECOND_BUF);
+-				atmci_writel(host, ATMCI_IER, ATMCI_ENDRX);
++						XFER_TRANSMIT, PDC_SECOND_BUF);
++				atmci_writel(host, ATMCI_IER, ATMCI_ENDTX);
+ 			}
+ 		}
+ 
+ 		if (pending & ATMCI_RXBUFF) {
+ 			atmci_writel(host, ATMCI_IDR, ATMCI_RXBUFF);
++			atmci_writel(host, ATMCI_IDR, ATMCI_ENDRX);
+ 			/*
+ 			 * We can receive this interruption before having configured
+ 			 * the second pdc buffer, so we need to reconfigure first and
+@@ -1772,12 +1764,22 @@ static irqreturn_t atmci_interrupt(int irq, void *dev_id)
+ 			 */
+ 			if (host->data_size) {
+ 				atmci_pdc_set_both_buf(host, XFER_RECEIVE);
++				atmci_writel(host, ATMCI_IER, ATMCI_ENDRX);
+ 				atmci_writel(host, ATMCI_IER, ATMCI_RXBUFF);
+ 			} else {
+ 				atmci_pdc_complete(host);
+ 			}
++		} else if (pending & ATMCI_ENDRX) {
++			atmci_writel(host, ATMCI_IDR, ATMCI_ENDRX);
++
++			if (host->data_size) {
++				atmci_pdc_set_single_buf(host,
++						XFER_RECEIVE, PDC_SECOND_BUF);
++				atmci_writel(host, ATMCI_IER, ATMCI_ENDRX);
++			}
+ 		}
+ 
++
+ 		if (pending & ATMCI_NOTBUSY) {
+ 			atmci_writel(host, ATMCI_IDR,
+ 					ATMCI_DATA_ERROR_FLAGS | ATMCI_NOTBUSY);
 -- 
 1.7.0.4
 
