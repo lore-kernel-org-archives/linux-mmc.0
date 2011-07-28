@@ -1,51 +1,48 @@
-From: =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
-Subject: [PATCH] cb710: fix possible pci_dev leak in
- cb710_pci_configure()
-Date: Thu, 28 Jul 2011 20:55:27 +0200 (CEST)
-Message-ID: <d8d89ffdad20168a3c2273418aff74036eb24add.1311879121.git.mirq-linux@rere.qmqm.pl>
-References: <20110728183319.GC24120@rere.qmqm.pl>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 1/2] MMC / TMIO: Fix build issue related to struct
+ scatterlist
+Date: Thu, 28 Jul 2011 22:09:10 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1107282205110.20737@axis700.grange>
+References: <201107262049.15333.rjw@sisk.pl> <201107262050.23379.rjw@sisk.pl>
+ <Pine.LNX.4.64.1107272236510.7435@axis700.grange> <201107272356.16817.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rere.qmqm.pl ([89.167.52.164]:57225 "EHLO rere.qmqm.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755249Ab1G1Sz2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Jul 2011 14:55:28 -0400
-In-Reply-To: <20110728183319.GC24120@rere.qmqm.pl>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <201107272356.16817.rjw@sisk.pl>
+Sender: linux-sh-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>, linux-sh@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: kernel-janitors@vger.kernel.org, Julia Lawall <julia@diku.dk>
 
-Reported-by: Julia Lawall <julia@diku.dk>
-Signed-off-by: Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmqm.pl>
+On Wed, 27 Jul 2011, Rafael J. Wysocki wrote:
+
+> On Wednesday, July 27, 2011, Guennadi Liakhovetski wrote:
+> > (added MMC maintainer to CC:)
+> > 
+> > On Tue, 26 Jul 2011, Rafael J. Wysocki wrote:
+> > 
+> > > From: Rafael J. Wysocki <rjw@sisk.pl>
+> > > 
+> > > Fix build issue caused by undefined struct scatterlist in
+> > > drivers/mmc/host/tmio_mmc.c.
+> > > 
+> > > Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
+> > 
+> > A nitpick, if I may: sCatterlist comes before sPinlock in my versions of 
+> > most popular alphabets;-) Please, fix (or maybe Chris can fix it himself), 
+> 
+> I'm not sure what you mean exactly (perhaps it's too late).
+
+I mean, that the headers are atm sorted alphabetically and should remain 
+so, therefore you should add the new header one line higher. As for 
+compile failure or not: I haven't seen any compile failures myself, but 
+the patch is academically correct, because structs, declared in tmio_mmc.h 
+embed struct scatterlist, therefore the header has to be included in that 
+header too.
+
+Thanks
+Guennadi
 ---
- drivers/misc/cb710/core.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/misc/cb710/core.c b/drivers/misc/cb710/core.c
-index efec413..68cd05b 100644
---- a/drivers/misc/cb710/core.c
-+++ b/drivers/misc/cb710/core.c
-@@ -33,7 +33,7 @@ EXPORT_SYMBOL_GPL(cb710_pci_update_config_reg);
- static int __devinit cb710_pci_configure(struct pci_dev *pdev)
- {
- 	unsigned int devfn =3D PCI_DEVFN(PCI_SLOT(pdev->devfn), 0);
--	struct pci_dev *pdev0 =3D pci_get_slot(pdev->bus, devfn);
-+	struct pci_dev *pdev0;
- 	u32 val;
-=20
- 	cb710_pci_update_config_reg(pdev, 0x48,
-@@ -43,6 +43,7 @@ static int __devinit cb710_pci_configure(struct pci_d=
-ev *pdev)
- 	if (val & 0x80000000)
- 		return 0;
-=20
-+	pdev0 =3D pci_get_slot(pdev->bus, devfn);
- 	if (!pdev0)
- 		return -ENODEV;
-=20
---=20
-1.7.5.4
-
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
