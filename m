@@ -1,51 +1,61 @@
-From: James Hogan <james.hogan@imgtec.com>
-Subject: Re: [PATCH 1/1] mmc: Fixed bug in IDMAC_SET_BUFFER1_SIZE Macro in
- dw_mmc.c
-Date: Thu, 28 Jul 2011 12:17:54 +0100
-Message-ID: <4E314562.2000001@imgtec.com>
-References: <1311851023-3563-1-git-send-email-shashidharh@vayavyalabs.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: ludovic.desroches@atmel.com
+Subject: [RFC PATCH 8/9] mmc: atmel-mci: correct sg buffer size evaluation
+Date: Thu, 28 Jul 2011 16:29:57 +0200
+Message-ID: <1311863398-31579-9-git-send-email-ludovic.desroches@atmel.com>
+References: <1311863398-31579-1-git-send-email-ludovic.desroches@atmel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:19620 "EHLO multi.imgtec.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754481Ab1G1LR6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Jul 2011 07:17:58 -0400
-In-Reply-To: <1311851023-3563-1-git-send-email-shashidharh@vayavyalabs.com>
+Received: from newsmtp5.atmel.com ([204.2.163.5]:27064 "EHLO
+	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754106Ab1G1NYJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2011 09:24:09 -0400
+In-Reply-To: <1311863398-31579-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Cc: Will Newton <will.newton@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: patrice.vilchez@atmel.com, nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On 07/28/2011 12:03 PM, Shashidhar Hiremath wrote:
-> The mask used inside this macro was assuming Buffer_Size1's[BS1's] width to be 14 bits,
-> it is actually of 13 bits, Modified masks used in IDMAC_SET_BUFFER1_SIZE such that
-> they use only 13 bits instead of current 14.
-> 
-> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-> ---
->  drivers/mmc/host/dw_mmc.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 77f0b6b..f13bb49 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -62,7 +62,7 @@ struct idmac_desc {
->  
->  	u32		des1;	/* Buffer sizes */
->  #define IDMAC_SET_BUFFER1_SIZE(d, s) \
-> -	((d)->des1 = ((d)->des1 & 0x03ffc000) | ((s) & 0x3fff))
-> +	((d)->des1 = ((d)->des1 & 0x03ffe000) | ((s) & 0x1fff))
->  
->  	u32		des2;	/* buffer 1 physical address */
->  
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Yes, according to the TRM you appear to be correct
+Assuming that a sg buffer size is a page size is false so use sg_dma_len.
+A 4096 bytes can be required with two 2048-bytes sg buffer.
 
-Reviewed-by: James Hogan <james.hogan@imgtec.com>
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
+ drivers/mmc/host/atmel-mci.c |    7 +++----
+ 1 files changed, 3 insertions(+), 4 deletions(-)
 
-Thanks
-James
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index c415322..963e320 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -608,7 +608,7 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
+ 	}
+ 
+ 	atmci_writel(host, pointer_reg, sg_dma_address(host->sg));
+-	if (host->data_size <= PAGE_SIZE) {
++	if (host->data_size <= sg_dma_len(host->sg)) {
+ 		if (host->data_size & 0x3) {
+ 			/* If size is different from modulo 4, transfer bytes */
+ 			atmci_writel(host, counter_reg, host->data_size);
+@@ -620,8 +620,8 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
+ 		host->data_size = 0;
+ 	} else {
+ 		/* We assume the size of a page is 32-bits aligned */
+-		atmci_writel(host, counter_reg, PAGE_SIZE / 4);
+-		host->data_size -= PAGE_SIZE;
++		atmci_writel(host, counter_reg, sg_dma_len(host->sg) / 4);
++		host->data_size -= sg_dma_len(host->sg);
+ 		if (host->data_size)
+ 			host->sg = sg_next(host->sg);
+ 	}
+@@ -808,7 +808,6 @@ atmci_prepare_data_pdc(struct atmel_mci *host, struct mmc_data *data)
+ 	/* Configure PDC */
+ 	host->data_size = data->blocks * data->blksz;
+ 	sg_len = dma_map_sg(&host->pdev->dev, data->sg, data->sg_len, dir);
+-	BUG_ON(sg_len < host->data_size / PAGE_SIZE);
+ 	if (host->data_size)
+ 		atmci_pdc_set_both_buf(host,
+ 			((dir == DMA_FROM_DEVICE)?XFER_RECEIVE:XFER_TRANSMIT));
+-- 
+1.7.0.4
 
