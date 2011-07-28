@@ -1,12 +1,12 @@
 From: ludovic.desroches@atmel.com
-Subject: [RFC PATCH 6/9] atmel_pdc: add ATMEL_PDC_SCND_BUF_OFF
-Date: Thu, 28 Jul 2011 16:29:55 +0200
-Message-ID: <1311863398-31579-7-git-send-email-ludovic.desroches@atmel.com>
+Subject: [RFC PATCH 7/9] mmc: atmel-mci: use ATMEL_PDC_SCND_BUF_OFF instead of a literal value
+Date: Thu, 28 Jul 2011 16:29:56 +0200
+Message-ID: <1311863398-31579-8-git-send-email-ludovic.desroches@atmel.com>
 References: <1311863398-31579-1-git-send-email-ludovic.desroches@atmel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:34979 "EHLO
+Received: from newsmtp5.atmel.com ([204.2.163.5]:35366 "EHLO
 	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755394Ab1G1NYI (ORCPT
+	with ESMTP id S1754106Ab1G1NYI (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2011 09:24:08 -0400
 In-Reply-To: <1311863398-31579-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -16,24 +16,26 @@ Cc: patrice.vilchez@atmel.com, nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, L
 
 From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Add define for the offset value between first and second buffer registers.
-
 Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 ---
- include/linux/atmel_pdc.h |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+ drivers/mmc/host/atmel-mci.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/atmel_pdc.h b/include/linux/atmel_pdc.h
-index 5058a31..63499ce 100644
---- a/include/linux/atmel_pdc.h
-+++ b/include/linux/atmel_pdc.h
-@@ -33,4 +33,6 @@
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 7955697..c415322 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -603,8 +603,8 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
+ 	}
  
- #define ATMEL_PDC_PTSR		0x124	/* Transfer Status Register */
+ 	if (buf_nb == PDC_SECOND_BUF) {
+-		pointer_reg += 0x10;
+-		counter_reg += 0x10;
++		pointer_reg += ATMEL_PDC_SCND_BUF_OFF;
++		counter_reg += ATMEL_PDC_SCND_BUF_OFF;
+ 	}
  
-+#define ATMEL_PDC_SCND_BUF_OFF	0x10	/* Offset between first and second buffer registers */
-+
- #endif
+ 	atmci_writel(host, pointer_reg, sg_dma_address(host->sg));
 -- 
 1.7.0.4
 
