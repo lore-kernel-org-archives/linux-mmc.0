@@ -1,48 +1,80 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 1/2] MMC / TMIO: Fix build issue related to struct
- scatterlist
-Date: Thu, 28 Jul 2011 22:09:10 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1107282205110.20737@axis700.grange>
-References: <201107262049.15333.rjw@sisk.pl> <201107262050.23379.rjw@sisk.pl>
- <Pine.LNX.4.64.1107272236510.7435@axis700.grange> <201107272356.16817.rjw@sisk.pl>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <201107272356.16817.rjw@sisk.pl>
-Sender: linux-sh-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>, linux-sh@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+From: Ido Yariv <ido@wizery.com>
+Subject: [PATCH REPOST v2] mmc: davinci: Add support for set_power callback
+Date: Thu, 28 Jul 2011 23:49:09 +0300
+Message-ID: <1311886149-3009-1-git-send-email-ido@wizery.com>
+References: <B85A65D85D7EB246BE421B3FB0FBB593024DD2CE0A@dbde02.ent.ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:59656 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755177Ab1G1Ute (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2011 16:49:34 -0400
+Received: by wyg8 with SMTP id 8so429094wyg.19
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Jul 2011 13:49:33 -0700 (PDT)
+In-Reply-To: <B85A65D85D7EB246BE421B3FB0FBB593024DD2CE0A@dbde02.ent.ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sekhar Nori <nsekhar@ti.com>, davinci-linux-open-source@linux.davincidsp.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: Ido Yariv <ido@wizery.com>, Chris Ball <cjb@laptop.org>
 
-On Wed, 27 Jul 2011, Rafael J. Wysocki wrote:
+Some devices connected to the MMC bus are power controlled by external
+means. For instance, an SDIO device may be powered down/up by an
+external gpio line.
 
-> On Wednesday, July 27, 2011, Guennadi Liakhovetski wrote:
-> > (added MMC maintainer to CC:)
-> > 
-> > On Tue, 26 Jul 2011, Rafael J. Wysocki wrote:
-> > 
-> > > From: Rafael J. Wysocki <rjw@sisk.pl>
-> > > 
-> > > Fix build issue caused by undefined struct scatterlist in
-> > > drivers/mmc/host/tmio_mmc.c.
-> > > 
-> > > Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
-> > 
-> > A nitpick, if I may: sCatterlist comes before sPinlock in my versions of 
-> > most popular alphabets;-) Please, fix (or maybe Chris can fix it himself), 
-> 
-> I'm not sure what you mean exactly (perhaps it's too late).
+In order to avoid toggling power from within the MMC host driver, add a
+set_power callback function, which will be called by set_ios upon
+powering down/up.
 
-I mean, that the headers are atm sorted alphabetically and should remain 
-so, therefore you should add the new header one line higher. As for 
-compile failure or not: I haven't seen any compile failures myself, but 
-the patch is academically correct, because structs, declared in tmio_mmc.h 
-embed struct scatterlist, therefore the header has to be included in that 
-header too.
-
-Thanks
-Guennadi
+Signed-off-by: Ido Yariv <ido@wizery.com>
+CC: Chris Ball <cjb@laptop.org>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ arch/arm/mach-davinci/include/mach/mmc.h |    3 +++
+ drivers/mmc/host/davinci_mmc.c           |   13 +++++++++++++
+ 2 files changed, 16 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/mach-davinci/include/mach/mmc.h b/arch/arm/mach-davinci/include/mach/mmc.h
+index d4f1e96..5ba6b22 100644
+--- a/arch/arm/mach-davinci/include/mach/mmc.h
++++ b/arch/arm/mach-davinci/include/mach/mmc.h
+@@ -12,6 +12,9 @@ struct davinci_mmc_config {
+ 	/* get_cd()/get_wp() may sleep */
+ 	int	(*get_cd)(int module);
+ 	int	(*get_ro)(int module);
++
++	void	(*set_power)(int module, bool on);
++
+ 	/* wires == 0 is equivalent to wires == 4 (4-bit parallel) */
+ 	u8	wires;
+ 
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index 0076c74..64a8325 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -807,12 +807,25 @@ static void calculate_clk_divider(struct mmc_host *mmc, struct mmc_ios *ios)
+ static void mmc_davinci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct mmc_davinci_host *host = mmc_priv(mmc);
++	struct platform_device *pdev = to_platform_device(mmc->parent);
++	struct davinci_mmc_config *config = pdev->dev.platform_data;
+ 
+ 	dev_dbg(mmc_dev(host->mmc),
+ 		"clock %dHz busmode %d powermode %d Vdd %04x\n",
+ 		ios->clock, ios->bus_mode, ios->power_mode,
+ 		ios->vdd);
+ 
++	switch (ios->power_mode) {
++	case MMC_POWER_OFF:
++		if (config && config->set_power)
++			config->set_power(pdev->id, false);
++		break;
++	case MMC_POWER_UP:
++		if (config && config->set_power)
++			config->set_power(pdev->id, true);
++		break;
++	}
++
+ 	switch (ios->bus_width) {
+ 	case MMC_BUS_WIDTH_8:
+ 		dev_dbg(mmc_dev(host->mmc), "Enabling 8 bit mode\n");
+-- 
+1.7.4.1
+
