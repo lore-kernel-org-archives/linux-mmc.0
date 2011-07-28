@@ -1,60 +1,65 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] cb710: fix possible pci_dev leak in cb710_pci_configure()
-Date: Thu, 28 Jul 2011 18:34:07 -0400
-Message-ID: <m2y5zihw68.fsf@bob.laptop.org>
-References: <20110728183319.GC24120@rere.qmqm.pl>
-	<d8d89ffdad20168a3c2273418aff74036eb24add.1311879121.git.mirq-linux@rere.qmqm.pl>
+Subject: Re: [Bug 39822] SDHC cards no longer recognized on AT91 based board
+Date: Thu, 28 Jul 2011 19:48:27 -0400
+Message-ID: <m28vridl10.fsf@bob.laptop.org>
+References: <bug-39822-26132@https.bugzilla.kernel.org/>
+	<201107282323.p6SNN9Jk026454@demeter1.kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:44997 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:38139 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756079Ab1G1Weg convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2011 18:34:36 -0400
-In-Reply-To: <d8d89ffdad20168a3c2273418aff74036eb24add.1311879121.git.mirq-linux@rere.qmqm.pl>
-	(=?utf-8?Q?=22Micha=C5=82_Miros=C5=82aw=22's?= message of "Thu, 28 Jul 2011
- 20:55:27 +0200
-	(CEST)")
+	id S1756213Ab1G1XtN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 28 Jul 2011 19:49:13 -0400
+In-Reply-To: <201107282323.p6SNN9Jk026454@demeter1.kernel.org>
+	(bugzilla-daemon@bugzilla.kernel.org's message of "Thu, 28 Jul 2011
+	23:23:09 GMT")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?utf-8?Q?Micha=C5=82_Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
-Cc: linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org, Julia Lawall <julia@diku.dk>
+To: dgilbert@interlog.com
+Cc: linux-mmc@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, ludovic.desroches@atmel.com, akpm@linux-foundation.org
 
-Hi Micha=C5=82,
+Hi, thanks for the bug report.  Adding linux-mmc@ and some atmel driver
+folks to CC.
 
-On Thu, Jul 28 2011, Micha=C5=82 Miros=C5=82aw wrote:
-> Reported-by: Julia Lawall <julia@diku.dk>
-> Signed-off-by: Micha=C5=82 Miros=C5=82aw <mirq-linux@rere.qmqm.pl>
-> ---
->  drivers/misc/cb710/core.c |    3 ++-
->  1 files changed, 2 insertions(+), 1 deletions(-)
+On Thu, Jul 28 2011, bugzilla-daemon@bugzilla.kernel.org wrote:
+> Prior to 3.0.0 the FoxG20 board (Atmel AT91SAM9G20) could boot and use
+> both micro SD and SDHC card to contain its root file system. With the
+> advent of the 3.0.0 kernel the micro SDHC card is unable to mount the
+> root file system.
+> 
+> Comparing the relevant part of dmesg for 2.6.38.6 (and it worked on
+> 2.6.39):
+> ...
+> Waiting for root device /dev/mmcblk0p2...
+> mmc0: host does not support reading read-only switch. assuming write-enable.
+> at91_mci at91_mci: Timeout waiting end of packet
+> mmc0: new SDHC card at address 1234
+> mmcblk0: mmc0:1234 SA04G 3.67 GiB
+>  mmcblk0: p1 p2 p3
+> ...
 >
-> diff --git a/drivers/misc/cb710/core.c b/drivers/misc/cb710/core.c
-> index efec413..68cd05b 100644
-> --- a/drivers/misc/cb710/core.c
-> +++ b/drivers/misc/cb710/core.c
-> @@ -33,7 +33,7 @@ EXPORT_SYMBOL_GPL(cb710_pci_update_config_reg);
->  static int __devinit cb710_pci_configure(struct pci_dev *pdev)
->  {
->  	unsigned int devfn =3D PCI_DEVFN(PCI_SLOT(pdev->devfn), 0);
-> -	struct pci_dev *pdev0 =3D pci_get_slot(pdev->bus, devfn);
-> +	struct pci_dev *pdev0;
->  	u32 val;
-> =20
->  	cb710_pci_update_config_reg(pdev, 0x48,
-> @@ -43,6 +43,7 @@ static int __devinit cb710_pci_configure(struct pci=
-_dev *pdev)
->  	if (val & 0x80000000)
->  		return 0;
-> =20
-> +	pdev0 =3D pci_get_slot(pdev->bus, devfn);
->  	if (!pdev0)
->  		return -ENODEV;
+> to the same dmesg section for 3.0.0 :
+> ...
+> Waiting for root device /dev/mmcblk0p2...
+> mmc0: error -110 whilst initialising SD card
+> at91_mci at91_mci: Timeout waiting end of packet
+> mmc0: error -110 whilst initialising SD card
+> [no further progress]
+>
+> Non "HC" SD cards work as expected in 3.0.0
 
-Pushed to mmc-next for 3.1, thanks.
+If no-one on the CC list has any ideas, would you be interested in
+trying to bisect this change?
+
+Another possibility would be adding printks before all of the -ETIMEDOUT
+lines in core/* and host/at*, in order to see which one you're hitting
+(and therefore which operation is causing the initialization to fail).
+But a full bisection would be more conclusive.
+
+Thanks,
 
 - Chris.
---=20
+-- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
