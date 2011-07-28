@@ -1,58 +1,48 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH 1/2] MMC / TMIO: Fix build issue related to struct scatterlist
-Date: Thu, 28 Jul 2011 00:06:26 +0200
-Message-ID: <201107280006.26466.rjw@sisk.pl>
-References: <201107262049.15333.rjw@sisk.pl> <201107262050.23379.rjw@sisk.pl> <m2pqkvl7l6.fsf@bob.laptop.org>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH 2/2] ARM: mmp2: support sdio device 8787
+Date: Thu, 28 Jul 2011 10:44:01 +0800
+Message-ID: <CAMj5BkgEWb4ejChy6NCdxLse9maG25Pr6JmTS3pt0HJk2ee1Eg@mail.gmail.com>
+References: <1654B53E-123B-43F5-B526-49D19D39D1F0@marvell.com>
+	<1EA87C4D-1B63-40E4-AA86-20D2A02A17B7@marvell.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-2"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <m2pqkvl7l6.fsf@bob.laptop.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>, linux-sh@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:39293 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752674Ab1G1CoD convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2011 22:44:03 -0400
+Received: by qwk3 with SMTP id 3so1120268qwk.19
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2011 19:44:02 -0700 (PDT)
+In-Reply-To: <1EA87C4D-1B63-40E4-AA86-20D2A02A17B7@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Bing Zhao <bzhao@marvell.com>, Frank Huang <frankh@marvell.com>
 
-On Wednesday, July 27, 2011, Chris Ball wrote:
-> Hi Rafael,
-> 
-> On Tue, Jul 26 2011, Rafael J. Wysocki wrote:
-> > From: Rafael J. Wysocki <rjw@sisk.pl>
-> >
-> > Fix build issue caused by undefined struct scatterlist in
-> > drivers/mmc/host/tmio_mmc.c.
-> >
-> > Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
-> > ---
-> >  drivers/mmc/host/tmio_mmc.h      |    1 +
-> >  drivers/usb/renesas_usbhs/fifo.c |    1 +
-> >  2 files changed, 2 insertions(+)
-> >
-> > Index: linux-2.6/drivers/mmc/host/tmio_mmc.h
-> > ===================================================================
-> > --- linux-2.6.orig/drivers/mmc/host/tmio_mmc.h
-> > +++ linux-2.6/drivers/mmc/host/tmio_mmc.h
-> > @@ -21,6 +21,7 @@
-> >  #include <linux/mutex.h>
-> >  #include <linux/pagemap.h>
-> >  #include <linux/spinlock.h>
-> > +#include <linux/scatterlist.h>
-> >  
-> >  /* Definitions for values the CTRL_SDIO_STATUS register can take. */
-> >  #define TMIO_SDIO_STAT_IOIRQ	0x0001
-> 
-> I'm not able to reproduce the build failure here.
-> 
-> drivers/mmc/host/tmio_mmc.c already performs "#include <linux/scatterlist.h>"
-> itself (and always has done), so I'm confused about why this is necessary.
-> Do you have a copy of your build log with the error?
-
-tmio_mmc.h is included by sh_mobile_sdhi.c too and that one doesn't include
-scatterlist.h, which causes a build failure to happen, becuase of the
-bounce_sg member of struct tmio_mmc_host.
-
-The patch has been merged already anyway.
-
-Thanks,
-Rafael
+>> +
+>> +static struct fixed_voltage_config sdio_power =3D {
+>> + =A0 =A0 .supply_name =A0 =A0 =A0 =A0 =A0 =A0=3D "vmmc",
+>> + =A0 =A0 .microvolts =A0 =A0 =A0 =A0 =A0 =A0 =3D 3000000,
+>> + =A0 =A0 .gpio =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =3D mfp_to_gpio(=
+MFP_PIN_GPIO57),
+>> + =A0 =A0 .enable_high =A0 =A0 =A0 =A0 =A0 =A0=3D 1,
+>> + =A0 =A0 .enabled_at_boot =A0 =A0 =A0 =A0=3D 0,
+>> + =A0 =A0 .init_data =A0 =A0 =A0 =A0 =A0 =A0 =A0=3D &sdio_power_data=
+,
+>> +};
+>> +
+>
+> ldo7 is the power source. =A0 The 8787 is the consumer and the code s=
+hould reflect this.
+> GPIO57 is an on/off switch to the 8787.
+>
+>
+Instead of LDO7, 8787 is powered with V_SD2, V_BATT, and VLDO12 on brow=
+nstone.
+Use PDn to control 8787 power is recommended method.
+1. Some LDO is shared and can not be cut down.
+2. Control LDO is much slower, some time is needed for voltage to
+decay, and the time is not accurate to control.
+3. With LDO powered, 8787 is under control and 8787 could put itself
+to the lowest state.
