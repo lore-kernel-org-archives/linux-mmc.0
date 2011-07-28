@@ -1,55 +1,250 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH 1/2] MMC / TMIO: Fix build issue related to struct scatterlist
-Date: Thu, 28 Jul 2011 23:07:31 +0200
-Message-ID: <201107282307.31564.rjw@sisk.pl>
-References: <201107262049.15333.rjw@sisk.pl> <201107272356.16817.rjw@sisk.pl> <Pine.LNX.4.64.1107282205110.20737@axis700.grange>
+From: Troy Kisky <troy.kisky@boundarydevices.com>
+Subject: Re: [PATCH v3] davinci: Add wl1271/wlan support for AM18x
+Date: Thu, 28 Jul 2011 14:15:41 -0700
+Message-ID: <4E31D17D.6050000@boundarydevices.com>
+References: <B85A65D85D7EB246BE421B3FB0FBB593024DD2CEC2@dbde02.ent.ti.com> <1311886373-3060-1-git-send-email-ido@wizery.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:60241 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754611Ab1G1VGa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Jul 2011 17:06:30 -0400
-In-Reply-To: <Pine.LNX.4.64.1107282205110.20737@axis700.grange>
+Received: from oproxy4-pub.bluehost.com ([69.89.21.11]:34060 "HELO
+	oproxy4-pub.bluehost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1754678Ab1G1VPv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2011 17:15:51 -0400
+In-Reply-To: <1311886373-3060-1-git-send-email-ido@wizery.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>, linux-sh@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: Ido Yariv <ido@wizery.com>
+Cc: Sekhar Nori <nsekhar@ti.com>, davinci-linux-open-source@linux.davincidsp.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-On Thursday, July 28, 2011, Guennadi Liakhovetski wrote:
-> On Wed, 27 Jul 2011, Rafael J. Wysocki wrote:
+On 7/28/2011 1:52 PM, Ido Yariv wrote:
+> The wl1271 daughter card for AM18x EVMs is a combo wireless connectivity
+> add-on card, based on the LS Research TiWi module with Texas
+> Instruments' wl1271 solution.
+> It is a 4-wire, 1.8V, embedded SDIO WLAN device with an external IRQ
+> line and is power-controlled by a GPIO-based fixed regulator.
 > 
-> > On Wednesday, July 27, 2011, Guennadi Liakhovetski wrote:
-> > > (added MMC maintainer to CC:)
-> > > 
-> > > On Tue, 26 Jul 2011, Rafael J. Wysocki wrote:
-> > > 
-> > > > From: Rafael J. Wysocki <rjw@sisk.pl>
-> > > > 
-> > > > Fix build issue caused by undefined struct scatterlist in
-> > > > drivers/mmc/host/tmio_mmc.c.
-> > > > 
-> > > > Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
-> > > 
-> > > A nitpick, if I may: sCatterlist comes before sPinlock in my versions of 
-> > > most popular alphabets;-) Please, fix (or maybe Chris can fix it himself), 
-> > 
-> > I'm not sure what you mean exactly (perhaps it's too late).
+> Add support for the WLAN capabilities of this expansion board.
 > 
-> I mean, that the headers are atm sorted alphabetically and should remain 
-> so, therefore you should add the new header one line higher.
+> Signed-off-by: Ido Yariv <ido@wizery.com>
+> ---
+>  arch/arm/mach-davinci/Kconfig           |   10 +++
+>  arch/arm/mach-davinci/board-da850-evm.c |  114 +++++++++++++++++++++++++++++++
+>  2 files changed, 124 insertions(+), 0 deletions(-)
+> 
+> diff --git a/arch/arm/mach-davinci/Kconfig b/arch/arm/mach-davinci/Kconfig
+> index c0deaca..32d837d 100644
+> --- a/arch/arm/mach-davinci/Kconfig
+> +++ b/arch/arm/mach-davinci/Kconfig
+> @@ -192,6 +192,16 @@ config DA850_UI_RMII
+>  
+>  endchoice
+>  
+> +config DA850_WL12XX
+> +	bool "AM18x wl1271 daughter board"
+> +	depends on MACH_DAVINCI_DA850_EVM
+> +	help
+> +	  The wl1271 daughter card for AM18x EVMs is a combo wireless
+> +	  connectivity add-on card, based on the LS Research TiWi module with
+> +	  Texas Instruments' wl1271 solution.
+> +	  Say Y if you want to use a wl1271 expansion card connected to the
+> +	  AM18x EVM.
+> +
+>  config GPIO_PCA953X
+>  	default MACH_DAVINCI_DA850_EVM
+>  
+> diff --git a/arch/arm/mach-davinci/board-da850-evm.c b/arch/arm/mach-davinci/board-da850-evm.c
+> index bd53945..d817626 100644
+> --- a/arch/arm/mach-davinci/board-da850-evm.c
+> +++ b/arch/arm/mach-davinci/board-da850-evm.c
+> @@ -31,6 +31,8 @@
+>  #include <linux/input/tps6507x-ts.h>
+>  #include <linux/spi/spi.h>
+>  #include <linux/spi/flash.h>
+> +#include <linux/delay.h>
+> +#include <linux/wl12xx.h>
+>  
+>  #include <asm/mach-types.h>
+>  #include <asm/mach/arch.h>
+> @@ -49,6 +51,9 @@
+>  #define DA850_MMCSD_CD_PIN		GPIO_TO_PIN(4, 0)
+>  #define DA850_MMCSD_WP_PIN		GPIO_TO_PIN(4, 1)
+>  
+> +#define DA850_WLAN_EN			GPIO_TO_PIN(6, 9)
+> +#define DA850_WLAN_IRQ			GPIO_TO_PIN(6, 10)
+> +
+>  #define DA850_MII_MDIO_CLKEN_PIN	GPIO_TO_PIN(2, 6)
+>  
+>  static struct mtd_partition da850evm_spiflash_part[] = {
+> @@ -1117,6 +1122,110 @@ static __init int da850_evm_init_cpufreq(void)
+>  static __init int da850_evm_init_cpufreq(void) { return 0; }
+>  #endif
+>  
+> +#ifdef CONFIG_DA850_WL12XX
+> +
+> +static void wl12xx_set_power(int index, bool power_on)
+> +{
+> +	static bool power_state;
+> +
+> +	pr_debug("Powering %s wl12xx", power_on ? "on" : "off");
+> +
+> +	if (power_on == power_state)
+> +		return;
+> +	power_state = power_on;
+> +
+> +	if (power_on) {
+> +		/* Power up sequence required for wl127x devices */
+> +		gpio_set_value(DA850_WLAN_EN, 1);
+> +		usleep_range(15000, 15000);
+> +		gpio_set_value(DA850_WLAN_EN, 0);
+> +		usleep_range(1000, 1000);
+> +		gpio_set_value(DA850_WLAN_EN, 1);
+> +		msleep(70);
 
-Ah.  Well, as I said the patch had been merged already, so obviously
-Linus didn't care. :-)
 
-> As for compile failure or not: I haven't seen any compile failures myself, but 
-> the patch is academically correct, because structs, declared in tmio_mmc.h 
-> embed struct scatterlist, therefore the header has to be included in that 
-> header too.
+Why turn on, then off, and then back on?
+Isn't off, then back on sufficient?
 
-Exactly.  I've seen a real failure, though.
+Also, why not use regulator API like panda board does?
+>From board-omap4panda.c, we have
+_________________________________________
+static struct regulator_consumer_supply omap4_panda_vmmc5_supply = {
+        .supply = "vmmc",
+        .dev_name = "omap_hsmmc.4",
+};
 
-Thanks,
-Rafael
+static struct regulator_init_data panda_vmmc5 = {
+        .constraints = {
+                .valid_ops_mask = REGULATOR_CHANGE_STATUS,
+        },
+        .num_consumer_supplies = 1,
+        .consumer_supplies = &omap4_panda_vmmc5_supply,
+};
+
+static struct fixed_voltage_config panda_vwlan = {
+        .supply_name = "vwl1271",
+        .microvolts = 1800000, /* 1.8V */
+        .gpio = GPIO_WIFI_PMENA,
+        .startup_delay = 70000, /* 70msec */
+        .enable_high = 1,
+        .enabled_at_boot = 0,
+        .init_data = &panda_vmmc5,
+};
+
+static struct platform_device omap_vwlan_device = {
+        .name           = "reg-fixed-voltage",
+        .id             = 1,
+        .dev = {
+                .platform_data = &panda_vwlan,
+        },
+};
+_________________________________________
+
+If this can't work for you, can you list why in the change log.
+
+If your mmc controller doesn't yet support vmmc control. It should
+be very easy to add it first.
+
+Thanks.
+
+
+> +	} else {
+> +		gpio_set_value(DA850_WLAN_EN, 0);
+> +	}
+> +}
+> +
+> +static struct davinci_mmc_config da850_wl12xx_mmc_config = {
+> +	.set_power	= wl12xx_set_power,
+> +	.wires		= 4,
+> +	.max_freq	= 25000000,
+> +	.caps		= MMC_CAP_4_BIT_DATA | MMC_CAP_NONREMOVABLE |
+> +			  MMC_CAP_POWER_OFF_CARD,
+> +	.version	= MMC_CTLR_VERSION_2,
+> +};
+> +
+> +static const short da850_wl12xx_pins[] __initconst = {
+> +	DA850_MMCSD1_DAT_0, DA850_MMCSD1_DAT_1, DA850_MMCSD1_DAT_2,
+> +	DA850_MMCSD1_DAT_3, DA850_MMCSD1_CLK, DA850_MMCSD1_CMD,
+> +	DA850_GPIO6_9, DA850_GPIO6_10,
+> +	-1
+> +};
+> +
+> +static struct wl12xx_platform_data da850_wl12xx_wlan_data __initdata = {
+> +	.irq			= -1,
+> +	.board_ref_clock	= WL12XX_REFCLOCK_38,
+> +	.platform_quirks	= WL12XX_PLATFORM_QUIRK_EDGE_IRQ,
+> +};
+> +
+> +static __init int da850_wl12xx_init(void)
+> +{
+> +	int ret;
+> +
+> +	ret = davinci_cfg_reg_list(da850_wl12xx_pins);
+> +	if (ret) {
+> +		pr_err("wl12xx/mmc mux setup failed: %d\n", ret);
+> +		goto exit;
+> +	}
+> +
+> +	ret = da850_register_mmcsd1(&da850_wl12xx_mmc_config);
+> +	if (ret) {
+> +		pr_err("wl12xx/mmc registration failed: %d\n", ret);
+> +		goto exit;
+> +	}
+> +
+> +	ret = gpio_request_one(DA850_WLAN_EN, GPIOF_OUT_INIT_LOW, "wl12xx_en");
+> +	if (ret) {
+> +		pr_err("Could not request wl12xx enable gpio: %d\n", ret);
+> +		goto exit;
+> +	}
+> +
+> +	ret = gpio_request_one(DA850_WLAN_IRQ, GPIOF_IN, "wl12xx_irq");
+> +	if (ret) {
+> +		pr_err("Could not request wl12xx irq gpio: %d\n", ret);
+> +		goto free_wlan_en;
+> +	}
+> +
+> +	da850_wl12xx_wlan_data.irq = gpio_to_irq(DA850_WLAN_IRQ);
+> +
+> +	ret = wl12xx_set_platform_data(&da850_wl12xx_wlan_data);
+> +	if (ret) {
+> +		pr_err("Could not set wl12xx data: %d\n", ret);
+> +		goto free_wlan_irq;
+> +	}
+> +
+> +	return 0;
+> +
+> +free_wlan_irq:
+> +	gpio_free(DA850_WLAN_IRQ);
+> +
+> +free_wlan_en:
+> +	gpio_free(DA850_WLAN_EN);
+> +
+> +exit:
+> +	return ret;
+> +}
+> +
+> +#else /* CONFIG_DA850_WL12XX */
+> +
+> +static __init int da850_wl12xx_init(void)
+> +{
+> +	return 0;
+> +}
+> +
+> +#endif /* CONFIG_DA850_WL12XX */
+> +
+>  #define DA850EVM_SATA_REFCLKPN_RATE	(100 * 1000 * 1000)
+>  
+>  static __init void da850_evm_init(void)
+> @@ -1171,6 +1280,11 @@ static __init void da850_evm_init(void)
+>  		if (ret)
+>  			pr_warning("da850_evm_init: mmcsd0 registration failed:"
+>  					" %d\n", ret);
+> +
+> +		ret = da850_wl12xx_init();
+> +		if (ret)
+> +			pr_warning("da850_evm_init: wl12xx initialization"
+> +				   " failed: %d\n", ret);
+>  	}
+>  
+>  	davinci_serial_init(&da850_evm_uart_config);
+
