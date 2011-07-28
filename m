@@ -1,50 +1,52 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci: fix retuning timer wrongly deleted in sdhci_tasklet_finish
-Date: Thu, 28 Jul 2011 18:28:13 -0400
-Message-ID: <m2fwlqjb0i.fsf@bob.laptop.org>
-References: <1310362031-8186-1-git-send-email-Aaron.Lu@amd.com>
+Subject: Re: [PATCH] mmc: sdhci-s3c: add quirk about BROKEN_ADMA_ZEROLEN_DESC
+Date: Thu, 28 Jul 2011 18:28:55 -0400
+Message-ID: <m2bowejazc.fsf@bob.laptop.org>
+References: <4E1C0637.2090603@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35739 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:35750 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756079Ab1G1W2R (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Jul 2011 18:28:17 -0400
-In-Reply-To: <1310362031-8186-1-git-send-email-Aaron.Lu@amd.com> (Aaron Lu's
-	message of "Mon, 11 Jul 2011 13:27:11 +0800")
+	id S1756079Ab1G1W3P (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 28 Jul 2011 18:29:15 -0400
+In-Reply-To: <4E1C0637.2090603@samsung.com> (Jaehoon Chung's message of "Tue,
+	12 Jul 2011 17:30:47 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <Aaron.Lu@amd.com>
-Cc: Arindam Nath <arindam.nath@amd.com>, linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ben Dooks <ben-linux@fluff.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Aaron,
+Hi Jaehoon,
 
-On Mon, Jul 11 2011, Aaron Lu wrote:
-> Currently, the retuning timer for retuning mode 1 will be deleted in
-> function sdhci_tasklet_finish after a mmc request done, which will make
-> retuning timing never trigger again. This patch fixed this problem.
+On Tue, Jul 12 2011, Jaehoon Chung wrote:
+> This patch is added the quirk for Samsung SoCs.
 >
-> Signed-off-by: Aaron Lu <Aaron.Lu@amd.com>
+> Samsung SoCs need to set QUIRK_BROKEN_ADMA_ZEROLEN_DESC.
+> (If ADMA operation is more than 65535, maybe set by zero.)
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 > ---
->  drivers/mmc/host/sdhci.c |    3 ---
->  1 files changed, 0 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/sdhci-s3c.c |    3 +++
+>  1 files changed, 3 insertions(+), 0 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 91d9892..6250bac 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1863,9 +1863,6 @@ static void sdhci_tasklet_finish(unsigned long param)
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 460ffaf..03da44a 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -502,6 +502,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+>  	/* This host supports the Auto CMD12 */
+>  	host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
 >  
->  	del_timer(&host->timer);
->  
-> -	if (host->version >= SDHCI_SPEC_300)
-> -		del_timer(&host->tuning_timer);
-> -
->  	mrq = host->mrq;
->  
->  	/*
+> +	/* Samsung SoCs need BROKEN_ADMA_ZEROLEN_DESC */
+> +	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC;
+> +
+>  	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
+>  	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
+>  		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
 
-Pushed to mmc-next for 3.1 with Philip's Reviewed-by, thanks.
+Pushed to mmc-next for 3.1, thanks.
 
 - Chris.
 -- 
