@@ -1,68 +1,69 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/1] mmc: Fixed bug in IDMAC_SET_BUFFER1_SIZE Macro in
- dw_mmc.c
-Date: Fri, 29 Jul 2011 11:17:11 +0900
-Message-ID: <4E321827.5020606@samsung.com>
-References: <1311851023-3563-1-git-send-email-shashidharh@vayavyalabs.com>
- <4E314562.2000001@imgtec.com>
+From: Douglas Gilbert <dgilbert@interlog.com>
+Subject: Re: [Bug 39822] SDHC cards no longer recognized on AT91 based board
+Date: Fri, 29 Jul 2011 00:03:18 -0400
+Message-ID: <4E323106.2030704@interlog.com>
+References: <bug-39822-26132@https.bugzilla.kernel.org/>	<201107282323.p6SNN9Jk026454@demeter1.kernel.org> <m28vridl10.fsf@bob.laptop.org>
+Reply-To: dgilbert@interlog.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:35653 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754308Ab1G2CR0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2011 22:17:26 -0400
-In-reply-to: <4E314562.2000001@imgtec.com>
+Received: from smtp.infotech.no ([82.134.31.41]:48073 "EHLO smtp.infotech.no"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750914Ab1G2ELN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Jul 2011 00:11:13 -0400
+In-Reply-To: <m28vridl10.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: James Hogan <james.hogan@imgtec.com>
-Cc: Shashidhar Hiremath <shashidharh@vayavyalabs.com>, Will Newton <will.newton@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, ludovic.desroches@atmel.com, akpm@linux-foundation.org
 
-Hi..
-
-this patch is right.
-
-Acked-by : Jaehoon Chung <jh80.chung@samsung.com>
-
-Regards,
-Jaehoon Chung
-
-James Hogan wrote:
-> On 07/28/2011 12:03 PM, Shashidhar Hiremath wrote:
->> The mask used inside this macro was assuming Buffer_Size1's[BS1's] width to be 14 bits,
->> it is actually of 13 bits, Modified masks used in IDMAC_SET_BUFFER1_SIZE such that
->> they use only 13 bits instead of current 14.
+On 11-07-28 07:48 PM, Chris Ball wrote:
+> Hi, thanks for the bug report.  Adding linux-mmc@ and some atmel driver
+> folks to CC.
+>
+> On Thu, Jul 28 2011, bugzilla-daemon@bugzilla.kernel.org wrote:
+>> Prior to 3.0.0 the FoxG20 board (Atmel AT91SAM9G20) could boot and use
+>> both micro SD and SDHC card to contain its root file system. With the
+>> advent of the 3.0.0 kernel the micro SDHC card is unable to mount the
+>> root file system.
 >>
->> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
->> ---
->>  drivers/mmc/host/dw_mmc.c |    2 +-
->>  1 files changed, 1 insertions(+), 1 deletions(-)
+>> Comparing the relevant part of dmesg for 2.6.38.6 (and it worked on
+>> 2.6.39):
+>> ...
+>> Waiting for root device /dev/mmcblk0p2...
+>> mmc0: host does not support reading read-only switch. assuming write-enable.
+>> at91_mci at91_mci: Timeout waiting end of packet
+>> mmc0: new SDHC card at address 1234
+>> mmcblk0: mmc0:1234 SA04G 3.67 GiB
+>>   mmcblk0: p1 p2 p3
+>> ...
 >>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 77f0b6b..f13bb49 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -62,7 +62,7 @@ struct idmac_desc {
->>  
->>  	u32		des1;	/* Buffer sizes */
->>  #define IDMAC_SET_BUFFER1_SIZE(d, s) \
->> -	((d)->des1 = ((d)->des1 & 0x03ffc000) | ((s) & 0x3fff))
->> +	((d)->des1 = ((d)->des1 & 0x03ffe000) | ((s) & 0x1fff))
->>  
->>  	u32		des2;	/* buffer 1 physical address */
->>  
-> 
-> Yes, according to the TRM you appear to be correct
-> 
-> Reviewed-by: James Hogan <james.hogan@imgtec.com>
-> 
-> Thanks
-> James
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+>> to the same dmesg section for 3.0.0 :
+>> ...
+>> Waiting for root device /dev/mmcblk0p2...
+>> mmc0: error -110 whilst initialising SD card
+>> at91_mci at91_mci: Timeout waiting end of packet
+>> mmc0: error -110 whilst initialising SD card
+>> [no further progress]
+>>
+>> Non "HC" SD cards work as expected in 3.0.0
+>
+> If no-one on the CC list has any ideas, would you be interested in
+> trying to bisect this change?
+>
+> Another possibility would be adding printks before all of the -ETIMEDOUT
+> lines in core/* and host/at*, in order to see which one you're hitting
+> (and therefore which operation is causing the initialization to fail).
+> But a full bisection would be more conclusive.
 
+Sorry, I keep away from git. But the smoking gun is
+drivers/mmc/core/sd.c that underwent major changes
+to support SDXC between 2.6.39 and 3.0.0 .
+
+Luckily I can revert core/sd.c to the state it was in
+in lk 2.6.38.6 and it compiles in 3.0.0 . With that kernel
+my Fox G20 can read its root fs from a SDHC card.
+
+BTW With lk 2.6.39 the Fox G20 booted okay from a SDHC
+card but that kernel had other (UDP broadcast) problems.
