@@ -1,85 +1,68 @@
-From: Ben Gardiner <bengardiner@nanometrics.ca>
-Subject: Re: [PATCH v2 2/6] arm: davinci: Explicitly set channel controllers'
- default queues
-Date: Fri, 29 Jul 2011 10:42:36 -0400
-Message-ID: <CAPcSpEJRjE-vD3XaTcVBUoBH_Ud+gBMgBSd=F0S1ON6cUy0vvg@mail.gmail.com>
-References: <1310303679-17936-1-git-send-email-ido@wizery.com>
-	<1310303679-17936-3-git-send-email-ido@wizery.com>
-	<B85A65D85D7EB246BE421B3FB0FBB593024DD2CE05@dbde02.ent.ti.com>
-	<4E2D70B9.7060202@mvista.com>
-	<B85A65D85D7EB246BE421B3FB0FBB593024DD2CEA5@dbde02.ent.ti.com>
+From: Troy Kisky <troy.kisky@boundarydevices.com>
+Subject: Re: [PATCH v3] davinci: Add wl1271/wlan support for AM18x
+Date: Fri, 29 Jul 2011 11:51:46 -0700
+Message-ID: <4E330142.6040809@boundarydevices.com>
+References: <B85A65D85D7EB246BE421B3FB0FBB593024DD2CEC2@dbde02.ent.ti.com>	<1311886373-3060-1-git-send-email-ido@wizery.com>	<4E31D17D.6050000@boundarydevices.com> <20110728220643.GG1985@WorkStation>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog118.obsmtp.com ([74.125.149.244]:39561 "EHLO
-	na3sys009aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751630Ab1G2Omr convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 29 Jul 2011 10:42:47 -0400
-Received: by mail-vw0-f44.google.com with SMTP id 12so4499020vws.17
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Jul 2011 07:42:36 -0700 (PDT)
-In-Reply-To: <B85A65D85D7EB246BE421B3FB0FBB593024DD2CEA5@dbde02.ent.ti.com>
+Received: from oproxy8-pub.bluehost.com ([69.89.22.20]:55658 "HELO
+	oproxy8-pub.bluehost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1752417Ab1G2Sv4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2011 14:51:56 -0400
+In-Reply-To: <20110728220643.GG1985@WorkStation>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Nori, Sekhar" <nsekhar@ti.com>
-Cc: Sergei Shtylyov <sshtylyov@mvista.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Ido Yariv <ido@wizery.com>
+Cc: linux-mmc@vger.kernel.org, davinci-linux-open-source@linux.davincidsp.com, Sekhar Nori <nsekhar@ti.com>, linux-arm-kernel@lists.infradead.org
 
-On Mon, Jul 25, 2011 at 12:31 PM, Nori, Sekhar <nsekhar@ti.com> wrote:
-> Hi Sergei,
->
-> On Mon, Jul 25, 2011 at 19:03:45, Sergei Shtylyov wrote:
->> Hello.
+On 7/28/2011 3:06 PM, Ido Yariv wrote:
+> Hi Troy,
+> 
+> On Thu, Jul 28, 2011 at 02:15:41PM -0700, Troy Kisky wrote:
+>>> +	if (power_on) {
+>>> +		/* Power up sequence required for wl127x devices */
+>>> +		gpio_set_value(DA850_WLAN_EN, 1);
+>>> +		usleep_range(15000, 15000);
+>>> +		gpio_set_value(DA850_WLAN_EN, 0);
+>>> +		usleep_range(1000, 1000);
+>>> +		gpio_set_value(DA850_WLAN_EN, 1);
+>>> +		msleep(70);
 >>
->> Nori, Sekhar wrote:
->>
->> >> Davinci platforms may define a default queue for each channel
->> >> controller. If one is not defined, the default queue is set to EV=
-ENTQ_1.
->> >> However, there's no way to distinguish between an unset default q=
-ueue to
->> >> one that is set to EVENTQ_0, as EVENTQ_0 =3D 0.
->>
->> >> Explicitly specify the default queue for all channel controllers =
-on all
->> >> Davinci platforms to EVENTQ_1, and don't overwrite it in the EDMA=
- probe
->> >> function.
->>
->> >> One exception is the DA850 board, for which EVENTQ_1 is not a val=
-id
->> >> option for its second channel controller. Use EVENTQ_0 instead fo=
-r that
->> >> channel controller.
->>
->> >> Signed-off-by: Ido Yariv <ido@wizery.com>
->>
->> > Looks good to me. Will queue for v3.2/fixes
->>
->> =A0 =A0 Why wait for 3.2? If this is considered a fix, it should be =
-applied to 3.1, no?
->
-> 3.2/fixes just indicates it will be queued as a fix/cleanup
-> for 3.2 so it will have higher priority for merge when compared
-> to a new feature.
->
-> This patch doesn't really fix any existing broken functionality.
-> It corrects event queue configuration for EDMA CC1 on DA850 for
-> which there are no current users in mainline.
->
-> So, not sending for v3.1.
+>> Why turn on, then off, and then back on?
+>> Isn't off, then back on sufficient?
+> 
+> Unfortunately, no. This is a required power up sequence for some
+> hardware revisions of the 1271 chip.
 
-If it's not too late:
+That's too bad.
 
-Tested this patch and it fixes SD/MMC1 support on da850.
+> 
+>> Also, why not use regulator API like panda board does?
+> 
+> Unlike omap_hsmmc, davinci's MMC host driver does not toggle any
+> regulators. To keep things simple, a set_power callback function was
+> added to the mmc host as part of this patch series.
+> I've considered adding regulator support instead, but found it to be
+> a bit over-complicated for this task. In addition, it would require
+> either modifying the fixed regulator or adding a new one in order to
+> support the above power sequence.
 
-Tested-by: Ben Gardiner <bengardiner@nanometrics.ca>
+Yes, that is more effort. I'm fine with your method, but with all
+the consolidation effort that's being expended currently, it would
+be nice if all boards could use a common method to power up sdio cards.
+It might make a device tree implementation for this driver easier too,
+though I am certainly no expert there.
 
-Thanks, Ido!
 
-Best Regards,
-Ben Gardiner
+> 
+> Thanks for your review,
+> Ido.
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> 
 
----
-Nanometrics Inc.
-http://www.nanometrics.ca
