@@ -1,65 +1,68 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [Bug 39822] SDHC cards no longer recognized on AT91 based board
-Date: Thu, 28 Jul 2011 19:48:27 -0400
-Message-ID: <m28vridl10.fsf@bob.laptop.org>
-References: <bug-39822-26132@https.bugzilla.kernel.org/>
-	<201107282323.p6SNN9Jk026454@demeter1.kernel.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/1] mmc: Fixed bug in IDMAC_SET_BUFFER1_SIZE Macro in
+ dw_mmc.c
+Date: Fri, 29 Jul 2011 11:17:11 +0900
+Message-ID: <4E321827.5020606@samsung.com>
+References: <1311851023-3563-1-git-send-email-shashidharh@vayavyalabs.com>
+ <4E314562.2000001@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:38139 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756213Ab1G1XtN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Jul 2011 19:49:13 -0400
-In-Reply-To: <201107282323.p6SNN9Jk026454@demeter1.kernel.org>
-	(bugzilla-daemon@bugzilla.kernel.org's message of "Thu, 28 Jul 2011
-	23:23:09 GMT")
+Received: from mailout3.samsung.com ([203.254.224.33]:35653 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754308Ab1G2CR0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2011 22:17:26 -0400
+In-reply-to: <4E314562.2000001@imgtec.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dgilbert@interlog.com
-Cc: linux-mmc@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, ludovic.desroches@atmel.com, akpm@linux-foundation.org
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Shashidhar Hiremath <shashidharh@vayavyalabs.com>, Will Newton <will.newton@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi, thanks for the bug report.  Adding linux-mmc@ and some atmel driver
-folks to CC.
+Hi..
 
-On Thu, Jul 28 2011, bugzilla-daemon@bugzilla.kernel.org wrote:
-> Prior to 3.0.0 the FoxG20 board (Atmel AT91SAM9G20) could boot and use
-> both micro SD and SDHC card to contain its root file system. With the
-> advent of the 3.0.0 kernel the micro SDHC card is unable to mount the
-> root file system.
+this patch is right.
+
+Acked-by : Jaehoon Chung <jh80.chung@samsung.com>
+
+Regards,
+Jaehoon Chung
+
+James Hogan wrote:
+> On 07/28/2011 12:03 PM, Shashidhar Hiremath wrote:
+>> The mask used inside this macro was assuming Buffer_Size1's[BS1's] width to be 14 bits,
+>> it is actually of 13 bits, Modified masks used in IDMAC_SET_BUFFER1_SIZE such that
+>> they use only 13 bits instead of current 14.
+>>
+>> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c |    2 +-
+>>  1 files changed, 1 insertions(+), 1 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 77f0b6b..f13bb49 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -62,7 +62,7 @@ struct idmac_desc {
+>>  
+>>  	u32		des1;	/* Buffer sizes */
+>>  #define IDMAC_SET_BUFFER1_SIZE(d, s) \
+>> -	((d)->des1 = ((d)->des1 & 0x03ffc000) | ((s) & 0x3fff))
+>> +	((d)->des1 = ((d)->des1 & 0x03ffe000) | ((s) & 0x1fff))
+>>  
+>>  	u32		des2;	/* buffer 1 physical address */
+>>  
 > 
-> Comparing the relevant part of dmesg for 2.6.38.6 (and it worked on
-> 2.6.39):
-> ...
-> Waiting for root device /dev/mmcblk0p2...
-> mmc0: host does not support reading read-only switch. assuming write-enable.
-> at91_mci at91_mci: Timeout waiting end of packet
-> mmc0: new SDHC card at address 1234
-> mmcblk0: mmc0:1234 SA04G 3.67 GiB
->  mmcblk0: p1 p2 p3
-> ...
->
-> to the same dmesg section for 3.0.0 :
-> ...
-> Waiting for root device /dev/mmcblk0p2...
-> mmc0: error -110 whilst initialising SD card
-> at91_mci at91_mci: Timeout waiting end of packet
-> mmc0: error -110 whilst initialising SD card
-> [no further progress]
->
-> Non "HC" SD cards work as expected in 3.0.0
+> Yes, according to the TRM you appear to be correct
+> 
+> Reviewed-by: James Hogan <james.hogan@imgtec.com>
+> 
+> Thanks
+> James
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-If no-one on the CC list has any ideas, would you be interested in
-trying to bisect this change?
-
-Another possibility would be adding printks before all of the -ETIMEDOUT
-lines in core/* and host/at*, in order to see which one you're hitting
-(and therefore which operation is causing the initialization to fail).
-But a full bisection would be more conclusive.
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
