@@ -1,23 +1,37 @@
-From: "Takashi Oyamada" <info@mail.com>
-Subject: Dear Friend
-Date: Fri, 29 Jul 2011 22:00:12 +0800
-Message-ID: <20110729140012.HOKB13854.viefep12-int.chello.at@edge05.upcmail.net>
-Reply-To: <takashi.oyamada1@xnmsn.com>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="Windows-1251"
-Content-Transfer-Encoding: 7bit
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: [PATCH] mmc: sdhci-s3c: Fix build for header change
+Date: Fri, 29 Jul 2011 15:35:00 +0100
+Message-ID: <1311950100-7508-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fep12.mx.upcmail.net ([62.179.121.32]:58563 "EHLO
-	fep12.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753098Ab1G2OAS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2011 10:00:18 -0400
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:33379 "EHLO
+	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751187Ab1G2OfE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2011 10:35:04 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ben Dooks <ben-linux@fluff.org>, Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-Dear Friend
+A header change has removed an implicit inclusion of module.h, breaking
+the build due to the use of THIS_MODULE. Fix that.
 
-I have a Business Proposal. If interested please contact me for more informations
+Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
-Regards,
-Takashi Oyamada
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 03da44a..2bd7bf4 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -19,6 +19,7 @@
+ #include <linux/clk.h>
+ #include <linux/io.h>
+ #include <linux/gpio.h>
++#include <linux/module.h>
+ 
+ #include <linux/mmc/host.h>
+ 
+-- 
+1.7.5.4
+
