@@ -1,68 +1,37 @@
-From: Troy Kisky <troy.kisky@boundarydevices.com>
-Subject: Re: [PATCH v3] davinci: Add wl1271/wlan support for AM18x
-Date: Fri, 29 Jul 2011 11:51:46 -0700
-Message-ID: <4E330142.6040809@boundarydevices.com>
-References: <B85A65D85D7EB246BE421B3FB0FBB593024DD2CEC2@dbde02.ent.ti.com>	<1311886373-3060-1-git-send-email-ido@wizery.com>	<4E31D17D.6050000@boundarydevices.com> <20110728220643.GG1985@WorkStation>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: Re: [RFC PATCH 1/9] mmc: atmel-mci: change namespace
+Date: Sat, 30 Jul 2011 09:48:07 +0200
+Message-ID: <20110730074807.GH25658@game.jcrosoft.org>
+References: <1311863398-31579-1-git-send-email-ludovic.desroches@atmel.com>
+	<1311863398-31579-2-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from oproxy8-pub.bluehost.com ([69.89.22.20]:55658 "HELO
-	oproxy8-pub.bluehost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1752417Ab1G2Sv4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2011 14:51:56 -0400
-In-Reply-To: <20110728220643.GG1985@WorkStation>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1311863398-31579-2-git-send-email-ludovic.desroches@atmel.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: ludovic.desroches@atmel.com
+Cc: patrice.vilchez@atmel.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nicolas.ferre@atmel.com
 List-Id: linux-mmc@vger.kernel.org
-To: Ido Yariv <ido@wizery.com>
-Cc: linux-mmc@vger.kernel.org, davinci-linux-open-source@linux.davincidsp.com, Sekhar Nori <nsekhar@ti.com>, linux-arm-kernel@lists.infradead.org
 
-On 7/28/2011 3:06 PM, Ido Yariv wrote:
-> Hi Troy,
+On 16:29 Thu 28 Jul     , ludovic.desroches@atmel.com wrote:
+> From: Ludovic Desroches <ludovic.desroches@atmel.com>
 > 
-> On Thu, Jul 28, 2011 at 02:15:41PM -0700, Troy Kisky wrote:
->>> +	if (power_on) {
->>> +		/* Power up sequence required for wl127x devices */
->>> +		gpio_set_value(DA850_WLAN_EN, 1);
->>> +		usleep_range(15000, 15000);
->>> +		gpio_set_value(DA850_WLAN_EN, 0);
->>> +		usleep_range(1000, 1000);
->>> +		gpio_set_value(DA850_WLAN_EN, 1);
->>> +		msleep(70);
->>
->> Why turn on, then off, and then back on?
->> Isn't off, then back on sufficient?
+> Homogenize namespace to atmci.
 > 
-> Unfortunately, no. This is a required power up sequence for some
-> hardware revisions of the 1271 chip.
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+prefer ATMEL_MCI
 
-That's too bad.
+ATMCI is not clear
 
-> 
->> Also, why not use regulator API like panda board does?
-> 
-> Unlike omap_hsmmc, davinci's MMC host driver does not toggle any
-> regulators. To keep things simple, a set_power callback function was
-> added to the mmc host as part of this patch series.
-> I've considered adding regulator support instead, but found it to be
-> a bit over-complicated for this task. In addition, it would require
-> either modifying the fixed regulator or adding a new one in order to
-> support the above power sequence.
-
-Yes, that is more effort. I'm fine with your method, but with all
-the consolidation effort that's being expended currently, it would
-be nice if all boards could use a common method to power up sdio cards.
-It might make a device tree implementation for this driver easier too,
-though I am certainly no expert there.
-
-
-> 
-> Thanks for your review,
-> Ido.
-> 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-> 
-
+Best Regards,
+J.
