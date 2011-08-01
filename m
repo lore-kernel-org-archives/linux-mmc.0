@@ -1,33 +1,156 @@
-From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-Subject: Re: [RFC PATCH 6/9] atmel_pdc: add ATMEL_PDC_SCND_BUF_OFF
-Date: Sat, 30 Jul 2011 10:24:34 +0200
-Message-ID: <20110730082434.GI25658@game.jcrosoft.org>
-References: <1311863398-31579-1-git-send-email-ludovic.desroches@atmel.com>
-	<1311863398-31579-7-git-send-email-ludovic.desroches@atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1311863398-31579-7-git-send-email-ludovic.desroches@atmel.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: ludovic.desroches@atmel.com
-Cc: patrice.vilchez@atmel.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nicolas.ferre@atmel.com
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: [PATCH] mmc: sd: UHS-I bus speed should be set last in UHS initialization
+Date: Mon,  1 Aug 2011 17:28:17 +0530
+Message-ID: <1312199897-5536-1-git-send-email-subhashj@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16:29 Thu 28 Jul     , ludovic.desroches@atmel.com wrote:
-> From: Ludovic Desroches <ludovic.desroches@atmel.com>
-> 
-> Add define for the offset value between first and second buffer registers.
-patch 6 & 7 can be joined
+mmc_sd_init_uhs_card function sets the driver type, current limit
+and bus speed mode on card as well as on host controller side.
 
-Best Regards,
-J.
+Currently bus speed mode is set by sending CMD6 to card and
+immediately setting the timing mode in host controller. But
+then before initiating tuning sequence, it also tries to set
+current limit by sending CMD6 to card which results in data
+timeout errors in controller if bus speed mode is SDR50/SDR104 mode.
+
+So basically bus speed mode should be set only after current limit
+is set in the card and immediately after setting the bus speed mode,
+tuning sequence should be initiated.
+
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+---
+ drivers/mmc/core/sd.c |   57 ++++++++++++++++++++++++++++++++----------------
+ 1 files changed, 38 insertions(+), 19 deletions(-)
+
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index ff27741..d257496 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -459,10 +459,9 @@ static int sd_select_driver_type(struct mmc_card *card, u8 *status)
+ 	return 0;
+ }
+ 
+-static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
++static int sd_get_bus_speed_mode(struct mmc_card *card)
+ {
+-	unsigned int bus_speed = 0, timing = 0;
+-	int err;
++	int bus_speed = 0;
+ 
+ 	/*
+ 	 * If the host doesn't support any of the UHS-I modes, fallback on
+@@ -470,37 +469,56 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
+ 	 */
+ 	if (!(card->host->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
+ 	    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_DDR50)))
+-		return 0;
++		return -EINVAL;
+ 
+ 	if ((card->host->caps & MMC_CAP_UHS_SDR104) &&
+ 	    (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR104)) {
+ 			bus_speed = UHS_SDR104_BUS_SPEED;
+-			timing = MMC_TIMING_UHS_SDR104;
+-			card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
+ 	} else if ((card->host->caps & MMC_CAP_UHS_DDR50) &&
+ 		   (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_DDR50)) {
+ 			bus_speed = UHS_DDR50_BUS_SPEED;
+-			timing = MMC_TIMING_UHS_DDR50;
+-			card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
+ 	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+ 		    MMC_CAP_UHS_SDR50)) && (card->sw_caps.sd3_bus_mode &
+ 		    SD_MODE_UHS_SDR50)) {
+ 			bus_speed = UHS_SDR50_BUS_SPEED;
+-			timing = MMC_TIMING_UHS_SDR50;
+-			card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
+ 	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+ 		    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25)) &&
+ 		   (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR25)) {
+ 			bus_speed = UHS_SDR25_BUS_SPEED;
+-			timing = MMC_TIMING_UHS_SDR25;
+-			card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
+ 	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+ 		    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25 |
+ 		    MMC_CAP_UHS_SDR12)) && (card->sw_caps.sd3_bus_mode &
+ 		    SD_MODE_UHS_SDR12)) {
+ 			bus_speed = UHS_SDR12_BUS_SPEED;
++	}
++
++	return bus_speed;
++}
++
++static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
++{
++	int err, bus_speed;
++	unsigned int timing = 0;
++
++	bus_speed = sd_get_bus_speed_mode(card);
++
++	if (bus_speed == UHS_SDR104_BUS_SPEED) {
++			timing = MMC_TIMING_UHS_SDR104;
++			card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
++	} else if (bus_speed == UHS_DDR50_BUS_SPEED) {
++			timing = MMC_TIMING_UHS_DDR50;
++			card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
++	} else if (bus_speed == UHS_SDR50_BUS_SPEED) {
++			timing = MMC_TIMING_UHS_SDR50;
++			card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
++	} else if (bus_speed == UHS_SDR25_BUS_SPEED) {
++			timing = MMC_TIMING_UHS_SDR25;
++			card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
++	} else if (bus_speed == UHS_SDR12_BUS_SPEED) {
+ 			timing = MMC_TIMING_UHS_SDR12;
+ 			card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
++	} else {
++		return -EINVAL;
+ 	}
+ 
+ 	card->sd_bus_speed = bus_speed;
+@@ -522,6 +540,7 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
+ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+ {
+ 	int current_limit = 0;
++	unsigned int bus_speed = sd_get_bus_speed_mode(card);
+ 	int err;
+ 
+ 	/*
+@@ -529,9 +548,9 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+ 	 * bus speed modes. For other bus speed modes, we set the default
+ 	 * current limit of 200mA.
+ 	 */
+-	if ((card->sd_bus_speed == UHS_SDR50_BUS_SPEED) ||
+-	    (card->sd_bus_speed == UHS_SDR104_BUS_SPEED) ||
+-	    (card->sd_bus_speed == UHS_DDR50_BUS_SPEED)) {
++	if ((bus_speed == UHS_SDR50_BUS_SPEED) ||
++	    (bus_speed == UHS_SDR104_BUS_SPEED) ||
++	    (bus_speed == UHS_DDR50_BUS_SPEED)) {
+ 		if (card->host->caps & MMC_CAP_MAX_CURRENT_800) {
+ 			if (card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_800)
+ 				current_limit = SD_SET_CURRENT_LIMIT_800;
+@@ -613,13 +632,13 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
+ 	if (err)
+ 		goto out;
+ 
+-	/* Set bus speed mode of the card */
+-	err = sd_set_bus_speed_mode(card, status);
++	/* Set current limit for the card */
++	err = sd_set_current_limit(card, status);
+ 	if (err)
+ 		goto out;
+ 
+-	/* Set current limit for the card */
+-	err = sd_set_current_limit(card, status);
++	/* Set bus speed mode of the card */
++	err = sd_set_bus_speed_mode(card, status);
+ 	if (err)
+ 		goto out;
+ 
+-- 
+1.7.1.1
+
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
