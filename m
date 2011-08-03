@@ -1,45 +1,33 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: tmio: eliminate unused variable 'mmc' warning
-Date: Wed, 03 Aug 2011 08:55:01 -0400
-Message-ID: <m2liva7ize.fsf@bob.laptop.org>
-References: <1312354138.14329.1.camel@phoenix>
-	<Pine.LNX.4.64.1108030924440.28502@axis700.grange>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH 0/4] mmc: sdhci: try to avoid another division by zero
+Date: Wed,  3 Aug 2011 18:35:57 +0300
+Message-ID: <cover.1312385378.git.andriy.shevchenko@linux.intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35473 "EHLO void.printf.net"
+Received: from mga01.intel.com ([192.55.52.88]:16490 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755277Ab1HCMzM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 3 Aug 2011 08:55:12 -0400
-In-Reply-To: <Pine.LNX.4.64.1108030924440.28502@axis700.grange> (Guennadi
-	Liakhovetski's message of "Wed, 3 Aug 2011 09:26:25 +0200 (CEST)")
+	id S1753101Ab1HCPga (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 3 Aug 2011 11:36:30 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Axel Lin <axel.lin@gmail.com>, linux-kernel@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-Hi,
+The set of patches that applied for 3.0 exposes another "division by zero"
+error. This set tries to remake the "Fix SDHCI_QUIRK_TIMEOUT_USES_SDCLK" patch.
 
-On Wed, Aug 03 2011, Guennadi Liakhovetski wrote:
-> On Wed, 3 Aug 2011, Axel Lin wrote:
->
->> Fix below compile warning:
->>   CC      drivers/mmc/host/tmio_mmc.o
->> drivers/mmc/host/tmio_mmc.c: In function 'tmio_mmc_suspend':
->> drivers/mmc/host/tmio_mmc.c:30: warning: unused variable 'mmc'
->> drivers/mmc/host/tmio_mmc.c: In function 'tmio_mmc_resume':
->> drivers/mmc/host/tmio_mmc.c:45: warning: unused variable 'mmc'
->> 
->> Signed-off-by: Axel Lin <axel.lin@gmail.com>
->
-> Good for 3.1, do we also push such "harmless" compiler warning fixes to 
-> stable?
->
-> Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Comments are very welcome!
 
-Pushed for 3.1, thanks.  I don't think this is appropriate for stable.
+Of course, the set needs to be tested carefully.
 
-- Chris.
+Andy Shevchenko (4):
+  Revert "mmc: sdhci: Fix SDHCI_QUIRK_TIMEOUT_USES_SDCLK"
+  mmc: sdhci: check host->clock before use it as denominator
+  mmc: sdhci: move timeout_clk calculation a bit further
+  mmc: sdhci: use f_max instead of host->clock for timeouts
+
+ drivers/mmc/host/sdhci.c |   50 ++++++++++++++++++++++-----------------------
+ 1 files changed, 24 insertions(+), 26 deletions(-)
+
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.5.4
+
