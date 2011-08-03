@@ -1,36 +1,45 @@
-From: Ralf Baechle <ralf@linux-mips.org>
-Subject: Re: [PATCH 12/15] MMC: au1xmmc: remove Alchemy CPU subtype
- dependencies
-Date: Wed, 3 Aug 2011 13:06:27 +0100
-Message-ID: <20110803120627.GA856@linux-mips.org>
-References: <1312307470-6841-1-git-send-email-manuel.lauss@googlemail.com>
- <1312307470-6841-13-git-send-email-manuel.lauss@googlemail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: tmio: eliminate unused variable 'mmc' warning
+Date: Wed, 03 Aug 2011 08:55:01 -0400
+Message-ID: <m2liva7ize.fsf@bob.laptop.org>
+References: <1312354138.14329.1.camel@phoenix>
+	<Pine.LNX.4.64.1108030924440.28502@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from h5.dl5rb.org.uk ([81.2.74.5]:41512 "EHLO linux-mips.org"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755442Ab1HCMGb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 3 Aug 2011 08:06:31 -0400
-Content-Disposition: inline
-In-Reply-To: <1312307470-6841-13-git-send-email-manuel.lauss@googlemail.com>
+Received: from void.printf.net ([89.145.121.20]:35473 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755277Ab1HCMzM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 3 Aug 2011 08:55:12 -0400
+In-Reply-To: <Pine.LNX.4.64.1108030924440.28502@axis700.grange> (Guennadi
+	Liakhovetski's message of "Wed, 3 Aug 2011 09:26:25 +0200 (CEST)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Manuel Lauss <manuel.lauss@googlemail.com>
-Cc: Linux-MIPS <linux-mips@linux-mips.org>, linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Axel Lin <axel.lin@gmail.com>, linux-kernel@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
 
-On Tue, Aug 02, 2011 at 07:51:07PM +0200, Manuel Lauss wrote:
+Hi,
 
-> Replace all occurrences of CONFIG_SOC_AU1??? with runtime feature
-> detection.
-> 
-> Cc: <linux-mmc@vger.kernel.org>
-> Signed-off-by: Manuel Lauss <manuel.lauss@googlemail.com>
-> ---
-> I'd like for this patch to go in via the mips tree since a few more depend
-> on it.
+On Wed, Aug 03 2011, Guennadi Liakhovetski wrote:
+> On Wed, 3 Aug 2011, Axel Lin wrote:
+>
+>> Fix below compile warning:
+>>   CC      drivers/mmc/host/tmio_mmc.o
+>> drivers/mmc/host/tmio_mmc.c: In function 'tmio_mmc_suspend':
+>> drivers/mmc/host/tmio_mmc.c:30: warning: unused variable 'mmc'
+>> drivers/mmc/host/tmio_mmc.c: In function 'tmio_mmc_resume':
+>> drivers/mmc/host/tmio_mmc.c:45: warning: unused variable 'mmc'
+>> 
+>> Signed-off-by: Axel Lin <axel.lin@gmail.com>
+>
+> Good for 3.1, do we also push such "harmless" compiler warning fixes to 
+> stable?
+>
+> Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Patch is looking ok.  Since MMC is orphaned I've just queued it and it
-will go to linux-next after -rc1.
+Pushed for 3.1, thanks.  I don't think this is appropriate for stable.
 
-  Ralf
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
