@@ -1,13 +1,13 @@
 From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH 1/4] Revert "mmc: sdhci: Fix SDHCI_QUIRK_TIMEOUT_USES_SDCLK"
-Date: Wed,  3 Aug 2011 18:35:58 +0300
-Message-ID: <ea979210cfeb01092be834debe22f473cd00ea19.1312385378.git.andriy.shevchenko@linux.intel.com>
+Subject: [PATCH 2/4] mmc: sdhci: check host->clock before use it as denominator
+Date: Wed,  3 Aug 2011 18:35:59 +0300
+Message-ID: <dcb216cfc982c5f760182f229ded70089e351c2f.1312385378.git.andriy.shevchenko@linux.intel.com>
 References: <cover.1312385378.git.andriy.shevchenko@linux.intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:17967 "EHLO mga02.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:63060 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753021Ab1HCPgm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 3 Aug 2011 11:36:42 -0400
+	id S1753021Ab1HCPgz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 3 Aug 2011 11:36:55 -0400
 In-Reply-To: <cover.1312385378.git.andriy.shevchenko@linux.intel.com>
 In-Reply-To: <cover.1312385378.git.andriy.shevchenko@linux.intel.com>
 References: <cover.1312385378.git.andriy.shevchenko@linux.intel.com>
@@ -16,43 +16,85 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-This reverts commit 4b01681c77642c62a833187066c35e71e59caaf5.
+Sometimes host->clock could be zero which is legal situation. This patch checks
+host->clock before usage as denominator when timeout is calculated. The similar
+patch is applied for mmc core (see commit e9b8684).
+
+Without this patch the execution of the sdhci_calc_timeout could end up with
+traceback like following:
+
+<0>[    4.014319] divide error: 0000 [#1] PREEMPT SMP
+<4>[    4.014352] Modules linked in: g_ether
+<4>[    4.014376]
+<4>[    4.014393] Pid: 33, comm: kworker/u:2 Not tainted 3.0.0+ #646
+<4>[    4.014421] EIP: 0060:[<c12fa38e>] EFLAGS: 00010046 CPU: 1
+<4>[    4.014449] EIP is at sdhci_calc_timeout+0x2e/0x100
+<4>[    4.014468] EAX: 00000000 EBX: f5930fc8 ECX: 00000000 EDX: 00000000
+<4>[    4.014488] ESI: f5291de8 EDI: f5291db8 EBP: f5291c6c ESP: f5291c50
+<4>[    4.014508]  DS: 007b ES: 007b FS: 00d8 GS: 0000 SS: 0068
+<0>[    4.014529] Process kworker/u:2 (pid: 33, ti=f5290000 task=f53065a0 task.ti=f5290000)
+<0>[    4.014546] Stack:
+<4>[    4.014557]  00000082 c1054fdd f5291c78 04000000 f5930fc8 f5291de8 f5291db8 f5291cac
+<4>[    4.014611]  c12fab7c c107a98b f5291c88 c13b6d3f f593109c f5882000 f5291cac c1054fdd
+<4>[    4.014663]  00000000 00000000 f5882000 00000082 f5930fc8 f5291db8 0000000a f5291ccc
+<0>[    4.014716] Call Trace:
+<4>[    4.014743]  [<c1054fdd>] ? mod_timer+0x11d/0x380
+<4>[    4.014770]  [<c12fab7c>] sdhci_prepare_data+0x2c/0x3a0
+<4>[    4.014798]  [<c107a98b>] ? trace_hardirqs_off+0xb/0x10
+<4>[    4.014827]  [<c13b6d3f>] ? _raw_spin_unlock_irqrestore+0x2f/0x60
+<4>[    4.014854]  [<c1054fdd>] ? mod_timer+0x11d/0x380
+<4>[    4.014880]  [<c12fc7db>] sdhci_send_command+0xdb/0x210
+<4>[    4.014906]  [<c12fd5f3>] sdhci_request+0xc3/0x150
+<4>[    4.014932]  [<c12ec56a>] mmc_start_request+0xda/0x200
+<4>[    4.014960]  [<c120d7c2>] ? __raw_spin_lock_init+0x32/0x60
+<4>[    4.014989]  [<c1066a85>] ? __init_waitqueue_head+0x35/0x50
+<4>[    4.015015]  [<c12ec70b>] mmc_wait_for_req+0x7b/0x90
+<4>[    4.015045]  [<c12f0c67>] mmc_send_cxd_data+0xf7/0x130
+<4>[    4.015076]  [<c12ecbc0>] ? mmc_erase+0x140/0x140
+<4>[    4.015102]  [<c12f139d>] mmc_send_ext_csd+0x1d/0x20
+<4>[    4.015125]  [<c12efef0>] mmc_get_ext_csd+0x70/0x140
+<4>[    4.015151]  [<c12effe8>] mmc_compare_ext_csds+0x28/0x190
+<4>[    4.015176]  [<c12f039f>] mmc_init_card+0x24f/0x650
+<4>[    4.015201]  [<c13b6d5d>] ? _raw_spin_unlock_irqrestore+0x4d/0x60
+<4>[    4.015226]  [<c107fd9c>] ? trace_hardirqs_on_caller+0x11c/0x160
+<4>[    4.015255]  [<c12f09a4>] mmc_attach_mmc+0xa4/0x190
+<4>[    4.015282]  [<c12ee3f0>] mmc_rescan+0x210/0x240
+<4>[    4.015311]  [<c105f9b6>] process_one_work+0x176/0x550
+<4>[    4.015336]  [<c105f93a>] ? process_one_work+0xfa/0x550
+<4>[    4.015360]  [<c12ee1e0>] ? mmc_init_erase+0x140/0x140
+<4>[    4.015385]  [<c1061c2a>] worker_thread+0x12a/0x2c0
+<4>[    4.015410]  [<c1061b00>] ? manage_workers.clone.18+0x100/0x100
+<4>[    4.015437]  [<c1066244>] kthread+0x74/0x80
+<4>[    4.015463]  [<c10661d0>] ? __init_kthread_worker+0x60/0x60
+<4>[    4.015490]  [<c13b7dfa>] kernel_thread_helper+0x6/0xd
+<0>[    4.015507] Code: 57 89 d7 56 53 89 c3 83 ec 10 8b 40 04 8b 72 28 f6 c4 10 89 45 f0 0f 85 91 00 00 00 85 f6 0f 84 c1 00 00 00 8b 4e 04 31 d2 89 c8 <f7> 73 58 ba d3 4d 62 10 89 c1 8b 06 f7 e2 c1 ea 06 01 d1 f7 45
+<0>[    4.015829] EIP: [<c12fa38e>] sdhci_calc_timeout+0x2e/0x100 SS:ESP 0068:f5291c50
+
+Reported-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- drivers/mmc/host/sdhci.c |    7 +++----
- 1 files changed, 3 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 51c3b3f..aef7982 100644
+index aef7982..58bb15c 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -633,9 +633,6 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 		target_timeout = data->timeout_ns / 1000 +
- 			data->timeout_clks / host->clock;
+@@ -629,9 +629,11 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ 	/* timeout in us */
+ 	if (!data)
+ 		target_timeout = cmd->cmd_timeout_ms * 1000;
+-	else
+-		target_timeout = data->timeout_ns / 1000 +
+-			data->timeout_clks / host->clock;
++	else {
++		target_timeout = data->timeout_ns / 1000;
++		if (host->clock)
++			target_timeout += data->timeout_clks / host->clock;
++	}
  
--	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
--		host->timeout_clk = host->clock / 1000;
--
  	/*
  	 * Figure out needed cycles.
- 	 * We do this in steps in order to fit inside a 32 bit int.
-@@ -646,7 +643,6 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 	 *     =>
- 	 *     (1) / (2) > 2^6
- 	 */
--	BUG_ON(!host->timeout_clk);
- 	count = 0;
- 	current_timeout = (1 << 13) * 1000 / host->timeout_clk;
- 	while (current_timeout < target_timeout) {
-@@ -2475,6 +2471,9 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
- 		host->timeout_clk *= 1000;
- 
-+	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
-+		host->timeout_clk = host->clock / 1000;
-+
- 	/*
- 	 * In case of Host Controller v3.00, find out whether clock
- 	 * multiplier is supported.
 -- 
 1.7.5.4
 
