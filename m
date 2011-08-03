@@ -1,33 +1,58 @@
 From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH 0/4] mmc: sdhci: try to avoid another division by zero
-Date: Wed,  3 Aug 2011 18:35:57 +0300
-Message-ID: <cover.1312385378.git.andriy.shevchenko@linux.intel.com>
+Subject: [PATCH 1/4] Revert "mmc: sdhci: Fix SDHCI_QUIRK_TIMEOUT_USES_SDCLK"
+Date: Wed,  3 Aug 2011 18:35:58 +0300
+Message-ID: <ea979210cfeb01092be834debe22f473cd00ea19.1312385378.git.andriy.shevchenko@linux.intel.com>
+References: <cover.1312385378.git.andriy.shevchenko@linux.intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:16490 "EHLO mga01.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:17967 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753101Ab1HCPga (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 3 Aug 2011 11:36:30 -0400
+	id S1753021Ab1HCPgm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 3 Aug 2011 11:36:42 -0400
+In-Reply-To: <cover.1312385378.git.andriy.shevchenko@linux.intel.com>
+In-Reply-To: <cover.1312385378.git.andriy.shevchenko@linux.intel.com>
+References: <cover.1312385378.git.andriy.shevchenko@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-The set of patches that applied for 3.0 exposes another "division by zero"
-error. This set tries to remake the "Fix SDHCI_QUIRK_TIMEOUT_USES_SDCLK" patch.
+This reverts commit 4b01681c77642c62a833187066c35e71e59caaf5.
+---
+ drivers/mmc/host/sdhci.c |    7 +++----
+ 1 files changed, 3 insertions(+), 4 deletions(-)
 
-Comments are very welcome!
-
-Of course, the set needs to be tested carefully.
-
-Andy Shevchenko (4):
-  Revert "mmc: sdhci: Fix SDHCI_QUIRK_TIMEOUT_USES_SDCLK"
-  mmc: sdhci: check host->clock before use it as denominator
-  mmc: sdhci: move timeout_clk calculation a bit further
-  mmc: sdhci: use f_max instead of host->clock for timeouts
-
- drivers/mmc/host/sdhci.c |   50 ++++++++++++++++++++++-----------------------
- 1 files changed, 24 insertions(+), 26 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 51c3b3f..aef7982 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -633,9 +633,6 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ 		target_timeout = data->timeout_ns / 1000 +
+ 			data->timeout_clks / host->clock;
+ 
+-	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+-		host->timeout_clk = host->clock / 1000;
+-
+ 	/*
+ 	 * Figure out needed cycles.
+ 	 * We do this in steps in order to fit inside a 32 bit int.
+@@ -646,7 +643,6 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ 	 *     =>
+ 	 *     (1) / (2) > 2^6
+ 	 */
+-	BUG_ON(!host->timeout_clk);
+ 	count = 0;
+ 	current_timeout = (1 << 13) * 1000 / host->timeout_clk;
+ 	while (current_timeout < target_timeout) {
+@@ -2475,6 +2471,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
+ 		host->timeout_clk *= 1000;
+ 
++	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
++		host->timeout_clk = host->clock / 1000;
++
+ 	/*
+ 	 * In case of Host Controller v3.00, find out whether clock
+ 	 * multiplier is supported.
 -- 
 1.7.5.4
 
