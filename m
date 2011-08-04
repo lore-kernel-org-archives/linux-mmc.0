@@ -1,163 +1,57 @@
-From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: [PATCH v1 1/1] mmc: sd: UHS-I bus speed should be set last in UHS initialization
-Date: Thu,  4 Aug 2011 16:08:15 +0530
-Message-ID: <1312454295-10609-1-git-send-email-subhashj@codeaurora.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/1] Add support for JMicron chip with UHS-I function
+Date: Thu, 04 Aug 2011 09:12:46 -0400
+Message-ID: <m2d3gl5nht.fsf@bob.laptop.org>
+References: <201108040731.p747Vp13002998@jmr105.jmicron.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:62066 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753640Ab1HDKi0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Aug 2011 06:38:26 -0400
+Received: from void.printf.net ([89.145.121.20]:49883 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753206Ab1HDNN1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 4 Aug 2011 09:13:27 -0400
+In-Reply-To: <201108040731.p747Vp13002998@jmr105.jmicron.com> (Aries Lee's
+	message of "Thu, 4 Aug 2011 15:31:48 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, Subhash Jadavani <subhashj@codeaurora.org>
+To: Aries Lee <arieslee@jmicron.com>
+Cc: linux-mmc@vger.kernel.org, 'Andrei Warkentin' <andreiw@motorola.com>, 'Adrian Hunter' <adrian.hunter@intel.com>, 'Arnd Bergmann' <arnd@arndb.de>, 'Andrew Morton' <akpm@linux-foundation.org>, 'Ohad Ben-Cohen' <ohad@wizery.com>, 'Philip Rakity' <prakity@marvell.com>
 
-mmc_sd_init_uhs_card function sets the driver type, current limit
-and bus speed mode on card as well as on host controller side.
+Hi Aries,
 
-Currently bus speed mode is set by sending CMD6 to card and
-immediately setting the timing mode in host controller. But
-then before initiating tuning sequence, it also tries to set
-current limit by sending CMD6 to card which results in data
-timeout errors in controller if bus speed mode is SDR50/SDR104 mode.
+On Thu, Aug 04 2011, Aries Lee wrote:
+> 1. Force to assign some property at sdhci_add_host() function.
+>
+> 2. Jmicron doesn't support CMD19, install of tuning command, Jmicron run a
+> procedure to tune the clock delay, command delay and data delay. Actually I
+> want to define a quirks such like "SDHCI_QUIRK_NONSTANDARD_TUNE", but it run
+> out the quirks definition. So I share SDHCI_QUIRK_UNSTABLE_RO_DETECT
+> temporarily, looking for anyone provide any suggestion :-)
+>
+> The tuning procedure is very simple -- try to get card status and read data
+> under totally 32 different clock delay setting, and record the result those
+> Operations, then choose a proper delay setting from this result.
+>
+> 3. Jmicron using a nonstandard clock setting. this patch implement a
+> function to set host clock by this nonstandard way.
+>
+> 4. The tuning procedure is put in host/sdhci.c temporarily, I am not sure it
+> is a proper location or not, any suggestion?
+>
+> Signed-off-by: arieslee <arieslee@jmicron.com>
 
-So basically bus speed mode should be set only after current limit
-is set in the card and immediately after setting the bus speed mode,
-tuning sequence should be initiated.
+This patch is still corrupt.
 
-Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
----
- drivers/mmc/core/sd.c |   65 ++++++++++++++++++++++++++++++++++---------------
- 1 files changed, 45 insertions(+), 20 deletions(-)
+Before sending it to us, you should send it to yourself, and check that
+it can be applied with "git am" or "patch -p1".
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index ff27741..769e587 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -459,10 +459,9 @@ static int sd_select_driver_type(struct mmc_card *card, u8 *status)
- 	return 0;
- }
- 
--static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
-+static int sd_get_bus_speed_mode(struct mmc_card *card)
- {
--	unsigned int bus_speed = 0, timing = 0;
--	int err;
-+	int bus_speed = 0;
- 
- 	/*
- 	 * If the host doesn't support any of the UHS-I modes, fallback on
-@@ -475,32 +474,57 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
- 	if ((card->host->caps & MMC_CAP_UHS_SDR104) &&
- 	    (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR104)) {
- 			bus_speed = UHS_SDR104_BUS_SPEED;
--			timing = MMC_TIMING_UHS_SDR104;
--			card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
- 	} else if ((card->host->caps & MMC_CAP_UHS_DDR50) &&
- 		   (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_DDR50)) {
- 			bus_speed = UHS_DDR50_BUS_SPEED;
--			timing = MMC_TIMING_UHS_DDR50;
--			card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
- 	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
- 		    MMC_CAP_UHS_SDR50)) && (card->sw_caps.sd3_bus_mode &
- 		    SD_MODE_UHS_SDR50)) {
- 			bus_speed = UHS_SDR50_BUS_SPEED;
--			timing = MMC_TIMING_UHS_SDR50;
--			card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
- 	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
- 		    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25)) &&
- 		   (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR25)) {
- 			bus_speed = UHS_SDR25_BUS_SPEED;
--			timing = MMC_TIMING_UHS_SDR25;
--			card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
- 	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
- 		    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25 |
- 		    MMC_CAP_UHS_SDR12)) && (card->sw_caps.sd3_bus_mode &
- 		    SD_MODE_UHS_SDR12)) {
- 			bus_speed = UHS_SDR12_BUS_SPEED;
--			timing = MMC_TIMING_UHS_SDR12;
--			card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
-+	}
-+
-+	return bus_speed;
-+}
-+
-+static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
-+{
-+	int err, bus_speed;
-+	unsigned int timing = 0;
-+
-+	bus_speed = sd_get_bus_speed_mode(card);
-+
-+	switch (bus_speed) {
-+	case UHS_SDR104_BUS_SPEED:
-+		timing = MMC_TIMING_UHS_SDR104;
-+		card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
-+		break;
-+	case UHS_DDR50_BUS_SPEED:
-+		timing = MMC_TIMING_UHS_DDR50;
-+		card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
-+		break;
-+	case UHS_SDR50_BUS_SPEED:
-+		timing = MMC_TIMING_UHS_SDR50;
-+		card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
-+		break;
-+	case UHS_SDR25_BUS_SPEED:
-+		timing = MMC_TIMING_UHS_SDR25;
-+		card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
-+		break;
-+	case UHS_SDR12_BUS_SPEED:
-+		timing = MMC_TIMING_UHS_SDR12;
-+		card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
-+		break;
-+	default:
-+		return 0;
- 	}
- 
- 	card->sd_bus_speed = bus_speed;
-@@ -522,6 +546,7 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
- static int sd_set_current_limit(struct mmc_card *card, u8 *status)
- {
- 	int current_limit = 0;
-+	unsigned int bus_speed = sd_get_bus_speed_mode(card);
- 	int err;
- 
- 	/*
-@@ -529,9 +554,9 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
- 	 * bus speed modes. For other bus speed modes, we set the default
- 	 * current limit of 200mA.
- 	 */
--	if ((card->sd_bus_speed == UHS_SDR50_BUS_SPEED) ||
--	    (card->sd_bus_speed == UHS_SDR104_BUS_SPEED) ||
--	    (card->sd_bus_speed == UHS_DDR50_BUS_SPEED)) {
-+	if ((bus_speed == UHS_SDR50_BUS_SPEED) ||
-+	    (bus_speed == UHS_SDR104_BUS_SPEED) ||
-+	    (bus_speed == UHS_DDR50_BUS_SPEED)) {
- 		if (card->host->caps & MMC_CAP_MAX_CURRENT_800) {
- 			if (card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_800)
- 				current_limit = SD_SET_CURRENT_LIMIT_800;
-@@ -613,13 +638,13 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
- 	if (err)
- 		goto out;
- 
--	/* Set bus speed mode of the card */
--	err = sd_set_bus_speed_mode(card, status);
-+	/* Set current limit for the card */
-+	err = sd_set_current_limit(card, status);
- 	if (err)
- 		goto out;
- 
--	/* Set current limit for the card */
--	err = sd_set_current_limit(card, status);
-+	/* Set bus speed mode of the card */
-+	err = sd_set_bus_speed_mode(card, status);
- 	if (err)
- 		goto out;
- 
+Also, when sending a new version of a patch, please include a changelog
+that explains what is different about the new version.  If it's just a
+resent version of the old patch, you can write that.
+
+Thanks,
+
+- Chris.
 -- 
-1.7.1.1
-
---
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
