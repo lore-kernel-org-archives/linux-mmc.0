@@ -1,83 +1,38 @@
-From: Stephen Warren <swarren@nvidia.com>
-Subject: RE: [RFC PATCH 0/3] If an IRQ is a GPIO, request and configure it
-Date: Fri, 5 Aug 2011 08:43:20 -0700
-Message-ID: <74CDBE0F657A3D45AFBB94109FB122FF049F171EFC@HQMAIL01.nvidia.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH 1/3] irq: If an IRQ is a GPIO, request and configure it
+Date: Sat, 6 Aug 2011 01:15:13 +0900
+Message-ID: <20110805161511.GB3438@opensource.wolfsonmicro.com>
 References: <1312498820-2275-1-git-send-email-swarren@nvidia.com>
- <20110805094017.GC20575@n2100.arm.linux.org.uk>
+ <1312498820-2275-2-git-send-email-swarren@nvidia.com>
+ <20110805000148.GB13321@opensource.wolfsonmicro.com>
+ <74CDBE0F657A3D45AFBB94109FB122FF049F171EC1@HQMAIL01.nvidia.com>
+ <20110805053510.GA16956@opensource.wolfsonmicro.com>
+ <74CDBE0F657A3D45AFBB94109FB122FF049F171EF4@HQMAIL01.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate03.nvidia.com ([216.228.121.140]:2017 "EHLO
-	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754892Ab1HEPpr convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Aug 2011 11:45:47 -0400
-In-Reply-To: <20110805094017.GC20575@n2100.arm.linux.org.uk>
-Content-Language: en-US
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:49065 "EHLO
+	opensource2.wolfsonmicro.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753623Ab1HEQPW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Aug 2011 12:15:22 -0400
+Content-Disposition: inline
+In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF049F171EF4@HQMAIL01.nvidia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>, "ccross@android.com" <ccross@android.com>, "olof@lixom.net" <olof@lixom.net>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Stephen Warren <swarren@nvidia.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>, "ccross@android.com" <ccross@android.com>, "olof@lixom.net" <olof@lixom.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
 
-Russell King - ARM Linux wrote at Friday, August 05, 2011 3:40 AM:
-> On Thu, Aug 04, 2011 at 05:00:17PM -0600, Stephen Warren wrote:
-> > In http://www.spinics.net/lists/linux-tegra/msg01731.html, Mark Brown
-> > pointed out that it was a little silly forcing every board or driver
-> > to gpio_request() a GPIO that is later converted to an IRQ, and passed
-> > to request_irq. The first patch in this series instead makes the core
-> > IRQ code perform these calls when appropriate, to avoid duplicating it
-> > everywhere.
-> 
-> Trying to go from IRQ to GPIO is not a good idea - most of the
-> IRQ <-> GPIO macros we have today are just plain broken.  Many of them
-> just add or subtract a constant, which means non-GPIO IRQs have an
-> apparant GPIO number too.  Couple this with the fact that all positive
-> GPIO numbers are valid, and this is a recipe for wrong GPIOs getting
-> used and GPIOs being requested for non-GPIO IRQs.
-> 
-> I think this was also discussed in the past, and the conclusion was that
-> IRQs should be kept separate from GPIOs.  Maybe views have changed since
-> then...
-> 
-> However, if we do want to do this, then it would be much better to provide
-> a new API for requesting GPIO IRQs, eg:
-> 
-> gpio_request_irq()
-> 
-> which would wrap around request_threaded_irq(), takes a GPIO number,
-> does the GPIO->IRQ conversion internally, and whatever GPIO setup is
-> required.  Something like this:
+On Fri, Aug 05, 2011 at 08:29:38AM -0700, Stephen Warren wrote:
+> Mark Brown wrote at Thursday, August 04, 2011 11:35 PM:
 
-With that approach, drivers need to explicitly know whether they're
-passed a GPIO or an IRQ, and do something different, or they need to
-choose to only accept a GPIO or IRQ.
+> > But it's not a bug to use a GPIO as an IRQ source, otherwise we wouldn't
+> > have gpio_to_irq() in the first place.
 
-Take the case of the WM8903 audio codec, which is the case I was primarily
-motivated by.
+> 2) Two pieces of unrelated code somehow accidentally get a GPIO and IRQ
+> number that map to the same resource, e.g. due to incorrect board files or
+> Device Tree content. This is probably a bug, but ends up looking exactly
+> the same as far as the IRQ code's gpio_request call failing in the patch I
+> posted.
 
-The struct i2c_board_info for the WM8903 contains a .irq field, which is
-already an IRQ number. This IRQ might be a plain IRQ (i.e. a dedicated
-interrupt pin on the SoC's package), or a pin that's a GPIO with interrupt
-capabilities.
-
-It'd be best if the WM8903 driver could handle either case, and be
-Completely unaware of which case was used in practice; it simply wants to
-request the interrupt, and have that work appropriately.
-
-Having a separate API for this means pushing this GPIO-vs-IRQ knowledge
-into all drivers, which doesn't seem like a good thing.
-
-So it seems like, as was mentioned elsewhere in this thread, the upshot of
-this conversation is that interrupt chip drivers should do this internally,
-both to avoid requiring a general irq_to_gpio function, and because calling
-gpio_direction_input for GPIOs-used-as-IRQs isn't appropriate for all
-hardware.
-
-> int gpio_request_threaded_irq(int gpio, irq_handler_t handler,
-> 	irq_handler_t thread_fn, unsigned long flags, const char *name,
-> 	void *dev)
-...
-
--- 
-nvpublic
-
+Right, but this doesn't mean we can break the legitimate users to catch
+the buggy ones.
