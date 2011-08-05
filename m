@@ -1,38 +1,71 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 1/3] irq: If an IRQ is a GPIO, request and configure it
-Date: Fri, 5 Aug 2011 09:29:21 +0100
-Message-ID: <20110805082921.GA4977@opensource.wolfsonmicro.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [RFC PATCH 0/3] If an IRQ is a GPIO, request and configure it
+Date: Fri, 5 Aug 2011 10:40:17 +0100
+Message-ID: <20110805094017.GC20575@n2100.arm.linux.org.uk>
 References: <1312498820-2275-1-git-send-email-swarren@nvidia.com>
-	<1312498820-2275-2-git-send-email-swarren@nvidia.com>
-	<20110805000148.GB13321@opensource.wolfsonmicro.com>
-	<74CDBE0F657A3D45AFBB94109FB122FF049F171EC1@HQMAIL01.nvidia.com>
-	<20110805053510.GA16956@opensource.wolfsonmicro.com>
-	<20110805080620.GE28651@trinity.fluff.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:36215 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750766Ab1HEJlB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Aug 2011 05:41:01 -0400
 Content-Disposition: inline
-In-Reply-To: <20110805080620.GE28651@trinity.fluff.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ben Dooks <ben-linux@fluff.org>
-Cc: "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, Stephen Warren <swarren@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "olof@lixom.net" <olof@lixom.net>, "ccross@android.com" <ccross@android.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, Liam Girdwood <lrg@ti.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+In-Reply-To: <1312498820-2275-1-git-send-email-swarren@nvidia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephen Warren <swarren@nvidia.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>, ccross@android.com, olof@lixom.net, alsa-devel@alsa-project.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Fri, Aug 05, 2011 at 09:06:20AM +0100, Ben Dooks wrote:
+On Thu, Aug 04, 2011 at 05:00:17PM -0600, Stephen Warren wrote:
+> In http://www.spinics.net/lists/linux-tegra/msg01731.html, Mark Brown
+> pointed out that it was a little silly forcing every board or driver
+> to gpio_request() a GPIO that is later converted to an IRQ, and passed
+> to request_irq. The first patch in this series instead makes the core
+> IRQ code perform these calls when appropriate, to avoid duplicating it
+> everywhere.
 
-> I would say that setting the interrupt should deal with all the necessary
-> configuration to get that interrupt working. In the case of pretty much all
-> of the SoCs I have been involved with have always set the GPIO's function
-> to allow the interrupt to pass through.
+Trying to go from IRQ to GPIO is not a good idea - most of the
+IRQ <-> GPIO macros we have today are just plain broken.  Many of them
+just add or subtract a constant, which means non-GPIO IRQs have an
+apparant GPIO number too.  Couple this with the fact that all positive
+GPIO numbers are valid, and this is a recipe for wrong GPIOs getting
+used and GPIOs being requested for non-GPIO IRQs.
 
-That's what Stephen is trying to do, essentially.  It's looking like
-it's more sensible to fix it in the Tegra interrupt drivers, though.
+I think this was also discussed in the past, and the conclusion was that
+IRQs should be kept separate from GPIOs.  Maybe views have changed since
+then...
+
+However, if we do want to do this, then it would be much better to provide
+a new API for requesting GPIO IRQs, eg:
+
+gpio_request_irq()
+
+which would wrap around request_threaded_irq(), takes a GPIO number,
+does the GPIO->IRQ conversion internally, and whatever GPIO setup is
+required.  Something like this:
+
+int gpio_request_threaded_irq(int gpio, irq_handler_t handler,
+	irq_handler_t thread_fn, unsigned long flags, const char *name,
+	void *dev)
+{
+	int ret;
+
+	if (!gpio_valid(gpio))
+		return -EINVAL;
+
+	ret = gpio_request_one(gpio, GPIOF_IN, name);
+	if (ret)
+		return ret;
+
+	ret = request_threaded_irq(gpio_to_irq(gpio), handler, thread_fn,
+				flags, name, dev);
+	if (ret)
+		gpio_free(gpio);
+
+	return ret;
+}
+
+This then limits the exposure of the GPIO<->IRQ conversion macros to just
+GPIOs, where the buggy nature of the existing conversions won't impact on
+non-GPIO IRQs.
