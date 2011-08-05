@@ -1,169 +1,111 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: Issue with non-UHS-I SD3.0 cards
-Date: Fri, 5 Aug 2011 14:08:21 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B3000197DD107A@SAUSEXMBP01.amd.com>
-References: <1312199897-5536-1-git-send-email-subhashj@codeaurora.org>
- <m2d3goc2r1.fsf@bob.laptop.org>
- <6C03668EAF45B747AF947A1603D1B3000197C66B0B@SAUSEXMBP01.amd.com>
- <000001cc50f4$5a9e5530$0fdaff90$@org>
- <6C03668EAF45B747AF947A1603D1B3000197C66BA2@SAUSEXMBP01.amd.com>
- <000601cc5111$64c0e9c0$2e42bd40$@org> <000001cc5373$e4e466e0$aead34a0$@org>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [RFC PATCH 0/3] If an IRQ is a GPIO, request and configure it
+Date: Fri, 5 Aug 2011 20:15:04 +0100
+Message-ID: <20110805191504.GB28958@n2100.arm.linux.org.uk>
+References: <1312498820-2275-1-git-send-email-swarren@nvidia.com> <20110805094017.GC20575@n2100.arm.linux.org.uk> <74CDBE0F657A3D45AFBB94109FB122FF049F171EFC@HQMAIL01.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:2842 "EHLO
-	VA3EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753200Ab1HETMN convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 5 Aug 2011 15:12:13 -0400
-Content-Language: en-US
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:39417 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755316Ab1HETPw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Aug 2011 15:15:52 -0400
+Content-Disposition: inline
+In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF049F171EFC@HQMAIL01.nvidia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Philip Rakity' <prakity@marvell.com>, 'zhangfei gao' <zhangfei.gao@gmail.com>
+To: Stephen Warren <swarren@nvidia.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>, "ccross@android.com" <ccross@android.com>, "olof@lixom.net" <olof@lixom.net>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-
-
-> -----Original Message-----
-> From: Nath, Arindam
-> Sent: Saturday, August 06, 2011 12:27 AM
-> To: 'Subhash Jadavani'; 'linux-mmc@vger.kernel.org'
-> Cc: 'Chris Ball'; 'Philip Rakity'; 'zhangfei gao'
-> Subject: RE: Issue with non-UHS-I SD3.0 cards
+On Fri, Aug 05, 2011 at 08:43:20AM -0700, Stephen Warren wrote:
+> Russell King - ARM Linux wrote at Friday, August 05, 2011 3:40 AM:
+> > On Thu, Aug 04, 2011 at 05:00:17PM -0600, Stephen Warren wrote:
+> > > In http://www.spinics.net/lists/linux-tegra/msg01731.html, Mark Brown
+> > > pointed out that it was a little silly forcing every board or driver
+> > > to gpio_request() a GPIO that is later converted to an IRQ, and passed
+> > > to request_irq. The first patch in this series instead makes the core
+> > > IRQ code perform these calls when appropriate, to avoid duplicating it
+> > > everywhere.
+> > 
+> > Trying to go from IRQ to GPIO is not a good idea - most of the
+> > IRQ <-> GPIO macros we have today are just plain broken.  Many of them
+> > just add or subtract a constant, which means non-GPIO IRQs have an
+> > apparant GPIO number too.  Couple this with the fact that all positive
+> > GPIO numbers are valid, and this is a recipe for wrong GPIOs getting
+> > used and GPIOs being requested for non-GPIO IRQs.
+> > 
+> > I think this was also discussed in the past, and the conclusion was that
+> > IRQs should be kept separate from GPIOs.  Maybe views have changed since
+> > then...
+> > 
+> > However, if we do want to do this, then it would be much better to provide
+> > a new API for requesting GPIO IRQs, eg:
+> > 
+> > gpio_request_irq()
+> > 
+> > which would wrap around request_threaded_irq(), takes a GPIO number,
+> > does the GPIO->IRQ conversion internally, and whatever GPIO setup is
+> > required.  Something like this:
 > 
-> 
-> 
-> > -----Original Message-----
-> > From: Nath, Arindam
-> > Sent: Saturday, August 06, 2011 12:15 AM
-> > To: 'Subhash Jadavani'; linux-mmc@vger.kernel.org
-> > Cc: 'Chris Ball'; 'Philip Rakity'; 'zhangfei gao'
-> > Subject: RE: Issue with non-UHS-I SD3.0 cards
-> >
-> > Hi Subhash,
-> >
-> >
-> > > -----Original Message-----
-> > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > > Sent: Friday, August 05, 2011 7:01 PM
-> > > To: linux-mmc@vger.kernel.org
-> > > Cc: Nath, Arindam; 'Chris Ball'; 'Philip Rakity'; 'zhangfei gao'
-> > > Subject: Issue with non-UHS-I SD3.0 cards
-> > >
-> > > Hi,
-> > >
-> > > I am seeing the issue where "SanDisk Extreme SDHC 8GB Class 10
-> card"
-> > is
-> > > running in "Default Speed" mode even though it supports "High
-> Speed"
-> > > mode.
-> > > After analysis, I found that this card is advertising itself as
-> SD3.0
-> > > card
-> > > (with SD_SPEC=2 and SD_SPEC3=1 in SCR). But current mmc core later
-> > > initialization sequence for SD3.0 cards is such that these non-UHS-
-> I
-> > > SD3.0
-> > > cards runs in Default Speed mode @25MHz.
-> > >
-> > > Here is Essential conditions to indicate Version 3.00 Card (from
-> > SD3.01
-> > > spec)
-> > >     (SD_SPEC=2 and SD_SPEC3=1) :
-> > >     (1) The card shall support CMD6
-> > >     (2) The card shall support CMD8
-> > >     (3) The card shall support CMD42
-> > >     (4) User area capacity shall be up to 2GB (SDSC) or 32GB (SDHC)
-> > >         User area capacity shall be more than or equal to 32GB and
-> > >         up to 2TB (SDXC)
-> > >     (5) Speed Class shall be supported (SDHC or SDXC)
-> >
-> > I went through the particular section of the spec again, and IMO, the
-> > essential conditions are for the manufacturer of the card to
-> advertise
-> > his card as SD3.0 card or otherwise. From software point of view, the
-> > SD_SPEC=2 _and_ SD_SPEC3=1 will indicate a SD3.0 card.
-> 
-> I misread your comment, so please ignore what you mentioned above. So
+> With that approach, drivers need to explicitly know whether they're
+> passed a GPIO or an IRQ, and do something different, or they need to
+> choose to only accept a GPIO or IRQ.
 
-*so please ignore what I mentioned above*
+You completely missed the biggest reason why your approach is broken.
 
-Sorry for the typo.
++               gpio = irq_to_gpio(irq);
++               if (gpio_is_valid(gpio))
 
-> if I understand correctly, in your case *sd_spec3* is set for the card,
-> even though it is a non UHS-I card. In that case, what you tried in
-> your patch looks fine, except that I would suggest to move it inside
-> the
-> 
-> if (card->scr.sda_spec3) {
-> 	...
-> }
-> 
-> condition.
-> 
-> >
-> > Thanks,
-> > Arindam
-> >
-> > >
-> > >
-> > > So even if SD card doesn't support any of the newly defined UHS-I
-> bus
-> > > speed
-> > > mode, it can advertise itself as SD3.0 cards as long as it supports
-> > all
-> > > the
-> > > essential conditions of SD3.0 cards. Given this, these type of
-> cards
-> > > should
-> > > at least run in High Speed mode @50MHZ if it supports HS.
-> > >
-> > > Here are the changes you have to do to make non-UHS-I SD3.0 cards
-> run
-> > > in
-> > > High Speed Mode @50MHz. Do let me know if looks fine or not, so I
-> can
-> > > post
-> > > the formal patch.
-> > >
-> > > ---
-> > >  drivers/mmc/core/sd.c |    6 +++---
-> > >  1 files changed, 3 insertions(+), 3 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > > index 907662a..3fab676 100644
-> > > --- a/drivers/mmc/core/sd.c
-> > > +++ b/drivers/mmc/core/sd.c
-> > > @@ -305,6 +305,9 @@ static int mmc_read_switch(struct mmc_card
-> *card)
-> > >                 goto out;
-> > >         }
-> > >
-> > > +       if (status[13] & 0x02)
-> > > +               card->sw_caps.hs_max_dtr = 50000000;
-> > > +
-> > >         if (card->scr.sda_spec3) {
-> > >                 card->sw_caps.sd3_bus_mode = status[13];
-> > >
-> > > @@ -347,9 +350,6 @@ static int mmc_read_switch(struct mmc_card
-> *card)
-> > >                 }
-> > >
-> > >                 card->sw_caps.sd3_curr_limit = status[7];
-> > > -       } else {
-> > > -               if (status[13] & 0x02)
-> > > -                       card->sw_caps.hs_max_dtr = 50000000;
-> > >         }
-> > >
-> > >  out:
-> > > --
-> > >
-> > >
-> > > Regards,
-> > > Subhash
-> > >
-> > >
+Let's look at the code:
 
+#define ARCH_NR_GPIOS           256
 
+static inline bool gpio_is_valid(int number)
+{
+        return number >= 0 && number < ARCH_NR_GPIOS;
+}
+
+Now, let's take AT91:
+
+#define irq_to_gpio(irq)  (irq)
+
+This doesn't define ARCH_NR_GPIOS, so it gets the default 256.  Now lets
+take a random selection of the AT91 interrupt numbers:
+
+#define AT91RM9200_ID_US3       9       /* USART 3 */
+#define AT91RM9200_ID_MCI       10      /* Multimedia Card Interface */
+#define AT91RM9200_ID_UDP       11      /* USB Device Port */
+#define AT91RM9200_ID_TWI       12      /* Two-Wire Interface */
+#define AT91RM9200_ID_SPI       13      /* Serial Peripheral Interface */
+#define AT91RM9200_ID_SSC0      14      /* Serial Synchronous Controller 0 */
+#define AT91RM9200_ID_SSC1      15      /* Serial Synchronous Controller 1 */
+
+None of these are GPIOs.  Yet gpio_is_valid(irq_to_gpio(AT91RM9200_ID_TWI))
+is true.
+
+That's the problem - it's undefined whether gpio_is_valid(irq_to_gpio(irq))
+returns true or false for any particular interrupt.  There's no multiplexing
+through gpiolib for the IRQ-to-GPIO mapping either, so it doesn't work for
+off-SoC GPIOs.
+
+So, you can't reliably go from interrupt numbers to GPIO numbers - it's
+just not supported.  So to throw this into the IRQ layer is just going to
+end up breaking a hell of a lot of platforms.
+
+Now, stack on top of that a discussion at the Linaro Connect conference
+this week where we discussed getting rid of IRQ numbers entirely, and
+our desire to kill off irq_to_gpio() and I think it makes this approach
+a non-starter.
+
+> So it seems like, as was mentioned elsewhere in this thread, the upshot of
+> this conversation is that interrupt chip drivers should do this internally,
+> both to avoid requiring a general irq_to_gpio function, and because calling
+> gpio_direction_input for GPIOs-used-as-IRQs isn't appropriate for all
+> hardware.
+
+That would be more appropriate, because the IRQ chip stuff at least knows
+if there's a GPIO associated with it.
+
+There's still the unanswered question whether we even want the IRQ layer
+to do this kind of stuff, and the previous decision on that I believe was
+in the negative.  So I think Thomas needs to respond to that point first.
