@@ -1,74 +1,40 @@
-From: Stephen Warren <swarren@nvidia.com>
-Subject: Re: [RFC PATCH 0/3] If an IRQ is a GPIO,
-	request and configure it
-Date: Fri, 5 Aug 2011 12:33:31 -0700
-Message-ID: <74CDBE0F657A3D45AFBB94109FB122FF049F171FD3@HQMAIL01.nvidia.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [RFC PATCH 0/3] If an IRQ is a GPIO, request and configure it
+Date: Fri, 5 Aug 2011 22:25:55 +0200
+Message-ID: <CACRpkdai55JSN+dkaYu96FTDDVSa8bHZFkBS6M1u3gPUDmpE_g@mail.gmail.com>
 References: <1312498820-2275-1-git-send-email-swarren@nvidia.com>
 	<20110805094017.GC20575@n2100.arm.linux.org.uk>
-	<74CDBE0F657A3D45AFBB94109FB122FF049F171EFC@HQMAIL01.nvidia.com>
-	<20110805191504.GB28958@n2100.arm.linux.org.uk>
+	<20110805103045.GG28651@trinity.fluff.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-In-Reply-To: <20110805191504.GB28958@n2100.arm.linux.org.uk>
-Content-Language: en-US
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
-	<mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
-	<mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Sender: alsa-devel-bounces@alsa-project.org
-Errors-To: alsa-devel-bounces@alsa-project.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "ccross@android.com" <ccross@android.com>, "olof@lixom.net" <olof@lixom.net>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, Liam Girdwood <lrg@ti.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:55040 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750827Ab1HEUZ4 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Aug 2011 16:25:56 -0400
+In-Reply-To: <20110805103045.GG28651@trinity.fluff.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ben Dooks <ben-linux@fluff.org>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Stephen Warren <swarren@nvidia.com>, alsa-devel@alsa-project.org, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, ccross@android.com, olof@lixom.net, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, Liam Girdwood <lrg@ti.com>, linux-arm-kernel@lists.infradead.org
 
-Russell King - ARM Linux wrote at Friday, August 05, 2011 1:15 PM:
-> On Fri, Aug 05, 2011 at 08:43:20AM -0700, Stephen Warren wrote:
-> > Russell King - ARM Linux wrote at Friday, August 05, 2011 3:40 AM:
-> > > On Thu, Aug 04, 2011 at 05:00:17PM -0600, Stephen Warren wrote:
-> > > > In http://www.spinics.net/lists/linux-tegra/msg01731.html, Mark Brown
-> > > > pointed out that it was a little silly forcing every board or driver
-> > > > to gpio_request() a GPIO that is later converted to an IRQ, and passed
-> > > > to request_irq. The first patch in this series instead makes the core
-> > > > IRQ code perform these calls when appropriate, to avoid duplicating it
-> > > > everywhere.
-> > >
-> > > Trying to go from IRQ to GPIO is not a good idea - most of the
-> > > IRQ <-> GPIO macros we have today are just plain broken.  Many of them
-> > > just add or subtract a constant, which means non-GPIO IRQs have an
-> > > apparant GPIO number too.  Couple this with the fact that all positive
-> > > GPIO numbers are valid, and this is a recipe for wrong GPIOs getting
-> > > used and GPIOs being requested for non-GPIO IRQs.
-> > >
-> > > I think this was also discussed in the past, and the conclusion was that
-> > > IRQs should be kept separate from GPIOs.  Maybe views have changed since
-> > > then...
-> > >
-> > > However, if we do want to do this, then it would be much better to provide
-> > > a new API for requesting GPIO IRQs, eg:
-> > >
-> > > gpio_request_irq()
-> > >
-> > > which would wrap around request_threaded_irq(), takes a GPIO number,
-> > > does the GPIO->IRQ conversion internally, and whatever GPIO setup is
-> > > required.  Something like this:
-> >
-> > With that approach, drivers need to explicitly know whether they're
-> > passed a GPIO or an IRQ, and do something different, or they need to
-> > choose to only accept a GPIO or IRQ.
-> 
-> You completely missed the biggest reason why your approach is broken.
+On Fri, Aug 5, 2011 at 12:30 PM, Ben Dooks <ben-linux@fluff.org> wrote:
+> On Fri, Aug 05, 2011 at 10:40:17AM +0100, Russell King - ARM Linux wr=
+ote:
+>> Trying to go from IRQ to GPIO is not a good idea - most of the
+>> IRQ <-> GPIO macros we have today are just plain broken. =A0Many of =
+them
+>> just add or subtract a constant, which means non-GPIO IRQs have an
+>> apparant GPIO number too. =A0Couple this with the fact that all posi=
+tive
+>> GPIO numbers are valid, and this is a recipe for wrong GPIOs getting
+>> used and GPIOs being requested for non-GPIO IRQs.
+>
+> Yes, and there's a pile without these defined/
 
-No, I didn't.
+And I'm piling a few patches *deleting* irq_to_gpio() from platforms th=
+at
+define but actually don't use it, like U300 and SA1100.
 
-I was discussing whether an alternative API for IRQ registration
-would work, and I was pointing out some problems with it.
-
-That has nothing to do with whether my original proposal is workable.
-
--- 
-nvpublic
+Linus Walleij
