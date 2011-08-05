@@ -1,86 +1,66 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: Issue with non-UHS-I SD3.0 cards
-Date: Fri, 5 Aug 2011 19:00:47 +0530
-Message-ID: <000001cc5373$e4e466e0$aead34a0$@org>
-References: <1312199897-5536-1-git-send-email-subhashj@codeaurora.org> <m2d3goc2r1.fsf@bob.laptop.org> <6C03668EAF45B747AF947A1603D1B3000197C66B0B@SAUSEXMBP01.amd.com> <000001cc50f4$5a9e5530$0fdaff90$@org> <6C03668EAF45B747AF947A1603D1B3000197C66BA2@SAUSEXMBP01.amd.com> <000601cc5111$64c0e9c0$2e42bd40$@org>
+From: Stephen Warren <swarren@nvidia.com>
+Subject: RE: [PATCH 1/3] irq: If an IRQ is a GPIO, request and configure it
+Date: Fri, 5 Aug 2011 08:29:38 -0700
+Message-ID: <74CDBE0F657A3D45AFBB94109FB122FF049F171EF4@HQMAIL01.nvidia.com>
+References: <1312498820-2275-1-git-send-email-swarren@nvidia.com>
+ <1312498820-2275-2-git-send-email-swarren@nvidia.com>
+ <20110805000148.GB13321@opensource.wolfsonmicro.com>
+ <74CDBE0F657A3D45AFBB94109FB122FF049F171EC1@HQMAIL01.nvidia.com>
+ <20110805053510.GA16956@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:19417 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754761Ab1HENav (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Aug 2011 09:30:51 -0400
-In-Reply-To: <000601cc5111$64c0e9c0$2e42bd40$@org>
-Content-Language: en-us
+Received: from hqemgate03.nvidia.com ([216.228.121.140]:19152 "EHLO
+	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753643Ab1HEP37 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Aug 2011 11:29:59 -0400
+In-Reply-To: <20110805053510.GA16956@opensource.wolfsonmicro.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: "'Nath, Arindam'" <Arindam.Nath@amd.com>, 'Chris Ball' <cjb@laptop.org>, 'Philip Rakity' <prakity@marvell.com>, 'zhangfei gao' <zhangfei.gao@gmail.com>
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>, "ccross@android.com" <ccross@android.com>, "olof@lixom.net" <olof@lixom.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
 
-Hi,
+Mark Brown wrote at Thursday, August 04, 2011 11:35 PM:
+> On Thu, Aug 04, 2011 at 08:53:34PM -0700, Stephen Warren wrote:
+> 
+> > Well, things break. This is essentially the problem I was describing in
+> > the PATCH 0 email, just with a slightly different motivation.
+> 
+> There's a bunch of existing code using that idiom.
 
-I am seeing the issue where "SanDisk Extreme SDHC 8GB Class 10 card" is
-running in "Default Speed" mode even though it supports "High Speed" mode.
-After analysis, I found that this card is advertising itself as SD3.0 card
-(with SD_SPEC=2 and SD_SPEC3=1 in SCR). But current mmc core later
-initialization sequence for SD3.0 cards is such that these non-UHS-I SD3.0
-cards runs in Default Speed mode @25MHz.
+Certainly.
 
-Here is Essential conditions to indicate Version 3.00 Card (from SD3.01
-spec)
-    (SD_SPEC=2 and SD_SPEC3=1) :
-    (1) The card shall support CMD6
-    (2) The card shall support CMD8
-    (3) The card shall support CMD42
-    (4) User area capacity shall be up to 2GB (SDSC) or 32GB (SDHC)
-        User area capacity shall be more than or equal to 32GB and
-        up to 2TB (SDXC)
-    (5) Speed Class shall be supported (SDHC or SDXC)
+> > I suppose that an alternative here would be to simply ignore any errors
+> > from gpio_request. This might have the benefit of removing the need for
+> > the other two patches I posted in the series. However, it seems a little
+> > dirty; one benefit of the IRQ code calling gpio_request and honoring
+> > errors would be to detect when some completely unrelated code had a bug
+> > and had called gpio_request on the GPIO before. Such detection would be
+> > non-existent if we don't error out on gpio_request. Perhaps some mechanism
+> > is needed to indicate that the driver has explicitly already called
+> > gpio_request for a legitimate shared purpose, and only then ignore
+> > errors?
+> 
+> But it's not a bug to use a GPIO as an IRQ source, otherwise we wouldn't
+> have gpio_to_irq() in the first place.
 
+True, but I think there are two cases:
 
-So even if SD card doesn't support any of the newly defined UHS-I bus speed
-mode, it can advertise itself as SD3.0 cards as long as it supports all the
-essential conditions of SD3.0 cards. Given this, these type of cards should
-at least run in High Speed mode @50MHZ if it supports HS.
+1) Some code legitimately uses a pin as both a GPIO and IRQ, and is fully
+cognizant of the fact, just like in your example -> no bug.
 
-Here are the changes you have to do to make non-UHS-I SD3.0 cards run in
-High Speed Mode @50MHz. Do let me know if looks fine or not, so I can post
-the formal patch.
+2) Two pieces of unrelated code somehow accidentally get a GPIO and IRQ
+number that map to the same resource, e.g. due to incorrect board files or
+Device Tree content. This is probably a bug, but ends up looking exactly
+the same as far as the IRQ code's gpio_request call failing in the patch I
+posted.
 
----
- drivers/mmc/core/sd.c |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
+> Feels like we need a backchannel
+> between gpiolib and the IRQ code to do this.  Or perhaps the drivers
+> that implement this should be taking care of setting up the GPIO mode?
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 907662a..3fab676 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -305,6 +305,9 @@ static int mmc_read_switch(struct mmc_card *card)
-                goto out;
-        }
-
-+       if (status[13] & 0x02)
-+               card->sw_caps.hs_max_dtr = 50000000;
-+
-        if (card->scr.sda_spec3) {
-                card->sw_caps.sd3_bus_mode = status[13];
-
-@@ -347,9 +350,6 @@ static int mmc_read_switch(struct mmc_card *card)
-                }
-
-                card->sw_caps.sd3_curr_limit = status[7];
--       } else {
--               if (status[13] & 0x02)
--                       card->sw_caps.hs_max_dtr = 50000000;
-        }
-
- out:
---
-
-
-Regards,
-Subhash
-
+-- 
+nvpublic
 
