@@ -1,26 +1,26 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
 Subject: Re: [PATCH] mmc: support HPI send command
-Date: Mon, 08 Aug 2011 16:08:23 +0900
-Message-ID: <4E3F8B67.8080603@samsung.com>
+Date: Mon, 08 Aug 2011 16:22:28 +0900
+Message-ID: <4E3F8EB4.7080403@samsung.com>
 References: <4E3F821A.3060405@samsung.com>
  <5D8008F58939784290FAB48F5497519847296B8B16@shsmsx502.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:12407 "EHLO
+Received: from mailout3.samsung.com ([203.254.224.33]:21350 "EHLO
 	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753176Ab1HHHIs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2011 03:08:48 -0400
-Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
+	with ESMTP id S1752485Ab1HHHW3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2011 03:22:29 -0400
+Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
  by mailout3.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LPL00DS3L5PAN40@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 08 Aug 2011 16:08:22 +0900 (KST)
+ 2010)) with ESMTP id <0LPL00KYJLSVAY30@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 08 Aug 2011 16:22:27 +0900 (KST)
 Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
  by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LPL00HBQL5ZQM@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 08 Aug 2011 16:08:23 +0900 (KST)
+ with ESMTPA id <0LPL006AHLTGZS@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 08 Aug 2011 16:22:28 +0900 (KST)
 In-reply-to: <5D8008F58939784290FAB48F5497519847296B8B16@shsmsx502.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -29,12 +29,7 @@ Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-m
 
 Hi Chuanxiao.
 
-Thank you for your comment.
-Right, you mentioned, including some case should be better.
-So i will send some patch for the case that use HPI command.
-
-Regards,
-Jaehoon Chung
+Sorry, i couldn't see the below your comment. :)
 
 Dong, Chuanxiao wrote:
 > Hi Chung,
@@ -110,6 +105,16 @@ Dong, Chuanxiao wrote:
 > So if card is already not in prg-state, then you will get some error. For sdhci host controller, response timeout error will be returned back. So here driver may return with error.
 > Suggest to add some error handling in mmc_send_hpi_cmd to avoid this. If the error is caused by improper scenario of sending HPI command, then we can ignore this.
 > What do you think?
+
+Right. maybe at that time, if card is already out of prg-state, we need to control error.
+(this patch initialized just HPI send command, so i think maybe we should fix this patch in future)
+And I will add the code for error-control.
+
+i wonder the improper scenario..? interruptible command?
+
+Regards,
+Jaehoon chung
+
 > 
 >> +	}
 >> +
