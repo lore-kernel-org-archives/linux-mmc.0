@@ -1,193 +1,254 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: Issue with non-UHS-I SD3.0 cards
-Date: Mon, 8 Aug 2011 11:50:58 +0530
-Message-ID: <000001cc5593$5910d2d0$0b327870$@org>
-References: <1312199897-5536-1-git-send-email-subhashj@codeaurora.org> <m2d3goc2r1.fsf@bob.laptop.org> <6C03668EAF45B747AF947A1603D1B3000197C66B0B@SAUSEXMBP01.amd.com> <000001cc50f4$5a9e5530$0fdaff90$@org> <6C03668EAF45B747AF947A1603D1B3000197C66BA2@SAUSEXMBP01.amd.com> <000601cc5111$64c0e9c0$2e42bd40$@org> <000001cc5373$e4e466e0$aead34a0$@org>  <6C03668EAF45B747AF947A1603D1B3000197DD104C@SAUSEXMBP01.amd.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: support HPI send command
+Date: Mon, 08 Aug 2011 15:28:42 +0900
+Message-ID: <4E3F821A.3060405@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:11138 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751464Ab1HHGVT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2011 02:21:19 -0400
-In-Reply-To: <6C03668EAF45B747AF947A1603D1B3000197DD104C@SAUSEXMBP01.amd.com>
-Content-language: en-us
+Received: from mailout1.samsung.com ([203.254.224.24]:63606 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751717Ab1HHG2o (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2011 02:28:44 -0400
+Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LPL00KFPJ9UE430@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 08 Aug 2011 15:28:42 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LPL000FTJBUTI@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 08 Aug 2011 15:28:42 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "'Nath, Arindam'" <Arindam.Nath@amd.com>, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Philip Rakity' <prakity@marvell.com>, 'zhangfei gao' <zhangfei.gao@gmail.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Chuanxiao Dong <chuanxiao.dong@intel.com>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, svenkatr@ti.com
 
-Hi Arindam,
+HPI command is defined in eMMC4.41.
+We didn't use this command.
+But maybe we need to use HPI command for using eMMC4.5 feature.
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Nath, Arindam
-> Sent: Saturday, August 06, 2011 12:27 AM
-> To: Subhash Jadavani; linux-mmc@vger.kernel.org
-> Cc: 'Chris Ball'; 'Philip Rakity'; 'zhangfei gao'
-> Subject: RE: Issue with non-UHS-I SD3.0 cards
-> 
-> 
-> 
-> > -----Original Message-----
-> > From: Nath, Arindam
-> > Sent: Saturday, August 06, 2011 12:15 AM
-> > To: 'Subhash Jadavani'; linux-mmc@vger.kernel.org
-> > Cc: 'Chris Ball'; 'Philip Rakity'; 'zhangfei gao'
-> > Subject: RE: Issue with non-UHS-I SD3.0 cards
-> >
-> > Hi Subhash,
-> >
-> >
-> > > -----Original Message-----
-> > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > > Sent: Friday, August 05, 2011 7:01 PM
-> > > To: linux-mmc@vger.kernel.org
-> > > Cc: Nath, Arindam; 'Chris Ball'; 'Philip Rakity'; 'zhangfei gao'
-> > > Subject: Issue with non-UHS-I SD3.0 cards
-> > >
-> > > Hi,
-> > >
-> > > I am seeing the issue where "SanDisk Extreme SDHC 8GB Class 10
-> card"
-> > is
-> > > running in "Default Speed" mode even though it supports "High
-> Speed"
-> > > mode.
-> > > After analysis, I found that this card is advertising itself as
-> SD3.0
-> > > card
-> > > (with SD_SPEC=2 and SD_SPEC3=1 in SCR). But current mmc core later
-> > > initialization sequence for SD3.0 cards is such that these non-UHS-
-> I
-> > > SD3.0
-> > > cards runs in Default Speed mode @25MHz.
-> > >
-> > > Here is Essential conditions to indicate Version 3.00 Card (from
-> > SD3.01
-> > > spec)
-> > >     (SD_SPEC=2 and SD_SPEC3=1) :
-> > >     (1) The card shall support CMD6
-> > >     (2) The card shall support CMD8
-> > >     (3) The card shall support CMD42
-> > >     (4) User area capacity shall be up to 2GB (SDSC) or 32GB (SDHC)
-> > >         User area capacity shall be more than or equal to 32GB and
-> > >         up to 2TB (SDXC)
-> > >     (5) Speed Class shall be supported (SDHC or SDXC)
-> >
-> > I went through the particular section of the spec again, and IMO, the
-> > essential conditions are for the manufacturer of the card to
-> advertise
-> > his card as SD3.0 card or otherwise. From software point of view, the
-> > SD_SPEC=2 _and_ SD_SPEC3=1 will indicate a SD3.0 card.
-> 
-> I misread your comment, so please ignore what you mentioned above. So
-> if I understand correctly, in your case *sd_spec3* is set for the card,
-> even though it is a non UHS-I card. In that case, what you tried in
-> your patch looks fine, except that I would suggest to move it inside
-> the
-> 
-> if (card->scr.sda_spec3) {
-> 	...
-> }
-> 
-> condition.
-> 
+Many patches related with HPI sent to mailing.
+(This patch is based on Chuanxiao's patch.)
+But this patch is added sending function for HPI command.
 
-You mean moving the " card->sw_caps.hs_max_dtr = 50000000;" under if
-(card->scr.sda_spec3) condition and still retaining the else condition for "
-if (card->scr.sda_spec3) ".
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+CC: Hanumath Prasad <hanumath.prasad@stericsson.com>
 
-Something like this:
+---
+ drivers/mmc/core/core.c    |   28 ++++++++++++++++++++++++++++
+ drivers/mmc/core/mmc.c     |   37 ++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/core/mmc_ops.c |   31 +++++++++++++++++++++++++++++++
+ drivers/mmc/core/mmc_ops.h |    1 +
+ include/linux/mmc/card.h   |    4 ++++
+ include/linux/mmc/core.h   |    1 +
+ include/linux/mmc/mmc.h    |    3 +++
+ 7 files changed, 104 insertions(+), 1 deletions(-)
 
-if (card->scr.sda_spec3) {
-       if (status[13] & 0x02)
-               card->sw_caps.hs_max_dtr = 50000000;
-	...
-	...
-	
-} else {
-       if (status[13] & 0x02)
-               card->sw_caps.hs_max_dtr = 50000000;
-}
-
-I thought it's duplication of code as both if & else condition is executing
-the same code so thought of putting it outside of if, else. 
-I am even ok with putting it inside "if (card->scr.sda_spec3)", if you think
-it's better.
-
-Regards,
-Subhash
-
-
-> >
-> > Thanks,
-> > Arindam
-> >
-> > >
-> > >
-> > > So even if SD card doesn't support any of the newly defined UHS-I
-> bus
-> > > speed
-> > > mode, it can advertise itself as SD3.0 cards as long as it supports
-> > all
-> > > the
-> > > essential conditions of SD3.0 cards. Given this, these type of
-> cards
-> > > should
-> > > at least run in High Speed mode @50MHZ if it supports HS.
-> > >
-> > > Here are the changes you have to do to make non-UHS-I SD3.0 cards
-> run
-> > > in
-> > > High Speed Mode @50MHz. Do let me know if looks fine or not, so I
-> can
-> > > post
-> > > the formal patch.
-> > >
-> > > ---
-> > >  drivers/mmc/core/sd.c |    6 +++---
-> > >  1 files changed, 3 insertions(+), 3 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > > index 907662a..3fab676 100644
-> > > --- a/drivers/mmc/core/sd.c
-> > > +++ b/drivers/mmc/core/sd.c
-> > > @@ -305,6 +305,9 @@ static int mmc_read_switch(struct mmc_card
-> *card)
-> > >                 goto out;
-> > >         }
-> > >
-> > > +       if (status[13] & 0x02)
-> > > +               card->sw_caps.hs_max_dtr = 50000000;
-> > > +
-> > >         if (card->scr.sda_spec3) {
-> > >                 card->sw_caps.sd3_bus_mode = status[13];
-> > >
-> > > @@ -347,9 +350,6 @@ static int mmc_read_switch(struct mmc_card
-> *card)
-> > >                 }
-> > >
-> > >                 card->sw_caps.sd3_curr_limit = status[7];
-> > > -       } else {
-> > > -               if (status[13] & 0x02)
-> > > -                       card->sw_caps.hs_max_dtr = 50000000;
-> > >         }
-> > >
-> > >  out:
-> > > --
-> > >
-> > >
-> > > Regards,
-> > > Subhash
-> > >
-> > >
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index f091b43..a20ff75 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -346,6 +346,34 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int retries
+ 
+ EXPORT_SYMBOL(mmc_wait_for_cmd);
+ 
++int mmc_interrupt_hpi(struct mmc_card *card)
++{
++	int err;
++	u32 status;
++
++	BUG_ON(!card);
++
++	if (!card->ext_csd.hpi_en) {
++		printk(KERN_INFO "Didn't set HPI enable bit!\n");
++		return 0;
++	}
++
++	err = mmc_send_status(card, &status);
++	if (err)
++		return err;
++
++	/* If Card status is prg-state, can send HPI command */
++	if (R1_CURRENT_STATE(status) == 7) {
++		err = mmc_send_hpi_cmd(card, &status);
++		if (err)
++			return err;
++	}
++
++	return 0;
++
++}
++EXPORT_SYMBOL(mmc_interrupt_hpi);
++
+ /**
+  *	mmc_set_data_timeout - set the timeout for a data command
+  *	@data: data phase for command
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5700b1c..c51ae8c 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -402,8 +402,26 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 			ext_csd[EXT_CSD_TRIM_MULT];
+ 	}
+ 
+-	if (card->ext_csd.rev >= 5)
++	if (card->ext_csd.rev >= 5) {
++		/* check whether the eMMC card support HPI */
++		if (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1) {
++			card->ext_csd.hpi = 1;
++			if (ext_csd[EXT_CSD_HPI_FEATURES] & 0x2)
++				card->ext_csd.hpi_cmd =
++						MMC_STOP_TRANSMISSION;
++			else
++				card->ext_csd.hpi_cmd =
++						MMC_SEND_STATUS;
++
++			/*
++			 * Indicate the maximum timeout to close
++			 * a command interrupted by HPI
++			 */
++			card->ext_csd.out_of_int_time =
++				ext_csd[EXT_CSD_OUT_OF_INTERRUPT_TIME] * 10;
++		}
+ 		card->ext_csd.rel_param = ext_csd[EXT_CSD_WR_REL_PARAM];
++}
+ 
+ 	if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
+ 		card->erased_byte = 0xFF;
+@@ -726,6 +744,23 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	}
+ 
+ 	/*
++	 * Enable HPI feature (if supported)
++	 */
++	if (card->ext_csd.hpi) {
++		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++			EXT_CSD_HPI_MGMT, 1, 0);
++		if (err && err != -EBADMSG)
++			goto free_card;
++
++		if (err) {
++			printk(KERN_WARNING "%s: Enabling HPI failed\n",
++				mmc_hostname(card->host));
++			err = 0;
++		} else
++			card->ext_csd.hpi_en = 1;
++	}
++
++	/*
+ 	 * Compute bus speed.
+ 	 */
+ 	max_dtr = (unsigned int)-1;
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 845ce7c..f111907 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -547,3 +547,34 @@ int mmc_bus_test(struct mmc_card *card, u8 bus_width)
+ 	err = mmc_send_bus_test(card, card->host, MMC_BUS_TEST_R, width);
+ 	return err;
+ }
++
++int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
++{
++	struct mmc_command cmd;
++	unsigned int opcode;
++	unsigned int flags;
++	int err;
++
++	opcode = card->ext_csd.hpi_cmd;
++	if (opcode == MMC_STOP_TRANSMISSION)
++		flags = MMC_RSP_R1B | MMC_CMD_AC;
++	else if (opcode == MMC_SEND_STATUS)
++		flags = MMC_RSP_R1 | MMC_CMD_AC;
++
++	memset(&cmd, 0, sizeof(struct mmc_command));
++	cmd.opcode = opcode;
++	cmd.arg = card->rca << 16 | 1;
++	cmd.flags = flags;
++	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
++
++	err = mmc_wait_for_cmd(card->host, &cmd, 0);
++	if (err) {
++		printk(KERN_ERR "error %d interrupting operation"
++			"HPI command response  %#x\n",
++				err, cmd.resp[0]);
++		return err;
++	}
++	if (status)
++		*status = cmd.resp[0];
++	return 0;
++}
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index 9276946..2a6e0db 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -17,6 +17,7 @@ int mmc_deselect_cards(struct mmc_host *host);
+ int mmc_go_idle(struct mmc_host *host);
+ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
+ int mmc_all_send_cid(struct mmc_host *host, u32 *cid);
++int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status);
+ int mmc_set_relative_addr(struct mmc_card *card);
+ int mmc_send_csd(struct mmc_card *card, u32 *csd);
+ int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index b460fc2..411054d 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -64,10 +64,14 @@ struct mmc_ext_csd {
+ 	unsigned long long	enhanced_area_offset;	/* Units: Byte */
+ 	unsigned int		enhanced_area_size;	/* Units: KB */
+ 	unsigned int		boot_size;		/* in bytes */
++	bool			hpi_en;			/* HPI enablebit */
++	bool			hpi;			/* HPI support bit */
++	unsigned int		hpi_cmd;		/* cmd used as HPI */
+ 	u8			raw_partition_support;	/* 160 */
+ 	u8			raw_erased_mem_count;	/* 181 */
+ 	u8			raw_ext_csd_structure;	/* 194 */
+ 	u8			raw_card_type;		/* 196 */
++	u8			out_of_int_time;	/* 198 */
+ 	u8			raw_s_a_timeout;		/* 217 */
+ 	u8			raw_hc_erase_gap_size;	/* 221 */
+ 	u8			raw_erase_timeout_mult;	/* 223 */
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index b8b1b7a..dca3c08 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -136,6 +136,7 @@ struct mmc_async_req;
+ 
+ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+ 					   struct mmc_async_req *, int *);
++extern int mmc_interrupt_hpi(struct mmc_card *);
+ extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
+ extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
+ extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 5a794cb..e16c776 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -272,6 +272,7 @@ struct _mmc_csd {
+ 
+ #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+ #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
++#define EXT_CSD_HPI_MGMT		161	/* R/W */
+ #define EXT_CSD_WR_REL_PARAM		166	/* RO */
+ #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
+ #define EXT_CSD_PART_CONFIG		179	/* R/W */
+@@ -281,6 +282,7 @@ struct _mmc_csd {
+ #define EXT_CSD_REV			192	/* RO */
+ #define EXT_CSD_STRUCTURE		194	/* RO */
+ #define EXT_CSD_CARD_TYPE		196	/* RO */
++#define EXT_CSD_OUT_OF_INTERRUPT_TIME	198	/* RO */
+ #define EXT_CSD_PART_SWITCH_TIME        199     /* RO */
+ #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
+ #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
+@@ -293,6 +295,7 @@ struct _mmc_csd {
+ #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
+ #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
+ #define EXT_CSD_TRIM_MULT		232	/* RO */
++#define EXT_CSD_HPI_FEATURES		503	/* RO */
+ 
+ /*
+  * EXT_CSD field definitions
