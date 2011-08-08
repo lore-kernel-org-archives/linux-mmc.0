@@ -1,94 +1,47 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: Fix DDR mode support.
-Date: Mon, 08 Aug 2011 10:38:44 +0900
-Message-ID: <009d01cc556b$e99cc9d0$bcd65d70$%jun@samsung.com>
-References: <1312515303-17169-1-git-send-email-tgih.jun@samsung.com>
- <CAFbHwiT3p3pSC1q4xQRYkLzSG7tPuGLXB4KKwC-8HWMmtF+fhA@mail.gmail.com>
- <CAELcNGTNA83nD3kCh=-BJ6DxRqnNaRznn3mTd5PVY_fRArp+fA@mail.gmail.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: [PATCH 0/2] eMMC v4.5 feature supports
+Date: Mon, 08 Aug 2011 11:11:13 +0900
+Message-ID: <20110808021113.GA20317@july>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:23793 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751660Ab1HHBiq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Aug 2011 21:38:46 -0400
-In-reply-to: <CAELcNGTNA83nD3kCh=-BJ6DxRqnNaRznn3mTd5PVY_fRArp+fA@mail.gmail.com>
-Content-language: ko
+Received: from mailout3.samsung.com ([203.254.224.33]:22645 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751248Ab1HHCLT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Aug 2011 22:11:19 -0400
+Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LPL00LWJ7EFLLF0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 08 Aug 2011 11:11:18 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LPL009RF7EURQ@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 08 Aug 2011 11:11:18 +0900 (KST)
+Content-disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jae hoon Chung' <jh80.chung@gmail.com>, 'Will Newton' <will.newton@gmail.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: jh80.chung@samsung.com, arnd@arndb.de
 
-Jaehoon Chung wrote:
-> 
-> Hi Seungwon
-> 
-> This patch is looks fine to me..
-> 
-> Just ask to you...Don't you want to locate MMC_CAP_MMC_HIGHSPEED in
-> platdata?
+New feature, discard and sanitize supports
 
-Thank you for your comment.
-Of course, I have considered appropriate location for MMC_CAP_MMC_HIGHSPEED.
-But it seems to be difficult to distinguish a difference between MMC_CAP_SD_HIGHSPEED and MMC_CAP_MMC_HIGHSPEED,
-if DW_MCI_QUIRK_HIGHSPEED is defined.
+See the detail information at each patch
 
-Beset regards,
-Seungwon Jeon.
+Kyungmin Park (2):
+  mmc: core: new discard feature support at mmc v4.5
+  mmc: core: mmc sanitize feature support for v4.5
 
-> 
-> Regards,
-> Jaehoon Chung
-> 
-> 
-> 2011/8/5 Will Newton <will.newton@gmail.com>:
-> > On Fri, Aug 5, 2011 at 4:35 AM, Seungwon Jeon <tgih.jun@samsung.com>
-> wrote:
-> >> Host driver can't get a hint of DDR mode through ios->ddr flag anymore.
-> >> ios->timing is currently used to inform DDR mode as a substitute.
-> >> And capability of MMC_CAP_MMC_HIGHSPEED is added for DDR support.
-> >>
-> >> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> >> ---
-> >>  drivers/mmc/host/dw_mmc.c |    4 ++--
-> >>  1 files changed, 2 insertions(+), 2 deletions(-)
-> >>
-> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> >> index d65511e..b412a1d 100644
-> >> --- a/drivers/mmc/host/dw_mmc.c
-> >> +++ b/drivers/mmc/host/dw_mmc.c
-> >> @@ -699,7 +699,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc,
-> struct mmc_ios *ios)
-> >>        }
-> >>
-> >>        /* DDR mode set */
-> >> -       if (ios->ddr) {
-> >> +       if (ios->timing == MMC_TIMING_UHS_DDR50) {
-> >>                regs = mci_readl(slot->host, UHS_REG);
-> >>                regs |= (0x1 << slot->id) << 16;
-> >>                mci_writel(slot->host, UHS_REG, regs);
-> >> @@ -1646,7 +1646,7 @@ static int __init dw_mci_init_slot(struct dw_mci
-> *host, unsigned int id)
-> >>                        mmc->caps |= MMC_CAP_4_BIT_DATA;
-> >>
-> >>        if (host->pdata->quirks & DW_MCI_QUIRK_HIGHSPEED)
-> >> -               mmc->caps |= MMC_CAP_SD_HIGHSPEED;
-> >> +               mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
-> >>
-> >>  #ifdef CONFIG_MMC_DW_IDMAC
-> >>        mmc->max_segs = host->ring_size;
-> >> --
-> >> 1.7.0.4
-> >
-> > Acked-by: Will Newton <will.newton@imgtec.com>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ drivers/mmc/card/block.c |   13 +++++++++++--
+ drivers/mmc/card/queue.c |    2 +-
+ drivers/mmc/core/core.c  |   22 ++++++++++++++++++++++
+ drivers/mmc/core/mmc.c   |    4 ++++
+ include/linux/mmc/card.h |    3 +++
+ include/linux/mmc/core.h |    3 +++
+ include/linux/mmc/mmc.h  |    2 ++
+ 7 files changed, 46 insertions(+), 3 deletions(-)
+
+-- 
+1.7.5.1.300.gc565c
 
