@@ -1,143 +1,193 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: [PATCH 2/2] mmc: core: mmc sanitize feature support for v4.5
-Date: Mon, 08 Aug 2011 11:11:33 +0900
-Message-ID: <20110808021133.GA20325@july>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: Issue with non-UHS-I SD3.0 cards
+Date: Mon, 8 Aug 2011 11:50:58 +0530
+Message-ID: <000001cc5593$5910d2d0$0b327870$@org>
+References: <1312199897-5536-1-git-send-email-subhashj@codeaurora.org> <m2d3goc2r1.fsf@bob.laptop.org> <6C03668EAF45B747AF947A1603D1B3000197C66B0B@SAUSEXMBP01.amd.com> <000001cc50f4$5a9e5530$0fdaff90$@org> <6C03668EAF45B747AF947A1603D1B3000197C66BA2@SAUSEXMBP01.amd.com> <000601cc5111$64c0e9c0$2e42bd40$@org> <000001cc5373$e4e466e0$aead34a0$@org>  <6C03668EAF45B747AF947A1603D1B3000197DD104C@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:43703 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751248Ab1HHCLk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Aug 2011 22:11:40 -0400
-Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LPL00K047FC2EC0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 08 Aug 2011 11:11:38 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LPL00F2V7FE9T@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 08 Aug 2011 11:11:38 +0900 (KST)
-Content-disposition: inline
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:11138 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751464Ab1HHGVT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2011 02:21:19 -0400
+In-Reply-To: <6C03668EAF45B747AF947A1603D1B3000197DD104C@SAUSEXMBP01.amd.com>
+Content-language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: jh80.chung@samsung.com, arnd@arndb.de
+To: "'Nath, Arindam'" <Arindam.Nath@amd.com>, linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Philip Rakity' <prakity@marvell.com>, 'zhangfei gao' <zhangfei.gao@gmail.com>
 
-From: Kyungmin Park <kyungmin.park@samsung.com>
+Hi Arindam,
 
-In the v4.5, there's no secure erase & trim support.
-Instead it supports the sanitize feature.
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Nath, Arindam
+> Sent: Saturday, August 06, 2011 12:27 AM
+> To: Subhash Jadavani; linux-mmc@vger.kernel.org
+> Cc: 'Chris Ball'; 'Philip Rakity'; 'zhangfei gao'
+> Subject: RE: Issue with non-UHS-I SD3.0 cards
+> 
+> 
+> 
+> > -----Original Message-----
+> > From: Nath, Arindam
+> > Sent: Saturday, August 06, 2011 12:15 AM
+> > To: 'Subhash Jadavani'; linux-mmc@vger.kernel.org
+> > Cc: 'Chris Ball'; 'Philip Rakity'; 'zhangfei gao'
+> > Subject: RE: Issue with non-UHS-I SD3.0 cards
+> >
+> > Hi Subhash,
+> >
+> >
+> > > -----Original Message-----
+> > > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
+> > > Sent: Friday, August 05, 2011 7:01 PM
+> > > To: linux-mmc@vger.kernel.org
+> > > Cc: Nath, Arindam; 'Chris Ball'; 'Philip Rakity'; 'zhangfei gao'
+> > > Subject: Issue with non-UHS-I SD3.0 cards
+> > >
+> > > Hi,
+> > >
+> > > I am seeing the issue where "SanDisk Extreme SDHC 8GB Class 10
+> card"
+> > is
+> > > running in "Default Speed" mode even though it supports "High
+> Speed"
+> > > mode.
+> > > After analysis, I found that this card is advertising itself as
+> SD3.0
+> > > card
+> > > (with SD_SPEC=2 and SD_SPEC3=1 in SCR). But current mmc core later
+> > > initialization sequence for SD3.0 cards is such that these non-UHS-
+> I
+> > > SD3.0
+> > > cards runs in Default Speed mode @25MHz.
+> > >
+> > > Here is Essential conditions to indicate Version 3.00 Card (from
+> > SD3.01
+> > > spec)
+> > >     (SD_SPEC=2 and SD_SPEC3=1) :
+> > >     (1) The card shall support CMD6
+> > >     (2) The card shall support CMD8
+> > >     (3) The card shall support CMD42
+> > >     (4) User area capacity shall be up to 2GB (SDSC) or 32GB (SDHC)
+> > >         User area capacity shall be more than or equal to 32GB and
+> > >         up to 2TB (SDXC)
+> > >     (5) Speed Class shall be supported (SDHC or SDXC)
+> >
+> > I went through the particular section of the spec again, and IMO, the
+> > essential conditions are for the manufacturer of the card to
+> advertise
+> > his card as SD3.0 card or otherwise. From software point of view, the
+> > SD_SPEC=2 _and_ SD_SPEC3=1 will indicate a SD3.0 card.
+> 
+> I misread your comment, so please ignore what you mentioned above. So
+> if I understand correctly, in your case *sd_spec3* is set for the card,
+> even though it is a non UHS-I card. In that case, what you tried in
+> your patch looks fine, except that I would suggest to move it inside
+> the
+> 
+> if (card->scr.sda_spec3) {
+> 	...
+> }
+> 
+> condition.
+> 
 
->From the Spec.:
+You mean moving the " card->sw_caps.hs_max_dtr = 50000000;" under if
+(card->scr.sda_spec3) condition and still retaining the else condition for "
+if (card->scr.sda_spec3) ".
 
-The Sanitize operation is a feature, in addition to TRIM and Erase that is used to remove data from the device. The use of the Sanitize operation requires the device to physically remove data from the unmapped user address space. A Sanitize operation is initiated by writing a value to the extended CSD[165] SANITIZE_START. While the device is performing the sanitize operation, the busy line is asserted. The device will continue the sanitize operation, with busy asserted, until one of the following events occurs:
-. Sanitize operation is complete.
-. An HPI is used to abort the operation
-. A power failure.
-. A hardware reset.
+Something like this:
 
-After the sanitize operation is completed, no data should exist in the unmapped host address space. If the sanitize operation is interrupted, either by HPI, power failure or hardware reset, the state of the unmapped host address space cannot be guaranteed. The host must re-initiate the sanitize operation by writing to the SANITIZE_START[165] and allow the operation to complete to be sure that unmapped host address space is clear.
-Since the region being operated on is not accessible by the host, applications requiring this feature must work with individual device manufacturers to ensure this operation is performing properly and to understand the impact on device reliability.
+if (card->scr.sda_spec3) {
+       if (status[13] & 0x02)
+               card->sw_caps.hs_max_dtr = 50000000;
+	...
+	...
+	
+} else {
+       if (status[13] & 0x02)
+               card->sw_caps.hs_max_dtr = 50000000;
+}
 
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/card/block.c |    9 ++++++++-
- drivers/mmc/card/queue.c |    2 +-
- drivers/mmc/core/core.c  |    8 ++++++++
- include/linux/mmc/core.h |    1 +
- include/linux/mmc/mmc.h  |    2 ++
- 5 files changed, 20 insertions(+), 2 deletions(-)
+I thought it's duplication of code as both if & else condition is executing
+the same code so thought of putting it outside of if, else. 
+I am even ok with putting it inside "if (card->scr.sda_spec3)", if you think
+it's better.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 9649997..d96a9b4 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -735,11 +735,18 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- 	unsigned int from, nr, arg;
- 	int err = 0;
- 
--	if (!mmc_can_secure_erase_trim(card)) {
-+	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
- 		err = -EOPNOTSUPP;
- 		goto out;
- 	}
- 
-+	/* The sanitize operation is supported at v4.5 only */
-+	if (mmc_can_sanitize(card)) {
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+				 EXT_CSD_SANITIZE_START, 1, 0);
-+		goto out;
-+	}
-+
- 	from = blk_rq_pos(req);
- 	nr = blk_rq_sectors(req);
- 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 45fb362..d7f2f45 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -140,7 +140,7 @@ static void mmc_queue_setup_discard(struct request_queue *q,
- 	/* granularity must not be greater than max. discard */
- 	if (card->pref_erase > max_discard)
- 		q->limits.discard_granularity = 0;
--	if (mmc_can_secure_erase_trim(card))
-+	if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))
- 		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
- }
- 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index c88fb57..d6232e0 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1604,6 +1604,14 @@ int mmc_can_discard(struct mmc_card *card)
- }
- EXPORT_SYMBOL(mmc_can_discard);
- 
-+int mmc_can_sanitize(struct mmc_card *card)
-+{
-+	if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_SANITIZE)
-+		return 1;
-+	return 0;
-+}
-+EXPORT_SYMBOL(mmc_can_sanitize);
-+
- int mmc_can_secure_erase_trim(struct mmc_card *card)
- {
- 	if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN)
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 6118f10..f1e5773 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -158,6 +158,7 @@ extern int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
- extern int mmc_can_erase(struct mmc_card *card);
- extern int mmc_can_trim(struct mmc_card *card);
- extern int mmc_can_discard(struct mmc_card *card);
-+extern int mmc_can_sanitize(struct mmc_card *card);
- extern int mmc_can_secure_erase_trim(struct mmc_card *card);
- extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
- 				   unsigned int nr);
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 5a794cb..b45628b 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -272,6 +272,7 @@ struct _mmc_csd {
- 
- #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
- #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
-+#define EXT_CSD_SANITIZE_START		165	/* W */
- #define EXT_CSD_WR_REL_PARAM		166	/* RO */
- #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
- #define EXT_CSD_PART_CONFIG		179	/* R/W */
-@@ -327,6 +328,7 @@ struct _mmc_csd {
- #define EXT_CSD_SEC_ER_EN	BIT(0)
- #define EXT_CSD_SEC_BD_BLK_EN	BIT(2)
- #define EXT_CSD_SEC_GB_CL_EN	BIT(4)
-+#define EXT_CSD_SEC_SANITIZE	BIT(6)	/* v4.5 only */
- 
- /*
-  * MMC_SWITCH access modes
--- 
-1.7.5.1.300.gc565c
+Regards,
+Subhash
+
+
+> >
+> > Thanks,
+> > Arindam
+> >
+> > >
+> > >
+> > > So even if SD card doesn't support any of the newly defined UHS-I
+> bus
+> > > speed
+> > > mode, it can advertise itself as SD3.0 cards as long as it supports
+> > all
+> > > the
+> > > essential conditions of SD3.0 cards. Given this, these type of
+> cards
+> > > should
+> > > at least run in High Speed mode @50MHZ if it supports HS.
+> > >
+> > > Here are the changes you have to do to make non-UHS-I SD3.0 cards
+> run
+> > > in
+> > > High Speed Mode @50MHz. Do let me know if looks fine or not, so I
+> can
+> > > post
+> > > the formal patch.
+> > >
+> > > ---
+> > >  drivers/mmc/core/sd.c |    6 +++---
+> > >  1 files changed, 3 insertions(+), 3 deletions(-)
+> > >
+> > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > > index 907662a..3fab676 100644
+> > > --- a/drivers/mmc/core/sd.c
+> > > +++ b/drivers/mmc/core/sd.c
+> > > @@ -305,6 +305,9 @@ static int mmc_read_switch(struct mmc_card
+> *card)
+> > >                 goto out;
+> > >         }
+> > >
+> > > +       if (status[13] & 0x02)
+> > > +               card->sw_caps.hs_max_dtr = 50000000;
+> > > +
+> > >         if (card->scr.sda_spec3) {
+> > >                 card->sw_caps.sd3_bus_mode = status[13];
+> > >
+> > > @@ -347,9 +350,6 @@ static int mmc_read_switch(struct mmc_card
+> *card)
+> > >                 }
+> > >
+> > >                 card->sw_caps.sd3_curr_limit = status[7];
+> > > -       } else {
+> > > -               if (status[13] & 0x02)
+> > > -                       card->sw_caps.hs_max_dtr = 50000000;
+> > >         }
+> > >
+> > >  out:
+> > > --
+> > >
+> > >
+> > > Regards,
+> > > Subhash
+> > >
+> > >
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
