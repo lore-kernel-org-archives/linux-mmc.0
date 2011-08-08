@@ -1,68 +1,94 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [RFC PATCH 0/3] If an IRQ is a GPIO, request and configure it
-Date: Fri, 5 Aug 2011 22:40:27 +0100
-Message-ID: <20110805214027.GA4699@n2100.arm.linux.org.uk>
-References: <1312498820-2275-1-git-send-email-swarren@nvidia.com> <20110805094017.GC20575@n2100.arm.linux.org.uk> <74CDBE0F657A3D45AFBB94109FB122FF049F171EFC@HQMAIL01.nvidia.com> <20110805191504.GB28958@n2100.arm.linux.org.uk> <74CDBE0F657A3D45AFBB94109FB122FF049F171FD3@HQMAIL01.nvidia.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: dw_mmc: Fix DDR mode support.
+Date: Mon, 08 Aug 2011 10:38:44 +0900
+Message-ID: <009d01cc556b$e99cc9d0$bcd65d70$%jun@samsung.com>
+References: <1312515303-17169-1-git-send-email-tgih.jun@samsung.com>
+ <CAFbHwiT3p3pSC1q4xQRYkLzSG7tPuGLXB4KKwC-8HWMmtF+fhA@mail.gmail.com>
+ <CAELcNGTNA83nD3kCh=-BJ6DxRqnNaRznn3mTd5PVY_fRArp+fA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:53368 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754501Ab1HEVlC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Aug 2011 17:41:02 -0400
-Content-Disposition: inline
-In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF049F171FD3@HQMAIL01.nvidia.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:23793 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751660Ab1HHBiq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Aug 2011 21:38:46 -0400
+In-reply-to: <CAELcNGTNA83nD3kCh=-BJ6DxRqnNaRznn3mTd5PVY_fRArp+fA@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@nvidia.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>, "ccross@android.com" <ccross@android.com>, "olof@lixom.net" <olof@lixom.net>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: 'Jae hoon Chung' <jh80.chung@gmail.com>, 'Will Newton' <will.newton@gmail.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-kernel@vger.kernel.org
 
-On Fri, Aug 05, 2011 at 12:33:31PM -0700, Stephen Warren wrote:
-> Russell King - ARM Linux wrote at Friday, August 05, 2011 1:15 PM:
-> > On Fri, Aug 05, 2011 at 08:43:20AM -0700, Stephen Warren wrote:
-> > > Russell King - ARM Linux wrote at Friday, August 05, 2011 3:40 AM:
-> > > > On Thu, Aug 04, 2011 at 05:00:17PM -0600, Stephen Warren wrote:
-> > > > > In http://www.spinics.net/lists/linux-tegra/msg01731.html, Mark Brown
-> > > > > pointed out that it was a little silly forcing every board or driver
-> > > > > to gpio_request() a GPIO that is later converted to an IRQ, and passed
-> > > > > to request_irq. The first patch in this series instead makes the core
-> > > > > IRQ code perform these calls when appropriate, to avoid duplicating it
-> > > > > everywhere.
-> > > >
-> > > > Trying to go from IRQ to GPIO is not a good idea - most of the
-> > > > IRQ <-> GPIO macros we have today are just plain broken.  Many of them
-> > > > just add or subtract a constant, which means non-GPIO IRQs have an
-> > > > apparant GPIO number too.  Couple this with the fact that all positive
-> > > > GPIO numbers are valid, and this is a recipe for wrong GPIOs getting
-> > > > used and GPIOs being requested for non-GPIO IRQs.
-> > > >
-> > > > I think this was also discussed in the past, and the conclusion was that
-> > > > IRQs should be kept separate from GPIOs.  Maybe views have changed since
-> > > > then...
-> > > >
-> > > > However, if we do want to do this, then it would be much better to provide
-> > > > a new API for requesting GPIO IRQs, eg:
-> > > >
-> > > > gpio_request_irq()
-> > > >
-> > > > which would wrap around request_threaded_irq(), takes a GPIO number,
-> > > > does the GPIO->IRQ conversion internally, and whatever GPIO setup is
-> > > > required.  Something like this:
-> > >
-> > > With that approach, drivers need to explicitly know whether they're
-> > > passed a GPIO or an IRQ, and do something different, or they need to
-> > > choose to only accept a GPIO or IRQ.
-> > 
-> > You completely missed the biggest reason why your approach is broken.
+Jaehoon Chung wrote:
 > 
-> No, I didn't.
-
-Yes you did.
-
-> I was discussing whether an alternative API for IRQ registration
-> would work, and I was pointing out some problems with it.
+> Hi Seungwon
 > 
-> That has nothing to do with whether my original proposal is workable.
+> This patch is looks fine to me..
+> 
+> Just ask to you...Don't you want to locate MMC_CAP_MMC_HIGHSPEED in
+> platdata?
 
-And that proves that you missed the point.  I am suggesting an alternative
-solution precisely because your original proposal is unworkable.
+Thank you for your comment.
+Of course, I have considered appropriate location for MMC_CAP_MMC_HIGHSPEED.
+But it seems to be difficult to distinguish a difference between MMC_CAP_SD_HIGHSPEED and MMC_CAP_MMC_HIGHSPEED,
+if DW_MCI_QUIRK_HIGHSPEED is defined.
+
+Beset regards,
+Seungwon Jeon.
+
+> 
+> Regards,
+> Jaehoon Chung
+> 
+> 
+> 2011/8/5 Will Newton <will.newton@gmail.com>:
+> > On Fri, Aug 5, 2011 at 4:35 AM, Seungwon Jeon <tgih.jun@samsung.com>
+> wrote:
+> >> Host driver can't get a hint of DDR mode through ios->ddr flag anymore.
+> >> ios->timing is currently used to inform DDR mode as a substitute.
+> >> And capability of MMC_CAP_MMC_HIGHSPEED is added for DDR support.
+> >>
+> >> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> >> ---
+> >>  drivers/mmc/host/dw_mmc.c |    4 ++--
+> >>  1 files changed, 2 insertions(+), 2 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> >> index d65511e..b412a1d 100644
+> >> --- a/drivers/mmc/host/dw_mmc.c
+> >> +++ b/drivers/mmc/host/dw_mmc.c
+> >> @@ -699,7 +699,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc,
+> struct mmc_ios *ios)
+> >>        }
+> >>
+> >>        /* DDR mode set */
+> >> -       if (ios->ddr) {
+> >> +       if (ios->timing == MMC_TIMING_UHS_DDR50) {
+> >>                regs = mci_readl(slot->host, UHS_REG);
+> >>                regs |= (0x1 << slot->id) << 16;
+> >>                mci_writel(slot->host, UHS_REG, regs);
+> >> @@ -1646,7 +1646,7 @@ static int __init dw_mci_init_slot(struct dw_mci
+> *host, unsigned int id)
+> >>                        mmc->caps |= MMC_CAP_4_BIT_DATA;
+> >>
+> >>        if (host->pdata->quirks & DW_MCI_QUIRK_HIGHSPEED)
+> >> -               mmc->caps |= MMC_CAP_SD_HIGHSPEED;
+> >> +               mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+> >>
+> >>  #ifdef CONFIG_MMC_DW_IDMAC
+> >>        mmc->max_segs = host->ring_size;
+> >> --
+> >> 1.7.0.4
+> >
+> > Acked-by: Will Newton <will.newton@imgtec.com>
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
