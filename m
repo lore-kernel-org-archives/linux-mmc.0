@@ -1,30 +1,42 @@
-From: Akinobu Mita <akinobu.mita@gmail.com>
-Subject: Re: [PATCH --mmotm v5 0/3] Make fault injection available for MMC IO
-Date: Tue, 9 Aug 2011 19:17:05 +0900
-Message-ID: <CAC5umyhyRCU9mNCz9Q2Ly1f3+UEv+EOGicd735QXjpKUAvzDzw@mail.gmail.com>
-References: <1312834049-29910-1-git-send-email-per.forlin@linaro.org>
-	<CAC5umyhWr8t7HyQVEn-W-7HSaeESnTLX8okcQNqPO6mYFuWtUg@mail.gmail.com>
-	<CAJ0pr18Mpv7mFHC3NnfqEqtTFd_qgNhH9rZgCENgH0zKmBfFsQ@mail.gmail.com>
-	<CAC5umygEJy8he1X2Egiuh16HGCC6=Krxv1F3j=bh7xrZmNTHJg@mail.gmail.com>
-	<CAJ0pr182aHm7H+s04Pqg5_CxVQLAhGOwLHQ_-aUS7ZgWKSwMxQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:61866 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753168Ab1HIKRG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Aug 2011 06:17:06 -0400
-In-Reply-To: <CAJ0pr182aHm7H+s04Pqg5_CxVQLAhGOwLHQ_-aUS7ZgWKSwMxQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Per Forlin <per.forlin@linaro.org>
+Subject: [PATCH --mmotm v7 0/3] Make fault injection available for MMC IO
+Date: Tue,  9 Aug 2011 13:48:56 +0200
+Message-ID: <1312890539-28177-1-git-send-email-per.forlin@linaro.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Akinobu Mita <akinobu.mita@gmail.com>, akpm@linux-foundation.org, Linus Walleij <linus.ml.walleij@gmail.com>, linux-kernel@vger.kernel.org, Randy Dunlap <rdunlap@xenotime.net>, Chris
+Cc: linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linaro-dev@lists.linaro.org, linux-mm@kvack.org, Per Forlin <per.forlin@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: akpm@linux-foundation.org, Linus Walleij <linus.ml.walleij@gmail.com>, linux-kernel@vger.kernel.org, Randy Dunlap <rdunlap@xenotime.net>, Chris Ball <cjb@laptop.org>, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linaro-dev@lists.linaro.org, linux-mm@kvack.org
 
-2011/8/9 Per Forlin <per.forlin@linaro.org>:
+change log:
+ v2 - Resolve build issue in mmc core.c due to multiple init_module by
+      removing the fault inject module.
+    - Export fault injection functions to make them available for modules
+    - Update fault injection documentation on MMC IO  
+ v3 - add function descriptions in core.c
+    - use export GPL for fault injection functions
+ v4 - make the fault_attr per host. This prepares for upcoming patch from
+      Akinobu that adds support for creating debugfs entries in
+      arbitrary directory.
+ v5 - Make use of fault_create_debugfs_attr() in Akinobu's
+      patch "fault-injection: add ability to export fault_attr in...". 
+ v6 - Fix typo in commit message in patch "export fault injection functions"
+ v7 - Don't compile in boot param setup function if mmc-core is
+      built as module.
 
-> Do you think it would be possible to get only the export
-> fault-injection patch in 3.1? I know it's not a bugfix so I guess it
-> wont be accepted.
+Per Forlin (3):
+  fault-inject: export fault injection functions
+  mmc: core: add random fault injection
+  fault injection: add documentation on MMC IO fault injection
 
-No modules except mmc plan to use those symbols.  So I think there is
-no reason to merge them separately.
+ Documentation/fault-injection/fault-injection.txt |    5 ++
+ drivers/mmc/core/core.c                           |   44 +++++++++++++++++++++
+ drivers/mmc/core/debugfs.c                        |   27 +++++++++++++
+ include/linux/mmc/host.h                          |    7 +++
+ lib/Kconfig.debug                                 |   11 +++++
+ lib/fault-inject.c                                |    2 +
+ 6 files changed, 96 insertions(+), 0 deletions(-)
+
+-- 
+1.7.4.1
+
