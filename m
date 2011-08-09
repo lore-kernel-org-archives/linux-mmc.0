@@ -1,56 +1,41 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: [PATCH --mmotm v8 3/3] fault injection: add documentation on MMC IO fault injection
-Date: Tue,  9 Aug 2011 14:07:51 +0200
-Message-ID: <1312891671-28680-4-git-send-email-per.forlin@linaro.org>
-References: <1312891671-28680-1-git-send-email-per.forlin@linaro.org>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1312891671-28680-1-git-send-email-per.forlin@linaro.org>
-Sender: owner-linux-mm@kvack.org
-To: Akinobu Mita <akinobu.mita@gmail.com>, akpm@linux-foundation.org, Linus Walleij <linus.ml.walleij@gmail.com>, linux-kernel@vger.kernel.org, Randy Dunlap <rdunlap@xenotime.net>, Chri
-Cc: linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linaro-dev@lists.linaro.org, linux-mm@kvack.org, Per Forlin <per.forlin@linaro.org>
+From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] mmc: sdhci-tegra: get_ro(): Retrieve pdata correctly
+Date: Tue,  9 Aug 2011 12:16:38 -0600
+Message-ID: <1312913798-32564-1-git-send-email-swarren@nvidia.com>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add description on how to enable random fault injection
-for MMC IO
+The active platform data pointer is stored as pltfm_host->priv, and not
+always in the platform device itself. In particular, the platform data in
+the platform device is NULL when the platform data comes from Device Tree.
 
-Signed-off-by: Per Forlin <per.forlin@linaro.org>
-Acked-by: Akinobu Mita <akinobu.mita@gmail.com>
+Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 ---
- Documentation/fault-injection/fault-injection.txt |    8 +++++++-
- 1 files changed, 7 insertions(+), 1 deletions(-)
+Grant, this patch is for branch devicetree/next; the Tegra DT support
+doesn't appear to be in other branches yet.
 
-diff --git a/Documentation/fault-injection/fault-injection.txt b/Documentation/fault-injection/fault-injection.txt
-index 82a5d25..70f924e 100644
---- a/Documentation/fault-injection/fault-injection.txt
-+++ b/Documentation/fault-injection/fault-injection.txt
-@@ -21,6 +21,11 @@ o fail_make_request
-   /sys/block/<device>/make-it-fail or
-   /sys/block/<device>/<partition>/make-it-fail. (generic_make_request())
+ drivers/mmc/host/sdhci-tegra.c |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 9329465..406d360 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -74,10 +74,8 @@ static void tegra_sdhci_writel(struct sdhci_host *host, u32 val, int reg)
  
-+o fail_mmc_request
-+
-+  injects MMC data errors on devices permitted by setting
-+  debugfs entries under /sys/kernel/debug/mmc0/fail_mmc_request
-+
- Configure fault-injection capabilities behavior
- -----------------------------------------------
+ static unsigned int tegra_sdhci_get_ro(struct sdhci_host *sdhci)
+ {
+-	struct platform_device *pdev = to_platform_device(mmc_dev(sdhci->mmc));
+-	struct tegra_sdhci_platform_data *plat;
+-
+-	plat = pdev->dev.platform_data;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(sdhci);
++	struct tegra_sdhci_platform_data *plat = pltfm_host->priv;
  
-@@ -115,7 +120,8 @@ use the boot option:
- 
- 	failslab=
- 	fail_page_alloc=
--	fail_make_request=<interval>,<probability>,<space>,<times>
-+	fail_make_request=
-+	fail_mmc_request=<interval>,<probability>,<space>,<times>
- 
- How to add new fault injection capability
- -----------------------------------------
+ 	if (!gpio_is_valid(plat->wp_gpio))
+ 		return -1;
 -- 
-1.7.4.1
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+1.7.0.4
