@@ -1,49 +1,44 @@
 From: Per Forlin <per.forlin@linaro.org>
-Subject: [PATCH --mmotm v8 1/3] fault-inject: export fault injection functions
-Date: Tue,  9 Aug 2011 14:07:49 +0200
-Message-ID: <1312891671-28680-2-git-send-email-per.forlin@linaro.org>
-References: <1312891671-28680-1-git-send-email-per.forlin@linaro.org>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1312891671-28680-1-git-send-email-per.forlin@linaro.org>
-Sender: owner-linux-mm@kvack.org
-To: Akinobu Mita <akinobu.mita@gmail.com>, akpm@linux-foundation.org, Linus Walleij <linus.ml.walleij@gmail.com>, linux-kernel@vger.kernel.org, Randy Dunlap <rdunlap@xenotime.net>, Chri
+Subject: [PATCH --mmotm v8 0/3] Make fault injection available for MMC IO
+Date: Tue,  9 Aug 2011 14:07:48 +0200
+Message-ID: <1312891671-28680-1-git-send-email-per.forlin@linaro.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Akinobu Mita <akinobu.mita@gmail.com>, akpm@linux-foundation.org, Linus Walleij <linus.ml.walleij@gmail.com>, linux-kernel@vger.kernel.org, Randy Dunlap <rdunlap@xenotime.net>, Chris
 Cc: linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linaro-dev@lists.linaro.org, linux-mm@kvack.org, Per Forlin <per.forlin@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-export symbols should_fail() and fault_create_debugfs_attr() in order
-to let modules utilize the fault injection
+change log:
+ v2 - Resolve build issue in mmc core.c due to multiple init_module by
+      removing the fault inject module.
+    - Export fault injection functions to make them available for modules
+    - Update fault injection documentation on MMC IO  
+ v3 - add function descriptions in core.c
+    - use export GPL for fault injection functions
+ v4 - make the fault_attr per host. This prepares for upcoming patch from
+      Akinobu that adds support for creating debugfs entries in
+      arbitrary directory.
+ v5 - Make use of fault_create_debugfs_attr() in Akinobu's
+      patch "fault-injection: add ability to export fault_attr in...". 
+ v6 - Fix typo in commit message in patch "export fault injection functions"
+ v7 - Don't compile in boot param setup function if mmc-core is
+      built as module.
+ v8 - Update fault injection documentation.
+      Add fail_mmc_request to boot option section. 
 
-Signed-off-by: Per Forlin <per.forlin@linaro.org>
-Acked-by: Akinobu Mita <akinobu.mita@gmail.com>
----
- lib/fault-inject.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+Per Forlin (3):
+  fault-inject: export fault injection functions
+  mmc: core: add random fault injection
+  fault injection: add documentation on MMC IO fault injection
 
-diff --git a/lib/fault-inject.c b/lib/fault-inject.c
-index f193b77..328d433 100644
---- a/lib/fault-inject.c
-+++ b/lib/fault-inject.c
-@@ -130,6 +130,7 @@ bool should_fail(struct fault_attr *attr, ssize_t size)
- 
- 	return true;
- }
-+EXPORT_SYMBOL_GPL(should_fail);
- 
- #ifdef CONFIG_FAULT_INJECTION_DEBUG_FS
- 
-@@ -243,5 +244,6 @@ fail:
- 
- 	return ERR_PTR(-ENOMEM);
- }
-+EXPORT_SYMBOL_GPL(fault_create_debugfs_attr);
- 
- #endif /* CONFIG_FAULT_INJECTION_DEBUG_FS */
+ Documentation/fault-injection/fault-injection.txt |    8 +++-
+ drivers/mmc/core/core.c                           |   44 +++++++++++++++++++++
+ drivers/mmc/core/debugfs.c                        |   27 +++++++++++++
+ include/linux/mmc/host.h                          |    7 +++
+ lib/Kconfig.debug                                 |   11 +++++
+ lib/fault-inject.c                                |    2 +
+ 6 files changed, 98 insertions(+), 1 deletions(-)
+
 -- 
 1.7.4.1
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
