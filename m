@@ -1,40 +1,43 @@
 From: Per Forlin <per.forlin@linaro.org>
-Subject: [PATCH --mmotm v7 3/3] fault injection: add documentation on MMC IO fault injection
-Date: Tue,  9 Aug 2011 13:48:59 +0200
-Message-ID: <1312890539-28177-4-git-send-email-per.forlin@linaro.org>
-References: <1312890539-28177-1-git-send-email-per.forlin@linaro.org>
+Subject: [PATCH --mmotm v8 1/3] fault-inject: export fault injection functions
+Date: Tue,  9 Aug 2011 14:07:49 +0200
+Message-ID: <1312891671-28680-2-git-send-email-per.forlin@linaro.org>
+References: <1312891671-28680-1-git-send-email-per.forlin@linaro.org>
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1312890539-28177-1-git-send-email-per.forlin@linaro.org>
+In-Reply-To: <1312891671-28680-1-git-send-email-per.forlin@linaro.org>
 Sender: owner-linux-mm@kvack.org
 To: Akinobu Mita <akinobu.mita@gmail.com>, akpm@linux-foundation.org, Linus Walleij <linus.ml.walleij@gmail.com>, linux-kernel@vger.kernel.org, Randy Dunlap <rdunlap@xenotime.net>, Chri
 Cc: linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linaro-dev@lists.linaro.org, linux-mm@kvack.org, Per Forlin <per.forlin@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add description on how to enable random fault injection
-for MMC IO
+export symbols should_fail() and fault_create_debugfs_attr() in order
+to let modules utilize the fault injection
 
 Signed-off-by: Per Forlin <per.forlin@linaro.org>
 Acked-by: Akinobu Mita <akinobu.mita@gmail.com>
 ---
- Documentation/fault-injection/fault-injection.txt |    5 +++++
- 1 files changed, 5 insertions(+), 0 deletions(-)
+ lib/fault-inject.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-diff --git a/Documentation/fault-injection/fault-injection.txt b/Documentation/fault-injection/fault-injection.txt
-index 82a5d25..10571df 100644
---- a/Documentation/fault-injection/fault-injection.txt
-+++ b/Documentation/fault-injection/fault-injection.txt
-@@ -21,6 +21,11 @@ o fail_make_request
-   /sys/block/<device>/make-it-fail or
-   /sys/block/<device>/<partition>/make-it-fail. (generic_make_request())
+diff --git a/lib/fault-inject.c b/lib/fault-inject.c
+index f193b77..328d433 100644
+--- a/lib/fault-inject.c
++++ b/lib/fault-inject.c
+@@ -130,6 +130,7 @@ bool should_fail(struct fault_attr *attr, ssize_t size)
  
-+o fail_mmc_request
-+
-+  injects MMC data errors on devices permitted by setting
-+  debugfs entries under /sys/kernel/debug/mmc0/fail_mmc_request
-+
- Configure fault-injection capabilities behavior
- -----------------------------------------------
+ 	return true;
+ }
++EXPORT_SYMBOL_GPL(should_fail);
  
+ #ifdef CONFIG_FAULT_INJECTION_DEBUG_FS
+ 
+@@ -243,5 +244,6 @@ fail:
+ 
+ 	return ERR_PTR(-ENOMEM);
+ }
++EXPORT_SYMBOL_GPL(fault_create_debugfs_attr);
+ 
+ #endif /* CONFIG_FAULT_INJECTION_DEBUG_FS */
 -- 
 1.7.4.1
 
