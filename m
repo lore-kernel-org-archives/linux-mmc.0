@@ -1,41 +1,70 @@
-From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH] mmc: sdhci-tegra: get_ro(): Retrieve pdata correctly
-Date: Tue,  9 Aug 2011 12:16:38 -0600
-Message-ID: <1312913798-32564-1-git-send-email-swarren@nvidia.com>
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: [PATCH v1 1/1] mmc: sd: Handle SD3.0 cards not supporting UHS-I bus speed mode
+Date: Wed, 10 Aug 2011 11:16:01 +0530
+Message-ID: <1312955161-24844-1-git-send-email-subhashj@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The active platform data pointer is stored as pltfm_host->priv, and not
-always in the platform device itself. In particular, the platform data in
-the platform device is NULL when the platform data comes from Device Tree.
+Here is Essential conditions to indicate Version 3.00 Card
+(SD_SPEC=2 and SD_SPEC3=1) :
+(1) The card shall support CMD6
+(2) The card shall support CMD8
+(3) The card shall support CMD42
+(4) User area capacity shall be up to 2GB (SDSC) or 32GB (SDHC)
+    User area capacity shall be more than or equal to 32GB and
+    up to 2TB (SDXC)
+(5) Speed Class shall be supported (SDHC or SDXC)
 
-Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+So even if SD card doesn't support any of the newly defined
+UHS-I bus speed mode, it can advertise itself as SD3.0 cards
+as long as it supports all the essential conditions of
+SD3.0 cards. Given this, these type of cards should atleast
+run in High Speed mode @50MHZ if it supports HS.
+
+But current initialization sequence for SD3.0 cards is
+such that these non-UHS-I SD3.0 cards runs in Default
+Speed mode @25MHz.
+
+This patch makes sure that these non-UHS-I SD3.0 cards run
+in High Speed Mode @50MHz.
+
+Tested this patch with SanDisk Extreme SDHC 8GB Class 10 card.
+
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
 ---
-Grant, this patch is for branch devicetree/next; the Tegra DT support
-doesn't appear to be in other branches yet.
+ drivers/mmc/core/sd.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
 
- drivers/mmc/host/sdhci-tegra.c |    6 ++----
- 1 files changed, 2 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 9329465..406d360 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -74,10 +74,8 @@ static void tegra_sdhci_writel(struct sdhci_host *host, u32 val, int reg)
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index ff27741..e2dcf23 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -306,6 +306,9 @@ static int mmc_read_switch(struct mmc_card *card)
+ 		goto out;
+ 	}
  
- static unsigned int tegra_sdhci_get_ro(struct sdhci_host *sdhci)
- {
--	struct platform_device *pdev = to_platform_device(mmc_dev(sdhci->mmc));
--	struct tegra_sdhci_platform_data *plat;
--
--	plat = pdev->dev.platform_data;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(sdhci);
-+	struct tegra_sdhci_platform_data *plat = pltfm_host->priv;
++	if (status[13] & 0x02)
++		card->sw_caps.hs_max_dtr = 50000000;
++
+ 	if (card->scr.sda_spec3) {
+ 		card->sw_caps.sd3_bus_mode = status[13];
  
- 	if (!gpio_is_valid(plat->wp_gpio))
- 		return -1;
+@@ -348,9 +351,6 @@ static int mmc_read_switch(struct mmc_card *card)
+ 		}
+ 
+ 		card->sw_caps.sd3_curr_limit = status[7];
+-	} else {
+-		if (status[13] & 0x02)
+-			card->sw_caps.hs_max_dtr = 50000000;
+ 	}
+ 
+ out:
 -- 
-1.7.0.4
+1.7.1.1
+
+--
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
