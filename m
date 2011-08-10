@@ -1,79 +1,44 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: use defined macro for card status
-Date: Wed, 10 Aug 2011 18:46:28 +0900
-Message-ID: <4E425374.7060706@samsung.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH V4] mmc: Enable the ADMA2 on esdhc imx driver
+Date: Wed, 10 Aug 2011 05:48:47 -0400
+Message-ID: <m27h6ltx4w.fsf@bob.laptop.org>
+References: <1312792204-7652-1-git-send-email-richard.zhu@linaro.org>
+	<CAMPhdO8QiODg6sTKe2N2b4xT8ZHXSh1DvRn57J8JfLx6+QAD4w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:14196 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753267Ab1HJJqW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Aug 2011 05:46:22 -0400
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LPP00BM1HSNP800@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 10 Aug 2011 18:46:21 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LPP004GKHT9ME@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 10 Aug 2011 18:46:21 +0900 (KST)
+Received: from void.printf.net ([89.145.121.20]:35132 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753294Ab1HJJtH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 10 Aug 2011 05:49:07 -0400
+In-Reply-To: <CAMPhdO8QiODg6sTKe2N2b4xT8ZHXSh1DvRn57J8JfLx6+QAD4w@mail.gmail.com>
+	(Eric Miao's message of "Wed, 10 Aug 2011 16:08:53 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Eric Miao <eric.miao@linaro.org>
+Cc: Richard Zhu <richard.zhu@linaro.org>, linux-arm-kernel@lists.infradead.org, pma@sysgo.com, linux-mmc@vger.kernel.org, w.sang@pengutronix.de, kernel@pengutronix.de, avorontsov@ru.mvista.com
 
-Sometime we need to check the card status.
-So using R1_CURRENT_STATE(status)..and compare with R1_STATE_xxx.
-But some code didn't use R1_STATE_xxx.
+Hi,
 
-I think good that use defined macro for checking card status.
+On Wed, Aug 10 2011, Eric Miao wrote:
+> On Mon, Aug 8, 2011 at 4:30 PM, Richard Zhu <richard.zhu@linaro.org> wrote:
+>> Eanble the ADMA2 mode for freescale esdhc imx driver,
+>> tested on MX25 3DS board, MX51 BBG board and MX53 LOCO board.
+>>
+>> This patch is only used to enable the ADMA2 for MX51/53 platforms.
+>> MX25/35 can't support the ADMA2 mode, set BROKEN_ADMA quirk on
+>> MX25/35 platforms.
+>>
+>> The ADMA mode supported or not can be distinguished by the
+>> bit20 of Capability Register(offset 0x40) in FSL eSDHC module.
+>>
+>> Signed-off-by: Richard Zhu <richard.zhu@linaro.org>
+>
+> Tested-and-acked-by: Eric Miao <eric.miao@linaro.org>
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/card/mmc_test.c |    2 +-
- drivers/mmc/core/core.c     |    2 +-
- drivers/mmc/core/mmc_ops.c  |    2 +-
- 3 files changed, 3 insertions(+), 3 deletions(-)
+Thanks, pushed to mmc-next for 3.2.
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index 742dc98..2bf229a 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -224,7 +224,7 @@ static void mmc_test_prepare_mrq(struct mmc_test_card *test,
- static int mmc_test_busy(struct mmc_command *cmd)
- {
- 	return !(cmd->resp[0] & R1_READY_FOR_DATA) ||
--		(R1_CURRENT_STATE(cmd->resp[0]) == 7);
-+		(R1_CURRENT_STATE(cmd->resp[0]) == R1_STATE_PRG);
- }
- 
- /*
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index f091b43..bfb86a6 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1501,7 +1501,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
- 			goto out;
- 		}
- 	} while (!(cmd.resp[0] & R1_READY_FOR_DATA) ||
--		 R1_CURRENT_STATE(cmd.resp[0]) == 7);
-+		 R1_CURRENT_STATE(cmd.resp[0]) == R1_STATE_PRG);
- out:
- 	return err;
- }
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 845ce7c..770c3d0 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -407,7 +407,7 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 			break;
- 		if (mmc_host_is_spi(card->host))
- 			break;
--	} while (R1_CURRENT_STATE(status) == 7);
-+	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
- 
- 	if (mmc_host_is_spi(card->host)) {
- 		if (status & R1_SPI_ILLEGAL_COMMAND)
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
