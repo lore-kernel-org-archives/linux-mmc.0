@@ -1,171 +1,130 @@
-From: Eric Miao <eric.miao@linaro.org>
-Subject: Re: [PATCH V4] mmc: Enable the ADMA2 on esdhc imx driver
-Date: Wed, 10 Aug 2011 16:08:53 +0800
-Message-ID: <CAMPhdO8QiODg6sTKe2N2b4xT8ZHXSh1DvRn57J8JfLx6+QAD4w@mail.gmail.com>
-References: <1312792204-7652-1-git-send-email-richard.zhu@linaro.org>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [RFC PATCH] request: teach the device more intelligent
+Date: Wed, 10 Aug 2011 17:42:45 +0900
+Message-ID: <CAH9JG2VhPg-mk36CO_Jh8D0O6SW3RnZyjnBRNH4UqT8SXXWULQ@mail.gmail.com>
+References: <20110809034724.GA22257@july>
+	<4E4181E4.3090704@kernel.dk>
+	<CAH9JG2X5yb9JEyO60YeLFHcuNp54m-xX8M-xSR7+DEY7FKQL1Q@mail.gmail.com>
+	<4E423C83.9090209@kernel.dk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:64702 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750978Ab1HJIJN convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Aug 2011 04:09:13 -0400
-Received: by vws1 with SMTP id 1so651786vws.19
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Aug 2011 01:09:13 -0700 (PDT)
-In-Reply-To: <1312792204-7652-1-git-send-email-richard.zhu@linaro.org>
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:51677 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751921Ab1HJImp convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Aug 2011 04:42:45 -0400
+In-Reply-To: <4E423C83.9090209@kernel.dk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Richard Zhu <richard.zhu@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, pma@sysgo.com, linux-mmc@vger.kernel.org, w.sang@pengutronix.de, kernel@pengutronix.de, avorontsov@ru.mvista.com
+To: Jens Axboe <axboe@kernel.dk>
+Cc: linux-kernel@vger.kernel.org, arnd@arndb.de, jh80.chung@samsung.com, linux-mmc@vger.kernel.org
 
-On Mon, Aug 8, 2011 at 4:30 PM, Richard Zhu <richard.zhu@linaro.org> wr=
-ote:
-> Eanble the ADMA2 mode for freescale esdhc imx driver,
-> tested on MX25 3DS board, MX51 BBG board and MX53 LOCO board.
+On Wed, Aug 10, 2011 at 5:08 PM, Jens Axboe <axboe@kernel.dk> wrote:
+> On 2011-08-10 01:43, Kyungmin Park wrote:
+>> On Wed, Aug 10, 2011 at 3:52 AM, Jens Axboe <axboe@kernel.dk> wrote:
+>>> On 2011-08-09 05:47, Kyungmin Park wrote:
+>>>> Hi Jens
+>>>>
+>>>> Now eMMC device requires the upper layer information to improve th=
+e data
+>>>> performance and reliability.
+>>>>
+>>>> . Context ID
+>>>> Using the context information, it can sort out the data internally=
+ and improve the performance.
+>>>> The main problem is that it's needed to define "What's the context=
+".
+>>>> Actually I expect cfq queue has own unique ID but it doesn't so de=
+cide to use the pid instead
+>>>>
+>>>> . Data Tag
+>>>> Using the Data Tag (1-bit information), It writes the data at SLC =
+area when it's hot data. So it can make the chip more reliable.
+>>>> First I expect the REQ_META but current ext4 doesn't pass the WRIT=
+E_META. only use the READ_META. so it needs to investigate it.
+>>>>
+>>>> With these characteristics, it's helpful to teach the device. Afte=
+r some consideration. it's needed to pass out these information at requ=
+est data structure.
+>>>>
+>>>> Can you give your opinions and does it proper fields at requests?
+>>>
+>>> You need this to work on all IO schedulers, not just cfq.
+>> Of course if the concept is acceptable, I'll add the other IO schedu=
+lers also.
+>>
+>>> And since that's the case, there's no need to add this field since =
+you can just
+>>> retrieve it if the driver asks for it. For CFQ, it could look like =
+this:
+>>>
+>>> static int cfq_foo(struct request *rq)
+>>> {
+>>> =A0 =A0 =A0 =A0struct cfq_queue *cfqq =3D rq->elevator_private[1];
+>>>
+>>> =A0 =A0 =A0 =A0if (cfqq)
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return cfqq->pid;
+>>>
+>>> =A0 =A0 =A0 =A0return -1;
+>>> }
+>>
+>> The actual user of these information is device driver. e.g.,
+>> drivers/mmc/card/block.c
+>> So it's not good to use cfq data structure at D/D. some time later
+>> these are also used at scsi device drivers.
 >
-> This patch is only used to enable the ADMA2 for MX51/53 platforms.
-> MX25/35 can't support the ADMA2 mode, set BROKEN_ADMA quirk on
-> MX25/35 platforms.
+> No, what I'm suggesting above is the CFQ implementation. You would ne=
+ed
+> to wire up an elv_ops->get_foo() and have the IO schedulers fill it i=
+n.
+> If you notice, the above function does not take or output anything
+> related to CFQ in particular, it'll just return you the unique key yo=
+u
+> need.
 >
-> The ADMA mode supported or not can be distinguished by the
-> bit20 of Capability Register(offset 0x40) in FSL eSDHC module.
->
-> Signed-off-by: Richard Zhu <richard.zhu@linaro.org>
+> It's either the above, or a field in the request that the schedulers
+> fill out. However, it'd be somewhat annoying to grow struct request f=
+or
+> something that has a narrow scope of use. Hence the suggestion to add=
+ a
+> strategy helper for this.
+Okay, I'll add new elevator function one for getting context or more hi=
+nts.
+BTW, does it okay to call elevator function call at D/D?
 
-Tested-and-acked-by: Eric Miao <eric.miao@linaro.org>
+The quick-n-dirty call is like this at "drivers/mmc/card/block.c"
 
-> ---
-> =C2=A0drivers/mmc/host/sdhci-esdhc-imx.c | =C2=A0 45 ++++++++++++++++=
-+++++++++++++++++--
-> =C2=A01 files changed, 42 insertions(+), 3 deletions(-)
+                struct elevator_queue *e =3D md->queue.queue->elevator;
+                int context =3D -1;
+
+                if (e->ops->elevator_get_req_hint_fn && req) {
+                        context =3D e->ops->elevator_get_req_hint_fn(re=
+q);
+
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sd=
-hci-esdhc-imx.c
-> index e62d33f..a966d5c 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -30,6 +30,14 @@
-> =C2=A0#define SDHCI_VENDOR_SPEC =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A00xC0
-> =C2=A0#define =C2=A0SDHCI_VENDOR_SPEC_SDIO_QUIRK =C2=A00x00000002
+>>> As to the hot part, I think that would be better as just a request =
+flag
+>>> like eg the meta flag.
+>> Yes it can use the JBD_flags at cfq. but same reason it's not proper
+>> reference at device drivers. that's reason to make a filed at reques=
+t.
+>>
+>> Device driver should or must see the request data structure and don'=
+t
+>> refer the upper layer data structures.
 >
-> +/*
-> + * There is INT DMA ERR mis-match between eSDHC and STD SDHC SPEC
-> + * Bit25 is used in STD SPEC, and is reserved in fsl eSDHC design,
-> + * but bit28 is used as the INT DMA ERR in fsl eSDHC design.
-> + * Define this macro DMA error INT for fsl eSDHC
-> + */
-> +#define =C2=A0SDHCI_INT_VENDOR_SPEC_DMA_ERR 0x10000000
-> +
-> =C2=A0#define ESDHC_FLAG_GPIO_FOR_CD =C2=A0 =C2=A0 =C2=A0 =C2=A0 (1 <=
-< 0)
-> =C2=A0/*
-> =C2=A0* The CMDTYPE of the CMD register (offset 0xE) should be set to
-> @@ -79,6 +87,27 @@ static u32 esdhc_readl_le(struct sdhci_host *host,=
- int reg)
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0val |=3D SDHCI_CARD_PRESENT;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0}
+> The device driver sees the struct request, which is where this flag e=
+nds
+> up.
+It's ext{3,4} series specific detection method. if user use the
+another filesystem, it's difficult to detect hot/cold.
+I'll more think about it.
+
+Thank you for suggestion.
+Kyungmin Park
 >
-> + =C2=A0 =C2=A0 =C2=A0 if (unlikely(reg =3D=3D SDHCI_CAPABILITIES)) {
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 /* In FSL esdhc IC=
- module, only bit20 is used to indicate the
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0* ADMA2 capa=
-bility of esdhc, but this bit is messed up on some
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0* SOCs (e.x =
-MX25,MX35 this bit is set, but it can't support the
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0* ADMA2 actu=
-ally). So set the BROKEN_ADMA quirk on MX25/35
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0* paltforms.
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
-> +
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (val & SDHCI_CA=
-N_DO_ADMA1) {
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 val &=3D ~SDHCI_CAN_DO_ADMA1;
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 val |=3D SDHCI_CAN_DO_ADMA2;
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
-> + =C2=A0 =C2=A0 =C2=A0 }
-> +
-> + =C2=A0 =C2=A0 =C2=A0 if (unlikely(reg =3D=3D SDHCI_INT_STATUS)) {
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (val & SDHCI_IN=
-T_VENDOR_SPEC_DMA_ERR) {
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 val &=3D ~SDHCI_INT_VENDOR_SPEC_DMA_ERR;
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 val |=3D SDHCI_INT_ADMA_ERROR;
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
-> + =C2=A0 =C2=A0 =C2=A0 }
-> +
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0return val;
-> =C2=A0}
->
-> @@ -125,6 +154,14 @@ static void esdhc_writel_le(struct sdhci_host *h=
-ost, u32 val, int reg)
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0writel(v, host->ioaddr + SDHCI_VENDOR_SPEC);
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0}
->
-> + =C2=A0 =C2=A0 =C2=A0 if (unlikely((reg =3D=3D SDHCI_INT_ENABLE)
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 || (reg =3D=3D SDHCI_SIGNAL_ENABLE)=
-)) {
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (val & SDHCI_IN=
-T_ADMA_ERROR) {
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 val &=3D ~SDHCI_INT_ADMA_ERROR;
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 val |=3D SDHCI_INT_VENDOR_SPEC_DMA_ERR;
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
-> + =C2=A0 =C2=A0 =C2=A0 }
-> +
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0writel(val, host->ioaddr + reg);
-> =C2=A0}
->
-> @@ -225,9 +262,10 @@ static struct sdhci_ops sdhci_esdhc_ops =3D {
-> =C2=A0};
->
-> =C2=A0static struct sdhci_pltfm_data sdhci_esdhc_imx_pdata =3D {
-> - =C2=A0 =C2=A0 =C2=A0 .quirks =3D ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK=
-_BROKEN_ADMA
-> + =C2=A0 =C2=A0 =C2=A0 .quirks =3D ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK=
-_NO_HISPD_BIT
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 | SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 | SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0| SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-> - =C2=A0 =C2=A0 =C2=A0 /* ADMA has issues. Might be fixable */
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0.ops =3D &sdhci_esdhc_ops,
-> =C2=A0};
->
-> @@ -284,7 +322,8 @@ static int __devinit sdhci_esdhc_imx_probe(struct=
- platform_device *pdev)
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (cpu_is_mx25() || cpu_is_mx35()) {
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0/* Fix errata =
-ENGcm07207 present on i.MX25 and i.MX35 */
-> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->quirks |=3D =
-SDHCI_QUIRK_NO_MULTIBLOCK;
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->quirks |=3D =
-SDHCI_QUIRK_NO_MULTIBLOCK
-> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 | SDHCI_QUIRK_BROKEN_ADMA;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0/* write_prote=
-ct can't be routed to controller, use gpio */
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0sdhci_esdhc_op=
-s.get_ro =3D esdhc_pltfm_get_ro;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0}
 > --
-> 1.7.1
+> Jens Axboe
 >
->
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 >
