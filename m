@@ -1,58 +1,51 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Fix DDR mode support.
-Date: Thu, 11 Aug 2011 17:38:49 -0400
-Message-ID: <m2fwl7pr12.fsf@bob.laptop.org>
-References: <1312515303-17169-1-git-send-email-tgih.jun@samsung.com>
+Subject: Re: [PATCH] mmc: remove not using parameter in struct mmc_ios
+Date: Thu, 11 Aug 2011 17:40:53 -0400
+Message-ID: <m2bovvpqxm.fsf@bob.laptop.org>
+References: <4E3FA81C.1000702@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35962 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:35985 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754253Ab1HKViz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 11 Aug 2011 17:38:55 -0400
-In-Reply-To: <1312515303-17169-1-git-send-email-tgih.jun@samsung.com>
-	(Seungwon Jeon's message of "Fri, 5 Aug 2011 12:35:03 +0900")
+	id S1754203Ab1HKVk7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Aug 2011 17:40:59 -0400
+In-Reply-To: <4E3FA81C.1000702@samsung.com> (Jaehoon Chung's message of "Mon,
+	08 Aug 2011 18:10:52 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Hi,
+Hi Jaehoon,
 
-On Thu, Aug 04 2011, Seungwon Jeon wrote:
-> Host driver can't get a hint of DDR mode through ios->ddr flag anymore.
-> ios->timing is currently used to inform DDR mode as a substitute.
-> And capability of MMC_CAP_MMC_HIGHSPEED is added for DDR support.
+On Mon, Aug 08 2011, Jaehoon Chung wrote:
+> This patch is removed ddr parameter in struct mmc_ios.
 >
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> If applied Seungwon's Patch([PATCH] mmc: dw_mmc: Fix DDR mode
+> support.), no more used.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 > ---
->  drivers/mmc/host/dw_mmc.c |    4 ++--
->  1 files changed, 2 insertions(+), 2 deletions(-)
+>  include/linux/mmc/host.h |    2 --
+>  1 files changed, 0 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index d65511e..b412a1d 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -699,7 +699,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	}
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 0f83858..1d09562 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -56,8 +56,6 @@ struct mmc_ios {
+>  #define MMC_TIMING_UHS_SDR104	4
+>  #define MMC_TIMING_UHS_DDR50	5
 >  
->  	/* DDR mode set */
-> -	if (ios->ddr) {
-> +	if (ios->timing == MMC_TIMING_UHS_DDR50) {
->  		regs = mci_readl(slot->host, UHS_REG);
->  		regs |= (0x1 << slot->id) << 16;
->  		mci_writel(slot->host, UHS_REG, regs);
-> @@ -1646,7 +1646,7 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  			mmc->caps |= MMC_CAP_4_BIT_DATA;
->  
->  	if (host->pdata->quirks & DW_MCI_QUIRK_HIGHSPEED)
-> -		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
-> +		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
->  
->  #ifdef CONFIG_MMC_DW_IDMAC
->  	mmc->max_segs = host->ring_size;
+> -	unsigned char	ddr;			/* dual data rate used */
+> -
+>  #define MMC_SDR_MODE		0
+>  #define MMC_1_2V_DDR_MODE	1
+>  #define MMC_1_8V_DDR_MODE	2
 
-Thanks, pushed to mmc-next for 3.1 with Will's ACK.
+Thanks, pushed to mmc-next for 3.1.
 
 - Chris.
 -- 
