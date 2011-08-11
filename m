@@ -1,59 +1,51 @@
-From: Shaohua Li <shli@kernel.org>
-Subject: Re: [RFC PATCH v2] Add new elevator ops for request hint
-Date: Thu, 11 Aug 2011 09:14:43 +0800
-Message-ID: <CANejiEUSU_hfex5i5znjAUU9Te2o-fgKuO=uD0UW+a4eaiU4Bw@mail.gmail.com>
-References: <20110811004216.GA24810@july>
-	<CANejiEXgsVW4qk3hwHvd6YzgRsZueAB3ZSh3Rvx3fz9tM7KHPw@mail.gmail.com>
+From: Panduranga <x0125717@ti.com>
+Subject: Re: [PATCH 0/1] OMAP: wlan : To fix wlan issue with kernel 3.0
+Date: Thu, 11 Aug 2011 12:45:07 +0530
+Message-ID: <606B2926D61D49379AEF49D407C6C912@MINX0125717>
+References: <1311950476-2452-1-git-send-email-panduranga_mallireddy@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:57112 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755343Ab1HKBOo convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Aug 2011 21:14:44 -0400
-In-Reply-To: <CANejiEXgsVW4qk3hwHvd6YzgRsZueAB3ZSh3Rvx3fz9tM7KHPw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; format=flowed; charset="iso-8859-1";
+	reply-type=original
+Content-Transfer-Encoding: 7bit
+Return-path: <netdev-owner@vger.kernel.org>
+Sender: netdev-owner@vger.kernel.org
+To: tony@atomide.com
+Cc: ohad@wizery.com, "Gabay, Benzy" <benzyg@ti.com>, "Gurumath, Pradeep" <pradeepgurumath@ti.com>, "Mahaveer, Vishal" <vishalm@ti.com>, "Boudet, Xavier" <x-boudet@ti.com>, "Jain, Naveen" <naveen_jain@ti.com>, "Halli, Manjunatha" <manjunatha_halli@ti.com>, "Mallireddy, Panduranga" <panduranga_mallireddy@ti.com>, "Coelho, Luciano" <coelho@ti.com>, netdev@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kmpark@infradead.org>
-Cc: jaxboe@fusionio.com, linux-kernel@vger.kernel.org, arnd@arndb.de, jh80.chung@samsung.com, linux-mmc@vger.kernel.org
 
-2011/8/11 Shaohua Li <shli@kernel.org>:
-> 2011/8/11 Kyungmin Park <kmpark@infradead.org>:
->> Hi Jens
->>
->> Now eMMC device requires the upper layer information to improve the =
-data
->> performance and reliability.
->>
->> . Context ID
->> Using the context information, it can sort out the data internally a=
-nd improve the performance.
->> The main problem is that it's needed to define "What's the context".
->> Actually I expect cfq queue has own unique ID but it doesn't so deci=
-de to use the pid instead
->>
->> . Data Tag
->> Using the Data Tag (1-bit information), It writes the data at SLC ar=
-ea when it's hot data. So it can make the chip more reliable.
->> First I expect the REQ_META but current ext4 doesn't pass the WRITE_=
-META. only use the READ_META. so it needs to investigate it.
->>
->> With these characteristics, it's helpful to teach the device. After =
-some consideration. it's needed to pass out these information at reques=
-t data structure.
->>
->> Sample usage is following in drivers/mmc/card/block.c
->>
->> =A0 =A0 =A0 =A0struct elevator_queue *e =3D md->queue.queue->elevato=
-r;
->> =A0 =A0 =A0 =A0struct request_hint hint;
->> =A0 =A0 =A0 =A0int ret;
->>
->> =A0 =A0 =A0 =A0if (e->ops->elevator_get_req_hint_fn && req)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D e->ops->elevator_get_req_hint=
-_fn(req, &hint);
-> please put this to blkdev.h or similar. directly using it here
-> is abnormal.
-BTW, we can add a (rq->cmd_flags & REQ_ELVPRIV) check here to make
-sure the request is at io scheduler.
+Hi Tony,
+
+Can you merge this patch series to Kernel 3.1.
+It fixes the WLAN issue on Panda board, reported in Kernel 3.0
+
+Regards,
+Pandu.
+
+----- Original Message ----- 
+From: "Mallireddy, Panduranga" <panduranga_mallireddy@ti.com>
+To: "Coelho, Luciano" <coelho@ti.com>; <netdev@vger.kernel.org>; 
+<linux-omap@vger.kernel.org>; <linux-mmc@vger.kernel.org>
+Cc: <ohad@wizery.com>; "Gabay, Benzy" <benzyg@ti.com>; "Gurumath, Pradeep" 
+<pradeepgurumath@ti.com>; "Mahaveer, Vishal" <vishalm@ti.com>; "Boudet, 
+Xavier" <x-boudet@ti.com>; "Jain, Naveen" <naveen_jain@ti.com>; "Halli, 
+Manjunatha" <manjunatha_halli@ti.com>; "Mallireddy, Panduranga" 
+<panduranga_mallireddy@ti.com>
+Sent: Friday, July 29, 2011 8:11 PM
+Subject: [PATCH 0/1] OMAP: wlan : To fix wlan issue with kernel 3.0
+
+
+From: Panduranga Mallireddy <panduranga_mallireddy@ti.com>
+
+Error reported for wl12xx driver with Kernel 3.0 is
+[    0.181457] error setting wl12xx data
+
+FIX:
+For regulator omap4_clk32k used by wlan, set .constraints.always_on to 1
+
+Panduranga Mallireddy (1):
+  OMAP: wlan: Set the WLAN Regulator to be always on
+
+ arch/arm/mach-omap2/twl-common.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+
