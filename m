@@ -1,64 +1,39 @@
 From: ludovic.desroches@atmel.com
-Subject: [PATCH v2 7/8] mmc: atmel-mci: correct sg buffer size evaluation
-Date: Thu, 11 Aug 2011 17:25:47 +0200
-Message-ID: <2f4a8ec5ba984e7e8730580811781869c4112b15.1313071126.git.ludovic.desroches@atmel.com>
+Subject: [PATCH v2 0/8] Add pdc feature to atmel-mci
+Date: Thu, 11 Aug 2011 17:25:40 +0200
+Message-ID: <1313076348-3065-1-git-send-email-ludovic.desroches@atmel.com>
 References: <1311863398-31579-1-git-send-email-ludovic.desroches@atmel.com>
- <1313076348-3065-1-git-send-email-ludovic.desroches@atmel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:1917 "EHLO sjogate2.atmel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751343Ab1HKOQH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 11 Aug 2011 10:16:07 -0400
-In-Reply-To: <1313076348-3065-1-git-send-email-ludovic.desroches@atmel.com>
-In-Reply-To: <3408076e8bc2e7b3ad3bb4d3ae3859ab665a59aa.1313071125.git.ludovic.desroches@atmel.com>
-References: <3408076e8bc2e7b3ad3bb4d3ae3859ab665a59aa.1313071125.git.ludovic.desroches@atmel.com>
+Received: from newsmtp5.atmel.com ([204.2.163.5]:32925 "EHLO
+	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751473Ab1HKOQJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Aug 2011 10:16:09 -0400
+In-Reply-To: <1311863398-31579-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com, Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: nicolas.ferre@atmel.com, plagnioj@jcrosoft.com
 
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Changes since v1:
+ * merge patch 6 and 7.
 
-Assuming that a sg buffer size is a page size is false so use sg_dma_len.
-A 4096 bytes can be required with two 2048-bytes sg buffer.
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
----
- drivers/mmc/host/atmel-mci.c |    7 +++----
- 1 files changed, 3 insertions(+), 4 deletions(-)
+The purpose of these patches is to merge at91_mci and atmel atmel-mci drivers.
+The first one is used only for old atmel mci core and provides the PDC feature.
+The second one works with the old core but doesn't provide the PDC feature so
+the goal is to implement this feature in order to remove at91_mci.
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index c415322..963e320 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -608,7 +608,7 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
- 	}
- 
- 	atmci_writel(host, pointer_reg, sg_dma_address(host->sg));
--	if (host->data_size <= PAGE_SIZE) {
-+	if (host->data_size <= sg_dma_len(host->sg)) {
- 		if (host->data_size & 0x3) {
- 			/* If size is different from modulo 4, transfer bytes */
- 			atmci_writel(host, counter_reg, host->data_size);
-@@ -620,8 +620,8 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
- 		host->data_size = 0;
- 	} else {
- 		/* We assume the size of a page is 32-bits aligned */
--		atmci_writel(host, counter_reg, PAGE_SIZE / 4);
--		host->data_size -= PAGE_SIZE;
-+		atmci_writel(host, counter_reg, sg_dma_len(host->sg) / 4);
-+		host->data_size -= sg_dma_len(host->sg);
- 		if (host->data_size)
- 			host->sg = sg_next(host->sg);
- 	}
-@@ -808,7 +808,6 @@ atmci_prepare_data_pdc(struct atmel_mci *host, struct mmc_data *data)
- 	/* Configure PDC */
- 	host->data_size = data->blocks * data->blksz;
- 	sg_len = dma_map_sg(&host->pdev->dev, data->sg, data->sg_len, dir);
--	BUG_ON(sg_len < host->data_size / PAGE_SIZE);
- 	if (host->data_size)
- 		atmci_pdc_set_both_buf(host,
- 			((dir == DMA_FROM_DEVICE)?XFER_RECEIVE:XFER_TRANSMIT));
--- 
-1.7.0.4
+This new version of the atmel-mci driver detects mci core version at runtime.
+Then it knows if we have to use pio, pdc or dma for transfers.
+
+These patches are based on "mmc: atmel-mci: add suspend/resume support" from
+Nicolas.
+
+
+arch/arm/mach-at91/at91sam9260_devices.c |    2 +-
+drivers/mmc/host/atmel-mci-regs.h        |  220 +++++----
+drivers/mmc/host/atmel-mci.c             |  824 ++++++++++++++++++++----------
+include/linux/atmel-mci.h                |    4 +-
+include/linux/atmel_pdc.h                |    2 +
+5 files changed, 681 insertions(+), 371 deletions(-)
 
