@@ -1,60 +1,86 @@
-From: David Brown <davidb@codeaurora.org>
-Subject: Re: [PATCH] mmc: Use pr_<level>, add and use mmc_<level>
-Date: Thu, 11 Aug 2011 13:34:16 -0700
-Message-ID: <20110811203416.GA12740@huya.qualcomm.com>
-References: <1441985db03ab10b067332f7d4b75b607921441b.1313094012.git.joe@perches.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v1 1/1] mmc: sd: Handle SD3.0 cards not supporting UHS-I bus speed mode
+Date: Thu, 11 Aug 2011 17:33:04 -0400
+Message-ID: <m2k4ajpran.fsf@bob.laptop.org>
+References: <1312955161-24844-1-git-send-email-subhashj@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1441985db03ab10b067332f7d4b75b607921441b.1313094012.git.joe@perches.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Joe Perches <joe@perches.com>
-Cc: Pavel Pisa <ppisa@pikron.com>, Nicolas Ferre <nicolas.ferre@atmel.com>, Daniel Walker <dwalker@fifo99.com>, Harald Welte <HaraldWelte@viatech.com>, Pierre Ossman <pierre@ossman.eu>, Chris Ball <cjb@laptop.org>, Alex Dubov <oakad@yahoo.com>, linux-arm-msm@vger.kernel.org, Bruce Chang <brucechang@via.com.tw>, Ian Molton <ian@mnementh.co.uk>, Ben Dooks <ben-linux@fluff.org>, Tony Olech <tony.olech@elandigitalsystems.com>, linux-omap@vger.kernel.org, David Brown <davidb@codeaurora.org>, linux-arm-kernel@lists.infradead.org, Nicolas Pitre <nico@fluxnic.net>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Bryan Huntsman <bryanh@codeaurora.org>, Manuel Lauss <manuel.lauss@gmail.com>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Content-Type: text/plain
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1312955161-24844-1-git-send-email-subhashj@codeaurora.org>
+	(Subhash Jadavani's message of "Wed, 10 Aug 2011 11:16:01 +0530")
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, "Nath, Arindam" <Arindam.Nath@amd.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Aug 11, 2011 at 01:21:24PM -0700, Joe Perches wrote:
-> Use current logging styles.
-> 
-> Add an mmc_printk function to reduce overall size
-> by centralizing the mmc_hostname use.
-> 
-> Because pr_fmt(fmt) KBUILD_MODNAME is used,
-> some logging prefixes are changed.
-> For instance from "SDIO:" to "mmc_core:"
-> 
-> Add macros for mmc_err, mmc_warn, and mmc_info.
-> Convert printks with mmc_hostname to mmc_<level>.
-> 
-> Whitespace neatening around pr_<level>.
-> Convert printk(KERN_DEBUG to pr_debug(
-> Convert direct uses of DBG macros to pr_debug.
-> Convert direct uses of DBGF to DBG.
-> Coalesce long format strings.
-> Add a few missing newlines to logging messages.
-> 
-> $ size drivers/mmc/built-in.o*
->    text	   data	    bss	    dec	    hex	filename
->   92530	   1608	    204	  94342	  17086	drivers/mmc/built-in.o.minimal.new
->   94229	   1608	    204	  96041	  17729	drivers/mmc/built-in.o.minimal.old
->  291831	   5152	  77344	 374327	  5b637	drivers/mmc/built-in.o.allyesconfig.new
->  293616	   5152	  78128	 376896	  5c040	drivers/mmc/built-in.o.allyesconfig.old
-> 
-> Signed-off-by: Joe Perches <joe@perches.com>
+Hi Subhash, Arindam,
+
+On Wed, Aug 10 2011, Subhash Jadavani wrote:
+> Here is Essential conditions to indicate Version 3.00 Card
+> (SD_SPEC=2 and SD_SPEC3=1) :
+> (1) The card shall support CMD6
+> (2) The card shall support CMD8
+> (3) The card shall support CMD42
+> (4) User area capacity shall be up to 2GB (SDSC) or 32GB (SDHC)
+>     User area capacity shall be more than or equal to 32GB and
+>     up to 2TB (SDXC)
+> (5) Speed Class shall be supported (SDHC or SDXC)
+>
+> So even if SD card doesn't support any of the newly defined
+> UHS-I bus speed mode, it can advertise itself as SD3.0 cards
+> as long as it supports all the essential conditions of
+> SD3.0 cards. Given this, these type of cards should atleast
+> run in High Speed mode @50MHZ if it supports HS.
+>
+> But current initialization sequence for SD3.0 cards is
+> such that these non-UHS-I SD3.0 cards runs in Default
+> Speed mode @25MHz.
+>
+> This patch makes sure that these non-UHS-I SD3.0 cards run
+> in High Speed Mode @50MHz.
+>
+> Tested this patch with SanDisk Extreme SDHC 8GB Class 10 card.
+>
+> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
 > ---
->  drivers/mmc/host/msm_sdcc.c     |  103 +++++++++----------
+>  drivers/mmc/core/sd.c |    6 +++---
+>  1 files changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index ff27741..e2dcf23 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -306,6 +306,9 @@ static int mmc_read_switch(struct mmc_card *card)
+>  		goto out;
+>  	}
+>  
+> +	if (status[13] & 0x02)
+> +		card->sw_caps.hs_max_dtr = 50000000;
+> +
+>  	if (card->scr.sda_spec3) {
+>  		card->sw_caps.sd3_bus_mode = status[13];
+>  
+> @@ -348,9 +351,6 @@ static int mmc_read_switch(struct mmc_card *card)
+>  		}
+>  
+>  		card->sw_caps.sd3_curr_limit = status[7];
+> -	} else {
+> -		if (status[13] & 0x02)
+> -			card->sw_caps.hs_max_dtr = 50000000;
+>  	}
+>  
+>  out:
 
-Acked-by: David Brown <davidb@codeaurora.org>
+The patch itself is fine, but please could one of you add some #defines
+for the status response bit names and their possible values inside
+mmc_read_switch()?  It's looking a bit opaque.
 
+(I know that this patch doesn't introduce any of these magic numbers;
+I just think that now is a good time to add documentation for them.)
+
+Thanks very much,
+
+- Chris.
 -- 
-Sent by an employee of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
