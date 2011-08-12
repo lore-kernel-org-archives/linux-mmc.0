@@ -1,64 +1,46 @@
-From: Zang Roy-R61911 <r61911@freescale.com>
-Subject: RE: [PATCH 2/2 v2] eSDHC: Fix errors when booting kernel with fsl
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH 2/2 v2] eSDHC: Fix errors when booting kernel with fsl
  esdhc
-Date: Fri, 12 Aug 2011 09:44:26 +0000
-Message-ID: <2239AC579C7D3646A720227A37E0268118FD3B@039-SN1MPN1-005.039d.mgd.msft.net>
+Date: Fri, 12 Aug 2011 14:04:50 +0400
+Message-ID: <20110812100450.GA23333@oksana.dev.rtsoft.ru>
 References: <1311329717-13954-1-git-send-email-tie-fei.zang@freescale.com>
  <1311329717-13954-2-git-send-email-tie-fei.zang@freescale.com>
  <20110722101512.GA1576@oksana.dev.rtsoft.ru>
+ <2239AC579C7D3646A720227A37E0268118FD3B@039-SN1MPN1-005.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe002.messaging.microsoft.com ([213.199.154.140]:34330
-	"EHLO DB3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751709Ab1HLJoa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Aug 2011 05:44:30 -0400
-In-Reply-To: <20110722101512.GA1576@oksana.dev.rtsoft.ru>
-Content-Language: en-US
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:54874 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752844Ab1HLKE4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Aug 2011 06:04:56 -0400
+Received: by wyg24 with SMTP id 24so1997247wyg.19
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Aug 2011 03:04:55 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <2239AC579C7D3646A720227A37E0268118FD3B@039-SN1MPN1-005.039d.mgd.msft.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
+To: Zang Roy-R61911 <r61911@freescale.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Xu Lei-B33228 <B33228@freescale.com>, Kumar Gala <galak@kernel.crashing.org>, Wood Scott-B07421 <B07421@freescale.com>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbW1jLW93bmVy
-QHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmdd
-DQo+IE9uIEJlaGFsZiBPZiBBbnRvbiBWb3JvbnRzb3YNCj4gU2VudDogRnJpZGF5LCBKdWx5IDIy
-LCAyMDExIDE4OjE1IFBNDQo+IFRvOiBaYW5nIFJveS1SNjE5MTENCj4gQ2M6IGxpbnV4LW1tY0B2
-Z2VyLmtlcm5lbC5vcmc7IGxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnOyBha3BtQGxpbnV4
-LQ0KPiBmb3VuZGF0aW9uLm9yZzsgWHUgTGVpLUIzMzIyODsgS3VtYXIgR2FsYQ0KPiBTdWJqZWN0
-OiBSZTogW1BBVENIIDIvMiB2Ml0gZVNESEM6IEZpeCBlcnJvcnMgd2hlbiBib290aW5nIGtlcm5l
-bCB3aXRoIGZzbCBlc2RoYw0KPiANCj4gT24gRnJpLCBKdWwgMjIsIDIwMTEgYXQgMDY6MTU6MTdQ
-TSArMDgwMCwgUm95IFphbmcgd3JvdGU6DQo+IFsuLi5dDQo+ID4gIAlpZiAoaG9zdC0+dmVyc2lv
-biA+PSBTREhDSV9TUEVDXzIwMCkgew0KPiA+IC0JCWN0cmwgPSBzZGhjaV9yZWFkYihob3N0LCBT
-REhDSV9IT1NUX0NPTlRST0wpOw0KPiA+IC0JCWN0cmwgJj0gflNESENJX0NUUkxfRE1BX01BU0s7
-DQo+ID4gLQkJaWYgKChob3N0LT5mbGFncyAmIFNESENJX1JFUV9VU0VfRE1BKSAmJg0KPiA+IC0J
-CQkoaG9zdC0+ZmxhZ3MgJiBTREhDSV9VU0VfQURNQSkpDQo+ID4gLQkJCWN0cmwgfD0gU0RIQ0lf
-Q1RSTF9BRE1BMzI7DQo+ID4gLQkJZWxzZQ0KPiA+IC0JCQljdHJsIHw9IFNESENJX0NUUkxfU0RN
-QTsNCj4gPiAtCQlzZGhjaV93cml0ZWIoaG9zdCwgY3RybCwgU0RIQ0lfSE9TVF9DT05UUk9MKTsN
-Cj4gPiArCQlpZiAoaG9zdC0+cXVpcmtzICYgU0RIQ0lfUVVJUktfUU9SSVFfUFJPQ1RMX1dFSVJE
-KSB7DQo+ID4gKyNkZWZpbmUgRVNESENJX1BST0NUTF9ETUFTX01BU0sJCTB4MDAwMDAzMDANCj4g
-PiArI2RlZmluZSBFU0RIQ0lfUFJPQ1RMX0FETUEzMgkJMHgwMDAwMDIwMA0KPiA+ICsjZGVmaW5l
-IEVTREhDSV9QUk9DVExfU0RNQQkJMHgwMDAwMDAwMA0KPiA+ICsJCQljdHJsID0gc2RoY2lfcmVh
-ZGwoaG9zdCwgU0RIQ0lfSE9TVF9DT05UUk9MKTsNCj4gPiArCQkJY3RybCAmPSB+RVNESENJX1BS
-T0NUTF9ETUFTX01BU0s7DQo+ID4gKwkJCWlmICgoaG9zdC0+ZmxhZ3MgJiBTREhDSV9SRVFfVVNF
-X0RNQSkgJiYNCj4gPiArCQkJCShob3N0LT5mbGFncyAmIFNESENJX1VTRV9BRE1BKSkNCj4gPiAr
-CQkJCWN0cmwgfD0gRVNESENJX1BST0NUTF9BRE1BMzI7DQo+ID4gKwkJCWVsc2UNCj4gPiArCQkJ
-CWN0cmwgfD0gRVNESENJX1BST0NUTF9TRE1BOw0KPiA+ICsJCQlzZGhjaV93cml0ZWwoaG9zdCwg
-Y3RybCwgU0RIQ0lfSE9TVF9DT05UUk9MKTsNCj4gPiArCQl9IGVsc2Ugew0KPiA+ICsJCQljdHJs
-ID0gc2RoY2lfcmVhZGIoaG9zdCwgU0RIQ0lfSE9TVF9DT05UUk9MKTsNCj4gPiArCQkJY3RybCAm
-PSB+U0RIQ0lfQ1RSTF9ETUFfTUFTSzsNCj4gPiArCQkJaWYgKChob3N0LT5mbGFncyAmIFNESENJ
-X1JFUV9VU0VfRE1BKSAmJg0KPiA+ICsJCQkJKGhvc3QtPmZsYWdzICYgU0RIQ0lfVVNFX0FETUEp
-KQ0KPiA+ICsJCQkJY3RybCB8PSBTREhDSV9DVFJMX0FETUEzMjsNCj4gPiArCQkJZWxzZQ0KPiA+
-ICsJCQkJY3RybCB8PSBTREhDSV9DVFJMX1NETUE7DQo+ID4gKwkJCXNkaGNpX3dyaXRlYihob3N0
-LCBjdHJsLCBTREhDSV9IT1NUX0NPTlRST0wpOw0KPiANCj4gV2UgdHJ5IHRvIG5vdCBwb2xsdXRl
-IGdlbmVyaWMgc2RoY2kuYyBkcml2ZXIgd2l0aCBjaGlwLXNwZWNpZmljDQo+IHF1aXJrcy4NCj4g
-DQo+IE1heWJlIHlvdSBjYW4gZG8gdGhlIGZpeHVwcyB2aWEgSU8gYWNjZXNzb3JzPyBPciBieSBp
-bnRyb2R1Y2luZw0KPiBzb21lIGFkZGl0aW9uYWwgc2RoY2kgb3A/DQpBbnRvbiwNCnRoYW5rcyBm
-b3IgdGhlIGNvbW1lbnQsIGFzIHdlIGRpc2N1c3NlZCwgdGhlIG9yaWdpbmFsIGNvZGUgdXNlIDgg
-Yml0IGJ5dGUgb3BlcmF0aW9uLA0Kd2hpbGUgaW4gZmFjdCwgb24gc29tZSBwb3dlcnBjIHBsYXRm
-b3JtLCAzMiBiaXQgb3BlcmF0aW9uIGlzIG5lZWRlZC4gDQpzaG91bGQgaXQgYmUgcG9zc2libGUg
-Zml4ZWQgYnkgYWRkaW5nIHNvbWUgd3JhcHBlciBpbiBJTyBhY2Nlc3NvcnMgb3IgaW50cm9kdWNl
-IGFkZGl0aW9uYWwgc2RoY2kgb3A/DQpQbGVhc2UgYWR2aWNlIG1vcmUuIA0KVGhhbmtzLg0KUm95
-DQo=
+Hello,
 
+On Fri, Aug 12, 2011 at 09:44:26AM +0000, Zang Roy-R61911 wrote:
+[...]
+> > We try to not pollute generic sdhci.c driver with chip-specific
+> > quirks.
+> > 
+> > Maybe you can do the fixups via IO accessors? Or by introducing
+> > some additional sdhci op?
+> Anton,
+> thanks for the comment, as we discussed, the original code use 8 bit byte operation,
+> while in fact, on some powerpc platform, 32 bit operation is needed. 
+> should it be possible fixed by adding some wrapper in IO accessors or introduce additional sdhci op?
+
+I would do it in the IO accessors.
+
+Thanks,
+
+-- 
+Anton Vorontsov
+Email: cbouatmailru@gmail.com
