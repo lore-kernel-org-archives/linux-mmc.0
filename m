@@ -1,108 +1,111 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [RFC PATCH v2] Add new elevator ops for request hint
-Date: Fri, 12 Aug 2011 11:27:41 +0900
-Message-ID: <CAH9JG2W9AgrgLwwkTQKGY60A2pXe50eLn128qtA6ZXiGWJsqCQ@mail.gmail.com>
-References: <20110811004216.GA24810@july>
-	<20110811133302.GC8552@redhat.com>
-	<4E43DBFB.6020105@fusionio.com>
-	<20110811140936.GD8552@redhat.com>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH v1 1/1] mmc: sd: Handle SD3.0 cards not supporting UHS-I
+ bus speed mode
+Date: Fri, 12 Aug 2011 02:26:05 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B3000197FBCBD5@SAUSEXMBP01.amd.com>
+References: <1312955161-24844-1-git-send-email-subhashj@codeaurora.org>
+ <m2k4ajpran.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:47857 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751821Ab1HLC1l (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Aug 2011 22:27:41 -0400
-In-Reply-To: <20110811140936.GD8552@redhat.com>
+Received: from va3ehsobe001.messaging.microsoft.com ([216.32.180.11]:11920
+	"EHLO VA3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751218Ab1HLH0Y convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 12 Aug 2011 03:26:24 -0400
+In-Reply-To: <m2k4ajpran.fsf@bob.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vivek Goyal <vgoyal@redhat.com>
-Cc: Jens Axboe <jaxboe@fusionio.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "shli@kernel.org" <shli@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>, Subhash Jadavani <subhashj@codeaurora.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 
-On Thu, Aug 11, 2011 at 11:09 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
-> On Thu, Aug 11, 2011 at 03:41:15PM +0200, Jens Axboe wrote:
->> On 2011-08-11 15:33, Vivek Goyal wrote:
->> > On Thu, Aug 11, 2011 at 09:42:16AM +0900, Kyungmin Park wrote:
->> >> Hi Jens
->> >>
->> >> Now eMMC device requires the upper layer information to improve the data
->> >> performance and reliability.
->> >>
->> >> . Context ID
->> >> Using the context information, it can sort out the data internally and improve the performance.
->> >> The main problem is that it's needed to define "What's the context".
->> >> Actually I expect cfq queue has own unique ID but it doesn't so decide to use the pid instead
->> >>
->> >
->> > Hi,
->> >
->> > Can you please give little more details about the optimization you will
->> > do with this pid information?
->>
->> It is provided in one of the other email threads for this patch.
->
-> Ok, thanks. I just read the other mail thread.
->
-> So the idea is that when multiple requests from multiple processes are
-> in flight in driver, then using context information (pid in this case),
-> driver can potentially do more efficient scheduling of these requests.
->
-> CFQ kind of already does that atleast for sync-idle queues as driver will
-> see requests only from one context for extended period of time. So this
-> optimization is primarily useful for random reads and writer queues where
-> we do not idle. (Well if rotational=0, then we don't idle on even on
-> sync-idle so not sure if these mmc chips set rotational=0 or not).
+Hi Subhash,
 
-Currently mmc set the non-rotational device.
->
->>
->> > Also what happens in the case of noop and deadline which don't maintain
->> > per process queues and can't provide this information.
->>
->> It'll still work, it isn't really tied to the CFQ way of diviying things
->> up.
->
-> IIUC, for noop and deadline no optimizatoin will take place as no context
-> information is available and things will default back to status quo? Atleast
-> this patch implements hook only for CFQ.
-now it focuss on the cfq and I don't see any benefit if it uses the
-noop and deadline.
->
->>
->> >> First I expect the REQ_META but current ext4 doesn't pass the WRITE_META. only use the READ_META. so it needs to investigate it.
->> >
->> > So are you planning to later fix file systems to appropriately mark meta
->> > data requests?
->>
->> One thing that occured to me is that equating META to HOT is not
->> necessarily a good idea. Meta data isn't necessarily more "hot" than
->> regular data, it all depends on how it's being used. So I think it would
->> be a lot more appropriate to pass down this information specifically,
->> instead of overloading REQ_META.
->
-> I think so. I guess it depends on what "HOT" means and filesystem should
-> understand REQ_HOT and flag bio/req appropriately.
->
-> But if this optimization is especially targeted at meta data, then using
-> REQ_META will make sense too.
 
-Right, that's the matter, what's the HOT data? if the filesystem
-provides the hot data exactly. it's best. the remaining is the
-heuristic.
-anyway, host give the hot data information chip, then chip handle it
-another place from cold data. e.g., SLC area or some place to improve
-the performance and reliability
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Friday, August 12, 2011 3:03 AM
+> To: Subhash Jadavani
+> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; Nath,
+> Arindam
+> Subject: Re: [PATCH v1 1/1] mmc: sd: Handle SD3.0 cards not supporting
+> UHS-I bus speed mode
+> 
+> Hi Subhash, Arindam,
+> 
+> On Wed, Aug 10 2011, Subhash Jadavani wrote:
+> > Here is Essential conditions to indicate Version 3.00 Card
+> > (SD_SPEC=2 and SD_SPEC3=1) :
+> > (1) The card shall support CMD6
+> > (2) The card shall support CMD8
+> > (3) The card shall support CMD42
+> > (4) User area capacity shall be up to 2GB (SDSC) or 32GB (SDHC)
+> >     User area capacity shall be more than or equal to 32GB and
+> >     up to 2TB (SDXC)
+> > (5) Speed Class shall be supported (SDHC or SDXC)
+> >
+> > So even if SD card doesn't support any of the newly defined
+> > UHS-I bus speed mode, it can advertise itself as SD3.0 cards
+> > as long as it supports all the essential conditions of
+> > SD3.0 cards. Given this, these type of cards should atleast
+> > run in High Speed mode @50MHZ if it supports HS.
+> >
+> > But current initialization sequence for SD3.0 cards is
+> > such that these non-UHS-I SD3.0 cards runs in Default
+> > Speed mode @25MHz.
+> >
+> > This patch makes sure that these non-UHS-I SD3.0 cards run
+> > in High Speed Mode @50MHz.
+> >
+> > Tested this patch with SanDisk Extreme SDHC 8GB Class 10 card.
+> >
+> > Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> > ---
+> >  drivers/mmc/core/sd.c |    6 +++---
+> >  1 files changed, 3 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > index ff27741..e2dcf23 100644
+> > --- a/drivers/mmc/core/sd.c
+> > +++ b/drivers/mmc/core/sd.c
+> > @@ -306,6 +306,9 @@ static int mmc_read_switch(struct mmc_card *card)
+> >  		goto out;
+> >  	}
+> >
+> > +	if (status[13] & 0x02)
+> > +		card->sw_caps.hs_max_dtr = 50000000;
+> > +
+> >  	if (card->scr.sda_spec3) {
+> >  		card->sw_caps.sd3_bus_mode = status[13];
+> >
+> > @@ -348,9 +351,6 @@ static int mmc_read_switch(struct mmc_card *card)
+> >  		}
+> >
+> >  		card->sw_caps.sd3_curr_limit = status[7];
+> > -	} else {
+> > -		if (status[13] & 0x02)
+> > -			card->sw_caps.hs_max_dtr = 50000000;
+> >  	}
+> >
+> >  out:
+> 
+> The patch itself is fine, but please could one of you add some #defines
+> for the status response bit names and their possible values inside
+> mmc_read_switch()?  It's looking a bit opaque.
 
->
-> Whatever flag it is (HOT, META), I am wondering why IO scheduler need to
-> come into the picture for this information. This is kind of between
-> filesystem and driver. As driver should see all the request flags, it
-> should just be able to check for presence of flag and not call into
-> elevator/IO scheduler.
->
-> On a side note, if we are willing to keep pid/iocontext information in
-> struct request, then this optimization should work with noop/deadline too.
-Okay, If the concept is accepted.
+Do you want to take it up?
 
-Thank you,
-Kyungmin Park
+> 
+> (I know that this patch doesn't introduce any of these magic numbers;
+> I just think that now is a good time to add documentation for them.)
+> 
+> Thanks very much,
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+
+
