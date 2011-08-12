@@ -1,82 +1,74 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: use defined macro for card status
-Date: Thu, 11 Aug 2011 17:42:43 -0400
-Message-ID: <m27h6jpquk.fsf@bob.laptop.org>
-References: <4E425374.7060706@samsung.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [RFC PATCH] request: teach the device more intelligent
+Date: Fri, 12 Aug 2011 11:20:21 +0900
+Message-ID: <CAH9JG2Xn92sbgbPx+E6LnS=7g7Yiq=f8KcjFLAcZ-_9UpVhGgA@mail.gmail.com>
+References: <20110809034724.GA22257@july>
+	<4E4181E4.3090704@kernel.dk>
+	<CAH9JG2X5yb9JEyO60YeLFHcuNp54m-xX8M-xSR7+DEY7FKQL1Q@mail.gmail.com>
+	<4E423C83.9090209@kernel.dk>
+	<CAH9JG2VhPg-mk36CO_Jh8D0O6SW3RnZyjnBRNH4UqT8SXXWULQ@mail.gmail.com>
+	<CANejiEVW69ihzpMYqvTZ5iW+uz3jUA2y60vL7xzyZidhSxj-0g@mail.gmail.com>
+	<4E424A0A.6090300@kernel.dk>
+	<CANejiEU+gG9wWb+=zqASj1M-CmcDhXi2kft=FpFJ8K6Tb+whrw@mail.gmail.com>
+	<CAH9JG2XTOOS5GGO7howP+SLbTkj0xUJHPisFYPZfkJddWeKQ4Q@mail.gmail.com>
+	<20110811142049.GE8552@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:42758 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754264Ab1HKVmq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 11 Aug 2011 17:42:46 -0400
-In-Reply-To: <4E425374.7060706@samsung.com> (Jaehoon Chung's message of "Wed,
-	10 Aug 2011 18:46:28 +0900")
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:43846 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752433Ab1HLCUW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Aug 2011 22:20:22 -0400
+In-Reply-To: <20110811142049.GE8552@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Vivek Goyal <vgoyal@redhat.com>
+Cc: Shaohua Li <shli@kernel.org>, Jens Axboe <axboe@kernel.dk>, linux-kernel@vger.kernel.org, arnd@arndb.de, jh80.chung@samsung.com, linux-mmc@vger.kernel.org
 
-Hi Jaehoon,
-
-On Wed, Aug 10 2011, Jaehoon Chung wrote:
-> Sometime we need to check the card status.
-> So using R1_CURRENT_STATE(status)..and compare with R1_STATE_xxx.
-> But some code didn't use R1_STATE_xxx.
+On Thu, Aug 11, 2011 at 11:20 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
+> On Thu, Aug 11, 2011 at 09:36:04AM +0900, Kyungmin Park wrote:
 >
-> I think good that use defined macro for checking card status.
+> [...]
+>> No, no need to consistent. the context id id only valid when several
+>> requests are request the I/O simultaneously
+>> e.g.,
+>> App1 requests A, B, C, D, ...
+>> App2 requests a, b, c, d, ...
+>> App2 requests 1, 2, 3, 4, 5, ...
+>> with following order, A, B, a, 1, C, b, 2, ...
+>>
+>> The current eMMC can't handle these operation.
+>>
+>> Instead using context, it can teach the these operation comes from
+>> using context ID. and finally can place the request in-order at card
+>> internally.
+>>
+>> Open Context ID operation, perform I/O with context Id, ...., and
+>> Close Context ID operation until queue is empty.
 >
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
->  drivers/mmc/card/mmc_test.c |    2 +-
->  drivers/mmc/core/core.c     |    2 +-
->  drivers/mmc/core/mmc_ops.c  |    2 +-
->  3 files changed, 3 insertions(+), 3 deletions(-)
+> Hi Kyungmin,
 >
-> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-> index 742dc98..2bf229a 100644
-> --- a/drivers/mmc/card/mmc_test.c
-> +++ b/drivers/mmc/card/mmc_test.c
-> @@ -224,7 +224,7 @@ static void mmc_test_prepare_mrq(struct mmc_test_card *test,
->  static int mmc_test_busy(struct mmc_command *cmd)
->  {
->  	return !(cmd->resp[0] & R1_READY_FOR_DATA) ||
-> -		(R1_CURRENT_STATE(cmd->resp[0]) == 7);
-> +		(R1_CURRENT_STATE(cmd->resp[0]) == R1_STATE_PRG);
->  }
->  
->  /*
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index f091b43..bfb86a6 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1501,7 +1501,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
->  			goto out;
->  		}
->  	} while (!(cmd.resp[0] & R1_READY_FOR_DATA) ||
-> -		 R1_CURRENT_STATE(cmd.resp[0]) == 7);
-> +		 R1_CURRENT_STATE(cmd.resp[0]) == R1_STATE_PRG);
->  out:
->  	return err;
->  }
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 845ce7c..770c3d0 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -407,7 +407,7 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->  			break;
->  		if (mmc_host_is_spi(card->host))
->  			break;
-> -	} while (R1_CURRENT_STATE(status) == 7);
-> +	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
->  
->  	if (mmc_host_is_spi(card->host)) {
->  		if (status & R1_SPI_ILLEGAL_COMMAND)
+> So once we have context information, we want to process all the requests
+> from the same context together? IOW, we expect that driver will have
+> multiple requests in flight from various context and it will batch the
+> requests from same context together?
+It's current implementation. Actually there's no context until eMMC v4.41.
+After eMMC v4.5. introduce the context and handle it efficiently if
+context is provided from host
+>
+> How does that help? Is it something related to seeking? If yes, then just
+> setting the rotational=1 should help as CFQ will sequence all the
+> sequential IO where it can. For random IO, anyway optimization will not
+> help. May be it is about something else which I am completely missing.
+> Some details here will help.
+No, it's dependent on firmware implementation at each vendor. but some
+mixed workload, several programs requests the sequential write, and
+one or two random write, it can assign the blocks one for sequential,
+another for ramdon. don't mix it if context is provided.
 
-Thanks, pushed to mmc-next for 3.1.
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thank you,
+Kyungmin Park
+>
+> Thanks
+> Vivek
+>
