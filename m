@@ -1,74 +1,108 @@
 From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [RFC PATCH] request: teach the device more intelligent
-Date: Fri, 12 Aug 2011 11:20:21 +0900
-Message-ID: <CAH9JG2Xn92sbgbPx+E6LnS=7g7Yiq=f8KcjFLAcZ-_9UpVhGgA@mail.gmail.com>
-References: <20110809034724.GA22257@july>
-	<4E4181E4.3090704@kernel.dk>
-	<CAH9JG2X5yb9JEyO60YeLFHcuNp54m-xX8M-xSR7+DEY7FKQL1Q@mail.gmail.com>
-	<4E423C83.9090209@kernel.dk>
-	<CAH9JG2VhPg-mk36CO_Jh8D0O6SW3RnZyjnBRNH4UqT8SXXWULQ@mail.gmail.com>
-	<CANejiEVW69ihzpMYqvTZ5iW+uz3jUA2y60vL7xzyZidhSxj-0g@mail.gmail.com>
-	<4E424A0A.6090300@kernel.dk>
-	<CANejiEU+gG9wWb+=zqASj1M-CmcDhXi2kft=FpFJ8K6Tb+whrw@mail.gmail.com>
-	<CAH9JG2XTOOS5GGO7howP+SLbTkj0xUJHPisFYPZfkJddWeKQ4Q@mail.gmail.com>
-	<20110811142049.GE8552@redhat.com>
+Subject: Re: [RFC PATCH v2] Add new elevator ops for request hint
+Date: Fri, 12 Aug 2011 11:27:41 +0900
+Message-ID: <CAH9JG2W9AgrgLwwkTQKGY60A2pXe50eLn128qtA6ZXiGWJsqCQ@mail.gmail.com>
+References: <20110811004216.GA24810@july>
+	<20110811133302.GC8552@redhat.com>
+	<4E43DBFB.6020105@fusionio.com>
+	<20110811140936.GD8552@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:43846 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752433Ab1HLCUW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Aug 2011 22:20:22 -0400
-In-Reply-To: <20110811142049.GE8552@redhat.com>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:47857 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751821Ab1HLC1l (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Aug 2011 22:27:41 -0400
+In-Reply-To: <20110811140936.GD8552@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Vivek Goyal <vgoyal@redhat.com>
-Cc: Shaohua Li <shli@kernel.org>, Jens Axboe <axboe@kernel.dk>, linux-kernel@vger.kernel.org, arnd@arndb.de, jh80.chung@samsung.com, linux-mmc@vger.kernel.org
+Cc: Jens Axboe <jaxboe@fusionio.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "arnd@arndb.de" <arnd@arndb.de>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "shli@kernel.org" <shli@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thu, Aug 11, 2011 at 11:20 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
-> On Thu, Aug 11, 2011 at 09:36:04AM +0900, Kyungmin Park wrote:
->
-> [...]
->> No, no need to consistent. the context id id only valid when several
->> requests are request the I/O simultaneously
->> e.g.,
->> App1 requests A, B, C, D, ...
->> App2 requests a, b, c, d, ...
->> App2 requests 1, 2, 3, 4, 5, ...
->> with following order, A, B, a, 1, C, b, 2, ...
+On Thu, Aug 11, 2011 at 11:09 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
+> On Thu, Aug 11, 2011 at 03:41:15PM +0200, Jens Axboe wrote:
+>> On 2011-08-11 15:33, Vivek Goyal wrote:
+>> > On Thu, Aug 11, 2011 at 09:42:16AM +0900, Kyungmin Park wrote:
+>> >> Hi Jens
+>> >>
+>> >> Now eMMC device requires the upper layer information to improve the data
+>> >> performance and reliability.
+>> >>
+>> >> . Context ID
+>> >> Using the context information, it can sort out the data internally and improve the performance.
+>> >> The main problem is that it's needed to define "What's the context".
+>> >> Actually I expect cfq queue has own unique ID but it doesn't so decide to use the pid instead
+>> >>
+>> >
+>> > Hi,
+>> >
+>> > Can you please give little more details about the optimization you will
+>> > do with this pid information?
 >>
->> The current eMMC can't handle these operation.
+>> It is provided in one of the other email threads for this patch.
+>
+> Ok, thanks. I just read the other mail thread.
+>
+> So the idea is that when multiple requests from multiple processes are
+> in flight in driver, then using context information (pid in this case),
+> driver can potentially do more efficient scheduling of these requests.
+>
+> CFQ kind of already does that atleast for sync-idle queues as driver will
+> see requests only from one context for extended period of time. So this
+> optimization is primarily useful for random reads and writer queues where
+> we do not idle. (Well if rotational=0, then we don't idle on even on
+> sync-idle so not sure if these mmc chips set rotational=0 or not).
+
+Currently mmc set the non-rotational device.
+>
 >>
->> Instead using context, it can teach the these operation comes from
->> using context ID. and finally can place the request in-order at card
->> internally.
+>> > Also what happens in the case of noop and deadline which don't maintain
+>> > per process queues and can't provide this information.
 >>
->> Open Context ID operation, perform I/O with context Id, ...., and
->> Close Context ID operation until queue is empty.
+>> It'll still work, it isn't really tied to the CFQ way of diviying things
+>> up.
 >
-> Hi Kyungmin,
+> IIUC, for noop and deadline no optimizatoin will take place as no context
+> information is available and things will default back to status quo? Atleast
+> this patch implements hook only for CFQ.
+now it focuss on the cfq and I don't see any benefit if it uses the
+noop and deadline.
 >
-> So once we have context information, we want to process all the requests
-> from the same context together? IOW, we expect that driver will have
-> multiple requests in flight from various context and it will batch the
-> requests from same context together?
-It's current implementation. Actually there's no context until eMMC v4.41.
-After eMMC v4.5. introduce the context and handle it efficiently if
-context is provided from host
+>>
+>> >> First I expect the REQ_META but current ext4 doesn't pass the WRITE_META. only use the READ_META. so it needs to investigate it.
+>> >
+>> > So are you planning to later fix file systems to appropriately mark meta
+>> > data requests?
+>>
+>> One thing that occured to me is that equating META to HOT is not
+>> necessarily a good idea. Meta data isn't necessarily more "hot" than
+>> regular data, it all depends on how it's being used. So I think it would
+>> be a lot more appropriate to pass down this information specifically,
+>> instead of overloading REQ_META.
 >
-> How does that help? Is it something related to seeking? If yes, then just
-> setting the rotational=1 should help as CFQ will sequence all the
-> sequential IO where it can. For random IO, anyway optimization will not
-> help. May be it is about something else which I am completely missing.
-> Some details here will help.
-No, it's dependent on firmware implementation at each vendor. but some
-mixed workload, several programs requests the sequential write, and
-one or two random write, it can assign the blocks one for sequential,
-another for ramdon. don't mix it if context is provided.
+> I think so. I guess it depends on what "HOT" means and filesystem should
+> understand REQ_HOT and flag bio/req appropriately.
+>
+> But if this optimization is especially targeted at meta data, then using
+> REQ_META will make sense too.
+
+Right, that's the matter, what's the HOT data? if the filesystem
+provides the hot data exactly. it's best. the remaining is the
+heuristic.
+anyway, host give the hot data information chip, then chip handle it
+another place from cold data. e.g., SLC area or some place to improve
+the performance and reliability
+
+>
+> Whatever flag it is (HOT, META), I am wondering why IO scheduler need to
+> come into the picture for this information. This is kind of between
+> filesystem and driver. As driver should see all the request flags, it
+> should just be able to check for presence of flag and not call into
+> elevator/IO scheduler.
+>
+> On a side note, if we are willing to keep pid/iocontext information in
+> struct request, then this optimization should work with noop/deadline too.
+Okay, If the concept is accepted.
 
 Thank you,
 Kyungmin Park
->
-> Thanks
-> Vivek
->
