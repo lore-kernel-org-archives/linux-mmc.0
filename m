@@ -1,56 +1,95 @@
-From: "Buckley, Bryan" <bryan.buckley@ti.com>
-Subject: Re: [PATCH] OMAP4: MMC: fix power and audio issue, decouple USBC1
- from MMC1
-Date: Fri, 12 Aug 2011 10:13:56 -0500
-Message-ID: <CAG_NtY8uCAQNOpGFYLSMTbQ-=WEmRmjFSau7a_41XEwhE0280Q@mail.gmail.com>
-References: <1311276543-9374-1-git-send-email-bryan.buckley@ti.com>
-	<CAF=Qhp0YO2zYnwo63ddhKZv-o+eXs2bQETrqF5wYU2EtKQ=Yqw@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC fixes for 3.1-rc2
+Date: Sun, 14 Aug 2011 15:07:10 -0400
+Message-ID: <m239h3olr5.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <CAF=Qhp0YO2zYnwo63ddhKZv-o+eXs2bQETrqF5wYU2EtKQ=Yqw@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Kishore Kadiyala <kishorek.kadiyala@gmail.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>, Balaji T Krishnamoorthy <balajitk@ti.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Moiz Sonasath <m-sonasath@ti.com>, Viswanath Puttagunta <vishp@ti.com>, Tony Lindgren <tony@atomide.com>, Madhusudhan Chikkature <madhu.cr@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:34755 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754653Ab1HNTH1 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Aug 2011 15:07:27 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Fri, Jul 22, 2011 at 7:30 AM, Kishore Kadiyala
-<kishorek.kadiyala@gmail.com> wrote:
->
-> On Fri, Jul 22, 2011 at 12:59 AM, Bryan Buckley <bryan.buckley@ti.com=
-> wrote:
-> > Remove OMAP4_USBC1_ICUSB_PWRDNZ_MASK during enable/disable PWRDNZ m=
-ode for
-> > MMC1_PBIAS and associated extended-drain MMC1 I/O cell. This is in =
-accordance
-> > with the control module programming guide. This fixes a bug where i=
-f trying to
-> > use gpio_98 or gpio_99 and MMC1 at the same time the GPIO signal wi=
-ll be
-> > affected by a changing SDMMC1_VDDS.
-> >
-> > Software must keep MMC1_PBIAS cell and MMC1_IO cell PWRDNZ signals =
-low whenever
-> > SDMMC1_VDDS ramps up/down or changes for cell protection purposes.
-> >
-> > MMC1 is based on SDMMC1_VDDS whereas USBC1 is based on SIM_VDDS the=
-refore
-> > they can operate independently.
-> >
-> > Signed-off-by: Bryan Buckley <bryan.buckley@ti.com>
->
-> Good catch,
->
-> Acked-by: =A0Kishore Kadiyala <kishore.kadiyala@ti.com>
->
+Hi Linus,
 
-Any other comments from anyone else?  Noticed that this commit isn't
-in any upstream branches. This patch will fix issues with people who
-want to use GPIO 98/99 AND MMC1 at the same time.  Would be good to
-have this fix upstream.
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Please pull from:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+for a small set of MMC fixes and cleanups.  There are currently no merg=
+e
+conflicts, and the patches have been tested in linux-next.  Thanks.
+
+
+The following changes since commit 322a8b034003c0d46d39af85bf24fee27b90=
+2f48:
+
+  Linux 3.1-rc1 (2011-08-07 18:23:30 -0700)
+
+are available in the git repository at:
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+Aaron Lu (1):
+      mmc: sdhci: fix retuning timer wrongly deleted in sdhci_tasklet_f=
+inish
+
+Andy Shevchenko (5):
+      mmc: mmc_test: avoid stalled file in debugfs
+      mmc: Revert "mmc: sdhci: Fix SDHCI_QUIRK_TIMEOUT_USES_SDCLK"
+      mmc: sdhci: check host->clock before using it as a denominator
+      mmc: sdhci: move timeout_clk calculation farther down
+      mmc: sdhci: use f_max instead of host->clock for timeouts
+
+Axel Lin (1):
+      mmc: tmio: eliminate unused variable 'mmc' warning
+
+Jaehoon Chung (3):
+      mmc: sdhci-s3c: add BROKEN_ADMA_ZEROLEN_DESC quirk
+      mmc: core: use defined R1_STATE_PRG macro for card status
+      mmc: remove unused "ddr" parameter in struct mmc_ios
+
+Kyungmin Park (1):
+      mmc: core: Detect eMMC v4.5 ext_csd entries
+
+Mark Brown (1):
+      mmc: sdhci-s3c: Fix build for header change
+
+Micha=C5=82 Miros=C5=82aw (1):
+      mmc: cb710: fix possible pci_dev leak in cb710_pci_configure()
+
+Philip Rakity (1):
+      mmc: sdhci: pxav3: controller needs 32 bit ADMA addressing
+
+Seungwon Jeon (1):
+      mmc: dw_mmc: Fix DDR mode support.
+
+Shashidhar Hiremath (1):
+      mmc: dw_mmc: Fix mask in IDMAC_SET_BUFFER1_SIZE macro
+
+Tony Lin (1):
+      mmc: esdhc-imx: fix card interrupt loss on freescale eSDHC
+
+ drivers/misc/cb710/core.c          |    3 +-
+ drivers/mmc/card/mmc_test.c        |   58 +++++++++++++++++++---------=
+-------
+ drivers/mmc/core/core.c            |    2 +-
+ drivers/mmc/core/mmc.c             |    2 +-
+ drivers/mmc/core/mmc_ops.c         |    2 +-
+ drivers/mmc/host/dw_mmc.c          |    6 ++--
+ drivers/mmc/host/sdhci-esdhc-imx.c |   40 +++++++++++++++++++-----
+ drivers/mmc/host/sdhci-pxav3.c     |    3 +-
+ drivers/mmc/host/sdhci-s3c.c       |    4 ++
+ drivers/mmc/host/sdhci.c           |   53 +++++++++++++++-------------=
+-----
+ drivers/mmc/host/tmio_mmc.c        |    2 -
+ include/linux/mmc/host.h           |    2 -
+ 12 files changed, 100 insertions(+), 77 deletions(-)
+
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
