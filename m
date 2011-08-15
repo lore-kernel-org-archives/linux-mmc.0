@@ -1,95 +1,88 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [GIT PULL] MMC fixes for 3.1-rc2
-Date: Sun, 14 Aug 2011 15:07:10 -0400
-Message-ID: <m239h3olr5.fsf@bob.laptop.org>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: add missing inclusion of linux/module.h
+Date: Mon, 15 Aug 2011 10:28:18 +0800
+Message-ID: <1313375298-18546-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34755 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754653Ab1HNTH1 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Aug 2011 15:07:27 -0400
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:65001 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750869Ab1HOCOo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Aug 2011 22:14:44 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, Stephen Rothwell <sfr@canb.auug.org.au>, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>
 
-Hi Linus,
+There are following warning and error when compiling the driver.
+The patch adds the missing inclusion of linux/module.h to fix them.
 
-Please pull from:
+drivers/mmc/host/sdhci-esdhc-imx.c:87:1: warning: data definition has n=
+o type or storage class
+drivers/mmc/host/sdhci-esdhc-imx.c:87:1: warning: type defaults to =E2=80=
+=98int=E2=80=99 in declaration of =E2=80=98MODULE_DEVICE_TABLE=E2=80=99
+drivers/mmc/host/sdhci-esdhc-imx.c:87:1: warning: parameter names (with=
+out types) in function declaration
+drivers/mmc/host/sdhci-esdhc-imx.c:96:1: warning: data definition has n=
+o type or storage class
+drivers/mmc/host/sdhci-esdhc-imx.c:96:1: warning: type defaults to =E2=80=
+=98int=E2=80=99 in declaration of =E2=80=98MODULE_DEVICE_TABLE=E2=80=99
+drivers/mmc/host/sdhci-esdhc-imx.c:96:1: warning: parameter names (with=
+out types) in function declaration
+drivers/mmc/host/sdhci-esdhc-imx.c:563:12: error: =E2=80=98THIS_MODULE=E2=
+=80=99 undeclared here (not in a function)
+drivers/mmc/host/sdhci-esdhc-imx.c:587:20: error: expected declaration =
+specifiers or =E2=80=98...=E2=80=99 before string constant
+drivers/mmc/host/sdhci-esdhc-imx.c:587:1: warning: data definition has =
+no type or storage class
+drivers/mmc/host/sdhci-esdhc-imx.c:587:1: warning: type defaults to =E2=
+=80=98int=E2=80=99 in declaration of =E2=80=98MODULE_DESCRIPTION=E2=80=99
+drivers/mmc/host/sdhci-esdhc-imx.c:587:20: warning: function declaratio=
+n isn=E2=80=99t a prototype
+drivers/mmc/host/sdhci-esdhc-imx.c:588:15: error: expected declaration =
+specifiers or =E2=80=98...=E2=80=99 before string constant
+drivers/mmc/host/sdhci-esdhc-imx.c:588:1: warning: data definition has =
+no type or storage class
+drivers/mmc/host/sdhci-esdhc-imx.c:588:1: warning: type defaults to =E2=
+=80=98int=E2=80=99 in declaration of =E2=80=98MODULE_AUTHOR=E2=80=99
+drivers/mmc/host/sdhci-esdhc-imx.c:588:15: warning: function declaratio=
+n isn=E2=80=99t a prototype
+drivers/mmc/host/sdhci-esdhc-imx.c:589:16: error: expected declaration =
+specifiers or =E2=80=98...=E2=80=99 before string constant
+drivers/mmc/host/sdhci-esdhc-imx.c:589:1: warning: data definition has =
+no type or storage class
+drivers/mmc/host/sdhci-esdhc-imx.c:589:1: warning: type defaults to =E2=
+=80=98int=E2=80=99 in declaration of =E2=80=98MODULE_LICENSE=E2=80=99
+drivers/mmc/host/sdhci-esdhc-imx.c:589:16: warning: function declaratio=
+n isn=E2=80=99t a prototype
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>
+---
+Hi Stephen,
 
-for a small set of MMC fixes and cleanups.  There are currently no merg=
-e
-conflicts, and the patches have been tested in linux-next.  Thanks.
+I spot this on linux-next-20110812.
 
+Regards,
+Shawn
 
-The following changes since commit 322a8b034003c0d46d39af85bf24fee27b90=
-2f48:
+ drivers/mmc/host/sdhci-esdhc-imx.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
-  Linux 3.1-rc1 (2011-08-07 18:23:30 -0700)
-
-are available in the git repository at:
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-Aaron Lu (1):
-      mmc: sdhci: fix retuning timer wrongly deleted in sdhci_tasklet_f=
-inish
-
-Andy Shevchenko (5):
-      mmc: mmc_test: avoid stalled file in debugfs
-      mmc: Revert "mmc: sdhci: Fix SDHCI_QUIRK_TIMEOUT_USES_SDCLK"
-      mmc: sdhci: check host->clock before using it as a denominator
-      mmc: sdhci: move timeout_clk calculation farther down
-      mmc: sdhci: use f_max instead of host->clock for timeouts
-
-Axel Lin (1):
-      mmc: tmio: eliminate unused variable 'mmc' warning
-
-Jaehoon Chung (3):
-      mmc: sdhci-s3c: add BROKEN_ADMA_ZEROLEN_DESC quirk
-      mmc: core: use defined R1_STATE_PRG macro for card status
-      mmc: remove unused "ddr" parameter in struct mmc_ios
-
-Kyungmin Park (1):
-      mmc: core: Detect eMMC v4.5 ext_csd entries
-
-Mark Brown (1):
-      mmc: sdhci-s3c: Fix build for header change
-
-Micha=C5=82 Miros=C5=82aw (1):
-      mmc: cb710: fix possible pci_dev leak in cb710_pci_configure()
-
-Philip Rakity (1):
-      mmc: sdhci: pxav3: controller needs 32 bit ADMA addressing
-
-Seungwon Jeon (1):
-      mmc: dw_mmc: Fix DDR mode support.
-
-Shashidhar Hiremath (1):
-      mmc: dw_mmc: Fix mask in IDMAC_SET_BUFFER1_SIZE macro
-
-Tony Lin (1):
-      mmc: esdhc-imx: fix card interrupt loss on freescale eSDHC
-
- drivers/misc/cb710/core.c          |    3 +-
- drivers/mmc/card/mmc_test.c        |   58 +++++++++++++++++++---------=
--------
- drivers/mmc/core/core.c            |    2 +-
- drivers/mmc/core/mmc.c             |    2 +-
- drivers/mmc/core/mmc_ops.c         |    2 +-
- drivers/mmc/host/dw_mmc.c          |    6 ++--
- drivers/mmc/host/sdhci-esdhc-imx.c |   40 +++++++++++++++++++-----
- drivers/mmc/host/sdhci-pxav3.c     |    3 +-
- drivers/mmc/host/sdhci-s3c.c       |    4 ++
- drivers/mmc/host/sdhci.c           |   53 +++++++++++++++-------------=
------
- drivers/mmc/host/tmio_mmc.c        |    2 -
- include/linux/mmc/host.h           |    2 -
- 12 files changed, 100 insertions(+), 77 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhc=
+i-esdhc-imx.c
+index 2a1ba84..4557aa1 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -16,6 +16,7 @@
+ #include <linux/err.h>
+ #include <linux/clk.h>
+ #include <linux/gpio.h>
++#include <linux/module.h>
+ #include <linux/slab.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
 --=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.4.1
+
