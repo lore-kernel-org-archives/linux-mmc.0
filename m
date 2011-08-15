@@ -1,70 +1,78 @@
-From: Stephen Rothwell <sfr@canb.auug.org.au>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: add missing inclusion of
- linux/module.h
-Date: Mon, 15 Aug 2011 16:44:07 +1000
-Message-ID: <20110815164407.9dee291afbc627e0dafe6b6c@canb.auug.org.au>
-References: <1313375298-18546-1-git-send-email-shawn.guo@linaro.org>
-	<m2mxfbmirn.fsf@bob.laptop.org>
-	<CAAQ0ZWRX_POwMZY9m9ath=oC0OS538+wRcfj-vay5VSkSRkzEg@mail.gmail.com>
-	<20110815154607.8c34ffd02558b4d86e17e396@canb.auug.org.au>
-	<CAAQ0ZWSqRiaPRF0ofyQL75QyYJov1VVnQjgs2LWAgSgp804NpQ@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [RFC 0/4] mmc: tmio, sdhi: provide multiple irq handlers
+Date: Mon, 15 Aug 2011 10:17:28 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1108150950330.7851@axis700.grange>
+References: <1313387488-28175-1-git-send-email-horms@verge.net.au>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pgp-signature";
- micalg="PGP-SHA1";
- boundary="Signature=_Mon__15_Aug_2011_16_44_07_+1000_eExonE/6_y0zE02_"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from chilli.pcug.org.au ([203.10.76.44]:40342 "EHLO smtps.tip.net.au"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751306Ab1HOGoP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 15 Aug 2011 02:44:15 -0400
-In-Reply-To: <CAAQ0ZWSqRiaPRF0ofyQL75QyYJov1VVnQjgs2LWAgSgp804NpQ@mail.gmail.com>
+Received: from moutng.kundenserver.de ([212.227.126.171]:64392 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751303Ab1HOIRe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Aug 2011 04:17:34 -0400
+In-Reply-To: <1313387488-28175-1-git-send-email-horms@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, patches@linaro.org
+To: Simon Horman <horms@verge.net.au>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
 
---Signature=_Mon__15_Aug_2011_16_44_07_+1000_eExonE/6_y0zE02_
-Content-Type: text/plain; charset=US-ASCII
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hi Simon
 
-Hi Shawn,
+On Mon, 15 Aug 2011, Simon Horman wrote:
 
-On Mon, 15 Aug 2011 14:05:49 +0800 Shawn Guo <shawn.guo@linaro.org> wrote:
->
-> My .config is attached.  It's used to build i.mx53 image.
+> The SDHI driver already supports making use of up to three interrupt
+> sources.
+> 
+> This series breaks up the existing interrupt handler into three handlers,
+> one for card access, one for card detect interrupts, and one for SDIO
+> interrupts.  A cover-all handler, which makes use of these new broken-out
+> handlers is provided for for the case where there is only one interrupt
+> source.
 
-Thanks.
+The idea is good, thanks for the patches. Only I'm not sure I find the way 
+you split the patches extremely intuitive;-) How about:
 
-> Before you start building it, you need to cherry-pick the following
-> commit from Linus' tree to fix another error.
->=20
-> commit d9c927833a42b4eaae4addd031f780f4530f7a2d
-> Author: Arnaud Patard (Rtp) <arnaud.patard@rtp-net.org>
-> Date:   Fri Aug 5 09:32:41 2011 +0200
->=20
->     iMX: Fix build for iMX53
+[PATCH 1/x] cache IRQ masks
+ * in this patch I'd propose to cache SD-card and SDIO IRQ masks in struct 
+   tmio_mmc_host, instead of reading them every time from the hardware
+[PATCH 2/x] split the ISR
+ * in this patch you split the IRQ handler directly into the final form as 
+   after the first your 3 patches, without intermediate steps, also adding 
+   them to the header
+[PATCH 3/x] SDHI: use specialized ISRs when available
+ * you know what to do here:-) Also, I'd
 
-That is included in today's linux-next.
+#define SH_MOBILE_SDHI_IRQ_SDCARD	0
+#define SH_MOBILE_SDHI_IRQ_CARD_DETECT	1
+#define SH_MOBILE_SDHI_IRQ_SDIO		2
 
---=20
-Cheers,
-Stephen Rothwell                    sfr@canb.auug.org.au
-http://www.canb.auug.org.au/~sfr/
+and use these defines both in platforms
 
---Signature=_Mon__15_Aug_2011_16_44_07_+1000_eExonE/6_y0zE02_
-Content-Type: application/pgp-signature
+	}, [1 + SH_MOBILE_SDHI_IRQ_SDCARD] = {
+...
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
+and in sh_mobile_sdhi.c, instead of going "case 2:" Please, also consider 
+unfolding the loop over platform IRQs in probing, it might look better 
+flat.
 
-iQEcBAEBAgAGBQJOSMA3AAoJEDMEi1NhKgbs/iEH+we5TjWoPRZa71iqNahB06Dx
-oxPh+xJXlalkcRPHUVOuikBoHKZUb+p17Gp/ObnKUoY6bPUdJTNJRQkZJBJqhi6p
-w028pedyl/u3FaZE489glXm7oeZ2GwPffZzVD3Q7QOlvP6e4sKgD/0h9ALeTAeDV
-d8G8m4YMPtUWr3GJiVzo9SZ/w9Pkfqy4qhdasghOKht9dM3WGV2oqEYjABSUK3Cq
-1WOPMywfj1NBarGOLwImC+CsiIaBp5Py3fBiUmtiWI82aiVwCVCM7YkTDRDow78f
-2m9ytAsw7zNDSVgtNvPdmSH1h/MVnL3fBq1efJZBvkMaOte+E+8CMkVA2lpGR0k=
-=ruSJ
------END PGP SIGNATURE-----
+"card_access" in function names I would replace with "io" or "data," 
+"card_irq" with "sdcard_irq" because I believe, that "SD card" is a proper 
+identification to pure storage card in SD format, as opposed to SDIO 
+cards.
 
---Signature=_Mon__15_Aug_2011_16_44_07_+1000_eExonE/6_y0zE02_--
+Also, maybe you can double-check, whether you really need all those 
+functions with names, beginning with a double underscore, and whether 
+better names wouldn't be possible for them.
+
+> This series also wires up the broken-out irq handlers in the SDHI driver
+> 
+> * Card portion tested on AP4/Mackerel
+> * SDIO portion yet to be tested. I intend to schedule access to hardware
+>   to test this if the review of these patches is positive.
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
