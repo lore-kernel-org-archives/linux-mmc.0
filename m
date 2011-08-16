@@ -1,68 +1,95 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 4/4] ARM: shmobile: ag5evm, ap4: Make use of irq index
- enum
-Date: Tue, 16 Aug 2011 20:36:20 +0900
-Message-ID: <20110816113620.GC3110@verge.net.au>
-References: <1313489486-831-1-git-send-email-horms@verge.net.au>
- <1313489486-831-5-git-send-email-horms@verge.net.au>
- <20110816111350.GC27653@trinity.fluff.org>
+Subject: Re: [PATCH 2/5] mmc: tmio: Provide separate interrupt handlers
+Date: Tue, 16 Aug 2011 20:45:22 +0900
+Message-ID: <20110816114522.GD3110@verge.net.au>
+References: <1313460499-3377-1-git-send-email-horms@verge.net.au>
+ <1313460499-3377-3-git-send-email-horms@verge.net.au>
+ <Pine.LNX.4.64.1108160924030.13154@axis700.grange>
+ <20110816075919.GA12097@verge.net.au>
+ <Pine.LNX.4.64.1108161250470.13913@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:59525 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751377Ab1HPLgY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Aug 2011 07:36:24 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20110816111350.GC27653@trinity.fluff.org>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <Pine.LNX.4.64.1108161250470.13913@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Dooks <ben@trinity.fluff.org>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>
 
-On Tue, Aug 16, 2011 at 12:13:50PM +0100, Ben Dooks wrote:
-> On Tue, Aug 16, 2011 at 07:11:26PM +0900, Simon Horman wrote:
-> > This is intended to make it easier to correctly order IRQs.
-> > 
-> > As suggested by Guennadi Liakhovetski.
-> > 
-> > Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > Cc: Magnus Damm <magnus.damm@gmail.com>
-> > Signed-off-by: Simon Horman <horms@verge.net.au>
-> > 
-> > ---
-> > 
-> > Depends on "mmc: sdhi: Make use of per-source irq handlers"
-> > ---
-> >  arch/arm/mach-shmobile/board-ag5evm.c   |   12 ++++++------
-> >  arch/arm/mach-shmobile/board-mackerel.c |   18 +++++++++---------
-> >  2 files changed, 15 insertions(+), 15 deletions(-)
-> > 
-> > diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
-> > index ce5c251..c687f67 100644
-> > --- a/arch/arm/mach-shmobile/board-ag5evm.c
-> > +++ b/arch/arm/mach-shmobile/board-ag5evm.c
-> > @@ -352,15 +352,15 @@ static struct resource sdhi0_resources[] = {
-> >  		.end	= 0xee1000ff,
-> >  		.flags	= IORESOURCE_MEM,
-> >  	},
-> > -	[1] = {
-> > +	[1 + SH_MOBILE_SDHI_IRQ_SDCARD] = {
-> >  		.start	= gic_spi(83),
-> >  		.flags	= IORESOURCE_IRQ,
-> >  	},
-> > -	[2] = {
-> > +	[1 + SH_MOBILE_SDHI_IRQ_CARD_DETECT] = {
-> >  		.start	= gic_spi(84),
-> >  		.flags	= IORESOURCE_IRQ,
-> >  	},
-> > -	[3] = {
-> > +	[1 + SH_MOBILE_SDHI_IRQ_SDIO] = {
-> >  		.start	= gic_spi(85),
-> >  		.flags	= IORESOURCE_IRQ,
-> >  	},
+On Tue, Aug 16, 2011 at 01:13:06PM +0200, Guennadi Liakhovetski wrote:
+> On Tue, 16 Aug 2011, Simon Horman wrote:
 > 
-> how about naming the irqs?
+> > On Tue, Aug 16, 2011 at 09:41:52AM +0200, Guennadi Liakhovetski wrote:
+> > > On Tue, 16 Aug 2011, Simon Horman wrote:
+> 
+> [snip]
+> 
+> > > > +irqreturn_t tmio_mmc_irq(int irq, void *devid)
+> > > > +{
+> > > > +	struct tmio_mmc_host *host = devid;
+> > > > +	unsigned int ireg, status;
+> > > > +
+> > > > +	pr_debug("MMC IRQ begin\n");
+> > > > +
+> > > > +	tmio_mmc_card_irq_status(host, &ireg, &status);
+> > > > +	__tmio_mmc_card_detect_irq(host, ireg, status);
+> > > 
+> > > Same here - I would return, if a card hot-plug event occurred.
+> > 
+> > Will do.
+> > 
+> > > > +	__tmio_mmc_sdcard_irq(host, ireg, status);
+> > > 
+> > > Ditto
+> > > 
+> > > > +
+> > > > +	tmio_mmc_sdio_irq(irq, devid);
+> > > 
+> > > Any specific reason, why you now process SDIO IRQs last?
+> > 
+> > I believe this is in keeping with the ordering implied by original code.
+> 
+> I believe it's not. The original version did SDIO first, then hotplug, 
+> then normal IO.
 
-Sorry, I'm not sure what you are asking for.
+My reading of the original code is that SDIO was the lowest priority
+although its code appeared near the top of tmio_mmc_irq().
+
+irqreturn_t tmio_mmc_irq(int irq, void *devid)
+{
+	...
+
+	status = sd_ctrl_read32(host, CTL_STATUS);
+	irq_mask = sd_ctrl_read32(host, CTL_IRQ_MASK);
+	ireg = status & TMIO_MASK_IRQ & ~irq_mask;
+
+	sdio_ireg = 0;
+	if (!ireg pdata->flags & TMIO_MMC_SDIO_IRQ) {
+		/* Handle SDIO Interrupt */
+		...
+		goto out;
+	}
+
+	/* Handle Card detect Interrupts */
+
+	/* Handle other Interrupts */
+
+	...
+}
+
+> I'm not necessarily saying, that the original code was 
+> correct or better, I'm just saying, it was different. As for which one we 
+> should prefer... I think, I'd check for hotplug first: if the card is 
+> removed, no reason to try to communicate with it. And we have to first 
+> report a new card, before reporting any IRQs from it. But then - IO or 
+> SDIO as second? Well, since SDIO IRQs are asynchronous, it shouldn't be a 
+> big problem for them to wait a bit, whereas normal IO IRQs are card's 
+> response to host's actions, so, the originator might want to know the 
+> result before processing any asynchronous events. So, I actually like your 
+> ordering better... But I'll give it a short spin with SDIO, unless you do 
+> it yourself.
+
+I intend to test my code with SDIO, however I don't have access to hardware
+at this exact moment. So if you could do so, that would be great.
 
