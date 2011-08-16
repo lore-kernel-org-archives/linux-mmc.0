@@ -1,70 +1,42 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 3/5] mmc: sdhi: Add defines for platform irq indexes
-Date: Tue, 16 Aug 2011 10:34:22 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1108161031340.13154@axis700.grange>
-References: <1313460499-3377-1-git-send-email-horms@verge.net.au>
- <1313460499-3377-4-git-send-email-horms@verge.net.au>
- <Pine.LNX.4.64.1108160944130.13154@axis700.grange> <20110816080304.GB12097@verge.net.au>
+From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Subject: Re: Testing Infrastructure for SD/MMC Commands
+Date: Tue, 16 Aug 2011 14:56:29 +0530
+Message-ID: <CANYdXnrHWGPCeAEJQq6cmsZAyYfvvcSZ_1_3jKhcMbTARJpGVw@mail.gmail.com>
+References: <CANYdXnoZK3OoWOnJhyq645GofnsXuk7tJm09Wv8=Y+gLujPSkQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20110816080304.GB12097@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iy0-f170.google.com ([209.85.210.170]:39512 "EHLO
+	mail-iy0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751277Ab1HPJ0a convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Aug 2011 05:26:30 -0400
+Received: by iye16 with SMTP id 16so9243724iye.1
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Aug 2011 02:26:30 -0700 (PDT)
+In-Reply-To: <CANYdXnoZK3OoWOnJhyq645GofnsXuk7tJm09Wv8=Y+gLujPSkQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, Will Newton <will.newton@gmail.com>, Jae hoon Chung <jh80.chung@gmail.com>, James Hogan <james.hogan@imgtec.com>, kyungmin.park@samsung.com
+Cc: linux-mmc@vger.kernel.org
 
-On Tue, 16 Aug 2011, Simon Horman wrote:
+adding mmc mailing list
 
-> On Tue, Aug 16, 2011 at 09:51:00AM +0200, Guennadi Liakhovetski wrote:
-> > On Tue, 16 Aug 2011, Simon Horman wrote:
-> > 
-> > > This is intended to make it easier to correctly
-> > > order platform defines in platform data and
-> > > the logic that uses them.
-> > > 
-> > > Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > > Cc: Magnus Damm <magnus.damm@gmail.com>
-> > > Cc: Paul Mundt <lethal@linux-sh.org>
-> > > Signed-off-by: Simon Horman <horms@verge.net.au>
-> > > ---
-> > >  include/linux/mmc/sh_mobile_sdhi.h |    4 ++++
-> > >  1 files changed, 4 insertions(+), 0 deletions(-)
-> > > 
-> > > diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-> > > index bd50b36..c66c58c 100644
-> > > --- a/include/linux/mmc/sh_mobile_sdhi.h
-> > > +++ b/include/linux/mmc/sh_mobile_sdhi.h
-> > > @@ -3,6 +3,10 @@
-> > >  
-> > >  #include <linux/types.h>
-> > >  
-> > > +#define SH_MOBILE_SDHI_IRQ_SDCARD	0
-> > > +#define SH_MOBILE_SDHI_IRQ_CARD_DETECT	1
-> > > +#define SH_MOBILE_SDHI_IRQ_SDIO		2
-> > > +
-> > 
-> > An idea: make this an enum, put SH_MOBILE_SDHI_IRQ_NUMBER as a last item 
-> > and use it in sh_mobile_sdhi_remove() as
-> > 
-> > 	for (i = 0; i < SH_MOBILE_SDHI_IRQ_NUMBER; i++) {
-> 
-> Sure.
-> 
-> > ? I would also merge it with PATCH 4/5.
-> 
-> I prefer to keep it separate as 5/5 also depends on this change
-> and that is a change for a different maintainer.
+On Tue, Aug 16, 2011 at 11:12 AM, Shashidhar Hiremath
+<shashidharh@vayavyalabs.com> wrote:
+> Hi All,
+> =A0i am planning to come up with a module that would help for testing
+> the SD/MMC controller to see if supports the particular command.
+>
+> For example ,Through this module , we will be able to see if a
+> particular command has been accepted by the device and whether device
+> has responded in the expected manner or not by checking its response.
+>
+> Can I get some points on how useful this infrastructure would be ,and
+> any inputs on what else =A0to cover under this ?
+>
 
-Yes, 5/5 anyway depends on 3/5 in your case and they are for different 
-maintainers (or need an ack), and, in fact, 5/5 can also be extended to 
-more mach-shmobile boards, and that is not urgent, it can be done any time 
-later. Whereas 3/5 and 4/5 anyway go via one tree and I see no advantage 
-in splitting them. But it's up to you in the end - not a big deal.
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+
+--=20
+regards,
+Shashidhar Hiremath
