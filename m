@@ -1,7 +1,7 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH 2/4] mmc: tmio: Provide separate interrupt handlers
-Date: Tue, 16 Aug 2011 19:11:24 +0900
-Message-ID: <1313489486-831-3-git-send-email-horms@verge.net.au>
+Subject: [PATCH 3/4] mmc: sdhi: Make use of per-source irq handlers
+Date: Tue, 16 Aug 2011 19:11:25 +0900
+Message-ID: <1313489486-831-4-git-send-email-horms@verge.net.au>
 References: <1313489486-831-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1313489486-831-1-git-send-email-horms@verge.net.au>
@@ -10,10 +10,11 @@ To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-Provide separate interrupt handlers which may be used by platforms where
-SDHI has three interrupt sources.
+Make use of per-source irq handles if the
+platform (data) has multiple irq sources.
 
-This patch also removes the commented-out handling of CRC and other errors.
+Also, as suggested by Guennadi Liakhovetski,
+add and use defines the index or irqs in platform data.
 
 Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: Magnus Damm <magnus.damm@gmail.com>
@@ -21,215 +22,136 @@ Signed-off-by: Simon Horman <horms@verge.net.au>
 
 ---
 
-* SDCARD portion tested on AP4/Mackerel
-* SDIO portion untested
-
 v3
-* Rebase for updated "mmc: tmio: Cache interrupt masks"
-* As suggested by Guennadi Liakhovetski
-  - Do not alter logic to handle more than one interupt at once
-  - Add missing "static" to declartion of __tmio_mmc_sdcard_irq()
+* Update for changes to "mmc: tmio: Provide separate interrupt handlers"
+* As suggested by Guennadi Liakhovetski:
+  - Merge in patch "mmc: sdhi: Add defines for platform irq indexes"
+  - Use an enum instead of defines for irq indexes
 
 v2
-* As suggested by Guennadi Liakhovetski
-  - Combine 3 patches into one
-  - Reduce the number of __tmio_..._irq() functions
-  - Rename "...card_access..." functions as "...sdcard..."
+* Update for changes to "mmc: tmio: Provide separate interrupt handlers"
+* Make use of defines provided by
+  "mmc: sdhi: Add defines for platform irq indexes"
+* As suggested by Guennadi Liakhovetski:
+  - Don't use a loop to initialise irq handlers, the unrolled version
+    is easier on the eyes (and exactly the same number of lines of code!)
 ---
- drivers/mmc/host/tmio_mmc.h     |    3 +
- drivers/mmc/host/tmio_mmc_pio.c |  131 ++++++++++++++++++++++++--------------
- 2 files changed, 86 insertions(+), 48 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c  |   60 ++++++++++++++++++++++-------------
+ include/linux/mmc/sh_mobile_sdhi.h |    7 ++++
+ 2 files changed, 45 insertions(+), 22 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 1cf8db5..3020f98 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -97,6 +97,9 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host);
- void tmio_mmc_enable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
- void tmio_mmc_disable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
- irqreturn_t tmio_mmc_irq(int irq, void *devid);
-+irqreturn_t tmio_mmc_sdcard_irq(int irq, void *devid);
-+irqreturn_t tmio_mmc_card_detect_irq(int irq, void *devid);
-+irqreturn_t tmio_mmc_sdio_irq(int irq, void *devid);
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 774f643..d792705 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -96,7 +96,9 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+ 	struct tmio_mmc_host *host;
+ 	char clk_name[8];
+-	int i, irq, ret;
++	int irq, ret;
++	irqreturn_t (*f)(int irq, void *devid);
++	bool multi_irq = false;
  
- static inline char *tmio_mmc_kmap_atomic(struct scatterlist *sg,
- 					 unsigned long *flags)
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index f0c7830..37adfb2 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -545,44 +545,20 @@ out:
- 	spin_unlock(&host->lock);
- }
+ 	priv = kzalloc(sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
+ 	if (priv == NULL) {
+@@ -153,27 +155,33 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	if (ret < 0)
+ 		goto eprobe;
  
--irqreturn_t tmio_mmc_irq(int irq, void *devid)
-+static void tmio_mmc_card_irq_status(struct tmio_mmc_host *host,
-+				       int *ireg, int *status)
- {
--	struct tmio_mmc_host *host = devid;
--	struct mmc_host *mmc = host->mmc;
--	struct tmio_mmc_data *pdata = host->pdata;
--	unsigned int ireg, status;
--	unsigned int sdio_ireg, sdio_status;
--
--	pr_debug("MMC IRQ begin\n");
--
--	status = sd_ctrl_read32(host, CTL_STATUS);
--	ireg = status & TMIO_MASK_IRQ & ~host->sdcard_irq_mask;
--
--	sdio_ireg = 0;
--	if (!ireg && pdata->flags & TMIO_MMC_SDIO_IRQ) {
--		sdio_status = sd_ctrl_read16(host, CTL_SDIO_STATUS);
--		sdio_ireg = sdio_status & TMIO_SDIO_MASK_ALL &
--				~host->sdio_irq_mask;
-+	*status = sd_ctrl_read32(host, CTL_STATUS);
-+	*ireg = *status & TMIO_MASK_IRQ & ~host->sdcard_irq_mask;
- 
--		sd_ctrl_write16(host, CTL_SDIO_STATUS, sdio_status & ~TMIO_SDIO_MASK_ALL);
--
--		if (sdio_ireg && !host->sdio_irq_enabled) {
--			pr_warning("tmio_mmc: Spurious SDIO IRQ, disabling! 0x%04x 0x%04x 0x%04x\n",
--				   sdio_status, host->sdio_irq_mask, sdio_ireg);
--			tmio_mmc_enable_sdio_irq(mmc, 0);
--			goto out;
+-	for (i = 0; i < 3; i++) {
+-		irq = platform_get_irq(pdev, i);
+-		if (irq < 0) {
+-			if (i) {
+-				continue;
+-			} else {
+-				ret = irq;
+-				goto eirq;
+-			}
 -		}
--
--		if (mmc->caps & MMC_CAP_SDIO_IRQ &&
--			sdio_ireg & TMIO_SDIO_STAT_IOIRQ)
--			mmc_signal_sdio_irq(mmc);
--
--		if (sdio_ireg)
--			goto out;
--	}
-+	pr_debug_status(*status);
-+	pr_debug_status(*ireg);
-+}
- 
--	pr_debug_status(status);
--	pr_debug_status(ireg);
-+static int __tmio_mmc_card_detect_irq(struct tmio_mmc_host *host,
-+				      int ireg, int status)
-+{
-+	struct mmc_host *mmc = host->mmc;
- 
- 	/* Card insert / remove attempts */
- 	if (ireg & (TMIO_STAT_CARD_INSERT | TMIO_STAT_CARD_REMOVE)) {
-@@ -592,43 +568,102 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
- 		     ((ireg & TMIO_STAT_CARD_INSERT) && !mmc->card)) &&
- 		    !work_pending(&mmc->detect.work))
- 			mmc_detect_change(host->mmc, msecs_to_jiffies(100));
--		goto out;
-+		return 1;
+-		ret = request_irq(irq, tmio_mmc_irq, 0,
++	irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
++	if (irq >= 0) {
++		multi_irq = true;
++		ret = request_irq(irq, tmio_mmc_sdio_irq, 0,
+ 				  dev_name(&pdev->dev), host);
+-		if (ret) {
+-			while (i--) {
+-				irq = platform_get_irq(pdev, i);
+-				if (irq >= 0)
+-					free_irq(irq, host);
+-			}
+-			goto eirq;
+-		}
++		if (ret)
++			goto eirq_sdio;
  	}
++
++	ret = irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
++	if (irq >= 0) {
++		multi_irq = true;
++		ret = request_irq(irq, tmio_mmc_sdcard_irq, 0,
++				  dev_name(&pdev->dev), host);
++		if (ret)
++			goto eirq_card_detect;
++	} else if (multi_irq)
++		goto eirq_card_detect;
++
++	ret = irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_SDCARD);
++	if (irq < 0)
++		goto eirq_sdcard;
++	f = multi_irq ? tmio_mmc_card_detect_irq : tmio_mmc_irq;
++	ret = request_irq(irq, f, 0, dev_name(&pdev->dev), host);
++	if (ret)
++		goto eirq_sdcard;
++
+ 	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
+ 		 mmc_hostname(host->mmc), (unsigned long)
+ 		 (platform_get_resource(pdev,IORESOURCE_MEM, 0)->start),
+@@ -181,7 +189,15 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
  
--	/* CRC and other errors */
--/*	if (ireg & TMIO_STAT_ERR_IRQ)
-- *		handled |= tmio_error_irq(host, irq, stat);
-- */
-+	return 0;
-+}
-+
-+irqreturn_t tmio_mmc_card_detect_irq(int irq, void *devid)
-+{
-+	unsigned int ireg, status;
-+	struct tmio_mmc_host *host = devid;
+ 	return ret;
  
-+	tmio_mmc_card_irq_status(host, &ireg, &status);
-+	__tmio_mmc_card_detect_irq(host, ireg, status);
-+
-+	return IRQ_HANDLED;
-+}
-+EXPORT_SYMBOL(tmio_mmc_card_detect_irq);
-+
-+static int __tmio_mmc_sdcard_irq(struct tmio_mmc_host *host,
-+				 int ireg, int status)
-+{
- 	/* Command completion */
- 	if (ireg & (TMIO_STAT_CMDRESPEND | TMIO_STAT_CMDTIMEOUT)) {
- 		tmio_mmc_ack_mmc_irqs(host,
- 			     TMIO_STAT_CMDRESPEND |
- 			     TMIO_STAT_CMDTIMEOUT);
- 		tmio_mmc_cmd_irq(host, status);
--		goto out;
-+		return 1;
- 	}
+-eirq:
++eirq_sdcard:
++	irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
++	if (irq >= 0)
++		free_irq(irq, host);
++eirq_card_detect:
++	irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
++	if (irq >= 0)
++		free_irq(irq, host);
++eirq_sdio:
+ 	tmio_mmc_host_remove(host);
+ eprobe:
+ 	clk_disable(priv->clk);
+@@ -203,7 +219,7 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
  
- 	/* Data transfer */
- 	if (ireg & (TMIO_STAT_RXRDY | TMIO_STAT_TXRQ)) {
- 		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_RXRDY | TMIO_STAT_TXRQ);
- 		tmio_mmc_pio_irq(host);
--		goto out;
-+		return 1;
- 	}
+ 	tmio_mmc_host_remove(host);
  
- 	/* Data transfer completion */
- 	if (ireg & TMIO_STAT_DATAEND) {
- 		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_DATAEND);
- 		tmio_mmc_data_irq(host);
--		goto out;
-+		return 1;
- 	}
+-	for (i = 0; i < 3; i++) {
++	for (i = 0; i < SH_MOBILE_SDHI_IRQ_MAX; i++) {
+ 		irq = platform_get_irq(pdev, i);
+ 		if (irq >= 0)
+ 			free_irq(irq, host);
+diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
+index bd50b36..5182496 100644
+--- a/include/linux/mmc/sh_mobile_sdhi.h
++++ b/include/linux/mmc/sh_mobile_sdhi.h
+@@ -3,6 +3,13 @@
  
--	pr_warning("tmio_mmc: Spurious irq, disabling! "
--		"0x%08x 0x%08x 0x%08x\n", status, host->sdcard_irq_mask, ireg);
--	pr_debug_status(status);
--	tmio_mmc_disable_mmc_irqs(host, status & ~host->sdcard_irq_mask);
-+	return 0;
-+}
-+
-+irqreturn_t tmio_mmc_sdcard_irq(int irq, void *devid)
-+{
-+	unsigned int ireg, status;
-+	struct tmio_mmc_host *host = devid;
-+
-+	tmio_mmc_card_irq_status(host, &ireg, &status);
-+	__tmio_mmc_sdcard_irq(host, ireg, status);
-+
-+	return IRQ_HANDLED;
-+}
-+EXPORT_SYMBOL(tmio_mmc_sdcard_irq);
-+
-+irqreturn_t tmio_mmc_sdio_irq(int irq, void *devid)
-+{
-+	struct tmio_mmc_host *host = devid;
-+	struct mmc_host *mmc = host->mmc;
-+	struct tmio_mmc_data *pdata = host->pdata;
-+	unsigned int ireg, status;
-+
-+	if (!(pdata->flags & TMIO_MMC_SDIO_IRQ))
-+		return IRQ_HANDLED;
-+
-+	status = sd_ctrl_read16(host, CTL_SDIO_STATUS);
-+	ireg = status & TMIO_SDIO_MASK_ALL & ~host->sdcard_irq_mask;
-+
-+	sd_ctrl_write16(host, CTL_SDIO_STATUS, status & ~TMIO_SDIO_MASK_ALL);
-+
-+	if (mmc->caps & MMC_CAP_SDIO_IRQ && ireg & TMIO_SDIO_STAT_IOIRQ)
-+		mmc_signal_sdio_irq(mmc);
-+
-+	return IRQ_HANDLED;
-+}
-+EXPORT_SYMBOL(tmio_mmc_sdio_irq);
-+
-+irqreturn_t tmio_mmc_irq(int irq, void *devid)
-+{
-+	struct tmio_mmc_host *host = devid;
-+	unsigned int ireg, status;
-+
-+	pr_debug("MMC IRQ begin\n");
-+
-+	tmio_mmc_card_irq_status(host, &ireg, &status);
-+	if (__tmio_mmc_card_detect_irq(host, ireg, status))
-+		return IRQ_HANDLED;
-+	if (__tmio_mmc_sdcard_irq(host, ireg, status))
-+		return IRQ_HANDLED;
-+
-+	tmio_mmc_sdio_irq(irq, devid);
+ #include <linux/types.h>
  
--out:
- 	return IRQ_HANDLED;
- }
- EXPORT_SYMBOL(tmio_mmc_irq);
++enum {
++	SH_MOBILE_SDHI_IRQ_SDCARD = 0,
++	SH_MOBILE_SDHI_IRQ_CARD_DETECT,
++	SH_MOBILE_SDHI_IRQ_SDIO,
++	SH_MOBILE_SDHI_IRQ_MAX
++};
++
+ struct platform_device;
+ struct tmio_mmc_data;
+ 
 -- 
 1.7.5.4
 
