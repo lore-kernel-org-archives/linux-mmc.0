@@ -1,7 +1,7 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH 4/4] ARM: shmobile: ag5evm, ap4: Make use of irq index enum
-Date: Tue, 16 Aug 2011 19:11:26 +0900
-Message-ID: <1313489486-831-5-git-send-email-horms@verge.net.au>
+Subject: [PATCH 1/4] mmc: tmio: Cache interrupt masks
+Date: Tue, 16 Aug 2011 19:11:23 +0900
+Message-ID: <1313489486-831-2-git-send-email-horms@verge.net.au>
 References: <1313489486-831-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1313489486-831-1-git-send-email-horms@verge.net.au>
@@ -10,9 +10,10 @@ To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-This is intended to make it easier to correctly order IRQs.
+This avoids the need to look up the masks each time an interrupt
+is handled.
 
-As suggested by Guennadi Liakhovetski.
+As suggested by Guennadi.
 
 Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: Magnus Damm <magnus.damm@gmail.com>
@@ -20,115 +21,129 @@ Signed-off-by: Simon Horman <horms@verge.net.au>
 
 ---
 
-Depends on "mmc: sdhi: Make use of per-source irq handlers"
----
- arch/arm/mach-shmobile/board-ag5evm.c   |   12 ++++++------
- arch/arm/mach-shmobile/board-mackerel.c |   18 +++++++++---------
- 2 files changed, 15 insertions(+), 15 deletions(-)
+* SDCARD portion tested on AP4/Mackerel
+* SDIO portion untested
 
-diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
-index ce5c251..c687f67 100644
---- a/arch/arm/mach-shmobile/board-ag5evm.c
-+++ b/arch/arm/mach-shmobile/board-ag5evm.c
-@@ -352,15 +352,15 @@ static struct resource sdhi0_resources[] = {
- 		.end	= 0xee1000ff,
- 		.flags	= IORESOURCE_MEM,
- 	},
--	[1] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_SDCARD] = {
- 		.start	= gic_spi(83),
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_CARD_DETECT] = {
- 		.start	= gic_spi(84),
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[3] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_SDIO] = {
- 		.start	= gic_spi(85),
- 		.flags	= IORESOURCE_IRQ,
- 	},
-@@ -395,15 +395,15 @@ static struct resource sdhi1_resources[] = {
- 		.end	= 0xee1200ff,
- 		.flags	= IORESOURCE_MEM,
- 	},
--	[1] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_SDCARD] = {
- 		.start	= gic_spi(87),
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_CARD_DETECT] = {
- 		.start	= gic_spi(88),
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[3] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_SDIO] = {
- 		.start	= gic_spi(89),
- 		.flags	= IORESOURCE_IRQ,
- 	},
-diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
-index d41c01f..bc575eb 100644
---- a/arch/arm/mach-shmobile/board-mackerel.c
-+++ b/arch/arm/mach-shmobile/board-mackerel.c
-@@ -1022,15 +1022,15 @@ static struct resource sdhi0_resources[] = {
- 		.end	= 0xe68500ff,
- 		.flags	= IORESOURCE_MEM,
- 	},
--	[1] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_SDCARD] = {
- 		.start	= evt2irq(0x0e00) /* SDHI0_SDHI0I0 */,
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_CARD_DETECT] = {
- 		.start	= evt2irq(0x0e20) /* SDHI0_SDHI0I1 */,
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[3] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_SDIO] = {
- 		.start	= evt2irq(0x0e40) /* SDHI0_SDHI0I2 */,
- 		.flags	= IORESOURCE_IRQ,
- 	},
-@@ -1065,15 +1065,15 @@ static struct resource sdhi1_resources[] = {
- 		.end	= 0xe68600ff,
- 		.flags	= IORESOURCE_MEM,
- 	},
--	[1] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_SDCARD] = {
- 		.start	= evt2irq(0x0e80), /* SDHI1_SDHI1I0 */
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_CARD_DETECT] = {
- 		.start	= evt2irq(0x0ea0), /* SDHI1_SDHI1I1 */
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[3] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_SDIO] = {
- 		.start	= evt2irq(0x0ec0), /* SDHI1_SDHI1I2 */
- 		.flags	= IORESOURCE_IRQ,
- 	},
-@@ -1116,15 +1116,15 @@ static struct resource sdhi2_resources[] = {
- 		.end	= 0xe68700ff,
- 		.flags	= IORESOURCE_MEM,
- 	},
--	[1] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_SDCARD] = {
- 		.start	= evt2irq(0x1200), /* SDHI2_SDHI2I0 */
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_CARD_DETECT] = {
- 		.start	= evt2irq(0x1220), /* SDHI2_SDHI2I1 */
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[3] = {
-+	[1 + SH_MOBILE_SDHI_IRQ_SDIO] = {
- 		.start	= evt2irq(0x1240), /* SDHI2_SDHI2I2 */
- 		.flags	= IORESOURCE_IRQ,
- 	},
+v3
+* As suggested by Guennadi Liakhovetski
+  - Only read sdcard_irq_mask once and never read sdio_irq_mask,
+    instead use the cached values as much as possible
+
+v2
+* Initial release
+---
+ drivers/mmc/host/tmio_mmc.h     |    4 ++++
+ drivers/mmc/host/tmio_mmc_pio.c |   34 ++++++++++++++++++----------------
+ 2 files changed, 22 insertions(+), 16 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index eeaf643..1cf8db5 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -79,6 +79,10 @@ struct tmio_mmc_host {
+ 	struct delayed_work	delayed_reset_work;
+ 	struct work_struct	done;
+ 
++	/* Cache IRQ mask */
++	u32			sdcard_irq_mask;
++	u32			sdio_irq_mask;
++
+ 	spinlock_t		lock;		/* protect host private data */
+ 	unsigned long		last_req_ts;
+ 	struct mutex		ios_lock;	/* protect set_ios() context */
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 1f16357..f0c7830 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -48,14 +48,14 @@
+ 
+ void tmio_mmc_enable_mmc_irqs(struct tmio_mmc_host *host, u32 i)
+ {
+-	u32 mask = sd_ctrl_read32(host, CTL_IRQ_MASK) & ~(i & TMIO_MASK_IRQ);
+-	sd_ctrl_write32(host, CTL_IRQ_MASK, mask);
++	host->sdcard_irq_mask &= ~(i & TMIO_MASK_IRQ);
++	sd_ctrl_write32(host, CTL_IRQ_MASK, host->sdcard_irq_mask);
+ }
+ 
+ void tmio_mmc_disable_mmc_irqs(struct tmio_mmc_host *host, u32 i)
+ {
+-	u32 mask = sd_ctrl_read32(host, CTL_IRQ_MASK) | (i & TMIO_MASK_IRQ);
+-	sd_ctrl_write32(host, CTL_IRQ_MASK, mask);
++	host->sdcard_irq_mask |= (i & TMIO_MASK_IRQ);
++	sd_ctrl_write32(host, CTL_IRQ_MASK, host->sdcard_irq_mask);
+ }
+ 
+ static void tmio_mmc_ack_mmc_irqs(struct tmio_mmc_host *host, u32 i)
+@@ -127,11 +127,13 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 
+ 	if (enable) {
+ 		host->sdio_irq_enabled = 1;
++		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL &
++					~TMIO_SDIO_STAT_IOIRQ;
+ 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
+-		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK,
+-			(TMIO_SDIO_MASK_ALL & ~TMIO_SDIO_STAT_IOIRQ));
++		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
+ 	} else {
+-		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, TMIO_SDIO_MASK_ALL);
++		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
++		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
+ 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0000);
+ 		host->sdio_irq_enabled = 0;
+ 	}
+@@ -548,26 +550,25 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
+ 	struct tmio_mmc_host *host = devid;
+ 	struct mmc_host *mmc = host->mmc;
+ 	struct tmio_mmc_data *pdata = host->pdata;
+-	unsigned int ireg, irq_mask, status;
+-	unsigned int sdio_ireg, sdio_irq_mask, sdio_status;
++	unsigned int ireg, status;
++	unsigned int sdio_ireg, sdio_status;
+ 
+ 	pr_debug("MMC IRQ begin\n");
+ 
+ 	status = sd_ctrl_read32(host, CTL_STATUS);
+-	irq_mask = sd_ctrl_read32(host, CTL_IRQ_MASK);
+-	ireg = status & TMIO_MASK_IRQ & ~irq_mask;
++	ireg = status & TMIO_MASK_IRQ & ~host->sdcard_irq_mask;
+ 
+ 	sdio_ireg = 0;
+ 	if (!ireg && pdata->flags & TMIO_MMC_SDIO_IRQ) {
+ 		sdio_status = sd_ctrl_read16(host, CTL_SDIO_STATUS);
+-		sdio_irq_mask = sd_ctrl_read16(host, CTL_SDIO_IRQ_MASK);
+-		sdio_ireg = sdio_status & TMIO_SDIO_MASK_ALL & ~sdio_irq_mask;
++		sdio_ireg = sdio_status & TMIO_SDIO_MASK_ALL &
++				~host->sdio_irq_mask;
+ 
+ 		sd_ctrl_write16(host, CTL_SDIO_STATUS, sdio_status & ~TMIO_SDIO_MASK_ALL);
+ 
+ 		if (sdio_ireg && !host->sdio_irq_enabled) {
+ 			pr_warning("tmio_mmc: Spurious SDIO IRQ, disabling! 0x%04x 0x%04x 0x%04x\n",
+-				   sdio_status, sdio_irq_mask, sdio_ireg);
++				   sdio_status, host->sdio_irq_mask, sdio_ireg);
+ 			tmio_mmc_enable_sdio_irq(mmc, 0);
+ 			goto out;
+ 		}
+@@ -623,9 +624,9 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
+ 	}
+ 
+ 	pr_warning("tmio_mmc: Spurious irq, disabling! "
+-		"0x%08x 0x%08x 0x%08x\n", status, irq_mask, ireg);
++		"0x%08x 0x%08x 0x%08x\n", status, host->sdcard_irq_mask, ireg);
+ 	pr_debug_status(status);
+-	tmio_mmc_disable_mmc_irqs(host, status & ~irq_mask);
++	tmio_mmc_disable_mmc_irqs(host, status & ~host->sdcard_irq_mask);
+ 
+ out:
+ 	return IRQ_HANDLED;
+@@ -882,6 +883,7 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 	tmio_mmc_clk_stop(_host);
+ 	tmio_mmc_reset(_host);
+ 
++	_host->sdcard_irq_mask = sd_ctrl_read32(_host, CTL_IRQ_MASK);
+ 	tmio_mmc_disable_mmc_irqs(_host, TMIO_MASK_ALL);
+ 	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+ 		tmio_mmc_enable_sdio_irq(mmc, 0);
 -- 
 1.7.5.4
 
