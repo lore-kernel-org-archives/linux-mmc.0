@@ -1,42 +1,25 @@
-From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Subject: Re: Testing Infrastructure for SD/MMC Commands
-Date: Tue, 16 Aug 2011 14:56:29 +0530
-Message-ID: <CANYdXnrHWGPCeAEJQq6cmsZAyYfvvcSZ_1_3jKhcMbTARJpGVw@mail.gmail.com>
-References: <CANYdXnoZK3OoWOnJhyq645GofnsXuk7tJm09Wv8=Y+gLujPSkQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH 0/4 v3] mmc: tmio, sdhi: provide multiple irq handlers
+Date: Tue, 16 Aug 2011 19:11:22 +0900
+Message-ID: <1313489486-831-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f170.google.com ([209.85.210.170]:39512 "EHLO
-	mail-iy0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751277Ab1HPJ0a convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Aug 2011 05:26:30 -0400
-Received: by iye16 with SMTP id 16so9243724iye.1
-        for <linux-mmc@vger.kernel.org>; Tue, 16 Aug 2011 02:26:30 -0700 (PDT)
-In-Reply-To: <CANYdXnoZK3OoWOnJhyq645GofnsXuk7tJm09Wv8=Y+gLujPSkQ@mail.gmail.com>
+Received: from kirsty.vergenet.net ([202.4.237.240]:38743 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752486Ab1HPKLh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Aug 2011 06:11:37 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, Will Newton <will.newton@gmail.com>, Jae hoon Chung <jh80.chung@gmail.com>, James Hogan <james.hogan@imgtec.com>, kyungmin.park@samsung.com
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>
 
-adding mmc mailing list
+The SDHI driver already supports making use of up to three interrupt
+sources.
 
-On Tue, Aug 16, 2011 at 11:12 AM, Shashidhar Hiremath
-<shashidharh@vayavyalabs.com> wrote:
-> Hi All,
-> =A0i am planning to come up with a module that would help for testing
-> the SD/MMC controller to see if supports the particular command.
->
-> For example ,Through this module , we will be able to see if a
-> particular command has been accepted by the device and whether device
-> has responded in the expected manner or not by checking its response.
->
-> Can I get some points on how useful this infrastructure would be ,and
-> any inputs on what else =A0to cover under this ?
->
+This series breaks up the existing interrupt handler into three handlers,
+one for card access, one for card detect interrupts, and one for SDIO
+interrupts.  A cover-all handler, which makes use of these new broken-out
+handlers is provided for for the case where there is only one interrupt
+source.
 
+This series also wires up the broken-out irq handlers in the SDHI driver
 
-
---=20
-regards,
-Shashidhar Hiremath
