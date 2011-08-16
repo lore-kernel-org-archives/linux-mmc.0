@@ -1,56 +1,57 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: [GIT PULL] mmc: atmel rework for next
-Date: Tue, 16 Aug 2011 17:36:19 +0200
-Message-ID: <4E4A8E73.7050705@atmel.com>
+From: J Freyensee <james_p_freyensee@linux.intel.com>
+Subject: Re: Testing Infrastructure for SD/MMC Commands
+Date: Tue, 16 Aug 2011 09:03:56 -0700
+Message-ID: <4E4A94EC.7040606@linux.intel.com>
+References: <CANYdXnoZK3OoWOnJhyq645GofnsXuk7tJm09Wv8=Y+gLujPSkQ@mail.gmail.com> <CANYdXnrHWGPCeAEJQq6cmsZAyYfvvcSZ_1_3jKhcMbTARJpGVw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:24386 "EHLO
-	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751621Ab1HPPgs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Aug 2011 11:36:48 -0400
+Received: from mga02.intel.com ([134.134.136.20]:38774 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752012Ab1HPQCx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 16 Aug 2011 12:02:53 -0400
+In-Reply-To: <CANYdXnrHWGPCeAEJQq6cmsZAyYfvvcSZ_1_3jKhcMbTARJpGVw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, "'linux-arm-kernel@lists.infradead.org'" <linux-arm-kernel@lists.infradead.org>
-Cc: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Linux Kernel list <linux-kernel@vger.kernel.org>
+To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Cc: cjb@laptop.org, Will Newton <will.newton@gmail.com>, Jae hoon Chung <jh80.chung@gmail.com>, James Hogan <james.hogan@imgtec.com>, kyungmin.park@samsung.com, linux-mmc@vger.kernel.org
 
-Hi Chris,
+On 08/16/2011 02:26 AM, Shashidhar Hiremath wrote:
+> adding mmc mailing list
+>
+> On Tue, Aug 16, 2011 at 11:12 AM, Shashidhar Hiremath
+> <shashidharh@vayavyalabs.com>  wrote:
+>> Hi All,
+>>   i am planning to come up with a module that would help for testing
+>> the SD/MMC controller to see if supports the particular command.
+>>
+>> For example ,Through this module , we will be able to see if a
+>> particular command has been accepted by the device and whether device
+>> has responded in the expected manner or not by checking its response.
+>>
+>> Can I get some points on how useful this infrastructure would be ,and
+>> any inputs on what else  to cover under this ?
+>>
+>
 
-Please pull from:
+It sounds like you are looking to design a functional model, a module 
+that utilizes some type of design spec or standard to verify if the 
+design implementation works according to the design-spec/standard, correct?
 
-git://github.com/at91linux/linux-2.6-at91.git nfe/mmc_atmel
+If true, my first question would be, what document will you be basing 
+this module on?
 
-This is a series that reworks the atmel-mci driver for a future merge of both at91_mci and atmel-mci drivers. Those patches have been discussed on the mailing-list.
-I added a tiny at91_mci patch also sent last week.
+It probably could be useful- the more testing on something the better. 
+But I think the first step is you need to define what 
+document/spec/standard this module is going to follow, then how this 
+module is going to be designed and used, then go from there.
 
-Those changes are made on top of current linus' git tree (v3.1-rc2-64-g688d1b3).
-
-Thanks.
-
-Ludovic Desroches (8):
-      mmc: atmel-mci: change namespace
-      mmc: atmel-mci: change atmci_readl and atmci_writel macros
-      mmc: atmel-mci: indentation
-      mmc: atmel-mci: add pdc support and runtime capabilities detection
-      mmc: atmel-mci: change atmci_start_command to atmci_send_command
-      mmc: atmel-mci: use ATMEL_PDC_SCND_BUF_OFF instead of a literal value
-      mmc: atmel-mci: correct sg buffer size evaluation
-      mmc: atmel-mci: fix a potential issue about pending PDC interrupts
-
-Nicolas Ferre (1):
-      mmc: at91_mci: remove the use of irq_to_gpio
-
- arch/arm/mach-at91/at91sam9260_devices.c |    2 +-
- drivers/mmc/host/at91_mci.c              |    6 +-
- drivers/mmc/host/atmel-mci-regs.h        |  220 +++++----
- drivers/mmc/host/atmel-mci.c             |  823 ++++++++++++++++++++----------
- include/linux/atmel-mci.h                |    4 +-
- include/linux/atmel_pdc.h                |    2 +
- 6 files changed, 685 insertions(+), 372 deletions(-)
-
+>
+>
 
 
 -- 
-Nicolas Ferre
-
+J (James/Jay) Freyensee
+Storage Technology Group
+Intel Corporation
