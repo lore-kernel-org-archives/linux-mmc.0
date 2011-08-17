@@ -1,145 +1,140 @@
-From: Mika Westerberg <mika.westerberg@linux.intel.com>
-Subject: Re: [PATCH 1/2] mmc: add functions to enable/disable aggressive
- clock gating
-Date: Wed, 17 Aug 2011 08:59:58 +0300
-Message-ID: <20110817055958.GU16790@intel.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: add functions to enable/disable aggressive clock gating
+Date: Wed, 17 Aug 2011 09:51:31 +0200
+Message-ID: <CACRpkdZ5oCmRupNn9HjZj534zXJQWD8OpycpMxG4Jhgsvk=kEQ@mail.gmail.com>
 References: <e13e177c732ee8ad2d6fe389c9bac21877f60c59.1313400777.git.mika.westerberg@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:61178 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750813Ab1HQF7Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 17 Aug 2011 01:59:25 -0400
-Content-Disposition: inline
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:34170 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751277Ab1HQHvc convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Aug 2011 03:51:32 -0400
 In-Reply-To: <e13e177c732ee8ad2d6fe389c9bac21877f60c59.1313400777.git.mika.westerberg@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, cjb@laptop.org, Linus Walleij <linus.walleij@linaro.org>
+To: Mika Westerberg <mika.westerberg@linux.intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, cjb@laptop.org
 
-On Mon, Aug 15, 2011 at 01:03:37PM +0300, Mika Westerberg wrote:
-> There are few places where we want to make sure that no clock gating takes
+On Mon, Aug 15, 2011 at 12:03 PM, Mika Westerberg
+<mika.westerberg@linux.intel.com> wrote:
+
+> There are few places where we want to make sure that no clock gating =
+takes
 > place. For example when we are updating several related fields in ios
-> structure and we don't want to accidentally pass the partially filled ios
+> structure and we don't want to accidentally pass the partially filled=
+ ios
 > to the host driver.
-> 
-> To solve this we add two functions to enable/disable the aggressive clock
+>
+> To solve this we add two functions to enable/disable the aggressive c=
+lock
 > gating where this is needed.
 
-Chris, Linus W,
+OK I realize the problem.
 
-Do you have any comments on this series?
+There is a terminologty problem here: "disable" is a word used
+in the clock framework clk.h and can be very cofusing, since it
+means "turn off the clock" or "decrease refcount on clock by one",
+whereas here the meaning is the exact opposite.
 
-I should've added a better explanation of the problem. In summary, to me it
-looks like the aggressive clock gating framework can cause an incomplete
-ios to be passed to the host driver if we are just updating it in MMC core,
-which could cause the host driver to do wrong things. In our case it
-happened during call of mmc_power_off(), resulting an BUG() to be
-triggered.
+Please use some other word like "gate inhibit" or so.
 
-Also in mmc_set_ios() there's a possibility that the aggressive clock
-gating triggers just after we have tested ios->clock > 0. Next time a
-request is started, the mmc_host_clk_ungate() is called but it doesn't
-ungate the clock as it is already marked as ungated. This leads to a hang
-in our case (as the clock is stopped).
-
-I think the same problem was previously solved in 26fc8775b51 ("mmc: fix a
-race between card-detect rescan and clock-gate work instances") which got
-reverted.
-
-Thanks.
-
-> 
-> Signed-off-by: Mika Westerberg <mika.westerberg@linux.intel.com>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/core/host.c  |   39 ++++++++++++++++++++++++++++++++++++++-
->  drivers/mmc/core/host.h  |   11 +++++++++++
->  include/linux/mmc/host.h |    1 +
->  3 files changed, 50 insertions(+), 1 deletions(-)
-> 
 > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
 > index b29d3e8..ee52246 100644
 > --- a/drivers/mmc/core/host.c
 > +++ b/drivers/mmc/core/host.c
 > @@ -178,7 +178,7 @@ void mmc_host_clk_gate(struct mmc_host *host)
->  	spin_lock_irqsave(&host->clk_lock, flags);
->  	host->clk_requests--;
->  	if (mmc_host_may_gate_card(host->card) &&
-> -	    !host->clk_requests)
-> +	    !host->clk_requests && !host->clk_disabled)
->  		schedule_work(&host->clk_gate_work);
->  	spin_unlock_irqrestore(&host->clk_lock, flags);
->  }
-> @@ -204,6 +204,42 @@ unsigned int mmc_host_clk_rate(struct mmc_host *host)
->  }
->  
->  /**
-> + *	mmc_host_clk_gate_disable - temporarily disable clock gating
-> + *	@host: host to disable clock gating
+> =A0 =A0 =A0 =A0spin_lock_irqsave(&host->clk_lock, flags);
+> =A0 =A0 =A0 =A0host->clk_requests--;
+> =A0 =A0 =A0 =A0if (mmc_host_may_gate_card(host->card) &&
+> - =A0 =A0 =A0 =A0 =A0 !host->clk_requests)
+> + =A0 =A0 =A0 =A0 =A0 !host->clk_requests && !host->clk_disabled)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0schedule_work(&host->clk_gate_work);
+> =A0 =A0 =A0 =A0spin_unlock_irqrestore(&host->clk_lock, flags);
+> =A0}
+> @@ -204,6 +204,42 @@ unsigned int mmc_host_clk_rate(struct mmc_host *=
+host)
+> =A0}
+>
+> =A0/**
+> + * =A0 =A0 mmc_host_clk_gate_disable - temporarily disable clock gat=
+ing
+> + * =A0 =A0 @host: host to disable clock gating
 > + *
-> + *	Function temporarily disables aggressive clock gating. This is to
-> + *	prevent clock gating worker to kick in for example in a middle of
-> + *	ios structure update.
+> + * =A0 =A0 Function temporarily disables aggressive clock gating. Th=
+is is to
+> + * =A0 =A0 prevent clock gating worker to kick in for example in a m=
+iddle of
+> + * =A0 =A0 ios structure update.
 > + *
-> + *	After this function returns, it is guaranteed that no clock gating
-> + *	takes place until it is re-enabled again.
+> + * =A0 =A0 After this function returns, it is guaranteed that no clo=
+ck gating
+> + * =A0 =A0 takes place until it is re-enabled again.
 > + */
 > +void mmc_host_clk_gate_disable(struct mmc_host *host)
+
+So rename "mmc_host_clk_gate_inhibit() or so.
+
 > +{
-> +	spin_lock_irq(&host->clk_lock);
-> +	WARN_ON(host->clk_disabled);
-> +	host->clk_disabled = true;
-> +	spin_unlock_irq(&host->clk_lock);
+> + =A0 =A0 =A0 spin_lock_irq(&host->clk_lock);
+> + =A0 =A0 =A0 WARN_ON(host->clk_disabled);
+> + =A0 =A0 =A0 host->clk_disabled =3D true;
+> + =A0 =A0 =A0 spin_unlock_irq(&host->clk_lock);
 > +
-> +	cancel_work_sync(&host->clk_gate_work);
+> + =A0 =A0 =A0 cancel_work_sync(&host->clk_gate_work);
 > +}
-> +
+
+To inhibit clock gating it should be enough to increase
+the refcount on the requests:
+
+spin_lock_*(&host->clk_lock);
+host->clk_requests++;
+spin_unlock_*(&host->clk_lock);
+
+But if you look closer at mmc_host_clk_gate() that is
+exactly what that function does.
+
 > +/**
-> + *	mmc_host_clk_gate_enable - re-enables clock gating
-> + *	@host: host to re-enable clock gating
+> + * =A0 =A0 mmc_host_clk_gate_enable - re-enables clock gating
+> + * =A0 =A0 @host: host to re-enable clock gating
 > + *
-> + *	Allows aggressive clock gating framework to continue gating the
-> + *	host clock.
+> + * =A0 =A0 Allows aggressive clock gating framework to continue gati=
+ng the
+> + * =A0 =A0 host clock.
 > + */
 > +void mmc_host_clk_gate_enable(struct mmc_host *host)
 > +{
-> +	spin_lock_irq(&host->clk_lock);
-> +	WARN_ON(!host->clk_disabled);
-> +	host->clk_disabled = false;
-> +	spin_unlock_irq(&host->clk_lock);
+> + =A0 =A0 =A0 spin_lock_irq(&host->clk_lock);
+> + =A0 =A0 =A0 WARN_ON(!host->clk_disabled);
+> + =A0 =A0 =A0 host->clk_disabled =3D false;
+> + =A0 =A0 =A0 spin_unlock_irq(&host->clk_lock);
 > +}
-> +
-> +/**
->   *	mmc_host_clk_init - set up clock gating code
->   *	@host: host with potential clock to control
->   */
-> @@ -213,6 +249,7 @@ static inline void mmc_host_clk_init(struct mmc_host *host)
->  	/* Hold MCI clock for 8 cycles by default */
->  	host->clk_delay = 8;
->  	host->clk_gated = false;
-> +	host->clk_disabled = false;
->  	INIT_WORK(&host->clk_gate_work, mmc_host_clk_gate_work);
->  	spin_lock_init(&host->clk_lock);
->  	mutex_init(&host->clk_gate_mutex);
+
+spin_lock_*(&host->clk_lock);
+host->clk_requests--;
+spin_unlock_*(&host->clk_lock);
+
+But this is equivalent to mmc_host_clk_gate().
+
 > diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
 > index de199f9..7148b24 100644
 > --- a/drivers/mmc/core/host.h
 > +++ b/drivers/mmc/core/host.h
 > @@ -19,6 +19,8 @@ void mmc_unregister_host_class(void);
->  void mmc_host_clk_ungate(struct mmc_host *host);
->  void mmc_host_clk_gate(struct mmc_host *host);
->  unsigned int mmc_host_clk_rate(struct mmc_host *host);
+> =A0void mmc_host_clk_ungate(struct mmc_host *host);
+> =A0void mmc_host_clk_gate(struct mmc_host *host);
+> =A0unsigned int mmc_host_clk_rate(struct mmc_host *host);
 > +void mmc_host_clk_gate_disable(struct mmc_host *host);
 > +void mmc_host_clk_gate_enable(struct mmc_host *host);
->  
->  #else
->  static inline void mmc_host_clk_ungate(struct mmc_host *host)
-> @@ -33,6 +35,15 @@ static inline unsigned int mmc_host_clk_rate(struct mmc_host *host)
->  {
->  	return host->ios.clock;
->  }
+>
+> =A0#else
+> =A0static inline void mmc_host_clk_ungate(struct mmc_host *host)
+> @@ -33,6 +35,15 @@ static inline unsigned int mmc_host_clk_rate(struc=
+t mmc_host *host)
+> =A0{
+> =A0 =A0 =A0 =A0return host->ios.clock;
+> =A0}
 > +
 > +static inline void mmc_host_clk_gate_disable(struct mmc_host *host)
 > +{
@@ -149,20 +144,47 @@ Thanks.
 > +{
 > +}
 > +
->  #endif
->  
->  void mmc_host_deeper_disable(struct work_struct *work);
+> =A0#endif
+>
+> =A0void mmc_host_deeper_disable(struct work_struct *work);
 > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
 > index 1d09562..dea6350 100644
 > --- a/include/linux/mmc/host.h
 > +++ b/include/linux/mmc/host.h
 > @@ -240,6 +240,7 @@ struct mmc_host {
->  	unsigned int		clk_old;	/* old clock value cache */
->  	spinlock_t		clk_lock;	/* lock for clk fields */
->  	struct mutex		clk_gate_mutex;	/* mutex for clock gating */
-> +	bool			clk_disabled;	/* gating is temporarily disabled */
->  #endif
->  
->  	/* host specific block data */
-> -- 
-> 1.7.5.4
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0clk_old; =A0 =A0 =A0=
+ =A0/* old clock value cache */
+> =A0 =A0 =A0 =A0spinlock_t =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_lock; =A0 =A0=
+ =A0 /* lock for clk fields */
+> =A0 =A0 =A0 =A0struct mutex =A0 =A0 =A0 =A0 =A0 =A0clk_gate_mutex; /*=
+ mutex for clock gating */
+> + =A0 =A0 =A0 bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_disable=
+d; =A0 /* gating is temporarily disabled */
+
+This name does not work. Please call it "gating_inhibited" or
+something similar if you use this approach.
+
+I would suggest that in all patches using these functions, try
+to replace:
+
+mmc_host_clk_disable() -> mmc_host_clk_ungate()
+mmc_host_clk_enable() -> mmc_host_clk_gate()
+
+Please tell us if this works!
+
+I understand that the names can be a bit confusing by but
+I think you can convince yourself that what this will do is
+simply increase the refcount host->clk_requests so the
+clock is not gated across these sections.
+
+If you think the names of the functions are confusing then
+you may rename them, say like this:
+
+mmc_host_clk_ungate() -> mmc_host_clk_hold()
+mmc_host_clk_gate() -> mmc_host_clk_release()
+
+Which would make the usecases more clear, I'd be happy
+to ACK a patch for this.
+
+Thanks,
+Linus Walleij
