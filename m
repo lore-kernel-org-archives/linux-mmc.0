@@ -1,153 +1,283 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH 1/4] mmc: tmio: Cache interrupt masks
-Date: Wed, 17 Aug 2011 09:50:52 +0900
-Message-ID: <1313542255-31662-2-git-send-email-horms@verge.net.au>
-References: <1313542255-31662-1-git-send-email-horms@verge.net.au>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC PATCH] mmc: support background operation
+Date: Wed, 17 Aug 2011 13:03:02 +0900
+Message-ID: <4E4B3D76.1030506@samsung.com>
+References: <4E450B21.8040502@samsung.com> <4E4A9C40.3000708@linux.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:41149 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751562Ab1HQAvI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Aug 2011 20:51:08 -0400
-In-Reply-To: <1313542255-31662-1-git-send-email-horms@verge.net.au>
+Received: from mailout4.samsung.com ([203.254.224.34]:36319 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750756Ab1HQEDF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Aug 2011 00:03:05 -0400
+Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LQ2009P30KW2080@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 17 Aug 2011 13:03:02 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LQ200D7I0L39I@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 17 Aug 2011 13:03:03 +0900 (KST)
+In-reply-to: <4E4A9C40.3000708@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>
+To: J Freyensee <james_p_freyensee@linux.intel.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>
 
-This avoids the need to look up the masks each time an interrupt
-is handled.
+Hi,
 
-As suggested by Guennadi.
+J Freyensee wrote:
+> On 08/12/2011 04:14 AM, Jaehoon Chung wrote:
+>> Hi mailing.
+>>
+>> This RFC patch is supported background operation(BKOPS).
+>> And if you want to test this patch, must apply "[PATCH v3] mmc:
+>> support HPI send command"
+>>
+>> This patch is based on Hanumath Prasad's patch "mmc: enable background
+>> operations for emmc4.41 with HPI support"
+>> Hanumath's patch is implemented before applied per forlin's patch "use
+>> nonblock mmc request...".
+>> This patch is based on 3.1.0-rc1 in mmc-next.
+> 
+> I'm a little confused by this statement.  Was this patch done before Per
+> Forlin's work, or is this patch the implementation of the infrastructure
+> Per Forlin worked on to do non-blocking requests to the host controller?
+> 
 
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Magnus Damm <magnus.damm@gmail.com>
-Signed-off-by: Simon Horman <horms@verge.net.au>
+This feature(BKOPS) is defined in eMMC4.41 spec.(differ with Per Forlins's non-blocking patch)
+Hanumath Prasad's patch is sent before Per Forlin's patch. 
+so need to rebase for applied patch.
 
----
+>>
+>> Background operations is run when set the URGENT_BKOPS in response.
+>>
+>> if set the URGENT_BKOPS in response, we can notify that card need the
+>> BKOPS.
+>> (URGENT_BKOPS is used in eMMC4.41 spec, but in eMMC4.5 changed to
+>> EXCEPTION_EVENT bit.
+>>   maybe, we need to change this point).
+>>
+>> And all request is done, then run background operation.
+>> if request read/write operation when running BKOPS, issue HPI interrupt
+>>
+>> This patch is just RFC patch (not to merge), because i want to use
+>> BKOPS in userspace.
+>> (using ioctl).
+>>
+>> I want to get mailing's review for this patch.
+>>
+>>
+>> Signed-off-by: Jaehoon Chung<jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park<kyungmin.park@samsung.com>
+>> CC: Hanumath Prasad<hanumath.prasad@stericsson.com>
+>>
+>> ---
+>>   drivers/mmc/card/block.c   |    4 ++++
+>>   drivers/mmc/card/queue.c   |   10 ++++++++++
+>>   drivers/mmc/core/core.c    |   35 +++++++++++++++++++++++++++++++++++
+>>   drivers/mmc/core/mmc.c     |   28 ++++++++++++++++++++++++++++
+>>   drivers/mmc/core/mmc_ops.c |    3 +++
+>>   include/linux/mmc/card.h   |   11 +++++++++++
+>>   include/linux/mmc/core.h   |    1 +
+>>   include/linux/mmc/mmc.h    |    4 ++++
+>>   8 files changed, 96 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 1ff5486..ff72c4a 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -1078,6 +1078,10 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+>> *mq, struct request *rqc)
+>>           switch (status) {
+>>           case MMC_BLK_SUCCESS:
+>>           case MMC_BLK_PARTIAL:
+>> +            if (mmc_card_mmc(card)&&
+>> +                (brq->cmd.resp[0]&  R1_URGENT_BKOPS)) {
+>> +                mmc_card_set_need_bkops(card);
+>> +            }
+>>               /*
+>>                * A block was successfully transferred.
+>>                */
+>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+>> index 45fb362..52b1293 100644
+>> --- a/drivers/mmc/card/queue.c
+>> +++ b/drivers/mmc/card/queue.c
+>> @@ -46,6 +46,8 @@ static int mmc_queue_thread(void *d)
+>>   {
+>>       struct mmc_queue *mq = d;
+>>       struct request_queue *q = mq->queue;
+>> +    struct mmc_card *card = mq->card;
+>> +    unsigned long flags;
+>>
+>>       current->flags |= PF_MEMALLOC;
+>>
+>> @@ -61,6 +63,13 @@ static int mmc_queue_thread(void *d)
+>>           spin_unlock_irq(q->queue_lock);
+>>
+>>           if (req || mq->mqrq_prev->req) {
+>> +            if (mmc_card_doing_bkops(card)) {
+>> +                mmc_interrupt_hpi(card);
+>> +                spin_lock_irqsave(&card->host->lock, flags);
+>> +                mmc_card_clr_doing_bkops(card);
+>> +                spin_unlock_irqrestore(&card->host->lock,
+>> +                        flags);
+>> +            }
+>>               set_current_state(TASK_RUNNING);
+>>               mq->issue_fn(mq, req);
+>>           } else {
+>> @@ -68,6 +77,7 @@ static int mmc_queue_thread(void *d)
+>>                   set_current_state(TASK_RUNNING);
+>>                   break;
+>>               }
+>> +            mmc_start_bkops(mq->card);
+>>               up(&mq->thread_sem);
+>>               schedule();
+>>               down(&mq->thread_sem);
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 7c1ab06..b6de0e5 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -347,6 +347,41 @@ int mmc_wait_for_cmd(struct mmc_host *host,
+>> struct mmc_command *cmd, int retries
+>>
+>>   EXPORT_SYMBOL(mmc_wait_for_cmd);
+>>
+>> +/* Start background operation */
+>> +void mmc_start_bkops(struct mmc_card *card)
+> 
+> Is it possible to follow the kernel documentation standard for comment
+> function headers (I believe Randy Dunlap has given links to this in the
+> past)? You can see in this patch that after this function the next
+> function is using a function comment header per kernel guidelines.
 
-* SDCARD portion tested on AP4/Mackerel
-* SDIO portion untested
+You're right. 
+But this patch is the RFC patch (i mentioned this patch is not to merge).
+So i didn't add the comment for this function.
+If this patch should be merge, i will add the comment for function.
+(at next time, if i send the other RFC patch, i will also add the comment)
 
-v3
-* As suggested by Guennadi Liakhovetski
-  - Only read sdcard_irq_mask once and never read sdio_irq_mask,
-    instead use the cached values as much as possible
+> 
+>> +{
+>> +    int err;
+>> +    unsigned long flags;
+>> +
+>> +    BUG_ON(!card);
+>> +
+>> +    if (!card->ext_csd.bkops_en) {
+>> +        printk(KERN_INFO "Didn't set BKOPS enable bit!\n");
+> 
+> I know that if new drivers are added to the kernel, maintainers will
+> reject the work if it's using printk()'s.  If this code is getting new
+> functions, is it a good idea to start using the more modern, accepted
+> coding functions like pr_info()?
 
-v2
-* Initial release
----
- drivers/mmc/host/tmio_mmc.h     |    4 ++++
- drivers/mmc/host/tmio_mmc_pio.c |   34 ++++++++++++++++++----------------
- 2 files changed, 22 insertions(+), 16 deletions(-)
+No problem..using pr_info or pr_debug..
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index eeaf643..1cf8db5 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -79,6 +79,10 @@ struct tmio_mmc_host {
- 	struct delayed_work	delayed_reset_work;
- 	struct work_struct	done;
+> 
+>> +        return;
+>> +    }
+>> +
+>> +    if (mmc_card_doing_bkops(card) ||
+>> +            !mmc_card_need_bkops(card)) {
+> 
+> This code wouldn't pass the checkpatch.pl tool; I've been burned by the
+> Linux community of having brackets around a single line of code.
+
+I used the checkpatch.pl tool..but i didn't find message about this line.
+If you point out the brackets {}, i will removed that and make a single line.
+
+> 
+>> +        return;
+>> +    }
+>> +
+>> +    mmc_claim_host(card->host);
+>> +    err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +        EXT_CSD_BKOPS_START, 1, 0);
+>> +    if (err) {
+>> +        mmc_card_clr_need_bkops(card);
+>> +        goto out;
+>> +    }
+>> +
+>> +    spin_lock_irqsave(&card->host->lock, flags);
+>> +    mmc_card_clr_need_bkops(card);
+>> +    mmc_card_set_doing_bkops(card);
+>> +    spin_unlock_irqrestore(&card->host->lock, flags);
+>> +out:
+>> +    mmc_release_host(card->host);
+>> +}
+>> +EXPORT_SYMBOL(mmc_start_bkops);
+>> +
+>>   /**
+>>    *    mmc_interrupt_hpi - Issue for High priority Interrupt
+>>    *    @card: the MMC card associated with the HPI transfer
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index ef10bfd..0372414 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -421,6 +421,17 @@ static int mmc_read_ext_csd(struct mmc_card
+>> *card, u8 *ext_csd)
+>>                   ext_csd[EXT_CSD_OUT_OF_INTERRUPT_TIME] * 10;
+>>           }
+>>
+>> +        /*
+>> +         * check whether the eMMC card support BKOPS.
+>> +         * if set BKOPS_SUPPORT bit,
+>> +         * BKOPS_STATUS, BKOPS_EN,,BKOPS_START and
+>> +         * URGENT_BKOPS are supported.(default)
+>> +         */
+>> +        if (ext_csd[EXT_CSD_BKOPS_SUPPORT]&  0x1) {
+> 
+> That is kind of an ugly if() statement; a bit further down I explain my
+> reasons for making if() statements like this more readable.
+
+I didn't understand this comment...how do you change this statement?
+
+> 
+>> +            card->ext_csd.bkops = 1;
+>> +            card->ext_csd.bkops_en = ext_csd[EXT_CSD_BKOPS_EN];
+>> +        }
+>> +
+>>           card->ext_csd.rel_param = ext_csd[EXT_CSD_WR_REL_PARAM];
+>>       }
+>>
+>> @@ -762,6 +773,23 @@ static int mmc_init_card(struct mmc_host *host,
+>> u32 ocr,
+>>       }
+>>
+>>       /*
+>> +     * Enable HPI feature (if supported)
+>> +     */
+>> +    if (card->ext_csd.hpi) {
+> 
+> I know some people prefer doing things like
+> 
+> A.'if (x)'
+> instead of
+> B.'if (x != NULL)
+> 
+> because A. is supposed to be some type of 'expert way' of doing things.
+> However, B. is a whole lot more readable and easier for people to
+> decipher precisely what is going on, especially newer people that may
+> not be as familiar with this part of the Linux kernel as others.  Just
+> looking at this patch, I can't tell if 'card->ext_csd.hpi' is supposed
+> to be a number value or a pointer.  And if you use Linus's tool 'sparse'
+> to check your kernel code before submitting, there is a difference
+> between statements like 'if (x == 0)' and 'if (x == NULL)', even though
+> they could evaluate to the same result in this if() statement.
+> 
+> So I suggest adding the equality or inequality sign to this if() as well
+> as any other if() to make the code a bit easier to understand.
+
+Right..i will modify this point..
+
+Thanks for your comments..
+Any other opinion about this feature (BKOPS)..??
+
+Regards,
+Jaehoon Chung
+
  
-+	/* Cache IRQ mask */
-+	u32			sdcard_irq_mask;
-+	u32			sdio_irq_mask;
-+
- 	spinlock_t		lock;		/* protect host private data */
- 	unsigned long		last_req_ts;
- 	struct mutex		ios_lock;	/* protect set_ios() context */
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 1f16357..f0c7830 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -48,14 +48,14 @@
- 
- void tmio_mmc_enable_mmc_irqs(struct tmio_mmc_host *host, u32 i)
- {
--	u32 mask = sd_ctrl_read32(host, CTL_IRQ_MASK) & ~(i & TMIO_MASK_IRQ);
--	sd_ctrl_write32(host, CTL_IRQ_MASK, mask);
-+	host->sdcard_irq_mask &= ~(i & TMIO_MASK_IRQ);
-+	sd_ctrl_write32(host, CTL_IRQ_MASK, host->sdcard_irq_mask);
- }
- 
- void tmio_mmc_disable_mmc_irqs(struct tmio_mmc_host *host, u32 i)
- {
--	u32 mask = sd_ctrl_read32(host, CTL_IRQ_MASK) | (i & TMIO_MASK_IRQ);
--	sd_ctrl_write32(host, CTL_IRQ_MASK, mask);
-+	host->sdcard_irq_mask |= (i & TMIO_MASK_IRQ);
-+	sd_ctrl_write32(host, CTL_IRQ_MASK, host->sdcard_irq_mask);
- }
- 
- static void tmio_mmc_ack_mmc_irqs(struct tmio_mmc_host *host, u32 i)
-@@ -127,11 +127,13 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 
- 	if (enable) {
- 		host->sdio_irq_enabled = 1;
-+		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL &
-+					~TMIO_SDIO_STAT_IOIRQ;
- 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
--		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK,
--			(TMIO_SDIO_MASK_ALL & ~TMIO_SDIO_STAT_IOIRQ));
-+		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
- 	} else {
--		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, TMIO_SDIO_MASK_ALL);
-+		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
-+		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
- 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0000);
- 		host->sdio_irq_enabled = 0;
- 	}
-@@ -548,26 +550,25 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
- 	struct tmio_mmc_host *host = devid;
- 	struct mmc_host *mmc = host->mmc;
- 	struct tmio_mmc_data *pdata = host->pdata;
--	unsigned int ireg, irq_mask, status;
--	unsigned int sdio_ireg, sdio_irq_mask, sdio_status;
-+	unsigned int ireg, status;
-+	unsigned int sdio_ireg, sdio_status;
- 
- 	pr_debug("MMC IRQ begin\n");
- 
- 	status = sd_ctrl_read32(host, CTL_STATUS);
--	irq_mask = sd_ctrl_read32(host, CTL_IRQ_MASK);
--	ireg = status & TMIO_MASK_IRQ & ~irq_mask;
-+	ireg = status & TMIO_MASK_IRQ & ~host->sdcard_irq_mask;
- 
- 	sdio_ireg = 0;
- 	if (!ireg && pdata->flags & TMIO_MMC_SDIO_IRQ) {
- 		sdio_status = sd_ctrl_read16(host, CTL_SDIO_STATUS);
--		sdio_irq_mask = sd_ctrl_read16(host, CTL_SDIO_IRQ_MASK);
--		sdio_ireg = sdio_status & TMIO_SDIO_MASK_ALL & ~sdio_irq_mask;
-+		sdio_ireg = sdio_status & TMIO_SDIO_MASK_ALL &
-+				~host->sdio_irq_mask;
- 
- 		sd_ctrl_write16(host, CTL_SDIO_STATUS, sdio_status & ~TMIO_SDIO_MASK_ALL);
- 
- 		if (sdio_ireg && !host->sdio_irq_enabled) {
- 			pr_warning("tmio_mmc: Spurious SDIO IRQ, disabling! 0x%04x 0x%04x 0x%04x\n",
--				   sdio_status, sdio_irq_mask, sdio_ireg);
-+				   sdio_status, host->sdio_irq_mask, sdio_ireg);
- 			tmio_mmc_enable_sdio_irq(mmc, 0);
- 			goto out;
- 		}
-@@ -623,9 +624,9 @@ irqreturn_t tmio_mmc_irq(int irq, void *devid)
- 	}
- 
- 	pr_warning("tmio_mmc: Spurious irq, disabling! "
--		"0x%08x 0x%08x 0x%08x\n", status, irq_mask, ireg);
-+		"0x%08x 0x%08x 0x%08x\n", status, host->sdcard_irq_mask, ireg);
- 	pr_debug_status(status);
--	tmio_mmc_disable_mmc_irqs(host, status & ~irq_mask);
-+	tmio_mmc_disable_mmc_irqs(host, status & ~host->sdcard_irq_mask);
- 
- out:
- 	return IRQ_HANDLED;
-@@ -882,6 +883,7 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 	tmio_mmc_clk_stop(_host);
- 	tmio_mmc_reset(_host);
- 
-+	_host->sdcard_irq_mask = sd_ctrl_read32(_host, CTL_IRQ_MASK);
- 	tmio_mmc_disable_mmc_irqs(_host, TMIO_MASK_ALL);
- 	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
- 		tmio_mmc_enable_sdio_irq(mmc, 0);
--- 
-1.7.5.4
 
