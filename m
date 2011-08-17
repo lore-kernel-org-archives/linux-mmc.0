@@ -1,81 +1,68 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC PATCH] mmc: support background operation
-Date: Wed, 17 Aug 2011 17:30:39 +0900
-Message-ID: <4E4B7C2F.9090304@samsung.com>
-References: <4E450B21.8040502@samsung.com>
- <001301cc5cb4$141daea0$3c590be0$%jun@samsung.com>
- <4E4B7825.9030608@samsung.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH 3/4] mmc: sdhi: Make use of per-source irq handlers
+Date: Wed, 17 Aug 2011 18:49:09 +0900
+Message-ID: <20110817094908.GB3561@verge.net.au>
+References: <1313542255-31662-1-git-send-email-horms@verge.net.au>
+ <1313542255-31662-4-git-send-email-horms@verge.net.au>
+ <Pine.LNX.4.64.1108171010350.18317@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:55495 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751187Ab1HQIat (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Aug 2011 04:30:49 -0400
-Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LQ200EQNCYUM9H0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 17 Aug 2011 17:30:38 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LQ200302CZ32J@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 17 Aug 2011 17:30:39 +0900 (KST)
-In-reply-to: <4E4B7825.9030608@samsung.com>
+Received: from kirsty.vergenet.net ([202.4.237.240]:50627 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751618Ab1HQJtp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Aug 2011 05:49:45 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1108171010350.18317@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Chuanxiao Dong' <chuanxiao.dong@intel.com>, 'Hanumath Prasad' <hanumath.prasad@stericsson.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>
 
-Hi
+On Wed, Aug 17, 2011 at 10:20:24AM +0200, Guennadi Liakhovetski wrote:
+> On Wed, 17 Aug 2011, Simon Horman wrote:
 
-In eMMC spec, if set BKOPS_SUPPORT bit in ext_csd,
-BKOPS_EN, BKOPS_STATUS, BKOPS_START and URGENT_BKOPS are supported for default.
+[snip ]
 
-So need not to send switch-command for BKOPS_EN when set BKOPS_SUPPORT bit.
-
-Thanks,
-Jaehoon Chung
-
->> There is no code for enabling BKOPS_EN?
->> If host want to handle background operation manually, it needs. 
+> > +	ret = irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_SDCARD);
+> > +	if (irq >= 0) {
+> > +		multi_irq = true;
+> > +		ret = request_irq(irq, tmio_mmc_sdcard_irq, 0,
+> > +				  dev_name(&pdev->dev), host);
+> > +		if (ret)
+> > +			goto eirq_sdcard;
+> > +	} else if (multi_irq)
+> > +		goto eirq_sdcard;
+> > +
+> > +	ret = irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
+> > +	if (irq < 0)
+> > +		goto eirq_card_detect;
+> > +	f = multi_irq ? tmio_mmc_card_detect_irq : tmio_mmc_irq;
+> > +	ret = request_irq(irq, f, 0, dev_name(&pdev->dev), host);
+> > +	if (ret)
+> > +		goto eirq_card_detect;
+> > +
 > 
-> Sorry, this code is my mistake...maybe duplicated the HPI patch..
-> You means maybe need this code..
->            /*
-> +           * Enable BKOPS feature (if supported)
-> +           */
-> +           if (card->ext_csd.bkops != NULL) {
-> +                         /*
-> +                         * If card supported BKOPS, default set BKOPS_EN bit.
-> +                         * But ensure to enable bkops, need to check enable bit
-> +                         */
-> +                         if (!card->ext_csd.bkops_en) {
-> +                                      err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +                                                   EXT_CSD_BKOPS_EN, 1, 0);
-> +                                      if (err && err != -EBADMSG)
-> +                                                   goto free_card;
-> +
-> +                                      if (err) {
-> +                                                   printk(KERN_ERR "%s: Enabling BKOPS failed\n",
-> +                                                                mmc_hostname(card->host));
-> +                                                   err = 0;
-> +                                      } else
-> +                                                   card->ext_csd.bkops_en = 1;
-> +                         }
-> +           }
-> +
+> I still don't see why a multi-IRQ configuration without a card-detect IRQ 
+> like
 > 
-> I will resend the RFC patch..
+> static struct resource sdhi_resources[] = {
+> 	[0] = {
+> 		.name	= "SDHI2",
+> 		...,
+> 	},
+> 	[1 + SH_MOBILE_SDHI_IRQ_SDCARD] = {
+> 		.start	= ...,
+> 		.flags	= IORESOURCE_IRQ,
+> 	},
+> 	[1 + SH_MOBILE_SDHI_IRQ_SDIO] = {
+> 		.start	= ...,
+> 		.flags	= IORESOURCE_IRQ,
+> 	},
+> };
 > 
-> Thank you for comment.
-> 
-> Best Regards,
-> Jaehoon Chung
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> should be invalid. Especially since we actually want to avoid using the 
+> controller card-detect IRQ for power efficiency and use a GPIO instead.
 
+Ok, in this case you would like SH_MOBILE_SDHI_IRQ_SDCARD to use
+tmio_mmc_sdcard_irq() ?
