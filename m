@@ -1,278 +1,162 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 3/4] mmc: sdhi: Make use of per-source irq handlers
-Date: Wed, 17 Aug 2011 21:57:31 +0900
-Message-ID: <20110817125728.GD13086@verge.net.au>
-References: <1313578756-10413-1-git-send-email-horms@verge.net.au>
- <1313578756-10413-4-git-send-email-horms@verge.net.au>
- <Pine.LNX.4.64.1108171320310.18317@axis700.grange>
- <20110817114147.GA13086@verge.net.au>
- <20110817120748.GB13086@verge.net.au>
- <Pine.LNX.4.64.1108171416010.18317@axis700.grange>
+From: seedshope <bocui107@gmail.com>
+Subject: Re: Testing Infrastructure for SD/MMC Commands
+Date: Wed, 17 Aug 2011 21:51:44 +0800
+Message-ID: <4E4BC770.90708@gmail.com>
+References: <CANYdXnoZK3OoWOnJhyq645GofnsXuk7tJm09Wv8=Y+gLujPSkQ@mail.gmail.com> <CANYdXnrHWGPCeAEJQq6cmsZAyYfvvcSZ_1_3jKhcMbTARJpGVw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:57492 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752126Ab1HQM5h (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Aug 2011 08:57:37 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1108171416010.18317@axis700.grange>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:48205 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753397Ab1HQNvw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Aug 2011 09:51:52 -0400
+Received: by gxk21 with SMTP id 21so747648gxk.19
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Aug 2011 06:51:52 -0700 (PDT)
+In-Reply-To: <CANYdXnrHWGPCeAEJQq6cmsZAyYfvvcSZ_1_3jKhcMbTARJpGVw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>
+To: linux-mmc@vger.kernel.org
+Cc: bobo <bocui107@googlemail.com>
 
-On Wed, Aug 17, 2011 at 02:22:56PM +0200, Guennadi Liakhovetski wrote:
-> On Wed, 17 Aug 2011, Simon Horman wrote:
-> 
-> > On Wed, Aug 17, 2011 at 08:41:47PM +0900, Simon Horman wrote:
-> > > On Wed, Aug 17, 2011 at 01:24:58PM +0200, Guennadi Liakhovetski wrote:
-> > > > On Wed, 17 Aug 2011, Simon Horman wrote:
-> > > > 
-> > > > > Make use of per-source irq handles if the
-> > > > > platform (data) has multiple irq sources.
-> > > > > 
-> > > > > Also, as suggested by Guennadi Liakhovetski,
-> > > > > add and use defines the index or irqs in platform data.
-> > > > > 
-> > > > > Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > > > > Cc: Magnus Damm <magnus.damm@gmail.com>
-> > > > > Signed-off-by: Simon Horman <horms@verge.net.au>
-> > > > > 
-> > > > > ---
-> > > > > 
-> > > > > v5
-> > > > > * As suggested by Guennadi Liakhovetski:
-> > > > >   - Allow only SH_MOBILE_SDHI_IRQ_SDCARD and
-> > > > >     SH_MOBILE_SDHI_IRQ_SDIO to be specified in platform data
-> > > > 
-> > > > This means, CARD_DETECT is optional in a multi-irq configuration, agree.
-> > > 
-> > > [snip]
-> > > 
-> > > > > +	ret = irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_SDCARD);
-> > > > > +	if (irq >= 0) {
-> > > > > +		multi_irq = true;
-> > > > > +		ret = request_irq(irq, tmio_mmc_sdcard_irq, 0,
-> > > > > +				  dev_name(&pdev->dev), host);
-> > > > > +		if (ret)
-> > > > > +			goto eirq_sdcard;
-> > > > >  	}
-> > > > 
-> > > > This means SDCARD is optional in both single- and multi-irq 
-> > > > configurations.
-> > > > 
-> > > > > +
-> > > > > +	ret = irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
-> > > > > +	if (irq < 0)
-> > > > > +		goto eirq_card_detect;
-> > > > 
-> > > > This means, CARD_DETECT is compulsory in all configurations.
-> > > > 
-> > > > One of us must be speaking klingonish today.
-> > > 
-> > > Sorry, I messed that up a bit.
-> > > 
-> > > I will make CARD_DETECT optional in multi-irq configurations.
-> > > Likewise SDIO will be optional in multi-irq configurations.
-> > > 
-> > > But SDCARD will always be required.
-> > 
-> > Oops, that scheme won't work because in single-irq configuration
-> > the only IRQ will be #0, but SDCARD != 0.
-> > 
-> > So I have it in mind to allow the following combinations.
-> > 
-> > i) SDIO, SDCARD, CARD_DETECT
-> > ii) SDIO, SDCARD
-> > iii) SDCARD, CARD_DETECT
-> > iv) SDCARD only (sets multi_irq = true locally, but only one irq!)
-> > v) CARD_DETECT only (uses tmio_mmc_irq(), traditional single-irq setup)
-> 
-> I would make it simple:
-> 
-> (1) 1 IRQ: only resource #0 (CARD_DETECT, use tmio_mmc_irq())
-> (2) 2 or 3 IRQs: compulsory SDCARD and any further IRQs: use respective 
->     specialised ISRs.
-> 
-> > Do you think iii and iv are necessary?
-> 
-> Accordingly: iii - yes, iv - no.
+Hi All,
 
-Ok, how about this?
+I uses potevio MicroSD 512M to test the SD/MMC driver in current master
+kernel. I found some issue:
+
+1. The issue
+(1) After I insert the microSD,Why The SD card probe finish(The
+parrition and device has already register). But The more and more data
+transport between card and host? Who can told me the function of this
+data.(The log information as following).
+
+(2) The MicroSD can be probe successful. But The error information
+display on the processor of multi-block data transfer.
+
+Any advices are welcome!
 
 
->From 6514563c5637e65a397d0bf88cda95168a69dea1 Mon Sep 17 00:00:00 2001
-From: Simon Horman <horms@verge.net.au>
-Date: Tue, 16 Aug 2011 10:42:35 +0900
-Subject: [PATCH] mmc: sdhi: Make use of per-source irq handlers
+2. Kernel configure:
+CONFIG_MMC = y
+CONFIG_MMC_DEBUG = y
+CONFIG_MMC_BLOCK = y
+CONFIG_MMC_SDHCI = y
+CONFIG_MMC_SDHCI_PCI = y
 
-Make use of per-source irq handles if the
-platform (data) has multiple irq sources.
+3. Debug information:
+mmc0: clock 0Hz busmode 1 powermode 1 cs 0 Vdd 20 width 0 timing 0
+mmc0: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 20 width 0 timing 0
+mmc0: clock 400000Hz busmode 1 powermode 2 cs 1 Vdd 20 width 0 timing 0
+mmc0: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 20 width 0 timing 0
+mmc0: req failed (CMD5): -110, retrying...
+mmc0: req failed (CMD5): -110, retrying...
+mmc0: req failed (CMD5): -110, retrying...
+mmc0: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 20 width 0 timing 0
+mmc0: clock 400000Hz busmode 1 powermode 2 cs 1 Vdd 20 width 0 timing 0
+mmc0: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 20 width 0 timing 0
+mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 20 width 0 timing 0
+mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 20 width 0 timing 2
+mmc0: clock 50000000Hz busmode 2 powermode 2 cs 0 Vdd 20 width 0 timing 2
+mmc0: clock 50000000Hz busmode 2 powermode 2 cs 0 Vdd 20 width 2 timing 2
+mmc0: new high speed SD card at address 0002
+mmcblk0: mmc0:0002 N/A   484 MiB
+ mmcblk0: p1
+mmcblk0: retrying using single block read
+mmcblk0: error -84 transferring data, sector 57, nr 71, card status  0x900
+end_request: I/O error, dev mmcblk0, sector 57
+mmcblk0: error -84 transferring data, sector 61, nr 67, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 61
+quiet_error: 15 callbacks suppressed
+Buffer I/O error on device mmcblk0, logical block 7
+mmcblk0: error -84 transferring data, sector 65, nr 63, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 65
+mmcblk0: error -84 transferring data, sector 69, nr 59, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 69
+mmcblk0: error -84 transferring data, sector 71, nr 57, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 71
+Buffer I/O error on device mmcblk0, logical block 8
+mmcblk0: error -84 transferring data, sector 73, nr 55, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 73
+mmcblk0: error -84 transferring data, sector 77, nr 51, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 77
+Buffer I/O error on device mmcblk0, logical block 9
+mmcblk0: error -84 transferring data, sector 87, nr 41, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 87
+Buffer I/O error on device mmcblk0, logical block 10
+mmcblk0: error -84 transferring data, sector 127, nr 1, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 127
+Buffer I/O error on device mmcblk0, logical block 15
+mmcblk0: retrying using single block read
+mmcblk0: error -84 transferring data, sector 143, nr 113, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 143
+Buffer I/O error on device mmcblk0, logical block 17
+mmcblk0: error -84 transferring data, sector 151, nr 105, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 151
+Buffer I/O error on device mmcblk0, logical block 18
+mmcblk0: error -84 transferring data, sector 161, nr 95, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 161
+mmcblk0: error -84 transferring data, sector 215, nr 41, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 215
+Buffer I/O error on device mmcblk0, logical block 26
+mmcblk0: error -84 transferring data, sector 217, nr 39, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 217
+mmcblk0: retrying using single block read
+mmcblk0: error -84 transferring data, sector 57, nr 7, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 57
+mmcblk0: retrying using single block read
+mmcblk0: error -84 transferring data, sector 535, nr 9, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 535
+mmcblk0: retrying using single block read
+mmcblk0: error -84 transferring data, sector 535, nr 1, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 535
+mmcblk0: retrying using single block read
+mmcblk0: retrying using single block read
+mmcblk0: error -84 transferring data, sector 193, nr 116, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 193
+mmcblk0: error -84 transferring data, sector 215, nr 94, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 215
+mmcblk0: error -84 transferring data, sector 217, nr 92, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 217
+mmcblk0: error -84 transferring data, sector 279, nr 30, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 279
+mmcblk0: error -84 transferring data, sector 289, nr 20, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 289
+mmcblk0: retrying using single block read
+mmcblk0: error -84 transferring data, sector 57, nr 124, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 57
+mmcblk0: error -84 transferring data, sector 61, nr 120, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 61
+mmcblk0: error -84 transferring data, sector 65, nr 116, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 65
+mmcblk0: error -84 transferring data, sector 71, nr 110, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 71
+mmcblk0: error -84 transferring data, sector 75, nr 106, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 75
+mmcblk0: error -84 transferring data, sector 77, nr 104, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 77
+mmcblk0: error -84 transferring data, sector 79, nr 102, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 79
+mmcblk0: error -84 transferring data, sector 81, nr 100, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 81
+mmcblk0: error -84 transferring data, sector 85, nr 96, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 85
+mmcblk0: error -84 transferring data, sector 87, nr 94, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 87
+mmcblk0: error -84 transferring data, sector 103, nr 78, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 103
+mmcblk0: error -84 transferring data, sector 127, nr 54, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 127
+mmcblk0: error -84 transferring data, sector 143, nr 38, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 143
+mmcblk0: error -84 transferring data, sector 151, nr 30, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 151
+mmcblk0: error -84 transferring data, sector 161, nr 20, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 161
+mmcblk0: error -84 transferring data, sector 177, nr 4, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 177
+mmcblk0: error -84 transferring data, sector 57, nr 1, card status 0x900
+end_request: I/O error, dev mmcblk0, sector 57
 
-Also, as suggested by Guennadi Liakhovetski,
-add and use defines the index or irqs in platform data.
 
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Magnus Damm <magnus.damm@gmail.com>
-Signed-off-by: Simon Horman <horms@verge.net.au>
-
----
-
-v6
-* As discussed with Guennadi Liakhovetski:
-  - The SDCARD/SDIO change in v5 was not implemented as described.
-    And the logic wasn't fully described in any case. This
-    version (hope to!) implement the following logic:
-    1) 1 IRQ: only resource #0 (CARD_DETECT, use tmio_mmc_irq())
-    2) 2 or 3 IRQs: compulsory SDCARD and any further IRQs: use respective
-       specialised ISRs.
-
-v5
-* As suggested by Guennadi Liakhovetski:
-  - Allow only SH_MOBILE_SDHI_IRQ_SDCARD and
-    SH_MOBILE_SDHI_IRQ_SDIO to be specified in platform data
-
-v4
-* As suggested by Guennadi Liakhovetski:
-  - Correct inverted values of SH_MOBILE_SDHI_IRQ_SDCARD and
-    SH_MOBILE_SDHI_IRQ_CARD_DETECT
-
-v3
-* Update for changes to "mmc: tmio: Provide separate interrupt handlers"
-* As suggested by Guennadi Liakhovetski:
-  - Merge in patch "mmc: sdhi: Add defines for platform irq indexes"
-  - Use an enum instead of defines for irq indexes
-
-v2
-* Update for changes to "mmc: tmio: Provide separate interrupt handlers"
-* Make use of defines provided by
-  "mmc: sdhi: Add defines for platform irq indexes"
-* As suggested by Guennadi Liakhovetski:
-  - Don't use a loop to initialise irq handlers, the unrolled version
-    is easier on the eyes (and exactly the same number of lines of code!)
----
- drivers/mmc/host/sh_mobile_sdhi.c  |   65 +++++++++++++++++++++++------------
- include/linux/mmc/sh_mobile_sdhi.h |    7 ++++
- 2 files changed, 50 insertions(+), 22 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 774f643..2fa7bbc 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -96,7 +96,8 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
- 	struct tmio_mmc_host *host;
- 	char clk_name[8];
--	int i, irq, ret;
-+	int irq, ret, irq_count = 0;
-+	irqreturn_t (*f)(int irq, void *devid);
- 
- 	priv = kzalloc(sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
- 	if (priv == NULL) {
-@@ -153,27 +154,39 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	if (ret < 0)
- 		goto eprobe;
- 
--	for (i = 0; i < 3; i++) {
--		irq = platform_get_irq(pdev, i);
--		if (irq < 0) {
--			if (i) {
--				continue;
--			} else {
--				ret = irq;
--				goto eirq;
--			}
--		}
--		ret = request_irq(irq, tmio_mmc_irq, 0,
-+	/* Allow a single IRQ resource #0 (CARD_DETECT) which will
-+	 * use tmio_mmc_irq() or;
-+	 * Allow 2 or 3 IRQ resources in which case SDCARD is required
-+	 * and specialised ISRs are used.
-+	 */
-+	irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_SDCARD);
-+	if (irq >= 0) {
-+		irq_count++;
-+		ret = request_irq(irq, tmio_mmc_sdcard_irq, 0,
- 				  dev_name(&pdev->dev), host);
--		if (ret) {
--			while (i--) {
--				irq = platform_get_irq(pdev, i);
--				if (irq >= 0)
--					free_irq(irq, host);
--			}
--			goto eirq;
--		}
-+		if (ret)
-+			goto eirq_sdcard;
- 	}
-+
-+	ret = irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
-+	if (irq_count && irq >= 0) {
-+		irq_count++;
-+		ret = request_irq(irq, tmio_mmc_sdio_irq, 0,
-+				  dev_name(&pdev->dev), host);
-+		if (ret)
-+			goto eirq_sdio;
-+	} else if (!irq_count)
-+		goto eirq_sdio;
-+
-+	ret = irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
-+	if (irq >= 0) {
-+		f = irq_count ? tmio_mmc_card_detect_irq : tmio_mmc_irq;
-+		ret = request_irq(irq, f, 0, dev_name(&pdev->dev), host);
-+		if (ret)
-+			goto eirq_card_detect;
-+	} else if (irq_count < 2)
-+		goto eirq_card_detect;
-+
- 	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
- 		 mmc_hostname(host->mmc), (unsigned long)
- 		 (platform_get_resource(pdev,IORESOURCE_MEM, 0)->start),
-@@ -181,7 +194,15 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 
- 	return ret;
- 
--eirq:
-+eirq_card_detect:
-+	irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
-+	if (irq >= 0)
-+		free_irq(irq, host);
-+eirq_sdio:
-+	irq = platform_get_irq(pdev, SH_MOBILE_SDHI_IRQ_SDCARD);
-+	if (irq >= 0)
-+		free_irq(irq, host);
-+eirq_sdcard:
- 	tmio_mmc_host_remove(host);
- eprobe:
- 	clk_disable(priv->clk);
-@@ -203,7 +224,7 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
- 
- 	tmio_mmc_host_remove(host);
- 
--	for (i = 0; i < 3; i++) {
-+	for (i = 0; i < SH_MOBILE_SDHI_IRQ_MAX; i++) {
- 		irq = platform_get_irq(pdev, i);
- 		if (irq >= 0)
- 			free_irq(irq, host);
-diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-index bd50b36..80d3629 100644
---- a/include/linux/mmc/sh_mobile_sdhi.h
-+++ b/include/linux/mmc/sh_mobile_sdhi.h
-@@ -3,6 +3,13 @@
- 
- #include <linux/types.h>
- 
-+enum {
-+	SH_MOBILE_SDHI_IRQ_CARD_DETECT = 0,
-+	SH_MOBILE_SDHI_IRQ_SDCARD,
-+	SH_MOBILE_SDHI_IRQ_SDIO,
-+	SH_MOBILE_SDHI_IRQ_MAX
-+};
-+
- struct platform_device;
- struct tmio_mmc_data;
- 
--- 
-1.7.5.4
-
+Thanks
+hongbo
