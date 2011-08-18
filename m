@@ -1,93 +1,46 @@
-From: J Freyensee <james_p_freyensee@linux.intel.com>
-Subject: Re: [RFC PATCH] mmc: support background operation
-Date: Wed, 17 Aug 2011 20:16:06 -0700
-Message-ID: <4E4C83F6.6080608@linux.intel.com>
-References: <4E450B21.8040502@samsung.com> <4E4A9C40.3000708@linux.intel.com> <4E4B3D76.1030506@samsung.com> <4E4BE8C6.5040106@linux.intel.com> <4E4C74EB.8050702@samsung.com>
+From: Mika Westerberg <mika.westerberg@linux.intel.com>
+Subject: Re: [PATCH 1/2] mmc: add functions to enable/disable aggressive
+ clock gating
+Date: Thu, 18 Aug 2011 13:34:41 +0300
+Message-ID: <20110818103441.GX16790@intel.com>
+References: <e13e177c732ee8ad2d6fe389c9bac21877f60c59.1313400777.git.mika.westerberg@linux.intel.com>
+ <CACRpkdZ5oCmRupNn9HjZj534zXJQWD8OpycpMxG4Jhgsvk=kEQ@mail.gmail.com>
+ <20110817121914.GW16790@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:21537 "EHLO mga02.intel.com"
+Received: from mga14.intel.com ([143.182.124.37]:58468 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754805Ab1HRDOu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 17 Aug 2011 23:14:50 -0400
-In-Reply-To: <4E4C74EB.8050702@samsung.com>
+	id S1755228Ab1HRKeI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 18 Aug 2011 06:34:08 -0400
+Content-Disposition: inline
+In-Reply-To: <20110817121914.GW16790@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, cjb@laptop.org
 
-On 08/17/2011 07:11 PM, Jaehoon Chung wrote:
-> Hi Jay..
->
-> I didn't know the tool 'sparse'. i will check the tool for your advice.
-> Thank you a lot for your help.. :)
+On Wed, Aug 17, 2011 at 03:19:14PM +0300, Mika Westerberg wrote:
+> On Wed, Aug 17, 2011 at 09:51:31AM +0200, Linus Walleij wrote:
+> > 
+> > I would suggest that in all patches using these functions, try
+> > to replace:
+> > 
+> > mmc_host_clk_disable() -> mmc_host_clk_ungate()
+> > mmc_host_clk_enable() -> mmc_host_clk_gate()
+> > 
+> 
+> Wow, that is indeed *much* cleaner way of doing this!
+> 
+> One thing is that if I call these from those ios functions,
+> mmc_host_clk_ungate() will always try to restore the clock
+> even if there is really no need. Do you see this as a problem?
+> 
+> > Please tell us if this works!
+> 
+> Certainly. I'll try this overnight and see whether it works.
 
-here, I'll provide it from a write-up I did within my department. 
-Unfortunately, finding documentation how to use it is pretty hard 
-because very little is provided.
+The device survived overnight reboot loop test, so this scheme seems to
+work.
 
--------------------------------------------------
-Step 9 in SubmitChecklist documentation in preparing to submit a device 
-driver upstream to Linus's kernel is:
-
-9: Check cleanly with sparse.
-
-Sparse is a tool written by Linus that contains built-in checks
-for known problematic and a set of annotations in the Linux kernel
-designed to convey semantic information about types, such as what
-address space pointers point to, or what locks a function acquires or
-releases.  It does appear to be a useful tool to make your code that
-much more tight.
-
-The #1 problem with this tool is there is little documentation how to 
-use it.  I think I figured it out how to use it, basic-wise,
-with the help of searching on-line forums.
-
-To set up and use for the first time:
-1. git clone git://git.kernel.org/pub/scm/devel/sparse/sparse.git
-2. cd to the sparse directory
-3. make; sudo make install
-4. cd to your linux kernel
-5. 'make C=1 >& sparse.log' if you have not built your kernel,
-OR
-'make C=2 >& sparse.log' if you have already built your kernel
-
-I HIGHLY recommend the file redirection operator because a LOT OF STUFF
-GETS SPIT OUT.
-
-6. To use other macros, do something like:
-
-make C=1 CF=
-example:
-make C=2 CF="-D__CHECK_ENDIAN__" (to check endianess)
-
-Further info:
-http://en.wikipedia.org/wiki/Sparse
--------------------------------------------------
-
->
->> Unfortunately, I am still a little new to this area of the Linux kernel
->> so I don't quite have the background to give an intelligent answer
->> w/respect to eMMC 4.41 and BKOPS.  I just have 3 device driver accepts
->> in the TTY space, so my contributions to patches are mainly basic code
->> functionality and Linux kernel/device-driver gotchas.
->>
->> Do you know the tool 'sparse'?  It's a good thing to try once, before
->> submitting upstream, if you haven't done it.
->>
->>>
->>> Regards,
->>> Jaehoon Chung
->>>
->>>
->>>
->>
->>
->
-
-
--- 
-J (James/Jay) Freyensee
-Storage Technology Group
-Intel Corporation
+I'll prepare a new series which uses mmc_host_clk_{ungate|gate}().
