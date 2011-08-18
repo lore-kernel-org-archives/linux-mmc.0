@@ -1,46 +1,32 @@
-From: Mika Westerberg <mika.westerberg@linux.intel.com>
-Subject: [PATCH v2 0/3] mmc: fixes for aggressive clock gating framework
-Date: Thu, 18 Aug 2011 15:23:46 +0300
-Message-ID: <cover.1313664897.git.mika.westerberg@linux.intel.com>
+From: J Freyensee <james_p_freyensee@linux.intel.com>
+Subject: Tools to read eMMC registers?
+Date: Thu, 18 Aug 2011 11:45:28 -0700
+Message-ID: <4E4D5DC8.4010605@linux.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:9537 "EHLO mga09.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:26358 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755786Ab1HRMXQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 18 Aug 2011 08:23:16 -0400
+	id S1750764Ab1HRSoH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 18 Aug 2011 14:44:07 -0400
+Received: from [10.7.232.80] (poundcake.jf.intel.com [10.7.232.80])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by linux.intel.com (Postfix) with ESMTP id 9ECB26A4082
+	for <linux-mmc@vger.kernel.org>; Thu, 18 Aug 2011 11:44:05 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, linus.walleij@linaro.org, linux-kernel@vger.kernel.org, Mika Westerberg <mika.westerberg@linux.intel.com>
 
-Hi,
+Are there any tools, software (free or proprietary but preferably 
+Linux-based) or hardware probes, that can read eMMC registers?  If so, 
+would you be able to provide a link to it?
 
-This is an updated series which should fix few races seen when aggressive
-clock gating is active. The first patch actually just renames the gating
-functions to make their use-cases a bit more clear.
+Thanks, I appreciate it!
 
-Second and third patches fix the races itself.
-
-Previous version of the series can be seen here
-	http://article.gmane.org/gmane.linux.kernel.mmc/9611
-
-Changes to previous version:
-	* rename clock gating functions
-	* use mmc_host_clk_hold() and mmc_host_clk_release() to protect the
-	  ios updates
-	* use non-reentrant workqueue instead of the default
-
-Please review, thanks.
-
-Mika Westerberg (3):
-  mmc: rename mmc_host_clk_{ungate|gate} to mmc_host_clk_{hold|release}
-  mmc: prevent aggressive clock gating to race with ios updates
-  mmc: use non-reentrant workqueue for clock gating
-
- drivers/mmc/core/core.c |   35 +++++++++++++++++++++++++++++++----
- drivers/mmc/core/host.c |   12 ++++++------
- drivers/mmc/core/host.h |    8 ++++----
- 3 files changed, 41 insertions(+), 14 deletions(-)
 
 -- 
-1.7.5.4
-
+J (James/Jay) Freyensee
+Storage Technology Group
+Intel Corporation
