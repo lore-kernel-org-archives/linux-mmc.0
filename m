@@ -1,45 +1,45 @@
-From: Linus Walleij <linus.ml.walleij-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v9 2/3] mmc: core: add random fault injection
-Date: Fri, 19 Aug 2011 16:16:42 +0200
-Message-ID: <CAKnu2Mq9N0JyrBnfJ2GupgEcKUfsGUkxZvRcBq9d2s07xUZyDA@mail.gmail.com>
-References: <1313758358-27536-1-git-send-email-per.forlin@stericsson.com>
-	<1313758358-27536-2-git-send-email-per.forlin@stericsson.com>
-	<1313758358-27536-3-git-send-email-per.forlin@stericsson.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [GIT PULL] mmc: atmel rework for next
+Date: Fri, 19 Aug 2011 13:03:47 -0400
+Message-ID: <m24o1dnxjg.fsf@bob.laptop.org>
+References: <4E4A8E73.7050705@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <1313758358-27536-3-git-send-email-per.forlin-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: Per Forlin <per.forlin-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Akinobu Mita <akinobu.mita-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:39750 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751697Ab1HSREO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Aug 2011 13:04:14 -0400
+In-Reply-To: <4E4A8E73.7050705@atmel.com> (Nicolas Ferre's message of "Tue, 16
+	Aug 2011 17:36:19 +0200")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: linux-mmc@vger.kernel.org, "'linux-arm-kernel@lists.infradead.org'" <linux-arm-kernel@lists.infradead.org>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Linux Kernel list <linux-kernel@vger.kernel.org>
 
-2011/8/19 Per Forlin <per.forlin-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>:
+Hi,
 
-> From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On Tue, Aug 16 2011, Nicolas Ferre wrote:
+> Hi Chris,
 >
-> This adds support to inject data errors after a completed host transfer.
-> The mmc core will return error even though the host transfer is successful.
-> This simple fault injection proved to be very useful to test the
-> non-blocking error handling in the mmc_blk_issue_rw_rq().
-> Random faults can also test how the host driver handles pre_req()
-> and post_req() in case of errors.
+> Please pull from:
 >
-> Signed-off-by: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Acked-by: Akinobu Mita <akinobu.mita-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> git://github.com/at91linux/linux-2.6-at91.git nfe/mmc_atmel
+>
+> This is a series that reworks the atmel-mci driver for a future merge of both at91_mci and atmel-mci drivers. Those patches have been discussed on the mailing-list.
+> I added a tiny at91_mci patch also sent last week.
 
-OK!
+Thanks, all looks good -- pushed to mmc-next with some commit message
+rewording.  Please wrap your commit messages to 75 cols in future, so
+that they're viewable in "git log" without wrapping.
 
-Reviewed-by: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-For the MMC portions in 2/3.
+I'll repeat your warning text from one of the commit messages here for
+the broader audience:
 
-Linus Walleij
+    Warning: at91rm9200 is not supported, to support it we need to use
+    swab32 on data but I have no board to test it.
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
