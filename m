@@ -1,20 +1,40 @@
-From: Microsoft <m.loto.yahoo.co.uk@[71.239.161.201]>
-Subject: winner
-Date: Thu, 18 Aug 2011 22:18:18 +0200
-Message-ID: <0LQ500GQUDLBJXC3@a-mtaout21.012.net.il>
-Reply-To: agentpaulines@yahoo.com.hk
-Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1251
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mtaout21.012.net.il ([80.179.55.169]:45769 "EHLO
-	mtaout21.012.net.il" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751155Ab1HRXh6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Aug 2011 19:37:58 -0400
-Received: from conversion-daemon.a-mtaout21.012.net.il by a-mtaout21.012.net.il (HyperSendmail v2007.08) id <0LQ500M00DB75D00@a-mtaout21.012.net.il> for linux-mmc@vger.kernel.org; Fri, 19 Aug 2011 02:37:21 +0300 (IDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH] mmc: sdhi: initialise mmc_data->flags before use
+Date: Fri, 19 Aug 2011 10:07:07 +0900
+Message-ID: <1313716027-19470-1-git-send-email-horms@verge.net.au>
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-You have won 500.000 GBP
-send your phone number
-and address
+This corrects a logic error that I introduced in
+"mmc: sdhi: Add write16_hook"
+
+Reported-by: Magnus Damm <magnus.damm@gmail.com>
+Signed-off-by: Simon Horman <horms@verge.net.au>
+---
+ drivers/mmc/host/sh_mobile_sdhi.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 2fa7bbc..68702e4 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -121,11 +121,11 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	mmc_data->hclk = clk_get_rate(priv->clk);
+ 	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
+ 	mmc_data->get_cd = sh_mobile_sdhi_get_cd;
+-	if (mmc_data->flags & TMIO_MMC_HAS_IDLE_WAIT)
+-		mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
+ 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
+ 	if (p) {
+ 		mmc_data->flags = p->tmio_flags;
++		if (mmc_data->flags & TMIO_MMC_HAS_IDLE_WAIT)
++			mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
+ 		mmc_data->ocr_mask = p->tmio_ocr_mask;
+ 		mmc_data->capabilities |= p->tmio_caps;
+ 
+-- 
+1.7.5.4
+
