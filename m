@@ -1,51 +1,43 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhi: initialise mmc_data->flags before use
-Date: Fri, 19 Aug 2011 13:18:02 -0400
-Message-ID: <m2vcttmib9.fsf@bob.laptop.org>
-References: <1313716027-19470-1-git-send-email-horms@verge.net.au>
+Subject: Re: [PATCH --mmotm v8 0/3] Make fault injection available for MMC IO
+Date: Fri, 19 Aug 2011 13:24:55 -0400
+Message-ID: <m2pqk1mhzs.fsf@bob.laptop.org>
+References: <1312891671-28680-1-git-send-email-per.forlin@linaro.org>
+	<CAJ0pr1-8Jnk1CKakWcS6T4Q3bAe7sF=5p8+9ou1+SbxsZM_Svw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1313716027-19470-1-git-send-email-horms@verge.net.au> (Simon
-	Horman's message of "Fri, 19 Aug 2011 10:07:07 +0900")
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <CAJ0pr1-8Jnk1CKakWcS6T4Q3bAe7sF=5p8+9ou1+SbxsZM_Svw@mail.gmail.com>
+	(Per Forlin's message of "Fri, 19 Aug 2011 11:53:44 +0200")
+Sender: owner-linux-mm@kvack.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: Akinobu Mita <akinobu.mita@gmail.com>, akpm@linux-foundation.org, Linus Walleij <linus.ml.walleij@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linaro-dev@lists.linaro.org, linux-mm@kvack.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Per,
 
-On Thu, Aug 18 2011, Simon Horman wrote:
-> This corrects a logic error that I introduced in
-> "mmc: sdhi: Add write16_hook"
+On Fri, Aug 19 2011, Per Forlin wrote:
+> Hi Chris,
 >
-> Reported-by: Magnus Damm <magnus.damm@gmail.com>
-> Signed-off-by: Simon Horman <horms@verge.net.au>
-> ---
->  drivers/mmc/host/sh_mobile_sdhi.c |    4 ++--
->  1 files changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index 2fa7bbc..68702e4 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -121,11 +121,11 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
->  	mmc_data->hclk = clk_get_rate(priv->clk);
->  	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
->  	mmc_data->get_cd = sh_mobile_sdhi_get_cd;
-> -	if (mmc_data->flags & TMIO_MMC_HAS_IDLE_WAIT)
-> -		mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
->  	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
->  	if (p) {
->  		mmc_data->flags = p->tmio_flags;
-> +		if (mmc_data->flags & TMIO_MMC_HAS_IDLE_WAIT)
-> +			mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
->  		mmc_data->ocr_mask = p->tmio_ocr_mask;
->  		mmc_data->capabilities |= p->tmio_caps;
+> It's no longer necessary to merge this through the mm-tree since
+> Akinobu's patch "fault-injection: add ability to export fault_attr in
+> arbitrary directory" is in mainline.
+> Chris, would you mind merging the fault-injection patches in this
+> patchset to mmc-next once the mmc part of this patchset is acked and
+> accepted?
 
-Thanks, Simon, pushed to mmc-next for 3.1-rc.
+That's fine -- merged to mmc-next for 3.2 now, with Linus W's review.
+
+Thanks,
 
 - Chris.
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
