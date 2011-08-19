@@ -1,51 +1,56 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: sdhi: initialise mmc_data->flags before use
-Date: Fri, 19 Aug 2011 09:06:50 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1108190902180.11363@axis700.grange>
-References: <1313716027-19470-1-git-send-email-horms@verge.net.au>
- <CANqRtoRx5MC-smUjuYBgpstcm49_PqwXqG=YEe+dkqVte7eQ9w@mail.gmail.com>
+Subject: Re: [PATCH 4/4] ARM: shmobile: ag5evm, ap4: Make use of irq index
+ enum
+Date: Fri, 19 Aug 2011 09:45:06 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1108190929030.11363@axis700.grange>
+References: <1313716221-20136-1-git-send-email-horms@verge.net.au>
+ <1313716221-20136-5-git-send-email-horms@verge.net.au>
+ <CANqRtoQL4cw2+71P5+1hU-2TUyV=gQJ9X2NN+_e_S3dgKeWWJA@mail.gmail.com>
+ <20110819052004.GB17548@verge.net.au> <20110819063857.GC16419@verge.net.au>
+ <CANqRtoTu6G=Dut8eQb+aZPrQ9pF383tGHnQ6JNbH=R2wcuuNiA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:56367 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754659Ab1HTSHy convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 20 Aug 2011 14:07:54 -0400
-In-Reply-To: <CANqRtoRx5MC-smUjuYBgpstcm49_PqwXqG=YEe+dkqVte7eQ9w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <CANqRtoTu6G=Dut8eQb+aZPrQ9pF383tGHnQ6JNbH=R2wcuuNiA@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
 To: Magnus Damm <magnus.damm@gmail.com>
-Cc: Simon Horman <horms@verge.net.au>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Simon Horman <horms@verge.net.au>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>
+List-Id: linux-mmc@vger.kernel.org
 
 On Fri, 19 Aug 2011, Magnus Damm wrote:
 
-> On Fri, Aug 19, 2011 at 10:07 AM, Simon Horman <horms@verge.net.au> w=
-rote:
-> > This corrects a logic error that I introduced in
-> > "mmc: sdhi: Add write16_hook"
-> >
-> > Reported-by: Magnus Damm <magnus.damm@gmail.com>
-> > Signed-off-by: Simon Horman <horms@verge.net.au>
-> > ---
-> > =A0drivers/mmc/host/sh_mobile_sdhi.c | =A0 =A04 ++--
-> > =A01 files changed, 2 insertions(+), 2 deletions(-)
->=20
-> Hi Simon,
->=20
-> Thanks for providing a fix for this issue. Correct me if I'm wrong,
-> but I believe this patch is suitable for 3.1-rc. So it would be great
-> to have it merged rather soon as a fix instead of delaying it to 3.2.
+> On Fri, Aug 19, 2011 at 3:39 PM, Simon Horman <horms@verge.net.au> wrote:
 
-Indeed:
+[snip]
 
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > As we are already on the slippery slope of allowing combinations
+> > other than 1 (legacy) or 3 (specific) IRQ sources I plan to implement
+> > a variant of your flag idea. The variation being to use names instead
+> > because a) that allows the use of platform_get_irq_byname() and b)
+> > the flags bits seem to be full and not driver-specific.
+> 
+> Great, platform_get_irq_byname() seems like a perfect match.
 
-Chris, please, push for 3.1.
+Indeed, good idea! This API is (unfortunately) so rarely used, that it was  
+pretty much completely absent from my "active dictionary."
+
+> May I suggest "hotplug", "data" and "sdio" as names? I don't care very
+> much about names except keeping them short and precise to prevent
+> errors that can only be caught during runtime.
+
+I don't care about names all that much either, but as Simon suggested in 
+his other mail, consistency is good. Besides, yes, I thought about "data"
+as a name for the main SDHI IRQ, but I decided it didn't reflect its 
+function very well. Firstly, it is not only data, secondly, SDIO IRQs can 
+also announce data availability, I think. The even more precise 
+description of these two IRQs would be, perhaps, "synchronous" and 
+"asynchronous," but that's probably not very intuitivy.
+
+So, I'll accept any names, that you two agree upon:-)
 
 Thanks
 Guennadi
 ---
 Guennadi Liakhovetski, Ph.D.
-=46reelance Open-Source Software Developer
+Freelance Open-Source Software Developer
 http://www.open-technology.de/
