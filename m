@@ -1,26 +1,39 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: [PATCH 0/4 v6] mmc: tmio, sdhi: provide multiple irq handlers
-Date: Fri, 19 Aug 2011 10:10:17 +0900
-Message-ID: <1313716221-20136-1-git-send-email-horms@verge.net.au>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH] mmc: sdhi: initialise mmc_data->flags before use
+Date: Fri, 19 Aug 2011 12:04:06 +0900
+Message-ID: <CANqRtoRx5MC-smUjuYBgpstcm49_PqwXqG=YEe+dkqVte7eQ9w@mail.gmail.com>
+References: <1313716027-19470-1-git-send-email-horms@verge.net.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:55968 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753004Ab1HSBKe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Aug 2011 21:10:34 -0400
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:63233 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751399Ab1HSDEH convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Aug 2011 23:04:07 -0400
+In-Reply-To: <1313716027-19470-1-git-send-email-horms@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>
+To: Simon Horman <horms@verge.net.au>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-The SDHI driver already supports making use of up to three interrupt
-sources.
+On Fri, Aug 19, 2011 at 10:07 AM, Simon Horman <horms@verge.net.au> wro=
+te:
+> This corrects a logic error that I introduced in
+> "mmc: sdhi: Add write16_hook"
+>
+> Reported-by: Magnus Damm <magnus.damm@gmail.com>
+> Signed-off-by: Simon Horman <horms@verge.net.au>
+> ---
+> =A0drivers/mmc/host/sh_mobile_sdhi.c | =A0 =A04 ++--
+> =A01 files changed, 2 insertions(+), 2 deletions(-)
 
-This series breaks up the existing interrupt handler into three handlers,
-one for card access, one for card detect interrupts, and one for SDIO
-interrupts.  A cover-all handler, which makes use of these new broken-out
-handlers is provided for for the case where there is only one interrupt
-source.
+Hi Simon,
 
-This series also wires up the broken-out irq handlers in the SDHI driver
+Thanks for providing a fix for this issue. Correct me if I'm wrong,
+but I believe this patch is suitable for 3.1-rc. So it would be great
+to have it merged rather soon as a fix instead of delaying it to 3.2.
 
+Thanks,
 
+/ magnus
