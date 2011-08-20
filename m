@@ -1,43 +1,76 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH --mmotm v8 0/3] Make fault injection available for MMC IO
-Date: Fri, 19 Aug 2011 13:24:55 -0400
-Message-ID: <m2pqk1mhzs.fsf@bob.laptop.org>
-References: <1312891671-28680-1-git-send-email-per.forlin@linaro.org>
-	<CAJ0pr1-8Jnk1CKakWcS6T4Q3bAe7sF=5p8+9ou1+SbxsZM_Svw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <CAJ0pr1-8Jnk1CKakWcS6T4Q3bAe7sF=5p8+9ou1+SbxsZM_Svw@mail.gmail.com>
-	(Per Forlin's message of "Fri, 19 Aug 2011 11:53:44 +0200")
-Sender: owner-linux-mm@kvack.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: Akinobu Mita <akinobu.mita@gmail.com>, akpm@linux-foundation.org, Linus Walleij <linus.ml.walleij@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linaro-dev@lists.linaro.org, linux-mm@kvack.org
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: [PATCH] mmc: Use switch() instead of if/else if in mmc_blk_issue_rq.
+Date: Sat, 20 Aug 2011 23:50:39 +0900
+Message-ID: <1313851839-32483-1-git-send-email-linkinjeon@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iy0-f170.google.com ([209.85.210.170]:49393 "EHLO
+	mail-iy0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752034Ab1HTOvC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 20 Aug 2011 10:51:02 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, linus.walleij@linaro.org, linux-kernel@vger.kernel.org, Namjae Jeon <linkinjeon@gmail.com>
 
-Hi Per,
+This uses a switch statement instead of if/else if statements.
+It will make to improve clarity and scalability, and offer faster execution through compiler optimization than if/else if statements.
 
-On Fri, Aug 19 2011, Per Forlin wrote:
-> Hi Chris,
->
-> It's no longer necessary to merge this through the mm-tree since
-> Akinobu's patch "fault-injection: add ability to export fault_attr in
-> arbitrary directory" is in mainline.
-> Chris, would you mind merging the fault-injection patches in this
-> patchset to mmc-next once the mmc part of this patchset is acked and
-> accepted?
+Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
+---
+ drivers/mmc/card/block.c |   38 +++++++++++++++++++++++---------------
+ 1 files changed, 23 insertions(+), 15 deletions(-)
 
-That's fine -- merged to mmc-next for 3.2 now, with Linus W's review.
-
-Thanks,
-
-- Chris.
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1ff5486..fe9dd89 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1191,23 +1191,31 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		goto out;
+ 	}
+ 
+-	if (req && req->cmd_flags & REQ_DISCARD) {
+-		/* complete ongoing async transfer before issuing discard */
+-		if (card->host->areq)
+-			mmc_blk_issue_rw_rq(mq, NULL);
+-		if (req->cmd_flags & REQ_SECURE)
+-			ret = mmc_blk_issue_secdiscard_rq(mq, req);
+-		else
++	if (req) {
++		switch(req->cmd_flags) {
++		case REQ_DISCARD:
++			/* complete ongoing async transfer before issuing discard */
++			if (card->host->areq)
++				mmc_blk_issue_rw_rq(mq, NULL);
+ 			ret = mmc_blk_issue_discard_rq(mq, req);
+-	} else if (req && req->cmd_flags & REQ_FLUSH) {
+-		/* complete ongoing async transfer before issuing flush */
+-		if (card->host->areq)
+-			mmc_blk_issue_rw_rq(mq, NULL);
+-		ret = mmc_blk_issue_flush(mq, req);
+-	} else {
++			break;
++		case REQ_DISCARD | REQ_SECURE:
++			/* complete ongoing async transfer before issuing discard */
++			if (card->host->areq)
++				mmc_blk_issue_rw_rq(mq, NULL);
++			ret = mmc_blk_issue_secdiscard_rq(mq, req);
++			break;
++		case REQ_FLUSH:
++			/* complete ongoing async transfer before issuing discard */
++			if (card->host->areq)
++				mmc_blk_issue_rw_rq(mq, NULL);
++			ret = mmc_blk_issue_flush(mq, req);
++			break;
++		}
++	}		
++	else
+ 		ret = mmc_blk_issue_rw_rq(mq, req);
+-	}
+-
++			
+ out:
+ 	if (!req)
+ 		/* release host only when there are no more requests */
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.4.4
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
