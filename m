@@ -1,48 +1,120 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: Re: [GIT PULL] mmc: atmel rework for next
-Date: Mon, 22 Aug 2011 10:28:21 +0200
-Message-ID: <4E521325.9090606@atmel.com>
-References: <4E4A8E73.7050705@atmel.com> <m24o1dnxjg.fsf@bob.laptop.org>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: Re: [PATCH v1 1/1] mmc: sd: Handle SD3.0 cards not supporting
+     UHS-I bus speed mode
+Date: Mon, 22 Aug 2011 02:44:39 -0700 (PDT)
+Message-ID: <3f99dd036fb7c56c252e1dd27ccc965a.squirrel@www.codeaurora.org>
+References: <1312955161-24844-1-git-send-email-subhashj@codeaurora.org>
+    <m2k4ajpran.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:52478 "EHLO
-	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754735Ab1HVI27 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2011 04:28:59 -0400
-In-Reply-To: <m24o1dnxjg.fsf@bob.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <m2k4ajpran.fsf@bob.laptop.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, "'linux-arm-kernel@lists.infradead.org'" <linux-arm-kernel@lists.infradead.org>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Linux Kernel list <linux-kernel@vger.kernel.org>
+Cc: Subhash Jadavani <subhashj@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, "Nath, Arindam" <arindam.nath@amd.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Le 19/08/2011 19:03, Chris Ball :
-> Hi,
-> 
-> On Tue, Aug 16 2011, Nicolas Ferre wrote:
->> Hi Chris,
+Hi Chris,
+
+> Hi Subhash, Arindam,
+>
+> On Wed, Aug 10 2011, Subhash Jadavani wrote:
+>> Here is Essential conditions to indicate Version 3.00 Card
+>> (SD_SPEC=2 and SD_SPEC3=1) :
+>> (1) The card shall support CMD6
+>> (2) The card shall support CMD8
+>> (3) The card shall support CMD42
+>> (4) User area capacity shall be up to 2GB (SDSC) or 32GB (SDHC)
+>>     User area capacity shall be more than or equal to 32GB and
+>>     up to 2TB (SDXC)
+>> (5) Speed Class shall be supported (SDHC or SDXC)
 >>
->> Please pull from:
+>> So even if SD card doesn't support any of the newly defined
+>> UHS-I bus speed mode, it can advertise itself as SD3.0 cards
+>> as long as it supports all the essential conditions of
+>> SD3.0 cards. Given this, these type of cards should atleast
+>> run in High Speed mode @50MHZ if it supports HS.
 >>
->> git://github.com/at91linux/linux-2.6-at91.git nfe/mmc_atmel
+>> But current initialization sequence for SD3.0 cards is
+>> such that these non-UHS-I SD3.0 cards runs in Default
+>> Speed mode @25MHz.
 >>
->> This is a series that reworks the atmel-mci driver for a future merge of both at91_mci and atmel-mci drivers. Those patches have been discussed on the mailing-list.
->> I added a tiny at91_mci patch also sent last week.
-> 
-> Thanks, all looks good -- pushed to mmc-next with some commit message
-> rewording.  Please wrap your commit messages to 75 cols in future, so
-> that they're viewable in "git log" without wrapping.
+>> This patch makes sure that these non-UHS-I SD3.0 cards run
+>> in High Speed Mode @50MHz.
+>>
+>> Tested this patch with SanDisk Extreme SDHC 8GB Class 10 card.
+>>
+>> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+>> ---
+>>  drivers/mmc/core/sd.c |    6 +++---
+>>  1 files changed, 3 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>> index ff27741..e2dcf23 100644
+>> --- a/drivers/mmc/core/sd.c
+>> +++ b/drivers/mmc/core/sd.c
+>> @@ -306,6 +306,9 @@ static int mmc_read_switch(struct mmc_card *card)
+>>  		goto out;
+>>  	}
+>>
+>> +	if (status[13] & 0x02)
+>> +		card->sw_caps.hs_max_dtr = 50000000;
+>> +
+>>  	if (card->scr.sda_spec3) {
+>>  		card->sw_caps.sd3_bus_mode = status[13];
+>>
+>> @@ -348,9 +351,6 @@ static int mmc_read_switch(struct mmc_card *card)
+>>  		}
+>>
+>>  		card->sw_caps.sd3_curr_limit = status[7];
+>> -	} else {
+>> -		if (status[13] & 0x02)
+>> -			card->sw_caps.hs_max_dtr = 50000000;
+>>  	}
+>>
+>>  out:
+>
+> The patch itself is fine, but please could one of you add some #defines
+> for the status response bit names and their possible values inside
+> mmc_read_switch()?  It's looking a bit opaque.
+>
+> (I know that this patch doesn't introduce any of these magic numbers;
+> I just think that now is a good time to add documentation for them.)
 
-Thanks Chris for this. I will pay attention to line wrapping.
+For UHS-I bus speed modes,we already have macros for bus speed modes under
+include/linux/mmc/card.h:
+#define UHS_SDR12_BUS_SPEED     0
+#define UHS_SDR25_BUS_SPEED     1
+#define UHS_SDR50_BUS_SPEED     2
+#define UHS_SDR104_BUS_SPEED    3
+#define UHS_DDR50_BUS_SPEED     4
 
-> I'll repeat your warning text from one of the commit messages here for
-> the broader audience:
-> 
->     Warning: at91rm9200 is not supported, to support it we need to use
->     swab32 on data but I have no board to test it.
+There are only 2 non-uhs-i bus speed mode options:
+      high speed and default speed.
 
-Best regards,
+So,
+status[13] = 2 => High speed mode
+status[13] = 1 => Default speed mode
+
+If you want, i can add 2 more macros for HS and DS modes. Do you want me
+to define these macros within mmc_read_switch() or under sd_switch_caps
+struct in include/linux/mmc/card.h file?
+
+Regards,
+Subhash
+
+
+>
+> Thanks very much,
+>
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+>
+
+
 -- 
-Nicolas Ferre
-
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
