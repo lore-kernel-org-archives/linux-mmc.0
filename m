@@ -1,39 +1,53 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v1 1/1] mmc: sd: Handle SD3.0 cards not supporting  UHS-I bus speed mode
-Date: Mon, 22 Aug 2011 09:20:45 -0400
-Message-ID: <m2mxf1fuqa.fsf@bob.laptop.org>
-References: <1312955161-24844-1-git-send-email-subhashj@codeaurora.org>
-	<m2k4ajpran.fsf@bob.laptop.org>
-	<3f99dd036fb7c56c252e1dd27ccc965a.squirrel@www.codeaurora.org>
+From: David Brown <davidb@codeaurora.org>
+Subject: Re: [PATCH 1/2] msm: Fix a typo in MSM SDCC driver gpio setup
+Date: Mon, 22 Aug 2011 08:50:41 -0700
+Message-ID: <20110822155041.GA4829@huya.qualcomm.com>
+References: <1313927564-10355-1-git-send-email-alexander.tarasikov@gmail.com>
+ <1313927564-10355-2-git-send-email-alexander.tarasikov@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <3f99dd036fb7c56c252e1dd27ccc965a.squirrel@www.codeaurora.org>
-	(Subhash Jadavani's message of "Mon, 22 Aug 2011 02:44:39 -0700
-	(PDT)")
+Content-Disposition: inline
+In-Reply-To: <1313927564-10355-2-git-send-email-alexander.tarasikov@gmail.com>
 Sender: linux-arm-msm-owner@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, "Nath, Arindam" <arindam.nath@amd.com>
+To: Alexander Tarasikov <alexander.tarasikov@gmail.com>
+Cc: davidb@codeaurora.org, dwalker@fifo99.com, bryanh@codeaurora.org, cjb@laptop.org, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Subhash,
+On Sun, Aug 21, 2011 at 03:52:43PM +0400, Alexander Tarasikov wrote:
+> The use of && instead of || caused a NULL pointer dereference if
+> gpio setup was not passed via platform data
+> 
+> Signed-off-by: Alexander Tarasikov <alexander.tarasikov@gmail.com>
+> ---
+>  drivers/mmc/host/msm_sdcc.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
+> index a4c865a..d06539d 100644
+> --- a/drivers/mmc/host/msm_sdcc.c
+> +++ b/drivers/mmc/host/msm_sdcc.c
+> @@ -939,7 +939,7 @@ static void msmsdcc_setup_gpio(struct msmsdcc_host *host, bool enable)
+> 	struct msm_mmc_gpio_data *curr;
+> 	int i, rc = 0;
+> 
+> -	if (!host->plat->gpio_data && host->gpio_config_status == enable)
+> +	if (!host->plat->gpio_data || host->gpio_config_status == enable)
+> 		return;
+> 
+> 	curr = host->plat->gpio_data;
 
-On Mon, Aug 22 2011, Subhash Jadavani wrote:
-> status[13] = 2 => High speed mode
-> status[13] = 1 => Default speed mode
->
-> If you want, i can add 2 more macros for HS and DS modes. Do you want me
-> to define these macros within mmc_read_switch() or under sd_switch_caps
-> struct in include/linux/mmc/card.h file?
+Both of your patches have somehow gotten mangled in transit (the
+context lines have lost their leading space).  Did you perhaps edit
+the patch files with an editor that is configured to fold spaces into
+tabs?
 
-Under the struct sounds good.
-
-How about status[13] itself?  Could we add macros for the names of the
-status bits, as we do for e.g. the ext_csd[*] fields in mmc.h?
+I was able to fix up the files and apply the patches, and will include
+these once Sahitya has a chance to review them.
 
 Thanks,
+David
 
-- Chris.
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Sent by an employee of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
