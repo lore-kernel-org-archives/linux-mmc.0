@@ -1,28 +1,21 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [RFC PATCH] support ioctl for tunable user request
-Date: Tue, 23 Aug 2011 13:33:56 +0900
-Message-ID: <4E532DB4.8080700@samsung.com>
+Subject: [RFC PATCH resend] support ioctl for tunable user request
+Date: Tue, 23 Aug 2011 13:48:24 +0900
+Message-ID: <4E533118.5010906@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:14621 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751094Ab1HWEdm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Aug 2011 00:33:42 -0400
-Received: from epcpsbgm2.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LQD006WB5ZR3930@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 23 Aug 2011 13:33:41 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LQD00M8O6055G@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 23 Aug 2011 13:33:41 +0900 (KST)
+Received: from mailout1.samsung.com ([203.254.224.24]:48244 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751502Ab1HWEsL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Aug 2011 00:48:11 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Jens Axboe <axboe@kerne.dk>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd.bergmann@linaro.org>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Jens Axboe <jaxboe@fusionio.com>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd.bergmann@linaro.org>
+
+Sorry Add to linux-kernel mailing and change Jens's e-mail.
 
 This patch is added the ioctl for tunable user request.
 
@@ -313,3 +306,8 @@ index 90f2e1c..6a4fa77 100644
  extern int mmc_can_trim(struct mmc_card *card);
  extern int mmc_can_secure_erase_trim(struct mmc_card *card);
  extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
