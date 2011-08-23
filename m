@@ -1,42 +1,40 @@
-From: blp@cs.stanford.edu (Ben Pfaff)
+From: Sam Ravnborg <sam@ravnborg.org>
 Subject: Re: [PATCH 2/2] mmc: fix integer assignments to pointer
-Date: Tue, 23 Aug 2011 11:04:08 -0700
-Message-ID: <874o18m2cn.fsf@blp.benpfaff.org>
-References: <1314114363-6767-1-git-send-email-svenkatr@ti.com>
-	<1314114363-6767-3-git-send-email-svenkatr@ti.com>
-	<m27h643x8k.fsf@bob.laptop.org> <20110823172851.GB1784@leaf>
-Reply-To: blp@cs.stanford.edu
+Date: Tue, 23 Aug 2011 22:22:25 +0200
+Message-ID: <20110823202225.GA9433@merkur.ravnborg.org>
+References: <1314114363-6767-1-git-send-email-svenkatr@ti.com> <1314114363-6767-3-git-send-email-svenkatr@ti.com> <m27h643x8k.fsf@bob.laptop.org> <20110823172851.GB1784@leaf> <874o18m2cn.fsf@blp.benpfaff.org> <20110823181359.GB3418@leaf> <m2mxf02d9h.fsf@bob.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Reply-to: blp@cs.stanford.edu
-In-Reply-To: <20110823172851.GB1784@leaf> (Josh Triplett's message of "Tue, 23
-	Aug 2011 10:28:51 -0700")
-Sender: linux-sparse-owner@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-sparse@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.snhosting.dk ([87.238.248.203]:19179 "EHLO
+	smtp.domainteam.dk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752130Ab1HWUW1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Aug 2011 16:22:27 -0400
+Content-Disposition: inline
+In-Reply-To: <m2mxf02d9h.fsf@bob.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Josh Triplett <josh@joshtriplett.org>, blp@cs.stanford.edu, Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-sparse@vger.kernel.org
 
-Josh Triplett <josh@joshtriplett.org> writes:
+On Tue, Aug 23, 2011 at 02:28:42PM -0400, Chris Ball wrote:
+> Hi,
+> 
+> On Tue, Aug 23 2011, Josh Triplett wrote:
+> > {} produces the same effect, as far as I know.
+> 
+> Yeah.  I prefer {0}, because {} is a gcc-ism (the ANSI grammar demands
+> initializer-lists be non-empty) and is less readable for people who
+> haven't seen the idiom before and are wondering what's going on.
+> 
+> I'm still a little confused -- the {0} or memset(0, struct ..);
+> formations are used often in the kernel, even with pointers involved.
+> Is the warning (Wnon_pointer_null) run against the kernel by default,
+> or did Venkatraman add it manually?  If default, is it catching bugs?
 
-> On Tue, Aug 23, 2011 at 12:31:55PM -0400, Chris Ball wrote:
->> On Tue, Aug 23 2011, Venkatraman S wrote:
->> > -	struct mmc_request mrq = {0};
->> > +	struct mmc_request mrq = {NULL};
->> 
->> The sparse warning is mistaken.  Or I'm mistaken.  But I suspect it's
->> the sparse warning.
->
-> Notice that it says "the remainder of the aggregate".  The first field
-> still gets initialized with the 0 you supplied, and the first field of
-> struct mmc_request has a pointer type.
+It is default enabled - and trigger a lot of warnings.
+But the kernel idiom is to use NULL for a null pointer - and not to use 0.
 
-That's an understandable position, but I think it would also be
-reasonable for sparse to special case using {0} as an
-initializer.  {0} is a valid initializer for every type and so
-it's sometimes used as an initializer for a local variable to get
-the same effect that one would have for a static variable without
-specifying an initializer.
--- 
-Ben Pfaff 
-http://benpfaff.org
+Which is why the warning was introduced.
+
+	Sam
