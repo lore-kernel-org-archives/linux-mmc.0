@@ -1,38 +1,276 @@
-From: Sahitya Tummala <stummala@codeaurora.org>
-Subject: Re: Fixes for the MSM SDCC driver on msm7200a
-Date: Tue, 23 Aug 2011 16:16:37 +0530
-Message-ID: <4E53850D.4040301@codeaurora.org>
-References: <1313927564-10355-1-git-send-email-alexander.tarasikov@gmail.com>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: RE: [PATCH v2 1/1] mmc: sd: UHS-I bus speed should be set last in
+      UHS initialization
+Date: Tue, 23 Aug 2011 07:14:58 -0500
+Message-ID: <6C03668EAF45B747AF947A1603D1B300019EC0F037@SAUSEXMBP01.amd.com>
+References: <1312872571-12091-1-git-send-email-subhashj@codeaurora.org>
+ <9ee37b38ae8b93ce66b7b9daa0d08d9f.squirrel@www.codeaurora.org>
+  <000201cc6189$fdb73d40$f925b7c0$@org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1313927564-10355-1-git-send-email-alexander.tarasikov@gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Alexander Tarasikov <alexander.tarasikov@gmail.com>
-Cc: davidb@codeaurora.org, dwalker@fifo99.com, bryanh@codeaurora.org, cjb@laptop.org, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:39478
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752538Ab1HWMPP convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 23 Aug 2011 08:15:15 -0400
+In-Reply-To: <000201cc6189$fdb73d40$f925b7c0$@org>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, 'Philip Rakity' <prakity@marvell.com>
 
-Hi Alexander,
+Hi Subhash,
 
-Both these patches looks good to me.
+The patch looks good to me.
 
-Acked-by: Sahitya Tummala <stummala@codeaurora.org>
+Reviewed-by: Arindam Nath <arindam.nath@amd.com>
 
 Thanks,
-Sahitya.
---
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+Arindam
 
-On 8/21/2011 5:22 PM, Alexander Tarasikov wrote:
-> These two patches fix issues that prevent the MSM SDCC driver from
-> being used on msm7200a boards. First one fixes a NULL pointer when
-> the board does not supply gpio config. Second one adds the init_card
-> operation instead of the declared but unimplemented embedded_sdio_data
-> feature.
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-arm-msm" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -----Original Message-----
+> From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
+> Sent: Tuesday, August 23, 2011 5:14 PM
+> To: Nath, Arindam
+> Subject: RE: [PATCH v2 1/1] mmc: sd: UHS-I bus speed should be set last
+> in UHS initialization
+> 
+> FYI ...
+> 
+> > -----Original Message-----
+> > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
+> > Sent: Tuesday, August 23, 2011 5:13 PM
+> > To: 'Arindam Nath'
+> > Subject: RE: [PATCH v2 1/1] mmc: sd: UHS-I bus speed should be set
+> last
+> > in UHS initialization
+> >
+> > Hi Arindam,
+> >
+> > Can you have a look at this patch? Do let me know if it looks ok or
+> > not?
+> >
+> > Regards,
+> > Subhash
+> >
+> > > -----Original Message-----
+> > > From: linux-arm-msm-owner@vger.kernel.org [mailto:linux-arm-msm-
+> > > owner@vger.kernel.org] On Behalf Of Subhash Jadavani
+> > > Sent: Monday, August 22, 2011 3:17 PM
+> > > To: Arindam Nath
+> > > Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org;
+> Subhash
+> > > Jadavani
+> > > Subject: Re: [PATCH v2 1/1] mmc: sd: UHS-I bus speed should be set
+> > last
+> > > in UHS initialization
+> > >
+> > > Hi Arindam,
+> > >
+> > > Can you please check if this patch looks ok or not?
+> > >
+> > > Regards,
+> > > Subhash
+> > >
+> > > > mmc_sd_init_uhs_card function sets the driver type, current limit
+> > > > and bus speed mode on card as well as on host controller side.
+> > > >
+> > > > Currently bus speed mode is set by sending CMD6 to card and
+> > > > immediately setting the timing mode in host controller. But
+> > > > then before initiating tuning sequence, it also tries to set
+> > > > current limit by sending CMD6 to card which results in data
+> > > > timeout errors in controller if bus speed mode is SDR50/SDR104
+> > mode.
+> > > >
+> > > > So basically bus speed mode should be set only after current
+> limit
+> > > > is set in the card and immediately after setting the bus speed
+> > mode,
+> > > > tuning sequence should be initiated.
+> > > >
+> > > > Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> > > > ---
+> > > >  drivers/mmc/core/sd.c |   81
+> > > > ++++++++++++++++++++++++++++++++-----------------
+> > > >  1 files changed, 53 insertions(+), 28 deletions(-)
+> > > >
+> > > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > > > index e2dcf23..2191dda 100644
+> > > > --- a/drivers/mmc/core/sd.c
+> > > > +++ b/drivers/mmc/core/sd.c
+> > > > @@ -459,56 +459,75 @@ static int sd_select_driver_type(struct
+> > > mmc_card
+> > > > *card, u8 *status)
+> > > >  	return 0;
+> > > >  }
+> > > >
+> > > > -static int sd_set_bus_speed_mode(struct mmc_card *card, u8
+> > *status)
+> > > > +static void sd_update_bus_speed_mode(struct mmc_card *card)
+> > > >  {
+> > > > -	unsigned int bus_speed = 0, timing = 0;
+> > > > -	int err;
+> > > > -
+> > > >  	/*
+> > > >  	 * If the host doesn't support any of the UHS-I modes,
+> fallback
+> > > on
+> > > >  	 * default speed.
+> > > >  	 */
+> > > >  	if (!(card->host->caps & (MMC_CAP_UHS_SDR12 |
+> MMC_CAP_UHS_SDR25 |
+> > > > -	    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
+> MMC_CAP_UHS_DDR50)))
+> > > > -		return 0;
+> > > > +	    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
+> MMC_CAP_UHS_DDR50)))
+> > > {
+> > > > +		card->sd_bus_speed = 0;
+> > > > +		return;
+> > > > +	}
+> > > >
+> > > >  	if ((card->host->caps & MMC_CAP_UHS_SDR104) &&
+> > > >  	    (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR104)) {
+> > > > -			bus_speed = UHS_SDR104_BUS_SPEED;
+> > > > -			timing = MMC_TIMING_UHS_SDR104;
+> > > > -			card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
+> > > > +			card->sd_bus_speed = UHS_SDR104_BUS_SPEED;
+> > > >  	} else if ((card->host->caps & MMC_CAP_UHS_DDR50) &&
+> > > >  		   (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_DDR50))
+> {
+> > > > -			bus_speed = UHS_DDR50_BUS_SPEED;
+> > > > -			timing = MMC_TIMING_UHS_DDR50;
+> > > > -			card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
+> > > > +			card->sd_bus_speed = UHS_DDR50_BUS_SPEED;
+> > > >  	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+> > > >  		    MMC_CAP_UHS_SDR50)) && (card-
+> >sw_caps.sd3_bus_mode &
+> > > >  		    SD_MODE_UHS_SDR50)) {
+> > > > -			bus_speed = UHS_SDR50_BUS_SPEED;
+> > > > -			timing = MMC_TIMING_UHS_SDR50;
+> > > > -			card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
+> > > > +			card->sd_bus_speed = UHS_SDR50_BUS_SPEED;
+> > > >  	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+> > > >  		    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25)) &&
+> > > >  		   (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR25))
+> {
+> > > > -			bus_speed = UHS_SDR25_BUS_SPEED;
+> > > > -			timing = MMC_TIMING_UHS_SDR25;
+> > > > -			card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
+> > > > +			card->sd_bus_speed = UHS_SDR25_BUS_SPEED;
+> > > >  	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
+> > > >  		    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25 |
+> > > >  		    MMC_CAP_UHS_SDR12)) && (card-
+> >sw_caps.sd3_bus_mode &
+> > > >  		    SD_MODE_UHS_SDR12)) {
+> > > > -			bus_speed = UHS_SDR12_BUS_SPEED;
+> > > > -			timing = MMC_TIMING_UHS_SDR12;
+> > > > -			card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
+> > > > +			card->sd_bus_speed = UHS_SDR12_BUS_SPEED;
+> > > > +	}
+> > > > +}
+> > > > +
+> > > > +static int sd_set_bus_speed_mode(struct mmc_card *card, u8
+> > *status)
+> > > > +{
+> > > > +	int err;
+> > > > +	unsigned int timing = 0;
+> > > > +
+> > > > +	switch (card->sd_bus_speed) {
+> > > > +	case UHS_SDR104_BUS_SPEED:
+> > > > +		timing = MMC_TIMING_UHS_SDR104;
+> > > > +		card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
+> > > > +		break;
+> > > > +	case UHS_DDR50_BUS_SPEED:
+> > > > +		timing = MMC_TIMING_UHS_DDR50;
+> > > > +		card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
+> > > > +		break;
+> > > > +	case UHS_SDR50_BUS_SPEED:
+> > > > +		timing = MMC_TIMING_UHS_SDR50;
+> > > > +		card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
+> > > > +		break;
+> > > > +	case UHS_SDR25_BUS_SPEED:
+> > > > +		timing = MMC_TIMING_UHS_SDR25;
+> > > > +		card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
+> > > > +		break;
+> > > > +	case UHS_SDR12_BUS_SPEED:
+> > > > +		timing = MMC_TIMING_UHS_SDR12;
+> > > > +		card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
+> > > > +		break;
+> > > > +	default:
+> > > > +		return 0;
+> > > >  	}
+> > > >
+> > > > -	card->sd_bus_speed = bus_speed;
+> > > > -	err = mmc_sd_switch(card, 1, 0, bus_speed, status);
+> > > > +	err = mmc_sd_switch(card, 1, 0, card->sd_bus_speed,
+> status);
+> > > >  	if (err)
+> > > >  		return err;
+> > > >
+> > > > -	if ((status[16] & 0xF) != bus_speed)
+> > > > +	if ((status[16] & 0xF) != card->sd_bus_speed)
+> > > >  		printk(KERN_WARNING "%s: Problem setting bus speed
+> > > mode!\n",
+> > > >  			mmc_hostname(card->host));
+> > > >  	else {
+> > > > @@ -608,18 +627,24 @@ static int mmc_sd_init_uhs_card(struct
+> > mmc_card
+> > > > *card)
+> > > >  		mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
+> > > >  	}
+> > > >
+> > > > +	/*
+> > > > +	 * Select the bus speed mode depending on host
+> > > > +	 * and card capability.
+> > > > +	 */
+> > > > +	sd_update_bus_speed_mode(card);
+> > > > +
+> > > >  	/* Set the driver strength for the card */
+> > > >  	err = sd_select_driver_type(card, status);
+> > > >  	if (err)
+> > > >  		goto out;
+> > > >
+> > > > -	/* Set bus speed mode of the card */
+> > > > -	err = sd_set_bus_speed_mode(card, status);
+> > > > +	/* Set current limit for the card */
+> > > > +	err = sd_set_current_limit(card, status);
+> > > >  	if (err)
+> > > >  		goto out;
+> > > >
+> > > > -	/* Set current limit for the card */
+> > > > -	err = sd_set_current_limit(card, status);
+> > > > +	/* Set bus speed mode of the card */
+> > > > +	err = sd_set_bus_speed_mode(card, status);
+> > > >  	if (err)
+> > > >  		goto out;
+> > > >
+> > > > --
+> > > > 1.7.1.1
+> > > >
+> > > > --
+> > > > Sent by a consultant of the Qualcomm Innovation Center, Inc.
+> > > > The Qualcomm Innovation Center, Inc. is a member of the Code
+> Aurora
+> > > Forum.
+> > > >
+> > > >
+> > >
+> > >
+> > > --
+> > > Sent by a consultant of the Qualcomm Innovation Center, Inc.
+> > > The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
+> > > Forum.
+> > >
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe linux-
+> arm-
+> > > msm" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+
