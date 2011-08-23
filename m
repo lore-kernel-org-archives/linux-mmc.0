@@ -1,44 +1,64 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 2/2] mmc: fix integer assignments to pointer
-Date: Tue, 23 Aug 2011 11:13:59 -0700
-Message-ID: <20110823181359.GB3418@leaf>
-References: <1314114363-6767-1-git-send-email-svenkatr@ti.com>
- <1314114363-6767-3-git-send-email-svenkatr@ti.com>
- <m27h643x8k.fsf@bob.laptop.org>
- <20110823172851.GB1784@leaf>
- <874o18m2cn.fsf@blp.benpfaff.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <874o18m2cn.fsf@blp.benpfaff.org>
-Sender: linux-sparse-owner@vger.kernel.org
-To: blp@cs.stanford.edu
-Cc: Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-sparse@vger.kernel.org
+From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 2/2] arm/dt: Tegra: Update SDHCI nodes to match bindings
+Date: Tue, 23 Aug 2011 12:15:34 -0600
+Message-ID: <1314123334-23133-2-git-send-email-swarren@nvidia.com>
+References: <1314123334-23133-1-git-send-email-swarren@nvidia.com>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1314123334-23133-1-git-send-email-swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Aug 23, 2011 at 11:04:08AM -0700, Ben Pfaff wrote:
-> Josh Triplett <josh@joshtriplett.org> writes:
-> 
-> > On Tue, Aug 23, 2011 at 12:31:55PM -0400, Chris Ball wrote:
-> >> On Tue, Aug 23 2011, Venkatraman S wrote:
-> >> > -	struct mmc_request mrq = {0};
-> >> > +	struct mmc_request mrq = {NULL};
-> >> 
-> >> The sparse warning is mistaken.  Or I'm mistaken.  But I suspect it's
-> >> the sparse warning.
-> >
-> > Notice that it says "the remainder of the aggregate".  The first field
-> > still gets initialized with the 0 you supplied, and the first field of
-> > struct mmc_request has a pointer type.
-> 
-> That's an understandable position, but I think it would also be
-> reasonable for sparse to special case using {0} as an
-> initializer.  {0} is a valid initializer for every type and so
-> it's sometimes used as an initializer for a local variable to get
-> the same effect that one would have for a static variable without
-> specifying an initializer.
+The bindings were recently updated to be more in-line with other SDHCI
+bindings that are already merged.
 
-{} produces the same effect, as far as I know.
+Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+---
+ arch/arm/boot/dts/tegra-harmony.dts  |   12 ++++++------
+ arch/arm/boot/dts/tegra-seaboard.dts |    6 +++---
+ 2 files changed, 9 insertions(+), 9 deletions(-)
 
-- Josh Triplett
+diff --git a/arch/arm/boot/dts/tegra-harmony.dts b/arch/arm/boot/dts/tegra-harmony.dts
+index 4c05334..e581866 100644
+--- a/arch/arm/boot/dts/tegra-harmony.dts
++++ b/arch/arm/boot/dts/tegra-harmony.dts
+@@ -57,14 +57,14 @@
+ 	};
+ 
+ 	sdhci@c8000200 {
+-		gpios = <&gpio 69 0>, /* cd, gpio PI5 */
+-			<&gpio 57 0>, /* wp, gpio PH1 */
+-			<&gpio 155 0>; /* power, gpio PT3 */
++		cd-gpios = <&gpio 69 0>; /* gpio PI5 */
++		wp-gpios = <&gpio 57 0>; /* gpio PH1 */
++		power-gpios = <&gpio 155 0>; /* gpio PT3 */
+ 	};
+ 
+ 	sdhci@c8000600 {
+-		gpios = <&gpio 58 0>, /* cd, gpio PH2 */
+-			<&gpio 59 0>, /* wp, gpio PH3 */
+-			<&gpio 70 0>; /* power, gpio PI6 */
++		cd-gpios = <&gpio 58 0>; /* gpio PH2 */
++		wp-gpios = <&gpio 59 0>; /* gpio PH3 */
++		power-gpios = <&gpio 70 0>; /* gpio PI6 */
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/tegra-seaboard.dts b/arch/arm/boot/dts/tegra-seaboard.dts
+index 1940cae..64cedca 100644
+--- a/arch/arm/boot/dts/tegra-seaboard.dts
++++ b/arch/arm/boot/dts/tegra-seaboard.dts
+@@ -21,8 +21,8 @@
+ 	};
+ 
+ 	sdhci@c8000400 {
+-		gpios = <&gpio 69 0>, /* cd, gpio PI5 */
+-			<&gpio 57 0>, /* wp, gpio PH1 */
+-			<&gpio 70 0>; /* power, gpio PI6 */
++		cd-gpios = <&gpio 69 0>; /* gpio PI5 */
++		wp-gpios = <&gpio 57 0>; /* gpio PH1 */
++		power-gpios = <&gpio 70 0>; /* gpio PI6 */
+ 	};
+ };
+-- 
+1.7.0.4
