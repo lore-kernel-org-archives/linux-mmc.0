@@ -1,314 +1,315 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [RFC PATCH v2] mmc: support background operation
-Date: Tue, 23 Aug 2011 13:33:55 +0900
-Message-ID: <4E532DB3.2070303@samsung.com>
+Subject: [RFC PATCH] support ioctl for tunable user request
+Date: Tue, 23 Aug 2011 13:33:56 +0900
+Message-ID: <4E532DB4.8080700@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:14564 "EHLO
+Received: from mailout2.samsung.com ([203.254.224.25]:14621 "EHLO
 	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751094Ab1HWEdk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Aug 2011 00:33:40 -0400
+	with ESMTP id S1751094Ab1HWEdm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Aug 2011 00:33:42 -0400
 Received: from epcpsbgm2.samsung.com (mailout2.samsung.com [203.254.224.25])
  by mailout2.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
  2010)) with ESMTP id <0LQD006WB5ZR3930@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 23 Aug 2011 13:33:39 +0900 (KST)
+ linux-mmc@vger.kernel.org; Tue, 23 Aug 2011 13:33:41 +0900 (KST)
 Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
- with ESMTPA id <0LQD00CMX6039U@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 23 Aug 2011 13:33:39 +0900 (KST)
+ by mmp1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14 2004))
+ with ESMTPA id <0LQD00M8O6055G@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 23 Aug 2011 13:33:41 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, J Freyensee <james_p_freyensee@linux.intel.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Jens Axboe <axboe@kerne.dk>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd.bergmann@linaro.org>
 
-Hi mailing.
+This patch is added the ioctl for tunable user request.
 
-This RFC patch is supported background operation(BKOPS).
-And if you want to test this patch, must apply "[PATCH v3] mmc: support HPI send command"
+First, We defined TUNE request (REQ_TUNE). TUNE request means tunable request.
+(In this patch, TUNE request is background request for eMMC).
 
-This patch is based on Hanumath Prasad's patch "mmc: enable background operations for emmc4.41 with HPI support"
-Hanumath's patch is implemented before applied per forlin's patch "use nonblock mmc request...".
-This patch is based on 3.1.0-rc1 in mmc-next.
+That request should be defined by device.
+User has only to do TUNE-request trigger. Then device should be run its specific request.
 
-Background operations is run when set the URGENT_BKOPS in response.
+In other words, user notify the request to device. then user's responsibility is done.
+(i think quite similar to DISCARD request)
 
-if set the URGENT_BKOPS in response, we can notify that card need the BKOPS.
-(URGENT_BKOPS is used in eMMC4.41 spec, but in eMMC4.5 changed to EXCEPTION_EVENT bit.
- maybe, we need to change this point).
+If you want to test this patch, you need to apply the some patches in mmc mailing.
+([PATCH v4] mmc: support HPI send command, [RFC PATCH v2] mmc: support background operation)
 
-And all request is done, then run background operation.
-if request read/write operation when running BKOPS, issue HPI interrupt
+Because this patch is based on background operation for eMMC.
+(but, if use the ioctl part,then i think TUNE request is supported other devices)
 
-This patch is just RFC patch (not to merge).
-
+This patch didn't separate the block layer and eMMC.(because just RFC patch)
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-CC: Hanumath Prasad <hanumath.prasad@stericsson.com>
 ---
-v2:
-- change pr_debug/pr_info instead of printk()
-- add check BKOPS_EN bit (if BKOPS support)
----
- drivers/mmc/card/block.c   |    4 ++++
- drivers/mmc/card/queue.c   |   10 ++++++++++
- drivers/mmc/core/core.c    |   38 ++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/mmc.c     |   34 ++++++++++++++++++++++++++++++++++
- drivers/mmc/core/mmc_ops.c |    3 +++
- include/linux/mmc/card.h   |   11 +++++++++++
- include/linux/mmc/core.h   |    1 +
- include/linux/mmc/mmc.h    |    4 ++++
- 8 files changed, 105 insertions(+), 0 deletions(-)
+ block/blk-core.c          |    2 +-
+ block/blk-lib.c           |   47 +++++++++++++++++++++++++++++++++++++++++++++
+ block/ioctl.c             |    3 ++
+ drivers/mmc/card/block.c  |   17 ++++++++++++++++
+ drivers/mmc/card/queue.c  |   10 +++++++++
+ drivers/mmc/core/core.c   |    9 ++++++++
+ include/linux/blk_types.h |    4 ++-
+ include/linux/blkdev.h    |    3 ++
+ include/linux/fs.h        |    1 +
+ include/linux/mmc/core.h  |    1 +
+ 10 files changed, 95 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1ff5486..83379ff 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1078,6 +1078,10 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 		switch (status) {
- 		case MMC_BLK_SUCCESS:
- 		case MMC_BLK_PARTIAL:
-+			if (mmc_card_mmc(card) &&
-+				(brq->cmd.resp[0] & R1_URGENT_BKOPS))
-+				mmc_card_set_need_bkops(card);
-+
- 			/*
- 			 * A block was successfully transferred.
- 			 */
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 45fb362..52b1293 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -46,6 +46,8 @@ static int mmc_queue_thread(void *d)
- {
- 	struct mmc_queue *mq = d;
- 	struct request_queue *q = mq->queue;
-+	struct mmc_card *card = mq->card;
-+	unsigned long flags;
- 
- 	current->flags |= PF_MEMALLOC;
- 
-@@ -61,6 +63,13 @@ static int mmc_queue_thread(void *d)
- 		spin_unlock_irq(q->queue_lock);
- 
- 		if (req || mq->mqrq_prev->req) {
-+			if (mmc_card_doing_bkops(card)) {
-+				mmc_interrupt_hpi(card);
-+				spin_lock_irqsave(&card->host->lock, flags);
-+				mmc_card_clr_doing_bkops(card);
-+				spin_unlock_irqrestore(&card->host->lock,
-+						flags);
-+			}
- 			set_current_state(TASK_RUNNING);
- 			mq->issue_fn(mq, req);
+diff --git a/block/blk-core.c b/block/blk-core.c
+index b627558..0e94897 100644
+--- a/block/blk-core.c
++++ b/block/blk-core.c
+@@ -1623,7 +1623,7 @@ void submit_bio(int rw, struct bio *bio)
+ 	 * If it's a regular read/write or a barrier with data attached,
+ 	 * go through the normal accounting stuff before submission.
+ 	 */
+-	if (bio_has_data(bio) && !(rw & REQ_DISCARD)) {
++	if (bio_has_data(bio) && !((rw & REQ_DISCARD) || (rw & REQ_TUNE))) {
+ 		if (rw & WRITE) {
+ 			count_vm_events(PGPGOUT, count);
  		} else {
-@@ -68,6 +77,7 @@ static int mmc_queue_thread(void *d)
- 				set_current_state(TASK_RUNNING);
- 				break;
- 			}
-+			mmc_start_bkops(mq->card);
- 			up(&mq->thread_sem);
- 			schedule();
- 			down(&mq->thread_sem);
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 06fd77c..b5a92af 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -360,6 +360,44 @@ void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
- EXPORT_SYMBOL(mmc_wait_for_req);
+diff --git a/block/blk-lib.c b/block/blk-lib.c
+index 2b461b4..58dcf5e 100644
+--- a/block/blk-lib.c
++++ b/block/blk-lib.c
+@@ -27,6 +27,53 @@ static void bio_batch_end_io(struct bio *bio, int err)
+ }
  
  /**
-+ *	mmc_start_bkops - start a background operation
-+ *	@card: the MMC card associated with the HPI transfer
++ * blkdev_issue_tune - queue a tune request
++ * @bdev:	blockdev to issue discard for
++ * @gfp_mask:	memory allocation flags (for bio_alloc)
 + *
-+ *	When need a background operation, card start a background operation.
++ * Description:
++ *    Issue a tunable request from user.
 + */
-+void mmc_start_bkops(struct mmc_card *card)
++int blkdev_issue_tune(struct block_device *bdev, gfp_t gfp_mask)
 +{
-+	int err;
-+	unsigned long flags;
++	DECLARE_COMPLETION_ONSTACK(wait);
++	struct request_queue *q = bdev_get_queue(bdev);
++	struct bio_batch bb;
++	struct bio *bio;
++	int ret = 0;
++	int type = REQ_TUNE;
 +
-+	BUG_ON(!card);
++	if (!blk_queue_tune(q))
++		return -ENXIO;
 +
-+	if (!card->ext_csd.bkops_en) {
-+		pr_info("Didn't set BKOPS enable bit!\n");
-+		return;
-+	}
++	atomic_set(&bb.done, 1);
++	bb.flags = 1 << BIO_UPTODATE;
++	bb.wait = &wait;
 +
-+	if (mmc_card_doing_bkops(card) || !mmc_card_need_bkops(card))
-+		return;
++	bio = bio_alloc(gfp_mask, 1);
++	if (bio == NULL)
++		return 0;
++	bio->bi_end_io = bio_batch_end_io;
++	bio->bi_bdev = bdev;
++	bio->bi_private = &bb;
 +
-+	mmc_claim_host(card->host);
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+		EXT_CSD_BKOPS_START, 1, 0);
-+	if (err) {
-+		mmc_card_clr_need_bkops(card);
-+		goto out;
-+	}
++	bio->bi_bdev = bdev;
 +
-+	spin_lock_irqsave(&card->host->lock, flags);
-+	mmc_card_clr_need_bkops(card);
-+	mmc_card_set_doing_bkops(card);
-+	spin_unlock_irqrestore(&card->host->lock, flags);
-+out:
-+	mmc_release_host(card->host);
++	atomic_inc(&bb.done);
++	submit_bio(type, bio);
++
++	/* Wait for bios in-flight */
++	if (!atomic_dec_and_test(&bb.done))
++		wait_for_completion(&wait);
++
++	if (!test_bit(BIO_UPTODATE, &bb.flags))
++		ret = -EIO;
++
++	return ret;
 +}
-+EXPORT_SYMBOL(mmc_start_bkops);
++EXPORT_SYMBOL(blkdev_issue_tune);
 +
 +/**
-  *	mmc_interrupt_hpi - Issue for High priority Interrupt
-  *	@card: the MMC card associated with the HPI transfer
-  *
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index ef312c9..4ae02d2 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -420,6 +420,18 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 			card->ext_csd.out_of_int_time =
- 				ext_csd[EXT_CSD_OUT_OF_INTERRUPT_TIME] * 10;
- 		}
-+
-+		/*
-+		 * check whether the eMMC card support BKOPS.
-+		 * if set BKOPS_SUPPORT bit,
-+		 * BKOPS_STATUS, BKOPS_EN,,BKOPS_START and
-+		 * URGENT_BKOPS are supported.(default)
-+		 */
-+		if (ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1) {
-+			card->ext_csd.bkops = 1;
-+			card->ext_csd.bkops_en = ext_csd[EXT_CSD_BKOPS_EN];
-+		}
-+
- 		card->ext_csd.rel_param = ext_csd[EXT_CSD_WR_REL_PARAM];
- 	}
+  * blkdev_issue_discard - queue a discard
+  * @bdev:	blockdev to issue discard for
+  * @sector:	start sector
+diff --git a/block/ioctl.c b/block/ioctl.c
+index 1124cd2..5f26cff 100644
+--- a/block/ioctl.c
++++ b/block/ioctl.c
+@@ -112,6 +112,7 @@ static int blkdev_reread_part(struct block_device *bdev)
+ 	return res;
+ }
  
-@@ -744,6 +756,28 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	}
- 
- 	/*
-+	 * Enable BKOPS feature (if supported)
-+	 */
-+	if (card->ext_csd.bkops) {
-+		/*
-+		 * If card supported BKOPS, default set BKOPS_EN bit.
-+		 * But ensure to enable bkops, need to check enable bit
-+		*/
-+		if (!card->ext_csd.bkops_en) {
-+			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					EXT_CSD_BKOPS_EN, 1, 0);
-+			if (err && err != -EBADMSG)
-+				goto free_card;
-+			if (err) {
-+				printk(KERN_ERR "%s: Enabling BKOPS failed\n",
-+						mmc_hostname(card->host));
-+				err = 0;
-+			} else
-+				card->ext_csd.bkops_en = 1;
-+		}
-+	}
 +
-+	/*
- 	 * Enable HPI feature (if supported)
- 	 */
- 	if (card->ext_csd.hpi) {
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 4706400..2a54221 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -398,6 +398,9 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	if (err)
- 		return err;
+ static int blk_ioctl_discard(struct block_device *bdev, uint64_t start,
+ 			     uint64_t len, int secure)
+ {
+@@ -214,6 +215,8 @@ int blkdev_ioctl(struct block_device *bdev, fmode_t mode, unsigned cmd,
+ 			return -EFAULT;
+ 		set_device_ro(bdev, n);
+ 		return 0;
++	case BLKTUNE:
++		return blkdev_issue_tune(bdev, GFP_KERNEL);
  
-+	if (index == EXT_CSD_BKOPS_START)
-+		return 0;
+ 	case BLKDISCARD:
+ 	case BLKSECDISCARD: {
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 83379ff..2adb072 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -791,6 +791,18 @@ static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
+ 	return 1;
+ }
+ 
++static int mmc_blk_issue_bkops(struct mmc_queue *mq, struct request *req)
++{
++	struct mmc_blk_data *md = mq->data;
 +
- 	/* Must check status to be sure of no errors */
- 	do {
- 		err = mmc_send_status(card, &status);
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 411054d..c41b91b 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -67,6 +67,8 @@ struct mmc_ext_csd {
- 	bool			hpi_en;			/* HPI enablebit */
- 	bool			hpi;			/* HPI support bit */
- 	unsigned int		hpi_cmd;		/* cmd used as HPI */
-+	bool			bkops;			/* BKOPS support bit */
-+	bool			bkops_en;		/* BKOPS enable bit */
- 	u8			raw_partition_support;	/* 160 */
- 	u8			raw_erased_mem_count;	/* 181 */
- 	u8			raw_ext_csd_structure;	/* 194 */
-@@ -181,6 +183,8 @@ struct mmc_card {
- #define MMC_STATE_HIGHSPEED_DDR (1<<4)		/* card is in high speed mode */
- #define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in ultra high speed mode */
- #define MMC_CARD_SDXC		(1<<6)		/* card is SDXC */
-+#define MMC_STATE_NEED_BKOPS	(1<<7)		/* Need background operation */
-+#define MMC_STATE_DOING_BKOPS	(1<<8)		/* Do running background operation */
- 	unsigned int		quirks; 	/* card quirks */
- #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
- #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
-@@ -318,6 +322,8 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_ddr_mode(c)	((c)->state & MMC_STATE_HIGHSPEED_DDR)
- #define mmc_sd_card_uhs(c) ((c)->state & MMC_STATE_ULTRAHIGHSPEED)
- #define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
-+#define mmc_card_need_bkops(c) ((c)->state & MMC_STATE_NEED_BKOPS)
-+#define mmc_card_doing_bkops(c) ((c)->state & MMC_STATE_DOING_BKOPS)
- 
- #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
- #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
-@@ -326,6 +332,11 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
- #define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
- #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
-+#define mmc_card_set_need_bkops(c) ((c)->state |= MMC_STATE_NEED_BKOPS)
-+#define mmc_card_set_doing_bkops(c) ((c)->state |= MMC_STATE_DOING_BKOPS)
++	spin_lock_irq(&md->lock);
++	__blk_end_request_all(req, 0);
++	spin_unlock_irq(&md->lock);
 +
-+#define mmc_card_clr_need_bkops(c) ((c)->state &= ~MMC_STATE_NEED_BKOPS)
-+#define mmc_card_clr_doing_bkops(c) ((c)->state &= ~MMC_STATE_DOING_BKOPS)
- 
++	return 1;
++}
++
++
  /*
-  * Quirk add/remove for MMC products.
+  * Reformat current write as a reliable write, supporting
+  * both legacy and the enhanced reliable write MMC cards.
+@@ -1208,6 +1220,11 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		if (card->host->areq)
+ 			mmc_blk_issue_rw_rq(mq, NULL);
+ 		ret = mmc_blk_issue_flush(mq, req);
++	} else if (req && req->cmd_flags & REQ_TUNE) {
++		if (card->host->areq)
++			mmc_blk_issue_rw_rq(mq, NULL);
++		ret = mmc_blk_issue_bkops(mq, req);
++		mmc_card_set_need_bkops(card);
+ 	} else {
+ 		ret = mmc_blk_issue_rw_rq(mq, req);
+ 	}
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 52b1293..6f1bbff 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -133,6 +133,12 @@ struct scatterlist *mmc_alloc_sg(int sg_len, int *err)
+ 	return sg;
+ }
+ 
++static void mmc_queue_setup_bkops(struct request_queue *q,
++		struct mmc_card *card)
++{
++	queue_flag_set_unlocked(QUEUE_FLAG_TUNE, q);
++}
++
+ static void mmc_queue_setup_discard(struct request_queue *q,
+ 				    struct mmc_card *card)
+ {
+@@ -191,6 +197,10 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	if (mmc_can_erase(card))
+ 		mmc_queue_setup_discard(mq->queue, card);
+ 
++	/* Set support bkops flag */
++	if (mmc_can_bkops(card))
++		mmc_queue_setup_bkops(mq->queue, card);
++
+ #ifdef CONFIG_MMC_BLOCK_BOUNCE
+ 	if (host->max_segs == 1) {
+ 		unsigned int bouncesz;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index b5a92af..19e7579 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1738,6 +1738,15 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ }
+ EXPORT_SYMBOL(mmc_erase);
+ 
++int mmc_can_bkops(struct mmc_card *card)
++{
++	if (mmc_card_mmc(card) && card->ext_csd.bkops &&
++			card->ext_csd.hpi)
++		return 1;
++	return 0;
++}
++EXPORT_SYMBOL(mmc_can_bkops);
++
+ int mmc_can_erase(struct mmc_card *card)
+ {
+ 	if ((card->host->caps & MMC_CAP_ERASE) &&
+diff --git a/include/linux/blk_types.h b/include/linux/blk_types.h
+index 6395692..75521e3 100644
+--- a/include/linux/blk_types.h
++++ b/include/linux/blk_types.h
+@@ -125,6 +125,7 @@ enum rq_flag_bits {
+ 	__REQ_SYNC,		/* request is sync (sync write or read) */
+ 	__REQ_META,		/* metadata io request */
+ 	__REQ_DISCARD,		/* request to discard sectors */
++	__REQ_TUNE,		/* tunable request */
+ 	__REQ_NOIDLE,		/* don't anticipate more IO after this one */
+ 
+ 	/* bio only flags */
+@@ -161,13 +162,14 @@ enum rq_flag_bits {
+ #define REQ_SYNC		(1 << __REQ_SYNC)
+ #define REQ_META		(1 << __REQ_META)
+ #define REQ_DISCARD		(1 << __REQ_DISCARD)
++#define REQ_TUNE		(1 << __REQ_TUNE)
+ #define REQ_NOIDLE		(1 << __REQ_NOIDLE)
+ 
+ #define REQ_FAILFAST_MASK \
+ 	(REQ_FAILFAST_DEV | REQ_FAILFAST_TRANSPORT | REQ_FAILFAST_DRIVER)
+ #define REQ_COMMON_MASK \
+ 	(REQ_WRITE | REQ_FAILFAST_MASK | REQ_SYNC | REQ_META | REQ_DISCARD | \
+-	 REQ_NOIDLE | REQ_FLUSH | REQ_FUA | REQ_SECURE)
++	 REQ_NOIDLE | REQ_FLUSH | REQ_FUA | REQ_SECURE | REQ_TUNE)
+ #define REQ_CLONE_MASK		REQ_COMMON_MASK
+ 
+ #define REQ_RAHEAD		(1 << __REQ_RAHEAD)
+diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+index 0e67c45..f1f4532 100644
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -403,6 +403,7 @@ struct request_queue {
+ #define QUEUE_FLAG_ADD_RANDOM  16	/* Contributes to random pool */
+ #define QUEUE_FLAG_SECDISCARD  17	/* supports SECDISCARD */
+ #define QUEUE_FLAG_SAME_FORCE  18	/* force complete on same CPU */
++#define QUEUE_FLAG_TUNE        19	/* support tunable request */
+ 
+ #define QUEUE_FLAG_DEFAULT	((1 << QUEUE_FLAG_IO_STAT) |		\
+ 				 (1 << QUEUE_FLAG_STACKABLE)	|	\
+@@ -487,6 +488,7 @@ static inline void queue_flag_clear(unsigned int flag, struct request_queue *q)
+ #define blk_queue_discard(q)	test_bit(QUEUE_FLAG_DISCARD, &(q)->queue_flags)
+ #define blk_queue_secdiscard(q)	(blk_queue_discard(q) && \
+ 	test_bit(QUEUE_FLAG_SECDISCARD, &(q)->queue_flags))
++#define blk_queue_tune(q)	test_bit(QUEUE_FLAG_TUNE, &(q)->queue_flags)
+ 
+ #define blk_noretry_request(rq) \
+ 	((rq)->cmd_flags & (REQ_FAILFAST_DEV|REQ_FAILFAST_TRANSPORT| \
+@@ -929,6 +931,7 @@ static inline struct request *blk_map_queue_find_tag(struct blk_queue_tag *bqt,
+ #define BLKDEV_DISCARD_SECURE  0x01    /* secure discard */
+ 
+ extern int blkdev_issue_flush(struct block_device *, gfp_t, sector_t *);
++extern int blkdev_issue_tune(struct block_device *bdev, gfp_t gfp_mask);
+ extern int blkdev_issue_discard(struct block_device *bdev, sector_t sector,
+ 		sector_t nr_sects, gfp_t gfp_mask, unsigned long flags);
+ extern int blkdev_issue_zeroout(struct block_device *bdev, sector_t sector,
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index 178cdb4..8d8faa1 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -320,6 +320,7 @@ struct inodes_stat_t {
+ #define BLKPBSZGET _IO(0x12,123)
+ #define BLKDISCARDZEROES _IO(0x12,124)
+ #define BLKSECDISCARD _IO(0x12,125)
++#define BLKTUNE _IO(0x12,126)
+ 
+ #define BMAP_IOCTL 1		/* obsolete - kept for compatibility */
+ #define FIBMAP	   _IO(0x00,1)	/* bmap access */
 diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index dca3c08..90f2e1c 100644
+index 90f2e1c..6a4fa77 100644
 --- a/include/linux/mmc/core.h
 +++ b/include/linux/mmc/core.h
-@@ -162,6 +162,7 @@ extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
- 				   unsigned int nr);
- extern unsigned int mmc_calc_max_discard(struct mmc_card *card);
- 
-+extern void mmc_start_bkops(struct mmc_card *card);
- extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
- 
- extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index e16c776..419a48e 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -139,6 +139,7 @@ static inline bool mmc_op_multi(u32 opcode)
- #define R1_READY_FOR_DATA	(1 << 8)	/* sx, a */
- #define R1_SWITCH_ERROR		(1 << 7)	/* sx, c */
- #define R1_APP_CMD		(1 << 5)	/* sr, c */
-+#define R1_URGENT_BKOPS		(1 << 6)	/* sr, a */
- 
- #define R1_STATE_IDLE	0
- #define R1_STATE_READY	1
-@@ -273,6 +274,8 @@ struct _mmc_csd {
- #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
- #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
- #define EXT_CSD_HPI_MGMT		161	/* R/W */
-+#define EXT_CSD_BKOPS_EN		163	/* R/W */
-+#define EXT_CSD_BKOPS_START		164	/* R/W */
- #define EXT_CSD_WR_REL_PARAM		166	/* RO */
- #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
- #define EXT_CSD_PART_CONFIG		179	/* R/W */
-@@ -295,6 +298,7 @@ struct _mmc_csd {
- #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
- #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
- #define EXT_CSD_TRIM_MULT		232	/* RO */
-+#define EXT_CSD_BKOPS_SUPPORT		502	/* RO */
- #define EXT_CSD_HPI_FEATURES		503	/* RO */
- 
- /*
+@@ -156,6 +156,7 @@ extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
+ extern int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 		     unsigned int arg);
+ extern int mmc_can_erase(struct mmc_card *card);
++extern int mmc_can_bkops(struct mmc_card *card);
+ extern int mmc_can_trim(struct mmc_card *card);
+ extern int mmc_can_secure_erase_trim(struct mmc_card *card);
+ extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
