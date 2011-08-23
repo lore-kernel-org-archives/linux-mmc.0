@@ -1,276 +1,117 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH v2 1/1] mmc: sd: UHS-I bus speed should be set last in
-      UHS initialization
-Date: Tue, 23 Aug 2011 07:14:58 -0500
-Message-ID: <6C03668EAF45B747AF947A1603D1B300019EC0F037@SAUSEXMBP01.amd.com>
-References: <1312872571-12091-1-git-send-email-subhashj@codeaurora.org>
- <9ee37b38ae8b93ce66b7b9daa0d08d9f.squirrel@www.codeaurora.org>
-  <000201cc6189$fdb73d40$f925b7c0$@org>
+From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Subject: [PATCH v2 1/1] mmc: Support of SDIO irq for dw_mmc
+Date: Tue, 23 Aug 2011 18:50:02 +0530
+Message-ID: <CANYdXnqfBP74Xi1SuWJh3pjrZ4h7hjrc7xE+vXL0Bw41xEbVUw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:39478
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752538Ab1HWMPP convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 23 Aug 2011 08:15:15 -0400
-In-Reply-To: <000201cc6189$fdb73d40$f925b7c0$@org>
-Content-Language: en-US
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:53468 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752656Ab1HWNUD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Aug 2011 09:20:03 -0400
+Received: by gxk21 with SMTP id 21so72960gxk.19
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Aug 2011 06:20:02 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, 'Philip Rakity' <prakity@marvell.com>
+To: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>
+Cc: linux-mmc@vger.kernel.org, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 
-Hi Subhash,
+The Patch adds the support for SDIO interrupts for all slots.
+It includes enabling of SDIO interrupts through dw_mci_enable_sdio_irq
+and the handling of the slot specific interrupts in the Interrupt Service
+Routine.
 
-The patch looks good to me.
+Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+---
+v2:
+* As per Suggestions by James Hogan
+-fixed code that was disabling other interrupts.
+-removed [int_mask &= 0xFFFF0000; and int_mask &= 0xFFFF0000;] as it
+was unnecessary
+-modified (slot->id + 16) with appropriate Macro SDMMC_INT_SDIO(i)
+ drivers/mmc/host/dw_mmc.c |   35 +++++++++++++++++++++++++++++++----
+ drivers/mmc/host/dw_mmc.h |    2 +-
+ 2 files changed, 32 insertions(+), 5 deletions(-)
 
-Reviewed-by: Arindam Nath <arindam.nath@amd.com>
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 66dcddb..b06f8f1 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -746,11 +746,29 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ 	return present;
+ }
 
-Thanks,
-Arindam
++static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
++{
++	struct dw_mci_slot *slot = mmc_priv(mmc);
++	struct dw_mci *host = slot->host;
++	u32 int_mask;
++
++	/* Enable/disable Slot Specific SDIO interrupt */
++	int_mask = mci_readl(host, INTMASK);
++	if (enb) {
++		mci_writel(host, INTMASK,
++			   (int_mask | (1 << SDMMC_INT_SDIO(slot->id))));
++	} else {
++		mci_writel(host, INTMASK,
++			   (int_mask & ~(1 << SDMMC_INT_SDIO(slot->id))));
++	}
++}
++
+ static const struct mmc_host_ops dw_mci_ops = {
+-	.request	= dw_mci_request,
+-	.set_ios	= dw_mci_set_ios,
+-	.get_ro		= dw_mci_get_ro,
+-	.get_cd		= dw_mci_get_cd,
++	.request		= dw_mci_request,
++	.set_ios		= dw_mci_set_ios,
++	.get_ro			= dw_mci_get_ro,
++	.get_cd			= dw_mci_get_cd,
++	.enable_sdio_irq	= dw_mci_enable_sdio_irq,
+ };
 
-> -----Original Message-----
-> From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> Sent: Tuesday, August 23, 2011 5:14 PM
-> To: Nath, Arindam
-> Subject: RE: [PATCH v2 1/1] mmc: sd: UHS-I bus speed should be set last
-> in UHS initialization
-> 
-> FYI ...
-> 
-> > -----Original Message-----
-> > From: Subhash Jadavani [mailto:subhashj@codeaurora.org]
-> > Sent: Tuesday, August 23, 2011 5:13 PM
-> > To: 'Arindam Nath'
-> > Subject: RE: [PATCH v2 1/1] mmc: sd: UHS-I bus speed should be set
-> last
-> > in UHS initialization
-> >
-> > Hi Arindam,
-> >
-> > Can you have a look at this patch? Do let me know if it looks ok or
-> > not?
-> >
-> > Regards,
-> > Subhash
-> >
-> > > -----Original Message-----
-> > > From: linux-arm-msm-owner@vger.kernel.org [mailto:linux-arm-msm-
-> > > owner@vger.kernel.org] On Behalf Of Subhash Jadavani
-> > > Sent: Monday, August 22, 2011 3:17 PM
-> > > To: Arindam Nath
-> > > Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org;
-> Subhash
-> > > Jadavani
-> > > Subject: Re: [PATCH v2 1/1] mmc: sd: UHS-I bus speed should be set
-> > last
-> > > in UHS initialization
-> > >
-> > > Hi Arindam,
-> > >
-> > > Can you please check if this patch looks ok or not?
-> > >
-> > > Regards,
-> > > Subhash
-> > >
-> > > > mmc_sd_init_uhs_card function sets the driver type, current limit
-> > > > and bus speed mode on card as well as on host controller side.
-> > > >
-> > > > Currently bus speed mode is set by sending CMD6 to card and
-> > > > immediately setting the timing mode in host controller. But
-> > > > then before initiating tuning sequence, it also tries to set
-> > > > current limit by sending CMD6 to card which results in data
-> > > > timeout errors in controller if bus speed mode is SDR50/SDR104
-> > mode.
-> > > >
-> > > > So basically bus speed mode should be set only after current
-> limit
-> > > > is set in the card and immediately after setting the bus speed
-> > mode,
-> > > > tuning sequence should be initiated.
-> > > >
-> > > > Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
-> > > > ---
-> > > >  drivers/mmc/core/sd.c |   81
-> > > > ++++++++++++++++++++++++++++++++-----------------
-> > > >  1 files changed, 53 insertions(+), 28 deletions(-)
-> > > >
-> > > > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > > > index e2dcf23..2191dda 100644
-> > > > --- a/drivers/mmc/core/sd.c
-> > > > +++ b/drivers/mmc/core/sd.c
-> > > > @@ -459,56 +459,75 @@ static int sd_select_driver_type(struct
-> > > mmc_card
-> > > > *card, u8 *status)
-> > > >  	return 0;
-> > > >  }
-> > > >
-> > > > -static int sd_set_bus_speed_mode(struct mmc_card *card, u8
-> > *status)
-> > > > +static void sd_update_bus_speed_mode(struct mmc_card *card)
-> > > >  {
-> > > > -	unsigned int bus_speed = 0, timing = 0;
-> > > > -	int err;
-> > > > -
-> > > >  	/*
-> > > >  	 * If the host doesn't support any of the UHS-I modes,
-> fallback
-> > > on
-> > > >  	 * default speed.
-> > > >  	 */
-> > > >  	if (!(card->host->caps & (MMC_CAP_UHS_SDR12 |
-> MMC_CAP_UHS_SDR25 |
-> > > > -	    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
-> MMC_CAP_UHS_DDR50)))
-> > > > -		return 0;
-> > > > +	    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
-> MMC_CAP_UHS_DDR50)))
-> > > {
-> > > > +		card->sd_bus_speed = 0;
-> > > > +		return;
-> > > > +	}
-> > > >
-> > > >  	if ((card->host->caps & MMC_CAP_UHS_SDR104) &&
-> > > >  	    (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR104)) {
-> > > > -			bus_speed = UHS_SDR104_BUS_SPEED;
-> > > > -			timing = MMC_TIMING_UHS_SDR104;
-> > > > -			card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
-> > > > +			card->sd_bus_speed = UHS_SDR104_BUS_SPEED;
-> > > >  	} else if ((card->host->caps & MMC_CAP_UHS_DDR50) &&
-> > > >  		   (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_DDR50))
-> {
-> > > > -			bus_speed = UHS_DDR50_BUS_SPEED;
-> > > > -			timing = MMC_TIMING_UHS_DDR50;
-> > > > -			card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
-> > > > +			card->sd_bus_speed = UHS_DDR50_BUS_SPEED;
-> > > >  	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
-> > > >  		    MMC_CAP_UHS_SDR50)) && (card-
-> >sw_caps.sd3_bus_mode &
-> > > >  		    SD_MODE_UHS_SDR50)) {
-> > > > -			bus_speed = UHS_SDR50_BUS_SPEED;
-> > > > -			timing = MMC_TIMING_UHS_SDR50;
-> > > > -			card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
-> > > > +			card->sd_bus_speed = UHS_SDR50_BUS_SPEED;
-> > > >  	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
-> > > >  		    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25)) &&
-> > > >  		   (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR25))
-> {
-> > > > -			bus_speed = UHS_SDR25_BUS_SPEED;
-> > > > -			timing = MMC_TIMING_UHS_SDR25;
-> > > > -			card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
-> > > > +			card->sd_bus_speed = UHS_SDR25_BUS_SPEED;
-> > > >  	} else if ((card->host->caps & (MMC_CAP_UHS_SDR104 |
-> > > >  		    MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR25 |
-> > > >  		    MMC_CAP_UHS_SDR12)) && (card-
-> >sw_caps.sd3_bus_mode &
-> > > >  		    SD_MODE_UHS_SDR12)) {
-> > > > -			bus_speed = UHS_SDR12_BUS_SPEED;
-> > > > -			timing = MMC_TIMING_UHS_SDR12;
-> > > > -			card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
-> > > > +			card->sd_bus_speed = UHS_SDR12_BUS_SPEED;
-> > > > +	}
-> > > > +}
-> > > > +
-> > > > +static int sd_set_bus_speed_mode(struct mmc_card *card, u8
-> > *status)
-> > > > +{
-> > > > +	int err;
-> > > > +	unsigned int timing = 0;
-> > > > +
-> > > > +	switch (card->sd_bus_speed) {
-> > > > +	case UHS_SDR104_BUS_SPEED:
-> > > > +		timing = MMC_TIMING_UHS_SDR104;
-> > > > +		card->sw_caps.uhs_max_dtr = UHS_SDR104_MAX_DTR;
-> > > > +		break;
-> > > > +	case UHS_DDR50_BUS_SPEED:
-> > > > +		timing = MMC_TIMING_UHS_DDR50;
-> > > > +		card->sw_caps.uhs_max_dtr = UHS_DDR50_MAX_DTR;
-> > > > +		break;
-> > > > +	case UHS_SDR50_BUS_SPEED:
-> > > > +		timing = MMC_TIMING_UHS_SDR50;
-> > > > +		card->sw_caps.uhs_max_dtr = UHS_SDR50_MAX_DTR;
-> > > > +		break;
-> > > > +	case UHS_SDR25_BUS_SPEED:
-> > > > +		timing = MMC_TIMING_UHS_SDR25;
-> > > > +		card->sw_caps.uhs_max_dtr = UHS_SDR25_MAX_DTR;
-> > > > +		break;
-> > > > +	case UHS_SDR12_BUS_SPEED:
-> > > > +		timing = MMC_TIMING_UHS_SDR12;
-> > > > +		card->sw_caps.uhs_max_dtr = UHS_SDR12_MAX_DTR;
-> > > > +		break;
-> > > > +	default:
-> > > > +		return 0;
-> > > >  	}
-> > > >
-> > > > -	card->sd_bus_speed = bus_speed;
-> > > > -	err = mmc_sd_switch(card, 1, 0, bus_speed, status);
-> > > > +	err = mmc_sd_switch(card, 1, 0, card->sd_bus_speed,
-> status);
-> > > >  	if (err)
-> > > >  		return err;
-> > > >
-> > > > -	if ((status[16] & 0xF) != bus_speed)
-> > > > +	if ((status[16] & 0xF) != card->sd_bus_speed)
-> > > >  		printk(KERN_WARNING "%s: Problem setting bus speed
-> > > mode!\n",
-> > > >  			mmc_hostname(card->host));
-> > > >  	else {
-> > > > @@ -608,18 +627,24 @@ static int mmc_sd_init_uhs_card(struct
-> > mmc_card
-> > > > *card)
-> > > >  		mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
-> > > >  	}
-> > > >
-> > > > +	/*
-> > > > +	 * Select the bus speed mode depending on host
-> > > > +	 * and card capability.
-> > > > +	 */
-> > > > +	sd_update_bus_speed_mode(card);
-> > > > +
-> > > >  	/* Set the driver strength for the card */
-> > > >  	err = sd_select_driver_type(card, status);
-> > > >  	if (err)
-> > > >  		goto out;
-> > > >
-> > > > -	/* Set bus speed mode of the card */
-> > > > -	err = sd_set_bus_speed_mode(card, status);
-> > > > +	/* Set current limit for the card */
-> > > > +	err = sd_set_current_limit(card, status);
-> > > >  	if (err)
-> > > >  		goto out;
-> > > >
-> > > > -	/* Set current limit for the card */
-> > > > -	err = sd_set_current_limit(card, status);
-> > > > +	/* Set bus speed mode of the card */
-> > > > +	err = sd_set_bus_speed_mode(card, status);
-> > > >  	if (err)
-> > > >  		goto out;
-> > > >
-> > > > --
-> > > > 1.7.1.1
-> > > >
-> > > > --
-> > > > Sent by a consultant of the Qualcomm Innovation Center, Inc.
-> > > > The Qualcomm Innovation Center, Inc. is a member of the Code
-> Aurora
-> > > Forum.
-> > > >
-> > > >
-> > >
-> > >
-> > > --
-> > > Sent by a consultant of the Qualcomm Innovation Center, Inc.
-> > > The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
-> > > Forum.
-> > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-
-> arm-
-> > > msm" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+ static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
+@@ -1179,6 +1197,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 	struct dw_mci *host = dev_id;
+ 	u32 status, pending;
+ 	unsigned int pass_count = 0;
++	int i;
+
+ 	do {
+ 		status = mci_readl(host, RINTSTS);
+@@ -1249,6 +1268,14 @@ static irqreturn_t dw_mci_interrupt(int irq,
+void *dev_id)
+ 			tasklet_schedule(&host->card_tasklet);
+ 		}
+
++		/* Handle SDIO Interrupts */
++		for (i = 0; i < host->num_slots; i++) {
++			struct dw_mci_slot *slot = host->slot[i];
++			if (pending & SDMMC_INT_SDIO(i)) {
++				mci_writel(host, RINTSTS, SDMMC_INT_SDIO(i));
++				mmc_signal_sdio_irq(slot->mmc);
++			}
++		}
+ 	} while (pass_count++ < 5);
+
+ #ifdef CONFIG_MMC_DW_IDMAC
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 23c662a..ecf1043 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -82,7 +82,7 @@
+ #define SDMMC_CTYPE_4BIT		BIT(0)
+ #define SDMMC_CTYPE_1BIT		0
+ /* Interrupt status & mask register defines */
+-#define SDMMC_INT_SDIO			BIT(16)
++#define SDMMC_INT_SDIO(n)		BIT((16 + (n)))
+ #define SDMMC_INT_EBE			BIT(15)
+ #define SDMMC_INT_ACD			BIT(14)
+ #define SDMMC_INT_SBE			BIT(13)
+-- 
+1.7.2.3
 
 
+--
+regards,
+Shashidhar Hiremath
