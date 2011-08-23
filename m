@@ -1,52 +1,42 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/2] sdhci/tegra: Add Device Tree probing support
-Date: Tue, 23 Aug 2011 14:41:05 -0400
-Message-ID: <m2ippo2cou.fsf@bob.laptop.org>
-References: <1314123334-23133-1-git-send-email-swarren@nvidia.com>
+From: blp@cs.stanford.edu (Ben Pfaff)
+Subject: Re: [PATCH 2/2] mmc: fix integer assignments to pointer
+Date: Tue, 23 Aug 2011 11:04:08 -0700
+Message-ID: <874o18m2cn.fsf@blp.benpfaff.org>
+References: <1314114363-6767-1-git-send-email-svenkatr@ti.com>
+	<1314114363-6767-3-git-send-email-svenkatr@ti.com>
+	<m27h643x8k.fsf@bob.laptop.org> <20110823172851.GB1784@leaf>
+Reply-To: blp@cs.stanford.edu
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:48560 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752684Ab1HWSle (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 23 Aug 2011 14:41:34 -0400
-In-Reply-To: <1314123334-23133-1-git-send-email-swarren@nvidia.com> (Stephen
-	Warren's message of "Tue, 23 Aug 2011 12:15:33 -0600")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Reply-to: blp@cs.stanford.edu
+In-Reply-To: <20110823172851.GB1784@leaf> (Josh Triplett's message of "Tue, 23
+	Aug 2011 10:28:51 -0700")
+Sender: linux-sparse-owner@vger.kernel.org
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-sparse@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@nvidia.com>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Olof Johansson <olof@lixom.net>, Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org
 
-Hi Stephen,
+Josh Triplett <josh@joshtriplett.org> writes:
 
-On Tue, Aug 23 2011, Stephen Warren wrote:
-> From: Grant Likely <grant.likely@secretlab.ca>
+> On Tue, Aug 23, 2011 at 12:31:55PM -0400, Chris Ball wrote:
+>> On Tue, Aug 23 2011, Venkatraman S wrote:
+>> > -	struct mmc_request mrq = {0};
+>> > +	struct mmc_request mrq = {NULL};
+>> 
+>> The sparse warning is mistaken.  Or I'm mistaken.  But I suspect it's
+>> the sparse warning.
 >
-> Add hooks to read gpio configuration out of the device tree node.
->
-> [grant.likely: Rewrite of original patch from John Bonesio]
-> Signed-off-by: Grant Likely <grant.likely@secretlab.ca>
-> [swarren: Fixed tegra_sdhci_get_ro() to retrieve pdata correctly]
-> [swarren: Reworked to avoid #ifdef CONFIG_OF]
-> [swarren: Reworked binding based on fsl-imx-esdhc.txt]
-> [swarren: Documented binding]
-> Signed-off-by: Stephen Warren <swarren@nvidia.com>
-> ---
-> Theoretically, these two patches should be merged in order in one place,
-> since the 2nd logically depends on the first. However, it's really just
-> a documentation dependency, so I think it's fine to merge them into the
-> MMC and DT trees separately and let them meet in linux-next.
->
->  .../devicetree/bindings/mmc/nvidia-sdhci.txt       |   25 ++++++++++
->  drivers/mmc/host/sdhci-tegra.c                     |   51 +++++++++++++++----
->  2 files changed, 65 insertions(+), 11 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt
+> Notice that it says "the remainder of the aggregate".  The first field
+> still gets initialized with the 0 you supplied, and the first field of
+> struct mmc_request has a pointer type.
 
-Okay, I've pushed this patch [1/2] to mmc-next for 3.2.
-
-Thanks,
-
-- Chris.
+That's an understandable position, but I think it would also be
+reasonable for sparse to special case using {0} as an
+initializer.  {0} is a valid initializer for every type and so
+it's sometimes used as an initializer for a local variable to get
+the same effect that one would have for a static variable without
+specifying an initializer.
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Ben Pfaff 
+http://benpfaff.org
