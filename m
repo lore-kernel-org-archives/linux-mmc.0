@@ -1,54 +1,42 @@
-From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: RE: [PATCH] mmc: sdhci-tegra: get_ro(): Retrieve pdata correctly
-Date: Tue, 23 Aug 2011 11:17:56 -0700
-Message-ID: <74CDBE0F657A3D45AFBB94109FB122FF04B24A38C1@HQMAIL01.nvidia.com>
-References: <1312913798-32564-1-git-send-email-swarren@nvidia.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 2/2] mmc: fix integer assignments to pointer
+Date: Tue, 23 Aug 2011 14:28:42 -0400
+Message-ID: <m2mxf02d9h.fsf@bob.laptop.org>
+References: <1314114363-6767-1-git-send-email-svenkatr@ti.com>
+	<1314114363-6767-3-git-send-email-svenkatr@ti.com>
+	<m27h643x8k.fsf@bob.laptop.org> <20110823172851.GB1784@leaf>
+	<874o18m2cn.fsf@blp.benpfaff.org> <20110823181359.GB3418@leaf>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1312913798-32564-1-git-send-email-swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Content-Language: en-US
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:55161 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754685Ab1HWS25 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 23 Aug 2011 14:28:57 -0400
+In-Reply-To: <20110823181359.GB3418@leaf> (Josh Triplett's message of "Tue, 23
+	Aug 2011 11:13:59 -0700")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: blp@cs.stanford.edu, Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-sparse@vger.kernel.org
 
-Stephen Warren wrote at Tuesday, August 09, 2011 12:17 PM:
-> The active platform data pointer is stored as pltfm_host->priv, and not
-> always in the platform device itself. In particular, the platform data in
-> the platform device is NULL when the platform data comes from Device Tree.
-> 
-> Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> ---
-> Grant, this patch is for branch devicetree/next; the Tegra DT support
-> doesn't appear to be in other branches yet.
+Hi,
 
-Grant, you can ignore this patch now; I just posted a complete version
-suitable for inclusion in mainline.
+On Tue, Aug 23 2011, Josh Triplett wrote:
+> {} produces the same effect, as far as I know.
 
->  drivers/mmc/host/sdhci-tegra.c |    6 ++----
->  1 files changed, 2 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 9329465..406d360 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -74,10 +74,8 @@ static void tegra_sdhci_writel(struct sdhci_host *host, u32 val, int reg)
-> 
->  static unsigned int tegra_sdhci_get_ro(struct sdhci_host *sdhci)
->  {
-> -	struct platform_device *pdev = to_platform_device(mmc_dev(sdhci->mmc));
-> -	struct tegra_sdhci_platform_data *plat;
-> -
-> -	plat = pdev->dev.platform_data;
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(sdhci);
-> +	struct tegra_sdhci_platform_data *plat = pltfm_host->priv;
-> 
->  	if (!gpio_is_valid(plat->wp_gpio))
->  		return -1;
-> --
-> 1.7.0.4
+Yeah.  I prefer {0}, because {} is a gcc-ism (the ANSI grammar demands
+initializer-lists be non-empty) and is less readable for people who
+haven't seen the idiom before and are wondering what's going on.
 
+I'm still a little confused -- the {0} or memset(0, struct ..);
+formations are used often in the kernel, even with pointers involved.
+Is the warning (Wnon_pointer_null) run against the kernel by default,
+or did Venkatraman add it manually?  If default, is it catching bugs?
+
+Thanks,
+
+- Chris.
 -- 
-nvpublic
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
