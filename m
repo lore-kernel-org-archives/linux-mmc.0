@@ -1,115 +1,31 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: RFC : mmc: mmc_blk_issue_secdiscard_rq() and mmc_blk_issue_discard_rq()
- effectively merged into one.
-Date: Wed, 24 Aug 2011 14:09:28 +0900
-Message-ID: <CAKYAXd9MwO-JEMNt9-0C8pzgYn5Tvtv8ovJ35TNiqqe8PWGogQ@mail.gmail.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH 0/4 v7] mmc: tmio, sdhi: provide multiple irq handlers
+Date: Wed, 24 Aug 2011 14:37:11 +0900
+Message-ID: <20110824053711.GB17212@verge.net.au>
+References: <1313740642-18307-1-git-send-email-horms@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, linus.walleij@linaro.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1313740642-18307-1-git-send-email-horms@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi.
+On Fri, Aug 19, 2011 at 04:57:18PM +0900, Simon Horman wrote:
+> The SDHI driver already supports making use of up to three interrupt
+> sources.
+> 
+> This series breaks up the existing interrupt handler into three handlers,
+> one for card access, one for card detect interrupts, and one for SDIO
+> interrupts.  A cover-all handler, which makes use of these new broken-out
+> handlers is provided for for the case where there is only one interrupt
+> source.
+> 
+> This series also wires up the broken-out irq handlers in the SDHI driver
 
-I am wordering why mmc_blk_issue_secdiscard_rq() and
-mmc_blk_issue_discard_rq() is seperated.
-So I try to make mmc_blk_issue_secdiscard_rq() and
-mmc_blk_issue_discard_rq() effectively merged into one.
+Magnus, Guennadi,
 
-I want to know your opinion.
+when you get a chance could I get an ack or otherwise on these changes.
 
-Thanks.
-
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
-{
-        struct mmc_blk_data *md = mq->data;
-        struct mmc_card *card = md->queue.card;
-        unsigned int from, nr, arg;
-        int err = 0;
-        from = blk_rq_pos(req);
-        nr = blk_rq_sectors(req);
-        if (req->cmd_flags & REQ_SECURE) {
-                if (!mmc_can_secure_erase_trim(card)) {
-                        err = -EOPNOTSUPP;
-                        goto out;
-                }
-                if(mmc_can_trim(card) &&
-!mmc_erase_group_aligned(card, from, nr))
-                        arg = MMC_SECURE_TRIM1_ARG;
-                else
-                        arg = MMC_SECURE_ERASE_ARG;
-        }
-        else {
-                if (!mmc_can_erase(card)) {
-                        err = -EOPNOTSUPP;
-                        goto out;
-                }
-                if (mmc_can_trim(card))
-                        arg = MMC_TRIM_ARG;
-                else
-                        arg = MMC_ERASE_ARG;
-        }
-
-        if (card->quirks & MMC_QUIRK_INAND_CMD38) {
-                if(req->cmd_flags & REQ_SECURE)
-                        err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-                                        NAND_CMD38_ARG_EXT_CSD,
-                                        arg == MMC_SECURE_TRIM1_ARG ?
-                                        INAND_CMD38_ARG_SECTRIM1 :
-                                        INAND_CMD38_ARG_SECERASE,
-                                        0);
-                else
-                        err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-                                        INAND_CMD38_ARG_EXT_CSD,
-                                        arg == MMC_TRIM_ARG ?
-                                        INAND_CMD38_ARG_TRIM :
-                                        INAND_CMD38_ARG_ERASE,
-                                        0);
-                if (err)
-                        goto out;
-        }
-        err = mmc_erase(card, from, nr, arg);
-        if (!err && arg == MMC_SECURE_TRIM1_ARG) {
-                if (card->quirks & MMC_QUIRK_INAND_CMD38) {
-                        err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-                                         INAND_CMD38_ARG_EXT_CSD,
-                                         INAND_CMD38_ARG_SECTRIM2,
-                                         0);
-                        if (err)
-                                goto out;
-                }
-                err = mmc_erase(card, from, nr, MMC_SECURE_TRIM2_ARG);
-        }
-out:
-        spin_lock_irq(&md->lock);
-        __blk_end_request(req, err, blk_rq_bytes(req));
-        spin_unlock_irq(&md->lock);
-        return err ? 0 : 1;
-}
-
-
-static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
-{
-        int ret;
-        struct mmc_blk_data *md = mq->data;
-        struct mmc_card *card = md->queue.card;
-        mmc_claim_host(card->host);
-        ret = mmc_blk_part_switch(card, md);
-        if (ret) {
-                ret = 0;
-                goto out;
-        }
-        if (req->cmd_flags & REQ_DISCARD) {
-                ret = mmc_blk_issue_discard_rq(mq, req);
-        } else if (req->cmd_flags & REQ_FLUSH) {
-                ret = mmc_blk_issue_flush(mq, req);
-        } else {
-                ret = mmc_blk_issue_rw_rq(mq, req);
-        }
-out:
-        mmc_release_host(card->host);
-        return ret;
-}
