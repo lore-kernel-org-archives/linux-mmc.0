@@ -1,108 +1,122 @@
-From: Kalle Valo <kvalo@qca.qualcomm.com>
-Subject: Re: [RFC 0/4] sdhci: few patches for ENE 712 support
-Date: Wed, 24 Aug 2011 14:02:16 +0300
-Message-ID: <4E54DA38.1000408@qca.qualcomm.com>
-References: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com> <20110319091544.GA16635@pengutronix.de> <20110330011629.GA15578@tux> <20110330074713.GA2232@pengutronix.de>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH 2/2] mmc: fix integer assignments to pointer
+Date: Wed, 24 Aug 2011 16:53:07 +0530
+Message-ID: <CANfBPZ_MfTVDWo8As3c-Ax5bjr=QN2rK2CYdmdY4Qw4cRbok2Q@mail.gmail.com>
+References: <1314114363-6767-1-git-send-email-svenkatr@ti.com>
+ <1314114363-6767-3-git-send-email-svenkatr@ti.com> <m27h643x8k.fsf@bob.laptop.org>
+ <20110823165620.GA9132@merkur.ravnborg.org> <4E542C6E.5080507@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:61663 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756631Ab1HXLCX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2011 07:02:23 -0400
-In-Reply-To: <20110330074713.GA2232@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sparse-owner@vger.kernel.org>
+In-Reply-To: <4E542C6E.5080507@linux.intel.com>
+Sender: linux-sparse-owner@vger.kernel.org
+To: J Freyensee <james_p_freyensee@linux.intel.com>
+Cc: Sam Ravnborg <sam@ravnborg.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-sparse@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "Luis R. Rodriguez" <rodrigue@qca.qualcomm.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "j@w1.fi" <j@w1.fi>
 
-Hi Wolfram,
-
-going back to an old thread from March:
-
-https://lkml.org/lkml/2011/3/18/433
-
-Background:
-
-Luis had problems with ath6kl (driver for ar6003 wifi chip using sdio)
-and PCI ENE 712 SDIO extender and he had to use few ugly patches to get
-it working. Later this year I inherited all this. I have been using the
-hack patches until now but finally I started debugging this and I can
-provide more information.
-
-On 03/30/2011 10:47 AM, Wolfram Sang wrote:
->
->> I just tried this, it does not work, in fact my own my patches don't
-work too,
->> only the original crap does though for some odd magical reason.
+On Wed, Aug 24, 2011 at 4:10 AM, J Freyensee
+<james_p_freyensee@linux.intel.com> wrote:
+> On 08/23/2011 09:56 AM, Sam Ravnborg wrote:
 >>
->> Then again, what I tried was:
->>
->> insmod ./sdhci.ko debug_quirks=0x8028
->>
->> Was that what you wanted me to try?
+>> On Tue, Aug 23, 2011 at 12:31:55PM -0400, Chris Ball wrote:
+>>>
+>>> Hi,
+>>>
+>>> [Adding linux-sparse@ to CC]
+>>>
+>>> On Tue, Aug 23 2011, Venkatraman S wrote:
+>>>>
+>>>> Fix the sparse warning output
+>>>> "warning: Using plain integer as NULL pointer"
+>>>>
+>>>> Signed-off-by: Venkatraman S<svenkatr@ti.com>
+>>>> ---
+>>>> =A0drivers/mmc/card/block.c =A0 =A0| =A0 =A04 ++--
+>>>> =A0drivers/mmc/core/core.c =A0 =A0 | =A0 =A02 +-
+>>>> =A0drivers/mmc/core/mmc_ops.c =A0| =A0 =A04 ++--
+>>>> =A0drivers/mmc/core/sdio_ops.c | =A0 =A02 +-
+>>>> =A04 files changed, 6 insertions(+), 6 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>>>> index 1ff5486..e702c61 100644
+>>>> --- a/drivers/mmc/card/block.c
+>>>> +++ b/drivers/mmc/card/block.c
+>>>> @@ -291,7 +291,7 @@ static int mmc_blk_ioctl_cmd(struct block_devi=
+ce
+>>>> *bdev,
+>>>> =A0 =A0 =A0 =A0struct mmc_card *card;
+>>>> =A0 =A0 =A0 =A0struct mmc_command cmd =3D {0};
+>>>> =A0 =A0 =A0 =A0struct mmc_data data =3D {0};
+>>>> - =A0 =A0 =A0 struct mmc_request mrq =3D {0};
+>>>> + =A0 =A0 =A0 struct mmc_request mrq =3D {NULL};
+>>>> =A0 =A0 =A0 =A0struct scatterlist sg;
+>>>> =A0 =A0 =A0 =A0int err;
+>>>> [...]
+>>>
+>>> The sparse warning is mistaken. =A0Or I'm mistaken. =A0But I suspec=
+t it's
+>>> the sparse warning.
+>>>
 >
-> Yes. I assume this would have helped also (assuming that the original
-> patchset was working), but looks like more investigation is needed.
-
-I tried 0x8028 as well and it didn't help. But what I noticed was that
-enabling SDHCI_QUIRK_FORCE_1_BIT_DATA with 0x00400038 makes it work.
-
-Also I did some debugging on the hack patches and found out that the
-hack patch below also makes ath6kl work with my ENE card. As suspected,
-rest of the changes from the patches Luis sent were not needed.
-
-http://www.valot.fi/kalle/tmp/sdhci-ene/sdhci-ene-idle-1bit-1.patch
-
-So only needed change was to force 1 bit mode while the bus is idle. Any
-ideas what would be the best way to fix this?
-
-I'm currently using 3.1.0-rc2-wl+ from ath6kl.git which is based on
-wireless-testing on an x86 32bit box. I can provide more information and
-logs.
-
->> 03:0a.1 0805: 1524:0750
+> Okay, stupid question times:
 >
-> Okay, so you have PCI_DEVICE_ID_ENE_CB714_SD and not
-> PCI_DEVICE_ID_ENE_CB714_SD_2 (just in case they need to be dealt
-> differently).
-
-This is the device I have, it should be similar (if not the same) as Luis':
-
-03:02.1 SD Host controller [0805]: ENE Technology Inc ENE PCI SmartMedia
-/ xD Card Reader Controller [1524:0750] (prog-if 01)
-        Subsystem: ENE Technology Inc ENE PCI SmartMedia / xD Card
-Reader Controller [1524:0750]
-        Control: I/O- Mem+ BusMaster- SpecCycle- MemWINV- VGASnoop-
-ParErr- Stepping- SERR- FastB2B- DisINTx-
-        Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=medium >TAbort-
-<TAbort- <MAbort- >SERR- <PERR- INTx-
-        Interrupt: pin A routed to IRQ 19
-        Region 0: Memory at febff800 (32-bit, non-prefetchable) [size=256]
-        Capabilities: [80] Power Management version 2
-                Flags: PMEClk- DSI- D1+ D2+ AuxCurrent=0mA
-PME(D0+,D1+,D2+,D3hot+,D3cold-)
-                Status: D0 PME-Enable- DSel=0 DScale=0 PME-
-        Kernel driver in use: sdhci-pci
-00: 24 15 50 07 02 00 10 02 00 01 05 08 08 40 80 00
-10: 00 f8 bf fe 00 00 00 00 00 00 00 00 00 00 00 00
-20: 00 00 00 00 00 00 00 00 00 00 00 00 24 15 50 07
-30: 00 00 00 00 80 00 00 00 00 00 00 00 05 01 20 48
-
->>> And does it make a difference if you use the SDIO-WLAN card or a
-standard SD
->>> memory card?
->>
->> Um, I don't have physical access to the box, Naveen or Vipin would
-have to
->> test this.
+>>>> - =A0 struct mmc_request mrq =3D {0};
 >
-> Might be worth.
+> this is 'struct mmc_request mrq' and not 'struct mmc_request *mrq', r=
+ight?
+>
+> Then I think the sparse warning is correct. =A0From my experience, sp=
+arse is
+> very clear: if any variable is defined as a pointer, you use NULL to =
+reset
+> the pointer instead of '0', and if any variable is a normal variable,=
+ you
+> use '0' to reset the variable. I don't think sparse is smart enough t=
+o look
+> at the underlying variables, which in this case, mrq contains members=
+ that
+> are pointers to something.
+>
+> in this case, the defined variable is not a pointer, rather a variabl=
+e named
+> mrq that is of type 'struct mmc_request'. =A0Therefore, 0 is correct =
+to use
+> and NULL is incorrect.
 
-I tried with my 1GB SD card from my camera and oddly enough I didn't see
-any new devices in /dev/sd*. But I don't know if I was missing some
-important kernel config options, I have used this ENE card only with
-ath6kl. I will retest this later.
+Please tolerate my misunderstanding here - but aren't the above two sta=
+tements
+contradictory ?
+My understanding was the '0' or NULL would be assigned to the first mem=
+ber of
+struct mmc_request, which happens to be a pointer. Hence NULL is more c=
+orrect
+than '0', right ?
 
-Kalle
+The type of the structure variable is irrelevant here. i.e.
+struct mmc_request mrq =3D {0};
+and
+struct mmc_request *mrq =3D {0};
+
+would generate the same warning, isn't it ?
+
+>
+> If you want it to be sparse-correct as well as human-readable correct=
+, you
+> probably should write the code that explicitly shows assigning each p=
+ointer
+> member of mrq to NULL, ie:
+>
+> struct mmc_request mrq;
+> mrq.sbc =3D NULL;
+> mrq.cmd =3D NULL;
+> mrq.data =3D NULL;
+> .
+> .
+> etc.
+>
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
