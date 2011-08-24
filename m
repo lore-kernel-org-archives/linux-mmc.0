@@ -1,57 +1,108 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 0/4 v7] mmc: tmio, sdhi: provide multiple irq handlers
-Date: Wed, 24 Aug 2011 18:47:40 +0900
-Message-ID: <CANqRtoSg2+9sVmBU0H5Si4-faqqeYvXoyCpjqs1tvx_mmLSZGQ@mail.gmail.com>
-References: <1313740642-18307-1-git-send-email-horms@verge.net.au>
-	<20110824053711.GB17212@verge.net.au>
+From: Kalle Valo <kvalo@qca.qualcomm.com>
+Subject: Re: [RFC 0/4] sdhci: few patches for ENE 712 support
+Date: Wed, 24 Aug 2011 14:02:16 +0300
+Message-ID: <4E54DA38.1000408@qca.qualcomm.com>
+References: <1300486320-23607-1-git-send-email-lrodriguez@atheros.com> <20110319091544.GA16635@pengutronix.de> <20110330011629.GA15578@tux> <20110330074713.GA2232@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20110824053711.GB17212@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:61663 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756631Ab1HXLCX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2011 07:02:23 -0400
+In-Reply-To: <20110330074713.GA2232@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: "Luis R. Rodriguez" <rodrigue@qca.qualcomm.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "j@w1.fi" <j@w1.fi>
 
-On Wed, Aug 24, 2011 at 2:37 PM, Simon Horman <horms@verge.net.au> wrot=
-e:
-> On Fri, Aug 19, 2011 at 04:57:18PM +0900, Simon Horman wrote:
->> The SDHI driver already supports making use of up to three interrupt
->> sources.
->>
->> This series breaks up the existing interrupt handler into three hand=
-lers,
->> one for card access, one for card detect interrupts, and one for SDI=
-O
->> interrupts. =A0A cover-all handler, which makes use of these new bro=
-ken-out
->> handlers is provided for for the case where there is only one interr=
-upt
->> source.
->>
->> This series also wires up the broken-out irq handlers in the SDHI dr=
-iver
+Hi Wolfram,
+
+going back to an old thread from March:
+
+https://lkml.org/lkml/2011/3/18/433
+
+Background:
+
+Luis had problems with ath6kl (driver for ar6003 wifi chip using sdio)
+and PCI ENE 712 SDIO extender and he had to use few ugly patches to get
+it working. Later this year I inherited all this. I have been using the
+hack patches until now but finally I started debugging this and I can
+provide more information.
+
+On 03/30/2011 10:47 AM, Wolfram Sang wrote:
 >
-> Magnus, Guennadi,
+>> I just tried this, it does not work, in fact my own my patches don't
+work too,
+>> only the original crap does though for some odd magical reason.
+>>
+>> Then again, what I tried was:
+>>
+>> insmod ./sdhci.ko debug_quirks=0x8028
+>>
+>> Was that what you wanted me to try?
 >
-> when you get a chance could I get an ack or otherwise on these change=
-s.
+> Yes. I assume this would have helped also (assuming that the original
+> patchset was working), but looks like more investigation is needed.
 
-Hi Simon,
+I tried 0x8028 as well and it didn't help. But what I noticed was that
+enabling SDHCI_QUIRK_FORCE_1_BIT_DATA with 0x00400038 makes it work.
 
-Your latest revision of SDHI patches looked very good, thanks for your =
-effort!
+Also I did some debugging on the hack patches and found out that the
+hack patch below also makes ath6kl work with my ENE card. As suspected,
+rest of the changes from the patches Luis sent were not needed.
 
-I prefer to give acks to each of the patches individually if possible,
-but I'm a bit confused by all the versions floating around. So for
-now, please add my acked-by for all patches in this series.
+http://www.valot.fi/kalle/tmp/sdhci-ene/sdhci-ene-idle-1bit-1.patch
 
-In the future, please consider a) including version number in the
-subject of the patch email and b) including a list of all the patches
-(including version) in [PATCH 0/...]. That will make it easier to
-track down each individual patch.
+So only needed change was to force 1 bit mode while the bus is idle. Any
+ideas what would be the best way to fix this?
 
-Thank you!
+I'm currently using 3.1.0-rc2-wl+ from ath6kl.git which is based on
+wireless-testing on an x86 32bit box. I can provide more information and
+logs.
 
-/ magnus
+>> 03:0a.1 0805: 1524:0750
+>
+> Okay, so you have PCI_DEVICE_ID_ENE_CB714_SD and not
+> PCI_DEVICE_ID_ENE_CB714_SD_2 (just in case they need to be dealt
+> differently).
+
+This is the device I have, it should be similar (if not the same) as Luis':
+
+03:02.1 SD Host controller [0805]: ENE Technology Inc ENE PCI SmartMedia
+/ xD Card Reader Controller [1524:0750] (prog-if 01)
+        Subsystem: ENE Technology Inc ENE PCI SmartMedia / xD Card
+Reader Controller [1524:0750]
+        Control: I/O- Mem+ BusMaster- SpecCycle- MemWINV- VGASnoop-
+ParErr- Stepping- SERR- FastB2B- DisINTx-
+        Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=medium >TAbort-
+<TAbort- <MAbort- >SERR- <PERR- INTx-
+        Interrupt: pin A routed to IRQ 19
+        Region 0: Memory at febff800 (32-bit, non-prefetchable) [size=256]
+        Capabilities: [80] Power Management version 2
+                Flags: PMEClk- DSI- D1+ D2+ AuxCurrent=0mA
+PME(D0+,D1+,D2+,D3hot+,D3cold-)
+                Status: D0 PME-Enable- DSel=0 DScale=0 PME-
+        Kernel driver in use: sdhci-pci
+00: 24 15 50 07 02 00 10 02 00 01 05 08 08 40 80 00
+10: 00 f8 bf fe 00 00 00 00 00 00 00 00 00 00 00 00
+20: 00 00 00 00 00 00 00 00 00 00 00 00 24 15 50 07
+30: 00 00 00 00 80 00 00 00 00 00 00 00 05 01 20 48
+
+>>> And does it make a difference if you use the SDIO-WLAN card or a
+standard SD
+>>> memory card?
+>>
+>> Um, I don't have physical access to the box, Naveen or Vipin would
+have to
+>> test this.
+>
+> Might be worth.
+
+I tried with my 1GB SD card from my camera and oddly enough I didn't see
+any new devices in /dev/sd*. But I don't know if I was missing some
+important kernel config options, I have used this ENE card only with
+ath6kl. I will retest this later.
+
+Kalle
