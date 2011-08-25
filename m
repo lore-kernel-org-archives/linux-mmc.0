@@ -1,43 +1,27 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: RFC : mmc : Use wait_for_completion_timeout() instead of
- wait_for_completion in case of multiple write blocks.
-Date: Thu, 25 Aug 2011 13:44:31 +0900
-Message-ID: <CAKYAXd_QrgHHdiev-Vxt=FrwkJg-3qfjxzqkPmgLbwZ=U4358Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Zhangfei Gao <zhangfei.gao@marvell.com>
+Subject: [PATCH v3 0/2] mmc add vsdio to dynamically control sdio power
+Date: Thu, 25 Aug 2011 14:26:13 +0800
+Message-ID: <1314253575-2602-1-git-send-email-zhangfei.gao@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yi0-f46.google.com ([209.85.218.46]:56235 "EHLO
-	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752039Ab1HYEoc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2011 00:44:32 -0400
+Received: from dakia2.marvell.com ([65.219.4.35]:33179 "EHLO
+	dakia2.marvell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752532Ab1HYG0y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2011 02:26:54 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, linus.walleij@linaro.org, Kyungmin Park <kmpark@infradead.org>
+To: Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>, Daniel Drake <dsd@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, linux-mmc@vger.kernel.o
+Cc: Zhangfei Gao <zhangfei.gao@marvell.com>
 
-Hi.
+v2->v3, change vmmc to vsdio
+In v2, vmmc is reused, however, sd may be impacted if move vmmc to set_ios.
+When no card inserted, CD is high, vmmc will be disabled when detect fail, CD will pull low accordingly, controller may treat as card inserted and re-detect.
 
-If card is infinitely holding pull down busy line(data 0) while
-writing multiple blocks, write will be blocked in
-mmc_wait_for_req_done().
-I suggest to use wait_for_completion_timeout instread of
-wait_for_completion like the below code.
+Zhangfei Gao (2):
+  mmc: sdio add regulator vsdio
+  ARM: mmp2: support sdio with regulator vsdio
 
-How do you think about my suggestion ?
+ arch/arm/mach-mmp/brownstone.c |   60 ++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci.c       |   22 ++++++++++++++
+ include/linux/mmc/sdhci.h      |    2 +
+ 3 files changed, 82 insertions(+), 2 deletions(-)
 
-Thanks.
-
-------------------------------------------------------------------------------------------------------------------
-static void mmc_wait_for_req_done(struct mmc_host *host, struct
-mmc_request *mrq)
-{
-        unsigned int write_timeout = 0;
-	
-        if(mrq->data != NULL && (mrq->data->flags & MMC_DATA_WRITE) &&
-(mrq->cmd->opcode & MMC_WRITE_MULTIPLE_BLOCK)) {
-                write_timeout =
-usecs_to_jiffies(mrq->data->timeout_ns/1000) * mrq->data->blocks;
-                wait_for_completion_timeout(&mrq->completion, write_timeout);
-        }
-        else wait_for_completion(&mrq->completion);
-}
