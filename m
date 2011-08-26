@@ -1,31 +1,66 @@
-From: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
-Subject: Re: [PATCH 1/2] sdhci/tegra: Add Device Tree probing support
-Date: Thu, 25 Aug 2011 22:19:34 -0700
-Message-ID: <CAOesGMgS0LZdSA9LFvn+_bkdnKfT4d3n6mZCe=vpTGK1c1y+cg@mail.gmail.com>
-References: <1314123334-23133-1-git-send-email-swarren@nvidia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1314123334-23133-1-git-send-email-swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH] mmc: core: Add default timeout value for CMD6.
+Date: Fri, 26 Aug 2011 15:48:06 +0900
+Message-ID: <1314341286-22141-1-git-send-email-tgih.jun@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ganesha.gnumonks.org ([213.95.27.120]:59883 "EHLO
+	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751023Ab1HZHD0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2011 03:03:26 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: linux-kernel@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>
 
-On Tue, Aug 23, 2011 at 11:15 AM, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> wrote:
-> From: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
->
-> Add hooks to read gpio configuration out of the device tree node.
->
-> [grant.likely: Rewrite of original patch from John Bonesio]
-> Signed-off-by: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
-> [swarren: Fixed tegra_sdhci_get_ro() to retrieve pdata correctly]
-> [swarren: Reworked to avoid #ifdef CONFIG_OF]
-> [swarren: Reworked binding based on fsl-imx-esdhc.txt]
-> [swarren: Documented binding]
-> Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+EXT_CSD[248] includes the default maximum timeout for CMD6.
+This field is added at eMMC4.5 Spec.
 
-Acked-by: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+ drivers/mmc/core/mmc.c   |    4 ++++
+ include/linux/mmc/card.h |    1 +
+ include/linux/mmc/mmc.h  |    1 +
+ 3 files changed, 6 insertions(+), 0 deletions(-)
 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5700b1c..68eb368 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -410,6 +410,10 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 	else
+ 		card->erased_byte = 0x0;
 
--Olof
++	if (card->ext_csd.rev >= 6)
++		card->ext_csd.generic_cmd6_time = 10 *
++			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
++
+ out:
+ 	return err;
+ }
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index b460fc2..e992fe3 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -52,6 +52,7 @@ struct mmc_ext_csd {
+ 	u8			part_config;
+ 	unsigned int		part_time;		/* Units: ms */
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
++	unsigned int		generic_cmd6_time;	/* Units: ms */
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		sectors;
+ 	unsigned int		card_type;
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 5a794cb..e869f00 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -293,6 +293,7 @@ struct _mmc_csd {
+ #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
+ #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
+ #define EXT_CSD_TRIM_MULT		232	/* RO */
++#define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
+
+ /*
+  * EXT_CSD field definitions
+--
+1.7.0.4
+
