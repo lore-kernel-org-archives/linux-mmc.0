@@ -1,67 +1,301 @@
-From: Santosh <santosh.shilimkar@ti.com>
-Subject: Re: [PATCH v9 00/12] use nonblock mmc requests to minimize latency
-Date: Fri, 26 Aug 2011 21:58:19 +0530
-Message-ID: <4E57C9A3.8000208@ti.com>
-References: <1309539333-2606-1-git-send-email-per.forlin@linaro.org> <20110826161951.GA26197@n2100.arm.linux.org.uk>
+From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Subject: Re: [PATCH 1/1] mmc: Support of DUAL BUFFER DESC[ring] mode for dw_mmc
+Date: Fri, 26 Aug 2011 23:36:11 +0530
+Message-ID: <CANYdXnoKJxo+Q8gwfbXbeaADK_HuPNnV2YjfqkVSNsCCFy3x5A@mail.gmail.com>
+References: <CANYdXno+b6ZZ=3upGMwYxxbJMbKSteWKGM=RxtKhSOYr3iov4g@mail.gmail.com>
+	<4E57A22A.7050604@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aob106.obsmtp.com ([74.125.149.76]:48424 "EHLO
-	na3sys009aog106.obsmtp.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752179Ab1HZQ2c (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2011 12:28:32 -0400
-In-Reply-To: <20110826161951.GA26197@n2100.arm.linux.org.uk>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:58575 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755350Ab1HZSGN convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2011 14:06:13 -0400
+Received: by gxk21 with SMTP id 21so3049881gxk.19
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2011 11:06:11 -0700 (PDT)
+In-Reply-To: <4E57A22A.7050604@imgtec.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Per Forlin <per.forlin@linaro.org>, linux-omap@vger.kernel.org, Nicolas Pitre <nicolas.pitre@linaro.org>, Chris Ball <cjb@laptop.org>, linaro-dev@lists.linaro.org, Arnd Bergmann <arnd@arndb.de>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Sourav Poddar <sourav.poddar@ti.com>, linux-arm-kernel@lists.infradead.org, Balaji T Krishnamoorthy <balajitk@ti.com>
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org
 
-+ Balaji,
+Hi James,
+  thanks a lot for the reply.
+  I will fix all the indentation issues as well.Please find my
+comments/queries below:
 
-On Friday 26 August 2011 09:49 PM, Russell King - ARM Linux wrote:
-> I'm not sure who's responsible for this, but the nonblocking MMC stuff is
-> broken on OMAPs HSMMC:
+On Fri, Aug 26, 2011 at 7:09 PM, James Hogan <james.hogan@imgtec.com> w=
+rote:
+> Hi,
 >
-> mmcblk0: error -84 transferring data, sector 149201, nr 64, cmd response 0x900, card status 0xb00
-> mmcblk0: retrying using single block read
-> ------------[ cut here ]------------
-> WARNING: at /home/rmk/git/linux-2.6-rmk/lib/dma-debug.c:811 check_unmap+0x1ac/0x764()
-> omap_hsmmc omap_hsmmc.0: DMA-API: device driver tries to free DMA memory it has not allocated [device address=0x0000000080933000] [size=20480 bytes]
-> Modules linked in:
-> Backtrace:
-> [<c0017874>] (dump_backtrace+0x0/0x10c) from [<c02ce8ac>] (dump_stack+0x18/0x1c)
->   r7:c1abfcb8 r6:c0186248 r5:c037de51 r4:0000032b
-> [<c02ce894>] (dump_stack+0x0/0x1c) from [<c0039ed4>] (warn_slowpath_common+0x58/0x70)
-> [<c0039e7c>] (warn_slowpath_common+0x0/0x70) from [<c0039f90>] (warn_slowpath_fmt+0x38/0x40)
->   r8:c1abfd50 r7:00000000 r6:00005000 r5:00000000 r4:80933000
-> [<c0039f58>] (warn_slowpath_fmt+0x0/0x40) from [<c0186248>] (check_unmap+0x1ac/0x764)
->   r3:c0367d55 r2:c037e24d
-> [<c018609c>] (check_unmap+0x0/0x764) from [<c0186978>] (debug_dma_unmap_sg+0x100/0x134)
-> [<c0186878>] (debug_dma_unmap_sg+0x0/0x134) from [<c0019770>] (dma_unmap_sg+0x24/0x7c)
-> [<c001974c>] (dma_unmap_sg+0x0/0x7c) from [<c0207220>] (omap_hsmmc_post_req+0x48/0x54)
-> [<c02071d8>] (omap_hsmmc_post_req+0x0/0x54) from [<c01fb644>] (mmc_start_req+0x9c/0x128)
->   r4:c1a76000
-> [<c01fb5a8>] (mmc_start_req+0x0/0x128) from [<c02049fc>] (mmc_blk_issue_rw_rq+0x80/0x460)
->   r8:c1ab5c00 r7:00000001 r6:c1ab5824 r5:c1ab5824 r4:c1ab5c00
-> [<c020497c>] (mmc_blk_issue_rw_rq+0x0/0x460) from [<c02050a8>] (mmc_blk_issue_rq+0x2cc/0x2fc)
-> [<c0204ddc>] (mmc_blk_issue_rq+0x0/0x2fc) from [<c02056c4>] (mmc_queue_thread+0xa0/0x104)
-> [<c0205624>] (mmc_queue_thread+0x0/0x104) from [<c0054f8c>] (kthread+0x88/0x90)
-> [<c0054f04>] (kthread+0x0/0x90) from [<c003d9a4>] (do_exit+0x0/0x618)
->   r7:00000013 r6:c003d9a4 r5:c0054f04 r4:c1a7bc7c
-> ---[ end trace 3314ad56daf5d14f ]---
+> Thanks for sending the patch.
 >
-> Luckily thinks continue to work, but clearly releasing DMA mappings which
-> drivers don't own is bad news.  Unfortunately, I don't have the bandwidth
-> to be able to investigate this at present - well, I could do but then I'd
-> have to drop working on the OMAP4 vs generic suspend/resume code and learn
-> about something I've no current clue about.
+> On 08/26/2011 11:31 AM, Shashidhar Hiremath wrote:
+>> This Patch adds the support for Dual Buffer Descriptor mode of
+>> Operation for the dw_mmc driver.The patch also provides the configur=
+ability
+>> Option for choosing DUAL_BUFFER mode or the chained modes through me=
+nuconfig.
+>> The Menuconfig option for selecting Dual Buffer mode or chained mode
+>> is selected only if
+>> Internal DMAC is enabled.
+>>
+>> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+>> ---
+>> =A0drivers/mmc/host/Kconfig =A0| =A0 22 ++++++++++++++++++
+>> =A0drivers/mmc/host/dw_mmc.c | =A0 55 ++++++++++++++++++++++++++++++=
+++++++--------
+>> =A02 files changed, 67 insertions(+), 10 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index 8c87096..e10f585 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -534,6 +534,28 @@ config MMC_DW_IDMAC
+>> =A0 =A0 =A0 =A0 Designware Mobile Storage IP block. This disables th=
+e external DMA
+>> =A0 =A0 =A0 =A0 interface.
+>>
+>> +config IDMAC_DESC_MODE
 >
-Please continue your help on generic suspend.
+> I think this config needs to be more specific, otherwise it could
+> conflict with drivers for other hardware with an internal DMAC, i.e.
+> something like MMC_DW_IDMAC_DESC_MODE.
+>
+>> + =A0 =A0 bool "Internal DMAC Descriptor Operating Mode"
+>> + =A0 =A0 depends on MMC_DW_IDMAC
+>> + =A0 =A0 help
+>> + =A0 =A0 =A0 This selects the Operating mode for the Descriptors.
+>
+> Am I right that there are 3 modes, dual buffer, chain descriptor, and
+> something else?
+> This config option doesn't seem necessary. I would put "optional" in =
+the
+> choice below, or add a choice for whatever the mode is called when
+> neither option is selected.
+> If there are only the two options, don't have the choice depend on
+> IDMAC_DESC_MODE, otherwise if you don't select it, neither of the
+> choices will be set.
+>
+There are only two modes actually,and one of them has to be selected
+is MMC_DW_IDMAC is seleced i'e If Internal DMAC is selected ,only
+then ,the usage of descriptors and its modes used here come into
+picture.
+So, Is it OK if I add the choice options within MMC_DW_IDMAC option
+which reprsents internal DMAC selected ?
+>> +
+>> +choice
+>> + =A0 =A0 prompt "select configuration"
+>> + =A0 =A0 depends on IDMAC_DESC_MODE
+>> +
+>> +config CHAIN_DESC
+>
+> same here (config name)
+>
+>> + =A0 =A0 bool "Chain Descriptor Structure"
+>> + =A0 =A0 help
+>> + =A0 =A0 =A0 Select this option to enable Chained Mode of Operation=
+=2E
+>> +
+>> +config DUAL_BUFFER_DESC
+>
+> same here (config name)
+>
+>> + =A0 =A0 bool "Dual Buffer Descriptor Structure"
+>> + =A0 =A0 help
+>> + =A0 =A0 =A0 Select this option to enable Dual Buffer Desc Mode of =
+Operation.
+>> +endchoice
+>> +
+>> +
+>
+> probably no need for the extra newline
+>
+>> =A0config MMC_SH_MMCIF
+>> =A0 =A0 =A0 tristate "SuperH Internal MMCIF support"
+>> =A0 =A0 =A0 depends on MMC_BLOCK && (SUPERH || ARCH_SHMOBILE)
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index ff0f714..a590856 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -63,6 +63,9 @@ struct idmac_desc {
+>> =A0 =A0 =A0 u32 =A0 =A0 =A0 =A0 =A0 =A0 des1; =A0 /* Buffer sizes */
+>> =A0#define IDMAC_SET_BUFFER1_SIZE(d, s) \
+>> =A0 =A0 =A0 ((d)->des1 =3D ((d)->des1 & 0x03ffe000) | ((s) & 0x1fff)=
+)
+>> +#define IDMAC_SET_BUFFER_SIZE(d, s1, s2) \
+>> + =A0 =A0 ((d)->des1 =3D ((d)->des1 & 0x0) | \
+>
+> Do you mean to & with 0 there?
+Yes, I have made the desc1 '0' first and then I have ORed the length's
+of Buffer1 and Buffer2 appropriately as below.The reason I have ANDed
+with zero is to remove any junk value present in descriptors.
 
-> Can someone please investigate and fix whatever is broken.
 >
-Will find somebody to look at this issue.
+>> + =A0 =A0 (((s1) & 0x1fff) | ((s2) & 0x1fff << 13)))
+>>
+>> =A0 =A0 =A0 u32 =A0 =A0 =A0 =A0 =A0 =A0 des2; =A0 /* buffer 1 physic=
+al address */
+>>
+>> @@ -348,17 +351,44 @@ static void dw_mci_translate_sglist(struct
+>> dw_mci *host, struct mmc_data *data,
+>> =A0 =A0 =A0 struct idmac_desc *desc =3D host->sg_cpu;
+>>
+>> =A0 =A0 =A0 for (i =3D 0; i < sg_len; i++, desc++) {
+>> - =A0 =A0 =A0 =A0 =A0 =A0 unsigned int length =3D sg_dma_len(&data->=
+sg[i]);
+>> - =A0 =A0 =A0 =A0 =A0 =A0 u32 mem_addr =3D sg_dma_address(&data->sg[=
+i]);
+>> -
+>> - =A0 =A0 =A0 =A0 =A0 =A0 /* Set the OWN bit and disable interrupts =
+for this descriptor */
+>> + =A0 =A0 =A0 =A0 =A0 =A0 /*length and mem_aadress of first buffer*/
+>
+> it'd be nice to have a space after /* and before */ to be consistent.
+>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 unsigned int length1 =3D sg_dma_len(&data-=
+>sg[i]);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 u32 mem_addr1 =3D sg_dma_address(&data->sg=
+[i]);
+>> +#ifdef CONFIG_DUAL_BUFFER_DESC
+>> + =A0 =A0 =A0 =A0 =A0 =A0 unsigned int length2;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 u32 mem_addr2;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 if ((i+1) <=3D sg_len) {
+>
+> should that be "< sg_len", it never hit sg[sg_len] before, but it wil=
+l
+> below?
+Yes, You are right, I will make the change.
+>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 length2 =3D sg_dma_len(&da=
+ta->sg[i+1]);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mem_addr2 =3D sg_dma_addre=
+ss(&data->sg[i+1]);
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Set the OWN bit and dis=
+able interrupts
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* for this descriptor
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>
+> the coding style says to have multiline comments with nothing on the
+> first line, i.e.
+> /*
+> =A0* Set the OWN ....
+> =A0* ....
+> =A0*/
+>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des0 =3D IDMAC_DES0_=
+OWN | IDMAC_DES0_DIC
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des0 &=3D (~IDMAC_DE=
+S0_CH);
+>
+> is this line necessary, since you only just set it without that bit.
+Yes, agreed.I will make the change.
+>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Buffer length being set=
+ for Buffer1
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* and Buffer2 being set
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>
+> same here (multiline comment)
+>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 IDMAC_SET_BUFFER_SIZE(desc=
+, length1, length2);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des3 =3D mem_addr2;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Incrementing for the se=
+cond buffer */
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 i++;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 } else {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des0 =3D IDMAC_DES0_=
+OWN | IDMAC_DES0_DIC
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des0 &=3D (~IDMAC_DE=
+S0_CH);
+>
+> same here (necessary?)
+Agreed,not necessary.I will make the change.
+>
+> Also, should this be the same as the non-dual case (also have
+> IDMAC_DES0_CH), since there is only one sg buffer left?
+Please correct me If I am wrong here.I feel since we select the mode
+for one complee transfer.I have reset it and made the second buffer
+length zero,If dynamic switching to chained mode is possible,I can
+probably make it same as for non dual case.
+>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Buffer length being set=
+ for Buffer1
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* and Buffer2 being set
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>
+> same here (multiline comment)
+>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 IDMAC_SET_BUFFER_SIZE(desc=
+, length1, 0);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 }
+>> +#elif CONFIG_CHAIN_DESC
+>> + =A0 =A0 =A0 =A0 =A0 =A0 /* Set OWN bit and disable interrupts for =
+this descriptor */
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des0 =3D IDMAC_DES0_OWN | IDMAC_DE=
+S0_DIC | IDMAC_DES0_CH;
+>> -
+>> - =A0 =A0 =A0 =A0 =A0 =A0 /* Buffer length */
+>> - =A0 =A0 =A0 =A0 =A0 =A0 IDMAC_SET_BUFFER1_SIZE(desc, length);
+>> -
+>> + =A0 =A0 =A0 =A0 =A0 =A0 /* Buffer length for Buffer1*/
+>
+> same here (comment spacing)
+>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 IDMAC_SET_BUFFER1_SIZE(desc, length1);
+>> +#endif
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Physical address to DMA to/from */
+>> - =A0 =A0 =A0 =A0 =A0 =A0 desc->des2 =3D mem_addr;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 desc->des2 =3D mem_addr1;
+>> =A0 =A0 =A0 }
+>>
+>> =A0 =A0 =A0 /* Set first descriptor */
+>> @@ -369,6 +399,10 @@ static void dw_mci_translate_sglist(struct dw_m=
+ci
+>> *host, struct mmc_data *data,
+>> =A0 =A0 =A0 desc =3D host->sg_cpu + (i - 1) * sizeof(struct idmac_de=
+sc);
+>> =A0 =A0 =A0 desc->des0 &=3D ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
+>> =A0 =A0 =A0 desc->des0 |=3D IDMAC_DES0_LD;
+>> +#ifdef CONFIG_DUAL_BUFFER_DESC
+>> + =A0 =A0 /*Set the End of Ring bit */
+>
+> same here (comment spacing)
+>
+>> + =A0 =A0 desc->des0 |=3D IDMAC_DES0_ER;
+>> +#endif
+>>
+>> =A0 =A0 =A0 wmb();
+>> =A0}
+>> @@ -388,7 +422,8 @@ static void dw_mci_idmac_start_dma(struct dw_mci
+>> *host, unsigned int sg_len)
+>>
+>> =A0 =A0 =A0 /* Enable the IDMAC */
+>> =A0 =A0 =A0 temp =3D mci_readl(host, BMOD);
+>> - =A0 =A0 temp |=3D SDMMC_IDMAC_ENABLE | SDMMC_IDMAC_FB;
+>> + =A0 =A0 /* The Descriptor Skip length is made zero */
+>> + =A0 =A0 temp |=3D SDMMC_IDMAC_ENABLE | SDMMC_IDMAC_FB & SDMMC_BMOD=
+_DSL(0);
+>
+> should that be a | instead of &?
+Yes, will make this change.
+>
+> Also, where is SDMMC_BMOD_DSL defined?
+>
+>> =A0 =A0 =A0 mci_writel(host, BMOD, temp);
+>>
+>> =A0 =A0 =A0 /* Start it running */
+>
+> Thanks
+> James
+>
+>
 
-Regards
-Santosh
+
+
+--=20
+regards,
+Shashidhar Hiremath
