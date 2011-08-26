@@ -1,14 +1,14 @@
 From: Chunhe Lan <Chunhe.Lan@freescale.com>
-Subject: [PATCH 2/3 v2] mmc: Use mmc_delay() instead of mdelay() for time delay
-Date: Fri, 26 Aug 2011 15:54:47 +0800
-Message-ID: <1314345287-14849-1-git-send-email-Chunhe.Lan@freescale.com>
+Subject: [PATCH 3/3 v2] mmc: Use mmc_delay() instead of mdelay() for time delay
+Date: Fri, 26 Aug 2011 15:55:10 +0800
+Message-ID: <1314345310-15041-1-git-send-email-Chunhe.Lan@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe006.messaging.microsoft.com ([213.199.154.144]:17824
-	"EHLO DB3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754545Ab1HZI5R (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2011 04:57:17 -0400
+Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:12955
+	"EHLO DB3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753730Ab1HZI55 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2011 04:57:57 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
@@ -29,31 +29,58 @@ Signed-off-by: Shengzhou Liu <b36685@freescale.com>
 Signed-off-by: Chunhe Lan <Chunhe.Lan@freescale.com>
 Cc: Chris Ball <cjb@laptop.org>
 ---
- drivers/mmc/host/sdhci-esdhc.h |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci.c |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index c3b08f1..b8c0ab1 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -1,7 +1,7 @@
- /*
-  * Freescale eSDHC controller driver generics for OF and pltfm.
-  *
-- * Copyright (c) 2007 Freescale Semiconductor, Inc.
-+ * Copyright (c) 2007, 2011 Freescale Semiconductor, Inc.
-  * Copyright (c) 2009 MontaVista Software, Inc.
-  * Copyright (c) 2010 Pengutronix e.K.
-  *   Author: Wolfram Sang <w.sang@pengutronix.de>
-@@ -73,7 +73,7 @@ static inline void esdhc_set_clock(struct sdhci_host *host, unsigned int clock)
- 		| (div << ESDHC_DIVIDER_SHIFT)
- 		| (pre_div << ESDHC_PREDIV_SHIFT));
- 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
--	mdelay(100);
-+	mmc_delay(100);
- out:
- 	host->clock = clock;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0e02cc1..b0cf79f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -186,7 +186,7 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 			return;
+ 		}
+ 		timeout--;
+-		mdelay(1);
++		mmc_delay(1);
+ 	}
+ 
+ 	if (host->ops->platform_reset_exit)
+@@ -957,7 +957,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 			return;
+ 		}
+ 		timeout--;
+-		mdelay(1);
++		mmc_delay(1);
+ 	}
+ 
+ 	mod_timer(&host->timer, jiffies + 10 * HZ);
+@@ -1127,7 +1127,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 			return;
+ 		}
+ 		timeout--;
+-		mdelay(1);
++		mmc_delay(1);
+ 	}
+ 
+ 	clk |= SDHCI_CLOCK_CARD_EN;
+@@ -1192,7 +1192,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ 	 * can apply clock after applying power
+ 	 */
+ 	if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+-		mdelay(10);
++		mmc_delay(10);
  }
+ 
+ /*****************************************************************************\
+@@ -1712,7 +1712,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc)
+ 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 		tuning_loop_counter--;
+ 		timeout--;
+-		mdelay(1);
++		mmc_delay(1);
+ 	} while (ctrl & SDHCI_CTRL_EXEC_TUNING);
+ 
+ 	/*
 -- 
 1.7.5.1
 
