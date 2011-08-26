@@ -1,190 +1,72 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 3/4 v9] mmc: sdhi: Allow named IRQs to use specific handlers
-Date: Fri, 26 Aug 2011 10:42:39 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1108261022320.25272@axis700.grange>
-References: <1314235648-8959-1-git-send-email-horms@verge.net.au>
- <1314235648-8959-4-git-send-email-horms@verge.net.au>
+From: Lan Chunhe <b25806@freescale.com>
+Subject: Re: [PATCH 2/2] mmc: Use mmc_delay() instead of mdelay() for time
+ delay
+Date: Fri, 26 Aug 2011 16:45:53 +0800
+Message-ID: <op.v0tbyr18z91x4h@localhost.localdomain>
+References: <1314262479-32520-1-git-send-email-Chunhe.Lan@freescale.com>
+ <CAH9JG2VUA_5c=3LPEvoVmTrYN9WibY87AgEkNgV3uFpAS0euQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1314235648-8959-4-git-send-email-horms@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed; delsp=yes
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:52698 "EHLO
+	TX2EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753197Ab1HZIm5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2011 04:42:57 -0400
+In-Reply-To: <CAH9JG2VUA_5c=3LPEvoVmTrYN9WibY87AgEkNgV3uFpAS0euQA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kyungmin Park <kmpark@infradead.org>, Chunhe Lan <Chunhe.Lan@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, kumar.gala@freescale.com, Shengzhou Liu <b36685@freescale.com>, Chris Ball <cjb@laptop.org>
 
-From: Simon Horman <horms@verge.net.au>
+On Thu, 25 Aug 2011 18:23:35 +0800, Kyungmin Park <kmpark@infradead.org>  
+wrote:
 
-Allow named IRQs to use corresponding specific handlers. If named IRQs are 
-used, at least an "sdcard" IRQ has to be specified by the platform. If 
-names are not used, an arbitrary number of IRQs can be provided by the 
-platform, in which case the generic ISR will be used for each of them.
+> On Thu, Aug 25, 2011 at 5:54 PM, Chunhe Lan <Chunhe.Lan@freescale.com>  
+> wrote:
+>> The mmc_delay() is a wrapper function for mdelay() and msleep().
+>>
+>>    o mdelay() -- block the system when busy-waiting.
+>>    o msleep() -- suspend the currently running task to enable CPU
+>>                  to process other tasks, so it is non-blocking
+>>                  regarding the whole system.
+>>
+>> When the desired delay time is more than a period of timer interrupt,
+>> just use msleep(). Change mdelay() to mmc_delay() to avoid chewing
+>> CPU when busy wait.
+>>
+>> Signed-off-by: Shengzhou Liu <b36685@freescale.com>
+>> Signed-off-by: Chunhe Lan <Chunhe.Lan@freescale.com>
+>> Cc: Chris Ball <cjb@laptop.org>
+>> ---
+>>  drivers/mmc/host/sdhci.c |   11 ++++++-----
+>>  1 files changed, 6 insertions(+), 5 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 0e02cc1..0cb5dc1 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -27,6 +27,7 @@
+>>  #include <linux/mmc/host.h>
+>>
+>>  #include "sdhci.h"
+>> +#include "../core/core.h"
+>
+> Doesn't better to move the mmc_delay() to "include/linux/mmc/core.h"?
+> and include it.
+> I think It's not proper include syntax using relative path.
 
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Acked-by: Magnus Damm <magnus.damm@gmail.com>
-Signed-off-by: Simon Horman <horms@verge.net.au>
-[g.liakhovetski@gmx.de: style and typo corrections, platform data check]
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
+    Yes, your suggestion is very good.
+    I will move the mmc_delay() to "include/linux/mmc/core.h" .
 
-Simon, this is what I propose to commit. I fixed a typo, wrong multi-line 
-comment style and indentation spaces in your patch. Besides, I added a 
-check to require the SDCARD IRQ if named IRQs are used. It is a common 
-practice to verify platform data availability and at least some basic 
-correctness and completeness. This check is trivial and adds extra 
-robustness to the driver. Please, have a look, whether you agree with my 
-version.
+    Thanks.
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 774f643..d9013ad 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -96,7 +96,8 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
- 	struct tmio_mmc_host *host;
- 	char clk_name[8];
--	int i, irq, ret;
-+	int irq, ret, i = 0;
-+	bool multiplexed_isr = true;
- 
- 	priv = kzalloc(sizeof(struct sh_mobile_sdhi), GFP_KERNEL);
- 	if (priv == NULL) {
-@@ -153,27 +154,60 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	if (ret < 0)
- 		goto eprobe;
- 
--	for (i = 0; i < 3; i++) {
--		irq = platform_get_irq(pdev, i);
--		if (irq < 0) {
--			if (i) {
--				continue;
--			} else {
--				ret = irq;
--				goto eirq;
--			}
--		}
--		ret = request_irq(irq, tmio_mmc_irq, 0,
-+	/*
-+	 * Allow one or more specific (named) ISRs or
-+	 * one or more multiplexed (un-named) ISRs.
-+	 */
-+
-+	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
-+	if (irq >= 0) {
-+		multiplexed_isr = false;
-+		ret = request_irq(irq, tmio_mmc_card_detect_irq, 0,
-+				  dev_name(&pdev->dev), host);
-+		if (ret)
-+			goto eirq_card_detect;
-+	}
-+
-+	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
-+	if (irq >= 0) {
-+		multiplexed_isr = false;
-+		ret = request_irq(irq, tmio_mmc_sdio_irq, 0,
-+				  dev_name(&pdev->dev), host);
-+		if (ret)
-+			goto eirq_sdio;
-+	}
-+
-+	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDCARD);
-+	if (irq >= 0) {
-+		multiplexed_isr = false;
-+		ret = request_irq(irq, tmio_mmc_sdcard_irq, 0,
- 				  dev_name(&pdev->dev), host);
--		if (ret) {
--			while (i--) {
--				irq = platform_get_irq(pdev, i);
--				if (irq >= 0)
--					free_irq(irq, host);
--			}
--			goto eirq;
-+		if (ret)
-+			goto eirq_sdcard;
-+	} else if (!multiplexed_isr) {
-+		dev_err(&pdev->dev,
-+			"Principal SD-card IRQ is missing among named interrupts\n");
-+		ret = irq;
-+		goto eirq_sdcard;
-+	}
-+
-+	if (multiplexed_isr) {
-+		while (1) {
-+			irq = platform_get_irq(pdev, i);
-+			if (irq < 0)
-+				break;
-+			i++;
-+			ret = request_irq(irq, tmio_mmc_irq, 0,
-+					  dev_name(&pdev->dev), host);
-+			if (ret)
-+				goto eirq_multiplexed;
- 		}
-+
-+		/* There must be at least one IRQ source */
-+		if (!i)
-+			goto eirq_multiplexed;
- 	}
-+
- 	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
- 		 mmc_hostname(host->mmc), (unsigned long)
- 		 (platform_get_resource(pdev,IORESOURCE_MEM, 0)->start),
-@@ -181,7 +215,20 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 
- 	return ret;
- 
--eirq:
-+eirq_multiplexed:
-+	while (i--) {
-+		irq = platform_get_irq(pdev, i);
-+		free_irq(irq, host);
-+	}
-+eirq_sdcard:
-+	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
-+	if (irq >= 0)
-+		free_irq(irq, host);
-+eirq_sdio:
-+	irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
-+	if (irq >= 0)
-+		free_irq(irq, host);
-+eirq_card_detect:
- 	tmio_mmc_host_remove(host);
- eprobe:
- 	clk_disable(priv->clk);
-@@ -197,16 +244,17 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
- 	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
- 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
--	int i, irq;
-+	int i = 0, irq;
- 
- 	p->pdata = NULL;
- 
- 	tmio_mmc_host_remove(host);
- 
--	for (i = 0; i < 3; i++) {
--		irq = platform_get_irq(pdev, i);
--		if (irq >= 0)
--			free_irq(irq, host);
-+	while (1) {
-+		irq = platform_get_irq(pdev, i++);
-+		if (irq < 0)
-+			break;
-+		free_irq(irq, host);
- 	}
- 
- 	clk_disable(priv->clk);
-diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-index bd50b36..71b8054 100644
---- a/include/linux/mmc/sh_mobile_sdhi.h
-+++ b/include/linux/mmc/sh_mobile_sdhi.h
-@@ -6,6 +6,10 @@
- struct platform_device;
- struct tmio_mmc_data;
- 
-+#define SH_MOBILE_SDHI_IRQ_CARD_DETECT	"card_detect"
-+#define SH_MOBILE_SDHI_IRQ_SDCARD	"sdcard"
-+#define SH_MOBILE_SDHI_IRQ_SDIO		"sdio"
-+
- struct sh_mobile_sdhi_info {
- 	int dma_slave_tx;
- 	int dma_slave_rx;
+    -Jack Lan
+
+> Thank you,
+> Kyungmin Park
+>>
+>>  #define DRIVER_NAME "sdhci"
+>>
+
+
