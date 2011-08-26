@@ -1,254 +1,185 @@
-From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Subject: Re: [PATCH 1/1] mmc: Support of DUAL BUFFER DESC[ring] mode for dw_mmc
-Date: Fri, 26 Aug 2011 16:50:51 +0530
-Message-ID: <CANYdXnoR2h17k84fVwz_SAHEcWy-fJn+zGu+yxrcOk6HczQR4A@mail.gmail.com>
-References: <CANYdXno+b6ZZ=3upGMwYxxbJMbKSteWKGM=RxtKhSOYr3iov4g@mail.gmail.com>
-	<CAFbHwiR25Nrwbvd1SXr=HVWwroQz3smumpVkj27ij4w+DfCnZQ@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH] [RFC] ARM: shmobile: g4evm: Use multiple irq vectors
+ for SDHI
+Date: Fri, 26 Aug 2011 14:17:20 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1108261416330.25272@axis700.grange>
+References: <1314353627-23079-1-git-send-email-horms@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:37565 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751924Ab1HZLVx convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2011 07:21:53 -0400
-Received: by gya6 with SMTP id 6so2706529gya.19
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2011 04:21:52 -0700 (PDT)
-In-Reply-To: <CAFbHwiR25Nrwbvd1SXr=HVWwroQz3smumpVkj27ij4w+DfCnZQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1314353627-23079-1-git-send-email-horms@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org
 
-thanks Will,
-I will make the changes soon.
+On Fri, 26 Aug 2011, Simon Horman wrote:
 
-On Fri, Aug 26, 2011 at 4:36 PM, Will Newton <will.newton@gmail.com> wr=
-ote:
-> On Fri, Aug 26, 2011 at 11:31 AM, Shashidhar Hiremath
-> <shashidharh@vayavyalabs.com> wrote:
->
-> Hi Shashidhar,
->
-> Thanks for the patch! A few comments below:
->
->> This Patch adds the support for Dual Buffer Descriptor mode of
->> Operation for the dw_mmc driver.The patch also provides the configur=
-ability
->> Option for choosing DUAL_BUFFER mode or the chained modes through me=
-nuconfig.
->> The Menuconfig option for selecting Dual Buffer mode or chained mode
->> is selected only if
->> Internal DMAC is enabled.
->>
->> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
->> ---
->> =A0drivers/mmc/host/Kconfig =A0| =A0 22 ++++++++++++++++++
->> =A0drivers/mmc/host/dw_mmc.c | =A0 55 ++++++++++++++++++++++++++++++=
-++++++--------
->> =A02 files changed, 67 insertions(+), 10 deletions(-)
->>
->> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> index 8c87096..e10f585 100644
->> --- a/drivers/mmc/host/Kconfig
->> +++ b/drivers/mmc/host/Kconfig
->> @@ -534,6 +534,28 @@ config MMC_DW_IDMAC
->> =A0 =A0 =A0 =A0 =A0Designware Mobile Storage IP block. This disables=
- the external DMA
->> =A0 =A0 =A0 =A0 =A0interface.
->>
->> +config IDMAC_DESC_MODE
->> + =A0 =A0 =A0 bool "Internal DMAC Descriptor Operating Mode"
->> + =A0 =A0 =A0 depends on MMC_DW_IDMAC
->> + =A0 =A0 =A0 help
->> + =A0 =A0 =A0 =A0 This selects the Operating mode for the Descriptor=
-s.
->> +
->> +choice
->> + =A0 =A0 =A0 prompt "select configuration"
->> + =A0 =A0 =A0 depends on IDMAC_DESC_MODE
->> +
->> +config CHAIN_DESC
->> + =A0 =A0 =A0 bool "Chain Descriptor Structure"
->> + =A0 =A0 =A0 help
->> + =A0 =A0 =A0 =A0 Select this option to enable Chained Mode of Opera=
-tion.
->> +
->> +config DUAL_BUFFER_DESC
->> + =A0 =A0 =A0 bool "Dual Buffer Descriptor Structure"
->> + =A0 =A0 =A0 help
->> + =A0 =A0 =A0 =A0 Select this option to enable Dual Buffer Desc Mode=
- of Operation.
->> +endchoice
->
-> These config symbols go in the global config namespace so you should
-> probably prefix them with "MMC_DW" to prevent pollution of the
-> namespace. Also it would be good to add some more description text so
-> the user can understand which choice to make.
->
->> +
->> +
->> =A0config MMC_SH_MMCIF
->> =A0 =A0 =A0 =A0tristate "SuperH Internal MMCIF support"
->> =A0 =A0 =A0 =A0depends on MMC_BLOCK && (SUPERH || ARCH_SHMOBILE)
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index ff0f714..a590856 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -63,6 +63,9 @@ struct idmac_desc {
->> =A0 =A0 =A0 =A0u32 =A0 =A0 =A0 =A0 =A0 =A0 des1; =A0 /* Buffer sizes=
- */
->> =A0#define IDMAC_SET_BUFFER1_SIZE(d, s) \
->> =A0 =A0 =A0 =A0((d)->des1 =3D ((d)->des1 & 0x03ffe000) | ((s) & 0x1f=
-ff))
->> +#define IDMAC_SET_BUFFER_SIZE(d, s1, s2) \
->> + =A0 =A0 =A0 ((d)->des1 =3D ((d)->des1 & 0x0) | \
->> + =A0 =A0 =A0 (((s1) & 0x1fff) | ((s2) & 0x1fff << 13)))
->
-> IDMAC_SET_BUFFER_SIZES might be a more descriptive name for this macr=
-o.
->
->> =A0 =A0 =A0 =A0u32 =A0 =A0 =A0 =A0 =A0 =A0 des2; =A0 /* buffer 1 phy=
-sical address */
->>
->> @@ -348,17 +351,44 @@ static void dw_mci_translate_sglist(struct
->> dw_mci *host, struct mmc_data *data,
->> =A0 =A0 =A0 =A0struct idmac_desc *desc =3D host->sg_cpu;
->>
->> =A0 =A0 =A0 =A0for (i =3D 0; i < sg_len; i++, desc++) {
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned int length =3D sg_dma_len(&da=
-ta->sg[i]);
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 u32 mem_addr =3D sg_dma_address(&data-=
->sg[i]);
->> -
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Set the OWN bit and disable interru=
-pts for this descriptor */
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*length and mem_aadress of first buff=
-er*/
->
-> There's typo in this comment.
->
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned int length1 =3D sg_dma_len(&d=
-ata->sg[i]);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 u32 mem_addr1 =3D sg_dma_address(&data=
-->sg[i]);
->> +#ifdef CONFIG_DUAL_BUFFER_DESC
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned int length2;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 u32 mem_addr2;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((i+1) <=3D sg_len) {
->
-> Won't this always be true as i < sg_len? Should it be if ((i +1) < sg=
-_len)?
->
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 length2 =3D sg_dma_len=
-(&data->sg[i+1]);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mem_addr2 =3D sg_dma_a=
-ddress(&data->sg[i+1]);
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Set the OWN bit and=
- disable interrupts
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* for this descript=
-or
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des0 =3D IDMAC_D=
-ES0_OWN | IDMAC_DES0_DIC
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des0 &=3D (~IDMA=
-C_DES0_CH);
->
-> These two lines are identical in both branches of the if statement so
-> could be moved above it.
->
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Buffer length being=
- set for Buffer1
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* and Buffer2 being=
- set
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 IDMAC_SET_BUFFER_SIZE(=
-desc, length1, length2);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des3 =3D mem_add=
-r2;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Incrementing for th=
-e second buffer */
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 i++;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des0 =3D IDMAC_D=
-ES0_OWN | IDMAC_DES0_DIC
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des0 &=3D (~IDMA=
-C_DES0_CH);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Buffer length being=
- set for Buffer1
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* and Buffer2 being=
- set
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 IDMAC_SET_BUFFER_SIZE(=
-desc, length1, 0);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> +#elif CONFIG_CHAIN_DESC
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Set OWN bit and disable interrupts =
-for this descriptor */
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0desc->des0 =3D IDMAC_DES0_OWN | IDMAC=
-_DES0_DIC | IDMAC_DES0_CH;
->> -
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Buffer length */
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 IDMAC_SET_BUFFER1_SIZE(desc, length);
->> -
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Buffer length for Buffer1*/
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 IDMAC_SET_BUFFER1_SIZE(desc, length1);
->> +#endif
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Physical address to DMA to/from */
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des2 =3D mem_addr;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 desc->des2 =3D mem_addr1;
->> =A0 =A0 =A0 =A0}
->>
->> =A0 =A0 =A0 =A0/* Set first descriptor */
->> @@ -369,6 +399,10 @@ static void dw_mci_translate_sglist(struct dw_m=
-ci
->> *host, struct mmc_data *data,
->> =A0 =A0 =A0 =A0desc =3D host->sg_cpu + (i - 1) * sizeof(struct idmac=
-_desc);
->> =A0 =A0 =A0 =A0desc->des0 &=3D ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
->> =A0 =A0 =A0 =A0desc->des0 |=3D IDMAC_DES0_LD;
->> +#ifdef CONFIG_DUAL_BUFFER_DESC
->> + =A0 =A0 =A0 /*Set the End of Ring bit */
->> + =A0 =A0 =A0 desc->des0 |=3D IDMAC_DES0_ER;
->> +#endif
->>
->> =A0 =A0 =A0 =A0wmb();
->> =A0}
->> @@ -388,7 +422,8 @@ static void dw_mci_idmac_start_dma(struct dw_mci
->> *host, unsigned int sg_len)
->>
->> =A0 =A0 =A0 =A0/* Enable the IDMAC */
->> =A0 =A0 =A0 =A0temp =3D mci_readl(host, BMOD);
->> - =A0 =A0 =A0 temp |=3D SDMMC_IDMAC_ENABLE | SDMMC_IDMAC_FB;
->> + =A0 =A0 =A0 /* The Descriptor Skip length is made zero */
->> + =A0 =A0 =A0 temp |=3D SDMMC_IDMAC_ENABLE | SDMMC_IDMAC_FB & SDMMC_=
-BMOD_DSL(0);
->
-> I'm not sure what this is trying to do exactly, but it looks like it
-> won't work. Setting DSL 0 just means having 0 in bits 6:2 of BMOD,
-> which would be "& ~SDMMC_BMOD_DSL(0)" I would have thought?
->
->> =A0 =A0 =A0 =A0mci_writel(host, BMOD, temp);
->>
->> =A0 =A0 =A0 =A0/* Start it running */
->> --
->> 1.7.2.3
->>
->>
->> --
->> regards,
->> Shashidhar Hiremath
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->>
->
+> This patch is based on "ARM: arch-shmobile: Use multiple irq vectors for SDHI"
+> 
+> It removes multiplexing of the SDHI vectors and names each IRQ source
+> to allow the SDHI driver to used source-specific handlers.
+> 
+> This is untested as I do not have access to a working g4evm.
+> 
+> Signed-off-by: Simon Horman <horms@verge.net.au>
+> 
+> ---
+> 
+> Requires "mmc: sdhi: Allow specific IRQ sources to use corresponding handlers."
+> 
+> *** compile tested only ***
+> ---
+>  arch/arm/mach-shmobile/board-g4evm.c |   26 ++++++++++++++++++++++-
+>  arch/arm/mach-shmobile/intc-sh7377.c |   36 ++++++++++++++++-----------------
 
+This second file should not be here, right?
 
+Thanks
+Guennadi
 
---=20
-regards,
-Shashidhar Hiremath
+>  2 files changed, 41 insertions(+), 21 deletions(-)
+> 
+> diff --git a/arch/arm/mach-shmobile/board-g4evm.c b/arch/arm/mach-shmobile/board-g4evm.c
+> index 8e3c555..60721f1 100644
+> --- a/arch/arm/mach-shmobile/board-g4evm.c
+> +++ b/arch/arm/mach-shmobile/board-g4evm.c
+> @@ -209,7 +209,18 @@ static struct resource sdhi0_resources[] = {
+>  		.flags  = IORESOURCE_MEM,
+>  	},
+>  	[1] = {
+> -		.start  = evt2irq(0x0e00), /* SDHI0 */
+> +		.name   = SH_MOBILE_SDHI_IRQ_CARD_DETECT,
+> +		.start  = evt2irq(0x0e00) /* SDHI0_SDHI0I0 */,
+> +		.flags  = IORESOURCE_IRQ,
+> +	},
+> +	[2] = {
+> +		.name   = SH_MOBILE_SDHI_IRQ_SDCARD,
+> +		.start  = evt2irq(0x0e20) /* SDHI0_SDHI0I1 */,
+> +		.flags  = IORESOURCE_IRQ,
+> +	},
+> +	[3] = {
+> +		.name   = SH_MOBILE_SDHI_IRQ_SDIO,
+> +		.start  = evt2irq(0x0e40) /* SDHI0_SDHI0I2 */,
+>  		.flags  = IORESOURCE_IRQ,
+>  	},
+>  };
+> @@ -236,7 +247,18 @@ static struct resource sdhi1_resources[] = {
+>  		.flags  = IORESOURCE_MEM,
+>  	},
+>  	[1] = {
+> -		.start  = evt2irq(0x0e80), /* SDHI1 */
+> +		.name   = SH_MOBILE_SDHI_IRQ_CARD_DETECT,
+> +		.start  = evt2irq(0x0e80) /* SDHI1_SDHI0I0 */,
+> +		.flags  = IORESOURCE_IRQ,
+> +	},
+> +	[2] = {
+> +		.name   = SH_MOBILE_SDHI_IRQ_SDCARD,
+> +		.start  = evt2irq(0x0ea0) /* SDHI1_SDHI0I1 */,
+> +		.flags  = IORESOURCE_IRQ,
+> +	},
+> +	[3] = {
+> +		.name   = SH_MOBILE_SDHI_IRQ_SDIO,
+> +		.start  = evt2irq(0x0ec0) /* SDHI1_SDHI0I2 */,
+>  		.flags  = IORESOURCE_IRQ,
+>  	},
+>  };
+> diff --git a/arch/arm/mach-shmobile/intc-sh7377.c b/arch/arm/mach-shmobile/intc-sh7377.c
+> index fe45154..6395687 100644
+> --- a/arch/arm/mach-shmobile/intc-sh7377.c
+> +++ b/arch/arm/mach-shmobile/intc-sh7377.c
+> @@ -27,8 +27,6 @@
+>  
+>  enum {
+>  	UNUSED_INTCA = 0,
+> -	ENABLED,
+> -	DISABLED,
+>  
+>  	/* interrupt sources INTCA */
+>  	IRQ0A, IRQ1A, IRQ2A, IRQ3A, IRQ4A, IRQ5A, IRQ6A, IRQ7A,
+> @@ -51,8 +49,8 @@ enum {
+>  	MSIOF2, MSIOF1,
+>  	SCIFA4, SCIFA5, SCIFB,
+>  	FLCTL_FLSTEI, FLCTL_FLTENDI, FLCTL_FLTREQ0I, FLCTL_FLTREQ1I,
+> -	SDHI0,
+> -	SDHI1,
+> +	SDHI0_SDHI0I0, SDHI0_SDHI0I1, SDHI0_SDHI0I2, SDHI0_SDHI0I3,
+> +	SDHI1_SDHI1I0, SDHI1_SDHI1I1, SDHI1_SDHI1I2, SDHI1_SDHI1I3,
+>  	MSU_MSU, MSU_MSU2,
+>  	IRREM,
+>  	MSUG,
+> @@ -87,7 +85,7 @@ enum {
+>  	/* interrupt groups INTCA */
+>  	DMAC_1, DMAC_2,	DMAC2_1, DMAC2_2, DMAC3_1, DMAC3_2, SHWYSTAT,
+>  	AP_ARM1, AP_ARM2, USBHS, SPU2, FLCTL, IIC1,
+> -	ICUSB, ICUDMC
+> +	ICUSB, ICUDMC, SDHI0, SDHI1,
+>  };
+>  
+>  static struct intc_vect intca_vectors[] __initdata = {
+> @@ -130,10 +128,10 @@ static struct intc_vect intca_vectors[] __initdata = {
+>  	INTC_VECT(SCIFB, 0x0d60),
+>  	INTC_VECT(FLCTL_FLSTEI, 0x0d80), INTC_VECT(FLCTL_FLTENDI, 0x0da0),
+>  	INTC_VECT(FLCTL_FLTREQ0I, 0x0dc0), INTC_VECT(FLCTL_FLTREQ1I, 0x0de0),
+> -	INTC_VECT(SDHI0, 0x0e00), INTC_VECT(SDHI0, 0x0e20),
+> -	INTC_VECT(SDHI0, 0x0e40), INTC_VECT(SDHI0, 0x0e60),
+> -	INTC_VECT(SDHI1, 0x0e80), INTC_VECT(SDHI1, 0x0ea0),
+> -	INTC_VECT(SDHI1, 0x0ec0), INTC_VECT(SDHI1, 0x0ee0),
+> +	INTC_VECT(SDHI0_SDHI0I0, 0x0e00), INTC_VECT(SDHI0_SDHI0I1, 0x0e20),
+> +	INTC_VECT(SDHI0_SDHI0I2, 0x0e40), INTC_VECT(SDHI0_SDHI0I3, 0x0e60),
+> +	INTC_VECT(SDHI1_SDHI1I0, 0x0e80), INTC_VECT(SDHI1_SDHI1I1, 0x0ea0),
+> +	INTC_VECT(SDHI1_SDHI1I2, 0x0ec0), INTC_VECT(SDHI1_SDHI1I3, 0x0ee0),
+>  	INTC_VECT(MSU_MSU, 0x0f20), INTC_VECT(MSU_MSU2, 0x0f40),
+>  	INTC_VECT(IRREM, 0x0f60),
+>  	INTC_VECT(MSUG, 0x0fa0),
+> @@ -200,6 +198,10 @@ static struct intc_group intca_groups[] __initdata = {
+>  	INTC_GROUP(SHWYSTAT, SHWYSTAT_RT, SHWYSTAT_HS, SHWYSTAT_COM),
+>  	INTC_GROUP(ICUSB, ICUSB_ICUSB0, ICUSB_ICUSB1),
+>  	INTC_GROUP(ICUDMC, ICUDMC_ICUDMC1, ICUDMC_ICUDMC2),
+> +	INTC_GROUP(SDHI0, SDHI0_SDHI0I0, SDHI0_SDHI0I1,
+> +		   SDHI0_SDHI0I2, SDHI0_SDHI0I3),
+> +	INTC_GROUP(SDHI1, SDHI1_SDHI1I0, SDHI1_SDHI1I1,
+> +		   SDHI1_SDHI1I2, SDHI1_SDHI1I3)
+>  };
+>  
+>  static struct intc_mask_reg intca_mask_registers[] __initdata = {
+> @@ -234,10 +236,10 @@ static struct intc_mask_reg intca_mask_registers[] __initdata = {
+>  	  { SCIFB, SCIFA5, SCIFA4, MSIOF1,
+>  	    0, 0, MSIOF2, 0 } },
+>  	{ 0xe694009c, 0xe69400dc, 8, /* IMR7A / IMCR7A */
+> -	  { DISABLED, ENABLED, ENABLED, ENABLED,
+> +	  { SDHI0_SDHI0I3, SDHI0_SDHI0I2, SDHI0_SDHI0I1, SDHI0_SDHI0I0,
+>  	    FLCTL_FLTREQ1I, FLCTL_FLTREQ0I, FLCTL_FLTENDI, FLCTL_FLSTEI } },
+>  	{ 0xe69400a0, 0xe69400e0, 8, /* IMR8A / IMCR8A */
+> -	  { DISABLED, ENABLED, ENABLED, ENABLED,
+> +	  { SDHI1_SDHI1I3, SDHI1_SDHI1I2, SDHI1_SDHI1I1, SDHI1_SDHI1I0,
+>  	    TTI20, USBDMAC_USHDMI, 0, MSUG } },
+>  	{ 0xe69400a4, 0xe69400e4, 8, /* IMR9A / IMCR9A */
+>  	  { CMT1_CMT13, CMT1_CMT12, CMT1_CMT11, CMT1_CMT10,
+> @@ -337,14 +339,10 @@ static struct intc_mask_reg intca_ack_registers[] __initdata = {
+>  	  { IRQ24A, IRQ25A, IRQ26A, IRQ27A, IRQ28A, IRQ29A, IRQ30A, IRQ31A } },
+>  };
+>  
+> -static struct intc_desc intca_desc __initdata = {
+> -	.name = "sh7377-intca",
+> -	.force_enable = ENABLED,
+> -	.force_disable = DISABLED,
+> -	.hw = INTC_HW_DESC(intca_vectors, intca_groups,
+> -			   intca_mask_registers, intca_prio_registers,
+> -			   intca_sense_registers, intca_ack_registers),
+> -};
+> +static DECLARE_INTC_DESC_ACK(intca_desc, "sh7377-intca",
+> +			     intca_vectors, intca_groups,
+> +			     intca_mask_registers, intca_prio_registers,
+> +			     intca_sense_registers, intca_ack_registers);
+>  
+>  /* this macro ignore entry which is also in INTCA */
+>  #define __IGNORE(a...)
+> -- 
+> 1.7.5.4
+> 
+
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
