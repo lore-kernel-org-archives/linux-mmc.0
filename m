@@ -1,37 +1,43 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH v8 4/4] ARM: shmobile: ag5evm, ap4: Named SDHI IRQ sources
-Date: Fri, 26 Aug 2011 11:22:00 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1108261121280.25272@axis700.grange>
-References: <1314235648-8959-1-git-send-email-horms@verge.net.au>
- <1314235648-8959-5-git-send-email-horms@verge.net.au>
- <Pine.LNX.4.64.1108261042450.25272@axis700.grange> <20110826091407.GB5380@verge.net.au>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20110826091407.GB5380@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: [PATCH] mmc: sdhci-s3c: Fix mmc card I/O problem
+Date: Fri, 26 Aug 2011 14:58:18 +0530
+Message-ID: <1314350898-26372-1-git-send-email-girish.shivananjappa@linaro.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, ben-linux@fluff.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 26 Aug 2011, Simon Horman wrote:
+This patch fixes the problem in sdhci-s3c host driver for
+Samsung Soc's. During the card identification stage the
+mmc core driver enumerates for the best bus width in combination
+with the highest available data rate. It starts enumerating from
+the highest bus width (8) to lowest bus width (1).
 
-> On Fri, Aug 26, 2011 at 10:44:16AM +0200, Guennadi Liakhovetski wrote:
-> > On Thu, 25 Aug 2011, Simon Horman wrote:
-> > 
-> > > This allows specific (non-multiplexed) IRQ handlers to be used.
-> > 
-> > Could you also prepare a similar patch for g4evm and ap4evb? No need to 
-> > change this one, just prepare another one, please.
-> 
-> Sure, though I do not have access to those boards to test
-> (as far as I know).
+In case of few MMC cards the 4-bit bus enumeration fails and tries
+the 1-bit bus enumeration. When switched to 1-bit bus mode the host driver
+has to clear the previous bus width setting and apply the new setting.
 
-Ok, I've got an ap4evb, so, I'll prepare that patch myself.
+The current patch will clear the previous bus mode and apply the new
+mode setting.
 
-Thanks
-Guennadi
+Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ drivers/mmc/host/sdhci-s3c.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 2bd7bf4..fe886d6 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -302,6 +302,8 @@ static int sdhci_s3c_platform_8bit_width(struct sdhci_host *host, int width)
+ 		ctrl &= ~SDHCI_CTRL_8BITBUS;
+ 		break;
+ 	default:
++		ctrl &= ~SDHCI_CTRL_4BITBUS;
++		ctrl &= ~SDHCI_CTRL_8BITBUS;
+ 		break;
+ 	}
+ 
+-- 
+1.7.1
