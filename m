@@ -1,56 +1,31 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [PATCH 0/2] eMMC v4.5 feature supports
-Date: Fri, 26 Aug 2011 09:08:53 +0900
-Message-ID: <CAH9JG2VyBR+Cb48bnQZjF96NNuZqbbScYhgjLmZ9kdQP3iFhbQ@mail.gmail.com>
-References: <20110808021113.GA20317@july>
+From: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
+Subject: Re: [PATCH 2/2] arm/dt: Tegra: Update SDHCI nodes to match bindings
+Date: Thu, 25 Aug 2011 22:19:07 -0700
+Message-ID: <CAOesGMjxn0dd-UHoNNhOEjk9vqrTjVn4e-8PpKZV25F9Lfa0BA@mail.gmail.com>
+References: <1314123334-23133-1-git-send-email-swarren@nvidia.com>
+	<1314123334-23133-2-git-send-email-swarren@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:53781 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753073Ab1HZAIy convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2011 20:08:54 -0400
-Received: by qwk3 with SMTP id 3so1692106qwk.19
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Aug 2011 17:08:54 -0700 (PDT)
-In-Reply-To: <20110808021113.GA20317@july>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <1314123334-23133-2-git-send-email-swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+To: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: jh80.chung@samsung.com, arnd@arndb.de
 
-Hi Chris,
+On Tue, Aug 23, 2011 at 11:15 AM, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> wrote:
+> The bindings were recently updated to be more in-line with other SDHCI
+> bindings that are already merged.
+>
+> Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-Any comments on eMMC v4.5 supports?
-
-Thank you,
-Kyungmin Park
-
-On Mon, Aug 8, 2011 at 11:11 AM, Kyungmin Park <kmpark@infradead.org> w=
-rote:
-> New feature, discard and sanitize supports
->
-> See the detail information at each patch
->
-> Kyungmin Park (2):
-> =A0mmc: core: new discard feature support at mmc v4.5
-> =A0mmc: core: mmc sanitize feature support for v4.5
->
-> =A0drivers/mmc/card/block.c | =A0 13 +++++++++++--
-> =A0drivers/mmc/card/queue.c | =A0 =A02 +-
-> =A0drivers/mmc/core/core.c =A0| =A0 22 ++++++++++++++++++++++
-> =A0drivers/mmc/core/mmc.c =A0 | =A0 =A04 ++++
-> =A0include/linux/mmc/card.h | =A0 =A03 +++
-> =A0include/linux/mmc/core.h | =A0 =A03 +++
-> =A0include/linux/mmc/mmc.h =A0| =A0 =A02 ++
-> =A07 files changed, 46 insertions(+), 3 deletions(-)
->
-> --
-> 1.7.5.1.300.gc565c
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+Acked-by: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
