@@ -1,44 +1,56 @@
-From: David Brown <davidb@codeaurora.org>
-Subject: [GIT PULL] mmc: msm_sdcc: Fixes for 3.2
-Date: Thu, 25 Aug 2011 15:08:58 -0700
-Message-ID: <20110825220858.GA13652@huya.qualcomm.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCH 0/2] eMMC v4.5 feature supports
+Date: Fri, 26 Aug 2011 09:08:53 +0900
+Message-ID: <CAH9JG2VyBR+Cb48bnQZjF96NNuZqbbScYhgjLmZ9kdQP3iFhbQ@mail.gmail.com>
+References: <20110808021113.GA20317@july>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Sahitya Tummala <stummala@codeaurora.org>, linux-arm-msm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:53781 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753073Ab1HZAIy convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2011 20:08:54 -0400
+Received: by qwk3 with SMTP id 3so1692106qwk.19
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Aug 2011 17:08:54 -0700 (PDT)
+In-Reply-To: <20110808021113.GA20317@july>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: jh80.chung@samsung.com, arnd@arndb.de
 
-The following changes since commit 93ee7a9340d64f20295aacc3fb6a22b759323280:
+Hi Chris,
 
-  Linux 3.1-rc2 (2011-08-14 15:09:08 -0700)
+Any comments on eMMC v4.5 supports?
 
-are available in the git repository at:
-  git://codeaurora.org/quic/kernel/davidb/linux-msm.git msm-sdcc
+Thank you,
+Kyungmin Park
 
-Alexander Tarasikov (2):
-      msm: Fix a typo in MSM SDCC driver gpio setup
-      msm: Implement init_card operation for MSM SDCC
-
-Sahitya Tummala (5):
-      mmc: msm_sdcc: Handle error cases in probe
-      mmc: msm_sdcc: Enable SDC host->clk only after setting the rate.
-      msm: mmc: Remove "pio_irq" resource
-      mmc: msm_sdcc: Use MCI_INT_MASK0 for PIO interrupts
-      mmc: msm_sdcc: Change initialization order of busclk_timer in probe
-
-Subhash Jadavani (1):
-      mmc: msm_sdcc: Handle dma resource not present case
-
- arch/arm/mach-msm/devices-msm7x00.c  |   24 ----------
- arch/arm/mach-msm/devices-qsd8x50.c  |   24 ----------
- arch/arm/mach-msm/include/mach/mmc.h |    9 +----
- drivers/mmc/host/msm_sdcc.c          |   78 +++++++++++++++++++++++----------
- drivers/mmc/host/msm_sdcc.h          |    6 ++-
- 5 files changed, 60 insertions(+), 81 deletions(-)
-
--- 
-Sent by an employee of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+On Mon, Aug 8, 2011 at 11:11 AM, Kyungmin Park <kmpark@infradead.org> w=
+rote:
+> New feature, discard and sanitize supports
+>
+> See the detail information at each patch
+>
+> Kyungmin Park (2):
+> =A0mmc: core: new discard feature support at mmc v4.5
+> =A0mmc: core: mmc sanitize feature support for v4.5
+>
+> =A0drivers/mmc/card/block.c | =A0 13 +++++++++++--
+> =A0drivers/mmc/card/queue.c | =A0 =A02 +-
+> =A0drivers/mmc/core/core.c =A0| =A0 22 ++++++++++++++++++++++
+> =A0drivers/mmc/core/mmc.c =A0 | =A0 =A04 ++++
+> =A0include/linux/mmc/card.h | =A0 =A03 +++
+> =A0include/linux/mmc/core.h | =A0 =A03 +++
+> =A0include/linux/mmc/mmc.h =A0| =A0 =A02 ++
+> =A07 files changed, 46 insertions(+), 3 deletions(-)
+>
+> --
+> 1.7.5.1.300.gc565c
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
