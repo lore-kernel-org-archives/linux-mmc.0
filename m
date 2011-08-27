@@ -1,44 +1,33 @@
-From: Veda N <veda74@gmail.com>
-Subject: Re: SDIO
-Date: Sat, 27 Aug 2011 14:25:40 +0530
-Message-ID: <CAOO8FEekkOxhzmzhyXspCyvQiBFondKcVewj3Cxv+9JVydyt+w@mail.gmail.com>
-References: <CAOO8FEeLuJChxugg00paaxK3ra10=pUOxR40JyLA2X55MqB_eQ@mail.gmail.com>
+From: Ian Molton <ian@mnementh.co.uk>
+Subject: Re: [PATCH] mmc: tmio: eliminate unused variable 'mmc' warning
+Date: Sat, 27 Aug 2011 20:02:51 +0100
+Message-ID: <1314471775.2138.28.camel@drake>
+References: <1312354138.14329.1.camel@phoenix>
+	 <Pine.LNX.4.64.1108030924440.28502@axis700.grange>
+	 <m2liva7ize.fsf@bob.laptop.org>
+Reply-To: ian@mnementh.co.uk
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:55746 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751095Ab1H0Izl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 27 Aug 2011 04:55:41 -0400
-Received: by vxi9 with SMTP id 9so3205951vxi.19
-        for <linux-mmc@vger.kernel.org>; Sat, 27 Aug 2011 01:55:41 -0700 (PDT)
-In-Reply-To: <CAOO8FEeLuJChxugg00paaxK3ra10=pUOxR40JyLA2X55MqB_eQ@mail.gmail.com>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:65332 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750971Ab1H0TC6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 27 Aug 2011 15:02:58 -0400
+In-Reply-To: <m2liva7ize.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Axel Lin <axel.lin@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-I have configured 4 Bit mode in the controller and by setting bit 1 in
-the 0x07 address of CCCR in function 0
+On Wed, 2011-08-03 at 08:55 -0400, Chris Ball wrote:
+> > Good for 3.1, do we also push such "harmless" compiler warning fixes
+> to 
+> > stable?
+> >
+> > Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> 
+> Pushed for 3.1, thanks.  I don't think this is appropriate for stable.
 
-When i try to read the Vendor id. i dont see the data being sent in
-d0-d3. it is sent in d0 only.
+Why on earth not? its obviously correct...
 
-
-
-
-On Wed, Aug 17, 2011 at 8:01 PM, Veda N <veda74@gmail.com> wrote:
-> To configure the wlan chip into 4 bit mode. What are sequence of
-> commands that needs to be done by a host.
->
-> Can one explain.
->
-> --
-> Thanks & Regards,
-> S. N. Veda
->
-
-
-
--- 
-Regards,
-S. N. Veda
