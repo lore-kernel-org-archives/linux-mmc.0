@@ -1,39 +1,37 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/4 v8] mmc: tmio, sdhi: provide multiple irq handlers
-Date: Sun, 28 Aug 2011 13:58:54 -0400
-Message-ID: <m2sjolxvs1.fsf@bob.laptop.org>
-References: <1314235648-8959-1-git-send-email-horms@verge.net.au>
+Subject: Re: [PATCH] mmc: sdhci-s3c: Fix mmc card I/O problem
+Date: Sun, 28 Aug 2011 14:11:19 -0400
+Message-ID: <m2obz9xv7c.fsf@bob.laptop.org>
+References: <1314350898-26372-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1314235648-8959-1-git-send-email-horms@verge.net.au> (Simon
-	Horman's message of "Thu, 25 Aug 2011 10:27:24 +0900")
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1314350898-26372-1-git-send-email-girish.shivananjappa@linaro.org>
+	(Girish K. S.'s message of "Fri, 26 Aug 2011 14:58:18 +0530")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ben-linux@fluff.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Simon,
+Hi,
 
-On Wed, Aug 24 2011, Simon Horman wrote:
-> The SDHI driver already supports making use of up to three interrupt
-> sources.
+On Fri, Aug 26 2011, Girish K S wrote:
+> This patch fixes the problem in sdhci-s3c host driver for
+> Samsung Soc's. During the card identification stage the
+> mmc core driver enumerates for the best bus width in combination
+> with the highest available data rate. It starts enumerating from
+> the highest bus width (8) to lowest bus width (1).
 >
-> This series breaks up the existing interrupt handler into three handlers,
-> one for sdcard access, one for card detect and one for SDIO interrupts.
-> A cover-all handler, which makes use of these new broken-out handlers
-> is provided for for the case where there is a multiplexed interrupt source.
+> In case of few MMC cards the 4-bit bus enumeration fails and tries
+> the 1-bit bus enumeration. When switched to 1-bit bus mode the host driver
+> has to clear the previous bus width setting and apply the new setting.
 >
-> This series also wires up the new IRQ handlers for the mackerel and ag4evm.
+> The current patch will clear the previous bus mode and apply the new
+> mode setting.
 >
-> This series contains the following patches:
->
-> [PATCH v8 1/4] mmc: tmio: Cache interrupt masks
-> [PATCH v8 2/4] mmc: tmio: Provide separate interrupt handlers
-> [PATCH v8 3/4] mmc: sdhi: Allow name IRQs to use specific handlers
-> [PATCH v8 4/4] ARM: shmobile: ag5evm, ap4: Named SDHI IRQ sources
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
 
-Thanks, all applied to mmc-next for 3.2, using Guennadi's v9 for 3/4.
+Thanks, pushed to mmc-next for 3.1 with a stable@ tag.
 
 - Chris.
 -- 
