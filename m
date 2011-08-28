@@ -1,35 +1,36 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 1/1] mmc: Support of SDIO irq for dw_mmc
-Date: Sun, 28 Aug 2011 13:46:03 -0400
-Message-ID: <m28vqdzaxw.fsf@bob.laptop.org>
-References: <CANYdXnqfBP74Xi1SuWJh3pjrZ4h7hjrc7xE+vXL0Bw41xEbVUw@mail.gmail.com>
+Subject: Re: [PATCH 1/5] mmc i.MX: remove individual SoC dependency
+Date: Sun, 28 Aug 2011 13:51:28 -0400
+Message-ID: <m21uw5zaov.fsf@bob.laptop.org>
+References: <1314168072-13822-1-git-send-email-s.hauer@pengutronix.de>
+	<1314168072-13822-2-git-send-email-s.hauer@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:52232 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:58400 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751034Ab1H1RqO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 28 Aug 2011 13:46:14 -0400
-In-Reply-To: <CANYdXnqfBP74Xi1SuWJh3pjrZ4h7hjrc7xE+vXL0Bw41xEbVUw@mail.gmail.com>
-	(Shashidhar Hiremath's message of "Tue, 23 Aug 2011 18:50:02 +0530")
+	id S1750980Ab1H1Rvg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 28 Aug 2011 13:51:36 -0400
+In-Reply-To: <1314168072-13822-2-git-send-email-s.hauer@pengutronix.de>
+	(Sascha Hauer's message of "Wed, 24 Aug 2011 08:41:08 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Cc: Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-Hi Shashidhar,
+Hi Sascha,
 
-On Tue, Aug 23 2011, Shashidhar Hiremath wrote:
-> The Patch adds the support for SDIO interrupts for all slots.
-> It includes enabling of SDIO interrupts through dw_mci_enable_sdio_irq
-> and the handling of the slot specific interrupts in the Interrupt Service
-> Routine.
+On Wed, Aug 24 2011, Sascha Hauer wrote:
+> The individual SoC dependency in Kconfig hardly scales anymore.
+> Instead of having such a fine grained dependency just depend
+> on ARCH_MXC and risk that the uninformed user has to look in
+> the help text to figure out which driver is the correct one.
+>
+> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: linux-mmc@vger.kernel.org
 
-Please send a v3 patch that:
- * is not corrupt (the line starting "@@ -1249,6" is broken by a newline)
- * applies against mmc-next.
-
-Then I'll apply it for 3.2.   Thanks!
+Looks good, thanks -- applied to mmc-next for 3.2.
 
 - Chris.
 -- 
