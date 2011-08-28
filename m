@@ -1,37 +1,54 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-s3c: Fix mmc card I/O problem
-Date: Sun, 28 Aug 2011 14:11:19 -0400
-Message-ID: <m2obz9xv7c.fsf@bob.laptop.org>
-References: <1314350898-26372-1-git-send-email-girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH] mmc: tmio: eliminate unused variable 'mmc' warning
+Date: Sun, 28 Aug 2011 14:20:20 -0400
+Message-ID: <m2k49xxusb.fsf@bob.laptop.org>
+References: <1312354138.14329.1.camel@phoenix>
+	<Pine.LNX.4.64.1108030924440.28502@axis700.grange>
+	<m2liva7ize.fsf@bob.laptop.org> <1314471775.2138.28.camel@drake>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1314350898-26372-1-git-send-email-girish.shivananjappa@linaro.org>
-	(Girish K. S.'s message of "Fri, 26 Aug 2011 14:58:18 +0530")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ben-linux@fluff.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:43722 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751779Ab1H1SU3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 28 Aug 2011 14:20:29 -0400
+In-Reply-To: <1314471775.2138.28.camel@drake> (Ian Molton's message of "Sat,
+	27 Aug 2011 20:02:51 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ian@mnementh.co.uk
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Axel Lin <axel.lin@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Hi,
+Hi Ian,
 
-On Fri, Aug 26 2011, Girish K S wrote:
-> This patch fixes the problem in sdhci-s3c host driver for
-> Samsung Soc's. During the card identification stage the
-> mmc core driver enumerates for the best bus width in combination
-> with the highest available data rate. It starts enumerating from
-> the highest bus width (8) to lowest bus width (1).
+On Sat, Aug 27 2011, Ian Molton wrote:
+> On Wed, 2011-08-03 at 08:55 -0400, Chris Ball wrote:
+>> > Good for 3.1, do we also push such "harmless" compiler warning fixes
+>> > to stable?
+>> >
+>> > Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+>> 
+>> Pushed for 3.1, thanks.  I don't think this is appropriate for stable.
 >
-> In case of few MMC cards the 4-bit bus enumeration fails and tries
-> the 1-bit bus enumeration. When switched to 1-bit bus mode the host driver
-> has to clear the previous bus width setting and apply the new setting.
->
-> The current patch will clear the previous bus mode and apply the new
-> mode setting.
->
-> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> Why on earth not? its obviously correct...
 
-Thanks, pushed to mmc-next for 3.1 with a stable@ tag.
+Because the rules for stable@ consist of more than the patch being
+obviously correct.
+
+You seem to have chosen one stable@ rule that this patch meets, and
+ignored the other nine which it mostly does not meet:
+
+Documentation/stable_kernel_rules.txt:
+ - It must fix a real bug that bothers people (not a, "This could be a
+   problem..." type thing).
+ - It must fix a problem that causes a build error (but not for
+   things marked CONFIG_BROKEN), an oops, a hang, data corruption,
+   a real security issue, or some "oh, that's not good" issue.
+   In short, something critical.
+ - It cannot contain any "trivial" fixes in it (spelling changes,
+   whitespace cleanups, etc).
+
+Thanks,
 
 - Chris.
 -- 
