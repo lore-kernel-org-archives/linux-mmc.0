@@ -1,56 +1,64 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: tmio: eliminate unused variable 'mmc' warning
-Date: Sun, 28 Aug 2011 14:20:20 -0400
-Message-ID: <m2k49xxusb.fsf@bob.laptop.org>
-References: <1312354138.14329.1.camel@phoenix>
-	<Pine.LNX.4.64.1108030924440.28502@axis700.grange>
-	<m2liva7ize.fsf@bob.laptop.org> <1314471775.2138.28.camel@drake>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Per Forlin <per.forlin@linaro.org>
+Subject: [PATCH] mmc: omap_hsmmc: DMA unmap only once in case of MMC error
+Date: Mon, 29 Aug 2011 00:08:43 +0200
+Message-ID: <1314569323-6886-1-git-send-email-per.forlin@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43722 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751779Ab1H1SU3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 28 Aug 2011 14:20:29 -0400
-In-Reply-To: <1314471775.2138.28.camel@drake> (Ian Molton's message of "Sat,
-	27 Aug 2011 20:02:51 +0100")
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:61408 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752479Ab1H1WLr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Aug 2011 18:11:47 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ian@mnementh.co.uk
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Axel Lin <axel.lin@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: linaro-dev@lists.linaro.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>
+Cc: Chris Ball <cjb@laptop.org>, Nicolas Pitre <nicolas.pitre@linaro.org>, Per Forlin <per.forlin@linaro.org>
 
-Hi Ian,
+Reported by Russell King:
+------------
+mmcblk0: error -84 transferring data, sector 149201, nr 64,
+cmd response 0x900, card status 0xb00
+mmcblk0: retrying using single block read
 
-On Sat, Aug 27 2011, Ian Molton wrote:
-> On Wed, 2011-08-03 at 08:55 -0400, Chris Ball wrote:
->> > Good for 3.1, do we also push such "harmless" compiler warning fixes
->> > to stable?
->> >
->> > Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
->> 
->> Pushed for 3.1, thanks.  I don't think this is appropriate for stable.
->
-> Why on earth not? its obviously correct...
+WARNING: at /home/rmk/git/linux-2.6-rmk/lib/dma-debug.c:811 check_unmap
+omap_hsmmc omap_hsmmc.0: DMA-API: device driver tries to free DMA memory
+it has not allocated [device address=0x0000000080933000] [size=20480 bytes]
+-------------
 
-Because the rules for stable@ consist of more than the patch being
-obviously correct.
+In case of an error dma_unmap() is issued in omap_hsmmc_dma_cleanup()
+and then again in omap_hsmmc_post_req(). Resolve this by clearing the
+host_cookie to indicate there is no DMA mapped memory to unmap.
 
-You seem to have chosen one stable@ rule that this patch meets, and
-ignored the other nine which it mostly does not meet:
+Signed-off-by: Per Forlin <per.forlin@linaro.org>
+---
+Bug fix on 3.1-rc3
 
-Documentation/stable_kernel_rules.txt:
- - It must fix a real bug that bothers people (not a, "This could be a
-   problem..." type thing).
- - It must fix a problem that causes a build error (but not for
-   things marked CONFIG_BROKEN), an oops, a hang, data corruption,
-   a real security issue, or some "oh, that's not good" issue.
-   In short, something critical.
- - It cannot contain any "trivial" fixes in it (spelling changes,
-   whitespace cleanups, etc).
+ drivers/mmc/host/omap_hsmmc.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
 
-Thanks,
-
-- Chris.
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 21e4a79..31d9817 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1011,6 +1011,7 @@ static void omap_hsmmc_dma_cleanup(struct omap_hsmmc_host *host, int errno)
+ 			host->data->sg_len,
+ 			omap_hsmmc_get_dma_dir(host, host->data));
+ 		omap_free_dma(dma_ch);
++		host->data->host_cookie = 0;
+ 	}
+ 	host->data = NULL;
+ }
+@@ -1576,8 +1577,10 @@ static void omap_hsmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
+ 	struct mmc_data *data = mrq->data;
+ 
+ 	if (host->use_dma) {
+-		dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+-			     omap_hsmmc_get_dma_dir(host, data));
++		if (data->host_cookie)
++			dma_unmap_sg(mmc_dev(host->mmc), data->sg,
++				     data->sg_len,
++				     omap_hsmmc_get_dma_dir(host, data));
+ 		data->host_cookie = 0;
+ 	}
+ }
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.4.1
+
