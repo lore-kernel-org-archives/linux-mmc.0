@@ -1,96 +1,51 @@
-From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 2/3] mmc: sdhci-tegra: Add 8-bit support to device tree
-	binding.
-Date: Tue, 30 Aug 2011 13:17:16 -0600
-Message-ID: <1314731837-6985-2-git-send-email-swarren@nvidia.com>
+From: Stephen Warren <swarren@nvidia.com>
+Subject: [PATCH 3/3] arm/dt: Tegra: Add support-bit to SDHCI nodes
+Date: Tue, 30 Aug 2011 13:17:17 -0600
+Message-ID: <1314731837-6985-3-git-send-email-swarren@nvidia.com>
 References: <1314731837-6985-1-git-send-email-swarren@nvidia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <1314731837-6985-1-git-send-email-swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
-Cc: devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1314731837-6985-1-git-send-email-swarren@nvidia.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>
+Cc: Olof Johansson <olof@lixom.net>, Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, Stephen Warren <swarren@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The previous patch which implemented a DT binding for sdhci-tegra did not
-allow all platform data fields to be initialized from DT. The following
-were missing:
+For Seaboard's internal eMMC, this makes the difference between a
+5.5MB/s and 10.2MB/s transfer rate. On Harmony, there wasn't any
+measurable difference on my cheap/slow ~2MB/s card.
 
-is_8bit: Implemented by this patch.
-
-pm_flags: Not implemented yet. There are no mainline users of this field.
-  I'm not quite sure what it's for, and hence how to represent this
-  in DT; the value ends up being assigned to host->mmc->pm_caps.
-
-While we're at it, fix the binding documentation to refer to "SD/MMC"
-instead of "eSDHC", since that's the correct name; "eSDHC" was cut/paste
-from the Freescale binding docs.
-
-Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Stephen Warren <swarren@nvidia.com>
 ---
-This should be able to go straight into the MMC -next branch
+This depends on patch 1 in this series. I assume Grant or Arnd will apply
+them both to whatever branch usually takes .dts updates.
 
- .../devicetree/bindings/mmc/nvidia-sdhci.txt       |    6 ++++--
- drivers/mmc/host/sdhci-tegra.c                     |    3 +++
- 2 files changed, 7 insertions(+), 2 deletions(-)
+ arch/arm/boot/dts/tegra-harmony.dts  |    1 +
+ arch/arm/boot/dts/tegra-seaboard.dts |    4 ++++
+ 2 files changed, 5 insertions(+), 0 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt
-index c87f667..7e51154 100644
---- a/Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt
-@@ -5,13 +5,14 @@ and SDIO types of memory cards.
- 
- Required properties:
- - compatible : Should be "nvidia,<chip>-sdhci"
--- reg : Should contain eSDHC registers location and length
--- interrupts : Should contain eSDHC interrupt
-+- reg : Should contain SD/MMC registers location and length
-+- interrupts : Should contain SD/MMC interrupt
- 
- Optional properties:
- - cd-gpios : Specify GPIOs for card detection
- - wp-gpios : Specify GPIOs for write protection
- - power-gpios : Specify GPIOs for power control
-+- support-8bit : Boolean, indicates if 8-bit mode should be used.
- 
- Example:
- 
-@@ -22,4 +23,5 @@ sdhci@c8000200 {
- 	cd-gpios = <&gpio 69 0>; /* gpio PI5 */
- 	wp-gpios = <&gpio 57 0>; /* gpio PH1 */
- 	power-gpios = <&gpio 155 0>; /* gpio PT3 */
-+	support-8bit;
+diff --git a/arch/arm/boot/dts/tegra-harmony.dts b/arch/arm/boot/dts/tegra-harmony.dts
+index e581866..0e225b8 100644
+--- a/arch/arm/boot/dts/tegra-harmony.dts
++++ b/arch/arm/boot/dts/tegra-harmony.dts
+@@ -66,5 +66,6 @@
+ 		cd-gpios = <&gpio 58 0>; /* gpio PH2 */
+ 		wp-gpios = <&gpio 59 0>; /* gpio PH3 */
+ 		power-gpios = <&gpio 70 0>; /* gpio PI6 */
++		support-8bit;
+ 	};
  };
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 9ab18d6..67176af 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -17,6 +17,7 @@
- #include <linux/platform_device.h>
- #include <linux/clk.h>
- #include <linux/io.h>
-+#include <linux/of.h>
- #include <linux/of_gpio.h>
- #include <linux/gpio.h>
- #include <linux/mmc/card.h>
-@@ -153,6 +154,8 @@ static struct tegra_sdhci_platform_data * __devinit sdhci_tegra_dt_parse_pdata(
- 	plat->cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
- 	plat->wp_gpio = of_get_named_gpio(np, "wp-gpios", 0);
- 	plat->power_gpio = of_get_named_gpio(np, "power-gpios", 0);
-+	if (of_find_property(np, "support-8bit", NULL))
-+		plat->is_8bit = 1;
- 
- 	return plat;
- }
+diff --git a/arch/arm/boot/dts/tegra-seaboard.dts b/arch/arm/boot/dts/tegra-seaboard.dts
+index 64cedca..a72299b 100644
+--- a/arch/arm/boot/dts/tegra-seaboard.dts
++++ b/arch/arm/boot/dts/tegra-seaboard.dts
+@@ -25,4 +25,8 @@
+ 		wp-gpios = <&gpio 57 0>; /* gpio PH1 */
+ 		power-gpios = <&gpio 70 0>; /* gpio PI6 */
+ 	};
++
++	sdhci@c8000600 {
++		support-8bit;
++	};
+ };
 -- 
 1.7.0.4
