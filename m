@@ -1,104 +1,176 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: [PATCH] mmc: core: eMMC4.5 Add the timeout for switch
-Date: Tue, 30 Aug 2011 15:52:50 +0530
-Message-ID: <1314699770-17120-1-git-send-email-girish.shivananjappa@linaro.org>
+From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Subject: [PATCH v3 1/1] mmc: Support of DUAL BUFFER DESC[ring] mode for dw_mmc
+Date: Tue, 30 Aug 2011 17:15:21 +0530
+Message-ID: <1314704721-5175-1-git-send-email-shashidharh@vayavyalabs.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw0-f46.google.com ([74.125.83.46]:38561 "EHLO
-	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752988Ab1H3KW5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2011 06:22:57 -0400
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:41048 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753254Ab1H3LqH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2011 07:46:07 -0400
+Received: by pzk37 with SMTP id 37so10177010pzk.1
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Aug 2011 04:46:06 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, linux-arm-kernel@lists.infradead.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
+To: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Wil
+Cc: linux-mmc@vger.kernel.org, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 
-This patch adds the code to handle the default timeout
-for switch command.
-For eMMC 4.5 devices if timeout is not specified for the switch
-command while accessing a specific field,then the default timeout
-shall be used to timeout. Specification says there is no timeout
-defined while accessing BKOPS_START, SANITIZE_START, FLUSH_CACHE
-field(so these fields are excluded).
+This Patch adds the support for Dual Buffer Descriptor mode of
+Operation for the dw_mmc driver.The patch also provides the configurability
+Option for choosing DUAL_BUFFER mode or the chained modes through menuconfig.
+The Menuconfig option for selecting Dual Buffer mode or chained mode
+is selected only if Internal DMAC is enabled.
 
-Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 ---
- drivers/mmc/core/mmc.c     |    5 +++++
- drivers/mmc/core/mmc_ops.c |    8 ++++++++
- include/linux/mmc/card.h   |    1 +
- include/linux/mmc/mmc.h    |    4 ++++
- 4 files changed, 18 insertions(+), 0 deletions(-)
+v2:
+* As per suggestions by Will Newton and James Hogan
+-Config symbol Names prefixed with MMC_DW
+-Added more Description for Config parameters added
+-Removed unnecessary config opion IDMAC_DESC_MODE
+-IDMAC_SET_BUFFER_SIZE chenged IDMAC_SET_BUFFER_SIZES
+-fixed typos and indented commments correctly
+-if ((i +1) <= sg_len changed to ((i +1) < sg_len
+-duplication "desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC" line removed
+-fixed bug in making DSL value zero
+-removed ANDing the des1 with zero before writing buffer lengths to it
+-Added proper multiline comments
+v3:
+* As per suggestions by James Hogan
+-Modified Config Symbol Names in the Driver File
+-Fixed Bug in Clearing the DSL field of BMOD register
+-Fixed bug in IDMAC_SET_BUFFER_SIZES
+---
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 5700b1c..5b9fb6a 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -405,6 +405,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 	if (card->ext_csd.rev >= 5)
- 		card->ext_csd.rel_param = ext_csd[EXT_CSD_WR_REL_PARAM];
+ drivers/mmc/host/Kconfig  |   19 +++++++++++++++++
+ drivers/mmc/host/dw_mmc.c |   49 ++++++++++++++++++++++++++++++++++++--------
+ drivers/mmc/host/dw_mmc.h |    2 +
+ 3 files changed, 61 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index c226d54..1f5e4b6 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -534,6 +534,25 @@ config MMC_DW_IDMAC
+ 	  Designware Mobile Storage IP block. This disables the external DMA
+ 	  interface.
  
-+	if (card->ext_csd.rev > 5) {
-+		/* (eMMC 4.5)timeout is expressed in units of 10 ms*/
-+		card->ext_csd.cmd6_timeout = ext_csd[EXT_CSD_CMD6_TIME]*10;
-+	}
++choice
++	prompt "select  IDMAC Descriptors Mode"
++	depends on MMC_DW_IDMAC
 +
- 	if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
- 		card->erased_byte = 0xFF;
- 	else
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 770c3d0..c4d82f4 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -394,6 +394,14 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
- 	cmd.cmd_timeout_ms = timeout_ms;
- 
-+	/* timeout is not defined for below command indexes (eMMC 4.5) */
-+	if ((timeout_ms == 0)					&&
-+		(card->ext_csd->rev > 5)			&&
-+		(index != EXT_CSD_BKOPS_START)		&&
-+		(index != EXT_CSD_SANITIZE_START)	&&
-+		(index != EXT_CSD_FLUSH_CACHE))
-+			cmd.cmd_timeout_ms = card->ext_csd->cmd6_timeout;
++config MMC_DW_CHAIN_DESC
++	bool "Chain Descriptor Structure"
++	help
++	  Select this option to enable Chained Mode of Operation and the
++	  Chained Mode operates in a mode where only one Buffer will be used
++	  for each descriptor when the transfer is happening in DMA mode.
 +
- 	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
- 	if (err)
- 		return err;
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index b460fc2..ef88412 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -50,6 +50,7 @@ struct mmc_ext_csd {
- 	u8			rel_sectors;
- 	u8			rel_param;
- 	u8			part_config;
-+	u8			cmd6_timeout;	/* timeout in ms */
- 	unsigned int		part_time;		/* Units: ms */
- 	unsigned int		sa_timeout;		/* Units: 100ns */
- 	unsigned int		hs_max_dtr;
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 5a794cb..a23f836 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -270,8 +270,11 @@ struct _mmc_csd {
-  * EXT_CSD fields
-  */
++config MMC_DW_DUAL_BUFFER_DESC
++	bool "Dual Buffer Descriptor Structure"
++	help
++	  Select this option to enable Dual Buffer Desc Mode of Operation and
++	  Dual Buffer Descriptor Mode or the Ring Mode indicates that two
++	  buffers can be used for each descriptor during DMA mode transfer.
++endchoice
++
+ config MMC_SH_MMCIF
+ 	tristate "SuperH Internal MMCIF support"
+ 	depends on MMC_BLOCK && (SUPERH || ARCH_SHMOBILE)
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index ff0f714..56c3f02 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -63,6 +63,8 @@ struct idmac_desc {
+ 	u32		des1;	/* Buffer sizes */
+ #define IDMAC_SET_BUFFER1_SIZE(d, s) \
+ 	((d)->des1 = ((d)->des1 & 0x03ffe000) | ((s) & 0x1fff))
++#define IDMAC_SET_BUFFER_SIZES(d, s1, s2) \
++	((d)->des1 = (((s1) & 0x1fff) | (((s2) & 0x1fff) << 13)))
  
-+#define EXT_CSD_FLUSH_CACHE		32	/* R/W */
- #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
- #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
-+#define EXT_CSD_BKOPS_START		164	/* R/W */
-+#define EXT_CSD_SANITIZE_START		165	/* R/W */
- #define EXT_CSD_WR_REL_PARAM		166	/* RO */
- #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
- #define EXT_CSD_PART_CONFIG		179	/* R/W */
-@@ -293,6 +296,7 @@ struct _mmc_csd {
- #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
- #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
- #define EXT_CSD_TRIM_MULT		232	/* RO */
-+#define EXT_CSD_CMD6_TIME		248	/* RO */
+ 	u32		des2;	/* buffer 1 physical address */
  
- /*
-  * EXT_CSD field definitions
+@@ -348,17 +350,38 @@ static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
+ 	struct idmac_desc *desc = host->sg_cpu;
+ 
+ 	for (i = 0; i < sg_len; i++, desc++) {
+-		unsigned int length = sg_dma_len(&data->sg[i]);
+-		u32 mem_addr = sg_dma_address(&data->sg[i]);
++		/* Length and mem_address of first buffer */
++		unsigned int length1 = sg_dma_len(&data->sg[i]);
++		u32 mem_addr1 = sg_dma_address(&data->sg[i]);
++#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
++		unsigned int length2;
++		u32 mem_addr2;
+ 
+-		/* Set the OWN bit and disable interrupts for this descriptor */
++		/*
++		 * Set the OWN bit and disable interrupts
++		 * for this descriptor
++		 */
++		desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC
++		if ((i+1) < sg_len) {
++			length2 = sg_dma_len(&data->sg[i+1]);
++			mem_addr2 = sg_dma_address(&data->sg[i+1]);
++			/* Buffer length being set for Buffer1 and Buffer2 */
++			IDMAC_SET_BUFFER_SIZES(desc, length1, length2);
++			desc->des3 = mem_addr2;
++			/* Incrementing for the second buffer */
++			i++;
++		} else {
++			/* Buffer length being set for Buffer1 and Buffer2 */
++			IDMAC_SET_BUFFER_SIZES(desc, length1, 0);
++		}
++#elif CONFIG_MMC_DW_CHAIN_DESC
++		/* Set OWN bit and disable interrupts for this descriptor */
+ 		desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC | IDMAC_DES0_CH;
+-
+-		/* Buffer length */
+-		IDMAC_SET_BUFFER1_SIZE(desc, length);
+-
++		/* Buffer length for Buffer1 */
++		IDMAC_SET_BUFFER1_SIZE(desc, length1);
++#endif
+ 		/* Physical address to DMA to/from */
+-		desc->des2 = mem_addr;
++		desc->des2 = mem_addr1;
+ 	}
+ 
+ 	/* Set first descriptor */
+@@ -369,6 +392,10 @@ static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
+ 	desc = host->sg_cpu + (i - 1) * sizeof(struct idmac_desc);
+ 	desc->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
+ 	desc->des0 |= IDMAC_DES0_LD;
++#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
++	/* Set the End of Ring bit */
++	desc->des0 |= IDMAC_DES0_ER;
++#endif
+ 
+ 	wmb();
+ }
+@@ -389,6 +416,10 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
+ 	/* Enable the IDMAC */
+ 	temp = mci_readl(host, BMOD);
+ 	temp |= SDMMC_IDMAC_ENABLE | SDMMC_IDMAC_FB;
++#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
++	/* The Descriptor Skip length is made zero */
++	temp &= ~(SDMMC_BMOD_DSL(0x1f));
++#endif
+ 	mci_writel(host, BMOD, temp);
+ 
+ 	/* Start it running */
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 027d377..0520dc8 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -72,6 +72,8 @@
+ /* Clock Enable register defines */
+ #define SDMMC_CLKEN_LOW_PWR		BIT(16)
+ #define SDMMC_CLKEN_ENABLE		BIT(0)
++/* BMOD register defines */
++#define SDMMC_BMOD_DSL(n)		_SBF(2, (n))
+ /* time-out register defines */
+ #define SDMMC_TMOUT_DATA(n)		_SBF(8, (n))
+ #define SDMMC_TMOUT_DATA_MSK		0xFFFFFF00
 -- 
-1.7.1
+1.7.2.3
 
