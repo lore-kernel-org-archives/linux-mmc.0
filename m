@@ -1,116 +1,75 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 2/2] ARM: mach-shmobile: simplify MMCIF DMA configuration
-Date: Tue, 30 Aug 2011 18:26:44 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1108301825450.19151@axis700.grange>
-References: <Pine.LNX.4.64.1108301819150.19151@axis700.grange>
+From: Stephen Warren <swarren@nvidia.com>
+Subject: [PATCH 1/3] arm/dt: Tegra: Update SDHCI nodes to match bindings
+Date: Tue, 30 Aug 2011 13:17:15 -0600
+Message-ID: <1314731837-6985-1-git-send-email-swarren@nvidia.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:64706 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752453Ab1H3Q0u (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2011 12:26:50 -0400
-In-Reply-To: <Pine.LNX.4.64.1108301819150.19151@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>
+Cc: Stephen Warren <swarren@nvidia.com>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, Olof Johansson <olof@lixom.net>, Shawn Guo <shawn.guo@linaro.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>
 
-Use the simplified method to specify MMCIF DMA slave configuration.
-
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Signed-off-by: Stephen Warren <swarren@nvidia.com>
+Acked-by: Olof Johansson <olof@lixom.net>
 ---
- arch/arm/mach-shmobile/board-ag5evm.c   |   11 ++---------
- arch/arm/mach-shmobile/board-ap4evb.c   |   12 ++----------
- arch/arm/mach-shmobile/board-mackerel.c |   12 ++----------
- 3 files changed, 6 insertions(+), 29 deletions(-)
+This is a repost of http://www.spinics.net/lists/linux-tegra/msg02117.html
+I'm including it here since it's not in linux-next yet, and patch 3 depends
+on it.
 
-diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
-index ce5c251..7f26ecc 100644
---- a/arch/arm/mach-shmobile/board-ag5evm.c
-+++ b/arch/arm/mach-shmobile/board-ag5evm.c
-@@ -158,19 +158,12 @@ static struct resource sh_mmcif_resources[] = {
- 	},
- };
+ arch/arm/boot/dts/tegra-harmony.dts  |   12 ++++++------
+ arch/arm/boot/dts/tegra-seaboard.dts |    6 +++---
+ 2 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/arch/arm/boot/dts/tegra-harmony.dts b/arch/arm/boot/dts/tegra-harmony.dts
+index 4c05334..e581866 100644
+--- a/arch/arm/boot/dts/tegra-harmony.dts
++++ b/arch/arm/boot/dts/tegra-harmony.dts
+@@ -57,14 +57,14 @@
+ 	};
  
--static struct sh_mmcif_dma sh_mmcif_dma = {
--	.chan_priv_rx	= {
--		.slave_id	= SHDMA_SLAVE_MMCIF_RX,
--	},
--	.chan_priv_tx	= {
--		.slave_id	= SHDMA_SLAVE_MMCIF_TX,
--	},
--};
- static struct sh_mmcif_plat_data sh_mmcif_platdata = {
- 	.sup_pclk	= 0,
- 	.ocr		= MMC_VDD_165_195,
- 	.caps		= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
--	.dma		= &sh_mmcif_dma,
-+	.slave_id_tx	= SHDMA_SLAVE_MMCIF_TX,
-+	.slave_id_rx	= SHDMA_SLAVE_MMCIF_RX,
- };
+ 	sdhci@c8000200 {
+-		gpios = <&gpio 69 0>, /* cd, gpio PI5 */
+-			<&gpio 57 0>, /* wp, gpio PH1 */
+-			<&gpio 155 0>; /* power, gpio PT3 */
++		cd-gpios = <&gpio 69 0>; /* gpio PI5 */
++		wp-gpios = <&gpio 57 0>; /* gpio PH1 */
++		power-gpios = <&gpio 155 0>; /* gpio PT3 */
+ 	};
  
- static struct platform_device mmc_device = {
-diff --git a/arch/arm/mach-shmobile/board-ap4evb.c b/arch/arm/mach-shmobile/board-ap4evb.c
-index f530bf2..b8ed7a7 100644
---- a/arch/arm/mach-shmobile/board-ap4evb.c
-+++ b/arch/arm/mach-shmobile/board-ap4evb.c
-@@ -293,15 +293,6 @@ static struct resource sh_mmcif_resources[] = {
- 	},
+ 	sdhci@c8000600 {
+-		gpios = <&gpio 58 0>, /* cd, gpio PH2 */
+-			<&gpio 59 0>, /* wp, gpio PH3 */
+-			<&gpio 70 0>; /* power, gpio PI6 */
++		cd-gpios = <&gpio 58 0>; /* gpio PH2 */
++		wp-gpios = <&gpio 59 0>; /* gpio PH3 */
++		power-gpios = <&gpio 70 0>; /* gpio PI6 */
+ 	};
  };
+diff --git a/arch/arm/boot/dts/tegra-seaboard.dts b/arch/arm/boot/dts/tegra-seaboard.dts
+index 1940cae..64cedca 100644
+--- a/arch/arm/boot/dts/tegra-seaboard.dts
++++ b/arch/arm/boot/dts/tegra-seaboard.dts
+@@ -21,8 +21,8 @@
+ 	};
  
--static struct sh_mmcif_dma sh_mmcif_dma = {
--	.chan_priv_rx	= {
--		.slave_id	= SHDMA_SLAVE_MMCIF_RX,
--	},
--	.chan_priv_tx	= {
--		.slave_id	= SHDMA_SLAVE_MMCIF_TX,
--	},
--};
--
- static struct sh_mmcif_plat_data sh_mmcif_plat = {
- 	.sup_pclk	= 0,
- 	.ocr		= MMC_VDD_165_195 | MMC_VDD_32_33 | MMC_VDD_33_34,
-@@ -309,7 +300,8 @@ static struct sh_mmcif_plat_data sh_mmcif_plat = {
- 			  MMC_CAP_8_BIT_DATA |
- 			  MMC_CAP_NEEDS_POLL,
- 	.get_cd		= slot_cn7_get_cd,
--	.dma		= &sh_mmcif_dma,
-+	.slave_id_tx	= SHDMA_SLAVE_MMCIF_TX,
-+	.slave_id_rx	= SHDMA_SLAVE_MMCIF_RX,
+ 	sdhci@c8000400 {
+-		gpios = <&gpio 69 0>, /* cd, gpio PI5 */
+-			<&gpio 57 0>, /* wp, gpio PH1 */
+-			<&gpio 70 0>; /* power, gpio PI6 */
++		cd-gpios = <&gpio 69 0>; /* gpio PI5 */
++		wp-gpios = <&gpio 57 0>; /* gpio PH1 */
++		power-gpios = <&gpio 70 0>; /* gpio PI6 */
+ 	};
  };
- 
- static struct platform_device sh_mmcif_device = {
-diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
-index 7e7da60..dfae824 100644
---- a/arch/arm/mach-shmobile/board-mackerel.c
-+++ b/arch/arm/mach-shmobile/board-mackerel.c
-@@ -1164,15 +1164,6 @@ static struct resource sh_mmcif_resources[] = {
- 	},
- };
- 
--static struct sh_mmcif_dma sh_mmcif_dma = {
--	.chan_priv_rx	= {
--		.slave_id	= SHDMA_SLAVE_MMCIF_RX,
--	},
--	.chan_priv_tx	= {
--		.slave_id	= SHDMA_SLAVE_MMCIF_TX,
--	},
--};
--
- static struct sh_mmcif_plat_data sh_mmcif_plat = {
- 	.sup_pclk	= 0,
- 	.ocr		= MMC_VDD_165_195 | MMC_VDD_32_33 | MMC_VDD_33_34,
-@@ -1180,7 +1171,8 @@ static struct sh_mmcif_plat_data sh_mmcif_plat = {
- 			  MMC_CAP_8_BIT_DATA |
- 			  MMC_CAP_NEEDS_POLL,
- 	.get_cd		= slot_cn7_get_cd,
--	.dma		= &sh_mmcif_dma,
-+	.slave_id_tx	= SHDMA_SLAVE_MMCIF_TX,
-+	.slave_id_rx	= SHDMA_SLAVE_MMCIF_RX,
- };
- 
- static struct platform_device sh_mmcif_device = {
 -- 
-1.7.2.5
-
+1.7.0.4
