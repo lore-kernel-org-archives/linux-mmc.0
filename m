@@ -1,68 +1,67 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: [PATCH 1/2] sdhci/tegra: Add Device Tree probing support
-Date: Tue, 30 Aug 2011 11:40:36 +0800
-Message-ID: <20110830034035.GC19294@S2100-06.ap.freescale.net>
-References: <1314123334-23133-1-git-send-email-swarren@nvidia.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH] [RFC] ARM: shmobile: g4evm: Use multiple irq vectors for
+ SDHI
+Date: Tue, 30 Aug 2011 12:45:28 +0900
+Message-ID: <20110830034528.GA31103@verge.net.au>
+References: <1314353627-23079-1-git-send-email-horms@verge.net.au>
+ <Pine.LNX.4.64.1108261416330.25272@axis700.grange>
+ <20110826123411.GB29479@verge.net.au>
+ <Pine.LNX.4.64.1108261448400.25272@axis700.grange>
+ <20110826130642.GA13205@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1314123334-23133-1-git-send-email-swarren@nvidia.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Stephen Warren <swarren@nvidia.com>
-Cc: devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, linux-tegra@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+In-Reply-To: <20110826130642.GA13205@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Aug 23, 2011 at 12:15:33PM -0600, Stephen Warren wrote:
-> From: Grant Likely <grant.likely@secretlab.ca>
+On Fri, Aug 26, 2011 at 10:06:45PM +0900, Simon Horman wrote:
+> On Fri, Aug 26, 2011 at 02:56:50PM +0200, Guennadi Liakhovetski wrote:
+> > On Fri, 26 Aug 2011, Simon Horman wrote:
+> > 
+> > > On Fri, Aug 26, 2011 at 02:17:20PM +0200, Guennadi Liakhovetski wrote:
+> > > > On Fri, 26 Aug 2011, Simon Horman wrote:
+> > > > 
+> > > > > This patch is based on "ARM: arch-shmobile: Use multiple irq vectors for SDHI"
+> > > > > 
+> > > > > It removes multiplexing of the SDHI vectors and names each IRQ source
+> > > > > to allow the SDHI driver to used source-specific handlers.
+> > > > > 
+> > > > > This is untested as I do not have access to a working g4evm.
+> > > > > 
+> > > > > Signed-off-by: Simon Horman <horms@verge.net.au>
+> > > > > 
+> > > > > ---
+> > > > > 
+> > > > > Requires "mmc: sdhi: Allow specific IRQ sources to use corresponding handlers."
+> > > > > 
+> > > > > *** compile tested only ***
+> > > > > ---
+> > > > >  arch/arm/mach-shmobile/board-g4evm.c |   26 ++++++++++++++++++++++-
+> > > > >  arch/arm/mach-shmobile/intc-sh7377.c |   36 ++++++++++++++++-----------------
+> > > > 
+> > > > This second file should not be here, right?
+> > > 
+> > > I believe that the g4evm uses the sh7377 and that the multiplexing of
+> > > SDHIinterrupts for the 7377 need to be removed in order to provide multiple
+> > > SDHI irq sources.
+> > > 
+> > > Am I missing something?
+> > 
+> > Maybe not, I just misread your patch description as that it only should 
+> > touch the board itself. Since intc-sh7377.c has to be touched too, this 
+> > should be tested, I think. And I don't have any 7377 hardware available. 
 > 
-> Add hooks to read gpio configuration out of the device tree node.
-> 
-> [grant.likely: Rewrite of original patch from John Bonesio]
-> Signed-off-by: Grant Likely <grant.likely@secretlab.ca>
-> [swarren: Fixed tegra_sdhci_get_ro() to retrieve pdata correctly]
-> [swarren: Reworked to avoid #ifdef CONFIG_OF]
-> [swarren: Reworked binding based on fsl-imx-esdhc.txt]
-> [swarren: Documented binding]
-> Signed-off-by: Stephen Warren <swarren@nvidia.com>
-> ---
-> Theoretically, these two patches should be merged in order in one place,
-> since the 2nd logically depends on the first. However, it's really just
-> a documentation dependency, so I think it's fine to merge them into the
-> MMC and DT trees separately and let them meet in linux-next.
-> 
->  .../devicetree/bindings/mmc/nvidia-sdhci.txt       |   25 ++++++++++
->  drivers/mmc/host/sdhci-tegra.c                     |   51 +++++++++++++++----
->  2 files changed, 65 insertions(+), 11 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt
-> new file mode 100644
-> index 0000000..c87f667
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt
-> @@ -0,0 +1,25 @@
-> +* NVIDIA Tegra Secure Digital Host Controller
-> +
-> +This controller on Tegra family SoCs provides an interface for MMC, SD,
-> +and SDIO types of memory cards.
-> +
-> +Required properties:
-> +- compatible : Should be "nvidia,<chip>-sdhci"
-> +- reg : Should contain eSDHC registers location and length
-> +- interrupts : Should contain eSDHC interrupt
+> I agree that this needs to be tested (or dropped).
+> And its annoying that neither of us have the hardware at this time.
 
-You may want to replace eSDHC with something Tegra specific.
+Hi Guennadi,
 
--- 
-Regards,
-Shawn
+I spoke with Magnus yesterday and there doesn't seem to be any realistic
+chance of accessing hardware to test this patch on in the near future.
+
+So I would like to just leave it sitting in the mailing list archive as
+an RFC for now.
