@@ -1,28 +1,98 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 0/2] mmc: sh_mmcif: simplify platform DMA configuration
-Date: Tue, 30 Aug 2011 18:26:34 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1108301819150.19151@axis700.grange>
+Subject: [PATCH 1/2] mmc: sh_mmcif: simplify platform data
+Date: Tue, 30 Aug 2011 18:26:39 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1108301824380.19151@axis700.grange>
+References: <Pine.LNX.4.64.1108301819150.19151@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:63484 "EHLO
+Received: from moutng.kundenserver.de ([212.227.126.171]:62193 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754141Ab1H3Q0h (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2011 12:26:37 -0400
+	with ESMTP id S1754141Ab1H3Q0l (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2011 12:26:41 -0400
+In-Reply-To: <Pine.LNX.4.64.1108301819150.19151@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Chris Ball <cjb@laptop.org>
 
-A simple cosmetic clean-up, no functional changes. Patch 2/2 depends on 
-patch 1/2 and can wait until 3.3. Paul, would you be able to put it under 
-the carpet somewhere until then or shall I resend it after 3.2-rc1 is out? 
-After both these patches have been applied, we can remove struct 
-sh_mmcif_plat_data::dma around 3.4 or 4.0 or whatever;-)
+Provide platforms with a simplified way to specify MMCIF DMA slave IDs in
+a way, similar to SDHI and other sh_dma clients.
 
-Thanks
-Guennadi
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ drivers/mmc/host/sh_mmcif.c  |   20 ++++++++++++++++----
+ include/linux/mmc/sh_mmcif.h |    4 +++-
+ 2 files changed, 19 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 557886b..bd91c94 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -165,6 +165,8 @@ struct sh_mmcif_host {
+ 	struct mmc_host *mmc;
+ 	struct mmc_data *data;
+ 	struct platform_device *pd;
++	struct sh_dmae_slave dma_slave_tx;
++	struct sh_dmae_slave dma_slave_rx;
+ 	struct clk *hclk;
+ 	unsigned int clk;
+ 	int bus_width;
+@@ -323,25 +325,35 @@ static bool sh_mmcif_filter(struct dma_chan *chan, void *arg)
+ static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
+ 				 struct sh_mmcif_plat_data *pdata)
+ {
++	struct sh_dmae_slave *tx, *rx;
+ 	host->dma_active = false;
+ 
+ 	/* We can only either use DMA for both Tx and Rx or not use it at all */
+ 	if (pdata->dma) {
++		dev_warn(&host->pd->dev,
++			 "Update your platform to use embedded DMA slave IDs\n");
++		tx = &pdata->dma->chan_priv_tx;
++		rx = &pdata->dma->chan_priv_rx;
++	} else {
++		tx = &host->dma_slave_tx;
++		tx->slave_id = pdata->slave_id_tx;
++		rx = &host->dma_slave_rx;
++		rx->slave_id = pdata->slave_id_rx;
++	}
++	if (tx->slave_id > 0 && rx->slave_id > 0) {
+ 		dma_cap_mask_t mask;
+ 
+ 		dma_cap_zero(mask);
+ 		dma_cap_set(DMA_SLAVE, mask);
+ 
+-		host->chan_tx = dma_request_channel(mask, sh_mmcif_filter,
+-						    &pdata->dma->chan_priv_tx);
++		host->chan_tx = dma_request_channel(mask, sh_mmcif_filter, tx);
+ 		dev_dbg(&host->pd->dev, "%s: TX: got channel %p\n", __func__,
+ 			host->chan_tx);
+ 
+ 		if (!host->chan_tx)
+ 			return;
+ 
+-		host->chan_rx = dma_request_channel(mask, sh_mmcif_filter,
+-						    &pdata->dma->chan_priv_rx);
++		host->chan_rx = dma_request_channel(mask, sh_mmcif_filter, rx);
+ 		dev_dbg(&host->pd->dev, "%s: RX: got channel %p\n", __func__,
+ 			host->chan_rx);
+ 
+diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/mmc/sh_mmcif.h
+index 0222cd8..04ff452 100644
+--- a/include/linux/mmc/sh_mmcif.h
++++ b/include/linux/mmc/sh_mmcif.h
+@@ -41,7 +41,9 @@ struct sh_mmcif_plat_data {
+ 	void (*set_pwr)(struct platform_device *pdev, int state);
+ 	void (*down_pwr)(struct platform_device *pdev);
+ 	int (*get_cd)(struct platform_device *pdef);
+-	struct sh_mmcif_dma	*dma;
++	struct sh_mmcif_dma	*dma;		/* Deprecated. Instead */
++	unsigned int		slave_id_tx;	/* use embedded slave_id_[tr]x */
++	unsigned int		slave_id_rx;
+ 	u8			sup_pclk;	/* 1 :SH7757, 0: SH7724/SH7372 */
+ 	unsigned long		caps;
+ 	u32			ocr;
+-- 
+1.7.2.5
+
