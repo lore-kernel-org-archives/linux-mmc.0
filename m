@@ -1,36 +1,53 @@
-From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/3] arm/dt: Tegra: Update SDHCI nodes to match bindings
-Date: Tue, 30 Aug 2011 15:31:28 -0400
-Message-ID: <m2d3fmsnlb.fsf@bob.laptop.org>
-References: <1314731837-6985-1-git-send-email-swarren@nvidia.com>
-	<m2hb4yso44.fsf@bob.laptop.org>
-	<74CDBE0F657A3D45AFBB94109FB122FF04B3279E01@HQMAIL01.nvidia.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH 1/2] sdhci/tegra: Add Device Tree probing support
+Date: Wed, 31 Aug 2011 10:49:30 +0800
+Message-ID: <20110831024929.GA19795@S2100-06.ap.freescale.net>
+References: <1314123334-23133-1-git-send-email-swarren@nvidia.com>
+ <20110830034035.GC19294@S2100-06.ap.freescale.net>
+ <74CDBE0F657A3D45AFBB94109FB122FF04B3279D3F@HQMAIL01.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF04B3279E01-C7FfzLzN0UxDw2glCA4ptUEOCMrvLtNR@public.gmane.org>
-	(Stephen Warren's message of "Tue, 30 Aug 2011 12:26:16 -0700")
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc@vger.kernel.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra@vger.kernel.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-kernel@vger.kernel.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:8992 "EHLO
+	TX2EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754853Ab1HaCks (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2011 22:40:48 -0400
+Content-Disposition: inline
+In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF04B3279D3F@HQMAIL01.nvidia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephen Warren <swarren@nvidia.com>
+Cc: Grant Likely <grant.likely@secretlab.ca>, Chris Ball <cjb@laptop.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi,
+On Tue, Aug 30, 2011 at 09:01:37AM -0700, Stephen Warren wrote:
+> Shawn Guo wrote at Monday, August 29, 2011 9:41 PM:
+> > On Tue, Aug 23, 2011 at 12:15:33PM -0600, Stephen Warren wrote:
+> > > From: Grant Likely <grant.likely@secretlab.ca>
+> > >
+> > > Add hooks to read gpio configuration out of the device tree node.
+> ...
+> > > diff --git a/Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt
+> ...
+> > > +* NVIDIA Tegra Secure Digital Host Controller
+> > > +
+> > > +This controller on Tegra family SoCs provides an interface for MMC, SD,
+> > > +and SDIO types of memory cards.
+> > > +
+> > > +Required properties:
+> > > +- compatible : Should be "nvidia,<chip>-sdhci"
+> > > +- reg : Should contain eSDHC registers location and length
+> > > +- interrupts : Should contain eSDHC interrupt
+> > 
+> > You may want to replace eSDHC with something Tegra specific.
+> 
+> True. The patch is already submitted. Do you think it's worth posting one
+> just to fix that;
 
-On Tue, Aug 30 2011, Stephen Warren wrote:
-> I don't think there's actually any need for that; initializing Tegra's
-> SDHCI from device-tree has never worked in mainline to date; it relies
-> on patch 1 being there. And if patch 2 was there without patch 3,
-> the worst that will happen is some port runs in 4-bit mode instead of
-> 8-bit, which evidently works fine since I didn't even notice 8-bit
-> support was missing...
+It's totally your call.
 
-Ah, okay.  I've merged patch 2 to mmc-next for 3.2, then, and will keep
-an eye on what happens with the arch patches.
+Regards,
+Shawn
 
-Thanks,
+> it still seems pretty clear what's required?
+> 
 
-- Chris.
--- 
-Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
-One Laptop Per Child
