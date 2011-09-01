@@ -1,130 +1,47 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: [PATCH] mmc: core: eMMC4.5 Add the timeout for switch
-Date: Thu, 01 Sep 2011 11:13:55 +0900
-Message-ID: <001601cc684c$ce571b00$6b055100$%kim@samsung.com>
-References: <1314699770-17120-1-git-send-email-girish.shivananjappa@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1314699770-17120-1-git-send-email-girish.shivananjappa@linaro.org>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Girish K S' <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, 'Seungwon Jeon' <tgih.jun@samsung.com>
+From: Kumar Gala <kumar.gala@freescale.com>
+Subject: Re: [PATCH 3/3 v2] mmc: Use mmc_delay() instead of mdelay() for time delay
+Date: Wed, 31 Aug 2011 23:42:08 -0500
+Message-ID: <CBED532F-6456-46FE-A96A-D91264E95966@freescale.com>
+References: <1314345310-15041-1-git-send-email-Chunhe.Lan@freescale.com>
+Mime-Version: 1.0 (Apple Message framework v1084)
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:19907 "EHLO
+	TX2EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750967Ab1IAEmS convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2011 00:42:18 -0400
+In-Reply-To: <1314345310-15041-1-git-send-email-Chunhe.Lan@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chunhe Lan <Chunhe.Lan@freescale.com>, Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Shengzhou Liu <b36685@freescale.com>, PPC list <linuxppc-dev@lists.ozlabs.org>
 
-Girish K S wrote:
+
+On Aug 26, 2011, at 2:55 AM, Chunhe Lan wrote:
+
+> The mmc_delay() is a wrapper function for mdelay() and msleep().
 > 
-> This patch adds the code to handle the default timeout
-> for switch command.
-> For eMMC 4.5 devices if timeout is not specified for the switch
-> command while accessing a specific field,then the default timeout
-> shall be used to timeout. Specification says there is no timeout
-> defined while accessing BKOPS_START, SANITIZE_START, FLUSH_CACHE
-> field(so these fields are excluded).
+>    o mdelay() -- block the system when busy-waiting.
+>    o msleep() -- suspend the currently running task to enable CPU
+>                  to process other tasks, so it is non-blocking
+>                  regarding the whole system.
 > 
-> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> When the desired delay time is more than a period of timer interrupt,
+> just use msleep(). Change mdelay() to mmc_delay() to avoid chewing
+> CPU when busy wait.
+> 
+> Signed-off-by: Shengzhou Liu <b36685@freescale.com>
+> Signed-off-by: Chunhe Lan <Chunhe.Lan@freescale.com>
+> Cc: Chris Ball <cjb@laptop.org>
 > ---
->  drivers/mmc/core/mmc.c     |    5 +++++
->  drivers/mmc/core/mmc_ops.c |    8 ++++++++
->  include/linux/mmc/card.h   |    1 +
->  include/linux/mmc/mmc.h    |    4 ++++
->  4 files changed, 18 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 5700b1c..5b9fb6a 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -405,6 +405,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8
-> *ext_csd)
->  	if (card->ext_csd.rev >= 5)
->  		card->ext_csd.rel_param =
-> ext_csd[EXT_CSD_WR_REL_PARAM];
-> 
-> +	if (card->ext_csd.rev > 5) {
-> +		/* (eMMC 4.5)timeout is expressed in units of 10 ms*/
-> +		card->ext_csd.cmd6_timeout =
-> ext_csd[EXT_CSD_CMD6_TIME]*10;
-> +	}
-> +
->  	if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
->  		card->erased_byte = 0xFF;
->  	else
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 770c3d0..c4d82f4 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -394,6 +394,14 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
-index,
-> u8 value,
->  	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
->  	cmd.cmd_timeout_ms = timeout_ms;
-> 
-> +	/* timeout is not defined for below command indexes (eMMC 4.5) */
-> +	if ((timeout_ms == 0)					&&
-> +		(card->ext_csd->rev > 5)			&&
-> +		(index != EXT_CSD_BKOPS_START)		&&
-> +		(index != EXT_CSD_SANITIZE_START)	&&
-> +		(index != EXT_CSD_FLUSH_CACHE))
-> +			cmd.cmd_timeout_ms = card->ext_csd->cmd6_timeout;
-> +
->  	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
->  	if (err)
->  		return err;
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index b460fc2..ef88412 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -50,6 +50,7 @@ struct mmc_ext_csd {
->  	u8			rel_sectors;
->  	u8			rel_param;
->  	u8			part_config;
-> +	u8			cmd6_timeout;	/* timeout in ms */
->  	unsigned int		part_time;		/* Units: ms */
->  	unsigned int		sa_timeout;		/* Units: 100ns */
->  	unsigned int		hs_max_dtr;
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 5a794cb..a23f836 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -270,8 +270,11 @@ struct _mmc_csd {
->   * EXT_CSD fields
->   */
-> 
-> +#define EXT_CSD_FLUSH_CACHE		32	/* R/W */
->  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
->  #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
-> +#define EXT_CSD_BKOPS_START		164	/* R/W */
-> +#define EXT_CSD_SANITIZE_START		165	/* R/W */
->  #define EXT_CSD_WR_REL_PARAM		166	/* RO */
->  #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
->  #define EXT_CSD_PART_CONFIG		179	/* R/W */
-> @@ -293,6 +296,7 @@ struct _mmc_csd {
->  #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
->  #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
->  #define EXT_CSD_TRIM_MULT		232	/* RO */
-> +#define EXT_CSD_CMD6_TIME		248	/* RO */
-> 
->  /*
->   * EXT_CSD field definitions
-> --
-> 1.7.1
+> drivers/mmc/host/sdhci.c |   10 +++++-----
+> 1 files changed, 5 insertions(+), 5 deletions(-)
 
-Hi Girish,
-
-(Cc'ed Seungwon Jeon)
-
-As I know, Seungwon Jeon has been submitted same/similar patch before this.
-http://www.spinics.net/lists/linux-mmc/msg09770.html
+It might be good to either merge patch 2/3 & 3/3 or rename them since they have same commit message.
 
 Chris,
-I cannot find your review on that...
 
-Thanks.
+Any comments on closing on these patches?
 
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
+- k
