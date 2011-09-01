@@ -1,101 +1,59 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: [PATCH V2] mmc: core: eMMC4.5 Add the timeout for switch
-Date: Thu,  1 Sep 2011 10:57:41 +0530
-Message-ID: <1314854861-2430-1-git-send-email-girish.shivananjappa@linaro.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
+From: Lin Tony-B19295 <B19295@freescale.com>
+Subject: RE: sdhci-esdhc-imx and SDIO interrupts
+Date: Thu, 1 Sep 2011 05:30:43 +0000
+Message-ID: <97D3A72708D04647A5AC84A04996E5B519DCC2@039-SN1MPN1-002.039d.mgd.msft.net>
+References: <20110831120912.GN21500@whatever.nu>
+ <20110831155011.GN8104@pengutronix.de> <20110831163359.GO21500@whatever.nu>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from am1ehsobe004.messaging.microsoft.com ([213.199.154.207]:59443
+	"EHLO AM1EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751286Ab1IAFb2 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 1 Sep 2011 01:31:28 -0400
+In-Reply-To: <20110831163359.GO21500@whatever.nu>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Per-Henrik Lundblom <ph@whatever.nu>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-V2- The datatype of the cmd6_timeout is changed from u8 to unsigned int,
-as it can hold a value upto 255*10=2550.
-	This patch adds the code to handle the default timeout
-for switch command.
-For eMMC 4.5 devices if timeout is not specified for the switch
-command while accessing a specific field,then the default timeout
-shall be used to timeout. Specification says there is no timeout
-defined while accessing BKOPS_START, SANITIZE_START, FLUSH_CACHE
-field(so these fields are excluded).
+I commit a patch to fix this issue. Did you update your code? 
 
-Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
----
- drivers/mmc/core/mmc.c     |    5 +++++
- drivers/mmc/core/mmc_ops.c |    8 ++++++++
- include/linux/mmc/card.h   |    1 +
- include/linux/mmc/mmc.h    |    4 ++++
- 4 files changed, 18 insertions(+), 0 deletions(-)
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Per-Henrik Lundblom
+> Sent: Thursday, September 01, 2011 12:34 AM
+> To: linux-mmc@vger.kernel.org
+> Subject: Re: sdhci-esdhc-imx and SDIO interrupts
+> 
+> * Robert Schwebel <r.schwebel@pengutronix.de> [110831 17:50]:
+> 
+> > > I'm working with a driver for an SDIO Wireless LAN card and just
+> > > tried it out on an i.MX35 based development board (Phytec PCM-043).
+> > > My impression is that the sdhci-esdhc-imx driver doesn't support
+> > > SDIO interrupts, is that correct?
+> >
+> > I think we didn't test this on the PCM043 so far, so it probably won't
+> > work without further activities.
+> 
+> Just having a quick look at the code and a few printouts from sdhci.c
+> indicates that SDIO IRQs are enabled but in the end the eSDHC controller
+> doesn't report any IRQs. On the other hand, the IRQ handling for SDIO
+> IRQs in sdhci.c doesn't follow the steps described in the i.MX35
+> Reference Manual (but that doesn't explain why there is not one single
+> SDIO IRQ reported).
+> 
+> /PH
+> 
+> --
+> Per-Henrik Lundblom           epost: ph@whatever.nu
+> hemsida: www.whatever.nu
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 5700b1c..5b9fb6a 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -405,6 +405,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 	if (card->ext_csd.rev >= 5)
- 		card->ext_csd.rel_param = ext_csd[EXT_CSD_WR_REL_PARAM];
- 
-+	if (card->ext_csd.rev > 5) {
-+		/* (eMMC 4.5)timeout is expressed in units of 10 ms*/
-+		card->ext_csd.cmd6_timeout = ext_csd[EXT_CSD_CMD6_TIME]*10;
-+	}
-+
- 	if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
- 		card->erased_byte = 0xFF;
- 	else
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 770c3d0..c4d82f4 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -394,6 +394,14 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
- 	cmd.cmd_timeout_ms = timeout_ms;
- 
-+	/* timeout is not defined for below command indexes (eMMC 4.5) */
-+	if ((timeout_ms == 0)					&&
-+		(card->ext_csd->rev > 5)			&&
-+		(index != EXT_CSD_BKOPS_START)		&&
-+		(index != EXT_CSD_SANITIZE_START)	&&
-+		(index != EXT_CSD_FLUSH_CACHE))
-+			cmd.cmd_timeout_ms = card->ext_csd->cmd6_timeout;
-+
- 	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
- 	if (err)
- 		return err;
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index b460fc2..ef88412 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -50,6 +50,7 @@ struct mmc_ext_csd {
- 	u8			rel_sectors;
- 	u8			rel_param;
- 	u8			part_config;
-+	unsigned int		cmd6_timeout;	/* timeout in ms */
- 	unsigned int		part_time;		/* Units: ms */
- 	unsigned int		sa_timeout;		/* Units: 100ns */
- 	unsigned int		hs_max_dtr;
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 5a794cb..a23f836 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -270,8 +270,11 @@ struct _mmc_csd {
-  * EXT_CSD fields
-  */
- 
-+#define EXT_CSD_FLUSH_CACHE		32	/* R/W */
- #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
- #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
-+#define EXT_CSD_BKOPS_START		164	/* R/W */
-+#define EXT_CSD_SANITIZE_START		165	/* R/W */
- #define EXT_CSD_WR_REL_PARAM		166	/* RO */
- #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
- #define EXT_CSD_PART_CONFIG		179	/* R/W */
-@@ -293,6 +296,7 @@ struct _mmc_csd {
- #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
- #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
- #define EXT_CSD_TRIM_MULT		232	/* RO */
-+#define EXT_CSD_CMD6_TIME		248	/* RO */
- 
- /*
-  * EXT_CSD field definitions
--- 
-1.7.1
+
