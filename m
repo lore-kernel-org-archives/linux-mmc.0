@@ -1,50 +1,130 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH v3 1/2] mmc: sdio add regulator vsdio
-Date: Thu, 1 Sep 2011 09:37:53 +0800
-Message-ID: <CAMj5Bkh99bkQPX01h_WLnyOP_whdZx=WS-wfG1DB2b32STcTeA@mail.gmail.com>
-References: <1314253575-2602-1-git-send-email-zhangfei.gao@marvell.com>
-	<1314253575-2602-2-git-send-email-zhangfei.gao@marvell.com>
-	<CAMPhdO9r8wyyU9uW7NTyOR2e2kOJG0rqgUow3krg9GpiZmab_g@mail.gmail.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCH] mmc: core: eMMC4.5 Add the timeout for switch
+Date: Thu, 01 Sep 2011 11:13:55 +0900
+Message-ID: <001601cc684c$ce571b00$6b055100$%kim@samsung.com>
+References: <1314699770-17120-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:60316 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756900Ab1IABhz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Aug 2011 21:37:55 -0400
-Received: by eyx24 with SMTP id 24so1325447eyx.19
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Aug 2011 18:37:54 -0700 (PDT)
-In-Reply-To: <CAMPhdO9r8wyyU9uW7NTyOR2e2kOJG0rqgUow3krg9GpiZmab_g@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1314699770-17120-1-git-send-email-girish.shivananjappa@linaro.org>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Girish K S' <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, 'Seungwon Jeon' <tgih.jun@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Eric Miao <eric.y.miao@gmail.com>
-Cc: Zhangfei Gao <zhangfei.gao@marvell.com>, Chris Ball <cjb@laptop.org>, Ohad Ben-Cohen <ohad@wizery.com>, Daniel Drake <dsd@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Nicolas Pitre <nico@fluxnic.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Bing Zhao <bzhao@marvell.com>
 
-On Wed, Aug 31, 2011 at 10:06 PM, Eric Miao <eric.y.miao@gmail.com> wrote:
-> Zhangfei,
->
-> My understanding is that the card in the slot would be either MMC _or_
-> SDIO and why do we need another regulator for the power on/off?
->
-Hi, Eric
+Girish K S wrote:
+> 
+> This patch adds the code to handle the default timeout
+> for switch command.
+> For eMMC 4.5 devices if timeout is not specified for the switch
+> command while accessing a specific field,then the default timeout
+> shall be used to timeout. Specification says there is no timeout
+> defined while accessing BKOPS_START, SANITIZE_START, FLUSH_CACHE
+> field(so these fields are excluded).
+> 
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> ---
+>  drivers/mmc/core/mmc.c     |    5 +++++
+>  drivers/mmc/core/mmc_ops.c |    8 ++++++++
+>  include/linux/mmc/card.h   |    1 +
+>  include/linux/mmc/mmc.h    |    4 ++++
+>  4 files changed, 18 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 5700b1c..5b9fb6a 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -405,6 +405,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8
+> *ext_csd)
+>  	if (card->ext_csd.rev >= 5)
+>  		card->ext_csd.rel_param =
+> ext_csd[EXT_CSD_WR_REL_PARAM];
+> 
+> +	if (card->ext_csd.rev > 5) {
+> +		/* (eMMC 4.5)timeout is expressed in units of 10 ms*/
+> +		card->ext_csd.cmd6_timeout =
+> ext_csd[EXT_CSD_CMD6_TIME]*10;
+> +	}
+> +
+>  	if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
+>  		card->erased_byte = 0xFF;
+>  	else
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 770c3d0..c4d82f4 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -394,6 +394,14 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
+index,
+> u8 value,
+>  	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>  	cmd.cmd_timeout_ms = timeout_ms;
+> 
+> +	/* timeout is not defined for below command indexes (eMMC 4.5) */
+> +	if ((timeout_ms == 0)					&&
+> +		(card->ext_csd->rev > 5)			&&
+> +		(index != EXT_CSD_BKOPS_START)		&&
+> +		(index != EXT_CSD_SANITIZE_START)	&&
+> +		(index != EXT_CSD_FLUSH_CACHE))
+> +			cmd.cmd_timeout_ms = card->ext_csd->cmd6_timeout;
+> +
+>  	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+>  	if (err)
+>  		return err;
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index b460fc2..ef88412 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -50,6 +50,7 @@ struct mmc_ext_csd {
+>  	u8			rel_sectors;
+>  	u8			rel_param;
+>  	u8			part_config;
+> +	u8			cmd6_timeout;	/* timeout in ms */
+>  	unsigned int		part_time;		/* Units: ms */
+>  	unsigned int		sa_timeout;		/* Units: 100ns */
+>  	unsigned int		hs_max_dtr;
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 5a794cb..a23f836 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -270,8 +270,11 @@ struct _mmc_csd {
+>   * EXT_CSD fields
+>   */
+> 
+> +#define EXT_CSD_FLUSH_CACHE		32	/* R/W */
+>  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+>  #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
+> +#define EXT_CSD_BKOPS_START		164	/* R/W */
+> +#define EXT_CSD_SANITIZE_START		165	/* R/W */
+>  #define EXT_CSD_WR_REL_PARAM		166	/* RO */
+>  #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
+>  #define EXT_CSD_PART_CONFIG		179	/* R/W */
+> @@ -293,6 +296,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
+>  #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
+>  #define EXT_CSD_TRIM_MULT		232	/* RO */
+> +#define EXT_CSD_CMD6_TIME		248	/* RO */
+> 
+>  /*
+>   * EXT_CSD field definitions
+> --
+> 1.7.1
 
-vsdio is used for dynamically power control to sdio, for example
-application dynamically disable/enable wifi.
-Then mmc_start/stop_host and mmc_power_up/down could directly power
-on/off sdio via mmc_set_ios.
-This also workable with runtime PM, which already introduced into mmc by Ohad.
+Hi Girish,
 
-vmmc is used to statically provided power to sd or vmmc.
+(Cc'ed Seungwon Jeon)
 
-Daniel once suggested reusing vmmc, however we found CD pin requires
-vmmc to be alwayes on.
-If vmmc is dynamically power off, CD pin will be low, which indicating
-card is inserted by mistake.
-For example when no card inserted, CD pin will high -> host fail to
-detect sd card -> vmmc disabled in set_ios -> host thought card
-inserted -> irq happen -> host redetect card ->
+As I know, Seungwon Jeon has been submitted same/similar patch before this.
+http://www.spinics.net/lists/linux-mmc/msg09770.html
 
-If there is concern of vsdio in sdhci.c, how about moving vsdio to
-specific driver via call back.
+Chris,
+I cannot find your review on that...
 
-Thanks
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
