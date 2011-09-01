@@ -1,39 +1,36 @@
-From: Per-Henrik Lundblom <ph@whatever.nu>
-Subject: Re: sdhci-esdhc-imx and SDIO interrupts
-Date: Thu, 1 Sep 2011 13:21:28 +0200
-Message-ID: <20110901112128.GD9993@whatever.nu>
-References: <20110831120912.GN21500@whatever.nu>
- <20110831155011.GN8104@pengutronix.de>
- <20110831163359.GO21500@whatever.nu>
- <97D3A72708D04647A5AC84A04996E5B519DCC2@039-SN1MPN1-002.039d.mgd.msft.net>
- <20110901064609.GA9993@whatever.nu>
- <97D3A72708D04647A5AC84A04996E5B519DDA1@039-SN1MPN1-002.039d.mgd.msft.net>
+From: "Nori, Sekhar" <nsekhar@ti.com>
+Subject: RE: [PATCH v4] ARM: davinci: AM18x: Add wl1271/wlan support
+Date: Thu, 1 Sep 2011 17:29:08 +0530
+Message-ID: <B85A65D85D7EB246BE421B3FB0FBB5930257268CA9@dbde02.ent.ti.com>
+References: <B85A65D85D7EB246BE421B3FB0FBB593024DF05D8E@dbde02.ent.ti.com>
+ <1312444283-25581-1-git-send-email-ido@wizery.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from roadrunner.df.lth.se ([194.47.250.105]:51306 "EHLO
-	roadrunner.df.lth.se" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751068Ab1IALVa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2011 07:21:30 -0400
-Received: from roadrunner.df.lth.se (localhost [127.0.0.1])
-	by roadrunner.df.lth.se (Postfix) with ESMTP id C247B47B
-	for <linux-mmc@vger.kernel.org>; Thu,  1 Sep 2011 13:21:28 +0200 (CEST)
-Content-Disposition: inline
-In-Reply-To: <97D3A72708D04647A5AC84A04996E5B519DDA1@039-SN1MPN1-002.039d.mgd.msft.net>
+Received: from devils.ext.ti.com ([198.47.26.153]:43129 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753055Ab1IAL7R convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2011 07:59:17 -0400
+In-Reply-To: <1312444283-25581-1-git-send-email-ido@wizery.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ido Yariv <ido@wizery.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-ker>
 
-* Lin Tony-B19295 <B19295@freescale.com> [110901 09:34]:
+On Thu, Aug 04, 2011 at 13:21:23, Ido Yariv wrote:
+> The wl1271 daughter card for AM18x EVMs is a combo wireless connectivity
+> add-on card, based on the LS Research TiWi module with Texas
+> Instruments' wl1271 solution.
+> It is a 4-wire, 1.8V, embedded SDIO WLAN device with an external IRQ
+> line and is power-controlled by a GPIO-based fixed regulator.
+> 
+> Add support for the WLAN capabilities of this expansion board.
+> 
+> Signed-off-by: Ido Yariv <ido@wizery.com>
 
-> Chris ball's tree.
+Applied, thanks.
 
-Thanks! Merged relevant parts with 2.6.93.4 and the mach-mx3 platform
-and now it seems like SDIO interrupts are working fine. Sweet :)
-
-/PH
-
---
-Per-Henrik Lundblom           epost: ph@whatever.nu
-hemsida: www.whatever.nu
+Regards,
+Sekhar
 
