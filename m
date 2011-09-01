@@ -1,49 +1,150 @@
-From: Lin Tony-B19295 <B19295@freescale.com>
-Subject: RE: [PATCH 1/1] mmc: sdhci-esdhc: Change delay after setting clock
- from 100ms to 1ms
-Date: Thu, 1 Sep 2011 07:46:37 +0000
-Message-ID: <97D3A72708D04647A5AC84A04996E5B519DDC6@039-SN1MPN1-002.039d.mgd.msft.net>
-References: <1314856275-12131-1-git-send-email-tony.lin@freescale.com>
- <20110901055522.GB22652@pengutronix.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH V2] mmc: core: eMMC4.5 Add the timeout for switch
+Date: Thu, 01 Sep 2011 16:53:28 +0900
+Message-ID: <4E5F39F8.5040107@samsung.com>
+References: <1314854861-2430-1-git-send-email-girish.shivananjappa@linaro.org>
+ <001901cc686f$4be243c0$e3a6cb40$%jun@samsung.com>
+ <CAGxe1ZE--PoWiLmJstoyxJ+SpLdH9KzY3zPtC=PDEjdsg6Ot6g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:50407
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754523Ab1IAHqs convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 1 Sep 2011 03:46:48 -0400
-In-Reply-To: <20110901055522.GB22652@pengutronix.de>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <CAGxe1ZE--PoWiLmJstoyxJ+SpLdH9KzY3zPtC=PDEjdsg6Ot6g@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "cjb@laptop.org" <cjb@laptop.org>
 
-> -----Original Message-----
-> From: Wolfram Sang [mailto:w.sang@pengutronix.de]
-> Sent: Thursday, September 01, 2011 1:55 PM
-> To: Lin Tony-B19295
-> Cc: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
-> cjb@laptop.org
-> Subject: Re: [PATCH 1/1] mmc: sdhci-esdhc: Change delay after setting
-> clock from 100ms to 1ms
-> 
-> On Thu, Sep 01, 2011 at 01:51:15PM +0800, Tony Lin wrote:
-> > 1ms is enough for hardware to change the clock to stable.
-> > 100ms is too long.
-> 
-> How do you know that? Can you be sure for PowerPC as well? Have you
-> researched why the original author of the code has chosen that value? If
-> so, please update your commit message with such infos.
-> 
-I got this confirmation by IC simulation, but sorry I just noticed that's also used for PPC.
-I can update the information after got confirmation from author. 
+Hi Girish.
 
+I agreed for Mr.Jeon's opinion.
+I think that need not to check for any exception case.
+(Mr.Jeon mentioned the below comment, just using default cmd6_timeout)
+
+Thanks,
+Jaehoon Chung
+
+Girish K S wrote:
+
+> Hello Mr Jeon,
+>                       In case if the timeout is specified by the
+> calling function, the code in this patch will not be executed. But if
+> some command other than the three are called with 0, then this code
+> will make sure that atleast the default value is used to timeout.
+> 
+> regards
+> Girish K S
+> 
+> On 1 September 2011 11:50, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> Hi Girish,
+>>
+>> Girish K S wrote:
+>>> V2- The datatype of the cmd6_timeout is changed from u8 to unsigned int,
+>>> as it can hold a value upto 255*10=2550.
+>>>       This patch adds the code to handle the default timeout
+>>> for switch command.
+>>> For eMMC 4.5 devices if timeout is not specified for the switch
+>>> command while accessing a specific field,then the default timeout
+>>> shall be used to timeout. Specification says there is no timeout
+>>> defined while accessing BKOPS_START, SANITIZE_START, FLUSH_CACHE
+>>> field(so these fields are excluded).
+>>>
+>>> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+>>> ---
+>>>  drivers/mmc/core/mmc.c     |    5 +++++
+>>>  drivers/mmc/core/mmc_ops.c |    8 ++++++++
+>>>  include/linux/mmc/card.h   |    1 +
+>>>  include/linux/mmc/mmc.h    |    4 ++++
+>>>  4 files changed, 18 insertions(+), 0 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>> index 5700b1c..5b9fb6a 100644
+>>> --- a/drivers/mmc/core/mmc.c
+>>> +++ b/drivers/mmc/core/mmc.c
+>>> @@ -405,6 +405,11 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8
+>>> *ext_csd)
+>>>       if (card->ext_csd.rev >= 5)
+>>>               card->ext_csd.rel_param = ext_csd[EXT_CSD_WR_REL_PARAM];
+>>>
+>>> +     if (card->ext_csd.rev > 5) {
+>>> +             /* (eMMC 4.5)timeout is expressed in units of 10 ms*/
+>>> +             card->ext_csd.cmd6_timeout = ext_csd[EXT_CSD_CMD6_TIME]*10;
+>>> +     }
+>>> +
+>>>       if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
+>>>               card->erased_byte = 0xFF;
+>>>       else
+>>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>>> index 770c3d0..c4d82f4 100644
+>>> --- a/drivers/mmc/core/mmc_ops.c
+>>> +++ b/drivers/mmc/core/mmc_ops.c
+>>> @@ -394,6 +394,14 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
+>>> index, u8 value,
+>>>       cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>>>       cmd.cmd_timeout_ms = timeout_ms;
+>>>
+>>> +     /* timeout is not defined for below command indexes (eMMC 4.5) */
+>>> +     if ((timeout_ms == 0)                                   &&
+>>> +             (card->ext_csd->rev > 5)                        &&
+>>> +             (index != EXT_CSD_BKOPS_START)          &&
+>>> +             (index != EXT_CSD_SANITIZE_START)       &&
+>>> +             (index != EXT_CSD_FLUSH_CACHE))
+>>> +                     cmd.cmd_timeout_ms = card->ext_csd->cmd6_timeout;
+>>> +
+>> mmc_switch doesn't need to take over '0' value for timeout_ms except for undefined timeout(Background operation, sanitize, etc)
+>> It is possible and good to pass the argument of specific timeout_ms(including default cmd6 timeout) explicitly rather than '0',
+>> if timeout value for cmd6 is defined.
+>> Then, mmc_switch maybe doesn't need to handle timeout for some exception case.
+>>
+>>>       err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+>>>       if (err)
+>>>               return err;
+>>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+>>> index b460fc2..ef88412 100644
+>>> --- a/include/linux/mmc/card.h
+>>> +++ b/include/linux/mmc/card.h
+>>> @@ -50,6 +50,7 @@ struct mmc_ext_csd {
+>>>       u8                      rel_sectors;
+>>>       u8                      rel_param;
+>>>       u8                      part_config;
+>>> +     unsigned int            cmd6_timeout;   /* timeout in ms */
+>>>       unsigned int            part_time;              /* Units: ms */
+>>>       unsigned int            sa_timeout;             /* Units: 100ns */
+>>>       unsigned int            hs_max_dtr;
+>>> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+>>> index 5a794cb..a23f836 100644
+>>> --- a/include/linux/mmc/mmc.h
+>>> +++ b/include/linux/mmc/mmc.h
+>>> @@ -270,8 +270,11 @@ struct _mmc_csd {
+>>>   * EXT_CSD fields
+>>>   */
+>>>
+>>> +#define EXT_CSD_FLUSH_CACHE          32      /* R/W */
+>>>  #define EXT_CSD_PARTITION_ATTRIBUTE  156     /* R/W */
+>>>  #define EXT_CSD_PARTITION_SUPPORT    160     /* RO */
+>>> +#define EXT_CSD_BKOPS_START          164     /* R/W */
+>>> +#define EXT_CSD_SANITIZE_START               165     /* R/W */
+>>>  #define EXT_CSD_WR_REL_PARAM         166     /* RO */
+>>>  #define EXT_CSD_ERASE_GROUP_DEF              175     /* R/W */
+>>>  #define EXT_CSD_PART_CONFIG          179     /* R/W */
+>>> @@ -293,6 +296,7 @@ struct _mmc_csd {
+>>>  #define EXT_CSD_SEC_ERASE_MULT               230     /* RO */
+>>>  #define EXT_CSD_SEC_FEATURE_SUPPORT  231     /* RO */
+>>>  #define EXT_CSD_TRIM_MULT            232     /* RO */
+>>> +#define EXT_CSD_CMD6_TIME            248     /* RO */
+>>>
+>>>  /*
+>>>   * EXT_CSD field definitions
+>>> --
+>>> 1.7.1
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 > --
-> Pengutronix e.K.                           | Wolfram Sang
-> |
-> Industrial Linux Solutions                 | http://www.pengutronix.de/
-> |
-
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
