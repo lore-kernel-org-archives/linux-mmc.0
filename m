@@ -1,36 +1,89 @@
-From: "Nori, Sekhar" <nsekhar@ti.com>
-Subject: RE: [PATCH v4] ARM: davinci: AM18x: Add wl1271/wlan support
-Date: Thu, 1 Sep 2011 17:29:08 +0530
-Message-ID: <B85A65D85D7EB246BE421B3FB0FBB5930257268CA9@dbde02.ent.ti.com>
-References: <B85A65D85D7EB246BE421B3FB0FBB593024DF05D8E@dbde02.ent.ti.com>
- <1312444283-25581-1-git-send-email-ido@wizery.com>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: [PATCH 1/2] omap: hsmmc: Normalize dma cleanup operations
+Date: Fri, 2 Sep 2011 00:35:56 +0530
+Message-ID: <1314903957-24408-2-git-send-email-svenkatr@ti.com>
+References: <y>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:43129 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753055Ab1IAL7R convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2011 07:59:17 -0400
-In-Reply-To: <1312444283-25581-1-git-send-email-ido@wizery.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <y>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: per.forlin@linaro.org, cjb@laptop.org, Venkatraman S <svenkatr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ido Yariv <ido@wizery.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-ker>
 
-On Thu, Aug 04, 2011 at 13:21:23, Ido Yariv wrote:
-> The wl1271 daughter card for AM18x EVMs is a combo wireless connectivity
-> add-on card, based on the LS Research TiWi module with Texas
-> Instruments' wl1271 solution.
-> It is a 4-wire, 1.8V, embedded SDIO WLAN device with an external IRQ
-> line and is power-controlled by a GPIO-based fixed regulator.
-> 
-> Add support for the WLAN capabilities of this expansion board.
-> 
-> Signed-off-by: Ido Yariv <ido@wizery.com>
+Reuse omap_hsmmc_dma_cleanup even for normal dma teardown in
+omap_hsmmc_dma_cb. Consolidate multiple points of dma unmap into a 
+single location in post_req function, to prevent double unmapping.
 
-Applied, thanks.
+Signed-off-by: Venkatraman S <svenkatr@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   20 +++++---------------
+ 1 files changed, 5 insertions(+), 15 deletions(-)
 
-Regards,
-Sekhar
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 21e4a79..5b7776c 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -999,7 +999,8 @@ static void omap_hsmmc_dma_cleanup(struct omap_hsmmc_host *host, int errno)
+ {
+ 	int dma_ch;
+ 
+-	host->data->error = errno;
++	if (host->data)
++		host->data->error = errno;
+ 
+ 	spin_lock(&host->irq_lock);
+ 	dma_ch = host->dma_ch;
+@@ -1007,12 +1008,8 @@ static void omap_hsmmc_dma_cleanup(struct omap_hsmmc_host *host, int errno)
+ 	spin_unlock(&host->irq_lock);
+ 
+ 	if (host->use_dma && dma_ch != -1) {
+-		dma_unmap_sg(mmc_dev(host->mmc), host->data->sg,
+-			host->data->sg_len,
+-			omap_hsmmc_get_dma_dir(host, host->data));
+ 		omap_free_dma(dma_ch);
+ 	}
+-	host->data = NULL;
+ }
+ 
+ /*
+@@ -1370,7 +1367,7 @@ static void omap_hsmmc_dma_cb(int lch, u16 ch_status, void *cb_data)
+ {
+ 	struct omap_hsmmc_host *host = cb_data;
+ 	struct mmc_data *data;
+-	int dma_ch, req_in_progress;
++	int req_in_progress;
+ 
+ 	if (!(ch_status & OMAP_DMA_BLOCK_IRQ)) {
+ 		dev_warn(mmc_dev(host->mmc), "unexpected dma status %x\n",
+@@ -1394,16 +1391,9 @@ static void omap_hsmmc_dma_cb(int lch, u16 ch_status, void *cb_data)
+ 		return;
+ 	}
+ 
+-	if (!data->host_cookie)
+-		dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+-			     omap_hsmmc_get_dma_dir(host, data));
+-
+ 	req_in_progress = host->req_in_progress;
+-	dma_ch = host->dma_ch;
+-	host->dma_ch = -1;
+ 	spin_unlock(&host->irq_lock);
+-
+-	omap_free_dma(dma_ch);
++	omap_hsmmc_dma_cleanup(host, 0);
+ 
+ 	/* If DMA has finished after TC, complete the request */
+ 	if (!req_in_progress) {
+@@ -1575,7 +1565,7 @@ static void omap_hsmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+ 	struct mmc_data *data = mrq->data;
+ 
+-	if (host->use_dma) {
++	if (data->host_cookie) {
+ 		dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+ 			     omap_hsmmc_get_dma_dir(host, data));
+ 		data->host_cookie = 0;
+-- 
+1.7.1
 
