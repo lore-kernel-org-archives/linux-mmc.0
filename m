@@ -1,40 +1,68 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH 0/2] Move sdhci-s3c platform helper into driver
-Date: Fri, 02 Sep 2011 20:48:20 +0530
-Message-ID: <1314976702-19284-1-git-send-email-thomas.abraham@linaro.org>
+Subject: [PATCH 1/2] mmc: sdhci-s3c: add default controller configuration
+Date: Fri, 02 Sep 2011 20:48:21 +0530
+Message-ID: <1314976702-19284-2-git-send-email-thomas.abraham@linaro.org>
+References: <1314976702-19284-1-git-send-email-thomas.abraham@linaro.org>
 Content-Transfer-Encoding: 7BIT
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:45468 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752509Ab1IBPSj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2011 11:18:39 -0400
+In-reply-to: <1314976702-19284-1-git-send-email-thomas.abraham@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
 Cc: cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org, ben-linux@fluff.org
-List-Id: linux-mmc@vger.kernel.org
 
-The platform helper that sets up the default sdhci-s3c controller
-configuration can be removed and moved into the sdhci-s3c driver.
-This platform helper is removed for s3c2416, s3c64xx, s5pc100,
-s5pv210 and Exynos4 platforms.
+The default controller configuration which was previously setup by
+platform helper functions is moved into the driver.
 
-Since the platform helper function pointer was being passed in the
-platform data of sdhci-s3c driver, the removal of this pointer from
-the platform data is step closer to complete device tree support for
-sdhci-s3c driver.
+Cc: Ben Dooks <ben-linux@fluff.org>
+Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+---
+ drivers/mmc/host/sdhci-s3c.c |   28 +++++++++++++++++-----------
+ 1 files changed, 17 insertions(+), 11 deletions(-)
 
-This patchset has been tested on the following platforms.
-SMDK2416, SMDK6410, SMDKC100, SMDKV210 and SMDKV310.
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 2bd7bf4..d891682 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -203,17 +203,23 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		writel(ctrl, host->ioaddr + S3C_SDHCI_CONTROL2);
+ 	}
+ 
+-	/* reconfigure the hardware for new clock rate */
+-
+-	{
+-		struct mmc_ios ios;
+-
+-		ios.clock = clock;
+-
+-		if (ourhost->pdata->cfg_card)
+-			(ourhost->pdata->cfg_card)(ourhost->pdev, host->ioaddr,
+-						   &ios, NULL);
+-	}
++	/* reprogram default hardware configuration */
++	writel(S3C64XX_SDHCI_CONTROL4_DRIVE_9mA,
++		host->ioaddr + S3C64XX_SDHCI_CONTROL4);
++
++	ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
++	ctrl |= (S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR |
++		  S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK |
++		  S3C_SDHCI_CTRL2_ENFBCLKRX |
++		  S3C_SDHCI_CTRL2_DFCNT_NONE |
++		  S3C_SDHCI_CTRL2_ENCLKOUTHOLD);
++	writel(ctrl, host->ioaddr + S3C_SDHCI_CONTROL2);
++
++	/* reconfigure the controller for new clock rate */
++	ctrl = (S3C_SDHCI_CTRL3_FCSEL1 | S3C_SDHCI_CTRL3_FCSEL0);
++	if (clock < 25 * 1000000)
++		ctrl |= (S3C_SDHCI_CTRL3_FCSEL3 | S3C_SDHCI_CTRL3_FCSEL2);
++	writel(ctrl, host->ioaddr + S3C_SDHCI_CONTROL3);
+ }
+ 
+ /**
+-- 
+1.6.6.rc2
 
-Thomas Abraham (2):
-  mmc: sdhci-s3c: add default controller configuration
-  arm: samsung: remove sdhci default configuration setup platform helper
-
- arch/arm/mach-exynos4/setup-sdhci.c        |   47 -----------------------
- arch/arm/mach-s3c2416/setup-sdhci.c        |   37 ------------------
- arch/arm/mach-s3c64xx/setup-sdhci.c        |   48 -----------------------
- arch/arm/mach-s5pc100/setup-sdhci.c        |   42 --------------------
- arch/arm/mach-s5pv210/setup-sdhci.c        |   41 --------------------
- arch/arm/plat-samsung/dev-hsmmc.c          |    2 -
- arch/arm/plat-samsung/dev-hsmmc1.c         |    2 -
- arch/arm/plat-samsung/dev-hsmmc2.c         |    2 -
- arch/arm/plat-samsung/dev-hsmmc3.c         |    2 -
- arch/arm/plat-samsung/include/plat/sdhci.h |   57 ----------------------------
- drivers/mmc/host/sdhci-s3c.c               |   28 ++++++++-----
- 11 files changed, 17 insertions(+), 291 deletions(-)
