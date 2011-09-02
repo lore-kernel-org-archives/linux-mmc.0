@@ -1,177 +1,84 @@
-From: Kyungmin Park <kmpark@infradead.org>
-Subject: Re: [PATCH] mmc: core: Add power off notify feature(eMMC 4.5)
-Date: Fri, 2 Sep 2011 17:18:55 +0900
-Message-ID: <CAH9JG2XA7xa2vH8w9r00NWECir4Dye_fki1w0aGQpcrhvW7CgQ@mail.gmail.com>
-References: <1314948349-15856-1-git-send-email-girish.shivananjappa@linaro.org>
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: [PATCH 1/3] irq: If an IRQ is a GPIO, request and configure it
+Date: Fri, 2 Sep 2011 10:36:51 +0200 (CEST)
+Message-ID: <alpine.LFD.2.02.1109021027360.2723@ionos>
+References: <1312498820-2275-1-git-send-email-swarren@nvidia.com> <1312498820-2275-2-git-send-email-swarren@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1314948349-15856-1-git-send-email-girish.shivananjappa@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>, =?UTF-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from www.linutronix.de ([62.245.132.108]:59315 "EHLO
+	Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932419Ab1IBIhD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2011 04:37:03 -0400
+In-Reply-To: <1312498820-2275-2-git-send-email-swarren@nvidia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephen Warren <swarren@nvidia.com>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>, Chris Ball <cjb@laptop.org>, ccross@android.com, olof@lixom.net, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, alsa-devel@alsa-project.org, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
 
-Hi,
+On Thu, 4 Aug 2011, Stephen Warren wrote:
 
-Good job on eMMC v4.5. but this patch is incomplete for power off
-notification feature.
-Now you just enable the Power off notification, and don't handle the
-reaming one.
-As you read the spec, it takes more time the sleep & wake-up and next
-booting time if no proper power off notification
+> Many IRQs are associated with GPIO pins. When the pin is used as an IRQ,
+> it can't be used as anything else; it should be requested. Enhance the
+> core interrupt code to call gpio_request() and gpio_direction_input() for
+> any IRQ that is also a GPIO. This prevents duplication of these calls in
+> each driver that uses an IRQ.
 
-Please also consider it.
+This is very much the wrong approach. If you think it through then the
+irq setup code might end up with tons of other subsystem specific
+setup thingies, e.g. PCI .....
 
-Thank you,
-Kyungmin Park
+The right thing to do is to add a irq_configure() function pointer to
+the irq chip and provide a common function for gpios in gpiolib, which
+is then used by the particular GPIO irq chip implementation.
 
-On Fri, Sep 2, 2011 at 4:25 PM, Girish K S
-<girish.shivananjappa@linaro.org> wrote:
-> This patch adds the support for power off notify feature
-> available in eMMC 4.5 devices.
-> =A0 =A0 =A0 =A0If the the host has support for this feature, then the
-> mmc core will notify it to the device by setting the
-> POWER_OFF_NOTIFICATION byte in the extended csd register
-> with a value 1(POWER_ON).
-> =A0 =A0 =A0 =A0This patch should be applied after Seungwon Jeon's
-> patch for cmd6 timeout.
->
-> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
-> ---
-> =A0drivers/mmc/core/mmc.c =A0 | =A0 19 +++++++++++++++++--
-> =A0include/linux/mmc/card.h | =A0 =A01 +
-> =A0include/linux/mmc/host.h | =A0 =A01 +
-> =A0include/linux/mmc/mmc.h =A0| =A0 =A08 +++++++-
-> =A04 files changed, 26 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 68eb368..2f06b37 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -410,10 +410,12 @@ static int mmc_read_ext_csd(struct mmc_card *ca=
-rd, u8 *ext_csd)
-> =A0 =A0 =A0 =A0else
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->erased_byte =3D 0x0;
->
-> - =A0 =A0 =A0 if (card->ext_csd.rev >=3D 6)
-> + =A0 =A0 =A0 if (card->ext_csd.rev >=3D 6) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->ext_csd.generic_cmd6_time =3D 10=
- *
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_GENERI=
-C_CMD6_TIME];
-> -
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.power_off_longtime =3D 10=
- *
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_POWER_O=
-=46F_LONG_TIME];
-> + =A0 =A0 =A0 }
-> =A0out:
-> =A0 =A0 =A0 =A0return err;
-> =A0}
-> @@ -710,6 +712,19 @@ static int mmc_init_card(struct mmc_host *host, =
-u32 ocr,
-> =A0 =A0 =A0 =A0}
->
-> =A0 =A0 =A0 =A0/*
-> + =A0 =A0 =A0 =A0* If the host supports the power_off_notify capabili=
-ty then
-> + =A0 =A0 =A0 =A0* set the notification byte in the ext_csd register =
-of device
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 if (host->caps & MMC_CAP_POWER_OFF_NOTIFY) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_SE=
-T_NORMAL,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 EXT_CSD=
-_POWER_OFF_NOTIFICATION,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 EXT_CSD=
-_POWER_ON,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->e=
-xt_csd.generic_cmd6_time);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err && err !=3D -EBADMSG)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto free_card;
-> + =A0 =A0 =A0 }
-> +
-> + =A0 =A0 =A0 /*
-> =A0 =A0 =A0 =A0 * Activate high speed (if supported)
-> =A0 =A0 =A0 =A0 */
-> =A0 =A0 =A0 =A0if ((card->ext_csd.hs_max_dtr !=3D 0) &&
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index e992fe3..2bf2843 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -53,6 +53,7 @@ struct mmc_ext_csd {
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0part_time; =A0 =A0=
- =A0 =A0 =A0 =A0 =A0/* Units: ms */
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0sa_timeout; =A0 =A0=
- =A0 =A0 =A0 =A0 /* Units: 100ns */
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0generic_cmd6_time;=
- =A0 =A0 =A0/* Units: ms */
-> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0power_off_longtime;=
- =A0 =A0 /* Units: ms */
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0hs_max_dtr;
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0sectors;
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0card_type;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 1d09562..21c85e1 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -229,6 +229,7 @@ struct mmc_host {
-> =A0#define MMC_CAP_MAX_CURRENT_600 =A0 =A0 =A0 =A0(1 << 28) =A0 =A0 =A0=
- /* Host max current limit is 600mA */
-> =A0#define MMC_CAP_MAX_CURRENT_800 =A0 =A0 =A0 =A0(1 << 29) =A0 =A0 =A0=
- /* Host max current limit is 800mA */
-> =A0#define MMC_CAP_CMD23 =A0 =A0 =A0 =A0 =A0(1 << 30) =A0 =A0 =A0 /* =
-CMD23 supported. */
-> +#define MMC_CAP_POWER_OFF_NOTIFY =A0 =A0(1 << 31)/*NOtify poweroff s=
-upported */
->
-> =A0 =A0 =A0 =A0mmc_pm_flag_t =A0 =A0 =A0 =A0 =A0 pm_caps; =A0 =A0 =A0=
- =A0/* supported pm features */
->
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index e869f00..8e86d77 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -269,7 +269,7 @@ struct _mmc_csd {
-> =A0/*
-> =A0* EXT_CSD fields
-> =A0*/
-> -
-> +#define EXT_CSD_POWER_OFF_NOTIFICATION 34 /* R/W */
-> =A0#define EXT_CSD_PARTITION_ATTRIBUTE =A0 =A0156 =A0 =A0 /* R/W */
-> =A0#define EXT_CSD_PARTITION_SUPPORT =A0 =A0 =A0160 =A0 =A0 /* RO */
-> =A0#define EXT_CSD_WR_REL_PARAM =A0 =A0 =A0 =A0 =A0 166 =A0 =A0 /* RO=
- */
-> @@ -293,6 +293,7 @@ struct _mmc_csd {
-> =A0#define EXT_CSD_SEC_ERASE_MULT =A0 =A0 =A0 =A0 230 =A0 =A0 /* RO *=
-/
-> =A0#define EXT_CSD_SEC_FEATURE_SUPPORT =A0 =A0231 =A0 =A0 /* RO */
-> =A0#define EXT_CSD_TRIM_MULT =A0 =A0 =A0 =A0 =A0 =A0 =A0232 =A0 =A0 /=
-* RO */
-> +#define EXT_CSD_POWER_OFF_LONG_TIME =A0 =A0247 /*RO*/
-> =A0#define EXT_CSD_GENERIC_CMD6_TIME =A0 =A0 =A0248 =A0 =A0 /* RO */
->
-> =A0/*
-> @@ -329,6 +330,11 @@ struct _mmc_csd {
-> =A0#define EXT_CSD_SEC_BD_BLK_EN =A0BIT(2)
-> =A0#define EXT_CSD_SEC_GB_CL_EN =A0 BIT(4)
->
-> +#define EXT_CSD_NO_POWER_NOTIFICATION =A00
-> +#define EXT_CSD_POWER_ON =A0 =A0 =A0 1
-> +#define EXT_CSD_POWER_OFF_SHORT =A0 =A0 =A0 =A02
-> +#define EXT_CSD_POWER_OFF_LONG 3
-> +
-> =A0/*
-> =A0* MMC_SWITCH access modes
-> =A0*/
-> --
-> 1.7.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-samsu=
-ng-soc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+Thanks,
+
+	tglx
+---
+diff --git a/include/linux/irq.h b/include/linux/irq.h
+index 5951730..33ba4b8 100644
+--- a/include/linux/irq.h
++++ b/include/linux/irq.h
+@@ -265,6 +265,7 @@ static inline void irqd_clr_chained_irq_inprogress(struct irq_data *d)
+  * struct irq_chip - hardware interrupt chip descriptor
+  *
+  * @name:		name for /proc/interrupts
++ * @irq_configure:	configure an interrupt (optional)
+  * @irq_startup:	start up the interrupt (defaults to ->enable if NULL)
+  * @irq_shutdown:	shut down the interrupt (defaults to ->disable if NULL)
+  * @irq_enable:		enable the interrupt (defaults to chip->unmask if NULL)
+@@ -289,9 +290,14 @@ static inline void irqd_clr_chained_irq_inprogress(struct irq_data *d)
+  * @flags:		chip specific flags
+  *
+  * @release:		release function solely used by UML
++ *
++ * If @irq_configure is provided, it's called from setup_irq prior to
++ * enabling the interrupt. irq_configure should return 0 on success or
++ * an appropriate error code.
+  */
+ struct irq_chip {
+ 	const char	*name;
++	int		(*irq_configure)(struct irq_data *data);
+ 	unsigned int	(*irq_startup)(struct irq_data *data);
+ 	void		(*irq_shutdown)(struct irq_data *data);
+ 	void		(*irq_enable)(struct irq_data *data);
+diff --git a/kernel/irq/manage.c b/kernel/irq/manage.c
+index 9b956fa..d5e6a58 100644
+--- a/kernel/irq/manage.c
++++ b/kernel/irq/manage.c
+@@ -999,6 +999,13 @@ __setup_irq(unsigned int irq, struct irq_desc *desc, struct irqaction *new)
+ 	if (!shared) {
+ 		init_waitqueue_head(&desc->wait_for_threads);
+ 
++		/* Configure the interrupt */
++		if (desc->chip->irq_configure) {
++			ret = desc->chip->irq_configure(&desc->irq_data);
++			if (ret)
++				goto out_mask;
++		}
++
+ 		/* Setup the type (level, edge polarity) if configured: */
+ 		if (new->flags & IRQF_TRIGGER_MASK) {
+ 			ret = __irq_set_trigger(desc, irq,
+
