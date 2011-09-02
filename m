@@ -1,64 +1,125 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: RFC : mmc : Use wait_for_completion_timeout() instead of
- wait_for_completion in case of multiple write blocks.
-Date: Fri, 2 Sep 2011 14:58:11 +0900
-Message-ID: <CAKYAXd8VUAZ1gL-MZx7y6+nORJ4m2U+SFyzF2duB-9NUcbqBQw@mail.gmail.com>
-References: <CAKYAXd_QrgHHdiev-Vxt=FrwkJg-3qfjxzqkPmgLbwZ=U4358Q@mail.gmail.com>
-	<CACRpkdYkk+W98RoCCwRWXyF+_1_H9gujxHLCPnqtPMn401fZvg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:52012 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753327Ab1IBF6N (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2011 01:58:13 -0400
-In-Reply-To: <CACRpkdYkk+W98RoCCwRWXyF+_1_H9gujxHLCPnqtPMn401fZvg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: [PATCH] mmc: core: Add power off notify feature(eMMC 4.5)
+Date: Fri,  2 Sep 2011 12:55:49 +0530
+Message-ID: <1314948349-15856-1-git-send-email-girish.shivananjappa@linaro.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kyungmin Park <kmpark@infradead.org>, Sebastian Rasmussen <Sebastian.Rasmussen@stericsson.com>, Ulf Hansson <Ulf.Hansson@stericsson.com>
 
-2011/8/30 Linus Walleij <linus.walleij@linaro.org>:
-> On Thu, Aug 25, 2011 at 6:44 AM, NamJae Jeon <linkinjeon@gmail.com> wrote:
->
->> If card is infinitely holding pull down busy line(data 0) while
->> writing multiple blocks, write will be blocked in
->> mmc_wait_for_req_done().
->> I suggest to use wait_for_completion_timeout instread of
->> wait_for_completion like the below code.
->>
->> How do you think about my suggestion ?
->
-> Since this is a hardware lock-up it is up to the host driver to
-> timeout and return an error to the framework.
->
-> For example only the host driver have information on the
-> clock speed on the host controller and other information such
-> as request size that can be used to set a suitable timeout waiting
-> for the request to complete.
->
-> If you just grep for timeout_ns in drivers/mmc/host you can
-> see several drivers using the card-supplied timeout_ns for
-> handing the timeout properly given local clocking
-> constraints etc.
->
-> Often host controllers can take the number
-> of clock cycles until timeout as a parameter, and only
-> the host controller can calculate this number.
-> See for example in mmci_start_data()
-> in mmci.c.
->
-> So I seriously think you need to look closer at the problematic
-> host driver if this is a problem to you, e.g. rewrite it to use
-> wait_for_completion_timeout() there.
->
-> Yours,
-> Linus Walleij
->
+This patch adds the support for power off notify feature
+available in eMMC 4.5 devices.
+	If the the host has support for this feature, then the
+mmc core will notify it to the device by setting the
+POWER_OFF_NOTIFICATION byte in the extended csd register
+with a value 1(POWER_ON).
+	This patch should be applied after Seungwon Jeon's
+patch for cmd6 timeout.
 
-We should consider DMA situation. As I know, host controller can not
-rise timeout interrupt in write not read in DMA status. host
-controller can just know whether card is finish to program to use busy
-line. If unstable card is holding busy line while writing using DMA,
-hang problem will happen by wait_for_completion.
-so I think that mmc driver need some exception to avoid this problem.
+Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+---
+ drivers/mmc/core/mmc.c   |   19 +++++++++++++++++--
+ include/linux/mmc/card.h |    1 +
+ include/linux/mmc/host.h |    1 +
+ include/linux/mmc/mmc.h  |    8 +++++++-
+ 4 files changed, 26 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 68eb368..2f06b37 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -410,10 +410,12 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 	else
+ 		card->erased_byte = 0x0;
+ 
+-	if (card->ext_csd.rev >= 6)
++	if (card->ext_csd.rev >= 6) {
+ 		card->ext_csd.generic_cmd6_time = 10 *
+ 			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
+-
++		card->ext_csd.power_off_longtime = 10 *
++			ext_csd[EXT_CSD_POWER_OFF_LONG_TIME];
++	}
+ out:
+ 	return err;
+ }
+@@ -710,6 +712,19 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	}
+ 
+ 	/*
++	 * If the host supports the power_off_notify capability then
++	 * set the notification byte in the ext_csd register of device
++	 */
++	if (host->caps & MMC_CAP_POWER_OFF_NOTIFY) {
++		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++				EXT_CSD_POWER_OFF_NOTIFICATION,
++				EXT_CSD_POWER_ON,
++				card->ext_csd.generic_cmd6_time);
++		if (err && err != -EBADMSG)
++			goto free_card;
++	}
++
++	/*
+ 	 * Activate high speed (if supported)
+ 	 */
+ 	if ((card->ext_csd.hs_max_dtr != 0) &&
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index e992fe3..2bf2843 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -53,6 +53,7 @@ struct mmc_ext_csd {
+ 	unsigned int		part_time;		/* Units: ms */
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
+ 	unsigned int		generic_cmd6_time;	/* Units: ms */
++	unsigned int		power_off_longtime;	/* Units: ms */
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		sectors;
+ 	unsigned int		card_type;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 1d09562..21c85e1 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -229,6 +229,7 @@ struct mmc_host {
+ #define MMC_CAP_MAX_CURRENT_600	(1 << 28)	/* Host max current limit is 600mA */
+ #define MMC_CAP_MAX_CURRENT_800	(1 << 29)	/* Host max current limit is 800mA */
+ #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
++#define MMC_CAP_POWER_OFF_NOTIFY    (1 << 31)/*NOtify poweroff supported */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index e869f00..8e86d77 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -269,7 +269,7 @@ struct _mmc_csd {
+ /*
+  * EXT_CSD fields
+  */
+-
++#define EXT_CSD_POWER_OFF_NOTIFICATION	34 /* R/W */
+ #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+ #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
+ #define EXT_CSD_WR_REL_PARAM		166	/* RO */
+@@ -293,6 +293,7 @@ struct _mmc_csd {
+ #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
+ #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
+ #define EXT_CSD_TRIM_MULT		232	/* RO */
++#define EXT_CSD_POWER_OFF_LONG_TIME	247 /*RO*/
+ #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
+ 
+ /*
+@@ -329,6 +330,11 @@ struct _mmc_csd {
+ #define EXT_CSD_SEC_BD_BLK_EN	BIT(2)
+ #define EXT_CSD_SEC_GB_CL_EN	BIT(4)
+ 
++#define EXT_CSD_NO_POWER_NOTIFICATION	0
++#define EXT_CSD_POWER_ON	1
++#define EXT_CSD_POWER_OFF_SHORT	2
++#define EXT_CSD_POWER_OFF_LONG	3
++
+ /*
+  * MMC_SWITCH access modes
+  */
+-- 
+1.7.1
