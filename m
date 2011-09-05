@@ -1,36 +1,41 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 0/2] mmc: sh_mmcif: simplify platform DMA configuration
-Date: Mon, 5 Sep 2011 09:15:08 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1109050914520.13066@axis700.grange>
-References: <Pine.LNX.4.64.1108301819150.19151@axis700.grange>
- <20110905041553.GB22142@linux-sh.org>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: sdhci-s3c: add default controller configuration
+Date: Mon, 5 Sep 2011 13:28:13 +0530
+Message-ID: <CAJuYYwQ-tCFnL9ti5rtuGuqYkT+g7MEqdD1EpXOiC71zxeJbyg@mail.gmail.com>
+References: <1314976702-19284-1-git-send-email-thomas.abraham@linaro.org>
+	<1314976702-19284-2-git-send-email-thomas.abraham@linaro.org>
+	<4E64265D.9090206@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20110905041553.GB22142@linux-sh.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: Paul Mundt <lethal@linux-sh.org>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:42898 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750791Ab1IEH6O (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Sep 2011 03:58:14 -0400
+In-Reply-To: <4E64265D.9090206@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org, ben-linux@fluff.org
 
-On Mon, 5 Sep 2011, Paul Mundt wrote:
+Hi Jaehoon,
 
-> On Tue, Aug 30, 2011 at 06:26:34PM +0200, Guennadi Liakhovetski wrote:
-> > A simple cosmetic clean-up, no functional changes. Patch 2/2 depends on 
-> > patch 1/2 and can wait until 3.3. Paul, would you be able to put it under 
-> > the carpet somewhere until then or shall I resend it after 3.2-rc1 is out? 
-> > After both these patches have been applied, we can remove struct 
-> > sh_mmcif_plat_data::dma around 3.4 or 4.0 or whatever;-)
-> > 
-> It's not a problem, I'll just flag it as awaiting upstream in the
-> tracker. Anything flagged as such I generally give a once over after each
-> merge window to see if their dependencies have been worked out.
+On 5 September 2011 07:01, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi Thomas.
+>
+> I have some question. This patch looks good.
+> Some names are used S3C_SDHCI_xxxx. but some names are used S3C64XX_SDHCI_xxxx.
+> Do you know what differ them?
 
-Good, thanks!
+I am not sure why there are S3C_SDHCI_xxx and S3C64XX_SDHCI_xxx
+macros. This patch reused the existing macros from regs-sdhci.h file.
+It should be possible to rename S3C64XX_SDHCI_xxx to S3C_SDHCI_xxx.
 
-Regards
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Thanks,
+Thomas.
+
+>
+> Thanks,
+> Jaehoon Chung
+>
+[...]
