@@ -1,44 +1,81 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] dw_mmc: ensure the ciu-reset
-Date: Mon, 5 Sep 2011 10:27:01 +0100
-Message-ID: <CAFbHwiTSkcnXyy2igZd=WfozER1RmTwFdg=t=B87GzXU+nSwwQ@mail.gmail.com>
-References: <4E641A31.8070604@samsung.com>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH 2/2] arm: samsung: remove sdhci default configuration
+ setup platform helper
+Date: Mon, 5 Sep 2011 15:43:08 +0530
+Message-ID: <CAJuYYwT1tW0XEiwWWpX08OorZw2q2Wce2r0fUvxLmWC8uq6uhQ@mail.gmail.com>
+References: <1314976702-19284-1-git-send-email-thomas.abraham@linaro.org>
+	<1314976702-19284-2-git-send-email-thomas.abraham@linaro.org>
+	<1314976702-19284-3-git-send-email-thomas.abraham@linaro.org>
+	<001801cc6b8a$e953bda0$bbfb38e0$%kim@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:46431 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750802Ab1IEJ1D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Sep 2011 05:27:03 -0400
-Received: by gxk21 with SMTP id 21so3216418gxk.19
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Sep 2011 02:27:02 -0700 (PDT)
-In-Reply-To: <4E641A31.8070604@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <001801cc6b8a$e953bda0$bbfb38e0$%kim@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Kukjin Kim <kgene.kim@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Wonil Choi <wonil22.choi@samsung.com>
 
-On Mon, Sep 5, 2011 at 1:39 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+Dear Mr. Kim,
 
-Hi Jaehoon,
+On 5 September 2011 10:46, Kukjin Kim <kgene.kim@samsung.com> wrote:
+> Thomas Abraham wrote:
+>>
+>> The sdhci platform helper function that sets up the default controll=
+er
+>> configuration is removed for all Samsung platforms since such defaul=
+t
+>> controller configuration can be handled by the driver.
+>>
+>> Cc: Ben Dooks <ben-linux@fluff.org>
+>> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+>> ---
+>> =A0arch/arm/mach-exynos4/setup-sdhci.c =A0 =A0 =A0 =A0| =A0 47 -----=
+------------------
+>> =A0arch/arm/mach-s3c2416/setup-sdhci.c =A0 =A0 =A0 =A0| =A0 37 -----=
+-------------
+>> =A0arch/arm/mach-s3c64xx/setup-sdhci.c =A0 =A0 =A0 =A0| =A0 48 -----=
+------------------
+>> =A0arch/arm/mach-s5pc100/setup-sdhci.c =A0 =A0 =A0 =A0| =A0 42 -----=
+---------------
+>> =A0arch/arm/mach-s5pv210/setup-sdhci.c =A0 =A0 =A0 =A0| =A0 41 -----=
+---------------
+>> =A0arch/arm/plat-samsung/dev-hsmmc.c =A0 =A0 =A0 =A0 =A0| =A0 =A02 -
+>> =A0arch/arm/plat-samsung/dev-hsmmc1.c =A0 =A0 =A0 =A0 | =A0 =A02 -
+>> =A0arch/arm/plat-samsung/dev-hsmmc2.c =A0 =A0 =A0 =A0 | =A0 =A02 -
+>> =A0arch/arm/plat-samsung/dev-hsmmc3.c =A0 =A0 =A0 =A0 | =A0 =A02 -
+>> =A0arch/arm/plat-samsung/include/plat/sdhci.h | =A0 57
+> ----------------------------
+>> =A010 files changed, 0 insertions(+), 280 deletions(-)
+>>
 
-> This patch ensured the CIU-reset.
+[...]
+
 >
-> If data0 line is low, bit[9] in status register is set to 1.
-> Then we can know the card is busy.
+> Hi Thomas,
 >
-> Using this bit in status register, we can ensure to reset the CIU correctly.
-> When card is busy and doing ciu-reset, seem like reset completed.
-> But actually didn't complete ciu-reset. because card is busy.
->
-> So i think good whether check card busy or not before reset the ciu.
+> The arch/arm/plat-samsung/dev-hsmmcX.c files have been changed due to=
+ commit
+> 61e62fcb ("ARM: SAMSUNG: Consolidate common function to set SDHCI pla=
+t
+> data"). So if possible please make your patch based on latest my for-=
+next :)
 
-It looks like this isn't exactly what the patch does - the reset
-happens whether the card is busy or not, but if card data is busy then
-the reset may be re-issued.
-
-Is there some way to reproduce the issue in this patch? I can't find
-anything in the TRM that suggests that we need to issue the reset more
-than once.
+Sure. I will base these patches on your for-next, test and resubmit.
 
 Thanks,
+Thomas.
+
+>
+> If any problems, please let me know.
+>
+> Thanks.
+>
+> Best regards,
+> Kgene.
+> --
+> Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+> SW Solution Development Team, Samsung Electronics Co., Ltd.
+>
+>
