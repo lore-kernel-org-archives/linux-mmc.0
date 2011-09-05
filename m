@@ -1,99 +1,81 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] dw_mmc: ensure the ciu-reset
-Date: Mon, 05 Sep 2011 09:39:13 +0900
-Message-ID: <4E641A31.8070604@samsung.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-s3c: add default controller configuration
+Date: Mon, 05 Sep 2011 10:31:09 +0900
+Message-ID: <4E64265D.9090206@samsung.com>
+References: <1314976702-19284-1-git-send-email-thomas.abraham@linaro.org>
+ <1314976702-19284-2-git-send-email-thomas.abraham@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:38462 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753570Ab1IEAie (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Sep 2011 20:38:34 -0400
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LR000B19XR9X0E0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 05 Sep 2011 09:38:32 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LR000GR2XS8UC00@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 05 Sep 2011 09:38:32 +0900 (KST)
+Received: from mailout2.samsung.com ([203.254.224.25]:13010 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751668Ab1IEBar (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Sep 2011 21:30:47 -0400
+In-reply-to: <1314976702-19284-2-git-send-email-thomas.abraham@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Wonil Choi <wonil22.choi@samsung.com>
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org, ben-linux@fluff.org
 
-This patch ensured the CIU-reset.
+Hi Thomas.
 
-If data0 line is low, bit[9] in status register is set to 1.
-Then we can know the card is busy.
+I have some question. This patch looks good.
+Some names are used S3C_SDHCI_xxxx. but some names are used S3C64XX_SDHCI_xxxx.
+Do you know what differ them?
 
-Using this bit in status register, we can ensure to reset the CIU correctly.
-When card is busy and doing ciu-reset, seem like reset completed.
-But actually didn't complete ciu-reset. because card is busy.
+Thanks,
+Jaehoon Chung
 
-So i think good whether check card busy or not before reset the ciu.
+Thomas Abraham wrote:
+
+> The default controller configuration which was previously setup by
+> platform helper functions is moved into the driver.
+> 
+> Cc: Ben Dooks <ben-linux@fluff.org>
+> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci-s3c.c |   28 +++++++++++++++++-----------
+>  1 files changed, 17 insertions(+), 11 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 2bd7bf4..d891682 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -203,17 +203,23 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
+>  		writel(ctrl, host->ioaddr + S3C_SDHCI_CONTROL2);
+>  	}
+>  
+> -	/* reconfigure the hardware for new clock rate */
+> -
+> -	{
+> -		struct mmc_ios ios;
+> -
+> -		ios.clock = clock;
+> -
+> -		if (ourhost->pdata->cfg_card)
+> -			(ourhost->pdata->cfg_card)(ourhost->pdev, host->ioaddr,
+> -						   &ios, NULL);
+> -	}
+> +	/* reprogram default hardware configuration */
+> +	writel(S3C64XX_SDHCI_CONTROL4_DRIVE_9mA,
+> +		host->ioaddr + S3C64XX_SDHCI_CONTROL4);
+> +
+> +	ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
+> +	ctrl |= (S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR |
+> +		  S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK |
+> +		  S3C_SDHCI_CTRL2_ENFBCLKRX |
+> +		  S3C_SDHCI_CTRL2_DFCNT_NONE |
+> +		  S3C_SDHCI_CTRL2_ENCLKOUTHOLD);
+> +	writel(ctrl, host->ioaddr + S3C_SDHCI_CONTROL2);
+> +
+> +	/* reconfigure the controller for new clock rate */
+> +	ctrl = (S3C_SDHCI_CTRL3_FCSEL1 | S3C_SDHCI_CTRL3_FCSEL0);
+> +	if (clock < 25 * 1000000)
+> +		ctrl |= (S3C_SDHCI_CTRL3_FCSEL3 | S3C_SDHCI_CTRL3_FCSEL2);
+> +	writel(ctrl, host->ioaddr + S3C_SDHCI_CONTROL3);
+>  }
+>  
+>  /**
 
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-Reported-by: Wonil Choi <wonil22.choi@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |   15 +++++++++------
- drivers/mmc/host/dw_mmc.h |    3 +++
- 2 files changed, 12 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 0ed1d28..277f8ef 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1785,17 +1785,20 @@ no_dma:
- static bool mci_wait_reset(struct device *dev, struct dw_mci *host)
- {
- 	unsigned long timeout = jiffies + msecs_to_jiffies(500);
--	unsigned int ctrl;
-+	unsigned int ctrl, status;
- 
--	mci_writel(host, CTRL, (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
--				SDMMC_CTRL_DMA_RESET));
-+	mci_writel(host, CTRL, SDMMC_CTRL_RESET_ALL);
- 
- 	/* wait till resets clear */
- 	do {
- 		ctrl = mci_readl(host, CTRL);
--		if (!(ctrl & (SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET |
--			      SDMMC_CTRL_DMA_RESET)))
--			return true;
-+		if (!(ctrl & SDMMC_CTRL_RESET_ALL)) {
-+			status = mci_readl(host, STATUS);
-+			if (!(status & SDMMC_DATA_BUSY))
-+				return true;
-+			else
-+				mci_writel(host, CTRL, SDMMC_CTRL_RESET_ALL);
-+		}
- 	} while (time_before(jiffies, timeout));
- 
- 	dev_err(dev, "Timeout resetting block (ctrl %#x)\n", ctrl);
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index bfa3c1c..94e48ad 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -69,6 +69,8 @@
- #define SDMMC_CTRL_DMA_RESET		BIT(2)
- #define SDMMC_CTRL_FIFO_RESET		BIT(1)
- #define SDMMC_CTRL_RESET		BIT(0)
-+#define SDMMC_CTRL_RESET_ALL	(SDMMC_CTRL_DMA_RESET |\
-+			SDMMC_CTRL_FIFO_RESET | SDMMC_CTRL_RESET)
- /* Clock Enable register defines */
- #define SDMMC_CLKEN_LOW_PWR		BIT(16)
- #define SDMMC_CLKEN_ENABLE		BIT(0)
-@@ -118,6 +120,7 @@
- #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
- /* Status register defines */
- #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FF)
-+#define SDMMC_DATA_BUSY			BIT(9)
- /* Internal DMAC interrupt defines */
- #define SDMMC_IDMAC_INT_AI		BIT(9)
- #define SDMMC_IDMAC_INT_NI		BIT(8)
