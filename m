@@ -1,67 +1,62 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v2] mmc: core: eMMC in Sleep mode before suspend
-Date: Thu, 8 Sep 2011 22:08:39 +0530
-Message-ID: <1315499919-804-1-git-send-email-balajitk@ti.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC fixes for 3.1-rc6
+Date: Thu, 08 Sep 2011 20:03:04 -0400
+Message-ID: <m27h5i4m6f.fsf@bob.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:37923 "EHLO bear.ext.ti.com"
+Received: from void.printf.net ([89.145.121.20]:41704 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752899Ab1IHXKL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 8 Sep 2011 19:10:11 -0400
+	id S1756522Ab1IIADO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 8 Sep 2011 20:03:14 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: subhashj@codeaurora.org, adrian.hunter@intel.com, Balaji T K <balajitk@ti.com>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Put MMC to sleep if it supports SLEEP/AWAKE (CMD5)
-in the mmc suspend so that Vcc (NAND core) can be cut
-to minimize power consumption.
-eMMC put into SLEEP can respond to CMD0 or H/W reset or CMD5.
-Current implemention on resume from suspend relies on CMD0 in
-mmc_init_card to get out of SLEEP mode.
+Hi Linus,
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
-Acked-by: Venkatraman S <svenkatr@ti.com>
----
- drivers/mmc/core/mmc.c |    9 +++++++--
- 1 files changed, 7 insertions(+), 2 deletions(-)
+Please pull from:
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 5700b1c..f73fcee 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -553,6 +553,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	 * need to tell some cards to go back to the idle
- 	 * state.  We wait 1ms to give cards time to
- 	 * respond.
-+	 * mmc_go_idle is needed for eMMC that are asleep
- 	 */
- 	mmc_go_idle(host);
- 
-@@ -900,16 +901,20 @@ static void mmc_detect(struct mmc_host *host)
-  */
- static int mmc_suspend(struct mmc_host *host)
- {
-+	int err = 0;
-+
- 	BUG_ON(!host);
- 	BUG_ON(!host->card);
- 
- 	mmc_claim_host(host);
--	if (!mmc_host_is_spi(host))
-+	if (mmc_card_can_sleep(host))
-+		err = mmc_card_sleep(host);
-+	else if (!mmc_host_is_spi(host))
- 		mmc_deselect_cards(host);
- 	host->card->state &= ~MMC_STATE_HIGHSPEED;
- 	mmc_release_host(host);
- 
--	return 0;
-+	return err;
- }
- 
- /*
+  git://dev.laptop.org/users/cjb/mmc for-linus
+
+to receive small regression fixes for MMC.  These have been tested in
+linux-next, and there are no merge conflicts.  Thanks.
+
+
+The following changes since commit fcb8ce5cfe30ca9ca5c9a79cdfe26d1993e65e0c:
+
+  Linux 3.1-rc3 (2011-08-22 11:42:53 -0700)
+
+are available in the git repository at:
+  git://dev.laptop.org/users/cjb/mmc for-linus
+
+Girish K S (1):
+      mmc: sdhci-s3c: Fix mmc card I/O problem
+
+Mika Westerberg (3):
+      mmc: rename mmc_host_clk_{ungate|gate} to mmc_host_clk_{hold|release}
+      mmc: core: prevent aggressive clock gating racing with ios updates
+      mmc: core: use non-reentrant workqueue for clock gating
+
+Shawn Guo (1):
+      mmc: sdhci-esdhc-imx: add missing inclusion of linux/module.h
+
+Simon Horman (1):
+      mmc: sdhi: initialise mmc_data->flags before use
+
+Subhash Jadavani (1):
+      mmc: sd: UHS-I bus speed should be set last in UHS initialization
+
+ drivers/mmc/core/core.c            |   35 ++++++++++++++--
+ drivers/mmc/core/host.c            |   12 +++---
+ drivers/mmc/core/host.h            |    8 ++--
+ drivers/mmc/core/sd.c              |   81 +++++++++++++++++++++++------------
+ drivers/mmc/host/sdhci-esdhc-imx.c |    1 +
+ drivers/mmc/host/sdhci-s3c.c       |    2 +
+ drivers/mmc/host/sh_mobile_sdhi.c  |    4 +-
+ 7 files changed, 99 insertions(+), 44 deletions(-)
+
 -- 
-1.7.0.4
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
