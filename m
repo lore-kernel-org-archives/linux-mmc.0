@@ -1,88 +1,45 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] mmc: core: eMMC in Sleep mode before suspend
-Date: Fri, 09 Sep 2011 09:56:36 +0300
-Message-ID: <4E69B8A4.5070008@intel.com>
-References: <1315499919-804-1-git-send-email-balajitk@ti.com> <894c55383fbf1d731bb52d5279b08f80.squirrel@www.codeaurora.org>
+From: Zang Roy-R61911 <r61911@freescale.com>
+Subject: RE: [PATCH 2/2 v2] eSDHC: Fix errors when booting kernel with fsl
+ esdhc
+Date: Fri, 9 Sep 2011 09:03:53 +0000
+Message-ID: <2239AC579C7D3646A720227A37E026811A1F8D@039-SN1MPN1-005.039d.mgd.msft.net>
+References: <1311329717-13954-1-git-send-email-tie-fei.zang@freescale.com>
+ <1311329717-13954-2-git-send-email-tie-fei.zang@freescale.com>
+ <20110722101512.GA1576@oksana.dev.rtsoft.ru>
+ <2239AC579C7D3646A720227A37E0268118FD3B@039-SN1MPN1-005.039d.mgd.msft.net>
+ <20110812100450.GA23333@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:31017 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756565Ab1IIG4j (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 9 Sep 2011 02:56:39 -0400
-In-Reply-To: <894c55383fbf1d731bb52d5279b08f80.squirrel@www.codeaurora.org>
+Received: from am1ehsobe005.messaging.microsoft.com ([213.199.154.208]:54782
+	"EHLO AM1EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932889Ab1IIJD5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Sep 2011 05:03:57 -0400
+In-Reply-To: <20110812100450.GA23333@oksana.dev.rtsoft.ru>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org, cjb@laptop.org
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, Xu Lei-B33228 <B33228@freescale.com>, Kumar Gala <galak@kernel.crashing.org>, Wood Scott-B07421 <B07421@freescale.com>
 
-On 09/09/11 09:34, Subhash Jadavani wrote:
-> Hi Balaji,
->
->> Put MMC to sleep if it supports SLEEP/AWAKE (CMD5)
->> in the mmc suspend so that Vcc (NAND core) can be cut
->> to minimize power consumption.
->> eMMC put into SLEEP can respond to CMD0 or H/W reset or CMD5.
->> Current implemention on resume from suspend relies on CMD0 in
->> mmc_init_card to get out of SLEEP mode.
->>
->> Signed-off-by: Balaji T K<balajitk@ti.com>
->> Acked-by: Venkatraman S<svenkatr@ti.com>
->> ---
->>   drivers/mmc/core/mmc.c |    9 +++++++--
->>   1 files changed, 7 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 5700b1c..f73fcee 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -553,6 +553,7 @@ static int mmc_init_card(struct mmc_host *host, u32
->> ocr,
->>   	 * need to tell some cards to go back to the idle
->>   	 * state.  We wait 1ms to give cards time to
->>   	 * respond.
->> +	 * mmc_go_idle is needed for eMMC that are asleep
->>   	 */
->>   	mmc_go_idle(host);
->>
->> @@ -900,16 +901,20 @@ static void mmc_detect(struct mmc_host *host)
->>    */
->>   static int mmc_suspend(struct mmc_host *host)
->>   {
->> +	int err = 0;
->> +
->>   	BUG_ON(!host);
->>   	BUG_ON(!host->card);
->>
->>   	mmc_claim_host(host);
->> -	if (!mmc_host_is_spi(host))
->> +	if (mmc_card_can_sleep(host))
->> +		err = mmc_card_sleep(host);
->> +	else if (!mmc_host_is_spi(host))
->>   		mmc_deselect_cards(host);
->>   	host->card->state&= ~MMC_STATE_HIGHSPEED;
->>   	mmc_release_host(host);
->>
->> -	return 0;
->> +	return err;
->>   }
->
-> Looks good to me:
-> Reviewed-by: Subhash Jadavani<subhashj@codeaurora.org>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
->
-> Thanks,
-> Subhash
->
->>
->>   /*
->> --
->> 1.7.0.4
->>
->>
->
->
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW50b24gVm9yb250c292
+IFttYWlsdG86Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbV0NCj4gU2VudDogRnJpZGF5LCBBdWd1c3Qg
+MTIsIDIwMTEgMTg6MDUgUE0NCj4gVG86IFphbmcgUm95LVI2MTkxMQ0KPiBDYzogbGludXgtbW1j
+QHZnZXIua2VybmVsLm9yZzsgbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7IGFrcG1AbGlu
+dXgtDQo+IGZvdW5kYXRpb24ub3JnOyBYdSBMZWktQjMzMjI4OyBLdW1hciBHYWxhOyBXb29kIFNj
+b3R0LUIwNzQyMQ0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDIvMiB2Ml0gZVNESEM6IEZpeCBlcnJv
+cnMgd2hlbiBib290aW5nIGtlcm5lbCB3aXRoIGZzbCBlc2RoYw0KPiANCj4gSGVsbG8sDQo+IA0K
+PiBPbiBGcmksIEF1ZyAxMiwgMjAxMSBhdCAwOTo0NDoyNkFNICswMDAwLCBaYW5nIFJveS1SNjE5
+MTEgd3JvdGU6DQo+IFsuLi5dDQo+ID4gPiBXZSB0cnkgdG8gbm90IHBvbGx1dGUgZ2VuZXJpYyBz
+ZGhjaS5jIGRyaXZlciB3aXRoIGNoaXAtc3BlY2lmaWMNCj4gPiA+IHF1aXJrcy4NCj4gPiA+DQo+
+ID4gPiBNYXliZSB5b3UgY2FuIGRvIHRoZSBmaXh1cHMgdmlhIElPIGFjY2Vzc29ycz8gT3IgYnkg
+aW50cm9kdWNpbmcNCj4gPiA+IHNvbWUgYWRkaXRpb25hbCBzZGhjaSBvcD8NCj4gPiBBbnRvbiwN
+Cj4gPiB0aGFua3MgZm9yIHRoZSBjb21tZW50LCBhcyB3ZSBkaXNjdXNzZWQsIHRoZSBvcmlnaW5h
+bCBjb2RlIHVzZSA4IGJpdCBieXRlDQo+IG9wZXJhdGlvbiwNCj4gPiB3aGlsZSBpbiBmYWN0LCBv
+biBzb21lIHBvd2VycGMgcGxhdGZvcm0sIDMyIGJpdCBvcGVyYXRpb24gaXMgbmVlZGVkLg0KPiA+
+IHNob3VsZCBpdCBiZSBwb3NzaWJsZSBmaXhlZCBieSBhZGRpbmcgc29tZSB3cmFwcGVyIGluIElP
+IGFjY2Vzc29ycyBvcg0KPiBpbnRyb2R1Y2UgYWRkaXRpb25hbCBzZGhjaSBvcD8NCj4gDQo+IEkg
+d291bGQgZG8gaXQgaW4gdGhlIElPIGFjY2Vzc29ycy4NCj4gDQo+IFRoYW5rcywNCkFueSB1cGRh
+dGUgZm9yIHlvdXIgY29tbWVudD8NClJveQ0K
 
