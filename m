@@ -1,25 +1,48 @@
-From: Western Union Center <westernunion@westernunion.com>
-Subject: Western Union
-Date: Sat, 10 Sep 2011 20:25:56 -0400
-Message-ID: <1315700756.4e6c0014c3ce2@webmail.xcelco.on.ca>
-Reply-To: westernunion.center2@yahoo.fr
+From: ajh mls <ajhmls@gmail.com>
+Subject: Re: [PATCH] mmc: core: Fix the incorrect calculation for erase unit size.
+Date: Sun, 11 Sep 2011 20:32:05 +0300
+Message-ID: <CAN+dfcRYP2YktuDTUK5ARPEj87G3jO1nJoT_vCgATXFxFRizzA@mail.gmail.com>
+References: <1315461565-16009-1-git-send-email-tgih.jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; CHARSET=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mta01.eastlink.ca ([24.224.136.30]:61033 "EHLO
-	mta01.eastlink.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753247Ab1IKA4g (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 10 Sep 2011 20:56:36 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1315461565-16009-1-git-send-email-tgih.jun@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 List-Id: linux-mmc@vger.kernel.org
 
-Congrat your Email won you the sum of ($100,000.00 US Dollars) was won by your
-Email in the western union money transfer promo as one of our Customer you are
-to Send your
-Names,
-Sex,
-Age,
-Tel,
-Occupation
-Country,
+On 08/09/2011, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> Erase unit size of high capacity is multiple of 512KiB not 1024KiB.
+
+Isn't hc_erase_size in sectors so 512 x 1024 / 512 = 1024 and so the
+code is correct.
+
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+>  drivers/mmc/core/mmc.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index b148bb1..7991ecf 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -332,7 +332,7 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8
+> *ext_csd)
+>  		card->ext_csd.hc_erase_timeout = 300 *
+>  			ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT];
+>  		card->ext_csd.hc_erase_size =
+> -			ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE] << 10;
+> +			ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE] << 9;
+>
+>  		card->ext_csd.rel_sectors = ext_csd[EXT_CSD_REL_WR_SEC_C];
+>
+> --
+> 1.7.0.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
