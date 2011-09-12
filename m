@@ -1,43 +1,38 @@
-From: Viresh Kumar <viresh.kumar@st.com>
-Subject: [PATCH] mmc/sdhci-spear: Don't set power gpio to 1 on probe
-Date: Mon, 12 Sep 2011 16:52:49 +0530
-Message-ID: <afc56880fea90e49b8e64bc379be4572381791f5.1315826468.git.viresh.kumar@st.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: core: clarify how to use post_req in case of
+	errors
+Date: Mon, 12 Sep 2011 16:05:14 +0200
+Message-ID: <CACRpkdZJq1C4TyXbW7WuV3xgC1AhV-3aL0L8+svrPYi_FhT_Qw@mail.gmail.com>
+References: <1314624959-4634-1-git-send-email-per.forlin@linaro.org>
+	<1314624959-4634-2-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:48662 "EHLO
-	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755043Ab1ILLXT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Sep 2011 07:23:19 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1314624959-4634-2-git-send-email-per.forlin@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, linaro-dev@lists.linaro.org, Balaji T Krishnamoorthy <balajitk@ti.com>, linux-mmc@vger.kernel.org, Santosh <santosh.shilimkar@ti.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Sourav Poddar <sourav.poddar@ti.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: akpm@linux-foundation.org, linux-mmc@vger.kernel.org
-Cc: armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, viresh.kumar@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com
 
-Currently if card_power_gpio is passed from platform data, it is acquired and
-its value is either set or reset. After that its value is written 1, which is
-not required.
+On Mon, Aug 29, 2011 at 3:35 PM, Per Forlin <per.forlin@linaro.org> wrote:
 
-So, this patch removes this extra line while sets its value.
+> The err condition in post_req() is set to undo a call made
+> to pre_req() that hasn't been started yet.
+> The err condition is not set if an MMC request returns error.
+>
+> Signed-off-by: Per Forlin <per.forlin@linaro.org>
 
-Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
----
- drivers/mmc/host/sdhci-spear.c |    2 --
- 1 files changed, 0 insertions(+), 2 deletions(-)
+Comments look correct so:
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index a152b5c..63cc8b6 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -178,8 +178,6 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
- 					sdhci->data->card_power_gpio);
- 			goto err_pgpio_direction;
- 		}
--
--		gpio_set_value(sdhci->data->card_power_gpio, 1);
- 	}
- 
- 	if (sdhci->data->card_int_gpio >= 0) {
--- 
-1.7.2.2
-
+Thanks,
+Linus Walleij
