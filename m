@@ -1,40 +1,62 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: SDHCI regression since 2.6.39
-Date: Tue, 13 Sep 2011 09:22:41 -0400
-Message-ID: <m2bouo37by.fsf@bob.laptop.org>
-References: <4E6EA3E4.5080401@goop.org>
+From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v9 2/3] mmc: core: add random fault injection
+Date: Tue, 13 Sep 2011 16:19:59 +0200
+Message-ID: <CAJ0pr18dn3CtBsXk9MG3Zn9zSwAiNoxB3b-62aMO3+8H+kUX3A@mail.gmail.com>
+References: <1313758358-27536-1-git-send-email-per.forlin@stericsson.com>
+	<1313758358-27536-2-git-send-email-per.forlin@stericsson.com>
+	<1313758358-27536-3-git-send-email-per.forlin@stericsson.com>
+	<CAC5umyjWx7ZvT+F_XhOZt_utr=mS-0p5tDpJ1ioWNiDAJLNXwQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34908 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750746Ab1IMNWy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Sep 2011 09:22:54 -0400
-In-Reply-To: <4E6EA3E4.5080401@goop.org> (Jeremy Fitzhardinge's message of
-	"Mon, 12 Sep 2011 17:29:24 -0700")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+In-Reply-To: <CAC5umyjWx7ZvT+F_XhOZt_utr=mS-0p5tDpJ1ioWNiDAJLNXwQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
+List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
+Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: Akinobu Mita <akinobu.mita-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Per Forlin <per.forlin-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jeremy Fitzhardinge <jeremy@goop.org>
-Cc: linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Hi Jeremy,
-
-On Mon, Sep 12 2011, Jeremy Fitzhardinge wrote:
-> Since 2.6.39, the SD card slot in my Lenovo X220 has stopped working.  
-> When I insert a card with current linux.git kernel (3.1-rc6), I get:
+On 13 September 2011 15:12, Akinobu Mita <akinobu.mita-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> 2011/8/19 Per Forlin <per.forlin-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>:
 >
-> [ 3891.745549] mmc0: new SDHC card at address b368
-> [ 3891.790704] mmcblk0: mmc0:b368 PNY   7.51 GiB 
-> [ 3891.795568] mmc0: Got data interrupt 0x00200000 even though no data
-> operation was in progress.
+>> +#ifdef KERNEL
+>> +/*
+>> + * Internal function. Pass the boot param fail_mmc_request to
+>> + * the setup fault injection attributes routine.
+>> + */
+>> +static int __init setup_fail_mmc_request(char *str)
+>> +{
+>> + =A0 =A0 =A0 return setup_fault_attr(&fail_mmc_request, str);
+>> +}
+>> +__setup("fail_mmc_request=3D", setup_fail_mmc_request);
+>> +#endif /* KERNEL */
+>
+> You attempt to enable __setup() only when mmc_core is built into
+> the kernel. =A0Does it really work? I cannot find any drivers using
+> "KERNEL" macro.
+>
+Your right it doesn't work. I think I change from ifndef MODULE to
+ifdef KERNEL at one point.
+It should be "ifndef MODULE"
 
-Please could you try reverting a3c7778f8153b9 "mmc: sdhci: R1B command
-handling + MMC_CAP_ERASE"?  We've had one other similar report that
-bisected to this patch.
+> You can use module_param_cb() instead of __setup() without #ifdef KERNEL.
+> When mmc_core is built into the kernel, you can specify the parameter
+> with "mmc_core.fail_mmc_request=3D..."
+>
+Thanks, this is the proper way to do it.
 
-Thanks,
+> Sorry for pointing that out too late.
+>
+I think this patch is queued for 3.2 so there should be time to fix it stil=
+l.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks again,
+Per
