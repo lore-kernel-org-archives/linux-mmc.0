@@ -1,171 +1,27 @@
 From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: [PATCH] mmc: core: eMMC 4.5 Power Class Selection Feature
-Date: Tue, 13 Sep 2011 18:27:32 +0530
-Message-ID: <1315918652-14340-1-git-send-email-girish.shivananjappa@linaro.org>
+Subject: [PATCH V5 0/2] Poweroff Notify eMMC 4.5
+Date: Tue, 13 Sep 2011 18:28:04 +0530
+Message-ID: <1315918686-14375-1-git-send-email-girish.shivananjappa@linaro.org>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: cjb@laptop.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds the power class selection feature available
-for mmc versions 4.0 and above.
-During the enumeration stage before switching to the lower
-data bus, check if the power class is supported for the
-current bus width. If the power class is available then
-switch to the power class and use the higher data bus. If
-power class is not supported then switch to the lower data
-bus in a worst case.
+This patch version fixes the problem with power off
+notify function, when called for the first time and
+card is not yet initialised. 
+Earlier version will generate a core dump, so a check 
+for NULL is required in the power off function.
 
-Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
----
- drivers/mmc/core/mmc.c  |   77 +++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/mmc.h |   13 ++++++++
- 2 files changed, 90 insertions(+), 0 deletions(-)
+Girish K S (2):
+  mmc: core: Add power off notify feature(eMMC 4.5)
+  mmc: core: Add Poweroff Notify handling eMMC 4.5
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 63cc77b..a4004da 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -536,6 +536,81 @@ static struct device_type mmc_type = {
- };
- 
- /*
-+ * Select the PowerClass for the current bus width
-+ * If power class is defined for 4/8 bit bus in the
-+ * extended CSD register, select it by executing the
-+ * mmc_switch command.
-+ */
-+static int mmc_select_powerclass(struct mmc_card *card, unsigned int bus_width)
-+{
-+	u8 *ext_csd;
-+	int err;
-+	unsigned int pwrclass_val;
-+	unsigned int index = 0;
-+	struct mmc_host *host = card->host;
-+
-+	BUG_ON(!card);
-+	BUG_ON(!host);
-+
-+	/* Power class selection is supported for versions >= 4.0 */
-+	if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
-+		return 0;
-+	/*Power class values are defined only for 4/8 bit bus*/
-+	if (bus_width == EXT_CSD_BUS_WIDTH_1)
-+		return 0;
-+
-+	switch ((1 << host->ios.vdd)) {
-+	case MMC_VDD_165_195:
-+		if (host->ios.clock <= 26000000)
-+			index = EXT_CSD_PWR_CL_26_195;
-+		else if	(host->ios.clock <= 52000000)
-+			index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
-+					EXT_CSD_PWR_CL_52_195 :
-+					EXT_CSD_PWR_CL_DDR_52_195;
-+		else if (host->ios.clock <= 200000000)
-+			index = EXT_CSD_PWR_CL_200_195;
-+		break;
-+	case MMC_VDD_32_33:
-+	case MMC_VDD_33_34:
-+	case MMC_VDD_34_35:
-+	case MMC_VDD_35_36:
-+		if (host->ios.clock <= 26000000)
-+			index = EXT_CSD_PWR_CL_26_360;
-+		else if	(host->ios.clock <= 52000000)
-+			index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
-+					EXT_CSD_PWR_CL_52_360 :
-+					EXT_CSD_PWR_CL_DDR_52_360;
-+		else if (host->ios.clock <= 200000000)
-+			index = EXT_CSD_PWR_CL_200_360;
-+		break;
-+	default:
-+		BUG();
-+		break;
-+	}
-+
-+	err = mmc_get_ext_csd(card, &ext_csd);
-+	if (err)
-+		goto ret;
-+
-+	pwrclass_val = ext_csd[index];
-+
-+	if (bus_width & (EXT_CSD_BUS_WIDTH_8 | EXT_CSD_DDR_BUS_WIDTH_8))
-+		pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_8BIT_MASK) >>
-+					EXT_CSD_PWR_CL_8BIT_SHIFT;
-+	else
-+		pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_4BIT_MASK) >>
-+					EXT_CSD_PWR_CL_4BIT_SHIFT;
-+
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			EXT_CSD_POWER_CLASS,
-+			pwrclass_val,
-+			0);
-+ret:
-+	mmc_free_ext_csd(ext_csd);
-+	return err;
-+}
-+
-+/*
-  * Handle the detection and initialisation of a card.
-  *
-  * In the case of a resume, "oldcard" will contain the card
-@@ -802,6 +877,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 			bus_width = bus_widths[idx];
- 			if (bus_width == MMC_BUS_WIDTH_1)
- 				ddr = 0; /* no DDR for 1-bit width */
-+			mmc_select_powerclass(card, ext_csd_bits[idx][0]);
- 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 					 EXT_CSD_BUS_WIDTH,
- 					 ext_csd_bits[idx][0],
-@@ -825,6 +901,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		}
- 
- 		if (!err && ddr) {
-+			mmc_select_powerclass(card, ext_csd_bits[idx][1]);
- 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 					 EXT_CSD_BUS_WIDTH,
- 					 ext_csd_bits[idx][1],
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index a788e01..e183e32 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -279,10 +279,15 @@ struct _mmc_csd {
- #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
- #define EXT_CSD_BUS_WIDTH		183	/* R/W */
- #define EXT_CSD_HS_TIMING		185	/* R/W */
-+#define EXT_CSD_POWER_CLASS	187
- #define EXT_CSD_REV			192	/* RO */
- #define EXT_CSD_STRUCTURE		194	/* RO */
- #define EXT_CSD_CARD_TYPE		196	/* RO */
- #define EXT_CSD_PART_SWITCH_TIME        199     /* RO */
-+#define EXT_CSD_PWR_CL_52_195	200 /*RO*/
-+#define EXT_CSD_PWR_CL_26_195	201 /*RO*/
-+#define EXT_CSD_PWR_CL_52_360	202 /*RO*/
-+#define EXT_CSD_PWR_CL_26_360	203 /*RO*/
- #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
- #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
- #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
-@@ -294,6 +299,10 @@ struct _mmc_csd {
- #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
- #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
- #define EXT_CSD_TRIM_MULT		232	/* RO */
-+#define EXT_CSD_PWR_CL_200_195	236 /*RO*/
-+#define EXT_CSD_PWR_CL_200_360	237 /*RO*/
-+#define EXT_CSD_PWR_CL_DDR_52_195	238 /*RO*/
-+#define EXT_CSD_PWR_CL_DDR_52_360	239 /*RO*/
- #define EXT_CSD_POWER_OFF_LONG_TIME	247 /*RO*/
- #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
- 
-@@ -336,6 +345,10 @@ struct _mmc_csd {
- #define EXT_CSD_POWER_OFF_SHORT	2
- #define EXT_CSD_POWER_OFF_LONG	3
- 
-+#define EXT_CSD_PWR_CL_8BIT_MASK	0xF0/* 8 bit PWR CLS */
-+#define EXT_CSD_PWR_CL_4BIT_MASK	0x0F/* 8 bit PWR CLS */
-+#define EXT_CSD_PWR_CL_8BIT_SHIFT	4
-+#define EXT_CSD_PWR_CL_4BIT_SHIFT	0
- /*
-  * MMC_SWITCH access modes
-  */
--- 
-1.7.1
+ drivers/mmc/core/core.c  |   34 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/mmc.c   |   22 ++++++++++++++++++++--
+ drivers/mmc/host/sdhci.c |   10 ++++++++++
+ include/linux/mmc/card.h |   20 ++++++++++++++++++++
+ include/linux/mmc/host.h |    5 +++++
+ include/linux/mmc/mmc.h  |    7 +++++++
+ 6 files changed, 96 insertions(+), 2 deletions(-)
