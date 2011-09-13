@@ -1,31 +1,34 @@
-From: Jeremy Fitzhardinge <jeremy@goop.org>
-Subject: Re: SDHCI regression since 2.6.39
-Date: Tue, 13 Sep 2011 13:38:38 -0700
-Message-ID: <4E6FBF4E.7000103@goop.org>
-References: <4E6EA3E4.5080401@goop.org> <m2bouo37by.fsf@bob.laptop.org> <4E6F8C24.3090207@goop.org> <m2wrdc1i5b.fsf@bob.laptop.org> <4E6FA44F.1050705@goop.org> <m2aaa89t1m.fsf@bob.laptop.org> <alpine.DEB.2.02.1109131419430.3556@lazy> <4E6FBCA1.6040307@goop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Per Forlin <per.forlin@linaro.org>
+Subject: [PATCH 0/3] mmc: rectify boot param option for fault injection
+Date: Tue, 13 Sep 2011 23:03:27 +0200
+Message-ID: <1315947810-22714-1-git-send-email-per.forlin@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from claw.goop.org ([74.207.240.146]:35589 "EHLO claw.goop.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932560Ab1IMUim (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Sep 2011 16:38:42 -0400
-In-Reply-To: <4E6FBCA1.6040307@goop.org>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:38055 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754505Ab1IMVEI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Sep 2011 17:04:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Manoj Iyer <manoj.iyer@canonical.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: linaro-dev@lists.linaro.org, Akinobu Mita <akinobu.mita@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Randy Dunlap <rdunlap@xenotime.net>, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Per Forlin <per.forlin@linaro.org>
 
-On 09/13/2011 01:27 PM, Jeremy Fitzhardinge wrote:
-> I have 1.17 installed at the moment.  It looks like 1.21 is current, so
-> I could try updating it.  But the Fedora 15 2.6.38 kernel worked fine
-> with this controller and cards, so I don't think BIOS version is an
-> issue.  Also, there's nothing obviously related to the SD controller in
-> the release notes (not that I trust their competeness).
+Akinobu Mita reported that the boot option for mmc fault injection is never
+compiled in due to a fauly "ifdef KERNEL" that is never set.
+A correct ifdef would be "ifndef MODULE". Akinobu suggested to use
+a module param instead.
 
-...but in preparation for doing a bisection, I can't actually find a
-kernel version which works any more.  So... I'm not sure what changed. 
-Maybe it was the BIOS.
+This patch set is for 3.2
 
-    J
+Per Forlin (3):
+  fault-inject: export setup_fault_attr()
+  mmc: add module param to set fault injection attributes
+  fault-injection: update documenation with the mmc module param
+
+ Documentation/fault-injection/fault-injection.txt |    2 +-
+ drivers/mmc/core/debugfs.c                        |   29 ++++++++-------------
+ lib/fault-inject.c                                |    3 +-
+ 3 files changed, 14 insertions(+), 20 deletions(-)
+
+-- 
+1.7.4.1
+
