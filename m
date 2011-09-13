@@ -1,59 +1,28 @@
-From: Zang Roy-R61911 <r61911@freescale.com>
-Subject: RE: [PATCH] eSDHC: Access Freescale eSDHC registers by 32-bit
-Date: Tue, 13 Sep 2011 04:10:05 +0000
-Message-ID: <2239AC579C7D3646A720227A37E026811A3C67@039-SN1MPN1-005.039d.mgd.msft.net>
-References: <1315569946-21386-1-git-send-email-tie-fei.zang@freescale.com>
- <20110909114004.GP1912@pengutronix.de>
- <2239AC579C7D3646A720227A37E026811A22BD@039-SN1MPN1-005.039d.mgd.msft.net>
- <20110909123324.GQ1912@pengutronix.de>
- <2239AC579C7D3646A720227A37E026811A2311@039-SN1MPN1-005.039d.mgd.msft.net>
- <20110909130855.GR1912@pengutronix.de>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH 1/2] omap: hsmmc: Normalize dma cleanup operations
+Date: Tue, 13 Sep 2011 14:50:56 +0530
+Message-ID: <CANfBPZ-0ChfErPcFYe5jfip_6dSNv9Lz+-Mf6rEaB9j43QKtFQ@mail.gmail.com>
+References: <1314903957-24408-2-git-send-email-svenkatr@ti.com>
+	<CAJ0pr18PtGWga7n8nm1xs-=wtRjMu=X_wZONAOAgeaLamtEJjg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:43570
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750714Ab1IMEKI convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Sep 2011 00:10:08 -0400
-In-Reply-To: <20110909130855.GR1912@pengutronix.de>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <CAJ0pr18PtGWga7n8nm1xs-=wtRjMu=X_wZONAOAgeaLamtEJjg@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: Kishore Kadiyala <kishorek.kadiyala@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, cjb <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, Xu Lei-B33228 <B33228@freescale.com>, Kumar Gala <galak@kernel.crashing.org>
 
-
-
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org]
-> On Behalf Of Wolfram Sang
-> Sent: Friday, September 09, 2011 21:09 PM
-> To: Zang Roy-R61911
-> Cc: cjb@laptop.org; linux-mmc@vger.kernel.org; linuxppc-dev@lists.ozlabs.org;
-> akpm@linux-foundation.org; cbouatmailru@gmail.com; Xu Lei-B33228; Kumar Gala
-> Subject: Re: [PATCH] eSDHC: Access Freescale eSDHC registers by 32-bit
-> 
-> 
-> > Previously, I sent this patch together  with another one. But
-> > technically they are separated patches.  I got some comments from
-> > Anton about the patch. I will try to address the comment. but for this
-> > one, it is a stand along patch. I'd like to push it first.
-> 
-> Okay.
-Good.
-> 
-> > I do not see any comment about byte swapping about this patch.
-> > you may have mis-understanding here.
-> 
-> I was misguided, yes, sorry. BE/LE issues with additional byteswapping
-> are a mind twister :/ Having a second look, it looks okay to me. One
-> could think about putting this into sdhci_platform as well, but this can
-> be done later if needed. Sadly, I currently don't have hardware to test
-> it.
-I tested on 8536 and P4080/P5020/P3041 platform.
-Anyone can help to pull it in?
-Thanks.
-Roy
-
+On Tue, Sep 13, 2011 at 1:26 AM, Per Forlin <per.forlin@linaro.org> wrote:
+> On 1 September 2011 21:05, Venkatraman S <svenkatr@ti.com> wrote:
+>> Reuse omap_hsmmc_dma_cleanup even for normal dma teardown in
+>> omap_hsmmc_dma_cb. Consolidate multiple points of dma unmap into a
+>> single location in post_req function, to prevent double unmapping.
+> It's optional to use pre_req() and post_req(). The SDIO framework
+> doesn't utilise these hooks. For instance this wont work together with
+> SDIO-wlan on the pandaboard.
+> If pre_req() has been issued it's fine to defer dma_unmap() until
+> post_req(). If pre_req() is not called the driver should call
+> dma_unmap() directly.
+>
+Thanks for the clarification. I'll redo the fix.
