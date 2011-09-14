@@ -1,36 +1,98 @@
-From: Per Forlin <per.forlin@linaro.org>
-Subject: [PATCH v3 0/3] mmc: rectify boot param option for fault injection
-Date: Wed, 14 Sep 2011 14:10:15 +0200
-Message-ID: <1316002218-3408-1-git-send-email-per.forlin@linaro.org>
-Return-path: <linux-doc-owner@vger.kernel.org>
-Sender: linux-doc-owner@vger.kernel.org
-To: linaro-dev@lists.linaro.org, Akinobu Mita <akinobu.mita@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Randy Dunlap <rdunlap@xenotime.net>, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Per Forlin <per.forlin@linaro.org>
+From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v3 2/3] mmc: add module param to set fault injection attributes
+Date: Wed, 14 Sep 2011 14:10:17 +0200
+Message-ID: <1316002218-3408-3-git-send-email-per.forlin@linaro.org>
+References: <1316002218-3408-1-git-send-email-per.forlin@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+In-Reply-To: <1316002218-3408-1-git-send-email-per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
+List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
+Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Akinobu Mita <akinobu.mita-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Randy Dunlap <rdunlap-/UHa2rfvQTnk1uMJSBkQmQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Akinobu Mita reported that the boot option for mmc fault injection is never
-compiled in due to a fauly "ifdef KERNEL" that is never set.
-A correct ifdef would be "ifndef MODULE". This patch set adds a
-module_param_cb() and thereby no ifndef MODULE is needed.
-Using a module_param makes it possible to pass default fault attributes for
-external modules too.
+Replace setup("fail_mmc_request") and faulty "ifdef KERNEL" with
+a module_param_cb(). The module param mmc_core.fail_request
+may be used to set the fault injection attributes during boot time
+or module load time.
 
-This patch set is for 3.2
-Change log:
-v2 - use module_param_cb() to set default fault attributes
-   - fix spelling of documentation in patch #3  
-v3 - remove unused variable and return error if invalid boot param.
+Signed-off-by: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/mmc/core/debugfs.c |   38 ++++++++++++++++++++------------------
+ 1 files changed, 20 insertions(+), 18 deletions(-)
 
-Per Forlin (3):
-  fault-inject: export setup_fault_attr()
-  mmc: add module param to set fault injection attributes
-  fault-injection: update documentation with the mmc module param
-
- Documentation/fault-injection/fault-injection.txt |    2 +-
- drivers/mmc/core/debugfs.c                        |   38 +++++++++++----------
- lib/fault-inject.c                                |    3 +-
- 3 files changed, 23 insertions(+), 20 deletions(-)
-
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 5acd707..13e44c9 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -20,6 +20,25 @@
+ #include "core.h"
+ #include "mmc_ops.h"
+ 
++#ifdef CONFIG_FAIL_MMC_REQUEST
++
++static DECLARE_FAULT_ATTR(fail_default_attr);
++static int fail_mmc_request_param_set(const char *val,
++				      const struct kernel_param *kp)
++{
++	if (setup_fault_attr(&fail_default_attr, (char *) val) == 0)
++		return -EINVAL;
++
++	return 0;
++}
++
++static const struct kernel_param_ops fail_mmc_request_param_ops = {
++	.set = fail_mmc_request_param_set
++};
++module_param_cb(fail_request, &fail_mmc_request_param_ops, NULL, 0);
++
++#endif /* CONFIG_FAIL_MMC_REQUEST */
++
+ /* The debugfs functions are optimized away when CONFIG_DEBUG_FS isn't set. */
+ static int mmc_ios_show(struct seq_file *s, void *data)
+ {
+@@ -159,23 +178,6 @@ static int mmc_clock_opt_set(void *data, u64 val)
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_FAIL_MMC_REQUEST
+-
+-static DECLARE_FAULT_ATTR(fail_mmc_request);
+-
+-#ifdef KERNEL
+-/*
+- * Internal function. Pass the boot param fail_mmc_request to
+- * the setup fault injection attributes routine.
+- */
+-static int __init setup_fail_mmc_request(char *str)
+-{
+-	return setup_fault_attr(&fail_mmc_request, str);
+-}
+-__setup("fail_mmc_request=", setup_fail_mmc_request);
+-#endif /* KERNEL */
+-#endif /* CONFIG_FAIL_MMC_REQUEST */
+-
+ DEFINE_SIMPLE_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
+ 	"%llu\n");
+ 
+@@ -207,7 +209,7 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+ 		goto err_node;
+ #endif
+ #ifdef CONFIG_FAIL_MMC_REQUEST
+-	host->fail_mmc_request = fail_mmc_request;
++	host->fail_mmc_request = fail_default_attr;
+ 	if (IS_ERR(fault_create_debugfs_attr("fail_mmc_request",
+ 					     root,
+ 					     &host->fail_mmc_request)))
 -- 
 1.7.4.1
-
