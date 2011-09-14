@@ -1,44 +1,33 @@
-From: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 3/3] fault-injection: update documentation with the mmc
-	module param
-Date: Wed, 14 Sep 2011 14:10:18 +0200
-Message-ID: <1316002218-3408-4-git-send-email-per.forlin@linaro.org>
-References: <1316002218-3408-1-git-send-email-per.forlin@linaro.org>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH 1/2] omap: hsmmc: Normalize dma cleanup operations
+Date: Wed, 14 Sep 2011 19:10:42 +0530
+Message-ID: <CANfBPZ9sVvcVhwxgu0SqbjY1gT8GdeXXsThf48__ax=bQ4zHEA@mail.gmail.com>
+References: <1314903957-24408-2-git-send-email-svenkatr@ti.com> <CAJ0pr18PtGWga7n8nm1xs-=wtRjMu=X_wZONAOAgeaLamtEJjg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <1316002218-3408-1-git-send-email-per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Akinobu Mita <akinobu.mita-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Randy Dunlap <rdunlap-/UHa2rfvQTnk1uMJSBkQmQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog102.obsmtp.com ([74.125.149.69]:45784 "EHLO
+	na3sys009aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753786Ab1INNlE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2011 09:41:04 -0400
+In-Reply-To: <CAJ0pr18PtGWga7n8nm1xs-=wtRjMu=X_wZONAOAgeaLamtEJjg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: Kishore Kadiyala <kishorek.kadiyala@gmail.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org
 
-Signed-off-by: Per Forlin <per.forlin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- Documentation/fault-injection/fault-injection.txt |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+On Tue, Sep 13, 2011 at 1:26 AM, Per Forlin <per.forlin@linaro.org> wrote:
+> On 1 September 2011 21:05, Venkatraman S <svenkatr@ti.com> wrote:
+>> Reuse omap_hsmmc_dma_cleanup even for normal dma teardown in
+>> omap_hsmmc_dma_cb. Consolidate multiple points of dma unmap into a
+>> single location in post_req function, to prevent double unmapping.
+> It's optional to use pre_req() and post_req(). The SDIO framework
+> doesn't utilise these hooks. For instance this wont work together with
+> SDIO-wlan on the pandaboard.
+> If pre_req() has been issued it's fine to defer dma_unmap() until
+> post_req(). If pre_req() is not called the driver should call
+> dma_unmap() directly.
+>
 
-diff --git a/Documentation/fault-injection/fault-injection.txt b/Documentation/fault-injection/fault-injection.txt
-index 70f924e..ba4be8b 100644
---- a/Documentation/fault-injection/fault-injection.txt
-+++ b/Documentation/fault-injection/fault-injection.txt
-@@ -121,7 +121,7 @@ use the boot option:
- 	failslab=
- 	fail_page_alloc=
- 	fail_make_request=
--	fail_mmc_request=<interval>,<probability>,<space>,<times>
-+	mmc_core.fail_request=<interval>,<probability>,<space>,<times>
- 
- How to add new fault injection capability
- -----------------------------------------
--- 
-1.7.4.1
+In that case, can the actual 'request' function just call pre_req and post_req
+(at the beginning and at the end), if host_cookie is not set ?
