@@ -1,61 +1,35 @@
 From: Per Forlin <per.forlin@linaro.org>
-Subject: Re: [PATCH v9 2/3] mmc: core: add random fault injection
-Date: Wed, 14 Sep 2011 10:29:03 +0200
-Message-ID: <CAJ0pr18JwZFL64_rKYmMUpS8J38w=v+yR96Aeh15et42bfdY4Q@mail.gmail.com>
-References: <1313758358-27536-1-git-send-email-per.forlin@stericsson.com>
-	<1313758358-27536-2-git-send-email-per.forlin@stericsson.com>
-	<1313758358-27536-3-git-send-email-per.forlin@stericsson.com>
-	<CAC5umyjWx7ZvT+F_XhOZt_utr=mS-0p5tDpJ1ioWNiDAJLNXwQ@mail.gmail.com>
-	<CAJ0pr18dn3CtBsXk9MG3Zn9zSwAiNoxB3b-62aMO3+8H+kUX3A@mail.gmail.com>
-	<CAJ0pr1-ba0iY808igXJuEiWAX5zwhTUD6r+8MAMeBTHYFTenCg@mail.gmail.com>
-	<CAC5umygBmE-dayTrUhU_=dn7+YZ=nd8-s7SJw5xLxnKN1pBMAQ@mail.gmail.com>
-	<CAJ0pr19+qC0nVwzrq5wbQKzgSVFXzuSgJ2T8auNhmXpzQu8bfg@mail.gmail.com>
-	<CAC5umygv+y4J-hPNDjYo9ToV4z4uv5rzvK9pCLMa7vbjKvJgZg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f42.google.com ([209.85.216.42]:54179 "EHLO
-	mail-qw0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752811Ab1INI3E convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2011 04:29:04 -0400
-In-Reply-To: <CAC5umygv+y4J-hPNDjYo9ToV4z4uv5rzvK9pCLMa7vbjKvJgZg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [PATCH v2 0/3] mmc: rectify boot param option for fault injection
+Date: Wed, 14 Sep 2011 10:46:54 +0200
+Message-ID: <1315990017-16912-1-git-send-email-per.forlin@linaro.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: linaro-dev@lists.linaro.org, Akinobu Mita <akinobu.mita@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Randy Dunlap <rdunlap@xenotime.net>, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Per Forlin <per.forlin@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Akinobu Mita <akinobu.mita@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linaro-dev@lists.linaro.org, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <cjb@laptop.org>, linux-doc@vger.kernel.org
 
-On 14 September 2011 10:04, Akinobu Mita <akinobu.mita@gmail.com> wrote=
-:
-> 2011/9/14 Per Forlin <per.forlin@linaro.org>:
->
->> It's simple and the patch would be just two lines.
->> The reason for changing my mind is that it may be useful to be able =
-to
->> pass the fault injection attributes even when mmc_core is a module.
->>
->>> module_param is more complicated than this. Also the parameter is o=
-nly
->>> usefull when when mmc_core is built into the kernel (it's useless w=
-hen
->>> mmc_core is built as a module).
->>>
->> If you want to enable fault injection for the mmc_core module at loa=
-d
->> time (during mmc initialisation) the param must be used.
->> modprobe mmc_core fail_request=3D1,1,1,1
->> As soon as the module is loaded there is no need for the module para=
-m anymore.
->
-> OK, I agree with you. =A0The module parameter is the only way
-> to enable mmc fault injection if CONFIG_FAULT_INJECTION_DEBUG_FS
-> is disabled.
->
-This is true as well. My point is that if using
-CONFIG_FAULT_INJECTION_DEBUG_FS the fault attributes can't be set
-until after the mmc module initialisation. One may want to test the
-error handling during the mmc initialisation.
-I'll send out a version v2 using module_param_cb().
+Akinobu Mita reported that the boot option for mmc fault injection is never
+compiled in due to a fauly "ifdef KERNEL" that is never set.
+A correct ifdef would be "ifndef MODULE". This patch set adds a
+module_param_cb() and thereby no ifndef MODULE is needed.
+Using a module_param makes it possible to pass default fault attributes for
+external modules too.
 
-Thanks again,
-Per
+This patch set is for 3.2
+Change log:
+v2 - use module_param_cb() to set default fault attributes
+   - fix spelling of documentation in patch #3  
+
+Per Forlin (3):
+  fault-inject: export setup_fault_attr()
+  mmc: add module param to set fault injection attributes
+  fault-injection: update documentation with the mmc module param
+
+ Documentation/fault-injection/fault-injection.txt |    2 +-
+ drivers/mmc/core/debugfs.c                        |   38 +++++++++++----------
+ lib/fault-inject.c                                |    3 +-
+ 3 files changed, 23 insertions(+), 20 deletions(-)
+
+-- 
+1.7.4.1
+
