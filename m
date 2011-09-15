@@ -1,14 +1,14 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH] mmc: sdio: Workaround for dev with broken CMD53
-Date: Thu, 15 Sep 2011 17:43:04 +0200
-Message-ID: <1316101384-21009-1-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH] mmc: core: Set correct bus mode before card init
+Date: Thu, 15 Sep 2011 17:50:38 +0200
+Message-ID: <1316101838-22660-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog120.obsmtp.com ([207.126.144.149]:56084 "EHLO
-	eu1sys200aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S934046Ab1IOPoD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Sep 2011 11:44:03 -0400
+Received: from eu1sys200aog105.obsmtp.com ([207.126.144.119]:53079 "EHLO
+	eu1sys200aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S934067Ab1IOQMV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Sep 2011 12:12:21 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
@@ -16,95 +16,98 @@ Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.
 
 From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
 
-Adds a quirk which can be turned on for SDIO devices
-that do not support 512 byte requests in byte mode during
-CMD53. These requests will always be sent in block mode
-instead.
+Earlier all cards where initiated with bus mode set as OPENDRAIN, and then
+later switched to PUSHPULL. According to the MMC/SD/SDIO specifications only
+MMC cards use OPENDRAIN during init. For both SD and SDIO the bus mode shall
+be PUSHPULL before attempting to init the card.
 
-This patch also enables this quirk for ST-Ericsson
-CW1200 WLAN device.
+The consequence of having incorrect bus mode can lead to not being able
+to detect the card. Therefore the default behavior have now been changed to
+PUSHPULL in mmc_power_up, and will only be temporarily switched when trying
+to attach or init a MMC card.
 
-Change-Id: Id31787fcbfeb0b97ba2e8c583e9363a7c08811d2
 Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
 Signed-off-by: Ulf HANSSON <ulf.hansson@stericsson.com>
 ---
- drivers/mmc/core/quirks.c   |   11 +++++++++++
- drivers/mmc/core/sdio_ops.c |    7 +++++--
- include/linux/mmc/card.h    |    7 +++++++
- 3 files changed, 23 insertions(+), 2 deletions(-)
+ drivers/mmc/core/core.c |    8 +++-----
+ drivers/mmc/core/mmc.c  |    8 ++++++++
+ drivers/mmc/core/sd.c   |    2 --
+ drivers/mmc/core/sdio.c |    2 --
+ 4 files changed, 11 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
-index 3a59621..6c3cf98 100644
---- a/drivers/mmc/core/quirks.c
-+++ b/drivers/mmc/core/quirks.c
-@@ -21,6 +21,14 @@
- #define SDIO_DEVICE_ID_TI_WL1271	0x4076
- #endif
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 91a0a74..2a47973 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1098,13 +1098,11 @@ static void mmc_power_up(struct mmc_host *host)
+ 		bit = fls(host->ocr_avail) - 1;
  
-+#ifndef SDIO_VENDOR_ID_STE
-+#define SDIO_VENDOR_ID_STE		0x0020
-+#endif
+ 	host->ios.vdd = bit;
+-	if (mmc_host_is_spi(host)) {
++	if (mmc_host_is_spi(host))
+ 		host->ios.chip_select = MMC_CS_HIGH;
+-		host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
+-	} else {
++	else
+ 		host->ios.chip_select = MMC_CS_DONTCARE;
+-		host->ios.bus_mode = MMC_BUSMODE_OPENDRAIN;
+-	}
++	host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
+ 	host->ios.power_mode = MMC_POWER_UP;
+ 	host->ios.bus_width = MMC_BUS_WIDTH_1;
+ 	host->ios.timing = MMC_TIMING_LEGACY;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5700b1c..b36d786 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -548,6 +548,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	BUG_ON(!host);
+ 	WARN_ON(!host->claimed);
+ 
++	/* Set correct bus mode for MMC before attempting init */
++	if (!mmc_host_is_spi(host))
++		mmc_set_bus_mode(host, MMC_BUSMODE_OPENDRAIN);
 +
-+#ifndef SDIO_DEVICE_ID_STE_CW1200
-+#define SDIO_DEVICE_ID_STE_CW1200	0x2280
-+#endif
+ 	/*
+ 	 * Since we're changing the OCR value, we seem to
+ 	 * need to tell some cards to go back to the idle
+@@ -1016,6 +1020,10 @@ int mmc_attach_mmc(struct mmc_host *host)
+ 	BUG_ON(!host);
+ 	WARN_ON(!host->claimed);
+ 
++	/* Set correct bus mode for MMC before attempting attach */
++	if (!mmc_host_is_spi(host))
++		mmc_set_bus_mode(host, MMC_BUSMODE_OPENDRAIN);
 +
- /*
-  * This hook just adds a quirk for all sdio devices
-  */
-@@ -46,6 +54,9 @@ static const struct mmc_fixup mmc_fixup_methods[] = {
- 	SDIO_FIXUP(SDIO_VENDOR_ID_TI, SDIO_DEVICE_ID_TI_WL1271,
- 		   add_quirk, MMC_QUIRK_DISABLE_CD),
+ 	err = mmc_send_op_cond(host, 0, &ocr);
+ 	if (err)
+ 		return err;
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 633975f..b0f0216 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -904,8 +904,6 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+ 		err = mmc_send_relative_addr(host, &card->rca);
+ 		if (err)
+ 			return err;
+-
+-		mmc_set_bus_mode(host, MMC_BUSMODE_PUSHPULL);
+ 	}
  
-+	SDIO_FIXUP(SDIO_VENDOR_ID_STE, SDIO_DEVICE_ID_STE_CW1200,
-+		   add_quirk, MMC_QUIRK_BROKEN_BYTE_MODE_512),
-+
- 	END_FIXUP
- };
+ 	if (!oldcard) {
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 262fff0..7fc9953 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -408,8 +408,6 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 		 */
+ 		if (oldcard)
+ 			oldcard->rca = card->rca;
+-
+-		mmc_set_bus_mode(host, MMC_BUSMODE_PUSHPULL);
+ 	}
  
-diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
-index f087d87..bcef326 100644
---- a/drivers/mmc/core/sdio_ops.c
-+++ b/drivers/mmc/core/sdio_ops.c
-@@ -144,8 +144,11 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
- 	cmd.arg |= fn << 28;
- 	cmd.arg |= incr_addr ? 0x04000000 : 0x00000000;
- 	cmd.arg |= addr << 9;
--	if (blocks == 1 && blksz <= 512)
--		cmd.arg |= (blksz == 512) ? 0 : blksz;	/* byte mode */
-+	if (blocks == 1 && blksz < 512)
-+		cmd.arg |= blksz;			/* byte mode */
-+	else if (blocks == 1 && blksz == 512 &&
-+		 !(mmc_card_broken_byte_mode_512(card)))
-+		cmd.arg |= 0;				/* byte mode, 0==512 */
- 	else
- 		cmd.arg |= 0x08000000 | blocks;		/* block mode */
- 	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index b460fc2..6dfb293 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -188,6 +188,8 @@ struct mmc_card {
- #define MMC_QUIRK_DISABLE_CD	(1<<5)		/* disconnect CD/DAT[3] resistor */
- #define MMC_QUIRK_INAND_CMD38	(1<<6)		/* iNAND devices have broken CMD38 */
- #define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular multiblock */
-+#define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)	/* Avoid sending 512 bytes in */
-+						/* byte mode */
- 
- 	unsigned int		erase_size;	/* erase size in sectors */
-  	unsigned int		erase_shift;	/* if erase unit is power 2 */
-@@ -377,6 +379,11 @@ static inline int mmc_card_nonstd_func_interface(const struct mmc_card *c)
- 	return c->quirks & MMC_QUIRK_NONSTD_FUNC_IF;
- }
- 
-+static inline int mmc_card_broken_byte_mode_512(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_BROKEN_BYTE_MODE_512;
-+}
-+
- #define mmc_card_name(c)	((c)->cid.prod_name)
- #define mmc_card_id(c)		(dev_name(&(c)->dev))
- 
+ 	/*
 -- 
 1.7.5.4
 
