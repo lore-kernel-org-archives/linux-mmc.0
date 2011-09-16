@@ -1,14 +1,16 @@
 From: Girish K S <girish.shivananjappa@linaro.org>
 Subject: [PATCH V1] mmc: core: eMMC 4.5 Power Class Selection Feature
-Date: Fri, 16 Sep 2011 19:00:32 +0530
-Message-ID: <1316179832-30777-2-git-send-email-girish.shivananjappa@linaro.org>
-References: <1316179832-30777-1-git-send-email-girish.shivananjappa@linaro.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1316179832-30777-1-git-send-email-girish.shivananjappa@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Date: Fri, 16 Sep 2011 19:02:19 +0530
+Message-ID: <1316179939-30817-1-git-send-email-girish.shivananjappa@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:44630 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751691Ab1IPNc1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Sep 2011 09:32:27 -0400
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: cjb@laptop.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
-List-Id: linux-mmc@vger.kernel.org
 
 This patch adds the power class selection feature available
 for mmc versions 4.0 and above.
@@ -185,3 +187,4 @@ index a788e01..e183e32 100644
   */
 -- 
 1.7.1
+
