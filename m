@@ -1,44 +1,69 @@
-From: Aaron Lu <aaron.lu@amd.com>
-Subject: Re: [PATCH] mmc: core: Set correct bus mode before card init
-Date: Fri, 16 Sep 2011 10:05:24 +0800
-Message-ID: <20110916020522.GA3691@lovegaga>
-References: <1316101838-22660-1-git-send-email-ulf.hansson@stericsson.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: confusion regarding the CMD19 and CMD21 in eMMC/SD card spec
+Date: Fri, 16 Sep 2011 09:41:04 +0530
+Message-ID: <CAGxe1ZG4QjwB5OfrxupG_C+DtQ7sTQ4_EURaF-QrqPPSA3A0jw@mail.gmail.com>
+References: <CAGxe1ZH=mrAdfVR7Uw8mYNAD43BAbW7VGuhA1pN9hbSjTG9HVA@mail.gmail.com>
+	<0356427A-B949-4DA6-9F5D-FE0DD54AEDFF@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe005.messaging.microsoft.com ([213.199.154.208]:18442
-	"EHLO AM1EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750991Ab1IPCGS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Sep 2011 22:06:18 -0400
-Content-Disposition: inline
-In-Reply-To: <1316101838-22660-1-git-send-email-ulf.hansson@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <0356427A-B949-4DA6-9F5D-FE0DD54AEDFF@marvell.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
 
-Hi Ulf,
+but there is only one host controller to handle these commands.
+the generic sdhci driver has cmd19 hard coded, thats the reason I
+asked the question.
+you can also check it in the function sdhci_execute_tuning it is hard c=
+oded as
+cmd.opcode =3D MMC_SEND_TUNING_BLOCK; where the macro value is 19.
+So in case of SD card insertion it will send a SEND_TUNING_BLOCK
+command to the device. but if
+MMC card is inserted then it will send a BUS_TEST_W command to the devi=
+ce.
 
-I'm not familiar with mmc, but I've some questions on sd below.
+correct me if i am wrong
+regards
+Girish
 
-On Thu, Sep 15, 2011 at 05:50:38PM +0200, Ulf Hansson wrote:
-> Earlier all cards where initiated with bus mode set as OPENDRAIN, and then
-> later switched to PUSHPULL. According to the MMC/SD/SDIO specifications only
-> MMC cards use OPENDRAIN during init. For both SD and SDIO the bus mode shall
-> be PUSHPULL before attempting to init the card.
-AFAIK, there is no open drain mode in sd, and the sd host controller
-actually does not care about this setting(sdhci_set_ios does not
-manipulate bus_mode stored in ios).
-> 
-> The consequence of having incorrect bus mode can lead to not being able
-> to detect the card. Therefore the default behavior have now been changed to
-> PUSHPULL in mmc_power_up, and will only be temporarily switched when trying
-> to attach or init a MMC card.
-Do you see any sd cards that failed to be detected due to the incorrect
-bus_mode setting?
 
-Anyway, your patch removed an unnecessary call to mmc_set_bus_mode which
-should have no effect if the underlying controller is sdhci.
-
--Aaron
-
+On 15 September 2011 21:53, Philip Rakity <prakity@marvell.com> wrote:
+>
+> Different committee's --- Different standards.
+>
+> There is no issue with overlap.
+>
+>
+> On Sep 15, 2011, at 4:58 AM, Girish K S wrote:
+>
+>> Dear all,
+>> =A0 =A0 =A0 =A0 =A0 =A0 The eMMC 4.5 specification mentions that the=
+ CMD21 in
+>> class 2 is a SEND_TUNING BLOCK command. where as the SD card
+>> specification
+>> in the given link says CMD19 in class 2 is the SEND_TUNING_BLOCK
+>> http://www.scribd.com/doc/50685191/53/Figure-4-8-Send-Tuning-Block-C=
+ommand.
+>> Also the implementation in the drivers/mmc/host/sdhci.c uses the CMD=
+19
+>> as the SEND_TUNING_BLOCK.
+>> Can anybody clarify why there is overlapping in this command number.
+>> May be my understand is wrong.
+>>
+>> In the MMC spec the CMD19 is BUS_TEST_W in class 0 and CMD21 is
+>> reserved till eMMC 4.41 version.
+>> But in the SD specification (given link) CMD19 is SEND_TUNING_BLOCK
+>> and CMD21 is reserved.
+>>
+>> Thanks and regards
+>> Girish K S
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
+>
