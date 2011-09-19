@@ -1,73 +1,39 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: RFC : mmc : boot partition is set as a read-write.
-Date: Mon, 19 Sep 2011 12:56:16 +0900
-Message-ID: <CAKYAXd9=KE6wwcCQ+Khfy0N6uBizQEvoLCiu9vzbskGHtmsS4A@mail.gmail.com>
-References: <CAKYAXd8xd3sCi0CCOH6Y3AR2J2iuDQispCnt0D2mksiAWr=rgw@mail.gmail.com>
-	<m2vcsp2om9.fsf@bob.laptop.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: sdio: Workaround for dev with broken CMD53
+Date: Mon, 19 Sep 2011 10:55:27 +0200
+Message-ID: <CACRpkdb_hDiDzefc9mRb=DAWPLcGzuspN8TL6qQrZ5dAm7yg=g@mail.gmail.com>
+References: <1316101384-21009-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:39599 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754599Ab1ISD4S convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Sep 2011 23:56:18 -0400
-In-Reply-To: <m2vcsp2om9.fsf@bob.laptop.org>
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:39816 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751560Ab1ISIz2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2011 04:55:28 -0400
+Received: by pzk1 with SMTP id 1so10528189pzk.1
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Sep 2011 01:55:27 -0700 (PDT)
+In-Reply-To: <1316101384-21009-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Linus Walleij <linus.ml.walleij@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
 
-2011/9/19 Chris Ball <cjb@laptop.org>:
-> Hi,
+On Thu, Sep 15, 2011 at 5:43 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
+> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
 >
-> On Sun, Sep 18 2011, NamJae Jeon wrote:
->> mmc : boot partition is set as a read-write.
->>
->> There is a case that user directly update boot partition through mmc=
-blk0boot0,1.
->> However, the current boot partition is set as a read-only.
->> I suggest that boot partition is set as a read-write if there is no
->> reason that it should be read-only.
+> Adds a quirk which can be turned on for SDIO devices
+> that do not support 512 byte requests in byte mode during
+> CMD53. These requests will always be sent in block mode
+> instead.
 >
-> There is a reason.
+> This patch also enables this quirk for ST-Ericsson
+> CW1200 WLAN device.
 >
-> Documentation/mmc/mmc-dev-parts.txt:
->
-> MMC Boot Partitions
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->
-> Read and write access is provided to the two MMC boot partitions. Due=
- to
-> the sensitive nature of the boot partition contents, which often stor=
-e
-> a bootloader or bootloader configuration tables crucial to booting th=
-e
-> platform, write access is disabled by default to reduce the chance of
-> accidental bricking.
->
-> To enable write access to /dev/mmcblkXbootY, disable the forced read-=
-only
-> access with:
->
-> echo 0 > /sys/block/mmcblkXbootY/force_ro
->
-> =3D=3D
-> - Chris.
-> --
-> Chris Ball =C2=A0 <cjb@laptop.org> =C2=A0 <http://printf.net/>
-> One Laptop Per Child
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kerne=
-l" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
-ml
-> Please read the FAQ at =C2=A0http://www.tux.org/lkml/
->
+> Change-Id: Id31787fcbfeb0b97ba2e8c583e9363a7c08811d2
+> Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+> Signed-off-by: Ulf HANSSON <ulf.hansson@stericsson.com>
 
-Hi. Chris.
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-There is the way you are.
-
-Thanks a lot.
+Thanks,
+Linus Walleij
