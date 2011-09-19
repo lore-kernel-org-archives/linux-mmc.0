@@ -1,52 +1,25 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: RFC : mmc : boot partition is set as a read-write.
-Date: Sun, 18 Sep 2011 23:32:46 -0400
-Message-ID: <m2vcsp2om9.fsf@bob.laptop.org>
-References: <CAKYAXd8xd3sCi0CCOH6Y3AR2J2iuDQispCnt0D2mksiAWr=rgw@mail.gmail.com>
+From: Akinobu Mita <akinobu.mita@gmail.com>
+Subject: Re: [PATCH v3 0/3] mmc: rectify boot param option for fault injection
+Date: Mon, 19 Sep 2011 12:51:54 +0900
+Message-ID: <CAC5umyiTrU-6VoaMnsFFqyW7_bJToViOdWbwC04PM9LUSxQkRw@mail.gmail.com>
+References: <1316002218-3408-1-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:42499 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754017Ab1ISDcw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 18 Sep 2011 23:32:52 -0400
-In-Reply-To: <CAKYAXd8xd3sCi0CCOH6Y3AR2J2iuDQispCnt0D2mksiAWr=rgw@mail.gmail.com>
-	(NamJae Jeon's message of "Mon, 19 Sep 2011 12:10:28 +0900")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1316002218-3408-1-git-send-email-per.forlin@linaro.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linaro-dev@lists.linaro.org, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Randy Dunlap <rdunlap@xenotime.net>, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: NamJae Jeon <linkinjeon@gmail.com>
-Cc: Linus Walleij <linus.ml.walleij@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi,
+2011/9/14 Per Forlin <per.forlin@linaro.org>:
+> Akinobu Mita reported that the boot option for mmc fault injection is never
+> compiled in due to a fauly "ifdef KERNEL" that is never set.
+> A correct ifdef would be "ifndef MODULE". This patch set adds a
+> module_param_cb() and thereby no ifndef MODULE is needed.
+> Using a module_param makes it possible to pass default fault attributes for
+> external modules too.
 
-On Sun, Sep 18 2011, NamJae Jeon wrote:
-> mmc : boot partition is set as a read-write.
->
-> There is a case that user directly update boot partition through mmcblk0boot0,1.
-> However, the current boot partition is set as a read-only.
-> I suggest that boot partition is set as a read-write if there is no
-> reason that it should be read-only.
+All patches look good to me.
 
-There is a reason.
-
-Documentation/mmc/mmc-dev-parts.txt:
-
-MMC Boot Partitions
-===================
-
-Read and write access is provided to the two MMC boot partitions. Due to
-the sensitive nature of the boot partition contents, which often store
-a bootloader or bootloader configuration tables crucial to booting the
-platform, write access is disabled by default to reduce the chance of
-accidental bricking.
-
-To enable write access to /dev/mmcblkXbootY, disable the forced read-only
-access with:
-
-echo 0 > /sys/block/mmcblkXbootY/force_ro
-
-==
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Reviewed-by: Akinobu Mita <akinobu.mita@gmail.com>
