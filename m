@@ -1,39 +1,58 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: sdio: Workaround for dev with broken CMD53
-Date: Mon, 19 Sep 2011 10:55:27 +0200
-Message-ID: <CACRpkdb_hDiDzefc9mRb=DAWPLcGzuspN8TL6qQrZ5dAm7yg=g@mail.gmail.com>
-References: <1316101384-21009-1-git-send-email-ulf.hansson@stericsson.com>
+From: =?utf-8?B?5LuFMTDlhYPmr4/lpKk=?= <test@amidress.com>
+Subject: =?utf-8?B?576k5Y+R6L2v5Lu2K+S5sOWutuaQnOe0ouacuisxMDnlsYrlub/kuqTkvJrkubDlrrY=?=
+	=?utf-8?B?44CB5rW35YWz5pWw5o2uLEIyQuivouebmOS5sOWutjUwMOS4h+OAgg==?=
+Date: Mon, 19 Sep 2011 09:01:07 +0000 (UTC)
+Message-ID: <20120918084120450651@amidress.com>
+Reply-To: <1339625218@qq.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f42.google.com ([209.85.210.42]:39816 "EHLO
-	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751560Ab1ISIz2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2011 04:55:28 -0400
-Received: by pzk1 with SMTP id 1so10528189pzk.1
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Sep 2011 01:55:27 -0700 (PDT)
-In-Reply-To: <1316101384-21009-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from 184.172.211.66-static.reverse.softlayer.com ([184.172.211.66]:4846
+	"HELO amidress.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1750910Ab1ISJBC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2011 05:01:02 -0400
+Date: Tue, 18 Sep 2012 08:41:13 +0800
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+To: lintoa@rediffmail.com, linux-cluster@redhat.com, linux-mmc@vger.kernel.org, linwangling@518ad.com, linwu50@126.com, linxiequn@518ad.com, linxuehua1983@yahoo.com, linyia
 
-On Thu, Sep 15, 2011 at 5:43 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
-> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
->
-> Adds a quirk which can be turned on for SDIO devices
-> that do not support 512 byte requests in byte mode during
-> CMD53. These requests will always be sent in block mode
-> instead.
->
-> This patch also enables this quirk for ST-Ericsson
-> CW1200 WLAN device.
->
-> Change-Id: Id31787fcbfeb0b97ba2e8c583e9363a7c08811d2
-> Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
-> Signed-off-by: Ulf HANSSON <ulf.hansson@stericsson.com>
+576k5Y+R6L2v5Lu2KzEwOeWxiuW5v+S6pOS8muS5sOWutuOAgea1t+WFs+aVsOaNruOAgeaQnOe0
+ouW8leaTjuS5sOWutixCMkLor6Lnm5jkubDlrrblhbE1MDDkuIcs5LuFMTDlhYPmr4/lpKnjgIIg
+DQrkv53or4Hmr4/lpKnpg73mnInkubDlrrblm57lpI3jgIINCuS/neivgeavj+WkqemDveacieS5
+sOWutuWbnuWkjeOAgg0KDQoNCjHjgIHnvqTlj5Hova/ku7bvvJog5pON5L2c566A5Y2V77yM5Yqf
+6IO95by65aSn77yM5qih5Lu/5Lq65bel5pON5L2c5qih5byP77yM5Yiw6L6+546H6auY77yM5pel
+5Y+R6YCBNeS4h+WwgeS7peS4iuOAgiANCjLjgIE1MDDkuIflub/kuqTkvJrkubDlrrbotYTmupDv
+vJog6LWg6YCB55qENTAw5LiH5Lmw5a626LWE5rqQ5bqT77yM5q+P5pyI5pu05pawIOOAgiANCjPj
+gIHotoXnuqfmtbflpJbkubDlrrZFbWFpbOaQnOe0ouacuu+8miDmr4/lpKnog73mkJzntKIxLTLk
+uIfku6XkuIrkubDlrrbnnJ/lrp5FTUFJTO+8jOaIkOWNleeOh+mrmOOAgiANCiANCg0K6KaB55qE
+5oqT57Sn6IGU57O7UVE6IDEzMzk2MjUyMTggICDmiJbogIXnq4vljbPlm57lpI3pgq7nrrE6IDEz
+Mzk2MjUyMThAcXEuY29tDQropoHnmoTmipPntKfogZTns7tRUTogMTMzOTYyNTIxOCAgIOaIluiA
+heeri+WNs+WbnuWkjemCrueusTogMTMzOTYyNTIxOEBxcS5jb20NCuimgeeahOaKk+e0p+iBlOez
+u1FROiAxMzM5NjI1MjE4ICAg5oiW6ICF56uL5Y2z5Zue5aSN6YKu566xOiAxMzM5NjI1MjE4QHFx
+LmNvbQ0KDQrlhY3otLnotaDpgIE6DQrkuIDlhbE45Liq5YyFKOaVsOaNruaYr+WFqOihjOS4muea
+hO+8jOaMieeFp+ihjOS4muWIhuWlveexu++8jOW5tuS4lOWPr+S7peaMieeFp+WFs+mUruivjeaf
+peivoueahCnvvJogDQox77yMMjAxMeaYpeWtozEwOeWxiuW5v+S6pOS8muS5sOWutueOsOWcuuiv
+ouebmOaVsOaNruW6k+aWsOmynOWHuueCie+8jOi2hee6p+aWsOmynOS5sOWutu+8jOaWsOmynOaV
+sOaNru+8jOWuueaYk+aIkOWNle+8gSANCjLvvIzotK3kubDlkI7lj6/ku6XlhY3otLnmm7TmlrAy
+MDEx56eL5a2j5bm/5Lqk5LyaKzIwMTLmmKXlraPlub/kuqTkvJrkubDlrrbmlbDmja7jgILlpKro
+toXlgLzkuobjgIINCjPvvIzmnIDmlrDlhajnkIPkubDlrrblupMs5YWxNDUxNjYw5p2h5pWw5o2u
+44CCICjmnIDmlrDmm7TmlrDml6XmnJ8gMjAxMS0wNS0xNuaXpSkNCjTvvIwyMDA45bm0LDIwMDnl
+ubQsMjAxMOW5tCDmmKXlraMr56eL5a2j5bm/5Lqk5Lya5Lmw5a625ZCN5b2V77yMMTAzIDEwNCAx
+MDUgMTA2IDEwNyAxMDgg5YWx5YWt5bGKIOWFsTEyMC425LiH5pWw5o2u44CCDQo177yMMjAxMOW5
+tOWbvemZheS/g+mUgOWNj+S8mu+8iFBQQUnvvInmiJDlkZjlkI3ljZUgUFBBSSBNZW1iZXJzIERp
+cmVjdG9yee+8jOmdnuW4uOmHjeimgeeahOWkp+S5sOWutuOAgg0KNu+8jDIwMTDlubTliLDpppnm
+uK/ph4fotK3nmoTlm73lpJblrqLkurrlkI3lvZUo6aaZ5riv6LS45Y+R5bGA5o+Q5L6bKe+8jOWF
+sTcuMuS4h+aVsOaNru+8jOi2hee6p+mHjeimgeeahOS5sOWutuOAgg0KN++8jDQ4LjY45LiH5p2h
+5pyA5paw5Lmw5a626K+i55uY77yM6LSt5Lmw5ZCO5q+P5pyI5pu05pawIDEtMuS4h+adoe+8jOWM
+heaLrDLpg6jliIbvvIwx77yM5pyA5paw55qE6K+i55uYIDLvvIzmnIDmlrDnmoTlsZXkvJrkubDl
+rrbjgILlhY3otLnmm7TmlrAzNuS4quaciOOAgg0KOO+8jDIwMDnlubTmtbflhbPmj5DljZXmlbDm
+ja5waWVyc+eJiOaVsOaNriAx5Y2D5LiH44CCDQoNCg0K6K+a5L+h5Li65pys77yM5pSv5oyB5pSv
+5LuY5a6d5ouF5L+d5Lqk5piTICjlhYjlj5HotKflubblronoo4Xorr7nva7nvqTlj5Hova/ku7bv
+vIznhLblkI7ku5jmrL4pIOW9u+W6leaJk+a2iOaCqOeahCDpob7omZHjgIINCg0KIA0KDQoNCiAN
+Cg0K57K+5YeG5pWw5o2uLeaIkOWNleeOh+aegemrmA0K57K+5YeG5pWw5o2uLeaIkOWNleeOh+ae
+gemrmA0K57K+5YeG5pWw5o2uLeaIkOWNleeOh+aegemrmA0K57K+5YeG5pWw5o2uLeaIkOWNleeO
+h+aegemrmA0K57K+5YeG5pWw5o2uLeaIkOWNleeOh+aegemrmA0K
 
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-Thanks,
-Linus Walleij
