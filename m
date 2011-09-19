@@ -1,47 +1,52 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: RFC : mmc : boot partition is set as a read-write.
-Date: Mon, 19 Sep 2011 12:10:28 +0900
-Message-ID: <CAKYAXd8xd3sCi0CCOH6Y3AR2J2iuDQispCnt0D2mksiAWr=rgw@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: RFC : mmc : boot partition is set as a read-write.
+Date: Sun, 18 Sep 2011 23:32:46 -0400
+Message-ID: <m2vcsp2om9.fsf@bob.laptop.org>
+References: <CAKYAXd8xd3sCi0CCOH6Y3AR2J2iuDQispCnt0D2mksiAWr=rgw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:48458 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753948Ab1ISDKa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Sep 2011 23:10:30 -0400
+Received: from void.printf.net ([89.145.121.20]:42499 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754017Ab1ISDcw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 18 Sep 2011 23:32:52 -0400
+In-Reply-To: <CAKYAXd8xd3sCi0CCOH6Y3AR2J2iuDQispCnt0D2mksiAWr=rgw@mail.gmail.com>
+	(NamJae Jeon's message of "Mon, 19 Sep 2011 12:10:28 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Linus Walleij <linus.ml.walleij@gmail.com>, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+To: NamJae Jeon <linkinjeon@gmail.com>
+Cc: Linus Walleij <linus.ml.walleij@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-mmc : boot partition is set as a read-write.
+Hi,
 
-There is a case that user directly update boot partition through mmcblk0boot0,1.
-However, the current boot partition is set as a read-only.
-I suggest that boot partition is set as a read-write if there is no
-reason that it should be read-only.
+On Sun, Sep 18 2011, NamJae Jeon wrote:
+> mmc : boot partition is set as a read-write.
+>
+> There is a case that user directly update boot partition through mmcblk0boot0,1.
+> However, the current boot partition is set as a read-only.
+> I suggest that boot partition is set as a read-write if there is no
+> reason that it should be read-only.
 
-static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
-{
-	int ret = 0;
+There is a reason.
 
-	if (!mmc_card_mmc(card))
-		return 0;
+Documentation/mmc/mmc-dev-parts.txt:
 
-	if (card->ext_csd.boot_size) {
-		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT0,
-					 card->ext_csd.boot_size >> 9,
-					 false,
-					 "boot0");
-		if (ret)
-			return ret;
-		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT1,
-					 card->ext_csd.boot_size >> 9,
-					 false,
-					 "boot1");
-		if (ret)
-			return ret;
-	}
-}
+MMC Boot Partitions
+===================
 
-Thanks.
+Read and write access is provided to the two MMC boot partitions. Due to
+the sensitive nature of the boot partition contents, which often store
+a bootloader or bootloader configuration tables crucial to booting the
+platform, write access is disabled by default to reduce the chance of
+accidental bricking.
+
+To enable write access to /dev/mmcblkXbootY, disable the forced read-only
+access with:
+
+echo 0 > /sys/block/mmcblkXbootY/force_ro
+
+==
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
