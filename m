@@ -1,58 +1,138 @@
-From: =?utf-8?B?5LuFMTDlhYPmr4/lpKk=?= <test@amidress.com>
-Subject: =?utf-8?B?576k5Y+R6L2v5Lu2K+S5sOWutuaQnOe0ouacuisxMDnlsYrlub/kuqTkvJrkubDlrrY=?=
-	=?utf-8?B?44CB5rW35YWz5pWw5o2uLEIyQuivouebmOS5sOWutjUwMOS4h+OAgg==?=
-Date: Mon, 19 Sep 2011 09:01:07 +0000 (UTC)
-Message-ID: <20120918084120450651@amidress.com>
-Reply-To: <1339625218@qq.com>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: add basic imx6q usdhc support
+Date: Mon, 19 Sep 2011 17:32:21 +0800
+Message-ID: <1316424742-18502-1-git-send-email-shawn.guo@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 184.172.211.66-static.reverse.softlayer.com ([184.172.211.66]:4846
-	"HELO amidress.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1750910Ab1ISJBC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2011 05:01:02 -0400
-Date: Tue, 18 Sep 2012 08:41:13 +0800
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:44570 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753272Ab1ISJbK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2011 05:31:10 -0400
+Received: by yxl31 with SMTP id 31so2475yxl.19
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Sep 2011 02:31:10 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: lintoa@rediffmail.com, linux-cluster@redhat.com, linux-mmc@vger.kernel.org, linwangling@518ad.com, linwu50@126.com, linxiequn@518ad.com, linxuehua1983@yahoo.com, linyia
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, Shawn Guo <shawn.guo@linaro.org>
 
-576k5Y+R6L2v5Lu2KzEwOeWxiuW5v+S6pOS8muS5sOWutuOAgea1t+WFs+aVsOaNruOAgeaQnOe0
-ouW8leaTjuS5sOWutixCMkLor6Lnm5jkubDlrrblhbE1MDDkuIcs5LuFMTDlhYPmr4/lpKnjgIIg
-DQrkv53or4Hmr4/lpKnpg73mnInkubDlrrblm57lpI3jgIINCuS/neivgeavj+WkqemDveacieS5
-sOWutuWbnuWkjeOAgg0KDQoNCjHjgIHnvqTlj5Hova/ku7bvvJog5pON5L2c566A5Y2V77yM5Yqf
-6IO95by65aSn77yM5qih5Lu/5Lq65bel5pON5L2c5qih5byP77yM5Yiw6L6+546H6auY77yM5pel
-5Y+R6YCBNeS4h+WwgeS7peS4iuOAgiANCjLjgIE1MDDkuIflub/kuqTkvJrkubDlrrbotYTmupDv
-vJog6LWg6YCB55qENTAw5LiH5Lmw5a626LWE5rqQ5bqT77yM5q+P5pyI5pu05pawIOOAgiANCjPj
-gIHotoXnuqfmtbflpJbkubDlrrZFbWFpbOaQnOe0ouacuu+8miDmr4/lpKnog73mkJzntKIxLTLk
-uIfku6XkuIrkubDlrrbnnJ/lrp5FTUFJTO+8jOaIkOWNleeOh+mrmOOAgiANCiANCg0K6KaB55qE
-5oqT57Sn6IGU57O7UVE6IDEzMzk2MjUyMTggICDmiJbogIXnq4vljbPlm57lpI3pgq7nrrE6IDEz
-Mzk2MjUyMThAcXEuY29tDQropoHnmoTmipPntKfogZTns7tRUTogMTMzOTYyNTIxOCAgIOaIluiA
-heeri+WNs+WbnuWkjemCrueusTogMTMzOTYyNTIxOEBxcS5jb20NCuimgeeahOaKk+e0p+iBlOez
-u1FROiAxMzM5NjI1MjE4ICAg5oiW6ICF56uL5Y2z5Zue5aSN6YKu566xOiAxMzM5NjI1MjE4QHFx
-LmNvbQ0KDQrlhY3otLnotaDpgIE6DQrkuIDlhbE45Liq5YyFKOaVsOaNruaYr+WFqOihjOS4muea
-hO+8jOaMieeFp+ihjOS4muWIhuWlveexu++8jOW5tuS4lOWPr+S7peaMieeFp+WFs+mUruivjeaf
-peivoueahCnvvJogDQox77yMMjAxMeaYpeWtozEwOeWxiuW5v+S6pOS8muS5sOWutueOsOWcuuiv
-ouebmOaVsOaNruW6k+aWsOmynOWHuueCie+8jOi2hee6p+aWsOmynOS5sOWutu+8jOaWsOmynOaV
-sOaNru+8jOWuueaYk+aIkOWNle+8gSANCjLvvIzotK3kubDlkI7lj6/ku6XlhY3otLnmm7TmlrAy
-MDEx56eL5a2j5bm/5Lqk5LyaKzIwMTLmmKXlraPlub/kuqTkvJrkubDlrrbmlbDmja7jgILlpKro
-toXlgLzkuobjgIINCjPvvIzmnIDmlrDlhajnkIPkubDlrrblupMs5YWxNDUxNjYw5p2h5pWw5o2u
-44CCICjmnIDmlrDmm7TmlrDml6XmnJ8gMjAxMS0wNS0xNuaXpSkNCjTvvIwyMDA45bm0LDIwMDnl
-ubQsMjAxMOW5tCDmmKXlraMr56eL5a2j5bm/5Lqk5Lya5Lmw5a625ZCN5b2V77yMMTAzIDEwNCAx
-MDUgMTA2IDEwNyAxMDgg5YWx5YWt5bGKIOWFsTEyMC425LiH5pWw5o2u44CCDQo177yMMjAxMOW5
-tOWbvemZheS/g+mUgOWNj+S8mu+8iFBQQUnvvInmiJDlkZjlkI3ljZUgUFBBSSBNZW1iZXJzIERp
-cmVjdG9yee+8jOmdnuW4uOmHjeimgeeahOWkp+S5sOWutuOAgg0KNu+8jDIwMTDlubTliLDpppnm
-uK/ph4fotK3nmoTlm73lpJblrqLkurrlkI3lvZUo6aaZ5riv6LS45Y+R5bGA5o+Q5L6bKe+8jOWF
-sTcuMuS4h+aVsOaNru+8jOi2hee6p+mHjeimgeeahOS5sOWutuOAgg0KN++8jDQ4LjY45LiH5p2h
-5pyA5paw5Lmw5a626K+i55uY77yM6LSt5Lmw5ZCO5q+P5pyI5pu05pawIDEtMuS4h+adoe+8jOWM
-heaLrDLpg6jliIbvvIwx77yM5pyA5paw55qE6K+i55uYIDLvvIzmnIDmlrDnmoTlsZXkvJrkubDl
-rrbjgILlhY3otLnmm7TmlrAzNuS4quaciOOAgg0KOO+8jDIwMDnlubTmtbflhbPmj5DljZXmlbDm
-ja5waWVyc+eJiOaVsOaNriAx5Y2D5LiH44CCDQoNCg0K6K+a5L+h5Li65pys77yM5pSv5oyB5pSv
-5LuY5a6d5ouF5L+d5Lqk5piTICjlhYjlj5HotKflubblronoo4Xorr7nva7nvqTlj5Hova/ku7bv
-vIznhLblkI7ku5jmrL4pIOW9u+W6leaJk+a2iOaCqOeahCDpob7omZHjgIINCg0KIA0KDQoNCiAN
-Cg0K57K+5YeG5pWw5o2uLeaIkOWNleeOh+aegemrmA0K57K+5YeG5pWw5o2uLeaIkOWNleeOh+ae
-gemrmA0K57K+5YeG5pWw5o2uLeaIkOWNleeOh+aegemrmA0K57K+5YeG5pWw5o2uLeaIkOWNleeO
-h+aegemrmA0K57K+5YeG5pWw5o2uLeaIkOWNleeOh+aegemrmA0K
+This patch adds the basic support for imx6q usdhc, which is a
+derivative of esdhc controller.
 
+Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+---
+ drivers/mmc/host/Kconfig           |    6 +++---
+ drivers/mmc/host/sdhci-esdhc-imx.c |   36 ++++++++++++++++++++++++++++++++----
+ 2 files changed, 35 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index c226d54..87d5067 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -130,13 +130,13 @@ config MMC_SDHCI_CNS3XXX
+ 	  If unsure, say N.
+ 
+ config MMC_SDHCI_ESDHC_IMX
+-	tristate "SDHCI platform support for the Freescale eSDHC i.MX controller"
++	tristate "SDHCI support for the Freescale eSDHC/uSDHC i.MX controller"
+ 	depends on ARCH_MXC
+ 	depends on MMC_SDHCI_PLTFM
+ 	select MMC_SDHCI_IO_ACCESSORS
+ 	help
+-	  This selects the Freescale eSDHC controller support on the platform
+-	  bus, found on i.MX25, i.MX35 and i.MX5x.
++	  This selects the Freescale eSDHC/uSDHC controller support
++	  found on i.MX25, i.MX35 i.MX5x and i.MX6x.
+ 
+ 	  If you have a controller with this interface, say Y or M here.
+ 
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 4557aa1..ae57769 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -32,6 +32,7 @@
+ /* VENDOR SPEC register */
+ #define SDHCI_VENDOR_SPEC		0xC0
+ #define  SDHCI_VENDOR_SPEC_SDIO_QUIRK	0x00000002
++#define SDHCI_MIX_CTRL			0x48
+ 
+ /*
+  * There is an INT DMA ERR mis-match between eSDHC and STD SDHC SPEC:
+@@ -59,6 +60,7 @@ enum imx_esdhc_type {
+ 	IMX35_ESDHC,
+ 	IMX51_ESDHC,
+ 	IMX53_ESDHC,
++	IMX6Q_USDHC,
+ };
+ 
+ struct pltfm_imx_data {
+@@ -82,6 +84,9 @@ static struct platform_device_id imx_esdhc_devtype[] = {
+ 		.name = "sdhci-esdhc-imx53",
+ 		.driver_data = IMX53_ESDHC,
+ 	}, {
++		.name = "sdhci-usdhc-imx6q",
++		.driver_data = IMX6Q_USDHC,
++	}, {
+ 		/* sentinel */
+ 	}
+ };
+@@ -92,6 +97,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
+ 	{ .compatible = "fsl,imx35-esdhc", .data = &imx_esdhc_devtype[IMX35_ESDHC], },
+ 	{ .compatible = "fsl,imx51-esdhc", .data = &imx_esdhc_devtype[IMX51_ESDHC], },
+ 	{ .compatible = "fsl,imx53-esdhc", .data = &imx_esdhc_devtype[IMX53_ESDHC], },
++	{ .compatible = "fsl,imx6q-usdhc", .data = &imx_esdhc_devtype[IMX6Q_USDHC], },
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, imx_esdhc_dt_ids);
+@@ -116,6 +122,11 @@ static inline int is_imx53_esdhc(struct pltfm_imx_data *data)
+ 	return data->devtype == IMX53_ESDHC;
+ }
+ 
++static inline int is_imx6q_usdhc(struct pltfm_imx_data *data)
++{
++	return data->devtype == IMX6Q_USDHC;
++}
++
+ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, int reg)
+ {
+ 	void __iomem *base = host->ioaddr + (reg & ~0x3);
+@@ -220,8 +231,16 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ 
+ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+ {
+-	if (unlikely(reg == SDHCI_HOST_VERSION))
+-		reg ^= 2;
++	if (unlikely(reg == SDHCI_HOST_VERSION)) {
++		u16 val = readw(host->ioaddr + (reg ^ 2));
++		/*
++		 * uSDHC supports SDHCI v3.0, but it's encoded as value
++		 * 0x3 in host controller version register, which violates
++		 * SDHCI_SPEC_300 definition.  Work it around here.
++		 */
++		if ((val & SDHCI_SPEC_VER_MASK) == 3)
++			return --val;
++	}
+ 
+ 	return readw(host->ioaddr + reg);
+ }
+@@ -252,8 +271,17 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION)
+ 			&& (imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT))
+ 			val |= SDHCI_CMD_ABORTCMD;
+-		writel(val << 16 | imx_data->scratchpad,
+-			host->ioaddr + SDHCI_TRANSFER_MODE);
++
++		if (is_imx6q_usdhc(imx_data)) {
++			u32 m = readl(host->ioaddr + SDHCI_MIX_CTRL);
++			m = imx_data->scratchpad | (m & 0xffff0000);
++			writel(m, host->ioaddr + SDHCI_MIX_CTRL);
++			writel(val << 16,
++			       host->ioaddr + SDHCI_TRANSFER_MODE);
++		} else {
++			writel(val << 16 | imx_data->scratchpad,
++			       host->ioaddr + SDHCI_TRANSFER_MODE);
++		}
+ 		return;
+ 	case SDHCI_BLOCK_SIZE:
+ 		val &= ~SDHCI_MAKE_BLKSZ(0x7, 0);
+-- 
+1.7.4.1
 
