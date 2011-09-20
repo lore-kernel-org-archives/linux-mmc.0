@@ -1,96 +1,54 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc : export hw reset function info to user
-Date: Tue, 20 Sep 2011 15:21:41 +0300
-Message-ID: <4E788555.3040607@intel.com>
-References: <1316359225-2224-1-git-send-email-linkinjeon@gmail.com>
+From: NamJae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH] mmc : Use wait_for_completion_timeout() instead of
+ wait_for_completion in case of write.
+Date: Tue, 20 Sep 2011 23:22:38 +0900
+Message-ID: <CAKYAXd8WiakFVy_ykpbw-Eq+XDgX0NECtJZFDy3WzxtNfJmdkw@mail.gmail.com>
+References: <1316359301-2263-1-git-send-email-linkinjeon@gmail.com>
+	<4E78433F.2050900@stericsson.com>
+	<CA+Wuu-vAx8PkvPgy5mR5Bcg6e+q6Z3XOZtTGwNZgCW4HCrX5KA@mail.gmail.com>
+	<CAKYAXd9bmw12By6StTL_MRzAGsgG9BOfcvs=TA-nRu_uxMzOcw@mail.gmail.com>
+	<CA+Wuu-sK6B_k0+sG_p4JRuHOwO_HVCpNksg-9_TdpzXRS7y0xA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:65441 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751730Ab1ITMVp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 20 Sep 2011 08:21:45 -0400
-In-Reply-To: <1316359225-2224-1-git-send-email-linkinjeon@gmail.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:35490 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750777Ab1ITOWj convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2011 10:22:39 -0400
+In-Reply-To: <CA+Wuu-sK6B_k0+sG_p4JRuHOwO_HVCpNksg-9_TdpzXRS7y0xA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Murali Krishna Palnati <palnati.muralikrishna@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 18/09/11 18:20, Namjae Jeon wrote:
-> user app should know whether hw reset function is enable to use it.
-> so I try to add sysfs file of hw reset function like enhanced area.
+2011/9/20 Murali Krishna Palnati <palnati.muralikrishna@gmail.com>:
+> On Tue, Sep 20, 2011 at 4:05 PM, NamJae Jeon <linkinjeon@gmail.com> w=
+rote:
+>> yes, I knew. But if card keep holding busy line(data 0) in the middl=
+e
+>> of DMA operation(multi blocks write), =C2=A0host driver layer can no=
+t know
+>> card status in this situation.
+>
+> The host driver shall start a software timer and indpendently needs t=
+o
+> watch out for the expiry of the timeout. If the host doesn't hear bac=
+k
+> from the
+> controller/DMA engine even after waiting for the specified timeout,
+> then the timer handler that gets invoked can then do the necessary
+> cleanup and
+> inform the MMC core layer that the request failed. Does this sound fe=
+asible?
+>
 
-This conflicts with my patches:
-
-http://marc.info/?l=linux-mmc&m=131462534514277&w=2
-http://marc.info/?l=linux-mmc&m=131462534614281&w=2
-http://marc.info/?l=linux-mmc&m=131462534714284&w=2
-http://marc.info/?l=linux-mmc&m=131462534814287&w=2
-http://marc.info/?l=linux-mmc&m=131462535014290&w=2
-http://marc.info/?l=linux-mmc&m=131462535214297&w=2
-
->
-> Signed-off-by: Namjae Jeon<linkinjeon@gmail.com>
-> ---
->   drivers/mmc/core/mmc.c   |    6 ++++++
->   include/linux/mmc/card.h |    1 +
->   include/linux/mmc/mmc.h  |    1 +
->   3 files changed, 8 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 10f5a19..06c3ffc 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -355,6 +355,10 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
->   	card->ext_csd.raw_trim_mult =
->   		ext_csd[EXT_CSD_TRIM_MULT];
->   	if (card->ext_csd.rev>= 4) {
-> +		/* HW reset function feature support.
-> +		/* user can know it is enable through sysfs interface.
-> +		card->ext_csd.raw_hw_reset_function =
-> +			ext_csd[EXT_CSD_RST_FUNCTION];
->   		/*
->   		 * Enhanced area feature support -- check whether the eMMC
->   		 * card has the Enhanced area enabled.  If so, export enhanced
-> @@ -499,6 +503,7 @@ MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
->   MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
->   		card->ext_csd.enhanced_area_offset);
->   MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
-> +MMC_DEV_ATTR(raw_hw_reset_function, "0x%02x\n", card->ext_csd.raw_hw_reset_function);
->
->   static struct attribute *mmc_std_attrs[] = {
->   	&dev_attr_cid.attr,
-> @@ -514,6 +519,7 @@ static struct attribute *mmc_std_attrs[] = {
->   	&dev_attr_serial.attr,
->   	&dev_attr_enhanced_area_offset.attr,
->   	&dev_attr_enhanced_area_size.attr,
-> +	&dev_attr_raw_hw_reset_function.attr,
->   	NULL,
->   };
->
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index b460fc2..237bceb 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -65,6 +65,7 @@ struct mmc_ext_csd {
->   	unsigned int		enhanced_area_size;	/* Units: KB */
->   	unsigned int		boot_size;		/* in bytes */
->   	u8			raw_partition_support;	/* 160 */
-> +	u8                      raw_hw_reset_function;  /* 162 */
->   	u8			raw_erased_mem_count;	/* 181 */
->   	u8			raw_ext_csd_structure;	/* 194 */
->   	u8			raw_card_type;		/* 196 */
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 5a794cb..233c932 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -272,6 +272,7 @@ struct _mmc_csd {
->
->   #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
->   #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
-> +#define EXT_CSD_RST_FUNCTION           162     /* R/W */
->   #define EXT_CSD_WR_REL_PARAM		166	/* RO */
->   #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
->   #define EXT_CSD_PART_CONFIG		179	/* R/W */
-
+It may be no good choice that sw timer is on host driver. also I don't
+know what is different.
+It is the same as the ata driver's dma_map_sg.
+dma_map_sg is repectively called in mmc host driver. but it is being
+processed in ata core of ata driver.
+because it is common routine, ata core have called it instead of host d=
+river.
+if it is processed in mmc core, there is no need to modify several
+hosts.(except dma controller reset)
