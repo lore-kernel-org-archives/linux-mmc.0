@@ -1,42 +1,71 @@
-From: Murali Krishna Palnati <palnati.muralikrishna@gmail.com>
-Subject: Re: [PATCH] mmc : Use wait_for_completion_timeout() instead of
- wait_for_completion in case of write.
-Date: Tue, 20 Sep 2011 20:54:34 +0530
-Message-ID: <CA+Wuu-vG7QMcRwvi8F4rznQda3OmyEueNGDv=8gXkB6YVBWEaA@mail.gmail.com>
-References: <1316359301-2263-1-git-send-email-linkinjeon@gmail.com>
-	<4E78433F.2050900@stericsson.com>
-	<CA+Wuu-vAx8PkvPgy5mR5Bcg6e+q6Z3XOZtTGwNZgCW4HCrX5KA@mail.gmail.com>
-	<CAKYAXd9bmw12By6StTL_MRzAGsgG9BOfcvs=TA-nRu_uxMzOcw@mail.gmail.com>
-	<CA+Wuu-sK6B_k0+sG_p4JRuHOwO_HVCpNksg-9_TdpzXRS7y0xA@mail.gmail.com>
-	<CAKYAXd8WiakFVy_ykpbw-Eq+XDgX0NECtJZFDy3WzxtNfJmdkw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Stephen Warren <swarren@nvidia.com>
+Subject: [PATCH REPOST 1/2] arm/dt: Tegra: Update SDHCI nodes to match bindings
+Date: Tue, 20 Sep 2011 10:46:25 -0600
+Message-ID: <1316537186-26753-1-git-send-email-swarren@nvidia.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:65328 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750763Ab1ITPYf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2011 11:24:35 -0400
-In-Reply-To: <CAKYAXd8WiakFVy_ykpbw-Eq+XDgX0NECtJZFDy3WzxtNfJmdkw@mail.gmail.com>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:38190 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750857Ab1ITQqf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2011 12:46:35 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: NamJae Jeon <linkinjeon@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@stericsson.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Grant Likely <grant.likely@secretlab.ca>, Arnd Bergmann <arnd@arndb.de>, nicolas.pitre@linaro.org
+Cc: Olof Johansson <olof@lixom.net>, Shawn Guo <shawn.guo@linaro.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Stephen Warren <swarren@nvidia.com>
 
-On Tue, Sep 20, 2011 at 7:52 PM, NamJae Jeon <linkinjeon@gmail.com> wrote:
-> It may be no good choice that sw timer is on host driver. also I don't
-> know what is different.
+The bindings were recently updated to have separate properties for each
+type of GPIO. Update the Device Tree source to match that.
 
-It helps to have this functionality implemented at host controller
-layer so that the host layer is informed about this. If we just end
-the request from the MMC core layer, host controller driver doesnt
-even kow about that and it remains in the same state processing the
-request (that already got timed out at core layer). It is good to have
-the host layer trigger this timeout, do necessary clean up and then
-duly end the request by informing the core layer by calling
-mmc_request_done().
+Signed-off-by: Stephen Warren <swarren@nvidia.com>
+Acked-by: Olof Johansson <olof@lixom.net>
+---
+I'd previously sent these to Grant assuming they'd go in his dt/next branch,
+but perhaps these should go in through Arnd's arm-soc next/dt branch?
 
-Let me put the question in this way. If the core layer times out
-(because of wait_for_completion_timeout) then in the patch that you
-have submitted, i dont see how the host layer knows about it.
-Apologize, if i sound like a broken record saying the same thing again
-and again.
+ arch/arm/boot/dts/tegra-harmony.dts  |   12 ++++++------
+ arch/arm/boot/dts/tegra-seaboard.dts |    6 +++---
+ 2 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/arch/arm/boot/dts/tegra-harmony.dts b/arch/arm/boot/dts/tegra-harmony.dts
+index 4c05334..e581866 100644
+--- a/arch/arm/boot/dts/tegra-harmony.dts
++++ b/arch/arm/boot/dts/tegra-harmony.dts
+@@ -57,14 +57,14 @@
+ 	};
+ 
+ 	sdhci@c8000200 {
+-		gpios = <&gpio 69 0>, /* cd, gpio PI5 */
+-			<&gpio 57 0>, /* wp, gpio PH1 */
+-			<&gpio 155 0>; /* power, gpio PT3 */
++		cd-gpios = <&gpio 69 0>; /* gpio PI5 */
++		wp-gpios = <&gpio 57 0>; /* gpio PH1 */
++		power-gpios = <&gpio 155 0>; /* gpio PT3 */
+ 	};
+ 
+ 	sdhci@c8000600 {
+-		gpios = <&gpio 58 0>, /* cd, gpio PH2 */
+-			<&gpio 59 0>, /* wp, gpio PH3 */
+-			<&gpio 70 0>; /* power, gpio PI6 */
++		cd-gpios = <&gpio 58 0>; /* gpio PH2 */
++		wp-gpios = <&gpio 59 0>; /* gpio PH3 */
++		power-gpios = <&gpio 70 0>; /* gpio PI6 */
+ 	};
+ };
+diff --git a/arch/arm/boot/dts/tegra-seaboard.dts b/arch/arm/boot/dts/tegra-seaboard.dts
+index 1940cae..64cedca 100644
+--- a/arch/arm/boot/dts/tegra-seaboard.dts
++++ b/arch/arm/boot/dts/tegra-seaboard.dts
+@@ -21,8 +21,8 @@
+ 	};
+ 
+ 	sdhci@c8000400 {
+-		gpios = <&gpio 69 0>, /* cd, gpio PI5 */
+-			<&gpio 57 0>, /* wp, gpio PH1 */
+-			<&gpio 70 0>; /* power, gpio PI6 */
++		cd-gpios = <&gpio 69 0>; /* gpio PI5 */
++		wp-gpios = <&gpio 57 0>; /* gpio PH1 */
++		power-gpios = <&gpio 70 0>; /* gpio PI6 */
+ 	};
+ };
+-- 
+1.7.0.4
+
