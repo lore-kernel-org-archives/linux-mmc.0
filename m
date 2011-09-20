@@ -1,40 +1,51 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: Fix hangs related to insert/remove of cards
-Date: Tue, 20 Sep 2011 22:49:07 +0200
-Message-ID: <CACRpkdaUtY1S08gXNzfyRNnozE=LzKAFq19vvmK75yVLD5M5qw@mail.gmail.com>
-References: <1315918957-11491-1-git-send-email-ulf.hansson@stericsson.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH REPOST 1/2] arm/dt: Tegra: Update SDHCI nodes to match bindings
+Date: Tue, 20 Sep 2011 23:01:56 +0200
+Message-ID: <201109202301.56983.arnd@arndb.de>
+References: <1316537186-26753-1-git-send-email-swarren@nvidia.com> <20110920180731.GL7781@ponder.secretlab.ca> <201109202134.50242.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f42.google.com ([209.85.210.42]:38878 "EHLO
-	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750823Ab1ITUtI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2011 16:49:08 -0400
-Received: by pzk1 with SMTP id 1so256842pzk.1
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Sep 2011 13:49:07 -0700 (PDT)
-In-Reply-To: <1315918957-11491-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from moutng.kundenserver.de ([212.227.17.9]:65488 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751168Ab1ITVCC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2011 17:02:02 -0400
+In-Reply-To: <201109202134.50242.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Stephen Warren <swarren@nvidia.com>, nicolas.pitre@linaro.org, Shawn Guo <shawn.guo@linaro.org>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, Olof Johansson <olof@lixom.net>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-On Tue, Sep 13, 2011 at 3:02 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
+On Tuesday 20 September 2011, Arnd Bergmann wrote:
+> On Tuesday 20 September 2011, Grant Likely wrote:
+> > On Tue, Sep 20, 2011 at 07:43:29PM +0200, Arnd Bergmann wrote:
+> > > On Tuesday 20 September 2011, Stephen Warren wrote:
+> > > > The bindings were recently updated to have separate properties for each
+> > > > type of GPIO. Update the Device Tree source to match that.
+> > > > 
+> > > > Signed-off-by: Stephen Warren <swarren@nvidia.com>
+> > > > Acked-by: Olof Johansson <olof@lixom.net>
+> > > > ---
+> > > > I'd previously sent these to Grant assuming they'd go in his dt/next branch,
+> > > > but perhaps these should go in through Arnd's arm-soc next/dt branch?
+> > > > 
+> > > 
+> > > Which tree has the update that changed the bindings? I think it should
+> > > go into the same one.
+> > > 
+> > > If it's already upstream, I can take it into the fixes branch.
+> > 
+> > Already upstream
+> 
+> Ok, I see. I've applied both patches to the fixes branch and will send
+> it out with the next pull request for 3.1 to Linus then.
 
-> During a rescan operation mmc_attach(sd|mmc|sdio) functions are
-> called. The error handling in these function can trigger a detach
-> of the bus, which also meant a power off. This is not notified by
-> the rescan operation which then continues to the next attach function.
->
-> If a power off has been done, the framework must never send any
-> new commands to the host driver, without first doing a new power up.
-> This will most likely trigger any host driver to hang.
->
-> Moving power off out of detach and instead handle power off
-> separately when it is actually needed, solves the issue.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+Sorry, I just noticed that the second patch is not a bug fix, so I took it out
+again and kept only patch 1/2 in the fixes branch for 3.1.
 
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Should I take the other one as well? It's probably better to let that
+go the proper way through the tegra tree for 3.2, right?
 
-Thanks,
-Linus Walleij
+	Arnd
