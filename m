@@ -1,61 +1,42 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH] mmc : export hw reset function info to user
-Date: Tue, 20 Sep 2011 08:51:04 +0900
-Message-ID: <CAKYAXd9Q99BSrAfLDe+DK4cYyz7K5JLGvcMnSsE6pSrkEpOTjQ@mail.gmail.com>
-References: <1316359225-2224-1-git-send-email-linkinjeon@gmail.com>
-	<108743536.474964.1316449188347.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: core: Set correct bus mode before card init
+Date: Tue, 20 Sep 2011 08:48:49 +0200
+Message-ID: <CACRpkdY6nTa+zSmEbucUFZwXYd+qy3Sy_2ffDHTwEvGryWtEZg@mail.gmail.com>
+References: <1316101838-22660-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:42995 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750909Ab1ISXvH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2011 19:51:07 -0400
-In-Reply-To: <108743536.474964.1316449188347.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:43523 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752419Ab1ITGsu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2011 02:48:50 -0400
+Received: by gxk6 with SMTP id 6so125728gxk.19
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Sep 2011 23:48:50 -0700 (PDT)
+In-Reply-To: <1316101838-22660-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <awarkentin@vmware.com>
-Cc: linux-kernel@vger.kernel.org, cjb@laptop.org, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
 
-2011/9/20 Andrei Warkentin <awarkentin@vmware.com>:
-> Hi Namjae, others,
->
-> ----- Original Message -----
->> From: "Namjae Jeon" <linkinjeon@gmail.com>
->> To: cjb@laptop.org, linux-mmc@vger.kernel.org
->> Cc: linux-kernel@vger.kernel.org, "Namjae Jeon" <linkinjeon@gmail.com>
->> Sent: Sunday, September 18, 2011 11:20:25 AM
->> Subject: [PATCH] mmc : export hw reset function info to user
->>
->> user app should know whether hw reset function is enable to use it.
->> so I try to add sysfs file of hw reset function like enhanced area.
->>
->
-> If we're going to be adding a bunch of attributes from ext_csd, why not
-> just allow dumping the entire ext_csd in a semi-readable form? Via something like
-> hex_dump_to_buffer. This will allow easy human an machine parsing, and be more
-> lightweight then adding a sysfs attr for each EXT_CSD byte (of which there are a lot).
->
-> I'm basing this on the thought that the only clients of these attrbutes would
-> either be developers or engineers involved with MMC media, or very specialized
-> software.
->
-> Thoughts?
->
-> A
->
+On Thu, Sep 15, 2011 at 5:50 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
 
-Hi. Andrei.
+> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+>
+> Earlier all cards where initiated with bus mode set as OPENDRAIN, and then
+> later switched to PUSHPULL. According to the MMC/SD/SDIO specifications only
+> MMC cards use OPENDRAIN during init. For both SD and SDIO the bus mode shall
+> be PUSHPULL before attempting to init the card.
+>
+> The consequence of having incorrect bus mode can lead to not being able
+> to detect the card. Therefore the default behavior have now been changed to
+> PUSHPULL in mmc_power_up, and will only be temporarily switched when trying
+> to attach or init a MMC card.
+>
+> Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+> Signed-off-by: Ulf HANSSON <ulf.hansson@stericsson.com>
 
-We can see all dump of ext_csd by using debugfs like this.
+Looks solid to me,
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-mount -t debugfs /dev/mmcblk0 /mnt/
-cat /mnt/mmc0/mmc0\:0001/ext_csd
-
-If user take care of it by showing all dump of ext_csd, we may be
-comfortable more without having to worry.
-But most of them that they do not know a lot of information.
-If we provide some information they need them user friendly, I think
-that user can use more easily mmc.
-
-Thanks.
+Thanks,
+Linus Walleij
