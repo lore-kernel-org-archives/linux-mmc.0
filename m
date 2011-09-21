@@ -1,89 +1,84 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 37/57] mmc: irq: Remove IRQF_DISABLED
-Date: Wed, 21 Sep 2011 12:16:06 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1109211208440.24024@axis700.grange>
-References: <1316597339-29861-1-git-send-email-yong.zhang0@gmail.com>
- <1316597339-29861-38-git-send-email-yong.zhang0@gmail.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCH 2/2] arm: samsung: remove sdhci default configuration setup
+ platform helper
+Date: Wed, 21 Sep 2011 19:44:49 +0900
+Message-ID: <001f01cc784b$7cbdde00$76399a00$%kim@samsung.com>
+References: <1314976702-19284-1-git-send-email-thomas.abraham@linaro.org>
+ <1314976702-19284-2-git-send-email-thomas.abraham@linaro.org>
+ <1314976702-19284-3-git-send-email-thomas.abraham@linaro.org>
+ <001801cc6b8a$e953bda0$bbfb38e0$%kim@samsung.com>
+ <CAJuYYwT1tW0XEiwWWpX08OorZw2q2Wce2r0fUvxLmWC8uq6uhQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:54222 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753002Ab1IUKQL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Sep 2011 06:16:11 -0400
-In-Reply-To: <1316597339-29861-38-git-send-email-yong.zhang0@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <CAJuYYwT1tW0XEiwWWpX08OorZw2q2Wce2r0fUvxLmWC8uq6uhQ@mail.gmail.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Thomas Abraham' <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yong Zhang <yong.zhang0@gmail.com>
-Cc: linux-arch@vger.kernel.org, linux-kernel@vger.kernel.org, tglx@linutronix.de, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>, Tony Lindgren <tony@atomide.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Adrian Hunter <adrian.hunter@nokia.com>, Balaji T K <balajitk@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Wed, 21 Sep 2011, Yong Zhang wrote:
+Thomas Abraham wrote:
+>=20
+> Dear Mr. Kim,
+>=20
+> On 5 September 2011 10:46, Kukjin Kim <kgene.kim@samsung.com> wrote:
+> > Thomas Abraham wrote:
+> >>
+> >> The sdhci platform helper function that sets up the default contro=
+ller
+> >> configuration is removed for all Samsung platforms since such defa=
+ult
+> >> controller configuration can be handled by the driver.
+> >>
+> >> Cc: Ben Dooks <ben-linux@fluff.org>
+> >> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+> >> ---
+> >> =A0arch/arm/mach-exynos4/setup-sdhci.c =A0 =A0 =A0 =A0| =A0 47
+-----------------------
+> >> =A0arch/arm/mach-s3c2416/setup-sdhci.c =A0 =A0 =A0 =A0| =A0 37 ---=
+---------------
+> >> =A0arch/arm/mach-s3c64xx/setup-sdhci.c =A0 =A0 =A0 =A0| =A0 48
+-----------------------
+> >> =A0arch/arm/mach-s5pc100/setup-sdhci.c =A0 =A0 =A0 =A0| =A0 42 ---=
+-----------------
+> >> =A0arch/arm/mach-s5pv210/setup-sdhci.c =A0 =A0 =A0 =A0| =A0 41 ---=
+-----------------
+> >> =A0arch/arm/plat-samsung/dev-hsmmc.c =A0 =A0 =A0 =A0 =A0| =A0 =A02=
+ -
+> >> =A0arch/arm/plat-samsung/dev-hsmmc1.c =A0 =A0 =A0 =A0 | =A0 =A02 -
+> >> =A0arch/arm/plat-samsung/dev-hsmmc2.c =A0 =A0 =A0 =A0 | =A0 =A02 -
+> >> =A0arch/arm/plat-samsung/dev-hsmmc3.c =A0 =A0 =A0 =A0 | =A0 =A02 -
+> >> =A0arch/arm/plat-samsung/include/plat/sdhci.h | =A0 57
+> > ----------------------------
+> >> =A010 files changed, 0 insertions(+), 280 deletions(-)
+> >>
+>=20
+> [...]
+>=20
+> >
+> > Hi Thomas,
+> >
+> > The arch/arm/plat-samsung/dev-hsmmcX.c files have been changed due =
+to
+> commit
+> > 61e62fcb ("ARM: SAMSUNG: Consolidate common function to set SDHCI p=
+lat
+> > data"). So if possible please make your patch based on latest my
+for-next :)
+>=20
+> Sure. I will base these patches on your for-next, test and resubmit.
+>=20
 
-> Since commit [c58543c8: genirq: Run irq handlers with interrupts disabled],
-> We run all interrupt handlers with interrupts disabled
-> and we even check and yell when an interrupt handler
-> returns with interrupts enabled (see commit [b738a50a:
-> genirq: Warn when handler enables interrupts]).
-> 
-> So now this flag is a NOOP and can be removed.
-> 
-> Signed-off-by: Yong Zhang <yong.zhang0@gmail.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |    5 ++---
->  drivers/mmc/host/tmio_mmc.c   |    4 ++--
+Hi Thomas,
 
-For tmio_mmc.c:
+I missed? I didn't get your updated yet.
 
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Thanks.
 
-Thanks
-Guennadi
-
->  2 files changed, 4 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 21e4a79..75c6395 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2015,7 +2015,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
->  	}
->  
->  	/* Request IRQ for MMC operations */
-> -	ret = request_irq(host->irq, omap_hsmmc_irq, IRQF_DISABLED,
-> +	ret = request_irq(host->irq, omap_hsmmc_irq, 0,
->  			mmc_hostname(mmc), host);
->  	if (ret) {
->  		dev_dbg(mmc_dev(host->mmc), "Unable to grab HSMMC IRQ\n");
-> @@ -2043,8 +2043,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
->  	if ((mmc_slot(host).card_detect_irq)) {
->  		ret = request_irq(mmc_slot(host).card_detect_irq,
->  				  omap_hsmmc_cd_handler,
-> -				  IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING
-> -					  | IRQF_DISABLED,
-> +				  IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
->  				  mmc_hostname(mmc), host);
->  		if (ret) {
->  			dev_dbg(mmc_dev(host->mmc),
-> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-> index 44a9668..a4ea102 100644
-> --- a/drivers/mmc/host/tmio_mmc.c
-> +++ b/drivers/mmc/host/tmio_mmc.c
-> @@ -88,8 +88,8 @@ static int __devinit tmio_mmc_probe(struct platform_device *pdev)
->  	if (ret)
->  		goto cell_disable;
->  
-> -	ret = request_irq(irq, tmio_mmc_irq, IRQF_DISABLED |
-> -			  IRQF_TRIGGER_FALLING, dev_name(&pdev->dev), host);
-> +	ret = request_irq(irq, tmio_mmc_irq, IRQF_TRIGGER_FALLING,
-> +				dev_name(&pdev->dev), host);
->  	if (ret)
->  		goto host_remove;
->  
-> -- 
-> 1.7.4.1
-> 
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
