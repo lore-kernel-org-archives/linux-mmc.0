@@ -1,36 +1,34 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] eSDHC: Access Freescale eSDHC registers by 32-bit
-Date: Wed, 21 Sep 2011 13:53:27 -0400
-Message-ID: <m2pqit4wa0.fsf@bob.laptop.org>
-References: <1315569946-21386-1-git-send-email-tie-fei.zang@freescale.com>
+Subject: Re: [PATCH] mmc/sdhci-spear: Don't set power gpio to 1 on probe
+Date: Wed, 21 Sep 2011 13:55:45 -0400
+Message-ID: <m2lith4w66.fsf@bob.laptop.org>
+References: <afc56880fea90e49b8e64bc379be4572381791f5.1315826468.git.viresh.kumar@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41765 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:41805 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752582Ab1IURxp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 21 Sep 2011 13:53:45 -0400
-In-Reply-To: <1315569946-21386-1-git-send-email-tie-fei.zang@freescale.com>
-	(Roy Zang's message of "Fri, 9 Sep 2011 20:05:46 +0800")
+	id S1753211Ab1IURz5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 21 Sep 2011 13:55:57 -0400
+In-Reply-To: <afc56880fea90e49b8e64bc379be4572381791f5.1315826468.git.viresh.kumar@st.com>
+	(Viresh Kumar's message of "Mon, 12 Sep 2011 16:52:49 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Roy Zang <tie-fei.zang@freescale.com>
-Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, akpm@linux-foundation.org, cbouatmailru@gmail.com, Xu lei <B33228@freescale.com>, Kumar Gala <galak@kernel.crashing.org>
+To: Viresh Kumar <viresh.kumar@st.com>
+Cc: akpm@linux-foundation.org, linux-mmc@vger.kernel.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com
 
-Hi Roy,
+Hi Viresh,
 
-On Fri, Sep 09 2011, Roy Zang wrote:
-> From: Xu lei <B33228@freescale.com>
+On Mon, Sep 12 2011, Viresh Kumar wrote:
+> Currently if card_power_gpio is passed from platform data, it is acquired and
+> its value is either set or reset. After that its value is written 1, which is
+> not required.
 >
-> Freescale eSDHC registers only support 32-bit accesses,
-> this patch ensures that all Freescale eSDHC register accesses
-> are 32-bit.
+> So, this patch removes this extra line while sets its value.
 >
-> Signed-off-by: Xu lei <B33228@freescale.com>
-> Signed-off-by: Roy Zang <tie-fei.zang@freescale.com>
-> Signed-off-by: Kumar Gala <galak@kernel.crashing.org>
+> Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
 
-Pushed to mmc-next for 3.2 with Anton's ACK now, thanks.
+Pushed to mmc-next for 3.2, thanks.
 
 - Chris.
 -- 
