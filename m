@@ -1,68 +1,93 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH] mmc : Use wait_for_completion_timeout() instead of
- wait_for_completion in case of write.
-Date: Wed, 21 Sep 2011 10:14:46 +0900
-Message-ID: <CAKYAXd9ae_b_gq4GwXVjM4XDQAypOpKMEGz2_SN0uyV03OAPkA@mail.gmail.com>
-References: <1316359301-2263-1-git-send-email-linkinjeon@gmail.com>
-	<4E78433F.2050900@stericsson.com>
-	<CA+Wuu-vAx8PkvPgy5mR5Bcg6e+q6Z3XOZtTGwNZgCW4HCrX5KA@mail.gmail.com>
-	<CAKYAXd9bmw12By6StTL_MRzAGsgG9BOfcvs=TA-nRu_uxMzOcw@mail.gmail.com>
-	<CA+Wuu-sK6B_k0+sG_p4JRuHOwO_HVCpNksg-9_TdpzXRS7y0xA@mail.gmail.com>
-	<CAKYAXd8WiakFVy_ykpbw-Eq+XDgX0NECtJZFDy3WzxtNfJmdkw@mail.gmail.com>
-	<CA+Wuu-vG7QMcRwvi8F4rznQda3OmyEueNGDv=8gXkB6YVBWEaA@mail.gmail.com>
-	<CAKYAXd8uU+JEqJQZ6a7oBoynpLQ2=+gOk-Ue47y+HZgBsatGRQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:62849 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751235Ab1IUBOr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2011 21:14:47 -0400
-In-Reply-To: <CAKYAXd8uU+JEqJQZ6a7oBoynpLQ2=+gOk-Ue47y+HZgBsatGRQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: [PATCH RESEND] mmc: sdio: rw extended, use a sg entry for each block
+Date: Wed, 21 Sep 2011 11:40:39 +0200
+Message-ID: <1316598039-30238-1-git-send-email-nicolas.ferre@atmel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nicolas.pitre@linaro.org, per.forlin@linaro.org, Nicolas Ferre <nicolas.ferre@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Murali Krishna Palnati <palnati.muralikrishna@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@stericsson.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-2011/9/21 NamJae Jeon <linkinjeon@gmail.com>:
-> 2011/9/21 Murali Krishna Palnati <palnati.muralikrishna@gmail.com>:
->> On Tue, Sep 20, 2011 at 7:52 PM, NamJae Jeon <linkinjeon@gmail.com> wrote:
->>> It may be no good choice that sw timer is on host driver. also I don't
->>> know what is different.
->>
->> It helps to have this functionality implemented at host controller
->> layer so that the host layer is informed about this. If we just end
->> the request from the MMC core layer, host controller driver doesnt
->> even kow about that and it remains in the same state processing the
->> request (that already got timed out at core layer). It is good to have
->> the host layer trigger this timeout, do necessary clean up and then
->> duly end the request by informing the core layer by calling
->> mmc_request_done().
->>
->> Let me put the question in this way. If the core layer times out
->> (because of wait_for_completion_timeout) then in the patch that you
->> have submitted, i dont see how the host layer knows about it.
->> Apologize, if i sound like a broken record saying the same thing again
->> and again.
->>
->
-> I understand what you want. So I will add emergency_cleanup for host
-> driver like this.
-> struct mmc_host_ops {
-> ................
-> .................
-> void (*emergency_cleanup)(struct mmc_host *host);
->
-> }
->
-> When timeout error happen, mmc core will call this function as soon as
-> sending stop cmd.
-> And when timeout error happen by wait_for_completion_timeout, calling
-> mmc_request_done is not needed.
->
-> Thanks.
->
+While using io multiple blocks operations, change the way that sg is built:
+use one sg entry for each block instead of aggregating the whole buffer
+in a single sg entry.
+Using a single sg entry for a multiple block command may lead to
+misunderstanding between the sd/mmc and the DMA controllers. In fact, the
+knowledge of the block length will allow both controllers to optimize burst
+sizes on internal bus while dealing with those data.
 
-I'll follow the opinion of chris.
+Use a sg table to store start addresses of blocks within the data buffer.
 
-Thanks.
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+---
+ drivers/mmc/core/sdio_ops.c |   38 +++++++++++++++++++++++++++++---------
+ 1 files changed, 29 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
+index f087d87..aea6978 100644
+--- a/drivers/mmc/core/sdio_ops.c
++++ b/drivers/mmc/core/sdio_ops.c
+@@ -124,7 +124,7 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 	struct mmc_request mrq = {0};
+ 	struct mmc_command cmd = {0};
+ 	struct mmc_data data = {0};
+-	struct scatterlist sg;
++	struct sg_table sgt;
+ 
+ 	BUG_ON(!card);
+ 	BUG_ON(fn > 7);
+@@ -144,24 +144,44 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 	cmd.arg |= fn << 28;
+ 	cmd.arg |= incr_addr ? 0x04000000 : 0x00000000;
+ 	cmd.arg |= addr << 9;
+-	if (blocks == 1 && blksz <= 512)
+-		cmd.arg |= (blksz == 512) ? 0 : blksz;	/* byte mode */
+-	else
+-		cmd.arg |= 0x08000000 | blocks;		/* block mode */
++	if (blocks == 1 && blksz <= 512) {
++		/* byte mode */
++		struct scatterlist sg;
++
++		cmd.arg |= (blksz == 512) ? 0 : blksz;
++		sg_init_one(&sg, buf, blksz * blocks);
++
++		data.sg = &sg;
++		data.sg_len = 1;
++	} else {
++		/* block mode */
++		struct scatterlist *sg_ptr;
++		int i;
++
++		cmd.arg |= 0x08000000 | blocks;
++		if (sg_alloc_table(&sgt, blocks, GFP_KERNEL))
++			return -ENOMEM;
++		for_each_sg(sgt.sgl, sg_ptr, sgt.nents, i) {
++			sg_set_buf(sg_ptr, buf + i * blksz, blksz);
++		}
++
++		data.sg = sgt.sgl;
++		data.sg_len = sgt.nents;
++	}
++
+ 	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
+ 
+ 	data.blksz = blksz;
+ 	data.blocks = blocks;
+ 	data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
+-	data.sg = &sg;
+-	data.sg_len = 1;
+-
+-	sg_init_one(&sg, buf, blksz * blocks);
+ 
+ 	mmc_set_data_timeout(&data, card);
+ 
+ 	mmc_wait_for_req(card->host, &mrq);
+ 
++	if (blocks != 1 || blksz > 512)
++		sg_free_table(&sgt);
++
+ 	if (cmd.error)
+ 		return cmd.error;
+ 	if (data.error)
+-- 
+1.7.3
