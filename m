@@ -1,36 +1,82 @@
-From: J Freyensee <james_p_freyensee@linux.intel.com>
-Subject: bounce_sg and sg in mmc_queue
-Date: Wed, 21 Sep 2011 11:26:54 -0700
-Message-ID: <4E7A2C6E.70408@linux.intel.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: core: HS200 mode support for eMMC 4.5
+Date: Wed, 21 Sep 2011 14:26:40 -0400
+Message-ID: <m2obyd3g67.fsf@bob.laptop.org>
+References: <1316181604-31378-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:8581 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753729Ab1IUSVP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 21 Sep 2011 14:21:15 -0400
-Received: from [10.7.232.151] (poundcake.jf.intel.com [10.7.232.151])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by linux.intel.com (Postfix) with ESMTP id 9B6B56A4082
-	for <linux-mmc@vger.kernel.org>; Wed, 21 Sep 2011 11:21:11 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1316181604-31378-1-git-send-email-girish.shivananjappa@linaro.org>
+	(Girish K. S.'s message of "Fri, 16 Sep 2011 19:30:04 +0530")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: linux-mmc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-Hello:
+Hi Girish,
 
-Could anyone tell me in struct mmc_queue, what is the difference between 
-'struct scatterlist *bounce_sg' and 'struct scatterlist *sg' is?
+On Fri, Sep 16 2011, Girish K S wrote:
+> This patch adds the support of the HS200 bus speed for
+> eMMC 4.5 devices.
+> The eMMC 4.5 devices have support for 200MHz bus speed.
+> The mmc core and host modules have been touched to add support
+> for this module.
+> It is necessary to know the card type in the sdhci.c file to
+> add support for eMMC tuning function. So card.h file is included
+> to import the card data structure.
+>
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> ---
+>  drivers/mmc/core/bus.c   |    3 +-
+>  drivers/mmc/core/mmc.c   |  116 ++++++++++++++++++++++++++++++++++++++++++----
+>  drivers/mmc/host/sdhci.c |   18 ++++++-
+>  include/linux/mmc/card.h |    3 +
+>  include/linux/mmc/host.h |    8 +++
+>  include/linux/mmc/mmc.h  |    9 +++-
+>  6 files changed, 143 insertions(+), 14 deletions(-)
+>
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index 393d817..a0aa7ab 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -301,10 +301,11 @@ int mmc_add_card(struct mmc_card *card)
+>  			mmc_card_ddr_mode(card) ? "DDR " : "",
+>  			type);
+>  	} else {
+> -		printk(KERN_INFO "%s: new %s%s%s card at address %04x\n",
+> +		printk(KERN_INFO "%s: new %s%s%s%s card at address %04x\n",
+>  			mmc_hostname(card->host),
+>  			mmc_sd_card_uhs(card) ? "ultra high speed " :
+>  			(mmc_card_highspeed(card) ? "high speed " : ""),
+> +			(mmc_card_hs200(card) ? "HS200 " : ""),
+>  			mmc_card_ddr_mode(card) ? "DDR " : "",
+>  			type, card->rca);
+>  	}
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 9cbc113..c50ca42 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -283,6 +283,66 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  	}
+>  	card->ext_csd.raw_card_type = ext_csd[EXT_CSD_CARD_TYPE];
+>  	switch (ext_csd[EXT_CSD_CARD_TYPE] & EXT_CSD_CARD_TYPE_MASK) {
+> +	case EXT_CSD_CARD_TYPE_SDR_200 | EXT_CSD_CARD_TYPE_52 |
+> +	     EXT_CSD_CARD_TYPE_26:
+> +		card->ext_csd.hs_max_dtr = 200000000;
+> +		card->ext_csd.card_type = EXT_CSD_CARD_TYPE_SDR_200;
+> +		break;
+> +	case EXT_CSD_CARD_TYPE_SDR_200 | EXT_CSD_CARD_TYPE_DDR_1_8V |
+> +		 EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
+> +		card->ext_csd.hs_max_dtr = 200000000;
+> +		card->ext_csd.card_type = EXT_CSD_CARD_TYPE_SDR_200;
+> +		break;
 
-I see 'bounce_sg' get used to copy data from/to the buffer upon a host 
-read/write operation so I assume 'bounce_sg' points to the most recent 
-data from a host controller read/write operation.
+Please try shortening this switch-case by avoiding duplicating sections
+that repeat the same action, and having the case fall-through instead.
 
-Thanks for the help.
+Thanks,
 
+- Chris.
 -- 
-J (James/Jay) Freyensee
-Storage Technology Group
-Intel Corporation
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
