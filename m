@@ -1,33 +1,35 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/2] mmc: clarifications on host.post_req()
-Date: Wed, 21 Sep 2011 14:30:31 -0400
-Message-ID: <m2k4913fzs.fsf@bob.laptop.org>
-References: <1314624959-4634-1-git-send-email-per.forlin@linaro.org>
+Subject: Re: [PATCH 0/5] mmc: add eMMC hardware reset support
+Date: Wed, 21 Sep 2011 14:37:16 -0400
+Message-ID: <m2fwjp3foj.fsf@bob.laptop.org>
+References: <1314625335-11638-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57493 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:37844 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751256Ab1IUSat (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 21 Sep 2011 14:30:49 -0400
-In-Reply-To: <1314624959-4634-1-git-send-email-per.forlin@linaro.org> (Per
-	Forlin's message of "Mon, 29 Aug 2011 15:35:57 +0200")
+	id S1753581Ab1IUShT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 21 Sep 2011 14:37:19 -0400
+In-Reply-To: <1314625335-11638-1-git-send-email-adrian.hunter@intel.com>
+	(Adrian Hunter's message of "Mon, 29 Aug 2011 16:42:10 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@linaro.org>
-Cc: linaro-dev@lists.linaro.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Per,
+Hi Adrian,
 
-On Mon, Aug 29 2011, Per Forlin wrote:
-> Fixes for 3.1.
-> This patchset doesn't fix any bugs in 3.1 but it improves the documentation
-> in order to prevent new bugs.
+On Mon, Aug 29 2011, Adrian Hunter wrote:
+> Here are some patches to add eMMC hardware reset support.
+>
+> Adrian Hunter (5):
+>       mmc: add eMMC hardware reset support
+>       mmc: sdhci: add eMMC hardware reset support
+>       mmc: sdhci-pci: add eMMC hardware reset support
+>       mmc: mmc-test: add eMMC hardware reset test
+>       mmc: block: add eMMC hardware reset support
 
-I've merged this into mmc-next now, but I'm planning on sending it for
-3.2 instead of 3.1 at this point; hope that's okay.
-
-Thanks,
+Thanks, all pushed to mmc-next for 3.2.
 
 - Chris.
 -- 
