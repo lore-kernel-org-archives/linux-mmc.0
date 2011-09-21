@@ -1,60 +1,61 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH REPOST 1/2] arm/dt: Tegra: Update SDHCI nodes to match bindings
-Date: Tue, 20 Sep 2011 14:39:06 -0700
-Message-ID: <CAOesGMg4kBH77Ou1xyyVT-Ojxg=9uyxmfsmhbbKquru=j+z6Gg@mail.gmail.com>
-References: <1316537186-26753-1-git-send-email-swarren@nvidia.com>
-	<20110920180731.GL7781@ponder.secretlab.ca>
-	<201109202134.50242.arnd@arndb.de>
-	<201109202301.56983.arnd@arndb.de>
+From: NamJae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH] mmc : Use wait_for_completion_timeout() instead of
+ wait_for_completion in case of write.
+Date: Wed, 21 Sep 2011 09:26:51 +0900
+Message-ID: <CAKYAXd8uU+JEqJQZ6a7oBoynpLQ2=+gOk-Ue47y+HZgBsatGRQ@mail.gmail.com>
+References: <1316359301-2263-1-git-send-email-linkinjeon@gmail.com>
+	<4E78433F.2050900@stericsson.com>
+	<CA+Wuu-vAx8PkvPgy5mR5Bcg6e+q6Z3XOZtTGwNZgCW4HCrX5KA@mail.gmail.com>
+	<CAKYAXd9bmw12By6StTL_MRzAGsgG9BOfcvs=TA-nRu_uxMzOcw@mail.gmail.com>
+	<CA+Wuu-sK6B_k0+sG_p4JRuHOwO_HVCpNksg-9_TdpzXRS7y0xA@mail.gmail.com>
+	<CAKYAXd8WiakFVy_ykpbw-Eq+XDgX0NECtJZFDy3WzxtNfJmdkw@mail.gmail.com>
+	<CA+Wuu-vG7QMcRwvi8F4rznQda3OmyEueNGDv=8gXkB6YVBWEaA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:35382 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751194Ab1ITVjH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2011 17:39:07 -0400
-In-Reply-To: <201109202301.56983.arnd@arndb.de>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:52804 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751923Ab1IUA0x (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2011 20:26:53 -0400
+In-Reply-To: <CA+Wuu-vG7QMcRwvi8F4rznQda3OmyEueNGDv=8gXkB6YVBWEaA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Stephen Warren <swarren@nvidia.com>, nicolas.pitre@linaro.org, Shawn Guo <shawn.guo@linaro.org>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+To: Murali Krishna Palnati <palnati.muralikrishna@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Tue, Sep 20, 2011 at 2:01 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Tuesday 20 September 2011, Arnd Bergmann wrote:
->> On Tuesday 20 September 2011, Grant Likely wrote:
->> > On Tue, Sep 20, 2011 at 07:43:29PM +0200, Arnd Bergmann wrote:
->> > > On Tuesday 20 September 2011, Stephen Warren wrote:
->> > > > The bindings were recently updated to have separate properties for each
->> > > > type of GPIO. Update the Device Tree source to match that.
->> > > >
->> > > > Signed-off-by: Stephen Warren <swarren@nvidia.com>
->> > > > Acked-by: Olof Johansson <olof@lixom.net>
->> > > > ---
->> > > > I'd previously sent these to Grant assuming they'd go in his dt/next branch,
->> > > > but perhaps these should go in through Arnd's arm-soc next/dt branch?
->> > > >
->> > >
->> > > Which tree has the update that changed the bindings? I think it should
->> > > go into the same one.
->> > >
->> > > If it's already upstream, I can take it into the fixes branch.
->> >
->> > Already upstream
->>
->> Ok, I see. I've applied both patches to the fixes branch and will send
->> it out with the next pull request for 3.1 to Linus then.
+2011/9/21 Murali Krishna Palnati <palnati.muralikrishna@gmail.com>:
+> On Tue, Sep 20, 2011 at 7:52 PM, NamJae Jeon <linkinjeon@gmail.com> wrote:
+>> It may be no good choice that sw timer is on host driver. also I don't
+>> know what is different.
 >
-> Sorry, I just noticed that the second patch is not a bug fix, so I took it out
-> again and kept only patch 1/2 in the fixes branch for 3.1.
+> It helps to have this functionality implemented at host controller
+> layer so that the host layer is informed about this. If we just end
+> the request from the MMC core layer, host controller driver doesnt
+> even kow about that and it remains in the same state processing the
+> request (that already got timed out at core layer). It is good to have
+> the host layer trigger this timeout, do necessary clean up and then
+> duly end the request by informing the core layer by calling
+> mmc_request_done().
 >
-> Should I take the other one as well? It's probably better to let that
-> go the proper way through the tegra tree for 3.2, right?
+> Let me put the question in this way. If the core layer times out
+> (because of wait_for_completion_timeout) then in the patch that you
+> have submitted, i dont see how the host layer knows about it.
+> Apologize, if i sound like a broken record saying the same thing again
+> and again.
+>
 
-Given that you have a public tree right now, and I don't (since
-kernel.org is down), please feel free to start a tegra/for-3.2 branch
-for me and apply it there. I'll base further work on top of that if
-needed.
+I understand what you want. So I will add emergency_cleanup for host
+driver like this.
+struct mmc_host_ops {
+................
+.................
+void (*emergency_cleanup)(struct mmc_host *host);
 
-(There also aren't a whole lot of other patches queued for 3.2 right now).
+}
 
--Olof
+When timeout error happen, mmc core will call this function as soon as
+sending stop cmd.
+And when timeout error happen by wait_for_completion_timeout, calling
+mmc_request_done is not needed.
+
+Thanks.
