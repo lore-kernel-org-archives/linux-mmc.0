@@ -1,43 +1,36 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: core: Set correct bus mode before card init
-Date: Wed, 21 Sep 2011 14:20:09 -0400
-Message-ID: <m2vcsl3gh2.fsf@bob.laptop.org>
-References: <1316101838-22660-1-git-send-email-ulf.hansson@stericsson.com>
+From: J Freyensee <james_p_freyensee@linux.intel.com>
+Subject: bounce_sg and sg in mmc_queue
+Date: Wed, 21 Sep 2011 11:26:54 -0700
+Message-ID: <4E7A2C6E.70408@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:55736 "EHLO void.printf.net"
+Received: from mga14.intel.com ([143.182.124.37]:8581 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750832Ab1IUSUN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 21 Sep 2011 14:20:13 -0400
-In-Reply-To: <1316101838-22660-1-git-send-email-ulf.hansson@stericsson.com>
-	(Ulf Hansson's message of "Thu, 15 Sep 2011 17:50:38 +0200")
+	id S1753729Ab1IUSVP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 21 Sep 2011 14:21:15 -0400
+Received: from [10.7.232.151] (poundcake.jf.intel.com [10.7.232.151])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by linux.intel.com (Postfix) with ESMTP id 9B6B56A4082
+	for <linux-mmc@vger.kernel.org>; Wed, 21 Sep 2011 11:21:11 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+To: linux-mmc@vger.kernel.org
 
-Hi,
+Hello:
 
-On Thu, Sep 15 2011, Ulf Hansson wrote:
-> From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
->
-> Earlier all cards where initiated with bus mode set as OPENDRAIN, and then
-> later switched to PUSHPULL. According to the MMC/SD/SDIO specifications only
-> MMC cards use OPENDRAIN during init. For both SD and SDIO the bus mode shall
-> be PUSHPULL before attempting to init the card.
->
-> The consequence of having incorrect bus mode can lead to not being able
-> to detect the card. Therefore the default behavior have now been changed to
-> PUSHPULL in mmc_power_up, and will only be temporarily switched when trying
-> to attach or init a MMC card.
->
-> Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
-> Signed-off-by: Ulf HANSSON <ulf.hansson@stericsson.com>
+Could anyone tell me in struct mmc_queue, what is the difference between 
+'struct scatterlist *bounce_sg' and 'struct scatterlist *sg' is?
 
-Thanks, pushed to mmc-next for 3.2 with Linus W's ACK.
+I see 'bounce_sg' get used to copy data from/to the buffer upon a host 
+read/write operation so I assume 'bounce_sg' points to the most recent 
+data from a host controller read/write operation.
 
-- Chris.
+Thanks for the help.
+
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+J (James/Jay) Freyensee
+Storage Technology Group
+Intel Corporation
