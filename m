@@ -1,64 +1,29 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: card: modify mmc_getgeo function
-Date: Wed, 21 Sep 2011 14:52:08 -0400
-Message-ID: <m2ty8520fb.fsf@bob.laptop.org>
-References: <1316516929-26694-1-git-send-email-girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH v3 0/3] mmc: rectify boot param option for fault injection
+Date: Wed, 21 Sep 2011 14:57:58 -0400
+Message-ID: <m2mxdx205k.fsf@bob.laptop.org>
+References: <1316002218-3408-1-git-send-email-per.forlin@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43811 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752871Ab1IUSwP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 21 Sep 2011 14:52:15 -0400
-In-Reply-To: <1316516929-26694-1-git-send-email-girish.shivananjappa@linaro.org>
-	(Girish K. S.'s message of "Tue, 20 Sep 2011 16:38:49 +0530")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1316002218-3408-1-git-send-email-per.forlin@linaro.org> (Per
+	Forlin's message of "Wed, 14 Sep 2011 14:10:15 +0200")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Per Forlin <per.forlin@linaro.org>
+Cc: linaro-dev@lists.linaro.org, Akinobu Mita <akinobu.mita@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Randy Dunlap <rdunlap@xenotime.net>, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 
-Hi,
+Hi Per,
 
-On Tue, Sep 20 2011, Girish K S wrote:
-> In the earlier code the cylinder, sector and head are assigned
-> independently. Current patch generates the cylinder number
-> with the values of sector and head.
-> This patch only makes they cylinder value to be dependent on
-> the sector and head.
->
-> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
-> ---
->  drivers/mmc/card/block.c |    3 ++-
->  1 files changed, 2 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 1ff5486..bebb13b 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -226,9 +226,10 @@ static int mmc_blk_release(struct gendisk *disk, fmode_t mode)
->  static int
->  mmc_blk_getgeo(struct block_device *bdev, struct hd_geometry *geo)
->  {
-> -	geo->cylinders = get_capacity(bdev->bd_disk) / (4 * 16);
->  	geo->heads = 4;
->  	geo->sectors = 16;
-> +	geo->cylinders = get_capacity(bdev->bd_disk) /
-> +		(geo->heads * geo->sectors);
->  	return 0;
->  }
+On Wed, Sep 14 2011, Per Forlin wrote:
+> Akinobu Mita reported that the boot option for mmc fault injection is never
+> compiled in due to a fauly "ifdef KERNEL" that is never set.
+> A correct ifdef would be "ifndef MODULE". This patch set adds a
+> module_param_cb() and thereby no ifndef MODULE is needed.
+> Using a module_param makes it possible to pass default fault attributes for
+> external modules too.
 
-Thanks, pushed to mmc-next for 3.2 with a reworded commit message:
-
-Author: Girish K S <girish.shivananjappa@linaro.org>
-Date:   Tue Sep 20 16:38:49 2011 +0530
-
-    mmc: card: Remove duplicated constants
-
-    Reuse heads/sectors instead of duplicating them in the cylinders
-    calculation.
-
-    Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
-    Signed-off-by: Chris Ball <cjb@laptop.org>                    
+Thanks, all merged to mmc-next for 3.2 with Akinobu-san's Reviewed-by.
 
 - Chris.
 -- 
