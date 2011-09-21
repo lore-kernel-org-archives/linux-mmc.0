@@ -1,61 +1,36 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3] mmc: core: Add default timeout value for CMD6.
-Date: Wed, 21 Sep 2011 13:45:21 -0400
-Message-ID: <m262kl6b7y.fsf@bob.laptop.org>
-References: <1315466232-27487-1-git-send-email-tgih.jun@samsung.com>
+Subject: Re: [PATCH v2] mmc: core: eMMC in Sleep mode before suspend
+Date: Wed, 21 Sep 2011 13:47:28 -0400
+Message-ID: <m21uv96b4f.fsf@bob.laptop.org>
+References: <1315499919-804-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:48273 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:33108 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751390Ab1IURpm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 21 Sep 2011 13:45:42 -0400
-In-Reply-To: <1315466232-27487-1-git-send-email-tgih.jun@samsung.com>
-	(Seungwon Jeon's message of "Thu, 8 Sep 2011 16:17:12 +0900")
+	id S1751103Ab1IURrq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 21 Sep 2011 13:47:46 -0400
+In-Reply-To: <1315499919-804-1-git-send-email-balajitk@ti.com> (Balaji T. K.'s
+	message of "Thu, 8 Sep 2011 22:08:39 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-mmc@vger.kernel.org, subhashj@codeaurora.org, adrian.hunter@intel.com
 
-Hi,
+Hi Balaji,
 
-On Thu, Sep 08 2011, Seungwon Jeon wrote:
-> EXT_CSD[248] includes the default maximum timeout for CMD6.
-> This field is added at eMMC4.5 Spec. And it can be used for default
-> timeout except for some operations which don't define the timeout(i.e.
-> background operation, sanitize, flush cache) in eMMC4.5 Spec.
+On Thu, Sep 08 2011, Balaji T K wrote:
+> Put MMC to sleep if it supports SLEEP/AWAKE (CMD5)
+> in the mmc suspend so that Vcc (NAND core) can be cut
+> to minimize power consumption.
+> eMMC put into SLEEP can respond to CMD0 or H/W reset or CMD5.
+> Current implemention on resume from suspend relies on CMD0 in
+> mmc_init_card to get out of SLEEP mode.
 >
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
->  drivers/mmc/core/mmc.c   |   19 +++++++++++++++----
->  include/linux/mmc/card.h |    1 +
->  include/linux/mmc/mmc.h  |    1 +
->  3 files changed, 17 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 5700b1c..a72d879 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -410,6 +410,15 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
->  	else
->  		card->erased_byte = 0x0;
->
-> +	if (card->ext_csd.rev >= 6)
-> +		card->ext_csd.generic_cmd6_time = 10 *
-> +			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
-> +	else
-> +		card->ext_csd.generic_cmd6_time = 0;
-> +
->  out:
->  	return err;
->  }
-> @@ -668,7 +677,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  	 */
+> Signed-off-by: Balaji T K <balajitk@ti.com>
+> Acked-by: Venkatraman S <svenkatr@ti.com>
 
-The patch is corrupt at this point:
-
-patching file drivers/mmc/core/mmc.c
-patch: **** malformed patch at line 39: @@ -668,7 +677,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+Thanks, pushed to mmc-next for 3.2.
 
 - Chris.
 -- 
