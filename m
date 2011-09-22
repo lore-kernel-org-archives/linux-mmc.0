@@ -1,248 +1,103 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V3] mmc: core: eMMC 4.5 Power Class Selection Feature
-Date: Thu, 22 Sep 2011 08:28:24 -0400
-Message-ID: <m2wrd0zrpz.fsf@bob.laptop.org>
-References: <1316689931-8703-1-git-send-email-girish.shivananjappa@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH v4] mmc: core: Add default timeout value for CMD6.
+Date: Thu, 22 Sep 2011 11:12:21 +0900
+Message-ID: <1316657541-9221-1-git-send-email-tgih.jun@samsung.com>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1316689931-8703-1-git-send-email-girish.shivananjappa@linaro.org>
-	(Girish K. S.'s message of "Thu, 22 Sep 2011 16:42:11 +0530")
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com, Seungwon Jeon <tgih.jun@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Girish,
+EXT_CSD[248] includes the default maximum timeout for CMD6.
+This field is added at eMMC4.5 Spec. And it can be used for default
+timeout except for some operations which don't define the timeout(i.e.
+background operation, sanitize, flush cache) in eMMC4.5 Spec.
 
-On Thu, Sep 22 2011, Girish K S wrote:
-> This patch adds the power class selection feature available
-> for mmc versions 4.0 and above.
-> During the enumeration stage before switching to the lower
-> data bus, check if the power class is supported for the
-> current bus width. If the power class is available then
-> switch to the power class and use the higher data bus. If
-> power class is not supported then switch to the lower data
-> bus in a worst case.
->
-> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
-> ---
->  v1:
->  This patch version modifies the power_class_select function prototype.
->  During device enumeration, when the host tries to read the extended
->  csd register after switching to higher bus width, the read fails at
->  higher bus width. So the power_class_select function is modified to
->  reuse the extended csd register values read with 1 bit bus width.
->  v2:
->  This patch version removes some checkpatch error
->  v3:
->  updated with review comments made by chris ball. patch generated
->  by rebasing to chris balls mmc-next branch.
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+ drivers/mmc/core/mmc.c   |   16 ++++++++++++----
+ include/linux/mmc/card.h |    1 +
+ include/linux/mmc/mmc.h  |    1 +
+ 3 files changed, 14 insertions(+), 4 deletions(-)
 
-The mmc.h patch doesn't apply against today's mmc-next branch -- maybe
-due to a patch I pushed yesterday, also make sure that you're on the
-mmc-next branch, not master.  Mind rebasing once more, please?  And:
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5700b1c..b2ee14a 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -410,6 +410,12 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 	else
+ 		card->erased_byte = 0x0;
 
->  drivers/mmc/core/mmc.c  |   91 +++++++++++++++++++++++++++++++++++++++++++++++
->  include/linux/mmc/mmc.h |   13 +++++++
->  2 files changed, 104 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index e3695a0..9dd6c82 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -536,6 +536,81 @@ static struct device_type mmc_type = {
->  };
->  
->  /*
-> + * Select the PowerClass for the current bus width
-> + * If power class is defined for 4/8 bit bus in the
-> + * extended CSD register, select it by executing the
-> + * mmc_switch command.
-> + */
-> +static int mmc_select_powerclass(struct mmc_card *card,
-> +		unsigned int bus_width, u8 *ext_csd)
-> +{
-> +	int err = 0;
-> +	unsigned int pwrclass_val;
-> +	unsigned int index = 0;
-> +	struct mmc_host *host = card->host;
-> +
-> +	BUG_ON(!card);
++	if (card->ext_csd.rev >= 6)
++		card->ext_csd.generic_cmd6_time = 10 *
++			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
++	else
++		card->ext_csd.generic_cmd6_time = 0;
++
+ out:
+ 	return err;
+ }
+@@ -668,7 +674,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	 */
+ 	if (card->ext_csd.enhanced_area_en) {
+ 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-				 EXT_CSD_ERASE_GROUP_DEF, 1, 0);
++				 EXT_CSD_ERASE_GROUP_DEF, 1,
++				 card->ext_csd.generic_cmd6_time);
 
-If you're going to test the validity of card, do it before dereferencing
-card->host above.
+ 		if (err && err != -EBADMSG)
+ 			goto free_card;
+@@ -711,7 +718,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	if ((card->ext_csd.hs_max_dtr != 0) &&
+ 		(host->caps & MMC_CAP_MMC_HIGHSPEED)) {
+ 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-				 EXT_CSD_HS_TIMING, 1, 0);
++				 EXT_CSD_HS_TIMING, 1,
++				 card->ext_csd.generic_cmd6_time);
+ 		if (err && err != -EBADMSG)
+ 			goto free_card;
 
-> +	BUG_ON(!host);
-> +
-> +	if (ext_csd == NULL)
-> +		return 0;
+@@ -783,7 +791,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 					 EXT_CSD_BUS_WIDTH,
+ 					 ext_csd_bits[idx][0],
+-					 0);
++					 card->ext_csd.generic_cmd6_time);
+ 			if (!err) {
+ 				mmc_set_bus_width(card->host, bus_width);
 
-> +	/* Power class selection is supported for versions >= 4.0 */
-> +	if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
-> +		return 0;
+@@ -806,7 +814,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 					 EXT_CSD_BUS_WIDTH,
+ 					 ext_csd_bits[idx][1],
+-					 0);
++					 card->ext_csd.generic_cmd6_time);
+ 		}
+ 		if (err) {
+ 			printk(KERN_WARNING "%s: switch to bus width %d ddr %d "
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index b460fc2..b713abf 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -52,6 +52,7 @@ struct mmc_ext_csd {
+ 	u8			part_config;
+ 	unsigned int		part_time;		/* Units: ms */
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
++	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		sectors;
+ 	unsigned int		card_type;
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 5a794cb..e869f00 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -293,6 +293,7 @@ struct _mmc_csd {
+ #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
+ #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
+ #define EXT_CSD_TRIM_MULT		232	/* RO */
++#define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
 
-> +	/* Power class values are defined only for 4/8 bit bus */
-> +	if (bus_width == EXT_CSD_BUS_WIDTH_1)
-> +		return 0;
-
-Let's add newlines before each comment line here.
-
-> +
-> +	switch (1 << host->ios.vdd) {
-> +	case MMC_VDD_165_195:
-> +		if (host->ios.clock <= 26000000)
-> +			index = EXT_CSD_PWR_CL_26_195;
-> +		else if	(host->ios.clock <= 52000000)
-> +			index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
-> +					EXT_CSD_PWR_CL_52_195 :
-> +					EXT_CSD_PWR_CL_DDR_52_195;
-> +		else if (host->ios.clock <= 200000000)
-> +			index = EXT_CSD_PWR_CL_200_195;
-> +		break;
-> +	case MMC_VDD_32_33:
-> +	case MMC_VDD_33_34:
-> +	case MMC_VDD_34_35:
-> +	case MMC_VDD_35_36:
-> +		if (host->ios.clock <= 26000000)
-> +			index = EXT_CSD_PWR_CL_26_360;
-> +		else if	(host->ios.clock <= 52000000)
-> +			index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
-> +					EXT_CSD_PWR_CL_52_360 :
-> +					EXT_CSD_PWR_CL_DDR_52_360;
-> +		else if (host->ios.clock <= 200000000)
-> +			index = EXT_CSD_PWR_CL_200_360;
-> +		break;
-> +	default:
-> +		printk(KERN_ERR "votage range not supported\n");
-
-(voltage, not votage)
-
-This isn't good, because someone reading dmesg will have no idea that
-this message came from MMC, and even if they know that it came from MMC,
-they won't know which controller/card it came from.
-
-I suggest:
-
-                pr_warning("%s: Voltage range not supported for power class.\n",
-                           mmc_hostname(host));
-
-> +		break;
-> +	}
-> +
-> +	pwrclass_val = ext_csd[index];
-> +
-> +	if (bus_width & (EXT_CSD_BUS_WIDTH_8 | EXT_CSD_DDR_BUS_WIDTH_8))
-> +		pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_8BIT_MASK) >>
-> +					EXT_CSD_PWR_CL_8BIT_SHIFT;
-> +	else
-> +		pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_4BIT_MASK) >>
-> +					EXT_CSD_PWR_CL_4BIT_SHIFT;
-> +
-> +	/*If the power class is different from the default value*/
-
-Same comment -- leave spaces before the comment text.  (I meant for you
-to apply this comment to the whole patch.)
-
-> +	if (pwrclass_val > 0) {
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +				EXT_CSD_POWER_CLASS,
-> +				pwrclass_val,
-> +				0);
-> +	}
-> +
-> +	return err;
-> +}
-> +
-> +/*
->   * Handle the detection and initialisation of a card.
->   *
->   * In the case of a resume, "oldcard" will contain the card
-> @@ -807,6 +882,14 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  			bus_width = bus_widths[idx];
->  			if (bus_width == MMC_BUS_WIDTH_1)
->  				ddr = 0; /* no DDR for 1-bit width */
-> +			err = mmc_select_powerclass(card, ext_csd_bits[idx][0],
-> +					ext_csd);
-> +			if (err)
-> +				printk(KERN_ERR "%s: power class selection to "
-> +						"bus width %d failed\n",
-> +						mmc_hostname(card->host),
-> +						1 << bus_width);
-> +
->  			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->  					 EXT_CSD_BUS_WIDTH,
->  					 ext_csd_bits[idx][0],
-> @@ -830,6 +913,14 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  		}
->  
->  		if (!err && ddr) {
-> +			err = mmc_select_powerclass(card, ext_csd_bits[idx][1],
-> +					ext_csd);
-> +			if (err)
-> +				printk(KERN_ERR "%s: power class selection to "
-> +						"bus width %d ddr %d failed\n",
-> +						mmc_hostname(card->host),
-> +						1 << bus_width, ddr);
-> +
->  			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->  					 EXT_CSD_BUS_WIDTH,
->  					 ext_csd_bits[idx][1],
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 95912da..d72d550 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -280,10 +280,15 @@ struct _mmc_csd {
->  #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
->  #define EXT_CSD_BUS_WIDTH		183	/* R/W */
->  #define EXT_CSD_HS_TIMING		185	/* R/W */
-> +#define EXT_CSD_POWER_CLASS	187
->  #define EXT_CSD_REV			192	/* RO */
->  #define EXT_CSD_STRUCTURE		194	/* RO */
->  #define EXT_CSD_CARD_TYPE		196	/* RO */
->  #define EXT_CSD_PART_SWITCH_TIME        199     /* RO */
-> +#define EXT_CSD_PWR_CL_52_195	200 /*RO*/
-> +#define EXT_CSD_PWR_CL_26_195	201 /*RO*/
-> +#define EXT_CSD_PWR_CL_52_360	202 /*RO*/
-> +#define EXT_CSD_PWR_CL_26_360	203 /*RO*/
-
-Same comment with spaces, and it looks like this is less indented than
-the lines above.  The formatting should match the lines around it.
-
->  #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
->  #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
->  #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
-> @@ -295,6 +300,10 @@ struct _mmc_csd {
->  #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
->  #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
->  #define EXT_CSD_TRIM_MULT		232	/* RO */
-> +#define EXT_CSD_PWR_CL_200_195	236 /*RO*/
-> +#define EXT_CSD_PWR_CL_200_360	237 /*RO*/
-> +#define EXT_CSD_PWR_CL_DDR_52_195	238 /*RO*/
-> +#define EXT_CSD_PWR_CL_DDR_52_360	239 /*RO*/
->  #define EXT_CSD_POWER_OFF_LONG_TIME	247 /*RO*/
-
-As above.
->  
->  /*
-> @@ -338,6 +347,10 @@ struct _mmc_csd {
->  #define EXT_CSD_POWER_OFF_SHORT	2
->  #define EXT_CSD_POWER_OFF_LONG	3
->  
-> +#define EXT_CSD_PWR_CL_8BIT_MASK	0xF0/* 8 bit PWR CLS */
-> +#define EXT_CSD_PWR_CL_4BIT_MASK	0x0F/* 8 bit PWR CLS */
-
-As above, this time you're missing a tab before the /*.
-
-> +#define EXT_CSD_PWR_CL_8BIT_SHIFT	4
-> +#define EXT_CSD_PWR_CL_4BIT_SHIFT	0
->  /*
->   * MMC_SWITCH access modes
->   */
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+ /*
+  * EXT_CSD field definitions
+--
+1.7.0.4
