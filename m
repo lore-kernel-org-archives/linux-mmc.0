@@ -1,180 +1,120 @@
 From: J Freyensee <james_p_freyensee@linux.intel.com>
-Subject: Re: [PATCH] mmc : general purpose partition support.
-Date: Thu, 22 Sep 2011 15:08:19 -0700
-Message-ID: <4E7BB1D3.6020208@linux.intel.com>
-References: <1316705680-1940-1-git-send-email-linkinjeon@gmail.com>
+Subject: Re: [PATCH v4] mmc: core: Add default timeout value for CMD6.
+Date: Thu, 22 Sep 2011 15:11:35 -0700
+Message-ID: <4E7BB297.8090700@linux.intel.com>
+References: <1316657541-9221-1-git-send-email-tgih.jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:62455 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753955Ab1IVWCY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 Sep 2011 18:02:24 -0400
-In-Reply-To: <1316705680-1940-1-git-send-email-linkinjeon@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1316657541-9221-1-git-send-email-tgih.jun@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 09/22/2011 08:34 AM, Namjae Jeon wrote:
-> It allows general purpose parition in MMC Device. If it is enable, it will make mmcblk0gp1,gp2,gp3,gp4 partition like this.
+On 09/21/2011 07:12 PM, Seungwon Jeon wrote:
+> EXT_CSD[248] includes the default maximum timeout for CMD6.
+> This field is added at eMMC4.5 Spec. And it can be used for default
+> timeout except for some operations which don't define the timeout(i.e.
+> background operation, sanitize, flush cache) in eMMC4.5 Spec.
+
+Out of curiosity, what cache is being refered to in 'flush cache' comment?
+
 >
->> cat /proc/paritition
->        179 0 847872 mmcblk0
->        179 192 4096 mmcblk0gp4
->        179 160 4096 mmcblk0gp3
->        179 128 4096 mmcblk0gp2
->        179 96  1052672 mmcblk0gp1
->        179 64  1024 mmcblk0boot1
->        179 32  1024 mmcblk0boot0
->
-> Signed-off-by: Namjae Jeon<linkinjeon@gmail.com>
+> Signed-off-by: Seungwon Jeon<tgih.jun@samsung.com>
 > ---
->   drivers/mmc/card/block.c |   36 ++++++++++++++++++++++++++++++++++++
->   drivers/mmc/core/mmc.c   |   42 ++++++++++++++++++++++++++++++++++++++++++
->   include/linux/mmc/card.h |    4 ++++
->   include/linux/mmc/mmc.h  |    4 ++++
->   4 files changed, 86 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 9b90726..074ec55 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1402,6 +1402,42 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
->   			return ret;
->   	}
->
-> +	if (card->ext_csd.gp1_size) {
-> +		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_GP1,
-> +					card->ext_csd.gp1_size>>  9,
-> +					false,
-> +					"gp1");
-> +		if (ret)
-> +			return ret;
-> +	}
-> +
-
-if mmc_blk_alloc_part() fails for 'if (card->ext_csd.pt1_size)', why 
-would you want to give this code the opportunity to call 
-mmc_blk_alloc_part() again with the next if() below?  If 
-mmc_blk_alloc_part() fails, is it a big problem, like kzalloc() failing? 
-  If so, I would think you would want to immediately quit this function 
-and report an error (either use errno value or pass the value of ret).
-
-> +	if (card->ext_csd.gp2_size) {
-> +		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_GP2,
-> +					card->ext_csd.gp2_size>>  9,
-> +					false,
-> +					"gp2");
-> +		if (ret)
-> +			return ret;
-> +	}
-> +
-> +	if (card->ext_csd.gp3_size) {
-> +		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_GP3,
-> +					card->ext_csd.gp3_size>>  9,
-> +					false,
-> +					"gp3");
-> +		if (ret)
-> +			return ret;
-> +	}
-> +
-> +	if (card->ext_csd.gp4_size) {
-> +		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_GP4,
-> +					card->ext_csd.gp4_size>>  9,
-> +					false,
-> +					"gp4");
-> +		if (ret)
-> +			return ret;
-> +	}
-> +
->   	return ret;
->   }
+>   drivers/mmc/core/mmc.c   |   16 ++++++++++++----
+>   include/linux/mmc/card.h |    1 +
+>   include/linux/mmc/mmc.h  |    1 +
+>   3 files changed, 14 insertions(+), 4 deletions(-)
 >
 > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 10f5a19..cc31511 100644
+> index 5700b1c..b2ee14a 100644
 > --- a/drivers/mmc/core/mmc.c
 > +++ b/drivers/mmc/core/mmc.c
-> @@ -393,6 +393,48 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
->   			card->ext_csd.enhanced_area_offset = -EINVAL;
->   			card->ext_csd.enhanced_area_size = -EINVAL;
+> @@ -410,6 +410,12 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>   	else
+>   		card->erased_byte = 0x0;
+>
+> +	if (card->ext_csd.rev>= 6)
+> +		card->ext_csd.generic_cmd6_time = 10 *
+> +			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
+> +	else
+> +		card->ext_csd.generic_cmd6_time = 0;
+> +
+>   out:
+>   	return err;
+>   }
+> @@ -668,7 +674,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>   	 */
+>   	if (card->ext_csd.enhanced_area_en) {
+>   		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> -				 EXT_CSD_ERASE_GROUP_DEF, 1, 0);
+> +				 EXT_CSD_ERASE_GROUP_DEF, 1,
+> +				 card->ext_csd.generic_cmd6_time);
+>
+>   		if (err&&  err != -EBADMSG)
+>   			goto free_card;
+> @@ -711,7 +718,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>   	if ((card->ext_csd.hs_max_dtr != 0)&&
+>   		(host->caps&  MMC_CAP_MMC_HIGHSPEED)) {
+>   		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> -				 EXT_CSD_HS_TIMING, 1, 0);
+> +				 EXT_CSD_HS_TIMING, 1,
+> +				 card->ext_csd.generic_cmd6_time);
+>   		if (err&&  err != -EBADMSG)
+>   			goto free_card;
+>
+> @@ -783,7 +791,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>   			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>   					 EXT_CSD_BUS_WIDTH,
+>   					 ext_csd_bits[idx][0],
+> -					 0);
+> +					 card->ext_csd.generic_cmd6_time);
+>   			if (!err) {
+>   				mmc_set_bus_width(card->host, bus_width);
+>
+> @@ -806,7 +814,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>   			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>   					 EXT_CSD_BUS_WIDTH,
+>   					 ext_csd_bits[idx][1],
+> -					 0);
+> +					 card->ext_csd.generic_cmd6_time);
 >   		}
-> +
-> +		/*
-> +		 * General purpose partition Support
-> +		 */
-> +
-> +		if (ext_csd[EXT_CSD_PARTITION_SUPPORT]&  0x1) {
-> +
-> +			u8 hc_erase_grp_sz =
-> +				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-> +			u8 hc_wp_grp_sz =
-> +				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-> +
-> +			card->ext_csd.enhanced_area_en = 1;
-> +
-> +			card->ext_csd.gp1_size =
-> +				(ext_csd[145]<<  16) + (ext_csd[144]<<  8) +
-> +				ext_csd[143];
-> +			card->ext_csd.gp1_size *=
-> +				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
-> +			card->ext_csd.gp1_size<<= 19;
-> +
-> +			card->ext_csd.gp2_size =
-> +				(ext_csd[148]<<  16) + (ext_csd[147]<<  8) +
-> +				ext_csd[146];
-> +			card->ext_csd.gp2_size *=
-> +				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
-> +				card->ext_csd.gp2_size<<= 19;
-> +
-> +			card->ext_csd.gp3_size =
-> +				(ext_csd[151]<<  16) + (ext_csd[150]<<  8) +
-> +				ext_csd[149];
-> +			card->ext_csd.gp3_size *=
-> +				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
-> +			card->ext_csd.gp3_size<<= 19;
-> +
-> +			card->ext_csd.gp4_size =
-> +				(ext_csd[154]<<  16) + (ext_csd[153]<<  8) +
-> +				ext_csd[152];
-> +			card->ext_csd.gp4_size *=
-> +				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
-> +			card->ext_csd.gp4_size<<= 19;
-> +		}
->   		card->ext_csd.sec_trim_mult =
->   			ext_csd[EXT_CSD_SEC_TRIM_MULT];
->   		card->ext_csd.sec_erase_mult =
+>   		if (err) {
+>   			printk(KERN_WARNING "%s: switch to bus width %d ddr %d "
 > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index b460fc2..96a98a7 100644
+> index b460fc2..b713abf 100644
 > --- a/include/linux/mmc/card.h
 > +++ b/include/linux/mmc/card.h
-> @@ -64,6 +64,10 @@ struct mmc_ext_csd {
->   	unsigned long long	enhanced_area_offset;	/* Units: Byte */
->   	unsigned int		enhanced_area_size;	/* Units: KB */
->   	unsigned int		boot_size;		/* in bytes */
-> +	unsigned int		gp1_size;		/* in bytes */
-> +	unsigned int		gp2_size;		/* in bytes */
-> +	unsigned int		gp3_size;		/* in bytes */
-> +	unsigned int		gp4_size;		/* in bytes */
->   	u8			raw_partition_support;	/* 160 */
->   	u8			raw_erased_mem_count;	/* 181 */
->   	u8			raw_ext_csd_structure;	/* 194 */
+> @@ -52,6 +52,7 @@ struct mmc_ext_csd {
+>   	u8			part_config;
+>   	unsigned int		part_time;		/* Units: ms */
+>   	unsigned int		sa_timeout;		/* Units: 100ns */
+> +	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+>   	unsigned int		hs_max_dtr;
+>   	unsigned int		sectors;
+>   	unsigned int		card_type;
 > diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 5a794cb..380720a 100644
+> index 5a794cb..e869f00 100644
 > --- a/include/linux/mmc/mmc.h
 > +++ b/include/linux/mmc/mmc.h
-> @@ -303,6 +303,10 @@ struct _mmc_csd {
->   #define EXT_CSD_PART_CONFIG_ACC_MASK	(0x7)
->   #define EXT_CSD_PART_CONFIG_ACC_BOOT0	(0x1)
->   #define EXT_CSD_PART_CONFIG_ACC_BOOT1	(0x2)
-> +#define EXT_CSD_PART_CONFIG_ACC_GP1	(0x4)
-> +#define EXT_CSD_PART_CONFIG_ACC_GP2	(0x5)
-> +#define EXT_CSD_PART_CONFIG_ACC_GP3	(0x6)
-> +#define EXT_CSD_PART_CONFIG_ACC_GP4	(0x7)
+> @@ -293,6 +293,7 @@ struct _mmc_csd {
+>   #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
+>   #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
+>   #define EXT_CSD_TRIM_MULT		232	/* RO */
+> +#define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
 >
->   #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
->   #define EXT_CSD_CMD_SET_SECURE		(1<<1)
+>   /*
+>    * EXT_CSD field definitions
+> --
+> 1.7.0.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 -- 
