@@ -1,46 +1,56 @@
-From: J Freyensee <james_p_freyensee@linux.intel.com>
-Subject: Re: bounce_sg and sg in mmc_queue
-Date: Thu, 22 Sep 2011 09:35:04 -0700
-Message-ID: <4E7B63B8.2000100@linux.intel.com>
-References: <4E7A2C6E.70408@linux.intel.com>
+From: Stephen Warren <swarren@nvidia.com>
+Subject: RE: [PATCH 1/3] arm/tegra: Move EN_VDD_1V05_GPIO to board-harmony.h
+Date: Thu, 22 Sep 2011 09:31:48 -0700
+Message-ID: <74CDBE0F657A3D45AFBB94109FB122FF1739554CBD@HQMAIL01.nvidia.com>
+References: <1316633620-13184-1-git-send-email-swarren@nvidia.com>
+ <CAOesGMisOtEQpcS-hHi-3brpYzJr-UiB6b71c+bwkesPDk9iuA@mail.gmail.com>
+ <20110922081140.GH17169@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:63469 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751781Ab1IVQ3O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 Sep 2011 12:29:14 -0400
-Received: from [10.7.232.151] (poundcake.jf.intel.com [10.7.232.151])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by linux.intel.com (Postfix) with ESMTP id D90016A4087
-	for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2011 09:29:09 -0700 (PDT)
-In-Reply-To: <4E7A2C6E.70408@linux.intel.com>
+Received: from hqemgate03.nvidia.com ([216.228.121.140]:10403 "EHLO
+	hqemgate03.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751781Ab1IVQcM convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2011 12:32:12 -0400
+In-Reply-To: <20110922081140.GH17169@n2100.arm.linux.org.uk>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>, Olof Johansson <olof@lixom.net>
+Cc: Colin Cross <ccross@android.com>, Erik Gilling <konkers@android.com>, Grant Likely <grant.likely@secretlab.ca>, Chris Ball <cjb@laptop.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 09/21/2011 11:26 AM, J Freyensee wrote:
-> Hello:
->
-> Could anyone tell me in struct mmc_queue, what is the difference between
-> 'struct scatterlist *bounce_sg' and 'struct scatterlist *sg' is?
->
-> I see 'bounce_sg' get used to copy data from/to the buffer upon a host
-> read/write operation so I assume 'bounce_sg' points to the most recent
-> data from a host controller read/write operation.
->
+Russell King - ARM Linux wrote at Thursday, September 22, 2011 2:12 AM:
+> On Wed, Sep 21, 2011 at 01:16:49PM -0700, Olof Johansson wrote:
+> > Works for me. Or I could stage it in a topic branch that would be
+> > merged after Russell's GPIO tree.
+> 
+> Holding stuff off from being merged doesn't work.
 
-If someone actually knows this, I will send up a patch documenting this 
-in the code.  I think some of the mmc code could use a little 
-documentation??
+Russell,
 
-> Thanks for the help.
->
+So I take it I should add the two ack'd patches to the ARM patch system,
+and have you pick them up?
 
+Thanks.
+
+> If you have the following commit structure:
+> 
+> A---...-----M1-B-C-M2
+> +---A1-B1-C1'     /
+> +-A2-B2-C2-------'
+> 
+> Now, lets say A2 depends on C1.  Merely delaying the stuff so that M2
+> happens after M1 is insufficient to ensure git state doesn't break.
+> When bisecting, its entirely possible that the bisect algorithm may
+> chose B2 as a potential test candidate.  At that point you end up with
+> A2, but without C1.
+> 
+> The only way to solve this is to have A2 following on from C1 - which
+> of course requires A1..C1 to be declared stable and either pulled into
+> your local tree or for A2..C2 to be submitted to the same tree which
+> A1..C1 are already in.
 
 -- 
-J (James/Jay) Freyensee
-Storage Technology Group
-Intel Corporation
+nvpupblic
+
