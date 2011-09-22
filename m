@@ -1,36 +1,67 @@
-From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Subject: Re: [PATCH 1/3] arm/tegra: Move EN_VDD_1V05_GPIO to board-harmony.h
-Date: Thu, 22 Sep 2011 09:11:40 +0100
-Message-ID: <20110922081140.GH17169@n2100.arm.linux.org.uk>
-References: <1316633620-13184-1-git-send-email-swarren@nvidia.com> <CAOesGMisOtEQpcS-hHi-3brpYzJr-UiB6b71c+bwkesPDk9iuA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAOesGMisOtEQpcS-hHi-3brpYzJr-UiB6b71c+bwkesPDk9iuA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
-Cc: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Erik Gilling <konkers-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Yong Zhang <yong.zhang0@gmail.com>
+Subject: [PATCH 37/55] mmc: irq: Remove IRQF_DISABLED
+Date: Thu, 22 Sep 2011 16:59:04 +0800
+Message-ID: <1316681962-8217-38-git-send-email-yong.zhang0@gmail.com>
+References: <1316681962-8217-1-git-send-email-yong.zhang0@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1316681962-8217-1-git-send-email-yong.zhang0@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org
+Cc: tglx@linutronix.de, yong.zhang0@gmail.com, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Tony Lindgren <tony@atomide.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Adrian Hunter <adrian.hunter@nokia.com>, Balaji T K <balajitk@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Sep 21, 2011 at 01:16:49PM -0700, Olof Johansson wrote:
-> Works for me. Or I could stage it in a topic branch that would be
-> merged after Russell's GPIO tree.
+Since commit [e58aa3d2: genirq: Run irq handlers with interrupts disabled],
+We run all interrupt handlers with interrupts disabled
+and we even check and yell when an interrupt handler
+returns with interrupts enabled (see commit [b738a50a:
+genirq: Warn when handler enables interrupts]).
 
-Holding stuff off from being merged doesn't work.  If you have the
-following commit structure:
+So now this flag is a NOOP and can be removed.
 
-A---...-----M1-B-C-M2
-+---A1-B1-C1'     /
-+-A2-B2-C2-------'
+Signed-off-by: Yong Zhang <yong.zhang0@gmail.com>
+Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
+ drivers/mmc/host/omap_hsmmc.c |    5 ++---
+ drivers/mmc/host/tmio_mmc.c   |    4 ++--
+ 2 files changed, 4 insertions(+), 5 deletions(-)
 
-Now, lets say A2 depends on C1.  Merely delaying the stuff so that M2
-happens after M1 is insufficient to ensure git state doesn't break.
-When bisecting, its entirely possible that the bisect algorithm may
-chose B2 as a potential test candidate.  At that point you end up with
-A2, but without C1.
-
-The only way to solve this is to have A2 following on from C1 - which
-of course requires A1..C1 to be declared stable and either pulled into
-your local tree or for A2..C2 to be submitted to the same tree which
-A1..C1 are already in.
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 21e4a79..75c6395 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2015,7 +2015,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	/* Request IRQ for MMC operations */
+-	ret = request_irq(host->irq, omap_hsmmc_irq, IRQF_DISABLED,
++	ret = request_irq(host->irq, omap_hsmmc_irq, 0,
+ 			mmc_hostname(mmc), host);
+ 	if (ret) {
+ 		dev_dbg(mmc_dev(host->mmc), "Unable to grab HSMMC IRQ\n");
+@@ -2043,8 +2043,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	if ((mmc_slot(host).card_detect_irq)) {
+ 		ret = request_irq(mmc_slot(host).card_detect_irq,
+ 				  omap_hsmmc_cd_handler,
+-				  IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING
+-					  | IRQF_DISABLED,
++				  IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
+ 				  mmc_hostname(mmc), host);
+ 		if (ret) {
+ 			dev_dbg(mmc_dev(host->mmc),
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index 44a9668..a4ea102 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -88,8 +88,8 @@ static int __devinit tmio_mmc_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto cell_disable;
+ 
+-	ret = request_irq(irq, tmio_mmc_irq, IRQF_DISABLED |
+-			  IRQF_TRIGGER_FALLING, dev_name(&pdev->dev), host);
++	ret = request_irq(irq, tmio_mmc_irq, IRQF_TRIGGER_FALLING,
++				dev_name(&pdev->dev), host);
+ 	if (ret)
+ 		goto host_remove;
+ 
+-- 
+1.7.4.1
