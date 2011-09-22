@@ -1,55 +1,56 @@
-From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: RE: [PATCH 3/3] arm/tegra: Move "gpio-names.h" into
- <mach/gpio-tegra.h>
-Date: Wed, 21 Sep 2011 13:29:03 -0700
-Message-ID: <74CDBE0F657A3D45AFBB94109FB122FF173818019E@HQMAIL01.nvidia.com>
-References: <1316633620-13184-1-git-send-email-swarren@nvidia.com>
-	<1316633620-13184-3-git-send-email-swarren@nvidia.com>
- <CAOesGMhdkrtjvXWHhbLSj804s+CzTthn_hrGafp5K=Va5MTZ=w@mail.gmail.com>
+From: Stephen Rothwell <sfr@canb.auug.org.au>
+Subject: Re: New location of mmc-next while kernel.org is down
+Date: Thu, 22 Sep 2011 11:21:16 +1000
+Message-ID: <20110922112116.534bcf5fd47effe134ef7d52@canb.auug.org.au>
+References: <m2wrd14wg2.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAOesGMhdkrtjvXWHhbLSj804s+CzTthn_hrGafp5K=Va5MTZ=w@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
-Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Erik Gilling <konkers-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: multipart/signed; protocol="application/pgp-signature";
+ micalg="PGP-SHA1";
+ boundary="Signature=_Thu__22_Sep_2011_11_21_16_+1000_S5xa5fwmE7A_NB/6"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from calzone.tip.net.au ([203.10.76.15]:43071 "EHLO
+	calzone.tip.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750826Ab1IVBVW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Sep 2011 21:21:22 -0400
+In-Reply-To: <m2wrd14wg2.fsf@bob.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-kernel@vger.kernel.org, linux-next@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Olof Johansson wrote at Wednesday, September 21, 2011 2:15 PM:
-> On Wed, Sep 21, 2011 at 12:33 PM, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>=
- wrote:
-> > This centralizes all SoC-level GPIO-related definitions into a sing=
-le
-> > header file.
-> >
-> > Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> >
-> > =A0arch/arm/mach-tegra/gpio-names.h =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0=
-247 -------------------------
-> > =A0arch/arm/mach-tegra/include/mach/gpio-tegra.h | =A0225 +++++++++=
-+++++++++++++
-> > =A011 files changed, 226 insertions(+), 257 deletions(-)
-> > =A0delete mode 100644 arch/arm/mach-tegra/gpio-names.h
+--Signature=_Thu__22_Sep_2011_11_21_16_+1000_S5xa5fwmE7A_NB/6
+Content-Type: text/plain; charset=US-ASCII
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi Chris,
+
+On Wed, 21 Sep 2011 13:49:49 -0400 Chris Ball <cjb@laptop.org> wrote:
+>
+> Please switch the mmc-next location for linux-next over to:
 >=20
-> The main reason that gpio-names.h was only in the mach directory and
-> not under include in the first place, is to discourage use outside of
-> the base platform code and board definitions.
->=20
-> There should be no need for drivers and non-mach-tegra code to use th=
-e
-> file, so doing a current-directory include of it should be OK. Or do
-> you have other plans for it?
+> git://dev.laptop.org/users/cjb/mmc mmc-next
 
-My primary motivation was to bring Tegra into line with what appears to
-be common practice amongst other ARM sub-architectures; many of
-mach-$x/include/mach/gpio-$x.h define the GPIO names there.
-
-Still, your argument is valid; I don't foresee a need to anything other
-than mach-tegra/*.c to need the GPIO names file.
-
-So, feel free to take/drop this patch as you desire.
+OK, I have switched from today.
 
 --=20
-nvpublic
+Cheers,
+Stephen Rothwell                    sfr@canb.auug.org.au
+http://www.canb.auug.org.au/~sfr/
+
+--Signature=_Thu__22_Sep_2011_11_21_16_+1000_S5xa5fwmE7A_NB/6
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iQEcBAEBAgAGBQJOeo2MAAoJEDMEi1NhKgbsobgH/00CmLaaVWhZ8v7ldcJ3DHvP
+EgYO7uohvRdNYqyoaIX8uMnIuTuRj12DtI7LD/2X6cqZghbNdLbgdImRtBPcExC+
+efZcVOuVQ16OfXN+Ru8Pf3boGxi/JZHl3AM7ye9WU++EScUtkqHaxTn4T7Eh1h89
+yoQZLNJNpP8fFCzh8i/eYP8cVsAx5YU08z2/CinAAZqYrq23gMkzK6pbhNDjurjt
+4UDaGgZr4Ud6nRpmHcPtEniYbX7rLID1QkVPcBT8Qao/m2+P98A7jjVPvijmCy12
+lauZwRMqpG9vs5K2/ntB3Ke6CXJ0jBRL8iy1IayQUS4ZMCtH0TP+opU5ePEb1do=
+=64Xp
+-----END PGP SIGNATURE-----
+
+--Signature=_Thu__22_Sep_2011_11_21_16_+1000_S5xa5fwmE7A_NB/6--
