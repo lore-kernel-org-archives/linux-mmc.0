@@ -1,32 +1,244 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v4] mmc: support HPI send command
-Date: Thu, 22 Sep 2011 08:07:09 -0400
-Message-ID: <m21uv8232q.fsf@bob.laptop.org>
-References: <4E532DB1.4070301@samsung.com> <4E7ADE2D.4010007@samsung.com>
+Subject: Re: [PATCH V3] mmc: core: eMMC 4.5 Power Class Selection Feature
+Date: Thu, 22 Sep 2011 08:28:24 -0400
+Message-ID: <m2wrd0zrpz.fsf@bob.laptop.org>
+References: <1316689931-8703-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:45050 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751799Ab1IVMHW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 Sep 2011 08:07:22 -0400
-In-Reply-To: <4E7ADE2D.4010007@samsung.com> (Jaehoon Chung's message of "Thu,
-	22 Sep 2011 16:05:17 +0900")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1316689931-8703-1-git-send-email-girish.shivananjappa@linaro.org>
+	(Girish K. S.'s message of "Thu, 22 Sep 2011 16:42:11 +0530")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: linux-mmc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>
 
-Hi Jaehoon,
+Hi Girish,
 
-On Thu, Sep 22 2011, Jaehoon Chung wrote:
-> This feature is also used in eMMC4.41. So i want to know your opinion.
-> (In eMMC4.5, i known this feature is important)
-> If need more modification, i will do. if not, i want to merge this feature.
+On Thu, Sep 22 2011, Girish K S wrote:
+> This patch adds the power class selection feature available
+> for mmc versions 4.0 and above.
+> During the enumeration stage before switching to the lower
+> data bus, check if the power class is supported for the
+> current bus width. If the power class is available then
+> switch to the power class and use the higher data bus. If
+> power class is not supported then switch to the lower data
+> bus in a worst case.
+>
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> ---
+>  v1:
+>  This patch version modifies the power_class_select function prototype.
+>  During device enumeration, when the host tries to read the extended
+>  csd register after switching to higher bus width, the read fails at
+>  higher bus width. So the power_class_select function is modified to
+>  reuse the extended csd register values read with 1 bit bus width.
+>  v2:
+>  This patch version removes some checkpatch error
+>  v3:
+>  updated with review comments made by chris ball. patch generated
+>  by rebasing to chris balls mmc-next branch.
 
-I don't have any eMMC 4.5 devices -- the patch looks plausible, but it
-would be nice to get a Tested-by from someone else who's tested it on
-different devices to you and wants to see it merged.
+The mmc.h patch doesn't apply against today's mmc-next branch -- maybe
+due to a patch I pushed yesterday, also make sure that you're on the
+mmc-next branch, not master.  Mind rebasing once more, please?  And:
+
+>  drivers/mmc/core/mmc.c  |   91 +++++++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/mmc.h |   13 +++++++
+>  2 files changed, 104 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index e3695a0..9dd6c82 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -536,6 +536,81 @@ static struct device_type mmc_type = {
+>  };
+>  
+>  /*
+> + * Select the PowerClass for the current bus width
+> + * If power class is defined for 4/8 bit bus in the
+> + * extended CSD register, select it by executing the
+> + * mmc_switch command.
+> + */
+> +static int mmc_select_powerclass(struct mmc_card *card,
+> +		unsigned int bus_width, u8 *ext_csd)
+> +{
+> +	int err = 0;
+> +	unsigned int pwrclass_val;
+> +	unsigned int index = 0;
+> +	struct mmc_host *host = card->host;
+> +
+> +	BUG_ON(!card);
+
+If you're going to test the validity of card, do it before dereferencing
+card->host above.
+
+> +	BUG_ON(!host);
+> +
+> +	if (ext_csd == NULL)
+> +		return 0;
+
+> +	/* Power class selection is supported for versions >= 4.0 */
+> +	if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
+> +		return 0;
+
+> +	/* Power class values are defined only for 4/8 bit bus */
+> +	if (bus_width == EXT_CSD_BUS_WIDTH_1)
+> +		return 0;
+
+Let's add newlines before each comment line here.
+
+> +
+> +	switch (1 << host->ios.vdd) {
+> +	case MMC_VDD_165_195:
+> +		if (host->ios.clock <= 26000000)
+> +			index = EXT_CSD_PWR_CL_26_195;
+> +		else if	(host->ios.clock <= 52000000)
+> +			index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
+> +					EXT_CSD_PWR_CL_52_195 :
+> +					EXT_CSD_PWR_CL_DDR_52_195;
+> +		else if (host->ios.clock <= 200000000)
+> +			index = EXT_CSD_PWR_CL_200_195;
+> +		break;
+> +	case MMC_VDD_32_33:
+> +	case MMC_VDD_33_34:
+> +	case MMC_VDD_34_35:
+> +	case MMC_VDD_35_36:
+> +		if (host->ios.clock <= 26000000)
+> +			index = EXT_CSD_PWR_CL_26_360;
+> +		else if	(host->ios.clock <= 52000000)
+> +			index = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
+> +					EXT_CSD_PWR_CL_52_360 :
+> +					EXT_CSD_PWR_CL_DDR_52_360;
+> +		else if (host->ios.clock <= 200000000)
+> +			index = EXT_CSD_PWR_CL_200_360;
+> +		break;
+> +	default:
+> +		printk(KERN_ERR "votage range not supported\n");
+
+(voltage, not votage)
+
+This isn't good, because someone reading dmesg will have no idea that
+this message came from MMC, and even if they know that it came from MMC,
+they won't know which controller/card it came from.
+
+I suggest:
+
+                pr_warning("%s: Voltage range not supported for power class.\n",
+                           mmc_hostname(host));
+
+> +		break;
+> +	}
+> +
+> +	pwrclass_val = ext_csd[index];
+> +
+> +	if (bus_width & (EXT_CSD_BUS_WIDTH_8 | EXT_CSD_DDR_BUS_WIDTH_8))
+> +		pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_8BIT_MASK) >>
+> +					EXT_CSD_PWR_CL_8BIT_SHIFT;
+> +	else
+> +		pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_4BIT_MASK) >>
+> +					EXT_CSD_PWR_CL_4BIT_SHIFT;
+> +
+> +	/*If the power class is different from the default value*/
+
+Same comment -- leave spaces before the comment text.  (I meant for you
+to apply this comment to the whole patch.)
+
+> +	if (pwrclass_val > 0) {
+> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +				EXT_CSD_POWER_CLASS,
+> +				pwrclass_val,
+> +				0);
+> +	}
+> +
+> +	return err;
+> +}
+> +
+> +/*
+>   * Handle the detection and initialisation of a card.
+>   *
+>   * In the case of a resume, "oldcard" will contain the card
+> @@ -807,6 +882,14 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  			bus_width = bus_widths[idx];
+>  			if (bus_width == MMC_BUS_WIDTH_1)
+>  				ddr = 0; /* no DDR for 1-bit width */
+> +			err = mmc_select_powerclass(card, ext_csd_bits[idx][0],
+> +					ext_csd);
+> +			if (err)
+> +				printk(KERN_ERR "%s: power class selection to "
+> +						"bus width %d failed\n",
+> +						mmc_hostname(card->host),
+> +						1 << bus_width);
+> +
+>  			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>  					 EXT_CSD_BUS_WIDTH,
+>  					 ext_csd_bits[idx][0],
+> @@ -830,6 +913,14 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  		}
+>  
+>  		if (!err && ddr) {
+> +			err = mmc_select_powerclass(card, ext_csd_bits[idx][1],
+> +					ext_csd);
+> +			if (err)
+> +				printk(KERN_ERR "%s: power class selection to "
+> +						"bus width %d ddr %d failed\n",
+> +						mmc_hostname(card->host),
+> +						1 << bus_width, ddr);
+> +
+>  			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>  					 EXT_CSD_BUS_WIDTH,
+>  					 ext_csd_bits[idx][1],
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 95912da..d72d550 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -280,10 +280,15 @@ struct _mmc_csd {
+>  #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
+>  #define EXT_CSD_BUS_WIDTH		183	/* R/W */
+>  #define EXT_CSD_HS_TIMING		185	/* R/W */
+> +#define EXT_CSD_POWER_CLASS	187
+>  #define EXT_CSD_REV			192	/* RO */
+>  #define EXT_CSD_STRUCTURE		194	/* RO */
+>  #define EXT_CSD_CARD_TYPE		196	/* RO */
+>  #define EXT_CSD_PART_SWITCH_TIME        199     /* RO */
+> +#define EXT_CSD_PWR_CL_52_195	200 /*RO*/
+> +#define EXT_CSD_PWR_CL_26_195	201 /*RO*/
+> +#define EXT_CSD_PWR_CL_52_360	202 /*RO*/
+> +#define EXT_CSD_PWR_CL_26_360	203 /*RO*/
+
+Same comment with spaces, and it looks like this is less indented than
+the lines above.  The formatting should match the lines around it.
+
+>  #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
+>  #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
+>  #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
+> @@ -295,6 +300,10 @@ struct _mmc_csd {
+>  #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
+>  #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
+>  #define EXT_CSD_TRIM_MULT		232	/* RO */
+> +#define EXT_CSD_PWR_CL_200_195	236 /*RO*/
+> +#define EXT_CSD_PWR_CL_200_360	237 /*RO*/
+> +#define EXT_CSD_PWR_CL_DDR_52_195	238 /*RO*/
+> +#define EXT_CSD_PWR_CL_DDR_52_360	239 /*RO*/
+>  #define EXT_CSD_POWER_OFF_LONG_TIME	247 /*RO*/
+
+As above.
+>  
+>  /*
+> @@ -338,6 +347,10 @@ struct _mmc_csd {
+>  #define EXT_CSD_POWER_OFF_SHORT	2
+>  #define EXT_CSD_POWER_OFF_LONG	3
+>  
+> +#define EXT_CSD_PWR_CL_8BIT_MASK	0xF0/* 8 bit PWR CLS */
+> +#define EXT_CSD_PWR_CL_4BIT_MASK	0x0F/* 8 bit PWR CLS */
+
+As above, this time you're missing a tab before the /*.
+
+> +#define EXT_CSD_PWR_CL_8BIT_SHIFT	4
+> +#define EXT_CSD_PWR_CL_4BIT_SHIFT	0
+>  /*
+>   * MMC_SWITCH access modes
+>   */
 
 Thanks,
 
