@@ -1,102 +1,166 @@
-From: "Kadiyala, Kishore" <kishore.kadiyala@ti.com>
-Subject: Re: [PATCH 37/57] mmc: irq: Remove IRQF_DISABLED
-Date: Thu, 22 Sep 2011 20:20:23 +0530
-Message-ID: <CAA93xcbHJNpPsPetnLZbPiJ+36QBr8cHFwOdv=yCOVgY9LjgFw@mail.gmail.com>
-References: <1316597339-29861-1-git-send-email-yong.zhang0@gmail.com> <1316597339-29861-38-git-send-email-yong.zhang0@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: [PATCH] mmc : general purpose partition support.
+Date: Fri, 23 Sep 2011 00:34:40 +0900
+Message-ID: <1316705680-1940-1-git-send-email-linkinjeon@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog102.obsmtp.com ([74.125.149.69]:44045 "EHLO
-	na3sys009aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753216Ab1IVOup convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 Sep 2011 10:50:45 -0400
-In-Reply-To: <1316597339-29861-38-git-send-email-yong.zhang0@gmail.com>
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:47926 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751197Ab1IVPfa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2011 11:35:30 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yong Zhang <yong.zhang0@gmail.com>
-Cc: linux-arch@vger.kernel.org, linux-kernel@vger.kernel.org, tglx@linutronix.de, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@nokia.com>, Balaji T K <balajitk@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Namjae Jeon <linkinjeon@gmail.com>
 
-On Wed, Sep 21, 2011 at 2:58 PM, Yong Zhang <yong.zhang0@gmail.com> wro=
-te:
-> Since commit [c58543c8: genirq: Run irq handlers with interrupts disa=
-bled],
-> We run all interrupt handlers with interrupts disabled
-> and we even check and yell when an interrupt handler
-> returns with interrupts enabled (see commit [b738a50a:
-> genirq: Warn when handler enables interrupts]).
->
-> So now this flag is a NOOP and can be removed.
->
-> Signed-off-by: Yong Zhang <yong.zhang0@gmail.com>
+It allows general purpose parition in MMC Device. If it is enable, it will make mmcblk0gp1,gp2,gp3,gp4 partition like this.
 
-=46or omap_hsmmc.c
+>cat /proc/paritition
+      179 0 847872 mmcblk0
+      179 192 4096 mmcblk0gp4
+      179 160 4096 mmcblk0gp3
+      179 128 4096 mmcblk0gp2
+      179 96  1052672 mmcblk0gp1
+      179 64  1024 mmcblk0boot1
+      179 32  1024 mmcblk0boot0
 
-Acked-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
+---
+ drivers/mmc/card/block.c |   36 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/mmc.c   |   42 ++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/card.h |    4 ++++
+ include/linux/mmc/mmc.h  |    4 ++++
+ 4 files changed, 86 insertions(+), 0 deletions(-)
 
-> ---
-> =A0drivers/mmc/host/omap_hsmmc.c | =A0 =A05 ++---
-> =A0drivers/mmc/host/tmio_mmc.c =A0 | =A0 =A04 ++--
-> =A02 files changed, 4 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
-mmc.c
-> index 21e4a79..75c6395 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2015,7 +2015,7 @@ static int __init omap_hsmmc_probe(struct platf=
-orm_device *pdev)
-> =A0 =A0 =A0 =A0}
->
-> =A0 =A0 =A0 =A0/* Request IRQ for MMC operations */
-> - =A0 =A0 =A0 ret =3D request_irq(host->irq, omap_hsmmc_irq, IRQF_DIS=
-ABLED,
-> + =A0 =A0 =A0 ret =3D request_irq(host->irq, omap_hsmmc_irq, 0,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_hostname(mmc), hos=
-t);
-> =A0 =A0 =A0 =A0if (ret) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_dbg(mmc_dev(host->mmc), "Unable to=
- grab HSMMC IRQ\n");
-> @@ -2043,8 +2043,7 @@ static int __init omap_hsmmc_probe(struct platf=
-orm_device *pdev)
-> =A0 =A0 =A0 =A0if ((mmc_slot(host).card_detect_irq)) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D request_irq(mmc_slot(host).car=
-d_detect_irq,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0om=
-ap_hsmmc_cd_handler,
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 IRQ=
-=46_TRIGGER_RISING | IRQF_TRIGGER_FALLING
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 | IRQF_DISABLED,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 IRQ=
-=46_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mm=
-c_hostname(mmc), host);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (ret) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_dbg(mmc_dev(host->=
-mmc),
-> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.=
-c
-> index 44a9668..a4ea102 100644
-> --- a/drivers/mmc/host/tmio_mmc.c
-> +++ b/drivers/mmc/host/tmio_mmc.c
-> @@ -88,8 +88,8 @@ static int __devinit tmio_mmc_probe(struct platform=
-_device *pdev)
-> =A0 =A0 =A0 =A0if (ret)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto cell_disable;
->
-> - =A0 =A0 =A0 ret =3D request_irq(irq, tmio_mmc_irq, IRQF_DISABLED |
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 IRQF_TRIGGER_FALLIN=
-G, dev_name(&pdev->dev), host);
-> + =A0 =A0 =A0 ret =3D request_irq(irq, tmio_mmc_irq, IRQF_TRIGGER_FAL=
-LING,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_nam=
-e(&pdev->dev), host);
-> =A0 =A0 =A0 =A0if (ret)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto host_remove;
->
-> --
-> 1.7.4.1
->
->
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 9b90726..074ec55 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1402,6 +1402,42 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+ 			return ret;
+ 	}
+ 
++	if (card->ext_csd.gp1_size) {
++		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_GP1,
++					card->ext_csd.gp1_size >> 9,
++					false,
++					"gp1");
++		if (ret)
++			return ret;
++	}
++
++	if (card->ext_csd.gp2_size) {
++		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_GP2,
++					card->ext_csd.gp2_size >> 9,
++					false,
++					"gp2");
++		if (ret)
++			return ret;
++	}
++
++	if (card->ext_csd.gp3_size) {
++		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_GP3,
++					card->ext_csd.gp3_size >> 9,
++					false,
++					"gp3");
++		if (ret)
++			return ret;
++	}
++
++	if (card->ext_csd.gp4_size) {
++		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_GP4,
++					card->ext_csd.gp4_size >> 9,
++					false,
++					"gp4");
++		if (ret)
++			return ret;
++	}
++
+ 	return ret;
+ }
+ 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 10f5a19..cc31511 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -393,6 +393,48 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 			card->ext_csd.enhanced_area_offset = -EINVAL;
+ 			card->ext_csd.enhanced_area_size = -EINVAL;
+ 		}
++
++		/*
++		 * General purpose partition Support
++		 */
++
++		if (ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x1) {
++
++			u8 hc_erase_grp_sz =
++				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
++			u8 hc_wp_grp_sz =
++				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
++
++			card->ext_csd.enhanced_area_en = 1;
++
++			card->ext_csd.gp1_size =
++				(ext_csd[145] << 16) + (ext_csd[144] << 8) +
++				ext_csd[143];
++			card->ext_csd.gp1_size *=
++				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
++			card->ext_csd.gp1_size <<= 19;
++
++			card->ext_csd.gp2_size =
++				(ext_csd[148] << 16) + (ext_csd[147] << 8) +
++				ext_csd[146];
++			card->ext_csd.gp2_size *=
++				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
++				card->ext_csd.gp2_size <<= 19;
++
++			card->ext_csd.gp3_size =
++				(ext_csd[151] << 16) + (ext_csd[150] << 8) +
++				ext_csd[149];
++			card->ext_csd.gp3_size *=
++				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
++			card->ext_csd.gp3_size <<= 19;
++
++			card->ext_csd.gp4_size =
++				(ext_csd[154] << 16) + (ext_csd[153] << 8) +
++				ext_csd[152];
++			card->ext_csd.gp4_size *=
++				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
++			card->ext_csd.gp4_size <<= 19;
++		}
+ 		card->ext_csd.sec_trim_mult =
+ 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
+ 		card->ext_csd.sec_erase_mult =
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index b460fc2..96a98a7 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -64,6 +64,10 @@ struct mmc_ext_csd {
+ 	unsigned long long	enhanced_area_offset;	/* Units: Byte */
+ 	unsigned int		enhanced_area_size;	/* Units: KB */
+ 	unsigned int		boot_size;		/* in bytes */
++	unsigned int		gp1_size;		/* in bytes */
++	unsigned int		gp2_size;		/* in bytes */
++	unsigned int		gp3_size;		/* in bytes */
++	unsigned int		gp4_size;		/* in bytes */
+ 	u8			raw_partition_support;	/* 160 */
+ 	u8			raw_erased_mem_count;	/* 181 */
+ 	u8			raw_ext_csd_structure;	/* 194 */
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 5a794cb..380720a 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -303,6 +303,10 @@ struct _mmc_csd {
+ #define EXT_CSD_PART_CONFIG_ACC_MASK	(0x7)
+ #define EXT_CSD_PART_CONFIG_ACC_BOOT0	(0x1)
+ #define EXT_CSD_PART_CONFIG_ACC_BOOT1	(0x2)
++#define EXT_CSD_PART_CONFIG_ACC_GP1	(0x4)
++#define EXT_CSD_PART_CONFIG_ACC_GP2	(0x5)
++#define EXT_CSD_PART_CONFIG_ACC_GP3	(0x6)
++#define EXT_CSD_PART_CONFIG_ACC_GP4	(0x7)
+ 
+ #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
+ #define EXT_CSD_CMD_SET_SECURE		(1<<1)
+-- 
+1.7.4.4
+
