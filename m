@@ -1,56 +1,73 @@
-From: Stephen Rothwell <sfr@canb.auug.org.au>
-Subject: Re: New location of mmc-next while kernel.org is down
-Date: Thu, 22 Sep 2011 11:21:16 +1000
-Message-ID: <20110922112116.534bcf5fd47effe134ef7d52@canb.auug.org.au>
-References: <m2wrd14wg2.fsf@bob.laptop.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v3] mmc: core: Add default timeout value for CMD6.
+Date: Thu, 22 Sep 2011 11:15:30 +0900
+Message-ID: <005601cc78cd$80c71020$82553060$%jun@samsung.com>
+References: <1315466232-27487-1-git-send-email-tgih.jun@samsung.com>
+ <m262kl6b7y.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pgp-signature";
- micalg="PGP-SHA1";
- boundary="Signature=_Thu__22_Sep_2011_11_21_16_+1000_S5xa5fwmE7A_NB/6"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from calzone.tip.net.au ([203.10.76.15]:43071 "EHLO
-	calzone.tip.net.au" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750826Ab1IVBVW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Sep 2011 21:21:22 -0400
-In-Reply-To: <m2wrd14wg2.fsf@bob.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <m262kl6b7y.fsf@bob.laptop.org>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-kernel@vger.kernel.org, linux-next@vger.kernel.org, linux-mmc@vger.kernel.org
 
---Signature=_Thu__22_Sep_2011_11_21_16_+1000_S5xa5fwmE7A_NB/6
-Content-Type: text/plain; charset=US-ASCII
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hi Chris Ball,
 
-Hi Chris,
-
-On Wed, 21 Sep 2011 13:49:49 -0400 Chris Ball <cjb@laptop.org> wrote:
->
-> Please switch the mmc-next location for linux-next over to:
->=20
-> git://dev.laptop.org/users/cjb/mmc mmc-next
-
-OK, I have switched from today.
-
---=20
-Cheers,
-Stephen Rothwell                    sfr@canb.auug.org.au
-http://www.canb.auug.org.au/~sfr/
-
---Signature=_Thu__22_Sep_2011_11_21_16_+1000_S5xa5fwmE7A_NB/6
-Content-Type: application/pgp-signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iQEcBAEBAgAGBQJOeo2MAAoJEDMEi1NhKgbsobgH/00CmLaaVWhZ8v7ldcJ3DHvP
-EgYO7uohvRdNYqyoaIX8uMnIuTuRj12DtI7LD/2X6cqZghbNdLbgdImRtBPcExC+
-efZcVOuVQ16OfXN+Ru8Pf3boGxi/JZHl3AM7ye9WU++EScUtkqHaxTn4T7Eh1h89
-yoQZLNJNpP8fFCzh8i/eYP8cVsAx5YU08z2/CinAAZqYrq23gMkzK6pbhNDjurjt
-4UDaGgZr4Ud6nRpmHcPtEniYbX7rLID1QkVPcBT8Qao/m2+P98A7jjVPvijmCy12
-lauZwRMqpG9vs5K2/ntB3Ke6CXJ0jBRL8iy1IayQUS4ZMCtH0TP+opU5ePEb1do=
-=64Xp
------END PGP SIGNATURE-----
-
---Signature=_Thu__22_Sep_2011_11_21_16_+1000_S5xa5fwmE7A_NB/6--
+Chris Ball wrote:
+> Hi,
+> 
+> On Thu, Sep 08 2011, Seungwon Jeon wrote:
+> > EXT_CSD[248] includes the default maximum timeout for CMD6.
+> > This field is added at eMMC4.5 Spec. And it can be used for default
+> > timeout except for some operations which don't define the timeout(i.e.
+> > background operation, sanitize, flush cache) in eMMC4.5 Spec.
+> >
+> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> > ---
+> >  drivers/mmc/core/mmc.c   |   19 +++++++++++++++----
+> >  include/linux/mmc/card.h |    1 +
+> >  include/linux/mmc/mmc.h  |    1 +
+> >  3 files changed, 17 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> > index 5700b1c..a72d879 100644
+> > --- a/drivers/mmc/core/mmc.c
+> > +++ b/drivers/mmc/core/mmc.c
+> > @@ -410,6 +410,15 @@ static int mmc_read_ext_csd(struct mmc_card *card,
+> u8 *ext_csd)
+> >  	else
+> >  		card->erased_byte = 0x0;
+> >
+> > +	if (card->ext_csd.rev >= 6)
+> > +		card->ext_csd.generic_cmd6_time = 10 *
+> > +			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
+> > +	else
+> > +		card->ext_csd.generic_cmd6_time = 0;
+> > +
+> >  out:
+> >  	return err;
+> >  }
+> > @@ -668,7 +677,8 @@ static int mmc_init_card(struct mmc_host *host, u32
+> ocr,
+> >  	 */
+> 
+> The patch is corrupt at this point:
+> 
+> patching file drivers/mmc/core/mmc.c
+> patch: **** malformed patch at line 39: @@ -668,7 +677,8 @@ static int
+> mmc_init_card(struct mmc_host *host, u32 ocr,
+Oops.
+It's mistake. I'll resend.
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
