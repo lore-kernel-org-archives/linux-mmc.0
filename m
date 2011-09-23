@@ -1,83 +1,38 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 2/2] mmc: block: support no access to boot partitions
-Date: Fri, 23 Sep 2011 12:48:21 +0300
-Message-ID: <1316771301-12323-3-git-send-email-adrian.hunter@intel.com>
+From: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
+Subject: Re: [PATCH 1/2] mmc: block: fix boot partition switch error path
+Date: Fri, 23 Sep 2011 09:20:16 -0400
+Message-ID: <CANz0V+4GtyYLNEJdZp4MFoXGs8ZbfKScdFjHR0Wm6u1_C1hCJw@mail.gmail.com>
 References: <1316771301-12323-1-git-send-email-adrian.hunter@intel.com>
+	<1316771301-12323-2-git-send-email-adrian.hunter@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:42644 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752800Ab1IWJse (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 23 Sep 2011 05:48:34 -0400
-In-Reply-To: <1316771301-12323-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:45222 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753520Ab1IWNUR convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2011 09:20:17 -0400
+Received: by wwf22 with SMTP id 22so3655902wwf.1
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2011 06:20:16 -0700 (PDT)
+In-Reply-To: <1316771301-12323-2-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Intel Medfield platform blocks access to eMMC boot partitions
-which results in switch errors.  Since there is no access,
-mmcboot0/1 devices should not be created.  Add a host
-capability to reflect that.
+Hi Adrian,
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/card/block.c     |    2 +-
- drivers/mmc/host/sdhci-pci.c |    2 ++
- include/linux/mmc/host.h     |   10 ++++++++++
- 3 files changed, 13 insertions(+), 1 deletions(-)
+2011/9/23 Adrian Hunter <adrian.hunter@intel.com>:
+> In the case of a switch error, do not update partition
+> config as though the switch succeeded, and ensure
+> blk_end_request is called on the failed request.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+> =C2=A0drivers/mmc/card/block.c | =C2=A0 16 +++++++++++++---
+> =C2=A01 files changed, 13 insertions(+), 3 deletions(-)
+>
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 2350ac9..ad005e5 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1478,7 +1478,7 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
- 	if (!mmc_card_mmc(card))
- 		return 0;
- 
--	if (card->ext_csd.boot_size) {
-+	if (card->ext_csd.boot_size && mmc_boot_partition_access(card->host)) {
- 		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT0,
- 					 card->ext_csd.boot_size >> 9,
- 					 true,
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 3b30c51..f8a17f9 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -215,6 +215,8 @@ static int mfd_emmc_probe_slot(struct sdhci_pci_slot *slot)
- 
- 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA;
- 
-+	slot->host->mmc->caps2 = MMC_CAP2_BOOTPART_NOACC;
-+
- 	return 0;
- }
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index b2aefea..aed5bc7 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -236,6 +236,10 @@ struct mmc_host {
- #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
- #define MMC_CAP_HW_RESET	(1 << 31)	/* Hardware reset */
- 
-+	unsigned int		caps2;		/* More host capabilities */
-+
-+#define MMC_CAP2_BOOTPART_NOACC	(1 << 0)	/* Boot partition no access */
-+
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
- #ifdef CONFIG_MMC_CLKGATE
-@@ -404,4 +408,10 @@ static inline int mmc_host_cmd23(struct mmc_host *host)
- {
- 	return host->caps & MMC_CAP_CMD23;
- }
-+
-+static inline int mmc_boot_partition_access(struct mmc_host *host)
-+{
-+	return !(host->caps2 & MMC_CAP2_BOOTPART_NOACC);
-+}
-+
- #endif /* LINUX_MMC_HOST_H */
--- 
-1.7.6
+Thanks for catching these.
 
+Acked-by: Andrei Warkentin <andrey.warkentin@gmail.com>
