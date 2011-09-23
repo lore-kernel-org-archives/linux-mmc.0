@@ -1,34 +1,34 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/2] mmc: block: support no access to boot partitions
-Date: Fri, 23 Sep 2011 14:06:19 -0400
-Message-ID: <m2ty83w2uc.fsf@bob.laptop.org>
-References: <1316771301-12323-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH 37/55] mmc: irq: Remove IRQF_DISABLED
+Date: Fri, 23 Sep 2011 14:55:57 -0400
+Message-ID: <m2pqirw0jm.fsf@bob.laptop.org>
+References: <1316681962-8217-1-git-send-email-yong.zhang0@gmail.com>
+	<1316681962-8217-38-git-send-email-yong.zhang0@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36087 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750736Ab1IWSG2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 23 Sep 2011 14:06:28 -0400
-In-Reply-To: <1316771301-12323-1-git-send-email-adrian.hunter@intel.com>
-	(Adrian Hunter's message of "Fri, 23 Sep 2011 12:48:19 +0300")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arch-owner@vger.kernel.org>
+In-Reply-To: <1316681962-8217-38-git-send-email-yong.zhang0@gmail.com> (Yong
+	Zhang's message of "Thu, 22 Sep 2011 16:59:04 +0800")
+Sender: linux-arch-owner@vger.kernel.org
+To: Yong Zhang <yong.zhang0@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, tglx@linutronix.de, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Tony Lindgren <tony@atomide.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Adrian Hunter <adrian.hunter@nokia.com>, Balaji T K <balajitk@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Adrian,
+Hi,
 
-On Fri, Sep 23 2011, Adrian Hunter wrote:
-> Hi
+On Thu, Sep 22 2011, Yong Zhang wrote:
+> Since commit [e58aa3d2: genirq: Run irq handlers with interrupts disabled],
+> We run all interrupt handlers with interrupts disabled
+> and we even check and yell when an interrupt handler
+> returns with interrupts enabled (see commit [b738a50a:
+> genirq: Warn when handler enables interrupts]).
 >
-> Here is a minor fix and a patch to support no access to boot partitions.
+> So now this flag is a NOOP and can be removed.
 >
-> Adrian Hunter (2):
->       mmc: block: fix boot partition switch error path
->       mmc: block: support no access to boot partitions
+> Signed-off-by: Yong Zhang <yong.zhang0@gmail.com>
+> Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Thanks, pushed to mmc-next for 3.2.
+Thanks, pushed to mmc-next for 3.2 with Kishore's ACK added.
 
 - Chris.
 -- 
