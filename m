@@ -1,212 +1,143 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH] mmc : general purpose partition support.
-Date: Fri, 23 Sep 2011 09:29:03 +0900
-Message-ID: <CAKYAXd9nuP7FVb8E3s3w749RdD3KbLFf4cT3mdL_UCM7qcPGQg@mail.gmail.com>
-References: <1316705680-1940-1-git-send-email-linkinjeon@gmail.com>
-	<4E7BB1D3.6020208@linux.intel.com>
-	<CAKYAXd-ABNyB53r01f=J4jNxxqVLfKi1nFbBPifZMPXNYnFZ-w@mail.gmail.com>
-	<4E7BC3F4.2070809@linux.intel.com>
-	<CAKYAXd9jP9AkDfw6Vm0o5GUE07abkHdQQ42YPNQ7ezYY=Fthkg@mail.gmail.com>
-	<4E7BD079.6070309@linux.intel.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v4] mmc: core: Add default timeout value for CMD6.
+Date: Fri, 23 Sep 2011 09:58:35 +0900
+Message-ID: <000001cc798b$ec57e4e0$c507aea0$%jun@samsung.com>
+References: <1316657541-9221-1-git-send-email-tgih.jun@samsung.com>
+ <4E7BB297.8090700@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:40474 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754480Ab1IWA3F (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2011 20:29:05 -0400
-In-Reply-To: <4E7BD079.6070309@linux.intel.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:13767 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753659Ab1IWA6h (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2011 20:58:37 -0400
+In-reply-to: <4E7BB297.8090700@linux.intel.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: J Freyensee <james_p_freyensee@linux.intel.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: 'J Freyensee' <james_p_freyensee@linux.intel.com>
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 
-MjAxMS85LzIzIEogRnJleWVuc2VlIDxqYW1lc19wX2ZyZXllbnNlZUBsaW51eC5pbnRlbC5jb20+
-Cj4KPiBPbiAwOS8yMi8yMDExIDA0OjU4IFBNLCBOYW1KYWUgSmVvbiB3cm90ZToKPj4KPj4gMjAx
-MS85LzIzIEogRnJleWVuc2VlPGphbWVzX3BfZnJleWVuc2VlQGxpbnV4LmludGVsLmNvbT46Cj4+
-Pgo+Pj4gT24gMDkvMjIvMjAxMSAwNDoxNSBQTSwgTmFtSmFlIEplb24gd3JvdGU6Cj4+Pj4KPj4+
-PiAyMDExLzkvMjMgSiBGcmV5ZW5zZWU8amFtZXNfcF9mcmV5ZW5zZWVAbGludXguaW50ZWwuY29t
-PjoKPj4+Pj4KPj4+Pj4gT24gMDkvMjIvMjAxMSAwODozNCBBTSwgTmFtamFlIEplb24gd3JvdGU6
-Cj4+Pj4+Pgo+Pj4+Pj4gSXQgYWxsb3dzIGdlbmVyYWwgcHVycG9zZSBwYXJpdGlvbiBpbiBNTUMg
-RGV2aWNlLiBJZiBpdCBpcyBlbmFibGUsIGl0Cj4+Pj4+PiB3aWxsCj4+Pj4+PiBtYWtlIG1tY2Js
-azBncDEsZ3AyLGdwMyxncDQgcGFydGl0aW9uIGxpa2UgdGhpcy4KPj4+Pj4+Cj4+Pj4+Pj4gY2F0
-IC9wcm9jL3Bhcml0aXRpb24KPj4+Pj4+Cj4+Pj4+PiDCoCDCoCDCoCAxNzkgMCA4NDc4NzIgbW1j
-YmxrMAo+Pj4+Pj4gwqAgwqAgwqAgMTc5IDE5MiA0MDk2IG1tY2JsazBncDQKPj4+Pj4+IMKgIMKg
-IMKgIDE3OSAxNjAgNDA5NiBtbWNibGswZ3AzCj4+Pj4+PiDCoCDCoCDCoCAxNzkgMTI4IDQwOTYg
-bW1jYmxrMGdwMgo+Pj4+Pj4gwqAgwqAgwqAgMTc5IDk2IMKgMTA1MjY3MiBtbWNibGswZ3AxCj4+
-Pj4+PiDCoCDCoCDCoCAxNzkgNjQgwqAxMDI0IG1tY2JsazBib290MQo+Pj4+Pj4gwqAgwqAgwqAg
-MTc5IDMyIMKgMTAyNCBtbWNibGswYm9vdDAKPj4+Pj4+Cj4+Pj4+PiBTaWduZWQtb2ZmLWJ5OiBO
-YW1qYWUgSmVvbjxsaW5raW5qZW9uQGdtYWlsLmNvbT4KPj4+Pj4+IC0tLQo+Pj4+Pj4gwqBkcml2
-ZXJzL21tYy9jYXJkL2Jsb2NrLmMgfCDCoCAzNiArKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKysKPj4+Pj4+IMKgZHJpdmVycy9tbWMvY29yZS9tbWMuYyDCoCB8IMKgIDQyCj4+Pj4+
-PiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysKPj4+Pj4+IMKgaW5j
-bHVkZS9saW51eC9tbWMvY2FyZC5oIHwgwqAgwqA0ICsrKysKPj4+Pj4+IMKgaW5jbHVkZS9saW51
-eC9tbWMvbW1jLmggwqB8IMKgIMKgNCArKysrCj4+Pj4+PiDCoDQgZmlsZXMgY2hhbmdlZCwgODYg
-aW5zZXJ0aW9ucygrKSwgMCBkZWxldGlvbnMoLSkKPj4+Pj4+Cj4+Pj4+PiBkaWZmIC0tZ2l0IGEv
-ZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jIGIvZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jCj4+Pj4+
-PiBpbmRleCA5YjkwNzI2Li4wNzRlYzU1IDEwMDY0NAo+Pj4+Pj4gLS0tIGEvZHJpdmVycy9tbWMv
-Y2FyZC9ibG9jay5jCj4+Pj4+PiArKysgYi9kcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMKPj4+Pj4+
-IEBAIC0xNDAyLDYgKzE0MDIsNDIgQEAgc3RhdGljIGludCBtbWNfYmxrX2FsbG9jX3BhcnRzKHN0
-cnVjdCBtbWNfY2FyZAo+Pj4+Pj4gKmNhcmQsIHN0cnVjdCBtbWNfYmxrX2RhdGEgKm1kKQo+Pj4+
-Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqByZXR1cm4gcmV0Owo+Pj4+Pj4g
-wqAgwqAgwqAgwqB9Cj4+Pj4+Pgo+Pj4+Pj4gKyDCoCDCoCDCoCBpZiAoY2FyZC0+ZXh0X2NzZC5n
-cDFfc2l6ZSkgewo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCByZXQgPSBtbWNfYmxrX2Fs
-bG9jX3BhcnQoY2FyZCwgbWQsCj4+Pj4+PiBFWFRfQ1NEX1BBUlRfQ09ORklHX0FDQ19HUDEsCj4+
-Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIGNhcmQtPmV4dF9jc2QuZ3AxX3NpemU+PiDCoCDCoCDCoDksCj4+Pj4+PiArIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGZhbHNl
-LAo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCAiZ3AxIik7Cj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChyZXQp
-Cj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHJldHVybiByZXQ7Cj4+
-Pj4+PiArIMKgIMKgIMKgIH0KPj4+Pj4+ICsKPj4+Pj4KPj4+Pj4gaWYgbW1jX2Jsa19hbGxvY19w
-YXJ0KCkgZmFpbHMgZm9yICdpZiAoY2FyZC0+ZXh0X2NzZC5wdDFfc2l6ZSknLCB3aHkKPj4+Pj4g
-d291bGQKPj4+Pj4geW91IHdhbnQgdG8gZ2l2ZSB0aGlzIGNvZGUgdGhlIG9wcG9ydHVuaXR5IHRv
-IGNhbGwgbW1jX2Jsa19hbGxvY19wYXJ0KCkKPj4+Pj4gYWdhaW4gd2l0aCB0aGUgbmV4dCBpZigp
-IGJlbG93PyDCoElmIG1tY19ibGtfYWxsb2NfcGFydCgpIGZhaWxzLCBpcyBpdCBhCj4+Pj4+IGJp
-Zwo+Pj4+PiBwcm9ibGVtLCBsaWtlIGt6YWxsb2MoKSBmYWlsaW5nPyDCoElmIHNvLCBJIHdvdWxk
-IHRoaW5rIHlvdSB3b3VsZCB3YW50IHRvCj4+Pj4+IGltbWVkaWF0ZWx5IHF1aXQgdGhpcyBmdW5j
-dGlvbiBhbmQgcmVwb3J0IGFuIGVycm9yIChlaXRoZXIgdXNlIGVycm5vCj4+Pj4+IHZhbHVlCj4+
-Pj4+IG9yIHBhc3MgdGhlIHZhbHVlIG9mIHJldCkuCj4+Pj4KPj4+PiAtPiDCoCDCoGlmIGNhcmQt
-PmV4dF9jc2QuZ3AxX3NpemUgaXMgbm8gemVybywgaXQgbWVhbnMgZ2VuZXJhbCBwdXJwb3NlCj4+
-Pj4gcGFydGl0aW9uIGlzIGVuYWJsZS4KPj4+PiBhbmQgaXQgY2FuIHNldCB1cCB0byA0IHBhcnRp
-dGlvbiBpbiBzcGVjaWZpY2F0aW9uLiBzbyB3ZSBzaG91bGQgY2hlY2sKPj4+PiBpdCBieSBuZXh0
-IGlmKCkuCj4+Pgo+Pj4gUGxlYXNlIGRvY3VtZW50IHRoYXQgaW4geW91ciBjb2RlLiDCoFBsZWFz
-ZSBhZGQgYSBmdW5jdGlvbiBoZWFkZXIgdG8gdGhpcwo+Pj4gZnVuY3Rpb24uCj4+Cj4+IEkgd2ls
-bCBhZGQgY29tbWVudHMgYXQgdGhpcyBjb2RlLiDCoEkgZG9uJ3QgdW5kZXJzdGFuZCB3aHkgYSBm
-dW5jdGlvbgo+PiBoZWFkZXIgc2hvdWxkIGJlIGFkZGVkIHlldC4KPgo+IE9uZSBvciB0aGUgb3Ro
-ZXIuCj4KPiBidXQgYSBmdW5jdGlvbiBjb21tZW50IGhlYWRlciBzaG91bGQgYmUgYWRkZWQgYXQg
-c29tZSBwb2ludC4gwqBZZXMsIHRoZSBtbWMgc3Vic3lzdGVtIGlzIHByZXR0eSBsZWdhY3ksIGJ1
-dCBhbnkgbmV3IHdvcmsgdGhhdCBnZXRzIGFkZGVkIHRvIHRoZSBrZXJuZWwgaXMgdXN1YWxseSBo
-YXMgaGlnaGVyIHN0YW5kYXJkcyBmb3Igc3R1ZmYgbGlrZSBub3QganVzdCBhZGRpbmcgZnVuY3Rp
-b24gaGVhZGVyIGNvbW1lbnRzIGJ1dCBwdXR0aW5nIHRoZW0gaW4gYSBjZXJ0YWluIGZvcm1hdC4u
-LmF0IGxlYXN0IHRoaXMgaXMgd2hhdCBJIHdlbnQgdGhyb3VnaCB3aGVuIEkgaGFkIHRoaW5ncyBh
-Y2NlcHRlZCB1cHN0cmVhbS4KCk9rYXksIEkgd2lsbCByZWxlYXNlIHBhdGNoIHYyIGFmdGVyIGFk
-ZGluZyBmdW5jdGlvbiBoZWFkZXIgY29tbWVudHMgYWdhaW4uClRoYW5rcyBmb3IgeW91ciByZXZp
-ZXcuCj4KPj4KPj4+Cj4+Pj4KPj4+Pj4KPj4+Pj4+ICsgwqAgwqAgwqAgaWYgKGNhcmQtPmV4dF9j
-c2QuZ3AyX3NpemUpIHsKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcmV0ID0gbW1jX2Js
-a19hbGxvY19wYXJ0KGNhcmQsIG1kLAo+Pj4+Pj4gRVhUX0NTRF9QQVJUX0NPTkZJR19BQ0NfR1Ay
-LAo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmdwMl9zaXplPj4gwqAgwqAgwqA5LAo+Pj4+Pj4gKyDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBm
-YWxzZSwKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgImdwMiIpOwo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAo
-cmV0KQo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCByZXR1cm4gcmV0
-Owo+Pj4+Pj4gKyDCoCDCoCDCoCB9Cj4+Pj4+PiArCj4+Pj4+PiArIMKgIMKgIMKgIGlmIChjYXJk
-LT5leHRfY3NkLmdwM19zaXplKSB7Cj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHJldCA9
-IG1tY19ibGtfYWxsb2NfcGFydChjYXJkLCBtZCwKPj4+Pj4+IEVYVF9DU0RfUEFSVF9DT05GSUdf
-QUNDX0dQMywKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgY2FyZC0+ZXh0X2NzZC5ncDNfc2l6ZT4+IMKgIMKgIMKgOSwKPj4+
-Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgZmFsc2UsCj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgICJncDMiKTsKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgaWYgKHJldCkKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcmV0
-dXJuIHJldDsKPj4+Pj4+ICsgwqAgwqAgwqAgfQo+Pj4+Pj4gKwo+Pj4+Pj4gKyDCoCDCoCDCoCBp
-ZiAoY2FyZC0+ZXh0X2NzZC5ncDRfc2l6ZSkgewo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCByZXQgPSBtbWNfYmxrX2FsbG9jX3BhcnQoY2FyZCwgbWQsCj4+Pj4+PiBFWFRfQ1NEX1BBUlRf
-Q09ORklHX0FDQ19HUDQsCj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9jc2QuZ3A0X3NpemU+PiDCoCDCoCDC
-oDksCj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIGZhbHNlLAo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAiZ3A0Iik7Cj4+Pj4+PiArIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIGlmIChyZXQpCj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIHJldHVybiByZXQ7Cj4+Pj4+PiArIMKgIMKgIMKgIH0KPj4+Pj4+ICsKPj4+Pj4+IMKgIMKg
-IMKgIMKgcmV0dXJuIHJldDsKPj4+Pj4+IMKgfQo+Pj4+Pj4KPj4+Pj4+IGRpZmYgLS1naXQgYS9k
-cml2ZXJzL21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYwo+Pj4+Pj4gaW5k
-ZXggMTBmNWExOS4uY2MzMTUxMSAxMDA2NDQKPj4+Pj4+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUv
-bW1jLmMKPj4+Pj4+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKPj4+Pj4+IEBAIC0zOTMs
-NiArMzkzLDQ4IEBAIHN0YXRpYyBpbnQgbW1jX3JlYWRfZXh0X2NzZChzdHJ1Y3QgbW1jX2NhcmQg
-KmNhcmQsCj4+Pj4+PiB1OAo+Pj4+Pj4gKmV4dF9jc2QpCj4+Pj4+PiDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoGNhcmQtPmV4dF9jc2QuZW5oYW5jZWRfYXJlYV9vZmZzZXQgPSAt
-RUlOVkFMOwo+Pj4+Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBjYXJkLT5l
-eHRfY3NkLmVuaGFuY2VkX2FyZWFfc2l6ZSA9IC1FSU5WQUw7Cj4+Pj4+PiDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoH0KPj4+Pj4+ICsKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgLyoKPj4+
-Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAqIEdlbmVyYWwgcHVycG9zZSBwYXJ0aXRpb24g
-U3VwcG9ydAo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCovCj4+Pj4+PiArCj4+Pj4+
-PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChleHRfY3NkW0VYVF9DU0RfUEFSVElUSU9OX1NV
-UFBPUlRdJiDCoCDCoCDCoDB4MSkgewo+Pj4+Pj4gKwo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCB1OCBoY19lcmFzZV9ncnBfc3ogPQo+Pj4+Pj4gKyDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBleHRfY3NkW0VYVF9DU0RfSENfRVJB
-U0VfR1JQX1NJWkVdOwo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCB1
-OCBoY193cF9ncnBfc3ogPQo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCBleHRfY3NkW0VYVF9DU0RfSENfV1BfR1JQX1NJWkVdOwo+Pj4+Pj4gKwo+
-Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmVu
-aGFuY2VkX2FyZWFfZW4gPSAxOwo+Pj4+Pj4gKwo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmdwMV9zaXplID0KPj4+Pj4+ICsgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgKGV4dF9jc2RbMTQ1XTw8IMKgIMKg
-IMKgMTYpICsgKGV4dF9jc2RbMTQ0XTw8Cj4+Pj4+PiDCoCDCoDgpCj4+Pj4+PiArCj4+Pj4+PiAr
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGV4dF9jc2RbMTQz
-XTsKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgY2FyZC0+ZXh0X2Nz
-ZC5ncDFfc2l6ZSAqPQo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCAoc2l6ZV90KShoY19lcmFzZV9ncnBfc3ogKgo+Pj4+Pj4gaGNfd3BfZ3JwX3N6
-KTsKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgY2FyZC0+ZXh0X2Nz
-ZC5ncDFfc2l6ZTw8PSAxOTsKPj4+Pj4+ICsKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgY2FyZC0+ZXh0X2NzZC5ncDJfc2l6ZSA9Cj4+Pj4+PiArIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIChleHRfY3NkWzE0OF08PCDCoCDCoCDC
-oDE2KSArIChleHRfY3NkWzE0N108PAo+Pj4+Pj4gwqAgwqA4KQo+Pj4+Pj4gKwo+Pj4+Pj4gKyDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBleHRfY3NkWzE0Nl07
-Cj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9jc2Qu
-Z3AyX3NpemUgKj0KPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgKHNpemVfdCkoaGNfZXJhc2VfZ3JwX3N6ICoKPj4+Pj4+IGhjX3dwX2dycF9zeik7
-Cj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNh
-cmQtPmV4dF9jc2QuZ3AyX3NpemU8PD0gMTk7Cj4+Pj4+PiArCj4+Pj4+PiArIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9jc2QuZ3AzX3NpemUgPQo+Pj4+Pj4gKyDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAoZXh0X2NzZFsxNTFd
-PDwgwqAgwqAgwqAxNikgKyAoZXh0X2NzZFsxNTBdPDwKPj4+Pj4+IMKgIMKgOCkKPj4+Pj4+ICsK
-Pj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXh0
-X2NzZFsxNDldOwo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJk
-LT5leHRfY3NkLmdwM19zaXplICo9Cj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIChzaXplX3QpKGhjX2VyYXNlX2dycF9zeiAqCj4+Pj4+PiBoY193
-cF9ncnBfc3opOwo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJk
-LT5leHRfY3NkLmdwM19zaXplPDw9IDE5Owo+Pj4+Pj4gKwo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmdwNF9zaXplID0KPj4+Pj4+ICsgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgKGV4dF9jc2RbMTU0XTw8
-IMKgIMKgIMKgMTYpICsgKGV4dF9jc2RbMTUzXTw8Cj4+Pj4+PiDCoCDCoDgpCj4+Pj4+PiArCj4+
-Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGV4dF9j
-c2RbMTUyXTsKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgY2FyZC0+
-ZXh0X2NzZC5ncDRfc2l6ZSAqPQo+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCAoc2l6ZV90KShoY19lcmFzZV9ncnBfc3ogKgo+Pj4+Pj4gaGNfd3Bf
-Z3JwX3N6KTsKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgY2FyZC0+
-ZXh0X2NzZC5ncDRfc2l6ZTw8PSAxOTsKPj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgfQo+
-Pj4+Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBjYXJkLT5leHRfY3NkLnNlY190cmltX211bHQg
-PQo+Pj4+Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBleHRfY3NkW0VYVF9D
-U0RfU0VDX1RSSU1fTVVMVF07Cj4+Pj4+PiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGNhcmQtPmV4
-dF9jc2Quc2VjX2VyYXNlX211bHQgPQo+Pj4+Pj4gZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgv
-bW1jL2NhcmQuaCBiL2luY2x1ZGUvbGludXgvbW1jL2NhcmQuaAo+Pj4+Pj4gaW5kZXggYjQ2MGZj
-Mi4uOTZhOThhNyAxMDA2NDQKPj4+Pj4+IC0tLSBhL2luY2x1ZGUvbGludXgvbW1jL2NhcmQuaAo+
-Pj4+Pj4gKysrIGIvaW5jbHVkZS9saW51eC9tbWMvY2FyZC5oCj4+Pj4+PiBAQCAtNjQsNiArNjQs
-MTAgQEAgc3RydWN0IG1tY19leHRfY3NkIHsKPj4+Pj4+IMKgIMKgIMKgIMKgdW5zaWduZWQgbG9u
-ZyBsb25nIMKgIMKgIMKgZW5oYW5jZWRfYXJlYV9vZmZzZXQ7IMKgIC8qIFVuaXRzOiBCeXRlICov
-Cj4+Pj4+PiDCoCDCoCDCoCDCoHVuc2lnbmVkIGludCDCoCDCoCDCoCDCoCDCoCDCoGVuaGFuY2Vk
-X2FyZWFfc2l6ZTsgwqAgwqAgLyogVW5pdHM6IEtCICovCj4+Pj4+PiDCoCDCoCDCoCDCoHVuc2ln
-bmVkIGludCDCoCDCoCDCoCDCoCDCoCDCoGJvb3Rfc2l6ZTsgwqAgwqAgwqAgwqAgwqAgwqAgwqAv
-KiBpbiBieXRlcyAqLwo+Pj4+Pj4gKyDCoCDCoCDCoCB1bnNpZ25lZCBpbnQgwqAgwqAgwqAgwqAg
-wqAgwqBncDFfc2l6ZTsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgLyogaW4gYnl0ZXMgKi8KPj4+Pj4+
-ICsgwqAgwqAgwqAgdW5zaWduZWQgaW50IMKgIMKgIMKgIMKgIMKgIMKgZ3AyX3NpemU7IMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIC8qIGluIGJ5dGVzICovCj4+Pj4+PiArIMKgIMKgIMKgIHVuc2lnbmVk
-IGludCDCoCDCoCDCoCDCoCDCoCDCoGdwM19zaXplOyDCoCDCoCDCoCDCoCDCoCDCoCDCoCAvKiBp
-biBieXRlcyAqLwo+Pj4+Pj4gKyDCoCDCoCDCoCB1bnNpZ25lZCBpbnQgwqAgwqAgwqAgwqAgwqAg
-wqBncDRfc2l6ZTsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgLyogaW4gYnl0ZXMgKi8KPj4+Pj4+IMKg
-IMKgIMKgIMKgdTggwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqByYXdfcGFydGl0aW9u
-X3N1cHBvcnQ7IMKgLyogMTYwICovCj4+Pj4+PiDCoCDCoCDCoCDCoHU4IMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgcmF3X2VyYXNlZF9tZW1fY291bnQ7IMKgIC8qIDE4MSAqLwo+Pj4+
-Pj4gwqAgwqAgwqAgwqB1OCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoHJhd19leHRf
-Y3NkX3N0cnVjdHVyZTsgwqAvKiAxOTQgKi8KPj4+Pj4+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xp
-bnV4L21tYy9tbWMuaCBiL2luY2x1ZGUvbGludXgvbW1jL21tYy5oCj4+Pj4+PiBpbmRleCA1YTc5
-NGNiLi4zODA3MjBhIDEwMDY0NAo+Pj4+Pj4gLS0tIGEvaW5jbHVkZS9saW51eC9tbWMvbW1jLmgK
-Pj4+Pj4+ICsrKyBiL2luY2x1ZGUvbGludXgvbW1jL21tYy5oCj4+Pj4+PiBAQCAtMzAzLDYgKzMw
-MywxMCBAQCBzdHJ1Y3QgX21tY19jc2Qgewo+Pj4+Pj4gwqAjZGVmaW5lIEVYVF9DU0RfUEFSVF9D
-T05GSUdfQUNDX01BU0sgwqAoMHg3KQo+Pj4+Pj4gwqAjZGVmaW5lIEVYVF9DU0RfUEFSVF9DT05G
-SUdfQUNDX0JPT1QwICgweDEpCj4+Pj4+PiDCoCNkZWZpbmUgRVhUX0NTRF9QQVJUX0NPTkZJR19B
-Q0NfQk9PVDEgKDB4MikKPj4+Pj4+ICsjZGVmaW5lIEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX0dQ
-MSDCoCDCoCgweDQpCj4+Pj4+PiArI2RlZmluZSBFWFRfQ1NEX1BBUlRfQ09ORklHX0FDQ19HUDIg
-wqAgwqAoMHg1KQo+Pj4+Pj4gKyNkZWZpbmUgRVhUX0NTRF9QQVJUX0NPTkZJR19BQ0NfR1AzIMKg
-IMKgKDB4NikKPj4+Pj4+ICsjZGVmaW5lIEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX0dQNCDCoCDC
-oCgweDcpCj4+Pj4+Pgo+Pj4+Pj4gwqAjZGVmaW5lIEVYVF9DU0RfQ01EX1NFVF9OT1JNQUwgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAoMTw8MCkKPj4+Pj4+IMKgI2RlZmluZSBFWFRfQ1NEX0NNRF9T
-RVRfU0VDVVJFIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgKDE8PDEpCj4+Pj4+Cj4+Pj4+Cj4+Pj4+
-IC0tCj4+Pj4+IEogKEphbWVzL0pheSkgRnJleWVuc2VlCj4+Pj4+IFN0b3JhZ2UgVGVjaG5vbG9n
-eSBHcm91cAo+Pj4+PiBJbnRlbCBDb3Jwb3JhdGlvbgo+Pj4+Pgo+Pj4KPj4+Cj4+PiAtLQo+Pj4g
-SiAoSmFtZXMvSmF5KSBGcmV5ZW5zZWUKPj4+IFN0b3JhZ2UgVGVjaG5vbG9neSBHcm91cAo+Pj4g
-SW50ZWwgQ29ycG9yYXRpb24KPj4+Cj4KPgo+IC0tCj4gSiAoSmFtZXMvSmF5KSBGcmV5ZW5zZWUK
-PiBTdG9yYWdlIFRlY2hub2xvZ3kgR3JvdXAKPiBJbnRlbCBDb3Jwb3JhdGlvbgo=
+Hi,
+
+J Freyensee wrote:
+> 
+> On 09/21/2011 07:12 PM, Seungwon Jeon wrote:
+> > EXT_CSD[248] includes the default maximum timeout for CMD6.
+> > This field is added at eMMC4.5 Spec. And it can be used for default
+> > timeout except for some operations which don't define the timeout(i.e.
+> > background operation, sanitize, flush cache) in eMMC4.5 Spec.
+> 
+> Out of curiosity, what cache is being refered to in 'flush cache' comment?
+It is described in eMMC4.5 Spec.
+
+Best regards,
+Seungwon Jeon.
+> >
+> > Signed-off-by: Seungwon Jeon<tgih.jun@samsung.com>
+> > ---
+> >   drivers/mmc/core/mmc.c   |   16 ++++++++++++----
+> >   include/linux/mmc/card.h |    1 +
+> >   include/linux/mmc/mmc.h  |    1 +
+> >   3 files changed, 14 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> > index 5700b1c..b2ee14a 100644
+> > --- a/drivers/mmc/core/mmc.c
+> > +++ b/drivers/mmc/core/mmc.c
+> > @@ -410,6 +410,12 @@ static int mmc_read_ext_csd(struct mmc_card *card,
+> u8 *ext_csd)
+> >   	else
+> >   		card->erased_byte = 0x0;
+> >
+> > +	if (card->ext_csd.rev>= 6)
+> > +		card->ext_csd.generic_cmd6_time = 10 *
+> > +			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
+> > +	else
+> > +		card->ext_csd.generic_cmd6_time = 0;
+> > +
+> >   out:
+> >   	return err;
+> >   }
+> > @@ -668,7 +674,8 @@ static int mmc_init_card(struct mmc_host *host, u32
+> ocr,
+> >   	 */
+> >   	if (card->ext_csd.enhanced_area_en) {
+> >   		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> > -				 EXT_CSD_ERASE_GROUP_DEF, 1, 0);
+> > +				 EXT_CSD_ERASE_GROUP_DEF, 1,
+> > +				 card->ext_csd.generic_cmd6_time);
+> >
+> >   		if (err&&  err != -EBADMSG)
+> >   			goto free_card;
+> > @@ -711,7 +718,8 @@ static int mmc_init_card(struct mmc_host *host, u32
+> ocr,
+> >   	if ((card->ext_csd.hs_max_dtr != 0)&&
+> >   		(host->caps&  MMC_CAP_MMC_HIGHSPEED)) {
+> >   		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> > -				 EXT_CSD_HS_TIMING, 1, 0);
+> > +				 EXT_CSD_HS_TIMING, 1,
+> > +				 card->ext_csd.generic_cmd6_time);
+> >   		if (err&&  err != -EBADMSG)
+> >   			goto free_card;
+> >
+> > @@ -783,7 +791,7 @@ static int mmc_init_card(struct mmc_host *host, u32
+> ocr,
+> >   			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> >   					 EXT_CSD_BUS_WIDTH,
+> >   					 ext_csd_bits[idx][0],
+> > -					 0);
+> > +					 card->ext_csd.generic_cmd6_time);
+> >   			if (!err) {
+> >   				mmc_set_bus_width(card->host, bus_width);
+> >
+> > @@ -806,7 +814,7 @@ static int mmc_init_card(struct mmc_host *host, u32
+> ocr,
+> >   			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> >   					 EXT_CSD_BUS_WIDTH,
+> >   					 ext_csd_bits[idx][1],
+> > -					 0);
+> > +					 card->ext_csd.generic_cmd6_time);
+> >   		}
+> >   		if (err) {
+> >   			printk(KERN_WARNING "%s: switch to bus width %d ddr %d
+> "
+> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> > index b460fc2..b713abf 100644
+> > --- a/include/linux/mmc/card.h
+> > +++ b/include/linux/mmc/card.h
+> > @@ -52,6 +52,7 @@ struct mmc_ext_csd {
+> >   	u8			part_config;
+> >   	unsigned int		part_time;		/* Units: ms */
+> >   	unsigned int		sa_timeout;		/* Units: 100ns */
+> > +	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+> >   	unsigned int		hs_max_dtr;
+> >   	unsigned int		sectors;
+> >   	unsigned int		card_type;
+> > diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> > index 5a794cb..e869f00 100644
+> > --- a/include/linux/mmc/mmc.h
+> > +++ b/include/linux/mmc/mmc.h
+> > @@ -293,6 +293,7 @@ struct _mmc_csd {
+> >   #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
+> >   #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
+> >   #define EXT_CSD_TRIM_MULT		232	/* RO */
+> > +#define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
+> >
+> >   /*
+> >    * EXT_CSD field definitions
+> > --
+> > 1.7.0.4
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> --
+> J (James/Jay) Freyensee
+> Storage Technology Group
+> Intel Corporation
+
