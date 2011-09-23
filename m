@@ -1,71 +1,52 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH] mmc : general purpose partition support.
-Date: Fri, 23 Sep 2011 12:56:54 +0900
-Message-ID: <CAKYAXd_B9111vCZXhow1pv+9QsUuZYhWZ6Sner8yV2qmOhVcgA@mail.gmail.com>
-References: <1316705680-1940-1-git-send-email-linkinjeon@gmail.com>
-	<728441958.616721.1316748325054.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Andrei Warkentin <andrey.warkentin@gmail.com>
+Subject: [PATCH] MMC: ext_csd.raw_* used in comparison but never set
+Date: Fri, 23 Sep 2011 00:25:30 -0400
+Message-ID: <1316751930-7478-1-git-send-email-andrey.warkentin@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:52724 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751309Ab1IWD44 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2011 23:56:56 -0400
-In-Reply-To: <728441958.616721.1316748325054.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:41834 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750750Ab1IWE1z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2011 00:27:55 -0400
+Received: by vws1 with SMTP id 1so3889175vws.19
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2011 21:27:54 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <awarkentin@vmware.com>
-Cc: linux-kernel@vger.kernel.org, cjb@laptop.org, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Philip Rakity <prakity@marvell.com>, andreiw@vmware.com, Andrei Warkentin <andrey.warkentin@gmail.com>
 
-2011/9/23 Andrei Warkentin <awarkentin@vmware.com>:
-> Hi Namjae,
->
-> I scanned over your changes to enable GP partitions, and while I
-> did not yet test your changes, they do appear to be ok.
->
-> Please CC me on the next version of your patch so I can give
-> it a spin and Ack on it.
->
-> I do suggest at least thinking about ways to improve on this. Back
-> when I added boot partition support, I already didn't like the fact
-> that the block driver had to be aware of the eMMC partitions, with al=
-l
-> the code duplication and such. By adding four more partitions,
-> you've compounded the problem and now you have six pieces of
-> code that really look the same.
->
-> The core/mmc.c right now scans the size values and stores them
-> in mmc_card, and the block driver is smart enough to know what
-> to do with them. Why not make the block code generic at the expense
-> of keeping an array of structures in mmc_card? The block driver
-> would then just iterate over these and create the additional devices.=
- The partition
-> switch routine would then operate on these structures, and could then=
- be pulled out
-> of the block driver, making it simpler.
->
-> Each physical partition could be described by something like -
-> struct mmc_part {
-> =C2=A0 =C2=A0unsigned int size;
-> =C2=A0 =C2=A0unsigned int cookie; =C2=A0 =C2=A0 =C2=A0 =C2=A0/* for m=
-mc, idx used in mmc_switch, part_type from current mmc_blk_data */
-> =C2=A0 =C2=A0char name[DISK_NAME_LEN];
-> =C2=A0 =C2=A0bool force_ro; =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0/* to make boot parts RO by default */
-> };
->
-> Just an idea. Clearly, if MMC grows by another 4-5 possible partition=
-s, it's not
-> realistic to be copy-pasting the same block of code, nor would it mak=
-e sense
-> if/when these types of devices support an arbitrary amount of physica=
-l partitions.
->
-> Thanks,
-> A
->
+f39b2dd9d065151a04f5996656d1f27a7eb32d45 added code to
+only compare read-only ext_csd fields in bus width
+testing code, yet it's comparing some fields that are
+never set.
 
-Okay, I understand what you want. I will try to make patch included
-your suggestion again.
-Thanks for your review.
+The affected fields are ext_csd.raw_erased_mem_count and
+ext_csd.raw_partition_support.
+
+Signed-off-by: Andrei Warkentin <andrey.warkentin@gmail.com>
+---
+ drivers/mmc/core/mmc.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5700b1c..bb33832 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -359,6 +359,7 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 * card has the Enhanced area enabled.  If so, export enhanced
+ 		 * area offset and size to user by adding sysfs interface.
+ 		 */
++		card->ext_csd.raw_partition_support = ext_csd[EXT_CSD_PARTITION_SUPPORT];
+ 		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
+ 		    (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
+ 			u8 hc_erase_grp_sz =
+@@ -405,6 +406,7 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 	if (card->ext_csd.rev >= 5)
+ 		card->ext_csd.rel_param = ext_csd[EXT_CSD_WR_REL_PARAM];
+ 
++	card->ext_csd.raw_erased_mem_count = ext_csd[EXT_CSD_ERASED_MEM_CONT];
+ 	if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
+ 		card->erased_byte = 0xFF;
+ 	else
+-- 
+1.7.6.1
+
