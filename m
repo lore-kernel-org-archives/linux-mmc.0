@@ -1,212 +1,237 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: [PATCH v2] mmc : general purpose partition support.
-Date: Sat, 24 Sep 2011 14:07:00 +0900
-Message-ID: <1316840820-2014-1-git-send-email-linkinjeon@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:65330 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751135Ab1IXFHw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Sep 2011 01:07:52 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: NamJae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH] mmc : general purpose partition support.
+Date: Sat, 24 Sep 2011 14:21:00 +0900
+Message-ID: <CAKYAXd_N1aXR7tPAen6P=QxY-4=PzeYy+WbCx74KR0tLvS=7Kw@mail.gmail.com>
+References: <1316705680-1940-1-git-send-email-linkinjeon@gmail.com>
+	<4E7BB1D3.6020208@linux.intel.com>
+	<CAKYAXd-ABNyB53r01f=J4jNxxqVLfKi1nFbBPifZMPXNYnFZ-w@mail.gmail.com>
+	<4E7BC3F4.2070809@linux.intel.com>
+	<CAKYAXd9jP9AkDfw6Vm0o5GUE07abkHdQQ42YPNQ7ezYY=Fthkg@mail.gmail.com>
+	<4E7BD079.6070309@linux.intel.com>
+	<CAKYAXd9nuP7FVb8E3s3w749RdD3KbLFf4cT3mdL_UCM7qcPGQg@mail.gmail.com>
+	<4E7CB5FC.3090301@linux.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <4E7CB5FC.3090301@linux.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: J Freyensee <james_p_freyensee@linux.intel.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, james_p_freyensee@linux.intel.com, Namjae Jeon <linkinjeon@gmail.com>
 
-It allows gerneral purpose partitions in MMC Device.
-And I try to simpliy make mmc_blk_alloc_parts using mmc_part structure suggested by Andrei Warkentin.
-After patching, we can see general purpose partitions like this.
-> cat /proc/partitions
-          179 0 847872 mmcblk0
-          179 192 4096 mmcblk0gp4
-          179 160 4096 mmcblk0gp3
-          179 128 4096 mmcblk0gp2
-          179 96  1052672 mmcblk0gp1
-          179 64  1024 mmcblk0boot1
-          179 32  1024 mmcblk0boot0
-
-Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
----
- drivers/mmc/card/block.c |   30 ++++++++++++++++--------------
- drivers/mmc/core/mmc.c   |   46 +++++++++++++++++++++++++++++++++++++++++++++-
- include/linux/mmc/card.h |   19 ++++++++++++++++++-
- include/linux/mmc/mmc.h  |    2 --
- 4 files changed, 79 insertions(+), 18 deletions(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1ff5486..8ec7cfd 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1377,26 +1377,28 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
- 	return 0;
- }
- 
-+/* MMC Physical partition consist of two boot partitons and
-+ * four general purpose partitions.
-+ * if the register of respective partitions is set in ext_csd,
-+ * it allocate block device to be accessed.
-+ */
-+
- static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
- {
--	int ret = 0;
-+	int i, ret = 0;
- 
- 	if (!mmc_card_mmc(card))
- 		return 0;
- 
--	if (card->ext_csd.boot_size) {
--		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT0,
--					 card->ext_csd.boot_size >> 9,
--					 true,
--					 "boot0");
--		if (ret)
--			return ret;
--		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT1,
--					 card->ext_csd.boot_size >> 9,
--					 true,
--					 "boot1");
--		if (ret)
--			return ret;
-+	for (i = 0; i < MMC_MAX_NUM_PHY_PARTITION; i++) {
-+		if (card->part[i].size) {
-+			ret = mmc_blk_alloc_part(card, md, card->part[i].cookie,
-+				card->part[i].size >> 9,
-+				card->part[i].force_ro,
-+				card->part[i].name);
-+			if (ret)
-+				return ret;
-+		}
- 	}
- 
- 	return ret;
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 5700b1c..56c4b9e 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -340,7 +340,18 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		 * There are two boot regions of equal size, defined in
- 		 * multiples of 128K.
- 		 */
--		card->ext_csd.boot_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
-+		int i, boot_part_config;
-+		if (ext_csd[EXT_CSD_BOOT_MULT]) {
-+			for (i = 0, boot_part_config = 0x1;
-+				i < MMC_NUM_BOOT_PARTITION;
-+				i++, boot_part_config++) {
-+				card->part[i].size =
-+					ext_csd[EXT_CSD_BOOT_MULT] << 17;
-+				card->part[i].cookie = boot_part_config;
-+				sprintf(card->part[i].name, "boot%d", i);
-+				card->part[i].force_ro = true;
-+			}
-+		}
- 	}
- 
- 	card->ext_csd.raw_hc_erase_gap_size =
-@@ -392,6 +403,39 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 			card->ext_csd.enhanced_area_offset = -EINVAL;
- 			card->ext_csd.enhanced_area_size = -EINVAL;
- 		}
-+
-+		if (ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x1) {
-+			u8 hc_erase_grp_sz =
-+				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-+			u8 hc_wp_grp_sz =
-+				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-+
-+			card->ext_csd.enhanced_area_en = 1;
-+
-+			int i, gp_num, gp_part_config, gp_size_mult;
-+			for (i = 2, gp_num = 1, gp_part_config = 0x4,
-+				gp_size_mult = 143;
-+				i < MMC_MAX_NUM_PHY_PARTITION;
-+				i++, gp_num++, gp_part_config++,
-+				gp_size_mult += 3) {
-+					if (!ext_csd[gp_size_mult] &&
-+						!ext_csd[gp_size_mult + 1] &&
-+						!ext_csd[gp_size_mult + 2])
-+						continue;
-+				card->part[i].size =
-+					(ext_csd[gp_size_mult + 2] << 16) +
-+					(ext_csd[gp_size_mult + 1] << 8) +
-+					ext_csd[gp_size_mult];
-+				card->part[i].size *=
-+					(size_t)(hc_erase_grp_sz *
-+					hc_wp_grp_sz);
-+				card->part[i].size <<= 19;
-+				card->part[i].cookie = gp_part_config;
-+				sprintf(card->part[i].name,
-+					"gp%d", gp_num);
-+				card->part[i].force_ro = false;
-+			}
-+		}
- 		card->ext_csd.sec_trim_mult =
- 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
- 		card->ext_csd.sec_erase_mult =
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index b460fc2..842f702 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -12,6 +12,7 @@
- 
- #include <linux/mmc/core.h>
- #include <linux/mod_devicetable.h>
-+#include <linux/genhd.h>
- 
- struct mmc_cid {
- 	unsigned int		manfid;
-@@ -63,7 +64,6 @@ struct mmc_ext_csd {
- 	bool			enhanced_area_en;	/* enable bit */
- 	unsigned long long	enhanced_area_offset;	/* Units: Byte */
- 	unsigned int		enhanced_area_size;	/* Units: KB */
--	unsigned int		boot_size;		/* in bytes */
- 	u8			raw_partition_support;	/* 160 */
- 	u8			raw_erased_mem_count;	/* 181 */
- 	u8			raw_ext_csd_structure;	/* 194 */
-@@ -157,6 +157,22 @@ struct sdio_func_tuple;
- 
- #define SDIO_MAX_FUNCS		7
- 
-+/* The number of MMC physical partitions
-+ * It consist of boot partitions(2), general purpose partitions(4) in MMC v4.4
-+ */
-+#define MMC_NUM_BOOT_PARTITION	2
-+#define MMC_MAX_NUM_PHY_PARTITION	6
-+
-+/*
-+ * MMC Physical partitions
-+ */
-+struct mmc_part {
-+	unsigned int	size;	/* partition size (in bytes) */
-+	unsigned int	cookie;	/* it used to part_type */
-+	char	name[DISK_NAME_LEN];
-+	bool	force_ro;	/* to make boot parts RO by default */
-+};
-+
- /*
-  * MMC device
-  */
-@@ -216,6 +232,7 @@ struct mmc_card {
- 	unsigned int		sd_bus_speed;	/* Bus Speed Mode set for the card */
- 
- 	struct dentry		*debugfs_root;
-+	struct	mmc_part part[MMC_MAX_NUM_PHY_PARTITION];	/* mmc physical partitions */
- };
- 
- /*
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 5a794cb..33eae3d 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -301,8 +301,6 @@ struct _mmc_csd {
- #define EXT_CSD_WR_REL_PARAM_EN		(1<<2)
- 
- #define EXT_CSD_PART_CONFIG_ACC_MASK	(0x7)
--#define EXT_CSD_PART_CONFIG_ACC_BOOT0	(0x1)
--#define EXT_CSD_PART_CONFIG_ACC_BOOT1	(0x2)
- 
- #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
- #define EXT_CSD_CMD_SET_SECURE		(1<<1)
--- 
-1.7.4.4
-
+MjAxMS85LzI0IEogRnJleWVuc2VlIDxqYW1lc19wX2ZyZXllbnNlZUBsaW51eC5pbnRlbC5jb20+
+Ogo+IE9uIDA5LzIyLzIwMTEgMDU6MjkgUE0sIE5hbUphZSBKZW9uIHdyb3RlOgo+Pgo+PiAyMDEx
+LzkvMjMgSiBGcmV5ZW5zZWU8amFtZXNfcF9mcmV5ZW5zZWVAbGludXguaW50ZWwuY29tPgo+Pj4K
+Pj4+IE9uIDA5LzIyLzIwMTEgMDQ6NTggUE0sIE5hbUphZSBKZW9uIHdyb3RlOgo+Pj4+Cj4+Pj4g
+MjAxMS85LzIzIEogRnJleWVuc2VlPGphbWVzX3BfZnJleWVuc2VlQGxpbnV4LmludGVsLmNvbT46
+Cj4+Pj4+Cj4+Pj4+IE9uIDA5LzIyLzIwMTEgMDQ6MTUgUE0sIE5hbUphZSBKZW9uIHdyb3RlOgo+
+Pj4+Pj4KPj4+Pj4+IDIwMTEvOS8yMyBKIEZyZXllbnNlZTxqYW1lc19wX2ZyZXllbnNlZUBsaW51
+eC5pbnRlbC5jb20+Ogo+Pj4+Pj4+Cj4+Pj4+Pj4gT24gMDkvMjIvMjAxMSAwODozNCBBTSwgTmFt
+amFlIEplb24gd3JvdGU6Cj4+Pj4+Pj4+Cj4+Pj4+Pj4+IEl0IGFsbG93cyBnZW5lcmFsIHB1cnBv
+c2UgcGFyaXRpb24gaW4gTU1DIERldmljZS4gSWYgaXQgaXMgZW5hYmxlLAo+Pj4+Pj4+PiBpdAo+
+Pj4+Pj4+PiB3aWxsCj4+Pj4+Pj4+IG1ha2UgbW1jYmxrMGdwMSxncDIsZ3AzLGdwNCBwYXJ0aXRp
+b24gbGlrZSB0aGlzLgo+Pj4+Pj4+Pgo+Pj4+Pj4+Pj4gY2F0IC9wcm9jL3Bhcml0aXRpb24KPj4+
+Pj4+Pj4KPj4+Pj4+Pj4gwqAgwqAgwqAgMTc5IDAgODQ3ODcyIG1tY2JsazAKPj4+Pj4+Pj4gwqAg
+wqAgwqAgMTc5IDE5MiA0MDk2IG1tY2JsazBncDQKPj4+Pj4+Pj4gwqAgwqAgwqAgMTc5IDE2MCA0
+MDk2IG1tY2JsazBncDMKPj4+Pj4+Pj4gwqAgwqAgwqAgMTc5IDEyOCA0MDk2IG1tY2JsazBncDIK
+Pj4+Pj4+Pj4gwqAgwqAgwqAgMTc5IDk2IMKgMTA1MjY3MiBtbWNibGswZ3AxCj4+Pj4+Pj4+IMKg
+IMKgIMKgIDE3OSA2NCDCoDEwMjQgbW1jYmxrMGJvb3QxCj4+Pj4+Pj4+IMKgIMKgIMKgIDE3OSAz
+MiDCoDEwMjQgbW1jYmxrMGJvb3QwCj4+Pj4+Pj4+Cj4+Pj4+Pj4+IFNpZ25lZC1vZmYtYnk6IE5h
+bWphZSBKZW9uPGxpbmtpbmplb25AZ21haWwuY29tPgo+Pj4+Pj4+PiAtLS0KPj4+Pj4+Pj4gwqBk
+cml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMgfCDCoCAzNgo+Pj4+Pj4+PiArKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKysKPj4+Pj4+Pj4gwqBkcml2ZXJzL21tYy9jb3JlL21tYy5jIMKg
+IHwgwqAgNDIKPj4+Pj4+Pj4gKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrCj4+Pj4+Pj4+IMKgaW5jbHVkZS9saW51eC9tbWMvY2FyZC5oIHwgwqAgwqA0ICsrKysKPj4+
+Pj4+Pj4gwqBpbmNsdWRlL2xpbnV4L21tYy9tbWMuaCDCoHwgwqAgwqA0ICsrKysKPj4+Pj4+Pj4g
+wqA0IGZpbGVzIGNoYW5nZWQsIDg2IGluc2VydGlvbnMoKyksIDAgZGVsZXRpb25zKC0pCj4+Pj4+
+Pj4+Cj4+Pj4+Pj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMgYi9kcml2
+ZXJzL21tYy9jYXJkL2Jsb2NrLmMKPj4+Pj4+Pj4gaW5kZXggOWI5MDcyNi4uMDc0ZWM1NSAxMDA2
+NDQKPj4+Pj4+Pj4gLS0tIGEvZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jCj4+Pj4+Pj4+ICsrKyBi
+L2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYwo+Pj4+Pj4+PiBAQCAtMTQwMiw2ICsxNDAyLDQyIEBA
+IHN0YXRpYyBpbnQgbW1jX2Jsa19hbGxvY19wYXJ0cyhzdHJ1Y3QKPj4+Pj4+Pj4gbW1jX2NhcmQK
+Pj4+Pj4+Pj4gKmNhcmQsIHN0cnVjdCBtbWNfYmxrX2RhdGEgKm1kKQo+Pj4+Pj4+PiDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoHJldHVybiByZXQ7Cj4+Pj4+Pj4+IMKgIMKgIMKg
+IMKgfQo+Pj4+Pj4+Pgo+Pj4+Pj4+PiArIMKgIMKgIMKgIGlmIChjYXJkLT5leHRfY3NkLmdwMV9z
+aXplKSB7Cj4KPiBMb29rcyBsaWtlIHlvdSBtYXkgbmVlZCB0byBhbHNvIGluY29ycG9yYXRlIHRo
+ZSBpZGVhcyBBZHJpYW4gSHVudGVyIGRpZCBpbiBhCj4gcGF0Y2ggdGhhdCBzZWVtcyBzaW1pbGFy
+IHRvIHlvdXJzLCBtYWlubHkgYWxzbyBjaGVja2luZwo+IG1tY19ib290X3BhcnRpdGlvbl9hY2Nl
+c3MoY2FyZC0+aG9zdCkgaW4geW91ciBpZigpIHN0YXRlbWVudD8KPgo+IEkgYXR0YWNoZWQgaGlz
+IHBhdGNoIHRoYXQgd2FzIHNlbnQgdG9kYXkuCj4KPiBKYXkKSSBjaGVja2VkIGF0dGFjaGVkIHBh
+dGNoLCBzZWUgdGhlIHBhdGNoIHYyLiBJIHRoaW5rIHRoYXQgYWRyaWFuIG1heQptb2RpZnkgaGlz
+IHBhdGNoIGJhc2Ugb24gbXkgcGF0Y2guClRoYW5rcwoKPj4+Pj4+Pj4KPj4+Pj4+Pj4gKyDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCByZXQgPSBtbWNfYmxrX2FsbG9jX3BhcnQoY2FyZCwgbWQsCj4+Pj4+
+Pj4+IEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX0dQMSwKPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3Nk
+LmdwMV9zaXplPj4KPj4+Pj4+Pj4gwqAgwqA5LAo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGZhbHNlLAo+Pj4+Pj4+PiAr
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+ICJncDEiKTsKPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAocmV0KQo+Pj4+Pj4+
+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHJldHVybiByZXQ7Cj4+Pj4+Pj4+
+ICsgwqAgwqAgwqAgfQo+Pj4+Pj4+PiArCj4+Pj4+Pj4KPj4+Pj4+PiBpZiBtbWNfYmxrX2FsbG9j
+X3BhcnQoKSBmYWlscyBmb3IgJ2lmIChjYXJkLT5leHRfY3NkLnB0MV9zaXplKScsIHdoeQo+Pj4+
+Pj4+IHdvdWxkCj4+Pj4+Pj4geW91IHdhbnQgdG8gZ2l2ZSB0aGlzIGNvZGUgdGhlIG9wcG9ydHVu
+aXR5IHRvIGNhbGwKPj4+Pj4+PiBtbWNfYmxrX2FsbG9jX3BhcnQoKQo+Pj4+Pj4+IGFnYWluIHdp
+dGggdGhlIG5leHQgaWYoKSBiZWxvdz8gwqBJZiBtbWNfYmxrX2FsbG9jX3BhcnQoKSBmYWlscywg
+aXMgaXQKPj4+Pj4+PiBhCj4+Pj4+Pj4gYmlnCj4+Pj4+Pj4gcHJvYmxlbSwgbGlrZSBremFsbG9j
+KCkgZmFpbGluZz8gwqBJZiBzbywgSSB3b3VsZCB0aGluayB5b3Ugd291bGQgd2FudAo+Pj4+Pj4+
+IHRvCj4+Pj4+Pj4gaW1tZWRpYXRlbHkgcXVpdCB0aGlzIGZ1bmN0aW9uIGFuZCByZXBvcnQgYW4g
+ZXJyb3IgKGVpdGhlciB1c2UgZXJybm8KPj4+Pj4+PiB2YWx1ZQo+Pj4+Pj4+IG9yIHBhc3MgdGhl
+IHZhbHVlIG9mIHJldCkuCj4+Pj4+Pgo+Pj4+Pj4gLT4gwqAgwqAgwqBpZiBjYXJkLT5leHRfY3Nk
+LmdwMV9zaXplIGlzIG5vIHplcm8sIGl0IG1lYW5zIGdlbmVyYWwgcHVycG9zZQo+Pj4+Pj4gcGFy
+dGl0aW9uIGlzIGVuYWJsZS4KPj4+Pj4+IGFuZCBpdCBjYW4gc2V0IHVwIHRvIDQgcGFydGl0aW9u
+IGluIHNwZWNpZmljYXRpb24uIHNvIHdlIHNob3VsZCBjaGVjawo+Pj4+Pj4gaXQgYnkgbmV4dCBp
+ZigpLgo+Pj4+Pgo+Pj4+PiBQbGVhc2UgZG9jdW1lbnQgdGhhdCBpbiB5b3VyIGNvZGUuIMKgUGxl
+YXNlIGFkZCBhIGZ1bmN0aW9uIGhlYWRlciB0bwo+Pj4+PiB0aGlzCj4+Pj4+IGZ1bmN0aW9uLgo+
+Pj4+Cj4+Pj4gSSB3aWxsIGFkZCBjb21tZW50cyBhdCB0aGlzIGNvZGUuIMKgSSBkb24ndCB1bmRl
+cnN0YW5kIHdoeSBhIGZ1bmN0aW9uCj4+Pj4gaGVhZGVyIHNob3VsZCBiZSBhZGRlZCB5ZXQuCj4+
+Pgo+Pj4gT25lIG9yIHRoZSBvdGhlci4KPj4+Cj4+PiBidXQgYSBmdW5jdGlvbiBjb21tZW50IGhl
+YWRlciBzaG91bGQgYmUgYWRkZWQgYXQgc29tZSBwb2ludC4gwqBZZXMsIHRoZQo+Pj4gbW1jIHN1
+YnN5c3RlbSBpcyBwcmV0dHkgbGVnYWN5LCBidXQgYW55IG5ldyB3b3JrIHRoYXQgZ2V0cyBhZGRl
+ZCB0byB0aGUKPj4+IGtlcm5lbCBpcyB1c3VhbGx5IGhhcyBoaWdoZXIgc3RhbmRhcmRzIGZvciBz
+dHVmZiBsaWtlIG5vdCBqdXN0IGFkZGluZwo+Pj4gZnVuY3Rpb24gaGVhZGVyIGNvbW1lbnRzIGJ1
+dCBwdXR0aW5nIHRoZW0gaW4gYSBjZXJ0YWluIGZvcm1hdC4uLmF0IGxlYXN0Cj4+PiB0aGlzIGlz
+IHdoYXQgSSB3ZW50IHRocm91Z2ggd2hlbiBJIGhhZCB0aGluZ3MgYWNjZXB0ZWQgdXBzdHJlYW0u
+Cj4+Cj4+IE9rYXksIEkgd2lsbCByZWxlYXNlIHBhdGNoIHYyIGFmdGVyIGFkZGluZyBmdW5jdGlv
+biBoZWFkZXIgY29tbWVudHMgYWdhaW4uCj4+IFRoYW5rcyBmb3IgeW91ciByZXZpZXcuCj4+Pgo+
+Pj4+Cj4+Pj4+Cj4+Pj4+Pgo+Pj4+Pj4+Cj4+Pj4+Pj4+ICsgwqAgwqAgwqAgaWYgKGNhcmQtPmV4
+dF9jc2QuZ3AyX3NpemUpIHsKPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCByZXQgPSBt
+bWNfYmxrX2FsbG9jX3BhcnQoY2FyZCwgbWQsCj4+Pj4+Pj4+IEVYVF9DU0RfUEFSVF9DT05GSUdf
+QUNDX0dQMiwKPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmdwMl9zaXplPj4KPj4+Pj4+Pj4gwqAg
+wqA5LAo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIGZhbHNlLAo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgICJncDIiKTsKPj4+Pj4+Pj4gKyDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCBpZiAocmV0KQo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIHJldHVybiByZXQ7Cj4+Pj4+Pj4+ICsgwqAgwqAgwqAgfQo+Pj4+Pj4+PiAr
+Cj4+Pj4+Pj4+ICsgwqAgwqAgwqAgaWYgKGNhcmQtPmV4dF9jc2QuZ3AzX3NpemUpIHsKPj4+Pj4+
+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCByZXQgPSBtbWNfYmxrX2FsbG9jX3BhcnQoY2FyZCwg
+bWQsCj4+Pj4+Pj4+IEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX0dQMywKPj4+Pj4+Pj4gKyDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJk
+LT5leHRfY3NkLmdwM19zaXplPj4KPj4+Pj4+Pj4gwqAgwqA5LAo+Pj4+Pj4+PiArIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGZhbHNlLAo+
+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgICJncDMiKTsKPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAocmV0
+KQo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHJldHVybiByZXQ7
+Cj4+Pj4+Pj4+ICsgwqAgwqAgwqAgfQo+Pj4+Pj4+PiArCj4+Pj4+Pj4+ICsgwqAgwqAgwqAgaWYg
+KGNhcmQtPmV4dF9jc2QuZ3A0X3NpemUpIHsKPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCByZXQgPSBtbWNfYmxrX2FsbG9jX3BhcnQoY2FyZCwgbWQsCj4+Pj4+Pj4+IEVYVF9DU0RfUEFS
+VF9DT05GSUdfQUNDX0dQNCwKPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmdwNF9zaXplPj4KPj4+
+Pj4+Pj4gwqAgwqA5LAo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGZhbHNlLAo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgICJncDQiKTsKPj4+Pj4+
+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAocmV0KQo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIHJldHVybiByZXQ7Cj4+Pj4+Pj4+ICsgwqAgwqAgwqAgfQo+
+Pj4+Pj4+PiArCj4+Pj4+Pj4+IMKgIMKgIMKgIMKgcmV0dXJuIHJldDsKPj4+Pj4+Pj4gwqB9Cj4+
+Pj4+Pj4+Cj4+Pj4+Pj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGIvZHJp
+dmVycy9tbWMvY29yZS9tbWMuYwo+Pj4+Pj4+PiBpbmRleCAxMGY1YTE5Li5jYzMxNTExIDEwMDY0
+NAo+Pj4+Pj4+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jCj4+Pj4+Pj4+ICsrKyBiL2Ry
+aXZlcnMvbW1jL2NvcmUvbW1jLmMKPj4+Pj4+Pj4gQEAgLTM5Myw2ICszOTMsNDggQEAgc3RhdGlj
+IGludCBtbWNfcmVhZF9leHRfY3NkKHN0cnVjdCBtbWNfY2FyZAo+Pj4+Pj4+PiAqY2FyZCwKPj4+
+Pj4+Pj4gdTgKPj4+Pj4+Pj4gKmV4dF9jc2QpCj4+Pj4+Pj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgY2FyZC0+ZXh0X2NzZC5lbmhhbmNlZF9hcmVhX29mZnNldCA9IC1FSU5W
+QUw7Cj4+Pj4+Pj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgY2FyZC0+ZXh0
+X2NzZC5lbmhhbmNlZF9hcmVhX3NpemUgPSAtRUlOVkFMOwo+Pj4+Pj4+PiDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoH0KPj4+Pj4+Pj4gKwo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIC8q
+Cj4+Pj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAqIEdlbmVyYWwgcHVycG9zZSBwYXJ0
+aXRpb24gU3VwcG9ydAo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgKi8KPj4+Pj4+
+Pj4gKwo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChleHRfY3NkW0VYVF9DU0Rf
+UEFSVElUSU9OX1NVUFBPUlRdJiDCoCDCoCDCoCDCoDB4MSkKPj4+Pj4+Pj4gewo+Pj4+Pj4+PiAr
+Cj4+Pj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgdTggaGNfZXJhc2Vf
+Z3JwX3N6ID0KPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCBleHRfY3NkW0VYVF9DU0RfSENfRVJBU0VfR1JQX1NJWkVdOwo+Pj4+Pj4+PiArIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHU4IGhjX3dwX2dycF9zeiA9Cj4+Pj4+Pj4+
+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXh0X2NzZFtF
+WFRfQ1NEX0hDX1dQX0dSUF9TSVpFXTsKPj4+Pj4+Pj4gKwo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9jc2QuZW5oYW5jZWRfYXJlYV9lbiA9IDE7
+Cj4+Pj4+Pj4+ICsKPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBj
+YXJkLT5leHRfY3NkLmdwMV9zaXplID0KPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAoZXh0X2NzZFsxNDVdPDwgwqAgwqAgwqAgwqAxNikgKwo+
+Pj4+Pj4+PiAoZXh0X2NzZFsxNDRdPDwKPj4+Pj4+Pj4gwqAgwqA4KQo+Pj4+Pj4+PiArCj4+Pj4+
+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXh0X2Nz
+ZFsxNDNdOwo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQt
+PmV4dF9jc2QuZ3AxX3NpemUgKj0KPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCAoc2l6ZV90KShoY19lcmFzZV9ncnBfc3ogKgo+Pj4+Pj4+PiBo
+Y193cF9ncnBfc3opOwo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IGNhcmQtPmV4dF9jc2QuZ3AxX3NpemU8PD0gMTk7Cj4+Pj4+Pj4+ICsKPj4+Pj4+Pj4gKyDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmdwMl9zaXplID0KPj4+
+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAoZXh0
+X2NzZFsxNDhdPDwgwqAgwqAgwqAgwqAxNikgKwo+Pj4+Pj4+PiAoZXh0X2NzZFsxNDddPDwKPj4+
+Pj4+Pj4gwqAgwqA4KQo+Pj4+Pj4+PiArCj4+Pj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXh0X2NzZFsxNDZdOwo+Pj4+Pj4+PiArIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9jc2QuZ3AyX3NpemUgKj0KPj4+Pj4+
+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAoc2l6ZV90
+KShoY19lcmFzZV9ncnBfc3ogKgo+Pj4+Pj4+PiBoY193cF9ncnBfc3opOwo+Pj4+Pj4+PiArIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9jc2Qu
+Z3AyX3NpemU8PD0gMTk7Cj4+Pj4+Pj4+ICsKPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmdwM19zaXplID0KPj4+Pj4+Pj4gKyDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAoZXh0X2NzZFsxNTFdPDwgwqAg
+wqAgwqAgwqAxNikgKwo+Pj4+Pj4+PiAoZXh0X2NzZFsxNTBdPDwKPj4+Pj4+Pj4gwqAgwqA4KQo+
+Pj4+Pj4+PiArCj4+Pj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgZXh0X2NzZFsxNDldOwo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIGNhcmQtPmV4dF9jc2QuZ3AzX3NpemUgKj0KPj4+Pj4+Pj4gKyDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAoc2l6ZV90KShoY19lcmFzZV9ncnBf
+c3ogKgo+Pj4+Pj4+PiBoY193cF9ncnBfc3opOwo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9jc2QuZ3AzX3NpemU8PD0gMTk7Cj4+Pj4+Pj4+ICsK
+Pj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3Nk
+LmdwNF9zaXplID0KPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCAoZXh0X2NzZFsxNTRdPDwgwqAgwqAgwqAgwqAxNikgKwo+Pj4+Pj4+PiAoZXh0
+X2NzZFsxNTNdPDwKPj4+Pj4+Pj4gwqAgwqA4KQo+Pj4+Pj4+PiArCj4+Pj4+Pj4+ICsgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXh0X2NzZFsxNTJdOwo+Pj4+
+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9jc2QuZ3A0
+X3NpemUgKj0KPj4+Pj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCAoc2l6ZV90KShoY19lcmFzZV9ncnBfc3ogKgo+Pj4+Pj4+PiBoY193cF9ncnBfc3op
+Owo+Pj4+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9j
+c2QuZ3A0X3NpemU8PD0gMTk7Cj4+Pj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgfQo+Pj4+
+Pj4+PiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGNhcmQtPmV4dF9jc2Quc2VjX3RyaW1fbXVsdCA9
+Cj4+Pj4+Pj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZXh0X2NzZFtFWFRf
+Q1NEX1NFQ19UUklNX01VTFRdOwo+Pj4+Pj4+PiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGNhcmQt
+PmV4dF9jc2Quc2VjX2VyYXNlX211bHQgPQo+Pj4+Pj4+PiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9s
+aW51eC9tbWMvY2FyZC5oIGIvaW5jbHVkZS9saW51eC9tbWMvY2FyZC5oCj4+Pj4+Pj4+IGluZGV4
+IGI0NjBmYzIuLjk2YTk4YTcgMTAwNjQ0Cj4+Pj4+Pj4+IC0tLSBhL2luY2x1ZGUvbGludXgvbW1j
+L2NhcmQuaAo+Pj4+Pj4+PiArKysgYi9pbmNsdWRlL2xpbnV4L21tYy9jYXJkLmgKPj4+Pj4+Pj4g
+QEAgLTY0LDYgKzY0LDEwIEBAIHN0cnVjdCBtbWNfZXh0X2NzZCB7Cj4+Pj4+Pj4+IMKgIMKgIMKg
+IMKgdW5zaWduZWQgbG9uZyBsb25nIMKgIMKgIMKgZW5oYW5jZWRfYXJlYV9vZmZzZXQ7IMKgIC8q
+IFVuaXRzOgo+Pj4+Pj4+PiBCeXRlICovCj4+Pj4+Pj4+IMKgIMKgIMKgIMKgdW5zaWduZWQgaW50
+IMKgIMKgIMKgIMKgIMKgIMKgZW5oYW5jZWRfYXJlYV9zaXplOyDCoCDCoCAvKiBVbml0czogS0IK
+Pj4+Pj4+Pj4gKi8KPj4+Pj4+Pj4gwqAgwqAgwqAgwqB1bnNpZ25lZCBpbnQgwqAgwqAgwqAgwqAg
+wqAgwqBib290X3NpemU7IMKgIMKgIMKgIMKgIMKgIMKgIMKgLyogaW4gYnl0ZXMKPj4+Pj4+Pj4g
+Ki8KPj4+Pj4+Pj4gKyDCoCDCoCDCoCB1bnNpZ25lZCBpbnQgwqAgwqAgwqAgwqAgwqAgwqBncDFf
+c2l6ZTsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgLyogaW4gYnl0ZXMKPj4+Pj4+Pj4gKi8KPj4+Pj4+
+Pj4gKyDCoCDCoCDCoCB1bnNpZ25lZCBpbnQgwqAgwqAgwqAgwqAgwqAgwqBncDJfc2l6ZTsgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgLyogaW4gYnl0ZXMKPj4+Pj4+Pj4gKi8KPj4+Pj4+Pj4gKyDCoCDC
+oCDCoCB1bnNpZ25lZCBpbnQgwqAgwqAgwqAgwqAgwqAgwqBncDNfc2l6ZTsgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgLyogaW4gYnl0ZXMKPj4+Pj4+Pj4gKi8KPj4+Pj4+Pj4gKyDCoCDCoCDCoCB1bnNp
+Z25lZCBpbnQgwqAgwqAgwqAgwqAgwqAgwqBncDRfc2l6ZTsgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+LyogaW4gYnl0ZXMKPj4+Pj4+Pj4gKi8KPj4+Pj4+Pj4gwqAgwqAgwqAgwqB1OCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoHJhd19wYXJ0aXRpb25fc3VwcG9ydDsgwqAvKiAxNjAgKi8K
+Pj4+Pj4+Pj4gwqAgwqAgwqAgwqB1OCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoHJh
+d19lcmFzZWRfbWVtX2NvdW50OyDCoCAvKiAxODEgKi8KPj4+Pj4+Pj4gwqAgwqAgwqAgwqB1OCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoHJhd19leHRfY3NkX3N0cnVjdHVyZTsgwqAv
+KiAxOTQgKi8KPj4+Pj4+Pj4gZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgvbW1jL21tYy5oIGIv
+aW5jbHVkZS9saW51eC9tbWMvbW1jLmgKPj4+Pj4+Pj4gaW5kZXggNWE3OTRjYi4uMzgwNzIwYSAx
+MDA2NDQKPj4+Pj4+Pj4gLS0tIGEvaW5jbHVkZS9saW51eC9tbWMvbW1jLmgKPj4+Pj4+Pj4gKysr
+IGIvaW5jbHVkZS9saW51eC9tbWMvbW1jLmgKPj4+Pj4+Pj4gQEAgLTMwMyw2ICszMDMsMTAgQEAg
+c3RydWN0IF9tbWNfY3NkIHsKPj4+Pj4+Pj4gwqAjZGVmaW5lIEVYVF9DU0RfUEFSVF9DT05GSUdf
+QUNDX01BU0sgwqAoMHg3KQo+Pj4+Pj4+PiDCoCNkZWZpbmUgRVhUX0NTRF9QQVJUX0NPTkZJR19B
+Q0NfQk9PVDAgKDB4MSkKPj4+Pj4+Pj4gwqAjZGVmaW5lIEVYVF9DU0RfUEFSVF9DT05GSUdfQUND
+X0JPT1QxICgweDIpCj4+Pj4+Pj4+ICsjZGVmaW5lIEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX0dQ
+MSDCoCDCoCgweDQpCj4+Pj4+Pj4+ICsjZGVmaW5lIEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX0dQ
+MiDCoCDCoCgweDUpCj4+Pj4+Pj4+ICsjZGVmaW5lIEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX0dQ
+MyDCoCDCoCgweDYpCj4+Pj4+Pj4+ICsjZGVmaW5lIEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX0dQ
+NCDCoCDCoCgweDcpCj4+Pj4+Pj4+Cj4+Pj4+Pj4+IMKgI2RlZmluZSBFWFRfQ1NEX0NNRF9TRVRf
+Tk9STUFMIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgKDE8PDApCj4+Pj4+Pj4+IMKgI2RlZmluZSBF
+WFRfQ1NEX0NNRF9TRVRfU0VDVVJFIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgKDE8PDEpCj4+Pj4+
+Pj4KPj4+Pj4+Pgo+Pj4+Pj4+IC0tCj4+Pj4+Pj4gSiAoSmFtZXMvSmF5KSBGcmV5ZW5zZWUKPj4+
+Pj4+PiBTdG9yYWdlIFRlY2hub2xvZ3kgR3JvdXAKPj4+Pj4+PiBJbnRlbCBDb3Jwb3JhdGlvbgo+
+Pj4+Pj4+Cj4+Pj4+Cj4+Pj4+Cj4+Pj4+IC0tCj4+Pj4+IEogKEphbWVzL0pheSkgRnJleWVuc2Vl
+Cj4+Pj4+IFN0b3JhZ2UgVGVjaG5vbG9neSBHcm91cAo+Pj4+PiBJbnRlbCBDb3Jwb3JhdGlvbgo+
+Pj4+Pgo+Pj4KPj4+Cj4+PiAtLQo+Pj4gSiAoSmFtZXMvSmF5KSBGcmV5ZW5zZWUKPj4+IFN0b3Jh
+Z2UgVGVjaG5vbG9neSBHcm91cAo+Pj4gSW50ZWwgQ29ycG9yYXRpb24KPj4KPj4gTu+/ve+/ve+/
+ve+/ve+/vXLvv73vv71577+977+977+9Yu+/vVjvv73vv73Hp3bvv71e77+9Kd66ey5u77+9K++/
+ve+/ve+/ve+/vXvvv73vv71nIu+/ve+/vV5u77+9cu+/ve+/vXrvv70g77+977+9aO+/ve+/ve+/
+ve+/vSbvv73vv70g77+9R++/ve+/ve+/vWjvv70KPj4gKO+/vemaju+/vd2iaiLvv73vv70g77+9
+IG3vv73vv73vv73vv73vv71677+93pbvv73vv73vv71m77+977+977+9aO+/ve+/ve+/vX7vv71t
+bWw9PQo+Cj4KPiAtLQo+IEogKEphbWVzL0pheSkgRnJleWVuc2VlCj4gU3RvcmFnZSBUZWNobm9s
+b2d5IEdyb3VwCj4gSW50ZWwgQ29ycG9yYXRpb24KPgo=
