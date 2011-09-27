@@ -1,14 +1,14 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 1/4] mmc: mmci: Bugfix in pio read for small packets
-Date: Tue, 27 Sep 2011 09:46:08 +0200
-Message-ID: <1317109568-17905-1-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 4/4] mmc: mmci: Fix incorrect handling of HW flow control for SDIO
+Date: Tue, 27 Sep 2011 09:46:56 +0200
+Message-ID: <1317109616-18010-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog112.obsmtp.com ([207.126.144.133]:49954 "EHLO
-	eu1sys200aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750884Ab1I0Hqa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2011 03:46:30 -0400
+Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:45238 "EHLO
+	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751150Ab1I0HrO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2011 03:47:14 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
@@ -16,45 +16,81 @@ Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.c
 
 From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
 
-Corrects a bug in pio read when reading packets < 4 bytes. These
-small packets are only relevant for SDIO transfers.
+For data writes smaller <= 8 bytes (only SDIO case), HW flow control was
+disabled but never re-enabled again. This meant that a following large read
+request would randomly give buffer overrun errors.
+
+Moreover HW flow control is not needed for transfers that fits in the
+FIFO of PL18x. Thus it is disabled for write operations <= the FIFO size.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
 Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
 ---
- drivers/mmc/host/mmci.c |   19 ++++++++++++++++++-
- 1 files changed, 18 insertions(+), 1 deletions(-)
+ drivers/mmc/host/mmci.c |   42 ++++++++++++++++++++++++------------------
+ 1 files changed, 24 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 40e4c05..8831b2f 100644
+index cd3bc25..4da20ec 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -776,7 +776,24 @@ static int mmci_pio_read(struct mmci_host *host, char *buffer, unsigned int rema
- 		if (count <= 0)
- 			break;
+@@ -606,9 +606,32 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
  
--		readsl(base + MMCIFIFO, ptr, count >> 2);
-+		/*
-+		 * SDIO especially may want to receive something that is
-+		 * not divisible by 4 (as opposed to card sectors
-+		 * etc). Therefore make sure we always read the last bytes
-+		 * out of the FIFO.
-+		 */
-+		switch (count) {
-+		case 1:
-+		case 3:
-+			readsb(base + MMCIFIFO, ptr, count);
-+			break;
-+		case 2:
-+			readsw(base + MMCIFIFO, ptr, 1);
-+			break;
-+		default:
-+			readsl(base + MMCIFIFO, ptr, count >> 2);
-+			break;
+ 	/* The ST Micro variants has a special bit to enable SDIO */
+ 	if (variant->sdio && host->mmc->card)
+-		if (mmc_card_sdio(host->mmc->card))
++		if (mmc_card_sdio(host->mmc->card)) {
++			/*
++			 * The ST Micro variants has a special bit
++			 * to enable SDIO.
++			 */
+ 			datactrl |= MCI_ST_DPSM_SDIOEN;
+ 
++			/*
++			 * The ST Micro variant for SDIO transfer sizes
++			 * less then or equal to 8 bytes needs to have clock
++			 * H/W flow control disabled. Since flow control is
++			 * not really needed for anything that fits in the
++			 * FIFO, we can disable it for any write smaller
++			 * than the FIFO size.
++			 */
++			if ((host->size <= variant->fifosize) &&
++			    (data->flags & MMC_DATA_WRITE))
++				writel(readl(host->base + MMCICLOCK) &
++				       ~variant->clkreg_enable,
++				       host->base + MMCICLOCK);
++			else
++				writel(readl(host->base + MMCICLOCK) |
++				       variant->clkreg_enable,
++				       host->base + MMCICLOCK);
 +		}
++
+ 	/*
+ 	 * Attempt to use DMA operation mode, if this
+ 	 * should fail, fall back to PIO mode
+@@ -824,23 +847,6 @@ static int mmci_pio_write(struct mmci_host *host, char *buffer, unsigned int rem
+ 		count = min(remain, maxcnt);
  
- 		ptr += count;
- 		remain -= count;
+ 		/*
+-		 * The ST Micro variant for SDIO transfer sizes
+-		 * less then 8 bytes should have clock H/W flow
+-		 * control disabled.
+-		 */
+-		if (variant->sdio &&
+-		    mmc_card_sdio(host->mmc->card)) {
+-			if (count < 8)
+-				writel(readl(host->base + MMCICLOCK) &
+-					~variant->clkreg_enable,
+-					host->base + MMCICLOCK);
+-			else
+-				writel(readl(host->base + MMCICLOCK) |
+-					variant->clkreg_enable,
+-					host->base + MMCICLOCK);
+-		}
+-
+-		/*
+ 		 * SDIO especially may want to send something that is
+ 		 * not divisible by 4 (as opposed to card sectors
+ 		 * etc), and the FIFO only accept full 32-bit writes.
 -- 
 1.7.5.4
 
