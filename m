@@ -1,244 +1,208 @@
-From: Bryan Wu <bryan.wu@canonical.com>
-Subject: [PATCH] leds-class: change back LEDS_CLASS to tristate instead of bool
-Date: Tue, 27 Sep 2011 16:50:32 +0800
-Message-ID: <1317113432-7299-1-git-send-email-bryan.wu@canonical.com>
+From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Subject: [PATCH 1/1] [PATCH v4 1/1] mmc: Support of DUAL BUFFER DESC[ring] mode for dw_mmc
+Date: Tue, 27 Sep 2011 17:09:28 +0530
+Message-ID: <1317123568-5203-1-git-send-email-shashidharh@vayavyalabs.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:54038 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752389Ab1I0Iuq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2011 04:50:46 -0400
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:33545 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752733Ab1I0Lj6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2011 07:39:58 -0400
+Received: by vws1 with SMTP id 1so6449466vws.19
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Sep 2011 04:39:57 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: tony@atomide.com, linux@arm.linux.org.uk, rpurdie@rpsys.net, manuel.lauss@gmail.com, cjb@laptop.org, cbou@mail.ru, dwmw2@infradead.org, linux-omap@vger.kernel.org, linux-arm-kernel@li
+To: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Wil
+Cc: linux-mmc@vger.kernel.org, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 
-LEDS_CLASS is required by leds and trigger drivers, but we can build it as
-module.  So change this option back as tristate and treak the help message
-as well.
+This Patch adds the support for Dual Buffer Descriptor mode of
+Operation for the dw_mmc driver.The patch also provides the configurability
+Option for choosing DUAL_BUFFER mode or the chained modes through menuconfig.
+The Menuconfig option for selecting Dual Buffer mode or chained mode
+is selected only if Internal DMAC is enabled.
 
-LEDS_TRIGGERS depends on LEDS_CLASSS, which should be tristate.  So set it
-as tristate too and update header files as well.
-
-Change those ifdefs to take care of module configuration.
-
-Signed-off-by: Bryan Wu <bryan.wu@canonical.com>
+Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 ---
- arch/arm/mach-omap1/board-ams-delta.c |    4 ++--
- drivers/leds/Kconfig                  |    9 ++++++---
- drivers/leds/led-class.c              |    8 ++++----
- drivers/leds/leds.h                   |    2 +-
- drivers/mmc/host/au1xmmc.c            |    6 +++---
- drivers/power/power_supply.h          |    2 +-
- include/linux/leds.h                  |    7 ++++---
- include/linux/mmc/host.h              |    2 +-
- include/linux/power_supply.h          |    2 +-
- 9 files changed, 23 insertions(+), 19 deletions(-)
+v2:
+* As per suggestions by Will Newton and James Hogan
+-Config symbol Names prefixed with MMC_DW
+-Added more Description for Config parameters added
+-Removed unnecessary config opion IDMAC_DESC_MODE
+-IDMAC_SET_BUFFER_SIZE chenged IDMAC_SET_BUFFER_SIZES
+-fixed typos and indented commments correctly
+-if ((i +1) <= sg_len changed to ((i +1) < sg_len
+-duplication "desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC" line removed
+-fixed bug in making DSL value zero
+-removed ANDing the des1 with zero before writing buffer lengths to it
+-Added proper multiline comments
+v3:
+* As per suggestions by James Hogan
+-Modified Config Symbol Names in the Driver File
+-Fixed Bug in Clearing the DSL field of BMOD register
+-Fixed bug in IDMAC_SET_BUFFER_SIZES
+v4:
+* After Testing the Dual Buffer Support 
+-Modified the dma_init sequence to support Dual Buffer Mode
 
-diff --git a/arch/arm/mach-omap1/board-ams-delta.c b/arch/arm/mach-omap1/board-ams-delta.c
-index b2572f7..fd28696 100644
---- a/arch/arm/mach-omap1/board-ams-delta.c
-+++ b/arch/arm/mach-omap1/board-ams-delta.c
-@@ -241,7 +241,7 @@ static struct i2c_board_info ams_delta_camera_board_info[] = {
- 	},
- };
+ drivers/mmc/host/Kconfig  |   19 ++++++++++++++
+ drivers/mmc/host/dw_mmc.c |   58 ++++++++++++++++++++++++++++++++++++++++----
+ drivers/mmc/host/dw_mmc.h |    2 +
+ 3 files changed, 73 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 8c87096..dd0df83 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -534,6 +534,25 @@ config MMC_DW_IDMAC
+ 	  Designware Mobile Storage IP block. This disables the external DMA
+ 	  interface.
  
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
- DEFINE_LED_TRIGGER(ams_delta_camera_led_trigger);
- 
- static int ams_delta_camera_power(struct device *dev, int power)
-@@ -320,7 +320,7 @@ static void __init ams_delta_init(void)
- 
- 	omap1_usb_init(&ams_delta_usb_config);
- 	omap1_set_camera_info(&ams_delta_camera_platform_data);
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
- 	led_trigger_register_simple("ams_delta_camera",
- 			&ams_delta_camera_led_trigger);
- #endif
-diff --git a/drivers/leds/Kconfig b/drivers/leds/Kconfig
-index ff203a4..c30233e 100644
---- a/drivers/leds/Kconfig
-+++ b/drivers/leds/Kconfig
-@@ -17,10 +17,13 @@ menuconfig NEW_LEDS
- if NEW_LEDS
- 
- config LEDS_CLASS
--	bool "LED Class Support"
-+	tristate "LED Class Support"
- 	help
- 	  This option enables the led sysfs class in /sys/class/leds.  You'll
--	  need this to do anything useful with LEDs.  If unsure, say N.
-+	  need this to do anything useful with LEDs.  If unsure, say M.
++choice
++	prompt "select  IDMAC Descriptors Mode"
++	depends on MMC_DW_IDMAC
 +
-+	  Note: don't disable it as N, because plenty of led and trigger drivers
-+	  are using this option.
++config MMC_DW_CHAIN_DESC
++	bool "Chain Descriptor Structure"
++	help
++	  Select this option to enable Chained Mode of Operation and the
++	  Chained Mode operates in a mode where only one Buffer will be used
++	  for each descriptor when the transfer is happening in DMA mode.
++
++config MMC_DW_DUAL_BUFFER_DESC
++	bool "Dual Buffer Descriptor Structure"
++	help
++	  Select this option to enable Dual Buffer Desc Mode of Operation and
++	  Dual Buffer Descriptor Mode or the Ring Mode indicates that two
++	  buffers can be used for each descriptor during DMA mode transfer.
++endchoice
++
+ config MMC_SH_MMCIF
+ 	tristate "SuperH Internal MMCIF support"
+ 	depends on MMC_BLOCK && (SUPERH || ARCH_SHMOBILE)
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index ff0f714..ba54bb8 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -63,6 +63,8 @@ struct idmac_desc {
+ 	u32		des1;	/* Buffer sizes */
+ #define IDMAC_SET_BUFFER1_SIZE(d, s) \
+ 	((d)->des1 = ((d)->des1 & 0x03ffe000) | ((s) & 0x1fff))
++#define IDMAC_SET_BUFFER_SIZES(d, s1, s2) \
++	(d->des1 = (((s1) & 0x1fff) | (((s2) & 0x1fff) << 13)))
  
- comment "LED drivers"
+ 	u32		des2;	/* buffer 1 physical address */
  
-@@ -388,7 +391,7 @@ config LEDS_RENESAS_TPU
- 	  Brightness control is supported but hardware blinking is not.
+@@ -347,18 +349,45 @@ static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
+ 	int i;
+ 	struct idmac_desc *desc = host->sg_cpu;
  
- config LEDS_TRIGGERS
--	bool "LED Trigger support"
-+	tristate "LED Trigger support"
- 	depends on LEDS_CLASS
- 	help
- 	  This option enables trigger support for the leds class.
-diff --git a/drivers/leds/led-class.c b/drivers/leds/led-class.c
-index dc3d3d8..1f54cb0 100644
---- a/drivers/leds/led-class.c
-+++ b/drivers/leds/led-class.c
-@@ -75,7 +75,7 @@ static ssize_t led_max_brightness_show(struct device *dev,
- static struct device_attribute led_class_attrs[] = {
- 	__ATTR(brightness, 0644, led_brightness_show, led_brightness_store),
- 	__ATTR(max_brightness, 0444, led_max_brightness_show, NULL),
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
- 	__ATTR(trigger, 0644, led_trigger_show, led_trigger_store),
- #endif
- 	__ATTR_NULL,
-@@ -209,7 +209,7 @@ int led_classdev_register(struct device *parent, struct led_classdev *led_cdev)
- 	if (IS_ERR(led_cdev->dev))
- 		return PTR_ERR(led_cdev->dev);
++#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
++	for (i = 0; i < sg_len; i += 2, desc++) {
++#endif
++#ifdef CONFIG_MMC_DW_CHAIN_DESC
+ 	for (i = 0; i < sg_len; i++, desc++) {
+-		unsigned int length = sg_dma_len(&data->sg[i]);
+-		u32 mem_addr = sg_dma_address(&data->sg[i]);
++#endif
++		unsigned int length1 = sg_dma_len(&data->sg[i]);
++		u32 mem_addr1 = sg_dma_address(&data->sg[i]);
++#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
++		unsigned int length2 = 0;
++		u32 mem_addr2;
++
++		if ((i+1) < sg_len) {
++			length2 = sg_dma_len(&data->sg[(i+1)]);
++			mem_addr2 = sg_dma_address(&data->sg[i+1]);
++		}
++
++		/* Set the OWN bit and disable interrupts for this descriptor
++		 * and disable the Chained Mode
++		 */
++		desc->des0 = (IDMAC_DES0_OWN | IDMAC_DES0_DIC) & (~IDMAC_DES0_CH);
++		/* Buffer length1 and length2 */
++		IDMAC_SET_BUFFER_SIZES(desc, length1, length2);
++#endif
++#ifdef CONFIG_MMC_DW_CHAIN_DESC
  
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
- 	init_rwsem(&led_cdev->trigger_lock);
- #endif
- 	/* add to the list of leds */
-@@ -226,7 +226,7 @@ int led_classdev_register(struct device *parent, struct led_classdev *led_cdev)
- 	led_cdev->blink_timer.function = led_timer_function;
- 	led_cdev->blink_timer.data = (unsigned long)led_cdev;
+ 		/* Set the OWN bit and disable interrupts for this descriptor */
+ 		desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC | IDMAC_DES0_CH;
  
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
- 	led_trigger_set_default(led_cdev);
- #endif
+-		/* Buffer length */
+-		IDMAC_SET_BUFFER1_SIZE(desc, length);
++		/* Buffer length1 */
++		IDMAC_SET_BUFFER1_SIZE(desc, length1);
++#endif
  
-@@ -245,7 +245,7 @@ EXPORT_SYMBOL_GPL(led_classdev_register);
-  */
- void led_classdev_unregister(struct led_classdev *led_cdev)
- {
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
- 	down_write(&led_cdev->trigger_lock);
- 	if (led_cdev->trigger)
- 		led_trigger_set(led_cdev, NULL);
-diff --git a/drivers/leds/leds.h b/drivers/leds/leds.h
-index e77c7f8..53b59b7 100644
---- a/drivers/leds/leds.h
-+++ b/drivers/leds/leds.h
-@@ -35,7 +35,7 @@ static inline int led_get_brightness(struct led_classdev *led_cdev)
- extern struct rw_semaphore leds_list_lock;
- extern struct list_head leds_list;
- 
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
- void led_trigger_set_default(struct led_classdev *led_cdev);
- void led_trigger_set(struct led_classdev *led_cdev,
- 			struct led_trigger *trigger);
-diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
-index 56e7834..83f4913 100644
---- a/drivers/mmc/host/au1xmmc.c
-+++ b/drivers/mmc/host/au1xmmc.c
-@@ -1043,7 +1043,7 @@ static int __devinit au1xmmc_probe(struct platform_device *pdev)
- 						     "using PIO\n");
+ 		/* Physical address to DMA to/from */
+-		desc->des2 = mem_addr;
++		desc->des2 = mem_addr1;
++#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
++		if ((i+1) < sg_len)
++			desc->des3 = mem_addr2;
++#endif
  	}
  
--#ifdef CONFIG_LEDS_CLASS
-+#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
- 	if (host->platdata && host->platdata->led) {
- 		struct led_classdev *led = host->platdata->led;
- 		led->name = mmc_hostname(mmc);
-@@ -1072,7 +1072,7 @@ static int __devinit au1xmmc_probe(struct platform_device *pdev)
- 	return 0;	/* all ok */
+ 	/* Set first descriptor */
+@@ -366,8 +395,14 @@ static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
+ 	desc->des0 |= IDMAC_DES0_FD;
  
- out6:
--#ifdef CONFIG_LEDS_CLASS
-+#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
- 	if (host->platdata && host->platdata->led)
- 		led_classdev_unregister(host->platdata->led);
- out5:
-@@ -1111,7 +1111,7 @@ static int __devexit au1xmmc_remove(struct platform_device *pdev)
- 	if (host) {
- 		mmc_remove_host(host->mmc);
+ 	/* Set last descriptor */
++#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
++	desc = host->sg_cpu + ((i/2) - 1) * sizeof(struct idmac_desc);
++	desc->des0 &= (~IDMAC_DES0_DIC);
++#endif
++#ifdef CONFIG_MMC_DW_CHAIN_DESC
+ 	desc = host->sg_cpu + (i - 1) * sizeof(struct idmac_desc);
+ 	desc->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
++#endif
+ 	desc->des0 |= IDMAC_DES0_LD;
  
--#ifdef CONFIG_LEDS_CLASS
-+#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
- 		if (host->platdata && host->platdata->led)
- 			led_classdev_unregister(host->platdata->led);
- #endif
-diff --git a/drivers/power/power_supply.h b/drivers/power/power_supply.h
-index 018de2b..efa9544 100644
---- a/drivers/power/power_supply.h
-+++ b/drivers/power/power_supply.h
-@@ -22,7 +22,7 @@ static inline void power_supply_init_attrs(struct device_type *dev_type) {}
+ 	wmb();
+@@ -388,6 +423,10 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
  
- #endif /* CONFIG_SYSFS */
+ 	/* Enable the IDMAC */
+ 	temp = mci_readl(host, BMOD);
++#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
++	/* The Descriptor Skip length is made zero */
++	temp &= ~(SDMMC_BMOD_DSL(0x1f));
++#endif
+ 	temp |= SDMMC_IDMAC_ENABLE | SDMMC_IDMAC_FB;
+ 	mci_writel(host, BMOD, temp);
  
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
+@@ -402,13 +441,20 @@ static int dw_mci_idmac_init(struct dw_mci *host)
  
- extern void power_supply_update_leds(struct power_supply *psy);
- extern int power_supply_create_triggers(struct power_supply *psy);
-diff --git a/include/linux/leds.h b/include/linux/leds.h
-index 5884def..051bc7e 100644
---- a/include/linux/leds.h
-+++ b/include/linux/leds.h
-@@ -66,7 +66,7 @@ struct led_classdev {
- 	struct timer_list	 blink_timer;
- 	int			 blink_brightness;
+ 	/* Number of descriptors in the ring buffer */
+ 	host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
+-
++#ifdef CONFIG_MMC_DW_CHAIN_DESC
+ 	/* Forward link the descriptor list */
+ 	for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++)
+ 		p->des3 = host->sg_dma + (sizeof(struct idmac_desc) * (i + 1));
++#endif
++#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
++	for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++)
++		p++;
++#endif
  
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
- 	/* Protects the trigger data below */
- 	struct rw_semaphore	 trigger_lock;
+ 	/* Set the last descriptor as the end-of-ring descriptor */
++#ifdef CONFIG_MMC_DW_CHAIN_DESC
+ 	p->des3 = host->sg_dma;
++#endif
+ 	p->des0 = IDMAC_DES0_ER;
  
-@@ -115,7 +115,7 @@ extern void led_brightness_set(struct led_classdev *led_cdev,
- /*
-  * LED Triggers
-  */
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
- 
- #define TRIG_NAME_MAX 50
- 
-@@ -161,7 +161,8 @@ extern void led_trigger_blink(struct led_trigger *trigger,
- #endif
- 
- /* Trigger specific functions */
--#ifdef CONFIG_LEDS_TRIGGER_IDE_DISK
-+#if defined(CONFIG_LEDS_TRIGGER_IDE_DISK) || \
-+	defined(CONFIG_LEDS_TRIGGER_IDE_DISK_MODULE)
- extern void ledtrig_ide_activity(void);
- #else
- #define ledtrig_ide_activity() do {} while(0)
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index aed5bc7..adac344 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -300,7 +300,7 @@ struct mmc_host {
- 
- 	mmc_pm_flag_t		pm_flags;	/* requested pm features */
- 
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
- 	struct led_trigger	*led;		/* activity led */
- #endif
- 
-diff --git a/include/linux/power_supply.h b/include/linux/power_supply.h
-index 204c18d..cb09fa0 100644
---- a/include/linux/power_supply.h
-+++ b/include/linux/power_supply.h
-@@ -164,7 +164,7 @@ struct power_supply {
- 	struct device *dev;
- 	struct work_struct changed_work;
- 
--#ifdef CONFIG_LEDS_TRIGGERS
-+#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MODULE)
- 	struct led_trigger *charging_full_trig;
- 	char *charging_full_trig_name;
- 	struct led_trigger *charging_trig;
+ 	/* Mask out interrupts - get Tx & Rx complete only */
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 027d377..0520dc8 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -72,6 +72,8 @@
+ /* Clock Enable register defines */
+ #define SDMMC_CLKEN_LOW_PWR		BIT(16)
+ #define SDMMC_CLKEN_ENABLE		BIT(0)
++/* BMOD register defines */
++#define SDMMC_BMOD_DSL(n)		_SBF(2, (n))
+ /* time-out register defines */
+ #define SDMMC_TMOUT_DATA(n)		_SBF(8, (n))
+ #define SDMMC_TMOUT_DATA_MSK		0xFFFFFF00
 -- 
-1.7.5
+1.7.2.3
 
