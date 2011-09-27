@@ -1,14 +1,14 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 4/4] mmc: mmci: Fix incorrect handling of HW flow control for SDIO
-Date: Tue, 27 Sep 2011 09:46:56 +0200
-Message-ID: <1317109616-18010-1-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 2/4] mmc: mmci: Support non-power-of-two block sizes for ux500v2 variant
+Date: Tue, 27 Sep 2011 09:46:27 +0200
+Message-ID: <1317109587-17940-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:45238 "EHLO
-	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751150Ab1I0HrO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2011 03:47:14 -0400
+Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:36006 "EHLO
+	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751303Ab1I0HrS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2011 03:47:18 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
@@ -16,81 +16,68 @@ Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.c
 
 From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
 
-For data writes smaller <= 8 bytes (only SDIO case), HW flow control was
-disabled but never re-enabled again. This meant that a following large read
-request would randomly give buffer overrun errors.
+For the ux500v2 variant of the PL18x block, non power of two block
+sizes are supported. This will make it possible to decrease data
+overhead for SDIO transfers.
 
-Moreover HW flow control is not needed for transfers that fits in the
-FIFO of PL18x. Thus it is disabled for write operations <= the FIFO size.
-
-Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
 Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
 ---
- drivers/mmc/host/mmci.c |   42 ++++++++++++++++++++++++------------------
- 1 files changed, 24 insertions(+), 18 deletions(-)
+ drivers/mmc/host/mmci.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index cd3bc25..4da20ec 100644
+index 8831b2f..f1d27d9 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -606,9 +606,32 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+@@ -52,6 +52,7 @@ static unsigned int fmax = 515633;
+  * @sdio: variant supports SDIO
+  * @st_clkdiv: true if using a ST-specific clock divider algorithm
+  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
++ * @non_power_of_2_blksize: true if block sizes can be other than power of two
+  */
+ struct variant_data {
+ 	unsigned int		clkreg;
+@@ -62,6 +63,7 @@ struct variant_data {
+ 	bool			sdio;
+ 	bool			st_clkdiv;
+ 	bool			blksz_datactrl16;
++	bool			non_power_of_2_blksize;
+ };
  
- 	/* The ST Micro variants has a special bit to enable SDIO */
- 	if (variant->sdio && host->mmc->card)
--		if (mmc_card_sdio(host->mmc->card))
-+		if (mmc_card_sdio(host->mmc->card)) {
-+			/*
-+			 * The ST Micro variants has a special bit
-+			 * to enable SDIO.
-+			 */
- 			datactrl |= MCI_ST_DPSM_SDIOEN;
+ static struct variant_data variant_arm = {
+@@ -103,6 +105,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.sdio			= true,
+ 	.st_clkdiv		= true,
+ 	.blksz_datactrl16	= true,
++	.non_power_of_2_blksize	= true,
+ };
  
-+			/*
-+			 * The ST Micro variant for SDIO transfer sizes
-+			 * less then or equal to 8 bytes needs to have clock
-+			 * H/W flow control disabled. Since flow control is
-+			 * not really needed for anything that fits in the
-+			 * FIFO, we can disable it for any write smaller
-+			 * than the FIFO size.
-+			 */
-+			if ((host->size <= variant->fifosize) &&
-+			    (data->flags & MMC_DATA_WRITE))
-+				writel(readl(host->base + MMCICLOCK) &
-+				       ~variant->clkreg_enable,
-+				       host->base + MMCICLOCK);
-+			else
-+				writel(readl(host->base + MMCICLOCK) |
-+				       variant->clkreg_enable,
-+				       host->base + MMCICLOCK);
-+		}
-+
- 	/*
- 	 * Attempt to use DMA operation mode, if this
- 	 * should fail, fall back to PIO mode
-@@ -824,23 +847,6 @@ static int mmci_pio_write(struct mmci_host *host, char *buffer, unsigned int rem
- 		count = min(remain, maxcnt);
+ /*
+@@ -592,7 +595,6 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 	writel(host->size, base + MMCIDATALENGTH);
  
- 		/*
--		 * The ST Micro variant for SDIO transfer sizes
--		 * less then 8 bytes should have clock H/W flow
--		 * control disabled.
--		 */
--		if (variant->sdio &&
--		    mmc_card_sdio(host->mmc->card)) {
--			if (count < 8)
--				writel(readl(host->base + MMCICLOCK) &
--					~variant->clkreg_enable,
--					host->base + MMCICLOCK);
--			else
--				writel(readl(host->base + MMCICLOCK) |
--					variant->clkreg_enable,
--					host->base + MMCICLOCK);
--		}
--
--		/*
- 		 * SDIO especially may want to send something that is
- 		 * not divisible by 4 (as opposed to card sectors
- 		 * etc), and the FIFO only accept full 32-bit writes.
+ 	blksz_bits = ffs(data->blksz) - 1;
+-	BUG_ON(1 << blksz_bits != data->blksz);
+ 
+ 	if (variant->blksz_datactrl16)
+ 		datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
+@@ -989,11 +991,14 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct mmci_host *host = mmc_priv(mmc);
++	struct variant_data *variant = host->variant;
+ 	unsigned long flags;
+ 
+ 	WARN_ON(host->mrq != NULL);
+ 
+-	if (mrq->data && !is_power_of_2(mrq->data->blksz)) {
++	if (mrq->data &&
++	    !variant->non_power_of_2_blksize &&
++	    !is_power_of_2(mrq->data->blksz)) {
+ 		dev_err(mmc_dev(mmc), "unsupported block size (%d bytes)\n",
+ 			mrq->data->blksz);
+ 		mrq->cmd->error = -EINVAL;
 -- 
 1.7.5.4
 
