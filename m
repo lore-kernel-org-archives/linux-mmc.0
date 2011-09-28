@@ -1,81 +1,81 @@
-From: Andrei Warkentin <awarkentin@vmware.com>
-Subject: Re: [PATCH v2] mmc : general purpose partition support.
-Date: Wed, 28 Sep 2011 09:08:07 -0700 (PDT)
-Message-ID: <1419276380.765271.1317226086965.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-References: <1316840820-2014-1-git-send-email-linkinjeon@gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH] OMAP4: MMC: fix power and audio issue, decouple USBC1
+ from MMC1
+Date: Wed, 28 Sep 2011 11:06:52 -0700
+Message-ID: <20110928180652.GY6324@atomide.com>
+References: <1311276543-9374-1-git-send-email-bryan.buckley@ti.com>
+ <CAF=Qhp0YO2zYnwo63ddhKZv-o+eXs2bQETrqF5wYU2EtKQ=Yqw@mail.gmail.com>
+ <CAG_NtY8uCAQNOpGFYLSMTbQ-=WEmRmjFSau7a_41XEwhE0280Q@mail.gmail.com>
+ <CANrkHUZP5+wqmA5yjmbF5LatJH9Z7eJ1T-KEHogpP2MFxWRz=w@mail.gmail.com>
+ <CANrkHUZo+P2TOMUH9udX-oQ5o64vEpOQVefrEUs1VkPxZxbBQA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp-outbound-2.vmware.com ([65.115.85.73]:22271 "EHLO
-	smtp-outbound-2.vmware.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751869Ab1I1QIH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2011 12:08:07 -0400
-In-Reply-To: <1316840820-2014-1-git-send-email-linkinjeon@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CANrkHUZo+P2TOMUH9udX-oQ5o64vEpOQVefrEUs1VkPxZxbBQA@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Cc: "Buckley, Bryan" <bryan.buckley@ti.com>, Kishore Kadiyala <kishorek.kadiyala@gmail.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Moiz Sonasath <m-sonasath@ti.com>, Viswanath Puttagunta <vishp@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: linux-kernel@vger.kernel.org, adrian hunter <adrian.hunter@intel.com>, james p freyensee <james_p_freyensee@linux.intel.com>, cjb@laptop.org, linux-mmc@vger.kernel.org
 
-Hi Namjae,
+* T Krishnamoorthy, Balaji <balajitk@ti.com> [110928 05:00]:
+> Hi Tony,
+>=20
+> Can you queue this patch ?
 
-In general I think your approach is fine and solves the problem. See further inline
-comments.
+Thanks, adding into fixes.
 
------ Original Message -----
-> From: "Namjae Jeon" <linkinjeon@gmail.com>
-> To: cjb@laptop.org, linux-mmc@vger.kernel.org
-> Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, "adrian hunter" <adrian.hunter@intel.com>, "james p
-> freyensee" <james_p_freyensee@linux.intel.com>, "Namjae Jeon" <linkinjeon@gmail.com>
-> Sent: Saturday, September 24, 2011 1:07:00 AM
-> Subject: [PATCH v2] mmc : general purpose partition support.
-> 
-> It allows gerneral purpose partitions in MMC Device.
-> And I try to simpliy make mmc_blk_alloc_parts using mmc_part
-> structure suggested by Andrei Warkentin.
-> After patching, we can see general purpose partitions like this.
-> > cat /proc/partitions
->           179 0 847872 mmcblk0
->           179 192 4096 mmcblk0gp4
->           179 160 4096 mmcblk0gp3
->           179 128 4096 mmcblk0gp2
->           179 96  1052672 mmcblk0gp1
->           179 64  1024 mmcblk0boot1
->           179 32  1024 mmcblk0boot0
-> 
-> Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
-
-> +		if (ext_csd[EXT_CSD_BOOT_MULT]) {
-> +			for (i = 0, boot_part_config = 0x1;
-> +				i < MMC_NUM_BOOT_PARTITION;
-> +				i++, boot_part_config++) {
-> +				card->part[i].size = ...
-> +				card->part[i].cookie = ...
-> +				sprintf(card->part[i].name, "boot%d", i);
-> +				card->part[i].force_ro = ...
-> +			}
-> +		}
->  	}
->  
->
-> +		if (ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x1) {
-> +                     ....
-> +			int i, gp_num, gp_part_config, gp_size_mult;
-> +			for (i = 2, gp_num = 1, gp_part_config = 0x4,
-> +				card->part[i].size = ...
-> +				card->part[i].cookie = ...
-> +				sprintf(card->part[i].name,
-> +					"gp%d", gp_num);
-> +				card->part[i].force_ro = ..
-> +			}
-> +		}
->
-
-I feel that you should factor out a function that operates on the static part[] array and
-adds a new entry base name, index (i.e. the %d for gp%d), cookie, size, force. 
-Otherwise you end up with these hidden mines like fixed indeces for
-particular parts (i = 2, etc...) which becomes indecipherable for others. 
-Plus you're mostly doing the same thing.
-
-Thanks,
-A
+Tony
+=20
+> On Fri, Sep 9, 2011 at 7:34 PM, T Krishnamoorthy, Balaji
+> <balajitk@ti.com> wrote:
+> > On Fri, Aug 12, 2011 at 8:43 PM, Buckley, Bryan <bryan.buckley@ti.c=
+om> wrote:
+> >> On Fri, Jul 22, 2011 at 7:30 AM, Kishore Kadiyala
+> >> <kishorek.kadiyala@gmail.com> wrote:
+> >>>
+> >>> On Fri, Jul 22, 2011 at 12:59 AM, Bryan Buckley <bryan.buckley@ti=
+=2Ecom> wrote:
+> >>> > Remove OMAP4_USBC1_ICUSB_PWRDNZ_MASK during enable/disable PWRD=
+NZ mode for
+> >>> > MMC1_PBIAS and associated extended-drain MMC1 I/O cell. This is=
+ in accordance
+> >>> > with the control module programming guide. This fixes a bug whe=
+re if trying to
+> >>> > use gpio_98 or gpio_99 and MMC1 at the same time the GPIO signa=
+l will be
+> >>> > affected by a changing SDMMC1_VDDS.
+> >>> >
+> >>> > Software must keep MMC1_PBIAS cell and MMC1_IO cell PWRDNZ sign=
+als low whenever
+> >>> > SDMMC1_VDDS ramps up/down or changes for cell protection purpos=
+es.
+> >>> >
+> >>> > MMC1 is based on SDMMC1_VDDS whereas USBC1 is based on SIM_VDDS=
+ therefore
+> >>> > they can operate independently.
+> >>> >
+> >>> > Signed-off-by: Bryan Buckley <bryan.buckley@ti.com>
+> >>>
+> >>> Good catch,
+> >>>
+> >>> Acked-by: =C2=A0Kishore Kadiyala <kishore.kadiyala@ti.com>
+> >>>
+> >>
+> >> Any other comments from anyone else? =C2=A0Noticed that this commi=
+t isn't
+> >> in any upstream branches. This patch will fix issues with people w=
+ho
+> >> want to use GPIO 98/99 AND MMC1 at the same time. =C2=A0Would be g=
+ood to
+> >> have this fix upstream.
+> >>
+> > FWIW: Tested on OMAP4 Blaze
+> > Tested-by: Balaji T K <balajitk@ti.com>
+> >
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
