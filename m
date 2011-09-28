@@ -1,81 +1,43 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH] OMAP4: MMC: fix power and audio issue, decouple USBC1
- from MMC1
-Date: Wed, 28 Sep 2011 11:06:52 -0700
-Message-ID: <20110928180652.GY6324@atomide.com>
-References: <1311276543-9374-1-git-send-email-bryan.buckley@ti.com>
- <CAF=Qhp0YO2zYnwo63ddhKZv-o+eXs2bQETrqF5wYU2EtKQ=Yqw@mail.gmail.com>
- <CAG_NtY8uCAQNOpGFYLSMTbQ-=WEmRmjFSau7a_41XEwhE0280Q@mail.gmail.com>
- <CANrkHUZP5+wqmA5yjmbF5LatJH9Z7eJ1T-KEHogpP2MFxWRz=w@mail.gmail.com>
- <CANrkHUZo+P2TOMUH9udX-oQ5o64vEpOQVefrEUs1VkPxZxbBQA@mail.gmail.com>
+From: Praveen G K <praveen.gk@gmail.com>
+Subject: Re: slow eMMC write speed
+Date: Wed, 28 Sep 2011 12:06:01 -0700
+Message-ID: <CAHzg1A9H31hWdEKR5+_p8HuA_oq6o8EkESpJ22kQ4e4oFDH8GQ@mail.gmail.com>
+References: <CAHzg1A9usWP8o3xjEq3yFn56bEqk_Qp0a8-2FJzoRZG1MqPRPA@mail.gmail.com>
+	<CACRpkdYamRVpBbhAcgn7rXBGcgHUp7+9PCrmOUkXV1BvZ+4pDw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CANrkHUZo+P2TOMUH9udX-oQ5o64vEpOQVefrEUs1VkPxZxbBQA@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Cc: "Buckley, Bryan" <bryan.buckley@ti.com>, Kishore Kadiyala <kishorek.kadiyala@gmail.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>, Kishore Kadiyala <kishore.kadiyala@ti.com>, Moiz Sonasath <m-sonasath@ti.com>, Viswanath Puttagunta <vishp@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:59720 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752227Ab1I1TGE convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2011 15:06:04 -0400
+Received: by fxe4 with SMTP id 4so876711fxe.19
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Sep 2011 12:06:02 -0700 (PDT)
+In-Reply-To: <CACRpkdYamRVpBbhAcgn7rXBGcgHUp7+9PCrmOUkXV1BvZ+4pDw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-* T Krishnamoorthy, Balaji <balajitk@ti.com> [110928 05:00]:
-> Hi Tony,
->=20
-> Can you queue this patch ?
+On Tue, Sep 27, 2011 at 10:42 PM, Linus Walleij
+<linus.walleij@linaro.org> wrote:
+> On Fri, Sep 23, 2011 at 7:05 AM, Praveen G K <praveen.gk@gmail.com> w=
+rote:
+>
+>> I am working on the block driver module of the eMMC driver (SDIO 3.0
+>> controller). =A0I am seeing very low write speed for eMMC transfers.=
+ =A0On
+>> further debugging, I observed that every 63rd and 64th transfer take=
+s
+>> a long time.
+>
+> Are you not just seeing the card-internal garbage collection?
+> http://lwn.net/Articles/428584/
+Does this mean, theoretically, I should be able to achieve larger
+speeds if I am not using linux? So, is this a software issue? or if
+there is a way to increase the size of bounce buffers to 4MB?
 
-Thanks, adding into fixes.
-
-Tony
-=20
-> On Fri, Sep 9, 2011 at 7:34 PM, T Krishnamoorthy, Balaji
-> <balajitk@ti.com> wrote:
-> > On Fri, Aug 12, 2011 at 8:43 PM, Buckley, Bryan <bryan.buckley@ti.c=
-om> wrote:
-> >> On Fri, Jul 22, 2011 at 7:30 AM, Kishore Kadiyala
-> >> <kishorek.kadiyala@gmail.com> wrote:
-> >>>
-> >>> On Fri, Jul 22, 2011 at 12:59 AM, Bryan Buckley <bryan.buckley@ti=
-=2Ecom> wrote:
-> >>> > Remove OMAP4_USBC1_ICUSB_PWRDNZ_MASK during enable/disable PWRD=
-NZ mode for
-> >>> > MMC1_PBIAS and associated extended-drain MMC1 I/O cell. This is=
- in accordance
-> >>> > with the control module programming guide. This fixes a bug whe=
-re if trying to
-> >>> > use gpio_98 or gpio_99 and MMC1 at the same time the GPIO signa=
-l will be
-> >>> > affected by a changing SDMMC1_VDDS.
-> >>> >
-> >>> > Software must keep MMC1_PBIAS cell and MMC1_IO cell PWRDNZ sign=
-als low whenever
-> >>> > SDMMC1_VDDS ramps up/down or changes for cell protection purpos=
-es.
-> >>> >
-> >>> > MMC1 is based on SDMMC1_VDDS whereas USBC1 is based on SIM_VDDS=
- therefore
-> >>> > they can operate independently.
-> >>> >
-> >>> > Signed-off-by: Bryan Buckley <bryan.buckley@ti.com>
-> >>>
-> >>> Good catch,
-> >>>
-> >>> Acked-by: =C2=A0Kishore Kadiyala <kishore.kadiyala@ti.com>
-> >>>
-> >>
-> >> Any other comments from anyone else? =C2=A0Noticed that this commi=
-t isn't
-> >> in any upstream branches. This patch will fix issues with people w=
-ho
-> >> want to use GPIO 98/99 AND MMC1 at the same time. =C2=A0Would be g=
-ood to
-> >> have this fix upstream.
-> >>
-> > FWIW: Tested on OMAP4 Blaze
-> > Tested-by: Balaji T K <balajitk@ti.com>
-> >
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Yours,
+> Linus Walleij
+>
