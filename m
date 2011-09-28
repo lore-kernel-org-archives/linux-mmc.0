@@ -1,35 +1,74 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: slow eMMC write speed
-Date: Wed, 28 Sep 2011 07:42:22 +0200
-Message-ID: <CACRpkdYamRVpBbhAcgn7rXBGcgHUp7+9PCrmOUkXV1BvZ+4pDw@mail.gmail.com>
-References: <CAHzg1A9usWP8o3xjEq3yFn56bEqk_Qp0a8-2FJzoRZG1MqPRPA@mail.gmail.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: dw_mmc: Support predefined multiple block transfers.
+Date: Wed, 28 Sep 2011 17:23:47 +0900
+Message-ID: <003101cc7db7$f203e350$d60ba9f0$%jun@samsung.com>
+References: <001901cc7c42$00147c10$003d7430$%jun@samsung.com>
+ <992253991.685205.1317054932934.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+ <001f01cc7cba$f1238560$d36a9020$%jun@samsung.com>
+ <CANz0V+7xJF4h4XUGoL43odFyOpwcBmxgV18R-uR4oDaqV-9jJA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:34803 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752643Ab1I1FmY convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2011 01:42:24 -0400
-Received: by ywb5 with SMTP id 5so6073194ywb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Sep 2011 22:42:24 -0700 (PDT)
-In-Reply-To: <CAHzg1A9usWP8o3xjEq3yFn56bEqk_Qp0a8-2FJzoRZG1MqPRPA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <CANz0V+7xJF4h4XUGoL43odFyOpwcBmxgV18R-uR4oDaqV-9jJA@mail.gmail.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: "'Andrei E. Warkentin'" <andrey.warkentin@gmail.com>
+Cc: 'Andrei Warkentin' <awarkentin@vmware.com>, 'Chris Ball' <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, 'kgene kim' <kgene.kim@samsung.com>, 'dh han' <dh.han@samsung.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Praveen G K <praveen.gk@gmail.com>
-Cc: linux-mmc@vger.kernel.org
 
-On Fri, Sep 23, 2011 at 7:05 AM, Praveen G K <praveen.gk@gmail.com> wro=
-te:
+Andrei Warkentin wrote:
+> 2011/9/26 Seungwon Jeon <tgih.jun@samsung.com>:
+> > Andrei Warkentin wrote:
+> >> Hi Seungwon,
+> >>
+> >> ----- Original Message -----
+> >> > From: "Seungwon Jeon" <tgih.jun@samsung.com>
+> >> > To: linux-mmc@vger.kernel.org
+> >> > Cc: "Chris Ball" <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org,
+> >> "kgene kim" <kgene.kim@samsung.com>, "dh han"
+> >> > <dh.han@samsung.com>, "Seungwon Jeon" <tgih.jun@samsung.com>
+> >> > Sent: Monday, September 26, 2011 7:46:59 AM
+> >> > Subject: [PATCH] mmc: dw_mmc: Support predefined multiple block
+> >> transfers.
+> >> >
+> >> > This patch adds the support for predefined multiple block read/write.
+> >> >
+> >> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> >>
+> >> Without knowing much about dw_mmc host, your logic otherwise looks ok,
+> >> given what
+> >> I've previously done for SDHCI as far as CMD23/Auto-CMD23 enhancement.
+> >> Just curious, what eMMC cards did you test this on, and what
+> improvement
+> >> did you see?
+> >
+> > Thank you for review.
+> > As you done, predefined transfer is required for reliable writes and
+> eMMC4.5 feature.
+> > Sadly, I didn't gain an improvement in my case.
+> > (I don't know whether I can clarify the tested eMMC card, just one
+> sample.)
+> >
+> 
+> So far I've seen some Sandisk cards have a noticeable real-life
+> improvement (30%) over
+> open-ended transfers.
+> 
+> You might wish to try out https://github.com/andreiw/superalign to be
+> certain.
 
-> I am working on the block driver module of the eMMC driver (SDIO 3.0
-> controller). =A0I am seeing very low write speed for eMMC transfers. =
-=A0On
-> further debugging, I observed that every 63rd and 64th transfer takes
-> a long time.
+I had already tested this patch with IOZONE, but I found no difference.
+Maybe a result depends on eMMC device.
+As your recommend, I applied above benchmark tool. 
+Predefined transfer seems like a little better, but there is no difference.
 
-Are you not just seeing the card-internal garbage collection?
-http://lwn.net/Articles/428584/
+Thanks.
+Seungwon Jeon.
 
-Yours,
-Linus Walleij
+> 
+> A
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
