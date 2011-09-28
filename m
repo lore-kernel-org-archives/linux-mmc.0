@@ -1,74 +1,27 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: Support predefined multiple block transfers.
-Date: Wed, 28 Sep 2011 17:23:47 +0900
-Message-ID: <003101cc7db7$f203e350$d60ba9f0$%jun@samsung.com>
-References: <001901cc7c42$00147c10$003d7430$%jun@samsung.com>
- <992253991.685205.1317054932934.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
- <001f01cc7cba$f1238560$d36a9020$%jun@samsung.com>
- <CANz0V+7xJF4h4XUGoL43odFyOpwcBmxgV18R-uR4oDaqV-9jJA@mail.gmail.com>
+From: Sebastian RASMUSSEN <sebastian.rasmussen@stericsson.com>
+Subject: RE: [PATCH 1/3] mmc: mmci: Put power register deviations in variant
+ data
+Date: Wed, 28 Sep 2011 11:05:37 +0200
+Message-ID: <ECD438FDEF6BD742895E554C24725A401C4F1AE0D7@EXDCVYMBSTM005.EQ1STM.local>
+References: <1317123725-29832-1-git-send-email-ulf.hansson@stericsson.com>
+ <CACRpkdZoXmQiUJbLkzgTkRnjukS18RvcZASXzZshnuDSQDE1aQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <CANz0V+7xJF4h4XUGoL43odFyOpwcBmxgV18R-uR4oDaqV-9jJA@mail.gmail.com>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: "'Andrei E. Warkentin'" <andrey.warkentin@gmail.com>
-Cc: 'Andrei Warkentin' <awarkentin@vmware.com>, 'Chris Ball' <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, 'kgene kim' <kgene.kim@samsung.com>, 'dh han' <dh.han@samsung.com>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog106.obsmtp.com ([207.126.144.121]:60061 "EHLO
+	eu1sys200aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751417Ab1I1JGR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2011 05:06:17 -0400
+In-Reply-To: <CACRpkdZoXmQiUJbLkzgTkRnjukS18RvcZASXzZshnuDSQDE1aQ@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, Ulf HANSSON <ulf.hansson@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King <linux@arm.linux.org.uk>, Lee Jones <lee.jones@linaro.org>
 
-Andrei Warkentin wrote:
-> 2011/9/26 Seungwon Jeon <tgih.jun@samsung.com>:
-> > Andrei Warkentin wrote:
-> >> Hi Seungwon,
-> >>
-> >> ----- Original Message -----
-> >> > From: "Seungwon Jeon" <tgih.jun@samsung.com>
-> >> > To: linux-mmc@vger.kernel.org
-> >> > Cc: "Chris Ball" <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org,
-> >> "kgene kim" <kgene.kim@samsung.com>, "dh han"
-> >> > <dh.han@samsung.com>, "Seungwon Jeon" <tgih.jun@samsung.com>
-> >> > Sent: Monday, September 26, 2011 7:46:59 AM
-> >> > Subject: [PATCH] mmc: dw_mmc: Support predefined multiple block
-> >> transfers.
-> >> >
-> >> > This patch adds the support for predefined multiple block read/write.
-> >> >
-> >> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> >>
-> >> Without knowing much about dw_mmc host, your logic otherwise looks ok,
-> >> given what
-> >> I've previously done for SDHCI as far as CMD23/Auto-CMD23 enhancement.
-> >> Just curious, what eMMC cards did you test this on, and what
-> improvement
-> >> did you see?
-> >
-> > Thank you for review.
-> > As you done, predefined transfer is required for reliable writes and
-> eMMC4.5 feature.
-> > Sadly, I didn't gain an improvement in my case.
-> > (I don't know whether I can clarify the tested eMMC card, just one
-> sample.)
-> >
-> 
-> So far I've seen some Sandisk cards have a noticeable real-life
-> improvement (30%) over
-> open-ended transfers.
-> 
-> You might wish to try out https://github.com/andreiw/superalign to be
-> certain.
-
-I had already tested this patch with IOZONE, but I found no difference.
-Maybe a result depends on eMMC device.
-As your recommend, I applied above benchmark tool. 
-Predefined transfer seems like a little better, but there is no difference.
-
-Thanks.
-Seungwon Jeon.
-
-> 
-> A
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiA+ICsgwqAgwqAgwqAgdW5zaWduZWQgaW50IMKgIMKgIMKgIMKgIMKgIMKgcHdycmVnX3Bvd2Vy
+dXA7DQo+DQo+IFRoaXMgc2hvdWxkIHByb2JhYmx5IGJlIHUzMiwgbm8gYmlnIGRlYWwgYnV0IGVh
+c3kgdG8gZml4Lg0KPiBDYW4gYmUgZG9uZSB3aGVuIHB1dHRpbmcgaXQgaW50byBSdXNzZWxscyBw
+YXRjaCB0cmFja2VyIEkgZ3Vlc3MuDQoNCkFncmVlZCwgc2luY2UgcHdyIGlzIHUzMiB3aGVyZSBw
+d3JyZWcgaXMgdXNlZCwgaXQgc2hvdWxkIGJlLg0KDQogLyBTZWJhc3RpYW4NCg==
