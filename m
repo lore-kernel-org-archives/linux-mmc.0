@@ -1,394 +1,165 @@
-From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Subject: Re: [PATCH 1/1] mmc: Support of PCI mode for the dw_mmc driver This
- Patch adds the support for the scenario where the Synopsys Designware IP is
- present on the PCI bus.The patch adds the minimal modifications necessary for
- the driver to work on PCI pl
-Date: Thu, 29 Sep 2011 10:19:38 +0530
-Message-ID: <CANYdXnr+uHW5kq==tVkYAwY10qmZzxhWz-=bjbRJ3j10jjL+dA@mail.gmail.com>
-References: <CAFbHwiQ1zKPUjXLinZukbgbz1wqFs9q93W6y_owLiTvn=i-=Bw@mail.gmail.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH v2] mmc: core: Add default timeout value for CMD6.
+Date: Thu, 29 Sep 2011 10:23:48 +0530
+Message-ID: <CAGxe1ZFMwdVtNf-XKKwVXPR3FteMrXk+_3reRdF-=Y8FrBUvCg@mail.gmail.com>
+References: <1315462202-28032-1-git-send-email-tgih.jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:32963 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754020Ab1I2Etj convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2011 00:49:39 -0400
-Received: by ywb5 with SMTP id 5so197666ywb.19
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Sep 2011 21:49:39 -0700 (PDT)
-In-Reply-To: <CAFbHwiQ1zKPUjXLinZukbgbz1wqFs9q93W6y_owLiTvn=i-=Bw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1315462202-28032-1-git-send-email-tgih.jun@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org
 
-Hi Will,
+Hi Jeon,
 
-On Wed, Sep 28, 2011 at 9:03 PM, Will Newton <will.newton@gmail.com> wr=
-ote:
-> On Wed, Sep 28, 2011 at 4:02 PM, Shashidhar Hiremath
-> <shashidharh@vayavyalabs.com> wrote:
->>
->> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
->> ---
->> =C2=A0drivers/mmc/host/Kconfig =C2=A0 | =C2=A0 11 ++++
->> =C2=A0drivers/mmc/host/dw_mmc.c =C2=A0| =C2=A0126 ++++++++++++++++++=
-++++++++++++++++++++++++++
->> =C2=A0drivers/mmc/host/dw_mmc.h =C2=A0| =C2=A0 12 ++++
->> =C2=A0include/linux/mmc/dw_mmc.h | =C2=A0 =C2=A04 ++
->> =C2=A04 files changed, 153 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> index 8c87096..84d8908 100644
->> --- a/drivers/mmc/host/Kconfig
->> +++ b/drivers/mmc/host/Kconfig
->> @@ -526,6 +526,17 @@ config MMC_DW
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0block, this provides host support =
-for SD and MMC interfaces, in both
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0PIO and external DMA modes.
->>
->> +config MMC_DW_PCI
->> + =C2=A0 =C2=A0 =C2=A0 bool "MMC_DW Support On PCI bus"
->> + =C2=A0 =C2=A0 =C2=A0 depends on MMC_DW && PCI
->> + =C2=A0 =C2=A0 =C2=A0 help
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 This selects the PCI for the Synopsys =
-Designware Mobile Storage IP.
->> +
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 If you have a controller with this int=
-erface, say Y or M here.
->> +
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 If unsure, say N.
->> +
->> +
->> =C2=A0config MMC_DW_IDMAC
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0bool "Internal DMAC interface"
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0depends on MMC_DW
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index ff0f714..74f28a5 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -21,7 +21,11 @@
->> =C2=A0#include <linux/interrupt.h>
->> =C2=A0#include <linux/ioport.h>
->> =C2=A0#include <linux/module.h>
->> +#ifdef CONFIG_MMC_DW_PCI
->> +#include <linux/pci.h>
->> +#else
->> =C2=A0#include <linux/platform_device.h>
->> +#endif
->
-> This doesn't need an #ifdef.
->
->> =C2=A0#include <linux/scatterlist.h>
->> =C2=A0#include <linux/seq_file.h>
->> =C2=A0#include <linux/slab.h>
->> @@ -101,6 +105,18 @@ struct dw_mci_slot {
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0int =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 last_detect_state;
->> =C2=A0};
->>
->> +#ifdef CONFIG_MMC_DW_PCI
->> +static struct pci_device_id dw_mci_id =C2=A0=3D { =C2=A0PCI_DEVICE(=
-DEVICE_ID, VENDOR_ID) };
->> +
->> +struct dw_mci_board pci_board_data =3D {
->> + =C2=A0 =C2=A0 =C2=A0 .num_slots =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D 1,
->> + =C2=A0 =C2=A0 =C2=A0 .caps =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D DW_MCI_CAPABILITI=
-ES,
->> + =C2=A0 =C2=A0 =C2=A0 .bus_hz =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D 33 * 1000 * 1000,
->
-> Is this value correct? The bus this refers to is the SD bus, so 33MHz
-> is not fast.
-  I got the driver working with this frequency.Will check the optimal v=
-alue.
->
->> + =C2=A0 =C2=A0 =C2=A0 .detect_delay_ms =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
-=C2=A0 =C2=A0 =C2=A0 =C2=A0=3D 200,
->> + =C2=A0 =C2=A0 =C2=A0 .fifo_depth =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D 32,
->> +};
->> +#endif
->> +
->> =C2=A0static struct workqueue_struct *dw_mci_card_workqueue;
->>
->> =C2=A0#if defined(CONFIG_DEBUG_FS)
->> @@ -682,6 +698,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc,=
- struct mmc_ios *ios)
->> =C2=A0{
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct dw_mci_slot *slot =3D mmc_priv(mmc=
-);
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0u32 regs;
->> +#ifdef CONFIG_MMC_DW_PCI
->> + =C2=A0 =C2=A0 =C2=A0 u32 card_detect;
->> +#endif
->>
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0/* set default 1 bit mode */
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0slot->ctype =3D SDMMC_CTYPE_1BIT;
->> @@ -716,7 +735,15 @@ static void dw_mci_set_ios(struct mmc_host *mmc=
-, struct mmc_ios *ios)
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0switch (ios->power_mode) {
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0case MMC_POWER_UP:
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0set_bit(DW_MM=
-C_CARD_NEED_INIT, &slot->flags);
->> +#ifdef CONFIG_MMC_DW_PCI
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 /* Enable Power t=
-o the card that has been detected */
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card_detect =3D m=
-ci_readl(slot->host, CDETECT);
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mci_writel(slot->=
-host, PWREN, ((~card_detect) & 0x1));
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 break;
->> + =C2=A0 =C2=A0 =C2=A0 case MMC_POWER_OFF:
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mci_writel(slot->=
-host, PWREN, 0);
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0break;
->> +#endif
->
-> It may be safe to not #ifdef this, all the hardware I have uses an
-> external regulator so the PWREN bits do nothing. I could imagine
-> hardware that was non-PCI that could use PWREN however.
-The hardware that I was using required this to be done .else there was
-not power to the card.
->
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0default:
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0break;
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0}
->> @@ -1775,7 +1802,12 @@ static bool mci_wait_reset(struct device *dev=
-, struct dw_mci *host)
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0return false;
->> =C2=A0}
->>
->> +#ifdef CONFIG_MMC_DW_PCI
->> +static int __devinit dw_mci_probe(struct pci_dev *pdev,
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 const struct pci_device_i=
-d *entries)
->> +#else
->> =C2=A0static int dw_mci_probe(struct platform_device *pdev)
->> +#endif
->
-> Possibly it would be better to split this into three functions:
->
-> dw_mci_pci_probe
-> dw_mci_platform_probe
-> dw_mci_probe
->
-> And then the pci/platform probe functions can call the generic probe
-> function to do the common parts of the setup.
->
->> +#ifdef CONFIG_MMC_DW_PCI
->> +static void __devexit dw_mci_remove(struct pci_dev *pdev)
->> +#else
->> =C2=A0static int __exit dw_mci_remove(struct platform_device *pdev)
->> +#endif
->
-> Again this should probably be split into separate functions to reduce
-> the number of #ifdefs.
->
->> =C2=A0{
->> +
->> +#ifdef CONFIG_MMC_DW_PCI
->> + =C2=A0 =C2=A0 =C2=A0 struct dw_mci *host =3D pci_get_drvdata(pdev)=
-;
->> +#else
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct dw_mci *host =3D platform_get_drvd=
-ata(pdev);
->> +#endif
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0int i;
->>
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0mci_writel(host, RINTSTS, 0xFFFFFFFF);
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0mci_writel(host, INTMASK, 0); /* disable =
-all mmc interrupt first */
->>
->> +#ifdef CONFIG_MMC_DW_PCI
->> + =C2=A0 =C2=A0 =C2=A0 pci_set_drvdata(pdev, NULL);
->> +#else
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0platform_set_drvdata(pdev, NULL);
->> +#endif
->>
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0for (i =3D 0; i < host->num_slots; i++) {
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0dev_dbg(&pdev=
-->dev, "remove slot %d\n", i);
->> @@ -1992,7 +2074,11 @@ static int __exit dw_mci_remove(struct platfo=
-rm_device *pdev)
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0mci_writel(host, CLKENA, 0);
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0mci_writel(host, CLKSRC, 0);
->>
->> +#ifdef CONFIG_MMC_DW_PCI
->> + =C2=A0 =C2=A0 =C2=A0 free_irq(pdev->irq, host);
->> +#else
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0free_irq(platform_get_irq(pdev, 0), host)=
-;
->> +#endif
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0destroy_workqueue(dw_mci_card_workqueue);
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0dma_free_coherent(&pdev->dev, PAGE_SIZE, =
-host->sg_cpu, host->sg_dma);
->>
->> @@ -2006,18 +2092,31 @@ static int __exit dw_mci_remove(struct platf=
-orm_device *pdev)
->>
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0iounmap(host->regs);
->>
->> +#ifdef CONFIG_MMC_DW_PCI
->> + =C2=A0 =C2=A0 =C2=A0 pci_release_regions(pdev);
->> +#endif
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0kfree(host);
->> +#ifndef CONFIG_MMC_DW_PCI
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0return 0;
->> +#endif
->> =C2=A0}
->>
->> =C2=A0#ifdef CONFIG_PM
->> =C2=A0/*
->> =C2=A0* TODO: we should probably disable the clock to the card in th=
-e suspend path.
->> =C2=A0*/
->> +#ifdef CONFIG_MMC_DW_PCI
->> +static int dw_mci_suspend(struct pci_dev *pdev, pm_message_t mesg)
->> +#else
->> =C2=A0static int dw_mci_suspend(struct platform_device *pdev, pm_mes=
-sage_t mesg)
->> +#endif
->> =C2=A0{
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0int i, ret;
->> +#ifdef CONFIG_MMC_DW_PCI
->> + =C2=A0 =C2=A0 =C2=A0 struct dw_mci *host =3D pci_get_drvdata(pdev)=
-;
->> +#else
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct dw_mci *host =3D platform_get_drvd=
-ata(pdev);
->> +#endif
->>
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0for (i =3D 0; i < host->num_slots; i++) {
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0struct dw_mci=
-_slot *slot =3D host->slot[i];
->> @@ -2040,10 +2139,18 @@ static int dw_mci_suspend(struct platform_de=
-vice *pdev, pm_message_t mesg)
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0return 0;
->> =C2=A0}
->>
->> +#ifdef CONFIG_MMC_DW_PCI
->> +static int dw_mci_resume(struct pci_dev *pdev)
->> +#else
->> =C2=A0static int dw_mci_resume(struct platform_device *pdev)
->> +#endif
->> =C2=A0{
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0int i, ret;
->> +#ifdef CONFIG_MMC_DW_PCI
->> + =C2=A0 =C2=A0 =C2=A0 struct dw_mci *host =3D pci_get_drvdata(pdev)=
-;
->> +#else
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct dw_mci *host =3D platform_get_drvd=
-ata(pdev);
->> +#endif
->
-> Even though these functions are quite simple it would be better to co=
-de them as
->
-> dw_mci_platform_resume(struct platform_device *pdev)
-> =C2=A0calling dw_mci_resume(struct dw_mci *host)
->
-> dw_mci_pci_resume(struct pci_dev *pdev)
-> =C2=A0calling dw_mci_resume(struct dw_mci *host)
->
-> To reduce the #ifdef overhead.
-I will add separate functions for probe/suspend/resume/remove etc for
-PCI/non-PCI.
->
->>
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (host->vmmc)
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0regulator_ena=
-ble(host->vmmc);
->> @@ -2081,6 +2188,16 @@ static int dw_mci_resume(struct platform_devi=
-ce *pdev)
->> =C2=A0#define dw_mci_resume =C2=A0NULL
->> =C2=A0#endif /* CONFIG_PM */
->>
->> +#ifdef CONFIG_MMC_DW_PCI
->> +static struct pci_driver dw_mci_driver =3D {
->> + =C2=A0 =C2=A0 =C2=A0 .name =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D =
-"dw_mmc",
->> + =C2=A0 =C2=A0 =C2=A0 .id_table =C2=A0 =C2=A0 =C2=A0 =3D &dw_mci_id=
-,
->> + =C2=A0 =C2=A0 =C2=A0 .probe =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D =
-dw_mci_probe,
->> + =C2=A0 =C2=A0 =C2=A0 .remove =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D dw_mc=
-i_remove,
->> + =C2=A0 =C2=A0 =C2=A0 .suspend =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D dw_mc=
-i_suspend,
->> + =C2=A0 =C2=A0 =C2=A0 .resume =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D dw_mc=
-i_resume,
->> +};
->> +#else
->> =C2=A0static struct platform_driver dw_mci_driver =3D {
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0.remove =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D _=
-_exit_p(dw_mci_remove),
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0.suspend =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D d=
-w_mci_suspend,
->> @@ -2089,15 +2206,24 @@ static struct platform_driver dw_mci_driver =
-=3D {
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0.name =C2=A0 =
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D "dw_mmc",
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0},
->> =C2=A0};
->> +#endif
->>
->> =C2=A0static int __init dw_mci_init(void)
->> =C2=A0{
->> +#ifdef CONFIG_MMC_DW_PCI
->> + =C2=A0 =C2=A0 =C2=A0 return pci_register_driver(&dw_mci_driver);
->> +#else
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0return platform_driver_probe(&dw_mci_driv=
-er, dw_mci_probe);
->> +#endif
->> =C2=A0}
->>
->> =C2=A0static void __exit dw_mci_exit(void)
->> =C2=A0{
->> +#ifdef CONFIG_MMC_DW_PCI
->> + =C2=A0 =C2=A0 =C2=A0 pci_unregister_driver(&dw_mci_driver);
->> +#else
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0platform_driver_unregister(&dw_mci_driver=
-);
->> +#endif
->> =C2=A0}
->>
->> =C2=A0module_init(dw_mci_init);
->> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->> index 027d377..3b1e459 100644
->> --- a/drivers/mmc/host/dw_mmc.h
->> +++ b/drivers/mmc/host/dw_mmc.h
->> @@ -164,4 +164,16 @@
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0(*(volatile u64 __force *)((dev)->regs + =
-SDMMC_##reg) =3D (value))
->> =C2=A0#endif
->>
->> +/* PCI Specific macros */
->> +#ifdef CONFIG_MMC_DW_PCI
->> +#define PCI_BAR_NO 2
->> +#define COMPLETE_BAR 0
->> +/* Dummy Device Id and Vendor Id */
->> +#define VENDOR_ID 0x700
->> +#define DEVICE_ID 0x1107
->> +/* Defining the Capabilities */
->> +#define DW_MCI_CAPABILITIES (MMC_CAP_4_BIT_DATA | MMC_CAP_MMC_HIGHS=
-PEED |\
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0MMC_CAP_SD_HIGHSPEED | MMC_CAP_8_BIT_DATA | MMC_CAP_SD=
-IO_IRQ)
->> +#endif
->> +
->
-> Are these all necessary?
-I feel the defines other than capabilities are necessary  are a
-must,but will validate them once again
->
+I tried to apply your patch to the latest Chris-mmc/mmc-next branch.
+but the patch fails. can you please check
+err message.
 
+error: patch failed: include/linux/mmc/card.h:52
+error: include/linux/mmc/card.h: patch does not apply
+error: patch failed: include/linux/mmc/mmc.h:293
+error: include/linux/mmc/mmc.h: patch does not apply
+Patch failed at 0001 mmc: core: Add default timeout value for CMD6.
 
-
---=20
-regards,
-Shashidhar Hiremath
+regards
+Girish K S
+> EXT_CSD[248] includes the default maximum timeout for CMD6.
+> This field is added at eMMC4.5 Spec. And it can be used for default
+> timeout except for some operations which don't define the timeout(i.e=
+=2E
+> background operation, sanitize, flush cache) in eMMC4.5 Spec.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+> v2 : apply default maximum timeout of CMD6 which specific timeout is =
+not defined.
+>
+> =A0drivers/mmc/core/mmc.c =A0 | =A0 14 ++++++++++----
+> =A0include/linux/mmc/card.h | =A0 =A01 +
+> =A0include/linux/mmc/mmc.h =A0| =A0 =A01 +
+> =A03 files changed, 12 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 5700b1c..b148bb1 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -410,6 +410,10 @@ static int mmc_read_ext_csd(struct mmc_card *car=
+d, u8 *ext_csd)
+> =A0 =A0 =A0 =A0else
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->erased_byte =3D 0x0;
+>
+> + =A0 =A0 =A0 if (card->ext_csd.rev >=3D 6)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.generic_cmd6_time =3D 10 =
+*
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_GENERIC=
+_CMD6_TIME];
+> +
+> =A0out:
+> =A0 =A0 =A0 =A0return err;
+> =A0}
+> @@ -668,7 +672,8 @@ static int mmc_init_card(struct mmc_host *host, u=
+32 ocr,
+> =A0 =A0 =A0 =A0 */
+> =A0 =A0 =A0 =A0if (card->ext_csd.enhanced_area_en) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(card, EXT_CSD_CMD_S=
+ET_NORMAL,
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_=
+CSD_ERASE_GROUP_DEF, 1, 0);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_=
+CSD_ERASE_GROUP_DEF, 1,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card=
+->ext_csd.generic_cmd6_time);
+>
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err && err !=3D -EBADMSG)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto free_card;
+> @@ -711,7 +716,8 @@ static int mmc_init_card(struct mmc_host *host, u=
+32 ocr,
+> =A0 =A0 =A0 =A0if ((card->ext_csd.hs_max_dtr !=3D 0) &&
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(host->caps & MMC_CAP_MMC_HIGHSPEED)) =
+{
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(card, EXT_CSD_CMD_S=
+ET_NORMAL,
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_=
+CSD_HS_TIMING, 1, 0);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_=
+CSD_HS_TIMING, 1,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card=
+->ext_csd.generic_cmd6_time);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err && err !=3D -EBADMSG)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto free_card;
+>
+> @@ -783,7 +789,7 @@ static int mmc_init_card(struct mmc_host *host, u=
+32 ocr,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(car=
+d, EXT_CSD_CMD_SET_NORMAL,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 EXT_CSD_BUS_WIDTH,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 ext_csd_bits[idx][0],
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A00);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0card->ext_csd.generic_cmd6_time);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (!err) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_se=
+t_bus_width(card->host, bus_width);
+>
+> @@ -806,7 +812,7 @@ static int mmc_init_card(struct mmc_host *host, u=
+32 ocr,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(car=
+d, EXT_CSD_CMD_SET_NORMAL,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 EXT_CSD_BUS_WIDTH,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 ext_csd_bits[idx][1],
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A00);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0card->ext_csd.generic_cmd6_time);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0printk(KERN_WARNING "%=
+s: switch to bus width %d ddr %d "
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index b460fc2..e992fe3 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -52,6 +52,7 @@ struct mmc_ext_csd {
+> =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0part_con=
+fig;
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0part_time; =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0/* Units: ms */
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0sa_timeout; =A0 =A0=
+ =A0 =A0 =A0 =A0 /* Units: 100ns */
+> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0generic_cmd6_time; =
+=A0 =A0 =A0/* Units: ms */
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0hs_max_dtr;
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0sectors;
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0card_type;
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 5a794cb..e869f00 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -293,6 +293,7 @@ struct _mmc_csd {
+> =A0#define EXT_CSD_SEC_ERASE_MULT =A0 =A0 =A0 =A0 230 =A0 =A0 /* RO *=
+/
+> =A0#define EXT_CSD_SEC_FEATURE_SUPPORT =A0 =A0231 =A0 =A0 /* RO */
+> =A0#define EXT_CSD_TRIM_MULT =A0 =A0 =A0 =A0 =A0 =A0 =A0232 =A0 =A0 /=
+* RO */
+> +#define EXT_CSD_GENERIC_CMD6_TIME =A0 =A0 =A0248 =A0 =A0 /* RO */
+>
+> =A0/*
+> =A0* EXT_CSD field definitions
+> --
+> 1.7.0.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
