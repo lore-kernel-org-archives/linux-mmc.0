@@ -1,34 +1,105 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH 0/2] arm: omap4: hsmmc: pbias fixes
-Date: Thu, 29 Sep 2011 20:15:54 +0530
-Message-ID: <CANrkHUbSRLZe+6QWOSE0Hz6r5NUkRxUH+RW2_CYiQ3wrWu-Pzw@mail.gmail.com>
-References: <4e848386.2a1f440a.4d36.1824SMTPIN_ADDED@mx.google.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:39366 "EHLO
-	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751692Ab1I2Op4 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 29 Sep 2011 10:45:56 -0400
-In-Reply-To: <4e848386.2a1f440a.4d36.1824SMTPIN_ADDED@mx.google.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Barry Song <21cnbao@gmail.com>
+Subject: [PATCH v2] PM: HIBERNATION: add resume_wait param to support MMC-like devices as resume file
+Date: Thu, 29 Sep 2011 23:15:57 +0800
+Message-ID: <1317309357-3871-1-git-send-email-21cnbao@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: pavel@ucw.cz, rjw@sisk.pl, frank.hofmann@tomtom.com
+Cc: linux-mmc@vger.kernel.org, linux-pm@lists.linux-foundation.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, workgroup.linux@csr.com, Barry Song <baohua.song@csr.com>, Barry Song <Baohua.Song@csr.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, kishore.kadiyala@ti.com, vishp@ti.com
 
-> From: Balaji T K <balajitk@ti.com>
-Will resend this series as my email id is garbled.
+From: Barry Song <baohua.song@csr.com>
 
->
-> MMC1 pbias and speed control fix for SDMMC1 extended I/O cell
->
-> Balaji T K (2):
-> =A0arm: omap4: hsmmc: Fix Pbias configuration on regulator OFF
-> =A0arm: omap4: hsmmc: configure SDMMC1_DR0 properly
->
-> =A0arch/arm/mach-omap2/hsmmc.c | =A0 16 +++-------------
-> =A01 files changed, 3 insertions(+), 13 deletions(-)
->
->
+Some devices like mmc are async detected very slow. For example,
+drivers/mmc/host/sdhci.c launchs a 200ms delayed work to detect
+mmc partitions then add disk.
+
+we do have wait_for_device_probe and scsi_complete_async_scans
+before calling swsusp_check, but it is not enough to wait mmc.
+
+This patch adds resumewait kernel param just like rootwait so
+that we have enough time to wait mmc ready. The differene is
+here we wait for resume partition but rootwait waits for rootfs
+partition.
+
+This patch will make swsusp support many embedded products
+without scsi devices but devices like mmc.
+
+This was tested on one ARM platform with Frank Hofmann's patch.
+
+Signed-off-by: Barry Song <Baohua.Song@csr.com>
+Reviewed-by: Valdis Kletnieks <valdis.kletnieks@vt.edu>
+---
+ -v2:
+ add document for the resumewait kernel parameter
+
+ Documentation/kernel-parameters.txt |    4 ++++
+ kernel/power/hibernate.c            |   16 ++++++++++++++++
+ 2 files changed, 20 insertions(+), 0 deletions(-)
+
+diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+index 614d038..2aed0d2 100644
+--- a/Documentation/kernel-parameters.txt
++++ b/Documentation/kernel-parameters.txt
+@@ -2237,6 +2237,10 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 			in <PAGE_SIZE> units (needed only for swap files).
+ 			See  Documentation/power/swsusp-and-swap-files.txt
+ 
++	resumewait	[HIBERNATION] Wait (indefinitely) for resume device to show up.
++			Useful for devices that are detected asynchronously
++			(e.g. USB and MMC devices).
++
+ 	hibernate=	[HIBERNATION]
+ 		noresume	Don't check if there's a hibernation image
+ 				present during boot.
+diff --git a/kernel/power/hibernate.c b/kernel/power/hibernate.c
+index 8f7b1db..9f4b4f3 100644
+--- a/kernel/power/hibernate.c
++++ b/kernel/power/hibernate.c
+@@ -14,6 +14,7 @@
+ #include <linux/reboot.h>
+ #include <linux/string.h>
+ #include <linux/device.h>
++#include <linux/async.h>
+ #include <linux/kmod.h>
+ #include <linux/delay.h>
+ #include <linux/fs.h>
+@@ -31,6 +32,7 @@
+ 
+ static int nocompress = 0;
+ static int noresume = 0;
++static int resume_wait = 0;
+ static char resume_file[256] = CONFIG_PM_STD_PARTITION;
+ dev_t swsusp_resume_device;
+ sector_t swsusp_resume_block;
+@@ -732,6 +734,13 @@ static int software_resume(void)
+ 		 * to wait for this to finish.
+ 		 */
+ 		wait_for_device_probe();
++
++		if (resume_wait) {
++			while ((swsusp_resume_device = name_to_dev_t(resume_file)) == 0)
++				msleep(10);
++			async_synchronize_full();
++		}
++
+ 		/*
+ 		 * We can't depend on SCSI devices being available after loading
+ 		 * one of their modules until scsi_complete_async_scans() is
+@@ -1060,7 +1069,14 @@ static int __init noresume_setup(char *str)
+ 	return 1;
+ }
+ 
++static int __init resumewait_setup(char *str)
++{
++	resume_wait = 1;
++	return 1;
++}
++
+ __setup("noresume", noresume_setup);
+ __setup("resume_offset=", resume_offset_setup);
+ __setup("resume=", resume_setup);
+ __setup("hibernate=", hibernate_setup);
++__setup("resumewait", resumewait_setup);
+-- 
+1.7.0.4
