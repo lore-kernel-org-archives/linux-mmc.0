@@ -1,111 +1,68 @@
-From: =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>
-Subject: Re: slow eMMC write speed
-Date: Thu, 29 Sep 2011 10:17:00 +0200
-Message-ID: <4E84297C.3060408@stericsson.com>
-References: <CAHzg1A9usWP8o3xjEq3yFn56bEqk_Qp0a8-2FJzoRZG1MqPRPA@mail.gmail.com> <CACRpkdYamRVpBbhAcgn7rXBGcgHUp7+9PCrmOUkXV1BvZ+4pDw@mail.gmail.com> <CAHzg1A9H31hWdEKR5+_p8HuA_oq6o8EkESpJ22kQ4e4oFDH8GQ@mail.gmail.com> <4E837C89.9020109@linux.intel.com> <CAHzg1A8Cgz8DNje_We9MKJ90E4=9BDw9XzvEQU5h2et8HPHBjw@mail.gmail.com> <4E838B43.5090605@linux.intel.com> <CAHzg1A-wa0Gm2jXrU6q3L7-NBzQQJmZszraDsfs-Dgb8F6gT6w@mail.gmail.com> <4E839302.5020001@linux.intel.com> <CACRpkdYdrfhFSfLh=Zgjox60KbYCqN+n_WdOaP2sv_mhai+iig@mail.gmail.com>
+From: NamJae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH v2] mmc : general purpose partition support.
+Date: Thu, 29 Sep 2011 17:35:04 +0900
+Message-ID: <CAKYAXd9GqnmV5vz1BUa0oaHE6TBt85gJKCxRmxuR=Qno5kXAkA@mail.gmail.com>
+References: <1316840820-2014-1-git-send-email-linkinjeon@gmail.com>
+	<CACRpkdZM-F-E_RUu4JTd-1J8UeQWXiekBcnMf7Jp7m07B8SYVQ@mail.gmail.com>
+	<CAKYAXd-=EaG02N6f2VWO0ZNCshWp6swiT-WwpOV-p+cTDL7wwA@mail.gmail.com>
+	<CACRpkdaCVj1J10BeCbOgwvRAqfN=gmV-1_FYmd9W1cwFqWMiag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:59305 "EHLO
-	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755604Ab1I2IRQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2011 04:17:16 -0400
-In-Reply-To: <CACRpkdYdrfhFSfLh=Zgjox60KbYCqN+n_WdOaP2sv_mhai+iig@mail.gmail.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:58528 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754872Ab1I2IfG convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2011 04:35:06 -0400
+In-Reply-To: <CACRpkdaCVj1J10BeCbOgwvRAqfN=gmV-1_FYmd9W1cwFqWMiag@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Linus Walleij <linus.walleij@linaro.org>
-Cc: J Freyensee <james_p_freyensee@linux.intel.com>, Praveen G K <praveen.gk@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Jon Medhurst <tixy@linaro.org>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf Hansson <Ulf.Hansson@stericsson.com>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>, Per Forlin <per.forlin@stericsson.com>, johan.rudholm@stericsson.com
 
-On 09/29/2011 09:24 AM, Linus Walleij wrote:
-> On Wed, Sep 28, 2011 at 11:34 PM, J Freyensee
-> <james_p_freyensee@linux.intel.com> wrote:
->=20
->> Now in the 3.0 kernel I know mmc_wait_for_req() has changed and the =
-goal was
->> to try and make that function a bit more non-blocking,
->=20
-> What has been done by Per F=F6rlin is to add pre_req/post_req hooks
-> for the datapath. This will improve data transfers in general if and
-> only if the driver can do some meaningful work in these hooks, so
-> your driver needs to be patched to use these.
->=20
-> Per patched a few select drivers to prepare the DMA buffers
-> at this time. In our case (mmci.c) dma_map_sg() can be done in
-> parallel with an ongoing transfer.
->=20
-> In our case (ux500, mmci, dma40) we don't have bounce buffers
-> so the only thing that will happen in parallel with ongoing transfers
-> is L2 and L1 cache flush. *still* we see a noticeable improvement in
-> throughput, most in L2, but even on the U300 which only does L1
-> cache I see some small improvements.
->=20
-> I *guess* if you're using bounce buffers, the gain will be even
-> more pronounced.
->=20
-> (Per, correct me if I'm wrong on any of this...)
->=20
-Summary:
-* The mmc block driver runs mmc_blk_rw_rq_prep(), mmc_queue_bounce_post=
-() and __blk_end_request() in parallel with an ongoing mmc transfer.
-* The driver may use the hooks to schedule low level work such as prepa=
-ring dma and caches in parallel with ongoing mmc transfer.
-* The big benefit of this is when using DMA and running the CPU at a lo=
-wer speed. Here's an example of that: https://wiki.linaro.org/WorkingGr=
-oups/Kernel/Specs/StoragePerfMMC-async-req#Block_device_tests_with_gove=
-rnor
-
-
->> with it too much because my current focus is on existing products an=
-d no
->> handheld product uses a 3.0 kernel yet (that I am aware of at least)=
-=2E
->>  However, I still see the fundamental problem is that the MMC stack,=
- which
->> was probably written with the intended purpose to be independent of =
-the OS
->> block subsystem (struct request and other stuff), really isn't indep=
-endent
->> of the OS block subsystem and will cause holdups between one another=
+2011/9/29 Linus Walleij <linus.walleij@linaro.org>:
+> On Wed, Sep 28, 2011 at 3:50 PM, NamJae Jeon <linkinjeon@gmail.com> w=
+rote:
+>> 2011/9/28 Linus Walleij <linus.walleij@linaro.org>:
+>>> On Sat, Sep 24, 2011 at 7:07 AM, Namjae Jeon <linkinjeon@gmail.com>=
+ wrote:
+>>>>
+>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 64 =C2=A01024 mmcblk0boot1
+>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 32 =C2=A01024 mmcblk0boot0
+>>>
+>>> Does this mean that each GP-partition can contain an MBR and thus s=
+everal
+>>> subpartitions so we get things like:
+>>>
+>>> mmcblk0gp1p1, mmcblk0gp1p2...
+>>>
+>> Yes, We can divide dos partitions(included MBR) using fdisk like you=
+r
+>> words(mmcblk0gp1p1, mmcblk0gp1p2...)
+>
+> OK that seems logical.
+>
+> If this goes in, make a mental note to patch udev default rules
+> too, because currently they look like this:
+>
+> rules.d/60-persistent-storage.rules:KERNEL=3D=3D"mmcblk[0-9]",
+> SUBSYSTEMS=3D=3D"mmc", ATTRS{name}=3D=3D"?*", ATTRS{serial}=3D=3D"?*"=
 ,
->> thereby dragging down read/write performance of the MMC.
->=20
-> There are two issues IIRC:
->=20
-> - The block layer does not provide enough buffers at a time for
->   the out-of-order buffer pre/post preps to make effect, I think this
->   was during writes only (Per, can you elaborate?)
->=20
-Writes are buffered and pushed down many in one go. This mean they can =
-easily be scheduled to be prepared while another is being transferred.
-Large continues reads are pushed down to MMC synchronously one request =
-per read ahead size. The next large continues read will wait in the blo=
-ck layer and not start until the current one is complete. Read more abo=
-ut the details here: https://wiki.linaro.org/WorkingGroups/Kernel/Specs=
-/StoragePerfMMC-async-req#Analysis_of_how_block_layer_adds_read_request=
-_to_the_mmc_block_queue
-
-> - Anything related to card geometries and special sectors and
->   sector sizes etc, i.e. the stuff that Arnd has analyzed in detail,
->   also Tixy looked into that for some cards IIRC.
->=20
-> Each needs to be adressed and is currently "to be done".
->=20
->> The other fundamental problem is the writes themselves.  Way, WAY mo=
-re
->> writes occur on a handheld system in an end-user's hands than reads.
->> Fundamental computer principle states "you make the common case fast=
-". So
->> focus should be on how to complete a write operation the fastest way
->> possible.
->=20
-> First case above I think, yep it needs looking into...
->=20
-The mmc non-blocking patches only tries to move any overhead in paralle=
-l with transfer. The actual transfer speed of MMC reads and writes are =
-unaffected. I am hoping that the eMMC v4.5 packed commands support (the=
- ability to group a series of commands in a single data transaction) wi=
-ll help to boost the performance in the future.
-
-Regards,
-Per
+> ENV{ID_NAME}=3D"$attr{name}", ENV{ID_SERIAL}=3D"$attr{serial}",
+> SYMLINK+=3D"disk/by-id/mmc-$env{ID_NAME}_$env{ID_SERIAL}"
+> rules.d/60-persistent-storage.rules:KERNEL=3D=3D"mmcblk[0-9]p[0-9]",
+> ENV{ID_NAME}=3D=3D"?*", ENV{ID_SERIAL}=3D=3D"?*",
+> SYMLINK+=3D"disk/by-id/mmc-$env{ID_NAME}_$env{ID_SERIAL}-part%n"
+>
+> (I guess Android also has this kind of rule baked into its "big init"
+> process that handles also what udev normally takes care of.)
+>
+> Anyway:
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Thanks Linus~
+I will modify a little code to improve the readability.
+When I post patch v3 again, plz ack one more.
+>
+> Yours,
+> Linus Walleij
+>
