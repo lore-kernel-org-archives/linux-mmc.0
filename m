@@ -1,80 +1,100 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 1/2] arm: omap4: hsmmc: Fix Pbias configuration on
- regulator OFF
-Date: Thu, 29 Sep 2011 09:20:06 -0700
-Message-ID: <20110929162006.GG6324@atomide.com>
-References: <1317307500-5514-1-git-send-email-balajitk@ti.com>
- <1317307500-5514-2-git-send-email-balajitk@ti.com>
+From: Andrei Warkentin <awarkentin@vmware.com>
+Subject: Re: [PATCH v3] mmc : general purpose partition support.
+Date: Thu, 29 Sep 2011 10:20:28 -0700 (PDT)
+Message-ID: <1522108758.811204.1317316828352.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+References: <1317309431-1898-1-git-send-email-linkinjeon@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:62221 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754552Ab1I2QUJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2011 12:20:09 -0400
-Content-Disposition: inline
-In-Reply-To: <1317307500-5514-2-git-send-email-balajitk@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1317309431-1898-1-git-send-email-linkinjeon@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: linux-kernel@vger.kernel.org, adrian hunter <adrian.hunter@intel.com>, linus walleij <linus.walleij@linaro.org>, james p freyensee <james_p_freyensee@linux.intel.com>, sebras@gmail.com, Ulf Hansson <Ulf.Hansson@stericsson.com>, stefan xk nilsson <stefan.xk.nilsson@stericsson.com>, per forlin <per.forlin@stericsson.com>, johan rudholm <johan.rudholm@stericsson.com>, cjb@laptop.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, kishore.kadiyala@ti.com, vishp@ti.com
 
-* Balaji T K <balajitk@ti.com> [110929 07:11]:
-> MMC1 data line IO's are powered down in before set regulator function.
-> IO's should not be powered ON when regulator is OFF.
-> Keep the IO's in power pown mode after regulator OFF.
-> Delete incorrect comments which are not applicable for OMAP4.
+Namjae,
 
-Care to check how this is different from what I added into fixes
-branch as commit 3fe8df93b0992199e3a0026fc51e90b705f94e40?
-
-Is this a separate issue?
-
-Tony
-
- 
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-> Reported-by: Viswanath Puttagunta <vishp@ti.com>
-> ---
->  arch/arm/mach-omap2/hsmmc.c |   14 ++------------
->  1 files changed, 2 insertions(+), 12 deletions(-)
+----- Original Message -----
+> From: "Namjae Jeon" <linkinjeon@gmail.com>
+> To: cjb@laptop.org, linux-mmc@vger.kernel.org
+> Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, "adrian hunter" <adrian.hunter@intel.com>, "linus walleij"
+> <linus.walleij@linaro.org>, "james p freyensee" <james_p_freyensee@linux.intel.com>, sebras@gmail.com, "Ulf Hansson"
+> <Ulf.Hansson@stericsson.com>, "stefan xk nilsson" <stefan.xk.nilsson@stericsson.com>, "per forlin"
+> <per.forlin@stericsson.com>, "johan rudholm" <johan.rudholm@stericsson.com>, "Namjae Jeon" <linkinjeon@gmail.com>
+> Sent: Thursday, September 29, 2011 11:17:11 AM
+> Subject: [PATCH v3] mmc : general purpose partition support.
 > 
-> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-> index 097a42d..9cc2eb7 100644
-> --- a/arch/arm/mach-omap2/hsmmc.c
-> +++ b/arch/arm/mach-omap2/hsmmc.c
-> @@ -129,15 +129,11 @@ static void omap4_hsmmc1_before_set_reg(struct device *dev, int slot,
->  	 * Assume we power both OMAP VMMC1 (for CMD, CLK, DAT0..3) and the
->  	 * card with Vcc regulator (from twl4030 or whatever).  OMAP has both
->  	 * 1.8V and 3.0V modes, controlled by the PBIAS register.
-> -	 *
-> -	 * In 8-bit modes, OMAP VMMC1A (for DAT4..7) needs a supply, which
-> -	 * is most naturally TWL VSIM; those pins also use PBIAS.
-> -	 *
-> -	 * FIXME handle VMMC1A as needed ...
->  	 */
->  	reg = omap4_ctrl_pad_readl(control_pbias_offset);
->  	reg &= ~(OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
-> -		OMAP4_MMC1_PWRDNZ_MASK);
-> +		OMAP4_MMC1_PWRDNZ_MASK |
-> +		OMAP4_MMC1_PBIASLITE_VMODE_MASK);
->  	omap4_ctrl_pad_writel(reg, control_pbias_offset);
->  }
->  
-> @@ -172,12 +168,6 @@ static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
->  			reg &= ~(OMAP4_MMC1_PWRDNZ_MASK);
->  			omap4_ctrl_pad_writel(reg, control_pbias_offset);
->  		}
-> -	} else {
-> -		reg = omap4_ctrl_pad_readl(control_pbias_offset);
-> -		reg |= (OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
-> -			OMAP4_MMC1_PWRDNZ_MASK |
-> -			OMAP4_MMC1_PBIASLITE_VMODE_MASK);
-> -		omap4_ctrl_pad_writel(reg, control_pbias_offset);
+> It allows gerneral purpose partitions in MMC Device.
+> And I try to simpliy make mmc_blk_alloc_parts using mmc_part
+> structure suggested by Andrei Warkentin.
+> After patching, we can see general purpose partitions like this.
+> > cat /proc/partitions
+>               179 0 847872 mmcblk0
+>               179 192 4096 mmcblk0gp3
+>               179 160 4096 mmcblk0gp2
+>               179 128 4096 mmcblk0gp1
+>               179 96  1052672 mmcblk0gp0
+>               179 64  1024 mmcblk0boot1
+>               179 32  1024 mmcblk0boot0
+> 
+> Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
+
+> +	 for (idx = 0; idx < MMC_NUM_BOOT_PARTITION; idx++) {
+> +		if (card->boot_part[idx].size) {
+> +			ret = mmc_blk_alloc_part(card, md,
+> +				card->boot_part[idx].cookie,
+> +				card->boot_part[idx].size >> 9,
+> +				card->boot_part[idx].force_ro,
+> +				card->boot_part[idx].name);
+> +			if (ret)
+> +				return ret;
+> +		}
+> +	}
+> +
+> +	for (idx = 0; idx < MMC_NUM_GP_PARTITION; idx++) {
+> +		if (card->gp_part[idx].size) {
+> +			ret = mmc_blk_alloc_part(card, md,
+> +				card->gp_part[idx].cookie,
+> +				card->gp_part[idx].size >> 9,
+> +				card->gp_part[idx].force_ro,
+> +				card->gp_part[idx].name);
+> +			if (ret)
+> +				return ret;
+
+You were on a better track before. Why does the block drivre need to know about the partition types?
+You should parse one array.
+
+> -		card->ext_csd.boot_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
+> +		if (ext_csd[EXT_CSD_BOOT_MULT])	{
+> +			part_cfg = EXT_CSD_PART_CONFIG_ACC_BOOT0;
+> +			for (idx = 0; idx < MMC_NUM_BOOT_PARTITION; idx++) {
+> +				card->boot_part[idx].size =
+> +					ext_csd[EXT_CSD_BOOT_MULT] << 17;
+> +				card->boot_part[idx].cookie = part_cfg++;
+> +				sprintf(card->boot_part[idx].name, "boot%d",
+> +					idx);
+> +				card->boot_part[idx].force_ro = true;
+> +			}
+> +		}
 >  	}
->  }
 >  
-> -- 
-> 1.7.0.4
-> 
+
+My earlier comment still stands - make your code look something like -
+
+if (ext_csd[EXT_CSD_BOOT_MULT])	{
+	part_cfg = EXT_CSD_PART_CONFIG_ACC_BOOT0;
+	for (idx = 0; idx < MMC_NUM_BOOT_PARTITION; idx++) {
+		mmc_part_add(card, size, part_cfg++, "boot%d", part_cfg++,
+				"boot%d", idx, true)
+}
+
+> +	struct mmc_part	boot_part[MMC_NUM_BOOT_PARTITION];	/* mmc boot
+> partitions */
+> +	struct mmc_part	gp_part[MMC_NUM_GP_PARTITION];	/* mmc general
+> purpose partitions */
+
+struct mmc_part parts[MMC_NUM_BOOT_PARTITION + MMC_NUM_GP_PARTITION];
+unsigned nr_parts;
+
+A
