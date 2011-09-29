@@ -1,96 +1,97 @@
-From: Barry Song <Barry.Song@csr.com>
-Subject: [PATCH] PM: HIBERNATION: add resume_wait param to support MMC-like devices as resume file
-Date: Thu, 29 Sep 2011 02:29:08 -0700
-Message-ID: <1317288548-19560-1-git-send-email-Barry.Song@csr.com>
+From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Subject: Re: [PATCH 1/1] mmc: Support of PCI mode for the dw_mmc driver This
+ Patch adds the support for the scenario where the Synopsys Designware IP is
+ present on the PCI bus.The patch adds the minimal modifications necessary for
+ the driver to work on PCI pl
+Date: Thu, 29 Sep 2011 16:04:24 +0530
+Message-ID: <CANYdXnrboFHapGYs=4fcj9BeiM7bxuLwp_OgiNz=VJb=ZzMxKA@mail.gmail.com>
+References: <CAFbHwiQ1zKPUjXLinZukbgbz1wqFs9q93W6y_owLiTvn=i-=Bw@mail.gmail.com>
+	<CANYdXnr+uHW5kq==tVkYAwY10qmZzxhWz-=bjbRJ3j10jjL+dA@mail.gmail.com>
+	<CAFbHwiTXKM+69kQ1x5HfwCjoqLfZ+Eb5Lb1Vp7Um-3xXEekMcA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cluster-g.mailcontrol.com ([208.87.233.190]:37547 "EHLO
-	cluster-g.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755034Ab1I2J3p (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2011 05:29:45 -0400
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:35447 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755520Ab1I2KeZ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2011 06:34:25 -0400
+Received: by iaqq3 with SMTP id q3so541927iaq.19
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Sep 2011 03:34:24 -0700 (PDT)
+In-Reply-To: <CAFbHwiTXKM+69kQ1x5HfwCjoqLfZ+Eb5Lb1Vp7Um-3xXEekMcA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: pavel@ucw.cz, rjw@sisk.pl, frank.hofmann@tomtom.com
-Cc: linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, workgroup.linux@csr.com, Barry Song <baohua.song@csr.com>, Barry Song <Baohua.Song@csr.com>
+To: Will Newton <will.newton@gmail.com>
+Cc: Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org
 
-From: Barry Song <baohua.song@csr.com>
+Hi Will,James,
+When I looked at few examples of the pci platform support in kernel,I
+could find that they have used separate files for pci and platform.I
+feel I may not split the driver into 3 files since its not as complex
+as sdhci driver.So can I merge the ifdefs and have separate functions
+itself for pci and non-pci platforms instead of having ifdef's in each
+function ?
 
-Some devices like mmc are async detected very slow. For example,
-drivers/mmc/host/sdhci.c launchs a 200ms delayed work to detect
-mmc partitions then add disk.
-
-we do have wait_for_device_probe and scsi_complete_async_scans
-before calling swsusp_check, but it is not enough to wait mmc.
-
-This patch adds resumewait kernel param just like rootwait so
-that we have enough time to wait mmc ready. The differene is
-here we wait for resume partition but rootwait waits for rootfs
-partition.
-
-This patch will make swsusp support many embedded products
-without scsi devices but devices like mmc.
-
-This was tested on one ARM platform with Frank Hofmann's patch.
-
-Signed-off-by: Barry Song <Baohua.Song@csr.com>
----
- kernel/power/hibernate.c |   16 ++++++++++++++++
- 1 files changed, 16 insertions(+), 0 deletions(-)
-
-diff --git a/kernel/power/hibernate.c b/kernel/power/hibernate.c
-index 8f7b1db..9f4b4f3 100644
---- a/kernel/power/hibernate.c
-+++ b/kernel/power/hibernate.c
-@@ -14,6 +14,7 @@
- #include <linux/reboot.h>
- #include <linux/string.h>
- #include <linux/device.h>
-+#include <linux/async.h>
- #include <linux/kmod.h>
- #include <linux/delay.h>
- #include <linux/fs.h>
-@@ -31,6 +32,7 @@
- 
- static int nocompress = 0;
- static int noresume = 0;
-+static int resume_wait = 0;
- static char resume_file[256] = CONFIG_PM_STD_PARTITION;
- dev_t swsusp_resume_device;
- sector_t swsusp_resume_block;
-@@ -732,6 +734,13 @@ static int software_resume(void)
- 		 * to wait for this to finish.
- 		 */
- 		wait_for_device_probe();
-+
-+		if (resume_wait) {
-+			while ((swsusp_resume_device = name_to_dev_t(resume_file)) == 0)
-+				msleep(10);
-+			async_synchronize_full();
-+		}
-+
- 		/*
- 		 * We can't depend on SCSI devices being available after loading
- 		 * one of their modules until scsi_complete_async_scans() is
-@@ -1060,7 +1069,14 @@ static int __init noresume_setup(char *str)
- 	return 1;
- }
- 
-+static int __init resumewait_setup(char *str)
-+{
-+	resume_wait = 1;
-+	return 1;
-+}
-+
- __setup("noresume", noresume_setup);
- __setup("resume_offset=", resume_offset_setup);
- __setup("resume=", resume_setup);
- __setup("hibernate=", hibernate_setup);
-+__setup("resumewait", resumewait_setup);
--- 
-1.7.1
+On Thu, Sep 29, 2011 at 2:54 PM, Will Newton <will.newton@gmail.com> wr=
+ote:
+>
+> On Thu, Sep 29, 2011 at 5:49 AM, Shashidhar Hiremath
+> <shashidharh@vayavyalabs.com> wrote:
+> >>> + =C2=A0 =C2=A0 =C2=A0 .detect_delay_ms =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D 200,
+> >>> + =C2=A0 =C2=A0 =C2=A0 .fifo_depth =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D 32,
+> >>> +};
+> >>> +#endif
+> >>> +
+> >>> =C2=A0static struct workqueue_struct *dw_mci_card_workqueue;
+> >>>
+> >>> =C2=A0#if defined(CONFIG_DEBUG_FS)
+> >>> @@ -682,6 +698,9 @@ static void dw_mci_set_ios(struct mmc_host *m=
+mc, struct mmc_ios *ios)
+> >>> =C2=A0{
+> >>> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct dw_mci_slot *slot =3D mmc_priv(=
+mmc);
+> >>> =C2=A0 =C2=A0 =C2=A0 =C2=A0u32 regs;
+> >>> +#ifdef CONFIG_MMC_DW_PCI
+> >>> + =C2=A0 =C2=A0 =C2=A0 u32 card_detect;
+> >>> +#endif
+> >>>
+> >>> =C2=A0 =C2=A0 =C2=A0 =C2=A0/* set default 1 bit mode */
+> >>> =C2=A0 =C2=A0 =C2=A0 =C2=A0slot->ctype =3D SDMMC_CTYPE_1BIT;
+> >>> @@ -716,7 +735,15 @@ static void dw_mci_set_ios(struct mmc_host *=
+mmc, struct mmc_ios *ios)
+> >>> =C2=A0 =C2=A0 =C2=A0 =C2=A0switch (ios->power_mode) {
+> >>> =C2=A0 =C2=A0 =C2=A0 =C2=A0case MMC_POWER_UP:
+> >>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0set_bit(DW=
+_MMC_CARD_NEED_INIT, &slot->flags);
+> >>> +#ifdef CONFIG_MMC_DW_PCI
+> >>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 /* Enable Powe=
+r to the card that has been detected */
+> >>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card_detect =3D=
+ mci_readl(slot->host, CDETECT);
+> >>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mci_writel(slo=
+t->host, PWREN, ((~card_detect) & 0x1));
+> >>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 break;
+> >>> + =C2=A0 =C2=A0 =C2=A0 case MMC_POWER_OFF:
+> >>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mci_writel(slo=
+t->host, PWREN, 0);
+> >>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0break;
+> >>> +#endif
+> >>
+> >> It may be safe to not #ifdef this, all the hardware I have uses an
+> >> external regulator so the PWREN bits do nothing. I could imagine
+> >> hardware that was non-PCI that could use PWREN however.
+> > The hardware that I was using required this to be done .else there =
+was
+> > not power to the card.
+>
+> I think it is safe to remove the #ifdef from around this block though
+> - for devices with external regulators setting PWREN does nothing so
+> it should be safe to do it unconditionally.
 
 
 
-Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
-More information can be found at www.csr.com. Follow CSR on Twitter at http://twitter.com/CSR_PLC and read our blog at www.csr.com/blog
+--
+regards,
+Shashidhar Hiremath
