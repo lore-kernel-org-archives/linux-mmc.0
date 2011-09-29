@@ -1,328 +1,410 @@
-From: Bryan Wu <bryan.wu@canonical.com>
-Subject: Re: [PATCH] leds-class: change back LEDS_CLASS to tristate instead of bool
-Date: Thu, 29 Sep 2011 10:00:58 +0800
-Message-ID: <CAK5ve-KoanwFGFJcxGQGmAW0yR+MYR1uVGM5q+=8u_ofHrhwOQ__18329.9897857525$1317261711$gmane$org@mail.gmail.com>
-References: <1317113432-7299-1-git-send-email-bryan.wu@canonical.com>
+From: Praveen G K <praveen.gk@gmail.com>
+Subject: Re: slow eMMC write speed
+Date: Wed, 28 Sep 2011 19:24:03 -0700
+Message-ID: <CAHzg1A9Pgug__=SRuhsQOaTQQLudZKQCN=tL9N0saDd5-ou5TQ@mail.gmail.com>
+References: <CAHzg1A9usWP8o3xjEq3yFn56bEqk_Qp0a8-2FJzoRZG1MqPRPA@mail.gmail.com>
+	<CACRpkdYamRVpBbhAcgn7rXBGcgHUp7+9PCrmOUkXV1BvZ+4pDw@mail.gmail.com>
+	<CAHzg1A9H31hWdEKR5+_p8HuA_oq6o8EkESpJ22kQ4e4oFDH8GQ@mail.gmail.com>
+	<4E837C89.9020109@linux.intel.com>
+	<CAHzg1A8Cgz8DNje_We9MKJ90E4=9BDw9XzvEQU5h2et8HPHBjw@mail.gmail.com>
+	<4E838B43.5090605@linux.intel.com>
+	<CAHzg1A-wa0Gm2jXrU6q3L7-NBzQQJmZszraDsfs-Dgb8F6gT6w@mail.gmail.com>
+	<4E839302.5020001@linux.intel.com>
+	<CAHzg1A9Cr46QqWbTZgtYmEXBYBxU5K2j829iGuXpkFPymkiapA@mail.gmail.com>
+	<4E83A6EF.4070301@linux.intel.com>
+	<CAHzg1A9QrZFLVxQHUgED3UbJCzLM7wmvWmx+0zPcimnGBbZnxQ@mail.gmail.com>
+	<25C8F176-4375-4328-9E95-7F8E90C34E18@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:58958 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754074Ab1I2CBS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2011 22:01:18 -0400
-In-Reply-To: <1317113432-7299-1-git-send-email-bryan.wu@canonical.com>
+Received: from mail-yi0-f46.google.com ([209.85.218.46]:48234 "EHLO
+	mail-yi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754019Ab1I2CYE convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2011 22:24:04 -0400
+Received: by yib18 with SMTP id 18so127057yib.19
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Sep 2011 19:24:03 -0700 (PDT)
+In-Reply-To: <25C8F176-4375-4328-9E95-7F8E90C34E18@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: tony@atomide.com, linux@arm.linux.org.uk, rpurdie@rpsys.net, manuel.lauss@gmail.com, cjb@laptop.org, cbou@mail.ru, dwmw2@infradead.org, linux-omap@vger.kernel.org, linux-arm-kernel@li
+To: Philip Rakity <prakity@marvell.com>
+Cc: J Freyensee <james_p_freyensee@linux.intel.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hiya,
+On Wed, Sep 28, 2011 at 5:57 PM, Philip Rakity <prakity@marvell.com> wr=
+ote:
+>
+>
+> On Sep 28, 2011, at 4:16 PM, Praveen G K wrote:
+>
+>> On Wed, Sep 28, 2011 at 3:59 PM, J Freyensee
+>> <james_p_freyensee@linux.intel.com> wrote:
+>>> On 09/28/2011 03:24 PM, Praveen G K wrote:
+>>>>
+>>>> On Wed, Sep 28, 2011 at 2:34 PM, J Freyensee
+>>>> <james_p_freyensee@linux.intel.com> =A0wrote:
+>>>>>
+>>>>> On 09/28/2011 02:03 PM, Praveen G K wrote:
+>>>>>>
+>>>>>> On Wed, Sep 28, 2011 at 2:01 PM, J Freyensee
+>>>>>> <james_p_freyensee@linux.intel.com> =A0 =A0wrote:
+>>>>>>>
+>>>>>>> On 09/28/2011 01:34 PM, Praveen G K wrote:
+>>>>>>>>
+>>>>>>>> On Wed, Sep 28, 2011 at 12:59 PM, J Freyensee
+>>>>>>>> <james_p_freyensee@linux.intel.com> =A0 =A0 =A0wrote:
+>>>>>>>>>
+>>>>>>>>> On 09/28/2011 12:06 PM, Praveen G K wrote:
+>>>>>>>>>>
+>>>>>>>>>> On Tue, Sep 27, 2011 at 10:42 PM, Linus Walleij
+>>>>>>>>>> <linus.walleij@linaro.org> =A0 =A0 =A0 =A0wrote:
+>>>>>>>>>>>
+>>>>>>>>>>> On Fri, Sep 23, 2011 at 7:05 AM, Praveen G K<praveen.gk@gma=
+il.com>
+>>>>>>>>>>> wrote:
+>>>>>>>>>>>
+>>>>>>>>>>>> I am working on the block driver module of the eMMC driver=
+ (SDIO
+>>>>>>>>>>>> 3.0
+>>>>>>>>>>>> controller). =A0I am seeing very low write speed for eMMC =
+transfers.
+>>>>>>>>>>>> On
+>>>>>>>>>>>> further debugging, I observed that every 63rd and 64th tra=
+nsfer
+>>>>>>>>>>>> takes
+>>>>>>>>>>>> a long time.
+>>>>>>>>>>>
+>>>>>>>>>>> Are you not just seeing the card-internal garbage collectio=
+n?
+>>>>>>>>>>> http://lwn.net/Articles/428584/
+>>>>>>>>>>
+>>>>>>>>>> Does this mean, theoretically, I should be able to achieve l=
+arger
+>>>>>>>>>> speeds if I am not using linux?
+>>>>>>>>>
+>>>>>>>>> In theory in a fairy-tale world, maybe, in reality, not reall=
+y. =A0In
+>>>>>>>>> R/W
+>>>>>>>>> performance measurements we have done, eMMC performance in pr=
+oducts
+>>>>>>>>> users
+>>>>>>>>> would buy falls well, well short of any theoretical numbers. =
+=A0We
+>>>>>>>>> believe
+>>>>>>>>> in
+>>>>>>>>> theory, the eMMC interface should be able to support up to 10=
+0MB/s,
+>>>>>>>>> but
+>>>>>>>>> in
+>>>>>>>>> reality on real customer platforms write bandwidths (for exam=
+ple)
+>>>>>>>>> barely
+>>>>>>>>> approach 20MB/s, regardless if it's a Microsoft Windows envir=
+onment
+>>>>>>>>> or
+>>>>>>>>> Android (Linux OS environment we care about). =A0So maybe it =
+is
+>>>>>>>>> software
+>>>>>>>>> implementation issues of multiple OSs preventing higher eMMC
+>>>>>>>>> performance
+>>>>>>>>> numbers (hence the reason why I sometimes ask basic coding qu=
+estions
+>>>>>>>>> of
+>>>>>>>>> the
+>>>>>>>>> MMC subsystem- the code isn't the easiest to follow); however=
+, one
+>>>>>>>>> looks
+>>>>>>>>> no
+>>>>>>>>> further than what Apple has done with the iPad2 to see that e=
+MMC
+>>>>>>>>> probably
+>>>>>>>>> just is not a good solution to use in the first place. =A0We =
+have
+>>>>>>>>> measured
+>>>>>>>>> Apple's iPad2 write performance on *WHAT A USER WOULD SEE* be=
+ing
+>>>>>>>>> double
+>>>>>>>>> what
+>>>>>>>>> we see with products using eMMC solutions. The big difference=
+? =A0Apple
+>>>>>>>>> doesn't use eMMC at all for the iPad2.
+>>>>>>>>
+>>>>>>>> Thanks for all the clarification. =A0The problem is I am seein=
+g write
+>>>>>>>> speeds of about 5MBps on a Sandisk eMMC product and I can clea=
+rly see
+>>>>>>>> the time lost when measured between sending a command and rece=
+iving a
+>>>>>>>> data irq. =A0I am not sure what kind of an issue this is. =A05=
+MBps feels
+>>>>>>>> really slow but can the internal housekeeping of the card take=
+ so much
+>>>>>>>> time?
+>>>>>>>
+>>>>>>> Have you tried to trace through all structs used for an MMC
+>>>>>>> operation??!
+>>>>>>> Good gravy, there are request, mmc_queue, mmc_card, mmc_host,
+>>>>>>> mmc_blk_request, mmc_request, multiple mmc_command and multiple
+>>>>>>> scatterlists
+>>>>>>> that these other structs use...I've been playing around on tryi=
+ng to
+>>>>>>> cache
+>>>>>>> some things to try and improve performance and it blows me away=
+ how
+>>>>>>> many
+>>>>>>> variables and pointers I have to keep track of for one operatio=
+n going
+>>>>>>> to
+>>>>>>> an
+>>>>>>> LBA on an MMC. =A0I keep wondering if more of the 'struct reque=
+st' could
+>>>>>>> have
+>>>>>>> been used, and 1/3 of these structures could be eliminated. =A0=
+And
+>>>>>>> another
+>>>>>>> thing I wonder too is how much of this infrastructure is really=
+ needed,
+>>>>>>> that
+>>>>>>> when I do ask "what is this for?" question on the list and no o=
+ne
+>>>>>>> responds,
+>>>>>>> if anyone else understands if it's needed either.
+>>>>>>
+>>>>>> I know I am not using the scatterlists, since the scatterlists a=
+re
+>>>>>> aggregated into a 64k bounce buffer. =A0Regarding the different =
+structs,
+>>>>>> I am just taking them on face value assuming everything works "w=
+ell".
+>>>>>> But, my concern is why does it take such a long time (250 ms) to
+>>>>>> return a transfer complete interrupt on occasional cases. =A0Dur=
+ing this
+>>>>>> time, the kernel is just waiting for the txfer_complete interrup=
+t.
+>>>>>> That's it.
+>>>>>
+>>>>> I think one fundamental problem with execution of the MMC command=
+s is
+>>>>> even
+>>>>> though the MMC has it's own structures and own DMA/Host-controlle=
+r, the
+>>>>> OS's
+>>>>> block subsystem and MMC subsystem do not really run independent o=
+f either
+>>>>> other and each are still tied to each others' fate, holding up
+>>>>> performance
+>>>>> of the kernel in general.
+>>>>>
+>>>>> In particular, I have found that in the 2.6.36+ kernels that the =
+sooner
+>>>>> you
+>>>>> can retire the 'struct request *req' (ie using __blk_end_request(=
+)) with
+>>>>> respect to when the mmc_wait_for_req() call is made, the higher
+>>>>> performance
+>>>>> you are going to get out of the OS in terms of reads/writes using=
+ an MMC.
+>>>>> mmc_wait_for_req() is a blocking call, so that OS 'struct request=
+ req'
+>>>>> will
+>>>>> just sit around and do nothing until mmc_wait_for_req() is done. =
+=A0I have
+>>>>> been able to do some caching of some commands, calling
+>>>>> __blk_end_request()
+>>>>> before mmc_wait_for_req(), and getting much higher performance in=
+ a few
+>>>>> experiments (but the work certainly is not ready for prime-time).
+>>>>>
+>>>>> Now in the 3.0 kernel I know mmc_wait_for_req() has changed and t=
+he goal
+>>>>> was
+>>>>> to try and make that function a bit more non-blocking, but I have=
+ not
+>>>>> played
+>>>>> with it too much because my current focus is on existing products=
+ and no
+>>>>> handheld product uses a 3.0 kernel yet (that I am aware of at lea=
+st).
+>>>>> However, I still see the fundamental problem is that the MMC stac=
+k,
+>>>>> which
+>>>>> was probably written with the intended purpose to be independent =
+of the
+>>>>> OS
+>>>>> block subsystem (struct request and other stuff), really isn't
+>>>>> independent
+>>>>> of the OS block subsystem and will cause holdups between one anot=
+her,
+>>>>> thereby dragging down read/write performance of the MMC.
+>>>>>
+>>>>> The other fundamental problem is the writes themselves. =A0Way, W=
+AY more
+>>>>> writes occur on a handheld system in an end-user's hands than rea=
+ds.
+>>>>> Fundamental computer principle states "you make the common case f=
+ast". So
+>>>>> focus should be on how to complete a write operation the fastest =
+way
+>>>>> possible.
+>>>>
+>>>> Thanks for the detailed explanation.
+>>>> Please let me know if there is a fundamental issue with the way I =
+am
+>>>> inserting the high res timers. =A0In the block.c file, I am timing=
+ the
+>>>> transfers as follows
+>>>>
+>>>> 1. Start timer
+>>>> mmc_queue_bounce_pre()
+>>>> mmc_wait_for_req()
+>>>> mmc_queue_bounce_post()
+>>>> End timer
+>>>>
+>>>> So, I don't really have to worry about the blk_end_request right.
+>>>> Like you said, wait_for_req is a blocking wait. =A0I don't see wha=
+t is
+>>>> wrong with that being a blocking wait, because until you get the d=
+ata
+>>>> xfer complete irq, there is no point in going ahead. =A0The
+>>>> blk_end_request comes later in the picture only when all the data =
+is
+>>>> transferred to the card.
+>>>
+>>> Yes, that is correct.
+>>>
+>>> But if you can do some cache trickery or queue tricks, you can dela=
+y when
+>>> you have to actually write to the MMC, so then __blk_end_request() =
+and
+>>> retiring the 'struct request *req' becomes the time-sync. =A0That i=
+s a reason
+>>> why mmc_wait_for_req() got some work done on it in the 3.0 kernel. =
+=A0The OS
+>>> does not have to wait for the host controller to complete the opera=
+tion (ie,
+>>> block on mmc_wait_for_data()) if there is no immediate dependency o=
+n that
+>>> data- that is kind-of dumb. =A0This is why this can be a problem an=
+d a time
+>>> sync. =A0It's no different than out-of-order execution in CPUs.
+>>
+>> Thanks I'll look into the 3.0 code to see what the changes are and
+>> whether it can improve the speed. =A0Thanks for your suggestions.
+>>
+>>>> My line of thought is that the card is taking a lot of time for it=
+s
+>>>> internal housekeeping.
+>>>
+>>> Each 'write' to a solid-state/nand/flash requires an erase operatio=
+n first,
+>>> so yes, there is more housekeeping going on than a simple 'write'.
+>>>
+>>> But, I want to be absolutely sure of my
+>>>>
+>>>> analysis before I can pass that judgement.
+>>>>
+>>>> I have also used another Toshiba card that gives me about 12 MBps
+>>>> write speed for the same code, but I am worried is whether I am
+>>>> masking some issue by blaming it on the card. =A0What if the Toshi=
+ba
+>>>> card can give a throughput more than 12MBps ideally?
+>>>
+>>> No clue...you'd have to talk to Toshiba.
+>>>
+>>>>
+>>>> Or could there be an issue that the irq handler(sdhci_irq) is call=
+ed
+>>>> with some kind of a delay and is there a possibility that we are n=
+ot
+>>>> capturing the transfer complete interrupt immediately?
+>>>>
+>>>>>>
+>>>>>>> I mean, for the usual transfers it takes about 3ms to transfer
+>>>>>>>>
+>>>>>>>> 64kB of data, but for the 63rd and 64th transfers, it takes 25=
+0 ms.
+>>>>>>>> The thing is this is not on a file system. =A0I am measuring t=
+he speed
+>>>>>>>> using basic "dd" command to write directly to the block device=
+=2E
+>>>>>>>>
+>>>>>>>>> So, is this a software issue? or if
+>>>>>>>>>>
+>>>>>>>>>> there is a way to increase the size of bounce buffers to 4MB=
+?
+>>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>>> Yours,
+>>>>>>>>>>> Linus Walleij
+>>>>>>>>>>>
+>>>>>>>>>> --
+>>>>>>>>>> To unsubscribe from this list: send the line "unsubscribe li=
+nux-mmc"
+>>>>>>>>>> in
+>>>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>>>> More majordomo info at =A0http://vger.kernel.org/majordomo-i=
+nfo.html
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> --
+>>>>>>>>> J (James/Jay) Freyensee
+>>>>>>>>> Storage Technology Group
+>>>>>>>>> Intel Corporation
+>>>>>>>>>
+>>>>>>>> --
+>>>>>>>> To unsubscribe from this list: send the line "unsubscribe linu=
+x-mmc"
+>>>>>>>> in
+>>>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>>>> More majordomo info at =A0http://vger.kernel.org/majordomo-inf=
+o.html
+>>>>>>>
+>>>>>>>
+>>>>>>> --
+>>>>>>> J (James/Jay) Freyensee
+>>>>>>> Storage Technology Group
+>>>>>>> Intel Corporation
+>>>>>>>
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe linux-=
+mmc" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.=
+html
+>>>>>
+>>>>>
+>>>>> --
+>>>>> J (James/Jay) Freyensee
+>>>>> Storage Technology Group
+>>>>> Intel Corporation
+>>>>>
+>>>
+>
+> some questions:
+>
+> does using a bounce buffer make things faster ?
+>
+> I think you are using sdma. =A0 I am wondering if there is a way to i=
+ncrease the the xfer size.
+> Is there some magic number inside the mmc code that can be increased =
+?
 
-Any comments and need I do anything to improve this patch?
-
-Thanks,
--Bryan
-
-On Tue, Sep 27, 2011 at 4:50 PM, Bryan Wu <bryan.wu@canonical.com> wrot=
-e:
-> LEDS_CLASS is required by leds and trigger drivers, but we can build =
-it as
-> module. =A0So change this option back as tristate and treak the help =
-message
-> as well.
+The bounce buffer increases the speed, but that is limited to 64kB.  I
+don't know why it is limited to that number though.
+> Philip
 >
-> LEDS_TRIGGERS depends on LEDS_CLASSS, which should be tristate. =A0So=
- set it
-> as tristate too and update header files as well.
 >
-> Change those ifdefs to take care of module configuration.
->
-> Signed-off-by: Bryan Wu <bryan.wu@canonical.com>
-> ---
-> =A0arch/arm/mach-omap1/board-ams-delta.c | =A0 =A04 ++--
-> =A0drivers/leds/Kconfig =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A09=
- ++++++---
-> =A0drivers/leds/led-class.c =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A08 +++=
-+----
-> =A0drivers/leds/leds.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0 =A02=
- +-
-> =A0drivers/mmc/host/au1xmmc.c =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A06 +++--=
--
-> =A0drivers/power/power_supply.h =A0 =A0 =A0 =A0 =A0| =A0 =A02 +-
-> =A0include/linux/leds.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A07=
- ++++---
-> =A0include/linux/mmc/host.h =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A02 +-
-> =A0include/linux/power_supply.h =A0 =A0 =A0 =A0 =A0| =A0 =A02 +-
-> =A09 files changed, 23 insertions(+), 19 deletions(-)
->
-> diff --git a/arch/arm/mach-omap1/board-ams-delta.c b/arch/arm/mach-om=
-ap1/board-ams-delta.c
-> index b2572f7..fd28696 100644
-> --- a/arch/arm/mach-omap1/board-ams-delta.c
-> +++ b/arch/arm/mach-omap1/board-ams-delta.c
-> @@ -241,7 +241,7 @@ static struct i2c_board_info ams_delta_camera_boa=
-rd_info[] =3D {
-> =A0 =A0 =A0 =A0},
-> =A0};
->
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
-> =A0DEFINE_LED_TRIGGER(ams_delta_camera_led_trigger);
->
-> =A0static int ams_delta_camera_power(struct device *dev, int power)
-> @@ -320,7 +320,7 @@ static void __init ams_delta_init(void)
->
-> =A0 =A0 =A0 =A0omap1_usb_init(&ams_delta_usb_config);
-> =A0 =A0 =A0 =A0omap1_set_camera_info(&ams_delta_camera_platform_data)=
-;
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
-> =A0 =A0 =A0 =A0led_trigger_register_simple("ams_delta_camera",
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0&ams_delta_camera_led_=
-trigger);
-> =A0#endif
-> diff --git a/drivers/leds/Kconfig b/drivers/leds/Kconfig
-> index ff203a4..c30233e 100644
-> --- a/drivers/leds/Kconfig
-> +++ b/drivers/leds/Kconfig
-> @@ -17,10 +17,13 @@ menuconfig NEW_LEDS
-> =A0if NEW_LEDS
->
-> =A0config LEDS_CLASS
-> - =A0 =A0 =A0 bool "LED Class Support"
-> + =A0 =A0 =A0 tristate "LED Class Support"
-> =A0 =A0 =A0 =A0help
-> =A0 =A0 =A0 =A0 =A0This option enables the led sysfs class in /sys/cl=
-ass/leds. =A0You'll
-> - =A0 =A0 =A0 =A0 need this to do anything useful with LEDs. =A0If un=
-sure, say N.
-> + =A0 =A0 =A0 =A0 need this to do anything useful with LEDs. =A0If un=
-sure, say M.
-> +
-> + =A0 =A0 =A0 =A0 Note: don't disable it as N, because plenty of led =
-and trigger drivers
-> + =A0 =A0 =A0 =A0 are using this option.
->
-> =A0comment "LED drivers"
->
-> @@ -388,7 +391,7 @@ config LEDS_RENESAS_TPU
-> =A0 =A0 =A0 =A0 =A0Brightness control is supported but hardware blink=
-ing is not.
->
-> =A0config LEDS_TRIGGERS
-> - =A0 =A0 =A0 bool "LED Trigger support"
-> + =A0 =A0 =A0 tristate "LED Trigger support"
-> =A0 =A0 =A0 =A0depends on LEDS_CLASS
-> =A0 =A0 =A0 =A0help
-> =A0 =A0 =A0 =A0 =A0This option enables trigger support for the leds c=
-lass.
-> diff --git a/drivers/leds/led-class.c b/drivers/leds/led-class.c
-> index dc3d3d8..1f54cb0 100644
-> --- a/drivers/leds/led-class.c
-> +++ b/drivers/leds/led-class.c
-> @@ -75,7 +75,7 @@ static ssize_t led_max_brightness_show(struct devic=
-e *dev,
-> =A0static struct device_attribute led_class_attrs[] =3D {
-> =A0 =A0 =A0 =A0__ATTR(brightness, 0644, led_brightness_show, led_brig=
-htness_store),
-> =A0 =A0 =A0 =A0__ATTR(max_brightness, 0444, led_max_brightness_show, =
-NULL),
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
-> =A0 =A0 =A0 =A0__ATTR(trigger, 0644, led_trigger_show, led_trigger_st=
-ore),
-> =A0#endif
-> =A0 =A0 =A0 =A0__ATTR_NULL,
-> @@ -209,7 +209,7 @@ int led_classdev_register(struct device *parent, =
-struct led_classdev *led_cdev)
-> =A0 =A0 =A0 =A0if (IS_ERR(led_cdev->dev))
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return PTR_ERR(led_cdev->dev);
->
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
-> =A0 =A0 =A0 =A0init_rwsem(&led_cdev->trigger_lock);
-> =A0#endif
-> =A0 =A0 =A0 =A0/* add to the list of leds */
-> @@ -226,7 +226,7 @@ int led_classdev_register(struct device *parent, =
-struct led_classdev *led_cdev)
-> =A0 =A0 =A0 =A0led_cdev->blink_timer.function =3D led_timer_function;
-> =A0 =A0 =A0 =A0led_cdev->blink_timer.data =3D (unsigned long)led_cdev=
-;
->
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
-> =A0 =A0 =A0 =A0led_trigger_set_default(led_cdev);
-> =A0#endif
->
-> @@ -245,7 +245,7 @@ EXPORT_SYMBOL_GPL(led_classdev_register);
-> =A0*/
-> =A0void led_classdev_unregister(struct led_classdev *led_cdev)
-> =A0{
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
-> =A0 =A0 =A0 =A0down_write(&led_cdev->trigger_lock);
-> =A0 =A0 =A0 =A0if (led_cdev->trigger)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0led_trigger_set(led_cdev, NULL);
-> diff --git a/drivers/leds/leds.h b/drivers/leds/leds.h
-> index e77c7f8..53b59b7 100644
-> --- a/drivers/leds/leds.h
-> +++ b/drivers/leds/leds.h
-> @@ -35,7 +35,7 @@ static inline int led_get_brightness(struct led_cla=
-ssdev *led_cdev)
-> =A0extern struct rw_semaphore leds_list_lock;
-> =A0extern struct list_head leds_list;
->
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
-> =A0void led_trigger_set_default(struct led_classdev *led_cdev);
-> =A0void led_trigger_set(struct led_classdev *led_cdev,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct led_trigger *tr=
-igger);
-> diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
-> index 56e7834..83f4913 100644
-> --- a/drivers/mmc/host/au1xmmc.c
-> +++ b/drivers/mmc/host/au1xmmc.c
-> @@ -1043,7 +1043,7 @@ static int __devinit au1xmmc_probe(struct platf=
-orm_device *pdev)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "using PIO\n");
-> =A0 =A0 =A0 =A0}
->
-> -#ifdef CONFIG_LEDS_CLASS
-> +#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
-> =A0 =A0 =A0 =A0if (host->platdata && host->platdata->led) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct led_classdev *led =3D host->pla=
-tdata->led;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0led->name =3D mmc_hostname(mmc);
-> @@ -1072,7 +1072,7 @@ static int __devinit au1xmmc_probe(struct platf=
-orm_device *pdev)
-> =A0 =A0 =A0 =A0return 0; =A0 =A0 =A0 /* all ok */
->
-> =A0out6:
-> -#ifdef CONFIG_LEDS_CLASS
-> +#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
-> =A0 =A0 =A0 =A0if (host->platdata && host->platdata->led)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0led_classdev_unregister(host->platdata=
-->led);
-> =A0out5:
-> @@ -1111,7 +1111,7 @@ static int __devexit au1xmmc_remove(struct plat=
-form_device *pdev)
-> =A0 =A0 =A0 =A0if (host) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_remove_host(host->mmc);
->
-> -#ifdef CONFIG_LEDS_CLASS
-> +#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (host->platdata && host->platdata->=
-led)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0led_classdev_unregiste=
-r(host->platdata->led);
-> =A0#endif
-> diff --git a/drivers/power/power_supply.h b/drivers/power/power_suppl=
-y.h
-> index 018de2b..efa9544 100644
-> --- a/drivers/power/power_supply.h
-> +++ b/drivers/power/power_supply.h
-> @@ -22,7 +22,7 @@ static inline void power_supply_init_attrs(struct d=
-evice_type *dev_type) {}
->
-> =A0#endif /* CONFIG_SYSFS */
->
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
->
-> =A0extern void power_supply_update_leds(struct power_supply *psy);
-> =A0extern int power_supply_create_triggers(struct power_supply *psy);
-> diff --git a/include/linux/leds.h b/include/linux/leds.h
-> index 5884def..051bc7e 100644
-> --- a/include/linux/leds.h
-> +++ b/include/linux/leds.h
-> @@ -66,7 +66,7 @@ struct led_classdev {
-> =A0 =A0 =A0 =A0struct timer_list =A0 =A0 =A0 =A0blink_timer;
-> =A0 =A0 =A0 =A0int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0blink_b=
-rightness;
->
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
-> =A0 =A0 =A0 =A0/* Protects the trigger data below */
-> =A0 =A0 =A0 =A0struct rw_semaphore =A0 =A0 =A0trigger_lock;
->
-> @@ -115,7 +115,7 @@ extern void led_brightness_set(struct led_classde=
-v *led_cdev,
-> =A0/*
-> =A0* LED Triggers
-> =A0*/
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
->
-> =A0#define TRIG_NAME_MAX 50
->
-> @@ -161,7 +161,8 @@ extern void led_trigger_blink(struct led_trigger =
-*trigger,
-> =A0#endif
->
-> =A0/* Trigger specific functions */
-> -#ifdef CONFIG_LEDS_TRIGGER_IDE_DISK
-> +#if defined(CONFIG_LEDS_TRIGGER_IDE_DISK) || \
-> + =A0 =A0 =A0 defined(CONFIG_LEDS_TRIGGER_IDE_DISK_MODULE)
-> =A0extern void ledtrig_ide_activity(void);
-> =A0#else
-> =A0#define ledtrig_ide_activity() do {} while(0)
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index aed5bc7..adac344 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -300,7 +300,7 @@ struct mmc_host {
->
-> =A0 =A0 =A0 =A0mmc_pm_flag_t =A0 =A0 =A0 =A0 =A0 pm_flags; =A0 =A0 =A0=
- /* requested pm features */
->
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
-> =A0 =A0 =A0 =A0struct led_trigger =A0 =A0 =A0*led; =A0 =A0 =A0 =A0 =A0=
- /* activity led */
-> =A0#endif
->
-> diff --git a/include/linux/power_supply.h b/include/linux/power_suppl=
-y.h
-> index 204c18d..cb09fa0 100644
-> --- a/include/linux/power_supply.h
-> +++ b/include/linux/power_supply.h
-> @@ -164,7 +164,7 @@ struct power_supply {
-> =A0 =A0 =A0 =A0struct device *dev;
-> =A0 =A0 =A0 =A0struct work_struct changed_work;
->
-> -#ifdef CONFIG_LEDS_TRIGGERS
-> +#if defined(CONFIG_LEDS_TRIGGERS) || defined(CONFIG_LEDS_TRIGGERS_MO=
-DULE)
-> =A0 =A0 =A0 =A0struct led_trigger *charging_full_trig;
-> =A0 =A0 =A0 =A0char *charging_full_trig_name;
-> =A0 =A0 =A0 =A0struct led_trigger *charging_trig;
-> --
-> 1.7.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-omap"=
+>>>
+>>> --
+>>> J (James/Jay) Freyensee
+>>> Storage Technology Group
+>>> Intel Corporation
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
  in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 >
-
-
-
---=20
-Bryan Wu <bryan.wu@canonical.com>
-Kernel Developer =A0 =A0+86.138-1617-6545 Mobile
-Ubuntu Kernel Team
-Canonical Ltd. =A0 =A0 =A0www.canonical.com
-Ubuntu - Linux for human beings | www.ubuntu.com
+>
