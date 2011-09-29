@@ -1,498 +1,146 @@
-From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Subject: [PATCH v2 1/1] mmc: Support of PCI mode for the dw_mmc driver
-Date: Thu, 29 Sep 2011 23:10:52 +0530
-Message-ID: <1317318052-2750-1-git-send-email-shashidharh@vayavyalabs.com>
+From: J Freyensee <james_p_freyensee@linux.intel.com>
+Subject: Re: slow eMMC write speed
+Date: Thu, 29 Sep 2011 13:16:10 -0700
+Message-ID: <4E84D20A.4040707@linux.intel.com>
+References: <CAHzg1A9usWP8o3xjEq3yFn56bEqk_Qp0a8-2FJzoRZG1MqPRPA@mail.gmail.com> <CACRpkdYamRVpBbhAcgn7rXBGcgHUp7+9PCrmOUkXV1BvZ+4pDw@mail.gmail.com> <CAHzg1A9H31hWdEKR5+_p8HuA_oq6o8EkESpJ22kQ4e4oFDH8GQ@mail.gmail.com> <4E837C89.9020109@linux.intel.com> <CAHzg1A8Cgz8DNje_We9MKJ90E4=9BDw9XzvEQU5h2et8HPHBjw@mail.gmail.com> <4E838B43.5090605@linux.intel.com> <CAHzg1A-wa0Gm2jXrU6q3L7-NBzQQJmZszraDsfs-Dgb8F6gT6w@mail.gmail.com> <4E839302.5020001@linux.intel.com> <CACRpkdYdrfhFSfLh=Zgjox60KbYCqN+n_WdOaP2sv_mhai+iig@mail.gmail.com> <4E84297C.3060408@stericsson.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:61990 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753529Ab1I2Rlg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2011 13:41:36 -0400
-Received: by eya28 with SMTP id 28so626754eya.19
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Sep 2011 10:41:35 -0700 (PDT)
+Received: from mga01.intel.com ([192.55.52.88]:58958 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755709Ab1I2UIn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 29 Sep 2011 16:08:43 -0400
+In-Reply-To: <4E84297C.3060408@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Matt Fleming <matt@console-pimps.org>, Zhangfei Gao <zhangfei.gao@>
-Cc: linux-mmc@vger.kernel.org, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+To: =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Praveen G K <praveen.gk@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Jon Medhurst <tixy@linaro.org>
 
-Support of PCI mode for the dw_mmc driver This Patch adds the support for the scenario where the Synopsys Designware IP is present on the PCI bus.The patch adds the minimal modifications necessary for the driver to work on PCI platform. The Driver has also been tested for on the PCI platform with single Card Slot.
+On 09/29/2011 01:17 AM, Per F=F6rlin wrote:
+> On 09/29/2011 09:24 AM, Linus Walleij wrote:
+>> On Wed, Sep 28, 2011 at 11:34 PM, J Freyensee
+>> <james_p_freyensee@linux.intel.com>  wrote:
+>>
+>>> Now in the 3.0 kernel I know mmc_wait_for_req() has changed and the=
+ goal was
+>>> to try and make that function a bit more non-blocking,
+>>
+>> What has been done by Per F=F6rlin is to add pre_req/post_req hooks
+>> for the datapath. This will improve data transfers in general if and
+>> only if the driver can do some meaningful work in these hooks, so
+>> your driver needs to be patched to use these.
+>>
+>> Per patched a few select drivers to prepare the DMA buffers
+>> at this time. In our case (mmci.c) dma_map_sg() can be done in
+>> parallel with an ongoing transfer.
+>>
+>> In our case (ux500, mmci, dma40) we don't have bounce buffers
+>> so the only thing that will happen in parallel with ongoing transfer=
+s
+>> is L2 and L1 cache flush. *still* we see a noticeable improvement in
+>> throughput, most in L2, but even on the U300 which only does L1
+>> cache I see some small improvements.
+>>
+>> I *guess* if you're using bounce buffers, the gain will be even
+>> more pronounced.
+>>
+>> (Per, correct me if I'm wrong on any of this...)
+>>
+> Summary:
+> * The mmc block driver runs mmc_blk_rw_rq_prep(), mmc_queue_bounce_po=
+st() and __blk_end_request() in parallel with an ongoing mmc transfer.
+> * The driver may use the hooks to schedule low level work such as pre=
+paring dma and caches in parallel with ongoing mmc transfer.
+> * The big benefit of this is when using DMA and running the CPU at a =
+lower speed. Here's an example of that: https://wiki.linaro.org/Working=
+Groups/Kernel/Specs/StoragePerfMMC-async-req#Block_device_tests_with_go=
+vernor
+>
+>
+>>> with it too much because my current focus is on existing products a=
+nd no
+>>> handheld product uses a 3.0 kernel yet (that I am aware of at least=
+).
+>>>   However, I still see the fundamental problem is that the MMC stac=
+k, which
+>>> was probably written with the intended purpose to be independent of=
+ the OS
+>>> block subsystem (struct request and other stuff), really isn't inde=
+pendent
+>>> of the OS block subsystem and will cause holdups between one anothe=
+r,
+>>> thereby dragging down read/write performance of the MMC.
+>>
+>> There are two issues IIRC:
+>>
+>> - The block layer does not provide enough buffers at a time for
+>>    the out-of-order buffer pre/post preps to make effect, I think th=
+is
+>>    was during writes only (Per, can you elaborate?)
 
-Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
----
-v2:
-*As per Suggestions by Will Newton and James Hogan
--Reduced the number of ifdefs
+As I've been playing around with with buffering/caching, it seems to me=
+=20
+an opportunity to simplify things in the MMC space is to eliminate the=20
+need for a mmc_blk_request struct or mmc_request struct.  With looking=20
+through the mmc_blk_issue_rw_rq(), there is a lot of work to initialize=
+=20
+struct mmc_blk_request brq, only to pass a struct mmc_queue variable th=
+e=20
+actual mmc_wait_for_req() instead.  In fact, some of the parameters in=20
+the struct mmc_blk_request member brq.mrq (of type mmc_request) wind up=
+=20
+just pointing to members in struct mmc_blk_request brq.  Granted, I=20
+totally don't understand everything going on here and I haven't studied=
+=20
+this code nearly as long as others, but when I see something like this,=
+=20
+the first thing that comes up in my mind is 'elimination/simplification=
+=20
+opportunity'.
 
- drivers/mmc/host/Kconfig   |   11 ++
- drivers/mmc/host/dw_mmc.c  |  352 ++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/dw_mmc.h  |   13 ++
- include/linux/mmc/dw_mmc.h |    4 +
- 4 files changed, 380 insertions(+), 0 deletions(-)
+>>
+> Writes are buffered and pushed down many in one go. This mean they ca=
+n easily be scheduled to be prepared while another is being transferred=
+=2E
+> Large continues reads are pushed down to MMC synchronously one reques=
+t per read ahead size. The next large continues read will wait in the b=
+lock layer and not start until the current one is complete. Read more a=
+bout the details here: https://wiki.linaro.org/WorkingGroups/Kernel/Spe=
+cs/StoragePerfMMC-async-req#Analysis_of_how_block_layer_adds_read_reque=
+st_to_the_mmc_block_queue
+>
+>> - Anything related to card geometries and special sectors and
+>>    sector sizes etc, i.e. the stuff that Arnd has analyzed in detail=
+,
+>>    also Tixy looked into that for some cards IIRC.
+>>
+>> Each needs to be adressed and is currently "to be done".
+>>
+>>> The other fundamental problem is the writes themselves.  Way, WAY m=
+ore
+>>> writes occur on a handheld system in an end-user's hands than reads=
+=2E
+>>> Fundamental computer principle states "you make the common case fas=
+t". So
+>>> focus should be on how to complete a write operation the fastest wa=
+y
+>>> possible.
+>>
+>> First case above I think, yep it needs looking into...
+>>
+> The mmc non-blocking patches only tries to move any overhead in paral=
+lel with transfer. The actual transfer speed of MMC reads and writes ar=
+e unaffected. I am hoping that the eMMC v4.5 packed commands support (t=
+he ability to group a series of commands in a single data transaction) =
+will help to boost the performance in the future.
+>
+> Regards,
+> Per
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 8c87096..84d8908 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -526,6 +526,17 @@ config MMC_DW
- 	  block, this provides host support for SD and MMC interfaces, in both
- 	  PIO and external DMA modes.
- 
-+config MMC_DW_PCI
-+	bool "MMC_DW Support On PCI bus"
-+	depends on MMC_DW && PCI
-+	help
-+	  This selects the PCI for the Synopsys Designware Mobile Storage IP.
-+
-+	  If you have a controller with this interface, say Y or M here.
-+
-+	  If unsure, say N.
-+
-+
- config MMC_DW_IDMAC
- 	bool "Internal DMAC interface"
- 	depends on MMC_DW
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index ff0f714..0bd9e16 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -21,6 +21,7 @@
- #include <linux/interrupt.h>
- #include <linux/ioport.h>
- #include <linux/module.h>
-+#include <linux/pci.h>
- #include <linux/platform_device.h>
- #include <linux/scatterlist.h>
- #include <linux/seq_file.h>
-@@ -101,6 +102,7 @@ struct dw_mci_slot {
- 	int			last_detect_state;
- };
- 
-+
- static struct workqueue_struct *dw_mci_card_workqueue;
- 
- #if defined(CONFIG_DEBUG_FS)
-@@ -682,6 +684,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	u32 regs;
-+	u32 card_detect;
- 
- 	/* set default 1 bit mode */
- 	slot->ctype = SDMMC_CTYPE_1BIT;
-@@ -716,6 +719,13 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	switch (ios->power_mode) {
- 	case MMC_POWER_UP:
- 		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
-+		/* Enable Power to the card that has been detected */
-+		card_detect = mci_readl(slot->host, CDETECT);
-+		/* Enabling power for card 0 when PCI is the interface */
-+		mci_writel(slot->host, PWREN, ((~card_detect) & 0x1));
-+		break;
-+	case MMC_POWER_OFF:
-+		mci_writel(slot->host, PWREN, 0);
- 		break;
- 	default:
- 		break;
-@@ -1775,6 +1785,345 @@ static bool mci_wait_reset(struct device *dev, struct dw_mci *host)
- 	return false;
- }
- 
-+#ifdef CONFIG_MMC_DW_PCI
-+
-+static struct pci_device_id dw_mci_id  = {  PCI_DEVICE(DEVICE_ID, VENDOR_ID) };
-+
-+struct dw_mci_board pci_board_data = {
-+	.num_slots			= 1,
-+	.caps				= DW_MCI_CAPABILITIES,
-+	.bus_hz				= 33 * 1000 * 1000,
-+	.detect_delay_ms		= 200,
-+	.fifo_depth			= 32,
-+};
-+
-+static int __devinit dw_mci_probe(struct pci_dev *pdev,
-+				  const struct pci_device_id *entries)
-+{
-+	struct dw_mci *host;
-+	struct resource	*regs;
-+	struct dw_mci_board *pdata;
-+	int irq, ret, i, width;
-+	u32 fifo_size;
-+
-+	ret = pci_enable_device(pdev);
-+	if (ret)
-+		return ret;
-+	if (pci_request_regions(pdev, "dw_mmc")) {
-+		ret = -ENODEV;
-+		goto err_freehost;
-+	}
-+	irq = pdev->irq;
-+
-+	host = kzalloc(sizeof(struct dw_mci), GFP_KERNEL);
-+	if (!host)
-+		return -ENOMEM;
-+
-+	host->pdev = pdev;
-+	host->pdata = pdata = &pci_board_data;
-+
-+	if (!pdata->select_slot && pdata->num_slots > 1) {
-+		dev_err(&pdev->dev,
-+			"Platform data must supply select_slot function\n");
-+		ret = -ENODEV;
-+		goto err_freehost;
-+	}
-+
-+	if (!pdata->bus_hz) {
-+		dev_err(&pdev->dev,
-+			"Platform data must supply bus speed\n");
-+		ret = -ENODEV;
-+		goto err_freehost;
-+	}
-+
-+	host->bus_hz = pdata->bus_hz;
-+	host->quirks = pdata->quirks;
-+
-+	spin_lock_init(&host->lock);
-+	INIT_LIST_HEAD(&host->queue);
-+
-+	ret = -ENOMEM;
-+	host->regs = pci_iomap(pdev, PCI_BAR_NO, COMPLETE_BAR);
-+	if (!host->regs) {
-+		ret = -EIO;
-+		goto err_free_res;
-+	}
-+
-+	host->dma_ops = pdata->dma_ops;
-+	dw_mci_init_dma(host);
-+
-+	/*
-+	 * Get the host data width - this assumes that HCON has been set with
-+	 * the correct values.
-+	 */
-+	i = (mci_readl(host, HCON) >> 7) & 0x7;
-+	if (!i) {
-+		host->push_data = dw_mci_push_data16;
-+		host->pull_data = dw_mci_pull_data16;
-+		width = 16;
-+		host->data_shift = 1;
-+	} else if (i == 2) {
-+		host->push_data = dw_mci_push_data64;
-+		host->pull_data = dw_mci_pull_data64;
-+		width = 64;
-+		host->data_shift = 3;
-+	} else {
-+		/* Check for a reserved value, and warn if it is */
-+		WARN((i != 1),
-+		     "HCON reports a reserved host data width!\n"
-+		     "Defaulting to 32-bit access.\n");
-+		host->push_data = dw_mci_push_data32;
-+		host->pull_data = dw_mci_pull_data32;
-+		width = 32;
-+		host->data_shift = 2;
-+	}
-+
-+	/* Reset all blocks */
-+	if (!mci_wait_reset(&pdev->dev, host)) {
-+		ret = -ENODEV;
-+		goto err_dmaunmap;
-+	}
-+
-+	/* Clear the interrupts for the host controller */
-+	mci_writel(host, RINTSTS, 0xFFFFFFFF);
-+	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
-+
-+	/* Put in max timeout */
-+	mci_writel(host, TMOUT, 0xFFFFFFFF);
-+
-+	/*
-+	 * FIFO threshold settings  RxMark  = fifo_size / 2 - 1,
-+	 *                          Tx Mark = fifo_size / 2 DMA Size = 8
-+	 */
-+	if (!host->pdata->fifo_depth) {
-+		/*
-+		 * Power-on value of RX_WMark is FIFO_DEPTH-1, but this may
-+		 * have been overwritten by the bootloader, just like we're
-+		 * about to do, so if you know the value for your hardware, you
-+		 * should put it in the platform data.
-+		 */
-+		fifo_size = mci_readl(host, FIFOTH);
-+		fifo_size = 1 + ((fifo_size >> 16) & 0x7ff);
-+	} else {
-+		fifo_size = host->pdata->fifo_depth;
-+	}
-+	host->fifo_depth = fifo_size;
-+	host->fifoth_val = ((0x2 << 28) | ((fifo_size/2 - 1) << 16) |
-+			((fifo_size/2) << 0));
-+	mci_writel(host, FIFOTH, host->fifoth_val);
-+
-+	/* disable clock to CIU */
-+	mci_writel(host, CLKENA, 0);
-+	mci_writel(host, CLKSRC, 0);
-+
-+	tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
-+	dw_mci_card_workqueue = alloc_workqueue("dw-mci-card",
-+			WQ_MEM_RECLAIM | WQ_NON_REENTRANT, 1);
-+	if (!dw_mci_card_workqueue)
-+		goto err_dmaunmap;
-+	INIT_WORK(&host->card_work, dw_mci_work_routine_card);
-+
-+	ret = request_irq(irq, dw_mci_interrupt, IRQF_SHARED, "dw-mci", host);
-+	if (ret)
-+		goto err_workqueue;
-+
-+	pci_set_drvdata(pdev, host);
-+
-+	if (host->pdata->num_slots)
-+		host->num_slots = host->pdata->num_slots;
-+	else
-+		host->num_slots = ((mci_readl(host, HCON) >> 1) & 0x1F) + 1;
-+
-+	/* We need at least one slot to succeed */
-+	for (i = 0; i < host->num_slots; i++) {
-+		ret = dw_mci_init_slot(host, i);
-+		if (ret) {
-+			ret = -ENODEV;
-+			goto err_init_slot;
-+		}
-+	}
-+
-+	/*
-+	 * Enable interrupts for command done, data over, data empty, card det,
-+	 * receive ready and error such as transmit, receive timeout, crc error
-+	 */
-+	mci_writel(host, RINTSTS, 0xFFFFFFFF);
-+	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
-+		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
-+		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
-+	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE); /* Enable mci interrupt */
-+
-+	dev_info(&pdev->dev, "DW MMC controller at irq %d, "
-+		 "%d bit host data width, "
-+		 "%u deep fifo\n",
-+		 irq, width, fifo_size);
-+	if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
-+		dev_info(&pdev->dev, "Internal DMAC interrupt fix enabled.\n");
-+
-+	return 0;
-+
-+err_init_slot:
-+	/* De-init any initialized slots */
-+	while (i > 0) {
-+		if (host->slot[i])
-+			dw_mci_cleanup_slot(host->slot[i], i);
-+		i--;
-+	}
-+	free_irq(irq, host);
-+
-+err_workqueue:
-+	destroy_workqueue(dw_mci_card_workqueue);
-+
-+err_dmaunmap:
-+	if (host->use_dma && host->dma_ops->exit)
-+		host->dma_ops->exit(host);
-+	dma_free_coherent(&host->pdev->dev, PAGE_SIZE,
-+			  host->sg_cpu, host->sg_dma);
-+	iounmap(host->regs);
-+
-+	if (host->vmmc) {
-+		regulator_disable(host->vmmc);
-+		regulator_put(host->vmmc);
-+	}
-+
-+err_free_res:
-+	pci_release_regions(pdev);
-+
-+err_freehost:
-+	kfree(host);
-+	return ret;
-+}
-+
-+static void __devexit dw_mci_remove(struct pci_dev *pdev)
-+{
-+
-+	struct dw_mci *host = pci_get_drvdata(pdev);
-+	int i;
-+
-+	mci_writel(host, RINTSTS, 0xFFFFFFFF);
-+	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
-+
-+	pci_set_drvdata(pdev, NULL);
-+
-+	for (i = 0; i < host->num_slots; i++) {
-+		dev_dbg(&pdev->dev, "remove slot %d\n", i);
-+		if (host->slot[i])
-+			dw_mci_cleanup_slot(host->slot[i], i);
-+	}
-+
-+	/* disable clock to CIU */
-+	mci_writel(host, CLKENA, 0);
-+	mci_writel(host, CLKSRC, 0);
-+
-+	free_irq(pdev->irq, host);
-+	destroy_workqueue(dw_mci_card_workqueue);
-+	dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
-+
-+	if (host->use_dma && host->dma_ops->exit)
-+		host->dma_ops->exit(host);
-+
-+	if (host->vmmc) {
-+		regulator_disable(host->vmmc);
-+		regulator_put(host->vmmc);
-+	}
-+
-+	iounmap(host->regs);
-+
-+	pci_release_regions(pdev);
-+	kfree(host);
-+}
-+
-+#ifdef CONFIG_PM
-+/*
-+ * TODO: we should probably disable the clock to the card in the suspend path.
-+ */
-+static int dw_mci_suspend(struct pci_dev *pdev, pm_message_t mesg)
-+{
-+	int i, ret;
-+	struct dw_mci *host = pci_get_drvdata(pdev);
-+
-+	for (i = 0; i < host->num_slots; i++) {
-+		struct dw_mci_slot *slot = host->slot[i];
-+		if (!slot)
-+			continue;
-+		ret = mmc_suspend_host(slot->mmc);
-+		if (ret < 0) {
-+			while (--i >= 0) {
-+				slot = host->slot[i];
-+				if (slot)
-+					mmc_resume_host(host->slot[i]->mmc);
-+			}
-+			return ret;
-+		}
-+	}
-+
-+	if (host->vmmc)
-+		regulator_disable(host->vmmc);
-+
-+	return 0;
-+}
-+
-+static int dw_mci_resume(struct pci_dev *pdev)
-+{
-+	int i, ret;
-+	struct dw_mci *host = pci_get_drvdata(pdev);
-+
-+	if (host->vmmc)
-+		regulator_enable(host->vmmc);
-+
-+	if (host->dma_ops->init)
-+		host->dma_ops->init(host);
-+
-+	if (!mci_wait_reset(&pdev->dev, host)) {
-+		ret = -ENODEV;
-+		return ret;
-+	}
-+
-+	/* Restore the old value at FIFOTH register */
-+	mci_writel(host, FIFOTH, host->fifoth_val);
-+
-+	mci_writel(host, RINTSTS, 0xFFFFFFFF);
-+	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
-+		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
-+		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
-+	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
-+
-+	for (i = 0; i < host->num_slots; i++) {
-+		struct dw_mci_slot *slot = host->slot[i];
-+		if (!slot)
-+			continue;
-+		ret = mmc_resume_host(host->slot[i]->mmc);
-+		if (ret < 0)
-+			return ret;
-+	}
-+
-+	return 0;
-+}
-+#else
-+#define dw_mci_suspend	NULL
-+#define dw_mci_resume	NULL
-+#endif /* CONFIG_PM */
-+
-+static struct pci_driver dw_mci_driver = {
-+	.name		= "dw_mmc",
-+	.id_table	= &dw_mci_id,
-+	.probe		= dw_mci_probe,
-+	.remove		= dw_mci_remove,
-+	.suspend	= dw_mci_suspend,
-+	.resume		= dw_mci_resume,
-+};
-+
-+static int __init dw_mci_init(void)
-+{
-+	return pci_register_driver(&dw_mci_driver);
-+}
-+
-+static void __exit dw_mci_exit(void)
-+{
-+	pci_unregister_driver(&dw_mci_driver);
-+}
-+#else
-+
- static int dw_mci_probe(struct platform_device *pdev)
- {
- 	struct dw_mci *host;
-@@ -1974,6 +2323,7 @@ err_freehost:
- 
- static int __exit dw_mci_remove(struct platform_device *pdev)
- {
-+
- 	struct dw_mci *host = platform_get_drvdata(pdev);
- 	int i;
- 
-@@ -2100,6 +2450,8 @@ static void __exit dw_mci_exit(void)
- 	platform_driver_unregister(&dw_mci_driver);
- }
- 
-+#endif/* CONFIG_MMC_DW_PCI */
-+
- module_init(dw_mci_init);
- module_exit(dw_mci_exit);
- 
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 027d377..54bc604 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -164,4 +164,17 @@
- 	(*(volatile u64 __force *)((dev)->regs + SDMMC_##reg) = (value))
- #endif
- 
-+/* PCI Specific macros */
-+#ifdef CONFIG_MMC_DW_PCI
-+#define PCI_BAR_NO 2
-+#define COMPLETE_BAR 0
-+/* Dummy Device Id and Vendor Id */
-+#define VENDOR_ID 0x700
-+#define DEVICE_ID 0x1107
-+/* Defining the Capabilities */
-+#define DW_MCI_CAPABILITIES (MMC_CAP_4_BIT_DATA | MMC_CAP_MMC_HIGHSPEED |\
-+				MMC_CAP_SD_HIGHSPEED | MMC_CAP_8_BIT_DATA |\
-+				MMC_CAP_SDIO_IRQ)
-+#endif /* CONFIG_MMC_DW_PCI */
-+
- #endif /* _DW_MMC_H_ */
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 6b46819..87af5a6 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -147,7 +147,11 @@ struct dw_mci {
- 	u32			current_speed;
- 	u32			num_slots;
- 	u32			fifoth_val;
-+#ifdef CONFIG_MMC_DW_PCI
-+	struct pci_dev		*pdev;
-+#else
- 	struct platform_device	*pdev;
-+#endif
- 	struct dw_mci_board	*pdata;
- 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
- 
--- 
-1.7.2.3
 
+--=20
+J (James/Jay) Freyensee
+Storage Technology Group
+Intel Corporation
