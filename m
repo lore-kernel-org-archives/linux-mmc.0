@@ -1,64 +1,34 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 1/2] arm: omap4: hsmmc: Fix Pbias configuration on regulator OFF
-Date: Thu, 29 Sep 2011 20:14:59 +0530
-Message-ID: <1317307500-5514-2-git-send-email-balajitk@ti.com>
-References: <1317307500-5514-1-git-send-email-balajitk@ti.com>
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: [PATCH 0/2] arm: omap4: hsmmc: pbias fixes
+Date: Thu, 29 Sep 2011 20:15:54 +0530
+Message-ID: <CANrkHUbSRLZe+6QWOSE0Hz6r5NUkRxUH+RW2_CYiQ3wrWu-Pzw@mail.gmail.com>
+References: <4e848386.2a1f440a.4d36.1824SMTPIN_ADDED@mx.google.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1317307500-5514-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: tony@atomide.com, linux-omap@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, kishore.kadiyala@ti.com, vishp@ti.com, Balaji T K <balajitk@ti.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:39366 "EHLO
+	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751692Ab1I2Op4 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 29 Sep 2011 10:45:56 -0400
+In-Reply-To: <4e848386.2a1f440a.4d36.1824SMTPIN_ADDED@mx.google.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, kishore.kadiyala@ti.com, vishp@ti.com
 
-MMC1 data line IO's are powered down in before set regulator function.
-IO's should not be powered ON when regulator is OFF.
-Keep the IO's in power pown mode after regulator OFF.
-Delete incorrect comments which are not applicable for OMAP4.
+> From: Balaji T K <balajitk@ti.com>
+Will resend this series as my email id is garbled.
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
-Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
-Reported-by: Viswanath Puttagunta <vishp@ti.com>
----
- arch/arm/mach-omap2/hsmmc.c |   14 ++------------
- 1 files changed, 2 insertions(+), 12 deletions(-)
-
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index 097a42d..9cc2eb7 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -129,15 +129,11 @@ static void omap4_hsmmc1_before_set_reg(struct device *dev, int slot,
- 	 * Assume we power both OMAP VMMC1 (for CMD, CLK, DAT0..3) and the
- 	 * card with Vcc regulator (from twl4030 or whatever).  OMAP has both
- 	 * 1.8V and 3.0V modes, controlled by the PBIAS register.
--	 *
--	 * In 8-bit modes, OMAP VMMC1A (for DAT4..7) needs a supply, which
--	 * is most naturally TWL VSIM; those pins also use PBIAS.
--	 *
--	 * FIXME handle VMMC1A as needed ...
- 	 */
- 	reg = omap4_ctrl_pad_readl(control_pbias_offset);
- 	reg &= ~(OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
--		OMAP4_MMC1_PWRDNZ_MASK);
-+		OMAP4_MMC1_PWRDNZ_MASK |
-+		OMAP4_MMC1_PBIASLITE_VMODE_MASK);
- 	omap4_ctrl_pad_writel(reg, control_pbias_offset);
- }
- 
-@@ -172,12 +168,6 @@ static void omap4_hsmmc1_after_set_reg(struct device *dev, int slot,
- 			reg &= ~(OMAP4_MMC1_PWRDNZ_MASK);
- 			omap4_ctrl_pad_writel(reg, control_pbias_offset);
- 		}
--	} else {
--		reg = omap4_ctrl_pad_readl(control_pbias_offset);
--		reg |= (OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
--			OMAP4_MMC1_PWRDNZ_MASK |
--			OMAP4_MMC1_PBIASLITE_VMODE_MASK);
--		omap4_ctrl_pad_writel(reg, control_pbias_offset);
- 	}
- }
- 
--- 
-1.7.0.4
-
+>
+> MMC1 pbias and speed control fix for SDMMC1 extended I/O cell
+>
+> Balaji T K (2):
+> =A0arm: omap4: hsmmc: Fix Pbias configuration on regulator OFF
+> =A0arm: omap4: hsmmc: configure SDMMC1_DR0 properly
+>
+> =A0arch/arm/mach-omap2/hsmmc.c | =A0 16 +++-------------
+> =A01 files changed, 3 insertions(+), 13 deletions(-)
+>
+>
