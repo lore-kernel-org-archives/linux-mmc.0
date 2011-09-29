@@ -1,38 +1,21 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 2/2] arm: omap4: hsmmc: configure SDMMC1_DR0 properly
-Date: Thu, 29 Sep 2011 20:15:00 +0530
-Message-ID: <1317307500-5514-3-git-send-email-balajitk@ti.com>
-References: <1317307500-5514-1-git-send-email-balajitk@ti.com>
+Subject: [PATCH 0/2] arm: omap4: hsmmc: pbias fixes
+Date: Thu, 29 Sep 2011 20:14:58 +0530
+Message-ID: <1317307500-5514-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1317307500-5514-1-git-send-email-balajitk@ti.com>
 Sender: linux-omap-owner@vger.kernel.org
 To: tony@atomide.com, linux-omap@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, kishore.kadiyala@ti.com, vishp@ti.com, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Fix the typo, instead it should be SDMMC1
-USBC1 is not related to MMC1 I/Os
+MMC1 pbias and speed control fix for SDMMC1 extended I/O cell
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
- arch/arm/mach-omap2/hsmmc.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+Balaji T K (2):
+  arm: omap4: hsmmc: Fix Pbias configuration on regulator OFF
+  arm: omap4: hsmmc: configure SDMMC1_DR0 properly
 
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index 9cc2eb7..1a9bc52 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -495,7 +495,7 @@ void __init omap2_hsmmc_init(struct omap2_hsmmc_info *controllers)
- 			OMAP4_SDMMC1_PUSTRENGTH_GRP1_MASK);
- 		reg &= ~(OMAP4_SDMMC1_PUSTRENGTH_GRP2_MASK |
- 			OMAP4_SDMMC1_PUSTRENGTH_GRP3_MASK);
--		reg |= (OMAP4_USBC1_DR0_SPEEDCTRL_MASK|
-+		reg |= (OMAP4_SDMMC1_DR0_SPEEDCTRL_MASK |
- 			OMAP4_SDMMC1_DR1_SPEEDCTRL_MASK |
- 			OMAP4_SDMMC1_DR2_SPEEDCTRL_MASK);
- 		omap4_ctrl_pad_writel(reg, control_mmc1);
--- 
-1.7.0.4
+ arch/arm/mach-omap2/hsmmc.c |   16 +++-------------
+ 1 files changed, 3 insertions(+), 13 deletions(-)
 
