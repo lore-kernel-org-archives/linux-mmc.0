@@ -1,251 +1,228 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: [PATCH v5] mmc : general purpose partition support.
-Date: Sat,  1 Oct 2011 00:49:23 +0900
-Message-ID: <1317397763-7151-1-git-send-email-linkinjeon@gmail.com>
+From: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
+Subject: Re: [PATCH v4] mmc : general purpose partition support.
+Date: Fri, 30 Sep 2011 13:34:24 -0400
+Message-ID: <CANz0V+474_SvriQmUWx9VJwAk-iggu-h+A1WH-zGPBJgLzJDAg@mail.gmail.com>
+References: <1317397619-7091-1-git-send-email-linkinjeon@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:46950 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753910Ab1I3Pti (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2011 11:49:38 -0400
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:52871 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751842Ab1I3Re4 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2011 13:34:56 -0400
+In-Reply-To: <1317397619-7091-1-git-send-email-linkinjeon@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com, Namjae Jeon <linkinjeon@gmail.com>
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com
 
-It allows gerneral purpose partitions in MMC Device.
-And I try to simpliy make mmc_blk_alloc_parts using mmc_part structure suggested by Andrei Warkentin.
-After patching, we can see general purpose partitions like this.
-> cat /proc/partitions
-          179 0 847872 mmcblk0
-          179 192 4096 mmcblk0gp3
-          179 160 4096 mmcblk0gp2
-          179 128 4096 mmcblk0gp1
-          179 96  1052672 mmcblk0gp0
-          179 64  1024 mmcblk0boot1
-          179 32  1024 mmcblk0boot0
+Hi Namjae,
 
-Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
----
- drivers/mmc/card/block.c |   31 +++++++++++++++------------
- drivers/mmc/core/mmc.c   |   52 ++++++++++++++++++++++++++++++++++++++++++++-
- include/linux/mmc/card.h |   32 +++++++++++++++++++++++++++-
- include/linux/mmc/mmc.h  |    3 --
- 4 files changed, 98 insertions(+), 20 deletions(-)
+Why don't you update card->nr_parts inside mmc_part_add? You're making
+this too complicated. There
+is also no need for the part_cfg array.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1ff5486..56f7185 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1377,26 +1377,29 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
- 	return 0;
- }
- 
-+/* MMC Physical partition consist of two boot partitons and
-+ * four general purpose partitions.
-+ * if the register of respective partitions is set in ext_csd,
-+ * it allocate block device to be accessed.
-+ */
-+
- static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
- {
--	int ret = 0;
-+	int idx, ret = 0;
- 
- 	if (!mmc_card_mmc(card))
- 		return 0;
- 
--	if (card->ext_csd.boot_size) {
--		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT0,
--					 card->ext_csd.boot_size >> 9,
--					 true,
--					 "boot0");
--		if (ret)
--			return ret;
--		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT1,
--					 card->ext_csd.boot_size >> 9,
--					 true,
--					 "boot1");
--		if (ret)
--			return ret;
-+	 for (idx = 0; idx < card->nr_parts; idx++) {
-+		if (card->part[idx].size) {
-+			ret = mmc_blk_alloc_part(card, md,
-+				card->part[idx].cookie,
-+				card->part[idx].size >> 9,
-+				card->part[idx].force_ro,
-+				card->part[idx].name);
-+			if (ret)
-+				return ret;
-+		}
- 	}
- 
- 	return ret;
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 5700b1c..5db4cee 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -41,6 +41,11 @@ static const unsigned int tacc_mant[] = {
- 	35,	40,	45,	50,	55,	60,	70,	80,
- };
- 
-+/* partition configuration array */
-+static const unsigned int part_cfg[] = {
-+	0x1,	0x2,	0x4,	0x5,	0x6,	0x7,
-+};
-+
- #define UNSTUFF_BITS(resp,start,size)					\
- 	({								\
- 		const int __size = size;				\
-@@ -239,7 +244,8 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
-  */
- static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- {
--	int err = 0;
-+	int err = 0, idx, part_num;
-+	unsigned int part_size, gp_size_mult;
- 
- 	BUG_ON(!card);
- 
-@@ -340,7 +346,16 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		 * There are two boot regions of equal size, defined in
- 		 * multiples of 128K.
- 		 */
--		card->ext_csd.boot_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
-+		if (ext_csd[EXT_CSD_BOOT_MULT])	{
-+			card->nr_parts = MMC_NUM_BOOT_PARTITION;
-+			for (idx = 0, part_num = 0;
-+				idx < MMC_NUM_BOOT_PARTITION; idx++,
-+				part_num++) {
-+				part_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
-+				mmc_part_add(card, part_size, part_cfg[idx],
-+					"boot%d", idx, part_num, true);
-+			}
-+		}
- 	}
- 
- 	card->ext_csd.raw_hc_erase_gap_size =
-@@ -392,6 +407,39 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 			card->ext_csd.enhanced_area_offset = -EINVAL;
- 			card->ext_csd.enhanced_area_size = -EINVAL;
- 		}
-+
-+		/*
-+		 * General purpose partition feature support --
-+		 * If ext_csd have the size of general purpose partitions,
-+		 * set size, part_type, partition name in mmc_part.
-+		 */
-+
-+		if (ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x1) {
-+			u8 hc_erase_grp_sz =
-+				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-+			u8 hc_wp_grp_sz =
-+				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-+
-+			card->ext_csd.enhanced_area_en = 1;
-+
-+			card->nr_parts += MMC_NUM_GP_PARTITION;
-+			for (part_num = 0, gp_size_mult = 143;
-+				idx < card->nr_parts;
-+				idx++, part_num++, gp_size_mult += 3) {
-+				if (!ext_csd[gp_size_mult] &&
-+					!ext_csd[gp_size_mult + 1] &&
-+					!ext_csd[gp_size_mult + 2])
-+					continue;
-+				part_size = (ext_csd[gp_size_mult + 2] << 16) +
-+					(ext_csd[gp_size_mult + 1] << 8) +
-+					ext_csd[gp_size_mult];
-+				part_size *= (size_t)(hc_erase_grp_sz *
-+					hc_wp_grp_sz);
-+				part_size <<= 19;
-+				mmc_part_add(card, part_size, part_cfg[idx],
-+					"gp%d", idx, part_num, false);
-+			}
-+		}
- 		card->ext_csd.sec_trim_mult =
- 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
- 		card->ext_csd.sec_erase_mult =
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index b460fc2..941f2d0 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -12,6 +12,7 @@
- 
- #include <linux/mmc/core.h>
- #include <linux/mod_devicetable.h>
-+#include <linux/genhd.h>
- 
- struct mmc_cid {
- 	unsigned int		manfid;
-@@ -63,7 +64,6 @@ struct mmc_ext_csd {
- 	bool			enhanced_area_en;	/* enable bit */
- 	unsigned long long	enhanced_area_offset;	/* Units: Byte */
- 	unsigned int		enhanced_area_size;	/* Units: KB */
--	unsigned int		boot_size;		/* in bytes */
- 	u8			raw_partition_support;	/* 160 */
- 	u8			raw_erased_mem_count;	/* 181 */
- 	u8			raw_ext_csd_structure;	/* 194 */
-@@ -157,6 +157,22 @@ struct sdio_func_tuple;
- 
- #define SDIO_MAX_FUNCS		7
- 
-+/* The number of MMC physical partitions
-+ * It consist of boot partitions(2), general purpose partitions(4) in MMC v4.4
-+ */
-+#define MMC_NUM_BOOT_PARTITION	2
-+#define MMC_NUM_GP_PARTITION	4
-+
-+/*
-+ * MMC Physical partitions
-+ */
-+struct mmc_part {
-+	unsigned int	size;	/* partition size (in bytes) */
-+	unsigned int	cookie;	/* it used to part_type */
-+	char	name[DISK_NAME_LEN];
-+	bool	force_ro;	/* to make boot parts RO by default */
-+};
-+
- /*
-  * MMC device
-  */
-@@ -216,9 +232,23 @@ struct mmc_card {
- 	unsigned int		sd_bus_speed;	/* Bus Speed Mode set for the card */
- 
- 	struct dentry		*debugfs_root;
-+	struct mmc_part	part[MMC_NUM_BOOT_PARTITION + MMC_NUM_GP_PARTITION];	/* mmc physical partitions */
-+	unsigned int	nr_parts;
- };
- 
- /*
-+ * This function fill contents in mmc_part.
-+ */
-+static inline void mmc_part_add(struct mmc_card *card, unsigned int size,
-+	unsigned int part_cfg, char *name, int idx, int part_num, bool ro)
-+{
-+	card->part[idx].size = size;
-+	card->part[idx].cookie = part_cfg;
-+	sprintf(card->part[idx].name, name, part_num);
-+	card->part[idx].force_ro = ro;
-+}
-+
-+/*
-  *  The world is not perfect and supplies us with broken mmc/sdio devices.
-  *  For at least some of these bugs we need a work-around.
-  */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 5a794cb..08f1746 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -299,10 +299,7 @@ struct _mmc_csd {
-  */
- 
- #define EXT_CSD_WR_REL_PARAM_EN		(1<<2)
--
- #define EXT_CSD_PART_CONFIG_ACC_MASK	(0x7)
--#define EXT_CSD_PART_CONFIG_ACC_BOOT0	(0x1)
--#define EXT_CSD_PART_CONFIG_ACC_BOOT1	(0x2)
- 
- #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
- #define EXT_CSD_CMD_SET_SECURE		(1<<1)
--- 
-1.7.4.4
+2011/9/30 Namjae Jeon <linkinjeon@gmail.com>:
+> It allows gerneral purpose partitions in MMC Device.
+> And I try to simpliy make mmc_blk_alloc_parts using mmc_part structur=
+e suggested by Andrei Warkentin.
+> After patching, we can see general purpose partitions like this.
+>> cat /proc/partitions
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 0 847872 mmcblk0
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 192 4096 mmcblk0gp3
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 160 4096 mmcblk0gp2
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 128 4096 mmcblk0gp1
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 96 =C2=A01052672 mmcblk0gp0
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 64 =C2=A01024 mmcblk0boot1
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 32 =C2=A01024 mmcblk0boot0
+>
+> Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
+> ---
 
+>
+> +/* partition configuration array */
+> +static const unsigned int part_cfg[] =3D {
+> + =C2=A0 =C2=A0 =C2=A0 0x1, =C2=A0 =C2=A00x2, =C2=A0 =C2=A00x4, =C2=A0=
+ =C2=A00x5, =C2=A0 =C2=A00x6, =C2=A0 =C2=A07,
+> +};
+> +
+
+No need. Plus this is obscure.
+
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->ext_csd.boot=
+_size =3D ext_csd[EXT_CSD_BOOT_MULT] << 17;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (ext_csd[EXT_CS=
+D_BOOT_MULT]) {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 card->nr_parts =3D MMC_NUM_BOOT_PARTITION;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 for (idx =3D 0, part_num =3D 0;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 idx < MMC_NUM_BOOT_PARTITION; idx++=
+,
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 part_num++) {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 part_size =3D ext_csd[EXT_CSD_BOOT_=
+MULT] << 17;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mmc_part_add(card, part_size, part_=
+cfg[idx],
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 "boot%d=
+", idx, part_num, true);
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 }
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0}
+
+There is no need for part_num (you have idx for that). And there is no
+need for passing the actual array
+index either - that's why you have mmc_part_add: it will do
+card->parts[card->nr_parts++] =3D new_part.
+
+               if (ext_csd[EXT_CSD_BOOT_MULT]) {
+                       for (idx =3D 0, part_num =3D 0;
+                               idx < MMC_NUM_BOOT_PARTITION; idx++) {
+                               part_size =3D ext_csd[EXT_CSD_BOOT_MULT]=
+ << 17;
+                               mmc_part_add(card, part_size,
+EXT_CSD_PART_CONFIG_ACC_BOOT0 + idx,
+                                       "boot%d", idx, true);
+                       }
+               }
+
+
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (ext_csd[EXT_CS=
+D_PARTITION_SUPPORT] & 0x1) {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 u8 hc_erase_grp_sz =3D
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 u8 hc_wp_grp_sz =3D
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+> +
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 card->ext_csd.enhanced_area_en =3D 1;
+> +
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 card->nr_parts +=3D MMC_NUM_GP_PARTITION;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 for (part_num =3D 0, gp_size_mult =3D 143;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 idx < card->nr_parts;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 idx++, part_num++, gp_size_mult +=3D=
+ 3) {
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (!ext_csd[gp_size_mult] &&
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 !ext_cs=
+d[gp_size_mult + 1] &&
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 !ext_cs=
+d[gp_size_mult + 2])
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 continu=
+e;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 part_size =3D (ext_csd[gp_size_mult=
+ + 2] << 16) +
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 (ext_cs=
+d[gp_size_mult + 1] << 8) +
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ext_csd=
+[gp_size_mult];
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 part_size *=3D (size_t)(hc_erase_gr=
+p_sz *
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 hc_wp_g=
+rp_sz);
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 part_size <<=3D 19;
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mmc_part_add(card, part_size, part_=
+cfg[idx],
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 "gp%d",=
+ idx, part_num, false);
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 }
+> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
+
+Same story: get rid of part_num, don't touch card->nr_parts, and get
+rid of part_cfg array access.
+
+                       card->ext_csd.enhanced_area_en =3D 1;
+                       for (idx =3D 0, gp_size_mult =3D 143;
+                               idx < MMC_NUM_GP_PARTITION;
+                               idx++, gp_size_mult +=3D 3) {
+                               if (!ext_csd[gp_size_mult] &&
+                                       !ext_csd[gp_size_mult + 1] &&
+                                       !ext_csd[gp_size_mult + 2])
+                                       continue;
+                               part_size =3D (ext_csd[gp_size_mult + 2]=
+ << 16) +
+                                       (ext_csd[gp_size_mult + 1] << 8)=
+ +
+                                       ext_csd[gp_size_mult];
+                               part_size *=3D (size_t)(hc_erase_grp_sz =
+*
+                                       hc_wp_grp_sz);
+                               part_size <<=3D 19;
+                               mmc_part_add(card, part_size, idx +
+EXT_CSD_PART_CONFIG_ACC_GP0,
+                                       "gp%d", idx, false);
+                       }
+               }
+
+
+>  /*
+> + * This function fill contents in mmc_part.
+> + */
+> +static inline void mmc_part_add(struct mmc_card *card, unsigned int =
+size,
+> +       unsigned int part_cfg, char *name, int idx, int part_num, boo=
+l ro)
+> +{
+> +       card->part[idx].size =3D size;
+> +       card->part[idx].cookie =3D part_cfg;
+> +       sprintf(card->part[idx].name, name, part_num);
+> +       card->part[idx].force_ro =3D ro;
+> +}
+
+static inline void mmc_part_add(struct mmc_card *card, unsigned int siz=
+e,
+       unsigned int part_cfg, char *name, int idx, bool ro)
+{
+       card->part[card->nr_parts].size =3D size;
+       card->part[card->nr_parts].cookie =3D part_cfg;
+       sprintf(card->part[card->nr_parts].name, name, idx);
+       card->part[card->nr_parts].force_ro =3D ro;
+       card->nr_parts++;
+}
+
+> =C2=A0#define EXT_CSD_PART_CONFIG_ACC_MASK =C2=A0 (0x7)
+> -#define EXT_CSD_PART_CONFIG_ACC_BOOT0 =C2=A0(0x1)
+> -#define EXT_CSD_PART_CONFIG_ACC_BOOT1 =C2=A0(0x2)
+>
+
+I'd also keep the MMC_NUM_BOOT_PARTITION and MMC_NUM_GP_PARTITION defs
+at the same location.
+
+/* The number of MMC physical partitions
+ * It consist of boot partitions(2), general purpose partitions(4) in M=
+MC v4.4
+ */
+#define MMC_NUM_BOOT_PARTITION 2
+#define MMC_NUM_GP_PARTITION   4
+
+#define EXT_CSD_PART_CONFIG_ACC_BOOT0  (0x1)
+#define EXT_CSD_PART_CONFIG_ACC_GP0       (0x4)
+
+A
