@@ -1,12 +1,16 @@
 From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: [PATCH v4] mmc : general purpose partition support.
-Date: Sat,  1 Oct 2011 00:46:59 +0900
-Message-ID: <1317397619-7091-1-git-send-email-linkinjeon@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Subject: [PATCH v5] mmc : general purpose partition support.
+Date: Sat,  1 Oct 2011 00:49:23 +0900
+Message-ID: <1317397763-7151-1-git-send-email-linkinjeon@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:46950 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753910Ab1I3Pti (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2011 11:49:38 -0400
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org, linux-mmc@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com, Namjae Jeon <linkinjeon@gmail.com>
-List-Id: linux-mmc@vger.kernel.org
 
 It allows gerneral purpose partitions in MMC Device.
 And I try to simpliy make mmc_blk_alloc_parts using mmc_part structure suggested by Andrei Warkentin.
@@ -86,7 +90,7 @@ index 5700b1c..5db4cee 100644
  
 +/* partition configuration array */
 +static const unsigned int part_cfg[] = {
-+	0x1,	0x2,	0x4,	0x5,	0x6,	7,
++	0x1,	0x2,	0x4,	0x5,	0x6,	0x7,
 +};
 +
  #define UNSTUFF_BITS(resp,start,size)					\
@@ -244,3 +248,4 @@ index 5a794cb..08f1746 100644
  #define EXT_CSD_CMD_SET_SECURE		(1<<1)
 -- 
 1.7.4.4
+
