@@ -1,95 +1,116 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH v3] mmc : general purpose partition support.
-Date: Fri, 30 Sep 2011 10:32:23 +0900
-Message-ID: <CAKYAXd_1jY23C8NTvP7NizZEseb7G2bbtJYq7RvF1vaJaZgh_Q@mail.gmail.com>
-References: <1317309431-1898-1-git-send-email-linkinjeon@gmail.com>
-	<1522108758.811204.1317316828352.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 1/1] mmc: Support of PCI mode for the dw_mmc driver
+Date: Fri, 30 Sep 2011 10:51:48 +0900
+Message-ID: <4E8520B4.7070504@samsung.com>
+References: <1317318052-2750-1-git-send-email-shashidharh@vayavyalabs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1522108758.811204.1317316828352.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrei Warkentin <awarkentin@vmware.com>
-Cc: linux-kernel@vger.kernel.org, adrian hunter <adrian.hunter@intel.com>, linus walleij <linus.walleij@linaro.org>, james p freyensee <james_p_freyensee@linux.intel.com>, sebras@gmail.com, Ulf Hansson <Ulf.Hansson@stericsson.com>, stefan xk nilsson <stefan.xk.nilsson@stericsson.com>, per forlin <per.forlin@stericsson.com>, johan rudholm <johan.rudholm@stericsson.com>, cjb@laptop.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:32709 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753297Ab1I3Bvv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2011 21:51:51 -0400
+Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LSB00ESBBU0ER80@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 30 Sep 2011 10:51:50 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LSB009ERBUD8450@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 30 Sep 2011 10:51:49 +0900 (KST)
+In-reply-to: <1317318052-2750-1-git-send-email-shashidharh@vayavyalabs.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Cc: Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Matt Fleming <matt@console-pimps.org>, Zhangfei Gao <zhangfei.gao@marvell.com>, Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>, Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org
 
-MjAxMS85LzMwIEFuZHJlaSBXYXJrZW50aW4gPGF3YXJrZW50aW5Adm13YXJlLmNvbT46Cj4gTmFt
-amFlLAo+Cj4gLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLQo+PiBGcm9tOiAiTmFtamFlIEpl
-b24iIDxsaW5raW5qZW9uQGdtYWlsLmNvbT4KPj4gVG86IGNqYkBsYXB0b3Aub3JnLCBsaW51eC1t
-bWNAdmdlci5rZXJuZWwub3JnCj4+IENjOiBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnLCBh
-d2Fya2VudGluQHZtd2FyZS5jb20sICJhZHJpYW4gaHVudGVyIiA8YWRyaWFuLmh1bnRlckBpbnRl
-bC5jb20+LCAibGludXMgd2FsbGVpaiIKPj4gPGxpbnVzLndhbGxlaWpAbGluYXJvLm9yZz4sICJq
-YW1lcyBwIGZyZXllbnNlZSIgPGphbWVzX3BfZnJleWVuc2VlQGxpbnV4LmludGVsLmNvbT4sIHNl
-YnJhc0BnbWFpbC5jb20sICJVbGYgSGFuc3NvbiIKPj4gPFVsZi5IYW5zc29uQHN0ZXJpY3Nzb24u
-Y29tPiwgInN0ZWZhbiB4ayBuaWxzc29uIiA8c3RlZmFuLnhrLm5pbHNzb25Ac3Rlcmljc3Nvbi5j
-b20+LCAicGVyIGZvcmxpbiIKPj4gPHBlci5mb3JsaW5Ac3Rlcmljc3Nvbi5jb20+LCAiam9oYW4g
-cnVkaG9sbSIgPGpvaGFuLnJ1ZGhvbG1Ac3Rlcmljc3Nvbi5jb20+LCAiTmFtamFlIEplb24iIDxs
-aW5raW5qZW9uQGdtYWlsLmNvbT4KPj4gU2VudDogVGh1cnNkYXksIFNlcHRlbWJlciAyOSwgMjAx
-MSAxMToxNzoxMSBBTQo+PiBTdWJqZWN0OiBbUEFUQ0ggdjNdIG1tYyA6IGdlbmVyYWwgcHVycG9z
-ZSBwYXJ0aXRpb24gc3VwcG9ydC4KPj4KPj4gSXQgYWxsb3dzIGdlcm5lcmFsIHB1cnBvc2UgcGFy
-dGl0aW9ucyBpbiBNTUMgRGV2aWNlLgo+PiBBbmQgSSB0cnkgdG8gc2ltcGxpeSBtYWtlIG1tY19i
-bGtfYWxsb2NfcGFydHMgdXNpbmcgbW1jX3BhcnQKPj4gc3RydWN0dXJlIHN1Z2dlc3RlZCBieSBB
-bmRyZWkgV2Fya2VudGluLgo+PiBBZnRlciBwYXRjaGluZywgd2UgY2FuIHNlZSBnZW5lcmFsIHB1
-cnBvc2UgcGFydGl0aW9ucyBsaWtlIHRoaXMuCj4+ID4gY2F0IC9wcm9jL3BhcnRpdGlvbnMKPj4g
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgMTc5IDAgODQ3ODcyIG1tY2JsazAKPj4gwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgMTc5IDE5MiA0MDk2IG1tY2JsazBncDMKPj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-MTc5IDE2MCA0MDk2IG1tY2JsazBncDIKPj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgMTc5IDEyOCA0
-MDk2IG1tY2JsazBncDEKPj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgMTc5IDk2IMKgMTA1MjY3MiBt
-bWNibGswZ3AwCj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIDE3OSA2NCDCoDEwMjQgbW1jYmxrMGJv
-b3QxCj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIDE3OSAzMiDCoDEwMjQgbW1jYmxrMGJvb3QwCj4+
-Cj4+IFNpZ25lZC1vZmYtYnk6IE5hbWphZSBKZW9uIDxsaW5raW5qZW9uQGdtYWlsLmNvbT4KPgo+
-PiArIMKgIMKgIMKgZm9yIChpZHggPSAwOyBpZHggPCBNTUNfTlVNX0JPT1RfUEFSVElUSU9OOyBp
-ZHgrKykgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChjYXJkLT5ib290X3BhcnRbaWR4XS5z
-aXplKSB7Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcmV0ID0gbW1jX2Jsa19h
-bGxvY19wYXJ0KGNhcmQsIG1kLAo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIGNhcmQtPmJvb3RfcGFydFtpZHhdLmNvb2tpZSwKPj4gKyDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5ib290X3BhcnRbaWR4XS5zaXplID4+
-IDksCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgY2FyZC0+
-Ym9vdF9wYXJ0W2lkeF0uZm9yY2Vfcm8sCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgY2FyZC0+Ym9vdF9wYXJ0W2lkeF0ubmFtZSk7Cj4+ICsgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgaWYgKHJldCkKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCByZXR1cm4gcmV0Owo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIH0K
-Pj4gKyDCoCDCoCB9Cj4+ICsKPj4gKyDCoCDCoCBmb3IgKGlkeCA9IDA7IGlkeCA8IE1NQ19OVU1f
-R1BfUEFSVElUSU9OOyBpZHgrKykgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChjYXJkLT5n
-cF9wYXJ0W2lkeF0uc2l6ZSkgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHJl
-dCA9IG1tY19ibGtfYWxsb2NfcGFydChjYXJkLCBtZCwKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5ncF9wYXJ0W2lkeF0uY29va2llLAo+PiArIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmdwX3BhcnRbaWR4
-XS5zaXplID4+IDksCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgY2FyZC0+Z3BfcGFydFtpZHhdLmZvcmNlX3JvLAo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmdwX3BhcnRbaWR4XS5uYW1lKTsKPj4gKyDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAocmV0KQo+PiArIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHJldHVybiByZXQ7Cj4KPiBZb3Ugd2VyZSBvbiBhIGJl
-dHRlciB0cmFjayBiZWZvcmUuIFdoeSBkb2VzIHRoZSBibG9jayBkcml2cmUgbmVlZCB0byBrbm93
-IGFib3V0IHRoZSBwYXJ0aXRpb24gdHlwZXM/Cj4gWW91IHNob3VsZCBwYXJzZSBvbmUgYXJyYXku
-Cj4KPj4gLSDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmJvb3Rfc2l6ZSA9IGV4dF9j
-c2RbRVhUX0NTRF9CT09UX01VTFRdIDw8IDE3Owo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChl
-eHRfY3NkW0VYVF9DU0RfQk9PVF9NVUxUXSkgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIHBhcnRfY2ZnID0gRVhUX0NTRF9QQVJUX0NPTkZJR19BQ0NfQk9PVDA7Cj4+ICsgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZm9yIChpZHggPSAwOyBpZHggPCBNTUNfTlVNX0JP
-T1RfUEFSVElUSU9OOyBpZHgrKykgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIGNhcmQtPmJvb3RfcGFydFtpZHhdLnNpemUgPQo+PiArIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGV4dF9jc2RbRVhUX0NT
-RF9CT09UX01VTFRdIDw8IDE3Owo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIGNhcmQtPmJvb3RfcGFydFtpZHhdLmNvb2tpZSA9IHBhcnRfY2ZnKys7Cj4+ICsg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgc3ByaW50ZihjYXJkLT5i
-b290X3BhcnRbaWR4XS5uYW1lLCAiYm9vdCVkIiwKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZHgpOwo+PiArIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmJvb3RfcGFydFtpZHhdLmZvcmNlX3Jv
-ID0gdHJ1ZTsKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCB9Cj4+ICsgwqAgwqAg
-wqAgwqAgwqAgwqAgfQo+PiDCoCDCoCDCoCB9Cj4+Cj4KPiBNeSBlYXJsaWVyIGNvbW1lbnQgc3Rp
-bGwgc3RhbmRzIC0gbWFrZSB5b3VyIGNvZGUgbG9vayBzb21ldGhpbmcgbGlrZSAtCj4KPiBpZiAo
-ZXh0X2NzZFtFWFRfQ1NEX0JPT1RfTVVMVF0pIHsKPiDCoCDCoCDCoCDCoHBhcnRfY2ZnID0gRVhU
-X0NTRF9QQVJUX0NPTkZJR19BQ0NfQk9PVDA7Cj4gwqAgwqAgwqAgwqBmb3IgKGlkeCA9IDA7IGlk
-eCA8IE1NQ19OVU1fQk9PVF9QQVJUSVRJT047IGlkeCsrKSB7Cj4gwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqBtbWNfcGFydF9hZGQoY2FyZCwgc2l6ZSwgcGFydF9jZmcrKywgImJvb3QlZCIsIHBhcnRf
-Y2ZnKyssCj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAi
-Ym9vdCVkIiwgaWR4LCB0cnVlKQo+IH0KPgo+PiArIMKgIMKgIHN0cnVjdCBtbWNfcGFydCBib290
-X3BhcnRbTU1DX05VTV9CT09UX1BBUlRJVElPTl07IMKgIMKgIMKgLyogbW1jIGJvb3QKPj4gcGFy
-dGl0aW9ucyAqLwo+PiArIMKgIMKgIHN0cnVjdCBtbWNfcGFydCBncF9wYXJ0W01NQ19OVU1fR1Bf
-UEFSVElUSU9OXTsgwqAvKiBtbWMgZ2VuZXJhbAo+PiBwdXJwb3NlIHBhcnRpdGlvbnMgKi8KPgo+
-IHN0cnVjdCBtbWNfcGFydCBwYXJ0c1tNTUNfTlVNX0JPT1RfUEFSVElUSU9OICsgTU1DX05VTV9H
-UF9QQVJUSVRJT05dOwo+IHVuc2lnbmVkIG5yX3BhcnRzOwo+CgpZb3VyIHJldmlldyB3aWxsIGFs
-d2F5cyBpbnNwaXJlIG1lLgpJIHdpbGwgcG9zdCBhZ2Fpbi4KcGx6IHJldmlldyBhZnRlci4uClRo
-YW5rcy4KPiBBCj4K
+Hi Shashidhar.
+
+On 09/30/2011 02:40 AM, Shashidhar Hiremath wrote:
+
+> Support of PCI mode for the dw_mmc driver This Patch adds the support for the scenario where the Synopsys Designware IP is present on the PCI bus.The patch adds the minimal modifications necessary for the driver to work on PCI platform. The Driver has also been tested for on the PCI platform with single Card Slot.
+> 
+> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+> ---
+> v2:
+> *As per Suggestions by Will Newton and James Hogan
+> -Reduced the number of ifdefs
+> 
+>  drivers/mmc/host/Kconfig   |   11 ++
+>  drivers/mmc/host/dw_mmc.c  |  352 ++++++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/dw_mmc.h  |   13 ++
+>  include/linux/mmc/dw_mmc.h |    4 +
+>  4 files changed, 380 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 8c87096..84d8908 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -526,6 +526,17 @@ config MMC_DW
+>  	  block, this provides host support for SD and MMC interfaces, in both
+>  	  PIO and external DMA modes.
+>  
+> +config MMC_DW_PCI
+> +	bool "MMC_DW Support On PCI bus"
+> +	depends on MMC_DW && PCI
+> +	help
+> +	  This selects the PCI for the Synopsys Designware Mobile Storage IP.
+> +
+> +	  If you have a controller with this interface, say Y or M here.
+> +
+> +	  If unsure, say N.
+> +
+> +
+>  config MMC_DW_IDMAC
+>  	bool "Internal DMAC interface"
+>  	depends on MMC_DW
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index ff0f714..0bd9e16 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -21,6 +21,7 @@
+>  #include <linux/interrupt.h>
+>  #include <linux/ioport.h>
+>  #include <linux/module.h>
+> +#include <linux/pci.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/scatterlist.h>
+>  #include <linux/seq_file.h>
+> @@ -101,6 +102,7 @@ struct dw_mci_slot {
+>  	int			last_detect_state;
+>  };
+>  
+> +
+>  static struct workqueue_struct *dw_mci_card_workqueue;
+>  
+>  #if defined(CONFIG_DEBUG_FS)
+> @@ -682,6 +684,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  {
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>  	u32 regs;
+> +	u32 card_detect;
+>  
+>  	/* set default 1 bit mode */
+>  	slot->ctype = SDMMC_CTYPE_1BIT;
+> @@ -716,6 +719,13 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	switch (ios->power_mode) {
+>  	case MMC_POWER_UP:
+>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+> +		/* Enable Power to the card that has been detected */
+> +		card_detect = mci_readl(slot->host, CDETECT);
+> +		/* Enabling power for card 0 when PCI is the interface */
+> +		mci_writel(slot->host, PWREN, ((~card_detect) & 0x1));
+
+> +		break;
+> +	case MMC_POWER_OFF:
+> +		mci_writel(slot->host, PWREN, 0);
+>  		break;
+
+
+Using shift with slot->id.(1bit per card).
+
+Regards,
+Jaehoon Chung
