@@ -1,45 +1,37 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 1/2] arm: omap4: hsmmc: Fix Pbias configuration on
- regulator OFF
-Date: Fri, 30 Sep 2011 10:41:48 -0700
-Message-ID: <20110930174147.GJ6324@atomide.com>
-References: <1317307500-5514-1-git-send-email-balajitk@ti.com>
- <1317307500-5514-2-git-send-email-balajitk@ti.com>
- <20110929162006.GG6324@atomide.com>
- <CANrkHUaJr3L+y33j=za-j6Kcsv1dy-rt0URc_9GgzpfOjqPTZA@mail.gmail.com>
+From: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: shorten the interval to wait
+ SDHCI_PRESENT_STATE set after sending cmd
+Date: Fri, 30 Sep 2011 18:01:52 -0400
+Message-ID: <CANz0V+6mUaM-uvhi+yGD_43CSd-8aFhSSLcOczhanuXiP3OwSw@mail.gmail.com>
+References: <1317268732-11653-1-git-send-email-Barry.Song@csr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CANrkHUaJr3L+y33j=za-j6Kcsv1dy-rt0URc_9GgzpfOjqPTZA@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, kishore.kadiyala@ti.com, vishp@ti.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:40674 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755179Ab1I3WBy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2011 18:01:54 -0400
+Received: by wyg34 with SMTP id 34so1507484wyg.19
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Sep 2011 15:01:53 -0700 (PDT)
+In-Reply-To: <1317268732-11653-1-git-send-email-Barry.Song@csr.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Barry Song <Barry.Song@csr.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, workgroup.linux@csr.com, Barry Song <Baohua.Song@csr.com>
 
-* T Krishnamoorthy, Balaji <balajitk@ti.com> [110930 07:43]:
-> On Thu, Sep 29, 2011 at 9:50 PM, Tony Lindgren <tony@atomide.com> wrote:
-> > * Balaji T K <balajitk@ti.com> [110929 07:11]:
-> >> MMC1 data line IO's are powered down in before set regulator function.
-> >> IO's should not be powered ON when regulator is OFF.
-> >> Keep the IO's in power pown mode after regulator OFF.
-> >> Delete incorrect comments which are not applicable for OMAP4.
-> >
-> > Care to check how this is different from what I added into fixes
-> > branch as commit 3fe8df93b0992199e3a0026fc51e90b705f94e40?
-> >
-> > Is this a separate issue?
-> 
-> Yes.
-> commit 3fe8df93b fixes USBC1 configuration.
-> USBC1 IO was configured unnecessarily for MMC IO.
-> 
-> This patch keeps the MMC IO's in power down after regulator OFF
-> otherwise it generates VMODE_ERROR due to mismatch in input (regulator)
-> voltage and MMC IO drive voltage.
+Hi,
 
-OK, can you please refresh it against the current fixes branch?
+2011/9/28 Barry Song <Barry.Song@csr.com>:
+> From: Barry Song <Baohua.Song@csr.com>
+>
+> now we wait 1ms after every loop, in the worst case, 1ms will be wasted.
+> that both decreases sd performance and increases cpu usage.
+> This patch shorten the interval to 1us, then in the worst case, only 1us
+> is wasted.
+>
+> Signed-off-by: Barry Song <Baohua.Song@csr.com>
+> ---
 
-Thanks,
+Cool! How much I/O perf did you gain?
 
-Tony
+A
