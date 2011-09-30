@@ -1,105 +1,108 @@
-From: James Hogan <james.hogan@imgtec.com>
-Subject: Re: [PATCH] mmc: dw_mmc: use the use_hold_reg bit in CMD register
-Date: Fri, 30 Sep 2011 12:05:55 +0100
-Message-ID: <4E85A293.6020006@imgtec.com>
-References: <4E859DEF.7090308@samsung.com>
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: [PATCH 1/2] arm: omap4: hsmmc: Fix Pbias configuration on
+ regulator OFF
+Date: Fri, 30 Sep 2011 20:46:51 +0530
+Message-ID: <CANrkHUaJr3L+y33j=za-j6Kcsv1dy-rt0URc_9GgzpfOjqPTZA@mail.gmail.com>
+References: <1317307500-5514-1-git-send-email-balajitk@ti.com>
+	<1317307500-5514-2-git-send-email-balajitk@ti.com>
+	<20110929162006.GG6324@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:55408 "EHLO multi.imgtec.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755517Ab1I3LF7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 30 Sep 2011 07:05:59 -0400
-In-Reply-To: <4E859DEF.7090308@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20110929162006.GG6324@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, kishore.kadiyala@ti.com, vishp@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, kyungmin.park@samsung.com, Will Newton <will.newton@imgtec.com>
 
-Hi,
+On Thu, Sep 29, 2011 at 9:50 PM, Tony Lindgren <tony@atomide.com> wrote=
+:
+> * Balaji T K <balajitk@ti.com> [110929 07:11]:
+>> MMC1 data line IO's are powered down in before set regulator functio=
+n.
+>> IO's should not be powered ON when regulator is OFF.
+>> Keep the IO's in power pown mode after regulator OFF.
+>> Delete incorrect comments which are not applicable for OMAP4.
+>
+> Care to check how this is different from what I added into fixes
+> branch as commit 3fe8df93b0992199e3a0026fc51e90b705f94e40?
+>
+> Is this a separate issue?
 
-On 09/30/2011 11:46 AM, Jaehoon Chung wrote:
-> This patch is added the use_hold_reg bit in CMD register.
-> 
-> In 2.40a, bit[29] of CMD register is used the use_hold_reg.
-> Some SoC is affected by this bit.
-> (This bit means whether use hold register when send data and cmd.
->  And related with cclk_in_drv phase)
-> if set IMPLEMENT_HOLD_REG in HCON register, i think fine that set this
-> bit by default.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c  |    9 +++++++++
->  drivers/mmc/host/dw_mmc.h  |    1 +
->  include/linux/mmc/dw_mmc.h |    1 +
->  3 files changed, 11 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 0ed1d28..544a616 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -276,6 +276,13 @@ static void dw_mci_start_command(struct dw_mci *host,
->  	mci_writel(host, CMDARG, cmd->arg);
->  	wmb();
-> 
-> +	/*
-> +	 * If use HOLD register,
-> +	 * CMD and DATA sent to card through HOLD register.
-> +	 */
-> +	if (host->use_hold_reg)
-> +		cmd_flags |= SDMMC_CMD_USE_HOLD_REG;
-> +
+Yes.
+commit 3fe8df93b fixes USBC1 configuration.
+USBC1 IO was configured unnecessarily for MMC IO.
 
-Is the HOLD register an internal register that is always required for
-hardware that has it to work? What effect does it have on the transaction?
+This patch keeps the MMC IO's in power down after regulator OFF
+otherwise it generates VMODE_ERROR due to mismatch in input (regulator)
+voltage and MMC IO drive voltage.
 
->  	mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START);
->  }
-> 
-> @@ -1886,6 +1893,8 @@ static int dw_mci_probe(struct platform_device *pdev)
->  		host->data_shift = 2;
->  	}
-> 
-> +	host->use_hold_reg = (mci_readl(host, HCON) >> 22) & 0x1;
-> +
-
-it'd be nice to have a #define for the HCON bit.
-
->  	/* Reset all blocks */
->  	if (!mci_wait_reset(&pdev->dev, host)) {
->  		ret = -ENODEV;
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index bfa3c1c..8c4edca 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -102,6 +102,7 @@
->  #define SDMMC_INT_ERROR			0xbfc2
->  /* Command register defines */
->  #define SDMMC_CMD_START			BIT(31)
-> +#define SDMMC_CMD_USE_HOLD_REG		BIT(29)
->  #define SDMMC_CMD_CCS_EXP		BIT(23)
->  #define SDMMC_CMD_CEATA_RD		BIT(22)
->  #define SDMMC_CMD_UPD_CLK		BIT(21)
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 6b46819..d6d1515 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -147,6 +147,7 @@ struct dw_mci {
->  	u32			current_speed;
->  	u32			num_slots;
->  	u32			fifoth_val;
-> +	bool			use_hold_reg;
-
-in case of other similar bits being added it may be better to have a
-copy of the hcon register here, but its fine as it is too.
-
->  	struct platform_device	*pdev;
->  	struct dw_mci_board	*pdata;
->  	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
-
-Cheers
-James
-
+>
+> Tony
+>
+>
+>> Signed-off-by: Balaji T K <balajitk@ti.com>
+>> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
+>> Reported-by: Viswanath Puttagunta <vishp@ti.com>
+>> ---
+>> =A0arch/arm/mach-omap2/hsmmc.c | =A0 14 ++------------
+>> =A01 files changed, 2 insertions(+), 12 deletions(-)
+>>
+>> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc=
+=2Ec
+>> index 097a42d..9cc2eb7 100644
+>> --- a/arch/arm/mach-omap2/hsmmc.c
+>> +++ b/arch/arm/mach-omap2/hsmmc.c
+>> @@ -129,15 +129,11 @@ static void omap4_hsmmc1_before_set_reg(struct=
+ device *dev, int slot,
+>> =A0 =A0 =A0 =A0* Assume we power both OMAP VMMC1 (for CMD, CLK, DAT0=
+=2E.3) and the
+>> =A0 =A0 =A0 =A0* card with Vcc regulator (from twl4030 or whatever).=
+ =A0OMAP has both
+>> =A0 =A0 =A0 =A0* 1.8V and 3.0V modes, controlled by the PBIAS regist=
+er.
+>> - =A0 =A0 =A0*
+>> - =A0 =A0 =A0* In 8-bit modes, OMAP VMMC1A (for DAT4..7) needs a sup=
+ply, which
+>> - =A0 =A0 =A0* is most naturally TWL VSIM; those pins also use PBIAS=
+=2E
+>> - =A0 =A0 =A0*
+>> - =A0 =A0 =A0* FIXME handle VMMC1A as needed ...
+>> =A0 =A0 =A0 =A0*/
+>> =A0 =A0 =A0 reg =3D omap4_ctrl_pad_readl(control_pbias_offset);
+>> =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
+>> - =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PBIASLITE_VMODE_MASK);
+>> =A0 =A0 =A0 omap4_ctrl_pad_writel(reg, control_pbias_offset);
+>> =A0}
+>>
+>> @@ -172,12 +168,6 @@ static void omap4_hsmmc1_after_set_reg(struct d=
+evice *dev, int slot,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PW=
+RDNZ_MASK);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap4_ctrl_pad_writel(re=
+g, control_pbias_offset);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+>> - =A0 =A0 } else {
+>> - =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap4_ctrl_pad_readl(control_pbias=
+_offset);
+>> - =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK=
+ |
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK |
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PBIASLITE_VMODE=
+_MASK);
+>> - =A0 =A0 =A0 =A0 =A0 =A0 omap4_ctrl_pad_writel(reg, control_pbias_o=
+ffset);
+>> =A0 =A0 =A0 }
+>> =A0}
+>>
+>> --
+>> 1.7.0.4
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
