@@ -1,54 +1,95 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: Re: [PATCH] PM: HIBERNATION: add resume_wait param to support
- MMC-like devices as resume file
-Date: Fri, 30 Sep 2011 07:21:00 +0800
-Message-ID: <CAGsJ_4x=tC3sVdXbsN_U-xc6CH5AVqOJEjY0a3h1SuH6Xobpiw@mail.gmail.com>
-References: <1317288548-19560-1-git-send-email-Barry.Song@csr.com>
- <CAKPcRGr3EzjS2es6HniuQziEivpsfH2r=d_Y=nkrsFW59g6xSw@mail.gmail.com> <CAKPcRGpPG2Z_tMQFHz8fpBLhLO4dx58AVhYWmPdZ_0pV7pVK6A@mail.gmail.com>
+From: NamJae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH v3] mmc : general purpose partition support.
+Date: Fri, 30 Sep 2011 10:32:23 +0900
+Message-ID: <CAKYAXd_1jY23C8NTvP7NizZEseb7G2bbtJYq7RvF1vaJaZgh_Q@mail.gmail.com>
+References: <1317309431-1898-1-git-send-email-linkinjeon@gmail.com>
+	<1522108758.811204.1317316828352.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:47602 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752734Ab1I2XVV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2011 19:21:21 -0400
-In-Reply-To: <CAKPcRGpPG2Z_tMQFHz8fpBLhLO4dx58AVhYWmPdZ_0pV7pVK6A@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1522108758.811204.1317316828352.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andrei Warkentin <awarkentin@vmware.com>
+Cc: linux-kernel@vger.kernel.org, adrian hunter <adrian.hunter@intel.com>, linus walleij <linus.walleij@linaro.org>, james p freyensee <james_p_freyensee@linux.intel.com>, sebras@gmail.com, Ulf Hansson <Ulf.Hansson@stericsson.com>, stefan xk nilsson <stefan.xk.nilsson@stericsson.com>, per forlin <per.forlin@stericsson.com>, johan rudholm <johan.rudholm@stericsson.com>, cjb@laptop.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Luca Tettamanti <kronos.it@gmail.com>
-Cc: frank.hofmann@tomtom.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, workgroup.linux@csr.com, rjw@sisk.pl, pavel@ucw.cz, Barry Song <Baohua.Song@csr.com>, linux-pm@lists.linux-foundation.org, linux-arm-kernel@lists.infradead.org
 
-2011/9/29 Luca Tettamanti <kronos.it@gmail.com>:
-> On Thu, Sep 29, 2011 at 5:47 PM, Luca Tettamanti <kronos.it@gmail.com> wrote:
->> On Thu, Sep 29, 2011 at 11:29 AM, Barry Song <Barry.Song@csr.com> wrote:
->>> From: Barry Song <baohua.song@csr.com>
->>>
->>> Some devices like mmc are async detected very slow. For example,
->>> drivers/mmc/host/sdhci.c launchs a 200ms delayed work to detect
->>> mmc partitions then add disk.
->>>
->>> we do have wait_for_device_probe and scsi_complete_async_scans
->>> before calling swsusp_check, but it is not enough to wait mmc.
->>>
->>> This patch adds resumewait kernel param just like rootwait so
->>> that we have enough time to wait mmc ready. The differene is
->>> here we wait for resume partition but rootwait waits for rootfs
->>> partition.
->>
->> I assume that such a device would need "rootwait" to boot in the first
->> place; why don't you "overload" the param to also enable waiting in
->> the resume path?
->
-> And in case that makes sense, it might be worthwhile to refactor a
-> common helper to be also used in do_mounts.c, e.g.
-> dev_t wait_for_device(char *name)
-
-it is ok until we have many cases which wait for devices by polling.
-but there are only two by the moment.
-here i don't see it is worthwhile since the current codes are short
-and clear enough.
-
->
-> L
-
--barry
+MjAxMS85LzMwIEFuZHJlaSBXYXJrZW50aW4gPGF3YXJrZW50aW5Adm13YXJlLmNvbT46Cj4gTmFt
+amFlLAo+Cj4gLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLQo+PiBGcm9tOiAiTmFtamFlIEpl
+b24iIDxsaW5raW5qZW9uQGdtYWlsLmNvbT4KPj4gVG86IGNqYkBsYXB0b3Aub3JnLCBsaW51eC1t
+bWNAdmdlci5rZXJuZWwub3JnCj4+IENjOiBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnLCBh
+d2Fya2VudGluQHZtd2FyZS5jb20sICJhZHJpYW4gaHVudGVyIiA8YWRyaWFuLmh1bnRlckBpbnRl
+bC5jb20+LCAibGludXMgd2FsbGVpaiIKPj4gPGxpbnVzLndhbGxlaWpAbGluYXJvLm9yZz4sICJq
+YW1lcyBwIGZyZXllbnNlZSIgPGphbWVzX3BfZnJleWVuc2VlQGxpbnV4LmludGVsLmNvbT4sIHNl
+YnJhc0BnbWFpbC5jb20sICJVbGYgSGFuc3NvbiIKPj4gPFVsZi5IYW5zc29uQHN0ZXJpY3Nzb24u
+Y29tPiwgInN0ZWZhbiB4ayBuaWxzc29uIiA8c3RlZmFuLnhrLm5pbHNzb25Ac3Rlcmljc3Nvbi5j
+b20+LCAicGVyIGZvcmxpbiIKPj4gPHBlci5mb3JsaW5Ac3Rlcmljc3Nvbi5jb20+LCAiam9oYW4g
+cnVkaG9sbSIgPGpvaGFuLnJ1ZGhvbG1Ac3Rlcmljc3Nvbi5jb20+LCAiTmFtamFlIEplb24iIDxs
+aW5raW5qZW9uQGdtYWlsLmNvbT4KPj4gU2VudDogVGh1cnNkYXksIFNlcHRlbWJlciAyOSwgMjAx
+MSAxMToxNzoxMSBBTQo+PiBTdWJqZWN0OiBbUEFUQ0ggdjNdIG1tYyA6IGdlbmVyYWwgcHVycG9z
+ZSBwYXJ0aXRpb24gc3VwcG9ydC4KPj4KPj4gSXQgYWxsb3dzIGdlcm5lcmFsIHB1cnBvc2UgcGFy
+dGl0aW9ucyBpbiBNTUMgRGV2aWNlLgo+PiBBbmQgSSB0cnkgdG8gc2ltcGxpeSBtYWtlIG1tY19i
+bGtfYWxsb2NfcGFydHMgdXNpbmcgbW1jX3BhcnQKPj4gc3RydWN0dXJlIHN1Z2dlc3RlZCBieSBB
+bmRyZWkgV2Fya2VudGluLgo+PiBBZnRlciBwYXRjaGluZywgd2UgY2FuIHNlZSBnZW5lcmFsIHB1
+cnBvc2UgcGFydGl0aW9ucyBsaWtlIHRoaXMuCj4+ID4gY2F0IC9wcm9jL3BhcnRpdGlvbnMKPj4g
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgMTc5IDAgODQ3ODcyIG1tY2JsazAKPj4gwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgMTc5IDE5MiA0MDk2IG1tY2JsazBncDMKPj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+MTc5IDE2MCA0MDk2IG1tY2JsazBncDIKPj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgMTc5IDEyOCA0
+MDk2IG1tY2JsazBncDEKPj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgMTc5IDk2IMKgMTA1MjY3MiBt
+bWNibGswZ3AwCj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIDE3OSA2NCDCoDEwMjQgbW1jYmxrMGJv
+b3QxCj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIDE3OSAzMiDCoDEwMjQgbW1jYmxrMGJvb3QwCj4+
+Cj4+IFNpZ25lZC1vZmYtYnk6IE5hbWphZSBKZW9uIDxsaW5raW5qZW9uQGdtYWlsLmNvbT4KPgo+
+PiArIMKgIMKgIMKgZm9yIChpZHggPSAwOyBpZHggPCBNTUNfTlVNX0JPT1RfUEFSVElUSU9OOyBp
+ZHgrKykgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChjYXJkLT5ib290X3BhcnRbaWR4XS5z
+aXplKSB7Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcmV0ID0gbW1jX2Jsa19h
+bGxvY19wYXJ0KGNhcmQsIG1kLAo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIGNhcmQtPmJvb3RfcGFydFtpZHhdLmNvb2tpZSwKPj4gKyDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5ib290X3BhcnRbaWR4XS5zaXplID4+
+IDksCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgY2FyZC0+
+Ym9vdF9wYXJ0W2lkeF0uZm9yY2Vfcm8sCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgY2FyZC0+Ym9vdF9wYXJ0W2lkeF0ubmFtZSk7Cj4+ICsgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgaWYgKHJldCkKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCByZXR1cm4gcmV0Owo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIH0K
+Pj4gKyDCoCDCoCB9Cj4+ICsKPj4gKyDCoCDCoCBmb3IgKGlkeCA9IDA7IGlkeCA8IE1NQ19OVU1f
+R1BfUEFSVElUSU9OOyBpZHgrKykgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChjYXJkLT5n
+cF9wYXJ0W2lkeF0uc2l6ZSkgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHJl
+dCA9IG1tY19ibGtfYWxsb2NfcGFydChjYXJkLCBtZCwKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5ncF9wYXJ0W2lkeF0uY29va2llLAo+PiArIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmdwX3BhcnRbaWR4
+XS5zaXplID4+IDksCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgY2FyZC0+Z3BfcGFydFtpZHhdLmZvcmNlX3JvLAo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmdwX3BhcnRbaWR4XS5uYW1lKTsKPj4gKyDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAocmV0KQo+PiArIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHJldHVybiByZXQ7Cj4KPiBZb3Ugd2VyZSBvbiBhIGJl
+dHRlciB0cmFjayBiZWZvcmUuIFdoeSBkb2VzIHRoZSBibG9jayBkcml2cmUgbmVlZCB0byBrbm93
+IGFib3V0IHRoZSBwYXJ0aXRpb24gdHlwZXM/Cj4gWW91IHNob3VsZCBwYXJzZSBvbmUgYXJyYXku
+Cj4KPj4gLSDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmJvb3Rfc2l6ZSA9IGV4dF9j
+c2RbRVhUX0NTRF9CT09UX01VTFRdIDw8IDE3Owo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChl
+eHRfY3NkW0VYVF9DU0RfQk9PVF9NVUxUXSkgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIHBhcnRfY2ZnID0gRVhUX0NTRF9QQVJUX0NPTkZJR19BQ0NfQk9PVDA7Cj4+ICsgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZm9yIChpZHggPSAwOyBpZHggPCBNTUNfTlVNX0JP
+T1RfUEFSVElUSU9OOyBpZHgrKykgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIGNhcmQtPmJvb3RfcGFydFtpZHhdLnNpemUgPQo+PiArIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGV4dF9jc2RbRVhUX0NT
+RF9CT09UX01VTFRdIDw8IDE3Owo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIGNhcmQtPmJvb3RfcGFydFtpZHhdLmNvb2tpZSA9IHBhcnRfY2ZnKys7Cj4+ICsg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgc3ByaW50ZihjYXJkLT5i
+b290X3BhcnRbaWR4XS5uYW1lLCAiYm9vdCVkIiwKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZHgpOwo+PiArIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmJvb3RfcGFydFtpZHhdLmZvcmNlX3Jv
+ID0gdHJ1ZTsKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCB9Cj4+ICsgwqAgwqAg
+wqAgwqAgwqAgwqAgfQo+PiDCoCDCoCDCoCB9Cj4+Cj4KPiBNeSBlYXJsaWVyIGNvbW1lbnQgc3Rp
+bGwgc3RhbmRzIC0gbWFrZSB5b3VyIGNvZGUgbG9vayBzb21ldGhpbmcgbGlrZSAtCj4KPiBpZiAo
+ZXh0X2NzZFtFWFRfQ1NEX0JPT1RfTVVMVF0pIHsKPiDCoCDCoCDCoCDCoHBhcnRfY2ZnID0gRVhU
+X0NTRF9QQVJUX0NPTkZJR19BQ0NfQk9PVDA7Cj4gwqAgwqAgwqAgwqBmb3IgKGlkeCA9IDA7IGlk
+eCA8IE1NQ19OVU1fQk9PVF9QQVJUSVRJT047IGlkeCsrKSB7Cj4gwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqBtbWNfcGFydF9hZGQoY2FyZCwgc2l6ZSwgcGFydF9jZmcrKywgImJvb3QlZCIsIHBhcnRf
+Y2ZnKyssCj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAi
+Ym9vdCVkIiwgaWR4LCB0cnVlKQo+IH0KPgo+PiArIMKgIMKgIHN0cnVjdCBtbWNfcGFydCBib290
+X3BhcnRbTU1DX05VTV9CT09UX1BBUlRJVElPTl07IMKgIMKgIMKgLyogbW1jIGJvb3QKPj4gcGFy
+dGl0aW9ucyAqLwo+PiArIMKgIMKgIHN0cnVjdCBtbWNfcGFydCBncF9wYXJ0W01NQ19OVU1fR1Bf
+UEFSVElUSU9OXTsgwqAvKiBtbWMgZ2VuZXJhbAo+PiBwdXJwb3NlIHBhcnRpdGlvbnMgKi8KPgo+
+IHN0cnVjdCBtbWNfcGFydCBwYXJ0c1tNTUNfTlVNX0JPT1RfUEFSVElUSU9OICsgTU1DX05VTV9H
+UF9QQVJUSVRJT05dOwo+IHVuc2lnbmVkIG5yX3BhcnRzOwo+CgpZb3VyIHJldmlldyB3aWxsIGFs
+d2F5cyBpbnNwaXJlIG1lLgpJIHdpbGwgcG9zdCBhZ2Fpbi4KcGx6IHJldmlldyBhZnRlci4uClRo
+YW5rcy4KPiBBCj4K
