@@ -1,108 +1,246 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH 1/2] arm: omap4: hsmmc: Fix Pbias configuration on
- regulator OFF
-Date: Fri, 30 Sep 2011 20:46:51 +0530
-Message-ID: <CANrkHUaJr3L+y33j=za-j6Kcsv1dy-rt0URc_9GgzpfOjqPTZA@mail.gmail.com>
-References: <1317307500-5514-1-git-send-email-balajitk@ti.com>
-	<1317307500-5514-2-git-send-email-balajitk@ti.com>
-	<20110929162006.GG6324@atomide.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20110929162006.GG6324@atomide.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, kishore.kadiyala@ti.com, vishp@ti.com
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: [PATCH v4] mmc : general purpose partition support.
+Date: Sat,  1 Oct 2011 00:46:59 +0900
+Message-ID: <1317397619-7091-1-git-send-email-linkinjeon@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com, Namjae Jeon <linkinjeon@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Sep 29, 2011 at 9:50 PM, Tony Lindgren <tony@atomide.com> wrote=
-:
-> * Balaji T K <balajitk@ti.com> [110929 07:11]:
->> MMC1 data line IO's are powered down in before set regulator functio=
-n.
->> IO's should not be powered ON when regulator is OFF.
->> Keep the IO's in power pown mode after regulator OFF.
->> Delete incorrect comments which are not applicable for OMAP4.
->
-> Care to check how this is different from what I added into fixes
-> branch as commit 3fe8df93b0992199e3a0026fc51e90b705f94e40?
->
-> Is this a separate issue?
+It allows gerneral purpose partitions in MMC Device.
+And I try to simpliy make mmc_blk_alloc_parts using mmc_part structure suggested by Andrei Warkentin.
+After patching, we can see general purpose partitions like this.
+> cat /proc/partitions
+          179 0 847872 mmcblk0
+          179 192 4096 mmcblk0gp3
+          179 160 4096 mmcblk0gp2
+          179 128 4096 mmcblk0gp1
+          179 96  1052672 mmcblk0gp0
+          179 64  1024 mmcblk0boot1
+          179 32  1024 mmcblk0boot0
 
-Yes.
-commit 3fe8df93b fixes USBC1 configuration.
-USBC1 IO was configured unnecessarily for MMC IO.
+Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
+---
+ drivers/mmc/card/block.c |   31 +++++++++++++++------------
+ drivers/mmc/core/mmc.c   |   52 ++++++++++++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/card.h |   32 +++++++++++++++++++++++++++-
+ include/linux/mmc/mmc.h  |    3 --
+ 4 files changed, 98 insertions(+), 20 deletions(-)
 
-This patch keeps the MMC IO's in power down after regulator OFF
-otherwise it generates VMODE_ERROR due to mismatch in input (regulator)
-voltage and MMC IO drive voltage.
-
->
-> Tony
->
->
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->> Signed-off-by: Kishore Kadiyala <kishore.kadiyala@ti.com>
->> Reported-by: Viswanath Puttagunta <vishp@ti.com>
->> ---
->> =A0arch/arm/mach-omap2/hsmmc.c | =A0 14 ++------------
->> =A01 files changed, 2 insertions(+), 12 deletions(-)
->>
->> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc=
-=2Ec
->> index 097a42d..9cc2eb7 100644
->> --- a/arch/arm/mach-omap2/hsmmc.c
->> +++ b/arch/arm/mach-omap2/hsmmc.c
->> @@ -129,15 +129,11 @@ static void omap4_hsmmc1_before_set_reg(struct=
- device *dev, int slot,
->> =A0 =A0 =A0 =A0* Assume we power both OMAP VMMC1 (for CMD, CLK, DAT0=
-=2E.3) and the
->> =A0 =A0 =A0 =A0* card with Vcc regulator (from twl4030 or whatever).=
- =A0OMAP has both
->> =A0 =A0 =A0 =A0* 1.8V and 3.0V modes, controlled by the PBIAS regist=
-er.
->> - =A0 =A0 =A0*
->> - =A0 =A0 =A0* In 8-bit modes, OMAP VMMC1A (for DAT4..7) needs a sup=
-ply, which
->> - =A0 =A0 =A0* is most naturally TWL VSIM; those pins also use PBIAS=
-=2E
->> - =A0 =A0 =A0*
->> - =A0 =A0 =A0* FIXME handle VMMC1A as needed ...
->> =A0 =A0 =A0 =A0*/
->> =A0 =A0 =A0 reg =3D omap4_ctrl_pad_readl(control_pbias_offset);
->> =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK |
->> - =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK);
->> + =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK |
->> + =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PBIASLITE_VMODE_MASK);
->> =A0 =A0 =A0 omap4_ctrl_pad_writel(reg, control_pbias_offset);
->> =A0}
->>
->> @@ -172,12 +168,6 @@ static void omap4_hsmmc1_after_set_reg(struct d=
-evice *dev, int slot,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg &=3D ~(OMAP4_MMC1_PW=
-RDNZ_MASK);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap4_ctrl_pad_writel(re=
-g, control_pbias_offset);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> - =A0 =A0 } else {
->> - =A0 =A0 =A0 =A0 =A0 =A0 reg =3D omap4_ctrl_pad_readl(control_pbias=
-_offset);
->> - =A0 =A0 =A0 =A0 =A0 =A0 reg |=3D (OMAP4_MMC1_PBIASLITE_PWRDNZ_MASK=
- |
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PWRDNZ_MASK |
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 OMAP4_MMC1_PBIASLITE_VMODE=
-_MASK);
->> - =A0 =A0 =A0 =A0 =A0 =A0 omap4_ctrl_pad_writel(reg, control_pbias_o=
-ffset);
->> =A0 =A0 =A0 }
->> =A0}
->>
->> --
->> 1.7.0.4
->>
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1ff5486..56f7185 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1377,26 +1377,29 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
+ 	return 0;
+ }
+ 
++/* MMC Physical partition consist of two boot partitons and
++ * four general purpose partitions.
++ * if the register of respective partitions is set in ext_csd,
++ * it allocate block device to be accessed.
++ */
++
+ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+ {
+-	int ret = 0;
++	int idx, ret = 0;
+ 
+ 	if (!mmc_card_mmc(card))
+ 		return 0;
+ 
+-	if (card->ext_csd.boot_size) {
+-		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT0,
+-					 card->ext_csd.boot_size >> 9,
+-					 true,
+-					 "boot0");
+-		if (ret)
+-			return ret;
+-		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT1,
+-					 card->ext_csd.boot_size >> 9,
+-					 true,
+-					 "boot1");
+-		if (ret)
+-			return ret;
++	 for (idx = 0; idx < card->nr_parts; idx++) {
++		if (card->part[idx].size) {
++			ret = mmc_blk_alloc_part(card, md,
++				card->part[idx].cookie,
++				card->part[idx].size >> 9,
++				card->part[idx].force_ro,
++				card->part[idx].name);
++			if (ret)
++				return ret;
++		}
+ 	}
+ 
+ 	return ret;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5700b1c..5db4cee 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -41,6 +41,11 @@ static const unsigned int tacc_mant[] = {
+ 	35,	40,	45,	50,	55,	60,	70,	80,
+ };
+ 
++/* partition configuration array */
++static const unsigned int part_cfg[] = {
++	0x1,	0x2,	0x4,	0x5,	0x6,	7,
++};
++
+ #define UNSTUFF_BITS(resp,start,size)					\
+ 	({								\
+ 		const int __size = size;				\
+@@ -239,7 +244,8 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
+  */
+ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ {
+-	int err = 0;
++	int err = 0, idx, part_num;
++	unsigned int part_size, gp_size_mult;
+ 
+ 	BUG_ON(!card);
+ 
+@@ -340,7 +346,16 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 * There are two boot regions of equal size, defined in
+ 		 * multiples of 128K.
+ 		 */
+-		card->ext_csd.boot_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
++		if (ext_csd[EXT_CSD_BOOT_MULT])	{
++			card->nr_parts = MMC_NUM_BOOT_PARTITION;
++			for (idx = 0, part_num = 0;
++				idx < MMC_NUM_BOOT_PARTITION; idx++,
++				part_num++) {
++				part_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
++				mmc_part_add(card, part_size, part_cfg[idx],
++					"boot%d", idx, part_num, true);
++			}
++		}
+ 	}
+ 
+ 	card->ext_csd.raw_hc_erase_gap_size =
+@@ -392,6 +407,39 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 			card->ext_csd.enhanced_area_offset = -EINVAL;
+ 			card->ext_csd.enhanced_area_size = -EINVAL;
+ 		}
++
++		/*
++		 * General purpose partition feature support --
++		 * If ext_csd have the size of general purpose partitions,
++		 * set size, part_type, partition name in mmc_part.
++		 */
++
++		if (ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x1) {
++			u8 hc_erase_grp_sz =
++				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
++			u8 hc_wp_grp_sz =
++				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
++
++			card->ext_csd.enhanced_area_en = 1;
++
++			card->nr_parts += MMC_NUM_GP_PARTITION;
++			for (part_num = 0, gp_size_mult = 143;
++				idx < card->nr_parts;
++				idx++, part_num++, gp_size_mult += 3) {
++				if (!ext_csd[gp_size_mult] &&
++					!ext_csd[gp_size_mult + 1] &&
++					!ext_csd[gp_size_mult + 2])
++					continue;
++				part_size = (ext_csd[gp_size_mult + 2] << 16) +
++					(ext_csd[gp_size_mult + 1] << 8) +
++					ext_csd[gp_size_mult];
++				part_size *= (size_t)(hc_erase_grp_sz *
++					hc_wp_grp_sz);
++				part_size <<= 19;
++				mmc_part_add(card, part_size, part_cfg[idx],
++					"gp%d", idx, part_num, false);
++			}
++		}
+ 		card->ext_csd.sec_trim_mult =
+ 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
+ 		card->ext_csd.sec_erase_mult =
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index b460fc2..941f2d0 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -12,6 +12,7 @@
+ 
+ #include <linux/mmc/core.h>
+ #include <linux/mod_devicetable.h>
++#include <linux/genhd.h>
+ 
+ struct mmc_cid {
+ 	unsigned int		manfid;
+@@ -63,7 +64,6 @@ struct mmc_ext_csd {
+ 	bool			enhanced_area_en;	/* enable bit */
+ 	unsigned long long	enhanced_area_offset;	/* Units: Byte */
+ 	unsigned int		enhanced_area_size;	/* Units: KB */
+-	unsigned int		boot_size;		/* in bytes */
+ 	u8			raw_partition_support;	/* 160 */
+ 	u8			raw_erased_mem_count;	/* 181 */
+ 	u8			raw_ext_csd_structure;	/* 194 */
+@@ -157,6 +157,22 @@ struct sdio_func_tuple;
+ 
+ #define SDIO_MAX_FUNCS		7
+ 
++/* The number of MMC physical partitions
++ * It consist of boot partitions(2), general purpose partitions(4) in MMC v4.4
++ */
++#define MMC_NUM_BOOT_PARTITION	2
++#define MMC_NUM_GP_PARTITION	4
++
++/*
++ * MMC Physical partitions
++ */
++struct mmc_part {
++	unsigned int	size;	/* partition size (in bytes) */
++	unsigned int	cookie;	/* it used to part_type */
++	char	name[DISK_NAME_LEN];
++	bool	force_ro;	/* to make boot parts RO by default */
++};
++
+ /*
+  * MMC device
+  */
+@@ -216,9 +232,23 @@ struct mmc_card {
+ 	unsigned int		sd_bus_speed;	/* Bus Speed Mode set for the card */
+ 
+ 	struct dentry		*debugfs_root;
++	struct mmc_part	part[MMC_NUM_BOOT_PARTITION + MMC_NUM_GP_PARTITION];	/* mmc physical partitions */
++	unsigned int	nr_parts;
+ };
+ 
+ /*
++ * This function fill contents in mmc_part.
++ */
++static inline void mmc_part_add(struct mmc_card *card, unsigned int size,
++	unsigned int part_cfg, char *name, int idx, int part_num, bool ro)
++{
++	card->part[idx].size = size;
++	card->part[idx].cookie = part_cfg;
++	sprintf(card->part[idx].name, name, part_num);
++	card->part[idx].force_ro = ro;
++}
++
++/*
+  *  The world is not perfect and supplies us with broken mmc/sdio devices.
+  *  For at least some of these bugs we need a work-around.
+  */
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 5a794cb..08f1746 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -299,10 +299,7 @@ struct _mmc_csd {
+  */
+ 
+ #define EXT_CSD_WR_REL_PARAM_EN		(1<<2)
+-
+ #define EXT_CSD_PART_CONFIG_ACC_MASK	(0x7)
+-#define EXT_CSD_PART_CONFIG_ACC_BOOT0	(0x1)
+-#define EXT_CSD_PART_CONFIG_ACC_BOOT1	(0x2)
+ 
+ #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
+ #define EXT_CSD_CMD_SET_SECURE		(1<<1)
+-- 
+1.7.4.4
