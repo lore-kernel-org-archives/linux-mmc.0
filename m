@@ -1,51 +1,59 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
+From: James Hogan <james.hogan@imgtec.com>
 Subject: Re: [PATCH] mmc: dw_mmc: add write/read function for DATA register
-Date: Fri, 30 Sep 2011 19:01:09 +0900
-Message-ID: <4E859365.8060601@samsung.com>
-References: <4E857FE6.5020208@samsung.com> <4E8584EA.5000900@imgtec.com>
+Date: Fri, 30 Sep 2011 11:10:12 +0100
+Message-ID: <4E859584.1030402@imgtec.com>
+References: <4E857FE6.5020208@samsung.com> <4E8584EA.5000900@imgtec.com> <4E859365.8060601@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:64166 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751601Ab1I3KBN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2011 06:01:13 -0400
-Received: from epcpsbgm2.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LSB007G5YHZ7FW0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 30 Sep 2011 19:01:12 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LSB00N9WYHZ1RA1@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 30 Sep 2011 19:01:11 +0900 (KST)
-In-reply-to: <4E8584EA.5000900@imgtec.com>
+Received: from multi.imgtec.com ([194.200.65.239]:41128 "EHLO multi.imgtec.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751618Ab1I3KKQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 30 Sep 2011 06:10:16 -0400
+In-Reply-To: <4E859365.8060601@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: James Hogan <james.hogan@imgtec.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, kyungmin.park@samsung.com, Will Newton <will.newton@imgtec.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, kyungmin.park@samsung.com, Will Newton <will.newton@imgtec.com>
 
-Hi James.
+Hi
 
-> Can I suggest that instead of having 6 new macros with offset parameters
-> from the reg parameter (after all, the caller can just add the offset to
-> the reg argument just as easily), you simply store the data register
-> offset (what is currently DATA+host->data_offset) instead of
-> host->data_offset, and use that instead of DATA. That would be simpler
-> and more readable.
+On 09/30/2011 11:01 AM, Jaehoon Chung wrote:
+> Hi James.
+> 
+>> Can I suggest that instead of having 6 new macros with offset parameters
+>> from the reg parameter (after all, the caller can just add the offset to
+>> the reg argument just as easily), you simply store the data register
+>> offset (what is currently DATA+host->data_offset) instead of
+>> host->data_offset, and use that instead of DATA. That would be simpler
+>> and more readable.
+> 
+> 
+> Sure..i understood your suggestion. But i think that need check the
+> version-id. i will also consider more..:)
 
-
-Sure..i understood your suggestion. But i think that need check the
-version-id. i will also consider more..:)
+Yes, I mean where you currently set host->data_offset depending on the
+version id, set it to e.g. DATA or DATA_PRE240A (maybe DATA_LEGACY)
+depending on the version id. Then use host->data_offset instead of DATA
+everywhere else.
 
 > 
-> DATA should probably be defined as the most up to date value, and define
-> another one for pre-240A versions.
+>>
+>> DATA should probably be defined as the most up to date value, and define
+>> another one for pre-240A versions.
+> 
+> 
+> Right. i wonder why changed the DATA register :(
 
+Indeed, hopefully now they'll have twice as much space for normal
+registers and won't have to change it again. I'm just happy they didn't
+move the version id register!
 
-Right. i wonder why changed the DATA register :(
+Cheers
+James
 
-Best Regards,
-Jaehoon Chung
+> 
+> Best Regards,
+> Jaehoon Chung
+
