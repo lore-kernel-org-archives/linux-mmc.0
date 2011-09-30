@@ -1,116 +1,63 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 1/1] mmc: Support of PCI mode for the dw_mmc driver
-Date: Fri, 30 Sep 2011 10:51:48 +0900
-Message-ID: <4E8520B4.7070504@samsung.com>
-References: <1317318052-2750-1-git-send-email-shashidharh@vayavyalabs.com>
+From: =?utf-8?B?5LuFMTDlhYPmr4/lpKk=?= <user@tal-oz.co.il>
+Subject: =?utf-8?B?576k5Y+R6L2v5Lu2K+S5sOWutuaQnOe0ouacuivmnIDmlrDlub/kuqTkvJrkubDlrrbjgIHmtbc=?=
+	=?utf-8?B?5YWz5pWw5o2uLEIyQuivouebmOS5sOWutjUwMOS4h+OAgg==?=
+Date: Fri, 30 Sep 2011 01:59:33 +0000 (UTC)
+Message-ID: <20120930005016602106@tal-oz.co.il>
+Reply-To: <1339625218@qq.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:32709 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753297Ab1I3Bvv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2011 21:51:51 -0400
-Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LSB00ESBBU0ER80@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 30 Sep 2011 10:51:50 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LSB009ERBUD8450@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 30 Sep 2011 10:51:49 +0900 (KST)
-In-reply-to: <1317318052-2750-1-git-send-email-shashidharh@vayavyalabs.com>
+Received: from mail.tal-oz.co.il ([212.235.34.242]:13851 "EHLO tal-oz.co.il"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753297Ab1I3B72 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 29 Sep 2011 21:59:28 -0400
+Date: Sun, 30 Sep 2012 00:50:06 +0800
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Cc: Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Matt Fleming <matt@console-pimps.org>, Zhangfei Gao <zhangfei.gao@marvell.com>, Philip Rakity <prakity@marvell.com>, Wolfram Sang <w.sang@pengutronix.de>, Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org
+To: linmiao@online.sh.cn, linton032000@yahoo.co, linux@irc.hashmark.net, linux-mmc@vger.kernel.org, linxiaotiao2008@hotmail.com, linyanbin007@126.com, linys@hse-china.com
 
-Hi Shashidhar.
-
-On 09/30/2011 02:40 AM, Shashidhar Hiremath wrote:
-
-> Support of PCI mode for the dw_mmc driver This Patch adds the support for the scenario where the Synopsys Designware IP is present on the PCI bus.The patch adds the minimal modifications necessary for the driver to work on PCI platform. The Driver has also been tested for on the PCI platform with single Card Slot.
-> 
-> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-> ---
-> v2:
-> *As per Suggestions by Will Newton and James Hogan
-> -Reduced the number of ifdefs
-> 
->  drivers/mmc/host/Kconfig   |   11 ++
->  drivers/mmc/host/dw_mmc.c  |  352 ++++++++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/dw_mmc.h  |   13 ++
->  include/linux/mmc/dw_mmc.h |    4 +
->  4 files changed, 380 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 8c87096..84d8908 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -526,6 +526,17 @@ config MMC_DW
->  	  block, this provides host support for SD and MMC interfaces, in both
->  	  PIO and external DMA modes.
->  
-> +config MMC_DW_PCI
-> +	bool "MMC_DW Support On PCI bus"
-> +	depends on MMC_DW && PCI
-> +	help
-> +	  This selects the PCI for the Synopsys Designware Mobile Storage IP.
-> +
-> +	  If you have a controller with this interface, say Y or M here.
-> +
-> +	  If unsure, say N.
-> +
-> +
->  config MMC_DW_IDMAC
->  	bool "Internal DMAC interface"
->  	depends on MMC_DW
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index ff0f714..0bd9e16 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -21,6 +21,7 @@
->  #include <linux/interrupt.h>
->  #include <linux/ioport.h>
->  #include <linux/module.h>
-> +#include <linux/pci.h>
->  #include <linux/platform_device.h>
->  #include <linux/scatterlist.h>
->  #include <linux/seq_file.h>
-> @@ -101,6 +102,7 @@ struct dw_mci_slot {
->  	int			last_detect_state;
->  };
->  
-> +
->  static struct workqueue_struct *dw_mci_card_workqueue;
->  
->  #if defined(CONFIG_DEBUG_FS)
-> @@ -682,6 +684,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  {
->  	struct dw_mci_slot *slot = mmc_priv(mmc);
->  	u32 regs;
-> +	u32 card_detect;
->  
->  	/* set default 1 bit mode */
->  	slot->ctype = SDMMC_CTYPE_1BIT;
-> @@ -716,6 +719,13 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	switch (ios->power_mode) {
->  	case MMC_POWER_UP:
->  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
-> +		/* Enable Power to the card that has been detected */
-> +		card_detect = mci_readl(slot->host, CDETECT);
-> +		/* Enabling power for card 0 when PCI is the interface */
-> +		mci_writel(slot->host, PWREN, ((~card_detect) & 0x1));
-
-> +		break;
-> +	case MMC_POWER_OFF:
-> +		mci_writel(slot->host, PWREN, 0);
->  		break;
+576k5Y+R6L2v5Lu2K+S5sOWutuaQnOe0ouacuisxMDnlsYrlub/kuqTkvJrkubDlrrbjgIHlsZXk
+vJrkubDlrrbjgIHmtbflhbPmlbDmja4sQjJC6K+i55uY5Lmw5a62NTAw5LiH44CCDQoNCuS4gOWF
+sTjkuKrljIUo5pWw5o2u5piv5YWo6KGM5Lia55qE77yM5oyJ54Wn6KGM5Lia5YiG5aW957G777yM
+5bm25LiU5Y+v5Lul5oyJ54Wn5YWz6ZSu6K+N5p+l6K+i55qEKe+8miANCjHvvIwyMDEx5pil5a2j
+MTA55bGK5bm/5Lqk5Lya5Lmw5a625pWw5o2u5bqT5paw6bKc5Ye654KJ77yM6LaF57qn5paw6bKc
+5Lmw5a6277yM5paw6bKc5pWw5o2u77yM5a655piT5oiQ5Y2V77yBIA0KMu+8jOacgOaWsOWFqOeQ
+g+S5sOWutuW6kyzlhbE0NTE2NjDmnaHmlbDmja7jgIIgDQoz77yMMjAwOOW5tCwyMDA55bm0LDIw
+MTDlubQg5pil5a2jK+eni+Wto+W5v+S6pOS8muS5sOWutuWQjeW9le+8jDEwMyAxMDQgMTA1IDEw
+NiAxMDcgMTA4IOWFseWFreWxiiDlhbExMjAuNuS4h+aVsOaNruOAgg0KNO+8jDIwMTDlubTlm73p
+mYXkv4PplIDljY/kvJrvvIhQUEFJ77yJ5oiQ5ZGY5ZCN5Y2VIFBQQUkgTWVtYmVycyBEaXJlY3Rv
+cnnvvIzpnZ7luLjph43opoHnmoTlpKfkubDlrrbjgIINCjXvvIwyMDEw5bm05Yiw6aaZ5riv6YeH
+6LSt55qE5Zu95aSW5a6i5Lq65ZCN5b2VKOmmmea4r+i0uOWPkeWxgOaPkOS+mynvvIzlhbE3LjLk
+uIfmlbDmja7vvIzotoXnuqfph43opoHnmoTkubDlrrbjgIINCjbvvIw2MC445LiH5p2h5pyA5paw
+5Zu95aSWQjJC5Lmw5a626K+i55uY44CCDQo377yMMjAwOeW5tOa1t+WFs+aPkOWNleaVsOaNrnBp
+ZXJz54mI5pWw5o2uIDHljYPkuIfjgIINCjjvvIznvqTlj5Hova/ku7bvvIznvqTlj5Hova/ku7bn
+moTpg6jnvbLkuI7lronoo4XjgIINCg0K5YWxIDUwMOS4h+S4quS5sOWutu+8jOavj+S4quWdh+ac
+iUVtYWlsLiANCg0K5L+d6K+B5q+P5aSp6YO95pyJ5Lmw5a625Zue5aSN44CCDQrkv53or4Hmr4/l
+pKnpg73mnInkubDlrrblm57lpI3jgIINCg0K6KaB55qE5oqT57Sn6IGU57O7UVE6IDEzMzk2MjUy
+MTggICDmiJbogIXnq4vljbPlm57lpI3pgq7nrrE6IDEzMzk2MjUyMThAcXEuY29tDQropoHnmoTm
+ipPntKfogZTns7tRUTogMTMzOTYyNTIxOCAgIOaIluiAheeri+WNs+WbnuWkjemCrueusTogMTMz
+OTYyNTIxOEBxcS5jb20NCuimgeeahOaKk+e0p+iBlOezu1FROiAxMzM5NjI1MjE4ICAg5oiW6ICF
+56uL5Y2z5Zue5aSN6YKu566xOiAxMzM5NjI1MjE4QHFxLmNvbQ0KIA0KDQror5rkv6HkuLrmnKzv
+vIzlpoLmnpzkuI3kv6Hku7vmnKzkuros5Y+v5Lul6LWw5reY5a6d5Lqk5piTLOaUtui0p+mqjOiv
+geWQjuWGjeS7mOasvizov5nmmK/lr7nmgqjmnIDlpb3nmoTkv53pmpzkuobjgIIgDQoNCuS/neiv
+geavj+WkqemDveacieS5sOWutuWbnuWkjeOAgg0K5L+d6K+B5q+P5aSp6YO95pyJ5Lmw5a625Zue
+5aSN44CCDQrkv53or4Hmr4/lpKnpg73mnInkubDlrrblm57lpI3jgIINCg0KDQoNCg0K5bm/5Lqk
+5Lya5Lmw5a625oyJ5Lqn5ZOB57G75Yir5YiG57G777yM5YiG5Li65Lul5LiL5Yeg57G777yaDQox
+IOWKnuWFrOiuvuWkhw0KMiDnvJbnu4flj4rol6Tpk4Hlt6Xoibrlk4ENCjMg546755KDDQo0IOmk
+kOWOqOeUqOWFtw0KNSDovabovoYNCjYg5aSn5Z6L5py65qKw5Y+K6K6+5aSHDQo3IOeUteWtkOeU
+teawlA0KOCDnlLXlrZDmtojotLnlk4ENCjkg57q657uHDQoxMCDmnI3oo4UNCjExIOS4quS6uuaK
+pOeQhg0KMTIg5bel56iL5py65qKwDQoxMyDlt6XlhbcNCjE0IOWMluW3pQ0KMTUg6K6h566X5py6
+5Y+K6YCa6K6vDQoxNiDlrrblsYXnlKjlk4ENCjE3IOWutuWxheijhemlsA0KMTgg5a625YW3DQox
+OSDlrrbnlKjnlLXlmagNCjIwIOW7uuetkeWPiuijhemlsOadkOaWmQ0KMjEg6IqC5pel55So5ZOB
+DQoyMiDnpLzlk4Hlj4rotaDlk4ENCjIzIOaRqeaJmOi9pg0KMjQg5rG96L2m6YWN5Lu2DQoyNSDp
+o5/lk4ENCjI2IOmZtueTtw0KMjcg6ZOB55+zDQoyOCDnjqnlhbcNCjI5IOWNq+a1tA0KMzAg5LqU
+6YeRDQozMSDlsI/lnovmnLrmorANCjMyIOmeiw0KMzMg5LyR6Zey55So5ZOBDQozNCDljLvnlpcN
+CjM1IOa1tOWupOS6p+WTgQ0KMzYg5Zut5p6XDQozNyDnhafmmI7kuqflk4ENCjM4IOmSn+ihqOec
+vOmVnA0KMzkg6Ieq6KGM6L2mDQo0MCDljIUNCg0KDQrkv53or4Hmr4/lpKnpg73mnInkubDlrrbl
+m57lpI3jgIINCuS/neivgeavj+WkqemDveacieS5sOWutuWbnuWkjeOAgg0K5L+d6K+B5q+P5aSp
+6YO95pyJ5Lmw5a625Zue5aSN44CCDQrkv53or4Hmr4/lpKnpg73mnInkubDlrrblm57lpI3jgIIN
+CuS/neivgeavj+WkqemDveacieS5sOWutuWbnuWkjeOAgg0K
 
 
-Using shift with slot->id.(1bit per card).
-
-Regards,
-Jaehoon Chung
