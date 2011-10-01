@@ -1,16 +1,12 @@
 From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: [PATCH v6] mmc : general purpose partition support.
-Date: Sat,  1 Oct 2011 20:47:31 +0900
-Message-ID: <1317469651-1914-1-git-send-email-linkinjeon@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f42.google.com ([209.85.210.42]:38286 "EHLO
-	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751849Ab1JALrr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Oct 2011 07:47:47 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v7] mmc : general purpose partition support.
+Date: Sat,  1 Oct 2011 20:54:00 +0900
+Message-ID: <1317470040-2000-1-git-send-email-linkinjeon@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: cjb@laptop.org, linux-mmc@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com, Namjae Jeon <linkinjeon@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
 It allows gerneral purpose partitions in MMC Device.
 And I try to simpliy make mmc_blk_alloc_parts using mmc_part structure suggested by Andrei Warkentin.
@@ -100,8 +96,8 @@ index 5700b1c..818778f 100644
  		 */
 -		card->ext_csd.boot_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
 +		if (ext_csd[EXT_CSD_BOOT_MULT])	{
-+				for (idx = 0; idx < MMC_NUM_BOOT_PARTITION;
-+					idx++) {
++			for (idx = 0; idx < MMC_NUM_BOOT_PARTITION;
++				idx++) {
 +				part_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
 +				mmc_part_add(card, part_size,
 +					EXT_CSD_PART_CONFIG_ACC_BOOT0 + idx,
@@ -233,4 +229,3 @@ index 5a794cb..29b7cb6 100644
  #define EXT_CSD_CMD_SET_SECURE		(1<<1)
 -- 
 1.7.4.4
-
