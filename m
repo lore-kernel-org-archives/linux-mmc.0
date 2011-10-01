@@ -1,89 +1,236 @@
-From: J Freyensee <james_p_freyensee@linux.intel.com>
-Subject: Re: slow eMMC write speed
-Date: Fri, 30 Sep 2011 17:33:20 -0700
-Message-ID: <4E865FD0.8010309@linux.intel.com>
-References: <CAHzg1A9usWP8o3xjEq3yFn56bEqk_Qp0a8-2FJzoRZG1MqPRPA@mail.gmail.com> <CACRpkdYamRVpBbhAcgn7rXBGcgHUp7+9PCrmOUkXV1BvZ+4pDw@mail.gmail.com> <CAHzg1A9H31hWdEKR5+_p8HuA_oq6o8EkESpJ22kQ4e4oFDH8GQ@mail.gmail.com> <4E837C89.9020109@linux.intel.com> <CAHzg1A8Cgz8DNje_We9MKJ90E4=9BDw9XzvEQU5h2et8HPHBjw@mail.gmail.com> <4E838B43.5090605@linux.intel.com> <CAHzg1A-wa0Gm2jXrU6q3L7-NBzQQJmZszraDsfs-Dgb8F6gT6w@mail.gmail.com> <4E839302.5020001@linux.intel.com> <CACRpkdYdrfhFSfLh=Zgjox60KbYCqN+n_WdOaP2sv_mhai+iig@mail.gmail.com> <4E84297C.3060408@stericsson.com> <4E84D20A.4040707@linux.intel.com> <CANz0V+6zKiEs5YdpipM6iid_JwyQaN2cd5y9BKh1mXXgKpxXkA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: [PATCH v6] mmc : general purpose partition support.
+Date: Sat,  1 Oct 2011 20:47:31 +0900
+Message-ID: <1317469651-1914-1-git-send-email-linkinjeon@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:21912 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751998Ab1JAAZh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 30 Sep 2011 20:25:37 -0400
-In-Reply-To: <CANz0V+6zKiEs5YdpipM6iid_JwyQaN2cd5y9BKh1mXXgKpxXkA@mail.gmail.com>
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:38286 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751849Ab1JALrr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Oct 2011 07:47:47 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
-Cc: Praveen G K <praveen.gk@gmail.com>, =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Jon Medhurst <tixy@linaro.org>
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com, Namjae Jeon <linkinjeon@gmail.com>
 
-On 09/30/2011 01:22 AM, Andrei E. Warkentin wrote:
-> Hi James,
->
-> 2011/9/29 J Freyensee<james_p_freyensee@linux.intel.com>:
->> As I've been playing around with with buffering/caching, it seems to me an
->> opportunity to simplify things in the MMC space is to eliminate the need for
->> a mmc_blk_request struct or mmc_request struct.  With looking through the
->> mmc_blk_issue_rw_rq(), there is a lot of work to initialize struct
->> mmc_blk_request brq, only to pass a struct mmc_queue variable the actual
->> mmc_wait_for_req() instead.  In fact, some of the parameters in the struct
->> mmc_blk_request member brq.mrq (of type mmc_request) wind up just pointing
->> to members in struct mmc_blk_request brq.  Granted, I totally don't
->> understand everything going on here and I haven't studied this code nearly
->> as long as others, but when I see something like this, the first thing that
->> comes up in my mind is 'elimination/simplification opportunity'.
->
-> mmc_request is what is actually handled by the SD/MMC host driver -
-> compact representation of
-> what needs to be done (unneeded fields are NULL pointers).
-> mmc_blk_request is basically the backing
-> store for these fields, for the block driver. I would guess the
-> mmc_request doesn't contain the fields
-> because it would be inefficient (or correct me). And since there is
-> quite a bit of logic behind running the
-> actual MMC commands (esp. w.r.t to mrq->sbc and mrq->stop), it would
-> not be a good idea to get
-> rid of mmc_request and pull the strings from card drivers either.
+It allows gerneral purpose partitions in MMC Device.
+And I try to simpliy make mmc_blk_alloc_parts using mmc_part structure suggested by Andrei Warkentin.
+After patching, we can see general purpose partitions like this.
+> cat /proc/partitions
+          179 0 847872 mmcblk0
+          179 192 4096 mmcblk0gp3
+          179 160 4096 mmcblk0gp2
+          179 128 4096 mmcblk0gp1
+          179 96  1052672 mmcblk0gp0
+          179 64  1024 mmcblk0boot1
+          179 32  1024 mmcblk0boot0
 
-So I have a question on write behavior.
+Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
+---
+ drivers/mmc/card/block.c |   31 +++++++++++++++++--------------
+ drivers/mmc/core/mmc.c   |   45 +++++++++++++++++++++++++++++++++++++++++++--
+ include/linux/mmc/card.h |   33 ++++++++++++++++++++++++++++++++-
+ include/linux/mmc/mmc.h  |    2 +-
+ 4 files changed, 93 insertions(+), 18 deletions(-)
 
-Say mmc_blk_issue_rw_rq() is called.  Say the mmc_queue *mq variable 
-passed in is a write.  Say that write is buffered, delayed into being 
-sent via mmc_wait_for_req() for 5 seconds, and it's sent to 
-mmc_wait_for_req() later.  Would that delay of sending the brq->mrq 
-entry to mmc_wait_for_req() cause a timeout, ie:
-
-mmc0: Timeout waiting for hardware interrupt.
-
-??
-
-If this is true, how would you extend the timeout?  I would not have 
-expected this until mmc_wait_for_req() is called.  It appeared to me 
-mmc_set_data_timeout() was just setting a variable in brq to be used 
-when mmc_wait_for_req() is called.  I only see this behavior in eMMC 
-cards, not MMC cards being stuck into an MMC slot of a laptop.
-
-Thanks!
-
->
-> Praveen:
->
-> As for timings on Toshiba cards, you can search "MMC quirks relating
-> to performance/lifetime." in the archives.
-> There was quite a lot of very interesting data and discussions
-> specifically regarding performance, and it would
-> be pretty impossible and a disservice to try to summarize it :-). In
-> short, I've definitely seen 100ms blips, pronounced
-> by extra GC caused by unaligned accesses across allocation units (if I
-> remember correctly). You could try and reduce
-> the worst case, but it would make the average case worse. It's a bit
-> of voodoo. Best solution is interact with your vendor
-> and get suggestions on use and errata.
->
-> A
-
-
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1ff5486..56f7185 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1377,26 +1377,29 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
+ 	return 0;
+ }
+ 
++/* MMC Physical partition consist of two boot partitons and
++ * four general purpose partitions.
++ * if the register of respective partitions is set in ext_csd,
++ * it allocate block device to be accessed.
++ */
++
+ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+ {
+-	int ret = 0;
++	int idx, ret = 0;
+ 
+ 	if (!mmc_card_mmc(card))
+ 		return 0;
+ 
+-	if (card->ext_csd.boot_size) {
+-		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT0,
+-					 card->ext_csd.boot_size >> 9,
+-					 true,
+-					 "boot0");
+-		if (ret)
+-			return ret;
+-		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT1,
+-					 card->ext_csd.boot_size >> 9,
+-					 true,
+-					 "boot1");
+-		if (ret)
+-			return ret;
++	 for (idx = 0; idx < card->nr_parts; idx++) {
++		if (card->part[idx].size) {
++			ret = mmc_blk_alloc_part(card, md,
++				card->part[idx].cookie,
++				card->part[idx].size >> 9,
++				card->part[idx].force_ro,
++				card->part[idx].name);
++			if (ret)
++				return ret;
++		}
+ 	}
+ 
+ 	return ret;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5700b1c..818778f 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -239,7 +239,8 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
+  */
+ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ {
+-	int err = 0;
++	int err = 0, idx;
++	unsigned int part_size, gp_size_mult;
+ 
+ 	BUG_ON(!card);
+ 
+@@ -340,7 +341,15 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 * There are two boot regions of equal size, defined in
+ 		 * multiples of 128K.
+ 		 */
+-		card->ext_csd.boot_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
++		if (ext_csd[EXT_CSD_BOOT_MULT])	{
++				for (idx = 0; idx < MMC_NUM_BOOT_PARTITION;
++					idx++) {
++				part_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
++				mmc_part_add(card, part_size,
++					EXT_CSD_PART_CONFIG_ACC_BOOT0 + idx,
++					"boot%d", idx, true);
++			}
++		}
+ 	}
+ 
+ 	card->ext_csd.raw_hc_erase_gap_size =
+@@ -392,6 +401,38 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 			card->ext_csd.enhanced_area_offset = -EINVAL;
+ 			card->ext_csd.enhanced_area_size = -EINVAL;
+ 		}
++
++		/*
++		 * General purpose partition feature support --
++		 * If ext_csd have the size of general purpose partitions,
++		 * set size, part_type, partition name in mmc_part.
++		 */
++
++		if (ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x1) {
++			u8 hc_erase_grp_sz =
++				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
++			u8 hc_wp_grp_sz =
++				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
++
++			card->ext_csd.enhanced_area_en = 1;
++
++			for (idx = 0, gp_size_mult = 143;
++				idx < MMC_NUM_GP_PARTITION;
++				idx++, gp_size_mult += 3) {
++				if (!ext_csd[gp_size_mult] &&
++					!ext_csd[gp_size_mult + 1] &&
++					!ext_csd[gp_size_mult + 2])
++					continue;
++				part_size = (ext_csd[gp_size_mult + 2] << 16) +
++					(ext_csd[gp_size_mult + 1] << 8) +
++					ext_csd[gp_size_mult];
++				part_size *= (size_t)(hc_erase_grp_sz *
++					hc_wp_grp_sz);
++				mmc_part_add(card, part_size <<= 19,
++					EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
++					"gp%d", idx, false);
++			}
++		}
+ 		card->ext_csd.sec_trim_mult =
+ 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
+ 		card->ext_csd.sec_erase_mult =
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index b460fc2..550c2ed 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -12,6 +12,7 @@
+ 
+ #include <linux/mmc/core.h>
+ #include <linux/mod_devicetable.h>
++#include <linux/genhd.h>
+ 
+ struct mmc_cid {
+ 	unsigned int		manfid;
+@@ -63,7 +64,6 @@ struct mmc_ext_csd {
+ 	bool			enhanced_area_en;	/* enable bit */
+ 	unsigned long long	enhanced_area_offset;	/* Units: Byte */
+ 	unsigned int		enhanced_area_size;	/* Units: KB */
+-	unsigned int		boot_size;		/* in bytes */
+ 	u8			raw_partition_support;	/* 160 */
+ 	u8			raw_erased_mem_count;	/* 181 */
+ 	u8			raw_ext_csd_structure;	/* 194 */
+@@ -157,6 +157,22 @@ struct sdio_func_tuple;
+ 
+ #define SDIO_MAX_FUNCS		7
+ 
++/* The number of MMC physical partitions
++ * It consist of boot partitions(2), general purpose partitions(4) in MMC v4.4
++ */
++#define MMC_NUM_BOOT_PARTITION	2
++#define MMC_NUM_GP_PARTITION	4
++
++/*
++ * MMC Physical partitions
++ */
++struct mmc_part {
++	unsigned int	size;	/* partition size (in bytes) */
++	unsigned int	cookie;	/* it used to part_type */
++	char	name[DISK_NAME_LEN];
++	bool	force_ro;	/* to make boot parts RO by default */
++};
++
+ /*
+  * MMC device
+  */
+@@ -216,9 +232,24 @@ struct mmc_card {
+ 	unsigned int		sd_bus_speed;	/* Bus Speed Mode set for the card */
+ 
+ 	struct dentry		*debugfs_root;
++	struct mmc_part	part[MMC_NUM_BOOT_PARTITION + MMC_NUM_GP_PARTITION];	/* mmc physical partitions */
++	unsigned int	nr_parts;
+ };
+ 
+ /*
++ * This function fill contents in mmc_part.
++ */
++static inline void mmc_part_add(struct mmc_card *card, unsigned int size,
++	unsigned int part_cfg, char *name, int idx, bool ro)
++{
++	card->part[card->nr_parts].size = size;
++	card->part[card->nr_parts].cookie = part_cfg;
++	sprintf(card->part[card->nr_parts].name, name, idx);
++	card->part[card->nr_parts].force_ro = ro;
++	card->nr_parts++;
++}
++
++/*
+  *  The world is not perfect and supplies us with broken mmc/sdio devices.
+  *  For at least some of these bugs we need a work-around.
+  */
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 5a794cb..29b7cb6 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -302,7 +302,7 @@ struct _mmc_csd {
+ 
+ #define EXT_CSD_PART_CONFIG_ACC_MASK	(0x7)
+ #define EXT_CSD_PART_CONFIG_ACC_BOOT0	(0x1)
+-#define EXT_CSD_PART_CONFIG_ACC_BOOT1	(0x2)
++#define EXT_CSD_PART_CONFIG_ACC_GP0	(0x4)
+ 
+ #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
+ #define EXT_CSD_CMD_SET_SECURE		(1<<1)
 -- 
-J (James/Jay) Freyensee
-Storage Technology Group
-Intel Corporation
+1.7.4.4
+
