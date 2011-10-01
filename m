@@ -1,152 +1,89 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH v4] mmc : general purpose partition support.
-Date: Sat, 1 Oct 2011 08:27:19 +0900
-Message-ID: <CAKYAXd8cH5r8meTbTiEWNQAv5pmEwaL=T4=ZQOd+Bd99zLUusQ@mail.gmail.com>
-References: <1317397619-7091-1-git-send-email-linkinjeon@gmail.com>
-	<CANz0V+474_SvriQmUWx9VJwAk-iggu-h+A1WH-zGPBJgLzJDAg@mail.gmail.com>
+From: J Freyensee <james_p_freyensee@linux.intel.com>
+Subject: Re: slow eMMC write speed
+Date: Fri, 30 Sep 2011 17:33:20 -0700
+Message-ID: <4E865FD0.8010309@linux.intel.com>
+References: <CAHzg1A9usWP8o3xjEq3yFn56bEqk_Qp0a8-2FJzoRZG1MqPRPA@mail.gmail.com> <CACRpkdYamRVpBbhAcgn7rXBGcgHUp7+9PCrmOUkXV1BvZ+4pDw@mail.gmail.com> <CAHzg1A9H31hWdEKR5+_p8HuA_oq6o8EkESpJ22kQ4e4oFDH8GQ@mail.gmail.com> <4E837C89.9020109@linux.intel.com> <CAHzg1A8Cgz8DNje_We9MKJ90E4=9BDw9XzvEQU5h2et8HPHBjw@mail.gmail.com> <4E838B43.5090605@linux.intel.com> <CAHzg1A-wa0Gm2jXrU6q3L7-NBzQQJmZszraDsfs-Dgb8F6gT6w@mail.gmail.com> <4E839302.5020001@linux.intel.com> <CACRpkdYdrfhFSfLh=Zgjox60KbYCqN+n_WdOaP2sv_mhai+iig@mail.gmail.com> <4E84297C.3060408@stericsson.com> <4E84D20A.4040707@linux.intel.com> <CANz0V+6zKiEs5YdpipM6iid_JwyQaN2cd5y9BKh1mXXgKpxXkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:49960 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758814Ab1I3X1V (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2011 19:27:21 -0400
-In-Reply-To: <CANz0V+474_SvriQmUWx9VJwAk-iggu-h+A1WH-zGPBJgLzJDAg@mail.gmail.com>
+Received: from mga01.intel.com ([192.55.52.88]:21912 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751998Ab1JAAZh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 30 Sep 2011 20:25:37 -0400
+In-Reply-To: <CANz0V+6zKiEs5YdpipM6iid_JwyQaN2cd5y9BKh1mXXgKpxXkA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com
+Cc: Praveen G K <praveen.gk@gmail.com>, =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Jon Medhurst <tixy@linaro.org>
 
-MjAxMS8xMC8xIEFuZHJlaSBFLiBXYXJrZW50aW4gPGFuZHJleS53YXJrZW50aW5AZ21haWwuY29t
-PjoKPiBIaSBOYW1qYWUsCj4KPiBXaHkgZG9uJ3QgeW91IHVwZGF0ZSBjYXJkLT5ucl9wYXJ0cyBp
-bnNpZGUgbW1jX3BhcnRfYWRkPyBZb3UncmUgbWFraW5nCj4gdGhpcyB0b28gY29tcGxpY2F0ZWQu
-IFRoZXJlCj4gaXMgYWxzbyBubyBuZWVkIGZvciB0aGUgcGFydF9jZmcgYXJyYXkuCj4KPiAyMDEx
-LzkvMzAgTmFtamFlIEplb24gPGxpbmtpbmplb25AZ21haWwuY29tPjoKPj4gSXQgYWxsb3dzIGdl
-cm5lcmFsIHB1cnBvc2UgcGFydGl0aW9ucyBpbiBNTUMgRGV2aWNlLgo+PiBBbmQgSSB0cnkgdG8g
-c2ltcGxpeSBtYWtlIG1tY19ibGtfYWxsb2NfcGFydHMgdXNpbmcgbW1jX3BhcnQgc3RydWN0dXJl
-IHN1Z2dlc3RlZCBieSBBbmRyZWkgV2Fya2VudGluLgo+PiBBZnRlciBwYXRjaGluZywgd2UgY2Fu
-IHNlZSBnZW5lcmFsIHB1cnBvc2UgcGFydGl0aW9ucyBsaWtlIHRoaXMuCj4+PiBjYXQgL3Byb2Mv
-cGFydGl0aW9ucwo+PiDCoCDCoCDCoCDCoCDCoDE3OSAwIDg0Nzg3MiBtbWNibGswCj4+IMKgIMKg
-IMKgIMKgIMKgMTc5IDE5MiA0MDk2IG1tY2JsazBncDMKPj4gwqAgwqAgwqAgwqAgwqAxNzkgMTYw
-IDQwOTYgbW1jYmxrMGdwMgo+PiDCoCDCoCDCoCDCoCDCoDE3OSAxMjggNDA5NiBtbWNibGswZ3Ax
-Cj4+IMKgIMKgIMKgIMKgIMKgMTc5IDk2IMKgMTA1MjY3MiBtbWNibGswZ3AwCj4+IMKgIMKgIMKg
-IMKgIMKgMTc5IDY0IMKgMTAyNCBtbWNibGswYm9vdDEKPj4gwqAgwqAgwqAgwqAgwqAxNzkgMzIg
-wqAxMDI0IG1tY2JsazBib290MAo+Pgo+PiBTaWduZWQtb2ZmLWJ5OiBOYW1qYWUgSmVvbiA8bGlu
-a2luamVvbkBnbWFpbC5jb20+Cj4+IC0tLQo+Cj4+Cj4+ICsvKiBwYXJ0aXRpb24gY29uZmlndXJh
-dGlvbiBhcnJheSAqLwo+PiArc3RhdGljIGNvbnN0IHVuc2lnbmVkIGludCBwYXJ0X2NmZ1tdID0g
-ewo+PiArIMKgIMKgIMKgIDB4MSwgwqAgwqAweDIsIMKgIMKgMHg0LCDCoCDCoDB4NSwgwqAgwqAw
-eDYsIMKgIMKgNywKPj4gK307Cj4+ICsKPgo+IE5vIG5lZWQuIFBsdXMgdGhpcyBpcyBvYnNjdXJl
-Lgo+Cj4+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgY2FyZC0+ZXh0X2NzZC5ib290X3NpemUgPSBl
-eHRfY3NkW0VYVF9DU0RfQk9PVF9NVUxUXSA8PCAxNzsKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCBpZiAoZXh0X2NzZFtFWFRfQ1NEX0JPT1RfTVVMVF0pIHsKPj4gKyDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5ucl9wYXJ0cyA9IE1NQ19OVU1fQk9PVF9QQVJUSVRJT047
-Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZm9yIChpZHggPSAwLCBwYXJ0
-X251bSA9IDA7Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgaWR4IDwgTU1DX05VTV9CT09UX1BBUlRJVElPTjsgaWR4KyssCj4+ICsgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcGFydF9udW0rKykgewo+PiArIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHBhcnRfc2l6ZSA9IGV4dF9j
-c2RbRVhUX0NTRF9CT09UX01VTFRdIDw8IDE3Owo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIG1tY19wYXJ0X2FkZChjYXJkLCBwYXJ0X3NpemUsIHBhcnRf
-Y2ZnW2lkeF0sCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgImJvb3QlZCIsIGlkeCwgcGFydF9udW0sIHRydWUpOwo+PiArIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIH0KPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCB9
-Cj4+IMKgIMKgIMKgIMKgfQo+Cj4gVGhlcmUgaXMgbm8gbmVlZCBmb3IgcGFydF9udW0gKHlvdSBo
-YXZlIGlkeCBmb3IgdGhhdCkuIEFuZCB0aGVyZSBpcyBubwo+IG5lZWQgZm9yIHBhc3NpbmcgdGhl
-IGFjdHVhbCBhcnJheQo+IGluZGV4IGVpdGhlciAtIHRoYXQncyB3aHkgeW91IGhhdmUgbW1jX3Bh
-cnRfYWRkOiBpdCB3aWxsIGRvCj4gY2FyZC0+cGFydHNbY2FyZC0+bnJfcGFydHMrK10gPSBuZXdf
-cGFydC4KPgo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChleHRfY3NkW0VYVF9DU0RfQk9PVF9N
-VUxUXSkgewo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGZvciAoaWR4ID0gMCwg
-cGFydF9udW0gPSAwOwo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIGlkeCA8IE1NQ19OVU1fQk9PVF9QQVJUSVRJT047IGlkeCsrKSB7Cj4gwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcGFydF9zaXplID0gZXh0X2NzZFtFWFRf
-Q1NEX0JPT1RfTVVMVF0gPDwgMTc7Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgbW1jX3BhcnRfYWRkKGNhcmQsIHBhcnRfc2l6ZSwKPiBFWFRfQ1NEX1BBUlRf
-Q09ORklHX0FDQ19CT09UMCArIGlkeCwKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAiYm9vdCVkIiwgaWR4LCB0cnVlKTsKPiDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCB9Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgfQo+Cj4K
-Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAoZXh0X2NzZFtFWFRfQ1NEX1BBUlRJVElPTl9T
-VVBQT1JUXSAmIDB4MSkgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHU4
-IGhjX2VyYXNlX2dycF9zeiA9Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgZXh0X2NzZFtFWFRfQ1NEX0hDX0VSQVNFX0dSUF9TSVpFXTsKPj4gKyDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCB1OCBoY193cF9ncnBfc3ogPQo+PiArIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGV4dF9jc2RbRVhUX0NTRF9I
-Q19XUF9HUlBfU0laRV07Cj4+ICsKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCBjYXJkLT5leHRfY3NkLmVuaGFuY2VkX2FyZWFfZW4gPSAxOwo+PiArCj4+ICsgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgY2FyZC0+bnJfcGFydHMgKz0gTU1DX05VTV9HUF9QQVJU
-SVRJT047Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZm9yIChwYXJ0X251
-bSA9IDAsIGdwX3NpemVfbXVsdCA9IDE0MzsKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCBpZHggPCBjYXJkLT5ucl9wYXJ0czsKPj4gKyDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZHgrKywgcGFydF9udW0rKywgZ3Bf
-c2l6ZV9tdWx0ICs9IDMpIHsKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCBpZiAoIWV4dF9jc2RbZ3Bfc2l6ZV9tdWx0XSAmJgo+PiArIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgICFleHRfY3NkW2dw
-X3NpemVfbXVsdCArIDFdICYmCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgIWV4dF9jc2RbZ3Bfc2l6ZV9tdWx0ICsgMl0pCj4+ICsg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-Y29udGludWU7Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgcGFydF9zaXplID0gKGV4dF9jc2RbZ3Bfc2l6ZV9tdWx0ICsgMl0gPDwgMTYpICsKPj4gKyDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAo
-ZXh0X2NzZFtncF9zaXplX211bHQgKyAxXSA8PCA4KSArCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXh0X2NzZFtncF9zaXplX211
-bHRdOwo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHBh
-cnRfc2l6ZSAqPSAoc2l6ZV90KShoY19lcmFzZV9ncnBfc3ogKgo+PiArIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGhjX3dwX2dycF9zeik7
-Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcGFydF9z
-aXplIDw8PSAxOTsKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCBtbWNfcGFydF9hZGQoY2FyZCwgcGFydF9zaXplLCBwYXJ0X2NmZ1tpZHhdLAo+PiArIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgICJn
-cCVkIiwgaWR4LCBwYXJ0X251bSwgZmFsc2UpOwo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIH0KPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCB9Cj4KPiBTYW1lIHN0b3J5OiBn
-ZXQgcmlkIG9mIHBhcnRfbnVtLCBkb24ndCB0b3VjaCBjYXJkLT5ucl9wYXJ0cywgYW5kIGdldAo+
-IHJpZCBvZiBwYXJ0X2NmZyBhcnJheSBhY2Nlc3MuCj4KPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmVuaGFuY2VkX2FyZWFfZW4gPSAxOwo+IMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGZvciAoaWR4ID0gMCwgZ3Bfc2l6ZV9tdWx0ID0gMTQz
-Owo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlkeCA8IE1N
-Q19OVU1fR1BfUEFSVElUSU9OOwo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIGlkeCsrLCBncF9zaXplX211bHQgKz0gMykgewo+IMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlmICghZXh0X2NzZFtncF9zaXplX211bHRdICYm
-Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgIWV4dF9jc2RbZ3Bfc2l6ZV9tdWx0ICsgMV0gJiYKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAhZXh0X2NzZFtncF9zaXplX211bHQg
-KyAyXSkKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCBjb250aW51ZTsKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCBwYXJ0X3NpemUgPSAoZXh0X2NzZFtncF9zaXplX211bHQgKyAyXSA8PCAxNikgKwo+
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IChleHRfY3NkW2dwX3NpemVfbXVsdCArIDFdIDw8IDgpICsKPiDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBleHRfY3NkW2dwX3NpemVfbXVs
-dF07Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcGFydF9z
-aXplICo9IChzaXplX3QpKGhjX2VyYXNlX2dycF9zeiAqCj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgaGNfd3BfZ3JwX3N6KTsKPiDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBwYXJ0X3NpemUgPDw9IDE5
-Owo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIG1tY19wYXJ0
-X2FkZChjYXJkLCBwYXJ0X3NpemUsIGlkeCArCj4gRVhUX0NTRF9QQVJUX0NPTkZJR19BQ0NfR1Aw
-LAo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgICJncCVkIiwgaWR4LCBmYWxzZSk7Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgfQo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIH0KPgo+Cj4+IMKgLyoKPj4gKyAqIFRoaXMgZnVu
-Y3Rpb24gZmlsbCBjb250ZW50cyBpbiBtbWNfcGFydC4KPj4gKyAqLwo+PiArc3RhdGljIGlubGlu
-ZSB2b2lkIG1tY19wYXJ0X2FkZChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsIHVuc2lnbmVkIGludCBz
-aXplLAo+PiArIMKgIMKgIMKgIHVuc2lnbmVkIGludCBwYXJ0X2NmZywgY2hhciAqbmFtZSwgaW50
-IGlkeCwgaW50IHBhcnRfbnVtLCBib29sIHJvKQo+PiArewo+PiArIMKgIMKgIMKgIGNhcmQtPnBh
-cnRbaWR4XS5zaXplID0gc2l6ZTsKPj4gKyDCoCDCoCDCoCBjYXJkLT5wYXJ0W2lkeF0uY29va2ll
-ID0gcGFydF9jZmc7Cj4+ICsgwqAgwqAgwqAgc3ByaW50ZihjYXJkLT5wYXJ0W2lkeF0ubmFtZSwg
-bmFtZSwgcGFydF9udW0pOwo+PiArIMKgIMKgIMKgIGNhcmQtPnBhcnRbaWR4XS5mb3JjZV9ybyA9
-IHJvOwo+PiArfQo+Cj4gc3RhdGljIGlubGluZSB2b2lkIG1tY19wYXJ0X2FkZChzdHJ1Y3QgbW1j
-X2NhcmQgKmNhcmQsIHVuc2lnbmVkIGludCBzaXplLAo+IMKgIMKgIMKgIHVuc2lnbmVkIGludCBw
-YXJ0X2NmZywgY2hhciAqbmFtZSwgaW50IGlkeCwgYm9vbCBybykKPiB7Cj4gwqAgwqAgwqAgY2Fy
-ZC0+cGFydFtjYXJkLT5ucl9wYXJ0c10uc2l6ZSA9IHNpemU7Cj4gwqAgwqAgwqAgY2FyZC0+cGFy
-dFtjYXJkLT5ucl9wYXJ0c10uY29va2llID0gcGFydF9jZmc7Cj4gwqAgwqAgwqAgc3ByaW50Zihj
-YXJkLT5wYXJ0W2NhcmQtPm5yX3BhcnRzXS5uYW1lLCBuYW1lLCBpZHgpOwo+IMKgIMKgIMKgIGNh
-cmQtPnBhcnRbY2FyZC0+bnJfcGFydHNdLmZvcmNlX3JvID0gcm87Cj4gwqAgwqAgwqAgY2FyZC0+
-bnJfcGFydHMrKzsKPiB9Cj4KPj4gwqAjZGVmaW5lIEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX01B
-U0sgwqAgKDB4NykKPj4gLSNkZWZpbmUgRVhUX0NTRF9QQVJUX0NPTkZJR19BQ0NfQk9PVDAgwqAo
-MHgxKQo+PiAtI2RlZmluZSBFWFRfQ1NEX1BBUlRfQ09ORklHX0FDQ19CT09UMSDCoCgweDIpCj4+
-Cj4KPiBJJ2QgYWxzbyBrZWVwIHRoZSBNTUNfTlVNX0JPT1RfUEFSVElUSU9OIGFuZCBNTUNfTlVN
-X0dQX1BBUlRJVElPTiBkZWZzCj4gYXQgdGhlIHNhbWUgbG9jYXRpb24uCldoeSBzaG91bGQgdGhp
-cyBkZWYgbW92ZSB0byBtbWMuaCA/CnRoaXMgYXJlYSB3aGVyZSB0aGVyZSBhcmUgZXh0IGNzZCBm
-aWVsZHMuCj4KPiAvKiBUaGUgbnVtYmVyIG9mIE1NQyBwaHlzaWNhbCBwYXJ0aXRpb25zCj4gwqAq
-IEl0IGNvbnNpc3Qgb2YgYm9vdCBwYXJ0aXRpb25zKDIpLCBnZW5lcmFsIHB1cnBvc2UgcGFydGl0
-aW9ucyg0KSBpbiBNTUMgdjQuNAo+IMKgKi8KPiAjZGVmaW5lIE1NQ19OVU1fQk9PVF9QQVJUSVRJ
-T04gMgo+ICNkZWZpbmUgTU1DX05VTV9HUF9QQVJUSVRJT04gwqAgNAo+Cj4gI2RlZmluZSBFWFRf
-Q1NEX1BBUlRfQ09ORklHX0FDQ19CT09UMCDCoCgweDEpCj4gI2RlZmluZSBFWFRfQ1NEX1BBUlRf
-Q09ORklHX0FDQ19HUDAgwqAgwqAgwqAgKDB4NCkKPgo+IEEKPgo=
+On 09/30/2011 01:22 AM, Andrei E. Warkentin wrote:
+> Hi James,
+>
+> 2011/9/29 J Freyensee<james_p_freyensee@linux.intel.com>:
+>> As I've been playing around with with buffering/caching, it seems to me an
+>> opportunity to simplify things in the MMC space is to eliminate the need for
+>> a mmc_blk_request struct or mmc_request struct.  With looking through the
+>> mmc_blk_issue_rw_rq(), there is a lot of work to initialize struct
+>> mmc_blk_request brq, only to pass a struct mmc_queue variable the actual
+>> mmc_wait_for_req() instead.  In fact, some of the parameters in the struct
+>> mmc_blk_request member brq.mrq (of type mmc_request) wind up just pointing
+>> to members in struct mmc_blk_request brq.  Granted, I totally don't
+>> understand everything going on here and I haven't studied this code nearly
+>> as long as others, but when I see something like this, the first thing that
+>> comes up in my mind is 'elimination/simplification opportunity'.
+>
+> mmc_request is what is actually handled by the SD/MMC host driver -
+> compact representation of
+> what needs to be done (unneeded fields are NULL pointers).
+> mmc_blk_request is basically the backing
+> store for these fields, for the block driver. I would guess the
+> mmc_request doesn't contain the fields
+> because it would be inefficient (or correct me). And since there is
+> quite a bit of logic behind running the
+> actual MMC commands (esp. w.r.t to mrq->sbc and mrq->stop), it would
+> not be a good idea to get
+> rid of mmc_request and pull the strings from card drivers either.
+
+So I have a question on write behavior.
+
+Say mmc_blk_issue_rw_rq() is called.  Say the mmc_queue *mq variable 
+passed in is a write.  Say that write is buffered, delayed into being 
+sent via mmc_wait_for_req() for 5 seconds, and it's sent to 
+mmc_wait_for_req() later.  Would that delay of sending the brq->mrq 
+entry to mmc_wait_for_req() cause a timeout, ie:
+
+mmc0: Timeout waiting for hardware interrupt.
+
+??
+
+If this is true, how would you extend the timeout?  I would not have 
+expected this until mmc_wait_for_req() is called.  It appeared to me 
+mmc_set_data_timeout() was just setting a variable in brq to be used 
+when mmc_wait_for_req() is called.  I only see this behavior in eMMC 
+cards, not MMC cards being stuck into an MMC slot of a laptop.
+
+Thanks!
+
+>
+> Praveen:
+>
+> As for timings on Toshiba cards, you can search "MMC quirks relating
+> to performance/lifetime." in the archives.
+> There was quite a lot of very interesting data and discussions
+> specifically regarding performance, and it would
+> be pretty impossible and a disservice to try to summarize it :-). In
+> short, I've definitely seen 100ms blips, pronounced
+> by extra GC caused by unaligned accesses across allocation units (if I
+> remember correctly). You could try and reduce
+> the worst case, but it would make the average case worse. It's a bit
+> of voodoo. Best solution is interact with your vendor
+> and get suggestions on use and errata.
+>
+> A
+
+
+-- 
+J (James/Jay) Freyensee
+Storage Technology Group
+Intel Corporation
