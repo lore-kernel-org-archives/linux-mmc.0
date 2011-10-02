@@ -1,52 +1,44 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 4/4] mmc: mmci: Fix incorrect handling of HW flow
-	control for SDIO
-Date: Sat, 1 Oct 2011 17:12:48 +0100
-Message-ID: <20111001161248.GG11710@n2100.arm.linux.org.uk>
-References: <1317109616-18010-1-git-send-email-ulf.hansson@stericsson.com>
+From: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
+Subject: Re: [PATCH v7] mmc : general purpose partition support.
+Date: Sun, 2 Oct 2011 01:47:57 -0400
+Message-ID: <CANz0V+7Bwpa-S0qdW+pN_zu7PJFXQPOONq5WFhMTexddTb=hGg@mail.gmail.com>
+References: <1317470040-2000-1-git-send-email-linkinjeon@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:46800 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752197Ab1JAQMz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Oct 2011 12:12:55 -0400
-Content-Disposition: inline
-In-Reply-To: <1317109616-18010-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:63166 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750695Ab1JBFr6 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 2 Oct 2011 01:47:58 -0400
+In-Reply-To: <1317470040-2000-1-git-send-email-linkinjeon@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com
 
-On Tue, Sep 27, 2011 at 09:46:56AM +0200, Ulf Hansson wrote:
->  	/* The ST Micro variants has a special bit to enable SDIO */
->  	if (variant->sdio && host->mmc->card)
-> -		if (mmc_card_sdio(host->mmc->card))
-> +		if (mmc_card_sdio(host->mmc->card)) {
-> +			/*
-> +			 * The ST Micro variants has a special bit
-> +			 * to enable SDIO.
-> +			 */
->  			datactrl |= MCI_ST_DPSM_SDIOEN;
->  
-> +			/*
-> +			 * The ST Micro variant for SDIO transfer sizes
-> +			 * less then or equal to 8 bytes needs to have clock
-> +			 * H/W flow control disabled. Since flow control is
-> +			 * not really needed for anything that fits in the
-> +			 * FIFO, we can disable it for any write smaller
-> +			 * than the FIFO size.
-> +			 */
-> +			if ((host->size <= variant->fifosize) &&
-> +			    (data->flags & MMC_DATA_WRITE))
-> +				writel(readl(host->base + MMCICLOCK) &
-> +				       ~variant->clkreg_enable,
-> +				       host->base + MMCICLOCK);
-> +			else
-> +				writel(readl(host->base + MMCICLOCK) |
-> +				       variant->clkreg_enable,
-> +				       host->base + MMCICLOCK);
-> +		}
+Hi Namjae,
 
-Shouldn't this also re-enable the ST hardware flow control for non-SDIO
-cards?
+2011/10/1 Namjae Jeon <linkinjeon@gmail.com>:
+> It allows gerneral purpose partitions in MMC Device.
+> And I try to simpliy make mmc_blk_alloc_parts using mmc_part structur=
+e suggested by Andrei Warkentin.
+> After patching, we can see general purpose partitions like this.
+>> cat /proc/partitions
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 0 847872 mmcblk0
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 192 4096 mmcblk0gp3
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 160 4096 mmcblk0gp2
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 128 4096 mmcblk0gp1
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 96 =C2=A01052672 mmcblk0gp0
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 64 =C2=A01024 mmcblk0boot1
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0179 32 =C2=A01024 mmcblk0boot0
+>
+> Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
+> ---
+
+Looks good.
+
+Acked-by: Andrei Warkentin <andrey.warkentin@gmail.com>
+
+Thanks,
+A
