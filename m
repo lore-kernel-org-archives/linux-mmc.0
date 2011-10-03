@@ -1,48 +1,51 @@
-From: Stephen Warren <swarren@nvidia.com>
+From: H Hartley Sweeten <hartleys@visionengravers.com>
 Subject: RE: [PATCH] mmc: sdhci-tegra: Add #ifdef CONFIG_OF guard for
  of_find_property
-Date: Mon, 3 Oct 2011 08:59:45 -0700
-Message-ID: <74CDBE0F657A3D45AFBB94109FB122FF173A2C6C97@HQMAIL01.nvidia.com>
+Date: Mon, 3 Oct 2011 11:39:44 -0500
+Message-ID: <ADE657CA350FB648AAC2C43247A983F001F39DC56AB6@AUSP01VMBX24.collaborationhost.net>
 References: <1317614852.30838.1.camel@phoenix>
- <4E897318.3090004@compulab.co.il>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate04.nvidia.com ([216.228.121.35]:10646 "EHLO
-	hqemgate04.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755097Ab1JCP75 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2011 11:59:57 -0400
-In-Reply-To: <4E897318.3090004@compulab.co.il>
+Received: from mail209.messagelabs.com ([216.82.255.3]:8786 "EHLO
+	mail209.messagelabs.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753424Ab1JCQjx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2011 12:39:53 -0400
+In-Reply-To: <1317614852.30838.1.camel@phoenix>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Igor Grinberg <grinberg@compulab.co.il>, Axel Lin <axel.lin@gmail.com>, "Grant Likely (grant.likely@secretlab.ca)" <grant.likely@secretlab.ca>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Axel Lin <axel.lin@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-SWdvciBHcmluYmVyZyB3cm90ZSBhdCBNb25kYXksIE9jdG9iZXIgMDMsIDIwMTEgMjozMiBBTToN
-Cj4gSGkgQXhlbCwNCj4gDQo+IE9uIDEwLzAzLzExIDA2OjA3LCBBeGVsIExpbiB3cm90ZToNCj4g
+T24gU3VuZGF5LCBPY3RvYmVyIDAyLCAyMDExIDk6MDggUE0sIEF4ZWwgTGluIHdyb3RlOg0KPg0K
 PiBJIGdvdCBiZWxvdyBidWlsZCBlcnJvciB3aXRoICJtYWtlIHRlZ3JhX2RlZmNvbmZpZzttYWtl
-Ig0KPiA+IEFkZCAjaWZkZWYgQ09ORklHX09GIGd1YXJkIGZvciBvZl9maW5kX3Byb3BlcnR5IHRv
-IGZpeCBiZWxvdyBidWlsZCBlcnJvcjoNCj4gPg0KPiA+ICAgQ0MgICAgICBkcml2ZXJzL21tYy9o
-b3N0L3NkaGNpLXRlZ3JhLm8NCj4gPiBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLXRlZ3JhLmM6IElu
-IGZ1bmN0aW9uICdzZGhjaV90ZWdyYV9kdF9wYXJzZV9wZGF0YSc6DQo+ID4gZHJpdmVycy9tbWMv
-aG9zdC9zZGhjaS10ZWdyYS5jOjE1NzogZXJyb3I6IGltcGxpY2l0IGRlY2xhcmF0aW9uIG9mIGZ1
-bmN0aW9uICdvZl9maW5kX3Byb3BlcnR5Jw0KLi4uDQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMv
-bW1jL2hvc3Qvc2RoY2ktdGVncmEuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYw0K
-Li4uDQo+ID4gQEAgLTE1NCw4ICsxNTQsMTEgQEAgc3RhdGljIHN0cnVjdCB0ZWdyYV9zZGhjaV9w
-bGF0Zm9ybV9kYXRhICogX19kZXZpbml0IHNkaGNpX3RlZ3JhX2R0X3BhcnNlX3BkYXRhKA0KPiA+
-ICAJcGxhdC0+Y2RfZ3BpbyA9IG9mX2dldF9uYW1lZF9ncGlvKG5wLCAiY2QtZ3Bpb3MiLCAwKTsN
-Cj4gPiAgCXBsYXQtPndwX2dwaW8gPSBvZl9nZXRfbmFtZWRfZ3BpbyhucCwgIndwLWdwaW9zIiwg
-MCk7DQo+ID4gIAlwbGF0LT5wb3dlcl9ncGlvID0gb2ZfZ2V0X25hbWVkX2dwaW8obnAsICJwb3dl
-ci1ncGlvcyIsIDApOw0KPiA+ICsNCj4gPiArI2lmZGVmIENPTkZJR19PRg0KPiA+ICAJaWYgKG9m
-X2ZpbmRfcHJvcGVydHkobnAsICJzdXBwb3J0LThiaXQiLCBOVUxMKSkNCj4gPiAgCQlwbGF0LT5p
-c184Yml0ID0gMTsNCj4gPiArI2VuZGlmDQo+IA0KPiBTaG91bGRuJ3Qgd2UgYWRkIGEgc3R1YiBm
-b3IgdGhlIG9mX2ZpbmRfcHJvcGVydHkoKSBtZXRob2QgdG8gaW5jbHVkZS9saW51eC9vZi5oDQo+
-IGluc3RlYWQgb2YgYWRkaW5nIG1vcmUgaWZkZWZzPw0KPiBPciBtYXkgYmUgdXNlIG9mX2dldF9w
-cm9wZXJ0eSgpIG1ldGhvZCBpbnN0ZWFkPw0KDQpJIHN1Ym1pdHRlZCBhIHBhdGNoIHRvIGFkZCBh
-IHN0dWIgb2ZfZmluZF9wcm9wZXJ0eSBhIGxpdHRsZSB3aGlsZSBiYWNrLg0KUGVyIGh0dHBzOi8v
-bGttbC5vcmcvbGttbC8yMDExLzkvMjIvMzAxLCBHcmFudCBhcHBsaWVkIGl0IGFscmVhZHkuIEkn
-bQ0Kbm90IHN1cmUgd2h5IGl0IGhhc24ndCBzaG93biB1cCBpbiBsaW51eC1uZXh0LCBzaW5jZSBH
-cmFudCdzIHJlcG8gd2Fzbid0DQphZmZlY3RlZCBieSB0aGUga2VybmVsLm9yZyBkb3dudGltZS4N
-Cg0KU29ycnkgZm9yIHRoZSBicmVha2FnZS4NCg0KLS0gDQpudnB1YmxpYw0KDQo=
+Ig0KPiBBZGQgI2lmZGVmIENPTkZJR19PRiBndWFyZCBmb3Igb2ZfZmluZF9wcm9wZXJ0eSB0byBm
+aXggYmVsb3cgYnVpbGQgZXJyb3I6DQo+DQo+ICAgQ0MgICAgICBkcml2ZXJzL21tYy9ob3N0L3Nk
+aGNpLXRlZ3JhLm8NCj4gZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jOiBJbiBmdW5jdGlv
+biAnc2RoY2lfdGVncmFfZHRfcGFyc2VfcGRhdGEnOg0KPiBkcml2ZXJzL21tYy9ob3N0L3NkaGNp
+LXRlZ3JhLmM6MTU3OiBlcnJvcjogaW1wbGljaXQgZGVjbGFyYXRpb24gb2YgZnVuY3Rpb24gJ29m
+X2ZpbmRfcHJvcGVydHknDQo+IG1ha2VbM106ICoqKiBbZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10
+ZWdyYS5vXSBFcnJvciAxDQo+IG1ha2VbMl06ICoqKiBbZHJpdmVycy9tbWMvaG9zdF0gRXJyb3Ig
+Mg0KPiBtYWtlWzFdOiAqKiogW2RyaXZlcnMvbW1jXSBFcnJvciAyDQo+IG1ha2U6ICoqKiBbZHJp
+dmVyc10gRXJyb3IgMg0KPg0KPiBTaWduZWQtb2ZmLWJ5OiBBeGVsIExpbiA8YXhlbC5saW5AZ21h
+aWwuY29tPg0KPiAtLS0NCj4gSSBnb3QgdGhlIGJ1aWxkIGVycm9yIG9uIGxpbnV4LW5leHQgKDIw
+MTEwOTMwKS4NCj4gQXhlbA0KPg0KPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jIHwg
+ICAgMyArKysNCj4gIDEgZmlsZXMgY2hhbmdlZCwgMyBpbnNlcnRpb25zKCspLCAwIGRlbGV0aW9u
+cygtKQ0KPg0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jIGIv
+ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jDQo+IGluZGV4IDY3MTc2YWZjLi4zODgzNjAy
+IDEwMDY0NA0KPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXRlZ3JhLmMNCj4gKysrIGIv
+ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jDQo+IEBAIC0xNTQsOCArMTU0LDExIEBAIHN0
+YXRpYyBzdHJ1Y3QgdGVncmFfc2RoY2lfcGxhdGZvcm1fZGF0YSAqIF9fZGV2aW5pdCBzZGhjaV90
+ZWdyYV9kdF9wYXJzZV9wZGF0YSgNCj4gIAlwbGF0LT5jZF9ncGlvID0gb2ZfZ2V0X25hbWVkX2dw
+aW8obnAsICJjZC1ncGlvcyIsIDApOw0KPiAgCXBsYXQtPndwX2dwaW8gPSBvZl9nZXRfbmFtZWRf
+Z3BpbyhucCwgIndwLWdwaW9zIiwgMCk7DQo+ICAJcGxhdC0+cG93ZXJfZ3BpbyA9IG9mX2dldF9u
+YW1lZF9ncGlvKG5wLCAicG93ZXItZ3Bpb3MiLCAwKTsNCj4gKw0KPiArI2lmZGVmIENPTkZJR19P
+Rg0KPiAgCWlmIChvZl9maW5kX3Byb3BlcnR5KG5wLCAic3VwcG9ydC04Yml0IiwgTlVMTCkpDQo+
+ICAJCXBsYXQtPmlzXzhiaXQgPSAxOw0KPiArI2VuZGlmDQoNCkkgdGhpbmsgdGhpcyB0eXBlIG9m
+IGJ1aWxkIGVycm9yIGlzIGdvaW5nIHRvIGJlIHZlcnkgY29tbW9uIHdoZW4gQ09ORklHX09GDQpp
+cyBub3QgZGVmaW5lZC4gIFdvdWxkbid0IGl0IGJlIGJldHRlciB0byBmaXggdGhlIGlzc3VlIGlu
+IHRoZSA8bGludXgvb2YuaD4NCmhlYWRlcj8gIEl0IGxvb2tzIGxpa2Ugc29tZSBvZiB0aGUgb2Zf
+KiBjYWxscyBhcmUgYWxyZWFkeSBoYW5kbGVkIHByb3Blcmx5DQppbiB0aGF0IGhlYWRlci4NCg0K
+UmVnYXJkcywNCkhhcnRsZXk=
