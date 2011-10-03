@@ -1,17 +1,18 @@
 From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
-Subject: Re: [PATCH 1/4] mmc: mmci: Bugfix in pio read for small packets
-Date: Mon, 3 Oct 2011 09:08:26 +0200
-Message-ID: <4E895F6A.9070203@stericsson.com>
-References: <1317109568-17905-1-git-send-email-ulf.hansson@stericsson.com> <20111001160937.GF11710@n2100.arm.linux.org.uk>
+Subject: Re: [PATCH 4/4] mmc: mmci: Fix incorrect handling of HW flow control
+ for SDIO
+Date: Mon, 3 Oct 2011 09:31:14 +0200
+Message-ID: <4E8964C2.5000300@stericsson.com>
+References: <1317109616-18010-1-git-send-email-ulf.hansson@stericsson.com> <20111001161248.GG11710@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog111.obsmtp.com ([207.126.144.131]:45662 "EHLO
-	eu1sys200aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750873Ab1JCHJZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2011 03:09:25 -0400
-In-Reply-To: <20111001160937.GF11710@n2100.arm.linux.org.uk>
+Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:36872 "EHLO
+	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750873Ab1JCHcK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2011 03:32:10 -0400
+In-Reply-To: <20111001161248.GG11710@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Russell King - ARM Linux <linux@arm.linux.org.uk>
@@ -19,72 +20,24 @@ Cc: Ulf HANSSON <ulf.hansson@stericsson.com>, "linux-mmc@vger.kernel.org" <linux
 
 Hi Russel,
 
-On 10/01/2011 06:09 PM, Russell King - ARM Linux wrote:
-> Does this even work?  From the MMCI spec, I see no way for the MMCI
-> peripheral to know the size of the read/write on the APB bus.
->
-> The APB bus signals the MMCI uses are:
->
-> PCLK - APB bus clock
-> PRESETn - APB bus reset
-> PADDR[11:2] - APB bus address
-> PSEL - APB bus peripheral select
-> PENABLE - APB bus enable
-> PWRITE - APB bus write signal
-> PWDATA[31:0] - APB bus write data
-> PRDATA[31:0] - APB bus read data
->
-> As you can see, nothing in that set indicates whether it's an 8-bit,
-> 16-bit or 32-bit access.
+On 10/01/2011 06:12 PM, Russell King - ARM Linux wrote:
+> Shouldn't this also re-enable the ST hardware flow control for non-SDIO
+> cards?
 
-> Moreover, if you read the MMCIFifoCnt register writeup:
->
->    The MMCIFifoCnt register contains the remaining number of words to be
->    written to or read from the FIFO. The FIFO counter loads the value
->    from the data length register (see Data length register, MMCIDataLength
->    on page 3-11) when the Enable bit is set in the data control register.
->    If the data length is not word aligned (multiple of 4), the remaining
->    1 to 3 bytes are regarded as a word.
->
-> This suggests that we should be reading a 32-bit word and then storing
-> the relevant bytes from it.
+I do not think that is needed. Hardware flow control is turned on per 
+default for all cards thanks to the .clkreg member of the variant struct:
 
-Hmm, that is true. I will try to rework the patch to skip the case and 
-only do 32 bit reads. We do however need a patch since the current 
-"count" calculation is wrong (more info below). But it does in fact work.
+	mmci_set_clkreg():
+		clk |= variant->clkreg_enable;
+where
+	static struct variant_data variant_ux500v2 = {
+		.clkreg_enable          = MCI_ST_UX500_HWFCEN,
 
-> The other thing which concerns me is that the MMCI (ARM Ltd one at least)
-> only supports power-of-two block sizes.  So requesting a transfer of a
-> single block with a block size of 3 bytes is not supported by the ARM Ltd
-> MMCI.  (The way you end up with 1 to 3 bytes being received with ARM's
-> MMCI is if you're using a streaming transfer.)
-
-This is true for the standard ARM block. We have however done some 
-modifications of the standard block and added support for SDIO which 
-also implies streaming transfers which can be non power of 2. So with 
-the current implementation:
-
-	readsl(base + MMCIFIFO, ptr, count >> 2);
-
-when we get a request to read 3, 2 or 1 bytes (which our WLAN driver 
-actually requests from time to time), this will result in reading 0 
-words which is not correct. This was the original problem, but I might 
-have "overdone" the solution a bit. I will upload a new patch which 
-solves the original problem in a better way.
-
-> The last thing I don't like about this patch is that this code is in a
-> really hot path - one which is absolutely critical for things to work -
-> and the need for the condition to be dealt with is only at the end of a
-> transfer, not each time the FIFO needs emptying.
->
-> Bear in mind that there are platforms with the ARM MMCI which must read
-> the data within a certain time or suffer overruns, and which have either
-> totally broken and useless DMA or no DMA capability at all (which are
-> the only platforms I have with a MMCI on.)
-
-I will keep this in mind. We are fortunately blessed with a working DMA 
-in our platform, but for small SDIO transfers there is no point in 
-setting up a DMA job which is when we fall back to PIO mode.
+This means that HWFC will be on for all cards. This patch only disables 
+it for SDIO cards (thanks to the mmc_card_sdio()-check) during 
+problematic transfers (HW peculiarity), and then re-enables it again for 
+SDIO cards during "normal" transfers. So the HWFC state for non-SDIO 
+cards should not be touched I think.
 
 Best Regards
 
