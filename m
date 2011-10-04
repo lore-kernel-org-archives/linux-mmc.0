@@ -1,92 +1,137 @@
-From: J Freyensee <james_p_freyensee@linux.intel.com>
-Subject: Re: slow eMMC write speed
-Date: Mon, 03 Oct 2011 14:00:37 -0700
-Message-ID: <4E8A2275.3050009@linux.intel.com>
-References: <1680748273.3852.1317673156420.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: use the use_hold_reg bit in CMD register
+Date: Tue, 04 Oct 2011 10:21:31 +0900
+Message-ID: <4E8A5F9B.8060204@samsung.com>
+References: <4E859DEF.7090308@samsung.com> <4E85A293.6020006@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:17070 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755033Ab1JCUwR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 3 Oct 2011 16:52:17 -0400
-In-Reply-To: <1680748273.3852.1317673156420.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:43745 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752567Ab1JDBVm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2011 21:21:42 -0400
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LSI008T7P3SSN10@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 04 Oct 2011 10:21:41 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LSI009DXP44DQ40@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 04 Oct 2011 10:21:40 +0900 (KST)
+In-reply-to: <4E85A293.6020006@imgtec.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <awarkentin@vmware.com>
-Cc: Praveen G K <praveen.gk@gmail.com>, =?UTF-8?B?UGVyIEbDtnJsaW4=?= <per.forlin@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Jon Medhurst <tixy@linaro.org>, "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, kyungmin.park@samsung.com, Will Newton <will.newton@imgtec.com>
 
-On 10/03/2011 01:19 PM, Andrei Warkentin wrote:
-> Hi James,
->
-> ----- Original Message -----
->> From: "J Freyensee"<james_p_freyensee@linux.intel.com>
+Hi James
+
+On 09/30/2011 08:05 PM, James Hogan wrote:
+
+> Hi,
+> 
+> On 09/30/2011 11:46 AM, Jaehoon Chung wrote:
+>> This patch is added the use_hold_reg bit in CMD register.
 >>
->> Yeah, I know I'd be doing myself a huge favor by working off of
->> mmc-next
->> (or close to it), but product-wise, my department doesn't care for
->> sustaining current platforms...yet (still trying to convince).
+>> In 2.40a, bit[29] of CMD register is used the use_hold_reg.
+>> Some SoC is affected by this bit.
+>> (This bit means whether use hold register when send data and cmd.
+>>  And related with cclk_in_drv phase)
+>> if set IMPLEMENT_HOLD_REG in HCON register, i think fine that set this
+>> bit by default.
 >>
->
-> I'd suggest working on linux-mmc. You can always back-port.
->
->> So I was looking into sticking a write cache into block.c driver as a
->> parameter, so it can be turned on and off upon driver load.  Any
->> write
->> operation goes to the cache and only on a cache collision will the
->> write operation get sent to the host controller for a write.  What I
->> have working so far is just with an MMC card in an MMC slot of a
->> laptop,
->> and just bare-bones.  No general flush routine, error-handling, etc.
->>   From a couple performance measurements I did on the MMC slot using
->> blktrace/blkparse and 400MB write transactions, I was seeing huge
->> performance boost with no data corruption.  So it is not looking like
->> a
->> total hair-brained idea.  But I am still pretty far from
->> understanding
->> everything here.  And the real payoff we want to see is performance a
->> user can see on a handheld (i.e., Android) systems.
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c  |    9 +++++++++
+>>  drivers/mmc/host/dw_mmc.h  |    1 +
+>>  include/linux/mmc/dw_mmc.h |    1 +
+>>  3 files changed, 11 insertions(+), 0 deletions(-)
 >>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 0ed1d28..544a616 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -276,6 +276,13 @@ static void dw_mci_start_command(struct dw_mci *host,
+>>  	mci_writel(host, CMDARG, cmd->arg);
+>>  	wmb();
+>>
+>> +	/*
+>> +	 * If use HOLD register,
+>> +	 * CMD and DATA sent to card through HOLD register.
+>> +	 */
+>> +	if (host->use_hold_reg)
+>> +		cmd_flags |= SDMMC_CMD_USE_HOLD_REG;
+>> +
+> 
+> Is the HOLD register an internal register that is always required for
+> hardware that has it to work? What effect does it have on the transaction?
+
+
+I known that it's internal register. if we used hold register, it should
+be work to delay cclk_in to drive the card output.
+
+> 
+>>  	mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START);
+>>  }
+>>
+>> @@ -1886,6 +1893,8 @@ static int dw_mci_probe(struct platform_device *pdev)
+>>  		host->data_shift = 2;
+>>  	}
+>>
+>> +	host->use_hold_reg = (mci_readl(host, HCON) >> 22) & 0x1;
+>> +
+> 
+> it'd be nice to have a #define for the HCON bit.
+
+
+I will add a #define for the HCON
+
+> 
+>>  	/* Reset all blocks */
+>>  	if (!mci_wait_reset(&pdev->dev, host)) {
+>>  		ret = -ENODEV;
+>> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+>> index bfa3c1c..8c4edca 100644
+>> --- a/drivers/mmc/host/dw_mmc.h
+>> +++ b/drivers/mmc/host/dw_mmc.h
+>> @@ -102,6 +102,7 @@
+>>  #define SDMMC_INT_ERROR			0xbfc2
+>>  /* Command register defines */
+>>  #define SDMMC_CMD_START			BIT(31)
+>> +#define SDMMC_CMD_USE_HOLD_REG		BIT(29)
+>>  #define SDMMC_CMD_CCS_EXP		BIT(23)
+>>  #define SDMMC_CMD_CEATA_RD		BIT(22)
+>>  #define SDMMC_CMD_UPD_CLK		BIT(21)
+>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+>> index 6b46819..d6d1515 100644
+>> --- a/include/linux/mmc/dw_mmc.h
+>> +++ b/include/linux/mmc/dw_mmc.h
+>> @@ -147,6 +147,7 @@ struct dw_mci {
+>>  	u32			current_speed;
+>>  	u32			num_slots;
+>>  	u32			fifoth_val;
+>> +	bool			use_hold_reg;
+> 
+> in case of other similar bits being added it may be better to have a
+> copy of the hcon register here, but its fine as it is too.
+
 >
-> Interesting. Thanks for sharing. I don't want to seem silly, but how is what you're doing different from
-> the page cache? The page cache certainly defers write back (and I believe this is tunable...I'm not too
-> familiar yet or comfortable around the rest of blk I/O and VM).
 
-The idea is the page cache is too generic for hand-held (i.e. Android) 
-workloads.  Page cache handles regular files, directories, 
-user-swappable processes, etc, and all of that has to contend with the 
-resource available for the page cache.  This is specific to eMMC 
-workloads.  Namely, for games and even .pdf files on an Android system 
-(ARM or Intel), there are a lot of 1-2 sector writes and almost 0 reads.
-
-But by no means am I an expert on the page cache area either.
-
-You are certainly right that the page cache is tunable.  I briefly 
-looked at this, but then I decided I need to start writing something to 
-start understanding stuff.
-
-What are your test workloads?
-
-For the MMC tests I conducted, they were just write blasts, like writing 
-200 1MB files 200 times.  I just did enough as a 'thumb' test to see if 
-it's worth killing myself on an Android box...it's a little more 
-challenging getting it to work on an Android system since block.c is 
-*THE* driver, whereas an MMC slot on a laptop is like some peon 
-extension the laptop doesn't need.
-
-I would
-> guess this wouldn't have too great of an impact on a non O_DIRECT access, and O_DIRECT access anyway have
-> to bypass any caching logic.
-
-You are correct; I've already discovered I'd need to bypass the cache on 
-O_DIRECT access.
-
->
-> A
+>>  	struct platform_device	*pdev;
+>>  	struct dw_mci_board	*pdata;
+>>  	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
+> 
+> Cheers
+> James
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
 
--- 
-J (James/Jay) Freyensee
-Storage Technology Group
-Intel Corporation
