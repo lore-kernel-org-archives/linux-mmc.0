@@ -1,46 +1,48 @@
-From: Andrei Warkentin <awarkentin@vmware.com>
-Subject: Re: [PATCH v10] mmc : general purpose partition support.
-Date: Tue, 4 Oct 2011 13:20:16 -0700 (PDT)
-Message-ID: <1093389.39472.1317759616924.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-References: <1317750317-4489-1-git-send-email-linkinjeon@gmail.com>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [PATCH] PM: HIBERNATION: add resume_wait param to support MMC-like devices as resume file
+Date: Wed, 5 Oct 2011 00:30:43 +0200
+Message-ID: <201110050030.43953.rjw@sisk.pl>
+References: <1317288548-19560-1-git-send-email-Barry.Song@csr.com> <59872.1317299401@turing-police.cc.vt.edu> <CAGsJ_4znTLmjd_qhgru_aOZPMEZc=dyXEQTqdsVGKr-GaryQsQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: Text/Plain;
+  charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1317750317-4489-1-git-send-email-linkinjeon@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: linux-kernel@vger.kernel.org, adrian hunter <adrian.hunter@intel.com>, linus walleij <linus.walleij@linaro.org>, james p freyensee <james_p_freyensee@linux.intel.com>, sebras@gmail.com, Ulf Hansson <Ulf.Hansson@stericsson.com>, stefan xk nilsson <stefan.xk.nilsson@stericsson.com>, per forlin <per.forlin@stericsson.com>, johan rudholm <johan.rudholm@stericsson.com>, cjb@laptop.org, linux-mmc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ogre.sisk.pl ([217.79.144.158]:48045 "EHLO ogre.sisk.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933180Ab1JDW2Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 4 Oct 2011 18:28:25 -0400
+In-Reply-To: <CAGsJ_4znTLmjd_qhgru_aOZPMEZc=dyXEQTqdsVGKr-GaryQsQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Barry Song <21cnbao@gmail.com>
+Cc: Valdis.Kletnieks@vt.edu, Barry Song <Barry.Song@csr.com>, frank.hofmann@tomtom.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, workgroup.linux@csr.com, pavel@ucw.cz, Barry Song <baohua.song@csr.com>, linux-pm@lists.linux-foundation.org, linux-arm-kernel@lists.infradead.org
 
-Hi,
-
------ Original Message -----
-> From: "Namjae Jeon" <linkinjeon@gmail.com>
-> To: cjb@laptop.org, linux-mmc@vger.kernel.org
-> Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, "adrian hunter" <adrian.hunter@intel.com>, "linus walleij"
-> <linus.walleij@linaro.org>, "james p freyensee" <james_p_freyensee@linux.intel.com>, sebras@gmail.com, "Ulf Hansson"
-> <Ulf.Hansson@stericsson.com>, "stefan xk nilsson" <stefan.xk.nilsson@stericsson.com>, "per forlin"
-> <per.forlin@stericsson.com>, "johan rudholm" <johan.rudholm@stericsson.com>, "Namjae Jeon" <linkinjeon@gmail.com>
-> Sent: Tuesday, October 4, 2011 1:45:17 PM
-> Subject: [PATCH v10] mmc : general purpose partition support.
+On Thursday, September 29, 2011, Barry Song wrote:
+> hi Valdis,
 > 
-> It allows gerneral purpose partitions in MMC Device.
-> And I try to simpliy make mmc_blk_alloc_parts using mmc_part
-> structure suggested by Andrei Warkentin.
-> After patching, we can see general purpose partitions like this.
-> > cat /proc/partitions
->           179 0 847872 mmcblk0
->           179 192 4096 mmcblk0gp3
->           179 160 4096 mmcblk0gp2
->           179 128 4096 mmcblk0gp1
->           179 96  1052672 mmcblk0gp0
->           179 64  1024 mmcblk0boot1
->           179 32  1024 mmcblk0boot0
+> 2011/9/29  <Valdis.Kletnieks@vt.edu>:
+> > On Thu, 29 Sep 2011 02:29:08 PDT, Barry Song said:
+> >
+> >> This patch adds resumewait kernel param just like rootwait so
+> >> that we have enough time to wait mmc ready. The differene is
+> >> here we wait for resume partition but rootwait waits for rootfs
+> >> partition.
+> >
+> > OK, seems a reasonable idea...
+> >
+> >> kernel/power/hibernate.c |   16 ++++++++++++++++
+> >> 1 files changed, 16 insertions(+), 0 deletions(-)
+> >
+> > We have a __setup() parameter, this patch appears to be missing
+> > a hunk for Documentation/kernel-parameters.txt?
+> >
+> > Fix that issue, and you can stick this on there:
+> >
+> > Reviewed-by: Valdis Kletnieks <valdis.kletnieks@vt.edu>
 > 
-> Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
-> ---
+> thanks. i'll add the document in v2.
 
-Acked-by: Andrei Warkentin <andrey.warkentin@gmail.com>
+I can't find the v2.  Have you posted it already?
 
-A
+Rafael
