@@ -1,424 +1,262 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: [PATCH V4] mmc: core: HS200 mode support for eMMC 4.5
-Date: Tue,  4 Oct 2011 19:51:35 +0530
-Message-ID: <1317738095-17324-1-git-send-email-girish.shivananjappa@linaro.org>
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: [PATCH] mmc : general purpose partition support.
+Date: Wed,  5 Oct 2011 01:16:46 +0900
+Message-ID: <1317745006-6290-1-git-send-email-linkinjeon@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:55443 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757149Ab1JDOVA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Oct 2011 10:21:00 -0400
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:42435 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932275Ab1JDQRI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Oct 2011 12:17:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com, Namjae Jeon <linkinjeon@gmail.com>
 
-This patch adds the support of the HS200 bus speed for
-eMMC 4.5 devices.
-The eMMC 4.5 devices have support for 200MHz bus speed.
-The mmc core and host modules have been touched to add support
-for this module.
-It is necessary to know the card type in the sdhci.c file to
-add support for eMMC tuning function. So card.h file is included
-to import the card data structure.
+It allows gerneral purpose partitions in MMC Device.
+And I try to simpliy make mmc_blk_alloc_parts using mmc_part structure suggested by Andrei Warkentin.
+After patching, we can see general purpose partitions like this.
+> cat /proc/partitions
+          179 0 847872 mmcblk0
+          179 192 4096 mmcblk0gp3
+          179 160 4096 mmcblk0gp2
+          179 128 4096 mmcblk0gp1
+          179 96  1052672 mmcblk0gp0
+          179 64  1024 mmcblk0boot1
+          179 32  1024 mmcblk0boot0
 
-Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
 ---
-Changes in v1:
-	Case statements in switch that produce same result have
-	been combined to reduce repeated assignments.
-	patch recreated after rebase to chris balls mmc-next branch.
-Changes in v2:
-	Rebased to latest chris-mmc/mmc-next branch. Resolved indentation
-	problems identified in review. This patch has to be applied before
-	the patch released for modifying the printk messages.
-Changes in v3:
-	In the previous commits of chris-mmc/mmc-next branch, the patch with
-	commit id (c0f22a2c92e357e7cb3988b0b13034d70b7461f9) defines caps2 for
-	more capabilities. This patch version deletes the member ext_caps(created
-	in my earlier patch) from struct mmc_host and reuses already accepted
-	caps2 member.
-Changes in v4:
-	This patch is based on commit id d762b9bedaa1a5c720ecb4d56ba41f8cfc10d8e7
-	of Jaehoon Chung's repository at
-	git://git.infradead.org/users/kmpark/linux-2.6-samsung emmc4.5
- drivers/mmc/core/bus.c    |    3 +-
- drivers/mmc/core/mmc.c    |   92 ++++++++++++++++++++++++++++++++++++++++----
- drivers/mmc/host/sdhci.c  |   36 +++++++++++++++---
- include/linux/mmc/card.h  |    3 +
- include/linux/mmc/host.h  |    6 +++
- include/linux/mmc/mmc.h   |    8 +++-
- include/linux/mmc/sdhci.h |    1 +
- 7 files changed, 132 insertions(+), 17 deletions(-)
+ drivers/mmc/card/block.c |   31 +++++++++++++++------------
+ drivers/mmc/core/mmc.c   |   52 ++++++++++++++++++++++++++++++++++++++++++---
+ include/linux/mmc/card.h |   34 +++++++++++++++++++++++++++++-
+ include/linux/mmc/mmc.h  |    5 +++-
+ 4 files changed, 102 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 393d817..a0aa7ab 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -301,10 +301,11 @@ int mmc_add_card(struct mmc_card *card)
- 			mmc_card_ddr_mode(card) ? "DDR " : "",
- 			type);
- 	} else {
--		printk(KERN_INFO "%s: new %s%s%s card at address %04x\n",
-+		printk(KERN_INFO "%s: new %s%s%s%s card at address %04x\n",
- 			mmc_hostname(card->host),
- 			mmc_sd_card_uhs(card) ? "ultra high speed " :
- 			(mmc_card_highspeed(card) ? "high speed " : ""),
-+			(mmc_card_hs200(card) ? "HS200 " : ""),
- 			mmc_card_ddr_mode(card) ? "DDR " : "",
- 			type, card->rca);
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1ff5486..8452872 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1377,26 +1377,29 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
+ 	return 0;
+ }
+ 
++/* MMC Physical partition consist of two boot partitions and
++ * up to four general purpose partitions.
++ * For each partitions enabled in EXT_CSD
++ * The block device will allocated to provide access to the partition.
++ */
++
+ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+ {
+-	int ret = 0;
++	int idx, ret = 0;
+ 
+ 	if (!mmc_card_mmc(card))
+ 		return 0;
+ 
+-	if (card->ext_csd.boot_size) {
+-		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT0,
+-					 card->ext_csd.boot_size >> 9,
+-					 true,
+-					 "boot0");
+-		if (ret)
+-			return ret;
+-		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT1,
+-					 card->ext_csd.boot_size >> 9,
+-					 true,
+-					 "boot1");
+-		if (ret)
+-			return ret;
++	 for (idx = 0; idx < card->nr_parts; idx++) {
++		if (card->part[idx].size) {
++			ret = mmc_blk_alloc_part(card, md,
++				card->part[idx].part_cfg,
++				card->part[idx].size >> 9,
++				card->part[idx].force_ro,
++				card->part[idx].name);
++			if (ret)
++				return ret;
++		}
  	}
+ 
+ 	return ret;
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 297bbff..36aa662 100644
+index 5700b1c..478b251 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -283,6 +283,39 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 	}
- 	card->ext_csd.raw_card_type = ext_csd[EXT_CSD_CARD_TYPE];
- 	switch (ext_csd[EXT_CSD_CARD_TYPE] & EXT_CSD_CARD_TYPE_MASK) {
-+	case EXT_CSD_CARD_TYPE_SDR_200 |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+	case EXT_CSD_CARD_TYPE_SDR_200 | EXT_CSD_CARD_TYPE_DDR_1_8V |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+	case EXT_CSD_CARD_TYPE_SDR_200 | EXT_CSD_CARD_TYPE_DDR_1_2V |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+	case EXT_CSD_CARD_TYPE_SDR_200 | EXT_CSD_CARD_TYPE_DDR_52 |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+		card->ext_csd.hs_max_dtr = 200000000;
-+		card->ext_csd.card_type = EXT_CSD_CARD_TYPE_SDR_200;
-+		break;
-+	case EXT_CSD_CARD_TYPE_SDR_1_2V |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+	case EXT_CSD_CARD_TYPE_SDR_1_2V | EXT_CSD_CARD_TYPE_DDR_1_8V |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+	case EXT_CSD_CARD_TYPE_SDR_1_2V | EXT_CSD_CARD_TYPE_DDR_1_2V |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+	case EXT_CSD_CARD_TYPE_SDR_1_2V | EXT_CSD_CARD_TYPE_DDR_52 |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+		card->ext_csd.hs_max_dtr = 200000000;
-+		card->ext_csd.card_type = EXT_CSD_CARD_TYPE_SDR_1_2V;
-+		break;
-+	case EXT_CSD_CARD_TYPE_SDR_1_8V |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+	case EXT_CSD_CARD_TYPE_SDR_1_8V | EXT_CSD_CARD_TYPE_DDR_1_8V |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+	case EXT_CSD_CARD_TYPE_SDR_1_8V | EXT_CSD_CARD_TYPE_DDR_1_2V |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+	case EXT_CSD_CARD_TYPE_SDR_1_8V | EXT_CSD_CARD_TYPE_DDR_52 |
-+	     EXT_CSD_CARD_TYPE_52 | EXT_CSD_CARD_TYPE_26:
-+		card->ext_csd.hs_max_dtr = 200000000;
-+		card->ext_csd.card_type = EXT_CSD_CARD_TYPE_SDR_1_8V;
-+		break;
- 	case EXT_CSD_CARD_TYPE_DDR_52 | EXT_CSD_CARD_TYPE_52 |
- 	     EXT_CSD_CARD_TYPE_26:
- 		card->ext_csd.hs_max_dtr = 52000000;
-@@ -657,6 +690,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+@@ -239,7 +239,9 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
+  */
+ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
  {
- 	struct mmc_card *card;
- 	int err, ddr = 0;
-+	int hs_sdr = 0;
- 	u32 cid[4];
- 	unsigned int max_dtr;
- 	u32 rocr;
-@@ -848,11 +882,15 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	/*
- 	 * Activate high speed (if supported)
- 	 */
--	if ((card->ext_csd.hs_max_dtr != 0) &&
--		(host->caps & MMC_CAP_MMC_HIGHSPEED)) {
--		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--				 EXT_CSD_HS_TIMING, 1,
--				 card->ext_csd.generic_cmd6_time);
-+	if (card->ext_csd.hs_max_dtr != 0) {
-+		if ((card->ext_csd.hs_max_dtr > 52000000) &&
-+		    (host->caps2 & MMC_CAP2_HIGHSPEED_200))
-+			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					 EXT_CSD_HS_TIMING, 2, 0);
-+		else if	(host->caps & MMC_CAP_MMC_HIGHSPEED)
-+			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					 EXT_CSD_HS_TIMING, 1, 0);
-+
- 		if (err && err != -EBADMSG)
- 			goto free_card;
+-	int err = 0;
++	int err = 0, idx;
++	unsigned int part_size;
++	u8 hc_erase_grp_sz = 0, hc_wp_grp_sz = 0;
  
-@@ -861,7 +899,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 			       mmc_hostname(card->host));
- 			err = 0;
- 		} else {
--			mmc_card_set_highspeed(card);
-+			if (card->ext_csd.hs_max_dtr > 52000000)
-+				mmc_card_set_hs200(card);
-+			else
-+				mmc_card_set_highspeed(card);
- 			mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
- 		}
- 	}
-@@ -888,7 +929,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	 */
- 	max_dtr = (unsigned int)-1;
+ 	BUG_ON(!card);
  
--	if (mmc_card_highspeed(card)) {
-+	if (mmc_card_highspeed(card) || mmc_card_hs200(card)) {
- 		if (max_dtr > card->ext_csd.hs_max_dtr)
- 			max_dtr = card->ext_csd.hs_max_dtr;
- 	} else if (max_dtr > card->csd.max_dtr) {
-@@ -914,6 +955,22 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	}
- 
- 	/*
-+	 * Indicate HS200 SDR mode (if supported).
-+	 */
-+	if (mmc_card_hs200(card)) {
-+		if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_SDR_1_8V)
-+			&& ((host->caps2 & (MMC_CAP2_HS200_1_8V_SDR |
-+			     MMC_CAP2_HS200))
-+				== (MMC_CAP2_HS200_1_8V_SDR | MMC_CAP2_HS200)))
-+				hs_sdr = MMC_1_8V_SDR_MODE;
-+		else if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_SDR_1_2V)
-+			 && ((host->caps2 & (MMC_CAP2_HS200_1_2V_SDR |
-+			      MMC_CAP2_HS200))
-+				== (MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS200)))
-+				hs_sdr = MMC_1_2V_SDR_MODE;
-+	}
-+
-+	/*
- 	 * Activate wide bus and DDR (if supported).
- 	 */
- 	if ((card->csd.mmca_vsn >= CSD_SPEC_VER_4) &&
-@@ -953,16 +1010,24 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 			if (!err) {
- 				mmc_set_bus_width(card->host, bus_width);
- 
-+				if ((host->caps2 & MMC_CAP2_HS200) &&
-+				    card->host->ops->execute_tuning)
-+					err = card->host->ops->	\
-+					      execute_tuning(card->host);
-+
- 				/*
- 				 * If controller can't handle bus width test,
- 				 * compare ext_csd previously read in 1 bit mode
- 				 * against ext_csd at new bus width
- 				 */
--				if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
-+				if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST) &&
-+				    !err)
- 					err = mmc_compare_ext_csds(card,
- 						bus_width);
--				else
-+				else if (!err)
- 					err = mmc_bus_test(card, bus_width);
-+				else
-+					pr_warning("tuning execution failed\n");
- 				if (!err)
- 					break;
- 			}
-@@ -1011,6 +1076,15 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 			mmc_card_set_ddr_mode(card);
- 			mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
- 			mmc_set_bus_width(card->host, bus_width);
-+		} else if (hs_sdr) {
-+			if (hs_sdr == EXT_CSD_CARD_TYPE_SDR_1_2V) {
-+				err = mmc_set_signal_voltage(host,
-+					MMC_SIGNAL_VOLTAGE_120, 0);
-+				if (err)
-+					goto err;
-+			}
-+			mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
-+			mmc_set_bus_width(card->host, bus_width);
- 		}
- 	}
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 1a06dd4..1bb4989 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -25,6 +25,7 @@
- 
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/host.h>
-+#include <linux/mmc/card.h>
- 
- #include "sdhci.h"
- 
-@@ -993,7 +994,8 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		flags |= SDHCI_CMD_INDEX;
- 
- 	/* CMD19 is special in that the Data Present Select should be set */
--	if (cmd->data || (cmd->opcode == MMC_SEND_TUNING_BLOCK))
-+	if (cmd->data || (cmd->opcode == MMC_SEND_TUNING_BLOCK) ||
-+	    (cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200))
- 		flags |= SDHCI_CMD_DATA;
- 
- 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
-@@ -1623,10 +1625,13 @@ static int sdhci_execute_tuning(struct mmc_host *mmc)
- 	 * Host Controller needs tuning only in case of SDR104 mode
- 	 * and for SDR50 mode when Use Tuning for SDR50 is set in
- 	 * Capabilities register.
-+	 * If the Host Controller supports the HS200 mode then tuning
-+	 * function has to be executed.
- 	 */
- 	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR104) ||
- 	    (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR50) &&
--	    (host->flags & SDHCI_SDR50_NEEDS_TUNING)))
-+	    (host->flags & SDHCI_SDR50_NEEDS_TUNING)) ||
-+	    (host->flags & SDHCI_HS200_NEEDS_TUNING))
- 		ctrl |= SDHCI_CTRL_EXEC_TUNING;
- 	else {
- 		spin_unlock(&host->lock);
-@@ -1661,7 +1666,10 @@ static int sdhci_execute_tuning(struct mmc_host *mmc)
- 		if (!tuning_loop_counter && !timeout)
- 			break;
- 
--		cmd.opcode = MMC_SEND_TUNING_BLOCK;
-+		if (mmc->card->type == MMC_TYPE_MMC)
-+			cmd.opcode = MMC_SEND_TUNING_BLOCK_HS200;
-+		else
-+			cmd.opcode = MMC_SEND_TUNING_BLOCK;
- 		cmd.arg = 0;
- 		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
- 		cmd.retries = 0;
-@@ -1676,7 +1684,17 @@ static int sdhci_execute_tuning(struct mmc_host *mmc)
- 		 * block to the Host Controller. So we set the block size
- 		 * to 64 here.
+@@ -340,7 +342,15 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 * There are two boot regions of equal size, defined in
+ 		 * multiples of 128K.
  		 */
--		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64), SDHCI_BLOCK_SIZE);
-+		if (mmc->card->type == MMC_TYPE_MMC) {
-+			if (mmc->ios.bus_width == MMC_BUS_WIDTH_8)
-+				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128),
-+					     SDHCI_BLOCK_SIZE);
-+			else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4)
-+				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
-+					     SDHCI_BLOCK_SIZE);
-+		} else {
-+			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
-+				     SDHCI_BLOCK_SIZE);
+-		card->ext_csd.boot_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
++		if (ext_csd[EXT_CSD_BOOT_MULT])	{
++			for (idx = 0; idx < MMC_NUM_BOOT_PARTITION;
++				idx++) {
++				part_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
++				mmc_part_add(card, part_size,
++					EXT_CSD_PART_CONFIG_ACC_BOOT0 + idx,
++					"boot%d", idx, true);
++			}
 +		}
+ 	}
  
- 		/*
- 		 * The tuning block is sent by the card to the host controller.
-@@ -2047,12 +2065,14 @@ static void sdhci_show_adma_error(struct sdhci_host *host) { }
+ 	card->ext_csd.raw_hc_erase_gap_size =
+@@ -361,9 +371,9 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 */
+ 		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
+ 		    (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
+-			u8 hc_erase_grp_sz =
++			hc_erase_grp_sz =
+ 				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+-			u8 hc_wp_grp_sz =
++			hc_wp_grp_sz =
+ 				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
  
- static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- {
-+	u32 command;
- 	BUG_ON(intmask == 0);
- 
- 	/* CMD19 generates _only_ Buffer Read Ready interrupt */
- 	if (intmask & SDHCI_INT_DATA_AVAIL) {
--		if (SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND)) ==
--		    MMC_SEND_TUNING_BLOCK) {
-+		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
-+		if ((command == MMC_SEND_TUNING_BLOCK) ||
-+		    (command == MMC_SEND_TUNING_BLOCK_HS200)) {
- 			host->tuning_done = 1;
- 			wake_up(&host->buf_ready_int);
- 			return;
-@@ -2567,6 +2587,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (caps[1] & SDHCI_USE_SDR50_TUNING)
- 		host->flags |= SDHCI_SDR50_NEEDS_TUNING;
- 
-+	/* Does the host needs tuning for HS200? */
-+	if (mmc->caps2 & MMC_CAP2_HS200)
-+		host->flags |= SDHCI_HS200_NEEDS_TUNING;
+ 			card->ext_csd.enhanced_area_en = 1;
+@@ -392,6 +402,40 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 			card->ext_csd.enhanced_area_offset = -EINVAL;
+ 			card->ext_csd.enhanced_area_size = -EINVAL;
+ 		}
 +
- 	/* Driver Type(s) (A, C, D) supported by the host */
- 	if (caps[1] & SDHCI_DRIVER_TYPE_A)
- 		mmc->caps |= MMC_CAP_DRIVER_TYPE_A;
++		/*
++		 * General purpose partition feature support --
++		 * If ext_csd have the size of general purpose partitions,
++		 * set size, part_cfg, partition name in mmc_part.
++		 */
++
++		if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
++			EXT_CSD_PART_SUPPORT_PART_EN) {
++			if (card->ext_csd.enhanced_area_en != 1) {
++				hc_erase_grp_sz =
++					ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
++				hc_wp_grp_sz =
++					ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
++
++				card->ext_csd.enhanced_area_en = 1;
++			}
++
++			for (idx = 0; idx < MMC_NUM_GP_PARTITION; idx++) {
++				if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3] &&
++				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1] &&
++				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2])
++					continue;
++			part_size =
++			  (ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2] << 16) +
++			  (ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1] << 8) +
++			  ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3];
++				part_size *= (size_t)(hc_erase_grp_sz *
++					hc_wp_grp_sz);
++				mmc_part_add(card, part_size << 19,
++					EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
++					"gp%d", idx, false);
++			}
++		}
+ 		card->ext_csd.sec_trim_mult =
+ 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
+ 		card->ext_csd.sec_erase_mult =
 diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 096ccdc..7bd0635 100644
+index b460fc2..8e42573 100644
 --- a/include/linux/mmc/card.h
 +++ b/include/linux/mmc/card.h
-@@ -189,6 +189,7 @@ struct mmc_card {
- #define MMC_STATE_HIGHSPEED_DDR (1<<4)		/* card is in high speed mode */
- #define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in ultra high speed mode */
- #define MMC_CARD_SDXC		(1<<6)		/* card is SDXC */
-+#define MMC_STATE_HIGHSPEED_200	(1<<7)		/* card is in HS200 mode */
- 	unsigned int		quirks; 	/* card quirks */
- #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
- #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
-@@ -329,6 +330,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_present(c)	((c)->state & MMC_STATE_PRESENT)
- #define mmc_card_readonly(c)	((c)->state & MMC_STATE_READONLY)
- #define mmc_card_highspeed(c)	((c)->state & MMC_STATE_HIGHSPEED)
-+#define mmc_card_hs200(c)	((c)->state & MMC_STATE_HIGHSPEED_200)
- #define mmc_card_blockaddr(c)	((c)->state & MMC_STATE_BLOCKADDR)
- #define mmc_card_ddr_mode(c)	((c)->state & MMC_STATE_HIGHSPEED_DDR)
- #define mmc_sd_card_uhs(c) ((c)->state & MMC_STATE_ULTRAHIGHSPEED)
-@@ -337,6 +339,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
- #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
- #define mmc_card_set_highspeed(c) ((c)->state |= MMC_STATE_HIGHSPEED)
-+#define mmc_card_set_hs200(c)	((c)->state |= MMC_STATE_HIGHSPEED_200)
- #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
- #define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
- #define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 4915741..6f2fb00 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -60,6 +60,8 @@ struct mmc_ios {
- #define MMC_SDR_MODE		0
- #define MMC_1_2V_DDR_MODE	1
- #define MMC_1_8V_DDR_MODE	2
-+#define MMC_1_2V_SDR_MODE	3
-+#define MMC_1_8V_SDR_MODE	4
+@@ -12,6 +12,7 @@
  
- 	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
+ #include <linux/mmc/core.h>
+ #include <linux/mod_devicetable.h>
++#include <linux/genhd.h>
  
-@@ -241,6 +243,10 @@ struct mmc_host {
- #define MMC_CAP2_BOOTPART_NOACC	(1 << 0)	/* Boot partition no access */
- #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control. */
- #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff supported */
-+#define MMC_CAP2_HS200		(1 << 3)	/* Host supports HS200 mode */
-+#define MMC_CAP2_HS200_1_8V_SDR	(1 << 4)	/* can support */
-+#define MMC_CAP2_HS200_1_2V_SDR	(1 << 5)	/* can support */
-+#define MMC_CAP2_HIGHSPEED_200	(1 << 6)	/* Can do MMC HS200 timing */
+ struct mmc_cid {
+ 	unsigned int		manfid;
+@@ -63,7 +64,6 @@ struct mmc_ext_csd {
+ 	bool			enhanced_area_en;	/* enable bit */
+ 	unsigned long long	enhanced_area_offset;	/* Units: Byte */
+ 	unsigned int		enhanced_area_size;	/* Units: KB */
+-	unsigned int		boot_size;		/* in bytes */
+ 	u8			raw_partition_support;	/* 160 */
+ 	u8			raw_erased_mem_count;	/* 181 */
+ 	u8			raw_ext_csd_structure;	/* 194 */
+@@ -157,6 +157,23 @@ struct sdio_func_tuple;
  
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 	unsigned int        power_notify_type;
+ #define SDIO_MAX_FUNCS		7
+ 
++/* The number of MMC physical partitions
++ * It consist of boot partitions(2), general purpose partitions(4) in MMC v4.4
++ */
++#define MMC_NUM_BOOT_PARTITION	2
++#define MMC_NUM_GP_PARTITION	4
++#define MMC_NUM_PHY_PARTITION	6
++
++/*
++ * MMC Physical partitions
++ */
++struct mmc_part {
++	unsigned int	size;	/* partition size (in bytes) */
++	unsigned int	part_cfg;	/* it used to part_type */
++	char	name[DISK_NAME_LEN];
++	bool	force_ro;	/* to make boot parts RO by default */
++};
++
+ /*
+  * MMC device
+  */
+@@ -216,9 +233,24 @@ struct mmc_card {
+ 	unsigned int		sd_bus_speed;	/* Bus Speed Mode set for the card */
+ 
+ 	struct dentry		*debugfs_root;
++	struct mmc_part	part[MMC_NUM_PHY_PARTITION]; /* physical partitions */
++	unsigned int	nr_parts;
+ };
+ 
+ /*
++ * This function fill contents in mmc_part.
++ */
++static inline void mmc_part_add(struct mmc_card *card, unsigned int size,
++	unsigned int part_cfg, char *name, int idx, bool ro)
++{
++	card->part[card->nr_parts].size = size;
++	card->part[card->nr_parts].part_cfg = part_cfg;
++	sprintf(card->part[card->nr_parts].name, name, idx);
++	card->part[card->nr_parts].force_ro = ro;
++	card->nr_parts++;
++}
++
++/*
+  *  The world is not perfect and supplies us with broken mmc/sdio devices.
+  *  For at least some of these bugs we need a work-around.
+  */
 diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index ecf39ff..bb0567b 100644
+index 5a794cb..ac0422a 100644
 --- a/include/linux/mmc/mmc.h
 +++ b/include/linux/mmc/mmc.h
-@@ -51,6 +51,7 @@
- #define MMC_READ_SINGLE_BLOCK    17   /* adtc [31:0] data addr   R1  */
- #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data addr   R1  */
- #define MMC_SEND_TUNING_BLOCK    19   /* adtc                    R1  */
-+#define MMC_SEND_TUNING_BLOCK_HS200	21	/* adtc R1  */
+@@ -270,6 +270,7 @@ struct _mmc_csd {
+  * EXT_CSD fields
+  */
  
-   /* class 3 */
- #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data addr   R1  */
-@@ -330,13 +331,18 @@ struct _mmc_csd {
++#define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+ #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+ #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
+ #define EXT_CSD_WR_REL_PARAM		166	/* RO */
+@@ -302,7 +303,9 @@ struct _mmc_csd {
  
- #define EXT_CSD_CARD_TYPE_26	(1<<0)	/* Card can run at 26MHz */
- #define EXT_CSD_CARD_TYPE_52	(1<<1)	/* Card can run at 52MHz */
--#define EXT_CSD_CARD_TYPE_MASK	0xF	/* Mask out reserved bits */
-+#define EXT_CSD_CARD_TYPE_MASK	0x3F	/* Mask out reserved bits */
- #define EXT_CSD_CARD_TYPE_DDR_1_8V  (1<<2)   /* Card can run at 52MHz */
- 					     /* DDR mode @1.8V or 3V I/O */
- #define EXT_CSD_CARD_TYPE_DDR_1_2V  (1<<3)   /* Card can run at 52MHz */
- 					     /* DDR mode @1.2V I/O */
- #define EXT_CSD_CARD_TYPE_DDR_52       (EXT_CSD_CARD_TYPE_DDR_1_8V  \
- 					| EXT_CSD_CARD_TYPE_DDR_1_2V)
-+#define EXT_CSD_CARD_TYPE_SDR_1_8V	(1<<4)	/* Card can run at 200MHz */
-+#define EXT_CSD_CARD_TYPE_SDR_1_2V	(1<<5)	/* Card can run at 200MHz */
-+						/* SDR mode @1.2V I/O */
-+#define EXT_CSD_CARD_TYPE_SDR_200	(EXT_CSD_CARD_TYPE_SDR_1_8V	\
-+					| EXT_CSD_CARD_TYPE_SDR_1_2V)
+ #define EXT_CSD_PART_CONFIG_ACC_MASK	(0x7)
+ #define EXT_CSD_PART_CONFIG_ACC_BOOT0	(0x1)
+-#define EXT_CSD_PART_CONFIG_ACC_BOOT1	(0x2)
++#define EXT_CSD_PART_CONFIG_ACC_GP0	(0x4)
++
++#define EXT_CSD_PART_SUPPORT_PART_EN	(0x1)
  
- #define EXT_CSD_BUS_WIDTH_1	0	/* Card is in 1 bit mode */
- #define EXT_CSD_BUS_WIDTH_4	1	/* Card is in 4 bit mode */
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 5666f3a..b6e81bd 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -115,6 +115,7 @@ struct sdhci_host {
- #define SDHCI_NEEDS_RETUNING	(1<<5)	/* Host needs retuning */
- #define SDHCI_AUTO_CMD12	(1<<6)	/* Auto CMD12 support */
- #define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
-+#define SDHCI_HS200_NEEDS_TUNING (1<<8)	/* HS200 needs tuning */
- 
- 	unsigned int version;	/* SDHCI spec. version */
- 
+ #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
+ #define EXT_CSD_CMD_SET_SECURE		(1<<1)
 -- 
-1.7.1
+1.7.4.4
 
