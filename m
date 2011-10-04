@@ -1,41 +1,57 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH v10] mmc : general purpose partition support.
-Date: Tue, 4 Oct 2011 23:57:18 +0530
-Message-ID: <CANfBPZ_ncmQmugQ+GBszE0OMvYV5T7W0Yo-dP5=JcoabNLaEeA@mail.gmail.com>
-References: <1317750317-4489-1-git-send-email-linkinjeon@gmail.com>
- <CANfBPZ_aet5iF2zQ6zaqX0cjVB4LUnq6wLcHh2t_WNst3zXKAA@mail.gmail.com> <m2y5x0k40l.fsf@bob.laptop.org>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH] mmc: sdhci-tegra: Add #ifdef CONFIG_OF guard for
+ of_find_property
+Date: Tue, 4 Oct 2011 12:32:32 -0600
+Message-ID: <20111004183232.GF2870@ponder.secretlab.ca>
+References: <1317614852.30838.1.camel@phoenix>
+ <4E897318.3090004@compulab.co.il>
+ <74CDBE0F657A3D45AFBB94109FB122FF173A2C6C97@HQMAIL01.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog120.obsmtp.com ([74.125.149.140]:55808 "EHLO
-	na3sys009aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932752Ab1JDS1l convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 4 Oct 2011 14:27:41 -0400
-In-Reply-To: <m2y5x0k40l.fsf@bob.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF173A2C6C97@HQMAIL01.nvidia.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Stephen Warren <swarren@nvidia.com>
+Cc: Igor Grinberg <grinberg@compulab.co.il>, Axel Lin <axel.lin@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Namjae Jeon <linkinjeon@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com
 
-On Tue, Oct 4, 2011 at 11:55 PM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Tue, Oct 04 2011, S, Venkatraman wrote:
->> Stupid question - This will affect all MMC instances, right ? Doesn'=
-t
->> this constitute a ABI breakage for user space scripts ?
->
-> As I understand it, these partitions were simply not accessible befor=
-e
-> this patch: =A0we're not renaming mmcblkNpY to anything else, we're a=
-dding
-> support for mmcblkNgpY partitions, which are part of the "MMC General
-> Purpose Partition" spec, and are partitioned separately and not
-> currently available to userspace.
->
-> So, I don't see what would constitute breakage. =A0Does that clear it=
- up?
->
-It does - thanks !!
+On Mon, Oct 03, 2011 at 08:59:45AM -0700, Stephen Warren wrote:
+> Igor Grinberg wrote at Monday, October 03, 2011 2:32 AM:
+> > Hi Axel,
+> > 
+> > On 10/03/11 06:07, Axel Lin wrote:
+> > > I got below build error with "make tegra_defconfig;make"
+> > > Add #ifdef CONFIG_OF guard for of_find_property to fix below build error:
+> > >
+> > >   CC      drivers/mmc/host/sdhci-tegra.o
+> > > drivers/mmc/host/sdhci-tegra.c: In function 'sdhci_tegra_dt_parse_pdata':
+> > > drivers/mmc/host/sdhci-tegra.c:157: error: implicit declaration of function 'of_find_property'
+> ...
+> > > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> ...
+> > > @@ -154,8 +154,11 @@ static struct tegra_sdhci_platform_data * __devinit sdhci_tegra_dt_parse_pdata(
+> > >  	plat->cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
+> > >  	plat->wp_gpio = of_get_named_gpio(np, "wp-gpios", 0);
+> > >  	plat->power_gpio = of_get_named_gpio(np, "power-gpios", 0);
+> > > +
+> > > +#ifdef CONFIG_OF
+> > >  	if (of_find_property(np, "support-8bit", NULL))
+> > >  		plat->is_8bit = 1;
+> > > +#endif
+> > 
+> > Shouldn't we add a stub for the of_find_property() method to include/linux/of.h
+> > instead of adding more ifdefs?
+> > Or may be use of_get_property() method instead?
+> 
+> I submitted a patch to add a stub of_find_property a little while back.
+> Per https://lkml.org/lkml/2011/9/22/301, Grant applied it already. I'm
+> not sure why it hasn't shown up in linux-next, since Grant's repo wasn't
+> affected by the kernel.org downtime.
+> 
+> Sorry for the breakage.
+
+That's because I forgot to push out the tree.  :-(  Sorry.  I've just
+fixed it now.
+
+g.
