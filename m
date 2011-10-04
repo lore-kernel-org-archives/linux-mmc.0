@@ -1,12 +1,12 @@
 From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: [PATCH] mmc : general purpose partition support.
-Date: Wed,  5 Oct 2011 01:16:46 +0900
-Message-ID: <1317745006-6290-1-git-send-email-linkinjeon@gmail.com>
+Subject: [PATCH v9] mmc : general purpose partition support.
+Date: Wed,  5 Oct 2011 01:17:37 +0900
+Message-ID: <1317745057-6328-1-git-send-email-linkinjeon@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:42435 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932275Ab1JDQRI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Oct 2011 12:17:08 -0400
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:35005 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932089Ab1JDQRy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Oct 2011 12:17:54 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org, linux-mmc@vger.kernel.org
