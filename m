@@ -1,71 +1,118 @@
-From: Heiko =?iso-8859-15?q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH 3/3] ARM: SAMSUNG: Add lookup of sdhci-s3c clocks using generic names
-Date: Wed, 5 Oct 2011 09:30:30 +0200
-Message-ID: <201110050930.32216.heiko@sntech.de>
-References: <1317792669-19925-1-git-send-email-rajeshwari.s@samsung.com> <1317792669-19925-4-git-send-email-rajeshwari.s@samsung.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: dw_mmc: Support predefined multiple block transfers.
+Date: Wed, 05 Oct 2011 17:02:01 +0900
+Message-ID: <000c01cc8335$101b6d40$305247c0$%jun@samsung.com>
+References: <001901cc7c42$00147c10$003d7430$%jun@samsung.com>
+ <992253991.685205.1317054932934.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+ <001f01cc7cba$f1238560$d36a9020$%jun@samsung.com>
+ <CANz0V+7xJF4h4XUGoL43odFyOpwcBmxgV18R-uR4oDaqV-9jJA@mail.gmail.com>
+ <003101cc7db7$f203e350$d60ba9f0$%jun@samsung.com>
+ <4E8BE4D7.1070308@samsung.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from h1778886.stratoserver.net ([85.214.133.74]:60057 "EHLO
-	h1778886.stratoserver.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752624Ab1JEHan (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2011 03:30:43 -0400
-In-Reply-To: <1317792669-19925-4-git-send-email-rajeshwari.s@samsung.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:11927 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757978Ab1JEICD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2011 04:02:03 -0400
+In-reply-to: <4E8BE4D7.1070308@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rajeshwari Shinde <rajeshwari.s@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org, ben-linux@fluff.org, heiko@sntech.de
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: "'Andrei E. Warkentin'" <andrey.warkentin@gmail.com>, 'Andrei Warkentin' <awarkentin@vmware.com>, 'Chris Ball' <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, 'kgene kim' <kgene.kim@samsung.com>, 'dh han' <dh.han@samsung.com>, linux-mmc@vger.kernel.org
 
-Am Mittwoch, 5. Oktober 2011, 07:31:09 schrieb Rajeshwari Shinde:
-> Add support for lookup of sdhci-s3c controller clocks using generic names
-> for s3c2416, s3c64xx, s5pc100, s5pv210 and exynos4 SoC's.
+Jaehoon Chung wrote:
 > 
-> Signed-off-by: Rajeshwari Shinde <rajeshwari.s@samsung.com>
-> ---
-
-[...]
-
-> diff --git a/arch/arm/mach-s3c2416/clock.c b/arch/arm/mach-s3c2416/clock.c
-> index 72b7c62..cebaf3f 100644
-> --- a/arch/arm/mach-s3c2416/clock.c
-> +++ b/arch/arm/mach-s3c2416/clock.c
-
-[...]
-
-> @@ -143,8 +142,14 @@ static struct clksrc_clk *clksrcs[] __initdata = {
->  	&hsspi_mux,
->  	&hsmmc_div[0],
->  	&hsmmc_div[1],
-> -	&hsmmc_mux[0],
-> -	&hsmmc_mux[1],
-> +	&hsmmc_mux0,
-> +	&hsmmc_mux1,
-> +};
-> +
-> +static struct clk_lookup s3c2416_clk_lookup[] = {
-> +	CLKDEV_INIT("s3c-sdhci.0", "mmc_busclk.0", &hsmmc0_clk),
-This is missing the s3c-sdhci.1 mmc_busclk.0 as 4th entry which is defined in 
-s3c2443-clock.c. The pclk for hsmmc1 is common to S3C2416/2450 and S3C2443 and 
-is therefore defined in plat-s3c24xx [S3C2443 only has a hsmmc1 to be exact].
-
-Also it would be nice to include the hsmmc-clock in mach-s3c2443/clock.c too. 
-The sdhci support there seems to be incomplete but it would be nice to have 
-the clocks similar to everything else if anyone wants to start on this arch.
-
-> +	CLKDEV_INIT("s3c-sdhci.0", "mmc_busclk.2", &hsmmc_mux0.clk),
-> +	CLKDEV_INIT("s3c-sdhci.1", "mmc_busclk.2", &hsmmc_mux1.clk),
->  };
+> Hi Mr.Jeon
 > 
->  void __init s3c2416_init_clocks(int xtal)
-> @@ -164,6 +169,7 @@ void __init s3c2416_init_clocks(int xtal)
->  		s3c_register_clksrc(clksrcs[ptr], 1);
+> One question...if we used predefined transfer, didn't send stop-command?
+> then i think that didn't need to enter this condition..how about this?
 > 
->  	s3c24xx_register_clock(&hsmmc0_clk);
-> +	clkdev_add_table(s3c2416_clk_lookup, ARRAY_SIZE(s3c2416_clk_lookup));
+> In __dw_mci_start_reqeust() function(at your patch)
 > 
->  	s3c_pwmclk_init();
+> if (mrq->stop)
+> 	host->stop_cmdr = dw_mci_prepare_command(slot->mmc, mrq->stop);
 > 
+> If i misunderstood something, plz let me know...Thanks.
+Yes, predefined transfer doesn't send stop command normally.
+But if transfer error is occurred, stop command is required.
 
-Heiko
+Thank you for test.
+Best regards,
+Seungwon Jeon.
+> 
+> Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
+> 
+> On 09/28/2011 05:23 PM, Seungwon Jeon wrote:
+> 
+> > Andrei Warkentin wrote:
+> >> 2011/9/26 Seungwon Jeon <tgih.jun@samsung.com>:
+> >>> Andrei Warkentin wrote:
+> >>>> Hi Seungwon,
+> >>>>
+> >>>> ----- Original Message -----
+> >>>>> From: "Seungwon Jeon" <tgih.jun@samsung.com>
+> >>>>> To: linux-mmc@vger.kernel.org
+> >>>>> Cc: "Chris Ball" <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org,
+> >>>> "kgene kim" <kgene.kim@samsung.com>, "dh han"
+> >>>>> <dh.han@samsung.com>, "Seungwon Jeon" <tgih.jun@samsung.com>
+> >>>>> Sent: Monday, September 26, 2011 7:46:59 AM
+> >>>>> Subject: [PATCH] mmc: dw_mmc: Support predefined multiple block
+> >>>> transfers.
+> >>>>>
+> >>>>> This patch adds the support for predefined multiple block read/write.
+> >>>>>
+> >>>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> >>>>
+> >>>> Without knowing much about dw_mmc host, your logic otherwise looks ok,
+> >>>> given what
+> >>>> I've previously done for SDHCI as far as CMD23/Auto-CMD23 enhancement.
+> >>>> Just curious, what eMMC cards did you test this on, and what
+> >> improvement
+> >>>> did you see?
+> >>>
+> >>> Thank you for review.
+> >>> As you done, predefined transfer is required for reliable writes and
+> >> eMMC4.5 feature.
+> >>> Sadly, I didn't gain an improvement in my case.
+> >>> (I don't know whether I can clarify the tested eMMC card, just one
+> >> sample.)
+> >>>
+> >>
+> >> So far I've seen some Sandisk cards have a noticeable real-life
+> >> improvement (30%) over
+> >> open-ended transfers.
+> >>
+> >> You might wish to try out https://github.com/andreiw/superalign to be
+> >> certain.
+> >
+> > I had already tested this patch with IOZONE, but I found no difference.
+> > Maybe a result depends on eMMC device.
+> > As your recommend, I applied above benchmark tool.
+> > Predefined transfer seems like a little better, but there is no
+> difference.
+> >
+> > Thanks.
+> > Seungwon Jeon.
+> >
+> >>
+> >> A
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
