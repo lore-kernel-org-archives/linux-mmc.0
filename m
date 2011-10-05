@@ -1,280 +1,577 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: core: Add cache control for eMMC4.5 device
-Date: Wed, 05 Oct 2011 14:47:01 +0300
-Message-ID: <4E8C43B5.7020704@intel.com>
-References: <1315466950-28973-1-git-send-email-tgih.jun@samsung.com>
+From: NamJae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH v10] mmc : general purpose partition support.
+Date: Wed, 5 Oct 2011 20:49:24 +0900
+Message-ID: <CAKYAXd9OBgjjHHdqajgVtR4hBFs6cCGveahzgrT6x2_C+jP_Cw@mail.gmail.com>
+References: <1317750317-4489-1-git-send-email-linkinjeon@gmail.com>
+	<4E8C1F98.9070909@intel.com>
+	<CAKYAXd-9+_1TBniszQir+krF1fRqzBMiAAX9PgzaW+odps0EDg@mail.gmail.com>
+	<4E8C370E.7080806@intel.com>
+	<CAKYAXd_AoSgY6htSO5jJyD3QJ_xXFqgKLyNX49s3PuRW6AUmbg@mail.gmail.com>
+	<CAKYAXd9iHW3bdeFkq=ywdOTPtzFdqK8Yb9fXxi8Jvoq6BRvHtQ@mail.gmail.com>
+	<4E8C4163.1090109@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1315466950-28973-1-git-send-email-tgih.jun@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:54906 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934221Ab1JELt0 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2011 07:49:26 -0400
+In-Reply-To: <4E8C4163.1090109@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, awarkentin@vmware.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com
 
-On 08/09/11 10:29, Seungwon Jeon wrote:
-> This patch adds cache feature of eMMC4.5 Spec.
-> If device supports cache capability, host can utilize some specific
-> operations.
+2011/10/5 Adrian Hunter <adrian.hunter@intel.com>:
+> On 05/10/11 14:22, NamJae Jeon wrote:
+>>
+>> 2011/10/5 NamJae Jeon<linkinjeon@gmail.com>:
+>>>
+>>> 2011/10/5 Adrian Hunter<adrian.hunter@intel.com>:
+>>>>
+>>>> On 05/10/11 13:21, NamJae Jeon wrote:
+>>>>>
+>>>>> 2011/10/5 Adrian Hunter<adrian.hunter@intel.com>:
+>>>>>>
+>>>>>> On 04/10/11 20:45, Namjae Jeon wrote:
+>>>>>>>
+>>>>>>> It allows gerneral purpose partitions in MMC Device.
+>>>>>>> And I try to simpliy make mmc_blk_alloc_parts using mmc_part
+>>>>>>> structure
+>>>>>>> suggested by Andrei Warkentin.
+>>>>>>> After patching, we can see general purpose partitions like this=
+=2E
+>>>>>>>>
+>>>>>>>> cat /proc/partitions
+>>>>>>>
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 0 847872 mmcblk0
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 192 4096 mmcblk0gp3
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 160 4096 mmcblk0gp2
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 128 4096 mmcblk0gp1
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 96 =C2=A01052672 mmcblk0=
+gp0
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 64 =C2=A01024 mmcblk0boo=
+t1
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 32 =C2=A01024 mmcblk0boo=
+t0
+>>>>>>>
+>>>>>>> Signed-off-by: Namjae Jeon<linkinjeon@gmail.com>
+>>>>>>> ---
+>>>>>>> =C2=A0drivers/mmc/card/block.c | =C2=A0 34 +++++++++++++++++---=
+---------
+>>>>>>> =C2=A0drivers/mmc/core/mmc.c =C2=A0 | =C2=A0 52
+>>>>>>> ++++++++++++++++++++++++++++++++++++++++++---
+>>>>>>> =C2=A0include/linux/mmc/card.h | =C2=A0 34 ++++++++++++++++++++=
++++++++++-
+>>>>>>> =C2=A0include/linux/mmc/mmc.h =C2=A0| =C2=A0 =C2=A05 +++-
+>>>>>>> =C2=A04 files changed, 105 insertions(+), 20 deletions(-)
+>>>>>>>
+>>>>>>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.=
+c
+>>>>>>> index 782d5f8..fb6f1e9 100644
+>>>>>>> --- a/drivers/mmc/card/block.c
+>>>>>>> +++ b/drivers/mmc/card/block.c
+>>>>>>> @@ -1470,26 +1470,32 @@ static int mmc_blk_alloc_part(struct mm=
+c_card
+>>>>>>> *card,
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0return 0;
+>>>>>>> =C2=A0}
+>>>>>>>
+>>>>>>> +/* MMC Physical partition consist of two boot partitions and
+>>>>>>> + * up to four general purpose partitions.
+>>>>>>> + * For each partitions enabled in EXT_CSD
+>>>>>>> + * The block device will allocated to provide access to the
+>>>>>>> partition.
+>>>>>>> + */
+>>>>>>> +
+>>>>>>> =C2=A0static int mmc_blk_alloc_parts(struct mmc_card *card, str=
+uct
+>>>>>>> mmc_blk_data
+>>>>>>> *md)
+>>>>>>> =C2=A0{
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 int ret =3D 0;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 int idx, ret =3D 0;
+>>>>>>>
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (!mmc_card_mmc(card))
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0return 0=
+;
+>>>>>>>
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 if (card->ext_csd.boot_size&&
+>>>>>>> =C2=A0mmc_boot_partition_access(card->host)) {
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D mmc_=
+blk_alloc_part(card, md,
+>>>>>>> EXT_CSD_PART_CONFIG_ACC_BOOT0,
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0card->ext_csd.boot_size>>
+>>>>>>> =C2=A0 =C2=A09,
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0true,
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0"boot0");
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (ret)
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 return ret;
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D mmc_=
+blk_alloc_part(card, md,
+>>>>>>> EXT_CSD_PART_CONFIG_ACC_BOOT1,
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0card->ext_csd.boot_size>>
+>>>>>>> =C2=A0 =C2=A09,
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0true,
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0"boot1");
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (ret)
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 return ret;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 for (idx =3D 0; idx< =C2=A0 =C2=A0 =C2=A0=
+card->nr_parts; idx++) {
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if ((idx =3D=
+=3D 0 || idx =3D=3D 1)&&
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 !mmc_boot_partition_access(card->host))
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 continue;
+>>>>>>
+>>>>>> Seems a bit fragile. =C2=A0What if someone decided to put the gp
+>>>>>> partitions before the boot partitions. =C2=A0What about:
+>>>>>
+>>>>> There are the default two boot partition in mmc spec. I think tha=
+t
+>>>>> this case can not be happened.
+>>>>> And boot partition size of EXT CSD is read-only.
+>>>>> Can you explain which is case put to gp partitions before the boo=
+t
+>>>>> partition ?
+>>>>
+>>>> Relying on the partition order in the partition array is fragile.
+>>>> You cannot predict how someone may want to change it in the future=
+,
+>>>> and that person will not expect that certain positions have certai=
+n
+>>>> meaning.
+>>
+>> 0,1 of Boot partition is fixed if spec is not changed over. but gp
 >
-> Signed-off-by: Seungwon Jeon<tgih.jun@samsung.com>
-> ---
-> This patch is base on [PATCH v3] mmc: core: Add default timeout value for CMD6
+> No. 0,1 are an accidental result of the order in which ext-csd is
+> parsed.
 >
->   drivers/mmc/card/block.c |   14 ++++++----
->   drivers/mmc/core/core.c  |   62 ++++++++++++++++++++++++++++++++++++++++++++++
->   drivers/mmc/core/mmc.c   |   23 +++++++++++++++++
->   include/linux/mmc/card.h |    2 +
->   include/linux/mmc/core.h |    2 +
->   include/linux/mmc/host.h |    3 ++
->   include/linux/mmc/mmc.h  |    3 ++
->   7 files changed, 103 insertions(+), 6 deletions(-)
+>> partition is variable in 2,3,4,5,6 of array.
+>> If How someone change code, problem occur ?
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index e702c61..84fa4bb 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -779,16 +779,18 @@ out:
->   static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
->   {
->   	struct mmc_blk_data *md = mq->data;
-> +	struct mmc_card *card = md->queue.card;
-> +	int ret = 0;
-> +
-> +	ret = mmc_flush_cache(card);
-> +	if (ret)
-> +		ret = -EIO;
->
-> -	/*
-> -	 * No-op, only service this because we need REQ_FUA for reliable
-> -	 * writes.
-> -	 */
->   	spin_lock_irq(&md->lock);
-> -	__blk_end_request_all(req, 0);
-> +	__blk_end_request_all(req, ret);
->   	spin_unlock_irq(&md->lock);
->
-> -	return 1;
-> +	return ret ? 0 : 1;
->   }
->
->   /*
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 557856b..14c2431 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1987,6 +1987,64 @@ int mmc_card_can_sleep(struct mmc_host *host)
->   }
->   EXPORT_SYMBOL(mmc_card_can_sleep);
->
-> +/*
-> + * Flush the cache to the non-volatile storage.
-> + */
-> +int mmc_flush_cache(struct mmc_card *card)
-> +{
-> +	struct mmc_host *host = card->host;
-> +	int err = 0;
-> +
-> +	if (!(host->caps&  MMC_CAP_CACHE_CTRL))
-> +		return err;
-> +
-> +	if (mmc_card_mmc(card)&&
-> +			(card->ext_csd.cache_size>  0)&&
-> +			(card->ext_csd.cache_ctrl&  1)) {
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +				EXT_CSD_FLUSH_CACHE, 1, 0);
-> +		if (err)
-> +			pr_err("%s: cache flush error %d\n",
-> +					mmc_hostname(card->host), err);
-> +	}
-> +
-> +	return err;
-> +}
-> +EXPORT_SYMBOL(mmc_flush_cache);
-> +
-> +/*
-> + * Turn the cache ON/OFF.
-> + * Turning the cache OFF shall trigger flushing of the data
-> + * to the non-volatile storage.
-> + */
-> +int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
-> +{
-> +	struct mmc_card *card = host->card;
-> +	int err = 0;
-> +
-> +	if (!(host->caps&  MMC_CAP_CACHE_CTRL))
-> +		return err;
-> +
+> If you move code around in mmc_read_ext_csd() the order can change,
+> hence it is fragile.
+As I remember, boot size can be default zero in the mmc device 4.3 of
+some chip vendor.
+and it should set proper size using vendor cmd. but gp partition is
+not support in mmc 4.3.
+um.. I will add your suggested code to avoid vendor specific part in MM=
+C 4.4.
+Thanks Adrian~
 
-This patch does not cover code paths for removable cards.
-For clarity and in case a platform does not set non-removable
-flags for eMMC, a check is needed here e.g.
-
-	if (mmc_card_is_removable(host))
-		return 0;
-
-> +	if (card&&  mmc_card_mmc(card)&&
-> +			(card->ext_csd.cache_size>  0)) {
-> +		enable = !!enable;
-> +
-> +		if (card->ext_csd.cache_ctrl ^ enable)
-> +			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +					EXT_CSD_CACHE_CTRL, enable, 0);
-> +		if (err)
-> +			pr_err("%s: cache %s error %d\n",
-> +					mmc_hostname(card->host),
-> +					enable ? "on" : "off",
-> +					err);
-> +		else
-> +			card->ext_csd.cache_ctrl = enable;
-> +	}
-> +
-> +	return err;
-> +}
-> +EXPORT_SYMBOL(mmc_cache_ctrl);
-> +
->   #ifdef CONFIG_PM
 >
->   /**
-> @@ -2001,6 +2059,9 @@ int mmc_suspend_host(struct mmc_host *host)
->   		cancel_delayed_work(&host->disable);
->   	cancel_delayed_work(&host->detect);
->   	mmc_flush_scheduled_work();
-> +	err = mmc_cache_ctrl(host, 0);
-> +	if (err)
-> +		goto out;
+>>>>
+>>>>>
+>>>>>>
+>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0if (mmc_i=
+s_boot_partition(&part[idx])&&
+>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0!mmc_boot_partition_access(card->host)
+>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0continue;
+>>>>>>
+>>>>>> And:
+>>>>>>
+>>>>>> int mmc_is_boot_partition(struct mmc_part *part)
+>>>>>> {
+>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0return part->part_cfg>=3D EXT_CSD_PAR=
+T_CONFIG_ACC_BOOT0&&
+>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 part->part_cfg<=
+=3D EXT_CSD_PART_CONFIG_ACC_BOOT0 +
+>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 MMC_NUM_BOOT_PARTITION;
+>>>>>> }
+>>>>>>
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (card->pa=
+rt[idx].size) {
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 ret =3D mmc_blk_alloc_part(card, md,
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->part[idx].part_cfg,
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->part[idx].size>> =C2=A0=
+ =C2=A0 =C2=A09,
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->part[idx].force_ro,
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->part[idx].name);
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 if (ret)
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return ret;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0}
+>>>>>>>
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0return ret;
+>>>>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>>>>>> index c632b1f..2f458a0 100644
+>>>>>>> --- a/drivers/mmc/core/mmc.c
+>>>>>>> +++ b/drivers/mmc/core/mmc.c
+>>>>>>> @@ -239,7 +239,9 @@ static int mmc_get_ext_csd(struct mmc_card =
+*card,
+>>>>>>> u8
+>>>>>>> **new_ext_csd)
+>>>>>>> =C2=A0 */
+>>>>>>> =C2=A0static int mmc_read_ext_csd(struct mmc_card *card, u8 *ex=
+t_csd)
+>>>>>>> =C2=A0{
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 int err =3D 0;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 int err =3D 0, idx;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 unsigned int part_size;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 u8 hc_erase_grp_sz =3D 0, hc_wp_grp_sz =3D=
+ 0;
+>>>>>>>
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0BUG_ON(!card);
+>>>>>>>
+>>>>>>> @@ -340,7 +342,14 @@ static int mmc_read_ext_csd(struct mmc_car=
+d
+>>>>>>> *card,
+>>>>>>> u8
+>>>>>>> *ext_csd)
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 * There=
+ are two boot regions of equal size, defined
+>>>>>>> in
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 * multi=
+ples of 128K.
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 */
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->ext_cs=
+d.boot_size =3D
+>>>>>>> ext_csd[EXT_CSD_BOOT_MULT]<<
+>>>>>>> =C2=A017;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (ext_csd[=
+EXT_CSD_BOOT_MULT]) {
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 for (idx =3D 0; idx<
+>>>>>>> =C2=A0MMC_NUM_BOOT_PARTITION;
+>>>>>>> idx++)
+>>>>>>> {
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 part_size =3D
+>>>>>>> ext_csd[EXT_CSD_BOOT_MULT]<<
+>>>>>>> =C2=A017;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mmc_part_add(card, part_size=
+,
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+EXT_CSD_PART_CONFIG_ACC_BOOT0
+>>>>>>> +
+>>>>>>> idx,
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+"boot%d", idx, true);
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 }
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0}
+>>>>>>>
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0card->ext_csd.raw_hc_erase_gap_size =
+=3D
+>>>>>>> @@ -362,9 +371,9 @@ static int mmc_read_ext_csd(struct mmc_card
+>>>>>>> *card,
+>>>>>>> u8
+>>>>>>> *ext_csd)
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0card->ex=
+t_csd.raw_partition_support =3D
+>>>>>>> ext_csd[EXT_CSD_PARTITION_SUPPORT];
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0if ((ext=
+_csd[EXT_CSD_PARTITION_SUPPORT]& =C2=A0 =C2=A0 =C2=A00x2)&&
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0(ext_csd=
+[EXT_CSD_PARTITION_ATTRIBUTE]& =C2=A0 =C2=A0 =C2=A00x1)) {
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 u8 hc_erase_grp_sz =3D
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 hc_erase_grp_sz =3D
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0ext_csd[EXT_CSD_HC_ERAS=
+E_GRP_SIZE];
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 u8 hc_wp_grp_sz =3D
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 hc_wp_grp_sz =3D
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0ext_csd[EXT_CSD_HC_WP_G=
+RP_SIZE];
+>>>>>>>
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0card->ext_csd.enhanced_area_en =3D 1;
+>>>>>>> @@ -393,6 +402,41 @@ static int mmc_read_ext_csd(struct mmc_car=
+d
+>>>>>>> *card,
+>>>>>>> u8
+>>>>>>> *ext_csd)
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0card->ext_csd.enhanced_area_offset =3D -EINVAL;
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0card->ext_csd.enhanced_area_size =3D -EINVAL;
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0}
+>>>>>>> +
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 /*
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0* Gene=
+ral purpose partition feature support --
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0* If e=
+xt_csd have the size of general purpose
+>>>>>>> partitions,
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0* set =
+size, part_cfg, partition name in mmc_part.
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (ext_csd[=
+EXT_CSD_PARTITION_SUPPORT]&
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 EXT_CSD_PART_SUPPORT_PART_EN) {
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 if (card->ext_csd.enhanced_area_en !=3D 1) {
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 hc_erase_grp_sz =3D
+>>>>>>> +
+>>>>>>> ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 hc_wp_grp_sz =3D
+>>>>>>> +
+>>>>>>> ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+>>>>>>> +
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->ext_csd.enhanced_area_=
+en =3D 1;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 }
+>>>>>>> +
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 for (idx =3D 0; idx< =C2=A0 =C2=A0 =C2=A0MMC_NUM_GP_PART=
+ITION;
+>>>>>>> idx++) {
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (!ext_csd[EXT_CSD_GP_SIZE=
+_MULT +
+>>>>>>> idx
+>>>>>>> *
+>>>>>>> 3]&&
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 !ext_csd[EXT_CSD_GP_SIZE_MUL=
+T + idx *
+>>>>>>> 3
+>>>>>>> +
+>>>>>>> 1]&&
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 !ext_csd[EXT_CSD_GP_SIZE_MUL=
+T + idx *
+>>>>>>> 3
+>>>>>>> +
+>>>>>>> 2])
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+continue;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 part_size =3D
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 (ext_csd[EXT_CSD_GP_SIZE_MUL=
+T + idx *
+>>>>>>> 3
+>>>>>>> +
+>>>>>>> 2]
+>>>>>>> +<< =C2=A0 =C2=A0 =C2=A016) +
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 (ext_csd[EXT_CSD_GP_SIZE_MUL=
+T + idx *
+>>>>>>> 3
+>>>>>>> +
+>>>>>>> 1]
+>>>>>>> +<< =C2=A0 =C2=A0 =C2=A08) +
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ext_csd[EXT_CSD_GP_SIZE_MULT=
+ + idx *
+>>>>>>> 3];
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 part_size *=3D (size_t)(hc_e=
+rase_grp_sz
+>>>>>>> *
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+hc_wp_grp_sz);
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mmc_part_add(card, part_size=
+<<
+>>>>>>> =C2=A019,
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+EXT_CSD_PART_CONFIG_ACC_GP0 +
+>>>>>>> idx,
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+"gp%d", idx, false);
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 }
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0card->ex=
+t_csd.sec_trim_mult =3D
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0ext_csd[EXT_CSD_SEC_TRIM_MULT];
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0card->ex=
+t_csd.sec_erase_mult =3D
+>>>>>>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.=
+h
+>>>>>>> index 5294ddf..0522627 100644
+>>>>>>> --- a/include/linux/mmc/card.h
+>>>>>>> +++ b/include/linux/mmc/card.h
+>>>>>>> @@ -12,6 +12,7 @@
+>>>>>>>
+>>>>>>> =C2=A0#include<linux/mmc/core.h>
+>>>>>>> =C2=A0#include<linux/mod_devicetable.h>
+>>>>>>> +#include<linux/genhd.h>
+>>>>>>>
+>>>>>>> =C2=A0struct mmc_cid {
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned int =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0manfid;
+>>>>>>> @@ -64,7 +65,6 @@ struct mmc_ext_csd {
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0bool =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0enhanced_area_en; =C2=A0 =C2=A0 =C2=
+=A0 /* enable bit
+>>>>>>> */
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned long long =C2=A0 =C2=A0 =C2=
+=A0enhanced_area_offset; =C2=A0 /* Units: Byte
+>>>>>>> */
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned int =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0enhanced_area_size; =C2=A0 =C2=A0 /* Units: KB
+>>>>>>> */
+>>>>>>> - =C2=A0 =C2=A0 =C2=A0 unsigned int =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0boot_size; =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+/* in bytes
+>>>>>>> */
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0u8 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0raw_partition_support; =C2=A0=
+/* 160 */
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0u8 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0raw_erased_mem_count; =C2=A0 =
+/* 181 */
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0u8 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0raw_ext_csd_structure; =C2=A0=
+/* 194 */
+>>>>>>> @@ -158,6 +158,23 @@ struct sdio_func_tuple;
+>>>>>>>
+>>>>>>> =C2=A0#define SDIO_MAX_FUNCS =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A07
+>>>>>>>
+>>>>>>> +/* The number of MMC physical partitions
+>>>>>>> + * It consist of boot partitions(2), general purpose partition=
+s(4)
+>>>>>>> in
+>>>>>>> MMC
+>>>>>>> v4.4
+>>>>>>> + */
+>>>>>>> +#define MMC_NUM_BOOT_PARTITION 2
+>>>>>>> +#define MMC_NUM_GP_PARTITION =C2=A0 4
+>>>>>>> +#define MMC_NUM_PHY_PARTITION =C2=A06
+>>>>>>> +
+>>>>>>> +/*
+>>>>>>> + * MMC Physical partitions
+>>>>>>> + */
+>>>>>>> +struct mmc_part {
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 unsigned int =C2=A0 =C2=A0size; =C2=A0 /=
+* partition size (in bytes) */
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 unsigned int =C2=A0 =C2=A0part_cfg; =C2=A0=
+ =C2=A0 =C2=A0 /* it used to part_type */
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 char =C2=A0 =C2=A0name[DISK_NAME_LEN];
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 bool =C2=A0 =C2=A0force_ro; =C2=A0 =C2=A0=
+ =C2=A0 /* to make boot parts RO by default
+>>>>>>> */
+>>>>>>> +};
+>>>>>>> +
+>>>>>>> =C2=A0/*
+>>>>>>> =C2=A0 * MMC device
+>>>>>>> =C2=A0 */
+>>>>>>> @@ -219,9 +236,24 @@ struct mmc_card {
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned int =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0sd_bus_speed; =C2=A0 /* Bus Speed Mode set
+>>>>>>> for
+>>>>>>> the card */
+>>>>>>>
+>>>>>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct dentry =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 *debugfs_root;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 struct mmc_part part[MMC_NUM_PHY_PARTITI=
+ON]; /* physical
+>>>>>>> partitions */
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 unsigned int =C2=A0 =C2=A0nr_parts;
+>>>>>>> =C2=A0};
+>>>>>>>
+>>>>>>> =C2=A0/*
+>>>>>>> + * This function fill contents in mmc_part.
+>>>>>>> + */
+>>>>>>> +static inline void mmc_part_add(struct mmc_card *card, unsigne=
+d int
+>>>>>>> size,
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 unsigned int part_cfg, char *name, int idx,
+>>>>>>> bool
+>>>>>>> ro)
+>>>>>>> +{
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 card->part[card->nr_parts].size =3D size=
+;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 card->part[card->nr_parts].part_cfg =3D =
+part_cfg;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 sprintf(card->part[card->nr_parts].name,=
+ name, idx);
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 card->part[card->nr_parts].force_ro =3D =
+ro;
+>>>>>>> + =C2=A0 =C2=A0 =C2=A0 card->nr_parts++;
+>>>>>>> +}
+>>>>>>> +
+>>>>>>> +/*
+>>>>>>> =C2=A0 * =C2=A0The world is not perfect and supplies us with br=
+oken mmc/sdio
+>>>>>>> devices.
+>>>>>>> =C2=A0 * =C2=A0For at least some of these bugs we need a work-a=
+round.
+>>>>>>> =C2=A0 */
+>>>>>>> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+>>>>>>> index 50af227..ea558eb 100644
+>>>>>>> --- a/include/linux/mmc/mmc.h
+>>>>>>> +++ b/include/linux/mmc/mmc.h
+>>>>>>> @@ -270,6 +270,7 @@ struct _mmc_csd {
+>>>>>>> =C2=A0 * EXT_CSD fields
+>>>>>>> =C2=A0 */
+>>>>>>>
+>>>>>>> +#define EXT_CSD_GP_SIZE_MULT =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ 143 =C2=A0 =C2=A0 /* R/W */
+>>>>>>> =C2=A0#define EXT_CSD_PARTITION_ATTRIBUTE =C2=A0 156 =C2=A0 =C2=
+=A0 /* R/W */
+>>>>>>> =C2=A0#define EXT_CSD_PARTITION_SUPPORT =C2=A0 =C2=A0 160 =C2=A0=
+ =C2=A0 /* RO */
+>>>>>>> =C2=A0#define EXT_CSD_RST_N_FUNCTION =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0162 =C2=A0 =C2=A0 /* R/W */
+>>>>>>> @@ -313,7 +314,9 @@ struct _mmc_csd {
+>>>>>>>
+>>>>>>> =C2=A0#define EXT_CSD_PART_CONFIG_ACC_MASK =C2=A0(0x7)
+>>>>>>> =C2=A0#define EXT_CSD_PART_CONFIG_ACC_BOOT0 (0x1)
+>>>>>>> -#define EXT_CSD_PART_CONFIG_ACC_BOOT1 =C2=A0(0x2)
+>>>>>>> +#define EXT_CSD_PART_CONFIG_ACC_GP0 =C2=A0 =C2=A0(0x4)
+>>>>>>> +
+>>>>>>> +#define EXT_CSD_PART_SUPPORT_PART_EN =C2=A0 (0x1)
+>>>>>>>
+>>>>>>> =C2=A0#define EXT_CSD_CMD_SET_NORMAL =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0(1<<0)
+>>>>>>> =C2=A0#define EXT_CSD_CMD_SET_SECURE =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0(1<<1)
+>>>>>>
+>>>>>>
+>>>>
+>>>>
+>>>
 >
->   	mmc_bus_get(host);
->   	if (host->bus_ops&&  !host->bus_dead) {
-> @@ -2025,6 +2086,7 @@ int mmc_suspend_host(struct mmc_host *host)
->   	if (!err&&  !mmc_card_keep_power(host))
->   		mmc_power_off(host);
 >
-> +out:
->   	return err;
->   }
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index ea58a0c..035112b 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -419,6 +419,12 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
->   		 */
->   		card->ext_csd.generic_cmd6_time = 0;
->
-> +	card->ext_csd.cache_size =
-> +		ext_csd[EXT_CSD_CACHE_SIZE + 0]<<  0 |
-> +		ext_csd[EXT_CSD_CACHE_SIZE + 1]<<  8 |
-> +		ext_csd[EXT_CSD_CACHE_SIZE + 2]<<  16 |
-> +		ext_csd[EXT_CSD_CACHE_SIZE + 3]<<  24;
-> +
->   out:
->   	return err;
->   }
-> @@ -851,6 +857,23 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->   		}
->   	}
->
-> +	/*
-> +	 * If cache size is higher than 0, this indicates
-> +	 * the the existence of cache and it can be turned on.
-> +	 */
-> +	if ((host->caps&  MMC_CAP_CACHE_CTRL)&&
-> +			card->ext_csd.cache_size>  0) {
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +				EXT_CSD_CACHE_CTRL, 1, 0);
-> +		if (err&&  err != -EBADMSG)
-> +			goto free_card;
-> +
-> +		/*
-> +		 * Only if no error, cache is turned on successfully.
-> +		 */
-> +		card->ext_csd.cache_ctrl = err ? 0 : 1;
-> +	}
-> +
->   	if (!oldcard)
->   		host->card = card;
->
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index b713abf..519660b 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -50,6 +50,7 @@ struct mmc_ext_csd {
->   	u8			rel_sectors;
->   	u8			rel_param;
->   	u8			part_config;
-> +	u8			cache_ctrl;
->   	unsigned int		part_time;		/* Units: ms */
->   	unsigned int		sa_timeout;		/* Units: 100ns */
->   	unsigned int		generic_cmd6_time;	/* Units: 10ms */
-> @@ -65,6 +66,7 @@ struct mmc_ext_csd {
->   	unsigned long long	enhanced_area_offset;	/* Units: Byte */
->   	unsigned int		enhanced_area_size;	/* Units: KB */
->   	unsigned int		boot_size;		/* in bytes */
-> +	unsigned int		cache_size;		/* Units: KB */
->   	u8			raw_partition_support;	/* 160 */
->   	u8			raw_erased_mem_count;	/* 181 */
->   	u8			raw_ext_csd_structure;	/* 194 */
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index b8b1b7a..45b4acf 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -171,6 +171,8 @@ extern void mmc_release_host(struct mmc_host *host);
->   extern void mmc_do_release_host(struct mmc_host *host);
->   extern int mmc_try_claim_host(struct mmc_host *host);
->
-> +extern int mmc_flush_cache(struct mmc_card *);
-> +
->   /**
->    *	mmc_claim_host - exclusively claim a host
->    *	@host: mmc host to claim
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 4c4bddf..6d0006d 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -230,6 +230,7 @@ struct mmc_host {
->   #define MMC_CAP_MAX_CURRENT_600	(1<<  28)	/* Host max current limit is 600mA */
->   #define MMC_CAP_MAX_CURRENT_800	(1<<  29)	/* Host max current limit is 800mA */
->   #define MMC_CAP_CMD23		(1<<  30)	/* CMD23 supported. */
-> +#define MMC_CAP_CACHE_CTRL		(1<<  31)	/* Allow cache control. */
->
->   	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->
-> @@ -335,6 +336,8 @@ extern int mmc_power_restore_host(struct mmc_host *host);
->   extern void mmc_detect_change(struct mmc_host *, unsigned long delay);
->   extern void mmc_request_done(struct mmc_host *, struct mmc_request *);
->
-> +extern int mmc_cache_ctrl(struct mmc_host *, u8);
-> +
->   static inline void mmc_signal_sdio_irq(struct mmc_host *host)
->   {
->   	host->ops->enable_sdio_irq(host, 0);
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index e869f00..b7fa9f7 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -270,6 +270,8 @@ struct _mmc_csd {
->    * EXT_CSD fields
->    */
->
-> +#define EXT_CSD_FLUSH_CACHE		32	/* W */
-> +#define EXT_CSD_CACHE_CTRL		33	/* R/W */
->   #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
->   #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
->   #define EXT_CSD_WR_REL_PARAM		166	/* RO */
-> @@ -294,6 +296,7 @@ struct _mmc_csd {
->   #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
->   #define EXT_CSD_TRIM_MULT		232	/* RO */
->   #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
-> +#define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
->
->   /*
->    * EXT_CSD field definitions
-> --
-> 1.7.0.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
