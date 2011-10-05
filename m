@@ -1,47 +1,45 @@
 From: Rajeshwari Shinde <rajeshwari.s@samsung.com>
-Subject: [PATCH 0/3] ARM: SAMSUNG: Add support for sdhci clock lookup using
- generic names
-Date: Wed, 05 Oct 2011 11:01:06 +0530
-Message-ID: <1317792669-19925-1-git-send-email-rajeshwari.s@samsung.com>
+Subject: [PATCH 1/3] SDHCI: S3C: Use generic clock names for sdhci bus clock
+ options
+Date: Wed, 05 Oct 2011 11:01:07 +0530
+Message-ID: <1317792669-19925-2-git-send-email-rajeshwari.s@samsung.com>
+References: <1317792669-19925-1-git-send-email-rajeshwari.s@samsung.com>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1317792669-19925-1-git-send-email-rajeshwari.s@samsung.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
 Cc: cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patchset adds support for sdhci controller clock lookup using
-generic names. With this patchset, there will be no need to pass clock
-names in sdhci platform data.
+This patch modifies the driver to stop depending on the clock names
+being passed from the platform and switch over to bus clock lookup
+using generic clock names.
 
-This patchset depends on two other patchsets:
-mmc: sdhci-s3c: Remove 'clk_type' member from platform data
-Add a common macro for creating struct clk_lookup entries
+Signed-off-by: Rajeshwari Shinde <rajeshwari.s@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
 
-Rajeshwari Shinde (3):
-  SDHCI: S3C: Use generic clock names for sdhci bus clock options
-  ARM: SAMSUNG: Remove SDHCI bus clocks from platform data
-  ARM: SAMSUNG: Add lookup of sdhci-s3c clocks using generic names
-
- arch/arm/mach-exynos4/Makefile             |    1 -
- arch/arm/mach-exynos4/clock.c              |   99 ++++++++++------
- arch/arm/mach-exynos4/setup-sdhci.c        |   22 ----
- arch/arm/mach-s3c2416/Makefile             |    1 -
- arch/arm/mach-s3c2416/clock.c              |   68 ++++++-----
- arch/arm/mach-s3c2416/setup-sdhci.c        |   24 ----
- arch/arm/mach-s3c64xx/Makefile             |    1 -
- arch/arm/mach-s3c64xx/clock.c              |  138 ++++++++++++++--------
- arch/arm/mach-s3c64xx/setup-sdhci.c        |   24 ----
- arch/arm/mach-s5pc100/Makefile             |    1 -
- arch/arm/mach-s5pc100/clock.c              |  141 ++++++++++++++--------
- arch/arm/mach-s5pc100/setup-sdhci.c        |   23 ----
- arch/arm/mach-s5pv210/Makefile             |    1 -
- arch/arm/mach-s5pv210/clock.c              |  177 ++++++++++++++++++----------
- arch/arm/mach-s5pv210/setup-sdhci.c        |   22 ----
- arch/arm/plat-samsung/include/plat/sdhci.h |   31 -----
- drivers/mmc/host/sdhci-s3c.c               |    6 +-
- 17 files changed, 393 insertions(+), 387 deletions(-)
- delete mode 100644 arch/arm/mach-exynos4/setup-sdhci.c
- delete mode 100644 arch/arm/mach-s3c2416/setup-sdhci.c
- delete mode 100644 arch/arm/mach-s3c64xx/setup-sdhci.c
- delete mode 100644 arch/arm/mach-s5pc100/setup-sdhci.c
- delete mode 100644 arch/arm/mach-s5pv210/setup-sdhci.c
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index b29e734..871cf4f 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -477,14 +477,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 
+ 	for (clks = 0, ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+ 		struct clk *clk;
+-		char *name = pdata->clocks[ptr];
++		char name[14];
+ 
+-		if (name == NULL)
+-			continue;
++		sprintf(name, "mmc_busclk.%d", ptr);
+ 
+ 		clk = clk_get(dev, name);
+ 		if (IS_ERR(clk)) {
+-			dev_err(dev, "failed to get clock %s\n", name);
+ 			continue;
+ 		}
+ 
+-- 
+1.6.6.rc2
