@@ -1,139 +1,60 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v4] mmc: core: Add default timeout value for CMD6.
-Date: Wed, 05 Oct 2011 18:25:47 +0900
-Message-ID: <000f01cc8340$c3df5200$4b9df600$%jun@samsung.com>
-References: <1316657541-9221-1-git-send-email-tgih.jun@samsung.com>
- <4E8B05E8.2030206@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH 1/3] mmc: sdhci-s3c: Keep a copy of platform data and use it
+Date: Wed, 05 Oct 2011 15:42:59 +0530
+Message-ID: <1317809581-28783-2-git-send-email-thomas.abraham@linaro.org>
+References: <1317809581-28783-1-git-send-email-thomas.abraham@linaro.org>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <4E8B05E8.2030206@intel.com>
-Content-language: ko
+In-reply-to: <1317809581-28783-1-git-send-email-thomas.abraham@linaro.org>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Adrian Hunter' <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
+To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
 
-Adrian Hunter wrote:
-> On 22/09/11 05:12, Seungwon Jeon wrote:
-> > EXT_CSD[248] includes the default maximum timeout for CMD6.
-> > This field is added at eMMC4.5 Spec. And it can be used for default
-> > timeout except for some operations which don't define the timeout(i.e.
-> > background operation, sanitize, flush cache) in eMMC4.5 Spec.
-> >
-> > Signed-off-by: Seungwon Jeon<tgih.jun@samsung.com>
-> 
-> What about the mmc_switch() in mmc_select_powerclass()?
-During submission with revision, mmc_select_powerclass() is not considered.
-I'll apply it.
-Thank you for catch.
+The platform data is copied into driver's private data and the copy is
+used for all access to the platform data. This simpifies the addition
+of device tree support for the sdhci-s3c driver.
 
-> 
-> > ---
-> >   drivers/mmc/core/mmc.c   |   16 ++++++++++++----
-> >   include/linux/mmc/card.h |    1 +
-> >   include/linux/mmc/mmc.h  |    1 +
-> >   3 files changed, 14 insertions(+), 4 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> > index 5700b1c..b2ee14a 100644
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -410,6 +410,12 @@ static int mmc_read_ext_csd(struct mmc_card *card,
-> u8 *ext_csd)
-> >   	else
-> >   		card->erased_byte = 0x0;
-> >
-> > +	if (card->ext_csd.rev>= 6)
-> > +		card->ext_csd.generic_cmd6_time = 10 *
-> > +			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
-> > +	else
-> > +		card->ext_csd.generic_cmd6_time = 0;
-> > +
-> >   out:
-> >   	return err;
-> >   }
-> > @@ -668,7 +674,8 @@ static int mmc_init_card(struct mmc_host *host, u32
-> ocr,
-> >   	 */
-> >   	if (card->ext_csd.enhanced_area_en) {
-> >   		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> > -				 EXT_CSD_ERASE_GROUP_DEF, 1, 0);
-> > +				 EXT_CSD_ERASE_GROUP_DEF, 1,
-> > +				 card->ext_csd.generic_cmd6_time);
-> >
-> >   		if (err&&  err != -EBADMSG)
-> >   			goto free_card;
-> > @@ -711,7 +718,8 @@ static int mmc_init_card(struct mmc_host *host, u32
-> ocr,
-> >   	if ((card->ext_csd.hs_max_dtr != 0)&&
-> >   		(host->caps&  MMC_CAP_MMC_HIGHSPEED)) {
-> >   		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> > -				 EXT_CSD_HS_TIMING, 1, 0);
-> > +				 EXT_CSD_HS_TIMING, 1,
-> > +				 card->ext_csd.generic_cmd6_time);
-> >   		if (err&&  err != -EBADMSG)
-> >   			goto free_card;
-> >
-> > @@ -783,7 +791,7 @@ static int mmc_init_card(struct mmc_host *host, u32
-> ocr,
-> >   			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> >   					 EXT_CSD_BUS_WIDTH,
-> >   					 ext_csd_bits[idx][0],
-> > -					 0);
-> > +					 card->ext_csd.generic_cmd6_time);
-> >   			if (!err) {
-> >   				mmc_set_bus_width(card->host, bus_width);
-> >
-> > @@ -806,7 +814,7 @@ static int mmc_init_card(struct mmc_host *host, u32
-> ocr,
-> >   			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> >   					 EXT_CSD_BUS_WIDTH,
-> >   					 ext_csd_bits[idx][1],
-> > -					 0);
-> > +					 card->ext_csd.generic_cmd6_time);
-> >   		}
-> >   		if (err) {
-> >   			printk(KERN_WARNING "%s: switch to bus width %d ddr %d
-> "
-> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> > index b460fc2..b713abf 100644
-> > --- a/include/linux/mmc/card.h
-> > +++ b/include/linux/mmc/card.h
-> > @@ -52,6 +52,7 @@ struct mmc_ext_csd {
-> >   	u8			part_config;
-> >   	unsigned int		part_time;		/* Units: ms */
-> >   	unsigned int		sa_timeout;		/* Units: 100ns */
-> > +	unsigned int		generic_cmd6_time;	/* Units: 10ms */
-> 
-> 
-> Units are "ms" not "10ms" because you multiply by 10 in mmc_read_ext_csd
-The above comment is aimed to highlight 10ms is mentioned in spec.
-Yes, Units of generic_cmd6_time is "ms".
-Depending on point of view, the meaning can be construed differently.
-I will apply it.
+Cc: Ben Dooks <ben-linux@fluff.org>
+Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+---
+ drivers/mmc/host/sdhci-s3c.c |   11 +++++++++--
+ 1 files changed, 9 insertions(+), 2 deletions(-)
 
-> 
-> >   	unsigned int		hs_max_dtr;
-> >   	unsigned int		sectors;
-> >   	unsigned int		card_type;
-> > diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> > index 5a794cb..e869f00 100644
-> > --- a/include/linux/mmc/mmc.h
-> > +++ b/include/linux/mmc/mmc.h
-> > @@ -293,6 +293,7 @@ struct _mmc_csd {
-> >   #define EXT_CSD_SEC_ERASE_MULT		230	/* RO */
-> >   #define EXT_CSD_SEC_FEATURE_SUPPORT	231	/* RO */
-> >   #define EXT_CSD_TRIM_MULT		232	/* RO */
-> > +#define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
-> >
-> >   /*
-> >    * EXT_CSD field definitions
-> > --
-> > 1.7.0.4
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 871cf4f..8280af0 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -424,7 +424,7 @@ static inline struct sdhci_s3c_drv_data *sdhci_s3c_get_driver_data(
+ 
+ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ {
+-	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
++	struct s3c_sdhci_platdata *pdata;
+ 	struct sdhci_s3c_drv_data *drv_data;
+ 	struct device *dev = &pdev->dev;
+ 	struct sdhci_host *host;
+@@ -432,7 +432,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	struct resource *res;
+ 	int ret, irq, ptr, clks;
+ 
+-	if (!pdata) {
++	if (!pdev->dev.platform_data) {
+ 		dev_err(dev, "no device data specified\n");
+ 		return -ENOENT;
+ 	}
+@@ -455,6 +455,13 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 		return PTR_ERR(host);
+ 	}
+ 
++	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
++	if (!pdata) {
++		ret = -ENOMEM;
++		goto err_io_clk;
++	}
++	memcpy(pdata, pdev->dev.platform_data, sizeof(*pdata));
++
+ 	drv_data = sdhci_s3c_get_driver_data(pdev);
+ 	sc = sdhci_priv(host);
+ 
+-- 
+1.6.6.rc2
