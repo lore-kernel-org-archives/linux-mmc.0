@@ -1,366 +1,255 @@
-From: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 3/3] mmc: sdhci-s3c: Add device tree support
-Date: Wed, 05 Oct 2011 15:43:01 +0530
-Message-ID: <1317809581-28783-4-git-send-email-thomas.abraham@linaro.org>
-References: <1317809581-28783-1-git-send-email-thomas.abraham@linaro.org>
+From: NamJae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH v10] mmc : general purpose partition support.
+Date: Wed, 5 Oct 2011 19:21:19 +0900
+Message-ID: <CAKYAXd-9+_1TBniszQir+krF1fRqzBMiAAX9PgzaW+odps0EDg@mail.gmail.com>
+References: <1317750317-4489-1-git-send-email-linkinjeon@gmail.com>
+	<4E8C1F98.9070909@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-reply-to: <1317809581-28783-1-git-send-email-thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
-	<mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Cc: linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:61015 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934188Ab1JEKVV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2011 06:21:21 -0400
+In-Reply-To: <4E8C1F98.9070909@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, awarkentin@vmware.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com
 
-Add device tree based discovery support for Samsung's sdhci controller
-
-Cc: Ben Dooks <ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org>
-Signed-off-by: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- .../devicetree/bindings/mmc/samsung-sdhci.txt      |   75 ++++++++++
- drivers/mmc/host/sdhci-s3c.c                       |  150 +++++++++++++++++++-
- 2 files changed, 219 insertions(+), 6 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-
-diff --git a/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt b/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-new file mode 100644
-index 0000000..dc94d24
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-@@ -0,0 +1,75 @@
-+* Samsung's SDHCI Controller device tree bindings
-+
-+Samsung's SDHCI controller is used as a connectivity interface with external
-+MMC, SD and eMMC storage mediums.
-+
-+Required SoC Specific Properties:
-+- compatible: should be one of the following
-+  - "samsung,s3c6410-sdhci": For controllers compatible with s3c6410 sdhci
-+    controller.
-+  - "samsung,exynos4-sdhci": For controller compatible with Exynos4 sdhci
-+    controller.
-+
-+- reg: physical base address of the controller and length of memory mapped
-+  region.
-+
-+- interrupts: The interrupt number to the cpu. The interrupt specifier format
-+  depends on the interrupt controller.
-+
-+
-+Required Board Specific Properties:
-+- gpios: Should specify the gpios used for clock, command and data lines. The
-+  gpio specifier format depends on the gpio controller. Note: There is no
-+  particular order in which the gpio's have to be listed.
-+
-+
-+Optional Board Specific Properties:
-+- samsung,sdhci-bus-width: Number of data lines connected to the controller.
-+  Note: This excludes the clock,command and card detect lines. If this property
-+  is not specified, default value is 1.
-+
-+- samsung,cd-gpio-invert: If 'samsung,sdhci-cd-gpio' card detect method is
-+  selected, this property can be optionally specified to invert the value of
-+  external card detect gpio line.
-+
-+- One of the following properties for card detect type.
-+  - samsung,sdhci-cd-internal: Card detect line from the card slot  is
-+    connected to the card detect pad of the sdhci controller. A gpio is
-+    used for this connection (with possible pin function settings).
-+  - samsung,sdhci-cd-gpio: A gpio line (with possible pin function settings)
-+    is used a card detect line. This gpio line is not connected to card detect
-+    pad of the sdhci controller.
-+  - samsung,sdhci-cd-none: There is no card detect line. Polling is used to
-+    detect the presence of the card. (DEFAULT, if no card detect property
-+    is specified).
-+  - samsung,sdhci-cd-permanent: There is no card detect line. The card is
-+    permanently connected to the sdhci controller.
-+
-+- gpio-cd: The gpio to be used as card detect line for
-+  'samsung,sdhci-cd-internal' or 'samsung,sdhci-cd-gpio' card detection method.
-+  The gpio specifier format depends on the gpio controller.
-+
-+- One or more of the linux specific mmc host bindings.
-+  See Documentation/devicetree/bindings/mmc/linux-mmc-host.txt for all the
-+  linux mmc host controller specific bindings.
-+
-+Example:
-+	sdhci@12530000 {
-+		compatible = "samsung,exynos4-sdhci";
-+		reg = <0x12530000 0x100>;
-+		interrupts = <139>;
-+		samsung,sdhci-bus-width = <4>;
-+		linux,mmc_cap_4_bit_data;
-+		samsung,sdhci-cd-internal;
-+		gpio-cd = <&gpk2 2 2 3 3>;
-+		gpios = <&gpk2 0 2 0 3>,  /* clock line */
-+			<&gpk2 1 2 0 3>,  /* command line */
-+			<&gpk2 3 2 3 3>,  /* data line 0 */
-+			<&gpk2 4 2 3 3>,  /* data line 1 */
-+			<&gpk2 5 2 3 3>,  /* data line 2 */
-+			<&gpk2 6 2 3 3>;  /* data line 3 */
-+	};
-+
-+	Note: This example shows both SoC specific and board specific properties
-+	in a single device node. The properties can be actually be seperated
-+	into SoC specific node and board specific node.
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 8280af0..047c404 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -20,6 +20,8 @@
- #include <linux/io.h>
- #include <linux/gpio.h>
- #include <linux/module.h>
-+#include <linux/of.h>
-+#include <linux/of_gpio.h>
- 
- #include <linux/mmc/host.h>
- 
-@@ -29,6 +31,8 @@
- #include "sdhci.h"
- 
- #define MAX_BUS_CLK	(4)
-+/* Number of gpio's used is max data bus width + command and clock lines */
-+#define NUM_GPIOS(x)	(x + 2)
- 
- /**
-  * struct sdhci_s3c - S3C SDHCI instance
-@@ -48,6 +52,7 @@ struct sdhci_s3c {
- 	unsigned int		cur_clk;
- 	int			ext_cd_irq;
- 	int			ext_cd_gpio;
-+	int			*gpios;
- 
- 	struct clk		*clk_io;
- 	struct clk		*clk_bus[MAX_BUS_CLK];
-@@ -415,9 +420,110 @@ static void sdhci_s3c_setup_card_detect_gpio(struct sdhci_s3c *sc)
- 	}
- }
- 
-+#ifdef CONFIG_OF
-+static int __devinit sdhci_s3c_parse_dt(struct device *dev,
-+		struct sdhci_host *host, struct s3c_sdhci_platdata *pdata)
-+{
-+	struct device_node *node = dev->of_node;
-+	struct sdhci_s3c *ourhost = to_s3c(host);
-+	u32 max_width;
-+	int gpio, cnt, ret;
-+
-+	/* if the bus-width property is not specified, assume width as 1 */
-+	if (of_property_read_u32(node, "samsung,sdhci-bus-width",
-+				&max_width))
-+		max_width = 1;
-+	pdata->max_width = max_width;
-+
-+	ourhost->gpios = devm_kzalloc(dev, NUM_GPIOS(pdata->max_width) *
-+				sizeof(int), GFP_KERNEL);
-+	if (!ourhost->gpios)
-+		return -ENOMEM;
-+
-+	mmc_of_parse_host_caps(node, (unsigned long *)&pdata->host_caps);
-+
-+	/* get the card detection method */
-+	if (of_get_property(node, "samsung,sdhci-cd-internal", NULL))
-+		pdata->cd_type = S3C_SDHCI_CD_INTERNAL;
-+	else if (of_get_property(node, "samsung,sdhci-cd-gpio", NULL))
-+		pdata->cd_type = S3C_SDHCI_CD_GPIO;
-+	else if (of_get_property(node, "samsung,sdhci-cd-none", NULL))
-+		pdata->cd_type = S3C_SDHCI_CD_NONE;
-+	else if (of_get_property(node, "samsung,sdhci-cd-permanent", NULL))
-+		pdata->cd_type = S3C_SDHCI_CD_PERMANENT;
-+	else
-+		pdata->cd_type = S3C_SDHCI_CD_NONE;
-+
-+	/* get the gpio used for card detection */
-+	if (pdata->cd_type == S3C_SDHCI_CD_GPIO || S3C_SDHCI_CD_INTERNAL) {
-+		gpio = of_get_named_gpio(node, "gpio-cd", 0);
-+		if (!gpio_is_valid(gpio)) {
-+			dev_err(dev, "invalid card detect gpio specified\n");
-+			return -EINVAL;
-+		}
-+	}
-+
-+	if (pdata->cd_type == S3C_SDHCI_CD_GPIO) {
-+		pdata->ext_cd_gpio = gpio;
-+		ourhost->ext_cd_gpio = -1; /* invalid gpio number */
-+		if (of_get_property(node, "samsung,cd-gpio-invert", NULL))
-+			pdata->ext_cd_gpio_invert = 1;
-+	} else if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL) {
-+		ret = gpio_request(gpio, "sdhci-cd");
-+		if (ret) {
-+			dev_err(dev, "card detect gpio request failed\n");
-+			return -EINVAL;
-+		}
-+		ourhost->ext_cd_gpio = gpio;
-+	}
-+
-+	/* get the gpios for command, clock and data lines */
-+	for (cnt = 0; cnt < NUM_GPIOS(pdata->max_width); cnt++) {
-+		gpio = of_get_gpio(node, cnt);
-+		if (!gpio_is_valid(gpio)) {
-+			dev_err(dev, "invalid gpio[%d]\n", cnt);
-+			goto err_free_dt_cd_gpio;
-+		}
-+		ourhost->gpios[cnt] = gpio;
-+	}
-+
-+	for (cnt = 0; cnt < NUM_GPIOS(pdata->max_width); cnt++) {
-+		ret = gpio_request(ourhost->gpios[cnt], "sdhci-gpio");
-+		if (ret) {
-+			dev_err(dev, "gpio[%d] request failed\n", cnt);
-+			goto err_free_dt_gpios;
-+		}
-+	}
-+
-+	return 0;
-+
-+ err_free_dt_gpios:
-+	while (--cnt >= 0)
-+		gpio_free(ourhost->gpios[cnt]);
-+ err_free_dt_cd_gpio:
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL)
-+		gpio_free(ourhost->ext_cd_gpio);
-+	return -EINVAL;
-+}
-+#else
-+static int __devinit sdhci_s3c_parse_dt(struct device *dev,
-+		struct sdhci_host *host, struct s3c_sdhci_platdata *pdata)
-+{
-+}
-+#endif
-+
-+static const struct of_device_id sdhci_s3c_dt_match[];
-+
- static inline struct sdhci_s3c_drv_data *sdhci_s3c_get_driver_data(
- 			struct platform_device *pdev)
- {
-+#if CONFIG_OF
-+	if (pdev->dev.of_node) {
-+		const struct of_device_id *match;
-+		match = of_match_node(sdhci_s3c_dt_match, pdev->dev.of_node);
-+		return (struct sdhci_s3c_drv_data *)match->data;
-+	}
-+#endif
- 	return (struct sdhci_s3c_drv_data *)
- 			platform_get_device_id(pdev)->driver_data;
- }
-@@ -432,7 +538,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	struct resource *res;
- 	int ret, irq, ptr, clks;
- 
--	if (!pdev->dev.platform_data) {
-+	if (!pdev->dev.platform_data && !pdev->dev.of_node) {
- 		dev_err(dev, "no device data specified\n");
- 		return -ENOENT;
- 	}
-@@ -454,21 +560,28 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		dev_err(dev, "sdhci_alloc_host() failed\n");
- 		return PTR_ERR(host);
- 	}
-+	sc = sdhci_priv(host);
- 
- 	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
- 	if (!pdata) {
- 		ret = -ENOMEM;
--		goto err_io_clk;
-+		goto err_pdata;
-+	}
-+
-+	if (pdev->dev.of_node) {
-+		ret = sdhci_s3c_parse_dt(&pdev->dev, host, pdata);
-+		if (ret)
-+			goto err_pdata;
-+	} else {
-+		memcpy(pdata, pdev->dev.platform_data, sizeof(*pdata));
-+		sc->ext_cd_gpio = -1; /* invalid gpio number */
- 	}
--	memcpy(pdata, pdev->dev.platform_data, sizeof(*pdata));
- 
- 	drv_data = sdhci_s3c_get_driver_data(pdev);
--	sc = sdhci_priv(host);
- 
- 	sc->host = host;
- 	sc->pdev = pdev;
- 	sc->pdata = pdata;
--	sc->ext_cd_gpio = -1; /* invalid gpio number */
- 
- 	platform_set_drvdata(pdev, host);
- 
-@@ -625,6 +738,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	clk_put(sc->clk_io);
- 
-  err_io_clk:
-+	for (ptr = 0; ptr < NUM_GPIOS(sc->pdata->max_width); ptr++)
-+		gpio_free(sc->gpios[ptr]);
-+	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL)
-+		gpio_free(sc->ext_cd_gpio);
-+
-+ err_pdata:
- 	sdhci_free_host(host);
- 
- 	return ret;
-@@ -632,9 +751,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 
- static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
- {
--	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
- 	struct sdhci_host *host =  platform_get_drvdata(pdev);
- 	struct sdhci_s3c *sc = sdhci_priv(host);
-+	struct s3c_sdhci_platdata *pdata = sc->pdata;
- 	int ptr;
- 
- 	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
-@@ -661,6 +780,11 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
- 	release_resource(sc->ioarea);
- 	kfree(sc->ioarea);
- 
-+	if (pdev->dev.of_node) {
-+		for (ptr = 0; ptr < NUM_GPIOS(sc->pdata->max_width); ptr++)
-+			gpio_free(sc->gpios[ptr]);
-+	}
-+
- 	sdhci_free_host(host);
- 	platform_set_drvdata(pdev, NULL);
- 
-@@ -706,9 +830,22 @@ static struct platform_device_id sdhci_s3c_driver_ids[] = {
- 		.name		= "exynos4-sdhci",
- 		.driver_data	= EXYNOS4_SDHCI_DRV_DATA,
- 	},
-+	{},
- };
- MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
- 
-+#ifdef CONFIG_OF
-+static const struct of_device_id sdhci_s3c_dt_match[] = {
-+	{ .compatible = "samsung,s3c6410-sdhci", },
-+	{ .compatible = "samsung,exynos4-sdhci",
-+		.data = &exynos4_sdhci_drv_data },
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
-+#else
-+#define sdhci_s3c_dt_match NULL
-+#endif
-+
- static struct platform_driver sdhci_s3c_driver = {
- 	.probe		= sdhci_s3c_probe,
- 	.remove		= __devexit_p(sdhci_s3c_remove),
-@@ -718,6 +855,7 @@ static struct platform_driver sdhci_s3c_driver = {
- 	.driver		= {
- 		.owner	= THIS_MODULE,
- 		.name	= "s3c-sdhci",
-+		.of_match_table = sdhci_s3c_dt_match,
- 	},
- };
- 
--- 
-1.6.6.rc2
+MjAxMS8xMC81IEFkcmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjoKPiBPbiAw
+NC8xMC8xMSAyMDo0NSwgTmFtamFlIEplb24gd3JvdGU6Cj4+Cj4+IEl0IGFsbG93cyBnZXJuZXJh
+bCBwdXJwb3NlIHBhcnRpdGlvbnMgaW4gTU1DIERldmljZS4KPj4gQW5kIEkgdHJ5IHRvIHNpbXBs
+aXkgbWFrZSBtbWNfYmxrX2FsbG9jX3BhcnRzIHVzaW5nIG1tY19wYXJ0IHN0cnVjdHVyZQo+PiBz
+dWdnZXN0ZWQgYnkgQW5kcmVpIFdhcmtlbnRpbi4KPj4gQWZ0ZXIgcGF0Y2hpbmcsIHdlIGNhbiBz
+ZWUgZ2VuZXJhbCBwdXJwb3NlIHBhcnRpdGlvbnMgbGlrZSB0aGlzLgo+Pj4KPj4+IGNhdCAvcHJv
+Yy9wYXJ0aXRpb25zCj4+Cj4+IMKgIMKgIMKgIMKgIMKgIDE3OSAwIDg0Nzg3MiBtbWNibGswCj4+
+IMKgIMKgIMKgIMKgIMKgIDE3OSAxOTIgNDA5NiBtbWNibGswZ3AzCj4+IMKgIMKgIMKgIMKgIMKg
+IDE3OSAxNjAgNDA5NiBtbWNibGswZ3AyCj4+IMKgIMKgIMKgIMKgIMKgIDE3OSAxMjggNDA5NiBt
+bWNibGswZ3AxCj4+IMKgIMKgIMKgIMKgIMKgIDE3OSA5NiDCoDEwNTI2NzIgbW1jYmxrMGdwMAo+
+PiDCoCDCoCDCoCDCoCDCoCAxNzkgNjQgwqAxMDI0IG1tY2JsazBib290MQo+PiDCoCDCoCDCoCDC
+oCDCoCAxNzkgMzIgwqAxMDI0IG1tY2JsazBib290MAo+Pgo+PiBTaWduZWQtb2ZmLWJ5OiBOYW1q
+YWUgSmVvbjxsaW5raW5qZW9uQGdtYWlsLmNvbT4KPj4gLS0tCj4+IMKgZHJpdmVycy9tbWMvY2Fy
+ZC9ibG9jay5jIHwgwqAgMzQgKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0KPj4gwqBkcml2
+ZXJzL21tYy9jb3JlL21tYy5jIMKgIHwgwqAgNTIKPj4gKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrLS0tCj4+IMKgaW5jbHVkZS9saW51eC9tbWMvY2FyZC5oIHwgwqAg
+MzQgKysrKysrKysrKysrKysrKysrKysrKysrKysrKystCj4+IMKgaW5jbHVkZS9saW51eC9tbWMv
+bW1jLmggwqB8IMKgIMKgNSArKystCj4+IMKgNCBmaWxlcyBjaGFuZ2VkLCAxMDUgaW5zZXJ0aW9u
+cygrKSwgMjAgZGVsZXRpb25zKC0pCj4+Cj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jYXJk
+L2Jsb2NrLmMgYi9kcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMKPj4gaW5kZXggNzgyZDVmOC4uZmI2
+ZjFlOSAxMDA2NDQKPj4gLS0tIGEvZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jCj4+ICsrKyBiL2Ry
+aXZlcnMvbW1jL2NhcmQvYmxvY2suYwo+PiBAQCAtMTQ3MCwyNiArMTQ3MCwzMiBAQCBzdGF0aWMg
+aW50IG1tY19ibGtfYWxsb2NfcGFydChzdHJ1Y3QgbW1jX2NhcmQKPj4gKmNhcmQsCj4+IMKgIMKg
+IMKgIMKgcmV0dXJuIDA7Cj4+IMKgfQo+Pgo+PiArLyogTU1DIFBoeXNpY2FsIHBhcnRpdGlvbiBj
+b25zaXN0IG9mIHR3byBib290IHBhcnRpdGlvbnMgYW5kCj4+ICsgKiB1cCB0byBmb3VyIGdlbmVy
+YWwgcHVycG9zZSBwYXJ0aXRpb25zLgo+PiArICogRm9yIGVhY2ggcGFydGl0aW9ucyBlbmFibGVk
+IGluIEVYVF9DU0QKPj4gKyAqIFRoZSBibG9jayBkZXZpY2Ugd2lsbCBhbGxvY2F0ZWQgdG8gcHJv
+dmlkZSBhY2Nlc3MgdG8gdGhlIHBhcnRpdGlvbi4KPj4gKyAqLwo+PiArCj4+IMKgc3RhdGljIGlu
+dCBtbWNfYmxrX2FsbG9jX3BhcnRzKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwgc3RydWN0IG1tY19i
+bGtfZGF0YQo+PiAqbWQpCj4+IMKgewo+PiAtIMKgIMKgIMKgIGludCByZXQgPSAwOwo+PiArIMKg
+IMKgIMKgIGludCBpZHgsIHJldCA9IDA7Cj4+Cj4+IMKgIMKgIMKgIMKgaWYgKCFtbWNfY2FyZF9t
+bWMoY2FyZCkpCj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgcmV0dXJuIDA7Cj4+Cj4+IC0gwqAg
+wqAgwqAgaWYgKGNhcmQtPmV4dF9jc2QuYm9vdF9zaXplJiYKPj4gwqBtbWNfYm9vdF9wYXJ0aXRp
+b25fYWNjZXNzKGNhcmQtPmhvc3QpKSB7Cj4+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgcmV0ID0g
+bW1jX2Jsa19hbGxvY19wYXJ0KGNhcmQsIG1kLAo+PiBFWFRfQ1NEX1BBUlRfQ09ORklHX0FDQ19C
+T09UMCwKPj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoGNhcmQtPmV4dF9jc2QuYm9vdF9zaXplPj4gwqA5LAo+PiAtIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgdHJ1ZSwK
+Pj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCJib290MCIpOwo+PiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChyZXQpCj4+IC0g
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcmV0dXJuIHJldDsKPj4gLSDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCByZXQgPSBtbWNfYmxrX2FsbG9jX3BhcnQoY2FyZCwgbWQsCj4+IEVYVF9D
+U0RfUEFSVF9DT05GSUdfQUNDX0JPT1QxLAo+PiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgY2FyZC0+ZXh0X2NzZC5ib290X3NpemU+
+PiDCoDksCj4+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqB0cnVlLAo+PiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgImJvb3QxIik7Cj4+IC0gwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgaWYgKHJldCkKPj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCByZXR1
+cm4gcmV0Owo+PiArIMKgIMKgIMKgIGZvciAoaWR4ID0gMDsgaWR4PCDCoGNhcmQtPm5yX3BhcnRz
+OyBpZHgrKykgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlmICgoaWR4ID09IDAgfHwgaWR4
+ID09IDEpJiYKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAhbW1jX2Jvb3Rf
+cGFydGl0aW9uX2FjY2VzcyhjYXJkLT5ob3N0KSkKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCBjb250aW51ZTsKPgo+IFNlZW1zIGEgYml0IGZyYWdpbGUuIMKgV2hhdCBpZiBz
+b21lb25lIGRlY2lkZWQgdG8gcHV0IHRoZSBncAo+IHBhcnRpdGlvbnMgYmVmb3JlIHRoZSBib290
+IHBhcnRpdGlvbnMuIMKgV2hhdCBhYm91dDoKVGhlcmUgYXJlIHRoZSBkZWZhdWx0IHR3byBib290
+IHBhcnRpdGlvbiBpbiBtbWMgc3BlYy4gSSB0aGluayB0aGF0CnRoaXMgY2FzZSBjYW4gbm90IGJl
+IGhhcHBlbmVkLgpBbmQgYm9vdCBwYXJ0aXRpb24gc2l6ZSBvZiBFWFQgQ1NEIGlzIHJlYWQtb25s
+eS4KQ2FuIHlvdSBleHBsYWluIHdoaWNoIGlzIGNhc2UgcHV0IHRvIGdwIHBhcnRpdGlvbnMgYmVm
+b3JlIHRoZSBib290IHBhcnRpdGlvbiA/Cgo+Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBpZiAo
+bW1jX2lzX2Jvb3RfcGFydGl0aW9uKCZwYXJ0W2lkeF0pICYmCj4gwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAhbW1jX2Jvb3RfcGFydGl0aW9uX2FjY2VzcyhjYXJkLT5ob3N0KQo+IMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgY29udGludWU7Cj4KPiBBbmQ6Cj4KPiBpbnQg
+bW1jX2lzX2Jvb3RfcGFydGl0aW9uKHN0cnVjdCBtbWNfcGFydCAqcGFydCkKPiB7Cj4gwqAgwqAg
+wqAgwqByZXR1cm4gcGFydC0+cGFydF9jZmcgPj0gRVhUX0NTRF9QQVJUX0NPTkZJR19BQ0NfQk9P
+VDAgJiYKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCBwYXJ0LT5wYXJ0X2NmZyA8PSBFWFRfQ1NEX1BB
+UlRfQ09ORklHX0FDQ19CT09UMCArCj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgTU1DX05VTV9CT09UX1BBUlRJVElPTjsKPiB9Cj4KPj4gKyDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCBpZiAoY2FyZC0+cGFydFtpZHhdLnNpemUpIHsKPj4gKyDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCByZXQgPSBtbWNfYmxrX2FsbG9jX3BhcnQoY2FyZCwgbWQs
+Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgY2FyZC0+
+cGFydFtpZHhdLnBhcnRfY2ZnLAo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIGNhcmQtPnBhcnRbaWR4XS5zaXplPj4gwqA5LAo+PiArIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPnBhcnRbaWR4XS5mb3JjZV9y
+bywKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJk
+LT5wYXJ0W2lkeF0ubmFtZSk7Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+aWYgKHJldCkKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCByZXR1cm4gcmV0Owo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIH0KPj4gwqAgwqAgwqAgwqB9
+Cj4+Cj4+IMKgIMKgIMKgIMKgcmV0dXJuIHJldDsKPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1j
+L2NvcmUvbW1jLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jCj4+IGluZGV4IGM2MzJiMWYuLjJm
+NDU4YTAgMTAwNjQ0Cj4+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKPj4gKysrIGIvZHJp
+dmVycy9tbWMvY29yZS9tbWMuYwo+PiBAQCAtMjM5LDcgKzIzOSw5IEBAIHN0YXRpYyBpbnQgbW1j
+X2dldF9leHRfY3NkKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwgdTgKPj4gKipuZXdfZXh0X2NzZCkK
+Pj4gwqAgKi8KPj4gwqBzdGF0aWMgaW50IG1tY19yZWFkX2V4dF9jc2Qoc3RydWN0IG1tY19jYXJk
+ICpjYXJkLCB1OCAqZXh0X2NzZCkKPj4gwqB7Cj4+IC0gwqAgwqAgwqAgaW50IGVyciA9IDA7Cj4+
+ICsgwqAgwqAgwqAgaW50IGVyciA9IDAsIGlkeDsKPj4gKyDCoCDCoCDCoCB1bnNpZ25lZCBpbnQg
+cGFydF9zaXplOwo+PiArIMKgIMKgIMKgIHU4IGhjX2VyYXNlX2dycF9zeiA9IDAsIGhjX3dwX2dy
+cF9zeiA9IDA7Cj4+Cj4+IMKgIMKgIMKgIMKgQlVHX09OKCFjYXJkKTsKPj4KPj4gQEAgLTM0MCw3
+ICszNDIsMTQgQEAgc3RhdGljIGludCBtbWNfcmVhZF9leHRfY3NkKHN0cnVjdCBtbWNfY2FyZCAq
+Y2FyZCwgdTgKPj4gKmV4dF9jc2QpCj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgICogVGhlcmUg
+YXJlIHR3byBib290IHJlZ2lvbnMgb2YgZXF1YWwgc2l6ZSwgZGVmaW5lZCBpbgo+PiDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCAqIG11bHRpcGxlcyBvZiAxMjhLLgo+PiDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCAqLwo+PiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9jc2QuYm9vdF9z
+aXplID0gZXh0X2NzZFtFWFRfQ1NEX0JPT1RfTVVMVF08PAo+PiDCoDE3Owo+PiArIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIGlmIChleHRfY3NkW0VYVF9DU0RfQk9PVF9NVUxUXSkgewo+PiArIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGZvciAoaWR4ID0gMDsgaWR4PCDCoE1NQ19OVU1f
+Qk9PVF9QQVJUSVRJT047IGlkeCsrKQo+PiB7Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgcGFydF9zaXplID0gZXh0X2NzZFtFWFRfQ1NEX0JPT1RfTVVM
+VF08PAo+PiDCoDE3Owo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIG1tY19wYXJ0X2FkZChjYXJkLCBwYXJ0X3NpemUsCj4+ICsgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgRVhUX0NTRF9QQVJUX0NP
+TkZJR19BQ0NfQk9PVDAgKwo+PiBpZHgsCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgImJvb3QlZCIsIGlkeCwgdHJ1ZSk7Cj4+ICsg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgfQo+PiArIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIH0KPj4gwqAgwqAgwqAgwqB9Cj4+Cj4+IMKgIMKgIMKgIMKgY2FyZC0+ZXh0X2NzZC5yYXdf
+aGNfZXJhc2VfZ2FwX3NpemUgPQo+PiBAQCAtMzYyLDkgKzM3MSw5IEBAIHN0YXRpYyBpbnQgbW1j
+X3JlYWRfZXh0X2NzZChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsIHU4Cj4+ICpleHRfY3NkKQo+PiDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoGNhcmQtPmV4dF9jc2QucmF3X3BhcnRpdGlvbl9zdXBwb3J0
+ID0KPj4gZXh0X2NzZFtFWFRfQ1NEX1BBUlRJVElPTl9TVVBQT1JUXTsKPj4gwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqBpZiAoKGV4dF9jc2RbRVhUX0NTRF9QQVJUSVRJT05fU1VQUE9SVF0mIMKgMHgy
+KSYmCj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgKGV4dF9jc2RbRVhUX0NTRF9QQVJUSVRJT05f
+QVRUUklCVVRFXSYgwqAweDEpKSB7Cj4+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgdTggaGNfZXJhc2VfZ3JwX3N6ID0KPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCBoY19lcmFzZV9ncnBfc3ogPQo+PiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoGV4dF9jc2RbRVhUX0NTRF9IQ19FUkFTRV9HUlBfU0laRV07Cj4+IC0g
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgdTggaGNfd3BfZ3JwX3N6ID0KPj4gKyDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBoY193cF9ncnBfc3ogPQo+PiDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGV4dF9jc2RbRVhUX0NTRF9I
+Q19XUF9HUlBfU0laRV07Cj4+Cj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+Y2FyZC0+ZXh0X2NzZC5lbmhhbmNlZF9hcmVhX2VuID0gMTsKPj4gQEAgLTM5Myw2ICs0MDIsNDEg
+QEAgc3RhdGljIGludCBtbWNfcmVhZF9leHRfY3NkKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwgdTgK
+Pj4gKmV4dF9jc2QpCj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgY2FyZC0+
+ZXh0X2NzZC5lbmhhbmNlZF9hcmVhX29mZnNldCA9IC1FSU5WQUw7Cj4+IMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgY2FyZC0+ZXh0X2NzZC5lbmhhbmNlZF9hcmVhX3NpemUgPSAt
+RUlOVkFMOwo+PiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoH0KPj4gKwo+PiArIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIC8qCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAqIEdlbmVyYWwgcHVycG9z
+ZSBwYXJ0aXRpb24gZmVhdHVyZSBzdXBwb3J0IC0tCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAqIElmIGV4dF9jc2QgaGF2ZSB0aGUgc2l6ZSBvZiBnZW5lcmFsIHB1cnBvc2UgcGFydGl0aW9u
+cywKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCogc2V0IHNpemUsIHBhcnRfY2ZnLCBwYXJ0
+aXRpb24gbmFtZSBpbiBtbWNfcGFydC4KPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCovCj4+
+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgaWYgKGV4dF9jc2RbRVhUX0NTRF9QQVJUSVRJT05fU1VQ
+UE9SVF0mCj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgRVhUX0NTRF9QQVJU
+X1NVUFBPUlRfUEFSVF9FTikgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IGlmIChjYXJkLT5leHRfY3NkLmVuaGFuY2VkX2FyZWFfZW4gIT0gMSkgewo+PiArIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGhjX2VyYXNlX2dycF9zeiA9Cj4+
+ICsKPj4gZXh0X2NzZFtFWFRfQ1NEX0hDX0VSQVNFX0dSUF9TSVpFXTsKPj4gKyDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBoY193cF9ncnBfc3ogPQo+PiArIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGV4
+dF9jc2RbRVhUX0NTRF9IQ19XUF9HUlBfU0laRV07Cj4+ICsKPj4gKyDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5leHRfY3NkLmVuaGFuY2VkX2FyZWFf
+ZW4gPSAxOwo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIH0KPj4gKwo+PiAr
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGZvciAoaWR4ID0gMDsgaWR4PCDCoE1N
+Q19OVU1fR1BfUEFSVElUSU9OOyBpZHgrKykgewo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlmICghZXh0X2NzZFtFWFRfQ1NEX0dQX1NJWkVfTVVMVCAr
+IGlkeCAqCj4+IDNdJiYKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCAhZXh0X2NzZFtFWFRfQ1NEX0dQX1NJWkVfTVVMVCArIGlkeCAqIDMgKwo+PiAxXSYm
+Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgIWV4dF9j
+c2RbRVhUX0NTRF9HUF9TSVpFX01VTFQgKyBpZHggKiAzICsKPj4gMl0pCj4+ICsgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgY29udGludWU7
+Cj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcGFydF9z
+aXplID0KPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAo
+ZXh0X2NzZFtFWFRfQ1NEX0dQX1NJWkVfTVVMVCArIGlkeCAqIDMgKwo+PiAyXQo+PiArIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIDw8IMKg
+MTYpICsKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAo
+ZXh0X2NzZFtFWFRfQ1NEX0dQX1NJWkVfTVVMVCArIGlkeCAqIDMgKwo+PiAxXQo+PiArIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIDw8IMKg
+OCkgKwo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGV4
+dF9jc2RbRVhUX0NTRF9HUF9TSVpFX01VTFQgKyBpZHggKiAzXTsKPj4gKyDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBwYXJ0X3NpemUgKj0gKHNpemVfdCkoaGNf
+ZXJhc2VfZ3JwX3N6ICoKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCBoY193cF9ncnBfc3opOwo+PiArIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIG1tY19wYXJ0X2FkZChjYXJkLCBwYXJ0X3NpemU8
+PCDCoDE5LAo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX0dQMCArIGlkeCwKPj4gKyDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAiZ3Al
+ZCIsIGlkeCwgZmFsc2UpOwo+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIH0K
+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCB9Cj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgY2Fy
+ZC0+ZXh0X2NzZC5zZWNfdHJpbV9tdWx0ID0KPj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqBleHRfY3NkW0VYVF9DU0RfU0VDX1RSSU1fTVVMVF07Cj4+IMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgY2FyZC0+ZXh0X2NzZC5zZWNfZXJhc2VfbXVsdCA9Cj4+IGRpZmYgLS1naXQgYS9p
+bmNsdWRlL2xpbnV4L21tYy9jYXJkLmggYi9pbmNsdWRlL2xpbnV4L21tYy9jYXJkLmgKPj4gaW5k
+ZXggNTI5NGRkZi4uMDUyMjYyNyAxMDA2NDQKPj4gLS0tIGEvaW5jbHVkZS9saW51eC9tbWMvY2Fy
+ZC5oCj4+ICsrKyBiL2luY2x1ZGUvbGludXgvbW1jL2NhcmQuaAo+PiBAQCAtMTIsNiArMTIsNyBA
+QAo+Pgo+PiDCoCNpbmNsdWRlPGxpbnV4L21tYy9jb3JlLmg+Cj4+IMKgI2luY2x1ZGU8bGludXgv
+bW9kX2RldmljZXRhYmxlLmg+Cj4+ICsjaW5jbHVkZTxsaW51eC9nZW5oZC5oPgo+Pgo+PiDCoHN0
+cnVjdCBtbWNfY2lkIHsKPj4gwqAgwqAgwqAgwqB1bnNpZ25lZCBpbnQgwqAgwqAgwqAgwqAgwqAg
+wqBtYW5maWQ7Cj4+IEBAIC02NCw3ICs2NSw2IEBAIHN0cnVjdCBtbWNfZXh0X2NzZCB7Cj4+IMKg
+IMKgIMKgIMKgYm9vbCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGVuaGFuY2VkX2FyZWFf
+ZW47IMKgIMKgIMKgIC8qIGVuYWJsZSBiaXQgKi8KPj4gwqAgwqAgwqAgwqB1bnNpZ25lZCBsb25n
+IGxvbmcgwqAgwqAgwqBlbmhhbmNlZF9hcmVhX29mZnNldDsgwqAgLyogVW5pdHM6IEJ5dGUgKi8K
+Pj4gwqAgwqAgwqAgwqB1bnNpZ25lZCBpbnQgwqAgwqAgwqAgwqAgwqAgwqBlbmhhbmNlZF9hcmVh
+X3NpemU7IMKgIMKgIC8qIFVuaXRzOiBLQiAqLwo+PiAtIMKgIMKgIMKgIHVuc2lnbmVkIGludCDC
+oCDCoCDCoCDCoCDCoCDCoGJvb3Rfc2l6ZTsgwqAgwqAgwqAgwqAgwqAgwqAgwqAvKiBpbiBieXRl
+cyAqLwo+PiDCoCDCoCDCoCDCoHU4IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgcmF3
+X3BhcnRpdGlvbl9zdXBwb3J0OyDCoC8qIDE2MCAqLwo+PiDCoCDCoCDCoCDCoHU4IMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgcmF3X2VyYXNlZF9tZW1fY291bnQ7IMKgIC8qIDE4MSAq
+Lwo+PiDCoCDCoCDCoCDCoHU4IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgcmF3X2V4
+dF9jc2Rfc3RydWN0dXJlOyDCoC8qIDE5NCAqLwo+PiBAQCAtMTU4LDYgKzE1OCwyMyBAQCBzdHJ1
+Y3Qgc2Rpb19mdW5jX3R1cGxlOwo+Pgo+PiDCoCNkZWZpbmUgU0RJT19NQVhfRlVOQ1MgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqA3Cj4+Cj4+ICsvKiBUaGUgbnVtYmVyIG9mIE1NQyBwaHlzaWNhbCBw
+YXJ0aXRpb25zCj4+ICsgKiBJdCBjb25zaXN0IG9mIGJvb3QgcGFydGl0aW9ucygyKSwgZ2VuZXJh
+bCBwdXJwb3NlIHBhcnRpdGlvbnMoNCkgaW4gTU1DCj4+IHY0LjQKPj4gKyAqLwo+PiArI2RlZmlu
+ZSBNTUNfTlVNX0JPT1RfUEFSVElUSU9OIDIKPj4gKyNkZWZpbmUgTU1DX05VTV9HUF9QQVJUSVRJ
+T04gwqAgNAo+PiArI2RlZmluZSBNTUNfTlVNX1BIWV9QQVJUSVRJT04gwqA2Cj4+ICsKPj4gKy8q
+Cj4+ICsgKiBNTUMgUGh5c2ljYWwgcGFydGl0aW9ucwo+PiArICovCj4+ICtzdHJ1Y3QgbW1jX3Bh
+cnQgewo+PiArIMKgIMKgIMKgIHVuc2lnbmVkIGludCDCoCDCoHNpemU7IMKgIC8qIHBhcnRpdGlv
+biBzaXplIChpbiBieXRlcykgKi8KPj4gKyDCoCDCoCDCoCB1bnNpZ25lZCBpbnQgwqAgwqBwYXJ0
+X2NmZzsgwqAgwqAgwqAgLyogaXQgdXNlZCB0byBwYXJ0X3R5cGUgKi8KPj4gKyDCoCDCoCDCoCBj
+aGFyIMKgIMKgbmFtZVtESVNLX05BTUVfTEVOXTsKPj4gKyDCoCDCoCDCoCBib29sIMKgIMKgZm9y
+Y2Vfcm87IMKgIMKgIMKgIC8qIHRvIG1ha2UgYm9vdCBwYXJ0cyBSTyBieSBkZWZhdWx0ICovCj4+
+ICt9Owo+PiArCj4+IMKgLyoKPj4gwqAgKiBNTUMgZGV2aWNlCj4+IMKgICovCj4+IEBAIC0yMTks
+OSArMjM2LDI0IEBAIHN0cnVjdCBtbWNfY2FyZCB7Cj4+IMKgIMKgIMKgIMKgdW5zaWduZWQgaW50
+IMKgIMKgIMKgIMKgIMKgIMKgc2RfYnVzX3NwZWVkOyDCoCAvKiBCdXMgU3BlZWQgTW9kZSBzZXQg
+Zm9yCj4+IHRoZSBjYXJkICovCj4+Cj4+IMKgIMKgIMKgIMKgc3RydWN0IGRlbnRyeSDCoCDCoCDC
+oCDCoCDCoCAqZGVidWdmc19yb290Owo+PiArIMKgIMKgIMKgIHN0cnVjdCBtbWNfcGFydCBwYXJ0
+W01NQ19OVU1fUEhZX1BBUlRJVElPTl07IC8qIHBoeXNpY2FsCj4+IHBhcnRpdGlvbnMgKi8KPj4g
+KyDCoCDCoCDCoCB1bnNpZ25lZCBpbnQgwqAgwqBucl9wYXJ0czsKPj4gwqB9Owo+Pgo+PiDCoC8q
+Cj4+ICsgKiBUaGlzIGZ1bmN0aW9uIGZpbGwgY29udGVudHMgaW4gbW1jX3BhcnQuCj4+ICsgKi8K
+Pj4gK3N0YXRpYyBpbmxpbmUgdm9pZCBtbWNfcGFydF9hZGQoc3RydWN0IG1tY19jYXJkICpjYXJk
+LCB1bnNpZ25lZCBpbnQgc2l6ZSwKPj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCB1bnNpZ25lZCBpbnQgcGFydF9jZmcsIGNoYXIgKm5hbWUsIGludCBpZHgsIGJvb2wKPj4gcm8p
+Cj4+ICt7Cj4+ICsgwqAgwqAgwqAgY2FyZC0+cGFydFtjYXJkLT5ucl9wYXJ0c10uc2l6ZSA9IHNp
+emU7Cj4+ICsgwqAgwqAgwqAgY2FyZC0+cGFydFtjYXJkLT5ucl9wYXJ0c10ucGFydF9jZmcgPSBw
+YXJ0X2NmZzsKPj4gKyDCoCDCoCDCoCBzcHJpbnRmKGNhcmQtPnBhcnRbY2FyZC0+bnJfcGFydHNd
+Lm5hbWUsIG5hbWUsIGlkeCk7Cj4+ICsgwqAgwqAgwqAgY2FyZC0+cGFydFtjYXJkLT5ucl9wYXJ0
+c10uZm9yY2Vfcm8gPSBybzsKPj4gKyDCoCDCoCDCoCBjYXJkLT5ucl9wYXJ0cysrOwo+PiArfQo+
+PiArCj4+ICsvKgo+PiDCoCAqIMKgVGhlIHdvcmxkIGlzIG5vdCBwZXJmZWN0IGFuZCBzdXBwbGll
+cyB1cyB3aXRoIGJyb2tlbiBtbWMvc2Rpbwo+PiBkZXZpY2VzLgo+PiDCoCAqIMKgRm9yIGF0IGxl
+YXN0IHNvbWUgb2YgdGhlc2UgYnVncyB3ZSBuZWVkIGEgd29yay1hcm91bmQuCj4+IMKgICovCj4+
+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L21tYy9tbWMuaCBiL2luY2x1ZGUvbGludXgvbW1j
+L21tYy5oCj4+IGluZGV4IDUwYWYyMjcuLmVhNTU4ZWIgMTAwNjQ0Cj4+IC0tLSBhL2luY2x1ZGUv
+bGludXgvbW1jL21tYy5oCj4+ICsrKyBiL2luY2x1ZGUvbGludXgvbW1jL21tYy5oCj4+IEBAIC0y
+NzAsNiArMjcwLDcgQEAgc3RydWN0IF9tbWNfY3NkIHsKPj4gwqAgKiBFWFRfQ1NEIGZpZWxkcwo+
+PiDCoCAqLwo+Pgo+PiArI2RlZmluZSBFWFRfQ1NEX0dQX1NJWkVfTVVMVCDCoCDCoCDCoCDCoCDC
+oCAxNDMgwqAgwqAgLyogUi9XICovCj4+IMKgI2RlZmluZSBFWFRfQ1NEX1BBUlRJVElPTl9BVFRS
+SUJVVEUgwqAgMTU2IMKgIMKgIC8qIFIvVyAqLwo+PiDCoCNkZWZpbmUgRVhUX0NTRF9QQVJUSVRJ
+T05fU1VQUE9SVCDCoCDCoCAxNjAgwqAgwqAgLyogUk8gKi8KPj4gwqAjZGVmaW5lIEVYVF9DU0Rf
+UlNUX05fRlVOQ1RJT04gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAxNjIgwqAgwqAgLyogUi9XICov
+Cj4+IEBAIC0zMTMsNyArMzE0LDkgQEAgc3RydWN0IF9tbWNfY3NkIHsKPj4KPj4gwqAjZGVmaW5l
+IEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX01BU0sgwqAoMHg3KQo+PiDCoCNkZWZpbmUgRVhUX0NT
+RF9QQVJUX0NPTkZJR19BQ0NfQk9PVDAgKDB4MSkKPj4gLSNkZWZpbmUgRVhUX0NTRF9QQVJUX0NP
+TkZJR19BQ0NfQk9PVDEgwqAoMHgyKQo+PiArI2RlZmluZSBFWFRfQ1NEX1BBUlRfQ09ORklHX0FD
+Q19HUDAgwqAgwqAoMHg0KQo+PiArCj4+ICsjZGVmaW5lIEVYVF9DU0RfUEFSVF9TVVBQT1JUX1BB
+UlRfRU4gwqAgKDB4MSkKPj4KPj4gwqAjZGVmaW5lIEVYVF9DU0RfQ01EX1NFVF9OT1JNQUwgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAoMTw8MCkKPj4gwqAjZGVmaW5lIEVYVF9DU0RfQ01EX1NFVF9T
+RUNVUkUgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAoMTw8MSkKPgo+Cg==
