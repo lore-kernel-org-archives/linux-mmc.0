@@ -1,125 +1,237 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH v2] PM: HIBERNATION: add resume_wait param to support MMC-like devices as resume file
-Date: Wed, 5 Oct 2011 00:32:49 +0200
-Message-ID: <201110050032.49837.rjw@sisk.pl>
-References: <1317309357-3871-1-git-send-email-21cnbao@gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/1] [PATCH v4 1/1] mmc: Support of DUAL BUFFER DESC[ring]
+ mode for dw_mmc
+Date: Wed, 05 Oct 2011 11:14:14 +0900
+Message-ID: <4E8BBD76.9020001@samsung.com>
+References: <1317123568-5203-1-git-send-email-shashidharh@vayavyalabs.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-2"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:48059 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933180Ab1JDWab (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 4 Oct 2011 18:30:31 -0400
-In-Reply-To: <1317309357-3871-1-git-send-email-21cnbao@gmail.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:48460 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933564Ab1JECO2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Oct 2011 22:14:28 -0400
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LSK001PFM7L3GC0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 05 Oct 2011 11:14:26 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LSK00GTBM82BZ30@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 05 Oct 2011 11:14:26 +0900 (KST)
+In-reply-to: <1317123568-5203-1-git-send-email-shashidharh@vayavyalabs.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Barry Song <21cnbao@gmail.com>
-Cc: pavel@ucw.cz, frank.hofmann@tomtom.com, linux-mmc@vger.kernel.org, linux-pm@lists.linux-foundation.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, workgroup.linux@csr.com, Barry Song <baohua.song@csr.com>
+To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Cc: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org
 
-On Thursday, September 29, 2011, Barry Song wrote:
-> From: Barry Song <baohua.song@csr.com>
-> 
-> Some devices like mmc are async detected very slow. For example,
-> drivers/mmc/host/sdhci.c launchs a 200ms delayed work to detect
-> mmc partitions then add disk.
-> 
-> we do have wait_for_device_probe and scsi_complete_async_scans
-> before calling swsusp_check, but it is not enough to wait mmc.
-> 
-> This patch adds resumewait kernel param just like rootwait so
-> that we have enough time to wait mmc ready. The differene is
-> here we wait for resume partition but rootwait waits for rootfs
-> partition.
-> 
-> This patch will make swsusp support many embedded products
-> without scsi devices but devices like mmc.
-> 
-> This was tested on one ARM platform with Frank Hofmann's patch.
-> 
-> Signed-off-by: Barry Song <Baohua.Song@csr.com>
-> Reviewed-by: Valdis Kletnieks <valdis.kletnieks@vt.edu>
+Hi Shashidhar.
 
-Sorry, I couldn't find the patch previously.
+I tested dual-buffer descriptor with applied your patch.
+Actually, i didn't see to improve the performance. Dose it relate with
+the performance? i didn't sure..
 
-I only have one question.  Namely, are there any systems that would
-use resumewait and wouldn't use rootwait?
+And you used #ifdef CHAIN_DESC and #ifdef DUAL_BUFFER_DESC.
+I think if you use CHAIN_DESC by default, need not #ifdef CHAIN_DESC.
+Because if you didn't select DUAL_BUFFER_DESC, should be work with
+CHAIN_DESC. (i think good that using #ifdef..#else..#endif)
 
-Rafael
+Regards,
+Jaehoon Chung
 
+On 09/27/2011 08:39 PM, Shashidhar Hiremath wrote:
 
+> This Patch adds the support for Dual Buffer Descriptor mode of
+> Operation for the dw_mmc driver.The patch also provides the configurability
+> Option for choosing DUAL_BUFFER mode or the chained modes through menuconfig.
+> The Menuconfig option for selecting Dual Buffer mode or chained mode
+> is selected only if Internal DMAC is enabled.
+> 
+> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 > ---
->  -v2:
->  add document for the resumewait kernel parameter
+> v2:
+> * As per suggestions by Will Newton and James Hogan
+> -Config symbol Names prefixed with MMC_DW
+> -Added more Description for Config parameters added
+> -Removed unnecessary config opion IDMAC_DESC_MODE
+> -IDMAC_SET_BUFFER_SIZE chenged IDMAC_SET_BUFFER_SIZES
+> -fixed typos and indented commments correctly
+> -if ((i +1) <= sg_len changed to ((i +1) < sg_len
+> -duplication "desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC" line removed
+> -fixed bug in making DSL value zero
+> -removed ANDing the des1 with zero before writing buffer lengths to it
+> -Added proper multiline comments
+> v3:
+> * As per suggestions by James Hogan
+> -Modified Config Symbol Names in the Driver File
+> -Fixed Bug in Clearing the DSL field of BMOD register
+> -Fixed bug in IDMAC_SET_BUFFER_SIZES
+> v4:
+> * After Testing the Dual Buffer Support 
+> -Modified the dma_init sequence to support Dual Buffer Mode
 > 
->  Documentation/kernel-parameters.txt |    4 ++++
->  kernel/power/hibernate.c            |   16 ++++++++++++++++
->  2 files changed, 20 insertions(+), 0 deletions(-)
+>  drivers/mmc/host/Kconfig  |   19 ++++++++++++++
+>  drivers/mmc/host/dw_mmc.c |   58 ++++++++++++++++++++++++++++++++++++++++----
+>  drivers/mmc/host/dw_mmc.h |    2 +
+>  3 files changed, 73 insertions(+), 6 deletions(-)
 > 
-> diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-> index 614d038..2aed0d2 100644
-> --- a/Documentation/kernel-parameters.txt
-> +++ b/Documentation/kernel-parameters.txt
-> @@ -2237,6 +2237,10 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
->  			in <PAGE_SIZE> units (needed only for swap files).
->  			See  Documentation/power/swsusp-and-swap-files.txt
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 8c87096..dd0df83 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -534,6 +534,25 @@ config MMC_DW_IDMAC
+>  	  Designware Mobile Storage IP block. This disables the external DMA
+>  	  interface.
 >  
-> +	resumewait	[HIBERNATION] Wait (indefinitely) for resume device to show up.
-> +			Useful for devices that are detected asynchronously
-> +			(e.g. USB and MMC devices).
+> +choice
+> +	prompt "select  IDMAC Descriptors Mode"
+> +	depends on MMC_DW_IDMAC
 > +
->  	hibernate=	[HIBERNATION]
->  		noresume	Don't check if there's a hibernation image
->  				present during boot.
-> diff --git a/kernel/power/hibernate.c b/kernel/power/hibernate.c
-> index 8f7b1db..9f4b4f3 100644
-> --- a/kernel/power/hibernate.c
-> +++ b/kernel/power/hibernate.c
-> @@ -14,6 +14,7 @@
->  #include <linux/reboot.h>
->  #include <linux/string.h>
->  #include <linux/device.h>
-> +#include <linux/async.h>
->  #include <linux/kmod.h>
->  #include <linux/delay.h>
->  #include <linux/fs.h>
-> @@ -31,6 +32,7 @@
+> +config MMC_DW_CHAIN_DESC
+> +	bool "Chain Descriptor Structure"
+> +	help
+> +	  Select this option to enable Chained Mode of Operation and the
+> +	  Chained Mode operates in a mode where only one Buffer will be used
+> +	  for each descriptor when the transfer is happening in DMA mode.
+> +
+> +config MMC_DW_DUAL_BUFFER_DESC
+> +	bool "Dual Buffer Descriptor Structure"
+> +	help
+> +	  Select this option to enable Dual Buffer Desc Mode of Operation and
+> +	  Dual Buffer Descriptor Mode or the Ring Mode indicates that two
+> +	  buffers can be used for each descriptor during DMA mode transfer.
+> +endchoice
+> +
+>  config MMC_SH_MMCIF
+>  	tristate "SuperH Internal MMCIF support"
+>  	depends on MMC_BLOCK && (SUPERH || ARCH_SHMOBILE)
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index ff0f714..ba54bb8 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -63,6 +63,8 @@ struct idmac_desc {
+>  	u32		des1;	/* Buffer sizes */
+>  #define IDMAC_SET_BUFFER1_SIZE(d, s) \
+>  	((d)->des1 = ((d)->des1 & 0x03ffe000) | ((s) & 0x1fff))
+> +#define IDMAC_SET_BUFFER_SIZES(d, s1, s2) \
+> +	(d->des1 = (((s1) & 0x1fff) | (((s2) & 0x1fff) << 13)))
 >  
->  static int nocompress = 0;
->  static int noresume = 0;
-> +static int resume_wait = 0;
->  static char resume_file[256] = CONFIG_PM_STD_PARTITION;
->  dev_t swsusp_resume_device;
->  sector_t swsusp_resume_block;
-> @@ -732,6 +734,13 @@ static int software_resume(void)
->  		 * to wait for this to finish.
->  		 */
->  		wait_for_device_probe();
+>  	u32		des2;	/* buffer 1 physical address */
+>  
+> @@ -347,18 +349,45 @@ static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
+>  	int i;
+>  	struct idmac_desc *desc = host->sg_cpu;
+>  
+> +#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
+> +	for (i = 0; i < sg_len; i += 2, desc++) {
+> +#endif
+> +#ifdef CONFIG_MMC_DW_CHAIN_DESC
+>  	for (i = 0; i < sg_len; i++, desc++) {
+> -		unsigned int length = sg_dma_len(&data->sg[i]);
+> -		u32 mem_addr = sg_dma_address(&data->sg[i]);
+> +#endif
+> +		unsigned int length1 = sg_dma_len(&data->sg[i]);
+> +		u32 mem_addr1 = sg_dma_address(&data->sg[i]);
+> +#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
+> +		unsigned int length2 = 0;
+> +		u32 mem_addr2;
 > +
-> +		if (resume_wait) {
-> +			while ((swsusp_resume_device = name_to_dev_t(resume_file)) == 0)
-> +				msleep(10);
-> +			async_synchronize_full();
+> +		if ((i+1) < sg_len) {
+> +			length2 = sg_dma_len(&data->sg[(i+1)]);
+> +			mem_addr2 = sg_dma_address(&data->sg[i+1]);
 > +		}
 > +
->  		/*
->  		 * We can't depend on SCSI devices being available after loading
->  		 * one of their modules until scsi_complete_async_scans() is
-> @@ -1060,7 +1069,14 @@ static int __init noresume_setup(char *str)
->  	return 1;
->  }
+> +		/* Set the OWN bit and disable interrupts for this descriptor
+> +		 * and disable the Chained Mode
+> +		 */
+> +		desc->des0 = (IDMAC_DES0_OWN | IDMAC_DES0_DIC) & (~IDMAC_DES0_CH);
+> +		/* Buffer length1 and length2 */
+> +		IDMAC_SET_BUFFER_SIZES(desc, length1, length2);
+> +#endif
+> +#ifdef CONFIG_MMC_DW_CHAIN_DESC
 >  
-> +static int __init resumewait_setup(char *str)
-> +{
-> +	resume_wait = 1;
-> +	return 1;
-> +}
-> +
->  __setup("noresume", noresume_setup);
->  __setup("resume_offset=", resume_offset_setup);
->  __setup("resume=", resume_setup);
->  __setup("hibernate=", hibernate_setup);
-> +__setup("resumewait", resumewait_setup);
-> 
+>  		/* Set the OWN bit and disable interrupts for this descriptor */
+>  		desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC | IDMAC_DES0_CH;
+>  
+> -		/* Buffer length */
+> -		IDMAC_SET_BUFFER1_SIZE(desc, length);
+> +		/* Buffer length1 */
+> +		IDMAC_SET_BUFFER1_SIZE(desc, length1);
+> +#endif
+>  
+>  		/* Physical address to DMA to/from */
+> -		desc->des2 = mem_addr;
+> +		desc->des2 = mem_addr1;
+> +#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
+> +		if ((i+1) < sg_len)
+> +			desc->des3 = mem_addr2;
+> +#endif
+>  	}
+>  
+>  	/* Set first descriptor */
+> @@ -366,8 +395,14 @@ static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
+>  	desc->des0 |= IDMAC_DES0_FD;
+>  
+>  	/* Set last descriptor */
+> +#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
+> +	desc = host->sg_cpu + ((i/2) - 1) * sizeof(struct idmac_desc);
+> +	desc->des0 &= (~IDMAC_DES0_DIC);
+> +#endif
+> +#ifdef CONFIG_MMC_DW_CHAIN_DESC
+>  	desc = host->sg_cpu + (i - 1) * sizeof(struct idmac_desc);
+>  	desc->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
+> +#endif
+>  	desc->des0 |= IDMAC_DES0_LD;
+>  
+>  	wmb();
+> @@ -388,6 +423,10 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
+>  
+>  	/* Enable the IDMAC */
+>  	temp = mci_readl(host, BMOD);
+> +#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
+> +	/* The Descriptor Skip length is made zero */
+> +	temp &= ~(SDMMC_BMOD_DSL(0x1f));
+> +#endif
+>  	temp |= SDMMC_IDMAC_ENABLE | SDMMC_IDMAC_FB;
+>  	mci_writel(host, BMOD, temp);
+>  
+> @@ -402,13 +441,20 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+>  
+>  	/* Number of descriptors in the ring buffer */
+>  	host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
+> -
+> +#ifdef CONFIG_MMC_DW_CHAIN_DESC
+>  	/* Forward link the descriptor list */
+>  	for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++)
+>  		p->des3 = host->sg_dma + (sizeof(struct idmac_desc) * (i + 1));
+> +#endif
+> +#ifdef CONFIG_MMC_DW_DUAL_BUFFER_DESC
+> +	for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++)
+> +		p++;
+> +#endif
+>  
+>  	/* Set the last descriptor as the end-of-ring descriptor */
+> +#ifdef CONFIG_MMC_DW_CHAIN_DESC
+>  	p->des3 = host->sg_dma;
+> +#endif
+>  	p->des0 = IDMAC_DES0_ER;
+>  
+>  	/* Mask out interrupts - get Tx & Rx complete only */
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 027d377..0520dc8 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -72,6 +72,8 @@
+>  /* Clock Enable register defines */
+>  #define SDMMC_CLKEN_LOW_PWR		BIT(16)
+>  #define SDMMC_CLKEN_ENABLE		BIT(0)
+> +/* BMOD register defines */
+> +#define SDMMC_BMOD_DSL(n)		_SBF(2, (n))
+>  /* time-out register defines */
+>  #define SDMMC_TMOUT_DATA(n)		_SBF(8, (n))
+>  #define SDMMC_TMOUT_DATA_MSK		0xFFFFFF00
+
 
