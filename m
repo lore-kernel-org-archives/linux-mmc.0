@@ -1,198 +1,272 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH 2/3] mmc: Add OF bindings support for mmc host controller capabilities
-Date: Wed, 5 Oct 2011 19:57:47 +0530
-Message-ID: <CAJuYYwS_NeE6OG9X2p2rkjgo4OqO-ijeVwr1sLGkUuLJOxMw2g@mail.gmail.com>
-References: <1317809581-28783-1-git-send-email-thomas.abraham@linaro.org>
-	<1317809581-28783-3-git-send-email-thomas.abraham@linaro.org>
-	<4E8C5BD6.2070709@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: [PATCH v11] mmc : general purpose partition support.
+Date: Wed,  5 Oct 2011 23:45:45 +0900
+Message-ID: <1317825945-1918-1-git-send-email-linkinjeon@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:64103 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755276Ab1JEO1r convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2011 10:27:47 -0400
-In-Reply-To: <4E8C5BD6.2070709@gmail.com>
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:55558 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934414Ab1JEOqD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2011 10:46:03 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robherring2@gmail.com>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, rob.herring@calxeda.com, kgene.kim@samsung.com, ben-linux@fluff.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, adrian.hunter@intel.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com, Namjae Jeon <linkinjeon@gmail.com>
 
-Hi Rob,
+It allows gerneral purpose partitions in MMC Device.
+And I try to simpliy make mmc_blk_alloc_parts using mmc_part structure suggested by Andrei Warkentin.
+After patching, we can see general purpose partitions like this.
+> cat /proc/partitions
+          179 0 847872 mmcblk0
+          179 192 4096 mmcblk0gp3
+          179 160 4096 mmcblk0gp2
+          179 128 4096 mmcblk0gp1
+          179 96  1052672 mmcblk0gp0
+          179 64  1024 mmcblk0boot1
+          179 32  1024 mmcblk0boot0
 
-On 5 October 2011 18:59, Rob Herring <robherring2@gmail.com> wrote:
-> Thomas,
->
-> On 10/05/2011 05:13 AM, Thomas Abraham wrote:
->> Device nodes representing sd/mmc controllers in a device tree would =
-include
->> mmc host controller capabilities. Add support for parsing of mmc hos=
-t
->> controller capabilities included in device nodes.
->>
->> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
->> ---
->> =A0.../devicetree/bindings/mmc/linux-mmc-host.txt =A0 =A0 | =A0 11 +=
-++++++
->> =A0drivers/mmc/core/host.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0| =A0 31 ++++++++++++++++++++
->> =A0include/linux/mmc/host.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 | =A0 =A03 ++
->> =A03 files changed, 45 insertions(+), 0 deletions(-)
->> =A0create mode 100644 Documentation/devicetree/bindings/mmc/linux-mm=
-c-host.txt
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/linux-mmc-host.tx=
-t b/Documentation/devicetree/bindings/mmc/linux-mmc-host.txt
->> new file mode 100644
->> index 0000000..cb43905
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/linux-mmc-host.txt
->> @@ -0,0 +1,11 @@
->> +* Linux mmc host capabilities
->> +
->> +MMC Host Controller capabilities used in linux:
->
-> These aren't really linux properties... Is the capabilities register
-> really this broken that all these are needed? If so, perhaps just a
-> straight caps register value to override with would be better.
+Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
+---
+ drivers/mmc/card/block.c |   41 +++++++++++++++++++++++------------
+ drivers/mmc/core/mmc.c   |   52 ++++++++++++++++++++++++++++++++++++++++++---
+ include/linux/mmc/card.h |   34 +++++++++++++++++++++++++++++-
+ include/linux/mmc/mmc.h  |    5 +++-
+ 4 files changed, 112 insertions(+), 20 deletions(-)
 
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 782d5f8..6091f13 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1470,26 +1470,39 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
+ 	return 0;
+ }
+ 
++static int mmc_is_boot_partition(struct mmc_part *part)
++{
++	return (part->part_cfg >= EXT_CSD_PART_CONFIG_ACC_BOOT0) &&
++		(part->part_cfg < (EXT_CSD_PART_CONFIG_ACC_BOOT0 +
++				MMC_NUM_BOOT_PARTITION));
++}
++
++/* MMC Physical partition consist of two boot partitions and
++ * up to four general purpose partitions.
++ * For each partitions enabled in EXT_CSD
++ * The block device will allocated to provide access to the partition.
++ */
++
+ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+ {
+-	int ret = 0;
++	int idx, ret = 0;
+ 
+ 	if (!mmc_card_mmc(card))
+ 		return 0;
+ 
+-	if (card->ext_csd.boot_size && mmc_boot_partition_access(card->host)) {
+-		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT0,
+-					 card->ext_csd.boot_size >> 9,
+-					 true,
+-					 "boot0");
+-		if (ret)
+-			return ret;
+-		ret = mmc_blk_alloc_part(card, md, EXT_CSD_PART_CONFIG_ACC_BOOT1,
+-					 card->ext_csd.boot_size >> 9,
+-					 true,
+-					 "boot1");
+-		if (ret)
+-			return ret;
++	for (idx = 0; idx < card->nr_parts; idx++) {
++		if (mmc_is_boot_partition(&card->part[idx]) &&
++			!mmc_boot_partition_access(card->host))
++			continue;
++		if (card->part[idx].size) {
++			ret = mmc_blk_alloc_part(card, md,
++				card->part[idx].part_cfg,
++				card->part[idx].size >> 9,
++				card->part[idx].force_ro,
++				card->part[idx].name);
++			if (ret)
++				return ret;
++		}
+ 	}
+ 
+ 	return ret;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index c632b1f..425803d 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -239,7 +239,9 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
+  */
+ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ {
+-	int err = 0;
++	int err = 0, idx;
++	unsigned int part_size;
++	u8 hc_erase_grp_sz = 0, hc_wp_grp_sz = 0;
+ 
+ 	BUG_ON(!card);
+ 
+@@ -340,7 +342,14 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 * There are two boot regions of equal size, defined in
+ 		 * multiples of 128K.
+ 		 */
+-		card->ext_csd.boot_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
++		if (ext_csd[EXT_CSD_BOOT_MULT]) {
++			for (idx = 0; idx < MMC_NUM_BOOT_PARTITION; idx++) {
++				part_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
++				mmc_part_add(card, part_size,
++					EXT_CSD_PART_CONFIG_ACC_BOOT0 + idx,
++					"boot%d", idx, true);
++			}
++		}
+ 	}
+ 
+ 	card->ext_csd.raw_hc_erase_gap_size =
+@@ -362,9 +371,9 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		card->ext_csd.raw_partition_support = ext_csd[EXT_CSD_PARTITION_SUPPORT];
+ 		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
+ 		    (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
+-			u8 hc_erase_grp_sz =
++			hc_erase_grp_sz =
+ 				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+-			u8 hc_wp_grp_sz =
++			hc_wp_grp_sz =
+ 				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+ 
+ 			card->ext_csd.enhanced_area_en = 1;
+@@ -393,6 +402,41 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 			card->ext_csd.enhanced_area_offset = -EINVAL;
+ 			card->ext_csd.enhanced_area_size = -EINVAL;
+ 		}
++
++		/*
++		 * General purpose partition feature support --
++		 * If ext_csd have the size of general purpose partitions,
++		 * set size, part_cfg, partition name in mmc_part.
++		 */
++		if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
++			EXT_CSD_PART_SUPPORT_PART_EN) {
++			if (card->ext_csd.enhanced_area_en != 1) {
++				hc_erase_grp_sz =
++					ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
++				hc_wp_grp_sz =
++					ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
++
++				card->ext_csd.enhanced_area_en = 1;
++			}
++
++			for (idx = 0; idx < MMC_NUM_GP_PARTITION; idx++) {
++				if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3] &&
++				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1] &&
++				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2])
++					continue;
++				part_size =
++				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2]
++					<< 16) +
++				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1]
++					<< 8) +
++				ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3];
++				part_size *= (size_t)(hc_erase_grp_sz *
++					hc_wp_grp_sz);
++				mmc_part_add(card, part_size << 19,
++					EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
++					"gp%d", idx, false);
++			}
++		}
+ 		card->ext_csd.sec_trim_mult =
+ 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
+ 		card->ext_csd.sec_erase_mult =
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 5294ddf..0522627 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -12,6 +12,7 @@
+ 
+ #include <linux/mmc/core.h>
+ #include <linux/mod_devicetable.h>
++#include <linux/genhd.h>
+ 
+ struct mmc_cid {
+ 	unsigned int		manfid;
+@@ -64,7 +65,6 @@ struct mmc_ext_csd {
+ 	bool			enhanced_area_en;	/* enable bit */
+ 	unsigned long long	enhanced_area_offset;	/* Units: Byte */
+ 	unsigned int		enhanced_area_size;	/* Units: KB */
+-	unsigned int		boot_size;		/* in bytes */
+ 	u8			raw_partition_support;	/* 160 */
+ 	u8			raw_erased_mem_count;	/* 181 */
+ 	u8			raw_ext_csd_structure;	/* 194 */
+@@ -158,6 +158,23 @@ struct sdio_func_tuple;
+ 
+ #define SDIO_MAX_FUNCS		7
+ 
++/* The number of MMC physical partitions
++ * It consist of boot partitions(2), general purpose partitions(4) in MMC v4.4
++ */
++#define MMC_NUM_BOOT_PARTITION	2
++#define MMC_NUM_GP_PARTITION	4
++#define MMC_NUM_PHY_PARTITION	6
++
++/*
++ * MMC Physical partitions
++ */
++struct mmc_part {
++	unsigned int	size;	/* partition size (in bytes) */
++	unsigned int	part_cfg;	/* it used to part_type */
++	char	name[DISK_NAME_LEN];
++	bool	force_ro;	/* to make boot parts RO by default */
++};
++
+ /*
+  * MMC device
+  */
+@@ -219,9 +236,24 @@ struct mmc_card {
+ 	unsigned int		sd_bus_speed;	/* Bus Speed Mode set for the card */
+ 
+ 	struct dentry		*debugfs_root;
++	struct mmc_part	part[MMC_NUM_PHY_PARTITION]; /* physical partitions */
++	unsigned int    nr_parts;
+ };
+ 
+ /*
++ * This function fill contents in mmc_part.
++ */
++static inline void mmc_part_add(struct mmc_card *card, unsigned int size,
++			unsigned int part_cfg, char *name, int idx, bool ro)
++{
++	card->part[card->nr_parts].size = size;
++	card->part[card->nr_parts].part_cfg = part_cfg;
++	sprintf(card->part[card->nr_parts].name, name, idx);
++	card->part[card->nr_parts].force_ro = ro;
++	card->nr_parts++;
++}
++
++/*
+  *  The world is not perfect and supplies us with broken mmc/sdio devices.
+  *  For at least some of these bugs we need a work-around.
+  */
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 50af227..ea558eb 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -270,6 +270,7 @@ struct _mmc_csd {
+  * EXT_CSD fields
+  */
+ 
++#define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+ #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+ #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
+ #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
+@@ -313,7 +314,9 @@ struct _mmc_csd {
+ 
+ #define EXT_CSD_PART_CONFIG_ACC_MASK	(0x7)
+ #define EXT_CSD_PART_CONFIG_ACC_BOOT0	(0x1)
+-#define EXT_CSD_PART_CONFIG_ACC_BOOT1	(0x2)
++#define EXT_CSD_PART_CONFIG_ACC_GP0	(0x4)
++
++#define EXT_CSD_PART_SUPPORT_PART_EN	(0x1)
+ 
+ #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
+ #define EXT_CSD_CMD_SET_SECURE		(1<<1)
+-- 
+1.7.4.4
 
-I was trying to provide bindings for the MMC_CAP_XXX defined in
-include/linux/mmc/host.h file. I am no expert in mmc subsystem but I
-believe that these capabilities are not directly mapped to any
-capabilities register in the host controller hardware. All of the
-MMC_CAP_XXX defines are flags used by the mmc core to make runtime
-decisions. The host controller driver would read its capability
-register and report its capabilities to the mmc core layer using these
-MMC_CAP_XXX defines.
-
-But not all of the MMC_CAP_XXX defines can be derived from a
-capabilities register of a host controller. Some of the MMC_CAP_XXX
-capabilities are used as defaults by the host controller driver while
-some others which are board dependent are feed to the host controller
-driver using the platform data.
-
-While migrating a host controller driver to device tree, and not
-relying on the aux data for platform data, there has to be mechanism
-to specify the mmc core subsystem capabilities which are board
-specific and I though bindings for MMC_CAP_XXX could be an option.
-
-
->
->> +- linux,mmc_cap_4_bit_data - host can do 4 bit transfers
->> +- linux,mmc_cap_mmc_highspeed - host can do MMC high-speed timing
->> +- linux,mmc_cap_sd_highspeed - host can do SD high-speed timing
->> +- linux,mmc_cap_needs_poll - host needs polling for card detection
->> +- linux,mmc_cap_8_bit_data - host can do 8 bit transfer
->
-> "sdhci,1-bit-only" already exists as a binding. Perhaps add
-> "sdhci,4-bit-only". No property then means can do 8-bit.
-
-
-Ok. But that would remain just as sdhci host controller capability and
-will not be applicable to other types of host controllers.
-
-
->
->> +- linux,mmc_cap_disable - host can be disabled
->
-> What?
-
-Apologies. I will be more verbose next time.
-
->
->> +- linux,mmc_cap_nonremovable - host is connected to nonremovable me=
-dia
->> +- linux,mmc_cap_erase - host allows erase/trim commands
->
-> Isn't TRIM a card property and transparent to the host controller?
-
-
-I am not sure on this. Maybe it might have some dependency on the host
-controller as well.
-
-
->
->> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
->> index 793d0a0..4ee2e43 100644
->> --- a/drivers/mmc/core/host.c
->> +++ b/drivers/mmc/core/host.c
->> @@ -19,6 +19,7 @@
->> =A0#include <linux/leds.h>
->> =A0#include <linux/slab.h>
->> =A0#include <linux/suspend.h>
->> +#include <linux/of.h>
->>
->> =A0#include <linux/mmc/host.h>
->> =A0#include <linux/mmc/card.h>
->> @@ -385,3 +386,33 @@ void mmc_free_host(struct mmc_host *host)
->> =A0}
->>
->> =A0EXPORT_SYMBOL(mmc_free_host);
->> +
->> +#ifdef CONFIG_OF
->> +/**
->> + * =A0 mmc_of_parse_host_caps - parse mmc host capabilities from de=
-vice node
->> + * =A0 @np: pointer to device node in device tree
->> + * =A0 @caps: pointer to host caps value to be returned
->> + *
->> + * =A0 Search the device node in device tree for mmc host capabilit=
-ies.
->> + */
->> +void mmc_of_parse_host_caps(struct device_node *np, unsigned long *=
-caps)
->> +{
->> + =A0 =A0 if (of_find_property(np, "linux,mmc_cap_4_bit_data", NULL)=
-)
->> + =A0 =A0 =A0 =A0 =A0 =A0 *caps |=3D MMC_CAP_4_BIT_DATA;
->> + =A0 =A0 if (of_find_property(np, "linux,mmc_cap_mmc_highspeed", NU=
-LL))
->> + =A0 =A0 =A0 =A0 =A0 =A0 *caps |=3D MMC_CAP_MMC_HIGHSPEED;
->> + =A0 =A0 if (of_find_property(np, "linux,mmc_cap_sd_highspeed", NUL=
-L))
->> + =A0 =A0 =A0 =A0 =A0 =A0 *caps |=3D MMC_CAP_SD_HIGHSPEED;
->> + =A0 =A0 if (of_find_property(np, "linux,mmc_cap_needs_poll", NULL)=
-)
->> + =A0 =A0 =A0 =A0 =A0 =A0 *caps |=3D MMC_CAP_NEEDS_POLL;
->> + =A0 =A0 if (of_find_property(np, "linux,mmc_cap_8_bit_data", NULL)=
-)
->> + =A0 =A0 =A0 =A0 =A0 =A0 *caps |=3D MMC_CAP_8_BIT_DATA;
->> + =A0 =A0 if (of_find_property(np, "linux,mmc_cap_disable", NULL))
->> + =A0 =A0 =A0 =A0 =A0 =A0 *caps |=3D MMC_CAP_DISABLE;
->> + =A0 =A0 if (of_find_property(np, "linux,mmc_cap_nonremovable", NUL=
-L))
->> + =A0 =A0 =A0 =A0 =A0 =A0 *caps |=3D MMC_CAP_NONREMOVABLE;
->> + =A0 =A0 if (of_find_property(np, "linux,mmc_cap_erase", NULL))
->> + =A0 =A0 =A0 =A0 =A0 =A0 *caps |=3D MMC_CAP_ERASE;
->> +}
->> +EXPORT_SYMBOL(mmc_of_parse_host_caps);
->> +#endif /* CONFIG_OF */
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index 1d09562..72b5df2 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -309,6 +309,9 @@ extern struct mmc_host *mmc_alloc_host(int extra=
-, struct device *);
->> =A0extern int mmc_add_host(struct mmc_host *);
->> =A0extern void mmc_remove_host(struct mmc_host *);
->> =A0extern void mmc_free_host(struct mmc_host *);
->> +#ifdef CONFIG_OF
->> +extern void mmc_of_parse_host_caps(struct device_node *np, unsigned=
- long *caps);
->> +#endif
->
-> You don't need a ifdef around this.
-
-Ok.
-
->
-> Rob
->
-
-Thanks for your review.
-
-Regards,
-Thomas.
