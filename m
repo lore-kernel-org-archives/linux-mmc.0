@@ -1,92 +1,74 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-pci: add runtime pm support
-Date: Wed, 5 Oct 2011 16:59:35 +0200
-Message-ID: <4E8C70D7.6080305@stericsson.com>
-References: <1317645214-12316-1-git-send-email-adrian.hunter@intel.com> <1317645214-12316-3-git-send-email-adrian.hunter@intel.com>
+From: Andrei Warkentin <awarkentin@vmware.com>
+Subject: Re: [PATCH v11] mmc : general purpose partition support.
+Date: Wed, 5 Oct 2011 08:33:53 -0700 (PDT)
+Message-ID: <1757717892.66886.1317828833207.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+References: <1317825945-1918-1-git-send-email-linkinjeon@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog115.obsmtp.com ([207.126.144.139]:34005 "EHLO
-	eu1sys200aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S934672Ab1JEPAT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2011 11:00:19 -0400
-In-Reply-To: <1317645214-12316-3-git-send-email-adrian.hunter@intel.com>
+Received: from smtp-outbound-2.vmware.com ([65.115.85.73]:45859 "EHLO
+	smtp-outbound-2.vmware.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757962Ab1JEPdy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2011 11:33:54 -0400
+In-Reply-To: <1317825945-1918-1-git-send-email-linkinjeon@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, elinwal <linus.walleij@stericsson.com>
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: linux-kernel@vger.kernel.org, adrian hunter <adrian.hunter@intel.com>, linus walleij <linus.walleij@linaro.org>, james p freyensee <james_p_freyensee@linux.intel.com>, sebras@gmail.com, Ulf Hansson <Ulf.Hansson@stericsson.com>, stefan xk nilsson <stefan.xk.nilsson@stericsson.com>, per forlin <per.forlin@stericsson.com>, johan rudholm <johan.rudholm@stericsson.com>, cjb@laptop.org, linux-mmc@vger.kernel.org
 
-Adrian Hunter wrote:
-> Ths patch allows runtime PM for sdhci-pci, runtime suspending
-> after inactivity of 50ms and ensuring runtime resume before
-> SDHC registers are accessed.  During runtime suspend, interrupts
-> are masked.  The host controller state is restored at runtime
-> resume.
+Hi,
+
+----- Original Message -----
+> From: "Namjae Jeon" <linkinjeon@gmail.com>
+> To: cjb@laptop.org, linux-mmc@vger.kernel.org
+> Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, "adrian hunter" <adrian.hunter@intel.com>, "linus walleij"
+> <linus.walleij@linaro.org>, "james p freyensee" <james_p_freyensee@linux.intel.com>, sebras@gmail.com, "Ulf Hansson"
+> <Ulf.Hansson@stericsson.com>, "stefan xk nilsson" <stefan.xk.nilsson@stericsson.com>, "per forlin"
+> <per.forlin@stericsson.com>, "johan rudholm" <johan.rudholm@stericsson.com>, "Namjae Jeon" <linkinjeon@gmail.com>
+> Sent: Wednesday, October 5, 2011 10:45:45 AM
+> Subject: [PATCH v11] mmc : general purpose partition support.
 > 
-> For Medfield, the host controller's card detect mechanism
-> is supplanted by an always-on GPIO which provides for card
-> detect wake-up.
+> It allows gerneral purpose partitions in MMC Device.
+> And I try to simpliy make mmc_blk_alloc_parts using mmc_part
+> structure suggested by Andrei Warkentin.
+> After patching, we can see general purpose partitions like this.
+> > cat /proc/partitions
+>           179 0 847872 mmcblk0
+>           179 192 4096 mmcblk0gp3
+>           179 160 4096 mmcblk0gp2
+>           179 128 4096 mmcblk0gp1
+>           179 96  1052672 mmcblk0gp0
+>           179 64  1024 mmcblk0boot1
+>           179 32  1024 mmcblk0boot0
 > 
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
+> ---
+>  drivers/mmc/card/block.c |   41 +++++++++++++++++++++++------------
+>  drivers/mmc/core/mmc.c   |   52
+>  ++++++++++++++++++++++++++++++++++++++++++---
+>  include/linux/mmc/card.h |   34 +++++++++++++++++++++++++++++-
+>  include/linux/mmc/mmc.h  |    5 +++-
+>  4 files changed, 112 insertions(+), 20 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> +	for (idx = 0; idx < card->nr_parts; idx++) {
+> +		if (mmc_is_boot_partition(&card->part[idx]) &&
+> +			!mmc_boot_partition_access(card->host))
+> +			continue;
+> +		if (card->part[idx].size) {
+> +			ret = mmc_blk_alloc_part(card, md,
+> +				card->part[idx].part_cfg,
+> +				card->part[idx].size >> 9,
+> +				card->part[idx].force_ro,
+> +				card->part[idx].name);
+> +			if (ret)
+> +				return ret;
+> +		}
+>  	}
 
+Is there any reason for putting the mmc_boot_partition_access() logic here? If
+boot partitions are not allowed by host, then just don't add the mmc_parts to
+the parts array, no? Such minutae should belong in core mmc code, not block driver, IMHO.
 
-I am not that into how the sdhci host drivers is working, myself is more 
-working with the mmci driver and about to sent out patches with improved 
-power management support soon. I would like to take the opportunity to 
-discuss in general pm_runtime for mmc/sd/sdio.
-
-Right now the mmc framework supports MMC_CAP_DISABLE, which means the 
-host driver shall implement an enable/disable function. Very similar to 
-what pm_runtime can be used for, but pm_runtime is a more modern way of 
-solving power management. Is this your overall view on this as well?
-
-Anyway, I would then suggest that it should be the framework 
-responsibilities of doing:
-
-1. pm_runtime_get_sync -> To make sure the mmc host is runtime resumed 
-before the framework is using it. This could be done when "claiming" the 
-host or more precisely as the first thing in the mmc_host_enable function.
-
-2. pm_runtime_mark_last_busy -> To put a time stamp at the last time the 
-framework used the mmc host. This could be done as the first thing in 
-mmc_host_lazy_disable/mmc_host_disable.
-
-3. pm_runtime_put_sync_autosuspend -> To trigger the timer of runtime 
-suspending the mmc host driver. This could be done as the first thing in 
-mmc_host_lazy_disable/mmc_host_disable.
-
-
-The mmc host drivers will be responsible of the following:
-
-1. Implementing the runtime_resume, runtime_suspend and possibly 
-runtime_idle functions and register them in the device driver struct.
-
-2. Initializing and setup pm_runtime for the mmc host driver. For 
-example use:
-pm_runtime_set_autosuspend_delay
-pm_runtime_use_autosuspend
-pm_runtime_enable
-
-
-Moreover 1:
-I have noticed the pm_runtime support is implemented for sdio and when 
-having MMC_CAP_POWER_OFF_CARD. This needs to be "cleaned up" after such 
-a change. It might also conflict with your patch considering "moreover 
-2" below.
-
-Moreover 2:
-dev_pm_ops with runtime functions, are implemented for the mmc bus 
-(core/bus.c). Maybe this should be moved from the responsibility of the 
-bus into the mmc host drivers instead!? I think it makes more sense to 
-leave such decisions as doing 
-"mmc_power_save_host/mmc_power_restore_host" to each mmc host driver. 
-Just because we get runtime suspended that does not have to mean we wnat 
-to do mmc_power_save_host... What do you think?
-
-Best regards
-Ulf Hansson
-
-
-
-
+A
