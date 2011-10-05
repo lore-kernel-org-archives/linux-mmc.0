@@ -1,74 +1,45 @@
-From: Andrei Warkentin <awarkentin@vmware.com>
-Subject: Re: [PATCH v11] mmc : general purpose partition support.
-Date: Wed, 5 Oct 2011 08:33:53 -0700 (PDT)
-Message-ID: <1757717892.66886.1317828833207.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-References: <1317825945-1918-1-git-send-email-linkinjeon@gmail.com>
+From: Stephen Warren <swarren@nvidia.com>
+Subject: RE: [PATCH 2/3] mmc: Add OF bindings support for mmc host
+ controller	capabilities
+Date: Wed, 5 Oct 2011 08:55:25 -0700
+Message-ID: <74CDBE0F657A3D45AFBB94109FB122FF173A2C7245@HQMAIL01.nvidia.com>
+References: <1317809581-28783-1-git-send-email-thomas.abraham@linaro.org>
+	<1317809581-28783-3-git-send-email-thomas.abraham@linaro.org>
+	<4E8C5BD6.2070709@gmail.com>
+ <CAJuYYwS_NeE6OG9X2p2rkjgo4OqO-ijeVwr1sLGkUuLJOxMw2g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp-outbound-2.vmware.com ([65.115.85.73]:45859 "EHLO
-	smtp-outbound-2.vmware.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757962Ab1JEPdy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2011 11:33:54 -0400
-In-Reply-To: <1317825945-1918-1-git-send-email-linkinjeon@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAJuYYwS_NeE6OG9X2p2rkjgo4OqO-ijeVwr1sLGkUuLJOxMw2g@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Thomas Abraham <thomas.abraham@linaro.org>, Rob Herring <robherring2@gmail.com>
+Cc: "kgene.kim@samsung.com" <kgene.kim@samsung.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "ben-linux@fluff.org" <ben-linux@fluff.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: linux-kernel@vger.kernel.org, adrian hunter <adrian.hunter@intel.com>, linus walleij <linus.walleij@linaro.org>, james p freyensee <james_p_freyensee@linux.intel.com>, sebras@gmail.com, Ulf Hansson <Ulf.Hansson@stericsson.com>, stefan xk nilsson <stefan.xk.nilsson@stericsson.com>, per forlin <per.forlin@stericsson.com>, johan rudholm <johan.rudholm@stericsson.com>, cjb@laptop.org, linux-mmc@vger.kernel.org
 
-Hi,
-
------ Original Message -----
-> From: "Namjae Jeon" <linkinjeon@gmail.com>
-> To: cjb@laptop.org, linux-mmc@vger.kernel.org
-> Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, "adrian hunter" <adrian.hunter@intel.com>, "linus walleij"
-> <linus.walleij@linaro.org>, "james p freyensee" <james_p_freyensee@linux.intel.com>, sebras@gmail.com, "Ulf Hansson"
-> <Ulf.Hansson@stericsson.com>, "stefan xk nilsson" <stefan.xk.nilsson@stericsson.com>, "per forlin"
-> <per.forlin@stericsson.com>, "johan rudholm" <johan.rudholm@stericsson.com>, "Namjae Jeon" <linkinjeon@gmail.com>
-> Sent: Wednesday, October 5, 2011 10:45:45 AM
-> Subject: [PATCH v11] mmc : general purpose partition support.
+Thomas Abraham wrote at Wednesday, October 05, 2011 8:28 AM:
+> On 5 October 2011 18:59, Rob Herring <robherring2@gmail.com> wrote:
+> > On 10/05/2011 05:13 AM, Thomas Abraham wrote:
+> >> Device nodes representing sd/mmc controllers in a device tree would include
+> >> mmc host controller capabilities. Add support for parsing of mmc host
+> >> controller capabilities included in device nodes.
+...
+> >> +- linux,mmc_cap_4_bit_data - host can do 4 bit transfers
+> >> +- linux,mmc_cap_mmc_highspeed - host can do MMC high-speed timing
+> >> +- linux,mmc_cap_sd_highspeed - host can do SD high-speed timing
+> >> +- linux,mmc_cap_needs_poll - host needs polling for card detection
+> >> +- linux,mmc_cap_8_bit_data - host can do 8 bit transfer
+> >
+> > "sdhci,1-bit-only" already exists as a binding. Perhaps add
+> > "sdhci,4-bit-only". No property then means can do 8-bit.
 > 
-> It allows gerneral purpose partitions in MMC Device.
-> And I try to simpliy make mmc_blk_alloc_parts using mmc_part
-> structure suggested by Andrei Warkentin.
-> After patching, we can see general purpose partitions like this.
-> > cat /proc/partitions
->           179 0 847872 mmcblk0
->           179 192 4096 mmcblk0gp3
->           179 160 4096 mmcblk0gp2
->           179 128 4096 mmcblk0gp1
->           179 96  1052672 mmcblk0gp0
->           179 64  1024 mmcblk0boot1
->           179 32  1024 mmcblk0boot0
-> 
-> Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
-> ---
->  drivers/mmc/card/block.c |   41 +++++++++++++++++++++++------------
->  drivers/mmc/core/mmc.c   |   52
->  ++++++++++++++++++++++++++++++++++++++++++---
->  include/linux/mmc/card.h |   34 +++++++++++++++++++++++++++++-
->  include/linux/mmc/mmc.h  |    5 +++-
->  4 files changed, 112 insertions(+), 20 deletions(-)
-> 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> +	for (idx = 0; idx < card->nr_parts; idx++) {
-> +		if (mmc_is_boot_partition(&card->part[idx]) &&
-> +			!mmc_boot_partition_access(card->host))
-> +			continue;
-> +		if (card->part[idx].size) {
-> +			ret = mmc_blk_alloc_part(card, md,
-> +				card->part[idx].part_cfg,
-> +				card->part[idx].size >> 9,
-> +				card->part[idx].force_ro,
-> +				card->part[idx].name);
-> +			if (ret)
-> +				return ret;
-> +		}
->  	}
+> Ok. But that would remain just as sdhci host controller capability and
+> will not be applicable to other types of host controllers.
 
-Is there any reason for putting the mmc_boot_partition_access() logic here? If
-boot partitions are not allowed by host, then just don't add the mmc_parts to
-the parts array, no? Such minutae should belong in core mmc code, not block driver, IMHO.
+Just as an FYI, NVIDIA's SDHCI controller bindings use property
+"support-8bit" to indicate 8-bit support. A similar property could be
+used for 4-bit support too.
 
-A
+-- 
+nvpublic
