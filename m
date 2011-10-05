@@ -1,284 +1,366 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [PATCH v10] mmc : general purpose partition support.
-Date: Wed, 5 Oct 2011 20:22:56 +0900
-Message-ID: <CAKYAXd9iHW3bdeFkq=ywdOTPtzFdqK8Yb9fXxi8Jvoq6BRvHtQ@mail.gmail.com>
-References: <1317750317-4489-1-git-send-email-linkinjeon@gmail.com>
-	<4E8C1F98.9070909@intel.com>
-	<CAKYAXd-9+_1TBniszQir+krF1fRqzBMiAAX9PgzaW+odps0EDg@mail.gmail.com>
-	<4E8C370E.7080806@intel.com>
-	<CAKYAXd_AoSgY6htSO5jJyD3QJ_xXFqgKLyNX49s3PuRW6AUmbg@mail.gmail.com>
+Date: Wed, 05 Oct 2011 14:37:07 +0300
+Message-ID: <4E8C4163.1090109@intel.com>
+References: <1317750317-4489-1-git-send-email-linkinjeon@gmail.com> <4E8C1F98.9070909@intel.com> <CAKYAXd-9+_1TBniszQir+krF1fRqzBMiAAX9PgzaW+odps0EDg@mail.gmail.com> <4E8C370E.7080806@intel.com> <CAKYAXd_AoSgY6htSO5jJyD3QJ_xXFqgKLyNX49s3PuRW6AUmbg@mail.gmail.com> <CAKYAXd9iHW3bdeFkq=ywdOTPtzFdqK8Yb9fXxi8Jvoq6BRvHtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:53213 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934411Ab1JELW6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2011 07:22:58 -0400
-In-Reply-To: <CAKYAXd_AoSgY6htSO5jJyD3QJ_xXFqgKLyNX49s3PuRW6AUmbg@mail.gmail.com>
+Received: from mga03.intel.com ([143.182.124.21]:49125 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S934286Ab1JELhN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 5 Oct 2011 07:37:13 -0400
+In-Reply-To: <CAKYAXd9iHW3bdeFkq=ywdOTPtzFdqK8Yb9fXxi8Jvoq6BRvHtQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
+To: NamJae Jeon <linkinjeon@gmail.com>
 Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, awarkentin@vmware.com, linus.walleij@linaro.org, james_p_freyensee@linux.intel.com, sebras@gmail.com, Ulf.Hansson@stericsson.com, stefan.xk.nilsson@stericsson.com, per.forlin@stericsson.com, johan.rudholm@stericsson.com
 
-MjAxMS8xMC81IE5hbUphZSBKZW9uIDxsaW5raW5qZW9uQGdtYWlsLmNvbT46Cj4gMjAxMS8xMC81
-IEFkcmlhbiBIdW50ZXIgPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjoKPj4gT24gMDUvMTAvMTEg
-MTM6MjEsIE5hbUphZSBKZW9uIHdyb3RlOgo+Pj4KPj4+IDIwMTEvMTAvNSBBZHJpYW4gSHVudGVy
-PGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjoKPj4+Pgo+Pj4+IE9uIDA0LzEwLzExIDIwOjQ1LCBO
-YW1qYWUgSmVvbiB3cm90ZToKPj4+Pj4KPj4+Pj4gSXQgYWxsb3dzIGdlcm5lcmFsIHB1cnBvc2Ug
-cGFydGl0aW9ucyBpbiBNTUMgRGV2aWNlLgo+Pj4+PiBBbmQgSSB0cnkgdG8gc2ltcGxpeSBtYWtl
-IG1tY19ibGtfYWxsb2NfcGFydHMgdXNpbmcgbW1jX3BhcnQgc3RydWN0dXJlCj4+Pj4+IHN1Z2dl
-c3RlZCBieSBBbmRyZWkgV2Fya2VudGluLgo+Pj4+PiBBZnRlciBwYXRjaGluZywgd2UgY2FuIHNl
-ZSBnZW5lcmFsIHB1cnBvc2UgcGFydGl0aW9ucyBsaWtlIHRoaXMuCj4+Pj4+Pgo+Pj4+Pj4gY2F0
-IC9wcm9jL3BhcnRpdGlvbnMKPj4+Pj4KPj4+Pj4gwqAgwqAgwqAgwqAgwqAgMTc5IDAgODQ3ODcy
-IG1tY2JsazAKPj4+Pj4gwqAgwqAgwqAgwqAgwqAgMTc5IDE5MiA0MDk2IG1tY2JsazBncDMKPj4+
-Pj4gwqAgwqAgwqAgwqAgwqAgMTc5IDE2MCA0MDk2IG1tY2JsazBncDIKPj4+Pj4gwqAgwqAgwqAg
-wqAgwqAgMTc5IDEyOCA0MDk2IG1tY2JsazBncDEKPj4+Pj4gwqAgwqAgwqAgwqAgwqAgMTc5IDk2
-IMKgMTA1MjY3MiBtbWNibGswZ3AwCj4+Pj4+IMKgIMKgIMKgIMKgIMKgIDE3OSA2NCDCoDEwMjQg
-bW1jYmxrMGJvb3QxCj4+Pj4+IMKgIMKgIMKgIMKgIMKgIDE3OSAzMiDCoDEwMjQgbW1jYmxrMGJv
-b3QwCj4+Pj4+Cj4+Pj4+IFNpZ25lZC1vZmYtYnk6IE5hbWphZSBKZW9uPGxpbmtpbmplb25AZ21h
-aWwuY29tPgo+Pj4+PiAtLS0KPj4+Pj4gwqBkcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMgfCDCoCAz
-NCArKysrKysrKysrKysrKysrKy0tLS0tLS0tLS0tLQo+Pj4+PiDCoGRyaXZlcnMvbW1jL2NvcmUv
-bW1jLmMgwqAgfCDCoCA1Mgo+Pj4+PiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKystLS0KPj4+Pj4gwqBpbmNsdWRlL2xpbnV4L21tYy9jYXJkLmggfCDCoCAzNCArKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKy0KPj4+Pj4gwqBpbmNsdWRlL2xpbnV4L21tYy9tbWMu
-aCDCoHwgwqAgwqA1ICsrKy0KPj4+Pj4gwqA0IGZpbGVzIGNoYW5nZWQsIDEwNSBpbnNlcnRpb25z
-KCspLCAyMCBkZWxldGlvbnMoLSkKPj4+Pj4KPj4+Pj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1j
-L2NhcmQvYmxvY2suYyBiL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYwo+Pj4+PiBpbmRleCA3ODJk
-NWY4Li5mYjZmMWU5IDEwMDY0NAo+Pj4+PiAtLS0gYS9kcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMK
-Pj4+Pj4gKysrIGIvZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jCj4+Pj4+IEBAIC0xNDcwLDI2ICsx
-NDcwLDMyIEBAIHN0YXRpYyBpbnQgbW1jX2Jsa19hbGxvY19wYXJ0KHN0cnVjdCBtbWNfY2FyZAo+
-Pj4+PiAqY2FyZCwKPj4+Pj4gwqAgwqAgwqAgwqByZXR1cm4gMDsKPj4+Pj4gwqB9Cj4+Pj4+Cj4+
-Pj4+ICsvKiBNTUMgUGh5c2ljYWwgcGFydGl0aW9uIGNvbnNpc3Qgb2YgdHdvIGJvb3QgcGFydGl0
-aW9ucyBhbmQKPj4+Pj4gKyAqIHVwIHRvIGZvdXIgZ2VuZXJhbCBwdXJwb3NlIHBhcnRpdGlvbnMu
-Cj4+Pj4+ICsgKiBGb3IgZWFjaCBwYXJ0aXRpb25zIGVuYWJsZWQgaW4gRVhUX0NTRAo+Pj4+PiAr
-ICogVGhlIGJsb2NrIGRldmljZSB3aWxsIGFsbG9jYXRlZCB0byBwcm92aWRlIGFjY2VzcyB0byB0
-aGUgcGFydGl0aW9uLgo+Pj4+PiArICovCj4+Pj4+ICsKPj4+Pj4gwqBzdGF0aWMgaW50IG1tY19i
-bGtfYWxsb2NfcGFydHMoc3RydWN0IG1tY19jYXJkICpjYXJkLCBzdHJ1Y3QKPj4+Pj4gbW1jX2Js
-a19kYXRhCj4+Pj4+ICptZCkKPj4+Pj4gwqB7Cj4+Pj4+IC0gwqAgwqAgwqAgaW50IHJldCA9IDA7
-Cj4+Pj4+ICsgwqAgwqAgwqAgaW50IGlkeCwgcmV0ID0gMDsKPj4+Pj4KPj4+Pj4gwqAgwqAgwqAg
-wqBpZiAoIW1tY19jYXJkX21tYyhjYXJkKSkKPj4+Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBy
-ZXR1cm4gMDsKPj4+Pj4KPj4+Pj4gLSDCoCDCoCDCoCBpZiAoY2FyZC0+ZXh0X2NzZC5ib290X3Np
-emUmJgo+Pj4+PiDCoG1tY19ib290X3BhcnRpdGlvbl9hY2Nlc3MoY2FyZC0+aG9zdCkpIHsKPj4+
-Pj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCByZXQgPSBtbWNfYmxrX2FsbG9jX3BhcnQoY2FyZCwg
-bWQsCj4+Pj4+IEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX0JPT1QwLAo+Pj4+PiAtIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgY2FyZC0+
-ZXh0X2NzZC5ib290X3NpemU+PiDCoCDCoDksCj4+Pj4+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqB0cnVlLAo+Pj4+PiAtIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgImJv
-b3QwIik7Cj4+Pj4+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgaWYgKHJldCkKPj4+Pj4gLSDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCByZXR1cm4gcmV0Owo+Pj4+PiAtIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIHJldCA9IG1tY19ibGtfYWxsb2NfcGFydChjYXJkLCBtZCwKPj4+Pj4gRVhU
-X0NTRF9QQVJUX0NPTkZJR19BQ0NfQk9PVDEsCj4+Pj4+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBjYXJkLT5leHRfY3NkLmJvb3Rf
-c2l6ZT4+IMKgIMKgOSwKPj4+Pj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoHRydWUsCj4+Pj4+IC0gwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAiYm9vdDEiKTsKPj4+Pj4g
-LSDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAocmV0KQo+Pj4+PiAtIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIHJldHVybiByZXQ7Cj4+Pj4+ICsgwqAgwqAgwqAgZm9yIChpZHggPSAw
-OyBpZHg8IMKgIMKgY2FyZC0+bnJfcGFydHM7IGlkeCsrKSB7Cj4+Pj4+ICsgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgaWYgKChpZHggPT0gMCB8fCBpZHggPT0gMSkmJgo+Pj4+PiArIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgICFtbWNfYm9vdF9wYXJ0aXRpb25fYWNjZXNzKGNhcmQtPmhv
-c3QpKQo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNvbnRpbnVlOwo+
-Pj4+Cj4+Pj4gU2VlbXMgYSBiaXQgZnJhZ2lsZS4gwqBXaGF0IGlmIHNvbWVvbmUgZGVjaWRlZCB0
-byBwdXQgdGhlIGdwCj4+Pj4gcGFydGl0aW9ucyBiZWZvcmUgdGhlIGJvb3QgcGFydGl0aW9ucy4g
-wqBXaGF0IGFib3V0Ogo+Pj4KPj4+IFRoZXJlIGFyZSB0aGUgZGVmYXVsdCB0d28gYm9vdCBwYXJ0
-aXRpb24gaW4gbW1jIHNwZWMuIEkgdGhpbmsgdGhhdAo+Pj4gdGhpcyBjYXNlIGNhbiBub3QgYmUg
-aGFwcGVuZWQuCj4+PiBBbmQgYm9vdCBwYXJ0aXRpb24gc2l6ZSBvZiBFWFQgQ1NEIGlzIHJlYWQt
-b25seS4KPj4+IENhbiB5b3UgZXhwbGFpbiB3aGljaCBpcyBjYXNlIHB1dCB0byBncCBwYXJ0aXRp
-b25zIGJlZm9yZSB0aGUgYm9vdAo+Pj4gcGFydGl0aW9uID8KPj4KPj4gUmVseWluZyBvbiB0aGUg
-cGFydGl0aW9uIG9yZGVyIGluIHRoZSBwYXJ0aXRpb24gYXJyYXkgaXMgZnJhZ2lsZS4KPj4gWW91
-IGNhbm5vdCBwcmVkaWN0IGhvdyBzb21lb25lIG1heSB3YW50IHRvIGNoYW5nZSBpdCBpbiB0aGUg
-ZnV0dXJlLAo+PiBhbmQgdGhhdCBwZXJzb24gd2lsbCBub3QgZXhwZWN0IHRoYXQgY2VydGFpbiBw
-b3NpdGlvbnMgaGF2ZSBjZXJ0YWluIG1lYW5pbmcuCjAsMSBvZiBCb290IHBhcnRpdGlvbiBpcyBm
-aXhlZCBpZiBzcGVjIGlzIG5vdCBjaGFuZ2VkIG92ZXIuIGJ1dCBncApwYXJ0aXRpb24gaXMgdmFy
-aWFibGUgaW4gMiwzLDQsNSw2IG9mIGFycmF5LgpJZiBIb3cgc29tZW9uZSBjaGFuZ2UgY29kZSwg
-cHJvYmxlbSBvY2N1ciA/Cj4+Cj4+Pgo+Pj4+Cj4+Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBp
-ZiAobW1jX2lzX2Jvb3RfcGFydGl0aW9uKCZwYXJ0W2lkeF0pJiYKPj4+PiDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCFtbWNfYm9vdF9wYXJ0aXRpb25fYWNjZXNzKGNhcmQtPmhvc3QpCj4+
-Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBjb250aW51ZTsKPj4+Pgo+Pj4+
-IEFuZDoKPj4+Pgo+Pj4+IGludCBtbWNfaXNfYm9vdF9wYXJ0aXRpb24oc3RydWN0IG1tY19wYXJ0
-ICpwYXJ0KQo+Pj4+IHsKPj4+PiDCoCDCoCDCoCDCoHJldHVybiBwYXJ0LT5wYXJ0X2NmZz49IEVY
-VF9DU0RfUEFSVF9DT05GSUdfQUNDX0JPT1QwJiYKPj4+PiDCoCDCoCDCoCDCoCDCoCDCoCDCoCBw
-YXJ0LT5wYXJ0X2NmZzw9IEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX0JPT1QwICsKPj4+PiDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBNTUNfTlVNX0JPT1Rf
-UEFSVElUSU9OOwo+Pj4+IH0KPj4+Pgo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChj
-YXJkLT5wYXJ0W2lkeF0uc2l6ZSkgewo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIHJldCA9IG1tY19ibGtfYWxsb2NfcGFydChjYXJkLCBtZCwKPj4+Pj4gKyDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjYXJkLT5wYXJ0W2lkeF0ucGFy
-dF9jZmcsCj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgY2FyZC0+cGFydFtpZHhdLnNpemU+PiDCoCDCoDksCj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgY2FyZC0+cGFydFtpZHhdLmZvcmNlX3JvLAo+
-Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQt
-PnBhcnRbaWR4XS5uYW1lKTsKPj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCBpZiAocmV0KQo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIHJldHVybiByZXQ7Cj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgfQo+Pj4+PiDC
-oCDCoCDCoCDCoH0KPj4+Pj4KPj4+Pj4gwqAgwqAgwqAgwqByZXR1cm4gcmV0Owo+Pj4+PiBkaWZm
-IC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMK
-Pj4+Pj4gaW5kZXggYzYzMmIxZi4uMmY0NThhMCAxMDA2NDQKPj4+Pj4gLS0tIGEvZHJpdmVycy9t
-bWMvY29yZS9tbWMuYwo+Pj4+PiArKysgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jCj4+Pj4+IEBA
-IC0yMzksNyArMjM5LDkgQEAgc3RhdGljIGludCBtbWNfZ2V0X2V4dF9jc2Qoc3RydWN0IG1tY19j
-YXJkICpjYXJkLCB1OAo+Pj4+PiAqKm5ld19leHRfY3NkKQo+Pj4+PiDCoCAqLwo+Pj4+PiDCoHN0
-YXRpYyBpbnQgbW1jX3JlYWRfZXh0X2NzZChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsIHU4ICpleHRf
-Y3NkKQo+Pj4+PiDCoHsKPj4+Pj4gLSDCoCDCoCDCoCBpbnQgZXJyID0gMDsKPj4+Pj4gKyDCoCDC
-oCDCoCBpbnQgZXJyID0gMCwgaWR4Owo+Pj4+PiArIMKgIMKgIMKgIHVuc2lnbmVkIGludCBwYXJ0
-X3NpemU7Cj4+Pj4+ICsgwqAgwqAgwqAgdTggaGNfZXJhc2VfZ3JwX3N6ID0gMCwgaGNfd3BfZ3Jw
-X3N6ID0gMDsKPj4+Pj4KPj4+Pj4gwqAgwqAgwqAgwqBCVUdfT04oIWNhcmQpOwo+Pj4+Pgo+Pj4+
-PiBAQCAtMzQwLDcgKzM0MiwxNCBAQCBzdGF0aWMgaW50IG1tY19yZWFkX2V4dF9jc2Qoc3RydWN0
-IG1tY19jYXJkICpjYXJkLAo+Pj4+PiB1OAo+Pj4+PiAqZXh0X2NzZCkKPj4+Pj4gwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgKiBUaGVyZSBhcmUgdHdvIGJvb3QgcmVnaW9ucyBvZiBlcXVhbCBzaXpl
-LCBkZWZpbmVkIGluCj4+Pj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgICogbXVsdGlwbGVzIG9m
-IDEyOEsuCj4+Pj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgICovCj4+Pj4+IC0gwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgY2FyZC0+ZXh0X2NzZC5ib290X3NpemUgPSBleHRfY3NkW0VYVF9DU0RfQk9P
-VF9NVUxUXTw8Cj4+Pj4+IMKgMTc7Cj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgaWYgKGV4
-dF9jc2RbRVhUX0NTRF9CT09UX01VTFRdKSB7Cj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgZm9yIChpZHggPSAwOyBpZHg8IMKgIMKgTU1DX05VTV9CT09UX1BBUlRJVElP
-TjsKPj4+Pj4gaWR4KyspCj4+Pj4+IHsKPj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCBwYXJ0X3NpemUgPSBleHRfY3NkW0VYVF9DU0RfQk9PVF9NVUxU
-XTw8Cj4+Pj4+IMKgMTc7Cj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgbW1jX3BhcnRfYWRkKGNhcmQsIHBhcnRfc2l6ZSwKPj4+Pj4gKyDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBFWFRfQ1NE
-X1BBUlRfQ09ORklHX0FDQ19CT09UMCArCj4+Pj4+IGlkeCwKPj4+Pj4gKyDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAiYm9vdCVkIiwgaWR4
-LCB0cnVlKTsKPj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCB9Cj4+Pj4+
-ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgfQo+Pj4+PiDCoCDCoCDCoCDCoH0KPj4+Pj4KPj4+Pj4g
-wqAgwqAgwqAgwqBjYXJkLT5leHRfY3NkLnJhd19oY19lcmFzZV9nYXBfc2l6ZSA9Cj4+Pj4+IEBA
-IC0zNjIsOSArMzcxLDkgQEAgc3RhdGljIGludCBtbWNfcmVhZF9leHRfY3NkKHN0cnVjdCBtbWNf
-Y2FyZCAqY2FyZCwKPj4+Pj4gdTgKPj4+Pj4gKmV4dF9jc2QpCj4+Pj4+IMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgY2FyZC0+ZXh0X2NzZC5yYXdfcGFydGl0aW9uX3N1cHBvcnQgPQo+Pj4+PiBleHRf
-Y3NkW0VYVF9DU0RfUEFSVElUSU9OX1NVUFBPUlRdOwo+Pj4+PiDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoGlmICgoZXh0X2NzZFtFWFRfQ1NEX1BBUlRJVElPTl9TVVBQT1JUXSYgwqAgwqAweDIpJiYK
-Pj4+Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAoZXh0X2NzZFtFWFRfQ1NEX1BBUlRJVElPTl9B
-VFRSSUJVVEVdJiDCoCDCoDB4MSkpIHsKPj4+Pj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCB1OCBoY19lcmFzZV9ncnBfc3ogPQo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIGhjX2VyYXNlX2dycF9zeiA9Cj4+Pj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZXh0X2NzZFtFWFRfQ1NEX0hDX0VSQVNFX0dSUF9T
-SVpFXTsKPj4+Pj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCB1OCBoY193cF9n
-cnBfc3ogPQo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGhjX3dwX2dy
-cF9zeiA9Cj4+Pj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgZXh0X2NzZFtFWFRfQ1NEX0hDX1dQX0dSUF9TSVpFXTsKPj4+Pj4KPj4+Pj4gwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBjYXJkLT5leHRfY3NkLmVuaGFuY2VkX2FyZWFfZW4g
-PSAxOwo+Pj4+PiBAQCAtMzkzLDYgKzQwMiw0MSBAQCBzdGF0aWMgaW50IG1tY19yZWFkX2V4dF9j
-c2Qoc3RydWN0IG1tY19jYXJkICpjYXJkLAo+Pj4+PiB1OAo+Pj4+PiAqZXh0X2NzZCkKPj4+Pj4g
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBjYXJkLT5leHRfY3NkLmVuaGFuY2Vk
-X2FyZWFfb2Zmc2V0ID0gLUVJTlZBTDsKPj4+Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqBjYXJkLT5leHRfY3NkLmVuaGFuY2VkX2FyZWFfc2l6ZSA9IC1FSU5WQUw7Cj4+Pj4+
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgfQo+Pj4+PiArCj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgLyoKPj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCogR2VuZXJhbCBwdXJwb3Nl
-IHBhcnRpdGlvbiBmZWF0dXJlIHN1cHBvcnQgLS0KPj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCogSWYgZXh0X2NzZCBoYXZlIHRoZSBzaXplIG9mIGdlbmVyYWwgcHVycG9zZQo+Pj4+PiBw
-YXJ0aXRpb25zLAo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgKiBzZXQgc2l6ZSwgcGFy
-dF9jZmcsIHBhcnRpdGlvbiBuYW1lIGluIG1tY19wYXJ0Lgo+Pj4+PiArIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgKi8KPj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAoZXh0X2NzZFtFWFRf
-Q1NEX1BBUlRJVElPTl9TVVBQT1JUXSYKPj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCBFWFRfQ1NEX1BBUlRfU1VQUE9SVF9QQVJUX0VOKSB7Cj4+Pj4+ICsgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgaWYgKGNhcmQtPmV4dF9jc2QuZW5oYW5jZWRfYXJlYV9l
-biAhPSAxKSB7Cj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgaGNfZXJhc2VfZ3JwX3N6ID0KPj4+Pj4gKwo+Pj4+PiBleHRfY3NkW0VYVF9DU0RfSENf
-RVJBU0VfR1JQX1NJWkVdOwo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIGhjX3dwX2dycF9zeiA9Cj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXh0X2NzZFtFWFRfQ1NEX0hDX1dQ
-X0dSUF9TSVpFXTsKPj4+Pj4gKwo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9jc2QuZW5oYW5jZWRfYXJlYV9lbiA9IDE7Cj4+Pj4+
-ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgfQo+Pj4+PiArCj4+Pj4+ICsgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZm9yIChpZHggPSAwOyBpZHg8IMKgIMKgTU1D
-X05VTV9HUF9QQVJUSVRJT047Cj4+Pj4+IGlkeCsrKSB7Cj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgaWYgKCFleHRfY3NkW0VYVF9DU0RfR1BfU0la
-RV9NVUxUICsgaWR4Cj4+Pj4+ICoKPj4+Pj4gM10mJgo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgICFleHRfY3NkW0VYVF9DU0RfR1BfU0laRV9NVUxU
-ICsgaWR4ICogMwo+Pj4+PiArCj4+Pj4+IDFdJiYKPj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAhZXh0X2NzZFtFWFRfQ1NEX0dQX1NJWkVfTVVMVCAr
-IGlkeCAqIDMKPj4+Pj4gKwo+Pj4+PiAyXSkKPj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBjb250aW51ZTsKPj4+Pj4gKyDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBwYXJ0X3NpemUgPQo+Pj4+
-PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIChleHRfY3Nk
-W0VYVF9DU0RfR1BfU0laRV9NVUxUICsgaWR4ICogMwo+Pj4+PiArCj4+Pj4+IDJdCj4+Pj4+ICs8
-PCDCoCDCoDE2KSArCj4+Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgKGV4dF9jc2RbRVhUX0NTRF9HUF9TSVpFX01VTFQgKyBpZHggKiAzCj4+Pj4+ICsK
-Pj4+Pj4gMV0KPj4+Pj4gKzw8IMKgIMKgOCkgKwo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGV4dF9jc2RbRVhUX0NTRF9HUF9TSVpFX01VTFQgKyBp
-ZHggKiAzXTsKPj4+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCBwYXJ0X3NpemUgKj0gKHNpemVfdCkoaGNfZXJhc2VfZ3JwX3N6ICoKPj4+Pj4gKyDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBoY193
-cF9ncnBfc3opOwo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIG1tY19wYXJ0X2FkZChjYXJkLCBwYXJ0X3NpemU8PCDCoCDCoDE5LAo+Pj4+PiArIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIEVY
-VF9DU0RfUEFSVF9DT05GSUdfQUNDX0dQMCArCj4+Pj4+IGlkeCwKPj4+Pj4gKyDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCAiZ3AlZCIsIGlk
-eCwgZmFsc2UpOwo+Pj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIH0KPj4+
-Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCB9Cj4+Pj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-Y2FyZC0+ZXh0X2NzZC5zZWNfdHJpbV9tdWx0ID0KPj4+Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqBleHRfY3NkW0VYVF9DU0RfU0VDX1RSSU1fTVVMVF07Cj4+Pj4+IMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgY2FyZC0+ZXh0X2NzZC5zZWNfZXJhc2VfbXVsdCA9Cj4+Pj4+IGRp
-ZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L21tYy9jYXJkLmggYi9pbmNsdWRlL2xpbnV4L21tYy9j
-YXJkLmgKPj4+Pj4gaW5kZXggNTI5NGRkZi4uMDUyMjYyNyAxMDA2NDQKPj4+Pj4gLS0tIGEvaW5j
-bHVkZS9saW51eC9tbWMvY2FyZC5oCj4+Pj4+ICsrKyBiL2luY2x1ZGUvbGludXgvbW1jL2NhcmQu
-aAo+Pj4+PiBAQCAtMTIsNiArMTIsNyBAQAo+Pj4+Pgo+Pj4+PiDCoCNpbmNsdWRlPGxpbnV4L21t
-Yy9jb3JlLmg+Cj4+Pj4+IMKgI2luY2x1ZGU8bGludXgvbW9kX2RldmljZXRhYmxlLmg+Cj4+Pj4+
-ICsjaW5jbHVkZTxsaW51eC9nZW5oZC5oPgo+Pj4+Pgo+Pj4+PiDCoHN0cnVjdCBtbWNfY2lkIHsK
-Pj4+Pj4gwqAgwqAgwqAgwqB1bnNpZ25lZCBpbnQgwqAgwqAgwqAgwqAgwqAgwqBtYW5maWQ7Cj4+
-Pj4+IEBAIC02NCw3ICs2NSw2IEBAIHN0cnVjdCBtbWNfZXh0X2NzZCB7Cj4+Pj4+IMKgIMKgIMKg
-IMKgYm9vbCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGVuaGFuY2VkX2FyZWFfZW47IMKg
-IMKgIMKgIC8qIGVuYWJsZSBiaXQgKi8KPj4+Pj4gwqAgwqAgwqAgwqB1bnNpZ25lZCBsb25nIGxv
-bmcgwqAgwqAgwqBlbmhhbmNlZF9hcmVhX29mZnNldDsgwqAgLyogVW5pdHM6IEJ5dGUgKi8KPj4+
-Pj4gwqAgwqAgwqAgwqB1bnNpZ25lZCBpbnQgwqAgwqAgwqAgwqAgwqAgwqBlbmhhbmNlZF9hcmVh
-X3NpemU7IMKgIMKgIC8qIFVuaXRzOiBLQiAqLwo+Pj4+PiAtIMKgIMKgIMKgIHVuc2lnbmVkIGlu
-dCDCoCDCoCDCoCDCoCDCoCDCoGJvb3Rfc2l6ZTsgwqAgwqAgwqAgwqAgwqAgwqAgwqAvKiBpbiBi
-eXRlcyAqLwo+Pj4+PiDCoCDCoCDCoCDCoHU4IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgcmF3X3BhcnRpdGlvbl9zdXBwb3J0OyDCoC8qIDE2MCAqLwo+Pj4+PiDCoCDCoCDCoCDCoHU4
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgcmF3X2VyYXNlZF9tZW1fY291bnQ7IMKg
-IC8qIDE4MSAqLwo+Pj4+PiDCoCDCoCDCoCDCoHU4IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgcmF3X2V4dF9jc2Rfc3RydWN0dXJlOyDCoC8qIDE5NCAqLwo+Pj4+PiBAQCAtMTU4LDYg
-KzE1OCwyMyBAQCBzdHJ1Y3Qgc2Rpb19mdW5jX3R1cGxlOwo+Pj4+Pgo+Pj4+PiDCoCNkZWZpbmUg
-U0RJT19NQVhfRlVOQ1MgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqA3Cj4+Pj4+Cj4+Pj4+ICsvKiBU
-aGUgbnVtYmVyIG9mIE1NQyBwaHlzaWNhbCBwYXJ0aXRpb25zCj4+Pj4+ICsgKiBJdCBjb25zaXN0
-IG9mIGJvb3QgcGFydGl0aW9ucygyKSwgZ2VuZXJhbCBwdXJwb3NlIHBhcnRpdGlvbnMoNCkgaW4K
-Pj4+Pj4gTU1DCj4+Pj4+IHY0LjQKPj4+Pj4gKyAqLwo+Pj4+PiArI2RlZmluZSBNTUNfTlVNX0JP
-T1RfUEFSVElUSU9OIDIKPj4+Pj4gKyNkZWZpbmUgTU1DX05VTV9HUF9QQVJUSVRJT04gwqAgNAo+
-Pj4+PiArI2RlZmluZSBNTUNfTlVNX1BIWV9QQVJUSVRJT04gwqA2Cj4+Pj4+ICsKPj4+Pj4gKy8q
-Cj4+Pj4+ICsgKiBNTUMgUGh5c2ljYWwgcGFydGl0aW9ucwo+Pj4+PiArICovCj4+Pj4+ICtzdHJ1
-Y3QgbW1jX3BhcnQgewo+Pj4+PiArIMKgIMKgIMKgIHVuc2lnbmVkIGludCDCoCDCoHNpemU7IMKg
-IC8qIHBhcnRpdGlvbiBzaXplIChpbiBieXRlcykgKi8KPj4+Pj4gKyDCoCDCoCDCoCB1bnNpZ25l
-ZCBpbnQgwqAgwqBwYXJ0X2NmZzsgwqAgwqAgwqAgLyogaXQgdXNlZCB0byBwYXJ0X3R5cGUgKi8K
-Pj4+Pj4gKyDCoCDCoCDCoCBjaGFyIMKgIMKgbmFtZVtESVNLX05BTUVfTEVOXTsKPj4+Pj4gKyDC
-oCDCoCDCoCBib29sIMKgIMKgZm9yY2Vfcm87IMKgIMKgIMKgIC8qIHRvIG1ha2UgYm9vdCBwYXJ0
-cyBSTyBieSBkZWZhdWx0ICovCj4+Pj4+ICt9Owo+Pj4+PiArCj4+Pj4+IMKgLyoKPj4+Pj4gwqAg
-KiBNTUMgZGV2aWNlCj4+Pj4+IMKgICovCj4+Pj4+IEBAIC0yMTksOSArMjM2LDI0IEBAIHN0cnVj
-dCBtbWNfY2FyZCB7Cj4+Pj4+IMKgIMKgIMKgIMKgdW5zaWduZWQgaW50IMKgIMKgIMKgIMKgIMKg
-IMKgc2RfYnVzX3NwZWVkOyDCoCAvKiBCdXMgU3BlZWQgTW9kZSBzZXQgZm9yCj4+Pj4+IHRoZSBj
-YXJkICovCj4+Pj4+Cj4+Pj4+IMKgIMKgIMKgIMKgc3RydWN0IGRlbnRyeSDCoCDCoCDCoCDCoCDC
-oCAqZGVidWdmc19yb290Owo+Pj4+PiArIMKgIMKgIMKgIHN0cnVjdCBtbWNfcGFydCBwYXJ0W01N
-Q19OVU1fUEhZX1BBUlRJVElPTl07IC8qIHBoeXNpY2FsCj4+Pj4+IHBhcnRpdGlvbnMgKi8KPj4+
-Pj4gKyDCoCDCoCDCoCB1bnNpZ25lZCBpbnQgwqAgwqBucl9wYXJ0czsKPj4+Pj4gwqB9Owo+Pj4+
-Pgo+Pj4+PiDCoC8qCj4+Pj4+ICsgKiBUaGlzIGZ1bmN0aW9uIGZpbGwgY29udGVudHMgaW4gbW1j
-X3BhcnQuCj4+Pj4+ICsgKi8KPj4+Pj4gK3N0YXRpYyBpbmxpbmUgdm9pZCBtbWNfcGFydF9hZGQo
-c3RydWN0IG1tY19jYXJkICpjYXJkLCB1bnNpZ25lZCBpbnQKPj4+Pj4gc2l6ZSwKPj4+Pj4gKyDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCB1bnNpZ25lZCBpbnQgcGFydF9jZmcsIGNo
-YXIgKm5hbWUsIGludCBpZHgsIGJvb2wKPj4+Pj4gcm8pCj4+Pj4+ICt7Cj4+Pj4+ICsgwqAgwqAg
-wqAgY2FyZC0+cGFydFtjYXJkLT5ucl9wYXJ0c10uc2l6ZSA9IHNpemU7Cj4+Pj4+ICsgwqAgwqAg
-wqAgY2FyZC0+cGFydFtjYXJkLT5ucl9wYXJ0c10ucGFydF9jZmcgPSBwYXJ0X2NmZzsKPj4+Pj4g
-KyDCoCDCoCDCoCBzcHJpbnRmKGNhcmQtPnBhcnRbY2FyZC0+bnJfcGFydHNdLm5hbWUsIG5hbWUs
-IGlkeCk7Cj4+Pj4+ICsgwqAgwqAgwqAgY2FyZC0+cGFydFtjYXJkLT5ucl9wYXJ0c10uZm9yY2Vf
-cm8gPSBybzsKPj4+Pj4gKyDCoCDCoCDCoCBjYXJkLT5ucl9wYXJ0cysrOwo+Pj4+PiArfQo+Pj4+
-PiArCj4+Pj4+ICsvKgo+Pj4+PiDCoCAqIMKgVGhlIHdvcmxkIGlzIG5vdCBwZXJmZWN0IGFuZCBz
-dXBwbGllcyB1cyB3aXRoIGJyb2tlbiBtbWMvc2Rpbwo+Pj4+PiBkZXZpY2VzLgo+Pj4+PiDCoCAq
-IMKgRm9yIGF0IGxlYXN0IHNvbWUgb2YgdGhlc2UgYnVncyB3ZSBuZWVkIGEgd29yay1hcm91bmQu
-Cj4+Pj4+IMKgICovCj4+Pj4+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L21tYy9tbWMuaCBi
-L2luY2x1ZGUvbGludXgvbW1jL21tYy5oCj4+Pj4+IGluZGV4IDUwYWYyMjcuLmVhNTU4ZWIgMTAw
-NjQ0Cj4+Pj4+IC0tLSBhL2luY2x1ZGUvbGludXgvbW1jL21tYy5oCj4+Pj4+ICsrKyBiL2luY2x1
-ZGUvbGludXgvbW1jL21tYy5oCj4+Pj4+IEBAIC0yNzAsNiArMjcwLDcgQEAgc3RydWN0IF9tbWNf
-Y3NkIHsKPj4+Pj4gwqAgKiBFWFRfQ1NEIGZpZWxkcwo+Pj4+PiDCoCAqLwo+Pj4+Pgo+Pj4+PiAr
-I2RlZmluZSBFWFRfQ1NEX0dQX1NJWkVfTVVMVCDCoCDCoCDCoCDCoCDCoCAxNDMgwqAgwqAgLyog
-Ui9XICovCj4+Pj4+IMKgI2RlZmluZSBFWFRfQ1NEX1BBUlRJVElPTl9BVFRSSUJVVEUgwqAgMTU2
-IMKgIMKgIC8qIFIvVyAqLwo+Pj4+PiDCoCNkZWZpbmUgRVhUX0NTRF9QQVJUSVRJT05fU1VQUE9S
-VCDCoCDCoCAxNjAgwqAgwqAgLyogUk8gKi8KPj4+Pj4gwqAjZGVmaW5lIEVYVF9DU0RfUlNUX05f
-RlVOQ1RJT04gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAxNjIgwqAgwqAgLyogUi9XICovCj4+Pj4+
-IEBAIC0zMTMsNyArMzE0LDkgQEAgc3RydWN0IF9tbWNfY3NkIHsKPj4+Pj4KPj4+Pj4gwqAjZGVm
-aW5lIEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX01BU0sgwqAoMHg3KQo+Pj4+PiDCoCNkZWZpbmUg
-RVhUX0NTRF9QQVJUX0NPTkZJR19BQ0NfQk9PVDAgKDB4MSkKPj4+Pj4gLSNkZWZpbmUgRVhUX0NT
-RF9QQVJUX0NPTkZJR19BQ0NfQk9PVDEgwqAoMHgyKQo+Pj4+PiArI2RlZmluZSBFWFRfQ1NEX1BB
-UlRfQ09ORklHX0FDQ19HUDAgwqAgwqAoMHg0KQo+Pj4+PiArCj4+Pj4+ICsjZGVmaW5lIEVYVF9D
-U0RfUEFSVF9TVVBQT1JUX1BBUlRfRU4gwqAgKDB4MSkKPj4+Pj4KPj4+Pj4gwqAjZGVmaW5lIEVY
-VF9DU0RfQ01EX1NFVF9OT1JNQUwgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAoMTw8MCkKPj4+Pj4g
-wqAjZGVmaW5lIEVYVF9DU0RfQ01EX1NFVF9TRUNVUkUgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAo
-MTw8MSkKPj4+Pgo+Pj4+Cj4+Cj4+Cj4K
+On 05/10/11 14:22, NamJae Jeon wrote:
+> 2011/10/5 NamJae Jeon<linkinjeon@gmail.com>:
+>> 2011/10/5 Adrian Hunter<adrian.hunter@intel.com>:
+>>> On 05/10/11 13:21, NamJae Jeon wrote:
+>>>>
+>>>> 2011/10/5 Adrian Hunter<adrian.hunter@intel.com>:
+>>>>>
+>>>>> On 04/10/11 20:45, Namjae Jeon wrote:
+>>>>>>
+>>>>>> It allows gerneral purpose partitions in MMC Device.
+>>>>>> And I try to simpliy make mmc_blk_alloc_parts using mmc_part structure
+>>>>>> suggested by Andrei Warkentin.
+>>>>>> After patching, we can see general purpose partitions like this.
+>>>>>>>
+>>>>>>> cat /proc/partitions
+>>>>>>
+>>>>>>            179 0 847872 mmcblk0
+>>>>>>            179 192 4096 mmcblk0gp3
+>>>>>>            179 160 4096 mmcblk0gp2
+>>>>>>            179 128 4096 mmcblk0gp1
+>>>>>>            179 96  1052672 mmcblk0gp0
+>>>>>>            179 64  1024 mmcblk0boot1
+>>>>>>            179 32  1024 mmcblk0boot0
+>>>>>>
+>>>>>> Signed-off-by: Namjae Jeon<linkinjeon@gmail.com>
+>>>>>> ---
+>>>>>>   drivers/mmc/card/block.c |   34 +++++++++++++++++------------
+>>>>>>   drivers/mmc/core/mmc.c   |   52
+>>>>>> ++++++++++++++++++++++++++++++++++++++++++---
+>>>>>>   include/linux/mmc/card.h |   34 +++++++++++++++++++++++++++++-
+>>>>>>   include/linux/mmc/mmc.h  |    5 +++-
+>>>>>>   4 files changed, 105 insertions(+), 20 deletions(-)
+>>>>>>
+>>>>>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>>>>>> index 782d5f8..fb6f1e9 100644
+>>>>>> --- a/drivers/mmc/card/block.c
+>>>>>> +++ b/drivers/mmc/card/block.c
+>>>>>> @@ -1470,26 +1470,32 @@ static int mmc_blk_alloc_part(struct mmc_card
+>>>>>> *card,
+>>>>>>         return 0;
+>>>>>>   }
+>>>>>>
+>>>>>> +/* MMC Physical partition consist of two boot partitions and
+>>>>>> + * up to four general purpose partitions.
+>>>>>> + * For each partitions enabled in EXT_CSD
+>>>>>> + * The block device will allocated to provide access to the partition.
+>>>>>> + */
+>>>>>> +
+>>>>>>   static int mmc_blk_alloc_parts(struct mmc_card *card, struct
+>>>>>> mmc_blk_data
+>>>>>> *md)
+>>>>>>   {
+>>>>>> -       int ret = 0;
+>>>>>> +       int idx, ret = 0;
+>>>>>>
+>>>>>>         if (!mmc_card_mmc(card))
+>>>>>>                 return 0;
+>>>>>>
+>>>>>> -       if (card->ext_csd.boot_size&&
+>>>>>>   mmc_boot_partition_access(card->host)) {
+>>>>>> -               ret = mmc_blk_alloc_part(card, md,
+>>>>>> EXT_CSD_PART_CONFIG_ACC_BOOT0,
+>>>>>> -                                        card->ext_csd.boot_size>>      9,
+>>>>>> -                                        true,
+>>>>>> -                                        "boot0");
+>>>>>> -               if (ret)
+>>>>>> -                       return ret;
+>>>>>> -               ret = mmc_blk_alloc_part(card, md,
+>>>>>> EXT_CSD_PART_CONFIG_ACC_BOOT1,
+>>>>>> -                                        card->ext_csd.boot_size>>      9,
+>>>>>> -                                        true,
+>>>>>> -                                        "boot1");
+>>>>>> -               if (ret)
+>>>>>> -                       return ret;
+>>>>>> +       for (idx = 0; idx<      card->nr_parts; idx++) {
+>>>>>> +               if ((idx == 0 || idx == 1)&&
+>>>>>> +                       !mmc_boot_partition_access(card->host))
+>>>>>> +                       continue;
+>>>>>
+>>>>> Seems a bit fragile.  What if someone decided to put the gp
+>>>>> partitions before the boot partitions.  What about:
+>>>>
+>>>> There are the default two boot partition in mmc spec. I think that
+>>>> this case can not be happened.
+>>>> And boot partition size of EXT CSD is read-only.
+>>>> Can you explain which is case put to gp partitions before the boot
+>>>> partition ?
+>>>
+>>> Relying on the partition order in the partition array is fragile.
+>>> You cannot predict how someone may want to change it in the future,
+>>> and that person will not expect that certain positions have certain meaning.
+> 0,1 of Boot partition is fixed if spec is not changed over. but gp
+
+No. 0,1 are an accidental result of the order in which ext-csd is
+parsed.
+
+> partition is variable in 2,3,4,5,6 of array.
+> If How someone change code, problem occur ?
+
+If you move code around in mmc_read_ext_csd() the order can change,
+hence it is fragile.
+
+>>>
+>>>>
+>>>>>
+>>>>>                 if (mmc_is_boot_partition(&part[idx])&&
+>>>>>                     !mmc_boot_partition_access(card->host)
+>>>>>                         continue;
+>>>>>
+>>>>> And:
+>>>>>
+>>>>> int mmc_is_boot_partition(struct mmc_part *part)
+>>>>> {
+>>>>>         return part->part_cfg>= EXT_CSD_PART_CONFIG_ACC_BOOT0&&
+>>>>>                part->part_cfg<= EXT_CSD_PART_CONFIG_ACC_BOOT0 +
+>>>>>                                  MMC_NUM_BOOT_PARTITION;
+>>>>> }
+>>>>>
+>>>>>> +               if (card->part[idx].size) {
+>>>>>> +                       ret = mmc_blk_alloc_part(card, md,
+>>>>>> +                               card->part[idx].part_cfg,
+>>>>>> +                               card->part[idx].size>>      9,
+>>>>>> +                               card->part[idx].force_ro,
+>>>>>> +                               card->part[idx].name);
+>>>>>> +                       if (ret)
+>>>>>> +                               return ret;
+>>>>>> +               }
+>>>>>>         }
+>>>>>>
+>>>>>>         return ret;
+>>>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>>>>> index c632b1f..2f458a0 100644
+>>>>>> --- a/drivers/mmc/core/mmc.c
+>>>>>> +++ b/drivers/mmc/core/mmc.c
+>>>>>> @@ -239,7 +239,9 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8
+>>>>>> **new_ext_csd)
+>>>>>>    */
+>>>>>>   static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>>>>>>   {
+>>>>>> -       int err = 0;
+>>>>>> +       int err = 0, idx;
+>>>>>> +       unsigned int part_size;
+>>>>>> +       u8 hc_erase_grp_sz = 0, hc_wp_grp_sz = 0;
+>>>>>>
+>>>>>>         BUG_ON(!card);
+>>>>>>
+>>>>>> @@ -340,7 +342,14 @@ static int mmc_read_ext_csd(struct mmc_card *card,
+>>>>>> u8
+>>>>>> *ext_csd)
+>>>>>>                  * There are two boot regions of equal size, defined in
+>>>>>>                  * multiples of 128K.
+>>>>>>                  */
+>>>>>> -               card->ext_csd.boot_size = ext_csd[EXT_CSD_BOOT_MULT]<<
+>>>>>>   17;
+>>>>>> +               if (ext_csd[EXT_CSD_BOOT_MULT]) {
+>>>>>> +                       for (idx = 0; idx<      MMC_NUM_BOOT_PARTITION;
+>>>>>> idx++)
+>>>>>> {
+>>>>>> +                               part_size = ext_csd[EXT_CSD_BOOT_MULT]<<
+>>>>>>   17;
+>>>>>> +                               mmc_part_add(card, part_size,
+>>>>>> +                                       EXT_CSD_PART_CONFIG_ACC_BOOT0 +
+>>>>>> idx,
+>>>>>> +                                       "boot%d", idx, true);
+>>>>>> +                       }
+>>>>>> +               }
+>>>>>>         }
+>>>>>>
+>>>>>>         card->ext_csd.raw_hc_erase_gap_size =
+>>>>>> @@ -362,9 +371,9 @@ static int mmc_read_ext_csd(struct mmc_card *card,
+>>>>>> u8
+>>>>>> *ext_csd)
+>>>>>>                 card->ext_csd.raw_partition_support =
+>>>>>> ext_csd[EXT_CSD_PARTITION_SUPPORT];
+>>>>>>                 if ((ext_csd[EXT_CSD_PARTITION_SUPPORT]&      0x2)&&
+>>>>>>                 (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE]&      0x1)) {
+>>>>>> -                       u8 hc_erase_grp_sz =
+>>>>>> +                       hc_erase_grp_sz =
+>>>>>>                                 ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+>>>>>> -                       u8 hc_wp_grp_sz =
+>>>>>> +                       hc_wp_grp_sz =
+>>>>>>                                 ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+>>>>>>
+>>>>>>                         card->ext_csd.enhanced_area_en = 1;
+>>>>>> @@ -393,6 +402,41 @@ static int mmc_read_ext_csd(struct mmc_card *card,
+>>>>>> u8
+>>>>>> *ext_csd)
+>>>>>>                         card->ext_csd.enhanced_area_offset = -EINVAL;
+>>>>>>                         card->ext_csd.enhanced_area_size = -EINVAL;
+>>>>>>                 }
+>>>>>> +
+>>>>>> +               /*
+>>>>>> +                * General purpose partition feature support --
+>>>>>> +                * If ext_csd have the size of general purpose
+>>>>>> partitions,
+>>>>>> +                * set size, part_cfg, partition name in mmc_part.
+>>>>>> +                */
+>>>>>> +               if (ext_csd[EXT_CSD_PARTITION_SUPPORT]&
+>>>>>> +                       EXT_CSD_PART_SUPPORT_PART_EN) {
+>>>>>> +                       if (card->ext_csd.enhanced_area_en != 1) {
+>>>>>> +                               hc_erase_grp_sz =
+>>>>>> +
+>>>>>> ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+>>>>>> +                               hc_wp_grp_sz =
+>>>>>> +                                       ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+>>>>>> +
+>>>>>> +                               card->ext_csd.enhanced_area_en = 1;
+>>>>>> +                       }
+>>>>>> +
+>>>>>> +                       for (idx = 0; idx<      MMC_NUM_GP_PARTITION;
+>>>>>> idx++) {
+>>>>>> +                               if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx
+>>>>>> *
+>>>>>> 3]&&
+>>>>>> +                               !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3
+>>>>>> +
+>>>>>> 1]&&
+>>>>>> +                               !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3
+>>>>>> +
+>>>>>> 2])
+>>>>>> +                                       continue;
+>>>>>> +                               part_size =
+>>>>>> +                               (ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3
+>>>>>> +
+>>>>>> 2]
+>>>>>> +<<      16) +
+>>>>>> +                               (ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3
+>>>>>> +
+>>>>>> 1]
+>>>>>> +<<      8) +
+>>>>>> +                               ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3];
+>>>>>> +                               part_size *= (size_t)(hc_erase_grp_sz *
+>>>>>> +                                       hc_wp_grp_sz);
+>>>>>> +                               mmc_part_add(card, part_size<<      19,
+>>>>>> +                                       EXT_CSD_PART_CONFIG_ACC_GP0 +
+>>>>>> idx,
+>>>>>> +                                       "gp%d", idx, false);
+>>>>>> +                       }
+>>>>>> +               }
+>>>>>>                 card->ext_csd.sec_trim_mult =
+>>>>>>                         ext_csd[EXT_CSD_SEC_TRIM_MULT];
+>>>>>>                 card->ext_csd.sec_erase_mult =
+>>>>>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+>>>>>> index 5294ddf..0522627 100644
+>>>>>> --- a/include/linux/mmc/card.h
+>>>>>> +++ b/include/linux/mmc/card.h
+>>>>>> @@ -12,6 +12,7 @@
+>>>>>>
+>>>>>>   #include<linux/mmc/core.h>
+>>>>>>   #include<linux/mod_devicetable.h>
+>>>>>> +#include<linux/genhd.h>
+>>>>>>
+>>>>>>   struct mmc_cid {
+>>>>>>         unsigned int            manfid;
+>>>>>> @@ -64,7 +65,6 @@ struct mmc_ext_csd {
+>>>>>>         bool                    enhanced_area_en;       /* enable bit */
+>>>>>>         unsigned long long      enhanced_area_offset;   /* Units: Byte */
+>>>>>>         unsigned int            enhanced_area_size;     /* Units: KB */
+>>>>>> -       unsigned int            boot_size;              /* in bytes */
+>>>>>>         u8                      raw_partition_support;  /* 160 */
+>>>>>>         u8                      raw_erased_mem_count;   /* 181 */
+>>>>>>         u8                      raw_ext_csd_structure;  /* 194 */
+>>>>>> @@ -158,6 +158,23 @@ struct sdio_func_tuple;
+>>>>>>
+>>>>>>   #define SDIO_MAX_FUNCS                7
+>>>>>>
+>>>>>> +/* The number of MMC physical partitions
+>>>>>> + * It consist of boot partitions(2), general purpose partitions(4) in
+>>>>>> MMC
+>>>>>> v4.4
+>>>>>> + */
+>>>>>> +#define MMC_NUM_BOOT_PARTITION 2
+>>>>>> +#define MMC_NUM_GP_PARTITION   4
+>>>>>> +#define MMC_NUM_PHY_PARTITION  6
+>>>>>> +
+>>>>>> +/*
+>>>>>> + * MMC Physical partitions
+>>>>>> + */
+>>>>>> +struct mmc_part {
+>>>>>> +       unsigned int    size;   /* partition size (in bytes) */
+>>>>>> +       unsigned int    part_cfg;       /* it used to part_type */
+>>>>>> +       char    name[DISK_NAME_LEN];
+>>>>>> +       bool    force_ro;       /* to make boot parts RO by default */
+>>>>>> +};
+>>>>>> +
+>>>>>>   /*
+>>>>>>    * MMC device
+>>>>>>    */
+>>>>>> @@ -219,9 +236,24 @@ struct mmc_card {
+>>>>>>         unsigned int            sd_bus_speed;   /* Bus Speed Mode set for
+>>>>>> the card */
+>>>>>>
+>>>>>>         struct dentry           *debugfs_root;
+>>>>>> +       struct mmc_part part[MMC_NUM_PHY_PARTITION]; /* physical
+>>>>>> partitions */
+>>>>>> +       unsigned int    nr_parts;
+>>>>>>   };
+>>>>>>
+>>>>>>   /*
+>>>>>> + * This function fill contents in mmc_part.
+>>>>>> + */
+>>>>>> +static inline void mmc_part_add(struct mmc_card *card, unsigned int
+>>>>>> size,
+>>>>>> +                       unsigned int part_cfg, char *name, int idx, bool
+>>>>>> ro)
+>>>>>> +{
+>>>>>> +       card->part[card->nr_parts].size = size;
+>>>>>> +       card->part[card->nr_parts].part_cfg = part_cfg;
+>>>>>> +       sprintf(card->part[card->nr_parts].name, name, idx);
+>>>>>> +       card->part[card->nr_parts].force_ro = ro;
+>>>>>> +       card->nr_parts++;
+>>>>>> +}
+>>>>>> +
+>>>>>> +/*
+>>>>>>    *  The world is not perfect and supplies us with broken mmc/sdio
+>>>>>> devices.
+>>>>>>    *  For at least some of these bugs we need a work-around.
+>>>>>>    */
+>>>>>> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+>>>>>> index 50af227..ea558eb 100644
+>>>>>> --- a/include/linux/mmc/mmc.h
+>>>>>> +++ b/include/linux/mmc/mmc.h
+>>>>>> @@ -270,6 +270,7 @@ struct _mmc_csd {
+>>>>>>    * EXT_CSD fields
+>>>>>>    */
+>>>>>>
+>>>>>> +#define EXT_CSD_GP_SIZE_MULT           143     /* R/W */
+>>>>>>   #define EXT_CSD_PARTITION_ATTRIBUTE   156     /* R/W */
+>>>>>>   #define EXT_CSD_PARTITION_SUPPORT     160     /* RO */
+>>>>>>   #define EXT_CSD_RST_N_FUNCTION                162     /* R/W */
+>>>>>> @@ -313,7 +314,9 @@ struct _mmc_csd {
+>>>>>>
+>>>>>>   #define EXT_CSD_PART_CONFIG_ACC_MASK  (0x7)
+>>>>>>   #define EXT_CSD_PART_CONFIG_ACC_BOOT0 (0x1)
+>>>>>> -#define EXT_CSD_PART_CONFIG_ACC_BOOT1  (0x2)
+>>>>>> +#define EXT_CSD_PART_CONFIG_ACC_GP0    (0x4)
+>>>>>> +
+>>>>>> +#define EXT_CSD_PART_SUPPORT_PART_EN   (0x1)
+>>>>>>
+>>>>>>   #define EXT_CSD_CMD_SET_NORMAL                (1<<0)
+>>>>>>   #define EXT_CSD_CMD_SET_SECURE                (1<<1)
+>>>>>
+>>>>>
+>>>
+>>>
+>>
+
