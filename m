@@ -1,118 +1,116 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH v11] mmc : general purpose partition support.
-Date: Thu, 6 Oct 2011 09:13:50 +0900
-Message-ID: <CAKYAXd9wqjK90pn6YHNGKi+gDEqwDV4x14CrY-Nc7JHQ_Ed7xw@mail.gmail.com>
-References: <1317825945-1918-1-git-send-email-linkinjeon@gmail.com>
-	<1757717892.66886.1317828833207.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH v5] mmc: core: Add default timeout value for CMD6.
+Date: Thu, 06 Oct 2011 11:32:53 +0900
+Message-ID: <000001cc83d0$3fffb2a0$bfff17e0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:46719 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935580Ab1JFANw convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2011 20:13:52 -0400
-In-Reply-To: <1757717892.66886.1317828833207.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com, 'jh80.chung@samsung.com'
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <awarkentin@vmware.com>
-Cc: linux-kernel@vger.kernel.org, adrian hunter <adrian.hunter@intel.com>, linus walleij <linus.walleij@linaro.org>, james p freyensee <james_p_freyensee@linux.intel.com>, sebras@gmail.com, Ulf Hansson <Ulf.Hansson@stericsson.com>, stefan xk nilsson <stefan.xk.nilsson@stericsson.com>, per forlin <per.forlin@stericsson.com>, johan rudholm <johan.rudholm@stericsson.com>, cjb@laptop.org, linux-mmc@vger.kernel.org
 
-2011/10/6 Andrei Warkentin <awarkentin@vmware.com>:
-> Hi,
->
-> ----- Original Message -----
->> From: "Namjae Jeon" <linkinjeon@gmail.com>
->> To: cjb@laptop.org, linux-mmc@vger.kernel.org
->> Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, "adrian hun=
-ter" <adrian.hunter@intel.com>, "linus walleij"
->> <linus.walleij@linaro.org>, "james p freyensee" <james_p_freyensee@l=
-inux.intel.com>, sebras@gmail.com, "Ulf Hansson"
->> <Ulf.Hansson@stericsson.com>, "stefan xk nilsson" <stefan.xk.nilsson=
-@stericsson.com>, "per forlin"
->> <per.forlin@stericsson.com>, "johan rudholm" <johan.rudholm@stericss=
-on.com>, "Namjae Jeon" <linkinjeon@gmail.com>
->> Sent: Wednesday, October 5, 2011 10:45:45 AM
->> Subject: [PATCH v11] mmc : general purpose partition support.
->>
->> It allows gerneral purpose partitions in MMC Device.
->> And I try to simpliy make mmc_blk_alloc_parts using mmc_part
->> structure suggested by Andrei Warkentin.
->> After patching, we can see general purpose partitions like this.
->> > cat /proc/partitions
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 0 847872 mmcblk0
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 192 4096 mmcblk0gp3
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 160 4096 mmcblk0gp2
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 128 4096 mmcblk0gp1
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 96 =C2=A01052672 mmcblk0gp0
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 64 =C2=A01024 mmcblk0boot1
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 179 32 =C2=A01024 mmcblk0boot0
->>
->> Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
->> ---
->> =C2=A0drivers/mmc/card/block.c | =C2=A0 41 +++++++++++++++++++++++--=
-----------
->> =C2=A0drivers/mmc/core/mmc.c =C2=A0 | =C2=A0 52
->> =C2=A0++++++++++++++++++++++++++++++++++++++++++---
->> =C2=A0include/linux/mmc/card.h | =C2=A0 34 +++++++++++++++++++++++++=
-++++-
->> =C2=A0include/linux/mmc/mmc.h =C2=A0| =C2=A0 =C2=A05 +++-
->> =C2=A04 files changed, 112 insertions(+), 20 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> + =C2=A0 =C2=A0 for (idx =3D 0; idx < card->nr_parts; idx++) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (mmc_is_boot_partitio=
-n(&card->part[idx]) &&
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 !mmc_boot_partition_access(card->host))
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 continue;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (card->part[idx].size=
-) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 ret =3D mmc_blk_alloc_part(card, md,
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->part[idx].part_cfg,
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->part[idx].size >> 9,
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->part[idx].force_ro,
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->part[idx].name);
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 if (ret)
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return ret;
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
->> =C2=A0 =C2=A0 =C2=A0 }
->
-> Is there any reason for putting the mmc_boot_partition_access() logic=
- here? If
-> boot partitions are not allowed by host, then just don't add the mmc_=
-parts to
-> the parts array, no? Such minutae should belong in core mmc code, not=
- block driver, IMHO.
+EXT_CSD[248] includes the default maximum timeout for CMD6.
+This field is added at eMMC4.5 Spec. And it can be used for default
+timeout except for some operations which don't define the timeout(i.e.
+background operation, sanitize, flush cache) in eMMC4.5 Spec.
 
-Hi.
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+ drivers/mmc/core/mmc.c   |   18 +++++++++++++-----
+ include/linux/mmc/card.h |    1 +
+ include/linux/mmc/mmc.h  |    1 +
+ 3 files changed, 15 insertions(+), 5 deletions(-)
 
-How about changing patch like this ?
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index c632b1f..c37b8d2 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -414,6 +414,12 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 	else
+ 		card->erased_byte = 0x0;
 
-if (ext_csd[EXT_CSD_BOOT_MULT] && mmc_boot_partition_access(card->host)=
-) {
-                        for (idx =3D 0; idx < MMC_NUM_BOOT_PARTITION; i=
-dx++) {
-                                part_size =3D ext_csd[EXT_CSD_BOOT_MULT=
-] << 17;
-                                mmc_part_add(card, part_size,
-                                        EXT_CSD_PART_CONFIG_ACC_BOOT0 +=
- idx,
-                                        "boot%d", idx, true);
-                        }
-                }
++	if (card->ext_csd.rev >= 6)
++		card->ext_csd.generic_cmd6_time = 10 *
++			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
++	else
++		card->ext_csd.generic_cmd6_time = 0;
++
+ out:
+ 	return err;
+ }
+@@ -607,7 +613,7 @@ static int mmc_select_powerclass(struct mmc_card *card,
+ 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 				 EXT_CSD_POWER_CLASS,
+ 				 pwrclass_val,
+-				 0);
++				 card->ext_csd.generic_cmd6_time);
+ 	}
 
-I want to hear the opinion from andrei and
-adrian(mmc_boot_partition_access patch's author)
-Thanks.
->
-> A
->
+ 	return err;
+@@ -757,7 +763,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	 */
+ 	if (card->ext_csd.enhanced_area_en) {
+ 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-				 EXT_CSD_ERASE_GROUP_DEF, 1, 0);
++				 EXT_CSD_ERASE_GROUP_DEF, 1,
++				 card->ext_csd.generic_cmd6_time);
+
+ 		if (err && err != -EBADMSG)
+ 			goto free_card;
+@@ -800,7 +807,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	if ((card->ext_csd.hs_max_dtr != 0) &&
+ 		(host->caps & MMC_CAP_MMC_HIGHSPEED)) {
+ 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-				 EXT_CSD_HS_TIMING, 1, 0);
++				 EXT_CSD_HS_TIMING, 1,
++				 card->ext_csd.generic_cmd6_time);
+ 		if (err && err != -EBADMSG)
+ 			goto free_card;
+
+@@ -880,7 +888,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 					 EXT_CSD_BUS_WIDTH,
+ 					 ext_csd_bits[idx][0],
+-					 0);
++					 card->ext_csd.generic_cmd6_time);
+ 			if (!err) {
+ 				mmc_set_bus_width(card->host, bus_width);
+
+@@ -911,7 +919,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 					 EXT_CSD_BUS_WIDTH,
+ 					 ext_csd_bits[idx][1],
+-					 0);
++					 card->ext_csd.generic_cmd6_time);
+ 		}
+ 		if (err) {
+ 			printk(KERN_WARNING "%s: switch to bus width %d ddr %d "
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 5294ddf..d751ceb 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -53,6 +53,7 @@ struct mmc_ext_csd {
+ 	u8			rst_n_function;
+ 	unsigned int		part_time;		/* Units: ms */
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
++	unsigned int		generic_cmd6_time;	/* Units: ms */
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		sectors;
+ 	unsigned int		card_type;
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 50af227..b26c9e4 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -304,6 +304,7 @@ struct _mmc_csd {
+ #define EXT_CSD_PWR_CL_DDR_52_195	238	/* RO */
+ #define EXT_CSD_PWR_CL_DDR_52_360	239	/* RO */
+ #define EXT_CSD_POWER_OFF_LONG_TIME	247	/* RO */
++#define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
+
+ /*
+  * EXT_CSD field definitions
+--
+1.7.0.4
