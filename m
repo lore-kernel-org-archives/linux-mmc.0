@@ -1,44 +1,34 @@
-From: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
-Subject: Re: [PATCH] mmc: core: Add cache control for eMMC4.5 device
-Date: Thu, 6 Oct 2011 15:38:27 -0400
-Message-ID: <CANz0V+6DE7Zj=gWe4NOAzO3fFPApS3BTxgUJcMpPbDNMAZ5sGA@mail.gmail.com>
-References: <1315466950-28973-1-git-send-email-tgih.jun@samsung.com>
-	<4E8C43B5.7020704@intel.com>
-	<000401cc83e1$ca2c8fa0$5e85aee0$%jun@samsung.com>
-	<CANz0V+4Ue_TNXsJEEpGwTyHFUJjz+f41aF+VfWdKqc=BqW1-0w@mail.gmail.com>
-	<000f01cc8401$14d6ffd0$3e84ff70$%jun@samsung.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v2 0/2] arm: omap4: hsmmc: pbias fixes
+Date: Thu, 6 Oct 2011 12:58:42 -0700
+Message-ID: <20111006195842.GP6324@atomide.com>
+References: <1317644571-25175-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <000f01cc8401$14d6ffd0$3e84ff70$%jun@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1317644571-25175-1-git-send-email-balajitk@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, kishore.kadiyala@ti.com, vishp@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-2011/10/6 Seungwon Jeon <tgih.jun@samsung.com>:
-> Andrei E. Warkentin wrote:
->> Hi Seungwon,
->>
->> 2011/10/6 Seungwon Jeon <tgih.jun@samsung.com>:
->> > Adrian Hunter wrote:
->> >> On 08/09/11 10:29, Seungwon Jeon wrote:
->> >> > This patch adds cache feature of eMMC4.5 Spec.
->> >> > If device supports cache capability, host can utilize some specific
->> >> > operations.
->> >> >
->> >> > Signed-off-by: Seungwon Jeon<tgih.jun@samsung.com>
->> >> > ---
->>
->> I don't think eMMC 4.5 is public yet, so could you elaborate on the
->> volatile cache? I am
->> in particular interested in how the volatile cache affects reliable
->> writes (I would assume it doesn't
->> affect them at all).
-> Right, no effect.
-> Data of reliable write will be written the non-volatile memory not cache forcedly.
->>
+* Balaji T K <balajitk@ti.com> [111003 04:48]:
+> MMC1 pbias and speed control fix for SDMMC1 extended I/O cell
+> Rebase to git://github.com/tmlind/linux.git fixes
+> 	commit 122a98589349fe3388ffb7b996b54614951c934a
+> 	Author: Tapani Utriainen <tapani@technexion.com>
+> 	Date:   Fri Sep 30 11:05:56 2011 -0700
+> 
+> 	    ARM: OMAP: irq: loop counter fix in omap_init_irq()
+> 
+> 
+> Balaji T K (2):
+>   arm: omap4: hsmmc: Fix Pbias configuration on regulator OFF
+>   arm: omap4: hsmmc: configure SDMMC1_DR0 properly
 
-Good, sounds like REQ_FUA path needs no changes, then.
+Thanks adding both to fixes-part2 branch.
 
-A
+Regards,
+
+Tony
