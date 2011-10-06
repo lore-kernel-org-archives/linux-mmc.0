@@ -1,34 +1,46 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v2 0/2] arm: omap4: hsmmc: pbias fixes
-Date: Thu, 6 Oct 2011 12:58:42 -0700
-Message-ID: <20111006195842.GP6324@atomide.com>
-References: <1317644571-25175-1-git-send-email-balajitk@ti.com>
+From: Paul Walmsley <paul@pwsan.com>
+Subject: [PATCH 0/2] MMC: disable multiblock reads on controllers that don't
+ support them
+Date: Thu, 06 Oct 2011 14:50:30 -0600
+Message-ID: <20111006205002.7083.94088.stgit@dusk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1317644571-25175-1-git-send-email-balajitk@ti.com>
 Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, kishore.kadiyala@ti.com, vishp@ti.com
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: sakoman@gmail.com, dhylands@gmail.com, cjb@laptop.org
 List-Id: linux-mmc@vger.kernel.org
 
-* Balaji T K <balajitk@ti.com> [111003 04:48]:
-> MMC1 pbias and speed control fix for SDMMC1 extended I/O cell
-> Rebase to git://github.com/tmlind/linux.git fixes
-> 	commit 122a98589349fe3388ffb7b996b54614951c934a
-> 	Author: Tapani Utriainen <tapani@technexion.com>
-> 	Date:   Fri Sep 30 11:05:56 2011 -0700
-> 
-> 	    ARM: OMAP: irq: loop counter fix in omap_init_irq()
-> 
-> 
-> Balaji T K (2):
->   arm: omap4: hsmmc: Fix Pbias configuration on regulator OFF
->   arm: omap4: hsmmc: configure SDMMC1_DR0 properly
+Hello,
 
-Thanks adding both to fixes-part2 branch.
+Some MMC controller instances integrated on older OMAP34xx/35xx chips
+don't work correctly with multiple-block reads, due to a hardware bug.
+This series fixes the problem by adding an MMC capability flag for this
+case and making the appropriate changes to the MMC core code and OMAP HSMMC
+driver to support this.
 
-Regards,
+Once this series is merged, a subsequent patch will be needed by us OMAP
+folks to pass the appropriate device data via hwmod - this will be posted
+separately.
 
-Tony
+
+- Paul
+
+---
+mmc_errata_2.1.1.128_fix_3.2
+   text	   data	    bss	    dec	    hex	filename
+6325283	 655708	5591124	12572115	 bfd5d3	vmlinux.omap2plus_defconfig.orig
+6329423	 655700	5591124	12576247	 bfe5f7	vmlinux.omap2plus_defconfig.patched
+
+Paul Walmsley (2):
+      MMC: add workaround for controllers with broken multiblock reads
+      MMC: omap_hsmmc: disable multiblock reads when platform_data indicates that they are broken
+
+
+ arch/arm/plat-omap/include/plat/mmc.h |   19 ++++++++++++++++++-
+ drivers/mmc/card/block.c              |   21 ++++++++++++++-------
+ drivers/mmc/host/omap_hsmmc.c         |    4 ++++
+ include/linux/mmc/host.h              |    1 +
+ 4 files changed, 37 insertions(+), 8 deletions(-)
+
