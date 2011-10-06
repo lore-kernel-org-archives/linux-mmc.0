@@ -1,8 +1,8 @@
 From: Paul Walmsley <paul@pwsan.com>
-Subject: [PATCH 1/2] MMC: add workaround for controllers with broken
- multiblock reads
-Date: Thu, 06 Oct 2011 14:50:33 -0600
-Message-ID: <20111006205030.7083.79614.stgit@dusk>
+Subject: [PATCH 2/2] MMC: omap_hsmmc: disable multiblock reads when
+ platform_data indicates that they are broken
+Date: Thu, 06 Oct 2011 14:50:35 -0600
+Message-ID: <20111006205033.7083.75908.stgit@dusk>
 References: <20111006205002.7083.94088.stgit@dusk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -14,69 +14,63 @@ To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@list
 Cc: Dave Hylands <dhylands@gmail.com>, Steve Sakoman <sakoman@gmail.com>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Due to hardware bugs, some MMC host controllers don't support
-multiple-block reads[1].  To resolve, add a new MMC capability flag,
-MMC_CAP_NO_MULTI_READ, which can be set by affected host controller
-drivers.  When this capability is set, all reads will be issued one
-sector at a time.
-
-1. See for example Advisory 2.1.1.128 "MMC: Multiple Block Read
-Operation Issue" in _OMAP3530/3525/3515/3503 Silicon Errata_
-Revision F (October 2010) (SPRZ278F), available from
-http://focus.ti.com/lit/er/sprz278f/sprz278f.pdf
+When device data indicates that multiple block reads are not supported on
+a given HSMMC controller instance, log a message to the console, and
+pass the appropriate MMC capability flag to the MMC core.
 
 Signed-off-by: Paul Walmsley <paul@pwsan.com>
 Cc: Dave Hylands <dhylands@gmail.com>
 Cc: Steve Sakoman <sakoman@gmail.com>
 Cc: Chris Ball <cjb@laptop.org>
 ---
- drivers/mmc/card/block.c |   21 ++++++++++++++-------
- include/linux/mmc/host.h |    1 +
- 2 files changed, 15 insertions(+), 7 deletions(-)
+ arch/arm/plat-omap/include/plat/mmc.h |   19 ++++++++++++++++++-
+ drivers/mmc/host/omap_hsmmc.c         |    4 ++++
+ 2 files changed, 22 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1ff5486..927f9d5 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -954,13 +954,20 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	if (brq->data.blocks > card->host->max_blk_count)
- 		brq->data.blocks = card->host->max_blk_count;
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index c7b8741..94cf70a 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -31,7 +31,24 @@
  
--	/*
--	 * After a read error, we redo the request one sector at a time
--	 * in order to accurately determine which sectors can be read
--	 * successfully.
--	 */
--	if (disable_multi && brq->data.blocks > 1)
--		brq->data.blocks = 1;
-+	if (brq->data.blocks > 1) {
-+		/*
-+		 * After a read error, we redo the request one sector
-+		 * at a time in order to accurately determine which
-+		 * sectors can be read successfully.
-+		 */
-+		if (disable_multi)
-+			brq->data.blocks = 1;
-+
-+		/* Some controllers can't do multiblock reads due to hw bugs */
-+		if (card->host->caps & MMC_CAP_NO_MULTI_READ &&
-+		    rq_data_dir(req) == READ)
-+			brq->data.blocks = 1;
+ #define OMAP_MMC_MAX_SLOTS	2
+ 
+-#define OMAP_HSMMC_SUPPORTS_DUAL_VOLT	BIT(1)
++/*
++ * struct omap_mmc_dev_attr.flags possibilities
++ *
++ * OMAP_HSMMC_SUPPORTS_DUAL_VOLT: Some HSMMC controller instances can
++ *    operate with either 1.8Vdc or 3.0Vdc card voltages; this flag
++ *    should be set if this is the case.  See for example Section 22.5.3
++ *    "MMC/SD/SDIO1 Bus Voltage Selection" of the OMAP34xx Multimedia
++ *    Device Silicon Revision 3.1.x Revision ZR (July 2011) (SWPU223R).
++ *
++ * OMAP_HSMMC_BROKEN_MULTIBLOCK_READ: Multiple-block read transfers
++ *    don't work correctly on some MMC controller instances on some
++ *    OMAP3 SoCs; this flag should be set if this is the case.  See
++ *    for example Advisory 2.1.1.128 "MMC: Multiple Block Read
++ *    Operation Issue" in _OMAP3530/3525/3515/3503 Silicon Errata_
++ *    Revision F (October 2010) (SPRZ278F).
++ */
++#define OMAP_HSMMC_SUPPORTS_DUAL_VOLT		BIT(0)
++#define OMAP_HSMMC_BROKEN_MULTIBLOCK_READ	BIT(1)
+ 
+ struct omap_mmc_dev_attr {
+ 	u8 flags;
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 21e4a79..9e8fc75 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1943,6 +1943,10 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	omap_hsmmc_context_save(host);
+ 
+ 	mmc->caps |= MMC_CAP_DISABLE;
++	if (host->pdata->controller_flags & OMAP_HSMMC_BROKEN_MULTIBLOCK_READ) {
++		dev_info(&pdev->dev, "multiblock reads disabled due to 35xx erratum 2.1.1.128; MMC read performance may suffer\n");
++		mmc->caps |= MMC_CAP_NO_MULTI_READ;
 +	}
  
- 	if (brq->data.blocks > 1 || do_rel_wr) {
- 		/* SPI multiblock writes terminate using a special
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 1d09562..745f506 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -229,6 +229,7 @@ struct mmc_host {
- #define MMC_CAP_MAX_CURRENT_600	(1 << 28)	/* Host max current limit is 600mA */
- #define MMC_CAP_MAX_CURRENT_800	(1 << 29)	/* Host max current limit is 800mA */
- #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
-+#define MMC_CAP_NO_MULTI_READ	(1 << 31)	/* Multiblock reads don't work */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
+ 	pm_runtime_enable(host->dev);
+ 	pm_runtime_get_sync(host->dev);
 
 
