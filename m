@@ -1,36 +1,35 @@
 From: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
-Subject: Re: [PATCH v11] mmc : general purpose partition support.
-Date: Thu, 6 Oct 2011 01:14:07 -0400
-Message-ID: <CANz0V+5ybs6K7bGxHnXbyPCnBDZzw-O1X6zBfbmG16XvofJUTA@mail.gmail.com>
-References: <1317825945-1918-1-git-send-email-linkinjeon@gmail.com>
-	<1757717892.66886.1317828833207.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-	<CAKYAXd9wqjK90pn6YHNGKi+gDEqwDV4x14CrY-Nc7JHQ_Ed7xw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Add cache control for eMMC4.5 device
+Date: Thu, 6 Oct 2011 01:21:35 -0400
+Message-ID: <CANz0V+4Ue_TNXsJEEpGwTyHFUJjz+f41aF+VfWdKqc=BqW1-0w@mail.gmail.com>
+References: <1315466950-28973-1-git-send-email-tgih.jun@samsung.com>
+	<4E8C43B5.7020704@intel.com>
+	<000401cc83e1$ca2c8fa0$5e85aee0$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:57872 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751312Ab1JFFOJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Oct 2011 01:14:09 -0400
-In-Reply-To: <CAKYAXd9wqjK90pn6YHNGKi+gDEqwDV4x14CrY-Nc7JHQ_Ed7xw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <000401cc83e1$ca2c8fa0$5e85aee0$%jun@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: NamJae Jeon <linkinjeon@gmail.com>
-Cc: Andrei Warkentin <awarkentin@vmware.com>, linux-kernel@vger.kernel.org, adrian hunter <adrian.hunter@intel.com>, linus walleij <linus.walleij@linaro.org>, james p freyensee <james_p_freyensee@linux.intel.com>, sebras@gmail.com, Ulf Hansson <Ulf.Hansson@stericsson.com>, stefan xk nilsson <stefan.xk.nilsson@stericsson.com>, per forlin <per.forlin@stericsson.com>, johan rudholm <johan.rudholm@stericsson.com>, cjb@laptop.org, linux-mmc@vger.kernel.org
 
-SEkgTmFtSmFlLAoKMjAxMS8xMC81IE5hbUphZSBKZW9uIDxsaW5raW5qZW9uQGdtYWlsLmNvbT46
-Cj4KPiBIb3cgYWJvdXQgY2hhbmdpbmcgcGF0Y2ggbGlrZSB0aGlzID8KPgo+IGlmIChleHRfY3Nk
-W0VYVF9DU0RfQk9PVF9NVUxUXSAmJiBtbWNfYm9vdF9wYXJ0aXRpb25fYWNjZXNzKGNhcmQtPmhv
-c3QpKSB7Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBmb3IgKGlkeCA9IDA7
-IGlkeCA8IE1NQ19OVU1fQk9PVF9QQVJUSVRJT047IGlkeCsrKSB7Cj4gwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBwYXJ0X3NpemUgPSBleHRfY3NkW0VYVF9D
-U0RfQk9PVF9NVUxUXSA8PCAxNzsKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoG1tY19wYXJ0X2FkZChjYXJkLCBwYXJ0X3NpemUsCj4gwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBFWFRfQ1NEX1BB
-UlRfQ09ORklHX0FDQ19CT09UMCArIGlkeCwKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCJib290JWQiLCBpZHgsIHRydWUpOwo+IMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgfQo+IMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgfQo+Cj4gSSB3YW50IHRvIGhlYXIgdGhlIG9waW5pb24gZnJvbSBhbmRyZWkgYW5kCj4gYWRy
-aWFuKG1tY19ib290X3BhcnRpdGlvbl9hY2Nlc3MgcGF0Y2gncyBhdXRob3IpCj4gVGhhbmtzLgoK
-SSBsaWtlIHRoaXMuCgpBCg==
+Hi Seungwon,
+
+2011/10/6 Seungwon Jeon <tgih.jun@samsung.com>:
+> Adrian Hunter wrote:
+>> On 08/09/11 10:29, Seungwon Jeon wrote:
+>> > This patch adds cache feature of eMMC4.5 Spec.
+>> > If device supports cache capability, host can utilize some specific
+>> > operations.
+>> >
+>> > Signed-off-by: Seungwon Jeon<tgih.jun@samsung.com>
+>> > ---
+
+I don't think eMMC 4.5 is public yet, so could you elaborate on the
+volatile cache? I am
+in particular interested in how the volatile cache affects reliable
+writes (I would assume it doesn't
+affect them at all).
+
+A
