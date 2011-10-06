@@ -1,35 +1,81 @@
-From: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
-Subject: Re: [PATCH] mmc: core: Add cache control for eMMC4.5 device
-Date: Thu, 6 Oct 2011 01:21:35 -0400
-Message-ID: <CANz0V+4Ue_TNXsJEEpGwTyHFUJjz+f41aF+VfWdKqc=BqW1-0w@mail.gmail.com>
-References: <1315466950-28973-1-git-send-email-tgih.jun@samsung.com>
-	<4E8C43B5.7020704@intel.com>
-	<000401cc83e1$ca2c8fa0$5e85aee0$%jun@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v11] mmc : general purpose partition support.
+Date: Thu, 06 Oct 2011 09:31:54 +0300
+Message-ID: <4E8D4B5A.6040106@intel.com>
+References: <1757717892.66886.1317828833207.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <000401cc83e1$ca2c8fa0$5e85aee0$%jun@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:32671 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S935243Ab1JFGb7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 6 Oct 2011 02:31:59 -0400
+In-Reply-To: <1757717892.66886.1317828833207.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrei Warkentin <awarkentin@vmware.com>
+Cc: Namjae Jeon <linkinjeon@gmail.com>, linux-kernel@vger.kernel.org, linus walleij <linus.walleij@linaro.org>, james p freyensee <james_p_freyensee@linux.intel.com>, sebras@gmail.com, Ulf Hansson <Ulf.Hansson@stericsson.com>, stefan xk nilsson <stefan.xk.nilsson@stericsson.com>, per forlin <per.forlin@stericsson.com>, johan rudholm <johan.rudholm@stericsson.com>, cjb@laptop.org, linux-mmc@vger.kernel.org
 
-Hi Seungwon,
+On 05/10/11 18:33, Andrei Warkentin wrote:
+> Hi,
+>
+> ----- Original Message -----
+>> From: "Namjae Jeon"<linkinjeon@gmail.com>
+>> To: cjb@laptop.org, linux-mmc@vger.kernel.org
+>> Cc: linux-kernel@vger.kernel.org, awarkentin@vmware.com, "adrian hunter"<adrian.hunter@intel.com>, "linus walleij"
+>> <linus.walleij@linaro.org>, "james p freyensee"<james_p_freyensee@linux.intel.com>, sebras@gmail.com, "Ulf Hansson"
+>> <Ulf.Hansson@stericsson.com>, "stefan xk nilsson"<stefan.xk.nilsson@stericsson.com>, "per forlin"
+>> <per.forlin@stericsson.com>, "johan rudholm"<johan.rudholm@stericsson.com>, "Namjae Jeon"<linkinjeon@gmail.com>
+>> Sent: Wednesday, October 5, 2011 10:45:45 AM
+>> Subject: [PATCH v11] mmc : general purpose partition support.
+>>
+>> It allows gerneral purpose partitions in MMC Device.
+>> And I try to simpliy make mmc_blk_alloc_parts using mmc_part
+>> structure suggested by Andrei Warkentin.
+>> After patching, we can see general purpose partitions like this.
+>>> cat /proc/partitions
+>>            179 0 847872 mmcblk0
+>>            179 192 4096 mmcblk0gp3
+>>            179 160 4096 mmcblk0gp2
+>>            179 128 4096 mmcblk0gp1
+>>            179 96  1052672 mmcblk0gp0
+>>            179 64  1024 mmcblk0boot1
+>>            179 32  1024 mmcblk0boot0
+>>
+>> Signed-off-by: Namjae Jeon<linkinjeon@gmail.com>
+>> ---
+>>   drivers/mmc/card/block.c |   41 +++++++++++++++++++++++------------
+>>   drivers/mmc/core/mmc.c   |   52
+>>   ++++++++++++++++++++++++++++++++++++++++++---
+>>   include/linux/mmc/card.h |   34 +++++++++++++++++++++++++++++-
+>>   include/linux/mmc/mmc.h  |    5 +++-
+>>   4 files changed, 112 insertions(+), 20 deletions(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> +	for (idx = 0; idx<  card->nr_parts; idx++) {
+>> +		if (mmc_is_boot_partition(&card->part[idx])&&
+>> +			!mmc_boot_partition_access(card->host))
+>> +			continue;
+>> +		if (card->part[idx].size) {
+>> +			ret = mmc_blk_alloc_part(card, md,
+>> +				card->part[idx].part_cfg,
+>> +				card->part[idx].size>>  9,
+>> +				card->part[idx].force_ro,
+>> +				card->part[idx].name);
+>> +			if (ret)
+>> +				return ret;
+>> +		}
+>>   	}
+>
+> Is there any reason for putting the mmc_boot_partition_access() logic here? If
+> boot partitions are not allowed by host, then just don't add the mmc_parts to
+> the parts array, no? Such minutae should belong in core mmc code, not block driver, IMHO.
 
-2011/10/6 Seungwon Jeon <tgih.jun@samsung.com>:
-> Adrian Hunter wrote:
->> On 08/09/11 10:29, Seungwon Jeon wrote:
->> > This patch adds cache feature of eMMC4.5 Spec.
->> > If device supports cache capability, host can utilize some specific
->> > operations.
->> >
->> > Signed-off-by: Seungwon Jeon<tgih.jun@samsung.com>
->> > ---
+I like data structures to model reality i.e. the partitions exist but are not 
+accessible.  However I am not fussed - change it or not.
 
-I don't think eMMC 4.5 is public yet, so could you elaborate on the
-volatile cache? I am
-in particular interested in how the volatile cache affects reliable
-writes (I would assume it doesn't
-affect them at all).
+>
+> A
+>
 
-A
