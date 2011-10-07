@@ -1,53 +1,61 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 1/4] mmc: mmci: Bugfix in pio read for small packets
-Date: Fri, 7 Oct 2011 20:11:28 +0100
-Message-ID: <20111007191128.GA25689@n2100.arm.linux.org.uk>
-References: <1317109568-17905-1-git-send-email-ulf.hansson@stericsson.com> <20111001160937.GF11710@n2100.arm.linux.org.uk> <4E895F6A.9070203@stericsson.com> <4E8F00E4.5010702@stericsson.com>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
+Date: Fri, 7 Oct 2011 13:57:15 -0700
+Message-ID: <20111007205715.GC5275@leaf>
+References: <1317963790-29426-1-git-send-email-manjugk@ti.com>
+ <1317963790-29426-3-git-send-email-manjugk@ti.com>
+ <20111007064928.GE27508@kroah.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:39491 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753947Ab1JGTLm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2011 15:11:42 -0400
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:46558 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754395Ab1JGU53 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2011 16:57:29 -0400
 Content-Disposition: inline
-In-Reply-To: <4E8F00E4.5010702@stericsson.com>
+In-Reply-To: <20111007064928.GE27508@kroah.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Stefan NILSSON9 <stefan.xk.nilsson@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>
+To: Greg KH <greg@kroah.com>
+Cc: "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dilan Lee <dilee@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Manjunath@jasper.es
 
-On Fri, Oct 07, 2011 at 03:38:44PM +0200, Ulf Hansson wrote:
-> In this hot path we already do a read of the FIFOCNT register for every  
-> loop in pio_read, won't this sometimes cause caches to flush and  
-> similar, thus cost quite a lot - at least a lot more than executing a  
-> switch/if sentence like Stefan added? Or do I miss something?
+On Thu, Oct 06, 2011 at 11:49:28PM -0700, Greg KH wrote:
+> On Fri, Oct 07, 2011 at 10:33:07AM +0500, G, Manjunath Kondaiah wrote:
+> > +config PROBE_DEFER
+> > +	bool "Deferred Driver Probe"
+> > +	default y
+> > +	help
+> > +	  This option provides deferring driver probe if it has dependency on
+> > +	  other driver. Without this feature, initcall ordering should be done
+> > +	  manually to resolve driver dependencies. This feature completely side
+> > +	  steps the issues by allowing driver registration to occur in any
+> > +	  order, and any driver can request to be retried after a few more other
+> > +	  drivers get probed.
+> 
+> Why is this even an option?  Why would you ever want it disabled?  Why
+> does it need to be selected?
+> 
+> If you are going to default something to 'y' then just make it so it
+> can't be turned off any other way by just not making it an option at
+> all.
 
-The read of FIFOCNT just reads the counter and does nothing more.  Why
-do you think it causes a cache flush, and what cache do you think would
-be flushed?
+Given that the drivers which use this mechanism will not necessarily get
+built into the kernel, I'd suggest that it should remain optional and
+default to n.  Those drivers can then add a dependency on PROBE_DEFER.
+Let's try to avoid adding more infrastructure to the kernel that takes
+up space even when unused; certainly embedded will appreciate not having
+this feature unless a driver needs it.
 
-> I were also thinking of a possible optimization of minimizing the total  
-> numbers of reads of the FIFOCNT register in pio_read. Basically we can  
-> make use of the RXFIFOHALFFULL irq/status to know when there is a  
-> "burst" available in the FIFO. Do you think this will be feasible for  
-> the ARM MMCI Pl18x IP as well? I mean the consequence of using  
-> RXFIFOHALFFULL will be less numbers of IRQ raised and then when reading  
-> data from the FIFO it will be done in larger chunks.
+(That said, it still feels to me like an explicit dependency mechanism
+would make more sense than this "try again later" mechanism, but
+nonetheless "try again later" seems like an improvement over what we
+have now.)
 
-We read the FIFOCNT register to allow us to empty as much data from the
-FIFO as we possibly can at each interrupt.  We know that it's going to
-be at least half full at that time because that's the interrupt which is
-triggering us to do the read (except for the final few words).  What we
-want to do is not just read half the FIFO, but everything that it
-contains.  Hence why we read FIFOCNT.
+> It also cleans up this diff a lot, as you really don't want #ifdef in .c
+> files.
 
-> We could make use of the "likely" makro to make compiler optimizations  
-> of the code, is that a way forward do you think?
+Ideally the entire .c file could become conditional on PROBE_DEFER via
+kbuild, with the usual compatibility inlines in a .h file for the
+!PROBE_DEFER case.
 
-That only helps if you look at the assembled code and inspect what the
-compiler is doing.  If it's already correctly guessing the best paths,
-then the likely macro does nothing for you.
-
-But first, you need to fix your code so you're only reading 32-bit
-quantities from the FIFO register.
+- Josh Triplett
