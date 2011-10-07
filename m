@@ -1,71 +1,81 @@
 From: Barry Song <21cnbao@gmail.com>
 Subject: Re: [PATCH] PM: HIBERNATION: add resume_wait param to support
  MMC-like devices as resume file
-Date: Fri, 7 Oct 2011 23:45:21 +0800
-Message-ID: <CAGsJ_4wfpsTMEhs_-N1itXcJB03nvdfyjj+ksWG5g9YRB6Trgw@mail.gmail.com>
+Date: Fri, 7 Oct 2011 23:46:47 +0800
+Message-ID: <CAGsJ_4yf2B5=xwMMD-VpGmWKwZh8PxWT4ePm8ysjyQdc5OX+Bw@mail.gmail.com>
 References: <1317288548-19560-1-git-send-email-Barry.Song@csr.com>
  <CAKPcRGr3EzjS2es6HniuQziEivpsfH2r=d_Y=nkrsFW59g6xSw@mail.gmail.com>
- <CAGsJ_4zjRpEx_yLwXx74uipPN-Q2hun3AdLxKw2EYOy00cDm3Q@mail.gmail.com> <20111006175818.GB9886@atrey.karlin.mff.cuni.cz>
+ <CAGsJ_4zjRpEx_yLwXx74uipPN-Q2hun3AdLxKw2EYOy00cDm3Q@mail.gmail.com>
+ <20111006175818.GB9886@atrey.karlin.mff.cuni.cz> <CAGsJ_4wfpsTMEhs_-N1itXcJB03nvdfyjj+ksWG5g9YRB6Trgw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:63171 "EHLO
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:64085 "EHLO
 	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752951Ab1JGPpn convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2011 11:45:43 -0400
-In-Reply-To: <20111006175818.GB9886@atrey.karlin.mff.cuni.cz>
+	with ESMTP id S1752784Ab1JGPrJ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2011 11:47:09 -0400
+In-Reply-To: <CAGsJ_4wfpsTMEhs_-N1itXcJB03nvdfyjj+ksWG5g9YRB6Trgw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Pavel Machek <pavel@ucw.cz>
 Cc: rjw@sisk.pl, Luca Tettamanti <kronos.it@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, workgroup.linux@csr.com, frank.hofmann@tomtom.com, linux-arm-kernel@lists.infradead.org, linux-pm@lists.linux-foundation.org, Barry Song <Barry.Song@csr.com>
 
-2011/10/7 Pavel Machek <pavel@ucw.cz>:
->> 2011/9/29 Luca Tettamanti <kronos.it@gmail.com>:
->> > On Thu, Sep 29, 2011 at 11:29 AM, Barry Song <Barry.Song@csr.com> =
-wrote:
->> >> From: Barry Song <baohua.song@csr.com>
->> >>
->> >> Some devices like mmc are async detected very slow. For example,
->> >> drivers/mmc/host/sdhci.c launchs a 200ms delayed work to detect
->> >> mmc partitions then add disk.
->> >>
->> >> we do have wait_for_device_probe and scsi_complete_async_scans
->> >> before calling swsusp_check, but it is not enough to wait mmc.
->> >>
->> >> This patch adds resumewait kernel param just like rootwait so
->> >> that we have enough time to wait mmc ready. The differene is
->> >> here we wait for resume partition but rootwait waits for rootfs
->> >> partition.
->> >
->> > I assume that such a device would need "rootwait" to boot in the f=
-irst
->> > place; why don't you "overload" the param to also enable waiting i=
-n
->> > the resume path?
+2011/10/7 Barry Song <21cnbao@gmail.com>:
+> 2011/10/7 Pavel Machek <pavel@ucw.cz>:
+>>> 2011/9/29 Luca Tettamanti <kronos.it@gmail.com>:
+>>> > On Thu, Sep 29, 2011 at 11:29 AM, Barry Song <Barry.Song@csr.com>=
+ wrote:
+>>> >> From: Barry Song <baohua.song@csr.com>
+>>> >>
+>>> >> Some devices like mmc are async detected very slow. For example,
+>>> >> drivers/mmc/host/sdhci.c launchs a 200ms delayed work to detect
+>>> >> mmc partitions then add disk.
+>>> >>
+>>> >> we do have wait_for_device_probe and scsi_complete_async_scans
+>>> >> before calling swsusp_check, but it is not enough to wait mmc.
+>>> >>
+>>> >> This patch adds resumewait kernel param just like rootwait so
+>>> >> that we have enough time to wait mmc ready. The differene is
+>>> >> here we wait for resume partition but rootwait waits for rootfs
+>>> >> partition.
+>>> >
+>>> > I assume that such a device would need "rootwait" to boot in the =
+first
+>>> > place; why don't you "overload" the param to also enable waiting =
+in
+>>> > the resume path?
+>>>
+>>> not real. for an embedded product, the type of the rootfs, the plac=
+e
+>>> of the rootfs =C2=A0and the way to mount rootfs are pretty flexible=
+=2E
+>>> even though both rootfs and resume file use mmc, they will be in
+>>> different partitions at least. so i don't think rootwait can overlo=
+ad
+>>> resumewait.
 >>
->> not real. for an embedded product, the type of the rootfs, the place
->> of the rootfs =C2=A0and the way to mount rootfs are pretty flexible.
->> even though both rootfs and resume file use mmc, they will be in
->> different partitions at least. so i don't think rootwait can overloa=
-d
->> resumewait.
+>> It would be good to at least model it the same way. rootdelay allows
+>> you to specify time, which is important for USB devices...
 >
-> It would be good to at least model it the same way. rootdelay allows
-> you to specify time, which is important for USB devices...
+> actually i considered resumedelay before i sent this resumewait patch=
+=2E
+> now resumedelay is not an indispensable feature to my application and
+> most other systems since they are able to wait for the swap devices
+> ready by resumewait.
+> but of course we can have the resumedelay param as well just like
+> rootdelay. since Rafael has applied this resumedelay patch, =C2=A0i c=
+an
 
-actually i considered resumedelay before i sent this resumewait patch.
-now resumedelay is not an indispensable feature to my application and
-most other systems since they are able to wait for the swap devices
-ready by resumewait.
-but of course we can have the resumedelay param as well just like
-rootdelay. since Rafael has applied this resumedelay patch,  i can
-treat resumedelay as one new seperate patch.
+ sorry for typo.  -> since Rafael has applied this *resumewait* patch
 
+> treat resumedelay as one new seperate patch.
 >
-> --
-> (english) http://www.livejournal.com/~pavelmachek
-> (cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/hors=
-es/blog.html
+>>
+>> --
+>> (english) http://www.livejournal.com/~pavelmachek
+>> (cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/hor=
+ses/blog.html
+>>
+> -barry
 >
--barry
