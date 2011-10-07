@@ -1,30 +1,46 @@
 From: Greg KH <greg@kroah.com>
-Subject: Re: [PATCH 1/5] drivercore: add new error value for deferred probe
-Date: Thu, 6 Oct 2011 23:43:49 -0700
-Message-ID: <20111007064349.GD27508@kroah.com>
+Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
+Date: Thu, 6 Oct 2011 23:49:28 -0700
+Message-ID: <20111007064928.GE27508@kroah.com>
 References: <1317963790-29426-1-git-send-email-manjugk@ti.com>
- <1317963790-29426-2-git-send-email-manjugk@ti.com>
+ <1317963790-29426-3-git-send-email-manjugk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from out3.smtp.messagingengine.com ([66.111.4.27]:56110 "EHLO
-	out3.smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751071Ab1JGGvV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2011 02:51:21 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1317963790-29426-2-git-send-email-manjugk@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <1317963790-29426-3-git-send-email-manjugk@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: "G, Manjunath Kondaiah" <manjugk@ti.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, Dilan Lee <dilee@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Manjunath GKondaiah <manjunath.gkondaiah@linaro.org>, Arnd Bergmann <arnd@arndb.de>
+Cc: linux-arm-kernel@lists.infradead.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dilan Lee <dilee@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Manjunath GKondaiah <manjunath.gkondaiah@linaro.org>, Arnd Bergmann <arnd@arndb.de>
+List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Oct 07, 2011 at 10:33:06AM +0500, G, Manjunath Kondaiah wrote:
+On Fri, Oct 07, 2011 at 10:33:07AM +0500, G, Manjunath Kondaiah wrote:
 > 
-> Add new error value so that drivers can request deferred probe
-> from drivercore.
+> From: Grant Likely <grant.likely@secretlab.ca>
 > 
+> Allow drivers to report at probe time that they cannot get all the 
+> resources required by the device, and should be retried at a
+> later time.
+> 
+> This should completely solve the problem of getting devices
+> initialized in the right order.  Right now this is mostly handled by
+> mucking about with initcall ordering which is a complete hack, and
+> doesn't even remotely handle the case where device drivers are in
+> modules.  This approach completely sidesteps the issues by allowing
+> driver registration to occur in any order, and any driver can request
+> to be retried after a few more other drivers get probed.
+> 
+> Original patch posted by Grant Likely <grant.likely@secretlab.ca> at:
+> http://lwn.net/Articles/460522/
+> 
+> Enhancements to original patch by G, Manjunath Kondaiah <manjugk@ti.com>
+>  - checkpatch warning fixes
+>  - added Kconfig symbol CONFIG_PROBE_DEFER
+>  - replacing normal workqueue with singlethread_workqueue
+>  - handling -EPROBE_DEFER error
+> 
+> Signed-off-by: Grant Likely <grant.likely@secretlab.ca>
 > Signed-off-by: G, Manjunath Kondaiah <manjugk@ti.com>
-> Reported-by: Grant Likely <grant.likely@secretlab.ca>
 > ---
 > Cc: linux-omap@vger.kernel.org
 > Cc: linux-mmc@vger.kernel.org
@@ -36,22 +52,120 @@ On Fri, Oct 07, 2011 at 10:33:06AM +0500, G, Manjunath Kondaiah wrote:
 > Cc: Manjunath GKondaiah <manjunath.gkondaiah@linaro.org>
 > Cc: Arnd Bergmann <arnd@arndb.de>
 > 
->  include/linux/errno.h |    1 +
->  1 files changed, 1 insertions(+), 0 deletions(-)
+>  drivers/base/Kconfig   |   11 ++++
+>  drivers/base/base.h    |    3 +
+>  drivers/base/core.c    |    6 ++
+>  drivers/base/dd.c      |  145 ++++++++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/device.h |    7 ++
+>  5 files changed, 172 insertions(+), 0 deletions(-)
 > 
-> diff --git a/include/linux/errno.h b/include/linux/errno.h
-> index 4668583..83d8fcf 100644
-> --- a/include/linux/errno.h
-> +++ b/include/linux/errno.h
-> @@ -16,6 +16,7 @@
->  #define ERESTARTNOHAND	514	/* restart if no handler.. */
->  #define ENOIOCTLCMD	515	/* No ioctl command */
->  #define ERESTART_RESTARTBLOCK 516 /* restart by calling sys_restart_syscall */
-> +#define EPROBE_DEFER	517	/* restart probe again after some time */
+> diff --git a/drivers/base/Kconfig b/drivers/base/Kconfig
+> index 21cf46f..b412a71 100644
+> --- a/drivers/base/Kconfig
+> +++ b/drivers/base/Kconfig
+> @@ -172,6 +172,17 @@ config SYS_HYPERVISOR
+>  	bool
+>  	default n
+>  
+> +config PROBE_DEFER
+> +	bool "Deferred Driver Probe"
+> +	default y
+> +	help
+> +	  This option provides deferring driver probe if it has dependency on
+> +	  other driver. Without this feature, initcall ordering should be done
+> +	  manually to resolve driver dependencies. This feature completely side
+> +	  steps the issues by allowing driver registration to occur in any
+> +	  order, and any driver can request to be retried after a few more other
+> +	  drivers get probed.
 
-Can we really do this?  Isn't this some user/kernel api here?
+Why is this even an option?  Why would you ever want it disabled?  Why
+does it need to be selected?
 
-What's wrong with just "overloading" on top of an existing error code?
-Surely one of the other 516 types could be used here, right?
+If you are going to default something to 'y' then just make it so it
+can't be turned off any other way by just not making it an option at
+all.
+
+It also cleans up this diff a lot, as you really don't want #ifdef in .c
+files.
+
+> --- a/drivers/base/dd.c
+> +++ b/drivers/base/dd.c
+> @@ -28,6 +28,136 @@
+>  #include "base.h"
+>  #include "power/power.h"
+>  
+> +#if defined CONFIG_PROBE_DEFER
+> +/*
+> + * Deferred Probe infrastructure.
+
+Why not use kerneldoc?
+
+> + *
+> + * Sometimes driver probe order matters, but the kernel doesn't always have
+> + * dependency information which means some drivers will get probed before a
+> + * resource it depends on is available.  For example, an SDHCI driver may
+> + * first need a GPIO line from an i2c GPIO controller before it can be
+> + * initialized.  If a required resource is not available yet, a driver can
+> + * request probing to be deferred by returning -EPROBE_DEFER from its probe hook
+> + *
+> + * Deferred probe maintains two lists of devices, a pending list and an active
+> + * list.  A driver returning -EPROBE_DEFER causes the device to be added to the
+> + * pending list.
+> + *
+> + * The deferred_probe_mutex *must* be held any time the deferred_probe_*_list
+> + * of the (struct device*)->deferred_probe pointers are manipulated
+> + */
+> +static DEFINE_MUTEX(deferred_probe_mutex);
+> +static LIST_HEAD(deferred_probe_pending_list);
+> +static LIST_HEAD(deferred_probe_active_list);
+> +static struct workqueue_struct *deferred_wq;
+> +
+> +/**
+> + * deferred_probe_work_func() - Retry probing devices in the active list.
+> + */
+> +static void deferred_probe_work_func(struct work_struct *work)
+> +{
+> +	struct device *dev;
+> +	/*
+
+Extra blank line please.
+
+> +	 * This bit is tricky.  We want to process every device in the
+> +	 * deferred list, but devices can be removed from the list at any
+> +	 * time while inside this for-each loop.  There are two things that
+> +	 * need to be protected against:
+
+That's what the klist structure is supposed to make easier, why not use
+that here?
+
+> +	 * - if the device is removed from the deferred_probe_list, then we
+> +	 *   loose our place in the loop.  Since any device can be removed
+> +	 *   asynchronously, list_for_each_entry_safe() wouldn't make things
+> +	 *   much better.  Simplest solution is to restart walking the list
+> +	 *   whenever the current device gets removed.  Not the most efficient,
+> +	 *   but is simple to implement and easy to audit for correctness.
+> +	 * - if the device is unregistered, and freed, then there is a risk
+> +	 *   of a null pointer dereference.  This code uses get/put_device()
+> +	 *   to ensure the device cannot disappear from under our feet.
+
+Ick, use a klist, it was created to handle this exact problem in the
+driver core, so to not use it would be wrong, right?
+
+> +	 */
+> +	mutex_lock(&deferred_probe_mutex);
+> +	while (!list_empty(&deferred_probe_active_list)) {
+> +		dev = list_first_entry(&deferred_probe_active_list,
+> +					typeof(*dev), deferred_probe);
+> +		list_del_init(&dev->deferred_probe);
+> +
+> +		get_device(dev);
+> +
+> +		/* Drop the mutex while probing each device; the probe path
+> +		 * may manipulate the deferred list */
+
+Use proper kernel multi-line comment format.  This needs to be done in a
+number of places in this patch, please fix them all.
+
+thanks,
 
 greg k-h
