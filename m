@@ -1,36 +1,70 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 1/4] mmc: mmci: Bugfix in pio read for small packets
-Date: Sat, 8 Oct 2011 10:10:36 +0100
-Message-ID: <20111008091036.GF25689@n2100.arm.linux.org.uk>
-References: <1317109568-17905-1-git-send-email-ulf.hansson@stericsson.com>
-	<20111001160937.GF11710@n2100.arm.linux.org.uk>
-	<4E8F028C.10102@stericsson.com>
+From: Greg KH <greg@kroah.com>
+Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
+Date: Sat, 8 Oct 2011 08:55:02 -0700
+Message-ID: <20111008155502.GB616@kroah.com>
+References: <1317963790-29426-1-git-send-email-manjugk@ti.com>
+ <1317963790-29426-3-git-send-email-manjugk@ti.com>
+ <20111007064928.GE27508@kroah.com>
+ <20111007205715.GC5275@leaf>
+ <20111007212326.GA29003@kroah.com>
+ <20111008040351.GA7694@leaf>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from out3.smtp.messagingengine.com ([66.111.4.27]:35947 "EHLO
+	out3.smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753157Ab1JHPzl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2011 11:55:41 -0400
 Content-Disposition: inline
-In-Reply-To: <4E8F028C.10102@stericsson.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Lee Jones <lee.jones@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Stefan NILSSON9 <stefan.xk.nilsson@stericsson.com>
+In-Reply-To: <20111008040351.GA7694@leaf>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dilan Lee <dilee@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Manjunath@jasper.es
 
-On Fri, Oct 07, 2011 at 03:45:48PM +0200, Ulf Hansson wrote:
-> My feeling is that since discussing this patch, the rest of the patches  
-> in this serie and are kind of "put on hold". The reason for keeping them  
-> together is more of functional purpose. I hope you can have a look at  
-> them anyway, they shall be possible to apply without this one.
+On Fri, Oct 07, 2011 at 09:03:51PM -0700, Josh Triplett wrote:
+> On Fri, Oct 07, 2011 at 02:23:26PM -0700, Greg KH wrote:
+> > On Fri, Oct 07, 2011 at 01:57:15PM -0700, Josh Triplett wrote:
+> > > On Thu, Oct 06, 2011 at 11:49:28PM -0700, Greg KH wrote:
+> > > > On Fri, Oct 07, 2011 at 10:33:07AM +0500, G, Manjunath Kondaiah wrote:
+> > > > > +config PROBE_DEFER
+> > > > > +	bool "Deferred Driver Probe"
+> > > > > +	default y
+> > > > > +	help
+> > > > > +	  This option provides deferring driver probe if it has dependency on
+> > > > > +	  other driver. Without this feature, initcall ordering should be done
+> > > > > +	  manually to resolve driver dependencies. This feature completely side
+> > > > > +	  steps the issues by allowing driver registration to occur in any
+> > > > > +	  order, and any driver can request to be retried after a few more other
+> > > > > +	  drivers get probed.
+> > > > 
+> > > > Why is this even an option?  Why would you ever want it disabled?  Why
+> > > > does it need to be selected?
+> > > > 
+> > > > If you are going to default something to 'y' then just make it so it
+> > > > can't be turned off any other way by just not making it an option at
+> > > > all.
+> > > 
+> > > Given that the drivers which use this mechanism will not necessarily get
+> > > built into the kernel, I'd suggest that it should remain optional and
+> > > default to n.  Those drivers can then add a dependency on PROBE_DEFER.
+> > > Let's try to avoid adding more infrastructure to the kernel that takes
+> > > up space even when unused; certainly embedded will appreciate not having
+> > > this feature unless a driver needs it.
+> > 
+> > How much extra space is this "feature" really?
+> 
+> Just checked: 776 bytes, 640 of text and 136 of data.  We have kconfig
+> options for comparable amounts.
+> 
+> > I don't see it being
+> > anything larger than the amount of memory increase that just happened as
+> > I typed this email as part of the ongoing memory density changes.
+> 
+> I don't know about the changes you mean
 
-Well, the patch system says that each one depends on the previous one,
-and the first one in the series contains the PIO read thing.
+Moore's law.
 
-Do 7108/1 onwards depend on 7106/1 and 7107/1 ?
+Really, 776 bytes, just always enable it, it's not worth it.
+
+greg k-h
