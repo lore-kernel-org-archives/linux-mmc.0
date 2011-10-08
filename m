@@ -1,66 +1,56 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
-Date: Fri, 7 Oct 2011 21:03:51 -0700
-Message-ID: <20111008040351.GA7694@leaf>
-References: <1317963790-29426-1-git-send-email-manjugk@ti.com>
- <1317963790-29426-3-git-send-email-manjugk@ti.com>
- <20111007064928.GE27508@kroah.com>
- <20111007205715.GC5275@leaf>
- <20111007212326.GA29003@kroah.com>
+From: Barry Song <21cnbao@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: shorten the interval to wait
+ SDHCI_PRESENT_STATE set after sending cmd
+Date: Sat, 8 Oct 2011 16:00:09 +0800
+Message-ID: <CAGsJ_4zZUQqYTenFGCvNV_pYG68bVizs_-MzOR7d5ckLMZP1zg@mail.gmail.com>
+References: <1317268732-11653-1-git-send-email-Barry.Song@csr.com> <CANz0V+6mUaM-uvhi+yGD_43CSd-8aFhSSLcOczhanuXiP3OwSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:50750 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750734Ab1JHEEF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2011 00:04:05 -0400
-Content-Disposition: inline
-In-Reply-To: <20111007212326.GA29003@kroah.com>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:39516 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754701Ab1JHIAa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2011 04:00:30 -0400
+Received: by bkbzt4 with SMTP id zt4so5828587bkb.19
+        for <linux-mmc@vger.kernel.org>; Sat, 08 Oct 2011 01:00:29 -0700 (PDT)
+In-Reply-To: <CANz0V+6mUaM-uvhi+yGD_43CSd-8aFhSSLcOczhanuXiP3OwSw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Greg KH <greg@kroah.com>
-Cc: "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dilan Lee <dilee@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Manjunath@jasper.es
+To: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
+Cc: Barry Song <Barry.Song@csr.com>, cjb@laptop.org, linux-mmc@vger.kernel.org, workgroup.linux@csr.com, Barry Song <Baohua.Song@csr.com>
 
-On Fri, Oct 07, 2011 at 02:23:26PM -0700, Greg KH wrote:
-> On Fri, Oct 07, 2011 at 01:57:15PM -0700, Josh Triplett wrote:
-> > On Thu, Oct 06, 2011 at 11:49:28PM -0700, Greg KH wrote:
-> > > On Fri, Oct 07, 2011 at 10:33:07AM +0500, G, Manjunath Kondaiah wrote:
-> > > > +config PROBE_DEFER
-> > > > +	bool "Deferred Driver Probe"
-> > > > +	default y
-> > > > +	help
-> > > > +	  This option provides deferring driver probe if it has dependency on
-> > > > +	  other driver. Without this feature, initcall ordering should be done
-> > > > +	  manually to resolve driver dependencies. This feature completely side
-> > > > +	  steps the issues by allowing driver registration to occur in any
-> > > > +	  order, and any driver can request to be retried after a few more other
-> > > > +	  drivers get probed.
-> > > 
-> > > Why is this even an option?  Why would you ever want it disabled?  Why
-> > > does it need to be selected?
-> > > 
-> > > If you are going to default something to 'y' then just make it so it
-> > > can't be turned off any other way by just not making it an option at
-> > > all.
-> > 
-> > Given that the drivers which use this mechanism will not necessarily get
-> > built into the kernel, I'd suggest that it should remain optional and
-> > default to n.  Those drivers can then add a dependency on PROBE_DEFER.
-> > Let's try to avoid adding more infrastructure to the kernel that takes
-> > up space even when unused; certainly embedded will appreciate not having
-> > this feature unless a driver needs it.
-> 
-> How much extra space is this "feature" really?
+2011/10/1 Andrei E. Warkentin <andrey.warkentin@gmail.com>:
+> Hi,
+>
+> 2011/9/28 Barry Song <Barry.Song@csr.com>:
+>> From: Barry Song <Baohua.Song@csr.com>
+>>
+>> now we wait 1ms after every loop, in the worst case, 1ms will be wasted.
+>> that both decreases sd performance and increases cpu usage.
+>> This patch shorten the interval to 1us, then in the worst case, only 1us
+>> is wasted.
+>>
+>> Signed-off-by: Barry Song <Baohua.Song@csr.com>
+>> ---
+>
+> Cool! How much I/O perf did you gain?
 
-Just checked: 776 bytes, 640 of text and 136 of data.  We have kconfig
-options for comparable amounts.
+A test was done by bonnie++ on csr prima2 with 2GB class 2 SD card.
 
-> I don't see it being
-> anything larger than the amount of memory increase that just happened as
-> I typed this email as part of the ongoing memory density changes.
+before applying this patch:
+Version 1.03e       ------Sequential Output------ --Sequential Input- --Random-
+                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+SiRFPrima2     768M  2555  39  2737   0  3661   2  5947  91 13301   3 909.3   4
 
-I don't know about the changes you mean, but in any case I'd like to
-prevent mandatory size increases wherever possible.  I'd love to see the
-size of "allnoconfig" getting *smaller* over time, not larger.
+after applying this patch:
+Version 1.03e       ------Sequential Output------ --Sequential Input- --Random-
+                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
+Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
+SiRFPrima2     768M  2611  40  2668   0  3675   2  5952  91 13302   3 952.2   4
 
-- Josh Triplett
+>
+> A
+> -
+
+-barry
