@@ -1,56 +1,36 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: shorten the interval to wait
- SDHCI_PRESENT_STATE set after sending cmd
-Date: Sat, 8 Oct 2011 16:00:09 +0800
-Message-ID: <CAGsJ_4zZUQqYTenFGCvNV_pYG68bVizs_-MzOR7d5ckLMZP1zg@mail.gmail.com>
-References: <1317268732-11653-1-git-send-email-Barry.Song@csr.com> <CANz0V+6mUaM-uvhi+yGD_43CSd-8aFhSSLcOczhanuXiP3OwSw@mail.gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 1/4] mmc: mmci: Bugfix in pio read for small packets
+Date: Sat, 8 Oct 2011 10:10:36 +0100
+Message-ID: <20111008091036.GF25689@n2100.arm.linux.org.uk>
+References: <1317109568-17905-1-git-send-email-ulf.hansson@stericsson.com>
+	<20111001160937.GF11710@n2100.arm.linux.org.uk>
+	<4E8F028C.10102@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:39516 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754701Ab1JHIAa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2011 04:00:30 -0400
-Received: by bkbzt4 with SMTP id zt4so5828587bkb.19
-        for <linux-mmc@vger.kernel.org>; Sat, 08 Oct 2011 01:00:29 -0700 (PDT)
-In-Reply-To: <CANz0V+6mUaM-uvhi+yGD_43CSd-8aFhSSLcOczhanuXiP3OwSw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <4E8F028C.10102@stericsson.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: Lee Jones <lee.jones@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Stefan NILSSON9 <stefan.xk.nilsson@stericsson.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
-Cc: Barry Song <Barry.Song@csr.com>, cjb@laptop.org, linux-mmc@vger.kernel.org, workgroup.linux@csr.com, Barry Song <Baohua.Song@csr.com>
 
-2011/10/1 Andrei E. Warkentin <andrey.warkentin@gmail.com>:
-> Hi,
->
-> 2011/9/28 Barry Song <Barry.Song@csr.com>:
->> From: Barry Song <Baohua.Song@csr.com>
->>
->> now we wait 1ms after every loop, in the worst case, 1ms will be wasted.
->> that both decreases sd performance and increases cpu usage.
->> This patch shorten the interval to 1us, then in the worst case, only 1us
->> is wasted.
->>
->> Signed-off-by: Barry Song <Baohua.Song@csr.com>
->> ---
->
-> Cool! How much I/O perf did you gain?
+On Fri, Oct 07, 2011 at 03:45:48PM +0200, Ulf Hansson wrote:
+> My feeling is that since discussing this patch, the rest of the patches  
+> in this serie and are kind of "put on hold". The reason for keeping them  
+> together is more of functional purpose. I hope you can have a look at  
+> them anyway, they shall be possible to apply without this one.
 
-A test was done by bonnie++ on csr prima2 with 2GB class 2 SD card.
+Well, the patch system says that each one depends on the previous one,
+and the first one in the series contains the PIO read thing.
 
-before applying this patch:
-Version 1.03e       ------Sequential Output------ --Sequential Input- --Random-
-                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
-Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-SiRFPrima2     768M  2555  39  2737   0  3661   2  5947  91 13301   3 909.3   4
-
-after applying this patch:
-Version 1.03e       ------Sequential Output------ --Sequential Input- --Random-
-                    -Per Chr- --Block-- -Rewrite- -Per Chr- --Block-- --Seeks--
-Machine        Size K/sec %CP K/sec %CP K/sec %CP K/sec %CP K/sec %CP  /sec %CP
-SiRFPrima2     768M  2611  40  2668   0  3675   2  5952  91 13302   3 952.2   4
-
->
-> A
-> -
-
--barry
+Do 7108/1 onwards depend on 7106/1 and 7107/1 ?
