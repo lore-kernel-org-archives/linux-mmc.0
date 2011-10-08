@@ -1,56 +1,66 @@
-From: Greg KH <greg@kroah.com>
-Subject: Re: [PATCH 1/5] drivercore: add new error value for deferred probe
-Date: Fri, 7 Oct 2011 17:12:37 -0700
-Message-ID: <20111008001237.GA30551@kroah.com>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
+Date: Fri, 7 Oct 2011 21:03:51 -0700
+Message-ID: <20111008040351.GA7694@leaf>
 References: <1317963790-29426-1-git-send-email-manjugk@ti.com>
- <1317963790-29426-2-git-send-email-manjugk@ti.com>
- <20111007064349.GD27508@kroah.com>
- <CACxGe6uOmrLwJSPw4JHuOmt5B2wsukdDgVUr01pryq5Z9BFadw@mail.gmail.com>
- <32004.1318030113@turing-police.cc.vt.edu>
+ <1317963790-29426-3-git-send-email-manjugk@ti.com>
+ <20111007064928.GE27508@kroah.com>
+ <20111007205715.GC5275@leaf>
+ <20111007212326.GA29003@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from out3.smtp.messagingengine.com ([66.111.4.27]:45416 "EHLO
-	out3.smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752563Ab1JHAN2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2011 20:13:28 -0400
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:50750 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750734Ab1JHEEF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2011 00:04:05 -0400
 Content-Disposition: inline
-In-Reply-To: <32004.1318030113@turing-police.cc.vt.edu>
+In-Reply-To: <20111007212326.GA29003@kroah.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Valdis.Kletnieks@vt.edu
-Cc: Grant Likely <grant.likely@secretlab.ca>, "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dilan Lee <dilee@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Manjunath GKondaiah <manjunath.gkondaiah@linaro.org>, Arnd Bergmann <arnd@arndb.de>
+To: Greg KH <greg@kroah.com>
+Cc: "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dilan Lee <dilee@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Manjunath@jasper.es
 
-On Fri, Oct 07, 2011 at 07:28:33PM -0400, Valdis.Kletnieks@vt.edu wrote=
-:
-> On Fri, 07 Oct 2011 16:12:45 MDT, Grant Likely said:
-> > On Fri, Oct 7, 2011 at 12:43 AM, Greg KH <greg@kroah.com> wrote:
-> > > On Fri, Oct 07, 2011 at 10:33:06AM +0500, G, Manjunath Kondaiah w=
-rote:
->=20
-> > >> +#define EPROBE_DEFER 517 =A0 =A0 /* restart probe again after s=
-ome time */
-> > >
-> > > Can we really do this?
->=20
-> > According to Arnd, yes this is okay.
->=20
-> > > =A0Isn't this some user/kernel api here?
->=20
-> > > What's wrong with just "overloading" on top of an existing error =
-code?
-> > > Surely one of the other 516 types could be used here, right?
->=20
-> > overloading makes it really hard to find the users at a later date.
->=20
-> Would proposing '#define EPROBE_DEFER EAGAIN' be acceptable to everyb=
-ody? That
-> would allow overloading EAGAIN, but still make it easy to tell the us=
-ages apart
-> if we need to separate them later...
+On Fri, Oct 07, 2011 at 02:23:26PM -0700, Greg KH wrote:
+> On Fri, Oct 07, 2011 at 01:57:15PM -0700, Josh Triplett wrote:
+> > On Thu, Oct 06, 2011 at 11:49:28PM -0700, Greg KH wrote:
+> > > On Fri, Oct 07, 2011 at 10:33:07AM +0500, G, Manjunath Kondaiah wrote:
+> > > > +config PROBE_DEFER
+> > > > +	bool "Deferred Driver Probe"
+> > > > +	default y
+> > > > +	help
+> > > > +	  This option provides deferring driver probe if it has dependency on
+> > > > +	  other driver. Without this feature, initcall ordering should be done
+> > > > +	  manually to resolve driver dependencies. This feature completely side
+> > > > +	  steps the issues by allowing driver registration to occur in any
+> > > > +	  order, and any driver can request to be retried after a few more other
+> > > > +	  drivers get probed.
+> > > 
+> > > Why is this even an option?  Why would you ever want it disabled?  Why
+> > > does it need to be selected?
+> > > 
+> > > If you are going to default something to 'y' then just make it so it
+> > > can't be turned off any other way by just not making it an option at
+> > > all.
+> > 
+> > Given that the drivers which use this mechanism will not necessarily get
+> > built into the kernel, I'd suggest that it should remain optional and
+> > default to n.  Those drivers can then add a dependency on PROBE_DEFER.
+> > Let's try to avoid adding more infrastructure to the kernel that takes
+> > up space even when unused; certainly embedded will appreciate not having
+> > this feature unless a driver needs it.
+> 
+> How much extra space is this "feature" really?
 
-Yes, please do that, it is what USB does for it's internal error code
-handling.
+Just checked: 776 bytes, 640 of text and 136 of data.  We have kconfig
+options for comparable amounts.
 
-greg k-h
+> I don't see it being
+> anything larger than the amount of memory increase that just happened as
+> I typed this email as part of the ongoing memory density changes.
+
+I don't know about the changes you mean, but in any case I'd like to
+prevent mandatory size increases wherever possible.  I'd love to see the
+size of "allnoconfig" getting *smaller* over time, not larger.
+
+- Josh Triplett
