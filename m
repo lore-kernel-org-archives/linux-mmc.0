@@ -1,45 +1,77 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 1/4] mmc: mmci: Bugfix in pio read for small packets
-Date: Sun, 9 Oct 2011 08:59:29 +0200
-Message-ID: <CACRpkdY=DFW+J_pQetK38mPqic2iBuDWCx5QZTo-NkL1L37Fuw@mail.gmail.com>
-References: <1317109568-17905-1-git-send-email-ulf.hansson@stericsson.com>
-	<20111001160937.GF11710@n2100.arm.linux.org.uk>
-	<4E8F028C.10102@stericsson.com>
-	<20111008091036.GF25689@n2100.arm.linux.org.uk>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH 1/5] drivercore: add new error value for deferred probe
+Date: Sun, 9 Oct 2011 16:59:31 -0600
+Message-ID: <CACxGe6t+PfnNGniYUj3pbK22uqjqkbh2+D=7qvvd_-Yd4yR0dw@mail.gmail.com>
+References: <1317963790-29426-1-git-send-email-manjugk@ti.com>
+ <1317963790-29426-2-git-send-email-manjugk@ti.com> <20111007064349.GD27508@kroah.com>
+ <CACxGe6uOmrLwJSPw4JHuOmt5B2wsukdDgVUr01pryq5Z9BFadw@mail.gmail.com>
+ <32004.1318030113@turing-police.cc.vt.edu> <20111008001237.GA30551@kroah.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:62750 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750817Ab1JIG7a (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Oct 2011 02:59:30 -0400
-Received: by iakk32 with SMTP id k32so6069862iak.19
-        for <linux-mmc@vger.kernel.org>; Sat, 08 Oct 2011 23:59:30 -0700 (PDT)
-In-Reply-To: <20111008091036.GF25689@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20111008001237.GA30551@kroah.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Greg KH <greg@kroah.com>
+Cc: Valdis.Kletnieks@vt.edu, "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dilan Lee <dilee@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Manjunath GKondaiah <manjunath.gkondaiah@linaro.org>, Arnd Bergmann <arnd@arndb.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Ulf Hansson <ulf.hansson@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>, Stefan NILSSON9 <stefan.xk.nilsson@stericsson.com>
 
-On Sat, Oct 8, 2011 at 11:10 AM, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Fri, Oct 07, 2011 at 03:45:48PM +0200, Ulf Hansson wrote:
+On Fri, Oct 7, 2011 at 6:12 PM, Greg KH <greg@kroah.com> wrote:
+> On Fri, Oct 07, 2011 at 07:28:33PM -0400, Valdis.Kletnieks@vt.edu wro=
+te:
+>> On Fri, 07 Oct 2011 16:12:45 MDT, Grant Likely said:
+>> > On Fri, Oct 7, 2011 at 12:43 AM, Greg KH <greg@kroah.com> wrote:
+>> > > On Fri, Oct 07, 2011 at 10:33:06AM +0500, G, Manjunath Kondaiah =
+wrote:
+>>
+>> > >> +#define EPROBE_DEFER 517 =A0 =A0 /* restart probe again after =
+some time */
+>> > >
+>> > > Can we really do this?
+>>
+>> > According to Arnd, yes this is okay.
+>>
+>> > > =A0Isn't this some user/kernel api here?
+>>
+>> > > What's wrong with just "overloading" on top of an existing error=
+ code?
+>> > > Surely one of the other 516 types could be used here, right?
+>>
+>> > overloading makes it really hard to find the users at a later date=
+=2E
+>>
+>> Would proposing '#define EPROBE_DEFER EAGAIN' be acceptable to every=
+body? That
+>> would allow overloading EAGAIN, but still make it easy to tell the u=
+sages apart
+>> if we need to separate them later...
 >
-> Well, the patch system says that each one depends on the previous one,
-> and the first one in the series contains the PIO read thing.
->
-> Do 7108/1 onwards depend on 7106/1 and 7107/1 ?
+> Yes, please do that, it is what USB does for it's internal error code
+> handling.
 
-Probably my fault, since I was helping Ulf out with the patch tracker
-introduction.
+Really?  When we've only currently used approximately 2^9 of a 2^31
+numberspace?  I'm fine with making sure that the number doesn't show
+up in the userspace headers, but it makes no sense to overload the
+#defines.  Particularly so in this case where it isn't feasible to
+audit every driver to figure out what probe might possibly return.  It
+is well within the realm of possibility that existing drivers are
+already returning -EAGAIN.
 
-The patches should be pretty much semantically orthogonal as
-far as I can tell, the only reason dependency was stated that way
-was that I couldn't tell from head-parsing whether there were
-syntactical dependencies. (And wanted to avoid the annoyance
-of non-applying patches...)
+Besides; linux/errno.h *already* has linux-internal error codes that
+do not get exported out to userspace.  There is an #ifdef __KERNEL__
+block around ERESTARTSYS through EIOCBRETRY which is filtered out when
+exporting headers.  I can't see any possible reason why we wouldn't
+add Linux internal error codes here.
 
-So if they apply, they are independent AFAICT.
+g.
 
-Yours,
-Linus Walleij
+
+
+--=20
+Grant Likely, B.Sc., P.Eng.
+Secret Lab Technologies Ltd.
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
