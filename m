@@ -1,74 +1,69 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
-Date: Sat, 8 Oct 2011 11:18:29 -0700
-Message-ID: <20111008181829.GB15617@leaf>
-References: <1317963790-29426-1-git-send-email-manjugk@ti.com>
- <1317963790-29426-3-git-send-email-manjugk@ti.com>
- <20111007064928.GE27508@kroah.com>
- <20111007205715.GC5275@leaf>
- <20111007212326.GA29003@kroah.com>
- <20111008040351.GA7694@leaf>
- <20111008155502.GB616@kroah.com>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH 2/3] mmc: Add OF bindings support for mmc host controller capabilities
+Date: Sun, 9 Oct 2011 12:28:15 +0530
+Message-ID: <CAJuYYwSOZsqKObmt4MeaJa+aPmktwLsFocfmpjbJbOYyvmuwLQ@mail.gmail.com>
+References: <1317809581-28783-1-git-send-email-thomas.abraham@linaro.org>
+	<1317809581-28783-3-git-send-email-thomas.abraham@linaro.org>
+	<4E8C5BD6.2070709@gmail.com>
+	<CAJuYYwS_NeE6OG9X2p2rkjgo4OqO-ijeVwr1sLGkUuLJOxMw2g@mail.gmail.com>
+	<74CDBE0F657A3D45AFBB94109FB122FF173A2C7245@HQMAIL01.nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20111008155502.GB616@kroah.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Greg KH <greg@kroah.com>
-Cc: "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dilan Lee <dilee@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Manjunath@jasper.es
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF173A2C7245@HQMAIL01.nvidia.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Stephen Warren <swarren@nvidia.com>, Rob Herring <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, Chris Ball <cjb@laptop.org>
+Cc: "kgene.kim@samsung.com" <kgene.kim@samsung.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "ben-linux@fluff.org" <ben-linux@fluff.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Oct 08, 2011 at 08:55:02AM -0700, Greg KH wrote:
-> On Fri, Oct 07, 2011 at 09:03:51PM -0700, Josh Triplett wrote:
-> > On Fri, Oct 07, 2011 at 02:23:26PM -0700, Greg KH wrote:
-> > > On Fri, Oct 07, 2011 at 01:57:15PM -0700, Josh Triplett wrote:
-> > > > On Thu, Oct 06, 2011 at 11:49:28PM -0700, Greg KH wrote:
-> > > > > On Fri, Oct 07, 2011 at 10:33:07AM +0500, G, Manjunath Kondaiah wrote:
-> > > > > > +config PROBE_DEFER
-> > > > > > +	bool "Deferred Driver Probe"
-> > > > > > +	default y
-> > > > > > +	help
-> > > > > > +	  This option provides deferring driver probe if it has dependency on
-> > > > > > +	  other driver. Without this feature, initcall ordering should be done
-> > > > > > +	  manually to resolve driver dependencies. This feature completely side
-> > > > > > +	  steps the issues by allowing driver registration to occur in any
-> > > > > > +	  order, and any driver can request to be retried after a few more other
-> > > > > > +	  drivers get probed.
-> > > > > 
-> > > > > Why is this even an option?  Why would you ever want it disabled?  Why
-> > > > > does it need to be selected?
-> > > > > 
-> > > > > If you are going to default something to 'y' then just make it so it
-> > > > > can't be turned off any other way by just not making it an option at
-> > > > > all.
-> > > > 
-> > > > Given that the drivers which use this mechanism will not necessarily get
-> > > > built into the kernel, I'd suggest that it should remain optional and
-> > > > default to n.  Those drivers can then add a dependency on PROBE_DEFER.
-> > > > Let's try to avoid adding more infrastructure to the kernel that takes
-> > > > up space even when unused; certainly embedded will appreciate not having
-> > > > this feature unless a driver needs it.
-> > > 
-> > > How much extra space is this "feature" really?
-> > 
-> > Just checked: 776 bytes, 640 of text and 136 of data.  We have kconfig
-> > options for comparable amounts.
-> > 
-> > > I don't see it being
-> > > anything larger than the amount of memory increase that just happened as
-> > > I typed this email as part of the ongoing memory density changes.
-> > 
-> > I don't know about the changes you mean
-> 
-> Moore's law.
+On 5 October 2011 21:25, Stephen Warren <swarren@nvidia.com> wrote:
+> Thomas Abraham wrote at Wednesday, October 05, 2011 8:28 AM:
+>> On 5 October 2011 18:59, Rob Herring <robherring2@gmail.com> wrote:
+>> > On 10/05/2011 05:13 AM, Thomas Abraham wrote:
+>> >> Device nodes representing sd/mmc controllers in a device tree would include
+>> >> mmc host controller capabilities. Add support for parsing of mmc host
+>> >> controller capabilities included in device nodes.
+> ...
+>> >> +- linux,mmc_cap_4_bit_data - host can do 4 bit transfers
+>> >> +- linux,mmc_cap_mmc_highspeed - host can do MMC high-speed timing
+>> >> +- linux,mmc_cap_sd_highspeed - host can do SD high-speed timing
+>> >> +- linux,mmc_cap_needs_poll - host needs polling for card detection
+>> >> +- linux,mmc_cap_8_bit_data - host can do 8 bit transfer
+>> >
+>> > "sdhci,1-bit-only" already exists as a binding. Perhaps add
+>> > "sdhci,4-bit-only". No property then means can do 8-bit.
+>>
+>> Ok. But that would remain just as sdhci host controller capability and
+>> will not be applicable to other types of host controllers.
+>
+> Just as an FYI, NVIDIA's SDHCI controller bindings use property
+> "support-8bit" to indicate 8-bit support. A similar property could be
+> used for 4-bit support too.
 
-Ah, I see.  For new systems, sure; for systems or mechanisms with a
-pre-existing size constraint, that doesn't help.
 
-> Really, 776 bytes, just always enable it, it's not worth it.
+In this case, the binding would be applicable only to nVidia's SDHCI
+controller. And this binding would select MMC_CAP_8_BIT_DATA in the
+sdhci-tegra driver. There are sdhci drivers that can accept host
+capabilities via platform data.
 
-776 bytes alone, no; 776 bytes times the next (or previous) thousand
-features, yes.
+The MMC_CAP_XXX macros in linux/mmc/host.h file are usuable across
+host controllers and some of them are supplied as platform data for
+non-device tree platforms.
 
-- Josh Triplett
+So, bindings for MMC_CAP_XXX macros can be defined which any host
+controller supporting device tree could use. Host controllers could
+use the mmc_of_parse_host_caps() helper function (listed in this
+patch) to parse all the bindings for MMC_CAP_XXX  available in the
+device node.
+
+I would like to retain this patch in this series but if there is a
+definite no, then I will drop it. Please let me know your opinion.
+
+Thanks,
+Thomas.
+
+>
+> --
+> nvpublic
+>
+>
