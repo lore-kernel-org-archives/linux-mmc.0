@@ -1,44 +1,36 @@
-From: Anton Vorontsov <cbouatmailru@gmail.com>
-Subject: Re: [PATCH] leds-class: change back LEDS_CLASS to tristate instead
-	of bool
-Date: Mon, 10 Oct 2011 22:54:09 +0400
-Message-ID: <20111010185409.GA8787@oksana.dev.rtsoft.ru>
-References: <1317113432-7299-1-git-send-email-bryan.wu@canonical.com>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [PATCH] PM: HIBERNATION: add resume_delay kernel param as well as resume_delay
+Date: Mon, 10 Oct 2011 23:46:41 +0200
+Message-ID: <201110102346.41331.rjw@sisk.pl>
+References: <1318225452-10397-1-git-send-email-Barry.Song@csr.com> <20111010165437.GA11093@elf.ucw.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1317113432-7299-1-git-send-email-bryan.wu@canonical.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Bryan Wu <bryan.wu@canonical.com>
-Cc: akpm@google.com, linux-omap@vger.kernel.org, linux@arm.linux.org.uk, tony@atomide.com, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, rpurdie@rpsys.net, manuel.lauss@gmail.com, cjb@laptop.org, dwmw2@infradead.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ogre.sisk.pl ([217.79.144.158]:60015 "EHLO ogre.sisk.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752937Ab1JJVoX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 10 Oct 2011 17:44:23 -0400
+In-Reply-To: <20111010165437.GA11093@elf.ucw.cz>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Barry Song <Barry.Song@csr.com>, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, workgroup.linux@csr.com, Barry Song <baohua.song@csr.com>
 
-On Tue, Sep 27, 2011 at 04:50:32PM +0800, Bryan Wu wrote:
-> LEDS_CLASS is required by leds and trigger drivers, but we can build it as
-> module.  So change this option back as tristate and treak the help message
-> as well.
+On Monday, October 10, 2011, Pavel Machek wrote:
+> On Sun 2011-10-09 22:44:12, Barry Song wrote:
+> > From: Barry Song <baohua.song@csr.com>
+> > 
+> > patch "PM: HIBERNATION: add resume_wait param to support MMC-like devices
+> > as resume file" add resume_wait param. this patch adds resume_delay so that
+> > resume_wait/delay has the same model with root_wait/delay.
+> > 
+> > Signed-off-by: Barry Song <baohua.song@csr.com>
 > 
-> LEDS_TRIGGERS depends on LEDS_CLASSS, which should be tristate.  So set it
-> as tristate too and update header files as well.
-> 
-> Change those ifdefs to take care of module configuration.
-> 
-> Signed-off-by: Bryan Wu <bryan.wu@canonical.com>
+> ACK.
 
-Won't this break linking if POWER_SUPPLY=y and LEDS_TRIGGERS=m?
+Applied to linux-pm/linux-next.
 
 Thanks,
-
--- 
-Anton Vorontsov
-Email: cbouatmailru@gmail.com
+Rafael
