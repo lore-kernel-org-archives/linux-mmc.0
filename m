@@ -1,34 +1,41 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH] PM: HIBERNATION: add resume_delay kernel param as well
- as resume_delay
-Date: Mon, 10 Oct 2011 18:54:38 +0200
-Message-ID: <20111010165437.GA11093@elf.ucw.cz>
-References: <1318225452-10397-1-git-send-email-Barry.Song@csr.com>
+From: Andrei Warkentin <awarkentin@vmware.com>
+Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
+Date: Mon, 10 Oct 2011 10:37:22 -0700 (PDT)
+Message-ID: <361419345.198335.1318268242916.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+References: <20111008155502.GB616@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:55568 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751274Ab1JJQzn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2011 12:55:43 -0400
-Content-Disposition: inline
-In-Reply-To: <1318225452-10397-1-git-send-email-Barry.Song@csr.com>
+Received: from smtp-outbound-2.vmware.com ([65.115.85.73]:27834 "EHLO
+	smtp-outbound-2.vmware.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750893Ab1JJRhY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2011 13:37:24 -0400
+In-Reply-To: <20111008155502.GB616@kroah.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Barry Song <Barry.Song@csr.com>
-Cc: rjw@sisk.pl, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, workgroup.linux@csr.com, Barry Song <baohua.song@csr.com>
+To: Greg KH <greg@kroah.com>
+Cc: "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dilan Lee <dilee@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Manjunath@jasper.es, Josh Triplett <josh@joshtriplett.org>
 
-On Sun 2011-10-09 22:44:12, Barry Song wrote:
-> From: Barry Song <baohua.song@csr.com>
+Hi,
+
+----- Original Message -----
+> From: "Greg KH" <greg@kroah.com>
+> To: "Josh Triplett" <josh@joshtriplett.org>
+> Cc: "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, "Grant Likely"
+> <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+> "Dilan Lee" <dilee@nvidia.com>, "Mark Brown" <broonie@opensource.wolfsonmicro.com>, Manjunath@jasper.es
+> Sent: Saturday, October 8, 2011 11:55:02 AM
+> Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
 > 
-> patch "PM: HIBERNATION: add resume_wait param to support MMC-like devices
-> as resume file" add resume_wait param. this patch adds resume_delay so that
-> resume_wait/delay has the same model with root_wait/delay.
-> 
-> Signed-off-by: Barry Song <baohua.song@csr.com>
 
-ACK.
+I'm a bit of a fly on the wall here, but I'm curious how this impacts suspend/resume.
+device_initialize->device_pm_init are called from device_register, so certainly this
+patch doesn't also ensure that the PM ordering matches probe ordering, which is bound
+to break suspend, right? Was this ever tested with the OMAP target? Shouldn't the
+PM change be also part of this patch set? I don't see why you would want to have this in
+without the PM changes.
 
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+Maybe I have it all wrong though :-).
+
+A
