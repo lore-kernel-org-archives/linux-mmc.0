@@ -1,41 +1,44 @@
-From: Andrei Warkentin <awarkentin@vmware.com>
-Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
-Date: Mon, 10 Oct 2011 10:37:22 -0700 (PDT)
-Message-ID: <361419345.198335.1318268242916.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-References: <20111008155502.GB616@kroah.com>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH] leds-class: change back LEDS_CLASS to tristate instead
+	of bool
+Date: Mon, 10 Oct 2011 22:54:09 +0400
+Message-ID: <20111010185409.GA8787@oksana.dev.rtsoft.ru>
+References: <1317113432-7299-1-git-send-email-bryan.wu@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp-outbound-2.vmware.com ([65.115.85.73]:27834 "EHLO
-	smtp-outbound-2.vmware.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750893Ab1JJRhY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2011 13:37:24 -0400
-In-Reply-To: <20111008155502.GB616@kroah.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1317113432-7299-1-git-send-email-bryan.wu@canonical.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Bryan Wu <bryan.wu@canonical.com>
+Cc: akpm@google.com, linux-omap@vger.kernel.org, linux@arm.linux.org.uk, tony@atomide.com, linus.walleij@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, rpurdie@rpsys.net, manuel.lauss@gmail.com, cjb@laptop.org, dwmw2@infradead.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Greg KH <greg@kroah.com>
-Cc: "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dilan Lee <dilee@nvidia.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Manjunath@jasper.es, Josh Triplett <josh@joshtriplett.org>
 
-Hi,
-
------ Original Message -----
-> From: "Greg KH" <greg@kroah.com>
-> To: "Josh Triplett" <josh@joshtriplett.org>
-> Cc: "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, "Grant Likely"
-> <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-> "Dilan Lee" <dilee@nvidia.com>, "Mark Brown" <broonie@opensource.wolfsonmicro.com>, Manjunath@jasper.es
-> Sent: Saturday, October 8, 2011 11:55:02 AM
-> Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
+On Tue, Sep 27, 2011 at 04:50:32PM +0800, Bryan Wu wrote:
+> LEDS_CLASS is required by leds and trigger drivers, but we can build it as
+> module.  So change this option back as tristate and treak the help message
+> as well.
 > 
+> LEDS_TRIGGERS depends on LEDS_CLASSS, which should be tristate.  So set it
+> as tristate too and update header files as well.
+> 
+> Change those ifdefs to take care of module configuration.
+> 
+> Signed-off-by: Bryan Wu <bryan.wu@canonical.com>
 
-I'm a bit of a fly on the wall here, but I'm curious how this impacts suspend/resume.
-device_initialize->device_pm_init are called from device_register, so certainly this
-patch doesn't also ensure that the PM ordering matches probe ordering, which is bound
-to break suspend, right? Was this ever tested with the OMAP target? Shouldn't the
-PM change be also part of this patch set? I don't see why you would want to have this in
-without the PM changes.
+Won't this break linking if POWER_SUPPLY=y and LEDS_TRIGGERS=m?
 
-Maybe I have it all wrong though :-).
+Thanks,
 
-A
+-- 
+Anton Vorontsov
+Email: cbouatmailru@gmail.com
