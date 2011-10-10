@@ -1,44 +1,34 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH 1/4] mmc: mmci: Bugfix in pio read for small packets
-Date: Mon, 10 Oct 2011 10:23:02 +0200
-Message-ID: <4E92AB66.1030406@stericsson.com>
-References: <1317109568-17905-1-git-send-email-ulf.hansson@stericsson.com>	<20111001160937.GF11710@n2100.arm.linux.org.uk>	<4E8F028C.10102@stericsson.com>	<20111008091036.GF25689@n2100.arm.linux.org.uk> <CACRpkdY=DFW+J_pQetK38mPqic2iBuDWCx5QZTo-NkL1L37Fuw@mail.gmail.com>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [PATCH] PM: HIBERNATION: add resume_delay kernel param as well
+ as resume_delay
+Date: Mon, 10 Oct 2011 18:54:38 +0200
+Message-ID: <20111010165437.GA11093@elf.ucw.cz>
+References: <1318225452-10397-1-git-send-email-Barry.Song@csr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog120.obsmtp.com ([207.126.144.149]:33177 "EHLO
-	eu1sys200aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752897Ab1JJIYG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2011 04:24:06 -0400
-In-Reply-To: <CACRpkdY=DFW+J_pQetK38mPqic2iBuDWCx5QZTo-NkL1L37Fuw@mail.gmail.com>
+Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:55568 "EHLO
+	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751274Ab1JJQzn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2011 12:55:43 -0400
+Content-Disposition: inline
+In-Reply-To: <1318225452-10397-1-git-send-email-Barry.Song@csr.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>, Stefan NILSSON9 <stefan.xk.nilsson@stericsson.com>
+To: Barry Song <Barry.Song@csr.com>
+Cc: rjw@sisk.pl, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, workgroup.linux@csr.com, Barry Song <baohua.song@csr.com>
 
-Linus Walleij wrote:
-> On Sat, Oct 8, 2011 at 11:10 AM, Russell King - ARM Linux
-> <linux@arm.linux.org.uk> wrote:
->> On Fri, Oct 07, 2011 at 03:45:48PM +0200, Ulf Hansson wrote:
->>
->> Well, the patch system says that each one depends on the previous one,
->> and the first one in the series contains the PIO read thing.
->>
->> Do 7108/1 onwards depend on 7106/1 and 7107/1 ?
+On Sun 2011-10-09 22:44:12, Barry Song wrote:
+> From: Barry Song <baohua.song@csr.com>
 > 
-> Probably my fault, since I was helping Ulf out with the patch tracker
-> introduction.
+> patch "PM: HIBERNATION: add resume_wait param to support MMC-like devices
+> as resume file" add resume_wait param. this patch adds resume_delay so that
+> resume_wait/delay has the same model with root_wait/delay.
 > 
-> The patches should be pretty much semantically orthogonal as
-> far as I can tell, the only reason dependency was stated that way
-> was that I couldn't tell from head-parsing whether there were
-> syntactical dependencies. (And wanted to avoid the annoyance
-> of non-applying patches...)
-> 
-> So if they apply, they are independent AFAICT.
+> Signed-off-by: Barry Song <baohua.song@csr.com>
 
-7108/1 and 7109/1, have real dependencies. Otherwise there none.
+ACK.
 
-BR
-Ulf Hansson
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
