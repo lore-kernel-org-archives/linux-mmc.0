@@ -1,36 +1,50 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH] PM: HIBERNATION: add resume_delay kernel param as well as resume_delay
-Date: Mon, 10 Oct 2011 23:46:41 +0200
-Message-ID: <201110102346.41331.rjw@sisk.pl>
-References: <1318225452-10397-1-git-send-email-Barry.Song@csr.com> <20111010165437.GA11093@elf.ucw.cz>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/2] mmc: core: move ->request() call from atomic context
+Date: Mon, 10 Oct 2011 18:05:30 -0400
+Message-ID: <m2wrcclcyd.fsf@bob.laptop.org>
+References: <1317645214-12316-1-git-send-email-adrian.hunter@intel.com>
+	<1317645214-12316-2-git-send-email-adrian.hunter@intel.com>
+	<4E8C6229.6010302@stericsson.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:60015 "EHLO ogre.sisk.pl"
+Received: from void.printf.net ([89.145.121.20]:38725 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752937Ab1JJVoX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 10 Oct 2011 17:44:23 -0400
-In-Reply-To: <20111010165437.GA11093@elf.ucw.cz>
+	id S1752546Ab1JJWFp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 10 Oct 2011 18:05:45 -0400
+In-Reply-To: <4E8C6229.6010302@stericsson.com> (Ulf Hansson's message of "Wed,
+	5 Oct 2011 15:56:57 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Barry Song <Barry.Song@csr.com>, linux-pm@lists.linux-foundation.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, workgroup.linux@csr.com, Barry Song <baohua.song@csr.com>
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Monday, October 10, 2011, Pavel Machek wrote:
-> On Sun 2011-10-09 22:44:12, Barry Song wrote:
-> > From: Barry Song <baohua.song@csr.com>
-> > 
-> > patch "PM: HIBERNATION: add resume_wait param to support MMC-like devices
-> > as resume file" add resume_wait param. this patch adds resume_delay so that
-> > resume_wait/delay has the same model with root_wait/delay.
-> > 
-> > Signed-off-by: Barry Song <baohua.song@csr.com>
-> 
-> ACK.
+Hi,
 
-Applied to linux-pm/linux-next.
+On Wed, Oct 05 2011, Ulf Hansson wrote:
+> Adrian Hunter wrote:
+>> mmc_request_done() is sometimes called from interrupt
+>> or other atomic context.  Mostly all mmc_request_done()
+>> does is complete(), however it contains code to retry
+>> on error, which uses ->request().  As the error path
+>> is certainly not performance critical, this may be
+>> moved to the waiting function mmc_wait_for_req_done().
+>>
+>> This allows ->request() to use runtime PM get_sync()
+>> and guarantee it is never in an atomic context.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>
+> Calling back into the host driver directly from mmc_request_done when
+> doing error handling were just plain wrong.
+>
+> This patch is really great, not just for pm_runtime issues!
+>
+> Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
 
-Thanks,
-Rafael
+Pushed to mmc-next for 3.2.  Thanks!
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
