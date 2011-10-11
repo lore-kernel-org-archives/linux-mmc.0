@@ -1,45 +1,43 @@
-From: Ming Lei <tom.leiming@gmail.com>
-Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
-Date: Tue, 11 Oct 2011 20:29:18 +0800
-Message-ID: <CACVXFVMnt-ChUDhawhoyMm-wJ8xSQAWs1c8ykzmyshfX49HEsw@mail.gmail.com>
-References: <20111008155502.GB616@kroah.com>
-	<361419345.198335.1318268242916.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH V6 RESEND 2/2] mmc: core: Add Poweroff Notify handling eMMC 4.5
+Date: Tue, 11 Oct 2011 10:00:24 -0400
+Message-ID: <m27h4bljbb.fsf@bob.laptop.org>
+References: <1316180377-30969-1-git-send-email-girish.shivananjappa@linaro.org>
+	<1316180377-30969-3-git-send-email-girish.shivananjappa@linaro.org>
+	<m2obxola02.fsf@bob.laptop.org>
+	<CAGxe1ZEMsqJr==Dk_4C-izK=sy=tkQD0CGzeyh84tURcXcEeZg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <361419345.198335.1318268242916.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrei Warkentin <awarkentin@vmware.com>
-Cc: Greg KH <greg@kroah.com>, Dilan Lee <dilee@nvidia.com>, "G, Manjunath Kondaiah" <manjugk@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>, Grant Likely <grant.likely@secretlab.ca>, Manjunath@jasper.es, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:47428 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750699Ab1JKOAd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 11 Oct 2011 10:00:33 -0400
+In-Reply-To: <CAGxe1ZEMsqJr==Dk_4C-izK=sy=tkQD0CGzeyh84tURcXcEeZg@mail.gmail.com>
+	(Girish K. S.'s message of "Tue, 11 Oct 2011 10:29:44 +0530")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: linux-mmc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 
-On Tue, Oct 11, 2011 at 1:37 AM, Andrei Warkentin <awarkentin@vmware.com> wrote:
-> Hi,
->
-> ----- Original Message -----
->> From: "Greg KH" <greg@kroah.com>
->> To: "Josh Triplett" <josh@joshtriplett.org>
->> Cc: "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@lists.infradead.org, "Grant Likely"
->> <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
->> "Dilan Lee" <dilee@nvidia.com>, "Mark Brown" <broonie@opensource.wolfsonmicro.com>, Manjunath@jasper.es
->> Sent: Saturday, October 8, 2011 11:55:02 AM
->> Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
->>
->
-> I'm a bit of a fly on the wall here, but I'm curious how this impacts suspend/resume.
-> device_initialize->device_pm_init are called from device_register, so certainly this
-> patch doesn't also ensure that the PM ordering matches probe ordering, which is bound
-> to break suspend, right? Was this ever tested with the OMAP target? Shouldn't the
+Hi Girish,
 
-Inside device_add(), device_pm_add is called before bus_probe_device,
-so the patch can't change the device order in pm list, and just change
-the driver probe order.
+On Tue, Oct 11 2011, Girish K S wrote:
+> This is a very old version of the patch. My latest patch has been
+> merged with Mr Chung's branch (the one with PULL REQUEST).
+> These comments have been already taken care.
 
-> PM change be also part of this patch set? I don't see why you would want to have this in
-> without the PM changes.
->
+No, that's not the case.  Here is the version of the patch on the
+emmc4.5 branch that the pull request is for:
 
+http://git.infradead.org/users/kmpark/linux-2.6-samsung/commitdiff/dac139c9591545a40ea0058d9305514130762682
 
-thanks,
+and it has the same problems I'm replying to here.  Maybe the wrong
+version got merged?
+
+Thanks,
+
+- Chris.
 -- 
-Ming Lei
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
