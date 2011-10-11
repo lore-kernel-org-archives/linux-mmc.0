@@ -1,47 +1,37 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH] mmc: mmci: Do not release spinlock in request_end
-Date: Tue, 11 Oct 2011 16:06:41 +0200
-Message-ID: <1318342001-26955-1-git-send-email-ulf.hansson@stericsson.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH RESEND V1] mmc: replace printk with appropriate display macro
+Date: Tue, 11 Oct 2011 10:11:26 -0400
+Message-ID: <m2y5wrk48h.fsf@bob.laptop.org>
+References: <1318313649-22465-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:57308 "EHLO
-	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750942Ab1JKOHR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2011 10:07:17 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1318313649-22465-1-git-send-email-girish.shivananjappa@linaro.org>
+	(Girish K. S.'s message of "Tue, 11 Oct 2011 11:44:09 +0530")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: linux-mmc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-The patch "mmc: core: move ->request() call from atomic context",
-is the reason to why this change is possible. This simplifies the
-error handling code execution path quite a lot and potentially also
-fixes some error handling hang problems.
+Hi,
 
-Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
----
- drivers/mmc/host/mmci.c |    6 ------
- 1 files changed, 0 insertions(+), 6 deletions(-)
+On Tue, Oct 11 2011, Girish K S wrote:
+> All the files using printk function for displaying kernel messages
+> in the mmc driver have been replaced with corresponding macro.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 40e4c05..f7755c9 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -165,13 +165,7 @@ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
- 	host->mrq = NULL;
- 	host->cmd = NULL;
- 
--	/*
--	 * Need to drop the host lock here; mmc_request_done may call
--	 * back into the driver...
--	 */
--	spin_unlock(&host->lock);
- 	mmc_request_done(host->mmc, mrq);
--	spin_lock(&host->lock);
- }
- 
- static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+Thanks, applied!
+
+I haven't been sure how to handle this patch; in general cosmetic
+patches that touch many parts of many files are a bad idea, because they
+break the ability to merge patches.  Since we're getting near the end of
+merging the 3.2 merge window patches, though, maybe now is a good time.
+
+If this patch starts causing merge conflicts, I might pull it out later
+or remove the modifications for the most common files (core.c/sd.c/sdhci.c).
+
+Thanks,
+
+- Chris.
 -- 
-1.7.5.4
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
