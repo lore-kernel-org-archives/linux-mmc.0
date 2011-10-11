@@ -1,55 +1,47 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-s3c: fix wrong error-control
-Date: Tue, 11 Oct 2011 10:03:39 -0400
-Message-ID: <m239ezlj5w.fsf@bob.laptop.org>
-References: <4E93D107.200@samsung.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH] mmc: mmci: Do not release spinlock in request_end
+Date: Tue, 11 Oct 2011 16:06:41 +0200
+Message-ID: <1318342001-26955-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57365 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750699Ab1JKODs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 11 Oct 2011 10:03:48 -0400
-In-Reply-To: <4E93D107.200@samsung.com> (Jaehoon Chung's message of "Tue, 11
-	Oct 2011 14:15:51 +0900")
+Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:57308 "EHLO
+	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750942Ab1JKOHR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2011 10:07:17 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi,
+The patch "mmc: core: move ->request() call from atomic context",
+is the reason to why this change is possible. This simplifies the
+error handling code execution path quite a lot and potentially also
+fixes some error handling hang problems.
 
-On Tue, Oct 11 2011, Jaehoon Chung wrote:
-> If sc->clk_bus[ptr] is NULL, happen NULL pointer error.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
->  drivers/mmc/host/sdhci-s3c.c |    6 ++++--
->  1 files changed, 4 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 82709b6..3d00e72 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -567,8 +567,10 @@ static int __devinit sdhci_s3c_probe(struct
-> platform_device *pdev)
->
->   err_req_regs:
->  	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
-> -		clk_disable(sc->clk_bus[ptr]);
-> -		clk_put(sc->clk_bus[ptr]);
-> +		if (sc->clk_bus[ptr]) {
-> +			clk_disable(sc->clk_bus[ptr]);
-> +			clk_put(sc->clk_bus[ptr]);
-> +		}
->  	}
->
->   err_no_busclks:
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+---
+ drivers/mmc/host/mmci.c |    6 ------
+ 1 files changed, 0 insertions(+), 6 deletions(-)
 
-Patch is corrupt due to line-wrapping.
-
-- Chris.
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 40e4c05..f7755c9 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -165,13 +165,7 @@ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ 	host->mrq = NULL;
+ 	host->cmd = NULL;
+ 
+-	/*
+-	 * Need to drop the host lock here; mmc_request_done may call
+-	 * back into the driver...
+-	 */
+-	spin_unlock(&host->lock);
+ 	mmc_request_done(host->mmc, mrq);
+-	spin_lock(&host->lock);
+ }
+ 
+ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.5.4
+
