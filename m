@@ -1,52 +1,47 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH RESEND] mmc: sdhci-s3c: fix wrong error-control
-Date: Wed, 12 Oct 2011 11:19:17 -0400
-Message-ID: <m2mxd6i6fe.fsf@bob.laptop.org>
-References: <4E951425.4000807@samsung.com>
+Subject: Re: [PATCH] mmc: sdhci: fix debug_quirks2 module parameter description
+Date: Wed, 12 Oct 2011 11:30:50 -0400
+Message-ID: <m2ipnui5w5.fsf@bob.laptop.org>
+References: <1318423479-3805-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57473 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:58207 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753113Ab1JLPT3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 12 Oct 2011 11:19:29 -0400
-In-Reply-To: <4E951425.4000807@samsung.com> (Jaehoon Chung's message of "Wed,
-	12 Oct 2011 13:14:29 +0900")
+	id S1752113Ab1JLPa7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 12 Oct 2011 11:30:59 -0400
+In-Reply-To: <1318423479-3805-1-git-send-email-adrian.hunter@intel.com>
+	(Adrian Hunter's message of "Wed, 12 Oct 2011 15:44:39 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi,
+Hi Adrian,
 
-On Wed, Oct 12 2011, Jaehoon Chung wrote:
-> If sc->clk_bus[ptr] is NULL, happen NULL pointer error.
+On Wed, Oct 12 2011, Adrian Hunter wrote:
+> debug_quirks2 module parameter description was inadvertently added
+> as debug_quirks.
 >
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 > ---
->  drivers/mmc/host/sdhci-s3c.c |    6 ++++--
->  1 files changed, 4 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 82709b6..3d00e72 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -567,8 +567,10 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index f530de6..2cc3ffa 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3058,4 +3058,4 @@ MODULE_DESCRIPTION("Secure Digital Host
+> Controller Interface core driver");
+>  MODULE_LICENSE("GPL");
 >  
->   err_req_regs:
->  	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
-> -		clk_disable(sc->clk_bus[ptr]);
-> -		clk_put(sc->clk_bus[ptr]);
-> +		if (sc->clk_bus[ptr]) {
-> +			clk_disable(sc->clk_bus[ptr]);
-> +			clk_put(sc->clk_bus[ptr]);
-> +		}
->  	}
->  
->   err_no_busclks:
+>  MODULE_PARM_DESC(debug_quirks, "Force certain quirks.");
+> -MODULE_PARM_DESC(debug_quirks, "Force certain other quirks.");
+> +MODULE_PARM_DESC(debug_quirks2, "Force certain other quirks.");
 
-Thanks, pushed to mmc-next for 3.2.
+Thanks, I've folded this into the original "sdhci-pci: add runtime pm
+support" patch in mmc-next.
 
 - Chris.
 -- 
