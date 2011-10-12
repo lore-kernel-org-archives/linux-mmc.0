@@ -1,35 +1,54 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH] mmc: sdhci: fix debug_quirks2 module parameter description
-Date: Wed, 12 Oct 2011 15:44:39 +0300
-Message-ID: <1318423479-3805-1-git-send-email-adrian.hunter@intel.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH RESEND] mmc: sdhci-s3c: fix wrong error-control
+Date: Wed, 12 Oct 2011 11:19:17 -0400
+Message-ID: <m2mxd6i6fe.fsf@bob.laptop.org>
+References: <4E951425.4000807@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:44442 "EHLO mga14.intel.com"
+Received: from void.printf.net ([89.145.121.20]:57473 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752862Ab1JLMpB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 12 Oct 2011 08:45:01 -0400
+	id S1753113Ab1JLPT3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 12 Oct 2011 11:19:29 -0400
+In-Reply-To: <4E951425.4000807@samsung.com> (Jaehoon Chung's message of "Wed,
+	12 Oct 2011 13:14:29 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-debug_quirks2 module parameter description was inadvertently added
-as debug_quirks.
+Hi,
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+On Wed, Oct 12 2011, Jaehoon Chung wrote:
+> If sc->clk_bus[ptr] is NULL, happen NULL pointer error.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/host/sdhci-s3c.c |    6 ++++--
+>  1 files changed, 4 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 82709b6..3d00e72 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -567,8 +567,10 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+>  
+>   err_req_regs:
+>  	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+> -		clk_disable(sc->clk_bus[ptr]);
+> -		clk_put(sc->clk_bus[ptr]);
+> +		if (sc->clk_bus[ptr]) {
+> +			clk_disable(sc->clk_bus[ptr]);
+> +			clk_put(sc->clk_bus[ptr]);
+> +		}
+>  	}
+>  
+>   err_no_busclks:
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index f530de6..2cc3ffa 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3058,4 +3058,4 @@ MODULE_DESCRIPTION("Secure Digital Host Controller Interface core driver");
- MODULE_LICENSE("GPL");
- 
- MODULE_PARM_DESC(debug_quirks, "Force certain quirks.");
--MODULE_PARM_DESC(debug_quirks, "Force certain other quirks.");
-+MODULE_PARM_DESC(debug_quirks2, "Force certain other quirks.");
+Thanks, pushed to mmc-next for 3.2.
+
+- Chris.
 -- 
-1.7.6.4
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
