@@ -1,79 +1,54 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: mmc core broken dependency on CONFIG_BLOCK (Was: linux-next: Tree
- for Oct 11 (mmc))
-Date: Wed, 12 Oct 2011 10:55:08 +0900
-Message-ID: <CAKYAXd_HAv5+kg26tGLZcDHWmD2MoQFFTwoDtFuvsqgZTcPJwA@mail.gmail.com>
-References: <CAKYAXd_MJy_3TAoM_buCmP5g3j1e=Vh5vZPJP9O_nxDrWiHsAw@mail.gmail.com>
-	<1711499402.60485.1318380603125.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH RESEND] mmc: sdhci-s3c: fix wrong error-control
+Date: Wed, 12 Oct 2011 13:14:29 +0900
+Message-ID: <4E951425.4000807@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:56154 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750980Ab1JLBzK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2011 21:55:10 -0400
-In-Reply-To: <1711499402.60485.1318380603125.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:14159 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752060Ab1JLEOz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Oct 2011 00:14:55 -0400
+Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LSX00KPZQGU7VL0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 12 Oct 2011 13:14:54 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LSX00472QGU7E30@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 12 Oct 2011 13:14:54 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <awarkentin@vmware.com>
-Cc: linux-next@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Stephen Rothwell <sfr@canb.auug.org.au>, Randy Dunlap <rdunlap@xenotime.net>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-2011/10/12 Andrei Warkentin <awarkentin@vmware.com>:
-> Hi,
->
-> ----- Original Message -----
->> From: "NamJae Jeon" <linkinjeon@gmail.com>
->> To: "Andrei Warkentin" <awarkentin@vmware.com>
->> Cc: linux-next@vger.kernel.org, "LKML" <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, "Chris Ball"
->> <cjb@laptop.org>, "Stephen Rothwell" <sfr@canb.auug.org.au>, "Randy Dunlap" <rdunlap@xenotime.net>
->> Sent: Tuesday, October 11, 2011 8:16:51 PM
->> Subject: Re: mmc core broken dependency on CONFIG_BLOCK (Was: linux-next: Tree for Oct 11 (mmc))
->>
->> 2011/10/12 Andrei Warkentin <awarkentin@vmware.com>:
->> > ----- Original Message -----
->> >> From: "NamJae Jeon" <linkinjeon@gmail.com>
->> >> To: "Randy Dunlap" <rdunlap@xenotime.net>, "Andrei Warkentin"
->> >> <awarkentin@vmware.com>
->> >> Cc: linux-next@vger.kernel.org, "LKML"
->> >> <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, "Chris
->> >> Ball"
->> >> <cjb@laptop.org>, "Stephen Rothwell" <sfr@canb.auug.org.au>
->> >> Sent: Tuesday, October 11, 2011 7:20:48 PM
->> >> Subject: Re: mmc core broken dependency on CONFIG_BLOCK (Was:
->> >> linux-next: Tree for Oct 11 (mmc))
->> >>
->> >> Hi Randy, Andrei.
->> >>
->> >> I suggest third option for this.
->> >> As you know, MMC like ATA Driver and SCSI Driver etc.. can not
->> >> enable
->> >> without CONFIG_BLOCK
->> >> So I think that mmc should be depended from CONFIG_BLOCK like
->> >> other
->> >> block device driver.
->> >> see the their Kconfig. How do you think ?
->> >
->> > MMC core doesn't not imply MMC_BLOCK. You could well use SDIO
->> > devices via MMC without any flash storage whatsoever.
->> > What I want to say is that MMC_BLOCK already depends on BLOCK. MMC,
->> > however, has no such functional dependence, as it
->> > just (effectively) provides bus and device enumeration. So I think
->> > the better solution is wrapping all MMC partition
->> > code within mmc/core/mmc.c and card.h with CONFIG_BLOCK.
->> yes, you're right, I found it after sending mail. If so, should I
->> wrap
->> CONFIG_MMC_BLOCK instead of CONFIG_MMC ? After I add CONFIG_MMC_BLOCK
->> in core/mmc.c, card.h, I can see compile is okay.
->> Thanks.
->> >
->
-> I am not sure if it should be CONFIG_MMC_BLOCK or CONFIG_BLOCK. After all, the
-> code you're wrapping doesn't really depend on CONFIG_MMC_BLOCK, it gets consumed by it, and
-> it depends (in using that one define) only on CONFIG_BLOCK. Maybe I'm overthinking it
-> and the code should just define it's own MAX_MMC_PART_NAME to be like 10 or something.
-yes, I agree your opinion,  If we define it is easy to solve.
-I will send new patch for it today.
-Thanks.
->
-> A
->
+If sc->clk_bus[ptr] is NULL, happen NULL pointer error.
+
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 82709b6..3d00e72 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -567,8 +567,10 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 
+  err_req_regs:
+ 	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+-		clk_disable(sc->clk_bus[ptr]);
+-		clk_put(sc->clk_bus[ptr]);
++		if (sc->clk_bus[ptr]) {
++			clk_disable(sc->clk_bus[ptr]);
++			clk_put(sc->clk_bus[ptr]);
++		}
+ 	}
+ 
+  err_no_busclks:
+-- 
+1.7.4.1
