@@ -1,36 +1,65 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: Do not release spinlock in request_end
-Date: Wed, 12 Oct 2011 11:41:19 +0200
-Message-ID: <CACRpkdb5pn=q+hQSsrTgKbCvuKR83vHn1iAfvzMFXQeAgv--+Q@mail.gmail.com>
-References: <1318342001-26955-1-git-send-email-ulf.hansson@stericsson.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Rajeshwari Shinde <rajeshwari.s@samsung.com>
+Subject: [PATCH V3 0/3] ARM: SAMSUNG: Add support for sdhci clock lookup using
+ generic names
+Date: Wed, 12 Oct 2011 15:13:04 +0530
+Message-ID: <1318412587-29987-1-git-send-email-rajeshwari.s@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:51255 "EHLO
-	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751386Ab1JLJlU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Oct 2011 05:41:20 -0400
-Received: by qyk30 with SMTP id 30so4517385qyk.19
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Oct 2011 02:41:20 -0700 (PDT)
-In-Reply-To: <1318342001-26955-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:24230 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751114Ab1JLJqr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Oct 2011 05:46:47 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, Lee Jones <lee.jones@linaro.org>
+To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
+Cc: cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org
 
-On Tue, Oct 11, 2011 at 4:06 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
+This patchset adds support for sdhci controller clock lookup using
+generic names. With this patchset, there will be no need to pass clock
+names in sdhci platform data.
 
-> The patch "mmc: core: move ->request() call from atomic context",
-> is the reason to why this change is possible. This simplifies the
-> error handling code execution path quite a lot and potentially also
-> fixes some error handling hang problems.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+This patchset depends on the patchset:
+Add a common macro for creating struct clk_lookup entries.
+mmc: sdhci-s3c: add default controller configuration.
 
-Adrian do you agree with this?
+V2 Changes:
+- Added HCLK instance for HSMMC instance 1 as suggested by Heiko.
+- Rebased on UART clkdev patches. So these patches should be applied
+  after UART clkdev patches are applied.
 
-To me it looks correct,
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+V3 Changes:
+- Removed double registration of hsmmc1 hclk from s3c2416 as suggested by
+  Heiko
 
-Yours,
-Linus Walleij
+Rajeshwari Shinde (3):
+  SDHCI: S3C: Use generic clock names for sdhci bus clock options
+  ARM: SAMSUNG: Remove SDHCI bus clocks from platform data
+  ARM: SAMSUNG: Add lookup of sdhci-s3c clocks using generic names
+
+ arch/arm/mach-exynos4/Makefile             |    1 -
+ arch/arm/mach-exynos4/clock.c              |   88 +++++++++------
+ arch/arm/mach-exynos4/setup-sdhci.c        |   22 ----
+ arch/arm/mach-s3c2416/Makefile             |    1 -
+ arch/arm/mach-s3c2416/clock.c              |   68 ++++++-----
+ arch/arm/mach-s3c2416/setup-sdhci.c        |   24 ----
+ arch/arm/mach-s3c64xx/Makefile             |    1 -
+ arch/arm/mach-s3c64xx/clock.c              |  126 +++++++++++++--------
+ arch/arm/mach-s3c64xx/setup-sdhci.c        |   24 ----
+ arch/arm/mach-s5pc100/Makefile             |    1 -
+ arch/arm/mach-s5pc100/clock.c              |  130 +++++++++++++---------
+ arch/arm/mach-s5pc100/setup-sdhci.c        |   23 ----
+ arch/arm/mach-s5pv210/Makefile             |    1 -
+ arch/arm/mach-s5pv210/clock.c              |  167 +++++++++++++++++-----------
+ arch/arm/mach-s5pv210/setup-sdhci.c        |   22 ----
+ arch/arm/plat-s3c24xx/s3c2443-clock.c      |   15 ++-
+ arch/arm/plat-samsung/include/plat/sdhci.h |   31 -----
+ drivers/mmc/host/sdhci-s3c.c               |    6 +-
+ 18 files changed, 361 insertions(+), 390 deletions(-)
+ delete mode 100644 arch/arm/mach-exynos4/setup-sdhci.c
+ delete mode 100644 arch/arm/mach-s3c2416/setup-sdhci.c
+ delete mode 100644 arch/arm/mach-s3c64xx/setup-sdhci.c
+ delete mode 100644 arch/arm/mach-s5pc100/setup-sdhci.c
+ delete mode 100644 arch/arm/mach-s5pv210/setup-sdhci.c
+
+-- 
+1.7.4.4
+
