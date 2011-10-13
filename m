@@ -1,42 +1,84 @@
-From: Sylwester Nawrocki <s.nawrocki@samsung.com>
-Subject: Re: [PATCH V4 3/3] ARM: SAMSUNG: Add lookup of sdhci-s3c clocks	using
- generic names
-Date: Thu, 13 Oct 2011 11:40:33 +0200
-Message-ID: <4E96B211.1090908@samsung.com>
-References: <1318412587-29987-1-git-send-email-rajeshwari.s@samsung.com>
- <1318412587-29987-4-git-send-email-rajeshwari.s@samsung.com>
- <4E956ADB.3060604@samsung.com>
- <CAPs=JDf2N1kh4BO9nPBb-J6k51e-ytntrNOvw_UOKtw-ktdycA@mail.gmail.com>
- <4E95BDF8.2080406@samsung.com>
- <CAPs=JDeFyoCYnR-Xa_fdmBVHxfNGuVNfdHd-MZgYcPytprsmFg@mail.gmail.com>
- <4E969958.9020200@samsung.com> <20111013085521.GJ21648@n2100.arm.linux.org.uk>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH] mmc: core: Prevent too long response times for suspend
+Date: Thu, 13 Oct 2011 16:03:58 +0200
+Message-ID: <1318514638-32452-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.w1.samsung.com ([210.118.77.14]:35686 "EHLO
-	mailout4.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752003Ab1JMJkl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2011 05:40:41 -0400
-In-reply-to: <20111013085521.GJ21648@n2100.arm.linux.org.uk>
+Received: from eu1sys200aog106.obsmtp.com ([207.126.144.121]:57380 "EHLO
+	eu1sys200aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755587Ab1JMOEP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2011 10:04:15 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Rajeshwari Shinde <rajeshwari.s@samsung.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-On 10/13/2011 10:55 AM, Russell King - ARM Linux wrote:
-> On Thu, Oct 13, 2011 at 09:55:04AM +0200, Sylwester Nawrocki wrote:
->> Yes, it allowed to add clkdev support with minimal changes required.
->>
->> But let's see what happens when the works on common struct clk for all
->> architectures are more or less completed and we convert Samsung platforms
->> to use it;)
-> 
-> The common struct clk shouldn't have much to do with the clkdev part of
-> it - clkdev just provides a method to associate a struct clk with the
-> drivers request.  The common struct clk doesn't change that.
+While trying to suspend the mmc host there could still be
+ongoing requests that we need to wait for. At the same time
+a device driver must respond to a suspend request rather quickly.
 
-Indeed. I was just wondering where we end up with the arch struct clk attribute
-which is specific to clkdev processes.
-It could just go into the hardware-specific data, although it doesn't sound
-like a perfectly right approach.
+Instead of potentially wait "forever" by claiming the host we now
+"try" to claim the host instead. If it fails, -EBUSY is returned.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+---
+ drivers/mmc/core/core.c |   42 +++++++++++++++++++++++++++---------------
+ 1 files changed, 27 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 61d7730..b900932 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2121,21 +2121,33 @@ int mmc_suspend_host(struct mmc_host *host)
+ 
+ 	mmc_bus_get(host);
+ 	if (host->bus_ops && !host->bus_dead) {
+-		if (host->bus_ops->suspend)
+-			err = host->bus_ops->suspend(host);
+-		if (err == -ENOSYS || !host->bus_ops->resume) {
+-			/*
+-			 * We simply "remove" the card in this case.
+-			 * It will be redetected on resume.
+-			 */
+-			if (host->bus_ops->remove)
+-				host->bus_ops->remove(host);
+-			mmc_claim_host(host);
+-			mmc_detach_bus(host);
+-			mmc_power_off(host);
+-			mmc_release_host(host);
+-			host->pm_flags = 0;
+-			err = 0;
++
++		/*
++		 * A long response time is not acceptable for device drivers
++		 * when doing suspend. Prevent mmc_claim_host in the suspend
++		 * sequence, to potentially wait "forever" by trying to
++		 * pre-claim the host.
++		 */
++		if (mmc_try_claim_host(host)) {
++			if (host->bus_ops->suspend)
++				err = host->bus_ops->suspend(host);
++			if (err == -ENOSYS || !host->bus_ops->resume) {
++				/*
++				 * We simply "remove" the card in this case.
++				 * It will be redetected on resume.
++				 */
++				if (host->bus_ops->remove)
++					host->bus_ops->remove(host);
++				mmc_claim_host(host);
++				mmc_detach_bus(host);
++				mmc_power_off(host);
++				mmc_release_host(host);
++				host->pm_flags = 0;
++				err = 0;
++			}
++			mmc_do_release_host(host);
++		} else {
++			err = -EBUSY;
+ 		}
+ 	}
+ 	mmc_bus_put(host);
+-- 
+1.7.5.4
+
