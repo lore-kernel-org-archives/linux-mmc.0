@@ -1,45 +1,64 @@
 From: Rajeshwari Shinde <rajeshwari.s@samsung.com>
-Subject: [PATCH V4 1/3] SDHCI: S3C: Use generic clock names for sdhci bus clock
- options
-Date: Thu, 13 Oct 2011 13:46:57 +0530
-Message-ID: <1318493819-18906-2-git-send-email-rajeshwari.s@samsung.com>
-References: <1318493819-18906-1-git-send-email-rajeshwari.s@samsung.com>
+Subject: [PATCH V4 0/3] ARM: SAMSUNG: Add support for sdhci clock lookup using
+ generic names
+Date: Thu, 13 Oct 2011 13:46:56 +0530
+Message-ID: <1318493819-18906-1-git-send-email-rajeshwari.s@samsung.com>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1318493819-18906-1-git-send-email-rajeshwari.s@samsung.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
 Cc: cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch modifies the driver to stop depending on the clock names
-being passed from the platform and switch over to bus clock lookup
-using generic clock names.
+This patchset adds support for sdhci controller clock lookup using
+generic names. With this patchset, there will be no need to pass clock
+names in sdhci platform data.
 
-Signed-off-by: Rajeshwari Shinde <rajeshwari.s@samsung.com>
----
- drivers/mmc/host/sdhci-s3c.c |    6 ++----
- 1 files changed, 2 insertions(+), 4 deletions(-)
+This patchset depends on the patchset:
+Add a common macro for creating struct clk_lookup entries.
+mmc: sdhci-s3c: add default controller configuration.
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 82709b6..a5fde87 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -435,14 +435,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 
- 	for (clks = 0, ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
- 		struct clk *clk;
--		char *name = pdata->clocks[ptr];
-+		char name[14];
- 
--		if (name == NULL)
--			continue;
-+		sprintf(name, "mmc_busclk.%d", ptr);
- 
- 		clk = clk_get(dev, name);
- 		if (IS_ERR(clk)) {
--			dev_err(dev, "failed to get clock %s\n", name);
- 			continue;
- 		}
- 
+V2 Changes:
+- Added HCLK instance for HSMMC instance 1 as suggested by Heiko.
+- Rebased on UART clkdev patches. So these patches should be applied
+  after UART clkdev patches are applied.
+
+V3 Changes:
+- Removed double registration of hsmmc1 hclk from s3c2416 as suggested by
+  Heiko
+
+V4 Changes:
+- Changed the devname for bus clocks in Exynos4 to s3c-sdhci. from 
+  exynos4-sdhci. as suggested by Sylwester.
+
+Rajeshwari Shinde (3):
+  SDHCI: S3C: Use generic clock names for sdhci bus clock options
+  ARM: SAMSUNG: Remove SDHCI bus clocks from platform data
+  ARM: SAMSUNG: Add lookup of sdhci-s3c clocks using generic names
+
+ arch/arm/mach-exynos4/Makefile             |    1 -
+ arch/arm/mach-exynos4/clock.c              |   88 +++++++++------
+ arch/arm/mach-exynos4/setup-sdhci.c        |   22 ----
+ arch/arm/mach-s3c2416/Makefile             |    1 -
+ arch/arm/mach-s3c2416/clock.c              |   68 ++++++-----
+ arch/arm/mach-s3c2416/setup-sdhci.c        |   24 ----
+ arch/arm/mach-s3c64xx/Makefile             |    1 -
+ arch/arm/mach-s3c64xx/clock.c              |  126 +++++++++++++--------
+ arch/arm/mach-s3c64xx/setup-sdhci.c        |   24 ----
+ arch/arm/mach-s5pc100/Makefile             |    1 -
+ arch/arm/mach-s5pc100/clock.c              |  130 +++++++++++++---------
+ arch/arm/mach-s5pc100/setup-sdhci.c        |   23 ----
+ arch/arm/mach-s5pv210/Makefile             |    1 -
+ arch/arm/mach-s5pv210/clock.c              |  167 +++++++++++++++++-----------
+ arch/arm/mach-s5pv210/setup-sdhci.c        |   22 ----
+ arch/arm/plat-s3c24xx/s3c2443-clock.c      |   15 ++-
+ arch/arm/plat-samsung/include/plat/sdhci.h |   31 -----
+ drivers/mmc/host/sdhci-s3c.c               |    6 +-
+ 18 files changed, 361 insertions(+), 390 deletions(-)
+ delete mode 100644 arch/arm/mach-exynos4/setup-sdhci.c
+ delete mode 100644 arch/arm/mach-s3c2416/setup-sdhci.c
+ delete mode 100644 arch/arm/mach-s3c64xx/setup-sdhci.c
+ delete mode 100644 arch/arm/mach-s5pc100/setup-sdhci.c
+ delete mode 100644 arch/arm/mach-s5pv210/setup-sdhci.c
+
 -- 
 1.7.4.4
