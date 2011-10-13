@@ -1,92 +1,98 @@
-From: Ming Lei <tom.leiming@gmail.com>
-Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
-Date: Thu, 13 Oct 2011 22:18:07 +0800
-Message-ID: <CACVXFVNXyzzJw7UK+OFuDe23voQvyywoP9AvUsV=iPDFPO4fPw@mail.gmail.com>
-References: <20111008155502.GB616@kroah.com>
-	<361419345.198335.1318268242916.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-	<CACVXFVMnt-ChUDhawhoyMm-wJ8xSQAWs1c8ykzmyshfX49HEsw@mail.gmail.com>
-	<20111013040923.GE15829@ponder.secretlab.ca>
+From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
+Subject: Linux v3.1-rc8 : SDHC card do not switch to high speed mode
+Date: Thu, 13 Oct 2011 19:55:25 +0530
+Message-ID: <C82BA3053CFD354AACBD25EFBD2A4EC603F959EF62@dbde02.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20111013040923.GE15829@ponder.secretlab.ca>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Andrei Warkentin <awarkentin@vmware.com>, Greg KH <greg@kroah.com>, Dilan Lee <dilee@nvidia.com>, "G, Manjunath Kondaiah" <manjugk@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>, Manjunath@jasper.es, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Linux PM List <linux-pm@vger.kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-omap-owner@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-CC Rafael and linux-pm
+Hi all,
 
-On Thu, Oct 13, 2011 at 12:09 PM, Grant Likely
-<grant.likely@secretlab.ca> wrote:
-> On Tue, Oct 11, 2011 at 08:29:18PM +0800, Ming Lei wrote:
->> On Tue, Oct 11, 2011 at 1:37 AM, Andrei Warkentin <awarkentin@vmware=
-=2Ecom> wrote:
->> > Hi,
->> >
->> > ----- Original Message -----
->> >> From: "Greg KH" <greg@kroah.com>
->> >> To: "Josh Triplett" <josh@joshtriplett.org>
->> >> Cc: "G, Manjunath Kondaiah" <manjugk@ti.com>, linux-arm-kernel@li=
-sts.infradead.org, "Grant Likely"
->> >> <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-mm=
-c@vger.kernel.org, linux-kernel@vger.kernel.org,
->> >> "Dilan Lee" <dilee@nvidia.com>, "Mark Brown" <broonie@opensource.=
-wolfsonmicro.com>, Manjunath@jasper.es
->> >> Sent: Saturday, October 8, 2011 11:55:02 AM
->> >> Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral me=
-chanism
->> >>
->> >
->> > I'm a bit of a fly on the wall here, but I'm curious how this impa=
-cts suspend/resume.
->> > device_initialize->device_pm_init are called from device_register,=
- so certainly this
->> > patch doesn't also ensure that the PM ordering matches probe order=
-ing, which is bound
->> > to break suspend, right? Was this ever tested with the OMAP target=
-? Shouldn't the
->>
->> Inside device_add(), device_pm_add is called before bus_probe_device=
-,
->> so the patch can't change the device order in pm list, and just chan=
-ge
->> the driver probe order.
->
-> That's the way it works now, but can it be reworked? =A0It would be
+We are porting existing OMAP HSMMC driver (omap_hsmmc.c) to an upcoming SOC. 
 
-IMO, it depends on what shape you plan to rework.  Currently, the
-deferred probe may found a resource dependency, but I am not sure
-that pm dependency is same with the resource dependency found
-during probe.
+When testing the driver with SanDisk 16GB SDHC Card (SanDisk Extreme HD Video 16GB 20Mb/s), we observed that the card doesn't switch to High Speed mode. 
 
-> possible to adjust the list order after successful probe. =A0However,
-> I'm not clear on the ordering rules for the dpm_list. =A0Right now it=
- is
-> explicitly ordered to have parents before children, but as already
-> expressed, that doesn't accurately represent ordering constraints for
-> multiple device dependancies.
+The card shows that it is compatible with SDA spec3. 
 
-Maybe we should understand the correct model of the ordering constraint=
-s
-for the multiple device dependancies first, could you give a descriptio=
-n or
-some examples about it?
-
->
-> So, reordering the list would probably require maintaining the
-> existing parent-child ordering constraint, but to also shift
-> devices (and any possible children?) to be after drivers that are
-> already probed. =A0That alone will be difficult to implement and get
-> right, but maybe the constraints can be simplified. =A0It needs some
-> further thought.
->
-> g.
->
->
+We are testing on Linux v3.1-rc8
 
 
-thanks,
---=20
-Ming Lei
+In mmc_sd_init_card(), rocr received from card is 0xc0ff8000, (S18A bit not set).
+
+During mmc_sd_setup_card() --> mmc_decode_scr(), when decoding scr, the card specifies that it is sda spec3 compatible 
+
+	if (scr->sda_vsn == SCR_SPEC_VER_2)
+		/* Check if Physical Layer Spec v3.0 is supported */
+		scr->sda_spec3 = UNSTUFF_BITS(resp, 47, 1);			--> true
+
+Then during mmc_read_switch(), since it's a sda spec3 card, the code goes to read sd3_drv_type & sd3_curr_limit and skips settings hs_max_dtr.
+
+mmc_sd_switch_hs() returns back since hs_max_dtr == 0
+
+	if (card->sw_caps.hs_max_dtr == 0)
+		return 0;
+
+Because of this Card isn't switched to High Speed mode.
+
+Is there any solution for this? Has anyone seen this issue.
+
+Thanks in advance.
+
+
+I am also attaching the log I get from the sd dev attr
+
+Regards
+Gururaja
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat cid
+0353445344313647800c03994400ac6f
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat csd
+400e00325b59000076b27f800a404013
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat date
+12/2010
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat erase_size
+512
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat fwrev
+0x0
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat hwrev
+0x8
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat name
+SD16G
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat manfid
+0x000003
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat oemid
+0x5344
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat preferred_erase_size
+4194304
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat scr
+0235800000000000
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat serial
+0x0c039944
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat type
+SD
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat uevent
+DRIVER=mmcblk
+MMC_TYPE=SD
+MMC_NAME=SD16G
+MODALIAS=mmc:block
+
+
