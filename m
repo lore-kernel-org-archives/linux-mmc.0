@@ -1,85 +1,45 @@
-From: Sylwester Nawrocki <s.nawrocki@samsung.com>
-Subject: Re: [PATCH V4 3/3] ARM: SAMSUNG: Add lookup of sdhci-s3c clocks using
- generic names
-Date: Thu, 13 Oct 2011 09:55:04 +0200
-Message-ID: <4E969958.9020200@samsung.com>
-References: <1318412587-29987-1-git-send-email-rajeshwari.s@samsung.com>
- <1318412587-29987-4-git-send-email-rajeshwari.s@samsung.com>
- <4E956ADB.3060604@samsung.com>
- <CAPs=JDf2N1kh4BO9nPBb-J6k51e-ytntrNOvw_UOKtw-ktdycA@mail.gmail.com>
- <4E95BDF8.2080406@samsung.com>
- <CAPs=JDeFyoCYnR-Xa_fdmBVHxfNGuVNfdHd-MZgYcPytprsmFg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.w1.samsung.com ([210.118.77.11]:18045 "EHLO
-	mailout1.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751454Ab1JMHzI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2011 03:55:08 -0400
-In-reply-to: <CAPs=JDeFyoCYnR-Xa_fdmBVHxfNGuVNfdHd-MZgYcPytprsmFg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Rajeshwari Shinde <rajeshwari.s@samsung.com>
+Subject: [PATCH V4 1/3] SDHCI: S3C: Use generic clock names for sdhci bus clock
+ options
+Date: Thu, 13 Oct 2011 13:46:57 +0530
+Message-ID: <1318493819-18906-2-git-send-email-rajeshwari.s@samsung.com>
+References: <1318493819-18906-1-git-send-email-rajeshwari.s@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1318493819-18906-1-git-send-email-rajeshwari.s@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
+Cc: cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rajeshwari Shinde <rajeshwari.s@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org
 
-On 10/13/2011 09:16 AM, Rajeshwari Birje wrote:
-> On Wed, Oct 12, 2011 at 9:49 PM, Sylwester Nawrocki
-> <s.nawrocki@samsung.com> wrote:
->> On 10/12/2011 02:36 PM, Rajeshwari Birje wrote:
->>> On Wed, Oct 12, 2011 at 3:54 PM, Sylwester Nawrocki
->>> <s.nawrocki@samsung.com> wrote:
->>>> Hi Rajeshwari,
->>>>
->>>> On 10/12/2011 11:43 AM, Rajeshwari Shinde wrote:
->>>>> Add support for lookup of sdhci-s3c controller clocks using generic names
->>>>> for s3c2416, s3c64xx, s5pc100, s5pv210 and exynos4 SoC's.
->>>>>
->>>>> Signed-off-by: Rajeshwari Shinde <rajeshwari.s@samsung.com>
->>>>> ---
->>>>>  arch/arm/mach-exynos4/clock.c         |   88 ++++++++++-------
->>>>>  arch/arm/mach-s3c2416/clock.c         |   68 +++++++------
->>>>>  arch/arm/mach-s3c64xx/clock.c         |  126 +++++++++++++++----------
->>>>>  arch/arm/mach-s5pc100/clock.c         |  130 ++++++++++++++++----------
->>>>>  arch/arm/mach-s5pv210/clock.c         |  167 ++++++++++++++++++++-------------
->>>>>  arch/arm/plat-s3c24xx/s3c2443-clock.c |   15 ++-
->>>>>  6 files changed, 359 insertions(+), 235 deletions(-)
->>>>>
->>>>> diff --git a/arch/arm/mach-exynos4/clock.c b/arch/arm/mach-exynos4/clock.c
->>>>> index 9f50e33..c6383b9 100644
->>>>> --- a/arch/arm/mach-exynos4/clock.c
->>>>> +++ b/arch/arm/mach-exynos4/clock.c
->>>>> @@ -1157,42 +1157,6 @@ static struct clksrc_clk clksrcs[] = {
->>>>>               .reg_div = { .reg = S5P_CLKDIV_MFC, .shift = 0, .size = 4 },
->> ...
->>>>> +static struct clksrc_clk clk_sclk_mmc0 = {
->>>>> +     .clk            = {
->>>>> +             .name           = "sclk_mmc",
->>>>> +             .devname        = "s3c-sdhci.0",
->>>>
->>>> Would it make sense to drop this 'devname' field here and others
->>>> until sclk_mmc3 ....
->>>
->>> *** The devname here distinguishes these clocks. So it should be okay
->>> to have a devname for these clocks.
->>
->> I'm not sure what's Mr Kukjin's opinion on that, but I personally would really
->> like to see all the devname fields disappear from samsung clk data structures.
->> Possibly if all involved people would keep that in mind we could achieve this
->> over time.
-> 
-> 
-> **** Devname field is still required for clocks like hsmmc for driver
-> to work fine. Hence it would be tough to remove the devname
-> completely.
+This patch modifies the driver to stop depending on the clock names
+being passed from the platform and switch over to bus clock lookup
+using generic clock names.
 
-Yes, it allowed to add clkdev support with minimal changes required.
+Signed-off-by: Rajeshwari Shinde <rajeshwari.s@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
 
-But let's see what happens when the works on common struct clk for all
-architectures are more or less completed and we convert Samsung platforms
-to use it;)
-
-Regards,
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 82709b6..a5fde87 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -435,14 +435,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 
+ 	for (clks = 0, ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
+ 		struct clk *clk;
+-		char *name = pdata->clocks[ptr];
++		char name[14];
+ 
+-		if (name == NULL)
+-			continue;
++		sprintf(name, "mmc_busclk.%d", ptr);
+ 
+ 		clk = clk_get(dev, name);
+ 		if (IS_ERR(clk)) {
+-			dev_err(dev, "failed to get clock %s\n", name);
+ 			continue;
+ 		}
+ 
 -- 
-Sylwester Nawrocki
-Samsung Poland R&D Center
+1.7.4.4
