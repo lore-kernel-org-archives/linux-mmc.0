@@ -1,58 +1,102 @@
-From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
-Date: Thu, 13 Oct 2011 10:31:45 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1110131029510.2026-100000@iolanthe.rowland.org>
-References: <CACVXFVNXyzzJw7UK+OFuDe23voQvyywoP9AvUsV=iPDFPO4fPw@mail.gmail.com>
+From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
+Subject: Linux v3.1-rc8 : SDHC card do not switch to high speed mode
+Date: Thu, 13 Oct 2011 20:19:27 +0530
+Message-ID: <C82BA3053CFD354AACBD25EFBD2A4EC603F959EF6E@dbde02.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from iolanthe.rowland.org ([192.131.102.54]:59226 "HELO
-	iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1751356Ab1JMObq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2011 10:31:46 -0400
-In-Reply-To: <CACVXFVNXyzzJw7UK+OFuDe23voQvyywoP9AvUsV=iPDFPO4fPw@mail.gmail.com>
+Received: from comal.ext.ti.com ([198.47.26.152]:34706 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752470Ab1JMOtd convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2011 10:49:33 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ming Lei <tom.leiming@gmail.com>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Andrei Warkentin <awarkentin@vmware.com>, Greg KH <greg@kroah.com>, Dilan Lee <dilee@nvidia.com>, "G, Manjunath Kondaiah" <manjugk@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>, Manjunath@jasper.es, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Linux PM List <linux-pm@vger.kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>
 
-On Thu, 13 Oct 2011, Ming Lei wrote:
+Hi all,
 
-> >> Inside device_add(), device_pm_add is called before bus_probe_devi=
-ce,
-> >> so the patch can't change the device order in pm list, and just ch=
-ange
-> >> the driver probe order.
-> >
-> > That's the way it works now, but can it be reworked? =A0It would be
->=20
-> IMO, it depends on what shape you plan to rework.  Currently, the
-> deferred probe may found a resource dependency, but I am not sure
-> that pm dependency is same with the resource dependency found
-> during probe.
->=20
-> > possible to adjust the list order after successful probe. =A0Howeve=
-r,
-> > I'm not clear on the ordering rules for the dpm_list. =A0Right now =
-it is
-> > explicitly ordered to have parents before children, but as already
-> > expressed, that doesn't accurately represent ordering constraints f=
-or
-> > multiple device dependancies.
->=20
-> Maybe we should understand the correct model of the ordering constrai=
-nts
-> for the multiple device dependancies first, could you give a descript=
-ion or
-> some examples about it?
+We are porting existing OMAP HSMMC driver (omap_hsmmc.c) to an upcoming SOC. 
 
-The requirement is that devices must be capable of resuming in the=20
-order given by dpm_list, and they must be capable of suspending in=20
-the reverse order.
+When testing the driver with SanDisk 16GB SDHC Card (SanDisk Extreme HD Video 16GB 20Mb/s), we observed that the card doesn't switch to High Speed mode. 
 
-Therefore if device A can't work unless device B is functional, then B=20
-must come before A in dpm_list.
+The card shows that it is compatible with SDA spec3. 
 
-Alan Stern
+We are testing on Linux v3.1-rc8
+
+
+In mmc_sd_init_card(), rocr received from card is 0xc0ff8000, (S18A bit not set).
+
+During mmc_sd_setup_card() --> mmc_decode_scr(), when decoding scr, the card specifies that it is sda spec3 compatible 
+
+	if (scr->sda_vsn == SCR_SPEC_VER_2)
+		/* Check if Physical Layer Spec v3.0 is supported */
+		scr->sda_spec3 = UNSTUFF_BITS(resp, 47, 1);			--> true
+
+Then during mmc_read_switch(), since it's a sda spec3 card, the code goes to read sd3_drv_type & sd3_curr_limit and skips settings hs_max_dtr.
+
+mmc_sd_switch_hs() returns back since hs_max_dtr == 0
+
+	if (card->sw_caps.hs_max_dtr == 0)
+		return 0;
+
+Because of this Card isn't switched to High Speed mode.
+
+Is there any solution for this? Has anyone seen this issue.
+
+Thanks in advance.
+
+
+I am also attaching the log I get from the sd dev attr
+
+Regards
+Gururaja
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat cid
+0353445344313647800c03994400ac6f
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat csd
+400e00325b59000076b27f800a404013
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat date
+12/2010
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat erase_size
+512
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat fwrev
+0x0
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat hwrev
+0x8
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat name
+SD16G
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat manfid
+0x000003
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat oemid
+0x5344
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat preferred_erase_size
+4194304
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat scr
+0235800000000000
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat serial
+0x0c039944
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat type
+SD
+
+root@arago-armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa# cat uevent
+DRIVER=mmcblk
+MMC_TYPE=SD
+MMC_NAME=SD16G
+MODALIAS=mmc:block
+
 
