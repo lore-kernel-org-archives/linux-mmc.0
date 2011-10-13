@@ -1,49 +1,44 @@
-From: "Jon Medhurst (Tixy)" <jon.medhurst@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: Do not release spinlock in request_end
-Date: Thu, 13 Oct 2011 16:59:52 +0100
-Message-ID: <1318521592.2090.16.camel@linaro1>
-References: <1318342001-26955-1-git-send-email-ulf.hansson@stericsson.com>
-	<20111013142914.GZ21648@n2100.arm.linux.org.uk>
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
+Date: Thu, 13 Oct 2011 12:04:25 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1110131202350.2026-100000@iolanthe.rowland.org>
+References: <CACVXFVMoac7psbfO6UdDvNux4c8bQYS4YNUdz1C-o+CiJzyuZA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20111013142914.GZ21648@n2100.arm.linux.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from iolanthe.rowland.org ([192.131.102.54]:59313 "HELO
+	iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1753443Ab1JMQE0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2011 12:04:26 -0400
+In-Reply-To: <CACVXFVMoac7psbfO6UdDvNux4c8bQYS4YNUdz1C-o+CiJzyuZA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ming Lei <tom.leiming@gmail.com>
+Cc: Grant Likely <grant.likely@secretlab.ca>, Andrei Warkentin <awarkentin@vmware.com>, Greg KH <greg@kroah.com>, Dilan Lee <dilee@nvidia.com>, "G, Manjunath Kondaiah" <manjugk@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>, Manjunath@jasper.es, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Linux PM List <linux-pm@vger.kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>
 
-On Thu, 2011-10-13 at 15:29 +0100, Russell King - ARM Linux wrote:
-> On Tue, Oct 11, 2011 at 04:06:41PM +0200, Ulf Hansson wrote:
-> > The patch "mmc: core: move ->request() call from atomic context",
-> > is the reason to why this change is possible. This simplifies the
-> > error handling code execution path quite a lot and potentially also
-> > fixes some error handling hang problems.
-> > 
-> > Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
-> 
-> This doesn't look right:
-> 
-> void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
-> {
->         if (err && cmd->retries) {
->                 host->ops->request(host, mrq);
-> 
-> So, not dropping the spinlock results in calling the request function
-> with the spinlock held - and as the request function then goes on to
-> lock the spinlock, we will deadlock.
+On Thu, 13 Oct 2011, Ming Lei wrote:
 
-Indeed, deadlock behaviour at this point is what I see with this patch
-on a Versatile Express board running 3.0-rc9.
+> Hi,
+> 
+> On Thu, Oct 13, 2011 at 10:31 PM, Alan Stern <stern@rowland.harvard.edu>
+> >> Maybe we should understand the correct model of the ordering constraints
+> >> for the multiple device dependancies first, could you give a description or
+> >> some examples about it?
+> >
+> > The requirement is that devices must be capable of resuming in the
+> > order given by dpm_list, and they must be capable of suspending in
+> > the reverse order.
+> >
+> > Therefore if device A can't work unless device B is functional, then B
+> > must come before A in dpm_list.
+> 
+> If all devices can support async suspend and resume correctly, looks like
+> the device order given by dpm_list is not needed any longer, doesn't it?
 
--- 
-Tixy
+It _is_ needed, because the user can disable async suspend/resume via 
+/sys/power/pm_async.
+
+Also, not all devices do support async suspend/resume.
+
+Alan Stern
+
