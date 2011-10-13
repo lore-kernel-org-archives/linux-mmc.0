@@ -1,58 +1,49 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 1/4] mmc: mmci: Bugfix in pio read for small packets
-Date: Thu, 13 Oct 2011 16:48:03 +0100
-Message-ID: <20111013154803.GH21648@n2100.arm.linux.org.uk>
-References: <1317109568-17905-1-git-send-email-ulf.hansson@stericsson.com> <20111001160937.GF11710@n2100.arm.linux.org.uk> <4E8F028C.10102@stericsson.com> <20111008091036.GF25689@n2100.arm.linux.org.uk> <CACRpkdY=DFW+J_pQetK38mPqic2iBuDWCx5QZTo-NkL1L37Fuw@mail.gmail.com> <4E92AB66.1030406@stericsson.com>
+From: "Jon Medhurst (Tixy)" <jon.medhurst@linaro.org>
+Subject: Re: [PATCH] mmc: mmci: Do not release spinlock in request_end
+Date: Thu, 13 Oct 2011 16:59:52 +0100
+Message-ID: <1318521592.2090.16.camel@linaro1>
+References: <1318342001-26955-1-git-send-email-ulf.hansson@stericsson.com>
+	<20111013142914.GZ21648@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:42158 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751849Ab1JMPsQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2011 11:48:16 -0400
-Content-Disposition: inline
-In-Reply-To: <4E92AB66.1030406@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20111013142914.GZ21648@n2100.arm.linux.org.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-mmc@vger.kernel.org, Lee Jones <lee.jones@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>, Stefan NILSSON9 <stefan.xk.nilsson@stericsson.com>
 
-On Mon, Oct 10, 2011 at 10:23:02AM +0200, Ulf Hansson wrote:
-> Linus Walleij wrote:
->> On Sat, Oct 8, 2011 at 11:10 AM, Russell King - ARM Linux
->> <linux@arm.linux.org.uk> wrote:
->>> On Fri, Oct 07, 2011 at 03:45:48PM +0200, Ulf Hansson wrote:
->>>
->>> Well, the patch system says that each one depends on the previous one,
->>> and the first one in the series contains the PIO read thing.
->>>
->>> Do 7108/1 onwards depend on 7106/1 and 7107/1 ?
->>
->> Probably my fault, since I was helping Ulf out with the patch tracker
->> introduction.
->>
->> The patches should be pretty much semantically orthogonal as
->> far as I can tell, the only reason dependency was stated that way
->> was that I couldn't tell from head-parsing whether there were
->> syntactical dependencies. (And wanted to avoid the annoyance
->> of non-applying patches...)
->>
->> So if they apply, they are independent AFAICT.
->
-> 7108/1 and 7109/1, have real dependencies. Otherwise there none.
+On Thu, 2011-10-13 at 15:29 +0100, Russell King - ARM Linux wrote:
+> On Tue, Oct 11, 2011 at 04:06:41PM +0200, Ulf Hansson wrote:
+> > The patch "mmc: core: move ->request() call from atomic context",
+> > is the reason to why this change is possible. This simplifies the
+> > error handling code execution path quite a lot and potentially also
+> > fixes some error handling hang problems.
+> > 
+> > Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+> 
+> This doesn't look right:
+> 
+> void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+> {
+>         if (err && cmd->retries) {
+>                 host->ops->request(host, mrq);
+> 
+> So, not dropping the spinlock results in calling the request function
+> with the spinlock held - and as the request function then goes on to
+> lock the spinlock, we will deadlock.
 
-Ok, I assume that those depend on the first two patches.
+Indeed, deadlock behaviour at this point is what I see with this patch
+on a Versatile Express board running 3.0-rc9.
 
-So, I tried applying 7110/1 .. 7112/1 but the first rejects because it
-doesn't have the non-power-of-2 support patch applied (7107/1).  And
-it seems sensible that 7107/1 depends on 7106/1 (the PIO patch) which
-I believe to be a problem.
-
-Therefore, I don't think any of these can be applied without the
-initial PIO patch.
-
-One thing I haven't yet mentioned is about the non-power-of-2 support -
-surely this can only be supported if blksz_datactrl16 is set?  If so,
-shouldn't it key off that?  I don't see how it could otherwise support
-non-power of 2 block sizes with just a log2 of the block size programmed
-into the data control register.
+-- 
+Tixy
