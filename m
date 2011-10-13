@@ -1,76 +1,59 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: Re: [RFC/PATCH] mmc: core: Kill block requests if card is removed
-Date: Thu, 13 Oct 2011 23:23:58 +0530
-Message-ID: <4E9725B6.7010907@codeaurora.org>
-References: <1318405013-32434-1-git-send-email-sthumma@codeaurora.org> <4E956D2E.5070706@codeaurora.org>
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
+Date: Thu, 13 Oct 2011 14:16:42 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1110131413410.2026-100000@iolanthe.rowland.org>
+References: <20111013171539.GA18574@ponder.secretlab.ca>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <4E956D2E.5070706@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Pavan Kondeti <pkondeti@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-msm@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20111013171539.GA18574@ponder.secretlab.ca>
+Sender: linux-omap-owner@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Ming Lei <tom.leiming@gmail.com>, Andrei Warkentin <awarkentin@vmware.com>, Greg KH <greg@kroah.com>, Dilan Lee <dilee@nvidia.com>, "G, Manjunath Kondaiah" <manjugk@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>, Manjunath@jasper.es, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Linux PM List <linux-pm@vger.kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10/12/2011 4:04 PM, Pavan Kondeti wrote:
-> Hello Sujit,
->
-> On 10/12/2011 1:06 PM, Sujit Reddy Thumma wrote:
->> Kill block requests when the host knows that the card is
->> removed from the slot and is sure that it can no longer
->> accept any requests.
->>
->> Kill this silently so that the block layer don't output
->> error messages unnecessarily.
->>
->> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
->>
-> <snip>
->>
->> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
->> index 0ea4a06..7cdbc14 100644
->> --- a/include/linux/mmc/card.h
->> +++ b/include/linux/mmc/card.h
->> @@ -196,6 +196,7 @@ struct mmc_card {
->>   #define MMC_STATE_HIGHSPEED_DDR (1<<4)		/* card is in high speed mode */
->>   #define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in ultra high speed mode */
->>   #define MMC_CARD_SDXC		(1<<6)		/* card is SDXC */
->> +#define MMC_STATE_INSERTED      (1<<7)          /* card present in the slot */
->>   	unsigned int		quirks; 	/* card quirks */
->>   #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
->>   #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
->> @@ -344,6 +345,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
->>   #define mmc_card_sdio(c)	((c)->type == MMC_TYPE_SDIO)
->>
->>   #define mmc_card_present(c)	((c)->state&  MMC_STATE_PRESENT)
->> +#define mmc_card_inserted(c)     ((c)->state&  MMC_STATE_INSERTED)
->>   #define mmc_card_readonly(c)	((c)->state&  MMC_STATE_READONLY)
->>   #define mmc_card_highspeed(c)	((c)->state&  MMC_STATE_HIGHSPEED)
->>   #define mmc_card_blockaddr(c)	((c)->state&  MMC_STATE_BLOCKADDR)
->> @@ -352,6 +354,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
->>   #define mmc_card_ext_capacity(c) ((c)->state&  MMC_CARD_SDXC)
->>
->>   #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
->> +#define mmc_card_set_inserted(c) ((c)->state |= MMC_STATE_INSERTED)
->>   #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
->>   #define mmc_card_set_highspeed(c) ((c)->state |= MMC_STATE_HIGHSPEED)
->>   #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
->
-> Why do we need another flag to indicate card's presence? can not we use
-> MMC_STATE_PRESENT flag? This flag is set in mmc_add_card(). But not
-> cleared any where...
->
-MMC_STATE_PRESENT signifies the card presence in sysfs i.e. after 
-device_add() is called we can be sure that kobject for card device is 
-created. This will be cleared automatically when we do 
-mmc_release_card() after card removal. But before this when doing 
-device_del() is called the FS layer flush/sync the dirty data onto card. 
-This creates unnecessary noise in dmesg log when the card is removed 
-from the slot (without unmounting).
-> Thanks,
-> Pavan
->
->
-Thanks,
-Sujit
+On Thu, 13 Oct 2011, Grant Likely wrote:
+
+> For the deferred case; here is an example of the additional
+> constraint.  Consider the following hierarchy:
+> 
+> -A
+>  +-B
+>  | +-C
+>  | +-D
+>  |
+>  +-E
+>    +-F
+>    +-G
+> 
+> dpm_list could be ordered in at least the following ways (depending on
+> exactly when devices get registered).  There are many permutation, but
+> children are always be listed after its direct parent.
+> 
+> 1) ABECDFG (breadth first)
+> 2) AEBFGCD (breadth first)
+> 3) ABCDEFG (depth first)
+> 4) AEFGBCD (depth first)
+> 
+> Now, assume that device B depends on device F, and also assume that
+> there is no way either to express that in the hierarchy or even for
+> the constraint to be known at device registration time (the is exactly
+> the situation we're dealing with on embedded platforms).  Only the
+> driver for B knows that it needs a resource provided by F's driver.
+> So, the situation becomes that the ordering of dpm_list must now also
+> be sorted so that non-tree dependencies are also accounted for.  Of
+> the list above, only sort order 4 meets the new constraint.
+> 
+> The question then becomes, how can the dpm_list get resorted
+> dynamically at runtime to ensure that the new constraints are always
+> met without breaking old ones.  Here are some options I can think of:
+
+This was a long message and I haven't absorbed the whole thing.  
+However it's worth pointing out right at the start that we already have
+device_pm_move_before(), device_pm_move_after(), and
+device_pm_move_last().  They are intended specifically to provide
+drivers with a way of making sure that dpm_list is in the right order 
+-- people have been aware of these issues for some time.
+
+Alan Stern
+
