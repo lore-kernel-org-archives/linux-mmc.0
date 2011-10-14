@@ -1,88 +1,63 @@
-From: David Daney <ddaney.cavm@gmail.com>
-Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
-Date: Fri, 14 Oct 2011 12:09:00 -0700
-Message-ID: <4E9888CC.4060104@gmail.com>
-References: <CACxGe6vF6em0-PnJ7UuH0CQ0_StJTfmFKBsktvb9O+ccCx6E8A@mail.gmail.com> <Pine.LNX.4.44L0.1110141229450.2036-100000@iolanthe.rowland.org> <CACxGe6t2Xu5B0AKZJe-6HEpxK6GfuNm0Y2Kb_bs8ZwaTz5XnRg@mail.gmail.com> <4E9885CF.1000301@gmail.com> <CACxGe6v=NuxX3b=7wG6hMZjO22_zEg3Q4LtjT3UPtv2bKFtjWQ@mail.gmail.com>
+From: =?utf-8?B?5L+d6K+B5pyJ5Lmw5a625Zue5aSN?= <root@wztelecom.cn>
+Subject: =?utf-8?B?576k5Y+R6L2v5Lu2K+S5sOWutuaQnOe0ouacuivmnIDmlrDlub/kuqTkvJrkubDlrrbjgIHmtbc=?=
+	=?utf-8?B?5YWz5pWw5o2uLEIyQuivouebmOS5sOWutjUwMOS4h+OAgg==?=
+Date: Fri, 14 Oct 2011 19:55:54 +0000 (UTC)
+Message-ID: <20121015003341110235__38430.7220149369$1318622154$gmane$org@wztelecom.cn>
+Reply-To: <1339625218@qq.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:58388 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755179Ab1JNTJE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Oct 2011 15:09:04 -0400
-In-Reply-To: <CACxGe6v=NuxX3b=7wG6hMZjO22_zEg3Q4LtjT3UPtv2bKFtjWQ@mail.gmail.com>
+Received: from mail.wztelecom.cn ([220.189.240.212]:60491 "EHLO
+	mail.wztelecom.cn" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754021Ab1JNTzt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Oct 2011 15:55:49 -0400
+Date: Mon, 15 Oct 2012 00:33:27 +0800
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Alan Stern <stern@rowland.harvard.edu>, Ming Lei <tom.leiming@gmail.com>, Andrei Warkentin <awarkentin@vmware.com>, Greg KH <greg@kroah.com>, Dilan Lee <dilee@nvidia.com>, "G, Manjunath Kondaiah" <manjugk@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>, Manjunath@jasper.es, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Linux PM List <linux-pm@vger.kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>
+To: linsma@aol.com, linux@supermail.ru, linux-assembly@yahoogroups.com, linuxcaster@gmail.com, linuxdna@googlegroups.com, linuxecci@googlegroups.com, linuxfan@linux.orgli
 
-On 10/14/2011 12:03 PM, Grant Likely wrote:
-> On Fri, Oct 14, 2011 at 12:56 PM, David Daney<ddaney.cavm@gmail.com>  wrote:
->> On 10/14/2011 10:20 AM, Grant Likely wrote:
->>>
->>> On Fri, Oct 14, 2011 at 10:33 AM, Alan Stern<stern@rowland.harvard.edu>
->>>   wrote:
->>>>
->>>> On Fri, 14 Oct 2011, Grant Likely wrote:
->>>>
->>>>>> How can a device acquire children before it has a driver?
->>>>>
->>>>> There are a few potential situations in embedded systems (or at least
->>>>> nothing currently prevents it) where platform setup code constructs a
->>>>> device hierarchy without the aid of device drivers, and it is still
->>>>> possible for a parent device to be attached to a driver.  IIUC, SPARC
->>>>> creates an entire hierarchy of platform_devices from all the nodes in
->>>>> the OpenFirmware device tree, and any of those devices can be bound to
->>>>> a driver.  I don't like that approach, but at the very least it needs
->>>>> to be guarded against.
->>>>
->>>> Do these devices ever require deferred probes?
->>>
->>> Yes, they very well might.  However, I'm happy with the limitation
->>> that only leaf devices can take advantage of probe deferral.
->>>
->>
->>
->> I have:
->>
->> I2C-Bus-A
->>   +--Mux-I2C (controlled by parent I2C-Bus-A)
->>       +---I2C-Bus-1
->>       |      +--GPIO-Expander-A
->>       |
->>       +---I2C-Bus-2
->>              +--GPIO-Expander-B
->>
->> These all have a parent/child relationship so no deferral is needed, so far
->> so good.
->>
->>
->> Then this:
->>
->> MDIO-Bus-A
->>    +---Mux-MDIO (controlled by GPIO-Expander-A)
->>          +---MDIO-Bus-1
->>          |
->>          +---MDIO-Bus-2
->>                +---PHY-1
->>                |
->>                +---PHY-2
->>
->> In this case the driver for Mux-MDIO needs to be deferred until *both*
->> MDIO-Bus-A's driver *and* GPIO-Expander-B's driver are loaded.  A perfect
->> use case for the patch.
->>
->> Would you consider Mux-MDIO to be a 'leaf device'?  If not, then I have real
->> problems with 'the limitation that only leaf devices can take advantage of
->> probe deferral'
->
-> leaf device **at the time of its driver probe**.  :-)  After the
-> device has all of its dependencies met, it can freely add child
-> devices.  In your case, the child devices will get added by the
-> Mux-MDIO device driver, so all is good.
->
+576k5Y+R6L2v5Lu2K+S5sOWutuaQnOe0ouacuisxMDnlsYrlub/kuqTkvJrkubDlrrbjgIHlsZXk
+vJrkubDlrrbjgIHmtbflhbPmlbDmja4sQjJC6K+i55uY5Lmw5a62NTAw5LiH44CCDQoNCuS4gOWF
+sTjkuKrljIUo5pWw5o2u5piv5YWo6KGM5Lia55qE77yM5oyJ54Wn6KGM5Lia5YiG5aW957G777yM
+5bm25LiU5Y+v5Lul5oyJ54Wn5YWz6ZSu6K+N5p+l6K+i55qEKe+8miANCjHvvIwyMDEx5pil5a2j
+MTA55bGK5bm/5Lqk5Lya5Lmw5a625pWw5o2u5bqT5paw6bKc5Ye654KJ77yM6LaF57qn5paw6bKc
+5Lmw5a6277yM5paw6bKc5pWw5o2u77yM5a655piT5oiQ5Y2V77yBIA0KMu+8jOacgOaWsOWFqOeQ
+g+S5sOWutuW6kyzlhbE0NTE2NjDmnaHmlbDmja7jgIIgDQoz77yMMjAwOOW5tCwyMDA55bm0LDIw
+MTDlubQg5pil5a2jK+eni+Wto+W5v+S6pOS8muS5sOWutuWQjeW9le+8jDEwMyAxMDQgMTA1IDEw
+NiAxMDcgMTA4IOWFseWFreWxiiDlhbExMjAuNuS4h+aVsOaNruOAgg0KNO+8jDIwMTDlubTlm73p
+mYXkv4PplIDljY/kvJrvvIhQUEFJ77yJ5oiQ5ZGY5ZCN5Y2VIFBQQUkgTWVtYmVycyBEaXJlY3Rv
+cnnvvIzpnZ7luLjph43opoHnmoTlpKfkubDlrrbjgIINCjXvvIwyMDEw5bm05Yiw6aaZ5riv6YeH
+6LSt55qE5Zu95aSW5a6i5Lq65ZCN5b2VKOmmmea4r+i0uOWPkeWxgOaPkOS+mynvvIzlhbE3LjLk
+uIfmlbDmja7vvIzotoXnuqfph43opoHnmoTkubDlrrbjgIINCjbvvIw2MC445LiH5p2h5pyA5paw
+5Zu95aSWQjJC5Lmw5a626K+i55uY44CCDQo377yMMjAwOeW5tOa1t+WFs+aPkOWNleaVsOaNrnBp
+ZXJz54mI5pWw5o2uIDHljYPkuIfjgIINCjjvvIznvqTlj5Hova/ku7bvvIznvqTlj5Hova/ku7bn
+moTpg6jnvbLkuI7lronoo4XjgIINCg0K5YWxIDUwMOS4h+S4quS5sOWutu+8jOavj+S4quWdh+ac
+iUVtYWlsLiANCg0K5L+d6K+B5q+P5aSp6YO95pyJ5Lmw5a625Zue5aSN44CCDQrkv53or4Hmr4/l
+pKnpg73mnInkubDlrrblm57lpI3jgIINCg0K6KaB55qE5oqT57Sn6IGU57O7UVE6IDEzMzk2MjUy
+MTggICDmiJbogIXnq4vljbPlm57lpI3pgq7nrrE6IDEzMzk2MjUyMThAcXEuY29tDQropoHnmoTm
+ipPntKfogZTns7tRUTogMTMzOTYyNTIxOCAgIOaIluiAheeri+WNs+WbnuWkjemCrueusTogMTMz
+OTYyNTIxOEBxcS5jb20NCuimgeeahOaKk+e0p+iBlOezu1FROiAxMzM5NjI1MjE4ICAg5oiW6ICF
+56uL5Y2z5Zue5aSN6YKu566xOiAxMzM5NjI1MjE4QHFxLmNvbQ0KDQror5rkv6HkuLrmnKzvvIzl
+poLmnpzkuI3kv6Hku7vmnKzkuros5Y+v5Lul6LWw5reY5a6d5Lqk5piTLOaUtui0p+mqjOivgeWQ
+juWGjeS7mOasvizov5nmmK/lr7nmgqjmnIDlpb3nmoTkv53pmpzkuobjgIIgDQoNCuS/neivgeav
+j+WkqemDveacieS5sOWutuWbnuWkjeOAgg0K5L+d6K+B5q+P5aSp6YO95pyJ5Lmw5a625Zue5aSN
+44CCDQrkv53or4Hmr4/lpKnpg73mnInkubDlrrblm57lpI3jgIINCg0KDQoNCg0K5bm/5Lqk5Lya
+5Lmw5a625oyJ5Lqn5ZOB57G75Yir5YiG57G777yM5YiG5Li65Lul5LiL5Yeg57G777yaDQoxIOWK
+nuWFrOiuvuWkhw0KMiDnvJbnu4flj4rol6Tpk4Hlt6Xoibrlk4ENCjMg546755KDDQo0IOmkkOWO
+qOeUqOWFtw0KNSDovabovoYNCjYg5aSn5Z6L5py65qKw5Y+K6K6+5aSHDQo3IOeUteWtkOeUteaw
+lA0KOCDnlLXlrZDmtojotLnlk4ENCjkg57q657uHDQoxMCDmnI3oo4UNCjExIOS4quS6uuaKpOeQ
+hg0KMTIg5bel56iL5py65qKwDQoxMyDlt6XlhbcNCjE0IOWMluW3pQ0KMTUg6K6h566X5py65Y+K
+6YCa6K6vDQoxNiDlrrblsYXnlKjlk4ENCjE3IOWutuWxheijhemlsA0KMTgg5a625YW3DQoxOSDl
+rrbnlKjnlLXlmagNCjIwIOW7uuetkeWPiuijhemlsOadkOaWmQ0KMjEg6IqC5pel55So5ZOBDQoy
+MiDnpLzlk4Hlj4rotaDlk4ENCjIzIOaRqeaJmOi9pg0KMjQg5rG96L2m6YWN5Lu2DQoyNSDpo5/l
+k4ENCjI2IOmZtueTtw0KMjcg6ZOB55+zDQoyOCDnjqnlhbcNCjI5IOWNq+a1tA0KMzAg5LqU6YeR
+DQozMSDlsI/lnovmnLrmorANCjMyIOmeiw0KMzMg5LyR6Zey55So5ZOBDQozNCDljLvnlpcNCjM1
+IOa1tOWupOS6p+WTgQ0KMzYg5Zut5p6XDQozNyDnhafmmI7kuqflk4ENCjM4IOmSn+ihqOecvOmV
+nA0KMzkg6Ieq6KGM6L2mDQo0MCDljIUNCg0KDQrkv53or4Hmr4/lpKnpg73mnInkubDlrrblm57l
+pI3jgIINCuS/neivgeavj+WkqemDveacieS5sOWutuWbnuWkjeOAgg0K5L+d6K+B5q+P5aSp6YO9
+5pyJ5Lmw5a625Zue5aSN44CCDQrkv53or4Hmr4/lpKnpg73mnInkubDlrrblm57lpI3jgIINCuS/
+neivgeavj+WkqemDveacieS5sOWutuWbnuWkjeOAgg0K
 
-Indeed.  Thanks for the confirmation.
 
-David Daney
