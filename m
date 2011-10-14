@@ -1,51 +1,53 @@
-From: Ming Lei <tom.leiming@gmail.com>
-Subject: Re: [PATCH 2/5] drivercore: Add driver probe deferral mechanism
-Date: Fri, 14 Oct 2011 08:13:17 +0800
-Message-ID: <CACVXFVMnm2rLPNsaLtTT2NtVkh5UFO8mEy7E9VWNYdjhvw2-0A@mail.gmail.com>
-References: <CACVXFVMoac7psbfO6UdDvNux4c8bQYS4YNUdz1C-o+CiJzyuZA@mail.gmail.com>
-	<Pine.LNX.4.44L0.1110131202350.2026-100000@iolanthe.rowland.org>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] mmc: mmci: Do not release spinlock in request_end
+Date: Fri, 14 Oct 2011 09:37:51 +0200
+Message-ID: <4E97E6CF.1000601@stericsson.com>
+References: <1318342001-26955-1-git-send-email-ulf.hansson@stericsson.com>	 <20111013142914.GZ21648@n2100.arm.linux.org.uk> <1318521592.2090.16.camel@linaro1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:35026 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753026Ab1JNANS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2011 20:13:18 -0400
-In-Reply-To: <Pine.LNX.4.44L0.1110131202350.2026-100000@iolanthe.rowland.org>
+Received: from eu1sys200aog113.obsmtp.com ([207.126.144.135]:59993 "EHLO
+	eu1sys200aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753918Ab1JNHiZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Oct 2011 03:38:25 -0400
+In-Reply-To: <1318521592.2090.16.camel@linaro1>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Stern <stern@rowland.harvard.edu>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Andrei Warkentin <awarkentin@vmware.com>, Greg KH <greg@kroah.com>, Dilan Lee <dilee@nvidia.com>, "G, Manjunath Kondaiah" <manjugk@ti.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>, Manjunath@jasper.es, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Linux PM List <linux-pm@vger.kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>
+To: "Jon Medhurst (Tixy)" <jon.medhurst@linaro.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Lee Jones <lee.jones@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Fri, Oct 14, 2011 at 12:04 AM, Alan Stern <stern@rowland.harvard.edu> wrote:
-> On Thu, 13 Oct 2011, Ming Lei wrote:
->
->> Hi,
+Jon Medhurst (Tixy) wrote:
+> On Thu, 2011-10-13 at 15:29 +0100, Russell King - ARM Linux wrote:
+>> On Tue, Oct 11, 2011 at 04:06:41PM +0200, Ulf Hansson wrote:
+>>> The patch "mmc: core: move ->request() call from atomic context",
+>>> is the reason to why this change is possible. This simplifies the
+>>> error handling code execution path quite a lot and potentially also
+>>> fixes some error handling hang problems.
+>>>
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+>> This doesn't look right:
 >>
->> On Thu, Oct 13, 2011 at 10:31 PM, Alan Stern <stern@rowland.harvard.edu>
->> >> Maybe we should understand the correct model of the ordering constraints
->> >> for the multiple device dependancies first, could you give a description or
->> >> some examples about it?
->> >
->> > The requirement is that devices must be capable of resuming in the
->> > order given by dpm_list, and they must be capable of suspending in
->> > the reverse order.
->> >
->> > Therefore if device A can't work unless device B is functional, then B
->> > must come before A in dpm_list.
+>> void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+>> {
+>>         if (err && cmd->retries) {
+>>                 host->ops->request(host, mrq);
 >>
->> If all devices can support async suspend and resume correctly, looks like
->> the device order given by dpm_list is not needed any longer, doesn't it?
->
-> It _is_ needed, because the user can disable async suspend/resume via
-> /sys/power/pm_async.
->
-> Also, not all devices do support async suspend/resume.
 
-Basically, the devices which don't support async suspend/resume
-should have out of tree PM dependency. If out of tree PM dependency
-issue is solved, all devices can support async suspend/resume.
+This is NOT how it looks at mmc-next. You need to test with Adrian 
+Hunters patch which the commit refers two.
 
-thanks,
--- 
-Ming Lei
+Linux next for mmc is available at:
+
+git://dev.laptop.org/users/cjb/mmc mmc-next
+
+
+
+>> So, not dropping the spinlock results in calling the request function
+>> with the spinlock held - and as the request function then goes on to
+>> lock the spinlock, we will deadlock.
+> 
+> Indeed, deadlock behaviour at this point is what I see with this patch
+> on a Versatile Express board running 3.0-rc9.
+> 
+
