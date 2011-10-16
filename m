@@ -1,43 +1,48 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-pci: add runtime pm support
-Date: Sat, 15 Oct 2011 22:26:06 -0400
-Message-ID: <m262jpekox.fsf@bob.laptop.org>
-References: <1317645214-12316-1-git-send-email-adrian.hunter@intel.com>
-	<1317645214-12316-3-git-send-email-adrian.hunter@intel.com>
-	<m2aa91eoe6.fsf@bob.laptop.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: mmci: Do not release spinlock in request_end
+Date: Sun, 16 Oct 2011 22:34:07 +0200
+Message-ID: <CAKnu2MrohC0=1kC2Qo=BrcPxgEQ16B4EczehUbz1JtNRx2Cb4w@mail.gmail.com>
+References: <1318342001-26955-1-git-send-email-ulf.hansson@stericsson.com>
+	<20111013142914.GZ21648@n2100.arm.linux.org.uk>
+	<1318521592.2090.16.camel@linaro1>
+	<4E97E6CF.1000601@stericsson.com>
+	<20111014074224.GQ21648@n2100.arm.linux.org.uk>
+	<4E97EA10.6040800@stericsson.com>
+	<20111014080318.GR21648@n2100.arm.linux.org.uk>
+	<4E97F131.6090406@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:47681 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750957Ab1JPC0M (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 15 Oct 2011 22:26:12 -0400
-In-Reply-To: <m2aa91eoe6.fsf@bob.laptop.org> (Chris Ball's message of "Sat, 15
-	Oct 2011 21:06:09 -0400")
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:45052 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751311Ab1JPUeI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Oct 2011 16:34:08 -0400
+Received: by ywf7 with SMTP id 7so44917ywf.19
+        for <linux-mmc@vger.kernel.org>; Sun, 16 Oct 2011 13:34:07 -0700 (PDT)
+In-Reply-To: <4E97F131.6090406@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "Jon Medhurst (Tixy)" <jon.medhurst@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Lee Jones <lee.jones@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi,
+2011/10/14 Ulf Hansson <ulf.hansson@stericsson.com>:
 
-On Sat, Oct 15 2011, Chris Ball wrote:
-> Card insertion detection after boot no longer works (nothing new appears
-> in dmesg), so I'm unable to use the reader.  Are you able to try to
-> figure this out?  I'm happy to try any patches you suggest.
+> So how can we handle to merge it via mmc tree instead? Will you be able to
+> "Ack" patches for mmci so Chris Ball can merge them for the mmc tree
+> instead?
 
-If I boot with a card inserted, I still see repeated "irq while runtime
-suspended" messages for 80 seconds after boot, but the card *does* work.
-I don't see further "irq while runtime suspended" messages during or
-after I/O to the card at that point.
+If you get Russell's ACK on it (provided it is merged on top of
+Adrians patch) Chris can surely merge it into his tree.
+He's already merging subsystem-wide patches (like Adrians)
+to his tree, often touching several drivers in the process, as is
+custom.
 
-So, we have a problem of unexpected irqs while runtime suspended, and a
-problem of broken card detection when booted without a card inserted
-(on my laptop).
+Have we checked if there are more spin_lock():s in the
+other MMC host drivers that also should be removed as a
+result of this or is MMCI the sole sinner?
 
-Thanks,
+Cross-tree dependencies is a mess, sadly we have no way
+of solving that which is perfect. (Yet.)
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Yours,
+Linus Walleij
