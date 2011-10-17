@@ -1,78 +1,47 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-pci: add flag for devices that can support runtime PM
-Date: Mon, 17 Oct 2011 10:09:33 -0400
-Message-ID: <m2sjmr7lr6.fsf@bob.laptop.org>
-References: <1318837964-28654-1-git-send-email-adrian.hunter@intel.com>
-	<m21uub93on.fsf@bob.laptop.org> <4E9C34AB.9000206@intel.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH V8] mmc: core: Add Power Off Notify Feature eMMC 4.5
+Date: Mon, 17 Oct 2011 20:01:10 +0530
+Message-ID: <CAGxe1ZF-UdHMXXBAyH_tfnGm7AbEQ7r0NVYmu+hL53HNvhmydQ@mail.gmail.com>
+References: <1318487656-8566-1-git-send-email-girish.shivananjappa@linaro.org>
+	<m2lisofsov.fsf@bob.laptop.org>
+	<CAGxe1ZHgHMEzBq=eDiPUhPmQZSM33WGA9HLs_ejWnsxpLC1mTQ@mail.gmail.com>
+	<m262jn944t.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36390 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750938Ab1JQOJi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 17 Oct 2011 10:09:38 -0400
-In-Reply-To: <4E9C34AB.9000206@intel.com> (Adrian Hunter's message of "Mon, 17
-	Oct 2011 16:59:07 +0300")
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:41567 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755760Ab1JQObL convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2011 10:31:11 -0400
+In-Reply-To: <m262jn944t.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi,
-
-On Mon, Oct 17 2011, Adrian Hunter wrote:
->> Thanks -- any objection to using a bool type instead for allow_runtime_pm?
+On 17 October 2011 18:17, Chris Ball <cjb@laptop.org> wrote:
+> Hi Girish,
 >
-> None at all
+> On Mon, Oct 17 2011, Girish K S wrote:
+>>>> + if (card !=3D NULL && mmc_card_mmc(card) &&
+>>>
+>>> !=3D NULL is unnecessary.
+>>
+>> This is required. Let me explain the scenario where i felt it is nec=
+essary.
+>
+> I'm not saying that you shouldn't test whether card is NULL -- I'm
+> saying that "if (card && mmc_card_mmc(card) && " would perform this
+> test with fewer characters, and be idiomatic for the kernel.
+>
+After fetching your mmc-next branch. i can see that this patch is
+already applied. How about the changes that have been pointed here?
 
-Pushed to mmc-next for 3.2 with a conversion to bool, thanks:
-
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index c22d810..d833d9c 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -47,7 +47,7 @@ struct sdhci_pci_slot;
- 
- struct sdhci_pci_fixes {
- 	unsigned int		quirks;
--	unsigned int		allow_runtime_pm:1;
-+	bool			allow_runtime_pm;
- 
- 	int			(*probe) (struct sdhci_pci_chip *);
- 
-@@ -73,7 +73,7 @@ struct sdhci_pci_chip {
- 	struct pci_dev		*pdev;
- 
- 	unsigned int		quirks;
--	unsigned int		allow_runtime_pm:1;
-+	bool			allow_runtime_pm;
- 	const struct sdhci_pci_fixes *fixes;
- 
- 	int			num_slots;	/* Slots on controller */
-@@ -307,19 +307,19 @@ static const struct sdhci_pci_fixes sdhci_intel_mrst_hc1_hc2 = {
- 
- static const struct sdhci_pci_fixes sdhci_intel_mfd_sd = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
--	.allow_runtime_pm = 1,
-+	.allow_runtime_pm = true,
- 	.probe_slot	= mfd_sd_probe_slot,
- 	.remove_slot	= mfd_sd_remove_slot,
- };
- 
- static const struct sdhci_pci_fixes sdhci_intel_mfd_sdio = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
--	.allow_runtime_pm = 1,
-+	.allow_runtime_pm = true,
- };
- 
- static const struct sdhci_pci_fixes sdhci_intel_mfd_emmc = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
--	.allow_runtime_pm = 1,
-+	.allow_runtime_pm = true,
- 	.probe_slot	= mfd_emmc_probe_slot,
- 	.remove_slot	= mfd_emmc_remove_slot,
- };
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> Thanks,
+>
+> - Chris.
+> --
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
+>
