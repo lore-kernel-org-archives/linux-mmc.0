@@ -1,40 +1,44 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V8] mmc: core: Add Power Off Notify Feature eMMC 4.5
-Date: Mon, 17 Oct 2011 08:47:14 -0400
-Message-ID: <m262jn944t.fsf@bob.laptop.org>
-References: <1318487656-8566-1-git-send-email-girish.shivananjappa@linaro.org>
-	<m2lisofsov.fsf@bob.laptop.org>
-	<CAGxe1ZHgHMEzBq=eDiPUhPmQZSM33WGA9HLs_ejWnsxpLC1mTQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pci: add flag for devices that can support runtime PM
+Date: Mon, 17 Oct 2011 08:56:56 -0400
+Message-ID: <m21uub93on.fsf@bob.laptop.org>
+References: <1318837964-28654-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56577 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:48409 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753402Ab1JQMr0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 17 Oct 2011 08:47:26 -0400
-In-Reply-To: <CAGxe1ZHgHMEzBq=eDiPUhPmQZSM33WGA9HLs_ejWnsxpLC1mTQ@mail.gmail.com>
-	(Girish K. S.'s message of "Mon, 17 Oct 2011 10:34:58 +0530")
+	id S1753511Ab1JQM5E (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 17 Oct 2011 08:57:04 -0400
+In-Reply-To: <1318837964-28654-1-git-send-email-adrian.hunter@intel.com>
+	(Adrian Hunter's message of "Mon, 17 Oct 2011 10:52:44 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Girish,
+Hi Adrian,
 
-On Mon, Oct 17 2011, Girish K S wrote:
->>> + if (card != NULL && mmc_card_mmc(card) &&
->>
->> != NULL is unnecessary.
+On Mon, Oct 17 2011, Adrian Hunter wrote:
+> Only allow runtime PM for devices that specifically indicate
+> that they support it.
 >
-> This is required. Let me explain the scenario where i felt it is necessary.
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>  drivers/mmc/host/sdhci-pci.c |   17 +++++++++++++----
+>  1 files changed, 13 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index f49b184..c22d810 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -47,6 +47,7 @@ struct sdhci_pci_slot;
+>  
+>  struct sdhci_pci_fixes {
+>  	unsigned int		quirks;
+> +	unsigned int		allow_runtime_pm:1;
 
-I'm not saying that you shouldn't test whether card is NULL -- I'm
-saying that "if (card && mmc_card_mmc(card) && " would perform this
-test with fewer characters, and be idiomatic for the kernel.
+Thanks -- any objection to using a bool type instead for allow_runtime_pm?
 
-Thanks,
-
-- Chris.
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
