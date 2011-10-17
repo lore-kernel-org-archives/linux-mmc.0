@@ -1,107 +1,41 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH V8 RESEND] mmc: core: Add Power Off Notify Feature eMMC 4.5
-Date: Mon, 17 Oct 2011 20:30:09 +0530
-Message-ID: <CAGxe1ZFGF8vQVHUzx_zmFTPSwTYNXAyK3+yEiqtP7dswPTsS1A@mail.gmail.com>
-References: <1318862823-22909-1-git-send-email-girish.shivananjappa@linaro.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2] mmc: dw_mmc: modify DATA register offset
+Date: Mon, 17 Oct 2011 14:12:23 -0400
+Message-ID: <m262jn7aig.fsf@bob.laptop.org>
+References: <4E9C0527.50706@samsung.com> <4E9C0941.1030507@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1318862823-22909-1-git-send-email-girish.shivananjappa@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: kgene.kim@samsung.com, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:58434 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751198Ab1JQSMg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 17 Oct 2011 14:12:36 -0400
+In-Reply-To: <4E9C0941.1030507@imgtec.com> (James Hogan's message of "Mon, 17
+	Oct 2011 11:53:53 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>
 
-On 17 October 2011 20:17, Girish K S <girish.shivananjappa@linaro.org> =
-wrote:
-> This patch adds the support for power off notify feature, available i=
-n
-> eMMC 4.5 devices. If the the host has support for this feature, then =
-the
-> mmc core will notify it to the device by setting the POWER_OFF_NOTIFI=
-CATION
-> byte in the extended csd register with a value 1(POWER_ON).
+Hi,
+
+On Mon, Oct 17 2011, James Hogan wrote:
+> On 10/17/2011 11:36 AM, Jaehoon Chung wrote:
+>> In dw_mmc 2.40a spec, Data register's offset is changed.
+>> Now we used Data register offset is 0x100. but if somebody use 2.40a
+>> controller, must use 0x200 for Data register.
+>> 
+>> This patch is added version-id checking point and using SDMMC_DATA(x)
+>> instead of SDMMC_DATA. (assume 2.40a is the latest version)
+>> 
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 >
-> For suspend mode short timeout is used, whereas for the normal powero=
-ff long
-> timeout is used.
->
-> cc: Chris Ball <cjb@laptop.org>
-> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
-> Changes in V8:
-> =A0 =A0 =A0 =A0Updated with review comments of Chris Ball and rebased=
- to
-> =A0 =A0 =A0 =A0chris-mmc/mmc-next branch.
-> Changes in V7:
-> =A0 =A0 =A0 =A0Rebased to chris-mmc/mmc-next branch. merged to patche=
-s
-> =A0 =A0 =A0 =A0to single patch.
-> Changes in V6:
-> =A0 =A0 =A0 =A0Fixes checkpatch errors. The patches are generated aft=
-er
-> =A0 =A0 =A0 =A0rebasing to chris's mmc-next branch.
-> Changes in V5:
-> =A0 =A0 =A0 =A0This patch version fixes the problem with power off
-> =A0 =A0 =A0 =A0notify function, when called for the first time and
-> =A0 =A0 =A0 =A0card is not yet initialised.
-> Changes in V4:
-> =A0 =A0 =A0 =A0Updated with review comments of Jeon
-> Changes in V2:
-> =A0 =A0 =A0 =A0Adds poweroff notification handling in suspend/normal.
->
->
-> =A0drivers/mmc/core/core.c =A0| =A0 =A06 ++----
-> =A0include/linux/mmc/host.h | =A0 =A02 +-
-> =A02 files changed, 3 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index db368b2..b1eca96 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1217,16 +1217,14 @@ void mmc_power_off(struct mmc_host *host)
-> =A0 =A0 =A0 =A0unsigned int timeout;
-> =A0 =A0 =A0 =A0int err;
->
-> - =A0 =A0 =A0 BUG_ON(!host);
-> -
-> =A0 =A0 =A0 =A0mmc_host_clk_hold(host);
->
-> =A0 =A0 =A0 =A0card =3D host->card;
-> =A0 =A0 =A0 =A0host->ios.clock =3D 0;
-> =A0 =A0 =A0 =A0host->ios.vdd =3D 0;
->
-> - =A0 =A0 =A0 if (card !=3D NULL && mmc_card_mmc(card) &&
-> - =A0 =A0 =A0 =A0 =A0 (card->poweroff_notify_state =3D=3D MMC_POWERED=
-_ON)) {
-> + =A0 =A0 =A0 if (card && mmc_card_mmc(card) &&
-> + =A0 =A0 =A0 =A0 =A0 card->poweroff_notify_state =3D=3D MMC_POWERED_=
-ON) {
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (host->power_notify_type =3D=3D MMC=
-_HOST_PW_NOTIFY_SHORT) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0notify_type =3D EXT_CS=
-D_POWER_OFF_SHORT;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 65c47fc..a991ae7 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -243,7 +243,7 @@ struct mmc_host {
-> =A0#define MMC_CAP2_POWEROFF_NOTIFY (1 << 2) =A0 =A0 =A0/* Notify pow=
-eroff supported */
->
-> =A0 =A0 =A0 =A0mmc_pm_flag_t =A0 =A0 =A0 =A0 =A0 pm_caps; =A0 =A0 =A0=
- =A0/* supported pm features */
-> - =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0power_notify_type;
-> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0power_notify_type;
-> =A0#define MMC_HOST_PW_NOTIFY_NONE =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A00
-> =A0#define MMC_HOST_PW_NOTIFY_SHORT =A0 =A0 =A0 1
-> =A0#define MMC_HOST_PW_NOTIFY_LONG =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A02
-> --
-Ignore this patch. this just gives only the diff with previous patch.
-i will resend the complete patch
-> 1.7.1
->
->
+> Acked-by: James Hogan <james.hogan@imgtec.com>
+
+Pushed to mmc-next for 3.2, thanks.
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
