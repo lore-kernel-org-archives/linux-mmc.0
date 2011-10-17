@@ -1,102 +1,45 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH] mmc: sdhci-pci: add flag for devices that can support runtime PM
-Date: Mon, 17 Oct 2011 10:52:44 +0300
-Message-ID: <1318837964-28654-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-pci: add runtime pm support
+Date: Mon, 17 Oct 2011 11:19:37 +0300
+Message-ID: <4E9BE519.2020908@intel.com>
+References: <1317645214-12316-1-git-send-email-adrian.hunter@intel.com> <1317645214-12316-3-git-send-email-adrian.hunter@intel.com> <m2aa91eoe6.fsf@bob.laptop.org> <m262jpekox.fsf@bob.laptop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:46092 "EHLO mga01.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:18181 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752695Ab1JQHxU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 17 Oct 2011 03:53:20 -0400
+	id S1750992Ab1JQITj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 17 Oct 2011 04:19:39 -0400
+In-Reply-To: <m262jpekox.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Only allow runtime PM for devices that specifically indicate
-that they support it.
+On 16/10/11 05:26, Chris Ball wrote:
+> Hi,
+> 
+> On Sat, Oct 15 2011, Chris Ball wrote:
+>> Card insertion detection after boot no longer works (nothing new appears
+>> in dmesg), so I'm unable to use the reader.  Are you able to try to
+>> figure this out?  I'm happy to try any patches you suggest.
+> 
+> If I boot with a card inserted, I still see repeated "irq while runtime
+> suspended" messages for 80 seconds after boot, but the card *does* work.
+> I don't see further "irq while runtime suspended" messages during or
+> after I/O to the card at that point.
+> 
+> So, we have a problem of unexpected irqs while runtime suspended, and a
+> problem of broken card detection when booted without a card inserted
+> (on my laptop).
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-pci.c |   17 +++++++++++++----
- 1 files changed, 13 insertions(+), 4 deletions(-)
+Unfortunately I do not have any information about the unexpected irqs.
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index f49b184..c22d810 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -47,6 +47,7 @@ struct sdhci_pci_slot;
- 
- struct sdhci_pci_fixes {
- 	unsigned int		quirks;
-+	unsigned int		allow_runtime_pm:1;
- 
- 	int			(*probe) (struct sdhci_pci_chip *);
- 
-@@ -72,6 +73,7 @@ struct sdhci_pci_chip {
- 	struct pci_dev		*pdev;
- 
- 	unsigned int		quirks;
-+	unsigned int		allow_runtime_pm:1;
- 	const struct sdhci_pci_fixes *fixes;
- 
- 	int			num_slots;	/* Slots on controller */
-@@ -305,16 +307,19 @@ static const struct sdhci_pci_fixes sdhci_intel_mrst_hc1_hc2 = {
- 
- static const struct sdhci_pci_fixes sdhci_intel_mfd_sd = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+	.allow_runtime_pm = 1,
- 	.probe_slot	= mfd_sd_probe_slot,
- 	.remove_slot	= mfd_sd_remove_slot,
- };
- 
- static const struct sdhci_pci_fixes sdhci_intel_mfd_sdio = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+	.allow_runtime_pm = 1,
- };
- 
- static const struct sdhci_pci_fixes sdhci_intel_mfd_emmc = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+	.allow_runtime_pm = 1,
- 	.probe_slot	= mfd_emmc_probe_slot,
- 	.remove_slot	= mfd_emmc_remove_slot,
- };
-@@ -1355,8 +1360,10 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
- 
- 	chip->pdev = pdev;
- 	chip->fixes = (const struct sdhci_pci_fixes *)ent->driver_data;
--	if (chip->fixes)
-+	if (chip->fixes) {
- 		chip->quirks = chip->fixes->quirks;
-+		chip->allow_runtime_pm = chip->fixes->allow_runtime_pm;
-+	}
- 	chip->num_slots = slots;
- 
- 	pci_set_drvdata(pdev, chip);
-@@ -1381,7 +1388,8 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
- 		chip->slots[i] = slot;
- 	}
- 
--	sdhci_pci_runtime_pm_allow(&pdev->dev);
-+	if (chip->allow_runtime_pm)
-+		sdhci_pci_runtime_pm_allow(&pdev->dev);
- 
- 	return 0;
- 
-@@ -1399,11 +1407,12 @@ static void __devexit sdhci_pci_remove(struct pci_dev *pdev)
- 	int i;
- 	struct sdhci_pci_chip *chip;
- 
--	sdhci_pci_runtime_pm_forbid(&pdev->dev);
--
- 	chip = pci_get_drvdata(pdev);
- 
- 	if (chip) {
-+		if (chip->allow_runtime_pm)
-+			sdhci_pci_runtime_pm_forbid(&pdev->dev);
-+
- 		for (i = 0; i < chip->num_slots; i++)
- 			sdhci_pci_remove_slot(chip->slots[i]);
- 
--- 
-1.7.6.4
+Card detect will not work because the interrupt is masked while the
+host controller is runtime suspended, on the grounds that the host
+controller may be powered off and so cannot handle interrupts.  An
+alternate mechanism is needed to enable the host controller to
+wake-up from a card detect signal.
 
+So Runtime PM needs to be opt-in.  I have sent a patch.
