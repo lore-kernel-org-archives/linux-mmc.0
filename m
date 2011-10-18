@@ -1,296 +1,285 @@
-From: "Hiremath, Vaibhav" <hvaibhav@ti.com>
-Subject: RE: Linux v3.1-rc8 : SDHC card do not switch to high speed mode
-Date: Tue, 18 Oct 2011 00:12:41 +0530
-Message-ID: <19F8576C6E063C45BE387C64729E739404ECE22DBA@dbde02.ent.ti.com>
-References: <C82BA3053CFD354AACBD25EFBD2A4EC603F959EF6E@dbde02.ent.ti.com>
- <19F8576C6E063C45BE387C64729E739404ECE22D47@dbde02.ent.ti.com>
- <6C03668EAF45B747AF947A1603D1B30001E3579366@SAUSEXMBP01.amd.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH V8] mmc: core: Add Power Off Notify Feature eMMC 4.5
+Date: Tue, 18 Oct 2011 09:40:35 +0900
+Message-ID: <000001cc8d2e$8d1afd30$a750f790$%jun@samsung.com>
+References: <1318487656-8566-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:45764 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751221Ab1JQSnc convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2011 14:43:32 -0400
-In-Reply-To: <6C03668EAF45B747AF947A1603D1B30001E3579366@SAUSEXMBP01.amd.com>
-Content-Language: en-US
+Received: from mailout1.samsung.com ([203.254.224.24]:8884 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751043Ab1JRAki (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2011 20:40:38 -0400
+In-reply-to: <1318487656-8566-1-git-send-email-girish.shivananjappa@linaro.org>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Nath, Arindam" <Arindam.Nath@amd.com>, Subhash Jadavani <subhashj@codeaurora.org>, "Hebbar, Gururaja" <gururaja.hebbar@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "prakity@marvell.com" <prakity@marvell.com>"prakity@marvell.com" <prakity@marvell.com>, "zhangfei.gao@marvell.com" <zhangfei.gao@marvell.com>, "cjb@laptop.org" <cjb@laptop.org>, "Saxena, Parth" <parth.saxena@ti.com>
+To: 'Girish K S' <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, 'Jaehoon Chung' <jh80.chung@samsung.com>
 
+Base code of V8 may be mixed.
+Please check below for next resending. It seems like unrelated.
 
-> -----Original Message-----
-> From: Nath, Arindam [mailto:Arindam.Nath@amd.com]
-> Sent: Monday, October 17, 2011 8:28 PM
-> To: Subhash Jadavani; Hiremath, Vaibhav; Hebbar, Gururaja; linux-
-> mmc@vger.kernel.org
-> Cc: linux-omap@vger.kernel.org; prakity@marvell.com; prakity@marvell.com;
-> zhangfei.gao@marvell.com; cjb@laptop.org; Saxena, Parth
-> Subject: RE: Linux v3.1-rc8 : SDHC card do not switch to high speed mode
-> 
-> +Subhash
-> 
-> Hi Subhash,
-> 
-> If I am not mistaken, there was patch by you couple of weeks back to fix
-> the issue. Did you not post your final version of the patch to community?
-> 
-[Hiremath, Vaibhav] I could able to trace the patch, but not sure why it did not make it to the mainline -
+#define MMC_CAP2_CACHE_CTRL	(1 << 1)
+#define EXT_CSD_FLUSH_CACHE		32
 
-http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg09358.html
+Best regards,
+Seungwon Jeon.
 
-Fortunately, it is exactly same as what I did.
-
-Thanks,
-Vaibhav
-
-> Thanks,
-> Arindam
+Girish K S wrote:
+> This patch adds the support for power off notify feature, available in
+> eMMC 4.5 devices. If the the host has support for this feature, then the
+> mmc core will notify it to the device by setting the
+> POWER_OFF_NOTIFICATION
+> byte in the extended csd register with a value 1(POWER_ON).
 > 
-> > -----Original Message-----
-> > From: Hiremath, Vaibhav [mailto:hvaibhav@ti.com]
-> > Sent: Monday, October 17, 2011 8:19 PM
-> > To: Hebbar, Gururaja; linux-mmc@vger.kernel.org
-> > Cc: linux-omap@vger.kernel.org; Nath, Arindam; prakity@marvell.com;
-> > prakity@marvell.com; zhangfei.gao@marvell.com; cjb@laptop.org; Saxena,
-> > Parth
-> > Subject: RE: Linux v3.1-rc8 : SDHC card do not switch to high speed
-> > mode
-> >
-> > > -----Original Message-----
-> > > From: linux-omap-owner@vger.kernel.org [mailto:linux-omap-
-> > > owner@vger.kernel.org] On Behalf Of Hebbar, Gururaja
-> > > Sent: Thursday, October 13, 2011 8:19 PM
-> > > To: linux-mmc@vger.kernel.org
-> > > Cc: linux-omap@vger.kernel.org
-> > > Subject: Linux v3.1-rc8 : SDHC card do not switch to high speed mode
-> > >
-> > > Hi all,
-> > >
-> > > We are porting existing OMAP HSMMC driver (omap_hsmmc.c) to an
-> > upcoming
-> > > SOC.
-> > >
-> > > When testing the driver with SanDisk 16GB SDHC Card (SanDisk Extreme
-> > HD
-> > > Video 16GB 20Mb/s), we observed that the card doesn't switch to High
-> > Speed
-> > > mode.
-> > >
-> > > The card shows that it is compatible with SDA spec3.
-> > >
-> > > We are testing on Linux v3.1-rc8
-> > >
-> > >
-> > > In mmc_sd_init_card(), rocr received from card is 0xc0ff8000, (S18A
-> > bit
-> > > not set).
-> > >
-> > > During mmc_sd_setup_card() --> mmc_decode_scr(), when decoding scr,
-> > the
-> > > card specifies that it is sda spec3 compatible
-> > >
-> > > 	if (scr->sda_vsn == SCR_SPEC_VER_2)
-> > > 		/* Check if Physical Layer Spec v3.0 is supported */
-> > > 		scr->sda_spec3 = UNSTUFF_BITS(resp, 47, 1);
-> > 	--
-> > > > true
-> > >
-> > > Then during mmc_read_switch(), since it's a sda spec3 card, the code
-> > goes
-> > > to read sd3_drv_type & sd3_curr_limit and skips settings hs_max_dtr.
-> > >
-> > > mmc_sd_switch_hs() returns back since hs_max_dtr == 0
-> > >
-> > > 	if (card->sw_caps.hs_max_dtr == 0)
-> > > 		return 0;
-> > >
-> > > Because of this Card isn't switched to High Speed mode.
-> > >
-> > [Hiremath, Vaibhav] After doing bisect, I could able to nail down the
-> > commit which is leading to this issue.
-> >
-> >
-> > psplinux060:/datalocal/omap-kernel>git bisect good
-> > d6d50a15a2897d4133d536dd4343b5cf21163db3 is the first bad commit
-> > commit d6d50a15a2897d4133d536dd4343b5cf21163db3
-> > Author: Arindam Nath <arindam.nath@amd.com>
-> > Date:   Thu May 5 12:18:59 2011 +0530
-> >
-> >     mmc: sd: add support for driver type selection
-> >
-> >     This patch adds support for setting driver strength during UHS-I
-> >     initialization procedure. Since UHS-I cards set S18A (bit 24) in
-> >     response to ACMD41, we use this as a base for UHS-I initialization.
-> >     We modify the parameter list of mmc_sd_get_cid() so that we can
-> >     save the ROCR from ACMD41 to check whether bit 24 is set.
-> >
-> >     We decide whether the Host Controller supports A, C, or D driver
-> >     type depending on the Capabilities register. Driver type B is
-> >     suported by default. We then set the appropriate driver type for
-> >     the card using CMD6 mode 1. As per Host Controller spec v3.00, we
-> >     set driver type for the host only if Preset Value Enable in the
-> >     Host Control2 register is not set. SDHCI_HOST_CONTROL has been
-> >     renamed to SDHCI_HOST_CONTROL1 to conform to the spec.
-> >
-> >     Tested by Zhangfei Gao with a Toshiba uhs card and general hs card,
-> >     on mmp2 in SDMA mode.
-> >
-> >     Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> >     Reviewed-by: Philip Rakity <prakity@marvell.com>
-> >     Tested-by: Philip Rakity <prakity@marvell.com>
-> >     Acked-by: Zhangfei Gao <zhangfei.gao@marvell.com>
-> >     Signed-off-by: Chris Ball <cjb@laptop.org>
-> >
-> >
-> > I am not a MMC/SD expert, but looking at the logic I did change to code
-> > to something like,
-> >
-> >
-> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > index 0370e03..1a45059 100644
-> > --- a/drivers/mmc/core/sd.c
-> > +++ b/drivers/mmc/core/sd.c
-> > @@ -348,10 +348,9 @@ static int mmc_read_switch(struct mmc_card *card)
-> >                 }
-> >
-> >                 card->sw_caps.sd3_curr_limit = status[7];
-> > -       } else {
-> > -               if (status[13] & 0x02)
-> > -                       card->sw_caps.hs_max_dtr = 50000000;
-> >         }
-> > +       if (status[13] & 0x02)
-> > +               card->sw_caps.hs_max_dtr = 50000000;
-> >
-> >  out:
-> >         kfree(status);
-> >
-> >
-> > This resolves the issue, and now card is getting detected properly as a
-> > high speed card.
-> > May be I am wrong completely here, any pointers? Any comments?
-> >
-> > Thanks,
-> > Vaibhav
-> >
-> > > Is there any solution for this? Has anyone seen this issue.
-> > >
-> > > Thanks in advance.
-> > >
-> > >
-> > > I am also attaching the log I get from the sd dev attr
-> > >
-> > > Regards
-> > > Gururaja
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > cid
-> > > 0353445344313647800c03994400ac6f
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > csd
-> > > 400e00325b59000076b27f800a404013
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > date
-> > > 12/2010
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > erase_size
-> > > 512
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > fwrev
-> > > 0x0
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > hwrev
-> > > 0x8
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > name
-> > > SD16G
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > manfid
-> > > 0x000003
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > oemid
-> > > 0x5344
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > preferred_erase_size
-> > > 4194304
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > scr
-> > > 0235800000000000
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > serial
-> > > 0x0c039944
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > type
-> > > SD
-> > >
-> > > root@arago-
-> > >
-> > armv7:/sys/devices/platform/omap/omap_hsmmc.0/mmc_host/mmc0/mmc0:aaaa#
-> > cat
-> > > uevent
-> > > DRIVER=mmcblk
-> > > MMC_TYPE=SD
-> > > MMC_NAME=SD16G
-> > > MODALIAS=mmc:block
-> > >
-> > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-omap"
-> > in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> For suspend mode short timeout is used, whereas for the normal poweroff
+> long
+> timeout is used.
+> cc: Chris Ball <cjb@laptop.org>
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+> Changes in V8:
+> 	Updated with review comments of Chris Ball and rebased to
+> 	chris-mmc/mmc-next branch.
+> Changes in V7:
+> 	Rebased to chris-mmc/mmc-next branch. merged to patches
+> 	to single patch.
+> Changes in V6:
+> 	Fixes checkpatch errors. The patches are generated after
+> 	rebasing to chris's mmc-next branch.
+> Changes in V5:
+> 	This patch version fixes the problem with power off
+> 	notify function, when called for the first time and
+> 	card is not yet initialised.
+> Changes in V4:
+> 	Updated with review comments of Jeon
+> Changes in V2:
+> 	Adds poweroff notification handling in suspend/normal.
 > 
+>  drivers/mmc/core/core.c  |   36 ++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/core/mmc.c   |   23 +++++++++++++++++++++--
+>  drivers/mmc/host/sdhci.c |    9 +++++++++
+>  include/linux/mmc/card.h |    6 ++++++
+>  include/linux/mmc/host.h |    6 ++++++
+>  include/linux/mmc/mmc.h  |    8 ++++++++
+>  6 files changed, 86 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 61d7730..db368b2 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1212,11 +1212,45 @@ static void mmc_power_up(struct mmc_host *host)
+> 
+>  void mmc_power_off(struct mmc_host *host)
+>  {
+> +	struct mmc_card *card;
+> +	unsigned int notify_type;
+> +	unsigned int timeout;
+> +	int err;
+> +
+> +	BUG_ON(!host);
+> +
+>  	mmc_host_clk_hold(host);
+> 
+> +	card = host->card;
+>  	host->ios.clock = 0;
+>  	host->ios.vdd = 0;
+> 
+> +	if (card != NULL && mmc_card_mmc(card) &&
+> +	    (card->poweroff_notify_state == MMC_POWERED_ON)) {
+> +
+> +		if (host->power_notify_type == MMC_HOST_PW_NOTIFY_SHORT) {
+> +			notify_type = EXT_CSD_POWER_OFF_SHORT;
+> +			timeout = card->ext_csd.generic_cmd6_time;
+> +			card->poweroff_notify_state = MMC_POWEROFF_SHORT;
+> +		} else {
+> +			notify_type = EXT_CSD_POWER_OFF_LONG;
+> +			timeout = card->ext_csd.power_off_longtime;
+> +			card->poweroff_notify_state = MMC_POWEROFF_LONG;
+> +		}
+> +
+> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +				 EXT_CSD_POWER_OFF_NOTIFICATION,
+> +				 notify_type, timeout);
+> +
+> +		if (err && err != -EBADMSG)
+> +			pr_err("Device failed to respond within %d poweroff "
+> +			       "time. Forcefully powering down the device\n",
+> +			       timeout);
+> +
+> +		/* Set the card state to no notification after the poweroff
+> */
+> +		card->poweroff_notify_state = MMC_NO_POWER_NOTIFICATION;
+> +	}
+> +
+>  	/*
+>  	 * Reset ocr mask to be the highest possible voltage supported for
+>  	 * this mmc host. This value will be used at next power up.
+> @@ -2208,6 +2242,7 @@ int mmc_pm_notify(struct notifier_block
+> *notify_block,
+> 
+>  		spin_lock_irqsave(&host->lock, flags);
+>  		host->rescan_disable = 1;
+> +		host->power_notify_type = MMC_HOST_PW_NOTIFY_SHORT;
+>  		spin_unlock_irqrestore(&host->lock, flags);
+>  		cancel_delayed_work_sync(&host->detect);
+> 
+> @@ -2231,6 +2266,7 @@ int mmc_pm_notify(struct notifier_block
+> *notify_block,
+> 
+>  		spin_lock_irqsave(&host->lock, flags);
+>  		host->rescan_disable = 0;
+> +		host->power_notify_type = MMC_HOST_PW_NOTIFY_LONG;
+>  		spin_unlock_irqrestore(&host->lock, flags);
+>  		mmc_detect_change(host, 0);
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 4e869d3..f8ea938 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -458,10 +458,12 @@ static int mmc_read_ext_csd(struct mmc_card *card,
+> u8 *ext_csd)
+>  	else
+>  		card->erased_byte = 0x0;
+> 
+> -	if (card->ext_csd.rev >= 6)
+> +	if (card->ext_csd.rev >= 6) {
+>  		card->ext_csd.generic_cmd6_time = 10 *
+>  			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
+> -	else
+> +		card->ext_csd.power_off_longtime = 10 *
+> +			ext_csd[EXT_CSD_POWER_OFF_LONG_TIME];
+> +	} else
+>  		card->ext_csd.generic_cmd6_time = 0;
+> 
+>  out:
+> @@ -846,6 +848,23 @@ static int mmc_init_card(struct mmc_host *host, u32
+> ocr,
+>  	}
+> 
+>  	/*
+> +	 * If the host supports the power_off_notify capability then
+> +	 * set the notification byte in the ext_csd register of device
+> +	 */
+> +	if ((host->caps2 & MMC_CAP2_POWEROFF_NOTIFY) &&
+> +	    (card->poweroff_notify_state == MMC_NO_POWER_NOTIFICATION)) {
+> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +				 EXT_CSD_POWER_OFF_NOTIFICATION,
+> +				 EXT_CSD_POWER_ON,
+> +				 card->ext_csd.generic_cmd6_time);
+> +		if (err && err != -EBADMSG)
+> +			goto free_card;
+> +	}
+> +
+> +	if (!err)
+> +		card->poweroff_notify_state = MMC_POWERED_ON;
+> +
+> +	/*
+>  	 * Activate high speed (if supported)
+>  	 */
+>  	if ((card->ext_csd.hs_max_dtr != 0) &&
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2cc3ffa..91fdaed 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2739,6 +2739,15 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	if (caps[1] & SDHCI_DRIVER_TYPE_D)
+>  		mmc->caps |= MMC_CAP_DRIVER_TYPE_D;
+> 
+> +	/*
+> +	 * If Notify capability is enabled by the host, set notify to
+> +	 * short power off notify timeout value.
+> +	 */
+> +	if (mmc->caps2 & MMC_CAP2_POWEROFF_NOTIFY)
+> +		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_SHORT;
+> +	else
+> +		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
+> +
+>  	/* Initial value for re-tuning timer count */
+>  	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
+>  			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 30d493c..fce88b3 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -54,6 +54,7 @@ struct mmc_ext_csd {
+>  	unsigned int		part_time;		/* Units: ms */
+>  	unsigned int		sa_timeout;		/* Units: 100ns */
+>  	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+> +	unsigned int            power_off_longtime;     /* Units: ms */
+>  	unsigned int		hs_max_dtr;
+>  	unsigned int		sectors;
+>  	unsigned int		card_type;
+> @@ -209,6 +210,11 @@ struct mmc_card {
+>  #define MMC_QUIRK_BLK_NO_CMD23	(1<<7)		/* Avoid CMD23 for regular
+> multiblock */
+>  #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)	/* Avoid sending 512 bytes
+> in */
+>  						/* byte mode */
+> +	unsigned int    poweroff_notify_state;	/* eMMC4.5 notify feature
+> */
+> +#define MMC_NO_POWER_NOTIFICATION	0
+> +#define MMC_POWERED_ON			1
+> +#define MMC_POWEROFF_SHORT		2
+> +#define MMC_POWEROFF_LONG		3
+> 
+>  	unsigned int		erase_size;	/* erase size in sectors */
+>   	unsigned int		erase_shift;	/* if erase unit is power 2 */
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index aed5bc7..65c47fc 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -239,8 +239,14 @@ struct mmc_host {
+>  	unsigned int		caps2;		/* More host capabilities */
+> 
+>  #define MMC_CAP2_BOOTPART_NOACC	(1 << 0)	/* Boot partition no access
+> */
+> +#define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control. */
+> +#define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff
+> supported */
+> 
+>  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+> +	unsigned int        power_notify_type;
+> +#define MMC_HOST_PW_NOTIFY_NONE		0
+> +#define MMC_HOST_PW_NOTIFY_SHORT	1
+> +#define MMC_HOST_PW_NOTIFY_LONG		2
+> 
+>  #ifdef CONFIG_MMC_CLKGATE
+>  	int			clk_requests;	/* internal reference counter */
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index cd63c2d..36ed258 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -271,6 +271,9 @@ struct _mmc_csd {
+>   */
+> 
+>  #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+> +#define EXT_CSD_FLUSH_CACHE		32	/* W */
+> +#define EXT_CSD_CACHE_CTRL		33	/* R/W */
+> +#define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
+>  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+>  #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
+>  #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
+> @@ -346,6 +349,11 @@ struct _mmc_csd {
+>  #define EXT_CSD_RST_N_EN_MASK	0x3
+>  #define EXT_CSD_RST_N_ENABLED	1	/* RST_n is enabled on card */
+> 
+> +#define EXT_CSD_NO_POWER_NOTIFICATION	0
+> +#define EXT_CSD_POWER_ON		1
+> +#define EXT_CSD_POWER_OFF_SHORT		2
+> +#define EXT_CSD_POWER_OFF_LONG		3
+> +
+>  #define EXT_CSD_PWR_CL_8BIT_MASK	0xF0	/* 8 bit PWR CLS */
+>  #define EXT_CSD_PWR_CL_4BIT_MASK	0x0F	/* 8 bit PWR CLS */
+>  #define EXT_CSD_PWR_CL_8BIT_SHIFT	4
+> --
+> 1.7.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
