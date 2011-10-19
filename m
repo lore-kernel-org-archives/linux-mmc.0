@@ -1,12 +1,16 @@
 From: Sujit Reddy Thumma <sthumma@codeaurora.org>
 Subject: [PATCH 1/1] mmc: core: Use delayed work in clock gating framework
 Date: Wed, 19 Oct 2011 20:18:33 +0530
-Message-ID: <1319035713-4979-1-git-send-email-sthumma@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Message-ID: <1319035713-4979-1-git-send-email-sthumma__3501.08635980195$1319035765$gmane$org@codeaurora.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:16842 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750944Ab1JSOtP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2011 10:49:15 -0400
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.orglinux-mmc@vger.kernel.org
 Cc: Sujit Reddy Thumma <sthumma@codeaurora.org>, linux-arm-msm@vger.kernel.org, cjb@laptop.org
-List-Id: linux-mmc@vger.kernel.org
 
 Current clock gating framework disables the MCI clock as soon as the
 request is completed and enables it when a request arrives. This aggressive
@@ -109,3 +113,4 @@ index 16e9338..8d6ba4c 100644
 -- 
 Sent by a consultant of the Qualcomm Innovation Center, Inc.
 The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+
