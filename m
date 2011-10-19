@@ -1,57 +1,35 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
+From: Linus Walleij <linus.walleij@linaro.org>
 Subject: Re: [PATCH] mmc: core: Prevent too long response times for suspend
-Date: Wed, 19 Oct 2011 22:55:07 +0530
-Message-ID: <4E9F07F3.2050103@codeaurora.org>
-References: <1318514638-32452-1-git-send-email-ulf.hansson@stericsson.com> <4f62290baad48cd8655f3f82f7b162b9.squirrel@www.codeaurora.org> <4E9BFA84.1040709@stericsson.com>
+Date: Thu, 20 Oct 2011 00:09:12 +0200
+Message-ID: <CAKnu2MraxuB=cWme7OkX7k6K6c+1oNQ_+iJrswCw5YU0vjyayw@mail.gmail.com>
+References: <1318514638-32452-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:11824 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751469Ab1JSRZO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2011 13:25:14 -0400
-In-Reply-To: <4E9BFA84.1040709@stericsson.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:51804 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754676Ab1JSWJM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2011 18:09:12 -0400
+Received: by ywf7 with SMTP id 7so2150667ywf.19
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Oct 2011 15:09:12 -0700 (PDT)
+In-Reply-To: <1318514638-32452-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-On 10/17/2011 3:21 PM, Ulf Hansson wrote:
->>
->> Why would there be pending requests while host is suspending? Is the
->> kernel framework not handling sync before going to suspend? However, the
->> mmc_blk_suspend() would be called before the host driver suspends (as all
->> the driver suspend routines are serialized) which means it stops block
->> layer to queue more I/O requests well before the host driver start
->> suspend. Does this sequence break in your case?
->
-> I have observed this issue for different cases (one case was logging to
-> eMMC). The idea is simply that we would like to be sure that we do not
-> wait "forever", no matter if the "upper layers" misbehaved in the
-> suspend sequence.
->
-Agree. I was just curious to know why would there be a pending requests. 
-If the issue is seen while logging to eMMC then there may be something 
-wrong, probably, we may see issue while running mmc_test and initiating 
-suspend. Your patch looks good to me though.
+2011/10/13 Ulf Hansson <ulf.hansson@stericsson.com>:
 
-Reviewed-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
-
->>
->> Your concern seems to be valid for SDIO case, but again the function
->> driver must be intelligent enough to return -EBUSY as it knows that it
->> had
->> posted a request to MMC.
->>
+> While trying to suspend the mmc host there could still be
+> ongoing requests that we need to wait for. At the same time
+> a device driver must respond to a suspend request rather quickly.
 >
-> For SDIO, should we really assume that function driver has implemented a
-> suspend function and moreover that it actually always behaves as we expect?
-I hope so, but yes, in some cases that may be broken. I agree with you.
+> Instead of potentially wait "forever" by claiming the host we now
+> "try" to claim the host instead. If it fails, -EBUSY is returned.
 >
-> Br
-> Ulf Hansson
+> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
 
--- 
-Thanks & Regards,
-Sujit Reddy Thumma
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
+
+Thanks,
+Linus Walleij
