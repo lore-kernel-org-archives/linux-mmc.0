@@ -1,63 +1,84 @@
-From: =?utf-8?B?5LuFMTDlhYPmr4/lpKnjgII=?= <admin@ahjn.com>
-Subject: =?utf-8?B?576k5Y+R6L2v5Lu2K+S5sOWutuaQnOe0ouacuivmnIDmlrDlub/kuqTkvJrkubDlrrbjgIHmtbc=?=
-	=?utf-8?B?5YWz5pWw5o2uLEIyQuivouebmOS5sOWutjUwMOS4h+OAgg==?=
-Date: Thu, 20 Oct 2011 15:40:57 +0000 (UTC)
-Message-ID: <20121020233617401026@ahjn.com>
-Reply-To: <467643975@qq.com>
+From: Praveen G K <praveen.gk@gmail.com>
+Subject: Re: slow eMMC write speed
+Date: Thu, 20 Oct 2011 09:07:41 -0700
+Message-ID: <CAHzg1A9SO6s8vabSGcuNWWGswMkF4UB_vRjdgiEN-qtc_GObeg@mail.gmail.com>
+References: <CAHzg1A-E0ziGaO_4ttm6tWBsLZe+cUVt=Cn7Cr8gwC0XA_PSSw@mail.gmail.com>
+	<334439217.124350.1319124396858.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [61.191.24.52] ([61.191.24.52]:13532 "HELO ahjn.com"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with SMTP
-	id S1756308Ab1JTPkp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 20 Oct 2011 11:40:45 -0400
-Date: Sat, 20 Oct 2012 23:36:10 +0800
+Received: from mail-dy0-f46.google.com ([209.85.220.46]:51831 "EHLO
+	mail-dy0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754954Ab1JTQHn convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2011 12:07:43 -0400
+Received: by dyf17 with SMTP id 17so106417dyf.19
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2011 09:07:42 -0700 (PDT)
+In-Reply-To: <334439217.124350.1319124396858.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: jnjspas@hotmail.com, linux-mmc@vger.kernel.org, susan1992@yeah.net, icebarli@yahoo.com, zhai@163.net, yzczb68@sina.com, tcsxyxl@163.com, 3181emailg.alaqqad@googlemail.c
+To: Andrei Warkentin <awarkentin@vmware.com>
+Cc: J Freyensee <james_p_freyensee@linux.intel.com>, =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Jon Medhurst <tixy@linaro.org>, "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
 
-576k5Y+R6L2v5Lu2K+S5sOWutuaQnOe0ouacuisxMDnlsYrlub/kuqTkvJrkubDlrrbjgIHlsZXk
-vJrkubDlrrbjgIHmtbflhbPmlbDmja4sQjJC6K+i55uY5Lmw5a62NTAw5LiH44CCDQoNCuS4gOWF
-sTjkuKrljIUo5pWw5o2u5piv5YWo6KGM5Lia55qE77yM5oyJ54Wn6KGM5Lia5YiG5aW957G777yM
-5bm25LiU5Y+v5Lul5oyJ54Wn5YWz6ZSu6K+N5p+l6K+i55qEKe+8miANCjHvvIwyMDEx5pil5a2j
-MTA55bGK5bm/5Lqk5Lya5Lmw5a625pWw5o2u5bqT5paw6bKc5Ye654KJ77yM6LaF57qn5paw6bKc
-5Lmw5a6277yM5paw6bKc5pWw5o2u77yM5a655piT5oiQ5Y2V77yBIA0KMu+8jOacgOaWsOWFqOeQ
-g+S5sOWutuW6kyzlhbE0NTE2NjDmnaHmlbDmja7jgIIgDQoz77yMMjAwOOW5tCwyMDA55bm0LDIw
-MTDlubQg5pil5a2jK+eni+Wto+W5v+S6pOS8muS5sOWutuWQjeW9le+8jDEwMyAxMDQgMTA1IDEw
-NiAxMDcgMTA4IOWFseWFreWxiiDlhbExMjAuNuS4h+aVsOaNruOAgg0KNO+8jDIwMTDlubTlm73p
-mYXkv4PplIDljY/kvJrvvIhQUEFJ77yJ5oiQ5ZGY5ZCN5Y2VIFBQQUkgTWVtYmVycyBEaXJlY3Rv
-cnnvvIzpnZ7luLjph43opoHnmoTlpKfkubDlrrbjgIINCjXvvIwyMDEw5bm05Yiw6aaZ5riv6YeH
-6LSt55qE5Zu95aSW5a6i5Lq65ZCN5b2VKOmmmea4r+i0uOWPkeWxgOaPkOS+mynvvIzlhbE3LjLk
-uIfmlbDmja7vvIzotoXnuqfph43opoHnmoTkubDlrrbjgIINCjbvvIw2MC445LiH5p2h5pyA5paw
-5Zu95aSWQjJC5Lmw5a626K+i55uY44CCDQo377yMMjAwOeW5tOa1t+WFs+aPkOWNleaVsOaNrnBp
-ZXJz54mI5pWw5o2uIDHljYPkuIfjgIINCjjvvIznvqTlj5Hova/ku7bvvIznvqTlj5Hova/ku7bn
-moTpg6jnvbLkuI7lronoo4XjgIINCg0K5YWxIDUwMOS4h+S4quS5sOWutu+8jOavj+S4quWdh+ac
-iUVtYWlsLiANCg0K5L+d6K+B5q+P5aSp6YO95pyJ5Lmw5a625Zue5aSN44CCDQrkv53or4Hmr4/l
-pKnpg73mnInkubDlrrblm57lpI3jgIINCg0K6KaB55qE5oqT57Sn6IGU57O7UVE6IDQ2NzY0Mzk3
-NSAgIOaIluiAheeri+WNs+WbnuWkjemCrueusTogIDQ2NzY0Mzk3NUBxcS5jb20NCuimgeeahOaK
-k+e0p+iBlOezu1FROiA0Njc2NDM5NzUgICDmiJbogIXnq4vljbPlm57lpI3pgq7nrrE6ICA0Njc2
-NDM5NzVAcXEuY29tDQropoHnmoTmipPntKfogZTns7tRUTogNDY3NjQzOTc1ICAg5oiW6ICF56uL
-5Y2z5Zue5aSN6YKu566xOiAgNDY3NjQzOTc1QHFxLmNvbQ0KDQoNCuivmuS/oeS4uuacrO+8jOWm
-guaenOS4jeS/oeS7u+acrOS6uizlj6/ku6XotbDmt5jlrp3kuqTmmJMs5pS26LSn6aqM6K+B5ZCO
-5YaN5LuY5qy+LOi/meaYr+WvueaCqOacgOWlveeahOS/nemanOS6huOAgiANCg0K5L+d6K+B5q+P
-5aSp6YO95pyJ5Lmw5a625Zue5aSN44CCDQrkv53or4Hmr4/lpKnpg73mnInkubDlrrblm57lpI3j
-gIINCuS/neivgeavj+WkqemDveacieS5sOWutuWbnuWkjeOAgg0KDQoNCg0KDQrlub/kuqTkvJrk
-ubDlrrbmjInkuqflk4HnsbvliKvliIbnsbvvvIzliIbkuLrku6XkuIvlh6DnsbvvvJoNCjEg5Yqe
-5YWs6K6+5aSHDQoyIOe8lue7h+WPiuiXpOmTgeW3peiJuuWTgQ0KMyDnjrvnkoMNCjQg6aSQ5Y6o
-55So5YW3DQo1IOi9pui+hg0KNiDlpKflnovmnLrmorDlj4rorr7lpIcNCjcg55S15a2Q55S15rCU
-DQo4IOeUteWtkOa2iOi0ueWTgQ0KOSDnurrnu4cNCjEwIOacjeijhQ0KMTEg5Liq5Lq65oqk55CG
-DQoxMiDlt6XnqIvmnLrmorANCjEzIOW3peWFtw0KMTQg5YyW5belDQoxNSDorqHnrpfmnLrlj4rp
-gJrorq8NCjE2IOWutuWxheeUqOWTgQ0KMTcg5a625bGF6KOF6aWwDQoxOCDlrrblhbcNCjE5IOWu
-tueUqOeUteWZqA0KMjAg5bu6562R5Y+K6KOF6aWw5p2Q5paZDQoyMSDoioLml6XnlKjlk4ENCjIy
-IOekvOWTgeWPiui1oOWTgQ0KMjMg5pGp5omY6L2mDQoyNCDmsb3ovabphY3ku7YNCjI1IOmjn+WT
-gQ0KMjYg6Zm255O3DQoyNyDpk4Hnn7MNCjI4IOeOqeWFtw0KMjkg5Y2r5rW0DQozMCDkupTph5EN
-CjMxIOWwj+Wei+acuuaisA0KMzIg6Z6LDQozMyDkvJHpl7LnlKjlk4ENCjM0IOWMu+eWlw0KMzUg
-5rW05a6k5Lqn5ZOBDQozNiDlm63mnpcNCjM3IOeFp+aYjuS6p+WTgQ0KMzgg6ZKf6KGo55y86ZWc
-DQozOSDoh6rooYzovaYNCjQwIOWMhQ0KDQoNCuS/neivgeavj+WkqemDveacieS5sOWutuWbnuWk
-jeOAgg0K5L+d6K+B5q+P5aSp6YO95pyJ5Lmw5a625Zue5aSN44CCDQrkv53or4Hmr4/lpKnpg73m
-nInkubDlrrblm57lpI3jgIINCuS/neivgeavj+WkqemDveacieS5sOWutuWbnuWkjeOAgg0K5L+d
-6K+B5q+P5aSp6YO95pyJ5Lmw5a625Zue5aSN44CCDQo=
+2011/10/20 Andrei Warkentin <awarkentin@vmware.com>:
+> ----- Original Message -----
+>> From: "Praveen G K" <praveen.gk@gmail.com>
+>> To: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
+>> Cc: "J Freyensee" <james_p_freyensee@linux.intel.com>, "Andrei Warke=
+ntin" <awarkentin@vmware.com>, "Per F=F6rlin"
+>> <per.forlin@stericsson.com>, "Linus Walleij" <linus.walleij@linaro.o=
+rg>, linux-mmc@vger.kernel.org, "Arnd Bergmann"
+>> <arnd@arndb.de>, "Jon Medhurst" <tixy@linaro.org>
+>> Sent: Thursday, October 20, 2011 11:10:02 AM
+>> Subject: Re: slow eMMC write speed
+>>
+>> 2011/10/20 Andrei E. Warkentin <andrey.warkentin@gmail.com>:
+>> > 2011/10/19 Praveen G K <praveen.gk@gmail.com>:
+>> >> Also, can somebody please tell me the significance of
+>> >> blk_end_request? Thanks.
+>> >> Why do we call this after every block read or write?
+>> >
+>> > Because you want to update the struct request with the amount
+>> > written/read. If the entire
+>> > requested I/O range has been satiffied, blk_end_request also calls
+>> > blk_finish_request and
+>> > completes the request.
+>> Just for a quick understanding, I did the following
+>>
+>> During every eMMC write, I called the multi block write command with
+>> the same set of data, and I called the mmc_end_request
+>
+> What's mmc_end_request? I'm assuming you meant blk_end_request.
+Yes, you are right.  I meant blk_end_request.
 
+>> after =A0let's
+>> say every 10 transfers (with each transfer being 128 blocks). =A0I
+>> noticed that I did not see those big busy wait times as frequently a=
+s
+>> compared to calling blk_end_request after every 128 block was
+>> transferred. =A0Why is that happening?
+>
+> So you did 10 back-to-back 64k transfers inside the request handling =
+routine, and you noticed that caused a smaller GC delay
+> rather than doing 10 separate multiblock 64k transfers the normal way=
+?
+That's right.  Even though the request is supposed to service only
+64k, I sent 10 write commands each with 64k and then completed the
+request (within the loop that takes care of the read/writes in
+block.c) with the same data.
 
+So, instead of calling blk_end_request just after one write, I call
+blk_end_request after 10 writes.
+
+> Depends. Maybe mmc_host_lazy_disable() (called by mmc_release_host) e=
+nds up doing some power management, which is bound
+> to affect the card as well.
+>
+> Or maybe the card is trying to optimize consecutive writes into one l=
+arger write internally, and you're crossing some internal
+> timestamp checking logic that distinguishes between separate and cons=
+ecutive writes. You should talk to your manufacturer, and investigate w=
+hat happens to your host on mmc_release_host.
+>
+> A
+>
