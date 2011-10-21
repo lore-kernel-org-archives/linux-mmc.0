@@ -1,142 +1,324 @@
-From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Subject: Re: A question on IOCTL interface for MMC
-Date: Fri, 21 Oct 2011 20:40:51 +0530
-Message-ID: <CANYdXnq19NUPe3=hqTjVt-WBsJuFe8aYfzFdBAGx+nj_hbWy+Q@mail.gmail.com>
-References: <CANYdXnqDYn5-zehsJ9ibviJ7FoofcY=YLUqrROoK8k53v-czNA@mail.gmail.com>
-	<29942744.123457.1319122534256.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-	<CANYdXnp06UUY28Xjzd9DyCTbLeVNoGNV2T5XTihf2GRoKCEJdA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH] mmc: mmci: Improve runtime PM support
+Date: Fri, 21 Oct 2011 17:25:54 +0200
+Message-ID: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:33401 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751658Ab1JUPKw convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2011 11:10:52 -0400
-Received: by iaek3 with SMTP id k3so4838905iae.19
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Oct 2011 08:10:51 -0700 (PDT)
-In-Reply-To: <CANYdXnp06UUY28Xjzd9DyCTbLeVNoGNV2T5XTihf2GRoKCEJdA@mail.gmail.com>
+Received: from eu1sys200aog109.obsmtp.com ([207.126.144.127]:34419 "EHLO
+	eu1sys200aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751891Ab1JUP0W (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2011 11:26:22 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrei Warkentin <awarkentin@vmware.com>
-Cc: Chris Ball <cjb@laptop.org>, J Freyensee <james_p_freyensee@linux.intel.com>, John Calixto <john.calixto@modsystems.com>, linux-mmc@vger.kernel.org, Rayagond Kokatanur <rayagond@vayavyalabs.com>, Sandeep Pendharkar <sandeep@vayavyalabs.com>, pavitra <pavitra@vayavyalabs.com>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi All,
-Let me explain things in detail :-
+Runtime PM support is now dynamically controling the
+enable/disable of the clock and vcore regulator.
 
-My INTENT / REQUIREMENT is to test "ALL"  the SD/MMC Commands and NOT
-just the Read/Write(data transfer) Commands.
+In runtime_suspend the register values are saved and in
+runtime_resume register values are restored. We also make
+use of the runtime_autosuspend with a timeout value
+set to 50 ms.
 
-How can this be helpful
-  1. It can be used to validate the SD/MMC Core flows(Command specific
-code paths)
-  2. The Card Enumeration can be done from user space or for that
-matter any sequence of commands can be sent from the user space.
-  3. Individual commands can be tested with this interface, which is
-good for the Buggy IP/Hardware testing. This provides fine control
-over testing.
+Moreover a runtime_idle function is implemented to be able
+to enter runtime suspend state after probe and when no
+requests are recieved from the mmc framework (due to that
+there are no card inserted).
 
-To do this I had two options
-  1. Use the Block layer IOCTL.
-  2. Write my own kernel module and hack MMC Core to call command
-specific functions. This would be similar to "mmc_test.c" module.
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+---
+ drivers/mmc/host/mmci.c |  154 ++++++++++++++++++++++++++++++++++++++---------
+ drivers/mmc/host/mmci.h |    6 ++-
+ 2 files changed, 131 insertions(+), 29 deletions(-)
 
-APPROACH 1 : Using the Block Layer IOCTL
-
-  Block Layer IOCTL expects only the READ/WRITE commands and hence its
-  limited in functionality. I cannot send commands other than
-Read/Write, say CMD 2 or
-  CMD 0.
-  Also you said that the Block Layer cannot be modified to add support =
-for the
-  non read/write commands. How should I go about this ?
-
-   OR
-
-  Can we have an IOCTL in MMC Core like the one at Block layer.
-
-    Or
-
-  Can we have a kernel module which can directly call the driver by byp=
-assing
-  mmc_core.
-
-APPROACH 2 :
-
-  I have already tested a Kernel Module that uses the sysfs interface t=
-o
-  send commands. MMC Core will have to be binded to this kernel module.
-  This is similar to mmc_test.c module usage.
-
-  Commands will be sent via the sys file and response can be got from t=
-he card.
-  As of now, the response is not sent to the user space but just to
-/var/log/messages.
-
-  MMC Core has to be hacked to export certain functions which will be c=
-alled
-  from the module.
-
-  Is this ok and  can I submit this code.
-
-Cheers,
-Shashi
-
-
-On Fri, Oct 21, 2011 at 10:04 AM, Shashidhar Hiremath
-<shashidharh@vayavyalabs.com> wrote:
-> thanks for the reply Andrei,
-> =C2=A0through the IOCTL, I am actually trying to send a command to th=
-e
-> device and validate the response.So, when I send the command using th=
-e
-> IOCTL, I actually get a Input/Output Error. The reason I feel is that
-> the command is sent to the block layer and since block layer only
-> supports the read/write commands,even when I send command zero ,it
-> treats it like a read/write command.
->
-> On Thu, Oct 20, 2011 at 8:25 PM, Andrei Warkentin <awarkentin@vmware.=
-com> wrote:
->> Hi,
->>
->> ----- Original Message -----
->>> From: "Shashidhar Hiremath" <shashidharh@vayavyalabs.com>
->>> To: "Chris Ball" <cjb@laptop.org>, "J Freyensee" <james_p_freyensee=
-@linux.intel.com>, "John Calixto"
->>> <john.calixto@modsystems.com>, linux-mmc@vger.kernel.org
->>> Sent: Thursday, October 20, 2011 1:09:00 AM
->>> Subject: A question on IOCTL interface for MMC
->>>
->>> Hi ,
->>> =C2=A0 I am planning to use the existing IOCTL interface for SD/MMC
->>> =C2=A0 present
->>> in the kernel.
->>> =C2=A0 Since, the IOCTL interface expects a read/write flag and the=
- MMC
->>> IOCTL is actually an interface to block layer I feel without
->>> modifying
->>> the block layer for the support of non-read write commands ,I may n=
-ot
->>> be able to test the non-read/write commands through the IOCTL
->>> interface .
->>
->> Unsure what you mean. Certainly it's up to you how to handle the dat=
-a
->> you pass to the ioctl(). The "in" and "out" just says whether you
->> are passing data to the kernel or expecting something back, no more =
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 50b5f99..571834a 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -166,14 +166,10 @@ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ 	host->mrq = NULL;
+ 	host->cmd = NULL;
+ 
+-	/*
+-	 * Need to drop the host lock here; mmc_request_done may call
+-	 * back into the driver...
+-	 */
+-	spin_unlock(&host->lock);
+-	pm_runtime_put(mmc_dev(host->mmc));
+ 	mmc_request_done(host->mmc, mrq);
+-	spin_lock(&host->lock);
++
++	pm_runtime_mark_last_busy(host->mmc->parent);
++	pm_runtime_put_autosuspend(host->mmc->parent);
+ }
+ 
+ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+@@ -986,7 +982,7 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		return;
+ 	}
+ 
+-	pm_runtime_get_sync(mmc_dev(mmc));
++	pm_runtime_get_sync(mmc->parent);
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+@@ -1010,6 +1006,8 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	unsigned long flags;
+ 	int ret;
+ 
++	pm_runtime_get_sync(mmc->parent);
++
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_OFF:
+ 		if (host->vcc)
+@@ -1058,12 +1056,15 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	mmci_set_clkreg(host, ios->clock);
+ 
+-	if (host->pwr != pwr) {
+-		host->pwr = pwr;
++	if (host->pwr_reg != pwr) {
++		host->pwr_reg = pwr;
+ 		writel(pwr, host->base + MMCIPOWER);
+ 	}
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
++
++	pm_runtime_mark_last_busy(mmc->parent);
++	pm_runtime_put_autosuspend(mmc->parent);
+ }
+ 
+ static int mmci_get_ro(struct mmc_host *mmc)
+@@ -1147,6 +1148,9 @@ static int __devinit mmci_probe(struct amba_device *dev,
+ 	host->gpio_wp = -ENOSYS;
+ 	host->gpio_cd = -ENOSYS;
+ 	host->gpio_cd_irq = -1;
++	host->irqmask0_reg = 0;
++	host->pwr_reg = 0;
++	host->clk_reg = 0;
+ 
+ 	host->hw_designer = amba_manf(dev);
+ 	host->hw_revision = amba_rev(dev);
+@@ -1324,6 +1328,7 @@ static int __devinit mmci_probe(struct amba_device *dev,
+ 			goto irq0_free;
+ 	}
+ 
++	host->irqmask0_reg = MCI_IRQENABLE;
+ 	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
+ 
+ 	amba_set_drvdata(dev, mmc);
+@@ -1335,7 +1340,9 @@ static int __devinit mmci_probe(struct amba_device *dev,
+ 
+ 	mmci_dma_setup(host);
+ 
+-	pm_runtime_put(&dev->dev);
++	pm_runtime_set_autosuspend_delay(mmc->parent, 50);
++	pm_runtime_use_autosuspend(mmc->parent);
++	pm_runtime_put(mmc->parent);
+ 
+ 	mmc_add_host(mmc);
+ 
+@@ -1377,10 +1384,11 @@ static int __devexit mmci_remove(struct amba_device *dev)
+ 		struct mmci_host *host = mmc_priv(mmc);
+ 
+ 		/*
+-		 * Undo pm_runtime_put() in probe.  We use the _sync
+-		 * version here so that we can access the primecell.
++		 * Make sure the host is resumed and undo the
++		 * pm_runtime_put in probe.
+ 		 */
+-		pm_runtime_get_sync(&dev->dev);
++		pm_runtime_resume(mmc->parent);
++		pm_runtime_get_noresume(mmc->parent);
+ 
+ 		mmc_remove_host(mmc);
+ 
+@@ -1419,43 +1427,134 @@ static int __devexit mmci_remove(struct amba_device *dev)
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_PM
+-static int mmci_suspend(struct amba_device *dev, pm_message_t state)
++#ifdef CONFIG_SUSPEND
++
++#ifdef CONFIG_PM_RUNTIME
++static void mmci_disable_irq(struct mmci_host *host) {}
++static void mmci_enable_irq(struct mmci_host *host) {}
++#else
++static void mmci_disable_irq(struct mmci_host *host)
+ {
+-	struct mmc_host *mmc = amba_get_drvdata(dev);
++	writel(0, host->base + MMCIMASK0);
++}
++static void mmci_enable_irq(struct mmci_host *host)
++{
++	writel(host->irqmask0_reg, host->base + MMCIMASK0);
++}
++#endif
++
++static int mmci_suspend(struct device *dev)
++{
++	struct amba_device *adev = to_amba_device(dev);
++	struct mmc_host *mmc = amba_get_drvdata(adev);
+ 	int ret = 0;
+ 
+ 	if (mmc) {
+ 		struct mmci_host *host = mmc_priv(mmc);
+ 
++		pm_runtime_get_sync(mmc->parent);
++
+ 		ret = mmc_suspend_host(mmc);
+-		if (ret == 0)
+-			writel(0, host->base + MMCIMASK0);
++		if (!ret)
++			mmci_disable_irq(host);
++
++		pm_runtime_put_sync_suspend(mmc->parent);
+ 	}
+ 
+ 	return ret;
+ }
+ 
+-static int mmci_resume(struct amba_device *dev)
++static int mmci_resume(struct device *dev)
+ {
+-	struct mmc_host *mmc = amba_get_drvdata(dev);
++	struct amba_device *adev = to_amba_device(dev);
++	struct mmc_host *mmc = amba_get_drvdata(adev);
+ 	int ret = 0;
+ 
+ 	if (mmc) {
+ 		struct mmci_host *host = mmc_priv(mmc);
+ 
+-		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
 -
->> no less.
->>
->> What are you actually trying to do? What are you trying to expose or=
- control
->> through an ioctl?
->>
->> A
->>
->
->
->
-> --
-> regards,
-> Shashidhar Hiremath
->
++		mmci_enable_irq(host);
+ 		ret = mmc_resume_host(mmc);
+ 	}
+ 
+ 	return ret;
+ }
+-#else
+-#define mmci_suspend	NULL
+-#define mmci_resume	NULL
+ #endif
+ 
++#ifdef CONFIG_PM_RUNTIME
++static int mmci_runtime_suspend(struct device *dev)
++{
++	struct amba_device *adev = to_amba_device(dev);
++	struct mmc_host *mmc = amba_get_drvdata(adev);
++	unsigned long flags;
++
++	if (mmc) {
++		struct mmci_host *host = mmc_priv(mmc);
++
++		spin_lock_irqsave(&host->lock, flags);
++
++		/* Save registers for POWER, CLOCK and IRQMASK0 */
++		host->irqmask0_reg = readl(host->base + MMCIMASK0);
++		host->pwr_reg = readl(host->base + MMCIPOWER);
++		host->clk_reg = readl(host->base + MMCICLOCK);
++
++		/*
++		 * Make sure we do not get any interrupts when we disabled the
++		 * clock and the regulator and as well make sure to clear the
++		 * registers for clock and power.
++		 */
++		writel(0, host->base + MMCIMASK0);
++		writel(0, host->base + MMCIPOWER);
++		writel(0, host->base + MMCICLOCK);
++
++		spin_unlock_irqrestore(&host->lock, flags);
++
++		clk_disable(host->clk);
++		amba_vcore_disable(adev);
++	}
++
++	return 0;
++}
++
++static int mmci_runtime_resume(struct device *dev)
++{
++	struct amba_device *adev = to_amba_device(dev);
++	struct mmc_host *mmc = amba_get_drvdata(adev);
++	unsigned long flags;
++
++	if (mmc) {
++		struct mmci_host *host = mmc_priv(mmc);
++
++		amba_vcore_enable(adev);
++		clk_enable(host->clk);
++
++		spin_lock_irqsave(&host->lock, flags);
++
++		/* Restore registers for POWER, CLOCK and IRQMASK0 */
++		writel(host->clk_reg, host->base + MMCICLOCK);
++		writel(host->pwr_reg, host->base + MMCIPOWER);
++		writel(host->irqmask0_reg, host->base + MMCIMASK0);
++
++		spin_unlock_irqrestore(&host->lock, flags);
++	}
++
++	return 0;
++}
++
++static int mmci_runtime_idle(struct device *dev)
++{
++	pm_runtime_suspend(dev);
++	return 0;
++}
++#endif
++
++static const struct dev_pm_ops mmci_dev_pm_ops = {
++	SET_SYSTEM_SLEEP_PM_OPS(mmci_suspend, mmci_resume)
++	SET_RUNTIME_PM_OPS(mmci_runtime_suspend,
++			   mmci_runtime_resume,
++			   mmci_runtime_idle)
++};
++
+ static struct amba_id mmci_ids[] = {
+ 	{
+ 		.id	= 0x00041180,
+@@ -1499,11 +1598,10 @@ static struct amba_id mmci_ids[] = {
+ static struct amba_driver mmci_driver = {
+ 	.drv		= {
+ 		.name	= DRIVER_NAME,
++		.pm	= &mmci_dev_pm_ops,
+ 	},
+ 	.probe		= mmci_probe,
+ 	.remove		= __devexit_p(mmci_remove),
+-	.suspend	= mmci_suspend,
+-	.resume		= mmci_resume,
+ 	.id_table	= mmci_ids,
+ };
+ 
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 79e4143..4ae0f84 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -189,7 +189,6 @@ struct mmci_host {
+ 
+ 	unsigned int		mclk;
+ 	unsigned int		cclk;
+-	u32			pwr;
+ 	struct mmci_platform_data *plat;
+ 	struct variant_data	*variant;
+ 
+@@ -199,6 +198,11 @@ struct mmci_host {
+ 	struct timer_list	timer;
+ 	unsigned int		oldstat;
+ 
++	/* register cache */
++	u32			irqmask0_reg;
++	u32			pwr_reg;
++	u32			clk_reg;
++
+ 	/* pio stuff */
+ 	struct sg_mapping_iter	sg_miter;
+ 	unsigned int		size;
+-- 
+1.7.5.4
+
