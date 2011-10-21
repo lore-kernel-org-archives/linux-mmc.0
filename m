@@ -1,38 +1,54 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: A question on IOCTL interface for MMC
-Date: Thu, 20 Oct 2011 09:18:14 +0200
-Message-ID: <5263525.D4yqBTjgWh@wuerfel>
-References: <CANYdXnqDYn5-zehsJ9ibviJ7FoofcY=YLUqrROoK8k53v-czNA@mail.gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH] mmc: mmci: Improve runtime PM support
+Date: Fri, 21 Oct 2011 18:36:38 +0100
+Message-ID: <20111021173637.GG21648@n2100.arm.linux.org.uk>
+References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:59293 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753408Ab1JUQwy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2011 12:52:54 -0400
-In-Reply-To: <CANYdXnqDYn5-zehsJ9ibviJ7FoofcY=YLUqrROoK8k53v-czNA@mail.gmail.com>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:56533 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753885Ab1JURgq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2011 13:36:46 -0400
+Content-Disposition: inline
+In-Reply-To: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Cc: Chris Ball <cjb@laptop.org>, J Freyensee <james_p_freyensee@linux.intel.com>, John Calixto <john.calixto@modsystems.com>, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>
 
-On Thursday 20 October 2011 10:39:00 Shashidhar Hiremath wrote:
->   I am planning to use the existing IOCTL interface for SD/MMC present
-> in the kernel.
->   Since, the IOCTL interface expects a read/write flag , and the MMC
-> IOCTL is actually an interface to block layer I feel without modifying
-> the block layer for the support of non-read write commands ,I may not
-> be able to test the non-read/write commands through the IOCTL
-> interface .
-> Is there a way of doing this without modifying block layer ?
+On Fri, Oct 21, 2011 at 05:25:54PM +0200, Ulf Hansson wrote:
+> +#ifdef CONFIG_PM_RUNTIME
+> +static int mmci_runtime_suspend(struct device *dev)
+> +{
+> +	struct amba_device *adev = to_amba_device(dev);
+> +	struct mmc_host *mmc = amba_get_drvdata(adev);
+> +	unsigned long flags;
+> +
+> +	if (mmc) {
+> +		struct mmci_host *host = mmc_priv(mmc);
+> +
+> +		spin_lock_irqsave(&host->lock, flags);
+> +
+> +		/* Save registers for POWER, CLOCK and IRQMASK0 */
+> +		host->irqmask0_reg = readl(host->base + MMCIMASK0);
+> +		host->pwr_reg = readl(host->base + MMCIPOWER);
+> +		host->clk_reg = readl(host->base + MMCICLOCK);
+> +
+> +		/*
+> +		 * Make sure we do not get any interrupts when we disabled the
+> +		 * clock and the regulator and as well make sure to clear the
+> +		 * registers for clock and power.
+> +		 */
+> +		writel(0, host->base + MMCIMASK0);
+> +		writel(0, host->base + MMCIPOWER);
+> +		writel(0, host->base + MMCICLOCK);
 
-Hi Shashidhar,
+Err, no.  You're not allowed to power down the card between commands
+unless the card has been removed or been has finished with.
 
-I think there is actually no problem here at all. The block layer simply
-passes the ioctl command number and argument to the driver, which can
-do anything with it.
+If you power down the card (which you _are_ doing by writing zero to
+the MMCIPOWER register), then you have to do a full setup of the card
+when you resume.
 
-What functionality are you actually looking for?
-
-	Arnd
+This is completely unsuitable for runtime-PM usage.
