@@ -1,47 +1,103 @@
-From: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
-Subject: Re: slow eMMC write speed
-Date: Fri, 21 Oct 2011 00:45:06 -0400
-Message-ID: <CANz0V+6=shJk2_73RETGk7Y55FCKRJgZf__rp72RHh9U6Z9KEQ@mail.gmail.com>
-References: <CAHzg1A-E0ziGaO_4ttm6tWBsLZe+cUVt=Cn7Cr8gwC0XA_PSSw@mail.gmail.com>
-	<334439217.124350.1319124396858.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-	<CAHzg1A9SO6s8vabSGcuNWWGswMkF4UB_vRjdgiEN-qtc_GObeg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: [PATCH] mmc: debugfs: expose the SDCLK frq in sys ios (v2)
+Date: Fri, 21 Oct 2011 10:16:41 +0200
+Message-ID: <1319185001-10226-1-git-send-email-peppe.cavallaro@st.com>
+References: <1319031945-2630-1-git-send-email-peppe.cavallaro@st.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:59592 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751432Ab1JUEpI convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2011 00:45:08 -0400
-Received: by wwe6 with SMTP id 6so5147893wwe.1
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2011 21:45:07 -0700 (PDT)
-In-Reply-To: <CAHzg1A9SO6s8vabSGcuNWWGswMkF4UB_vRjdgiEN-qtc_GObeg@mail.gmail.com>
+Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:44675 "EHLO
+	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753634Ab1JUIRB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2011 04:17:01 -0400
+In-Reply-To: <1319031945-2630-1-git-send-email-peppe.cavallaro@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Praveen G K <praveen.gk@gmail.com>
-Cc: Andrei Warkentin <awarkentin@vmware.com>, J Freyensee <james_p_freyensee@linux.intel.com>, =?UTF-8?Q?Per_F=C3=B6rlin?= <per.forlin@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Jon Medhurst <tixy@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: adrian.hunter@intel.com, Giuseppe Cavallaro <peppe.cavallaro@st.com>
 
-2011/10/20 Praveen G K <praveen.gk@gmail.com>:
->>
->> So you did 10 back-to-back 64k transfers inside the request handling=
- routine, and you noticed that caused a smaller GC delay
->> rather than doing 10 separate multiblock 64k transfers the normal wa=
-y?
-> That's right. =C2=A0Even though the request is supposed to service on=
-ly
-> 64k, I sent 10 write commands each with 64k and then completed the
-> request (within the loop that takes care of the read/writes in
-> block.c) with the same data.
->
-> So, instead of calling blk_end_request just after one write, I call
-> blk_end_request after 10 writes.
->
+This patch is to expose the actual SDCLK frequency in
+/sys/kernel/debug/mmcX/ios entry.
 
-Well, if you're just writing 10 times the data to the *same* location
-(since it's inside the loop), then of course
-your noticed GC delay is smaller when compared to writing 10 times to
-different locations - the garbage collection happens
-when the card notices you are writing to more allocation units than
-are cached internally...
+For example, if the max clk for a normal speed card is 20MHz
+this is reported in /sys/kernel/debug/mmcX/ios.
+Unfortunately the actual SDCLK frequency (i.e. Baseclock / divisor)
+is not reported at all: for example, in that case, on Arasan HC,
+it should be 48/4=12 (MHz).
 
-A
+Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+---
+ drivers/mmc/core/debugfs.c |    2 ++
+ drivers/mmc/host/sdhci.c   |    7 +++++++
+ include/linux/mmc/host.h   |    2 ++
+ 3 files changed, 11 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 998797e..0b9a4aa 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -46,6 +46,8 @@ static int mmc_ios_show(struct seq_file *s, void *data)
+ 	const char *str;
+ 
+ 	seq_printf(s, "clock:\t\t%u Hz\n", ios->clock);
++	if (host->actual_clock)
++		seq_printf(s, "actual clock:\t%u Hz\n", host->actual_clock);
+ 	seq_printf(s, "vdd:\t\t%u ", ios->vdd);
+ 	if ((1 << ios->vdd) & MMC_VDD_165_195)
+ 		seq_printf(s, "(1.65 - 1.95 V)\n");
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0e02cc1..a0d61b0 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1043,6 +1043,7 @@ static void sdhci_finish_command(struct sdhci_host *host)
+ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	int div = 0; /* Initialized for compiler warning */
++	int actual_div = 0;
+ 	u16 clk = 0;
+ 	unsigned long timeout;
+ 
+@@ -1088,6 +1089,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 				clk = SDHCI_PROG_CLOCK_MODE;
+ 				div--;
+ 			}
++			actual_div = div;
+ 		} else {
+ 			/* Version 3.00 divisors must be a multiple of 2. */
+ 			if (host->max_clk <= clock)
+@@ -1099,6 +1101,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 						break;
+ 				}
+ 			}
++			actual_div = div;
+ 			div >>= 1;
+ 		}
+ 	} else {
+@@ -1107,9 +1110,13 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 			if ((host->max_clk / div) <= clock)
+ 				break;
+ 		}
++			actual_div = div;
+ 		div >>= 1;
+ 	}
+ 
++	if (actual_div)
++		host->mmc->actual_clock = host->max_clk / actual_div;
++
+ 	clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+ 	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
+ 		<< SDHCI_DIVIDER_HI_SHIFT;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 1d09562..d815311 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -302,6 +302,8 @@ struct mmc_host {
+ 
+ 	struct mmc_async_req	*areq;		/* active async req */
+ 
++	unsigned int		actual_clock;	/* Actual HC clock rate */
++
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+ 
+-- 
+1.7.4.4
+
