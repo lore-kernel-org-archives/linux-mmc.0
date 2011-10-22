@@ -1,54 +1,65 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] mmc: mmci: Improve runtime PM support
-Date: Fri, 21 Oct 2011 18:36:38 +0100
-Message-ID: <20111021173637.GG21648@n2100.arm.linux.org.uk>
-References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>
+From: Andrei Warkentin <awarkentin@vmware.com>
+Subject: Re: [PATCH] mmc: boot partition ro lock support
+Date: Fri, 21 Oct 2011 18:44:36 -0700 (PDT)
+Message-ID: <1817564019.180377.1319247876337.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+References: <1319203043-29388-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:56533 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753885Ab1JURgq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2011 13:36:46 -0400
-Content-Disposition: inline
-In-Reply-To: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from smtp-outbound-1.vmware.com ([65.115.85.69]:26557 "EHLO
+	smtp-outbound-1.vmware.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751958Ab1JVBoh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2011 21:44:37 -0400
+In-Reply-To: <1319203043-29388-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>
+Cc: Per Forlin <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, John Beckett <john.beckett@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-On Fri, Oct 21, 2011 at 05:25:54PM +0200, Ulf Hansson wrote:
-> +#ifdef CONFIG_PM_RUNTIME
-> +static int mmci_runtime_suspend(struct device *dev)
-> +{
-> +	struct amba_device *adev = to_amba_device(dev);
-> +	struct mmc_host *mmc = amba_get_drvdata(adev);
-> +	unsigned long flags;
-> +
-> +	if (mmc) {
-> +		struct mmci_host *host = mmc_priv(mmc);
-> +
-> +		spin_lock_irqsave(&host->lock, flags);
-> +
-> +		/* Save registers for POWER, CLOCK and IRQMASK0 */
-> +		host->irqmask0_reg = readl(host->base + MMCIMASK0);
-> +		host->pwr_reg = readl(host->base + MMCIPOWER);
-> +		host->clk_reg = readl(host->base + MMCICLOCK);
-> +
-> +		/*
-> +		 * Make sure we do not get any interrupts when we disabled the
-> +		 * clock and the regulator and as well make sure to clear the
-> +		 * registers for clock and power.
-> +		 */
-> +		writel(0, host->base + MMCIMASK0);
-> +		writel(0, host->base + MMCIPOWER);
-> +		writel(0, host->base + MMCICLOCK);
+Hi Ulf, Johan,
 
-Err, no.  You're not allowed to power down the card between commands
-unless the card has been removed or been has finished with.
+----- Original Message -----
+> From: "Ulf Hansson" <ulf.hansson@stericsson.com>
+> To: linux-mmc@vger.kernel.org, "Chris Ball" <cjb@laptop.org>
+> Cc: "Per Forlin" <per.forlin@stericsson.com>, "Ulf Hansson" <ulf.hansson@stericsson.com>, "Lee Jones"
+> <lee.jones@linaro.org>, "Johan Rudholm" <johan.rudholm@stericsson.com>, "John Beckett" <john.beckett@stericsson.com>
+> Sent: Friday, October 21, 2011 9:17:23 AM
+> Subject: [PATCH] mmc: boot partition ro lock support
+> 
+> From: Johan Rudholm <johan.rudholm@stericsson.com>
+> 
+> Enable boot partitions to be power and permanently read-only locked
+> via
+> a sysfs entry. There will be one sysfs entry for the main mmc device:
+> 
+> /sys/block/mmcblkX/boot_partition_ro_lock
+> 
+> and one for each boot partition:
+> 
+> /sys/block/mmcblkXbootY/ro_lock
+> 
+> The boot partitions are power or permanently locked by writing
+> "pwr_ro"
+> or "perm_ro" to one of the files.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+> Signed-off-by: John Beckett <john.beckett@stericsson.com>
+> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
+> ---
 
-If you power down the card (which you _are_ doing by writing zero to
-the MMCIPOWER register), then you have to do a full setup of the card
-when you resume.
+What does power locking do that force_ro currently doesn't achieve?
 
-This is completely unsuitable for runtime-PM usage.
+The permalocking brick-potential (more like paper-weight-potential) is IMO unacceptably
+high that something like this is just accessible via a sysfs attribute. This is exactly
+why the boot partitions were put under force_ro, so that some poor sap wouldn't end up
+nuking the boot partitions (with obvious consequences), and permalocking seems even nastier.
+
+At a bigger picture, I'm uncertain what the point of this is. It adds code complexity for,
+a generally rare and possibly self-destructive operation. This is like the GP partitioning 
+support - it's a once-a-time (and unrecoverable) operation usually done at manufacturing (or initial
+provisioning time) that shouldn't be even exposed to the general purpose user. This would be a
+good use of that arbitrary-CMD ioctl interface John Calixto put in.
+
+Thanks,
+A
