@@ -1,55 +1,56 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: boot partition ro lock support
-Date: Sat, 22 Oct 2011 12:55:01 -0400
-Message-ID: <m2vcrh55lm.fsf@bob.laptop.org>
-References: <1817564019.180377.1319247876337.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
-	<m24nz171vj.fsf@bob.laptop.org>
-	<CACRpkdY5T+QoyLvsPmwQRcNPoV=U=46LRGzKvK_8fSL8kurSwA@mail.gmail.com>
+From: Sebastian Rasmussen <sebras@gmail.com>
+Subject: Re: [PATCH] mmc: mmci: Improve runtime PM support
+Date: Sun, 23 Oct 2011 02:31:39 +0200
+Message-ID: <CAAgDR1OT=+xgQTNwmTz=9XwzpbhjeZ6F-mxnVGhOAPSAR3JiFQ@mail.gmail.com>
+References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>
+	<20111021173637.GG21648@n2100.arm.linux.org.uk>
+	<CAKnu2MrOriMzJH9NcwUivWa0cinASa6wrRf4a69si4WUs-aTrQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36432 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752073Ab1JVQzJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 22 Oct 2011 12:55:09 -0400
-In-Reply-To: <CACRpkdY5T+QoyLvsPmwQRcNPoV=U=46LRGzKvK_8fSL8kurSwA@mail.gmail.com>
-	(Linus Walleij's message of "Sat, 22 Oct 2011 18:33:57 +0200")
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:62655 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753008Ab1JWAbk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2011 20:31:40 -0400
+Received: by ywm3 with SMTP id 3so577134ywm.19
+        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2011 17:31:40 -0700 (PDT)
+In-Reply-To: <CAKnu2MrOriMzJH9NcwUivWa0cinASa6wrRf4a69si4WUs-aTrQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Andrei Warkentin <awarkentin@vmware.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Per Forlin <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Johan Rudholm <johan.rudholm@stericsson.com>, John Beckett <john.beckett@stericsson.com>, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
 
-Hi Linus,
+Hi!
 
-On Sat, Oct 22 2011, Linus Walleij wrote:
-> So what about a cmdline approach? That makes it possible
-> for people who are willingly recompiling and hacking their kernels
-> to tinker with this if they absolutely want to go in on that
-> partition, make it rw and change stuff.
+> Err, no.  You're not allowed to power down the card between commands
+> unless the card has been removed or been has finished with.
 >
-> ...org have I just got all this backwards...?
+> If you power down the card (which you _are_ doing by writing zero to
+> the MMCIPOWER register), then you have to do a full setup of the card
+> when you resume.
 
-Regarding this patch, we're not so worried that someone will take a
-read-only boot partition and make it read-write and do something wrong;
-sysfs is good enough to protect against that happening (at least by
-mistake).
+MCIPower is according to ARM PL180 TRM signalling to an external power
+supply to turn on/off (MCIPWR), whether to use open-drain (MCIROD),
+what voltage to use (MCIVDD) and whether the card is clocked (MCICLK).
 
-What we're worried about is someone issuing the perm read-only command,
-and not realizing that it really means that they can never ever write
-any more changes to their eMMC -- it's a one-time fuse -- and perhaps
-further not realizing that this may make their expensive cell phone
-become a brick of some sort, depending on how much the bootloader or
-OS depends on having r/w access.
+According ST-Ericsson's public PL180 derivative spec[1] it seems to work
+roughly in same way (but renaming the register SDI_PWR and the signals
+SDIPWR & SDICLK). However, there is no SDIVDD as the derivative can not
+signal desired voltage level externally (there are no bits in SDI_PWR for this).
+This makes it plausible that SDIPWR may not be routed externally either.
+Can you verify this as there are no signal routing diagrams in the spec..?
 
-I don't even know that I'd want to make such an option available via a
-boot argument, since boot arguments are often misunderstood.  As Andrei
-says, it doesn't sound like something a regular user (as opposed to an
-OEM) should ever have reason to do.  I'd rather leave it to specialized
-manufacturing equipment.
+This leads me to believe that writing 0 to SDI_PWR/MMC in actual practice
+doesn't really do much but disabling the clock to the card (and for
+ST-Ericsson's PL180, disable direction signalling to the external level
+shifter). Clearing bit 8 of MCIClock/SDI_CLKCR also disables the clock.
 
-Does that make sense?  Thanks,
+I guess the patch would appeal more to Russell if mmci_runtime_suspend()
+only cleared MCIMask0/SDI_MASK0 and MCIClock/SDI_CLKCR and left
+MCIPower/SDI_PWR unchanged. It may be the case that the signal direction
+bits need to be cleared for the ST-Ericsson PL180, but I haven't yet verified
+this on my Snowball dev board yet.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+ / Sebastian
+
+[1] http://www.stericsson.com/developers/DM00030004_AP9500_reference_manual_rev1.pdf
