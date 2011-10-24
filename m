@@ -1,60 +1,43 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH] mmc: boot partition ro lock support
-Date: Mon, 24 Oct 2011 11:23:30 +0200
-Message-ID: <4EA52E92.1010406@stericsson.com>
-References: <1817564019.180377.1319247876337.JavaMail.root@zimbra-prod-mbox-2.vmware.com>	<m24nz171vj.fsf@bob.laptop.org>	<CACRpkdY5T+QoyLvsPmwQRcNPoV=U=46LRGzKvK_8fSL8kurSwA@mail.gmail.com>	<m2vcrh55lm.fsf@bob.laptop.org>	<CAAgDR1P0F1oue29jj-N3AU60JkEJ7qQtt1oLURSNzptjaQLa7A@mail.gmail.com> <m2r5245i0y.fsf@bob.laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 0/2] MMC: disable multiblock reads on controllers that don't support them
+Date: Mon, 24 Oct 2011 05:27:44 -0400
+Message-ID: <m2wrbu4u3z.fsf@bob.laptop.org>
+References: <20111006205002.7083.94088.stgit@dusk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:54619 "EHLO
-	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753961Ab1JXJYM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 05:24:12 -0400
-In-Reply-To: <m2r5245i0y.fsf@bob.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20111006205002.7083.94088.stgit@dusk> (Paul Walmsley's message
+	of "Thu, 06 Oct 2011 14:50:30 -0600")
+Sender: linux-omap-owner@vger.kernel.org
+To: Paul Walmsley <paul@pwsan.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, sakoman@gmail.com, dhylands@gmail.com
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Sebastian Rasmussen <sebras@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Andrei Warkentin <awarkentin@vmware.com>, Per FORLIN <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Johan RUDHOLM <johan.rudholm@stericsson.com>, John BECKETT <john.beckett@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Chris Ball wrote:
-> Hi Sebastian,
-> 
-> On Sat, Oct 22 2011, Sebastian Rasmussen wrote:
->> Hi!
->>
->>> What we're worried about is someone issuing the perm read-only command,
->>> and not realizing that it really means that they can never ever write
->>> any more changes to their eMMC -- it's a one-time fuse
->> I can see why you are worried that people may brick their devices.
->> How about only adding the read-only-until-power-cycled command?
-> 
-> I think that makes sense.  I'd be curious to hear if anyone thinks we
-> shouldn't even add that command, perhaps on grounds that "the kernel
-> shouldn't be enthusiastic about locking itself out of future access to
-> a device" or similar.  As you say, the ioctl interface would still work.
-> 
->>> I'd rather leave it to specialized manufacturing equipment.
->> Sure, but then again permanent read-only commands seem to be
->> able to be sent by writing a userspace tool that issues a ioctl(fd, 0xb3, ...)
->> using the generic command interface by John Calixto mentioned by
->> Andrei. I assume that what reassures you in this case is
->> that CAP_SYS_RAWIO is required and perhaps also obscurity?
-> 
-> Yes, that's right -- running a userspace program that you explicitly
-> downloaded from somewhere and compiled is more intentional than
-> wondering what a kernel argument or sysfs node does and trying it.
-> (Maybe I'm special, but I often use kernel arguments and sysfs nodes
-> without reading their code or finding the best documentation for them
-> first, when trying to get something to work.)
+Hi Paul,
 
-The kernel could very much be used in manufacturing environment as well. 
-Don't know if and how we should consider this.
+On Thu, Oct 06 2011, Paul Walmsley wrote:
+> Some MMC controller instances integrated on older OMAP34xx/35xx chips
+> don't work correctly with multiple-block reads, due to a hardware bug.
+> This series fixes the problem by adding an MMC capability flag for this
+> case and making the appropriate changes to the MMC core code and OMAP HSMMC
+> driver to support this.
+>
+> Once this series is merged, a subsequent patch will be needed by us OMAP
+> folks to pass the appropriate device data via hwmod - this will be posted
+> separately.
 
-Do you think a change to an ioctl is a better alternative than sysfs? 
-Then let's change to that!
+Thanks, both pushed to mmc-next for 3.2.
 
-BR
-Ulf Hansson
+We've run out of MMC caps nad moved onto CAPS2, so I modified these patches
+to define and test MMC_CAP2_NO_MULTI_READ instead of MMC_CAP_NO_MULTI_READ:
 
+  http://dev.laptop.org/git/users/cjb/mmc/commit/?h=mmc-next&id=a4b35b6acf2e9edc52132d34015f0a90b02e2df2
+  http://dev.laptop.org/git/users/cjb/mmc/commit/?h=mmc-next&id=6d621423128909f09072835445ce36dd357a758a
 
+(This shouldn't affect your hwmod patch, since that just uses an
+OMAP-internal flag.)
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
