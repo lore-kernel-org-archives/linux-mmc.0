@@ -1,80 +1,60 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: Improve runtime PM support
-Date: Mon, 24 Oct 2011 11:14:21 +0200
-Message-ID: <CACRpkdaz7OGeTsvMkNtK_t6t3Wcog=U9Oq9dkumW52H8R+ws0Q@mail.gmail.com>
-References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>
-	<20111021173637.GG21648@n2100.arm.linux.org.uk>
-	<CAKnu2MrOriMzJH9NcwUivWa0cinASa6wrRf4a69si4WUs-aTrQ@mail.gmail.com>
-	<CAAgDR1OT=+xgQTNwmTz=9XwzpbhjeZ6F-mxnVGhOAPSAR3JiFQ@mail.gmail.com>
-	<4EA51C4A.7040802@stericsson.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] mmc: boot partition ro lock support
+Date: Mon, 24 Oct 2011 11:23:30 +0200
+Message-ID: <4EA52E92.1010406@stericsson.com>
+References: <1817564019.180377.1319247876337.JavaMail.root@zimbra-prod-mbox-2.vmware.com>	<m24nz171vj.fsf@bob.laptop.org>	<CACRpkdY5T+QoyLvsPmwQRcNPoV=U=46LRGzKvK_8fSL8kurSwA@mail.gmail.com>	<m2vcrh55lm.fsf@bob.laptop.org>	<CAAgDR1P0F1oue29jj-N3AU60JkEJ7qQtt1oLURSNzptjaQLa7A@mail.gmail.com> <m2r5245i0y.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="iso-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:61096 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753344Ab1JXJOV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 05:14:21 -0400
-Received: by iaby12 with SMTP id y12so1133187iab.19
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2011 02:14:21 -0700 (PDT)
-In-Reply-To: <4EA51C4A.7040802@stericsson.com>
+Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:54619 "EHLO
+	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753961Ab1JXJYM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 05:24:12 -0400
+In-Reply-To: <m2r5245i0y.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Sebastian Rasmussen <sebras@gmail.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Sebastian Rasmussen <sebras@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Andrei Warkentin <awarkentin@vmware.com>, Per FORLIN <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Johan RUDHOLM <johan.rudholm@stericsson.com>, John BECKETT <john.beckett@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Mon, Oct 24, 2011 at 10:05 AM, Ulf Hansson
-<ulf.hansson@stericsson.com> wrote:
+Chris Ball wrote:
+> Hi Sebastian,
+> 
+> On Sat, Oct 22 2011, Sebastian Rasmussen wrote:
+>> Hi!
+>>
+>>> What we're worried about is someone issuing the perm read-only command,
+>>> and not realizing that it really means that they can never ever write
+>>> any more changes to their eMMC -- it's a one-time fuse
+>> I can see why you are worried that people may brick their devices.
+>> How about only adding the read-only-until-power-cycled command?
+> 
+> I think that makes sense.  I'd be curious to hear if anyone thinks we
+> shouldn't even add that command, perhaps on grounds that "the kernel
+> shouldn't be enthusiastic about locking itself out of future access to
+> a device" or similar.  As you say, the ioctl interface would still work.
+> 
+>>> I'd rather leave it to specialized manufacturing equipment.
+>> Sure, but then again permanent read-only commands seem to be
+>> able to be sent by writing a userspace tool that issues a ioctl(fd, 0xb3, ...)
+>> using the generic command interface by John Calixto mentioned by
+>> Andrei. I assume that what reassures you in this case is
+>> that CAP_SYS_RAWIO is required and perhaps also obscurity?
+> 
+> Yes, that's right -- running a userspace program that you explicitly
+> downloaded from somewhere and compiled is more intentional than
+> wondering what a kernel argument or sysfs node does and trying it.
+> (Maybe I'm special, but I often use kernel arguments and sysfs nodes
+> without reading their code or finding the best documentation for them
+> first, when trying to get something to work.)
 
-> The hole idea with this PM patch is to make sure the vcore regulator and the
-> clock are disabled in runtime_suspend to be able to save a huge amount of
-> current in "idle" mode.
->
-> Disabling the vcore regulator will sooner or later (depending on your
-> regulator tree) mean that that power to the controller is actually cut,
-> which then means that all registers will be "cleared" including the MCIPWR.
+The kernel could very much be used in manufacturing environment as well. 
+Don't know if and how we should consider this.
 
-I guess since this means writing power-off to bits 1 and 0 of
-of MCIPower meaning "power off"  it should not be done unless the MMC
-core has first issued mmci_set_ios() with MMC_POWER_OFF set in
-ios->power_mode. Which means mmc_power_off() must have
-been called.
+Do you think a change to an ioctl is a better alternative than sysfs? 
+Then let's change to that!
 
-That in turn is called by mmc_power_save_host() or
-mmc_suspend_host().
+BR
+Ulf Hansson
 
-mmc_power_save_host() is in turn called by
-mmc_runtime_suspend() in drivers/mmc/bus.c!
 
-So if that is called *before* the driver-local runtime suspend
-calls, you're actually on the safe side, and you can
-proceed to cut the power.
-
-So these need to be zero before we enter runtime suspend.
-This could then be assured by:
-
-if (readl(host->base + MMCIPOWER) & 3)
-  return -EBUSY;
-
-If this has already been done we are on the green and can
-runtime suspend the controller I guess?
-
-So what this code
-
-> +             /* Save registers for POWER, CLOCK and IRQMASK0 */
-> +             host->irqmask0_reg = readl(host->base + MMCIMASK0);
-> +             host->pwr_reg = readl(host->base + MMCIPOWER);
-> +             host->clk_reg = readl(host->base + MMCICLOCK);
-
-In the end does is save the contents of the other 30 bits.
-(MCI_OD, MCI_ROD, and the ST-specific bits)
-
-So can we first:
-
-- Assure that mmc_power_save_host() has already been
-  done (MMCI_POWER_OFF)
-
-- Make this variable a prerequiste for cutting the power in
-  runtime_pm?
-
-Yours,
-Linus Walleij
