@@ -1,51 +1,73 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH] mmc: mmci: Improve runtime PM support
-Date: Mon, 24 Oct 2011 12:17:01 +0200
-Message-ID: <4EA53B1D.9090208@stericsson.com>
-References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com> <20111021173637.GG21648@n2100.arm.linux.org.uk> <CAKnu2MrOriMzJH9NcwUivWa0cinASa6wrRf4a69si4WUs-aTrQ@mail.gmail.com> <CAAgDR1OT=+xgQTNwmTz=9XwzpbhjeZ6F-mxnVGhOAPSAR3JiFQ@mail.gmail.com> <20111024093632.GH9893@n2100.arm.linux.org.uk> <CACRpkdY6rzYsYQW+GACL6Ux8o=Eo-3wn62O0YZxJZ=F2WbE4DQ@mail.gmail.com> <20111024095638.GJ9893@n2100.arm.linux.org.uk>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH] mmc: core: Assemble the codes of related to eMMC4.5
+Date: Mon, 24 Oct 2011 19:31:25 +0900
+Message-ID: <001b01cc9238$156a65a0$403f30e0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog113.obsmtp.com ([207.126.144.135]:53340 "EHLO
-	eu1sys200aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754061Ab1JXKRY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 06:17:24 -0400
-In-Reply-To: <20111024095638.GJ9893@n2100.arm.linux.org.uk>
+Received: from mailout3.samsung.com ([203.254.224.33]:23025 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754208Ab1JXKb2 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 06:31:28 -0400
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Sebastian Rasmussen <sebras@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 
-Russell King - ARM Linux wrote:
-> On Mon, Oct 24, 2011 at 11:54:00AM +0200, Linus Walleij wrote:
->> On Mon, Oct 24, 2011 at 11:36 AM, Russell King - ARM Linux
->> <linux@arm.linux.org.uk> wrote:
->>> On Sun, Oct 23, 2011 at 02:31:39AM +0200, Sebastian Rasmussen wrote:
->>>> I guess the patch would appeal more to Russell if mmci_runtime_suspend()
->>>> only cleared MCIMask0/SDI_MASK0 and MCIClock/SDI_CLKCR and left
->>>> MCIPower/SDI_PWR unchanged. It may be the case that the signal direction
->>>> bits need to be cleared for the ST-Ericsson PL180, but I haven't yet verified
->>>> this on my Snowball dev board yet.
->>> There's also the issue that the specs call for the clock to run after
->>> a command has completed for a certain number of cycles, and that the
->>> clock must continue to run until the card reports not-busy after a
->>> programming or erase cycle has completed - that can be long after the
->>> previous command has 'completed'.
->> It's 8 cycles on MCLK required.
-> 
-> _Plus_ keeping the clock running while the card is signalling busy.
-> 
-> If you don't clock the card while its signalling busy, it will never
-> go non-busy (the data line becomes frozen.)
-> 
+Code cleanup. The codes of related to eMMC4.5 are scattered.
+This patch removes a duplicate if-statement and assembles all.
 
-Good point!
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+ drivers/mmc/core/mmc.c |   20 +++++++++-----------
+ 1 files changed, 9 insertions(+), 11 deletions(-)
 
-Is the aggressive clk gating feature in the mmc framework taking this 
-into account as well?
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index fb5bf01..3627044 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -467,29 +467,27 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		card->ext_csd.rst_n_function = ext_csd[EXT_CSD_RST_N_FUNCTION];
+ 	}
 
-Potentially the framework could do a get_sync/put (in claim/release 
-host) to prevent hosts from being runtime disabled. Similar how the 
-enable/disable mechanism is working.
+-	/* eMMC v4.5 or later */
+-	if (card->ext_csd.rev >= 6)
+-		card->ext_csd.feature_support |= MMC_DISCARD_FEATURE;
+-
+ 	card->ext_csd.raw_erased_mem_count = ext_csd[EXT_CSD_ERASED_MEM_CONT];
+ 	if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
+ 		card->erased_byte = 0xFF;
+ 	else
+ 		card->erased_byte = 0x0;
+
++	/* eMMC v4.5 or later */
+ 	if (card->ext_csd.rev >= 6) {
++		card->ext_csd.feature_support |= MMC_DISCARD_FEATURE;
++
+ 		card->ext_csd.generic_cmd6_time = 10 *
+ 			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
+ 		card->ext_csd.power_off_longtime = 10 *
+ 			ext_csd[EXT_CSD_POWER_OFF_LONG_TIME];
+-	} else
+-		card->ext_csd.generic_cmd6_time = 0;
+
+-	card->ext_csd.cache_size =
+-		ext_csd[EXT_CSD_CACHE_SIZE + 0] << 0 |
+-		ext_csd[EXT_CSD_CACHE_SIZE + 1] << 8 |
+-		ext_csd[EXT_CSD_CACHE_SIZE + 2] << 16 |
+-		ext_csd[EXT_CSD_CACHE_SIZE + 3] << 24;
++		card->ext_csd.cache_size =
++			ext_csd[EXT_CSD_CACHE_SIZE + 0] << 0 |
++			ext_csd[EXT_CSD_CACHE_SIZE + 1] << 8 |
++			ext_csd[EXT_CSD_CACHE_SIZE + 2] << 16 |
++			ext_csd[EXT_CSD_CACHE_SIZE + 3] << 24;
++	}
+
+ out:
+ 	return err;
+--
+1.7.0.4
+
 
