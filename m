@@ -1,70 +1,69 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: Re: [PATCH V5 1/3] SDHCI: S3C: Use generic clock names for sdhci
-	bus clock options
-Date: Mon, 24 Oct 2011 17:16:49 +0200
-Message-ID: <4EA58161.30603@samsung.com>
-References: <1318588126-19167-1-git-send-email-rajeshwari.s@samsung.com>
-	<1318588126-19167-2-git-send-email-rajeshwari.s@samsung.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] mmc: mmci: Improve runtime PM support
+Date: Mon, 24 Oct 2011 17:25:28 +0200
+Message-ID: <4EA58368.6050704@stericsson.com>
+References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>	<20111021173637.GG21648@n2100.arm.linux.org.uk>	<CAKnu2MrOriMzJH9NcwUivWa0cinASa6wrRf4a69si4WUs-aTrQ@mail.gmail.com>	<CAAgDR1OT=+xgQTNwmTz=9XwzpbhjeZ6F-mxnVGhOAPSAR3JiFQ@mail.gmail.com>	<4EA51C4A.7040802@stericsson.com>	<20111024090432.GA9893@n2100.arm.linux.org.uk>	<4EA53181.2050700@stericsson.com>	<20111024094203.GI9893@n2100.arm.linux.org.uk>	<4EA538A3.9070501@stericsson.com>	<20111024101416.GK9893@n2100.arm.linux.org.uk>	<4EA55076.2010701@stericsson.com> <CACRpkdb7FwW=Qa2MiJkbezkBO3F+Y0j6-RWSiL8dfJXkbd4pHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="iso-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1318588126-19167-2-git-send-email-rajeshwari.s@samsung.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Rajeshwari Shinde <rajeshwari.s@samsung.com>
-Cc: kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog105.obsmtp.com ([207.126.144.119]:55696 "EHLO
+	eu1sys200aog105.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932306Ab1JXPZu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 11:25:50 -0400
+In-Reply-To: <CACRpkdb7FwW=Qa2MiJkbezkBO3F+Y0j6-RWSiL8dfJXkbd4pHw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Sebastian Rasmussen <sebras@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 10/14/11 12:28, Rajeshwari Shinde wrote:
-> This patch modifies the driver to stop depending on the clock names
-> being passed from the platform and switch over to bus clock lookup
-> using generic clock names.
->
-> Signed-off-by: Rajeshwari Shinde<rajeshwari.s@samsung.com>
-> ---
->   drivers/mmc/host/sdhci-s3c.c |    6 ++----
->   1 files changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 82709b6..a5fde87 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -435,14 +435,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->
->   	for (clks = 0, ptr = 0; ptr<  MAX_BUS_CLK; ptr++) {
->   		struct clk *clk;
-> -		char *name = pdata->clocks[ptr];
-> +		char name[14];
->
-> -		if (name == NULL)
-> -			continue;
-> +		sprintf(name, "mmc_busclk.%d", ptr);
->
->   		clk = clk_get(dev, name);
->   		if (IS_ERR(clk)) {
-> -			dev_err(dev, "failed to get clock %s\n", name);
->   			continue;
->   		}
->
+Linus Walleij wrote:
+> On Mon, Oct 24, 2011 at 1:48 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
+>> [Russell]
+>>> The MCIPWR signal controls the external power switch.  This is the only
+>>> signal for it.  This is the only connection for it.  There is no other
+>>> control form for this power switch.
+>>>
+>> Then we are only left to use the variant struct I believe. In principle, a
+>> flag in the variant struct, could indicate whether it is OK to disable the
+>> vcore regulator and thus clear the MCIPWR when doing runtime_suspend.
+> 
+> Yep I think the best could be to add some variant named
+> bool external_card_power; and then document in the kerneldoc that this
+> means the driver can clear MMCIPWR without risk of cutting the power
+> to the card.
+> 
+> This should be true for Ux500, U300 and Nomadik (just checked the designs -
+> they all have external regulators).
+> 
 
-Looks ok for me.
+Could we assume that all boards which utilizes the ARM PL180 are using 
+the MMCIPWR register to control power the card? Or should we add a new 
+amba mmci platform member so this is configurable for each board?
 
-Chris, if you're ok on this, could you please add this in your tree for 
-this merge window? or if you want, I will apply this to Samsung tree 
-with other Rajeshwari's patches. I'm ok either...
+An option could also be if we might want to simplify code to just skip 
+the entire runtime_suspend|idle|resume function (ie stubb it or 
+something) for these kind of boards?
 
-Thanks.
+What do you prefer?
 
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
+> So the state save/restore and amba_vcore_disable(adev); should be done
+> only for those variants.
+> 
+> However this:
+> 
+> clk_disable(host->clk);
+> 
+> We ought to be able to do for *all* variants, provided we can create
+> pm_runtime_get/put and delay properly to cover all bus traffic
+> (looks like the patch already does that), plus all the time the card is
+> signalling busy. The best I can think of is to just return -EBUSY to runtime
+> PM like this:
+> 
+> if ((readl(base + MMCISTATUS) & (MCI_CMDACTIVE | MCI_TXACTIVE| MCI_RXACTIVE))
+>   return -EBUSY;
+> 
+> Yours,
+> Linus Walleij
+> 
+
