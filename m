@@ -1,43 +1,67 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
+From: Linus Walleij <linus.walleij@linaro.org>
 Subject: Re: [PATCH] mmc: mmci: Improve runtime PM support
-Date: Mon, 24 Oct 2011 13:48:06 +0200
-Message-ID: <4EA55076.2010701@stericsson.com>
-References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com> <20111021173637.GG21648@n2100.arm.linux.org.uk> <CAKnu2MrOriMzJH9NcwUivWa0cinASa6wrRf4a69si4WUs-aTrQ@mail.gmail.com> <CAAgDR1OT=+xgQTNwmTz=9XwzpbhjeZ6F-mxnVGhOAPSAR3JiFQ@mail.gmail.com> <4EA51C4A.7040802@stericsson.com> <20111024090432.GA9893@n2100.arm.linux.org.uk> <4EA53181.2050700@stericsson.com> <20111024094203.GI9893@n2100.arm.linux.org.uk> <4EA538A3.9070501@stericsson.com> <20111024101416.GK9893@n2100.arm.linux.org.uk>
+Date: Mon, 24 Oct 2011 13:49:28 +0200
+Message-ID: <CACRpkdZdrB0Q8Wy2kgD_zAD1Dn3qZcJPQoM8vvU8JO-AH0utJg@mail.gmail.com>
+References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>
+	<20111021173637.GG21648@n2100.arm.linux.org.uk>
+	<CAKnu2MrOriMzJH9NcwUivWa0cinASa6wrRf4a69si4WUs-aTrQ@mail.gmail.com>
+	<CAAgDR1OT=+xgQTNwmTz=9XwzpbhjeZ6F-mxnVGhOAPSAR3JiFQ@mail.gmail.com>
+	<20111024093632.GH9893@n2100.arm.linux.org.uk>
+	<CACRpkdY6rzYsYQW+GACL6Ux8o=Eo-3wn62O0YZxJZ=F2WbE4DQ@mail.gmail.com>
+	<20111024095638.GJ9893@n2100.arm.linux.org.uk>
+	<4EA53B1D.9090208@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:44734 "EHLO
-	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932109Ab1JXLsb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 07:48:31 -0400
-In-Reply-To: <20111024101416.GK9893@n2100.arm.linux.org.uk>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:46510 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755452Ab1JXLt3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 07:49:29 -0400
+Received: by iaby12 with SMTP id y12so1246331iab.19
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2011 04:49:28 -0700 (PDT)
+In-Reply-To: <4EA53B1D.9090208@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Sebastian Rasmussen <sebras@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Sebastian Rasmussen <sebras@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>
 
->> Could you maybe elaborate a bit of how the power is controlled in the  
->> ARM dev boards? Would it be possible to control such a switch in "GPIO"  
->> manner instead? For example via the vdd_handler or similar?
+On Mon, Oct 24, 2011 at 12:17 PM, Ulf Hansson
+<ulf.hansson@stericsson.com> wrote:
+> Russell King - ARM Linux wrote:
+>> On Mon, Oct 24, 2011 at 11:54:00AM +0200, Linus Walleij wrote:
+>>>
+>>> It's 8 cycles on MCLK required.
 >>
->> I will also think if and see if is feasible to re-design and see if this  
->> hole feature can be controlled by the variant struct instead. My feeling  
->> is although it can be kind of messy. But let's see...
-> 
-> The MCIPWR register contains two bits to control _the_ _power_ _state_.
-> See Table A-4: the MCIPWR signal.  See section 2.2.2.  See section 3.3.1.
-> 
-> The MCIPWR signal controls the external power switch.  This is the only
-> signal for it.  This is the only connection for it.  There is no other
-> control form for this power switch.
-> 
+>> _Plus_ keeping the clock running while the card is signalling busy.
+>>
+>> If you don't clock the card while its signalling busy, it will never
+>> go non-busy (the data line becomes frozen.)
+>>
+>
+> (...)
+> Is the aggressive clk gating feature in the mmc framework taking this into
+> account as well?
 
-Then we are only left to use the variant struct I believe. In principle, 
-a flag in the variant struct, could indicate whether it is OK to disable 
-the vcore regulator and thus clear the MCIPWR when doing runtime_suspend.
+Nope.
 
-How do you feel about this kind of approach to find a solution?
+That is why frequency 0 is not handled like some special case in the
+MMCI driver, which means you can turn it on but nothing spectacularly
+power saving will happen. (i.e. clock gating does not gate the clock
+on the mmci driver) I did a rough patch to cut the clock
+but Russell pointed out the problem here (same as discussed above):
+http://marc.info/?l=linux-mmc&m=129146545916794&w=2
 
-BR
-Ulf Hansson
+I *was* meaning to fix it. However now I feel that since we're
+anyway ironing out the painful details of runtime PM, we can
+probably use that framework to handle also aggressive clock
+gating.
+
+> Potentially the framework could do a get_sync/put (in claim/release host) to
+> prevent hosts from being runtime disabled. Similar how the enable/disable
+> mechanism is working.
+
+Yep. We just need to make sure the hysteresis/delay value covers
+the bus activity with some margin.
+
+Yours,
+Linus Walleij
