@@ -1,73 +1,41 @@
-From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Subject: Re: A question on IOCTL interface for MMC
-Date: Mon, 24 Oct 2011 18:02:36 +0530
-Message-ID: <CANYdXnoS31GLnbFcwj76SUoyVhcti8Q-4_5fmyRy3DUJGbSRjg@mail.gmail.com>
-References: <CANYdXnqDYn5-zehsJ9ibviJ7FoofcY=YLUqrROoK8k53v-czNA@mail.gmail.com>
-	<5263525.D4yqBTjgWh@wuerfel>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH V2 0/3] Clearify code paths for how to modify the power register
+Date: Mon, 24 Oct 2011 15:28:45 +0200
+Message-ID: <1319462928-14892-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:61490 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932166Ab1JXMch convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 08:32:37 -0400
-Received: by iaby12 with SMTP id y12so1281373iab.19
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2011 05:32:37 -0700 (PDT)
-In-Reply-To: <5263525.D4yqBTjgWh@wuerfel>
+Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:58391 "EHLO
+	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932563Ab1JXN3e (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 09:29:34 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Chris Ball <cjb@laptop.org>, J Freyensee <james_p_freyensee@linux.intel.com>, John Calixto <john.calixto@modsystems.com>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi Arnd,
-=C2=A0 As explained in previous mail, the IOCTL is actually an inteface=
- to
-block layer and it is only expecting read/write commands to be sent
-through the interface.The prrof of it can be seen in write_flag
-present in the IOCTL structure which indicates the either the command
-can be read or a write command.
+In the set_ios function there has been a mess of how the power register
+can be modified. One part, especially strange was related to the use of 
+the vdd_handler.
 
-So, can I submit a linux module to the kernel which uses the same
-mmc_ioc_cmd structure and do all the required processing in my module.
+V2 changes:
+	-Rebased to remove dependency to other patch serie for mmci called
+	"mmc: mmci: Improvements and bugfixes for SDIO".
+	-Fixed minor review comments.
 
-To be clear on my requirement:
-it is=C2=A0 To test ALL SD/MMC Commands and NOT just the  Read/Write Co=
-mmands.
-or should I extend the mmc_test module present in kernel to support
-testing of individual commands as well ?
-Can I get some suggestions on what approach to take ?
+Sebastian Rasmussen (1):
+  mmc: mmci: Put power register deviations in variant data
 
+Ulf Hansson (2):
+  mmc: mmci: Provide option to configure bus signal direction
+  mmc: mmci: Change vdd_handler to a generic ios_handler
 
-On Thu, Oct 20, 2011 at 12:48 PM, Arnd Bergmann <arnd@arndb.de> wrote:
->
-> On Thursday 20 October 2011 10:39:00 Shashidhar Hiremath wrote:
-> > =C2=A0 I am planning to use the existing IOCTL interface for SD/MMC=
- present
-> > in the kernel.
-> > =C2=A0 Since, the IOCTL interface expects a read/write flag , and t=
-he MMC
-> > IOCTL is actually an interface to block layer I feel without modify=
-ing
-> > the block layer for the support of non-read write commands ,I may n=
-ot
-> > be able to test the non-read/write commands through the IOCTL
-> > interface .
-> > Is there a way of doing this without modifying block layer ?
->
-> Hi Shashidhar,
->
-> I think there is actually no problem here at all. The block layer sim=
-ply
-> passes the ioctl command number and argument to the driver, which can
-> do anything with it.
->
-> What functionality are you actually looking for?
->
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0Arnd
+ arch/arm/mach-ux500/board-mop500-sdi.c |   21 +++++--------
+ drivers/mmc/host/mmci.c                |   49 ++++++++++++++++++++++++++-----
+ drivers/mmc/host/mmci.h                |   10 ------
+ include/linux/amba/mmci.h              |   22 ++++++++++++--
+ 4 files changed, 68 insertions(+), 34 deletions(-)
 
+-- 
+1.7.5.4
 
-
---
-regards,
-Shashidhar Hiremath
