@@ -1,7 +1,7 @@
-From: Sebastian Rasmussen <sebras@gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
 Subject: Re: [PATCH] mmc: mmci: Improve runtime PM support
-Date: Mon, 24 Oct 2011 11:11:28 +0200
-Message-ID: <CAAgDR1MxvhXKwDoBMZF44gJXTigWNDQCkZXsueAqUxw4Rf5fkw@mail.gmail.com>
+Date: Mon, 24 Oct 2011 11:14:21 +0200
+Message-ID: <CACRpkdaz7OGeTsvMkNtK_t6t3Wcog=U9Oq9dkumW52H8R+ws0Q@mail.gmail.com>
 References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>
 	<20111021173637.GG21648@n2100.arm.linux.org.uk>
 	<CAKnu2MrOriMzJH9NcwUivWa0cinASa6wrRf4a69si4WUs-aTrQ@mail.gmail.com>
@@ -10,40 +10,71 @@ References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:53222 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753344Ab1JXJL3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 05:11:29 -0400
-Received: by ywm3 with SMTP id 3so1268191ywm.19
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2011 02:11:28 -0700 (PDT)
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:61096 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753344Ab1JXJOV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 05:14:21 -0400
+Received: by iaby12 with SMTP id y12so1133187iab.19
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2011 02:14:21 -0700 (PDT)
 In-Reply-To: <4EA51C4A.7040802@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>
+Cc: Sebastian Rasmussen <sebras@gmail.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>
 
-Hi!
+On Mon, Oct 24, 2011 at 10:05 AM, Ulf Hansson
+<ulf.hansson@stericsson.com> wrote:
 
-> If the ARM PL180 TRM prevent us from from doing this kind of operations in
-> runtime_suspend, we must think of an alternative solution which just apply
-> for ST-Ericssons derivative of PL180. THIS IS VERY IMPORTANT to be able to
-> implement a proper power management solution.
+> The hole idea with this PM patch is to make sure the vcore regulator and the
+> clock are disabled in runtime_suspend to be able to save a huge amount of
+> current in "idle" mode.
+>
+> Disabling the vcore regulator will sooner or later (depending on your
+> regulator tree) mean that that power to the controller is actually cut,
+> which then means that all registers will be "cleared" including the MCIPWR.
 
-I believe that what it boils down to is how the power regulators are controlled.
+I guess since this means writing power-off to bits 1 and 0 of
+of MCIPower meaning "power off"  it should not be done unless the MMC
+core has first issued mmci_set_ios() with MMC_POWER_OFF set in
+ios->power_mode. Which means mmc_power_off() must have
+been called.
 
-In ST-Ericssons PL180 derivative there must be two independent regulators,
-controlled by something outside the PL180 itself, one for the controller and
-one for the external card. So if you know what you are doing you can power
-down the controller while still keeping the card powered.
+That in turn is called by mmc_power_save_host() or
+mmc_suspend_host().
 
-In the case of ARM PL180 it seems to me as if there is one power regulator,
-controlled by something outside the PL180, that supplies power to the
-controller, and one power regulator, controlled by the PL180, that supplies
-power to the card. Therefore it is simply not possible to clear the ARM
-PL180s MCIPower register (because that means that the card will loose
-power since the control signals to the card's power regulator are now asking
-it to cut power to the card). In addition I believe that it may not be
-possible to
-power the controller down...
+mmc_power_save_host() is in turn called by
+mmc_runtime_suspend() in drivers/mmc/bus.c!
 
- / Sebastian
+So if that is called *before* the driver-local runtime suspend
+calls, you're actually on the safe side, and you can
+proceed to cut the power.
+
+So these need to be zero before we enter runtime suspend.
+This could then be assured by:
+
+if (readl(host->base + MMCIPOWER) & 3)
+  return -EBUSY;
+
+If this has already been done we are on the green and can
+runtime suspend the controller I guess?
+
+So what this code
+
+> +             /* Save registers for POWER, CLOCK and IRQMASK0 */
+> +             host->irqmask0_reg = readl(host->base + MMCIMASK0);
+> +             host->pwr_reg = readl(host->base + MMCIPOWER);
+> +             host->clk_reg = readl(host->base + MMCICLOCK);
+
+In the end does is save the contents of the other 30 bits.
+(MCI_OD, MCI_ROD, and the ST-specific bits)
+
+So can we first:
+
+- Assure that mmc_power_save_host() has already been
+  done (MMCI_POWER_OFF)
+
+- Make this variable a prerequiste for cutting the power in
+  runtime_pm?
+
+Yours,
+Linus Walleij
