@@ -1,92 +1,89 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: core: Use delayed work in clock gating framework
-Date: Mon, 24 Oct 2011 09:23:43 +0200
-Message-ID: <CACRpkdY1WE8KrFW1qjLJk_sMivicqwDtBVzNDVN6H-3utw0isw@mail.gmail.com>
-References: <1319035713-4979-1-git-send-email-sthumma@codeaurora.org>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] mmc: mmci: Improve runtime PM support
+Date: Mon, 24 Oct 2011 10:05:30 +0200
+Message-ID: <4EA51C4A.7040802@stericsson.com>
+References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com>	<20111021173637.GG21648@n2100.arm.linux.org.uk>	<CAKnu2MrOriMzJH9NcwUivWa0cinASa6wrRf4a69si4WUs-aTrQ@mail.gmail.com> <CAAgDR1OT=+xgQTNwmTz=9XwzpbhjeZ6F-mxnVGhOAPSAR3JiFQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="iso-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:52607 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753326Ab1JXHXo convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 03:23:44 -0400
-In-Reply-To: <1319035713-4979-1-git-send-email-sthumma@codeaurora.org>
+Received: from eu1sys200aog115.obsmtp.com ([207.126.144.139]:47730 "EHLO
+	eu1sys200aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753657Ab1JXIGB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2011 04:06:01 -0400
+In-Reply-To: <CAAgDR1OT=+xgQTNwmTz=9XwzpbhjeZ6F-mxnVGhOAPSAR3JiFQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, cjb@laptop.org
+To: Sebastian Rasmussen <sebras@gmail.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>
 
-On Wed, Oct 19, 2011 at 4:48 PM, Sujit Reddy Thumma
-<sthumma@codeaurora.org> wrote:
+Sebastian Rasmussen wrote:
+> Hi!
+> 
+>> Err, no.  You're not allowed to power down the card between commands
+>> unless the card has been removed or been has finished with.
+>>
+>> If you power down the card (which you _are_ doing by writing zero to
+>> the MMCIPOWER register), then you have to do a full setup of the card
+>> when you resume.
+> 
+> MCIPower is according to ARM PL180 TRM signalling to an external power
+> supply to turn on/off (MCIPWR), whether to use open-drain (MCIROD),
+> what voltage to use (MCIVDD) and whether the card is clocked (MCICLK).
+> 
+> According ST-Ericsson's public PL180 derivative spec[1] it seems to work
+> roughly in same way (but renaming the register SDI_PWR and the signals
+> SDIPWR & SDICLK). However, there is no SDIVDD as the derivative can not
+> signal desired voltage level externally (there are no bits in SDI_PWR for this).
+> This makes it plausible that SDIPWR may not be routed externally either.
+> Can you verify this as there are no signal routing diagrams in the spec..?
+> 
 
-> Current clock gating framework disables the MCI clock as soon as the
-> request is completed and enables it when a request arrives. This aggr=
-essive
-> clock gating framework when enabled cause following issues:
->
-> When there are back-to-back requests from the Queue layer, we unneces=
-sarily
-> end up disabling and enabling the clocks between these requests since=
- 8 MCLK
-> clock cycles is a very short duration compared to the time delay betw=
-een
-> back to back requests reaching the MMC layer. This overhead can effec=
-t the
-> overall performance depending on how long the clock enable and disabl=
-e
-> calls take which is platform dependent. For example on some platforms=
- we
-> can have clock control not on the local processor, but on a different
-> subsystem and the time taken to perform the clock enable/disable can =
-add
-> significant overhead.
+The hole idea with this PM patch is to make sure the vcore regulator and 
+the clock are disabled in runtime_suspend to be able to save a huge 
+amount of current in "idle" mode.
 
-OK I see the problem. At one point it was suggested to use the delayed
-disable facilities in runtime PM for avoiding this, but it never materi=
-alized.
+Disabling the vcore regulator will sooner or later (depending on your 
+regulator tree) mean that that power to the controller is actually cut, 
+which then means that all registers will be "cleared" including the 
+MCIPWR. So the actual reason for clearing the registers in the 
+runtime_suspend function is because of two reasons.
 
-> Fix this by delaying turning off the clocks by posting request on
-> delayed workqueue. Also cancel the unscheduled pending work, if any,
-> when there is access to card.
+1. Set the controller in a known state so no "magic" things happens when 
+we are runtime suspended, for example getting an IRQ.
 
-(...)
-> @@ -252,10 +252,11 @@ struct mmc_host {
-> =A0 =A0 =A0 =A0int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 clk_reques=
-ts; =A0 /* internal reference counter */
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0clk_delay; =A0 =A0=
- =A0/* number of MCI clk hold cycles */
-> =A0 =A0 =A0 =A0bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_gated;=
- =A0 =A0 =A0/* clock gated */
-> - =A0 =A0 =A0 struct work_struct =A0 =A0 =A0clk_gate_work; /* delayed=
- clock gate */
-> + =A0 =A0 =A0 struct delayed_work =A0 =A0 clk_gate_work; /* delayed c=
-lock gate */
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0clk_old; =A0 =A0 =A0=
- =A0/* old clock value cache */
-> =A0 =A0 =A0 =A0spinlock_t =A0 =A0 =A0 =A0 =A0 =A0 =A0clk_lock; =A0 =A0=
- =A0 /* lock for clk fields */
-> =A0 =A0 =A0 =A0struct mutex =A0 =A0 =A0 =A0 =A0 =A0clk_gate_mutex; /*=
- mutex for clock gating */
-> +#define MMC_CLK_GATE_DELAY =A0 =A0 50 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* =
-in milliseconds*/
-> =A0#endif
+2. Save power by disabling the clock etc. The actual power to the 
+controller does not have to be cut just because we have disabled the 
+vore regulator.
 
-What's the rationale of having this in the middle of the struct
-in the .h-file?
+If the ARM PL180 TRM prevent us from from doing this kind of operations 
+in runtime_suspend, we must think of an alternative solution which just 
+apply for ST-Ericssons derivative of PL180. THIS IS VERY IMPORTANT to be 
+able to implement a proper power management solution.
 
-Move it inside the #ifdef in host.c instead, and also provide
-some rationale about the choice of 50 ms.
+Please check this Russell, this is VERY IMPORTANT!
 
-Maybe we should even provide a sysfs or debugfs entry for
-tweaking that value, as has been suggested in the past.
-However that's no big deal for me...
 
-Do you have a patch to your msm_sdcc.c that enables the
-gating to take effect as well? Does it solve the problems
-pointed out by Russell when I tried the same type of patch
-to mmci.c?
-http://marc.info/?l=3Dlinux-mmc&m=3D129146545916794&w=3D2
+> This leads me to believe that writing 0 to SDI_PWR/MMC in actual practice
+> doesn't really do much but disabling the clock to the card (and for
+> ST-Ericsson's PL180, disable direction signalling to the external level
+> shifter). Clearing bit 8 of MCIClock/SDI_CLKCR also disables the clock.
+> 
+> I guess the patch would appeal more to Russell if mmci_runtime_suspend()
+> only cleared MCIMask0/SDI_MASK0 and MCIClock/SDI_CLKCR and left
+> MCIPower/SDI_PWR unchanged. It may be the case that the signal direction
+> bits need to be cleared for the ST-Ericsson PL180, but I haven't yet verified
+> this on my Snowball dev board yet.
 
-Yours,
-Linus Walleij
+This is according the comment above not feasible, since the vcore 
+regulator to the controller is disabled all registers will be "cleared" 
+anyway.
+
+> 
+>  / Sebastian
+> 
+> [1] http://www.stericsson.com/developers/DM00030004_AP9500_reference_manual_rev1.pdf
+> 
+
+BR
+Ulf Hansson
