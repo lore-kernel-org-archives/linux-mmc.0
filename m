@@ -1,93 +1,106 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: Re: [PATCH 1/1] mmc: core: Use delayed work in clock gating framework
-Date: Mon, 24 Oct 2011 16:46:15 +0530
-Message-ID: <4EA548FF.7070707@codeaurora.org>
-References: <1319035713-4979-1-git-send-email-sthumma@codeaurora.org> <CACRpkdY1WE8KrFW1qjLJk_sMivicqwDtBVzNDVN6H-3utw0isw@mail.gmail.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH] mmc: core: Assemble the codes of related to eMMC4.5
+Date: Mon, 24 Oct 2011 17:02:51 +0530
+Message-ID: <CAGxe1ZGer3KyWtGKwAsKfcfOA87McG5tfeEn=V-E=oUbtRFJdg@mail.gmail.com>
+References: <001b01cc9238$156a65a0$403f30e0$%jun@samsung.com>
+	<m2obx64pes.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdY1WE8KrFW1qjLJk_sMivicqwDtBVzNDVN6H-3utw0isw@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, cjb@laptop.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <m2obx64pes.fsf@bob.laptop.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 10/24/2011 12:53 PM, Linus Walleij wrote:
-> On Wed, Oct 19, 2011 at 4:48 PM, Sujit Reddy Thumma
-> <sthumma@codeaurora.org>  wrote:
+On 24 October 2011 16:39, Chris Ball <cjb@laptop.org> wrote:
+> Hi Seungwon,
 >
->> Current clock gating framework disables the MCI clock as soon as the
->> request is completed and enables it when a request arrives. This aggressive
->> clock gating framework when enabled cause following issues:
+> On Mon, Oct 24 2011, Seungwon Jeon wrote:
+>> Code cleanup. The codes of related to eMMC4.5 are scattered.
+>> This patch removes a duplicate if-statement and assembles all.
 >>
->> When there are back-to-back requests from the Queue layer, we unnecessarily
->> end up disabling and enabling the clocks between these requests since 8 MCLK
->> clock cycles is a very short duration compared to the time delay between
->> back to back requests reaching the MMC layer. This overhead can effect the
->> overall performance depending on how long the clock enable and disable
->> calls take which is platform dependent. For example on some platforms we
->> can have clock control not on the local processor, but on a different
->> subsystem and the time taken to perform the clock enable/disable can add
->> significant overhead.
+>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> ---
+>> =A0drivers/mmc/core/mmc.c | =A0 20 +++++++++-----------
+>> =A01 files changed, 9 insertions(+), 11 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index fb5bf01..3627044 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -467,29 +467,27 @@ static int mmc_read_ext_csd(struct mmc_card *c=
+ard, u8 *ext_csd)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.rst_n_function =3D ext_csd=
+[EXT_CSD_RST_N_FUNCTION];
+>> =A0 =A0 =A0 }
+>>
+>> - =A0 =A0 /* eMMC v4.5 or later */
+>> - =A0 =A0 if (card->ext_csd.rev >=3D 6)
+>> - =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.feature_support |=3D MMC_DIS=
+CARD_FEATURE;
+>> -
+>> =A0 =A0 =A0 card->ext_csd.raw_erased_mem_count =3D ext_csd[EXT_CSD_E=
+RASED_MEM_CONT];
+>> =A0 =A0 =A0 if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->erased_byte =3D 0xFF;
+>> =A0 =A0 =A0 else
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->erased_byte =3D 0x0;
+>>
+>> + =A0 =A0 /* eMMC v4.5 or later */
+>> =A0 =A0 =A0 if (card->ext_csd.rev >=3D 6) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.feature_support |=3D MMC_DIS=
+CARD_FEATURE;
+>> +
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.generic_cmd6_time =3D 10 *
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_GENERIC_=
+CMD6_TIME];
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.power_off_longtime =3D 10 =
+*
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_POWER_OF=
+=46_LONG_TIME];
+>> - =A0 =A0 } else
+>> - =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.generic_cmd6_time =3D 0;
 >
-> OK I see the problem. At one point it was suggested to use the delayed
-> disable facilities in runtime PM for avoiding this, but it never materialized.
+> Your patch removes this line completely. =A0Why is that? =A0You shoul=
+d
+> explain it in the commit message.
+By tracing the code what i understand is  mmc_read_ext_csd is called
+from mmc_card_init. In the init function the card instance is created.
+When the card instance is created kzalloc is used. This will
+initialize all the card structure members to 0.
+So the deleted line is implicit.
 >
->> Fix this by delaying turning off the clocks by posting request on
->> delayed workqueue. Also cancel the unscheduled pending work, if any,
->> when there is access to card.
+>>
+>> - =A0 =A0 card->ext_csd.cache_size =3D
+>> - =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_CACHE_SIZE + 0] << 0 |
+>> - =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_CACHE_SIZE + 1] << 8 |
+>> - =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_CACHE_SIZE + 2] << 16 |
+>> - =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_CACHE_SIZE + 3] << 24;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.cache_size =3D
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_CACHE_SIZE=
+ + 0] << 0 |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_CACHE_SIZE=
+ + 1] << 8 |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_CACHE_SIZE=
+ + 2] << 16 |
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ext_csd[EXT_CSD_CACHE_SIZE=
+ + 3] << 24;
+>> + =A0 =A0 }
+>>
+>> =A0out:
+>> =A0 =A0 =A0 return err;
 >
-> (...)
->> @@ -252,10 +252,11 @@ struct mmc_host {
->>         int                     clk_requests;   /* internal reference counter */
->>         unsigned int            clk_delay;      /* number of MCI clk hold cycles */
->>         bool                    clk_gated;      /* clock gated */
->> -       struct work_struct      clk_gate_work; /* delayed clock gate */
->> +       struct delayed_work     clk_gate_work; /* delayed clock gate */
->>         unsigned int            clk_old;        /* old clock value cache */
->>         spinlock_t              clk_lock;       /* lock for clk fields */
->>         struct mutex            clk_gate_mutex; /* mutex for clock gating */
->> +#define MMC_CLK_GATE_DELAY     50              /* in milliseconds*/
->>   #endif
+> The rest looks good, thanks,
 >
-> What's the rationale of having this in the middle of the struct
-> in the .h-file?
+> - Chris.
+> --
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 >
-> Move it inside the #ifdef in host.c instead, and also provide
-> some rationale about the choice of 50 ms.
-
-With my testing on a MSM platform, round-trip delay of 10ms to turn off 
-and on the clocks is seen. So I thought 50ms is a reasonable tradeoff. 
-There is no specific calculation behind this delay. We just relied on 
-the empirical data which again may vary with different platforms.
-
-If you have any suggestions I would be happy to consider that. I am 
-planning to increase this to 200ms, any comments on that?
-
->
-> Maybe we should even provide a sysfs or debugfs entry for
-> tweaking that value, as has been suggested in the past.
-> However that's no big deal for me...
-
-Adding an entry in sysfs seems to be a good solution to tune the 
-required delay. I will add this.
-
->
-> Do you have a patch to your msm_sdcc.c that enables the
-> gating to take effect as well? Does it solve the problems
-> pointed out by Russell when I tried the same type of patch
-> to mmci.c?
-> http://marc.info/?l=linux-mmc&m=129146545916794&w=2
-
-Looking at the patch that you pointed out, I don't think it is required 
-for msm_sdcc.c to enable clock gating. The current code inherently takes 
-care of logic that is needed to ensure that MCLK is not turned off until 
-any pending register write in the host driver is completed. You might 
-want to have a look at set_ios function in 
-https://www.codeaurora.org/gitweb/quic/la/?p=kernel/msm.git;a=blob;f=drivers/mmc/host/msm_sdcc.c;h=b5a08d2b58e0cd6d18a8f1041139b6866c0cdc09;hb=refs/heads/msm-3.0
-Please let me know if I am still missing anything.
-
--- 
-Thanks & Regards,
-Sujit Reddy Thumma
