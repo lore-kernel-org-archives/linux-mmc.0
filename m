@@ -1,60 +1,74 @@
-From: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
-Subject: [PATCH 3/3] ARM: pxa168/gplugd: Add support for SD port 1
-Date: Tue, 25 Oct 2011 18:08:00 +0530
-Message-ID: <1319546280-31848-1-git-send-email-tanmay.upadhyay@einfochips.com>
+From: "Andrei E. Warkentin" <andrey.warkentin@gmail.com>
+Subject: Re: [PATCH] mmc: boot partition ro lock support
+Date: Tue, 25 Oct 2011 17:31:35 -0400
+Message-ID: <CANz0V+5VQekjq0+Q8pLtZp9+uBMT3U56xEAraOAt-evVsGwvFQ@mail.gmail.com>
+References: <1817564019.180377.1319247876337.JavaMail.root@zimbra-prod-mbox-2.vmware.com>
+	<m24nz171vj.fsf@bob.laptop.org>
+	<CACRpkdY5T+QoyLvsPmwQRcNPoV=U=46LRGzKvK_8fSL8kurSwA@mail.gmail.com>
+	<m2vcrh55lm.fsf@bob.laptop.org>
+	<CAAgDR1P0F1oue29jj-N3AU60JkEJ7qQtt1oLURSNzptjaQLa7A@mail.gmail.com>
+	<m2r5245i0y.fsf@bob.laptop.org>
+	<4EA52E92.1010406@stericsson.com>
+	<m2sjmi4s7x.fsf@bob.laptop.org>
+	<E2E6AC6BFAD06343BA2D97432459C1B6071A90E6A8@EXDCVYMBSTM005.EQ1STM.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: eric.y.miao@gmail.com, jason.chagas@marvell.com
-Cc: linux-mmc@vger.kernel.org, Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:49522 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751837Ab1JYVbh convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2011 17:31:37 -0400
+Received: by wyg36 with SMTP id 36so1032154wyg.19
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Oct 2011 14:31:36 -0700 (PDT)
+In-Reply-To: <E2E6AC6BFAD06343BA2D97432459C1B6071A90E6A8@EXDCVYMBSTM005.EQ1STM.local>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Johan RUDHOLM <johan.rudholm@stericsson.com>
+Cc: Chris Ball <cjb@laptop.org>, Ulf HANSSON <ulf.hansson@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Andrei Warkentin <awarkentin@vmware.com>, Per FORLIN <per.forlin@stericsson.com>, Lee Jones <lee.jones@linaro.org>, John BECKETT <john.beckett@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Signed-off-by: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
----
- arch/arm/mach-mmp/gplugd.c |    7 +++++++
- 1 files changed, 7 insertions(+), 0 deletions(-)
+2011/10/24 Johan RUDHOLM <johan.rudholm@stericsson.com>:
 
-diff --git a/arch/arm/mach-mmp/gplugd.c b/arch/arm/mach-mmp/gplugd.c
-index 98e25d9..f453561 100644
---- a/arch/arm/mach-mmp/gplugd.c
-+++ b/arch/arm/mach-mmp/gplugd.c
-@@ -17,6 +17,8 @@
- #include <mach/pxa168.h>
- #include <mach/mfp-pxa168.h>
- 
-+#include <linux/mmc/sdhci.h>
-+
- #include "common.h"
- 
- static unsigned long gplugd_pin_config[] __initdata = {
-@@ -154,6 +156,10 @@ struct pxa168_eth_platform_data gplugd_eth_platform_data = {
- 	.init        = gplugd_eth_init,
- };
- 
-+struct sdhci_pxa_platdata gplugd_sdh_platdata = {
-+	.delay_in_ms = 4,
-+};
-+
- static void __init select_disp_freq(void)
- {
- 	/* set GPIO 35 & clear GPIO 85 to set LCD External Clock to 74.25 MHz */
-@@ -186,6 +192,7 @@ static void __init gplugd_init(void)
- 	pxa168_add_twsi(0, NULL, ARRAY_AND_SIZE(gplugd_i2c_board_info));
- 
- 	pxa168_add_eth(&gplugd_eth_platform_data);
-+	pxa168_add_sdh(0, &gplugd_sdh_platdata);
- }
- 
- MACHINE_START(SHEEVAD, "PXA168-based GuruPlug Display (gplugD) Platform")
--- 
-1.6.3.3
+>> I think the overlap between your patch and Andrei's
+>> mmcblkXbootY/force_ro
+>> node is going to be confusing -- one operates purely in the kernel a=
+nd
+>> the other is sent to the card. =C2=A0Do you have any proposal for ma=
+king the
+>> difference clearer?
+>
+> I concur, the same can be said about general purpose partitions as we=
+ll? Partitions that are configured in hardware rather than software. Th=
+e current layout in sysfs does not reflect this difference either, belo=
+w
+>
+
+Well, they're not really partitions, though, but separate logical
+devices that can be
+configred only once,  but I generally agree with you.
+
+My personal opinion is that since the kernel is not used solely in a
+controlled, embedded
+environment, effort should be done to reduce the number of physically d=
+amaging
+actions a curious user could do :-). I don't mean "formatting disk", I
+mean "raising Vcc
+to the point of smoking device", bricking, exploding, etc. In line
+with this thought,
+I think it should be more difficult to permanently lock a card - an
+ioctl (whether
+specific or generic, involving knowing what command to send) I think
+is the better solution.
+
+As far as the temporary locking, I'm still not really convinced, but
+I'll say I don't have a
+strong opinion about it. Certainly, as an implementer, I would do so
+in the bootloader
+rather than the kernel (why? for Android - because you can fastboot
+boot kernels via USB,
+or maybe some bootloader somewhere supports booting from SD, so your
+security policy
+should be enforced as soon as possible, instead of relying on booting
+your trusted image).
+
+A
