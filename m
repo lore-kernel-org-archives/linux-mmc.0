@@ -1,70 +1,62 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH RESEND] mmc: core: Assemble the codes of related to eMMC4.5
-Date: Tue, 25 Oct 2011 09:43:12 +0900
-Message-ID: <002401cc92af$13358b30$39a0a190$%jun@samsung.com>
+From: Douglas Gilbert <dgilbert@interlog.com>
+Subject: Re: [Bug 39822] SDHC cards no longer recognized on AT91 based board
+Date: Mon, 24 Oct 2011 21:54:44 -0400
+Message-ID: <4EA616E4.2060405@interlog.com>
+References: <bug-39822-26132@https.bugzilla.kernel.org/>	<201107282323.p6SNN9Jk026454@demeter1.kernel.org> <m28vridl10.fsf@bob.laptop.org>
+Reply-To: dgilbert@interlog.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.infotech.no ([82.134.31.41]:44097 "EHLO smtp.infotech.no"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756171Ab1JYByv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 24 Oct 2011 21:54:51 -0400
+In-Reply-To: <m28vridl10.fsf@bob.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, ludovic.desroches@atmel.com, akpm@linux-foundation.org
 
-Code cleanup. The codes of related to eMMC4.5 are scattered.
-This patch removes one if-statement and assembles all. And it also
-removes variable initialization below else-statement. It is obvious
-for previous version but seems unnecessary. All members of card structure
-are already set to zero at card-init.
+On 11-07-28 07:48 PM, Chris Ball wrote:
+> Hi, thanks for the bug report.  Adding linux-mmc@ and some atmel driver
+> folks to CC.
+>
+> On Thu, Jul 28 2011, bugzilla-daemon@bugzilla.kernel.org wrote:
+>> Prior to 3.0.0 the FoxG20 board (Atmel AT91SAM9G20) could boot and use
+>> both micro SD and SDHC card to contain its root file system. With the
+>> advent of the 3.0.0 kernel the micro SDHC card is unable to mount the
+>> root file system.
+>>
+>> Comparing the relevant part of dmesg for 2.6.38.6 (and it worked on
+>> 2.6.39):
+>> ...
+>> Waiting for root device /dev/mmcblk0p2...
+>> mmc0: host does not support reading read-only switch. assuming write-enable.
+>> at91_mci at91_mci: Timeout waiting end of packet
+>> mmc0: new SDHC card at address 1234
+>> mmcblk0: mmc0:1234 SA04G 3.67 GiB
+>>   mmcblk0: p1 p2 p3
+>> ...
+>>
+>> to the same dmesg section for 3.0.0 :
+>> ...
+>> Waiting for root device /dev/mmcblk0p2...
+>> mmc0: error -110 whilst initialising SD card
+>> at91_mci at91_mci: Timeout waiting end of packet
+>> mmc0: error -110 whilst initialising SD card
+>> [no further progress]
+>>
+>> Non "HC" SD cards work as expected in 3.0.0
+>
+> If no-one on the CC list has any ideas, would you be interested in
+> trying to bisect this change?
+>
+> Another possibility would be adding printks before all of the -ETIMEDOUT
+> lines in core/* and host/at*, in order to see which one you're hitting
+> (and therefore which operation is causing the initialization to fail).
+> But a full bisection would be more conclusive.
 
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
----
- drivers/mmc/core/mmc.c |   20 +++++++++-----------
- 1 files changed, 9 insertions(+), 11 deletions(-)
+Still broken in lk 3.1.0, same errors in dmesg.
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 6354eb3..6354bac 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -467,29 +467,27 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		card->ext_csd.rst_n_function = ext_csd[EXT_CSD_RST_N_FUNCTION];
- 	}
-
--	/* eMMC v4.5 or later */
--	if (card->ext_csd.rev >= 6)
--		card->ext_csd.feature_support |= MMC_DISCARD_FEATURE;
--
- 	card->ext_csd.raw_erased_mem_count = ext_csd[EXT_CSD_ERASED_MEM_CONT];
- 	if (ext_csd[EXT_CSD_ERASED_MEM_CONT])
- 		card->erased_byte = 0xFF;
- 	else
- 		card->erased_byte = 0x0;
-
-+	/* eMMC v4.5 or later */
- 	if (card->ext_csd.rev >= 6) {
-+		card->ext_csd.feature_support |= MMC_DISCARD_FEATURE;
-+
- 		card->ext_csd.generic_cmd6_time = 10 *
- 			ext_csd[EXT_CSD_GENERIC_CMD6_TIME];
- 		card->ext_csd.power_off_longtime = 10 *
- 			ext_csd[EXT_CSD_POWER_OFF_LONG_TIME];
--	} else
--		card->ext_csd.generic_cmd6_time = 0;
-
--	card->ext_csd.cache_size =
--		ext_csd[EXT_CSD_CACHE_SIZE + 0] << 0 |
--		ext_csd[EXT_CSD_CACHE_SIZE + 1] << 8 |
--		ext_csd[EXT_CSD_CACHE_SIZE + 2] << 16 |
--		ext_csd[EXT_CSD_CACHE_SIZE + 3] << 24;
-+		card->ext_csd.cache_size =
-+			ext_csd[EXT_CSD_CACHE_SIZE + 0] << 0 |
-+			ext_csd[EXT_CSD_CACHE_SIZE + 1] << 8 |
-+			ext_csd[EXT_CSD_CACHE_SIZE + 2] << 16 |
-+			ext_csd[EXT_CSD_CACHE_SIZE + 3] << 24;
-+	}
-
- out:
- 	return err;
---
-1.7.0.4
+Doug Gilbert
