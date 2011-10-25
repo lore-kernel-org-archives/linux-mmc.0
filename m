@@ -1,58 +1,114 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: mmci: Improve runtime PM support
-Date: Tue, 25 Oct 2011 11:05:01 +0300
-Message-ID: <4EA66DAD.3000609@intel.com>
-References: <1319210754-22775-1-git-send-email-ulf.hansson@stericsson.com> <20111021173637.GG21648@n2100.arm.linux.org.uk> <CAKnu2MrOriMzJH9NcwUivWa0cinASa6wrRf4a69si4WUs-aTrQ@mail.gmail.com> <CAAgDR1OT=+xgQTNwmTz=9XwzpbhjeZ6F-mxnVGhOAPSAR3JiFQ@mail.gmail.com> <20111024093632.GH9893@n2100.arm.linux.org.uk> <CACRpkdY6rzYsYQW+GACL6Ux8o=Eo-3wn62O0YZxJZ=F2WbE4DQ@mail.gmail.com> <20111024095638.GJ9893@n2100.arm.linux.org.uk>
+Subject: Re: [PATCH] mmc: debugfs: expose the SDCLK frq in sys ios (v2)
+Date: Tue, 25 Oct 2011 11:40:44 +0300
+Message-ID: <4EA6760C.3080806@intel.com>
+References: <1319031945-2630-1-git-send-email-peppe.cavallaro@st.com> <1319185001-10226-1-git-send-email-peppe.cavallaro@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:39974 "EHLO mga11.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:29759 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753673Ab1JYIFh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 25 Oct 2011 04:05:37 -0400
-In-Reply-To: <20111024095638.GJ9893@n2100.arm.linux.org.uk>
+	id S1752026Ab1JYIkr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 25 Oct 2011 04:40:47 -0400
+In-Reply-To: <1319185001-10226-1-git-send-email-peppe.cavallaro@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Sebastian Rasmussen <sebras@gmail.com>, Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>
+To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Cc: linux-mmc@vger.kernel.org
 
-On 24/10/11 12:56, Russell King - ARM Linux wrote:
-> On Mon, Oct 24, 2011 at 11:54:00AM +0200, Linus Walleij wrote:
->> On Mon, Oct 24, 2011 at 11:36 AM, Russell King - ARM Linux
->> <linux@arm.linux.org.uk> wrote:
->>> On Sun, Oct 23, 2011 at 02:31:39AM +0200, Sebastian Rasmussen wrote:
->>>> I guess the patch would appeal more to Russell if mmci_runtime_suspend()
->>>> only cleared MCIMask0/SDI_MASK0 and MCIClock/SDI_CLKCR and left
->>>> MCIPower/SDI_PWR unchanged. It may be the case that the signal direction
->>>> bits need to be cleared for the ST-Ericsson PL180, but I haven't yet verified
->>>> this on my Snowball dev board yet.
->>>
->>> There's also the issue that the specs call for the clock to run after
->>> a command has completed for a certain number of cycles, and that the
->>> clock must continue to run until the card reports not-busy after a
->>> programming or erase cycle has completed - that can be long after the
->>> previous command has 'completed'.
->>
->> It's 8 cycles on MCLK required.
-> 
-> _Plus_ keeping the clock running while the card is signalling busy.
-> 
-> If you don't clock the card while its signalling busy, it will never
-> go non-busy (the data line becomes frozen.)
+On 21/10/11 11:16, Giuseppe CAVALLARO wrote:
+> This patch is to expose the actual SDCLK frequency in
+> /sys/kernel/debug/mmcX/ios entry.
+>
+> For example, if the max clk for a normal speed card is 20MHz
+> this is reported in /sys/kernel/debug/mmcX/ios.
+> Unfortunately the actual SDCLK frequency (i.e. Baseclock / divisor)
+> is not reported at all: for example, in that case, on Arasan HC,
+> it should be 48/4=12 (MHz).
+>
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> ---
+>  drivers/mmc/core/debugfs.c |    2 ++
+>  drivers/mmc/host/sdhci.c   |    7 +++++++
+>  include/linux/mmc/host.h   |    2 ++
+>  3 files changed, 11 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index 998797e..0b9a4aa 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -46,6 +46,8 @@ static int mmc_ios_show(struct seq_file *s, void *data)
+>  	const char *str;
+>  
+>  	seq_printf(s, "clock:\t\t%u Hz\n", ios->clock);
+> +	if (host->actual_clock)
+> +		seq_printf(s, "actual clock:\t%u Hz\n", host->actual_clock);
+>  	seq_printf(s, "vdd:\t\t%u ", ios->vdd);
+>  	if ((1 << ios->vdd) & MMC_VDD_165_195)
+>  		seq_printf(s, "(1.65 - 1.95 V)\n");
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 0e02cc1..a0d61b0 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1043,6 +1043,7 @@ static void sdhci_finish_command(struct sdhci_host *host)
+>  static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  {
+>  	int div = 0; /* Initialized for compiler warning */
+> +	int actual_div = 0;
+>  	u16 clk = 0;
+>  	unsigned long timeout;
 
-The spec does say that it is OK to turn off the clock, but it
-must be turned back on to release the busy signal.  That will always
-happen with the block driver because it always sends a status command
-when waiting.
+What if the clock is gated i.e. zero?  Maybe add
 
-Maybe it is an issue with SDIO but currently SDIO is using
-MMC_QUIRK_BROKEN_CLK_GATING by default (although wl1271 is
-using it)
+	host->mmc->actual_clock = 0;
 
 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  
+> @@ -1088,6 +1089,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  				clk = SDHCI_PROG_CLOCK_MODE;
+>  				div--;
+>  			}
+> +			actual_div = div;
+
+What about the clock multiplier?
+
+>  		} else {
+>  			/* Version 3.00 divisors must be a multiple of 2. */
+>  			if (host->max_clk <= clock)
+> @@ -1099,6 +1101,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  						break;
+>  				}
+>  			}
+> +			actual_div = div;
+>  			div >>= 1;
+>  		}
+>  	} else {
+> @@ -1107,9 +1110,13 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  			if ((host->max_clk / div) <= clock)
+>  				break;
+>  		}
+> +			actual_div = div;
+>  		div >>= 1;
+>  	}
+>  
+> +	if (actual_div)
+> +		host->mmc->actual_clock = host->max_clk / actual_div;
+> +
+>  	clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+>  	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
+>  		<< SDHCI_DIVIDER_HI_SHIFT;
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 1d09562..d815311 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -302,6 +302,8 @@ struct mmc_host {
+>  
+>  	struct mmc_async_req	*areq;		/* active async req */
+>  
+> +	unsigned int		actual_clock;	/* Actual HC clock rate */
+> +
+>  	unsigned long		private[0] ____cacheline_aligned;
+>  };
+>  
 
