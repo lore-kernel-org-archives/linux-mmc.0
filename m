@@ -1,62 +1,44 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V5 1/3] SDHCI: S3C: Use generic clock names for sdhci bus clock options
-Date: Wed, 26 Oct 2011 15:59:42 -0400
-Message-ID: <m2obx34j81.fsf@bob.laptop.org>
-References: <1318588126-19167-1-git-send-email-rajeshwari.s@samsung.com>
-	<1318588126-19167-2-git-send-email-rajeshwari.s@samsung.com>
+Subject: MMC tree moved back to kernel.org
+Date: Wed, 26 Oct 2011 17:23:22 -0400
+Message-ID: <m2ty6vih11.fsf@bob.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34443 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752105Ab1JZUAN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 26 Oct 2011 16:00:13 -0400
-In-Reply-To: <1318588126-19167-2-git-send-email-rajeshwari.s@samsung.com>
-	(Rajeshwari Shinde's message of "Fri, 14 Oct 2011 15:58:44 +0530")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-next-owner@vger.kernel.org>
+Sender: linux-next-owner@vger.kernel.org
+To: Stephen Rothwell <sfr@canb.auug.org.au>
+Cc: linux-next@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rajeshwari Shinde <rajeshwari.s@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org
 
-Hi Rajeshwari, Kukjin,
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
 
-On Fri, Oct 14 2011, Rajeshwari Shinde wrote:
-> This patch modifies the driver to stop depending on the clock names
-> being passed from the platform and switch over to bus clock lookup
-> using generic clock names.
->
-> Signed-off-by: Rajeshwari Shinde <rajeshwari.s@samsung.com>
-> ---
->  drivers/mmc/host/sdhci-s3c.c |    6 ++----
->  1 files changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 82709b6..a5fde87 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -435,14 +435,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->  
->  	for (clks = 0, ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
->  		struct clk *clk;
-> -		char *name = pdata->clocks[ptr];
-> +		char name[14];
->  
-> -		if (name == NULL)
-> -			continue;
-> +		sprintf(name, "mmc_busclk.%d", ptr);
+Hi Stephen,
 
-Let's use snprintf() here instead -- it's better to have fewer uses of
-sprintf() to audit.
+The mmc-next tree has returned to its original location at:
 
->  		clk = clk_get(dev, name);
->  		if (IS_ERR(clk)) {
-> -			dev_err(dev, "failed to get clock %s\n", name);
->  			continue;
->  		}
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git mmc-next 
 
-Thanks,
+Thanks very much,
 
-- Chris.
+Chris.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iQIcBAEBAgAGBQJOqHlBAAoJEHNBYZ7TNxYMbvUP+gOPY/bIc4cgLV2xMKuHUk9O
+A/aB8TrvssBz3+m/FBlnhF9v1htOzcoqWBRzRHU0vsPSxJ82H/Ljcg2k1n/iiKAV
+01wzHMhvIdpDcZoAgdThrSI1CXNmxXWpxvnPyf2/eBWfO4Pq/X/X1h6atiDbKcwi
+bd2Y4JAvnhtY2FyrdoRev87gzI4BD6IamtQk9Go1jZMyleqXSiiGQQRlR48thUBO
+gsdehUM6WTwYjBKSz/4WCBcEAi6GM0eaaVS4Kjy0765EVj03/RpWJfOCNt5n1XGJ
+LuaWyTkyWWbZF2Y5dDffEk4vivWOXsjQmIWuyVJF/3+qRj7NTaE+aNWi+94uLIMb
+9nJq/2AmICNU13CToOQuCphXEyym/ZlyVOLYtyYfP5dn8ZSBFm/O1/g+17b0JO2x
+AhfHUDhN9g0A8d89RTQCDDKSlMOhaZVmv/vNMhOtaSZOnPmtJtiMjjv0Y1WSgvMG
+0pt6ellNFwiM6km0B9FyrN+zC7EkTuOMNpZzav76btJAoCWgqZ3swAKXv1LPBpSy
+gzsAOnpkrp6AIw6dyB44RRE7dmRBnPtS9lSd8XkkFC9BcOFEvSBd/eOb6n33OjuC
+9yGfiOLptPtCzWl+2iEAdGjqEKleTWh+IgjQUTKPdDCMaGyKbnOR2azj0mLF1CCc
+RjTSjReAyRsUJxHUN49R
+=pwB6
+-----END PGP SIGNATURE-----
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
