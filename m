@@ -1,54 +1,109 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [PATCH]mmc: sdhci: use udelay instead of mdelay for some cases
-Date: Thu, 27 Oct 2011 08:02:13 +0200
-Message-ID: <20111027060213.GB28387@pengutronix.de>
-References: <20111027041851.GA18442@gmail.com>
- <20111027051532.GA28387@pengutronix.de>
- <20111027050939.GA27531@gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="oLBj+sq0vYjzfsbl"
+From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: [PATCH] mmc: debugfs: expose the SDCLK frq in sys ios (v3)
+Date: Thu, 27 Oct 2011 08:16:49 +0200
+Message-ID: <1319696209-3171-1-git-send-email-peppe.cavallaro@st.com>
+References: <1319031945-2630-1-git-send-email-peppe.cavallaro@st.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:52601 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753202Ab1J0GCO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2011 02:02:14 -0400
-Content-Disposition: inline
-In-Reply-To: <20111027050939.GA27531@gmail.com>
+Received: from eu1sys200aog118.obsmtp.com ([207.126.144.145]:38394 "EHLO
+	eu1sys200aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751532Ab1J0GRX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2011 02:17:23 -0400
+In-Reply-To: <1319031945-2630-1-git-send-email-peppe.cavallaro@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Shawn.Dong" <shawn.dong.cx@gmail.com>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: adrian.hunter@intel.com, Giuseppe Cavallaro <peppe.cavallaro@st.com>
 
+This patch is to expose the actual SDCLK frequency in
+/sys/kernel/debug/mmcX/ios entry.
 
---oLBj+sq0vYjzfsbl
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+For example, if the max clk for a normal speed card is 20MHz
+this is reported in /sys/kernel/debug/mmcX/ios.
+Unfortunately the actual SDCLK frequency (i.e. Baseclock / divisor)
+is not reported at all: for example, in that case, on Arasan HC,
+it should be 48/4=12 (MHz).
 
+Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+---
+ drivers/mmc/core/debugfs.c |    2 ++
+ drivers/mmc/host/sdhci.c   |   10 ++++++++++
+ include/linux/mmc/host.h   |    2 ++
+ 3 files changed, 14 insertions(+), 0 deletions(-)
 
-> Even there are some SDHCI hardwares cannot be stable in microseconds, I
-> think this is also OK since they just need to wait for a few more loops. =
-The
-> total waiting time is the same as before.
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 998797e..0b9a4aa 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -46,6 +46,8 @@ static int mmc_ios_show(struct seq_file *s, void *data)
+ 	const char *str;
+ 
+ 	seq_printf(s, "clock:\t\t%u Hz\n", ios->clock);
++	if (host->actual_clock)
++		seq_printf(s, "actual clock:\t%u Hz\n", host->actual_clock);
+ 	seq_printf(s, "vdd:\t\t%u ", ios->vdd);
+ 	if ((1 << ios->vdd) & MMC_VDD_165_195)
+ 		seq_printf(s, "(1.65 - 1.95 V)\n");
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0e02cc1..6bfdec5 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1043,9 +1043,12 @@ static void sdhci_finish_command(struct sdhci_host *host)
+ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	int div = 0; /* Initialized for compiler warning */
++	int real_div = div, clk_mul = 1;
+ 	u16 clk = 0;
+ 	unsigned long timeout;
+ 
++	host->mmc->actual_clock = 0;
++
+ 	if (clock == host->clock)
+ 		return;
+ 
+@@ -1086,6 +1089,8 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 				 * Control register.
+ 				 */
+ 				clk = SDHCI_PROG_CLOCK_MODE;
++				real_div = div;
++				clk_mul = host->clk_mul;
+ 				div--;
+ 			}
+ 		} else {
+@@ -1099,6 +1104,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 						break;
+ 				}
+ 			}
++			real_div = div;
+ 			div >>= 1;
+ 		}
+ 	} else {
+@@ -1107,9 +1113,13 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 			if ((host->max_clk / div) <= clock)
+ 				break;
+ 		}
++		real_div = div;
+ 		div >>= 1;
+ 	}
+ 
++	if (real_div)
++		host->mmc->actual_clock = (host->max_clk * clk_mul) / real_div;
++
+ 	clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+ 	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
+ 		<< SDHCI_DIVIDER_HI_SHIFT;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 1d09562..d815311 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -302,6 +302,8 @@ struct mmc_host {
+ 
+ 	struct mmc_async_req	*areq;		/* active async req */
+ 
++	unsigned int		actual_clock;	/* Actual HC clock rate */
++
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+ 
+-- 
+1.7.4.4
 
-Well, I still think this is curing the symptoms not the cause. But will talk
-with Chris about it since we are both in Prague at the moment...
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---oLBj+sq0vYjzfsbl
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAk6o8+UACgkQD27XaX1/VRtVPQCeJdy+B6J1NWZjBgb2OH63ksbl
-V2kAoJ20UqLYH0J/NTGZjtpExjUxpRsn
-=Vtqa
------END PGP SIGNATURE-----
-
---oLBj+sq0vYjzfsbl--
