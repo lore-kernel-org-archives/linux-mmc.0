@@ -1,46 +1,76 @@
 From: Sebastian Rasmussen <sebras@gmail.com>
-Subject: Re: [PATCH] mmc: debugfs: expose the SDCLK frq in sys ios (v3)
-Date: Fri, 28 Oct 2011 00:02:40 +0200
-Message-ID: <CAAgDR1N=mPVMoQNHmFvX2BvH_nmuemzQx3+z16qqS7BjQeOWDg@mail.gmail.com>
-References: <1319031945-2630-1-git-send-email-peppe.cavallaro@st.com>
-	<1319696209-3171-1-git-send-email-peppe.cavallaro@st.com>
+Subject: Re: [PATCH] mmc: support BKOPS feature for eMMC
+Date: Fri, 28 Oct 2011 00:25:12 +0200
+Message-ID: <CAAgDR1OaF1uGnZ7=Uxc2NXRsHKmJwdFTWWKOL+Q-AgrDkr554g@mail.gmail.com>
+References: <4EA93C08.9030009@samsung.com>
+	<loom.20111027T202726-264@post.gmane.org>
+	<CAAgDR1PJFX1c3xexgv7=Ccm3HGRtu0VMDy6APWUExSHOO3aE4A@mail.gmail.com>
+	<CAFEEs1kJ91ye-CGGFZ0C9E6cEE_7eNOi-H5tC=TNiLz3pv_mdg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:44567 "EHLO
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:62783 "EHLO
 	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752099Ab1J0WCl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2011 18:02:41 -0400
-Received: by ywm3 with SMTP id 3so3076714ywm.19
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Oct 2011 15:02:40 -0700 (PDT)
-In-Reply-To: <1319696209-3171-1-git-send-email-peppe.cavallaro@st.com>
+	with ESMTP id S1751163Ab1J0WZN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2011 18:25:13 -0400
+Received: by ywm3 with SMTP id 3so3090920ywm.19
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Oct 2011 15:25:12 -0700 (PDT)
+In-Reply-To: <CAFEEs1kJ91ye-CGGFZ0C9E6cEE_7eNOi-H5tC=TNiLz3pv_mdg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+To: Per Forlin <per.lkml@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
 Cc: linux-mmc@vger.kernel.org
 
 Hi!
 
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1107,9 +1113,13 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->                        if ((host->max_clk / div) <= clock)
->                                break;
->                }
-> +               real_div = div;
->                div >>= 1;
->        }
->
-> +       if (real_div)
-> +               host->mmc->actual_clock = (host->max_clk * clk_mul) / real_div;
+>> Well, you kind of need both.
+> Periodical check is a complement, not a replacement.
 
-What triggered me to look at this is that usually a divider of 0 means
-that the clock is not divided at all, and your code seemed to set
-host->mmc->actual_clock to 0 in this case. After further inspection I
-realize that real_div appears to always be >= 1 which means that the
-if-statement is unnecessary. Or did I miss something?
+Then we are indeed in agreement.
+
+> Must BKOPS always be deferred until performance is impacted?
+
+No, of course not. As you say doing BKOPS too late is not good, but
+also doing them too often is probably not wise either (will cause
+latency for interrupting BKOPS for too many requests in that case).
+
+> About starvation.
+> What happens if the BKOPS never have time to finish because new writes
+> are coming in all the time. Is it possible to starve the
+> BKOPS-operation?
+> Will it come to a point when BKOPS must run without interruption?
+
+The 4.5 spec says that if the level is at critical then some
+operations may extend beyond their original timeouts due to
+undelayable maintenance operations. So I can not forsee that an eMMC
+might stop working because the level reached critical and the host did
+not start BKOPS periodically. So as far as I understand it you may HPI
+interrupt BKOPS at critical level in order to issue CMD25
+(WRITE_MULTIPLE_BLOCK), but there is a good chance that this write
+will take a long time to complete.
+
+> One question is:
+> Is it worth running BKOPS if the BKOPS_STATUS is only 1? I could run
+> some tests comparing write performance when status is 0,1,2.
+
+The spec is likely intentionally arbitrary about what these levels
+mean in order to allow vendors to implement those differently.
+
+> I don't know what the best place would be for a BKOPS_STATUS check.
+> What comes to my mind is to use the same credentials that are used for
+> power save.
+
+That seems like a good option, yes.
+
+> Suspend? if suspend is requested one might check BKOPS_STATUS and
+> return -EBUSY if BKOPS needs to be started.
+
+Maybe, one could also choose to do this based on the level of course.
+
+However now that I'm thinking about it, I don't think Jaehoon has
+taken care of the case where suspend happens while BKOPS are running
+in the background. I guess one has to issue HPI in that case to stop
+the BKOPS before going in to suspend, otherwise one risks cutting
+power to the card while BKOPS are running.
 
  / Sebastian
-
-PS. I don't have a good SDHCI spec, is it publicly available
-somewhere? I have only found Pierre Ossman's old wiki on
-archive.org...
