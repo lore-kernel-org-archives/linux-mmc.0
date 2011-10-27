@@ -1,346 +1,685 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: support BKOPS feature for eMMC
-Date: Thu, 27 Oct 2011 20:10:00 +0900
-Message-ID: <4EA93C08.9030009@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:50497 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754021Ab1J0LKK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2011 07:10:10 -0400
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LTQ00CWG1OWR8P0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 27 Oct 2011 20:10:08 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LTQ005OD1OVPI30@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 27 Oct 2011 20:10:07 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH] mmc: core: Add packed command for eMMC4.5 device
+Date: Thu, 27 Oct 2011 19:54:01 +0900
+Message-ID: <1319712841-28579-1-git-send-email-tgih.jun@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, dh.han@samsung.com, Seungwon Jeon <tgih.jun@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>
 
-Background operation(BKOPS) is one of eMMC's features.
+This patch supports packed command feature of eMMC4.5 Spec.
+Several reads(or writes) can be grouped in packed command
+and all data of the individual commands can be sent in one
+transfer on the bus.
 
-If set the URGENT_BKOPS in response, we can notify that card nedd the BKOPS.
-And all I/O request is done, then run background operation.
-If request read/write operation during BKOPS, issue HPI interrupt.
-
-If you want to use this feature, should be set MMC_CAP2_BKOPS.
-
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-CC: Hanumath Prasad <hanumath.prasad@stericsson.com>
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/card/block.c   |   13 +++++++-
- drivers/mmc/card/queue.c   |    1 +
- drivers/mmc/core/core.c    |   77 ++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/mmc.c     |   21 ++++++++++++
- drivers/mmc/core/mmc_ops.c |    4 ++
- include/linux/mmc/card.h   |   11 ++++++
- include/linux/mmc/core.h   |    2 +
- include/linux/mmc/host.h   |    1 +
- include/linux/mmc/mmc.h    |    4 ++
- 9 files changed, 133 insertions(+), 1 deletions(-)
+ drivers/mmc/card/block.c |  349 ++++++++++++++++++++++++++++++++++++++++++++--
+ drivers/mmc/card/queue.c |   48 ++++++-
+ drivers/mmc/card/queue.h |   12 ++
+ drivers/mmc/core/mmc.c   |   20 +++
+ include/linux/mmc/card.h |    3 +
+ include/linux/mmc/host.h |    1 +
+ include/linux/mmc/mmc.h  |   15 ++
+ 7 files changed, 434 insertions(+), 14 deletions(-)
 
 diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 4fd5723..edbed7a 100644
+index 4fd5723..0258a81 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -1185,14 +1185,25 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 		type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
- 		mmc_queue_bounce_post(mq_rq);
- 
-+		if (mmc_card_doing_bkops(card)) {
-+			if (mmc_interrupt_bkops(card))
-+				goto cmd_abort;
+@@ -45,6 +45,7 @@
+ #include <asm/uaccess.h>
+
+ #include "queue.h"
++#include "../core/mmc_ops.h"
+
+ MODULE_ALIAS("mmc:block");
+ #ifdef MODULE_PARAM_PREFIX
+@@ -59,6 +60,10 @@ MODULE_ALIAS("mmc:block");
+ #define INAND_CMD38_ARG_SECTRIM1 0x81
+ #define INAND_CMD38_ARG_SECTRIM2 0x88
+
++#define mmc_req_rel_wr(req)	(((req->cmd_flags & REQ_FUA) || \
++			(req->cmd_flags & REQ_META)) && \
++			(rq_data_dir(req) == WRITE))
++
+ static DEFINE_MUTEX(block_mutex);
+
+ /*
+@@ -943,7 +948,8 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 	 * kind.  If it was a write, we may have transitioned to
+ 	 * program mode, which we have to wait for it to complete.
+ 	 */
+-	if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ) {
++	if ((!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ) ||
++			(mq_mrq->packed_cmd == MMC_PACKED_WR_HDR)) {
+ 		u32 status;
+ 		do {
+ 			int err = get_card_status(card, &status, 5);
+@@ -980,12 +986,67 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 	if (!brq->data.bytes_xfered)
+ 		return MMC_BLK_RETRY;
+
++	if (mq_mrq->packed_cmd != MMC_PACKED_NONE) {
++		if (unlikely(brq->data.blocks << 9 != brq->data.bytes_xfered))
++			return MMC_BLK_PARTIAL;
++		else
++			return MMC_BLK_SUCCESS;
++	}
++
+ 	if (blk_rq_bytes(req) != brq->data.bytes_xfered)
+ 		return MMC_BLK_PARTIAL;
+
+ 	return MMC_BLK_SUCCESS;
+ }
+
++static int mmc_blk_packed_err_check(struct mmc_card *card,
++			     struct mmc_async_req *areq)
++{
++	struct mmc_queue_req *mq_mrq = container_of(areq, struct mmc_queue_req,
++						    mmc_active);
++	int err, check, status;
++	u8 ext_csd[512];
++
++	check = mmc_blk_err_check(card, areq);
++
++	if (check == MMC_BLK_SUCCESS)
++		return check;
++
++	if (check == MMC_BLK_PARTIAL) {
++		err = get_card_status(card, &status, 0);
++		if (err)
++			return MMC_BLK_ABORT;
++
++		if (status & R1_EXP_EVENT) {
++			err = mmc_send_ext_csd(card, ext_csd);
++			if (err)
++				return MMC_BLK_ABORT;
++
++			if ((ext_csd[EXT_CSD_EXP_EVENTS_STATUS + 0] &
++						EXT_CSD_PACKED_FAILURE) &&
++					(ext_csd[EXT_CSD_PACKED_CMD_STATUS] &
++					 EXT_CSD_PACKED_GENERIC_ERROR)) {
++				if (ext_csd[EXT_CSD_PACKED_CMD_STATUS] &
++						EXT_CSD_PACKED_INDEXED_ERROR) {
++					/* Make be 0-based */
++					mq_mrq->packed_fail_idx =
++						ext_csd[EXT_CSD_PACKED_FAILURE_INDEX] - 1;
++					return MMC_BLK_PARTIAL;
++				} else {
++					return MMC_BLK_RETRY;
++				}
++			}
++		} else {
++			return MMC_BLK_RETRY;
++		}
++	}
++
++	if (check != MMC_BLK_ABORT)
++		return MMC_BLK_RETRY;
++	else
++		return MMC_BLK_ABORT;
++}
++
+ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 			       struct mmc_card *card,
+ 			       int disable_multi,
+@@ -1126,6 +1187,207 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 	mmc_queue_bounce_pre(mqrq);
+ }
+
++static u8 mmc_blk_chk_packable(struct mmc_queue *mq, struct request *req)
++{
++	struct request_queue *q = mq->queue;
++	struct mmc_card *card = mq->card;
++	struct request *cur = req, *next = NULL;
++	struct mmc_blk_data *md = mq->data;
++	bool en_rel_wr = card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN;
++	unsigned int req_sectors = 0, phys_segments = 0;
++	unsigned int max_blk_count, max_phys_segs;
++	u8 max_packed_rw = 0;
++	u8 reqs = 0;
++
++	if (!(md->flags & MMC_BLK_CMD23) &&
++			!card->ext_csd.packed_event_en)
++		goto no_packed;
++
++	if (rq_data_dir(cur) == READ)
++		max_packed_rw = card->ext_csd.max_packed_reads;
++	else
++		max_packed_rw = card->ext_csd.max_packed_writes;
++
++	if (max_packed_rw == 0)
++		goto no_packed;
++
++	if (mmc_req_rel_wr(cur) &&
++			(md->flags & MMC_BLK_REL_WR) &&
++			!en_rel_wr) {
++		goto no_packed;
++	}
++
++	max_blk_count = min(card->host->max_blk_count,
++			card->host->max_req_size >> 9);
++	max_phys_segs = queue_max_segments(q);
++	req_sectors += blk_rq_sectors(cur);
++	phys_segments += req->nr_phys_segments;
++
++	if (rq_data_dir(cur) == WRITE) {
++		req_sectors++;
++		phys_segments++;
++	}
++
++	while (reqs < max_packed_rw - 1) {
++		next = blk_fetch_request(q);
++		if (!next)
++			break;
++
++		if (rq_data_dir(cur) != rq_data_dir(next)) {
++			blk_requeue_request(q, next);
++			break;
 +		}
 +
- 		switch (status) {
- 		case MMC_BLK_SUCCESS:
- 		case MMC_BLK_PARTIAL:
-+			spin_lock_irq(&md->lock);
-+			/*
-+			 * Check BKOPS urgency from each R1 response
-+			 */
-+			if (mmc_card_mmc(card) &&
-+				(brq->cmd.resp[0] & R1_URGENT_BKOPS))
-+				mmc_card_set_need_bkops(card);
- 			/*
++		if (mmc_req_rel_wr(next) &&
++				(md->flags & MMC_BLK_REL_WR) &&
++				!en_rel_wr) {
++			blk_requeue_request(q, next);
++			break;
++		}
++
++		req_sectors += blk_rq_sectors(next);
++		if (req_sectors > max_blk_count) {
++			blk_requeue_request(q, next);
++			break;
++		}
++
++		phys_segments +=  next->nr_phys_segments;
++		if (phys_segments > max_phys_segs) {
++			blk_requeue_request(q, next);
++			break;
++		}
++
++		list_add_tail(&next->queuelist, &mq->mqrq_cur->packed_list);
++		cur = next;
++		reqs++;
++	}
++
++	if (reqs > 0) {
++		list_add(&req->queuelist, &mq->mqrq_cur->packed_list);
++		return (reqs + 1);
++	}
++
++no_packed:
++	mq->mqrq_cur->packed_cmd = MMC_PACKED_NONE;
++	return reqs;
++}
++
++static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
++			       struct mmc_card *card,
++			       struct mmc_queue *mq,
++			       u8 reqs)
++{
++	struct mmc_blk_request *brq = &mqrq->brq;
++	struct request *req = mqrq->req;
++	struct request *prq;
++	struct mmc_blk_data *md = mq->data;
++	bool do_rel_wr;
++	u32 *packed_cmd_hdr = mqrq->packed_cmd_hdr;
++	u8 i =1;
++
++	mqrq->packed_cmd = (rq_data_dir(req) == READ) ?
++		MMC_PACKED_WR_HDR : MMC_PACKED_WRITE;
++	mqrq->packed_blocks = 0;
++	mqrq->packed_fail_idx = -1;
++
++	memset(packed_cmd_hdr, 0, sizeof(mqrq->packed_cmd_hdr));
++	packed_cmd_hdr[0] = (reqs << 16) |
++		(((rq_data_dir(req) == READ) ? 0x01 : 0x02) << 8) | (0x01 << 0);
++
++	/*
++	 * Argument for each entry of packed group
++	 */
++	list_for_each_entry(prq, &mqrq->packed_list, queuelist) {
++		do_rel_wr = mmc_req_rel_wr(prq) && (md->flags & MMC_BLK_REL_WR);
++		/* Argument of CMD23*/
++		packed_cmd_hdr[(i * 2)] = (do_rel_wr ? (1 << 31) : 0) |
++			blk_rq_sectors(prq);
++		/* Argument of CMD18 or CMD25 */
++		packed_cmd_hdr[((i * 2)) + 1] = mmc_card_blockaddr(card) ?
++			blk_rq_pos(prq) : blk_rq_pos(prq) << 9;
++		mqrq->packed_blocks += blk_rq_sectors(prq);
++		i++;
++	}
++
++	memset(brq, 0, sizeof(struct mmc_blk_request));
++	brq->mrq.cmd = &brq->cmd;
++	brq->mrq.data = &brq->data;
++	brq->mrq.sbc = &brq->sbc;
++	brq->mrq.stop = &brq->stop;
++
++	brq->sbc.opcode = MMC_SET_BLOCK_COUNT;
++	brq->sbc.arg = (0 << 31) | (1 << 30) |
++		((rq_data_dir(req) == READ) ? 1 : mqrq->packed_blocks + 1);
++	brq->sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
++
++	brq->cmd.opcode = MMC_WRITE_MULTIPLE_BLOCK;
++	brq->cmd.arg = blk_rq_pos(req);
++	if (!mmc_card_blockaddr(card))
++		brq->cmd.arg <<= 9;
++	brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
++
++	brq->data.blksz = 512;
++	/*
++	 * Write separately the packd command header only for packed read.
++	 * In case of packed write, header is sent with blocks of data.
++	 */
++	brq->data.blocks = (rq_data_dir(req) == READ) ?
++		1 : mqrq->packed_blocks + 1;
++	brq->data.flags |= MMC_DATA_WRITE;
++
++	brq->stop.opcode = MMC_STOP_TRANSMISSION;
++	brq->stop.arg = 0;
++	brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
++
++	mmc_set_data_timeout(&brq->data, card);
++
++	brq->data.sg = mqrq->sg;
++	brq->data.sg_len = mmc_queue_map_sg(mq, mqrq);
++
++	mqrq->mmc_active.mrq = &brq->mrq;
++	mqrq->mmc_active.err_check = mmc_blk_packed_err_check;
++
++	mmc_queue_bounce_pre(mqrq);
++}
++
++static void mmc_blk_packed_rrq_prep(struct mmc_queue_req *mqrq,
++			       struct mmc_card *card,
++			       struct mmc_queue *mq)
++{
++	struct mmc_blk_request *brq = &mqrq->brq;
++	struct request *req = mqrq->req;
++
++	mqrq->packed_cmd = MMC_PACKED_READ;
++
++	memset(brq, 0, sizeof(struct mmc_blk_request));
++	brq->mrq.cmd = &brq->cmd;
++	brq->mrq.data = &brq->data;
++	brq->mrq.stop = &brq->stop;
++
++	brq->cmd.opcode = MMC_READ_MULTIPLE_BLOCK;
++	brq->cmd.arg = blk_rq_pos(req);
++	if (!mmc_card_blockaddr(card))
++		brq->cmd.arg <<= 9;
++	brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
++	brq->data.blksz = 512;
++	brq->data.blocks = mqrq->packed_blocks;
++	brq->data.flags |= MMC_DATA_READ;
++
++	brq->stop.opcode = MMC_STOP_TRANSMISSION;
++	brq->stop.arg = 0;
++	brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
++
++	mmc_set_data_timeout(&brq->data, card);
++
++	brq->data.sg = mqrq->sg;
++	brq->data.sg_len = mmc_queue_map_sg(mq, mqrq);
++
++	mqrq->mmc_active.mrq = &brq->mrq;
++	mqrq->mmc_active.err_check = mmc_blk_packed_err_check;
++
++	mmc_queue_bounce_pre(mqrq);
++}
++
+ static int mmc_blk_cmd_err(struct mmc_blk_data *md, struct mmc_card *card,
+ 			   struct mmc_blk_request *brq, struct request *req,
+ 			   int ret)
+@@ -1163,15 +1425,33 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	int ret = 1, disable_multi = 0, retry = 0, type;
+ 	enum mmc_blk_status status;
+ 	struct mmc_queue_req *mq_rq;
+-	struct request *req;
++	struct request *req, *prq;
+ 	struct mmc_async_req *areq;
++	u8 reqs = 0;
+
+ 	if (!rqc && !mq->mqrq_prev->req)
+ 		return 0;
+
++	if (rqc)
++		reqs = mmc_blk_chk_packable(mq, rqc);
++
+ 	do {
+ 		if (rqc) {
+-			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
++			if (reqs >= 2) {
++				mmc_blk_packed_hdr_wrq_prep(mq->mqrq_cur, card, mq, reqs);
++				if (rq_data_dir(rqc) == READ) {
++					areq = &mq->mqrq_cur->mmc_active;
++					mmc_wait_for_req(card->host, areq->mrq);
++					status = mmc_blk_packed_err_check(card, areq);
++					if (status == MMC_BLK_SUCCESS) {
++						mmc_blk_packed_rrq_prep(mq->mqrq_cur, card, mq);
++					} else {
++						goto check_status;
++					}
++				}
++			} else {
++				mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
++			}
+ 			areq = &mq->mqrq_cur->mmc_active;
+ 		} else
+ 			areq = NULL;
+@@ -1179,6 +1459,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 		if (!areq)
+ 			return 0;
+
++check_status:
+ 		mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
+ 		brq = &mq_rq->brq;
+ 		req = mq_rq->req;
+@@ -1192,10 +1473,32 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
  			 * A block was successfully transferred.
  			 */
  			mmc_blk_reset_success(md, type);
 -			spin_lock_irq(&md->lock);
- 			ret = __blk_end_request(req, 0,
+-			ret = __blk_end_request(req, 0,
++
++			if (mq_rq->packed_cmd != MMC_PACKED_NONE) {
++				int idx = mq_rq->packed_fail_idx, i = 0;
++				while (!list_empty(&mq_rq->packed_list)) {
++					prq = list_entry_rq(mq_rq->packed_list.next);
++					if (idx == i) {
++						/* retry from error index */
++						reqs -= idx;
++						mq_rq->req = prq;
++						ret = 1;
++						break;
++					}
++					list_del_init(&prq->queuelist);
++					spin_lock_irq(&md->lock);
++					ret = __blk_end_request(prq, 0, blk_rq_bytes(prq));
++					spin_unlock_irq(&md->lock);
++					i++;
++				}
++				break;
++			} else {
++				spin_lock_irq(&md->lock);
++				ret = __blk_end_request(req, 0,
  						brq->data.bytes_xfered);
- 			spin_unlock_irq(&md->lock);
+-			spin_unlock_irq(&md->lock);
++				spin_unlock_irq(&md->lock);
++			}
++
+ 			/*
+ 			 * If the blk_end_request function returns non-zero even
+ 			 * though all data has been transferred and no errors
+@@ -1254,7 +1557,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			break;
+ 		}
+
+-		if (ret) {
++		if (ret && (mq_rq->packed_cmd == MMC_PACKED_NONE)) {
+ 			/*
+ 			 * In case of a incomplete request
+ 			 * prepare it again and resend.
+@@ -1267,13 +1570,37 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	return 1;
+
+  cmd_abort:
+-	spin_lock_irq(&md->lock);
+-	while (ret)
+-		ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
+-	spin_unlock_irq(&md->lock);
++	if (mq_rq->packed_cmd != MMC_PACKED_NONE) {
++		spin_lock_irq(&md->lock);
++		while (ret)
++			ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
++		spin_unlock_irq(&md->lock);
++	} else {
++		while (!list_empty(&mq_rq->packed_list)) {
++			prq = list_entry_rq(mq_rq->packed_list.next);
++			list_del_init(&prq->queuelist);
++			spin_lock_irq(&md->lock);
++			__blk_end_request(prq, -EIO, blk_rq_bytes(prq));
++			spin_unlock_irq(&md->lock);
++		}
++	}
+
+  start_new_req:
+ 	if (rqc) {
++		/*
++		 * If current request is packed, it need to put back.
++		 */
++		if (mq->mqrq_cur->packed_cmd != MMC_PACKED_NONE) {
++			while (!list_empty(&mq->mqrq_cur->packed_list)) {
++				prq = list_entry_rq(mq->mqrq_cur->packed_list.prev);
++				if (prq->queuelist.prev != &mq->mqrq_cur->packed_list) {
++					list_del_init(&prq->queuelist);
++					blk_requeue_request(mq->queue, prq);
++				} else {
++					list_del_init(&prq->queuelist);
++				}
++			}
++		}
+ 		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+ 		mmc_start_req(card->host, &mq->mqrq_cur->mmc_active, NULL);
+ 	}
 diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index dcad59c..31e5eca 100644
+index dcad59c..3a4542e 100644
 --- a/drivers/mmc/card/queue.c
 +++ b/drivers/mmc/card/queue.c
-@@ -68,6 +68,7 @@ static int mmc_queue_thread(void *d)
- 				set_current_state(TASK_RUNNING);
- 				break;
- 			}
-+			mmc_start_bkops(mq->card);
- 			up(&mq->thread_sem);
- 			schedule();
- 			down(&mq->thread_sem);
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 5278ffb..7ef270d 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -238,6 +238,50 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 	host->ops->request(host, mrq);
+@@ -172,6 +172,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+
+ 	memset(&mq->mqrq_cur, 0, sizeof(mq->mqrq_cur));
+ 	memset(&mq->mqrq_prev, 0, sizeof(mq->mqrq_prev));
++	INIT_LIST_HEAD(&mqrq_cur->packed_list);
++	INIT_LIST_HEAD(&mqrq_prev->packed_list);
+ 	mq->mqrq_cur = mqrq_cur;
+ 	mq->mqrq_prev = mqrq_prev;
+ 	mq->queue->queuedata = mq;
+@@ -372,6 +374,39 @@ void mmc_queue_resume(struct mmc_queue *mq)
+ 	}
  }
- 
-+/**
-+ *	mmc_start_bkops - start BKOPS for supported cards
-+ *	@card: MMC card to start BKOPS
-+ *
-+ *	Start background operations whenever requested.
-+ *	when the urgent BKOPS bit is set in a R1 command response
-+ *	then background operations should be started immediately.
-+*/
-+void mmc_start_bkops(struct mmc_card *card)
+
++static unsigned int mmc_queue_packed_map_sg(struct mmc_queue *mq,
++				struct mmc_queue_req *mqrq,
++				struct scatterlist *sg)
 +{
-+	int err;
-+	unsigned long flags;
++	struct scatterlist *__sg;
++	unsigned int sg_len = 0;
++	struct request *req;
++	enum mmc_packed_cmd cmd;
 +
-+	if ((!card || !card->ext_csd.bkops_en) &&
-+			!(card->host->caps2 & MMC_CAP2_BKOPS))
-+		return;
++	cmd = mqrq->packed_cmd;
 +
-+	/*
-+	 * If card is already doing bkops or need for
-+	 * bkops flag is not set, then do nothing just
-+	 * return
-+	 */
-+	if (mmc_card_doing_bkops(card)
-+			|| !mmc_card_need_bkops(card))
-+		return;
-+
-+	mmc_claim_host(card->host);
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			EXT_CSD_BKOPS_START, 1, 0);
-+	if (err) {
-+		pr_warning("error %d starting bkops\n", err);
-+		mmc_card_clr_need_bkops(card);
-+		goto out;
++	if (cmd == MMC_PACKED_WR_HDR || cmd == MMC_PACKED_WRITE) {
++		__sg =sg;
++		sg_set_buf(__sg, mqrq->packed_cmd_hdr,
++				sizeof(mqrq->packed_cmd_hdr));
++		sg_len++;
++		if (cmd == MMC_PACKED_WR_HDR) {
++			sg_mark_end(__sg);
++			return sg_len;
++		}
++		__sg->page_link &= ~0x02;
 +	}
-+	spin_lock_irqsave(&card->host->lock, flags);
-+	mmc_card_clr_need_bkops(card);
-+	mmc_card_set_doing_bkops(card);
-+	spin_unlock_irqrestore(&card->host->lock, flags);
-+out:
-+	mmc_release_host(card->host);
-+}
-+EXPORT_SYMBOL(mmc_start_bkops);
 +
-+
- static void mmc_wait_done(struct mmc_request *mrq)
- {
- 	complete(&mrq->completion);
-@@ -466,6 +510,39 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int retries
- EXPORT_SYMBOL(mmc_wait_for_cmd);
- 
- /**
-+ *	mmc_interrupt_bkops - interrupt ongoing BKOPS
-+ *	@card: MMC card to check BKOPS
-+ *
-+ *	Send HPI command to interrupt ongoing background operations,
-+ *	to allow rapid servicing of foreground operations,e.g. read/
-+ *	writes. Wait until the card comes out of the programming state
-+ *	to avoid errors in servicing read/write requests.
-+ */
-+int mmc_interrupt_bkops(struct mmc_card *card)
-+{
-+	int err;
-+	unsigned long flags;
-+	u32 status;
-+
-+	BUG_ON(!card);
-+
-+	/* send HPI to interrupt BKOPS. */
-+	err = mmc_send_hpi_cmd(card, &status);
-+	if (err || R1_CURRENT_STATE(status) == 7) {
-+		do {
-+			err = mmc_send_status(card, &status);
-+			if (err)
-+				return err;
-+		} while (R1_CURRENT_STATE(status) == 7);
++	__sg = sg + sg_len;
++	list_for_each_entry(req, &mqrq->packed_list, queuelist) {
++		sg_len += blk_rq_map_sg(mq->queue, req, __sg);
++		__sg = sg + (sg_len - 1);
++		(__sg++)->page_link &= ~0x02;
 +	}
-+	spin_lock_irqsave(&card->host->lock, flags);
-+	mmc_card_clr_doing_bkops(card);
-+	spin_unlock_irqrestore(&card->host->lock, flags);
-+	return 0;
++	sg_mark_end(sg + (sg_len - 1));
++	return sg_len;
 +}
-+EXPORT_SYMBOL(mmc_interrupt_bkops);
 +
-+/**
-  *	mmc_set_data_timeout - set the timeout for a data command
-  *	@data: data phase for command
-  *	@card: the MMC card associated with the data transfer
+ /*
+  * Prepare the sg list(s) to be handed of to the host driver
+  */
+@@ -382,12 +417,19 @@ unsigned int mmc_queue_map_sg(struct mmc_queue *mq, struct mmc_queue_req *mqrq)
+ 	struct scatterlist *sg;
+ 	int i;
+
+-	if (!mqrq->bounce_buf)
+-		return blk_rq_map_sg(mq->queue, mqrq->req, mqrq->sg);
++	if (!mqrq->bounce_buf) {
++		if (!list_empty(&mqrq->packed_list))
++			return mmc_queue_packed_map_sg(mq, mqrq, mqrq->sg);
++		else
++			return blk_rq_map_sg(mq->queue, mqrq->req, mqrq->sg);
++	}
+
+ 	BUG_ON(!mqrq->bounce_sg);
+
+-	sg_len = blk_rq_map_sg(mq->queue, mqrq->req, mqrq->bounce_sg);
++	if (!list_empty(&mqrq->packed_list))
++		sg_len = mmc_queue_packed_map_sg(mq, mqrq, mqrq->bounce_sg);
++	else
++		sg_len = blk_rq_map_sg(mq->queue, mqrq->req, mqrq->bounce_sg);
+
+ 	mqrq->bounce_sg_len = sg_len;
+
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index d2a1eb4..5d0131e 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -12,6 +12,13 @@ struct mmc_blk_request {
+ 	struct mmc_data		data;
+ };
+
++enum mmc_packed_cmd {
++	MMC_PACKED_NONE = 0,
++	MMC_PACKED_WR_HDR,
++	MMC_PACKED_WRITE,
++	MMC_PACKED_READ,
++};
++
+ struct mmc_queue_req {
+ 	struct request		*req;
+ 	struct mmc_blk_request	brq;
+@@ -20,6 +27,11 @@ struct mmc_queue_req {
+ 	struct scatterlist	*bounce_sg;
+ 	unsigned int		bounce_sg_len;
+ 	struct mmc_async_req	mmc_active;
++	struct list_head	packed_list;
++	u32			packed_cmd_hdr[128];
++	unsigned int		packed_blocks;
++	enum mmc_packed_cmd	packed_cmd;
++	int		packed_fail_idx;
+ };
+
+ struct mmc_queue {
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 3627044..b16db45 100644
+index 3627044..eab01c1 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -448,6 +448,10 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 	}
- 
- 	if (card->ext_csd.rev >= 5) {
-+		/* check whether the eMMC card support BKOPS */
-+		if (ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1)
-+			card->ext_csd.bkops = 1;
+@@ -487,6 +487,9 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 			ext_csd[EXT_CSD_CACHE_SIZE + 1] << 8 |
+ 			ext_csd[EXT_CSD_CACHE_SIZE + 2] << 16 |
+ 			ext_csd[EXT_CSD_CACHE_SIZE + 3] << 24;
 +
- 		/* check whether the eMMC card supports HPI */
- 		if (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1) {
- 			card->ext_csd.hpi = 1;
-@@ -909,6 +913,23 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
++		card->ext_csd.max_packed_writes = ext_csd[EXT_CSD_MAX_PACKED_WRITES];
++		card->ext_csd.max_packed_reads = ext_csd[EXT_CSD_MAX_PACKED_READS];
  	}
- 
- 	/*
-+	 * enable BKOPS feature (if supported)
-+	 */
-+	if (card->ext_csd.bkops) {
+
+ out:
+@@ -1072,6 +1075,23 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		card->ext_csd.cache_ctrl = err ? 0 : 1;
+ 	}
+
++	if ((host->caps2 & MMC_CAP2_PACKED_CMD) &&
++			(card->ext_csd.max_packed_writes > 0) &&
++			(card->ext_csd.max_packed_reads > 0)) {
 +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			EXT_CSD_BKOPS_EN, 1, 0);
++				EXT_CSD_EXP_EVENTS_CTRL,
++				EXT_CSD_PACKED_EVENT_EN,
++				card->ext_csd.generic_cmd6_time);
 +		if (err && err != -EBADMSG)
 +			goto free_card;
-+
 +		if (err) {
-+			pr_warning("%s: Enabling BKOPS failed\n",
-+				mmc_hostname(card->host));
++			pr_warning("%s: Enabling packed event failed\n",
++					mmc_hostname(card->host));
 +			err = 0;
 +		} else
-+			card->ext_csd.bkops_en = 1;
++			card->ext_csd.packed_event_en = 1;
 +	}
 +
-+	/*
- 	 * Enable HPI feature (if supported)
- 	 */
- 	if (card->ext_csd.hpi) {
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 007863e..7653e33 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -398,6 +398,10 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	if (err)
- 		return err;
- 
-+	/* No need to check card status in case of BKOPS switch*/
-+	if (index == EXT_CSD_BKOPS_START)
-+		return 0;
-+
- 	/* Must check status to be sure of no errors */
- 	do {
- 		err = mmc_send_status(card, &status);
+ 	if (!oldcard)
+ 		host->card = card;
+
 diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 6e04e10..f4abb7c 100644
+index 6e04e10..3ffd93f 100644
 --- a/include/linux/mmc/card.h
 +++ b/include/linux/mmc/card.h
-@@ -71,6 +71,8 @@ struct mmc_ext_csd {
- 	bool			hpi_en;			/* HPI enablebit */
- 	bool			hpi;			/* HPI support bit */
- 	unsigned int		hpi_cmd;		/* cmd used as HPI */
-+	bool			bkops;		/* background support bit */
-+	bool			bkops_en;	/* background enable bit */
- 	u8			raw_partition_support;	/* 160 */
- 	u8			raw_erased_mem_count;	/* 181 */
- 	u8			raw_ext_csd_structure;	/* 194 */
-@@ -206,6 +208,8 @@ struct mmc_card {
- #define MMC_STATE_HIGHSPEED_DDR (1<<4)		/* card is in high speed mode */
- #define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in ultra high speed mode */
- #define MMC_CARD_SDXC		(1<<6)		/* card is SDXC */
-+#define MMC_STATE_NEED_BKOPS	(1<<7)		/* card need to do BKOPS */
-+#define MMC_STATE_DOING_BKOPS	(1<<8)		/* card is doing BKOPS */
- 	unsigned int		quirks; 	/* card quirks */
- #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
- #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
-@@ -365,6 +369,8 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_ddr_mode(c)	((c)->state & MMC_STATE_HIGHSPEED_DDR)
- #define mmc_sd_card_uhs(c) ((c)->state & MMC_STATE_ULTRAHIGHSPEED)
- #define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
-+#define mmc_card_need_bkops(c)	((c)->state & MMC_STATE_NEED_BKOPS)
-+#define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
- 
- #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
- #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
-@@ -373,6 +379,11 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
- #define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
- #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
-+#define mmc_card_set_need_bkops(c)	((c)->state |= MMC_STATE_NEED_BKOPS)
-+#define mmc_card_set_doing_bkops(c)	((c)->state |= MMC_STATE_DOING_BKOPS)
-+
-+#define mmc_card_clr_need_bkops(c)	((c)->state &= ~MMC_STATE_NEED_BKOPS)
-+#define mmc_card_clr_doing_bkops(c)	((c)->state &= ~MMC_STATE_DOING_BKOPS)
- 
- /*
-  * Quirk add/remove for MMC products.
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 174a844..600a177 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -134,6 +134,7 @@ struct mmc_host;
- struct mmc_card;
- struct mmc_async_req;
- 
-+extern int mmc_interrupt_bkops(struct mmc_card *);
- extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
- 					   struct mmc_async_req *, int *);
- extern int mmc_interrupt_hpi(struct mmc_card *);
-@@ -163,6 +164,7 @@ extern int mmc_can_sanitize(struct mmc_card *card);
- extern int mmc_can_secure_erase_trim(struct mmc_card *card);
- extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
- 				   unsigned int nr);
-+extern void mmc_start_bkops(struct mmc_card *card);
- extern unsigned int mmc_calc_max_discard(struct mmc_card *card);
- 
- extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
+@@ -52,6 +52,9 @@ struct mmc_ext_csd {
+ 	u8			part_config;
+ 	u8			cache_ctrl;
+ 	u8			rst_n_function;
++	u8			max_packed_writes;
++	u8			max_packed_reads;
++	u8			packed_event_en;
+ 	unsigned int		part_time;		/* Units: ms */
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
+ 	unsigned int		generic_cmd6_time;	/* Units: 10ms */
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index a3ac9c4..692e5f6 100644
+index a3ac9c4..d2e4210 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
 @@ -242,6 +242,7 @@ struct mmc_host {
  #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
  #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff supported */
  #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
-+#define MMC_CAP2_BKOPS		(1 << 4)	/* BKOPS supported */
- 
++#define MMC_CAP2_PACKED_CMD	(1 << 4)	/* Allow packed command */
+
  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
  	unsigned int        power_notify_type;
 diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 0e71356..283b848 100644
+index 0e71356..1988780 100644
 --- a/include/linux/mmc/mmc.h
 +++ b/include/linux/mmc/mmc.h
 @@ -138,6 +138,7 @@ static inline bool mmc_op_multi(u32 opcode)
  #define R1_CURRENT_STATE(x)	((x & 0x00001E00) >> 9)	/* sx, b (4 bits) */
  #define R1_READY_FOR_DATA	(1 << 8)	/* sx, a */
  #define R1_SWITCH_ERROR		(1 << 7)	/* sx, c */
-+#define R1_URGENT_BKOPS		(1 << 6)	/* sx, a */
++#define R1_EXP_EVENT		(1 << 6)	/* sr, a */
  #define R1_APP_CMD		(1 << 5)	/* sr, c */
- 
+
  #define R1_STATE_IDLE	0
-@@ -278,6 +279,8 @@ struct _mmc_csd {
+@@ -273,6 +274,10 @@ struct _mmc_csd {
+ #define EXT_CSD_FLUSH_CACHE		32      /* W */
+ #define EXT_CSD_CACHE_CTRL		33      /* R/W */
+ #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
++#define EXT_CSD_PACKED_FAILURE_INDEX	35	/* RO */
++#define EXT_CSD_PACKED_CMD_STATUS	36	/* RO */
++#define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
++#define EXT_CSD_EXP_EVENTS_CTRL	56	/* R/W, 2 bytes */
+ #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+ #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
  #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
- #define EXT_CSD_HPI_MGMT		161	/* R/W */
- #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
-+#define EXT_CSD_BKOPS_EN		163	/* R/W */
-+#define EXT_CSD_BKOPS_START		164	/* W */
- #define EXT_CSD_SANITIZE_START		165     /* W */
- #define EXT_CSD_WR_REL_PARAM		166	/* RO */
- #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
-@@ -313,6 +316,7 @@ struct _mmc_csd {
+@@ -313,6 +318,8 @@ struct _mmc_csd {
  #define EXT_CSD_POWER_OFF_LONG_TIME	247	/* RO */
  #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
  #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
-+#define EXT_CSD_BKOPS_SUPPORT		502	/* RO */
++#define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
++#define EXT_CSD_MAX_PACKED_READS	501	/* RO */
  #define EXT_CSD_HPI_FEATURES		503	/* RO */
- 
+
  /*
+@@ -364,6 +371,14 @@ struct _mmc_csd {
+ #define EXT_CSD_PWR_CL_4BIT_MASK	0x0F	/* 8 bit PWR CLS */
+ #define EXT_CSD_PWR_CL_8BIT_SHIFT	4
+ #define EXT_CSD_PWR_CL_4BIT_SHIFT	0
++
++#define EXT_CSD_PACKED_EVENT_EN	(1<<3)
++
++#define EXT_CSD_PACKED_FAILURE	(1<<3)
++
++#define EXT_CSD_PACKED_GENERIC_ERROR	(1<<0)
++#define EXT_CSD_PACKED_INDEXED_ERROR	(1<<1)
++
+ /*
+  * MMC_SWITCH access modes
+  */
+--
+1.7.2.3
