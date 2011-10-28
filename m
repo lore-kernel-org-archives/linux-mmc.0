@@ -1,253 +1,111 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 4/4] mmc: sdhci-pci: get gpio numbers from platform data
-Date: Fri, 28 Oct 2011 12:33:57 +0300
-Message-ID: <1319794437-16870-5-git-send-email-adrian.hunter@intel.com>
-References: <1319794437-16870-1-git-send-email-adrian.hunter@intel.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: support BKOPS feature for eMMC
+Date: Fri, 28 Oct 2011 20:01:18 +0900
+Message-ID: <4EAA8B7E.1040203@samsung.com>
+References: <4EA93C08.9030009@samsung.com>
+ <loom.20111027T202726-264@post.gmane.org>
+ <CAAgDR1PJFX1c3xexgv7=Ccm3HGRtu0VMDy6APWUExSHOO3aE4A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:62681 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754419Ab1J1JeK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 28 Oct 2011 05:34:10 -0400
-In-Reply-To: <1319794437-16870-1-git-send-email-adrian.hunter@intel.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:41984 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752163Ab1J1LB2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2011 07:01:28 -0400
+Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LTR00A6VVY7RQD0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 28 Oct 2011 20:01:27 +0900 (KST)
+Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
+ by mmp1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LTR00FC4VYF6690@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 28 Oct 2011 20:01:27 +0900 (KST)
+In-reply-to: <CAAgDR1PJFX1c3xexgv7=Ccm3HGRtu0VMDy6APWUExSHOO3aE4A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Sebastian Rasmussen <sebras@gmail.com>
+Cc: Per Forlin <per.lkml@gmail.com>, linux-mmc@vger.kernel.org
 
-Retrieve the GPIO numbers for hardware reset and
-card detect from platform data.
+Hi Sebastian.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-pci.c |  105 +++++++++++++++---------------------------
- 1 files changed, 38 insertions(+), 67 deletions(-)
+I have some question..
+Maybe i think that my-patch should be worked only level-2/3..right?
+Because URGENT_BKOPS bit in the EXCEPTION_EVENTS_STATUS is set whenever=
+ is either 2 or 3.
+In this case, host control with R1-type response.
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 4f380e4..8e89655 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -23,7 +23,6 @@
- #include <linux/scatterlist.h>
- #include <linux/io.h>
- #include <linux/gpio.h>
--#include <linux/sfi.h>
- #include <linux/pm_runtime.h>
- #include <linux/mmc/sdhci-pci-data.h>
- 
-@@ -174,32 +173,9 @@ static int mrst_hc_probe(struct sdhci_pci_chip *chip)
- 	return 0;
- }
- 
--/* Medfield eMMC hardware reset GPIOs */
--static int mfd_emmc0_rst_gpio = -EINVAL;
--static int mfd_emmc1_rst_gpio = -EINVAL;
--
--static int mfd_emmc_gpio_parse(struct sfi_table_header *table)
--{
--	struct sfi_table_simple *sb = (struct sfi_table_simple *)table;
--	struct sfi_gpio_table_entry *entry;
--	int i, num;
--
--	num = SFI_GET_NUM_ENTRIES(sb, struct sfi_gpio_table_entry);
--	entry = (struct sfi_gpio_table_entry *)sb->pentry;
--
--	for (i = 0; i < num; i++, entry++) {
--		if (!strncmp(entry->pin_name, "emmc0_rst", SFI_NAME_LEN))
--			mfd_emmc0_rst_gpio = entry->pin_no;
--		else if (!strncmp(entry->pin_name, "emmc1_rst", SFI_NAME_LEN))
--			mfd_emmc1_rst_gpio = entry->pin_no;
--	}
--
--	return 0;
--}
--
- #ifdef CONFIG_PM_RUNTIME
- 
--static irqreturn_t mfd_sd_cd(int irq, void *dev_id)
-+static irqreturn_t sdhci_pci_sd_cd(int irq, void *dev_id)
- {
- 	struct sdhci_pci_slot *slot = dev_id;
- 	struct sdhci_host *host = slot->host;
-@@ -208,15 +184,16 @@ static irqreturn_t mfd_sd_cd(int irq, void *dev_id)
- 	return IRQ_HANDLED;
- }
- 
--#define MFLD_SD_CD_PIN 69
--
--static int mfd_sd_probe_slot(struct sdhci_pci_slot *slot)
-+static void sdhci_pci_add_own_cd(struct sdhci_pci_slot *slot)
- {
--	int err, irq, gpio = MFLD_SD_CD_PIN;
-+	int err, irq, gpio = slot->cd_gpio;
- 
- 	slot->cd_gpio = -EINVAL;
- 	slot->cd_irq = -EINVAL;
- 
-+	if (!gpio_is_valid(gpio))
-+		return;
-+
- 	err = gpio_request(gpio, "sd_cd");
- 	if (err < 0)
- 		goto out;
-@@ -229,7 +206,7 @@ static int mfd_sd_probe_slot(struct sdhci_pci_slot *slot)
- 	if (irq < 0)
- 		goto out_free;
- 
--	err = request_irq(irq, mfd_sd_cd, IRQF_TRIGGER_RISING |
-+	err = request_irq(irq, sdhci_pci_sd_cd, IRQF_TRIGGER_RISING |
- 			  IRQF_TRIGGER_FALLING, "sd_cd", slot);
- 	if (err)
- 		goto out_free;
-@@ -238,16 +215,15 @@ static int mfd_sd_probe_slot(struct sdhci_pci_slot *slot)
- 	slot->cd_irq = irq;
- 	slot->host->quirks2 |= SDHCI_QUIRK2_OWN_CARD_DETECTION;
- 
--	return 0;
-+	return;
- 
- out_free:
- 	gpio_free(gpio);
- out:
- 	dev_warn(&slot->chip->pdev->dev, "failed to setup card detect wake up\n");
--	return 0;
- }
- 
--static void mfd_sd_remove_slot(struct sdhci_pci_slot *slot, int dead)
-+static void sdhci_pci_remove_own_cd(struct sdhci_pci_slot *slot)
- {
- 	if (slot->cd_irq >= 0)
- 		free_irq(slot->cd_irq, slot);
-@@ -256,47 +232,23 @@ static void mfd_sd_remove_slot(struct sdhci_pci_slot *slot, int dead)
- 
- #else
- 
--#define mfd_sd_probe_slot	NULL
--#define mfd_sd_remove_slot	NULL
-+static inline void sdhci_pci_add_own_cd(struct sdhci_pci_slot *slot)
-+{
-+}
-+
-+static inline void sdhci_pci_remove_own_cd(struct sdhci_pci_slot *slot)
-+{
-+}
- 
- #endif
- 
- static int mfd_emmc_probe_slot(struct sdhci_pci_slot *slot)
- {
--	const char *name = NULL;
--	int gpio = -EINVAL;
--
--	sfi_table_parse(SFI_SIG_GPIO, NULL, NULL, mfd_emmc_gpio_parse);
--
--	switch (slot->chip->pdev->device) {
--	case PCI_DEVICE_ID_INTEL_MFD_EMMC0:
--		gpio = mfd_emmc0_rst_gpio;
--		name = "eMMC0_reset";
--		break;
--	case PCI_DEVICE_ID_INTEL_MFD_EMMC1:
--		gpio = mfd_emmc1_rst_gpio;
--		name = "eMMC1_reset";
--		break;
--	}
--
--	if (!gpio_request(gpio, name)) {
--		gpio_direction_output(gpio, 1);
--		slot->rst_n_gpio = gpio;
--		slot->host->mmc->caps |= MMC_CAP_HW_RESET;
--	}
--
- 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE;
--
- 	slot->host->mmc->caps2 = MMC_CAP2_BOOTPART_NOACC;
--
- 	return 0;
- }
- 
--static void mfd_emmc_remove_slot(struct sdhci_pci_slot *slot, int dead)
--{
--	gpio_free(slot->rst_n_gpio);
--}
--
- static const struct sdhci_pci_fixes sdhci_intel_mrst_hc0 = {
- 	.quirks		= SDHCI_QUIRK_BROKEN_ADMA | SDHCI_QUIRK_NO_HISPD_BIT,
- 	.probe_slot	= mrst_hc_probe_slot,
-@@ -310,8 +262,6 @@ static const struct sdhci_pci_fixes sdhci_intel_mrst_hc1_hc2 = {
- static const struct sdhci_pci_fixes sdhci_intel_mfd_sd = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.allow_runtime_pm = true,
--	.probe_slot	= mfd_sd_probe_slot,
--	.remove_slot	= mfd_sd_remove_slot,
- };
- 
- static const struct sdhci_pci_fixes sdhci_intel_mfd_sdio = {
-@@ -323,7 +273,6 @@ static const struct sdhci_pci_fixes sdhci_intel_mfd_emmc = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.allow_runtime_pm = true,
- 	.probe_slot	= mfd_emmc_probe_slot,
--	.remove_slot	= mfd_emmc_remove_slot,
- };
- 
- /* O2Micro extra registers */
-@@ -1242,6 +1191,8 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
- 				goto free;
- 			}
- 		}
-+		slot->rst_n_gpio = slot->data->rst_n_gpio;
-+		slot->cd_gpio = slot->data->cd_gpio;
- 	}
- 
- 	host->hw_name = "PCI";
-@@ -1269,15 +1220,30 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
- 			goto unmap;
- 	}
- 
-+	if (gpio_is_valid(slot->rst_n_gpio)) {
-+		if (!gpio_request(slot->rst_n_gpio, "eMMC_reset")) {
-+			gpio_direction_output(slot->rst_n_gpio, 1);
-+			slot->host->mmc->caps |= MMC_CAP_HW_RESET;
-+		} else {
-+			dev_warn(&pdev->dev, "failed to request rst_n_gpio\n");
-+			slot->rst_n_gpio = -EINVAL;
-+		}
-+	}
-+
- 	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
- 
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto remove;
- 
-+	sdhci_pci_add_own_cd(slot);
-+
- 	return slot;
- 
- remove:
-+	if (gpio_is_valid(slot->rst_n_gpio))
-+		gpio_free(slot->rst_n_gpio);
-+
- 	if (chip->fixes && chip->fixes->remove_slot)
- 		chip->fixes->remove_slot(slot, 0);
- 
-@@ -1302,6 +1268,8 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
- 	int dead;
- 	u32 scratch;
- 
-+	sdhci_pci_remove_own_cd(slot);
-+
- 	dead = 0;
- 	scratch = readl(slot->host->ioaddr + SDHCI_INT_STATUS);
- 	if (scratch == (u32)-1)
-@@ -1309,6 +1277,9 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
- 
- 	sdhci_remove_host(slot->host, dead);
- 
-+	if (gpio_is_valid(slot->rst_n_gpio))
-+		gpio_free(slot->rst_n_gpio);
-+
- 	if (slot->chip->fixes && slot->chip->fixes->remove_slot)
- 		slot->chip->fixes->remove_slot(slot, dead);
- 
--- 
-1.7.6.4
+But in level-0/1 case, need to check BKOPS_STATUS periodically.
+How did you understand that "periodically" means?
+If host need to get BKOPS_STATUS periodically, maybe send CMD8 periodic=
+ally.
+How periodically?=20
+
+Best Regards,
+Jaehoon Chung
+
+On 10/28/2011 05:51 AM, Sebastian Rasmussen wrote:
+
+> Hi!
+>=20
+>> This patch only starts BKOPS if it's urgent or critical.
+>=20
+> Almost, it starts BKOPS when it is urgent, which per spec means level
+> 2 or 3, i.e. when performance is impacted or when it is critical.
+> Better use the specs terminology as far as possible to relieve
+> everyone of confusion.
+>=20
+>> I would be preferable to run bkops periodically and only when
+>> the card is idle to minimize the risk of reaching URGENT.
+>=20
+> Well, you kind of need both. If the eMMC is kept busy to such an
+> extent that the block device is never idling then you would definitel=
+y
+> require this patch, right? Otherwise you may end up wasting the time
+> between the last command sent and when the device has been deemed to
+> be idle for long enough.
+>=20
+> So basically the OP's patch fixes the case where, e.g. sustained
+> (re-)writing, keeps the block device busy until and after it reaches
+> the critical BKOPS level, while your proposal takes care of the other
+> case where the block device is not accessed all the time.
+>=20
+>> The specs says:
+>> -----
+>> Hosts shall still read the full status from the BKOPS_STATUS byte pe=
+riodically
+>> and start background operations as needed.
+>> -----
+>=20
+> Sure, if there is idle time to do it, then why not.
+> If there is no idle time and URGENT_BKOPS is asserted, then the
+> framework can not wait until the next idle period, but should issue
+> BKOPS as soon as possible after the current command is finished.
+>=20
+>> I'm thinking of checking BKOPS_STATUS when the card is idle and then=
+ run bkops
+>> even if level is only 1 (Operations outstanding =96 non critical). W=
+ould this make
+>> sense?
+>=20
+> I guess this boils down to how you define idle..? Does it mean
+> immediately after the current command has been fully serviced, or doe=
+s
+> it mean some arbitrary time after the last sent command has been full=
+y
+> serviced? My assumption is that you are refering to the latter, in
+> which case certain access patterns may cause problems. So, how do
+> _you_ define idle? :)
+>=20
+
+>  / Sebastian
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
 
