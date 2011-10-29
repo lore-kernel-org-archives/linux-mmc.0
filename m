@@ -1,31 +1,51 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: MMC updates for 3.2-rc1
-Date: Fri, 28 Oct 2011 14:20:17 -0700
-Message-ID: <CA+55aFwwEVCVTdFKSb3Rszb-s90fV3ocOWrbevrhYJV8X6bWog@mail.gmail.com>
-References: <m2fwide1ai.fsf@bob.laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] omap_hsmmc: fix missing parenthesis in pr_info
+Date: Sat, 29 Oct 2011 16:04:16 -0400
+Message-ID: <m239ebef9b.fsf@bob.laptop.org>
+References: <1319917151-5626-1-git-send-email-J.Kilb@phytec.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:55489 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933393Ab1J1VUj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2011 17:20:39 -0400
-In-Reply-To: <m2fwide1ai.fsf@bob.laptop.org>
+Received: from void.printf.net ([89.145.121.20]:40298 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754108Ab1J2UEY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 29 Oct 2011 16:04:24 -0400
+In-Reply-To: <1319917151-5626-1-git-send-email-J.Kilb@phytec.de> (Juergen
+	Kilb's message of "Sat, 29 Oct 2011 21:39:11 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Juergen Kilb <J.Kilb@phytec.de>
+Cc: linux-mmc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>, linux-omap@vger.kernel.org
 
-On Fri, Oct 28, 2011 at 5:41 AM, Chris Ball <cjb@laptop.org> wrote:
+Hi,
+
+On Sat, Oct 29 2011, Juergen Kilb wrote:
+> In commit a3c76eb9 (mmc: replace printk with appropriate
+> display macro) the opening parenthesis of pr_info was missing.
 >
-> Does the below method of verifying a signed pull request work well for you?
+> Signed-off-by: Juergen Kilb <J.Kilb@phytec.de>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index e8ff123..101cd31 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1270,7 +1270,7 @@ static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
+>  		}
+>  	} else {
+>  		if (!host->protect_card) {
+> -			pr_info"%s: cover is open, "
+> +			pr_info("%s: cover is open, "
+>  					 "card is now inaccessible\n",
+>  					 mmc_hostname(host->mmc));
+>  			host->protect_card = 1;
 
-This kind of GPG-signed thing works well (with explicit BEGIN PGP
-SIGNED MESSAGE quoting).
+Oops.  Thank you; I've pushed this to mmc-next now, and will send the
+fix to Linus.  I've checked for other errors in the original patch.
 
-Not that you even need it, since it's on git.kernel.org, so it's
-doubly verified.
-
-Pulled,
-
-                       Linus
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
