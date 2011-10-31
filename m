@@ -1,66 +1,48 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: core: fix the critical bug for multiple block read
-Date: Mon, 31 Oct 2011 19:52:07 +0900
-Message-ID: <4EAE7DD7.6090304@samsung.com>
-References: <4EAE7C76.1050104@samsung.com>
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: Re: Question: kick SDIO irq when resume
+Date: Mon, 31 Oct 2011 08:39:26 -0400 (EDT)
+Message-ID: <alpine.LFD.2.02.1110310824120.3307@xanadu.home>
+References: <CAGA24MKE-FLRBk2zHk_Wy2Apg8-epC6Q38W2csTs7YSN1gHzhg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:23503 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933619Ab1JaKwJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2011 06:52:09 -0400
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LTX009TZFIKKGX0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 31 Oct 2011 19:52:08 +0900 (KST)
-Received: from TNRNDGASPAPP1.tn.corp.samsungelectronics.net ([165.213.149.150])
- by mmp2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LTX00E15FIWKYD0@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 31 Oct 2011 19:52:08 +0900 (KST)
-In-reply-to: <4EAE7C76.1050104@samsung.com>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:62307 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934434Ab1JaMjb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2011 08:39:31 -0400
+Received: by vcge1 with SMTP id e1so4695616vcg.19
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Oct 2011 05:39:30 -0700 (PDT)
+In-Reply-To: <CAGA24MKE-FLRBk2zHk_Wy2Apg8-epC6Q38W2csTs7YSN1gHzhg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, paul@pwsan.com
+To: Jun Nie <niej0001@gmail.com>
+Cc: Bing Zhao <bzhao@marvell.com>, frankh@marvell.com, yongd@marvell.com, tianfh@marvell.com, njun@marvell.com, linux-mmc@vger.kernel.org
 
-Sorry card->host->caps instead of host->mmc->caps.(typo)
+On Mon, 31 Oct 2011, Jun Nie wrote:
 
-On 10/31/2011 07:46 PM, Jaehoon Chung wrote:
+> Hi Nico,
+>     We are debugging fake SDIO irq when 8787 SDIO card resume and
+> found below patch. The issue is that 8787 driver can not handle card
+> irq if neither 8787 nor host trigger resume event in some cases. Do
+> you remember what SDIO card need below patch? What's your idea on this
+> issue? How about add a SDIO function flag to decide the irq thread
+> kick off in resume?
 
-> This patch is fixed the critical bug for multiple block read.
-> 
-> In Paul's patch(commit:6d621423128909f09072835445ce36dd357a758a),
-> used MMC_CAP2_NO_MULTI_READ. But that value was assigned card->host->caps.
-> 
-> MMC_CAPS2_NO_MULTI_READ must assign card->host->caps2 instead of card->host->caps.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
->  drivers/mmc/card/block.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 4fd5723..1882149 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1037,7 +1037,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
->  			brq->data.blocks = 1;
->  
->  		/* Some controllers can't do multiblock reads due to hw bugs */
-> -		if (card->host->caps & MMC_CAP2_NO_MULTI_READ &&
-> +		if (card->host->caps2 & MMC_CAP2_NO_MULTI_READ &&
->  		    rq_data_dir(req) == READ)
->  			brq->data.blocks = 1;
->  	}
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+This is needed because in some cases the card interrupt is already 
+consumed for the wake-up event.  Kicking this thread shouldn't cause any 
+issue though, as the card is just polled for the actual presence of an 
+IRQ ...
+
+... or maybe not.  In this case commit 06e8935feb "optimized SDIO IRQ 
+handling for single irq" may certainly cause problems.
+
+The fix here would be to clear card->sdio_single_irq before calling 
+mmc_signal_sdio_irq() in mmc_sdio_resume() and restore its original 
+value eventually, or better yet ignore that flag when the IRQ thread is 
+ran for the first time after a resume.
+
+In any case you may disable that optimization in the IRQ demux handler 
+to see if this fixes your problem.
 
 
+Nicolas
