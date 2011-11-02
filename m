@@ -1,40 +1,43 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: [PATCH] mmc: omap_hsmmc: Fix build for hsmmc
-Date: Wed, 2 Nov 2011 10:06:19 -0700
-Message-ID: <20111102170619.GJ31337@atomide.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH V6] SDHCI: S3C: Use generic clock names for sdhci bus clock options
+Date: Wed, 02 Nov 2011 13:56:32 -0400
+Message-ID: <m2aa8e9zn3.fsf@bob.laptop.org>
+References: <1320039876-21148-1-git-send-email-rajeshwari.s@samsung.com>
+	<005301cc9958$bcf5aa10$36e0fe30$%kim@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
+Content-Type: text/plain
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <005301cc9958$bcf5aa10$36e0fe30$%kim@samsung.com> (Kukjin Kim's
+	message of "Wed, 02 Nov 2011 21:12:49 +0900")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Kukjin Kim <kgene.kim@samsung.com>
+Cc: 'Rajeshwari Shinde' <rajeshwari.s@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Commit a3c76eb9d4a1e68a69dd880cf0bcb8a52418b993 (mmc: replace
-printk with appropriate display macro) does not compile:
+Hi Kukjin,
 
-drivers/mmc/host/omap_hsmmc.c: In function 'omap_hsmmc_protect_card':
-drivers/mmc/host/omap_hsmmc.c:1273: error: 'pr_info' undeclared (first use in this function)
-drivers/mmc/host/omap_hsmmc.c:1273: error: (Each undeclared identifier is reported only once
-drivers/mmc/host/omap_hsmmc.c:1273: error: for each function it appears in.)
-drivers/mmc/host/omap_hsmmc.c:1273: error: expected ';' before string constant
-drivers/mmc/host/omap_hsmmc.c:1275: error: expected statement before ')' token
-distcc[15197] ERROR: compile drivers/mmc/host/omap_hsmmc.c on localhost failed
+On Wed, Nov 02 2011, Kukjin Kim wrote:
+>> This patch modifies the driver to stop depending on the clock names
+>> being passed from the platform and switch over to bus clock lookup
+>> using generic clock names.
+>> 
+>> V6 Changes:
+>> Changed sprintf to snprintf as suggested by Chris Ball.
+>> 
+>> Signed-off-by: Rajeshwari Shinde <rajeshwari.s@samsung.com>
+>
+> Acked-by: Kukjin Kim <kgene.kim@samsung.com>
+>
+> Hi Chirs,
+>
+> Could you please pick this up in your tree for this merge window?
 
-Cc: Girish K S <girish.shivananjappa@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Tony Lindgren <tony@atomide.com>
+Might be easier to have you send this, if you don't mind, since I'm
+still traveling and have already sent my main pull request.  Thanks!
 
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1270,7 +1270,7 @@ static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
- 		}
- 	} else {
- 		if (!host->protect_card) {
--			pr_info"%s: cover is open, "
-+			pr_info("%s: cover is open, "
- 					 "card is now inaccessible\n",
- 					 mmc_hostname(host->mmc));
- 			host->protect_card = 1;
+Acked-by: Chris Ball <cjb@laptop.org>
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
