@@ -1,248 +1,72 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 4/4] mmc: sdhci-pci: get gpio numbers from platform data
-Date: Wed,  2 Nov 2011 08:57:21 +0200
-Message-ID: <1320217041-2580-5-git-send-email-adrian.hunter@intel.com>
-References: <1320217041-2580-1-git-send-email-adrian.hunter@intel.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [GIT PULL] hwspinlock changes for 3.2
+Date: Wed, 2 Nov 2011 09:45:11 +0200
+Message-ID: <CAK=Wgbb9yfFeubc8jfTe5urMz4WoCpOL=LwP9=Lr7mYaWrt1Vw@mail.gmail.com>
+References: <CAK=WgbZso1qk5XUTjB1bLXYbezv80SbgyEXJ3Q32U28+cQMfZA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1320217041-2580-1-git-send-email-adrian.hunter@intel.com>
+In-Reply-To: <CAK=WgbZso1qk5XUTjB1bLXYbezv80SbgyEXJ3Q32U28+cQMfZA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
+To: Linus Torvalds <torvalds@linux-foundation.org>, Chris Ball <cjb@laptop.org>
+Cc: linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Arnd Bergmann <arnd@arndb.de>, Greg KH <greg@kroah.com>, linux-omap@vger.kernel.org, "Gutierrez, Juan" <jgutierrez@ti.com>, Mathieu Poirier <mathieu.poirier@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, linux-arm <linux-arm-kernel@lists.infradead.org>, Stephen Rothwell <sfr@canb.auug.org.au>, linux-mmc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Retrieve the GPIO numbers for hardware reset and
-card detect from platform data.
+On Sun, Oct 30, 2011 at 10:06 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote:
+> Please pull from
+>
+> git://git.kernel.org/pub/scm/linux/kernel/git/ohad/hwspinlock.git for-linus
+...
+> All of the patches have been tested in linux-next and currently there
+> are no merge conflicts, though I expect one to happen with the arm-sco
+> tree, as reported (and fixed) by Stephen earlier this month (see
+> http://www.spinics.net/lists/linux-next/msg16931.html).
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-pci.c |  105 +++++++++++++++---------------------------
- 1 files changed, 38 insertions(+), 67 deletions(-)
+Now that arm-soc is merged, I fixed the conflict with the hwspinlock
+tree and pushed it (just for reference) at:
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 9d1874a..3d842d9 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -23,7 +23,6 @@
- #include <linux/scatterlist.h>
- #include <linux/io.h>
- #include <linux/gpio.h>
--#include <linux/sfi.h>
- #include <linux/pm_runtime.h>
- #include <linux/mmc/sdhci-pci-data.h>
- 
-@@ -174,32 +173,9 @@ static int mrst_hc_probe(struct sdhci_pci_chip *chip)
- 	return 0;
- }
- 
--/* Medfield eMMC hardware reset GPIOs */
--static int mfd_emmc0_rst_gpio = -EINVAL;
--static int mfd_emmc1_rst_gpio = -EINVAL;
--
--static int mfd_emmc_gpio_parse(struct sfi_table_header *table)
--{
--	struct sfi_table_simple *sb = (struct sfi_table_simple *)table;
--	struct sfi_gpio_table_entry *entry;
--	int i, num;
--
--	num = SFI_GET_NUM_ENTRIES(sb, struct sfi_gpio_table_entry);
--	entry = (struct sfi_gpio_table_entry *)sb->pentry;
--
--	for (i = 0; i < num; i++, entry++) {
--		if (!strncmp(entry->pin_name, "emmc0_rst", SFI_NAME_LEN))
--			mfd_emmc0_rst_gpio = entry->pin_no;
--		else if (!strncmp(entry->pin_name, "emmc1_rst", SFI_NAME_LEN))
--			mfd_emmc1_rst_gpio = entry->pin_no;
--	}
--
--	return 0;
--}
--
- #ifdef CONFIG_PM_RUNTIME
- 
--static irqreturn_t mfd_sd_cd(int irq, void *dev_id)
-+static irqreturn_t sdhci_pci_sd_cd(int irq, void *dev_id)
- {
- 	struct sdhci_pci_slot *slot = dev_id;
- 	struct sdhci_host *host = slot->host;
-@@ -208,15 +184,16 @@ static irqreturn_t mfd_sd_cd(int irq, void *dev_id)
- 	return IRQ_HANDLED;
- }
- 
--#define MFLD_SD_CD_PIN 69
--
--static int mfd_sd_probe_slot(struct sdhci_pci_slot *slot)
-+static void sdhci_pci_add_own_cd(struct sdhci_pci_slot *slot)
- {
--	int err, irq, gpio = MFLD_SD_CD_PIN;
-+	int err, irq, gpio = slot->cd_gpio;
- 
- 	slot->cd_gpio = -EINVAL;
- 	slot->cd_irq = -EINVAL;
- 
-+	if (!gpio_is_valid(gpio))
-+		return;
-+
- 	err = gpio_request(gpio, "sd_cd");
- 	if (err < 0)
- 		goto out;
-@@ -229,7 +206,7 @@ static int mfd_sd_probe_slot(struct sdhci_pci_slot *slot)
- 	if (irq < 0)
- 		goto out_free;
- 
--	err = request_irq(irq, mfd_sd_cd, IRQF_TRIGGER_RISING |
-+	err = request_irq(irq, sdhci_pci_sd_cd, IRQF_TRIGGER_RISING |
- 			  IRQF_TRIGGER_FALLING, "sd_cd", slot);
- 	if (err)
- 		goto out_free;
-@@ -238,16 +215,15 @@ static int mfd_sd_probe_slot(struct sdhci_pci_slot *slot)
- 	slot->cd_irq = irq;
- 	slot->host->quirks2 |= SDHCI_QUIRK2_OWN_CARD_DETECTION;
- 
--	return 0;
-+	return;
- 
- out_free:
- 	gpio_free(gpio);
- out:
- 	dev_warn(&slot->chip->pdev->dev, "failed to setup card detect wake up\n");
--	return 0;
- }
- 
--static void mfd_sd_remove_slot(struct sdhci_pci_slot *slot, int dead)
-+static void sdhci_pci_remove_own_cd(struct sdhci_pci_slot *slot)
- {
- 	if (slot->cd_irq >= 0)
- 		free_irq(slot->cd_irq, slot);
-@@ -256,47 +232,23 @@ static void mfd_sd_remove_slot(struct sdhci_pci_slot *slot, int dead)
- 
- #else
- 
--#define mfd_sd_probe_slot	NULL
--#define mfd_sd_remove_slot	NULL
-+static inline void sdhci_pci_add_own_cd(struct sdhci_pci_slot *slot)
-+{
-+}
-+
-+static inline void sdhci_pci_remove_own_cd(struct sdhci_pci_slot *slot)
-+{
-+}
- 
- #endif
- 
- static int mfd_emmc_probe_slot(struct sdhci_pci_slot *slot)
- {
--	const char *name = NULL;
--	int gpio = -EINVAL;
--
--	sfi_table_parse(SFI_SIG_GPIO, NULL, NULL, mfd_emmc_gpio_parse);
--
--	switch (slot->chip->pdev->device) {
--	case PCI_DEVICE_ID_INTEL_MFD_EMMC0:
--		gpio = mfd_emmc0_rst_gpio;
--		name = "eMMC0_reset";
--		break;
--	case PCI_DEVICE_ID_INTEL_MFD_EMMC1:
--		gpio = mfd_emmc1_rst_gpio;
--		name = "eMMC1_reset";
--		break;
--	}
--
--	if (!gpio_request(gpio, name)) {
--		gpio_direction_output(gpio, 1);
--		slot->rst_n_gpio = gpio;
--		slot->host->mmc->caps |= MMC_CAP_HW_RESET;
--	}
--
- 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE;
--
- 	slot->host->mmc->caps2 = MMC_CAP2_BOOTPART_NOACC;
--
- 	return 0;
- }
- 
--static void mfd_emmc_remove_slot(struct sdhci_pci_slot *slot, int dead)
--{
--	gpio_free(slot->rst_n_gpio);
--}
--
- static const struct sdhci_pci_fixes sdhci_intel_mrst_hc0 = {
- 	.quirks		= SDHCI_QUIRK_BROKEN_ADMA | SDHCI_QUIRK_NO_HISPD_BIT,
- 	.probe_slot	= mrst_hc_probe_slot,
-@@ -310,8 +262,6 @@ static const struct sdhci_pci_fixes sdhci_intel_mrst_hc1_hc2 = {
- static const struct sdhci_pci_fixes sdhci_intel_mfd_sd = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.allow_runtime_pm = true,
--	.probe_slot	= mfd_sd_probe_slot,
--	.remove_slot	= mfd_sd_remove_slot,
- };
- 
- static const struct sdhci_pci_fixes sdhci_intel_mfd_sdio = {
-@@ -323,7 +273,6 @@ static const struct sdhci_pci_fixes sdhci_intel_mfd_emmc = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.allow_runtime_pm = true,
- 	.probe_slot	= mfd_emmc_probe_slot,
--	.remove_slot	= mfd_emmc_remove_slot,
- };
- 
- /* O2Micro extra registers */
-@@ -1242,6 +1191,8 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
- 				goto free;
- 			}
- 		}
-+		slot->rst_n_gpio = slot->data->rst_n_gpio;
-+		slot->cd_gpio = slot->data->cd_gpio;
- 	}
- 
- 	host->hw_name = "PCI";
-@@ -1269,15 +1220,30 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
- 			goto unmap;
- 	}
- 
-+	if (gpio_is_valid(slot->rst_n_gpio)) {
-+		if (!gpio_request(slot->rst_n_gpio, "eMMC_reset")) {
-+			gpio_direction_output(slot->rst_n_gpio, 1);
-+			slot->host->mmc->caps |= MMC_CAP_HW_RESET;
-+		} else {
-+			dev_warn(&pdev->dev, "failed to request rst_n_gpio\n");
-+			slot->rst_n_gpio = -EINVAL;
-+		}
-+	}
-+
- 	host->mmc->pm_caps = MMC_PM_KEEP_POWER | MMC_PM_WAKE_SDIO_IRQ;
- 
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto remove;
- 
-+	sdhci_pci_add_own_cd(slot);
-+
- 	return slot;
- 
- remove:
-+	if (gpio_is_valid(slot->rst_n_gpio))
-+		gpio_free(slot->rst_n_gpio);
-+
- 	if (chip->fixes && chip->fixes->remove_slot)
- 		chip->fixes->remove_slot(slot, 0);
- 
-@@ -1302,6 +1268,8 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
- 	int dead;
- 	u32 scratch;
- 
-+	sdhci_pci_remove_own_cd(slot);
-+
- 	dead = 0;
- 	scratch = readl(slot->host->ioaddr + SDHCI_INT_STATUS);
- 	if (scratch == (u32)-1)
-@@ -1309,6 +1277,9 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
- 
- 	sdhci_remove_host(slot->host, dead);
- 
-+	if (gpio_is_valid(slot->rst_n_gpio))
-+		gpio_free(slot->rst_n_gpio);
-+
- 	if (slot->chip->fixes && slot->chip->fixes->remove_slot)
- 		slot->chip->fixes->remove_slot(slot, dead);
- 
--- 
-1.7.6.4
+git://git.kernel.org/pub/scm/linux/kernel/git/ohad/hwspinlock.git
+for-linus-merged
+
+There also seems to be a (trivial) omap_hsmmc build issue which I've
+fixed and pushed to that branch (Chris I'm also attaching it below in
+case you prefer to take it through the mmc tree).
+
+> the hwspinlock
+> tree and its upstream path have only materialized quite late in the
+> cycle (see https://lkml.org/lkml/2011/9/21/249)
+
+Linus, in the aforementioned thread, Arnd, Tony and Linus W preferred
+that I send you direct pull requests for hwspinlock changes, but were
+also ok with other upstream paths (e.g. through the arm-soc or the
+omap trees), so please express your preference :) I don't expect much
+hwspinlock activity anytime soon (at least not until we'll get either
+c6x support or additional u8500 functionality).
+
+Thanks,
+Ohad.
+
+commit f6e49189a11622f8675bd386db560309a05e581a
+Author: Ohad Ben-Cohen <ohad@wizery.com>
+Date:   Wed Nov 2 08:57:23 2011 +0200
+
+    mmc: omap_hsmmc: fix build
+
+    Fix omap_hsmmc build issue that was introduced by commit a3c76eb
+    "mmc: replace printk with appropriate display macro".
+
+    Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index e8ff123..101cd31 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1270,7 +1270,7 @@ static void omap_hsmmc_protect_card(struct omap_hsmmc_host
+                }
+        } else {
+                if (!host->protect_card) {
+-                       pr_info"%s: cover is open, "
++                       pr_info("%s: cover is open, "
+                                         "card is now inaccessible\n",
+                                         mmc_hostname(host->mmc));
+                        host->protect_card = 1;
