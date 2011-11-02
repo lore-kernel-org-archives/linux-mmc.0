@@ -1,32 +1,32 @@
-From: Praveen Krishnan <praveen.gk@gmail.com>
-Subject: DDR eMMC write failures
-Date: Wed, 2 Nov 2011 16:51:03 -0700
-Message-ID: <CAHzg1A-7RNthipDredO4KSrC+bM0nqLuhWaw1cveFzzfXd2k3Q@mail.gmail.com>
+From: Kevin Hilman <khilman@ti.com>
+Subject: Re: [PATCH] omap_hsmmc: fix missing parenthesis in pr_info
+Date: Wed, 02 Nov 2011 16:59:27 -0700
+Message-ID: <87ty6mhy8w.fsf@ti.com>
+References: <1319917151-5626-1-git-send-email-J.Kilb@phytec.de>
+	<m239ebef9b.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:54221 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752419Ab1KBXvF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2011 19:51:05 -0400
-Received: by faao14 with SMTP id o14so942602faa.19
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Nov 2011 16:51:03 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <m239ebef9b.fsf@bob.laptop.org> (Chris Ball's message of "Sat, 29
+	Oct 2011 16:04:16 -0400")
+Sender: linux-omap-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Juergen Kilb <J.Kilb@phytec.de>, linux-mmc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-Hello all,
+Hi Chris,
 
-I am working on getting the DDR50 mode up and running for the eMMC
-cards.  I am running into some weird CRC error cases.  Initially, I
-thought that everything works fine, but when I stress test it with
-large amounts of data (more than 100MB of writes), I notice that my
-console is spewed with venomous error messages.  I get a CRC error and
-every now and then, I also see this message "Got data interrupt even
-though no data operation was in progress" and "Buffer I/O error" and
-so on.
+Chris Ball <cjb@laptop.org> writes:
 
-Can anybody give any pointers as to what could be causing this?
+[...]
 
-Thanks a lot,
-Praveen
+> Oops.  Thank you; I've pushed this to mmc-next now, and will send the
+> fix to Linus.  I've checked for other errors in the original patch.
+
+Where did you push this fix?
+
+I don't see this in the mmc-next branch of git://dev.laptop.org/users/cjb/mmc
+
+Thanks,
+
+Kevin
