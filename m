@@ -1,180 +1,104 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH 1/6] mmc: sdhci-s3c: Remove usage of clk_type member in
- platform data
-Date: Thu, 03 Nov 2011 02:05:58 +0530
-Message-ID: <1320266163-15292-2-git-send-email-thomas.abraham@linaro.org>
+Subject: [PATCH 5/6] mmc: Add OF bindings support for mmc host controller
+ capabilities
+Date: Thu, 03 Nov 2011 02:06:02 +0530
+Message-ID: <1320266163-15292-6-git-send-email-thomas.abraham@linaro.org>
 References: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 In-reply-to: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org>
 Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
-Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org, Jeongbae Seo <jeongbae.seo@samsung.com>
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
 
-SDHCI controllers on Exynos4 do not include the sdclk divider as per the
-sdhci controller specification. This case can be represented using the
-sdhci quirk SDHCI_QUIRK_NONSTANDARD_CLOCK instead of using an additional
-enum type definition 'clk_types'.
+Device nodes representing sd/mmc controllers in a device tree would include
+mmc host controller capabilities. Add support for parsing of mmc host
+controller capabilities included in device nodes.
 
-Hence, usage of clk_type member in platform data is removed and the sdhci
-quirk is used. In addition to that, since this qurik is SoC specific,
-driver data is introduced to represent controllers on SoC's that require
-this quirk.
-
-Cc: Ben Dooks <ben-linux@fluff.org>
-Cc: Jeongbae Seo <jeongbae.seo@samsung.com>
 Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 ---
- drivers/mmc/host/sdhci-s3c.c |   74 +++++++++++++++++++++++++++++++++++++++--
- 1 files changed, 70 insertions(+), 4 deletions(-)
+ .../devicetree/bindings/mmc/linux-mmc-host.txt     |   13 ++++++++
+ drivers/mmc/core/host.c                            |   31 ++++++++++++++++++++
+ include/linux/mmc/host.h                           |    1 +
+ 3 files changed, 45 insertions(+), 0 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/linux-mmc-host.txt
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 7551468..141fbbf 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -53,6 +53,18 @@ struct sdhci_s3c {
- 	struct clk		*clk_bus[MAX_BUS_CLK];
- };
+diff --git a/Documentation/devicetree/bindings/mmc/linux-mmc-host.txt b/Documentation/devicetree/bindings/mmc/linux-mmc-host.txt
+new file mode 100644
+index 0000000..714b2b1
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/linux-mmc-host.txt
+@@ -0,0 +1,13 @@
++* Linux MMC Host Controller Capabilities
++
++The following bindings can be used in a device node to specify any board
++specific mmc host controller capabilities.
++
++- linux,mmc_cap_4_bit_data - Host can do 4-bit transfers
++- linux,mmc_cap_mmc_highspeed - Host can do MMC high-speed timing
++- linux,mmc_cap_sd_highspeed - Host can do SD high-speed timing
++- linux,mmc_cap_needs_poll - Host needs polling for card detection
++- linux,mmc_cap_8_bit_data - Host can do 8-bit transfer
++- linux,mmc_cap_disable - Host can be disabled and re-enabled to save power
++- linux,mmc_cap_nonremovable - Host is connected to nonremovable media
++- linux,mmc_cap_erase - Host allows erase/trim commands
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index ca2e4f5..aabf440 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -19,6 +19,7 @@
+ #include <linux/leds.h>
+ #include <linux/slab.h>
+ #include <linux/suspend.h>
++#include <linux/of.h>
  
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
+@@ -396,3 +397,33 @@ void mmc_free_host(struct mmc_host *host)
+ }
+ 
+ EXPORT_SYMBOL(mmc_free_host);
++
++#ifdef CONFIG_OF
 +/**
-+ * struct sdhci_s3c_driver_data - S3C SDHCI platform specific driver data
-+ * @sdhci_quirks: sdhci host specific quirks.
++ *	mmc_of_parse_host_caps - parse mmc host capabilities from device node
++ *	@np: pointer to device node in device tree
++ *	@caps: pointer to host caps value to be returned
 + *
-+ * Specifies platform specific configuration of sdhci controller.
-+ * Note: A structure for driver specific platform data is used for future
-+ * expansion of its usage.
++ *	Search the device node in device tree for mmc host capabilities.
 + */
-+struct sdhci_s3c_drv_data {
-+	unsigned int	sdhci_quirks;
-+};
-+
- static inline struct sdhci_s3c *to_s3c(struct sdhci_host *host)
- {
- 	return sdhci_priv(host);
-@@ -132,10 +144,10 @@ static unsigned int sdhci_s3c_consider_clock(struct sdhci_s3c *ourhost,
- 		return UINT_MAX;
- 
- 	/*
--	 * Clock divider's step is different as 1 from that of host controller
--	 * when 'clk_type' is S3C_SDHCI_CLK_DIV_EXTERNAL.
-+	 * If controller uses a non-standard clock division, find the best clock
-+	 * speed possible with selected clock source and skip the division.
- 	 */
--	if (ourhost->pdata->clk_type) {
-+	if (ourhost->host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
- 		rate = clk_round_rate(clksrc, wanted);
- 		return wanted - rate;
- 	}
-@@ -272,6 +284,8 @@ static unsigned int sdhci_cmu_get_min_clock(struct sdhci_host *host)
- static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	struct sdhci_s3c *ourhost = to_s3c(host);
-+	unsigned long timeout;
-+	u16 clk = 0;
- 
- 	/* don't bother if the clock is going off */
- 	if (clock == 0)
-@@ -282,6 +296,25 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
- 	clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
- 
- 	host->clock = clock;
-+
-+	clk = SDHCI_CLOCK_INT_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+
-+	/* Wait max 20 ms */
-+	timeout = 20;
-+	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-+		& SDHCI_CLOCK_INT_STABLE)) {
-+		if (timeout == 0) {
-+			printk(KERN_ERR "%s: Internal clock never "
-+				"stabilised.\n", mmc_hostname(host->mmc));
-+			return;
-+		}
-+		timeout--;
-+		mdelay(1);
-+	}
-+
-+	clk |= SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
- }
- 
- /**
-@@ -382,9 +415,17 @@ static void sdhci_s3c_setup_card_detect_gpio(struct sdhci_s3c *sc)
- 	}
- }
- 
-+static inline struct sdhci_s3c_drv_data *sdhci_s3c_get_driver_data(
-+			struct platform_device *pdev)
++void mmc_of_parse_host_caps(struct device_node *np, unsigned long *caps)
 +{
-+	return (struct sdhci_s3c_drv_data *)
-+			platform_get_device_id(pdev)->driver_data;
++	if (of_find_property(np, "linux,mmc_cap_4_bit_data", NULL))
++		*caps |= MMC_CAP_4_BIT_DATA;
++	if (of_find_property(np, "linux,mmc_cap_mmc_highspeed", NULL))
++		*caps |= MMC_CAP_MMC_HIGHSPEED;
++	if (of_find_property(np, "linux,mmc_cap_sd_highspeed", NULL))
++		*caps |= MMC_CAP_SD_HIGHSPEED;
++	if (of_find_property(np, "linux,mmc_cap_needs_poll", NULL))
++		*caps |= MMC_CAP_NEEDS_POLL;
++	if (of_find_property(np, "linux,mmc_cap_8_bit_data", NULL))
++		*caps |= MMC_CAP_8_BIT_DATA;
++	if (of_find_property(np, "linux,mmc_cap_disable", NULL))
++		*caps |= MMC_CAP_DISABLE;
++	if (of_find_property(np, "linux,mmc_cap_nonremovable", NULL))
++		*caps |= MMC_CAP_NONREMOVABLE;
++	if (of_find_property(np, "linux,mmc_cap_erase", NULL))
++		*caps |= MMC_CAP_ERASE;
 +}
-+
- static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
++EXPORT_SYMBOL(mmc_of_parse_host_caps);
++#endif /* CONFIG_OF */
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index a3ac9c4..c81c6e8 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -330,6 +330,7 @@ extern struct mmc_host *mmc_alloc_host(int extra, struct device *);
+ extern int mmc_add_host(struct mmc_host *);
+ extern void mmc_remove_host(struct mmc_host *);
+ extern void mmc_free_host(struct mmc_host *);
++extern void mmc_of_parse_host_caps(struct device_node *np, unsigned long *caps);
+ 
+ static inline void *mmc_priv(struct mmc_host *host)
  {
- 	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
-+	struct sdhci_s3c_drv_data *drv_data;
- 	struct device *dev = &pdev->dev;
- 	struct sdhci_host *host;
- 	struct sdhci_s3c *sc;
-@@ -414,6 +455,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		return PTR_ERR(host);
- 	}
- 
-+	drv_data = sdhci_s3c_get_driver_data(pdev);
- 	sc = sdhci_priv(host);
- 
- 	sc->host = host;
-@@ -491,6 +533,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	/* Setup quirks for the controller */
- 	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
- 	host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
-+	if (drv_data)
-+		host->quirks |= drv_data->sdhci_quirks;
- 
- #ifndef CONFIG_MMC_SDHCI_S3C_DMA
- 
-@@ -531,7 +575,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	 * If controller does not have internal clock divider,
- 	 * we can use overriding functions instead of default.
- 	 */
--	if (pdata->clk_type) {
-+	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
- 		sdhci_s3c_ops.set_clock = sdhci_cmu_set_clock;
- 		sdhci_s3c_ops.get_min_clock = sdhci_cmu_get_min_clock;
- 		sdhci_s3c_ops.get_max_clock = sdhci_cmu_get_max_clock;
-@@ -638,9 +682,31 @@ static int sdhci_s3c_resume(struct platform_device *dev)
- #define sdhci_s3c_resume NULL
- #endif
- 
-+#if defined(CONFIG_CPU_EXYNOS4210) || defined(CONFIG_SOC_EXYNOS4212)
-+static struct sdhci_s3c_drv_data exynos4_sdhci_drv_data = {
-+	.sdhci_quirks = SDHCI_QUIRK_NONSTANDARD_CLOCK,
-+};
-+#define EXYNOS4_SDHCI_DRV_DATA ((kernel_ulong_t)&exynos4_sdhci_drv_data)
-+#else
-+#define EXYNOS4_SDHCI_DRV_DATA (kernel_ulong_t)NULL
-+#endif
-+
-+static struct platform_device_id sdhci_s3c_driver_ids[] = {
-+	{
-+		.name		= "s3c-sdhci",
-+		.driver_data	= (kernel_ulong_t)NULL,
-+	},
-+	{
-+		.name		= "exynos4-sdhci",
-+		.driver_data	= EXYNOS4_SDHCI_DRV_DATA,
-+	},
-+};
-+MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
-+
- static struct platform_driver sdhci_s3c_driver = {
- 	.probe		= sdhci_s3c_probe,
- 	.remove		= __devexit_p(sdhci_s3c_remove),
-+	.id_table	= sdhci_s3c_driver_ids,
- 	.suspend	= sdhci_s3c_suspend,
- 	.resume	        = sdhci_s3c_resume,
- 	.driver		= {
 -- 
 1.6.6.rc2
