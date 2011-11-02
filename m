@@ -1,43 +1,68 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V6] SDHCI: S3C: Use generic clock names for sdhci bus clock options
-Date: Wed, 02 Nov 2011 13:56:32 -0400
-Message-ID: <m2aa8e9zn3.fsf@bob.laptop.org>
-References: <1320039876-21148-1-git-send-email-rajeshwari.s@samsung.com>
-	<005301cc9958$bcf5aa10$36e0fe30$%kim@samsung.com>
+From: Thomas Weber <thomas.weber.linux@googlemail.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Fix build for hsmmc
+Date: Wed, 2 Nov 2011 19:57:08 +0100
+Message-ID: <CABoOg6wtN-t-DRKCWukauMQZ=FRDUcVRxVAVaaYco+sWAqT3Ug@mail.gmail.com>
+References: <20111102170619.GJ31337@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <005301cc9958$bcf5aa10$36e0fe30$%kim@samsung.com> (Kukjin Kim's
-	message of "Wed, 02 Nov 2011 21:12:49 +0900")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>
-Cc: 'Rajeshwari Shinde' <rajeshwari.s@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20111102170619.GJ31337@atomide.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Kukjin,
+Hello Tony, hello
+Chris,https://mail.google.com/mail/?shva=3D1#label/linux-omap/133653efb=
+30ae047
 
-On Wed, Nov 02 2011, Kukjin Kim wrote:
->> This patch modifies the driver to stop depending on the clock names
->> being passed from the platform and switch over to bus clock lookup
->> using generic clock names.
->> 
->> V6 Changes:
->> Changed sprintf to snprintf as suggested by Chris Ball.
->> 
->> Signed-off-by: Rajeshwari Shinde <rajeshwari.s@samsung.com>
+isn't this already fixed?
+
+http://marc.info/?l=3Dlinux-omap&m=3D131991921316862&w=3D2
+
+[PATCH] omap_hsmmc: fix missing parenthesis in pr_info
+
+Thomas
+
+On Wed, Nov 2, 2011 at 6:06 PM, Tony Lindgren <tony@atomide.com> wrote:
+> Commit a3c76eb9d4a1e68a69dd880cf0bcb8a52418b993 (mmc: replace
+> printk with appropriate display macro) does not compile:
 >
-> Acked-by: Kukjin Kim <kgene.kim@samsung.com>
+> drivers/mmc/host/omap_hsmmc.c: In function 'omap_hsmmc_protect_card':
+> drivers/mmc/host/omap_hsmmc.c:1273: error: 'pr_info' undeclared (firs=
+t use in this function)
+> drivers/mmc/host/omap_hsmmc.c:1273: error: (Each undeclared identifie=
+r is reported only once
+> drivers/mmc/host/omap_hsmmc.c:1273: error: for each function it appea=
+rs in.)
+> drivers/mmc/host/omap_hsmmc.c:1273: error: expected ';' before string=
+ constant
+> drivers/mmc/host/omap_hsmmc.c:1275: error: expected statement before =
+')' token
+> distcc[15197] ERROR: compile drivers/mmc/host/omap_hsmmc.c on localho=
+st failed
 >
-> Hi Chirs,
+> Cc: Girish K S <girish.shivananjappa@linaro.org>
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
 >
-> Could you please pick this up in your tree for this merge window?
-
-Might be easier to have you send this, if you don't mind, since I'm
-still traveling and have already sent my main pull request.  Thanks!
-
-Acked-by: Chris Ball <cjb@laptop.org>
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1270,7 +1270,7 @@ static void omap_hsmmc_protect_card(struct omap=
+_hsmmc_host *host)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+> =A0 =A0 =A0 =A0} else {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (!host->protect_card) {
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_info"%s: cover is op=
+en, "
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_info("%s: cover is o=
+pen, "
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 "card is now inaccessible\n",
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 mmc_hostname(host->mmc));
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->protect_card =3D=
+ 1;
+>
