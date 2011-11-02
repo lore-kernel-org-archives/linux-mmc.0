@@ -1,42 +1,32 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH V6] SDHCI: S3C: Use generic clock names for sdhci bus
- clock options
-Date: Thu, 3 Nov 2011 02:11:56 +0530
-Message-ID: <CAJuYYwSav=zEWLpkSsCLF4RafZHsXimayd2APqBrKe6DiQZKwQ@mail.gmail.com>
-References: <1320039876-21148-1-git-send-email-rajeshwari.s@samsung.com>
+From: Praveen Krishnan <praveen.gk@gmail.com>
+Subject: DDR eMMC write failures
+Date: Wed, 2 Nov 2011 16:51:03 -0700
+Message-ID: <CAHzg1A-7RNthipDredO4KSrC+bM0nqLuhWaw1cveFzzfXd2k3Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1320039876-21148-1-git-send-email-rajeshwari.s@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Rajeshwari Shinde <rajeshwari.s@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:54221 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752419Ab1KBXvF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2011 19:51:05 -0400
+Received: by faao14 with SMTP id o14so942602faa.19
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Nov 2011 16:51:03 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-On 31 October 2011 11:14, Rajeshwari Shinde <rajeshwari.s@samsung.com> =
-wrote:
-> This patch modifies the driver to stop depending on the clock names
-> being passed from the platform and switch over to bus clock lookup
-> using generic clock names.
->
-> V6 Changes:
-> Changed sprintf to snprintf as suggested by Chris Ball.
+Hello all,
 
-The above two lines can be removed from the commit message.
+I am working on getting the DDR50 mode up and running for the eMMC
+cards.  I am running into some weird CRC error cases.  Initially, I
+thought that everything works fine, but when I stress test it with
+large amounts of data (more than 100MB of writes), I notice that my
+console is spewed with venomous error messages.  I get a CRC error and
+every now and then, I also see this message "Got data interrupt even
+though no data operation was in progress" and "Buffer I/O error" and
+so on.
 
->
-> Signed-off-by: Rajeshwari Shinde <rajeshwari.s@samsung.com>
-> ---
-> =A0drivers/mmc/host/sdhci-s3c.c | =A0 =A07 ++-----
-> =A01 files changed, 2 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3=
-c.c
-> index 82709b6..488223c 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -435,14 +435,11 @@ static int __devinit sdhci_s3c_probe(struct pla=
-tform_device *pdev)
+Can anybody give any pointers as to what could be causing this?
 
-[...]
+Thanks a lot,
+Praveen
