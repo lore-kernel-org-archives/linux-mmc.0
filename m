@@ -1,104 +1,182 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH 5/6] mmc: Add OF bindings support for mmc host controller
- capabilities
-Date: Thu, 03 Nov 2011 02:06:02 +0530
-Message-ID: <1320266163-15292-6-git-send-email-thomas.abraham@linaro.org>
+From: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 2/6] arm: exynos4: use 'exynos4-sdhci' as device name for sdhci
+ controllers
+Date: Thu, 03 Nov 2011 02:05:59 +0530
+Message-ID: <1320266163-15292-3-git-send-email-thomas.abraham@linaro.org>
 References: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
-Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-reply-to: <1320266163-15292-1-git-send-email-thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Cc: linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Device nodes representing sd/mmc controllers in a device tree would include
-mmc host controller capabilities. Add support for parsing of mmc host
-controller capabilities included in device nodes.
+With the addition of platform specific driver data in the sdhci driver
+for exynos4, the device name of sdhci controllers on exynos4 is changed
+accordingly.
 
-Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: Kukjin Kim <kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Signed-off-by: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- .../devicetree/bindings/mmc/linux-mmc-host.txt     |   13 ++++++++
- drivers/mmc/core/host.c                            |   31 ++++++++++++++++++++
- include/linux/mmc/host.h                           |    1 +
- 3 files changed, 45 insertions(+), 0 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/linux-mmc-host.txt
+ arch/arm/mach-exynos4/clock.c              |   24 ++++++++++++------------
+ arch/arm/mach-exynos4/cpu.c                |    5 +++++
+ arch/arm/plat-samsung/include/plat/sdhci.h |   27 +++++++++++++++++++++++++++
+ 3 files changed, 44 insertions(+), 12 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/linux-mmc-host.txt b/Documentation/devicetree/bindings/mmc/linux-mmc-host.txt
-new file mode 100644
-index 0000000..714b2b1
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/linux-mmc-host.txt
-@@ -0,0 +1,13 @@
-+* Linux MMC Host Controller Capabilities
-+
-+The following bindings can be used in a device node to specify any board
-+specific mmc host controller capabilities.
-+
-+- linux,mmc_cap_4_bit_data - Host can do 4-bit transfers
-+- linux,mmc_cap_mmc_highspeed - Host can do MMC high-speed timing
-+- linux,mmc_cap_sd_highspeed - Host can do SD high-speed timing
-+- linux,mmc_cap_needs_poll - Host needs polling for card detection
-+- linux,mmc_cap_8_bit_data - Host can do 8-bit transfer
-+- linux,mmc_cap_disable - Host can be disabled and re-enabled to save power
-+- linux,mmc_cap_nonremovable - Host is connected to nonremovable media
-+- linux,mmc_cap_erase - Host allows erase/trim commands
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index ca2e4f5..aabf440 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -19,6 +19,7 @@
- #include <linux/leds.h>
- #include <linux/slab.h>
- #include <linux/suspend.h>
-+#include <linux/of.h>
+diff --git a/arch/arm/mach-exynos4/clock.c b/arch/arm/mach-exynos4/clock.c
+index 6eeabdd..94fc337 100644
+--- a/arch/arm/mach-exynos4/clock.c
++++ b/arch/arm/mach-exynos4/clock.c
+@@ -495,25 +495,25 @@ static struct clk init_clocks_off[] = {
+ 		.ctrlbit	= (1 << 0),
+ 	}, {
+ 		.name		= "hsmmc",
+-		.devname	= "s3c-sdhci.0",
++		.devname	= "exynos4-sdhci.0",
+ 		.parent		= &clk_aclk_133.clk,
+ 		.enable		= exynos4_clk_ip_fsys_ctrl,
+ 		.ctrlbit	= (1 << 5),
+ 	}, {
+ 		.name		= "hsmmc",
+-		.devname	= "s3c-sdhci.1",
++		.devname	= "exynos4-sdhci.1",
+ 		.parent		= &clk_aclk_133.clk,
+ 		.enable		= exynos4_clk_ip_fsys_ctrl,
+ 		.ctrlbit	= (1 << 6),
+ 	}, {
+ 		.name		= "hsmmc",
+-		.devname	= "s3c-sdhci.2",
++		.devname	= "exynos4-sdhci.2",
+ 		.parent		= &clk_aclk_133.clk,
+ 		.enable		= exynos4_clk_ip_fsys_ctrl,
+ 		.ctrlbit	= (1 << 7),
+ 	}, {
+ 		.name		= "hsmmc",
+-		.devname	= "s3c-sdhci.3",
++		.devname	= "exynos4-sdhci.3",
+ 		.parent		= &clk_aclk_133.clk,
+ 		.enable		= exynos4_clk_ip_fsys_ctrl,
+ 		.ctrlbit	= (1 << 8),
+@@ -1221,7 +1221,7 @@ static struct clksrc_clk clk_sclk_uart3 = {
+ static struct clksrc_clk clk_sclk_mmc0 = {
+ 	.clk		= {
+ 		.name		= "sclk_mmc",
+-		.devname	= "s3c-sdhci.0",
++		.devname	= "exynos4-sdhci.0",
+ 		.parent		= &clk_dout_mmc0.clk,
+ 		.enable		= exynos4_clksrc_mask_fsys_ctrl,
+ 		.ctrlbit	= (1 << 0),
+@@ -1232,7 +1232,7 @@ static struct clksrc_clk clk_sclk_mmc0 = {
+ static struct clksrc_clk clk_sclk_mmc1 = {
+ 	.clk		= {
+ 		.name		= "sclk_mmc",
+-		.devname	= "s3c-sdhci.1",
++		.devname	= "exynos4-sdhci.1",
+ 		.parent         = &clk_dout_mmc1.clk,
+ 		.enable		= exynos4_clksrc_mask_fsys_ctrl,
+ 		.ctrlbit	= (1 << 4),
+@@ -1243,7 +1243,7 @@ static struct clksrc_clk clk_sclk_mmc1 = {
+ static struct clksrc_clk clk_sclk_mmc2 = {
+ 	.clk		= {
+ 		.name		= "sclk_mmc",
+-		.devname	= "s3c-sdhci.2",
++		.devname	= "exynos4-sdhci.2",
+ 		.parent         = &clk_dout_mmc2.clk,
+ 		.enable		= exynos4_clksrc_mask_fsys_ctrl,
+ 		.ctrlbit	= (1 << 8),
+@@ -1254,7 +1254,7 @@ static struct clksrc_clk clk_sclk_mmc2 = {
+ static struct clksrc_clk clk_sclk_mmc3 = {
+ 	.clk		= {
+ 		.name		= "sclk_mmc",
+-		.devname	= "s3c-sdhci.3",
++		.devname	= "exynos4-sdhci.3",
+ 		.parent         = &clk_dout_mmc3.clk,
+ 		.enable		= exynos4_clksrc_mask_fsys_ctrl,
+ 		.ctrlbit	= (1 << 12),
+@@ -1317,10 +1317,10 @@ static struct clk_lookup exynos4_clk_lookup[] = {
+ 	CLKDEV_INIT("exynos4210-uart.1", "clk_uart_baud0", &clk_sclk_uart1.clk),
+ 	CLKDEV_INIT("exynos4210-uart.2", "clk_uart_baud0", &clk_sclk_uart2.clk),
+ 	CLKDEV_INIT("exynos4210-uart.3", "clk_uart_baud0", &clk_sclk_uart3.clk),
+-	CLKDEV_INIT("s3c-sdhci.0", "mmc_busclk.2", &clk_sclk_mmc0.clk),
+-	CLKDEV_INIT("s3c-sdhci.1", "mmc_busclk.2", &clk_sclk_mmc1.clk),
+-	CLKDEV_INIT("s3c-sdhci.2", "mmc_busclk.2", &clk_sclk_mmc2.clk),
+-	CLKDEV_INIT("s3c-sdhci.3", "mmc_busclk.2", &clk_sclk_mmc3.clk),
++	CLKDEV_INIT("exynos4-sdhci.0", "mmc_busclk.2", &clk_sclk_mmc0.clk),
++	CLKDEV_INIT("exynos4-sdhci.1", "mmc_busclk.2", &clk_sclk_mmc1.clk),
++	CLKDEV_INIT("exynos4-sdhci.2", "mmc_busclk.2", &clk_sclk_mmc2.clk),
++	CLKDEV_INIT("exynos4-sdhci.3", "mmc_busclk.2", &clk_sclk_mmc3.clk),
+ 	CLKDEV_INIT("dma-pl330.0", "apb_pclk", &clk_pdma0),
+ 	CLKDEV_INIT("dma-pl330.1", "apb_pclk", &clk_pdma1),
+ };
+diff --git a/arch/arm/mach-exynos4/cpu.c b/arch/arm/mach-exynos4/cpu.c
+index 6ac9baf..152c8b1 100644
+--- a/arch/arm/mach-exynos4/cpu.c
++++ b/arch/arm/mach-exynos4/cpu.c
+@@ -195,6 +195,11 @@ void __init exynos4_map_io(void)
+ 	s3c_fimc_setname(2, "exynos4-fimc");
+ 	s3c_fimc_setname(3, "exynos4-fimc");
  
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
-@@ -396,3 +397,33 @@ void mmc_free_host(struct mmc_host *host)
- }
- 
- EXPORT_SYMBOL(mmc_free_host);
++	s3c_sdhci_setname(0, "exynos4-sdhci");
++	s3c_sdhci_setname(1, "exynos4-sdhci");
++	s3c_sdhci_setname(2, "exynos4-sdhci");
++	s3c_sdhci_setname(3, "exynos4-sdhci");
 +
-+#ifdef CONFIG_OF
-+/**
-+ *	mmc_of_parse_host_caps - parse mmc host capabilities from device node
-+ *	@np: pointer to device node in device tree
-+ *	@caps: pointer to host caps value to be returned
-+ *
-+ *	Search the device node in device tree for mmc host capabilities.
-+ */
-+void mmc_of_parse_host_caps(struct device_node *np, unsigned long *caps)
+ 	/* The I2C bus controllers are directly compatible with s3c2440 */
+ 	s3c_i2c0_setname("s3c2440-i2c");
+ 	s3c_i2c1_setname("s3c2440-i2c");
+diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/plat-samsung/include/plat/sdhci.h
+index dcff7dd..8daaa4d 100644
+--- a/arch/arm/plat-samsung/include/plat/sdhci.h
++++ b/arch/arm/plat-samsung/include/plat/sdhci.h
+@@ -18,6 +18,8 @@
+ #ifndef __PLAT_S3C_SDHCI_H
+ #define __PLAT_S3C_SDHCI_H __FILE__
+ 
++#include <plat/devs.h>
++
+ struct platform_device;
+ struct mmc_host;
+ struct mmc_card;
+@@ -309,4 +311,29 @@ static inline void exynos4_default_sdhci3(void) { }
+ 
+ #endif /* CONFIG_EXYNOS4_SETUP_SDHCI */
+ 
++static inline void s3c_sdhci_setname(int id, char *name)
 +{
-+	if (of_find_property(np, "linux,mmc_cap_4_bit_data", NULL))
-+		*caps |= MMC_CAP_4_BIT_DATA;
-+	if (of_find_property(np, "linux,mmc_cap_mmc_highspeed", NULL))
-+		*caps |= MMC_CAP_MMC_HIGHSPEED;
-+	if (of_find_property(np, "linux,mmc_cap_sd_highspeed", NULL))
-+		*caps |= MMC_CAP_SD_HIGHSPEED;
-+	if (of_find_property(np, "linux,mmc_cap_needs_poll", NULL))
-+		*caps |= MMC_CAP_NEEDS_POLL;
-+	if (of_find_property(np, "linux,mmc_cap_8_bit_data", NULL))
-+		*caps |= MMC_CAP_8_BIT_DATA;
-+	if (of_find_property(np, "linux,mmc_cap_disable", NULL))
-+		*caps |= MMC_CAP_DISABLE;
-+	if (of_find_property(np, "linux,mmc_cap_nonremovable", NULL))
-+		*caps |= MMC_CAP_NONREMOVABLE;
-+	if (of_find_property(np, "linux,mmc_cap_erase", NULL))
-+		*caps |= MMC_CAP_ERASE;
++	switch (id) {
++#ifdef CONFIG_S3C_DEV_HSMMC
++	case 0:
++		s3c_device_hsmmc0.name = name;
++		break;
++#endif
++#ifdef CONFIG_S3C_DEV_HSMMC1
++	case 1:
++		s3c_device_hsmmc1.name = name;
++		break;
++#endif
++#ifdef CONFIG_S3C_DEV_HSMMC2
++	case 2:
++		s3c_device_hsmmc2.name = name;
++		break;
++#endif
++#ifdef CONFIG_S3C_DEV_HSMMC3
++	case 3:
++		s3c_device_hsmmc3.name = name;
++		break;
++#endif
++	}
 +}
-+EXPORT_SYMBOL(mmc_of_parse_host_caps);
-+#endif /* CONFIG_OF */
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index a3ac9c4..c81c6e8 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -330,6 +330,7 @@ extern struct mmc_host *mmc_alloc_host(int extra, struct device *);
- extern int mmc_add_host(struct mmc_host *);
- extern void mmc_remove_host(struct mmc_host *);
- extern void mmc_free_host(struct mmc_host *);
-+extern void mmc_of_parse_host_caps(struct device_node *np, unsigned long *caps);
- 
- static inline void *mmc_priv(struct mmc_host *host)
- {
+ #endif /* __PLAT_S3C_SDHCI_H */
 -- 
 1.6.6.rc2
