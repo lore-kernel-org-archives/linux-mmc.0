@@ -1,138 +1,421 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: RFC:  Ricoh Controller sd
-Date: Wed, 2 Nov 2011 06:46:17 -0700
-Message-ID: <5BB414E9-67B8-4FBE-A674-2FA6ECAFB959@marvell.com>
-References: <04757B09-064A-4E08-878C-15C2171B2299@marvell.com>
- <45FA27B2-1769-47BD-999B-58CA09F8A5BA@marvell.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: remove "state" argument from sdhci_suspend_host
+Date: Wed, 02 Nov 2011 15:55:53 +0200
+Message-ID: <4EB14BE9.4050202@intel.com>
+References: <1320236002-28715-1-git-send-email-manuel.lauss@googlemail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:55799 "EHLO
-	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752450Ab1KBNrV convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 2 Nov 2011 09:47:21 -0400
-In-Reply-To: <45FA27B2-1769-47BD-999B-58CA09F8A5BA@marvell.com>
-Content-Language: en-US
+Received: from mga11.intel.com ([192.55.52.93]:49326 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755494Ab1KBNz4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 2 Nov 2011 09:55:56 -0400
+In-Reply-To: <1320236002-28715-1-git-send-email-manuel.lauss@googlemail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Arindam.Nath@amd.com Nath" <arindam.nath@amd.com>
-Cc: Bing Zhao <bzhao@marvell.com>, Aaron Lu <Aaron.Lu@amd.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>
+To: Manuel Lauss <manuel.lauss@googlemail.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, ben-linux@fluff.org
+
+On 02/11/11 14:13, Manuel Lauss wrote:
+> Drop the "state" argument from sdhci_suspend_host.  It's only user
+> is the PCI glue;  this allows to move all SDHCI glues to use
+> dev_pm_ops instead.
+> 
+> Signed-off-by: Manuel Lauss <manuel.lauss@googlemail.com>
+> ---
+>  drivers/mmc/host/sdhci-cns3xxx.c   |    5 +----
+>  drivers/mmc/host/sdhci-dove.c      |    5 +----
+>  drivers/mmc/host/sdhci-esdhc-imx.c |    5 +----
+>  drivers/mmc/host/sdhci-of-esdhc.c  |    5 +----
+>  drivers/mmc/host/sdhci-of-hlwd.c   |    5 +----
+>  drivers/mmc/host/sdhci-pci.c       |   25 +++++++++++++------------
+>  drivers/mmc/host/sdhci-pltfm.c     |   18 +++++++++++-------
+>  drivers/mmc/host/sdhci-pltfm.h     |    6 ++++--
+>  drivers/mmc/host/sdhci-pxav2.c     |    5 +----
+>  drivers/mmc/host/sdhci-pxav3.c     |    5 +----
+>  drivers/mmc/host/sdhci-s3c.c       |   22 +---------------------
+>  drivers/mmc/host/sdhci-tegra.c     |    5 +----
+>  drivers/mmc/host/sdhci.c           |    2 +-
+>  drivers/mmc/host/sdhci.h           |    2 +-
+>  14 files changed, 39 insertions(+), 76 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
+> index 4b920b7..fbd0638 100644
+> --- a/drivers/mmc/host/sdhci-cns3xxx.c
+> +++ b/drivers/mmc/host/sdhci-cns3xxx.c
+> @@ -108,13 +108,10 @@ static struct platform_driver sdhci_cns3xxx_driver = {
+>  	.driver		= {
+>  		.name	= "sdhci-cns3xxx",
+>  		.owner	= THIS_MODULE,
+> +		.pm	= SDHCI_PLTFM_PMOPS,
+>  	},
+>  	.probe		= sdhci_cns3xxx_probe,
+>  	.remove		= __devexit_p(sdhci_cns3xxx_remove),
+> -#ifdef CONFIG_PM
+> -	.suspend	= sdhci_pltfm_suspend,
+> -	.resume		= sdhci_pltfm_resume,
+> -#endif
+>  };
+>  
+>  static int __init sdhci_cns3xxx_init(void)
+> diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
+> index f2d29dc..a81312c 100644
+> --- a/drivers/mmc/host/sdhci-dove.c
+> +++ b/drivers/mmc/host/sdhci-dove.c
+> @@ -82,13 +82,10 @@ static struct platform_driver sdhci_dove_driver = {
+>  	.driver		= {
+>  		.name	= "sdhci-dove",
+>  		.owner	= THIS_MODULE,
+> +		.pm	= SDHCI_PLTFM_PMOPS,
+>  	},
+>  	.probe		= sdhci_dove_probe,
+>  	.remove		= __devexit_p(sdhci_dove_remove),
+> -#ifdef CONFIG_PM
+> -	.suspend	= sdhci_pltfm_suspend,
+> -	.resume		= sdhci_pltfm_resume,
+> -#endif
+>  };
+>  
+>  static int __init sdhci_dove_init(void)
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index ae57769..8fc8006 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -591,14 +591,11 @@ static struct platform_driver sdhci_esdhc_imx_driver = {
+>  		.name	= "sdhci-esdhc-imx",
+>  		.owner	= THIS_MODULE,
+>  		.of_match_table = imx_esdhc_dt_ids,
+> +		.pm	= SDHCI_PLTFM_PMOPS,
+>  	},
+>  	.id_table	= imx_esdhc_devtype,
+>  	.probe		= sdhci_esdhc_imx_probe,
+>  	.remove		= __devexit_p(sdhci_esdhc_imx_remove),
+> -#ifdef CONFIG_PM
+> -	.suspend	= sdhci_pltfm_suspend,
+> -	.resume		= sdhci_pltfm_resume,
+> -#endif
+>  };
+>  
+>  static int __init sdhci_esdhc_imx_init(void)
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 59e9d00..01e5f62 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -125,13 +125,10 @@ static struct platform_driver sdhci_esdhc_driver = {
+>  		.name = "sdhci-esdhc",
+>  		.owner = THIS_MODULE,
+>  		.of_match_table = sdhci_esdhc_of_match,
+> +		.pm = SDHCI_PLTFM_PMOPS,
+>  	},
+>  	.probe = sdhci_esdhc_probe,
+>  	.remove = __devexit_p(sdhci_esdhc_remove),
+> -#ifdef CONFIG_PM
+> -	.suspend = sdhci_pltfm_suspend,
+> -	.resume = sdhci_pltfm_resume,
+> -#endif
+>  };
+>  
+>  static int __init sdhci_esdhc_init(void)
+> diff --git a/drivers/mmc/host/sdhci-of-hlwd.c b/drivers/mmc/host/sdhci-of-hlwd.c
+> index 9b0d794..3619adc 100644
+> --- a/drivers/mmc/host/sdhci-of-hlwd.c
+> +++ b/drivers/mmc/host/sdhci-of-hlwd.c
+> @@ -87,13 +87,10 @@ static struct platform_driver sdhci_hlwd_driver = {
+>  		.name = "sdhci-hlwd",
+>  		.owner = THIS_MODULE,
+>  		.of_match_table = sdhci_hlwd_of_match,
+> +		.pm = SDHCI_PLTFM_PMOPS,
+>  	},
+>  	.probe = sdhci_hlwd_probe,
+>  	.remove = __devexit_p(sdhci_hlwd_remove),
+> -#ifdef CONFIG_PM
+> -	.suspend = sdhci_pltfm_suspend,
+> -	.resume = sdhci_pltfm_resume,
+> -#endif
+>  };
+>  
+>  static int __init sdhci_hlwd_init(void)
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index d833d9c..e786d3f 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -54,8 +54,7 @@ struct sdhci_pci_fixes {
+>  	int			(*probe_slot) (struct sdhci_pci_slot *);
+>  	void			(*remove_slot) (struct sdhci_pci_slot *, int);
+>  
+> -	int			(*suspend) (struct sdhci_pci_chip *,
+> -					pm_message_t);
+> +	int			(*suspend) (struct sdhci_pci_chip *);
+>  	int			(*resume) (struct sdhci_pci_chip *);
+>  };
+>  
+> @@ -549,7 +548,7 @@ static void jmicron_remove_slot(struct sdhci_pci_slot *slot, int dead)
+>  		jmicron_enable_mmc(slot->host, 0);
+>  }
+>  
+> -static int jmicron_suspend(struct sdhci_pci_chip *chip, pm_message_t state)
+> +static int jmicron_suspend(struct sdhci_pci_chip *chip)
+>  {
+>  	int i;
+>  
+> @@ -993,8 +992,9 @@ static struct sdhci_ops sdhci_pci_ops = {
+>  
+>  #ifdef CONFIG_PM
+>  
+> -static int sdhci_pci_suspend(struct pci_dev *pdev, pm_message_t state)
+> +static int sdhci_pci_suspend(struct device *dev)
+>  {
+> +	struct pci_dev *pdev = to_pci_dev(dev);
+>  	struct sdhci_pci_chip *chip;
+>  	struct sdhci_pci_slot *slot;
+>  	mmc_pm_flag_t slot_pm_flags;
+> @@ -1010,7 +1010,7 @@ static int sdhci_pci_suspend(struct pci_dev *pdev, pm_message_t state)
+>  		if (!slot)
+>  			continue;
+>  
+> -		ret = sdhci_suspend_host(slot->host, state);
+> +		ret = sdhci_suspend_host(slot->host);
+>  
+>  		if (ret) {
+>  			for (i--; i >= 0; i--)
+> @@ -1026,7 +1026,7 @@ static int sdhci_pci_suspend(struct pci_dev *pdev, pm_message_t state)
+>  	}
+>  
+>  	if (chip->fixes && chip->fixes->suspend) {
+> -		ret = chip->fixes->suspend(chip, state);
+> +		ret = chip->fixes->suspend(chip);
+>  		if (ret) {
+>  			for (i = chip->num_slots - 1; i >= 0; i--)
+>  				sdhci_resume_host(chip->slots[i]->host);
+> @@ -1042,16 +1042,17 @@ static int sdhci_pci_suspend(struct pci_dev *pdev, pm_message_t state)
+>  		}
+>  		pci_set_power_state(pdev, PCI_D3hot);
+>  	} else {
+> -		pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
+> +		pci_enable_wake(pdev, PCI_D3hot, 0);
+>  		pci_disable_device(pdev);
+> -		pci_set_power_state(pdev, pci_choose_state(pdev, state));
+> +		pci_set_power_state(pdev, PCI_D3hot);
+>  	}
+>  
+>  	return 0;
+>  }
+>  
+> -static int sdhci_pci_resume(struct pci_dev *pdev)
+> +static int sdhci_pci_resume(struct device *dev)
+>  {
+> +	struct pci_dev *pdev = to_pci_dev(dev);
+>  	struct sdhci_pci_chip *chip;
+>  	struct sdhci_pci_slot *slot;
+>  	int i, ret;
+> @@ -1121,7 +1122,7 @@ static int sdhci_pci_runtime_suspend(struct device *dev)
+>  	}
+>  
+>  	if (chip->fixes && chip->fixes->suspend) {
+> -		ret = chip->fixes->suspend(chip, state);
+> +		ret = chip->fixes->suspend(chip);
+>  		if (ret) {
+>  			for (i = chip->num_slots - 1; i >= 0; i--)
+>  				sdhci_runtime_resume_host(chip->slots[i]->host);
+> @@ -1176,6 +1177,8 @@ static int sdhci_pci_runtime_idle(struct device *dev)
+>  #endif
+>  
+>  static const struct dev_pm_ops sdhci_pci_pm_ops = {
+> +	.suspend = sdhci_pci_suspend,
+> +	.resume = sdhci_pci_resume,
+>  	.runtime_suspend = sdhci_pci_runtime_suspend,
+>  	.runtime_resume = sdhci_pci_runtime_resume,
+>  	.runtime_idle = sdhci_pci_runtime_idle,
+> @@ -1428,8 +1431,6 @@ static struct pci_driver sdhci_driver = {
+>  	.id_table =	pci_ids,
+>  	.probe =	sdhci_pci_probe,
+>  	.remove =	__devexit_p(sdhci_pci_remove),
+> -	.suspend =	sdhci_pci_suspend,
+> -	.resume	=	sdhci_pci_resume,
+>  	.driver =	{
+>  		.pm =   &sdhci_pci_pm_ops
+>  	},
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> index a9e12ea..03970bc 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -194,21 +194,25 @@ int sdhci_pltfm_unregister(struct platform_device *pdev)
+>  EXPORT_SYMBOL_GPL(sdhci_pltfm_unregister);
+>  
+>  #ifdef CONFIG_PM
+> -int sdhci_pltfm_suspend(struct platform_device *dev, pm_message_t state)
+> +static int sdhci_pltfm_suspend(struct device *dev)
+>  {
+> -	struct sdhci_host *host = platform_get_drvdata(dev);
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>  
+> -	return sdhci_suspend_host(host, state);
+> +	return sdhci_suspend_host(host);
+>  }
+> -EXPORT_SYMBOL_GPL(sdhci_pltfm_suspend);
+>  
+> -int sdhci_pltfm_resume(struct platform_device *dev)
+> +static int sdhci_pltfm_resume(struct device *dev)
+>  {
+> -	struct sdhci_host *host = platform_get_drvdata(dev);
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>  
+>  	return sdhci_resume_host(host);
+>  }
+> -EXPORT_SYMBOL_GPL(sdhci_pltfm_resume);
+> +
+> +const struct dev_pm_ops sdhci_pltfm_pmops = {
+> +	.suspend	= sdhci_pltfm_suspend,
+> +	.resume		= sdhci_pltfm_resume,
+> +};
+> +EXPORT_SYMBOL_GPL(sdhci_pltfm_pmops);
+>  #endif	/* CONFIG_PM */
+>  
+>  static int __init sdhci_pltfm_drv_init(void)
+> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+> index 3a9fc3f..700bdf7 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.h
+> +++ b/drivers/mmc/host/sdhci-pltfm.h
+> @@ -99,8 +99,10 @@ extern int sdhci_pltfm_register(struct platform_device *pdev,
+>  extern int sdhci_pltfm_unregister(struct platform_device *pdev);
+>  
+>  #ifdef CONFIG_PM
+> -extern int sdhci_pltfm_suspend(struct platform_device *dev, pm_message_t state);
+> -extern int sdhci_pltfm_resume(struct platform_device *dev);
+> +extern struct dev_pm_ops sdhci_pltfm_pmops;
+> +#define SDHCI_PLTFM_PMOPS (&sdhci_pltfm_pmops)
+> +#else
+> +#define SDHCI_PLTFM_PMOPS NULL
+>  #endif
+>  
+>  #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
+> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+> index d4bf6d3..7a039c3 100644
+> --- a/drivers/mmc/host/sdhci-pxav2.c
+> +++ b/drivers/mmc/host/sdhci-pxav2.c
+> @@ -218,13 +218,10 @@ static struct platform_driver sdhci_pxav2_driver = {
+>  	.driver		= {
+>  		.name	= "sdhci-pxav2",
+>  		.owner	= THIS_MODULE,
+> +		.pm	= SDHCI_PLTFM_PMOPS,
+>  	},
+>  	.probe		= sdhci_pxav2_probe,
+>  	.remove		= __devexit_p(sdhci_pxav2_remove),
+> -#ifdef CONFIG_PM
+> -	.suspend	= sdhci_pltfm_suspend,
+> -	.resume		= sdhci_pltfm_resume,
+> -#endif
+>  };
+>  static int __init sdhci_pxav2_init(void)
+>  {
+> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+> index cff4ad3..15673a7 100644
+> --- a/drivers/mmc/host/sdhci-pxav3.c
+> +++ b/drivers/mmc/host/sdhci-pxav3.c
+> @@ -264,13 +264,10 @@ static struct platform_driver sdhci_pxav3_driver = {
+>  	.driver		= {
+>  		.name	= "sdhci-pxav3",
+>  		.owner	= THIS_MODULE,
+> +		.pm	= SDHCI_PLTFM_PMOPS,
+>  	},
+>  	.probe		= sdhci_pxav3_probe,
+>  	.remove		= __devexit_p(sdhci_pxav3_remove),
+> -#ifdef CONFIG_PM
+> -	.suspend	= sdhci_pltfm_suspend,
+> -	.resume		= sdhci_pltfm_resume,
+> -#endif
+>  };
+>  static int __init sdhci_pxav3_init(void)
+>  {
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 3d00e72..a485b1a 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -620,27 +620,6 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+>  	return 0;
+>  }
+>  
+> -#ifdef CONFIG_PM
+> -
+> -static int sdhci_s3c_suspend(struct platform_device *dev, pm_message_t pm)
+> -{
+> -	struct sdhci_host *host = platform_get_drvdata(dev);
+> -
+> -	return sdhci_suspend_host(host, pm);
+> -}
+> -
+> -static int sdhci_s3c_resume(struct platform_device *dev)
+> -{
+> -	struct sdhci_host *host = platform_get_drvdata(dev);
+> -
+> -	return sdhci_resume_host(host);
+> -}
+> -
+> -#else
+> -#define sdhci_s3c_suspend NULL
+> -#define sdhci_s3c_resume NULL
+> -#endif
+> -
+>  static struct platform_driver sdhci_s3c_driver = {
+>  	.probe		= sdhci_s3c_probe,
+>  	.remove		= __devexit_p(sdhci_s3c_remove),
+> @@ -649,6 +628,7 @@ static struct platform_driver sdhci_s3c_driver = {
+>  	.driver		= {
+>  		.owner	= THIS_MODULE,
+>  		.name	= "s3c-sdhci",
+> +		.pm	= SDHCI_PLTFM_PMOPS,
 
 
-A couple of clarifications:
+Isn't this a new dependency.  It will need a Kconfig change
 
-a) if no signal voltage switch UHS SDR50 works
-b) The CMD11 does not return a error -- after the voltage switch future command fail with error -110 (timeout)
 
-Thanks Arindam for helping with the clarification.
-
-Philip
-
-On Nov 2, 2011, at 5:10 AM, Philip Rakity wrote:
-
-> 
-> Folks,
-> 
-> We are working on some changes to support SDR50 and SDR104 for SDIO cards.  The code works on some controllers but not
-> on the ricoh r5c822.  The system is 64-bit Fedora 11 x86 with PCI-to-SD adapter card (Ricoh controller).
-> DMI: Hewlett-Packard HP Compaq dx2200 MT /0A48, BIOS MS7254 1.05 08/14/2006
-> 
-> 
-> The trace shows:
-> 
-> mmc0: no vmmc regulator found
-> Registered led device: mmc0::
-> mmc0: SDHCI controller on PCI [0000:03:00.0] using DMA
-> mmc_attach_sdio:mmc0 ocr = B1FF8000
-> mmc_attach_sdio:mmc0 R4_18V_PRESENT = 01000000, v18 = 1
-> mmc_sdio_init_card:mmc0 ocr = B1300000
-> mmc_sdio_init_card:mmc0: mmc_set_signal_voltage ret = 0
-> mmc0: error -110 whilst initialising SDIO card
-> mmc_attach_sdio:mmc0 ocr = 31FF8000
-> mmc_attach_sdio:mmc0 R4_18V_PRESENT = 01000000, v18 = 1
-> mmc_sdio_init_card:mmc0 ocr = B1300000
-> mmc_sdio_init_card:mmc0: mmc_set_signal_voltage ret = 0
-> mmc0: error -110 whilst initialising SDIO card
-> mmc_attach_sdio:mmc0 ocr = 31FF8000
-> mmc_attach_sdio:mmc0 R4_18V_PRESENT = 01000000, v18 = 1
-> mmc_sdio_init_card:mmc0 ocr = B1300000
-> mmc_sdio_init_card:mmc0: mmc_set_signal_voltage ret = 0
-> mmc0: error -110 whilst initialising SDIO card
-> mmc_attach_sdio:mmc0 ocr = 31FF8000
-> mmc_attach_sdio:mmc0 R4_18V_PRESENT = 01000000, v18 = 1
-> mmc_sdio_init_card:mmc0 ocr = B1300000
-> mmc_sdio_init_card:mmc0: mmc_set_signal_voltage ret = 0
-> mmc0: error -110 whilst initialising SDIO card
-> EXT4-fs (dm-0): re-mounted. Opts: (null)
-> 
-> We have narrowed this down to the sending of the CMD11.  If this is NOT done the the ultra high speed card works.
-> CMD11 is required for signal voltage switching.
-> 
-> The register dump from the host controller:
-> 
-> sdhci-pci 0000:03:00.0: SDHCI controller found [1180:0822] (rev 22)
-> 
-> 
-> [    2.030053] mmc1: SDHCI controller on PCI [0000:02:05.0] using ADMA
-> [    2.030187] sdhci: =========== REGISTER DUMP (mmc1)===========
-> [    2.030268] sdhci: Sys addr: 0x00000000 | Version:  0x00001002
-> [    2.030342] sdhci: Blk size: 0x00000000 | Blk cnt:  0x00000000
-> [    2.030425] sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
-> [    2.030503] sdhci: Present:  0x01ff0000 | Host ctl: 0x00000004
-> [    2.030589] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
-> [    2.030668] sdhci: Wake-up:  0x00000000 | Clock:    0x00000000
-> [    2.030753] sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
-> [    2.030832] sdhci: Int enab: 0x00ff0083 | Sig enab: 0x00ff0083
-> [    2.030917] sdhci: AC12 err: 0x00000000 | Slot int: 0x000000ff
-> [    2.030996] sdhci: Caps:     0x31fe32b2 | Caps_1:   0x00030503
-> [    2.031082] sdhci: Cmd:      0x00000000 | Max curr: 0x00c80064
-> [    2.031158] sdhci: Host ctl2: 0x00000000
-> [    2.031242] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x00000000
-> [    2.031315] sdhci: ===========================================
-> 
-> 
-> This shows that the controller is V3 and does support SDR50 and SDR104.
-> 
-> We can hack our way around this by adding a quirk to sdhci-pci.c for the controller to disable sending CMD11 
-> 
-> something along the lines of 
-> #define SDHCI_QUIRK_NO_VOLTAGE_SIGNAL_CMD11_SUPPORT
-> 
-> and check in core.c (mmc_set_signal_voltage()).  and just not send the CMD11.
-> 
-> very ugly.
-> 
-> Any other suggestions ?
-> 
-> 
-> 
-> Philip
-> 
-> 
-> 
-> 
-> On Nov 1, 2011, at 3:52 PM, Philip Rakity wrote:
-> 
->> 
->> Chris,
->> 
->> Testing my SDIO 3.0 changes UHS mode 100 m/bps   Code works find on MMP2.
->> 
->> Using the system
->>> 64-bit Fedora 11 x86 with PCI-to-SD adapter card (Ricoh controller).
->> 
->> The code fails.  Bing found that if CMD11 is sent when doing the voltage switch timeout errors (-110) occur.
->> If CMD11 is not sent then everything. works.   Unfortunately CMD11 is required.  No error is returned when the CMD11 is sent.
->> 
->> I know there are some quirks for the controller in sdhci-pci.  
->> 
->> Any ideas who to ask about this if you do not know the answer ?
->> 
->> regards,
->> 
->> Philip
->> 
-> 
+>  	},
+>  };
+>  
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 067a4cd..ea77df7 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -317,13 +317,10 @@ static struct platform_driver sdhci_tegra_driver = {
+>  		.name	= "sdhci-tegra",
+>  		.owner	= THIS_MODULE,
+>  		.of_match_table = sdhci_tegra_dt_match,
+> +		.pm	= SDHCI_PLTFM_PMOPS,
+>  	},
+>  	.probe		= sdhci_tegra_probe,
+>  	.remove		= __devexit_p(sdhci_tegra_remove),
+> -#ifdef CONFIG_PM
+> -	.suspend	= sdhci_pltfm_suspend,
+> -	.resume		= sdhci_pltfm_resume,
+> -#endif
+>  };
+>  
+>  static int __init sdhci_tegra_init(void)
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 6d8eea3..19ed580 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2327,7 +2327,7 @@ out:
+>  
+>  #ifdef CONFIG_PM
+>  
+> -int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state)
+> +int sdhci_suspend_host(struct sdhci_host *host)
+>  {
+>  	int ret;
+>  
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0a5b654..a04d4d0 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -374,7 +374,7 @@ extern int sdhci_add_host(struct sdhci_host *host);
+>  extern void sdhci_remove_host(struct sdhci_host *host, int dead);
+>  
+>  #ifdef CONFIG_PM
+> -extern int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state);
+> +extern int sdhci_suspend_host(struct sdhci_host *host);
+>  extern int sdhci_resume_host(struct sdhci_host *host);
+>  extern void sdhci_enable_irq_wakeups(struct sdhci_host *host);
+>  #endif
 
