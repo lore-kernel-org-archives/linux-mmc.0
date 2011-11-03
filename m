@@ -1,46 +1,43 @@
-From: Daniel Mack <zonque@gmail.com>
-Subject: [PATCH] mmc: omap_hsmmc: fix typo around pr_info() call
-Date: Thu,  3 Nov 2011 12:24:42 +0100
-Message-ID: <1320319482-9809-1-git-send-email-zonque@gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: core: Quirk for long data read time
+Date: Thu, 3 Nov 2011 12:32:06 +0100
+Message-ID: <CAKnu2Mqr2Vi8f3KkgmQxywucAS9BN4rY-SxSOiFd5oV06sZ12w@mail.gmail.com>
+References: <1320309852-21893-1-git-send-email-stefan.xk.nilsson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
-	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org
-Cc: Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Daniel Mack <zonque@gmail.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:59421 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755488Ab1KCLcG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2011 07:32:06 -0400
+Received: by gyc15 with SMTP id 15so127289gyc.19
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Nov 2011 04:32:06 -0700 (PDT)
+In-Reply-To: <1320309852-21893-1-git-send-email-stefan.xk.nilsson@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, stable@kernel.org
 
-This was introduced by a3c76eb9 ("mmc: replace printk with appropriate
-display macro").
+2011/11/3 Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>:
 
-Signed-off-by: Daniel Mack <zonque@gmail.com>
-Cc: Girish K S <girish.shivananjappa@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>
----
- drivers/mmc/host/omap_hsmmc.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+> Adds a quirk that sets the data read timeout to a fixed value instead
+> of relying on the information in the CSD. The timeout value choosen
+> is 300ms since that has proven enough for the problematic cards found,
+> but could be increased if other cards require this.
+>
+> This patch also enables this quirk for certain Micron cards known to
+> have this problem.
+>
+> Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index e8ff123..101cd31 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1270,7 +1270,7 @@ static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
- 		}
- 	} else {
- 		if (!host->protect_card) {
--			pr_info"%s: cover is open, "
-+			pr_info("%s: cover is open, "
- 					 "card is now inaccessible\n",
- 					 mmc_hostname(host->mmc));
- 			host->protect_card = 1;
--- 
-1.7.6.4
+And I thought it was enough with *people* who didn't deliver stuff
+they promised in due time, now even *memory cards* miss their
+own promised deadlines.... :-)
+
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
+
+This should go into stable as well right?
+
+Thanks,
+Linus Walleij
