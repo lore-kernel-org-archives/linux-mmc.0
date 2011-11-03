@@ -1,59 +1,61 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: [PATCH V6] SDHCI: S3C: Use generic clock names for sdhci bus clock
- options
-Date: Thu, 03 Nov 2011 11:14:41 +0900
-Message-ID: <013501cc99ce$58ea8920$0abf9b60$%kim@samsung.com>
-References: <1320039876-21148-1-git-send-email-rajeshwari.s@samsung.com>
- <005301cc9958$bcf5aa10$36e0fe30$%kim@samsung.com>
- <m2aa8e9zn3.fsf@bob.laptop.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCHv2 1/2] arm: samsung: support the second capability for
+ samsung-soc
+Date: Thu, 03 Nov 2011 11:35:58 +0900
+Message-ID: <4EB1FE0E.5070902@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:62265 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933049Ab1KCCOn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2011 22:14:43 -0400
-In-reply-to: <m2aa8e9zn3.fsf@bob.laptop.org>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-samsung-soc@vger.kernel.org
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, 'kgene kim' <kgene.kim@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>
-Cc: 'Rajeshwari Shinde' <rajeshwari.s@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Chris Ball wrote:
-> 
-> Hi Kukjin,
-> 
-> On Wed, Nov 02 2011, Kukjin Kim wrote:
-> >> This patch modifies the driver to stop depending on the clock names
-> >> being passed from the platform and switch over to bus clock lookup
-> >> using generic clock names.
-> >>
-> >> V6 Changes:
-> >> Changed sprintf to snprintf as suggested by Chris Ball.
-> >>
-> >> Signed-off-by: Rajeshwari Shinde <rajeshwari.s@samsung.com>
-> >
-> > Acked-by: Kukjin Kim <kgene.kim@samsung.com>
-> >
-> > Hi Chirs,
-> >
-> > Could you please pick this up in your tree for this merge window?
-> 
-> Might be easier to have you send this, if you don't mind, since I'm
-> still traveling and have already sent my main pull request.  Thanks!
-> 
-> Acked-by: Chris Ball <cjb@laptop.org>
-> 
-Hi Chris,
+In mmc, there are capabilities and use the host_caps.
+That capability is expressed with bit[0:31].
+But now..already filled the bit[0:31]...
+so we need to denote with the other capability field.
+(if we want to use the cache, powerclass, etc for eMMC..this field is necessary)
 
-OK, I picked this up in my tree.
-Thanks.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <Kyungmin.park@samsung.com>
+---
+Changelog v2:
+   - based-on samsung-soc's for-next tree.
 
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
+ arch/arm/plat-samsung/include/plat/sdhci.h |    2 ++
+ arch/arm/plat-samsung/platformdata.c       |    2 ++
+ 2 files changed, 4 insertions(+), 0 deletions(-)
 
+diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/plat-samsung/include/plat/sdhci.h
+index dcff7dd..bf33ea1 100644
+--- a/arch/arm/plat-samsung/include/plat/sdhci.h
++++ b/arch/arm/plat-samsung/include/plat/sdhci.h
+@@ -40,6 +40,7 @@ enum clk_types {
+  * struct s3c_sdhci_platdata() - Platform device data for Samsung SDHCI
+  * @max_width: The maximum number of data bits supported.
+  * @host_caps: Standard MMC host capabilities bit field.
++ * @host_caps2: The Second Standard MMC host capabilities bit field.
+  * @cd_type: Type of Card Detection method (see cd_types enum above)
+  * @clk_type: Type of clock divider method (see clk_types enum above)
+  * @ext_cd_init: Initialize external card detect subsystem. Called on
+@@ -63,6 +64,7 @@ enum clk_types {
+ struct s3c_sdhci_platdata {
+ 	unsigned int	max_width;
+ 	unsigned int	host_caps;
++	unsigned int	host_caps2;
+ 	enum cd_types	cd_type;
+ 	enum clk_types	clk_type;
+ 
+diff --git a/arch/arm/plat-samsung/platformdata.c b/arch/arm/plat-samsung/platformdata.c
+index 4c9a207..5ffcf46 100644
+--- a/arch/arm/plat-samsung/platformdata.c
++++ b/arch/arm/plat-samsung/platformdata.c
+@@ -54,4 +54,6 @@ void s3c_sdhci_set_platdata(struct s3c_sdhci_platdata *pd,
+ 		set->host_caps |= pd->host_caps;
+ 	if (pd->clk_type)
+ 		set->clk_type = pd->clk_type;
++	if (pd->host_caps2)
++		set->host_caps2 |= pd->host_caps2;
+ }
