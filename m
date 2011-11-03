@@ -1,51 +1,109 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCHv2 2/2]  mmc: sdhci-s3c: add platform data for the second
- capability
-Date: Thu, 03 Nov 2011 11:35:59 +0900
-Message-ID: <4EB1FE0F.5020608@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, 'kgene kim' <kgene.kim@samsung.com>
+From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: [PATCH] mmc: debugfs: expose the SDCLK frq in sys ios (V4)
+Date: Thu,  3 Nov 2011 07:45:37 +0100
+Message-ID: <1320302737-32312-1-git-send-email-peppe.cavallaro@st.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:58670 "EHLO
+	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754205Ab1KCGpu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2011 02:45:50 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: sebras@gmail.com, adrian.hunter@intel.com, Giuseppe Cavallaro <peppe.cavallaro@st.com>
 
-This patch is added host_caps2 in sdhci-s3c.c
-It's necessary that use the second capabilities.
-And removed the duplicated host_caps.
+This patch is to expose the actual SDCLK frequency in
+/sys/kernel/debug/mmcX/ios entry.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+For example, if the max clk for a normal speed card is 20MHz
+this is reported in /sys/kernel/debug/mmcX/ios.
+Unfortunately the actual SDCLK frequency (i.e. Baseclock / divisor)
+is not reported at all: for example, in that case, on Arasan HC,
+it should be 48/4=12 (MHz).
+
+Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 ---
-Changelog v2:
-   - remove the duplicated host_caps.
+ drivers/mmc/core/debugfs.c |    2 ++
+ drivers/mmc/host/sdhci.c   |    9 +++++++++
+ include/linux/mmc/host.h   |    2 ++
+ 3 files changed, 13 insertions(+), 0 deletions(-)
 
- drivers/mmc/host/sdhci-s3c.c |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 3d00e72..6b8f8f6 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -521,9 +521,6 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
- 		host->mmc->caps = MMC_CAP_NONREMOVABLE;
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 998797e..0b9a4aa 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -46,6 +46,8 @@ static int mmc_ios_show(struct seq_file *s, void *data)
+ 	const char *str;
  
--	if (pdata->host_caps)
--		host->mmc->caps |= pdata->host_caps;
--
- 	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
- 			 SDHCI_QUIRK_32BIT_DMA_SIZE);
+ 	seq_printf(s, "clock:\t\t%u Hz\n", ios->clock);
++	if (host->actual_clock)
++		seq_printf(s, "actual clock:\t%u Hz\n", host->actual_clock);
+ 	seq_printf(s, "vdd:\t\t%u ", ios->vdd);
+ 	if ((1 << ios->vdd) & MMC_VDD_165_195)
+ 		seq_printf(s, "(1.65 - 1.95 V)\n");
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0e02cc1..3ee94dc 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1043,12 +1043,15 @@ static void sdhci_finish_command(struct sdhci_host *host)
+ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	int div = 0; /* Initialized for compiler warning */
++	int real_div = div, clk_mul = 1;
+ 	u16 clk = 0;
+ 	unsigned long timeout;
  
-@@ -544,6 +541,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	if (pdata->host_caps)
- 		host->mmc->caps |= pdata->host_caps;
+ 	if (clock == host->clock)
+ 		return;
  
-+	if (pdata->host_caps2)
-+		host->mmc->caps2 |= pdata->host_caps2;
++	host->mmc->actual_clock = 0;
 +
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_err(dev, "sdhci_add_host() failed\n");
+ 	if (host->ops->set_clock) {
+ 		host->ops->set_clock(host, clock);
+ 		if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
+@@ -1086,6 +1089,8 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 				 * Control register.
+ 				 */
+ 				clk = SDHCI_PROG_CLOCK_MODE;
++				real_div = div;
++				clk_mul = host->clk_mul;
+ 				div--;
+ 			}
+ 		} else {
+@@ -1099,6 +1104,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 						break;
+ 				}
+ 			}
++			real_div = div;
+ 			div >>= 1;
+ 		}
+ 	} else {
+@@ -1107,9 +1113,12 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 			if ((host->max_clk / div) <= clock)
+ 				break;
+ 		}
++		real_div = div;
+ 		div >>= 1;
+ 	}
+ 
++	host->mmc->actual_clock = (host->max_clk * clk_mul) / real_div;
++
+ 	clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+ 	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
+ 		<< SDHCI_DIVIDER_HI_SHIFT;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 1d09562..d815311 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -302,6 +302,8 @@ struct mmc_host {
+ 
+ 	struct mmc_async_req	*areq;		/* active async req */
+ 
++	unsigned int		actual_clock;	/* Actual HC clock rate */
++
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+ 
+-- 
+1.7.4.4
+
