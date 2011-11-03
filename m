@@ -1,55 +1,51 @@
-From: CaT <cat@zip.com.au>
-Subject: Re: SDHCI regression since 2.6.39
-Date: Thu, 3 Nov 2011 23:53:54 +1100
-Message-ID: <20111103125354.GZ3428@zip.com.au>
-References: <4E6FCE28.5040403@goop.org>
- <F54ECF19-5E4C-40A6-8E26-99BF223F9FE2@marvell.com>
- <4E6FDA0B.9060007@goop.org>
- <4E6FDC3E.8030702@goop.org>
- <003A4041-99F9-4598-AB9A-D08C76CDAECB@marvell.com>
- <4E6FFADE.5090004@goop.org>
- <m2k49b9qvu.fsf@bob.laptop.org>
- <4E70D62B.2030007@goop.org>
- <m2boun9dg1.fsf@bob.laptop.org>
- <4E710660.1060101@goop.org>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH 1/1] [PATCH v4 1/1] mmc: Support of DUAL BUFFER DESC[ring]
+ mode for dw_mmc
+Date: Thu, 3 Nov 2011 15:18:07 +0000
+Message-ID: <CAFbHwiSahkGOd4EfYiKY-T9Segn9Nn4qSMA591SFRmMmKY67VQ@mail.gmail.com>
+References: <1317123568-5203-1-git-send-email-shashidharh@vayavyalabs.com>
+	<4E8BBD76.9020001@samsung.com>
+	<CANYdXnpe0prpdJcYpi3yVqCecugwZ1999c2u2u6ffjXjSeCDnw@mail.gmail.com>
+	<m2obwt8ju2.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4E710660.1060101@goop.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jeremy Fitzhardinge <jeremy@goop.org>
-Cc: Chris Ball <cjb@laptop.org>, Philip Rakity <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Manoj Iyer <manoj.iyer@canonical.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:47375 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755670Ab1KCPSI convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2011 11:18:08 -0400
+Received: by vcge1 with SMTP id e1so1196178vcg.19
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Nov 2011 08:18:07 -0700 (PDT)
+In-Reply-To: <m2obwt8ju2.fsf@bob.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Shashidhar Hiremath <shashidharh@vayavyalabs.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org
 
-On Wed, Sep 14, 2011 at 12:54:08PM -0700, Jeremy Fitzhardinge wrote:
+On Thu, Nov 3, 2011 at 12:35 PM, Chris Ball <cjb@laptop.org> wrote:
+> Hi,
+>
+> On Thu, Nov 03 2011, Shashidhar Hiremath wrote:
+>> Hi Chris,
+>> =A0 Can this patch be accepted by criteria that its an additional
+>> feature supported by the hardware and hence good to have the support
+>> in the driver.Also note the patch has been tested.
+>
+> I think Will and James should make the call on that.
+>
+> My own opinion is that it's not usually a good idea to merge code tha=
+t
+> increases complexity for no performance gain; if the feature is actua=
+lly
+> important, someone should find a way to finish it and measure a
+> performance gain (the gain can be in any of bandwidth, memory, or
+> lower CPU utilization) with it, to prove that the change is worthwhil=
+e.
 
-Ok. Thread is a bit dated but the bug is the same by the looks of it.
-Apologies to anyone hit by the funk of a thousand years. :)
-
-> On 09/14/2011 11:38 AM, Chris Ball wrote:
-> > It could indeed be some kind of signal integrity issue.  The easy way to
-> > investigate that would be to boot Windows and see if it works there, and
-> > the hard way would be to find a friendly hardware hacker with a nice scope.
-> 
-> I have the original HDD with Windows on it around here somewhere; when I
-> get the chance I'll switch them around and see what Windows thinks of it
-> (I guess if its still failing then its a warranty fix).
-
-I have an X220 with the same issue. Using a MicroSDHC card with an adapter.
-
-Windows likes it, Linux does not. Very similar looking errors as what Jeremy
-has.
-
-Linux: 3.1
-BIOS: 1.21 (08/02/2011)
-OS: Debian Wheezy
-
-SanDisk adapter with Kingston 4GB MicroSDHC card.
-
-I could help with any testing.
-
--- 
-  "A search of his car uncovered pornography, a homemade sex aid, women's 
-  stockings and a Jack Russell terrier."
-    - http://www.dailytelegraph.com.au/news/wacky/indeed/story-e6frev20-1111118083480
+I'm inclined to agree. I don't want to feel like I am blocking
+inclusion of anyone's hard work, but unless there is a clear advantage
+for one option over the other I can't see a good reason for merging
+it. At present it adds a question to the Kconfig that is pretty much
+impossible for the user to answer (do I turn this feature on or off?
+what is the advantage of choosing each option?).
