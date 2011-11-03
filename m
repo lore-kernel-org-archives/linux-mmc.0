@@ -1,59 +1,43 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: fix typo around pr_info() call
-Date: Thu, 3 Nov 2011 17:42:36 +0530
-Message-ID: <CANfBPZ-Z5PZFwW1uderk5A1FzNKFq=9f-RTOSg0Lre5CX-NDUw@mail.gmail.com>
-References: <1320319482-9809-1-git-send-email-zonque@gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/1] [PATCH v4 1/1] mmc: Support of DUAL BUFFER DESC[ring] mode for dw_mmc
+Date: Thu, 03 Nov 2011 08:35:33 -0400
+Message-ID: <m2obwt8ju2.fsf@bob.laptop.org>
+References: <1317123568-5203-1-git-send-email-shashidharh@vayavyalabs.com>
+	<4E8BBD76.9020001@samsung.com>
+	<CANYdXnpe0prpdJcYpi3yVqCecugwZ1999c2u2u6ffjXjSeCDnw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog109.obsmtp.com ([74.125.149.201]:36691 "EHLO
-	na3sys009aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933172Ab1KCMM6 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 3 Nov 2011 08:12:58 -0400
-Received: by mail-iy0-f177.google.com with SMTP id p10so1549177iap.8
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Nov 2011 05:12:57 -0700 (PDT)
-In-Reply-To: <1320319482-9809-1-git-send-email-zonque@gmail.com>
+Received: from void.printf.net ([89.145.121.20]:47826 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933538Ab1KCMfx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 3 Nov 2011 08:35:53 -0400
+In-Reply-To: <CANYdXnpe0prpdJcYpi3yVqCecugwZ1999c2u2u6ffjXjSeCDnw@mail.gmail.com>
+	(Shashidhar Hiremath's message of "Thu, 3 Nov 2011 17:17:06 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Mack <zonque@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org
 
-On Thu, Nov 3, 2011 at 4:54 PM, Daniel Mack <zonque@gmail.com> wrote:
-> This was introduced by a3c76eb9 ("mmc: replace printk with appropriat=
-e
-> display macro").
->
-> Signed-off-by: Daniel Mack <zonque@gmail.com>
-> Cc: Girish K S <girish.shivananjappa@linaro.org>
-> Cc: Chris Ball <cjb@laptop.org>
-> ---
-> =A0drivers/mmc/host/omap_hsmmc.c | =A0 =A02 +-
-> =A01 files changed, 1 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
-mmc.c
-> index e8ff123..101cd31 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1270,7 +1270,7 @@ static void omap_hsmmc_protect_card(struct omap=
-_hsmmc_host *host)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
-> =A0 =A0 =A0 =A0} else {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (!host->protect_card) {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_info"%s: cover is op=
-en, "
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_info("%s: cover is o=
-pen, "
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 "card is now inaccessible\n",
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 mmc_hostname(host->mmc));
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->protect_card =3D=
- 1;
-> --
-> 1.7.6.4
->
+Hi,
 
-Thanks ! But this has been fixed and is available in mmc-next
+On Thu, Nov 03 2011, Shashidhar Hiremath wrote:
+> Hi Chris,
+>   Can this patch be accepted by criteria that its an additional
+> feature supported by the hardware and hence good to have the support
+> in the driver.Also note the patch has been tested.
+
+I think Will and James should make the call on that.
+
+My own opinion is that it's not usually a good idea to merge code that
+increases complexity for no performance gain; if the feature is actually
+important, someone should find a way to finish it and measure a
+performance gain (the gain can be in any of bandwidth, memory, or
+lower CPU utilization) with it, to prove that the change is worthwhile.
+
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
