@@ -1,51 +1,80 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4] mmc: sdhci: remove "state" argument from sdhci_suspend_host
-Date: Fri, 04 Nov 2011 12:12:51 +0200
-Message-ID: <4EB3BAA3.3020408@intel.com>
-References: <1320314985-9536-1-git-send-email-manuel.lauss@googlemail.com>
+From: Qiang Liu <b32616@freescale.com>
+Subject: [PATCH] [RFC/PATCH] SD/MMC: support adjust bounce buffer size dynamically in menuconfig
+Date: Fri, 4 Nov 2011 17:54:27 +0800
+Message-ID: <1320400467-6496-1-git-send-email-b32616@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([143.182.124.37]:44812 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751262Ab1KDKMy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 4 Nov 2011 06:12:54 -0400
-In-Reply-To: <1320314985-9536-1-git-send-email-manuel.lauss@googlemail.com>
+Received: from db3ehsobe001.messaging.microsoft.com ([213.199.154.139]:29517
+	"EHLO DB3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752754Ab1KDKWt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2011 06:22:49 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Manuel Lauss <manuel.lauss@googlemail.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, leoli@freescale.com, kumar.gala@freescale.com, Qiang Liu <b32616@freescale.com>, Qiang Liu <qiang.liu@freescale.com>
 
-On 03/11/11 12:09, Manuel Lauss wrote:
-> Drop the "state" argument from sdhci_suspend_host.  Its only user
-> is the PCI glue;  this allows to move all SDHCI glues to use
-> dev_pm_ops instead.
-> 
-> Signed-off-by: Manuel Lauss <manuel.lauss@googlemail.com>
+Improve IO throughput according to different controllers.
+Make it configuable in menuconfig. Of course, there is another
+implement of adjust bounce buffer size at run-time. Like:
+echo 262144 > /sys/block/mmcblk0/device/bouncesz
+This will reinit mmc queue when bounce size is changed.
+Which is better?
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On powerpc platform, 256KiB will get better perfromance than 64KiB.
+I used Sandisk Extreme III Class 6, 4G memory card, tested on P1022DS
+with IOzone. P1022DS memory is 1GBytes. Filesystem is ext4.
+By default, bounce buffer size is 64KiB,
+[root@p1022ds root]# iozone -Rab result -i0 -i1 -r64 -n1g -g2g -f /mnt/ff
+	     KB  reclen   write rewrite    read    reread
+	1048576      64   12794   13260    32330    31731
+	2097152      64   12301   12382    18213    18239
+use 256KiB as bounce buffer size,
+[root@p1022ds root]# iozone -Rab result -i0 -i1 -r64 -n1g -g2g -f /mnt/ff
+             KB  reclen   write rewrite    read    reread
+	1048576      64   18533   19076    22841    23151
+	2097152      64   17744   17980    18333    18342
 
-> ---
-> V4: get rid of last checkpatch warning.
-> V3: remove unused local var in sdhci-pci.c
-> V2: sdhci-s3c does not use sdhci-pltfm.c and gets its own dev_pm_ops.
-> 
-> run-tested on pci/x64 and compile-tested with tegra_defconfig.
-> 
->  drivers/mmc/host/sdhci-cns3xxx.c   |    5 +----
->  drivers/mmc/host/sdhci-dove.c      |    5 +----
->  drivers/mmc/host/sdhci-esdhc-imx.c |    5 +----
->  drivers/mmc/host/sdhci-of-esdhc.c  |    5 +----
->  drivers/mmc/host/sdhci-of-hlwd.c   |    5 +----
->  drivers/mmc/host/sdhci-pci.c       |   26 +++++++++++++-------------
->  drivers/mmc/host/sdhci-pltfm.c     |   18 +++++++++++-------
->  drivers/mmc/host/sdhci-pltfm.h     |    6 ++++--
->  drivers/mmc/host/sdhci-pxav2.c     |    5 +----
->  drivers/mmc/host/sdhci-pxav3.c     |    5 +----
->  drivers/mmc/host/sdhci-s3c.c       |   21 ++++++++++++++-------
->  drivers/mmc/host/sdhci-tegra.c     |    5 +----
->  drivers/mmc/host/sdhci.c           |    2 +-
->  drivers/mmc/host/sdhci.h           |    2 +-
->  14 files changed, 52 insertions(+), 63 deletions(-)
-> 
+Signed-off-by: Qiang Liu <qiang.liu@freescale.com>
+---
+ drivers/mmc/card/Kconfig |    9 +++++++++
+ drivers/mmc/card/queue.c |    2 +-
+ 2 files changed, 10 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
+index 3b1f783..3390154 100644
+--- a/drivers/mmc/card/Kconfig
++++ b/drivers/mmc/card/Kconfig
+@@ -50,6 +50,15 @@ config MMC_BLOCK_BOUNCE
+
+ 	  If unsure, say Y here.
+
++config MMC_QUEUE_BOUNCESZ
++	int "MMC memory card bounce buffer size"
++	depends on MMC_BLOCK_BOUNCE
++	range 512 4194304
++	default "65536"
++	help
++	  Provide a flexible method to adjust bounce buffer size to
++	  improve the throughput according to different controller.
++
+ config SDIO_UART
+ 	tristate "SDIO UART/GPS class support"
+ 	help
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index dcad59c..590723f 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -20,7 +20,7 @@
+ #include <linux/mmc/host.h>
+ #include "queue.h"
+
+-#define MMC_QUEUE_BOUNCESZ	65536
++#define MMC_QUEUE_BOUNCESZ	CONFIG_MMC_QUEUE_BOUNCESZ
+
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+
+--
+1.6.4
+
+
