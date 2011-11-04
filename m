@@ -1,75 +1,111 @@
-From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Subject: Re: [PATCH 1/1] [PATCH v4 1/1] mmc: Support of DUAL BUFFER DESC[ring]
- mode for dw_mmc
-Date: Fri, 4 Nov 2011 12:36:01 +0530
-Message-ID: <CANYdXnqviDqYb9Rq0O-48P6f+v6NSg8j8-H7XYU+ccNx_P17zw@mail.gmail.com>
-References: <1317123568-5203-1-git-send-email-shashidharh@vayavyalabs.com>
-	<4E8BBD76.9020001@samsung.com>
-	<CANYdXnpe0prpdJcYpi3yVqCecugwZ1999c2u2u6ffjXjSeCDnw@mail.gmail.com>
-	<m2obwt8ju2.fsf@bob.laptop.org>
-	<CAFbHwiSahkGOd4EfYiKY-T9Segn9Nn4qSMA591SFRmMmKY67VQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: [PATCH] mmc: debugfs: expose the SDCLK frq in sys ios (V5)
+Date: Fri,  4 Nov 2011 08:16:14 +0100
+Message-ID: <1320390974-17167-1-git-send-email-peppe.cavallaro@st.com>
+References: <1320302737-32312-1-git-send-email-peppe.cavallaro@st.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:48978 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751371Ab1KDHGC convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2011 03:06:02 -0400
-Received: by iage36 with SMTP id e36so2239536iag.19
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Nov 2011 00:06:01 -0700 (PDT)
-In-Reply-To: <CAFbHwiSahkGOd4EfYiKY-T9Segn9Nn4qSMA591SFRmMmKY67VQ@mail.gmail.com>
+Received: from eu1sys200aog107.obsmtp.com ([207.126.144.123]:54997 "EHLO
+	eu1sys200aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751328Ab1KDHUL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2011 03:20:11 -0400
+In-Reply-To: <1320302737-32312-1-git-send-email-peppe.cavallaro@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: adrian.hunter@intel.com, Giuseppe Cavallaro <peppe.cavallaro@st.com>
 
-Hi Will,
-   I agree with you that it should not be merged  unless it improves
-the performance. But I still feel that there might be some reason for
-which the IP Vendor has provided an additional feature. So will this
-not be a good feature to have as it will help in IP Validation for
-different modes.
-  As far as the Kconfig option is concerned, the user need not always
-modify it since the default case will still be Chained Mode. Also Such
-Kconfig options for selecting mode is already  used for stmmac
-Ethernet Drivers.
+This patch is to expose the actual SDCLK frequency in
+/sys/kernel/debug/mmcX/ios entry.
 
-On Thu, Nov 3, 2011 at 8:48 PM, Will Newton <will.newton@gmail.com> wro=
-te:
-> On Thu, Nov 3, 2011 at 12:35 PM, Chris Ball <cjb@laptop.org> wrote:
->> Hi,
->>
->> On Thu, Nov 03 2011, Shashidhar Hiremath wrote:
->>> Hi Chris,
->>> =C2=A0 Can this patch be accepted by criteria that its an additiona=
-l
->>> feature supported by the hardware and hence good to have the suppor=
-t
->>> in the driver.Also note the patch has been tested.
->>
->> I think Will and James should make the call on that.
->>
->> My own opinion is that it's not usually a good idea to merge code th=
-at
->> increases complexity for no performance gain; if the feature is actu=
-ally
->> important, someone should find a way to finish it and measure a
->> performance gain (the gain can be in any of bandwidth, memory, or
->> lower CPU utilization) with it, to prove that the change is worthwhi=
-le.
->
-> I'm inclined to agree. I don't want to feel like I am blocking
-> inclusion of anyone's hard work, but unless there is a clear advantag=
-e
-> for one option over the other I can't see a good reason for merging
-> it. At present it adds a question to the Kconfig that is pretty much
-> impossible for the user to answer (do I turn this feature on or off?
-> what is the advantage of choosing each option?).
->
+For example, if the max clk for a normal speed card is 20MHz
+this is reported in /sys/kernel/debug/mmcX/ios.
+Unfortunately the actual SDCLK frequency (i.e. Baseclock / divisor)
+is not reported at all: for example, in that case, on Arasan HC,
+it should be 48/4=12 (MHz).
 
+Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+---
+ drivers/mmc/core/debugfs.c |    2 ++
+ drivers/mmc/host/sdhci.c   |    9 +++++++++
+ include/linux/mmc/host.h   |    2 ++
+ 3 files changed, 13 insertions(+), 0 deletions(-)
 
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index c3f24a7..688f4f8 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -56,6 +56,8 @@ static int mmc_ios_show(struct seq_file *s, void *data)
+ 	const char *str;
+ 
+ 	seq_printf(s, "clock:\t\t%u Hz\n", ios->clock);
++	if (host->actual_clock)
++		seq_printf(s, "actual clock:\t%u Hz\n", host->actual_clock);
+ 	seq_printf(s, "vdd:\t\t%u ", ios->vdd);
+ 	if ((1 << ios->vdd) & MMC_VDD_165_195)
+ 		seq_printf(s, "(1.65 - 1.95 V)\n");
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 6d8eea3..f801609 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1066,12 +1066,15 @@ static void sdhci_finish_command(struct sdhci_host *host)
+ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	int div = 0; /* Initialized for compiler warning */
++	int real_div = div, clk_mul = 1;
+ 	u16 clk = 0;
+ 	unsigned long timeout;
+ 
+ 	if (clock == host->clock)
+ 		return;
+ 
++	host->mmc->actual_clock = 0;
++
+ 	if (host->ops->set_clock) {
+ 		host->ops->set_clock(host, clock);
+ 		if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
+@@ -1109,6 +1112,8 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 				 * Control register.
+ 				 */
+ 				clk = SDHCI_PROG_CLOCK_MODE;
++				real_div = div;
++				clk_mul = host->clk_mul;
+ 				div--;
+ 			}
+ 		} else {
+@@ -1122,6 +1127,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 						break;
+ 				}
+ 			}
++			real_div = div;
+ 			div >>= 1;
+ 		}
+ 	} else {
+@@ -1130,9 +1136,12 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 			if ((host->max_clk / div) <= clock)
+ 				break;
+ 		}
++		real_div = div;
+ 		div >>= 1;
+ 	}
+ 
++	host->mmc->actual_clock = (host->max_clk * clk_mul) / real_div;
++
+ 	clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+ 	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
+ 		<< SDHCI_DIVIDER_HI_SHIFT;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index a3ac9c4..cea064f 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -323,6 +323,8 @@ struct mmc_host {
+ 	struct fault_attr	fail_mmc_request;
+ #endif
+ 
++	unsigned int		actual_clock;	/* Actual HC clock rate */
++
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+ 
+-- 
+1.7.4.4
 
---=20
-regards,
-Shashidhar Hiremath
