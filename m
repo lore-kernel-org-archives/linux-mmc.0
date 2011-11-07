@@ -1,123 +1,86 @@
-From: Rajendra Nayak <rnayak@ti.com>
-Subject: Re: [PATCH 2/4] mmc: omap: adapt the hsmmc driver to device tree
-Date: Mon, 07 Nov 2011 11:48:13 +0530
-Message-ID: <4EB77825.1010309@ti.com>
-References: <1320407441-29697-1-git-send-email-rnayak@ti.com> <1320407441-29697-3-git-send-email-rnayak@ti.com> <20111104200415.GC3045@quad.lixom.net>
+From: Qiang Liu <b32616@freescale.com>
+Subject: [PATCH] SD/MMC: fix the issue of SDHC performance regression
+Date: Mon, 7 Nov 2011 17:36:29 +0800
+Message-ID: <1320658589-13143-1-git-send-email-b32616@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20111104200415.GC3045@quad.lixom.net>
-Sender: linux-omap-owner@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, thomas.abraham@linaro.org, balajitk@ti.com, cjb@laptop.org, tony@atomide.com
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:20737
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752339Ab1KGKFp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2011 05:05:45 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, leoli@freescale.com, kumar.gala@freescale.com, Qiang Liu <b32616@freescale.com>
 
-On Saturday 05 November 2011 01:34 AM, Olof Johansson wrote:
-> On Fri, Nov 04, 2011 at 05:20:39PM +0530, Rajendra Nayak wrote:
->> Define dt bindings for the ti-omap-hsmmc, and adapt
->> the driver to extract data (which was earlier passed as
->> platform_data) from device tree node.
->>
->> Signed-off-by: Rajendra Nayak<rnayak@ti.com>
->> ---
->>   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   50 +++++++++
->>   drivers/mmc/host/omap_hsmmc.c                      |  117 ++++++++++++++++++++
->>   2 files changed, 167 insertions(+), 0 deletions(-)
->>   create mode 100644 Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->> new file mode 100644
->> index 0000000..370af1b
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->> @@ -0,0 +1,50 @@
->> +* TI Highspeed MMC host controller for OMAP
->> +
->> +The Highspeed MMC Host Controller on TI OMAP family
->> +provides an interface for MMC, SD, and SDIO types of memory cards.
->> +
->> +Required properties:
->> +- compatible: Should be "ti,omap-hsmmc<n>", "ti,omap2-hsmmc";
->> +n is controller instance starting 0, for OMAP2/3 controllers
->
-> No, no, no. You should not have to specify the unit-address in the compatible
-> field. They are all programmed the same way, right?
->
-> Also, they should go from the specific to the generic, but the first property
-> is the same for 2/3 and 4. That's wrong.
+Low performance of SDHC (half of before) due to its frequency was set to 25MHz,
+but not 50MHz (involved by commit id 013909c4ffd16ded4895528b856fd8782df04dc6,
+add support for query function modes for uhs cards according to Physical Layer
+SPEC V3.01).
 
-agreed, will get rid of instance number from the compatible property.
->
->> +- compatible: Should be "ti,omap-hsmmc<n>", "ti,omap4-hsmmc";
->> +n is controller instance starting 0, for OMAP4 controllers
->> +- ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
->
-> I didn't think hwmod bindings were settled on yet?
->
->> +- reg : should contain hsmmc registers location and length
->> +
->> +Optional properties:
->> +ti,hsmmc-supports-dual-volt: boolean, supports dual voltage cards
->
-> ti,dual-voltage is a better name here (by definition, if it has the property it
-> supports it, the word "supports" is redundant).
+Set high speed max frequency according to response status of CMD6, but
+not for SPEC Version. Response of switch command is first consideration
+factor when set SDHC max working frequency. TRAN_SPEED in CSD register
+will be seemed as the second factor.
 
-Ok.
->
->> +ti,hsmmc-nr-slots: Number of mmc slots
->
-> You shouldn't have to specify this, it can be derived from the number of child
-> nodes.
+Signed-off-by: Qiang Liu <qiang.liu@freescale.com>
+---
+ drivers/mmc/core/sd.c    |    6 +++---
+ include/linux/mmc/card.h |    3 +++
+ 2 files changed, 6 insertions(+), 3 deletions(-)
 
-right, will do that.
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index b33537f..5cdab7c 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -306,6 +306,9 @@ static int mmc_read_switch(struct mmc_card *card)
+ 		goto out;
+ 	}
 
->
->> +<supply-name>-supply: phandle to the regulator device tree node
->> +"supply-name" examples are "vmmc", "vmmc_aux" etc
->> +ti,hsmmc-has-pbias: Has PBIAS cell support
->> +ti,hsmmc-has-special-reset: Requires a special softreset sequence
->
-> you can drop hsmmc- from the properties here
++	if (status[13] & SD_MODE_HIGH_SPEED)
++		card->sw_caps.hs_max_dtr = HIGH_SPEED_MAX_DTR;
++
+ 	if (card->scr.sda_spec3) {
+ 		card->sw_caps.sd3_bus_mode = status[13];
 
-Ok.
->
->> +
->> +For every supported slot a slot node can be defined
->> +with the following optional properties
->> +
->> +ti,hsmmc-slot-name: Name assocaited to the mmc slot
->> +ti,hsmmc-gpio-cd: gpio for card detect
->> +ti,hsmmc-gpio-wp: gpio for write protect
->
-> Please use the same standard as the other mmc controllers for CD/WP.
+@@ -348,9 +351,6 @@ static int mmc_read_switch(struct mmc_card *card)
+ 		}
 
-Ok.
->
->> +ti,hsmmc-ocr-mask: mmc/sd/sdio ocr mask
->
-> What is OCR mask?
+ 		card->sw_caps.sd3_curr_limit = status[7];
+-	} else {
+-		if (status[13] & 0x02)
+-			card->sw_caps.hs_max_dtr = 50000000;
+ 	}
 
-Its used to derive the vdd range the card supports. I hadn't
-looked at this closely, but looks like this isn't something that
-needs to be told to the driver anyway, it can always just query the
-card about the voltages it supports and derive the ocrmask internally.
-One more of the hacks in the driver to be cleaned up. Will drop this
-property completely.
+ out:
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 6ad4355..499a268 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -99,6 +99,7 @@ struct sd_ssr {
+ struct sd_switch_caps {
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		uhs_max_dtr;
++#define HIGH_SPEED_MAX_DTR	50000000
+ #define UHS_SDR104_MAX_DTR	208000000
+ #define UHS_SDR50_MAX_DTR	100000000
+ #define UHS_DDR50_MAX_DTR	50000000
+@@ -106,11 +107,13 @@ struct sd_switch_caps {
+ #define UHS_SDR12_MAX_DTR	25000000
+ 	unsigned int		sd3_bus_mode;
+ #define UHS_SDR12_BUS_SPEED	0
++#define HIGH_SPEED_BUS_SPEED	1
+ #define UHS_SDR25_BUS_SPEED	1
+ #define UHS_SDR50_BUS_SPEED	2
+ #define UHS_SDR104_BUS_SPEED	3
+ #define UHS_DDR50_BUS_SPEED	4
 
->
->> +ti,hsmmc-non-removable: non-removable slot (like eMMC)
->
-> Same here, non-removable should be standardized.
++#define SD_MODE_HIGH_SPEED	(1 << HIGH_SPEED_BUS_SPEED)
+ #define SD_MODE_UHS_SDR12	(1 << UHS_SDR12_BUS_SPEED)
+ #define SD_MODE_UHS_SDR25	(1 << UHS_SDR25_BUS_SPEED)
+ #define SD_MODE_UHS_SDR50	(1 << UHS_SDR50_BUS_SPEED)
+--
+1.6.4
 
-You mean there is already a binding available for this?
-
-Thanks for the review.
-
-regards,
-Rajendra
-
->
->
-> -Olof
 
