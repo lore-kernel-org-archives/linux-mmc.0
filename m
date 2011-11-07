@@ -1,101 +1,63 @@
-From: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 5/6] mmc: Add OF bindings support for mmc host controller
- capabilities
-Date: Mon, 7 Nov 2011 19:51:26 +0530
-Message-ID: <CAJuYYwThsY0gwG4D3bNC-VnifggT6Y4f0s3FVHebAXdubTb4Zg@mail.gmail.com>
-References: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org>
- <1320266163-15292-6-git-send-email-thomas.abraham@linaro.org>
- <20111104195717.GA3045@quad.lixom.net>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH 1/1] mmc: omap_hsmmc: DMA unmap only once in case of MMC error
+Date: Mon, 7 Nov 2011 21:55:11 +0530
+Message-ID: <1320683111-12577-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <20111104195717.GA3045-O5ziIzlqnXUVNXGz7ipsyg@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
-Cc: linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: linux-omap@vger.kernel.org, linux@arm.linux.org.uk, linux-arm-kernel@lists.infradead.org, Per Forlin <per.forlin@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 5 November 2011 01:27, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org> wrote:
-> On Thu, Nov 03, 2011 at 02:06:02AM +0530, Thomas Abraham wrote:
->> Device nodes representing sd/mmc controllers in a device tree would incl=
-ude
->> mmc host controller capabilities. Add support for parsing of mmc host
->> controller capabilities included in device nodes.
->>
->> Signed-off-by: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->> =A0.../devicetree/bindings/mmc/linux-mmc-host.txt =A0 =A0 | =A0 13 +++++=
-+++
->> =A0drivers/mmc/core/host.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0| =A0 31 ++++++++++++++++++++
->> =A0include/linux/mmc/host.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 | =A0 =A01 +
->> =A03 files changed, 45 insertions(+), 0 deletions(-)
->> =A0create mode 100644 Documentation/devicetree/bindings/mmc/linux-mmc-ho=
-st.txt
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/linux-mmc-host.txt b/=
-Documentation/devicetree/bindings/mmc/linux-mmc-host.txt
->> new file mode 100644
->> index 0000000..714b2b1
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/linux-mmc-host.txt
->> @@ -0,0 +1,13 @@
->> +* Linux MMC Host Controller Capabilities
->> +
->> +The following bindings can be used in a device node to specify any board
->> +specific mmc host controller capabilities.
->> +
->> +- linux,mmc_cap_4_bit_data - Host can do 4-bit transfers
->> +- linux,mmc_cap_mmc_highspeed - Host can do MMC high-speed timing
->> +- linux,mmc_cap_sd_highspeed - Host can do SD high-speed timing
->> +- linux,mmc_cap_needs_poll - Host needs polling for card detection
->> +- linux,mmc_cap_8_bit_data - Host can do 8-bit transfer
->> +- linux,mmc_cap_disable - Host can be disabled and re-enabled to save p=
-ower
->> +- linux,mmc_cap_nonremovable - Host is connected to nonremovable media
->> +- linux,mmc_cap_erase - Host allows erase/trim commands
->
-> linux-prefixed properties are a big red flag. The device tree should desc=
-ribe
-> the hardware, not what linux does with the hardware.
+From: Per Forlin <per.forlin@linaro.org>
 
-The vendor-prefixes documentation for device tree bindings includes
-'linux' as an option. And I was trying to encode the linux specific
-host controller capabilities using the above bindings.
+Reported by Russell King:
+mmcblk0: error -84 transferring data, sector 149201, nr 64,
+cmd response 0x900, card status 0xb00
+mmcblk0: retrying using single block read
 
->
-> See previous comments about "support-8bit" for encoding exactly the same
-> hardware capability in a linux-agnostic way. What the sdhci driver choose=
-s to
-> do with it is up to the driver, and in some cases it means it will set the
-> capabilities flag.
->
-> Same goes for the other properties. It should not go in as it is
-> implemented in this patch, it needs to be fixed up.
+WARNING: at lib/dma-debug.c:811 check_unmap
+omap_hsmmc omap_hsmmc.0: DMA-API: device driver tries to free DMA memory
+it has not allocated [device address=0x0000000080933000] [size=20480 bytes]
 
-Ok. I will remove all these linux specific bindings and replace with a
-more generic ones. Bindings will be defined for all the linux defined
-host capabilities. Non-linux platforms can add additional bindings as
-required. A function to parse such properties from a controller device
-node could actually be shared among all the mmc/sd host controller
-drivers in linux. I will redo this patch and submit again.
+In case of an error dma_unmap() is issued in omap_hsmmc_dma_cleanup()
+and then again in omap_hsmmc_post_req(). Resolve this by clearing the
+host_cookie to indicate there is no DMA mapped memory to unmap.
 
-Thanks Olof for your review and comments.
+Signed-off-by: Per Forlin <per.forlin@linaro.org>
+Tested-by: Balaji T K <balajitk@ti.com>
+---
+Repost with my Tested-by
 
-Regards,
-Thomas.
+ drivers/mmc/host/omap_hsmmc.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
 
->
->
-> -Olof
->
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 101cd31..d5fe43d 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1010,6 +1010,7 @@ static void omap_hsmmc_dma_cleanup(struct omap_hsmmc_host *host, int errno)
+ 			host->data->sg_len,
+ 			omap_hsmmc_get_dma_dir(host, host->data));
+ 		omap_free_dma(dma_ch);
++		host->data->host_cookie = 0;
+ 	}
+ 	host->data = NULL;
+ }
+@@ -1575,8 +1576,10 @@ static void omap_hsmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
+ 	struct mmc_data *data = mrq->data;
+ 
+ 	if (host->use_dma) {
+-		dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+-			     omap_hsmmc_get_dma_dir(host, data));
++		if (data->host_cookie)
++			dma_unmap_sg(mmc_dev(host->mmc), data->sg,
++				     data->sg_len,
++				     omap_hsmmc_get_dma_dir(host, data));
+ 		data->host_cookie = 0;
+ 	}
+ }
+-- 
+1.7.0.4
+
