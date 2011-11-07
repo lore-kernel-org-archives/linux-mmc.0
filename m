@@ -1,59 +1,123 @@
 From: Rajendra Nayak <rnayak@ti.com>
 Subject: Re: [PATCH 2/4] mmc: omap: adapt the hsmmc driver to device tree
-Date: Mon, 07 Nov 2011 11:44:43 +0530
-Message-ID: <4EB77753.8040606@ti.com>
-References: <1320407441-29697-1-git-send-email-rnayak@ti.com> <1320407441-29697-3-git-send-email-rnayak@ti.com> <20111104200415.GC3045@quad.lixom.net> <4EB45844.5000603@ti.com>
+Date: Mon, 07 Nov 2011 11:48:13 +0530
+Message-ID: <4EB77825.1010309@ti.com>
+References: <1320407441-29697-1-git-send-email-rnayak@ti.com> <1320407441-29697-3-git-send-email-rnayak@ti.com> <20111104200415.GC3045@quad.lixom.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog115.obsmtp.com ([74.125.149.238]:35229 "EHLO
-	na3sys009aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751600Ab1KGGOw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2011 01:14:52 -0500
-In-Reply-To: <4EB45844.5000603@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20111104200415.GC3045@quad.lixom.net>
+Sender: linux-omap-owner@vger.kernel.org
+To: Olof Johansson <olof@lixom.net>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, thomas.abraham@linaro.org, balajitk@ti.com, cjb@laptop.org, tony@atomide.com
 List-Id: linux-mmc@vger.kernel.org
-To: "Cousson, Benoit" <b-cousson@ti.com>
-Cc: Olof Johansson <olof@lixom.net>, cjb@laptop.org, balajitk@ti.com, tony@atomide.com, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, rob.herring@calxeda.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Saturday 05 November 2011 02:55 AM, Cousson, Benoit wrote:
->>> +Required properties:
->>> +- compatible: Should be "ti,omap-hsmmc<n>", "ti,omap2-hsmmc";
->>> +n is controller instance starting 0, for OMAP2/3 controllers
+On Saturday 05 November 2011 01:34 AM, Olof Johansson wrote:
+> On Fri, Nov 04, 2011 at 05:20:39PM +0530, Rajendra Nayak wrote:
+>> Define dt bindings for the ti-omap-hsmmc, and adapt
+>> the driver to extract data (which was earlier passed as
+>> platform_data) from device tree node.
 >>
->> No, no, no. You should not have to specify the unit-address in the
->> compatible
->> field. They are all programmed the same way, right?
+>> Signed-off-by: Rajendra Nayak<rnayak@ti.com>
+>> ---
+>>   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   50 +++++++++
+>>   drivers/mmc/host/omap_hsmmc.c                      |  117 ++++++++++++++++++++
+>>   2 files changed, 167 insertions(+), 0 deletions(-)
+>>   create mode 100644 Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>> new file mode 100644
+>> index 0000000..370af1b
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>> @@ -0,0 +1,50 @@
+>> +* TI Highspeed MMC host controller for OMAP
+>> +
+>> +The Highspeed MMC Host Controller on TI OMAP family
+>> +provides an interface for MMC, SD, and SDIO types of memory cards.
+>> +
+>> +Required properties:
+>> +- compatible: Should be "ti,omap-hsmmc<n>", "ti,omap2-hsmmc";
+>> +n is controller instance starting 0, for OMAP2/3 controllers
 >
-> AFAIR, 2 instances contain a DMA engine, but that should anyway be
-> detected using a "ti,had-dma-engine" extra property and not like that.
+> No, no, no. You should not have to specify the unit-address in the compatible
+> field. They are all programmed the same way, right?
 >
-> Checking the code in #2, it is used to get the instance of the MMC.
->
-> +static unsigned int of_get_hsmmc_instance(struct device_node *np)
-> +{
-> +    int i;
-> +    char comp[32];
-> +
-> +    for (; i < OMAP_MMC_DEV_MAX; i++) {
-> +        snprintf(comp, 32, "ti,omap-hsmmc%d", i);
-> +        if (of_device_is_compatible(np, comp))
-> +            break;
-> +    }
-> +    return i;
-> +}
->
-> Which does not seems to be a good usage of the compatible property anyway.
-> For a similar issue someone on the list suggested using the "cell-index"
-> property. But the definition I found in some binding documentation seems
-> to reserve that to: "enumerate logical devices within an IP core."
-> Ideally the driver should probably get rid of the need for an index.
-> I didn't check the original driver, but that should be needed for some
-> legacy reason.
+> Also, they should go from the specific to the generic, but the first property
+> is the same for 2/3 and 4. That's wrong.
 
-yes, there are a bunch of things done inside the driver based on the
-instance id which seem wrong, but I agree, encoding the instance
-in the compatible property seems really bad and non-scalable.
-Will look at how some of this legacy code in the driver can be
-removed/cleaned up.
+agreed, will get rid of instance number from the compatible property.
+>
+>> +- compatible: Should be "ti,omap-hsmmc<n>", "ti,omap4-hsmmc";
+>> +n is controller instance starting 0, for OMAP4 controllers
+>> +- ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
+>
+> I didn't think hwmod bindings were settled on yet?
+>
+>> +- reg : should contain hsmmc registers location and length
+>> +
+>> +Optional properties:
+>> +ti,hsmmc-supports-dual-volt: boolean, supports dual voltage cards
+>
+> ti,dual-voltage is a better name here (by definition, if it has the property it
+> supports it, the word "supports" is redundant).
+
+Ok.
+>
+>> +ti,hsmmc-nr-slots: Number of mmc slots
+>
+> You shouldn't have to specify this, it can be derived from the number of child
+> nodes.
+
+right, will do that.
+
+>
+>> +<supply-name>-supply: phandle to the regulator device tree node
+>> +"supply-name" examples are "vmmc", "vmmc_aux" etc
+>> +ti,hsmmc-has-pbias: Has PBIAS cell support
+>> +ti,hsmmc-has-special-reset: Requires a special softreset sequence
+>
+> you can drop hsmmc- from the properties here
+
+Ok.
+>
+>> +
+>> +For every supported slot a slot node can be defined
+>> +with the following optional properties
+>> +
+>> +ti,hsmmc-slot-name: Name assocaited to the mmc slot
+>> +ti,hsmmc-gpio-cd: gpio for card detect
+>> +ti,hsmmc-gpio-wp: gpio for write protect
+>
+> Please use the same standard as the other mmc controllers for CD/WP.
+
+Ok.
+>
+>> +ti,hsmmc-ocr-mask: mmc/sd/sdio ocr mask
+>
+> What is OCR mask?
+
+Its used to derive the vdd range the card supports. I hadn't
+looked at this closely, but looks like this isn't something that
+needs to be told to the driver anyway, it can always just query the
+card about the voltages it supports and derive the ocrmask internally.
+One more of the hacks in the driver to be cleaned up. Will drop this
+property completely.
+
+>
+>> +ti,hsmmc-non-removable: non-removable slot (like eMMC)
+>
+> Same here, non-removable should be standardized.
+
+You mean there is already a binding available for this?
+
+Thanks for the review.
+
+regards,
+Rajendra
+
+>
+>
+> -Olof
+
