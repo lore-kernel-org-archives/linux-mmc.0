@@ -1,47 +1,27 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] SD/MMC: fix the issue of SDHC performance regression
-Date: Mon, 07 Nov 2011 08:20:10 -0500
-Message-ID: <m2ipmw133p.fsf@bob.laptop.org>
-References: <1320658589-13143-1-git-send-email-b32616@freescale.com>
+From: loody <miloody@gmail.com>
+Subject: question about bounce
+Date: Mon, 7 Nov 2011 21:36:18 +0800
+Message-ID: <CANudz+vMxzRTspx0HkJ6DkFVmGLk3PC9Yy+Wbj1L7N7E41F7kg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57947 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754377Ab1KGNUR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 7 Nov 2011 08:20:17 -0500
-In-Reply-To: <1320658589-13143-1-git-send-email-b32616@freescale.com> (Qiang
-	Liu's message of "Mon, 7 Nov 2011 17:36:29 +0800")
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:35853 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755581Ab1KGNgT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2011 08:36:19 -0500
+Received: by qao25 with SMTP id 25so584918qao.19
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2011 05:36:18 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Qiang Liu <b32616@freescale.com>
-Cc: linux-mmc@vger.kernel.org, leoli@freescale.com, kumar.gala@freescale.com
+To: linux-mmc@vger.kernel.org
 
-Hi,
+Hi all:
+There is a comment from card/Kconfig as below:
+         controllers, however, are restricted to continuous memory
+          (i.e. they can't do scatter-gather), something the kernel
+          rarely can provide.
+if my controller support ADMA, should I use bounce again?
+Since each scatter-gather list can be made as an ADMA command, right?
 
-On Mon, Nov 07 2011, Qiang Liu wrote:
-> Low performance of SDHC (half of before) due to its frequency was set to 25MHz,
-> but not 50MHz (involved by commit id 013909c4ffd16ded4895528b856fd8782df04dc6,
-> add support for query function modes for uhs cards according to Physical Layer
-> SPEC V3.01).
->
-> Set high speed max frequency according to response status of CMD6, but
-> not for SPEC Version. Response of switch command is first consideration
-> factor when set SDHC max working frequency. TRAN_SPEED in CSD register
-> will be seemed as the second factor.
->
-> Signed-off-by: Qiang Liu <qiang.liu@freescale.com>
-
-Have you seen:
-
-http://git.kernel.org/?p=linux/kernel/git/torvalds/linux.git;a=commitdiff;h=f2815f68dabbb373fd1c9f0fd4a609d486697c2b 
-("mmc: sd: Handle SD3.0 cards not supporting UHS-I bus speed mode")
-
-which is already in mainline?  I think your patch is identical.
-
-Thanks,
-
-- Chris.
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Regards,
