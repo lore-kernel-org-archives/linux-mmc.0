@@ -1,65 +1,99 @@
 From: Liu Qiang-B32616 <B32616@freescale.com>
-Subject: RE: [PATCH] SD/MMC: fix the issue of SDHC performance regression
-Date: Tue, 8 Nov 2011 02:17:58 +0000
-Message-ID: <8F012AA59EAB7D4F89C0AE6C20D45709112374@039-SN1MPN1-004.039d.mgd.msft.net>
-References: <1320658589-13143-1-git-send-email-b32616@freescale.com>
- <m2ipmw133p.fsf@bob.laptop.org>
+Subject: RE: [PATCH] [RFC/PATCH] SD/MMC: support adjust bounce buffer size
+ dynamically in menuconfig
+Date: Tue, 8 Nov 2011 02:28:54 +0000
+Message-ID: <8F012AA59EAB7D4F89C0AE6C20D45709112393@039-SN1MPN1-004.039d.mgd.msft.net>
+References: <1320400467-6496-1-git-send-email-b32616@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:45856
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751214Ab1KHCSD convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 7 Nov 2011 21:18:03 -0500
-In-Reply-To: <m2ipmw133p.fsf@bob.laptop.org>
+Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:4483 "EHLO
+	VA3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752465Ab1KHC25 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2011 21:28:57 -0500
+In-Reply-To: <1320400467-6496-1-git-send-email-b32616@freescale.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Li Yang-R58472 <r58472@freescale.com>, Gala Kumar-B11780 <B11780@freescale.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "cjb@laptop.org" <cjb@laptop.org>, Li Yang-R58472 <r58472@freescale.com>, Gala Kumar-B11780 <B11780@freescale.com>
 
+Hi all,
 
+What about this feature? Provide a method of adjust mmc bounce size through menuconfig
+or /sys/block/mmcblk0 at run-time. Which one is better?
 
------Original Message-----
-From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
-Sent: Monday, November 07, 2011 9:20 PM
-To: Liu Qiang-B32616
-Cc: linux-mmc@vger.kernel.org; Li Yang-R58472; Gala Kumar-B11780
-Subject: Re: [PATCH] SD/MMC: fix the issue of SDHC performance regression
+Do you have any ideas? Thanks for your advice.
 
-Hi,
+________________________________________
+From: Liu Qiang-B32616
+Sent: Friday, November 04, 2011 4:54 AM
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org; Li Yang-R58472; Gala Kumar-B11780; Liu Qiang-B32616; Liu Qiang-B32616
+Subject: [PATCH] [RFC/PATCH] SD/MMC: support adjust bounce buffer size dynamically in menuconfig
 
-On Mon, Nov 07 2011, Qiang Liu wrote:
-> Low performance of SDHC (half of before) due to its frequency was set 
-> to 25MHz, but not 50MHz (involved by commit id 
-> 013909c4ffd16ded4895528b856fd8782df04dc6,
-> add support for query function modes for uhs cards according to 
-> Physical Layer SPEC V3.01).
->
-> Set high speed max frequency according to response status of CMD6, but 
-> not for SPEC Version. Response of switch command is first 
-> consideration factor when set SDHC max working frequency. TRAN_SPEED 
-> in CSD register will be seemed as the second factor.
->
-> Signed-off-by: Qiang Liu <qiang.liu@freescale.com>
+Improve IO throughput according to different controllers.
+Make it configuable in menuconfig. Of course, there is another
+implement of adjust bounce buffer size at run-time. Like:
+echo 262144 > /sys/block/mmcblk0/device/bouncesz
+This will reinit mmc queue when bounce size is changed.
+Which is better?
 
-Have you seen:
+On powerpc platform, 256KiB will get better perfromance than 64KiB.
+I used Sandisk Extreme III Class 6, 4G memory card, tested on P1022DS
+with IOzone. P1022DS memory is 1GBytes. Filesystem is ext4.
+By default, bounce buffer size is 64KiB,
+[root@p1022ds root]# iozone -Rab result -i0 -i1 -r64 -n1g -g2g -f /mnt/ff
+             KB  reclen   write rewrite    read    reread
+        1048576      64   12794   13260    32330    31731
+        2097152      64   12301   12382    18213    18239
+use 256KiB as bounce buffer size,
+[root@p1022ds root]# iozone -Rab result -i0 -i1 -r64 -n1g -g2g -f /mnt/ff
+             KB  reclen   write rewrite    read    reread
+        1048576      64   18533   19076    22841    23151
+        2097152      64   17744   17980    18333    18342
 
-http://git.kernel.org/?p=linux/kernel/git/torvalds/linux.git;a=commitdiff;h=f2815f68dabbb373fd1c9f0fd4a609d486697c2b
-("mmc: sd: Handle SD3.0 cards not supporting UHS-I bus speed mode")
+Signed-off-by: Qiang Liu <qiang.liu@freescale.com>
+---
+ drivers/mmc/card/Kconfig |    9 +++++++++
+ drivers/mmc/card/queue.c |    2 +-
+ 2 files changed, 10 insertions(+), 1 deletions(-)
 
-which is already in mainline?  I think your patch is identical.
-[Liu Qiang] Yes, they are identical. Thanks a lot.
+diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
+index 3b1f783..3390154 100644
+--- a/drivers/mmc/card/Kconfig
++++ b/drivers/mmc/card/Kconfig
+@@ -50,6 +50,15 @@ config MMC_BLOCK_BOUNCE
 
-Thanks,
+          If unsure, say Y here.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
++config MMC_QUEUE_BOUNCESZ
++       int "MMC memory card bounce buffer size"
++       depends on MMC_BLOCK_BOUNCE
++       range 512 4194304
++       default "65536"
++       help
++         Provide a flexible method to adjust bounce buffer size to
++         improve the throughput according to different controller.
++
+ config SDIO_UART
+        tristate "SDIO UART/GPS class support"
+        help
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index dcad59c..590723f 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -20,7 +20,7 @@
+ #include <linux/mmc/host.h>
+ #include "queue.h"
+
+-#define MMC_QUEUE_BOUNCESZ     65536
++#define MMC_QUEUE_BOUNCESZ     CONFIG_MMC_QUEUE_BOUNCESZ
+
+ #define MMC_QUEUE_SUSPENDED    (1 << 0)
+
 --
-To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+1.6.4
 
 
