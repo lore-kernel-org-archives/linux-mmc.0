@@ -1,113 +1,57 @@
-From: Sahitya Tummala <stummala@codeaurora.org>
-Subject: Re: [PATCH V9] mmc: core: Add Power Off Notify Feature eMMC 4.5
-Date: Tue, 08 Nov 2011 15:18:01 +0530
-Message-ID: <4EB8FAD1.7010606@codeaurora.org>
-References: <1318914301-30339-1-git-send-email-girish.shivananjappa@linaro.org>
+From: Aaron Lu <aaron.lu@amd.com>
+Subject: Re: [PATCH] SD/MMC: fix the issue of SDHC performance regression
+Date: Tue, 8 Nov 2011 17:47:36 +0800
+Message-ID: <20111108094734.GA1592@ladygaga>
+References: <1320658589-13143-1-git-send-email-b32616@freescale.com>
+ <m2ipmw133p.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1318914301-30339-1-git-send-email-girish.shivananjappa@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from am1ehsobe002.messaging.microsoft.com ([213.199.154.205]:21839
+	"EHLO AM1EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750816Ab1KHJu3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Nov 2011 04:50:29 -0500
+Content-Disposition: inline
+In-Reply-To: <m2ipmw133p.fsf@bob.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Qiang Liu <b32616@freescale.com>, linux-mmc@vger.kernel.org, leoli@freescale.com, kumar.gala@freescale.com, subhashj@codeaurora.org
 
-Hi Girish,
+On Mon, Nov 07, 2011 at 08:20:10AM -0500, Chris Ball wrote:
+> Have you seen:
+> 
+> http://git.kernel.org/?p=linux/kernel/git/torvalds/linux.git;a=commitdiff;h=f2815f68dabbb373fd1c9f0fd4a609d486697c2b 
+> ("mmc: sd: Handle SD3.0 cards not supporting UHS-I bus speed mode")
+> 
+> which is already in mainline?  I think your patch is identical.
+Hi Chris,
 
-On 10/18/2011 10:35 AM, Girish K S wrote:
-> This patch adds the support for power off notify feature, available in
-> eMMC 4.5 devices. If the the host has support for this feature, then the
-> mmc core will notify it to the device by setting the POWER_OFF_NOTIFICATION
-> byte in the extended csd register with a value 1(POWER_ON).
->
-> For suspend mode short timeout is used, whereas for the normal poweroff long
-> timeout is used.
->
-> cc: Chris Ball<cjb@laptop.org>
-> Signed-off-by: Girish K S<girish.shivananjappa@linaro.org>
-> Signed-off-by: Jaehoon Chung<jh80.chung@samsung.com>
-> ---
-> Changes in V9:
-> 	Removed the macros not related with the PowerOff notify feature.
-> 	The previous patch with commit id
-> 	bd3151f6c55c553bed2c0df72792841457b75bb5 should be deleted before
-> 	applying this patch.
-> Changes in V8:
-> 	Updated with review comments of Chris Ball and rebased to
-> 	chris-mmc/mmc-next branch.
-> Changes in V7:
-> 	Rebased to chris-mmc/mmc-next branch. merged to patches to single
-> 	patch.
-> Changes in V6:
-> 	Fixes checkpatch errors. The patches are generated after rebasing to
-> 	 chris's mmc-next branch.
-> Changes in V5:
-> 	This patch version fixes the problem with power off notify function,
-> 	 when called for the first time and card is not yet initialised.
-> Changes in V4:
-> 	Updated with review comments of Jeon
-> Changes in V2:
-> 	Adds poweroff notification handling in suspend/normal.
->
->   drivers/mmc/core/core.c  |   34 ++++++++++++++++++++++++++++++++++
->   drivers/mmc/core/mmc.c   |   23 +++++++++++++++++++++--
->   drivers/mmc/host/sdhci.c |    9 +++++++++
->   include/linux/mmc/card.h |    6 ++++++
->   include/linux/mmc/host.h |    5 +++++
->   include/linux/mmc/mmc.h  |    6 ++++++
->   6 files changed, 81 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 61d7730..b1eca96 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1212,11 +1212,43 @@ static void mmc_power_up(struct mmc_host *host)
->
->   void mmc_power_off(struct mmc_host *host)
->   {
-> +	struct mmc_card *card;
-> +	unsigned int notify_type;
-> +	unsigned int timeout;
-> +	int err;
-> +
->   	mmc_host_clk_hold(host);
->
-> +	card = host->card;
->   	host->ios.clock = 0;
->   	host->ios.vdd = 0;
->
-> +	if (card&&  mmc_card_mmc(card)&&
-> +	    card->poweroff_notify_state == MMC_POWERED_ON) {
-> +
-> +		if (host->power_notify_type == MMC_HOST_PW_NOTIFY_SHORT) {
-> +			notify_type = EXT_CSD_POWER_OFF_SHORT;
-> +			timeout = card->ext_csd.generic_cmd6_time;
-> +			card->poweroff_notify_state = MMC_POWEROFF_SHORT;
-> +		} else {
-> +			notify_type = EXT_CSD_POWER_OFF_LONG;
-> +			timeout = card->ext_csd.power_off_longtime;
-> +			card->poweroff_notify_state = MMC_POWEROFF_LONG;
-> +		}
-> +
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +				 EXT_CSD_POWER_OFF_NOTIFICATION,
-> +				 notify_type, timeout);
+I think the existing code is somewhat confusing, since SDR50 means
+100MHZ frequency while high speed is 50MHZ.
+The reason it is correct is UHS_SDR50_BUS_SPEED is defined as 2,
+which happened to be the same value as (1 << UHS_SDR25_BUS_SPEED).
 
-During suspend, the device can already be in sleep state (CMD5) before 
-mmc_power_off()
-is called from mmc_suspend_host(). As per eMMC specification, when the 
-device is in sleep state,
-it can only respond to RESET commands (CMD0 with argument of either 
-0x00000000 or
-0xF0F0F0F0 or H/W reset) and awake command (CMD5).  So, how does this 
-switch going
-to happen (CMD6) if it is in sleep state?
+How about change it like this:
+
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index a230e7f..670fd7f 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -306,7 +306,7 @@ static int mmc_read_switch(struct mmc_card *card)
+                goto out;
+        }
+ 
+-       if (status[13] & UHS_SDR50_BUS_SPEED)
++       if (status[13] & SD_MODE_UHS_SDR25)
+                card->sw_caps.hs_max_dtr = 50000000;
+ 
+        if (card->scr.sda_spec3) {
+
+SDR25 is also 50MHZ, the same frequency as high speed.
+Or we can add a new macro for high speed like qiang has done,
+which one you prefer?
 
 Thanks,
-Sahitya.
+Aaron
 
---
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
-Forum.
