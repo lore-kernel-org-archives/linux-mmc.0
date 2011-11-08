@@ -1,59 +1,54 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: Re: [PATCH 6/6] mmc: sdhci-s3c: Add device tree support
-Date: Tue, 8 Nov 2011 20:53:58 +0530
-Message-ID: <CAJuYYwSfC5t6xs-TDT2wBOj1RbQYSpH0wjo9uBcYf7bGyi0t9g@mail.gmail.com>
-References: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org>
-	<1320266163-15292-7-git-send-email-thomas.abraham@linaro.org>
-	<20111107211726.GC28491@ponder.secretlab.ca>
+From: Per Forlin <per.lkml@gmail.com>
+Subject: Re: [PATCH v2] mmc: support BKOPS feature for eMMC
+Date: Tue, 8 Nov 2011 19:37:03 +0100
+Message-ID: <CAFEEs1=Zb7eXdbK11NJDxVnt2xYuxid1oX8SsPTRL0dPQwEWow@mail.gmail.com>
+References: <4EB11B6B.2010909@samsung.com>
+	<CAFEEs1=yF3u-xL6OnEMTfqYx6HgOaePYkhC7iOJi-=z9TjPfmw@mail.gmail.com>
+	<CAELcNGQEm073tFsmSgbKzBfx=oYjZDX=EdbgWQOMZEBscsobTw@mail.gmail.com>
+	<CAFEEs1==cJ_dYDgesAZcs+E=-jj7-hwwssbAsE4a9AdmED8k3A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <20111107211726.GC28491@ponder.secretlab.ca>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:63105 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754109Ab1KHShE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Nov 2011 13:37:04 -0500
+Received: by vcbf1 with SMTP id f1so694629vcb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Nov 2011 10:37:03 -0800 (PST)
+In-Reply-To: <CAFEEs1==cJ_dYDgesAZcs+E=-jj7-hwwssbAsE4a9AdmED8k3A@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jae hoon Chung <jh80.chung@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, svenkatr@ti.com, chuanxiao.dong@intel.com
 
-Hi Grant,
-
-On 8 November 2011 02:47, Grant Likely <grant.likely@secretlab.ca> wrot=
-e:
-> On Thu, Nov 03, 2011 at 02:06:03AM +0530, Thomas Abraham wrote:
->> Add device tree based discovery support for Samsung's sdhci controll=
-er
->>
->> Cc: Ben Dooks <ben-linux@fluff.org>
->> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
->> ---
->> +Example:
->> + =A0 =A0 sdhci@12530000 {
->> + =A0 =A0 =A0 =A0 =A0 =A0 compatible =3D "samsung,exynos4210-sdhci";
->> + =A0 =A0 =A0 =A0 =A0 =A0 reg =3D <0x12530000 0x100>;
->> + =A0 =A0 =A0 =A0 =A0 =A0 interrupts =3D <139>;
->> + =A0 =A0 =A0 =A0 =A0 =A0 samsung,sdhci-bus-width =3D <4>;
->> + =A0 =A0 =A0 =A0 =A0 =A0 linux,mmc_cap_4_bit_data;
+On Tue, Nov 8, 2011 at 2:53 PM, Per Forlin <per.lkml@gmail.com> wrote:
+> Hi Jaehoon,
 >
-> Following on from my reply on patch 5, this is an example of exactly
-> what I'm talking about. =A0This node both sets bus-width to '4', and
-> sets the 4_bit_data flag. =A0Don't you think that the driver would be
-> smart enough to set the 4_bit_data flag when the bus width was set to
-> 4?
+> On Tue, Nov 8, 2011 at 1:43 PM, Jae hoon Chung <jh80.chung@gmail.com> wrote:
+>> Hi Per.
+>>
+>> 2011/11/5 Per Forlin <per.lkml@gmail.com>:
+>>> Hi Jaehoon,
+>>>
+>>> On Wed, Nov 2, 2011 at 11:28 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>>> Enable eMMC background operations (BKOPS) feature.
+>>>>
+>>>> If URGENT_BKOPS is set after a response, note that BKOPS
+>>>> are required. After all I/O requests are finished, run
+>>>> BKOPS if required. Should read/write operations be requested
+>>>> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
+>>>> and then service the request.
+>>>>
+>>>> If you want to enable this feature, set MMC_CAP2_BKOPS.
+>>>>
+I'm thinking if it's good to add something in this commit message
+about what has been proposed in this thread. The scope of this patch
+is good and any additional optimizations could be added separately
+later on.
 
-Yes, that is true. I will modify the driver based on your comments and
-resubmit this patch.
-
-Thanks for your comments.
+Future considerations
+ * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
+ * Interrupt ongoing BKOPS before powering off the card.
 
 Regards,
-Thomas.
-
->
-> g.
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-samsu=
-ng-soc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
+Per
