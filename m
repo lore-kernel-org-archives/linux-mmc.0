@@ -1,42 +1,42 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V2] mmc: core: Use delayed work in clock gating framework
-Date: Wed, 9 Nov 2011 14:58:03 +0100
-Message-ID: <CACRpkdZHFvJBVU0fZoj0Gu44oLiF5LzXOiHh0yC0-0cjyCL2og@mail.gmail.com>
-References: <1319699643-30700-1-git-send-email-sthumma@codeaurora.org>
-	<4EBA04BC.2010507@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Manuel Lauss <manuel.lauss@googlemail.com>
+Subject: [PATCH] mmc: sdhci-pci: shut up BAR size warning
+Date: Wed,  9 Nov 2011 21:21:58 +0100
+Message-ID: <1320870118-3427-1-git-send-email-manuel.lauss@googlemail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:39307 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753047Ab1KIN6E convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2011 08:58:04 -0500
-In-Reply-To: <4EBA04BC.2010507@codeaurora.org>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:57837 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755430Ab1KIUWF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2011 15:22:05 -0500
+Received: by bke11 with SMTP id 11so1694997bke.19
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2011 12:22:03 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-msm@vger.kernel.org, cjb@laptop.org
+To: linux-mmc@vger.kernel.org
+Cc: Manuel Lauss <manuel.lauss@googlemail.com>
 
-On Wed, Nov 9, 2011 at 5:42 AM, Sujit Reddy Thumma
-<sthumma@codeaurora.org> wrote:
-> On 10/27/2011 12:44 PM, Sujit Reddy Thumma wrote:
->>
->> Current clock gating framework disables the MCI clock as soon as the
->> request is completed and enables it when a request arrives. This
->> aggressive
->> clock gating framework, when enabled, cause following issues:
->> (...)
->> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
->>
->> ---
->> Changes in v2:
->> =A0 =A0 =A0 =A0- support for tuning delay via sysfs entry.
->
-> Linus/Chris, any comments on this V2 version?
+kernel complains about invalid SDHCI iomem size on boot.  The BAR on my
+O2-Micro controller is 512 bytes large, twice the size SDHCI-PCI needs.
+This patch changes the warning to only appear when the BAR is smaller
+than expected.
 
-Yes! This:
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Signed-off-by: Manuel Lauss <manuel.lauss@googlemail.com>
+---
+ drivers/mmc/host/sdhci-pci.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Thanks Sujit,
-Linus Walleij
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index d833d9c..0ee5c07 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -1199,7 +1199,7 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
+ 		return ERR_PTR(-ENODEV);
+ 	}
+ 
+-	if (pci_resource_len(pdev, bar) != 0x100) {
++	if (pci_resource_len(pdev, bar) < 0x100) {
+ 		dev_err(&pdev->dev, "Invalid iomem size. You may "
+ 			"experience problems.\n");
+ 	}
+-- 
+1.7.7.2
+
