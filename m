@@ -1,151 +1,249 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH V9] mmc: core: Add Power Off Notify Feature eMMC 4.5
-Date: Thu, 10 Nov 2011 11:24:02 +0530
-Message-ID: <CAGxe1ZHyZStX1_ZjRx+C3kMuLVhg3W2T8LM0zOoAQWeXVvFg3g@mail.gmail.com>
-References: <1318914301-30339-1-git-send-email-girish.shivananjappa@linaro.org>
-	<4EB8FAD1.7010606@codeaurora.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: core: Kill block requests if card is removed
+Date: Thu, 10 Nov 2011 11:35:29 +0200
+Message-ID: <4EBB9AE1.2060909@intel.com>
+References: <1320813119-24383-1-git-send-email-sthumma@codeaurora.org> <4EBA4940.6030808@intel.com> <CAFEEs1nPe3=TFwdf8rbPk6AtWzMdfaKR=-Rv0OVJhnANX=3fUQ@mail.gmail.com> <4EBB4CEA.1050901@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <4EB8FAD1.7010606@codeaurora.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Sahitya Tummala <stummala@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <4EBB4CEA.1050901@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Cc: Per Forlin <per.lkml@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, cjb@laptop.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 8 November 2011 15:18, Sahitya Tummala <stummala@codeaurora.org> wro=
-te:
-> Hi Girish,
->
-> On 10/18/2011 10:35 AM, Girish K S wrote:
+On 10/11/11 06:02, Sujit Reddy Thumma wrote:
+> Hi,
+>> Hi Adrian,
 >>
->> This patch adds the support for power off notify feature, available =
-in
->> eMMC 4.5 devices. If the the host has support for this feature, then=
- the
->> mmc core will notify it to the device by setting the
->> POWER_OFF_NOTIFICATION
->> byte in the extended csd register with a value 1(POWER_ON).
+>> On Wed, Nov 9, 2011 at 10:34 AM, Adrian Hunter<adrian.hunter@intel.com> 
+>> wrote:
+>>> On 09/11/11 06:31, Sujit Reddy Thumma wrote:
+>>>> Kill block requests when the host knows that the card is
+>>>> removed from the slot and is sure that subsequent requests
+>>>> are bound to fail. Do this silently so that the block
+>>>> layer doesn't output unnecessary error messages.
+>>>>
+>>>> This patch implements suggestion from Adrian Hunter,
+>>>> http://thread.gmane.org/gmane.linux.kernel.mmc/2714/focus=3474
+>>>>
+>>>> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
+>>>> ---
+>>>
+>>>
+>>> It is safer to have zero initialisations so I suggest inverting
+>>> the meaning of the state bit i.e.
+> 
+> Makes sense. Will take care in V2.
+> 
+>>>
+>>> #define MMC_STATE_CARD_GONE     (1<<7)          /* card removed from the
+>>> slot */
+>>>
+>>>
+>>> Also it would be nice is a request did not start if the card is
+>>> gone.  For the non-async case, that is easy:
+>>>
+>> As far as I understand Sujit's patch it will stop new requests from
+>> being issued, blk_fetch_request(q) returns NULL.
+> 
+> Yes, Per you are right. The ongoing requests will fail at the controller
+> driver layer and only the new requests coming to MMC queue layer will be
+> blocked.
+> 
+> Adrian's suggestion is to stop all the requests reaching host controller
+> layer by mmc core. This seems to be a good approach but the problem here is
+> the host driver should inform mmc core that card is gone.
+> 
+> Adrian, do you agree if we need to change all the host drivers to set the
+> MMC_STATE_CARD_GONE flag as soon as the card detect irq handler detects the
+> card as removed?
+
+Typically a card detect interrupt queues a rescan which in turn will have
+to wait to claim the host.  In the meantime, in the async case, the block
+driver will not release the host until the queue is empty.  The block
+driver will see errors and will use a send status command which will fail
+so the request will be aborted, but the next request will be started
+anyway.
+
+There are two problems:
+
+1. When do we reliably know that the card has really gone?
+
+At present, the detect method for SD and MMC is just the send status
+command, which is what the block driver is doing i.e. if the block
+driver sees send status fail, after an errored request, and the
+card is removable, then it is very likely the card has gone.
+
+At present, it is not considered that the host controller driver
+knows whether the card is really gone - just that it might be.
+
+Setting a MMC_STATE_CARD_GONE flag early may be a little complicated.
+e.g. mmc_detect_change() flags that the card may be gone.  After an
+error, if the "card may be gone" flag is set a new bus method could
+be called that just does send status.  If that fails, then the
+MMC_STATE_CARD_GONE flag is set.  Any calls to the detect method
+must first check the MMC_STATE_CARD_GONE flag so that, once gone,
+a card can not come back.
+
+Maybe you can think of something simpler.
+
+2. How can new requests be prevented from starting once the card
+is gone?
+
+Using BLKPREP_KILL will do that for all but the request that has been
+prepared already (i.e. async case) if the MMC_STATE_CARD_GONE flag is set
+early enough.
+
+Maybe blocking requests at a lower level is not needed.
+
+
+> 
 >>
->> For suspend mode short timeout is used, whereas for the normal power=
-off
->> long
->> timeout is used.
+>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>> index 5278ffb..91d7721 100644
+>>> --- a/drivers/mmc/core/core.c
+>>> +++ b/drivers/mmc/core/core.c
+>>> @@ -259,7 +259,7 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
+>>>                 wait_for_completion(&mrq->completion);
+>>>
+>>>                 cmd = mrq->cmd;
+>>> -               if (!cmd->error || !cmd->retries)
+>>> +               if (!cmd->error || !cmd->retries ||
+>>> mmc_card_gone(host->card))
+>> host->card will be NULL
+> 
+> Yes, the host->card will be NULL for some requests. Will take care of it.
+> 
+>> static void mmc_remove(struct mmc_host *host)
+>> {
+>>     BUG_ON(!host);
+>>     BUG_ON(!host->card);
 >>
->> cc: Chris Ball<cjb@laptop.org>
->> Signed-off-by: Girish K S<girish.shivananjappa@linaro.org>
->> Signed-off-by: Jaehoon Chung<jh80.chung@samsung.com>
->> ---
->> Changes in V9:
->> =A0 =A0 =A0 =A0Removed the macros not related with the PowerOff noti=
-fy feature.
->> =A0 =A0 =A0 =A0The previous patch with commit id
->> =A0 =A0 =A0 =A0bd3151f6c55c553bed2c0df72792841457b75bb5 should be de=
-leted before
->> =A0 =A0 =A0 =A0applying this patch.
->> Changes in V8:
->> =A0 =A0 =A0 =A0Updated with review comments of Chris Ball and rebase=
-d to
->> =A0 =A0 =A0 =A0chris-mmc/mmc-next branch.
->> Changes in V7:
->> =A0 =A0 =A0 =A0Rebased to chris-mmc/mmc-next branch. merged to patch=
-es to single
->> =A0 =A0 =A0 =A0patch.
->> Changes in V6:
->> =A0 =A0 =A0 =A0Fixes checkpatch errors. The patches are generated af=
-ter rebasing
->> to
->> =A0 =A0 =A0 =A0 chris's mmc-next branch.
->> Changes in V5:
->> =A0 =A0 =A0 =A0This patch version fixes the problem with power off n=
-otify
->> function,
->> =A0 =A0 =A0 =A0 when called for the first time and card is not yet i=
-nitialised.
->> Changes in V4:
->> =A0 =A0 =A0 =A0Updated with review comments of Jeon
->> Changes in V2:
->> =A0 =A0 =A0 =A0Adds poweroff notification handling in suspend/normal=
-=2E
+>>     mmc_remove_card(host->card);
+>>     host->card = NULL;
+>> }
+>> card is not freed until later.
 >>
->> =A0drivers/mmc/core/core.c =A0| =A0 34 +++++++++++++++++++++++++++++=
-+++++
->> =A0drivers/mmc/core/mmc.c =A0 | =A0 23 +++++++++++++++++++++--
->> =A0drivers/mmc/host/sdhci.c | =A0 =A09 +++++++++
->> =A0include/linux/mmc/card.h | =A0 =A06 ++++++
->> =A0include/linux/mmc/host.h | =A0 =A05 +++++
->> =A0include/linux/mmc/mmc.h =A0| =A0 =A06 ++++++
->> =A06 files changed, 81 insertions(+), 2 deletions(-)
+>>>                         break;
+>>>
+>>>                 pr_debug("%s: req failed (CMD%u): %d, retrying...\n",
+>>> @@ -374,6 +374,10 @@ EXPORT_SYMBOL(mmc_start_req);
+>>>   */
+>>>   void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
+>>>   {
+>>> +       if (mmc_card_gone(host->card)) {
+>>> +               mrq->cmd->error = -ENODEV;
+>>> +               return;
+>>> +       }
+> 
+> Looks good. Just for clarification, some host controller drivers return
+> -ENOMEDIUM in host->ops->request() when they see the card is gone. Do you
+> think we can remove this now from host controller drivers?
+
+I see include/linux/mmc/core.h has specified the use of -ENOMEDIUM so that
+should be used.
+
+> 
+> 
+>>>         __mmc_start_req(host, mrq);
+>>>         mmc_wait_for_req_done(host, mrq);
+>>>   }
+>>>
+>>>
+>>>
+>>> The async case is harder...
+>>>
+>> I can help out with the non-async code if we go for your proposal.
+> 
+> I will check the possibilities.
+> 
 >>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 61d7730..b1eca96 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -1212,11 +1212,43 @@ static void mmc_power_up(struct mmc_host *ho=
-st)
->>
->> =A0void mmc_power_off(struct mmc_host *host)
->> =A0{
->> + =A0 =A0 =A0 struct mmc_card *card;
->> + =A0 =A0 =A0 unsigned int notify_type;
->> + =A0 =A0 =A0 unsigned int timeout;
->> + =A0 =A0 =A0 int err;
->> +
->> =A0 =A0 =A0 =A0mmc_host_clk_hold(host);
->>
->> + =A0 =A0 =A0 card =3D host->card;
->> =A0 =A0 =A0 =A0host->ios.clock =3D 0;
->> =A0 =A0 =A0 =A0host->ios.vdd =3D 0;
->>
->> + =A0 =A0 =A0 if (card&& =A0mmc_card_mmc(card)&&
->> + =A0 =A0 =A0 =A0 =A0 card->poweroff_notify_state =3D=3D MMC_POWERED=
-_ON) {
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->power_notify_type =3D=3D MMC=
-_HOST_PW_NOTIFY_SHORT) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 notify_type =3D EXT_CS=
-D_POWER_OFF_SHORT;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timeout =3D card->ext_=
-csd.generic_cmd6_time;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->poweroff_notify_=
-state =3D MMC_POWEROFF_SHORT;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 notify_type =3D EXT_CS=
-D_POWER_OFF_LONG;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timeout =3D card->ext_=
-csd.power_off_longtime;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->poweroff_notify_=
-state =3D MMC_POWEROFF_LONG;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_S=
-ET_NORMAL,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT=
-_CSD_POWER_OFF_NOTIFICATION,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0not=
-ify_type, timeout);
->
-> During suspend, the device can already be in sleep state (CMD5) befor=
-e
-> mmc_power_off()
-> is called from mmc_suspend_host(). As per eMMC specification, when th=
-e
-> device is in sleep state,
-> it can only respond to RESET commands (CMD0 with argument of either
-> 0x00000000 or
-> 0xF0F0F0F0 or H/W reset) and awake command (CMD5). =A0So, how does th=
-is switch
-> going
-> to happen (CMD6) if it is in sleep state?
-> Thanks Sahitya. Will handle the situation of sending the switch comma=
-nd  in mmc_suspend_host function before the device goes to sleep.
-> Thanks,
-> Sahitya.
->
-> --
-> Sent by a consultant of the Qualcomm Innovation Center, Inc.
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
-> Forum.
->
->
+>>>
+>>>>   drivers/mmc/card/queue.c |    5 +++++
+>>>>   drivers/mmc/core/bus.c   |    2 ++
+>>>>   include/linux/mmc/card.h |    3 +++
+>>>>   3 files changed, 10 insertions(+), 0 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+>>>> index dcad59c..f8a3298 100644
+>>>> --- a/drivers/mmc/card/queue.c
+>>>> +++ b/drivers/mmc/card/queue.c
+>>>> @@ -29,6 +29,8 @@
+>>>>    */
+>>>>   static int mmc_prep_request(struct request_queue *q, struct request *req)
+>>>>   {
+>>>> +     struct mmc_queue *mq = q->queuedata;
+>>>> +
+>>>>        /*
+>>>>         * We only like normal block requests and discards.
+>>>>         */
+>>>> @@ -37,6 +39,9 @@ static int mmc_prep_request(struct request_queue *q,
+>>>> struct request *req)
+>>>>                return BLKPREP_KILL;
+>>>>        }
+>>>>
+>>>> +     if (mq&&  mq->card&&  !mmc_card_inserted(mq->card))
+>>>> +             return BLKPREP_KILL;
+>>>> +
+>>>>        req->cmd_flags |= REQ_DONTPREP;
+>>>>
+>>>>        return BLKPREP_OK;
+>>>> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+>>>> index 46b6e84..ea3be5d 100644
+>>>> --- a/drivers/mmc/core/bus.c
+>>>> +++ b/drivers/mmc/core/bus.c
+>>>> @@ -308,6 +308,7 @@ int mmc_add_card(struct mmc_card *card)
+>>>>                        mmc_card_ddr_mode(card) ? "DDR " : "",
+>>>>                        type, card->rca);
+>>>>        }
+>>>> +     mmc_card_set_inserted(card);
+>>>>
+>>>>   #ifdef CONFIG_DEBUG_FS
+>>>>        mmc_add_card_debugfs(card);
+>>>> @@ -340,6 +341,7 @@ void mmc_remove_card(struct mmc_card *card)
+>>>>                        pr_info("%s: card %04x removed\n",
+>>>>                                mmc_hostname(card->host), card->rca);
+>>>>                }
+>>>> +             card->state&= ~MMC_STATE_INSERTED;
+>>>>                device_del(&card->dev);
+>>>>        }
+>>>>
+>>>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+>>>> index b7a8cb1..be4125a 100644
+>>>> --- a/include/linux/mmc/card.h
+>>>> +++ b/include/linux/mmc/card.h
+>>>> @@ -209,6 +209,7 @@ struct mmc_card {
+>>>>   #define MMC_STATE_HIGHSPEED_DDR (1<<4)               /* card is in
+>>>> high speed mode */
+>>>>   #define MMC_STATE_ULTRAHIGHSPEED (1<<5)              /* card is in
+>>>> ultra high speed mode */
+>>>>   #define MMC_CARD_SDXC                (1<<6)          /* card is SDXC */
+>>>> +#define MMC_STATE_INSERTED   (1<<7)          /* card present in the
+>>>> slot */
+>>>>        unsigned int            quirks;         /* card quirks */
+>>>>   #define MMC_QUIRK_LENIENT_FN0        (1<<0)          /* allow SDIO FN0
+>>>> writes outside of the VS CCCR range */
+>>>>   #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1) /* use func->cur_blksize */
+>>>> @@ -362,6 +363,7 @@ static inline void __maybe_unused
+>>>> remove_quirk(struct mmc_card *card, int data)
+>>>>   #define mmc_card_sdio(c)     ((c)->type == MMC_TYPE_SDIO)
+>>>>
+>>>>   #define mmc_card_present(c)  ((c)->state&  MMC_STATE_PRESENT)
+>>>> +#define mmc_card_inserted(c) ((c)->state&  MMC_STATE_INSERTED)
+>>>>   #define mmc_card_readonly(c) ((c)->state&  MMC_STATE_READONLY)
+>>>>   #define mmc_card_highspeed(c)        ((c)->state&  MMC_STATE_HIGHSPEED)
+>>>>   #define mmc_card_blockaddr(c)        ((c)->state&  MMC_STATE_BLOCKADDR)
+>>>> @@ -370,6 +372,7 @@ static inline void __maybe_unused
+>>>> remove_quirk(struct mmc_card *card, int data)
+>>>>   #define mmc_card_ext_capacity(c) ((c)->state&  MMC_CARD_SDXC)
+>>>>
+>>>>   #define mmc_card_set_present(c)      ((c)->state |= MMC_STATE_PRESENT)
+>>>> +#define mmc_card_set_inserted(c) ((c)->state |= MMC_STATE_INSERTED)
+>>>>   #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+>>>>   #define mmc_card_set_highspeed(c) ((c)->state |= MMC_STATE_HIGHSPEED)
+>>>>   #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
+>>>
+> 
+> 
