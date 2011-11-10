@@ -1,41 +1,43 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH] mmc: mmci: Support MMC_PM_KEEP_POWER
-Date: Thu, 10 Nov 2011 17:23:42 +0100
-Message-ID: <1320942222-3409-1-git-send-email-ulf.hansson@stericsson.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 2/3] mmc: sdhci-pxa: Add SDHCI driver for PXA16x
+Date: Thu, 10 Nov 2011 15:09:54 -0500
+Message-ID: <87r51fwxgt.fsf@laptop.org>
+References: <1319546229-31804-1-git-send-email-tanmay.upadhyay@einfochips.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:56816 "EHLO
-	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933104Ab1KJQXz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2011 11:23:55 -0500
+Received: from void.printf.net ([89.145.121.20]:41985 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753363Ab1KJUKK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Nov 2011 15:10:10 -0500
+In-Reply-To: <1319546229-31804-1-git-send-email-tanmay.upadhyay@einfochips.com>
+	(Tanmay Upadhyay's message of "Tue, 25 Oct 2011 18:07:09 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
+Cc: zhangfei.gao@marvell.com, dwang4@marvell.com, njun@marvell.com, wuqm@marvell.com, prakity@marvell.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Add MMC_PM_KEEP_POWER to pm_caps so SDIO clients are able
-to use this option to prevent power off in suspend.
+Hi Tanmay and Philip,
 
-Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
----
- drivers/mmc/host/mmci.c |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
+On Tue, Oct 25 2011, Tanmay Upadhyay wrote:
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> Signed-off-by: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
+> ---
+>  drivers/mmc/host/Kconfig                |   13 ++
+>  drivers/mmc/host/Makefile               |    1 +
+>  drivers/mmc/host/sdhci-pxav1.c          |  256 +++++++++++++++++++++++++++++++
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 50b5f99..1ac04a2 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1240,6 +1240,9 @@ static int __devinit mmci_probe(struct amba_device *dev,
- 		mmc->ocr_avail = plat->ocr_mask;
- 	mmc->caps = plat->capabilities;
- 
-+	/* We support these PM capabilities. */
-+	mmc->pm_caps = MMC_PM_KEEP_POWER;
-+
- 	/*
- 	 * We can do SGIO
- 	 */
+By my script's count, 215 of the 256 lines in this file (84%) are simply
+duplicated from sdhci-pxav2.c, which makes me think we've failed at
+abstraction here.  Can you have a think about how to do better, please?
+
+My intuition is that since there are only 41 lines of difference (actually,
+less, since the only difference on many of these is s/pxav2/pxav1/g), I'd
+rather see this become special-cases in the sdhci-pxav2.c code.
+
+Thanks,
+
+- Chris.
 -- 
-1.7.5.4
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
