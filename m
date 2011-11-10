@@ -1,99 +1,151 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: Re: [PATCH] mmc: core: Kill block requests if card is removed
-Date: Thu, 10 Nov 2011 11:01:58 +0530
-Message-ID: <4EBB61CE.4090306@codeaurora.org>
-References: <1320813119-24383-1-git-send-email-sthumma@codeaurora.org> <CAFEEs1=rbYKv9uWXJ0A-aD5bsUfHEYbBrc98hcB7o+C9b+nvNQ@mail.gmail.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH V9] mmc: core: Add Power Off Notify Feature eMMC 4.5
+Date: Thu, 10 Nov 2011 11:24:02 +0530
+Message-ID: <CAGxe1ZHyZStX1_ZjRx+C3kMuLVhg3W2T8LM0zOoAQWeXVvFg3g@mail.gmail.com>
+References: <1318914301-30339-1-git-send-email-girish.shivananjappa@linaro.org>
+	<4EB8FAD1.7010606@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:25034 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933629Ab1KJFcE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2011 00:32:04 -0500
-In-Reply-To: <CAFEEs1=rbYKv9uWXJ0A-aD5bsUfHEYbBrc98hcB7o+C9b+nvNQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <4EB8FAD1.7010606@codeaurora.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Sahitya Tummala <stummala@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.lkml@gmail.com>
-Cc: linux-mmc@vger.kernel.org, adrian.hunter@intel.com, linux-arm-msm@vger.kernel.org, cjb@laptop.org
 
-Hi Per,
-
-On 11/10/2011 3:17 AM, Per Forlin wrote:
-> Hi Sujit,
+On 8 November 2011 15:18, Sahitya Tummala <stummala@codeaurora.org> wro=
+te:
+> Hi Girish,
 >
-> On Wed, Nov 9, 2011 at 5:31 AM, Sujit Reddy Thumma
-> <sthumma@codeaurora.org>  wrote:
->> Kill block requests when the host knows that the card is
->> removed from the slot and is sure that subsequent requests
->> are bound to fail. Do this silently so that the block
->> layer doesn't output unnecessary error messages.
+> On 10/18/2011 10:35 AM, Girish K S wrote:
 >>
->> This patch implements suggestion from Adrian Hunter,
->> http://thread.gmane.org/gmane.linux.kernel.mmc/2714/focus=3474
+>> This patch adds the support for power off notify feature, available =
+in
+>> eMMC 4.5 devices. If the the host has support for this feature, then=
+ the
+>> mmc core will notify it to the device by setting the
+>> POWER_OFF_NOTIFICATION
+>> byte in the extended csd register with a value 1(POWER_ON).
 >>
->> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
+>> For suspend mode short timeout is used, whereas for the normal power=
+off
+>> long
+>> timeout is used.
+>>
+>> cc: Chris Ball<cjb@laptop.org>
+>> Signed-off-by: Girish K S<girish.shivananjappa@linaro.org>
+>> Signed-off-by: Jaehoon Chung<jh80.chung@samsung.com>
 >> ---
->>   drivers/mmc/card/queue.c |    5 +++++
->>   drivers/mmc/core/bus.c   |    2 ++
->>   include/linux/mmc/card.h |    3 +++
->>   3 files changed, 10 insertions(+), 0 deletions(-)
+>> Changes in V9:
+>> =A0 =A0 =A0 =A0Removed the macros not related with the PowerOff noti=
+fy feature.
+>> =A0 =A0 =A0 =A0The previous patch with commit id
+>> =A0 =A0 =A0 =A0bd3151f6c55c553bed2c0df72792841457b75bb5 should be de=
+leted before
+>> =A0 =A0 =A0 =A0applying this patch.
+>> Changes in V8:
+>> =A0 =A0 =A0 =A0Updated with review comments of Chris Ball and rebase=
+d to
+>> =A0 =A0 =A0 =A0chris-mmc/mmc-next branch.
+>> Changes in V7:
+>> =A0 =A0 =A0 =A0Rebased to chris-mmc/mmc-next branch. merged to patch=
+es to single
+>> =A0 =A0 =A0 =A0patch.
+>> Changes in V6:
+>> =A0 =A0 =A0 =A0Fixes checkpatch errors. The patches are generated af=
+ter rebasing
+>> to
+>> =A0 =A0 =A0 =A0 chris's mmc-next branch.
+>> Changes in V5:
+>> =A0 =A0 =A0 =A0This patch version fixes the problem with power off n=
+otify
+>> function,
+>> =A0 =A0 =A0 =A0 when called for the first time and card is not yet i=
+nitialised.
+>> Changes in V4:
+>> =A0 =A0 =A0 =A0Updated with review comments of Jeon
+>> Changes in V2:
+>> =A0 =A0 =A0 =A0Adds poweroff notification handling in suspend/normal=
+=2E
 >>
->> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
->> index dcad59c..f8a3298 100644
->> --- a/drivers/mmc/card/queue.c
->> +++ b/drivers/mmc/card/queue.c
->> @@ -29,6 +29,8 @@
->>   */
->>   static int mmc_prep_request(struct request_queue *q, struct request *req)
->>   {
->> +       struct mmc_queue *mq = q->queuedata;
+>> =A0drivers/mmc/core/core.c =A0| =A0 34 +++++++++++++++++++++++++++++=
++++++
+>> =A0drivers/mmc/core/mmc.c =A0 | =A0 23 +++++++++++++++++++++--
+>> =A0drivers/mmc/host/sdhci.c | =A0 =A09 +++++++++
+>> =A0include/linux/mmc/card.h | =A0 =A06 ++++++
+>> =A0include/linux/mmc/host.h | =A0 =A05 +++++
+>> =A0include/linux/mmc/mmc.h =A0| =A0 =A06 ++++++
+>> =A06 files changed, 81 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 61d7730..b1eca96 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1212,11 +1212,43 @@ static void mmc_power_up(struct mmc_host *ho=
+st)
+>>
+>> =A0void mmc_power_off(struct mmc_host *host)
+>> =A0{
+>> + =A0 =A0 =A0 struct mmc_card *card;
+>> + =A0 =A0 =A0 unsigned int notify_type;
+>> + =A0 =A0 =A0 unsigned int timeout;
+>> + =A0 =A0 =A0 int err;
 >> +
->>         /*
->>          * We only like normal block requests and discards.
->>          */
->> @@ -37,6 +39,9 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
->>                 return BLKPREP_KILL;
->>         }
+>> =A0 =A0 =A0 =A0mmc_host_clk_hold(host);
 >>
->> +       if (mq&&  mq->card&&  !mmc_card_inserted(mq->card))
-> I guess the card is not freed until all pending requests have been
-> flushed? mq->card will be valid as long as the queue is active.
-
-Agreed. This is a redundant check, will remove it in v2.
-
->
-> Another way to detect card removal is to subscribe for
-> "BUS_NOTIFY_DEL_DEVICE" mmc card device.
-
-Thanks, this sounds good, for the current v1 patch.
-I have a concern about this when we take Adrian's suggestion. If we want 
-to set the card gone flag as soon as the card is removed, then we can 
-stop any new block request. Registering for BUS_NOTIFY_DEL_DEVICE only 
-stops sync requests issued in device_del().
-
->
->> +               return BLKPREP_KILL;
+>> + =A0 =A0 =A0 card =3D host->card;
+>> =A0 =A0 =A0 =A0host->ios.clock =3D 0;
+>> =A0 =A0 =A0 =A0host->ios.vdd =3D 0;
+>>
+>> + =A0 =A0 =A0 if (card&& =A0mmc_card_mmc(card)&&
+>> + =A0 =A0 =A0 =A0 =A0 card->poweroff_notify_state =3D=3D MMC_POWERED=
+_ON) {
 >> +
->>         req->cmd_flags |= REQ_DONTPREP;
->>
->>         return BLKPREP_OK;
->> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
->> index 46b6e84..ea3be5d 100644
->> --- a/drivers/mmc/core/bus.c
->> +++ b/drivers/mmc/core/bus.c
->> @@ -308,6 +308,7 @@ int mmc_add_card(struct mmc_card *card)
->>                         mmc_card_ddr_mode(card) ? "DDR " : "",
->>                         type, card->rca);
->>         }
->> +       mmc_card_set_inserted(card);
-> If the card-alloction is freed when the card is removed. Is it
-> necessary to set this bit for the new allocated card? Or could this be
-> the same card allocation?
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->power_notify_type =3D=3D MMC=
+_HOST_PW_NOTIFY_SHORT) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 notify_type =3D EXT_CS=
+D_POWER_OFF_SHORT;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timeout =3D card->ext_=
+csd.generic_cmd6_time;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->poweroff_notify_=
+state =3D MMC_POWEROFF_SHORT;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 notify_type =3D EXT_CS=
+D_POWER_OFF_LONG;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timeout =3D card->ext_=
+csd.power_off_longtime;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->poweroff_notify_=
+state =3D MMC_POWEROFF_LONG;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_S=
+ET_NORMAL,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT=
+_CSD_POWER_OFF_NOTIFICATION,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0not=
+ify_type, timeout);
 >
-Adrian's suggestion, "It is safer to have zero initialisations so I 
-suggest inverting the meaning of the state bit," I guess, answer your 
-question. We set the card gone flag when the card is removed i.e., 
-either in mmc_remove_card() or host driver's card detect irq handler and 
-while card allocation is freed it is cleared anyways.
-
+> During suspend, the device can already be in sleep state (CMD5) befor=
+e
+> mmc_power_off()
+> is called from mmc_suspend_host(). As per eMMC specification, when th=
+e
+> device is in sleep state,
+> it can only respond to RESET commands (CMD0 with argument of either
+> 0x00000000 or
+> 0xF0F0F0F0 or H/W reset) and awake command (CMD5). =A0So, how does th=
+is switch
+> going
+> to happen (CMD6) if it is in sleep state?
+> Thanks Sahitya. Will handle the situation of sending the switch comma=
+nd  in mmc_suspend_host function before the device goes to sleep.
+> Thanks,
+> Sahitya.
+>
+> --
+> Sent by a consultant of the Qualcomm Innovation Center, Inc.
+> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
+> Forum.
+>
+>
