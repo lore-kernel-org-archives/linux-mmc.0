@@ -1,249 +1,144 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: core: Kill block requests if card is removed
-Date: Thu, 10 Nov 2011 11:35:29 +0200
-Message-ID: <4EBB9AE1.2060909@intel.com>
-References: <1320813119-24383-1-git-send-email-sthumma@codeaurora.org> <4EBA4940.6030808@intel.com> <CAFEEs1nPe3=TFwdf8rbPk6AtWzMdfaKR=-Rv0OVJhnANX=3fUQ@mail.gmail.com> <4EBB4CEA.1050901@codeaurora.org>
+From: merez@codeaurora.org
+Subject: RE: [PATCH 2/2] mmc: core: Support packed command for eMMC4.5      
+     device
+Date: Thu, 10 Nov 2011 05:41:17 -0800 (PST)
+Message-ID: <620ec9ffa6bdbba9ae5f76998e36f8dc.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <4EBB4CEA.1050901@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: Per Forlin <per.lkml@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, cjb@laptop.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:33798 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932540Ab1KJNlS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2011 08:41:18 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: "'S, Venkatraman'" <svenkatr@ti.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 
-On 10/11/11 06:02, Sujit Reddy Thumma wrote:
-> Hi,
->> Hi Adrian,
->>
->> On Wed, Nov 9, 2011 at 10:34 AM, Adrian Hunter<adrian.hunter@intel.com> 
->> wrote:
->>> On 09/11/11 06:31, Sujit Reddy Thumma wrote:
->>>> Kill block requests when the host knows that the card is
->>>> removed from the slot and is sure that subsequent requests
->>>> are bound to fail. Do this silently so that the block
->>>> layer doesn't output unnecessary error messages.
->>>>
->>>> This patch implements suggestion from Adrian Hunter,
->>>> http://thread.gmane.org/gmane.linux.kernel.mmc/2714/focus=3474
->>>>
->>>> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
->>>> ---
->>>
->>>
->>> It is safer to have zero initialisations so I suggest inverting
->>> the meaning of the state bit i.e.
-> 
-> Makes sense. Will take care in V2.
-> 
->>>
->>> #define MMC_STATE_CARD_GONE     (1<<7)          /* card removed from the
->>> slot */
->>>
->>>
->>> Also it would be nice is a request did not start if the card is
->>> gone.  For the non-async case, that is easy:
->>>
->> As far as I understand Sujit's patch it will stop new requests from
->> being issued, blk_fetch_request(q) returns NULL.
-> 
-> Yes, Per you are right. The ongoing requests will fail at the controller
-> driver layer and only the new requests coming to MMC queue layer will be
-> blocked.
-> 
-> Adrian's suggestion is to stop all the requests reaching host controller
-> layer by mmc core. This seems to be a good approach but the problem here is
-> the host driver should inform mmc core that card is gone.
-> 
-> Adrian, do you agree if we need to change all the host drivers to set the
-> MMC_STATE_CARD_GONE flag as soon as the card detect irq handler detects the
-> card as removed?
+On Thu, Nov 10, 2011 Maya Erez wrote:
+> S, Venkatraman <svenkatr@ti.com> wrote:
+>> On Thu, Nov 3, 2011 at 7:23 AM, Seungwon Jeon <tgih.jun@samsung.com>
+wrote:
+>> >> > +static u8 mmc_blk_chk_packable(struct mmc_queue *mq, struct
+>> request *req)
 
-Typically a card detect interrupt queues a rescan which in turn will have
-to wait to claim the host.  In the meantime, in the async case, the block
-driver will not release the host until the queue is empty.  The block
-driver will see errors and will use a send status command which will fail
-so the request will be aborted, but the next request will be started
-anyway.
+The function prepares the checkable list and not only checks if packing=
+ is
+possible, therefore I think its name should change to reflect its real
+action.
 
-There are two problems:
+>> >> > + =A0 =A0 =A0 if (!(md->flags & MMC_BLK_CMD23) &&
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 !card->ext_csd.pa=
+cked_event_en)
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto no_packed;
 
-1. When do we reliably know that the card has really gone?
+Having the condition with a && can lead to cases where CMD23 is not=20
+supported and we send packed commands. Therfore the condition should be
+changed to || or be splitted to 2 separate checks.
+Also, according to the standard the generic error flag in
+PACKED_COMMAND_STATUS is set in case of any error and having
+PACKED_EVENT_EN is only optional. Therefore, I don't think that setting
+the packed_event_en should be a mandatory condition for using packed
+coammnds.
 
-At present, the detect method for SD and MMC is just the send status
-command, which is what the block driver is doing i.e. if the block
-driver sees send status fail, after an errored request, and the
-card is removable, then it is very likely the card has gone.
+>> >> > + =A0 =A0 =A0 if (mmc_req_rel_wr(cur) &&
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (md->flags & MMC_=
+BLK_REL_WR) &&
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 !en_rel_wr) {
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto no_packed;
+>> >> > + =A0 =A0 =A0 }
 
-At present, it is not considered that the host controller driver
-knows whether the card is really gone - just that it might be.
+Can you please explain this condition and its purpose?
 
-Setting a MMC_STATE_CARD_GONE flag early may be a little complicated.
-e.g. mmc_detect_change() flags that the card may be gone.  After an
-error, if the "card may be gone" flag is set a new bus method could
-be called that just does send status.  If that fails, then the
-MMC_STATE_CARD_GONE flag is set.  Any calls to the detect method
-must first check the MMC_STATE_CARD_GONE flag so that, once gone,
-a card can not come back.
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 phys_segments +=3D =A0next->nr_ph=
+ys_segments;
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (phys_segments > max_phys_segs=
+) {
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 blk_requeue_reque=
+st(q, next);
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+>> >> I mentioned this before - if the next request is not packable and
+>> requeued,
+>> >> blk_fetch_request will retrieve it again and this while loop will
+never terminate.
+>> >>
+>> > If next request is not packable, it is requeued and 'break'
+terminates
+>> this loop.
+>> > So it not infinite.
+>> Right !! But that doesn't help finding the commands that are packabl=
+e.
+Ideally, you'd need to pack all neighbouring requests into one packed
+command.
+>> The way CFQ works, it is not necessary that the fetch would return a=
+ll
+outstanding
+>> requests that are packable (unless you invoke a forced dispatch) It
+would be good to see some numbers on the number of pack hits /
+misses
+>> that
+>> you would encounter with this logic, on a typical usecase.
+> Is it considered only for CFQ scheduler? How about other I/O schedule=
+r?
+If all requests are drained from scheduler queue forcedly,
+> the number of candidate to be packed can be increased.
+> However we may lose the unique CFQ's strength and MMC D/D may take th=
+e
+CFQ's duty.
+> Basically, this patch accommodates the origin order requests from I/O
+scheduler.
+>
 
-Maybe you can think of something simpler.
+In order to better utilize the packed commands feature and achieve the
+best performance improvements I think that the command packing should b=
+e
+done in the block layer, according to the scheduler policy.
+That is, the scheduler should be aware of the capability of the device =
+to
+receive a request list and its constrains (such as maximum number of
+requests, max number of sectors etc) and use this information as a  fac=
+tor
+to its algorithm.
+This way you keep the decision making in the hands of the scheduler whi=
+le
+the MMC layer will only have to send this list as a packed command.
 
-2. How can new requests be prevented from starting once the card
-is gone?
+>> >> > + =A0 =A0 =A0 if (rqc)
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 reqs =3D mmc_blk_chk_packable(mq,=
+ rqc);
 
-Using BLKPREP_KILL will do that for all but the request that has been
-prepared already (i.e. async case) if the MMC_STATE_CARD_GONE flag is set
-early enough.
+It would be best to keep all the calls to blk_fetch_request in the same
+location. Therefore, I suggest to move the call to mmc_blk_chk_packable=
+ to
+mmc/card/queue.c after the first request is fetched.
 
-Maybe blocking requests at a lower level is not needed.
+>> >> > =A0cmd_abort:
+>> >> > - =A0 =A0 =A0 spin_lock_irq(&md->lock);
+>> >> > - =A0 =A0 =A0 while (ret)
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D __blk_end_request(req, -E=
+IO,
+>> blk_rq_cur_bytes(req));
+>> >> > - =A0 =A0 =A0 spin_unlock_irq(&md->lock);
+>> >> > + =A0 =A0 =A0 if (mq_rq->packed_cmd !=3D MMC_PACKED_NONE) {
+
+This should be the case for MMC_PACKED_NONE.
+
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_lock_irq(&md->lock);
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 while (ret)
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D __blk_end=
+_request(req, -EIO,
+>> blk_rq_cur_bytes(req));
+
+Do we need the while or should it be an if? In other cases where
+__blk_end_request is called there is no such while.
+
+Thanks,
+Maya Erez
+Consultant for Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
 
 
-> 
->>
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> index 5278ffb..91d7721 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -259,7 +259,7 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
->>>                 wait_for_completion(&mrq->completion);
->>>
->>>                 cmd = mrq->cmd;
->>> -               if (!cmd->error || !cmd->retries)
->>> +               if (!cmd->error || !cmd->retries ||
->>> mmc_card_gone(host->card))
->> host->card will be NULL
-> 
-> Yes, the host->card will be NULL for some requests. Will take care of it.
-> 
->> static void mmc_remove(struct mmc_host *host)
->> {
->>     BUG_ON(!host);
->>     BUG_ON(!host->card);
->>
->>     mmc_remove_card(host->card);
->>     host->card = NULL;
->> }
->> card is not freed until later.
->>
->>>                         break;
->>>
->>>                 pr_debug("%s: req failed (CMD%u): %d, retrying...\n",
->>> @@ -374,6 +374,10 @@ EXPORT_SYMBOL(mmc_start_req);
->>>   */
->>>   void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
->>>   {
->>> +       if (mmc_card_gone(host->card)) {
->>> +               mrq->cmd->error = -ENODEV;
->>> +               return;
->>> +       }
-> 
-> Looks good. Just for clarification, some host controller drivers return
-> -ENOMEDIUM in host->ops->request() when they see the card is gone. Do you
-> think we can remove this now from host controller drivers?
 
-I see include/linux/mmc/core.h has specified the use of -ENOMEDIUM so that
-should be used.
 
-> 
-> 
->>>         __mmc_start_req(host, mrq);
->>>         mmc_wait_for_req_done(host, mrq);
->>>   }
->>>
->>>
->>>
->>> The async case is harder...
->>>
->> I can help out with the non-async code if we go for your proposal.
-> 
-> I will check the possibilities.
-> 
->>
->>>
->>>>   drivers/mmc/card/queue.c |    5 +++++
->>>>   drivers/mmc/core/bus.c   |    2 ++
->>>>   include/linux/mmc/card.h |    3 +++
->>>>   3 files changed, 10 insertions(+), 0 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
->>>> index dcad59c..f8a3298 100644
->>>> --- a/drivers/mmc/card/queue.c
->>>> +++ b/drivers/mmc/card/queue.c
->>>> @@ -29,6 +29,8 @@
->>>>    */
->>>>   static int mmc_prep_request(struct request_queue *q, struct request *req)
->>>>   {
->>>> +     struct mmc_queue *mq = q->queuedata;
->>>> +
->>>>        /*
->>>>         * We only like normal block requests and discards.
->>>>         */
->>>> @@ -37,6 +39,9 @@ static int mmc_prep_request(struct request_queue *q,
->>>> struct request *req)
->>>>                return BLKPREP_KILL;
->>>>        }
->>>>
->>>> +     if (mq&&  mq->card&&  !mmc_card_inserted(mq->card))
->>>> +             return BLKPREP_KILL;
->>>> +
->>>>        req->cmd_flags |= REQ_DONTPREP;
->>>>
->>>>        return BLKPREP_OK;
->>>> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
->>>> index 46b6e84..ea3be5d 100644
->>>> --- a/drivers/mmc/core/bus.c
->>>> +++ b/drivers/mmc/core/bus.c
->>>> @@ -308,6 +308,7 @@ int mmc_add_card(struct mmc_card *card)
->>>>                        mmc_card_ddr_mode(card) ? "DDR " : "",
->>>>                        type, card->rca);
->>>>        }
->>>> +     mmc_card_set_inserted(card);
->>>>
->>>>   #ifdef CONFIG_DEBUG_FS
->>>>        mmc_add_card_debugfs(card);
->>>> @@ -340,6 +341,7 @@ void mmc_remove_card(struct mmc_card *card)
->>>>                        pr_info("%s: card %04x removed\n",
->>>>                                mmc_hostname(card->host), card->rca);
->>>>                }
->>>> +             card->state&= ~MMC_STATE_INSERTED;
->>>>                device_del(&card->dev);
->>>>        }
->>>>
->>>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
->>>> index b7a8cb1..be4125a 100644
->>>> --- a/include/linux/mmc/card.h
->>>> +++ b/include/linux/mmc/card.h
->>>> @@ -209,6 +209,7 @@ struct mmc_card {
->>>>   #define MMC_STATE_HIGHSPEED_DDR (1<<4)               /* card is in
->>>> high speed mode */
->>>>   #define MMC_STATE_ULTRAHIGHSPEED (1<<5)              /* card is in
->>>> ultra high speed mode */
->>>>   #define MMC_CARD_SDXC                (1<<6)          /* card is SDXC */
->>>> +#define MMC_STATE_INSERTED   (1<<7)          /* card present in the
->>>> slot */
->>>>        unsigned int            quirks;         /* card quirks */
->>>>   #define MMC_QUIRK_LENIENT_FN0        (1<<0)          /* allow SDIO FN0
->>>> writes outside of the VS CCCR range */
->>>>   #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1) /* use func->cur_blksize */
->>>> @@ -362,6 +363,7 @@ static inline void __maybe_unused
->>>> remove_quirk(struct mmc_card *card, int data)
->>>>   #define mmc_card_sdio(c)     ((c)->type == MMC_TYPE_SDIO)
->>>>
->>>>   #define mmc_card_present(c)  ((c)->state&  MMC_STATE_PRESENT)
->>>> +#define mmc_card_inserted(c) ((c)->state&  MMC_STATE_INSERTED)
->>>>   #define mmc_card_readonly(c) ((c)->state&  MMC_STATE_READONLY)
->>>>   #define mmc_card_highspeed(c)        ((c)->state&  MMC_STATE_HIGHSPEED)
->>>>   #define mmc_card_blockaddr(c)        ((c)->state&  MMC_STATE_BLOCKADDR)
->>>> @@ -370,6 +372,7 @@ static inline void __maybe_unused
->>>> remove_quirk(struct mmc_card *card, int data)
->>>>   #define mmc_card_ext_capacity(c) ((c)->state&  MMC_CARD_SDXC)
->>>>
->>>>   #define mmc_card_set_present(c)      ((c)->state |= MMC_STATE_PRESENT)
->>>> +#define mmc_card_set_inserted(c) ((c)->state |= MMC_STATE_INSERTED)
->>>>   #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
->>>>   #define mmc_card_set_highspeed(c) ((c)->state |= MMC_STATE_HIGHSPEED)
->>>>   #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
->>>
-> 
-> 
