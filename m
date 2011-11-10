@@ -1,62 +1,53 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: Re: [PATCH] mmc: core: Kill block requests if card is removed
-Date: Thu, 10 Nov 2011 09:43:27 +0530
-Message-ID: <4EBB4F67.1080406@codeaurora.org>
-References: <1320813119-24383-1-git-send-email-sthumma@codeaurora.org> <4EBA4940.6030808@intel.com> <CAFEEs1nPe3=TFwdf8rbPk6AtWzMdfaKR=-Rv0OVJhnANX=3fUQ@mail.gmail.com> <CAFEEs1nQmKues-93zQe7uxNnNqJPEzvBc-2zGkrvUdgPvoGBKw@mail.gmail.com>
+From: Richard Zhao <richard.zhao@linaro.org>
+Subject: [PATCH 1/1] mmc: sdhci-esdhc-imx: convert to clk_prepare/clk_unprepare
+Date: Thu, 10 Nov 2011 13:06:29 +0800
+Message-ID: <1320901589-13262-1-git-send-email-richard.zhao@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAFEEs1nQmKues-93zQe7uxNnNqJPEzvBc-2zGkrvUdgPvoGBKw@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Per Forlin <per.lkml@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, cjb@laptop.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:14568
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S934093Ab1KJFGt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2011 00:06:49 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, w.sang@pengutronix.de, shawn.guo@linaro.org, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, eric.miao@linaro.org, Richard Zhao <richard.zhao@linaro.org>
 
-On 11/10/2011 3:35 AM, Per Forlin wrote:
-> Hi Adrian,
->
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> index 5278ffb..91d7721 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -259,7 +259,7 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
->>>                 wait_for_completion(&mrq->completion);
->>>
->>>                 cmd = mrq->cmd;
->>> -               if (!cmd->error || !cmd->retries)
->>> +               if (!cmd->error || !cmd->retries || mmc_card_gone(host->card))
->> host->card will be NULL
->> static void mmc_remove(struct mmc_host *host)
->> {
->>         BUG_ON(!host);
->>         BUG_ON(!host->card);
->>
->>         mmc_remove_card(host->card);
->>         host->card = NULL;
->> }
->> card is not freed until later.
-> Please ignore this part. I jumped to conclusions. I had another look
-> and there can't be any incoming requests when host->card is NULL.
-> I need to study device_del() further, in order to understand the details.
+Signed-off-by: Richard Zhao <richard.zhao@linaro.org>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
 
-There can be incoming requests when the host->card is NULL. This happens 
-when we are detecting the card for the first time. That is, in 
-mmc_rescan() we send all the initialization commands with host->card 
-being NULL.
-
-We can do something like this:
-#define mmc_card_gone(c) (c && ((c)->state & MMC_STATE_CARD_GONE))
-
-
->
-> Regards,
-> Per
-
-
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index ae57769..b37e5d4 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -462,6 +462,7 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		err = PTR_ERR(clk);
+ 		goto err_clk_get;
+ 	}
++	clk_prepare(clk);
+ 	clk_enable(clk);
+ 	pltfm_host->clk = clk;
+ 
+@@ -551,6 +552,7 @@ no_card_detect_irq:
+ no_card_detect_pin:
+ no_board_data:
+ 	clk_disable(pltfm_host->clk);
++	clk_unprepare(pltfm_host->clk);
+ 	clk_put(pltfm_host->clk);
+ err_clk_get:
+ 	kfree(imx_data);
+@@ -578,6 +580,7 @@ static int __devexit sdhci_esdhc_imx_remove(struct platform_device *pdev)
+ 	}
+ 
+ 	clk_disable(pltfm_host->clk);
++	clk_unprepare(pltfm_host->clk);
+ 	clk_put(pltfm_host->clk);
+ 	kfree(imx_data);
+ 
 -- 
-Thanks & Regards,
-Sujit Reddy Thumma
+1.7.5.4
 
-Sent by an employee of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+
