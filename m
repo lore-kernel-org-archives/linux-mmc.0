@@ -1,34 +1,38 @@
 From: Richard Zhao <richard.zhao@linaro.org>
-Subject: [PATCH V2 05/14] ARM: mxc: epit: add clk_prepare/clk_unprepare
-Date: Fri, 11 Nov 2011 09:10:20 +0800
-Message-ID: <1320973829-4388-6-git-send-email-richard.zhao@linaro.org>
+Subject: [PATCH V2 06/14] ARM: mxc: arch_reset: add clk_prepare/clk_unprepare
+Date: Fri, 11 Nov 2011 09:10:21 +0800
+Message-ID: <1320973829-4388-7-git-send-email-richard.zhao@linaro.org>
 References: <1320973829-4388-1-git-send-email-richard.zhao@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-serial-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-va3.bigfish.com ([216.32.180.10]:58382 "EHLO
+	VA3EHSOBE008.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S932562Ab1KKBLs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2011 20:11:48 -0500
 In-Reply-To: <1320973829-4388-1-git-send-email-richard.zhao@linaro.org>
-Sender: linux-serial-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, netdev@vger.kernel.org, linux-serial@vger.kernel.org
 Cc: linux@arm.linux.org.uk, amit.kucheria@canonical.com, kernel@pengutronix.de, ben-linux@fluff.org, cjb@laptop.org, alan@linux.intel.com, eric.miao@linaro.org, Richard Zhao <richard.zhao@linaro.org>
-List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Richard Zhao <richard.zhao@linaro.org>
 ---
- arch/arm/plat-mxc/epit.c |    2 +-
+ arch/arm/plat-mxc/system.c |    2 +-
  1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/arch/arm/plat-mxc/epit.c b/arch/arm/plat-mxc/epit.c
-index d3467f8..9129c9e 100644
---- a/arch/arm/plat-mxc/epit.c
-+++ b/arch/arm/plat-mxc/epit.c
-@@ -203,7 +203,7 @@ static int __init epit_clockevent_init(struct clk *timer_clk)
+diff --git a/arch/arm/plat-mxc/system.c b/arch/arm/plat-mxc/system.c
+index 9dad8dc..a667adc 100644
+--- a/arch/arm/plat-mxc/system.c
++++ b/arch/arm/plat-mxc/system.c
+@@ -54,7 +54,7 @@ void arch_reset(char mode, const char *cmd)
  
- void __init epit_timer_init(struct clk *timer_clk, void __iomem *base, int irq)
- {
--	clk_enable(timer_clk);
-+	clk_prepare_enable(timer_clk);
- 
- 	timer_base = base;
+ 		clk = clk_get_sys("imx2-wdt.0", NULL);
+ 		if (!IS_ERR(clk))
+-			clk_enable(clk);
++			clk_prepare_enable(clk);
+ 		wcr_enable = (1 << 2);
+ 	}
  
 -- 
 1.7.5.4
