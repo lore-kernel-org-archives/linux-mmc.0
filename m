@@ -1,32 +1,56 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: mmci: Fixup handling of MCI_STARTBITERR
-Date: Fri, 11 Nov 2011 16:17:17 +0100
-Message-ID: <CACRpkdazenok0RHQL0kXLKk2i3bcrWZ9aWDmoCGfjF6JpEoySA@mail.gmail.com>
-References: <1320939199-30363-1-git-send-email-ulf.hansson@stericsson.com>
+From: =?utf-8?Q?Lothar_Wa=C3=9Fmann?= <LW@KARO-electronics.de>
+Subject: Re: [PATCH v2] mmc mxcmmc: fix falling back to PIO
+Date: Fri, 11 Nov 2011 16:13:41 +0100
+Message-ID: <20157.15269.398865.274711@ipc1.ka-ro>
+References: <1314264785-19224-1-git-send-email-s.hauer@pengutronix.de>
+ <20111111144815.GW16886@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:57045 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751284Ab1KKPRS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2011 10:17:18 -0500
-Received: by gyc15 with SMTP id 15so2973218gyc.19
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2011 07:17:18 -0800 (PST)
-In-Reply-To: <1320939199-30363-1-git-send-email-ulf.hansson@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20111111144815.GW16886@pengutronix.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, stable@kernel.org
 
-On Thu, Nov 10, 2011 at 4:33 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
-
-> The interrupt was previously enabled and then correctly cleared.
-> Now we also handle it correctly.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
-
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
-
-This should also go to -stable I think?
-
-Linus Walleij
+SGksCgpTYXNjaGEgSGF1ZXIgd3JpdGVzOgo+IEhpIENocmlzLAo+IAo+IENhbiB5b3UgdGFrZSB0
+aGlzIG9uZSBwbGVhc2U/Cj4gCj4gU2FzY2hhCj4gCj4gT24gVGh1LCBBdWcgMjUsIDIwMTEgYXQg
+MTE6MzM6MDVBTSArMDIwMCwgU2FzY2hhIEhhdWVyIHdyb3RlOgo+ID4gV2hlbiB3ZSBjYW4ndCBj
+b25maWd1cmUgdGhlIGRtYSBjaGFubmVsIHdlIHdhbnQgdG8gZmFsbAo+ID4gYmFjayB0byBQSU8u
+IFdlIGRvIHRoaXMgYnkgc2V0dGluZyBob3N0LT5kb19kbWEgdG8gemVyby4KPiA+IFRoaXMgZG9l
+cyBub3Qgd29yayBhcyBkb19kbWEgaXMgdXNlZCB0byBzZWUgd2hldGhlciBkbWEKPiA+IGNhbiBi
+ZSB1c2VkIGZvciB0aGUgY3VycmVudCB0cmFuc2Zlci4gSW5zdGVhZCwgd2UgaGF2ZQo+ID4gdG8g
+c2V0IGhvc3QtPmRtYSB0byBOVUxMLgo+ID4gCj4gPiBTaWduZWQtb2ZmLWJ5OiBTYXNjaGEgSGF1
+ZXIgPHMuaGF1ZXJAcGVuZ3V0cm9uaXguZGU+Cj4gPiBDYzogQ2hyaXMgQmFsbCA8Y2piQGxhcHRv
+cC5vcmc+Cj4gPiBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZwo+ID4gLS0tCj4gPiAgZHJp
+dmVycy9tbWMvaG9zdC9teGNtbWMuYyB8ICAgIDMgKystCj4gPiAgMSBmaWxlcyBjaGFuZ2VkLCAy
+IGluc2VydGlvbnMoKyksIDEgZGVsZXRpb25zKC0pCj4gPiAKPiA+IGRpZmYgLS1naXQgYS9kcml2
+ZXJzL21tYy9ob3N0L214Y21tYy5jIGIvZHJpdmVycy9tbWMvaG9zdC9teGNtbWMuYwo+ID4gaW5k
+ZXggMTRhYTIxMy4uNGRjOTAwOCAxMDA2NDQKPiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvbXhj
+bW1jLmMKPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbXhjbW1jLmMKPiA+IEBAIC03MzAsNyAr
+NzMwLDggQEAgc3RhdGljIHZvaWQgbXhjbWNpX3NldF9pb3Moc3RydWN0IG1tY19ob3N0ICptbWMs
+IHN0cnVjdCBtbWNfaW9zICppb3MpCj4gPiAgCQkJZGV2X2VycihtbWNfZGV2KGhvc3QtPm1tYyks
+Cj4gPiAgCQkJCSJmYWlsZWQgdG8gY29uZmlnIERNQSBjaGFubmVsLiBGYWxsaW5nIGJhY2sgdG8g
+UElPXG4iKTsKPiA+ICAJCQlkbWFfcmVsZWFzZV9jaGFubmVsKGhvc3QtPmRtYSk7Cj4gPiAtCQkJ
+aG9zdC0+ZG9fZG1hID0gMDsKPiA+ICsJCQlob3N0LT5kbWEgPSBOVUxMOwo+ID4gKwkJCWhvc3Qt
+PmRtYSA9IDA7Ck5VTEwgb3IgMCwgdGhhdCBpcyB0aGUgcXVlc3Rpb24/IE9yIGJvdGg/ClRoYXQg
+bG9va3MgYSBsaXR0bGUgYml0IHNjcmV3ZWQuCgoKTG90aGFyIFdhw59tYW5uCi0tIApfX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwoKS2Et
+Um8gZWxlY3Ryb25pY3MgR21iSCB8IFBhc2NhbHN0cmHDn2UgMjIgfCBEIC0gNTIwNzYgQWFjaGVu
+ClBob25lOiArNDkgMjQwOCAxNDAyLTAgfCBGYXg6ICs0OSAyNDA4IDE0MDItMTAKR2VzY2jDpGZ0
+c2bDvGhyZXI6IE1hdHRoaWFzIEthdXNzZW4KSGFuZGVsc3JlZ2lzdGVyZWludHJhZzogQW10c2dl
+cmljaHQgQWFjaGVuLCBIUkIgNDk5NgoKd3d3Lmthcm8tZWxlY3Ryb25pY3MuZGUgfCBpbmZvQGth
+cm8tZWxlY3Ryb25pY3MuZGUKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX18KCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJu
+ZWxAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFu
+L2xpc3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
