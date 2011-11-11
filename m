@@ -1,52 +1,51 @@
-From: Per Forlin <per.lkml@gmail.com>
-Subject: Re: [PATCH v2] mmc: support BKOPS feature for eMMC
-Date: Thu, 10 Nov 2011 23:01:56 +0100
-Message-ID: <CAFEEs1kRrJT+SzbUN5U0rpR0CyRZsH6it-iemBOMKK=tGkOSSw@mail.gmail.com>
-References: <4EB11B6B.2010909@samsung.com>
+From: Richard Zhao <richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH V2 01/14] clk: add helper functions clk_prepare_enable and clk_disable_unprepare
+Date: Fri, 11 Nov 2011 09:10:16 +0800
+Message-ID: <1320973829-4388-2-git-send-email-richard.zhao@linaro.org>
+References: <1320973829-4388-1-git-send-email-richard.zhao@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:46890 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752101Ab1KJWB5 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2011 17:01:57 -0500
-Received: by vcbf1 with SMTP id f1so2862509vcb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Nov 2011 14:01:56 -0800 (PST)
-In-Reply-To: <4EB11B6B.2010909@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1320973829-4388-1-git-send-email-richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, amit.kucheria-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, alan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, eric.miao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Richard Zhao <richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, svenkatr@ti.com, chuanxiao.dong@intel.com
 
-Hi Jaehoon,
+Signed-off-by: Richard Zhao <richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ include/linux/clk.h |   19 +++++++++++++++++++
+ 1 files changed, 19 insertions(+), 0 deletions(-)
 
-On Wed, Nov 2, 2011 at 11:28 AM, Jaehoon Chung <jh80.chung@samsung.com>=
- wrote:
-> Enable eMMC background operations (BKOPS) feature.
->
-> If URGENT_BKOPS is set after a response, note that BKOPS
-> are required. After all I/O requests are finished, run
-> BKOPS if required. Should read/write operations be requested
-> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
-> and then service the request.
->
-> If you want to enable this feature, set MMC_CAP2_BKOPS.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> CC: Hanumath Prasad <hanumath.prasad@stericsson.com>
->
-> ---
-> Changelog V2:
-> =A0 =A0 =A0 =A0- Use EXCEPTION_STATUS instead of URGENT_BKOPS
-> =A0 =A0 =A0 =A0- Add function to check Exception_status(for eMMC4.5)
-> =A0 =A0 =A0 =A0- remove unnecessary code.
-Will there be a V3 soon?
-
-I have tested this patch with my minor changes on top and as far as I
-can tell it looks ok.
-I'm ready to accept this patch if those minor updates are made in V3.
-
-Thanks,
-Per
+diff --git a/include/linux/clk.h b/include/linux/clk.h
+index 7213b52..63985f7 100644
+--- a/include/linux/clk.h
++++ b/include/linux/clk.h
+@@ -107,6 +107,25 @@ static inline void clk_unprepare(struct clk *clk)
+ }
+ #endif
+ 
++static inline int clk_prepare_enable(struct clk *clk)
++{
++	int ret;
++
++	ret = clk_prepare(clk);
++	if (!ret)
++		ret = clk_enable(clk);
++	if (ret)
++		clk_unprepare(clk);
++
++	return ret;
++}
++
++static inline void clk_disable_unprepare(struct clk *clk)
++{
++	clk_disable(clk);
++	clk_unprepare(clk);
++}
++
+ /**
+  * clk_get_rate - obtain the current clock rate (in Hz) for a clock source.
+  *		  This is only valid once the clock source has been enabled.
+-- 
+1.7.5.4
