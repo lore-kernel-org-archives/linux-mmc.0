@@ -1,53 +1,54 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH V2 01/14] clk: add helper functions clk_prepare_enable
-	and clk_disable_unprepare
-Date: Fri, 11 Nov 2011 10:27:27 +0000
-Message-ID: <20111111102727.GC12913@n2100.arm.linux.org.uk>
-References: <1320973829-4388-1-git-send-email-richard.zhao@linaro.org> <1320973829-4388-2-git-send-email-richard.zhao@linaro.org> <20111111084950.GH16886@pengutronix.de> <20111111090546.GC14617@b20223-02.ap.freescale.net> <20111111091556.GI16886@pengutronix.de>
+From: Richard Zhao <richard.zhao@linaro.org>
+Subject: [PATCH V3 00/14] add clk_prepare/clk_unprepare to imx drivers
+Date: Fri, 11 Nov 2011 18:50:23 +0800
+Message-ID: <1321008637-19999-1-git-send-email-richard.zhao@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:51417 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751083Ab1KKK1x (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2011 05:27:53 -0500
-Content-Disposition: inline
-In-Reply-To: <20111111091556.GI16886@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <netdev-owner@vger.kernel.org>
+Sender: netdev-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, netdev@vger.kernel.org, linux-serial@vger.kernel.org
+Cc: linux@arm.linux.org.uk, amit.kucheria@canonical.com, kernel@pengutronix.de, ben-linux@fluff.org, cjb@laptop.org, alan@linux.intel.com, eric.miao@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: Richard Zhao <richard.zhao@linaro.org>, amit.kucheria@canonical.com, kernel@pengutronix.de, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, ben-linux@fluff.org, eric.miao@linaro.org, linux-i2c@vger.kernel.org, linux-serial@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, alan@linux.intel.com
 
-On Fri, Nov 11, 2011 at 10:15:56AM +0100, Sascha Hauer wrote:
-> On Fri, Nov 11, 2011 at 05:05:47PM +0800, Richard Zhao wrote:
-> > {
-> > 	int ret;
-> > 
-> > 	ret = clk_prepare(clk);
-> > 	if (ret)
-> > 		return ret;
-> > 	ret = clk_enable(clk);
-> > 	if (ret)
-> > 		clk_unprepare(clk);
-> > 	return ret;
-> 
-> Yes, looks good.
+Changes since V2:
+ - fix clk_prepare_enable bug
 
-While this looks like a nice easy solution for converting existing
-drivers, I'd suggest thinking about this a little more...
+Changes since V1:
+ - Add common helper functions clk_prepare_enable/clk_disable_unprepare
+ - serial/imx: move clk_disable_unprepare before clk_put
 
-I would suggest some thought is given to the placement of clk_enable()
-and clk_disable() when adding clk_prepare(), especially if your existing
-clk_enable() function can only be called from non-atomic contexts.
+Richard Zhao (14):
+      clk: add helper functions clk_prepare_enable and clk_disable_unprepare
+      ARM: mxc: time: add clk_prepare/clk_unprepare
+      ARM: mxc: ahci: add clk_prepare/clk_unprepare
+      ARM: mxc: pwm: add clk_prepare/clk_unprepare
+      ARM: mxc: epit: add clk_prepare/clk_unprepare
+      ARM: mxc: arch_reset: add clk_prepare/clk_unprepare
+      ARM: mxc: audmux-v2: add clk_prepare/clk_unprepare
+      ARM: pm-imx5: add clk_prepare/clk_unprepare
+      ARM: mx31moboard: add clk_prepare/clk_unprepare
+      ARM: mxs: add clk_prepare/clk_unprepare
+      serial: imx: add clk_prepare/clk_unprepare
+      net: fec: add clk_prepare/clk_unprepare
+      i2c: imx: add clk_prepare/clk_unprepare
+      mmc: sdhci-esdhc-imx: add clk_prepare/clk_unprepare
 
-Obviously, the transition path needs to be along these lines:
+ arch/arm/mach-imx/mach-mx31moboard.c          |    2 +-
+ arch/arm/mach-mx5/pm-imx5.c                   |    4 ++--
+ arch/arm/mach-mxs/system.c                    |    2 +-
+ arch/arm/mach-mxs/timer.c                     |    2 +-
+ arch/arm/plat-mxc/audmux-v2.c                 |    8 ++++----
+ arch/arm/plat-mxc/devices/platform-ahci-imx.c |   16 ++++++++--------
+ arch/arm/plat-mxc/epit.c                      |    2 +-
+ arch/arm/plat-mxc/pwm.c                       |    4 ++--
+ arch/arm/plat-mxc/system.c                    |    2 +-
+ arch/arm/plat-mxc/time.c                      |    2 +-
+ drivers/i2c/busses/i2c-imx.c                  |    4 ++--
+ drivers/mmc/host/sdhci-esdhc-imx.c            |    6 +++---
+ drivers/net/ethernet/freescale/fec.c          |   10 +++++-----
+ drivers/tty/serial/imx.c                      |    7 +++----
+ include/linux/clk.h                           |   20 ++++++++++++++++++++
+ 15 files changed, 55 insertions(+), 36 deletions(-)
 
-1. add clk_prepare() to drivers
-2. implement clk_prepare() and make clk_enable() callable from non-atomic
-   contexts
-3. move clk_enable() in drivers to places it can be called from non-atomic
-   contexts to achieve greater power savings (maybe via the runtime pm)
-
-and where a driver is shared between different sub-architectures which
-have non-atomic clk_enable()s, (3) can only happen when all those sub-
-architectures have been updated to step (2).
+Thanks
+Richard
