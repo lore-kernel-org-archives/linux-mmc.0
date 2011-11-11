@@ -1,127 +1,61 @@
-From: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
-Subject: Re: [PATCH] mmc: sdio: Fix to support any block size optimally
-Date: Fri, 11 Nov 2011 13:13:47 +0100
-Message-ID: <4EBD117B.3090406@stericsson.com>
-References: <1319619137-17156-1-git-send-email-stefan.xk.nilsson@stericsson.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] mmc: core: Fix setting power notify state variable for
+ non eMMC
+Date: Fri, 11 Nov 2011 14:32:44 +0100
+Message-ID: <4EBD23FC.3070203@stericsson.com>
+References: <1320403967-2940-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset="iso-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:48116 "EHLO
-	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751879Ab1KKMO2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2011 07:14:28 -0500
-In-Reply-To: <1319619137-17156-1-git-send-email-stefan.xk.nilsson@stericsson.com>
+Received: from eu1sys200aog113.obsmtp.com ([207.126.144.135]:37034 "EHLO
+	eu1sys200aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757487Ab1KKNdC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2011 08:33:02 -0500
+In-Reply-To: <1320403967-2940-1-git-send-email-girish.shivananjappa@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
-Cc: Stefan NILSSON9 <stefan.xk.nilsson@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Ulf HANSSON <ulf.hansson@stericsson.com>
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "patches@linaro.org" <patches@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>
 
-Any comments on this patch?
-Can we merge it?
-
-Best Regards
-
-Stefan Nilsson
-
-On 10/26/2011 10:52 AM, Stefan NILSSON9 wrote:
-> This patch allows any block size to be set on the SDIO link,
-> and still have an arbitrary sized packet (adjusted in size by
-> using sdio_align_size) transferred in an optimal way
-> (preferably one transfer).
->
-> Previously if the block size was larger than the default of
-> 512 bytes and the transfer size was exactly one block size
-> (possibly thanks to using sdio_align_size to get an optimal
-> transfer size), it was sent as a number of byte transfers instead
-> of one block transfer. Also if the number of blocks was
-> (max_blocks * N) + 1, the tranfer would be conducted with a number
-> of blocks and finished off with a number of byte transfers.
->
-> When doing this change it was also possible to break out the quirk
-> for broken byte mode in a much cleaner way, and collect the logic of
-> when to do byte or block transfer in one function instead of two.
->
-> Signed-off-by: Stefan Nilsson XK<stefan.xk.nilsson@stericsson.com>
-> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
-> Acked-by: Linus Walleij<linus.walleij@linaro.org>
+Girish K S wrote:
+> This patch skips the setting of the power notify state variable
+> for non eMMC 4.5 devices. Also fixes the problem of omap_hsmmc
+> noisy/broken for suspend resume reported by kevin Hilman.
+> 
+> cc: Chris Ball <cjb@laptop.org>
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
 > ---
->   drivers/mmc/core/sdio_io.c  |    8 ++++++--
->   drivers/mmc/core/sdio_ops.c |   14 +++++---------
->   2 files changed, 11 insertions(+), 11 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-> index 0f687cd..b20fbb4 100644
-> --- a/drivers/mmc/core/sdio_io.c
-> +++ b/drivers/mmc/core/sdio_io.c
-> @@ -195,6 +195,9 @@ static inline unsigned int sdio_max_byte_size(struct sdio_func *func)
->   	else
->   		mval = min(mval, func->max_blksize);
->
-> +	if (mmc_card_broken_byte_mode_512(func->card))
-> +		return min(mval, 511u);
-> +
->   	return min(mval, 512u); /* maximum size for byte mode */
->   }
->
-> @@ -313,7 +316,7 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
->   			func->card->host->max_seg_size / func->cur_blksize);
->   		max_blocks = min(max_blocks, 511u);
->
-> -		while (remainder>  func->cur_blksize) {
-> +		while (remainder>= func->cur_blksize) {
->   			unsigned blocks;
->
->   			blocks = remainder / func->cur_blksize;
-> @@ -338,8 +341,9 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
->   	while (remainder>  0) {
->   		size = min(remainder, sdio_max_byte_size(func));
->
-> +		/* Indicate byte mode by setting "blocks" = 0 */
->   		ret = mmc_io_rw_extended(func->card, write, func->num, addr,
-> -			 incr_addr, buf, 1, size);
-> +			 incr_addr, buf, 0, size);
->   		if (ret)
->   			return ret;
->
-> diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
-> index b0517cc..d29e206 100644
-> --- a/drivers/mmc/core/sdio_ops.c
-> +++ b/drivers/mmc/core/sdio_ops.c
-> @@ -128,8 +128,6 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
->
->   	BUG_ON(!card);
->   	BUG_ON(fn>  7);
-> -	BUG_ON(blocks == 1&&  blksz>  512);
-> -	WARN_ON(blocks == 0);
->   	WARN_ON(blksz == 0);
->
->   	/* sanity check */
-> @@ -144,22 +142,20 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
->   	cmd.arg |= fn<<  28;
->   	cmd.arg |= incr_addr ? 0x04000000 : 0x00000000;
->   	cmd.arg |= addr<<  9;
-> -	if (blocks == 1&&  blksz<  512)
-> -		cmd.arg |= blksz;			/* byte mode */
-> -	else if (blocks == 1&&  blksz == 512&&
-> -		 !(mmc_card_broken_byte_mode_512(card)))
-> -		cmd.arg |= 0;				/* byte mode, 0==512 */
-> +	if (blocks == 0)
-> +		cmd.arg |= (blksz == 512) ? 0 : blksz;	/* byte mode */
->   	else
->   		cmd.arg |= 0x08000000 | blocks;		/* block mode */
->   	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
->
->   	data.blksz = blksz;
-> -	data.blocks = blocks;
-> +	/* Code in host drivers/fwk assumes that "blocks" always is>=1 */
-> +	data.blocks = blocks ? blocks : 1;
->   	data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
->   	data.sg =&sg;
->   	data.sg_len = 1;
->
-> -	sg_init_one(&sg, buf, blksz * blocks);
-> +	sg_init_one(&sg, buf, data.blksz * data.blocks);
->
->   	mmc_set_data_timeout(&data, card);
->
+>  drivers/mmc/core/mmc.c |   10 +++++++---
+>  1 files changed, 7 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 3627044..4db73a9 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -882,10 +882,14 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  				 card->ext_csd.generic_cmd6_time);
+>  		if (err && err != -EBADMSG)
+>  			goto free_card;
+> -	}
+>  
+> -	if (!err)
+> -		card->poweroff_notify_state = MMC_POWERED_ON;
+> +		/*
+> +		 * The err can be -EBADMSG or 0,
+> +		 * so check for success and update the flag
+> +		 */
+> +		if (!err)
+> +			card->poweroff_notify_state = MMC_POWERED_ON;
+> +	}
+>  
+>  	/*
+>  	 * Activate high speed (if supported)
+
+
+I encountered similar problems as for omap_hsmmc for the mmci driver 
+(although with some ST-Ericsson internal pm_runtime patches). This patch 
+fixed the problem. Great!
+
+Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
+
