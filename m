@@ -1,35 +1,49 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [Query] mmc/sdhci: Suspend hangs if card is inserted at suspend.
-Date: Fri, 11 Nov 2011 22:24:29 -0500
-Message-ID: <877h36hvki.fsf@laptop.org>
-References: <4EBCC49E.5060008@st.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: debugfs: parse all ext_csd via debug_fs
+Date: Sat, 12 Nov 2011 11:25:06 +0100
+Message-ID: <CACRpkdY4TnVmiU-XP9gQGVzxwV7ZHJ6Ms++_c2+7dTfNBgWLVQ@mail.gmail.com>
+References: <1319468694-8773-1-git-send-email-peppe.cavallaro@st.com>
+	<CAAgDR1N_CKnXo=G2oTHAShhgegMZF-nMySBuWebDPeu8VTEBKg@mail.gmail.com>
+	<4EA7EEBC.2070109@st.com>
+	<CAAgDR1NhqOkDZ8M18Uc6CtWtZSy153wOnuxjhQ-m7aitPwitLQ@mail.gmail.com>
+	<4EAA5F02.2080702@st.com>
+	<878vnmjftj.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:34826 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751253Ab1KLDY3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 11 Nov 2011 22:24:29 -0500
-In-Reply-To: <4EBCC49E.5060008@st.com> (Viresh Kumar's message of "Fri, 11 Nov
-	2011 12:15:50 +0530")
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:51836 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752538Ab1KLKZI convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Nov 2011 05:25:08 -0500
+Received: by iage36 with SMTP id e36so5055873iag.19
+        for <linux-mmc@vger.kernel.org>; Sat, 12 Nov 2011 02:25:07 -0800 (PST)
+In-Reply-To: <878vnmjftj.fsf@laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Viresh Kumar <viresh.kumar@st.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shiraz HASHIM <shiraz.hashim@st.com>, Armando VISCONTI <armando.visconti@st.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Giuseppe CAVALLARO <peppe.cavallaro@st.com>, Sebastian Rasmussen <sebras@gmail.com>, linux-mmc@vger.kernel.org
 
-Hi Viresh,
+On Sat, Nov 12, 2011 at 2:21 AM, Chris Ball <cjb@laptop.org> wrote:
 
-On Fri, Nov 11 2011, Viresh Kumar wrote:
-> Controller specific suspend/resume are still not called, so i think it might
-> be related to core code. I am using 2.6.37 kernel version.
->
-> Any help on this?
+> I wonder if we should start an MMC userspace tools repository contain=
+ing
+> code for features like the cmd passthrough ioctl, secure erase/trim/d=
+iscard
+> requests, and debugging output of the type this patch provides. =A0On=
+ the
+> other hand, maybe existing similar tools should just be modified to
+> learn about how to deal with MMC?
 
-Please try to reproduce on 3.1 and let us know if it's present there.
+Go for mmc-tools.git
 
-Thanks,
+People might have a lot of useful stuff to throw in there...
+And I easily see this thing being picked up by distros.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+If for nothing else it's an opportunity to exercise using P=F6ttering
+and Sievers libabc as basis for some kind of userspace lib.
+http://lwn.net/Articles/465093/
+
+Just my =800.01.
+
+Linus Walleij
