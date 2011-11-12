@@ -1,36 +1,62 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v4] mmc: sdhci: remove "state" argument from sdhci_suspend_host
-Date: Fri, 11 Nov 2011 22:08:36 -0500
-Message-ID: <87k476hwaz.fsf@laptop.org>
-References: <1320314985-9536-1-git-send-email-manuel.lauss@googlemail.com>
-	<4EB3BAA3.3020408@intel.com>
+Subject: Re: [PATCH] mmc: core: Fix setting power notify state variable for non eMMC
+Date: Fri, 11 Nov 2011 22:12:26 -0500
+Message-ID: <87fwhuhw4l.fsf@laptop.org>
+References: <1320403967-2940-1-git-send-email-girish.shivananjappa@linaro.org>
+	<4EBD23FC.3070203@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58346 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751648Ab1KLDIg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 11 Nov 2011 22:08:36 -0500
-In-Reply-To: <4EB3BAA3.3020408@intel.com> (Adrian Hunter's message of "Fri, 04
-	Nov 2011 12:12:51 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <4EBD23FC.3070203@stericsson.com> (Ulf Hansson's message of "Fri,
+	11 Nov 2011 14:32:44 +0100")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: Girish K S <girish.shivananjappa@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Manuel Lauss <manuel.lauss@googlemail.com>, linux-mmc@vger.kernel.org
 
 Hi,
 
-On Fri, Nov 04 2011, Adrian Hunter wrote:
-> On 03/11/11 12:09, Manuel Lauss wrote:
->> Drop the "state" argument from sdhci_suspend_host.  Its only user
->> is the PCI glue;  this allows to move all SDHCI glues to use
->> dev_pm_ops instead.
->> 
->> Signed-off-by: Manuel Lauss <manuel.lauss@googlemail.com>
+On Fri, Nov 11 2011, Ulf Hansson wrote:
+> Girish K S wrote:
+>> This patch skips the setting of the power notify state variable
+>> for non eMMC 4.5 devices. Also fixes the problem of omap_hsmmc
+>> noisy/broken for suspend resume reported by kevin Hilman.
+>>
+>> cc: Chris Ball <cjb@laptop.org>
+>> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+>> ---
+>>  drivers/mmc/core/mmc.c |   10 +++++++---
+>>  1 files changed, 7 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 3627044..4db73a9 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -882,10 +882,14 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>>  				 card->ext_csd.generic_cmd6_time);
+>>  		if (err && err != -EBADMSG)
+>>  			goto free_card;
+>> -	}
+>>  -	if (!err)
+>> -		card->poweroff_notify_state = MMC_POWERED_ON;
+>> +		/*
+>> +		 * The err can be -EBADMSG or 0,
+>> +		 * so check for success and update the flag
+>> +		 */
+>> +		if (!err)
+>> +			card->poweroff_notify_state = MMC_POWERED_ON;
+>> +	}
+>>   	/*
+>>  	 * Activate high speed (if supported)
 >
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>
+> I encountered similar problems as for omap_hsmmc for the mmci driver
+> (although with some ST-Ericsson internal pm_runtime patches). This
+> patch fixed the problem. Great!
+>
+> Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
 
-Thanks!  Pushed to mmc-next for 3.3 with Adrian's ACK.
+Thanks, pushed to mmc-next for 3.2.
 
 - Chris.
 -- 
