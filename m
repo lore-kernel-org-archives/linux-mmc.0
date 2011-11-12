@@ -1,50 +1,60 @@
-From: Linus Walleij <linus.walleij@linaro.org>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: [PATCH] mmc: debugfs: parse all ext_csd via debug_fs
-Date: Sat, 12 Nov 2011 02:12:34 +0100
-Message-ID: <CACRpkda0y7cOR4EfuGLoGnD_PS1gTWqN7UA74=s2mWmEHokQhQ@mail.gmail.com>
+Date: Fri, 11 Nov 2011 20:21:44 -0500
+Message-ID: <878vnmjftj.fsf@laptop.org>
 References: <1319468694-8773-1-git-send-email-peppe.cavallaro@st.com>
 	<CAAgDR1N_CKnXo=G2oTHAShhgegMZF-nMySBuWebDPeu8VTEBKg@mail.gmail.com>
+	<4EA7EEBC.2070109@st.com>
+	<CAAgDR1NhqOkDZ8M18Uc6CtWtZSy153wOnuxjhQ-m7aitPwitLQ@mail.gmail.com>
+	<4EAA5F02.2080702@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:39556 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755846Ab1KLBMf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2011 20:12:35 -0500
-Received: by iage36 with SMTP id e36so4692775iag.19
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2011 17:12:34 -0800 (PST)
-In-Reply-To: <CAAgDR1N_CKnXo=G2oTHAShhgegMZF-nMySBuWebDPeu8VTEBKg@mail.gmail.com>
+Received: from void.printf.net ([89.145.121.20]:35673 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755846Ab1KLBVq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 11 Nov 2011 20:21:46 -0500
+In-Reply-To: <4EAA5F02.2080702@st.com> (Giuseppe CAVALLARO's message of "Fri,
+	28 Oct 2011 09:51:30 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sebastian Rasmussen <sebras@gmail.com>
-Cc: Giuseppe CAVALLARO <peppe.cavallaro@st.com>, linux-mmc@vger.kernel.org
+To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Cc: Sebastian Rasmussen <sebras@gmail.com>, linux-mmc@vger.kernel.org
 
-On Tue, Oct 25, 2011 at 1:43 PM, Sebastian Rasmussen <sebras@gmail.com> wrote:
->[Giuseppe]
->> This patch enhances the debug information reported
->> for the mmc card by parsing the extended CSD registers
->> obviously according to all the current specifications.
+Hi Giuseppe,
+
+On Fri, Oct 28 2011, Giuseppe CAVALLARO wrote:
+> On 10/27/2011 4:19 PM, Sebastian Rasmussen wrote:
+>> Hi!
+>> 
+>>> Before the patch the output from /sys/kernel/debug/mmc0/mmc0:0001/ext_csd
+>>> was a big number and I had many problems parsing it in real-time.
+>>> [...]
+>>> In any case, the patch wants to help to directly get the ext_csd in a
+>>> human format.
+>> 
+>> Yes, I realize this. However I'm unsure whether this parsing should be
+>> done in kernelspace at all. If your patch is accepted then it is obvious
+>> that people think this belongs in kernelspace rather than in userspace.
 >
-> Does this belong kernel or in userspace? I'm not sure, and
-> I'm hoping that any of the old-timers here chime in on it.
-> Anyway I supply you with a few comments on you patch
-> below...
+> I've found really useful to have this kind of parsing in Kernel space
+> because, fortunately, we are also using the kernel to validate the HW on
+> our platforms.
 
-Since it's in debugfs we can have it as verbose and whatever
-weird structure we wish. Userspace tools usually don't
-depend on debugfs ... except for some :-/ (see recent
-ftrace vs perf debates etc etc)
+sysfs has a strict one-value-per-file rule which this patch breaks, but
+I can see putting something like this in debugfs instead.  I'm wary of
+committing to maintaining a parser for this information in the kernel,
+though -- does anyone have advice on where this ought to be done?
 
-To implement getting at this data in a future-proof way
-from userspace we should put it in sysfs.
+I wonder if we should start an MMC userspace tools repository containing
+code for features like the cmd passthrough ioctl, secure erase/trim/discard
+requests, and debugging output of the type this patch provides.  On the
+other hand, maybe existing similar tools should just be modified to
+learn about how to deal with MMC?
 
-And if it was in sysfs we would have to follow the rule
-"one value per file" with files named after each CSD/etc
-field. Then to make that human-readable you would need
-a userspace tool, and preferrably it should also be
-documented in Documentation/ABI/testing/*
+Thanks,
 
-And nothing really prevents us from doing both :-)
-
-Yours,
-Linus Walleij
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
