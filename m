@@ -1,81 +1,38 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: [PATCH] mmc: card: Use manufacturer ID symbols in card quirks.
-Date: Fri, 11 Nov 2011 22:07:01 -0500
-Message-ID: <1321067221-18639-1-git-send-email-cjb@laptop.org>
+Subject: Re: [PATCH v4] mmc: sdhci: remove "state" argument from sdhci_suspend_host
+Date: Fri, 11 Nov 2011 22:08:36 -0500
+Message-ID: <87k476hwaz.fsf@laptop.org>
+References: <1320314985-9536-1-git-send-email-manuel.lauss@googlemail.com>
+	<4EB3BAA3.3020408@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58333 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:58346 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750971Ab1KLDHf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 11 Nov 2011 22:07:35 -0500
+	id S1751648Ab1KLDIg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 11 Nov 2011 22:08:36 -0500
+In-Reply-To: <4EB3BAA3.3020408@intel.com> (Adrian Hunter's message of "Fri, 04
+	Nov 2011 12:12:51 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, "Andrei E. Warkentin" <andrey.warkentin@gmail.com>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Manuel Lauss <manuel.lauss@googlemail.com>, linux-mmc@vger.kernel.org
 
-No functional change; adds macros for card manufacturer IDs.
+Hi,
 
-Signed-off-by: Chris Ball <cjb@laptop.org>
-Cc: Andrei E. Warkentin <andrey.warkentin@gmail.com>
-Cc: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
----
- drivers/mmc/card/block.c |   27 ++++++++++++++++++---------
- 1 files changed, 18 insertions(+), 9 deletions(-)
+On Fri, Nov 04 2011, Adrian Hunter wrote:
+> On 03/11/11 12:09, Manuel Lauss wrote:
+>> Drop the "state" argument from sdhci_suspend_host.  Its only user
+>> is the PCI glue;  this allows to move all SDHCI glues to use
+>> dev_pm_ops instead.
+>> 
+>> Signed-off-by: Manuel Lauss <manuel.lauss@googlemail.com>
+>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1e0e27c..c80bb6d 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1584,13 +1584,22 @@ static int mmc_add_disk(struct mmc_blk_data *md)
- 	return ret;
- }
- 
-+#define CID_MANFID_SANDISK	0x2
-+#define CID_MANFID_TOSHIBA	0x11
-+#define CID_MANFID_MICRON	0x13
-+
- static const struct mmc_fixup blk_fixups[] =
- {
--	MMC_FIXUP("SEM02G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
--	MMC_FIXUP("SEM04G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
--	MMC_FIXUP("SEM08G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
--	MMC_FIXUP("SEM16G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
--	MMC_FIXUP("SEM32G", 0x2, 0x100, add_quirk, MMC_QUIRK_INAND_CMD38),
-+	MMC_FIXUP("SEM02G", CID_MANFID_SANDISK, 0x100, add_quirk,
-+		  MMC_QUIRK_INAND_CMD38),
-+	MMC_FIXUP("SEM04G", CID_MANFID_SANDISK, 0x100, add_quirk,
-+		  MMC_QUIRK_INAND_CMD38),
-+	MMC_FIXUP("SEM08G", CID_MANFID_SANDISK, 0x100, add_quirk,
-+		  MMC_QUIRK_INAND_CMD38),
-+	MMC_FIXUP("SEM16G", CID_MANFID_SANDISK, 0x100, add_quirk,
-+		  MMC_QUIRK_INAND_CMD38),
-+	MMC_FIXUP("SEM32G", CID_MANFID_SANDISK, 0x100, add_quirk,
-+		  MMC_QUIRK_INAND_CMD38),
- 
- 	/*
- 	 * Some MMC cards experience performance degradation with CMD23
-@@ -1600,18 +1609,18 @@ static const struct mmc_fixup blk_fixups[] =
- 	 *
- 	 * N.B. This doesn't affect SD cards.
- 	 */
--	MMC_FIXUP("MMC08G", 0x11, CID_OEMID_ANY, add_quirk_mmc,
-+	MMC_FIXUP("MMC08G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_mmc,
- 		  MMC_QUIRK_BLK_NO_CMD23),
--	MMC_FIXUP("MMC16G", 0x11, CID_OEMID_ANY, add_quirk_mmc,
-+	MMC_FIXUP("MMC16G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_mmc,
- 		  MMC_QUIRK_BLK_NO_CMD23),
--	MMC_FIXUP("MMC32G", 0x11, CID_OEMID_ANY, add_quirk_mmc,
-+	MMC_FIXUP("MMC32G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_mmc,
- 		  MMC_QUIRK_BLK_NO_CMD23),
- 
- 	/*
- 	 * Some Micron MMC cards needs longer data read timeout than
- 	 * indicated in CSD.
- 	 */
--	MMC_FIXUP(CID_NAME_ANY, 0x13, 0x200, add_quirk_mmc,
-+	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
- 		  MMC_QUIRK_LONG_READ_TIME),
- 
- 	END_FIXUP
+Thanks!  Pushed to mmc-next for 3.3 with Adrian's ACK.
+
+- Chris.
 -- 
-1.7.5.4
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
