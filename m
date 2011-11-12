@@ -1,46 +1,54 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdio: Fix to support any block size optimally
-Date: Fri, 11 Nov 2011 19:47:55 -0500
-Message-ID: <87hb2ajhdw.fsf@laptop.org>
-References: <1319619137-17156-1-git-send-email-stefan.xk.nilsson@stericsson.com>
+Subject: Re: [PATCH V2] mmc: core: Use delayed work in clock gating framework
+Date: Fri, 11 Nov 2011 20:00:04 -0500
+Message-ID: <87d3cyjgtn.fsf@laptop.org>
+References: <1319699643-30700-1-git-send-email-sthumma@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43379 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755053Ab1KLAr4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 11 Nov 2011 19:47:56 -0500
-In-Reply-To: <1319619137-17156-1-git-send-email-stefan.xk.nilsson@stericsson.com>
-	(Stefan Nilsson's message of "Wed, 26 Oct 2011 10:52:17 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1319699643-30700-1-git-send-email-sthumma@codeaurora.org> (Sujit
+	Reddy Thumma's message of "Thu, 27 Oct 2011 12:44:03 +0530")
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-Hi Stefan,
+Hi Sujit,
 
-On Wed, Oct 26 2011, Stefan Nilsson XK wrote:
-> This patch allows any block size to be set on the SDIO link,
-> and still have an arbitrary sized packet (adjusted in size by
-> using sdio_align_size) transferred in an optimal way
-> (preferably one transfer).
+On Thu, Oct 27 2011, Sujit Reddy Thumma wrote:
+> Current clock gating framework disables the MCI clock as soon as the
+> request is completed and enables it when a request arrives. This aggressive
+> clock gating framework, when enabled, cause following issues:
 >
-> Previously if the block size was larger than the default of
-> 512 bytes and the transfer size was exactly one block size
-> (possibly thanks to using sdio_align_size to get an optimal
-> transfer size), it was sent as a number of byte transfers instead
-> of one block transfer. Also if the number of blocks was
-> (max_blocks * N) + 1, the tranfer would be conducted with a number
-> of blocks and finished off with a number of byte transfers.
+> When there are back-to-back requests from the Queue layer, we unnecessarily
+> end up disabling and enabling the clocks between these requests since 8MCLK
+> clock cycles is a very short duration compared to the time delay between
+> back to back requests reaching the MMC layer. This overhead can effect the
+> overall performance depending on how long the clock enable and disable
+> calls take which is platform dependent. For example on some platforms we
+> can have clock control not on the local processor, but on a different
+> subsystem and the time taken to perform the clock enable/disable can add
+> significant overhead.
 >
-> When doing this change it was also possible to break out the quirk
-> for broken byte mode in a much cleaner way, and collect the logic of
-> when to do byte or block transfer in one function instead of two.
+> Also if the host controller driver decides to disable the host clock too
+> when mmc_set_ios function is called with ios.clock=0, it adds additional
+> delay and it is highly possible that the next request had already arrived
+> and unnecessarily blocked in enabling the clocks. This is seen frequently
+> when the processor is executing at high speeds and in multi-core platforms
+> thus reduces the overall throughput compared to if clock gating is
+> disabled.
 >
-> Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+> Fix this by delaying turning off the clocks by posting request on
+> delayed workqueue. Also cancel the unscheduled pending work, if any,
+> when there is access to card.
+>
+> sysfs entry is provided to tune the delay as needed, default
+> value set to 200ms.
 
-Pushed to mmc-next for 3.3, thanks.
+Looks good, but please add documentation for the new sysfs node in
+Documentation/mmc/mmc-dev-attrs.txt.
+
+Thanks,
 
 - Chris.
 -- 
