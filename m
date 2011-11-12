@@ -1,52 +1,31 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-pci: shut up BAR size warning
-Date: Fri, 11 Nov 2011 22:20:36 -0500
-Message-ID: <87bosihvqz.fsf@laptop.org>
-References: <1320870118-3427-1-git-send-email-manuel.lauss@googlemail.com>
+Subject: Re: [Query] mmc/sdhci: Suspend hangs if card is inserted at suspend.
+Date: Fri, 11 Nov 2011 22:24:29 -0500
+Message-ID: <877h36hvki.fsf@laptop.org>
+References: <4EBCC49E.5060008@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:38840 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:34826 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751253Ab1KLDUg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 11 Nov 2011 22:20:36 -0500
-In-Reply-To: <1320870118-3427-1-git-send-email-manuel.lauss@googlemail.com>
-	(Manuel Lauss's message of "Wed, 9 Nov 2011 21:21:58 +0100")
+	id S1751253Ab1KLDY3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 11 Nov 2011 22:24:29 -0500
+In-Reply-To: <4EBCC49E.5060008@st.com> (Viresh Kumar's message of "Fri, 11 Nov
+	2011 12:15:50 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Manuel Lauss <manuel.lauss@googlemail.com>
-Cc: linux-mmc@vger.kernel.org
+To: Viresh Kumar <viresh.kumar@st.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shiraz HASHIM <shiraz.hashim@st.com>, Armando VISCONTI <armando.visconti@st.com>
 
-Hi Manuel,
+Hi Viresh,
 
-On Wed, Nov 09 2011, Manuel Lauss wrote:
-> kernel complains about invalid SDHCI iomem size on boot.  The BAR on my
-> O2-Micro controller is 512 bytes large, twice the size SDHCI-PCI needs.
-> This patch changes the warning to only appear when the BAR is smaller
-> than expected.
+On Fri, Nov 11 2011, Viresh Kumar wrote:
+> Controller specific suspend/resume are still not called, so i think it might
+> be related to core code. I am using 2.6.37 kernel version.
 >
-> Signed-off-by: Manuel Lauss <manuel.lauss@googlemail.com>
-> ---
->  drivers/mmc/host/sdhci-pci.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index d833d9c..0ee5c07 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -1199,7 +1199,7 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
->  		return ERR_PTR(-ENODEV);
->  	}
->  
-> -	if (pci_resource_len(pdev, bar) != 0x100) {
-> +	if (pci_resource_len(pdev, bar) < 0x100) {
->  		dev_err(&pdev->dev, "Invalid iomem size. You may "
->  			"experience problems.\n");
->  	}
+> Any help on this?
 
-We discussed this a few months ago -- the thread is at:
-
-   http://thread.gmane.org/gmane.linux.kernel.mmc/8314
+Please try to reproduce on 3.1 and let us know if it's present there.
 
 Thanks,
 
