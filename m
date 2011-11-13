@@ -1,33 +1,51 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: card: Use manufacturer ID symbols in card quirks.
-Date: Sat, 12 Nov 2011 11:26:55 +0100
-Message-ID: <CACRpkdb+SmkX6yjSnnDVzA5pguBk_iL-te4EOobLgQ0ntX3U1g@mail.gmail.com>
-References: <1321067221-18639-1-git-send-email-cjb@laptop.org>
+From: merez@codeaurora.org
+Subject: Re: [PATCH 2/2] mmc: core: Support packed command for eMMC4.5      
+     device
+Date: Sun, 13 Nov 2011 05:04:26 -0800 (PST)
+Message-ID: <29dbe1d4d0e92bc4b4acf1ac2909f2df.squirrel@www.codeaurora.org>
+References: <620ec9ffa6bdbba9ae5f76998e36f8dc.squirrel@www.codeaurora.org>
+    <001001cca043$395dbfc0$ac193f40$%jun@samsung.com>
+    <CANfBPZ-Zn+R4GosEL-RJxh8gduAr8e+qN876uPwDkHfiEpdERw@mail.gmail.com>
+    <ea21d88d904af165cb911354e3f51ea6.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:57605 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751322Ab1KLK0z (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Nov 2011 05:26:55 -0500
-Received: by iage36 with SMTP id e36so5057026iag.19
-        for <linux-mmc@vger.kernel.org>; Sat, 12 Nov 2011 02:26:55 -0800 (PST)
-In-Reply-To: <1321067221-18639-1-git-send-email-cjb@laptop.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:26267 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751963Ab1KMNE1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Nov 2011 08:04:27 -0500
+In-Reply-To: <ea21d88d904af165cb911354e3f51ea6.squirrel@www.codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, "Andrei E. Warkentin" <andrey.warkentin@gmail.com>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: "S, Venkatraman" <svenkatr@ti.com>, merez@codeaurora.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 
-On Sat, Nov 12, 2011 at 4:07 AM, Chris Ball <cjb@laptop.org> wrote:
+>> On Fri, Nov 11, 2011 at 12:56 PM, Seungwon Jeon <tgih.jun@samsung.com>
+>> wrote:
+>>> Maya Erez wrote:
+>>>> On Thu, Nov 10, 2011 Maya Erez wrote:
+>>>> > S, Venkatraman <svenkatr@ti.com> wrote:
+>>>> >> On Thu, Nov 3, 2011 at 7:23 AM, Seungwon Jeon
+>>>> <tgih.jun@samsung.com>
+>>>> wrote:
+>>>> >> >> > +static u8 mmc_blk_chk_packable(struct mmc_queue *mq, struct
+>>>> >> request *req)
+>>>>
+>>>> The function prepares the checkable list and not only checks if
+>>>> packing
+>>>> is
+>>>> possible, therefore I think its name should change to reflect its real
+>>>> action
+>>> I labored at naming. Isn't it proper? :)
+>>> Do you have any recommendation?
+>>> group_pack_req?
+>>>
+How about mmc_blk_prep_packed_list?
 
-> No functional change; adds macros for card manufacturer IDs.
->
-> Signed-off-by: Chris Ball <cjb@laptop.org>
-> Cc: Andrei E. Warkentin <andrey.warkentin@gmail.com>
-> Cc: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
+Thanks,
+Maya Erez
+Consultant for Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
 
-Elegant,
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-Thanks!
-Linus Walleij
