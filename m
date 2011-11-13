@@ -1,51 +1,98 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH 2/2] mmc: core: Support packed command for eMMC4.5      
-     device
-Date: Sun, 13 Nov 2011 05:04:26 -0800 (PST)
-Message-ID: <29dbe1d4d0e92bc4b4acf1ac2909f2df.squirrel@www.codeaurora.org>
-References: <620ec9ffa6bdbba9ae5f76998e36f8dc.squirrel@www.codeaurora.org>
-    <001001cca043$395dbfc0$ac193f40$%jun@samsung.com>
-    <CANfBPZ-Zn+R4GosEL-RJxh8gduAr8e+qN876uPwDkHfiEpdERw@mail.gmail.com>
-    <ea21d88d904af165cb911354e3f51ea6.squirrel@www.codeaurora.org>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH] SD/MMC: fix the issue of SDHC performance regression
+Date: Sun, 13 Nov 2011 21:44:45 +0530
+Message-ID: <000301cca21f$5fda9c30$1f8fd490$@org>
+References: <1320658589-13143-1-git-send-email-b32616@freescale.com>	<m2ipmw133p.fsf@bob.laptop.org> <20111108094734.GA1592@ladygaga> <m2lirqybtm.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain;
+	charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:26267 "EHLO
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:31439 "EHLO
 	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751963Ab1KMNE1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Nov 2011 08:04:27 -0500
-In-Reply-To: <ea21d88d904af165cb911354e3f51ea6.squirrel@www.codeaurora.org>
+	with ESMTP id S1753276Ab1KMQOx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Nov 2011 11:14:53 -0500
+In-Reply-To: <m2lirqybtm.fsf@bob.laptop.org>
+Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: "S, Venkatraman" <svenkatr@ti.com>, merez@codeaurora.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
+To: 'Chris Ball' <cjb@laptop.org>, 'Aaron Lu' <aaron.lu@amd.com>
+Cc: 'Qiang Liu' <b32616@freescale.com>, linux-mmc@vger.kernel.org, leoli@freescale.com, kumar.gala@freescale.com
 
->> On Fri, Nov 11, 2011 at 12:56 PM, Seungwon Jeon <tgih.jun@samsung.com>
->> wrote:
->>> Maya Erez wrote:
->>>> On Thu, Nov 10, 2011 Maya Erez wrote:
->>>> > S, Venkatraman <svenkatr@ti.com> wrote:
->>>> >> On Thu, Nov 3, 2011 at 7:23 AM, Seungwon Jeon
->>>> <tgih.jun@samsung.com>
->>>> wrote:
->>>> >> >> > +static u8 mmc_blk_chk_packable(struct mmc_queue *mq, struct
->>>> >> request *req)
->>>>
->>>> The function prepares the checkable list and not only checks if
->>>> packing
->>>> is
->>>> possible, therefore I think its name should change to reflect its real
->>>> action
->>> I labored at naming. Isn't it proper? :)
->>> Do you have any recommendation?
->>> group_pack_req?
->>>
-How about mmc_blk_prep_packed_list?
+Chris, Aaron,
 
-Thanks,
-Maya Erez
-Consultant for Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
+a230e7f..670fd7f 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -306,7 +306,7 @@ static int mmc_read_switch(struct mmc_card *card)
+                goto out;
+        }
+ 
+-       if (status[13] & UHS_SDR50_BUS_SPEED)
++       if (status[13] & SD_MODE_UHS_SDR25)
+                card->sw_caps.hs_max_dtr = 50000000;
+ 
+Using SD_MODE_UHS_SDR25 macro name is not appropriate here. It's really not
+the SDR25 mode (although clock rate is 50mhz), it's High speed mode only.
+"Qiang Liu" patch had defined new marco "SD_MODE_HIGH_SPEED" which looks
+most appropriate to use here.
 
+@@ -99,6 +99,7 @@ struct sd_ssr {
+ struct sd_switch_caps {
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		uhs_max_dtr;
++#define HIGH_SPEED_MAX_DTR	50000000
+ #define UHS_SDR104_MAX_DTR	208000000
+ #define UHS_SDR50_MAX_DTR	100000000
+ #define UHS_DDR50_MAX_DTR	50000000
+@@ -106,11 +107,13 @@ struct sd_switch_caps {
+ #define UHS_SDR12_MAX_DTR	25000000
+ 	unsigned int		sd3_bus_mode;
+ #define UHS_SDR12_BUS_SPEED	0
++#define HIGH_SPEED_BUS_SPEED	1
+ #define UHS_SDR25_BUS_SPEED	1
+ #define UHS_SDR50_BUS_SPEED	2
+ #define UHS_SDR104_BUS_SPEED	3
+ #define UHS_DDR50_BUS_SPEED	4
+
++#define SD_MODE_HIGH_SPEED	(1 << HIGH_SPEED_BUS_SPEED)
+ #define SD_MODE_UHS_SDR12	(1 << UHS_SDR12_BUS_SPEED)
+ #define SD_MODE_UHS_SDR25	(1 << UHS_SDR25_BUS_SPEED)
+ #define SD_MODE_UHS_SDR50	(1 << UHS_SDR50_BUS_SPEED)
+--
+
+Regards,
+Subhash
+
+
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Chris Ball
+> Sent: Tuesday, November 08, 2011 7:08 PM
+> To: Aaron Lu
+> Cc: Qiang Liu; linux-mmc@vger.kernel.org; leoli@freescale.com;
+> kumar.gala@freescale.com; subhashj@codeaurora.org
+> Subject: Re: [PATCH] SD/MMC: fix the issue of SDHC performance
+> regression
+> 
+> Hi,
+> 
+> On Tue, Nov 08 2011, Aaron Lu wrote:
+> > SDR25 is also 50MHZ, the same frequency as high speed.
+> > Or we can add a new macro for high speed like qiang has done,
+> > which one you prefer?
+> 
+> The new macro makes most sense to me -- if no-one disagrees, I'll
+> convert Liu's patch into a rename patch and queue it as a cleanup
+> for 3.2.  Thanks!
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
