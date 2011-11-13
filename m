@@ -1,98 +1,89 @@
 From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [PATCH] SD/MMC: fix the issue of SDHC performance regression
-Date: Sun, 13 Nov 2011 21:44:45 +0530
-Message-ID: <000301cca21f$5fda9c30$1f8fd490$@org>
-References: <1320658589-13143-1-git-send-email-b32616@freescale.com>	<m2ipmw133p.fsf@bob.laptop.org> <20111108094734.GA1592@ladygaga> <m2lirqybtm.fsf@bob.laptop.org>
+Subject: RE: DDR eMMC write failures
+Date: Sun, 13 Nov 2011 22:05:14 +0530
+Message-ID: <000601cca222$3a103430$ae309c90$@org>
+References: <CAHzg1A-7RNthipDredO4KSrC+bM0nqLuhWaw1cveFzzfXd2k3Q@mail.gmail.com> <CAHzg1A_igBoJ01eNzS5HX3LAAWo7tkTtmdbh8ACASt5r9LvbLg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:31439 "EHLO
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:56309 "EHLO
 	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753276Ab1KMQOx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Nov 2011 11:14:53 -0500
-In-Reply-To: <m2lirqybtm.fsf@bob.laptop.org>
+	with ESMTP id S1753469Ab1KMQfS convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Nov 2011 11:35:18 -0500
+In-Reply-To: <CAHzg1A_igBoJ01eNzS5HX3LAAWo7tkTtmdbh8ACASt5r9LvbLg@mail.gmail.com>
 Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>, 'Aaron Lu' <aaron.lu@amd.com>
-Cc: 'Qiang Liu' <b32616@freescale.com>, linux-mmc@vger.kernel.org, leoli@freescale.com, kumar.gala@freescale.com
+To: 'Praveen Krishnan' <praveen.gk@gmail.com>, linux-mmc@vger.kernel.org
 
-Chris, Aaron,
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
-a230e7f..670fd7f 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -306,7 +306,7 @@ static int mmc_read_switch(struct mmc_card *card)
-                goto out;
-        }
- 
--       if (status[13] & UHS_SDR50_BUS_SPEED)
-+       if (status[13] & SD_MODE_UHS_SDR25)
-                card->sw_caps.hs_max_dtr = 50000000;
- 
-Using SD_MODE_UHS_SDR25 macro name is not appropriate here. It's really not
-the SDR25 mode (although clock rate is 50mhz), it's High speed mode only.
-"Qiang Liu" patch had defined new marco "SD_MODE_HIGH_SPEED" which looks
-most appropriate to use here.
-
-@@ -99,6 +99,7 @@ struct sd_ssr {
- struct sd_switch_caps {
- 	unsigned int		hs_max_dtr;
- 	unsigned int		uhs_max_dtr;
-+#define HIGH_SPEED_MAX_DTR	50000000
- #define UHS_SDR104_MAX_DTR	208000000
- #define UHS_SDR50_MAX_DTR	100000000
- #define UHS_DDR50_MAX_DTR	50000000
-@@ -106,11 +107,13 @@ struct sd_switch_caps {
- #define UHS_SDR12_MAX_DTR	25000000
- 	unsigned int		sd3_bus_mode;
- #define UHS_SDR12_BUS_SPEED	0
-+#define HIGH_SPEED_BUS_SPEED	1
- #define UHS_SDR25_BUS_SPEED	1
- #define UHS_SDR50_BUS_SPEED	2
- #define UHS_SDR104_BUS_SPEED	3
- #define UHS_DDR50_BUS_SPEED	4
-
-+#define SD_MODE_HIGH_SPEED	(1 << HIGH_SPEED_BUS_SPEED)
- #define SD_MODE_UHS_SDR12	(1 << UHS_SDR12_BUS_SPEED)
- #define SD_MODE_UHS_SDR25	(1 << UHS_SDR25_BUS_SPEED)
- #define SD_MODE_UHS_SDR50	(1 << UHS_SDR50_BUS_SPEED)
---
+I guess there is some issue with board level signal condition issue on =
+MMC
+interface lines. You may try increasing the drive strength of interface
+lines from host controller side.
 
 Regards,
 Subhash
 
-
 > -----Original Message-----
 > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Chris Ball
-> Sent: Tuesday, November 08, 2011 7:08 PM
-> To: Aaron Lu
-> Cc: Qiang Liu; linux-mmc@vger.kernel.org; leoli@freescale.com;
-> kumar.gala@freescale.com; subhashj@codeaurora.org
-> Subject: Re: [PATCH] SD/MMC: fix the issue of SDHC performance
-> regression
-> 
-> Hi,
-> 
-> On Tue, Nov 08 2011, Aaron Lu wrote:
-> > SDR25 is also 50MHZ, the same frequency as high speed.
-> > Or we can add a new macro for high speed like qiang has done,
-> > which one you prefer?
-> 
-> The new macro makes most sense to me -- if no-one disagrees, I'll
-> convert Liu's patch into a rename patch and queue it as a cleanup
-> for 3.2.  Thanks!
-> 
-> - Chris.
+> owner@vger.kernel.org] On Behalf Of Praveen Krishnan
+> Sent: Saturday, November 05, 2011 5:57 AM
+> To: linux-mmc@vger.kernel.org
+> Subject: Re: DDR eMMC write failures
+>=20
+> I am seeing some very strange things.
+>=20
+> When I do
+>=20
+> Dd if=3D/dev/zero of=3D/dev/mmcblk0 bs=3D512k count=3D200 (it fails w=
+hen
+> writing about 100MB of data with a crc error)
+>=20
+> When I do
+> Dd if=3D/dev/zero of=3D/dev/mmcblk0 bs=3D64k count=3D3000 (it fails o=
+nly after
+> 125 MB of data with a crc error)
+>=20
+> When I do
+>=20
+> Dd if=3D/dev/zero of=3D/dev/mmcblk0 bs=3D32k count=3D16000 (it fails =
+when I
+> try to write 500MB of data, but good until 375MB of data)
+>=20
+> Any ideas what I am running into?
+>=20
+> Thanks,
+> Praveen
+>=20
+>=20
+> On Wed, Nov 2, 2011 at 4:51 PM, Praveen Krishnan <praveen.gk@gmail.co=
+m>
+> wrote:
+> > Hello all,
+> >
+> > I am working on getting the DDR50 mode up and running for the eMMC
+> > cards. =A0I am running into some weird CRC error cases. =A0Initiall=
+y, I
+> > thought that everything works fine, but when I stress test it with
+> > large amounts of data (more than 100MB of writes), I notice that my
+> > console is spewed with venomous error messages. =A0I get a CRC erro=
+r
+> and
+> > every now and then, I also see this message "Got data interrupt eve=
+n
+> > though no data operation was in progress" and "Buffer I/O error" an=
+d
+> > so on.
+> >
+> > Can anybody give any pointers as to what could be causing this?
+> >
+> > Thanks a lot,
+> > Praveen
+> >
 > --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
