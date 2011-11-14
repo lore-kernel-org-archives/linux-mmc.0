@@ -1,95 +1,67 @@
-From: Per Forlin <per.forlin@stericsson.com>
-Subject: [PATCH] mmc: block: release host in case of error
-Date: Mon, 14 Nov 2011 12:12:46 +0100
-Message-ID: <1321269166-22128-1-git-send-email-per.forlin@stericsson.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH V3] mmc: core: Use delayed work in clock gating framework
+Date: Mon, 14 Nov 2011 08:15:13 -0500
+Message-ID: <87ehxaluam.fsf@laptop.org>
+References: <1321259009-22626-1-git-send-email-sthumma@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog112.obsmtp.com ([207.126.144.133]:51734 "EHLO
-	eu1sys200aog112.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754552Ab1KNLOh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2011 06:14:37 -0500
+Received: from void.printf.net ([89.145.121.20]:45918 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754404Ab1KNNPM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Nov 2011 08:15:12 -0500
+In-Reply-To: <1321259009-22626-1-git-send-email-sthumma@codeaurora.org> (Sujit
+	Reddy Thumma's message of "Mon, 14 Nov 2011 13:53:29 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Sujit Reddy Thumma <sthumma@codeaurora.org>, adrian.hunter@intel.com
-Cc: Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>
+To: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 
-Host is claimed as long as there are requests in the block queue
-and all request are completed successfully. If an error occur release
-the host in case someone else needs to claim it, for instance if the card
-is removed during a transfer.
+Hi Sujit,
 
-Signed-off-by: Per Forlin <per.forlin@stericsson.com>
----
- drivers/mmc/card/block.c |   37 +++++++++++++++++++++++++++++--------
- 1 files changed, 29 insertions(+), 8 deletions(-)
+On Mon, Nov 14 2011, Sujit Reddy Thumma wrote:
+> Current clock gating framework disables the MCI clock as soon as the
+> request is completed and enables it when a request arrives. This aggressive
+> clock gating framework, when enabled, cause following issues:
+>
+> When there are back-to-back requests from the Queue layer, we unnecessarily
+> end up disabling and enabling the clocks between these requests since 8MCLK
+> clock cycles is a very short duration compared to the time delay between
+> back to back requests reaching the MMC layer. This overhead can effect the
+> overall performance depending on how long the clock enable and disable
+> calls take which is platform dependent. For example on some platforms we
+> can have clock control not on the local processor, but on a different
+> subsystem and the time taken to perform the clock enable/disable can add
+> significant overhead.
+>
+> Also if the host controller driver decides to disable the host clock too
+> when mmc_set_ios function is called with ios.clock=0, it adds additional
+> delay and it is highly possible that the next request had already arrived
+> and unnecessarily blocked in enabling the clocks. This is seen frequently
+> when the processor is executing at high speeds and in multi-core platforms
+> thus reduces the overall throughput compared to if clock gating is
+> disabled.
+>
+> Fix this by delaying turning off the clocks by posting request on
+> delayed workqueue. Also cancel the unscheduled pending work, if any,
+> when there is access to card.
+>
+> sysfs entry is provided to tune the delay as needed, default
+> value set to 200ms.
+>
+> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index c80bb6d..c21fd2c 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1158,6 +1158,28 @@ static int mmc_blk_cmd_err(struct mmc_blk_data *md, struct mmc_card *card,
- 	return ret;
- }
- 
-+/*
-+ * This function should be called to resend a request after failure.
-+ * Prepares and starts the request.
-+ */
-+static inline struct mmc_async_req *mmc_blk_resend(struct mmc_card *card,
-+						   struct mmc_queue *mq,
-+						   struct mmc_queue_req *mqrq,
-+						   int disable_multi,
-+						   struct mmc_async_req *areq)
-+{
-+	/*
-+	 * Release host after failure in case the host is needed
-+	 * by someone else. For instance, if the card is removed the
-+	 * worker thread needs to claim the host in order to do mmc_rescan.
-+	 */
-+	mmc_release_host(card->host);
-+	mmc_claim_host(card->host);
-+
-+	mmc_blk_rw_rq_prep(mqrq, card, disable_multi, mq);
-+	return mmc_start_req(card->host, areq, NULL);
-+}
-+
- static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- {
- 	struct mmc_blk_data *md = mq->data;
-@@ -1257,14 +1279,14 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			break;
- 		}
- 
--		if (ret) {
-+		if (ret)
- 			/*
- 			 * In case of a incomplete request
- 			 * prepare it again and resend.
- 			 */
--			mmc_blk_rw_rq_prep(mq_rq, card, disable_multi, mq);
--			mmc_start_req(card->host, &mq_rq->mmc_active, NULL);
--		}
-+			mmc_blk_resend(card, mq, mq_rq, disable_multi,
-+				       &mq_rq->mmc_active);
-+
- 	} while (ret);
- 
- 	return 1;
-@@ -1276,10 +1298,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	spin_unlock_irq(&md->lock);
- 
-  start_new_req:
--	if (rqc) {
--		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
--		mmc_start_req(card->host, &mq->mqrq_cur->mmc_active, NULL);
--	}
-+	if (rqc)
-+		mmc_blk_resend(card, mq, mq->mqrq_cur, 0,
-+			       &mq->mqrq_cur->mmc_active);
- 
- 	return 0;
- }
+error: patch failed: drivers/mmc/core/host.c:53
+error: drivers/mmc/core/host.c: patch does not apply
+error: patch failed: include/linux/mmc/host.h:253
+error: include/linux/mmc/host.h: patch does not apply
+
+Please could you resend against current mmc-next?
+
+Thanks,
+
+- Chris.
 -- 
-1.6.3.3
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
