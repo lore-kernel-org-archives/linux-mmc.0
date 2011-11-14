@@ -1,57 +1,245 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2] mmc: support BKOPS feature for eMMC
-Date: Mon, 14 Nov 2011 13:18:43 +0900
-Message-ID: <4EC096A3.4070309@samsung.com>
-References: <4EB11B6B.2010909@samsung.com>
- <CAFEEs1=yF3u-xL6OnEMTfqYx6HgOaePYkhC7iOJi-=z9TjPfmw@mail.gmail.com>
- <CAELcNGQEm073tFsmSgbKzBfx=oYjZDX=EdbgWQOMZEBscsobTw@mail.gmail.com>
- <CAFEEs1==cJ_dYDgesAZcs+E=-jj7-hwwssbAsE4a9AdmED8k3A@mail.gmail.com>
- <CAELcNGTddwX6HtR5vJ+wQChyN5a=mU3Wbd5Hg_EqY72xR7k8dA@mail.gmail.com>
- <CAFEEs1mKBUqi8HJK3unRh7KMraethMATTTf8Fn6WB2L+ZUqO9g@mail.gmail.com>
+From: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Subject: Re: [PATCH] mmc: core: Kill block requests if card is removed
+Date: Mon, 14 Nov 2011 09:49:26 +0530
+Message-ID: <4EC096CE.7000003@codeaurora.org>
+References: <1320813119-24383-1-git-send-email-sthumma@codeaurora.org> <4EBA4940.6030808@intel.com> <CAFEEs1nPe3=TFwdf8rbPk6AtWzMdfaKR=-Rv0OVJhnANX=3fUQ@mail.gmail.com> <4EBB4CEA.1050901@codeaurora.org> <4EBB9AE1.2060909@intel.com> <CAFEEs1nFkWv5x1RbJ923JJk9C3A3XX84k+=RT1+rd9S1rau99A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:16967 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751932Ab1KNESx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Nov 2011 23:18:53 -0500
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LUM00I6HUNEBZ10@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 14 Nov 2011 13:18:52 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LUM00M2ZUNFFS90@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 14 Nov 2011 13:18:52 +0900 (KST)
-In-reply-to: <CAFEEs1mKBUqi8HJK3unRh7KMraethMATTTf8Fn6WB2L+ZUqO9g@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAFEEs1nFkWv5x1RbJ923JJk9C3A3XX84k+=RT1+rd9S1rau99A@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: Per Forlin <per.lkml@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, svenkatr@ti.com, chuanxiao.dong@intel.com
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, cjb@laptop.org
+List-Id: linux-mmc@vger.kernel.org
 
-Hi Per
-
->>>>>>
->>>>>>        if (card->ext_csd.rev >= 5) {
->>>>>> +               /* check whether the eMMC card support BKOPS */
->>>>>> +               if (ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1) {
->>>>>> +                       card->ext_csd.bkops = 1;
->>>>>> +                       card->ext_csd.bkops_en = 1;
->>>>> What if the card has not enabled bkops? This bit could be unset.
->>>>> card->ext_csd.bkops_en = ext_csd[EXT_CSD_BKOPS_EN];
->>>> When card is supported the bkops, bkops_en bit is set by default...
+On 11/10/2011 7:50 PM, Per Forlin wrote:
+> On Thu, Nov 10, 2011 at 10:35 AM, Adrian Hunter<adrian.hunter@intel.com>  wrote:
+>> On 10/11/11 06:02, Sujit Reddy Thumma wrote:
+>>> Hi,
+>>>> Hi Adrian,
 >>>>
->>> How do you know if the bkops_en is really enabled in th ext_csd?
->>> It could be unset in the ext_csd, right?
+>>>> On Wed, Nov 9, 2011 at 10:34 AM, Adrian Hunter<adrian.hunter@intel.com>
+>>>> wrote:
+>>>>> On 09/11/11 06:31, Sujit Reddy Thumma wrote:
+>>>>>> Kill block requests when the host knows that the card is
+>>>>>> removed from the slot and is sure that subsequent requests
+>>>>>> are bound to fail. Do this silently so that the block
+>>>>>> layer doesn't output unnecessary error messages.
+>>>>>>
+>>>>>> This patch implements suggestion from Adrian Hunter,
+>>>>>> http://thread.gmane.org/gmane.linux.kernel.mmc/2714/focus=3474
+>>>>>>
+>>>>>> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
+>>>>>> ---
+>>>>>
+>>>>>
+>>>>> It is safer to have zero initialisations so I suggest inverting
+>>>>> the meaning of the state bit i.e.
+>>>
+>>> Makes sense. Will take care in V2.
+>>>
+>>>>>
+>>>>> #define MMC_STATE_CARD_GONE     (1<<7)          /* card removed from the
+>>>>> slot */
+>>>>>
+>>>>>
+>>>>> Also it would be nice is a request did not start if the card is
+>>>>> gone.  For the non-async case, that is easy:
+>>>>>
+>>>> As far as I understand Sujit's patch it will stop new requests from
+>>>> being issued, blk_fetch_request(q) returns NULL.
+>>>
+>>> Yes, Per you are right. The ongoing requests will fail at the controller
+>>> driver layer and only the new requests coming to MMC queue layer will be
+>>> blocked.
+>>>
+>>> Adrian's suggestion is to stop all the requests reaching host controller
+>>> layer by mmc core. This seems to be a good approach but the problem here is
+>>> the host driver should inform mmc core that card is gone.
+>>>
+>>> Adrian, do you agree if we need to change all the host drivers to set the
+>>> MMC_STATE_CARD_GONE flag as soon as the card detect irq handler detects the
+>>> card as removed?
 >>
->> In emmc4.5 spec, if card is supported the bkops, bkops_en is set by default.
-> If bkops_en is set by default it should be in the the ext_csd too, right?
-> It should be safer to trust the value of ext_csd[EXT_CSD_BKOPS_EN] in
-> this case I think.
+>> Typically a card detect interrupt queues a rescan which in turn will have
+>> to wait to claim the host.  In the meantime, in the async case, the block
+>> driver will not release the host until the queue is empty.
+> Here is a patch that let async-mmc release host and reclaim it in case of error.
+> When the host is released mmc_rescan will claim the host and run.
+> --------------------------------
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index cf73877..8952e63 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1209,6 +1209,28 @@ static int mmc_blk_cmd_err(struct mmc_blk_data
+> *md, struct mmc_card *card,
+>   	return ret;
+>   }
+>
+> +/*
+> + * This function should be called to resend a request after failure.
+> + * Prepares and starts the request.
+> + */
+> +static inline struct mmc_async_req *mmc_blk_resend(struct mmc_card *card,
+> +						   struct mmc_queue *mq,
+> +						   struct mmc_queue_req *mqrq,
+> +						   int disable_multi,
+> +						   struct mmc_async_req *areq)
+> +{
+> +	/*
+> +	 * Release host after failure in case the host is needed
+> +	 * by someone else. For instance, if the card is removed the
+> +	 * worker thread needs to claim the host in order to do mmc_rescan.
+> +	 */
+> +	mmc_release_host(card->host);
+> +	mmc_claim_host(card->host);
+> +
+> +	mmc_blk_rw_rq_prep(mqrq, card, disable_multi, mq);
+> +	return mmc_start_req(card->host, areq, NULL);
+> +}
+> +
+>   static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>   {
+>   	struct mmc_blk_data *md = mq->data;
+> @@ -1308,14 +1330,14 @@ static int mmc_blk_issue_rw_rq(struct
+> mmc_queue *mq, struct request *rqc)
+>   			break;
+>   		}
+>
+> -		if (ret) {
+> +		if (ret)
+>   			/*
+>   			 * In case of a incomplete request
+>   			 * prepare it again and resend.
+>   			 */
+> -			mmc_blk_rw_rq_prep(mq_rq, card, disable_multi, mq);
+> -			mmc_start_req(card->host,&mq_rq->mmc_active, NULL);
+> -		}
+> +			mmc_blk_prep_start(card, mq, mq_rq, disable_multi,
+> +					&mq_rq->mmc_active);
+> +
 
-If we want to ensure whether bkops_en bit is set or not, your approach is right.
+:%s/mmc_blk_prep_start/mmc_blk_resend
 
-Best Regards,
-Jaehoon Chung
+>   	} while (ret);
+>
+>   	return 1;
+> @@ -1327,10 +1349,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+> *mq, struct request *rqc)
+>   	spin_unlock_irq(&md->lock);
+>
+>    start_new_req:
+> -	if (rqc) {
+> -		mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+> -		mmc_start_req(card->host,&mq->mqrq_cur->mmc_active, NULL);
+> -	}
+> +	if (rqc)
+> +		mmc_blk_prep_start(card, mq, mq->mqrq_cur, 0,
+> +				&mq->mqrq_cur->mmc_active);
+>
+>   	return 0;
+>   }
+
+Thanks Per. This looks good. Can we split this into a different patch?
+
+> -------------------------------------
+>
+>
+>>   The block
+>> driver will see errors and will use a send status command which will fail
+>> so the request will be aborted, but the next request will be started
+>> anyway.
+>>
+>> There are two problems:
+>>
+>> 1. When do we reliably know that the card has really gone?
+>>
+>> At present, the detect method for SD and MMC is just the send status
+>> command, which is what the block driver is doing i.e. if the block
+>> driver sees send status fail, after an errored request, and the
+>> card is removable, then it is very likely the card has gone.
+>>
+>> At present, it is not considered that the host controller driver
+>> knows whether the card is really gone - just that it might be.
+>>
+>> Setting a MMC_STATE_CARD_GONE flag early may be a little complicated.
+>> e.g. mmc_detect_change() flags that the card may be gone.  After an
+>> error, if the "card may be gone" flag is set a new bus method could
+>> be called that just does send status.  If that fails, then the
+>> MMC_STATE_CARD_GONE flag is set.  Any calls to the detect method
+>> must first check the MMC_STATE_CARD_GONE flag so that, once gone,
+>> a card can not come back.
+>>
+>> Maybe you can think of something simpler.
+
+Can we do something like this:
+
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -648,8 +648,15 @@ static int mmc_blk_cmd_recovery(struct mmc_card 
+*card, struct request *req,
+         }
+
+         /* We couldn't get a response from the card.  Give up. */
+-       if (err)
++       if (err) {
++               /*
++                * If the card didn't respond to status command,
++                * it is likely that card is gone. Flag it as removed,
++                * mmc_detect_change() cleans the rest.
++                */
++               mmc_card_set_card_gone(card);
+                 return ERR_ABORT;
++       }
+
+         /* Flag ECC errors */
+         if ((status & R1_CARD_ECC_FAILED) ||
+
+and some additions to Per's patch, changes denoted in (++):
+
++/*
++ * This function should be called to resend a request after failure.
++ * Prepares and starts the request.
++ */
++static inline struct mmc_async_req *mmc_blk_resend(struct mmc_card *card,
++						   struct mmc_queue *mq,
++						   struct mmc_queue_req *mqrq,
++						   int disable_multi,
++						   struct mmc_async_req *areq)
++{
++	/*
++	 * Release host after failure in case the host is needed
++	 * by someone else. For instance, if the card is removed the
++	 * worker thread needs to claim the host in order to do mmc_rescan.
++	 */
++	mmc_release_host(card->host);
++	mmc_claim_host(card->host);
+++	if (mmc_card_gone(card)) {
+++	/*
+++	 * End the pending async request without starting it when card
+++	 * is removed.
+++	 */
+++		req->cmd_flags |= REQ_QUIET;
+++		__blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
++	} else {
++		mmc_blk_rw_rq_prep(mqrq, card, disable_multi, mq);
++		return mmc_start_req(card->host, areq, NULL);
++	}
++}
++
+
+
+>>
+>> 2. How can new requests be prevented from starting once the card
+>> is gone?
+>>
+>> Using BLKPREP_KILL will do that for all but the request that has been
+>> prepared already (i.e. async case) if the MMC_STATE_CARD_GONE flag is set
+>> early enough.
+>>
+>> Maybe blocking requests at a lower level is not needed.
+>>
+>>
+>>>
+>>>>
