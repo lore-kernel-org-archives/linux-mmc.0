@@ -1,218 +1,325 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: [PATCH V3] mmc: core: Use delayed work in clock gating framework
-Date: Mon, 14 Nov 2011 13:53:29 +0530
-Message-ID: <1321259009-22626-1-git-send-email-sthumma@codeaurora.org>
+From: Per Forlin <per.lkml@gmail.com>
+Subject: Re: [PATCH] mmc: core: Kill block requests if card is removed
+Date: Mon, 14 Nov 2011 09:24:26 +0100
+Message-ID: <CAFEEs1kXy4GB-kWZ++v7tBPeDj=HJqj+Tcv+tnmvV_O86xbuBA@mail.gmail.com>
+References: <1320813119-24383-1-git-send-email-sthumma@codeaurora.org>
+	<4EBA4940.6030808@intel.com>
+	<CAFEEs1nPe3=TFwdf8rbPk6AtWzMdfaKR=-Rv0OVJhnANX=3fUQ@mail.gmail.com>
+	<4EBB4CEA.1050901@codeaurora.org>
+	<4EBB9AE1.2060909@intel.com>
+	<CAFEEs1nFkWv5x1RbJ923JJk9C3A3XX84k+=RT1+rd9S1rau99A@mail.gmail.com>
+	<4EC096CE.7000003@codeaurora.org>
+	<CAFEEs1mD9pSBrZrC5GPLVcEywS9uHbZtTd2inzU7uYSUMF+2Kg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAFEEs1mD9pSBrZrC5GPLVcEywS9uHbZtTd2inzU7uYSUMF+2Kg@mail.gmail.com>
 Sender: linux-arm-msm-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Sujit Reddy Thumma <sthumma@codeaurora.org>, linux-arm-msm@vger.kernel.org, cjb@laptop.org
+To: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, cjb@laptop.org
 List-Id: linux-mmc@vger.kernel.org
 
-Current clock gating framework disables the MCI clock as soon as the
-request is completed and enables it when a request arrives. This aggressive
-clock gating framework, when enabled, cause following issues:
+On Mon, Nov 14, 2011 at 8:52 AM, Per Forlin <per.lkml@gmail.com> wrote:
+> On Mon, Nov 14, 2011 at 5:19 AM, Sujit Reddy Thumma
+> <sthumma@codeaurora.org> wrote:
+>> On 11/10/2011 7:50 PM, Per Forlin wrote:
+>>>
+>>> On Thu, Nov 10, 2011 at 10:35 AM, Adrian Hunter<adrian.hunter@intel=
+=2Ecom>
+>>> =A0wrote:
+>>>>
+>>>> On 10/11/11 06:02, Sujit Reddy Thumma wrote:
+>>>>>
+>>>>> Hi,
+>>>>>>
+>>>>>> Hi Adrian,
+>>>>>>
+>>>>>> On Wed, Nov 9, 2011 at 10:34 AM, Adrian Hunter<adrian.hunter@int=
+el.com>
+>>>>>> wrote:
+>>>>>>>
+>>>>>>> On 09/11/11 06:31, Sujit Reddy Thumma wrote:
+>>>>>>>>
+>>>>>>>> Kill block requests when the host knows that the card is
+>>>>>>>> removed from the slot and is sure that subsequent requests
+>>>>>>>> are bound to fail. Do this silently so that the block
+>>>>>>>> layer doesn't output unnecessary error messages.
+>>>>>>>>
+>>>>>>>> This patch implements suggestion from Adrian Hunter,
+>>>>>>>> http://thread.gmane.org/gmane.linux.kernel.mmc/2714/focus=3D34=
+74
+>>>>>>>>
+>>>>>>>> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
+>>>>>>>> ---
+>>>>>>>
+>>>>>>>
+>>>>>>> It is safer to have zero initialisations so I suggest inverting
+>>>>>>> the meaning of the state bit i.e.
+>>>>>
+>>>>> Makes sense. Will take care in V2.
+>>>>>
+>>>>>>>
+>>>>>>> #define MMC_STATE_CARD_GONE =A0 =A0 (1<<7) =A0 =A0 =A0 =A0 =A0/=
+* card removed from
+>>>>>>> the
+>>>>>>> slot */
+>>>>>>>
+>>>>>>>
+>>>>>>> Also it would be nice is a request did not start if the card is
+>>>>>>> gone. =A0For the non-async case, that is easy:
+>>>>>>>
+>>>>>> As far as I understand Sujit's patch it will stop new requests f=
+rom
+>>>>>> being issued, blk_fetch_request(q) returns NULL.
+>>>>>
+>>>>> Yes, Per you are right. The ongoing requests will fail at the con=
+troller
+>>>>> driver layer and only the new requests coming to MMC queue layer =
+will be
+>>>>> blocked.
+>>>>>
+>>>>> Adrian's suggestion is to stop all the requests reaching host con=
+troller
+>>>>> layer by mmc core. This seems to be a good approach but the probl=
+em here
+>>>>> is
+>>>>> the host driver should inform mmc core that card is gone.
+>>>>>
+>>>>> Adrian, do you agree if we need to change all the host drivers to=
+ set
+>>>>> the
+>>>>> MMC_STATE_CARD_GONE flag as soon as the card detect irq handler d=
+etects
+>>>>> the
+>>>>> card as removed?
+>>>>
+>>>> Typically a card detect interrupt queues a rescan which in turn wi=
+ll have
+>>>> to wait to claim the host. =A0In the meantime, in the async case, =
+the block
+>>>> driver will not release the host until the queue is empty.
+>>>
+>>> Here is a patch that let async-mmc release host and reclaim it in c=
+ase of
+>>> error.
+>>> When the host is released mmc_rescan will claim the host and run.
+>>> --------------------------------
+>>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>>> index cf73877..8952e63 100644
+>>> --- a/drivers/mmc/card/block.c
+>>> +++ b/drivers/mmc/card/block.c
+>>> @@ -1209,6 +1209,28 @@ static int mmc_blk_cmd_err(struct mmc_blk_da=
+ta
+>>> *md, struct mmc_card *card,
+>>> =A0 =A0 =A0 =A0return ret;
+>>> =A0}
+>>>
+>>> +/*
+>>> + * This function should be called to resend a request after failur=
+e.
+>>> + * Prepares and starts the request.
+>>> + */
+>>> +static inline struct mmc_async_req *mmc_blk_resend(struct mmc_card=
+ *card,
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct mmc_queue *mq,
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct mmc_queue_req
+>>> *mqrq,
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int disable_multi,
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct mmc_async_req
+>>> *areq)
+>>> +{
+>>> + =A0 =A0 =A0 /*
+>>> + =A0 =A0 =A0 =A0* Release host after failure in case the host is n=
+eeded
+>>> + =A0 =A0 =A0 =A0* by someone else. For instance, if the card is re=
+moved the
+>>> + =A0 =A0 =A0 =A0* worker thread needs to claim the host in order t=
+o do
+>>> mmc_rescan.
+>>> + =A0 =A0 =A0 =A0*/
+>>> + =A0 =A0 =A0 mmc_release_host(card->host);
+>>> + =A0 =A0 =A0 mmc_claim_host(card->host);
+>>> +
+>>> + =A0 =A0 =A0 mmc_blk_rw_rq_prep(mqrq, card, disable_multi, mq);
+>>> + =A0 =A0 =A0 return mmc_start_req(card->host, areq, NULL);
+>>> +}
+>>> +
+>>> =A0static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct requ=
+est *rqc)
+>>> =A0{
+>>> =A0 =A0 =A0 =A0struct mmc_blk_data *md =3D mq->data;
+>>> @@ -1308,14 +1330,14 @@ static int mmc_blk_issue_rw_rq(struct
+>>> mmc_queue *mq, struct request *rqc)
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+>>>
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret) {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/*
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * In case of a inco=
+mplete request
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * prepare it again =
+and resend.
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_blk_rw_rq_prep(mq=
+_rq, card, disable_multi,
+>>> mq);
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_start_req(card->h=
+ost,&mq_rq->mmc_active,
+>>> NULL);
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_blk_prep_start(ca=
+rd, mq, mq_rq, disable_multi,
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 &mq_rq->mmc_active);
+>>> +
+>>
+>> :%s/mmc_blk_prep_start/mmc_blk_resend
+>>
+> I'll update.
+>
+>>> =A0 =A0 =A0 =A0} while (ret);
+>>>
+>>> =A0 =A0 =A0 =A0return 1;
+>>> @@ -1327,10 +1349,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_qu=
+eue
+>>> *mq, struct request *rqc)
+>>> =A0 =A0 =A0 =A0spin_unlock_irq(&md->lock);
+>>>
+>>> =A0 start_new_req:
+>>> - =A0 =A0 =A0 if (rqc) {
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_blk_rw_rq_prep(mq->mqrq_cur, card=
+, 0, mq);
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_start_req(card->host,&mq->mqrq_cu=
+r->mmc_active, NULL);
+>>> - =A0 =A0 =A0 }
+>>> + =A0 =A0 =A0 if (rqc)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_blk_prep_start(card, mq, mq->mqrq=
+_cur, 0,
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 &mq->=
+mqrq_cur->mmc_active);
+>>>
+>>> =A0 =A0 =A0 =A0return 0;
+>>> =A0}
+>>
+>> Thanks Per. This looks good. Can we split this into a different patc=
+h?
+>>
+> Yes I agree. My intention was to treat this as a separate patch.
+> I'll post it.
+>
+>>> -------------------------------------
+>>>
+>>>
+>>>> =A0The block
+>>>> driver will see errors and will use a send status command which wi=
+ll fail
+>>>> so the request will be aborted, but the next request will be start=
+ed
+>>>> anyway.
+>>>>
+>>>> There are two problems:
+>>>>
+>>>> 1. When do we reliably know that the card has really gone?
+>>>>
+>>>> At present, the detect method for SD and MMC is just the send stat=
+us
+>>>> command, which is what the block driver is doing i.e. if the block
+>>>> driver sees send status fail, after an errored request, and the
+>>>> card is removable, then it is very likely the card has gone.
+>>>>
+>>>> At present, it is not considered that the host controller driver
+>>>> knows whether the card is really gone - just that it might be.
+>>>>
+>>>> Setting a MMC_STATE_CARD_GONE flag early may be a little complicat=
+ed.
+>>>> e.g. mmc_detect_change() flags that the card may be gone. =A0After=
+ an
+>>>> error, if the "card may be gone" flag is set a new bus method coul=
+d
+>>>> be called that just does send status. =A0If that fails, then the
+>>>> MMC_STATE_CARD_GONE flag is set. =A0Any calls to the detect method
+>>>> must first check the MMC_STATE_CARD_GONE flag so that, once gone,
+>>>> a card can not come back.
+>>>>
+>>>> Maybe you can think of something simpler.
+>>
+>> Can we do something like this:
+>>
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -648,8 +648,15 @@ static int mmc_blk_cmd_recovery(struct mmc_card=
+ *card,
+>> struct request *req,
+>> =A0 =A0 =A0 =A0}
+>>
+>> =A0 =A0 =A0 =A0/* We couldn't get a response from the card. =A0Give =
+up. */
+>> - =A0 =A0 =A0 if (err)
+>> + =A0 =A0 =A0 if (err) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* If the card didn't respond to sta=
+tus command,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* it is likely that card is gone. F=
+lag it as removed,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* mmc_detect_change() cleans the re=
+st.
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_set_card_gone(card);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return ERR_ABORT;
+>> + =A0 =A0 =A0 }
+>>
+>> =A0 =A0 =A0 =A0/* Flag ECC errors */
+>> =A0 =A0 =A0 =A0if ((status & R1_CARD_ECC_FAILED) ||
+>>
+>> and some additions to Per's patch, changes denoted in (++):
+>>
+>> +/*
+>> + * This function should be called to resend a request after failure=
+=2E
+>> + * Prepares and starts the request.
+>> + */
+>> +static inline struct mmc_async_req *mmc_blk_resend(struct mmc_card =
+*card,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct mmc_queue *mq,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct mmc_queue_req
+>> *mqrq,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int disable_multi,
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct mmc_async_req
+>> *areq)
+>> +{
+>> + =A0 =A0 =A0 /*
+>> + =A0 =A0 =A0 =A0* Release host after failure in case the host is ne=
+eded
+>> + =A0 =A0 =A0 =A0* by someone else. For instance, if the card is rem=
+oved the
+>> + =A0 =A0 =A0 =A0* worker thread needs to claim the host in order to=
+ do mmc_rescan.
+>> + =A0 =A0 =A0 =A0*/
+>> + =A0 =A0 =A0 mmc_release_host(card->host);
+>> + =A0 =A0 =A0 mmc_claim_host(card->host);
+>> ++ =A0 =A0 =A0if (mmc_card_gone(card)) {
+>> ++ =A0 =A0 =A0/*
+>> ++ =A0 =A0 =A0 * End the pending async request without starting it w=
+hen card
+>> ++ =A0 =A0 =A0 * is removed.
+>> ++ =A0 =A0 =A0 */
+>> ++ =A0 =A0 =A0 =A0 =A0 =A0 =A0req->cmd_flags |=3D REQ_QUIET;
+>> ++ =A0 =A0 =A0 =A0 =A0 =A0 =A0__blk_end_request(req, -EIO, blk_rq_cu=
+r_bytes(req));
+> I'll add this to the patch and send it out.
+I'll wait adding this since mmc_card_gone() is not available yet.
+Maybe we should send these two patches (aync error release and kill
+block request) in the same patch-set?
 
-When there are back-to-back requests from the Queue layer, we unnecessarily
-end up disabling and enabling the clocks between these requests since 8MCLK
-clock cycles is a very short duration compared to the time delay between
-back to back requests reaching the MMC layer. This overhead can effect the
-overall performance depending on how long the clock enable and disable
-calls take which is platform dependent. For example on some platforms we
-can have clock control not on the local processor, but on a different
-subsystem and the time taken to perform the clock enable/disable can add
-significant overhead.
-
-Also if the host controller driver decides to disable the host clock too
-when mmc_set_ios function is called with ios.clock=0, it adds additional
-delay and it is highly possible that the next request had already arrived
-and unnecessarily blocked in enabling the clocks. This is seen frequently
-when the processor is executing at high speeds and in multi-core platforms
-thus reduces the overall throughput compared to if clock gating is
-disabled.
-
-Fix this by delaying turning off the clocks by posting request on
-delayed workqueue. Also cancel the unscheduled pending work, if any,
-when there is access to card.
-
-sysfs entry is provided to tune the delay as needed, default
-value set to 200ms.
-
-Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
-
----
-Changes in v3:
-	- Documentation for sysfs entry is added.
-
-Changes in v2:
-	- support for tuning delay via sysfs entry.
----
- Documentation/mmc/mmc-dev-attrs.txt |   10 ++++++
- drivers/mmc/core/host.c             |   57 ++++++++++++++++++++++++++++++++--
- include/linux/mmc/host.h            |    4 ++-
- 3 files changed, 66 insertions(+), 5 deletions(-)
-
-diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
-index 8898a95..b024556 100644
---- a/Documentation/mmc/mmc-dev-attrs.txt
-+++ b/Documentation/mmc/mmc-dev-attrs.txt
-@@ -64,3 +64,13 @@ Note on Erase Size and Preferred Erase Size:
- 	size specified by the card.
- 
- 	"preferred_erase_size" is in bytes.
-+
-+SD/MMC/SDIO Clock Gating Attribute
-+==================================
-+
-+Read and write access is provided to following attribute.
-+This attribute appears only if CONFIG_MMC_CLKGATE is enabled.
-+
-+	clkgate_delay	Tune the clock gating delay with desired value in milli seconds.
-+
-+echo <desired delay> > /sys/class/mmc_host/mmcX/clkgate_delay
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index ca2e4f5..ba4cc5d 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -53,6 +53,31 @@ static DEFINE_IDR(mmc_host_idr);
- static DEFINE_SPINLOCK(mmc_host_lock);
- 
- #ifdef CONFIG_MMC_CLKGATE
-+static ssize_t clkgate_delay_show(struct device *dev,
-+		struct device_attribute *attr, char *buf)
-+{
-+	struct mmc_host *host = cls_dev_to_mmc_host(dev);
-+	return snprintf(buf, PAGE_SIZE, "%lu millisecs\n",
-+			host->clkgate_delay);
-+}
-+
-+static ssize_t clkgate_delay_store(struct device *dev,
-+		struct device_attribute *attr, const char *buf, size_t count)
-+{
-+	struct mmc_host *host = cls_dev_to_mmc_host(dev);
-+	unsigned long flags, value;
-+
-+	if (kstrtoul(buf, 0, &value))
-+		return -EINVAL;
-+
-+	spin_lock_irqsave(&host->clk_lock, flags);
-+	host->clkgate_delay = value;
-+	spin_unlock_irqrestore(&host->clk_lock, flags);
-+
-+	pr_info("%s: clock gate delay set to %lu ms\n",
-+			mmc_hostname(host), value);
-+	return count;
-+}
- 
- /*
-  * Enabling clock gating will make the core call out to the host
-@@ -113,7 +138,7 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
- static void mmc_host_clk_gate_work(struct work_struct *work)
- {
- 	struct mmc_host *host = container_of(work, struct mmc_host,
--					      clk_gate_work);
-+					      clk_gate_work.work);
- 
- 	mmc_host_clk_gate_delayed(host);
- }
-@@ -130,6 +155,8 @@ void mmc_host_clk_hold(struct mmc_host *host)
- {
- 	unsigned long flags;
- 
-+	/* cancel any clock gating work scheduled by mmc_host_clk_release() */
-+	cancel_delayed_work_sync(&host->clk_gate_work);
- 	mutex_lock(&host->clk_gate_mutex);
- 	spin_lock_irqsave(&host->clk_lock, flags);
- 	if (host->clk_gated) {
-@@ -179,7 +206,8 @@ void mmc_host_clk_release(struct mmc_host *host)
- 	host->clk_requests--;
- 	if (mmc_host_may_gate_card(host->card) &&
- 	    !host->clk_requests)
--		queue_work(system_nrt_wq, &host->clk_gate_work);
-+		queue_delayed_work(system_nrt_wq, &host->clk_gate_work,
-+				msecs_to_jiffies(host->clkgate_delay));
- 	spin_unlock_irqrestore(&host->clk_lock, flags);
- }
- 
-@@ -212,8 +240,13 @@ static inline void mmc_host_clk_init(struct mmc_host *host)
- 	host->clk_requests = 0;
- 	/* Hold MCI clock for 8 cycles by default */
- 	host->clk_delay = 8;
-+	/*
-+	 * Default clock gating delay is 200ms.
-+	 * This value can be tuned by writing into sysfs entry.
-+	 */
-+	host->clkgate_delay = 200;
- 	host->clk_gated = false;
--	INIT_WORK(&host->clk_gate_work, mmc_host_clk_gate_work);
-+	INIT_DELAYED_WORK(&host->clk_gate_work, mmc_host_clk_gate_work);
- 	spin_lock_init(&host->clk_lock);
- 	mutex_init(&host->clk_gate_mutex);
- }
-@@ -228,7 +261,7 @@ static inline void mmc_host_clk_exit(struct mmc_host *host)
- 	 * Wait for any outstanding gate and then make sure we're
- 	 * ungated before exiting.
- 	 */
--	if (cancel_work_sync(&host->clk_gate_work))
-+	if (cancel_delayed_work_sync(&host->clk_gate_work))
- 		mmc_host_clk_gate_delayed(host);
- 	if (host->clk_gated)
- 		mmc_host_clk_hold(host);
-@@ -236,6 +269,17 @@ static inline void mmc_host_clk_exit(struct mmc_host *host)
- 	WARN_ON(host->clk_requests > 1);
- }
- 
-+static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
-+{
-+	host->clkgate_delay_attr.show = clkgate_delay_show;
-+	host->clkgate_delay_attr.store = clkgate_delay_store;
-+	sysfs_attr_init(&host->clkgate_delay_attr.attr);
-+	host->clkgate_delay_attr.attr.name = "clkgate_delay";
-+	host->clkgate_delay_attr.attr.mode = S_IRUGO | S_IWUSR;
-+	if (device_create_file(&host->class_dev, &host->clkgate_delay_attr))
-+		pr_err("%s: Failed to create clkgate_delay sysfs entry\n",
-+				mmc_hostname(host));
-+}
- #else
- 
- static inline void mmc_host_clk_init(struct mmc_host *host)
-@@ -246,6 +290,10 @@ static inline void mmc_host_clk_exit(struct mmc_host *host)
- {
- }
- 
-+static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
-+{
-+}
-+
- #endif
- 
- /**
-@@ -345,6 +393,7 @@ int mmc_add_host(struct mmc_host *host)
- #ifdef CONFIG_DEBUG_FS
- 	mmc_add_host_debugfs(host);
- #endif
-+	mmc_host_clk_sysfs_init(host);
- 
- 	mmc_start_host(host);
- 	register_pm_notifier(&host->pm_notify);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index a3ac9c4..7206c80 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -253,10 +253,12 @@ struct mmc_host {
- 	int			clk_requests;	/* internal reference counter */
- 	unsigned int		clk_delay;	/* number of MCI clk hold cycles */
- 	bool			clk_gated;	/* clock gated */
--	struct work_struct	clk_gate_work; /* delayed clock gate */
-+	struct delayed_work	clk_gate_work; /* delayed clock gate */
- 	unsigned int		clk_old;	/* old clock value cache */
- 	spinlock_t		clk_lock;	/* lock for clk fields */
- 	struct mutex		clk_gate_mutex;	/* mutex for clock gating */
-+	struct device_attribute clkgate_delay_attr;
-+	unsigned long           clkgate_delay;
- #endif
- 
- 	/* host specific block data */
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+Thanks,
+Per
