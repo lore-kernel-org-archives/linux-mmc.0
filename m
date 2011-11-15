@@ -1,33 +1,34 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V3] mmc: core: Use delayed work in clock gating framework
-Date: Tue, 15 Nov 2011 08:12:02 -0500
-Message-ID: <877h31jzrx.fsf@laptop.org>
-References: <1321259009-22626-1-git-send-email-sthumma@codeaurora.org>
-	<87ehxaluam.fsf@laptop.org> <4EC1F4CE.90706@codeaurora.org>
+Subject: Re: [PATCH] mmc: core: Fix power_off_notify during suspend
+Date: Tue, 15 Nov 2011 08:17:29 -0500
+Message-ID: <8739dpjziu.fsf@laptop.org>
+References: <1321338346-10911-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33496 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:36025 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752605Ab1KONL7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 15 Nov 2011 08:11:59 -0500
-In-Reply-To: <4EC1F4CE.90706@codeaurora.org> (Sujit Reddy Thumma's message of
-	"Tue, 15 Nov 2011 10:42:46 +0530")
+	id S1754831Ab1KONRZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 15 Nov 2011 08:17:25 -0500
+In-Reply-To: <1321338346-10911-1-git-send-email-girish.shivananjappa@linaro.org>
+	(Girish K. S.'s message of "Tue, 15 Nov 2011 11:55:46 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: linux-mmc@vger.kernel.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org
 
 Hi,
 
-On Tue, Nov 15 2011, Sujit Reddy Thumma wrote:
-> I see that the patch is already applied on mmc-next, hence the conflicts.
+On Tue, Nov 15 2011, Girish K S wrote:
+> The eMMC 4.5 devices respond to only RESET and AWAKE command in the sleep
+> state. Hence the mmc switch command to notify power off state should be sent
+> before the device enters sleep state.
 >
-> http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commit;h=0987075c3c285ba92f93464f7a882515d4a054d1
+> This patch fixes the same.
 >
-> Can we rebase the tree and apply V3?
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
 
-Done.  Thanks!
+Thanks, pushed to mmc-next for 3.2.
 
 - Chris.
 -- 
