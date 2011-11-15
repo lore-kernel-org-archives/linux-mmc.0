@@ -1,93 +1,47 @@
-From: Viresh Kumar <viresh.kumar@st.com>
-Subject: [PATCH V2] mmc/sdhci-spear: Implement suspend/resume
-Date: Tue, 15 Nov 2011 16:24:40 +0530
-Message-ID: <f255cb1f0ea01794526004ef9e0dd516014a5744.1321354417.git.viresh.kumar@st.com>
+From: merez@codeaurora.org
+Subject: RE: [PATCH 2/2] mmc: core: Support packed command for eMMC4.5
+     device
+Date: Tue, 15 Nov 2011 04:48:02 -0800 (PST)
+Message-ID: <faba552e7bd19ee5399c73c2b478a34d.squirrel@www.codeaurora.org>
+References: <620ec9ffa6bdbba9ae5f76998e36f8dc.squirrel@www.codeaurora.org>
+    <001001cca043$395dbfc0$ac193f40$%jun@samsung.com>
+    <CANfBPZ-Zn+R4GosEL-RJxh8gduAr8e+qN876uPwDkHfiEpdERw@mail.gmail.com>
+    <ea21d88d904af165cb911354e3f51ea6.squirrel@www.codeaurora.org>
+    <001e01cca2b2$3b449310$b1cdb930$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog103.obsmtp.com ([207.126.144.115]:51431 "EHLO
-	eu1sys200aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754947Ab1KOKyu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2011 05:54:50 -0500
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:15423 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751526Ab1KOMsD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2011 07:48:03 -0500
+In-Reply-To: <001e01cca2b2$3b449310$b1cdb930$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, viresh.kumar@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: merez@codeaurora.org, "'S, Venkatraman'" <svenkatr@ti.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 
-Suspend/Resume is missing from sdhci-spear driver. This patch adds support for
-suspend/resume for this driver.
-
-Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
----
-
-Changes in V2:
-- support for clk enable/disable is added in suspend/resume
-
- drivers/mmc/host/sdhci-spear.c |   40 ++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 40 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 63cc8b6..dee70b6 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -21,6 +21,7 @@
- #include <linux/interrupt.h>
- #include <linux/irq.h>
- #include <linux/platform_device.h>
-+#include <linux/pm.h>
- #include <linux/slab.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdhci-spear.h>
-@@ -271,10 +272,49 @@ static int __devexit sdhci_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+#ifdef CONFIG_PM
-+static int sdhci_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct spear_sdhci *sdhci = dev_get_platdata(dev);
-+	pm_message_t state = {.event = 0};
-+	int ret;
-+
-+	ret = sdhci_suspend_host(host, state);
-+	if (!ret)
-+		clk_disable(sdhci->clk);
-+
-+	return ret;
-+}
-+
-+static int sdhci_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct spear_sdhci *sdhci = dev_get_platdata(dev);
-+	int ret;
-+
-+	ret = clk_enable(sdhci->clk);
-+	if (ret) {
-+		dev_dbg(dev, "Resume: Error enabling clock\n");
-+		return ret;
-+	}
-+
-+	return sdhci_resume_host(host);
-+}
-+
-+const struct dev_pm_ops sdhci_pm_ops = {
-+	.suspend	= sdhci_suspend,
-+	.resume		= sdhci_resume,
-+};
-+#endif
-+
- static struct platform_driver sdhci_driver = {
- 	.driver = {
- 		.name	= "sdhci",
- 		.owner	= THIS_MODULE,
-+#ifdef CONFIG_PM
-+		.pm	= &sdhci_pm_ops,
-+#endif
- 	},
- 	.probe		= sdhci_probe,
- 	.remove		= __devexit_p(sdhci_remove),
--- 
-1.7.2.2
+>> >>> >> >> > + =A0 =A0 =A0 if (rqc)
+>> >>> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 reqs =3D mmc_blk_chk_packa=
+ble(mq, rqc);
+>> >>>
+>> >>> It would be best to keep all the calls to blk_fetch_request in t=
+he
+>> same
+>> >>> location. Therefore, I suggest to move the call to
+>> mmc_blk_chk_packable
+>> >>> to
+>> >>> mmc/card/queue.c after the first request is fetched.
+>> >>
+>> >> At the first time, I considered that way.
+>> >> I'll do more, if possible.
+> I considered more.
+> I think that mmc_blk_chk_packable would rather be called only for r/w=
+ type
+> than all request type(e.g. discard, flush).
+>
+mmc_blk_chk_packable can check the cmd_flags of the request to verify i=
+t's
+not a flush/disacrad etc. In such cases will not pack.
 
