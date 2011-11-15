@@ -1,143 +1,75 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: Re: [Query] mmc/sdhci: Suspend hangs if card is inserted at suspend.
-Date: Tue, 15 Nov 2011 13:41:45 +0530
-Message-ID: <4EC21EC1.2090607@codeaurora.org>
-References: <4EBCC49E.5060008@st.com> <877h36hvki.fsf@laptop.org> <4EC1FCC1.6070609@st.com> <5D8008F58939784290FAB48F549751984E6510F91D@shsmsx502.ccr.corp.intel.com>
+From: Viresh Kumar <viresh.kumar@st.com>
+Subject: [PATCH] mmc/sdhci-spear: Implement suspend/resume
+Date: Tue, 15 Nov 2011 14:06:02 +0530
+Message-ID: <d91523b382aa22a6d274be8c88227e0bfdefc944.1321346114.git.viresh.kumar@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:15684 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752851Ab1KOIL4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2011 03:11:56 -0500
-In-Reply-To: <5D8008F58939784290FAB48F549751984E6510F91D@shsmsx502.ccr.corp.intel.com>
+Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:58947 "EHLO
+	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753578Ab1KOIgR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2011 03:36:17 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, ulf.hansson@stericsson.com
-Cc: Viresh Kumar <viresh.kumar@st.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shiraz HASHIM <shiraz.hashim@st.com>, Armando VISCONTI <armando.visconti@st.com>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, viresh.kumar@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
 
-Hi Ulf,
+Suspend/Resume is missing from sdhci-spear driver. This patch adds support for
+suspend/resume for this driver.
 
-I see similar issue with your patch in 3.2 "mmc: core: Prevent too long 
-response times for suspend".
+Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
+---
+ drivers/mmc/host/sdhci-spear.c |   26 ++++++++++++++++++++++++++
+ 1 files changed, 26 insertions(+), 0 deletions(-)
 
-                 if (mmc_try_claim_host(host)) {
-<snip>
-/* if CONFIG_MMC_UNSAFE_RESUME is not set, remove() callback would get 
-blocked until mmcqd gets mmc_claim_host() causing deadlock here */
-                                 if (host->bus_ops->remove)
-                                         host->bus_ops->remove(host);
-<snip>
-                 } else {
-                         err = -EBUSY;
-                 }
-         }
-
-Proabably, we can do something like this:
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 5278ffb..0177d4a 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2309,6 +2309,7 @@ int mmc_suspend_host(struct mmc_host *host)
-                                  * We simply "remove" the card in this 
-case.
-                                  * It will be redetected on resume.
-                                  */
-+                               mmc_do_release_host(host);
-                                 if (host->bus_ops->remove)
-                                         host->bus_ops->remove(host);
-                                 mmc_claim_host(host);
-@@ -2317,8 +2318,9 @@ int mmc_suspend_host(struct mmc_host *host)
-                                 mmc_release_host(host);
-                                 host->pm_flags = 0;
-                                 err = 0;
-+                       } else {
-+                               mmc_do_release_host(host);
-                         }
--                       mmc_do_release_host(host);
-                 } else {
-                         err = -EBUSY;
-                 }
-
-Please let me know if you agree. I can post a patch for this.
-
-
-Thanks
-Sujit
-
-On 11/15/2011 12:27 PM, Dong, Chuanxiao wrote:
-> Hi Viresh,
-> I also meet the hang issue when suspending a system with a mounted SD card. Actually it caused by a dead lock of mmc_claim_host. Maybe we faced the same issue.
-> So may be the two mails in the attachment can help you.
->
-> Thanks
-> Chuanxiao
->
->> -----Original Message-----
->> From: linux-mmc-owner@vger.kernel.org
->> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Viresh Kumar
->> Sent: Tuesday, November 15, 2011 1:47 PM
->> To: Chris Ball
->> Cc: linux-mmc@vger.kernel.org; Shiraz HASHIM; Armando VISCONTI
->> Subject: Re: [Query] mmc/sdhci: Suspend hangs if card is inserted at suspend.
->>
->> On 11/12/2011 8:54 AM, Chris Ball wrote:
->>> On Fri, Nov 11 2011, Viresh Kumar wrote:
->>>>> Controller specific suspend/resume are still not called, so i think it might
->>>>> be related to core code. I am using 2.6.37 kernel version.
->>>>>
->>>>> Any help on this?
->>> Please try to reproduce on 3.1 and let us know if it's present there.
->>
->> Hi Chris,
->>
->> Support for SPEAr13xx is not present on 3.1 and it will take some time to
->> move support there. I have a bit more info which might able you to guide us:
->>
->> file: drivers/mmc/card/queue.c
->>
->> static int mmc_queue_thread(void *d)
->> {
->> 	...
->> 	do {
->> 		req = blk_fetch_request(q);
->> 		...
->> 		if (!req) {
->> 			if (kthread_should_stop()) {
->> 				set_current_state(TASK_RUNNING);
->> 				break;
->> 			}
->> 			up(&mq->thread_sem);
->> 			schedule();
->> 			down(&mq->thread_sem);
->> 			continue;
->> 		}
->> 		set_current_state(TASK_RUNNING);
->> 		mq->issue_fn(mq, req);
->> 	} while (1);
->> 	...
->> }
->>
->> - In normal cases, i.e. when we are able to stop this thread,
->>    req is returned as NULL from blk_fetch_request()
->> - Suspend hang only occurs when the card is mounted.
->> - When suspend hangs, req is not returned as NULL and the card is
->>    already removed by kernel and so we never check kthread_should_stop().
->>    So it hangs.
->>
->> --
->> viresh
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
+diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+index 63cc8b6..663e02f 100644
+--- a/drivers/mmc/host/sdhci-spear.c
++++ b/drivers/mmc/host/sdhci-spear.c
+@@ -21,6 +21,7 @@
+ #include <linux/interrupt.h>
+ #include <linux/irq.h>
+ #include <linux/platform_device.h>
++#include <linux/pm.h>
+ #include <linux/slab.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/sdhci-spear.h>
+@@ -271,10 +272,35 @@ static int __devexit sdhci_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_PM
++static int sdhci_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	pm_message_t state = {.event = 0};
++
++	return sdhci_suspend_host(host, state);
++}
++
++static int sdhci_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++
++	return sdhci_resume_host(host);
++}
++
++const struct dev_pm_ops sdhci_pm_ops = {
++	.suspend	= sdhci_suspend,
++	.resume		= sdhci_resume,
++};
++#endif
++
+ static struct platform_driver sdhci_driver = {
+ 	.driver = {
+ 		.name	= "sdhci",
+ 		.owner	= THIS_MODULE,
++#ifdef CONFIG_PM
++		.pm	= &sdhci_pm_ops,
++#endif
+ 	},
+ 	.probe		= sdhci_probe,
+ 	.remove		= __devexit_p(sdhci_remove),
 -- 
-Thanks & Regards,
-Sujit Reddy Thumma
+1.7.2.2
 
-Sent by an employee of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
