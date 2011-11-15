@@ -1,75 +1,83 @@
-From: Viresh Kumar <viresh.kumar@st.com>
-Subject: [PATCH] mmc/sdhci-spear: Implement suspend/resume
-Date: Tue, 15 Nov 2011 14:06:02 +0530
-Message-ID: <d91523b382aa22a6d274be8c88227e0bfdefc944.1321346114.git.viresh.kumar@st.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCHv2 1/2] arm: samsung: support the second capability for
+ samsung-soc
+Date: Tue, 15 Nov 2011 18:53:32 +0900
+Message-ID: <005b01cca37c$6f9f3a00$4eddae00$%kim@samsung.com>
+References: <4EB1FE0E.5070902@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:58947 "EHLO
-	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753578Ab1KOIgR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2011 03:36:17 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <4EB1FE0E.5070902@samsung.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-samsung-soc@vger.kernel.org
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, viresh.kumar@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
 
-Suspend/Resume is missing from sdhci-spear driver. This patch adds support for
-suspend/resume for this driver.
+Jaehoon Chung wrote:
+> 
+> In mmc, there are capabilities and use the host_caps.
+> That capability is expressed with bit[0:31].
+> But now..already filled the bit[0:31]...
+> so we need to denote with the other capability field.
+> (if we want to use the cache, powerclass, etc for eMMC..this field is
+necessary)
+> 
+Hi,
 
-Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
----
- drivers/mmc/host/sdhci-spear.c |   26 ++++++++++++++++++++++++++
- 1 files changed, 26 insertions(+), 0 deletions(-)
+This description is better than previous.
+However, I wonder this is _really_ used for eMMC at sdhci-s3c.c driver.
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 63cc8b6..663e02f 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -21,6 +21,7 @@
- #include <linux/interrupt.h>
- #include <linux/irq.h>
- #include <linux/platform_device.h>
-+#include <linux/pm.h>
- #include <linux/slab.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdhci-spear.h>
-@@ -271,10 +272,35 @@ static int __devexit sdhci_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+#ifdef CONFIG_PM
-+static int sdhci_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	pm_message_t state = {.event = 0};
-+
-+	return sdhci_suspend_host(host, state);
-+}
-+
-+static int sdhci_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+
-+	return sdhci_resume_host(host);
-+}
-+
-+const struct dev_pm_ops sdhci_pm_ops = {
-+	.suspend	= sdhci_suspend,
-+	.resume		= sdhci_resume,
-+};
-+#endif
-+
- static struct platform_driver sdhci_driver = {
- 	.driver = {
- 		.name	= "sdhci",
- 		.owner	= THIS_MODULE,
-+#ifdef CONFIG_PM
-+		.pm	= &sdhci_pm_ops,
-+#endif
- 	},
- 	.probe		= sdhci_probe,
- 	.remove		= __devexit_p(sdhci_remove),
--- 
-1.7.2.2
+Thanks.
 
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
+
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <Kyungmin.park@samsung.com>
+> ---
+> Changelog v2:
+>    - based-on samsung-soc's for-next tree.
+> 
+>  arch/arm/plat-samsung/include/plat/sdhci.h |    2 ++
+>  arch/arm/plat-samsung/platformdata.c       |    2 ++
+>  2 files changed, 4 insertions(+), 0 deletions(-)
+> 
+> diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/plat-
+> samsung/include/plat/sdhci.h
+> index dcff7dd..bf33ea1 100644
+> --- a/arch/arm/plat-samsung/include/plat/sdhci.h
+> +++ b/arch/arm/plat-samsung/include/plat/sdhci.h
+> @@ -40,6 +40,7 @@ enum clk_types {
+>   * struct s3c_sdhci_platdata() - Platform device data for Samsung SDHCI
+>   * @max_width: The maximum number of data bits supported.
+>   * @host_caps: Standard MMC host capabilities bit field.
+> + * @host_caps2: The Second Standard MMC host capabilities bit field.
+>   * @cd_type: Type of Card Detection method (see cd_types enum above)
+>   * @clk_type: Type of clock divider method (see clk_types enum above)
+>   * @ext_cd_init: Initialize external card detect subsystem. Called on
+> @@ -63,6 +64,7 @@ enum clk_types {
+>  struct s3c_sdhci_platdata {
+>  	unsigned int	max_width;
+>  	unsigned int	host_caps;
+> +	unsigned int	host_caps2;
+>  	enum cd_types	cd_type;
+>  	enum clk_types	clk_type;
+> 
+> diff --git a/arch/arm/plat-samsung/platformdata.c b/arch/arm/plat-
+> samsung/platformdata.c
+> index 4c9a207..5ffcf46 100644
+> --- a/arch/arm/plat-samsung/platformdata.c
+> +++ b/arch/arm/plat-samsung/platformdata.c
+> @@ -54,4 +54,6 @@ void s3c_sdhci_set_platdata(struct s3c_sdhci_platdata
+*pd,
+>  		set->host_caps |= pd->host_caps;
+>  	if (pd->clk_type)
+>  		set->clk_type = pd->clk_type;
+> +	if (pd->host_caps2)
+> +		set->host_caps2 |= pd->host_caps2;
+>  }
