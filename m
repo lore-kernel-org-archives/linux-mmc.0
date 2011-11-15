@@ -1,43 +1,55 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 2/4] mmc: omap: adapt the hsmmc driver to device tree
-Date: Mon, 14 Nov 2011 13:30:27 -0800
-Message-ID: <20111114213026.GP31337@atomide.com>
-References: <1320407441-29697-1-git-send-email-rnayak@ti.com>
- <1320407441-29697-3-git-send-email-rnayak@ti.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: sdio: support SDIO UHS cards
+Date: Mon, 14 Nov 2011 20:33:11 -0500
+Message-ID: <87mxbyjhk8.fsf@laptop.org>
+References: <5E6C4F13-16DC-4C62-A30E-B8FF235A93AE@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:21707 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754718Ab1KNVac (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2011 16:30:32 -0500
-Content-Disposition: inline
-In-Reply-To: <1320407441-29697-3-git-send-email-rnayak@ti.com>
+Received: from void.printf.net ([89.145.121.20]:51606 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752726Ab1KOBdO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Nov 2011 20:33:14 -0500
+In-Reply-To: <5E6C4F13-16DC-4C62-A30E-B8FF235A93AE@marvell.com> (Philip
+	Rakity's message of "Mon, 14 Nov 2011 11:23:37 -0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rajendra Nayak <rnayak@ti.com>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, thomas.abraham@linaro.org, balajitk@ti.com, cjb@laptop.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Bing Zhao <bzhao@marvell.com>, Aaron Lu <Aaron.Lu@amd.com>, Arindam Nath <arindam.nath@amd.com>
 
-* Rajendra Nayak <rnayak@ti.com> [111104 04:16]:
-> @@ -1869,6 +1957,14 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
->  	struct omap_hsmmc_host *host = NULL;
->  	struct resource *res;
->  	int ret, irq;
-> +	const struct of_device_id *match;
-> +
-> +	match = of_match_device(omap_mmc_of_match, &pdev->dev);
-> +	if (match) {
-> +		pdata = of_get_hsmmc_pdata(&pdev->dev);
-> +		if (match->data)
-> +			pdata->reg_offset = *(u16 *)match->data;
-> +	}
+Hi Philip,
 
-So this is now using both DT and pdata?
+On Mon, Nov 14 2011, Philip Rakity wrote:
+> This patch adds support for sdio UHS cards per the version 3.0
+> spec.
+>
+> UHS mode is only enabled for version 3.0 cards when both the
+> host and the controller support UHS modes.
+>
+> 1.8v signaling support is removed if both the card and the
+> host do not support UHS.  This is done to maintain
+> compatibility and some system/card combinations break when
+> 1.8v signaling is enabled when the host does not support UHS.
+>
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> Signed-off-by: Aaron Lu <Aaron.lu@amd.com>
+> Reviewed-by: Arindam Nath <arindam.nath@amd.com>
+> Tested-by: Bing Zhao <bzhao@marvell.com>
 
-We want to use DT only, and get rid of pdata. Other than the
-deferred probe, is there some other dependency remaining to
-having to use the pdata also?
+Against mmc-next, please:
 
-Regards,
+error: patch failed: drivers/mmc/core/bus.c:303
+error: drivers/mmc/core/bus.c: patch does not apply
+error: patch failed: drivers/mmc/core/sd.c:959
+error: drivers/mmc/core/sd.c: patch does not apply
+error: patch failed: drivers/mmc/core/sdio.c:102
+error: drivers/mmc/core/sdio.c: patch does not apply
+error: patch failed: include/linux/mmc/card.h:363
+error: include/linux/mmc/card.h: patch does not apply
+error: patch failed: include/linux/mmc/sdio.h:85
+error: include/linux/mmc/sdio.h: patch does not apply
 
-Tony
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
