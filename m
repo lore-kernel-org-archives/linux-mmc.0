@@ -1,45 +1,67 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: Plans to add SD4.0 (UHS-II) support
-Date: Wed, 16 Nov 2011 19:02:53 +0530
-Message-ID: <000901cca464$40428d50$c0c7a7f0$@org>
-References: <723849F6A4B5A3408299DF1FFE37CA776C2D057AD4@BGMAIL02.nvidia.com>
+From: Mike Frysinger <vapier@gentoo.org>
+Subject: Re: [PATCH 3/4] mmc: Logging neatening
+Date: Wed, 16 Nov 2011 13:38:46 -0500
+Message-ID: <201111161338.53049.vapier@gentoo.org>
+References: <cover.1321398814.git.joe@perches.com> <d2c1a76fea1844ae7ac3e7e17183fb39df19178e.1321398814.git.joe@perches.com> <CAKYAXd8_mDF68PnEnpuZZQ+O8-QmrfRpP4jv+SpHDx1juTxFGQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
+Content-Type: multipart/signed;
+  boundary="nextPart2319489.Vp8sye1eQN";
+  protocol="application/pgp-signature";
+  micalg=pgp-sha1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:49776 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756655Ab1KPNdH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2011 08:33:07 -0500
-In-Reply-To: <723849F6A4B5A3408299DF1FFE37CA776C2D057AD4@BGMAIL02.nvidia.com>
-Content-Language: en-us
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAKYAXd8_mDF68PnEnpuZZQ+O8-QmrfRpP4jv+SpHDx1juTxFGQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: uclinux-dist-devel@blackfin.uclinux.org
+Cc: NamJae Jeon <linkinjeon@gmail.com>, Joe Perches <joe@perches.com>, Cliff Cai <cliff.cai@analog.com>, linux-omap@vger.kernel.org, Alex Dubov <oakad@yahoo.com>, Nicolas Pitre <nico@fluxnic.net>, linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, Harald Welte <HaraldWelte@viatech.com>, Bruce Chang <brucechang@via.com.tw>, Sascha Sommer <saschasommer@freenet.de>, linux-arm-kernel@lists.infradead.org, Tony Olech <tony.olech@elandigitalsystems.com>, Manuel Lauss <manuel.lauss@gmail.com>, Pierre Ossman <pierre@ossman.eu>, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Sachin Nikam' <Snikam@nvidia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
+--nextPart2319489.Vp8sye1eQN
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 
+On Tuesday 15 November 2011 20:48:05 NamJae Jeon wrote:
+> 2011/11/16 Joe Perches <joe@perches.com>:
+> >        mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE); /* Enable mci
+> > interrupt */
+> >=20
+> > -       dev_info(&pdev->dev, "DW MMC controller at irq %d, "
+> > -                "%d bit host data width, "
+> > -                "%u deep fifo\n",
+> > +       dev_info(&pdev->dev,
+> > +       "DW MMC controller at irq %d, %d bit host data width, %u deep
+> > fifo\n", irq, width, fifo_size);
+>=20
+> I think that tab is needed this "DW MMC controller at irq ...." ?
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Sachin Nikam
-> Sent: Wednesday, November 16, 2011 6:29 PM
-> To: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
-> Subject: Plans to add SD4.0 (UHS-II) support
-> 
-> Hi Folks,
-> What are the plans to add SD4.0 (UHS-II) support in mmc driver?
+looks to me like this was the only part you replied to.  could you please s=
+nip=20
+the unrelated context in the future ?  no reason to include ~1700 lines of=
+=20
+context when you only replying to like ~10 lines.
+=2Dmike
 
-Are there any SD4.0 spec available? I can't find simplified version of the
-same from sdcard.org.
+--nextPart2319489.Vp8sye1eQN
+Content-Type: application/pgp-signature; name=signature.asc 
+Content-Description: This is a digitally signed message part.
 
-> 
-> Best Regards,
-> Sachin Nikam.
-> Sr. Software Engineer.
-> NVIDIA, Pune.
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.17 (GNU/Linux)
 
+iQIcBAABAgAGBQJOxAM8AAoJEEFjO5/oN/WB7usP/0XsO3sDmFr2DWVBW/lHyG50
+lrCFD215bQKBCxKw3SW8cDOGHPGQWKgwgpELLajPOEs7xsYeZTbSh1f79t07uaGL
+8Fzh+aKoM2dk4RXzJmBO1D2AavmMRZldMWGVeN8M/LIkPVmLeJ/0jgFmsMS/fa2c
+Ki+6dM7YApc3L0Keug7ehZ1SDhZjxT47uj7jCYa1wA6eJPyxxd1wPJ1V27MokdEt
+rJ/sMM61f2zKZ4T39idRsTiMToE9J57UnPocAdnw3IO2Nhq6gEmLfg6KE1DIz8w9
+Jfr1Scivr8BQdINhSXCng51LQvyNyp/3vGqHufD2zksyaGekWG46I34sIVp+hZzl
+/J1LcYxlebpl+6qblS4nzV/2ouIMmipF58grE+s71lsy9ptdQnSLZZEjSa+IXz22
+MfkXajA3XhNf0NdGw2TB0rq+gS/hgrSmwjofEt+TH0erm+CQxc/N5VqHA7okHJR5
+eLRokLZ8BmMBTkBEoac+u7858JoxUxpUoNkAFbTfT4PpXexAz4yd91WI6II+tG6b
+kW1Htbh+hm36unT7VluB1em3WGYcBhsACeHh620/Vp80L20E1Z9NK1OaiLF6uyfd
+8BIhqpY7RoXXto3Ce4tN3x0xhBD9XTlOh82geVHZ7JIJ60armEvtW+sJMF6uuPSF
+wNVbieuwRBXj1ji2jTsn
+=XUXI
+-----END PGP SIGNATURE-----
+
+--nextPart2319489.Vp8sye1eQN--
