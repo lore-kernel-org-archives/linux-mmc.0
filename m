@@ -1,70 +1,36 @@
-From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH 3/4] mmc: Logging neatening
-Date: Wed, 16 Nov 2011 11:08:27 +0900
-Message-ID: <CAKYAXd9GVQkLvhy2cx7n77jMtxBNK=1xG5wZ8zx_kcihHZGkFw@mail.gmail.com>
+From: David Brown <davidb@codeaurora.org>
+Subject: Re: [PATCH 4/4] mmc: Add mmc_host_<level> logging
+Date: Tue, 15 Nov 2011 21:00:46 -0800
+Message-ID: <20111116050046.GA422@huya.qualcomm.com>
 References: <cover.1321398814.git.joe@perches.com>
-	<d2c1a76fea1844ae7ac3e7e17183fb39df19178e.1321398814.git.joe@perches.com>
-	<CAKYAXd8_mDF68PnEnpuZZQ+O8-QmrfRpP4jv+SpHDx1juTxFGQ@mail.gmail.com>
-	<1321408236.9189.3.camel@Joe-Laptop>
-	<CAKYAXd8fki1HfFRuRyi4_HNLK6aiFM5NAbyKApgbGaaR=VOTEg@mail.gmail.com>
-	<1321408846.9189.5.camel@Joe-Laptop>
+ <631c53d126feff0a99b61d9c9a00b308d2b638ee.1321398815.git.joe@perches.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:46722 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932911Ab1KPCI3 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2011 21:08:29 -0500
-In-Reply-To: <1321408846.9189.5.camel@Joe-Laptop>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:57735 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750707Ab1KPFAs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2011 00:00:48 -0500
+Content-Disposition: inline
+In-Reply-To: <631c53d126feff0a99b61d9c9a00b308d2b638ee.1321398815.git.joe@perches.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Joe Perches <joe@perches.com>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, Manuel Lauss <manuel.lauss@gmail.com>, Cliff Cai <cliff.cai@analog.com>, Nicolas Pitre <nico@fluxnic.net>, Chris Ball <cjb@laptop.org>, Sascha Sommer <saschasommer@freenet.de>, Alex Dubov <oakad@yahoo.com>, Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, Tony Olech <tony.olech@elandigitalsystems.com>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, uclinux-dist-devel@blackfin.uclinux.org, linux-omap@vger.kernel.org, linux-usb@vger.kernel.org
+Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, David Brown <davidb@codeaurora.org>, Daniel Walker <dwalker@fifo99.com>, Bryan Huntsman <bryanh@codeaurora.org>, Nicolas Pitre <nico@fluxnic.net>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-arm-msm@vger.kernel.org, linux-omap@vger.kernel.org
 
-2011/11/16 Joe Perches <joe@perches.com>:
-> On Wed, 2011-11-16 at 10:55 +0900, NamJae Jeon wrote:
->> 2011/11/16 Joe Perches <joe@perches.com>:
->> > On Wed, 2011-11-16 at 10:48 +0900, NamJae Jeon wrote:
->> >
->> > [123K of untrimmed reply]
->> >
->> > If you wrote something, I didn't find it.
->> >
->>
->> > - =C2=A0 =C2=A0 =C2=A0 dev_info(&pdev->dev, "DW MMC controller at =
-irq %d, "
->> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0"%d bit h=
-ost data width, "
->> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0"%u deep =
-fifo\n",
->> > + =C2=A0 =C2=A0 =C2=A0 dev_info(&pdev->dev,
->> > + =C2=A0 =C2=A0 =C2=A0 "DW MMC controller at irq %d, %d bit host d=
-ata width, %u deep fifo\n",
->> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 irq, width=
-, fifo_size);
->>
->> I think that tab is needed this "DW MMC controller at irq ...." ?
->
-> Argument alignment isn't always the right thing.
->
-> Very long formats should not necessarily be aligned
-> at the open parenthesis. =C2=A0It helps to determine
-> when the format string or the dmesg output line length
-> is too long.
-Okay~ I understand clearly.
-Thanks.
+On Tue, Nov 15, 2011 at 03:32:08PM -0800, Joe Perches wrote:
 
-> Coalesce formats.
-> Align arguments.
-> Add pr_fmt, remove prefixes from format strings.
-> Neaten DBG uses, rearrange argument order.
->
-> Signed-off-by: Joe Perches <joe@perches.com>
-Reviewed-by: NamJae Jeon <linkinjeon@gmail.com>
->
->
->
->
->
->
+> Centralize the pr_<level> uses of mmc_hostname into specific
+> mmc_host_<level> calls to allow a flexible presentation style
+> and shorten the code a bit.
+
+>  drivers/mmc/host/msm_sdcc.c     |  101 ++++++++++++++++++---------------------
+
+The MSM ones at least are quite straightforward, so I'm fine with this
+part of the change.
+
+Acked-by: David Brown <davidb@codeaurora.org>
+
+-- 
+Sent by an employee of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
