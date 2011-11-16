@@ -1,23 +1,26 @@
 From: NamJae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH 1/4] mmc: Update logging style
-Date: Wed, 16 Nov 2011 10:18:52 +0900
-Message-ID: <CAKYAXd_gSohnAc9tpK53bjpoeSJ=0fMWz38SeLzHtRzvGTNgGQ@mail.gmail.com>
+Subject: Re: [PATCH 2/4] wbsd: Use current logging
+Date: Wed, 16 Nov 2011 10:23:05 +0900
+Message-ID: <CAKYAXd_RZHH+zcvUBLyeFnXJstx7+AWF0GmZetX1cjw1qFi1Zw@mail.gmail.com>
 References: <cover.1321398814.git.joe@perches.com>
-	<c75784ed1efa8636f7177cd5662c35fa6a8d03df.1321398814.git.joe@perches.com>
+	<6f82953de3539a33c4c5499cd7310ed54528f118.1321398814.git.joe@perches.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <c75784ed1efa8636f7177cd5662c35fa6a8d03df.1321398814.git.joe@perches.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Joe Perches <joe@perches.com>
-Cc: Ben Dooks <ben-linux@fluff.org>, Chris Ball <cjb@laptop.org>, Alex Dubov <oakad@yahoo.com>, Pierre Ossman <pierre@ossman.eu>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:53116 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756944Ab1KPBXH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2011 20:23:07 -0500
+In-Reply-To: <6f82953de3539a33c4c5499cd7310ed54528f118.1321398814.git.joe@perches.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Joe Perches <joe@perches.com>
+Cc: Pierre Ossman <pierre@ossman.eu>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
 2011/11/16 Joe Perches <joe@perches.com>:
-> Convert pr_warning to pr_warn.
-> Coalesce format strings.
-> Align arguments.
-> Add missing \n.
+> Add pr_fmt.
+> Remove DRIVER_NAME from logging calls.
+> Remove DBG, use pr_debug.
 >
 > Signed-off-by: Joe Perches <joe@perches.com>
 Reviewed-by: NamJae Jeon <linkinjeon@gmail.com>
