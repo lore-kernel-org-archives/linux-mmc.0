@@ -1,36 +1,45 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: Re: [PATCH] mmc: block: release host in case of error
-Date: Thu, 17 Nov 2011 09:33:27 +0530
-Message-ID: <4EC4878F.80002@codeaurora.org>
-References: <1321269166-22128-1-git-send-email-per.forlin@stericsson.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: [PATCH] mmc: core: Fix typo at mmc_card_sleep
+Date: Thu, 17 Nov 2011 13:34:33 +0900
+Message-ID: <20111117043433.GA32665@july>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:53326 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754646Ab1KQEDb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2011 23:03:31 -0500
-In-Reply-To: <1321269166-22128-1-git-send-email-per.forlin@stericsson.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:52880 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754875Ab1KQEeh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2011 23:34:37 -0500
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LUS00KE8FDJFVK0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 17 Nov 2011 13:34:36 +0900 (KST)
+Received: from july ([165.213.219.175])
+ by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
+ 64bit (built Sep  7 2010)) with ESMTPA id <0LUS00D09FDKZU00@mmp1.samsung.com>
+ for linux-mmc@vger.kernel.org; Thu, 17 Nov 2011 13:34:33 +0900 (KST)
+Content-disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.forlin@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, adrian.hunter@intel.com, Chris Ball <cjb@laptop.org>
+To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
 
-On 11/14/2011 4:42 PM, Per Forlin wrote:
-> Host is claimed as long as there are requests in the block queue
-> and all request are completed successfully. If an error occur release
-> the host in case someone else needs to claim it, for instance if the card
-> is removed during a transfer.
->
-> Signed-off-by: Per Forlin<per.forlin@stericsson.com>
-> ---
->   drivers/mmc/card/block.c |   37 +++++++++++++++++++++++++++++--------
->   1 files changed, 29 insertions(+), 8 deletions(-)
+From: Kyungmin Park <kyungmin.park@samsung.com>
 
-Tested-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Fix wrong bus_ops->sleep check.
 
-
-Thanks
-Sujit
-
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 5278ffb..193e449 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2196,7 +2196,7 @@ int mmc_card_sleep(struct mmc_host *host)
+ 
+ 	mmc_bus_get(host);
+ 
+-	if (host->bus_ops && !host->bus_dead && host->bus_ops->awake)
++	if (host->bus_ops && !host->bus_dead && host->bus_ops->sleep)
+ 		err = host->bus_ops->sleep(host);
+ 
+ 	mmc_bus_put(host);
