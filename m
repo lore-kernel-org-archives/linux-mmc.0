@@ -1,450 +1,56 @@
-From: "Konstantin Dorfman" <kdorfman@codeaurora.org>
-Subject: RE: [PATCH v3] mmc: support BKOPS feature for eMMC
-Date: Thu, 17 Nov 2011 17:01:16 +0200
-Message-ID: <000301cca539$c3bdb350$4b3919f0$@org>
-References: <4EC45A39.5030706@samsung.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: A question on IOCTL interface for MMC
+Date: Thu, 17 Nov 2011 15:46:10 +0000
+Message-ID: <201111171546.10214.arnd@arndb.de>
+References: <CANYdXnqDYn5-zehsJ9ibviJ7FoofcY=YLUqrROoK8k53v-czNA@mail.gmail.com> <CANYdXnoS31GLnbFcwj76SUoyVhcti8Q-4_5fmyRy3DUJGbSRjg@mail.gmail.com> <4EA5AE64.2030106@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
+Content-Type: Text/Plain;
+  charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:15025 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757780Ab1KQPB1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2011 10:01:27 -0500
-In-Reply-To: <4EC45A39.5030706@samsung.com>
-Content-Language: en-us
+Received: from moutng.kundenserver.de ([212.227.126.186]:59557 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932196Ab1KQPqS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2011 10:46:18 -0500
+In-Reply-To: <4EA5AE64.2030106@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Hanumath Prasad' <hanumath.prasad@stericsson.com>, 'Per Forlin' <per.lkml@gmail.com>, 'Sebastian Rasmussen' <sebras@gmail.com>, "'Dong, Chuanxiao'" <chuanxiao.dong@intel.com>, svenkatr@ti.com
+To: J Freyensee <james_p_freyensee@linux.intel.com>
+Cc: Shashidhar Hiremath <shashidharh@vayavyalabs.com>, Chris Ball <cjb@laptop.org>, John Calixto <john.calixto@modsystems.com>, linux-mmc@vger.kernel.org
 
-Hello Jaenhoon,
+On Monday 24 October 2011, J Freyensee wrote:
+> On 10/24/2011 05:32 AM, Shashidhar Hiremath wrote:
+> > Hi Arnd,
+> >    As explained in previous mail, the IOCTL is actually an inteface to
+> > block layer and it is only expecting read/write commands to be sent
+> > through the interface.The prrof of it can be seen in write_flag
+> > present in the IOCTL structure which indicates the either the command
+> > can be read or a write command.
+> >
+> > So, can I submit a linux module to the kernel which uses the same
+> > mmc_ioc_cmd structure and do all the required processing in my module.
+> >
+> > To be clear on my requirement:
+> > it is  To test ALL SD/MMC Commands and NOT just the  Read/Write Commands.
+> > or should I extend the mmc_test module present in kernel to support
+> > testing of individual commands as well ?
+> 
+> I would think the mmc_test module would be a good vehicle to extend to 
+> have it test individual commands.
+> 
+> Of course if there is no documentation or HOWTO use mmc_test module to 
+> test an individual MMC command then the work is kind-of for naught.
 
-I have a few suggestions regarding the situation when Host starts BKOPS:
+I'm still catching up on my email after travelling. I'm sorry I did not
+catch this earlier, because this seems to be the source of the confusion
+that lead to the suboptimal implementation of test code in the kernel
+driver.
 
-1) Host should start BKOPS (based on BKOPS_STATUS or URGENT_BKOPS event)
-when going to mmc_sleep, which means that the bus is in idle state (this
-also covers the case in mmc_queue_thread, because in this case no I/O
-request exists). It seems like checking the status periodically in addition
-to mmc_suspend is not needed. Since if the device was in idle and we
-performed a single BKOPS then there is no point in performing another BKOPS
-unless there was actually another I/O request.
+I believe the correct answer to the original question would have been
+that any command that does not take an argument should just pass
+a length of zero on the ioctl interface. If I read the code correctly,
+this needs at least a change to mmc_blk_ioctl_copy_from_user to 
+handle zero-length arguments, and there are possibly some other
+issues, but I think that should let you do everything you need.
 
-2) Also this implies an answer to the question about need to interrupt BKOPS
-before powering off card - the answer is no.
-
-3) Based on statistical data we have (day long test) it looks like we do not
-need to do any preventive BKOPS caused by BKOPS_STATUS less than critical
-(0x3).
-
-Thanks,
-Konstantin Dorfman
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-
------Original Message-----
-From: linux-mmc-owner@vger.kernel.org
-[mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Jaehoon Chung
-Sent: Thursday, November 17, 2011 2:50 AM
-To: linux-mmc
-Cc: Chris Ball; Kyungmin Park; Hanumath Prasad; Per Forlin; Sebastian
-Rasmussen; Dong, Chuanxiao; svenkatr@ti.com
-Subject: [PATCH v3] mmc: support BKOPS feature for eMMC
-
-Enable eMMC background operations (BKOPS) feature.
-
-If URGENT_BKOPS is set after a response, note that BKOPS
-are required. After all I/O requests are finished, run
-BKOPS if required. Should read/write operations be requested
-during BKOPS, first issue HPI to interrupt the ongoing BKOPS
-and then service the request.
-
-If you want to enable this feature, set MMC_CAP2_BKOPS.
-
-Future considerations
- * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
- * Interrupt ongoing BKOPS before powering off the card.
-
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-CC: Hanumath Prasad <hanumath.prasad@stericsson.com>
----
-Changelog V3:
-	- move the bkops setting's location in mmc_blk_issue_rw_rq
-	- modify condition checking
-	- bkops_en is assigned ext_csd[EXT_CSD_BKOPS_EN] instead of "1"
-	- remove the unused code
-	- change pr_debug instead of pr_warn in mmc_send_hpi_cmd
-	- Add the Future consideration suggested by Per
-	
-Changelog V2:
-	- Use EXCEPTION_STATUS instead of URGENT_BKOPS
-	- Add function to check Exception_status(for eMMC4.5)
-	- remove unnecessary code.
-
- drivers/mmc/card/block.c   |   10 +++++
- drivers/mmc/card/queue.c   |    4 ++
- drivers/mmc/core/core.c    |   87
-++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/mmc.c     |    8 ++++
- drivers/mmc/core/mmc_ops.c |    6 +++-
- include/linux/mmc/card.h   |   12 ++++++
- include/linux/mmc/core.h   |    3 ++
- include/linux/mmc/host.h   |    1 +
- include/linux/mmc/mmc.h    |   14 +++++++
- 9 files changed, 144 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index c80bb6d..9d19ebb 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1188,6 +1188,16 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq,
-struct request *rqc)
- 		type = rq_data_dir(req) == READ ? MMC_BLK_READ :
-MMC_BLK_WRITE;
- 		mmc_queue_bounce_post(mq_rq);
- 
-+		/*
-+		 * Check BKOPS urgency from each R1 response
-+		 */
-+		if (mmc_card_mmc(card) &&
-+			(brq->cmd.resp[0] & R1_EXCEPTION_EVENT)) {
-+			if (mmc_is_exception_event(card,
-+					EXT_CSD_URGENT_BKOPS))
-+				mmc_card_set_need_bkops(card);
-+		}
-+
- 		switch (status) {
- 		case MMC_BLK_SUCCESS:
- 		case MMC_BLK_PARTIAL:
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index dcad59c..20bb4a5 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -61,6 +61,9 @@ static int mmc_queue_thread(void *d)
- 		spin_unlock_irq(q->queue_lock);
- 
- 		if (req || mq->mqrq_prev->req) {
-+			if (mmc_card_doing_bkops(mq->card))
-+				mmc_interrupt_bkops(mq->card);
-+
- 			set_current_state(TASK_RUNNING);
- 			mq->issue_fn(mq, req);
- 		} else {
-@@ -68,6 +71,7 @@ static int mmc_queue_thread(void *d)
- 				set_current_state(TASK_RUNNING);
- 				break;
- 			}
-+			mmc_start_bkops(mq->card);
- 			up(&mq->thread_sem);
- 			schedule();
- 			down(&mq->thread_sem);
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 7ee2e07..2d2f1d5 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -238,6 +238,50 @@ mmc_start_request(struct mmc_host *host, struct
-mmc_request *mrq)
- 	host->ops->request(host, mrq);
- }
- 
-+/**
-+ *	mmc_start_bkops - start BKOPS for supported cards
-+ *	@card: MMC card to start BKOPS
-+ *
-+ *	Start background operations whenever requested.
-+ *	when the urgent BKOPS bit is set in a R1 command response
-+ *	then background operations should be started immediately.
-+*/
-+void mmc_start_bkops(struct mmc_card *card)
-+{
-+	int err;
-+	unsigned long flags;
-+
-+	BUG_ON(!card);
-+	if ((!card->ext_csd.bkops_en) ||
-+			!(card->host->caps2 & MMC_CAP2_BKOPS))
-+		return;
-+
-+	/*
-+	 * If card is already doing bkops or need for
-+	 * bkops flag is not set, then do nothing just
-+	 * return
-+	 */
-+	if (mmc_card_doing_bkops(card)
-+			|| !mmc_card_need_bkops(card))
-+		return;
-+
-+	mmc_claim_host(card->host);
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			EXT_CSD_BKOPS_START, 1, 0);
-+	if (err) {
-+		pr_warning("error %d starting bkops\n", err);
-+		mmc_card_clr_need_bkops(card);
-+		goto out;
-+	}
-+	spin_lock_irqsave(&card->host->lock, flags);
-+	mmc_card_clr_need_bkops(card);
-+	mmc_card_set_doing_bkops(card);
-+	spin_unlock_irqrestore(&card->host->lock, flags);
-+out:
-+	mmc_release_host(card->host);
-+}
-+EXPORT_SYMBOL(mmc_start_bkops);
-+
- static void mmc_wait_done(struct mmc_request *mrq)
- {
- 	complete(&mrq->completion);
-@@ -466,6 +510,49 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct
-mmc_command *cmd, int retries
- EXPORT_SYMBOL(mmc_wait_for_cmd);
- 
- /**
-+ *	mmc_interrupt_bkops - interrupt ongoing BKOPS
-+ *	@card: MMC card to check BKOPS
-+ *
-+ *	Send HPI command to interrupt ongoing background operations,
-+ *	to allow rapid servicing of foreground operations,e.g. read/
-+ *	writes. Wait until the card comes out of the programming state
-+ *	to avoid errors in servicing read/write requests.
-+ */
-+int mmc_interrupt_bkops(struct mmc_card *card)
-+{
-+	int err = 0;
-+	unsigned long flags;
-+
-+	BUG_ON(!card);
-+
-+	err = mmc_interrupt_hpi(card);
-+
-+	spin_lock_irqsave(&card->host->lock, flags);
-+	mmc_card_clr_doing_bkops(card);
-+	spin_unlock_irqrestore(&card->host->lock, flags);
-+
-+	return err;
-+}
-+EXPORT_SYMBOL(mmc_interrupt_bkops);
-+
-+int mmc_is_exception_event(struct mmc_card *card, unsigned int value)
-+{
-+	int err;
-+	u8 ext_csd[512];
-+
-+	/* In eMMC 4.41, R1_EXCEPTION_EVENT is URGENT_BKOPS */
-+	if (card->ext_csd.rev == 5)
-+		return 1;
-+
-+	err = mmc_send_ext_csd(card, ext_csd);
-+	if (err)
-+		return err;
-+
-+	return (ext_csd[EXT_CSD_EXCEPTION_STATUS] & value) ? 1 : 0;
-+}
-+EXPORT_SYMBOL(mmc_is_exception_event);
-+
-+/**
-  *	mmc_set_data_timeout - set the timeout for a data command
-  *	@data: data phase for command
-  *	@card: the MMC card associated with the data transfer
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a1223bd..514ad0f 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -448,6 +448,14 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8
-*ext_csd)
- 	}
- 
- 	if (card->ext_csd.rev >= 5) {
-+		/* check whether the eMMC card support BKOPS */
-+		if (ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1) {
-+			card->ext_csd.bkops = 1;
-+			card->ext_csd.bkops_en = ext_csd[EXT_CSD_BKOPS_EN];
-+			card->ext_csd.raw_bkops_status =
-+				ext_csd[EXT_CSD_BKOPS_STATUS];
-+		}
-+
- 		/* check whether the eMMC card supports HPI */
- 		if (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1) {
- 			card->ext_csd.hpi = 1;
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 007863e..2e397d5 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -398,6 +398,10 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index,
-u8 value,
- 	if (err)
- 		return err;
- 
-+	/* No need to check card status in case of BKOPS switch*/
-+	if (index == EXT_CSD_BKOPS_START)
-+		return 0;
-+
- 	/* Must check status to be sure of no errors */
- 	do {
- 		err = mmc_send_status(card, &status);
-@@ -568,7 +572,7 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
- 
- 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
- 	if (err) {
--		pr_warn("%s: error %d interrupting operation. "
-+		pr_debug("%s: error %d interrupting operation. "
- 			"HPI command response %#x\n",
-mmc_hostname(card->host),
- 			err, cmd.resp[0]);
- 		return err;
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 534974c..3c983d7 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -70,6 +70,8 @@ struct mmc_ext_csd {
- 	unsigned int		cache_size;		/* Units: KB */
- 	bool			hpi_en;			/* HPI enablebit */
- 	bool			hpi;			/* HPI support bit
-*/
-+	bool			bkops;		/* background support bit */
-+	bool			bkops_en;	/* background enable bit */
- 	unsigned int		hpi_cmd;		/* cmd used as HPI
-*/
- 	u8			raw_partition_support;	/* 160 */
- 	u8			raw_erased_mem_count;	/* 181 */
-@@ -84,6 +86,7 @@ struct mmc_ext_csd {
- 	u8			raw_sec_erase_mult;	/* 230 */
- 	u8			raw_sec_feature_support;/* 231 */
- 	u8			raw_trim_mult;		/* 232 */
-+	u8			raw_bkops_status;	/* 246 */
- 	u8			raw_sectors[4];		/* 212 - 4 bytes */
- 
- 	unsigned int            feature_support;
-@@ -209,6 +212,8 @@ struct mmc_card {
- #define MMC_STATE_HIGHSPEED_DDR (1<<4)		/* card is in high speed
-mode */
- #define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in ultra
-high speed mode */
- #define MMC_CARD_SDXC		(1<<6)		/* card is SDXC */
-+#define MMC_STATE_NEED_BKOPS	(1<<7)		/* card need to do BKOPS */
-+#define MMC_STATE_DOING_BKOPS	(1<<8)		/* card is doing BKOPS */
- 	unsigned int		quirks; 	/* card quirks */
- #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes
-outside of the VS CCCR range */
- #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
-@@ -370,6 +375,8 @@ static inline void __maybe_unused remove_quirk(struct
-mmc_card *card, int data)
- #define mmc_card_uhs(c)		((c)->state &
-MMC_STATE_ULTRAHIGHSPEED)
- #define mmc_sd_card_uhs(c)	((c)->state & MMC_STATE_ULTRAHIGHSPEED)
- #define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
-+#define mmc_card_need_bkops(c)	((c)->state & MMC_STATE_NEED_BKOPS)
-+#define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
- 
- #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
- #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
-@@ -379,6 +386,11 @@ static inline void __maybe_unused remove_quirk(struct
-mmc_card *card, int data)
- #define mmc_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
- #define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
- #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
-+#define mmc_card_set_need_bkops(c)	((c)->state |= MMC_STATE_NEED_BKOPS)
-+#define mmc_card_set_doing_bkops(c)	((c)->state |=
-MMC_STATE_DOING_BKOPS)
-+
-+#define mmc_card_clr_need_bkops(c)	((c)->state &=
-~MMC_STATE_NEED_BKOPS)
-+#define mmc_card_clr_doing_bkops(c)	((c)->state &=
-~MMC_STATE_DOING_BKOPS)
- 
- /*
-  * Quirk add/remove for MMC products.
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 174a844..f6b997a 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -134,6 +134,8 @@ struct mmc_host;
- struct mmc_card;
- struct mmc_async_req;
- 
-+extern int mmc_interrupt_bkops(struct mmc_card *);
-+extern int mmc_is_exception_event(struct mmc_card *, unsigned int);
- extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
- 					   struct mmc_async_req *, int *);
- extern int mmc_interrupt_hpi(struct mmc_card *);
-@@ -163,6 +165,7 @@ extern int mmc_can_sanitize(struct mmc_card *card);
- extern int mmc_can_secure_erase_trim(struct mmc_card *card);
- extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int
-from,
- 				   unsigned int nr);
-+extern void mmc_start_bkops(struct mmc_card *card);
- extern unsigned int mmc_calc_max_discard(struct mmc_card *card);
- 
- extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 706f722..4629e84 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -242,6 +242,7 @@ struct mmc_host {
- #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
- #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff supported
-*/
- #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't
-work */
-+#define MMC_CAP2_BKOPS		(1 << 4)	/* BKOPS supported */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 	unsigned int        power_notify_type;
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 0e71356..20b1420 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -138,6 +138,7 @@ static inline bool mmc_op_multi(u32 opcode)
- #define R1_CURRENT_STATE(x)	((x & 0x00001E00) >> 9)	/* sx, b (4 bits) */
- #define R1_READY_FOR_DATA	(1 << 8)	/* sx, a */
- #define R1_SWITCH_ERROR		(1 << 7)	/* sx, c */
-+#define R1_EXCEPTION_EVENT	(1 << 6)	/* sx, a */
- #define R1_APP_CMD		(1 << 5)	/* sr, c */
- 
- #define R1_STATE_IDLE	0
-@@ -273,11 +274,14 @@ struct _mmc_csd {
- #define EXT_CSD_FLUSH_CACHE		32      /* W */
- #define EXT_CSD_CACHE_CTRL		33      /* R/W */
- #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
-+#define EXT_CSD_EXCEPTION_STATUS	54	/* RO */
- #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
- #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
- #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
- #define EXT_CSD_HPI_MGMT		161	/* R/W */
- #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
-+#define EXT_CSD_BKOPS_EN		163	/* R/W */
-+#define EXT_CSD_BKOPS_START		164	/* W */
- #define EXT_CSD_SANITIZE_START		165     /* W */
- #define EXT_CSD_WR_REL_PARAM		166	/* RO */
- #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
-@@ -310,9 +314,11 @@ struct _mmc_csd {
- #define EXT_CSD_PWR_CL_200_360		237	/* RO */
- #define EXT_CSD_PWR_CL_DDR_52_195	238	/* RO */
- #define EXT_CSD_PWR_CL_DDR_52_360	239	/* RO */
-+#define EXT_CSD_BKOPS_STATUS		246	/* RO */
- #define EXT_CSD_POWER_OFF_LONG_TIME	247	/* RO */
- #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
- #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
-+#define EXT_CSD_BKOPS_SUPPORT		502	/* RO */
- #define EXT_CSD_HPI_FEATURES		503	/* RO */
- 
- /*
-@@ -373,4 +379,12 @@ struct _mmc_csd {
- #define MMC_SWITCH_MODE_CLEAR_BITS	0x02	/* Clear bits which are 1 in
-value */
- #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
- 
-+/*
-+ * EXCEPTION_EVENT_STATUS field (eMMC4.5)
-+ */
-+#define EXT_CSD_URGENT_BKOPS		BIT(0)
-+#define EXT_CSD_DYNCAP_NEEDED		BIT(1)
-+#define EXT_CSD_SYSPOOL_EXHAUSTED	BIT(2)
-+#define EXT_CSD_PACKED_FAILURE		BIT(3)
-+
- #endif /* LINUX_MMC_MMC_H */
---
-To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+	Arnd
