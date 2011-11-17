@@ -1,21 +1,60 @@
-From: Richard Zhao <richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH V4 00/14] add clk_prepare/clk_unprepare to imx drivers
-Date: Thu, 17 Nov 2011 09:22:11 +0800
-Message-ID: <20111117012210.GA23392@b20223-02.ap.freescale.net>
-References: <1321339689-25256-1-git-send-email-richard.zhao@linaro.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH 2/2] mmc: core: Support packed command for eMMC4.5 device
+Date: Thu, 17 Nov 2011 11:02:21 +0900
+Message-ID: <004901cca4cc$f18d6180$d4a82480$%jun@samsung.com>
+References: <620ec9ffa6bdbba9ae5f76998e36f8dc.squirrel@www.codeaurora.org>
+ <001001cca043$395dbfc0$ac193f40$%jun@samsung.com>
+ <CANfBPZ-Zn+R4GosEL-RJxh8gduAr8e+qN876uPwDkHfiEpdERw@mail.gmail.com>
+ <ea21d88d904af165cb911354e3f51ea6.squirrel@www.codeaurora.org>
+ <001e01cca2b2$3b449310$b1cdb930$%jun@samsung.com>
+ <faba552e7bd19ee5399c73c2b478a34d.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1321339689-25256-1-git-send-email-richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: amit.kucheria-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, eric.miao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, alan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:11784 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754749Ab1KQCCi convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2011 21:02:38 -0500
+In-reply-to: <faba552e7bd19ee5399c73c2b478a34d.squirrel@www.codeaurora.org>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: merez@codeaurora.org
+Cc: "'S, Venkatraman'" <svenkatr@ti.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 
-Hi Sascha,
+Maya Erez wrote:
+> >> >>> >> >> > + =A0 =A0 =A0 if (rqc)
+> >> >>> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 reqs =3D mmc_blk_chk_pac=
+kable(mq, rqc);
+> >> >>>
+> >> >>> It would be best to keep all the calls to blk_fetch_request in=
+ the
+> >> same
+> >> >>> location. Therefore, I suggest to move the call to
+> >> mmc_blk_chk_packable
+> >> >>> to
+> >> >>> mmc/card/queue.c after the first request is fetched.
+> >> >>
+> >> >> At the first time, I considered that way.
+> >> >> I'll do more, if possible.
+> > I considered more.
+> > I think that mmc_blk_chk_packable would rather be called only for r=
+/w type
+> > than all request type(e.g. discard, flush).
+> >
+> mmc_blk_chk_packable can check the cmd_flags of the request to verify=
+ it's
+> not a flush/disacrad etc. In such cases will not pack.
+Yes. It must be checked, but omitted.
+I already have added this check. It will be applied next.
 
-Would you merge this patch series?
+Thanks,
+Seungwon Jeon.
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Thanks
-Richard 
