@@ -1,155 +1,76 @@
-From: "Srivatsa S. Bhat" <srivatsa.bhat@linux.vnet.ibm.com>
-Subject: Re: Oops on suspend with libertas SDIO (Linux 3.2-rc2)
-Date: Fri, 18 Nov 2011 00:49:16 +0530
-Message-ID: <4EC55E34.3080503@linux.vnet.ibm.com>
-References: <1321544210.31090.6.camel@sven> <87zkfuhhpq.fsf@laptop.org>
+From: "Joe Woodward" <jw@terrafix.co.uk>
+Subject: mmc: sdio: runtime PM and 8686 problems
+Date: Fri, 18 Nov 2011 08:53:27 +0000
+Message-ID: <WC20111118085327.010279@terrafix.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87zkfuhhpq.fsf@laptop.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Sven Neumann <s.neumann@raumfeld.com>, Daniel Drake <dsd@laptop.org>, Dan Williams <dcbw@redhat.com>, linux-mmc@vger.kernel.org, libertas-dev@lists.infradead.org, linux-kernel@vger.kernel.org, Daniel Mack <daniel@zonque.org>, "linux-pm >> Linux PM mailing list" <linux-pm@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp1.keele.netcentral.co.uk ([212.57.235.197]:58936 "EHLO
+	smtp3.keele.netcentral.co.uk" rhost-flags-OK-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S1752447Ab1KRIxn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2011 03:53:43 -0500
+Received: from terrafix.co.uk (reverse.keele.netcentral.co.uk [212.57.249.250] (may be forged))
+	by smtp3.keele.netcentral.co.uk (8.14.2/8.14.2) with ESMTP id pAI8rMMC021298
+	for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2011 08:53:28 GMT
+Received: from WorldClient by terrafix.co.uk (MDaemon PRO v12.5.0)
+	with ESMTP id md50002111720.msg
+	for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2011 08:53:31 +0000
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-[ Adding linux-pm mailing list to CC as well ]
+(resending as my mailer seems to have decided that the first try was a reply to "RE: [PATCH 2/2] mmc: core: Support packed command for eMMC4.5 
+device,"... apologies!)
 
-Thanks,
-Srivatsa S. Bhat
+I have a GUMSTIX Overo (OMAP35xx) with a Marvel 8686 WiFi attached via SDIO (ok, I think it's actually a Wi2Wi W2CBW003 module containing an 8686).
 
-On 11/17/2011 09:19 PM, Chris Ball wrote:
-> Hi,
-> 
-> On Thu, Nov 17 2011, Sven Neumann wrote:
->> I've given 3.2-rc2 a try today and the kernel oopsed when going into suspend:
->>
->> [   20.387912] Freezing user space processes ... (elapsed 0.01 seconds) done.
->> [ 20.408759] Freezing remaining freezable tasks ... (elapsed 0.01
->> seconds) done.
->> [   20.432966] libertas_sdio mmc0:0001:1: mmc0:0001:1: suspend: PM flags = 0x0
->> [ 20.439978] libertas_sdio mmc0:0001:1: Suspend without wake params --
->> powering down card
->> [   23.456061] libertas_sdio mmc0:0001:1: wlan0: command 0x0010 timed out
->> [ 23.462626] libertas_sdio mmc0:0001:1: wlan0: Timeout submitting
->> command 0x0010
->> [   23.470026] libertas_sdio: Resetting card...
->> [   23.474140] ------------[ cut here ]------------
->> [   23.479002] WARNING: at fs/sysfs/group.c:138 sysfs_remove_group+0x50/0x11c()
->> [   23.486045] sysfs group c05cb5c8 not found for kobject 'mmc0:0001:1'
->> [   23.492358] Modules linked in: libertas_sdio libertas pxamci
->> [ 23.498091] [<c000dbb4>] (unwind_backtrace+0x0/0xec) from
->> [<c001ca10>] (warn_slowpath_common+0x4c/0x64)
->> [ 23.507467] [<c001ca10>] (warn_slowpath_common+0x4c/0x64) from
->> [<c001cabc>] (warn_slowpath_fmt+0x30/0x40)
->> [ 23.517021] [<c001cabc>] (warn_slowpath_fmt+0x30/0x40) from
->> [<c00d369c>] (sysfs_remove_group+0x50/0x11c)
->> [ 23.526504] [<c00d369c>] (sysfs_remove_group+0x50/0x11c) from
->> [<c0202ec4>] (device_del+0x3c/0x1a4)
->> [ 23.535437] [<c0202ec4>] (device_del+0x3c/0x1a4) from [<c0295dfc>]
->> (sdio_remove_func+0x1c/0x2c)
->> [ 23.544127] [<c0295dfc>] (sdio_remove_func+0x1c/0x2c) from
->> [<c0295110>] (mmc_sdio_remove+0x44/0x78)
->> [ 23.553161] [<c0295110>] (mmc_sdio_remove+0x44/0x78) from
->> [<c028f0e4>] (mmc_stop_host+0xd0/0x22c)
->> [ 23.562016] [<c028f0e4>] (mmc_stop_host+0xd0/0x22c) from [<c0290578>]
->> (mmc_remove_host+0x18/0x2c)
->> [ 23.570898] [<c0290578>] (mmc_remove_host+0x18/0x2c) from
->> [<bf019470>] (if_sdio_reset_card_worker+0x18/0x2c [libertas_sdio])
->> [ 23.582138] [<bf019470>] (if_sdio_reset_card_worker+0x18/0x2c
->> [libertas_sdio]) from [<c00302fc>] (process_one_work+0x260/0x3c8)
->> [ 23.593594] [<c00302fc>] (process_one_work+0x260/0x3c8) from
->> [<c0030ac8>] (worker_thread+0x224/0x458)
->> [ 23.602816] [<c0030ac8>] (worker_thread+0x224/0x458) from
->> [<c0036a00>] (kthread+0x80/0x88)
->> [ 23.611078] [<c0036a00>] (kthread+0x80/0x88) from [<c0009ca8>]
->> (kernel_thread_exit+0x0/0x8)
->> [   23.619409] ---[ end trace 78598ef84f325bdd ]---
->> [ 23.624011] Unable to handle kernel NULL pointer dereference at
->> virtual address 0000000c
->> [   23.632079] pgd = c0004000
->> [   23.634762] [0000000c] *pgd=00000000
->> [   23.638351] Internal error: Oops: 17 [#1] PREEMPT
->> [   23.643016] Modules linked in: libertas_sdio libertas pxamci
->> [   23.648666] CPU: 0    Tainted: G        W     (3.2.0-rc2 #2)
->> [   23.654316] PC is at klist_put+0x18/0x9c
->> [   23.658213] LR is at device_del+0x50/0x1a4
->> [   23.662287] pc : [<c03ca8fc>]    lr : [<c0202ed8>]    psr: a0000013
->> [   23.662298] sp : c6569f18  ip : 40000013  fp : c602e605
->> [   23.673688] r10: 00000000  r9 : bf019458  r8 : c602e600
->> [   23.678876] r7 : 00000000  r6 : c6447408  r5 : c64bbe50  r4 : 00000001
->> [   23.685363] r3 : 00000000  r2 : 00000200  r1 : 00000001  r0 : 00000001
->> [ 23.691844] Flags: NzCv IRQs on FIQs on Mode SVC_32 ISA ARM Segment
->> kernel
->> [   23.699106] Control: 0000397f  Table: a65a0018  DAC: 00000035
->> [   23.704817] Process kworker/0:2 (pid: 1204, stack limit = 0xc6568278)
->> [   23.711218] Stack: (0xc6569f18 to 0xc656a000)
->> [ 23.715547] 9f00: c65fe008 c6447000
->> [ 23.723677] 9f20: c6447408 c0202ed8 c65fe008 c6447000 00000084
->> c0295dfc 00000001 c0295110
->> [ 23.731810] 9f40: c63e8f00 c6447000 60000013 00000000 00000009
->> c028f0e4 c6447000 c6447000
->> [ 23.739944] 9f60: c63e8f00 c0290578 bf019c9c bf019470 bf019af0
->> c00302fc c05c1b38 c63e8f00
->> [ 23.748076] 9f80: c05c1b38 c05c1b38 00000009 c6568000 c63e8f10
->> c05c1b38 c63e8f10 c0030ac8
->> [ 23.756208] 9fa0: c6083f14 c6569fd4 c6083f14 c63e8f00 c00308a4
->> 00000000 00000000 00000000
->> [ 23.764341] 9fc0: 00000000 c0036a00 c0009ca8 00000000 c63e8f00
->> 00000000 c6569fd8 c6569fd8
->> [ 23.772475] 9fe0: 00000000 c6083f14 c0036980 c0009ca8 00000013
->> c0009ca8 0340f30e 153b5900
->> [ 23.780618] [<c03ca8fc>] (klist_put+0x18/0x9c) from [<c0202ed8>]
->> (device_del+0x50/0x1a4)
->> [ 23.788675] [<c0202ed8>] (device_del+0x50/0x1a4) from [<c0295dfc>]
->> (sdio_remove_func+0x1c/0x2c)
->> [ 23.797327] [<c0295dfc>] (sdio_remove_func+0x1c/0x2c) from
->> [<c0295110>] (mmc_sdio_remove+0x44/0x78)
->> [ 23.806328] [<c0295110>] (mmc_sdio_remove+0x44/0x78) from
->> [<c028f0e4>] (mmc_stop_host+0xd0/0x22c)
->> [ 23.815148] [<c028f0e4>] (mmc_stop_host+0xd0/0x22c) from [<c0290578>]
->> (mmc_remove_host+0x18/0x2c)
->> [ 23.823987] [<c0290578>] (mmc_remove_host+0x18/0x2c) from
->> [<bf019470>] (if_sdio_reset_card_worker+0x18/0x2c [libertas_sdio])
->> [ 23.835164] [<bf019470>] (if_sdio_reset_card_worker+0x18/0x2c
->> [libertas_sdio]) from [<c00302fc>] (process_one_work+0x260/0x3c8)
->> [ 23.846584] [<c00302fc>] (process_one_work+0x260/0x3c8) from
->> [<c0030ac8>] (worker_thread+0x224/0x458)
->> [ 23.855760] [<c0030ac8>] (worker_thread+0x224/0x458) from
->> [<c0036a00>] (kthread+0x80/0x88)
->> [ 23.863984] [<c0036a00>] (kthread+0x80/0x88) from [<c0009ca8>]
->> (kernel_thread_exit+0x0/0x8)
->> [   23.872292] Code: e1a05000 e3a00001 e3c33001 e1a04001 (e593600c) 
->> [   23.878402] ---[ end trace 78598ef84f325bde ]---
->> [ 23.883135] Unable to handle kernel paging request at virtual address
->> fffffffc
->> [   23.890313] pgd = c0004000
->> [   23.893000] [fffffffc] *pgd=a7ffe821, *pte=00000000, *ppte=00000000
->> [   23.899244] Internal error: Oops: 17 [#2] PREEMPT
->> [   23.903915] Modules linked in: libertas_sdio libertas pxamci
->> [   23.909564] CPU: 0    Tainted: G      D W     (3.2.0-rc2 #2)
->> [   23.915199] PC is at kthread_data+0x4/0xc
->> [   23.919186] LR is at wq_worker_sleeping+0xc/0xb4
->> [   23.923772] pc : [<c003648c>]    lr : [<c0032ee0>]    psr: 20000093
->> [   23.923783] sp : c6569d60  ip : c05bff98  fp : c6569d94
->> [   23.935174] r10: c60336ec  r9 : c05bff98  r8 : c6568000
->> [   23.940361] r7 : c6032000  r6 : c6033768  r5 : c6033600  r4 : 00000000
->> [   23.946848] r3 : 00000000  r2 : c05bff98  r1 : 00000000  r0 : c6033600
->> [ 23.953329] Flags: nzCv IRQs off FIQs on Mode SVC_32 ISA ARM Segment
->> user
->> [   23.960504] Control: 0000397f  Table: a65a0018  DAC: 00000015
->> [   23.966207] Process kworker/0:2 (pid: 1204, stack limit = 0xc6568278)
->> [...]
->>
->> Hardware is a PXA300 with a Marvell 8868 Wifi module attached over SDIO.
-> 
-> Adding Daniel Drake to CC, for 9a821f5d0fc ("libertas: add sd8686
-> reset_card support").
-> 
-> Looks like mmc_sdio_remove() calls mmc_remove_card() after the
-> reset_card function has called mmc_remove_host() already.  Maybe
-> if_sdio_reset_card_worker() should call mmc_free_host() as well?
-> 
-> Thanks,
-> 
-> - Chris.
+Up to the 3.1 mainline kernel WiFi worked just fine! I could boot the kernel and load the libertas module successfully:
+
+(during boot)
+[    3.193176] mmc1: new SDIO card at address 0001
+
+(when loading module)
+# modprobe libertas_sdio
+[   30.817749] lib80211: common routines for IEEE802.11 drivers
+[   31.143951] cfg80211: Calling CRDA to update world regulatory domain
+[   31.375823] libertas_sdio: Libertas SDIO driver
+[   31.380737] libertas_sdio: Copyright Pierre Ossman
+[   32.035186] libertas_sdio mmc1:0001:1: (unregistered net_device): 00:19:88:3e:4f:f9, fw 9.70.3p36, cap 0x00000303
+[   32.129943] libertas_sdio mmc1:0001:1: wlan0: Marvell WLAN 802.11 adapter
+
+
+However it seems that runtime PM has now been turned on by default (by setting MMC_CAP_POWER_OFF_CARD in drivers/mmc/core/host.c), and the WiFi 
+has stopped working!
+
+So, if I run the 3.2-rc2 (or rc1 for that matter) I get the following:
+
+(during boot)
+[    3.486541] mmc1: new SDIO card at address 0001
+
+(when loading module)
+# modprobe libertas_sdio
+[   34.015350] lib80211: common routines for IEEE802.11 drivers
+[   34.345092] cfg80211: Calling CRDA to update world regulatory domain
+[   34.574096] libertas_sdio: Libertas SDIO driver
+[   34.578979] libertas_sdio: Copyright Pierre Ossman
+[   34.637481] libertas_sdio: probe of mmc1:0001:1 failed with error -16
+
+
+Looking at arch/arm/mach-omap2/overo.c you can see that GPIO16 (OVERO_GPIO_W2W_NRESET) is the nRESET line for the 8686. This is held low for 
+10usecs during boot (see overo.c line 530 to 533).
+
+I'm not 100% sure how power is connected to the SD8686 as GUMSTIX don't release schematics for their modules.
+
+If I disable runtime PM (by commenting out the setting of MMC_CAP_POWER_OFF_CARD) everything works as before.
+
+I can see plenty of threads relating to getting the SD8686 working for OLPC, and that some workarounds have made it in to the mainline kernel. From what 
+I understand the problem is that runtime PM removes power from the 8686 after boot and before the loading of the libertas module.
+
+Are these workarounds expected to be enough for runtime PM to just "work"?
+Is there anything special I should be doing with the nRESET line other than that which is done by default in the board file (holding nRESET low for 10usecs)?
+
+Cheers,
+Joe
+
+
+
