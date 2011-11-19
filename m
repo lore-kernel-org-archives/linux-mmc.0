@@ -1,91 +1,148 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 2/4] mmc: omap: adapt the hsmmc driver to device tree
-Date: Fri, 18 Nov 2011 16:21:40 -0800
-Message-ID: <20111119002140.GX31337@atomide.com>
-References: <1320407441-29697-1-git-send-email-rnayak@ti.com>
- <1320407441-29697-3-git-send-email-rnayak@ti.com>
- <20111114213026.GP31337@atomide.com>
- <4EC1E757.2000308@ti.com>
+From: James Hogan <james@albanarts.com>
+Subject: Re: [PATCH 1/1] [PATCH v4 1/1] mmc: Support of DUAL BUFFER
+ DESC[ring] mode for dw_mmc
+Date: Sat, 19 Nov 2011 01:34:35 +0000
+Message-ID: <20111119013435.GA19582@balrog>
+References: <1317123568-5203-1-git-send-email-shashidharh@vayavyalabs.com>
+ <4E8BBD76.9020001@samsung.com>
+ <CANYdXnpe0prpdJcYpi3yVqCecugwZ1999c2u2u6ffjXjSeCDnw@mail.gmail.com>
+ <m2obwt8ju2.fsf@bob.laptop.org>
+ <CAFbHwiSahkGOd4EfYiKY-T9Segn9Nn4qSMA591SFRmMmKY67VQ@mail.gmail.com>
+ <CANYdXnqviDqYb9Rq0O-48P6f+v6NSg8j8-H7XYU+ccNx_P17zw@mail.gmail.com>
+ <CANYdXnpdHVWFbXnSR2wGVOF4zKMxxmEMTfC+1x10NCpvmPNXDQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:46353 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751744Ab1KSAVq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2011 19:21:46 -0500
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:60051 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751541Ab1KSBeo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2011 20:34:44 -0500
+Received: by wwe5 with SMTP id 5so6249780wwe.1
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2011 17:34:43 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <4EC1E757.2000308@ti.com>
+In-Reply-To: <CANYdXnpdHVWFbXnSR2wGVOF4zKMxxmEMTfC+1x10NCpvmPNXDQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rajendra Nayak <rnayak@ti.com>
-Cc: cjb@laptop.org, balajitk@ti.com, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, thomas.abraham@linaro.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Cc: Will Newton <will.newton@gmail.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org, Sandeep Pendharkar <sandeep@vayavyalabs.com>, Rayagond Kokatanur <rayagond@vayavyalabs.com>
 
-* Rajendra Nayak <rnayak@ti.com> [111114 19:40]:
-> On Tuesday 15 November 2011 03:00 AM, Tony Lindgren wrote:
-> >* Rajendra Nayak<rnayak@ti.com>  [111104 04:16]:
-> >>@@ -1869,6 +1957,14 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
-> >>  	struct omap_hsmmc_host *host = NULL;
-> >>  	struct resource *res;
-> >>  	int ret, irq;
-> >>+	const struct of_device_id *match;
-> >>+
-> >>+	match = of_match_device(omap_mmc_of_match,&pdev->dev);
-> >>+	if (match) {
-> >>+		pdata = of_get_hsmmc_pdata(&pdev->dev);
-> >>+		if (match->data)
-> >>+			pdata->reg_offset = *(u16 *)match->data;
-> >>+	}
+Hi Shashidhar,
+
+On Mon, Nov 14, 2011 at 09:32:25PM +0530, Shashidhar Hiremath wrote:
+> Hi Will,
+>=20
+> Just following up since i did not see any response from you on my
+> earlier mail.. In previous mail, im not sure whether i gave you enoug=
+h
+> context/background.. So here it goes (apologies in advance if this
+> turns out to be a  lengthy mail...):
+>=20
+> 1>At Vayavya Labs, our work is to make sure that drivers for SNPS
+> designware IP is available in kernel.org. One of the
+> mandates/requirements from SNPS is that the driver submitted to
+> kernel.org should support all the features/configurations of the IP.
+> The bigger picture being that once this is done, SNPS customers dont
+> have to write code for any specific feature/configuration since it is
+> already available in the driver and they can start using it
+> immediately...
+> 2>As such, it is required that code for dual descriptors be also
+> present in the driver submitted to kernel.org.. In future there, ther=
+e
+> could be some person wanting to use this feature of the IP..
+> 3>Also note that in kconfig, there does not have to be a choice
+> between this mode and chained mode since the default will always be
+> chained mode. STM Ethernet MAC driver already has such a kind of
+> support.. If this is not acceptable, do you feel the code should be
+> wrapped in some totally different preprocessor directive with comment=
+s
+> in the driver explaining the same?
+> 4>With regards to your points on performance, I am open to look at it
+> and see where we can make improvements in the driver (if any... if it=
+s
+> a hardware thing, there is not much we can do)
+
+Can I suggest you try running mmc_test with and without the dual
+descriptor mode. It has a bunch of performance tests in it.
+
+Cheers
+James
+
+>=20
+> Do let me know your views.
+>=20
+> best regards
+> --Shashidhar Hiremath
+>=20
+> On Fri, Nov 4, 2011 at 12:36 PM, Shashidhar Hiremath
+> <shashidharh@vayavyalabs.com> wrote:
+> > Hi Will,
+> > =A0 I agree with you that it should not be merged =A0unless it impr=
+oves
+> > the performance. But I still feel that there might be some reason f=
+or
+> > which the IP Vendor has provided an additional feature. So will thi=
+s
+> > not be a good feature to have as it will help in IP Validation for
+> > different modes.
+> > =A0As far as the Kconfig option is concerned, the user need not alw=
+ays
+> > modify it since the default case will still be Chained Mode. Also S=
+uch
+> > Kconfig options for selecting mode is already =A0used for stmmac
+> > Ethernet Drivers.
 > >
-> >So this is now using both DT and pdata?
+> > On Thu, Nov 3, 2011 at 8:48 PM, Will Newton <will.newton@gmail.com>=
+ wrote:
+> >> On Thu, Nov 3, 2011 at 12:35 PM, Chris Ball <cjb@laptop.org> wrote=
+:
+> >>> Hi,
+> >>>
+> >>> On Thu, Nov 03 2011, Shashidhar Hiremath wrote:
+> >>>> Hi Chris,
+> >>>> =A0 Can this patch be accepted by criteria that its an additiona=
+l
+> >>>> feature supported by the hardware and hence good to have the sup=
+port
+> >>>> in the driver.Also note the patch has been tested.
+> >>>
+> >>> I think Will and James should make the call on that.
+> >>>
+> >>> My own opinion is that it's not usually a good idea to merge code=
+ that
+> >>> increases complexity for no performance gain; if the feature is a=
+ctually
+> >>> important, someone should find a way to finish it and measure a
+> >>> performance gain (the gain can be in any of bandwidth, memory, or
+> >>> lower CPU utilization) with it, to prove that the change is worth=
+while.
+> >>
+> >> I'm inclined to agree. I don't want to feel like I am blocking
+> >> inclusion of anyone's hard work, but unless there is a clear advan=
+tage
+> >> for one option over the other I can't see a good reason for mergin=
+g
+> >> it. At present it adds a question to the Kconfig that is pretty mu=
+ch
+> >> impossible for the user to answer (do I turn this feature on or of=
+f?
+> >> what is the advantage of choosing each option?).
+> >>
 > >
-> >We want to use DT only, and get rid of pdata. Other than the
-> >deferred probe, is there some other dependency remaining to
-> >having to use the pdata also?
-> 
-> We are using pdata today mainly for the platform function pointers
-> that get passed for MMC, which can never be passed from DT.
-> 
-> The  omap_mmc_platform_data structure today has '17' function pointers.
-> Most might be sparingly used, nevertheless, its an awfully large number.
-
-Yeah OK.
- 
-> Here's the list...
-> ---------
-> int (*switch_slot)(struct device *dev, int slot);
-> int (*init)(struct device *dev);
-> void (*cleanup)(struct device *dev);
-> void (*shutdown)(struct device *dev);
-> int (*suspend)(struct device *dev, int slot);
-> int (*resume)(struct device *dev, int slot);
-> int (*get_context_loss_count)(struct device *dev);
-> 
-> per-slot functions
-> 
-> int (*set_bus_mode)(struct device *dev, int slot, int bus_mode);
-> int (*set_power)(struct device *dev, int slot,
->                                  int power_on, int vdd);
-> int (*get_ro)(struct device *dev, int slot);
-> int (*set_sleep)(struct device *dev, int slot, int sleep,
->                                  int vdd, int cardsleep);
-> void (*remux)(struct device *dev, int slot, int power_on);
-> void (*before_set_reg)(struct device *dev, int slot,
->                                        int power_on, int vdd);
-> void (*after_set_reg)(struct device *dev, int slot,
->                                       int power_on, int vdd);
-> void (*init_card)(struct mmc_card *card);
-> int (*get_cover_state)(struct device *dev, int slot);
-> int (*card_detect)(struct device *dev, int slot);
-> ---------
-
-To me it seems we should move these into drivers/mmc/host/omap_hsmmc.c
-and set them based on DT compatible (or some other) property.
-
-If these functions tinker with some internal registers, then we need
-to fix those too to use regulator/gpio API.
-
-This way we don't need the platform_data any longer.
-
-Regards,
-
-Tony
+> >
+> >
+> > --
+> > regards,
+> > Shashidhar Hiremath
+> >
+>=20
+>=20
+>=20
+> --=20
+> regards,
+> Shashidhar Hiremath
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
