@@ -1,94 +1,93 @@
-From: Per Forlin <per.lkml@gmail.com>
-Subject: Re: [PATCH v3] mmc: support BKOPS feature for eMMC
-Date: Sun, 20 Nov 2011 23:42:20 +0100
-Message-ID: <CAFEEs1mA8xSm2wTY_kO4GGysq0dQizAozm_3dTaooZM5+xWOuA@mail.gmail.com>
-References: <4EC45A39.5030706@samsung.com>
-	<000301cca539$c3bdb350$4b3919f0$@org>
-	<CAFEEs1=f+CG6g7eu84g6kG5tueqfV1rukzb3gX5-dZWmuO0s_A@mail.gmail.com>
-	<b1420856d6d04502786262d58234f78c.squirrel@www.codeaurora.org>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: omap_hsmmc noisy/broken for suspend resume
+Date: Mon, 21 Nov 2011 09:02:02 +0530
+Message-ID: <CAGxe1ZESmZ8hU4OZoCdacKTbu+uLcJinCEowfPSdqq5_aYw4kQ@mail.gmail.com>
+References: <878vnwhpbr.fsf@ti.com>
+	<CAGxe1ZFsTYt+8YyBuQZjUJ78d=19v9spFxrZkqYKiKgw0vpABg@mail.gmail.com>
+	<4EC6B566.5030406@deeprootsystems.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:44126 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754150Ab1KTWmV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Nov 2011 17:42:21 -0500
-Received: by vcbfk1 with SMTP id fk1so5004778vcb.19
-        for <linux-mmc@vger.kernel.org>; Sun, 20 Nov 2011 14:42:20 -0800 (PST)
-In-Reply-To: <b1420856d6d04502786262d58234f78c.squirrel@www.codeaurora.org>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:42364 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752204Ab1KUDcF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Nov 2011 22:32:05 -0500
+In-Reply-To: <4EC6B566.5030406@deeprootsystems.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Konstantin Dorfman <kdorfman@codeaurora.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, svenkatr@ti.com
+To: Kevin Hilman <khilman@deeprootsystems.com>
+Cc: Kevin Hilman <khilman@ti.com>, svenkatr@ti.com, linux-omap <linux-omap@vger.kernel.org>, Santosh Shilimkar <santosh.shilimkar@ti.com>, cjb@laptop.org, linux-mmc@vger.kernel.org
 
-Hi Konstantin,
-
-On Sun, Nov 20, 2011 at 5:12 PM, Konstantin Dorfman
-<kdorfman@codeaurora.org> wrote:
-> Hello Per,
+On 19 November 2011 01:13, Kevin Hilman <khilman@deeprootsystems.com> w=
+rote:
+> Hello Girish,
 >
->> On Thu, Nov 17, 2011 at 4:01 PM, Konstantin Dorfman
->> <kdorfman@codeaurora.org> wrote:
->>> Hello Jaenhoon,
+> On 11/03/2011 09:21 PM, Girish K S wrote:
+>> On 3 November 2011 17:24, Kevin Hilman <khilman@ti.com> wrote:
+>>> Hello,
 >>>
->>> I have a few suggestions regarding the situation when Host starts BKOPS:
+>>> Using Linus' master branch, I was testing PM functionality on OMAP3=
+/4
+>>> and noticed that the MMC driver is now rather noisy during suspend =
+on
+>>> OMAP3[1], but seems to work.
 >>>
->>> 1) Host should start BKOPS (based on BKOPS_STATUS or URGENT_BKOPS event)
->>> when going to mmc_sleep, which means that the bus is in idle state (this
->>> also covers the case in mmc_queue_thread, because in this case no I/O
->>> request exists). It seems like checking the status periodically in
->>> addition
->>> to mmc_suspend is not needed. Since if the device was in idle and we
->>> performed a single BKOPS then there is no point in performing another
->>> BKOPS
->>> unless there was actually another I/O request.
->>>
->>> 2) Also this implies an answer to the question about need to interrupt
->>> BKOPS
->>> before powering off card - the answer is no.
->> By the answer no you mean there is no risk of data corruption if
->> cutting power in the middle of a BKOPS. When the card is powered up
->> next time it will verify that bkops is in a defined state, and do
->> recovery if necessary. An interesting comment I got from Sebastian is
->> if this recovery mechanism affects card boot time.
->> The question is: May the card boot up slower (due to recovery) next
->> time if BKOPS was ongoing at power off?
->> I assume this recovery time should be insignificant, but I don't know for
->> sure.
+>
+> [...]
+>
+>>> / # echo mem > /sys/power/state
+>>> [ =A0811.145507] PM: Syncing filesystems ... done.
+>>> [ =A0811.150268] PM: Preparing system for mem sleep
+>>> [ =A0811.155059] Freezing user space processes ... (elapsed 0.01 se=
+conds) done.
+>>> [ =A0811.179992] Freezing remaining freezable tasks ... (elapsed 0.=
+01 seconds) done.
+>>> [ =A0811.203460] PM: Entering mem sleep
+>>> [ =A0811.207489] Suspending console(s) (use no_console_suspend to d=
+ebug)
+>>> a[ =A0811.225860] ------------[ cut here ]------------
+>>> [ =A0811.225891] WARNING: at /work/kernel/omap/pm/drivers/mmc/core/=
+core.c:453 mmc_wait_for_cmd+0x78/0x84()
+>>> [ =A0811.225921] Modules linked in:
+>>> [ =A0811.225952] [<c001a810>] (unwind_backtrace+0x0/0xf0) from [<c0=
+0525d0>] (warn_slowpath_common+0x4c/0x64)
+>>> [ =A0811.225982] [<c00525d0>] (warn_slowpath_common+0x4c/0x64) from=
+ [<c0052604>] (warn_slowpath_null+0x1c/0x24)
+>>> [ =A0811.226013] [<c0052604>] (warn_slowpath_null+0x1c/0x24) from [=
+<c033a494>] (mmc_wait_for_cmd+0x78/0x84)
+>>> [ =A0811.226043] [<c033a494>] (mmc_wait_for_cmd+0x78/0x84) from [<c=
+033e7b8>] (mmc_switch+0x74/0x118)
+>>> [ =A0811.226074] [<c033e7b8>] (mmc_switch+0x74/0x118) from [<c033b0=
+34>] (mmc_power_off+0xd8/0x108)
 >>
-> Let me explain proposed flow:
-> The only trigger to start BKOPS command should be mmc_power_off() function,
-> just before sending POWER_OFF_NOTIFICATION[34] and only when BKOPS is needed
-> (by needed I understand situation, when URGENT_BKOPS event arrived or
-> BKOPS_STATUS 0x2 or 0x3).
-> The flow will wait till BKOPS successfully completed and than continue to
-> powering off the card. Power off will never occur in the middle of BKOPS.
-> Also do not need to start BKOPS when mmc_queue_thread() is in IDLE state
-> (no requests exists), because in such case power off should be done to card.
+>> The problem is caused by the card->poweroff_notify_state =3D
+>> MMC_POWERED_ON; statement in the mmc_card_init function
+>> it is set for the non eMMC4.5 devices. I will rectify this and soon
+>> send a patch for the same.
 >
-I wonder how this works with suspend.
-If suspend is called on the system, MMC should suspend quickly and not
-wait for the BKOPS to finish.
-For pm_runtime_suspend it's fine to return -EBUSY and defer
-pm_runtime_suspend until BKOPS is completed.
-mmc_power_on/off is too low level I think. What about adding this at
-the suspend/resume level instead?
-
->>> 3) Based on statistical data we have (day long test) it looks like we do
->>> not
->>> need to do any preventive BKOPS caused by BKOPS_STATUS less than
->>> critical
->>> (0x3).
->> I proposed this "preventive action" but at that time I didn't have any
->> data to back it up with. I've run some day long tests and what I could
->> see is when BKOPS_LEVEL goes from 0 to 1, it goes back to 0 without
->> having to start BKOPS. Can you confirm this with your tests as well?
->> One explanation I got for this is that level of 1 only means the eMMC
->> internal cache is fragmented and not the actual memory.
-> We have such data from card vendors, but I plan to do similar tests to
-> confirm.
-> I will update about the results.
-Looking forward to see your results.
-
-Thanks,
-Per
+> Is this the patch that fixes this issue:
+>
+> =A0 =A0 =A0 =A0http://article.gmane.org/gmane.linux.kernel.mmc/10961
+>
+> I found this by digging (since I'm not subscribed to linux-mmc), but =
+it
+> would've been much more efficient if you Cc the original lists where =
+the
+> issue was reported, and especially the person reporting the bug so it
+> can be tested by those reporting the problem.
+> Did you mention in your first mail? "You are not subscribed in the li=
+st."
+> I tested the above patch and verified it gets rid of all the noise in
+> the OMAP HS-MMC driver.
+>
+> Chris, I see this is already in mmc-next. =A0Feel free to add:
+>
+> Tested-by: Kevin Hilman <khilman@ti.com>
+>
+> If you like.
+>
+> Thanks,
+>
+> Kevin
+>
