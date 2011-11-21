@@ -1,98 +1,41 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] sdhci-pci register legacy PCI PM or runtime PM not both
-Date: Mon, 21 Nov 2011 10:48:20 +0200
-Message-ID: <4ECA1054.6050805@intel.com>
-References: <20111120212951.GA4577@spacedout.fries.net>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: debugfs: parse all ext_csd via debug_fs
+Date: Mon, 21 Nov 2011 11:08:25 +0100
+Message-ID: <CACRpkda4gf7dpMxzPTjNZZX1mNqS4YMv21w-xC9TFCYot3qRAg@mail.gmail.com>
+References: <1319468694-8773-1-git-send-email-peppe.cavallaro@st.com>
+	<CAAgDR1N_CKnXo=G2oTHAShhgegMZF-nMySBuWebDPeu8VTEBKg@mail.gmail.com>
+	<CACRpkda0y7cOR4EfuGLoGnD_PS1gTWqN7UA74=s2mWmEHokQhQ@mail.gmail.com>
+	<4ECA0025.6030700@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:7133 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754443Ab1KUIsX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 21 Nov 2011 03:48:23 -0500
-In-Reply-To: <20111120212951.GA4577@spacedout.fries.net>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:45797 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755291Ab1KUKI0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2011 05:08:26 -0500
+Received: by iage36 with SMTP id e36so7073189iag.19
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Nov 2011 02:08:25 -0800 (PST)
+In-Reply-To: <4ECA0025.6030700@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Fries <david@fries.net>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Yunpeng Gao <yunpeng.gao@intel.com>
+To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Cc: Chris Ball <cjb@laptop.org>, Sebastian Rasmussen <sebras@gmail.com>, linux-mmc@vger.kernel.org
 
-On 20/11/11 23:29, David Fries wrote:
-> From: David Fries <David@Fries.net>
-> 
-> pci_has_legacy_pm_support says to not register both legacy PM
-> and runtime PM callbacks, modified ifdefs.
+On Mon, Nov 21, 2011 at 8:39 AM, Giuseppe CAVALLARO
+<peppe.cavallaro@st.com> wrote:
 
-Hasn't this already been done in Chris mmc tree i.e.
+> Just to summarize: the patch works in debugfs context so the parsing doesn't
+> break the sys rules. I agree with Chris this has to be maintained for the
+> next mmc standards but IMO we can pay this waiting for having both a
+> user-space application (mmc-tool) and the ext_csd in /sys (after that the
+> ext_csd in debugfs could be completely removed).
 
-commit f353f593fe449178a8cb01cefe559dba125ab8b1
-Author: Manuel Lauss <manuel.lauss@googlemail.com>
-Date:   Thu Nov 3 11:09:45 2011 +0100
+I'm all for this patch so it gets visible in debugfs atleast,
+since people seem to need to know these things, so take that as an
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-    mmc: sdhci: remove "state" argument from sdhci_suspend_host
+Those who want to writ userspace tools can proceed to
+implement the proper sysfs interfaces and document them.
 
-    Drop the "state" argument from sdhci_suspend_host.  Its only user is the
-    PCI glue;  this allows to move all SDHCI glues to use dev_pm_ops instead.
-
-    Signed-off-by: Manuel Lauss <manuel.lauss@googlemail.com>
-    Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-    Signed-off-by: Chris Ball <cjb@laptop.org>
-
- drivers/mmc/host/sdhci-cns3xxx.c   |    5 +----
- drivers/mmc/host/sdhci-dove.c      |    5 +----
- drivers/mmc/host/sdhci-esdhc-imx.c |    5 +----
- drivers/mmc/host/sdhci-of-esdhc.c  |    5 +----
- drivers/mmc/host/sdhci-of-hlwd.c   |    5 +----
- drivers/mmc/host/sdhci-pci.c       |   26 +++++++++++++-------------
- drivers/mmc/host/sdhci-pltfm.c     |   18 +++++++++++-------
- drivers/mmc/host/sdhci-pltfm.h     |    6 ++++--
- drivers/mmc/host/sdhci-pxav2.c     |    5 +----
- drivers/mmc/host/sdhci-pxav3.c     |    5 +----
- drivers/mmc/host/sdhci-s3c.c       |   21 ++++++++++++++-------
- drivers/mmc/host/sdhci-tegra.c     |    5 +----
- drivers/mmc/host/sdhci.c           |    2 +-
- drivers/mmc/host/sdhci.h           |    2 +-
- 14 files changed, 52 insertions(+), 63 deletions(-)
-
-
-
-> 
-> Signed-off-by: David Fries <David@Fries.net>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Yunpeng Gao <yunpeng.gao@intel.com>
-> ---
->  drivers/mmc/host/sdhci-pci.c |    7 ++++---
->  1 files changed, 4 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index d833d9c..eca6e84 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -991,7 +991,8 @@ static struct sdhci_ops sdhci_pci_ops = {
->   *                                                                           *
->  \*****************************************************************************/
->  
-> -#ifdef CONFIG_PM
-> +/* Register legacy PM or PM runtime, not both. */
-> +#if defined(CONFIG_PM) && !defined(CONFIG_PM_RUNTIME)
->  
->  static int sdhci_pci_suspend(struct pci_dev *pdev, pm_message_t state)
->  {
-> @@ -1085,12 +1086,12 @@ static int sdhci_pci_resume(struct pci_dev *pdev)
->  	return 0;
->  }
->  
-> -#else /* CONFIG_PM */
-> +#else /* CONFIG_PM && !CONFIG_PM_RUNTIME */
->  
->  #define sdhci_pci_suspend NULL
->  #define sdhci_pci_resume NULL
->  
-> -#endif /* CONFIG_PM */
-> +#endif /* CONFIG_PM && !CONFIG_PM_RUNTIME */
->  
->  #ifdef CONFIG_PM_RUNTIME
->  
-
+Thanks,
+Linus Walleij
