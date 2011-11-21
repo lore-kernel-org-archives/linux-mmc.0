@@ -1,162 +1,159 @@
 From: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
-Subject: [PATCH v3 2/4] ARM: pxa168: Add SDHCI support
-Date: Mon, 21 Nov 2011 09:56:12 +0530
-Message-ID: <1321849572-2944-1-git-send-email-tanmay.upadhyay@einfochips.com>
+Subject: [PATCH v2 3/4] mmc: sdhci-pxa: Add SDHCI driver for PXA16x
+Date: Mon, 21 Nov 2011 09:56:49 +0530
+Message-ID: <1321849609-3013-1-git-send-email-tanmay.upadhyay@einfochips.com>
 References: <87r51fwxgt.fsf@laptop.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ahm.einfochips.com ([203.76.128.206]:59331 "EHLO
+Received: from ahm.einfochips.com ([203.76.128.206]:59370 "EHLO
 	ahm.einfochips.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751782Ab1KUE0W (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Nov 2011 23:26:22 -0500
+	with ESMTP id S1752164Ab1KUE1A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Nov 2011 23:27:00 -0500
 In-Reply-To: <87r51fwxgt.fsf@laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: eric.y.miao@gmail.com, jason.chagas@marvell.com
-Cc: prakity@marvell.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
+To: zhangfei.gao@marvell.com, dwang4@marvell.com, njun@marvell.com, wuqm@marvell.com, prakity@marvell.com
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
 
-v2 - clock register for SDHCI are not common across all MMP SoCs.
-     So, move PXA168 implementation to pxa168.c
+PXA16x devices uses SDHCI controller v1. As it's not much different
+than v2 controller, v1 driver is merged with sdhci-pxav2 driver
 
-v3 - sdhci-pxav1 driver code is merged with sdhci-pxav2. So, change
-     the device name accordingly
-   - start sdhci device numbering from 1 as other PXA168 devices
-     does that
+v2 - instead of having separate file sdhci-pxav1, merge code with
+     sdhci-pxav2 driver code as suggested by Chris Ball
 
+Signed-off-by: Philip Rakity <prakity@marvell.com>
 Signed-off-by: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
-Reviewed-by: Philip Rakity <prakity@marvell.com>
 ---
- arch/arm/mach-mmp/include/mach/pxa168.h |   20 +++++++++++++
- arch/arm/mach-mmp/pxa168.c              |   46 +++++++++++++++++++++++++++++++
- 2 files changed, 66 insertions(+), 0 deletions(-)
+ drivers/mmc/host/Kconfig                |    7 ++++---
+ drivers/mmc/host/sdhci-pxav2.c          |   30 +++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci.c                |    3 +++
+ drivers/mmc/host/sdhci.h                |    1 +
+ include/linux/platform_data/pxa_sdhci.h |    2 ++
+ 5 files changed, 39 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm/mach-mmp/include/mach/pxa168.h b/arch/arm/mach-mmp/include/mach/pxa168.h
-index 7fb568d..a181608 100644
---- a/arch/arm/mach-mmp/include/mach/pxa168.h
-+++ b/arch/arm/mach-mmp/include/mach/pxa168.h
-@@ -15,6 +15,7 @@ extern void pxa168_clear_keypad_wakeup(void);
- #include <plat/pxa27x_keypad.h>
- #include <mach/cputype.h>
- #include <linux/pxa168_eth.h>
-+#include <linux/platform_data/pxa_sdhci.h>
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 21b4149..77541f5 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -195,14 +195,15 @@ config MMC_SDHCI_PXAV3
+ 	  If unsure, say N.
  
- extern struct pxa_device_desc pxa168_device_uart1;
- extern struct pxa_device_desc pxa168_device_uart2;
-@@ -34,6 +35,10 @@ extern struct pxa_device_desc pxa168_device_nand;
- extern struct pxa_device_desc pxa168_device_fb;
- extern struct pxa_device_desc pxa168_device_keypad;
- extern struct pxa_device_desc pxa168_device_eth;
-+extern struct pxa_device_desc pxa168_device_sdh1;
-+extern struct pxa_device_desc pxa168_device_sdh2;
-+extern struct pxa_device_desc pxa168_device_sdh3;
-+extern struct pxa_device_desc pxa168_device_sdh4;
+ config MMC_SDHCI_PXAV2
+-	tristate "Marvell PXA9XX SD Host Controller support (PXAV2)"
++	tristate "Marvell PXA16X/PXA9XX SD Host Controller support (PXAV1/V2)"
+ 	depends on CLKDEV_LOOKUP
+ 	select MMC_SDHCI
+ 	select MMC_SDHCI_PLTFM
+ 	default y if CPU_PXA910
++	default y if CPU_PXA168
+ 	help
+-	  This selects the Marvell(R) PXAV2 SD Host Controller.
+-	  If you have a PXA9XX platform with SD Host Controller
++	  This selects the Marvell(R) PXAV1/V2 SD Host Controller.
++	  If you have a PXA16X or PXA9XX platform with SD Host Controller
+ 	  and a card slot, say Y or M here.
  
- struct pxa168_usb_pdata {
- 	/* If NULL, default phy init routine for PXA168 would be called */
-@@ -132,4 +137,19 @@ static inline int pxa168_add_eth(struct pxa168_eth_platform_data *data)
- {
- 	return pxa_register_device(&pxa168_device_eth, data, sizeof(*data));
- }
-+
-+static inline int pxa168_add_sdh(int id, struct sdhci_pxa_platdata *data)
-+{
-+	struct pxa_device_desc *d = NULL;
-+
-+	switch (id) {
-+	case 1: d = &pxa168_device_sdh1; break;
-+	case 2: d = &pxa168_device_sdh2; break;
-+	case 3: d = &pxa168_device_sdh3; break;
-+	case 4: d = &pxa168_device_sdh4; break;
-+	default:
-+		return -EINVAL;
-+	}
-+	return pxa_register_device(d, data, sizeof(*data));
-+}
- #endif /* __ASM_MACH_PXA168_H */
-diff --git a/arch/arm/mach-mmp/pxa168.c b/arch/arm/mach-mmp/pxa168.c
-index 76ca15c..102f65f 100644
---- a/arch/arm/mach-mmp/pxa168.c
-+++ b/arch/arm/mach-mmp/pxa168.c
-@@ -45,6 +45,14 @@ static struct mfp_addr_map pxa168_mfp_addr_map[] __initdata =
+ 	  If unsure, say N.
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+index d4bf6d3..633cc77 100644
+--- a/drivers/mmc/host/sdhci-pxav2.c
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -28,6 +28,7 @@
+ #include <linux/mmc/host.h>
+ #include <linux/platform_data/pxa_sdhci.h>
+ #include <linux/slab.h>
++#include <linux/delay.h>
+ #include "sdhci.h"
+ #include "sdhci-pltfm.h"
  
- #define APMASK(i)	(GPIO_REGS_VIRT + BANK_OFF(i) + 0x09c)
+@@ -72,7 +73,13 @@ static void pxav2_set_private_registers(struct sdhci_host *host, u8 mask)
+ 			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+ 		}
  
-+/* Offset defined in arch/arm/mach-mmp/include/mach/regs-apmu.h are for MMP2
-+ * PXA168 has different offset */
-+#undef APMU_SDH2
-+#undef APMU_SDH3
-+
-+#define APMU_SDH2	APMU_REG(0xe0)
-+#define APMU_SDH3	APMU_REG(0xe4)
-+
- static void __init pxa168_init_gpio(void)
- {
- 	int i;
-@@ -65,6 +73,31 @@ void __init pxa168_init_irq(void)
- 	pxa168_init_gpio();
+-		if (pdata && (pdata->flags & PXA_FLAG_ENABLE_CLOCK_GATING)) {
++		if (pdata && pdata->pxav1_controller) {
++			/* no clock gating */
++			tmp = readw(host->ioaddr + SD_FIFO_PARAM);
++			tmp |= DIS_PAD_SD_CLK_GATE;
++			writew(tmp, host->ioaddr + SD_FIFO_PARAM);
++		} else if (pdata && (pdata->flags
++				& PXA_FLAG_ENABLE_CLOCK_GATING)) {
+ 			tmp = readw(host->ioaddr + SD_FIFO_PARAM);
+ 			tmp &= ~CLK_GATE_SETTING_BITS;
+ 			writew(tmp, host->ioaddr + SD_FIFO_PARAM);
+@@ -115,6 +122,20 @@ static u32 pxav2_get_max_clock(struct sdhci_host *host)
+ 	return clk_get_rate(pltfm_host->clk);
  }
  
-+static void sdh_clk_enable(struct clk *clk)
++/*
++ * we cannot talk to controller for 8 bus cycles according to sdio spec
++ * at lowest speed this is 100,000 HZ per cycle or 800,000 cycles
++ * which is quite a LONG TIME on a fast cpu -- so delay if needed
++ */
++static void platform_specific_completion(struct sdhci_host *host)
 +{
-+	void __iomem *clk_reg_offset = clk->clk_rst;
++	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
++	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
 +
-+	/* Can't see any clean way to do this: Bits 3 & 0 in registers
-+	 * for host 0 & 2 should be set for host 1 & 3 also */
-+	if (clk_reg_offset == APMU_SDH0 || clk_reg_offset == APMU_SDH1)
-+		__raw_writel(__raw_readl(APMU_SDH0) | 0x9, APMU_SDH0);
-+	if (clk_reg_offset == APMU_SDH2 || clk_reg_offset == APMU_SDH3)
-+		__raw_writel(__raw_readl(APMU_SDH2) | 0x9, APMU_SDH2);
-+
-+	__raw_writel(__raw_readl(clk->clk_rst) | clk->enable_val, clk->clk_rst);
++	if (host->clock < 3200000 && pdata && pdata->delay_in_ms)
++		mdelay(pdata->delay_in_ms);
 +}
 +
-+static void sdh_clk_disable(struct clk *clk)
-+{
-+	__raw_writel(__raw_readl(clk->clk_rst) & ~(clk->enable_val),
-+			clk->clk_rst);
-+}
-+
-+struct clkops sdh_clk_ops = {
-+	.enable		= sdh_clk_enable,
-+	.disable	= sdh_clk_disable,
-+};
-+
- /* APB peripheral clocks */
- static APBC_CLK(uart1, PXA168_UART1, 1, 14745600);
- static APBC_CLK(uart2, PXA168_UART2, 1, 14745600);
-@@ -87,6 +120,11 @@ static APMU_CLK(lcd, LCD, 0x7f, 312000000);
- static APMU_CLK(eth, ETH, 0x09, 0);
- static APMU_CLK(usb, USB, 0x12, 0);
+ static struct sdhci_ops pxav2_sdhci_ops = {
+ 	.get_max_clock = pxav2_get_max_clock,
+ 	.platform_reset_exit = pxav2_set_private_registers,
+@@ -167,6 +188,13 @@ static int __devinit sdhci_pxav2_probe(struct platform_device *pdev)
+ 		if (pdata->flags & PXA_FLAG_SD_8_BIT_CAPABLE_SLOT)
+ 			host->mmc->caps |= MMC_CAP_8_BIT_DATA;
  
-+static APMU_CLK_OPS(sdh1, SDH0, 0x12, 48000000, &sdh_clk_ops);
-+static APMU_CLK_OPS(sdh2, SDH1, 0x12, 48000000, &sdh_clk_ops);
-+static APMU_CLK_OPS(sdh3, SDH2, 0x12, 48000000, &sdh_clk_ops);
-+static APMU_CLK_OPS(sdh4, SDH3, 0x12, 48000000, &sdh_clk_ops);
++		if (pdata->pxav1_controller) {
++			host->quirks |=	SDHCI_QUIRK_NO_BUSY_IRQ
++					| SDHCI_QUIRK_32BIT_DMA_SIZE;
++			pxav2_sdhci_ops.platform_specific_completion
++				= platform_specific_completion;
++		}
 +
- /* device and clock bindings */
- static struct clk_lookup pxa168_clkregs[] = {
- 	INIT_CLKREG(&clk_uart1, "pxa2xx-uart.0", NULL),
-@@ -108,6 +146,10 @@ static struct clk_lookup pxa168_clkregs[] = {
- 	INIT_CLKREG(&clk_keypad, "pxa27x-keypad", NULL),
- 	INIT_CLKREG(&clk_eth, "pxa168-eth", "MFUCLK"),
- 	INIT_CLKREG(&clk_usb, "pxa168-ehci", "PXA168-USBCLK"),
-+	INIT_CLKREG(&clk_sdh1, NULL, "PXA-SDHCLK"),
-+	INIT_CLKREG(&clk_sdh2, NULL, "PXA-SDHCLK"),
-+	INIT_CLKREG(&clk_sdh3, NULL, "PXA-SDHCLK"),
-+	INIT_CLKREG(&clk_sdh4, NULL, "PXA-SDHCLK"),
+ 		if (pdata->quirks)
+ 			host->quirks |= pdata->quirks;
+ 		if (pdata->host_caps)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 6d8eea3..c6b52b8 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -983,6 +983,9 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		mdelay(1);
+ 	}
+ 
++	if (host->ops->platform_specific_completion)
++		host->ops->platform_specific_completion(host);
++
+ 	mod_timer(&host->timer, jiffies + 10 * HZ);
+ 
+ 	host->cmd = cmd;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0a5b654..4ba3244 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -274,6 +274,7 @@ struct sdhci_ops {
+ 	void	(*platform_reset_exit)(struct sdhci_host *host, u8 mask);
+ 	int	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
+ 	void	(*hw_reset)(struct sdhci_host *host);
++	void	(*platform_specific_completion)(struct sdhci_host *host);
  };
  
- static int __init pxa168_init(void)
-@@ -173,6 +215,10 @@ PXA168_DEVICE(ssp5, "pxa168-ssp", 4, SSP5, 0xd4021000, 0x40, 60, 61);
- PXA168_DEVICE(fb, "pxa168-fb", -1, LCD, 0xd420b000, 0x1c8);
- PXA168_DEVICE(keypad, "pxa27x-keypad", -1, KEYPAD, 0xd4012000, 0x4c);
- PXA168_DEVICE(eth, "pxa168-eth", -1, MFU, 0xc0800000, 0x0fff);
-+PXA168_DEVICE(sdh1, "sdhci-pxav2", 0, SDH1, 0xd4280000, 0x100);
-+PXA168_DEVICE(sdh2, "sdhci-pxav2", 1, SDH1, 0xd4281000, 0x100);
-+PXA168_DEVICE(sdh3, "sdhci-pxav2", 2, SDH2, 0xd427e000, 0x100);
-+PXA168_DEVICE(sdh4, "sdhci-pxav2", 3, SDH2, 0xd427f000, 0x100);
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+diff --git a/include/linux/platform_data/pxa_sdhci.h b/include/linux/platform_data/pxa_sdhci.h
+index 51ad099..99bf54d 100644
+--- a/include/linux/platform_data/pxa_sdhci.h
++++ b/include/linux/platform_data/pxa_sdhci.h
+@@ -51,6 +51,8 @@ struct sdhci_pxa_platdata {
+ 	unsigned int	host_caps;
+ 	unsigned int	quirks;
+ 	unsigned int	pm_caps;
++	bool		pxav1_controller;  /* set if pxa168 */
++	unsigned int	delay_in_ms;
+ };
  
- struct resource pxa168_usb_host_resources[] = {
- 	/* USB Host conroller register base */
+ struct sdhci_pxa {
 -- 
 1.7.0.4
 
