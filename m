@@ -1,62 +1,107 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [Query] mmc: core "MMC_PM_KEEP_POWER"
-Date: Tue, 22 Nov 2011 08:53:37 -0500
-Message-ID: <87ty5w2rha.fsf@laptop.org>
-References: <4ECBA3B1.1010808@stericsson.com>
+From: "Konstantin Dorfman" <kdorfman@codeaurora.org>
+Subject: Re: [PATCH v3] mmc: support BKOPS feature for eMMC
+Date: Tue, 22 Nov 2011 16:00:38 +0200 (IST)
+Message-ID: <e32cfeb959b1b8849a6f3644b157056d.squirrel@www.codeaurora.org>
+References: <4EC45A39.5030706@samsung.com>
+    <3f75bb7f25e649376784536d819e7fbf.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:42989 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755421Ab1KVNxo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 22 Nov 2011 08:53:44 -0500
-In-Reply-To: <4ECBA3B1.1010808@stericsson.com> (Ulf Hansson's message of "Tue,
-	22 Nov 2011 14:29:21 +0100")
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:51948 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755480Ab1KVOAj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2011 09:00:39 -0500
+In-Reply-To: <3f75bb7f25e649376784536d819e7fbf.squirrel@www.codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, eliad@wizery.com, nico@fluxnic.net
+To: Konstantin Dorfman <kdorfman@codeaurora.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per Forlin <per.lkml@gmail.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>
 
-Hi,
-
-On Tue, Nov 22 2011, Ulf Hansson wrote:
-> Hi,
+> Hello Jaehoon,
 >
-> In mmc_resume_host we clear the MMC_PM_KEEP_POWER flag from the
-> pm_flags bitfield. This is done by a patch from Eliad Peller a while
-> ago, "mmc: clear MMC_PM_KEEP_POWER flag on resume"
+> ...
+>> +/**
+>> + *	mmc_start_bkops - start BKOPS for supported cards
+>> + *	@card: MMC card to start BKOPS
+>> + *
+>> + *	Start background operations whenever requested.
+>> + *	when the urgent BKOPS bit is set in a R1 command response
+>> + *	then background operations should be started immediately.
+>> +*/
+>> +void mmc_start_bkops(struct mmc_card *card)
+>> +{
+>> +	int err;
+>> +	unsigned long flags;
+>> +
+>> +	BUG_ON(!card);
+>> +	if ((!card->ext_csd.bkops_en) ||
+>> +			!(card->host->caps2 & MMC_CAP2_BKOPS))
+>> +		return;
+>> +
+>> +	/*
+>> +	 * If card is already doing bkops or need for
+>> +	 * bkops flag is not set, then do nothing just
+>> +	 * return
+>> +	 */
+>> +	if (mmc_card_doing_bkops(card)
+>> +			|| !mmc_card_need_bkops(card))
+>> +		return;
+>> +
+>> +	mmc_claim_host(card->host);
+>> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +			EXT_CSD_BKOPS_START, 1, 0);
+>> +	if (err) {
+>> +		pr_warning("error %d starting bkops\n", err);
+>> +		mmc_card_clr_need_bkops(card);
+>> +		goto out;
+>> +	}
+>> +	spin_lock_irqsave(&card->host->lock, flags);
+>> +	mmc_card_clr_need_bkops(card);
+>> +	mmc_card_set_doing_bkops(card);
+> Sending CMD6 (by mmc_switch()) will start BKOPS on card,
+> according to eMMC spec:
+> -----
+> 7.4.56 BKOPS_START [164]
+> Writing any value to this field shall manually start background
+> operations.
+> Device shall stay busy till no more background operations are needed.
+> -----
+> Where/when mmc_card_clear_doing_bkops() should called? The only place I
+> see this happens is
+> in mmc_interrupt_bkops(). This means, that once BKOPS started, next
+> read/write request
+> will _always_(and not when card really busy) send HPI and only then will
+> clear "doing" flag.
 >
-> I would like to understand if there are any reason to why we want to
-> clear this flag after we done a resume. I think it will add complexity
-> to an sdio function driver since it must update this flag for after
-> each suspend/resume sequence. Should it not just be enough to do this
-> during the initialization of the sdio func driver.
+> May be it is possible to poll for ack from card about when BKOPS finished?
+> Another possibility that
+> mmc_switch() synchronous and after flow returns from it, we can clear
+> "doing" flag immediately.
+> Does it make sense?
+> ...
 
-The sdio function driver should just call sdio_set_host_pm_flags() in
-its suspend function, if it wants to stay awake at the next suspend.
-It's just one line of code, so I don't think it's overly complex.
-
-We clear the flag because that's how the API is defined --
-sdio_set_host_pm_flags() says "This must be called, if needed, each
-time the suspend method of the function driver is called".
-
-There's a separate question of "Why is the API this way, and should
-we change it?".  I think the API ended up this way because it was
-created for a wifi device where a suspend would usually happen while
-you're unassociated, so you don't need to preserve power (because
-nothing interesting can happen to wake you up), but will sometimes
-happen while you're associated, in which case you do.  It sounds like
-you're considering a device that *always* wants to stay awake, which
-is different to the rest of the users of this API.
-
-But it's just the difference between (your proposal) having
-sdio_set_host_pm_flags() be called during init, and (the API) having
-sdio_set_host_pm_flags() be called during suspend.  It's the same
-line of code either way, so I don't see why it's annoying this way.
-
+Now I understand that mmc_switch() command was modified for BKOPS_START to
+be non-blocking, so the flow never waits for BKOPS to be finished. Because
+of this HPI is always sent before next request.
+Since start bkops flow is not frequent, it is ok.
 Thanks,
+Kostya
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+>> +	spin_unlock_irqrestore(&card->host->lock, flags);
+>> +out:
+>> +	mmc_release_host(card->host);
+>> +}
+>> +EXPORT_SYMBOL(mmc_start_bkops);
+>> +
+>
+> Thanks,
+> Kostya
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
