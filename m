@@ -1,47 +1,53 @@
-From: Greg KH <greg@kroah.com>
-Subject: Re: [GIT PULL] ARM: amba: Enable module alias
- autogeneration for AMBA drivers
-Date: Tue, 22 Nov 2011 11:20:30 -0800
-Message-ID: <20111122192030.GA4930@kroah.com>
-References: <1321961573-4562-1-git-send-email-dave.martin@linaro.org>
-	<20111122115632.GA5165@mail.gnudd.com>
+From: David Taylor <dmtaylor@skytex.net>
+Subject: Re: [PATCH] mmc: core: Kill block requests if card is removed
+Date: Tue, 22 Nov 2011 20:18:31 +0000 (UTC)
+Message-ID: <loom.20111122T210615-276@post.gmane.org>
+References: <1320813119-24383-1-git-send-email-sthumma@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-Content-Disposition: inline
-In-Reply-To: <20111122115632.GA5165@mail.gnudd.com>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
-	<mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
-	<mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Sender: alsa-devel-bounces@alsa-project.org
-Errors-To: alsa-devel-bounces@alsa-project.org
-To: Alessandro Rubini <rubini@unipv.it>
-Cc: dave.martin@linaro.org, Pawel.Moll@arm.com, tiwai@suse.de, linus.walleij@linaro.org, alsa-devel@alsa-project.org, grant.likely@secretlab.ca, wim@iguana.be, julia@diku.dk, linux@arm.linux.org.uk, vinod.koul@intel.com, jassisinghbrar@gmail.com, linux-serial@vger.kernel.org, linux-input@vger.kernel.org, cjb@laptop.org, linux-watchdog@vger.kernel.org, rtc-linux@googlegroups.com, patches@linaro.org, linux-fbdev@vger.kernel.org, dan.j.williams@intel.com, linux-arm-kernel@lists.infradead.org, alan@linux.intel.com, a.zummo@towertech.it, dmitry.torokhov@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, lethal@linux-sh.org, spi-devel-general@lists.sourceforge.net
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lo.gmane.org ([80.91.229.12]:47733 "EHLO lo.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753278Ab1KVVkJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 22 Nov 2011 16:40:09 -0500
+Received: from list by lo.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1RSy4W-0005nO-11
+	for linux-mmc@vger.kernel.org; Tue, 22 Nov 2011 22:40:08 +0100
+Received: from 192.94.92.11 ([192.94.92.11])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Nov 2011 22:40:08 +0100
+Received: from dmtaylor by 192.94.92.11 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Nov 2011 22:40:08 +0100
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-On Tue, Nov 22, 2011 at 12:56:32PM +0100, Alessandro Rubini wrote:
-> > I have Acks on some of the driver patches and no comments on the
-> > rest.  I've been circulating these for some time, so if you're
-> > happy to pull those driver patches via your tree, please go ahead.
-> 
-> Sure I have no problem with the nomadik-rng.c, (so please have my
-> Acked-by: -- sorry for not noting it earlier) but I think this
-> file2alias thing needs a serious rework to split each bus in a
-> different file, using ELF sections like we do elsewhere.
-> 
-> I posted a patch last week but I got no comment at all. Maybe this
-> is the time to ask for comments? I can rebase and repost if needed.
-> 
->   lkml.org/lkml/2011/11/4/125 (0/2: description of the work)
->   lkml.org/lkml/2011/11/4/126 (1/2: turn the if plethora to table lookup)
->   lkml.org/lkml/2011/11/4/127 (2/2: partial split to type-specific files).
+Sujit Reddy Thumma <sthumma <at> codeaurora.org> writes:
 
-Ah, I missed that, yes, this would be a good thing to have, we've been
-wanting it for _years_.
+> 
+> Kill block requests when the host knows that the card is
+> removed from the slot and is sure that subsequent requests
+> are bound to fail. Do this silently so that the block
+> layer doesn't output unnecessary error messages.
+> 
+> This patch implements suggestion from Adrian Hunter,
+> http://thread.gmane.org/gmane.linux.kernel.mmc/2714/focus=3474
+> 
+> Signed-off-by: Sujit Reddy Thumma <sthumma <at> codeaurora.org>
+> ---
+>  drivers/mmc/card/queue.c |    5 +++++
+>  drivers/mmc/core/bus.c   |    2 ++
+>  include/linux/mmc/card.h |    3 +++
+>  3 files changed, 10 insertions(+), 0 deletions(-)
+> 
 
-greg k-h
+Thanks, this patch worked nicely to control a seemingly endless series of 
+driver complaints when the SD card was removed during a transfer.
+
+The OMAP4 I'm working on has hardware assisted detection of card removal, and 
+this patch looks like it will be sufficient.
+
