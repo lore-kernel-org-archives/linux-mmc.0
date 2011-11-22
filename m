@@ -1,56 +1,81 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: [PATCH] mmc: core: Fix deadlock when the CONFIG_MMC_UNSAFE_RESUME is not defined
-Date: Tue, 22 Nov 2011 17:00:37 +0530
-Message-ID: <1321961437-27130-1-git-send-email-sthumma@codeaurora.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:12298 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754839Ab1KVLav (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2011 06:30:51 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Dave Martin <dave.martin@linaro.org>
+Subject: [GIT PULL] ARM: amba: Enable module alias autogeneration for AMBA drivers
+Date: Tue, 22 Nov 2011 11:32:53 +0000
+Message-ID: <1321961573-4562-1-git-send-email-dave.martin@linaro.org>
+Return-path: <linux-input-owner@vger.kernel.org>
+Sender: linux-input-owner@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: patches@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Alan Cox <alan@linux.intel.com>, Alessandro Rubini <rubini@unipv.it>, Alessandro Zummo <a.zummo@towertech.it>, alsa-devel@alsa-project.org, Chris Ball <cjb@laptop.org>, Dan Williams <dan.j.williams@intel.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Grant Likely <grant.likely@secretlab.ca>, Jaroslav Kysela <perex@perex.cz>, Jassi Brar <jassisinghbrar@gmail.com>, Julia Lawall <julia@diku.dk>, Linus Walleij <linus.walleij@linaro.org>, linux-fbdev@vger.kernel.org, linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-watchdog@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, =?UTF-8?q?Pawe=C5=82=20Moll?= <Pawel.Moll@arm.com>, rtc-linux@googlegroups.com, spi-devel-general@lists.sourceforge.net, Takashi Iwai <tiwai@suse.de>, Vinod Koul <vi>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@stericsson.com
-Cc: Sujit Reddy Thumma <sthumma@codeaurora.org>, cjb@laptop.org
 
-mmc_suspend_host() tries to claim host during suspend
-and release it only when the bus suspend operation is
-compeleted. If CONFIG_MMC_UNSAFE_RESUME is defined and
-the host is flagged as removable, mmc_suspend_host()
-tries to remove the card. In this process, the file system
-sync can get blocked trying to acquire host which is already
-claimed by mmc_suspend_host() causing deadlock.
+Hi Russell,
 
-Fix this deadlock by releasing host before ->remove() is called.
+This series enables the general infrastructure for modalias
+generation to work for AMBA devices, and enables it in the affected
+drivers.
 
-Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
----
- drivers/mmc/core/core.c |    4 +++-
- 1 files changed, 3 insertions(+), 1 deletions(-)
+Since there are several patches here, I though it better to send a
+pull request.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 271efea..8adbadf 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2338,6 +2338,7 @@ int mmc_suspend_host(struct mmc_host *host)
- 				 * We simply "remove" the card in this case.
- 				 * It will be redetected on resume.
- 				 */
-+				mmc_do_release_host(host);
- 				if (host->bus_ops->remove)
- 					host->bus_ops->remove(host);
- 				mmc_claim_host(host);
-@@ -2346,8 +2347,9 @@ int mmc_suspend_host(struct mmc_host *host)
- 				mmc_release_host(host);
- 				host->pm_flags = 0;
- 				err = 0;
-+			} else {
-+				mmc_do_release_host(host);
- 			}
--			mmc_do_release_host(host);
- 		} else {
- 			err = -EBUSY;
- 		}
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+The first two patches (subject lines "ARM: amba: ...") are the core
+patches; the remainder of the patches are the driver changes --
+each is trivial and simply adds a MODULE_DEVICE_ALIAS() entry.
+
+I have Acks on some of the driver patches and no comments on the
+rest.  I've been circulating these for some time, so if you're
+happy to pull those driver patches via your tree, please go ahead.
+
+Otherwise, let me know and I can continue trying to push the driver
+patches via other routes.
+
+Cheers
+---Dave
+
+The following changes since commit cfcfc9eca2bcbd26a8e206baeb005b055dbf8e37:
+
+  Linux 3.2-rc2 (2011-11-15 15:02:59 -0200)
+
+are available in the git repository at:
+  git://git.linaro.org/people/dmart/linux-2.6-arm.git arm/amba-modalias+for-rmk
+
+Dave Martin (16):
+      ARM: amba: Move definition of struct amba_id to mod_devicetable.h
+      ARM: amba: Auto-generate AMBA driver module aliases during modpost
+      hwrng: nomadik: Enable module alias autogeneration for AMBA drivers
+      dmaengine: pl08x: Enable module alias autogeneration for AMBA drivers
+      dmaengine: pl330: Enable module alias autogeneration for AMBA drivers
+      gpio: pl061: Enable module alias autogeneration for AMBA drivers
+      input: ambakmi: Enable module alias autogeneration for AMBA drivers
+      mmc: mmci: Enable module alias autogeneration for AMBA drivers
+      rtc: pl030: Enable module alias autogeneration for AMBA drivers
+      rtc: pl031: Enable module alias autogeneration for AMBA drivers
+      spi: pl022: Enable module alias autogeneration for AMBA drivers
+      serial: pl010: Enable module alias autogeneration for AMBA drivers
+      serial: pl011: Enable module alias autogeneration for AMBA drivers
+      fbdev: amba: Enable module alias autogeneration for AMBA drivers
+      watchdog: sp805: Enable module alias autogeneration for AMBA drivers
+      sound: aaci: Enable module alias autogeneration for AMBA drivers
+
+ drivers/amba/bus.c                   |    4 ++
+ drivers/char/hw_random/nomadik-rng.c |    2 +
+ drivers/dma/amba-pl08x.c             |    2 +
+ drivers/dma/pl330.c                  |    2 +
+ drivers/gpio/gpio-pl061.c            |    2 +
+ drivers/input/serio/ambakmi.c        |    2 +
+ drivers/mmc/host/mmci.c              |    2 +
+ drivers/rtc/rtc-pl030.c              |    2 +
+ drivers/rtc/rtc-pl031.c              |    2 +
+ drivers/spi/spi-pl022.c              |    2 +
+ drivers/tty/serial/amba-pl010.c      |    2 +
+ drivers/tty/serial/amba-pl011.c      |    2 +
+ drivers/video/amba-clcd.c            |    2 +
+ drivers/watchdog/sp805_wdt.c         |    2 +
+ include/linux/amba/bus.h             |    7 +---
+ include/linux/mod_devicetable.h      |   18 ++++++++
+ scripts/mod/file2alias.c             |   72 ++++++++++++++++++++++++++++++++++
+ sound/arm/aaci.c                     |    2 +
+ 18 files changed, 123 insertions(+), 6 deletions(-)
+
+
+
 
