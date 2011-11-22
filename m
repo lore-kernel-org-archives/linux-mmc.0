@@ -1,39 +1,53 @@
-From: Eliad Peller <eliad@wizery.com>
-Subject: [PATCH 3/3] omap: board-sdp4430: declare support for MMC_PM_KEEP_POWER
-Date: Tue, 22 Nov 2011 16:02:19 +0200
-Message-ID: <1321970539-7104-3-git-send-email-eliad@wizery.com>
-References: <1321970539-7104-1-git-send-email-eliad@wizery.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:57760 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751184Ab1KVOCG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2011 09:02:06 -0500
-In-Reply-To: <1321970539-7104-1-git-send-email-eliad@wizery.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>
+Subject: Re: [GIT PULL] ARM: amba: Enable module alias autogeneration for
+	AMBA drivers
+Date: Tue, 22 Nov 2011 16:19:42 +0100
+Message-ID: <20111122151942.GA24821@mail.gnudd.com>
+References: <20111122120756.GF2066@localhost.localdomain>
+	<1321961573-4562-1-git-send-email-dave.martin@linaro.org>
+	<20111122115632.GA5165@mail.gnudd.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20111122120756.GF2066-bi+AKbBUZKY6gyzm1THtWbp2dZbC/Bob@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: dave.martin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, Pawel.Moll-5wv7dgnIgG8@public.gmane.org, tiwai-l3A5Bk7waGM@public.gmane.org, linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, perex-/Fr2/VpizcU@public.gmane.org, wim-IQzOog9fTRqzQB+pC5nmwQ@public.gmane.org, julia-dAYI7NvHqcQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-input-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-watchdog-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, alan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org, dmitry.torokhov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lethal-M7jkjyW5wf5g9hUCZPvPmw@public.gmane.org, spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>
 
-Declare support for keeping the power of the wlan chip
-while suspended. this is needed for Wakeup-On-Wireless.
+>>   lkml.org/lkml/2011/11/4/125 (0/2: description of the work)
+>>   lkml.org/lkml/2011/11/4/126 (1/2: turn the if plethora to table lookup)
+>>   lkml.org/lkml/2011/11/4/127 (2/2: partial split to type-specific files).
+> 
+> Splitting this up doesn't look like a silly idea -- I thought it was
+> unfortunate to have to patch a core file just to add a bus type.
+>
+> I guess the question is how many new buses we get over time.
 
-Signed-off-by: Eliad Peller <eliad@wizery.com>
----
- arch/arm/mach-omap2/board-4430sdp.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+Well, CERN will have 2 in a short time. And I'm sure the bus concept
+is so good that a number of them exists as external patches. Being
+forced to patch a core file is not good, with conflicts that accumulate
+over time.
 
-diff --git a/arch/arm/mach-omap2/board-4430sdp.c b/arch/arm/mach-omap2/board-4430sdp.c
-index c7cef44..fd8b2a5 100644
---- a/arch/arm/mach-omap2/board-4430sdp.c
-+++ b/arch/arm/mach-omap2/board-4430sdp.c
-@@ -420,6 +420,7 @@ static struct omap2_hsmmc_info mmc[] = {
- 	{
- 		.mmc		= 5,
- 		.caps		= MMC_CAP_4_BIT_DATA | MMC_CAP_POWER_OFF_CARD,
-+		.pm_caps	= MMC_PM_KEEP_POWER,
- 		.gpio_cd	= -EINVAL,
- 		.gpio_wp	= -EINVAL,
- 		.ocr_mask	= MMC_VDD_165_195,
--- 
-1.7.6.401.g6a319
+I'd better be able to drop in my own file and add a kconfig-aware line
+in Makefile.  I think the implementation is straightforward. Who should
+I send it to?
 
+thanks
+/alessandro
+
+------------------------------------------------------------------------------
+All the data continuously generated in your IT infrastructure 
+contains a definitive record of customers, application performance, 
+security threats, fraudulent activity, and more. Splunk takes this 
+data and makes sense of it. IT sense. And common sense.
+http://p.sf.net/sfu/splunk-novd2d
