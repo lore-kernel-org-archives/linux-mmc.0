@@ -1,90 +1,184 @@
-From: "Konstantin Dorfman" <kdorfman@codeaurora.org>
-Subject: Re: [PATCH v3] mmc: support BKOPS feature for eMMC
-Date: Tue, 22 Nov 2011 14:44:47 +0200 (IST)
-Message-ID: <3f75bb7f25e649376784536d819e7fbf.squirrel@www.codeaurora.org>
-References: <4EC45A39.5030706@samsung.com>
+From: Per Forlin <per.lkml@gmail.com>
+Subject: Re: [PATCH V2] mmc: Kill block requests if card is removed
+Date: Tue, 22 Nov 2011 14:10:42 +0100
+Message-ID: <CAFEEs1n5k-0MqJXanLN=S1uEfzqFxoeCHnT3Gs6DjJB6t5819Q@mail.gmail.com>
+References: <1321959418-26864-1-git-send-email-sthumma@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:35438 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754135Ab1KVMor (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2011 07:44:47 -0500
-In-Reply-To: <4EC45A39.5030706@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1321959418-26864-1-git-send-email-sthumma@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, adrian.hunter@intel.com, linux-arm-msm@vger.kernel.org, cjb@laptop.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per Forlin <per.lkml@gmail.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>
 
-Hello Jaehoon,
+Hi Sujit,
 
-...
-> +/**
-> + *	mmc_start_bkops - start BKOPS for supported cards
-> + *	@card: MMC card to start BKOPS
-> + *
-> + *	Start background operations whenever requested.
-> + *	when the urgent BKOPS bit is set in a R1 command response
-> + *	then background operations should be started immediately.
-> +*/
-> +void mmc_start_bkops(struct mmc_card *card)
-> +{
-> +	int err;
-> +	unsigned long flags;
-> +
-> +	BUG_ON(!card);
-> +	if ((!card->ext_csd.bkops_en) ||
-> +			!(card->host->caps2 & MMC_CAP2_BKOPS))
-> +		return;
-> +
-> +	/*
-> +	 * If card is already doing bkops or need for
-> +	 * bkops flag is not set, then do nothing just
-> +	 * return
-> +	 */
-> +	if (mmc_card_doing_bkops(card)
-> +			|| !mmc_card_need_bkops(card))
-> +		return;
-> +
-> +	mmc_claim_host(card->host);
-> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +			EXT_CSD_BKOPS_START, 1, 0);
-> +	if (err) {
-> +		pr_warning("error %d starting bkops\n", err);
-> +		mmc_card_clr_need_bkops(card);
-> +		goto out;
-> +	}
-> +	spin_lock_irqsave(&card->host->lock, flags);
-> +	mmc_card_clr_need_bkops(card);
-> +	mmc_card_set_doing_bkops(card);
-Sending CMD6 (by mmc_switch()) will start BKOPS on card,
-according to eMMC spec:
------
-7.4.56 BKOPS_START [164]
-Writing any value to this field shall manually start background operations.
-Device shall stay busy till no more background operations are needed.
------
-Where/when mmc_card_clear_doing_bkops() should called? The only place I
-see this happens is
-in mmc_interrupt_bkops(). This means, that once BKOPS started, next
-read/write request
-will _always_(and not when card really busy) send HPI and only then will
-clear "doing" flag.
+On Tue, Nov 22, 2011 at 11:56 AM, Sujit Reddy Thumma
+<sthumma@codeaurora.org> wrote:
+> Kill block requests when the host knows that the card is
+> removed from the slot and is sure that subsequent requests
+> are bound to fail. Do this silently so that the block
+> layer doesn't output unnecessary error messages.
+>
+> This patch implements suggestion from Adrian Hunter,
+> http://thread.gmane.org/gmane.linux.kernel.mmc/2714/focus=3D3474
+>
+> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+>
+> ---
+> Changes in v2:
+> =A0 =A0 =A0 =A0- Changed the implementation with further comments fro=
+m Adrian
+> =A0 =A0 =A0 =A0- Set the card removed flag in bus notifier callbacks
+> =A0 =A0 =A0 =A0- This patch is now dependent on patch from Per Forlin=
+:
+> =A0 =A0 =A0 =A0http://thread.gmane.org/gmane.linux.kernel.mmc/11128/f=
+ocus=3D11211
+> ---
+> =A0drivers/mmc/card/block.c | =A0 33 ++++++++++++++++++++++++++++----=
+-
+> =A0drivers/mmc/card/queue.c | =A0 =A05 +++++
+> =A0drivers/mmc/core/bus.c =A0 | =A0 32 ++++++++++++++++++++++++++++++=
++-
+> =A0drivers/mmc/core/core.c =A0| =A0 =A08 +++++++-
+> =A0include/linux/mmc/card.h | =A0 =A03 +++
+> =A05 files changed, 74 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index edc379e..83956fa 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -648,8 +648,15 @@ static int mmc_blk_cmd_recovery(struct mmc_card =
+*card, struct request *req,
+> =A0 =A0 =A0 =A0}
+>
+> =A0 =A0 =A0 =A0/* We couldn't get a response from the card. =A0Give u=
+p. */
+> - =A0 =A0 =A0 if (err)
+> + =A0 =A0 =A0 if (err) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* If the card didn't respond to stat=
+us command,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* it is likely that card is gone. Fl=
+ag it as removed,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* mmc_detect_change() cleans the res=
+t.
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_set_removed(card);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return ERR_ABORT;
+> + =A0 =A0 =A0 }
+>
+> =A0 =A0 =A0 =A0/* Flag ECC errors */
+> =A0 =A0 =A0 =A0if ((status & R1_CARD_ECC_FAILED) ||
+> @@ -1168,6 +1175,9 @@ static inline struct mmc_async_req *mmc_blk_res=
+end(struct mmc_card *card,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 int disable_multi,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct mmc_async_req *areq)
+> =A0{
+> + =A0 =A0 =A0 struct mmc_blk_data *md =3D mmc_get_drvdata(card);
+> + =A0 =A0 =A0 struct request *req =3D mqrq->req;
+> + =A0 =A0 =A0 int ret;
+> =A0 =A0 =A0 =A0/*
+> =A0 =A0 =A0 =A0 * Release host after failure in case the host is need=
+ed
+> =A0 =A0 =A0 =A0 * by someone else. For instance, if the card is remov=
+ed the
+> @@ -1175,11 +1185,24 @@ static inline struct mmc_async_req *mmc_blk_r=
+esend(struct mmc_card *card,
+> =A0 =A0 =A0 =A0 */
+> =A0 =A0 =A0 =A0mmc_release_host(card->host);
+> =A0 =A0 =A0 =A0mmc_claim_host(card->host);
+> -
+> - =A0 =A0 =A0 mmc_blk_rw_rq_prep(mqrq, card, disable_multi, mq);
+> - =A0 =A0 =A0 return mmc_start_req(card->host, areq, NULL);
+> + =A0 =A0 =A0 if (mmc_card_removed(card)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* End the pending async request with=
+out starting
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* it when card is removed.
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_lock_irq(&md->lock);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 req->cmd_flags |=3D REQ_QUIET;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 do {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D __blk_end_reque=
+st(req,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 -EIO, blk_rq_cur_bytes(req));
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } while (ret);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_unlock_irq(&md->lock);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return NULL;
+> + =A0 =A0 =A0 } else {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_blk_rw_rq_prep(mqrq, card, disable_=
+multi, mq);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return mmc_start_req(card->host, areq, =
+NULL);
+> + =A0 =A0 =A0 }
+mmc_blk_resend is only called to resend a request that has failed. If
+the card is removed the request will still be issued, but when it
+retries it will give up here.
+You have added a check in mmc_wait_for_req(). What about this:
+--------------------------
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index b526036..dcdcb9a 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -287,11 +287,17 @@ static void mmc_wait_done(struct mmc_request *mrq=
+)
+        complete(&mrq->completion);
+ }
 
-May be it is possible to poll for ack from card about when BKOPS finished?
-Another possibility that
-mmc_switch() synchronous and after flow returns from it, we can clear
-"doing" flag immediately.
-Does it make sense?
-...
-> +	spin_unlock_irqrestore(&card->host->lock, flags);
-> +out:
-> +	mmc_release_host(card->host);
-> +}
-> +EXPORT_SYMBOL(mmc_start_bkops);
-> +
+-static void __mmc_start_req(struct mmc_host *host, struct mmc_request =
+*mrq)
++static int __mmc_start_req(struct mmc_host *host, struct mmc_request *=
+mrq)
+ {
+-       init_completion(&mrq->completion);
+-       mrq->done =3D mmc_wait_done;
+-       mmc_start_request(host, mrq);
++       if (mmc_card_removed(host->card)) {
++              mrq->cmd->error =3D -ENOMEDIUM;
++              return -ENOMEDIUM;
++       }
++
++       init_completion(&mrq->completion);
++       mrq->done =3D mmc_wait_done;
++       mmc_start_request(host, mrq);
++       return 0;
+ }
 
-Thanks,
-Kostya
+ static void mmc_wait_for_req_done(struct mmc_host *host,
+@@ -418,7 +424,8 @@ EXPORT_SYMBOL(mmc_start_req);
+  */
+ void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
+-       __mmc_start_req(host, mrq);
++       if (__mmc_start_req(host, mrq))
++               return
+        mmc_wait_for_req_done(host, mrq);
+ }
+ EXPORT_SYMBOL(mmc_wait_for_req);
+----------------------------------
+This patch will set error to -ENOMEDIUM for both mmc_start_req() and
+mmc_wait_for_req()
 
+mmc_blk_err_check() can check for -ENOMEDIUM and return something like
+MMC_BLK_ENOMEDIUM
+And eventually do
++               /*
++                * End the pending async request without starting
++                * it when card is removed.
++                */
++               spin_lock_irq(&md->lock);
++               req->cmd_flags |=3D REQ_QUIET;
++               do {
++                       ret =3D __blk_end_request(req,
++                                       -EIO, blk_rq_cur_bytes(req));
++               } while (ret);
++               spin_unlock_irq(&md->lock);
+
+Regards,
+Per
