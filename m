@@ -1,53 +1,73 @@
-From: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>
-Subject: Re: [GIT PULL] ARM: amba: Enable module alias autogeneration for
-	AMBA drivers
-Date: Tue, 22 Nov 2011 16:19:42 +0100
-Message-ID: <20111122151942.GA24821@mail.gnudd.com>
-References: <20111122120756.GF2066@localhost.localdomain>
-	<1321961573-4562-1-git-send-email-dave.martin@linaro.org>
-	<20111122115632.GA5165@mail.gnudd.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [Query] mmc: core "MMC_PM_KEEP_POWER"
+Date: Tue, 22 Nov 2011 16:33:21 +0100
+Message-ID: <4ECBC0C1.7080904@stericsson.com>
+References: <4ECBA3B1.1010808@stericsson.com> <87ty5w2rha.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="iso-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20111122120756.GF2066-bi+AKbBUZKY6gyzm1THtWbp2dZbC/Bob@public.gmane.org>
-List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
-List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
-List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
-	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
-Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
-To: dave.martin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, Pawel.Moll-5wv7dgnIgG8@public.gmane.org, tiwai-l3A5Bk7waGM@public.gmane.org, linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, perex-/Fr2/VpizcU@public.gmane.org, wim-IQzOog9fTRqzQB+pC5nmwQ@public.gmane.org, julia-dAYI7NvHqcQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-input-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-watchdog-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, alan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org, dmitry.torokhov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lethal-M7jkjyW5wf5g9hUCZPvPmw@public.gmane.org, spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:57450 "EHLO
+	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757007Ab1KVPdv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2011 10:33:51 -0500
+In-Reply-To: <87ty5w2rha.fsf@laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "eliad@wizery.com" <eliad@wizery.com>, "nico@fluxnic.net" <nico@fluxnic.net>
 
->>   lkml.org/lkml/2011/11/4/125 (0/2: description of the work)
->>   lkml.org/lkml/2011/11/4/126 (1/2: turn the if plethora to table lookup)
->>   lkml.org/lkml/2011/11/4/127 (2/2: partial split to type-specific files).
+Hi Chris,
+
+Thanks for the quick reply! I understand the idea better now. Just a 
+minor follow-up question..
+
+The power_restore function for sdio also uses this flag, which is a 
+little bit strange I think. Especially since the mmc_power_off|up is 
+always called no matter of the value of this flag.
+
+Br
+Ulf Hansson
+
+Chris Ball wrote:
+> Hi,
 > 
-> Splitting this up doesn't look like a silly idea -- I thought it was
-> unfortunate to have to patch a core file just to add a bus type.
->
-> I guess the question is how many new buses we get over time.
+> On Tue, Nov 22 2011, Ulf Hansson wrote:
+>> Hi,
+>>
+>> In mmc_resume_host we clear the MMC_PM_KEEP_POWER flag from the
+>> pm_flags bitfield. This is done by a patch from Eliad Peller a while
+>> ago, "mmc: clear MMC_PM_KEEP_POWER flag on resume"
+>>
+>> I would like to understand if there are any reason to why we want to
+>> clear this flag after we done a resume. I think it will add complexity
+>> to an sdio function driver since it must update this flag for after
+>> each suspend/resume sequence. Should it not just be enough to do this
+>> during the initialization of the sdio func driver.
+> 
+> The sdio function driver should just call sdio_set_host_pm_flags() in
+> its suspend function, if it wants to stay awake at the next suspend.
+> It's just one line of code, so I don't think it's overly complex.
+> 
+> We clear the flag because that's how the API is defined --
+> sdio_set_host_pm_flags() says "This must be called, if needed, each
+> time the suspend method of the function driver is called".
+> 
+> There's a separate question of "Why is the API this way, and should
+> we change it?".  I think the API ended up this way because it was
+> created for a wifi device where a suspend would usually happen while
+> you're unassociated, so you don't need to preserve power (because
+> nothing interesting can happen to wake you up), but will sometimes
+> happen while you're associated, in which case you do.  It sounds like
+> you're considering a device that *always* wants to stay awake, which
+> is different to the rest of the users of this API.
+> 
+> But it's just the difference between (your proposal) having
+> sdio_set_host_pm_flags() be called during init, and (the API) having
+> sdio_set_host_pm_flags() be called during suspend.  It's the same
+> line of code either way, so I don't see why it's annoying this way.
+> 
+> Thanks,
+> 
+> - Chris.
 
-Well, CERN will have 2 in a short time. And I'm sure the bus concept
-is so good that a number of them exists as external patches. Being
-forced to patch a core file is not good, with conflicts that accumulate
-over time.
-
-I'd better be able to drop in my own file and add a kconfig-aware line
-in Makefile.  I think the implementation is straightforward. Who should
-I send it to?
-
-thanks
-/alessandro
-
-------------------------------------------------------------------------------
-All the data continuously generated in your IT infrastructure 
-contains a definitive record of customers, application performance, 
-security threats, fraudulent activity, and more. Splunk takes this 
-data and makes sense of it. IT sense. And common sense.
-http://p.sf.net/sfu/splunk-novd2d
