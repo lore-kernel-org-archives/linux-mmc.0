@@ -1,53 +1,107 @@
-From: David Taylor <dmtaylor@skytex.net>
-Subject: Re: [PATCH] mmc: core: Kill block requests if card is removed
-Date: Tue, 22 Nov 2011 20:18:31 +0000 (UTC)
-Message-ID: <loom.20111122T210615-276@post.gmane.org>
-References: <1320813119-24383-1-git-send-email-sthumma@codeaurora.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v3] mmc: support BKOPS feature for eMMC
+Date: Wed, 23 Nov 2011 08:54:13 +0900
+Message-ID: <4ECC3625.3090109@samsung.com>
+References: <4EC45A39.5030706@samsung.com>
+ <3f75bb7f25e649376784536d819e7fbf.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lo.gmane.org ([80.91.229.12]:47733 "EHLO lo.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753278Ab1KVVkJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 22 Nov 2011 16:40:09 -0500
-Received: from list by lo.gmane.org with local (Exim 4.69)
-	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1RSy4W-0005nO-11
-	for linux-mmc@vger.kernel.org; Tue, 22 Nov 2011 22:40:08 +0100
-Received: from 192.94.92.11 ([192.94.92.11])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Nov 2011 22:40:08 +0100
-Received: from dmtaylor by 192.94.92.11 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Nov 2011 22:40:08 +0100
+Received: from mailout2.samsung.com ([203.254.224.25]:36120 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753186Ab1KVXyc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2011 18:54:32 -0500
+Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LV3008G96ES4Y70@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 23 Nov 2011 08:54:30 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LV300KG46EHK440@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 23 Nov 2011 08:54:30 +0900 (KST)
+In-reply-to: <3f75bb7f25e649376784536d819e7fbf.squirrel@www.codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Konstantin Dorfman <kdorfman@codeaurora.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per Forlin <per.lkml@gmail.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>
 
-Sujit Reddy Thumma <sthumma <at> codeaurora.org> writes:
+Hi Konstantin
 
+On 11/22/2011 09:44 PM, Konstantin Dorfman wrote:
+
+> Hello Jaehoon,
 > 
-> Kill block requests when the host knows that the card is
-> removed from the slot and is sure that subsequent requests
-> are bound to fail. Do this silently so that the block
-> layer doesn't output unnecessary error messages.
-> 
-> This patch implements suggestion from Adrian Hunter,
-> http://thread.gmane.org/gmane.linux.kernel.mmc/2714/focus=3474
-> 
-> Signed-off-by: Sujit Reddy Thumma <sthumma <at> codeaurora.org>
-> ---
->  drivers/mmc/card/queue.c |    5 +++++
->  drivers/mmc/core/bus.c   |    2 ++
->  include/linux/mmc/card.h |    3 +++
->  3 files changed, 10 insertions(+), 0 deletions(-)
-> 
+> ...
+>> +/**
+>> + *	mmc_start_bkops - start BKOPS for supported cards
+>> + *	@card: MMC card to start BKOPS
+>> + *
+>> + *	Start background operations whenever requested.
+>> + *	when the urgent BKOPS bit is set in a R1 command response
+>> + *	then background operations should be started immediately.
+>> +*/
+>> +void mmc_start_bkops(struct mmc_card *card)
+>> +{
+>> +	int err;
+>> +	unsigned long flags;
+>> +
+>> +	BUG_ON(!card);
+>> +	if ((!card->ext_csd.bkops_en) ||
+>> +			!(card->host->caps2 & MMC_CAP2_BKOPS))
+>> +		return;
+>> +
+>> +	/*
+>> +	 * If card is already doing bkops or need for
+>> +	 * bkops flag is not set, then do nothing just
+>> +	 * return
+>> +	 */
+>> +	if (mmc_card_doing_bkops(card)
+>> +			|| !mmc_card_need_bkops(card))
+>> +		return;
+>> +
+>> +	mmc_claim_host(card->host);
+>> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +			EXT_CSD_BKOPS_START, 1, 0);
+>> +	if (err) {
+>> +		pr_warning("error %d starting bkops\n", err);
+>> +		mmc_card_clr_need_bkops(card);
+>> +		goto out;
+>> +	}
+>> +	spin_lock_irqsave(&card->host->lock, flags);
+>> +	mmc_card_clr_need_bkops(card);
+>> +	mmc_card_set_doing_bkops(card);
+> Sending CMD6 (by mmc_switch()) will start BKOPS on card,
+> according to eMMC spec:
+> -----
+> 7.4.56 BKOPS_START [164]
+> Writing any value to this field shall manually start background operations.
+> Device shall stay busy till no more background operations are needed.
+> -----
+> Where/when mmc_card_clear_doing_bkops() should called? The only place I
+> see this happens is
+> in mmc_interrupt_bkops(). This means, that once BKOPS started, next
+> read/write request
+> will _always_(and not when card really busy) send HPI and only then will
+> clear "doing" flag.
 
-Thanks, this patch worked nicely to control a seemingly endless series of 
-driver complaints when the SD card was removed during a transfer.
 
-The OMAP4 I'm working on has hardware assisted detection of card removal, and 
-this patch looks like it will be sufficient.
+Right, that is called only in mmc_interrupt_bkops. I wonder how did you check
+to finish the bkops without hpi command?
 
+> May be it is possible to poll for ack from card about when BKOPS finished?
+> Another possibility that
+> mmc_switch() synchronous and after flow returns from it, we can clear
+> "doing" flag immediately.
+> Does it make sense?
+
+i didn't know how poll for ack from card..did you know?
+So i implemented that send the hpi command whatever status.
+
+If let me know checking for ack from card, i will consider that.
+
+Thanks
+
+Best Regards,
+Jaehoon Chung
