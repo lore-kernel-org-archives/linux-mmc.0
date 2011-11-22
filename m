@@ -1,80 +1,76 @@
 From: Eliad Peller <eliad@wizery.com>
-Subject: [PATCH 1/3] omap_hsmmc: consider MMC_PM_KEEP_POWER on suspend/resume
-Date: Tue, 22 Nov 2011 16:02:17 +0200
-Message-ID: <1321970539-7104-1-git-send-email-eliad@wizery.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:38189 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751184Ab1KVOB7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2011 09:01:59 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 2/3] omap_hsmmc: add pm_caps field
+Date: Tue, 22 Nov 2011 16:02:18 +0200
+Message-ID: <1321970539-7104-2-git-send-email-eliad@wizery.com>
+References: <1321970539-7104-1-git-send-email-eliad@wizery.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1321970539-7104-1-git-send-email-eliad@wizery.com>
+Sender: linux-omap-owner@vger.kernel.org
 To: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-When an mmc card has the MMC_PM_KEEP_POWER flag, it shouldn't
-be powered off on suspend (and thus doesn't have to be powered-on
-on resume)
-
-While on it, change the suspend flow a bit, to make it a bit
-easier to follow.
+Add pm_caps field to omap2_hsmmc_info and omap_mmc_slot_data
+structs, so we will be able to indicate mmc pm capabilities
+in the board file.
 
 Signed-off-by: Eliad Peller <eliad@wizery.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   24 +++++++++++++++---------
- 1 files changed, 15 insertions(+), 9 deletions(-)
+ arch/arm/mach-omap2/hsmmc.c           |    1 +
+ arch/arm/mach-omap2/hsmmc.h           |    1 +
+ arch/arm/plat-omap/include/plat/mmc.h |    1 +
+ drivers/mmc/host/omap_hsmmc.c         |    2 ++
+ 4 files changed, 5 insertions(+), 0 deletions(-)
 
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index 097a42d..d00a54a 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -306,6 +306,7 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+ 	mmc->slots[0].name = hc_name;
+ 	mmc->nr_slots = 1;
+ 	mmc->slots[0].caps = c->caps;
++	mmc->slots[0].pm_caps = c->pm_caps;
+ 	mmc->slots[0].internal_clock = !c->ext_clock;
+ 	mmc->dma_mask = 0xffffffff;
+ 	if (cpu_is_omap44xx())
+diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+index f757e78..c440973 100644
+--- a/arch/arm/mach-omap2/hsmmc.h
++++ b/arch/arm/mach-omap2/hsmmc.h
+@@ -12,6 +12,7 @@ struct omap2_hsmmc_info {
+ 	u8	mmc;		/* controller 1/2/3 */
+ 	u32	caps;		/* 4/8 wires and any additional host
+ 				 * capabilities OR'd (ref. linux/mmc/host.h) */
++	u32	pm_caps;	/* PM capabilities */
+ 	bool	transceiver;	/* MMC-2 option */
+ 	bool	ext_clock;	/* use external pin for input clock */
+ 	bool	cover_only;	/* No card detect - just cover switch */
+diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+index c7b8741..d3263ac 100644
+--- a/arch/arm/plat-omap/include/plat/mmc.h
++++ b/arch/arm/plat-omap/include/plat/mmc.h
+@@ -79,6 +79,7 @@ struct omap_mmc_platform_data {
+ 		 */
+ 		u8  wires;	/* Used for the MMC driver on omap1 and 2420 */
+ 		u32 caps;	/* Used for the MMC driver on 2430 and later */
++		u32 pm_caps;	/* PM capabilities of the mmc */
+ 
+ 		/*
+ 		 * nomux means "standard" muxing is wrong on this board, and
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 21e4a79..ec7c83c 100644
+index ec7c83c..2bc964a6 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2174,13 +2174,7 @@ static int omap_hsmmc_suspend(struct device *dev)
- 		cancel_work_sync(&host->mmc_carddetect_work);
- 		ret = mmc_suspend_host(host->mmc);
+@@ -1985,6 +1985,8 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (mmc_slot(host).nonremovable)
+ 		mmc->caps |= MMC_CAP_NONREMOVABLE;
  
--		if (ret == 0) {
--			omap_hsmmc_disable_irq(host);
--			OMAP_HSMMC_WRITE(host->base, HCTL,
--				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
--			if (host->got_dbclk)
--				clk_disable(host->dbclk);
--		} else {
-+		if (ret) {
- 			host->suspended = 0;
- 			if (host->pdata->resume) {
- 				ret = host->pdata->resume(&pdev->dev,
-@@ -2189,9 +2183,20 @@ static int omap_hsmmc_suspend(struct device *dev)
- 					dev_dbg(mmc_dev(host->mmc),
- 						"Unmask interrupt failed\n");
- 			}
-+			goto err;
- 		}
--		pm_runtime_put_sync(host->dev);
++	mmc->pm_caps = mmc_slot(host).pm_caps;
 +
-+		if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER)) {
-+			omap_hsmmc_disable_irq(host);
-+			OMAP_HSMMC_WRITE(host->base, HCTL,
-+				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
-+		}
-+		if (host->got_dbclk)
-+			clk_disable(host->dbclk);
-+
- 	}
-+err:
-+	pm_runtime_put_sync(host->dev);
- 	return ret;
- }
+ 	omap_hsmmc_conf_bus_power(host);
  
-@@ -2211,7 +2216,8 @@ static int omap_hsmmc_resume(struct device *dev)
- 		if (host->got_dbclk)
- 			clk_enable(host->dbclk);
- 
--		omap_hsmmc_conf_bus_power(host);
-+		if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER))
-+			omap_hsmmc_conf_bus_power(host);
- 
- 		if (host->pdata->resume) {
- 			ret = host->pdata->resume(&pdev->dev, host->slot_id);
+ 	/* Select DMA lines */
 -- 
 1.7.6.401.g6a319
 
