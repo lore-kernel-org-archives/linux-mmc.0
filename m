@@ -1,40 +1,48 @@
-From: ygardi@codeaurora.org
-Subject: sanitize for eMMC v4.5
-Date: Wed, 23 Nov 2011 04:09:45 -0800 (PST)
-Message-ID: <806ca0964234cf284f0b5ca61ee8df3e.squirrel@www.codeaurora.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH] mmc: sh_mmcif: simplify clock divisor calculation
+Date: Wed, 23 Nov 2011 15:52:30 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1111231551100.5635@axis700.grange>
+References: <1321473366-31053-1-git-send-email-andreiw@vmware.com>
+ <20111117150549.15528e81.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:61211 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754475Ab1KWMJp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2011 07:09:45 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20111117150549.15528e81.akpm@linux-foundation.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Andrei Warkentin <andreiw@vmware.com>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-sorry for sending it again...(changed the mailing-list)
+Replace ilog2(__rounddown_pow_of_two(x)) with the equivalent but much
+simpler fls(x) - 1.
 
-hello,
+Reported-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
+ drivers/mmc/host/sh_mmcif.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
 
-i have a few questions regarding the sanitize capability that was added in
-v4.5.
-
-1. how often this operation should take place ?
-   a. any advantages to perform sanitize in power-up, power-down, or every
-X hours when the card in idle ?
-
-2. how this operation should be triggered?
-is it external adb command, or is part of the driver operation ?
-
-3. does anyone have a speculated time duration for that operation
-according to a card size / vendor ?
-
-thanks,
-Yaniv
-
-
-
-
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index c021482..824fee5 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -16,6 +16,7 @@
+  *
+  */
+ 
++#include <linux/bitops.h>
+ #include <linux/clk.h>
+ #include <linux/completion.h>
+ #include <linux/delay.h>
+@@ -386,7 +387,7 @@ static void sh_mmcif_clock_control(struct sh_mmcif_host *host, unsigned int clk)
+ 		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_SUP_PCLK);
+ 	else
+ 		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR &
+-			(ilog2(__rounddown_pow_of_two(host->clk / clk)) << 16));
++				((fls(host->clk / clk) - 1) << 16));
+ 
+ 	sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_ENABLE);
+ }
+-- 
+1.7.2.5
 
