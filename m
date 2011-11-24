@@ -1,318 +1,265 @@
-From: Per Forlin <per.lkml@gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [PATCH V2] mmc: Kill block requests if card is removed
-Date: Thu, 24 Nov 2011 14:08:27 +0100
-Message-ID: <CAFEEs1m2ySFhOKcu_TK8_pjag7zVQyM_DDt+Oxc_5P7E2HBkqQ@mail.gmail.com>
+Date: Thu, 24 Nov 2011 16:52:45 +0200
+Message-ID: <4ECE5A3D.6060004@intel.com>
 References: <1321959418-26864-1-git-send-email-sthumma@codeaurora.org>
-	<CAFEEs1n5k-0MqJXanLN=S1uEfzqFxoeCHnT3Gs6DjJB6t5819Q@mail.gmail.com>
-	<4ECE2A14.6070005@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <4ECE2A14.6070005@codeaurora.org>
+In-Reply-To: <1321959418-26864-1-git-send-email-sthumma@codeaurora.org>
 Sender: linux-arm-msm-owner@vger.kernel.org
 To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, adrian.hunter@intel.com, linux-arm-msm@vger.kernel.org, cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, per.lkml@gmail.com, linux-arm-msm@vger.kernel.org, cjb@laptop.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Nov 24, 2011 at 12:27 PM, Sujit Reddy Thumma
-<sthumma@codeaurora.org> wrote:
-> Hi Per,
->
-> On 11/22/2011 6:40 PM, Per Forlin wrote:
->>
->> Hi Sujit,
->>
->> On Tue, Nov 22, 2011 at 11:56 AM, Sujit Reddy Thumma
->> <sthumma@codeaurora.org> =A0wrote:
->>>
->>> Kill block requests when the host knows that the card is
->>> removed from the slot and is sure that subsequent requests
->>> are bound to fail. Do this silently so that the block
->>> layer doesn't output unnecessary error messages.
->>>
->>> This patch implements suggestion from Adrian Hunter,
->>> http://thread.gmane.org/gmane.linux.kernel.mmc/2714/focus=3D3474
->>>
->>> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
->>>
->>> ---
->>> Changes in v2:
->>> =A0 =A0 =A0 =A0- Changed the implementation with further comments f=
-rom Adrian
->>> =A0 =A0 =A0 =A0- Set the card removed flag in bus notifier callback=
-s
->>> =A0 =A0 =A0 =A0- This patch is now dependent on patch from Per Forl=
-in:
->>> =A0 =A0 =A0 =A0http://thread.gmane.org/gmane.linux.kernel.mmc/11128=
-/focus=3D11211
->>> ---
->>> =A0drivers/mmc/card/block.c | =A0 33 ++++++++++++++++++++++++++++--=
+Hi
+
+Here is a way to allow mmc block to determine immediately
+if a card has been removed while preserving the present rules
+and keeping card detection in the bus_ops.
+
+Untested I'm afraid.
+
+Regards
+Adrian
+
+
+
+>From 2c6c9535b94c07fa3d12af26e9b6de500cb29970 Mon Sep 17 00:00:00 2001
+From: Adrian Hunter <adrian.hunter@intel.com>
+Date: Thu, 24 Nov 2011 16:32:34 +0200
+Subject: [PATCH] mmc: allow upper layers to determine immediately if a card has been removed
+
+Add a function mmc_card_removed() which upper layers can use
+to determine immediately if a card has been removed.  This
+function should be called after an I/O request fails so that
+all queued I/O requests can be errored out immediately
+instead of waiting for the card device to be removed.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
->>> =A0drivers/mmc/card/queue.c | =A0 =A05 +++++
->>> =A0drivers/mmc/core/bus.c =A0 | =A0 32 ++++++++++++++++++++++++++++=
-+++-
->>> =A0drivers/mmc/core/core.c =A0| =A0 =A08 +++++++-
->>> =A0include/linux/mmc/card.h | =A0 =A03 +++
->>> =A05 files changed, 74 insertions(+), 7 deletions(-)
->>>
->>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>> index edc379e..83956fa 100644
->>> --- a/drivers/mmc/card/block.c
->>> +++ b/drivers/mmc/card/block.c
->>> @@ -648,8 +648,15 @@ static int mmc_blk_cmd_recovery(struct mmc_car=
-d
->>> *card, struct request *req,
->>> =A0 =A0 =A0 =A0}
->>>
->>> =A0 =A0 =A0 =A0/* We couldn't get a response from the card. =A0Give=
- up. */
->>> - =A0 =A0 =A0 if (err)
->>> + =A0 =A0 =A0 if (err) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* If the card didn't respond to st=
-atus command,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* it is likely that card is gone. =
-=46lag it as removed,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* mmc_detect_change() cleans the r=
-est.
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_set_removed(card);
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return ERR_ABORT;
->>> + =A0 =A0 =A0 }
->>>
->>> =A0 =A0 =A0 =A0/* Flag ECC errors */
->>> =A0 =A0 =A0 =A0if ((status& =A0R1_CARD_ECC_FAILED) ||
->>> @@ -1168,6 +1175,9 @@ static inline struct mmc_async_req
->>> *mmc_blk_resend(struct mmc_card *card,
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 int disable_multi,
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct mmc_async_req
->>> *areq)
->>> =A0{
->>> + =A0 =A0 =A0 struct mmc_blk_data *md =3D mmc_get_drvdata(card);
->>> + =A0 =A0 =A0 struct request *req =3D mqrq->req;
->>> + =A0 =A0 =A0 int ret;
->>> =A0 =A0 =A0 =A0/*
->>> =A0 =A0 =A0 =A0 * Release host after failure in case the host is ne=
-eded
->>> =A0 =A0 =A0 =A0 * by someone else. For instance, if the card is rem=
-oved the
->>> @@ -1175,11 +1185,24 @@ static inline struct mmc_async_req
->>> *mmc_blk_resend(struct mmc_card *card,
->>> =A0 =A0 =A0 =A0 */
->>> =A0 =A0 =A0 =A0mmc_release_host(card->host);
->>> =A0 =A0 =A0 =A0mmc_claim_host(card->host);
->>> -
->>> - =A0 =A0 =A0 mmc_blk_rw_rq_prep(mqrq, card, disable_multi, mq);
->>> - =A0 =A0 =A0 return mmc_start_req(card->host, areq, NULL);
->>> + =A0 =A0 =A0 if (mmc_card_removed(card)) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* End the pending async request wi=
-thout starting
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* it when card is removed.
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_lock_irq(&md->lock);
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 req->cmd_flags |=3D REQ_QUIET;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 do {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D __blk_end_req=
-uest(req,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 -EIO, blk_rq_cur_bytes(req));
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } while (ret);
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 spin_unlock_irq(&md->lock);
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return NULL;
->>> + =A0 =A0 =A0 } else {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_blk_rw_rq_prep(mqrq, card, disabl=
-e_multi, mq);
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return mmc_start_req(card->host, areq=
-, NULL);
->>> + =A0 =A0 =A0 }
->>
->> mmc_blk_resend is only called to resend a request that has failed. I=
-f
->> the card is removed the request will still be issued, but when it
->> retries it will give up here.
->
-> Currently, we set the card_removed flag in two places:
->
-> 1) If the host supports interrupt detection, mmc_detect_change() call=
-s the
-> bus detect method and we set card removed flag in bus notifier call b=
-ack.
->
-> 2) When there is a transfer going on (host is claimed by mmcqd) and t=
-he card
-> is removed ungracefully, the driver sends an error code to the block =
-layer.
-> mmc_blk_cmd_recovery() tries to send CMD13 to the card which in this =
-case
-> fails and we set the card_removed flag.
->
-> So when we retry or send next async request we end it in mmc_blk_rese=
-nd()
-> and there will be no subsequent request to the driver since we are
-> suppressing the requests in the queue layer.
->
-> So I guess there is no need to add further checks in the __mmc_start_=
-req(),
-> which could be redundant as there are no calls to the core layer from=
- block
-> layer once the card is found to be removed.
->
-> In summary the sequence I thought would be like this:
-> Case 1:
-> 1) Transfer is going on (host claimed by mmcqd) and card is removed.
-> 2) Driver is in middle of transaction, hence some kind of timeout err=
-or is
-> returned.
-> 3) mmc_blk_cmd_recovery(): Block layer does error checking and sets t=
-he card
-> as removed.
-> 4) Block layer then retries the request calling mmc_blk_resend().
-> 5) Since the mmc_card_removed is true we end the request here and do =
-not
-> send any request to the core.
->
-> Case 2:
-> 1) When there is no transfer going on (host->claimed =3D 0)
-> 2) mmc_detect_change() would set card_removed flag.
-> 3) All the subsequent requests would be killed in queue layer itself.
->
->> You have added a check in mmc_wait_for_req(). What about this:
->
-> mmc_wait_for_req() will be called to send regular CMDs as well, hence=
- we
-> need to add a check.
->
->> --------------------------
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index b526036..dcdcb9a 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -287,11 +287,17 @@ static void mmc_wait_done(struct mmc_request *=
-mrq)
->> =A0 =A0 =A0 =A0 complete(&mrq->completion);
->> =A0}
->>
->> -static void __mmc_start_req(struct mmc_host *host, struct mmc_reque=
-st
->> *mrq)
->> +static int __mmc_start_req(struct mmc_host *host, struct mmc_reques=
-t
->> *mrq)
->> =A0{
->> - =A0 =A0 =A0 init_completion(&mrq->completion);
->> - =A0 =A0 =A0 mrq->done =3D mmc_wait_done;
->> - =A0 =A0 =A0 mmc_start_request(host, mrq);
->> + =A0 =A0 =A0 if (mmc_card_removed(host->card)) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0mrq->cmd->error =3D -ENOMEDIUM;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0return -ENOMEDIUM;
->> + =A0 =A0 =A0 }
->
-> This is not yet done here. If an async request comes then it will do =
-a
-> wait_for_req_done() for the previous request which returned even with=
-out
-> doing a init_completion. So we need to handle this case in mmc_start_=
-req().
->
-You're right. Thanks for spotting this. init_completion and done must
-be assigned.
-The patch should look like this:
--------------------------------
-init_completion(&mrq->completion);
-mrq->done =3D mmc_wait_done;
-if (mmc_card_removed(host->card)) {
-             complete(&mrq->completion);
-             mrq->cmd->error =3D -ENOMEDIUM;
-             return -ENOMEDIUM;
-}
-mmc_start_request(host, mrq);
------------------------
-What about this?
+ drivers/mmc/core/core.c  |   32 ++++++++++++++++++++++++++++++++
+ drivers/mmc/core/core.h  |    3 +++
+ drivers/mmc/core/mmc.c   |   12 +++++++++++-
+ drivers/mmc/core/sd.c    |   12 +++++++++++-
+ drivers/mmc/core/sdio.c  |   11 ++++++++++-
+ include/linux/mmc/card.h |    1 +
+ include/linux/mmc/core.h |    2 ++
+ 7 files changed, 70 insertions(+), 3 deletions(-)
 
->> +
->> + =A0 =A0 =A0 init_completion(&mrq->completion);
->> + =A0 =A0 =A0 mrq->done =3D mmc_wait_done;
->> + =A0 =A0 =A0 mmc_start_request(host, mrq);
->> + =A0 =A0 =A0 return 0;
->> =A0}
->>
->> =A0static void mmc_wait_for_req_done(struct mmc_host *host,
->> @@ -418,7 +424,8 @@ EXPORT_SYMBOL(mmc_start_req);
->> =A0 */
->> =A0void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *=
-mrq)
->> =A0{
->> - =A0 =A0 =A0 __mmc_start_req(host, mrq);
->> + =A0 =A0 =A0 if (__mmc_start_req(host, mrq))
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return
->> =A0 =A0 =A0 =A0 mmc_wait_for_req_done(host, mrq);
->> =A0}
->> =A0EXPORT_SYMBOL(mmc_wait_for_req);
->> ----------------------------------
->> This patch will set error to -ENOMEDIUM for both mmc_start_req() and
->> mmc_wait_for_req()
->>
->> mmc_blk_err_check() can check for -ENOMEDIUM and return something li=
-ke
->> MMC_BLK_ENOMEDIUM
->
-> If I understand correctly, the above patch handles a third case:
-> 1) issue_fn is called by the queue layer (for the first request)
-> 2) just before the mmcqd claims host card is removed and the
-> mmc_detect_change has flagged the card as removed.
-> 3) we send the request and before it was sent to host driver
-> __mmc_start_req() sent -ENOMEDIUM and the block layer handles new err=
-or
-> ENOMEDIUM.
->
-> This is a valid case but increases the complexity as we need to take =
-care of
-> the async request which does not know we have returned prematurely wi=
-thout
-> doing init_completion().
-My intention is to simplify the error handling by checking
-is-card-removed in __mmc_start_req() rather than both
-mmc_wait_for_req() and mmc_start_req().
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 271efea..c317564 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2049,6 +2049,38 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ 	return -EIO;
+ }
 
-=46low for async:
-0. *card is removed
-1. mmc_start_req()
-2. -> mmc_wait_for_req_done()
-3. ->->err_check()
-4. ->->->mmc_blk_cmd_recovery()
-5. ->->->->mmc_card_set_removed(card)
-6. skip start next request and returns
-7. new request from block layer
-8. mmc_start_req()
-9. ->__mmc_start_req()
-10.new request from block layer
-11. mmc_start_req()
-12. -> mmc_wait_for_req_done() /* completion is already completed in
-__mmc_start_req(), checks card-is-removed and returns */
-13. ->-> err_check() /* prints no warning since error is -ENOMEDIUM */
++int _mmc_card_removed(struct mmc_host *host, int detect_change)
++{
++	int ret;
++
++	if (!(host->caps & MMC_CAP_NONREMOVABLE) || !host->bus_ops->alive)
++		return 0;
++
++	if (!host->card || (host->card->state & MMC_CARD_REMOVED))
++		return 1;
++
++	/*
++	 * The card will be considered alive unless we have been asked to detect
++	 * a change or host requires polling to provide card detection.
++	 */
++	if (!detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
++		return 0;
++
++	ret = host->bus_ops->alive(host);
++	if (ret)
++		host->card->state |= MMC_CARD_REMOVED;
++
++	return ret;
++}
++
++int mmc_card_removed(struct mmc_host *host)
++{
++	WARN_ON(!host->claimed);
++
++	return _mmc_card_removed(host, work_pending(&host->detect.work));
++}
++EXPORT_SYMBOL(mmc_card_removed);
++
+ void mmc_rescan(struct work_struct *work)
+ {
+ 	static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 14664f1..4b6b10e 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -24,6 +24,7 @@ struct mmc_bus_ops {
+ 	int (*resume)(struct mmc_host *);
+ 	int (*power_save)(struct mmc_host *);
+ 	int (*power_restore)(struct mmc_host *);
++	int (*alive)(struct mmc_host *);
+ };
 
->
-> I guess we can live with this rare case with just outputting few erro=
-rs, as
-> the whole idea of patch is to reduce (if not completely eliminate)
-> unnecessary prints in the log output which can bog down cpu if some w=
-ired
-> peripheral like UART console is enabled.
->
-> Please let me know if I am missing something.
->
-Here's my case. in mmci.c: mmc_detect_change(host->mmc, msecs_to_jiffie=
-s(500));
-It takes 500 ms until mmc_rescan is called. Of course, I can change
-the timing but let's skip that part for now.
-This means the block layer will continue to issue requests for 500 ms
-after the card is ejected. There will be no warnings for the retries
-because the card-is-removed is checked in resend(), but for new
-incoming requests there will be error prints.
+ void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
+@@ -59,6 +60,8 @@ void mmc_rescan(struct work_struct *work);
+ void mmc_start_host(struct mmc_host *host);
+ void mmc_stop_host(struct mmc_host *host);
 
-Regards,
-Per
++int _mmc_card_removed(struct mmc_host *host, int detect_change);
++
+ int mmc_attach_mmc(struct mmc_host *host);
+ int mmc_attach_sd(struct mmc_host *host);
+ int mmc_attach_sdio(struct mmc_host *host);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index a1223bd..5841d08 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1104,6 +1104,14 @@ static void mmc_remove(struct mmc_host *host)
+ }
+
+ /*
++ * Card detection - card is alive.
++ */
++static int mmc_alive(struct mmc_host *host)
++{
++	return mmc_send_status(host->card, NULL);
++}
++
++/*
+  * Card detection callback from host.
+  */
+ static void mmc_detect(struct mmc_host *host)
+@@ -1118,7 +1126,7 @@ static void mmc_detect(struct mmc_host *host)
+ 	/*
+ 	 * Just check if our card has been removed.
+ 	 */
+-	err = mmc_send_status(host->card, NULL);
++	err = _mmc_card_removed(host, 1);
+
+ 	mmc_release_host(host);
+
+@@ -1223,6 +1231,7 @@ static const struct mmc_bus_ops mmc_ops = {
+ 	.suspend = NULL,
+ 	.resume = NULL,
+ 	.power_restore = mmc_power_restore,
++	.alive = mmc_alive,
+ };
+
+ static const struct mmc_bus_ops mmc_ops_unsafe = {
+@@ -1233,6 +1242,7 @@ static const struct mmc_bus_ops mmc_ops_unsafe = {
+ 	.suspend = mmc_suspend,
+ 	.resume = mmc_resume,
+ 	.power_restore = mmc_power_restore,
++	.alive = mmc_alive,
+ };
+
+ static void mmc_attach_bus_ops(struct mmc_host *host)
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 1d5a3bd..82855ed 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1018,6 +1018,14 @@ static void mmc_sd_remove(struct mmc_host *host)
+ }
+
+ /*
++ * Card detection - card is alive.
++ */
++static int mmc_sd_alive(struct mmc_host *host)
++{
++	return mmc_send_status(host->card, NULL);
++}
++
++/*
+  * Card detection callback from host.
+  */
+ static void mmc_sd_detect(struct mmc_host *host)
+@@ -1032,7 +1040,7 @@ static void mmc_sd_detect(struct mmc_host *host)
+ 	/*
+ 	 * Just check if our card has been removed.
+ 	 */
+-	err = mmc_send_status(host->card, NULL);
++	err = _mmc_card_removed(host, 1);
+
+ 	mmc_release_host(host);
+
+@@ -1101,6 +1109,7 @@ static const struct mmc_bus_ops mmc_sd_ops = {
+ 	.suspend = NULL,
+ 	.resume = NULL,
+ 	.power_restore = mmc_sd_power_restore,
++	.alive = mmc_sd_alive,
+ };
+
+ static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
+@@ -1109,6 +1118,7 @@ static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
+ 	.suspend = mmc_sd_suspend,
+ 	.resume = mmc_sd_resume,
+ 	.power_restore = mmc_sd_power_restore,
++	.alive = mmc_sd_alive,
+ };
+
+ static void mmc_sd_attach_bus_ops(struct mmc_host *host)
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 8c04f7f..ca5c4f9 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -820,6 +820,14 @@ static void mmc_sdio_remove(struct mmc_host *host)
+ }
+
+ /*
++ * Card detection - card is alive.
++ */
++static int mmc_sdio_alive(struct mmc_host *host)
++{
++	return mmc_select_card(host->card);
++}
++
++/*
+  * Card detection callback from host.
+  */
+ static void mmc_sdio_detect(struct mmc_host *host)
+@@ -841,7 +849,7 @@ static void mmc_sdio_detect(struct mmc_host *host)
+ 	/*
+ 	 * Just check if our card has been removed.
+ 	 */
+-	err = mmc_select_card(host->card);
++	err = _mmc_card_removed(host, 1);
+
+ 	mmc_release_host(host);
+
+@@ -1019,6 +1027,7 @@ static const struct mmc_bus_ops mmc_sdio_ops = {
+ 	.suspend = mmc_sdio_suspend,
+ 	.resume = mmc_sdio_resume,
+ 	.power_restore = mmc_sdio_power_restore,
++	.alive = mmc_sdio_alive,
+ };
+
+
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 534974c..c81b09f 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -209,6 +209,7 @@ struct mmc_card {
+ #define MMC_STATE_HIGHSPEED_DDR (1<<4)		/* card is in high speed mode */
+ #define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in ultra high speed mode */
+ #define MMC_CARD_SDXC		(1<<6)		/* card is SDXC */
++#define MMC_CARD_REMOVED	(1<<7)		/* card has been removed */
+ 	unsigned int		quirks; 	/* card quirks */
+ #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
+ #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 174a844..8604472 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -180,6 +180,8 @@ extern int mmc_try_claim_host(struct mmc_host *host);
+
+ extern int mmc_flush_cache(struct mmc_card *);
+
++extern int mmc_card_removed(struct mmc_host *host);
++
+ /**
+  *	mmc_claim_host - exclusively claim a host
+  *	@host: mmc host to claim
+-- 
+1.7.6.4
