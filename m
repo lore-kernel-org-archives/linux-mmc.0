@@ -1,265 +1,57 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V2] mmc: Kill block requests if card is removed
-Date: Thu, 24 Nov 2011 16:52:45 +0200
-Message-ID: <4ECE5A3D.6060004@intel.com>
-References: <1321959418-26864-1-git-send-email-sthumma@codeaurora.org>
+From: Lars-Peter Clausen <lars@metafoo.de>
+Subject: [PATCH 07/11] mmc: Remove redundant spi driver bus initialization
+Date: Thu, 24 Nov 2011 16:29:17 +0100
+Message-ID: <1322148561-25138-7-git-send-email-lars@metafoo.de>
+References: <1322148561-25138-1-git-send-email-lars@metafoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1321959418-26864-1-git-send-email-sthumma@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, per.lkml@gmail.com, linux-arm-msm@vger.kernel.org, cjb@laptop.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:46340
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753969Ab1KXP2m (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2011 10:28:42 -0500
+In-Reply-To: <1322148561-25138-1-git-send-email-lars@metafoo.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Lars-Peter Clausen <lars@metafoo.de>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Hi
+In ancient times it was necessary to manually initialize the bus field of an
+spi_driver to spi_bus_type. These days this is done in spi_driver_register(),
+so we can drop the manual assignment.
 
-Here is a way to allow mmc block to determine immediately
-if a card has been removed while preserving the present rules
-and keeping card detection in the bus_ops.
+The patch was generated using the following coccinelle semantic patch:
+// <smpl>
+@@
+identifier _driver;
+@@
+struct spi_driver _driver = {
+	.driver = {
+-		.bus = &spi_bus_type,
+	},
+};
+// </smpl>
 
-Untested I'm afraid.
-
-Regards
-Adrian
-
-
-
->From 2c6c9535b94c07fa3d12af26e9b6de500cb29970 Mon Sep 17 00:00:00 2001
-From: Adrian Hunter <adrian.hunter@intel.com>
-Date: Thu, 24 Nov 2011 16:32:34 +0200
-Subject: [PATCH] mmc: allow upper layers to determine immediately if a card has been removed
-
-Add a function mmc_card_removed() which upper layers can use
-to determine immediately if a card has been removed.  This
-function should be called after an I/O request fails so that
-all queued I/O requests can be errored out immediately
-instead of waiting for the card device to be removed.
-
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 ---
- drivers/mmc/core/core.c  |   32 ++++++++++++++++++++++++++++++++
- drivers/mmc/core/core.h  |    3 +++
- drivers/mmc/core/mmc.c   |   12 +++++++++++-
- drivers/mmc/core/sd.c    |   12 +++++++++++-
- drivers/mmc/core/sdio.c  |   11 ++++++++++-
- include/linux/mmc/card.h |    1 +
- include/linux/mmc/core.h |    2 ++
- 7 files changed, 70 insertions(+), 3 deletions(-)
+ drivers/mmc/host/mmc_spi.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 271efea..c317564 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2049,6 +2049,38 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
- 	return -EIO;
- }
-
-+int _mmc_card_removed(struct mmc_host *host, int detect_change)
-+{
-+	int ret;
-+
-+	if (!(host->caps & MMC_CAP_NONREMOVABLE) || !host->bus_ops->alive)
-+		return 0;
-+
-+	if (!host->card || (host->card->state & MMC_CARD_REMOVED))
-+		return 1;
-+
-+	/*
-+	 * The card will be considered alive unless we have been asked to detect
-+	 * a change or host requires polling to provide card detection.
-+	 */
-+	if (!detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
-+		return 0;
-+
-+	ret = host->bus_ops->alive(host);
-+	if (ret)
-+		host->card->state |= MMC_CARD_REMOVED;
-+
-+	return ret;
-+}
-+
-+int mmc_card_removed(struct mmc_host *host)
-+{
-+	WARN_ON(!host->claimed);
-+
-+	return _mmc_card_removed(host, work_pending(&host->detect.work));
-+}
-+EXPORT_SYMBOL(mmc_card_removed);
-+
- void mmc_rescan(struct work_struct *work)
- {
- 	static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 14664f1..4b6b10e 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -24,6 +24,7 @@ struct mmc_bus_ops {
- 	int (*resume)(struct mmc_host *);
- 	int (*power_save)(struct mmc_host *);
- 	int (*power_restore)(struct mmc_host *);
-+	int (*alive)(struct mmc_host *);
- };
-
- void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
-@@ -59,6 +60,8 @@ void mmc_rescan(struct work_struct *work);
- void mmc_start_host(struct mmc_host *host);
- void mmc_stop_host(struct mmc_host *host);
-
-+int _mmc_card_removed(struct mmc_host *host, int detect_change);
-+
- int mmc_attach_mmc(struct mmc_host *host);
- int mmc_attach_sd(struct mmc_host *host);
- int mmc_attach_sdio(struct mmc_host *host);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a1223bd..5841d08 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1104,6 +1104,14 @@ static void mmc_remove(struct mmc_host *host)
- }
-
- /*
-+ * Card detection - card is alive.
-+ */
-+static int mmc_alive(struct mmc_host *host)
-+{
-+	return mmc_send_status(host->card, NULL);
-+}
-+
-+/*
-  * Card detection callback from host.
-  */
- static void mmc_detect(struct mmc_host *host)
-@@ -1118,7 +1126,7 @@ static void mmc_detect(struct mmc_host *host)
- 	/*
- 	 * Just check if our card has been removed.
- 	 */
--	err = mmc_send_status(host->card, NULL);
-+	err = _mmc_card_removed(host, 1);
-
- 	mmc_release_host(host);
-
-@@ -1223,6 +1231,7 @@ static const struct mmc_bus_ops mmc_ops = {
- 	.suspend = NULL,
- 	.resume = NULL,
- 	.power_restore = mmc_power_restore,
-+	.alive = mmc_alive,
- };
-
- static const struct mmc_bus_ops mmc_ops_unsafe = {
-@@ -1233,6 +1242,7 @@ static const struct mmc_bus_ops mmc_ops_unsafe = {
- 	.suspend = mmc_suspend,
- 	.resume = mmc_resume,
- 	.power_restore = mmc_power_restore,
-+	.alive = mmc_alive,
- };
-
- static void mmc_attach_bus_ops(struct mmc_host *host)
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 1d5a3bd..82855ed 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1018,6 +1018,14 @@ static void mmc_sd_remove(struct mmc_host *host)
- }
-
- /*
-+ * Card detection - card is alive.
-+ */
-+static int mmc_sd_alive(struct mmc_host *host)
-+{
-+	return mmc_send_status(host->card, NULL);
-+}
-+
-+/*
-  * Card detection callback from host.
-  */
- static void mmc_sd_detect(struct mmc_host *host)
-@@ -1032,7 +1040,7 @@ static void mmc_sd_detect(struct mmc_host *host)
- 	/*
- 	 * Just check if our card has been removed.
- 	 */
--	err = mmc_send_status(host->card, NULL);
-+	err = _mmc_card_removed(host, 1);
-
- 	mmc_release_host(host);
-
-@@ -1101,6 +1109,7 @@ static const struct mmc_bus_ops mmc_sd_ops = {
- 	.suspend = NULL,
- 	.resume = NULL,
- 	.power_restore = mmc_sd_power_restore,
-+	.alive = mmc_sd_alive,
- };
-
- static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
-@@ -1109,6 +1118,7 @@ static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
- 	.suspend = mmc_sd_suspend,
- 	.resume = mmc_sd_resume,
- 	.power_restore = mmc_sd_power_restore,
-+	.alive = mmc_sd_alive,
- };
-
- static void mmc_sd_attach_bus_ops(struct mmc_host *host)
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 8c04f7f..ca5c4f9 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -820,6 +820,14 @@ static void mmc_sdio_remove(struct mmc_host *host)
- }
-
- /*
-+ * Card detection - card is alive.
-+ */
-+static int mmc_sdio_alive(struct mmc_host *host)
-+{
-+	return mmc_select_card(host->card);
-+}
-+
-+/*
-  * Card detection callback from host.
-  */
- static void mmc_sdio_detect(struct mmc_host *host)
-@@ -841,7 +849,7 @@ static void mmc_sdio_detect(struct mmc_host *host)
- 	/*
- 	 * Just check if our card has been removed.
- 	 */
--	err = mmc_select_card(host->card);
-+	err = _mmc_card_removed(host, 1);
-
- 	mmc_release_host(host);
-
-@@ -1019,6 +1027,7 @@ static const struct mmc_bus_ops mmc_sdio_ops = {
- 	.suspend = mmc_sdio_suspend,
- 	.resume = mmc_sdio_resume,
- 	.power_restore = mmc_sdio_power_restore,
-+	.alive = mmc_sdio_alive,
- };
-
-
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 534974c..c81b09f 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -209,6 +209,7 @@ struct mmc_card {
- #define MMC_STATE_HIGHSPEED_DDR (1<<4)		/* card is in high speed mode */
- #define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in ultra high speed mode */
- #define MMC_CARD_SDXC		(1<<6)		/* card is SDXC */
-+#define MMC_CARD_REMOVED	(1<<7)		/* card has been removed */
- 	unsigned int		quirks; 	/* card quirks */
- #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
- #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 174a844..8604472 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -180,6 +180,8 @@ extern int mmc_try_claim_host(struct mmc_host *host);
-
- extern int mmc_flush_cache(struct mmc_card *);
-
-+extern int mmc_card_removed(struct mmc_host *host);
-+
- /**
-  *	mmc_claim_host - exclusively claim a host
-  *	@host: mmc host to claim
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index 92946b8..273306c 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -1525,7 +1525,6 @@ static struct of_device_id mmc_spi_of_match_table[] __devinitdata = {
+ static struct spi_driver mmc_spi_driver = {
+ 	.driver = {
+ 		.name =		"mmc_spi",
+-		.bus =		&spi_bus_type,
+ 		.owner =	THIS_MODULE,
+ 		.of_match_table = mmc_spi_of_match_table,
+ 	},
 -- 
-1.7.6.4
+1.7.7.1
+
+
