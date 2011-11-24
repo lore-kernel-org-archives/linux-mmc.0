@@ -1,117 +1,153 @@
-From: Qiang Liu <b32616@freescale.com>
-Subject: [PATCH 2/2] SD/MMC: add support of adjust bounce size at run-time
-Date: Thu, 24 Nov 2011 11:06:17 +0800
-Message-ID: <1322103977-7155-2-git-send-email-b32616@freescale.com>
-References: <1322103977-7155-1-git-send-email-b32616@freescale.com>
+From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Subject: Re: [PATCH 1/1] mmc:Extension of MMC Block IOCTL Command support for
+ testing of non read/write Commands
+Date: Thu, 24 Nov 2011 10:06:42 +0530
+Message-ID: <CANYdXnpQhCFmkL5+u9P73LDhMpCH45=H=ipwrnbYA8N+MRbang@mail.gmail.com>
+References: <1321441734-24191-1-git-send-email-shashidharh@vayavyalabs.com>
+	<201111171441.48504.arnd@arndb.de>
+	<CANYdXnpAbvNSqMRACLKre3mYR3v4UFSocEBgBTv+EWU3qw+J7Q@mail.gmail.com>
+	<201111221604.53474.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe005.messaging.microsoft.com ([65.55.88.15]:57378 "EHLO
-	TX2EHSOBE010.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751029Ab1KXDiN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2011 22:38:13 -0500
-In-Reply-To: <1322103977-7155-1-git-send-email-b32616@freescale.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:40174 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751212Ab1KXEgn convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2011 23:36:43 -0500
+Received: by iage36 with SMTP id e36so2494618iag.19
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Nov 2011 20:36:42 -0800 (PST)
+In-Reply-To: <201111221604.53474.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org
-Cc: leoli@freescale.com, Qiang Liu <b32616@freescale.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Venkatraman S <svenkatr@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Philip Rakity <prakity@marvell.com>, Girish K S <girish.shivananjappa@linaro.org>, Lucas De Marchi <lucas.demarchi@profusion.mobi>, Aries Lee <arieslee@jmicron.com>, Arindam Nath <arindam.nath@amd.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Kyungmin Park <kyungmin.park@samsung.com>, Andrei Warkentin <awarkentin@vmware.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, pk <pavitra@vayavyalabs.com>, Sandeep <sandeep@vayavyalabs.com>, Rayagond <rayagond@vayavyalabs.com>
 
-Add bounce_size under /sys/block/mmcblk0/bouncesz.
-Support dynamic adjustment of bounce buffer in run-time (include mounted or
-unmounted filesystem).
+Hi Arnd,
+  thanks for the reply.
 
-/sys/block/mmcblk0/bouncesz should be integer multiple of 512, the
-value should be range from 4096 to 4194304.
+On Tue, Nov 22, 2011 at 9:34 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Friday 18 November 2011, Shashidhar Hiremath wrote:
+>> Hi Arnd,
+>> Please forgive me for a lengthy mail.
+>>
+>> firstly, the Patch has not added testcases in kernel, =C2=A0but has =
+added
+>> support infrastructure =C2=A0for handling =C2=A0different commands. =
+=46unction
+>> names are misnomers and =E2=80=9C.test_CMD0=E2=80=9D should have ins=
+tead been
+>> =E2=80=9Csend_CMD0=E2=80=9D.
+>>
+>> I have tried to express my views in 2 questions:
+>>
+>> Q1 : What all Commands can be sent using MMC block layer IOCTL ?
+>>
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0Currently =C2=A0it be used for sending on=
+ly read/write commands.
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0Should it also not support non-data (read=
+/write) commands ?
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0If Yes, then the =E2=80=9Cblock.c=E2=80=9D=
+ must be modified with few changes to
+>> handle non-data commands by making the read/write code conditional.
+>>
+>> Ex: =C2=A0Code snippet below has to be made conditional i.e. execute=
+ only
+>> for read/write commands
+>>
+>> =C2=A0 =C2=A0 =C2=A0 data.sg =3D &sg;
+>> =C2=A0 =C2=A0 =C2=A0 data.sg_len =3D 1;
+>> =C2=A0 =C2=A0 =C2=A0 data.blksz =3D idata->ic.blksz;
+>> =C2=A0 =C2=A0 =C2=A0 data.blocks =3D idata->ic.blocks;
+>>
+>> =C2=A0 =C2=A0 =C2=A0 sg_init_one(data.sg, idata->buf, idata->buf_byt=
+es);
+>>
+>> =C2=A0 =C2=A0 =C2=A0 if (idata->ic.write_flag)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 data.flags =3D MMC_=
+DATA_WRITE;
+>> =C2=A0 =C2=A0 =C2=A0 else
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 data.flags =3D MMC_=
+DATA_READ;
+>
+> This is all fine, I don't object at all to changing the code so it
+> supports non-data commands. It should be easy enough to make the abov=
+e
+> code get executed only if idata->buf_bytes is positive.
+>
+>> Q2 : Can I send CMD 9 (or any non-data command) via the mmc blk laye=
+r
+>> IOCTL ? If not what are the issues ?
+>>
+>> As of now non-data commands are not supported. So in order to send C=
+MD
+>> 9, the card has to be brought to a certain known state by sending th=
+e
+>> pre CMD 9 sequence.
+>
+> The command interface we have is for very low-level commands, and the
+> kernel should not try to intercept these.
+>
+>> As per the Specification, before sending CMD 9, the following comman=
+ds
+>> have to be sent
+>> Pre-CMD 9 Sequence
+>> =C2=A0 CMD0 : Reset
+>> =C2=A0 CMD8 : Get ocr
+>> =C2=A0 CMD55 : App command
+>> =C2=A0 CMD41 :
+>> =C2=A0 CMD2 :
+>> =C2=A0 CMD3 :
+>>
+>> ...
+>>
+>> =C2=A0From user space, in order to send CMD9, the above code snippet=
+ should
+>> be available as a single stand alone function. As of now the mmc cor=
+e
+>> state machine has a single flow which is card enumeration. But if we
+>> want to send stand alone commands from user space, the enumeration
+>> flow has to be broken into single standalone functions specific to t=
+he
+>> commands that is they have to send the pre command sequence and get
+>> the card to the proper state to send the user specified command.
+>
+> I think it is reasonable to require user space to know that it needs =
+to
+> send all the other commands before it can send CMD9. However, if you
+> need the mmc_block driver to perform any other operations besides
+> sending commands to the card, you can add new ioctl commands for
+> this, e.g. you can have one ioctl to tell the block driver to
+> get out of the way and not accept any requests from the block layer
+> while you are sending low-level commands, and another ioctl to
+> tell the block layer to rescan the card in order to get it into
+> a known working state again after you are done with the tests. Would
+> that work for you?
 
-Signed-off-by: Qiang Liu <qiang.liu@freescale.com>
----
- drivers/mmc/card/block.c |   44 ++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 44 insertions(+), 0 deletions(-)
+Yes, =C2=A0extra ioctl's can help me bringing the card to defined state=
+=2E I
+will try implementing with this approach.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index a1cb21f..649bfed 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -59,6 +59,9 @@ MODULE_ALIAS("mmc:block");
- #define INAND_CMD38_ARG_SECTRIM1 0x81
- #define INAND_CMD38_ARG_SECTRIM2 0x88
+>
+>> The command sent should also work in following scenarios:-
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0CASE 1 : Card enumerated, and ready for t=
+ransfer
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0CASE 2 : Card is reset
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0CASE 3 : CMD 9 has been sent, now can I s=
+end CMD 8
+>
+> Why is that a requirement? I would argue that the user application
+> already does things that are outside of the scope of normal
+> operation, so it should know what it is doing and cannot expect
+> the kernel to perform extra magic behind its back.
 
-+#define MMC_MIN_QUEUE_BOUNCESZ 4096
-+#define MMC_MAX_QUEUE_BOUNCESZ 4194304
-+
- static DEFINE_MUTEX(block_mutex);
+I Agree, Kernel need not worry about these scenarios..
 
- /*
-@@ -107,6 +110,7 @@ struct mmc_blk_data {
- 	 */
- 	unsigned int	part_curr;
- 	struct device_attribute force_ro;
-+	struct device_attribute bouncesz;
- };
-
- static DEFINE_MUTEX(open_lock);
-@@ -1547,6 +1551,7 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
- 			del_gendisk(md->disk);
- 		}
-
-+		device_remove_file(disk_to_dev(md->disk), &md->bouncesz);
- 		/* Then flush out any already in there */
- 		mmc_cleanup_queue(&md->queue);
- 		mmc_blk_put(md);
-@@ -1609,6 +1614,33 @@ static const struct mmc_fixup blk_fixups[] =
- 	END_FIXUP
- };
-
-+#ifdef CONFIG_MMC_BLOCK_BOUNCE
-+static ssize_t mmc_bouncesz_show(struct device *dev,
-+		struct device_attribute *attr, char *buf)
-+{
-+	 return sprintf(buf, "%u\n", mmc_queue_bouncesz);
-+}
-+
-+static ssize_t mmc_bouncesz_store(struct device *dev,
-+		struct device_attribute *attr,
-+		const char *buf, size_t count)
-+{
-+	unsigned int bouncesz;
-+	struct mmc_blk_data *md;
-+
-+	if ((sscanf(buf, "%d", &bouncesz) != 1) ||
-+			(bouncesz < MMC_MIN_QUEUE_BOUNCESZ) ||
-+			(bouncesz > MMC_MAX_QUEUE_BOUNCESZ) ||
-+			(bouncesz % 512 != 0))
-+		return -EINVAL;
-+
-+	md = mmc_blk_get(dev_to_disk(dev));
-+	mmc_reinit_bounce_queue(&md->queue, md->queue.card, bouncesz);
-+	mmc_blk_put(md);
-+	return mmc_queue_bouncesz;
-+}
-+#endif
-+
- static int mmc_blk_probe(struct mmc_card *card)
- {
- 	struct mmc_blk_data *md, *part_md;
-@@ -1648,6 +1680,18 @@ static int mmc_blk_probe(struct mmc_card *card)
- 		if (mmc_add_disk(part_md))
- 			goto out;
- 	}
-+
-+#ifdef CONFIG_MMC_BLOCK_BOUNCE
-+	md->bouncesz.show = mmc_bouncesz_show;
-+	md->bouncesz.store = mmc_bouncesz_store;
-+	sysfs_attr_init(&md->bouncesz.attr);
-+	md->bouncesz.attr.name = "bouncesz";
-+	md->bouncesz.attr.mode = S_IRUGO | S_IWUSR;
-+	err = device_create_file(disk_to_dev(md->disk), &md->bouncesz);
-+	if (err)
-+		goto out;
-+#endif
-+
- 	return 0;
-
-  out:
---
-1.6.4
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0Arnd
+>
 
 
+--=20
+regards,
+Shashidhar Hiremath
