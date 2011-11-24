@@ -1,60 +1,98 @@
-From: Per Forlin <per.lkml@gmail.com>
-Subject: Re: [PATCH] mmc: core: Kill block requests if card is removed
-Date: Thu, 24 Nov 2011 10:30:25 +0100
-Message-ID: <CAFEEs1nBFFLNvRDfwFkkp5SaifmKeykS-jrEtiSHw2ahR_38Zg@mail.gmail.com>
-References: <1320813119-24383-1-git-send-email-sthumma@codeaurora.org>
-	<loom.20111122T210615-276@post.gmane.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH 1/2] mmc: core: Separate the timeout value for cache-ctrl
+Date: Thu, 24 Nov 2011 18:22:46 +0900
+Message-ID: <1322126566-5107-1-git-send-email-tgih.jun@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:41872 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754607Ab1KXJa0 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2011 04:30:26 -0500
-Received: by vcbfk14 with SMTP id fk14so1159072vcb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Nov 2011 01:30:25 -0800 (PST)
-In-Reply-To: <loom.20111122T210615-276@post.gmane.org>
+Received: from ganesha.gnumonks.org ([213.95.27.120]:55495 "EHLO
+	ganesha.gnumonks.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753346Ab1KXJpV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2011 04:45:21 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Taylor <dmtaylor@skytex.net>, Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Hi David,
+Turning the cache off implies flushing cache which doesn't define
+maximum timeout unlike cache-on. This patch will apply the generic
+CMD6 timeout only for cache-on. Additionally the kernel message is
+added for checking failure case of cache-on.
 
-On Tue, Nov 22, 2011 at 9:18 PM, David Taylor <dmtaylor@skytex.net> wro=
-te:
-> Sujit Reddy Thumma <sthumma <at> codeaurora.org> writes:
->
->>
->> Kill block requests when the host knows that the card is
->> removed from the slot and is sure that subsequent requests
->> are bound to fail. Do this silently so that the block
->> layer doesn't output unnecessary error messages.
->>
->> This patch implements suggestion from Adrian Hunter,
->> http://thread.gmane.org/gmane.linux.kernel.mmc/2714/focus=3D3474
->>
->> Signed-off-by: Sujit Reddy Thumma <sthumma <at> codeaurora.org>
->> ---
->> =A0drivers/mmc/card/queue.c | =A0 =A05 +++++
->> =A0drivers/mmc/core/bus.c =A0 | =A0 =A02 ++
->> =A0include/linux/mmc/card.h | =A0 =A03 +++
->> =A03 files changed, 10 insertions(+), 0 deletions(-)
->>
->
-> Thanks, this patch worked nicely to control a seemingly endless serie=
-s of
-> driver complaints when the SD card was removed during a transfer.
->
-> The OMAP4 I'm working on has hardware assisted detection of card remo=
-val, and
-> this patch looks like it will be sufficient.
->
-What happens if you run "dd if=3D/dev/zero of=3D/dev/mmcblk0 bs=3D1M
-count=3D1000" and during dd the card is ejected?
-When I test this, the host is claimed until the dd has tried to
-transfer all 1000MB.
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+ drivers/mmc/core/core.c |   22 +++++++++++++---------
+ drivers/mmc/core/mmc.c  |   12 ++++++++++--
+ 2 files changed, 23 insertions(+), 11 deletions(-)
 
-Regards,
-Per
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 271efea..481b090 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2270,6 +2270,7 @@ EXPORT_SYMBOL(mmc_flush_cache);
+ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
+ {
+ 	struct mmc_card *card = host->card;
++	unsigned int timeout;
+ 	int err = 0;
+ 
+ 	if (!(host->caps2 & MMC_CAP2_CACHE_CTRL) ||
+@@ -2280,16 +2281,19 @@ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
+ 			(card->ext_csd.cache_size > 0)) {
+ 		enable = !!enable;
+ 
+-		if (card->ext_csd.cache_ctrl ^ enable)
++		if (card->ext_csd.cache_ctrl ^ enable) {
++			timeout = enable ? card->ext_csd.generic_cmd6_time : 0;
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-					EXT_CSD_CACHE_CTRL, enable, 0);
+-		if (err)
+-			pr_err("%s: cache %s error %d\n",
+-					mmc_hostname(card->host),
+-					enable ? "on" : "off",
+-					err);
+-		else
+-			card->ext_csd.cache_ctrl = enable;
++					EXT_CSD_CACHE_CTRL, enable, timeout);
++
++			if (err)
++				pr_err("%s: cache %s error %d\n",
++						mmc_hostname(card->host),
++						enable ? "on" : "off",
++						err);
++			else
++				card->ext_csd.cache_ctrl = enable;
++		}
+ 	}
+ 
+ 	return err;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index a1223bd..1e1dda9 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1066,14 +1066,22 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	if ((host->caps2 & MMC_CAP2_CACHE_CTRL) &&
+ 			card->ext_csd.cache_size > 0) {
+ 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-				EXT_CSD_CACHE_CTRL, 1, 0);
++				EXT_CSD_CACHE_CTRL, 1,
++				card->ext_csd.generic_cmd6_time);
+ 		if (err && err != -EBADMSG)
+ 			goto free_card;
+ 
+ 		/*
+ 		 * Only if no error, cache is turned on successfully.
+ 		 */
+-		card->ext_csd.cache_ctrl = err ? 0 : 1;
++		if (err) {
++			pr_warning("%s: Cache is supported, "
++					"but failed to turn on (%d)\n",
++					mmc_hostname(card->host), err);
++			err = 0;
++		} else {
++			card->ext_csd.cache_ctrl = 1;
++		}
+ 	}
+ 
+ 	if (!oldcard)
+-- 
+1.7.0.4
+
