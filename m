@@ -1,75 +1,305 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: block: Fix compile time warning for uninitalized
- variables
-Date: Fri, 25 Nov 2011 12:06:49 +0200
-Message-ID: <4ECF68B9.7050708@intel.com>
-References: <1322043102-28050-1-git-send-email-tushar.behera@linaro.org>
+From: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Subject: Re: [PATCH V2] mmc: Kill block requests if card is removed
+Date: Fri, 25 Nov 2011 15:56:59 +0530
+Message-ID: <4ECF6D73.7080302@codeaurora.org>
+References: <1321959418-26864-1-git-send-email-sthumma@codeaurora.org> <4ECE5A3D.6060004@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:46569 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753764Ab1KYKGx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 25 Nov 2011 05:06:53 -0500
-In-Reply-To: <1322043102-28050-1-git-send-email-tushar.behera@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <4ECE5A3D.6060004@intel.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, per.lkml@gmail.com, linux-arm-msm@vger.kernel.org, cjb@laptop.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tushar Behera <tushar.behera@linaro.org>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, kyungmin.park@samsung.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 23/11/11 12:11, Tushar Behera wrote:
-> This patch fixes following compile time warnings.
->=20
-> drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_issue_rq=E2=80=
-=99:
-> drivers/mmc/card/block.c:828:18: warning: =E2=80=98arg=E2=80=99 may b=
-e used uninitialized in this function [-Wun    initialized]
-> drivers/mmc/card/block.c:794:25: note: =E2=80=98arg=E2=80=99 was decl=
-ared here
-> drivers/mmc/card/block.c:827:6: warning: =E2=80=98nr=E2=80=99 may be =
-used uninitialized in this function [-Wunin    itialized]
-> drivers/mmc/card/block.c:794:21: note: =E2=80=98nr=E2=80=99 was decla=
-red here
-> drivers/mmc/card/block.c:827:6: warning: =E2=80=98from=E2=80=99 may b=
-e used uninitialized in this function [-Wun    initialized]
-> drivers/mmc/card/block.c:794:15: note: =E2=80=98from=E2=80=99 was dec=
-lared here
->=20
-> If the code follows the labels 'out' and 'retry', then we get
-> to situation when these variables are used uninitialized.
->=20
-> Signed-off-by: Tushar Behera <tushar.behera@linaro.org>
+Hi Adrian,
+
+On 11/24/2011 8:22 PM, Adrian Hunter wrote:
+> Hi
+>
+> Here is a way to allow mmc block to determine immediately
+> if a card has been removed while preserving the present rules
+> and keeping card detection in the bus_ops.
+>
+> Untested I'm afraid.
+>
+> Regards
+> Adrian
+>
+>
+>
+>  From 2c6c9535b94c07fa3d12af26e9b6de500cb29970 Mon Sep 17 00:00:00 2001
+> From: Adrian Hunter<adrian.hunter@intel.com>
+> Date: Thu, 24 Nov 2011 16:32:34 +0200
+> Subject: [PATCH] mmc: allow upper layers to determine immediately if a card has been removed
+>
+> Add a function mmc_card_removed() which upper layers can use
+> to determine immediately if a card has been removed.  This
+> function should be called after an I/O request fails so that
+> all queued I/O requests can be errored out immediately
+> instead of waiting for the card device to be removed.
+>
+> Signed-off-by: Adrian Hunter<adrian.hunter@intel.com>
 > ---
->=20
-> The patch is rebased on v3.2-rc2.
->=20
-> I don't have much idea on what should be the default value
-> for these variables. The fixes are provided just to do away
-> with the compile time warnings.
+>   drivers/mmc/core/core.c  |   32 ++++++++++++++++++++++++++++++++
+>   drivers/mmc/core/core.h  |    3 +++
+>   drivers/mmc/core/mmc.c   |   12 +++++++++++-
+>   drivers/mmc/core/sd.c    |   12 +++++++++++-
+>   drivers/mmc/core/sdio.c  |   11 ++++++++++-
+>   include/linux/mmc/card.h |    1 +
+>   include/linux/mmc/core.h |    2 ++
+>   7 files changed, 70 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 271efea..c317564 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2049,6 +2049,38 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+>   	return -EIO;
+>   }
+>
+> +int _mmc_card_removed(struct mmc_host *host, int detect_change)
+> +{
+> +	int ret;
+> +
+> +	if (!(host->caps&  MMC_CAP_NONREMOVABLE) || !host->bus_ops->alive)
+> +		return 0;
+> +
+> +	if (!host->card || (host->card->state&  MMC_CARD_REMOVED))
+> +		return 1;
+> +
+> +	/*
+> +	 * The card will be considered alive unless we have been asked to detect
+> +	 * a change or host requires polling to provide card detection.
+> +	 */
+> +	if (!detect_change&&  !(host->caps&  MMC_CAP_NEEDS_POLL))
+> +		return 0;
+> +
+> +	ret = host->bus_ops->alive(host);
+> +	if (ret)
+> +		host->card->state |= MMC_CARD_REMOVED;
+> +
+> +	return ret;
+> +}
+> +
 
-It is a "goto" that is wrong, not the initialization.
+The patch itself looks good to me, but can't we decide this in the block 
+layer itself when we issue get_card_status() when the ongoing request fails?
 
-But there is another problem.  The sanitize code is
-side-stepping the reset and retry path entirely.
+----------------------------------------------
+         for (retry = 2; retry >= 0; retry--) {
+                 err = get_card_status(card, &status, 0);
+                 if (!err)
+                         break;
+
+                 prev_cmd_status_valid = false;
+                 pr_err("%s: error %d sending status command, %sing\n",
+                        req->rq_disk->disk_name, err, retry ? "retry" : 
+"abort");
+         }
 
 
->=20
->  drivers/mmc/card/block.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
->=20
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index a1cb21f..8e0ffe9 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -791,7 +791,7 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc=
-_queue *mq,
->  {
->  	struct mmc_blk_data *md =3D mq->data;
->  	struct mmc_card *card =3D md->queue.card;
-> -	unsigned int from, nr, arg;
-> +	unsigned int from =3D 0, nr =3D 0, arg =3D 0;
->  	int err =3D 0, type =3D MMC_BLK_SECDISCARD;
-> =20
->  	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
+  	/* We couldn't get a response from the card.  Give up. */
+-	if (err)
++	if (err) {
++		/*
++		 * If the card didn't respond to status command,
++		 * it is likely that card is gone. Flag it as removed,
++		 * mmc_detect_change() cleans the rest.
++		 */
++		mmc_card_set_removed(card);
+  		return ERR_ABORT;
++	}
+------------------------------------------------
 
+The V2 patch I have posted takes care of this. Please let me know if it 
+not good to decide in the block layer itself. Essentially, both the 
+implementations are sending CMD13 to know the status of the card.
+
+> +int mmc_card_removed(struct mmc_host *host)
+> +{
+> +	WARN_ON(!host->claimed);
+> +
+> +	return _mmc_card_removed(host, work_pending(&host->detect.work));
+> +}
+> +EXPORT_SYMBOL(mmc_card_removed);
+> +
+>   void mmc_rescan(struct work_struct *work)
+>   {
+>   	static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+> index 14664f1..4b6b10e 100644
+> --- a/drivers/mmc/core/core.h
+> +++ b/drivers/mmc/core/core.h
+> @@ -24,6 +24,7 @@ struct mmc_bus_ops {
+>   	int (*resume)(struct mmc_host *);
+>   	int (*power_save)(struct mmc_host *);
+>   	int (*power_restore)(struct mmc_host *);
+> +	int (*alive)(struct mmc_host *);
+>   };
+>
+>   void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
+> @@ -59,6 +60,8 @@ void mmc_rescan(struct work_struct *work);
+>   void mmc_start_host(struct mmc_host *host);
+>   void mmc_stop_host(struct mmc_host *host);
+>
+> +int _mmc_card_removed(struct mmc_host *host, int detect_change);
+> +
+>   int mmc_attach_mmc(struct mmc_host *host);
+>   int mmc_attach_sd(struct mmc_host *host);
+>   int mmc_attach_sdio(struct mmc_host *host);
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index a1223bd..5841d08 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1104,6 +1104,14 @@ static void mmc_remove(struct mmc_host *host)
+>   }
+>
+>   /*
+> + * Card detection - card is alive.
+> + */
+> +static int mmc_alive(struct mmc_host *host)
+> +{
+> +	return mmc_send_status(host->card, NULL);
+> +}
+> +
+> +/*
+>    * Card detection callback from host.
+>    */
+>   static void mmc_detect(struct mmc_host *host)
+> @@ -1118,7 +1126,7 @@ static void mmc_detect(struct mmc_host *host)
+>   	/*
+>   	 * Just check if our card has been removed.
+>   	 */
+> -	err = mmc_send_status(host->card, NULL);
+> +	err = _mmc_card_removed(host, 1);
+>
+>   	mmc_release_host(host);
+>
+> @@ -1223,6 +1231,7 @@ static const struct mmc_bus_ops mmc_ops = {
+>   	.suspend = NULL,
+>   	.resume = NULL,
+>   	.power_restore = mmc_power_restore,
+> +	.alive = mmc_alive,
+>   };
+>
+>   static const struct mmc_bus_ops mmc_ops_unsafe = {
+> @@ -1233,6 +1242,7 @@ static const struct mmc_bus_ops mmc_ops_unsafe = {
+>   	.suspend = mmc_suspend,
+>   	.resume = mmc_resume,
+>   	.power_restore = mmc_power_restore,
+> +	.alive = mmc_alive,
+>   };
+>
+>   static void mmc_attach_bus_ops(struct mmc_host *host)
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 1d5a3bd..82855ed 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -1018,6 +1018,14 @@ static void mmc_sd_remove(struct mmc_host *host)
+>   }
+>
+>   /*
+> + * Card detection - card is alive.
+> + */
+> +static int mmc_sd_alive(struct mmc_host *host)
+> +{
+> +	return mmc_send_status(host->card, NULL);
+> +}
+> +
+> +/*
+>    * Card detection callback from host.
+>    */
+>   static void mmc_sd_detect(struct mmc_host *host)
+> @@ -1032,7 +1040,7 @@ static void mmc_sd_detect(struct mmc_host *host)
+>   	/*
+>   	 * Just check if our card has been removed.
+>   	 */
+> -	err = mmc_send_status(host->card, NULL);
+> +	err = _mmc_card_removed(host, 1);
+>
+>   	mmc_release_host(host);
+>
+> @@ -1101,6 +1109,7 @@ static const struct mmc_bus_ops mmc_sd_ops = {
+>   	.suspend = NULL,
+>   	.resume = NULL,
+>   	.power_restore = mmc_sd_power_restore,
+> +	.alive = mmc_sd_alive,
+>   };
+>
+>   static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
+> @@ -1109,6 +1118,7 @@ static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
+>   	.suspend = mmc_sd_suspend,
+>   	.resume = mmc_sd_resume,
+>   	.power_restore = mmc_sd_power_restore,
+> +	.alive = mmc_sd_alive,
+>   };
+>
+>   static void mmc_sd_attach_bus_ops(struct mmc_host *host)
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 8c04f7f..ca5c4f9 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -820,6 +820,14 @@ static void mmc_sdio_remove(struct mmc_host *host)
+>   }
+>
+>   /*
+> + * Card detection - card is alive.
+> + */
+> +static int mmc_sdio_alive(struct mmc_host *host)
+> +{
+> +	return mmc_select_card(host->card);
+> +}
+> +
+> +/*
+>    * Card detection callback from host.
+>    */
+>   static void mmc_sdio_detect(struct mmc_host *host)
+> @@ -841,7 +849,7 @@ static void mmc_sdio_detect(struct mmc_host *host)
+>   	/*
+>   	 * Just check if our card has been removed.
+>   	 */
+> -	err = mmc_select_card(host->card);
+> +	err = _mmc_card_removed(host, 1);
+>
+>   	mmc_release_host(host);
+>
+> @@ -1019,6 +1027,7 @@ static const struct mmc_bus_ops mmc_sdio_ops = {
+>   	.suspend = mmc_sdio_suspend,
+>   	.resume = mmc_sdio_resume,
+>   	.power_restore = mmc_sdio_power_restore,
+> +	.alive = mmc_sdio_alive,
+>   };
+>
+>
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 534974c..c81b09f 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -209,6 +209,7 @@ struct mmc_card {
+>   #define MMC_STATE_HIGHSPEED_DDR (1<<4)		/* card is in high speed mode */
+>   #define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in ultra high speed mode */
+>   #define MMC_CARD_SDXC		(1<<6)		/* card is SDXC */
+> +#define MMC_CARD_REMOVED	(1<<7)		/* card has been removed */
+>   	unsigned int		quirks; 	/* card quirks */
+>   #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
+>   #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index 174a844..8604472 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -180,6 +180,8 @@ extern int mmc_try_claim_host(struct mmc_host *host);
+>
+>   extern int mmc_flush_cache(struct mmc_card *);
+>
+> +extern int mmc_card_removed(struct mmc_host *host);
+> +
+>   /**
+>    *	mmc_claim_host - exclusively claim a host
+>    *	@host: mmc host to claim
+
+
+-- 
+Thanks,
+Sujit
