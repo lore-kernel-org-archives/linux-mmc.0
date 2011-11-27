@@ -1,112 +1,129 @@
-From: viresh kumar <viresh.linux@gmail.com>
-Subject: Re: [PATCH] mmc: convert drivers/mmc/host/* to use module_platform_driver()
-Date: Sun, 27 Nov 2011 19:12:51 +0530
-Message-ID: <CAOh2x=mF2x+8DG0D2RiEoGsk4kFvi8S5V_MaWYVBP4B5m1sJvQ@mail.gmail.com>
-References: <1322283343.14278.2.camel@phoenix>
+From: merez@codeaurora.org
+Subject: RE: [PATCH 2/2] mmc: core: Support packed command for eMMC4.5      
+     device
+Date: Sun, 27 Nov 2011 11:41:11 -0800 (PST)
+Message-ID: <aad7cb35699550e89526a5fb083c520d.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:51269 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751460Ab1K0Nmx convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Nov 2011 08:42:53 -0500
-In-Reply-To: <1322283343.14278.2.camel@phoenix>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: "'S, Venkatraman'" <svenkatr@ti.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@gmail.com>
-Cc: linux-kernel@vger.kernel.org, Micha <mirq-linux@rere.qmqm.pl>, David Brown <davidb@codeaurora.org>, Ben Dooks <ben-linux@fluff.org>, Viresh Kumar <viresh.kumar@st.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Sascha Hauer <s.hauer@pengutronix.de>, Wolfram Sang <w.sang@pengutronix.de>, Grant Likely <grant.likely@secretlab.ca>, Anton Vorontsov <cbouatmailru@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Shiraz HASHIM <shiraz.hashim@st.com>, Armando VISCONTI <armando.visconti@st.com>
 
-On Sat, Nov 26, 2011 at 10:25 AM, Axel Lin <axel.lin@gmail.com> wrote:
-> This patch converts the drivers in drivers/mmc/host/* to use the
-> module_platform_driver() macro which makes the code smaller and a bit
-> simpler.
->
-> Cc: "Micha=C5=82 Miros=C5=82aw" <mirq-linux@rere.qmqm.pl>
-> Cc: David Brown <davidb@codeaurora.org>
-> Cc: Ben Dooks <ben-linux@fluff.org>
-> Cc: Viresh Kumar <viresh.kumar@st.com>
-> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> Cc: Ian Molton <ian@mnementh.co.uk>
-> Cc: Sascha Hauer <s.hauer@pengutronix.de>
-> Cc: Wolfram Sang <w.sang@pengutronix.de>
-> Cc: Grant Likely <grant.likely@secretlab.ca>
-> Cc: Anton Vorontsov <cbouatmailru@gmail.com>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Signed-off-by: Axel Lin <axel.lin@gmail.com>
-> ---
-> =C2=A0drivers/mmc/host/bfin_sdh.c =C2=A0 =C2=A0 =C2=A0 =C2=A0| =C2=A0=
- 12 +-----------
-> =C2=A0drivers/mmc/host/cb710-mmc.c =C2=A0 =C2=A0 =C2=A0 | =C2=A0 13 +=
-------------
-> =C2=A0drivers/mmc/host/jz4740_mmc.c =C2=A0 =C2=A0 =C2=A0| =C2=A0 12 +=
------------
-> =C2=A0drivers/mmc/host/msm_sdcc.c =C2=A0 =C2=A0 =C2=A0 =C2=A0| =C2=A0=
- 13 +------------
-> =C2=A0drivers/mmc/host/mxcmmc.c =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0| =C2=
-=A0 13 +------------
-> =C2=A0drivers/mmc/host/mxs-mmc.c =C2=A0 =C2=A0 =C2=A0 =C2=A0 | =C2=A0=
- 13 +------------
-> =C2=A0drivers/mmc/host/pxamci.c =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0| =C2=
-=A0 13 +------------
-> =C2=A0drivers/mmc/host/s3cmci.c =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0| =C2=
-=A0 13 +------------
-> =C2=A0drivers/mmc/host/sdhci-cns3xxx.c =C2=A0 | =C2=A0 12 +----------=
--
-> =C2=A0drivers/mmc/host/sdhci-dove.c =C2=A0 =C2=A0 =C2=A0| =C2=A0 12 +=
------------
-> =C2=A0drivers/mmc/host/sdhci-esdhc-imx.c | =C2=A0 12 +-----------
-> =C2=A0drivers/mmc/host/sdhci-of-esdhc.c =C2=A0| =C2=A0 12 +----------=
--
-> =C2=A0drivers/mmc/host/sdhci-of-hlwd.c =C2=A0 | =C2=A0 12 +----------=
--
-> =C2=A0drivers/mmc/host/sdhci-pxav2.c =C2=A0 =C2=A0 | =C2=A0 12 +-----=
-------
-> =C2=A0drivers/mmc/host/sdhci-pxav3.c =C2=A0 =C2=A0 | =C2=A0 12 +-----=
-------
-> =C2=A0drivers/mmc/host/sdhci-s3c.c =C2=A0 =C2=A0 =C2=A0 | =C2=A0 13 +=
-------------
-> =C2=A0drivers/mmc/host/sdhci-spear.c =C2=A0 =C2=A0 | =C2=A0 12 +-----=
-------
-> =C2=A0drivers/mmc/host/sdhci-tegra.c =C2=A0 =C2=A0 | =C2=A0 12 +-----=
-------
-> =C2=A0drivers/mmc/host/sh_mmcif.c =C2=A0 =C2=A0 =C2=A0 =C2=A0| =C2=A0=
- 14 +-------------
-> =C2=A0drivers/mmc/host/sh_mobile_sdhi.c =C2=A0| =C2=A0 13 +----------=
+>> >> On Wed, Nov 2, 2011 at 1:33 PM, Seungwon Jeon <tgih.jun@samsung.c=
+om>
+>> wrote:
+>> >> > @@ -943,7 +950,8 @@ static int mmc_blk_err_check(struct mmc_car=
+d
+>> *card,
+>> >> > =A0 =A0 =A0 =A0 * kind. =A0If it was a write, we may have trans=
+itioned to =A0
+=A0 =A0 =A0 * program mode, which we have to wait for it to complete. =A0
+=A0 =A0 =A0 */
+>> >> > - =A0 =A0 =A0 if (!mmc_host_is_spi(card->host) && rq_data_dir(r=
+eq) !=3D
+>> READ) {
+>> >> > + =A0 =A0 =A0 if ((!mmc_host_is_spi(card->host) && rq_data_dir(=
+req) !=3D
+>> READ) ||
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (mq_mrq->packed_c=
+md =3D=3D MMC_PACKED_WR_HDR))
+Since the header's direction is WRITE I don't think we also need to che=
+ck
+if mq_mrq->packed_cmd =3D=3D MMC_PACKED_WR_HDR since it will be covered=
+ by the
+original condition.
+>> {
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0u32 status;
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0do {
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int err =3D get_=
+card_status(card, &status,
+5);
+A general question, not related specifically to packed commands - Do yo=
+u
+know why the status is not checked to see which error we got?
+>> >> > @@ -980,12 +988,67 @@ static int mmc_blk_err_check(struct mmc_c=
+ard
+>> *card,
+>> >> > =A0 =A0 =A0 =A0if (!brq->data.bytes_xfered)
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return MMC_BLK_RETRY;
+>> >> >
+>> >> > + =A0 =A0 =A0 if (mq_mrq->packed_cmd !=3D MMC_PACKED_NONE) {
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (unlikely(brq->data.blocks << =
+9 !=3D
+>> brq->data.bytes_xfered))
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_BLK_PA=
+RTIAL;
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_BLK_SU=
+CCESS;
+>> >> > + =A0 =A0 =A0 }
+>> >> > +
+>> >> > =A0 =A0 =A0 =A0if (blk_rq_bytes(req) !=3D brq->data.bytes_xfere=
+d)
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return MMC_BLK_PARTIAL;
+>> >> >
+>> >> > =A0 =A0 =A0 =A0return MMC_BLK_SUCCESS;
+>> >> > =A0}
+>> >> >
+>> >> > +static int mmc_blk_packed_err_check(struct mmc_card *card, + =A0=
+ =A0
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct mmc_async_req *ar=
+eq)
+>> >> > +{
+>> >> > + =A0 =A0 =A0 struct mmc_queue_req *mq_mrq =3D container_of(are=
+q, struct
+>> mmc_queue_req,
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_active); +
+=A0 =A0 =A0 int err, check, status;
+>> >> > + =A0 =A0 =A0 u8 ext_csd[512];
+>> >> > +
+>> >> > + =A0 =A0 =A0 check =3D mmc_blk_err_check(card, areq);
+>> >> > +
+>> >> > + =A0 =A0 =A0 if (check =3D=3D MMC_BLK_SUCCESS)
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return check;
+I think we need to check the status for all cases and not only in case =
+of
+MMC_BLK_PARTIAL. For example, in cases where the header was traferred
+successfully but had logic errors (wrong number of sectors etc.)
+mmc_blk_err_check will return MMC_BLK_SUCCESS although the packed comma=
+nds
+failed.
+>> >> > +
+>> >> > + =A0 =A0 =A0 if (check =3D=3D MMC_BLK_PARTIAL) {
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D get_card_status(card, &st=
+atus, 0);
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_BLK_AB=
+ORT;
+>> >> > +
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (status & R1_EXP_EVENT) {
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_send_=
+ext_csd(card, ext_csd); + =A0
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 r=
+eturn MMC_BLK_ABORT;
+>> >> > +
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((ext_csd[EXT_=
+CSD_EXP_EVENTS_STATUS +
+0]
+why do we need the + 0?
+>> &
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0
+>> EXT_CSD_PACKED_INDEXED_ERROR) {
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 /* Make be 0-based */
+The comment is not understood
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 mq_mrq->packed_fail_idx =3D
++ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0
+Thanks,
+Maya Erez
 --
-> =C2=A0drivers/mmc/host/tmio_mmc.c =C2=A0 =C2=A0 =C2=A0 =C2=A0| =C2=A0=
- 14 +-------------
-> =C2=A021 files changed, 21 insertions(+), 243 deletions(-)
->
-
-> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-=
-spear.c
-> index dee70b6..883548e 100644
-> --- a/drivers/mmc/host/sdhci-spear.c
-> +++ b/drivers/mmc/host/sdhci-spear.c
-> @@ -320,17 +320,7 @@ static struct platform_driver sdhci_driver =3D {
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0.remove =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D __=
-devexit_p(sdhci_remove),
-> =C2=A0};
->
-> -static int __init sdhci_init(void)
-> -{
-> - =C2=A0 =C2=A0 =C2=A0 return platform_driver_register(&sdhci_driver)=
-;
-> -}
-> -module_init(sdhci_init);
-> -
-> -static void __exit sdhci_exit(void)
-> -{
-> - =C2=A0 =C2=A0 =C2=A0 platform_driver_unregister(&sdhci_driver);
-> -}
-> -module_exit(sdhci_exit);
-> +module_platform_driver(sdhci_driver);
->
-> =C2=A0MODULE_DESCRIPTION("SPEAr Secure Digital Host Controller Interf=
-ace driver");
-> =C2=A0MODULE_AUTHOR("Viresh Kumar <viresh.kumar@st.com>");
-
-=46or SPEAr:
-
-Acked-by: Viresh Kumar <viresh.linux@gmail.com>
+Seny by a Consultant for Qualcomm innovation center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
