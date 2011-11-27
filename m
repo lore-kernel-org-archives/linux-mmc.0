@@ -1,198 +1,51 @@
-From: Cong Wang <amwang@redhat.com>
-Subject: [PATCH 20/62] mmc: remove the second argument of k[un]map_atomic()
-Date: Sun, 27 Nov 2011 13:27:00 +0800
-Message-ID: <1322371662-26166-21-git-send-email-amwang@redhat.com>
-References: <1322371662-26166-1-git-send-email-amwang@redhat.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH] mmc: convert drivers/mmc/host/* to use
+ module_platform_driver()
+Date: Sun, 27 Nov 2011 09:58:13 +0100
+Message-ID: <20111127085813.GC5263@pengutronix.de>
+References: <1322283343.14278.2.camel@phoenix>
+ <20111126121953.GA11865@oksana.dev.rtsoft.ru>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="Izn7cH1Com+I3R9J"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1322371662-26166-1-git-send-email-amwang@redhat.com>
+Content-Disposition: inline
+In-Reply-To: <20111126121953.GA11865@oksana.dev.rtsoft.ru>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: akpm@linux-foundation.org, Cong Wang <amwang@redhat.com>, Nicolas Ferre <nicolas.ferre@atmel.com>, Chris Ball <cjb@laptop.org>, David Brown <davidb@codeaurora.org>, Daniel Walker <dwalker@fifo99.com>, Bryan Huntsman <bryanh@codeaurora.org>, Alex Dubov <oakad@yahoo.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Axel Lin <axel.lin@gmail.com>, linux-kernel@vger.kernel.org, Micha <mirq-linux@rere.qmqm.pl>, David Brown <davidb@codeaurora.org>, Ben Dooks <ben-linux@fluff.org>, Viresh Kumar <viresh.kumar@st.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Sascha Hauer <s.hauer@pengutronix.de>, Grant Likely <grant.likely@secretlab.ca>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
-Signed-off-by: Cong Wang <amwang@redhat.com>
----
- drivers/mmc/host/at91_mci.c |    8 ++++----
- drivers/mmc/host/msm_sdcc.c |    6 +++---
- drivers/mmc/host/sdhci.c    |    4 ++--
- drivers/mmc/host/tifm_sd.c  |   16 ++++++++--------
- drivers/mmc/host/tmio_mmc.c |    1 -
- drivers/mmc/host/tmio_mmc.h |    4 ++--
- 6 files changed, 19 insertions(+), 20 deletions(-)
+--Izn7cH1Com+I3R9J
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/host/at91_mci.c b/drivers/mmc/host/at91_mci.c
-index a8b4d2a..9a32922 100644
---- a/drivers/mmc/host/at91_mci.c
-+++ b/drivers/mmc/host/at91_mci.c
-@@ -236,7 +236,7 @@ static inline void at91_mci_sg_to_dma(struct at91mci_host *host, struct mmc_data
- 
- 		sg = &data->sg[i];
- 
--		sgbuffer = kmap_atomic(sg_page(sg), KM_BIO_SRC_IRQ) + sg->offset;
-+		sgbuffer = kmap_atomic(sg_page(sg)) + sg->offset;
- 		amount = min(size, sg->length);
- 		size -= amount;
- 
-@@ -252,7 +252,7 @@ static inline void at91_mci_sg_to_dma(struct at91mci_host *host, struct mmc_data
- 			dmabuf = (unsigned *)tmpv;
- 		}
- 
--		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
-+		kunmap_atomic(sgbuffer);
- 
- 		if (size == 0)
- 			break;
-@@ -302,7 +302,7 @@ static void at91_mci_post_dma_read(struct at91mci_host *host)
- 
- 		sg = &data->sg[i];
- 
--		sgbuffer = kmap_atomic(sg_page(sg), KM_BIO_SRC_IRQ) + sg->offset;
-+		sgbuffer = kmap_atomic(sg_page(sg)) + sg->offset;
- 		amount = min(size, sg->length);
- 		size -= amount;
- 
-@@ -318,7 +318,7 @@ static void at91_mci_post_dma_read(struct at91mci_host *host)
- 		}
- 
- 		flush_kernel_dcache_page(sg_page(sg));
--		kunmap_atomic(sgbuffer, KM_BIO_SRC_IRQ);
-+		kunmap_atomic(sgbuffer);
- 		data->bytes_xfered += amount;
- 		if (size == 0)
- 			break;
-diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
-index 80d8eb1..62faa4a 100644
---- a/drivers/mmc/host/msm_sdcc.c
-+++ b/drivers/mmc/host/msm_sdcc.c
-@@ -689,8 +689,8 @@ msmsdcc_pio_irq(int irq, void *dev_id)
- 
- 		/* Map the current scatter buffer */
- 		local_irq_save(flags);
--		buffer = kmap_atomic(sg_page(host->pio.sg),
--				     KM_BIO_SRC_IRQ) + host->pio.sg->offset;
-+		buffer = kmap_atomic(sg_page(host->pio.sg))
-+				     + host->pio.sg->offset;
- 		buffer += host->pio.sg_off;
- 		remain = host->pio.sg->length - host->pio.sg_off;
- 		len = 0;
-@@ -700,7 +700,7 @@ msmsdcc_pio_irq(int irq, void *dev_id)
- 			len = msmsdcc_pio_write(host, buffer, remain, status);
- 
- 		/* Unmap the buffer */
--		kunmap_atomic(buffer, KM_BIO_SRC_IRQ);
-+		kunmap_atomic(buffer);
- 		local_irq_restore(flags);
- 
- 		host->pio.sg_off += len;
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6d8eea3..2cc9e29 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -423,12 +423,12 @@ static void sdhci_transfer_pio(struct sdhci_host *host)
- static char *sdhci_kmap_atomic(struct scatterlist *sg, unsigned long *flags)
- {
- 	local_irq_save(*flags);
--	return kmap_atomic(sg_page(sg), KM_BIO_SRC_IRQ) + sg->offset;
-+	return kmap_atomic(sg_page(sg)) + sg->offset;
- }
- 
- static void sdhci_kunmap_atomic(void *buffer, unsigned long *flags)
- {
--	kunmap_atomic(buffer, KM_BIO_SRC_IRQ);
-+	kunmap_atomic(buffer);
- 	local_irq_restore(*flags);
- }
- 
-diff --git a/drivers/mmc/host/tifm_sd.c b/drivers/mmc/host/tifm_sd.c
-index f70d046..fc00081 100644
---- a/drivers/mmc/host/tifm_sd.c
-+++ b/drivers/mmc/host/tifm_sd.c
-@@ -118,7 +118,7 @@ static void tifm_sd_read_fifo(struct tifm_sd *host, struct page *pg,
- 	unsigned char *buf;
- 	unsigned int pos = 0, val;
- 
--	buf = kmap_atomic(pg, KM_BIO_DST_IRQ) + off;
-+	buf = kmap_atomic(pg) + off;
- 	if (host->cmd_flags & DATA_CARRY) {
- 		buf[pos++] = host->bounce_buf_data[0];
- 		host->cmd_flags &= ~DATA_CARRY;
-@@ -134,7 +134,7 @@ static void tifm_sd_read_fifo(struct tifm_sd *host, struct page *pg,
- 		}
- 		buf[pos++] = (val >> 8) & 0xff;
- 	}
--	kunmap_atomic(buf - off, KM_BIO_DST_IRQ);
-+	kunmap_atomic(buf - off);
- }
- 
- static void tifm_sd_write_fifo(struct tifm_sd *host, struct page *pg,
-@@ -144,7 +144,7 @@ static void tifm_sd_write_fifo(struct tifm_sd *host, struct page *pg,
- 	unsigned char *buf;
- 	unsigned int pos = 0, val;
- 
--	buf = kmap_atomic(pg, KM_BIO_SRC_IRQ) + off;
-+	buf = kmap_atomic(pg) + off;
- 	if (host->cmd_flags & DATA_CARRY) {
- 		val = host->bounce_buf_data[0] | ((buf[pos++] << 8) & 0xff00);
- 		writel(val, sock->addr + SOCK_MMCSD_DATA);
-@@ -161,7 +161,7 @@ static void tifm_sd_write_fifo(struct tifm_sd *host, struct page *pg,
- 		val |= (buf[pos++] << 8) & 0xff00;
- 		writel(val, sock->addr + SOCK_MMCSD_DATA);
- 	}
--	kunmap_atomic(buf - off, KM_BIO_SRC_IRQ);
-+	kunmap_atomic(buf - off);
- }
- 
- static void tifm_sd_transfer_data(struct tifm_sd *host)
-@@ -212,13 +212,13 @@ static void tifm_sd_copy_page(struct page *dst, unsigned int dst_off,
- 			      struct page *src, unsigned int src_off,
- 			      unsigned int count)
- {
--	unsigned char *src_buf = kmap_atomic(src, KM_BIO_SRC_IRQ) + src_off;
--	unsigned char *dst_buf = kmap_atomic(dst, KM_BIO_DST_IRQ) + dst_off;
-+	unsigned char *src_buf = kmap_atomic(src) + src_off;
-+	unsigned char *dst_buf = kmap_atomic(dst) + dst_off;
- 
- 	memcpy(dst_buf, src_buf, count);
- 
--	kunmap_atomic(dst_buf - dst_off, KM_BIO_DST_IRQ);
--	kunmap_atomic(src_buf - src_off, KM_BIO_SRC_IRQ);
-+	kunmap_atomic(dst_buf - dst_off);
-+	kunmap_atomic(src_buf - src_off);
- }
- 
- static void tifm_sd_bounce_block(struct tifm_sd *host, struct mmc_data *r_data)
-diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index a4ea102..4626ef2 100644
---- a/drivers/mmc/host/tmio_mmc.c
-+++ b/drivers/mmc/host/tmio_mmc.c
-@@ -20,7 +20,6 @@
- #include <linux/module.h>
- #include <linux/pagemap.h>
- #include <linux/scatterlist.h>
--
- #include "tmio_mmc.h"
- 
- #ifdef CONFIG_PM
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 3020f98..a95e6d9 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -105,13 +105,13 @@ static inline char *tmio_mmc_kmap_atomic(struct scatterlist *sg,
- 					 unsigned long *flags)
- {
- 	local_irq_save(*flags);
--	return kmap_atomic(sg_page(sg), KM_BIO_SRC_IRQ) + sg->offset;
-+	return kmap_atomic(sg_page(sg)) + sg->offset;
- }
- 
- static inline void tmio_mmc_kunmap_atomic(struct scatterlist *sg,
- 					  unsigned long *flags, void *virt)
- {
--	kunmap_atomic(virt - sg->offset, KM_BIO_SRC_IRQ);
-+	kunmap_atomic(virt - sg->offset);
- 	local_irq_restore(*flags);
- }
- 
--- 
-1.7.4.4
+On Sat, Nov 26, 2011 at 04:19:53PM +0400, Anton Vorontsov wrote:
+> On Sat, Nov 26, 2011 at 12:55:43PM +0800, Axel Lin wrote:
+> > This patch converts the drivers in drivers/mmc/host/* to use the
+> > module_platform_driver() macro which makes the code smaller and a bit
+> > simpler.
+
+Lost the original mail, but checked the patch using an archive.
+
+Acked-by: Wolfram Sang <w.sang@pengutronix.de>
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--Izn7cH1Com+I3R9J
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAk7R+6UACgkQD27XaX1/VRvv5QCgnAx2idQPQgU7MLIf+lQIvX1a
+Y6oAoKyNMYfZIduxWkKAxZa5e7+IeipD
+=LL3t
+-----END PGP SIGNATURE-----
+
+--Izn7cH1Com+I3R9J--
