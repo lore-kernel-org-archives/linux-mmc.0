@@ -1,214 +1,43 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: Re: [PATCH V2] mmc: Kill block requests if card is removed
-Date: Mon, 28 Nov 2011 11:53:54 +0530
-Message-ID: <4ED328FA.7050301@codeaurora.org>
-References: <1321959418-26864-1-git-send-email-sthumma@codeaurora.org> <4ECE5A3D.6060004@intel.com> <4ECF6D73.7080302@codeaurora.org> <4ECF7BDA.8020801@intel.com>
+From: "Coelho, Luciano" <coelho@ti.com>
+Subject: Re: [PATCH 3/3] omap: board-sdp4430: declare support for MMC_PM_KEEP_POWER
+Date: Mon, 28 Nov 2011 09:50:18 +0200
+Message-ID: <CAKd1q9pv5hMSpazYiZpmoowV52GvE7gFK5zUJSGpKhNkDZGuVg@mail.gmail.com>
+References: <1321970539-7104-1-git-send-email-eliad@wizery.com>
+	<1321970539-7104-3-git-send-email-eliad@wizery.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <4ECF7BDA.8020801@intel.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, per.lkml@gmail.com, linux-arm-msm@vger.kernel.org, cjb@laptop.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:51631 "EHLO
+	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751823Ab1K1HuU convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 28 Nov 2011 02:50:20 -0500
+In-Reply-To: <1321970539-7104-3-git-send-email-eliad@wizery.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Eliad Peller <eliad@wizery.com>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>
 
-Hi Adrian,
+Hi Eliad,
 
-On 11/25/2011 4:58 PM, Adrian Hunter wrote:
-> On 25/11/11 12:26, Sujit Reddy Thumma wrote:
->> Hi Adrian,
->>
->> On 11/24/2011 8:22 PM, Adrian Hunter wrote:
->>> Hi
->>>
->>> Here is a way to allow mmc block to determine immediately
->>> if a card has been removed while preserving the present rules
->>> and keeping card detection in the bus_ops.
->>>
->>> Untested I'm afraid.
->>>
->>> Regards
->>> Adrian
->>>
->>>
->>>
->>>   From 2c6c9535b94c07fa3d12af26e9b6de500cb29970 Mon Sep 17 00:00:00 2001
->>> From: Adrian Hunter<adrian.hunter@intel.com>
->>> Date: Thu, 24 Nov 2011 16:32:34 +0200
->>> Subject: [PATCH] mmc: allow upper layers to determine immediately if a
->>> card has been removed
->>>
->>> Add a function mmc_card_removed() which upper layers can use
->>> to determine immediately if a card has been removed.  This
->>> function should be called after an I/O request fails so that
->>> all queued I/O requests can be errored out immediately
->>> instead of waiting for the card device to be removed.
->>>
->>> Signed-off-by: Adrian Hunter<adrian.hunter@intel.com>
->>> ---
->>>    drivers/mmc/core/core.c  |   32 ++++++++++++++++++++++++++++++++
->>>    drivers/mmc/core/core.h  |    3 +++
->>>    drivers/mmc/core/mmc.c   |   12 +++++++++++-
->>>    drivers/mmc/core/sd.c    |   12 +++++++++++-
->>>    drivers/mmc/core/sdio.c  |   11 ++++++++++-
->>>    include/linux/mmc/card.h |    1 +
->>>    include/linux/mmc/core.h |    2 ++
->>>    7 files changed, 70 insertions(+), 3 deletions(-)
->>>
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> index 271efea..c317564 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -2049,6 +2049,38 @@ static int mmc_rescan_try_freq(struct mmc_host
->>> *host, unsigned freq)
->>>        return -EIO;
->>>    }
->>>
->>> +int _mmc_card_removed(struct mmc_host *host, int detect_change)
->>> +{
->>> +    int ret;
->>> +
->>> +    if (!(host->caps&   MMC_CAP_NONREMOVABLE) || !host->bus_ops->alive)
->>> +        return 0;
->>> +
->>> +    if (!host->card || (host->card->state&   MMC_CARD_REMOVED))
->>> +        return 1;
->>> +
->>> +    /*
->>> +     * The card will be considered alive unless we have been asked to detect
->>> +     * a change or host requires polling to provide card detection.
->>> +     */
->>> +    if (!detect_change&&   !(host->caps&   MMC_CAP_NEEDS_POLL))
->>> +        return 0;
->>> +
->>> +    ret = host->bus_ops->alive(host);
->>> +    if (ret)
->>> +        host->card->state |= MMC_CARD_REMOVED;
->>> +
->>> +    return ret;
->>> +}
->>> +
->>
->> The patch itself looks good to me, but can't we decide this in the block
->> layer itself when we issue get_card_status() when the ongoing request fails?
->>
->> ----------------------------------------------
->>          for (retry = 2; retry>= 0; retry--) {
->>                  err = get_card_status(card,&status, 0);
->>                  if (!err)
->>                          break;
->>
->>                  prev_cmd_status_valid = false;
->>                  pr_err("%s: error %d sending status command, %sing\n",
->>                         req->rq_disk->disk_name, err, retry ? "retry" :
->> "abort");
->>          }
->>
->>
->>       /* We couldn't get a response from the card.  Give up. */
->> -    if (err)
->> +    if (err) {
->> +        /*
->> +         * If the card didn't respond to status command,
->> +         * it is likely that card is gone. Flag it as removed,
->> +         * mmc_detect_change() cleans the rest.
->> +         */
->> +        mmc_card_set_removed(card);
->>           return ERR_ABORT;
->> +    }
->> ------------------------------------------------
->>
->> The V2 patch I have posted takes care of this. Please let me know if it not
->> good to decide in the block layer itself. Essentially, both the
->> implementations are sending CMD13 to know the status of the card.
+On Tue, Nov 22, 2011 at 4:02 PM, Eliad Peller <eliad@wizery.com> wrote:
+> Declare support for keeping the power of the wlan chip
+> while suspended. this is needed for Wakeup-On-Wireless.
 >
-> I think it is better to have the decision over whether or not the card
-> has been removed in only one place.  Also, never flagging
-> MMC_CAP_NONREMOVABLE cards as removed nor if the HC driver has not called
-> mmc_detect_change.
+> Signed-off-by: Eliad Peller <eliad@wizery.com>
+> ---
+> =C2=A0arch/arm/mach-omap2/board-4430sdp.c | =C2=A0 =C2=A01 +
+> =C2=A01 files changed, 1 insertions(+), 0 deletions(-)
 
-Agreed. This is much cleaner implementation. Thanks.
-
->
-> But the block change is essentially the same:
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index c80bb6d..32590c3 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -632,6 +632,8 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card,
-> struct request *req,
->   	u32 status, stop_status = 0;
->   	int err, retry;
->
-> +	if (mmc_card_removed(card))
-> +		return ERR_ABORT;
->   	/*
->   	 * Try to get card status which indicates both the card state
->   	 * and why there was no response.  If the first attempt fails,
-> @@ -648,8 +650,10 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card,
-> struct request *req,
->   	}
->
->   	/* We couldn't get a response from the card.  Give up. */
-> -	if (err)
-> +	if (err) {
-> +		mmc_detect_card_removed(card->host);
->   		return ERR_ABORT;
-> +	}
->
->   	/* Flag ECC errors */
->   	if ((status&  R1_CARD_ECC_FAILED) ||
->
-> I attached a revised version of the patch adding -ENOMEDIUM
-> errors from __mmc_start_request as you and Per discussed.
-
-Thanks. I had a look at it and I have some comments:
-
-+int mmc_detect_card_removed(struct mmc_host *host)
-+{
-+       WARN_ON(!host->claimed);
-+
-+       return _mmc_detect_card_removed(host, 
-work_pending(&host->detect.work));
-
-The work_pending bit would be set only when the HC driver has detected a 
-change in the slot and called mmc_detect_change() to queue the detect 
-work after a delay. In my case this delay is zero. So as soon as the 
-card is removed following happen:
-
-->mmc_detect_change
--->mmc_schedule_delayed_work
---->work_pending bit is set
----->since the delay is zero, work is queued asap
------>just before work->func is called, work_pending bit is cleared
------->work->func() i.e., mmc_rescan is started
-------->mmc_rescan waiting for claim host.
-
-So there can be a case where work_pending bit is set as well as cleared 
-even before block layer get a chance to call mmc_detect_card_removed(), 
-hence the block layer would always see that card is alive even if the 
-card is removed until mmc_rescan is completed.
-
-+       /*
-+        * The card will be considered alive unless we have been asked 
-to detect
-+        * a change or host requires polling to provide card detection.
-+        */
-+       if (!detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
-+               return 0;
-+
-
-Since, the main purpose of _mmc_detect_card_removed() is to detect 
-whether the card is removed or not I feel "detect_change" is redundant. 
-Let me know if you see any other problem without this.
+What about all the other board files that also have this structure?
+=46or example board-omap4panda.c? I think they should all be changed an=
+d
+the change should also be communicated more broadly for those board
+files which (unfortunately) are not upstream (or which are upstream
+but without the wl12xx-specific definitions on it, such as Beagle).
 
 
-+}
-+EXPORT_SYMBOL(mmc_detect_card_removed);
-+
-
--- 
-Thanks,
-Sujit
+--=20
+Cheers,
+Luca.
