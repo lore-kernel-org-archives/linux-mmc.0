@@ -1,58 +1,44 @@
-From: Luciano Coelho <coelho@ti.com>
-Subject: Re: [PATCH 3/3] omap: board-sdp4430: declare support for
- MMC_PM_KEEP_POWER
-Date: Mon, 28 Nov 2011 11:58:10 +0200
-Message-ID: <1322474290.6502.53.camel@cumari>
-References: <1321970539-7104-1-git-send-email-eliad@wizery.com>
-	 <1321970539-7104-3-git-send-email-eliad@wizery.com>
-	 <CAKd1q9pv5hMSpazYiZpmoowV52GvE7gFK5zUJSGpKhNkDZGuVg@mail.gmail.com>
-	 <CAB3XZEenx7L07BYmrHGt0h9ZAY-LOpWXL+in0vs7XOoeBf_LUw@mail.gmail.com>
-	 <1322471324.6502.32.camel@cumari>  <4ED353C5.7030704@compulab.co.il>
+From: Igor Grinberg <grinberg@compulab.co.il>
+Subject: Re: [PATCH 2/3] omap_hsmmc: add pm_caps field
+Date: Mon, 28 Nov 2011 12:01:34 +0200
+Message-ID: <4ED35BFE.9060202@compulab.co.il>
+References: <1321970539-7104-1-git-send-email-eliad@wizery.com>	<1321970539-7104-2-git-send-email-eliad@wizery.com>	<4ED35131.6020206@compulab.co.il> <CAB3XZEeFSXBQZCR17bRdaG3UbhpE6JJHD_aEiq8Y2Kc3=eGRSQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <4ED353C5.7030704@compulab.co.il>
-Sender: linux-omap-owner@vger.kernel.org
-To: Igor Grinberg <grinberg@compulab.co.il>
-Cc: Eliad Peller <eliad@wizery.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from 50.23.254.54-static.reverse.softlayer.com ([50.23.254.54]:56764
+	"EHLO softlayer.compulab.co.il" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752510Ab1K1KBq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2011 05:01:46 -0500
+In-Reply-To: <CAB3XZEeFSXBQZCR17bRdaG3UbhpE6JJHD_aEiq8Y2Kc3=eGRSQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Eliad Peller <eliad@wizery.com>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>
 
-On Mon, 2011-11-28 at 11:26 +0200, Igor Grinberg wrote: 
-> Hi Luciano,
-
-Hi Igor,
-
-
-> On 11/28/11 11:08, Luciano Coelho wrote:
-> > I may do it for panda later on, if I get the time to test it.  For
-> > beagle, it doesn't really apply, because the wl12xx support is
-> > out-of-tree, unfortunately. :(
+On 11/28/11 11:23, Eliad Peller wrote:
+> hi Igor,
 > 
-> If I understood correctly, you want to change all the
-> board files supporting the wl12xx wifi chip to have this
-> capability set, right?
-> Isn't this immediately affects the power consumption in
-> sleep state?
-> Shouldn't this be runtime controllable?
-> I bet there are many applications that do not care about WoW,
-> but do care about the power consumption.
-> How does this change affect them?
+> On Mon, Nov 28, 2011 at 11:15 AM, Igor Grinberg <grinberg@compulab.co.il> wrote:
+>> On 11/22/11 16:02, Eliad Peller wrote:
+>>> Add pm_caps field to omap2_hsmmc_info and omap_mmc_slot_data
+>>> structs, so we will be able to indicate mmc pm capabilities
+>>> in the board file.
+>>
+>> Shouldn't this be user space runtime controllable?
+>> Instead of being a static per board decision?
+>>
+> we only declare here support for the pm capabilities.
+> the actual configuration of these capabilities is done at a later
+> stage, and can be controlled (implicitly) by userspace (e.g. by
+> enabling Wakeup-On-Wireless for the wl12xx chip).
 
-Good point, I don't know. :) Probably Eliad has the answer for that.
+This is good to hear, because patch 1/3 makes it look like
+the bus power does get immediately affected depending
+on that capability, isn't it?
 
-In any case, I don't see why this behaviour should be different in the
-different board files.  If there is the problem of power consumption
-while in suspend, we will have it also with the 4430sdp board.
-
-I'm not sure about doing it dynamically, though.  I think it would be
-more of a kernel configuration option or something.  At least the board
-file is not the correct place to decide whether the wl12xx chip will
-support WoW or not.  And, if we change only the MMC capabilities of the
-wl12xx chip, we won't hurt other scenarios, when the wl12xx chip is not
-in use.
 
 -- 
-Cheers,
-Luca.
-
+Regards,
+Igor.
