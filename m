@@ -1,60 +1,87 @@
-From: Luciano Coelho <coelho@ti.com>
-Subject: Re: [PATCH 3/3] omap: board-sdp4430: declare support for
- MMC_PM_KEEP_POWER
-Date: Mon, 28 Nov 2011 11:08:44 +0200
-Message-ID: <1322471324.6502.32.camel@cumari>
-References: <1321970539-7104-1-git-send-email-eliad@wizery.com>
-	 <1321970539-7104-3-git-send-email-eliad@wizery.com>
-	 <CAKd1q9pv5hMSpazYiZpmoowV52GvE7gFK5zUJSGpKhNkDZGuVg@mail.gmail.com>
-	 <CAB3XZEenx7L07BYmrHGt0h9ZAY-LOpWXL+in0vs7XOoeBf_LUw@mail.gmail.com>
+From: Igor Grinberg <grinberg@compulab.co.il>
+Subject: Re: [PATCH 2/3] omap_hsmmc: add pm_caps field
+Date: Mon, 28 Nov 2011 11:15:29 +0200
+Message-ID: <4ED35131.6020206@compulab.co.il>
+References: <1321970539-7104-1-git-send-email-eliad@wizery.com> <1321970539-7104-2-git-send-email-eliad@wizery.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog122.obsmtp.com ([74.125.149.147]:55712 "EHLO
-	na3sys009aog122.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752840Ab1K1JIx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2011 04:08:53 -0500
-In-Reply-To: <CAB3XZEenx7L07BYmrHGt0h9ZAY-LOpWXL+in0vs7XOoeBf_LUw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1321970539-7104-2-git-send-email-eliad@wizery.com>
+Sender: linux-omap-owner@vger.kernel.org
 To: Eliad Peller <eliad@wizery.com>
 Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 2011-11-28 at 10:26 +0200, Eliad Peller wrote: 
-> On Mon, Nov 28, 2011 at 9:50 AM, Coelho, Luciano <coelho@ti.com> wrote:
-> > On Tue, Nov 22, 2011 at 4:02 PM, Eliad Peller <eliad@wizery.com> wrote:
-> >> Declare support for keeping the power of the wlan chip
-> >> while suspended. this is needed for Wakeup-On-Wireless.
-> >>
-> >> Signed-off-by: Eliad Peller <eliad@wizery.com>
-> >> ---
-> >>  arch/arm/mach-omap2/board-4430sdp.c |    1 +
-> >>  1 files changed, 1 insertions(+), 0 deletions(-)
-> >
-> > What about all the other board files that also have this structure?
-> > For example board-omap4panda.c? I think they should all be changed and
-> > the change should also be communicated more broadly for those board
-> > files which (unfortunately) are not upstream (or which are upstream
-> > but without the wl12xx-specific definitions on it, such as Beagle).
-> >
-> i preferred adding this capability only for boards i can test.
-> unfortunately, i don't a panda/beagle setup.
-> anyway, i don't think we have to add it all at once.
-> let's just do it one board at a time... i'll add support for zoom as
-> well. any volunteers for panda/beagle? ;)
+Hi Eliad,
 
-Hmmm, okay, there is logic in that for the pragmatic, but this seems to
-be so clearly what is needed to solve the same problem with other boards
-that it could deserve changing all the board files.  In practice, your
-changes may affect all the other boards too, regardless of whether you
-set the new flag or not.  In any case, not my call here.
+On 11/22/11 16:02, Eliad Peller wrote:
+> Add pm_caps field to omap2_hsmmc_info and omap_mmc_slot_data
+> structs, so we will be able to indicate mmc pm capabilities
+> in the board file.
 
-I may do it for panda later on, if I get the time to test it.  For
-beagle, it doesn't really apply, because the wl12xx support is
-out-of-tree, unfortunately. :(
+Shouldn't this be user space runtime controllable?
+Instead of being a static per board decision?
+
+> 
+> Signed-off-by: Eliad Peller <eliad@wizery.com>
+> ---
+>  arch/arm/mach-omap2/hsmmc.c           |    1 +
+>  arch/arm/mach-omap2/hsmmc.h           |    1 +
+>  arch/arm/plat-omap/include/plat/mmc.h |    1 +
+>  drivers/mmc/host/omap_hsmmc.c         |    2 ++
+>  4 files changed, 5 insertions(+), 0 deletions(-)
+> 
+> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+> index 097a42d..d00a54a 100644
+> --- a/arch/arm/mach-omap2/hsmmc.c
+> +++ b/arch/arm/mach-omap2/hsmmc.c
+> @@ -306,6 +306,7 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+>  	mmc->slots[0].name = hc_name;
+>  	mmc->nr_slots = 1;
+>  	mmc->slots[0].caps = c->caps;
+> +	mmc->slots[0].pm_caps = c->pm_caps;
+>  	mmc->slots[0].internal_clock = !c->ext_clock;
+>  	mmc->dma_mask = 0xffffffff;
+>  	if (cpu_is_omap44xx())
+> diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+> index f757e78..c440973 100644
+> --- a/arch/arm/mach-omap2/hsmmc.h
+> +++ b/arch/arm/mach-omap2/hsmmc.h
+> @@ -12,6 +12,7 @@ struct omap2_hsmmc_info {
+>  	u8	mmc;		/* controller 1/2/3 */
+>  	u32	caps;		/* 4/8 wires and any additional host
+>  				 * capabilities OR'd (ref. linux/mmc/host.h) */
+> +	u32	pm_caps;	/* PM capabilities */
+>  	bool	transceiver;	/* MMC-2 option */
+>  	bool	ext_clock;	/* use external pin for input clock */
+>  	bool	cover_only;	/* No card detect - just cover switch */
+> diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+> index c7b8741..d3263ac 100644
+> --- a/arch/arm/plat-omap/include/plat/mmc.h
+> +++ b/arch/arm/plat-omap/include/plat/mmc.h
+> @@ -79,6 +79,7 @@ struct omap_mmc_platform_data {
+>  		 */
+>  		u8  wires;	/* Used for the MMC driver on omap1 and 2420 */
+>  		u32 caps;	/* Used for the MMC driver on 2430 and later */
+> +		u32 pm_caps;	/* PM capabilities of the mmc */
+>  
+>  		/*
+>  		 * nomux means "standard" muxing is wrong on this board, and
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index ec7c83c..2bc964a6 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1985,6 +1985,8 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+>  	if (mmc_slot(host).nonremovable)
+>  		mmc->caps |= MMC_CAP_NONREMOVABLE;
+>  
+> +	mmc->pm_caps = mmc_slot(host).pm_caps;
+> +
+>  	omap_hsmmc_conf_bus_power(host);
+>  
+>  	/* Select DMA lines */
 
 -- 
-Cheers,
-Luca.
-
+Regards,
+Igor.
