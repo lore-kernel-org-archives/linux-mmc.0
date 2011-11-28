@@ -1,44 +1,49 @@
-From: Igor Grinberg <grinberg@compulab.co.il>
+From: Eliad Peller <eliad@wizery.com>
 Subject: Re: [PATCH 2/3] omap_hsmmc: add pm_caps field
-Date: Mon, 28 Nov 2011 12:01:34 +0200
-Message-ID: <4ED35BFE.9060202@compulab.co.il>
-References: <1321970539-7104-1-git-send-email-eliad@wizery.com>	<1321970539-7104-2-git-send-email-eliad@wizery.com>	<4ED35131.6020206@compulab.co.il> <CAB3XZEeFSXBQZCR17bRdaG3UbhpE6JJHD_aEiq8Y2Kc3=eGRSQ@mail.gmail.com>
+Date: Mon, 28 Nov 2011 12:07:21 +0200
+Message-ID: <CAB3XZEeOAznyX8Z4vpb34GqD2mpr_0_Bje=-5KVkUs3q18ao_Q@mail.gmail.com>
+References: <1321970539-7104-1-git-send-email-eliad@wizery.com>
+	<1321970539-7104-2-git-send-email-eliad@wizery.com>
+	<4ED35131.6020206@compulab.co.il>
+	<CAB3XZEeFSXBQZCR17bRdaG3UbhpE6JJHD_aEiq8Y2Kc3=eGRSQ@mail.gmail.com>
+	<4ED35BFE.9060202@compulab.co.il>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 50.23.254.54-static.reverse.softlayer.com ([50.23.254.54]:56764
-	"EHLO softlayer.compulab.co.il" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752510Ab1K1KBq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2011 05:01:46 -0500
-In-Reply-To: <CAB3XZEeFSXBQZCR17bRdaG3UbhpE6JJHD_aEiq8Y2Kc3=eGRSQ@mail.gmail.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:65080 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752591Ab1K1KHW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2011 05:07:22 -0500
+In-Reply-To: <4ED35BFE.9060202@compulab.co.il>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Eliad Peller <eliad@wizery.com>
+To: Igor Grinberg <grinberg@compulab.co.il>
 Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>
 
-On 11/28/11 11:23, Eliad Peller wrote:
-> hi Igor,
-> 
-> On Mon, Nov 28, 2011 at 11:15 AM, Igor Grinberg <grinberg@compulab.co.il> wrote:
->> On 11/22/11 16:02, Eliad Peller wrote:
->>> Add pm_caps field to omap2_hsmmc_info and omap_mmc_slot_data
->>> structs, so we will be able to indicate mmc pm capabilities
->>> in the board file.
+On Mon, Nov 28, 2011 at 12:01 PM, Igor Grinberg <grinberg@compulab.co.il> wrote:
+> On 11/28/11 11:23, Eliad Peller wrote:
+>> hi Igor,
 >>
->> Shouldn't this be user space runtime controllable?
->> Instead of being a static per board decision?
->>
-> we only declare here support for the pm capabilities.
-> the actual configuration of these capabilities is done at a later
-> stage, and can be controlled (implicitly) by userspace (e.g. by
-> enabling Wakeup-On-Wireless for the wl12xx chip).
+>> On Mon, Nov 28, 2011 at 11:15 AM, Igor Grinberg <grinberg@compulab.co.il> wrote:
+>>> On 11/22/11 16:02, Eliad Peller wrote:
+>>>> Add pm_caps field to omap2_hsmmc_info and omap_mmc_slot_data
+>>>> structs, so we will be able to indicate mmc pm capabilities
+>>>> in the board file.
+>>>
+>>> Shouldn't this be user space runtime controllable?
+>>> Instead of being a static per board decision?
+>>>
+>> we only declare here support for the pm capabilities.
+>> the actual configuration of these capabilities is done at a later
+>> stage, and can be controlled (implicitly) by userspace (e.g. by
+>> enabling Wakeup-On-Wireless for the wl12xx chip).
+>
+> This is good to hear, because patch 1/3 makes it look like
+> the bus power does get immediately affected depending
+> on that capability, isn't it?
+>
+no.
+it checks pm_flags (configured pm features) rather than pm_caps
+(supported pm features).
 
-This is good to hear, because patch 1/3 makes it look like
-the bus power does get immediately affected depending
-on that capability, isn't it?
-
-
--- 
-Regards,
-Igor.
+Eliad.
