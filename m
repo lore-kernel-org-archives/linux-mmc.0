@@ -1,152 +1,60 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 2/2] mmc: core: Support packed command for eMMC4.5 device
-Date: Mon, 28 Nov 2011 17:52:54 +0900
-Message-ID: <000201ccadab$1e57b8a0$5b0729e0$%jun@samsung.com>
-References: <aad7cb35699550e89526a5fb083c520d.squirrel@www.codeaurora.org>
+From: Luciano Coelho <coelho@ti.com>
+Subject: Re: [PATCH 3/3] omap: board-sdp4430: declare support for
+ MMC_PM_KEEP_POWER
+Date: Mon, 28 Nov 2011 11:08:44 +0200
+Message-ID: <1322471324.6502.32.camel@cumari>
+References: <1321970539-7104-1-git-send-email-eliad@wizery.com>
+	 <1321970539-7104-3-git-send-email-eliad@wizery.com>
+	 <CAKd1q9pv5hMSpazYiZpmoowV52GvE7gFK5zUJSGpKhNkDZGuVg@mail.gmail.com>
+	 <CAB3XZEenx7L07BYmrHGt0h9ZAY-LOpWXL+in0vs7XOoeBf_LUw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:32425 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751150Ab1K1Iw4 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2011 03:52:56 -0500
-In-reply-to: <aad7cb35699550e89526a5fb083c520d.squirrel@www.codeaurora.org>
-Content-language: ko
+Received: from na3sys009aog122.obsmtp.com ([74.125.149.147]:55712 "EHLO
+	na3sys009aog122.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752840Ab1K1JIx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2011 04:08:53 -0500
+In-Reply-To: <CAB3XZEenx7L07BYmrHGt0h9ZAY-LOpWXL+in0vs7XOoeBf_LUw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: "'S, Venkatraman'" <svenkatr@ti.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
+To: Eliad Peller <eliad@wizery.com>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>
 
-Maya Erez wrote:
-> >> >> On Wed, Nov 2, 2011 at 1:33 PM, Seungwon Jeon <tgih.jun@samsung=
-=2Ecom>
-> >> wrote:
-> >> >> > @@ -943,7 +950,8 @@ static int mmc_blk_err_check(struct mmc_c=
-ard
-> >> *card,
-> >> >> > =A0 =A0 =A0 =A0 * kind. =A0If it was a write, we may have tra=
-nsitioned to
-> =A0 =A0 =A0 * program mode, which we have to wait for it to complete.
-> =A0 =A0 =A0 */
-> >> >> > - =A0 =A0 =A0 if (!mmc_host_is_spi(card->host) && rq_data_dir=
-(req) !=3D
-> >> READ) {
-> >> >> > + =A0 =A0 =A0 if ((!mmc_host_is_spi(card->host) && rq_data_di=
-r(req) !=3D
-> >> READ) ||
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (mq_mrq->packed=
-_cmd =3D=3D MMC_PACKED_WR_HDR))
-> Since the header's direction is WRITE I don't think we also need to c=
-heck
-> if mq_mrq->packed_cmd =3D=3D MMC_PACKED_WR_HDR since it will be cover=
-ed by the
-> original condition.
-The header is written. But origin request is about read.
-That means rq_data_dir(req) is READ. So new condition is needed.
-> >> {
-> >> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0u32 status;
-> >> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0do {
-> >> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0int err =3D ge=
-t_card_status(card, &status,
-> 5);
-> A general question, not related specifically to packed commands - Do =
-you
-> know why the status is not checked to see which error we got?
-This status is for checking whether the card is ready for new data.
-> >> >> > @@ -980,12 +988,67 @@ static int mmc_blk_err_check(struct mmc=
-_card
-> >> *card,
-> >> >> > =A0 =A0 =A0 =A0if (!brq->data.bytes_xfered)
-> >> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return MMC_BLK_RETRY;
-> >> >> >
-> >> >> > + =A0 =A0 =A0 if (mq_mrq->packed_cmd !=3D MMC_PACKED_NONE) {
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (unlikely(brq->data.blocks <=
-< 9 !=3D
-> >> brq->data.bytes_xfered))
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_BLK_=
-PARTIAL;
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_BLK_=
-SUCCESS;
-> >> >> > + =A0 =A0 =A0 }
-> >> >> > +
-> >> >> > =A0 =A0 =A0 =A0if (blk_rq_bytes(req) !=3D brq->data.bytes_xfe=
-red)
-> >> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return MMC_BLK_PARTIAL;
-> >> >> >
-> >> >> > =A0 =A0 =A0 =A0return MMC_BLK_SUCCESS;
-> >> >> > =A0}
-> >> >> >
-> >> >> > +static int mmc_blk_packed_err_check(struct mmc_card *card, +
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct mmc_async_req *=
-areq)
-> >> >> > +{
-> >> >> > + =A0 =A0 =A0 struct mmc_queue_req *mq_mrq =3D container_of(a=
-req, struct
-> >> mmc_queue_req,
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_active); +
-> =A0 =A0 =A0 int err, check, status;
-> >> >> > + =A0 =A0 =A0 u8 ext_csd[512];
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 check =3D mmc_blk_err_check(card, areq);
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 if (check =3D=3D MMC_BLK_SUCCESS)
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return check;
-> I think we need to check the status for all cases and not only in cas=
-e of
-> MMC_BLK_PARTIAL. For example, in cases where the header was traferred
-> successfully but had logic errors (wrong number of sectors etc.)
-> mmc_blk_err_check will return MMC_BLK_SUCCESS although the packed com=
-mands
-> failed.
-Similarly, Sahitya Tummala is already mentioned this.
-Other error case will be checked in next version.
-The case you suggested is about read or write?
-Device may detect error and stop transferring the data.
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 if (check =3D=3D MMC_BLK_PARTIAL) {
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D get_card_status(card, &=
-status, 0);
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_BLK_=
-ABORT;
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (status & R1_EXP_EVENT) {
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_sen=
-d_ext_csd(card, ext_csd); +
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- return MMC_BLK_ABORT;
-> >> >> > +
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((ext_csd[EX=
-T_CSD_EXP_EVENTS_STATUS +
-> 0]
-> why do we need the + 0?
-It is explicit expression, no more, no less.
-Actually, there is no need.
-> >> &
-> >> >> > +
-> >> EXT_CSD_PACKED_INDEXED_ERROR) {
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 /* Make be 0-based */
-> The comment is not understood
-PACKED_FAILURE_INDEX starts from '1'
-It is converted to 0-base for use.
-> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 mq_mrq->packed_fail_idx =3D
-> +
-> Thanks,
-> Maya Erez
-> --
-> Seny by a Consultant for Qualcomm innovation center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Mon, 2011-11-28 at 10:26 +0200, Eliad Peller wrote: 
+> On Mon, Nov 28, 2011 at 9:50 AM, Coelho, Luciano <coelho@ti.com> wrote:
+> > On Tue, Nov 22, 2011 at 4:02 PM, Eliad Peller <eliad@wizery.com> wrote:
+> >> Declare support for keeping the power of the wlan chip
+> >> while suspended. this is needed for Wakeup-On-Wireless.
+> >>
+> >> Signed-off-by: Eliad Peller <eliad@wizery.com>
+> >> ---
+> >>  arch/arm/mach-omap2/board-4430sdp.c |    1 +
+> >>  1 files changed, 1 insertions(+), 0 deletions(-)
+> >
+> > What about all the other board files that also have this structure?
+> > For example board-omap4panda.c? I think they should all be changed and
+> > the change should also be communicated more broadly for those board
+> > files which (unfortunately) are not upstream (or which are upstream
+> > but without the wl12xx-specific definitions on it, such as Beagle).
+> >
+> i preferred adding this capability only for boards i can test.
+> unfortunately, i don't a panda/beagle setup.
+> anyway, i don't think we have to add it all at once.
+> let's just do it one board at a time... i'll add support for zoom as
+> well. any volunteers for panda/beagle? ;)
+
+Hmmm, okay, there is logic in that for the pragmatic, but this seems to
+be so clearly what is needed to solve the same problem with other boards
+that it could deserve changing all the board files.  In practice, your
+changes may affect all the other boards too, regardless of whether you
+set the new flag or not.  In any case, not my call here.
+
+I may do it for panda later on, if I get the time to test it.  For
+beagle, it doesn't really apply, because the wl12xx support is
+out-of-tree, unfortunately. :(
+
+-- 
+Cheers,
+Luca.
 
