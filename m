@@ -1,48 +1,37 @@
-From: Igor Grinberg <grinberg@compulab.co.il>
-Subject: Re: [PATCH 2/3] omap_hsmmc: add pm_caps field
-Date: Mon, 28 Nov 2011 12:39:59 +0200
-Message-ID: <4ED364FF.8000007@compulab.co.il>
-References: <1321970539-7104-1-git-send-email-eliad@wizery.com>	<1321970539-7104-2-git-send-email-eliad@wizery.com>	<4ED35131.6020206@compulab.co.il>	<CAB3XZEeFSXBQZCR17bRdaG3UbhpE6JJHD_aEiq8Y2Kc3=eGRSQ@mail.gmail.com>	<4ED35BFE.9060202@compulab.co.il> <CAB3XZEeOAznyX8Z4vpb34GqD2mpr_0_Bje=-5KVkUs3q18ao_Q@mail.gmail.com>
+From: "Konstantin Dorfman" <kdorfman@codeaurora.org>
+Subject: Re: [PATCH v3] mmc: support BKOPS feature for eMMC
+Date: Mon, 28 Nov 2011 13:33:22 +0200 (IST)
+Message-ID: <3cda1651a2c6624538bda5e049b04e15.squirrel@www.codeaurora.org>
+References: <4EC45A39.5030706@samsung.com>
+    <3f75bb7f25e649376784536d819e7fbf.squirrel@www.codeaurora.org>
+    <4ECC3625.3090109@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <CAB3XZEeOAznyX8Z4vpb34GqD2mpr_0_Bje=-5KVkUs3q18ao_Q@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Eliad Peller <eliad@wizery.com>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:36315 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752464Ab1K1LdX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2011 06:33:23 -0500
+In-Reply-To: <4ECC3625.3090109@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+Cc: Konstantin Dorfman <kdorfman@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per Forlin <per.lkml@gmail.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>
 
-On 11/28/11 12:07, Eliad Peller wrote:
-> On Mon, Nov 28, 2011 at 12:01 PM, Igor Grinberg <grinberg@compulab.co.il> wrote:
->> On 11/28/11 11:23, Eliad Peller wrote:
->>> hi Igor,
->>>
->>> On Mon, Nov 28, 2011 at 11:15 AM, Igor Grinberg <grinberg@compulab.co.il> wrote:
->>>> On 11/22/11 16:02, Eliad Peller wrote:
->>>>> Add pm_caps field to omap2_hsmmc_info and omap_mmc_slot_data
->>>>> structs, so we will be able to indicate mmc pm capabilities
->>>>> in the board file.
->>>>
->>>> Shouldn't this be user space runtime controllable?
->>>> Instead of being a static per board decision?
->>>>
->>> we only declare here support for the pm capabilities.
->>> the actual configuration of these capabilities is done at a later
->>> stage, and can be controlled (implicitly) by userspace (e.g. by
->>> enabling Wakeup-On-Wireless for the wl12xx chip).
->>
->> This is good to hear, because patch 1/3 makes it look like
->> the bus power does get immediately affected depending
->> on that capability, isn't it?
->>
-> no.
-> it checks pm_flags (configured pm features) rather than pm_caps
-> (supported pm features).
+Hi Jaehoon,
 
-I see. Thanks for the explanation.
+>
+> i didn't know how poll for ack from card..did you know?
+> So i implemented that send the hpi command whatever status.
+>
+> If let me know checking for ack from card, i will consider that.
 
+Some of MMC controllers (in my case msm_sdcc) can process automatically
+"busy line" and fire interrupt with "prog done" bit asserted, so we can
+use handler of this irq to turn off "doing bkops" flag. Otherwise it is
+possible to read mmc controller status and check busy line, in case it is
+already released we can skip HPI command.
 
--- 
-Regards,
-Igor.
+Thanks,
+Kostya
+
