@@ -1,38 +1,30 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: mmc: sdio: runtime PM and 8686 problems
-Date: Tue, 29 Nov 2011 14:43:08 +0200
-Message-ID: <CAK=Wgbb6s_BGfJYAoH3V77QvWoAXVAchg0ojBx4Mbmgq8bgvWw@mail.gmail.com>
-References: <WC20111118085327.010279@terrafix.co.uk> <CAK=WgbZvcTqmpT0jWT1b-GN1e5091AikAfL88Q8Z66dsOXx6Og@mail.gmail.com>
- <WC20111118100011.2902A2@terrafix.co.uk> <CAK=WgbaJ-q4TqgV5tdPQPm6CT9roceqn6QMxEJgA=Prd52jVEQ@mail.gmail.com>
- <WC20111129111750.470087@terrafix.co.uk>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] ARM: mmci: add capabilities2 for MMC_CAP2
+Date: Tue, 29 Nov 2011 14:43:38 +0100
+Message-ID: <4ED4E18A.3070907@stericsson.com>
+References: <1321268548-21933-1-git-send-email-per.forlin@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="iso-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:41073 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754760Ab1K2Mn3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2011 07:43:29 -0500
-Received: by ghrr1 with SMTP id r1so6327118ghr.19
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2011 04:43:29 -0800 (PST)
-In-Reply-To: <WC20111129111750.470087@terrafix.co.uk>
+Received: from eu1sys200aog107.obsmtp.com ([207.126.144.123]:54582 "EHLO
+	eu1sys200aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754349Ab1K2Nou (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2011 08:44:50 -0500
+In-Reply-To: <1321268548-21933-1-git-send-email-per.forlin@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Joe Woodward <jw@terrafix.co.uk>, Daniel Drake <dsd@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: Per FORLIN <per.forlin@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King <rmk+kernel@arm.linux.org.uk>
 
-On Tue, Nov 29, 2011 at 1:17 PM, Joe Woodward <jw@terrafix.co.uk> wrote:
-> Any more feedback on this?
+Per FORLIN wrote:
+> Signed-off-by: Per Forlin <per.forlin@stericsson.com>
+> ---
+> This patch depends on patches adding CAP2 available on mmc-next.
+> Chris, would you mind merging this through your tree when it
+> has been accepted.
+> 
 
-Daniel, can you please take a look ?
+Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
 
-Joe, Daniel's patch is long term the right thing to do, so I hope we
-could understand and solve the issue you have and still go on with
-Daniel's long term plan.
 
-At the same time, though, we're very much determined not to compromise
-any existing functionality. So IMHO it's either fixing your regression
-or reverting the change (and then possibly introducing white/black
-listing as Daniel suggested), but we definitely aren't going to have
-you maintain the fix for this out-of-tree.
-
-Ohad.
