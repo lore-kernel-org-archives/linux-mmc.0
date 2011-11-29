@@ -1,109 +1,57 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V3] mmc: allow upper layers to determine immediately if
- a card has been removed
-Date: Mon, 28 Nov 2011 16:23:32 +0200
-Message-ID: <4ED39964.7020806@intel.com>
-References: <1322485335-17922-1-git-send-email-adrian.hunter@intel.com> <9a3d4e0770dc0d7421d6abf0e1a57166.squirrel@www.codeaurora.org>
+From: "Joe Woodward" <jw@terrafix.co.uk>
+Subject: Re: mmc: sdio: runtime PM and 8686 problems
+Date: Tue, 29 Nov 2011 11:17:50 +0000
+Message-ID: <WC20111129111750.470087@terrafix.co.uk>
+References: <WC20111118085327.010279@terrafix.co.uk> <CAK=WgbZvcTqmpT0jWT1b-GN1e5091AikAfL88Q8Z66dsOXx6Og@mail.gmail.com> <WC20111118100011.2902A2@terrafix.co.uk> <CAK=WgbaJ-q4TqgV5tdPQPm6CT9roceqn6QMxEJgA=Prd52jVEQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <9a3d4e0770dc0d7421d6abf0e1a57166.squirrel@www.codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: Chris Ball <cjb@laptop.org>, per.lkml@gmail.com, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp3.keele.netcentral.co.uk ([212.57.235.197]:47409 "EHLO
+	smtp3.keele.netcentral.co.uk" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751663Ab1K2LSH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2011 06:18:07 -0500
+In-Reply-To: <CAK=WgbaJ-q4TqgV5tdPQPm6CT9roceqn6QMxEJgA=Prd52jVEQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: Daniel Drake <dsd@laptop.org>, linux-mmc@vger.kernel.org
 
-On 28/11/11 15:37, Sujit Reddy Thumma wrote:
-> 
->> Add a function mmc_detect_card_removed() which upper layers
->> can use to determine immediately if a card has been removed.
->> This function should be called after an I/O request fails so
->> that all queued I/O requests can be errored out immediately
->> instead of waiting for the card device to be removed.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->> ---
->>  drivers/mmc/core/core.c  |   51
->> +++++++++++++++++++++++++++++++++++++++++++--
->>  drivers/mmc/core/core.h  |    3 ++
->>  drivers/mmc/core/mmc.c   |   12 ++++++++++-
->>  drivers/mmc/core/sd.c    |   12 ++++++++++-
->>  drivers/mmc/core/sdio.c  |   11 +++++++++-
->>  include/linux/mmc/card.h |    3 ++
->>  include/linux/mmc/core.h |    2 +
->>  include/linux/mmc/host.h |    1 +
->>  8 files changed, 89 insertions(+), 6 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 271efea..3dacc98 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -140,7 +140,7 @@ void mmc_request_done(struct mmc_host *host, struct
->> mmc_request *mrq)
->>  			cmd->retries = 0;
->>  	}
->>
->> -	if (err && cmd->retries) {
->> +	if (err && cmd->retries && !mmc_card_removed(host->card)) {
->>  		/*
->>  		 * Request starter must handle retries - see
->>  		 * mmc_wait_for_req_done().
->> @@ -247,6 +247,11 @@ static void __mmc_start_req(struct mmc_host *host,
->> struct mmc_request *mrq)
->>  {
->>  	init_completion(&mrq->completion);
->>  	mrq->done = mmc_wait_done;
->> +	if (mmc_card_removed(host->card)) {
->> +		mrq->cmd->error = -ENOMEDIUM;
->> +		complete(&mrq->completion);
->> +		return;
->> +	}
->>  	mmc_start_request(host, mrq);
->>  }
->>
->> @@ -259,7 +264,8 @@ static void mmc_wait_for_req_done(struct mmc_host
->> *host,
->>  		wait_for_completion(&mrq->completion);
->>
->>  		cmd = mrq->cmd;
->> -		if (!cmd->error || !cmd->retries)
->> +		if (!cmd->error || !cmd->retries ||
->> +		    mmc_card_removed(host->card))
->>  			break;
->>
->>  		pr_debug("%s: req failed (CMD%u): %d, retrying...\n",
->> @@ -1456,7 +1462,7 @@ void mmc_detect_change(struct mmc_host *host,
->> unsigned long delay)
->>  	WARN_ON(host->removed);
->>  	spin_unlock_irqrestore(&host->lock, flags);
->>  #endif
->> -
->> +	host->detect_change = 1;
->>  	mmc_schedule_delayed_work(&host->detect, delay);
->>  }
->>
->> @@ -2049,6 +2055,43 @@ static int mmc_rescan_try_freq(struct mmc_host
->> *host, unsigned freq)
->>  	return -EIO;
->>  }
->>
->> +int _mmc_detect_card_removed(struct mmc_host *host)
->> +{
->> +	int ret;
->> +
->> +	if (!(host->caps & MMC_CAP_NONREMOVABLE) || !host->bus_ops->alive)
->> +		return 0;
->> +
->> +	if (!host->card || mmc_card_removed(host->card))
->> +		return 1;
->> +
->> +	ret = host->bus_ops->alive(host);
->> +	if (ret) {
->> +		mmc_card_set_removed(host->card);
->> +		pr_info("%s: card removed\n", mmc_hostname(host));
-> 
-> We are printing the same information when mmc_remove_card() is called. Can
-> we move this to pr_debug() here?
+Any more feedback on this?
 
-Changed in V4
+I don't mind having to maintain my own patch to revert the change to core/host.c to disable runtime PM, but I'm a bit concerned by the commit comment:
+
+"... Enable this trivially for a release or two. If no problems are reported,
+we will follow up with a more extensive patch to remove this flag
+altogether. If problems are reported, we can look at whitelist/blacklist
+possibilities as before."
+
+Certainly for my use case I'd appreciate keeping this flag around!
+
+Cheers,
+Joe
+
+
+-----Original Message-----
+From: Ohad Ben-Cohen <ohad@wizery.com>
+To: Joe Woodward <jw@terrafix.co.uk>
+Cc: Daniel Drake <dsd@laptop.org>, linux-mmc@vger.kernel.org
+Date: Fri, 18 Nov 2011 14:15:03 +0200
+Subject: Re: mmc: sdio: runtime PM and 8686 problems
+
+> On Fri, Nov 18, 2011 at 12:00 PM, Joe Woodward <jw@terrafix.co.uk>
+> wrote:
+> > I'm assuming these changes have already made it to the mainline, and
+> therefore are in the 3.2rc2 build I was testing...
+> 
+> Most probably, yeah.
+> 
+> > Is there anything I can do to debug further the problems I'm seeing?
+> 
+> Let's wait for Daniel to take a look, as he got libertas and sd8686
+> working with SDIO runtime PM.
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
