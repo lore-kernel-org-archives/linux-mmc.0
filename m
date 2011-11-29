@@ -1,30 +1,47 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH] ARM: mmci: add capabilities2 for MMC_CAP2
-Date: Tue, 29 Nov 2011 14:43:38 +0100
-Message-ID: <4ED4E18A.3070907@stericsson.com>
-References: <1321268548-21933-1-git-send-email-per.forlin@stericsson.com>
+Subject: [PATCH] mmc: mmci: Fixup error handling for dma
+Date: Tue, 29 Nov 2011 15:51:26 +0100
+Message-ID: <1322578286-18727-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog107.obsmtp.com ([207.126.144.123]:54582 "EHLO
-	eu1sys200aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754349Ab1K2Nou (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2011 08:44:50 -0500
-In-Reply-To: <1321268548-21933-1-git-send-email-per.forlin@stericsson.com>
+Received: from eu1sys200aog118.obsmtp.com ([207.126.144.145]:47924 "EHLO
+	eu1sys200aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755644Ab1K2Ovw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2011 09:51:52 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per FORLIN <per.forlin@stericsson.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King <rmk+kernel@arm.linux.org.uk>
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Per Forlin <per.forlin@stericsson.com>
 
-Per FORLIN wrote:
-> Signed-off-by: Per Forlin <per.forlin@stericsson.com>
-> ---
-> This patch depends on patches adding CAP2 available on mmc-next.
-> Chris, would you mind merging this through your tree when it
-> has been accepted.
-> 
+When getting a cmd irq during an ongoing data transfer
+with dma, the dma job were never terminated. This is now
+corrected.
 
-Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+Signed-off-by: Per Forlin <per.forlin@stericsson.com>
+---
+ drivers/mmc/host/mmci.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
 
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index e900f51..62ad649 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -761,8 +761,12 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	}
+ 
+ 	if (!cmd->data || cmd->error) {
+-		if (host->data)
++		if (host->data) {
++			/* Terminate the DMA transfer */
++			if (dma_inprogress(host))
++				mmci_dma_data_error(host);
+ 			mmci_stop_data(host);
++		}
+ 		mmci_request_end(host, cmd->mrq);
+ 	} else if (!(cmd->data->flags & MMC_DATA_READ)) {
+ 		mmci_start_data(host, cmd->data);
+-- 
+1.7.5.4
 
