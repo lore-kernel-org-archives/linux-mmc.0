@@ -1,66 +1,38 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3] mmc: support BKOPS feature for eMMC
-Date: Tue, 29 Nov 2011 14:20:20 +0200
-Message-ID: <4ED4CE04.4070403@intel.com>
-References: <4EC45A39.5030706@samsung.com>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: mmc: sdio: runtime PM and 8686 problems
+Date: Tue, 29 Nov 2011 14:43:08 +0200
+Message-ID: <CAK=Wgbb6s_BGfJYAoH3V77QvWoAXVAchg0ojBx4Mbmgq8bgvWw@mail.gmail.com>
+References: <WC20111118085327.010279@terrafix.co.uk> <CAK=WgbZvcTqmpT0jWT1b-GN1e5091AikAfL88Q8Z66dsOXx6Og@mail.gmail.com>
+ <WC20111118100011.2902A2@terrafix.co.uk> <CAK=WgbaJ-q4TqgV5tdPQPm6CT9roceqn6QMxEJgA=Prd52jVEQ@mail.gmail.com>
+ <WC20111129111750.470087@terrafix.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:5834 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754210Ab1K2MUg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 29 Nov 2011 07:20:36 -0500
-In-Reply-To: <4EC45A39.5030706@samsung.com>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:41073 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754760Ab1K2Mn3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2011 07:43:29 -0500
+Received: by ghrr1 with SMTP id r1so6327118ghr.19
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2011 04:43:29 -0800 (PST)
+In-Reply-To: <WC20111129111750.470087@terrafix.co.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per Forlin <per.lkml@gmail.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>
+To: Joe Woodward <jw@terrafix.co.uk>, Daniel Drake <dsd@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-On 17/11/11 02:50, Jaehoon Chung wrote:
-> Enable eMMC background operations (BKOPS) feature.
-> 
-> If URGENT_BKOPS is set after a response, note that BKOPS
-> are required. After all I/O requests are finished, run
-> BKOPS if required. Should read/write operations be requested
-> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
-> and then service the request.
-> 
-> If you want to enable this feature, set MMC_CAP2_BKOPS.
-> 
-> Future considerations
->  * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
->  * Interrupt ongoing BKOPS before powering off the card.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> CC: Hanumath Prasad <hanumath.prasad@stericsson.com>
-> ---
-> Changelog V3:
-> 	- move the bkops setting's location in mmc_blk_issue_rw_rq
-> 	- modify condition checking
-> 	- bkops_en is assigned ext_csd[EXT_CSD_BKOPS_EN] instead of "1"
-> 	- remove the unused code
-> 	- change pr_debug instead of pr_warn in mmc_send_hpi_cmd
-> 	- Add the Future consideration suggested by Per
-> 	
-> Changelog V2:
-> 	- Use EXCEPTION_STATUS instead of URGENT_BKOPS
-> 	- Add function to check Exception_status(for eMMC4.5)
-> 	- remove unnecessary code.
-> 
+On Tue, Nov 29, 2011 at 1:17 PM, Joe Woodward <jw@terrafix.co.uk> wrote:
+> Any more feedback on this?
 
-The main problem with bkops is:
+Daniel, can you please take a look ?
 
-	If the status is at level 3 ("critical"), some operations
-	may extend beyond their original timeouts due to maintenance
-	operations which cannot be delayed anymore.
+Joe, Daniel's patch is long term the right thing to do, so I hope we
+could understand and solve the issue you have and still go on with
+Daniel's long term plan.
 
-This means:
+At the same time, though, we're very much determined not to compromise
+any existing functionality. So IMHO it's either fixing your regression
+or reverting the change (and then possibly introducing white/black
+listing as Daniel suggested), but we definitely aren't going to have
+you maintain the fix for this out-of-tree.
 
-	1. at level 3 either bkops are run or the timeout of the next
-	(data?) operation is extended
-
-	2. at level 3 either the bkops must not be interrupted or the
-	level must be rechecked after interruption and bkops run again
-	if the level is still 3
+Ohad.
