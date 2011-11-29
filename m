@@ -1,63 +1,66 @@
-From: "Konstantin Dorfman" <kdorfman@codeaurora.org>
-Subject: Re: [PATCH v2] mmc: support BKOPS feature for eMMC
-Date: Tue, 29 Nov 2011 13:47:21 +0200 (IST)
-Message-ID: <9dcc3cb061c7f9a0743a627e08685ac4.squirrel@www.codeaurora.org>
-References: <4EB11B6B.2010909@samsung.com>
-    <CAFEEs1=yF3u-xL6OnEMTfqYx6HgOaePYkhC7iOJi-=z9TjPfmw@mail.gmail.com>
-    <CAELcNGQEm073tFsmSgbKzBfx=oYjZDX=EdbgWQOMZEBscsobTw@mail.gmail.com>
-    <CAFEEs1==cJ_dYDgesAZcs+E=-jj7-hwwssbAsE4a9AdmED8k3A@mail.gmail.com>
-    <CAELcNGTddwX6HtR5vJ+wQChyN5a=mU3Wbd5Hg_EqY72xR7k8dA@mail.gmail.com>
-    <CAFEEs1mKBUqi8HJK3unRh7KMraethMATTTf8Fn6WB2L+ZUqO9g@mail.gmail.com>
-    <4EC096A3.4070309@samsung.com>
-    <491f3d5b2d7e3949fdba902e1c98e26b.squirrel@www.codeaurora.org>
-    <4ED37784.6030004@samsung.com>
-    <CAH9JG2WW+yhoqKSUkh7J4hTMic=ZqWicnhk_AwM-G5M6SUKjSA@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v3] mmc: support BKOPS feature for eMMC
+Date: Tue, 29 Nov 2011 14:20:20 +0200
+Message-ID: <4ED4CE04.4070403@intel.com>
+References: <4EC45A39.5030706@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:24763 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751411Ab1K2LrV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2011 06:47:21 -0500
-In-Reply-To: <CAH9JG2WW+yhoqKSUkh7J4hTMic=ZqWicnhk_AwM-G5M6SUKjSA@mail.gmail.com>
+Received: from mga01.intel.com ([192.55.52.88]:5834 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754210Ab1K2MUg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 29 Nov 2011 07:20:36 -0500
+In-Reply-To: <4EC45A39.5030706@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kyungmin.park@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Per Forlin <per.lkml@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, svenkatr@ti.com, chuanxiao.dong@intel.com
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per Forlin <per.lkml@gmail.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>
 
->>>
->>> First of all protocol state:
->>> ------------------------------
->>> 7.4.57 BKOPS_EN [163]
->>> This field allows the _host_ to indicate to the device if it is
->>> expected
->>> to periodically manually start background operations by writing to the
->>> BKOPS_START field.
->>>
->>> ...In order for the device to know if host is going to periodically
->>> start
->>> background operations, host shall set bit 0 of BKOPS_EN (EXT_CSD byte
->>> [163]) to indicate that it is going to write to BKOPS_START
->>> periodically.
->>> The device may then delay some of its maintenance operations to when
->>> host
->>> writes to BKOPS_START.
->>> ------------------------------
->>>
->>> My card supports BKOPS (by reading Bit 0 of BKOPS_SUPPORT (EXT_CSD byte
->>> [502]), but BKOPS_EN[163] is not set. So I suppose, original code to
->>> set
->>> BKOPS_EN[163] is needed, otherwise card will never delay its
->>> maintenance
->>> operations.
->>
->>
->> Ok...i will add the code for setting BKOPS_EN bit in patch-v4.
-> I hope this features are provided from platform data. since it's not
-> mandatory for all devices
-This feature is mandatory for eMMC v4.5, but it may be enabled only when
-card supports BKOPS_SUPPORT[502] is set (and this one depend on device)
-Thanks,
-Kostya
+On 17/11/11 02:50, Jaehoon Chung wrote:
+> Enable eMMC background operations (BKOPS) feature.
+> 
+> If URGENT_BKOPS is set after a response, note that BKOPS
+> are required. After all I/O requests are finished, run
+> BKOPS if required. Should read/write operations be requested
+> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
+> and then service the request.
+> 
+> If you want to enable this feature, set MMC_CAP2_BKOPS.
+> 
+> Future considerations
+>  * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
+>  * Interrupt ongoing BKOPS before powering off the card.
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> CC: Hanumath Prasad <hanumath.prasad@stericsson.com>
+> ---
+> Changelog V3:
+> 	- move the bkops setting's location in mmc_blk_issue_rw_rq
+> 	- modify condition checking
+> 	- bkops_en is assigned ext_csd[EXT_CSD_BKOPS_EN] instead of "1"
+> 	- remove the unused code
+> 	- change pr_debug instead of pr_warn in mmc_send_hpi_cmd
+> 	- Add the Future consideration suggested by Per
+> 	
+> Changelog V2:
+> 	- Use EXCEPTION_STATUS instead of URGENT_BKOPS
+> 	- Add function to check Exception_status(for eMMC4.5)
+> 	- remove unnecessary code.
+> 
 
+The main problem with bkops is:
+
+	If the status is at level 3 ("critical"), some operations
+	may extend beyond their original timeouts due to maintenance
+	operations which cannot be delayed anymore.
+
+This means:
+
+	1. at level 3 either bkops are run or the timeout of the next
+	(data?) operation is extended
+
+	2. at level 3 either the bkops must not be interrupted or the
+	level must be rechecked after interruption and bkops run again
+	if the level is still 3
