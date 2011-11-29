@@ -1,57 +1,63 @@
-From: "Joe Woodward" <jw@terrafix.co.uk>
-Subject: Re: mmc: sdio: runtime PM and 8686 problems
-Date: Tue, 29 Nov 2011 11:17:50 +0000
-Message-ID: <WC20111129111750.470087@terrafix.co.uk>
-References: <WC20111118085327.010279@terrafix.co.uk> <CAK=WgbZvcTqmpT0jWT1b-GN1e5091AikAfL88Q8Z66dsOXx6Og@mail.gmail.com> <WC20111118100011.2902A2@terrafix.co.uk> <CAK=WgbaJ-q4TqgV5tdPQPm6CT9roceqn6QMxEJgA=Prd52jVEQ@mail.gmail.com>
+From: "Konstantin Dorfman" <kdorfman@codeaurora.org>
+Subject: Re: [PATCH v2] mmc: support BKOPS feature for eMMC
+Date: Tue, 29 Nov 2011 13:47:21 +0200 (IST)
+Message-ID: <9dcc3cb061c7f9a0743a627e08685ac4.squirrel@www.codeaurora.org>
+References: <4EB11B6B.2010909@samsung.com>
+    <CAFEEs1=yF3u-xL6OnEMTfqYx6HgOaePYkhC7iOJi-=z9TjPfmw@mail.gmail.com>
+    <CAELcNGQEm073tFsmSgbKzBfx=oYjZDX=EdbgWQOMZEBscsobTw@mail.gmail.com>
+    <CAFEEs1==cJ_dYDgesAZcs+E=-jj7-hwwssbAsE4a9AdmED8k3A@mail.gmail.com>
+    <CAELcNGTddwX6HtR5vJ+wQChyN5a=mU3Wbd5Hg_EqY72xR7k8dA@mail.gmail.com>
+    <CAFEEs1mKBUqi8HJK3unRh7KMraethMATTTf8Fn6WB2L+ZUqO9g@mail.gmail.com>
+    <4EC096A3.4070309@samsung.com>
+    <491f3d5b2d7e3949fdba902e1c98e26b.squirrel@www.codeaurora.org>
+    <4ED37784.6030004@samsung.com>
+    <CAH9JG2WW+yhoqKSUkh7J4hTMic=ZqWicnhk_AwM-G5M6SUKjSA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp3.keele.netcentral.co.uk ([212.57.235.197]:47409 "EHLO
-	smtp3.keele.netcentral.co.uk" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751663Ab1K2LSH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2011 06:18:07 -0500
-In-Reply-To: <CAK=WgbaJ-q4TqgV5tdPQPm6CT9roceqn6QMxEJgA=Prd52jVEQ@mail.gmail.com>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:24763 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751411Ab1K2LrV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2011 06:47:21 -0500
+In-Reply-To: <CAH9JG2WW+yhoqKSUkh7J4hTMic=ZqWicnhk_AwM-G5M6SUKjSA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>
-Cc: Daniel Drake <dsd@laptop.org>, linux-mmc@vger.kernel.org
+To: Kyungmin Park <kyungmin.park@samsung.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Per Forlin <per.lkml@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, svenkatr@ti.com, chuanxiao.dong@intel.com
 
-Any more feedback on this?
-
-I don't mind having to maintain my own patch to revert the change to core/host.c to disable runtime PM, but I'm a bit concerned by the commit comment:
-
-"... Enable this trivially for a release or two. If no problems are reported,
-we will follow up with a more extensive patch to remove this flag
-altogether. If problems are reported, we can look at whitelist/blacklist
-possibilities as before."
-
-Certainly for my use case I'd appreciate keeping this flag around!
-
-Cheers,
-Joe
-
-
------Original Message-----
-From: Ohad Ben-Cohen <ohad@wizery.com>
-To: Joe Woodward <jw@terrafix.co.uk>
-Cc: Daniel Drake <dsd@laptop.org>, linux-mmc@vger.kernel.org
-Date: Fri, 18 Nov 2011 14:15:03 +0200
-Subject: Re: mmc: sdio: runtime PM and 8686 problems
-
-> On Fri, Nov 18, 2011 at 12:00 PM, Joe Woodward <jw@terrafix.co.uk>
-> wrote:
-> > I'm assuming these changes have already made it to the mainline, and
-> therefore are in the 3.2rc2 build I was testing...
-> 
-> Most probably, yeah.
-> 
-> > Is there anything I can do to debug further the problems I'm seeing?
-> 
-> Let's wait for Daniel to take a look, as he got libertas and sd8686
-> working with SDIO runtime PM.
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+>>>
+>>> First of all protocol state:
+>>> ------------------------------
+>>> 7.4.57 BKOPS_EN [163]
+>>> This field allows the _host_ to indicate to the device if it is
+>>> expected
+>>> to periodically manually start background operations by writing to the
+>>> BKOPS_START field.
+>>>
+>>> ...In order for the device to know if host is going to periodically
+>>> start
+>>> background operations, host shall set bit 0 of BKOPS_EN (EXT_CSD byte
+>>> [163]) to indicate that it is going to write to BKOPS_START
+>>> periodically.
+>>> The device may then delay some of its maintenance operations to when
+>>> host
+>>> writes to BKOPS_START.
+>>> ------------------------------
+>>>
+>>> My card supports BKOPS (by reading Bit 0 of BKOPS_SUPPORT (EXT_CSD byte
+>>> [502]), but BKOPS_EN[163] is not set. So I suppose, original code to
+>>> set
+>>> BKOPS_EN[163] is needed, otherwise card will never delay its
+>>> maintenance
+>>> operations.
+>>
+>>
+>> Ok...i will add the code for setting BKOPS_EN bit in patch-v4.
+> I hope this features are provided from platform data. since it's not
+> mandatory for all devices
+This feature is mandatory for eMMC v4.5, but it may be enabled only when
+card supports BKOPS_SUPPORT[502] is set (and this one depend on device)
+Thanks,
+Kostya
 
