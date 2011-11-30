@@ -1,93 +1,102 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3] mmc: support BKOPS feature for eMMC
-Date: Wed, 30 Nov 2011 13:09:56 +0900
-Message-ID: <4ED5AC94.9020609@samsung.com>
-References: <4EC45A39.5030706@samsung.com> <4ED4CE04.4070403@intel.com>
+Subject: [PATCH] mmc: dw_mmc: use the dev_pm_ops for dw_mmccontroller
+Date: Wed, 30 Nov 2011 13:58:05 +0900
+Message-ID: <4ED5B7DD.1060609@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:29663 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751996Ab1K3EKB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2011 23:10:01 -0500
-Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
+Received: from mailout2.samsung.com ([203.254.224.25]:20459 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752176Ab1K3E6K (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2011 23:58:10 -0500
+Received: from epcpsbgm2.samsung.com (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LVG00FBMGWNDGJ0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 30 Nov 2011 13:09:59 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
+ 2010)) with ESMTP id <0LVG00CNEJ4WCBL0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 30 Nov 2011 13:58:09 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LVG00KSTGWM7MV0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 30 Nov 2011 13:09:59 +0900 (KST)
-In-reply-to: <4ED4CE04.4070403@intel.com>
+ 2010)) with ESMTPA id <0LVG00EHNJ4WLW40@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 30 Nov 2011 13:58:08 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per Forlin <per.lkml@gmail.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Adrian.
+Dw_mmc controller didn't use dev_pm_ops.
+This patch modified to use the dev_mp_ops for dw_mmc controller
 
-On 11/29/2011 09:20 PM, Adrian Hunter wrote:
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |   24 +++++++++++++++---------
+ 1 files changed, 15 insertions(+), 9 deletions(-)
 
-> On 17/11/11 02:50, Jaehoon Chung wrote:
->> Enable eMMC background operations (BKOPS) feature.
->>
->> If URGENT_BKOPS is set after a response, note that BKOPS
->> are required. After all I/O requests are finished, run
->> BKOPS if required. Should read/write operations be requested
->> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
->> and then service the request.
->>
->> If you want to enable this feature, set MMC_CAP2_BKOPS.
->>
->> Future considerations
->>  * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
->>  * Interrupt ongoing BKOPS before powering off the card.
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> CC: Hanumath Prasad <hanumath.prasad@stericsson.com>
->> ---
->> Changelog V3:
->> 	- move the bkops setting's location in mmc_blk_issue_rw_rq
->> 	- modify condition checking
->> 	- bkops_en is assigned ext_csd[EXT_CSD_BKOPS_EN] instead of "1"
->> 	- remove the unused code
->> 	- change pr_debug instead of pr_warn in mmc_send_hpi_cmd
->> 	- Add the Future consideration suggested by Per
->> 	
->> Changelog V2:
->> 	- Use EXCEPTION_STATUS instead of URGENT_BKOPS
->> 	- Add function to check Exception_status(for eMMC4.5)
->> 	- remove unnecessary code.
->>
-> 
-> The main problem with bkops is:
-> 
-> 	If the status is at level 3 ("critical"), some operations
-> 	may extend beyond their original timeouts due to maintenance
-> 	operations which cannot be delayed anymore.
-> 
-> This means:
-> 
-> 	1. at level 3 either bkops are run or the timeout of the next
-> 	(data?) operation is extended
-> 
-> 	2. at level 3 either the bkops must not be interrupted or the
-> 	level must be rechecked after interruption and bkops run again
-> 	if the level is still 3
-
-
-Thanks for your comment..I will consider to solve this problem.
-
-Best Regards,
-Jaehoon Chung
-
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 3aaeb08..fc9beea 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2066,10 +2066,10 @@ static int __exit dw_mci_remove(struct platform_device *pdev)
+ /*
+  * TODO: we should probably disable the clock to the card in the suspend path.
+  */
+-static int dw_mci_suspend(struct platform_device *pdev, pm_message_t mesg)
++static int dw_mci_suspend(struct device *dev)
+ {
+ 	int i, ret;
+-	struct dw_mci *host = platform_get_drvdata(pdev);
++	struct dw_mci *host = dev_get_drvdata(dev);
+ 
+ 	for (i = 0; i < host->num_slots; i++) {
+ 		struct dw_mci_slot *slot = host->slot[i];
+@@ -2092,10 +2092,10 @@ static int dw_mci_suspend(struct platform_device *pdev, pm_message_t mesg)
+ 	return 0;
+ }
+ 
+-static int dw_mci_resume(struct platform_device *pdev)
++static int dw_mci_resume(struct device *dev)
+ {
+ 	int i, ret;
+-	struct dw_mci *host = platform_get_drvdata(pdev);
++	struct dw_mci *host = dev_get_drvdata(dev);
+ 
+ 	if (host->vmmc)
+ 		regulator_enable(host->vmmc);
+@@ -2103,7 +2103,7 @@ static int dw_mci_resume(struct platform_device *pdev)
+ 	if (host->dma_ops->init)
+ 		host->dma_ops->init(host);
+ 
+-	if (!mci_wait_reset(&pdev->dev, host)) {
++	if (!mci_wait_reset(dev, host)) {
+ 		ret = -ENODEV;
+ 		return ret;
+ 	}
+@@ -2128,17 +2128,23 @@ static int dw_mci_resume(struct platform_device *pdev)
+ 
+ 	return 0;
+ }
++
++static const struct dev_pm_ops dw_mci_pmops = {
++	.suspend	= dw_mci_suspend,
++	.resume		= dw_mci_resume,
++};
++
++#define DW_MCI_PMOPS	(&dw_mci_pmops)
++
+ #else
+-#define dw_mci_suspend	NULL
+-#define dw_mci_resume	NULL
++#define DW_MCI_PMOPS	NULL
+ #endif /* CONFIG_PM */
+ 
+ static struct platform_driver dw_mci_driver = {
+ 	.remove		= __exit_p(dw_mci_remove),
+-	.suspend	= dw_mci_suspend,
+-	.resume		= dw_mci_resume,
+ 	.driver		= {
+ 		.name		= "dw_mmc",
++		.pm		= DW_MCI_PMOPS,
+ 	},
+ };
+ 
