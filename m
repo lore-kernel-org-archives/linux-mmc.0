@@ -1,536 +1,1132 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: [PATCH V5] mmc: core: HS200 mode support for eMMC 4.5
-Date: Wed, 30 Nov 2011 14:23:48 +0530
-Message-ID: <1322643228-10320-1-git-send-email-girish.shivananjappa@linaro.org>
+From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Subject: Re: [PATCH v3 1/1] mmc:Support of PCI mode for the dw_mmc driver
+Date: Wed, 30 Nov 2011 15:31:16 +0530
+Message-ID: <CANYdXnqB6DhFd6Sd72OE+YZ5tpEnkN3a68vZKBLXSn9FyHUaPA@mail.gmail.com>
+References: <1322591437-4494-1-git-send-email-shashidharh@vayavyalabs.com>
+	<20111129212633.GB26823@balrog>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:38277 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755961Ab1K3Ixg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2011 03:53:36 -0500
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:54774 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752866Ab1K3KBS convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2011 05:01:18 -0500
+Received: by ywa9 with SMTP id 9so423241ywa.19
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2011 02:01:17 -0800 (PST)
+In-Reply-To: <20111129212633.GB26823@balrog>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, subhashj@codeaurora.org, Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>
+To: James Hogan <james@albanarts.com>
+Cc: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Philip Rakity <prakity@marvell.com>, "Mark F. Brown" <mark.brown314@gmail.com>, Wolfram Sang <w.sang@pengutronix.de>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org
 
-This patch adds the support of the HS200 bus speed for eMMC 4.5 devices.
-The eMMC 4.5 devices have support for 200MHz bus speed.The mmc core and
-host modules have been touched to add support for this module.
+Hi James,
+  thanks for the reply.
 
-It is necessary to know the card type in the sdhci.c file to add support
-for eMMC tuning function. So card.h file is included to import the card
-data structure.
+On Wed, Nov 30, 2011 at 2:56 AM, James Hogan <james@albanarts.com> wrot=
+e:
+> Hi,
+>
+> Thanks for the update. It's better, but there's still a few issues...
+>
+> On Wed, Nov 30, 2011 at 12:00:37AM +0530, Shashidhar Hiremath wrote:
+>> Support of PCI mode for the dw_mmc driver This Patch adds the suppor=
+t for the scenario where the Synopsys Designware IP is present on the P=
+CI bus.The patch adds the minimal modifications necessary for the drive=
+r to work on PCI platform.Also added separate files for PCI and PLATFOR=
+M modes of operation
+>
+> Being picky, but full stop at end of sentences, and a space between
+> sentences would be nice. Wrapping to 72 characters is nice too. :)
+>
+>>
+>> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+>> ---
+>> v2:
+>> *As per Suggestions by Will Newton and James Hogan
+>> -Reduced the number of ifdefs
+>> v3:
+>> *As per Suggestions by Will Newton and James Hogan
+>> -Added separate files for PCI and PLATFORM Modes similar to SDHCI dr=
+iver
+>> =C2=A0drivers/mmc/host/Kconfig =C2=A0 =C2=A0 =C2=A0 =C2=A0| =C2=A0 2=
+3 ++++++
+>> =C2=A0drivers/mmc/host/Makefile =C2=A0 =C2=A0 =C2=A0 | =C2=A0 =C2=A0=
+2 +
+>> =C2=A0drivers/mmc/host/dw_mmc-pci.c =C2=A0 | =C2=A0159 +++++++++++++=
+++++++++++++++++++++++++++
+>> =C2=A0drivers/mmc/host/dw_mmc-pltfm.c | =C2=A0125 ++++++++++++++++++=
+++++++++++++
+>> =C2=A0drivers/mmc/host/dw_mmc.c =C2=A0 =C2=A0 =C2=A0 | =C2=A0155 +++=
++++++++++++------------------------
+>> =C2=A0drivers/mmc/host/dw_mmc.h =C2=A0 =C2=A0 =C2=A0 | =C2=A0 =C2=A0=
+7 ++
+>> =C2=A0include/linux/mmc/dw_mmc.h =C2=A0 =C2=A0 =C2=A0| =C2=A0 =C2=A0=
+4 +-
+>> =C2=A07 files changed, 374 insertions(+), 101 deletions(-)
+>> =C2=A0create mode 100644 drivers/mmc/host/dw_mmc-pci.c
+>> =C2=A0create mode 100644 drivers/mmc/host/dw_mmc-pltfm.c
+>>
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index 87d5067..6735fbe 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -534,6 +534,29 @@ config MMC_DW_IDMAC
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 Designware Mobile Storage IP block. This=
+ disables the external DMA
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 interface.
+>>
+>> +config MMC_DW_PCI
+>> + =C2=A0 =C2=A0 tristate "Synopsys Designware MCI support on PCI bus=
+"
+>> + =C2=A0 =C2=A0 depends on MMC_DW && PCI
+>> + =C2=A0 =C2=A0 help
+>> + =C2=A0 =C2=A0 =C2=A0 This selects the PCI bus for the Synopsys Des=
+ignware Mobile Storage IP.
+>> + =C2=A0 =C2=A0 =C2=A0 Select this option if the IP is present on PC=
+I platform.
+>> +
+>> + =C2=A0 =C2=A0 =C2=A0 If you have a controller with this interface,=
+ say Y or M here.
+>> +
+>> + =C2=A0 =C2=A0 =C2=A0 If unsure, say N.
+>> +
+>> +config MMC_DW_PLTFM
+>> + =C2=A0 =C2=A0 tristate "platform driver helper for Synopsys Design=
+ware Mobile Storage IP"
+>> + =C2=A0 =C2=A0 depends on MMC_DW
+>> + =C2=A0 =C2=A0 help
+>> + =C2=A0 =C2=A0 =C2=A0 This selects the common helper functions supp=
+ort for Host Controller
+>> + =C2=A0 =C2=A0 =C2=A0 Interface based platform driver.Please select=
+ this option if the IP
+>> + =C2=A0 =C2=A0 =C2=A0 is present as a platform device.
+>> +
+>> + =C2=A0 =C2=A0 =C2=A0 If you have a controller with this interface,=
+ say Y or M here.
+>> +
+>> + =C2=A0 =C2=A0 =C2=A0 If unsure, say N.
+>> +
+>> =C2=A0config MMC_SH_MMCIF
+>> =C2=A0 =C2=A0 =C2=A0 tristate "SuperH Internal MMCIF support"
+>> =C2=A0 =C2=A0 =C2=A0 depends on MMC_BLOCK && (SUPERH || ARCH_SHMOBIL=
+E)
+>> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+>> index b4b83f3..3aa2fa3 100644
+>> --- a/drivers/mmc/host/Makefile
+>> +++ b/drivers/mmc/host/Makefile
+>> @@ -38,6 +38,8 @@ obj-$(CONFIG_MMC_CB710) =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 +=3D cb710-mmc.o
+>> =C2=A0obj-$(CONFIG_MMC_VIA_SDMMC) =C2=A0+=3D via-sdmmc.o
+>> =C2=A0obj-$(CONFIG_SDH_BFIN) =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 +=3D bfin_sdh.o
+>> =C2=A0obj-$(CONFIG_MMC_DW) =C2=A0 =C2=A0 =C2=A0 =C2=A0 +=3D dw_mmc.o
+>> +obj-$(CONFIG_MMC_DW_PLTFM) =C2=A0 +=3D dw_mmc-pltfm.o
+>> +obj-$(CONFIG_MMC_DW_PCI) =C2=A0 =C2=A0 +=3D dw_mmc-pci.o
+>> =C2=A0obj-$(CONFIG_MMC_SH_MMCIF) =C2=A0 +=3D sh_mmcif.o
+>> =C2=A0obj-$(CONFIG_MMC_JZ4740) =C2=A0 =C2=A0 +=3D jz4740_mmc.o
+>> =C2=A0obj-$(CONFIG_MMC_VUB300) =C2=A0 =C2=A0 +=3D vub300.o
+>> diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc=
+-pci.c
+>> new file mode 100644
+>> index 0000000..7d8fb5e
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/dw_mmc-pci.c
+>> @@ -0,0 +1,159 @@
+>> +/*
+>> + * Synopsys DesignWare Multimedia Card PCI Interface driver
+>> + *
+>> + * Copyright (C) 2011 Vayavya Labs Pvt. Ltd.
+>> + *
+>> + * This program is free software; you can redistribute it and/or mo=
+dify
+>> + * it under the terms of the GNU General Public License as publishe=
+d by
+>> + * the Free Software Foundation; either version 2 of the License, o=
+r
+>> + * (at your option) any later version.
+>> + */
+>> +
+>> +#include <linux/interrupt.h>
+>> +#include <linux/irq.h>
+>> +#include <linux/pci.h>
+>> +#include <linux/mmc/host.h>
+>> +#include <linux/mmc/mmc.h>
+>> +#include <linux/mmc/dw_mmc.h>
+>> +#include "dw_mmc.h"
+>> +
+>> +#define PCI_BAR_NO 2
+>> +#define COMPLETE_BAR 0
+>> +#define DW_MCI_VENDOR_ID 0x700
+>> +#define DW_MCI_DEVICE_ID 0x1107
+>> +/* Defining the Capabilities */
+>> +#define DW_MCI_CAPABILITIES (MMC_CAP_4_BIT_DATA | MMC_CAP_MMC_HIGHS=
+PEED |\
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 MMC_CAP_SD_HIGHSPEED | MMC_CAP_8_BIT_DA=
+TA |\
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 MMC_CAP_SDIO_IRQ)
+>> +
+>> +static struct dw_mci_board pci_board_data =3D {
+>> + =C2=A0 =C2=A0 .num_slots =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D 1,
+>> + =C2=A0 =C2=A0 .caps =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D DW_MCI_CAPABILITIES,
+>> + =C2=A0 =C2=A0 .bus_hz =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D 33 * 1000 * 1000,
+>> + =C2=A0 =C2=A0 .detect_delay_ms =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0=3D 200,
+>> + =C2=A0 =C2=A0 .fifo_depth =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D 32,
+>> +};
+>> +
+>> +static int __devinit dw_mci_pci_probe(struct pci_dev *pdev,
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 const struct pci_device_id *entr=
+ies)
+>> +{
+>> + =C2=A0 =C2=A0 struct =C2=A0dw_mci *host;
+>> + =C2=A0 =C2=A0 int =C2=A0 =C2=A0 ret;
+>> +
+>> + =C2=A0 =C2=A0 ret =3D pci_enable_device(pdev);
+>> + =C2=A0 =C2=A0 if (ret)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return ret;
+>> + =C2=A0 =C2=A0 if (pci_request_regions(pdev, "dw_mmc_pci")) {
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D -ENODEV;
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_freehost;
+>
+> This will kfree the as yet uninitialised host.
+>
+> Should this (and later error handlers) also undo the effects of
+> pci_enable_device with pci_disable_device?
+>
+Yes , Will make the change
+>> + =C2=A0 =C2=A0 }
+>> +
+>> + =C2=A0 =C2=A0 host =3D kzalloc(sizeof(struct dw_mci), GFP_KERNEL);
+>> + =C2=A0 =C2=A0 if (!host)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -ENOMEM;
+>> +
+>> + =C2=A0 =C2=A0 host->irq =3D pdev->irq;
+>> + =C2=A0 =C2=A0 host->dev =3D pdev->dev;
+>> + =C2=A0 =C2=A0 host->pdata =3D &pci_board_data;
+>> +
+>> + =C2=A0 =C2=A0 ret =3D -ENOMEM;
+>
+> what's this for?
+>
+This has somehow creeped from the old code.Will clean it up.
+>> + =C2=A0 =C2=A0 host->regs =3D pci_iomap(pdev, PCI_BAR_NO, COMPLETE_=
+BAR);
+>> + =C2=A0 =C2=A0 if (!host->regs) {
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 pci_release_regions(pdev=
+);
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D -EIO;
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_freehost;
+>> + =C2=A0 =C2=A0 }
+>> +
+>> +
+>> + =C2=A0 =C2=A0 pci_set_drvdata(pdev, host);
+>> + =C2=A0 =C2=A0 ret =3D dw_mci_probe(host);
+>> + =C2=A0 =C2=A0 if (ret)
+>> +err_freehost:
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 kfree(host);
+>
+> pci_iounmap?
+>
+will add this.
+>> + =C2=A0 =C2=A0 return ret;
+>
+> Since there are several things that need cleaning up on failure, it
+> should really have the error handling labels after the return like a =
+lot
+> of other kernel drivers do (e.g. see ioapic_probe() in
+> drivers/pci/ioapic.c). This makes the code a lot neater and easier to
+> read.
+>
+>> +}
+>> +
+>> +
+>> +
+>> +
+>> +static void __devexit dw_mci_pci_remove(struct pci_dev *pdev)
+>> +{
+>> +
+>
+> no need for a newline here
+>
+>> + =C2=A0 =C2=A0 struct dw_mci *host =3D pci_get_drvdata(pdev);
+>> +
+>> + =C2=A0 =C2=A0 mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>> + =C2=A0 =C2=A0 mci_writel(host, INTMASK, 0); /* disable all mmc int=
+errupt first */
+>> +
+>> + =C2=A0 =C2=A0 pci_set_drvdata(pdev, NULL);
+>> + =C2=A0 =C2=A0 dw_mci_remove(host);
+>> + =C2=A0 =C2=A0 pci_release_regions(pdev);
+>> + =C2=A0 =C2=A0 kfree(host);
+>
+> should this also be pci_iounmap'ing, and pci_disable_device'ing?
+>
+Yes, will make the change.
+>> +}
+>> +
+>> +#ifdef CONFIG_PM
+>> +static int dw_mci_pci_suspend(struct pci_dev *pdev, pm_message_t me=
+sg)
+>> +{
+>> + =C2=A0 =C2=A0 int =C2=A0ret;
+>> + =C2=A0 =C2=A0 struct dw_mci *host =3D pci_get_drvdata(pdev);
+>> +
+>> + =C2=A0 =C2=A0 ret =3D dw_mci_suspend(host);
+>> + =C2=A0 =C2=A0 if (ret)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return ret;
+>> +
+>> + =C2=A0 =C2=A0 return 0;
+>> +}
+>> +
+>> +/*
+>> + * TODO: we should probably disable the clock to the card in the su=
+spend path.
+>> + */
+>> +
+>> +
+>> +static int dw_mci_pci_resume(struct pci_dev *pdev)
+>> +{
+>> + =C2=A0 =C2=A0 int ret;
+>> + =C2=A0 =C2=A0 struct dw_mci *host =3D pci_get_drvdata(pdev);
+>> +
+>> + =C2=A0 =C2=A0 ret =3D dw_mci_resume(host);
+>> + =C2=A0 =C2=A0 if (ret)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return ret;
+>> +
+>> + =C2=A0 =C2=A0 return 0;
+>> +}
+>> +
+>> +#else
+>> +#define dw_mci_pci_suspend =C2=A0 NULL
+>> +#define dw_mci_pci_resume =C2=A0 =C2=A0NULL
+>> +#endif /* CONFIG_PM */
+>> +
+>> +static DEFINE_PCI_DEVICE_TABLE(dw_mci_pci_id) =3D {
+>> + =C2=A0 =C2=A0 { PCI_DEVICE(DW_MCI_DEVICE_ID, DW_MCI_VENDOR_ID) },
+>> + =C2=A0 =C2=A0 {}
+>> +};
+>> +MODULE_DEVICE_TABLE(pci, dw_mci_pci_id);
+>> +
+>> +static struct pci_driver dw_mci_pci_driver =3D {
+>> + =C2=A0 =C2=A0 .name =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D "dw_mmc=
+_pci",
+>> + =C2=A0 =C2=A0 .id_table =C2=A0 =C2=A0 =C2=A0 =3D dw_mci_pci_id,
+>> + =C2=A0 =C2=A0 .probe =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D dw_mci_=
+pci_probe,
+>> + =C2=A0 =C2=A0 .remove =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D dw_mci_pci_r=
+emove,
+>> + =C2=A0 =C2=A0 .suspend =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D dw_mci_pci_s=
+uspend,
+>> + =C2=A0 =C2=A0 .resume =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D dw_mci_pci_r=
+esume,
+>> +};
+>> +
+>> +static int __init dw_mci_init(void)
+>> +{
+>> + =C2=A0 =C2=A0 return pci_register_driver(&dw_mci_pci_driver);
+>> +}
+>> +
+>> +static void __exit dw_mci_exit(void)
+>> +{
+>> + =C2=A0 =C2=A0 pci_unregister_driver(&dw_mci_pci_driver);
+>> +}
+>> +
+>> +module_init(dw_mci_init);
+>> +module_exit(dw_mci_exit);
+>> +
+>> +MODULE_DESCRIPTION("DW Multimedia Card PCI Interface driver");
+>> +MODULE_AUTHOR("Shashidhar Hiremath <shashidharh@vayavyalabs.com>");
+>> +MODULE_AUTHOR("VayavyaLabs Pvt. Ltd.");
+>> +MODULE_LICENSE("GPL v2");
+>> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_m=
+mc-pltfm.c
+>> new file mode 100644
+>> index 0000000..0c6a95df
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+>> @@ -0,0 +1,125 @@
+>> +/*
+>> + * Synopsys DesignWare Multimedia Card Interface driver
+>> + *
+>> + * Copyright (C) 2009 NXP Semiconductors
+>> + * Copyright (C) 2009, 2010 Imagination Technologies Ltd.
+>> + *
+>> + * This program is free software; you can redistribute it and/or mo=
+dify
+>> + * it under the terms of the GNU General Public License as publishe=
+d by
+>> + * the Free Software Foundation; either version 2 of the License, o=
+r
+>> + * (at your option) any later version.
+>> + */
+>> +
+>> +#include <linux/interrupt.h>
+>> +#include <linux/irq.h>
+>> +#include <linux/platform_device.h>
+>> +#include <linux/slab.h>
+>> +#include <linux/mmc/host.h>
+>> +#include <linux/mmc/mmc.h>
+>> +#include <linux/mmc/dw_mmc.h>
+>> +#include "dw_mmc.h"
+>> +
+>> +static int dw_mci_pltfm_probe(struct platform_device *pdev)
+>> +{
+>> + =C2=A0 =C2=A0 struct dw_mci *host;
+>> + =C2=A0 =C2=A0 struct resource *regs;
+>> + =C2=A0 =C2=A0 int =C2=A0ret;
+>
+> no need for the extra space before ret.
+>
+>> +
+>> + =C2=A0 =C2=A0 host =3D kzalloc(sizeof(struct dw_mci), GFP_KERNEL);
+>> + =C2=A0 =C2=A0 if (!host)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -ENOMEM;
+>> +
+>> + =C2=A0 =C2=A0 regs =3D platform_get_resource(pdev, IORESOURCE_MEM,=
+ 0);
+>> + =C2=A0 =C2=A0 if (!regs)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -ENXIO;
+>> +
+>> + =C2=A0 =C2=A0 host->irq =3D platform_get_irq(pdev, 0);
+>> + =C2=A0 =C2=A0 if (host->irq < 0)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return host->irq;
+>> +
+>> + =C2=A0 =C2=A0 host->dev =3D pdev->dev;
+>> + =C2=A0 =C2=A0 host->pdata =3D pdev->dev.platform_data;
+>> + =C2=A0 =C2=A0 ret =3D -ENOMEM;
+>> + =C2=A0 =C2=A0 host->regs =3D ioremap(regs->start, resource_size(re=
+gs));
+>> + =C2=A0 =C2=A0 if (!host->regs)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_freehost;
+>> + =C2=A0 =C2=A0 platform_set_drvdata(pdev, host);
+>> + =C2=A0 =C2=A0 ret =3D dw_mci_probe(host);
+>> + =C2=A0 =C2=A0 if (ret)
+>> +err_freehost:
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 kfree(host);
+>> + =C2=A0 =C2=A0 return ret;
+>
+> same stuff again, please fix the error handling.
+>
+will do the change.
+>> +}
+>> +
+>> +static int __exit dw_mci_pltfm_remove(struct platform_device *pdev)
+>> +{
+>> + =C2=A0 =C2=A0 struct dw_mci *host =3D platform_get_drvdata(pdev);
+>> +
+>> + =C2=A0 =C2=A0 mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>> + =C2=A0 =C2=A0 mci_writel(host, INTMASK, 0); /* disable all mmc int=
+errupt first */
+>> +
+>> + =C2=A0 =C2=A0 platform_set_drvdata(pdev, NULL);
+>> + =C2=A0 =C2=A0 dw_mci_remove(host);
+>> + =C2=A0 =C2=A0 kfree(host);
+>
+> iounmap (see below)?
+>
+>> + =C2=A0 =C2=A0 return 0;
+>> +}
+>> +#ifdef CONFIG_PM
+>> +/*
+>> + * TODO: we should probably disable the clock to the card in the su=
+spend path.
+>> + */
+>> +static int dw_mci_pltfm_suspend(struct platform_device *pdev, pm_me=
+ssage_t mesg)
+>> +{
+>> +
+>> + =C2=A0 =C2=A0 int =C2=A0ret;
+>> + =C2=A0 =C2=A0 struct dw_mci *host =3D platform_get_drvdata(pdev);
+>> +
+>> + =C2=A0 =C2=A0 ret =3D dw_mci_suspend(host);
+>> + =C2=A0 =C2=A0 if (ret)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return ret;
+>> +
+>> + =C2=A0 =C2=A0 return 0;
+>> +}
+>> +
+>> +static int dw_mci_pltfm_resume(struct platform_device *pdev)
+>> +{
+>> +
+>> + =C2=A0 =C2=A0 int ret;
+>> + =C2=A0 =C2=A0 struct dw_mci *host =3D platform_get_drvdata(pdev);
+>> +
+>> + =C2=A0 =C2=A0 ret =3D dw_mci_resume(host);
+>> + =C2=A0 =C2=A0 if (ret)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return ret;
+>> +
+>> + =C2=A0 =C2=A0 return 0;
+>> +}
+>> +#else
+>> +#define dw_mci_pltfm_suspend NULL
+>> +#define dw_mci_pltfm_resume =C2=A0NULL
+>> +#endif /* CONFIG_PM */
+>> +
+>> +static struct platform_driver dw_mci_pltfm_driver =3D {
+>> + =C2=A0 =C2=A0 .remove =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D __exit_p(dw_=
+mci_pltfm_remove),
+>> + =C2=A0 =C2=A0 .suspend =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D dw_mci_pltfm=
+_suspend,
+>> + =C2=A0 =C2=A0 .resume =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D dw_mci_pltfm=
+_resume,
+>> + =C2=A0 =C2=A0 .driver =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D {
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 .name =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =3D "dw_mmc",
+>> + =C2=A0 =C2=A0 },
+>> +};
+>> +
+>> +static int __init dw_mci_init(void)
+>> +{
+>> + =C2=A0 =C2=A0 return platform_driver_probe(&dw_mci_pltfm_driver, d=
+w_mci_pltfm_probe);
+>> +}
+>> +
+>> +static void __exit dw_mci_exit(void)
+>> +{
+>> + =C2=A0 =C2=A0 platform_driver_unregister(&dw_mci_pltfm_driver);
+>> +}
+>> +
+>> +module_init(dw_mci_init);
+>> +module_exit(dw_mci_exit);
+>> +
+>> +MODULE_DESCRIPTION("DW Multimedia Card Interface driver");
+>> +MODULE_AUTHOR("NXP Semiconductor VietNam");
+>> +MODULE_AUTHOR("Imagination Technologies Ltd");
+>> +MODULE_LICENSE("GPL v2");
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 3aaeb08..7d33626 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -269,7 +269,7 @@ static void dw_mci_start_command(struct dw_mci *=
+host,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0struct mmc_command *cmd, u32 =
+cmd_flags)
+>> =C2=A0{
+>> =C2=A0 =C2=A0 =C2=A0 host->cmd =3D cmd;
+>> - =C2=A0 =C2=A0 dev_vdbg(&host->pdev->dev,
+>> + =C2=A0 =C2=A0 dev_vdbg(&host->dev,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0"start comman=
+d: ARGR=3D0x%08x CMDR=3D0x%08x\n",
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0cmd->arg, cmd=
+_flags);
+>>
+>> @@ -302,7 +302,7 @@ static void dw_mci_dma_cleanup(struct dw_mci *ho=
+st)
+>> =C2=A0 =C2=A0 =C2=A0 struct mmc_data *data =3D host->data;
+>>
+>> =C2=A0 =C2=A0 =C2=A0 if (data)
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dma_unmap_sg(&host->pdev=
+->dev, data->sg, data->sg_len,
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dma_unmap_sg(&host->dev,=
+ data->sg, data->sg_len,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0((data->flags & MMC_DATA_WRITE)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 ? DMA_TO_DEVICE : DMA_FROM_DEVICE));
+>> =C2=A0}
+>> @@ -327,7 +327,7 @@ static void dw_mci_idmac_complete_dma(struct dw_=
+mci *host)
+>> =C2=A0{
+>> =C2=A0 =C2=A0 =C2=A0 struct mmc_data *data =3D host->data;
+>>
+>> - =C2=A0 =C2=A0 dev_vdbg(&host->pdev->dev, "DMA complete\n");
+>> + =C2=A0 =C2=A0 dev_vdbg(&host->dev, "DMA complete\n");
+>>
+>> =C2=A0 =C2=A0 =C2=A0 host->dma_ops->cleanup(host);
+>>
+>> @@ -463,10 +463,10 @@ static int dw_mci_submit_data_dma(struct dw_mc=
+i *host, struct mmc_data *data)
+>> =C2=A0 =C2=A0 =C2=A0 else
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 direction =3D DMA_T=
+O_DEVICE;
+>>
+>> - =C2=A0 =C2=A0 sg_len =3D dma_map_sg(&host->pdev->dev, data->sg, da=
+ta->sg_len,
+>> + =C2=A0 =C2=A0 sg_len =3D dma_map_sg(&host->dev, data->sg, data->sg=
+_len,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 direction);
+>>
+>> - =C2=A0 =C2=A0 dev_vdbg(&host->pdev->dev,
+>> + =C2=A0 =C2=A0 dev_vdbg(&host->dev,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0"sd sg_cpu: %=
+#lx sg_dma: %#lx sg_len: %d\n",
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0(unsigned lon=
+g)host->sg_cpu, (unsigned long)host->sg_dma,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0sg_len);
+>> @@ -716,6 +716,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc,=
+ struct mmc_ios *ios)
+>> =C2=A0 =C2=A0 =C2=A0 switch (ios->power_mode) {
+>> =C2=A0 =C2=A0 =C2=A0 case MMC_POWER_UP:
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 set_bit(DW_MMC_CARD=
+_NEED_INIT, &slot->flags);
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mci_writel(slot->host, P=
+WREN, (0x1 << (slot->id)));
+>
+> Was this something that the original driver should have been doing? (=
+it
+> might be best as a separate patch if so).
+>
+Yes, I will submit another patch on this.
+> Does it need to be undone somewhere?
+>
+> Won't it unintentionally power down all other slots by writing 0 to
+> them?
+>
+> Do you "wait for regulator/switch ramp-up time before trying to
+> initialize card" (quoting TRM) or is that handled by other code?
+>
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 break;
+>> =C2=A0 =C2=A0 =C2=A0 default:
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 break;
+>> @@ -804,12 +805,12 @@ static void dw_mci_request_end(struct dw_mci *=
+host, struct mmc_request *mrq)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 slot =3D list_entry=
+(host->queue.next,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 struct dw_mci_slot, queue_no=
+de);
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 list_del(&slot->que=
+ue_node);
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_vdbg(&host->pdev->de=
+v, "list not empty: %s is next\n",
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_vdbg(&host->dev, "li=
+st not empty: %s is next\n",
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0mmc_hostname(slot->mmc));
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->state =3D STA=
+TE_SENDING_CMD;
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dw_mci_start_reques=
+t(host, slot);
+>> =C2=A0 =C2=A0 =C2=A0 } else {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_vdbg(&host->pdev->de=
+v, "list empty\n");
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_vdbg(&host->dev, "li=
+st empty\n");
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->state =3D STA=
+TE_IDLE;
+>> =C2=A0 =C2=A0 =C2=A0 }
+>>
+>> @@ -941,7 +942,7 @@ static void dw_mci_tasklet_func(unsigned long pr=
+iv)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 data->b=
+ytes_xfered =3D 0;
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 data->e=
+rror =3D -ETIMEDOUT;
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 } else {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&ho=
+st->pdev->dev,
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&ho=
+st->dev,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 "data FIFO error "
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 "(status=3D%08x)\n",
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 status);
+>> @@ -1651,7 +1652,7 @@ static int __init dw_mci_init_slot(struct dw_m=
+ci *host, unsigned int id)
+>> =C2=A0 =C2=A0 =C2=A0 struct mmc_host *mmc;
+>> =C2=A0 =C2=A0 =C2=A0 struct dw_mci_slot *slot;
+>>
+>> - =C2=A0 =C2=A0 mmc =3D mmc_alloc_host(sizeof(struct dw_mci_slot), &=
+host->pdev->dev);
+>> + =C2=A0 =C2=A0 mmc =3D mmc_alloc_host(sizeof(struct dw_mci_slot), &=
+host->dev);
+>> =C2=A0 =C2=A0 =C2=A0 if (!mmc)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -ENOMEM;
+>>
+>> @@ -1757,10 +1758,10 @@ static void dw_mci_cleanup_slot(struct dw_mc=
+i_slot *slot, unsigned int id)
+>> =C2=A0static void dw_mci_init_dma(struct dw_mci *host)
+>> =C2=A0{
+>> =C2=A0 =C2=A0 =C2=A0 /* Alloc memory for sg translation */
+>> - =C2=A0 =C2=A0 host->sg_cpu =3D dma_alloc_coherent(&host->pdev->dev=
+, PAGE_SIZE,
+>> + =C2=A0 =C2=A0 host->sg_cpu =3D dma_alloc_coherent(&host->dev, PAGE=
+_SIZE,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+&host->sg_dma, GFP_KERNEL);
+>> =C2=A0 =C2=A0 =C2=A0 if (!host->sg_cpu) {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&host->pdev->dev=
+, "%s: could not alloc DMA memory\n",
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&host->dev, "%s:=
+ could not alloc DMA memory\n",
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 __func__);
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto no_dma;
+>> =C2=A0 =C2=A0 =C2=A0 }
+>> @@ -1768,7 +1769,7 @@ static void dw_mci_init_dma(struct dw_mci *hos=
+t)
+>> =C2=A0 =C2=A0 =C2=A0 /* Determine which DMA interface to use */
+>> =C2=A0#ifdef CONFIG_MMC_DW_IDMAC
+>> =C2=A0 =C2=A0 =C2=A0 host->dma_ops =3D &dw_mci_idmac_ops;
+>> - =C2=A0 =C2=A0 dev_info(&host->pdev->dev, "Using internal DMA contr=
+oller.\n");
+>> + =C2=A0 =C2=A0 dev_info(&host->dev, "Using internal DMA controller.=
+\n");
+>> =C2=A0#endif
+>>
+>> =C2=A0 =C2=A0 =C2=A0 if (!host->dma_ops)
+>> @@ -1776,12 +1777,12 @@ static void dw_mci_init_dma(struct dw_mci *h=
+ost)
+>>
+>> =C2=A0 =C2=A0 =C2=A0 if (host->dma_ops->init) {
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (host->dma_ops->=
+init(host)) {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 dev_err(&host->pdev->dev, "%s: Unable to initialize "
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 dev_err(&host->dev, "%s: Unable to initialize "
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 "DMA Controller.\n", __func__);
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 goto no_dma;
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
+>> =C2=A0 =C2=A0 =C2=A0 } else {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&host->pdev->dev=
+, "DMA initialization not found.\n");
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&host->dev, "DMA=
+ initialization not found.\n");
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto no_dma;
+>> =C2=A0 =C2=A0 =C2=A0 }
+>>
+>> @@ -1789,7 +1790,7 @@ static void dw_mci_init_dma(struct dw_mci *hos=
+t)
+>> =C2=A0 =C2=A0 =C2=A0 return;
+>>
+>> =C2=A0no_dma:
+>> - =C2=A0 =C2=A0 dev_info(&host->pdev->dev, "Using PIO mode.\n");
+>> + =C2=A0 =C2=A0 dev_info(&host->dev, "Using PIO mode.\n");
+>> =C2=A0 =C2=A0 =C2=A0 host->use_dma =3D 0;
+>> =C2=A0 =C2=A0 =C2=A0 return;
+>> =C2=A0}
+>> @@ -1815,61 +1816,37 @@ static bool mci_wait_reset(struct device *de=
+v, struct dw_mci *host)
+>> =C2=A0 =C2=A0 =C2=A0 return false;
+>> =C2=A0}
+>>
+>> -static int dw_mci_probe(struct platform_device *pdev)
+>> +int dw_mci_probe(struct dw_mci *host)
+>> =C2=A0{
+>> - =C2=A0 =C2=A0 struct dw_mci *host;
+>> - =C2=A0 =C2=A0 struct resource *regs;
+>> - =C2=A0 =C2=A0 struct dw_mci_board *pdata;
+>> - =C2=A0 =C2=A0 int irq, ret, i, width;
+>> + =C2=A0 =C2=A0 int width, i , ret;
+>
+> no need for a space after the i.
+>
+>> =C2=A0 =C2=A0 =C2=A0 u32 fifo_size;
+>>
+>> - =C2=A0 =C2=A0 regs =3D platform_get_resource(pdev, IORESOURCE_MEM,=
+ 0);
+>> - =C2=A0 =C2=A0 if (!regs)
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -ENXIO;
+>> -
+>> - =C2=A0 =C2=A0 irq =3D platform_get_irq(pdev, 0);
+>> - =C2=A0 =C2=A0 if (irq < 0)
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return irq;
+>> -
+>> - =C2=A0 =C2=A0 host =3D kzalloc(sizeof(struct dw_mci), GFP_KERNEL);
+>> - =C2=A0 =C2=A0 if (!host)
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -ENOMEM;
+>> -
+>> - =C2=A0 =C2=A0 host->pdev =3D pdev;
+>> - =C2=A0 =C2=A0 host->pdata =3D pdata =3D pdev->dev.platform_data;
+>> - =C2=A0 =C2=A0 if (!pdata || !pdata->init) {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&pdev->dev,
+>> + =C2=A0 =C2=A0 if (!host->pdata || !host->pdata->init) {
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&host->dev,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 "Platform data must supply init function\n");
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D -ENODEV;
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_freehost;
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -ENODEV;
+>> =C2=A0 =C2=A0 =C2=A0 }
+>>
+>> - =C2=A0 =C2=A0 if (!pdata->select_slot && pdata->num_slots > 1) {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&pdev->dev,
+>> + =C2=A0 =C2=A0 if (!host->pdata->select_slot && host->pdata->num_sl=
+ots > 1) {
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&host->dev,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 "Platform data must supply select_slot function\n");
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D -ENODEV;
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_freehost;
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -ENODEV;
+>> =C2=A0 =C2=A0 =C2=A0 }
+>>
+>> - =C2=A0 =C2=A0 if (!pdata->bus_hz) {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&pdev->dev,
+>> + =C2=A0 =C2=A0 if (!host->pdata->bus_hz) {
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_err(&host->dev,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 "Platform data must supply bus speed\n");
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D -ENODEV;
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_freehost;
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return -ENODEV;
+>> =C2=A0 =C2=A0 =C2=A0 }
+>>
+>> - =C2=A0 =C2=A0 host->bus_hz =3D pdata->bus_hz;
+>> - =C2=A0 =C2=A0 host->quirks =3D pdata->quirks;
+>> + =C2=A0 =C2=A0 host->bus_hz =3D host->pdata->bus_hz;
+>> + =C2=A0 =C2=A0 host->quirks =3D host->pdata->quirks;
+>>
+>> =C2=A0 =C2=A0 =C2=A0 spin_lock_init(&host->lock);
+>> =C2=A0 =C2=A0 =C2=A0 INIT_LIST_HEAD(&host->queue);
+>>
+>> - =C2=A0 =C2=A0 ret =3D -ENOMEM;
+>> - =C2=A0 =C2=A0 host->regs =3D ioremap(regs->start, resource_size(re=
+gs));
+>> - =C2=A0 =C2=A0 if (!host->regs)
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_freehost;
+>>
+>> - =C2=A0 =C2=A0 host->dma_ops =3D pdata->dma_ops;
+>> + =C2=A0 =C2=A0 host->dma_ops =3D host->pdata->dma_ops;
+>> =C2=A0 =C2=A0 =C2=A0 dw_mci_init_dma(host);
+>>
+>> =C2=A0 =C2=A0 =C2=A0 /*
+>> @@ -1899,7 +1876,7 @@ static int dw_mci_probe(struct platform_device=
+ *pdev)
+>> =C2=A0 =C2=A0 =C2=A0 }
+>>
+>> =C2=A0 =C2=A0 =C2=A0 /* Reset all blocks */
+>> - =C2=A0 =C2=A0 if (!mci_wait_reset(&pdev->dev, host)) {
+>> + =C2=A0 =C2=A0 if (!mci_wait_reset(&host->dev, host)) {
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D -ENODEV;
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_dmaunmap;
+>> =C2=A0 =C2=A0 =C2=A0 }
+>> @@ -1942,13 +1919,13 @@ static int dw_mci_probe(struct platform_devi=
+ce *pdev)
+>> =C2=A0 =C2=A0 =C2=A0 if (!dw_mci_card_workqueue)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_dmaunmap;
+>> =C2=A0 =C2=A0 =C2=A0 INIT_WORK(&host->card_work, dw_mci_work_routine=
+_card);
+>> -
+>> - =C2=A0 =C2=A0 ret =3D request_irq(irq, dw_mci_interrupt, 0, "dw-mc=
+i", host);
+>> +#ifdef CONFIG_MMC_DW_PCI
+>> + =C2=A0 =C2=A0 ret =3D request_irq(host->irq, dw_mci_interrupt, IRQ=
+=46_SHARED, "dw-mci", host);
+>> +#else
+>> + =C2=A0 =C2=A0 ret =3D request_irq(host->irq, dw_mci_interrupt, 0, =
+"dw-mci", host);
+>> +#endif
+>
+> is this necessary? perhaps it could pass in the irq flags from the
+> caller somehow.
+>
+>> =C2=A0 =C2=A0 =C2=A0 if (ret)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 goto err_workqueue;
+>> -
+>> - =C2=A0 =C2=A0 platform_set_drvdata(pdev, host);
+>> -
+>> =C2=A0 =C2=A0 =C2=A0 if (host->pdata->num_slots)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->num_slots =3D=
+ host->pdata->num_slots;
+>> =C2=A0 =C2=A0 =C2=A0 else
+>> @@ -1985,12 +1962,12 @@ static int dw_mci_probe(struct platform_devi=
+ce *pdev)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0DW_MCI=
+_ERROR_FLAGS | SDMMC_INT_CD);
+>> =C2=A0 =C2=A0 =C2=A0 mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE); =
+/* Enable mci interrupt */
+>>
+>> - =C2=A0 =C2=A0 dev_info(&pdev->dev, "DW MMC controller at irq %d, "
+>> + =C2=A0 =C2=A0 dev_info(&host->dev, "DW MMC controller at irq %d, "
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0"%d bit host =
+data width, "
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0"%u deep fifo=
+\n",
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0irq, width, fifo_s=
+ize);
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0host->irq, width, =
+fifo_size);
+>> =C2=A0 =C2=A0 =C2=A0 if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_info(&pdev->dev, "In=
+ternal DMAC interrupt fix enabled.\n");
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_info(&host->dev, "In=
+ternal DMAC interrupt fix enabled.\n");
+>>
+>> =C2=A0 =C2=A0 =C2=A0 return 0;
+>>
+>> @@ -2001,7 +1978,7 @@ err_init_slot:
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 dw_mci_cleanup_slot(host->slot[i], i);
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 i--;
+>> =C2=A0 =C2=A0 =C2=A0 }
+>> - =C2=A0 =C2=A0 free_irq(irq, host);
+>> + =C2=A0 =C2=A0 free_irq(host->irq, host);
+>>
+>> =C2=A0err_workqueue:
+>> =C2=A0 =C2=A0 =C2=A0 destroy_workqueue(dw_mci_card_workqueue);
+>> @@ -2009,7 +1986,7 @@ err_workqueue:
+>> =C2=A0err_dmaunmap:
+>> =C2=A0 =C2=A0 =C2=A0 if (host->use_dma && host->dma_ops->exit)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->dma_ops->exit=
+(host);
+>> - =C2=A0 =C2=A0 dma_free_coherent(&host->pdev->dev, PAGE_SIZE,
+>> + =C2=A0 =C2=A0 dma_free_coherent(&host->dev, PAGE_SIZE,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 host->sg_cpu, host->sg_dma);
+>> =C2=A0 =C2=A0 =C2=A0 iounmap(host->regs);
+>
+> this iounmap can be moved out to caller now that regs it initialised =
+by
+> caller.
+>
+>>
+>> @@ -2017,25 +1994,16 @@ err_dmaunmap:
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 regulator_disable(h=
+ost->vmmc);
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 regulator_put(host-=
+>vmmc);
+>> =C2=A0 =C2=A0 =C2=A0 }
+>> -
+>> -
+>> -err_freehost:
+>> - =C2=A0 =C2=A0 kfree(host);
+>> =C2=A0 =C2=A0 =C2=A0 return ret;
+>> =C2=A0}
+>> +EXPORT_SYMBOL(dw_mci_probe);
+>>
+>> -static int __exit dw_mci_remove(struct platform_device *pdev)
+>> +void dw_mci_remove(struct dw_mci *host)
+>> =C2=A0{
+>> - =C2=A0 =C2=A0 struct dw_mci *host =3D platform_get_drvdata(pdev);
+>> =C2=A0 =C2=A0 =C2=A0 int i;
+>>
+>> - =C2=A0 =C2=A0 mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>> - =C2=A0 =C2=A0 mci_writel(host, INTMASK, 0); /* disable all mmc int=
+errupt first */
+>
+> This seems pretty independent of PCI/platform, and is done by both
+> callers anyway. Perhaps it should stay where it is.
+>
+>> -
+>> - =C2=A0 =C2=A0 platform_set_drvdata(pdev, NULL);
+>> -
+>> =C2=A0 =C2=A0 =C2=A0 for (i =3D 0; i < host->num_slots; i++) {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_dbg(&pdev->dev, "rem=
+ove slot %d\n", i);
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 dev_dbg(&host->dev, "rem=
+ove slot %d\n", i);
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (host->slot[i])
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 dw_mci_cleanup_slot(host->slot[i], i);
+>> =C2=A0 =C2=A0 =C2=A0 }
+>> @@ -2044,9 +2012,9 @@ static int __exit dw_mci_remove(struct platfor=
+m_device *pdev)
+>> =C2=A0 =C2=A0 =C2=A0 mci_writel(host, CLKENA, 0);
+>> =C2=A0 =C2=A0 =C2=A0 mci_writel(host, CLKSRC, 0);
+>>
+>> - =C2=A0 =C2=A0 free_irq(platform_get_irq(pdev, 0), host);
+>> + =C2=A0 =C2=A0 free_irq(host->irq, host);
+>> =C2=A0 =C2=A0 =C2=A0 destroy_workqueue(dw_mci_card_workqueue);
+>> - =C2=A0 =C2=A0 dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cp=
+u, host->sg_dma);
+>> + =C2=A0 =C2=A0 dma_free_coherent(&host->dev, PAGE_SIZE, host->sg_cp=
+u, host->sg_dma);
+>>
+>> =C2=A0 =C2=A0 =C2=A0 if (host->use_dma && host->dma_ops->exit)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->dma_ops->exit=
+(host);
+>> @@ -2057,19 +2025,18 @@ static int __exit dw_mci_remove(struct platf=
+orm_device *pdev)
+>> =C2=A0 =C2=A0 =C2=A0 }
+>>
+>> =C2=A0 =C2=A0 =C2=A0 iounmap(host->regs);
+>
+> same here (move out to caller)
+>
+>> -
+>> - =C2=A0 =C2=A0 kfree(host);
+>> - =C2=A0 =C2=A0 return 0;
+>> =C2=A0}
+>> +EXPORT_SYMBOL(dw_mci_remove);
+>> +
+>> +
+>>
+>> =C2=A0#ifdef CONFIG_PM
+>> =C2=A0/*
+>> =C2=A0 * TODO: we should probably disable the clock to the card in t=
+he suspend path.
+>> =C2=A0 */
+>> -static int dw_mci_suspend(struct platform_device *pdev, pm_message_=
+t mesg)
+>> +int dw_mci_suspend(struct dw_mci *host)
+>> =C2=A0{
+>> =C2=A0 =C2=A0 =C2=A0 int i, ret;
+>> - =C2=A0 =C2=A0 struct dw_mci *host =3D platform_get_drvdata(pdev);
+>>
+>> =C2=A0 =C2=A0 =C2=A0 for (i =3D 0; i < host->num_slots; i++) {
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 struct dw_mci_slot =
+*slot =3D host->slot[i];
+>> @@ -2091,19 +2058,18 @@ static int dw_mci_suspend(struct platform_de=
+vice *pdev, pm_message_t mesg)
+>>
+>> =C2=A0 =C2=A0 =C2=A0 return 0;
+>> =C2=A0}
+>> +EXPORT_SYMBOL(dw_mci_suspend);
+>>
+>> -static int dw_mci_resume(struct platform_device *pdev)
+>> +int dw_mci_resume(struct dw_mci *host)
+>> =C2=A0{
+>> =C2=A0 =C2=A0 =C2=A0 int i, ret;
+>> - =C2=A0 =C2=A0 struct dw_mci *host =3D platform_get_drvdata(pdev);
+>> -
+>> =C2=A0 =C2=A0 =C2=A0 if (host->vmmc)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 regulator_enable(ho=
+st->vmmc);
+>>
+>> =C2=A0 =C2=A0 =C2=A0 if (host->dma_ops->init)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->dma_ops->init=
+(host);
+>>
+>> - =C2=A0 =C2=A0 if (!mci_wait_reset(&pdev->dev, host)) {
+>> + =C2=A0 =C2=A0 if (!mci_wait_reset(&host->dev, host)) {
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D -ENODEV;
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 return ret;
+>> =C2=A0 =C2=A0 =C2=A0 }
+>> @@ -2125,31 +2091,22 @@ static int dw_mci_resume(struct platform_dev=
+ice *pdev)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (ret < 0)
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 return ret;
+>> =C2=A0 =C2=A0 =C2=A0 }
+>> -
+>> =C2=A0 =C2=A0 =C2=A0 return 0;
+>> =C2=A0}
+>> +EXPORT_SYMBOL(dw_mci_resume);
+>> =C2=A0#else
+>> =C2=A0#define dw_mci_suspend =C2=A0 =C2=A0 =C2=A0 NULL
+>> =C2=A0#define dw_mci_resume =C2=A0 =C2=A0 =C2=A0 =C2=A0NULL
+>
+> this else bit can probably go since the #defines aren't being used
+> any more.
+>
+>> =C2=A0#endif /* CONFIG_PM */
+>>
+>> -static struct platform_driver dw_mci_driver =3D {
+>> - =C2=A0 =C2=A0 .remove =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D __exit_p(dw_=
+mci_remove),
+>> - =C2=A0 =C2=A0 .suspend =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D dw_mci_suspe=
+nd,
+>> - =C2=A0 =C2=A0 .resume =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D dw_mci_resum=
+e,
+>> - =C2=A0 =C2=A0 .driver =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 .name =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =3D "dw_mmc",
+>> - =C2=A0 =C2=A0 },
+>> -};
+>> -
+>> =C2=A0static int __init dw_mci_init(void)
+>> =C2=A0{
+>> - =C2=A0 =C2=A0 return platform_driver_probe(&dw_mci_driver, dw_mci_=
+probe);
+>> + =C2=A0 =C2=A0 printk(KERN_INFO "Synopsys Designware Multimedia Car=
+d Interface Driver");
+>> + =C2=A0 =C2=A0 return 0;
+>> =C2=A0}
+>>
+>> =C2=A0static void __exit dw_mci_exit(void)
+>> =C2=A0{
+>> - =C2=A0 =C2=A0 platform_driver_unregister(&dw_mci_driver);
+>> =C2=A0}
+>>
+>> =C2=A0module_init(dw_mci_init);
+>
+> if the init and exit functions of the main driver no longer do anythi=
+ng,
+> they can probably go too.
+Actually, when I looked at the SDHCI-PCI drivers, these are still
+present because the the plain sdhci.ko can be loaded as an independent
+module, after that we can insert either pltfm.ko module or pci.ko
+module. So I feel it would be better to keep them as it is.
+>
+>> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+>> index 72c071f..70078f6 100644
+>> --- a/drivers/mmc/host/dw_mmc.h
+>> +++ b/drivers/mmc/host/dw_mmc.h
+>> @@ -175,4 +175,11 @@
+>> =C2=A0 =C2=A0 =C2=A0 (*(volatile u64 __force *)((dev)->regs + SDMMC_=
+##reg) =3D (value))
+>> =C2=A0#endif
+>>
+>> +extern int dw_mci_probe(struct dw_mci *host);
+>> +extern void dw_mci_remove(struct dw_mci *host);
+>> +#ifdef CONFIG_PM
+>> +extern int dw_mci_suspend(struct dw_mci *host);
+>> +extern int dw_mci_resume(struct dw_mci *host);
+>> +#endif
+>> +
+>> =C2=A0#endif /* _DW_MMC_H_ */
+>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+>> index 6dc9b80..5240446 100644
+>> --- a/include/linux/mmc/dw_mmc.h
+>> +++ b/include/linux/mmc/dw_mmc.h
+>> @@ -74,7 +74,7 @@ struct mmc_data;
+>> =C2=A0 * @num_slots: Number of slots available.
+>> =C2=A0 * @verid: Denote Version ID.
+>> =C2=A0 * @data_offset: Set the offset of DATA register according to =
+VERID.
+>> - * @pdev: Platform device associated with the MMC controller.
+>> + * @dev: device associated with the MMC controller.
+>
+> I'm being picky here, but you could capitalise the d of device, for
+> consistency with the rest of the descriptions.
+>
+>> =C2=A0 * @pdata: Platform data associated with the MMC controller.
+>> =C2=A0 * @slot: Slots sharing this MMC controller.
+>> =C2=A0 * @fifo_depth: depth of FIFO.
+>> @@ -151,7 +151,7 @@ struct dw_mci {
+>> =C2=A0 =C2=A0 =C2=A0 u32 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 fifoth_val;
+>> =C2=A0 =C2=A0 =C2=A0 u16 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 verid;
+>> =C2=A0 =C2=A0 =C2=A0 u16 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 data_offset;
+>> - =C2=A0 =C2=A0 struct platform_device =C2=A0*pdev;
+>> + =C2=A0 =C2=A0 struct device =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 *de=
+v;
+>> =C2=A0 =C2=A0 =C2=A0 struct dw_mci_board =C2=A0 =C2=A0 *pdata;
+>> =C2=A0 =C2=A0 =C2=A0 struct dw_mci_slot =C2=A0 =C2=A0 =C2=A0*slot[MA=
+X_MCI_SLOTS];
+>>
+>> --
+>> 1.7.6.4
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
+tml
+>
+> Thanks
+> James
 
-cc: Chris Ball <cjb@laptop.org>
-Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
----
-Changes in v5:
-	Reduced the case statements for better code readability. Removed
-	unused macro definitions. Modified the tuning function prototype
-	and definition to support tuning for both SD and eMMC cards.
-Changes in v4:
-	Rebased onto chris-mmc/mmc-next branch. This patch is successfully 
-	applied on commit with id de022ed3fdc14808299b2fa66dbb1ed5ab921912.
-Changes in v3:
-	In the previous commits of chris-mmc/mmc-next branch, the patch with
-	commit id (c0f22a2c92e357e7cb3988b0b13034d70b7461f9) defines caps2 for
-	more capabilities. This patch version deletes the member ext_caps(created
-	in my earlier patch) from struct mmc_host and reuses already accepted
-	caps2 member.
-Changes in v2:
-	Rebased to latest chris-mmc/mmc-next branch. Resolved indentation
-	problems identified in review. This patch has to be applied before
-	the patch released for modifying the printk messages.
-Changes in v1:
-	Case statements in switch that produce same result have
-	been combined to reduce repeated assignments.
-	patch recreated after rebase to chris balls mmc-next branch.
 
- drivers/mmc/core/bus.c    |    3 +-
- drivers/mmc/core/mmc.c    |   77 ++++++++++++++++++++++++++++++++++++++++----
- drivers/mmc/core/sd.c     |    3 +-
- drivers/mmc/core/sdio.c   |    4 ++-
- drivers/mmc/host/sdhci.c  |   38 +++++++++++++++++-----
- include/linux/mmc/card.h  |    3 ++
- include/linux/mmc/host.h  |   11 ++++++-
- include/linux/mmc/mmc.h   |   66 ++++++++++++++++++++++++++++++++++++++-
- include/linux/mmc/sdhci.h |    1 +
- 9 files changed, 185 insertions(+), 21 deletions(-)
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 5639fdf..83c9f8d 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -301,10 +301,11 @@ int mmc_add_card(struct mmc_card *card)
- 			mmc_card_ddr_mode(card) ? "DDR " : "",
- 			type);
- 	} else {
--		printk(KERN_INFO "%s: new %s%s%s card at address %04x\n",
-+		pr_info("%s: new %s%s%s%s card at address %04x\n",
- 			mmc_hostname(card->host),
- 			mmc_card_uhs(card) ? "ultra high speed " :
- 			(mmc_card_highspeed(card) ? "high speed " : ""),
-+			(mmc_card_hs200(card) ? "HS200 " : ""),
- 			mmc_card_ddr_mode(card) ? "DDR " : "",
- 			type, card->rca);
- 	}
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a1223bd..f4124d6 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -285,6 +285,27 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 	}
- 	card->ext_csd.raw_card_type = ext_csd[EXT_CSD_CARD_TYPE];
- 	switch (ext_csd[EXT_CSD_CARD_TYPE] & EXT_CSD_CARD_TYPE_MASK) {
-+	case EXT_CSD_CARD_TYPE_SDR_ALL:
-+	case EXT_CSD_CARD_TYPE_SDR_ALL_DDR_1_8V:
-+	case EXT_CSD_CARD_TYPE_SDR_ALL_DDR_1_2V:
-+	case EXT_CSD_CARD_TYPE_SDR_ALL_DDR_52:
-+		card->ext_csd.hs_max_dtr = 200000000;
-+		card->ext_csd.card_type = EXT_CSD_CARD_TYPE_SDR_200;
-+		break;
-+	case EXT_CSD_CARD_TYPE_SDR_1_2V_ALL:
-+	case EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_1_8V:
-+	case EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_1_2V:
-+	case EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_52:
-+		card->ext_csd.hs_max_dtr = 200000000;
-+		card->ext_csd.card_type = EXT_CSD_CARD_TYPE_SDR_1_2V;
-+		break;
-+	case EXT_CSD_CARD_TYPE_SDR_1_8V_ALL:
-+	case EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_1_8V:
-+	case EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_1_2V:
-+	case EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_52:
-+		card->ext_csd.hs_max_dtr = 200000000;
-+		card->ext_csd.card_type = EXT_CSD_CARD_TYPE_SDR_1_8V;
-+		break;
- 	case EXT_CSD_CARD_TYPE_DDR_52 | EXT_CSD_CARD_TYPE_52 |
- 	     EXT_CSD_CARD_TYPE_26:
- 		card->ext_csd.hs_max_dtr = 52000000;
-@@ -699,6 +720,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- {
- 	struct mmc_card *card;
- 	int err, ddr = 0;
-+	int hs_sdr = 0;
- 	u32 cid[4];
- 	unsigned int max_dtr;
- 	u32 rocr;
-@@ -894,11 +916,16 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	/*
- 	 * Activate high speed (if supported)
- 	 */
--	if ((card->ext_csd.hs_max_dtr != 0) &&
--		(host->caps & MMC_CAP_MMC_HIGHSPEED)) {
--		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--				 EXT_CSD_HS_TIMING, 1,
--				 card->ext_csd.generic_cmd6_time);
-+	if (card->ext_csd.hs_max_dtr != 0) {
-+		err = 0;
-+		if ((card->ext_csd.hs_max_dtr > 52000000) &&
-+		    (host->caps2 & MMC_CAP2_HS200))
-+			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					 EXT_CSD_HS_TIMING, 2, 0);
-+		else if	(host->caps & MMC_CAP_MMC_HIGHSPEED)
-+			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					 EXT_CSD_HS_TIMING, 1, 0);
-+
- 		if (err && err != -EBADMSG)
- 			goto free_card;
- 
-@@ -907,7 +934,11 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 			       mmc_hostname(card->host));
- 			err = 0;
- 		} else {
--			mmc_card_set_highspeed(card);
-+			if ((card->ext_csd.hs_max_dtr > 52000000) &&
-+			    (host->caps2 & MMC_CAP2_HS200))
-+				mmc_card_set_hs200(card);
-+			else
-+				mmc_card_set_highspeed(card);
- 			mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
- 		}
- 	}
-@@ -933,7 +964,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	 */
- 	max_dtr = (unsigned int)-1;
- 
--	if (mmc_card_highspeed(card)) {
-+	if (mmc_card_highspeed(card) || mmc_card_hs200(card)) {
- 		if (max_dtr > card->ext_csd.hs_max_dtr)
- 			max_dtr = card->ext_csd.hs_max_dtr;
- 	} else if (max_dtr > card->csd.max_dtr) {
-@@ -959,6 +990,18 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	}
- 
- 	/*
-+	 * Indicate HS200 SDR mode (if supported).
-+	 */
-+	if (mmc_card_hs200(card)) {
-+		if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_SDR_1_8V)
-+			&& (host->caps2 & MMC_CAP2_HS200_1_8V_SDR))
-+				hs_sdr = MMC_1_8V_SDR_MODE;
-+		else if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_SDR_1_2V)
-+			&& (host->caps2 & MMC_CAP2_HS200_1_2V_SDR))
-+				hs_sdr = MMC_1_2V_SDR_MODE;
-+	}
-+
-+	/*
- 	 * Activate wide bus and DDR (if supported).
- 	 */
- 	if ((card->csd.mmca_vsn >= CSD_SPEC_VER_4) &&
-@@ -998,6 +1041,17 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 			if (!err) {
- 				mmc_set_bus_width(card->host, bus_width);
- 
-+				if ((host->caps2 & MMC_CAP2_HS200) &&
-+				    card->host->ops->execute_tuning)
-+					err = card->host->ops->	\
-+					      execute_tuning(card->host,
-+						MMC_SEND_TUNING_BLOCK_HS200);
-+
-+				if (err) {
-+					pr_warning("tuning execution failed\n");
-+					continue;
-+				}
-+
- 				/*
- 				 * If controller can't handle bus width test,
- 				 * compare ext_csd previously read in 1 bit mode
-@@ -1056,6 +1110,15 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 			mmc_card_set_ddr_mode(card);
- 			mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
- 			mmc_set_bus_width(card->host, bus_width);
-+		} else if (hs_sdr) {
-+			if (hs_sdr == EXT_CSD_CARD_TYPE_SDR_1_2V) {
-+				err = mmc_set_signal_voltage(host,
-+					MMC_SIGNAL_VOLTAGE_120, 0);
-+				if (err)
-+					goto err;
-+			}
-+			mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
-+			mmc_set_bus_width(card->host, bus_width);
- 		}
- 	}
- 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 1d5a3bd..c1d3ee3 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -660,7 +660,8 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
- 
- 	/* SPI mode doesn't define CMD19 */
- 	if (!mmc_host_is_spi(card->host) && card->host->ops->execute_tuning)
--		err = card->host->ops->execute_tuning(card->host);
-+		err = card->host->ops->execute_tuning(card->host,	\
-+						      MMC_SEND_TUNING_BLOCK);
- 
- out:
- 	kfree(status);
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 8c04f7f..8ef8817 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -14,6 +14,7 @@
- 
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
-+#include <linux/mmc/mmc.h>
- #include <linux/mmc/sdio.h>
- #include <linux/mmc/sdio_func.h>
- #include <linux/mmc/sdio_ids.h>
-@@ -556,7 +557,8 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
- 
- 	/* Initialize and start re-tuning timer */
- 	if (!mmc_host_is_spi(card->host) && card->host->ops->execute_tuning)
--		err = card->host->ops->execute_tuning(card->host);
-+		err = card->host->ops->execute_tuning(card->host,
-+						      MMC_SEND_TUNING_BLOCK);
- 
- out:
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a7c2311..13d74bb 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -49,7 +49,7 @@ static void sdhci_finish_data(struct sdhci_host *);
- 
- static void sdhci_send_command(struct sdhci_host *, struct mmc_command *);
- static void sdhci_finish_command(struct sdhci_host *);
--static int sdhci_execute_tuning(struct mmc_host *mmc);
-+static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- static void sdhci_tuning_timer(unsigned long data);
- 
- #ifdef CONFIG_PM_RUNTIME
-@@ -1016,7 +1016,8 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		flags |= SDHCI_CMD_INDEX;
- 
- 	/* CMD19 is special in that the Data Present Select should be set */
--	if (cmd->data || (cmd->opcode == MMC_SEND_TUNING_BLOCK))
-+	if (cmd->data || (cmd->opcode == MMC_SEND_TUNING_BLOCK) ||
-+	    (cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200))
- 		flags |= SDHCI_CMD_DATA;
- 
- 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
-@@ -1287,7 +1288,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
- 		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
- 			spin_unlock_irqrestore(&host->lock, flags);
--			sdhci_execute_tuning(mmc);
-+			sdhci_execute_tuning(mmc, mrq->cmd->opcode);
- 			spin_lock_irqsave(&host->lock, flags);
- 
- 			/* Restore original mmc_request structure */
-@@ -1673,7 +1674,7 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 	return err;
- }
- 
--static int sdhci_execute_tuning(struct mmc_host *mmc)
-+static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host;
- 	u16 ctrl;
-@@ -1694,10 +1695,13 @@ static int sdhci_execute_tuning(struct mmc_host *mmc)
- 	 * Host Controller needs tuning only in case of SDR104 mode
- 	 * and for SDR50 mode when Use Tuning for SDR50 is set in
- 	 * Capabilities register.
-+	 * If the Host Controller supports the HS200 mode then tuning
-+	 * function has to be executed.
- 	 */
- 	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR104) ||
- 	    (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR50) &&
--	    (host->flags & SDHCI_SDR50_NEEDS_TUNING)))
-+	    (host->flags & SDHCI_SDR50_NEEDS_TUNING)) ||
-+	    (host->flags & SDHCI_HS200_NEEDS_TUNING))
- 		ctrl |= SDHCI_CTRL_EXEC_TUNING;
- 	else {
- 		spin_unlock(&host->lock);
-@@ -1733,7 +1737,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc)
- 		if (!tuning_loop_counter && !timeout)
- 			break;
- 
--		cmd.opcode = MMC_SEND_TUNING_BLOCK;
-+		cmd.opcode = opcode;
- 		cmd.arg = 0;
- 		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
- 		cmd.retries = 0;
-@@ -1748,7 +1752,17 @@ static int sdhci_execute_tuning(struct mmc_host *mmc)
- 		 * block to the Host Controller. So we set the block size
- 		 * to 64 here.
- 		 */
--		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64), SDHCI_BLOCK_SIZE);
-+		if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200) {
-+			if (mmc->ios.bus_width == MMC_BUS_WIDTH_8)
-+				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128),
-+					     SDHCI_BLOCK_SIZE);
-+			else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4)
-+				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
-+					     SDHCI_BLOCK_SIZE);
-+		} else {
-+			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
-+				     SDHCI_BLOCK_SIZE);
-+		}
- 
- 		/*
- 		 * The tuning block is sent by the card to the host controller.
-@@ -2131,12 +2145,14 @@ static void sdhci_show_adma_error(struct sdhci_host *host) { }
- 
- static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- {
-+	u32 command;
- 	BUG_ON(intmask == 0);
- 
- 	/* CMD19 generates _only_ Buffer Read Ready interrupt */
- 	if (intmask & SDHCI_INT_DATA_AVAIL) {
--		if (SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND)) ==
--		    MMC_SEND_TUNING_BLOCK) {
-+		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
-+		if ((command == MMC_SEND_TUNING_BLOCK) ||
-+		    (command == MMC_SEND_TUNING_BLOCK_HS200)) {
- 			host->tuning_done = 1;
- 			wake_up(&host->buf_ready_int);
- 			return;
-@@ -2741,6 +2757,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (caps[1] & SDHCI_USE_SDR50_TUNING)
- 		host->flags |= SDHCI_SDR50_NEEDS_TUNING;
- 
-+	/* Does the host needs tuning for HS200? */
-+	if (mmc->caps2 & MMC_CAP2_HS200)
-+		host->flags |= SDHCI_HS200_NEEDS_TUNING;
-+
- 	/* Driver Type(s) (A, C, D) supported by the host */
- 	if (caps[1] & SDHCI_DRIVER_TYPE_A)
- 		mmc->caps |= MMC_CAP_DRIVER_TYPE_A;
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 534974c..e76f649 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -209,6 +209,7 @@ struct mmc_card {
- #define MMC_STATE_HIGHSPEED_DDR (1<<4)		/* card is in high speed mode */
- #define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in ultra high speed mode */
- #define MMC_CARD_SDXC		(1<<6)		/* card is SDXC */
-+#define MMC_STATE_HIGHSPEED_200	(1<<7)	/* card is in HS200 mode */
- 	unsigned int		quirks; 	/* card quirks */
- #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
- #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
-@@ -365,6 +366,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_present(c)	((c)->state & MMC_STATE_PRESENT)
- #define mmc_card_readonly(c)	((c)->state & MMC_STATE_READONLY)
- #define mmc_card_highspeed(c)	((c)->state & MMC_STATE_HIGHSPEED)
-+#define mmc_card_hs200(c)	((c)->state & MMC_STATE_HIGHSPEED_200)
- #define mmc_card_blockaddr(c)	((c)->state & MMC_STATE_BLOCKADDR)
- #define mmc_card_ddr_mode(c)	((c)->state & MMC_STATE_HIGHSPEED_DDR)
- #define mmc_card_uhs(c)		((c)->state & MMC_STATE_ULTRAHIGHSPEED)
-@@ -374,6 +376,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
- #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
- #define mmc_card_set_highspeed(c) ((c)->state |= MMC_STATE_HIGHSPEED)
-+#define mmc_card_set_hs200(c)	((c)->state |= MMC_STATE_HIGHSPEED_200)
- #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
- #define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
- #define mmc_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 706f722..5eac57a 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -50,6 +50,7 @@ struct mmc_ios {
- 
- #define MMC_TIMING_LEGACY	0
- #define MMC_TIMING_MMC_HS	1
-+#define MMC_TIMING_MMC_HS200	2
- #define MMC_TIMING_SD_HS	2
- #define MMC_TIMING_UHS_SDR12	MMC_TIMING_LEGACY
- #define MMC_TIMING_UHS_SDR25	MMC_TIMING_SD_HS
-@@ -60,6 +61,8 @@ struct mmc_ios {
- #define MMC_SDR_MODE		0
- #define MMC_1_2V_DDR_MODE	1
- #define MMC_1_8V_DDR_MODE	2
-+#define MMC_1_2V_SDR_MODE	3
-+#define MMC_1_8V_SDR_MODE	4
- 
- 	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
- 
-@@ -148,7 +151,9 @@ struct mmc_host_ops {
- 	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
- 
- 	int	(*start_signal_voltage_switch)(struct mmc_host *host, struct mmc_ios *ios);
--	int	(*execute_tuning)(struct mmc_host *host);
-+
-+	/* The tuning command opcode value is different for SD and eMMC cards */
-+	int	(*execute_tuning)(struct mmc_host *host, u32 opcode);
- 	void	(*enable_preset_value)(struct mmc_host *host, bool enable);
- 	int	(*select_drive_strength)(unsigned int max_dtr, int host_drv, int card_drv);
- 	void	(*hw_reset)(struct mmc_host *host);
-@@ -242,6 +247,10 @@ struct mmc_host {
- #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
- #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff supported */
- #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
-+#define MMC_CAP2_HS200_1_8V_SDR	(1 << 4)	/* can support */
-+#define MMC_CAP2_HS200_1_2V_SDR	(1 << 5)	/* can support */
-+#define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
-+				 MMC_CAP2_HS200_1_2V_SDR)
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 	unsigned int        power_notify_type;
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 0e71356..7996272 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -51,6 +51,7 @@
- #define MMC_READ_SINGLE_BLOCK    17   /* adtc [31:0] data addr   R1  */
- #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data addr   R1  */
- #define MMC_SEND_TUNING_BLOCK    19   /* adtc                    R1  */
-+#define MMC_SEND_TUNING_BLOCK_HS200	21	/* adtc R1  */
- 
-   /* class 3 */
- #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data addr   R1  */
-@@ -333,13 +334,76 @@ struct _mmc_csd {
- 
- #define EXT_CSD_CARD_TYPE_26	(1<<0)	/* Card can run at 26MHz */
- #define EXT_CSD_CARD_TYPE_52	(1<<1)	/* Card can run at 52MHz */
--#define EXT_CSD_CARD_TYPE_MASK	0xF	/* Mask out reserved bits */
-+#define EXT_CSD_CARD_TYPE_MASK	0x3F	/* Mask out reserved bits */
- #define EXT_CSD_CARD_TYPE_DDR_1_8V  (1<<2)   /* Card can run at 52MHz */
- 					     /* DDR mode @1.8V or 3V I/O */
- #define EXT_CSD_CARD_TYPE_DDR_1_2V  (1<<3)   /* Card can run at 52MHz */
- 					     /* DDR mode @1.2V I/O */
- #define EXT_CSD_CARD_TYPE_DDR_52       (EXT_CSD_CARD_TYPE_DDR_1_8V  \
- 					| EXT_CSD_CARD_TYPE_DDR_1_2V)
-+#define EXT_CSD_CARD_TYPE_SDR_1_8V	(1<<4)	/* Card can run at 200MHz */
-+#define EXT_CSD_CARD_TYPE_SDR_1_2V	(1<<5)	/* Card can run at 200MHz */
-+						/* SDR mode @1.2V I/O */
-+
-+#define EXT_CSD_CARD_TYPE_SDR_200	(EXT_CSD_CARD_TYPE_SDR_1_8V	\
-+					| EXT_CSD_CARD_TYPE_SDR_1_2V)
-+
-+#define EXT_CSD_CARD_TYPE_SDR_ALL	(EXT_CSD_CARD_TYPE_SDR_200	\
-+					| EXT_CSD_CARD_TYPE_52		\
-+					| EXT_CSD_CARD_TYPE_26)
-+
-+#define	EXT_CSD_CARD_TYPE_SDR_1_2V_ALL	(EXT_CSD_CARD_TYPE_SDR_1_2V	\
-+					| EXT_CSD_CARD_TYPE_52		\
-+					| EXT_CSD_CARD_TYPE_26)
-+
-+#define	EXT_CSD_CARD_TYPE_SDR_1_8V_ALL	(EXT_CSD_CARD_TYPE_SDR_1_8V	\
-+					| EXT_CSD_CARD_TYPE_52		\
-+					| EXT_CSD_CARD_TYPE_26)
-+
-+#define EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_1_8V	(EXT_CSD_CARD_TYPE_SDR_1_2V  \
-+						| EXT_CSD_CARD_TYPE_DDR_1_8V \
-+						| EXT_CSD_CARD_TYPE_52	     \
-+						| EXT_CSD_CARD_TYPE_26)
-+
-+#define EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_1_8V	(EXT_CSD_CARD_TYPE_SDR_1_8V  \
-+						| EXT_CSD_CARD_TYPE_DDR_1_8V \
-+						| EXT_CSD_CARD_TYPE_52	     \
-+						| EXT_CSD_CARD_TYPE_26)
-+
-+#define EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_1_2V	(EXT_CSD_CARD_TYPE_SDR_1_2V  \
-+						| EXT_CSD_CARD_TYPE_DDR_1_2V \
-+						| EXT_CSD_CARD_TYPE_52	     \
-+						| EXT_CSD_CARD_TYPE_26)
-+
-+#define EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_1_2V	(EXT_CSD_CARD_TYPE_SDR_1_8V  \
-+						| EXT_CSD_CARD_TYPE_DDR_1_2V \
-+						| EXT_CSD_CARD_TYPE_52	     \
-+						| EXT_CSD_CARD_TYPE_26)
-+
-+#define EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_52	(EXT_CSD_CARD_TYPE_SDR_1_2V  \
-+						| EXT_CSD_CARD_TYPE_DDR_52   \
-+						| EXT_CSD_CARD_TYPE_52	     \
-+						| EXT_CSD_CARD_TYPE_26)
-+
-+#define EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_52	(EXT_CSD_CARD_TYPE_SDR_1_8V  \
-+						| EXT_CSD_CARD_TYPE_DDR_52   \
-+						| EXT_CSD_CARD_TYPE_52	     \
-+						| EXT_CSD_CARD_TYPE_26)
-+
-+#define EXT_CSD_CARD_TYPE_SDR_ALL_DDR_1_8V	(EXT_CSD_CARD_TYPE_SDR_200   \
-+						| EXT_CSD_CARD_TYPE_DDR_1_8V \
-+						| EXT_CSD_CARD_TYPE_52	     \
-+						| EXT_CSD_CARD_TYPE_26)
-+
-+#define EXT_CSD_CARD_TYPE_SDR_ALL_DDR_1_2V	(EXT_CSD_CARD_TYPE_SDR_200   \
-+						| EXT_CSD_CARD_TYPE_DDR_1_2V \
-+						| EXT_CSD_CARD_TYPE_52	     \
-+						| EXT_CSD_CARD_TYPE_26)
-+
-+#define EXT_CSD_CARD_TYPE_SDR_ALL_DDR_52	(EXT_CSD_CARD_TYPE_SDR_200   \
-+						| EXT_CSD_CARD_TYPE_DDR_52   \
-+						| EXT_CSD_CARD_TYPE_52	     \
-+						| EXT_CSD_CARD_TYPE_26)
- 
- #define EXT_CSD_BUS_WIDTH_1	0	/* Card is in 1 bit mode */
- #define EXT_CSD_BUS_WIDTH_4	1	/* Card is in 4 bit mode */
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index e4b6935..d9a2222 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -121,6 +121,7 @@ struct sdhci_host {
- #define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
- #define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
- #define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
-+#define SDHCI_HS200_NEEDS_TUNING (1<<10)	/* HS200 needs tuning */
- 
- 	unsigned int version;	/* SDHCI spec. version */
- 
--- 
-1.7.1
-
+--=20
+regards,
+Shashidhar Hiremath
