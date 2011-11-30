@@ -1,48 +1,32 @@
-From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: mmc: sdio: runtime PM and 8686 problems
-Date: Wed, 30 Nov 2011 12:36:50 +0200
-Message-ID: <CAK=WgbY22BD8WWk71nL3=D3NZfJY92LXUum8yhV3JyHypjOe-g@mail.gmail.com>
-References: <WC20111118085327.010279@terrafix.co.uk> <CAK=WgbZvcTqmpT0jWT1b-GN1e5091AikAfL88Q8Z66dsOXx6Og@mail.gmail.com>
- <WC20111118100011.2902A2@terrafix.co.uk> <CAK=WgbaJ-q4TqgV5tdPQPm6CT9roceqn6QMxEJgA=Prd52jVEQ@mail.gmail.com>
- <WC20111129111750.470087@terrafix.co.uk> <CAK=Wgbb6s_BGfJYAoH3V77QvWoAXVAchg0ojBx4Mbmgq8bgvWw@mail.gmail.com>
- <CAMLZHHRF2ygqBRyNm21vv0WnCYKPtduGpW7ME25z55v7nTaRnA@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] ARM: mmci: add capabilities2 for MMC_CAP2
+Date: Wed, 30 Nov 2011 12:39:42 +0100
+Message-ID: <CACRpkdYFVfwRxW+XL6GQtE+NxJvM_3gvCn5a9A+pDL4S77BXqA@mail.gmail.com>
+References: <1321268548-21933-1-git-send-email-per.forlin@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:52673 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753660Ab1K3KhN convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2011 05:37:13 -0500
-Received: by ggnr5 with SMTP id r5so451688ggn.19
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2011 02:37:12 -0800 (PST)
-In-Reply-To: <CAMLZHHRF2ygqBRyNm21vv0WnCYKPtduGpW7ME25z55v7nTaRnA@mail.gmail.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:65043 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752807Ab1K3Ljn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2011 06:39:43 -0500
+Received: by iage36 with SMTP id e36so644042iag.19
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2011 03:39:42 -0800 (PST)
+In-Reply-To: <1321268548-21933-1-git-send-email-per.forlin@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Drake <dsd@laptop.org>
-Cc: Joe Woodward <jw@terrafix.co.uk>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: Per Forlin <per.forlin@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@stericsson.com, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Russell King <rmk+kernel@arm.linux.org.uk>
 
-Hi Daniel,
+On Mon, Nov 14, 2011 at 12:02 PM, Per Forlin <per.forlin@stericsson.com> wrote:
 
-On Tue, Nov 29, 2011 at 11:42 PM, Daniel Drake <dsd@laptop.org> wrote:
-> Even though I have the pleasure of working with 8686 quite a bit
+> Signed-off-by: Per Forlin <per.forlin@stericsson.com>
+> ---
+> This patch depends on patches adding CAP2 available on mmc-next.
+> Chris, would you mind merging this through your tree when it
+> has been accepted.
 
-(Is there a subtle cynicism here ? :)
-
-> So first thing to do is to investigate the source of this error, as b=
-efore:
-> [ =A0 34.637481] libertas_sdio: probe of mmc1:0001:1 failed with erro=
-r -16
->
-> which is likely bubbling up from somewhere inside the mmc/sdio layer.
-
-Well, it sounds like Joe might need a hand here.
-
-Since this regression is directly caused by commit 08da834 "mmc:
-enable runtime PM by default", which you authored and have interest
-in, it does make sense that you help Joe here. In case you're short of
-time, then I suggest to revert 08da834 (which anyway was
-experimental), and get back to it later, when you're more available.
+Chris are you taking this into your tree?
 
 Thanks,
-Ohad.
+Linus Walleij
