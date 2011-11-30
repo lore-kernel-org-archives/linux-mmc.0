@@ -1,29 +1,23 @@
 From: David Brown <davidb@codeaurora.org>
-Subject: Re: [PATCH] mmc: convert drivers/mmc/host/* to use
- module_platform_driver()
-Date: Wed, 30 Nov 2011 15:40:46 -0800
-Message-ID: <20111130234046.GA27107@huya.qualcomm.com>
-References: <1322283343.14278.2.camel@phoenix>
+Subject: Re: [PATCH 20/62] mmc: remove the second argument of
+ k[un]map_atomic()
+Date: Wed, 30 Nov 2011 15:51:10 -0800
+Message-ID: <20111130235110.GA27283@huya.qualcomm.com>
+References: <1322371662-26166-1-git-send-email-amwang@redhat.com>
+ <1322371662-26166-21-git-send-email-amwang@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:16421 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751659Ab1K3Xks (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2011 18:40:48 -0500
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1322283343.14278.2.camel@phoenix>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1322371662-26166-21-git-send-email-amwang@redhat.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Cong Wang <amwang@redhat.com>
+Cc: linux-kernel@vger.kernel.org, akpm@linux-foundation.org, Nicolas Ferre <nicolas.ferre@atmel.com>, Chris Ball <cjb@laptop.org>, David Brown <davidb@codeaurora.org>, Daniel Walker <dwalker@fifo99.com>, Bryan Huntsman <bryanh@codeaurora.org>, Alex Dubov <oakad@yahoo.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@gmail.com>
-Cc: linux-kernel@vger.kernel.org, Micha <mirq-linux@rere.qmqm.pl>, David Brown <davidb@codeaurora.org>, Ben Dooks <ben-linux@fluff.org>, Viresh Kumar <viresh.kumar@st.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Sascha Hauer <s.hauer@pengutronix.de>, Wolfram Sang <w.sang@pengutronix.de>, Grant Likely <grant.likely@secretlab.ca>, Anton Vorontsov <cbouatmailru@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On Sat, Nov 26, 2011 at 12:55:43PM +0800, Axel Lin wrote:
-> This patch converts the drivers in drivers/mmc/host/* to use the
-> module_platform_driver() macro which makes the code smaller and a bit
-> simpler.
+On Sun, Nov 27, 2011 at 01:27:00PM +0800, Cong Wang wrote:
 
->  drivers/mmc/host/msm_sdcc.c        |   13 +------------
+>  drivers/mmc/host/msm_sdcc.c |    6 +++---
 
 Acked-by: David Brown <davidb@codeaurora.org>
 
