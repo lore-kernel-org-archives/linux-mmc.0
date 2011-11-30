@@ -1,152 +1,71 @@
-From: James Hogan <james.hogan@imgtec.com>
-Subject: Re: [PATCH 1/1] mmc:Support of PCI mode for the dw_mmc driver
-Date: Wed, 30 Nov 2011 14:06:25 +0000
-Message-ID: <4ED63861.7030607@imgtec.com>
-References: <1322656585-8363-1-git-send-email-shashidharh@vayavyalabs.com>
+From: Daniel Drake <dsd@laptop.org>
+Subject: Re: mmc: sdio: runtime PM and 8686 problems
+Date: Wed, 30 Nov 2011 08:12:13 -0600
+Message-ID: <CAMLZHHRfitBnmXi=2ndvm5-jm1Mg4+NT83rjuwD9w236E12hQw@mail.gmail.com>
+References: <WC20111118085327.010279@terrafix.co.uk>
+	<CAK=WgbZvcTqmpT0jWT1b-GN1e5091AikAfL88Q8Z66dsOXx6Og@mail.gmail.com>
+	<WC20111118100011.2902A2@terrafix.co.uk>
+	<CAK=WgbaJ-q4TqgV5tdPQPm6CT9roceqn6QMxEJgA=Prd52jVEQ@mail.gmail.com>
+	<WC20111129111750.470087@terrafix.co.uk>
+	<CAK=Wgbb6s_BGfJYAoH3V77QvWoAXVAchg0ojBx4Mbmgq8bgvWw@mail.gmail.com>
+	<CAMLZHHRF2ygqBRyNm21vv0WnCYKPtduGpW7ME25z55v7nTaRnA@mail.gmail.com>
+	<CAK=WgbY22BD8WWk71nL3=D3NZfJY92LXUum8yhV3JyHypjOe-g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from multi.imgtec.com ([194.200.65.239]:38377 "EHLO multi.imgtec.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751522Ab1K3OG3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 30 Nov 2011 09:06:29 -0500
-In-Reply-To: <1322656585-8363-1-git-send-email-shashidharh@vayavyalabs.com>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:45301 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755443Ab1K3OMN convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2011 09:12:13 -0500
+Received: by yenl6 with SMTP id l6so526458yen.19
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2011 06:12:13 -0800 (PST)
+In-Reply-To: <CAK=WgbY22BD8WWk71nL3=D3NZfJY92LXUum8yhV3JyHypjOe-g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Cc: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Philip Rakity <prakity@marvell.com>, "Mark F. Brown" <mark.brown314@gmail.com>, Wolfram Sang <w.sang@pengutronix.de>, Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: Joe Woodward <jw@terrafix.co.uk>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-Hi,
+On Wed, Nov 30, 2011 at 4:36 AM, Ohad Ben-Cohen <ohad@wizery.com> wrote=
+:
+> Hi Daniel,
+>
+> On Tue, Nov 29, 2011 at 11:42 PM, Daniel Drake <dsd@laptop.org> wrote=
+:
+>> Even though I have the pleasure of working with 8686 quite a bit
+>
+> (Is there a subtle cynicism here ? :)
+>
+>> So first thing to do is to investigate the source of this error, as =
+before:
+>> [ =A0 34.637481] libertas_sdio: probe of mmc1:0001:1 failed with err=
+or -16
+>>
+>> which is likely bubbling up from somewhere inside the mmc/sdio layer=
+=2E
+>
+> Well, it sounds like Joe might need a hand here.
 
-*sigh* You haven't actually tried compiling this have you? How do you
-know whether it works or not? You really really should at least make
-sure it compiles (for simple changes) and works without breaking
-anything (for anything non-trivial like adding support for a new bus
-like PCI)!
+I can't reproduce it.
 
-Couple of other minor things below.
+My suggestion is to follow the debugging steps from previous threads
+on this topic such as
+MMC runtime PM patches break libertas probe
+The goal is to identify the line of code that is causing this error.
+Use printk debugging in the codepaths mentioned earlier until the
+point of failure is known. Let me know if further direction is needed.
 
-On 11/30/2011 12:36 PM, Shashidhar Hiremath wrote:
-> Support of PCI mode for the dw_mmc driver. This Patch adds the
-> support for the scenario where the Synopsys Designware IP
-> is present on the PCI bus. The patch adds the minimal modifications
-> necessary for the driver to work on PCI platform. Also added separate
-> files for PCI and PLATFORM modes of operation.
-> 
-> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-> ---
-> v2:
-> *As per Suggestions by Will Newton and James Hogan
-> -Reduced the number of ifdefs
-> v3:
-> *As per Suggestions by Will Newton and James Hogan
-> -Added separate files for PCI and PLATFORM Modes similar to SDHCI driver
-> v4:
-> *As per Suggestions by James Hogan
-> -Fixed Indentation Issue.
-> -Added Proper error Handling for probe and remove sequences.
-> -Modified location of some code.
-> -Added isr_flags to dw_mmc.h and removed the ifdef PCI from driver.
-> 
->  drivers/mmc/host/Kconfig        |   23 ++++++
->  drivers/mmc/host/dw_mmc-pci.c   |  158 +++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/dw_mmc-pltfm.c |  134 +++++++++++++++++++++++++++++++++
->  drivers/mmc/host/dw_mmc.c       |  151 +++++++++++++------------------------
->  drivers/mmc/host/dw_mmc.h       |    7 ++
->  include/linux/mmc/dw_mmc.h      |    6 +-
->  6 files changed, 377 insertions(+), 102 deletions(-)
->  create mode 100644 drivers/mmc/host/dw_mmc-pci.c
->  create mode 100644 drivers/mmc/host/dw_mmc-pltfm.c
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 87d5067..2d8fad6 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -534,6 +534,29 @@ config MMC_DW_IDMAC
->  	  Designware Mobile Storage IP block. This disables the external DMA
->  	  interface.
->  
-> +config MMC_DW_PCI
-> +	tristate "Synopsys Designware MCI support on PCI bus"
-> +	depends on MMC_DW && PCI
-> +	help
-> +	  This selects the PCI bus for the Synopsys Designware Mobile Storage IP.
-> +	  Select this option if the IP is present on PCI platform.
-> +
-> +	  If you have a controller with this interface, say Y or M here.
-> +
-> +	  If unsure, say N.
-> +
-> +config MMC_DW_PLTFM
-> +	tristate "platform driver helper for Synopsys Designware Mobile Storage IP"
+> Since this regression is directly caused by commit 08da834 "mmc:
+> enable runtime PM by default", which you authored and have interest
+> in, it does make sense that you help Joe here. In case you're short o=
+f
+> time, then I suggest to revert 08da834 (which anyway was
+> experimental), and get back to it later, when you're more available.
 
-It would be nice if this followed the same pattern as MMC_DW_PCI, i.e.
-something like "Synopsys DesignWare MCI support as platform device"
-(makes it look nicer on the menu :) ).
+My patch simply sets a flag to enable a whole load of code written by
+you - code which I understand little about. I am now available to
+help, but given that my understanding of mmc is limited, I didn't
+write the code in question, and I also lack expert insight into 8686
+powerup, I'm not sure how useful I can be.
 
-Presuming this is the more common case, it might make sense for it to be
-default y too (the driver cannot be used by default until one or both of
-these options has been selected).
-
-> +	depends on MMC_DW
-> +	help
-> +	  This selects the common helper functions support for Host Controller
-> +	  Interface based platform driver.Please select this option if the IP
-> +	  is present as a platform device.
-> +
-> +	  If you have a controller with this interface, say Y or M here.
-> +
-> +	  If unsure, say N.
-> +
->  config MMC_SH_MMCIF
->  	tristate "SuperH Internal MMCIF support"
->  	depends on MMC_BLOCK && (SUPERH || ARCH_SHMOBILE)
-
-<snip>
-
-> +static int dw_mci_pltfm_probe(struct platform_device *pdev)
-> +{
-> +	struct dw_mci *host;
-> +	struct resource	*regs;
-> +	int  ret;
-> +
-> +	host = kzalloc(sizeof(struct dw_mci), GFP_KERNEL);
-> +	if (!host)
-> +		return -ENOMEM;
-> +
-> +	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +	if (!regs) {
-> +		ret = -ENXIO;
-> +		goto err_free;
-> +	}
-> +
-> +	host->irq = platform_get_irq(pdev, 0);
-> +	if (host->irq < 0) {
-> +		ret = host->irq;
-> +		goto err_free;
-> +	}
-> +
-> +	host->dev = pdev->dev;
-> +	host->irq_flags = 0;
-> +	host->pdata = pdev->dev.platform_data;
-> +	ret = -ENOMEM;
-> +	host->regs = ioremap(regs->start, resource_size(regs));
-> +	if (!host->regs)
-> +		goto err_free;
-> +	platform_set_drvdata(pdev, host);
-> +	ret = dw_mci_probe(host);
-> +	if (ret)
-> +		goto err_out;
-> +	else
-> +		return ret;
-> +err_out:
-> +		iounmap(host->regs);
-> +err_free:
-> +		kfree(host);
-
-alignment needs fixing here. There's no need for the else either.
-
-Thanks
-James
-
+Daniel
