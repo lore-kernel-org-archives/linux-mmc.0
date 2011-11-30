@@ -1,19 +1,20 @@
 From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
-Subject: [PATCH 1/1] mmc:Support of PCI mode for the dw_mmc driver
-Date: Wed, 30 Nov 2011 18:06:25 +0530
-Message-ID: <1322656585-8363-1-git-send-email-shashidharh@vayavyalabs.com>
+Subject: [PATCH v4 1/1] mmc:Support of PCI mode for the dw_mmc driver
+Date: Wed, 30 Nov 2011 18:08:27 +0530
+Message-ID: <1322656707-8398-1-git-send-email-shashidharh@vayavyalabs.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:55261 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751118Ab1K3Mgt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2011 07:36:49 -0500
-Received: by eeuu47 with SMTP id u47so309810eeu.19
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2011 04:36:47 -0800 (PST)
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:40479 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751118Ab1K3MjA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2011 07:39:00 -0500
+Received: by eaak14 with SMTP id k14so612576eaa.19
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2011 04:38:58 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Philip Rakity <prakity@marvell.com>, "Mark F. Brown" <mark.brown314@gmail.com>, Wolfram Sang <w.sang@pengutronix.de>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>
 Cc: linux-mmc@vger.kernel.org, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 
+Added the version number in Subject.
 Support of PCI mode for the dw_mmc driver. This Patch adds the
 support for the scenario where the Synopsys Designware IP
 is present on the PCI bus. The patch adds the minimal modifications
