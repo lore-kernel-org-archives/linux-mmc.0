@@ -1,58 +1,41 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: [PATCH 2/2] mmc: sdhci-s3c: Add pm_caps into SD/MMC host
-Date: Thu, 01 Dec 2011 16:30:28 +0900
-Message-ID: <046001ccaffb$1988f580$4c9ae080$%kim@samsung.com>
-References: <1320685522-17481-1-git-send-email-sangwook.lee@linaro.org>
- <1320685522-17481-3-git-send-email-sangwook.lee@linaro.org>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: mmc: sdio: runtime PM and 8686 problems
+Date: Thu, 1 Dec 2011 09:50:01 +0200
+Message-ID: <CAK=WgbZ88U2_-ub9jSYf+jJOtr3W1d_3fkhT+PHeLrjA-accRg@mail.gmail.com>
+References: <WC20111118085327.010279@terrafix.co.uk> <CAK=WgbZvcTqmpT0jWT1b-GN1e5091AikAfL88Q8Z66dsOXx6Og@mail.gmail.com>
+ <WC20111118100011.2902A2@terrafix.co.uk> <CAK=WgbaJ-q4TqgV5tdPQPm6CT9roceqn6QMxEJgA=Prd52jVEQ@mail.gmail.com>
+ <WC20111129111750.470087@terrafix.co.uk> <CAK=Wgbb6s_BGfJYAoH3V77QvWoAXVAchg0ojBx4Mbmgq8bgvWw@mail.gmail.com>
+ <CAMLZHHRF2ygqBRyNm21vv0WnCYKPtduGpW7ME25z55v7nTaRnA@mail.gmail.com>
+ <CAK=WgbY22BD8WWk71nL3=D3NZfJY92LXUum8yhV3JyHypjOe-g@mail.gmail.com>
+ <CAMLZHHRfitBnmXi=2ndvm5-jm1Mg4+NT83rjuwD9w236E12hQw@mail.gmail.com>
+ <CAK=WgbYRvsOur6RmAYMEAf-01e-paGinPU4G_0VesacPGBD5GA@mail.gmail.com> <CAMLZHHRmsd4VL-iuWqOcqYQBpqzYLm7JfjMyzFyXJQbQUpdUjg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1320685522-17481-3-git-send-email-sangwook.lee@linaro.org>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Sangwook Lee' <sangwook.lee@linaro.org>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, ben-linux@fluff.org, linaro-dev@lists.linaro.org, patches@linaro.org, 'Sangwook Lee' <sangwook.lee@samsung.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:52658 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753107Ab1LAHuY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2011 02:50:24 -0500
+Received: by ggnr5 with SMTP id r5so1535641ggn.19
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2011 23:50:24 -0800 (PST)
+In-Reply-To: <CAMLZHHRmsd4VL-iuWqOcqYQBpqzYLm7JfjMyzFyXJQbQUpdUjg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Daniel Drake <dsd@laptop.org>
+Cc: Joe Woodward <jw@terrafix.co.uk>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-Sangwook Lee wrote:
-> 
-> sdhci-s3c updates pm_caps from platform data for SDIO PM.
-> 
-> Signed-off-by: Sangwook Lee <sangwook.lee@samsung.com>
+On Wed, Nov 30, 2011 at 4:57 PM, Daniel Drake <dsd@laptop.org> wrote:
+> If we go ahead with the revert, can you help me come up with a way to
+> whitelist it for OLPC?
 
-Acked-by: Kukjin Kim <kgene.kim@samsung.com>
+Sure thing.
 
-Hi Chris,
+> Would a DMI-based quirk in sdhci be acceptable for you?
 
-Could you please pick this up in your tree for v3.3?
+I wasn't following sdhci development so much as I'm not developing on
+such hardware, so I'll have to take a look. AFAIK though sdhci is
+maintained by Wolfram, so you need his consent. Whatever approach
+Wolfram and you will agree on is of course fine with me.
 
-Thanks.
-
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
-
-> ---
->  drivers/mmc/host/sdhci-s3c.c |    3 +++
->  1 files changed, 3 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index fe886d6..f10dd52 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -518,6 +518,9 @@ static int __devinit sdhci_s3c_probe(struct
-> platform_device *pdev)
->  	if (pdata->host_caps)
->  		host->mmc->caps |= pdata->host_caps;
-> 
-> +	if (pdata->pm_caps)
-> +		host->mmc->pm_caps |= pdata->pm_caps;
-> +
->  	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
->  			 SDHCI_QUIRK_32BIT_DMA_SIZE);
-> 
-> --
-> 1.7.4.1
+Thanks,
+Ohad.
