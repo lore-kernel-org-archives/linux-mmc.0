@@ -1,67 +1,160 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V2] mmc: core: Fix deadlock when the CONFIG_MMC_UNSAFE_RESUME is not defined
-Date: Thu, 01 Dec 2011 13:18:23 -0500
-Message-ID: <87mxbckvf4.fsf@laptop.org>
-References: <1322017998-16559-1-git-send-email-sthumma@codeaurora.org>
+Subject: Re: [PATCH] mmc: core: check for zero length ioctl data
+Date: Thu, 01 Dec 2011 13:20:53 -0500
+Message-ID: <87ipm0kvay.fsf@laptop.org>
+References: <1322035558-1127-1-git-send-email-johan.rudholm@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:52342 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:52352 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756069Ab1LASSR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 1 Dec 2011 13:18:17 -0500
-In-Reply-To: <1322017998-16559-1-git-send-email-sthumma@codeaurora.org> (Sujit
-	Reddy Thumma's message of "Wed, 23 Nov 2011 08:43:18 +0530")
+	id S1755672Ab1LASUr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 1 Dec 2011 13:20:47 -0500
+In-Reply-To: <1322035558-1127-1-git-send-email-johan.rudholm@stericsson.com>
+	(Johan Rudholm's message of "Wed, 23 Nov 2011 09:05:58 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, ulf.hansson@stericsson.com
+To: Johan Rudholm <johan.rudholm@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-Hi,
+Hi Johan,
 
-On Tue, Nov 22 2011, Sujit Reddy Thumma wrote:
-> mmc_suspend_host() tries to claim host during suspend
-> and release it only when the bus suspend operation is
-> compeleted. If CONFIG_MMC_UNSAFE_RESUME is defined and
-> the host is flagged as removable, mmc_suspend_host()
-> tries to remove the card. In this process, the file system
-> sync can get blocked trying to acquire host which is already
-> claimed by mmc_suspend_host() causing deadlock.
+On Wed, Nov 23 2011, Johan Rudholm wrote:
+> If the read or write buffer size associated with the command sent
+> through the mmc_blk_ioctl is zero, do not prepare data buffer.
 >
-> Fix this deadlock by releasing host before ->remove() is called.
+> This enables a ioctl(2) call to for instance send a MMC_SWITCH to set
+> a byte in the ext_csd.
 >
-> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
->
+> Change-Id: Ieab8400ace1ba91bfb3d911377de557bf2d593d0
+
+(Please don't send these tags; I've stripped this one out.)
+
+> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
 > ---
-> Changes in v2:
-> 	- Addressed review comment from Ulf Hansson.
-> ---
->  drivers/mmc/core/core.c |    3 ++-
->  1 files changed, 2 insertions(+), 1 deletions(-)
+>  drivers/mmc/card/block.c |   82 +++++++++++++++++++++++++---------------------
+>  1 files changed, 45 insertions(+), 37 deletions(-)
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 271efea..950b97d 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2333,6 +2333,8 @@ int mmc_suspend_host(struct mmc_host *host)
->  				mmc_poweroff_notify(host);
->  				err = host->bus_ops->suspend(host);
->  			}
-> +			mmc_do_release_host(host);
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 12096cc..4d29b30 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -336,6 +336,9 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
+>  		goto idata_err;
+>  	}
+>  
+> +	if (!idata->buf_bytes)
+> +		return idata;
 > +
->  			if (err == -ENOSYS || !host->bus_ops->resume) {
->  				/*
->  				 * We simply "remove" the card in this case.
-> @@ -2347,7 +2349,6 @@ int mmc_suspend_host(struct mmc_host *host)
->  				host->pm_flags = 0;
->  				err = 0;
->  			}
-> -			mmc_do_release_host(host);
->  		} else {
->  			err = -EBUSY;
->  		}
+>  	idata->buf = kzalloc(idata->buf_bytes, GFP_KERNEL);
+>  	if (!idata->buf) {
+>  		err = -ENOMEM;
+> @@ -382,25 +385,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>  	if (IS_ERR(idata))
+>  		return PTR_ERR(idata);
+>  
+> -	cmd.opcode = idata->ic.opcode;
+> -	cmd.arg = idata->ic.arg;
+> -	cmd.flags = idata->ic.flags;
+> -
+> -	data.sg = &sg;
+> -	data.sg_len = 1;
+> -	data.blksz = idata->ic.blksz;
+> -	data.blocks = idata->ic.blocks;
+> -
+> -	sg_init_one(data.sg, idata->buf, idata->buf_bytes);
+> -
+> -	if (idata->ic.write_flag)
+> -		data.flags = MMC_DATA_WRITE;
+> -	else
+> -		data.flags = MMC_DATA_READ;
+> -
+> -	mrq.cmd = &cmd;
+> -	mrq.data = &data;
+> -
+>  	md = mmc_blk_get(bdev->bd_disk);
+>  	if (!md) {
+>  		err = -EINVAL;
+> @@ -413,6 +397,48 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>  		goto cmd_done;
+>  	}
+>  
+> +	cmd.opcode = idata->ic.opcode;
+> +	cmd.arg = idata->ic.arg;
+> +	cmd.flags = idata->ic.flags;
+> +
+> +	if (idata->buf_bytes) {
+> +		data.sg = &sg;
+> +		data.sg_len = 1;
+> +		data.blksz = idata->ic.blksz;
+> +		data.blocks = idata->ic.blocks;
+> +
+> +		sg_init_one(data.sg, idata->buf, idata->buf_bytes);
+> +
+> +		if (idata->ic.write_flag)
+> +			data.flags = MMC_DATA_WRITE;
+> +		else
+> +			data.flags = MMC_DATA_READ;
+> +
+> +		/* data.flags must already be set before doing this. */
+> +		mmc_set_data_timeout(&data, card);
+> +
+> +		/* Allow overriding the timeout_ns for empirical tuning. */
+> +		if (idata->ic.data_timeout_ns)
+> +			data.timeout_ns = idata->ic.data_timeout_ns;
+> +
+> +		if ((cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
+> +			/*
+> +			 * Pretend this is a data transfer and rely on the
+> +			 * host driver to compute timeout.  When all host
+> +			 * drivers support cmd.cmd_timeout for R1B, this
+> +			 * can be changed to:
+> +			 *
+> +			 *     mrq.data = NULL;
+> +			 *     cmd.cmd_timeout = idata->ic.cmd_timeout_ms;
+> +			 */
+> +			data.timeout_ns = idata->ic.cmd_timeout_ms * 1000000;
+> +		}
+> +
+> +		mrq.data = &data;
+> +	}
+> +
+> +	mrq.cmd = &cmd;
+> +
+>  	mmc_claim_host(card->host);
+>  
+>  	if (idata->ic.is_acmd) {
+> @@ -421,24 +447,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>  			goto cmd_rel_host;
+>  	}
+>  
+> -	/* data.flags must already be set before doing this. */
+> -	mmc_set_data_timeout(&data, card);
+> -	/* Allow overriding the timeout_ns for empirical tuning. */
+> -	if (idata->ic.data_timeout_ns)
+> -		data.timeout_ns = idata->ic.data_timeout_ns;
+> -
+> -	if ((cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
+> -		/*
+> -		 * Pretend this is a data transfer and rely on the host driver
+> -		 * to compute timeout.  When all host drivers support
+> -		 * cmd.cmd_timeout for R1B, this can be changed to:
+> -		 *
+> -		 *     mrq.data = NULL;
+> -		 *     cmd.cmd_timeout = idata->ic.cmd_timeout_ms;
+> -		 */
+> -		data.timeout_ns = idata->ic.cmd_timeout_ms * 1000000;
+> -	}
+> -
+>  	mmc_wait_for_req(card->host, &mrq);
+>  
+>  	if (cmd.error) {
 
-Thanks very much, pushed to mmc-next for 3.2 with ACKs from Ulf and Linus.
+Thanks, looks good to me, pushed to mmc-next for 3.3.
+
+Would you be able to share the userspace code that you've been using
+with this, please?  I'd like to start collecting a repository of
+userspace code showing common uses of this ioctl.
 
 - Chris.
 -- 
