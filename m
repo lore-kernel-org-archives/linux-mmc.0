@@ -1,16 +1,14 @@
 From: "Joe Woodward" <jw@terrafix.co.uk>
 Subject: Re: mmc: sdio: runtime PM and 8686 problems
-Date: Thu, 01 Dec 2011 11:28:05 +0000
-Message-ID: <WC20111201112805.3502EA@terrafix.co.uk>
-References: <CAMLZHHRF2ygqBRyNm21vv0WnCYKPtduGpW7ME25z55v7nTaRnA@mail.gmail.com> <CAK=WgbY22BD8WWk71nL3=D3NZfJY92LXUum8yhV3JyHypjOe-g@mail.gmail.com> <CAMLZHHRfitBnmXi=2ndvm5-jm1Mg4+NT83rjuwD9w236E12hQw@mail.gmail.com> <CAK=WgbYRvsOur6RmAYMEAf-01e-paGinPU4G_0VesacPGBD5GA@mail.gmail.com> <WC20111130150051.910209@terrafix.co.uk> <CAK=WgbbBF1=YJyc2MF2fgNtPbbqF=-9L53=LKoEmkgA43PjSdw@mail.gmail.com>
+Date: Thu, 01 Dec 2011 11:29:05 +0000
+Message-ID: <WC20111201112905.8702EB@terrafix.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.keele.netcentral.co.uk ([212.57.235.197]:42001 "EHLO
+Received: from smtp1.keele.netcentral.co.uk ([212.57.235.197]:55811 "EHLO
 	smtp3.keele.netcentral.co.uk" rhost-flags-OK-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1752257Ab1LAL31 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2011 06:29:27 -0500
-In-Reply-To: <CAK=WgbbBF1=YJyc2MF2fgNtPbbqF=-9L53=LKoEmkgA43PjSdw@mail.gmail.com>
+	by vger.kernel.org with ESMTP id S1752257Ab1LALa1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2011 06:30:27 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ohad Ben-Cohen <ohad@wizery.com>
@@ -26,16 +24,14 @@ I'm not entirely sure of the CMD sequence. It seems we get:
   - CMD8 (fails)
   - CMD5 (fails)
 
-In the "SDIO Simplified Specification Version 2.00" (https://www.sdcard.org/developers/overview/sdio/sdio_spec/Simplified_SDIO_Card_Spec.pdf) page 6 it 
-seems only a CMD52 should be required to "Re-init IO". Previous thread posts state CMD5 (x2) are required by the 8686, but why CMD0/CMD8?
+In the "SDIO Simplified Specification Version 2.00" (https://www.sdcard.org/developers/overview/sdio/sdio_spec/Simplified_SDIO_Card_Spec.pdf) page 6 it seems only a CMD52 should be required to "Re-init IO". Previous thread posts state CMD5 (x2) are required by the 8686, but why CMD0/CMD8?
 
 Incidentally errors only occur after the CMD0, but before the first error we get (i.e. a change of cs from 1 to 0):
 "mmc1: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 20 width 0 timing 0".
 
 Any thoughts?
 
-I think we've probably hit the end of the line here, unless someone else pops up who knows more about the Gumstix (i.e. has access to a schematic) or the 
-W2CBW003 and it's SD8686 internals.
+I think we've probably hit the end of the line here, unless someone else pops up who knows more about the Gumstix (i.e. has access to a schematic) or the W2CBW003 and it's SD8686 internals.
 
 Thanks for the help anyway chaps!
 
