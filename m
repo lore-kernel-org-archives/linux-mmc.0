@@ -1,50 +1,62 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sh_mmcif: fix clock gating on platforms, implementing a .down_pwr() method
-Date: Thu, 01 Dec 2011 12:48:51 -0500
-Message-ID: <87d3c8mbcs.fsf@laptop.org>
-References: <Pine.LNX.4.64.1111161009060.1100@axis700.grange>
+Subject: Re: mmc0: Too large timeout requested for CMD38!
+Date: Thu, 01 Dec 2011 13:01:39 -0500
+Message-ID: <878vmwmarg.fsf@laptop.org>
+References: <CAC=G6szdK=6wR4xiZk9mhBofEf7DHeuAcpeeTiVCdiK1aUyeOw@mail.gmail.com>
+	<CAC=G6swWj3=eUYUczCqcNJq7Nj177nis4817+bg-qS0dUic=Xg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:38364 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:54212 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755824Ab1LARsp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 1 Dec 2011 12:48:45 -0500
-In-Reply-To: <Pine.LNX.4.64.1111161009060.1100@axis700.grange> (Guennadi
-	Liakhovetski's message of "Wed, 16 Nov 2011 10:10:41 +0100 (CET)")
+	id S1755813Ab1LASBf convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2011 13:01:35 -0500
+In-Reply-To: <CAC=G6swWj3=eUYUczCqcNJq7Nj177nis4817+bg-qS0dUic=Xg@mail.gmail.com>
+	(Paul Schilling's message of "Fri, 18 Nov 2011 16:59:53 -0600")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org
+To: Paul Schilling <paul.s.schilling@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>
 
-Hi,
+Hi Jaehoon, Kyungmin, Kukjin,
 
-On Wed, Nov 16 2011, Guennadi Liakhovetski wrote:
-> Do not power down the card in .set_ios(), unless MMC_POWER_OFF is 
-> requested. This fixes the MMCIF interface functionality on ecovec boards.
+On Fri, Nov 18 2011, Paul Schilling wrote:
+> I am getting the following error when trying to use a swap file on a
+> large 32GB SD card formated with EXT4.
 >
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
->  drivers/mmc/host/sh_mmcif.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
+> Thanks,
+> Paul Schilling
 >
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 557886b..c021482 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -895,7 +895,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  		if (host->power) {
->  			pm_runtime_put(&host->pd->dev);
->  			host->power = false;
-> -			if (p->down_pwr)
-> +			if (p->down_pwr && ios->power_mode == MMC_POWER_OFF)
->  				p->down_pwr(host->pd);
->  		}
->  		host->state = STATE_IDLE;
+> Swap file /external_flash_a/swap_file being enabled.
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> mmc0: Too large timeout requested for CMD38!
+> Adding 131068k swap on /external_flash_a/swap_file.=C2=A0 Priority:-1
+> extents:3 across:135104k SS
+>
+> Linux version 3.2.0-rc2+ (#######) (gcc version 4.3.3 (GCC) ) #77
+> PREEMPT Fri Nov 18 13:37:37 CST 2011
+> CPU: ARM926EJ-S [41069265] revision 5 (ARMv5TEJ), cr=3D00053177
+> CPU: VIVT data cache, VIVT instruction cache
+> Machine: CONDOR2416
+> [..]
 
-Thanks, pushed to mmc-next for 3.2.
+Any thoughts on this s3c error?
+
+Thanks,
 
 - Chris.
--- 
+--=20
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
