@@ -1,160 +1,55 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: core: check for zero length ioctl data
-Date: Thu, 01 Dec 2011 13:20:53 -0500
-Message-ID: <87ipm0kvay.fsf@laptop.org>
-References: <1322035558-1127-1-git-send-email-johan.rudholm@stericsson.com>
+Subject: Re: [PATCH] mmc: sh_mmcif: simplify clock divisor calculation
+Date: Thu, 01 Dec 2011 13:24:20 -0500
+Message-ID: <87ehwokv57.fsf@laptop.org>
+References: <1321473366-31053-1-git-send-email-andreiw@vmware.com>
+	<20111117150549.15528e81.akpm@linux-foundation.org>
+	<Pine.LNX.4.64.1111231551100.5635@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:52352 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755672Ab1LASUr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 1 Dec 2011 13:20:47 -0500
-In-Reply-To: <1322035558-1127-1-git-send-email-johan.rudholm@stericsson.com>
-	(Johan Rudholm's message of "Wed, 23 Nov 2011 09:05:58 +0100")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1111231551100.5635@axis700.grange> (Guennadi
+	Liakhovetski's message of "Wed, 23 Nov 2011 15:52:30 +0100 (CET)")
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Andrei Warkentin <andreiw@vmware.com>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <johan.rudholm@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-Hi Johan,
+Hi,
 
-On Wed, Nov 23 2011, Johan Rudholm wrote:
-> If the read or write buffer size associated with the command sent
-> through the mmc_blk_ioctl is zero, do not prepare data buffer.
+On Wed, Nov 23 2011, Guennadi Liakhovetski wrote:
+> Replace ilog2(__rounddown_pow_of_two(x)) with the equivalent but much
+> simpler fls(x) - 1.
 >
-> This enables a ioctl(2) call to for instance send a MMC_SWITCH to set
-> a byte in the ext_csd.
->
-> Change-Id: Ieab8400ace1ba91bfb3d911377de557bf2d593d0
-
-(Please don't send these tags; I've stripped this one out.)
-
-> Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
+> Reported-by: Andrew Morton <akpm@linux-foundation.org>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > ---
->  drivers/mmc/card/block.c |   82 +++++++++++++++++++++++++---------------------
->  1 files changed, 45 insertions(+), 37 deletions(-)
+>  drivers/mmc/host/sh_mmcif.c |    3 ++-
+>  1 files changed, 2 insertions(+), 1 deletions(-)
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 12096cc..4d29b30 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -336,6 +336,9 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
->  		goto idata_err;
->  	}
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index c021482..824fee5 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -16,6 +16,7 @@
+>   *
+>   */
 >  
-> +	if (!idata->buf_bytes)
-> +		return idata;
-> +
->  	idata->buf = kzalloc(idata->buf_bytes, GFP_KERNEL);
->  	if (!idata->buf) {
->  		err = -ENOMEM;
-> @@ -382,25 +385,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->  	if (IS_ERR(idata))
->  		return PTR_ERR(idata);
+> +#include <linux/bitops.h>
+>  #include <linux/clk.h>
+>  #include <linux/completion.h>
+>  #include <linux/delay.h>
+> @@ -386,7 +387,7 @@ static void sh_mmcif_clock_control(struct sh_mmcif_host *host, unsigned int clk)
+>  		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_SUP_PCLK);
+>  	else
+>  		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR &
+> -			(ilog2(__rounddown_pow_of_two(host->clk / clk)) << 16));
+> +				((fls(host->clk / clk) - 1) << 16));
 >  
-> -	cmd.opcode = idata->ic.opcode;
-> -	cmd.arg = idata->ic.arg;
-> -	cmd.flags = idata->ic.flags;
-> -
-> -	data.sg = &sg;
-> -	data.sg_len = 1;
-> -	data.blksz = idata->ic.blksz;
-> -	data.blocks = idata->ic.blocks;
-> -
-> -	sg_init_one(data.sg, idata->buf, idata->buf_bytes);
-> -
-> -	if (idata->ic.write_flag)
-> -		data.flags = MMC_DATA_WRITE;
-> -	else
-> -		data.flags = MMC_DATA_READ;
-> -
-> -	mrq.cmd = &cmd;
-> -	mrq.data = &data;
-> -
->  	md = mmc_blk_get(bdev->bd_disk);
->  	if (!md) {
->  		err = -EINVAL;
-> @@ -413,6 +397,48 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->  		goto cmd_done;
->  	}
->  
-> +	cmd.opcode = idata->ic.opcode;
-> +	cmd.arg = idata->ic.arg;
-> +	cmd.flags = idata->ic.flags;
-> +
-> +	if (idata->buf_bytes) {
-> +		data.sg = &sg;
-> +		data.sg_len = 1;
-> +		data.blksz = idata->ic.blksz;
-> +		data.blocks = idata->ic.blocks;
-> +
-> +		sg_init_one(data.sg, idata->buf, idata->buf_bytes);
-> +
-> +		if (idata->ic.write_flag)
-> +			data.flags = MMC_DATA_WRITE;
-> +		else
-> +			data.flags = MMC_DATA_READ;
-> +
-> +		/* data.flags must already be set before doing this. */
-> +		mmc_set_data_timeout(&data, card);
-> +
-> +		/* Allow overriding the timeout_ns for empirical tuning. */
-> +		if (idata->ic.data_timeout_ns)
-> +			data.timeout_ns = idata->ic.data_timeout_ns;
-> +
-> +		if ((cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
-> +			/*
-> +			 * Pretend this is a data transfer and rely on the
-> +			 * host driver to compute timeout.  When all host
-> +			 * drivers support cmd.cmd_timeout for R1B, this
-> +			 * can be changed to:
-> +			 *
-> +			 *     mrq.data = NULL;
-> +			 *     cmd.cmd_timeout = idata->ic.cmd_timeout_ms;
-> +			 */
-> +			data.timeout_ns = idata->ic.cmd_timeout_ms * 1000000;
-> +		}
-> +
-> +		mrq.data = &data;
-> +	}
-> +
-> +	mrq.cmd = &cmd;
-> +
->  	mmc_claim_host(card->host);
->  
->  	if (idata->ic.is_acmd) {
-> @@ -421,24 +447,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->  			goto cmd_rel_host;
->  	}
->  
-> -	/* data.flags must already be set before doing this. */
-> -	mmc_set_data_timeout(&data, card);
-> -	/* Allow overriding the timeout_ns for empirical tuning. */
-> -	if (idata->ic.data_timeout_ns)
-> -		data.timeout_ns = idata->ic.data_timeout_ns;
-> -
-> -	if ((cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
-> -		/*
-> -		 * Pretend this is a data transfer and rely on the host driver
-> -		 * to compute timeout.  When all host drivers support
-> -		 * cmd.cmd_timeout for R1B, this can be changed to:
-> -		 *
-> -		 *     mrq.data = NULL;
-> -		 *     cmd.cmd_timeout = idata->ic.cmd_timeout_ms;
-> -		 */
-> -		data.timeout_ns = idata->ic.cmd_timeout_ms * 1000000;
-> -	}
-> -
->  	mmc_wait_for_req(card->host, &mrq);
->  
->  	if (cmd.error) {
+>  	sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_ENABLE);
+>  }
 
-Thanks, looks good to me, pushed to mmc-next for 3.3.
-
-Would you be able to share the userspace code that you've been using
-with this, please?  I'd like to start collecting a repository of
-userspace code showing common uses of this ioctl.
+Thanks, pushed to mmc-next for 3.3.
 
 - Chris.
 -- 
