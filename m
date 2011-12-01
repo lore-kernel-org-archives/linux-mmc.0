@@ -1,14 +1,14 @@
 From: "Joe Woodward" <jw@terrafix.co.uk>
 Subject: Re: mmc: sdio: runtime PM and 8686 problems
-Date: Thu, 01 Dec 2011 11:29:05 +0000
-Message-ID: <WC20111201112905.8702EB@terrafix.co.uk>
+Date: Thu, 01 Dec 2011 11:29:11 +0000
+Message-ID: <WC20111201112911.5402EC@terrafix.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.keele.netcentral.co.uk ([212.57.235.197]:55811 "EHLO
-	smtp3.keele.netcentral.co.uk" rhost-flags-OK-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1752257Ab1LALa1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2011 06:30:27 -0500
+Received: from smtp3.keele.netcentral.co.uk ([212.57.235.197]:55827 "EHLO
+	smtp3.keele.netcentral.co.uk" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752257Ab1LALa3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2011 06:30:29 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ohad Ben-Cohen <ohad@wizery.com>
