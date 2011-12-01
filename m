@@ -1,55 +1,36 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/1] mmc: sdhci-esdhc: Change delay after setting clock from 100ms to 1ms
-Date: Thu, 01 Dec 2011 13:10:33 -0500
-Message-ID: <87vcq0kvs6.fsf@laptop.org>
-References: <1321944150-12162-1-git-send-email-tony.lin@freescale.com>
+Subject: Re: [PATCH 1/3] omap_hsmmc: consider MMC_PM_KEEP_POWER on suspend/resume
+Date: Thu, 01 Dec 2011 13:16:05 -0500
+Message-ID: <87r50okviy.fsf@laptop.org>
+References: <1321970539-7104-1-git-send-email-eliad@wizery.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50778 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753524Ab1LASKa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 1 Dec 2011 13:10:30 -0500
-In-Reply-To: <1321944150-12162-1-git-send-email-tony.lin@freescale.com> (Tony
-	Lin's message of "Tue, 22 Nov 2011 14:42:30 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1321970539-7104-1-git-send-email-eliad@wizery.com> (Eliad
+	Peller's message of "Tue, 22 Nov 2011 16:02:17 +0200")
+Sender: linux-omap-owner@vger.kernel.org
+To: Eliad Peller <eliad@wizery.com>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Russell King <linux@arm.linux.org.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lin <tony.lin@freescale.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, X.Xie@freescale.com, avorontsov@ru.mvista.com
 
 Hi,
 
-On Tue, Nov 22 2011, Tony Lin wrote:
-> 1ms is enough for hardware to change the clock to stable.
-> 100ms is too long in the tasklet.
+On Tue, Nov 22 2011, Eliad Peller wrote:
+> When an mmc card has the MMC_PM_KEEP_POWER flag, it shouldn't
+> be powered off on suspend (and thus doesn't have to be powered-on
+> on resume)
 >
-> Signed-off-by: Tony Lin <tony.lin@freescale.com>
-> CC: Xiaobo Xie <X.Xie@freescale.com>
-> CC: Anton Vorontsov <avorontsov@ru.mvista.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc.h |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
+> While on it, change the suspend flow a bit, to make it a bit
+> easier to follow.
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-> index c3b08f1..b97b2f5 100644
-> --- a/drivers/mmc/host/sdhci-esdhc.h
-> +++ b/drivers/mmc/host/sdhci-esdhc.h
-> @@ -73,7 +73,7 @@ static inline void esdhc_set_clock(struct sdhci_host
-> *host, unsigned int clock)
->  		| (div << ESDHC_DIVIDER_SHIFT)
->  		| (pre_div << ESDHC_PREDIV_SHIFT));
->  	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-> -	mdelay(100);
-> +	mdelay(1);
->  out:
->  	host->clock = clock;
->  }
+> Signed-off-by: Eliad Peller <eliad@wizery.com>
 
-I don't know if 1ms is actually long enough for the clock to stabilize
-on all boards, but I'll push this change to mmc-next and we can see if
-we get any regression reports.
+Tony, feel free to merge this patchset (if you're happy with the rest of
+it) through your tree, with my:
 
-Thanks,
+Acked-by: Chris Ball <cjb@laptop.org>
+
+for this patch.  Thanks,
 
 - Chris.
 -- 
