@@ -1,47 +1,49 @@
-From: Richard Zhao <richard.zhao@linaro.org>
-Subject: Re: [PATCH V4 00/14] add clk_prepare/clk_unprepare to imx drivers
-Date: Fri, 2 Dec 2011 19:40:35 +0800
-Message-ID: <20111202114034.GH8684@b20223-02.ap.freescale.net>
-References: <1321339689-25256-1-git-send-email-richard.zhao@linaro.org>
- <20111117012210.GA23392@b20223-02.ap.freescale.net>
- <20111202110713.GG8684@b20223-02.ap.freescale.net>
+From: "UPGRADE MAINTAINANCE TEAM" <maintainanceteam@team.com>
+Subject: Dear Email Account User
+Date: Fri, 2 Dec 2011 12:15:27 +0100 (CET)
+Message-ID: <1583.82.128.16.34.1322824527.squirrel@webmail.infotel.bg>
+Reply-To: onthenetsupportteam@live.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-serial-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20111202110713.GG8684@b20223-02.ap.freescale.net>
-Sender: linux-serial-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, netdev@vger.kernel.org, linux-serial@vger.kernel.org
-Cc: amit.kucheria@canonical.com, linux@arm.linux.org.uk, kernel@pengutronix.de, eric.miao@linaro.org, ben-linux@fluff.org, cjb@laptop.org, alan@linux.intel.com
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mbox.infotel.bg ([212.39.65.212]:34055 "EHLO mbox.infotel.bg"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753839Ab1LBLrx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 2 Dec 2011 06:47:53 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Dec 02, 2011 at 07:07:14PM +0800, Richard Zhao wrote:
-> Is there any body merged this patch series?
-Thanks, Sascha! Just found it's in your imx-features branch.
+Dear Email Account User,
 
-Richard
-> 
-> Thanks
-> Richard
-> On Thu, Nov 17, 2011 at 09:22:11AM +0800, Richard Zhao wrote:
-> > Hi Sascha,
-> > 
-> > Would you merge this patch series?
-> > 
-> > Thanks
-> > Richard 
-> > 
-> > 
-> > _______________________________________________
-> > linux-arm-kernel mailing list
-> > linux-arm-kernel@lists.infradead.org
-> > http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-> > 
-> 
-> 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-> 
+This message is from the Server Control Panel messaging center,
+to you my dear e-mail account holder.Your account will undergo
+regularly scheduled maintenance. Access to your mailbox via our
+e-portal will be unavailable for any period during this maintenance.
+
+We shall perform maintenance service on our
+database and e-mail account center for better online
+services. We are deleting all unused email accounts to
+create more space for new accounts.In to ensure you
+do not experience service interruption / possible
+disable, Please you must reply to this email
+immediately verify your email account details below
+verification / identification purposes.
+_____________________________________
+1. First & Last Name:
+2. Full email address:
+3. Username and password:
+4. Verify Current Password:
+_____________________________________
+
+Failure to do so can automatically make your e-mail
+account deactivated from our database, email / mail server.
+that we upgrade your email account,
+
+
+Thank you.
+Upgrade Team
+
+
+
 
