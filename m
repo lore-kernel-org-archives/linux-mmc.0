@@ -1,111 +1,80 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 2/2] mmc: core: Support packed command for eMMC4.5 device
-Date: Fri, 02 Dec 2011 18:06:30 +0900
-Message-ID: <003201ccb0d1$ae9474c0$0bbd5e40$%jun@samsung.com>
-References: <aad7cb35699550e89526a5fb083c520d.squirrel@www.codeaurora.org>
- <000201ccadab$1e57b8a0$5b0729e0$%jun@samsung.com>
- <5573ef5046779298ee1555838015e0e3.squirrel@www.codeaurora.org>
+From: Heiko Schocher <hs@denx.de>
+Subject: Re: arm, am1808: using mmc1 controller and dma
+Date: Fri, 02 Dec 2011 10:19:57 +0100
+Message-ID: <4ED8983D.5020400@denx.de>
+References: <4ED87FBA.40409@denx.de>
+ <B6A220404B6BFC4BBD2AB91C54D39DF40293DB@DBDE01.ent.ti.com>
+ <4ED89294.6010804@denx.de>
+ <B6A220404B6BFC4BBD2AB91C54D39DF4029429@DBDE01.ent.ti.com>
+Reply-To: hs@denx.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:50943 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752938Ab1LBJGe convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Dec 2011 04:06:34 -0500
-In-reply-to: <5573ef5046779298ee1555838015e0e3.squirrel@www.codeaurora.org>
-Content-language: ko
+Received: from b.relay.invitel.net ([62.77.203.4]:35174 "EHLO
+	b.relay.invitel.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752885Ab1LBJUD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Dec 2011 04:20:03 -0500
+In-reply-to: <B6A220404B6BFC4BBD2AB91C54D39DF4029429@DBDE01.ent.ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: "'S, Venkatraman'" <svenkatr@ti.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, dh.han@samsung.com
+To: juha.kuikka@gmail.com
+Cc: "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, Wolfgang Denk <wd@denx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Vipin Bhandari <vipin.bhandari@ti.com>, "Kumar, Purushotam" <purushotam@ti.com>, Kevin Hilman <khilman@deeprootsystems.com>
 
-Maya Erez wrote:
-> > Maya Erez wrote:
-> >> >> >> On Wed, Nov 2, 2011 at 1:33 PM, Seungwon Jeon
-> >> <tgih.jun@samsung.com>
-> >> >> wrote:
-> >> >> >> > @@ -980,12 +988,67 @@ static int mmc_blk_err_check(struct
-> >> mmc_card
-> >> >> *card,
-> >> >> >> > =A0 =A0 =A0 =A0if (!brq->data.bytes_xfered)
-> >> >> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return MMC_BLK_RETRY;
-> >> >> >> >
-> >> >> >> > + =A0 =A0 =A0 if (mq_mrq->packed_cmd !=3D MMC_PACKED_NONE)=
- {
-> >> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (unlikely(brq->data.block=
-s << 9 !=3D
-> >> >> brq->data.bytes_xfered))
-> >> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_B=
-LK_PARTIAL;
-> >> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> >> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return MMC_B=
-LK_SUCCESS;
-> >> >> >> > + =A0 =A0 =A0 }
-> >> >> >> > +
-> >> >> >> > =A0 =A0 =A0 =A0if (blk_rq_bytes(req) !=3D brq->data.bytes_=
-xfered)
-> >> >> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return MMC_BLK_PARTIAL;
-> >> >> >> >
-> >> >> >> > =A0 =A0 =A0 =A0return MMC_BLK_SUCCESS;
-> >> >> >> > =A0}
-> >> >> >> >
-> >> >> >> > +static int mmc_blk_packed_err_check(struct mmc_card *card=
-, +
-> >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct mmc_async_re=
-q *areq)
-> >> >> >> > +{
-> >> >> >> > + =A0 =A0 =A0 struct mmc_queue_req *mq_mrq =3D container_o=
-f(areq, struct
-> >> >> mmc_queue_req,
-> >> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_active);
-> >> +
-> >> =A0 =A0 =A0 int err, check, status;
-> >> >> >> > + =A0 =A0 =A0 u8 ext_csd[512];
-> >> >> >> > +
-> >> >> >> > + =A0 =A0 =A0 check =3D mmc_blk_err_check(card, areq);
-> >> >> >> > +
-> >> >> >> > + =A0 =A0 =A0 if (check =3D=3D MMC_BLK_SUCCESS)
-> >> >> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return check;
-> >> I think we need to check the status for all cases and not only in =
-case
-> >> of
-> >> MMC_BLK_PARTIAL. For example, in cases where the header was trafer=
-red
-> >> successfully but had logic errors (wrong number of sectors etc.)
-> >> mmc_blk_err_check will return MMC_BLK_SUCCESS although the packed
-> >> commands
-> >> failed.
-> > Similarly, Sahitya Tummala is already mentioned this.
-> > Other error case will be checked in next version.
-> > The case you suggested is about read or write?
-> > Device may detect error and stop transferring the data.
-> Sahitya suggested to also check other error cases that mmc_blk_err_ch=
-eck
-> returns (such as MMC_BLK_CMD_ERR, MMC_BLK_ECC_ERR and MMC_BLK_DATA_ER=
-R).
-> I suggest to also check the exception bit in the status even if
-> mmc_blk_err_check returned success, since mmc_blk_err_check might not
-> catch all the packed commands failures. One example for such a failur=
-e is
-> when the header of read packed commands will have logical error.
-This part is modified in next version.
+Hello Juha,
 
-Thanks,
-Seungwon Jeon.
+Rajashekhara, Sudhakar wrote:
+> Hi,
+> 
+> On Fri, Dec 02, 2011 at 14:25:48, Heiko Schocher wrote:
+>> Hello Rajashekhara, Sudhakar,
+>>
+>> Rajashekhara, Sudhakar wrote:
+>>> Hi,
+>>>
+>>> On Fri, Dec 02, 2011 at 13:05:22, Heiko Schocher wrote:
+>>>> Hello,
+>>>>
+>>>> trying Linux 3.2.0-rc3 on an am1808 based board using MMCSD1 controller,
+>>>> and facing problems with using DMA. Deactivating use_dma=0 in the
+>>>> davinci_mmc controller and mmc works in pio mode without problems.
+>>>> So there are no hardware problems, pinmux is ok, psc are all on.
+>>>>
+>>> Please refer to the discussion at [1] where similar issue was discussed. Go through the
+> 
+> [...]
+> 
+>> Yuhu! that works for me! But I had to fix it a little, because "edma_info"
+>> is now named "info". Here my diff:
+>>
+> 
+> Yup, this patch was on an older version.
+> 
+>> diff --git a/arch/arm/mach-davinci/dma.c b/arch/arm/mach-davinci/dma.c
+>> index da90103..e10a251 100644
+>> --- a/arch/arm/mach-davinci/dma.c
+>> +++ b/arch/arm/mach-davinci/dma.c
+>> @@ -1513,7 +1513,7 @@ static int __init edma_probe(struct platform_device *pdev)
+>>                  * started by the codec engine will not cause audio defects.
+>>                  */
+>>                 for (i = 0; i < edma_cc[j]->num_channels; i++)
+>> -                       map_dmach_queue(j, i, EVENTQ_1);
+>> +                       map_dmach_queue(j, i, info[j]->default_queue);
+>>
+>>                 queue_tc_mapping = info[j]->queue_tc_mapping;
+>>                 queue_priority_mapping = info[j]->queue_priority_mapping;
+>>
+>>> [1] http://www.mail-archive.com/davinci-linux-open-source@linux.davincidsp.com/msg17926.html 
+>> Do you prepare a patch, or should I send it?
+>>
+> 
+> You can go ahead and submit the patch but Juha was the person who found out this issue.
 
-> Thanks,
-> Maya
-> --
-> Seny by a Consultant for Qualcomm innovation center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
->=20
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Juha, can you post this patch, or is it ok for you, if I post it
+with your "Reported-by" and "Signed-off-by"?
 
+bye,
+Heiko
+-- 
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
