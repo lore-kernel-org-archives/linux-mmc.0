@@ -1,95 +1,91 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 1/1] mmc: sdhci-esdhc: Change delay after setting clock
- from 100ms to 1ms
-Date: Fri, 2 Dec 2011 07:13:31 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F1162FCA2@039-SN1MPN1-005.039d.mgd.msft.net>
-References: <1321944150-12162-1-git-send-email-tony.lin@freescale.com>
- <87vcq0kvs6.fsf@laptop.org>
- <97D3A72708D04647A5AC84A04996E5B526EC0F@039-SN1MPN1-001.039d.mgd.msft.net>
+From: Heiko Schocher <hs-ynQEQJNshbs@public.gmane.org>
+Subject: arm, am1808: using mmc1 controller and dma
+Date: Fri, 02 Dec 2011 08:35:22 +0100
+Message-ID: <4ED87FBA.40409@denx.de>
+Reply-To: hs-ynQEQJNshbs@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe001.messaging.microsoft.com ([213.199.154.139]:43846
-	"EHLO DB3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752555Ab1LBHNf convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 2 Dec 2011 02:13:35 -0500
-In-Reply-To: <97D3A72708D04647A5AC84A04996E5B526EC0F@039-SN1MPN1-001.039d.mgd.msft.net>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Wolfgang Denk <wd-ynQEQJNshbs@public.gmane.org>, Kevin Hilman <khilman-1D3HCaltpLuhEniVeURVKkEOCMrvLtNR@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jarkko Lavinen <jarkko.lavinen-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Lin Tony-B19295 <B19295@freescale.com>, Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Xie Xiaobo-R63061 <r63061@freescale.com>, "avorontsov@ru.mvista.com" <avorontsov@ru.mvista.com>
 
-I don't think it make sense to change the delay time.
-Which will affect all PowerPC eSDHC controller, could you confirm which can work on all PowerPC platform?
+Hello,
 
------Original Message-----
-From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Lin Tony-B19295
-Sent: Friday, December 02, 2011 1:37 PM
-To: Chris Ball
-Cc: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org; Xie Xiaobo-R63061; avorontsov@ru.mvista.com
-Subject: RE: [PATCH 1/1] mmc: sdhci-esdhc: Change delay after setting clock from 100ms to 1ms
+trying Linux 3.2.0-rc3 on an am1808 based board using MMCSD1 controller,
+and facing problems with using DMA. Deactivating use_dma=0 in the
+davinci_mmc controller and mmc works in pio mode without problems.
+So there are no hardware problems, pinmux is ok, psc are all on.
 
-Okay
-Thanks
+Tried this on the AM1808 evalboard TMDXEXP1808L, and Linux 3.1
+works with DMA without problems. Difference: On the AM1808 Evalboard
+TMDXEXP1808L MMCSD0 controller is used on my am1808 based board
+MMCSD1!
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc- 
-> owner@vger.kernel.org] On Behalf Of Chris Ball
-> Sent: Friday, December 02, 2011 2:11 AM
-> To: Lin Tony-B19295
-> Cc: linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org; 
-> Xie Xiaobo-R63061; avorontsov@ru.mvista.com
-> Subject: Re: [PATCH 1/1] mmc: sdhci-esdhc: Change delay after setting 
-> clock from 100ms to 1ms
-> 
-> Hi,
-> 
-> On Tue, Nov 22 2011, Tony Lin wrote:
-> > 1ms is enough for hardware to change the clock to stable.
-> > 100ms is too long in the tasklet.
-> >
-> > Signed-off-by: Tony Lin <tony.lin@freescale.com>
-> > CC: Xiaobo Xie <X.Xie@freescale.com>
-> > CC: Anton Vorontsov <avorontsov@ru.mvista.com>
-> > ---
-> >  drivers/mmc/host/sdhci-esdhc.h |    2 +-
-> >  1 files changed, 1 insertions(+), 1 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-esdhc.h 
-> > b/drivers/mmc/host/sdhci-esdhc.h index c3b08f1..b97b2f5 100644
-> > --- a/drivers/mmc/host/sdhci-esdhc.h
-> > +++ b/drivers/mmc/host/sdhci-esdhc.h
-> > @@ -73,7 +73,7 @@ static inline void esdhc_set_clock(struct 
-> > sdhci_host *host, unsigned int clock)
-> >  		| (div << ESDHC_DIVIDER_SHIFT)
-> >  		| (pre_div << ESDHC_PREDIV_SHIFT));
-> >  	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-> > -	mdelay(100);
-> > +	mdelay(1);
-> >  out:
-> >  	host->clock = clock;
-> >  }
-> 
-> I don't know if 1ms is actually long enough for the clock to stabilize 
-> on all boards, but I'll push this change to mmc-next and we can see if 
-> we get any regression reports.
-> 
-> Thanks,
-> 
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" 
-> in the body of a message to majordomo@vger.kernel.org More majordomo 
-> info at http://vger.kernel.org/majordomo-info.html
+Debugging in code and found, that on the am1808 evalboard I get
+on startup (first DMA access):
 
+CMD13, arg 0x00000000, R1/R5/R6/R7 response
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
+a status back in mmc_davinci_irq():
 
+TRNDNE (0x1000) Transfer done
+RSPDNE (0x0004) Response succesfully has received
+DATDNE (0x0001) The data has been fully transmitted
 
+On the am1808 based board with using MMCSD1 I get:
+
+CMD13, arg 0x00000000, R1/R5/R6/R7 response
+
+TRNDNE (0x1000) Transfer done
+DRRDY  (0x0400) MMCDRR is ready New data arrived and can be read by cpu or dma
+RSPDNE (0x0004) Response succesfully has received
+
+after that command, I see  no more mmc accesses ... some ideas?
+
+Looking in the sprufu5.pdf (AM18x ARM Microprocessor Enhanced Direct
+Memory Access (EDMA3) Controller" chapter "2.6 Event, Channel, and
+PaRAM Mapping":
+
+"Most of the DMA channels are tied to a specific hardware peripheral
+event, thus allowing transfers to be triggered by events from device
+peripherals or external hardware."
+
+The mapping is defined in the device specific manual
+http://www.ti.com/lit/ds/sprs653b/sprs653b.pdf
+chapter "5.9.1 EDMA3 Channel Synchronization Events"
+
+and there I found:
+
+EDMA0 Controller Event 16 MMCSD0 Receive
+EDMA0 Controller Event 17 MMCSD0 Transmit
+
+EDMA1 Controller Event 28 MMCSD1 Receive
+EDMA1 Controller Event 29 MMCSD1 Transmit
+
+The Linux 3.1 Code is using
+EDMA1 Controller Event 28 MMCSD1 Receive
+EDMA1 Controller Event 29 MMCSD1 Transmit
+
+as events for the MMCSD1 controller ... so, this should be ok ...
+I see no more differences between MMCSD0 and MMCSD1 ... maybe I
+miss something?
+
+Have somebody running an am1808 based board with using MMCSD
+controller 1?
+
+bye,
+Heiko
+-- 
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
