@@ -1,37 +1,39 @@
-From: Johan RUDHOLM <johan.rudholm@stericsson.com>
-Subject: RE: [PATCH] mmc: core: check for zero length ioctl data
-Date: Fri, 2 Dec 2011 10:51:49 +0100
-Message-ID: <E2E6AC6BFAD06343BA2D97432459C1B6071D93F3BD@EXDCVYMBSTM005.EQ1STM.local>
-References: <1322035558-1127-1-git-send-email-johan.rudholm@stericsson.com>
- <87ipm0kvay.fsf@laptop.org>
+From: Richard Zhao <richard.zhao@linaro.org>
+Subject: Re: [PATCH V4 00/14] add clk_prepare/clk_unprepare to imx drivers
+Date: Fri, 2 Dec 2011 19:07:14 +0800
+Message-ID: <20111202110713.GG8684@b20223-02.ap.freescale.net>
+References: <1321339689-25256-1-git-send-email-richard.zhao@linaro.org>
+ <20111117012210.GA23392@b20223-02.ap.freescale.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:37096 "EHLO
-	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753311Ab1LBJvz convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 2 Dec 2011 04:51:55 -0500
-In-Reply-To: <87ipm0kvay.fsf@laptop.org>
-Content-Language: en-US
+Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:37209
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753340Ab1LBLHX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Dec 2011 06:07:23 -0500
+Content-Disposition: inline
+In-Reply-To: <20111117012210.GA23392@b20223-02.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Per FORLIN <per.forlin@stericsson.com>, Ulf HANSSON <ulf.hansson@stericsson.com>
+To: linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, netdev@vger.kernel.org, linux-serial@vger.kernel.org
+Cc: amit.kucheria@canonical.com, linux@arm.linux.org.uk, kernel@pengutronix.de, eric.miao@linaro.org, ben-linux@fluff.org, cjb@laptop.org, alan@linux.intel.com
 
-Hi Chris,
+Is there any body merged this patch series?
 
-Chris Ball wrote:
+Thanks
+Richard
+On Thu, Nov 17, 2011 at 09:22:11AM +0800, Richard Zhao wrote:
+> Hi Sascha,
 > 
-> Thanks, looks good to me, pushed to mmc-next for 3.3.
+> Would you merge this patch series?
+> 
+> Thanks
+> Richard 
+> 
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> 
 
-Great!
-
-> Would you be able to share the userspace code that you've been using
-> with this, please?  I'd like to start collecting a repository of
-> userspace code showing common uses of this ioctl.
-
-Yes, I think so. How would you prefer to receive such a contribution - as a .tar.gz, a patch, a plain text attachment? Do you have any idea where such a repository would live?
-
-Kind regards, Johan
