@@ -1,104 +1,67 @@
-From: Axel Lin <axel.lin@gmail.com>
-Subject: [PATCH] mmc: sdhci-pci: simplify error handling
-Date: Sat, 03 Dec 2011 15:28:05 +0800
-Message-ID: <1322897285.3884.1.camel@phoenix>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: Build breakage in sdhci-s3c
+Date: Sat, 03 Dec 2011 18:25:03 +0900
+Message-ID: <000101ccb19d$705e45b0$511ad110$%kim@samsung.com>
+References: <20111202115807.GJ8245@opensource.wolfsonmicro.com>
+ <CADPsn1aRwUfP+TjDXisoFqJUxg+H7m+OE3GVBE3PF1JZq-_PfA@mail.gmail.com>
+ <20111202130412.GP8245@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:43377 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751649Ab1LCH2Q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 3 Dec 2011 02:28:16 -0500
+Received: from mailout4.samsung.com ([203.254.224.34]:54795 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752891Ab1LCJZG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 3 Dec 2011 04:25:06 -0500
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LVM0093DFHS4E50@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Sat, 03 Dec 2011 18:25:04 +0900 (KST)
+Received: from DOKGENEKIM03 ([12.23.120.114])
+ by mmp2.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
+ 64bit (built Sep  7 2010)) with ESMTPA id <0LVM004EHFHRUN70@mmp2.samsung.com>
+ for linux-mmc@vger.kernel.org; Sat, 03 Dec 2011 18:25:04 +0900 (KST)
+In-reply-to: <20111202130412.GP8245@opensource.wolfsonmicro.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Adrian Hunter <adrian.hunter@intel.com>, Takashi Iwai <tiwai@suse.de>, linux-mmc@vger.kernel.org
+To: 'Mark Brown' <broonie@opensource.wolfsonmicro.com>, 'Sangwook Lee' <sangwook.lee@linaro.org>
+Cc: 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Signed-off-by: Axel Lin <axel.lin@gmail.com>
----
- drivers/mmc/host/sdhci-pci.c |   38 ++++++++++++++++++--------------------
- 1 files changed, 18 insertions(+), 20 deletions(-)
+Mark Brown wrote:
+> 
+> On Fri, Dec 02, 2011 at 12:59:42PM +0000, Sangwook Lee wrote:
+> 
+> > and I found out that the following patch wasn't applied This  patch
+> > was acked by you and Thomas.
+> 
+> > http://comments.gmane.org/gmane.linux.kernel.samsung-soc/7832
+> > This patch has the title : [PATCH v2 1/2] ARM: SAMSUNG: Add pm_caps
+> > into platform data
+> 
+> > Could you help me to solve the below problem ?
+> 
+> Probably the simplest/best solution here is for Chris to apply this
+> patch with Kukjin and Thomas' acks to the mmc tree.
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 6878a94..d2e77fb 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1012,11 +1012,8 @@ static int sdhci_pci_suspend(struct device *dev)
- 
- 		ret = sdhci_suspend_host(slot->host);
- 
--		if (ret) {
--			for (i--; i >= 0; i--)
--				sdhci_resume_host(chip->slots[i]->host);
--			return ret;
--		}
-+		if (ret)
-+			goto err_pci_suspend;
- 
- 		slot_pm_flags = slot->host->mmc->pm_flags;
- 		if (slot_pm_flags & MMC_PM_WAKE_SDIO_IRQ)
-@@ -1027,11 +1024,8 @@ static int sdhci_pci_suspend(struct device *dev)
- 
- 	if (chip->fixes && chip->fixes->suspend) {
- 		ret = chip->fixes->suspend(chip);
--		if (ret) {
--			for (i = chip->num_slots - 1; i >= 0; i--)
--				sdhci_resume_host(chip->slots[i]->host);
--			return ret;
--		}
-+		if (ret)
-+			goto err_pci_suspend;
- 	}
- 
- 	pci_save_state(pdev);
-@@ -1048,6 +1042,11 @@ static int sdhci_pci_suspend(struct device *dev)
- 	}
- 
- 	return 0;
-+
-+err_pci_suspend:
-+	while (--i >= 0)
-+		sdhci_resume_host(chip->slots[i]->host);
-+	return ret;
- }
- 
- static int sdhci_pci_resume(struct device *dev)
-@@ -1113,23 +1112,22 @@ static int sdhci_pci_runtime_suspend(struct device *dev)
- 
- 		ret = sdhci_runtime_suspend_host(slot->host);
- 
--		if (ret) {
--			for (i--; i >= 0; i--)
--				sdhci_runtime_resume_host(chip->slots[i]->host);
--			return ret;
--		}
-+		if (ret)
-+			goto err_pci_runtime_suspend;
- 	}
- 
- 	if (chip->fixes && chip->fixes->suspend) {
- 		ret = chip->fixes->suspend(chip);
--		if (ret) {
--			for (i = chip->num_slots - 1; i >= 0; i--)
--				sdhci_runtime_resume_host(chip->slots[i]->host);
--			return ret;
--		}
-+		if (ret)
-+			goto err_pci_runtime_suspend;
- 	}
- 
- 	return 0;
-+
-+err_pci_runtime_suspend:
-+	while (--i >= 0)
-+		sdhci_runtime_resume_host(chip->slots[i]->host);
-+	return ret;
- }
- 
- static int sdhci_pci_runtime_resume(struct device *dev)
--- 
-1.7.5.4
+Uhm...it is due to late pushing from my local, I need to sort out my tree
+now :(
 
+Anyway, Mark's suggestion makes sense, in this case. Because it can be
+happened during merge window even though I solve/push it now.
 
+Hi Chris,
+Could you please pick up Sangwook Lee's '[PATCH v2 1/2] ARM: SAMSUNG: Add
+pm_caps into platform data' with my ack?
+
+If any problems, please let me know.
+
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
 
