@@ -1,38 +1,37 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: mmc: sdio: runtime PM and 8686 problems
-Date: Sat, 3 Dec 2011 10:45:58 -0600
-Message-ID: <CAMLZHHQsFgRoVPhO0+VqOLXfRS=oaENoiS4cLU6hZ1G=6nGLoA@mail.gmail.com>
-References: <CAMLZHHRF2ygqBRyNm21vv0WnCYKPtduGpW7ME25z55v7nTaRnA@mail.gmail.com>
-	<CAK=WgbY22BD8WWk71nL3=D3NZfJY92LXUum8yhV3JyHypjOe-g@mail.gmail.com>
-	<CAMLZHHRfitBnmXi=2ndvm5-jm1Mg4+NT83rjuwD9w236E12hQw@mail.gmail.com>
-	<CAK=WgbYRvsOur6RmAYMEAf-01e-paGinPU4G_0VesacPGBD5GA@mail.gmail.com>
-	<WC20111130150051.910209@terrafix.co.uk>
-	<CAK=WgbbBF1=YJyc2MF2fgNtPbbqF=-9L53=LKoEmkgA43PjSdw@mail.gmail.com>
-	<WC20111201112805.3502EA@terrafix.co.uk>
-	<CAMLZHHSGL20vr7E1rMO47RsxOmO-UPRyOdnqq=DUie3FVzNcaQ@mail.gmail.com>
+From: Axel Lin <axel.lin@gmail.com>
+Subject: [linux-next] sdhci-s3c build error
+Date: Sun, 04 Dec 2011 08:04:05 +0800
+Message-ID: <1322957045.19303.0.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:36519 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752834Ab1LCQp6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 3 Dec 2011 11:45:58 -0500
-Received: by vbbfc26 with SMTP id fc26so3011963vbb.19
-        for <linux-mmc@vger.kernel.org>; Sat, 03 Dec 2011 08:45:58 -0800 (PST)
-In-Reply-To: <CAMLZHHSGL20vr7E1rMO47RsxOmO-UPRyOdnqq=DUie3FVzNcaQ@mail.gmail.com>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:41695 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752456Ab1LDAER (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 3 Dec 2011 19:04:17 -0500
+Received: by iage36 with SMTP id e36so6287325iag.19
+        for <linux-mmc@vger.kernel.org>; Sat, 03 Dec 2011 16:04:16 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Joe Woodward <jw@terrafix.co.uk>
-Cc: Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: linux-mmc@vger.kernel.org
+Cc: Sangwook Lee <sangwook.lee@samsung.com>, Chris Ball <cjb@laptop.org>
 
-On Sat, Dec 3, 2011 at 10:44 AM, Daniel Drake <dsd@laptop.org> wrote:
-> On Thu, Dec 1, 2011 at 5:28 AM, Joe Woodward <jw@terrafix.co.uk> wrote:
->> I've had a play with the nRESET line (as far as I can tell it is the only pin I have access to), and no joy.
+commit 666b6ab "mmc: sdhci-s3c: Add pm_caps into SD/MMC host" introduces below
+build error:
 
-The card is being reset and powered up successfully during boot, then
-powered down, then it fails to power up again.
-Can you confirm that the reset line is definitely being fiddled during
-the second and failing power up?
+  CC      drivers/mmc/host/sdhci-s3c.o
+drivers/mmc/host/sdhci-s3c.c: In function 'sdhci_s3c_probe':
+drivers/mmc/host/sdhci-s3c.c:524: error: 'struct s3c_sdhci_platdata' has no member named 'pm_caps'
+drivers/mmc/host/sdhci-s3c.c:525: error: 'struct s3c_sdhci_platdata' has no member named 'pm_caps'
+make[3]: *** [drivers/mmc/host/sdhci-s3c.o] Error 1
+make[2]: *** [drivers/mmc/host] Error 2
+make[1]: *** [drivers/mmc] Error 2
+make: *** [drivers] Error 2
 
-Thanks
-Daniel
+Forgot to add pm_caps to struct s3c_sdhci_platdata?
+
+Regards,
+Axel
+
+
