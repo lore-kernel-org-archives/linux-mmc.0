@@ -1,68 +1,56 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 00/14] mmc: mmci: Improved PM support, cleanup and bugfixes
-Date: Mon, 5 Dec 2011 18:35:46 +0100
-Message-ID: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 02/14] mmc: mmci: Fixup handling of MCI_STARTBITERR
+Date: Mon, 5 Dec 2011 18:35:48 +0100
+Message-ID: <1323106560-5218-3-git-send-email-ulf.hansson@stericsson.com>
+References: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:33677 "EHLO
-	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932649Ab1LERgU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 12:36:20 -0500
+Received: from eu1sys200aog107.obsmtp.com ([207.126.144.123]:37299 "EHLO
+	eu1sys200aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932686Ab1LERgY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 12:36:24 -0500
+In-Reply-To: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-This patchserie is based on Linux 3.2-rc3 and contains the following:
+The interrupt was previously enabled and then correctly cleared.
+Now we also handle it correctly.
 
-Patch 1 -> 4:
-Minor changes for bugs and some performance optimizations.
-Previously sent to the mailing list.
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/host/mmci.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
 
-Patch 5 -> 7:
-Minor changes affecting how to handle a levelshifter.
-Previously sent to the mailing list.
-
-Patch 8:
-Bugfix for dma. Previously sent to the mailing list, ongoing discussion.
-
-Patch 9 -> 14:
-Improvement of PM support.
-An earlier patch around extending the PM runtime support for mmci has been
-discussed on the mailing list rather recently. Those review comment's
-has been considered in these patches.
-
-
-This patchstack is becomming quite big. Hopefully it should still be possible
-review each piece separate. Those patches that earlier have been uploaded into
-Russell's patchtracker will be replaced with these new rebased versions.
-
-
-Sebastian Rasmussen (1):
-  mmc: mmci: Put power register deviations in variant data
-
-Ulf Hansson (13):
-  mmc: mmci: Support MMC_PM_KEEP_POWER
-  mmc: mmci: Fixup handling of MCI_STARTBITERR
-  mmc: mmci: Increase max_segs from 16 to 128
-  mmc: mmci: Do not release spinlock in request_end
-  mmc: mmci: Provide option to configure bus signal direction
-  mmc: mmci: Change vdd_handler to a generic ios_handler
-  mmc: mmci: Fixup error handling for dma
-  mmc: mmci: Change from using legacy suspend
-  mmc: mmci: Cache MMCICLOCK and MMCIPOWER register
-  mmc: mmci: Fixup use of runtime PM and use autosuspend
-  mmc: mmci: Decrease current consumption in suspend
-  mmc: mmci: Implement PM runtime callbacks to save power
-  mmc: mmci: Use ios_handler to save power
-
- arch/arm/mach-ux500/board-mop500-sdi.c |   21 +--
- drivers/mmc/host/mmci.c                |  266 ++++++++++++++++++++++++++------
- drivers/mmc/host/mmci.h                |   15 +--
- include/linux/amba/mmci.h              |   22 +++-
- 4 files changed, 252 insertions(+), 72 deletions(-)
-
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 1ac04a2..2bc7b6b 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -675,7 +675,8 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 	      unsigned int status)
+ {
+ 	/* First check for errors */
+-	if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_TXUNDERRUN|MCI_RXOVERRUN)) {
++	if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_STARTBITERR|
++		      MCI_TXUNDERRUN|MCI_RXOVERRUN)) {
+ 		u32 remain, success;
+ 
+ 		/* Terminate the DMA transfer */
+@@ -955,8 +956,9 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ 		dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
+ 
+ 		data = host->data;
+-		if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_TXUNDERRUN|
+-			      MCI_RXOVERRUN|MCI_DATAEND|MCI_DATABLOCKEND) && data)
++		if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_STARTBITERR|
++			      MCI_TXUNDERRUN|MCI_RXOVERRUN|MCI_DATAEND|
++			      MCI_DATABLOCKEND) && data)
+ 			mmci_data_irq(host, data, status);
+ 
+ 		cmd = host->cmd;
 -- 
 1.7.5.4
 
