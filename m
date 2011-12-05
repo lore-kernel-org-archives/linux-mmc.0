@@ -1,140 +1,107 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 13/14] mmc: mmci: Implement PM runtime callbacks to save power
-Date: Mon, 5 Dec 2011 18:35:59 +0100
-Message-ID: <1323106560-5218-14-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 11/14] mmc: mmci: Fixup use of runtime PM and use autosuspend
+Date: Mon, 5 Dec 2011 18:35:57 +0100
+Message-ID: <1323106560-5218-12-git-send-email-ulf.hansson@stericsson.com>
 References: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:41610 "EHLO
-	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932730Ab1LERgo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 12:36:44 -0500
+Received: from eu1sys200aog106.obsmtp.com ([207.126.144.121]:49727 "EHLO
+	eu1sys200aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932613Ab1LERgq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 12:36:46 -0500
 In-Reply-To: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-In the runtime_suspend callback we make use of mmci_save
-to disable the VCORE regulator and the MCLK to decrease
-current consumption. At runtime resume, we use mmci_restore
-to re-enable the resourses again.
+Added use of runtime PM autosuspend feature, with a fixed
+timeout of 50 ms. This will prevent adding a latency,
+although very minor, for _every_ request.
 
->From now on this will mean that especially the mmci_restore
-function must be fast to execute since otherwise request
-latency will be introduced.
-
-For the ARM Primcell PL180, the MMCIPOWER register is used
-to control an external power supply to the card. Thus we
-need to prevent the runtime callbacks from doing save and
-restore, otherwise the power to card will be cut. This is
-done by adding a new flag to the variant data.
+Moreover the runtime_get_sync is now also used in set_ios and
+suspend since the runtime resourses are needed here as well.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
 ---
- drivers/mmc/host/mmci.c |   43 ++++++++++++++++++++++++++++++++++++++++++-
- 1 files changed, 42 insertions(+), 1 deletions(-)
+ drivers/mmc/host/mmci.c |   19 ++++++++++++++++---
+ 1 files changed, 16 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index d29b7dc..c0d6026 100644
+index 45e794a..8971157 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -55,6 +55,7 @@ static unsigned int fmax = 515633;
-  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
-  * @pwrreg_powerup: power up value for MMCIPOWER register
-  * @signal_direction: input/out direction of bus signals can be indicated
-+ * @pwrreg_ctrl_power: bits in MMCIPOWER register controls ext. power supply
-  */
- struct variant_data {
- 	unsigned int		clkreg;
-@@ -67,6 +68,7 @@ struct variant_data {
- 	bool			blksz_datactrl16;
- 	u32			pwrreg_powerup;
- 	bool			signal_direction;
-+	bool			pwrreg_ctrl_power;
- };
+@@ -200,8 +200,10 @@ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ 	host->mrq = NULL;
+ 	host->cmd = NULL;
  
- static struct variant_data variant_arm = {
-@@ -74,6 +76,7 @@ static struct variant_data variant_arm = {
- 	.fifohalfsize		= 8 * 4,
- 	.datalength_bits	= 16,
- 	.pwrreg_powerup		= MCI_PWR_UP,
-+	.pwrreg_ctrl_power	= true,
- };
- 
- static struct variant_data variant_arm_extended_fifo = {
-@@ -81,6 +84,7 @@ static struct variant_data variant_arm_extended_fifo = {
- 	.fifohalfsize		= 64 * 4,
- 	.datalength_bits	= 16,
- 	.pwrreg_powerup		= MCI_PWR_UP,
-+	.pwrreg_ctrl_power	= true,
- };
- 
- static struct variant_data variant_u300 = {
-@@ -1482,7 +1486,7 @@ static int __devexit mmci_remove(struct amba_device *dev)
- 	return 0;
+-	pm_runtime_put(mmc_dev(host->mmc));
+ 	mmc_request_done(host->mmc, mrq);
++
++	pm_runtime_mark_last_busy(mmc_dev(host->mmc));
++	pm_runtime_put_autosuspend(mmc_dev(host->mmc));
  }
  
--#ifdef CONFIG_SUSPEND
-+#if defined(CONFIG_SUSPEND) || defined(CONFIG_PM_RUNTIME)
- static int mmci_save(struct amba_device *dev)
- {
- 	struct mmc_host *mmc = amba_get_drvdata(dev);
-@@ -1536,7 +1540,9 @@ static int mmci_restore(struct amba_device *dev)
+ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+@@ -1044,6 +1046,8 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	unsigned long flags;
+ 	int ret;
  
- 	return 0;
++	pm_runtime_get_sync(mmc_dev(mmc));
++
+ 	if (host->plat->ios_handler &&
+ 		host->plat->ios_handler(mmc_dev(mmc), ios))
+ 			dev_err(mmc_dev(mmc), "platform ios_handler failed\n");
+@@ -1064,7 +1068,7 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 				 * power should be rare so we print an error
+ 				 * and return here.
+ 				 */
+-				return;
++				goto out;
+ 			}
+ 		}
+ 		/*
+@@ -1114,6 +1118,10 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	mmci_write_pwrreg(host, pwr);
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
++
++ out:
++	pm_runtime_mark_last_busy(mmc_dev(mmc));
++	pm_runtime_put_autosuspend(mmc_dev(mmc));
  }
-+#endif
  
-+#ifdef CONFIG_SUSPEND
- static int mmci_suspend(struct device *dev)
- {
- 	struct amba_device *adev = to_amba_device(dev);
-@@ -1573,8 +1579,43 @@ static int mmci_resume(struct device *dev)
- }
- #endif
+ static int mmci_get_ro(struct mmc_host *mmc)
+@@ -1388,6 +1396,8 @@ static int __devinit mmci_probe(struct amba_device *dev,
  
-+#ifdef CONFIG_PM_RUNTIME
-+static int mmci_runtime_suspend(struct device *dev)
-+{
-+	struct amba_device *adev = to_amba_device(dev);
-+	struct mmc_host *mmc = amba_get_drvdata(adev);
-+	int ret = 0;
-+
-+	if (mmc) {
-+		struct mmci_host *host = mmc_priv(mmc);
-+		struct variant_data *variant = host->variant;
-+		if (!variant->pwrreg_ctrl_power)
-+			ret = mmci_save(adev);
-+	}
-+
-+	return ret;
-+}
-+
-+static int mmci_runtime_resume(struct device *dev)
-+{
-+	struct amba_device *adev = to_amba_device(dev);
-+	struct mmc_host *mmc = amba_get_drvdata(adev);
-+	int ret = 0;
-+
-+	if (mmc) {
-+		struct mmci_host *host = mmc_priv(mmc);
-+		struct variant_data *variant = host->variant;
-+		if (!variant->pwrreg_ctrl_power)
-+			ret = mmci_restore(adev);
-+	}
-+
-+	return ret;
-+}
-+#endif
-+
- static const struct dev_pm_ops mmci_dev_pm_ops = {
- 	SET_SYSTEM_SLEEP_PM_OPS(mmci_suspend, mmci_resume)
-+	SET_RUNTIME_PM_OPS(mmci_runtime_suspend, mmci_runtime_resume, NULL)
- };
+ 	mmci_dma_setup(host);
  
- static struct amba_id mmci_ids[] = {
++	pm_runtime_set_autosuspend_delay(&dev->dev, 50);
++	pm_runtime_use_autosuspend(&dev->dev);
+ 	pm_runtime_put(&dev->dev);
+ 
+ 	mmc_add_host(mmc);
+@@ -1483,8 +1493,10 @@ static int mmci_suspend(struct device *dev)
+ 		struct mmci_host *host = mmc_priv(mmc);
+ 
+ 		ret = mmc_suspend_host(mmc);
+-		if (ret == 0)
++		if (ret == 0) {
++			pm_runtime_get_sync(dev);
+ 			writel(0, host->base + MMCIMASK0);
++		}
+ 	}
+ 
+ 	return ret;
+@@ -1500,6 +1512,7 @@ static int mmci_resume(struct device *dev)
+ 		struct mmci_host *host = mmc_priv(mmc);
+ 
+ 		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
++		pm_runtime_put(dev);
+ 
+ 		ret = mmc_resume_host(mmc);
+ 	}
 -- 
 1.7.5.4
 
