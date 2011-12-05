@@ -1,71 +1,113 @@
-From: Heiko Schocher <hs@denx.de>
-Subject: Re: [PATCH] arm, da8xx, mmc: set second MMC controllers default queue
-Date: Mon, 05 Dec 2011 11:46:33 +0100
-Message-ID: <4EDCA109.2090204@denx.de>
-References: <1322991210-20486-1-git-send-email-hs@denx.de>
- <B6A220404B6BFC4BBD2AB91C54D39DF4029FE5@DBDE01.ent.ti.com>
-Reply-To: hs@denx.de
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCH 1/4] SDHCI: add sdhci_get_cd callback to detect the card
+Date: Mon, 5 Dec 2011 19:25:01 +0800
+Message-ID: <5D8008F58939784290FAB48F549751984EAE509937@shsmsx502.ccr.corp.intel.com>
+References: <1323077026-12071-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from a.relay.invitel.net ([62.77.203.3]:39907 "EHLO
-	a.relay.invitel.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755896Ab1LEKqi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 05:46:38 -0500
-In-reply-to: <B6A220404B6BFC4BBD2AB91C54D39DF4029FE5@DBDE01.ent.ti.com>
+Received: from mga02.intel.com ([134.134.136.20]:35313 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755912Ab1LELZG convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 06:25:06 -0500
+In-Reply-To: <1323077026-12071-1-git-send-email-r66093@freescale.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "juha.kuikka@gmail.com" <juha.kuikka@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, Ido Yariv <ido@wizery.com>, "Nori, Sekhar" <nsekhar@ti.com>, Wolfgang Denk <wd@denx.de>
+To: "r66093@freescale.com" <r66093@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Hello Rajashekhara,
+Hi Jerry,
 
-Rajashekhara, Sudhakar wrote:
-> Hi,
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org
+> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of r66093@freescale.com
+> Sent: Monday, December 05, 2011 5:24 PM
+> To: linux-mmc@vger.kernel.org
+> Cc: Jerry Huang
+> Subject: [PATCH 1/4] SDHCI: add sdhci_get_cd callback to detect the card
 > 
-> On Sun, Dec 04, 2011 at 15:03:30, Heiko Schocher wrote:
->> The MMC driver allocates channels with EVENTQ_DEFAULT they
->> get put into EVENTQ_1 which the second EDMA controller does
->> not have and hence transfers stall. This is tried to fix
->> in commit f23fe857bbea393b4b94fe2218c98d934bd3d4cf
->> from Ido Yariv, but missed a fix for the second MMC
->> controller on da850.
->>
->> Signed-off-by: Heiko Schocher <hs@denx.de>
->> Signed-off-by: juha.kuikka@gmail.com
->> Reported-by: juha.kuikka@gmail.com
->> Cc: linux-mmc@vger.kernel.org
->> Cc: davinci-linux-open-source@linux.davincidsp.com
->> Cc: Rajashekhara, Sudhakar <sudhakar.raj@ti.com>
->> Cc: Ido Yariv <ido@wizery.com>
->> Cc: Sekhar Nori <nsekhar@ti.com>
->> Cc: Wolfgang Denk <wd@denx.de>
->> ---
->>  arch/arm/mach-davinci/dma.c |    2 +-
->>  1 files changed, 1 insertions(+), 1 deletions(-)
->>
->> diff --git a/arch/arm/mach-davinci/dma.c b/arch/arm/mach-davinci/dma.c
->> index da90103..e10a251 100644
->> --- a/arch/arm/mach-davinci/dma.c
->> +++ b/arch/arm/mach-davinci/dma.c
->> @@ -1513,7 +1513,7 @@ static int __init edma_probe(struct platform_device *pdev)
->>  		 * started by the codec engine will not cause audio defects.
->>  		 */
->>  		for (i = 0; i < edma_cc[j]->num_channels; i++)
->> -			map_dmach_queue(j, i, EVENTQ_1);
->> +			map_dmach_queue(j, i, info[j]->default_queue);
->>  
->>  		queue_tc_mapping = info[j]->queue_tc_mapping;
->>  		queue_priority_mapping = info[j]->queue_priority_mapping;
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 > 
-> Acked-by: Rajashekhara, Sudhakar <sudhakar.raj@ti.com>
+> Add callback function sdhci_get_cd to detect the card.
+> In order to check if the card is present, we will read the PRESENT STATE
+> register and check the bit13(Card detect pin level) and bit15(CINS).
+> 
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci.c |   20 ++++++++++++++++++++
+>  drivers/mmc/host/sdhci.h |    1 +
+>  2 files changed, 21 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 6d8eea3..66afd82 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2,6 +2,7 @@
+>   *  linux/drivers/mmc/host/sdhci.c - Secure Digital Host Controller Interface
+> driver
+>   *
+>   *  Copyright (C) 2005-2008 Pierre Ossman, All Rights Reserved.
+> + *  Copyright (C) 2011 Freescale Semiconductor Inc.
+>   *
+>   * This program is free software; you can redistribute it and/or modify
+>   * it under the terms of the GNU General Public License as published by
+> @@ -1518,6 +1519,24 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+>  	return ret;
+>  }
+> 
+> +static int sdhci_get_cd(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	unsigned long flags;
+> +	int present;
+> +
+> +	spin_lock_irqsave(&host->lock, flags);
+> +
+> +	if (host->flags & SDHCI_DEVICE_DEAD)
+> +		present = 0;
+> +	else
+> +		present = sdhci_readl(host, SDHCI_PRESENT_STATE);
 
-Thanks, but as Ido commented, this patch is no longer necessary, sorry
-for the noise.
+As far as I know, some SDHC host controller didn't implement its present register well...The present register of some SDHC host controller will report "there is a card" forever. So, according to your patch2, using such method is not a proper solution for card detection, I think.
 
-bye,
-Heiko
--- 
-DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
-HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
+Thanks
+Chuanxiao
+> +
+> +	spin_unlock_irqrestore(&host->lock, flags);
+> +
+> +	return (present & (SDHCI_CARD_PRESENT | SDHCI_CARD_CDPL));
+> +}
+> +
+>  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
+>  {
+>  	if (host->flags & SDHCI_DEVICE_DEAD)
+> @@ -1884,6 +1903,7 @@ static const struct mmc_host_ops sdhci_ops = {
+>  	.request	= sdhci_request,
+>  	.set_ios	= sdhci_set_ios,
+>  	.get_ro		= sdhci_get_ro,
+> +	.get_cd		= sdhci_get_cd,
+>  	.hw_reset	= sdhci_hw_reset,
+>  	.enable_sdio_irq = sdhci_enable_sdio_irq,
+>  	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0a5b654..8ea7e00 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -69,6 +69,7 @@
+>  #define  SDHCI_SPACE_AVAILABLE	0x00000400
+>  #define  SDHCI_DATA_AVAILABLE	0x00000800
+>  #define  SDHCI_CARD_PRESENT	0x00010000
+> +#define  SDHCI_CARD_CDPL	0x00040000
+>  #define  SDHCI_WRITE_PROTECT	0x00080000
+>  #define  SDHCI_DATA_LVL_MASK	0x00F00000
+>  #define   SDHCI_DATA_LVL_SHIFT	20
+> --
+> 1.7.5.4
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
