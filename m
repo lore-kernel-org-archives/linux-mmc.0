@@ -1,168 +1,140 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 06/14] mmc: mmci: Provide option to configure bus signal direction
-Date: Mon, 5 Dec 2011 18:35:52 +0100
-Message-ID: <1323106560-5218-7-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 13/14] mmc: mmci: Implement PM runtime callbacks to save power
+Date: Mon, 5 Dec 2011 18:35:59 +0100
+Message-ID: <1323106560-5218-14-git-send-email-ulf.hansson@stericsson.com>
 References: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:46736 "EHLO
-	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932592Ab1LERgg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 12:36:36 -0500
+Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:41610 "EHLO
+	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932730Ab1LERgo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 12:36:44 -0500
 In-Reply-To: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Sebastian Rasmussen <sebastian.rasmussen@stericsson.com>
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-The ST Micro variant supports bus signal direction indication. A new
-member in the variant struct is added for this.
+In the runtime_suspend callback we make use of mmci_save
+to disable the VCORE regulator and the MCLK to decrease
+current consumption. At runtime resume, we use mmci_restore
+to re-enable the resourses again.
 
-Moreover the actual signal direction configuration is board specific,
-thus the amba mmci platform data is extended with a new member to be
-able provide mmci with these specific board configurations.
+>From now on this will mean that especially the mmci_restore
+function must be fast to execute since otherwise request
+latency will be introduced.
 
-This patch is based upon a patch from Sebastian Rasmussen.
+For the ARM Primcell PL180, the MMCIPOWER register is used
+to control an external power supply to the card. Thus we
+need to prevent the runtime callbacks from doing save and
+restore, otherwise the power to card will be cut. This is
+done by adding a new flag to the variant data.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
-Signed-off-by: Sebastian Rasmussen <sebastian.rasmussen@stericsson.com>
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c   |   21 +++++++++++++++++++++
- drivers/mmc/host/mmci.h   |   10 ----------
- include/linux/amba/mmci.h |   16 ++++++++++++++++
- 3 files changed, 37 insertions(+), 10 deletions(-)
+ drivers/mmc/host/mmci.c |   43 ++++++++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 42 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index a3912cc..d95555e 100644
+index d29b7dc..c0d6026 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -54,6 +54,7 @@ static unsigned int fmax = 515633;
-  * @st_clkdiv: true if using a ST-specific clock divider algorithm
+@@ -55,6 +55,7 @@ static unsigned int fmax = 515633;
   * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
   * @pwrreg_powerup: power up value for MMCIPOWER register
-+ * @signal_direction: input/out direction of bus signals can be indicated
+  * @signal_direction: input/out direction of bus signals can be indicated
++ * @pwrreg_ctrl_power: bits in MMCIPOWER register controls ext. power supply
   */
  struct variant_data {
  	unsigned int		clkreg;
-@@ -65,6 +66,7 @@ struct variant_data {
- 	bool			st_clkdiv;
+@@ -67,6 +68,7 @@ struct variant_data {
  	bool			blksz_datactrl16;
  	u32			pwrreg_powerup;
-+	bool			signal_direction;
+ 	bool			signal_direction;
++	bool			pwrreg_ctrl_power;
  };
  
  static struct variant_data variant_arm = {
-@@ -88,6 +90,7 @@ static struct variant_data variant_u300 = {
+@@ -74,6 +76,7 @@ static struct variant_data variant_arm = {
+ 	.fifohalfsize		= 8 * 4,
  	.datalength_bits	= 16,
- 	.sdio			= true,
- 	.pwrreg_powerup		= MCI_PWR_ON,
-+	.signal_direction	= true,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
++	.pwrreg_ctrl_power	= true,
  };
  
- static struct variant_data variant_ux500 = {
-@@ -99,6 +102,7 @@ static struct variant_data variant_ux500 = {
- 	.sdio			= true,
- 	.st_clkdiv		= true,
- 	.pwrreg_powerup		= MCI_PWR_ON,
-+	.signal_direction	= true,
+ static struct variant_data variant_arm_extended_fifo = {
+@@ -81,6 +84,7 @@ static struct variant_data variant_arm_extended_fifo = {
+ 	.fifohalfsize		= 64 * 4,
+ 	.datalength_bits	= 16,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
++	.pwrreg_ctrl_power	= true,
  };
  
- static struct variant_data variant_ux500v2 = {
-@@ -111,6 +115,7 @@ static struct variant_data variant_ux500v2 = {
- 	.st_clkdiv		= true,
- 	.blksz_datactrl16	= true,
- 	.pwrreg_powerup		= MCI_PWR_ON,
-+	.signal_direction	= true,
- };
+ static struct variant_data variant_u300 = {
+@@ -1482,7 +1486,7 @@ static int __devexit mmci_remove(struct amba_device *dev)
+ 	return 0;
+ }
  
- /*
-@@ -1050,6 +1055,22 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		break;
- 	}
+-#ifdef CONFIG_SUSPEND
++#if defined(CONFIG_SUSPEND) || defined(CONFIG_PM_RUNTIME)
+ static int mmci_save(struct amba_device *dev)
+ {
+ 	struct mmc_host *mmc = amba_get_drvdata(dev);
+@@ -1536,7 +1540,9 @@ static int mmci_restore(struct amba_device *dev)
  
-+	if (variant->signal_direction && ios->power_mode != MMC_POWER_OFF) {
-+		/*
-+		 * The ST Micro variant has some additional bits
-+		 * indicating signal direction for the signals in
-+		 * the SD/MMC bus and feedback-clock usage.
-+		 */
-+		pwr |= host->plat->sigdir;
+ 	return 0;
+ }
++#endif
+ 
++#ifdef CONFIG_SUSPEND
+ static int mmci_suspend(struct device *dev)
+ {
+ 	struct amba_device *adev = to_amba_device(dev);
+@@ -1573,8 +1579,43 @@ static int mmci_resume(struct device *dev)
+ }
+ #endif
+ 
++#ifdef CONFIG_PM_RUNTIME
++static int mmci_runtime_suspend(struct device *dev)
++{
++	struct amba_device *adev = to_amba_device(dev);
++	struct mmc_host *mmc = amba_get_drvdata(adev);
++	int ret = 0;
 +
-+		if (ios->bus_width == MMC_BUS_WIDTH_4)
-+			pwr &= ~MCI_ST_DATA74DIREN;
-+		else if (ios->bus_width == MMC_BUS_WIDTH_1)
-+			pwr &= (~MCI_ST_DATA74DIREN &
-+				~MCI_ST_DATA31DIREN &
-+				~MCI_ST_DATA2DIREN);
++	if (mmc) {
++		struct mmci_host *host = mmc_priv(mmc);
++		struct variant_data *variant = host->variant;
++		if (!variant->pwrreg_ctrl_power)
++			ret = mmci_save(adev);
 +	}
 +
- 	if (ios->bus_mode == MMC_BUSMODE_OPENDRAIN) {
- 		if (host->hw_designer != AMBA_VENDOR_ST)
- 			pwr |= MCI_ROD;
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 49f153e..89eb2e3 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -13,16 +13,6 @@
- #define MCI_PWR_ON		0x03
- #define MCI_OD			(1 << 6)
- #define MCI_ROD			(1 << 7)
--/*
-- * The ST Micro version does not have ROD and reuse the voltage registers
-- * for direction settings
-- */
--#define MCI_ST_DATA2DIREN	(1 << 2)
--#define MCI_ST_CMDDIREN		(1 << 3)
--#define MCI_ST_DATA0DIREN	(1 << 4)
--#define MCI_ST_DATA31DIREN	(1 << 5)
--#define MCI_ST_FBCLKEN		(1 << 7)
--#define MCI_ST_DATA74DIREN	(1 << 8)
- 
- #define MMCICLOCK		0x004
- #define MCI_CLK_ENABLE		(1 << 8)
-diff --git a/include/linux/amba/mmci.h b/include/linux/amba/mmci.h
-index 2111481..8ce34e8 100644
---- a/include/linux/amba/mmci.h
-+++ b/include/linux/amba/mmci.h
-@@ -6,6 +6,19 @@
- 
- #include <linux/mmc/host.h>
- 
++	return ret;
++}
 +
-+/*
-+ * These defines is places here due to access is needed from machine
-+ * configuration files. The ST Micro version does not have ROD and
-+ * reuse the voltage registers for direction settings.
-+ */
-+#define MCI_ST_DATA2DIREN	(1 << 2)
-+#define MCI_ST_CMDDIREN		(1 << 3)
-+#define MCI_ST_DATA0DIREN	(1 << 4)
-+#define MCI_ST_DATA31DIREN	(1 << 5)
-+#define MCI_ST_FBCLKEN		(1 << 7)
-+#define MCI_ST_DATA74DIREN	(1 << 8)
++static int mmci_runtime_resume(struct device *dev)
++{
++	struct amba_device *adev = to_amba_device(dev);
++	struct mmc_host *mmc = amba_get_drvdata(adev);
++	int ret = 0;
 +
- /* Just some dummy forwarding */
- struct dma_chan;
++	if (mmc) {
++		struct mmci_host *host = mmc_priv(mmc);
++		struct variant_data *variant = host->variant;
++		if (!variant->pwrreg_ctrl_power)
++			ret = mmci_restore(adev);
++	}
++
++	return ret;
++}
++#endif
++
+ static const struct dev_pm_ops mmci_dev_pm_ops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(mmci_suspend, mmci_resume)
++	SET_RUNTIME_PM_OPS(mmci_runtime_suspend, mmci_runtime_resume, NULL)
+ };
  
-@@ -30,6 +43,8 @@ struct dma_chan;
-  * @cd_invert: true if the gpio_cd pin value is active low
-  * @capabilities: the capabilities of the block as implemented in
-  * this platform, signify anything MMC_CAP_* from mmc/host.h
-+ * @sigdir: a bit field indicating for what bits in the MMC bus the host
-+ * should enable signal direction indication.
-  * @dma_filter: function used to select an appropriate RX and TX
-  * DMA channel to be used for DMA, if and only if you're deploying the
-  * generic DMA engine
-@@ -52,6 +67,7 @@ struct mmci_platform_data {
- 	int	gpio_cd;
- 	bool	cd_invert;
- 	unsigned long capabilities;
-+	u32 sigdir;
- 	bool (*dma_filter)(struct dma_chan *chan, void *filter_param);
- 	void *dma_rx_param;
- 	void *dma_tx_param;
+ static struct amba_id mmci_ids[] = {
 -- 
 1.7.5.4
 
