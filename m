@@ -1,56 +1,54 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 02/14] mmc: mmci: Fixup handling of MCI_STARTBITERR
-Date: Mon, 5 Dec 2011 18:35:48 +0100
-Message-ID: <1323106560-5218-3-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 03/14] mmc: mmci: Increase max_segs from 16 to 128
+Date: Mon, 5 Dec 2011 18:35:49 +0100
+Message-ID: <1323106560-5218-4-git-send-email-ulf.hansson@stericsson.com>
 References: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog107.obsmtp.com ([207.126.144.123]:37299 "EHLO
-	eu1sys200aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932686Ab1LERgY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 12:36:24 -0500
+Received: from eu1sys200aog109.obsmtp.com ([207.126.144.127]:45327 "EHLO
+	eu1sys200aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932592Ab1LERg0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 12:36:26 -0500
 In-Reply-To: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Per Forlin <per.forlin@stericsson.com>
 
-The interrupt was previously enabled and then correctly cleared.
-Now we also handle it correctly.
+A significant increase (10-20%) in performance throughput for
+USB mass storage is the reason for incrementing the value.
+By some reason the USB driver allocates buffers which requires
+a scattergather list to contain a lot more than 16 elements to
+get optimal performance. This change sets the maximum elements
+to 128.
+
+Tests with large reads and large writes (100 MiB) show that the
+throughput increase is significant for write (10% for this test)
+but not for read. Tests are run on a Linux host with ext4 FS on
+the gadget mass storage device. The sg-len still exceeds 16 for
+the read tests but the performance gain is low or nothing.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+Signed-off-by: Per Forlin <per.forlin@stericsson.com>
 Acked-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c |    8 +++++---
- 1 files changed, 5 insertions(+), 3 deletions(-)
+ drivers/mmc/host/mmci.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 1ac04a2..2bc7b6b 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -675,7 +675,8 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 	      unsigned int status)
- {
- 	/* First check for errors */
--	if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_TXUNDERRUN|MCI_RXOVERRUN)) {
-+	if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_STARTBITERR|
-+		      MCI_TXUNDERRUN|MCI_RXOVERRUN)) {
- 		u32 remain, success;
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 79e4143..49f153e 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -160,7 +160,7 @@
+ 	(MCI_RXFIFOHALFFULLMASK | MCI_RXDATAAVLBLMASK | \
+ 	 MCI_TXFIFOHALFEMPTYMASK)
  
- 		/* Terminate the DMA transfer */
-@@ -955,8 +956,9 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
- 		dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
+-#define NR_SG		16
++#define NR_SG		128
  
- 		data = host->data;
--		if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_TXUNDERRUN|
--			      MCI_RXOVERRUN|MCI_DATAEND|MCI_DATABLOCKEND) && data)
-+		if (status & (MCI_DATACRCFAIL|MCI_DATATIMEOUT|MCI_STARTBITERR|
-+			      MCI_TXUNDERRUN|MCI_RXOVERRUN|MCI_DATAEND|
-+			      MCI_DATABLOCKEND) && data)
- 			mmci_data_irq(host, data, status);
- 
- 		cmd = host->cmd;
+ struct clk;
+ struct variant_data;
 -- 
 1.7.5.4
 
