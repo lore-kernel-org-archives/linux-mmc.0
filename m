@@ -1,54 +1,127 @@
-From: Xie Xiaobo <X.Xie@freescale.com>
-Subject: [PATCH] mmc: sdhci-pltfm: Added sdhci-adjust-timeout quirk
-Date: Mon, 5 Dec 2011 16:55:20 +0800
-Message-ID: <1323075320-9138-1-git-send-email-X.Xie@freescale.com>
-References: <y>
+From: Ohad Ben-Cohen <ohad@wizery.com>
+Subject: Re: [PATCH] mmc/sdio: don't allow interface to runtime-suspend until
+ probe is finished.
+Date: Mon, 5 Dec 2011 12:25:42 +0200
+Message-ID: <CAK=Wgbb-6eV6aDxTdi3qFLZmu0cHSZvHRUpUEr3YQ=4tO5sCPw@mail.gmail.com>
+References: <20111205125416.6093ecd8@notabene.brown>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:49394 "EHLO
-	TX2EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755430Ab1LEKMg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 05:12:36 -0500
-In-Reply-To: <y>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:53812 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755903Ab1LEK0E convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2011 05:26:04 -0500
+In-Reply-To: <20111205125416.6093ecd8@notabene.brown>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linuxppc-dev@lists.ozlabs.org
-Cc: linux-mmc@vger.kernel.org, avorontsov@ru.mvista.com, Xie Xiaobo <X.Xie@freescale.com>
+To: NeilBrown <neilb@suse.de>
+Cc: linux-mmc@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, Daniel Drake <dsd@laptop.org>, Joe Woodward <jw@terrafix.co.uk>, Chris Ball <cjb@laptop.org>
 
-Some controller provides an incorrect timeout value for transfers,
-So it need the quirk to adjust timeout value to 0xE.
-E.g. eSDHC of MPC8536, P1010, and P2020.
+Hi Neil,
 
-Signed-off-by: Xie Xiaobo <X.Xie@freescale.com>
----
- drivers/mmc/host/sdhci-pltfm.c |    5 ++++-
- 1 files changed, 4 insertions(+), 1 deletions(-)
+On Mon, Dec 5, 2011 at 3:54 AM, NeilBrown <neilb@suse.de> wrote:
+> =A0I've been chasing down a problem with the SDIO-attached wifi card =
+in the
+> =A0GTA04 (www.gta04.org).
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index a9e12ea..b5d6b3f 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -2,7 +2,7 @@
-  * sdhci-pltfm.c Support for SDHCI platform devices
-  * Copyright (c) 2009 Intel Corporation
-  *
-- * Copyright (c) 2007 Freescale Semiconductor, Inc.
-+ * Copyright (c) 2007, 2011 Freescale Semiconductor, Inc.
-  * Copyright (c) 2009 MontaVista Software, Inc.
-  *
-  * Authors: Xiaobo Xie <X.Xie@freescale.com>
-@@ -68,6 +68,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 		if (of_get_property(np, "sdhci,1-bit-only", NULL))
- 			host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
- 
-+		if (of_get_property(np, "sdhci,sdhci-adjust-timeout", NULL))
-+			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-+
- 		if (sdhci_of_wp_inverted(np))
- 			host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
- 
--- 
-1.6.4
+8686, right ?
 
+> =A0The problem seems very similar to that described in
+>
+> =A0 =A0http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg04289=
+=2Ehtml
 
+Don't go that far back, Joe just reported this exact problem in :
+
+http://comments.gmane.org/gmane.linux.kernel.mmc/11231
+
+> commit 08da834a24312157f512224691ad1fddd11c1073
+> Author: Daniel Drake <dsd@laptop.org>
+> Date: =A0 Wed Jul 20 17:39:22 2011 +0100
+>
+> =A0 =A0mmc: enable runtime PM by default
+>
+>
+> and if I revert that commit so that runtime PM is not enabled the pro=
+blem
+> goes away.
+
+And this is most likely what we're going to do, unless someone with
+the 8686 can further look into the problem.
+
+> (The wifi chip is a libertas_sdio supported chip connected to an mmc
+> interface on an omap3, and has a separate regulator for power supply,=
+ plus a
+> GPIO pin for reset, just like in the email thread. =A0The problem is
+> exemplified by:
+> [ =A0 64.643981] libertas_sdio: probe of mmc1:0001:1 failed with erro=
+r -16
+> ).
+
+Yes, the same issue that Joe is seeing.
+
+> I finally managed to track down exactly what was happening - runtime =
+PM was
+> putting the interface to sleep before the SDIO functions were probed =
+so
+> initialising them failed.
+
+Yeah, but the question is why it fails.
+
+It's perfectly fine to power the card down before the functions are
+probed, because just before they are probed the bus is responsible to
+power the card up again.
+
+> From: NeilBrown <neilb@suse.de>
+> Date: Mon, 5 Dec 2011 11:34:47 +1100
+> Subject: [PATCH] mmc/sdio: don't allow interface to runtime-suspend u=
+ntil probe is finished.
+
+You can't tell when probe is finished. In fact, in can happen very far
+in the future or even never at all (e.g. when the function driver
+isn't loaded).
+
+> mmc_attach_sdio currently enables runtime power management on
+> the mmc interface before it completes the probe of functions.
+> This means that it might be asleep during the probe and the probe
+> will fail.
+
+No - the sdio bus powers the card up before probing the drivers. See
+sdio_bus_probe.
+
+> In particular, if 'drivers_autoprobe' is enabled on the mmc bus, then
+> device_attach() will be called by bus_probe_device() from device_add(=
+)
+> and it will pm_runtime_get_noresume()/pm_runtime_put_sync().
+>
+> As runtime power management this the device is running
+> (pm_runtime_set_active() in mmc_attach_sdio()) and rtpm is enabled
+> (pm_runtime_enable()), the pm_runtime_put_sync() call puts the mmc
+> interface to sleep,
+
+This is fine
+
+> so function probing fails.
+
+The question is why. Again - sdio_bus_probe should power up the card.
+=46or some reason, it (or something else) fails to do so with the 8686
+on some setups. Other chips might have similar issues, too - we just
+don't know (all we know is that it works great with the wl12xx, and
+with the Daniel's 8686 setup).
+
+> So this patch moves the call to pm_runtime_enable to after all the
+> calls to sdio_add_func.
+
+Looks like this will have the undesired side-effect of keeping the
+chip powered up, even if it doesn't have any driver loaded for it.
+
+And this doesn't really address the problem: we still don't know why
+the 8686 fails to power up at this point.
+
+Can you please tell us where exactly is the first failure coming from
+? is this from libertas own probe function ? is this sdio_bus_probe
+getting an error from calling pm_runtime_get_sync ?
+
+Thanks,
+Ohad
