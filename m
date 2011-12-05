@@ -1,115 +1,206 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 1/4] SDHCI: add sdhci_get_cd callback to detect the card
-Date: Mon, 5 Dec 2011 10:48:50 -0800
-Message-ID: <F2681397-0395-43F7-902F-9A575EDD843B@marvell.com>
-References: <1323077026-12071-1-git-send-email-r66093@freescale.com>
+From: NeilBrown <neilb@suse.de>
+Subject: Re: [PATCH] mmc/sdio: don't allow interface to runtime-suspend
+ until probe is finished.
+Date: Tue, 6 Dec 2011 06:06:54 +1100
+Message-ID: <20111206060654.0e8bebe0@notabene.brown>
+References: <20111205125416.6093ecd8@notabene.brown>
+	<CAK=Wgbb-6eV6aDxTdi3qFLZmu0cHSZvHRUpUEr3YQ=4tO5sCPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: multipart/signed; micalg=PGP-SHA1;
+ boundary="Sig_/AlrUhHGvZ.0DUp/WfjnurBT"; protocol="application/pgp-signature"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:57385 "EHLO
-	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750951Ab1LESsz convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 5 Dec 2011 13:48:55 -0500
-In-Reply-To: <1323077026-12071-1-git-send-email-r66093@freescale.com>
-Content-Language: en-US
+Received: from cantor2.suse.de ([195.135.220.15]:52194 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932069Ab1LETHi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 5 Dec 2011 14:07:38 -0500
+In-Reply-To: <CAK=Wgbb-6eV6aDxTdi3qFLZmu0cHSZvHRUpUEr3YQ=4tO5sCPw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "<r66093@freescale.com> <r66093@freescale.com>" <r66093@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jerry Huang <Chang-Ming.Huang@freescale.com>
+To: Ohad Ben-Cohen <ohad@wizery.com>
+Cc: linux-mmc@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, Daniel Drake <dsd@laptop.org>, Joe Woodward <jw@terrafix.co.uk>, Chris Ball <cjb@laptop.org>
+
+--Sig_/AlrUhHGvZ.0DUp/WfjnurBT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, 5 Dec 2011 12:25:42 +0200 Ohad Ben-Cohen <ohad@wizery.com> wrote:
+
+> Hi Neil,
+>=20
+> On Mon, Dec 5, 2011 at 3:54 AM, NeilBrown <neilb@suse.de> wrote:
+> > =A0I've been chasing down a problem with the SDIO-attached wifi card in=
+ the
+> > =A0GTA04 (www.gta04.org).
+>=20
+> 8686, right ?
+
+yep, that's the one!
+
+>=20
+> > =A0The problem seems very similar to that described in
+> >
+> > =A0 =A0http://www.mail-archive.com/linux-mmc@vger.kernel.org/msg04289.h=
+tml
+>=20
+> Don't go that far back, Joe just reported this exact problem in :
+>=20
+> http://comments.gmane.org/gmane.linux.kernel.mmc/11231
+
+Indeed.
+
+>=20
+> > commit 08da834a24312157f512224691ad1fddd11c1073
+> > Author: Daniel Drake <dsd@laptop.org>
+> > Date: =A0 Wed Jul 20 17:39:22 2011 +0100
+> >
+> > =A0 =A0mmc: enable runtime PM by default
+> >
+> >
+> > and if I revert that commit so that runtime PM is not enabled the probl=
+em
+> > goes away.
+>=20
+> And this is most likely what we're going to do, unless someone with
+> the 8686 can further look into the problem.
+
+Challenge accepted.
+
+Even if I don't find a better solution, this seems backwards.  Sure the
+default should be that PM is enabled, but individual board can request no
+PM on MMC interfaces where it is a problem.
+
+>=20
+> > (The wifi chip is a libertas_sdio supported chip connected to an mmc
+> > interface on an omap3, and has a separate regulator for power supply, p=
+lus a
+> > GPIO pin for reset, just like in the email thread. =A0The problem is
+> > exemplified by:
+> > [ =A0 64.643981] libertas_sdio: probe of mmc1:0001:1 failed with error =
+-16
+> > ).
+>=20
+> Yes, the same issue that Joe is seeing.
+>=20
+> > I finally managed to track down exactly what was happening - runtime PM=
+ was
+> > putting the interface to sleep before the SDIO functions were probed so
+> > initialising them failed.
+>=20
+> Yeah, but the question is why it fails.
+
+The chip has a requirement that the reset line is held down during power-on,
+and raised shortly after (I don't know exactly how short).  So if you just
+remove power and give it back, the chip doesn't come up properly.
+
+>=20
+> It's perfectly fine to power the card down before the functions are
+> probed, because just before they are probed the bus is responsible to
+> power the card up again.
+
+"It *should be* perfectly fine ..." :-)
+
+We just have to make sure the bug powers up the card properly.
+Maybe I need to create a virtual regulator that powers on the real regulato=
+r,
+then raises the reset line.  I wonder how hard that is.
 
 
-On Dec 5, 2011, at 1:23 AM, <r66093@freescale.com> <r66093@freescale.com> wrote:
+>=20
+> > From: NeilBrown <neilb@suse.de>
+> > Date: Mon, 5 Dec 2011 11:34:47 +1100
+> > Subject: [PATCH] mmc/sdio: don't allow interface to runtime-suspend unt=
+il probe is finished.
+>=20
+> You can't tell when probe is finished. In fact, in can happen very far
+> in the future or even never at all (e.g. when the function driver
+> isn't loaded).
 
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> 
-> Add callback function sdhci_get_cd to detect the card.
-> In order to check if the card is present, we will read the PRESENT STATE
-> register and check the bit13(Card detect pin level) and bit15(CINS).
-> 
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> ---
-> drivers/mmc/host/sdhci.c |   20 ++++++++++++++++++++
-> drivers/mmc/host/sdhci.h |    1 +
-> 2 files changed, 21 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 6d8eea3..66afd82 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2,6 +2,7 @@
->  *  linux/drivers/mmc/host/sdhci.c - Secure Digital Host Controller Interface driver
->  *
->  *  Copyright (C) 2005-2008 Pierre Ossman, All Rights Reserved.
-> + *  Copyright (C) 2011 Freescale Semiconductor Inc.
+Ahhh... I naively assumed that=20
 
+	/*
+	 * ...then the SDIO functions.
+	 */
+	for (i =3D 0;i < funcs;i++) {
+		err =3D sdio_add_func(host->card->sdio_func[i]);
+		if (err)
+			goto remove_added;
+	}
 
-Lots of folks have made mods to this code and they have not added a copyright name.
-What is the rule Chris ?
-
->  *
->  * This program is free software; you can redistribute it and/or modify
->  * it under the terms of the GNU General Public License as published by
-> @@ -1518,6 +1519,24 @@ static int sdhci_get_ro(struct mmc_host *mmc)
-> 	return ret;
-> }
-> 
-> +static int sdhci_get_cd(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	unsigned long flags;
-> +	int present;
-> +
-> +	spin_lock_irqsave(&host->lock, flags);
-> +
-> +	if (host->flags & SDHCI_DEVICE_DEAD)
-> +		present = 0;
-> +	else
-> +		present = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> +
-> +	spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +	return (present & (SDHCI_CARD_PRESENT | SDHCI_CARD_CDPL));
-> +}
-> +
-> static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
-> {
-> 	if (host->flags & SDHCI_DEVICE_DEAD)
-> @@ -1884,6 +1903,7 @@ static const struct mmc_host_ops sdhci_ops = {
-> 	.request	= sdhci_request,
-> 	.set_ios	= sdhci_set_ios,
-> 	.get_ro		= sdhci_get_ro,
-> +	.get_cd		= sdhci_get_cd,
+would add all the functions.  but as you say: the drivers might not be load=
+ed
+yet.
 
 
-A better approach would be to define a callback into platform specific code and use that.  For your
-chip reading present state works but for other chips this will not be sufficient so a more general
-solution would be better.
+>=20
+> > mmc_attach_sdio currently enables runtime power management on
+> > the mmc interface before it completes the probe of functions.
+> > This means that it might be asleep during the probe and the probe
+> > will fail.
+>=20
+> No - the sdio bus powers the card up before probing the drivers. See
+> sdio_bus_probe.
+>=20
+> > In particular, if 'drivers_autoprobe' is enabled on the mmc bus, then
+> > device_attach() will be called by bus_probe_device() from device_add()
+> > and it will pm_runtime_get_noresume()/pm_runtime_put_sync().
+> >
+> > As runtime power management this the device is running
+> > (pm_runtime_set_active() in mmc_attach_sdio()) and rtpm is enabled
+> > (pm_runtime_enable()), the pm_runtime_put_sync() call puts the mmc
+> > interface to sleep,
+>=20
+> This is fine
+>=20
+> > so function probing fails.
+>=20
+> The question is why. Again - sdio_bus_probe should power up the card.
+> For some reason, it (or something else) fails to do so with the 8686
+> on some setups. Other chips might have similar issues, too - we just
+> don't know (all we know is that it works great with the wl12xx, and
+> with the Daniel's 8686 setup).
+>=20
+> > So this patch moves the call to pm_runtime_enable to after all the
+> > calls to sdio_add_func.
+>=20
+> Looks like this will have the undesired side-effect of keeping the
+> chip powered up, even if it doesn't have any driver loaded for it.
+>=20
+> And this doesn't really address the problem: we still don't know why
+> the 8686 fails to power up at this point.
+>=20
+> Can you please tell us where exactly is the first failure coming from
+> ? is this from libertas own probe function ? is this sdio_bus_probe
+> getting an error from calling pm_runtime_get_sync ?
+>=20
+> Thanks,
+> Ohad
 
+I'll spend some more time on this and get back to you - probably next week.
 
+Thanks for the hints and perspective.
 
-> 	.hw_reset	= sdhci_hw_reset,
-> 	.enable_sdio_irq = sdhci_enable_sdio_irq,
-> 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 0a5b654..8ea7e00 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -69,6 +69,7 @@
-> #define  SDHCI_SPACE_AVAILABLE	0x00000400
-> #define  SDHCI_DATA_AVAILABLE	0x00000800
-> #define  SDHCI_CARD_PRESENT	0x00010000
-> +#define  SDHCI_CARD_CDPL	0x00040000
-> #define  SDHCI_WRITE_PROTECT	0x00080000
-> #define  SDHCI_DATA_LVL_MASK	0x00F00000
-> #define   SDHCI_DATA_LVL_SHIFT	20
-> -- 
-> 1.7.5.4
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+NeilBrown
 
+--Sig_/AlrUhHGvZ.0DUp/WfjnurBT
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Disposition: attachment; filename=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.18 (GNU/Linux)
+
+iQIVAwUBTt0WTjnsnt1WYoG5AQKPxA/+NO018Dfyb+bQW5Edw9Kz4dzc6zNctzTG
+Gb1r6lBSlhjCU13C5AESXMGI57aDyjSaMvjtADgEFugbBCEnaoE4D1GUWmsODUYy
+Ec8tEsl+RmF8PF/eMOWe4piDZIyPtHUWt84Yl8UX4lQexao4fz3UQLbg9PiYpCl1
+lq+cMgpJZ7k/o9kNX0gz4fdNk2lK6E71L56eIr0NkzHOyctoqip0Ihf6xs2939yV
+asE/kH9g33n6kdDxKhq3Bf12ksnI4a0cXFHpFagxEU8AR3qk1GjEsTmzf1rdpjJH
+0wJS0mMFOzCORFb1bYdPPYFa6XbD2AV+DjLku/oTTf6nFETvt6Hj7R8OInX3yqa7
++1ov+EJGr5ckEhPZouz7Id9bQiZE3SS5kHglu30mcc95g6g+/PW13wx6c847j588
+I8TwjCJbYbLLVc/I/UVItXyS2gjQGrMb6dmuiIHXLKq8Z2y5JXQIBSI6zs+qV+hZ
+WgOaBPkk0hqBogsftGtP2OW3s63XhJfmwCLZ1+XDi1VsOFqTwvy7iS3Xb9DRggx3
+lx11UpYVia1EM51gcVrcIjmpSXiJCJleHqbwUtiwz4sNU5ys2MJ4hNE6c7MjCggc
+j0OHemGOYHpBMVS/zQ/yvXYRMCzUi04gNqgjorqf2sc1fGkPaxf2D42HYB+4oP/Y
+zwYkAdri8sg=
+=9KJb
+-----END PGP SIGNATURE-----
+
+--Sig_/AlrUhHGvZ.0DUp/WfjnurBT--
