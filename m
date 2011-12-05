@@ -1,62 +1,69 @@
-From: "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>
-Subject: RE: [PATCH] arm, da8xx, mmc: set second MMC controllers default
- queue
-Date: Sun, 4 Dec 2011 13:25:35 +0000
-Message-ID: <B6A220404B6BFC4BBD2AB91C54D39DF4029FE5@DBDE01.ent.ti.com>
-References: <1322991210-20486-1-git-send-email-hs@denx.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: sdhci-s3c: remove unnecessary/dupulicated code
+Date: Mon, 05 Dec 2011 09:15:16 +0900
+Message-ID: <4EDC0D14.5080204@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:44867 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753951Ab1LDNZu convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Dec 2011 08:25:50 -0500
-In-Reply-To: <1322991210-20486-1-git-send-email-hs@denx.de>
-Content-Language: en-US
+Received: from mailout1.samsung.com ([203.254.224.24]:57567 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755859Ab1LEAPV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Dec 2011 19:15:21 -0500
+Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LVP00AUEFBQO390@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 05 Dec 2011 09:15:16 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LVP00DN5FDGPF10@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 05 Dec 2011 09:15:16 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiko Schocher <hs@denx.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
-Cc: "juha.kuikka@gmail.com" <juha.kuikka@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, Ido Yariv <ido@wizery.com>, "Nori, Sekhar" <nsekhar@ti.com>, Wolfgang Denk <wd@denx.de>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi,
+This patch is just removed the unnecessary code.
 
-On Sun, Dec 04, 2011 at 15:03:30, Heiko Schocher wrote:
-> The MMC driver allocates channels with EVENTQ_DEFAULT they
-> get put into EVENTQ_1 which the second EDMA controller does
-> not have and hence transfers stall. This is tried to fix
-> in commit f23fe857bbea393b4b94fe2218c98d934bd3d4cf
-> from Ido Yariv, but missed a fix for the second MMC
-> controller on da850.
-> 
-> Signed-off-by: Heiko Schocher <hs@denx.de>
-> Signed-off-by: juha.kuikka@gmail.com
-> Reported-by: juha.kuikka@gmail.com
-> Cc: linux-mmc@vger.kernel.org
-> Cc: davinci-linux-open-source@linux.davincidsp.com
-> Cc: Rajashekhara, Sudhakar <sudhakar.raj@ti.com>
-> Cc: Ido Yariv <ido@wizery.com>
-> Cc: Sekhar Nori <nsekhar@ti.com>
-> Cc: Wolfgang Denk <wd@denx.de>
-> ---
->  arch/arm/mach-davinci/dma.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/arch/arm/mach-davinci/dma.c b/arch/arm/mach-davinci/dma.c
-> index da90103..e10a251 100644
-> --- a/arch/arm/mach-davinci/dma.c
-> +++ b/arch/arm/mach-davinci/dma.c
-> @@ -1513,7 +1513,7 @@ static int __init edma_probe(struct platform_device *pdev)
->  		 * started by the codec engine will not cause audio defects.
->  		 */
->  		for (i = 0; i < edma_cc[j]->num_channels; i++)
-> -			map_dmach_queue(j, i, EVENTQ_1);
-> +			map_dmach_queue(j, i, info[j]->default_queue);
->  
->  		queue_tc_mapping = info[j]->queue_tc_mapping;
->  		queue_priority_mapping = info[j]->queue_priority_mapping;
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    7 +------
+ 1 files changed, 1 insertions(+), 6 deletions(-)
 
-Acked-by: Rajashekhara, Sudhakar <sudhakar.raj@ti.com>
-
-Regards,
-Sudhakar
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index b6558b8..ad0ef39 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -334,11 +334,9 @@ static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+ 		spin_lock_irqsave(&host->lock, flags);
+ 		if (state) {
+ 			dev_dbg(&dev->dev, "card inserted.\n");
+-			host->flags &= ~SDHCI_DEVICE_DEAD;
+ 			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+ 		} else {
+ 			dev_dbg(&dev->dev, "card removed.\n");
+-			host->flags |= SDHCI_DEVICE_DEAD;
+ 			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+ 		}
+ 		tasklet_schedule(&host->card_tasklet);
+@@ -521,6 +519,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
+ 		host->mmc->caps = MMC_CAP_NONREMOVABLE;
+ 
++	/* It supports additional host capabilities if needed */
+ 	if (pdata->host_caps)
+ 		host->mmc->caps |= pdata->host_caps;
+ 
+@@ -543,10 +542,6 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 		sdhci_s3c_ops.get_max_clock = sdhci_cmu_get_max_clock;
+ 	}
+ 
+-	/* It supports additional host capabilities if needed */
+-	if (pdata->host_caps)
+-		host->mmc->caps |= pdata->host_caps;
+-
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(dev, "sdhci_add_host() failed\n");
