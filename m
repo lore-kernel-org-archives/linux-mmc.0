@@ -1,93 +1,44 @@
-From: Dave Martin <dave.martin@linaro.org>
-Subject: [GIT PULL] ARM: amba: Enable module alias autogeneration for AMBA
- drivers
-Date: Tue, 6 Dec 2011 15:15:41 +0000
-Message-ID: <20111206151541.GA13774@linaro.org>
-References: <1321961573-4562-1-git-send-email-dave.martin@linaro.org>
+From: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>
+Subject: Re: [GIT PULL] ARM: amba: Enable module alias autogeneration for
+	AMBA drivers
+Date: Tue, 6 Dec 2011 16:59:11 +0100
+Message-ID: <20111206155911.GA11902@mail.gnudd.com>
+References: <20111206151541.GA13774@linaro.org>
+	<1321961573-4562-1-git-send-email-dave.martin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:61979 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752660Ab1LFPPy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 10:15:54 -0500
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1321961573-4562-1-git-send-email-dave.martin@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <20111206151541.GA13774-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: dave.martin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, Pawel.Moll-5wv7dgnIgG8@public.gmane.org, tiwai-l3A5Bk7waGM@public.gmane.org, linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, perex-/Fr2/VpizcU@public.gmane.org, wim-IQzOog9fTRqzQB+pC5nmwQ@public.gmane.org, julia-dAYI7NvHqcQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-input-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-watchdog-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, alan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org, dmitry.torokhov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lethal-M7jkjyW5wf5g9hUCZPvPmw@public.gmane.org, spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: patches@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Alan Cox <alan@linux.intel.com>, Alessandro Rubini <rubini@unipv.it>, Alessandro Zummo <a.zummo@towertech.it>, alsa-devel@alsa-project.org, Chris Ball <cjb@laptop.org>, Dan Williams <dan.j.williams@intel.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Grant Likely <grant.likely@secretlab.ca>, Jaroslav Kysela <perex@perex.cz>, Jassi Brar <jassisinghbrar@gmail.com>, Julia Lawall <julia@diku.dk>, Linus Walleij <linus.walleij@linaro.org>, linux-fbdev@vger.kernel.org, linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-watchdog@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, =?utf-8?B?UGF3ZcWC?= Moll <Pawel.Moll@arm.com>, rtc-linux@googlegroups.com, spi-devel-general@lists.sourceforge.net, Takashi Iwai <tiwai@suse.de>, Vinod Koul <vinod.>
 
-Hi Russell,
+> ... it looks like Alessandro's proposed change to tidy up scripts/mod/
+> ile2alias.c may get merged soon
 
-Further to my previous pull request:
+No, I don't think it will happen. Rusty disagrees, and his own
+suggestion is in the queue. I'm waiting a while to understand
+what is happening.
 
-> The following changes since commit cfcfc9eca2bcbd26a8e206baeb005b055dbf8e37:
-> 
->   Linux 3.2-rc2 (2011-11-15 15:02:59 -0200)
-> 
-> are available in the git repository at:
->   git://git.linaro.org/people/dmart/linux-2.6-arm.git arm/amba-modalias+for-rmk
-> 
-> Dave Martin (16):
->       ARM: amba: Move definition of struct amba_id to mod_devicetable.h
->       ARM: amba: Auto-generate AMBA driver module aliases during modpost
-[...]
+Anyways, I think it's better for me to wait for amba to come in, and
+work on scripts/mod later on. After all, it's meant to ease adding new
+buses later, not to make it more difficult for already scheduled ones.
 
-... it looks like Alessandro's proposed change to tidy up scripts/mod/
-ile2alias.c may get merged soon -- if that happens, you will get a
-conflict with the second patch of the series referenced by the previous
-pull request.  Fixing it up is straightforward -- if you prefer to
-resolve the conflict yourself, that's fine by me.  Alternatively, you
-can pull the following modified series instead.
+/alessandro
 
-The only difference is in the second patch
-("ARM: amba: Auto-generate AMBA driver module aliases during modpost").
-
-Cheers
----Dave
-
-The following changes since commit 114339d31aa813995461866c659bbf07e1cf2267:
-
-  modpost: use table-lookup to build module aliases (2011-12-02 15:18:08 +0000)
-
-are available in the git repository at:
-  git://git.linaro.org/people/dmart/linux-2.6-arm.git arm/amba-modalias+alessandro-modalias-v2+for-rmk
-
-Dave Martin (16):
-      ARM: amba: Move definition of struct amba_id to mod_devicetable.h
-      ARM: amba: Auto-generate AMBA driver module aliases during modpost
-      hwrng: nomadik: Enable module alias autogeneration for AMBA drivers
-      dmaengine: pl08x: Enable module alias autogeneration for AMBA drivers
-      dmaengine: pl330: Enable module alias autogeneration for AMBA drivers
-      gpio: pl061: Enable module alias autogeneration for AMBA drivers
-      input: ambakmi: Enable module alias autogeneration for AMBA drivers
-      mmc: mmci: Enable module alias autogeneration for AMBA drivers
-      rtc: pl030: Enable module alias autogeneration for AMBA drivers
-      rtc: pl031: Enable module alias autogeneration for AMBA drivers
-      spi: pl022: Enable module alias autogeneration for AMBA drivers
-      serial: pl010: Enable module alias autogeneration for AMBA drivers
-      serial: pl011: Enable module alias autogeneration for AMBA drivers
-      fbdev: amba: Enable module alias autogeneration for AMBA drivers
-      watchdog: sp805: Enable module alias autogeneration for AMBA drivers
-      sound: aaci: Enable module alias autogeneration for AMBA drivers
-
- drivers/amba/bus.c                   |    4 ++
- drivers/char/hw_random/nomadik-rng.c |    2 +
- drivers/dma/amba-pl08x.c             |    2 +
- drivers/dma/pl330.c                  |    2 +
- drivers/gpio/gpio-pl061.c            |    2 +
- drivers/input/serio/ambakmi.c        |    2 +
- drivers/mmc/host/mmci.c              |    2 +
- drivers/rtc/rtc-pl030.c              |    2 +
- drivers/rtc/rtc-pl031.c              |    2 +
- drivers/spi/spi-pl022.c              |    2 +
- drivers/tty/serial/amba-pl010.c      |    2 +
- drivers/tty/serial/amba-pl011.c      |    2 +
- drivers/video/amba-clcd.c            |    2 +
- drivers/watchdog/sp805_wdt.c         |    2 +
- include/linux/amba/bus.h             |    7 +---
- include/linux/mod_devicetable.h      |   18 +++++++++
- scripts/mod/file2alias.c             |   71 +++++++++++++++++++++++++++++++++-
- sound/arm/aaci.c                     |    2 +
- 18 files changed, 121 insertions(+), 7 deletions(-)
+------------------------------------------------------------------------------
+Cloud Services Checklist: Pricing and Packaging Optimization
+This white paper is intended to serve as a reference, checklist and point of 
+discussion for anyone considering optimizing the pricing and packaging model 
+of a cloud services business. Read Now!
+http://www.accelacomm.com/jaw/sfnl/114/51491232/
