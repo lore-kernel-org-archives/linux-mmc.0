@@ -1,52 +1,95 @@
 From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [MXS MMC 3/5] Add support for SSP/MMC ports 2 & 3
-Date: Tue, 6 Dec 2011 20:10:38 +0100
-Message-ID: <20111206191038.GD7835@pengutronix.de>
+Subject: Re: [MXS MMC 4/5] Check the return codes of clk_enable() and
+ mxs_reset_block()
+Date: Tue, 6 Dec 2011 20:12:03 +0100
+Message-ID: <20111206191203.GE7835@pengutronix.de>
 References: <cover.1323177907.git.LW@KARO-electronics.de>
- <e668bb1ab5fbe406ef604a18f59292a05149ae51.1323177907.git.LW@KARO-electronics.de>
+ <b4779523002ceef3e95887bbcf7ed570cdd93a95.1323177907.git.LW@KARO-electronics.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="a2FkP9tdjPU2nyhF"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:50935 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753160Ab1LFTKr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 14:10:47 -0500
-Content-Disposition: inline
-In-Reply-To: <e668bb1ab5fbe406ef604a18f59292a05149ae51.1323177907.git.LW@KARO-electronics.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============5774364288467657337=="
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <b4779523002ceef3e95887bbcf7ed570cdd93a95.1323177907.git.LW@KARO-electronics.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Lothar =?iso-8859-15?Q?Wa=DFmann?= <LW@KARO-electronics.de>
-Cc: linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Sascha Hauer <kernel@pengutronix.de>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
 
---a2FkP9tdjPU2nyhF
+--===============5774364288467657337==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="JBi0ZxuS5uaEhkUZ"
+Content-Disposition: inline
+
+
+--JBi0ZxuS5uaEhkUZ
 Content-Type: text/plain; charset=iso-8859-15
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Dec 06, 2011 at 02:41:28PM +0100, Lothar Wa=DFmann wrote:
-> i.MX28 has four SSP/MMC units, only two of which are currently
-> usable.
+On Tue, Dec 06, 2011 at 02:41:29PM +0100, Lothar Wa=DFmann wrote:
+> Add an int return value to mxs_mmc_reset(), so that the return code of
+> mxs_reset_block() can be promoted to the caller.
+> Also check the return code of clk_enable() in the probe function.
 >=20
 > Signed-off-by: Lothar Wa=DFmann <LW@KARO-electronics.de>
+> -	clk_enable(host->clk);
+> +	ret =3D clk_enable(host->clk);
+> +	if (ret) {
+> +		dev_err(mmc_dev(host->mmc),
+> +			"%s: failed to enable clock: %d\n", __func__, ret);
+> +		goto out_clk_put;
+> +	}
+> =20
+> -	mxs_mmc_reset(host);
+> +	ret =3D mxs_mmc_reset(host);
+> +	if (ret) {
+> +		dev_err(mmc_dev(host->mmc),
+> +			"%s: failed to reset controller: %d\n", __func__, ret);
+> +		goto out_clk_put;
+> +	}
 
-Reviewed-by: Wolfram Sang <w.sang@pengutronix.de>
+Why __func__ here? dev_err and the msg itself should be indication enough?
+
+Otherwise
+
+Acked-by: Wolfram Sang <w.sang@pengutronix.de>
 
 --=20
 Pengutronix e.K.                           | Wolfram Sang                |
 Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
---a2FkP9tdjPU2nyhF
+--JBi0ZxuS5uaEhkUZ
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iEYEARECAAYFAk7eaK4ACgkQD27XaX1/VRv+7wCffWvVrLnwx9YiGOGTOYbWDkxm
-HTIAnR2W3ckNCowSm0CaJ0vK+v+WF6Gv
-=Hxa+
+iEYEARECAAYFAk7eaQMACgkQD27XaX1/VRsmVQCgo5C27YH0V2JpiZdVCoLmhRk8
+R0sAoKv1OoiKTNL/O5v9j3Pgi3rxLL/B
+=3SQY
 -----END PGP SIGNATURE-----
 
---a2FkP9tdjPU2nyhF--
+--JBi0ZxuS5uaEhkUZ--
+
+
+--===============5774364288467657337==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============5774364288467657337==--
