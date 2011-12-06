@@ -1,93 +1,49 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 1/4] SDHCI: add sdhci_get_cd callback to detect the card
-Date: Tue, 6 Dec 2011 05:43:20 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F1163309E@039-SN1MPN1-005.039d.mgd.msft.net>
-References: <1323077026-12071-1-git-send-email-r66093@freescale.com>
- <5D8008F58939784290FAB48F549751984EAE509937@shsmsx502.ccr.corp.intel.com>
+From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: Re: [PATCH] mmc: debugfs: parse all ext_csd via debug_fs
+Date: Tue, 06 Dec 2011 06:52:21 +0100
+Message-ID: <4EDDAD95.7020500@st.com>
+References: <1319468694-8773-1-git-send-email-peppe.cavallaro@st.com> <CAAgDR1N_CKnXo=G2oTHAShhgegMZF-nMySBuWebDPeu8VTEBKg@mail.gmail.com> <CACRpkda0y7cOR4EfuGLoGnD_PS1gTWqN7UA74=s2mWmEHokQhQ@mail.gmail.com> <4ECA0025.6030700@st.com> <CACRpkda4gf7dpMxzPTjNZZX1mNqS4YMv21w-xC9TFCYot3qRAg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:52436 "EHLO
-	TX2EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751014Ab1LFFnV convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 00:43:21 -0500
-In-Reply-To: <5D8008F58939784290FAB48F549751984EAE509937@shsmsx502.ccr.corp.intel.com>
-Content-Language: en-US
+Received: from eu1sys200aog120.obsmtp.com ([207.126.144.149]:39420 "EHLO
+	eu1sys200aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752275Ab1LFFwm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 00:52:42 -0500
+In-Reply-To: <CACRpkda4gf7dpMxzPTjNZZX1mNqS4YMv21w-xC9TFCYot3qRAg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Sebastian Rasmussen <sebras@gmail.com>, linux-mmc@vger.kernel.org
 
-Hi, Chuanxiao
+On 11/21/2011 11:08 AM, Linus Walleij wrote:
+> On Mon, Nov 21, 2011 at 8:39 AM, Giuseppe CAVALLARO
+> <peppe.cavallaro@st.com> wrote:
+> 
+>> Just to summarize: the patch works in debugfs context so the parsing doesn't
+>> break the sys rules. I agree with Chris this has to be maintained for the
+>> next mmc standards but IMO we can pay this waiting for having both a
+>> user-space application (mmc-tool) and the ext_csd in /sys (after that the
+>> ext_csd in debugfs could be completely removed).
+> 
+> I'm all for this patch so it gets visible in debugfs atleast,
+> since people seem to need to know these things, so take that as an
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
+> 
+> Those who want to writ userspace tools can proceed to
+> implement the proper sysfs interfaces and document them.
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Dong, Chuanxiao
-> Sent: Monday, December 05, 2011 7:25 PM
-> To: Huang Changming-R66093; linux-mmc@vger.kernel.org
-> Cc: Huang Changming-R66093
-> Subject: RE: [PATCH 1/4] SDHCI: add sdhci_get_cd callback to detect the
-> card
-> 
-> Hi Jerry,
-> 
-> > -----Original Message-----
-> > From: linux-mmc-owner@vger.kernel.org
-> > [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of
-> > r66093@freescale.com
-> > Sent: Monday, December 05, 2011 5:24 PM
-> > To: linux-mmc@vger.kernel.org
-> > Cc: Jerry Huang
-> > Subject: [PATCH 1/4] SDHCI: add sdhci_get_cd callback to detect the
-> > card
-> >
-> > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> >
-> > Add callback function sdhci_get_cd to detect the card.
-> > In order to check if the card is present, we will read the PRESENT
-> > STATE register and check the bit13(Card detect pin level) and
-> bit15(CINS).
-> >
-> > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> > ---
-> >  drivers/mmc/host/sdhci.c |   20 ++++++++++++++++++++
-> >  drivers/mmc/host/sdhci.h |    1 +
-> >  2 files changed, 21 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
-> > 6d8eea3..66afd82 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -2,6 +2,7 @@
-> >   *  linux/drivers/mmc/host/sdhci.c - Secure Digital Host Controller
-> > Interface driver
-> >   *
-> >   *  Copyright (C) 2005-2008 Pierre Ossman, All Rights Reserved.
-> > + *  Copyright (C) 2011 Freescale Semiconductor Inc.
-> >   *
-> >   * This program is free software; you can redistribute it and/or
-> modify
-> >   * it under the terms of the GNU General Public License as published
-> > by @@ -1518,6 +1519,24 @@ static int sdhci_get_ro(struct mmc_host *mmc)
-> >  	return ret;
-> >  }
-> >
-> > +static int sdhci_get_cd(struct mmc_host *mmc) {
-> > +	struct sdhci_host *host = mmc_priv(mmc);
-> > +	unsigned long flags;
-> > +	int present;
-> > +
-> > +	spin_lock_irqsave(&host->lock, flags);
-> > +
-> > +	if (host->flags & SDHCI_DEVICE_DEAD)
-> > +		present = 0;
-> > +	else
-> > +		present = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> 
-> As far as I know, some SDHC host controller didn't implement its present
-> register well...The present register of some SDHC host controller will
-> report "there is a card" forever. So, according to your patch2, using
-> such method is not a proper solution for card detection, I think.
-Yes, maybe some controller don't support this feature, maybe can add one callback function to the platform special code.
-But, we need to define this interface.
+Hello Chris.
 
+Sorry if I disturb you, any news about the patch:
+
+    mmc: debugfs: parse ext_csd via debug_fs (v2)
+
+Reviewed-by Sebastian and Acked-by Linus?
+
+Please let me know if I need to do some other work on this or if it can
+be considered for mmc-next.
+
+Best Regards
+Peppe
