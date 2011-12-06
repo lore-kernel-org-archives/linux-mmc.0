@@ -1,109 +1,73 @@
 From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 1/4] SDHCI: add sdhci_get_cd callback to detect the card
-Date: Tue, 6 Dec 2011 05:35:36 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F1163306C@039-SN1MPN1-005.039d.mgd.msft.net>
+Subject: RE: [PATCH 3/4] MMC/core: Make sure the power is up, when detect
+ the card
+Date: Tue, 6 Dec 2011 05:40:07 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F11633083@039-SN1MPN1-005.039d.mgd.msft.net>
 References: <1323077026-12071-1-git-send-email-r66093@freescale.com>
- <F2681397-0395-43F7-902F-9A575EDD843B@marvell.com>
+ <1323077026-12071-2-git-send-email-r66093@freescale.com>
+ <1323077026-12071-3-git-send-email-r66093@freescale.com>
+ <4EDCE7B3.8090406@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:40939
+Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:43281
 	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750976Ab1LFFfm convert rfc822-to-8bit
+	by vger.kernel.org with ESMTP id S1750956Ab1LFFkL convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 6 Dec 2011 00:35:42 -0500
-In-Reply-To: <F2681397-0395-43F7-902F-9A575EDD843B@marvell.com>
+	Tue, 6 Dec 2011 00:40:11 -0500
+In-Reply-To: <4EDCE7B3.8090406@stericsson.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
+To: Ulf Hansson <ulf.hansson@stericsson.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
 
 > -----Original Message-----
 > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Philip Rakity
-> Sent: Tuesday, December 06, 2011 2:49 AM
+> owner@vger.kernel.org] On Behalf Of Ulf Hansson
+> Sent: Monday, December 05, 2011 11:48 PM
 > To: Huang Changming-R66093
 > Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093
-> Subject: Re: [PATCH 1/4] SDHCI: add sdhci_get_cd callback to detect the
-> card
+> Subject: Re: [PATCH 3/4] MMC/core: Make sure the power is up, when detect
+> the card
 > 
+> Hi Jerry,
 > 
-> On Dec 5, 2011, at 1:23 AM, <r66093@freescale.com> <r66093@freescale.com>
-> wrote:
-> 
+> r66093@freescale.com wrote:
 > > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 > >
-> > Add callback function sdhci_get_cd to detect the card.
-> > In order to check if the card is present, we will read the PRESENT
-> > STATE register and check the bit13(Card detect pin level) and
-> bit15(CINS).
+> > Before running get_cd() recall function to detect whether the card is
+> > present, must make sure the power is up.
 > >
 > > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
 > > ---
-> > drivers/mmc/host/sdhci.c |   20 ++++++++++++++++++++
-> > drivers/mmc/host/sdhci.h |    1 +
-> > 2 files changed, 21 insertions(+), 0 deletions(-)
+> >  drivers/mmc/core/core.c |    2 ++
+> >  1 files changed, 2 insertions(+), 0 deletions(-)
 > >
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
-> > 6d8eea3..66afd82 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -2,6 +2,7 @@
-> >  *  linux/drivers/mmc/host/sdhci.c - Secure Digital Host Controller
-> > Interface driver
-> >  *
-> >  *  Copyright (C) 2005-2008 Pierre Ossman, All Rights Reserved.
-> > + *  Copyright (C) 2011 Freescale Semiconductor Inc.
-> 
-> 
-> Lots of folks have made mods to this code and they have not added a
-> copyright name.
-> What is the rule Chris ?
-If someone think the copyright should be removed, I can do.
-
-> >  *
-> >  * This program is free software; you can redistribute it and/or
-> > modify
-> >  * it under the terms of the GNU General Public License as published
-> > by @@ -1518,6 +1519,24 @@ static int sdhci_get_ro(struct mmc_host *mmc)
-> > 	return ret;
-> > }
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
+> > 5278ffb..a08e6b1 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -2066,8 +2066,10 @@ void mmc_rescan(struct work_struct *work)
+> >  	 */
+> >  	mmc_bus_put(host);
 > >
-> > +static int sdhci_get_cd(struct mmc_host *mmc) {
-> > +	struct sdhci_host *host = mmc_priv(mmc);
-> > +	unsigned long flags;
-> > +	int present;
-> > +
-> > +	spin_lock_irqsave(&host->lock, flags);
-> > +
-> > +	if (host->flags & SDHCI_DEVICE_DEAD)
-> > +		present = 0;
-> > +	else
-> > +		present = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> > +
-> > +	spin_unlock_irqrestore(&host->lock, flags);
-> > +
-> > +	return (present & (SDHCI_CARD_PRESENT | SDHCI_CARD_CDPL)); }
-> > +
-> > static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int
-> > enable) {
-> > 	if (host->flags & SDHCI_DEVICE_DEAD)
-> > @@ -1884,6 +1903,7 @@ static const struct mmc_host_ops sdhci_ops = {
-> > 	.request	= sdhci_request,
-> > 	.set_ios	= sdhci_set_ios,
-> > 	.get_ro		= sdhci_get_ro,
-> > +	.get_cd		= sdhci_get_cd,
+> > +	mmc_power_up(host);
+> >  	if (host->ops->get_cd && host->ops->get_cd(host) == 0)
+> >  		goto out;
+> > +	mmc_power_off(host);
 > 
+> This does not feel right. get_cd is typically a function which makes use
+> of some GPIO pin to find out if there is a card present and thus no
+> power_up should be needed.
 > 
-> A better approach would be to define a callback into platform specific
-> code and use that.  For your chip reading present state works but for
-> other chips this will not be sufficient so a more general solution would
-> be better.
-Yes, I have thought about it, if some chip can't support this feature, the simple method is add the ifdef.
-Of course, the better way is to define a callback into platform specific code, but there is not the interface.
-
+> If your host driver does not support GPIO mechanism of detecting the card,
+> the polling mechanism is maybe what you want.
+> 
+Yes, the FSL eSDHC controller don't support GPIO mechanism to detect the card,
+But there is SDHC_CD pin from chip, and can detect the card, and update the register.
+So we should power up the controller to update the card status before read the register.
 
