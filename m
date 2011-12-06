@@ -1,50 +1,102 @@
 From: <r66093@freescale.com>
-Subject: [PATCH 1/5] MMC/core: Make sure the power is up, when detect the card
-Date: Tue, 6 Dec 2011 17:15:33 +0800
-Message-ID: <1323162937-7742-1-git-send-email-r66093@freescale.com>
+Subject: [PATCH 3/5 v2] MMC/SD: Add callback function to detect card
+Date: Tue, 6 Dec 2011 17:15:35 +0800
+Message-ID: <1323162937-7742-3-git-send-email-r66093@freescale.com>
+References: <1323162937-7742-1-git-send-email-r66093@freescale.com>
+ <1323162937-7742-2-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:59854
+Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:59952
 	"EHLO VA3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933242Ab1LFKdD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 05:33:03 -0500
-Received: from mail107-va3 (localhost [127.0.0.1])	by
- mail107-va3-R.bigfish.com (Postfix) with ESMTP id 4D02F200275	for
- <linux-mmc@vger.kernel.org>; Tue,  6 Dec 2011 10:33:00 +0000 (UTC)
-Received: from VA3EHSMHS036.bigfish.com (unknown [10.7.14.249])	by
- mail107-va3.bigfish.com (Postfix) with ESMTP id D4F3B48008A	for
- <linux-mmc@vger.kernel.org>; Tue,  6 Dec 2011 10:32:59 +0000 (UTC)
+	by vger.kernel.org with ESMTP id S933245Ab1LFKdG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 05:33:06 -0500
+In-Reply-To: <1323162937-7742-2-git-send-email-r66093@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
 
 From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Before running get_cd() recall function to detect whether the card is
-present, must make sure the power is up.
+In order to check whether the card has been removed, the function
+mmc_send_status() will send command CMD13 to card and ask the card
+to send its status register to sdhc driver, which will generate
+many interrupts repeatedly and make the system performance bad.
+
+Therefore, add callback function get_cd() to check whether
+the card has been removed when the driver has this callback function.
+
+If the card is present, 1 will return, if the card is absent, 0 will return.
+If the controller will not support this feature, -ENOSYS will return.
 
 Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+CC: Chris Ball <cjb@laptop.org>
 ---
- drivers/mmc/core/core.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+changes for v2:
+	- when controller don't support get_cd, return -ENOSYS
+	- add the CC
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 5278ffb..a08e6b1 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2066,8 +2066,10 @@ void mmc_rescan(struct work_struct *work)
+ drivers/mmc/core/mmc.c |   10 ++++++++--
+ drivers/mmc/core/sd.c  |   10 ++++++++--
+ 2 files changed, 16 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index dbf421a..e03860e 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1105,7 +1105,7 @@ static void mmc_remove(struct mmc_host *host)
+  */
+ static void mmc_detect(struct mmc_host *host)
+ {
+-	int err;
++	int err = -ENOSYS;
+ 
+ 	BUG_ON(!host);
+ 	BUG_ON(!host->card);
+@@ -1115,7 +1115,13 @@ static void mmc_detect(struct mmc_host *host)
+ 	/*
+ 	 * Just check if our card has been removed.
  	 */
- 	mmc_bus_put(host);
+-	err = mmc_send_status(host->card, NULL);
++	if (host->ops->get_cd) {
++		err = host->ops->get_cd(host);
++		if (err >= 0)
++			err = !err;
++	}
++	if (err < 0)
++		err = mmc_send_status(host->card, NULL);
  
-+	mmc_power_up(host);
- 	if (host->ops->get_cd && host->ops->get_cd(host) == 0)
- 		goto out;
-+	mmc_power_off(host);
+ 	mmc_release_host(host);
  
- 	mmc_claim_host(host);
- 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index f2a05ea..7e61bf0 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1023,7 +1023,7 @@ static void mmc_sd_remove(struct mmc_host *host)
+  */
+ static void mmc_sd_detect(struct mmc_host *host)
+ {
+-	int err;
++	int err = -ENOSYS;
+ 
+ 	BUG_ON(!host);
+ 	BUG_ON(!host->card);
+@@ -1033,7 +1033,13 @@ static void mmc_sd_detect(struct mmc_host *host)
+ 	/*
+ 	 * Just check if our card has been removed.
+ 	 */
+-	err = mmc_send_status(host->card, NULL);
++	if (host->ops->get_cd) {
++		err = host->ops->get_cd(host);
++		if (err >= 0)
++			err = !err;
++	}
++	if (err < 0)
++		err = mmc_send_status(host->card, NULL);
+ 
+ 	mmc_release_host(host);
+ 
 -- 
 1.7.5.4
 
