@@ -1,80 +1,137 @@
 From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: Re: [PATCH-next] mmc: core: Fixup delayed work clock gating patch
-Date: Tue, 06 Dec 2011 14:22:11 +0530
-Message-ID: <4EDDD7BB.5040506@codeaurora.org>
-References: <1323109724-30898-1-git-send-email-sboyd@codeaurora.org>
+Subject: Re: [PATCH V3] mmc: Kill block requests if card is removed
+Date: Tue, 06 Dec 2011 14:30:47 +0530
+Message-ID: <4EDDD9BF.2090608@codeaurora.org>
+References: <1322735441-3911-1-git-send-email-sthumma@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:12039 "EHLO
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:11968 "EHLO
 	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932971Ab1LFIwQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 03:52:16 -0500
-In-Reply-To: <1323109724-30898-1-git-send-email-sboyd@codeaurora.org>
+	with ESMTP id S1750966Ab1LFJAv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 04:00:51 -0500
+In-Reply-To: <1322735441-3911-1-git-send-email-sthumma@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Cc: adrian.hunter@intel.com, per.lkml@gmail.com, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, cjb@laptop.org
 
-On 12/5/2011 11:58 PM, Stephen Boyd wrote:
-> c31b50e (mmc: core: Use delayed work in clock gating framework,
-> 2011-11-14) missed a few things during review:
+Hi Adrian/Per,
+
+Any comments on this patch?
+
+Thanks,
+Sujit
+
+On 12/1/2011 4:00 PM, Sujit Reddy Thumma wrote:
+> Kill block requests when the host realizes that the card is
+> removed from the slot and is sure that subsequent requests
+> are bound to fail. Do this silently so that the block
+> layer doesn't output unnecessary error messages.
 >
->   o A useless pr_info()
+> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
 >
->   o milliseconds was written as two words
->
->   o The sysfs file had units in its output
->
-> Fix all three problems.
->
-> Cc: Sujit Reddy Thumma<sthumma@codeaurora.org>
-> Signed-off-by: Stephen Boyd<sboyd@codeaurora.org>
 > ---
+> Changes in v3:
+> 	- Dropped dependency on Per's patch and is now dependent
+> 	on "[PATCH V4] mmc: allow upper layers to determine immediately
+> 	if a card has been removed" by Adrian Hunter.
+> 	- Modified commit text slightly as Adrian has
+> 	implemented his own suggestion in a different patch.
 >
-> Feel free to squash if desired.
+> Changes in v2:
+> 	- Changed the implementation with further comments from Adrian
+> 	- Set the card removed flag in bus notifier callbacks
+> 	- This patch is now dependent on patch from Per Forlin:
+> 	http://thread.gmane.org/gmane.linux.kernel.mmc/11128/focus=11211
+> ---
+>   drivers/mmc/card/block.c |   14 +++++++++++++-
+>   drivers/mmc/card/queue.c |    5 +++++
+>   2 files changed, 18 insertions(+), 1 deletions(-)
 >
->   Documentation/mmc/mmc-dev-attrs.txt |    2 +-
->   drivers/mmc/core/host.c             |    6 +-----
->   2 files changed, 2 insertions(+), 6 deletions(-)
-
-Thanks Stephen.
-
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index c80bb6d..20350cb 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -119,6 +119,7 @@ enum mmc_blk_status {
+>   	MMC_BLK_ABORT,
+>   	MMC_BLK_DATA_ERR,
+>   	MMC_BLK_ECC_ERR,
+> +	MMC_BLK_NOMEDIUM,
+>   };
 >
-> diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
-> index b024556..22ae844 100644
-> --- a/Documentation/mmc/mmc-dev-attrs.txt
-> +++ b/Documentation/mmc/mmc-dev-attrs.txt
-> @@ -71,6 +71,6 @@ SD/MMC/SDIO Clock Gating Attribute
->   Read and write access is provided to following attribute.
->   This attribute appears only if CONFIG_MMC_CLKGATE is enabled.
+>   module_param(perdev_minors, int, 0444);
+> @@ -565,6 +566,7 @@ static int get_card_status(struct mmc_card *card, u32 *status, int retries)
+>   	return err;
+>   }
 >
-> -	clkgate_delay	Tune the clock gating delay with desired value in milli seconds.
-> +	clkgate_delay	Tune the clock gating delay with desired value in milliseconds.
+> +#define ERR_NOMEDIUM	3
+>   #define ERR_RETRY	2
+>   #define ERR_ABORT	1
+>   #define ERR_CONTINUE	0
+> @@ -648,8 +650,12 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
+>   	}
 >
->   echo<desired delay>  >  /sys/class/mmc_host/mmcX/clkgate_delay
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 835e86a..c152ce0c 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -58,8 +58,7 @@ static ssize_t clkgate_delay_show(struct device *dev,
->   		struct device_attribute *attr, char *buf)
+>   	/* We couldn't get a response from the card.  Give up. */
+> -	if (err)
+> +	if (err) {
+> +		/* Check if the card is removed */
+> +		if (mmc_detect_card_removed(card->host))
+> +			return ERR_NOMEDIUM;
+>   		return ERR_ABORT;
+> +	}
+>
+>   	/* Flag ECC errors */
+>   	if ((status&  R1_CARD_ECC_FAILED) ||
+> @@ -922,6 +928,8 @@ static int mmc_blk_err_check(struct mmc_card *card,
+>   			return MMC_BLK_RETRY;
+>   		case ERR_ABORT:
+>   			return MMC_BLK_ABORT;
+> +		case ERR_NOMEDIUM:
+> +			return MMC_BLK_NOMEDIUM;
+>   		case ERR_CONTINUE:
+>   			break;
+>   		}
+> @@ -1255,6 +1263,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>   			if (!ret)
+>   				goto start_new_req;
+>   			break;
+> +		case MMC_BLK_NOMEDIUM:
+> +			goto cmd_abort;
+>   		}
+>
+>   		if (ret) {
+> @@ -1271,6 +1281,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>
+>    cmd_abort:
+>   	spin_lock_irq(&md->lock);
+> +	if (mmc_card_removed(card))
+> +		req->cmd_flags |= REQ_QUIET;
+>   	while (ret)
+>   		ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
+>   	spin_unlock_irq(&md->lock);
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index dcad59c..2517547 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -29,6 +29,8 @@
+>    */
+>   static int mmc_prep_request(struct request_queue *q, struct request *req)
 >   {
->   	struct mmc_host *host = cls_dev_to_mmc_host(dev);
-> -	return snprintf(buf, PAGE_SIZE, "%lu millisecs\n",
-> -			host->clkgate_delay);
-> +	return snprintf(buf, PAGE_SIZE, "%lu\n", host->clkgate_delay);
->   }
+> +	struct mmc_queue *mq = q->queuedata;
+> +
+>   	/*
+>   	 * We only like normal block requests and discards.
+>   	 */
+> @@ -37,6 +39,9 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
+>   		return BLKPREP_KILL;
+>   	}
 >
->   static ssize_t clkgate_delay_store(struct device *dev,
-> @@ -74,9 +73,6 @@ static ssize_t clkgate_delay_store(struct device *dev,
->   	spin_lock_irqsave(&host->clk_lock, flags);
->   	host->clkgate_delay = value;
->   	spin_unlock_irqrestore(&host->clk_lock, flags);
-> -
-> -	pr_info("%s: clock gate delay set to %lu ms\n",
-> -			mmc_hostname(host), value);
->   	return count;
->   }
+> +	if (mq&&  mmc_card_removed(mq->card))
+> +		return BLKPREP_KILL;
+> +
+>   	req->cmd_flags |= REQ_DONTPREP;
 >
+>   	return BLKPREP_OK;
+
