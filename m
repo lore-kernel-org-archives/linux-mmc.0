@@ -1,137 +1,110 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: Re: [PATCH V3] mmc: Kill block requests if card is removed
-Date: Tue, 06 Dec 2011 14:30:47 +0530
-Message-ID: <4EDDD9BF.2090608@codeaurora.org>
-References: <1322735441-3911-1-git-send-email-sthumma@codeaurora.org>
+From: <r66093@freescale.com>
+Subject: [PATCH 4/5 v2] SDHCI: add sdhci_get_cd callback to detect the card
+Date: Tue, 6 Dec 2011 17:15:36 +0800
+Message-ID: <1323162937-7742-4-git-send-email-r66093@freescale.com>
+References: <1323162937-7742-1-git-send-email-r66093@freescale.com>
+ <1323162937-7742-2-git-send-email-r66093@freescale.com>
+ <1323162937-7742-3-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:11968 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750966Ab1LFJAv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 04:00:51 -0500
-In-Reply-To: <1322735441-3911-1-git-send-email-sthumma@codeaurora.org>
+Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:12938 "EHLO
+	TX2EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933273Ab1LFKdM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 05:33:12 -0500
+In-Reply-To: <1323162937-7742-3-git-send-email-r66093@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: adrian.hunter@intel.com, per.lkml@gmail.com, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, cjb@laptop.org
+To: linux-mmc@vger.kernel.org
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
 
-Hi Adrian/Per,
+From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Any comments on this patch?
+Add callback function sdhci_get_cd to detect the card.
+And one new callback added to implement the card detect in sdhci struncture.
+If special platform has the card detect callback, it will return the card
+state, the value zero is for absent cardi and one is for present card.
+If the controller don't support card detect, sdhci_get_cd will return -ENOSYS.
 
-Thanks,
-Sujit
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+CC: Chris Ball <cjb@laptop.org>
+---
+changes for v2:
+	- when controller don't support get_cd, return -ENOSYS
+	- add new callback for sdhci to detect the card
+	- add the CC
 
-On 12/1/2011 4:00 PM, Sujit Reddy Thumma wrote:
-> Kill block requests when the host realizes that the card is
-> removed from the slot and is sure that subsequent requests
-> are bound to fail. Do this silently so that the block
-> layer doesn't output unnecessary error messages.
->
-> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
->
-> ---
-> Changes in v3:
-> 	- Dropped dependency on Per's patch and is now dependent
-> 	on "[PATCH V4] mmc: allow upper layers to determine immediately
-> 	if a card has been removed" by Adrian Hunter.
-> 	- Modified commit text slightly as Adrian has
-> 	implemented his own suggestion in a different patch.
->
-> Changes in v2:
-> 	- Changed the implementation with further comments from Adrian
-> 	- Set the card removed flag in bus notifier callbacks
-> 	- This patch is now dependent on patch from Per Forlin:
-> 	http://thread.gmane.org/gmane.linux.kernel.mmc/11128/focus=11211
-> ---
->   drivers/mmc/card/block.c |   14 +++++++++++++-
->   drivers/mmc/card/queue.c |    5 +++++
->   2 files changed, 18 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index c80bb6d..20350cb 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -119,6 +119,7 @@ enum mmc_blk_status {
->   	MMC_BLK_ABORT,
->   	MMC_BLK_DATA_ERR,
->   	MMC_BLK_ECC_ERR,
-> +	MMC_BLK_NOMEDIUM,
->   };
->
->   module_param(perdev_minors, int, 0444);
-> @@ -565,6 +566,7 @@ static int get_card_status(struct mmc_card *card, u32 *status, int retries)
->   	return err;
->   }
->
-> +#define ERR_NOMEDIUM	3
->   #define ERR_RETRY	2
->   #define ERR_ABORT	1
->   #define ERR_CONTINUE	0
-> @@ -648,8 +650,12 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
->   	}
->
->   	/* We couldn't get a response from the card.  Give up. */
-> -	if (err)
-> +	if (err) {
-> +		/* Check if the card is removed */
-> +		if (mmc_detect_card_removed(card->host))
-> +			return ERR_NOMEDIUM;
->   		return ERR_ABORT;
-> +	}
->
->   	/* Flag ECC errors */
->   	if ((status&  R1_CARD_ECC_FAILED) ||
-> @@ -922,6 +928,8 @@ static int mmc_blk_err_check(struct mmc_card *card,
->   			return MMC_BLK_RETRY;
->   		case ERR_ABORT:
->   			return MMC_BLK_ABORT;
-> +		case ERR_NOMEDIUM:
-> +			return MMC_BLK_NOMEDIUM;
->   		case ERR_CONTINUE:
->   			break;
->   		}
-> @@ -1255,6 +1263,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
->   			if (!ret)
->   				goto start_new_req;
->   			break;
-> +		case MMC_BLK_NOMEDIUM:
-> +			goto cmd_abort;
->   		}
->
->   		if (ret) {
-> @@ -1271,6 +1281,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
->
->    cmd_abort:
->   	spin_lock_irq(&md->lock);
-> +	if (mmc_card_removed(card))
-> +		req->cmd_flags |= REQ_QUIET;
->   	while (ret)
->   		ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
->   	spin_unlock_irq(&md->lock);
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index dcad59c..2517547 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -29,6 +29,8 @@
->    */
->   static int mmc_prep_request(struct request_queue *q, struct request *req)
->   {
-> +	struct mmc_queue *mq = q->queuedata;
-> +
->   	/*
->   	 * We only like normal block requests and discards.
->   	 */
-> @@ -37,6 +39,9 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
->   		return BLKPREP_KILL;
->   	}
->
-> +	if (mq&&  mmc_card_removed(mq->card))
-> +		return BLKPREP_KILL;
-> +
->   	req->cmd_flags |= REQ_DONTPREP;
->
->   	return BLKPREP_OK;
+ drivers/mmc/host/sdhci.c |   21 +++++++++++++++++++++
+ drivers/mmc/host/sdhci.h |    2 ++
+ 2 files changed, 23 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 6d8eea3..2196c5e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2,6 +2,7 @@
+  *  linux/drivers/mmc/host/sdhci.c - Secure Digital Host Controller Interface driver
+  *
+  *  Copyright (C) 2005-2008 Pierre Ossman, All Rights Reserved.
++ *  Copyright (C) 2011 Freescale Semiconductor Inc.
+  *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+@@ -1518,6 +1519,25 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+ 	return ret;
+ }
+ 
++/* Return values for the sdjco_get_cd callback:
++ *   0 for a absent card
++ *   1 for a present card
++ *   -ENOSYS when not supported (equal to NULL callback)
++ */
++static int sdhci_get_cd(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	unsigned long flags;
++	int present = -ENOSYS;
++
++	spin_lock_irqsave(&host->lock, flags);
++	if (host->ops->get_cd)
++		present = host->ops->get_cd(host);
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return present;
++}
++
+ static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
+ {
+ 	if (host->flags & SDHCI_DEVICE_DEAD)
+@@ -1884,6 +1904,7 @@ static const struct mmc_host_ops sdhci_ops = {
+ 	.request	= sdhci_request,
+ 	.set_ios	= sdhci_set_ios,
+ 	.get_ro		= sdhci_get_ro,
++	.get_cd		= sdhci_get_cd,
+ 	.hw_reset	= sdhci_hw_reset,
+ 	.enable_sdio_irq = sdhci_enable_sdio_irq,
+ 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0a5b654..82f4d27 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -69,6 +69,7 @@
+ #define  SDHCI_SPACE_AVAILABLE	0x00000400
+ #define  SDHCI_DATA_AVAILABLE	0x00000800
+ #define  SDHCI_CARD_PRESENT	0x00010000
++#define  SDHCI_CARD_CDPL	0x00040000
+ #define  SDHCI_WRITE_PROTECT	0x00080000
+ #define  SDHCI_DATA_LVL_MASK	0x00F00000
+ #define   SDHCI_DATA_LVL_SHIFT	20
+@@ -261,6 +262,7 @@ struct sdhci_ops {
+ 
+ 	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
+ 
++	int		(*get_cd)(struct sdhci_host *host);
+ 	int		(*enable_dma)(struct sdhci_host *host);
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+-- 
+1.7.5.4
+
 
