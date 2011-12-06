@@ -1,43 +1,50 @@
-From: Dave Martin <dave.martin@linaro.org>
-Subject: Re: [GIT PULL] ARM: amba: Enable module alias autogeneration for
- AMBA drivers
-Date: Tue, 6 Dec 2011 16:18:15 +0000
-Message-ID: <20111206161815.GD13769@linaro.org>
-References: <20111206151541.GA13774@linaro.org>
- <1321961573-4562-1-git-send-email-dave.martin@linaro.org>
- <20111206155911.GA11902@mail.gnudd.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [MXS MMC 1/5] Fix grammatical error in comment
+Date: Tue, 6 Dec 2011 20:05:55 +0100
+Message-ID: <20111206190555.GC7835@pengutronix.de>
+References: <cover.1323177907.git.LW@KARO-electronics.de>
+ <1ebaeb7f7ed88b1d82f5fc3a01c0661f38e2a16d.1323177907.git.LW@KARO-electronics.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-input-owner@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="6zdv2QT/q3FMhpsV"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:56423 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752777Ab1LFTGH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 14:06:07 -0500
 Content-Disposition: inline
-In-Reply-To: <20111206155911.GA11902@mail.gnudd.com>
-Sender: linux-input-owner@vger.kernel.org
-To: Alessandro Rubini <rubini@unipv.it>
-Cc: linux@arm.linux.org.uk, patches@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, alan@linux.intel.com, a.zummo@towertech.it, alsa-devel@alsa-project.org, cjb@laptop.org, dan.j.williams@intel.com, dmitry.torokhov@gmail.com, grant.likely@secretlab.ca, perex@perex.cz, jassisinghbrar@gmail.com, julia@diku.dk, linus.walleij@linaro.org, linux-fbdev@vger.kernel.org, linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-watchdog@vger.kernel.org, lethal@linux-sh.org, Pawel.Moll@arm.com, rtc-linux@googlegroups.com, spi-devel-general@lists.sourceforge.net, tiwai@suse.de, vinod.koul@intel.com, wim@iguana.be
+In-Reply-To: <1ebaeb7f7ed88b1d82f5fc3a01c0661f38e2a16d.1323177907.git.LW@KARO-electronics.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-
-On Tue, Dec 06, 2011 at 04:59:11PM +0100, Alessandro Rubini wrote:
-> > ... it looks like Alessandro's proposed change to tidy up scripts/mod/
-> > ile2alias.c may get merged soon
-> 
-> No, I don't think it will happen. Rusty disagrees, and his own
-> suggestion is in the queue. I'm waiting a while to understand
-> what is happening.
-> 
-> Anyways, I think it's better for me to wait for amba to come in, and
-> work on scripts/mod later on. After all, it's meant to ease adding new
-> buses later, not to make it more difficult for already scheduled ones.
-
-OK -- thanks for the clarification.
+To: Lothar =?iso-8859-15?Q?Wa=DFmann?= <LW@KARO-electronics.de>
+Cc: linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
 
-Russell, it sounds like you shouldn't get a merge conflict with the
-original version of the series after all.
+--6zdv2QT/q3FMhpsV
+Content-Type: text/plain; charset=iso-8859-15
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-For reference, the original pull request is here:
+On Tue, Dec 06, 2011 at 02:41:26PM +0100, Lothar Wa=DFmann wrote:
+>=20
+> Signed-off-by: Lothar Wa=DFmann <LW@KARO-electronics.de>
 
-http://lists.infradead.org/pipermail/linux-arm-kernel/2011-November/073619.html
+Acked-by: Wolfram Sang <w.sang@pengutronix.de>
 
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
 
-Cheers
----Dave
+--6zdv2QT/q3FMhpsV
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAk7eZ5MACgkQD27XaX1/VRvZQQCdHL4Qz4cqBx995kDfmLDab/HW
+wUgAn0adspevevdVLCruE3jbpJwmWWUx
+=bEP3
+-----END PGP SIGNATURE-----
+
+--6zdv2QT/q3FMhpsV--
