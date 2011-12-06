@@ -1,22 +1,20 @@
 From: <r66093@freescale.com>
-Subject: [PATCH 2/5] MMC/core: Add f_min to mmc_power_on()
-Date: Tue, 6 Dec 2011 17:15:34 +0800
-Message-ID: <1323162937-7742-2-git-send-email-r66093@freescale.com>
-References: <1323162937-7742-1-git-send-email-r66093@freescale.com>
+Subject: [PATCH 1/5] MMC/core: Make sure the power is up, when detect the card
+Date: Tue, 6 Dec 2011 17:15:33 +0800
+Message-ID: <1323162937-7742-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:55245 "EHLO
-	TX2EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933272Ab1LFKdL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 05:33:11 -0500
-Received: from mail135-tx2 (localhost [127.0.0.1])	by
- mail135-tx2-R.bigfish.com (Postfix) with ESMTP id 17ACF3C02D1	for
- <linux-mmc@vger.kernel.org>; Tue,  6 Dec 2011 10:33:11 +0000 (UTC)
-Received: from TX2EHSMHS019.bigfish.com (unknown [10.9.14.245])	by
- mail135-tx2.bigfish.com (Postfix) with ESMTP id DA76F28004A	for
- <linux-mmc@vger.kernel.org>; Tue,  6 Dec 2011 10:33:10 +0000 (UTC)
-In-Reply-To: <1323162937-7742-1-git-send-email-r66093@freescale.com>
+Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:59854
+	"EHLO VA3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933242Ab1LFKdD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 05:33:03 -0500
+Received: from mail107-va3 (localhost [127.0.0.1])	by
+ mail107-va3-R.bigfish.com (Postfix) with ESMTP id 4D02F200275	for
+ <linux-mmc@vger.kernel.org>; Tue,  6 Dec 2011 10:33:00 +0000 (UTC)
+Received: from VA3EHSMHS036.bigfish.com (unknown [10.7.14.249])	by
+ mail107-va3.bigfish.com (Postfix) with ESMTP id D4F3B48008A	for
+ <linux-mmc@vger.kernel.org>; Tue,  6 Dec 2011 10:32:59 +0000 (UTC)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
@@ -24,30 +22,29 @@ Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
 From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-When f_init is zero, the SDHC can't work correctly. So f_min will replace
-f_init, when f_init is zero.
+Before running get_cd() recall function to detect whether the card is
+present, must make sure the power is up.
 
 Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
 ---
- drivers/mmc/core/core.c |    5 ++++-
- 1 files changed, 4 insertions(+), 1 deletions(-)
+ drivers/mmc/core/core.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index a08e6b1..2d40c04 100644
+index 5278ffb..a08e6b1 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1253,7 +1253,10 @@ static void mmc_power_up(struct mmc_host *host)
+@@ -2066,8 +2066,10 @@ void mmc_rescan(struct work_struct *work)
  	 */
- 	mmc_delay(10);
+ 	mmc_bus_put(host);
  
--	host->ios.clock = host->f_init;
-+	if (host->f_init)
-+		host->ios.clock = host->f_init;
-+	else
-+		host->ios.clock = host->f_min;
++	mmc_power_up(host);
+ 	if (host->ops->get_cd && host->ops->get_cd(host) == 0)
+ 		goto out;
++	mmc_power_off(host);
  
- 	host->ios.power_mode = MMC_POWER_ON;
- 	mmc_set_ios(host);
+ 	mmc_claim_host(host);
+ 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
 -- 
 1.7.5.4
 
