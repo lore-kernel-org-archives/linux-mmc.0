@@ -1,72 +1,53 @@
-From: Wolfram Sang <w.sang@pengutronix.de>
-Subject: Re: [MXS MMC 5/5] Add an appropriate MODULE_ALIAS
-Date: Tue, 6 Dec 2011 20:12:24 +0100
-Message-ID: <20111206191224.GF7835@pengutronix.de>
-References: <cover.1323177907.git.LW@KARO-electronics.de>
- <b1c45bfdbc9323b2a6c50ce213a3e895aeea2b2f.1323177907.git.LW@KARO-electronics.de>
+From: "Hernandez, Alejandro" <ajhernandez@ti.com>
+Subject: RE: [PATCH] arm, da8xx, mmc: set second MMC controllers default
+ queue
+Date: Tue, 6 Dec 2011 19:15:48 +0000
+Message-ID: <C1CAF10E70742149B55CDF4C48D47685061812@DLEE09.ent.ti.com>
+References: <1322991210-20486-1-git-send-email-hs@denx.de>
+	<B6A220404B6BFC4BBD2AB91C54D39DF4029FE5@DBDE01.ent.ti.com>
+	<4EDCA109.2090204@denx.de>
+ <DF0F476B391FA8409C78302C7BA518B603E610@DBDE01.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============5286836611573966845=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <b1c45bfdbc9323b2a6c50ce213a3e895aeea2b2f.1323177907.git.LW@KARO-electronics.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Lothar =?iso-8859-15?Q?Wa=DFmann?= <LW@KARO-electronics.de>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Sascha Hauer <kernel@pengutronix.de>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
-List-Id: linux-mmc@vger.kernel.org
-
-
---===============5286836611573966845==
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="MZf7D3rAEoQgPanC"
-Content-Disposition: inline
-
-
---MZf7D3rAEoQgPanC
-Content-Type: text/plain; charset=iso-8859-15
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Dec 06, 2011 at 02:41:30PM +0100, Lothar Wa=DFmann wrote:
->=20
-> Signed-off-by: Lothar Wa=DFmann <LW@KARO-electronics.de>
-
-Acked-by: Wolfram Sang <w.sang@pengutronix.de>
-
---=20
-Pengutronix e.K.                           | Wolfram Sang                |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-
---MZf7D3rAEoQgPanC
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAk7eaRgACgkQD27XaX1/VRvl4gCdHzPgZGNFKeLj6lKrjKJCuR0i
-DnkAoJ/VbRdKDHcjGuso9P9ptHhn5Svt
-=SAeG
------END PGP SIGNATURE-----
-
---MZf7D3rAEoQgPanC--
-
-
---===============5286836611573966845==
 Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:41430 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753173Ab1LFTPy convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Dec 2011 14:15:54 -0500
+In-Reply-To: <DF0F476B391FA8409C78302C7BA518B603E610@DBDE01.ent.ti.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: "Nori, Sekhar" <nsekhar@ti.com>, "hs@denx.de" <hs@denx.de>, "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>
+Cc: "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, Wolfgang Denk <wd@denx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ido Yariv <ido@wizery.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
+Sekhar,
+
+Do you still want me to try the patch?
+
+Thanks,
+Alejandro
+
+-----Original Message-----
+From: davinci-linux-open-source-bounces@linux.davincidsp.com [mailto:davinci-linux-open-source-bounces@linux.davincidsp.com] On Behalf Of Nori, Sekhar
+Sent: Tuesday, December 06, 2011 2:10 PM
+To: hs@denx.de; Rajashekhara, Sudhakar
+Cc: davinci-linux-open-source@linux.davincidsp.com; Wolfgang Denk; linux-mmc@vger.kernel.org; Ido Yariv; linux-arm-kernel@lists.infradead.org
+Subject: RE: [PATCH] arm, da8xx, mmc: set second MMC controllers default queue
+
+On Mon, Dec 05, 2011 at 16:16:33, Heiko Schocher wrote:
+> 
+> Thanks, but as Ido commented, this patch is no longer necessary, sorry
+> for the noise.
+> 
+
+It doesn't look like Ido's comment reached me or the archives. Can you
+please forward it?
+
+Thanks,
+Sekhar
 _______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============5286836611573966845==--
+Davinci-linux-open-source mailing list
+Davinci-linux-open-source@linux.davincidsp.com
+http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source
