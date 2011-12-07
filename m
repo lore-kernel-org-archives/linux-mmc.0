@@ -1,66 +1,41 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 00/14] mmc: mmci: Improved PM support, cleanup and bugfixes
-Date: Wed, 7 Dec 2011 13:06:47 +0100
-Message-ID: <CACRpkdZkqv+LW5nj4X9-sw+1kMWKbjQmZX_mECLx0Oq5o91JvQ@mail.gmail.com>
-References: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [MXS MMC 3/5] Add support for SSP/MMC ports 2 & 3
+Date: Wed, 7 Dec 2011 20:30:10 +0800
+Message-ID: <20111207123008.GM5550@S2100-06.ap.freescale.net>
+References: <cover.1323177907.git.LW@KARO-electronics.de>
+ <e668bb1ab5fbe406ef604a18f59292a05149ae51.1323177907.git.LW@KARO-electronics.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:60516 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755010Ab1LGMGs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2011 07:06:48 -0500
-Received: by iakc1 with SMTP id c1so843414iak.19
-        for <linux-mmc@vger.kernel.org>; Wed, 07 Dec 2011 04:06:47 -0800 (PST)
-In-Reply-To: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:59496
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755010Ab1LGMR1 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 7 Dec 2011 07:17:27 -0500
+Content-Disposition: inline
+In-Reply-To: <e668bb1ab5fbe406ef604a18f59292a05149ae51.1323177907.git.LW@KARO-electronics.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>, Russell King <linux@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>
+To: Lothar =?iso-8859-1?Q?Wa=DFmann?= <LW@KARO-electronics.de>
+Cc: linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-Hi Ulf,
+On Tue, Dec 06, 2011 at 02:41:28PM +0100, Lothar Wa=DFmann wrote:
+> i.MX28 has four SSP/MMC units, only two of which are currently
+> usable.
+>=20
+> Signed-off-by: Lothar Wa=DFmann <LW@KARO-electronics.de>
 
-On Mon, Dec 5, 2011 at 6:35 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
+Applied, thanks.
 
-> Patch 1 -> 4:
-> Minor changes for bugs and some performance optimizations.
-> Previously sent to the mailing list.
-> Patch 5 -> 7:
-> Minor changes affecting how to handle a levelshifter.
-> Previously sent to the mailing list.
-> Patch 8:
-> Bugfix for dma. Previously sent to the mailing list, ongoing discussion.
-> Patch 9 -> 14:
-> Improvement of PM support.
+Please add prefix 'ARM: mxs:' or 'arm/mxs' to make the patch look like
+the below in the future submission.
 
-I applied all 14 patches on top of current v3.2-rc4
-and regression-tested the whole shebang on RealView PB1176
-and U300.
+ [PATCH 3/5] ARM: mxs: Add support for SSP/MMC ports 2 & 3
 
-- Mounted /dev/mmcblk0p1
-- Copy a kernel-sized uImage file from the card to ramdisk
-- Copy the file back to the card from ramdisk
-- Unmount
-- Mount
-- Compare the two files with diff (identical)
-- Delete copy
-- Unmount
-- dd if=/dev/mmcblk0 of=/dev/null
+I fixed it this time.
 
-(If any of you wants any more specific tests, tell me.)
+--=20
+Regards,
+Shawn
 
-Both platforms still work like a charm with these patches.
-PB1176 is as slow on MMC as it always has been but dd:ed
-the entire card without errors.
-
-I have the branch here:
-git://git.kernel.org/pub/scm/linux/kernel/git/linusw/linux-stericsson.git mmci
-
-Ulf you can add my Tested-by: Linus Walleij <linus.walleij@linaro.org>
-for these patches.
-
-Russell if you want a pull request for a subset of the patches I can
-arrange that, just tell me.
-
-Yours,
-Linus Walleij
