@@ -1,20 +1,20 @@
 From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 2/5 v2] MMC/core: Add f_min to mmc_power_on()
-Date: Wed, 7 Dec 2011 02:23:59 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F116342A2@039-SN1MPN1-005.039d.mgd.msft.net>
+Subject: RE: [PATCH 1/5 v2] MMC/core: Make sure the power is up, when detect
+ the card
+Date: Wed, 7 Dec 2011 02:26:31 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F116342BA@039-SN1MPN1-005.039d.mgd.msft.net>
 References: <1323163107-32619-1-git-send-email-r66093@freescale.com>
- <1323163107-32619-2-git-send-email-r66093@freescale.com>
- <4EDE06DA.7010108@yahoo.es>
+ <4EDE06C4.2060303@yahoo.es>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:42341
-	"EHLO VA3EHSOBE009.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751901Ab1LGCYB convert rfc822-to-8bit
+Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:56954
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751901Ab1LGC0g convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 6 Dec 2011 21:24:01 -0500
-In-Reply-To: <4EDE06DA.7010108@yahoo.es>
+	Tue, 6 Dec 2011 21:26:36 -0500
+In-Reply-To: <4EDE06C4.2060303@yahoo.es>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -28,15 +28,16 @@ Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@lap
 > Sent: Tuesday, December 06, 2011 8:13 PM
 > To: Huang Changming-R66093
 > Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093; Chris Ball
-> Subject: Re: [PATCH 2/5 v2] MMC/core: Add f_min to mmc_power_on()
+> Subject: Re: [PATCH 1/5 v2] MMC/core: Make sure the power is up, when
+> detect the card
 > 
 > Hi Jerry,
 > 
 > On 12/6/2011 5:18 PM, r66093@freescale.com wrote:
 > > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 > >
-> > When f_init is zero, the SDHC can't work correctly. So f_min will
-> > replace f_init, when f_init is zero.
+> > Before running get_cd() recall function to detect whether the card is
+> > present, must make sure the power is up.
 > >
 > > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
 > > CC: Chris Ball <cjb@laptop.org>
@@ -44,26 +45,25 @@ Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@lap
 > > changes for v2:
 > > 	- add the CC
 > >
-> >  drivers/mmc/core/core.c |    5 ++++-
-> >  1 files changed, 4 insertions(+), 1 deletions(-)
+> >  drivers/mmc/core/core.c |    2 ++
+> >  1 files changed, 2 insertions(+), 0 deletions(-)
 > >
 > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
-> > a08e6b1..2d40c04 100644
+> > 5278ffb..a08e6b1 100644
 > > --- a/drivers/mmc/core/core.c
 > > +++ b/drivers/mmc/core/core.c
-> > @@ -1253,7 +1253,10 @@ static void mmc_power_up(struct mmc_host *host)
+> > @@ -2066,8 +2066,10 @@ void mmc_rescan(struct work_struct *work)
 > >  	 */
-> >  	mmc_delay(10);
+> >  	mmc_bus_put(host);
 > >
-> > -	host->ios.clock = host->f_init;
-> > +	if (host->f_init)
-> > +		host->ios.clock = host->f_init;
-> > +	else
-> > +		host->ios.clock = host->f_min;
+> > +	mmc_power_up(host);
 > 
-> Are you sure f_min can have a value of zero?
-> It should have been set mmc_rescan_try_freq(), when trying a list of
-> frequencies: 400000, 300000, 200000, 100000
+> If get_cd is not defined, a power-up for sure isn't necessary:
 > 
-But, mmc_power_up is called not only by mmc_rescan_try_freq, so the value of f_init may be zero.
+> >  	if (host->ops->get_cd && host->ops->get_cd(host) == 0)
+> >  		goto out;
+> 
+> Did you intent to leave it powered-up in case get_cd() fails?
+> 
+En, it is one bug, I will fix it
 
