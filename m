@@ -1,50 +1,50 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 3/4] MMC/core: Make sure the power is up, when detect the card
-Date: Wed, 7 Dec 2011 10:04:44 +0100
-Message-ID: <CACRpkdZ6FjrjtarzyLe_bmrZ6m6N=j07zaTxCFMuF6AsraKa4Q@mail.gmail.com>
-References: <1323077026-12071-1-git-send-email-r66093@freescale.com>
-	<1323077026-12071-2-git-send-email-r66093@freescale.com>
-	<1323077026-12071-3-git-send-email-r66093@freescale.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [MXS MMC 1/5] Fix grammatical error in comment
+Date: Wed, 7 Dec 2011 19:00:48 +0800
+Message-ID: <20111207110047.GI5550@S2100-06.ap.freescale.net>
+References: <cover.1323177907.git.LW@KARO-electronics.de>
+ <1ebaeb7f7ed88b1d82f5fc3a01c0661f38e2a16d.1323177907.git.LW@KARO-electronics.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:51945 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755273Ab1LGJEp convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2011 04:04:45 -0500
-Received: by iakc1 with SMTP id c1so623040iak.19
-        for <linux-mmc@vger.kernel.org>; Wed, 07 Dec 2011 01:04:45 -0800 (PST)
-In-Reply-To: <1323077026-12071-3-git-send-email-r66093@freescale.com>
+Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:3804 "EHLO
+	VA3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754028Ab1LGKsG convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2011 05:48:06 -0500
+Content-Disposition: inline
+In-Reply-To: <1ebaeb7f7ed88b1d82f5fc3a01c0661f38e2a16d.1323177907.git.LW@KARO-electronics.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: r66093@freescale.com
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>
+To: Lothar =?iso-8859-1?Q?Wa=DFmann?= <LW@KARO-electronics.de>
+Cc: linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-On Mon, Dec 5, 2011 at 10:23 AM,  <r66093@freescale.com> wrote:
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
->
-> Before running get_cd() recall function to detect whether the card is
-> present, must make sure the power is up.
-(...)
-> + =A0 =A0 =A0 mmc_power_up(host);
-> =A0 =A0 =A0 =A0if (host->ops->get_cd && host->ops->get_cd(host) =3D=3D=
- 0)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0goto out;
-> + =A0 =A0 =A0 mmc_power_off(host);
+On Tue, Dec 06, 2011 at 02:41:26PM +0100, Lothar Wa=DFmann wrote:
+>=20
+> Signed-off-by: Lothar Wa=DFmann <LW@KARO-electronics.de>
+> ---
+>  arch/arm/mach-mxs/clock-mx28.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+>=20
+> diff --git a/arch/arm/mach-mxs/clock-mx28.c b/arch/arm/mach-mxs/clock=
+-mx28.c
+> index da6e4aa..fc86b04 100644
+> --- a/arch/arm/mach-mxs/clock-mx28.c
+> +++ b/arch/arm/mach-mxs/clock-mx28.c
+> @@ -554,7 +554,7 @@ static struct clk rtc_clk =3D {
+>  	.parent =3D &ref_xtal_clk,
+>  };
+> =20
+> -/* usb_clk gate is controlled in DIGCTRL other than CLKCTRL */
+> +/* usb_clk gate is controlled in DIGCTRL rather than CLKCTRL */
+>  static struct clk usb0_clk =3D {
+>  	.enable_reg =3D DIGCTRL_BASE_ADDR,
+>  	.enable_shift =3D 2,
+> --=20
 
-NAK, I don't get it.
+Acked-by: Shawn Guo <shawn.guo@linaro.org>
 
-mmc_power_up() mmc_power_off() is about powering up/down the
-*card*.
+--=20
+Regards,
+Shawn
 
-If you need to read a register in your MMC host or so, control power
-and clocking of your silicon in the driver itself. You can use
-runtime PM or whatever including explicit clk_enable()/clk_disable()
-etc.
-
-I have a strong feeling that the bug you're trying to fix is in the
-host controller you're using, not in the MMC core.
-
-Yours,
-Linus Walleij
