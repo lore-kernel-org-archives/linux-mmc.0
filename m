@@ -1,20 +1,23 @@
 From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 1/5 v2] MMC/core: Make sure the power is up, when detect
- the card
-Date: Wed, 7 Dec 2011 02:26:31 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F116342BA@039-SN1MPN1-005.039d.mgd.msft.net>
-References: <1323163107-32619-1-git-send-email-r66093@freescale.com>
- <4EDE06C4.2060303@yahoo.es>
+Subject: RE: [PATCH 4/5 v2] SDHCI: add sdhci_get_cd callback to detect the
+ card
+Date: Wed, 7 Dec 2011 02:35:37 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F116342D5@039-SN1MPN1-005.039d.mgd.msft.net>
+References: <1323162937-7742-1-git-send-email-r66093@freescale.com>
+ <1323162937-7742-2-git-send-email-r66093@freescale.com>
+ <1323162937-7742-3-git-send-email-r66093@freescale.com>
+ <1323162937-7742-4-git-send-email-r66093@freescale.com>
+ <4EDE0669.5060601@yahoo.es>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:56954
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751901Ab1LGC0g convert rfc822-to-8bit
+Received: from db3ehsobe001.messaging.microsoft.com ([213.199.154.139]:6578
+	"EHLO DB3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754053Ab1LGCfm convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 6 Dec 2011 21:26:36 -0500
-In-Reply-To: <4EDE06C4.2060303@yahoo.es>
+	Tue, 6 Dec 2011 21:35:42 -0500
+In-Reply-To: <4EDE0669.5060601@yahoo.es>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -25,45 +28,72 @@ Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@lap
 
 > -----Original Message-----
 > From: Hein_Tibosch [mailto:hein_tibosch@yahoo.es]
-> Sent: Tuesday, December 06, 2011 8:13 PM
+> Sent: Tuesday, December 06, 2011 8:11 PM
 > To: Huang Changming-R66093
 > Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093; Chris Ball
-> Subject: Re: [PATCH 1/5 v2] MMC/core: Make sure the power is up, when
-> detect the card
+> Subject: Re: [PATCH 4/5 v2] SDHCI: add sdhci_get_cd callback to detect
+> the card
 > 
 > Hi Jerry,
 > 
-> On 12/6/2011 5:18 PM, r66093@freescale.com wrote:
+> On 12/6/2011 5:15 PM, r66093@freescale.com wrote:
 > > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 > >
-> > Before running get_cd() recall function to detect whether the card is
-> > present, must make sure the power is up.
+> > Add callback function sdhci_get_cd to detect the card.
+> > And one new callback added to implement the card detect in sdhci
+> struncture.
+> > If special platform has the card detect callback, it will return the
+> > card state, the value zero is for absent cardi and one is for present
+> card.
+> > If the controller don't support card detect, sdhci_get_cd will return -
+> ENOSYS.
 > >
 > > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
 > > CC: Chris Ball <cjb@laptop.org>
 > > ---
 > > changes for v2:
+> > 	- when controller don't support get_cd, return -ENOSYS
+> > 	- add new callback for sdhci to detect the card
 > > 	- add the CC
 > >
-> >  drivers/mmc/core/core.c |    2 ++
-> >  1 files changed, 2 insertions(+), 0 deletions(-)
+> >  drivers/mmc/host/sdhci.c |   21 +++++++++++++++++++++
+> >  drivers/mmc/host/sdhci.h |    2 ++
+> >  2 files changed, 23 insertions(+), 0 deletions(-)
 > >
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
-> > 5278ffb..a08e6b1 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -2066,8 +2066,10 @@ void mmc_rescan(struct work_struct *work)
-> >  	 */
-> >  	mmc_bus_put(host);
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
+> > 6d8eea3..2196c5e 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -2,6 +2,7 @@
+> >   *  linux/drivers/mmc/host/sdhci.c - Secure Digital Host Controller
+> Interface driver
+> >   *
+> >   *  Copyright (C) 2005-2008 Pierre Ossman, All Rights Reserved.
+> > + *  Copyright (C) 2011 Freescale Semiconductor Inc.
+> >   *
+> >   * This program is free software; you can redistribute it and/or
+> modify
+> >   * it under the terms of the GNU General Public License as published
+> > by @@ -1518,6 +1519,25 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+> >  	return ret;
+> >  }
 > >
-> > +	mmc_power_up(host);
+> > +/* Return values for the sdjco_get_cd callback:
+> > + *   0 for a absent card
+> > + *   1 for a present card
+> > + *   -ENOSYS when not supported (equal to NULL callback)
+> > + */
+> > +static int sdhci_get_cd(struct mmc_host *mmc) {
+> > +	struct sdhci_host *host = mmc_priv(mmc);
+> > +	unsigned long flags;
+> > +	int present = -ENOSYS;
+> > +
+> > +	spin_lock_irqsave(&host->lock, flags);
+> > +	if (host->ops->get_cd)
+> > +		present = host->ops->get_cd(host);
+> > +	spin_unlock_irqrestore(&host->lock, flags);
 > 
-> If get_cd is not defined, a power-up for sure isn't necessary:
+> Maybe only use spin-lock if get_cd is defined?
 > 
-> >  	if (host->ops->get_cd && host->ops->get_cd(host) == 0)
-> >  		goto out;
-> 
-> Did you intent to leave it powered-up in case get_cd() fails?
-> 
-En, it is one bug, I will fix it
+Yes, I will move it.
 
