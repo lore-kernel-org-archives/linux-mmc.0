@@ -1,155 +1,140 @@
-From: =?utf-8?q?Lothar=20Wa=C3=9Fmann?= <LW@KARO-electronics.de>
-Subject: [MXS MMC v2 2/4] Some cleanups for the MMC driver
-Date: Thu,  8 Dec 2011 09:17:45 +0100
-Message-ID: <d935557e044d2ebc56b4e70487b519fe722e9017.1323328267.git.LW@KARO-electronics.de>
-References: <cover.1323328267.git.LW@KARO-electronics.de>
- <1ebaeb7f7ed88b1d82f5fc3a01c0661f38e2a16d.1323328267.git.LW@KARO-electronics.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1ebaeb7f7ed88b1d82f5fc3a01c0661f38e2a16d.1323328267.git.LW@KARO-electronics.de>
-In-Reply-To: <cover.1323328267.git.LW@KARO-electronics.de>
-References: <cover.1323328267.git.LW@KARO-electronics.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, =?utf-8?q?Lothar=20Wa=C3=9Fmann?= <LW@KARO-electronics.de>
+From: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Subject: [PATCH V4] mmc: Kill block requests if card is removed
+Date: Thu,  8 Dec 2011 14:05:50 +0530
+Message-ID: <1323333350-14315-1-git-send-email-sthumma@codeaurora.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:36378 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751310Ab1LHIgB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2011 03:36:01 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, adrian.hunter@intel.com
+Cc: per.lkml@gmail.com, Sujit Reddy Thumma <sthumma@codeaurora.org>, cjb@laptop.org
 
- - Remove bogus parens around numerical arguments in #define's
- - When defining bit masks, use the #def for the shift count
-   instead of repeating the numbers
- - Remove 'break' at end of switch statement
+Kill block requests when the host realizes that the card is
+removed from the slot and is sure that subsequent requests
+are bound to fail. Do this silently so that the block
+layer doesn't output unnecessary error messages.
 
-Changes wrt v1:
- - break long lines
- - leave indentation as is
+Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
 
-Signed-off-by: Lothar Wa=C3=9Fmann <LW@KARO-electronics.de>
 ---
- drivers/mmc/host/mxs-mmc.c |   60 ++++++++++++++++++++++++------------=
----------
- 1 file changed, 32 insertions(+), 28 deletions(-)
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 99b449d..a9b70d2 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -47,7 +47,7 @@
- #define DRIVER_NAME	"mxs-mmc"
-=20
- /* card detect polling timeout */
--#define MXS_MMC_DETECT_TIMEOUT			(HZ/2)
-+#define MXS_MMC_DETECT_TIMEOUT			(HZ / 2)
-=20
- #define SSP_VERSION_LATEST	4
- #define ssp_is_old()		(host->version < SSP_VERSION_LATEST)
-@@ -59,39 +59,43 @@
- #define  BM_SSP_CTRL0_IGNORE_CRC		(1 << 26)
- #define  BM_SSP_CTRL0_READ			(1 << 25)
- #define  BM_SSP_CTRL0_DATA_XFER			(1 << 24)
--#define  BP_SSP_CTRL0_BUS_WIDTH			(22)
--#define  BM_SSP_CTRL0_BUS_WIDTH			(0x3 << 22)
-+#define  BP_SSP_CTRL0_BUS_WIDTH			22
-+#define  BM_SSP_CTRL0_BUS_WIDTH			(0x3 << BP_SSP_CTRL0_BUS_WIDTH)
- #define  BM_SSP_CTRL0_WAIT_FOR_IRQ		(1 << 21)
- #define  BM_SSP_CTRL0_LONG_RESP			(1 << 19)
- #define  BM_SSP_CTRL0_GET_RESP			(1 << 17)
- #define  BM_SSP_CTRL0_ENABLE			(1 << 16)
--#define  BP_SSP_CTRL0_XFER_COUNT		(0)
--#define  BM_SSP_CTRL0_XFER_COUNT		(0xffff)
-+#define  BP_SSP_CTRL0_XFER_COUNT		0
-+#define  BM_SSP_CTRL0_XFER_COUNT		0xffff
- #define HW_SSP_CMD0				0x010
- #define  BM_SSP_CMD0_DBL_DATA_RATE_EN		(1 << 25)
- #define  BM_SSP_CMD0_SLOW_CLKING_EN		(1 << 22)
- #define  BM_SSP_CMD0_CONT_CLKING_EN		(1 << 21)
- #define  BM_SSP_CMD0_APPEND_8CYC		(1 << 20)
--#define  BP_SSP_CMD0_BLOCK_SIZE			(16)
--#define  BM_SSP_CMD0_BLOCK_SIZE			(0xf << 16)
--#define  BP_SSP_CMD0_BLOCK_COUNT		(8)
--#define  BM_SSP_CMD0_BLOCK_COUNT		(0xff << 8)
--#define  BP_SSP_CMD0_CMD			(0)
--#define  BM_SSP_CMD0_CMD			(0xff)
-+#define  BP_SSP_CMD0_BLOCK_SIZE			16
-+#define  BM_SSP_CMD0_BLOCK_SIZE			(0xf << BP_SSP_CMD0_BLOCK_SIZE)
-+#define  BP_SSP_CMD0_BLOCK_COUNT		8
-+#define  BM_SSP_CMD0_BLOCK_COUNT		\
-+	(0xff << BP_SSP_CMD0_BLOCK_COUNT)
-+#define  BP_SSP_CMD0_CMD			0
-+#define  BM_SSP_CMD0_CMD			0xff
- #define HW_SSP_CMD1				0x020
- #define HW_SSP_XFER_SIZE			0x030
- #define HW_SSP_BLOCK_SIZE			0x040
--#define  BP_SSP_BLOCK_SIZE_BLOCK_COUNT		(4)
--#define  BM_SSP_BLOCK_SIZE_BLOCK_COUNT		(0xffffff << 4)
--#define  BP_SSP_BLOCK_SIZE_BLOCK_SIZE		(0)
--#define  BM_SSP_BLOCK_SIZE_BLOCK_SIZE		(0xf)
-+#define  BP_SSP_BLOCK_SIZE_BLOCK_COUNT		4
-+#define  BM_SSP_BLOCK_SIZE_BLOCK_COUNT		\
-+	(0xffffff << BP_SSP_BLOCK_SIZE_BLOCK_COUNT)
-+#define  BP_SSP_BLOCK_SIZE_BLOCK_SIZE		0
-+#define  BM_SSP_BLOCK_SIZE_BLOCK_SIZE		0xf
- #define HW_SSP_TIMING				(ssp_is_old() ? 0x050 : 0x070)
--#define  BP_SSP_TIMING_TIMEOUT			(16)
--#define  BM_SSP_TIMING_TIMEOUT			(0xffff << 16)
--#define  BP_SSP_TIMING_CLOCK_DIVIDE		(8)
--#define  BM_SSP_TIMING_CLOCK_DIVIDE		(0xff << 8)
--#define  BP_SSP_TIMING_CLOCK_RATE		(0)
--#define  BM_SSP_TIMING_CLOCK_RATE		(0xff)
-+#define  BP_SSP_TIMING_TIMEOUT			16
-+#define  BM_SSP_TIMING_TIMEOUT			\
-+	(0xffff << BP_SSP_TIMING_TIMEOUT)
-+#define  BP_SSP_TIMING_CLOCK_DIVIDE		8
-+#define  BM_SSP_TIMING_CLOCK_DIVIDE		\
-+	(0xff << BP_SSP_TIMING_CLOCK_DIVIDE)
-+#define  BP_SSP_TIMING_CLOCK_RATE		0
-+#define  BM_SSP_TIMING_CLOCK_RATE		0xff
- #define HW_SSP_CTRL1				(ssp_is_old() ? 0x060 : 0x080)
- #define  BM_SSP_CTRL1_SDIO_IRQ			(1 << 31)
- #define  BM_SSP_CTRL1_SDIO_IRQ_EN		(1 << 30)
-@@ -111,10 +115,11 @@
- #define  BM_SSP_CTRL1_FIFO_OVERRUN_IRQ_EN	(1 << 14)
- #define  BM_SSP_CTRL1_DMA_ENABLE		(1 << 13)
- #define  BM_SSP_CTRL1_POLARITY			(1 << 9)
--#define  BP_SSP_CTRL1_WORD_LENGTH		(4)
--#define  BM_SSP_CTRL1_WORD_LENGTH		(0xf << 4)
--#define  BP_SSP_CTRL1_SSP_MODE			(0)
--#define  BM_SSP_CTRL1_SSP_MODE			(0xf)
-+#define  BP_SSP_CTRL1_WORD_LENGTH		4
-+#define  BM_SSP_CTRL1_WORD_LENGTH		\
-+	(0xf << BP_SSP_CTRL1_WORD_LENGTH)
-+#define  BP_SSP_CTRL1_SSP_MODE			0
-+#define  BM_SSP_CTRL1_SSP_MODE			0xf
- #define HW_SSP_SDRESP0				(ssp_is_old() ? 0x080 : 0x0a0)
- #define HW_SSP_SDRESP1				(ssp_is_old() ? 0x090 : 0x0b0)
- #define HW_SSP_SDRESP2				(ssp_is_old() ? 0x0a0 : 0x0c0)
-@@ -123,7 +128,7 @@
- #define  BM_SSP_STATUS_CARD_DETECT		(1 << 28)
- #define  BM_SSP_STATUS_SDIO_IRQ			(1 << 17)
- #define HW_SSP_VERSION				(cpu_is_mx23() ? 0x110 : 0x130)
--#define  BP_SSP_VERSION_MAJOR			(24)
-+#define  BP_SSP_VERSION_MAJOR			24
-=20
- #define BF_SSP(value, field)	(((value) << BP_SSP_##field) & BM_SSP_##f=
-ield)
-=20
-@@ -151,7 +156,7 @@ struct mxs_mmc_host {
- 	struct clk			*clk;
- 	unsigned int			clk_rate;
-=20
--	struct dma_chan         	*dmach;
-+	struct dma_chan			*dmach;
- 	struct mxs_dma_data		dma_data;
- 	unsigned int			dma_dir;
- 	u32				ssp_pio_words[SSP_PIO_NUM];
-@@ -550,7 +555,6 @@ static void mxs_mmc_start_cmd(struct mxs_mmc_host *=
-host,
- 	default:
- 		dev_warn(mmc_dev(host->mmc),
- 			 "%s: unknown MMC command\n", __func__);
--		break;
- 	}
+Changes in v4:
+	- Extra check to make sure no further commands are sent
+	in error case when the card is removed.
+Changes in v3:
+	- Dropped dependency on Per's patch and is now dependent
+	on "[PATCH V4] mmc: allow upper layers to determine immediately
+	if a card has been removed" by Adrian Hunter.
+	- Modified commit text slightly as Adrian has
+	implemented his own suggestion in a different patch.
+
+Changes in v2:
+	- Changed the implementation with further comments from Adrian
+	- Set the card removed flag in bus notifier callbacks
+	- This patch is now dependent on patch from Per Forlin:
+	http://thread.gmane.org/gmane.linux.kernel.mmc/11128/focus=11211
+---
+ drivers/mmc/card/block.c |   17 ++++++++++++++++-
+ drivers/mmc/card/queue.c |    5 +++++
+ 2 files changed, 21 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 0c959c9..0cad48a 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -121,6 +121,7 @@ enum mmc_blk_status {
+ 	MMC_BLK_ABORT,
+ 	MMC_BLK_DATA_ERR,
+ 	MMC_BLK_ECC_ERR,
++	MMC_BLK_NOMEDIUM,
+ };
+ 
+ module_param(perdev_minors, int, 0444);
+@@ -639,6 +640,7 @@ static int get_card_status(struct mmc_card *card, u32 *status, int retries)
+ 	return err;
  }
-=20
---=20
-1.5.6.5
+ 
++#define ERR_NOMEDIUM	3
+ #define ERR_RETRY	2
+ #define ERR_ABORT	1
+ #define ERR_CONTINUE	0
+@@ -706,6 +708,9 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
+ 	u32 status, stop_status = 0;
+ 	int err, retry;
+ 
++	if (mmc_card_removed(card))
++		return ERR_NOMEDIUM;
++
+ 	/*
+ 	 * Try to get card status which indicates both the card state
+ 	 * and why there was no response.  If the first attempt fails,
+@@ -722,8 +727,12 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
+ 	}
+ 
+ 	/* We couldn't get a response from the card.  Give up. */
+-	if (err)
++	if (err) {
++		/* Check if the card is removed */
++		if (mmc_detect_card_removed(card->host))
++			return ERR_NOMEDIUM;
+ 		return ERR_ABORT;
++	}
+ 
+ 	/* Flag ECC errors */
+ 	if ((status & R1_CARD_ECC_FAILED) ||
+@@ -996,6 +1005,8 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 			return MMC_BLK_RETRY;
+ 		case ERR_ABORT:
+ 			return MMC_BLK_ABORT;
++		case ERR_NOMEDIUM:
++			return MMC_BLK_NOMEDIUM;
+ 		case ERR_CONTINUE:
+ 			break;
+ 		}
+@@ -1329,6 +1340,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			if (!ret)
+ 				goto start_new_req;
+ 			break;
++		case MMC_BLK_NOMEDIUM:
++			goto cmd_abort;
+ 		}
+ 
+ 		if (ret) {
+@@ -1345,6 +1358,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 
+  cmd_abort:
+ 	spin_lock_irq(&md->lock);
++	if (mmc_card_removed(card))
++		req->cmd_flags |= REQ_QUIET;
+ 	while (ret)
+ 		ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
+ 	spin_unlock_irq(&md->lock);
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index dcad59c..2517547 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -29,6 +29,8 @@
+  */
+ static int mmc_prep_request(struct request_queue *q, struct request *req)
+ {
++	struct mmc_queue *mq = q->queuedata;
++
+ 	/*
+ 	 * We only like normal block requests and discards.
+ 	 */
+@@ -37,6 +39,9 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
+ 		return BLKPREP_KILL;
+ 	}
+ 
++	if (mq && mmc_card_removed(mq->card))
++		return BLKPREP_KILL;
++
+ 	req->cmd_flags |= REQ_DONTPREP;
+ 
+ 	return BLKPREP_OK;
+-- 
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+
