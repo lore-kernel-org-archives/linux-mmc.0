@@ -1,46 +1,113 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [linux-next] sdhci-s3c build error
-Date: Wed, 07 Dec 2011 22:52:17 -0500
-Message-ID: <87ehwfu3da.fsf@laptop.org>
-References: <1322957045.19303.0.camel@phoenix> <87borpfb9x.fsf@laptop.org>
+Subject: Re: [PATCH] mmc: sdhci-pci: simplify error handling
+Date: Wed, 07 Dec 2011 22:53:24 -0500
+Message-ID: <87aa73u3bf.fsf@laptop.org>
+References: <1322897285.3884.1.camel@phoenix> <4EDCAAFB.4060209@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50131 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:50156 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754842Ab1LHDwF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 7 Dec 2011 22:52:05 -0500
-In-Reply-To: <87borpfb9x.fsf@laptop.org> (Chris Ball's message of "Sat, 03 Dec
-	2011 19:09:14 -0500")
+	id S1754842Ab1LHDxM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 7 Dec 2011 22:53:12 -0500
+In-Reply-To: <4EDCAAFB.4060209@intel.com> (Adrian Hunter's message of "Mon, 05
+	Dec 2011 13:28:59 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Sangwook Lee <sangwook.lee@samsung.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Axel Lin <axel.lin@gmail.com>, linux-kernel@vger.kernel.org, Takashi Iwai <tiwai@suse.de>, linux-mmc@vger.kernel.org
 
 Hi,
 
-On Sat, Dec 03 2011, Chris Ball wrote:
->>   CC      drivers/mmc/host/sdhci-s3c.o
->> drivers/mmc/host/sdhci-s3c.c: In function 'sdhci_s3c_probe':
->> drivers/mmc/host/sdhci-s3c.c:524: error: 'struct s3c_sdhci_platdata'
->> has no member named 'pm_caps'
->> drivers/mmc/host/sdhci-s3c.c:525: error: 'struct s3c_sdhci_platdata'
->> has no member named 'pm_caps'
->> make[3]: *** [drivers/mmc/host/sdhci-s3c.o] Error 1
->> make[2]: *** [drivers/mmc/host] Error 2
->> make[1]: *** [drivers/mmc] Error 2
->> make: *** [drivers] Error 2
->>
->> Forgot to add pm_caps to struct s3c_sdhci_platdata?
+On Mon, Dec 05 2011, Adrian Hunter wrote:
+> On 03/12/11 09:28, Axel Lin wrote:
+>> Signed-off-by: Axel Lin <axel.lin@gmail.com>
 >
-> Known, see http://thread.gmane.org/gmane.linux.kernel.mmc/11464.
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 >
-> I'll pull in the arch code fix, but I need to rebase mmc-next against
-> a newer Linus tree first (else the patch doesn't apply).
+>> ---
+>>  drivers/mmc/host/sdhci-pci.c |   38 ++++++++++++++++++--------------------
+>>  1 files changed, 18 insertions(+), 20 deletions(-)
+>> 
+>> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+>> index 6878a94..d2e77fb 100644
+>> --- a/drivers/mmc/host/sdhci-pci.c
+>> +++ b/drivers/mmc/host/sdhci-pci.c
+>> @@ -1012,11 +1012,8 @@ static int sdhci_pci_suspend(struct device *dev)
+>>  
+>>  		ret = sdhci_suspend_host(slot->host);
+>>  
+>> -		if (ret) {
+>> -			for (i--; i >= 0; i--)
+>> -				sdhci_resume_host(chip->slots[i]->host);
+>> -			return ret;
+>> -		}
+>> +		if (ret)
+>> +			goto err_pci_suspend;
+>>  
+>>  		slot_pm_flags = slot->host->mmc->pm_flags;
+>>  		if (slot_pm_flags & MMC_PM_WAKE_SDIO_IRQ)
+>> @@ -1027,11 +1024,8 @@ static int sdhci_pci_suspend(struct device *dev)
+>>  
+>>  	if (chip->fixes && chip->fixes->suspend) {
+>>  		ret = chip->fixes->suspend(chip);
+>> -		if (ret) {
+>> -			for (i = chip->num_slots - 1; i >= 0; i--)
+>> -				sdhci_resume_host(chip->slots[i]->host);
+>> -			return ret;
+>> -		}
+>> +		if (ret)
+>> +			goto err_pci_suspend;
+>>  	}
+>>  
+>>  	pci_save_state(pdev);
+>> @@ -1048,6 +1042,11 @@ static int sdhci_pci_suspend(struct device *dev)
+>>  	}
+>>  
+>>  	return 0;
+>> +
+>> +err_pci_suspend:
+>> +	while (--i >= 0)
+>> +		sdhci_resume_host(chip->slots[i]->host);
+>> +	return ret;
+>>  }
+>>  
+>>  static int sdhci_pci_resume(struct device *dev)
+>> @@ -1113,23 +1112,22 @@ static int sdhci_pci_runtime_suspend(struct device *dev)
+>>  
+>>  		ret = sdhci_runtime_suspend_host(slot->host);
+>>  
+>> -		if (ret) {
+>> -			for (i--; i >= 0; i--)
+>> -				sdhci_runtime_resume_host(chip->slots[i]->host);
+>> -			return ret;
+>> -		}
+>> +		if (ret)
+>> +			goto err_pci_runtime_suspend;
+>>  	}
+>>  
+>>  	if (chip->fixes && chip->fixes->suspend) {
+>>  		ret = chip->fixes->suspend(chip);
+>> -		if (ret) {
+>> -			for (i = chip->num_slots - 1; i >= 0; i--)
+>> -				sdhci_runtime_resume_host(chip->slots[i]->host);
+>> -			return ret;
+>> -		}
+>> +		if (ret)
+>> +			goto err_pci_runtime_suspend;
+>>  	}
+>>  
+>>  	return 0;
+>> +
+>> +err_pci_runtime_suspend:
+>> +	while (--i >= 0)
+>> +		sdhci_runtime_resume_host(chip->slots[i]->host);
+>> +	return ret;
+>>  }
+>>  
+>>  static int sdhci_pci_runtime_resume(struct device *dev)
 
-I've rebased and pulled this patch into mmc-next now.
-
-Thanks,
+Thanks, pushed to mmc-next for 3.3 with Adrian's ACK.
 
 - Chris.
 -- 
