@@ -1,46 +1,45 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 1/3] omap_hsmmc: consider MMC_PM_KEEP_POWER on
- suspend/resume
-Date: Thu, 8 Dec 2011 16:28:37 -0800
-Message-ID: <20111209002837.GF31337@atomide.com>
-References: <1321970539-7104-1-git-send-email-eliad@wizery.com>
- <87r50okviy.fsf@laptop.org>
+From: "Y/Msn" <noreply@yahoo.com>
+Subject: Final Notice
+Date: Thu, 8 Dec 2011 18:54:33 +0200 (EET)
+Message-ID: <36b01e96b9a62883bf3b7b92a74c358d.squirrel__45115.909461356$1323396334$gmane$org@webmail.infoseka.lt>
+Reply-To: barclays_transfer_group_dept@hotmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;charset=lt_LT
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:19493 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750836Ab1LIA2m (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2011 19:28:42 -0500
-Content-Disposition: inline
-In-Reply-To: <87r50okviy.fsf@laptop.org>
+Received: from pserver.infoseka.lt ([78.158.28.5]:55497 "EHLO infoseka.lt"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751642Ab1LICF0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 8 Dec 2011 21:05:26 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Eliad Peller <eliad@wizery.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Russell King <linux@arm.linux.org.uk>
 
-* Chris Ball <cjb@laptop.org> [111201 09:40]:
-> Hi,
-> 
-> On Tue, Nov 22 2011, Eliad Peller wrote:
-> > When an mmc card has the MMC_PM_KEEP_POWER flag, it shouldn't
-> > be powered off on suspend (and thus doesn't have to be powered-on
-> > on resume)
-> >
-> > While on it, change the suspend flow a bit, to make it a bit
-> > easier to follow.
-> >
-> > Signed-off-by: Eliad Peller <eliad@wizery.com>
-> 
-> Tony, feel free to merge this patchset (if you're happy with the rest of
-> it) through your tree, with my:
-> 
-> Acked-by: Chris Ball <cjb@laptop.org>
-> 
-> for this patch.  Thanks,
+Dear Internet User!
 
-Thanks applying these into omap driver branch.
+Congratulations! you and your family have won 500,000 GBP from the
+Microsoft Family Benefit 2011 for being a regular web user.Your winnings
+has been
+submitted to BARCLAYS BANK OF SCOTLAND. Contact the Bank with your full
+info for claims.:
 
-Regards,
+Send mail to the Transfer Manager:
 
-Tony
+Transfer Manager: Robert Williams
+Email: barclays_transfer_group_dept@hotmail.com
+
+Bank Name: Barclays Bank Of Scotland
+
+1.Name:
+2.Address:
+3.Telephone Number:
+4.Sex:
+Account Name:
+Account Number:
+Bank Name:
+
+
+Please use this as a subject of contact : TRANSFER/NUM/1090.
+
+Congratulations!!!
+Microsoft Window
+
