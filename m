@@ -1,113 +1,84 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-pci: simplify error handling
-Date: Wed, 07 Dec 2011 22:53:24 -0500
-Message-ID: <87aa73u3bf.fsf@laptop.org>
-References: <1322897285.3884.1.camel@phoenix> <4EDCAAFB.4060209@intel.com>
+Subject: Re: [PATCH-next] mmc: core: Fixup delayed work clock gating patch
+Date: Wed, 07 Dec 2011 22:58:34 -0500
+Message-ID: <8762hru32t.fsf@laptop.org>
+References: <4EC2B4A3.3030700@codeaurora.org>
+	<1323109724-30898-1-git-send-email-sboyd@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50156 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:37545 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754842Ab1LHDxM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 7 Dec 2011 22:53:12 -0500
-In-Reply-To: <4EDCAAFB.4060209@intel.com> (Adrian Hunter's message of "Mon, 05
-	Dec 2011 13:28:59 +0200")
+	id S1754842Ab1LHD6V (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 7 Dec 2011 22:58:21 -0500
+In-Reply-To: <1323109724-30898-1-git-send-email-sboyd@codeaurora.org> (Stephen
+	Boyd's message of "Mon, 5 Dec 2011 10:28:44 -0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Axel Lin <axel.lin@gmail.com>, linux-kernel@vger.kernel.org, Takashi Iwai <tiwai@suse.de>, linux-mmc@vger.kernel.org
+To: Stephen Boyd <sboyd@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, Sujit Reddy Thumma <sthumma@codeaurora.org>
 
-Hi,
+Hi Stephen,
 
-On Mon, Dec 05 2011, Adrian Hunter wrote:
-> On 03/12/11 09:28, Axel Lin wrote:
->> Signed-off-by: Axel Lin <axel.lin@gmail.com>
+On Mon, Dec 05 2011, Stephen Boyd wrote:
+> c31b50e (mmc: core: Use delayed work in clock gating framework,
+> 2011-11-14) missed a few things during review:
 >
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>  o A useless pr_info()
 >
->> ---
->>  drivers/mmc/host/sdhci-pci.c |   38 ++++++++++++++++++--------------------
->>  1 files changed, 18 insertions(+), 20 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
->> index 6878a94..d2e77fb 100644
->> --- a/drivers/mmc/host/sdhci-pci.c
->> +++ b/drivers/mmc/host/sdhci-pci.c
->> @@ -1012,11 +1012,8 @@ static int sdhci_pci_suspend(struct device *dev)
->>  
->>  		ret = sdhci_suspend_host(slot->host);
->>  
->> -		if (ret) {
->> -			for (i--; i >= 0; i--)
->> -				sdhci_resume_host(chip->slots[i]->host);
->> -			return ret;
->> -		}
->> +		if (ret)
->> +			goto err_pci_suspend;
->>  
->>  		slot_pm_flags = slot->host->mmc->pm_flags;
->>  		if (slot_pm_flags & MMC_PM_WAKE_SDIO_IRQ)
->> @@ -1027,11 +1024,8 @@ static int sdhci_pci_suspend(struct device *dev)
->>  
->>  	if (chip->fixes && chip->fixes->suspend) {
->>  		ret = chip->fixes->suspend(chip);
->> -		if (ret) {
->> -			for (i = chip->num_slots - 1; i >= 0; i--)
->> -				sdhci_resume_host(chip->slots[i]->host);
->> -			return ret;
->> -		}
->> +		if (ret)
->> +			goto err_pci_suspend;
->>  	}
->>  
->>  	pci_save_state(pdev);
->> @@ -1048,6 +1042,11 @@ static int sdhci_pci_suspend(struct device *dev)
->>  	}
->>  
->>  	return 0;
->> +
->> +err_pci_suspend:
->> +	while (--i >= 0)
->> +		sdhci_resume_host(chip->slots[i]->host);
->> +	return ret;
->>  }
->>  
->>  static int sdhci_pci_resume(struct device *dev)
->> @@ -1113,23 +1112,22 @@ static int sdhci_pci_runtime_suspend(struct device *dev)
->>  
->>  		ret = sdhci_runtime_suspend_host(slot->host);
->>  
->> -		if (ret) {
->> -			for (i--; i >= 0; i--)
->> -				sdhci_runtime_resume_host(chip->slots[i]->host);
->> -			return ret;
->> -		}
->> +		if (ret)
->> +			goto err_pci_runtime_suspend;
->>  	}
->>  
->>  	if (chip->fixes && chip->fixes->suspend) {
->>  		ret = chip->fixes->suspend(chip);
->> -		if (ret) {
->> -			for (i = chip->num_slots - 1; i >= 0; i--)
->> -				sdhci_runtime_resume_host(chip->slots[i]->host);
->> -			return ret;
->> -		}
->> +		if (ret)
->> +			goto err_pci_runtime_suspend;
->>  	}
->>  
->>  	return 0;
->> +
->> +err_pci_runtime_suspend:
->> +	while (--i >= 0)
->> +		sdhci_runtime_resume_host(chip->slots[i]->host);
->> +	return ret;
->>  }
->>  
->>  static int sdhci_pci_runtime_resume(struct device *dev)
+>  o milliseconds was written as two words
+>
+>  o The sysfs file had units in its output
+>
+> Fix all three problems.
+>
+> Cc: Sujit Reddy Thumma <sthumma@codeaurora.org>
+> Signed-off-by: Stephen Boyd <sboyd@codeaurora.org>
+> ---
+>
+> Feel free to squash if desired.
+>
+>  Documentation/mmc/mmc-dev-attrs.txt |    2 +-
+>  drivers/mmc/core/host.c             |    6 +-----
+>  2 files changed, 2 insertions(+), 6 deletions(-)
+>
+> diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
+> index b024556..22ae844 100644
+> --- a/Documentation/mmc/mmc-dev-attrs.txt
+> +++ b/Documentation/mmc/mmc-dev-attrs.txt
+> @@ -71,6 +71,6 @@ SD/MMC/SDIO Clock Gating Attribute
+>  Read and write access is provided to following attribute.
+>  This attribute appears only if CONFIG_MMC_CLKGATE is enabled.
+>  
+> -	clkgate_delay	Tune the clock gating delay with desired value in milli seconds.
+> +	clkgate_delay	Tune the clock gating delay with desired value in milliseconds.
+>  
+>  echo <desired delay> > /sys/class/mmc_host/mmcX/clkgate_delay
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 835e86a..c152ce0c 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -58,8 +58,7 @@ static ssize_t clkgate_delay_show(struct device *dev,
+>  		struct device_attribute *attr, char *buf)
+>  {
+>  	struct mmc_host *host = cls_dev_to_mmc_host(dev);
+> -	return snprintf(buf, PAGE_SIZE, "%lu millisecs\n",
+> -			host->clkgate_delay);
+> +	return snprintf(buf, PAGE_SIZE, "%lu\n", host->clkgate_delay);
+>  }
+>  
+>  static ssize_t clkgate_delay_store(struct device *dev,
+> @@ -74,9 +73,6 @@ static ssize_t clkgate_delay_store(struct device *dev,
+>  	spin_lock_irqsave(&host->clk_lock, flags);
+>  	host->clkgate_delay = value;
+>  	spin_unlock_irqrestore(&host->clk_lock, flags);
+> -
+> -	pr_info("%s: clock gate delay set to %lu ms\n",
+> -			mmc_hostname(host), value);
+>  	return count;
+>  }
 
-Thanks, pushed to mmc-next for 3.3 with Adrian's ACK.
+Thanks, pushed to mmc-next for 3.3.
 
 - Chris.
 -- 
