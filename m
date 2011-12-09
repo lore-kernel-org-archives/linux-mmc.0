@@ -1,77 +1,44 @@
-From: James Hogan <james@albanarts.com>
-Subject: Re: mmc: dw_mmc: Add more capabilities field
-Date: Fri, 9 Dec 2011 10:41:06 +0000
-Message-ID: <CAAG0J99SSLm6r0NoqXCMmEvdpVnW-zwHdFhA-n=zEiagyGHuTQ@mail.gmail.com>
-References: <00a801ccb636$5bbe2920$133a7b60$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <00a801ccb636$5bbe2920$133a7b60$%jun@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH] sdhci: Always pass clock request value zero to set_clock host op
+Date: Fri,  9 Dec 2011 13:34:11 +0200
+Message-ID: <1323430451-14701-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:45654 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751429Ab1LILeZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 9 Dec 2011 06:34:25 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Todd Poynor <toddpoynor@google.com>
 
-On 9 December 2011 05:49, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+From: Todd Poynor <toddpoynor@google.com>
 
-A commit message would be useful.
+To allow the set_clock host op to disable the SDCLK source when not
+needed, always call the host op when the requested clock speed is
+zero.  Do this even if host->clock already equals zero, because
+the SDHCI driver may set that value (without calling the host op)
+to force an update at the next (non-zero-speed) call.
 
-> ---
-> =A0drivers/mmc/host/dw_mmc.c =A0| =A0 =A06 ++++++
-> =A0include/linux/mmc/dw_mmc.h | =A0 =A01 +
-> =A02 files changed, 7 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 3aaeb08..366df6b 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1681,6 +1681,12 @@ static int __init dw_mci_init_slot(struct dw_m=
-ci *host, unsigned int id)
-> =A0 =A0 =A0 =A0else
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps =3D 0;
->
-> + =A0 =A0 =A0 if (host->pdata->caps2)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps2 =3D host->pdata->caps2;
-> + =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps2 =3D 0;
-> +
-> +
+Signed-off-by: Todd Poynor <toddpoynor@google.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-There's really no need to check the value here, just copy it over.
-Same with the other caps field really.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ab6018f..92332a1 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1070,7 +1070,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	u16 clk = 0;
+ 	unsigned long timeout;
+ 
+-	if (clock == host->clock)
++	if (clock && clock == host->clock)
+ 		return;
+ 
+ 	host->mmc->actual_clock = 0;
+-- 
+1.7.6.4
 
-> =A0 =A0 =A0 =A0if (host->pdata->get_bus_wd)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (host->pdata->get_bus_wd(slot->id) =
->=3D 4)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP=
-_4_BIT_DATA;
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 6dc9b80..e8779c6 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -214,6 +214,7 @@ struct dw_mci_board {
-> =A0 =A0 =A0 =A0unsigned int bus_hz; /* Bus speed */
->
-> =A0 =A0 =A0 =A0unsigned int caps; =A0 =A0 =A0/* Capabilities */
-> + =A0 =A0 =A0 unsigned int caps2; =A0 =A0 /* More capabilities */
-> =A0 =A0 =A0 =A0/*
-> =A0 =A0 =A0 =A0 * Override fifo depth. If 0, autodetect it from the F=
-IFOTH register,
-> =A0 =A0 =A0 =A0 * but note that this may not be reliable after a boot=
-loader has used
-> --
-> 1.7.0.4
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
-
-other than that it looks fine to me.
-
---=20
-James Hogan
