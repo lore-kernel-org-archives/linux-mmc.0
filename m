@@ -1,7 +1,7 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: mmc: dw_mmc: Add more capabilities field
-Date: Fri, 09 Dec 2011 14:49:46 +0900
-Message-ID: <00a801ccb636$5bbe2920$133a7b60$%jun@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: Add more capabilities field
+Date: Fri, 09 Dec 2011 14:55:52 +0900
+Message-ID: <00a901ccb637$35e66590$a1b330b0$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
@@ -11,6 +11,8 @@ Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: 'Chris Ball' <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+
+This patch adds another capabilities field for MMC_CAPS2_XXX.
 
 Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
