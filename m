@@ -1,17 +1,18 @@
 From: <r66093@freescale.com>
-Subject: [PATCH 3/4 v4] SDHCI: add sdhci_get_cd callback to detect the card
-Date: Fri, 9 Dec 2011 10:53:49 +0800
-Message-ID: <1323399230-29118-3-git-send-email-r66093@freescale.com>
+Subject: [PATCH 4/4 v3] ESDHC: add callback esdhc_of_get_cd to detect card
+Date: Fri, 9 Dec 2011 10:53:50 +0800
+Message-ID: <1323399230-29118-4-git-send-email-r66093@freescale.com>
 References: <1323399230-29118-1-git-send-email-r66093@freescale.com>
  <1323399230-29118-2-git-send-email-r66093@freescale.com>
+ <1323399230-29118-3-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:37772 "EHLO
-	TX2EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751603Ab1LIDiv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2011 22:38:51 -0500
-In-Reply-To: <1323399230-29118-2-git-send-email-r66093@freescale.com>
+Received: from va3ehsobe010.messaging.microsoft.com ([216.32.180.30]:58819
+	"EHLO VA3EHSOBE010.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751718Ab1LIDi6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2011 22:38:58 -0500
+In-Reply-To: <1323399230-29118-3-git-send-email-r66093@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
@@ -19,95 +20,71 @@ Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
 
 From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Add callback function sdhci_get_cd to detect the card.
-And one new callback added to implement the card detect in sdhci struncture.
-If special platform has the card detect callback, it will return the card
-state, the value zero is for absent cardi and one is for present card.
-If the controller don't support card detect, sdhci_get_cd will return -ENOSYS.
+In order to check if the card is present, we will read the PRESENT STATE
+register and check the bit13(Card detect pin level) and bit15(CINS).
 
 Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
 CC: Chris Ball <cjb@laptop.org>
 ---
 changes for v2:
-	- when controller don't support get_cd, return -ENOSYS
-	- add new callback for sdhci to detect the card
+	- add new callback for esdhc to detect the card state
 	- add the CC
 changes for v3:
-	- use pin_lock only when get_cd defined
-changes for v4:
-	- enalbe the controller clock in platform, instead of core
+	- enable the controller clock when detect the card state, not core
 
- drivers/mmc/host/sdhci.c |   22 ++++++++++++++++++++++
- drivers/mmc/host/sdhci.h |    2 ++
- 2 files changed, 24 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-of-esdhc.c |   25 ++++++++++++++++++++++++-
+ 1 files changed, 24 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6d8eea3..fbe2f46 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2,6 +2,7 @@
-  *  linux/drivers/mmc/host/sdhci.c - Secure Digital Host Controller Interface driver
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 59e9d00..40da8f4 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -1,7 +1,7 @@
+ /*
+  * Freescale eSDHC controller driver.
   *
-  *  Copyright (C) 2005-2008 Pierre Ossman, All Rights Reserved.
-+ *  Copyright (C) 2011 Freescale Semiconductor Inc.
+- * Copyright (c) 2007, 2010 Freescale Semiconductor, Inc.
++ * Copyright (c) 2007, 2010-2011 Freescale Semiconductor, Inc.
+  * Copyright (c) 2009 MontaVista Software, Inc.
   *
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-@@ -1518,6 +1519,26 @@ static int sdhci_get_ro(struct mmc_host *mmc)
- 	return ret;
+  * Authors: Xiaobo Xie <X.Xie@freescale.com>
+@@ -82,6 +82,28 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
+ 	return pltfm_host->clock / 256 / 16;
  }
  
-+/* Return values for the sdjco_get_cd callback:
-+ *   0 for a absent card
-+ *   1 for a present card
-+ *   -ENOSYS when not supported (equal to NULL callback)
-+ */
-+static int sdhci_get_cd(struct mmc_host *mmc)
++/* Return: none zero - the card is presetn; 0 - card is absent */
++static int esdhc_of_get_cd(struct sdhci_host *host)
 +{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+	int present = -ENOSYS;
++	int present;
 +
-+	if (host->ops->get_cd) {
-+		spin_lock_irqsave(&host->lock, flags);
-+		present = host->ops->get_cd(host);
-+		spin_unlock_irqrestore(&host->lock, flags);
++	if (host->flags & SDHCI_DEVICE_DEAD)
++		present = 0;
++	else {
++		int sysctl = sdhci_be32bs_readl(host, SDHCI_CLOCK_CONTROL);
++		/* Enable the controller clock to update the present state */
++		sdhci_be32bs_writel(host, sysctl | SDHCI_CLOCK_INT_EN,
++				SDHCI_CLOCK_CONTROL);
++		/* Detect the card present or absent */
++		present = sdhci_be32bs_readl(host, SDHCI_PRESENT_STATE);
++		present &= (SDHCI_CARD_PRESENT | SDHCI_CARD_CDPL);
++		/* Resve the previous to System control register */
++		sdhci_be32bs_writel(host, sysctl, SDHCI_CLOCK_CONTROL);
 +	}
 +
 +	return present;
 +}
 +
- static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
- {
- 	if (host->flags & SDHCI_DEVICE_DEAD)
-@@ -1884,6 +1905,7 @@ static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
- 	.set_ios	= sdhci_set_ios,
- 	.get_ro		= sdhci_get_ro,
-+	.get_cd		= sdhci_get_cd,
- 	.hw_reset	= sdhci_hw_reset,
- 	.enable_sdio_irq = sdhci_enable_sdio_irq,
- 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 0a5b654..82f4d27 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -69,6 +69,7 @@
- #define  SDHCI_SPACE_AVAILABLE	0x00000400
- #define  SDHCI_DATA_AVAILABLE	0x00000800
- #define  SDHCI_CARD_PRESENT	0x00010000
-+#define  SDHCI_CARD_CDPL	0x00040000
- #define  SDHCI_WRITE_PROTECT	0x00080000
- #define  SDHCI_DATA_LVL_MASK	0x00F00000
- #define   SDHCI_DATA_LVL_SHIFT	20
-@@ -261,6 +262,7 @@ struct sdhci_ops {
+ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.read_l = sdhci_be32bs_readl,
+ 	.read_w = esdhc_readw,
+@@ -93,6 +115,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.enable_dma = esdhc_of_enable_dma,
+ 	.get_max_clock = esdhc_of_get_max_clock,
+ 	.get_min_clock = esdhc_of_get_min_clock,
++	.get_cd = esdhc_of_get_cd,
+ };
  
- 	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
- 
-+	int		(*get_cd)(struct sdhci_host *host);
- 	int		(*enable_dma)(struct sdhci_host *host);
- 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+ static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
 -- 
 1.7.5.4
 
