@@ -1,32 +1,27 @@
-From: James Hogan <james@albanarts.com>
-Subject: Re: mmc: dw_mmc: Add more capabilities field
-Date: Mon, 12 Dec 2011 13:05:14 +0000
-Message-ID: <CAAG0J98DgVLiwoL6_TucVec=SQvSVMn6G8W7QFtTBc3iq1RKgg@mail.gmail.com>
-References: <00a801ccb636$5bbe2920$133a7b60$%jun@samsung.com>
-	<CAAG0J99SSLm6r0NoqXCMmEvdpVnW-zwHdFhA-n=zEiagyGHuTQ@mail.gmail.com>
-	<000001ccb8bc$9770db60$c6529220$%jun@samsung.com>
+From: Joseph Evans <josephconsultancy1@gmail.com>
+Subject: Xmas Lening Aanbieding
+Date: Mon, 12 Dec 2011 05:12:22 -0800
+Message-ID: <CA+B1JgGrhaHVgCZdFcLYmE+qMo8X22hhe3Utqm9mFKQZN_LK5A__17953.2623071738$1323695583$gmane$org@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <000001ccb8bc$9770db60$c6529220$%jun@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:42020 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752628Ab1LLNM3 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Dec 2011 08:12:29 -0500
+Received: by mail-gx0-f174.google.com with SMTP id k6so1076203ggd.19
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Dec 2011 05:12:29 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 December 2011 10:55, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> James Hogan wrote:
->> On 9 December 2011 05:49, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->>
->> A commit message would be useful.
-> "This patch adds another capabilities field for MMC_CAPS2_XXX."
-> Is a commit message disappeared?
+Wir sind auf dem XAMS Kredit Angebot mit so viel Bonus, bitte
+kontaktieren Sie mich, wenn Sie tun m=FCssen, jede Form von Darlehen vo=
+n
+unserer Firma.
+Gr=FC=DFe
 
-Ah yes, it was visible in the second email. It just wasn't at all
-obvious where the caps2 was added, but I eventually found a reference
-to it in another similar patch for another driver that explicitly
-mentioned the mmc-next tree.
 
-Cheers
-James
+We are on our xams loan special offer with so much bonus, please do
+contact me if you do need any form of loan from our firm.
+Regards
