@@ -1,103 +1,108 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [GIT PULL] MMC fixes for 3.2-rc6
-Date: Sun, 11 Dec 2011 13:40:38 -0500
-Message-ID: <m2fwgrost5.fsf@bob.laptop.org>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCH] mmc: sdhci-pci: remove SDHCI_QUIRK2_OWN_CARD_DETECTION
+Date: Mon, 12 Dec 2011 10:38:20 +0800
+Message-ID: <5D8008F58939784290FAB48F549751984EC27784E0@shsmsx502.ccr.corp.intel.com>
+References: <1323416198-14200-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43216 "EHLO void.printf.net"
+Received: from mga09.intel.com ([134.134.136.24]:8688 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752079Ab1LKSkw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 11 Dec 2011 13:40:52 -0500
+	id S1752756Ab1LLCjS convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Dec 2011 21:39:18 -0500
+In-Reply-To: <1323416198-14200-1-git-send-email-adrian.hunter@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
+Hi Adrian,
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org
+> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Adrian Hunter
+> Sent: Friday, December 09, 2011 3:37 PM
+> To: Chris Ball
+> Cc: linux-mmc@vger.kernel.org; Hunter, Adrian
+> Subject: [PATCH] mmc: sdhci-pci: remove SDHCI_QUIRK2_OWN_CARD_DETECTION
+> 
+> Even if a driver provides separate card detection,
+> an interrupt is still needed to abort mmc requests
+> that are in progress.  SDHCI_QUIRK2_OWN_CARD_DETECTION
+> prevents that, so remove it.
+I think this should be considered by the new registered irq handler but not directly removing this quirk.
+If removing it directly, inserting/removing a card will cause driver to get two interrupts and that makes people confusing why there are two interrupts actually. So, shall we change the mfd_sd_cd function like below?
 
-Hi Linus,
+static irqreturn_t mfd_sd_cd(int irq, void *dev_id)
+{
+	struct sdhci_pci_slot *slot = dev_id;
+	struct sdhci_host *host = slot->host;
 
-Please pull from:
+	if (host->card_tasklet.func == NULL)
+		return IRQ_NONE;
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+	tasklet_schedule(&host->card_tasklet);
 
-to receive small regression fixes for MMC.  These have been tested in
-linux-next, and there are no merge conflicts.  Thanks.
+	return IRQ_HANDLED;
+}
 
+With this, driver can also abort the mmc requests that are in progress.
 
-The following changes since commit 77a7300abad7fe01891b400e88d746f97307ee5a:
-
-  of/irq: Get rid of NO_IRQ usage (2011-12-07 09:06:37 -0800)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-for you to fetch changes up to 49df78074963c97e25debc3c67b72f059111607d:
-
-  mmc: core: Fix deadlock when the CONFIG_MMC_UNSAFE_RESUME is not defined (2011-12-10 16:18:39 -0500)
-
-- ----------------------------------------------------------------
-Chris Ball (1):
-      mmc: Add module.h include to sdhci-cns3xxx.c
-
-Girish K S (2):
-      mmc: core: Fix setting power notify state variable for non-eMMC
-      mmc: core: Fix power_off_notify during suspend
-
-Guennadi Liakhovetski (2):
-      mmc: sh_mmcif: fix clock gating on platforms with a .down_pwr() method
-      mmc: tmio: fix clock gating on platforms with a .set_pwr() method
-
-Kyungmin Park (1):
-      mmc: core: Fix typo at mmc_card_sleep
-
-Mark Brown (1):
-      mmc: sdhci-s3c: Remove old and misprototyped suspend operations
-
-Per Forlin (1):
-      mmc: omap_hsmmc: DMA unmap only once in case of MMC error
-
-Sascha Hauer (1):
-      mmc: mxcmmc: fix falling back to PIO
-
-Stefan Nilsson XK (1):
-      mmc: core: Add quirk for long data read time
-
-Sujit Reddy Thumma (1):
-      mmc: core: Fix deadlock when the CONFIG_MMC_UNSAFE_RESUME is not defined
-
- drivers/mmc/card/block.c         |    8 +++
- drivers/mmc/core/core.c          |   98 +++++++++++++++++++++++++-------------
- drivers/mmc/core/mmc.c           |   12 +++--
- drivers/mmc/host/mxcmmc.c        |    1 +
- drivers/mmc/host/omap_hsmmc.c    |    7 ++-
- drivers/mmc/host/sdhci-cns3xxx.c |    1 +
- drivers/mmc/host/sdhci-s3c.c     |    2 -
- drivers/mmc/host/sh_mmcif.c      |    2 +-
- drivers/mmc/host/tmio_mmc_pio.c  |    2 +-
- include/linux/mmc/card.h         |    6 ++
- 10 files changed, 95 insertions(+), 44 deletions(-)
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iQIcBAEBAgAGBQJO5PQXAAoJEHNBYZ7TNxYM8LgQAN+MjIovCGmoVeNQF6lc88OO
-GTrxRwCNmrgltc9Zd5Ks3Eo6kCnMo2fupH1qjWBw1nNZ0VvBm0m51NcjCbBGY9oG
-nVmDrLMkBdUkLWE2pPbEWeT3dBHARLM37KQu2wY9d82Vf4G8KabioBd6/amfufGo
-zcfQrhaPc8qo/oolJMqm1S1/0sK5dkljeBE5vfJTWnWioGIUPPwJDKn9XfBPNkS4
-zY712rdaVYIG3IoXu7Bl+0Cjbz3m53wq+p/8dIUzv3eNStBpvx5YtvtCFwq5ZxXG
-uEZ40i5DmT5SNsbhjOUs4Lt6nng9cgrN8cHPNRxvtgJtCOpsij4V9Aubst/CBGXm
-sKFJ5TD8TnN7t/EnmyNBX1GYC+9s2sOxmte53nSn7b4vJZHvUPmyDQJhIDfp0x5F
-MkZOkwA89kpbVEYRKXLamXP4RDuDjb04lv9EuoKyPrTC1AR8AcZboOttDgQhIygW
-9Baw2P/JYxJGkF2R+IbsYrFiOUzEABcYXpshUC0w10vtUuVB6MkPptoPAVFFwc7X
-naz5942e8XNA5pOagoqYvc6ryrByK52tIZ0zI7+dht6sP0shJpvdbimiHNXcefcy
-Zxdr9FyVk/fFh5dEQ5eTjfprtDXksC9aXHVdfjVES2RXVVRfamzPtbrDmKReVEWZ
-ldes9pqD/xEZ0IDcjhUL
-=MUDZ
------END PGP SIGNATURE-----
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks
+Chuanxiao
+> 
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/host/sdhci-pci.c |    1 -
+>  drivers/mmc/host/sdhci.c     |    3 ---
+>  include/linux/mmc/sdhci.h    |    2 --
+>  3 files changed, 0 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index d2e77fb..abced67 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -233,7 +233,6 @@ static int mfd_sd_probe_slot(struct sdhci_pci_slot *slot)
+> 
+>  	slot->cd_gpio = gpio;
+>  	slot->cd_irq = irq;
+> -	slot->host->quirks2 |= SDHCI_QUIRK2_OWN_CARD_DETECTION;
+> 
+>  	return 0;
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ab6018f..ec10288 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -149,9 +149,6 @@ static void sdhci_set_card_detection(struct sdhci_host
+> *host, bool enable)
+>  	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+>  		return;
+> 
+> -	if (host->quirks2 & SDHCI_QUIRK2_OWN_CARD_DETECTION)
+> -		return;
+> -
+>  	present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+>  			      SDHCI_CARD_PRESENT;
+>  	irqs = present ? SDHCI_INT_CARD_REMOVE : SDHCI_INT_CARD_INSERT;
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index e4b6935..dad7a46 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -90,8 +90,6 @@ struct sdhci_host {
+> 
+>  	unsigned int quirks2;	/* More deviations from spec. */
+> 
+> -#define SDHCI_QUIRK2_OWN_CARD_DETECTION			(1<<0)
+> -
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
+> 
+> --
+> 1.7.6.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
