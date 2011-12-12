@@ -1,27 +1,42 @@
-From: Joseph Evans <josephconsultancy1@gmail.com>
-Subject: Xmas Lening Aanbieding
-Date: Mon, 12 Dec 2011 05:12:22 -0800
-Message-ID: <CA+B1JgGrhaHVgCZdFcLYmE+qMo8X22hhe3Utqm9mFKQZN_LK5A__17953.2623071738$1323695583$gmane$org@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH 0/5] mmc: mmci: Improvements and bugfixes for SDIO
+Date: Mon, 12 Dec 2011 16:36:02 +0100
+Message-ID: <1323704167-10247-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:42020 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752628Ab1LLNM3 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Dec 2011 08:12:29 -0500
-Received: by mail-gx0-f174.google.com with SMTP id k6so1076203ggd.19
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Dec 2011 05:12:29 -0800 (PST)
+Received: from eu1sys200aog103.obsmtp.com ([207.126.144.115]:44278 "EHLO
+	eu1sys200aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751026Ab1LLPgd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Dec 2011 10:36:33 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Wir sind auf dem XAMS Kredit Angebot mit so viel Bonus, bitte
-kontaktieren Sie mich, wenn Sie tun m=FCssen, jede Form von Darlehen vo=
-n
-unserer Firma.
-Gr=FC=DFe
+This patchserie is based upon the below stated patchserie:
+mmc: mmci: Improved PM support, cleanup and bugfixes
 
+These patches are all related to the SDIO support. Some patches will
+anyway effect the code execution path for non-SDIO and more important
+also the "hotpath" for all PIO read transfers. The intent is to try
+to affect as little as possible.
 
-We are on our xams loan special offer with so much bonus, please do
-contact me if you do need any form of loan from our firm.
-Regards
+Per Forlin (1):
+  mmc: mmci: Add constraints on alignment for SDIO
+
+Stefan Nilsson XK (1):
+  mmc: mmci: Fix PIO read for small SDIO packets
+
+Ulf Hansson (3):
+  mmc: mmci: Prepare for SDIO before setting up DMA job
+  mmc: mmci: Fix incorrect handling of HW flow control for SDIO
+  mmc: mmci: Support any block sizes for ux500v2 variant
+
+ drivers/mmc/host/mmci.c |  120 +++++++++++++++++++++++++++++++++++-----------
+ drivers/mmc/host/mmci.h |    7 +++
+ 2 files changed, 98 insertions(+), 29 deletions(-)
+
+-- 
+1.7.5.4
+
