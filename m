@@ -1,55 +1,38 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: debugfs: parse all ext_csd via debug_fs
-Date: Tue, 13 Dec 2011 11:35:55 -0500
-Message-ID: <m2vcpkl990.fsf@bob.laptop.org>
-References: <1319468694-8773-1-git-send-email-peppe.cavallaro@st.com>
-	<CAAgDR1N_CKnXo=G2oTHAShhgegMZF-nMySBuWebDPeu8VTEBKg@mail.gmail.com>
-	<CACRpkda0y7cOR4EfuGLoGnD_PS1gTWqN7UA74=s2mWmEHokQhQ@mail.gmail.com>
-	<4ECA0025.6030700@st.com>
-	<CACRpkda4gf7dpMxzPTjNZZX1mNqS4YMv21w-xC9TFCYot3qRAg@mail.gmail.com>
-	<4EDDAD95.7020500@st.com>
+Subject: Re: [PATCH] mmc: mmci: Fixup handling of MCI_STARTBITERR
+Date: Tue, 13 Dec 2011 12:16:19 -0500
+Message-ID: <m2mxawl7do.fsf@bob.laptop.org>
+References: <1320939199-30363-1-git-send-email-ulf.hansson@stericsson.com>
+	<CACRpkdazenok0RHQL0kXLKk2i3bcrWZ9aWDmoCGfjF6JpEoySA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51722 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:57066 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754578Ab1LMQgI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Dec 2011 11:36:08 -0500
-In-Reply-To: <4EDDAD95.7020500@st.com> (Giuseppe CAVALLARO's message of "Tue,
-	06 Dec 2011 06:52:21 +0100")
+	id S1754098Ab1LMRQl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 13 Dec 2011 12:16:41 -0500
+In-Reply-To: <CACRpkdazenok0RHQL0kXLKk2i3bcrWZ9aWDmoCGfjF6JpEoySA@mail.gmail.com>
+	(Linus Walleij's message of "Fri, 11 Nov 2011 16:17:17 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Sebastian Rasmussen <sebras@gmail.com>, linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>
 
-Hi Peppe,
+Hi,
 
-On Tue, Dec 06 2011, Giuseppe CAVALLARO wrote:
->> I'm all for this patch so it gets visible in debugfs atleast,
->> since people seem to need to know these things, so take that as an
->> Acked-by: Linus Walleij <linus.walleij@linaro.org>
->> 
->> Those who want to writ userspace tools can proceed to
->> implement the proper sysfs interfaces and document them.
+On Fri, Nov 11 2011, Linus Walleij wrote:
+>> The interrupt was previously enabled and then correctly cleared.
+>> Now we also handle it correctly.
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
 >
-> Hello Chris.
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
 >
-> Sorry if I disturb you, any news about the patch:
->
->     mmc: debugfs: parse ext_csd via debug_fs (v2)
->
-> Reviewed-by Sebastian and Acked-by Linus?
->
-> Please let me know if I need to do some other work on this or if it can
-> be considered for mmc-next.
+> This should also go to -stable I think?
 
-I'm still leaning towards doing this in userspace instead -- once we
-have a userspace binary that can do this I don't think there'll be any
-reason to keep a debugfs interface for the same thing around, and that
-tells me that we should just avoid merging the debugfs interface and
-move to userspace straight away.
-
-I'm hoping to get the userspace tools repository running soon.
+Just to check:  should I be leaving MMCI patches for Russell to take
+care of?  I don't have hardware, so this suits me fine, but MAINTAINERS
+currently lists it as Orphan.
 
 Thanks,
 
