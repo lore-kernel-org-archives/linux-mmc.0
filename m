@@ -1,117 +1,59 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH 4/4] mtd: gpmi-nand: move to dma_transfer_direction
-Date: Tue, 13 Dec 2011 23:48:06 +0800
-Message-ID: <1323791286-29574-5-git-send-email-shawn.guo@linaro.org>
-References: <1323791286-29574-1-git-send-email-shawn.guo@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1323791286-29574-1-git-send-email-shawn.guo@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, Artem Bityutskiy <artem.bityutskiy@intel.com>
-Cc: Huang Shijie <b32955@freescale.com>, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH/RFC] mmc: add a device PM QoS constraint when a host is
+ first claimed
+Date: Tue, 13 Dec 2011 17:13:30 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1112131658330.20293@axis700.grange>
+References: <Pine.LNX.4.64.1112121642080.10378@axis700.grange>
+ <4EE76CC2.9080308@stericsson.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <4EE76CC2.9080308@stericsson.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch fixes usage of dma direction to adopt dma_transfer_direction.
+Hi Ulf
 
-Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+On Tue, 13 Dec 2011, Ulf Hansson wrote:
+
+> Guennadi Liakhovetski wrote:
+> > Some MMC hosts implement a fine-grained runtime PM, whereby they
+> > runtime-suspend and -resume the host interface on each transfer. This can
+> > negatively affect performance, if the user was trying to transfer data
+> > blocks back-to-back. This patch adds a PM QoS constraint to avoid such a
+> > throughput reduction. This constraint prevents runtime-suspending the
+> > device, if the expected wakeup latency is larger than 100us.
+> > 
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> 
+> I think host drivers can use autosuspend with some ms delay for this instead.
+> This will mean that requests coming in bursts will not be affected (well only
+> the first request in the burst will suffer from the runtime resume latency).
+
+I think, Rafael is the best person to explain, why exactly this is not 
+desired. In short, this is the wrong location to make such decisions and 
+to define these criteria. The only thing, that the driver may be aware of 
+is how quickly it wants to be able to wake up, if it got suspended. And 
+it's already the PM subsystem, that has to decide, whether it can satisfy 
+this requirement or not. Rafael will correct me, if my explanation is 
+wrong.
+
+> I believe that runtime resume callback should ofcourse be optimized so they
+> are executed as fast as possible. But moreover, if they take more 100us, is
+> that really a reason for not executing them at all?
+
+I think it is a reason not to execute them during an intensive IO, yes. I 
+cannot imagine a case, where if you have multiple IO requests waiting in 
+the queue to your medium, you would want to switch off and immediately on 
+again. Well, of course, such situations might exist, but then you just 
+have to define and use a different governor on your system. This is also 
+the flexibility, that this API is giving you.
+
+Thanks
+Guennadi
 ---
- drivers/mtd/nand/gpmi-nand/gpmi-lib.c |   22 ++++++++++++----------
- 1 files changed, 12 insertions(+), 10 deletions(-)
-
-diff --git a/drivers/mtd/nand/gpmi-nand/gpmi-lib.c b/drivers/mtd/nand/gpmi-nand/gpmi-lib.c
-index de4db76..c4c4d6d 100644
---- a/drivers/mtd/nand/gpmi-nand/gpmi-lib.c
-+++ b/drivers/mtd/nand/gpmi-nand/gpmi-lib.c
-@@ -827,7 +827,7 @@ int gpmi_send_command(struct gpmi_nand_data *this)
- 	pio[1] = pio[2] = 0;
- 	desc = channel->device->device_prep_slave_sg(channel,
- 					(struct scatterlist *)pio,
--					ARRAY_SIZE(pio), DMA_NONE, 0);
-+					ARRAY_SIZE(pio), DMA_TRANS_NONE, 0);
- 	if (!desc) {
- 		pr_err("step 1 error\n");
- 		return -1;
-@@ -839,7 +839,7 @@ int gpmi_send_command(struct gpmi_nand_data *this)
- 	sg_init_one(sgl, this->cmd_buffer, this->command_length);
- 	dma_map_sg(this->dev, sgl, 1, DMA_TO_DEVICE);
- 	desc = channel->device->device_prep_slave_sg(channel,
--					sgl, 1, DMA_TO_DEVICE, 1);
-+					sgl, 1, DMA_MEM_TO_DEV, 1);
- 	if (!desc) {
- 		pr_err("step 2 error\n");
- 		return -1;
-@@ -872,7 +872,7 @@ int gpmi_send_data(struct gpmi_nand_data *this)
- 	pio[1] = 0;
- 	desc = channel->device->device_prep_slave_sg(channel,
- 					(struct scatterlist *)pio,
--					ARRAY_SIZE(pio), DMA_NONE, 0);
-+					ARRAY_SIZE(pio), DMA_TRANS_NONE, 0);
- 	if (!desc) {
- 		pr_err("step 1 error\n");
- 		return -1;
-@@ -881,7 +881,7 @@ int gpmi_send_data(struct gpmi_nand_data *this)
- 	/* [2] send DMA request */
- 	prepare_data_dma(this, DMA_TO_DEVICE);
- 	desc = channel->device->device_prep_slave_sg(channel, &this->data_sgl,
--						1, DMA_TO_DEVICE, 1);
-+						1, DMA_MEM_TO_DEV, 1);
- 	if (!desc) {
- 		pr_err("step 2 error\n");
- 		return -1;
-@@ -908,7 +908,7 @@ int gpmi_read_data(struct gpmi_nand_data *this)
- 	pio[1] = 0;
- 	desc = channel->device->device_prep_slave_sg(channel,
- 					(struct scatterlist *)pio,
--					ARRAY_SIZE(pio), DMA_NONE, 0);
-+					ARRAY_SIZE(pio), DMA_TRANS_NONE, 0);
- 	if (!desc) {
- 		pr_err("step 1 error\n");
- 		return -1;
-@@ -917,7 +917,7 @@ int gpmi_read_data(struct gpmi_nand_data *this)
- 	/* [2] : send DMA request */
- 	prepare_data_dma(this, DMA_FROM_DEVICE);
- 	desc = channel->device->device_prep_slave_sg(channel, &this->data_sgl,
--						1, DMA_FROM_DEVICE, 1);
-+						1, DMA_DEV_TO_MEM, 1);
- 	if (!desc) {
- 		pr_err("step 2 error\n");
- 		return -1;
-@@ -964,7 +964,7 @@ int gpmi_send_page(struct gpmi_nand_data *this,
- 
- 	desc = channel->device->device_prep_slave_sg(channel,
- 					(struct scatterlist *)pio,
--					ARRAY_SIZE(pio), DMA_NONE, 0);
-+					ARRAY_SIZE(pio), DMA_TRANS_NONE, 0);
- 	if (!desc) {
- 		pr_err("step 2 error\n");
- 		return -1;
-@@ -998,7 +998,8 @@ int gpmi_read_page(struct gpmi_nand_data *this,
- 		| BF_GPMI_CTRL0_XFER_COUNT(0);
- 	pio[1] = 0;
- 	desc = channel->device->device_prep_slave_sg(channel,
--				(struct scatterlist *)pio, 2, DMA_NONE, 0);
-+				(struct scatterlist *)pio, 2,
-+				DMA_TRANS_NONE, 0);
- 	if (!desc) {
- 		pr_err("step 1 error\n");
- 		return -1;
-@@ -1027,7 +1028,7 @@ int gpmi_read_page(struct gpmi_nand_data *this,
- 	pio[5] = auxiliary;
- 	desc = channel->device->device_prep_slave_sg(channel,
- 					(struct scatterlist *)pio,
--					ARRAY_SIZE(pio), DMA_NONE, 1);
-+					ARRAY_SIZE(pio), DMA_TRANS_NONE, 1);
- 	if (!desc) {
- 		pr_err("step 2 error\n");
- 		return -1;
-@@ -1045,7 +1046,8 @@ int gpmi_read_page(struct gpmi_nand_data *this,
- 		| BF_GPMI_CTRL0_XFER_COUNT(geo->page_size);
- 	pio[1] = 0;
- 	desc = channel->device->device_prep_slave_sg(channel,
--				(struct scatterlist *)pio, 2, DMA_NONE, 1);
-+				(struct scatterlist *)pio, 2,
-+				DMA_TRANS_NONE, 1);
- 	if (!desc) {
- 		pr_err("step 3 error\n");
- 		return -1;
--- 
-1.7.4.1
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
