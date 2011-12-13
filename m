@@ -1,61 +1,62 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: Cache Control during mmc_suspend_host
-Date: Tue, 13 Dec 2011 15:27:16 +0900
-Message-ID: <000f01ccb960$42ac2a40$c8047ec0$%jun@samsung.com>
-References: <CAKLKtzej1VpD41GwBOoNv_51fPqMHMySViptjk6im_mSkSws9A@mail.gmail.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH 2/4] MMC/SD: Add callback function to detect card
+Date: Tue, 13 Dec 2011 07:25:56 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F11644BF7@039-SN1MPN1-006.039d.mgd.msft.net>
+References: <1323077026-12071-1-git-send-email-r66093@freescale.com>
+ <1323077026-12071-2-git-send-email-r66093@freescale.com>
+ <4EE1DCEB.5030102@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:23968 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751372Ab1LMG1T (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2011 01:27:19 -0500
-Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LW400EMSPXHPQR0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 13 Dec 2011 15:27:17 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
- 64bit (built Sep  7 2010)) with ESMTPA id <0LW400INKPXHJQ70@mmp1.samsung.com>
- for linux-mmc@vger.kernel.org; Tue, 13 Dec 2011 15:27:17 +0900 (KST)
-In-reply-to: <CAKLKtzej1VpD41GwBOoNv_51fPqMHMySViptjk6im_mSkSws9A@mail.gmail.com>
-Content-language: ko
+Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:49663
+	"EHLO VA3EHSOBE009.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751036Ab1LMH1L convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 13 Dec 2011 02:27:11 -0500
+In-Reply-To: <4EE1DCEB.5030102@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Saugata Das' <saugata.das@linaro.org>, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Saugata,
 
-Saugata Das wrote:
-> Hi Seungwon Jeon
-> 
-> I see a small issue with the implementation mmc_suspend_host,
-> 
-> int mmc_suspend_host(struct mmc_host *host)
-> {
-> .....
-> 	err = mmc_cache_ctrl(host, 0);
-> }
-> 
-> So, within mmc_suspend_host we are disabling the cache. But I do not
-> see a corresponding enabling of cache within mmc_resume_host. I
-> suggest we have either enabling of cache within mmc_resume_host or
-> within mmc_suspend_host, we replace mmc_cache_ctrl(host, 0) with the
-> flush operation, mmc_flush_cache(host->card).
-> 
-Currently,
-Cache is enabled in mmc_init_card() during mmc_resume_host().
 
-Thanks,
-Seungwon Jeon.
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Adrian Hunter
+> Sent: Friday, December 09, 2011 6:03 PM
+> To: Huang Changming-R66093
+> Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093
+> Subject: Re: [PATCH 2/4] MMC/SD: Add callback function to detect card
+> 
+> On 05/12/11 11:23, r66093@freescale.com wrote:
+> > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> >
+> > In order to check whether the card has been removed, the function
+> > mmc_send_status() will send command CMD13 to card and ask the card to
+> > send its status register to sdhc driver, which will generate many
+> > interrupts repeatedly and make the system performance bad.
+> 
+> That should not be true.  sdhci.c will not send a command to the card if
+> the card is not present i.e. see this excerpt from
+> sdhci_request():
 > 
 > 
-> Regards
-> Saugata
+> 	/* If polling, assume that the card is always present. */
+> 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+> 		present = true;
+> 	else
+> 		present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+> 				SDHCI_CARD_PRESENT;
+> 
+> 	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
+> 		host->mrq->cmd->error = -ENOMEDIUM;
+> 		tasklet_schedule(&host->finish_tasklet);
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+But, for some controller, this field of SDHCI_PRESENT_STATE register is reserved and always is 1. When the card is absent, many command will try to send to the card, and generate many interrupt.
+If even controller can detect the card state, if the card is absent as you said, this command can't send to card. But, when card is present, there will be many command to the card and many interrupts will be generated, that will affect the performance.
+So, I don't think this comment is not correct.  
+
 
