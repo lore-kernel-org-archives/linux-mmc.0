@@ -1,146 +1,149 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 3/4 v5] SDHCI: add sdhci_get_cd callback to detect the
- card
-Date: Tue, 13 Dec 2011 20:51:30 -0800
-Message-ID: <144B2D54-4027-4815-833F-C5D91626382B@marvell.com>
-References: <1323829093-29655-1-git-send-email-r66093@freescale.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH V6] mmc: core: Add host capability check for power class
+Date: Wed, 14 Dec 2011 11:44:14 +0530
+Message-ID: <CAGxe1ZH4V-KbiU6aaT+v=o7OYyickj-LOycLvOKSj6ngXPvwjw@mail.gmail.com>
+References: <1323843295-25314-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:43942 "EHLO
-	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751115Ab1LNEvn convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Dec 2011 23:51:43 -0500
-In-Reply-To: <1323829093-29655-1-git-send-email-r66093@freescale.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1323843295-25314-1-git-send-email-girish.shivananjappa@linaro.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, subhashj@codeaurora.org, Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "<r66093@freescale.com>" <r66093@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
 
+Ignore this patch
 
-On Dec 13, 2011, at 6:18 PM, <r66093@freescale.com> wrote:
-
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> 
-> Add callback function sdhci_get_cd to detect the card.
-> And one new callback added to implement the card detect in sdhci struncture.
-> If special platform has the card detect callback, it will return the card
-> state, the value zero is for absent cardi and one is for present card.
-> If the controller don't support card detect, sdhci_get_cd will return -ENOSYS.
-> 
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> CC: Chris Ball <cjb@laptop.org>
+On 14 December 2011 11:44, Girish K S <girish.shivananjappa@linaro.org>=
+ wrote:
+> This patch adds a check whether the host supports maximum current val=
+ue
+> obtained from the device's extended csd register for a selected inter=
+face
+> voltage and frequency.
+>
+> cc: Chris Ball <cjb@laptop.org>
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
 > ---
-> changes for v2:
-> 	- when controller don't support get_cd, return -ENOSYS
-> 	- add new callback for sdhci to detect the card
-> 	- add the CC
-> changes for v3:
-> 	- use pin_lock only when get_cd defined
-> changes for v4:
-> 	- enalbe the controller clock in platform, instead of core
-> changes for v5:
-> 	- remove the copyright
-> 
-> drivers/mmc/host/sdhci.c |   21 ++++++++++++++++++++++
-> drivers/mmc/host/sdhci.h |    2 ++
-> 2 files changed, 23 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 6d8eea3..fbe2f46 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1518,6 +1519,26 @@ static int sdhci_get_ro(struct mmc_host *mmc)
-> 	return ret;
-> }
-> 
-> +/* Return values for the sdjco_get_cd callback:
-> + *   0 for a absent card
-> + *   1 for a present card
-> + *   -ENOSYS when not supported (equal to NULL callback)
-> + */
-> +static int sdhci_get_cd(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	unsigned long flags;
-> +	int present = -ENOSYS;
+> Changes in v6:
+> =A0 =A0 =A0 =A0Added the check whehter the host supports the max curr=
+ent value
+> =A0 =A0 =A0 =A0read from the extended csd register.
+>
+> Changes in v5:
+> =A0 =A0 =A0 Replace break statement with appropriate return error val=
+ue in
+> =A0 =A0 =A0 drivers/mmc/core/mmc.c for unsupported voltage range.
+>
+> Changes in v4:
+> =A0 =A0 =A0 updated with review comments.
+>
+> Changes in v3:
+> =A0 =A0 =A0 updated with review comments made by chris ball. patch ge=
+nerated
+> =A0 =A0 =A0 by rebasing to chris balls mmc-next branch.
+>
+> Changes in v2:
+> =A0 =A0 =A0 This patch version removes some checkpatch error
+>
+> Changes in v1:
+> =A0 =A0 =A0 This version modifies the power_class_select function pro=
+totype.
+> =A0 =A0 =A0 During device enumeration, when the host tries to read th=
+e extended
+> =A0 =A0 =A0 csd register after switching to higher bus width, the rea=
+d fails at
+> =A0 =A0 =A0 higher bus width. So the power_class_select function is m=
+odified to
+> =A0 =A0 =A0 reuse the extended csd register values read with 1 bit bu=
+s width.
+>
+> =A0drivers/mmc/core/mmc.c =A0 | =A0 27 +++++++++++++++++++++++++++
+> =A0include/linux/mmc/card.h | =A0 =A04 ++++
+> =A02 files changed, 31 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 006e932..30d1cbc 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -688,6 +688,33 @@ static int mmc_select_powerclass(struct mmc_card=
+ *card,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pwrclass_val =3D (pwrclass_val & EXT_C=
+SD_PWR_CL_4BIT_MASK) >>
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_CS=
+D_PWR_CL_4BIT_SHIFT;
+>
+> + =A0 =A0 =A0 if (card->host->caps & MMC_CAP_MAX_CURRENT_800) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (pwrclass_val >=3D MMC_MAX_CURRENT_8=
+00)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MA=
+X_CURRENT_800;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (pwrclass_val >=3D MMC_MAX_CURR=
+ENT_600)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MA=
+X_CURRENT_600;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (pwrclass_val >=3D MMC_MAX_CURR=
+ENT_400)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MA=
+X_CURRENT_400;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (pwrclass_val >=3D MMC_MAX_CURR=
+ENT_200)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MA=
+X_CURRENT_200;
+> + =A0 =A0 =A0 } else if (card->host->caps & MMC_CAP_MAX_CURRENT_600) =
+{
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (pwrclass_val >=3D MMC_MAX_CURRENT_6=
+00)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MA=
+X_CURRENT_600;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (pwrclass_val >=3D MMC_MAX_CURR=
+ENT_400)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MA=
+X_CURRENT_400;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (pwrclass_val >=3D MMC_MAX_CURR=
+ENT_200)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MA=
+X_CURRENT_200;
+> + =A0 =A0 =A0 } else if (card->host->caps & MMC_CAP_MAX_CURRENT_400) =
+{
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (pwrclass_val >=3D MMC_MAX_CURRENT_4=
+00)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MA=
+X_CURRENT_400;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else if (pwrclass_val >=3D MMC_MAX_CURR=
+ENT_200)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MA=
+X_CURRENT_200;
+> + =A0 =A0 =A0 } else if (card->host->caps & MMC_CAP_MAX_CURRENT_200) =
+{
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (pwrclass_val >=3D MMC_MAX_CURRENT_2=
+00)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MA=
+X_CURRENT_200;
+> + =A0 =A0 =A0 } else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT_200;
 > +
-> +	if (host->ops->get_cd) {
-> +		spin_lock_irqsave(&host->lock, flags);
-> +		present = host->ops->get_cd(host);
-> +		spin_unlock_irqrestore(&host->lock, flags);
-> +	}
-> +
-> +	return present;
-> +}
-
-In  static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-
-there is code below to handle broken card detect.
-
-1257
-1258         /* If polling, assume that the card is always present. */
-1259         if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-1260                 present = true;
-1261         else
-1262                 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
-1263                                 SDHCI_CARD_PRESENT;
-
-The problem with this code is that it assumes broken card detect is broken since
-the present state register cannot be read.
-
-would it make more sense to do something like
-        if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) {
-		if (host->ops->get_cd)
-			present = present = host->ops->get_cd(host);
-		else
-			present = true;
-
-and adjust the code in host->ops->get_cd() to not -ENOSYS.
-
-Philip
-
-> +
-> static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
-> {
-> 	if (host->flags & SDHCI_DEVICE_DEAD)
-> @@ -1884,6 +1905,7 @@ static const struct mmc_host_ops sdhci_ops = {
-> 	.request	= sdhci_request,
-> 	.set_ios	= sdhci_set_ios,
-> 	.get_ro		= sdhci_get_ro,
-> +	.get_cd		= sdhci_get_cd,
-> 	.hw_reset	= sdhci_hw_reset,
-> 	.enable_sdio_irq = sdhci_enable_sdio_irq,
-> 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 0a5b654..82f4d27 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -69,6 +69,7 @@
-> #define  SDHCI_SPACE_AVAILABLE	0x00000400
-> #define  SDHCI_DATA_AVAILABLE	0x00000800
-> #define  SDHCI_CARD_PRESENT	0x00010000
-> +#define  SDHCI_CARD_CDPL	0x00040000
-> #define  SDHCI_WRITE_PROTECT	0x00080000
-> #define  SDHCI_DATA_LVL_MASK	0x00F00000
-> #define   SDHCI_DATA_LVL_SHIFT	20
-> @@ -261,6 +262,7 @@ struct sdhci_ops {
-> 
-> 	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
-> 
-> +	int		(*get_cd)(struct sdhci_host *host);
-> 	int		(*enable_dma)(struct sdhci_host *host);
-> 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
-> 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
-> -- 
-> 1.7.5.4
-> 
-> 
+> =A0 =A0 =A0 =A0/* If the power class is different from the default va=
+lue */
+> =A0 =A0 =A0 =A0if (pwrclass_val > 0) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(card, EXT_CSD_CMD_S=
+ET_NORMAL,
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 9478a6b..c5e031a 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -195,6 +195,10 @@ struct mmc_part {
+> =A0#define MMC_BLK_DATA_AREA_GP =A0 (1<<2)
+> =A0};
+>
+> +#define MMC_MAX_CURRENT_200 =A0 =A0(0)
+> +#define MMC_MAX_CURRENT_400 =A0 =A0(7)
+> +#define MMC_MAX_CURRENT_600 =A0 =A0(11)
+> +#define MMC_MAX_CURRENT_800 =A0 =A0(13)
+> =A0/*
+> =A0* MMC device
+> =A0*/
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+> 1.7.1
+>
