@@ -1,17 +1,18 @@
 From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: [PATCH] mmc: core: Add host capability check for power class
-Date: Wed, 14 Dec 2011 11:49:33 +0530
-Message-ID: <1323843573-25394-1-git-send-email-girish.shivananjappa@linaro.org>
+Subject: [RESEND PATCH] mmc: core: Add host capability check for power class
+Date: Wed, 14 Dec 2011 11:53:33 +0530
+Message-ID: <1323843813-25444-1-git-send-email-girish.shivananjappa@linaro.org>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, subhashj@codeaurora.org, Girish K S <girish.shivananjappa@linaro.org>
+Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, subhashj@codeaurora.org, Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
 This patch adds a check whether the host supports maximum current value
 obtained from the device's extended csd register for a selected interface
 voltage and frequency.
 
+cc: Chris Ball <cjb@laptop.org>
 Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
 ---
  drivers/mmc/core/mmc.c   |   27 +++++++++++++++++++++++++++
