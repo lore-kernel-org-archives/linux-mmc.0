@@ -1,97 +1,146 @@
-From: Jingoo Han <jg1.han@samsung.com>
-Subject: RE: [PATCH] mmc: sdhci-s3c: use dev_pm_ops
-Date: Wed, 14 Dec 2011 13:50:21 +0900
-Message-ID: <003a01ccba1b$e2a63b10$a7f2b130$%han@samsung.com>
-References: <003901ccba18$8e421a60$aac64f20$%han@samsung.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH 3/4 v5] SDHCI: add sdhci_get_cd callback to detect the
+ card
+Date: Tue, 13 Dec 2011 20:51:30 -0800
+Message-ID: <144B2D54-4027-4815-833F-C5D91626382B@marvell.com>
+References: <1323829093-29655-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:38403 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751115Ab1LNEuV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2011 23:50:21 -0500
-Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LW600GMMG36WID0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 14 Dec 2011 13:50:20 +0900 (KST)
-Received: from DOJG1HAN02 ([12.23.120.153])
- by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
- 64bit (built Sep  7 2010)) with ESMTPA id <0LW60046FG3W0Y30@mmp1.samsung.com>
- for linux-mmc@vger.kernel.org; Wed, 14 Dec 2011 13:50:20 +0900 (KST)
-In-reply-to: <003901ccba18$8e421a60$aac64f20$%han@samsung.com>
-Content-language: ko
+Received: from na3sys009aog103.obsmtp.com ([74.125.149.71]:43942 "EHLO
+	na3sys009aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751115Ab1LNEvn convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 13 Dec 2011 23:51:43 -0500
+In-Reply-To: <1323829093-29655-1-git-send-email-r66093@freescale.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>
-Cc: 'Ben Dooks' <ben-linux@fluff.org>, 'Jingoo Han' <jg1.han@samsung.com>
+To: "<r66093@freescale.com>" <r66093@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jerry Huang <Chang-Ming.Huang@freescale.com>, Chris Ball <cjb@laptop.org>
 
-I have just checked mmc-next branch.
-Please, don't submit this patch.
 
-Thank you.
+On Dec 13, 2011, at 6:18 PM, <r66093@freescale.com> wrote:
 
-> -----Original Message-----
-> Subject: [PATCH] mmc: sdhci-s3c: use dev_pm_ops
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 > 
-> Instead of using legacy suspend/resume methods, using newer dev_pm_ops
-> structure allows better control over power management.
+> Add callback function sdhci_get_cd to detect the card.
+> And one new callback added to implement the card detect in sdhci struncture.
+> If special platform has the card detect callback, it will return the card
+> state, the value zero is for absent cardi and one is for present card.
+> If the controller don't support card detect, sdhci_get_cd will return -ENOSYS.
 > 
-> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> CC: Chris Ball <cjb@laptop.org>
 > ---
->  drivers/mmc/host/sdhci-s3c.c |   19 +++++++++++++------
->  1 files changed, 13 insertions(+), 6 deletions(-)
+> changes for v2:
+> 	- when controller don't support get_cd, return -ENOSYS
+> 	- add new callback for sdhci to detect the card
+> 	- add the CC
+> changes for v3:
+> 	- use pin_lock only when get_cd defined
+> changes for v4:
+> 	- enalbe the controller clock in platform, instead of core
+> changes for v5:
+> 	- remove the copyright
 > 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index cb60c41..5272c74 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -621,17 +621,18 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
->  }
+> drivers/mmc/host/sdhci.c |   21 ++++++++++++++++++++++
+> drivers/mmc/host/sdhci.h |    2 ++
+> 2 files changed, 23 insertions(+), 0 deletions(-)
 > 
->  #ifdef CONFIG_PM
-> -
-> -static int sdhci_s3c_suspend(struct platform_device *dev, pm_message_t pm)
-> +static int sdhci_s3c_suspend(struct device *dev)
->  {
-> -	struct sdhci_host *host = platform_get_drvdata(dev);
-> +	struct platform_device *pdev = to_platform_device(dev);
-> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 6d8eea3..fbe2f46 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1518,6 +1519,26 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+> 	return ret;
+> }
 > 
-> -	return sdhci_suspend_host(host, pm);
-> +	return sdhci_suspend_host(host, PMSG_SUSPEND);
->  }
-> 
-> -static int sdhci_s3c_resume(struct platform_device *dev)
-> +static int sdhci_s3c_resume(struct device *dev)
->  {
-> -	struct sdhci_host *host = platform_get_drvdata(dev);
-> +	struct platform_device *pdev = to_platform_device(dev);
-> +	struct sdhci_host *host = platform_get_drvdata(pdev);
-> 
->  	return sdhci_resume_host(host);
->  }
-> @@ -641,12 +642,18 @@ static int sdhci_s3c_resume(struct platform_device *dev)
->  #define sdhci_s3c_resume NULL
->  #endif
-> 
-> +static const struct dev_pm_ops sdhci_s3c_pm_ops = {
-> +	.suspend	= sdhci_s3c_suspend,
-> +	.resume		= sdhci_s3c_resume,
-> +};
+> +/* Return values for the sdjco_get_cd callback:
+> + *   0 for a absent card
+> + *   1 for a present card
+> + *   -ENOSYS when not supported (equal to NULL callback)
+> + */
+> +static int sdhci_get_cd(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	unsigned long flags;
+> +	int present = -ENOSYS;
 > +
->  static struct platform_driver sdhci_s3c_driver = {
->  	.probe		= sdhci_s3c_probe,
->  	.remove		= __devexit_p(sdhci_s3c_remove),
->  	.driver		= {
->  		.owner	= THIS_MODULE,
->  		.name	= "s3c-sdhci",
-> +		.pm	= &sdhci_s3c_pm_ops,
->  	},
->  };
+> +	if (host->ops->get_cd) {
+> +		spin_lock_irqsave(&host->lock, flags);
+> +		present = host->ops->get_cd(host);
+> +		spin_unlock_irqrestore(&host->lock, flags);
+> +	}
+> +
+> +	return present;
+> +}
+
+In  static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+
+there is code below to handle broken card detect.
+
+1257
+1258         /* If polling, assume that the card is always present. */
+1259         if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+1260                 present = true;
+1261         else
+1262                 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+1263                                 SDHCI_CARD_PRESENT;
+
+The problem with this code is that it assumes broken card detect is broken since
+the present state register cannot be read.
+
+would it make more sense to do something like
+        if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) {
+		if (host->ops->get_cd)
+			present = present = host->ops->get_cd(host);
+		else
+			present = true;
+
+and adjust the code in host->ops->get_cd() to not -ENOSYS.
+
+Philip
+
+> +
+> static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
+> {
+> 	if (host->flags & SDHCI_DEVICE_DEAD)
+> @@ -1884,6 +1905,7 @@ static const struct mmc_host_ops sdhci_ops = {
+> 	.request	= sdhci_request,
+> 	.set_ios	= sdhci_set_ios,
+> 	.get_ro		= sdhci_get_ro,
+> +	.get_cd		= sdhci_get_cd,
+> 	.hw_reset	= sdhci_hw_reset,
+> 	.enable_sdio_irq = sdhci_enable_sdio_irq,
+> 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0a5b654..82f4d27 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -69,6 +69,7 @@
+> #define  SDHCI_SPACE_AVAILABLE	0x00000400
+> #define  SDHCI_DATA_AVAILABLE	0x00000800
+> #define  SDHCI_CARD_PRESENT	0x00010000
+> +#define  SDHCI_CARD_CDPL	0x00040000
+> #define  SDHCI_WRITE_PROTECT	0x00080000
+> #define  SDHCI_DATA_LVL_MASK	0x00F00000
+> #define   SDHCI_DATA_LVL_SHIFT	20
+> @@ -261,6 +262,7 @@ struct sdhci_ops {
+> 
+> 	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
+> 
+> +	int		(*get_cd)(struct sdhci_host *host);
+> 	int		(*enable_dma)(struct sdhci_host *host);
+> 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+> 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+> -- 
+> 1.7.5.4
+> 
 > 
 > --
-> 1.7.1
-
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
