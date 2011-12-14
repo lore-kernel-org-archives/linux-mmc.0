@@ -1,78 +1,79 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: [PATCH V1] mmc: core: Add host capability check for power class
-Date: Wed, 14 Dec 2011 17:30:59 +0530
-Message-ID: <1323864059-26966-1-git-send-email-girish.shivananjappa@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:45805 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754615Ab1LNMDb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Dec 2011 07:03:31 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Daniel Mack <zonque@gmail.com>
+Subject: [PATCH] ARM: OMAP: hsmmc: add max_freq field
+Date: Wed, 14 Dec 2011 14:22:07 +0100
+Message-ID: <1323868927-3738-1-git-send-email-zonque@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Tony Lindgren <tony@atomide.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Daniel Mack <zonque@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, subhashj@codeaurora.org, Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>
 
-This patch adds a check whether the host supports maximum current value
-obtained from the device's extended csd register for a selected interface
-voltage and frequency.
+External circuitry like level shifters may limit the maximum operation
+speed of the hsmmc controller. Add a field to struct omap2_hsmmc_info
+so boards can adjust the setting on demand.
 
-cc: Chris Ball <cjb@laptop.org>
-Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+Signed-off-by: Daniel Mack <zonque@gmail.com>
+Cc: Tony Lindgren <tony@atomide.com>
 ---
-Changes in v1:
-	reduced the number of comparisons as per Hein's suggestion
+ arch/arm/mach-omap2/hsmmc.c   |    1 +
+ arch/arm/mach-omap2/hsmmc.h   |    2 ++
+ drivers/mmc/host/omap_hsmmc.c |    8 ++++++--
+ 3 files changed, 9 insertions(+), 2 deletions(-)
 
- drivers/mmc/core/mmc.c   |   21 +++++++++++++++++++++
- include/linux/mmc/card.h |    4 ++++
- 2 files changed, 25 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 006e932..e7f1902 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -688,6 +688,27 @@ static int mmc_select_powerclass(struct mmc_card *card,
- 		pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_4BIT_MASK) >>
- 				EXT_CSD_PWR_CL_4BIT_SHIFT;
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index f4a1020..4c7bc36 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -298,6 +298,7 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+ 	mmc->slots[0].caps = c->caps;
+ 	mmc->slots[0].internal_clock = !c->ext_clock;
+ 	mmc->dma_mask = 0xffffffff;
++	mmc->max_freq = c->max_freq;
+ 	if (cpu_is_omap44xx())
+ 		mmc->reg_offset = OMAP4_MMC_REG_OFFSET;
+ 	else
+diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+index f757e78..65a8c12 100644
+--- a/arch/arm/mach-omap2/hsmmc.h
++++ b/arch/arm/mach-omap2/hsmmc.h
+@@ -25,6 +25,8 @@ struct omap2_hsmmc_info {
+ 	char	*name;		/* or NULL for default */
+ 	struct device *dev;	/* returned: pointer to mmc adapter */
+ 	int	ocr_mask;	/* temporary HACK */
++	int	max_freq;	/* maximum clock, if constrained by external
++				 * circuitry, or 0 for default */
+ 	/* Remux (pad configuration) when powering on/off */
+ 	void (*remux)(struct device *dev, int slot, int power_on);
+ 	/* init some special card */
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 101cd31..8215ef9 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1927,8 +1927,12 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (mmc_slot(host).vcc_aux_disable_is_sleep)
+ 		mmc_slot(host).no_off = 1;
  
-+	if (pwrclass_val >= MMC_MAX_CURRENT_800)
-+		pwrclass_val = MMC_MAX_CURRENT_800;
-+	else if (pwrclass_val >= MMC_MAX_CURRENT_600)
-+		pwrclass_val = MMC_MAX_CURRENT_600;
-+	else if (pwrclass_val >= MMC_MAX_CURRENT_400)
-+		pwrclass_val = MMC_MAX_CURRENT_400;
-+	else if (pwrclass_val >= MMC_MAX_CURRENT_200)
-+		pwrclass_val = MMC_MAX_CURRENT_200;
+-	mmc->f_min	= OMAP_MMC_MIN_CLOCK;
+-	mmc->f_max	= OMAP_MMC_MAX_CLOCK;
++	mmc->f_min = OMAP_MMC_MIN_CLOCK;
++
++	if (pdata->max_freq > 0)
++		mmc->f_max = pdata->max_freq;
 +	else
-+		pwrclass_val = MMC_MAX_CURRENT_200;
-+
-+	if ((pwrclass_val == MMC_MAX_CURRENT_800) &&
-+	    !(card->host->caps & MMC_CAP_MAX_CURRENT_800))
-+		pwrclass_val = MMC_MAX_CURRENT_600;
-+	if ((pwrclass_val == MMC_MAX_CURRENT_600) &&
-+	    !(card->host->caps & MMC_CAP_MAX_CURRENT_600))
-+		pwrclass_val = MMC_MAX_CURRENT_400;
-+	if ((pwrclass_val == MMC_MAX_CURRENT_400) &&
-+	    !(card->host->caps & MMC_CAP_MAX_CURRENT_400))
-+		pwrclass_val = MMC_MAX_CURRENT_200;
-+
- 	/* If the power class is different from the default value */
- 	if (pwrclass_val > 0) {
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 9478a6b..c5e031a 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -195,6 +195,10 @@ struct mmc_part {
- #define MMC_BLK_DATA_AREA_GP	(1<<2)
- };
++		mmc->f_max = OMAP_MMC_MAX_CLOCK;
  
-+#define MMC_MAX_CURRENT_200	(0)
-+#define MMC_MAX_CURRENT_400	(7)
-+#define MMC_MAX_CURRENT_600	(11)
-+#define MMC_MAX_CURRENT_800	(13)
- /*
-  * MMC device
-  */
+ 	spin_lock_init(&host->irq_lock);
+ 
 -- 
-1.7.1
-
+1.7.7.4
