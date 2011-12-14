@@ -1,76 +1,67 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: [RESEND PATCH] mmc: core: Add host capability check for power class
-Date: Wed, 14 Dec 2011 11:53:33 +0530
-Message-ID: <1323843813-25444-1-git-send-email-girish.shivananjappa@linaro.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, subhashj@codeaurora.org, Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 1/6] ESDHC: add PIO mode support
+Date: Wed, 14 Dec 2011 08:04:11 +0100
+Message-ID: <20111214070411.GA2593@pengutronix.de>
+References: <1323829182-1551-1-git-send-email-r66093@freescale.com>
+ <1323829182-1551-2-git-send-email-r66093@freescale.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="7JfCtLOvnd9MIVvH"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:42010 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752738Ab1LNHEN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Dec 2011 02:04:13 -0500
+Content-Disposition: inline
+In-Reply-To: <1323829182-1551-2-git-send-email-r66093@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: r66093@freescale.com
+Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Gao Guanhua <B22826@freescale.com>
 
-This patch adds a check whether the host supports maximum current value
-obtained from the device's extended csd register for a selected interface
-voltage and frequency.
 
-cc: Chris Ball <cjb@laptop.org>
-Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
----
- drivers/mmc/core/mmc.c   |   27 +++++++++++++++++++++++++++
- include/linux/mmc/card.h |    4 ++++
- 2 files changed, 31 insertions(+), 0 deletions(-)
+--7JfCtLOvnd9MIVvH
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 006e932..30d1cbc 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -688,6 +688,33 @@ static int mmc_select_powerclass(struct mmc_card *card,
- 		pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_4BIT_MASK) >>
- 				EXT_CSD_PWR_CL_4BIT_SHIFT;
- 
-+	if (card->host->caps & MMC_CAP_MAX_CURRENT_800) {
-+		if (pwrclass_val >= MMC_MAX_CURRENT_800)
-+			pwrclass_val = MMC_MAX_CURRENT_800;
-+		else if (pwrclass_val >= MMC_MAX_CURRENT_600)
-+			pwrclass_val = MMC_MAX_CURRENT_600;
-+		else if (pwrclass_val >= MMC_MAX_CURRENT_400)
-+			pwrclass_val = MMC_MAX_CURRENT_400;
-+		else if (pwrclass_val >= MMC_MAX_CURRENT_200)
-+			pwrclass_val = MMC_MAX_CURRENT_200;
-+	} else if (card->host->caps & MMC_CAP_MAX_CURRENT_600) {
-+		if (pwrclass_val >= MMC_MAX_CURRENT_600)
-+			pwrclass_val = MMC_MAX_CURRENT_600;
-+		else if (pwrclass_val >= MMC_MAX_CURRENT_400)
-+			pwrclass_val = MMC_MAX_CURRENT_400;
-+		else if (pwrclass_val >= MMC_MAX_CURRENT_200)
-+			pwrclass_val = MMC_MAX_CURRENT_200;
-+	} else if (card->host->caps & MMC_CAP_MAX_CURRENT_400) {
-+		if (pwrclass_val >= MMC_MAX_CURRENT_400)
-+			pwrclass_val = MMC_MAX_CURRENT_400;
-+		else if (pwrclass_val >= MMC_MAX_CURRENT_200)
-+			pwrclass_val = MMC_MAX_CURRENT_200;
-+	} else if (card->host->caps & MMC_CAP_MAX_CURRENT_200) {
-+		if (pwrclass_val >= MMC_MAX_CURRENT_200)
-+			pwrclass_val = MMC_MAX_CURRENT_200;
-+	} else
-+		pwrclass_val = MMC_MAX_CURRENT_200;
-+
- 	/* If the power class is different from the default value */
- 	if (pwrclass_val > 0) {
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 9478a6b..c5e031a 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -195,6 +195,10 @@ struct mmc_part {
- #define MMC_BLK_DATA_AREA_GP	(1<<2)
- };
- 
-+#define MMC_MAX_CURRENT_200	(0)
-+#define MMC_MAX_CURRENT_400	(7)
-+#define MMC_MAX_CURRENT_600	(11)
-+#define MMC_MAX_CURRENT_800	(13)
- /*
-  * MMC device
-  */
--- 
-1.7.1
+On Wed, Dec 14, 2011 at 10:19:37AM +0800, r66093@freescale.com wrote:
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+>=20
+> For some FSL ESDHC controller(e.g. P2020E, Rev1.0), the SDHC can not work=
+ on
+> DMA mode because of the hardware bug, so we set a broken dma flag and use
+> PIO mode.
+>=20
+> Signed-off-by: Gao Guanhua <B22826@freescale.com>
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+
+NACK for the series
+
+1) If you introduce a new property you always have to document the binding
+which is missing. But you don't need to write it because...
+
+2) ... the aproach seems wrong to me. The quirks should be set depending
+on the compatible entry, e.g. if compatible =3D=3D "this_controller" then
+quirks |=3D whatever_needed. Or?
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--7JfCtLOvnd9MIVvH
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk7oSmsACgkQD27XaX1/VRu3owCcCccZOGPiv0rUNCdNRxSdDJ15
+3YIAoIjjnuWJ91SRbEMks6uvbXzRBRWV
+=Q9OQ
+-----END PGP SIGNATURE-----
+
+--7JfCtLOvnd9MIVvH--
