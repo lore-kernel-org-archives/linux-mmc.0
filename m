@@ -1,789 +1,110 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 3/4 v2] mmc: sh_mmcif: process requests asynchronously
-Date: Wed, 14 Dec 2011 19:31:53 +0100
-Message-ID: <1323887514-12650-4-git-send-email-g.liakhovetski@gmx.de>
-References: <Pine.LNX.4.64.1111301553330.22197@axis700.grange>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [PATCH/RFC] mmc: add a device PM QoS constraint when a host is first claimed
+Date: Wed, 14 Dec 2011 22:36:26 +0100
+Message-ID: <201112142236.26739.rjw@sisk.pl>
+References: <Pine.LNX.4.64.1112121642080.10378@axis700.grange> <201112141115.00945.rjw@sisk.pl> <4EE8849D.1010401@stericsson.com>
+Mime-Version: 1.0
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1111301553330.22197@axis700.grange>
+In-Reply-To: <4EE8849D.1010401@stericsson.com>
 Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch converts the sh_mmcif MMC host driver to process requests
-asynchronously instead of waiting in its .request() method for completion.
-This is achieved by using threaded IRQs.
+On Wednesday, December 14, 2011, Ulf Hansson wrote:
+> 
+> >> You have a point. But I am not convinced. :-)
+> >>
+> >> Some host drivers already make use of autosuspend. I think this is most 
+> >> straightforward solution to this problem right now.
+> > 
+> > The problem is not about _when_ to suspend (which autosuspend is about),
+> > but _what_ _state_ to go when suspended.  That's quite a different issue.
+> 
+> I was kind of taking a more simple approach, I were considering 
+> runtime_suspend as _one_ state. Right now there is no host driver having 
+> different levels of runtime_suspend state, if I am correct. But ofcourse 
+> that could be the future.
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- drivers/mmc/host/sh_mmcif.c |  588 ++++++++++++++++++++++++++++++-------------
- 1 files changed, 416 insertions(+), 172 deletions(-)
+Yes, there is, or more precisely there's going to be shortly.  We have
+PM domains on SH7372 and when we enable all of them to be powered off
+at run time, there will be many power states for the controller which
+is located in one of them.  Hence the $subject patch. :-)
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index d6a534c..ec6805c 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -16,6 +16,32 @@
-  *
-  */
- 
-+/*
-+ * The MMCIF driver is now processing MMC requests asynchronously, according
-+ * to the Linux MMC API requirement.
-+ *
-+ * The MMCIF driver processes MMC requests in up to 3 stages: command, optional
-+ * data, and optional stop. To achieve asynchronous processing each of these
-+ * stages is split into two halves: a top and a bottom half. The top half
-+ * initialises the hardware, installs a timeout handler to handle completion
-+ * timeouts, and returns. In case of the command stage this immediately returns
-+ * control to the caller, leaving all further processing to run asynchronously.
-+ * All further request processing is performed by the bottom halves.
-+ *
-+ * The bottom half further consists of a "hard" IRQ handler, an IRQ handler
-+ * thread, a DMA completion callback, if DMA is used, a timeout work, and
-+ * request- and stage-specific handler methods.
-+ *
-+ * Each bottom half run begins with either a hardware interrupt, a DMA callback
-+ * invocation, or a timeout work run. In case of an error or a successful
-+ * processing completion, the MMC core is informed and the request processing is
-+ * finished. In case processing has to continue, i.e., if data has to be read
-+ * from or written to the card, or if a stop command has to be sent, the next
-+ * top half is called, which performs the necessary hardware handling and
-+ * reschedules the timeout work. This returns the driver state machine into the
-+ * bottom half waiting state.
-+ */
-+
- #include <linux/bitops.h>
- #include <linux/clk.h>
- #include <linux/completion.h>
-@@ -167,19 +193,38 @@ enum mmcif_state {
- 	STATE_IOS,
- };
- 
-+enum mmcif_wait_for {
-+	MMCIF_WAIT_FOR_REQUEST,
-+	MMCIF_WAIT_FOR_CMD,
-+	MMCIF_WAIT_FOR_MREAD,
-+	MMCIF_WAIT_FOR_MWRITE,
-+	MMCIF_WAIT_FOR_READ,
-+	MMCIF_WAIT_FOR_WRITE,
-+	MMCIF_WAIT_FOR_READ_END,
-+	MMCIF_WAIT_FOR_WRITE_END,
-+	MMCIF_WAIT_FOR_STOP,
-+};
-+
- struct sh_mmcif_host {
- 	struct mmc_host *mmc;
- 	struct mmc_data *data;
-+	struct mmc_request *mrq;
- 	struct platform_device *pd;
- 	struct clk *hclk;
- 	unsigned int clk;
- 	int bus_width;
- 	bool sd_error;
-+	bool dying;
- 	long timeout;
- 	void __iomem *addr;
--	struct completion intr_wait;
-+	u32 *pio_ptr;
- 	spinlock_t lock;		/* protect sh_mmcif_host::state */
- 	enum mmcif_state state;
-+	enum mmcif_wait_for wait_for;
-+	struct delayed_work timeout_work;
-+	size_t blocksize;
-+	int sg_idx;
-+	int sg_blkidx;
- 	bool power;
- 	bool card_present;
- 
-@@ -455,125 +500,183 @@ static int sh_mmcif_error_manage(struct sh_mmcif_host *host)
- 	return ret;
- }
- 
--static int sh_mmcif_single_read(struct sh_mmcif_host *host,
--					struct mmc_request *mrq)
-+static bool sh_mmcif_next_block(struct sh_mmcif_host *host, u32 *p)
- {
--	struct mmc_data *data = mrq->data;
--	long time;
--	u32 blocksize, i, *p = sg_virt(data->sg);
-+	struct mmc_data *data = host->mrq->data;
-+
-+	host->sg_blkidx += host->blocksize;
-+
-+	/* data->sg->length must be a multiple of host->blocksize? */
-+	BUG_ON(host->sg_blkidx > data->sg->length);
-+
-+	if (host->sg_blkidx == data->sg->length) {
-+		host->sg_blkidx = 0;
-+		if (++host->sg_idx < data->sg_len)
-+			host->pio_ptr = sg_virt(++data->sg);
-+	} else {
-+		host->pio_ptr = p;
-+	}
-+
-+	if (host->sg_idx == data->sg_len)
-+		return false;
-+
-+	return true;
-+}
-+
-+static void sh_mmcif_single_read(struct sh_mmcif_host *host,
-+				 struct mmc_request *mrq)
-+{
-+	host->blocksize = (sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
-+			   BLOCK_SIZE_MASK) + 3;
-+
-+	host->wait_for = MMCIF_WAIT_FOR_READ;
-+	schedule_delayed_work(&host->timeout_work, host->timeout);
- 
- 	/* buf read enable */
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
--	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
--			host->timeout);
--	if (time <= 0 || host->sd_error)
--		return sh_mmcif_error_manage(host);
--
--	blocksize = (BLOCK_SIZE_MASK &
--			sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET)) + 3;
--	for (i = 0; i < blocksize / 4; i++)
-+}
-+
-+static bool sh_mmcif_read_block(struct sh_mmcif_host *host)
-+{
-+	struct mmc_data *data = host->mrq->data;
-+	u32 *p = sg_virt(data->sg);
-+	int i;
-+
-+	if (host->sd_error) {
-+		data->error = sh_mmcif_error_manage(host);
-+		return false;
-+	}
-+
-+	for (i = 0; i < host->blocksize / 4; i++)
- 		*p++ = sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
- 
- 	/* buffer read end */
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFRE);
--	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
--			host->timeout);
--	if (time <= 0 || host->sd_error)
--		return sh_mmcif_error_manage(host);
-+	host->wait_for = MMCIF_WAIT_FOR_READ_END;
- 
--	return 0;
-+	return true;
- }
- 
--static int sh_mmcif_multi_read(struct sh_mmcif_host *host,
--					struct mmc_request *mrq)
-+static void sh_mmcif_multi_read(struct sh_mmcif_host *host,
-+				struct mmc_request *mrq)
- {
- 	struct mmc_data *data = mrq->data;
--	long time;
--	u32 blocksize, i, j, sec, *p;
--
--	blocksize = BLOCK_SIZE_MASK & sh_mmcif_readl(host->addr,
--						     MMCIF_CE_BLOCK_SET);
--	for (j = 0; j < data->sg_len; j++) {
--		p = sg_virt(data->sg);
--		for (sec = 0; sec < data->sg->length / blocksize; sec++) {
--			sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
--			/* buf read enable */
--			time = wait_for_completion_interruptible_timeout(&host->intr_wait,
--				host->timeout);
--
--			if (time <= 0 || host->sd_error)
--				return sh_mmcif_error_manage(host);
--
--			for (i = 0; i < blocksize / 4; i++)
--				*p++ = sh_mmcif_readl(host->addr,
--						      MMCIF_CE_DATA);
--		}
--		if (j < data->sg_len - 1)
--			data->sg++;
-+
-+	if (!data->sg_len || !data->sg->length)
-+		return;
-+
-+	host->blocksize = sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
-+		BLOCK_SIZE_MASK;
-+
-+	host->wait_for = MMCIF_WAIT_FOR_MREAD;
-+	host->sg_idx = 0;
-+	host->sg_blkidx = 0;
-+	host->pio_ptr = sg_virt(data->sg);
-+	schedule_delayed_work(&host->timeout_work, host->timeout);
-+	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
-+}
-+
-+static bool sh_mmcif_mread_block(struct sh_mmcif_host *host)
-+{
-+	struct mmc_data *data = host->mrq->data;
-+	u32 *p = host->pio_ptr;
-+	int i;
-+
-+	if (host->sd_error) {
-+		data->error = sh_mmcif_error_manage(host);
-+		return false;
- 	}
--	return 0;
-+
-+	BUG_ON(!data->sg->length);
-+
-+	for (i = 0; i < host->blocksize / 4; i++)
-+		*p++ = sh_mmcif_readl(host->addr, MMCIF_CE_DATA);
-+
-+	if (!sh_mmcif_next_block(host, p))
-+		return false;
-+
-+	schedule_delayed_work(&host->timeout_work, host->timeout);
-+	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFREN);
-+
-+	return true;
- }
- 
--static int sh_mmcif_single_write(struct sh_mmcif_host *host,
-+static void sh_mmcif_single_write(struct sh_mmcif_host *host,
- 					struct mmc_request *mrq)
- {
--	struct mmc_data *data = mrq->data;
--	long time;
--	u32 blocksize, i, *p = sg_virt(data->sg);
-+	host->blocksize = (sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
-+			   BLOCK_SIZE_MASK) + 3;
- 
--	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
-+	host->wait_for = MMCIF_WAIT_FOR_WRITE;
-+	schedule_delayed_work(&host->timeout_work, host->timeout);
- 
- 	/* buf write enable */
--	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
--			host->timeout);
--	if (time <= 0 || host->sd_error)
--		return sh_mmcif_error_manage(host);
--
--	blocksize = (BLOCK_SIZE_MASK &
--			sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET)) + 3;
--	for (i = 0; i < blocksize / 4; i++)
-+	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
-+}
-+
-+static bool sh_mmcif_write_block(struct sh_mmcif_host *host)
-+{
-+	struct mmc_data *data = host->mrq->data;
-+	u32 *p = sg_virt(data->sg);
-+	int i;
-+
-+	if (host->sd_error) {
-+		data->error = sh_mmcif_error_manage(host);
-+		return false;
-+	}
-+
-+	for (i = 0; i < host->blocksize / 4; i++)
- 		sh_mmcif_writel(host->addr, MMCIF_CE_DATA, *p++);
- 
- 	/* buffer write end */
- 	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MDTRANE);
-+	host->wait_for = MMCIF_WAIT_FOR_WRITE_END;
- 
--	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
--			host->timeout);
--	if (time <= 0 || host->sd_error)
--		return sh_mmcif_error_manage(host);
--
--	return 0;
-+	return true;
- }
- 
--static int sh_mmcif_multi_write(struct sh_mmcif_host *host,
--						struct mmc_request *mrq)
-+static void sh_mmcif_multi_write(struct sh_mmcif_host *host,
-+				struct mmc_request *mrq)
- {
- 	struct mmc_data *data = mrq->data;
--	long time;
--	u32 i, sec, j, blocksize, *p;
- 
--	blocksize = BLOCK_SIZE_MASK & sh_mmcif_readl(host->addr,
--						     MMCIF_CE_BLOCK_SET);
-+	if (!data->sg_len || !data->sg->length)
-+		return;
- 
--	for (j = 0; j < data->sg_len; j++) {
--		p = sg_virt(data->sg);
--		for (sec = 0; sec < data->sg->length / blocksize; sec++) {
--			sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
--			/* buf write enable*/
--			time = wait_for_completion_interruptible_timeout(&host->intr_wait,
--				host->timeout);
-+	host->blocksize = sh_mmcif_readl(host->addr, MMCIF_CE_BLOCK_SET) &
-+		BLOCK_SIZE_MASK;
- 
--			if (time <= 0 || host->sd_error)
--				return sh_mmcif_error_manage(host);
-+	host->wait_for = MMCIF_WAIT_FOR_MWRITE;
-+	host->sg_idx = 0;
-+	host->sg_blkidx = 0;
-+	host->pio_ptr = sg_virt(data->sg);
-+	schedule_delayed_work(&host->timeout_work, host->timeout);
-+	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
-+}
- 
--			for (i = 0; i < blocksize / 4; i++)
--				sh_mmcif_writel(host->addr,
--						MMCIF_CE_DATA, *p++);
--		}
--		if (j < data->sg_len - 1)
--			data->sg++;
-+static bool sh_mmcif_mwrite_block(struct sh_mmcif_host *host)
-+{
-+	struct mmc_data *data = host->mrq->data;
-+	u32 *p = host->pio_ptr;
-+	int i;
-+
-+	if (host->sd_error) {
-+		data->error = sh_mmcif_error_manage(host);
-+		return false;
- 	}
--	return 0;
-+
-+	BUG_ON(!data->sg->length);
-+
-+	for (i = 0; i < host->blocksize / 4; i++)
-+		sh_mmcif_writel(host->addr, MMCIF_CE_DATA, *p++);
-+
-+	if (!sh_mmcif_next_block(host, p))
-+		return false;
-+
-+	schedule_delayed_work(&host->timeout_work, host->timeout);
-+	sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MBUFWEN);
-+
-+	return true;
- }
- 
- static void sh_mmcif_get_response(struct sh_mmcif_host *host,
-@@ -670,18 +773,22 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
- }
- 
- static int sh_mmcif_data_trans(struct sh_mmcif_host *host,
--				struct mmc_request *mrq, u32 opc)
-+			       struct mmc_request *mrq, u32 opc)
- {
- 	switch (opc) {
- 	case MMC_READ_MULTIPLE_BLOCK:
--		return sh_mmcif_multi_read(host, mrq);
-+		sh_mmcif_multi_read(host, mrq);
-+		return 0;
- 	case MMC_WRITE_MULTIPLE_BLOCK:
--		return sh_mmcif_multi_write(host, mrq);
-+		sh_mmcif_multi_write(host, mrq);
-+		return 0;
- 	case MMC_WRITE_BLOCK:
--		return sh_mmcif_single_write(host, mrq);
-+		sh_mmcif_single_write(host, mrq);
-+		return 0;
- 	case MMC_READ_SINGLE_BLOCK:
- 	case MMC_SEND_EXT_CSD:
--		return sh_mmcif_single_read(host, mrq);
-+		sh_mmcif_single_read(host, mrq);
-+		return 0;
- 	default:
- 		dev_err(&host->pd->dev, "UNSUPPORTED CMD = d'%08d\n", opc);
- 		return -EINVAL;
-@@ -692,9 +799,8 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
- 			       struct mmc_request *mrq)
- {
- 	struct mmc_command *cmd = mrq->cmd;
--	long time;
--	int ret = 0;
--	u32 mask, opc = cmd->opcode;
-+	u32 opc = cmd->opcode;
-+	u32 mask;
- 
- 	switch (opc) {
- 	/* response busy check */
-@@ -725,62 +831,14 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
- 	/* set cmd */
- 	sh_mmcif_writel(host->addr, MMCIF_CE_CMD_SET, opc);
- 
--	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
--		host->timeout);
--	if (time <= 0) {
--		cmd->error = sh_mmcif_error_manage(host);
--		return;
--	}
--	if (host->sd_error) {
--		switch (cmd->opcode) {
--		case MMC_ALL_SEND_CID:
--		case MMC_SELECT_CARD:
--		case MMC_APP_CMD:
--			cmd->error = -ETIMEDOUT;
--			break;
--		default:
--			dev_dbg(&host->pd->dev, "Cmd(d'%d) err\n",
--					cmd->opcode);
--			cmd->error = sh_mmcif_error_manage(host);
--			break;
--		}
--		host->sd_error = false;
--		return;
--	}
--	if (!(cmd->flags & MMC_RSP_PRESENT)) {
--		cmd->error = 0;
--		return;
--	}
--	sh_mmcif_get_response(host, cmd);
--	if (host->data) {
--		if (!host->dma_active) {
--			ret = sh_mmcif_data_trans(host, mrq, cmd->opcode);
--		} else {
--			long time =
--				wait_for_completion_interruptible_timeout(&host->dma_complete,
--									  host->timeout);
--			if (!time)
--				ret = -ETIMEDOUT;
--			else if (time < 0)
--				ret = time;
--			sh_mmcif_bitclr(host, MMCIF_CE_BUF_ACC,
--					BUF_ACC_DMAREN | BUF_ACC_DMAWEN);
--			host->dma_active = false;
--		}
--		if (ret < 0)
--			mrq->data->bytes_xfered = 0;
--		else
--			mrq->data->bytes_xfered =
--				mrq->data->blocks * mrq->data->blksz;
--	}
--	cmd->error = ret;
-+	host->wait_for = MMCIF_WAIT_FOR_CMD;
-+	schedule_delayed_work(&host->timeout_work, host->timeout);
- }
- 
- static void sh_mmcif_stop_cmd(struct sh_mmcif_host *host,
- 			      struct mmc_request *mrq)
- {
- 	struct mmc_command *cmd = mrq->stop;
--	long time;
- 
- 	if (mrq->cmd->opcode == MMC_READ_MULTIPLE_BLOCK)
- 		sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MCMD12DRE);
-@@ -792,14 +850,8 @@ static void sh_mmcif_stop_cmd(struct sh_mmcif_host *host,
- 		return;
- 	}
- 
--	time = wait_for_completion_interruptible_timeout(&host->intr_wait,
--			host->timeout);
--	if (time <= 0 || host->sd_error) {
--		cmd->error = sh_mmcif_error_manage(host);
--		return;
--	}
--	sh_mmcif_get_cmd12response(host, cmd);
--	cmd->error = 0;
-+	host->wait_for = MMCIF_WAIT_FOR_STOP;
-+	schedule_delayed_work(&host->timeout_work, host->timeout);
- }
- 
- static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
-@@ -838,23 +890,11 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	default:
- 		break;
- 	}
-+
-+	host->mrq = mrq;
- 	host->data = mrq->data;
--	if (mrq->data) {
--		if (mrq->data->flags & MMC_DATA_READ) {
--			if (host->chan_rx)
--				sh_mmcif_start_dma_rx(host);
--		} else {
--			if (host->chan_tx)
--				sh_mmcif_start_dma_tx(host);
--		}
--	}
--	sh_mmcif_start_cmd(host, mrq);
--	host->data = NULL;
- 
--	if (!mrq->cmd->error && mrq->stop)
--		sh_mmcif_stop_cmd(host, mrq);
--	host->state = STATE_IDLE;
--	mmc_request_done(mmc, mrq);
-+	sh_mmcif_start_cmd(host, mrq);
- }
- 
- static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-@@ -929,6 +969,157 @@ static struct mmc_host_ops sh_mmcif_ops = {
- 	.get_cd		= sh_mmcif_get_cd,
- };
- 
-+static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
-+{
-+	struct mmc_command *cmd = host->mrq->cmd;
-+	long time;
-+
-+	if (host->sd_error) {
-+		switch (cmd->opcode) {
-+		case MMC_ALL_SEND_CID:
-+		case MMC_SELECT_CARD:
-+		case MMC_APP_CMD:
-+			cmd->error = -ETIMEDOUT;
-+			host->sd_error = false;
-+			break;
-+		default:
-+			cmd->error = sh_mmcif_error_manage(host);
-+			dev_dbg(&host->pd->dev, "Cmd(d'%d) error %d\n",
-+				cmd->opcode, cmd->error);
-+			break;
-+		}
-+		return false;
-+	}
-+	if (!(cmd->flags & MMC_RSP_PRESENT)) {
-+		cmd->error = 0;
-+		return false;
-+	}
-+
-+	sh_mmcif_get_response(host, cmd);
-+
-+	if (!host->data)
-+		return false;
-+
-+	if (host->mrq->data->flags & MMC_DATA_READ) {
-+		if (host->chan_rx)
-+			sh_mmcif_start_dma_rx(host);
-+	} else {
-+		if (host->chan_tx)
-+			sh_mmcif_start_dma_tx(host);
-+	}
-+
-+	if (!host->dma_active) {
-+		host->data->error = sh_mmcif_data_trans(host, host->mrq, cmd->opcode);
-+		if (!host->data->error)
-+			return true;
-+		return false;
-+	}
-+
-+	/* Running in the IRQ thread, can sleep */
-+	time = wait_for_completion_interruptible_timeout(&host->dma_complete,
-+							 host->timeout);
-+	if (host->sd_error) {
-+		dev_err(host->mmc->parent,
-+			"Error IRQ while waiting for DMA completion!\n");
-+		/* Woken up by an error IRQ: abort DMA */
-+		if (host->data->flags & MMC_DATA_READ)
-+			dmaengine_terminate_all(host->chan_rx);
-+		else
-+			dmaengine_terminate_all(host->chan_tx);
-+		host->data->error = sh_mmcif_error_manage(host);
-+	} else if (!time) {
-+		host->data->error = -ETIMEDOUT;
-+	} else if (time < 0) {
-+		host->data->error = time;
-+	}
-+	sh_mmcif_bitclr(host, MMCIF_CE_BUF_ACC,
-+			BUF_ACC_DMAREN | BUF_ACC_DMAWEN);
-+	host->dma_active = false;
-+
-+	if (host->data->error)
-+		host->data->bytes_xfered = 0;
-+
-+	return false;
-+}
-+
-+static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
-+{
-+	struct sh_mmcif_host *host = dev_id;
-+	struct mmc_request *mrq = host->mrq;
-+
-+	cancel_delayed_work_sync(&host->timeout_work);
-+
-+	/*
-+	 * All handlers return true, if processing continues, and false, if the
-+	 * request has to be completed - successfully or not
-+	 */
-+	switch (host->wait_for) {
-+	case MMCIF_WAIT_FOR_REQUEST:
-+		/* We're too late, the timeout has already kicked in */
-+		return IRQ_HANDLED;
-+	case MMCIF_WAIT_FOR_CMD:
-+		if (sh_mmcif_end_cmd(host))
-+			/* Wait for data */
-+			return IRQ_HANDLED;
-+		break;
-+	case MMCIF_WAIT_FOR_MREAD:
-+		if (sh_mmcif_mread_block(host))
-+			/* Wait for more data */
-+			return IRQ_HANDLED;
-+		break;
-+	case MMCIF_WAIT_FOR_READ:
-+		if (sh_mmcif_read_block(host))
-+			/* Wait for data end */
-+			return IRQ_HANDLED;
-+		break;
-+	case MMCIF_WAIT_FOR_MWRITE:
-+		if (sh_mmcif_mwrite_block(host))
-+			/* Wait data to write */
-+			return IRQ_HANDLED;
-+		break;
-+	case MMCIF_WAIT_FOR_WRITE:
-+		if (sh_mmcif_write_block(host))
-+			/* Wait for data end */
-+			return IRQ_HANDLED;
-+		break;
-+	case MMCIF_WAIT_FOR_STOP:
-+		if (host->sd_error) {
-+			mrq->stop->error = sh_mmcif_error_manage(host);
-+			break;
-+		}
-+		sh_mmcif_get_cmd12response(host, mrq->stop);
-+		mrq->stop->error = 0;
-+		break;
-+	case MMCIF_WAIT_FOR_READ_END:
-+	case MMCIF_WAIT_FOR_WRITE_END:
-+		if (host->sd_error)
-+			mrq->data->error = sh_mmcif_error_manage(host);
-+		break;
-+	default:
-+		BUG();
-+	}
-+
-+	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
-+		host->data = NULL;
-+
-+		if (!mrq->cmd->error && mrq->data && !mrq->data->error)
-+			mrq->data->bytes_xfered =
-+				mrq->data->blocks * mrq->data->blksz;
-+
-+		if (mrq->stop && !mrq->cmd->error && (!mrq->data || !mrq->data->error)) {
-+			sh_mmcif_stop_cmd(host, mrq);
-+			if (!mrq->stop->error)
-+				return IRQ_HANDLED;
-+		}
-+	}
-+
-+	host->wait_for = MMCIF_WAIT_FOR_REQUEST;
-+	host->state = STATE_IDLE;
-+	mmc_request_done(host->mmc, mrq);
-+
-+	return IRQ_HANDLED;
-+}
-+
- static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
- {
- 	struct sh_mmcif_host *host = dev_id;
-@@ -980,14 +1171,58 @@ static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
- 		host->sd_error = true;
- 		dev_dbg(&host->pd->dev, "int err state = %08x\n", state);
- 	}
--	if (state & ~(INT_CMD12RBE | INT_CMD12CRE))
--		complete(&host->intr_wait);
--	else
-+	if (state & ~(INT_CMD12RBE | INT_CMD12CRE)) {
-+		if (!host->dma_active)
-+			return IRQ_WAKE_THREAD;
-+		else if (host->sd_error)
-+			mmcif_dma_complete(host);
-+	} else {
- 		dev_dbg(&host->pd->dev, "Unexpected IRQ 0x%x\n", state);
-+	}
- 
- 	return IRQ_HANDLED;
- }
- 
-+static void mmcif_timeout_work(struct work_struct *work)
-+{
-+	struct delayed_work *d = container_of(work, struct delayed_work, work);
-+	struct sh_mmcif_host *host = container_of(d, struct sh_mmcif_host, timeout_work);
-+	struct mmc_request *mrq = host->mrq;
-+
-+	if (host->dying)
-+		/* Don't run after mmc_remove_host() */
-+		return;
-+
-+	/*
-+	 * Handle races with cancel_delayed_work(), unless
-+	 * cancel_delayed_work_sync() is used
-+	 */
-+	switch (host->wait_for) {
-+	case MMCIF_WAIT_FOR_CMD:
-+		mrq->cmd->error = sh_mmcif_error_manage(host);
-+		break;
-+	case MMCIF_WAIT_FOR_STOP:
-+		mrq->stop->error = sh_mmcif_error_manage(host);
-+		break;
-+	case MMCIF_WAIT_FOR_MREAD:
-+	case MMCIF_WAIT_FOR_MWRITE:
-+	case MMCIF_WAIT_FOR_READ:
-+	case MMCIF_WAIT_FOR_WRITE:
-+	case MMCIF_WAIT_FOR_READ_END:
-+	case MMCIF_WAIT_FOR_WRITE_END:
-+		host->data->error = sh_mmcif_error_manage(host);
-+		break;
-+	default:
-+		BUG();
-+	}
-+
-+	host->state = STATE_IDLE;
-+	host->wait_for = MMCIF_WAIT_FOR_REQUEST;
-+	host->data = NULL;
-+	host->mrq = NULL;
-+	mmc_request_done(host->mmc, mrq);
-+}
-+
- static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- {
- 	int ret = 0, irq[2];
-@@ -1041,7 +1276,6 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 	host->clk = clk_get_rate(host->hclk);
- 	host->pd = pdev;
- 
--	init_completion(&host->intr_wait);
- 	spin_lock_init(&host->lock);
- 
- 	mmc->ops = &sh_mmcif_ops;
-@@ -1078,18 +1312,20 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 
- 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
- 
--	ret = request_irq(irq[0], sh_mmcif_intr, 0, "sh_mmc:error", host);
-+	ret = request_threaded_irq(irq[0], sh_mmcif_intr, sh_mmcif_irqt, 0, "sh_mmc:error", host);
- 	if (ret) {
- 		dev_err(&pdev->dev, "request_irq error (sh_mmc:error)\n");
- 		goto clean_up3;
- 	}
--	ret = request_irq(irq[1], sh_mmcif_intr, 0, "sh_mmc:int", host);
-+	ret = request_threaded_irq(irq[1], sh_mmcif_intr, sh_mmcif_irqt, 0, "sh_mmc:int", host);
- 	if (ret) {
- 		free_irq(irq[0], host);
- 		dev_err(&pdev->dev, "request_irq error (sh_mmc:int)\n");
- 		goto clean_up3;
- 	}
- 
-+	INIT_DELAYED_WORK(&host->timeout_work, mmcif_timeout_work);
-+
- 	mmc_detect_change(host->mmc, 0);
- 
- 	dev_info(&pdev->dev, "driver version %s\n", DRIVER_VERSION);
-@@ -1116,11 +1352,19 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
- 	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
- 	int irq[2];
- 
-+	host->dying = true;
- 	pm_runtime_get_sync(&pdev->dev);
- 
- 	mmc_remove_host(host->mmc);
- 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
- 
-+	/*
-+	 * FIXME: cancel_delayed_work(_sync)() and free_irq() race with the
-+	 * mmc_remove_host() call above. But swapping order doesn't help either
-+	 * (a query on the linux-mmc mailing list didn't bring any replies).
-+	 */
-+	cancel_delayed_work_sync(&host->timeout_work);
-+
- 	if (host->addr)
- 		iounmap(host->addr);
- 
--- 
-1.7.2.5
+> Moreover, I definitely do not think that a fixed timeout of 100us is 
+> applicable for all use cases, this must at least be configurable.
 
+Well, this isn't a timeout.  Have you read my reply to Linus?
+
+I agree that it should be configurable _eventually_, but no one seems to
+know how to implement that configurability.  Ideally, that value should
+result from some user space input, possibly after a conversion by the
+driver to a useful number, but we don't seem to have any agreement as to
+what the interface for passing that user space input to the driver should
+look like.
+
+> >> However, we could also do pm_runtime_get_sync of the host device in 
+> >> claim host and vice verse in release host, thus preventing the host 
+> >> driver from triggering runtime_suspend|resume for every request. Though, 
+> >> I am not 100% sure this is really what you want either.
+> > 
+> > No, I don't want that.  I want the device to be suspended when possible,
+> > but I don't want that to cause the system to go into an overly deep power
+> > state as a result.
+> 
+> Before just skipping my proposal, I think you should know some more 
+> background to why I suggested this:
+> 
+> 1.
+> mmc_claim_host is using mmc_host_enable, which kind of mean the same 
+> thing for a host driver as doing get_sync. Vice verse for mmc_release_host.
+> 
+> 2.
+> When executing mmc/sd commands/requests the host must always be claimed 
+> (and thus the host is always enabled). But more important some mmc/sd 
+> commands must be executed as a sequence, without the host being disabled 
+> in between the commands (since a disable might mean that the clock to 
+> card gets disabled). To solve this, the mmc_claim_host is used, to make 
+> sure the host is enabled during the complete command sequence.
+> 
+> I happily continue this discussion, to see if someone more can break the 
+> idea about having get_sync in mmc_host_enable. :-)
+
+I'll leave this one to Guennadi, if you don't mind. :-)
+
+> >> Using PM QoS as you propose, might prevent some hosts from doing 
+> >> runtime_suspend|resume completely and thus those might not fulfill power 
+> >> consumption requirements instead.
+> > 
+> > I'm not sure what scenario you have in mind.  Care to elaborate?
+> 
+> Well, suppose a the host drivers start considering the PM QoS 
+> requirement, but never can fulfill the requirement of 100us for it's 
+> runtime_suspend callback function...
+
+OK, that's a valid concern.  This means there should be a way for user space
+to specify the constraint somehow, because it's a user space's role to define
+policies.
+
+> >> I do not think we can take this decision at this level. Is performance more
+> >> important than power save, that is kind of the question.
+> > 
+> > Yes, it is.  Also, the number used here is somewhat arbitrary.
+> 
+> For you maybe power management is less important, but I doubt everybody 
+> else agree to that. It is a more complex balance I believe.
+
+You're right.
+
+> > However, since no one except for SH7372 is now using device PM QoS, no one
+> > else will be affected by this change at the moment.
+> 
+> True, but that is not a good reason for adding more stuff to the mmc core.
+
+Good point.
+
+Thanks,
+Rafael
