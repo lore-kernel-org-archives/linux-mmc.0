@@ -1,182 +1,132 @@
 From: <r66093@freescale.com>
-Subject: [PATCH 6/6] ESDHC: Fix DMA errors in kernel booting on P1010
-Date: Wed, 14 Dec 2011 10:19:42 +0800
-Message-ID: <1323829182-1551-7-git-send-email-r66093@freescale.com>
+Subject: [PATCH 2/6] SDHCI: AHB2MAG IRQ bypass hardware workaround
+Date: Wed, 14 Dec 2011 10:19:38 +0800
+Message-ID: <1323829182-1551-3-git-send-email-r66093@freescale.com>
 References: <1323829182-1551-1-git-send-email-r66093@freescale.com>
  <1323829182-1551-2-git-send-email-r66093@freescale.com>
- <1323829182-1551-3-git-send-email-r66093@freescale.com>
- <1323829182-1551-4-git-send-email-r66093@freescale.com>
- <1323829182-1551-5-git-send-email-r66093@freescale.com>
- <1323829182-1551-6-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:38878 "EHLO
-	TX2EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755610Ab1LNDFx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2011 22:05:53 -0500
-Received: from mail176-tx2 (localhost [127.0.0.1])	by
- mail176-tx2-R.bigfish.com (Postfix) with ESMTP id 794A72C00B5	for
- <linux-mmc@vger.kernel.org>; Wed, 14 Dec 2011 03:05:54 +0000 (UTC)
-Received: from TX2EHSMHS006.bigfish.com (unknown [10.9.14.251])	by
- mail176-tx2.bigfish.com (Postfix) with ESMTP id 1C3CA220046	for
- <linux-mmc@vger.kernel.org>; Wed, 14 Dec 2011 03:05:54 +0000 (UTC)
-In-Reply-To: <1323829182-1551-6-git-send-email-r66093@freescale.com>
+Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:28485 "EHLO
+	TX2EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754032Ab1LNDGC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2011 22:06:02 -0500
+Received: from mail159-tx2 (localhost [127.0.0.1])	by
+ mail159-tx2-R.bigfish.com (Postfix) with ESMTP id 8926D4C022F	for
+ <linux-mmc@vger.kernel.org>; Wed, 14 Dec 2011 03:06:03 +0000 (UTC)
+Received: from TX2EHSMHS019.bigfish.com (unknown [10.9.14.247])	by
+ mail159-tx2.bigfish.com (Postfix) with ESMTP id 4758D6A006A	for
+ <linux-mmc@vger.kernel.org>; Wed, 14 Dec 2011 03:05:49 +0000 (UTC)
+In-Reply-To: <1323829182-1551-2-git-send-email-r66093@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Priyanka Jain <Priyanka.Jain@freescale.com>
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Gao Guanhua <B22826@freescale.com>
 
 From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-When linux is booted with DMA mode enabled in esdhc module on P1010,
-there were following errors:
+For Fsl eSDHC controller, the bit DCR[DMA__AHB2MAG_IRQ_BYPASS] cannot be
+set automatically, when SoC reset, therefore, we need to set this bit manually.
 
-mmc0: ADMA error
-mmc0: error -5 whilst initialising SD card
-
-It is because FSL ESDHC controller has different bit setting for PROCTL
-register, when kernel sets Power Control Register by method for standard
-SD Host Specification, it would overwritten FSL ESDHC PROCTL[DMAS];
-when it set Host Control Registers[DMAS], it sets PROCTL[EMODE] and
-PROCTL[D3CD]. These operations will set bad bits for PROCTL Register
-on FSL ESDHC Controller and cause errors, so this patch will make esdhc
-driver access FSL PROCTL Register according to block guide instead of
-standard SD Host Specification.
-
-For some FSL chips, such as MPC8536/P2020, PROCTL[VOLT_SEL] and PROCTL[DMAS]
-bits are reserved and even if they are set to wrong bits there is no error.
-But considering that all FSL ESDHC Controller register map is not fully
-compliant to standard SD Host Specification, we put the patch to all of
-FSL ESDHC Controllers.
-
-Signed-off-by: Priyanka Jain <Priyanka.Jain@freescale.com>
+Signed-off-by: Gao Guanhua <B22826@freescale.com>
 Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
 ---
- drivers/mmc/host/sdhci-pltfm.c |    4 ++
- drivers/mmc/host/sdhci.c       |   61 ++++++++++++++++++++++++++++++++-------
- include/linux/mmc/sdhci.h      |    2 +
- 3 files changed, 56 insertions(+), 11 deletions(-)
+ drivers/mmc/host/sdhci-esdhc.h    |    1 +
+ drivers/mmc/host/sdhci-of-esdhc.c |    7 +++++++
+ drivers/mmc/host/sdhci-pltfm.c    |    3 +++
+ drivers/mmc/host/sdhci.c          |    4 ++++
+ drivers/mmc/host/sdhci.h          |    1 +
+ include/linux/mmc/sdhci.h         |    2 ++
+ 6 files changed, 18 insertions(+), 0 deletions(-)
 
+diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+index c3b08f1..7cbaffe 100644
+--- a/drivers/mmc/host/sdhci-esdhc.h
++++ b/drivers/mmc/host/sdhci-esdhc.h
+@@ -39,6 +39,7 @@
+ /* OF-specific */
+ #define ESDHC_DMA_SYSCTL	0x40c
+ #define ESDHC_DMA_SNOOP		0x00000040
++#define ESDHC_AHB2MAG_IRQ_BYPASS	0x20
+ 
+ #define ESDHC_HOST_CONTROL_RES	0x05
+ 
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 7d5ae82..413ded5 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -68,6 +68,12 @@ static int esdhc_of_enable_dma(struct sdhci_host *host)
+ 	return 0;
+ }
+ 
++static int esdhc_of_enable_irq_bypass(struct sdhci_host *host)
++{
++	setbits32(host->ioaddr + ESDHC_DMA_SYSCTL, ESDHC_AHB2MAG_IRQ_BYPASS);
++	return 0;
++}
++
+ static unsigned int esdhc_of_get_max_clock(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -116,6 +122,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.get_max_clock = esdhc_of_get_max_clock,
+ 	.get_min_clock = esdhc_of_get_min_clock,
+ 	.get_cd = esdhc_of_get_cd,
++	.enable_irq_bypass = esdhc_of_enable_irq_bypass,
+ };
+ 
+ static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
 diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 8ece860..103abe9 100644
+index 2a77435..de182c6 100644
 --- a/drivers/mmc/host/sdhci-pltfm.c
 +++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -86,6 +86,10 @@ void sdhci_get_of_property(struct platform_device *pdev)
+@@ -74,6 +74,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
+ 		if (of_get_property(np, "sdhci,dma-broken", NULL))
+ 			host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
  
- 		if (of_get_property(np, "sdhci,relax-freq", NULL))
- 			host->quirks2 |= SDHCI_QUIRK2_RELAX_FREQ;
++		if (of_get_property(np, "sdhci,ahb2mag-irq-bypass", NULL))
++			host->quirks2 |= SDHCI_QUIRK2_SET_AHB2MAG_IRQ_BYPASS;
 +
-+		if (of_device_is_compatible(np, "fsl,esdhc"))
-+			host->quirks2 |= SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD;
-+
- #ifdef CONFIG_PM
- 		if (of_get_property(np, "pmsaveproctlreg", NULL))
- 			sdhc_pmsaveproctlreg = 1;
+ 		clk = of_get_property(np, "clock-frequency", &size);
+ 		if (clk && size == sizeof(*clk) && *clk)
+ 			pltfm_host->clock = be32_to_cpup(clk);
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ae52ab9..eccaaf4 100644
+index fbe2f46..ae52ab9 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -837,14 +837,29 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 	 * is ADMA.
- 	 */
- 	if (host->version >= SDHCI_SPEC_200) {
--		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
--		ctrl &= ~SDHCI_CTRL_DMA_MASK;
--		if ((host->flags & SDHCI_REQ_USE_DMA) &&
--			(host->flags & SDHCI_USE_ADMA))
--			ctrl |= SDHCI_CTRL_ADMA32;
--		else
--			ctrl |= SDHCI_CTRL_SDMA;
--		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+		if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD) {
-+#define ESDHCI_PROCTL_DMAS_MASK		0x00000300
-+#define ESDHCI_PROCTL_ADMA32		0x00000200
-+#define ESDHCI_PROCTL_SDMA		0x00000000
-+			u32 ctrl;
-+			ctrl = sdhci_readl(host, SDHCI_HOST_CONTROL);
-+			ctrl &= ~ESDHCI_PROCTL_DMAS_MASK;
-+			if ((host->flags & SDHCI_REQ_USE_DMA) &&
-+				(host->flags & SDHCI_USE_ADMA))
-+				ctrl |= ESDHCI_PROCTL_ADMA32;
-+			else
-+				ctrl |= ESDHCI_PROCTL_SDMA;
-+			sdhci_writel(host, ctrl, SDHCI_HOST_CONTROL);
-+		} else {
-+			ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+			ctrl &= ~SDHCI_CTRL_DMA_MASK;
-+			if ((host->flags & SDHCI_REQ_USE_DMA) &&
-+				(host->flags & SDHCI_USE_ADMA))
-+				ctrl |= SDHCI_CTRL_ADMA32;
-+			else
-+				ctrl |= SDHCI_CTRL_SDMA;
-+			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+		}
- 	}
+@@ -226,6 +226,10 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+ 	else
+ 		sdhci_reset(host, SDHCI_RESET_ALL);
  
- 	if (!(host->flags & SDHCI_REQ_USE_DMA)) {
-@@ -1170,17 +1185,29 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
- 	u8 pwr = 0;
- 
- 	if (power != (unsigned short)-1) {
-+#define	ESDHCI_FSL_POWER_MASK	0x40
-+#define	ESDHCI_FSL_POWER_180	0x00
-+#define	ESDHCI_FSL_POWER_300	0x40
- 		switch (1 << power) {
- 		case MMC_VDD_165_195:
--			pwr = SDHCI_POWER_180;
-+			if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD)
-+				pwr = ESDHCI_FSL_POWER_180;
-+			else
-+				pwr = SDHCI_POWER_180;
- 			break;
- 		case MMC_VDD_29_30:
- 		case MMC_VDD_30_31:
--			pwr = SDHCI_POWER_300;
-+			if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD)
-+				pwr = ESDHCI_FSL_POWER_300;
-+			else
-+				pwr = SDHCI_POWER_300;
- 			break;
- 		case MMC_VDD_32_33:
- 		case MMC_VDD_33_34:
--			pwr = SDHCI_POWER_330;
-+			if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD)
-+				pwr = ESDHCI_FSL_POWER_300;
-+			else
-+				pwr = SDHCI_POWER_330;
- 			break;
- 		default:
- 			BUG();
-@@ -1190,6 +1217,18 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
- 	if (host->pwr == pwr)
- 		return;
- 
-+	/* Now FSL ESDHC Controller has no Bus Power bit,
-+	 * and PROCTL[21] bit is for voltage selection */
-+	if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD) {
-+		u8 volt = 0;
-+		volt = sdhci_readb(host, SDHCI_POWER_CONTROL);
-+		volt &= ~ESDHCI_FSL_POWER_MASK;
-+		volt |= pwr;
-+		sdhci_writeb(host, volt, SDHCI_POWER_CONTROL);
++	if (host->quirks2 & SDHCI_QUIRK2_SET_AHB2MAG_IRQ_BYPASS)
++		if (host->ops->enable_irq_bypass)
++			host->ops->enable_irq_bypass(host);
 +
-+		return;
-+	}
-+
- 	host->pwr = pwr;
+ 	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK,
+ 		SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
+ 		SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_INDEX |
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 82f4d27..1326557 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -263,6 +263,7 @@ struct sdhci_ops {
+ 	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
  
- 	if (pwr == 0) {
+ 	int		(*get_cd)(struct sdhci_host *host);
++	int		(*enable_irq_bypass)(struct sdhci_host *host);
+ 	int		(*enable_dma)(struct sdhci_host *host);
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
 diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index b5f9559..e1331d6 100644
+index e4b6935..1dbe22b 100644
 --- a/include/linux/mmc/sdhci.h
 +++ b/include/linux/mmc/sdhci.h
-@@ -95,6 +95,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_SET_AHB2MAG_IRQ_BYPASS		(1<<1)
- /* Controller operates the cards at reduced frequency */
- #define SDHCI_QUIRK2_RELAX_FREQ				(1<<2)
-+/* Controller has weird bit setting for Protocol Control Register */
-+#define SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD			(1<<3)
+@@ -91,6 +91,8 @@ struct sdhci_host {
+ 	unsigned int quirks2;	/* More deviations from spec. */
+ 
+ #define SDHCI_QUIRK2_OWN_CARD_DETECTION			(1<<0)
++/* Controller cannot set DCR[DMA__AHB2MAG_IRQ_BYPASS] automatically */
++#define SDHCI_QUIRK2_SET_AHB2MAG_IRQ_BYPASS		(1<<1)
  
  	int irq;		/* Device IRQ */
  	void __iomem *ioaddr;	/* Mapped address */
