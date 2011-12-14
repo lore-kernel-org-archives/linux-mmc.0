@@ -1,148 +1,70 @@
-From: Huang Shijie <b32955@freescale.com>
-Subject: Re: [PATCH 3/4] mtd: fix compile error for gpmi-nand
-Date: Wed, 14 Dec 2011 10:21:03 +0800
-Message-ID: <4EE8080F.4090700@freescale.com>
-References: <1323791286-29574-1-git-send-email-shawn.guo@linaro.org> <1323791286-29574-4-git-send-email-shawn.guo@linaro.org>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH 2/4] MMC/SD: Add callback function to detect card
+Date: Wed, 14 Dec 2011 02:21:24 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F11645D83@039-SN1MPN1-006.039d.mgd.msft.net>
+References: <1323077026-12071-1-git-send-email-r66093@freescale.com>
+ <1323077026-12071-2-git-send-email-r66093@freescale.com>
+ <4EE1DCEB.5030102@intel.com>
+ <8A2FC72B45BB5A4C9F801431E06AE48F11644BF7@039-SN1MPN1-006.039d.mgd.msft.net>
+ <4EE7063F.9090900@intel <4EE712B1.6030706@intel.com>
+ <8A2FC72B45BB5A4C9F801431E06AE48F11644F37@039-SN1MPN1-006.039d.mgd.msft.net>
+ <4EE7285C.3070503@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:19493
-	"EHLO VA3EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1756510Ab1LNCUe convert rfc822-to-8bit
+Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:16203
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755741Ab1LNCV3 convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Dec 2011 21:20:34 -0500
-In-Reply-To: <1323791286-29574-4-git-send-email-shawn.guo@linaro.org>
+	Tue, 13 Dec 2011 21:21:29 -0500
+In-Reply-To: <4EE7285C.3070503@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Vinod Koul <vinod.koul@intel.com>, Chris Ball <cjb@laptop.org>, Artem Bityutskiy <artem.bityutskiy@intel.com>, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-=D3=DA 2011=C4=EA12=D4=C213=C8=D5 23:48, Shawn Guo =D0=B4=B5=C0:
-> From: Huang Shijie <b32955@freescale.com>
->
-> The driver gpmi-nand should compile at least.  This patch adds the
-> missing gpmi-nand.h to fix the compile error below.
->
->   CC      drivers/mtd/nand/gpmi-nand/gpmi-nand.o
->   CC      drivers/mtd/nand/gpmi-nand/gpmi-lib.o
-> drivers/mtd/nand/gpmi-nand/gpmi-nand.c:25:33: fatal error: linux/mtd/=
-gpmi-nand.h: No such file or directory
-> drivers/mtd/nand/gpmi-nand/gpmi-lib.c:21:33: fatal error: linux/mtd/g=
-pmi-nand.h: No such file or directory
->
-> This header is grabbed from patch below, which has not been postponed
-> for merging.
->
->   [PATCH v8 1/4] ARM: mxs: add GPMI-NAND support for imx23/imx28
->   http://permalink.gmane.org/gmane.linux.drivers.mtd/37338
->
-> Signed-off-by: Huang Shijie <b32955@freescale.com>
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> ---
->  include/linux/mtd/gpmi-nand.h |   68 +++++++++++++++++++++++++++++++=
-++++++++++
->  1 files changed, 68 insertions(+), 0 deletions(-)
->  create mode 100644 include/linux/mtd/gpmi-nand.h
->
-> diff --git a/include/linux/mtd/gpmi-nand.h b/include/linux/mtd/gpmi-n=
-and.h
-> new file mode 100644
-> index 0000000..69b6dbf
-> --- /dev/null
-> +++ b/include/linux/mtd/gpmi-nand.h
-> @@ -0,0 +1,68 @@
-> +/*
-> + * Copyright (C) 2011 Freescale Semiconductor, Inc. All Rights Reser=
-ved.
-> + *
-> + * This program is free software; you can redistribute it and/or mod=
-ify
-> + * it under the terms of the GNU General Public License as published=
- by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + *
-> + * This program is distributed in the hope that it will be useful,
-> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> + * GNU General Public License for more details.
-> + *
-> + * You should have received a copy of the GNU General Public License=
- along
-> + * with this program; if not, write to the Free Software Foundation,=
- Inc.,
-> + * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-> + */
-> +
-> +#ifndef __MACH_MXS_GPMI_NAND_H__
-> +#define __MACH_MXS_GPMI_NAND_H__
-> +
-> +/* The size of the resources is fixed. */
-> +#define GPMI_NAND_RES_SIZE	6
-> +
-> +/* Resource names for the GPMI NAND driver. */
-> +#define GPMI_NAND_GPMI_REGS_ADDR_RES_NAME  "GPMI NAND GPMI Registers=
-"
-> +#define GPMI_NAND_GPMI_INTERRUPT_RES_NAME  "GPMI NAND GPMI Interrupt=
-"
-> +#define GPMI_NAND_BCH_REGS_ADDR_RES_NAME   "GPMI NAND BCH Registers"
-> +#define GPMI_NAND_BCH_INTERRUPT_RES_NAME   "GPMI NAND BCH Interrupt"
-> +#define GPMI_NAND_DMA_CHANNELS_RES_NAME    "GPMI NAND DMA Channels"
-> +#define GPMI_NAND_DMA_INTERRUPT_RES_NAME   "GPMI NAND DMA Interrupt"
-> +
-> +/**
-> + * struct gpmi_nand_platform_data - GPMI NAND driver platform data.
-> + *
-> + * This structure communicates platform-specific information to the =
-GPMI NAND
-> + * driver that can't be expressed as resources.
-> + *
-> + * @platform_init:           A pointer to a function the driver will=
- call to
-> + *                           initialize the platform (e.g., set up t=
-he pin mux).
-> + * @min_prop_delay_in_ns:    Minimum propagation delay of GPMI signa=
-ls to and
-> + *                           from the NAND Flash device, in nanoseco=
-nds.
-> + * @max_prop_delay_in_ns:    Maximum propagation delay of GPMI signa=
-ls to and
-> + *                           from the NAND Flash device, in nanoseco=
-nds.
-> + * @max_chip_count:          The maximum number of chips for which t=
-he driver
-> + *                           should configure the hardware. This val=
-ue most
-> + *                           likely reflects the number of pins that=
- are
-> + *                           connected to a NAND Flash device. If th=
-is is
-> + *                           greater than the SoC hardware can suppo=
-rt, the
-> + *                           driver will print a message and fail to=
- initialize.
-> + * @partitions:              An optional pointer to an array of part=
-ition
-> + *                           descriptions.
-> + * @partition_count:         The number of elements in the partition=
-s array.
-> + */
-> +struct gpmi_nand_platform_data {
-> +	/* SoC hardware information. */
-> +	int		(*platform_init)(void);
-> +
-> +	/* NAND Flash information. */
-> +	unsigned int	min_prop_delay_in_ns;
-> +	unsigned int	max_prop_delay_in_ns;
-> +	unsigned int	max_chip_count;
-> +
-> +	/* Medium information. */
-> +	struct		mtd_partition *partitions;
-> +	unsigned	partition_count;
-> +};
-> +#endif
-thanks a lot.
+> >>>>
+> >>>> You patch uses (SDHCI_CARD_PRESENT | SDHCI_CARD_CDPL) Does that
+> >>>> mean SDHCI_CARD_CDPL does work in that case?
+> >>> No.
+> >>> The SDHCI_CARD_CDPL[bit13] reflect the pin level:
+> >>> CDPL: Card detect pin level. This bit reflects the inverse value of
+> >>> the
+> >> SDHC_CD pin for the card socket.
+> >>> 0 No card present (SDHC_CD = 1)
+> >>> 1 Card present (SDHC_CD = 0)
+> >>>
+> >>> So, this bit has the same effect as SDHCI_CARD_PRESENT[bit15], the
+> >> difference is that debouncing is not performed on this bit.
+> >>>
+> >>> Freescale's controller supports the card detection, if card is
+> >>> present,
+> >> none-zero will be returned, otherwise, zero will be returned.
+> >>>
+> >>> You can see my other patch [3/4], I add one callback to detect the
+> >>> card
+> >> state in special platform: if the controller supports card detection,
+> >> this callback will be performed in special platform (e.g. sdhci-of-
+> >> esdhc.c) and return the card state (present or absent), if controller
+> >> doesn't support card detection, this callback will be not performed
+> >> and return -ENOSYS.
+> >>
+> >> OK, but the point is, the request can be stopped in sdhci_request().
+> >> Can you just add your callback there?
+> > Why can the request be stopped? Just because of card absent or
+> SDHCI_DEVICE_DEAD?
+> 
+> Yes, both
+> 
+This function is to request command to the card, if callback is added here,
+it just replaces the code:
+present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+                                SDHCI_CARD_PRESENT;
+When SDHCI_QUIRK_BROKEN_CARD_DETECTION option is valid or the card is always present,
+This will affect the performance because the driver always ask the card preset state
+When card is present.
+So I think the best way is to detect the card before performing the mmc_send_status function.
 
-Huang Shijie
 
