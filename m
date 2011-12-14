@@ -1,59 +1,47 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [PATCH] mmc: core: Add option to prevent eMMC sleep command
-Date: Wed, 14 Dec 2011 21:08:43 +0530
-Message-ID: <000c01ccba76$787f7cf0$697e76d0$@org>
-References: <1323876036-10206-1-git-send-email-ulf.hansson@stericsson.com> <000601ccba74$afdb0180$0f910480$@org> <4EE8C1FB.5080205@stericsson.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH/RFC] mmc: add a device PM QoS constraint when a host is
+ first claimed
+Date: Wed, 14 Dec 2011 16:50:53 +0100
+Message-ID: <CACRpkdavEN4Ht425a5P9JfLttCqZ94-yH11GbxgV+mhvwHzGLA@mail.gmail.com>
+References: <Pine.LNX.4.64.1112121642080.10378@axis700.grange>
+	<4EE865CA.8000407@stericsson.com>
+	<CACRpkdZnmCUfk0h+wK=KUvrv5oCudEAdEc_TY6=yZg_3uTqkgw@mail.gmail.com>
+	<201112141128.56029.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:6333 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756282Ab1LNPjB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Dec 2011 10:39:01 -0500
-In-Reply-To: <4EE8C1FB.5080205@stericsson.com>
-Content-Language: en-us
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <201112141128.56029.rjw@sisk.pl>
+Sender: linux-sh-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Ulf Hansson' <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Per FORLIN' <per.forlin@stericsson.com>, 'Johan RUDHOLM' <johan.rudholm@stericsson.com>, 'Lee Jones' <lee.jones@linaro.org>
 
+On Wed, Dec 14, 2011 at 11:28 AM, Rafael J. Wysocki <rjw@sisk.pl> wrote=
+:
+> On Wednesday, December 14, 2011, Linus Walleij wrote:
 
+>> But this delta is dependent on a lot of stuff that only the platform
+>> knows, like nominal CPU frequency, bus speed etc, so certainly the
+>> platform must be able to modify that number.
+>
+> You seem to be confusing things. =A0The exact meaning of this number =
+is:
+> "I may want to use the device 100 us from now (but not earlier), so p=
+lease
+> make it possible to do that". =A0[It roughly means "don't put the dev=
+ice into
+> a low-power state that takes more than 100 us to resume from", but it=
+'s a bit
+> more complicated than that.] =A0It doesn't mean "don't suspend the de=
+vice for
+> the next 100 us".
 
-> -----Original Message-----
-> From: Ulf Hansson [mailto:ulf.hansson@stericsson.com]
-> Sent: Wednesday, December 14, 2011 9:04 PM
-> To: Subhash Jadavani
-> Cc: linux-mmc@vger.kernel.org; 'Chris Ball'; Per FORLIN; Johan RUDHOLM;
-> 'Lee Jones'
-> Subject: Re: [PATCH] mmc: core: Add option to prevent eMMC sleep
-> command
-> 
-> Subhash Jadavani wrote:
-> > Why is this patch needed? Do you see any issue with eMMC sleep on
-> particular
-> > cards?
-> >
-> > Regards,
-> > Subhash
-> 
-> Suppose the eMMC is put in sleep state when doing suspend, at that
-> point
-> the kernel crashes. The kernel crash is supposed to be dumped to the
-> same eMMC by some other software than the kernel itself. But this
-> software do not have support for waking up the eMMC from sleep and is
-> thus not able to store the dump.
+Yes you're right, I get it now!
 
-Ok. This means that SW still has some support to read/write eMMC. As part of
-suspend, we also deselect the card. So does that SW is capable of
-re-selecting the card and the do read/write transfer? I know this discussion
-might not be required. But still it's good to know.
+Thanks for the explanation Rafael.
 
-As far as patch is concerned, it looks good. You might want to mention the
-motivation for this patch in commit text.
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-> 
-> Br
-> Ulf Hansson
-
+Thanks,
+Linus Walleij
