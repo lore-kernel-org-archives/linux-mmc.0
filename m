@@ -1,105 +1,97 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH V2 1/2] mmc: block: Remove use of mmc_blk_set_blksize
-Date: Wed, 14 Dec 2011 16:06:09 +0100
-Message-ID: <1323875170-7103-2-git-send-email-ulf.hansson@stericsson.com>
-References: <1323875170-7103-1-git-send-email-ulf.hansson@stericsson.com>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH V1] mmc: core: Add host capability check for power class
+Date: Wed, 14 Dec 2011 20:46:28 +0530
+Message-ID: <000001ccba73$5c36ea90$14a4bfb0$@org>
+References: <1323864059-26966-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog113.obsmtp.com ([207.126.144.135]:45039 "EHLO
-	eu1sys200aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757290Ab1LNPHE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Dec 2011 10:07:04 -0500
-In-Reply-To: <1323875170-7103-1-git-send-email-ulf.hansson@stericsson.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1323864059-26966-1-git-send-email-girish.shivananjappa@linaro.org>
+Content-Language: en-us
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Girish K S' <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org
+Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-According to the specifications for SD and (e)MMC default
-blocksize (named BLOCKLEN in Spec.) must always be 512
-bytes. Since we hardcoded to always use 512 bytes, we do
-not explicitly have to set it. Future improvements should
-potentially make it possible to use a greater blocksize
-than 512 bytes, but until then let's skip this.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
-Reviewed-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
----
 
-Changes in v2:
-	- Rebased patch on latest version of mmc-next
+> -----Original Message-----
+> From: Girish K S [mailto:girish.shivananjappa@linaro.org]
+> Sent: Wednesday, December 14, 2011 5:31 PM
+> To: linux-mmc@vger.kernel.org
+> Cc: patches@linaro.org; linux-samsung-soc@vger.kernel.org;
+> subhashj@codeaurora.org; Girish K S; Chris Ball
+> Subject: [PATCH V1] mmc: core: Add host capability check for power
+> class
+> 
+> This patch adds a check whether the host supports maximum current value
+> obtained from the device's extended csd register for a selected
+> interface
+> voltage and frequency.
+> 
+> cc: Chris Ball <cjb@laptop.org>
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> ---
+> Changes in v1:
+> 	reduced the number of comparisons as per Hein's suggestion
+> 
+>  drivers/mmc/core/mmc.c   |   21 +++++++++++++++++++++
+>  include/linux/mmc/card.h |    4 ++++
+>  2 files changed, 25 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 006e932..e7f1902 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -688,6 +688,27 @@ static int mmc_select_powerclass(struct mmc_card
+> *card,
+>  		pwrclass_val = (pwrclass_val & EXT_CSD_PWR_CL_4BIT_MASK) >>
+>  				EXT_CSD_PWR_CL_4BIT_SHIFT;
+> 
+> +	if (pwrclass_val >= MMC_MAX_CURRENT_800)
+> +		pwrclass_val = MMC_MAX_CURRENT_800;
+> +	else if (pwrclass_val >= MMC_MAX_CURRENT_600)
+> +		pwrclass_val = MMC_MAX_CURRENT_600;
+> +	else if (pwrclass_val >= MMC_MAX_CURRENT_400)
+> +		pwrclass_val = MMC_MAX_CURRENT_400;
+> +	else if (pwrclass_val >= MMC_MAX_CURRENT_200)
+> +		pwrclass_val = MMC_MAX_CURRENT_200;
+> +	else
+> +		pwrclass_val = MMC_MAX_CURRENT_200;
 
----
- drivers/mmc/card/block.c |   27 +--------------------------
- 1 files changed, 1 insertions(+), 26 deletions(-)
+Last else if and else can be combined as they are assigning the same value
+to pwrclass_val.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 0c959c9..4b62d1f 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1598,24 +1598,6 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
- 	return ret;
- }
- 
--static int
--mmc_blk_set_blksize(struct mmc_blk_data *md, struct mmc_card *card)
--{
--	int err;
--
--	mmc_claim_host(card->host);
--	err = mmc_set_blocklen(card, 512);
--	mmc_release_host(card->host);
--
--	if (err) {
--		pr_err("%s: unable to set block size to 512: %d\n",
--			md->disk->disk_name, err);
--		return -EINVAL;
--	}
--
--	return 0;
--}
--
- static void mmc_blk_remove_req(struct mmc_blk_data *md)
- {
- 	struct mmc_card *card;
-@@ -1742,7 +1724,6 @@ static const struct mmc_fixup blk_fixups[] =
- static int mmc_blk_probe(struct mmc_card *card)
- {
- 	struct mmc_blk_data *md, *part_md;
--	int err;
- 	char cap_str[10];
- 
- 	/*
-@@ -1755,10 +1736,6 @@ static int mmc_blk_probe(struct mmc_card *card)
- 	if (IS_ERR(md))
- 		return PTR_ERR(md);
- 
--	err = mmc_blk_set_blksize(md, card);
--	if (err)
--		goto out;
--
- 	string_get_size((u64)get_capacity(md->disk) << 9, STRING_UNITS_2,
- 			cap_str, sizeof(cap_str));
- 	pr_info("%s: %s %s %s %s\n",
-@@ -1783,7 +1760,7 @@ static int mmc_blk_probe(struct mmc_card *card)
-  out:
- 	mmc_blk_remove_parts(card, md);
- 	mmc_blk_remove_req(md);
--	return err;
-+	return 0;
- }
- 
- static void mmc_blk_remove(struct mmc_card *card)
-@@ -1819,8 +1796,6 @@ static int mmc_blk_resume(struct mmc_card *card)
- 	struct mmc_blk_data *md = mmc_get_drvdata(card);
- 
- 	if (md) {
--		mmc_blk_set_blksize(md, card);
--
- 		/*
- 		 * Resume involves the card going into idle state,
- 		 * so current partition is always the main one.
--- 
-1.7.5.4
-
+> +
+> +	if ((pwrclass_val == MMC_MAX_CURRENT_800) &&
+> +	    !(card->host->caps & MMC_CAP_MAX_CURRENT_800))
+> +		pwrclass_val = MMC_MAX_CURRENT_600;
+> +	if ((pwrclass_val == MMC_MAX_CURRENT_600) &&
+> +	    !(card->host->caps & MMC_CAP_MAX_CURRENT_600))
+> +		pwrclass_val = MMC_MAX_CURRENT_400;
+> +	if ((pwrclass_val == MMC_MAX_CURRENT_400) &&
+> +	    !(card->host->caps & MMC_CAP_MAX_CURRENT_400))
+> +		pwrclass_val = MMC_MAX_CURRENT_200;
+> +
+>  	/* If the power class is different from the default value */
+>  	if (pwrclass_val > 0) {
+>  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 9478a6b..c5e031a 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -195,6 +195,10 @@ struct mmc_part {
+>  #define MMC_BLK_DATA_AREA_GP	(1<<2)
+>  };
+> 
+> +#define MMC_MAX_CURRENT_200	(0)
+> +#define MMC_MAX_CURRENT_400	(7)
+> +#define MMC_MAX_CURRENT_600	(11)
+> +#define MMC_MAX_CURRENT_800	(13)
+>  /*
+>   * MMC device
+>   */
+> --
+> 1.7.1
