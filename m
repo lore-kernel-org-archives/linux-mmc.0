@@ -1,64 +1,322 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH] mmc: core: Add option to prevent eMMC sleep command
-Date: Wed, 14 Dec 2011 17:48:17 +0100
-Message-ID: <4EE8D351.50508@stericsson.com>
-References: <1323876036-10206-1-git-send-email-ulf.hansson@stericsson.com> <000601ccba74$afdb0180$0f910480$@org> <4EE8C1FB.5080205@stericsson.com> <000c01ccba76$787f7cf0$697e76d0$@org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog106.obsmtp.com ([207.126.144.121]:53723 "EHLO
-	eu1sys200aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755146Ab1LNQtJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Dec 2011 11:49:09 -0500
-In-Reply-To: <000c01ccba76$787f7cf0$697e76d0$@org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 4/4] mmc: sh_mmcif: remove now superfluous sh_mmcif_host::data member
+Date: Wed, 14 Dec 2011 19:31:54 +0100
+Message-ID: <1323887514-12650-5-git-send-email-g.liakhovetski@gmx.de>
+References: <Pine.LNX.4.64.1111301553330.22197@axis700.grange>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1111301553330.22197@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, 'Lee Jones' <lee.jones@linaro.org>
 
-Subhash Jadavani wrote:
-> 
->> -----Original Message-----
->> From: Ulf Hansson [mailto:ulf.hansson@stericsson.com]
->> Sent: Wednesday, December 14, 2011 9:04 PM
->> To: Subhash Jadavani
->> Cc: linux-mmc@vger.kernel.org; 'Chris Ball'; Per FORLIN; Johan RUDHOLM;
->> 'Lee Jones'
->> Subject: Re: [PATCH] mmc: core: Add option to prevent eMMC sleep
->> command
->>
->> Subhash Jadavani wrote:
->>> Why is this patch needed? Do you see any issue with eMMC sleep on
->> particular
->>> cards?
->>>
->>> Regards,
->>> Subhash
->> Suppose the eMMC is put in sleep state when doing suspend, at that
->> point
->> the kernel crashes. The kernel crash is supposed to be dumped to the
->> same eMMC by some other software than the kernel itself. But this
->> software do not have support for waking up the eMMC from sleep and is
->> thus not able to store the dump.
-> 
-> Ok. This means that SW still has some support to read/write eMMC. As part of
-> suspend, we also deselect the card. So does that SW is capable of
-> re-selecting the card and the do read/write transfer? I know this discussion
-> might not be required. But still it's good to know.
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
+ drivers/mmc/host/sh_mmcif.c |   94 +++++++++++++++++++++++--------------------
+ 1 files changed, 50 insertions(+), 44 deletions(-)
 
-Sorry, but I can't go into too much details, since this software is 
-proprietary. :-)
-
-> 
-> As far as patch is concerned, it looks good. You might want to mention the
-> motivation for this patch in commit text.
-
-I fix in a V2 patch.
-
-> 
->> Br
->> Ulf Hansson
-> 
-> 
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index ec6805c..29bcb75 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -207,7 +207,6 @@ enum mmcif_wait_for {
+ 
+ struct sh_mmcif_host {
+ 	struct mmc_host *mmc;
+-	struct mmc_data *data;
+ 	struct mmc_request *mrq;
+ 	struct platform_device *pd;
+ 	struct clk *hclk;
+@@ -250,19 +249,21 @@ static inline void sh_mmcif_bitclr(struct sh_mmcif_host *host,
+ static void mmcif_dma_complete(void *arg)
+ {
+ 	struct sh_mmcif_host *host = arg;
++	struct mmc_data *data = host->mrq->data;
++
+ 	dev_dbg(&host->pd->dev, "Command completed\n");
+ 
+-	if (WARN(!host->data, "%s: NULL data in DMA completion!\n",
++	if (WARN(!data, "%s: NULL data in DMA completion!\n",
+ 		 dev_name(&host->pd->dev)))
+ 		return;
+ 
+-	if (host->data->flags & MMC_DATA_READ)
++	if (data->flags & MMC_DATA_READ)
+ 		dma_unmap_sg(host->chan_rx->device->dev,
+-			     host->data->sg, host->data->sg_len,
++			     data->sg, data->sg_len,
+ 			     DMA_FROM_DEVICE);
+ 	else
+ 		dma_unmap_sg(host->chan_tx->device->dev,
+-			     host->data->sg, host->data->sg_len,
++			     data->sg, data->sg_len,
+ 			     DMA_TO_DEVICE);
+ 
+ 	complete(&host->dma_complete);
+@@ -270,13 +271,14 @@ static void mmcif_dma_complete(void *arg)
+ 
+ static void sh_mmcif_start_dma_rx(struct sh_mmcif_host *host)
+ {
+-	struct scatterlist *sg = host->data->sg;
++	struct mmc_data *data = host->mrq->data;
++	struct scatterlist *sg = data->sg;
+ 	struct dma_async_tx_descriptor *desc = NULL;
+ 	struct dma_chan *chan = host->chan_rx;
+ 	dma_cookie_t cookie = -EINVAL;
+ 	int ret;
+ 
+-	ret = dma_map_sg(chan->device->dev, sg, host->data->sg_len,
++	ret = dma_map_sg(chan->device->dev, sg, data->sg_len,
+ 			 DMA_FROM_DEVICE);
+ 	if (ret > 0) {
+ 		host->dma_active = true;
+@@ -292,7 +294,7 @@ static void sh_mmcif_start_dma_rx(struct sh_mmcif_host *host)
+ 		dma_async_issue_pending(chan);
+ 	}
+ 	dev_dbg(&host->pd->dev, "%s(): mapped %d -> %d, cookie %d\n",
+-		__func__, host->data->sg_len, ret, cookie);
++		__func__, data->sg_len, ret, cookie);
+ 
+ 	if (!desc) {
+ 		/* DMA failed, fall back to PIO */
+@@ -313,18 +315,19 @@ static void sh_mmcif_start_dma_rx(struct sh_mmcif_host *host)
+ 	}
+ 
+ 	dev_dbg(&host->pd->dev, "%s(): desc %p, cookie %d, sg[%d]\n", __func__,
+-		desc, cookie, host->data->sg_len);
++		desc, cookie, data->sg_len);
+ }
+ 
+ static void sh_mmcif_start_dma_tx(struct sh_mmcif_host *host)
+ {
+-	struct scatterlist *sg = host->data->sg;
++	struct mmc_data *data = host->mrq->data;
++	struct scatterlist *sg = data->sg;
+ 	struct dma_async_tx_descriptor *desc = NULL;
+ 	struct dma_chan *chan = host->chan_tx;
+ 	dma_cookie_t cookie = -EINVAL;
+ 	int ret;
+ 
+-	ret = dma_map_sg(chan->device->dev, sg, host->data->sg_len,
++	ret = dma_map_sg(chan->device->dev, sg, data->sg_len,
+ 			 DMA_TO_DEVICE);
+ 	if (ret > 0) {
+ 		host->dma_active = true;
+@@ -340,7 +343,7 @@ static void sh_mmcif_start_dma_tx(struct sh_mmcif_host *host)
+ 		dma_async_issue_pending(chan);
+ 	}
+ 	dev_dbg(&host->pd->dev, "%s(): mapped %d -> %d, cookie %d\n",
+-		__func__, host->data->sg_len, ret, cookie);
++		__func__, data->sg_len, ret, cookie);
+ 
+ 	if (!desc) {
+ 		/* DMA failed, fall back to PIO */
+@@ -698,8 +701,11 @@ static void sh_mmcif_get_cmd12response(struct sh_mmcif_host *host,
+ }
+ 
+ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+-		struct mmc_request *mrq, struct mmc_command *cmd, u32 opc)
++			    struct mmc_request *mrq)
+ {
++	struct mmc_data *data = mrq->data;
++	struct mmc_command *cmd = mrq->cmd;
++	u32 opc = cmd->opcode;
+ 	u32 tmp = 0;
+ 
+ 	/* Response Type check */
+@@ -731,7 +737,7 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+ 		break;
+ 	}
+ 	/* WDAT / DATW */
+-	if (host->data) {
++	if (data) {
+ 		tmp |= CMD_SET_WDAT;
+ 		switch (host->bus_width) {
+ 		case MMC_BUS_WIDTH_1:
+@@ -755,7 +761,7 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+ 	if (opc == MMC_READ_MULTIPLE_BLOCK || opc == MMC_WRITE_MULTIPLE_BLOCK) {
+ 		tmp |= CMD_SET_CMLTE | CMD_SET_CMD12EN;
+ 		sh_mmcif_bitset(host, MMCIF_CE_BLOCK_SET,
+-					mrq->data->blocks << 16);
++				data->blocks << 16);
+ 	}
+ 	/* RIDXC[1:0] check bits */
+ 	if (opc == MMC_SEND_OP_COND || opc == MMC_ALL_SEND_CID ||
+@@ -769,7 +775,7 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+ 		opc == MMC_SEND_CSD || opc == MMC_SEND_CID)
+ 		tmp |= CMD_SET_CRC7C_INTERNAL;
+ 
+-	return opc = ((opc << 24) | tmp);
++	return (opc << 24) | tmp;
+ }
+ 
+ static int sh_mmcif_data_trans(struct sh_mmcif_host *host,
+@@ -817,12 +823,12 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
+ 		break;
+ 	}
+ 
+-	if (host->data) {
++	if (mrq->data) {
+ 		sh_mmcif_writel(host->addr, MMCIF_CE_BLOCK_SET, 0);
+ 		sh_mmcif_writel(host->addr, MMCIF_CE_BLOCK_SET,
+ 				mrq->data->blksz);
+ 	}
+-	opc = sh_mmcif_set_cmd(host, mrq, cmd, opc);
++	opc = sh_mmcif_set_cmd(host, mrq);
+ 
+ 	sh_mmcif_writel(host->addr, MMCIF_CE_INT, 0xD80430C0);
+ 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, mask);
+@@ -838,15 +844,16 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
+ static void sh_mmcif_stop_cmd(struct sh_mmcif_host *host,
+ 			      struct mmc_request *mrq)
+ {
+-	struct mmc_command *cmd = mrq->stop;
+-
+-	if (mrq->cmd->opcode == MMC_READ_MULTIPLE_BLOCK)
++	switch (mrq->cmd->opcode) {
++	case MMC_READ_MULTIPLE_BLOCK:
+ 		sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MCMD12DRE);
+-	else if (mrq->cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK)
++		break;
++	case MMC_WRITE_MULTIPLE_BLOCK:
+ 		sh_mmcif_bitset(host, MMCIF_CE_INT_MASK, MASK_MCMD12RBE);
+-	else {
++		break;
++	default:
+ 		dev_err(&host->pd->dev, "unsupported stop cmd\n");
+-		cmd->error = sh_mmcif_error_manage(host);
++		mrq->stop->error = sh_mmcif_error_manage(host);
+ 		return;
+ 	}
+ 
+@@ -892,7 +899,6 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	}
+ 
+ 	host->mrq = mrq;
+-	host->data = mrq->data;
+ 
+ 	sh_mmcif_start_cmd(host, mrq);
+ }
+@@ -972,6 +978,7 @@ static struct mmc_host_ops sh_mmcif_ops = {
+ static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
+ {
+ 	struct mmc_command *cmd = host->mrq->cmd;
++	struct mmc_data *data = host->mrq->data;
+ 	long time;
+ 
+ 	if (host->sd_error) {
+@@ -997,10 +1004,10 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
+ 
+ 	sh_mmcif_get_response(host, cmd);
+ 
+-	if (!host->data)
++	if (!data)
+ 		return false;
+ 
+-	if (host->mrq->data->flags & MMC_DATA_READ) {
++	if (data->flags & MMC_DATA_READ) {
+ 		if (host->chan_rx)
+ 			sh_mmcif_start_dma_rx(host);
+ 	} else {
+@@ -1009,8 +1016,8 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
+ 	}
+ 
+ 	if (!host->dma_active) {
+-		host->data->error = sh_mmcif_data_trans(host, host->mrq, cmd->opcode);
+-		if (!host->data->error)
++		data->error = sh_mmcif_data_trans(host, host->mrq, cmd->opcode);
++		if (!data->error)
+ 			return true;
+ 		return false;
+ 	}
+@@ -1022,22 +1029,22 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
+ 		dev_err(host->mmc->parent,
+ 			"Error IRQ while waiting for DMA completion!\n");
+ 		/* Woken up by an error IRQ: abort DMA */
+-		if (host->data->flags & MMC_DATA_READ)
++		if (data->flags & MMC_DATA_READ)
+ 			dmaengine_terminate_all(host->chan_rx);
+ 		else
+ 			dmaengine_terminate_all(host->chan_tx);
+-		host->data->error = sh_mmcif_error_manage(host);
++		data->error = sh_mmcif_error_manage(host);
+ 	} else if (!time) {
+-		host->data->error = -ETIMEDOUT;
++		data->error = -ETIMEDOUT;
+ 	} else if (time < 0) {
+-		host->data->error = time;
++		data->error = time;
+ 	}
+ 	sh_mmcif_bitclr(host, MMCIF_CE_BUF_ACC,
+ 			BUF_ACC_DMAREN | BUF_ACC_DMAWEN);
+ 	host->dma_active = false;
+ 
+-	if (host->data->error)
+-		host->data->bytes_xfered = 0;
++	if (data->error)
++		data->bytes_xfered = 0;
+ 
+ 	return false;
+ }
+@@ -1046,6 +1053,7 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+ {
+ 	struct sh_mmcif_host *host = dev_id;
+ 	struct mmc_request *mrq = host->mrq;
++	struct mmc_data *data = mrq->data;
+ 
+ 	cancel_delayed_work_sync(&host->timeout_work);
+ 
+@@ -1093,20 +1101,18 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+ 	case MMCIF_WAIT_FOR_READ_END:
+ 	case MMCIF_WAIT_FOR_WRITE_END:
+ 		if (host->sd_error)
+-			mrq->data->error = sh_mmcif_error_manage(host);
++			data->error = sh_mmcif_error_manage(host);
+ 		break;
+ 	default:
+ 		BUG();
+ 	}
+ 
+ 	if (host->wait_for != MMCIF_WAIT_FOR_STOP) {
+-		host->data = NULL;
++		if (!mrq->cmd->error && data && !data->error)
++			data->bytes_xfered =
++				data->blocks * data->blksz;
+ 
+-		if (!mrq->cmd->error && mrq->data && !mrq->data->error)
+-			mrq->data->bytes_xfered =
+-				mrq->data->blocks * mrq->data->blksz;
+-
+-		if (mrq->stop && !mrq->cmd->error && (!mrq->data || !mrq->data->error)) {
++		if (mrq->stop && !mrq->cmd->error && (!data || !data->error)) {
+ 			sh_mmcif_stop_cmd(host, mrq);
+ 			if (!mrq->stop->error)
+ 				return IRQ_HANDLED;
+@@ -1115,6 +1121,7 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+ 
+ 	host->wait_for = MMCIF_WAIT_FOR_REQUEST;
+ 	host->state = STATE_IDLE;
++	host->mrq = NULL;
+ 	mmc_request_done(host->mmc, mrq);
+ 
+ 	return IRQ_HANDLED;
+@@ -1210,7 +1217,7 @@ static void mmcif_timeout_work(struct work_struct *work)
+ 	case MMCIF_WAIT_FOR_WRITE:
+ 	case MMCIF_WAIT_FOR_READ_END:
+ 	case MMCIF_WAIT_FOR_WRITE_END:
+-		host->data->error = sh_mmcif_error_manage(host);
++		mrq->data->error = sh_mmcif_error_manage(host);
+ 		break;
+ 	default:
+ 		BUG();
+@@ -1218,7 +1225,6 @@ static void mmcif_timeout_work(struct work_struct *work)
+ 
+ 	host->state = STATE_IDLE;
+ 	host->wait_for = MMCIF_WAIT_FOR_REQUEST;
+-	host->data = NULL;
+ 	host->mrq = NULL;
+ 	mmc_request_done(host->mmc, mrq);
+ }
+-- 
+1.7.2.5
 
