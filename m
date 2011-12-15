@@ -1,104 +1,183 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [PATCH V2] mmc: core: Add option to prevent eMMC sleep command
-Date: Thu, 15 Dec 2011 22:50:34 +0530
-Message-ID: <000601ccbb4d$dcefca00$96cf5e00$@org>
-References: <1323941761-24947-1-git-send-email-ulf.hansson@stericsson.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v3 2/4] ARM: pxa168: Add SDHCI support
+Date: Thu, 15 Dec 2011 18:15:36 -0500
+Message-ID: <m2sjklfmuf.fsf@bob.laptop.org>
+References: <87r51fwxgt.fsf@laptop.org>
+	<1321849572-2944-1-git-send-email-tanmay.upadhyay@einfochips.com>
+	<874nxkmaky.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:12663 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759000Ab1LORUj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Dec 2011 12:20:39 -0500
-In-Reply-To: <1323941761-24947-1-git-send-email-ulf.hansson@stericsson.com>
-Content-Language: en-us
+Received: from void.printf.net ([89.145.121.20]:41601 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753413Ab1LOXPz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 15 Dec 2011 18:15:55 -0500
+In-Reply-To: <874nxkmaky.fsf@laptop.org> (Chris Ball's message of "Thu, 01 Dec
+	2011 13:05:33 -0500")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Ulf Hansson' <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>
-Cc: 'Per Forlin' <per.forlin@stericsson.com>, 'Johan Rudholm' <johan.rudholm@stericsson.com>, 'Lee Jones' <lee.jones@linaro.org>
+To: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
+Cc: eric.y.miao@gmail.com, jason.chagas@marvell.com, prakity@marvell.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
+Hi Eric and Jason,
 
+On Thu, Dec 01 2011, Chris Ball wrote:
+> Hi Eric, Jason,
+>
+> Please could you ACK this patch if you agree with it, and I'll take it
+> and the rest of the series via the MMC tree?  Thanks.
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Ulf Hansson
-> Sent: Thursday, December 15, 2011 3:06 PM
-> To: linux-mmc@vger.kernel.org; Chris Ball
-> Cc: Per Forlin; Ulf Hansson; Johan Rudholm; Lee Jones
-> Subject: [PATCH V2] mmc: core: Add option to prevent eMMC sleep command
-> 
-> Host may now use MMC_CAP2_NOSLEEP to disable the use of
-> eMMC sleep/awake command.
-> 
-> This option can be used when you platform have a buggy
-> kernel crash dump software, which is supposed to store
-> the dump on the eMMC, but is not able to wake up the eMMC
-> from sleep state.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
-> Reviewed-by: Hanumath Prasad <hanumath.prasad@stericsson.com>
-> Reviewed-by: Srinidhi Kasagar <srinidhi.kasagar@stericsson.com>
-> ---
-> 
-> Changes in v2:
-> 	- Added some motivation to why this patch is wanted in the
-> 	commit message.
-> 
-> ---
->  drivers/mmc/core/core.c  |    6 ++++++
->  include/linux/mmc/host.h |    1 +
->  2 files changed, 7 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index a2aa860..5a1ce37 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2246,6 +2246,9 @@ int mmc_card_awake(struct mmc_host *host)
->  {
->  	int err = -ENOSYS;
-> 
-> +	if (host->caps2 & MMC_CAP2_NOSLEEP)
-> +		return 0;
-> +
->  	mmc_bus_get(host);
-> 
->  	if (host->bus_ops && !host->bus_dead && host->bus_ops->awake)
-> @@ -2261,6 +2264,9 @@ int mmc_card_sleep(struct mmc_host *host)
->  {
->  	int err = -ENOSYS;
-> 
-> +	if (host->caps2 & MMC_CAP2_NOSLEEP)
-> +		return 0;
-> +
->  	mmc_bus_get(host);
-> 
->  	if (host->bus_ops && !host->bus_dead && host->bus_ops->sleep)
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 9a03d03..d07fb27 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -242,6 +242,7 @@ struct mmc_host {
->  #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
->  #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff
-> supported */
->  #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads
-> don't work */
-> +#define MMC_CAP2_NOSLEEP	(1 << 4)	/* Don't allow sleep command
+Ping?
 
-Can we rename this CAP to something like "MMC_CAP2_NO_MMC_SLEEP_CMD" to make
-it more specific?
+Thanks,
 
-> */
-> 
->  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->  	unsigned int        power_notify_type;
-> --
-> 1.7.5.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+- Chris.
 
+> On Sun, Nov 20 2011, Tanmay Upadhyay wrote:
+>> v2 - clock register for SDHCI are not common across all MMP SoCs.
+>>      So, move PXA168 implementation to pxa168.c
+>>
+>> v3 - sdhci-pxav1 driver code is merged with sdhci-pxav2. So, change
+>>      the device name accordingly
+>>    - start sdhci device numbering from 1 as other PXA168 devices
+>>      does that
+>>
+>> Signed-off-by: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
+>> Reviewed-by: Philip Rakity <prakity@marvell.com>
+>> ---
+>>  arch/arm/mach-mmp/include/mach/pxa168.h |   20 +++++++++++++
+>>  arch/arm/mach-mmp/pxa168.c              |   46 +++++++++++++++++++++++++++++++
+>>  2 files changed, 66 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/arch/arm/mach-mmp/include/mach/pxa168.h b/arch/arm/mach-mmp/include/mach/pxa168.h
+>> index 7fb568d..a181608 100644
+>> --- a/arch/arm/mach-mmp/include/mach/pxa168.h
+>> +++ b/arch/arm/mach-mmp/include/mach/pxa168.h
+>> @@ -15,6 +15,7 @@ extern void pxa168_clear_keypad_wakeup(void);
+>>  #include <plat/pxa27x_keypad.h>
+>>  #include <mach/cputype.h>
+>>  #include <linux/pxa168_eth.h>
+>> +#include <linux/platform_data/pxa_sdhci.h>
+>>  
+>>  extern struct pxa_device_desc pxa168_device_uart1;
+>>  extern struct pxa_device_desc pxa168_device_uart2;
+>> @@ -34,6 +35,10 @@ extern struct pxa_device_desc pxa168_device_nand;
+>>  extern struct pxa_device_desc pxa168_device_fb;
+>>  extern struct pxa_device_desc pxa168_device_keypad;
+>>  extern struct pxa_device_desc pxa168_device_eth;
+>> +extern struct pxa_device_desc pxa168_device_sdh1;
+>> +extern struct pxa_device_desc pxa168_device_sdh2;
+>> +extern struct pxa_device_desc pxa168_device_sdh3;
+>> +extern struct pxa_device_desc pxa168_device_sdh4;
+>>  
+>>  struct pxa168_usb_pdata {
+>>  	/* If NULL, default phy init routine for PXA168 would be called */
+>> @@ -132,4 +137,19 @@ static inline int pxa168_add_eth(struct pxa168_eth_platform_data *data)
+>>  {
+>>  	return pxa_register_device(&pxa168_device_eth, data, sizeof(*data));
+>>  }
+>> +
+>> +static inline int pxa168_add_sdh(int id, struct sdhci_pxa_platdata *data)
+>> +{
+>> +	struct pxa_device_desc *d = NULL;
+>> +
+>> +	switch (id) {
+>> +	case 1: d = &pxa168_device_sdh1; break;
+>> +	case 2: d = &pxa168_device_sdh2; break;
+>> +	case 3: d = &pxa168_device_sdh3; break;
+>> +	case 4: d = &pxa168_device_sdh4; break;
+>> +	default:
+>> +		return -EINVAL;
+>> +	}
+>> +	return pxa_register_device(d, data, sizeof(*data));
+>> +}
+>>  #endif /* __ASM_MACH_PXA168_H */
+>> diff --git a/arch/arm/mach-mmp/pxa168.c b/arch/arm/mach-mmp/pxa168.c
+>> index 76ca15c..102f65f 100644
+>> --- a/arch/arm/mach-mmp/pxa168.c
+>> +++ b/arch/arm/mach-mmp/pxa168.c
+>> @@ -45,6 +45,14 @@ static struct mfp_addr_map pxa168_mfp_addr_map[] __initdata =
+>>  
+>>  #define APMASK(i)	(GPIO_REGS_VIRT + BANK_OFF(i) + 0x09c)
+>>  
+>> +/* Offset defined in arch/arm/mach-mmp/include/mach/regs-apmu.h are for MMP2
+>> + * PXA168 has different offset */
+>> +#undef APMU_SDH2
+>> +#undef APMU_SDH3
+>> +
+>> +#define APMU_SDH2	APMU_REG(0xe0)
+>> +#define APMU_SDH3	APMU_REG(0xe4)
+>> +
+>>  static void __init pxa168_init_gpio(void)
+>>  {
+>>  	int i;
+>> @@ -65,6 +73,31 @@ void __init pxa168_init_irq(void)
+>>  	pxa168_init_gpio();
+>>  }
+>>  
+>> +static void sdh_clk_enable(struct clk *clk)
+>> +{
+>> +	void __iomem *clk_reg_offset = clk->clk_rst;
+>> +
+>> +	/* Can't see any clean way to do this: Bits 3 & 0 in registers
+>> +	 * for host 0 & 2 should be set for host 1 & 3 also */
+>> +	if (clk_reg_offset == APMU_SDH0 || clk_reg_offset == APMU_SDH1)
+>> +		__raw_writel(__raw_readl(APMU_SDH0) | 0x9, APMU_SDH0);
+>> +	if (clk_reg_offset == APMU_SDH2 || clk_reg_offset == APMU_SDH3)
+>> +		__raw_writel(__raw_readl(APMU_SDH2) | 0x9, APMU_SDH2);
+>> +
+>> +	__raw_writel(__raw_readl(clk->clk_rst) | clk->enable_val, clk->clk_rst);
+>> +}
+>> +
+>> +static void sdh_clk_disable(struct clk *clk)
+>> +{
+>> +	__raw_writel(__raw_readl(clk->clk_rst) & ~(clk->enable_val),
+>> +			clk->clk_rst);
+>> +}
+>> +
+>> +struct clkops sdh_clk_ops = {
+>> +	.enable		= sdh_clk_enable,
+>> +	.disable	= sdh_clk_disable,
+>> +};
+>> +
+>>  /* APB peripheral clocks */
+>>  static APBC_CLK(uart1, PXA168_UART1, 1, 14745600);
+>>  static APBC_CLK(uart2, PXA168_UART2, 1, 14745600);
+>> @@ -87,6 +120,11 @@ static APMU_CLK(lcd, LCD, 0x7f, 312000000);
+>>  static APMU_CLK(eth, ETH, 0x09, 0);
+>>  static APMU_CLK(usb, USB, 0x12, 0);
+>>  
+>> +static APMU_CLK_OPS(sdh1, SDH0, 0x12, 48000000, &sdh_clk_ops);
+>> +static APMU_CLK_OPS(sdh2, SDH1, 0x12, 48000000, &sdh_clk_ops);
+>> +static APMU_CLK_OPS(sdh3, SDH2, 0x12, 48000000, &sdh_clk_ops);
+>> +static APMU_CLK_OPS(sdh4, SDH3, 0x12, 48000000, &sdh_clk_ops);
+>> +
+>>  /* device and clock bindings */
+>>  static struct clk_lookup pxa168_clkregs[] = {
+>>  	INIT_CLKREG(&clk_uart1, "pxa2xx-uart.0", NULL),
+>> @@ -108,6 +146,10 @@ static struct clk_lookup pxa168_clkregs[] = {
+>>  	INIT_CLKREG(&clk_keypad, "pxa27x-keypad", NULL),
+>>  	INIT_CLKREG(&clk_eth, "pxa168-eth", "MFUCLK"),
+>>  	INIT_CLKREG(&clk_usb, "pxa168-ehci", "PXA168-USBCLK"),
+>> +	INIT_CLKREG(&clk_sdh1, NULL, "PXA-SDHCLK"),
+>> +	INIT_CLKREG(&clk_sdh2, NULL, "PXA-SDHCLK"),
+>> +	INIT_CLKREG(&clk_sdh3, NULL, "PXA-SDHCLK"),
+>> +	INIT_CLKREG(&clk_sdh4, NULL, "PXA-SDHCLK"),
+>>  };
+>>  
+>>  static int __init pxa168_init(void)
+>> @@ -173,6 +215,10 @@ PXA168_DEVICE(ssp5, "pxa168-ssp", 4, SSP5, 0xd4021000, 0x40, 60, 61);
+>>  PXA168_DEVICE(fb, "pxa168-fb", -1, LCD, 0xd420b000, 0x1c8);
+>>  PXA168_DEVICE(keypad, "pxa27x-keypad", -1, KEYPAD, 0xd4012000, 0x4c);
+>>  PXA168_DEVICE(eth, "pxa168-eth", -1, MFU, 0xc0800000, 0x0fff);
+>> +PXA168_DEVICE(sdh1, "sdhci-pxav2", 0, SDH1, 0xd4280000, 0x100);
+>> +PXA168_DEVICE(sdh2, "sdhci-pxav2", 1, SDH1, 0xd4281000, 0x100);
+>> +PXA168_DEVICE(sdh3, "sdhci-pxav2", 2, SDH2, 0xd427e000, 0x100);
+>> +PXA168_DEVICE(sdh4, "sdhci-pxav2", 3, SDH2, 0xd427f000, 0x100);
+>>  
+>>  struct resource pxa168_usb_host_resources[] = {
+>>  	/* USB Host conroller register base */
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
