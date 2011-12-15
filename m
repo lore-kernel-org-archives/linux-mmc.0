@@ -1,92 +1,122 @@
-From: Bing Zhao <bzhao@marvell.com>
-Subject: RE: [PATCH] mmc/sdio: don't allow interface to runtime-suspend
- until probe is finished.
-Date: Wed, 14 Dec 2011 23:35:03 -0800
-Message-ID: <477F20668A386D41ADCC57781B1F704308185E330B@SC-VEXCH1.marvell.com>
-References: <20111205125416.6093ecd8@notabene.brown>
- <CAK=Wgbb-6eV6aDxTdi3qFLZmu0cHSZvHRUpUEr3YQ=4tO5sCPw@mail.gmail.com>
- <20111206060654.0e8bebe0@notabene.brown>
- <CAK=WgbbqgAYZ8uurf+xVyCxfZxoHcLdytxzdUNtoP9VNYPd57A@mail.gmail.com>
- <20111210181546.6da7099a@notabene.brown>
- <CAK=WgbbZU=NJupPCeXfy5WcFCvzoCgmcf5HPWUEFaHMwLLCWJg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH V2 2/2] mmc: Minimize resume-time by deferring resume
+Date: Thu, 15 Dec 2011 10:22:41 +0100
+Message-ID: <4EE9BC61.7080705@stericsson.com>
+References: <1323875170-7103-1-git-send-email-ulf.hansson@stericsson.com>	<1323875170-7103-3-git-send-email-ulf.hansson@stericsson.com>	<CAMJBoFNU_+Ah8oxXy2Smr5L5oZ4wjZ1m8v6sp-kVcxgk4kYmNg@mail.gmail.com>	<4EE8C0C0.6010307@stericsson.com>	<CAMJBoFM9v9ugDL8gtNJ+AMCKmvOsUQHEmEf13VDXko41AkFfFA@mail.gmail.com>	<CAMJBoFPcBzezFDRXpL36zJZTttGgUFzDCUaFC69Pxg+gEWcAOw@mail.gmail.com>	<4EE8D23E.8030000@stericsson.com> <CAMJBoFPSEtM1rQ7Rq8d+Y6Qgd_GKq2o4p=vk60wZdbJ_Mhk_Gw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:50186 "EHLO
-	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751787Ab1LOHgw convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 15 Dec 2011 02:36:52 -0500
-In-Reply-To: <CAK=WgbbZU=NJupPCeXfy5WcFCvzoCgmcf5HPWUEFaHMwLLCWJg@mail.gmail.com>
-Content-Language: en-US
+Received: from eu1sys200aog115.obsmtp.com ([207.126.144.139]:47869 "EHLO
+	eu1sys200aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752934Ab1LOJZO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Dec 2011 04:25:14 -0500
+In-Reply-To: <CAMJBoFPSEtM1rQ7Rq8d+Y6Qgd_GKq2o4p=vk60wZdbJ_Mhk_Gw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ohad Ben-Cohen <ohad@wizery.com>, NeilBrown <neilb@suse.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Daniel Drake <dsd@laptop.org>, Joe Woodward <jw@terrafix.co.uk>, Chris Ball <cjb@laptop.org>
+To: Vitaly Wool <vitalywool@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi Ohad,
+Hi Vitaly,
 
-> > =A0But shortly there after the extra tracing I put in shows that mm=
-c_power_off
-> > =A0is called,
->=20
-> Probably right after libertas' if_sdio_probe() returns ?
->=20
-> > then mmc_sdio_power_restore calls mmc_send_io_op_cond
->=20
-> Is that as a result of libertas' if_sdio_power_restore() being called
-> (i.e. someone/something called 'ifconfig up') ?
->=20
-> > which again
-> > =A0returns -110, but now it isn't a problem and the wifi chip keeps=
- working.
->=20
-> if_sdio_power_restore doesn't check the return value of
-> pm_runtime_get_sync, so it won't error out, but I wonder how come the
-> chip still works.
->=20
-> > =A0So maybe the fact that we error-out in the first case is a probl=
-em??
->=20
-> It might be nice if Marvell could comment on this, though we can
-> probably empirically deduce this too.
+Vitaly Wool wrote:
+> 
+> On Wed, Dec 14, 2011 at 5:43 PM, Ulf Hansson
+> <ulf.hansson@stericsson.com<mailto:ulf.hansson@stericsson.com>>
+> wrote:
+> 
+> So in fact instead of decreasing time-to-userspace for resume, you
+> are rather going to increase it in this case.
+> 
+> Nope, not true. :-)
+> 
+> Somewhere you need to handle the resume. Earlier it was done
+> immediately when getting the resume request, thus every host resume
+> in the sequence is added to the total time for userspace to be
+> resumed.
+> 
+> I did some measurement, having two eMMC connected (one of them with a
+> root file system mounted) and one rather good SD-card with VFAT. The
+> resume time for the kernel before these patches were around 600 ms.
+> After my patches I had around 20 ms.
+> 
+> What do you call "resume time" in this case?
 
-We will get CMD5 R4 only after a PDn (power down line) or RESETn (reset=
- line) toggling.
+Total kernel resume time.
 
-Was it timed out on CMD5 or CMD52? The 2nd enumeration will result CMD5=
- timeout if SD8686 has been initialized (with CMD5,5,3,7 sequence) alre=
-ady. The 2nd CMD5 timeout should not cause any side effect though.
+> 
+> 
+> Moreover, I noticed very seldom than any mmc/sd request arrived
+> within the time were the deferred resumed has not been done. Of
+> course this will very much depend on what kind of userspace
+> application that is running and if there is an ongoing file transfer
+> that were frozen when doing suspend.
+> 
+> ...or  the wakeup source was the userspace alarm etc. etc.
+> 
+> 
+> But, if this happens (deferred resume not done), the total resume
+> time for that particular userspace application will anyway be heavily
+> decreased since the other hosts resume time did not affect the resume
+> time for this application.
+> 
+> I take that by "other hosts" you mean SD card? :)
 
->=20
-> > =A0I found that if I pull the reset line down and then let it back =
-up then it
-> > =A0all works.
->=20
-> Nice. Joe, did this work out for you too ?
->=20
-> > So I have run out of ideas. =A0I can make it work by reseting the c=
-hip during
-> > mmc_power_up but I have no idea what is causing the chip to need a =
-reset.
->=20
-> I wonder why the sdio reset command isn't helpful for you - it did
-> seem to resolve some issues for Daniel. Maybe you have two different
-> hardware revisions of the 8686 which behave differently in this
-> respect ?
+"Other hosts", are all those hosts holding an eMMC/MMC or an SD-card,
+but not that host that there were a request for, before the deferred
+resume has finalized.
 
-CMD52 Card Reset (writing bit3=3D1 to CCCR 0x06) may not reset the SD86=
-86 properly for some systems. The reliable way to reset SD8686 is via R=
-ESETn toggling.
+> 
+> 
+> -be async (e. g. start card resume process in resume routine, set
+> atomic, return success and have wait_event_interruptible_timeout in
+> block_rq if this atomic is set).
+> 
+> Don't follow you. This is exactly what the patch is doing. Not just
+> for SD, but also for (e)MMC. I don't see your issue.
+> 
+> The issue is  that in most cases when you have a root filesystem on
+> the eMMC, block request will come in less than 3 seconds and this
+> application will have to wait. You don't spawn resume immediately.
+> 
+> Also, how about race conditions resuming say SD and eMMC at the same
+> time?
 
-Regards,
-Bing
+One host holds one card. One card has one blkdev thread/queue. Resume is
+done for each host separate, no such thing as race can ever occur, I
+believe.
 
->=20
-> > However for now I think I'll go with my 'remux' hack.
->=20
-> Feel free to post it so we can take a look.
->=20
-> Thanks,
-> Ohad.
+> 
+> 
+> Anyway, in fact this patch is only addressing SD card case as of now
+> which can be covered by runtime PM.
+> 
+> Nope, both SD and (e)MMC. How can runtime PM solve a normal suspend?
+> It has noting to do we each other I believe.
+> 
+> SD card may not be resumed on system resume if it was runtime
+> suspended before system suspend. That basically covers your case,
+> doesn't it?
+
+Don't quite follow you. Right now SDIO is the only type of card that
+make use of runtime PM, which means mmc_power_save|restore_host could
+potentially be executed for SDIO cards.
+
+Do you mean that we should implement this for SD cards as well?
+
+Anyway, I don't understand what this should prevent a resume from being
+executed for SD/SDIO/(e)MMC at all?
+
+Please elaborate.
+
+> 
+> ~Vitaly
+> 
+
+Please try to in-line comments, it will make it easier to follow the
+discussion.
+
+
+Br
+Ulf Hansson
+
