@@ -1,108 +1,91 @@
 From: Saugata Das <saugata.das@linaro.org>
-Subject: Re: [PATCH V2] mmc: core: Add host capability check for power class
-Date: Thu, 15 Dec 2011 15:34:31 +0530
-Message-ID: <CAKLKtzc4HDmqStQhn_J6GZxdZ0vE_vb7=+xq+oEHqp6QxYDxsg@mail.gmail.com>
-References: <1323921517-31241-1-git-send-email-girish.shivananjappa@linaro.org>
+Subject: Re: Cache Control during mmc_suspend_host
+Date: Thu, 15 Dec 2011 15:38:25 +0530
+Message-ID: <CAKLKtzfQZrcG330Zf4EXx6rtZ6LZpxzpKnq5=z=fXOO1gZdvSg@mail.gmail.com>
+References: <CAKLKtzej1VpD41GwBOoNv_51fPqMHMySViptjk6im_mSkSws9A@mail.gmail.com>
+	<000f01ccb960$42ac2a40$c8047ec0$%jun@samsung.com>
+	<CAKLKtzdWzhJTy2KjCOsUs6rtf5Uec2vHoQ3Wkex6nfmhT01T+w@mail.gmail.com>
+	<002f01ccba19$9c2bd9d0$d4838d70$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1323921517-31241-1-git-send-email-girish.shivananjappa@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, subhashj@codeaurora.org, Chris Ball <cjb@laptop.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ww0-f42.google.com ([74.125.82.42]:49471 "EHLO
+	mail-ww0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932426Ab1LOKI0 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Dec 2011 05:08:26 -0500
+Received: by wgbds13 with SMTP id ds13so840096wgb.1
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Dec 2011 02:08:25 -0800 (PST)
+In-Reply-To: <002f01ccba19$9c2bd9d0$d4838d70$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org
 
-On 15 December 2011 09:28, Girish K S <girish.shivananjappa@linaro.org>=
- wrote:
-> This patch adds a check whether the host supports maximum current val=
-ue
-> obtained from the device's extended csd register for a selected inter=
-face
-> voltage and frequency.
->
-> cc: Chris Ball <cjb@laptop.org>
-> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
-> ---
-> Changes in v2:
-> =A0 =A0 =A0 =A0deleted a unnecessary if else condition identified by =
-subhash J
-> Changes in v1:
-> =A0 =A0 =A0 reduced the number of comparisons as per Hein's suggestio=
-n
->
-> =A0drivers/mmc/core/mmc.c =A0 | =A0 19 +++++++++++++++++++
-> =A0include/linux/mmc/card.h | =A0 =A04 ++++
-> =A02 files changed, 23 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 006e932..b9ef777 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -688,6 +688,25 @@ static int mmc_select_powerclass(struct mmc_card=
- *card,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pwrclass_val =3D (pwrclass_val & EXT_C=
-SD_PWR_CL_4BIT_MASK) >>
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_CS=
-D_PWR_CL_4BIT_SHIFT;
->
-> + =A0 =A0 =A0 if (pwrclass_val >=3D MMC_MAX_CURRENT_800)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT_800;
-> + =A0 =A0 =A0 else if (pwrclass_val >=3D MMC_MAX_CURRENT_600)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT_600;
-> + =A0 =A0 =A0 else if (pwrclass_val >=3D MMC_MAX_CURRENT_400)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT_400;
-> + =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT_200;
-> +
-> + =A0 =A0 =A0 if ((pwrclass_val =3D=3D MMC_MAX_CURRENT_800) &&
-> + =A0 =A0 =A0 =A0 =A0 !(card->host->caps & MMC_CAP_MAX_CURRENT_800))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT_600;
-> + =A0 =A0 =A0 if ((pwrclass_val =3D=3D MMC_MAX_CURRENT_600) &&
-> + =A0 =A0 =A0 =A0 =A0 !(card->host->caps & MMC_CAP_MAX_CURRENT_600))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT_400;
-> + =A0 =A0 =A0 if ((pwrclass_val =3D=3D MMC_MAX_CURRENT_400) &&
-> + =A0 =A0 =A0 =A0 =A0 !(card->host->caps & MMC_CAP_MAX_CURRENT_400))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT_200;
-> +
-> =A0 =A0 =A0 =A0/* If the power class is different from the default va=
-lue */
-> =A0 =A0 =A0 =A0if (pwrclass_val > 0) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(card, EXT_CSD_CMD_S=
-ET_NORMAL,
+On 14 December 2011 10:04, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> Saugata Das wrote:
+>> On 13 December 2011 11:57, Seungwon Jeon <tgih.jun@samsung.com> wrot=
+e:
+>> > Hi Saugata,
+>> >
+>> > Saugata Das wrote:
+>> >> Hi Seungwon Jeon
+>> >>
+>> >> I see a small issue with the implementation mmc_suspend_host,
+>> >>
+>> >> int mmc_suspend_host(struct mmc_host *host)
+>> >> {
+>> >> .....
+>> >> =A0 =A0 =A0 err =3D mmc_cache_ctrl(host, 0);
+>> >> }
+>> >>
+>> >> So, within mmc_suspend_host we are disabling the cache. But I do =
+not
+>> >> see a corresponding enabling of cache within mmc_resume_host. I
+>> >> suggest we have either enabling of cache within mmc_resume_host o=
+r
+>> >> within mmc_suspend_host, we replace mmc_cache_ctrl(host, 0) with =
+the
+>> >> flush operation, mmc_flush_cache(host->card).
+>> >>
+>> > Currently,
+>> > Cache is enabled in mmc_init_card() during mmc_resume_host().
+>> >
+>> Thanks for your answer.
+>>
+>> If mmc_card_keep_power is TRUE, then do you know why from mmc_resume
+>> we call mmc_init_card instead of just mmc_awake which should reduce
+>> some latency of system wakeup ?
+>>
+> I didn't find that case of keeping the power
+> during sleep in mmc unlike sdio.
 
-It is not allowed to set the POWER_CLASS with any value other than
-what is mentioned in the PWR_CL_ff_vvv or PWR_CL_DDR_ff_vvv  for the
-corresponding frequency, voltage. That is, if PWR_CL_200_195 is 14 and
-we want to operate at HS200 then the only value allowed for
-POWER_CLASS is 14. So, we need to check the PWR_CL numbers and choose
-the operating mode (HS200/DDR50/..) based on the platform capability
-to support the current consumption and set the corresponding
-POWER_CLASS value.
+I am talking about keeping VCCQ ON and switching OFF only VCC. This is
+normally the SLEEP mode of eMMC, which provides quicker wakeup or
+resume. Some platforms will like to have quicker resume and will like
+to avoid doing a mmc_init_card during resume. If that happens, then
+the cache control disabling from mmc_suspend_host will be a problem.
+So, I suggest we change that to mmc_flush_cache which logically does
+the same as  you wanted but it is also future proof.
 
-Please refer to section 6.6.5 of the 4.5 spec.
-
-
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 9478a6b..c5e031a 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -195,6 +195,10 @@ struct mmc_part {
-> =A0#define MMC_BLK_DATA_AREA_GP =A0 (1<<2)
-> =A0};
 >
-> +#define MMC_MAX_CURRENT_200 =A0 =A0(0)
-> +#define MMC_MAX_CURRENT_400 =A0 =A0(7)
-> +#define MMC_MAX_CURRENT_600 =A0 =A0(11)
-> +#define MMC_MAX_CURRENT_800 =A0 =A0(13)
-> =A0/*
-> =A0* MMC device
-> =A0*/
-> --
-> 1.7.1
+>>
+>> > Thanks,
+>> > Seungwon Jeon.
+>> >>
+>> >>
+>> >> Regards
+>> >> Saugata
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe linux-m=
+mc" in
+>> >> the body of a message to majordomo@vger.kernel.org
+>> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.h=
+tml
+>> >
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
