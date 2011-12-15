@@ -1,72 +1,101 @@
 From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [PATCH] mmc: core: Fix voltage select in DDR mode
-Date: Thu, 15 Dec 2011 22:36:30 +0530
-Message-ID: <000001ccbb4b$e65ce250$b316a6f0$@org>
-References: <1323950262-2160-1-git-send-email-girish.shivananjappa@linaro.org>
+Subject: RE: [PATCH V2] mmc: core: Add option to prevent eMMC sleep command
+Date: Thu, 15 Dec 2011 22:50:34 +0530
+Message-ID: <000601ccbb4d$dcefca00$96cf5e00$@org>
+References: <1323941761-24947-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
 	charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:13852 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756323Ab1LORGf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Dec 2011 12:06:35 -0500
-In-Reply-To: <1323950262-2160-1-git-send-email-girish.shivananjappa@linaro.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:12663 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759000Ab1LORUj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Dec 2011 12:20:39 -0500
+In-Reply-To: <1323941761-24947-1-git-send-email-ulf.hansson@stericsson.com>
 Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Girish K S' <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org
-Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, 'Philip Rakity' <prakity@marvell.com>, 'Arindam Nath' <arindam.nath@amd.com>, 'Chris Ball' <cjb@laptop.org>
+To: 'Ulf Hansson' <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>
+Cc: 'Per Forlin' <per.forlin@stericsson.com>, 'Johan Rudholm' <johan.rudholm@stericsson.com>, 'Lee Jones' <lee.jones@linaro.org>
 
 
 
 > -----Original Message-----
 > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Girish K S
-> Sent: Thursday, December 15, 2011 5:28 PM
-> To: linux-mmc@vger.kernel.org
-> Cc: patches@linaro.org; linux-samsung-soc@vger.kernel.org; Girish K S;
-> Philip Rakity; Arindam Nath; Chris Ball
-> Subject: [PATCH] mmc: core: Fix voltage select in DDR mode
+> owner@vger.kernel.org] On Behalf Of Ulf Hansson
+> Sent: Thursday, December 15, 2011 3:06 PM
+> To: linux-mmc@vger.kernel.org; Chris Ball
+> Cc: Per Forlin; Ulf Hansson; Johan Rudholm; Lee Jones
+> Subject: [PATCH V2] mmc: core: Add option to prevent eMMC sleep command
 > 
-> This patch fixes the wrong comparison before setting the interface
-> voltage in DDR mode.
+> Host may now use MMC_CAP2_NOSLEEP to disable the use of
+> eMMC sleep/awake command.
 > 
-> The assignment to the variable ddr before comaprison is either
-> ddr = MMC_1_2V_DDR_MODE; or ddr == MMC_1_8V_DDR_MODE. But the
-> comparison
-> is done wth the extended csd value if (ddr ==
-> EXT_CSD_CARD_TYPE_DDR_1_2V)
+> This option can be used when you platform have a buggy
+> kernel crash dump software, which is supposed to store
+> the dump on the eMMC, but is not able to wake up the eMMC
+> from sleep state.
 > 
-> cc: Philip Rakity <prakity@marvell.com>
-> cc: Arindam Nath <arindam.nath@amd.com>
-> cc: Chris Ball <cjb@laptop.org>
-> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+> Reviewed-by: Hanumath Prasad <hanumath.prasad@stericsson.com>
+> Reviewed-by: Srinidhi Kasagar <srinidhi.kasagar@stericsson.com>
 > ---
->  drivers/mmc/core/mmc.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
 > 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 006e932..f0a9f1f 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1058,7 +1058,7 @@ static int mmc_init_card(struct mmc_host *host,
-> u32 ocr,
->  			 *
->  			 * WARNING: eMMC rules are NOT the same as SD DDR
->  			 */
-> -			if (ddr == EXT_CSD_CARD_TYPE_DDR_1_2V) {
-> +			if (ddr == MMC_1_2V_DDR_MODE) {
+> Changes in v2:
+> 	- Added some motivation to why this patch is wanted in the
+> 	commit message.
+> 
+> ---
+>  drivers/mmc/core/core.c  |    6 ++++++
+>  include/linux/mmc/host.h |    1 +
+>  2 files changed, 7 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index a2aa860..5a1ce37 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2246,6 +2246,9 @@ int mmc_card_awake(struct mmc_host *host)
+>  {
+>  	int err = -ENOSYS;
+> 
+> +	if (host->caps2 & MMC_CAP2_NOSLEEP)
+> +		return 0;
+> +
+>  	mmc_bus_get(host);
+> 
+>  	if (host->bus_ops && !host->bus_dead && host->bus_ops->awake)
+> @@ -2261,6 +2264,9 @@ int mmc_card_sleep(struct mmc_host *host)
+>  {
+>  	int err = -ENOSYS;
+> 
+> +	if (host->caps2 & MMC_CAP2_NOSLEEP)
+> +		return 0;
+> +
+>  	mmc_bus_get(host);
+> 
+>  	if (host->bus_ops && !host->bus_dead && host->bus_ops->sleep)
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 9a03d03..d07fb27 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -242,6 +242,7 @@ struct mmc_host {
+>  #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
+>  #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff
+> supported */
+>  #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads
+> don't work */
+> +#define MMC_CAP2_NOSLEEP	(1 << 4)	/* Don't allow sleep command
 
-Looks fine. 
-Acked-by: Subhash Jadavani <subhashj@codeaurora.org>
+Can we rename this CAP to something like "MMC_CAP2_NO_MMC_SLEEP_CMD" to make
+it more specific?
 
->  				err = mmc_set_signal_voltage(host,
->  					MMC_SIGNAL_VOLTAGE_120, 0);
->  				if (err)
+> */
+> 
+>  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+>  	unsigned int        power_notify_type;
 > --
-> 1.7.1
+> 1.7.5.4
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
