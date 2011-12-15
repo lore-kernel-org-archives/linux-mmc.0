@@ -1,110 +1,123 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH/RFC] mmc: add a device PM QoS constraint when a host is first claimed
-Date: Wed, 14 Dec 2011 22:36:26 +0100
-Message-ID: <201112142236.26739.rjw@sisk.pl>
-References: <Pine.LNX.4.64.1112121642080.10378@axis700.grange> <201112141115.00945.rjw@sisk.pl> <4EE8849D.1010401@stericsson.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH 3/4 v5] SDHCI: add sdhci_get_cd callback to detect the
+ card
+Date: Thu, 15 Dec 2011 02:32:28 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F11646CFB@039-SN1MPN1-006.039d.mgd.msft.net>
+References: <1323829093-29655-1-git-send-email-r66093@freescale.com>
+ <144B2D54-4027-4815-833F-C5D91626382B@marvell.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <4EE8849D.1010401@stericsson.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:16400
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758438Ab1LOCcd convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 14 Dec 2011 21:32:33 -0500
+In-Reply-To: <144B2D54-4027-4815-833F-C5D91626382B@marvell.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
-On Wednesday, December 14, 2011, Ulf Hansson wrote:
+
+
+> -----Original Message-----
+> From: Philip Rakity [mailto:prakity@marvell.com]
+> Sent: Wednesday, December 14, 2011 12:52 PM
+> To: Huang Changming-R66093
+> Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093; Chris Ball
+> Subject: Re: [PATCH 3/4 v5] SDHCI: add sdhci_get_cd callback to detect
+> the card
 > 
-> >> You have a point. But I am not convinced. :-)
-> >>
-> >> Some host drivers already make use of autosuspend. I think this is most 
-> >> straightforward solution to this problem right now.
-> > 
-> > The problem is not about _when_ to suspend (which autosuspend is about),
-> > but _what_ _state_ to go when suspended.  That's quite a different issue.
 > 
-> I was kind of taking a more simple approach, I were considering 
-> runtime_suspend as _one_ state. Right now there is no host driver having 
-> different levels of runtime_suspend state, if I am correct. But ofcourse 
-> that could be the future.
-
-Yes, there is, or more precisely there's going to be shortly.  We have
-PM domains on SH7372 and when we enable all of them to be powered off
-at run time, there will be many power states for the controller which
-is located in one of them.  Hence the $subject patch. :-)
-
-> Moreover, I definitely do not think that a fixed timeout of 100us is 
-> applicable for all use cases, this must at least be configurable.
-
-Well, this isn't a timeout.  Have you read my reply to Linus?
-
-I agree that it should be configurable _eventually_, but no one seems to
-know how to implement that configurability.  Ideally, that value should
-result from some user space input, possibly after a conversion by the
-driver to a useful number, but we don't seem to have any agreement as to
-what the interface for passing that user space input to the driver should
-look like.
-
-> >> However, we could also do pm_runtime_get_sync of the host device in 
-> >> claim host and vice verse in release host, thus preventing the host 
-> >> driver from triggering runtime_suspend|resume for every request. Though, 
-> >> I am not 100% sure this is really what you want either.
-> > 
-> > No, I don't want that.  I want the device to be suspended when possible,
-> > but I don't want that to cause the system to go into an overly deep power
-> > state as a result.
+> On Dec 13, 2011, at 6:18 PM, <r66093@freescale.com> wrote:
 > 
-> Before just skipping my proposal, I think you should know some more 
-> background to why I suggested this:
+> > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> >
+> > Add callback function sdhci_get_cd to detect the card.
+> > And one new callback added to implement the card detect in sdhci
+> struncture.
+> > If special platform has the card detect callback, it will return the
+> > card state, the value zero is for absent cardi and one is for present
+> card.
+> > If the controller don't support card detect, sdhci_get_cd will return -
+> ENOSYS.
+> >
+> > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> > CC: Chris Ball <cjb@laptop.org>
+> > ---
+> > changes for v2:
+> > 	- when controller don't support get_cd, return -ENOSYS
+> > 	- add new callback for sdhci to detect the card
+> > 	- add the CC
+> > changes for v3:
+> > 	- use pin_lock only when get_cd defined changes for v4:
+> > 	- enalbe the controller clock in platform, instead of core changes
+> > for v5:
+> > 	- remove the copyright
+> >
+> > drivers/mmc/host/sdhci.c |   21 ++++++++++++++++++++++
+> > drivers/mmc/host/sdhci.h |    2 ++
+> > 2 files changed, 23 insertions(+), 0 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
+> > 6d8eea3..fbe2f46 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -1518,6 +1519,26 @@ static int sdhci_get_ro(struct mmc_host *mmc)
+> > 	return ret;
+> > }
+> >
+> > +/* Return values for the sdjco_get_cd callback:
+> > + *   0 for a absent card
+> > + *   1 for a present card
+> > + *   -ENOSYS when not supported (equal to NULL callback)
+> > + */
+> > +static int sdhci_get_cd(struct mmc_host *mmc) {
+> > +	struct sdhci_host *host = mmc_priv(mmc);
+> > +	unsigned long flags;
+> > +	int present = -ENOSYS;
+> > +
+> > +	if (host->ops->get_cd) {
+> > +		spin_lock_irqsave(&host->lock, flags);
+> > +		present = host->ops->get_cd(host);
+> > +		spin_unlock_irqrestore(&host->lock, flags);
+> > +	}
+> > +
+> > +	return present;
+> > +}
 > 
-> 1.
-> mmc_claim_host is using mmc_host_enable, which kind of mean the same 
-> thing for a host driver as doing get_sync. Vice verse for mmc_release_host.
+> In  static void sdhci_request(struct mmc_host *mmc, struct mmc_request
+> *mrq)
 > 
-> 2.
-> When executing mmc/sd commands/requests the host must always be claimed 
-> (and thus the host is always enabled). But more important some mmc/sd 
-> commands must be executed as a sequence, without the host being disabled 
-> in between the commands (since a disable might mean that the clock to 
-> card gets disabled). To solve this, the mmc_claim_host is used, to make 
-> sure the host is enabled during the complete command sequence.
+> there is code below to handle broken card detect.
 > 
-> I happily continue this discussion, to see if someone more can break the 
-> idea about having get_sync in mmc_host_enable. :-)
-
-I'll leave this one to Guennadi, if you don't mind. :-)
-
-> >> Using PM QoS as you propose, might prevent some hosts from doing 
-> >> runtime_suspend|resume completely and thus those might not fulfill power 
-> >> consumption requirements instead.
-> > 
-> > I'm not sure what scenario you have in mind.  Care to elaborate?
+> 1257
+> 1258         /* If polling, assume that the card is always present. */
+> 1259         if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+> 1260                 present = true;
+> 1261         else
+> 1262                 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+> 1263                                 SDHCI_CARD_PRESENT;
 > 
-> Well, suppose a the host drivers start considering the PM QoS 
-> requirement, but never can fulfill the requirement of 100us for it's 
-> runtime_suspend callback function...
-
-OK, that's a valid concern.  This means there should be a way for user space
-to specify the constraint somehow, because it's a user space's role to define
-policies.
-
-> >> I do not think we can take this decision at this level. Is performance more
-> >> important than power save, that is kind of the question.
-> > 
-> > Yes, it is.  Also, the number used here is somewhat arbitrary.
+> The problem with this code is that it assumes broken card detect is
+> broken since the present state register cannot be read.
 > 
-> For you maybe power management is less important, but I doubt everybody 
-> else agree to that. It is a more complex balance I believe.
-
-You're right.
-
-> > However, since no one except for SH7372 is now using device PM QoS, no one
-> > else will be affected by this change at the moment.
+> would it make more sense to do something like
+>         if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) {
+> 		if (host->ops->get_cd)
+> 			present = present = host->ops->get_cd(host);
+> 		else
+> 			present = true;
 > 
-> True, but that is not a good reason for adding more stuff to the mmc core.
+> and adjust the code in host->ops->get_cd() to not -ENOSYS.
 
-Good point.
+I think we should not detect the card present state in sdhci_request function,
+Because if we do it, this detection will be performed with any command to card,
+which will down the performance.
 
-Thanks,
-Rafael
+And if the quirks has SDHCI_QUIRK_BROKEN_CARD_DETECTION, that means the card is always present,
+We don't need to detect the card state.
+
