@@ -1,62 +1,75 @@
-From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
-Subject: Re: [PATCH] mmc: debugfs: parse all ext_csd via debug_fs
-Date: Thu, 15 Dec 2011 14:08:16 +0100
-Message-ID: <4EE9F140.4010505@st.com>
-References: <1319468694-8773-1-git-send-email-peppe.cavallaro@st.com> <CAAgDR1N_CKnXo=G2oTHAShhgegMZF-nMySBuWebDPeu8VTEBKg@mail.gmail.com> <CACRpkda0y7cOR4EfuGLoGnD_PS1gTWqN7UA74=s2mWmEHokQhQ@mail.gmail.com> <4ECA0025.6030700@st.com> <CACRpkda4gf7dpMxzPTjNZZX1mNqS4YMv21w-xC9TFCYot3qRAg@mail.gmail.com> <4EDDAD95.7020500@st.com> <m2vcpkl990.fsf@bob.laptop.org>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH] mmc: core: Fix voltage select in DDR mode
+Date: Thu, 15 Dec 2011 22:36:30 +0530
+Message-ID: <000001ccbb4b$e65ce250$b316a6f0$@org>
+References: <1323950262-2160-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog106.obsmtp.com ([207.126.144.121]:57211 "EHLO
-	eu1sys200aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751089Ab1LONIe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Dec 2011 08:08:34 -0500
-In-Reply-To: <m2vcpkl990.fsf@bob.laptop.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:13852 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756323Ab1LORGf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Dec 2011 12:06:35 -0500
+In-Reply-To: <1323950262-2160-1-git-send-email-girish.shivananjappa@linaro.org>
+Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Sebastian Rasmussen <sebras@gmail.com>, linux-mmc@vger.kernel.org
+To: 'Girish K S' <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org
+Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, 'Philip Rakity' <prakity@marvell.com>, 'Arindam Nath' <arindam.nath@amd.com>, 'Chris Ball' <cjb@laptop.org>
 
-Hi Chris
 
-On 12/13/2011 5:35 PM, Chris Ball wrote:
-> Hi Peppe,
-> 
-> On Tue, Dec 06 2011, Giuseppe CAVALLARO wrote:
->>> I'm all for this patch so it gets visible in debugfs atleast,
->>> since people seem to need to know these things, so take that as an
->>> Acked-by: Linus Walleij <linus.walleij@linaro.org>
->>>
->>> Those who want to writ userspace tools can proceed to
->>> implement the proper sysfs interfaces and document them.
->>
->> Hello Chris.
->>
->> Sorry if I disturb you, any news about the patch:
->>
->>     mmc: debugfs: parse ext_csd via debug_fs (v2)
->>
->> Reviewed-by Sebastian and Acked-by Linus?
->>
->> Please let me know if I need to do some other work on this or if it can
->> be considered for mmc-next.
-> 
-> I'm still leaning towards doing this in userspace instead -- once we
-> have a userspace binary that can do this I don't think there'll be any
-> reason to keep a debugfs interface for the same thing around, and that
-> tells me that we should just avoid merging the debugfs interface and
-> move to userspace straight away.
-> 
-> I'm hoping to get the userspace tools repository running soon.
 
-that sounds good to me. As soon as the tool is available I'll contribute
-with these changes.
-
-Let me know
-
-Peppe
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Girish K S
+> Sent: Thursday, December 15, 2011 5:28 PM
+> To: linux-mmc@vger.kernel.org
+> Cc: patches@linaro.org; linux-samsung-soc@vger.kernel.org; Girish K S;
+> Philip Rakity; Arindam Nath; Chris Ball
+> Subject: [PATCH] mmc: core: Fix voltage select in DDR mode
 > 
-> Thanks,
+> This patch fixes the wrong comparison before setting the interface
+> voltage in DDR mode.
 > 
-> - Chris.
+> The assignment to the variable ddr before comaprison is either
+> ddr = MMC_1_2V_DDR_MODE; or ddr == MMC_1_8V_DDR_MODE. But the
+> comparison
+> is done wth the extended csd value if (ddr ==
+> EXT_CSD_CARD_TYPE_DDR_1_2V)
+> 
+> cc: Philip Rakity <prakity@marvell.com>
+> cc: Arindam Nath <arindam.nath@amd.com>
+> cc: Chris Ball <cjb@laptop.org>
+> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> ---
+>  drivers/mmc/core/mmc.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 006e932..f0a9f1f 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1058,7 +1058,7 @@ static int mmc_init_card(struct mmc_host *host,
+> u32 ocr,
+>  			 *
+>  			 * WARNING: eMMC rules are NOT the same as SD DDR
+>  			 */
+> -			if (ddr == EXT_CSD_CARD_TYPE_DDR_1_2V) {
+> +			if (ddr == MMC_1_2V_DDR_MODE) {
+
+Looks fine. 
+Acked-by: Subhash Jadavani <subhashj@codeaurora.org>
+
+>  				err = mmc_set_signal_voltage(host,
+>  					MMC_SIGNAL_VOLTAGE_120, 0);
+>  				if (err)
+> --
+> 1.7.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
