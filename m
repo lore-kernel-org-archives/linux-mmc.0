@@ -1,195 +1,120 @@
-From: Paul Walmsley <paul@pwsan.com>
-Subject: [PATCH v2] ARM: OMAP3: hwmod data: disable multiblock reads on MMC1/2
- on OMAP34xx/35xx <= ES2.1
-Date: Fri, 16 Dec 2011 01:04:33 -0700 (MST)
-Message-ID: <alpine.DEB.2.00.1112152346080.12660@utopia.booyaka.com>
-References: <alpine.DEB.2.00.1110061453540.4611@utopia.booyaka.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: Cache Control during mmc_suspend_host
+Date: Fri, 16 Dec 2011 17:50:21 +0900
+Message-ID: <002901ccbbcf$be9b3990$3bd1acb0$%jun@samsung.com>
+References: <CAKLKtzej1VpD41GwBOoNv_51fPqMHMySViptjk6im_mSkSws9A@mail.gmail.com>
+ <000f01ccb960$42ac2a40$c8047ec0$%jun@samsung.com>
+ <CAKLKtzdWzhJTy2KjCOsUs6rtf5Uec2vHoQ3Wkex6nfmhT01T+w@mail.gmail.com>
+ <002f01ccba19$9c2bd9d0$d4838d70$%jun@samsung.com>
+ <CAKLKtzfQZrcG330Zf4EXx6rtZ6LZpxzpKnq5=z=fXOO1gZdvSg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=WINDOWS-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from utopia.booyaka.com ([72.9.107.138]:33215 "EHLO
-	utopia.booyaka.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759703Ab1LPIEe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Dec 2011 03:04:34 -0500
-In-Reply-To: <alpine.DEB.2.00.1110061453540.4611@utopia.booyaka.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:28005 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751924Ab1LPIuX convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Dec 2011 03:50:23 -0500
+Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LWA003RSGJ9VFJ0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 16 Dec 2011 17:50:22 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
+ 64bit (built Sep  7 2010)) with ESMTPA id <0LWA00D9WGJX8J80@mmp1.samsung.com>
+ for linux-mmc@vger.kernel.org; Fri, 16 Dec 2011 17:50:21 +0900 (KST)
+In-reply-to: <CAKLKtzfQZrcG330Zf4EXx6rtZ6LZpxzpKnq5=z=fXOO1gZdvSg@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: linux-mmc@vger.kernel.org, Dave Hylands <dhylands@gmail.com>, Steve Sakoman <sakoman@gmail.com>
+To: 'Saugata Das' <saugata.das@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
+Saugata Das wrote:
+> On 14 December 2011 10:04, Seungwon Jeon <tgih.jun@samsung.com> wrote=
+:
+> > Saugata Das wrote:
+> >> On 13 December 2011 11:57, Seungwon Jeon <tgih.jun@samsung.com> wr=
+ote:
+> >> > Hi Saugata,
+> >> >
+> >> > Saugata Das wrote:
+> >> >> Hi Seungwon Jeon
+> >> >>
+> >> >> I see a small issue with the implementation mmc_suspend_host,
+> >> >>
+> >> >> int mmc_suspend_host(struct mmc_host *host)
+> >> >> {
+> >> >> .....
+> >> >> =A0 =A0 =A0 err =3D mmc_cache_ctrl(host, 0);
+> >> >> }
+> >> >>
+> >> >> So, within mmc_suspend_host we are disabling the cache. But I d=
+o not
+> >> >> see a corresponding enabling of cache within mmc_resume_host. I
+> >> >> suggest we have either enabling of cache within mmc_resume_host=
+ or
+> >> >> within mmc_suspend_host, we replace mmc_cache_ctrl(host, 0) wit=
+h the
+> >> >> flush operation, mmc_flush_cache(host->card).
+> >> >>
+> >> > Currently,
+> >> > Cache is enabled in mmc_init_card() during mmc_resume_host().
+> >> >
+> >> Thanks for your answer.
+> >>
+> >> If mmc_card_keep_power is TRUE, then do you know why from mmc_resu=
+me
+> >> we call mmc_init_card instead of just mmc_awake which should reduc=
+e
+> >> some latency of system wakeup ?
+> >>
+> > I didn't find that case of keeping the power
+> > during sleep in mmc unlike sdio.
+>=20
+> I am talking about keeping VCCQ ON and switching OFF only VCC. This i=
+s
+> normally the SLEEP mode of eMMC, which provides quicker wakeup or
+> resume. Some platforms will like to have quicker resume and will like
+> to avoid doing a mmc_init_card during resume. If that happens, then
+> the cache control disabling from mmc_suspend_host will be a problem.
+> So, I suggest we change that to mmc_flush_cache which logically does
+> the same as  you wanted but it is also future proof.
 
-The HSMMC1/HSMMC2 host controllers on OMAP34xx and
-OMAP3503/3515/3525/3530 chips at ES levels prior to 3.0 can't do multiple
-block reads[1].  Mark the hwmod data appropriately.
+Yes.
+Currently mmc can wake up from sleep state using only CMD0 in mmc_init_=
+card.
+If we separate the escape route from sleep state, it must be considered=
+=2E
+Thank you for suggestion.
 
-Reported by Dave Hylands <dhylands@gmail.com> and Steve Sakoman
-<sakoman@gmail.com>.  Thanks to Steve Sakoman for further help
-testing this patch.
-
-1. See for example Advisory 2.1.1.128 "MMC: Multiple Block Read
-   Operation Issue" in _OMAP3530/3525/3515/3503 Silicon Errata_
-   Revision F (October 2010) (SPRZ278F), available from
-   http://focus.ti.com/lit/er/sprz278f/sprz278f.pdf
-
-Signed-off-by: Paul Walmsley <paul@pwsan.com>
-Cc: Dave Hylands <dhylands@gmail.com>
-Cc: Steve Sakoman <sakoman@gmail.com>
----
-
-The first version of this patch caused MMC hwmods to not be registered on 
-36xx/37xx chips.  Thanks to Steve Sakoman for noting this.  This version 
-fixes it - tested on 37xx BeagleBoard.
-
- arch/arm/mach-omap2/omap_hwmod_3xxx_data.c |   94 ++++++++++++++++++++++++++-
- 1 files changed, 90 insertions(+), 4 deletions(-)
-
-diff --git a/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c b/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c
-index 905fc44..27f2fad 100644
---- a/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c
-+++ b/arch/arm/mach-omap2/omap_hwmod_3xxx_data.c
-@@ -3125,7 +3125,35 @@ static struct omap_mmc_dev_attr mmc1_dev_attr = {
- 	.flags = OMAP_HSMMC_SUPPORTS_DUAL_VOLT,
- };
- 
--static struct omap_hwmod omap3xxx_mmc1_hwmod = {
-+/* See 35xx errata 2.1.1.128 in SPRZ278F */
-+static struct omap_mmc_dev_attr mmc1_pre_es3_dev_attr = {
-+	.flags = (OMAP_HSMMC_SUPPORTS_DUAL_VOLT |
-+		  OMAP_HSMMC_BROKEN_MULTIBLOCK_READ),
-+};
-+
-+static struct omap_hwmod omap3xxx_pre_es3_mmc1_hwmod = {
-+	.name		= "mmc1",
-+	.mpu_irqs	= omap34xx_mmc1_mpu_irqs,
-+	.sdma_reqs	= omap34xx_mmc1_sdma_reqs,
-+	.opt_clks	= omap34xx_mmc1_opt_clks,
-+	.opt_clks_cnt	= ARRAY_SIZE(omap34xx_mmc1_opt_clks),
-+	.main_clk	= "mmchs1_fck",
-+	.prcm		= {
-+		.omap2 = {
-+			.module_offs = CORE_MOD,
-+			.prcm_reg_id = 1,
-+			.module_bit = OMAP3430_EN_MMC1_SHIFT,
-+			.idlest_reg_id = 1,
-+			.idlest_idle_bit = OMAP3430_ST_MMC1_SHIFT,
-+		},
-+	},
-+	.dev_attr	= &mmc1_pre_es3_dev_attr,
-+	.slaves		= omap3xxx_mmc1_slaves,
-+	.slaves_cnt	= ARRAY_SIZE(omap3xxx_mmc1_slaves),
-+	.class		= &omap34xx_mmc_class,
-+};
-+
-+static struct omap_hwmod omap3xxx_es3plus_mmc1_hwmod = {
- 	.name		= "mmc1",
- 	.mpu_irqs	= omap34xx_mmc1_mpu_irqs,
- 	.sdma_reqs	= omap34xx_mmc1_sdma_reqs,
-@@ -3168,7 +3196,34 @@ static struct omap_hwmod_ocp_if *omap3xxx_mmc2_slaves[] = {
- 	&omap3xxx_l4_core__mmc2,
- };
- 
--static struct omap_hwmod omap3xxx_mmc2_hwmod = {
-+/* See 35xx errata 2.1.1.128 in SPRZ278F */
-+static struct omap_mmc_dev_attr mmc2_pre_es3_dev_attr = {
-+	.flags = OMAP_HSMMC_BROKEN_MULTIBLOCK_READ,
-+};
-+
-+static struct omap_hwmod omap3xxx_pre_es3_mmc2_hwmod = {
-+	.name		= "mmc2",
-+	.mpu_irqs	= omap34xx_mmc2_mpu_irqs,
-+	.sdma_reqs	= omap34xx_mmc2_sdma_reqs,
-+	.opt_clks	= omap34xx_mmc2_opt_clks,
-+	.opt_clks_cnt	= ARRAY_SIZE(omap34xx_mmc2_opt_clks),
-+	.main_clk	= "mmchs2_fck",
-+	.prcm		= {
-+		.omap2 = {
-+			.module_offs = CORE_MOD,
-+			.prcm_reg_id = 1,
-+			.module_bit = OMAP3430_EN_MMC2_SHIFT,
-+			.idlest_reg_id = 1,
-+			.idlest_idle_bit = OMAP3430_ST_MMC2_SHIFT,
-+		},
-+	},
-+	.dev_attr	= &mmc2_pre_es3_dev_attr,
-+	.slaves		= omap3xxx_mmc2_slaves,
-+	.slaves_cnt	= ARRAY_SIZE(omap3xxx_mmc2_slaves),
-+	.class		= &omap34xx_mmc_class,
-+};
-+
-+static struct omap_hwmod omap3xxx_es3plus_mmc2_hwmod = {
- 	.name		= "mmc2",
- 	.mpu_irqs	= omap34xx_mmc2_mpu_irqs,
- 	.sdma_reqs	= omap34xx_mmc2_sdma_reqs,
-@@ -3447,8 +3502,6 @@ static __initdata struct omap_hwmod *omap3xxx_hwmods[] = {
- 	&omap3xxx_l4_core_hwmod,
- 	&omap3xxx_l4_per_hwmod,
- 	&omap3xxx_l4_wkup_hwmod,
--	&omap3xxx_mmc1_hwmod,
--	&omap3xxx_mmc2_hwmod,
- 	&omap3xxx_mmc3_hwmod,
- 	&omap3xxx_mpu_hwmod,
- 
-@@ -3531,6 +3584,20 @@ static __initdata struct omap_hwmod *omap3430es2plus_hwmods[] = {
- 	NULL
- };
- 
-+/* <= 3430ES3-only hwmods */
-+static struct omap_hwmod *omap3430_pre_es3_hwmods[] __initdata = {
-+	&omap3xxx_pre_es3_mmc1_hwmod,
-+	&omap3xxx_pre_es3_mmc2_hwmod,
-+	NULL
-+};
-+
-+/* 3430ES3+-only hwmods */
-+static struct omap_hwmod *omap3430_es3plus_hwmods[] __initdata = {
-+	&omap3xxx_es3plus_mmc1_hwmod,
-+	&omap3xxx_es3plus_mmc2_hwmod,
-+	NULL
-+};
-+
- /* 34xx-only hwmods (all ES revisions) */
- static __initdata struct omap_hwmod *omap34xx_hwmods[] = {
- 	&omap3xxx_iva_hwmod,
-@@ -3551,6 +3618,8 @@ static __initdata struct omap_hwmod *omap36xx_hwmods[] = {
- 	&omap3xxx_mailbox_hwmod,
- 	&omap3xxx_usb_host_hs_hwmod,
- 	&omap3xxx_usb_tll_hs_hwmod,
-+	&omap3xxx_es3plus_mmc1_hwmod,
-+	&omap3xxx_es3plus_mmc2_hwmod,
- 	NULL
- };
- 
-@@ -3560,6 +3629,8 @@ static __initdata struct omap_hwmod *am35xx_hwmods[] = {
- 	&am35xx_uart4_hwmod,
- 	&omap3xxx_usb_host_hs_hwmod,
- 	&omap3xxx_usb_tll_hs_hwmod,
-+	&omap3xxx_es3plus_mmc1_hwmod,
-+	&omap3xxx_es3plus_mmc2_hwmod,
- 	NULL
- };
- 
-@@ -3619,6 +3690,21 @@ int __init omap3xxx_hwmod_init(void)
- 		h = omap3430es2plus_hwmods;
- 	};
- 
-+	if (h) {
-+		r = omap_hwmod_register(h);
-+		if (r < 0)
-+			return r;
-+	}
-+
-+	h = NULL;
-+	if (rev == OMAP3430_REV_ES1_0 || rev == OMAP3430_REV_ES2_0 ||
-+	    rev == OMAP3430_REV_ES2_1) {
-+		h = omap3430_pre_es3_hwmods;
-+	} else if (rev == OMAP3430_REV_ES3_0 || rev == OMAP3430_REV_ES3_1 ||
-+		   rev == OMAP3430_REV_ES3_1_2) {
-+		h = omap3430_es3plus_hwmods;
-+	};
-+
- 	if (h)
- 		r = omap_hwmod_register(h);
- 
--- 
-1.7.7.3
+>=20
+> >
+> >>
+> >> > Thanks,
+> >> > Seungwon Jeon.
+> >> >>
+> >> >>
+> >> >> Regards
+> >> >> Saugata
+> >> >> --
+> >> >> To unsubscribe from this list: send the line "unsubscribe linux=
+-mmc" in
+> >> >> the body of a message to majordomo@vger.kernel.org
+> >> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info=
+=2Ehtml
+> >> >
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe linux-mm=
+c" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.ht=
+ml
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
