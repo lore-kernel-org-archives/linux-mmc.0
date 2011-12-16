@@ -1,120 +1,115 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: Cache Control during mmc_suspend_host
-Date: Fri, 16 Dec 2011 17:50:21 +0900
-Message-ID: <002901ccbbcf$be9b3990$3bd1acb0$%jun@samsung.com>
-References: <CAKLKtzej1VpD41GwBOoNv_51fPqMHMySViptjk6im_mSkSws9A@mail.gmail.com>
- <000f01ccb960$42ac2a40$c8047ec0$%jun@samsung.com>
- <CAKLKtzdWzhJTy2KjCOsUs6rtf5Uec2vHoQ3Wkex6nfmhT01T+w@mail.gmail.com>
- <002f01ccba19$9c2bd9d0$d4838d70$%jun@samsung.com>
- <CAKLKtzfQZrcG330Zf4EXx6rtZ6LZpxzpKnq5=z=fXOO1gZdvSg@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH/RFC] mmc: add a device PM QoS constraint when a host is
+ first claimed
+Date: Fri, 16 Dec 2011 10:14:11 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1112160954030.6572@axis700.grange>
+References: <Pine.LNX.4.64.1112121642080.10378@axis700.grange>
+ <201112141115.00945.rjw@sisk.pl> <4EE8849D.1010401@stericsson.com>
+ <201112142236.26739.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:28005 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751924Ab1LPIuX convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Dec 2011 03:50:23 -0500
-Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LWA003RSGJ9VFJ0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 16 Dec 2011 17:50:22 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
- 64bit (built Sep  7 2010)) with ESMTPA id <0LWA00D9WGJX8J80@mmp1.samsung.com>
- for linux-mmc@vger.kernel.org; Fri, 16 Dec 2011 17:50:21 +0900 (KST)
-In-reply-to: <CAKLKtzfQZrcG330Zf4EXx6rtZ6LZpxzpKnq5=z=fXOO1gZdvSg@mail.gmail.com>
-Content-language: ko
+Received: from moutng.kundenserver.de ([212.227.126.187]:51614 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756260Ab1LPJOO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Dec 2011 04:14:14 -0500
+In-Reply-To: <201112142236.26739.rjw@sisk.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Saugata Das' <saugata.das@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>
 
-Saugata Das wrote:
-> On 14 December 2011 10:04, Seungwon Jeon <tgih.jun@samsung.com> wrote=
-:
-> > Saugata Das wrote:
-> >> On 13 December 2011 11:57, Seungwon Jeon <tgih.jun@samsung.com> wr=
-ote:
-> >> > Hi Saugata,
-> >> >
-> >> > Saugata Das wrote:
-> >> >> Hi Seungwon Jeon
-> >> >>
-> >> >> I see a small issue with the implementation mmc_suspend_host,
-> >> >>
-> >> >> int mmc_suspend_host(struct mmc_host *host)
-> >> >> {
-> >> >> .....
-> >> >> =A0 =A0 =A0 err =3D mmc_cache_ctrl(host, 0);
-> >> >> }
-> >> >>
-> >> >> So, within mmc_suspend_host we are disabling the cache. But I d=
-o not
-> >> >> see a corresponding enabling of cache within mmc_resume_host. I
-> >> >> suggest we have either enabling of cache within mmc_resume_host=
- or
-> >> >> within mmc_suspend_host, we replace mmc_cache_ctrl(host, 0) wit=
-h the
-> >> >> flush operation, mmc_flush_cache(host->card).
-> >> >>
-> >> > Currently,
-> >> > Cache is enabled in mmc_init_card() during mmc_resume_host().
-> >> >
-> >> Thanks for your answer.
-> >>
-> >> If mmc_card_keep_power is TRUE, then do you know why from mmc_resu=
-me
-> >> we call mmc_init_card instead of just mmc_awake which should reduc=
-e
-> >> some latency of system wakeup ?
-> >>
-> > I didn't find that case of keeping the power
-> > during sleep in mmc unlike sdio.
->=20
-> I am talking about keeping VCCQ ON and switching OFF only VCC. This i=
-s
-> normally the SLEEP mode of eMMC, which provides quicker wakeup or
-> resume. Some platforms will like to have quicker resume and will like
-> to avoid doing a mmc_init_card during resume. If that happens, then
-> the cache control disabling from mmc_suspend_host will be a problem.
-> So, I suggest we change that to mmc_flush_cache which logically does
-> the same as  you wanted but it is also future proof.
+On Wed, 14 Dec 2011, Rafael J. Wysocki wrote:
 
-Yes.
-Currently mmc can wake up from sleep state using only CMD0 in mmc_init_=
-card.
-If we separate the escape route from sleep state, it must be considered=
-=2E
-Thank you for suggestion.
+> On Wednesday, December 14, 2011, Ulf Hansson wrote:
 
->=20
-> >
-> >>
-> >> > Thanks,
-> >> > Seungwon Jeon.
-> >> >>
-> >> >>
-> >> >> Regards
-> >> >> Saugata
-> >> >> --
-> >> >> To unsubscribe from this list: send the line "unsubscribe linux=
--mmc" in
-> >> >> the body of a message to majordomo@vger.kernel.org
-> >> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info=
-=2Ehtml
-> >> >
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe linux-mm=
-c" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at =A0http://vger.kernel.org/majordomo-info.ht=
-ml
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[snip]
 
+> > 2.
+> > When executing mmc/sd commands/requests the host must always be claimed 
+> > (and thus the host is always enabled).
+
+Why? Why cannot we save some power between IO operations - if we can do 
+this quickly and safely without affecting functionality and throughput?
+
+> > But more important some mmc/sd 
+> > commands must be executed as a sequence, without the host being disabled 
+> > in between the commands (since a disable might mean that the clock to 
+> > card gets disabled).
+
+Ok, there might well be such command sequences, but my question is: who 
+knows about them? Is this mandated by the MMC(/SD/SDIO/...) standard or is 
+it host-specific? Also "might mean" is actually interesting here. I think 
+we eventually need a combination of timing-oriented PM constraints and 
+"stateful" ones. During such a command sequence you would require the card 
+clock to stay on.
+
+> > To solve this, the mmc_claim_host is used, to make 
+> > sure the host is enabled during the complete command sequence.
+> > 
+> > I happily continue this discussion, to see if someone more can break the 
+> > idea about having get_sync in mmc_host_enable. :-)
+> 
+> I'll leave this one to Guennadi, if you don't mind. :-)
+
+As I said above, I think, we need both - to be able to require a certain 
+responsiveness / throughput and specific interface parameters like 
+supplying clock, power, etc.
+
+Also notice, that setting a constraint doesn't affect in principle, when 
+the device is allowed to suspend. This is done as usual per 
+pm_runtime_get*() and _put*(). I think, a reasonable solution to use PM 
+QoS to impose timing constraints but at the same time to not disable the 
+hardware, when this is disallowed, is to tie pm_runtime_get() and _put() 
+calls to driver's .set_ios() method, like tmio_mmc and sh_mmcif drivers 
+currently do. Those drivers only call pm_runtime_put() when the interface 
+clock is gated. So, as long as the core is aware, that that IO sequence 
+has to run uninterrupted without stopping the clock between single 
+transfers, it just has to avoid gating the clock for that period and the 
+interface will not enter any power-saving mode.
+
+So, I don't think we need to enforce pm_runtime_get_sync() in 
+mmc_claim_host().
+
+Thanks
+Guennadi
+
+> > >> Using PM QoS as you propose, might prevent some hosts from doing 
+> > >> runtime_suspend|resume completely and thus those might not fulfill power 
+> > >> consumption requirements instead.
+> > > 
+> > > I'm not sure what scenario you have in mind.  Care to elaborate?
+> > 
+> > Well, suppose a the host drivers start considering the PM QoS 
+> > requirement, but never can fulfill the requirement of 100us for it's 
+> > runtime_suspend callback function...
+> 
+> OK, that's a valid concern.  This means there should be a way for user space
+> to specify the constraint somehow, because it's a user space's role to define
+> policies.
+> 
+> > >> I do not think we can take this decision at this level. Is performance more
+> > >> important than power save, that is kind of the question.
+> > > 
+> > > Yes, it is.  Also, the number used here is somewhat arbitrary.
+> > 
+> > For you maybe power management is less important, but I doubt everybody 
+> > else agree to that. It is a more complex balance I believe.
+> 
+> You're right.
+> 
+> > > However, since no one except for SH7372 is now using device PM QoS, no one
+> > > else will be affected by this change at the moment.
+> > 
+> > True, but that is not a good reason for adding more stuff to the mmc core.
+> 
+> Good point.
+> 
+> Thanks,
+> Rafael
+> 
+
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
