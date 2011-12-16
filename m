@@ -1,104 +1,57 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 3/4 v5] SDHCI: add sdhci_get_cd callback to detect the
- card
-Date: Fri, 16 Dec 2011 04:33:20 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F1165180B@039-SN1MPN1-005.039d.mgd.msft.net>
-References: <1323829093-29655-1-git-send-email-r66093@freescale.com>
- <144B2D54-4027-4815-833F-C5D91626382B@marvell.com>
- <8A2FC72B45BB5A4C9F801431E06AE48F11646CFB@039-SN1MPN1-006.039d.mgd.msft.net>
- <1A3D9F4B-2CA9-42E4-863D-F2E457D9593A@marvell.com>
- <8A2FC72B45BB5A4C9F801431E06AE48F1164F1EF@039-SN1MPN1-005.039d.mgd.msft.net>
- <4EE9C61A.30103@samsung.com>
- <8A2FC72B45BB5A4C9F801431E06AE48F11651768@039-SN1MPN1-005.039d.mgd.msft.net>
- <4EEAC38D.9070705@samsung.com>
+From: Bing Zhao <bzhao@marvell.com>
+Subject: RE: [PATCH] mmc/sdio: don't allow interface to runtime-suspend
+ until probe is finished.
+Date: Thu, 15 Dec 2011 20:39:28 -0800
+Message-ID: <477F20668A386D41ADCC57781B1F704308185E3505@SC-VEXCH1.marvell.com>
+References: <20111205125416.6093ecd8@notabene.brown>
+	<CAK=Wgbb-6eV6aDxTdi3qFLZmu0cHSZvHRUpUEr3YQ=4tO5sCPw@mail.gmail.com>
+	<20111206060654.0e8bebe0@notabene.brown>
+	<CAK=WgbbqgAYZ8uurf+xVyCxfZxoHcLdytxzdUNtoP9VNYPd57A@mail.gmail.com>
+	<20111210181546.6da7099a@notabene.brown>
+	<CAK=WgbbZU=NJupPCeXfy5WcFCvzoCgmcf5HPWUEFaHMwLLCWJg@mail.gmail.com>
+ <20111216150812.1ab91f03@notabene.brown>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe003.messaging.microsoft.com ([213.199.154.206]:15282
-	"EHLO AM1EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754042Ab1LPEdY convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 15 Dec 2011 23:33:24 -0500
-In-Reply-To: <4EEAC38D.9070705@samsung.com>
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:50024 "EHLO
+	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1760065Ab1LPEm1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Dec 2011 23:42:27 -0500
+In-Reply-To: <20111216150812.1ab91f03@notabene.brown>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Philip Rakity <prakity@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+To: NeilBrown <neilb@suse.de>, Ohad Ben-Cohen <ohad@wizery.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Daniel Drake <dsd@laptop.org>, Joe Woodward <jw@terrafix.co.uk>, Chris Ball <cjb@laptop.org>
 
-
-
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Jaehoon Chung
-> Sent: Friday, December 16, 2011 12:06 PM
-> To: Huang Changming-R66093
-> Cc: Jaehoon Chung; Philip Rakity; linux-mmc@vger.kernel.org; Chris Ball
-> Subject: Re: [PATCH 3/4 v5] SDHCI: add sdhci_get_cd callback to detect
-> the card
-> 
-> On 12/16/2011 12:25 PM, Huang Changming-R66093 wrote:
-> 
-> >>> I am very confused, why do we read the present state register on
-> every
-> >> request?
-> >>
-> >> How long time read the present state register?
-> > Even if one line code is performed, I think it need time to complete.
-> >
-> >>> My codes are added to the function mmc_sd_detect in file core/sd.c
-> >>> Function mmc_rescan has detect the card present state repeatedly, so
-> I
-> >> think we don't need to detect the card state on every request.
-> >>> So I think the codes to detect the card present state in
-> sdhci_request
-> >> should be removed to improve the performance.
-> >>
-> >> How did you get the performance benefit?
-> > Do you know there are many tools to run the performance?
-> > IPForward/IPSEC for network, iozone for SATA/SDHC...
-> >
-> > We have the performance result from our platform, the result will
-> decrease 2%~5%!
-> >
-> > If the driver has the option 'MMC_CAP_NEEDS_POLL' (many driver enable
-> this option) and the card is always present, the driver will send the
-> command "mmc_send_status" to ask the card state repeatedly.
-> > Do you know what it means? Many interrupts will be generated even if
-> the system is reading from/writing to the SD/MMC card.
-> >
-> >> And mmc_rescan is repeatedly for SD-card?
-> >> If mmc_rescan is repeatedly, that reason is the below code. (just my
-> >> thinking)
-> >>
-> >> if (host->caps & MMC_CAP_NEEDS_POLL)
-> >> 	mmc_schedule_delayed_work(&host->detect, HZ);
-> >>
-> >> what is your point related with mmc_rescan?
-> >> I didn't understand yours..
-> >
-> > There are some controllers don't support the card detect, the
-> SDHCI_CARD_PRESENT is forever one. And some controller must enable the
-> MMC_CAP_NEEDS_POLL option (about this, you can search the folder
-> mmc/host/), that means mmc_rescan will be run repeatedly.
-> > In these cases, if we detect the card state though command
-> mmc_send_status, a lot of interrupts will be generated.
-> 
-> I know that...Some controller didn't support the card detect...But I
-> think you can control this problem with SDHCI_QUIRK_BROKEN_CARD_DETECTION
-> and some flags.
-> If controller is always polling for card status, that's inefficient.
-Maybe.
-But, many controller will polling the card state as controller designed.
-
-> I use the SDHCI_QUIRK_BROKEN_CARD_DETECTION, but didn't generate the
-> interrupt at every time(didn't polling)
-> I think you can solve this problem in sdhci-xxx.c, not in sdhci.c
-> 
-Because there is one interface to detect card state .get_cd in structure mmc_host_ops,
-I just implement it in sdhci.c and just run the callback if the controller support the card detection,
-and think about some controller don't support card detection,
-I add one new interface to detect the card state in special platform.
-For FSL eSDHC controller, I do it in sdhci-of-esdhc.c
-
+SGkgTmVpbCwNCg0KPiBJbiB0aGUgb3RoZXIgY2FzZSB3aGVyZSBJIGRvIGxldCBpdCBzdXNwZW5k
+IGVhcmx5IChBbmQgaXQgbmV2ZXIgcmVjb3ZlcnMNCj4gd2l0aG91dCB0aGUgcmVzZXQgbGluZSBi
+ZWluZyB0b2dnbGVkKSBJIHNlZToNCj4gDQo+IFsgMjE3MC4xMDA5ODJdIG1tY193YWl0X2Zvcl9j
+bWQgNTIgLT4gLTExMA0KPiBbIDIxNzAuMTA1NDA3XSBtbWNfd2FpdF9mb3JfY21kIDUyIC0+IC0x
+MTANCj4gWyAyMTcwLjExMDI2MF0gbW1jX3dhaXRfZm9yX2NtZCAwIC0+IDANCj4gWyAyMTcwLjEx
+NTUwOV0gbW1jX3dhaXRfZm9yX2NtZCA4IC0+IC0xMTANCj4gWyAyMTcwLjExOTg0Ml0gbW1jX3dh
+aXRfZm9yX2NtZCA1IC0+IDANCj4gWyAyMTcwLjEyMzkwMV0gbW1jX3dhaXRfZm9yX2NtZCA1IC0+
+IDANCj4gWyAyMTcwLjEyNzkyOV0gbW1jX3dhaXRfZm9yX2NtZCAzIC0+IDANCj4gWyAyMTcwLjEz
+MTk1OF0gbW1jX3dhaXRfZm9yX2NtZCA3IC0+IDANCg0KVGhpcyB3b3JrcyB3aGVuIHJlc2V0IGxp
+bmUgdG9nZ2xpbmcgd2FzIGFwcGxpZWQuDQoNCj4gWyAyMTcwLjEzNTk4Nl0gbW1jX3dhaXRfZm9y
+X2NtZCA1MiAtPiAwDQo+IFsgMjE3MC4xNDAxMzZdIG1tY193YWl0X2Zvcl9jbWQgNTIgLT4gMA0K
+PiBbIDIxNzAuMTQ0MjI2XSBtbWNfd2FpdF9mb3JfY21kIDUyIC0+IDANCj4gWyAyMTcwLjE0ODM3
+Nl0gbW1jX3dhaXRfZm9yX2NtZCA1MiAtPiAwDQo+IFsgMjE3MC4xNTI0NjVdIG1tY193YWl0X2Zv
+cl9jbWQgNTIgLT4gMA0KPiANCj4gDQo+IHdoaWNoIGlzIG11Y2ggdGhlIHNhbWUgYnV0IHRoZW4g
+b25lIHNlY29uZCBsYXRlcjoNCj4gDQo+IFsgMjE3MS4xNjY2NTZdIG1tY193YWl0X2Zvcl9jbWQg
+NTIgLT4gMA0KPiBbIDIxNzEuMTcwODA2XSBtbWNfd2FpdF9mb3JfY21kIDUyIC0+IDANCj4gWyAy
+MTcxLjE3NTM4NF0gbW1jX3dhaXRfZm9yX2NtZCAwIC0+IDANCj4gWyAyMTcxLjE4MDYwM10gbW1j
+X3dhaXRfZm9yX2NtZCA4IC0+IC0xMTANCj4gWyAyMTcxLjE4NTk0M10gbW1jX3dhaXRfZm9yX2Nt
+ZCA1IC0+IC0xMTANCg0KSGVyZSB0aGUgQ01ENSB0aW1lb3V0IGlzIGV4cGVjdGVkIGJlY2F1c2Ug
+U0Q4Njg2IGhhcyBhbHJlYWR5IGJlZW4gaW5pdGlhbGl6ZWQgd2l0aCBDTUQ1LDUsMyw3Lg0KSWYg
+eW91IGFyZSBhYmxlIHRvIHNraXAgcmUtaW5pdGlhbGl6YXRpb24gYXQgdGhpcyBwb2ludCwgbGlr
+ZSB3aGF0ICJwb3dlcmVkX3Jlc3VtZSIgZG9lcywgeW91IHdpbGwgcHJvYmFibHkgZ2V0IFNEODY4
+NiBjb250aW51ZSB0byBydW4uDQoNClJlZ2FyZHMsDQpCaW5nDQoNCj4gWyAyMTcxLjE5MDA5M10g
+bGliZXJ0YXNfc2RpbzogcHJvYmUgb2YgbW1jMTowMDAxOjEgZmFpbGVkIHdpdGggZXJyb3IgLTE2
+DQo+IA0KPiANCj4gU28gdGhpcyBhbnN3ZXJzIEJpbmcgWmhhbydzIHF1ZXN0aW9uIC0gaXQgd2Fz
+IENNRDUgdGhhdCB0aW1lZCBvdXQgYW5kIGNhdXNlZA0KPiB0aGUgZmFpbHVyZS4NCj4gDQo+IElm
+IEkganVzdCBnZXQgbW1jX3dhaXRfZm9yX2NtZCB0byBoaWRlIGVycm9yIC0xMTAgZm9yIGNtZCA1
+IGl0IGNvbXBsYWlucw0KPiANCj4gWyAgIDI2LjQyMDQ0MF0gbW1jMTogaG9zdCBkb2Vzbid0IHN1
+cHBvcnQgY2FyZCdzIHZvbHRhZ2VzDQo+IA0KPiBzbyB0aGF0IGlzbid0IGEgc2ltcGxlIHNvbHV0
+aW9uIDotKQ0KDQo=
