@@ -1,56 +1,96 @@
-From: Marek Vasut <marek.vasut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH V3 10/14] ARM: mxs: add clk_prepare/clk_unprepare
-Date: Mon, 19 Dec 2011 23:21:41 +0100
-Message-ID: <201112192321.41560.marek.vasut@gmail.com>
-References: <1321008637-19999-1-git-send-email-richard.zhao@linaro.org> <1321008637-19999-11-git-send-email-richard.zhao@linaro.org>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1321008637-19999-11-git-send-email-richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: Richard Zhao <richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, amit.kucheria-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, eric.miao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, alan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Dmitry Shmidt <dimitrysh@google.com>
+Subject: [PATCH] mmc: Set suspend/resume bus operations if CONFIG_PM_RUNTIME is used
+Date: Fri, 16 Dec 2011 17:52:18 -0800
+Message-ID: <20111219223534.B9D4A38333@ushik.mtv.corp.google.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gy0-f202.google.com ([209.85.160.202]:47805 "EHLO
+	mail-gy0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751827Ab1LSWff (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2011 17:35:35 -0500
+Received: by ghrr15 with SMTP id r15so515089ghr.1
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Dec 2011 14:35:35 -0800 (PST)
+Received: from ushik.mtv.corp.google.com (ushik.mtv.corp.google.com [172.18.102.96])
+	by wpzn4.hot.corp.google.com (Postfix) with ESMTP id 246C21E004D
+	for <linux-mmc@vger.kernel.org>; Mon, 19 Dec 2011 14:35:35 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-> Signed-off-by: Richard Zhao <richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm/mach-mxs/system.c |    2 +-
->  arch/arm/mach-mxs/timer.c  |    2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/arch/arm/mach-mxs/system.c b/arch/arm/mach-mxs/system.c
-> index 20ec3bd..9760a12 100644
-> --- a/arch/arm/mach-mxs/system.c
-> +++ b/arch/arm/mach-mxs/system.c
-> @@ -66,7 +66,7 @@ static int __init mxs_arch_reset_init(void)
-> 
->  	clk = clk_get_sys("rtc", NULL);
->  	if (!IS_ERR(clk))
-> -		clk_enable(clk);
-> +		clk_prepare_enable(clk);
-> 
->  	return 0;
->  }
-> diff --git a/arch/arm/mach-mxs/timer.c b/arch/arm/mach-mxs/timer.c
-> index cace0d2..564a632 100644
-> --- a/arch/arm/mach-mxs/timer.c
-> +++ b/arch/arm/mach-mxs/timer.c
-> @@ -245,7 +245,7 @@ static int __init mxs_clocksource_init(struct clk
-> *timer_clk)
-> 
->  void __init mxs_timer_init(struct clk *timer_clk, int irq)
->  {
-> -	clk_enable(timer_clk);
-> +	clk_prepare_enable(timer_clk);
-> 
->  	/*
->  	 * Initialize timers to a known state
+Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+---
+ drivers/mmc/core/bus.c |   24 +++++++-----------------
+ 1 files changed, 7 insertions(+), 17 deletions(-)
 
-Hi Richard,
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 393d817..e07d6c9 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -120,18 +120,19 @@ static int mmc_bus_remove(struct device *dev)
+ 	return 0;
+ }
+ 
+-static int mmc_bus_suspend(struct device *dev, pm_message_t state)
++static int mmc_bus_pm_suspend(struct device *dev)
+ {
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+ 	int ret = 0;
++	pm_message_t state = { PM_EVENT_SUSPEND };
+ 
+ 	if (dev->driver && drv->suspend)
+ 		ret = drv->suspend(card, state);
+ 	return ret;
+ }
+ 
+-static int mmc_bus_resume(struct device *dev)
++static int mmc_bus_pm_resume(struct device *dev)
+ {
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+@@ -143,7 +144,6 @@ static int mmc_bus_resume(struct device *dev)
+ }
+ 
+ #ifdef CONFIG_PM_RUNTIME
+-
+ static int mmc_runtime_suspend(struct device *dev)
+ {
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+@@ -162,21 +162,13 @@ static int mmc_runtime_idle(struct device *dev)
+ {
+ 	return pm_runtime_suspend(dev);
+ }
++#endif /* CONFIG_PM_RUNTIME */
+ 
+ static const struct dev_pm_ops mmc_bus_pm_ops = {
+-	.runtime_suspend	= mmc_runtime_suspend,
+-	.runtime_resume		= mmc_runtime_resume,
+-	.runtime_idle		= mmc_runtime_idle,
++	SET_SYSTEM_SLEEP_PM_OPS(mmc_bus_pm_suspend, mmc_bus_pm_resume)
++	SET_RUNTIME_PM_OPS(mmc_runtime_suspend, mmc_runtime_resume, mmc_runtime_idle)
+ };
+ 
+-#define MMC_PM_OPS_PTR	(&mmc_bus_pm_ops)
+-
+-#else /* !CONFIG_PM_RUNTIME */
+-
+-#define MMC_PM_OPS_PTR	NULL
+-
+-#endif /* !CONFIG_PM_RUNTIME */
+-
+ static struct bus_type mmc_bus_type = {
+ 	.name		= "mmc",
+ 	.dev_attrs	= mmc_dev_attrs,
+@@ -184,9 +176,7 @@ static struct bus_type mmc_bus_type = {
+ 	.uevent		= mmc_bus_uevent,
+ 	.probe		= mmc_bus_probe,
+ 	.remove		= mmc_bus_remove,
+-	.suspend	= mmc_bus_suspend,
+-	.resume		= mmc_bus_resume,
+-	.pm		= MMC_PM_OPS_PTR,
++	.pm		= &mmc_bus_pm_ops,
+ };
+ 
+ int mmc_register_bus(void)
+-- 
+1.7.3.1
 
-I just came across this, will this also help solve the mxs problem with mutex 
-lock begin done in atomic context in clk_enable/disable()?
-
-M
