@@ -1,47 +1,29 @@
-From: Tony Olech <tony.olech@elandigitalsystems.com>
-Subject: Re: [PATCH 4/15] vub300: fix module parameter.
-Date: Fri, 16 Dec 2011 19:02:02 +0000
-Message-ID: <1324062122.2302.5.camel@study-2>
-References: <871us6tu0d.fsf@rustcorp.com.au>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 02/14] mmc: mmci: Fixup handling of MCI_STARTBITERR
+Date: Sun, 18 Dec 2011 23:15:35 +0000
+Message-ID: <20111218231534.GA14542@n2100.arm.linux.org.uk>
+References: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com> <1323106560-5218-3-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <871us6tu0d.fsf@rustcorp.com.au>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rusty Russell <rusty@rustcorp.com.au>
-Cc: tony@olech.com, lkml - Kernel Mailing List <linux-kernel@vger.kernel.org>, Pawel Moll <pawel.moll@arm.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:36896 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751988Ab1LRXPn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Dec 2011 18:15:43 -0500
+Content-Disposition: inline
+In-Reply-To: <1323106560-5218-3-git-send-email-ulf.hansson@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Lee Jones <lee.jones@linaro.org>
 
-You are right.
-I don't know how that slipped through
-Tony Olech
+On Mon, Dec 05, 2011 at 06:35:48PM +0100, Ulf Hansson wrote:
+> The interrupt was previously enabled and then correctly cleared.
+> Now we also handle it correctly.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-On Thu, 2011-12-15 at 13:34 +1030, Rusty Russell wrote:
-> You didn't mean this to be a bool.
-> 
-> Cc: Tony Olech <tony.olech@elandigitalsystems.com>
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-usb@vger.kernel.org
-> Signed-off-by: Rusty Russell <rusty@rustcorp.com.au>
-> ---
->  drivers/mmc/host/vub300.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-> --- a/drivers/mmc/host/vub300.c
-> +++ b/drivers/mmc/host/vub300.c
-> @@ -259,7 +259,7 @@ static int firmware_rom_wait_states = 0x
->  static int firmware_rom_wait_states = 0x1C;
->  #endif
->  
-> -module_param(firmware_rom_wait_states, bool, 0644);
-> +module_param(firmware_rom_wait_states, int, 0644);
->  MODULE_PARM_DESC(firmware_rom_wait_states,
->  		 "ROM wait states byte=RRRIIEEE (Reserved Internal External)");
->  
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I've queued this in my 'fixes' branch with a Cc to the stable team for
+previous kernel versions.  I believe that to be appropriate.  Please
+confirm.
