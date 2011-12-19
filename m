@@ -1,125 +1,131 @@
-From: "Dr. William Cole" <WilliamCole@yahoo.com>
-Subject: LET US WORK TOGETHER
-Date: Mon, 19 Dec 2011 05:39:57 -0800
-Message-ID: <20111219133946.C42764B008B__29829.6806439341$1324302736$gmane$org@tupu.netikka.net>
-Reply-To: <cole.william2010@yahoo.es>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH V2] mmc: core: Add option to prevent eMMC sleep command
+Date: Mon, 19 Dec 2011 20:27:14 +0530
+Message-ID: <000601ccbe5e$810edd20$832c9760$@org>
+References: <1323941761-24947-1-git-send-email-ulf.hansson@stericsson.com> <000601ccbb4d$dcefca00$96cf5e00$@org> <4EEF1C04.7030502@stericsson.com> <4EEF2479.7010602@codeaurora.org> <4EEF26DD.2070307@stericsson.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="----=_NextPart_000_0026_01C2A9A6.2A89A7C6"
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mbox2.netikka.net ([213.250.81.203]:52070 "EHLO
-	mbox2.netikka.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752739Ab1LSNvx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2011 08:51:53 -0500
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:61885 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750894Ab1LSO5T (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2011 09:57:19 -0500
+In-Reply-To: <4EEF26DD.2070307@stericsson.com>
+Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Ulf Hansson' <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Per FORLIN' <per.forlin@stericsson.com>, 'Johan RUDHOLM' <johan.rudholm@stericsson.com>, 'Lee Jones' <lee.jones@linaro.org>
 
-This is a multi-part message in MIME format.
 
-------=_NextPart_000_0026_01C2A9A6.2A89A7C6
-Content-Type: text/plain;
-	charset="big5"
-Content-Transfer-Encoding: 7bit
 
-To ensure that you get this message
-I have attached a file to this mail. 
-Please ensure you read the attached file
-and reply as soon as possible
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Ulf Hansson
+> Sent: Monday, December 19, 2011 5:28 PM
+> To: Subhash Jadavani
+> Cc: linux-mmc@vger.kernel.org; 'Chris Ball'; Per FORLIN; Johan RUDHOLM;
+> 'Lee Jones'
+> Subject: Re: [PATCH V2] mmc: core: Add option to prevent eMMC sleep
+> command
+> 
+> Subhash Jadavani wrote:
+> >   On 12/19/2011 4:42 PM, Ulf Hansson wrote:
+> >> Subhash Jadavani wrote:
+> >>>> -----Original Message-----
+> >>>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> >>>> owner@vger.kernel.org] On Behalf Of Ulf Hansson
+> >>>> Sent: Thursday, December 15, 2011 3:06 PM
+> >>>> To: linux-mmc@vger.kernel.org; Chris Ball
+> >>>> Cc: Per Forlin; Ulf Hansson; Johan Rudholm; Lee Jones
+> >>>> Subject: [PATCH V2] mmc: core: Add option to prevent eMMC sleep
+> command
+> >>>>
+> >>>> Host may now use MMC_CAP2_NOSLEEP to disable the use of
+> >>>> eMMC sleep/awake command.
+> >>>>
+> >>>> This option can be used when you platform have a buggy
+> >>>> kernel crash dump software, which is supposed to store
+> >>>> the dump on the eMMC, but is not able to wake up the eMMC
+> >>>> from sleep state.
+> >>>>
+> >>>> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+> >>>> Reviewed-by: Hanumath Prasad <hanumath.prasad@stericsson.com>
+> >>>> Reviewed-by: Srinidhi Kasagar <srinidhi.kasagar@stericsson.com>
+> >>>> ---
+> >>>>
+> >>>> Changes in v2:
+> >>>>     - Added some motivation to why this patch is wanted in the
+> >>>>     commit message.
+> >>>>
+> >>>> ---
+> >>>>  drivers/mmc/core/core.c  |    6 ++++++
+> >>>>  include/linux/mmc/host.h |    1 +
+> >>>>  2 files changed, 7 insertions(+), 0 deletions(-)
+> >>>>
+> >>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> >>>> index a2aa860..5a1ce37 100644
+> >>>> --- a/drivers/mmc/core/core.c
+> >>>> +++ b/drivers/mmc/core/core.c
+> >>>> @@ -2246,6 +2246,9 @@ int mmc_card_awake(struct mmc_host *host)
+> >>>>  {
+> >>>>      int err = -ENOSYS;
+> >>>>
+> >>>> +    if (host->caps2 & MMC_CAP2_NOSLEEP)
+> >>>> +        return 0;
+> >>>> +
+> >>>>      mmc_bus_get(host);
+> >>>>
+> >>>>      if (host->bus_ops && !host->bus_dead && host->bus_ops->awake)
+> >>>> @@ -2261,6 +2264,9 @@ int mmc_card_sleep(struct mmc_host *host)
+> >>>>  {
+> >>>>      int err = -ENOSYS;
+> >>>>
+> >>>> +    if (host->caps2 & MMC_CAP2_NOSLEEP)
+> >>>> +        return 0;
+> >>>> +
+> >>>>      mmc_bus_get(host);
+> >>>>
+> >>>>      if (host->bus_ops && !host->bus_dead && host->bus_ops->sleep)
+> >>>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> >>>> index 9a03d03..d07fb27 100644
+> >>>> --- a/include/linux/mmc/host.h
+> >>>> +++ b/include/linux/mmc/host.h
+> >>>> @@ -242,6 +242,7 @@ struct mmc_host {
+> >>>>  #define MMC_CAP2_CACHE_CTRL    (1 << 1)    /* Allow cache control
+> */
+> >>>>  #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)    /* Notify poweroff
+> >>>> supported */
+> >>>>  #define MMC_CAP2_NO_MULTI_READ    (1 << 3)    /* Multiblock reads
+> >>>> don't work */
+> >>>> +#define MMC_CAP2_NOSLEEP    (1 << 4)    /* Don't allow sleep
+> command
+> >>> Can we rename this CAP to something like
+> "MMC_CAP2_NO_MMC_SLEEP_CMD"
+> >>> to make
+> >>> it more specific?
+> >>>
+> >> The "cap" actually disables the execution of the
+> mmc_card_awake|sleep
+> >> functions which is not (e)MMC specific functions.
+> >>
+> >> I could change to someting like with *SLEEP_CMD but without *MMC* if
+> >> that sounds better?
+> > Yes, it sounds good.
+> 
+> OK, fixed in v3 patch. May I add your Ack as well?
+Yes, sure.
 
-------=_NextPart_000_0026_01C2A9A6.2A89A7C6
-Content-Type: application/octet-stream;
-	name="LET US WORK TOGETHER.rtf"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
-	filename="LET US WORK TOGETHER.rtf"
+Regards,
+Subhash
 
-e1xydGYxXGFuc2lcYW5zaWNwZzEyNTJcZGVmZjBcZGVmbGFuZzEwMzN7XGZv
-bnR0Ymx7XGYwXGZzd2lzc1xmcHJxMlxmY2hhcnNldDAgQ2FsaWJyaTt9e1xm
-MVxmc3dpc3NcZmNoYXJzZXQwIEFyaWFsO319DQp7XGNvbG9ydGJsIDtccmVk
-MFxncmVlbjBcYmx1ZTI1NTt9DQp7XCpcZ2VuZXJhdG9yIE1zZnRlZGl0IDUu
-NDEuMjEuMjUwOTt9XHZpZXdraW5kNFx1YzFccGFyZFxzYTIwMFxzbDI3Nlxz
-bG11bHQxXGJcZjBcZnMyMlxwYXINClxiMCBEZWFyIEZyaWVuZCxccGFyDQpc
-cGFyDQpccGFyDQpccGFyDQpccGFyDQpcYlxwYXINClxiMCBNeSBuYW1lIGlz
-IG5hbWUgaXMgRHIuIFdpbGxpYW0gQ29sZSwgYSBCcml0aXNoIG5hdGlvbmFs
-IGFuZCBhbiBpbnZlc3RtZW50IGNvbnN1bHRhbnQgYXR0YWNoZWQgdG8gdGhl
-IExpYnlhbiBpbnZlc3RtZW50IEF1dGhvcml0eSAoTElBKS5ccGFyDQpccGFy
-DQpccGFyDQpccGFyDQpccGFyDQogSSBzdGFydGVkIHdvcmtpbmcgZm9yIHRo
-ZSBMaWJ5YW4gZ292ZXJubWVudCB1bmRlciB0aGUgbGVhZGVyc2hpcCBvZiBN
-dWFtbWFyIE11aGFtbWFkIGFsLUdhZGRhZmkgc2luY2UgdGhlIGJlZ2lubmlu
-ZyBvZiAyMDAwIGFuZCBoYXZlIGFycmFuZ2VkIHNvIG1hbnkgZGVhbHMgYmV0
-d2VlbiB0aGUgZ292ZXJubWVudCBhbmQgdGhlIGludGVybmF0aW9uYWwgcGFy
-dG5lcnMgYnV0IGR1ZSB0byB0aGUgb25nb2luZyBjcmlzaXMgaW4gdGhlIGNv
-dW50cnkgSSBkZWNpZGVkIHRvIHF1aXQgbXkgam9iIGFuZCByZXR1cm4gdG8g
-bXkgaG9tZSBjb3VudHJ5IEVuZ2xhbmQgYmVjYXVzZSBJIGFtIG5vdCBpbiBz
-dXBwb3J0IG9mIHRoZSBMaWJ5YW4gbGVhZGVyIE11YW1tYXIgTXVoYW1tYWQg
-YWwtR2FkZGFmaSBkdWUgdG8gaGlzIGNyYWNrIGRvd24gb24gdGhlIG9wcG9z
-aXRpb24uIFxwYXINClxwYXINClxwYXINClxwYXINClxwYXINClRoZXJlIGFy
-ZSBzb21lIGZ1bmRzIHdoaWNoIEkgd2FzIGRpcmVjdGVkIHRvIG1vdmUgdG8g
-bmVpZ2hib3JpbmcgR2hhbmEgYXQgdGhlIGJlZ2lubmluZyBvZiB0aGUgdXBy
-aXNpbmcgZm9yIGZ1cnRoZXIgdHJhbnNmZXIgdG8gQ2hpbmEgZm9yIHRoZSBw
-dXJjaGFzZSBvZiBhcm1zIHRvIGJlIHVzZWQgaW4gdGhlIG9uZ29pbmcgd2Fy
-IGluIHRoZSBMaWJ5YS4gXHBhcg0KXHBhcg0KXHBhcg0KXHBhcg0KXHBhcg0K
-VGhlIGZ1bmRzIHdoaWNoIEkgc3VjY2VlZGVkIGluIG1vdmluZyB0aHJvdWdo
-IGEgY2xhbmRlc3RpbmUgYXJyYW5nZW1lbnQgdG8gYSBwcml2YXRlIGZpbmFu
-Y2UgY29tcGFueSBpbiBHaGFuYSBpcyBub3cgZGVwb3NpdGVkIHRoZXJlIHdh
-aXRpbmcgZm9yIG15IGZ1cnRoZXIgaW5zdHJ1Y3Rpb24gZm9yIG9ud2FyZCB0
-cmFuc2ZlciB0byBjaGluYSBmb3IgdGhlIHB1cmNoYXNlIG9mIHRoZSBhcm1z
-IGFuZCBhbW11bml0aW9ucyBmcm9tIGFuIGFybXMgbWFudWZhY3R1cmluZyBj
-b21wYW55IGluIENoaW5hIGJ1dCBJIG5vdyBkZWNpZGVkIHRvIGxlYXZlIHRo
-ZSBjb3VudHJ5IHdpdGggdGhlIHdob2xlIGRvY3VtZW50cyByZWxhdGluZyB0
-byB0aGlzIGZ1bmRzIGFzIHRoZSBMaWJ5YW4gbGVhZGVyIE11aGFtbWFkIGFs
-LUdhZGRhZmkgaGFzIGJlZW4gdG9wcGxlZCBhbmQga2lsbGVkIGJ5IHRoZSBy
-ZWJlbCBzLiBccGFyDQpccGFyDQpccGFyDQpccGFyDQpccGFyDQpJIHNhdyB0
-aGlzIGFzIGFuIG9wcG9ydHVuaXR5IHRvIGRpdmVydCB0aGlzIGZ1bmQgZm9y
-IG91ciBwZXJzb25hbCB1c2Ugc2luY2UgSSBoYXZlIHRoZSB3aG9sZSBkb2N1
-bWVudHMgYmVjYXVzZSB0d28gb2YgbXkgY29sbGVhZ3VlcywgdGhlIGRlZmVu
-c2UgY2hpZWYgQWJ1IEJha3IgWXVuaXMgYW5kIEdoYWRhZmlccnF1b3RlIHMg
-c29uIHdobyBhcmUgYXdhcmUgb2YgdGhpcyBkZXBvc2l0IHdlcmUgYWxsIGtp
-bGxlZCB0aGUgcmViZWwgZm9yY2VzIHRvZ2V0aGVyIHdpdGggR2hhZGFmaSB3
-aGVuIHRoZWlyIGNvbnZveSB3YXMgYXR0YWNoZWQgYnkgTlRPIHdhciBwbGFu
-ZS4gSSBhbSBjdXJyZW50bHkgaW4gbXkgbmF0aXZlIGNvdW50cnkgRW5nbGFu
-ZCB3YWl0aW5nIGZvciBhIHJlbGlhYmxlIHBhcnRuZXIgb24gd2hvc2UgbmFt
-ZSB0aGlzIGZ1bmQgc2hhbGwgYmUgdHJhbnNmZXJyZWQgc2luY2UgSSBhbSBp
-biBwb3NzZXNzaW9uIG9mIGFsbCB0aGUgZG9jdW1lbnRzLlxwYXINClxwYXIN
-ClxwYXINClxwYXINClxwYXINCiBJIHdpbGwgcGVyc29uYWxseSBmYWNpbGl0
-YXRlIHRoZSByZWxlYXNlIG9mIHRoaXMgZnVuZCBhbmQgaGF2ZSBpdCBtb3Zl
-ZCB0byB5b3VyIG5vbWluYXRlZCBhY2NvdW50IGFueXdoZXJlIGFyb3VuZCB0
-aGUgZ2xvYmUuIFxwYXINClxwYXINClxwYXINClxwYXINClxwYXINCkkgd2ls
-bCBiZSBhYmxlIHRvIGRvIHRoaXMgYmVjYXVzZSBJIHdhcyB0aGUgb25lIHRo
-YXQgb3JjaGVzdHJhdGVkIHRoZSBtb3ZlbWVudCBvZiB0aGlzIGZ1bmQgb3V0
-IG9mIExpYnlhIHRvIEdoYW5hIHRoZXJlZm9yZSBpcyBpbiBwb3NzZXNzaW9u
-IG9mIGFsbCB0aGUgcGFwZXJzIHRvIHRoYXQgZWZmZWN0LiBccGFyDQpccGFy
-DQpccGFyDQpccGFyDQpccGFyDQpccGFyDQpccGFyZCBGdXJ0aGVyIGRldGFp
-bHMgc2hhbGwgYmUgZ2l2ZW4gdG8geW91IHVwb24gdGhlIHJlY2VpcHQgb2Yg
-eW91ciBpbnRlcmVzdCB0byB3b3JrIHdpdGggbWUgb24gdGhpcyBwcm9qZWN0
-IHNvIHRoYXQgd2UgY2FuIHN1Y2Nlc3NmdWxseSBtb3ZlIHRoaXMgZnVuZCB0
-byB5b3VyIG5vbWluYXRlZCBhY2NvdW50LlxwYXINClxwYXINClxwYXINClxw
-YXINClxwYXINClxwYXINClxwYXINCiBBbGwgYXJyYW5nZW1lbnQgaGFzIGJl
-ZW4gY29uY2x1ZGVkIGZvciB0aGUgc3VjY2Vzc2Z1bCBjb25jbHVzaW9uIG9m
-IHRoZSByZWxlYXNlL3RyYW5zZmVyIG9mIHRoaXMgZnVuZCBpbiB5b3VyIG5h
-bWUuIFxwYXINClxwYXINClxwYXINClxwYXINClxwYXINClxwYXINCkdvIHRv
-IGh0dHA6Ly9zYWhhcmFyZXBvcnRlcnMuY29tL3ByZXNzLXJlbGVhc2UvbmV3
-LWxlYWtlZC1kb2N1bWVudC1yZXZlYWxzLWhzYmMtaGVsZC0xNGJuLWxpYnlh
-bi1mdW5kcyBccGFyDQpodHRwOi8vd2ViY2FjaGUuZ29vZ2xldXNlcmNvbnRl
-bnQuY29tL3NlYXJjaD9obD1lbiZnc19zbT1zJmdzX3VwbD0xMTYyNTgxbDEx
-NzQ3NDlsMGwxMTc2NjIybDM3bDMxbDFsOGwwbDJsMTE1Mmw0MDk2bDYtMS4z
-bDRsMCZxPWNhY2hlOnNZeGh6RTAxREo4SjpodHRwOi8vd3d3LmJiYy5jby51
-ay9uZXdzL3dvcmxkLWFmcmljYS0xNTM4OTU1MCtiYmMrbmV3cytyZXBvcnRz
-K2RlYXRoK29mK2dhZGRhZmkmY3Q9Y2xuayBccGFyDQpodHRwOi8vd3d3LmJi
-Yy5jby51ay9uZXdzL3dvcmxkLWFmcmljYS0xNTM5MDk4MCAgIGZvciBtb3Jl
-IGRldGFpbHMuXHBhcg0KXHBhcg0KXHBhcg0KXHBhcg0KXHBhcg0KXHBhcg0K
-XHBhcg0KXHBhcg0KUGxlYXNlIHRoaXMgaXMgaGlnaGx5IGNsYXNzaWZpZWQg
-aW5mb3JtYXRpb24gdGhlcmVmb3JlIEkgYWR2aXNlIHRoYXQgeW91IGtlZXAg
-aXQgdG8geW91cnNlbGYuIEkgc2hhbGwgYmUgd2lsbGluZyB0byBtZWV0IHdp
-dGggeW91IGFueXdoZXJlIGluIEV1cm9wZSBvciBwb3NzaWJseSBBZnJpY2Eg
-YnV0IGF0IHRoZSBtb21lbnQgSSBhbSBjdXJyZW50bHkgaW4gbXkgRW5nbGFu
-ZC4gR2V0IGJhY2sgdG8gbWUgb24gdGhpcyBlbWFpbDogXHVsIHcuY29sZTIw
-MDlAaG90bWFpbC5jb21cdWxub25lICBpZiB5b3UgYXJlIGludGVyZXN0ZWQg
-c28gdGhhdCB3ZSBjYW4gcHJvY2VlZC4gIFxwYXINClxwYXINClxwYXINClxw
-YXINClxwYXINClxwYXINCldlIHdpbGwgZGlzY3VzcyB0aGUgc2hhcmluZyBy
-YXRpbyBvbmNlIEkgaGVhciBmcm9tIHlvdSBiZWNhdXNlIHlvdSB3aWxsIHBs
-YXkgYSB2aXRhbCByb2xlIHRvIHRoZSBzdWNjZXNzIG9mIHRoaXMgYnVzaW5l
-c3MuXHBhcg0KUmVnYXJkc1xwYXINCkRyLiBXaWxsaWFtIENvbGVccGFyDQpc
-ZjFcZnMyMFxwYXINCn0NCgA=
+> 
+> Br
+> Ulf Hansson
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-------=_NextPart_000_0026_01C2A9A6.2A89A7C6--
