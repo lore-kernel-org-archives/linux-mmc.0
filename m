@@ -1,33 +1,56 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [GIT PULL] ARM: amba: Enable module alias autogeneration for
-	AMBA drivers
-Date: Mon, 19 Dec 2011 21:39:42 +0000
-Message-ID: <20111219213942.GM14542@n2100.arm.linux.org.uk>
-References: <20111206151541.GA13774@linaro.org> <1321961573-4562-1-git-send-email-dave.martin@linaro.org> <20111206155911.GA11902@mail.gnudd.com> <20111206161815.GD13769@linaro.org> <20111219132409.GB2031@linaro.org>
+From: Marek Vasut <marek.vasut-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH V3 10/14] ARM: mxs: add clk_prepare/clk_unprepare
+Date: Mon, 19 Dec 2011 23:21:41 +0100
+Message-ID: <201112192321.41560.marek.vasut@gmail.com>
+References: <1321008637-19999-1-git-send-email-richard.zhao@linaro.org> <1321008637-19999-11-git-send-email-richard.zhao@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20111219132409.GB2031@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Martin <dave.martin@linaro.org>
-Cc: Alessandro Rubini <rubini@unipv.it>, patches@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, alan@linux.intel.com, a.zummo@towertech.it, alsa-devel@alsa-project.org, cjb@laptop.org, dan.j.williams@intel.com, dmitry.torokhov@gmail.com, grant.likely@secretlab.ca, perex@perex.cz, jassisinghbrar@gmail.com, julia@diku.dk, linus.walleij@linaro.org, linux-fbdev@vger.kernel.org, linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-watchdog@vger.kernel.org, lethal@linux-sh.org, Pawel.Moll@arm.com, rtc-linux@googlegroups.com, spi-devel-general@lists.sourceforge.net, tiwai@suse.de, vinod.koul@intel.com, wim@iguana.be
+Content-Type: Text/Plain;
+  charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1321008637-19999-11-git-send-email-richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Richard Zhao <richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, amit.kucheria-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, eric.miao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, alan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Dec 19, 2011 at 01:24:09PM +0000, Dave Martin wrote:
-> Hi Russell,
+> Signed-off-by: Richard Zhao <richard.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm/mach-mxs/system.c |    2 +-
+>  arch/arm/mach-mxs/timer.c  |    2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
 > 
-> This one isn't urgent, but I'm not seeing the amba modalias patches
-> anywhere yet.  Did you have any outstanding concerns which need to be
-> resolved?
+> diff --git a/arch/arm/mach-mxs/system.c b/arch/arm/mach-mxs/system.c
+> index 20ec3bd..9760a12 100644
+> --- a/arch/arm/mach-mxs/system.c
+> +++ b/arch/arm/mach-mxs/system.c
+> @@ -66,7 +66,7 @@ static int __init mxs_arch_reset_init(void)
 > 
-> If you can suggest when/if these are likely to merge that would be great.
+>  	clk = clk_get_sys("rtc", NULL);
+>  	if (!IS_ERR(clk))
+> -		clk_enable(clk);
+> +		clk_prepare_enable(clk);
 > 
-> Since Alessandro is now expecting to have to rebase on top of the amba
-> additions anyway, we shouldn't need to worry about conflicting with his
-> patches.
+>  	return 0;
+>  }
+> diff --git a/arch/arm/mach-mxs/timer.c b/arch/arm/mach-mxs/timer.c
+> index cace0d2..564a632 100644
+> --- a/arch/arm/mach-mxs/timer.c
+> +++ b/arch/arm/mach-mxs/timer.c
+> @@ -245,7 +245,7 @@ static int __init mxs_clocksource_init(struct clk
+> *timer_clk)
 > 
-> Of course, if you've already merged these somewhere, then there's no
-> problem.
+>  void __init mxs_timer_init(struct clk *timer_clk, int irq)
+>  {
+> -	clk_enable(timer_clk);
+> +	clk_prepare_enable(timer_clk);
+> 
+>  	/*
+>  	 * Initialize timers to a known state
 
-I have pulled it, I just haven't merged it in anywhere yet.
+Hi Richard,
+
+I just came across this, will this also help solve the mxs problem with mutex 
+lock begin done in atomic context in clk_enable/disable()?
+
+M
