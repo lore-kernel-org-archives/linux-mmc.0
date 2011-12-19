@@ -1,122 +1,35 @@
 From: Ohad Ben-Cohen <ohad@wizery.com>
-Subject: Re: mmc: sdio: runtime PM and 8686 problems
-Date: Mon, 19 Dec 2011 11:10:18 +0200
-Message-ID: <CAK=WgbaKFhknaDVEbPjmcWGL-F_DiYG0t1t-cB-sGWHPCOBErA@mail.gmail.com>
-References: <WC20111118085327.010279@terrafix.co.uk> <CAK=WgbZvcTqmpT0jWT1b-GN1e5091AikAfL88Q8Z66dsOXx6Og@mail.gmail.com>
- <WC20111118100011.2902A2@terrafix.co.uk> <CAK=WgbaJ-q4TqgV5tdPQPm6CT9roceqn6QMxEJgA=Prd52jVEQ@mail.gmail.com>
- <WC20111129111750.470087@terrafix.co.uk> <CAK=Wgbb6s_BGfJYAoH3V77QvWoAXVAchg0ojBx4Mbmgq8bgvWw@mail.gmail.com>
- <CAMLZHHRF2ygqBRyNm21vv0WnCYKPtduGpW7ME25z55v7nTaRnA@mail.gmail.com>
- <CAK=WgbY22BD8WWk71nL3=D3NZfJY92LXUum8yhV3JyHypjOe-g@mail.gmail.com>
- <CAMLZHHRfitBnmXi=2ndvm5-jm1Mg4+NT83rjuwD9w236E12hQw@mail.gmail.com> <CAK=WgbYRvsOur6RmAYMEAf-01e-paGinPU4G_0VesacPGBD5GA@mail.gmail.com>
+Subject: Re: [PATCH] mmc/sdio: don't allow interface to runtime-suspend until
+ probe is finished.
+Date: Mon, 19 Dec 2011 11:12:47 +0200
+Message-ID: <CAK=Wgbb9nnC8e8aLS3XwLfHi8N2bXFSMYeviAOE9LOeocAPckQ@mail.gmail.com>
+References: <20111205125416.6093ecd8@notabene.brown> <CAK=Wgbb-6eV6aDxTdi3qFLZmu0cHSZvHRUpUEr3YQ=4tO5sCPw@mail.gmail.com>
+ <20111206060654.0e8bebe0@notabene.brown> <CAK=WgbbqgAYZ8uurf+xVyCxfZxoHcLdytxzdUNtoP9VNYPd57A@mail.gmail.com>
+ <20111210181546.6da7099a@notabene.brown> <CAK=WgbbZU=NJupPCeXfy5WcFCvzoCgmcf5HPWUEFaHMwLLCWJg@mail.gmail.com>
+ <477F20668A386D41ADCC57781B1F704308185E330B@SC-VEXCH1.marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:56369 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750880Ab1LSJKk convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2011 04:10:40 -0500
-Received: by dajs34 with SMTP id s34so3326301daj.19
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Dec 2011 01:10:40 -0800 (PST)
-In-Reply-To: <CAK=WgbYRvsOur6RmAYMEAf-01e-paGinPU4G_0VesacPGBD5GA@mail.gmail.com>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:64328 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751034Ab1LSJNI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2011 04:13:08 -0500
+In-Reply-To: <477F20668A386D41ADCC57781B1F704308185E330B@SC-VEXCH1.marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Joe Woodward <jw@terrafix.co.uk>, linux-mmc@vger.kernel.org, Neil Brown <neilb@suse.de>, Bing Zhao <bzhao@marvell.com>, Daniel Drake <dsd@laptop.org>
+To: Bing Zhao <bzhao@marvell.com>
+Cc: NeilBrown <neilb@suse.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, Daniel Drake <dsd@laptop.org>, Joe Woodward <jw@terrafix.co.uk>, Chris Ball <cjb@laptop.org>
 
-Hi Chris,
+Hello Bing,
 
-On Wed, Nov 30, 2011 at 4:29 PM, Ohad Ben-Cohen <ohad@wizery.com> wrote=
-:
-> On Wed, Nov 30, 2011 at 4:12 PM, Daniel Drake <dsd@laptop.org> wrote:
->> My patch simply sets a flag to enable a whole load of code written b=
-y
->> you - code which I understand little about. I am now available to
->> help, but given that my understanding of mmc is limited, I didn't
->> write the code in question, and I also lack expert insight into 8686
->> powerup, I'm not sure how useful I can be.
+On Thu, Dec 15, 2011 at 9:35 AM, Bing Zhao <bzhao@marvell.com> wrote:
+>> I wonder why the sdio reset command isn't helpful for you - it did
+>> seem to resolve some issues for Daniel. Maybe you have two different
+>> hardware revisions of the 8686 which behave differently in this
+>> respect ?
 >
-> Let's revert 08da834 then.
+> CMD52 Card Reset (writing bit3=1 to CCCR 0x06) may not reset the SD8686 properly for some systems. The reliable way to reset SD8686 is via RESETn toggling.
 
-We're slowly progressing towards understanding the issues we have with
-the 8686 (it seems there are a few different hw revisions of it, some
-of which do require toggling the reset pin before sending another init
-sequence), but it might take some more time until a solution fully
-materializes.
+Thanks a lot for confirming this.
 
-Since 3.2 is just around the corner, I suggest we should now proceed
-with the revert (see patch below), and later revisit this once we have
-a complete solution in hand.
-
-Thanks,
 Ohad.
-
->
-> When SDIO runtime PM was originally introduced, we immediately faced
-> two regressions with two different chipsets, and in response decided
-> not to enable it by default.
->
-> With your work on the 8686 we hoped we found all the gotchas, so
-> 08da834 did make sense (at least experimentally).
->
-> Unfortunately we now see that some setups out there still refuse to
-> work when SDIO runtime PM is enabled by default, and obviously we
-> can't live with these kind of regressions.
->
-> commit fd9fec7a00f58a16803e37a99a014ef82543ef6f
-> Author: Ohad Ben-Cohen <ohad@wizery.com>
-> Date: =A0 Wed Nov 30 16:22:13 2011 +0200
->
-> =A0 =A0Revert "mmc: enable runtime PM by default"
->
-> =A0 =A0When SDIO runtime PM was originally introduced, we immediately=
- faced
-> =A0 =A0two regressions with two different chipsets, and in response d=
-ecided
-> =A0 =A0not to enable it by default.
->
-> =A0 =A0With the recent work on the 8686 we hoped we found all the got=
-chas,
-> =A0 =A0so 08da834 did make sense (at least experimentally).
->
-> =A0 =A0Unfortunately we now see that some setups out there still refu=
-se to work
-> =A0 =A0when SDIO runtime PM is enabled by default (see
-> =A0 =A0http://www.spinics.net/lists/linux-mmc/msg11161.html), and obv=
-iously we
-> =A0 =A0can't live with these kind of regressions.
->
-> =A0 =A0This reverts commit 08da834a24312157f512224691ad1fddd11c1073.
->
-> =A0 =A0Signed-off-by: Ohad Ben-Cohen <ohad@wizery.com>
-> =A0 =A0Cc: Daniel Drake <dsd@laptop.org>
->
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index e8a5eb3..d31c78b 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -302,17 +302,6 @@ struct mmc_host *mmc_alloc_host(int extra, struc=
-t
-> device *dev)
-> =A0 =A0 =A0 =A0host->max_blk_size =3D 512;
-> =A0 =A0 =A0 =A0host->max_blk_count =3D PAGE_CACHE_SIZE / 512;
->
-> - =A0 =A0 =A0 /*
-> - =A0 =A0 =A0 =A0* Enable runtime power management by default. This f=
-lag was added due
-> - =A0 =A0 =A0 =A0* to runtime power management causing disruption for=
- some users, but
-> - =A0 =A0 =A0 =A0* the power on/off code has been improved since then=
-=2E
-> - =A0 =A0 =A0 =A0*
-> - =A0 =A0 =A0 =A0* We'll enable this flag by default as an experiment=
-, and if no
-> - =A0 =A0 =A0 =A0* problems are reported, we will follow up later and=
- remove the flag
-> - =A0 =A0 =A0 =A0* altogether.
-> - =A0 =A0 =A0 =A0*/
-> - =A0 =A0 =A0 host->caps =3D MMC_CAP_POWER_OFF_CARD;
-> -
-> =A0 =A0 =A0 =A0return host;
->
-> =A0free:
