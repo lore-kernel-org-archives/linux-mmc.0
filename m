@@ -1,33 +1,47 @@
-From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Subject: Re: [PATCH] mmc: omap: remove clock rate hard coding
-Date: Tue, 20 Dec 2011 15:17:40 +0530
-Message-ID: <CAMQu2gxQZvx9Zyd5n7FHBdZDez9=U14cU5WzZ=WcbjjP7qgYaQ@mail.gmail.com>
-References: <1324374120-19920-1-git-send-email-svenkatr@ti.com>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH 0/4] Fix the left DMA_NONE from dma_transfer_direction
+ migration
+Date: Tue, 20 Dec 2011 20:54:02 +0800
+Message-ID: <20111220125401.GA5129@S2101-09.ap.freescale.net>
+References: <1323791286-29574-1-git-send-email-shawn.guo@linaro.org>
+ <1324373044.1641.10096.camel@vkoul-udesk3>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:57306 "EHLO
-	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752655Ab1LTJsD convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 20 Dec 2011 04:48:03 -0500
-In-Reply-To: <1324374120-19920-1-git-send-email-svenkatr@ti.com>
+Received: from va3ehsobe006.messaging.microsoft.com ([216.32.180.16]:32536
+	"EHLO VA3EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1750830Ab1LTMpA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Dec 2011 07:45:00 -0500
+Content-Disposition: inline
+In-Reply-To: <1324373044.1641.10096.camel@vkoul-udesk3>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Balaji TK <balajitk@ti.com>
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, Chris Ball <cjb@laptop.org>, Artem Bityutskiy <artem.bityutskiy@intel.com>, linux-arm-kernel@lists.infradead.org, Huang Shijie <b32955@freescale.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mtd@lists.infradead.org
 
-On Tue, Dec 20, 2011 at 3:12 PM, Venkatraman S <svenkatr@ti.com> wrote:
-> From: Balaji TK <balajitk@ti.com>
->
-> MMC master clock rate can vary for each instance of the MMC controlle=
-r
-> on the device. Use clk_get_rate instead to get the value.
->
-> =A0Signed-off-by: Balaji TK =A0<balajitk@ti.com>
-> =A0Reviewed-by: Venkatraman S <svenkatr@ti.com>
-> ---
-=46inally.
-=46eel free to add if you need one
-Acked-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
+On Tue, Dec 20, 2011 at 02:54:04PM +0530, Vinod Koul wrote:
+> On Tue, 2011-12-13 at 23:48 +0800, Shawn Guo wrote:
+> > I have been working on -rc recently, and have not noticed the failure
+> > until I ran next tree today.  The mxs-mmc driver is broken on next
+> > tree because the DMA_NONE was left over from the dma_transfer_direction
+> > migration for mxs-dma and its client drivers.
+> > 
+> For DMA transfer, the NONE direction makes no sense?
+> 
+> In your conetext, what are you trying to achieve?
+> 
+The mxs-dma controller has a feature to program peripheral registers
+with given values (mxs-dma PIO mode).  This is designed to pipeline
+the operations.  For example, we can put mxs-mmc controller register
+values into scatter list as one element together with actual data.
+Triggering the mxs-dma, the dma will program the values into mxs-mmc
+controller register to set up and enable mxs-mmc, and then dma
+continue transfer data from/to mxs-mmc.  All these get done in one
+dmaengine_submit().
+
+And DMA_NONE was used to let mxs-dma know this is a PIO operation.
+
+-- 
+Regards,
+Shawn
+
