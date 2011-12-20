@@ -1,51 +1,37 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH v4 2/4] ARM: pxa168: Add SDHCI support
-Date: Tue, 20 Dec 2011 21:03:24 +0000
-Message-ID: <20111220210324.GD2577@n2100.arm.linux.org.uk>
-References: <CAN1soZxZjdzivfttUhDDvjUDiyiAC5SSKtB0rXR1D=3=q6O0wQ@mail.gmail.com> <1324386781-25271-1-git-send-email-tanmay.upadhyay@einfochips.com>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: PCI suspend warnings in 3.2-rc6
+Date: Tue, 20 Dec 2011 23:32:09 +0100
+Message-ID: <201112202332.09493.rjw@sisk.pl>
+References: <20111218151101.083bc530@x220.fritz.box> <201112190038.35760.rjw@sisk.pl> <m28vm85cxs.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: Text/Plain;
+  charset="iso-8859-2"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:39512 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752929Ab1LTVDl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Dec 2011 16:03:41 -0500
-Content-Disposition: inline
-In-Reply-To: <1324386781-25271-1-git-send-email-tanmay.upadhyay@einfochips.com>
+Received: from ogre.sisk.pl ([217.79.144.158]:34559 "EHLO ogre.sisk.pl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752037Ab1LTW3D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 20 Dec 2011 17:29:03 -0500
+In-Reply-To: <m28vm85cxs.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
-Cc: haojian.zhuang@gmail.com, eric.y.miao@gmail.com, jason.chagas@marvell.com, prakity@marvell.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Udo Steinberg <udo@hypervisor.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Linux PM list <linux-pm@vger.kernel.org>
 
-Just two minor style issues in this patch.
+On Tuesday, December 20, 2011, Chris Ball wrote:
+> Hi,
+> 
+> On Sun, Dec 18 2011, Rafael J. Wysocki wrote:
+> > On Sunday, December 18, 2011, Udo Steinberg wrote:
+> >> When suspending to RAM, I'm getting a bunch of warnings from the PCI layer
+> >> in Linux-3.2-rc6, which I didn't get with Linux-3.1. Please let me know if
+> >> I should provide more information about platform, config, etc.
+> >
+> > This is a known issue with sdhci-pci and there's a patch fixing that,
+> > hopefully in the maintainer's tree waiting for the next merge window
+> 
+> I'll push this for 3.2, thanks.
 
-On Tue, Dec 20, 2011 at 06:43:01PM +0530, Tanmay Upadhyay wrote:
-> +static inline int pxa168_add_sdh(int id, struct sdhci_pxa_platdata *data)
-> +{
-> +	struct pxa_device_desc *d = NULL;
-> +
-> +	switch (id) {
-> +	case 1: d = &pxa168_device_sdh1; break;
-> +	case 2: d = &pxa168_device_sdh2; break;
-> +	case 3: d = &pxa168_device_sdh3; break;
-> +	case 4: d = &pxa168_device_sdh4; break;
+Thanks a lot!
 
-Style.
-	case X:
-		d = &y;
-		break;
-
-> +static void sdh_clk_disable(struct clk *clk)
-> +{
-> +	__raw_writel(__raw_readl(clk->clk_rst) & ~(clk->enable_val),
-
-Parens around clk->enable_val not required.
-
-> +	INIT_CLKREG(&clk_sdh1, NULL, "PXA-SDHCLK"),
-> +	INIT_CLKREG(&clk_sdh2, NULL, "PXA-SDHCLK"),
-> +	INIT_CLKREG(&clk_sdh3, NULL, "PXA-SDHCLK"),
-> +	INIT_CLKREG(&clk_sdh4, NULL, "PXA-SDHCLK"),
-
-So these clocks are registered with the same name?  How are they
-distinguished by clk_get()?
-
+Rafael
