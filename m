@@ -1,35 +1,36 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: PCI suspend warnings in 3.2-rc6
-Date: Mon, 19 Dec 2011 19:01:03 -0500
-Message-ID: <m28vm85cxs.fsf@bob.laptop.org>
-References: <20111218151101.083bc530@x220.fritz.box>
-	<201112190038.35760.rjw@sisk.pl>
+Subject: Re: [PATCH 4/15] vub300: fix module parameter.
+Date: Mon, 19 Dec 2011 19:03:30 -0500
+Message-ID: <m24nww5ctp.fsf@bob.laptop.org>
+References: <871us6tu0d.fsf@rustcorp.com.au> <1324062122.2302.5.camel@study-2>
+	<87wr9tnvyo.fsf@rustcorp.com.au>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50856 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:46934 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751495Ab1LTABS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 19 Dec 2011 19:01:18 -0500
-In-Reply-To: <201112190038.35760.rjw@sisk.pl> (Rafael J. Wysocki's message of
-	"Mon, 19 Dec 2011 00:38:35 +0100")
+	id S1751845Ab1LTAEZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 19 Dec 2011 19:04:25 -0500
+In-Reply-To: <87wr9tnvyo.fsf@rustcorp.com.au> (Rusty Russell's message of
+	"Mon, 19 Dec 2011 12:50:31 +1030")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Udo Steinberg <udo@hypervisor.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Linux PM list <linux-pm@vger.kernel.org>
+To: Rusty Russell <rusty@rustcorp.com.au>
+Cc: Tony Olech <tony.olech@elandigitalsystems.com>, tony@olech.com, lkml - Kernel Mailing List <linux-kernel@vger.kernel.org>, Pawel Moll <pawel.moll@arm.com>, linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org
 
-Hi,
+Hi Rusty,
 
-On Sun, Dec 18 2011, Rafael J. Wysocki wrote:
-> On Sunday, December 18, 2011, Udo Steinberg wrote:
->> When suspending to RAM, I'm getting a bunch of warnings from the PCI layer
->> in Linux-3.2-rc6, which I didn't get with Linux-3.1. Please let me know if
->> I should provide more information about platform, config, etc.
+On Sun, Dec 18 2011, Rusty Russell wrote:
+> On Fri, 16 Dec 2011 19:02:02 +0000, Tony Olech
+> <tony.olech@elandigitalsystems.com> wrote:
+>> You are right.
+>> I don't know how that slipped through
+>> Tony Olech
 >
-> This is a known issue with sdhci-pci and there's a patch fixing that,
-> hopefully in the maintainer's tree waiting for the next merge window
+> I'm assuming that means you're taking this?  Otherwise, please give me
+> an acked-by.
 
-I'll push this for 3.2, thanks.
+Thanks, I'll send this for 3.2 with Tony's ACK.
 
 - Chris.
 -- 
