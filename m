@@ -1,224 +1,65 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: [PATCH V7 2/2] mmc: host: Adds support for eMMC 4.5 HS200 mode
-Date: Wed, 21 Dec 2011 09:42:59 +0530
-Message-ID: <1324440779-27843-3-git-send-email-girish.shivananjappa@linaro.org>
-References: <1324440779-27843-1-git-send-email-girish.shivananjappa@linaro.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1324440779-27843-1-git-send-email-girish.shivananjappa@linaro.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>
+From: Shawn Guo <shawn.guo@freescale.com>
+Subject: Re: [PATCH 0/4] Fix the left DMA_NONE from dma_transfer_direction
+ migration
+Date: Wed, 21 Dec 2011 12:45:18 +0800
+Message-ID: <20111221044517.GD5983@S2101-09.ap.freescale.net>
+References: <1323791286-29574-1-git-send-email-shawn.guo@linaro.org>
+ <1324373044.1641.10096.camel@vkoul-udesk3>
+ <20111220125401.GA5129@S2101-09.ap.freescale.net>
+ <1324440424.1641.10104.camel@vkoul-udesk3>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from db3ehsobe006.messaging.microsoft.com ([213.199.154.144]:35216
+	"EHLO DB3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751730Ab1LUEgN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Dec 2011 23:36:13 -0500
+Content-Disposition: inline
+In-Reply-To: <1324440424.1641.10104.camel@vkoul-udesk3>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, Artem Bityutskiy <artem.bityutskiy@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Huang Shijie <b32955@freescale.com>, linux-mtd@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>, linux-arm-kernel@lists.infradead.org
 
-This patch adds support for the HS200 mode on the host side.
-Also enables the tuning feature required when the HS200 mode
-is selected.
+On Wed, Dec 21, 2011 at 09:37:04AM +0530, Vinod Koul wrote:
+> On Tue, 2011-12-20 at 20:54 +0800, Shawn Guo wrote:
+> > On Tue, Dec 20, 2011 at 02:54:04PM +0530, Vinod Koul wrote:
+> > > On Tue, 2011-12-13 at 23:48 +0800, Shawn Guo wrote:
+> > > > I have been working on -rc recently, and have not noticed the failure
+> > > > until I ran next tree today.  The mxs-mmc driver is broken on next
+> > > > tree because the DMA_NONE was left over from the dma_transfer_direction
+> > > > migration for mxs-dma and its client drivers.
+> > > > 
+> > > For DMA transfer, the NONE direction makes no sense?
+> > > 
+> > > In your conetext, what are you trying to achieve?
+> > > 
+> > The mxs-dma controller has a feature to program peripheral registers
+> > with given values (mxs-dma PIO mode).  This is designed to pipeline
+> > the operations.  For example, we can put mxs-mmc controller register
+> > values into scatter list as one element together with actual data.
+> > Triggering the mxs-dma, the dma will program the values into mxs-mmc
+> > controller register to set up and enable mxs-mmc, and then dma
+> > continue transfer data from/to mxs-mmc.  All these get done in one
+> > dmaengine_submit().
+> > 
+> > And DMA_NONE was used to let mxs-dma know this is a PIO operation.
+> Sorry am little lost here. Why would DMA driver bother with a PIO mode,
+> that is something only peripheral driver would know about, mmc in your
+> case.
+> 
+The term PIO here may not the one on your mind.  I call it 'mxs-dma
+pio'.  In this mode, mxs-dma hardware can write values into mmc
+controller register without cpu involved.
 
-cc: Chris Ball <cjb@laptop.org>
-Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
----
- drivers/mmc/host/sdhci.c  |   45 ++++++++++++++++++++++++++++++++++-----------
- drivers/mmc/host/sdhci.h  |    1 +
- include/linux/mmc/host.h  |   11 ++++++++++-
- include/linux/mmc/sdhci.h |    1 +
- 4 files changed, 46 insertions(+), 12 deletions(-)
+> So what you are saying is the your dma has the capability to program the
+> peripheral registers in case of PIO mode, but why wouldn't the
+> peripheral driver do that instead? 
+> 
+Yes, I'm saying mxs-dma has the capability to program the peripheral
+registers, and that's called 'mxs-dma pio' mode.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ab6018f..fb17e95 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -49,7 +49,7 @@ static void sdhci_finish_data(struct sdhci_host *);
- 
- static void sdhci_send_command(struct sdhci_host *, struct mmc_command *);
- static void sdhci_finish_command(struct sdhci_host *);
--static int sdhci_execute_tuning(struct mmc_host *mmc);
-+static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- static void sdhci_tuning_timer(unsigned long data);
- 
- #ifdef CONFIG_PM_RUNTIME
-@@ -1016,7 +1016,8 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		flags |= SDHCI_CMD_INDEX;
- 
- 	/* CMD19 is special in that the Data Present Select should be set */
--	if (cmd->data || (cmd->opcode == MMC_SEND_TUNING_BLOCK))
-+	if (cmd->data || (cmd->opcode == MMC_SEND_TUNING_BLOCK) ||
-+	    (cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200))
- 		flags |= SDHCI_CMD_DATA;
- 
- 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
-@@ -1287,7 +1288,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
- 		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
- 			spin_unlock_irqrestore(&host->lock, flags);
--			sdhci_execute_tuning(mmc);
-+			sdhci_execute_tuning(mmc, mrq->cmd->opcode);
- 			spin_lock_irqsave(&host->lock, flags);
- 
- 			/* Restore original mmc_request structure */
-@@ -1371,7 +1372,8 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 		unsigned int clock;
- 
- 		/* In case of UHS-I modes, set High Speed Enable */
--		if ((ios->timing == MMC_TIMING_UHS_SDR50) ||
-+		if ((ios->timing == MMC_TIMING_MMC_HS200) ||
-+		    (ios->timing == MMC_TIMING_UHS_SDR50) ||
- 		    (ios->timing == MMC_TIMING_UHS_SDR104) ||
- 		    (ios->timing == MMC_TIMING_UHS_DDR50) ||
- 		    (ios->timing == MMC_TIMING_UHS_SDR25) ||
-@@ -1425,7 +1427,9 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 			ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 			/* Select Bus Speed Mode for host */
- 			ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
--			if (ios->timing == MMC_TIMING_UHS_SDR12)
-+			if (ios->timing == MMC_TIMING_MMC_HS200)
-+				ctrl_2 |= SDHCI_CTRL_HS_SDR200;
-+			else if (ios->timing == MMC_TIMING_UHS_SDR12)
- 				ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
- 			else if (ios->timing == MMC_TIMING_UHS_SDR25)
- 				ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
-@@ -1673,7 +1677,7 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 	return err;
- }
- 
--static int sdhci_execute_tuning(struct mmc_host *mmc)
-+static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host;
- 	u16 ctrl;
-@@ -1694,10 +1698,13 @@ static int sdhci_execute_tuning(struct mmc_host *mmc)
- 	 * Host Controller needs tuning only in case of SDR104 mode
- 	 * and for SDR50 mode when Use Tuning for SDR50 is set in
- 	 * Capabilities register.
-+	 * If the Host Controller supports the HS200 mode then tuning
-+	 * function has to be executed.
- 	 */
- 	if (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR104) ||
- 	    (((ctrl & SDHCI_CTRL_UHS_MASK) == SDHCI_CTRL_UHS_SDR50) &&
--	    (host->flags & SDHCI_SDR50_NEEDS_TUNING)))
-+	    (host->flags & SDHCI_SDR50_NEEDS_TUNING)) ||
-+	    (host->flags & SDHCI_HS200_NEEDS_TUNING))
- 		ctrl |= SDHCI_CTRL_EXEC_TUNING;
- 	else {
- 		spin_unlock(&host->lock);
-@@ -1733,7 +1740,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc)
- 		if (!tuning_loop_counter && !timeout)
- 			break;
- 
--		cmd.opcode = MMC_SEND_TUNING_BLOCK;
-+		cmd.opcode = opcode;
- 		cmd.arg = 0;
- 		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
- 		cmd.retries = 0;
-@@ -1748,7 +1755,17 @@ static int sdhci_execute_tuning(struct mmc_host *mmc)
- 		 * block to the Host Controller. So we set the block size
- 		 * to 64 here.
- 		 */
--		sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64), SDHCI_BLOCK_SIZE);
-+		if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200) {
-+			if (mmc->ios.bus_width == MMC_BUS_WIDTH_8)
-+				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128),
-+					     SDHCI_BLOCK_SIZE);
-+			else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4)
-+				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
-+					     SDHCI_BLOCK_SIZE);
-+		} else {
-+			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
-+				     SDHCI_BLOCK_SIZE);
-+		}
- 
- 		/*
- 		 * The tuning block is sent by the card to the host controller.
-@@ -2131,12 +2148,14 @@ static void sdhci_show_adma_error(struct sdhci_host *host) { }
- 
- static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- {
-+	u32 command;
- 	BUG_ON(intmask == 0);
- 
- 	/* CMD19 generates _only_ Buffer Read Ready interrupt */
- 	if (intmask & SDHCI_INT_DATA_AVAIL) {
--		if (SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND)) ==
--		    MMC_SEND_TUNING_BLOCK) {
-+		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
-+		if ((command == MMC_SEND_TUNING_BLOCK) ||
-+		    (command == MMC_SEND_TUNING_BLOCK_HS200)) {
- 			host->tuning_done = 1;
- 			wake_up(&host->buf_ready_int);
- 			return;
-@@ -2741,6 +2760,10 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (caps[1] & SDHCI_USE_SDR50_TUNING)
- 		host->flags |= SDHCI_SDR50_NEEDS_TUNING;
- 
-+	/* Does the host needs tuning for HS200? */
-+	if (mmc->caps2 & MMC_CAP2_HS200)
-+		host->flags |= SDHCI_HS200_NEEDS_TUNING;
-+
- 	/* Driver Type(s) (A, C, D) supported by the host */
- 	if (caps[1] & SDHCI_DRIVER_TYPE_A)
- 		mmc->caps |= MMC_CAP_DRIVER_TYPE_A;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index a04d4d0..46fd2ac 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -158,6 +158,7 @@
- #define   SDHCI_CTRL_UHS_SDR50		0x0002
- #define   SDHCI_CTRL_UHS_SDR104		0x0003
- #define   SDHCI_CTRL_UHS_DDR50		0x0004
-+#define   SDHCI_CTRL_HS_SDR200		0x0005 /*reserved value in SDIO spec */
- #define  SDHCI_CTRL_VDD_180		0x0008
- #define  SDHCI_CTRL_DRV_TYPE_MASK	0x0030
- #define   SDHCI_CTRL_DRV_TYPE_B		0x0000
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 9a03d03..606c8c3 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -56,10 +56,13 @@ struct mmc_ios {
- #define MMC_TIMING_UHS_SDR50	3
- #define MMC_TIMING_UHS_SDR104	4
- #define MMC_TIMING_UHS_DDR50	5
-+#define MMC_TIMING_MMC_HS200	6
- 
- #define MMC_SDR_MODE		0
- #define MMC_1_2V_DDR_MODE	1
- #define MMC_1_8V_DDR_MODE	2
-+#define MMC_1_2V_SDR_MODE	3
-+#define MMC_1_8V_SDR_MODE	4
- 
- 	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
- 
-@@ -148,7 +151,9 @@ struct mmc_host_ops {
- 	void	(*init_card)(struct mmc_host *host, struct mmc_card *card);
- 
- 	int	(*start_signal_voltage_switch)(struct mmc_host *host, struct mmc_ios *ios);
--	int	(*execute_tuning)(struct mmc_host *host);
-+
-+	/* The tuning command opcode value is different for SD and eMMC cards */
-+	int	(*execute_tuning)(struct mmc_host *host, u32 opcode);
- 	void	(*enable_preset_value)(struct mmc_host *host, bool enable);
- 	int	(*select_drive_strength)(unsigned int max_dtr, int host_drv, int card_drv);
- 	void	(*hw_reset)(struct mmc_host *host);
-@@ -242,6 +247,10 @@ struct mmc_host {
- #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
- #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff supported */
- #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
-+#define MMC_CAP2_HS200_1_8V_SDR	(1 << 4)	/* can support */
-+#define MMC_CAP2_HS200_1_2V_SDR	(1 << 5)	/* can support */
-+#define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
-+				 MMC_CAP2_HS200_1_2V_SDR)
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 	unsigned int        power_notify_type;
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index e4b6935..d9a2222 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -121,6 +121,7 @@ struct sdhci_host {
- #define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
- #define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
- #define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
-+#define SDHCI_HS200_NEEDS_TUNING (1<<10)	/* HS200 needs tuning */
- 
- 	unsigned int version;	/* SDHCI spec. version */
- 
 -- 
-1.7.1
+Regards,
+Shawn
+
