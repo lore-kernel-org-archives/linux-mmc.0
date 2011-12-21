@@ -1,55 +1,54 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [PATCH 0/4] Fix the left DMA_NONE from dma_transfer_direction
- migration
-Date: Wed, 21 Dec 2011 09:37:04 +0530
-Message-ID: <1324440424.1641.10104.camel@vkoul-udesk3>
-References: <1323791286-29574-1-git-send-email-shawn.guo@linaro.org>
-	 <1324373044.1641.10096.camel@vkoul-udesk3>
-	 <20111220125401.GA5129@S2101-09.ap.freescale.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:24329 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751418Ab1LUEHQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 20 Dec 2011 23:07:16 -0500
-In-Reply-To: <20111220125401.GA5129@S2101-09.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: [PATCH V7 0/2] HS200 Mode support for device and host
+Date: Wed, 21 Dec 2011 09:42:57 +0530
+Message-ID: <1324440779-27843-1-git-send-email-girish.shivananjappa@linaro.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@freescale.com>
-Cc: Chris Ball <cjb@laptop.org>, Artem Bityutskiy <artem.bityutskiy@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Huang Shijie <b32955@freescale.com>, linux-mtd@lists.infradead.org, Shawn Guo <shawn.guo@linaro.org>, linux-arm-kernel@lists.infradead.org
 
-On Tue, 2011-12-20 at 20:54 +0800, Shawn Guo wrote:
-> On Tue, Dec 20, 2011 at 02:54:04PM +0530, Vinod Koul wrote:
-> > On Tue, 2011-12-13 at 23:48 +0800, Shawn Guo wrote:
-> > > I have been working on -rc recently, and have not noticed the failure
-> > > until I ran next tree today.  The mxs-mmc driver is broken on next
-> > > tree because the DMA_NONE was left over from the dma_transfer_direction
-> > > migration for mxs-dma and its client drivers.
-> > > 
-> > For DMA transfer, the NONE direction makes no sense?
-> > 
-> > In your conetext, what are you trying to achieve?
-> > 
-> The mxs-dma controller has a feature to program peripheral registers
-> with given values (mxs-dma PIO mode).  This is designed to pipeline
-> the operations.  For example, we can put mxs-mmc controller register
-> values into scatter list as one element together with actual data.
-> Triggering the mxs-dma, the dma will program the values into mxs-mmc
-> controller register to set up and enable mxs-mmc, and then dma
-> continue transfer data from/to mxs-mmc.  All these get done in one
-> dmaengine_submit().
-> 
-> And DMA_NONE was used to let mxs-dma know this is a PIO operation.
-Sorry am little lost here. Why would DMA driver bother with a PIO mode,
-that is something only peripheral driver would know about, mmc in your
-case.
+changes in v7:
+	Updated with review comments for minor changes in host conditional
+	handling. added the handling for 4 bit bus width. 
+Changes in v6:
+       split the patch into 2 and classified them as a patch for device
+       and host. Modified to include the review comments.
+Changes in v5:
+       Reduced the case statements for better code readability. Removed
+       unused macro definitions. Modified the tuning function prototype
+       and definition to support tuning for both SD and eMMC cards.
+Changes in v4:
+       Rebased onto chris-mmc/mmc-next branch. This patch is successfully
+       applied on commit with id de022ed3fdc14808299b2fa66dbb1ed5ab921912.
+Changes in v3:
+       In the previous commits of chris-mmc/mmc-next branch, the patch with
+       commit id (c0f22a2c92e357e7cb3988b0b13034d70b7461f9) defines caps2 for
+       more capabilities. This patch version deletes the member ext_caps(created
+       in my earlier patch) from struct mmc_host and reuses already accepted
+       caps2 member.
+Changes in v2:
+       Rebased to latest chris-mmc/mmc-next branch. Resolved indentation
+       problems identified in review. This patch has to be applied before
+       the patch released for modifying the printk messages.
+Changes in v1:
+       Case statements in switch that produce same result have
+       been combined to reduce repeated assignments.
+       patch recreated after rebase to chris balls mmc-next branch.
 
-So what you are saying is the your dma has the capability to program the
-peripheral registers in case of PIO mode, but why wouldn't the
-peripheral driver do that instead? 
+Girish K S (2):
+  mmc: core: HS200 mode support for eMMC 4.5
+  mmc: host: Adds support for eMMC 4.5 HS200 mode
 
--- 
-~Vinod
-
+ drivers/mmc/core/bus.c     |    3 +-
+ drivers/mmc/core/debugfs.c |    3 +
+ drivers/mmc/core/mmc.c     |  142 +++++++++++++++++++++++++++++++++++++++++---
+ drivers/mmc/core/sd.c      |    3 +-
+ drivers/mmc/core/sdio.c    |    4 +-
+ drivers/mmc/host/sdhci.c   |   45 +++++++++++----
+ drivers/mmc/host/sdhci.h   |    1 +
+ include/linux/mmc/card.h   |    3 +
+ include/linux/mmc/host.h   |   11 +++-
+ include/linux/mmc/mmc.h    |   66 ++++++++++++++++++++-
+ include/linux/mmc/sdhci.h  |    1 +
+ 11 files changed, 257 insertions(+), 25 deletions(-)
