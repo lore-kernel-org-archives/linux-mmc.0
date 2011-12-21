@@ -1,196 +1,160 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH] MMC-4.5 Data Tag Support
-Date: Wed, 21 Dec 2011 16:23:49 +0530
-Message-ID: <CAGxe1ZGrBDLargLAFnagOH47-icLVFReEzhV9PzZrXc1MQVsew@mail.gmail.com>
-References: <1324453157-30081-1-git-send-email-saugata.das@stericsson.com>
+From: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Subject: Re: [PATCH V4] mmc: Kill block requests if card is removed
+Date: Wed, 21 Dec 2011 16:36:15 +0530
+Message-ID: <4EF1BDA7.6070903@codeaurora.org>
+References: <1323333350-14315-1-git-send-email-sthumma@codeaurora.org> <4EE081CF.3010303@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:45346 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750909Ab1LUKxu convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Dec 2011 05:53:50 -0500
-Received: by vcbfk14 with SMTP id fk14so5619888vcb.19
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Dec 2011 02:53:49 -0800 (PST)
-In-Reply-To: <1324453157-30081-1-git-send-email-saugata.das@stericsson.com>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:29048 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751176Ab1LULGU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Dec 2011 06:06:20 -0500
+In-Reply-To: <4EE081CF.3010303@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Saugata Das <saugata.das@stericsson.com>
-Cc: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Chris Ball <cjb@laptop.org>
+Cc: per.lkml@gmail.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 21 December 2011 13:09, Saugata Das <saugata.das@stericsson.com> wro=
-te:
-> From: Saugata Das <saugata.das@linaro.org>
+On 12/8/2011 2:52 PM, Adrian Hunter wrote:
+> On 08/12/11 10:35, Sujit Reddy Thumma wrote:
+>> Kill block requests when the host realizes that the card is
+>> removed from the slot and is sure that subsequent requests
+>> are bound to fail. Do this silently so that the block
+>> layer doesn't output unnecessary error messages.
+>>
+>> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
 >
-> MMC-4.5 data tag feature will be used to store the file system meta-d=
-ata in the
-> tagged region of eMMC. This will improve the write and subsequent rea=
-d transfer
-> time for the meta data.
+> Acked-by: Adrian Hunter<adrian.hunter@intel.com>
 >
-> Signed-off-by: Saugata Das <saugata.das@linaro.org>
-> ---
-> =A0drivers/mmc/card/block.c | =A0 17 +++++++++++++++--
-> =A0drivers/mmc/core/mmc.c =A0 | =A0 14 ++++++++++++++
-> =A0include/linux/mmc/card.h | =A0 =A02 ++
-> =A0include/linux/mmc/mmc.h =A0| =A0 =A03 +++
-> =A04 files changed, 34 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index a1cb21f..af3b6c3 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -995,6 +995,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_r=
-eq *mqrq,
-> =A0 =A0 =A0 =A0struct mmc_blk_request *brq =3D &mqrq->brq;
-> =A0 =A0 =A0 =A0struct request *req =3D mqrq->req;
-> =A0 =A0 =A0 =A0struct mmc_blk_data *md =3D mq->data;
-> + =A0 =A0 =A0 bool do_data_tag;
->
-> =A0 =A0 =A0 =A0/*
-> =A0 =A0 =A0 =A0 * Reliable writes are used to implement Forced Unit A=
-ccess and
-> @@ -1071,6 +1072,16 @@ static void mmc_blk_rw_rq_prep(struct mmc_queu=
-e_req *mqrq,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_apply_rel_rw(brq, card, req);
->
-> =A0 =A0 =A0 =A0/*
-> + =A0 =A0 =A0 =A0* Data tag is used only during writing meta data to =
-speed
-> + =A0 =A0 =A0 =A0* up write and any subsequent read of this meta data
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 do_data_tag =3D (card->ext_csd.data_tag_unit_size) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (req->cmd_flags & REQ_META) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (rq_data_dir(req) =3D=3D WRITE) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((brq->data.blocks * brq->data.blksz) >=
-=3D
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_tag_unit_size) ;
-> +
-> + =A0 =A0 =A0 /*
-> =A0 =A0 =A0 =A0 * Pre-defined multi-block transfers are preferable to
-> =A0 =A0 =A0 =A0 * open ended-ones (and necessary for reliable writes)=
-=2E
-> =A0 =A0 =A0 =A0 * However, it is not sufficient to just send CMD23,
-> @@ -1091,10 +1102,12 @@ static void mmc_blk_rw_rq_prep(struct mmc_que=
-ue_req *mqrq,
->
-> =A0 =A0 =A0 =A0if ((md->flags & MMC_BLK_CMD23) &&
-> =A0 =A0 =A0 =A0 =A0 =A0mmc_op_multi(brq->cmd.opcode) &&
-> - =A0 =A0 =A0 =A0 =A0 (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO=
-_CMD23))) {
-> + =A0 =A0 =A0 =A0 =A0 (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO=
-_CMD23) ||
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 do_data_tag)) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->sbc.opcode =3D MMC_SET_BLOCK_COUN=
-T;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->sbc.arg =3D brq->data.blocks |
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_rel_wr ? (1 << 31) =
-: 0);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_rel_wr ? (1 << 31) =
-: 0) |
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_data_tag ? (1 << 29=
-) : 0);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->sbc.flags =3D MMC_RSP_R1 | MMC_CM=
-D_AC;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->mrq.sbc =3D &brq->sbc;
-> =A0 =A0 =A0 =A0}
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index dbf421a..244049b 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -488,6 +488,20 @@ static int mmc_read_ext_csd(struct mmc_card *car=
-d, u8 *ext_csd)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_CACHE_=
-SIZE + 1] << 8 |
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_CACHE_=
-SIZE + 2] << 16 |
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_CACHE_=
-SIZE + 3] << 24;
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] =3D=
-=3D 1)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_sect=
-or_size =3D 4096;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_sect=
-or_size =3D 512;
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((ext_csd[EXT_CSD_DATA_TAG_SUPPORT] =
-& 1) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (ext_csd[EXT_CSD_TAG_UN=
-IT_SIZE] <=3D 8)) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_tag_=
-unit_size =3D
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((unsigned int) 1 << ex=
-t_csd[EXT_CSD_TAG_UNIT_SIZE]) *
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (card->ext_csd.data_sec=
-tor_size);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_tag_=
-unit_size =3D 0;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> =A0 =A0 =A0 =A0}
->
-> =A0out:
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 415f2db..a55668d 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -71,6 +71,8 @@ struct mmc_ext_csd {
-> =A0 =A0 =A0 =A0bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hpi_en; =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* HPI enablebit */
-> =A0 =A0 =A0 =A0bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hpi; =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* HPI support bit */
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0hpi_cmd; =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0/* cmd used as HPI */
-> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0data_sector_size; =A0=
- =A0 =A0 /* 512Bytes or 4KB */
-> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0data_tag_unit_size;=
- =A0 =A0 /* DATA TAG UNIT size */
-> =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0raw_part=
-ition_support; =A0/* 160 */
-> =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0raw_eras=
-ed_mem_count; =A0 /* 181 */
-> =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0raw_ext_=
-csd_structure; =A0/* 194 */
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 0e71356..e076f7f 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -273,6 +273,7 @@ struct _mmc_csd {
-> =A0#define EXT_CSD_FLUSH_CACHE =A0 =A0 =A0 =A0 =A0 =A032 =A0 =A0 =A0/=
-* W */
-> =A0#define EXT_CSD_CACHE_CTRL =A0 =A0 =A0 =A0 =A0 =A0 33 =A0 =A0 =A0/=
-* R/W */
-> =A0#define EXT_CSD_POWER_OFF_NOTIFICATION 34 =A0 =A0 =A0/* R/W */
-> +#define EXT_CSD_DATA_SECTOR_SIZE =A0 =A0 =A0 61 =A0 =A0 =A0/* R */
-> =A0#define EXT_CSD_GP_SIZE_MULT =A0 =A0 =A0 =A0 =A0 143 =A0 =A0 /* R/=
-W */
-> =A0#define EXT_CSD_PARTITION_ATTRIBUTE =A0 =A0156 =A0 =A0 /* R/W */
-> =A0#define EXT_CSD_PARTITION_SUPPORT =A0 =A0 =A0160 =A0 =A0 /* RO */
-> @@ -313,6 +314,8 @@ struct _mmc_csd {
-> =A0#define EXT_CSD_POWER_OFF_LONG_TIME =A0 =A0247 =A0 =A0 /* RO */
-> =A0#define EXT_CSD_GENERIC_CMD6_TIME =A0 =A0 =A0248 =A0 =A0 /* RO */
-> =A0#define EXT_CSD_CACHE_SIZE =A0 =A0 =A0 =A0 =A0 =A0 249 =A0 =A0 /* =
-RO, 4 bytes */
-> +#define EXT_CSD_TAG_UNIT_SIZE =A0 =A0 =A0 =A0 =A0498 =A0 =A0 /* RO *=
-/
-> +#define EXT_CSD_DATA_TAG_SUPPORT =A0 =A0 =A0 499 =A0 =A0 /* RO */
-> =A0#define EXT_CSD_HPI_FEATURES =A0 =A0 =A0 =A0 =A0 503 =A0 =A0 /* RO=
- */
->
-> =A0/*
 
-TAG_RES_SIZE in the extended csd register mentions about the resource
-size utilised by the device to keep data tag.
-This can be used to avoid the data exhaustion case.
+Thanks Adrian.
 
-> --
-> 1.7.4.3
+Chris can you pull this patch with Adrian's ack?
+
+Thanks,
+Sujit
+
+>>
+>> ---
+>> Changes in v4:
+>> 	- Extra check to make sure no further commands are sent
+>> 	in error case when the card is removed.
+>> Changes in v3:
+>> 	- Dropped dependency on Per's patch and is now dependent
+>> 	on "[PATCH V4] mmc: allow upper layers to determine immediately
+>> 	if a card has been removed" by Adrian Hunter.
+>> 	- Modified commit text slightly as Adrian has
+>> 	implemented his own suggestion in a different patch.
+>>
+>> Changes in v2:
+>> 	- Changed the implementation with further comments from Adrian
+>> 	- Set the card removed flag in bus notifier callbacks
+>> 	- This patch is now dependent on patch from Per Forlin:
+>> 	http://thread.gmane.org/gmane.linux.kernel.mmc/11128/focus=11211
+>> ---
+>>   drivers/mmc/card/block.c |   17 ++++++++++++++++-
+>>   drivers/mmc/card/queue.c |    5 +++++
+>>   2 files changed, 21 insertions(+), 1 deletions(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 0c959c9..0cad48a 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -121,6 +121,7 @@ enum mmc_blk_status {
+>>   	MMC_BLK_ABORT,
+>>   	MMC_BLK_DATA_ERR,
+>>   	MMC_BLK_ECC_ERR,
+>> +	MMC_BLK_NOMEDIUM,
+>>   };
+>>
+>>   module_param(perdev_minors, int, 0444);
+>> @@ -639,6 +640,7 @@ static int get_card_status(struct mmc_card *card, u32 *status, int retries)
+>>   	return err;
+>>   }
+>>
+>> +#define ERR_NOMEDIUM	3
+>>   #define ERR_RETRY	2
+>>   #define ERR_ABORT	1
+>>   #define ERR_CONTINUE	0
+>> @@ -706,6 +708,9 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
+>>   	u32 status, stop_status = 0;
+>>   	int err, retry;
+>>
+>> +	if (mmc_card_removed(card))
+>> +		return ERR_NOMEDIUM;
+>> +
+>>   	/*
+>>   	 * Try to get card status which indicates both the card state
+>>   	 * and why there was no response.  If the first attempt fails,
+>> @@ -722,8 +727,12 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
+>>   	}
+>>
+>>   	/* We couldn't get a response from the card.  Give up. */
+>> -	if (err)
+>> +	if (err) {
+>> +		/* Check if the card is removed */
+>> +		if (mmc_detect_card_removed(card->host))
+>> +			return ERR_NOMEDIUM;
+>>   		return ERR_ABORT;
+>> +	}
+>>
+>>   	/* Flag ECC errors */
+>>   	if ((status&  R1_CARD_ECC_FAILED) ||
+>> @@ -996,6 +1005,8 @@ static int mmc_blk_err_check(struct mmc_card *card,
+>>   			return MMC_BLK_RETRY;
+>>   		case ERR_ABORT:
+>>   			return MMC_BLK_ABORT;
+>> +		case ERR_NOMEDIUM:
+>> +			return MMC_BLK_NOMEDIUM;
+>>   		case ERR_CONTINUE:
+>>   			break;
+>>   		}
+>> @@ -1329,6 +1340,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>>   			if (!ret)
+>>   				goto start_new_req;
+>>   			break;
+>> +		case MMC_BLK_NOMEDIUM:
+>> +			goto cmd_abort;
+>>   		}
+>>
+>>   		if (ret) {
+>> @@ -1345,6 +1358,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>>
+>>    cmd_abort:
+>>   	spin_lock_irq(&md->lock);
+>> +	if (mmc_card_removed(card))
+>> +		req->cmd_flags |= REQ_QUIET;
+>>   	while (ret)
+>>   		ret = __blk_end_request(req, -EIO, blk_rq_cur_bytes(req));
+>>   	spin_unlock_irq(&md->lock);
+>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+>> index dcad59c..2517547 100644
+>> --- a/drivers/mmc/card/queue.c
+>> +++ b/drivers/mmc/card/queue.c
+>> @@ -29,6 +29,8 @@
+>>    */
+>>   static int mmc_prep_request(struct request_queue *q, struct request *req)
+>>   {
+>> +	struct mmc_queue *mq = q->queuedata;
+>> +
+>>   	/*
+>>   	 * We only like normal block requests and discards.
+>>   	 */
+>> @@ -37,6 +39,9 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
+>>   		return BLKPREP_KILL;
+>>   	}
+>>
+>> +	if (mq&&  mmc_card_removed(mq->card))
+>> +		return BLKPREP_KILL;
+>> +
+>>   	req->cmd_flags |= REQ_DONTPREP;
+>>
+>>   	return BLKPREP_OK;
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
