@@ -1,61 +1,98 @@
-From: Haojian Zhuang <haojian.zhuang@gmail.com>
-Subject: Re: [PATCH v4 2/4] ARM: pxa168: Add SDHCI support
-Date: Wed, 21 Dec 2011 09:48:24 +0800
-Message-ID: <CAN1soZwwPe1Xdh=EO-wdynihaBQ8DvWV=imjokJvDZVC+qqdSg@mail.gmail.com>
-References: <CAN1soZxZjdzivfttUhDDvjUDiyiAC5SSKtB0rXR1D=3=q6O0wQ@mail.gmail.com>
-	<1324386781-25271-1-git-send-email-tanmay.upadhyay@einfochips.com>
-	<20111220210324.GD2577@n2100.arm.linux.org.uk>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC fixes for 3.2
+Date: Tue, 20 Dec 2011 21:24:47 -0500
+Message-ID: <m2k45q3bm8.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:54831 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753012Ab1LUBsZ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Dec 2011 20:48:25 -0500
-Received: by vbbfc26 with SMTP id fc26so5427898vbb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Dec 2011 17:48:25 -0800 (PST)
-In-Reply-To: <20111220210324.GD2577@n2100.arm.linux.org.uk>
+Received: from void.printf.net ([89.145.121.20]:54779 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752787Ab1LUCY7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 20 Dec 2011 21:24:59 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>, eric.y.miao@gmail.com, jason.chagas@marvell.com, prakity@marvell.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wed, Dec 21, 2011 at 5:03 AM, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> Just two minor style issues in this patch.
->
-> On Tue, Dec 20, 2011 at 06:43:01PM +0530, Tanmay Upadhyay wrote:
->> +static inline int pxa168_add_sdh(int id, struct sdhci_pxa_platdata =
-*data)
->> +{
->> + =A0 =A0 struct pxa_device_desc *d =3D NULL;
->> +
->> + =A0 =A0 switch (id) {
->> + =A0 =A0 case 1: d =3D &pxa168_device_sdh1; break;
->> + =A0 =A0 case 2: d =3D &pxa168_device_sdh2; break;
->> + =A0 =A0 case 3: d =3D &pxa168_device_sdh3; break;
->> + =A0 =A0 case 4: d =3D &pxa168_device_sdh4; break;
->
-> Style.
-> =A0 =A0 =A0 =A0case X:
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0d =3D &y;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
->
->> +static void sdh_clk_disable(struct clk *clk)
->> +{
->> + =A0 =A0 __raw_writel(__raw_readl(clk->clk_rst) & ~(clk->enable_val=
-),
->
-> Parens around clk->enable_val not required.
->
->> + =A0 =A0 INIT_CLKREG(&clk_sdh1, NULL, "PXA-SDHCLK"),
->> + =A0 =A0 INIT_CLKREG(&clk_sdh2, NULL, "PXA-SDHCLK"),
->> + =A0 =A0 INIT_CLKREG(&clk_sdh3, NULL, "PXA-SDHCLK"),
->> + =A0 =A0 INIT_CLKREG(&clk_sdh4, NULL, "PXA-SDHCLK"),
->
-> So these clocks are registered with the same name? =A0How are they
-> distinguished by clk_get()?
->
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
 
-Yes, it's better to use devname.
+Hi Linus,
+
+Please pull from:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+to receive three fixes for MMC for 3.2:
+
+  * Revert automatic enabling of SDIO runtime PM (added in -rc1), after
+    finding that this has caused a regression for a few setups that we
+    don't know how to fix yet.  We'll try again in a later release.
+  * Silence PCI suspend WARN_ON()s that appeared in -rc1 regarding
+    legacy PM support.  This patch is what makes the diffstat large.
+  * Fix the type of a module_param in the vub300 driver.
+
+These have been tested in linux-next, and there are no merge conflicts.
+Thanks.
+
+
+The following changes since commit 49df78074963c97e25debc3c67b72f059111607d:
+
+  mmc: core: Fix deadlock when the CONFIG_MMC_UNSAFE_RESUME is not defined (2011-12-10 16:18:39 -0500)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+for you to fetch changes up to 61074287c2965edf0fc75b54ae8f4ce99f182669:
+
+  mmc: vub300: fix type of firmware_rom_wait_states module parameter (2011-12-19 15:56:09 -0800)
+
+- ----------------------------------------------------------------
+Manuel Lauss (1):
+      mmc: sdhci: remove "state" argument from sdhci_suspend_host
+
+Ohad Ben-Cohen (1):
+      Revert "mmc: enable runtime PM by default"
+
+Rusty Russell (1):
+      mmc: vub300: fix type of firmware_rom_wait_states module parameter
+
+ drivers/mmc/core/host.c            |   11 -----------
+ drivers/mmc/host/sdhci-cns3xxx.c   |    5 +----
+ drivers/mmc/host/sdhci-dove.c      |    5 +----
+ drivers/mmc/host/sdhci-esdhc-imx.c |    5 +----
+ drivers/mmc/host/sdhci-of-esdhc.c  |    5 +----
+ drivers/mmc/host/sdhci-of-hlwd.c   |    5 +----
+ drivers/mmc/host/sdhci-pci.c       |   26 +++++++++++++-------------
+ drivers/mmc/host/sdhci-pltfm.c     |   18 +++++++++++-------
+ drivers/mmc/host/sdhci-pltfm.h     |    6 ++++--
+ drivers/mmc/host/sdhci-pxav2.c     |    5 +----
+ drivers/mmc/host/sdhci-pxav3.c     |    5 +----
+ drivers/mmc/host/sdhci-s3c.c       |   21 ++++++++++++++-------
+ drivers/mmc/host/sdhci-tegra.c     |    5 +----
+ drivers/mmc/host/sdhci.c           |    2 +-
+ drivers/mmc/host/sdhci.h           |    2 +-
+ drivers/mmc/host/vub300.c          |    2 +-
+ 16 files changed, 53 insertions(+), 75 deletions(-)
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iQIcBAEBAgAGBQJO8UCZAAoJEHNBYZ7TNxYMSJIQAIbASQ0kezY5hLMyaf9mtInc
+s1o0UrKRAVhmjnqUvpQY3/woG2ABszrmjYAbHlGEVPe7/XPztPSXh4myjags+Jri
+K13omUqsGUaq1JJUk0/z0tQe8ixlaZTArfQpSCiaMUDZ8eO+p5eWNx0m0ZktBdUy
+VJAsk7HMg4Kvi4DUHplPnO9erbu0XZaTj93hpDLk3R7wpipkjDtb5p43Wt8KMVk3
+SwMbhQ6jdJbFwqh6D1GjFKTcIYOjNYluNHHwjI+rpzIElIkJmyK9eyORo9C9aEyD
+Oy7ap8934jYPEae9YApnPUwjDSWeH+VvAWY3vXEuPGGDlvZ1mQEHJ7vvpnqG9nvv
+u3CD7A0v4eXwAoaWxtCFfN+YlvLu8O+JYFmky/QlUfiUtWZH/miU8XWslofBrbT5
+h2gUn6wcjdNPFM1jshuSOoZS8IQt0XnQGsAaI/ChPDRA3Mx6JSvL/Fh8i2kyjh1I
+i751Y6WJoYVBGecFtfrjzEbCjKaKUPGnM+JIlvYKpzskmszxxR2tvd/x3EFUyDUL
+OD9BLzpJJRueOB1cMamdo3aJ8YEb/28to/Om2AeidWSD7Gaj0N7lu85CQpNxLmhm
+jySjWtaDAQYmMjMxR3jNrNirb47AkbkzMeToFCc78F/RpEZu1EJPVxQ+qX7P5BVT
+vTwVHvdvob0frPRyBPCs
+=exRR
+-----END PGP SIGNATURE-----
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
