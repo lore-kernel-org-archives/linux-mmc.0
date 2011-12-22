@@ -1,59 +1,49 @@
-From: <r66093@freescale.com>
-Subject: [PATCH 1/5 v2] ESDHC: add PIO mode support
-Date: Thu, 22 Dec 2011 18:21:57 +0800
-Message-ID: <1324549321-30796-1-git-send-email-r66093@freescale.com>
+From: Dave Martin <dave.martin@linaro.org>
+Subject: Re: [GIT PULL] ARM: amba: Enable module alias autogeneration for
+ AMBA drivers
+Date: Thu, 22 Dec 2011 11:21:25 +0000
+Message-ID: <20111222112125.GA2573@localhost>
+References: <20111206151541.GA13774@linaro.org>
+ <1321961573-4562-1-git-send-email-dave.martin@linaro.org>
+ <20111206155911.GA11902@mail.gnudd.com>
+ <20111206161815.GD13769@linaro.org>
+ <20111219132409.GB2031@linaro.org>
+ <20111219213942.GM14542@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:26369
-	"EHLO DB3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753952Ab1LVLKe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Dec 2011 06:10:34 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-input-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20111219213942.GM14542@n2100.arm.linux.org.uk>
+Sender: linux-input-owner@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Alessandro Rubini <rubini@unipv.it>, patches@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, alan@linux.intel.com, a.zummo@towertech.it, alsa-devel@alsa-project.org, cjb@laptop.org, dan.j.williams@intel.com, dmitry.torokhov@gmail.com, grant.likely@secretlab.ca, perex@perex.cz, jassisinghbrar@gmail.com, julia@diku.dk, linus.walleij@linaro.org, linux-fbdev@vger.kernel.org, linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-watchdog@vger.kernel.org, lethal@linux-sh.org, Pawel.Moll@arm.com, rtc-linux@googlegroups.com, spi-devel-general@lists.sourceforge.net, tiwai@suse.de, vinod.koul@intel.com, wim@iguana.be
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Gao Guanhua <B22826@freescale.com>, Chris Ball <cjb@laptop.org>
 
-From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+On Mon, Dec 19, 2011 at 09:39:42PM +0000, Russell King - ARM Linux wrote:
+> On Mon, Dec 19, 2011 at 01:24:09PM +0000, Dave Martin wrote:
+> > Hi Russell,
+> > 
+> > This one isn't urgent, but I'm not seeing the amba modalias patches
+> > anywhere yet.  Did you have any outstanding concerns which need to be
+> > resolved?
+> > 
+> > If you can suggest when/if these are likely to merge that would be great.
+> > 
+> > Since Alessandro is now expecting to have to rebase on top of the amba
+> > additions anyway, we shouldn't need to worry about conflicting with his
+> > patches.
+> > 
+> > Of course, if you've already merged these somewhere, then there's no
+> > problem.
+> 
+> I have pulled it, I just haven't merged it in anywhere yet.
 
-For some FSL ESDHC controller(e.g. P2020E, Rev1.0), the SDHC can not work on
-DMA mode because of the hardware bug, so we set a broken dma flag and use
-PIO mode.
+OK, great -- thanks.
 
-Signed-off-by: Gao Guanhua <B22826@freescale.com>
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-CC: Chris Ball <cjb@laptop.org>
----
-changes for v2:
-	- change the property to compatible for quirks
+I wasn't too familiar with the procedure, so I just wanted
+to be sure that I hadn't done things wrong.
 
- drivers/mmc/host/sdhci-pltfm.c |    5 ++++-
- 1 files changed, 4 insertions(+), 1 deletions(-)
+Have a good Christmas in the meantime!
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index a9e12ea..ba36c36 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -2,7 +2,7 @@
-  * sdhci-pltfm.c Support for SDHCI platform devices
-  * Copyright (c) 2009 Intel Corporation
-  *
-- * Copyright (c) 2007 Freescale Semiconductor, Inc.
-+ * Copyright (c) 2007, 2011 Freescale Semiconductor, Inc.
-  * Copyright (c) 2009 MontaVista Software, Inc.
-  *
-  * Authors: Xiaobo Xie <X.Xie@freescale.com>
-@@ -71,6 +71,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 		if (sdhci_of_wp_inverted(np))
- 			host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
- 
-+		if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
-+			host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
-+
- 		clk = of_get_property(np, "clock-frequency", &size);
- 		if (clk && size == sizeof(*clk) && *clk)
- 			pltfm_host->clock = be32_to_cpup(clk);
--- 
-1.7.5.4
-
-
+Cheers
+---Dave
