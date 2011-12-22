@@ -1,60 +1,110 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH v2] mmc: dw_mmc: Add second capability field
-Date: Thu, 22 Dec 2011 18:01:12 +0900
-Message-ID: <006801ccc088$40cf1460$c26d3d20$%jun@samsung.com>
+Subject: [PATCH RESEND] mmc: dw_mmc: Support predefined mutiple block transfers
+Date: Thu, 22 Dec 2011 18:01:29 +0900
+Message-ID: <006901ccc088$4b6aafb0$e2400f10$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:40882 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753025Ab1LVJBN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Dec 2011 04:01:13 -0500
+Received: from mailout4.samsung.com ([203.254.224.34]:47951 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753025Ab1LVJBg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Dec 2011 04:01:36 -0500
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, 'James Hogan' <james@albanarts.com>
+Cc: 'Chris Ball' <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org
 
-This patch adds caps2 filed for second capability in dw_mmc.
-It corresponds with MMC_CAPS2_XXX. And this patch removes the
-unnecessary condition statement for assigning caps.
+This patch adds the support for predefined multiple block r/w.
+dw_mmc can support MMC_CAP_CMD23 capability.
 
 Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/host/dw_mmc.c  |    6 ++----
- include/linux/mmc/dw_mmc.h |    1 +
- 2 files changed, 3 insertions(+), 4 deletions(-)
+ drivers/mmc/host/dw_mmc.c |   34 ++++++++++++++++++++++++++++------
+ 1 files changed, 28 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 3aaeb08..3f5a77a 100644
+index 3aaeb08..04653e8 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -1676,10 +1676,8 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	if (host->pdata->setpower)
- 		host->pdata->setpower(id, 0);
+@@ -588,11 +588,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+ 	mci_writel(host, CTYPE, (slot->ctype << slot->id));
+ }
  
--	if (host->pdata->caps)
--		mmc->caps = host->pdata->caps;
--	else
--		mmc->caps = 0;
-+	mmc->caps |= host->pdata->caps;
-+	mmc->caps2 |= host->pdata->caps2;
+-static void dw_mci_start_request(struct dw_mci *host,
+-				 struct dw_mci_slot *slot)
++static void __dw_mci_start_request(struct dw_mci *host,
++				   struct dw_mci_slot *slot,
++				   struct mmc_command *cmd)
+ {
+ 	struct mmc_request *mrq;
+-	struct mmc_command *cmd;
+ 	struct mmc_data	*data;
+ 	u32 cmdflags;
  
- 	if (host->pdata->get_bus_wd)
- 		if (host->pdata->get_bus_wd(slot->id) >= 4)
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 6dc9b80..e8779c6 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -214,6 +214,7 @@ struct dw_mci_board {
- 	unsigned int bus_hz; /* Bus speed */
+@@ -610,14 +610,13 @@ static void dw_mci_start_request(struct dw_mci *host,
+ 	host->completed_events = 0;
+ 	host->data_status = 0;
  
- 	unsigned int caps;	/* Capabilities */
-+	unsigned int caps2;	/* More capabilities */
- 	/*
- 	 * Override fifo depth. If 0, autodetect it from the FIFOTH register,
- 	 * but note that this may not be reliable after a bootloader has used
+-	data = mrq->data;
++	data = cmd->data;
+ 	if (data) {
+ 		dw_mci_set_timeout(host);
+ 		mci_writel(host, BYTCNT, data->blksz*data->blocks);
+ 		mci_writel(host, BLKSIZ, data->blksz);
+ 	}
+ 
+-	cmd = mrq->cmd;
+ 	cmdflags = dw_mci_prepare_command(slot->mmc, cmd);
+ 
+ 	/* this is the first command, send the initialization clock */
+@@ -635,6 +634,16 @@ static void dw_mci_start_request(struct dw_mci *host,
+ 		host->stop_cmdr = dw_mci_prepare_command(slot->mmc, mrq->stop);
+ }
+ 
++static void dw_mci_start_request(struct dw_mci *host,
++				 struct dw_mci_slot *slot)
++{
++	struct mmc_request *mrq = slot->mrq;
++	struct mmc_command *cmd;
++
++	cmd = mrq->sbc ? mrq->sbc : mrq->cmd;
++	__dw_mci_start_request(host, slot, cmd);
++}
++
+ /* must be called with host->lock held */
+ static void dw_mci_queue_request(struct dw_mci *host, struct dw_mci_slot *slot,
+ 				 struct mmc_request *mrq)
+@@ -889,7 +898,14 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			cmd = host->cmd;
+ 			host->cmd = NULL;
+ 			set_bit(EVENT_CMD_COMPLETE, &host->completed_events);
+-			dw_mci_command_complete(host, host->mrq->cmd);
++			dw_mci_command_complete(host, cmd);
++			if ((cmd == host->mrq->sbc) && !cmd->error) {
++				prev_state = state = STATE_SENDING_CMD;
++				__dw_mci_start_request(host, host->cur_slot,
++						       host->mrq->cmd);
++				goto unlock;
++			}
++
+ 			if (!host->mrq->data || cmd->error) {
+ 				dw_mci_request_end(host, host->mrq);
+ 				goto unlock;
+@@ -967,6 +983,12 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 				goto unlock;
+ 			}
+ 
++			if (host->mrq->sbc && !data->error) {
++				data->stop->error = 0;
++				dw_mci_request_end(host, host->mrq);
++				goto unlock;
++			}
++
+ 			prev_state = state = STATE_SENDING_STOP;
+ 			if (!data->error)
+ 				send_stop_cmd(host, data);
 -- 
 1.7.0.4
 
