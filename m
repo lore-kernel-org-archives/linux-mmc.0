@@ -1,28 +1,61 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH v2] mmc: dw_mmc: Add second capability field
-Date: Thu, 22 Dec 2011 10:30:36 +0000
-Message-ID: <CAFbHwiT8cyrDLqfAu+=8Ab2y31gDSfpqMQjO9RmAyNx=VT7=DQ@mail.gmail.com>
-References: <006801ccc088$40cf1460$c26d3d20$%jun@samsung.com>
+From: <r66093@freescale.com>
+Subject: [PATCH 2/5 v2] ESDHC: set the timeout to the max value
+Date: Thu, 22 Dec 2011 18:21:58 +0800
+Message-ID: <1324549321-30796-2-git-send-email-r66093@freescale.com>
+References: <1324549321-30796-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <006801ccc088$40cf1460$c26d3d20$%jun@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, James Hogan <james@albanarts.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:27990 "EHLO
+	TX2EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755152Ab1LVLJn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Dec 2011 06:09:43 -0500
+In-Reply-To: <1324549321-30796-1-git-send-email-r66093@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Gao Guanhua <B22826@freescale.com>, Xie Xiaobo <X.Xie@freescale.com>, Chris Ball <cjb@laptop.org>
 
-On Thu, Dec 22, 2011 at 9:01 AM, Seungwon Jeon <tgih.jun@samsung.com> w=
-rote:
-> This patch adds caps2 filed for second capability in dw_mmc.
-> It corresponds with MMC_CAPS2_XXX. And this patch removes the
-> unnecessary condition statement for assigning caps.
->
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
-> =A0drivers/mmc/host/dw_mmc.c =A0| =A0 =A06 ++----
-> =A0include/linux/mmc/dw_mmc.h | =A0 =A01 +
-> =A02 files changed, 3 insertions(+), 4 deletions(-)
+From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+When access the card on some FSL platform board (e.g p2020, p1010, mpc8536),
+the following error is reported with the timeout value calculated:
+
+mmc0: Got data interrupt 0x00000020 even though no data operation was
+in progress.
+mmc0: Got data interrupt 0x00000020 even though no data operation was
+in progress.
+
+So we skip the calculation of timeout and use the max value to fix it.
+
+Signed-off-by: Gao Guanhua <B22826@freescale.com>
+Signed-off-by: Xie Xiaobo <X.Xie@freescale.com>
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+CC: Chris Ball <cjb@laptop.org>
+---
+changes for v2:
+	- change the property to compatible for quirks
+
+ drivers/mmc/host/sdhci-pltfm.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index ba36c36..1c254b1 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -74,6 +74,11 @@ void sdhci_get_of_property(struct platform_device *pdev)
+ 		if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
+ 			host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+ 
++		if (of_device_is_compatible(np, "fsl,p2020-esdhc")
++			|| of_device_is_compatible(np, "fsl,p1010-esdhc")
++			|| of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
++			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
++
+ 		clk = of_get_property(np, "clock-frequency", &size);
+ 		if (clk && size == sizeof(*clk) && *clk)
+ 			pltfm_host->clock = be32_to_cpup(clk);
+-- 
+1.7.5.4
+
+
