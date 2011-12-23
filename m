@@ -1,93 +1,60 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] mmc: tmio_mmc: Hotplug code regrouping
-Date: Fri, 23 Dec 2011 23:03:13 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1112232301310.1911@axis700.grange>
+Subject: [PATCH 1/2] mmc: add a card hotplug handler context
+Date: Sat, 24 Dec 2011 00:00:15 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1112232351250.1911@axis700.grange>
+References: <Pine.LNX.4.64.1112232346180.1911@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:56222 "EHLO
+Received: from moutng.kundenserver.de ([212.227.17.9]:61401 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754468Ab1LWWDT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Dec 2011 17:03:19 -0500
+	with ESMTP id S1757914Ab1LWXAW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Dec 2011 18:00:22 -0500
+In-Reply-To: <Pine.LNX.4.64.1112232346180.1911@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>
 
-From: Bastian Hecht <hechtb@googlemail.com>
+SD/MMC controllers provide different card insertion and removal detection
+methods. On some of them the controller itself issues an interrupt, on
+others polling is used, on yet others auxiliary means are used for this
+purpose, e.g., a GPIO IRQ. Further, on some systems one of those methods
+can be chosen at driver probing time and configured in software. E.g., on
+some systems the SD/MMC controller card hot-plug detection pin can be
+configured either as a respective controller functions, or an IRQ-capable
+GPIO. To support such flexible configurations a card hot-plug context
+is added by this patch.
 
-This patch regroups the code slightly, adds documentation and allows
-the rtpm counter of MMC_CAP_NEEDS_POLL devices to reach 0 again.
-
-Signed-off-by: Bastian Hecht <hechtb@gmail.com>
-[g.liakhovetski@gmx.de: restore pm_runtime_get_noresume()]
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/tmio_mmc_pio.c |   30 +++++++++++++++++++++---------
- 1 files changed, 21 insertions(+), 9 deletions(-)
+ include/linux/mmc/host.h |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 4208b39..abad01b 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -800,8 +800,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	} else if (ios->power_mode != MMC_POWER_UP) {
- 		if (host->set_pwr && ios->power_mode == MMC_POWER_OFF)
- 			host->set_pwr(host->pdev, 0);
--		if ((pdata->flags & TMIO_MMC_HAS_COLD_CD) &&
--		    pdata->power) {
-+		if (pdata->power) {
- 			pdata->power = false;
- 			pm_runtime_put(&host->pdev->dev);
- 		}
-@@ -915,6 +914,23 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 	if (ret < 0)
- 		goto pm_disable;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index edf1f45..e43b808 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -168,6 +168,11 @@ struct mmc_async_req {
+ 	int (*err_check) (struct mmc_card *, struct mmc_async_req *);
+ };
  
-+	/*
-+	 * There are 4 different scenarios for the card detection:
-+	 *  1) an external gpio irq handles the cd (best for power savings)
-+	 *  2) internal sdhi irq handles the cd
-+	 *  3) a worker thread polls the sdhi - indicated by MMC_CAP_NEEDS_POLL
-+	 *  4) the medium is non-removable - indicated by MMC_CAP_NONREMOVABLE
-+	 *
-+	 *  While we increment the rtpm counter for all scenarios when the mmc
-+	 *  core activates us by calling an appropriate set_ios(), we must
-+	 *  additionally ensure that in case 2) the tmio mmc hardware stays
-+	 *  powered on during runtime for the card detection to work.
-+	 */
-+	if (!(pdata->flags & TMIO_MMC_HAS_COLD_CD
-+		|| mmc->caps & MMC_CAP_NEEDS_POLL
-+		|| mmc->caps & MMC_CAP_NONREMOVABLE))
-+		pm_runtime_get_noresume(&pdev->dev);
++struct mmc_hotplug {
++	unsigned int irq;
++	void *handler_priv;
++};
 +
- 	tmio_mmc_clk_stop(_host);
- 	tmio_mmc_reset(_host);
+ struct mmc_host {
+ 	struct device		*parent;
+ 	struct device		class_dev;
+@@ -299,6 +304,7 @@ struct mmc_host {
+ 	int			claim_cnt;	/* "claim" nesting count */
  
-@@ -933,12 +949,6 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 	/* See if we also get DMA */
- 	tmio_mmc_request_dma(_host, pdata);
+ 	struct delayed_work	detect;
++	struct mmc_hotplug	hotplug;
  
--	/* We have to keep the device powered for its card detection to work */
--	if (!(pdata->flags & TMIO_MMC_HAS_COLD_CD)) {
--		pdata->power = true;
--		pm_runtime_get_noresume(&pdev->dev);
--	}
--
- 	mmc_add_host(mmc);
- 
- 	/* Unmask the IRQs we want to know about */
-@@ -974,7 +984,9 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
- 	 * the controller, the runtime PM is suspended and pdata->power == false,
- 	 * so, our .runtime_resume() will not try to detect a card in the slot.
- 	 */
--	if (host->pdata->flags & TMIO_MMC_HAS_COLD_CD)
-+	if (host->pdata->flags & TMIO_MMC_HAS_COLD_CD
-+		|| host->mmc->caps & MMC_CAP_NEEDS_POLL
-+		|| host->mmc->caps & MMC_CAP_NONREMOVABLE)
- 		pm_runtime_get_sync(&pdev->dev);
- 
- 	mmc_remove_host(host->mmc);
+ 	const struct mmc_bus_ops *bus_ops;	/* current bus driver */
+ 	unsigned int		bus_refs;	/* reference counter */
 -- 
 1.7.2.5
 
