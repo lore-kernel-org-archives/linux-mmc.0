@@ -1,36 +1,54 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH] ARM: OMAP: hsmmc: add max_freq field
-Date: Fri, 23 Dec 2011 21:10:26 +0530
-Message-ID: <CANrkHUY3Zf4a2K5769Z=7Wng339zB6+z_Tgd4mOPChZ1RvZ=Kw@mail.gmail.com>
-References: <1323868927-3738-1-git-send-email-zonque@gmail.com>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [PATCH 0/4] Fix the left DMA_NONE from dma_transfer_direction
+ migration
+Date: Fri, 23 Dec 2011 21:33:49 +0530
+Message-ID: <1324656229.1633.12.camel@vkoul-udesk3>
+References: <1323791286-29574-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog119.obsmtp.com ([74.125.149.246]:59969 "EHLO
-	na3sys009aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752901Ab1LWPk2 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 23 Dec 2011 10:40:28 -0500
-In-Reply-To: <1323868927-3738-1-git-send-email-zonque@gmail.com>
+Received: from mga03.intel.com ([143.182.124.21]:42399 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753557Ab1LWQDs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 23 Dec 2011 11:03:48 -0500
+In-Reply-To: <1323791286-29574-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Mack <zonque@gmail.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Artem Bityutskiy <artem.bityutskiy@intel.com>, linux-arm-kernel@lists.infradead.org, Huang Shijie <b32955@freescale.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mtd@lists.infradead.org
 
-On Wed, Dec 14, 2011 at 6:52 PM, Daniel Mack <zonque@gmail.com> wrote:
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
-mmc.c
-> index 101cd31..8215ef9 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1927,8 +1927,12 @@ static int __init omap_hsmmc_probe(struct plat=
-form_device *pdev)
-> =A0 =A0 =A0 =A0if (mmc_slot(host).vcc_aux_disable_is_sleep)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_slot(host).no_off =3D 1;
->
-> - =A0 =A0 =A0 mmc->f_min =A0 =A0 =A0=3D OMAP_MMC_MIN_CLOCK;
-> - =A0 =A0 =A0 mmc->f_max =A0 =A0 =A0=3D OMAP_MMC_MAX_CLOCK;
-> + =A0 =A0 =A0 mmc->f_min =3D OMAP_MMC_MIN_CLOCK;
+On Tue, 2011-12-13 at 23:48 +0800, Shawn Guo wrote:
+> I have been working on -rc recently, and have not noticed the failure
+> until I ran next tree today.  The mxs-mmc driver is broken on next
+> tree because the DMA_NONE was left over from the dma_transfer_direction
+> migration for mxs-dma and its client drivers.
+> 
+> This seires is trying to fix it up.
+Applied, Thanks
 
-Stray change for f_min ?
+> 
+> Huang Shijie (1):
+>       mtd: fix compile error for gpmi-nand
+> 
+> Shawn Guo (3):
+>       dmaengine: add DMA_TRANS_NONE to dma_transfer_direction
+>       mmc: mxs-mmc: fix the dma_transfer_direction migration
+>       mtd: gpmi-nand: move to dma_transfer_direction
+> 
+>  drivers/dma/mxs-dma.c                 |    2 +-
+>  drivers/mmc/host/mxs-mmc.c            |    3 +
+>  drivers/mtd/nand/gpmi-nand/gpmi-lib.c |   22 ++++++-----
+>  include/linux/dmaengine.h             |    1 +
+>  include/linux/mtd/gpmi-nand.h         |   68 +++++++++++++++++++++++++++++++++
+>  5 files changed, 85 insertions(+), 11 deletions(-)
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+
+-- 
+~Vinod
+
