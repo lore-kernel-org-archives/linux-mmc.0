@@ -1,151 +1,45 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 2/2] mmc: add a generic GPIO card-detect helper
-Date: Sat, 24 Dec 2011 00:00:20 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1112232358100.1911@axis700.grange>
-References: <Pine.LNX.4.64.1112232346180.1911@axis700.grange>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH V4] mmc: Kill block requests if card is removed
+Date: Sat, 24 Dec 2011 20:58:07 -0500
+Message-ID: <m2sjk9za34.fsf@bob.laptop.org>
+References: <1323333350-14315-1-git-send-email-sthumma@codeaurora.org>
+	<4EE081CF.3010303@intel.com> <4EF1BDA7.6070903@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:49530 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757933Ab1LWXBG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Dec 2011 18:01:06 -0500
-In-Reply-To: <Pine.LNX.4.64.1112232346180.1911@axis700.grange>
+Received: from void.printf.net ([89.145.121.20]:55930 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758021Ab1LYB6c (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 24 Dec 2011 20:58:32 -0500
+In-Reply-To: <4EF1BDA7.6070903@codeaurora.org> (Sujit Reddy Thumma's message
+	of "Wed, 21 Dec 2011 16:36:15 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>
+To: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, per.lkml@gmail.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-This patch adds a primitive helper to support card hotplug detection on
-platforms, where a GPIO, capable of producing interrupts, is used for
-detection of card-insertion and -removal events.
+Hi,
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- drivers/mmc/core/Makefile   |    2 +-
- drivers/mmc/core/cd-gpio.c  |   74 +++++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/cd-gpio.h |   19 +++++++++++
- 3 files changed, 94 insertions(+), 1 deletions(-)
- create mode 100644 drivers/mmc/core/cd-gpio.c
- create mode 100644 include/linux/mmc/cd-gpio.h
+On Wed, Dec 21 2011, Sujit Reddy Thumma wrote:
+> On 12/8/2011 2:52 PM, Adrian Hunter wrote:
+>> On 08/12/11 10:35, Sujit Reddy Thumma wrote:
+>>> Kill block requests when the host realizes that the card is
+>>> removed from the slot and is sure that subsequent requests
+>>> are bound to fail. Do this silently so that the block
+>>> layer doesn't output unnecessary error messages.
+>>>
+>>> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
+>>
+>> Acked-by: Adrian Hunter<adrian.hunter@intel.com>
+>>
+>
+> Thanks Adrian.
+>
+> Chris can you pull this patch with Adrian's ack?
 
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 6395019..dca4428 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -7,6 +7,6 @@ mmc_core-y			:= core.o bus.o host.o \
- 				   mmc.o mmc_ops.o sd.o sd_ops.o \
- 				   sdio.o sdio_ops.o sdio_bus.o \
- 				   sdio_cis.o sdio_io.o sdio_irq.o \
--				   quirks.o
-+				   quirks.o cd-gpio.o
- 
- mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
-diff --git a/drivers/mmc/core/cd-gpio.c b/drivers/mmc/core/cd-gpio.c
-new file mode 100644
-index 0000000..4c79f0c
---- /dev/null
-+++ b/drivers/mmc/core/cd-gpio.c
-@@ -0,0 +1,74 @@
-+/*
-+ * Generic GPIO card-detect helper
-+ *
-+ * Copyright (C) 2011, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
-+
-+#include <linux/err.h>
-+#include <linux/gpio.h>
-+#include <linux/interrupt.h>
-+#include <linux/jiffies.h>
-+#include <linux/mmc/host.h>
-+#include <linux/module.h>
-+#include <linux/slab.h>
-+
-+struct mmc_cd_gpio {
-+	unsigned int gpio;
-+	char label[0];
-+};
-+
-+static irqreturn_t mmc_cd_gpio_irqt(int irq, void *dev_id)
-+{
-+	/* Schedule a card detection after a debounce timeout */
-+	mmc_detect_change(dev_id, msecs_to_jiffies(100));
-+	return IRQ_HANDLED;
-+}
-+
-+int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio,
-+			unsigned int irq, unsigned long flags)
-+{
-+	size_t len = strlen(dev_name(host->parent)) + 4;
-+	struct mmc_cd_gpio *cd = kmalloc(sizeof(*cd) + len, GFP_KERNEL);
-+	int ret;
-+
-+	if (!cd)
-+		return -ENOMEM;
-+
-+	sprintf(cd->label, "%s cd", dev_name(host->parent));
-+
-+	ret = gpio_request_one(gpio, GPIOF_DIR_IN, cd->label);
-+	if (ret < 0)
-+		goto egpioreq;
-+
-+	ret = request_threaded_irq(irq, NULL, mmc_cd_gpio_irqt,
-+				   flags, cd->label, host);
-+	if (ret < 0)
-+		goto eirqreq;
-+
-+	cd->gpio = gpio;
-+	host->hotplug.irq = irq;
-+	host->hotplug.handler_priv = cd;
-+
-+	return 0;
-+
-+eirqreq:
-+	gpio_free(gpio);
-+egpioreq:
-+	kfree(cd);
-+	return ret;
-+}
-+EXPORT_SYMBOL(mmc_cd_gpio_request);
-+
-+void mmc_cd_gpio_free(struct mmc_host *host)
-+{
-+	struct mmc_cd_gpio *cd = host->hotplug.handler_priv;
-+
-+	free_irq(host->hotplug.irq, host);
-+	gpio_free(cd->gpio);
-+	kfree(cd);
-+}
-+EXPORT_SYMBOL(mmc_cd_gpio_free);
-diff --git a/include/linux/mmc/cd-gpio.h b/include/linux/mmc/cd-gpio.h
-new file mode 100644
-index 0000000..a8e4697
---- /dev/null
-+++ b/include/linux/mmc/cd-gpio.h
-@@ -0,0 +1,19 @@
-+/*
-+ * Generic GPIO card-detect helper header
-+ *
-+ * Copyright (C) 2011, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
-+
-+#ifndef MMC_CD_GPIO_H
-+#define MMC_CD_GPIO_H
-+
-+struct mmc_host;
-+int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio,
-+			unsigned int irq, unsigned long flags);
-+void mmc_cd_gpio_free(struct mmc_host *host);
-+
-+#endif
+Thanks, pushed to mmc-next for 3.3 with Adrian's ACK.
+
+- Chris.
 -- 
-1.7.2.5
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
