@@ -1,40 +1,47 @@
-From: "postcodesloetrij-  Bonus" <Postinfo@luckymail.com>
-Subject: End of year bonus!!
-Date: Sun, 25 Dec 2011 14:55:33 -0700
-Message-ID: <0bb7cee5361d32f4a30bf4aa2b0d9925.squirrel@macmail.lakotanetwork.com>
-Reply-To: Postinfo@luckymail.com
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 3/4 v3] mmc: sh_mmcif: process requests asynchronously
+Date: Sun, 25 Dec 2011 17:43:04 -0500
+Message-ID: <m2aa6gxog7.fsf@bob.laptop.org>
+References: <Pine.LNX.4.64.1111301553330.22197@axis700.grange>
+	<1323887514-12650-4-git-send-email-g.liakhovetski@gmx.de>
+	<m2boqxz91n.fsf@bob.laptop.org>
+	<Pine.LNX.4.64.1112252105340.22951@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from filter3.e-filtering.net ([64.251.173.164]:41095 "EHLO
-	filter3.e-filtering.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752814Ab1LYWMx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Dec 2011 17:12:53 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1112252105340.22951@axis700.grange> (Guennadi
+	Liakhovetski's message of "Sun, 25 Dec 2011 21:07:52 +0100 (CET)")
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-postcodesloetrij-  Bonus !!
+Hi Guennadi,
 
-Promotion advertisement !!: we are please to inform you that the
-Postcode-lottery yearly award award promotion program held 25th Dec  2011,
-have pronounce your e-mail address as the luckily winner of a total sum:
-of ?100,000(One Hundred Thousand Euros
-Only)
+On Sun, Dec 25 2011, Guennadi Liakhovetski wrote:
+>> This patch (3/4) no longer applies to mmc-next -- mind resending?
+>
+> This one should be ok.
 
-Please email via BV Post-lottery Solicitors Fund Verification Department
-with your Serial-No:LE-0031#55330 for your claim,
+Seems to be worse, for some reason:
 
-Office/Email:Postinfo@luckymail.com
-Tell:+31-645-764-338/Netherlands
+patching file drivers/mmc/host/sh_mmcif.c
+Hunk #2 succeeded at 189 (offset -5 lines).
+Hunk #3 FAILED at 217.
+Hunk #4 succeeded at 503 (offset -4 lines).
+Hunk #5 FAILED at 780.
+Hunk #6 FAILED at 802.
+Hunk #7 FAILED at 835.
+Hunk #8 succeeded at 908 (offset 6 lines).
+Hunk #9 FAILED at 942.
+Hunk #10 succeeded at 1044 with fuzz 2 (offset 11 lines).
+Hunk #11 succeeded at 1246 (offset 11 lines).
+Hunk #12 succeeded at 1351 (offset 11 lines).
+Hunk #13 FAILED at 1376.
+Hunk #14 succeeded at 1425 (offset 11 lines).
+6 out of 14 hunks FAILED -- saving rejects to file drivers/mmc/host/sh_mmcif.c.rej
 
-This program is organize to promote the postcode lottery company award
-yearly, and we are strictly and skeptical regard your winning information
-that  is why you are advice to forward your serial number the claim
-department only and without any dis-closer to any person /friends for
-security reason
-
-Sincerely,
-Mrs:Hase Van Willems
-Promotion Coordinator.
-
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
