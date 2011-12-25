@@ -1,43 +1,49 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V3] mmc: core: Add option to prevent eMMC sleep command
-Date: Sat, 24 Dec 2011 21:31:31 -0500
-Message-ID: <m2y5u1xtz0.fsf@bob.laptop.org>
-References: <1324308259-6770-1-git-send-email-ulf.hansson@stericsson.com>
+Subject: Re: [PATCH v2] mmc: dw_mmc: Add second capability field
+Date: Sat, 24 Dec 2011 21:37:20 -0500
+Message-ID: <m2ty4pxtpb.fsf@bob.laptop.org>
+References: <006801ccc088$40cf1460$c26d3d20$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:55709 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754186Ab1LYCbl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 24 Dec 2011 21:31:41 -0500
-In-Reply-To: <1324308259-6770-1-git-send-email-ulf.hansson@stericsson.com>
-	(Ulf Hansson's message of "Mon, 19 Dec 2011 16:24:19 +0100")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <006801ccc088$40cf1460$c26d3d20$%jun@samsung.com> (Seungwon
+	Jeon's message of "Thu, 22 Dec 2011 18:01:12 +0900")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, 'James Hogan' <james@albanarts.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi Ulf,
+Hi,
 
-On Mon, Dec 19 2011, Ulf Hansson wrote:
-> Host may now use MMC_CAP2_NO_SLEEP_CMD to disable the use
-> of eMMC sleep/awake command.
+On Thu, Dec 22 2011, Seungwon Jeon wrote:
+> This patch adds caps2 filed for second capability in dw_mmc.
+> It corresponds with MMC_CAPS2_XXX. And this patch removes the
+> unnecessary condition statement for assigning caps.
 >
-> This option can be used when you platform have a buggy
-> kernel crash dump software, which is supposed to store
-> the dump on the eMMC, but is not able to wake up the eMMC
-> from sleep state.
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c  |    6 ++----
+>  include/linux/mmc/dw_mmc.h |    1 +
+>  2 files changed, 3 insertions(+), 4 deletions(-)
 >
-> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
-> Reviewed-by: Hanumath Prasad <hanumath.prasad@stericsson.com>
-> Reviewed-by: Srinidhi Kasagar <srinidhi.kasagar@stericsson.com>
-> Acked-by: Subhash Jadavani <subhashj@codeaurora.org>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 3aaeb08..3f5a77a 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1676,10 +1676,8 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	if (host->pdata->setpower)
+>  		host->pdata->setpower(id, 0);
+>  
+> -	if (host->pdata->caps)
+> -		mmc->caps = host->pdata->caps;
+> -	else
+> -		mmc->caps = 0;
+> +	mmc->caps |= host->pdata->caps;
+> +	mmc->caps2 |= host->pdata->caps2;
 
-Sorry for stepping in late, but we don't normally modify the kernel to
-make life easier for buggy proprietary software -- if this patch is to
-be merged, it has to make sense on its own merits.
-
-Thanks,
+Ah, I replied earlier without having seen this patch.  I still prefer
+the version I proposed, which doesn't dereference host->pdata->caps{,2}
+without testing it first.
 
 - Chris.
 -- 
