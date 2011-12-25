@@ -1,49 +1,103 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: dw_mmc: Add second capability field
-Date: Sat, 24 Dec 2011 21:37:20 -0500
-Message-ID: <m2ty4pxtpb.fsf@bob.laptop.org>
-References: <006801ccc088$40cf1460$c26d3d20$%jun@samsung.com>
+Subject: Re: [PATCH 2/2] mmc: add a generic GPIO card-detect helper
+Date: Sat, 24 Dec 2011 21:41:44 -0500
+Message-ID: <m2pqfdxthz.fsf@bob.laptop.org>
+References: <Pine.LNX.4.64.1112232346180.1911@axis700.grange>
+	<Pine.LNX.4.64.1112232358100.1911@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <006801ccc088$40cf1460$c26d3d20$%jun@samsung.com> (Seungwon
-	Jeon's message of "Thu, 22 Dec 2011 18:01:12 +0900")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, 'James Hogan' <james@albanarts.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:58845 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752413Ab1LYClv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 24 Dec 2011 21:41:51 -0500
+In-Reply-To: <Pine.LNX.4.64.1112232358100.1911@axis700.grange> (Guennadi
+	Liakhovetski's message of "Sat, 24 Dec 2011 00:00:20 +0100 (CET)")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Thu, Dec 22 2011, Seungwon Jeon wrote:
-> This patch adds caps2 filed for second capability in dw_mmc.
-> It corresponds with MMC_CAPS2_XXX. And this patch removes the
-> unnecessary condition statement for assigning caps.
+On Fri, Dec 23 2011, Guennadi Liakhovetski wrote:
+> This patch adds a primitive helper to support card hotplug detection on
+> platforms, where a GPIO, capable of producing interrupts, is used for
+> detection of card-insertion and -removal events.
 >
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > ---
->  drivers/mmc/host/dw_mmc.c  |    6 ++----
->  include/linux/mmc/dw_mmc.h |    1 +
->  2 files changed, 3 insertions(+), 4 deletions(-)
+>  drivers/mmc/core/Makefile   |    2 +-
+>  drivers/mmc/core/cd-gpio.c  |   74 +++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/cd-gpio.h |   19 +++++++++++
+>  3 files changed, 94 insertions(+), 1 deletions(-)
+>  create mode 100644 drivers/mmc/core/cd-gpio.c
+>  create mode 100644 include/linux/mmc/cd-gpio.h
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 3aaeb08..3f5a77a 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1676,10 +1676,8 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  	if (host->pdata->setpower)
->  		host->pdata->setpower(id, 0);
+> diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+> index 6395019..dca4428 100644
+> --- a/drivers/mmc/core/Makefile
+> +++ b/drivers/mmc/core/Makefile
+> @@ -7,6 +7,6 @@ mmc_core-y			:= core.o bus.o host.o \
+>  				   mmc.o mmc_ops.o sd.o sd_ops.o \
+>  				   sdio.o sdio_ops.o sdio_bus.o \
+>  				   sdio_cis.o sdio_io.o sdio_irq.o \
+> -				   quirks.o
+> +				   quirks.o cd-gpio.o
 >  
-> -	if (host->pdata->caps)
-> -		mmc->caps = host->pdata->caps;
-> -	else
-> -		mmc->caps = 0;
-> +	mmc->caps |= host->pdata->caps;
-> +	mmc->caps2 |= host->pdata->caps2;
+>  mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
+> diff --git a/drivers/mmc/core/cd-gpio.c b/drivers/mmc/core/cd-gpio.c
+> new file mode 100644
+> index 0000000..4c79f0c
+> --- /dev/null
+> +++ b/drivers/mmc/core/cd-gpio.c
+> @@ -0,0 +1,74 @@
+> +/*
+> + * Generic GPIO card-detect helper
+> + *
+> + * Copyright (C) 2011, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + */
+> +
+> +#include <linux/err.h>
+> +#include <linux/gpio.h>
+> +#include <linux/interrupt.h>
+> +#include <linux/jiffies.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/module.h>
+> +#include <linux/slab.h>
+> +
+> +struct mmc_cd_gpio {
+> +	unsigned int gpio;
+> +	char label[0];
+> +};
+> +
+> +static irqreturn_t mmc_cd_gpio_irqt(int irq, void *dev_id)
+> +{
+> +	/* Schedule a card detection after a debounce timeout */
+> +	mmc_detect_change(dev_id, msecs_to_jiffies(100));
+> +	return IRQ_HANDLED;
+> +}
+> +
+> +int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio,
+> +			unsigned int irq, unsigned long flags)
+> +{
+> +	size_t len = strlen(dev_name(host->parent)) + 4;
+> +	struct mmc_cd_gpio *cd = kmalloc(sizeof(*cd) + len, GFP_KERNEL);
+> +	int ret;
+> +
+> +	if (!cd)
+> +		return -ENOMEM;
+> +
+> +	sprintf(cd->label, "%s cd", dev_name(host->parent));
 
-Ah, I replied earlier without having seen this patch.  I still prefer
-the version I proposed, which doesn't dereference host->pdata->caps{,2}
-without testing it first.
+Mind using snprintf() instead?  I prefer it for new uses, it leaves
+fewer uses of sprintf to audit for correctness.
+
+Thanks,
 
 - Chris.
 -- 
