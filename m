@@ -1,49 +1,43 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-s3c: Remove old and misprototyped suspend operations
-Date: Sat, 24 Dec 2011 21:29:39 -0500
-Message-ID: <m239c9z8mk.fsf@bob.laptop.org>
-References: <1321898451-5347-1-git-send-email-broonie@opensource.wolfsonmicro.com>
-	<4ED4F4C4.2020805@samsung.com> <87zkfckvve.fsf@laptop.org>
-	<loom.20111219T110819-762@post.gmane.org>
+Subject: Re: [PATCH V3] mmc: core: Add option to prevent eMMC sleep command
+Date: Sat, 24 Dec 2011 21:31:31 -0500
+Message-ID: <m2y5u1xtz0.fsf@bob.laptop.org>
+References: <1324308259-6770-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:55668 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:55709 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754186Ab1LYC3u (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 24 Dec 2011 21:29:50 -0500
-In-Reply-To: <loom.20111219T110819-762@post.gmane.org> (Tushar Behera's
-	message of "Mon, 19 Dec 2011 10:15:27 +0000 (UTC)")
+	id S1754186Ab1LYCbl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 24 Dec 2011 21:31:41 -0500
+In-Reply-To: <1324308259-6770-1-git-send-email-ulf.hansson@stericsson.com>
+	(Ulf Hansson's message of "Mon, 19 Dec 2011 16:24:19 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tushar Behera <tushar.behera@linaro.org>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi,
+Hi Ulf,
 
-On Mon, Dec 19 2011, Tushar Behera wrote:
->> >> Now that the driver is using dev_pm_ops the suspend operations in the
->> >> platform_driver structure won't get called so don't need to be there,
->> >> and certainly shouldn't be the same function as dev_pm_ops since the
->> >> signatures are different.
->> >> 
->> >> Signed-off-by: Mark Brown <broonie <at> opensource.wolfsonmicro.com>
+On Mon, Dec 19 2011, Ulf Hansson wrote:
+> Host may now use MMC_CAP2_NO_SLEEP_CMD to disable the use
+> of eMMC sleep/awake command.
 >
-> On Origen board (based on EXYNOS4210), the primary filesystem is on a
-> SD/MMC card. When tested with v3.2-rc6 kernel, the system doesn't resume
-> properly.
+> This option can be used when you platform have a buggy
+> kernel crash dump software, which is supposed to store
+> the dump on the eMMC, but is not able to wake up the eMMC
+> from sleep state.
 >
-> After resume, it keeps printing following message and the filesystem never
-> comes up.
->
-> mmc0: Timeout waiting for hardware interrupt.
->
-> If this patch is reverted, the system is able to mount the filesystem 
-> successfully.    
->
-> Am I missing something?
+> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+> Reviewed-by: Hanumath Prasad <hanumath.prasad@stericsson.com>
+> Reviewed-by: Srinidhi Kasagar <srinidhi.kasagar@stericsson.com>
+> Acked-by: Subhash Jadavani <subhashj@codeaurora.org>
 
-Mark/Jaehoon?  This looks very bad.
+Sorry for stepping in late, but we don't normally modify the kernel to
+make life easier for buggy proprietary software -- if this patch is to
+be merged, it has to make sense on its own merits.
+
+Thanks,
 
 - Chris.
 -- 
