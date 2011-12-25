@@ -1,39 +1,49 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: core: Fix voltage select in DDR mode
-Date: Sat, 24 Dec 2011 21:24:11 -0500
-Message-ID: <m27h1lz8vo.fsf@bob.laptop.org>
-References: <1323950262-2160-1-git-send-email-girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-s3c: Remove old and misprototyped suspend operations
+Date: Sat, 24 Dec 2011 21:29:39 -0500
+Message-ID: <m239c9z8mk.fsf@bob.laptop.org>
+References: <1321898451-5347-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+	<4ED4F4C4.2020805@samsung.com> <87zkfckvve.fsf@laptop.org>
+	<loom.20111219T110819-762@post.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39342 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:55668 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754186Ab1LYCYX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 24 Dec 2011 21:24:23 -0500
-In-Reply-To: <1323950262-2160-1-git-send-email-girish.shivananjappa@linaro.org>
-	(Girish K. S.'s message of "Thu, 15 Dec 2011 17:27:42 +0530")
+	id S1754186Ab1LYC3u (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 24 Dec 2011 21:29:50 -0500
+In-Reply-To: <loom.20111219T110819-762@post.gmane.org> (Tushar Behera's
+	message of "Mon, 19 Dec 2011 10:15:27 +0000 (UTC)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Philip Rakity <prakity@marvell.com>, Arindam Nath <arindam.nath@amd.com>
+To: Tushar Behera <tushar.behera@linaro.org>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-mmc@vger.kernel.org
 
-Hi Girish,
+Hi,
 
-On Thu, Dec 15 2011, Girish K S wrote:
-> This patch fixes the wrong comparison before setting the interface
-> voltage in DDR mode.
+On Mon, Dec 19 2011, Tushar Behera wrote:
+>> >> Now that the driver is using dev_pm_ops the suspend operations in the
+>> >> platform_driver structure won't get called so don't need to be there,
+>> >> and certainly shouldn't be the same function as dev_pm_ops since the
+>> >> signatures are different.
+>> >> 
+>> >> Signed-off-by: Mark Brown <broonie <at> opensource.wolfsonmicro.com>
 >
-> The assignment to the variable ddr before comaprison is either
-> ddr = MMC_1_2V_DDR_MODE; or ddr == MMC_1_8V_DDR_MODE. But the comparison
-> is done wth the extended csd value if (ddr == EXT_CSD_CARD_TYPE_DDR_1_2V)
+> On Origen board (based on EXYNOS4210), the primary filesystem is on a
+> SD/MMC card. When tested with v3.2-rc6 kernel, the system doesn't resume
+> properly.
 >
-> cc: Philip Rakity <prakity@marvell.com>
-> cc: Arindam Nath <arindam.nath@amd.com>
-> cc: Chris Ball <cjb@laptop.org>
-> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
+> After resume, it keeps printing following message and the filesystem never
+> comes up.
+>
+> mmc0: Timeout waiting for hardware interrupt.
+>
+> If this patch is reverted, the system is able to mount the filesystem 
+> successfully.    
+>
+> Am I missing something?
 
-Pushed to mmc-next for 3.3 with ACKs from Philip and Subhash and a
-stable@ tag, thanks.  (It's too late for 3.2.)
+Mark/Jaehoon?  This looks very bad.
 
 - Chris.
 -- 
