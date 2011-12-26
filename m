@@ -1,302 +1,133 @@
-From: Liu Qiang-B32616 <B32616@freescale.com>
-Subject: RE: [PATCH V2 1/2] SD/MMC: add an interface to re-initialize bounce
- buffer
-Date: Mon, 26 Dec 2011 02:45:08 +0000
-Message-ID: <8F012AA59EAB7D4F89C0AE6C20D4570913AD9F@039-SN1MPN1-003.039d.mgd.msft.net>
-References: <1324451420-3899-1-git-send-email-b32616@freescale.com>
+From: Tushar Behera <tushar.behera@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-s3c: Remove old and misprototyped suspend
+ operations
+Date: Mon, 26 Dec 2011 10:35:17 +0530
+Message-ID: <4EF8008D.5060502@linaro.org>
+References: <1321898451-5347-1-git-send-email-broonie@opensource.wolfsonmicro.com> <4ED4F4C4.2020805@samsung.com> <87zkfckvve.fsf@laptop.org> <loom.20111219T110819-762@post.gmane.org> <m239c9z8mk.fsf@bob.laptop.org> <4EF7D3DE.5060907@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:13036 "EHLO
-	TX2EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753559Ab1LZCpT convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Dec 2011 21:45:19 -0500
-In-Reply-To: <1324451420-3899-1-git-send-email-b32616@freescale.com>
-Content-Language: en-US
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:42442 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750699Ab1LZFFX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Dec 2011 00:05:23 -0500
+Received: by iaeh11 with SMTP id h11so18336718iae.19
+        for <linux-mmc@vger.kernel.org>; Sun, 25 Dec 2011 21:05:22 -0800 (PST)
+In-Reply-To: <4EF7D3DE.5060907@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Liu Qiang-B32616 <B32616@freescale.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Li Yang-R58472 <r58472@freescale.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-mmc@vger.kernel.org
 
-Hi Chris,
+Hi Jaehoon,
 
-Happy holidays!
-How about this patch? And "[PATCH V2 2/2] mmc/doc: feature description of
-runtime bounce buffer size adjustment"? I add the description in Documents/mmc/mmc-dev-attrs.txt
-according to your suggestion.
+On 12/26/2011 07:24 AM, Jaehoon Chung wrote:
+> Hi Tushar.
+>
+> I also tested this patch with Samsung-SoC.
+> But i didn't find the below message
+> "mmc0: Timeout waiting for hardware interrupt."
+>
+When the primary filesystem is on SD/MMC card, I need to select 
+following config options for the system to go to sleep. Is it in anyway 
+the reason of conflict?
 
-Thanks for your reply.
+CONFIG_MMC_UNSAFE_RESUME=y
 
+I modified my test-case to use a ramdisk instead and use a script to 
+mount/unmount the filesystem on MMC card. In that case also I get the 
+above error for some time - around 30s. After that, it behaves normally 
+(mounting/unmounting etc.)
 
+$ echo mem > /sys/power/state
+[   18.825000] PM: Syncing filesystems ... done.
+[   18.830000] Freezing user space processes ... (elapsed 0.00 seconds) 
+done.
+[   18.835000] Freezing remaining freezable tasks ... (elapsed 0.01 
+seconds) done.
+[   18.855000] Suspending console(s) (use no_console_suspend to debug)
+[   18.865000] wake enabled for irq 292
+[   18.865000] wake enabled for irq 301
+[   18.865000] wake enabled for irq 302
+[   18.865000] wake enabled for irq 303
+[   18.865000] wake enabled for irq 304
+[   18.865000] wake enabled for irq 305
+[   18.890000] PM: suspend of devices complete after 26.491 msecs
+[   18.890000] PM: late suspend of devices complete after 0.829 msecs
+[   18.890000] Disabling non-boot CPUs ...
+[   18.895000] IRQ80 no longer affine to CPU1
+[   18.895000] CPU1: shutdown
+[   18.895000] Enabling non-boot CPUs ...
+[   18.905000] CPU1: Booted secondary processor
+[   18.905000] Calibrating delay loop (skipped) already calibrated this CPU
+[   18.905000] CPU1: Unknown IPI message 0x1
+[   18.905000] CPU1 is up
+[   18.905000] PM: early resume of devices complete after 0.745 msecs
+[   18.910000] s3c-i2c s3c2440-i2c.0: slave address 0x10
+[   18.910000] s3c-i2c s3c2440-i2c.0: bus frequency set to 97 KHz
+[   18.910000] usb usb1: root hub lost power or was reset
+[   18.935000] wake disabled for irq 301
+[   18.935000] wake disabled for irq 302
+[   18.935000] wake disabled for irq 303
+[   18.935000] wake disabled for irq 304
+[   18.935000] wake disabled for irq 305
+[   18.935000] wake disabled for irq 292
+[   19.070000] PM: resume of devices complete after 160.084 msecs
+[   19.180000] Restarting tasks ... done.
+/ $ [   29.200000] mmc0: Timeout waiting for hardware interrupt.
+[   39.220000] mmc0: Timeout waiting for hardware interrupt.
+[   49.240000] mmc0: Timeout waiting for hardware interrupt.
+[   59.260000] mmc0: Timeout waiting for hardware interrupt.
+[   59.260000] mmc0: card e624 removed
+[   59.330000] mmc0: new SDHC card at address e624
+[   59.335000] mmcblk0: mmc0:e624 SD04G 3.69 GiB
+[   59.340000]  mmcblk0: p1
 
------Original Message-----
-From: Liu Qiang-B32616 
-Sent: Wednesday, December 21, 2011 3:10 PM
-To: cjb@laptop.org; linux-mmc@vger.kernel.org
-Cc: Li Yang-R58472; Liu Qiang-B32616; Liu Qiang-B32616
-Subject: [PATCH V2 1/2] SD/MMC: add an interface to re-initialize bounce buffer
+> I didn't understand what is that differ with previously code?
+> (just using dev_pm_ops..)
+>
 
-Add bounce_size under /sys/block/mmcblk0/bouncesz.
-Support dynamic adjustment of bounce buffer in run-time (include mounted or unmounted filesystem).
+I could not find any dev_pm_ops related implementation in sdhci-s3c.c. 
+Are there some other patches that I am missing on v3.2-rc6? Or any 
+specific config settings that I need for this to be working?
 
-/sys/block/mmcblk0/bouncesz should be integer multiple of 512, the value should be range from 4096 to 4194304.
-
-1. use variable instead of MMC_QUEUE_BOUNCESZ; 2. Re-initialize bounce buffer accorinding to new bounce size at run-time;
-
-Signed-off-by: Qiang Liu <qiang.liu@freescale.com>
----
-changes for V2
-	merge former 2 patches to 1
-
-Here is the test results with different mmc bounce size, IOzone is used to test performance of mass data transmission.
-Environment:
-PowerPC P1022DS platform, Sandisk Class 10, 4G memory card, EXT4 filesystem
-[root@p2020ds root]# cat /sys/fs/   block/mmcblk0/bouncesz
-65536
-[root@p2020ds root]# mount /dev/mmcblk0p1 /mnt/ EXT4-fs (mmcblk0p1): mounted filesystem without journal. Opts:
-[root@p2020ds root]# iozone -Rab result -i0 -i1 -r64 =-  -n1g -g4g -f /mnt/ff ........
-              KB  reclen   write rewrite    read    reread
-         1048576      64   14229   13286   662028   663372
-         2097152      64   13758   12605    49549    47443
-         4194304      64   13435   12215    21974    22096
-........
-[root@p2020ds root]# echo 262144 > /sys/block/mmcblk0/bouncesz [root@p2020ds root]# cat /sys/block/mmcblk0/bouncesz
-262144
-[root@p2020ds root]# iozone -Rab result -i0 -i1 -r64 -n1g -g4g -f /mnt/ff ........
-              KB  reclen   write rewrite    read    reread
-         1048576      64   19228   19416   676659   677785
-         2097152      64   18512   18499    26978    27055
-         4194304      64   17932   18185    21945    21805
-........
-[root@p2020ds root]# echo 8192 > /sys/block/mmcblk0/bouncesz [root@p2020ds root]# cat /sys/block/mmcblk0/bouncesz
-8192
-[root@p2020ds root]# iozone -Rab result -i0 -i1 -r64 -n1g -g1g -f /mnt/ff
-              KB  reclen   write rewrite    read    reread
-         1048576      64    5068    3324   640266   641609
--------------------------------------------------------------------------------
- drivers/mmc/card/block.c |   43 +++++++++++++++++++
- drivers/mmc/card/queue.c |  102 +++++++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/card/queue.h |    6 +++
- 3 files changed, 149 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c index 0c959c9..790abe2 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -59,6 +59,9 @@ MODULE_ALIAS("mmc:block");  #define INAND_CMD38_ARG_SECTRIM1 0x81  #define INAND_CMD38_ARG_SECTRIM2 0x88
-
-+#define MMC_MIN_QUEUE_BOUNCESZ 4096
-+#define MMC_MAX_QUEUE_BOUNCESZ 4194304
-+
- static DEFINE_MUTEX(block_mutex);
-
- /*
-@@ -108,6 +111,7 @@ struct mmc_blk_data {
- 	unsigned int	part_curr;
- 	struct device_attribute force_ro;
- 	struct device_attribute power_ro_lock;
-+	struct device_attribute bouncesz;
- 	int	area_type;
- };
-
-@@ -1633,6 +1637,7 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
- 			del_gendisk(md->disk);
- 		}
-
-+		device_remove_file(disk_to_dev(md->disk), &md->bouncesz);
- 		/* Then flush out any already in there */
- 		mmc_cleanup_queue(&md->queue);
- 		mmc_blk_put(md);
-@@ -1739,6 +1744,33 @@ static const struct mmc_fixup blk_fixups[] =
- 	END_FIXUP
- };
-
-+#ifdef CONFIG_MMC_BLOCK_BOUNCE
-+static ssize_t mmc_bouncesz_show(struct device *dev,
-+		struct device_attribute *attr, char *buf) {
-+	 return sprintf(buf, "%u\n", mmc_queue_bouncesz); }
-+
-+static ssize_t mmc_bouncesz_store(struct device *dev,
-+		struct device_attribute *attr,
-+		const char *buf, size_t count)
-+{
-+	unsigned int bouncesz;
-+	struct mmc_blk_data *md;
-+
-+	if ((sscanf(buf, "%d", &bouncesz) != 1) ||
-+			(bouncesz < MMC_MIN_QUEUE_BOUNCESZ) ||
-+			(bouncesz > MMC_MAX_QUEUE_BOUNCESZ) ||
-+			(bouncesz % 512 != 0))
-+		return -EINVAL;
-+
-+	md = mmc_blk_get(dev_to_disk(dev));
-+	mmc_reinit_bounce_queue(&md->queue, md->queue.card, bouncesz);
-+	mmc_blk_put(md);
-+	return mmc_queue_bouncesz;
-+}
-+#endif
-+
- static int mmc_blk_probe(struct mmc_card *card)  {
- 	struct mmc_blk_data *md, *part_md;
-@@ -1771,6 +1803,17 @@ static int mmc_blk_probe(struct mmc_card *card)
- 	mmc_set_drvdata(card, md);
- 	mmc_fixup_device(card, blk_fixups);
-
-+#ifdef CONFIG_MMC_BLOCK_BOUNCE
-+	md->bouncesz.show = mmc_bouncesz_show;
-+	md->bouncesz.store = mmc_bouncesz_store;
-+	sysfs_attr_init(&md->bouncesz.attr);
-+	md->bouncesz.attr.name = "bouncesz";
-+	md->bouncesz.attr.mode = S_IRUGO | S_IWUSR;
-+	err = device_create_file(disk_to_dev(md->disk), &md->bouncesz);
-+	if (err)
-+		goto out;
-+#endif
-+
- 	if (mmc_add_disk(md))
- 		goto out;
-
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c index dcad59c..c563e33 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -21,7 +21,9 @@
- #include "queue.h"
-
- #define MMC_QUEUE_BOUNCESZ	65536
--
-+#ifdef CONFIG_MMC_BLOCK_BOUNCE
-+unsigned mmc_queue_bouncesz = MMC_QUEUE_BOUNCESZ; #endif
- #define MMC_QUEUE_SUSPENDED	(1 << 0)
-
- /*
-@@ -185,7 +187,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	if (host->max_segs == 1) {
- 		unsigned int bouncesz;
-
--		bouncesz = MMC_QUEUE_BOUNCESZ;
-+		bouncesz = mmc_queue_bouncesz;
-
- 		if (bouncesz > host->max_req_size)
- 			bouncesz = host->max_req_size;
-@@ -329,6 +331,102 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
- EXPORT_SYMBOL(mmc_cleanup_queue);
-
- /**
-+ * mmc_reinit_bounce_queue - re-initialise a bounce buffer.
-+ * @mq: mmc queue
-+ * @card: mmc card to attach this queue
-+ * @bouncesz: the bounce size that need re-initializing
-+ *
-+ * Initialise a MMC card request queue.
-+ */
-+#ifdef CONFIG_MMC_BLOCK_BOUNCE
-+int mmc_reinit_bounce_queue(struct mmc_queue *mq, struct mmc_card *card,
-+		   unsigned int bouncesz)
-+{
-+	struct mmc_host *host = card->host;
-+	struct mmc_queue_req *mqrq_cur = &mq->mqrq[0];
-+	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
-+	int ret;
-+	struct scatterlist *curr_bounce_sg, *prev_bounce_sg;
-+	char *curr_bounce_buf, *prev_bounce_buf;
-+
-+	mmc_claim_host(card->host);
-+
-+	bouncesz = min(bouncesz, host->max_req_size);
-+	bouncesz = min(bouncesz, host->max_seg_size);
-+	bouncesz = min(bouncesz, host->max_blk_count * 512);
-+
-+	/* store current using addr of bounce_buf and bounce_sg */
-+	curr_bounce_sg = mqrq_cur->bounce_sg;
-+	prev_bounce_sg = mqrq_prev->bounce_sg;
-+	curr_bounce_buf = mqrq_cur->bounce_buf;
-+	prev_bounce_buf = mqrq_prev->bounce_buf;
-+
-+	if (host->max_segs != 1)
-+		goto restore_queue;
-+
-+	/* realloc bounce queue use given bounce size */
-+	mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
-+	if (!mqrq_cur->bounce_buf) {
-+		printk(KERN_WARNING "%s: unable to "
-+			"allocate bounce cur buffer\n",
-+			mmc_card_name(card));
-+		ret = -ENOMEM;
-+		goto restore_queue;
-+	}
-+
-+	mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
-+	if (!mqrq_prev->bounce_buf) {
-+		printk(KERN_WARNING "%s: unable to "
-+			"allocate bounce prev buffer\n",
-+			mmc_card_name(card));
-+		kfree(mqrq_cur->bounce_buf);
-+		mqrq_cur->bounce_buf = NULL;
-+		ret = -ENOMEM;
-+		goto restore_queue;
-+	}
-+
-+	mqrq_cur->bounce_sg =
-+		mmc_alloc_sg(bouncesz / 512, &ret);
-+	if (ret)
-+		goto cleanup_queue;
-+
-+	mqrq_prev->bounce_sg =
-+		mmc_alloc_sg(bouncesz / 512, &ret);
-+	if (ret)
-+		goto cleanup_queue;
-+
-+	blk_queue_max_hw_sectors(mq->queue, bouncesz / 512);
-+	blk_queue_max_segments(mq->queue, bouncesz / 512);
-+	blk_queue_max_segment_size(mq->queue, bouncesz);
-+	mmc_queue_bouncesz = bouncesz;
-+
-+	kfree(curr_bounce_sg);
-+	kfree(prev_bounce_sg);
-+	kfree(curr_bounce_buf);
-+	kfree(prev_bounce_buf);
-+
-+	mmc_release_host(card->host);
-+	return 0;
-+
-+cleanup_queue:
-+	/* cleanup bounce queue first */
-+	kfree(mqrq_cur->sg);
-+	kfree(mqrq_cur->bounce_buf);
-+	kfree(mqrq_prev->sg);
-+	kfree(mqrq_prev->bounce_buf);
-+
-+restore_queue:
-+	mqrq_cur->bounce_buf = curr_bounce_buf;
-+	mqrq_prev->bounce_buf = prev_bounce_buf;
-+	mqrq_cur->bounce_sg = curr_bounce_sg;
-+	mqrq_prev->bounce_sg = prev_bounce_sg;
-+
-+	mmc_release_host(card->host);
-+	return ret;
-+}
-+#endif
-+
-+/**
-  * mmc_queue_suspend - suspend a MMC request queue
-  * @mq: MMC queue to suspend
-  *
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index d2a1eb4..c1dee6d 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -46,4 +46,10 @@ extern unsigned int mmc_queue_map_sg(struct mmc_queue *,
- extern void mmc_queue_bounce_pre(struct mmc_queue_req *);
- extern void mmc_queue_bounce_post(struct mmc_queue_req *);
-
-+#ifdef CONFIG_MMC_BLOCK_BOUNCE
-+extern int mmc_reinit_bounce_queue(struct mmc_queue *, struct mmc_card *,
-+		unsigned int);
-+extern unsigned mmc_queue_bouncesz;
-+#endif
-+
- #endif
---
-1.6.4
+> Thanks,
+> Jaehoon Chung
+>
+> On 12/25/2011 11:29 AM, Chris Ball wrote:
+>
+>> Hi,
+>>
+>> On Mon, Dec 19 2011, Tushar Behera wrote:
+>>>>>> Now that the driver is using dev_pm_ops the suspend operations in the
+>>>>>> platform_driver structure won't get called so don't need to be there,
+>>>>>> and certainly shouldn't be the same function as dev_pm_ops since the
+>>>>>> signatures are different.
+>>>>>>
+>>>>>> Signed-off-by: Mark Brown<broonie<at>  opensource.wolfsonmicro.com>
+>>>
+>>> On Origen board (based on EXYNOS4210), the primary filesystem is on a
+>>> SD/MMC card. When tested with v3.2-rc6 kernel, the system doesn't resume
+>>> properly.
+>>>
+>>> After resume, it keeps printing following message and the filesystem never
+>>> comes up.
+>>>
+>>> mmc0: Timeout waiting for hardware interrupt.
+>>>
+>>> If this patch is reverted, the system is able to mount the filesystem
+>>> successfully.
+>>>
+>>> Am I missing something?
+>>
+>> Mark/Jaehoon?  This looks very bad.
+>
+>>
+>> - Chris.
+>
+>
 
 
+-- 
+Tushar Behera
