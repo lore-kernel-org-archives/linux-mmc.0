@@ -1,56 +1,34 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 3/4 v3] mmc: sh_mmcif: process requests asynchronously
-Date: Mon, 26 Dec 2011 09:44:32 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1112260942330.9178@axis700.grange>
-References: <Pine.LNX.4.64.1111301553330.22197@axis700.grange>
- <1323887514-12650-4-git-send-email-g.liakhovetski@gmx.de> <m2boqxz91n.fsf@bob.laptop.org>
- <Pine.LNX.4.64.1112252105340.22951@axis700.grange> <m2aa6gxog7.fsf@bob.laptop.org>
- <Pine.LNX.4.64.1112252358050.22951@axis700.grange> <m2y5u0w1a2.fsf@bob.laptop.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH v2 RESEND 0/2] mmc: core: Fix cache control for eMMC4.5
+Date: Mon, 26 Dec 2011 18:02:18 +0900
+Message-ID: <000701ccc3ad$12661420$37323c60$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <m2y5u0w1a2.fsf@bob.laptop.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:21930 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752647Ab1LZJCV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Dec 2011 04:02:21 -0500
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org
 
-Hi Chris
+This patch-set fixed the cache control for eMMC4.5
 
-On Sun, 25 Dec 2011, Chris Ball wrote:
+Seungwon Jeon (2):
+      mmc: core: Separate the timeout value for cache-ctrl
+      mmc: core: Add claiming a host during mmc_cache_ctrl
 
-> Hi,
-> 
-> On Sun, Dec 25 2011, Guennadi Liakhovetski wrote:
-> > Hmmm, that's very weird - I rebased my patch series on top of your 
-> > mmc-next from a couple of hours ago. Sorry for asking, but you've also 
-> > applied the leading two patches from this series, right? This is what my 
-> > log of this driver looks like now:
-> 
-> Oops, that's it, thanks.
-> 
-> Now I have:
-> 
-> 13cb975 (HEAD, mmc-next) mmc: sh_mmcif: cosmetic clean up
-> 9e66e1c mmc: sh_mmcif: process error interrupts first
-> 9092a17 mmc: convert drivers/mmc/host/* to use module_platform_driver()
-> 2736566 mmc: sh_mmcif: simplify clock divisor calculation
-> 58f1934 mmc: sh_mmcif: fix clock gating on platforms with a .down_pwr() method
-> 88b4767 mmc: Add module.h to drivers/mmc users assuming implicit presence.
-> 714c4a6 mmc: sh_mmcif: simplify platform data
-> c9b0cef mmc: sh_mmcif: maximize power saving
-> 
-> But 4/4 ("mmc: sh_mmcif: remove now superfluous sh_mmcif_host::data
-> member") isn't applying without fuzz (offset 13 lines).  Any ideas/want
-> to resend it?
+ drivers/mmc/core/core.c |   29 +++++++++++++++++++----------
+ drivers/mmc/core/mmc.c  |   13 +++++++++++--
+ 2 files changed, 30 insertions(+), 12 deletions(-)
 
-I can resend it if you like, but in fact that fuzz is harmless - you can 
-go ahead with the patch you have at hand. But, please, do let me know if 
-you prefer to have an updated patch.
+Best regards,
+Seungwon Jeon.
+--
+1.7.2.3
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+
