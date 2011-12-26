@@ -1,49 +1,56 @@
-From: Tushar Behera <tushar.behera@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-s3c: Remove old and misprototyped suspend
- operations
-Date: Mon, 26 Dec 2011 11:30:54 +0530
-Message-ID: <4EF80D96.1010503@linaro.org>
-References: <1321898451-5347-1-git-send-email-broonie@opensource.wolfsonmicro.com> <4ED4F4C4.2020805@samsung.com> <87zkfckvve.fsf@laptop.org> <loom.20111219T110819-762@post.gmane.org> <m239c9z8mk.fsf@bob.laptop.org> <4EF7D3DE.5060907@samsung.com> <4EF8008D.5060502@linaro.org> <4EF804D6.3000609@samsung.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 3/4 v3] mmc: sh_mmcif: process requests asynchronously
+Date: Mon, 26 Dec 2011 09:44:32 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1112260942330.9178@axis700.grange>
+References: <Pine.LNX.4.64.1111301553330.22197@axis700.grange>
+ <1323887514-12650-4-git-send-email-g.liakhovetski@gmx.de> <m2boqxz91n.fsf@bob.laptop.org>
+ <Pine.LNX.4.64.1112252105340.22951@axis700.grange> <m2aa6gxog7.fsf@bob.laptop.org>
+ <Pine.LNX.4.64.1112252358050.22951@axis700.grange> <m2y5u0w1a2.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:32947 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750720Ab1LZGA7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Dec 2011 01:00:59 -0500
-Received: by iaeh11 with SMTP id h11so18392699iae.19
-        for <linux-mmc@vger.kernel.org>; Sun, 25 Dec 2011 22:00:59 -0800 (PST)
-In-Reply-To: <4EF804D6.3000609@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <m2y5u0w1a2.fsf@bob.laptop.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-mmc@vger.kernel.org
 
-Hi Jaehoon,
+Hi Chris
 
-On 12/26/2011 10:53 AM, Jaehoon Chung wrote:
-> Hi Tushar.
->
-> Did you test with linux-3.2-rc6?
-> I checked the linux-3.2-rc6..that version may be missed the dev_pm_ops patch..
-> (Manuel's patch [PATCH v4] mmc: sdhci: remove "state" argument from sdhci_suspend_host)
->
-> I didn't understand this condition.
->
-> That patch is include in linux-3.2-rc7.
->
+On Sun, 25 Dec 2011, Chris Ball wrote:
 
-Thanks for the information. I ran the tests with linux-3.2-rc7 and 
-everything seems great.
+> Hi,
+> 
+> On Sun, Dec 25 2011, Guennadi Liakhovetski wrote:
+> > Hmmm, that's very weird - I rebased my patch series on top of your 
+> > mmc-next from a couple of hours ago. Sorry for asking, but you've also 
+> > applied the leading two patches from this series, right? This is what my 
+> > log of this driver looks like now:
+> 
+> Oops, that's it, thanks.
+> 
+> Now I have:
+> 
+> 13cb975 (HEAD, mmc-next) mmc: sh_mmcif: cosmetic clean up
+> 9e66e1c mmc: sh_mmcif: process error interrupts first
+> 9092a17 mmc: convert drivers/mmc/host/* to use module_platform_driver()
+> 2736566 mmc: sh_mmcif: simplify clock divisor calculation
+> 58f1934 mmc: sh_mmcif: fix clock gating on platforms with a .down_pwr() method
+> 88b4767 mmc: Add module.h to drivers/mmc users assuming implicit presence.
+> 714c4a6 mmc: sh_mmcif: simplify platform data
+> c9b0cef mmc: sh_mmcif: maximize power saving
+> 
+> But 4/4 ("mmc: sh_mmcif: remove now superfluous sh_mmcif_host::data
+> member") isn't applying without fuzz (offset 13 lines).  Any ideas/want
+> to resend it?
 
-> To Chris.
-> If adopt "sdhci-s3c: remove Old and misprototyped suspend operation"
-> I think that Manuel's patch must be include in liux-3.2-rc6
->
-> Thanks,
-> Jaehoon Chung
->
+I can resend it if you like, but in fact that fuzz is harmless - you can 
+go ahead with the patch you have at hand. But, please, do let me know if 
+you prefer to have an updated patch.
 
--- 
-Tushar Behera
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
