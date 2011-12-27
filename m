@@ -1,206 +1,68 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V4 3/7] mmc: sdhci-pci: add platform data
-Date: Tue, 27 Dec 2011 15:48:43 +0200
-Message-ID: <1324993727-7508-4-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V4 5/7] mmc: sdhci-pci: remove SDHCI_QUIRK2_OWN_CARD_DETECTION
+Date: Tue, 27 Dec 2011 15:48:45 +0200
+Message-ID: <1324993727-7508-6-git-send-email-adrian.hunter@intel.com>
 References: <1324993727-7508-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga11.intel.com ([192.55.52.93]:49580 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753937Ab1L0NtG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 27 Dec 2011 08:49:06 -0500
+	id S1753946Ab1L0NtH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 27 Dec 2011 08:49:07 -0500
 In-Reply-To: <1324993727-7508-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
 Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
 
-Add a means of getting platform data for the SDHCI PCI
-devices.  The data is stored against the slot not the
-device in order to support multi-slot devices.
-
-The data allows platform-specific setup (such as getting
-GPIO numbers from firmware or setting up wl12xx for SDIO)
-to be done in platform support files instead of the
-sdhci-pci driver.
+Even if a driver provides separate card detection,
+an interrupt is still needed to abort mmc requests
+that are in progress.  SDHCI_QUIRK2_OWN_CARD_DETECTION
+prevents that, so remove it.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/Makefile                   |    2 +-
- drivers/mmc/Makefile               |    3 +--
- drivers/mmc/host/Makefile          |    1 +
- drivers/mmc/host/sdhci-pci-data.c  |    5 +++++
- drivers/mmc/host/sdhci-pci.c       |   32 ++++++++++++++++++++++++++++----
- include/linux/mmc/sdhci-pci-data.h |   18 ++++++++++++++++++
- 6 files changed, 54 insertions(+), 7 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-pci-data.c
- create mode 100644 include/linux/mmc/sdhci-pci-data.h
+ drivers/mmc/host/sdhci-pci.c |    1 -
+ drivers/mmc/host/sdhci.c     |    1 -
+ include/linux/mmc/sdhci.h    |    2 --
+ 3 files changed, 0 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/Makefile b/drivers/Makefile
-index 1b31421..c07be02 100644
---- a/drivers/Makefile
-+++ b/drivers/Makefile
-@@ -97,7 +97,7 @@ obj-$(CONFIG_EISA)		+= eisa/
- obj-y				+= lguest/
- obj-$(CONFIG_CPU_FREQ)		+= cpufreq/
- obj-$(CONFIG_CPU_IDLE)		+= cpuidle/
--obj-$(CONFIG_MMC)		+= mmc/
-+obj-y				+= mmc/
- obj-$(CONFIG_MEMSTICK)		+= memstick/
- obj-y				+= leds/
- obj-$(CONFIG_INFINIBAND)	+= infiniband/
-diff --git a/drivers/mmc/Makefile b/drivers/mmc/Makefile
-index 12eef39..400756e 100644
---- a/drivers/mmc/Makefile
-+++ b/drivers/mmc/Makefile
-@@ -6,5 +6,4 @@ subdir-ccflags-$(CONFIG_MMC_DEBUG) := -DDEBUG
- 
- obj-$(CONFIG_MMC)		+= core/
- obj-$(CONFIG_MMC)		+= card/
--obj-$(CONFIG_MMC)		+= host/
--
-+obj-$(subst m,y,$(CONFIG_MMC))	+= host/
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index b4b83f3..745f8fc 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -9,6 +9,7 @@ obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
- obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
- obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
- obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
-+obj-$(subst m,y,$(CONFIG_MMC_SDHCI_PCI))	+= sdhci-pci-data.o
- obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
- obj-$(CONFIG_MMC_SDHCI_PXAV2)	+= sdhci-pxav2.o
- obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
-diff --git a/drivers/mmc/host/sdhci-pci-data.c b/drivers/mmc/host/sdhci-pci-data.c
-new file mode 100644
-index 0000000..a611217
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-pci-data.c
-@@ -0,0 +1,5 @@
-+#include <linux/module.h>
-+#include <linux/mmc/sdhci-pci-data.h>
-+
-+struct sdhci_pci_data *(*sdhci_pci_get_data)(struct pci_dev *pdev, int slotno);
-+EXPORT_SYMBOL_GPL(sdhci_pci_get_data);
 diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index d2e77fb..4e8f324 100644
+index 646680a..83a152e 100644
 --- a/drivers/mmc/host/sdhci-pci.c
 +++ b/drivers/mmc/host/sdhci-pci.c
-@@ -25,6 +25,7 @@
- #include <linux/gpio.h>
- #include <linux/sfi.h>
- #include <linux/pm_runtime.h>
-+#include <linux/mmc/sdhci-pci-data.h>
+@@ -212,7 +212,6 @@ static void sdhci_pci_add_own_cd(struct sdhci_pci_slot *slot)
  
- #include "sdhci.h"
+ 	slot->cd_gpio = gpio;
+ 	slot->cd_irq = irq;
+-	slot->host->quirks2 |= SDHCI_QUIRK2_OWN_CARD_DETECTION;
  
-@@ -61,6 +62,7 @@ struct sdhci_pci_fixes {
- struct sdhci_pci_slot {
- 	struct sdhci_pci_chip	*chip;
- 	struct sdhci_host	*host;
-+	struct sdhci_pci_data	*data;
+ 	return;
  
- 	int			pci_bar;
- 	int			rst_n_gpio;
-@@ -1188,11 +1190,12 @@ static const struct dev_pm_ops sdhci_pci_pm_ops = {
- \*****************************************************************************/
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index e6c6cd6..6f1fd02 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -147,7 +147,6 @@ static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
+ 	u32 present, irqs;
  
- static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
--	struct pci_dev *pdev, struct sdhci_pci_chip *chip, int bar)
-+	struct pci_dev *pdev, struct sdhci_pci_chip *chip, int first_bar,
-+	int slotno)
- {
- 	struct sdhci_pci_slot *slot;
- 	struct sdhci_host *host;
--	int ret;
-+	int ret, bar = first_bar + slotno;
+ 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
+-	    (host->quirks2 & SDHCI_QUIRK2_OWN_CARD_DETECTION) ||
+ 	    !mmc_card_is_removable(host->mmc))
+ 		return;
  
- 	if (!(pci_resource_flags(pdev, bar) & IORESOURCE_MEM)) {
- 		dev_err(&pdev->dev, "BAR %d is not iomem. Aborting.\n", bar);
-@@ -1227,6 +1230,20 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
- 	slot->pci_bar = bar;
- 	slot->rst_n_gpio = -EINVAL;
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index e4b6935..dad7a46 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -90,8 +90,6 @@ struct sdhci_host {
  
-+	/* Retrieve platform data if there is any */
-+	if (*sdhci_pci_get_data)
-+		slot->data = sdhci_pci_get_data(pdev, slotno);
-+
-+	if (slot->data) {
-+		if (slot->data->setup) {
-+			ret = slot->data->setup(slot->data);
-+			if (ret) {
-+				dev_err(&pdev->dev, "platform setup failed\n");
-+				goto free;
-+			}
-+		}
-+	}
-+
- 	host->hw_name = "PCI";
- 	host->ops = &sdhci_pci_ops;
- 	host->quirks = chip->quirks;
-@@ -1236,7 +1253,7 @@ static struct sdhci_pci_slot * __devinit sdhci_pci_probe_slot(
- 	ret = pci_request_region(pdev, bar, mmc_hostname(host->mmc));
- 	if (ret) {
- 		dev_err(&pdev->dev, "cannot request region\n");
--		goto free;
-+		goto cleanup;
- 	}
+ 	unsigned int quirks2;	/* More deviations from spec. */
  
- 	host->ioaddr = pci_ioremap_bar(pdev, bar);
-@@ -1270,6 +1287,10 @@ unmap:
- release:
- 	pci_release_region(pdev, bar);
+-#define SDHCI_QUIRK2_OWN_CARD_DETECTION			(1<<0)
+-
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
  
-+cleanup:
-+	if (slot->data && slot->data->cleanup)
-+		slot->data->cleanup(slot->data);
-+
- free:
- 	sdhci_free_host(host);
- 
-@@ -1291,6 +1312,9 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
- 	if (slot->chip->fixes && slot->chip->fixes->remove_slot)
- 		slot->chip->fixes->remove_slot(slot, dead);
- 
-+	if (slot->data && slot->data->cleanup)
-+		slot->data->cleanup(slot->data);
-+
- 	pci_release_region(slot->chip->pdev, slot->pci_bar);
- 
- 	sdhci_free_host(slot->host);
-@@ -1377,7 +1401,7 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
- 	slots = chip->num_slots;	/* Quirk may have changed this */
- 
- 	for (i = 0; i < slots; i++) {
--		slot = sdhci_pci_probe_slot(pdev, chip, first_bar + i);
-+		slot = sdhci_pci_probe_slot(pdev, chip, first_bar, i);
- 		if (IS_ERR(slot)) {
- 			for (i--; i >= 0; i--)
- 				sdhci_pci_remove_slot(chip->slots[i]);
-diff --git a/include/linux/mmc/sdhci-pci-data.h b/include/linux/mmc/sdhci-pci-data.h
-new file mode 100644
-index 0000000..8959604
---- /dev/null
-+++ b/include/linux/mmc/sdhci-pci-data.h
-@@ -0,0 +1,18 @@
-+#ifndef LINUX_MMC_SDHCI_PCI_DATA_H
-+#define LINUX_MMC_SDHCI_PCI_DATA_H
-+
-+struct pci_dev;
-+
-+struct sdhci_pci_data {
-+	struct pci_dev	*pdev;
-+	int		slotno;
-+	int		rst_n_gpio; /* Set to -EINVAL if unused */
-+	int		cd_gpio;    /* Set to -EINVAL if unused */
-+	int		(*setup)(struct sdhci_pci_data *data);
-+	void		(*cleanup)(struct sdhci_pci_data *data);
-+};
-+
-+extern struct sdhci_pci_data *(*sdhci_pci_get_data)(struct pci_dev *pdev,
-+				int slotno);
-+
-+#endif
 -- 
 1.7.6.4
 
