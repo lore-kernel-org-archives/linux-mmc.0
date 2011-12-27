@@ -1,40 +1,44 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 3/4 v3] mmc: sh_mmcif: process requests asynchronously
-Date: Mon, 26 Dec 2011 12:59:52 -0500
-Message-ID: <m2boqvjjs7.fsf@bob.laptop.org>
-References: <Pine.LNX.4.64.1111301553330.22197@axis700.grange>
-	<1323887514-12650-4-git-send-email-g.liakhovetski@gmx.de>
-	<m2boqxz91n.fsf@bob.laptop.org>
-	<Pine.LNX.4.64.1112252105340.22951@axis700.grange>
-	<m2aa6gxog7.fsf@bob.laptop.org>
-	<Pine.LNX.4.64.1112252358050.22951@axis700.grange>
-	<m2y5u0w1a2.fsf@bob.laptop.org>
-	<Pine.LNX.4.64.1112260942330.9178@axis700.grange>
+From: Aaron Lu <aaron.lu@amd.com>
+Subject: [PATCH] mmc: sdhci: deactivate tuning timer when host is suspending
+Date: Tue, 27 Dec 2011 12:22:30 +0800
+Message-ID: <1324959750-18203-1-git-send-email-aaron.lu@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:38041 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751484Ab1LZSAN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 26 Dec 2011 13:00:13 -0500
-In-Reply-To: <Pine.LNX.4.64.1112260942330.9178@axis700.grange> (Guennadi
-	Liakhovetski's message of "Mon, 26 Dec 2011 09:44:32 +0100 (CET)")
+Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:8850 "EHLO
+	VA3EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753881Ab1L0EXC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Dec 2011 23:23:02 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: stable@kernel.org, linux-mmc@vger.kernel.org, Aaron Lu <aaron.lu@amd.com>, Philip Rakity <prakity@marvell.com>
 
-Hi,
+From: Philip Rakity <prakity@marvell.com>
 
-On Mon, Dec 26 2011, Guennadi Liakhovetski wrote:
-> I can resend it if you like, but in fact that fuzz is harmless - you can 
-> go ahead with the patch you have at hand. But, please, do let me know if 
-> you prefer to have an updated patch.
+Since we are suspending, the tuning timer should be deactivated.
 
-Okay, pushed to mmc-next for 3.3 -- please just check everything looks
-reasonable there.  Thanks,
+Signed-off-by: Philip Rakity <prakity@marvell.com>
+Acked-by: Aaron Lu <aaron.lu@amd.com>
+---
+ drivers/mmc/host/sdhci.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
 
-- Chris.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ab6018f..1abbd26 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2347,8 +2347,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
+ 	if (host->version >= SDHCI_SPEC_300 && host->tuning_count &&
+ 	    host->tuning_mode == SDHCI_TUNING_MODE_1) {
+ 		host->flags &= ~SDHCI_NEEDS_RETUNING;
+-		mod_timer(&host->tuning_timer, jiffies +
+-			host->tuning_count * HZ);
++		del_timer_sync(&host->tuning_timer);
+ 	}
+ 
+ 	ret = mmc_suspend_host(host->mmc);
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.7.4
+
+
