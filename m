@@ -1,44 +1,55 @@
-From: Aaron Lu <aaron.lu@amd.com>
-Subject: [PATCH] mmc: sdhci: deactivate tuning timer when host is suspending
-Date: Tue, 27 Dec 2011 12:22:30 +0800
-Message-ID: <1324959750-18203-1-git-send-email-aaron.lu@amd.com>
+From: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Subject: Re: [PATCH] mmc: use usleep_range() in mmc_delay()
+Date: Tue, 27 Dec 2011 10:10:25 +0530
+Message-ID: <4EF94C39.3070705@codeaurora.org>
+References: <4EF18310.6080801@linaro.org> <4EF1C230.6060005@codeaurora.org> <4EF1D97E.3000201@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:8850 "EHLO
-	VA3EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753881Ab1L0EXC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Dec 2011 23:23:02 -0500
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:29080 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753881Ab1L0Eka (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Dec 2011 23:40:30 -0500
+In-Reply-To: <4EF1D97E.3000201@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>
-Cc: stable@kernel.org, linux-mmc@vger.kernel.org, Aaron Lu <aaron.lu@amd.com>, Philip Rakity <prakity@marvell.com>
+To: Dmitry Antipov <dmitry.antipov@linaro.org>
+Cc: linaro-dev@lists.linaro.org, patches@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-From: Philip Rakity <prakity@marvell.com>
+Hi Antipov,
 
-Since we are suspending, the tuning timer should be deactivated.
+Sorry for the delayed response. Please find some comments below:
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
-Acked-by: Aaron Lu <aaron.lu@amd.com>
----
- drivers/mmc/host/sdhci.c |    3 +--
- 1 files changed, 1 insertions(+), 2 deletions(-)
+On 12/21/2011 6:35 PM, Dmitry Antipov wrote:
+> On 12/21/2011 03:25 PM, Sujit Reddy Thumma wrote:
+>
+>> I have posted similar patch some time back.
+>> http://comments.gmane.org/gmane.linux.ports.arm.msm/2119.
+>>
+>> Would you like to comment on that?
+>
+> - I believe we should forget about jiffies, HZ and other similar obsolete
+> timekeeping stuff;
+>
+> - I have no ideas where did you get 'most typical' 20 ms. MMC subsystem
+> uses
+> mmc_delay() with two compile-time fixed values 1 and 10 ms, with the only
+> exception of card-dependent sleep/awake timeout. I was unable to find a
+> table
+> with typical values, but it's rounded up to >= 1 ms anyway.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ab6018f..1abbd26 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2347,8 +2347,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 	if (host->version >= SDHCI_SPEC_300 && host->tuning_count &&
- 	    host->tuning_mode == SDHCI_TUNING_MODE_1) {
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
--		mod_timer(&host->tuning_timer, jiffies +
--			host->tuning_count * HZ);
-+		del_timer_sync(&host->tuning_timer);
- 	}
- 
- 	ret = mmc_suspend_host(host->mmc);
--- 
-1.7.7.4
+The main aim of my patch was to fix mmc_delay() to give accurate delay.
+You might want to refer to Documentation/timers/timers-howto.txt 
+(Section: SLEEPING FOR ~USECS OR SMALL MSECS) to know why usleep_range() 
+must be used instead of msleep for delays less than 20ms (or more 
+accurately two jiffies, since in HZ=100 systems this comes to 20ms).
 
+Also, in the documentation it is suggested that for delays greater than 
+10ms+ use msleep(). Although MMC subsystem doesn't use mmc_delay() for 
+greater than 10ms today but I guess we should keep it for future purpose 
+and just not have only usleep_range() as your patch did.
+
+>
+> Dmitry
 
