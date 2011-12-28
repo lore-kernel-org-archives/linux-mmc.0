@@ -1,73 +1,46 @@
-From: Shaohui Xie <Shaohui.Xie@freescale.com>
-Subject: [PATCH] mmc:sdhci: restore the enabled dma when do reset all
-Date: Wed, 28 Dec 2011 17:41:21 +0800
-Message-ID: <1325065281-17785-1-git-send-email-Shaohui.Xie@freescale.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Shashidhar hiremath <shashidharh@vayavyalabs.com>
+Subject: [PATCH 1/1] mmc: Check to disable IOCTL when card is mounted
+Date: Wed, 28 Dec 2011 16:16:20 +0530
+Message-ID: <1325069180-16319-1-git-send-email-shashidharh@vayavyalabs.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:58346 "EHLO
-	TX2EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752625Ab1L1Ka1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Dec 2011 05:30:27 -0500
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:62947 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753504Ab1L1Kqh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Dec 2011 05:46:37 -0500
+Received: by iaeh11 with SMTP id h11so21860232iae.19
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Dec 2011 02:46:37 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linuxppc-dev@lists.ozlabs.org, Shaohui Xie <Shaohui.Xie@freescale.com>
+To: Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>, Andrei Warkentin <awarkentin@vmware.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 
-If dma is enabled, it'll be cleared when reset all is performed, this can
-be observed on some platforms, such as P2041 which has a version 2.3
-controller, but platform like P4080 which has a version 2.2 controller,
-does not suffer this, so we will check if the dma is enabled, we should
-restore it after reset all.
+From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 
-Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
+The Patch adds a check to disable the IOCTL from running when the card is mounted
+or device is opened elsewhere.
+
+Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 ---
-based on http://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git,
-branch 'for-linus'.
+ drivers/mmc/card/block.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
 
- drivers/mmc/host/sdhci.c |    7 +++++++
- 1 files changed, 7 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 19ed580..22033c3 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -29,6 +29,7 @@
- #include <linux/mmc/host.h>
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 0cad48a..e680929 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -387,6 +387,12 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 		err = -EINVAL;
+ 		goto cmd_done;
+ 	}
++	/* Disallow the IOCTL run if card is already mounted or device is
++	 * opened elsewhere */
++	if (md->usage > 3) {
++		err = -EINVAL;
++		goto cmd_done;
++	}
  
- #include "sdhci.h"
-+#include "sdhci-esdhc.h"
- 
- #define DRIVER_NAME "sdhci"
- 
-@@ -176,6 +177,7 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
- {
- 	unsigned long timeout;
- 	u32 uninitialized_var(ier);
-+	u32 uninitialized_var(dma);
- 
- 	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
- 		if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) &
-@@ -189,6 +191,8 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
- 	if (host->ops->platform_reset_enter)
- 		host->ops->platform_reset_enter(host, mask);
- 
-+	dma = sdhci_readl(host, ESDHC_DMA_SYSCTL);
-+
- 	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
- 
- 	if (mask & SDHCI_RESET_ALL)
-@@ -214,6 +218,9 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
- 
- 	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
- 		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
-+
-+	if ((dma & ESDHC_DMA_SNOOP) && (mask & SDHCI_RESET_ALL))
-+		sdhci_writel(host, dma, ESDHC_DMA_SYSCTL);
- }
- 
- static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+ 	card = md->queue.card;
+ 	if (IS_ERR(card)) {
 -- 
-1.6.4
-
+1.7.6.4
 
