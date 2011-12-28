@@ -1,123 +1,73 @@
-From: Aaron Lu <aaron.lu@amd.com>
-Subject: [PATCH 2/2] mmc: sdhci: Deal with failure case in sdhci_suspend_host
-Date: Wed, 28 Dec 2011 11:11:13 +0800
-Message-ID: <1325041873-1320-3-git-send-email-aaron.lu@amd.com>
-References: <1325041873-1320-1-git-send-email-aaron.lu@amd.com>
+From: Shaohui Xie <Shaohui.Xie@freescale.com>
+Subject: [PATCH] mmc:sdhci: restore the enabled dma when do reset all
+Date: Wed, 28 Dec 2011 17:41:21 +0800
+Message-ID: <1325065281-17785-1-git-send-email-Shaohui.Xie@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:15255
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753101Ab1L1DLq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Dec 2011 22:11:46 -0500
-In-Reply-To: <1325041873-1320-1-git-send-email-aaron.lu@amd.com>
+Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:58346 "EHLO
+	TX2EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752625Ab1L1Ka1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Dec 2011 05:30:27 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>, Aaron Lu <aaron.lu@amd.com>
+To: linux-mmc@vger.kernel.org
+Cc: linuxppc-dev@lists.ozlabs.org, Shaohui Xie <Shaohui.Xie@freescale.com>
 
-If there are errors happened in sdhci_suspend_host, handle it so that
-when the function returns with error, the host's behaviour is the same
-before this function call, e.g. card detection is enabled and tuning
-timer is active, etc.
+If dma is enabled, it'll be cleared when reset all is performed, this can
+be observed on some platforms, such as P2041 which has a version 2.3
+controller, but platform like P4080 which has a version 2.2 controller,
+does not suffer this, so we will check if the dma is enabled, we should
+restore it after reset all.
 
-Previously, sdhci_suspend_host will return the error code and rely on
-the calling function to handle it. sdhci-pci will handle it in
-sdhci_pci_suspend while sdhci-platform code will not.
-
-Signed-off-by: Philip Rakity <prakity@marvell.com>
-Signed-off-by: Aaron Lu <aaron.lu@amd.com>
+Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
 ---
- drivers/mmc/host/sdhci-pci.c |    9 ++-------
- drivers/mmc/host/sdhci.c     |   27 +++++++++++++++++++++------
- 2 files changed, 23 insertions(+), 13 deletions(-)
+based on http://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git,
+branch 'for-linus'.
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index d2e77fb..494d14b 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1013,7 +1013,7 @@ static int sdhci_pci_suspend(struct device *dev)
- 		ret = sdhci_suspend_host(slot->host);
- 
- 		if (ret)
--			goto err_pci_suspend;
-+			return ret;
- 
- 		slot_pm_flags = slot->host->mmc->pm_flags;
- 		if (slot_pm_flags & MMC_PM_WAKE_SDIO_IRQ)
-@@ -1025,7 +1025,7 @@ static int sdhci_pci_suspend(struct device *dev)
- 	if (chip->fixes && chip->fixes->suspend) {
- 		ret = chip->fixes->suspend(chip);
- 		if (ret)
--			goto err_pci_suspend;
-+			return ret;
- 	}
- 
- 	pci_save_state(pdev);
-@@ -1042,11 +1042,6 @@ static int sdhci_pci_suspend(struct device *dev)
- 	}
- 
- 	return 0;
--
--err_pci_suspend:
--	while (--i >= 0)
--		sdhci_resume_host(chip->slots[i]->host);
--	return ret;
- }
- 
- static int sdhci_pci_resume(struct device *dev)
+ drivers/mmc/host/sdhci.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2007d37..37aeb81 100644
+index 19ed580..22033c3 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -2339,25 +2339,40 @@ out:
+@@ -29,6 +29,7 @@
+ #include <linux/mmc/host.h>
  
- int sdhci_suspend_host(struct sdhci_host *host)
+ #include "sdhci.h"
++#include "sdhci-esdhc.h"
+ 
+ #define DRIVER_NAME "sdhci"
+ 
+@@ -176,6 +177,7 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
  {
--	int ret;
-+	int ret, has_tuning_timer;
+ 	unsigned long timeout;
+ 	u32 uninitialized_var(ier);
++	u32 uninitialized_var(dma);
  
- 	sdhci_disable_card_detection(host);
+ 	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
+ 		if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) &
+@@ -189,6 +191,8 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	if (host->ops->platform_reset_enter)
+ 		host->ops->platform_reset_enter(host, mask);
  
- 	/* Disable tuning since we are suspending */
--	if (host->version >= SDHCI_SPEC_300 && host->tuning_count &&
--	    host->tuning_mode == SDHCI_TUNING_MODE_1) {
-+	has_tuning_timer = host->version >= SDHCI_SPEC_300 &&
-+		host->tuning_count && host->tuning_mode == SDHCI_TUNING_MODE_1;
-+	if (has_tuning_timer) {
- 		del_timer_sync(&host->tuning_timer);
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
- 	}
- 
- 	ret = mmc_suspend_host(host->mmc);
- 	if (ret)
--		return ret;
-+		goto err_suspend;
++	dma = sdhci_readl(host, ESDHC_DMA_SYSCTL);
 +
-+	if (host->vmmc) {
-+		ret = regulator_disable(host->vmmc);
-+		if (ret)
-+			goto err_suspend;
-+	}
+ 	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
  
- 	free_irq(host->irq, host);
+ 	if (mask & SDHCI_RESET_ALL)
+@@ -214,6 +218,9 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
  
--	if (host->vmmc)
--		ret = regulator_disable(host->vmmc);
-+	return 0;
+ 	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
+ 		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
 +
-+err_suspend:
-+	if (has_tuning_timer) {
-+		host->flags |= SDHCI_NEEDS_RETUNING;
-+		mod_timer(&host->tuning_timer, jiffies +
-+				host->tuning_count * HZ);
-+	}
-+
-+	sdhci_enable_card_detection(host);
- 
- 	return ret;
++	if ((dma & ESDHC_DMA_SNOOP) && (mask & SDHCI_RESET_ALL))
++		sdhci_writel(host, dma, ESDHC_DMA_SYSCTL);
  }
+ 
+ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
 -- 
-1.7.7.4
+1.6.4
 
 
