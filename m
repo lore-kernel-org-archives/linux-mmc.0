@@ -1,87 +1,79 @@
-From: Aaron Lu <aaron.lu@amd.com>
-Subject: [PATCH v2 2/2] mmc: sdhci: Deal with failure case in sdhci_suspend_host
-Date: Thu, 29 Dec 2011 10:50:14 +0800
-Message-ID: <1325127014-16337-1-git-send-email-aaron.lu@amd.com>
+From: Xie Shaohui-B21989 <B21989@freescale.com>
+Subject: RE: [PATCH] mmc:sdhci: restore the enabled dma when do reset all
+Date: Thu, 29 Dec 2011 09:05:22 +0000
+Message-ID: <ED492CCEAF882048BC2237DE806547C901BA03@039-SN2MPN1-013.039d.mgd.msft.net>
+References: <1325065281-17785-1-git-send-email-Shaohui.Xie@freescale.com>
+ <4EFB00AC.5070209@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:59783 "EHLO
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:38315 "EHLO
 	TX2EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751197Ab1L2CvP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Dec 2011 21:51:15 -0500
+	with ESMTP id S1751829Ab1L2JFY convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2011 04:05:24 -0500
+In-Reply-To: <4EFB00AC.5070209@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Aaron Lu <aaron.lu@amd.com>, Philip Rakity <prakity@marvell.com>, Adrian Hunter <adrian.hunter@intel.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 
-V2: Error processing code in sdhci_pci_suspend should not be deleted,
-it is used to resume hosts which are already successfully suspended for
-a multi slot pci device as suggested by Adrian.
+>-----Original Message-----
+>From: Adrian Hunter [mailto:adrian.hunter@intel.com]
+>Sent: Wednesday, December 28, 2011 7:43 PM
+>To: Xie Shaohui-B21989
+>Cc: linux-mmc@vger.kernel.org; linuxppc-dev@lists.ozlabs.org
+>Subject: Re: [PATCH] mmc:sdhci: restore the enabled dma when do reset all
+>
+>On 28/12/11 11:41, Shaohui Xie wrote:
+>> If dma is enabled, it'll be cleared when reset all is performed, this
+>> can be observed on some platforms, such as P2041 which has a version
+>> 2.3 controller, but platform like P4080 which has a version 2.2
+>> controller, does not suffer this, so we will check if the dma is
+>> enabled, we should restore it after reset all.
+>>
+>> Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
+>> ---
+>> based on http://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git,
+>> branch 'for-linus'.
+>>
+>>  drivers/mmc/host/sdhci.c |    7 +++++++
+>>  1 files changed, 7 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
+>> 19ed580..22033c3 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -29,6 +29,7 @@
+>>  #include <linux/mmc/host.h>
+>>
+>>  #include "sdhci.h"
+>> +#include "sdhci-esdhc.h"
+>>
+>>  #define DRIVER_NAME "sdhci"
+>>
+>> @@ -176,6 +177,7 @@ static void sdhci_reset(struct sdhci_host *host,
+>> u8 mask)  {
+>>  	unsigned long timeout;
+>>  	u32 uninitialized_var(ier);
+>> +	u32 uninitialized_var(dma);
+>>
+>>  	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
+>>  		if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) & @@ -189,6
+>+191,8 @@
+>> static void sdhci_reset(struct sdhci_host *host, u8 mask)
+>>  	if (host->ops->platform_reset_enter)
+>>  		host->ops->platform_reset_enter(host, mask);
+>>
+>> +	dma = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+>
+>
+>You must not access eSDHC-specific registers in generic SDHCI code
+[Xie Shaohui] OK. Thank you, I'll call the wrapper API here.
 
-If there are errors happened in sdhci_suspend_host, handle it so that
-when the function returns with an error, the host's behaviour is the
-same before this function call, e.g. card detection is enabled and
-tuning timer is active, etc.
 
-Signed-off-by: Philip Rakity <prakity@marvell.com>
-Signed-off-by: Aaron Lu <aaron.lu@amd.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c |   27 +++++++++++++++++++++------
- 1 files changed, 21 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2007d37..37aeb81 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2339,25 +2339,40 @@ out:
- 
- int sdhci_suspend_host(struct sdhci_host *host)
- {
--	int ret;
-+	int ret, has_tuning_timer;
- 
- 	sdhci_disable_card_detection(host);
- 
- 	/* Disable tuning since we are suspending */
--	if (host->version >= SDHCI_SPEC_300 && host->tuning_count &&
--	    host->tuning_mode == SDHCI_TUNING_MODE_1) {
-+	has_tuning_timer = host->version >= SDHCI_SPEC_300 &&
-+		host->tuning_count && host->tuning_mode == SDHCI_TUNING_MODE_1;
-+	if (has_tuning_timer) {
- 		del_timer_sync(&host->tuning_timer);
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
- 	}
- 
- 	ret = mmc_suspend_host(host->mmc);
- 	if (ret)
--		return ret;
-+		goto err_suspend;
-+
-+	if (host->vmmc) {
-+		ret = regulator_disable(host->vmmc);
-+		if (ret)
-+			goto err_suspend;
-+	}
- 
- 	free_irq(host->irq, host);
- 
--	if (host->vmmc)
--		ret = regulator_disable(host->vmmc);
-+	return 0;
-+
-+err_suspend:
-+	if (has_tuning_timer) {
-+		host->flags |= SDHCI_NEEDS_RETUNING;
-+		mod_timer(&host->tuning_timer, jiffies +
-+				host->tuning_count * HZ);
-+	}
-+
-+	sdhci_enable_card_detection(host);
- 
- 	return ret;
- }
--- 
-1.7.7.4
+Best Regards, 
+Shaohui Xie
 
 
