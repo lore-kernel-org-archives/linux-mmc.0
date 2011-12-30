@@ -1,168 +1,97 @@
-From: Kishore Kadiyala <kishorek.kadiyala@gmail.com>
-Subject: Re: [PATCH] omap_hsmmc - use threaded irq handler for card-detect.
-Date: Fri, 30 Dec 2011 02:18:34 -0500
-Message-ID: <CAF=Qhp3aM4o59Lpbf0zrDdjrgbmO6sA-vfOM1wU4iDtDjNKUow@mail.gmail.com>
-References: <20111230123513.6a843526@notabene.brown>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci: Deal with failure case in sdhci_suspend_host
+Date: Fri, 30 Dec 2011 09:23:52 +0200
+Message-ID: <4EFD6708.6080608@intel.com>
+References: <1325127014-16337-1-git-send-email-aaron.lu@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20111230123513.6a843526@notabene.brown>
-Sender: linux-omap-owner@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: Chris Ball <cjb@laptop.org>, Tony Lindgren <tony@atomide.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Felipe Balbi <balbi@ti.com>, Grazvydas Ignotas <notasas@gmail.com>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:48704 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751217Ab1L3HX4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 30 Dec 2011 02:23:56 -0500
+In-Reply-To: <1325127014-16337-1-git-send-email-aaron.lu@amd.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Aaron Lu <aaron.lu@amd.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>
 
-On Thu, Dec 29, 2011 at 8:35 PM, NeilBrown <neilb@suse.de> wrote:
+On 29/12/2011 4:50 a.m., Aaron Lu wrote:
+> V2: Error processing code in sdhci_pci_suspend should not be deleted,
+> it is used to resume hosts which are already successfully suspended for
+> a multi slot pci device as suggested by Adrian.
 >
+> If there are errors happened in sdhci_suspend_host, handle it so that
+> when the function returns with an error, the host's behaviour is the
+> same before this function call, e.g. card detection is enabled and
+> tuning timer is active, etc.
 >
-> As the card-detect irq handler just schedules work to be done by
-> a thread, we can use request_threaded_irq to do much of the work for
-> us. =A0This means that interrupts which arrive by handle_nested_irq
-> actually work.
+> Signed-off-by: Philip Rakity<prakity@marvell.com>
+> Signed-off-by: Aaron Lu<aaron.lu@amd.com>
+> Cc: Adrian Hunter<adrian.hunter@intel.com>
+> ---
+>   drivers/mmc/host/sdhci.c |   27 +++++++++++++++++++++------
+>   1 files changed, 21 insertions(+), 6 deletions(-)
 >
-> Reviewed-by: Felipe Balbi <balbi@ti.com>
-> Tested-by: Grazvydas Ignotas <notasas@gmail.com>
-> Signed-off-by: NeilBrown <neilb@suse.de>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2007d37..37aeb81 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2339,25 +2339,40 @@ out:
+>
+>   int sdhci_suspend_host(struct sdhci_host *host)
+>   {
+> -	int ret;
+> +	int ret, has_tuning_timer;
+>
+>   	sdhci_disable_card_detection(host);
+>
+>   	/* Disable tuning since we are suspending */
+> -	if (host->version>= SDHCI_SPEC_300&&  host->tuning_count&&
+> -	    host->tuning_mode == SDHCI_TUNING_MODE_1) {
+> +	has_tuning_timer = host->version>= SDHCI_SPEC_300&&
+> +		host->tuning_count&&  host->tuning_mode == SDHCI_TUNING_MODE_1;
+> +	if (has_tuning_timer) {
+>   		del_timer_sync(&host->tuning_timer);
+>   		host->flags&= ~SDHCI_NEEDS_RETUNING;
+>   	}
+>
+>   	ret = mmc_suspend_host(host->mmc);
+>   	if (ret)
+> -		return ret;
+> +		goto err_suspend;
+> +
+> +	if (host->vmmc) {
+> +		ret = regulator_disable(host->vmmc);
+> +		if (ret)
+> +			goto err_suspend;
+> +	}
 
-I have done some thing similar but didn't pushed it  :-(
-Anyways
-Acked-by:  Kishore Kadiyala <kishorek.kadiyala@gmail.com>
+This is slightly in conflict with my patch
+"mmc: sdhci: fix vmmc handling"
+
+Maybe you guys could ack/nack that
+and adjust this accordingly.
+
+
 
 >
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
-mmc.c
-> index d5fe43d..56f6cfc 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -24,7 +24,6 @@
-> =A0#include <linux/delay.h>
-> =A0#include <linux/dma-mapping.h>
-> =A0#include <linux/platform_device.h>
-> -#include <linux/workqueue.h>
-> =A0#include <linux/timer.h>
-> =A0#include <linux/clk.h>
-> =A0#include <linux/mmc/host.h>
-> @@ -163,7 +162,6 @@ struct omap_hsmmc_host {
-> =A0 =A0 =A0 =A0 */
-> =A0 =A0 =A0 =A0struct =A0regulator =A0 =A0 =A0 *vcc;
-> =A0 =A0 =A0 =A0struct =A0regulator =A0 =A0 =A0 *vcc_aux;
-> - =A0 =A0 =A0 struct =A0work_struct =A0 =A0 mmc_carddetect_work;
-> =A0 =A0 =A0 =A0void =A0 =A0__iomem =A0 =A0 =A0 =A0 *base;
-> =A0 =A0 =A0 =A0resource_size_t =A0 =A0 =A0 =A0 mapbase;
-> =A0 =A0 =A0 =A0spinlock_t =A0 =A0 =A0 =A0 =A0 =A0 =A0irq_lock; /* Pre=
-vent races with irq handler */
-> @@ -1280,17 +1278,16 @@ static void omap_hsmmc_protect_card(struct om=
-ap_hsmmc_host *host)
-> =A0}
+>   	free_irq(host->irq, host);
 >
-> =A0/*
-> - * Work Item to notify the core about card insertion/removal
-> + * irq handler to notify the core about card insertion/removal
-> =A0*/
-> -static void omap_hsmmc_detect(struct work_struct *work)
-> +static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id)
-> =A0{
-> - =A0 =A0 =A0 struct omap_hsmmc_host *host =3D
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 container_of(work, struct omap_hsmmc_ho=
-st, mmc_carddetect_work);
-> + =A0 =A0 =A0 struct omap_hsmmc_host *host =3D dev_id;
-> =A0 =A0 =A0 =A0struct omap_mmc_slot_data *slot =3D &mmc_slot(host);
-> =A0 =A0 =A0 =A0int carddetect;
+> -	if (host->vmmc)
+> -		ret = regulator_disable(host->vmmc);
+> +	return 0;
+> +
+> +err_suspend:
+> +	if (has_tuning_timer) {
+> +		host->flags |= SDHCI_NEEDS_RETUNING;
+> +		mod_timer(&host->tuning_timer, jiffies +
+> +				host->tuning_count * HZ);
+> +	}
+> +
+> +	sdhci_enable_card_detection(host);
 >
-> =A0 =A0 =A0 =A0if (host->suspended)
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 return;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return IRQ_HANDLED;
->
-> =A0 =A0 =A0 =A0sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_=
-switch");
->
-> @@ -1305,19 +1302,6 @@ static void omap_hsmmc_detect(struct work_stru=
-ct *work)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_detect_change(host->mmc, (HZ * 200=
-) / 1000);
-> =A0 =A0 =A0 =A0else
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_detect_change(host->mmc, (HZ * 50)=
- / 1000);
-> -}
-> -
-> -/*
-> - * ISR for handling card insertion and removal
-> - */
-> -static irqreturn_t omap_hsmmc_cd_handler(int irq, void *dev_id)
-> -{
-> - =A0 =A0 =A0 struct omap_hsmmc_host *host =3D (struct omap_hsmmc_hos=
-t *)dev_id;
-> -
-> - =A0 =A0 =A0 if (host->suspended)
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 return IRQ_HANDLED;
-> - =A0 =A0 =A0 schedule_work(&host->mmc_carddetect_work);
-> -
-> =A0 =A0 =A0 =A0return IRQ_HANDLED;
-> =A0}
->
-> @@ -1919,7 +1903,6 @@ static int __init omap_hsmmc_probe(struct platf=
-orm_device *pdev)
-> =A0 =A0 =A0 =A0host->next_data.cookie =3D 1;
->
-> =A0 =A0 =A0 =A0platform_set_drvdata(pdev, host);
-> - =A0 =A0 =A0 INIT_WORK(&host->mmc_carddetect_work, omap_hsmmc_detect=
-);
->
-> =A0 =A0 =A0 =A0mmc->ops =A0 =A0 =A0 =A0=3D &omap_hsmmc_ops;
->
-> @@ -2047,10 +2030,11 @@ static int __init omap_hsmmc_probe(struct pla=
-tform_device *pdev)
->
-> =A0 =A0 =A0 =A0/* Request IRQ for card detect */
-> =A0 =A0 =A0 =A0if ((mmc_slot(host).card_detect_irq)) {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D request_irq(mmc_slot(host).card=
-_detect_irq,
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 oma=
-p_hsmmc_cd_handler,
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 IRQ=
-=46_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc=
-_hostname(mmc), host);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D request_threaded_irq(mmc_slot(h=
-ost).card_detect_irq,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0NULL,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0omap_hsmmc_detect,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0mmc_hostname(mmc), host);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (ret) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_dbg(mmc_dev(host->=
-mmc),
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0"Unabl=
-e to grab MMC CD IRQ\n");
-> @@ -2129,7 +2113,6 @@ static int omap_hsmmc_remove(struct platform_de=
-vice *pdev)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0free_irq(host->irq, host);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (mmc_slot(host).card_detect_irq)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0free_irq(mmc_slot(host=
-).card_detect_irq, host);
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 flush_work_sync(&host->mmc_carddetect_w=
-ork);
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pm_runtime_put_sync(host->dev);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pm_runtime_disable(host->dev);
-> @@ -2176,7 +2159,6 @@ static int omap_hsmmc_suspend(struct device *de=
-v)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return=
- ret;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 cancel_work_sync(&host->mmc_carddetect_=
-work);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D mmc_suspend_host(host->mmc);
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (ret =3D=3D 0) {
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>   	return ret;
+>   }
+
