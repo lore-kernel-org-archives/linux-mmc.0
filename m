@@ -1,44 +1,61 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V3] mmc: core: Add option to prevent eMMC sleep command
-Date: Fri, 30 Dec 2011 03:21:52 +0100
-Message-ID: <CACRpkdYgOQP0A4oaLvxn6udC05ZDXLJFGkBkws4Gp=7UgfygQQ@mail.gmail.com>
-References: <1324308259-6770-1-git-send-email-ulf.hansson@stericsson.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: [PATCH 1/2] mmc: sdhci-s3c: Use CONFIG_PM_SLEEP to ifdef system suspend
+Date: Fri, 30 Dec 2011 02:24:31 +0000
+Message-ID: <1325211872-12567-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:41961 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752918Ab1L3CVy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2011 21:21:54 -0500
-Received: by iaeh11 with SMTP id h11so24540060iae.19
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Dec 2011 18:21:54 -0800 (PST)
-In-Reply-To: <1324308259-6770-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:59206 "EHLO
+	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754171Ab1L3CYh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2011 21:24:37 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Kukjin Kim <kgene.kim@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-On Mon, Dec 19, 2011 at 4:24 PM, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
-> This option can be used when you platform have a buggy
-> kernel crash dump software, which is supposed to store
-> the dump on the eMMC, but is not able to wake up the eMMC
-> from sleep state.
+This matches current best practice as one can have runtime PM enabled
+without system sleep and CONFIG_PM is defined for both.
 
-[Chris]
-> Sorry for stepping in late, but we don't normally modify the kernel to
-> make life easier for buggy proprietary software -- if this patch is to
-> be merged, it has to make sense on its own merits.
+Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
 
-IIRC (correct me if wrong) the kernel crash dump software in
-question is actually U-Boot and not proprietary at all.
-Knock yourself out with the source code :-)
-http://git.linaro.org/gitweb?p=bsp/st-ericsson/u-boot-ux500.git;a=summary
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 1af756e..df066b5 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -20,6 +20,7 @@
+ #include <linux/io.h>
+ #include <linux/gpio.h>
+ #include <linux/module.h>
++#include <linux/pm.h>
+ 
+ #include <linux/mmc/host.h>
+ 
+@@ -620,8 +621,7 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_PM
+-
++#ifdef CONFIG_PM_SLEEP
+ static int sdhci_s3c_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+@@ -635,10 +635,11 @@ static int sdhci_s3c_resume(struct device *dev)
+ 
+ 	return sdhci_resume_host(host);
+ }
++#endif
+ 
++#ifdef CONFIG_PM
+ static const struct dev_pm_ops sdhci_s3c_pmops = {
+-	.suspend	= sdhci_s3c_suspend,
+-	.resume		= sdhci_s3c_resume,
++	SET_SYSTEM_SLEEP_PM_OPS(sdhci_s3c_suspend, sdhci_s3c_resume)
+ };
+ 
+ #define SDHCI_S3C_PMOPS (&sdhci_s3c_pmops)
+-- 
+1.7.7.3
 
-The problem is that it cannot be replaced due to being
-deployed in a lot of static configurations. A problem which is pretty
-common in the ARM community, people do not like to replace their
-bootloaders at all, even if they do have the source code (under GPL).
-
-Maybe it can be reworded so this is clear?
-
-Linus Walleij
