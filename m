@@ -1,46 +1,159 @@
-From: Haojian Zhuang <haojian.zhuang@gmail.com>
-Subject: Re: [PATCH 2/4] ARM: pxa168: Add SDHCI support
-Date: Fri, 30 Dec 2011 08:36:33 +0800
-Message-ID: <CAN1soZwG37noxK8CUe7zMtaNJPTWSok5ROUXj_YvZ+dLEVkomA@mail.gmail.com>
-References: <CAN1soZwwPe1Xdh=EO-wdynihaBQ8DvWV=imjokJvDZVC+qqdSg@mail.gmail.com>
-	<1325166236-18650-1-git-send-email-tanmay.upadhyay@einfochips.com>
+From: NeilBrown <neilb@suse.de>
+Subject: [PATCH] omap_hsmmc - use threaded irq handler for card-detect.
+Date: Fri, 30 Dec 2011 12:35:13 +1100
+Message-ID: <20111230123513.6a843526@notabene.brown>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:55251 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754955Ab1L3Age convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2011 19:36:34 -0500
-Received: by vcbfk14 with SMTP id fk14so10412228vcb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Dec 2011 16:36:34 -0800 (PST)
-In-Reply-To: <1325166236-18650-1-git-send-email-tanmay.upadhyay@einfochips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=PGP-SHA1;
+ boundary="Sig_/RArZZEY8frjVL5viKLgm3lm"; protocol="application/pgp-signature"
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Tony Lindgren <tony@atomide.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Felipe Balbi <balbi@ti.com>, Grazvydas Ignotas <notasas@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
-Cc: eric.y.miao@gmail.com, jason.chagas@marvell.com, prakity@marvell.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Thu, Dec 29, 2011 at 9:43 PM, Tanmay Upadhyay
-<tanmay.upadhyay@einfochips.com> wrote:
-> v2 - clock register for SDHCI are not common across all MMP SoCs.
-> =A0 =A0 So, move PXA168 implementation to pxa168.c
->
-> v3 - sdhci-pxav1 driver code is merged with sdhci-pxav2. So, change
-> =A0 =A0 the device name accordingly
-> =A0 - start sdhci device numbering from 1 as other PXA168 devices
-> =A0 =A0 does that
->
-> v4 - Use different names for SD clock registers for PXA168 instead
-> =A0 =A0 of redefining them in pxa168.c. Suggested by Haojian Zhuang
->
-> v5 - Have two different clock enable functions for clock block 1 & 2
-> =A0 =A0 & don't change indentation in regs-apmu.h as suggested by Hao=
-jian
-> =A0 =A0 Zhuang
-> =A0 - Use device name while adding clock as suggested by Russell King
->
-> Signed-off-by: Tanmay Upadhyay <tanmay.upadhyay@einfochips.com>
-> Reviewed-by: Philip Rakity <prakity@marvell.com>
-> ---
+--Sig_/RArZZEY8frjVL5viKLgm3lm
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-Acked-by: Haojian Zhuang <haojian.zhuang@gmail.com>
+
+
+As the card-detect irq handler just schedules work to be done by
+a thread, we can use request_threaded_irq to do much of the work for
+us.  This means that interrupts which arrive by handle_nested_irq
+actually work.
+
+Reviewed-by: Felipe Balbi <balbi@ti.com>
+Tested-by: Grazvydas Ignotas <notasas@gmail.com>
+Signed-off-by: NeilBrown <neilb@suse.de>
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index d5fe43d..56f6cfc 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -24,7 +24,6 @@
+ #include <linux/delay.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/platform_device.h>
+-#include <linux/workqueue.h>
+ #include <linux/timer.h>
+ #include <linux/clk.h>
+ #include <linux/mmc/host.h>
+@@ -163,7 +162,6 @@ struct omap_hsmmc_host {
+ 	 */
+ 	struct	regulator	*vcc;
+ 	struct	regulator	*vcc_aux;
+-	struct	work_struct	mmc_carddetect_work;
+ 	void	__iomem		*base;
+ 	resource_size_t		mapbase;
+ 	spinlock_t		irq_lock; /* Prevent races with irq handler */
+@@ -1280,17 +1278,16 @@ static void omap_hsmmc_protect_card(struct omap_hsm=
+mc_host *host)
+ }
+=20
+ /*
+- * Work Item to notify the core about card insertion/removal
++ * irq handler to notify the core about card insertion/removal
+  */
+-static void omap_hsmmc_detect(struct work_struct *work)
++static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id)
+ {
+-	struct omap_hsmmc_host *host =3D
+-		container_of(work, struct omap_hsmmc_host, mmc_carddetect_work);
++	struct omap_hsmmc_host *host =3D dev_id;
+ 	struct omap_mmc_slot_data *slot =3D &mmc_slot(host);
+ 	int carddetect;
+=20
+ 	if (host->suspended)
+-		return;
++		return IRQ_HANDLED;
+=20
+ 	sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
+=20
+@@ -1305,19 +1302,6 @@ static void omap_hsmmc_detect(struct work_struct *wo=
+rk)
+ 		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+ 	else
+ 		mmc_detect_change(host->mmc, (HZ * 50) / 1000);
+-}
+-
+-/*
+- * ISR for handling card insertion and removal
+- */
+-static irqreturn_t omap_hsmmc_cd_handler(int irq, void *dev_id)
+-{
+-	struct omap_hsmmc_host *host =3D (struct omap_hsmmc_host *)dev_id;
+-
+-	if (host->suspended)
+-		return IRQ_HANDLED;
+-	schedule_work(&host->mmc_carddetect_work);
+-
+ 	return IRQ_HANDLED;
+ }
+=20
+@@ -1919,7 +1903,6 @@ static int __init omap_hsmmc_probe(struct platform_de=
+vice *pdev)
+ 	host->next_data.cookie =3D 1;
+=20
+ 	platform_set_drvdata(pdev, host);
+-	INIT_WORK(&host->mmc_carddetect_work, omap_hsmmc_detect);
+=20
+ 	mmc->ops	=3D &omap_hsmmc_ops;
+=20
+@@ -2047,10 +2030,11 @@ static int __init omap_hsmmc_probe(struct platform_=
+device *pdev)
+=20
+ 	/* Request IRQ for card detect */
+ 	if ((mmc_slot(host).card_detect_irq)) {
+-		ret =3D request_irq(mmc_slot(host).card_detect_irq,
+-				  omap_hsmmc_cd_handler,
+-				  IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
+-				  mmc_hostname(mmc), host);
++		ret =3D request_threaded_irq(mmc_slot(host).card_detect_irq,
++					   NULL,
++					   omap_hsmmc_detect,
++					   IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
++					   mmc_hostname(mmc), host);
+ 		if (ret) {
+ 			dev_dbg(mmc_dev(host->mmc),
+ 				"Unable to grab MMC CD IRQ\n");
+@@ -2129,7 +2113,6 @@ static int omap_hsmmc_remove(struct platform_device *=
+pdev)
+ 		free_irq(host->irq, host);
+ 		if (mmc_slot(host).card_detect_irq)
+ 			free_irq(mmc_slot(host).card_detect_irq, host);
+-		flush_work_sync(&host->mmc_carddetect_work);
+=20
+ 		pm_runtime_put_sync(host->dev);
+ 		pm_runtime_disable(host->dev);
+@@ -2176,7 +2159,6 @@ static int omap_hsmmc_suspend(struct device *dev)
+ 				return ret;
+ 			}
+ 		}
+-		cancel_work_sync(&host->mmc_carddetect_work);
+ 		ret =3D mmc_suspend_host(host->mmc);
+=20
+ 		if (ret =3D=3D 0) {
+
+--Sig_/RArZZEY8frjVL5viKLgm3lm
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Disposition: attachment; filename=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.18 (GNU/Linux)
+
+iQIVAwUBTv0VUTnsnt1WYoG5AQIoRw//TuWbRjM8YZUxhLe7D0bDH5jRzxlMHHQn
+FTwwtXNjYCsf4ApCzNpytWiysz+4HS7oj+0SMRFe7Ass1luuoWjmUvHyNuSi0QuI
+/5ubBiQV4KiXajLI8q+oLzIdgEVxCKkzOfBkmRRUAe2WwvWvKHF86d30RSs9uzbl
+DN+06uXlPA9HaTqfZI0XON/CArytyNzfsvpTmZmbPOhhW2D920NHYUdWBrwUAANb
+P/QpSw+QOSj6qemb/pVoGFfEMxI2Qx7wJPKhVxcn+R5lJ21w1ctoTF+ePGp9csUF
+1NCdZgCqbQaXxwH+xdHtrFEk1TURQGNrbImCREuo2Jp3/9aUFahdUZs3Td8zHWDS
+x2VSiRYebxfMO6a8/pP88dwtjxIG86d+2h9j2fxNdp54TsFz+Vmxccf2RMayZb57
+LcV6ZbytQxgDxaM5GyCxo2q6lr8B68ks8V4C7Zywbr7s1OHH9q4d9EOmjC2rZ1qr
+m2CE+V1neTHlaRRed+cFa34hZ5W96z2X3zL+uYdeC3rfDXmDRAZ4TI5HQWUu6ToG
+eWFXkxwDRsZgLi+dqGBE/O3umJ5FOXcchL/f9uvS06HwnoZDwAy0OGaFBq/DMYOf
+kt0Hvo6tl/TGi8ESFqMdb0au0sgcWjmM8Eel9FgaYWsLB3xOwo7Boeibo92q1QWH
+uBsaWvUKp5g=
+=DQzd
+-----END PGP SIGNATURE-----
+
+--Sig_/RArZZEY8frjVL5viKLgm3lm--
