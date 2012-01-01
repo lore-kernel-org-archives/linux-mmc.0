@@ -1,61 +1,27 @@
-From: Alexander Elbs <alex@segv.de>
-Subject: regression: sd cards no longer recognized
-Date: Sun, 1 Jan 2012 12:51:46 +0100
-Message-ID: <20120101115146.GE16096@segv.de>
+From: "Nath, Arindam" <Arindam.Nath@amd.com>
+Subject: mmc/sdhci: system hangs during suspend with SD card mounted
+Date: Sun, 1 Jan 2012 11:39:15 -0600
+Message-ID: <6C03668EAF45B747AF947A1603D1B3000233315D9A@SAUSEXMBP01.amd.com>
+References: <0A4227FEF76DD746B4FA33CAA4AF3C7B0452B7F0@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from siggy.segv.de ([88.198.14.238]:44644 "EHLO siggy.segv.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751957Ab2AAMSM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 1 Jan 2012 07:18:12 -0500
-Received: from alex by siggy.segv.de with local (Exim 4.72 #1 (Debian))
-	id 1RhJx4-0004AO-DC
-	for <linux-mmc@vger.kernel.org>; Sun, 01 Jan 2012 03:51:46 -0800
-Content-Disposition: inline
+Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:46320
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750925Ab2AARjQ convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 1 Jan 2012 12:39:16 -0500
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: 'Andrei Warkentin' <andreiw@motorola.com>
+Cc: "'chuanxiao.dong@intel.com'" <chuanxiao.dong@intel.com>, "'viresh.kumar@st.com'" <viresh.kumar@st.com>, "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>
 
-Hi,
+Hi Andrei,
 
-on a dell vostro with an integrated SD card reader I have the problem, that
-inserted SD cards are no longer recognized.
-The reader is a "O2 Micro, Inc. Integrated MMC/SD Controller (rev 02)"
-(1217:7120).
+I found that this issue is still there in the latest kernel. It has been pending since quite some time now. The one liner patch submitted by Chuanxiao some time back actually fixed the issue for me too, but if you have a better solution, can you post it?
 
-Doing a git bisect I found that commit 49c468f "mmc: sd: add support for uhs
-bus speed mode selection" caused this regression.
+Thanks,
+Arindam
 
-Looking more closely into it I found that the flag SDHCI_CTRL_HISPD is always
-set even on MMC_TIMING_UHS_SDR12 (which is an alias for MMC_TIMING_LEGACY).
-
-If that flag in that case is not set (as was before commit 49c468f) my reader
-works fine again.
-
-Could you include that fix or does it break other readers?
-
-Regards,
-Alexander Elbs
-
----
- drivers/mmc/host/sdhci.c |    3 +--
- 1 files changed, 1 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6d8eea3..8872e92 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1364,8 +1364,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host,
-struct mmc_ios *ios)
-                if ((ios->timing == MMC_TIMING_UHS_SDR50) ||
-                    (ios->timing == MMC_TIMING_UHS_SDR104) ||
-                    (ios->timing == MMC_TIMING_UHS_DDR50) ||
--                   (ios->timing == MMC_TIMING_UHS_SDR25) ||
--                   (ios->timing == MMC_TIMING_UHS_SDR12))
-+                   (ios->timing == MMC_TIMING_UHS_SDR25))
-                        ctrl |= SDHCI_CTRL_HISPD;
- 
-                ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--- 
-Alexander Elbs  ***  eMail alex@segv.de
