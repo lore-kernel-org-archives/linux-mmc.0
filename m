@@ -1,113 +1,38 @@
-From: "Alon Ziv" <alonz@discretix.com>
-Subject: [PATCH] Properly support MMC_IOC_CMD operations without a data payload
-Date: Mon, 2 Jan 2012 09:42:59 +0200
-Message-ID: <1CE895C75013AF4F8284BE71FD114B5D01836C5E@exchange1.discretix.com>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-s3c: Use CONFIG_PM_SLEEP to ifdef system
+ suspend
+Date: Mon, 2 Jan 2012 11:49:25 +0000
+Message-ID: <20120102114925.GF2899@opensource.wolfsonmicro.com>
+References: <1325211872-12567-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+ <4F01117F.6000206@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.discretix.com ([192.116.217.178]:39109 "EHLO discretix.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751697Ab2ABHtm convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jan 2012 02:49:42 -0500
-Content-class: urn:content-classes:message
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:42205 "EHLO
+	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752064Ab2ABLt2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jan 2012 06:49:28 -0500
+Content-Disposition: inline
+In-Reply-To: <4F01117F.6000206@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: Alon Ziv <alonz@discretix.com>, Chris Ball <cjb@laptop.org>, Andrei Warkentin <awarkentin@vmware.com>, Kyungmin Park <kyungmin.park@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Kukjin Kim <kgene.kim@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org
 
-Some MMC/SD host controllers require the "data" member of
-"struct mmc_request" to be NULL when the command has no data attached.
-Change the MMC ioctl method to not initialize the "data" member when
-the supplied data size (blksz * blocks) is zero.
+On Mon, Jan 02, 2012 at 11:07:59AM +0900, Jaehoon Chung wrote:
+> On 12/30/2011 11:24 AM, Mark Brown wrote:
 
-Signed-off-by: Alon Ziv <alonz@discretix.com>
----
- drivers/mmc/card/block.c |   45
-+++++++++++++++++++++++++--------------------
- 1 files changed, 25 insertions(+), 20 deletions(-)
+> > +#include <linux/pm.h>
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1e0e27c..a0ab6c1 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -266,16 +266,18 @@ static struct mmc_blk_ioc_data
-*mmc_blk_ioctl_copy_from_user(
- 		goto idata_err;
- 	}
- 
--	idata->buf = kzalloc(idata->buf_bytes, GFP_KERNEL);
--	if (!idata->buf) {
--		err = -ENOMEM;
--		goto idata_err;
--	}
-+	if (idata->buf_bytes != 0) {
-+		idata->buf = kzalloc(idata->buf_bytes, GFP_KERNEL);
-+		if (!idata->buf) {
-+			err = -ENOMEM;
-+			goto idata_err;
-+		}
- 
--	if (copy_from_user(idata->buf, (void __user *)(unsigned long)
--					idata->ic.data_ptr,
-idata->buf_bytes)) {
--		err = -EFAULT;
--		goto copy_err;
-+		if (copy_from_user(idata->buf, (void __user *)(unsigned
-long)
-+						idata->ic.data_ptr,
-idata->buf_bytes)) {
-+			err = -EFAULT;
-+			goto copy_err;
-+		}
- 	}
- 
- 	return idata;
-@@ -315,21 +317,23 @@ static int mmc_blk_ioctl_cmd(struct block_device
-*bdev,
- 	cmd.opcode = idata->ic.opcode;
- 	cmd.arg = idata->ic.arg;
- 	cmd.flags = idata->ic.flags;
-+	mrq.cmd = &cmd;
- 
--	data.sg = &sg;
--	data.sg_len = 1;
--	data.blksz = idata->ic.blksz;
--	data.blocks = idata->ic.blocks;
-+	if (idata->buf_bytes != 0) {
-+		data.sg = &sg;
-+		data.sg_len = 1;
-+		data.blksz = idata->ic.blksz;
-+		data.blocks = idata->ic.blocks;
- 
--	sg_init_one(data.sg, idata->buf, idata->buf_bytes);
-+		sg_init_one(data.sg, idata->buf, idata->buf_bytes);
- 
--	if (idata->ic.write_flag)
--		data.flags = MMC_DATA_WRITE;
--	else
--		data.flags = MMC_DATA_READ;
-+		if (idata->ic.write_flag)
-+			data.flags = MMC_DATA_WRITE;
-+		else
-+			data.flags = MMC_DATA_READ;
- 
--	mrq.cmd = &cmd;
--	mrq.data = &data;
-+		mrq.data = &data;
-+	}
- 
- 	md = mmc_blk_get(bdev->bd_disk);
- 	if (!md) {
-@@ -353,6 +357,7 @@ static int mmc_blk_ioctl_cmd(struct block_device
-*bdev,
- 
- 	/* data.flags must already be set before doing this. */
- 	mmc_set_data_timeout(&data, card);
-+
- 	/* Allow overriding the timeout_ns for empirical tuning. */
- 	if (idata->ic.data_timeout_ns)
- 		data.timeout_ns = idata->ic.data_timeout_ns;
--- 
-1.7.0.4
+> I think this include is unnecessary.
 
+I think you are wrong.  What makes you say that you think it is not
+needed?
+
+> > +#ifdef CONFIG_PM
+> >  static const struct dev_pm_ops sdhci_s3c_pmops = {
+> > -	.suspend	= sdhci_s3c_suspend,
+> > -	.resume		= sdhci_s3c_resume,
+> > +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_s3c_suspend, sdhci_s3c_resume)
+
+Note that above.
