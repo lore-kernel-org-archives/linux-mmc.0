@@ -1,31 +1,57 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: regression: sd cards no longer recognized
-Date: Mon, 02 Jan 2012 20:24:55 -0500
-Message-ID: <m2k459o9w8.fsf@bob.laptop.org>
-References: <20120101115146.GE16096@segv.de> <m2vcotoch5.fsf@bob.laptop.org>
-	<EDCB5254-AA5F-4082-9565-C389399E5893@marvell.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 3/5 v3] ESDHC: Power management for ESDHC
+Date: Tue, 3 Jan 2012 02:54:53 +0100
+Message-ID: <20120103015453.GA3767@pengutronix.de>
+References: <1324958792-16742-1-git-send-email-r66093@freescale.com>
+ <m2lipppscs.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="u3/rZRmxL6MmkK24"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:48134 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750965Ab2ACBZD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 2 Jan 2012 20:25:03 -0500
-In-Reply-To: <EDCB5254-AA5F-4082-9565-C389399E5893@marvell.com> (Philip
-	Rakity's message of "Mon, 2 Jan 2012 17:23:37 -0800")
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:38811 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750860Ab2ACBy4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jan 2012 20:54:56 -0500
+Content-Disposition: inline
+In-Reply-To: <m2lipppscs.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Alexander Elbs <alex@segv.de>, Arindam Nath <arindam.nath@amd.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: r66093@freescale.com, linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Jiang Yutang <b14898@freescale.com>
 
-Hi,
 
-On Mon, Jan 02 2012, Philip Rakity wrote:
-> Ack-by: Philip Rakity <prakity@marvell.com>
+--u3/rZRmxL6MmkK24
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thanks.  Alexander, could you give me a "Signed-off-by:" for the record?
+On Mon, Jan 02, 2012 at 07:00:51PM -0500, Chris Ball wrote:
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> Wolfram, do you have time to look at this?  Looks like we need to expose
+> suspend/resume hooks to -pltfm users for this use case -- I don't think
+> any esdhc code should be in sdhci-pltfm.c.  (I don't mind writing the
+> patch if you agree that that's the correct solution here.)
+
+I won't have time to look at it, but what you say sounds reasonable to me.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--u3/rZRmxL6MmkK24
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAk8CX+0ACgkQD27XaX1/VRvzbwCggv9QAA2VBppbIPmkei5GkcjH
+k5QAnRjkijr/N1O+PxFy6YTegcy1IgT7
+=EV2Q
+-----END PGP SIGNATURE-----
+
+--u3/rZRmxL6MmkK24--
