@@ -1,134 +1,51 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 3/5 v3] ESDHC: Power management for ESDHC
-Date: Mon, 02 Jan 2012 19:00:51 -0500
-Message-ID: <m2lipppscs.fsf@bob.laptop.org>
-References: <1324958792-16742-1-git-send-email-r66093@freescale.com>
+Subject: Re: [PATCH] mmc: sdhci: deactivate tuning timer when host is suspending
+Date: Mon, 02 Jan 2012 19:02:27 -0500
+Message-ID: <m2hb0dpsa4.fsf@bob.laptop.org>
+References: <1324959750-18203-1-git-send-email-aaron.lu@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50782 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:50787 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753507Ab2ACABB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 2 Jan 2012 19:01:01 -0500
-In-Reply-To: <1324958792-16742-1-git-send-email-r66093@freescale.com>
-	(r66093@freescale.com's message of "Tue, 27 Dec 2011 12:06:32 +0800")
+	id S1753486Ab2ACACf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 2 Jan 2012 19:02:35 -0500
+In-Reply-To: <1324959750-18203-1-git-send-email-aaron.lu@amd.com> (Aaron Lu's
+	message of "Tue, 27 Dec 2011 12:22:30 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: r66093@freescale.com
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Jiang Yutang <b14898@freescale.com>, Wolfram Sang <w.sang@pengutronix.de>
+To: Aaron Lu <aaron.lu@amd.com>
+Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>
 
 Hi,
 
-Wolfram, do you have time to look at this?  Looks like we need to expose
-suspend/resume hooks to -pltfm users for this use case -- I don't think
-any esdhc code should be in sdhci-pltfm.c.  (I don't mind writing the
-patch if you agree that that's the correct solution here.)
-
-Jerry, some style comments below.
-
-Thanks,
-
-- Chris.
-
-On Mon, Dec 26 2011, r66093@freescale.com wrote:
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+On Mon, Dec 26 2011, Aaron Lu wrote:
+> From: Philip Rakity <prakity@marvell.com>
 >
-> For FSL ESDHC controllor, when enter the sleep, the controller will power off,
-                controller,      entering sleep,
-> therefore the register will lost its valuse, and driver should save value of
-                              lose its values,
-> register during suspend and used during resume.
-  registers                   restore them during resume.
+> Since we are suspending, the tuning timer should be deactivated.
 >
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> Signed-off-by: Jiang Yutang <b14898@freescale.com>
-> CC: Chris Ball <cjb@laptop.org>
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> Acked-by: Aaron Lu <aaron.lu@amd.com>
 > ---
-> changes for v2:
-> 	- change the property to compatible for quirks
-> changes for v3:
-> 	- fix one compile error
+>  drivers/mmc/host/sdhci.c |    3 +--
+>  1 files changed, 1 insertions(+), 2 deletions(-)
 >
->  drivers/mmc/host/sdhci-pltfm.c |   21 ++++++++++++++++++++-
->  1 files changed, 20 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index 1c254b1..6791a2a 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -53,6 +53,10 @@ static bool sdhci_of_wp_inverted(struct device_node *np)
->  #endif /* CONFIG_PPC */
->  }
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ab6018f..1abbd26 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2347,8 +2347,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
+>  	if (host->version >= SDHCI_SPEC_300 && host->tuning_count &&
+>  	    host->tuning_mode == SDHCI_TUNING_MODE_1) {
+>  		host->flags &= ~SDHCI_NEEDS_RETUNING;
+> -		mod_timer(&host->tuning_timer, jiffies +
+> -			host->tuning_count * HZ);
+> +		del_timer_sync(&host->tuning_timer);
+>  	}
 >  
-> +#ifdef CONFIG_PM
-> +static int sdhc_pmsaveproctlreg;
-> +static u32 esdhc_proctl;
-> +#endif
->  void sdhci_get_of_property(struct platform_device *pdev)
->  {
->  	struct device_node *np = pdev->dev.of_node;
-> @@ -79,6 +83,11 @@ void sdhci_get_of_property(struct platform_device *pdev)
->  			|| of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
->  			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->  
-> +#ifdef CONFIG_PM
-> +		if (of_device_is_compatible(np, "fsl,p1022-esdhc"))
-> +			sdhc_pmsaveproctlreg = 1;
-> +#endif
-> +
->  		clk = of_get_property(np, "clock-frequency", &size);
->  		if (clk && size == sizeof(*clk) && *clk)
->  			pltfm_host->clock = be32_to_cpup(clk);
+>  	ret = mmc_suspend_host(host->mmc);
 
-error: patch failed: drivers/mmc/host/sdhci-pltfm.c:79
-error: drivers/mmc/host/sdhci-pltfm.c: patch does not apply
-
-Needs to be rebased against mmc-next.  But wait until we figure out
-what to do with this patch.
-
-> @@ -206,15 +215,25 @@ int sdhci_pltfm_suspend(struct platform_device *dev, pm_message_t state)
->  {
->  	struct sdhci_host *host = platform_get_drvdata(dev);
->  
-> +	if (sdhc_pmsaveproctlreg == 1)
-> +		esdhc_proctl = sdhci_readl(host, SDHCI_HOST_CONTROL);
-> +
-
-You can skip the "== 1".
-
->  	return sdhci_suspend_host(host, state);
->  }
->  EXPORT_SYMBOL_GPL(sdhci_pltfm_suspend);
->  
->  int sdhci_pltfm_resume(struct platform_device *dev)
->  {
-> +	int ret;
->  	struct sdhci_host *host = platform_get_drvdata(dev);
->  
-> -	return sdhci_resume_host(host);
-> +	 host->ops->enable_dma(host);
-
-(The indentation looks incorrect here.)
-
-You shouldn't be calling an ops pointer without testing it first.
-And you haven't explained why you're calling this unconditionally
-for *every* -pltfm driver.  How do you know it doesn't break one
-of them?
-
-> +
-> +	ret = mmc_resume_host(host->mmc);
-> +	if (sdhc_pmsaveproctlreg == 1)
-> +		sdhci_writel(host, esdhc_proctl, SDHCI_HOST_CONTROL);
-> +
-> +	return ret;
-
-== 1 not needed.
-
->  }
->  EXPORT_SYMBOL_GPL(sdhci_pltfm_resume);
->  #endif	/* CONFIG_PM */
-
-Thanks,
+Pushed to mmc-next for 3.3 with a stable@ tag, thanks.
 
 - Chris.
 -- 
