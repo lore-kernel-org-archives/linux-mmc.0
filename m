@@ -1,784 +1,478 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH V8 1/2] mmc: core: HS200 mode support for eMMC 4.5
-Date: Tue, 3 Jan 2012 11:44:02 +0530
-Message-ID: <CAGxe1ZGA6biMJLpptgvPC2Ex=xRfk7MYq40So0-GHbACNPXxPA@mail.gmail.com>
-References: <1324624322-2189-1-git-send-email-girish.shivananjappa@linaro.org>
-	<1324624322-2189-2-git-send-email-girish.shivananjappa@linaro.org>
-	<m2ty4dpvjr.fsf@bob.laptop.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v4] mmc: support BKOPS feature for eMMC
+Date: Tue, 03 Jan 2012 16:07:47 +0900
+Message-ID: <4F02A943.8030209@samsung.com>
+References: <4F010C1A.2000503@samsung.com> <m2r4zhobmw.fsf@bob.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <m2ty4dpvjr.fsf@bob.laptop.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, Philip Rakity <prakity@marvell.com>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:16340 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751621Ab2ACHH4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2012 02:07:56 -0500
+Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LX700MNTNT2PP70@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 03 Jan 2012 16:07:54 +0900 (KST)
+Received: from [165.213.219.108] by mmp1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LX700IQENT125V0@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 03 Jan 2012 16:07:54 +0900 (KST)
+In-reply-to: <m2r4zhobmw.fsf@bob.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per Forlin <per.lkml@gmail.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-On 3 January 2012 04:21, Chris Ball <cjb@laptop.org> wrote:
-> Hi Girish, small style comments,
->
-> On Fri, Dec 23 2011, Girish K S wrote:
->> This patch adds the support of the HS200 bus speed for eMMC 4.5 devi=
-ces.
->> The eMMC 4.5 devices have support for 200MHz bus speed. The function
->> prototype of the tuning function is modified to handle the tuning co=
-mmand
->> number which is different in sd and mmc case.
+Hi Chris,
+
+On 01/03/2012 09:47 AM, Chris Ball wrote:
+
+> Hi,
+> 
+> On Sun, Jan 01 2012, Jaehoon Chung wrote:
+>> Enable eMMC background operations (BKOPS) feature.
 >>
->> cc: Chris Ball <cjb@laptop.org>
->> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
->> Signed-off-by: Philip Rakity <prakity@marvell.com>
+>> If URGENT_BKOPS is set after a response, note that BKOPS
+>> are required. After all I/O requests are finished, run
+>> BKOPS if required. Should read/write operations be requested
+>> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
+>> and then service the request.
+>>
+>> If you want to enable this feature, set MMC_CAP2_BKOPS.
+>>
+>> Future considerations
+>>  * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
+>>  * Interrupt ongoing BKOPS before powering off the card.
+>>  * How get BKOPS_STATUS value.(periodically send ext_csd command?)
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 >> ---
->> =A0drivers/mmc/core/bus.c =A0 =A0 | =A0 =A03 +-
->> =A0drivers/mmc/core/debugfs.c | =A0 =A03 +
->> =A0drivers/mmc/core/mmc.c =A0 =A0 | =A0163 +++++++++++++++++++++++++=
-++++++++++++++++---
->> =A0drivers/mmc/core/sd.c =A0 =A0 =A0| =A0 =A03 +-
->> =A0drivers/mmc/core/sdio.c =A0 =A0| =A0 =A04 +-
->> =A0include/linux/mmc/card.h =A0 | =A0 =A03 +
->> =A0include/linux/mmc/host.h =A0 | =A0 11 +++-
->> =A0include/linux/mmc/mmc.h =A0 =A0| =A0 66 +++++++++++++++++-
->> =A08 files changed, 242 insertions(+), 14 deletions(-)
+>> Changelog V4:
+>> 	- Add mmc_read_bkops_status
+>> 	- When URGENT_BKOPS(level2-3), didn't use HPI command.
+>> 	- In mmc_switch(), use R1B/R1 according to level.
+>> Changelog V3:
+>> 	- move the bkops setting's location in mmc_blk_issue_rw_rq
+>> 	- modify condition checking
+>> 	- bkops_en is assigned ext_csd[EXT_CSD_BKOPS_EN] instead of "1"
+>> 	- remove the unused code
+>> 	- change pr_debug instead of pr_warn in mmc_send_hpi_cmd
+>> 	- Add the Future consideration suggested by Per
+>> 	
+>> Changelog V2:
+>> 	- Use EXCEPTION_STATUS instead of URGENT_BKOPS
+>> 	- Add function to check Exception_status(for eMMC4.5)
 >>
->> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
->> index f8a228a..5d011a3 100644
->> --- a/drivers/mmc/core/bus.c
->> +++ b/drivers/mmc/core/bus.c
->> @@ -303,10 +303,11 @@ int mmc_add_card(struct mmc_card *card)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_ddr_mode(card) =
-? "DDR " : "",
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 type);
->> =A0 =A0 =A0 } else {
->> - =A0 =A0 =A0 =A0 =A0 =A0 printk(KERN_INFO "%s: new %s%s%s card at a=
-ddress %04x\n",
->> + =A0 =A0 =A0 =A0 =A0 =A0 pr_info("%s: new %s%s%s%s card at address =
-%04x\n",
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hostname(card->host)=
-,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_uhs(card) ? "ul=
-tra high speed " :
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (mmc_card_highspeed(card=
-) ? "high speed " : ""),
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (mmc_card_hs200(card) ? "H=
-S200 " : ""),
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_ddr_mode(card) =
-? "DDR " : "",
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 type, card->rca);
->> =A0 =A0 =A0 }
->> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
->> index 027615d..9ab5b17 100644
->> --- a/drivers/mmc/core/debugfs.c
->> +++ b/drivers/mmc/core/debugfs.c
->> @@ -135,6 +135,9 @@ static int mmc_ios_show(struct seq_file *s, void=
- *data)
->> =A0 =A0 =A0 case MMC_TIMING_UHS_DDR50:
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 str =3D "sd uhs DDR50";
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
->> + =A0 =A0 case MMC_TIMING_MMC_HS200:
->> + =A0 =A0 =A0 =A0 =A0 =A0 str =3D "mmc high-speed SDR200";
->> + =A0 =A0 =A0 =A0 =A0 =A0 break;
->> =A0 =A0 =A0 default:
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 str =3D "invalid";
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
+>>  drivers/mmc/card/block.c   |   10 ++++
+>>  drivers/mmc/card/queue.c   |    3 +
+>>  drivers/mmc/core/core.c    |  104 ++++++++++++++++++++++++++++++++++++++++++++
+>>  drivers/mmc/core/mmc.c     |    8 +++
+>>  drivers/mmc/core/mmc_ops.c |   12 +++++-
+>>  include/linux/mmc/card.h   |   14 ++++++
+>>  include/linux/mmc/core.h   |    4 ++
+>>  include/linux/mmc/host.h   |    1 +
+>>  include/linux/mmc/mmc.h    |   19 ++++++++
+>>  9 files changed, 174 insertions(+), 1 deletions(-)
+>>
+> 
+> This doesn't apply against mmc-next.  Please rebase and resend?
+
+Sure, i will rebase and resend the patch with your comments
+Thanks,
+Jaehoon Chung
+
+> 
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 0cad48a..9c214e4 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -1273,6 +1273,16 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>>  		type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
+>>  		mmc_queue_bounce_post(mq_rq);
+>>  
+>> +		/*
+>> +		 * Check BKOPS urgency from each R1 response
+>> +		 */
+>> +		if (mmc_card_mmc(card) && ((brq->cmd.flags == MMC_RSP_R1B) ||
+>> +			 (brq->cmd.flags == MMC_RSP_R1)) &&
+>> +			(brq->cmd.resp[0] & R1_EXCEPTION_EVENT)) {
+> 
+> This is hard to follow.  I suggest:
+> 
+> 		if (mmc_card_mmc(card) &&
+> 		    (brq->cmd.flags == MMC_RSP_R1B ||
+> 		     brq->cmd.flags == MMC_RSP_R1) &&
+> 		    (brq->cmd.resp[0] & R1_EXCEPTION_EVENT) {
+> 
+>> +			if (mmc_is_exception_event(card, EXT_CSD_URGENT_BKOPS))
+>> +				mmc_card_set_need_bkops(card);
+>> +		}
+>> +
+>>  		switch (status) {
+>>  		case MMC_BLK_SUCCESS:
+>>  		case MMC_BLK_PARTIAL:
+>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+>> index 2517547..fd11a31 100644
+>> --- a/drivers/mmc/card/queue.c
+>> +++ b/drivers/mmc/card/queue.c
+>> @@ -66,6 +66,8 @@ static int mmc_queue_thread(void *d)
+>>  		spin_unlock_irq(q->queue_lock);
+>>  
+>>  		if (req || mq->mqrq_prev->req) {
+>> +			if (mmc_card_doing_bkops(mq->card))
+>> +				mmc_interrupt_bkops(mq->card);
+>>  			set_current_state(TASK_RUNNING);
+>>  			mq->issue_fn(mq, req);
+>>  		} else {
+>> @@ -73,6 +75,7 @@ static int mmc_queue_thread(void *d)
+>>  				set_current_state(TASK_RUNNING);
+>>  				break;
+>>  			}
+>> +			mmc_start_bkops(mq->card);
+>>  			up(&mq->thread_sem);
+>>  			schedule();
+>>  			down(&mq->thread_sem);
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index a2aa860..627697a 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -238,6 +238,51 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>>  	host->ops->request(host, mrq);
+>>  }
+>>  
+>> +/**
+>> + *	mmc_start_bkops - start BKOPS for supported cards
+>> + *	@card: MMC card to start BKOPS
+>> + *
+>> + *	Start background operations whenever requested.
+>> + *	when the urgent BKOPS bit is set in a R1 command response
+>> + *	then background operations should be started immediately.
+>> +*/
+>> +void mmc_start_bkops(struct mmc_card *card)
+>> +{
+>> +	int err;
+>> +	unsigned long flags;
+>> +
+>> +	BUG_ON(!card);
+>> +	if ((!card->ext_csd.bkops_en) ||
+>> +			!(card->host->caps2 & MMC_CAP2_BKOPS))
+> 
+>         if (!card->ext_csd.bkops_en || !(card->host->caps2 & MMC_CAP2_BKOPS))
+> 
+>> +		return;
+>> +
+>> +	/*
+>> +	 * If card is already doing bkops or need for
+>> +	 * bkops flag is not set, then do nothing just
+>> +	 * return
+>> +	 */
+>> +	if (mmc_card_doing_bkops(card)
+>> +			|| !mmc_card_need_bkops(card))
+> 
+>         if (mmc_card_doing_bkops(card) || !mmc_card_need_bkops(card))
+> 
+>> +		return;
+>> +
+>> +	mmc_claim_host(card->host);
+>> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +			EXT_CSD_BKOPS_START, 1, 0);
+>> +	if (err) {
+>> +		pr_warning("error %d starting bkops\n", err);
+> 
+> Add an mmc_hostname so that users know this is coming from mmc.
+> 
+>> +		mmc_card_clr_need_bkops(card);
+>> +		goto out;
+>> +	}
+>> +	spin_lock_irqsave(&card->host->lock, flags);
+>> +	mmc_card_clr_need_bkops(card);
+>> +	if (card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
+>> +		mmc_card_set_doing_bkops(card);
+>> +	spin_unlock_irqrestore(&card->host->lock, flags);
+>> +out:
+>> +	mmc_release_host(card->host);
+>> +}
+>> +EXPORT_SYMBOL(mmc_start_bkops);
+>> +
+>>  static void mmc_wait_done(struct mmc_request *mrq)
+>>  {
+>>  	complete(&mrq->completion);
+>> @@ -472,6 +517,65 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int retries
+>>  EXPORT_SYMBOL(mmc_wait_for_cmd);
+>>  
+>>  /**
+>> + *	mmc_interrupt_bkops - interrupt ongoing BKOPS
+>> + *	@card: MMC card to check BKOPS
+>> + *
+>> + *	Send HPI command to interrupt ongoing background operations,
+>> + *	to allow rapid servicing of foreground operations,e.g. read/
+>> + *	writes. Wait until the card comes out of the programming state
+>> + *	to avoid errors in servicing read/write requests.
+>> + */
+>> +int mmc_interrupt_bkops(struct mmc_card *card)
+>> +{
+>> +	int err = 0;
+>> +	unsigned long flags;
+>> +
+>> +	BUG_ON(!card);
+>> +
+>> +	err = mmc_interrupt_hpi(card);
+>> +
+>> +	spin_lock_irqsave(&card->host->lock, flags);
+>> +	mmc_card_clr_doing_bkops(card);
+>> +	spin_unlock_irqrestore(&card->host->lock, flags);
+>> +
+>> +	return err;
+>> +}
+>> +EXPORT_SYMBOL(mmc_interrupt_bkops);
+>> +
+>> +int mmc_read_bkops_status(struct mmc_card *card)
+>> +{
+>> +	int err;
+>> +	u8 ext_csd[512];
+>> +
+>> +	err = mmc_send_ext_csd(card, ext_csd);
+>> +	if (err)
+>> +		return err;
+>> +
+>> +	card->ext_csd.raw_bkops_status = ext_csd[EXT_CSD_BKOPS_STATUS];
+>> +	card->ext_csd.raw_exception_status = ext_csd[EXT_CSD_EXCEPTION_STATUS];
+>> +out:
+>> +	return 0;
+>> +}
+>> +EXPORT_SYMBOL(mmc_read_bkops_status);
+>> +
+>> +int mmc_is_exception_event(struct mmc_card *card, unsigned int value)
+>> +{
+>> +	int err;
+>> +
+>> +	err = mmc_read_bkops_status(card);
+>> +
+>> +	/* In eMMC 4.41, R1_EXCEPTION_EVENT is URGENT_BKOPS */
+>> +	if (card->ext_csd.rev == 5)
+>> +		return 1;
+>> +
+>> +	if (err)
+>> +		return 0;
+> 
+> The placement of the csd.rev inbetween setting and testing "err" is odd.
+> I think it should go before mmc_read_bkops_status() if it's unrelated.
+> 
+>> +
+>> +	return (card->ext_csd.raw_exception_status & value) ? 1 : 0;
+>> +}
+>> +EXPORT_SYMBOL(mmc_is_exception_event);
+>> +
+>> +/**
+>>   *	mmc_set_data_timeout - set the timeout for a data command
+>>   *	@data: data phase for command
+>>   *	@card: the MMC card associated with the data transfer
 >> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index f0a9f1f..583cb42 100644
+>> index f0a9f1f..94456b1 100644
 >> --- a/drivers/mmc/core/mmc.c
 >> +++ b/drivers/mmc/core/mmc.c
->> @@ -286,6 +286,27 @@ static int mmc_read_ext_csd(struct mmc_card *ca=
-rd, u8 *ext_csd)
->> =A0 =A0 =A0 }
->> =A0 =A0 =A0 card->ext_csd.raw_card_type =3D ext_csd[EXT_CSD_CARD_TYP=
-E];
->> =A0 =A0 =A0 switch (ext_csd[EXT_CSD_CARD_TYPE] & EXT_CSD_CARD_TYPE_M=
-ASK) {
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_ALL:
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_ALL_DDR_1_8V:
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_ALL_DDR_1_2V:
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_ALL_DDR_52:
->> + =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.hs_max_dtr =3D 200000000;
->> + =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.card_type =3D EXT_CSD_CARD_T=
-YPE_SDR_200;
->> + =A0 =A0 =A0 =A0 =A0 =A0 break;
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_1_2V_ALL:
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_1_8V:
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_1_2V:
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_52:
->> + =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.hs_max_dtr =3D 200000000;
->> + =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.card_type =3D EXT_CSD_CARD_T=
-YPE_SDR_1_2V;
->> + =A0 =A0 =A0 =A0 =A0 =A0 break;
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_1_8V_ALL:
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_1_8V:
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_1_2V:
->> + =A0 =A0 case EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_52:
->> + =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.hs_max_dtr =3D 200000000;
->> + =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.card_type =3D EXT_CSD_CARD_T=
-YPE_SDR_1_8V;
->> + =A0 =A0 =A0 =A0 =A0 =A0 break;
->> =A0 =A0 =A0 case EXT_CSD_CARD_TYPE_DDR_52 | EXT_CSD_CARD_TYPE_52 |
->> =A0 =A0 =A0 =A0 =A0 =A0EXT_CSD_CARD_TYPE_26:
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.hs_max_dtr =3D 52000000;
->> @@ -700,6 +721,79 @@ static int mmc_select_powerclass(struct mmc_car=
-d *card,
->> =A0}
->>
->> =A0/*
->> + * Selects the desired buswidth and switch to the HS200 mode
->> + * if bus width set without error
->> + */
->> +static int mmc_select_hs200(struct mmc_card *card)
->> +{
->> + =A0 =A0 int idx, err =3D 0;
->> + =A0 =A0 struct mmc_host *host;
->> + =A0 =A0 static unsigned ext_csd_bits[] =3D {
->> + =A0 =A0 =A0 =A0 =A0 =A0 EXT_CSD_BUS_WIDTH_4,
->> + =A0 =A0 =A0 =A0 =A0 =A0 EXT_CSD_BUS_WIDTH_8,
->> + =A0 =A0 };
->> + =A0 =A0 static unsigned bus_widths[] =3D {
->> + =A0 =A0 =A0 =A0 =A0 =A0 MMC_BUS_WIDTH_4,
->> + =A0 =A0 =A0 =A0 =A0 =A0 MMC_BUS_WIDTH_8,
->> + =A0 =A0 };
+>> @@ -459,6 +459,14 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>>  	}
+>>  
+>>  	if (card->ext_csd.rev >= 5) {
+>> +		/* check whether the eMMC card support BKOPS */
+>> +		if (ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1) {
+>> +			card->ext_csd.bkops = 1;
+>> +			card->ext_csd.bkops_en = ext_csd[EXT_CSD_BKOPS_EN];
+>> +			card->ext_csd.raw_bkops_status =
+>> +				ext_csd[EXT_CSD_BKOPS_STATUS];
+>> +		}
 >> +
->> + =A0 =A0 BUG_ON(!card);
+>>  		/* check whether the eMMC card supports HPI */
+>>  		if (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1) {
+>>  			card->ext_csd.hpi = 1;
+>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>> index 4d41fa9..040f144 100644
+>> --- a/drivers/mmc/core/mmc_ops.c
+>> +++ b/drivers/mmc/core/mmc_ops.c
+>> @@ -392,13 +392,23 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>>  		  (index << 16) |
+>>  		  (value << 8) |
+>>  		  set;
+>> -	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>> +	cmd.flags = MMC_CMD_AC;
+>> +	if (index == EXT_CSD_BKOPS_START &&
+>> +		card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
+>> +		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+> 
+>         if (index == EXT_CSD_BKOPS_START &&
+>             card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
+>                 cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+> 
+>> +	else
+>> +		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
 >> +
->> + =A0 =A0 host =3D card->host;
+>>  	cmd.cmd_timeout_ms = timeout_ms;
+>>  
+>>  	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+>>  	if (err)
+>>  		return err;
+>>  
+>> +	/* No need to check card status in case of BKOPS switch*/
+>> +	if (index == EXT_CSD_BKOPS_START)
+>> +		return 0;
 >> +
->> + =A0 =A0 if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_SDR_1_2V)
->> + =A0 =A0 =A0 =A0 =A0 =A0 && (host->caps2 & MMC_CAP2_HS200_1_2V_SDR)=
-)
->
-> A continuation (&&, ||..) should go on the end of the first line.
-> Also, & has higher precedence than &&, so parens are unneeded.
->
-> =A0 =A0 =A0 =A0if (card->ext_csd.card_type & EXT_CSD_CARD_TYPE_SDR_1_=
-2V &&
-> =A0 =A0 =A0 =A0 =A0 =A0host->caps2 & MMC_CAP2_HS200_1_2V_SDR)
-
-Will Update it
-
->
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_set_signal_voltage(host, MMC_SIGNA=
-L_VOLTAGE_120, 0))
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_set_signal_vol=
-tage(host,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0MMC_SIGNAL_VOLTAGE_180, 0);
->> +
->> + =A0 =A0 /* If fails try again during next card power cycle */
->> + =A0 =A0 if (err)
->> + =A0 =A0 =A0 =A0 =A0 =A0 goto err;
->> +
->> + =A0 =A0 idx =3D (host->caps & MMC_CAP_8_BIT_DATA) ? 1 : 0;
->
-> Wouldn't "idx =3D host->caps & MMC_CAP_8_BIT_DATA;" do the same thing=
-?
-
- host->caps & MMC_CAP_8_BIT_DATA will assign (1 << 6) or 0 to idx. But
-i want to assign 0 or 1.
-
->
->> +
->> + =A0 =A0 /*
->> + =A0 =A0 =A0* Unlike SD, MMC cards dont have a configuration regist=
-er to notify
->> + =A0 =A0 =A0* supported bus width. So bus test command should be ru=
-n to identify
->> + =A0 =A0 =A0* the supported bus width or compare the ext csd values=
- of current
->> + =A0 =A0 =A0* bus width and ext csd values of 1 bit mode read earli=
-er.
->> + =A0 =A0 =A0*/
->> + =A0 =A0 for (; idx >=3D 0; idx--) {
->
-> I don't understand the purpose of this loop. =A0idx can only be 0 or =
-1,
-> right? =A0Why would you go through the loop more than once? =A0Why no=
-t say
-> "if (idx) {"?
->
-idx value will only indicate whether host is capable of handling 8 bit
-and 4 bit mode.
-To validate whether card supports 8/4
-1. the driver code should switch to 8 bit mode (highest bus
-supported), execute the bus test. If successful then continue with the
-8 bit mode.
-2. If bus test fails for 8 bit mode then continue step 1 with 4 bit mod=
-e.
-
-due to this reason we need to go through the loop for more than once.
-
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 /*
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* Host is capable of 8bit transfer, the=
-n switch
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* the device to work in 8bit transfer m=
-ode. If the
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* mmc switch command returns error then=
- switch to
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* 4bit transfer mode. On success set th=
-e corresponding
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* bus width on the host.
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_SET_N=
-ORMAL,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_CSD=
-_BUS_WIDTH,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd=
-_bits[idx],
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->e=
-xt_csd.generic_cmd6_time);
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (err)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 continue;
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 mmc_set_bus_width(card->host, bus_widths[i=
-dx]);
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST)=
-)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_compare_ext_cs=
-ds(card, bus_widths[idx]);
->> + =A0 =A0 =A0 =A0 =A0 =A0 else
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_bus_test(card,=
- bus_widths[idx]);
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (!err)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
->> + =A0 =A0 }
->> +
->> + =A0 =A0 /* switch to HS200 mode if bus width set successfully */
->> + =A0 =A0 if (!err)
->> + =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_SET_N=
-ORMAL,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_CSD=
-_HS_TIMING, 2, 0);
->> +err:
->> + =A0 =A0 return err;
->> +}
->> +
->> +/*
->> =A0 * Handle the detection and initialisation of a card.
->> =A0 *
->> =A0 * In the case of a resume, "oldcard" will contain the card
->> @@ -905,11 +999,15 @@ static int mmc_init_card(struct mmc_host *host=
-, u32 ocr,
->> =A0 =A0 =A0 /*
->> =A0 =A0 =A0 =A0* Activate high speed (if supported)
->> =A0 =A0 =A0 =A0*/
->> - =A0 =A0 if ((card->ext_csd.hs_max_dtr !=3D 0) &&
->> - =A0 =A0 =A0 =A0 =A0 =A0 (host->caps & MMC_CAP_MMC_HIGHSPEED)) {
->> - =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_SET_N=
-ORMAL,
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_CSD=
-_HS_TIMING, 1,
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->e=
-xt_csd.generic_cmd6_time);
->> + =A0 =A0 if (card->ext_csd.hs_max_dtr !=3D 0) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 err =3D 0;
->> + =A0 =A0 =A0 =A0 =A0 =A0 if ((card->ext_csd.hs_max_dtr > 52000000) =
-&&
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (host->caps2 & MMC_CAP2_HS200))
->
-> No need for these parentheses.
-
-agree will update in next patch
-
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (card->ext_csd.hs_max_dtr > 5200000=
-0 &&
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->caps2 & MMC_CAP2_HS200)
->
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_select_hs200(c=
-ard);
->> + =A0 =A0 =A0 =A0 =A0 =A0 else if (host->caps & MMC_CAP_MMC_HIGHSPEE=
-D)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, E=
-XT_CSD_CMD_SET_NORMAL,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0EXT_CSD_HS_TIMING, 1, 0);
->> +
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err && err !=3D -EBADMSG)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto free_card;
->>
->> @@ -918,8 +1016,15 @@ static int mmc_init_card(struct mmc_host *host=
-, u32 ocr,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_hostn=
-ame(card->host));
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D 0;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_set_highspeed(car=
-d);
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_set_timing(card->host,=
- MMC_TIMING_MMC_HS);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((card->ext_csd.hs_max_=
-dtr > 52000000) &&
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (host->caps2 & MMC=
-_CAP2_HS200)) {
->
-> Same as above.
->
-
-agree will update in next patch
-
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_s=
-et_hs200(card);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_set_ti=
-ming(card->host,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0MMC_TIMING_MMC_HS200);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_s=
-et_highspeed(card);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_set_ti=
-ming(card->host, MMC_TIMING_MMC_HS);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->> =A0 =A0 =A0 }
->>
->> @@ -944,7 +1049,7 @@ static int mmc_init_card(struct mmc_host *host,=
- u32 ocr,
->> =A0 =A0 =A0 =A0*/
->> =A0 =A0 =A0 max_dtr =3D (unsigned int)-1;
->>
->> - =A0 =A0 if (mmc_card_highspeed(card)) {
->> + =A0 =A0 if (mmc_card_highspeed(card) || mmc_card_hs200(card)) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (max_dtr > card->ext_csd.hs_max_dtr)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 max_dtr =3D card->ext_cs=
-d.hs_max_dtr;
->> =A0 =A0 =A0 } else if (max_dtr > card->csd.max_dtr) {
->> @@ -970,9 +1075,49 @@ static int mmc_init_card(struct mmc_host *host=
-, u32 ocr,
->> =A0 =A0 =A0 }
->>
->> =A0 =A0 =A0 /*
->> + =A0 =A0 =A0* Indicate HS200 SDR mode (if supported).
->> + =A0 =A0 =A0*/
->> + =A0 =A0 if (mmc_card_hs200(card)) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 u32 ext_csd_bits;
->> + =A0 =A0 =A0 =A0 =A0 =A0 u32 bus_width =3D card->host->ios.bus_widt=
-h;
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 /*
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* For devices supporting HS200 mode, th=
-e bus width has
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* to be set before executing the tuning=
- function. If
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* set before tuning, then device will r=
-espond with CRC
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* errors for responses on CMD line. So =
-for HS200 the
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* sequence will be
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* 1. set bus width 4bit / 8 bit (1 bit =
-not supported)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* 2. switch to HS200 mode
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* 3. set the clock to > 52Mhz <=3D200MH=
-z and
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* 4. execute tuning for HS200
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 =A0 =A0 =A0 if ((host->caps2 & MMC_CAP2_HS200) &&
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->host->ops->execute_tuning)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D card->host->ops->e=
-xecute_tuning(card->host,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 MMC_SEND_TUNING_BLOCK_HS200);
->
-> One less tab here.
->
-
-agree will update in next patch
-
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("tuning executi=
-on failed\n");
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err;
->> + =A0 =A0 =A0 =A0 =A0 =A0 }
->
-> Add the mmc_hostname().
->
-
-agree will update in next patch
-
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 ext_csd_bits =3D (bus_width =3D=3D MMC_BUS=
-_WIDTH_8) ?
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 EXT_CSD_BUS_WIDTH_8 :
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 EXT_CSD_BUS_WIDTH_4;
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd_bits =3D (bus_width =3D=3D MMC=
-_BUS_WIDTH_8) ?
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_CS=
-D_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
->
-agree will update in next patch
-
->> + =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_select_powerclass(card, ext_cs=
-d_bits, ext_csd);
->> + =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("%s: power class se=
-lection to bus width"
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0"%d failed\=
-n", mmc_hostname(card->host),
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A01 << bus_wi=
-dth);
->
-> I think using one line for the format string is okay here, even thoug=
-h
-> it will go past 80 chars. =A0It's easier to grep for strings that way=
-=2E
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pr_err("%s: power clas=
-s selection to bus width %d failed\n",
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hostn=
-ame(card->host), 1 << bus_width);
->
-
-agree will update in next patch
-
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err;
->> + =A0 =A0 =A0 =A0 =A0 =A0 }
->> + =A0 =A0 }
->> +
->> + =A0 =A0 /*
->> =A0 =A0 =A0 =A0* Activate wide bus and DDR (if supported).
->> =A0 =A0 =A0 =A0*/
->> - =A0 =A0 if ((card->csd.mmca_vsn >=3D CSD_SPEC_VER_4) &&
->> + =A0 =A0 if (!mmc_card_hs200(card) &&
->> + =A0 =A0 =A0 =A0 (card->csd.mmca_vsn >=3D CSD_SPEC_VER_3) &&
->> =A0 =A0 =A0 =A0 =A0 (host->caps & (MMC_CAP_4_BIT_DATA | MMC_CAP_8_BI=
-T_DATA))) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 static unsigned ext_csd_bits[][2] =3D {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 { EXT_CSD_BUS_WIDTH_8, E=
-XT_CSD_DDR_BUS_WIDTH_8 },
->> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
->> index 6f27d35..a775131 100644
->> --- a/drivers/mmc/core/sd.c
->> +++ b/drivers/mmc/core/sd.c
->> @@ -661,7 +661,8 @@ static int mmc_sd_init_uhs_card(struct mmc_card =
-*card)
->>
->> =A0 =A0 =A0 /* SPI mode doesn't define CMD19 */
->> =A0 =A0 =A0 if (!mmc_host_is_spi(card->host) && card->host->ops->exe=
-cute_tuning)
->> - =A0 =A0 =A0 =A0 =A0 =A0 err =3D card->host->ops->execute_tuning(ca=
-rd->host);
->> + =A0 =A0 =A0 =A0 =A0 =A0 err =3D card->host->ops->execute_tuning(ca=
-rd->host, =A0 =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 MMC_SEND_TUNING_BLOCK);
->
-> \ is unnecessary here.
->
-
-OK agree
-
->>
->> =A0out:
->> =A0 =A0 =A0 kfree(status);
->> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->> index b77f770..bd7bacc 100644
->> --- a/drivers/mmc/core/sdio.c
->> +++ b/drivers/mmc/core/sdio.c
->> @@ -14,6 +14,7 @@
->>
->> =A0#include <linux/mmc/host.h>
->> =A0#include <linux/mmc/card.h>
->> +#include <linux/mmc/mmc.h>
->> =A0#include <linux/mmc/sdio.h>
->> =A0#include <linux/mmc/sdio_func.h>
->> =A0#include <linux/mmc/sdio_ids.h>
->> @@ -556,7 +557,8 @@ static int mmc_sdio_init_uhs_card(struct mmc_car=
-d *card)
->>
->> =A0 =A0 =A0 /* Initialize and start re-tuning timer */
->> =A0 =A0 =A0 if (!mmc_host_is_spi(card->host) && card->host->ops->exe=
-cute_tuning)
->> - =A0 =A0 =A0 =A0 =A0 =A0 err =3D card->host->ops->execute_tuning(ca=
-rd->host);
->> + =A0 =A0 =A0 =A0 =A0 =A0 err =3D card->host->ops->execute_tuning(ca=
-rd->host,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 MMC_SEND_TUNING_BLOCK);
->>
->> =A0out:
->>
+>>  	/* Must check status to be sure of no errors */
+>>  	do {
+>>  		err = mmc_send_status(card, &status);
 >> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
->> index 9478a6b..9f22ba5 100644
+>> index 9478a6b..b9e255f 100644
 >> --- a/include/linux/mmc/card.h
 >> +++ b/include/linux/mmc/card.h
->> @@ -216,6 +216,7 @@ struct mmc_card {
->> =A0#define MMC_STATE_ULTRAHIGHSPEED (1<<5) =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-/* card is in ultra high speed mode */
->> =A0#define MMC_CARD_SDXC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0(1<<6) =A0 =A0=
- =A0 =A0 =A0/* card is SDXC */
->> =A0#define MMC_CARD_REMOVED =A0 =A0 (1<<7) =A0 =A0 =A0 =A0 =A0/* car=
-d has been removed */
->> +#define MMC_STATE_HIGHSPEED_200 =A0 =A0 =A0(1<<8) =A0 =A0 =A0 =A0 =A0=
-/* card is in HS200 mode */
->> =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0quirks; =A0 =A0 =A0 =
-=A0 /* card quirks */
->> =A0#define MMC_QUIRK_LENIENT_FN0 =A0 =A0 =A0 =A0(1<<0) =A0 =A0 =A0 =A0=
- =A0/* allow SDIO FN0 writes outside of the VS CCCR range */
->> =A0#define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1) /* use func->cur_blk=
-size */
->> @@ -374,6 +375,7 @@ static inline void __maybe_unused remove_quirk(s=
-truct mmc_card *card, int data)
->> =A0#define mmc_card_present(c) =A0((c)->state & MMC_STATE_PRESENT)
->> =A0#define mmc_card_readonly(c) ((c)->state & MMC_STATE_READONLY)
->> =A0#define mmc_card_highspeed(c) =A0 =A0 =A0 =A0((c)->state & MMC_ST=
-ATE_HIGHSPEED)
->> +#define mmc_card_hs200(c) =A0 =A0((c)->state & MMC_STATE_HIGHSPEED_=
-200)
->> =A0#define mmc_card_blockaddr(c) =A0 =A0 =A0 =A0((c)->state & MMC_ST=
-ATE_BLOCKADDR)
->> =A0#define mmc_card_ddr_mode(c) ((c)->state & MMC_STATE_HIGHSPEED_DD=
-R)
->> =A0#define mmc_card_uhs(c) =A0 =A0 =A0 =A0 =A0 =A0 =A0((c)->state & =
-MMC_STATE_ULTRAHIGHSPEED)
->> @@ -384,6 +386,7 @@ static inline void __maybe_unused remove_quirk(s=
-truct mmc_card *card, int data)
->> =A0#define mmc_card_set_present(c) =A0 =A0 =A0((c)->state |=3D MMC_S=
-TATE_PRESENT)
->> =A0#define mmc_card_set_readonly(c) ((c)->state |=3D MMC_STATE_READO=
-NLY)
->> =A0#define mmc_card_set_highspeed(c) ((c)->state |=3D MMC_STATE_HIGH=
-SPEED)
->> +#define mmc_card_set_hs200(c) =A0 =A0 =A0 =A0((c)->state |=3D MMC_S=
-TATE_HIGHSPEED_200)
->> =A0#define mmc_card_set_blockaddr(c) ((c)->state |=3D MMC_STATE_BLOC=
-KADDR)
->> =A0#define mmc_card_set_ddr_mode(c) ((c)->state |=3D MMC_STATE_HIGHS=
-PEED_DDR)
->> =A0#define mmc_card_set_uhs(c) ((c)->state |=3D MMC_STATE_ULTRAHIGHS=
-PEED)
+>> @@ -71,8 +71,11 @@ struct mmc_ext_csd {
+>>  	bool			hpi_en;			/* HPI enablebit */
+>>  	bool			hpi;			/* HPI support bit */
+>>  	unsigned int		hpi_cmd;		/* cmd used as HPI */
+>> +	bool			bkops;		/* background support bit */
+>> +	bool			bkops_en;	/* background enable bit */
+>>  	unsigned int		boot_ro_lock;		/* ro lock support */
+>>  	bool			boot_ro_lockable;
+>> +	u8			raw_exception_status;	/* 53 */
+>>  	u8			raw_partition_support;	/* 160 */
+>>  	u8			raw_erased_mem_count;	/* 181 */
+>>  	u8			raw_ext_csd_structure;	/* 194 */
+>> @@ -86,6 +89,7 @@ struct mmc_ext_csd {
+>>  	u8			raw_sec_erase_mult;	/* 230 */
+>>  	u8			raw_sec_feature_support;/* 231 */
+>>  	u8			raw_trim_mult;		/* 232 */
+>> +	u8			raw_bkops_status;	/* 246 */
+>>  	u8			raw_sectors[4];		/* 212 - 4 bytes */
+>>  
+>>  	unsigned int            feature_support;
+>> @@ -216,6 +220,9 @@ struct mmc_card {
+>>  #define MMC_STATE_ULTRAHIGHSPEED (1<<5)		/* card is in ultra high speed mode */
+>>  #define MMC_CARD_SDXC		(1<<6)		/* card is SDXC */
+>>  #define MMC_CARD_REMOVED	(1<<7)		/* card has been removed */
+>> +#define MMC_STATE_NEED_BKOPS	(1<<8)		/* card need to do BKOPS */
+>> +#define MMC_STATE_DOING_BKOPS	(1<<9)		/* card is doing BKOPS */
+>> +
+>>  	unsigned int		quirks; 	/* card quirks */
+>>  #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
+>>  #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
+>> @@ -380,6 +387,8 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+>>  #define mmc_sd_card_uhs(c)	((c)->state & MMC_STATE_ULTRAHIGHSPEED)
+>>  #define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
+>>  #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
+>> +#define mmc_card_need_bkops(c)	((c)->state & MMC_STATE_NEED_BKOPS)
+>> +#define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
+>>  
+>>  #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
+>>  #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+>> @@ -390,6 +399,11 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+>>  #define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
+>>  #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
+>>  #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
+>> +#define mmc_card_set_need_bkops(c)	((c)->state |= MMC_STATE_NEED_BKOPS)
+>> +#define mmc_card_set_doing_bkops(c)	((c)->state |= MMC_STATE_DOING_BKOPS)
+>> +
+>> +#define mmc_card_clr_need_bkops(c)	((c)->state &= ~MMC_STATE_NEED_BKOPS)
+>> +#define mmc_card_clr_doing_bkops(c)	((c)->state &= ~MMC_STATE_DOING_BKOPS)
+>>  
+>>  /*
+>>   * Quirk add/remove for MMC products.
+>> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+>> index 87a976c..45357c7 100644
+>> --- a/include/linux/mmc/core.h
+>> +++ b/include/linux/mmc/core.h
+>> @@ -134,6 +134,9 @@ struct mmc_host;
+>>  struct mmc_card;
+>>  struct mmc_async_req;
+>>  
+>> +extern int mmc_interrupt_bkops(struct mmc_card *);
+>> +extern int mmc_read_bkops_status(struct mmc_card *);
+>> +extern int mmc_is_exception_event(struct mmc_card *, unsigned int);
+>>  extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+>>  					   struct mmc_async_req *, int *);
+>>  extern int mmc_interrupt_hpi(struct mmc_card *);
+>> @@ -163,6 +166,7 @@ extern int mmc_can_sanitize(struct mmc_card *card);
+>>  extern int mmc_can_secure_erase_trim(struct mmc_card *card);
+>>  extern int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
+>>  				   unsigned int nr);
+>> +extern void mmc_start_bkops(struct mmc_card *card);
+>>  extern unsigned int mmc_calc_max_discard(struct mmc_card *card);
+>>  
+>>  extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
 >> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index 9a03d03..606c8c3 100644
+>> index 742f0e1..02ef040 100644
 >> --- a/include/linux/mmc/host.h
 >> +++ b/include/linux/mmc/host.h
->> @@ -56,10 +56,13 @@ struct mmc_ios {
->> =A0#define MMC_TIMING_UHS_SDR50 3
->> =A0#define MMC_TIMING_UHS_SDR104 =A0 =A0 =A0 =A04
->> =A0#define MMC_TIMING_UHS_DDR50 5
->> +#define MMC_TIMING_MMC_HS200 6
->>
->> =A0#define MMC_SDR_MODE =A0 =A0 =A0 =A0 0
->> =A0#define MMC_1_2V_DDR_MODE =A0 =A01
->> =A0#define MMC_1_8V_DDR_MODE =A0 =A02
->> +#define MMC_1_2V_SDR_MODE =A0 =A03
->> +#define MMC_1_8V_SDR_MODE =A0 =A04
->>
->> =A0 =A0 =A0 unsigned char =A0 signal_voltage; =A0 =A0 =A0 =A0 /* sig=
-nalling voltage (1.8V or 3.3V) */
->>
->> @@ -148,7 +151,9 @@ struct mmc_host_ops {
->> =A0 =A0 =A0 void =A0 =A0(*init_card)(struct mmc_host *host, struct m=
-mc_card *card);
->>
->> =A0 =A0 =A0 int =A0 =A0 (*start_signal_voltage_switch)(struct mmc_ho=
-st *host, struct mmc_ios *ios);
->> - =A0 =A0 int =A0 =A0 (*execute_tuning)(struct mmc_host *host);
->> +
->> + =A0 =A0 /* The tuning command opcode value is different for SD and=
- eMMC cards */
->> + =A0 =A0 int =A0 =A0 (*execute_tuning)(struct mmc_host *host, u32 o=
-pcode);
->> =A0 =A0 =A0 void =A0 =A0(*enable_preset_value)(struct mmc_host *host=
-, bool enable);
->> =A0 =A0 =A0 int =A0 =A0 (*select_drive_strength)(unsigned int max_dt=
-r, int host_drv, int card_drv);
->> =A0 =A0 =A0 void =A0 =A0(*hw_reset)(struct mmc_host *host);
->> @@ -242,6 +247,10 @@ struct mmc_host {
->> =A0#define MMC_CAP2_CACHE_CTRL =A0(1 << 1) =A0 =A0 =A0 =A0/* Allow c=
-ache control */
->> =A0#define MMC_CAP2_POWEROFF_NOTIFY (1 << 2) =A0 =A0/* Notify powero=
-ff supported */
->> =A0#define MMC_CAP2_NO_MULTI_READ =A0 =A0 =A0 (1 << 3) =A0 =A0 =A0 =A0=
-/* Multiblock reads don't work */
->> +#define MMC_CAP2_HS200_1_8V_SDR =A0 =A0 =A0(1 << 4) =A0 =A0 =A0 =A0=
-/* can support */
->> +#define MMC_CAP2_HS200_1_2V_SDR =A0 =A0 =A0(1 << 5) =A0 =A0 =A0 =A0=
-/* can support */
->> +#define MMC_CAP2_HS200 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (MMC_CAP2_HS200_=
-1_8V_SDR | \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0MMC_CAP=
-2_HS200_1_2V_SDR)
->>
->> =A0 =A0 =A0 mmc_pm_flag_t =A0 =A0 =A0 =A0 =A0 pm_caps; =A0 =A0 =A0 =A0=
-/* supported pm features */
->> =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0power_notify_type;
+>> @@ -247,6 +247,7 @@ struct mmc_host {
+>>  #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
+>>  #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff supported */
+>>  #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
+>> +#define MMC_CAP2_BKOPS		(1 << 4)	/* BKOPS supported */
+>>  
+>>  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+>>  	unsigned int        power_notify_type;
 >> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
->> index 665548e..2c8cc69 100644
+>> index 665548e..8cc1a03 100644
 >> --- a/include/linux/mmc/mmc.h
 >> +++ b/include/linux/mmc/mmc.h
->> @@ -51,6 +51,7 @@
->> =A0#define MMC_READ_SINGLE_BLOCK =A0 =A017 =A0 /* adtc [31:0] data a=
-ddr =A0 R1 =A0*/
->> =A0#define MMC_READ_MULTIPLE_BLOCK =A018 =A0 /* adtc [31:0] data add=
-r =A0 R1 =A0*/
->> =A0#define MMC_SEND_TUNING_BLOCK =A0 =A019 =A0 /* adtc =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0R1 =A0*/
->> +#define MMC_SEND_TUNING_BLOCK_HS200 =A021 =A0 =A0 =A0/* adtc R1 =A0=
-*/
->>
->> =A0 =A0/* class 3 */
->> =A0#define MMC_WRITE_DAT_UNTIL_STOP 20 =A0 /* adtc [31:0] data addr =
-=A0 R1 =A0*/
->> @@ -339,13 +340,76 @@ struct _mmc_csd {
->>
->> =A0#define EXT_CSD_CARD_TYPE_26 (1<<0) =A0/* Card can run at 26MHz *=
-/
->> =A0#define EXT_CSD_CARD_TYPE_52 (1<<1) =A0/* Card can run at 52MHz *=
-/
->> -#define EXT_CSD_CARD_TYPE_MASK =A0 =A0 =A0 0xF =A0 =A0 /* Mask out =
-reserved bits */
->> +#define EXT_CSD_CARD_TYPE_MASK =A0 =A0 =A0 0x3F =A0 =A0/* Mask out =
-reserved bits */
->> =A0#define EXT_CSD_CARD_TYPE_DDR_1_8V =A0(1<<2) =A0 /* Card can run =
-at 52MHz */
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0/* DDR mode @1.8V or 3V I/O */
->> =A0#define EXT_CSD_CARD_TYPE_DDR_1_2V =A0(1<<3) =A0 /* Card can run =
-at 52MHz */
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0/* DDR mode @1.2V I/O */
->> =A0#define EXT_CSD_CARD_TYPE_DDR_52 =A0 =A0 =A0 (EXT_CSD_CARD_TYPE_D=
-DR_1_8V =A0\
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 | EXT_CSD_CARD_TYPE_DDR_1_2V)
->> +#define EXT_CSD_CARD_TYPE_SDR_1_8V =A0 (1<<4) =A0/* Card can run at=
- 200MHz */
->> +#define EXT_CSD_CARD_TYPE_SDR_1_2V =A0 (1<<5) =A0/* Card can run at=
- 200MHz */
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 /* SDR mode @1.2V I/O */
+>> @@ -138,6 +138,7 @@ static inline bool mmc_op_multi(u32 opcode)
+>>  #define R1_CURRENT_STATE(x)	((x & 0x00001E00) >> 9)	/* sx, b (4 bits) */
+>>  #define R1_READY_FOR_DATA	(1 << 8)	/* sx, a */
+>>  #define R1_SWITCH_ERROR		(1 << 7)	/* sx, c */
+>> +#define R1_EXCEPTION_EVENT	(1 << 6)	/* sx, a */
+>>  #define R1_APP_CMD		(1 << 5)	/* sr, c */
+>>  
+>>  #define R1_STATE_IDLE	0
+>> @@ -273,11 +274,14 @@ struct _mmc_csd {
+>>  #define EXT_CSD_FLUSH_CACHE		32      /* W */
+>>  #define EXT_CSD_CACHE_CTRL		33      /* R/W */
+>>  #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
+>> +#define EXT_CSD_EXCEPTION_STATUS	54	/* RO */
+>>  #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+>>  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+>>  #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
+>>  #define EXT_CSD_HPI_MGMT		161	/* R/W */
+>>  #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
+>> +#define EXT_CSD_BKOPS_EN		163	/* R/W */
+>> +#define EXT_CSD_BKOPS_START		164	/* W */
+>>  #define EXT_CSD_SANITIZE_START		165     /* W */
+>>  #define EXT_CSD_WR_REL_PARAM		166	/* RO */
+>>  #define EXT_CSD_BOOT_WP			173	/* R/W */
+>> @@ -311,9 +315,11 @@ struct _mmc_csd {
+>>  #define EXT_CSD_PWR_CL_200_360		237	/* RO */
+>>  #define EXT_CSD_PWR_CL_DDR_52_195	238	/* RO */
+>>  #define EXT_CSD_PWR_CL_DDR_52_360	239	/* RO */
+>> +#define EXT_CSD_BKOPS_STATUS		246	/* RO */
+>>  #define EXT_CSD_POWER_OFF_LONG_TIME	247	/* RO */
+>>  #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
+>>  #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
+>> +#define EXT_CSD_BKOPS_SUPPORT		502	/* RO */
+>>  #define EXT_CSD_HPI_FEATURES		503	/* RO */
+>>  
+>>  /*
+>> @@ -379,4 +385,17 @@ struct _mmc_csd {
+>>  #define MMC_SWITCH_MODE_CLEAR_BITS	0x02	/* Clear bits which are 1 in value */
+>>  #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
+>>  
+>> +/*
+>> + * BKOPS status level
+>> + */
+>> +#define EXT_CSD_BKOPS_LEVEL_2		0x2
 >> +
->> +#define EXT_CSD_CARD_TYPE_SDR_200 =A0 =A0(EXT_CSD_CARD_TYPE_SDR_1_8=
-V =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 | EXT_CSD_CARD_TYPE_SDR_1_2V)
+>> +/*
+>> + * EXCEPTION_EVENT_STATUS field (eMMC4.5)
+>> + */
+>> +#define EXT_CSD_URGENT_BKOPS		BIT(0)
+>> +#define EXT_CSD_DYNCAP_NEEDED		BIT(1)
+>> +#define EXT_CSD_SYSPOOL_EXHAUSTED	BIT(2)
+>> +#define EXT_CSD_PACKED_FAILURE		BIT(3)
 >> +
->
-> Normal kernel coding style is:
->
-
- Will update it as per feed back. I had taken above
-EXT_CSD_CARD_TYPE_DDR_52 as reference.
-
-> =A0#define EXT_CSD_CARD_TYPE_SDR_200 =A0 =A0 =A0(EXT_CSD_CARD_TYPE_SD=
-R_1_8V | \
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 EXT_CSD_CARD_TYPE_SDR_1_2V)
->
->> +#define EXT_CSD_CARD_TYPE_SDR_ALL =A0 =A0(EXT_CSD_CARD_TYPE_SDR_200=
- =A0 =A0 =A0\
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 =A0 =A0\
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 | EXT_CSD_CARD_TYPE_26)
->> +
->> +#define =A0 =A0 =A0EXT_CSD_CARD_TYPE_SDR_1_2V_ALL =A0(EXT_CSD_CARD_=
-TYPE_SDR_1_2V =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 =A0 =A0\
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 | EXT_CSD_CARD_TYPE_26)
->> +
->> +#define =A0 =A0 =A0EXT_CSD_CARD_TYPE_SDR_1_8V_ALL =A0(EXT_CSD_CARD_=
-TYPE_SDR_1_8V =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 =A0 =A0\
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 | EXT_CSD_CARD_TYPE_26)
->> +
->> +#define EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_1_8V =A0(EXT_CSD_CARD_TYPE_S=
-DR_1_2V =A0\
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_DDR_1_8V \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_26)
->> +
->> +#define EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_1_8V =A0(EXT_CSD_CARD_TYPE_S=
-DR_1_8V =A0\
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_DDR_1_8V \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_26)
->> +
->> +#define EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_1_2V =A0(EXT_CSD_CARD_TYPE_S=
-DR_1_2V =A0\
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_DDR_1_2V \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_26)
->> +
->> +#define EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_1_2V =A0(EXT_CSD_CARD_TYPE_S=
-DR_1_8V =A0\
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_DDR_1_2V \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_26)
->> +
->> +#define EXT_CSD_CARD_TYPE_SDR_1_2V_DDR_52 =A0 =A0(EXT_CSD_CARD_TYPE=
-_SDR_1_2V =A0\
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_DDR_52 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_26)
->> +
->> +#define EXT_CSD_CARD_TYPE_SDR_1_8V_DDR_52 =A0 =A0(EXT_CSD_CARD_TYPE=
-_SDR_1_8V =A0\
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_DDR_52 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_26)
->> +
->> +#define EXT_CSD_CARD_TYPE_SDR_ALL_DDR_1_8V =A0 (EXT_CSD_CARD_TYPE_S=
-DR_200 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_DDR_1_8V \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_26)
->> +
->> +#define EXT_CSD_CARD_TYPE_SDR_ALL_DDR_1_2V =A0 (EXT_CSD_CARD_TYPE_S=
-DR_200 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_DDR_1_2V \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_26)
->> +
->> +#define EXT_CSD_CARD_TYPE_SDR_ALL_DDR_52 =A0 =A0 (EXT_CSD_CARD_TYPE=
-_SDR_200 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_DDR_52 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_52 =A0 =A0 =A0 \
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 | EXT_CSD_CARD_TYPE_26)
->>
->> =A0#define EXT_CSD_BUS_WIDTH_1 =A00 =A0 =A0 =A0 /* Card is in 1 bit =
-mode */
->> =A0#define EXT_CSD_BUS_WIDTH_4 =A01 =A0 =A0 =A0 /* Card is in 4 bit =
-mode */
->
+>>  #endif /* LINUX_MMC_MMC_H */
+> 
 > Thanks,
->
+> 
 > - Chris.
-> --
-> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
-> One Laptop Per Child
+
+
