@@ -1,42 +1,77 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 10/11] mmc: tmio: reconfigure the controller on runtime resume
-Date: Wed,  4 Jan 2012 15:17:15 +0100
-Message-ID: <1325686636-23905-11-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 05/11] ARM: mach-shmobile: convert ag5evm to use the generic MMC GPIO hotplug helper
+Date: Wed,  4 Jan 2012 15:17:10 +0100
+Message-ID: <1325686636-23905-6-git-send-email-g.liakhovetski@gmx.de>
 References: <1325686636-23905-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:55270 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755684Ab2ADORX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2012 09:17:23 -0500
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1325686636-23905-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Samuel Ortiz <sameo@linux.intel.com>
-
-After the controller has been runtime suspended it has to be reset and DMA
-has to be re-enabled, if it is used.
+List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/tmio_mmc_pio.c |    4 ++++
- 1 files changed, 4 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 1811006..9106b3d 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -1031,6 +1031,10 @@ EXPORT_SYMBOL(tmio_mmc_host_suspend);
- int tmio_mmc_host_resume(struct device *dev)
- {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+
-+	tmio_mmc_reset(host);
-+	tmio_mmc_enable_dma(host, true);
+Only compile-tested.
+
+ arch/arm/mach-shmobile/board-ag5evm.c |   24 ++++--------------------
+ 1 files changed, 4 insertions(+), 20 deletions(-)
+
+diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
+index b862e9f..b1db188 100644
+--- a/arch/arm/mach-shmobile/board-ag5evm.c
++++ b/arch/arm/mach-shmobile/board-ag5evm.c
+@@ -340,23 +340,15 @@ static struct platform_device mipidsi0_device = {
+ };
  
- 	/* The MMC core will perform the complete set up */
- 	return mmc_resume_host(mmc);
+ /* SDHI0 */
+-static irqreturn_t ag5evm_sdhi0_gpio_cd(int irq, void *arg)
+-{
+-	struct device *dev = arg;
+-	struct sh_mobile_sdhi_info *info = dev->platform_data;
+-	struct tmio_mmc_data *pdata = info->pdata;
+-
+-	tmio_mmc_cd_wakeup(pdata);
+-
+-	return IRQ_HANDLED;
+-}
+-
+ static struct sh_mobile_sdhi_info sdhi0_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
+-	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
++	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_HAS_COLD_CD,
+ 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED,
+ 	.tmio_ocr_mask	= MMC_VDD_27_28 | MMC_VDD_28_29,
++	.cd_gpio	= GPIO_PORT251,
++	.cd_irq		= intcs_evt2irq(0x3c0),
++	.cd_flags	= IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
+ };
+ 
+ static struct resource sdhi0_resources[] = {
+@@ -560,7 +552,6 @@ static void __init ag5evm_init(void)
+ 	__raw_writel(0x2a809010, DSI0PHYCR);
+ 
+ 	/* enable SDHI0 on CN15 [SD I/F] */
+-	gpio_request(GPIO_FN_SDHICD0, NULL);
+ 	gpio_request(GPIO_FN_SDHIWP0, NULL);
+ 	gpio_request(GPIO_FN_SDHICMD0, NULL);
+ 	gpio_request(GPIO_FN_SDHICLK0, NULL);
+@@ -569,13 +560,6 @@ static void __init ag5evm_init(void)
+ 	gpio_request(GPIO_FN_SDHID0_1, NULL);
+ 	gpio_request(GPIO_FN_SDHID0_0, NULL);
+ 
+-	if (!request_irq(intcs_evt2irq(0x3c0), ag5evm_sdhi0_gpio_cd,
+-			 IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
+-			 "sdhi0 cd", &sdhi0_device.dev))
+-		sdhi0_info.tmio_flags |= TMIO_MMC_HAS_COLD_CD;
+-	else
+-		pr_warn("Unable to setup SDHI0 GPIO IRQ\n");
+-
+ 	/* enable SDHI1 on CN4 [WLAN I/F] */
+ 	gpio_request(GPIO_FN_SDHICLK1, NULL);
+ 	gpio_request(GPIO_FN_SDHICMD1_PU, NULL);
 -- 
 1.7.2.5
 
