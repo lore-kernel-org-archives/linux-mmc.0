@@ -1,77 +1,77 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 05/11] ARM: mach-shmobile: convert ag5evm to use the generic MMC GPIO hotplug helper
-Date: Wed,  4 Jan 2012 15:17:10 +0100
-Message-ID: <1325686636-23905-6-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 01/11] mmc: tmio: calculate the native hotplug condition only once
+Date: Wed,  4 Jan 2012 15:17:06 +0100
+Message-ID: <1325686636-23905-2-git-send-email-g.liakhovetski@gmx.de>
 References: <1325686636-23905-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.186]:63354 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755684Ab2ADOR3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2012 09:17:29 -0500
 In-Reply-To: <1325686636-23905-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Samuel Ortiz <sameo@linux.intel.com>
-List-Id: linux-mmc@vger.kernel.org
+
+The condition, whether we have to use the native TMIO card hotplug
+detection interrupt, is rather complex, it is better to only calculate it
+once and store in the private data.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
+ drivers/mmc/host/tmio_mmc.h     |    1 +
+ drivers/mmc/host/tmio_mmc_pio.c |   11 +++++------
+ 2 files changed, 6 insertions(+), 6 deletions(-)
 
-Only compile-tested.
-
- arch/arm/mach-shmobile/board-ag5evm.c |   24 ++++--------------------
- 1 files changed, 4 insertions(+), 20 deletions(-)
-
-diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
-index b862e9f..b1db188 100644
---- a/arch/arm/mach-shmobile/board-ag5evm.c
-+++ b/arch/arm/mach-shmobile/board-ag5evm.c
-@@ -340,23 +340,15 @@ static struct platform_device mipidsi0_device = {
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index a95e6d9..9aa6a18 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -86,6 +86,7 @@ struct tmio_mmc_host {
+ 	spinlock_t		lock;		/* protect host private data */
+ 	unsigned long		last_req_ts;
+ 	struct mutex		ios_lock;	/* protect set_ios() context */
++	bool			native_hotplug;
  };
  
- /* SDHI0 */
--static irqreturn_t ag5evm_sdhi0_gpio_cd(int irq, void *arg)
--{
--	struct device *dev = arg;
--	struct sh_mobile_sdhi_info *info = dev->platform_data;
--	struct tmio_mmc_data *pdata = info->pdata;
--
--	tmio_mmc_cd_wakeup(pdata);
--
--	return IRQ_HANDLED;
--}
--
- static struct sh_mobile_sdhi_info sdhi0_info = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
--	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
-+	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_HAS_COLD_CD,
- 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED,
- 	.tmio_ocr_mask	= MMC_VDD_27_28 | MMC_VDD_28_29,
-+	.cd_gpio	= GPIO_PORT251,
-+	.cd_irq		= intcs_evt2irq(0x3c0),
-+	.cd_flags	= IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
- };
+ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index abad01b..1a9e975 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -908,6 +908,9 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 	else
+ 		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
  
- static struct resource sdhi0_resources[] = {
-@@ -560,7 +552,6 @@ static void __init ag5evm_init(void)
- 	__raw_writel(0x2a809010, DSI0PHYCR);
++	_host->native_hotplug = !(pdata->flags & TMIO_MMC_HAS_COLD_CD ||
++				  mmc->caps & MMC_CAP_NEEDS_POLL ||
++				  mmc->caps & MMC_CAP_NONREMOVABLE);
+ 	pdata->power = false;
+ 	pm_runtime_enable(&pdev->dev);
+ 	ret = pm_runtime_resume(&pdev->dev);
+@@ -926,9 +929,7 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 	 *  additionally ensure that in case 2) the tmio mmc hardware stays
+ 	 *  powered on during runtime for the card detection to work.
+ 	 */
+-	if (!(pdata->flags & TMIO_MMC_HAS_COLD_CD
+-		|| mmc->caps & MMC_CAP_NEEDS_POLL
+-		|| mmc->caps & MMC_CAP_NONREMOVABLE))
++	if (_host->native_hotplug)
+ 		pm_runtime_get_noresume(&pdev->dev);
  
- 	/* enable SDHI0 on CN15 [SD I/F] */
--	gpio_request(GPIO_FN_SDHICD0, NULL);
- 	gpio_request(GPIO_FN_SDHIWP0, NULL);
- 	gpio_request(GPIO_FN_SDHICMD0, NULL);
- 	gpio_request(GPIO_FN_SDHICLK0, NULL);
-@@ -569,13 +560,6 @@ static void __init ag5evm_init(void)
- 	gpio_request(GPIO_FN_SDHID0_1, NULL);
- 	gpio_request(GPIO_FN_SDHID0_0, NULL);
+ 	tmio_mmc_clk_stop(_host);
+@@ -984,9 +985,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+ 	 * the controller, the runtime PM is suspended and pdata->power == false,
+ 	 * so, our .runtime_resume() will not try to detect a card in the slot.
+ 	 */
+-	if (host->pdata->flags & TMIO_MMC_HAS_COLD_CD
+-		|| host->mmc->caps & MMC_CAP_NEEDS_POLL
+-		|| host->mmc->caps & MMC_CAP_NONREMOVABLE)
++	if (!host->native_hotplug)
+ 		pm_runtime_get_sync(&pdev->dev);
  
--	if (!request_irq(intcs_evt2irq(0x3c0), ag5evm_sdhi0_gpio_cd,
--			 IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
--			 "sdhi0 cd", &sdhi0_device.dev))
--		sdhi0_info.tmio_flags |= TMIO_MMC_HAS_COLD_CD;
--	else
--		pr_warn("Unable to setup SDHI0 GPIO IRQ\n");
--
- 	/* enable SDHI1 on CN4 [WLAN I/F] */
- 	gpio_request(GPIO_FN_SDHICLK1, NULL);
- 	gpio_request(GPIO_FN_SDHICMD1_PU, NULL);
+ 	mmc_remove_host(host->mmc);
 -- 
 1.7.2.5
 
