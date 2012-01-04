@@ -1,102 +1,41 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 3/5 v3] ESDHC: Power management for ESDHC
-Date: Wed, 4 Jan 2012 03:28:12 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F1165E5A7@039-SN1MPN1-005.039d.mgd.msft.net>
-References: <1324958792-16742-1-git-send-email-r66093@freescale.com>
-	<m2lipppscs.fsf@bob.laptop.org> <20120103015453.GA3767@pengutronix.de>
- <m2fwfxo7pu.fsf@bob.laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: regression: sd cards no longer recognized
+Date: Tue, 03 Jan 2012 23:28:16 -0500
+Message-ID: <m2ty4cf5wf.fsf@bob.laptop.org>
+References: <20120101115146.GE16096@segv.de> <m2vcotoch5.fsf@bob.laptop.org>
+	<EDCB5254-AA5F-4082-9565-C389399E5893@marvell.com>
+	<m2k459o9w8.fsf@bob.laptop.org> <20120103095312.GG16096@segv.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe002.messaging.microsoft.com ([213.199.154.140]:30330
-	"EHLO DB3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755007Ab2ADD2j convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 3 Jan 2012 22:28:39 -0500
-In-Reply-To: <m2fwfxo7pu.fsf@bob.laptop.org>
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:50425 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755522Ab2ADE2Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 Jan 2012 23:28:25 -0500
+In-Reply-To: <20120103095312.GG16096@segv.de> (Alexander Elbs's message of
+	"Tue, 3 Jan 2012 10:53:12 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jiang Yutang-B14898 <B14898@freescale.com>
+To: Alexander Elbs <alex@segv.de>
+Cc: Philip Rakity <prakity@marvell.com>, Arindam Nath <arindam.nath@amd.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Thanks, Chris.
-I will try it.
-If it is ok, I will post the new patch.
+Hi,
 
-> -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org]
-> Sent: Tuesday, January 03, 2012 10:12 AM
-> To: Wolfram Sang
-> Cc: Huang Changming-R66093; linux-mmc@vger.kernel.org; Huang Changming-
-> R66093; Jiang Yutang-B14898
-> Subject: Re: [PATCH 3/5 v3] ESDHC: Power management for ESDHC
-> 
-> Hi,
-> 
-> On Mon, Jan 02 2012, Wolfram Sang wrote:
-> >> Wolfram, do you have time to look at this?  Looks like we need to
-> expose
-> >> suspend/resume hooks to -pltfm users for this use case -- I don't
-> think
-> >> any esdhc code should be in sdhci-pltfm.c.  (I don't mind writing the
-> >> patch if you agree that that's the correct solution here.)
-> >
-> > I won't have time to look at it, but what you say sounds reasonable to
-> me.
-> 
-> Thanks, Wolfram.  Jerry, does this patch give you the hook you need to
-> handle this inside the driver instead of sdhci/sdhci-pltfm?
-> 
-> From: Chris Ball <cjb@laptop.org>
-> Subject: [PATCH] mmc: sdhci: Add platform suspend/resume hooks.
-> 
-> Some platforms require saving/restoring registers across suspend/resume;
-> this hook allows them to do that inside their driver.
-> 
-> Signed-off-by: Chris Ball <cjb@laptop.org>
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 384adda..3425c9a 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2351,6 +2351,9 @@ int sdhci_suspend_host(struct sdhci_host *host)
->  {
->  	int ret;
-> 
-> +	if (host->ops->platform_suspend)
-> +		host->ops->platform_suspend(host);
-> +
->  	sdhci_disable_card_detection(host);
-> 
->  	/* Disable tuning since we are suspending */
-> @@ -2391,6 +2394,9 @@ int sdhci_resume_host(struct sdhci_host *host)
->  	ret = mmc_resume_host(host->mmc);
->  	sdhci_enable_card_detection(host);
-> 
-> +	if (host->ops->platform_resume)
-> +		host->ops->platform_resume(host);
-> +
->  	/* Set the re-tuning expiration flag */
->  	if ((host->version >= SDHCI_SPEC_300) && host->tuning_count &&
->  	    (host->tuning_mode == SDHCI_TUNING_MODE_1))
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index a04d4d0..ae05a80 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -274,6 +274,8 @@ struct sdhci_ops {
->  	void	(*platform_reset_exit)(struct sdhci_host *host, u8 mask);
->  	int	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int
-> uhs);
->  	void	(*hw_reset)(struct sdhci_host *host);
-> +	void	(*platform_suspend)(struct sdhci_host *host);
-> +	void	(*platform_resume)(struct sdhci_host *host);
->  };
-> 
->  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+On Tue, Jan 03 2012, Alexander Elbs wrote:
+> On Mon, Jan 02, 2012 at 08:24:55PM -0500, Chris Ball wrote:
+>> Hi,
+>> 
+>> On Mon, Jan 02 2012, Philip Rakity wrote:
+>> > Ack-by: Philip Rakity <prakity@marvell.com>
+>> 
+>> Thanks.  Alexander, could you give me a "Signed-off-by:" for the record?
+>
+> Signed-off-by: Alexander Elbs <alex@segv.de>
 
+Pushed to mmc-next for 3.3 with a stable@ tag, with ACKs from Philip and
+Arindam.  Thanks very much for tracking this down, Alexander!
 
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
