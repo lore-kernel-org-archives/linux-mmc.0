@@ -1,107 +1,84 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 07/11] mmc: tmio_mmc: power status flag doesn't have to be exposed in platform data
-Date: Wed,  4 Jan 2012 15:17:12 +0100
-Message-ID: <1325686636-23905-8-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 04/11] ARM: mach-shmobile: convert mackerel to use the generic MMC GPIO hotplug helper
+Date: Wed,  4 Jan 2012 15:17:09 +0100
+Message-ID: <1325686636-23905-5-git-send-email-g.liakhovetski@gmx.de>
 References: <1325686636-23905-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:60760 "EHLO
+Received: from moutng.kundenserver.de ([212.227.17.8]:64920 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755691Ab2ADORY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2012 09:17:24 -0500
+	with ESMTP id S1755357Ab2ADORZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2012 09:17:25 -0500
 In-Reply-To: <1325686636-23905-1-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Samuel Ortiz <sameo@linux.intel.com>
 
-The controller power status flag does not have to be accessed from the
-hot-plug detection code any more, it can now be removed from the platform
-data and put in the controller private struct.
-
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/tmio_mmc.h     |    3 +++
- drivers/mmc/host/tmio_mmc_pio.c |   13 ++++++-------
- include/linux/mfd/tmio.h        |    1 -
- 3 files changed, 9 insertions(+), 8 deletions(-)
+ arch/arm/mach-shmobile/board-mackerel.c |   24 ++++--------------------
+ 1 files changed, 4 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 9fb6e6b..0c39002 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -49,6 +49,9 @@ struct tmio_mmc_host {
- 	struct mmc_host         *mmc;
- 	unsigned int		sdio_irq_enabled;
+diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
+index 9c5e598..b35343a 100644
+--- a/arch/arm/mach-shmobile/board-mackerel.c
++++ b/arch/arm/mach-shmobile/board-mackerel.c
+@@ -1004,21 +1004,14 @@ static int slot_cn7_get_cd(struct platform_device *pdev)
+ }
  
-+	/* Controller power state */
-+	bool			power;
-+
- 	/* Callbacks for clock / power control */
- 	void (*set_pwr)(struct platform_device *host, int state);
- 	void (*set_clk_div)(struct platform_device *host, int state);
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 41b7eff..478e57b 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -754,7 +754,6 @@ fail:
- static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ /* SDHI0 */
+-static irqreturn_t mackerel_sdhi0_gpio_cd(int irq, void *arg)
+-{
+-	struct device *dev = arg;
+-	struct sh_mobile_sdhi_info *info = dev->platform_data;
+-	struct tmio_mmc_data *pdata = info->pdata;
+-
+-	tmio_mmc_cd_wakeup(pdata);
+-
+-	return IRQ_HANDLED;
+-}
+-
+ static struct sh_mobile_sdhi_info sdhi0_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
++	.tmio_flags	= TMIO_MMC_HAS_COLD_CD,
+ 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
++	.cd_gpio	= GPIO_PORT172,
++	.cd_irq		= evt2irq(0x3340),
++	.cd_flags	= IRQF_TRIGGER_FALLING,
+ };
+ 
+ static struct resource sdhi0_resources[] = {
+@@ -1408,7 +1401,6 @@ static void __init mackerel_init(void)
  {
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
--	struct tmio_mmc_data *pdata = host->pdata;
- 	unsigned long flags;
+ 	u32 srcr4;
+ 	struct clk *clk;
+-	int ret;
  
- 	mutex_lock(&host->ios_lock);
-@@ -784,15 +783,15 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	spin_unlock_irqrestore(&host->lock, flags);
+ 	sh7372_pinmux_init();
  
- 	/*
--	 * pdata->power toggles between false and true in both cases - either
-+	 * host->power toggles between false and true in both cases - either
- 	 * or not the controller can be runtime-suspended during inactivity. But
- 	 * if the controller has to be kept on, the runtime-pm usage_count is
- 	 * kept positive, so no suspending actually takes place.
- 	 */
- 	if (ios->power_mode == MMC_POWER_ON && ios->clock) {
--		if (!pdata->power) {
-+		if (!host->power) {
- 			pm_runtime_get_sync(&host->pdev->dev);
--			pdata->power = true;
-+			host->power = true;
- 		}
- 		tmio_mmc_set_clock(host, ios->clock);
- 		/* power up SD bus */
-@@ -803,8 +802,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	} else if (ios->power_mode != MMC_POWER_UP) {
- 		if (host->set_pwr && ios->power_mode == MMC_POWER_OFF)
- 			host->set_pwr(host->pdev, 0);
--		if (pdata->power) {
--			pdata->power = false;
-+		if (host->power) {
-+			host->power = false;
- 			pm_runtime_put(&host->pdev->dev);
- 		}
- 		tmio_mmc_clk_stop(host);
-@@ -914,7 +913,7 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 	_host->native_hotplug = !(pdata->flags & TMIO_MMC_HAS_COLD_CD ||
- 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
- 				  mmc->caps & MMC_CAP_NONREMOVABLE);
--	pdata->power = false;
-+	_host->power = false;
- 	pm_runtime_enable(&pdev->dev);
- 	ret = pm_runtime_resume(&pdev->dev);
- 	if (ret < 0)
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index 08fb7d2..367c65c6 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -98,7 +98,6 @@ struct tmio_mmc_data {
- 	u32				ocr_mask;	/* available voltages */
- 	struct tmio_mmc_dma		*dma;
- 	struct device			*dev;
--	bool				power;
- 	unsigned int			cd_gpio;
- 	unsigned int			cd_irq;
- 	unsigned long			cd_flags;
+@@ -1505,7 +1497,6 @@ static void __init mackerel_init(void)
+ 	irq_set_irq_type(IRQ21, IRQ_TYPE_LEVEL_HIGH);
+ 
+ 	/* enable SDHI0 */
+-	gpio_request(GPIO_FN_SDHICD0, NULL);
+ 	gpio_request(GPIO_FN_SDHIWP0, NULL);
+ 	gpio_request(GPIO_FN_SDHICMD0, NULL);
+ 	gpio_request(GPIO_FN_SDHICLK0, NULL);
+@@ -1514,13 +1505,6 @@ static void __init mackerel_init(void)
+ 	gpio_request(GPIO_FN_SDHID0_1, NULL);
+ 	gpio_request(GPIO_FN_SDHID0_0, NULL);
+ 
+-	ret = request_irq(evt2irq(0x3340), mackerel_sdhi0_gpio_cd,
+-			  IRQF_TRIGGER_FALLING, "sdhi0 cd", &sdhi0_device.dev);
+-	if (!ret)
+-		sdhi0_info.tmio_flags |= TMIO_MMC_HAS_COLD_CD;
+-	else
+-		pr_err("Cannot get IRQ #%d: %d\n", evt2irq(0x3340), ret);
+-
+ #if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
+ 	/* enable SDHI1 */
+ 	gpio_request(GPIO_FN_SDHICMD1, NULL);
 -- 
 1.7.2.5
 
