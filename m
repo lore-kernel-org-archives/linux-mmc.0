@@ -1,41 +1,52 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: regression: sd cards no longer recognized
-Date: Tue, 03 Jan 2012 23:28:16 -0500
-Message-ID: <m2ty4cf5wf.fsf@bob.laptop.org>
-References: <20120101115146.GE16096@segv.de> <m2vcotoch5.fsf@bob.laptop.org>
-	<EDCB5254-AA5F-4082-9565-C389399E5893@marvell.com>
-	<m2k459o9w8.fsf@bob.laptop.org> <20120103095312.GG16096@segv.de>
+From: Viresh Kumar <viresh.kumar@st.com>
+Subject: [PATCH] mmc/sdhci-spear: Fix compilation error
+Date: Wed, 4 Jan 2012 11:48:42 +0530
+Message-ID: <e3d642d24dc29bb018f1a81d422490957b23cd32.1325657740.git.viresh.kumar@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50425 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755522Ab2ADE2Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 3 Jan 2012 23:28:25 -0500
-In-Reply-To: <20120103095312.GG16096@segv.de> (Alexander Elbs's message of
-	"Tue, 3 Jan 2012 10:53:12 +0100")
+Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:48191 "EHLO
+	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753935Ab2ADGTB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2012 01:19:01 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexander Elbs <alex@segv.de>
-Cc: Philip Rakity <prakity@marvell.com>, Arindam Nath <arindam.nath@amd.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, Viresh Kumar <viresh.kumar@st.com>
 
-Hi,
+With the inclusion of following patch:
+"mmc: sdhci: remove "state" argument from sdhci_suspend_host"
 
-On Tue, Jan 03 2012, Alexander Elbs wrote:
-> On Mon, Jan 02, 2012 at 08:24:55PM -0500, Chris Ball wrote:
->> Hi,
->> 
->> On Mon, Jan 02 2012, Philip Rakity wrote:
->> > Ack-by: Philip Rakity <prakity@marvell.com>
->> 
->> Thanks.  Alexander, could you give me a "Signed-off-by:" for the record?
->
-> Signed-off-by: Alexander Elbs <alex@segv.de>
+we get a compilation error for sdhci-spear:
+drivers/mmc/host/sdhci-spear.c:283:2: error: too many arguments to func=
+tion
+=E2=80=98sdhci_suspend_host=E2=80=99
 
-Pushed to mmc-next for 3.3 with a stable@ tag, with ACKs from Philip and
-Arindam.  Thanks very much for tracking this down, Alexander!
+This patch fixes this error.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
+---
+ drivers/mmc/host/sdhci-spear.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-sp=
+ear.c
+index dee70b6..4e1130e 100644
+--- a/drivers/mmc/host/sdhci-spear.c
++++ b/drivers/mmc/host/sdhci-spear.c
+@@ -277,10 +277,9 @@ static int sdhci_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host =3D dev_get_drvdata(dev);
+ 	struct spear_sdhci *sdhci =3D dev_get_platdata(dev);
+-	pm_message_t state =3D {.event =3D 0};
+ 	int ret;
+=20
+-	ret =3D sdhci_suspend_host(host, state);
++	ret =3D sdhci_suspend_host(host);
+ 	if (!ret)
+ 		clk_disable(sdhci->clk);
+=20
+--=20
+1.7.8.110.g4cb5d
+
