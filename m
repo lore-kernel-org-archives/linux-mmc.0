@@ -1,95 +1,40 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: fix a deadlock between system suspend and MMC block IO
-Date: Wed, 04 Jan 2012 10:03:44 -0500
-Message-ID: <m2hb0bfr1r.fsf@bob.laptop.org>
-References: <Pine.LNX.4.64.1201041527480.30506@axis700.grange>
-	<m2lipnfs9x.fsf@bob.laptop.org>
-	<6C03668EAF45B747AF947A1603D1B300023363E95E@SAUSEXMBP01.amd.com>
+From: Matthieu CASTET <matthieu.castet@parrot.com>
+Subject: sdhci max_blk_size
+Date: Wed, 4 Jan 2012 16:01:07 +0100
+Message-ID: <4F0469B3.9080400@parrot.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54353 "EHLO void.printf.net"
+Received: from co202.xi-lite.net ([149.6.83.202]:59323 "EHLO co202.xi-lite.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755986Ab2ADPD6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 4 Jan 2012 10:03:58 -0500
-In-Reply-To: <6C03668EAF45B747AF947A1603D1B300023363E95E@SAUSEXMBP01.amd.com>
-	(Arindam Nath's message of "Wed, 4 Jan 2012 08:40:57 -0600")
+	id S1755090Ab2ADPK5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 4 Jan 2012 10:10:57 -0500
+Received: from ONYX.xi-lite.lan (unknown [193.34.35.244])
+	by co202.xi-lite.net (Postfix) with ESMTPS id C48612602B5
+	for <linux-mmc@vger.kernel.org>; Wed,  4 Jan 2012 16:01:15 +0100 (CET)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Nath, Arindam" <Arindam.Nath@amd.com>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Andrei Warkentin <andreiw@vmware.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 Hi,
 
-Adding Andrei to CC.  Thanks,
+our controller set "Max Block Length" to 3 (4096 byte), but the linux driver
+ignore this value [1].
 
-- Chris.
+Is there any reason to do that .
+Or it is code that was written with an older sdhci spec, and we can ignore this
+check today.
 
-On Wed, Jan 04 2012, Nath, Arindam wrote:
-> Hi Chris,
->
->> -----Original Message-----
->> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
->> owner@vger.kernel.org] On Behalf Of Chris Ball
->> Sent: Wednesday, January 04, 2012 8:07 PM
->> To: Guennadi Liakhovetski
->> Cc: linux-mmc@vger.kernel.org
->> Subject: Re: [PATCH] mmc: fix a deadlock between system suspend and MMC
->> block IO
->> 
->> Hi,
->> 
->> On Wed, Jan 04 2012, Guennadi Liakhovetski wrote:
->> > Performing MMC block IO with simultaneous STR can lead to a deadlock:
->> the
->> > mmc_pm_notify() function claims the host and then calls bus .remove()
->> > method, which lands in mmc_blk_remove(), which calls
->> mmc_blk_remove_req()
->> > then it goes to -> mmc_cleanup_queue() -> kthread_stop(), which waits
->> for
->> > the mmc-block thread to stop. If the mmc-block thread at that time is
->> > processing block requests, it will also try to claim the host in
->> > mmc_blk_issue_rq() and block there. This patch fixes the problem by
->> > calling .remove() before claiming the host.
->> >
->> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
->> > ---
->> >  drivers/mmc/core/core.c |    4 ++--
->> >  1 files changed, 2 insertions(+), 2 deletions(-)
->> >
->> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> > index a2aa860..a68f085 100644
->> > --- a/drivers/mmc/core/core.c
->> > +++ b/drivers/mmc/core/core.c
->> > @@ -2476,11 +2476,11 @@ int mmc_pm_notify(struct notifier_block
->> *notify_block,
->> >  		if (!host->bus_ops || host->bus_ops->suspend)
->> >  			break;
->> >
->> > -		mmc_claim_host(host);
->> > -
->> > +		/* On 2 occasions above bus_ops->remove() is called
->> unlocked */
->> >  		if (host->bus_ops->remove)
->> >  			host->bus_ops->remove(host);
->> >
->> > +		mmc_claim_host(host);
->> >  		mmc_detach_bus(host);
->> >  		mmc_power_off(host);
->> >  		mmc_release_host(host);
->> 
->> Thanks.  The commit message explanation is very good, but the comment
->> is
->> a bit cryptic.  Shall we make it longer?  I think even just:
->> 
->> /* Calling bus_ops->remove() with a claimed host can deadlock */
->> 
->> would be better.
->
-> This patch will actually fix a long standing issue for most of us. But
-> if I remember correctly, Andrei had some comments on the same patch
-> some time back. Would it be good to include him for comments?
 
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+
+Matthieu
+
+PS : please keep me in CC.
+
+[1]
+if (mmc->max_blk_size >= 3) {
+            pr_warning("%s: Invalid maximum block size, "
+                "assuming 512 bytes\n", mmc_hostname(mmc));
+            mmc->max_blk_size = 0;
+        }
