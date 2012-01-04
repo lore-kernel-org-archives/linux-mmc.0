@@ -1,40 +1,52 @@
-From: Matthieu CASTET <matthieu.castet@parrot.com>
-Subject: sdhci max_blk_size
-Date: Wed, 4 Jan 2012 16:01:07 +0100
-Message-ID: <4F0469B3.9080400@parrot.com>
+From: Sylwester Nawrocki <s.nawrocki@samsung.com>
+Subject: Re: [PATCH 6/6] mmc: sdhci-s3c: Add device tree support
+Date: Wed, 04 Jan 2012 16:37:25 +0100
+Message-ID: <4F047235.2090503@samsung.com>
+References: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org>
+ <1320266163-15292-7-git-send-email-thomas.abraham@linaro.org>
+ <20111107211726.GC28491@ponder.secretlab.ca>
+ <CAJuYYwSfC5t6xs-TDT2wBOj1RbQYSpH0wjo9uBcYf7bGyi0t9g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:59323 "EHLO co202.xi-lite.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755090Ab2ADPK5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 4 Jan 2012 10:10:57 -0500
-Received: from ONYX.xi-lite.lan (unknown [193.34.35.244])
-	by co202.xi-lite.net (Postfix) with ESMTPS id C48612602B5
-	for <linux-mmc@vger.kernel.org>; Wed,  4 Jan 2012 16:01:15 +0100 (CET)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <CAJuYYwSfC5t6xs-TDT2wBOj1RbQYSpH0wjo9uBcYf7bGyi0t9g@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Thomas Abraham <thomas.abraham@linaro.org>, kgene.kim@samsung.com
+Cc: Grant Likely <grant.likely@secretlab.ca>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi,
+Hi Kgene, Thomas
 
-our controller set "Max Block Length" to 3 (4096 byte), but the linux driver
-ignore this value [1].
+On 11/08/2011 04:23 PM, Thomas Abraham wrote:
+> Hi Grant,
+> 
+> On 8 November 2011 02:47, Grant Likely <grant.likely@secretlab.ca> wrote:
+>> On Thu, Nov 03, 2011 at 02:06:03AM +0530, Thomas Abraham wrote:
+>>> Add device tree based discovery support for Samsung's sdhci controller
+>>>
+>>> Cc: Ben Dooks <ben-linux@fluff.org>
+>>> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+>>> ---
+>>> +Example:
+>>> +     sdhci@12530000 {
+>>> +             compatible = "samsung,exynos4210-sdhci";
+>>> +             reg = <0x12530000 0x100>;
+>>> +             interrupts = <139>;
+>>> +             samsung,sdhci-bus-width = <4>;
+>>> +             linux,mmc_cap_4_bit_data;
+>>
+>> Following on from my reply on patch 5, this is an example of exactly
+>> what I'm talking about.  This node both sets bus-width to '4', and
+>> sets the 4_bit_data flag.  Don't you think that the driver would be
+>> smart enough to set the 4_bit_data flag when the bus width was set to
+>> 4?
+> 
+> Yes, that is true. I will modify the driver based on your comments and
+> resubmit this patch.
 
-Is there any reason to do that .
-Or it is code that was written with an older sdhci spec, and we can ignore this
-check today.
+Are we going to have those patches in 3.3-rc1 or only in 3.4 ?
 
-
-
-Matthieu
-
-PS : please keep me in CC.
-
-[1]
-if (mmc->max_blk_size >= 3) {
-            pr_warning("%s: Invalid maximum block size, "
-                "assuming 512 bytes\n", mmc_hostname(mmc));
-            mmc->max_blk_size = 0;
-        }
+--
+Regards,
+Sylwester
