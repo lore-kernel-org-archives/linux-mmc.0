@@ -1,151 +1,115 @@
-From: ebiederm@xmission.com (Eric W. Biederman)
-Subject: Re: sdhci causing WARNING: at fs/sysfs/dir.c:455 sysfs_add_one+0x9b/0xd0()
-Date: Wed, 04 Jan 2012 10:50:49 -0800
-Message-ID: <m11urffgja.fsf@fess.ebiederm.org>
-References: <CAHa016cp4uNZqCvJW0RZgEXST-VqpVWjYSXGE+RhThXXo6nzCA@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
+ cards
+Date: Wed, 04 Jan 2012 23:26:42 +0200
+Message-ID: <4F04C412.1030604@intel.com>
+References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from out02.mta.xmission.com ([166.70.13.232]:35878 "EHLO
-	out02.mta.xmission.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751467Ab2ADSsi convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2012 13:48:38 -0500
-In-Reply-To: <CAHa016cp4uNZqCvJW0RZgEXST-VqpVWjYSXGE+RhThXXo6nzCA@mail.gmail.com>
-	("Numan =?utf-8?B?REVNxLBSRMOWxJ5FTiIncw==?= message of "Wed, 4 Jan 2012
- 15:09:20 +0200")
+Received: from mga14.intel.com ([143.182.124.37]:1455 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756971Ab2ADV0r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 4 Jan 2012 16:26:47 -0500
+In-Reply-To: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Numan =?utf-8?B?REVNxLBSRMOWxJ5FTg==?= <numand46@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Numan DEM=C4=B0RD=C3=96=C4=9EEN <numand46@gmail.com> writes:
+On 3/01/2012 12:33 p.m., Ulf Hansson wrote:
+> Removing a card "slowly" can trigger a GPIO irq to be raised far
+> before the card is actually removed. This means the scheduled
+> detect work will not find out that the card were removed and thus
+> the card and the block device will not be unregistered.
 
-> I have been getting this message since I started to use 3.0 series'
-> kernels. I found this (https://lkml.org/lkml/2011/5/4/516) topic
-> related to this warning.
+One way around that problem is to error out requests after the GPIO
+indicates the card is "removed".  sdhci effectively does that but with
+a "present" bit.  Perhaps even simpler - set the card-removed flag.
 
-Hopefully I have added some relevant Cc's.  The sdhci driver attempting
-to abuse sysfs and sysfs is refusing to put up with it.
+> Let the mmc_detect_card_removed function trigger a new detect
+> work immediately when it discovers that a card has been removed.
 
-Can someone who understands the sdhci driver take a look at this?
+This is changing some long-standing functionality i.e. the card is not 
+removed
+without a card detect event.  It is difficult to know whether that will 
+be very
+bad for poor quality cards,
 
-Eric
-
-
-
-> Best regards,
-> =C2=A0 Numan.
+> This will solve the described issue above. Moreover we make sure
+> the detect work is executed as soon as possible, since there is
+> no reason for waiting for a "delayed" detect to happen.
+>
+> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
 > ---
-> ver_linux output:
+>   drivers/mmc/core/core.c  |   24 +++++++++++++-----------
+>   include/linux/mmc/host.h |    1 -
+>   2 files changed, 13 insertions(+), 12 deletions(-)
 >
-> Linux arch 3.1.6-1-ARCH #1 SMP PREEMPT Thu Dec 22 08:52:33 UTC 2011
-> i686 Intel(R) Pentium(R) M processor 1.73GHz GenuineIntel GNU/Linux
-> Gnu C                  4.6.2
-> Gnu make               3.82
-> binutils               Binutils
-> util-linux             fdformat
-> mount                  support
-> module-init-tools      3.16
-> e2fsprogs              1.41.14
-> xfsprogs               3.1.7
-> Linux C Library        > libc.2.15
-> Dynamic linker (ldd)   2.15
-> Linux C++ Library      6.0.16
-> Procps                 3.2.8
-> Kbd                    1.15.3
-> Sh-utils               8.14
-> Modules Loaded         michael_mic arc4 ecb lib80211_crypt_tkip pcmci=
-a
-> radeon ttm sdhci_pci sdhci firewire_ohci firewire_core ipw2200 libipw
-> yenta_socket cfg80211 iTCO_wdt r8169 intel_agp snd_hda_codec_si3054
-> rfkill pcmcia_rsrc snd_hda_codec_analog psmouse pcmcia_core mmc_core
-> intel_gtt i2c_i801 mii iTCO_vendor_support crc_itu_t drm_kms_helper
-> evdev lib80211 battery ac video snd_hda_intel snd_hda_codec drm
-> snd_hwdep snd_pcm agpgart tifm_7xx1 tifm_core i2c_algo_bit i2c_core
-> snd_timer snd soundcore snd_page_alloc thermal button cpufreq_ondeman=
-d
-> acpi_cpufreq freq_table processor mperf ext4 mbcache jbd2 crc16 usbhi=
-d
-> hid sr_mod cdrom sd_mod pata_acpi uhci_hcd ahci libahci ata_piix
-> libata ehci_hcd scsi_mod usbcore
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 4770807..7bc02f4 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1462,7 +1462,6 @@ void mmc_detect_change(struct mmc_host *host, unsigned long delay)
+>   	WARN_ON(host->removed);
+>   	spin_unlock_irqrestore(&host->lock, flags);
+>   #endif
+> -	host->detect_change = 1;
+>   	mmc_schedule_delayed_work(&host->detect, delay);
+>   }
 >
-> dmesg excerpt:
+> @@ -2077,18 +2076,23 @@ int _mmc_detect_card_removed(struct mmc_host *host)
+>   int mmc_detect_card_removed(struct mmc_host *host)
+>   {
+>   	struct mmc_card *card = host->card;
+> +	int ret = 1;
 >
-> sdhci-pci 0000:06:09.4: SDHCI controller found [104c:8034] (rev 0)
-> sdhci-pci 0000:06:09.4: PCI INT A -> GSI 22 (level, low) -> IRQ 22
->  _regulator_get: 0000:06:09.4 supply vmmc not found, using dummy regu=
-lator
-> Registered led device: mmc0::
-> mmc0: SDHCI controller on PCI [0000:06:09.4] using PIO
-> _regulator_get: 0000:06:09.4 supply vmmc not found, using dummy regul=
-ator
-> ------------[ cut here ]------------
-> WARNING: at fs/sysfs/dir.c:455 sysfs_add_one+0x9b/0xd0()
-> Hardware name: AMILO Pro V2045
-> sysfs: cannot create duplicate filename
-> '/devices/pci0000:00/0000:00:1e.0/0000:06:09.4/microamps_requested_00=
-00:06:09.4-vmmc'
-> Modules linked in: pcmcia radeon ttm sdhci_pci(+) sdhci firewire_ohci
-> firewire_core ipw2200 libipw yenta_socket cfg80211 iTCO_wdt r8169
-> intel_agp snd_hda_codec_si3054 rfkill pcmcia_rsrc snd_hda_codec_analo=
-g
-> psmouse pcmcia_core mmc_core intel_gtt i2c_i801 mii
-> iTCO_vendor_support crc_itu_t drm_kms_helper evdev lib80211 battery a=
-c
-> video snd_hda_intel snd_hda_codec drm snd_hwdep snd_pcm agpgart
-> tifm_7xx1 tifm_core i2c_algo_bit i2c_core snd_timer snd soundcore
-> snd_page_alloc thermal button cpufreq_ondemand acpi_cpufreq freq_tabl=
-e
-> processor mperf ext4 mbcache jbd2 crc16 usbhid hid sr_mod cdrom sd_mo=
-d
-> pata_acpi uhci_hcd ahci libahci ata_piix libata ehci_hcd scsi_mod
-> usbcore
-> Pid: 315, comm: modprobe Not tainted 3.1.6-1-ARCH #1
-> Call Trace:
-> [<c0147182>] warn_slowpath_common+0x72/0xa0
-> [<c02780db>] ? sysfs_add_one+0x9b/0xd0
-> [<c02780db>] ? sysfs_add_one+0x9b/0xd0
-> [<c0147253>] warn_slowpath_fmt+0x33/0x40
-> [<c02780db>] sysfs_add_one+0x9b/0xd0
-> [<c02773c9>] sysfs_add_file_mode+0x49/0x90
-> [<c0277428>] sysfs_add_file+0x18/0x20
-> [<c02774e1>] sysfs_create_file+0x21/0x30
-> [<c036ddc8>] device_create_file+0x18/0x20
-> [<c0341f5f>] create_regulator+0xdf/0x320
-> [<c0342384>] _regulator_get+0x1e4/0x2a0
-> [<e26803d0>] ? sdhci_timeout_timer+0xd0/0xd0 [sdhci]
-> [<c034246f>] regulator_get+0xf/0x20
-> [<e267e64a>] sdhci_add_host+0x5ea/0xa80 [sdhci]
-> [<e268ce47>] sdhci_pci_probe+0x31a/0x3d3 [sdhci_pci]
-> [<c02e782d>] pci_device_probe+0x8d/0x120
-> [<c0278a27>] ? sysfs_create_link+0x17/0x20
-> [<c0370da8>] driver_probe_device+0x68/0x170
-> [<c0370f41>] __driver_attach+0x91/0xa0
-> [<c0370eb0>] ? driver_probe_device+0x170/0x170
-> [<c0370009>] bus_for_each_dev+0x49/0x70
-> [<c0370ac1>] driver_attach+0x21/0x30
-> [<c0370eb0>] ? driver_probe_device+0x170/0x170
-> [<c037079f>] bus_add_driver+0x17f/0x260
-> [<c02e7690>] ? pci_dev_put+0x20/0x20
-> [<c03713f6>] driver_register+0x66/0x110
-> [<c02e85c3>] __pci_register_driver+0x43/0xc0
-> [<e268f017>] sdhci_drv_init+0x17/0x19 [sdhci_pci]
-> [<c0101125>] do_one_initcall+0x35/0x170
-> [<e268f000>] ? 0xe268efff
-> [<c0180ca5>] sys_init_module+0x905/0x1ac0
-> [<c046325f>] sysenter_do_call+0x12/0x28
-> ---[ end trace 1b4ccae14fe3a3a3 ]---
-> create_regulator: dummy: could not add regulator_dev requested
-> microamps sysfs entry
-> mmc1: no vmmc regulator found
-> Registered led device: mmc1::
-> mmc1: SDHCI controller on PCI [0000:06:09.4] using PIO
-> _regulator_get: 0000:06:09.4 supply vmmc not found, using dummy regul=
-ator
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kerne=
-l" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
+>   	WARN_ON(!host->claimed);
+> -	/*
+> -	 * The card will be considered unchanged unless we have been asked to
+> -	 * detect a change or host requires polling to provide card detection.
+> -	 */
+> -	if (card&&  !host->detect_change&&  !(host->caps&  MMC_CAP_NEEDS_POLL))
+> -		return mmc_card_removed(card);
+>
+> -	host->detect_change = 0;
+> +	if (card&&  !mmc_card_removed(card)) {
+> +		if (_mmc_detect_card_removed(host)) {
+> +			/*
+> +			 * Make sure a detect work is always executed and also
+> +			 * do it as soon as possible.
+> +			 */
+> +			cancel_delayed_work(&host->detect);
+> +			mmc_detect_change(host, 0);
+> +		}
+> +		ret = mmc_card_removed(card);
+> +	}
+>
+> -	return _mmc_detect_card_removed(host);
+> +	return ret;
+>   }
+>   EXPORT_SYMBOL(mmc_detect_card_removed);
+>
+> @@ -2112,8 +2116,6 @@ void mmc_rescan(struct work_struct *work)
+>   	&&  !(host->caps&  MMC_CAP_NONREMOVABLE))
+>   		host->bus_ops->detect(host);
+>
+> -	host->detect_change = 0;
+> -
+>   	/*
+>   	 * Let mmc_bus_put() free the bus/bus_ops if we've found that
+>   	 * the card is no longer present.
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 031d865..09fa5e6 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -305,7 +305,6 @@ struct mmc_host {
+>   	int			claim_cnt;	/* "claim" nesting count */
+>
+>   	struct delayed_work	detect;
+> -	int			detect_change;	/* card detect flag */
+>   	struct mmc_hotplug	hotplug;
+>
+>   	const struct mmc_bus_ops *bus_ops;	/* current bus driver */
+
