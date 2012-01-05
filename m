@@ -1,61 +1,42 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc/sdhci-spear: Fix compilation error
-Date: Wed, 04 Jan 2012 22:36:58 -0500
-Message-ID: <m2ty4addlx.fsf@bob.laptop.org>
-References: <e3d642d24dc29bb018f1a81d422490957b23cd32.1325657740.git.viresh.kumar@st.com>
+From: =?euc-kr?B?x+PBvri4?= <jongman.heo@samsung.com>
+Subject: typo in Documentation/devices.txt  ?
+Date: Thu, 05 Jan 2012 07:08:27 +0000 (GMT)
+Message-ID: <31861576.535331325747307853.JavaMail.weblogic@epml02>
+Reply-To: jongman.heo@samsung.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=euc-kr
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:52999 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757851Ab2AEDhF convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2012 22:37:05 -0500
-In-Reply-To: <e3d642d24dc29bb018f1a81d422490957b23cd32.1325657740.git.viresh.kumar@st.com>
-	(Viresh Kumar's message of "Wed, 4 Jan 2012 11:48:42 +0530")
+Received: from mailout4.samsung.com ([203.254.224.34]:17110 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751763Ab2AEHI3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2012 02:08:29 -0500
+Received: from epcpsbge1.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LXB000U2D4LRYP0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 05 Jan 2012 16:08:28 +0900 (KST)
+MIME-version: 1.0
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Viresh Kumar <viresh.kumar@st.com>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-Hi,
+DQpIaSwgYWxsLi4NCg0KSGVyZSBpcyBkZXNjcmlwdGlvbiBmb3IgTU1DIGJsb2NrIGRldmljZXMg
+aW4gRG9jdW1lbnRhdGlvbi9kZXZpY2VzLnR4dCA6DQoNCiAgICAxNzkgYmxvY2sgICAgICAgTU1D
+IGJsb2NrIGRldmljZXMNCiAgICAgICAgICAgICAgICAgICAgICAwID0gL2Rldi9tbWNibGswICAg
+ICAgRmlyc3QgU0QvTU1DIGNhcmQNCiAgICAgICAgICAgICAgICAgICAgICAxID0gL2Rldi9tbWNi
+bGswcDEgICAgRmlyc3QgcGFydGl0aW9uIG9uIGZpcnN0IE1NQyBjYXJkDQogICAgICAgICAgICAg
+ICAgICAgICAgOCA9IC9kZXYvbW1jYmxrMSAgICAgIFNlY29uZCBTRC9NTUMgY2FyZA0KICAgICAg
+ICAgICAgICAgICAgICAgIF5eXl5eXl5eXl5eXl5eXl5eXg0KICAgICAgICAgICAgICAgICAgICBU
+aGUgc3RhcnQgb2YgbmV4dCBTRC9NTUMgY2FyZCBjYW4gYmUgY29uZmlndXJlZCB3aXRoDQogICAg
+ICAgICAgICAgICAgICAgIENPTkZJR19NTUNfQkxPQ0tfTUlOT1JTLCBvciBvdmVycmlkZGVuIGF0
+IGJvb3QvbW9kcHJvYmUNCiAgICAgICAgICAgICAgICAgICAgdGltZSB1c2luZyB0aGUgbW1jYmxr
+LnBlcmRldl9taW5vcnMgb3B0aW9uLiBUaGF0IHdvdWxkDQogICAgICAgICAgICAgICAgICAgIGJ1
+bXAgdGhlIG9mZnNldCBiZXR3ZWVuIGVhY2ggY2FyZCB0byBiZSB0aGUgY29uZmlndXJlZA0KICAg
+ICAgICAgICAgICAgICAgICB2YWx1ZSBpbnN0ZWFkIG9mIHRoZSBkZWZhdWx0IDguDQoNCg0KU2hv
+dWxkbid0ICAiOCA9IC9kZXYvbW1jYmxrMSIgYmUgIjkgPSAvZGV2L21tY2JsazEiID8NCg0KSWYg
+d2UgaGF2ZSA4IHBhcnRpdGlvbnMgb24gZmlyc3QgTU1DIGNhcmQsIHdlIG5lZWQgbW1jYmxrMHAx
+IH4gbW1jYmxrMHA4IGRldmljZXMsIHdpdGggbWlub3IgbnVtYmVyIDEgfiA4Lg0KQW0gSSBtaXN1
+bmRlcnN0YW5kaW5nPw0KDQpSZWdhcmRzLA0KSm9uZ21hbiBIZW8uDQo=
 
-On Wed, Jan 04 2012, Viresh Kumar wrote:
-> With the inclusion of following patch:
-> "mmc: sdhci: remove "state" argument from sdhci_suspend_host"
->
-> we get a compilation error for sdhci-spear:
-> drivers/mmc/host/sdhci-spear.c:283:2: error: too many arguments to fu=
-nction
-> =E2=80=98sdhci_suspend_host=E2=80=99
->
-> This patch fixes this error.
->
-> Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
-> ---
->  drivers/mmc/host/sdhci-spear.c |    3 +--
->  1 files changed, 1 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-=
-spear.c
-> index dee70b6..4e1130e 100644
-> --- a/drivers/mmc/host/sdhci-spear.c
-> +++ b/drivers/mmc/host/sdhci-spear.c
-> @@ -277,10 +277,9 @@ static int sdhci_suspend(struct device *dev)
->  {
->  	struct sdhci_host *host =3D dev_get_drvdata(dev);
->  	struct spear_sdhci *sdhci =3D dev_get_platdata(dev);
-> -	pm_message_t state =3D {.event =3D 0};
->  	int ret;
-> =20
-> -	ret =3D sdhci_suspend_host(host, state);
-> +	ret =3D sdhci_suspend_host(host);
->  	if (!ret)
->  		clk_disable(sdhci->clk);
 
-Thanks, pushed to mmc-next for 3.3 with a stable@ tag.
-
-- Chris.
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
