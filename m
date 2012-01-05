@@ -1,35 +1,31 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: fixed wrong bit operation for SDMMC_GET_FCNT()
-Date: Thu, 5 Jan 2012 10:20:52 +0000
-Message-ID: <CAFbHwiTUjLUX2oRie2L5xDMg9BA+sLdYcg3H1w+vVJcQMVUwrg@mail.gmail.com>
-References: <4F0577A9.5080302@samsung.com>
+From: Samuel Ortiz <sameo@linux.intel.com>
+Subject: Re: [PATCH 06/11] mfd: tmio: remove now unneeded tmio_mmc_cd_wakeup()
+Date: Thu, 5 Jan 2012 12:53:16 +0100
+Message-ID: <20120105115316.GM5183@sortiz-mobl>
+References: <1325686636-23905-1-git-send-email-g.liakhovetski@gmx.de>
+ <1325686636-23905-7-git-send-email-g.liakhovetski@gmx.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:38198 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752743Ab2AEKUx convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2012 05:20:53 -0500
-Received: by pbdu13 with SMTP id u13so218746pbd.19
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Jan 2012 02:20:53 -0800 (PST)
-In-Reply-To: <4F0577A9.5080302@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1325686636-23905-7-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On Thu, Jan 5, 2012 at 10:12 AM, Jaehoon Chung <jh80.chung@samsung.com>=
- wrote:
-> In status register, fifo_count is bit[29:17].
-> (0x1FFF is correctly)
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
-> =A0drivers/mmc/host/dw_mmc.h | =A0 =A02 +-
-> =A01 files changed, 1 insertions(+), 1 deletions(-)
+Hi Guennadi,
 
-Good catch, thanks!
+On Wed, Jan 04, 2012 at 03:17:11PM +0100, Guennadi Liakhovetski wrote:
+> Now, that all users of tmio_mmc_cd_wakeup() have been converted over to
+> drivers/mmc/core/cd-gpio.c, that function can be removed.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Acked-by: Samuel Ortiz <sameo@linux.intel.com>
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+Cheers,
+Samuel.
+
+-- 
+Intel Open Source Technology Centre
+http://oss.intel.com/
