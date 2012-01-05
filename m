@@ -1,48 +1,35 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: fixed wrong bit operation for SDMMC_GET_FCNT()
-Date: Thu, 05 Jan 2012 19:12:57 +0900
-Message-ID: <4F0577A9.5080302@samsung.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: fixed wrong bit operation for SDMMC_GET_FCNT()
+Date: Thu, 5 Jan 2012 10:20:52 +0000
+Message-ID: <CAFbHwiTUjLUX2oRie2L5xDMg9BA+sLdYcg3H1w+vVJcQMVUwrg@mail.gmail.com>
+References: <4F0577A9.5080302@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:58862 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754908Ab2AEKNB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2012 05:13:01 -0500
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LXB0038XLMRI7C0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 05 Jan 2012 19:13:00 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LXB0050ULPO89A0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 05 Jan 2012 19:13:00 +0900 (KST)
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:38198 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752743Ab2AEKUx convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2012 05:20:53 -0500
+Received: by pbdu13 with SMTP id u13so218746pbd.19
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Jan 2012 02:20:53 -0800 (PST)
+In-Reply-To: <4F0577A9.5080302@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-In status register, fifo_count is bit[29:17].
-(0x1FFF is correctly)
+On Thu, Jan 5, 2012 at 10:12 AM, Jaehoon Chung <jh80.chung@samsung.com>=
+ wrote:
+> In status register, fifo_count is bit[29:17].
+> (0x1FFF is correctly)
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+> =A0drivers/mmc/host/dw_mmc.h | =A0 =A02 +-
+> =A01 files changed, 1 insertions(+), 1 deletions(-)
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.h |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+Good catch, thanks!
 
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 72c071f..df392a1 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -126,7 +126,7 @@
- #define SDMMC_CMD_RESP_EXP		BIT(6)
- #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
- /* Status register defines */
--#define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FF)
-+#define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
- /* Internal DMAC interrupt defines */
- #define SDMMC_IDMAC_INT_AI		BIT(9)
- #define SDMMC_IDMAC_INT_NI		BIT(8)
+Acked-by: Will Newton <will.newton@imgtec.com>
