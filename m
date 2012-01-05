@@ -1,40 +1,59 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Clear the DDR mode for non-DDR
-Date: Wed, 04 Jan 2012 22:32:06 -0500
-Message-ID: <m21ureeseh.fsf@bob.laptop.org>
-References: <000b01ccc91c$26cf0330$746d0990$%jun@samsung.com>
-	<CAFbHwiSH_eSYofo07Rk4H21nQ+0KSQ8zgmimEZz0anEga8rYgA@mail.gmail.com>
+Subject: Re: [PATCH] mmc/sdhci-spear: Fix compilation error
+Date: Wed, 04 Jan 2012 22:36:58 -0500
+Message-ID: <m2ty4addlx.fsf@bob.laptop.org>
+References: <e3d642d24dc29bb018f1a81d422490957b23cd32.1325657740.git.viresh.kumar@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAFbHwiSH_eSYofo07Rk4H21nQ+0KSQ8zgmimEZz0anEga8rYgA@mail.gmail.com>
-	(Will Newton's message of "Tue, 3 Jan 2012 10:29:57 +0000")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:52999 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757851Ab2AEDhF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2012 22:37:05 -0500
+In-Reply-To: <e3d642d24dc29bb018f1a81d422490957b23cd32.1325657740.git.viresh.kumar@st.com>
+	(Viresh Kumar's message of "Wed, 4 Jan 2012 11:48:42 +0530")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Viresh Kumar <viresh.kumar@st.com>
+Cc: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Tue, Jan 03 2012, Will Newton wrote:
-> On Mon, Jan 2, 2012 at 7:00 AM, Seungwon Jeon <tgih.jun@samsung.com> =
-wrote:
->> UHS_REG should be cleared for non-DDR mode. But currently there is
->> no way to clear DDR mode, if it is already set once. This patch adds
->> clearing DDR mode for non-DDD mode.
->>
->> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->> ---
->> =C2=A0drivers/mmc/host/dw_mmc.c | =C2=A0 11 +++++++----
->> =C2=A01 files changed, 7 insertions(+), 4 deletions(-)
+On Wed, Jan 04 2012, Viresh Kumar wrote:
+> With the inclusion of following patch:
+> "mmc: sdhci: remove "state" argument from sdhci_suspend_host"
 >
-> Looks ok to me, although I don't have any DDR capable hardware to tes=
-t.
+> we get a compilation error for sdhci-spear:
+> drivers/mmc/host/sdhci-spear.c:283:2: error: too many arguments to fu=
+nction
+> =E2=80=98sdhci_suspend_host=E2=80=99
 >
-> Acked-by: Will Newton <will.newton@imgtec.com>
+> This patch fixes this error.
+>
+> Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
+> ---
+>  drivers/mmc/host/sdhci-spear.c |    3 +--
+>  1 files changed, 1 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-=
+spear.c
+> index dee70b6..4e1130e 100644
+> --- a/drivers/mmc/host/sdhci-spear.c
+> +++ b/drivers/mmc/host/sdhci-spear.c
+> @@ -277,10 +277,9 @@ static int sdhci_suspend(struct device *dev)
+>  {
+>  	struct sdhci_host *host =3D dev_get_drvdata(dev);
+>  	struct spear_sdhci *sdhci =3D dev_get_platdata(dev);
+> -	pm_message_t state =3D {.event =3D 0};
+>  	int ret;
+> =20
+> -	ret =3D sdhci_suspend_host(host, state);
+> +	ret =3D sdhci_suspend_host(host);
+>  	if (!ret)
+>  		clk_disable(sdhci->clk);
 
-Thanks, pushed to mmc-next for 3.3.
+Thanks, pushed to mmc-next for 3.3 with a stable@ tag.
 
 - Chris.
 --=20
