@@ -1,42 +1,48 @@
-From: =?euc-kr?B?x+PBvri4?= <jongman.heo@samsung.com>
-Subject: typo in Documentation/devices.txt  ?
-Date: Thu, 05 Jan 2012 07:08:27 +0000 (GMT)
-Message-ID: <31861576.535331325747307853.JavaMail.weblogic@epml02>
-Reply-To: jongman.heo@samsung.com
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: fixed wrong bit operation for SDMMC_GET_FCNT()
+Date: Thu, 05 Jan 2012 19:12:57 +0900
+Message-ID: <4F0577A9.5080302@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=euc-kr
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:17110 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751763Ab2AEHI3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2012 02:08:29 -0500
-Received: from epcpsbge1.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
+Received: from mailout3.samsung.com ([203.254.224.33]:58862 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754908Ab2AEKNB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2012 05:13:01 -0500
+Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LXB000U2D4LRYP0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 05 Jan 2012 16:08:28 +0900 (KST)
-MIME-version: 1.0
+ 2010)) with ESMTP id <0LXB0038XLMRI7C0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 05 Jan 2012 19:13:00 +0900 (KST)
+Received: from [165.213.219.108] by mmp1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LXB0050ULPO89A0@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 05 Jan 2012 19:13:00 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-DQpIaSwgYWxsLi4NCg0KSGVyZSBpcyBkZXNjcmlwdGlvbiBmb3IgTU1DIGJsb2NrIGRldmljZXMg
-aW4gRG9jdW1lbnRhdGlvbi9kZXZpY2VzLnR4dCA6DQoNCiAgICAxNzkgYmxvY2sgICAgICAgTU1D
-IGJsb2NrIGRldmljZXMNCiAgICAgICAgICAgICAgICAgICAgICAwID0gL2Rldi9tbWNibGswICAg
-ICAgRmlyc3QgU0QvTU1DIGNhcmQNCiAgICAgICAgICAgICAgICAgICAgICAxID0gL2Rldi9tbWNi
-bGswcDEgICAgRmlyc3QgcGFydGl0aW9uIG9uIGZpcnN0IE1NQyBjYXJkDQogICAgICAgICAgICAg
-ICAgICAgICAgOCA9IC9kZXYvbW1jYmxrMSAgICAgIFNlY29uZCBTRC9NTUMgY2FyZA0KICAgICAg
-ICAgICAgICAgICAgICAgIF5eXl5eXl5eXl5eXl5eXl5eXg0KICAgICAgICAgICAgICAgICAgICBU
-aGUgc3RhcnQgb2YgbmV4dCBTRC9NTUMgY2FyZCBjYW4gYmUgY29uZmlndXJlZCB3aXRoDQogICAg
-ICAgICAgICAgICAgICAgIENPTkZJR19NTUNfQkxPQ0tfTUlOT1JTLCBvciBvdmVycmlkZGVuIGF0
-IGJvb3QvbW9kcHJvYmUNCiAgICAgICAgICAgICAgICAgICAgdGltZSB1c2luZyB0aGUgbW1jYmxr
-LnBlcmRldl9taW5vcnMgb3B0aW9uLiBUaGF0IHdvdWxkDQogICAgICAgICAgICAgICAgICAgIGJ1
-bXAgdGhlIG9mZnNldCBiZXR3ZWVuIGVhY2ggY2FyZCB0byBiZSB0aGUgY29uZmlndXJlZA0KICAg
-ICAgICAgICAgICAgICAgICB2YWx1ZSBpbnN0ZWFkIG9mIHRoZSBkZWZhdWx0IDguDQoNCg0KU2hv
-dWxkbid0ICAiOCA9IC9kZXYvbW1jYmxrMSIgYmUgIjkgPSAvZGV2L21tY2JsazEiID8NCg0KSWYg
-d2UgaGF2ZSA4IHBhcnRpdGlvbnMgb24gZmlyc3QgTU1DIGNhcmQsIHdlIG5lZWQgbW1jYmxrMHAx
-IH4gbW1jYmxrMHA4IGRldmljZXMsIHdpdGggbWlub3IgbnVtYmVyIDEgfiA4Lg0KQW0gSSBtaXN1
-bmRlcnN0YW5kaW5nPw0KDQpSZWdhcmRzLA0KSm9uZ21hbiBIZW8uDQo=
+In status register, fifo_count is bit[29:17].
+(0x1FFF is correctly)
 
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 72c071f..df392a1 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -126,7 +126,7 @@
+ #define SDMMC_CMD_RESP_EXP		BIT(6)
+ #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
+ /* Status register defines */
+-#define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FF)
++#define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
+ /* Internal DMAC interrupt defines */
+ #define SDMMC_IDMAC_INT_AI		BIT(9)
+ #define SDMMC_IDMAC_INT_NI		BIT(8)
