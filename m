@@ -1,45 +1,76 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fixed wrong bit operation for SDMMC_GET_FCNT()
-Date: Thu, 05 Jan 2012 10:33:57 -0500
-Message-ID: <m2hb0acgey.fsf@bob.laptop.org>
-References: <4F0577A9.5080302@samsung.com>
-	<CAFbHwiTUjLUX2oRie2L5xDMg9BA+sLdYcg3H1w+vVJcQMVUwrg@mail.gmail.com>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH 6/6] mmc: sdhci-s3c: Add device tree support
+Date: Thu, 5 Jan 2012 21:15:12 +0530
+Message-ID: <CAJuYYwTMpde-528t=vQnbkJv_gG7xuOr05b1K-+H-RxYRX0iEQ@mail.gmail.com>
+References: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org>
+	<1320266163-15292-7-git-send-email-thomas.abraham@linaro.org>
+	<20111107211726.GC28491@ponder.secretlab.ca>
+	<CAJuYYwSfC5t6xs-TDT2wBOj1RbQYSpH0wjo9uBcYf7bGyi0t9g@mail.gmail.com>
+	<4F047235.2090503@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:47752 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932654Ab2AEPeL convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2012 10:34:11 -0500
-In-Reply-To: <CAFbHwiTUjLUX2oRie2L5xDMg9BA+sLdYcg3H1w+vVJcQMVUwrg@mail.gmail.com>
-	(Will Newton's message of "Thu, 5 Jan 2012 10:20:52 +0000")
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:37005 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755374Ab2AEPpN convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2012 10:45:13 -0500
+In-Reply-To: <4F047235.2090503@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Newton <will.newton@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Sylwester Nawrocki <s.nawrocki@samsung.com>
+Cc: kgene.kim@samsung.com, Grant Likely <grant.likely@secretlab.ca>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org
 
-Hi,
+Hi Sylwester,
 
-On Thu, Jan 05 2012, Will Newton wrote:
-> On Thu, Jan 5, 2012 at 10:12 AM, Jaehoon Chung <jh80.chung@samsung.co=
-m> wrote:
->> In status register, fifo_count is bit[29:17].
->> (0x1FFF is correctly)
+On 4 January 2012 21:07, Sylwester Nawrocki <s.nawrocki@samsung.com> wr=
+ote:
+> Hi Kgene, Thomas
+>
+> On 11/08/2011 04:23 PM, Thomas Abraham wrote:
+>> Hi Grant,
 >>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> ---
->> =C2=A0drivers/mmc/host/dw_mmc.h | =C2=A0 =C2=A02 +-
->> =C2=A01 files changed, 1 insertions(+), 1 deletions(-)
+>> On 8 November 2011 02:47, Grant Likely <grant.likely@secretlab.ca> w=
+rote:
+>>> On Thu, Nov 03, 2011 at 02:06:03AM +0530, Thomas Abraham wrote:
+>>>> Add device tree based discovery support for Samsung's sdhci contro=
+ller
+>>>>
+>>>> Cc: Ben Dooks <ben-linux@fluff.org>
+>>>> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+>>>> ---
+>>>> +Example:
+>>>> + =A0 =A0 sdhci@12530000 {
+>>>> + =A0 =A0 =A0 =A0 =A0 =A0 compatible =3D "samsung,exynos4210-sdhci=
+";
+>>>> + =A0 =A0 =A0 =A0 =A0 =A0 reg =3D <0x12530000 0x100>;
+>>>> + =A0 =A0 =A0 =A0 =A0 =A0 interrupts =3D <139>;
+>>>> + =A0 =A0 =A0 =A0 =A0 =A0 samsung,sdhci-bus-width =3D <4>;
+>>>> + =A0 =A0 =A0 =A0 =A0 =A0 linux,mmc_cap_4_bit_data;
+>>>
+>>> Following on from my reply on patch 5, this is an example of exactl=
+y
+>>> what I'm talking about. =A0This node both sets bus-width to '4', an=
+d
+>>> sets the 4_bit_data flag. =A0Don't you think that the driver would =
+be
+>>> smart enough to set the 4_bit_data flag when the bus width was set =
+to
+>>> 4?
+>>
+>> Yes, that is true. I will modify the driver based on your comments a=
+nd
+>> resubmit this patch.
 >
-> Good catch, thanks!
+> Are we going to have those patches in 3.3-rc1 or only in 3.4 ?
+
+Sorry for the delaying in completing this patchset. I will redo this
+patchset and submit it soon. But 3.3-rc1 looks unlikely.
+
+Thanks,
+Thomas.
+
 >
-> Acked-by: Will Newton <will.newton@imgtec.com>
-
-Pushed to mmc-next for 3.3, thanks.
-
-- Chris.
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> --
+> Regards,
+> Sylwester
