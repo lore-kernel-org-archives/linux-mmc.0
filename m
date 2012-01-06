@@ -1,137 +1,77 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 02/11] mmc: tmio_mmc: support the generic MMC GPIO card
- hotplug helper
-Date: Fri, 6 Jan 2012 09:34:13 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1201060924100.16279@axis700.grange>
-References: <1325686636-23905-1-git-send-email-g.liakhovetski@gmx.de>
- <1325686636-23905-3-git-send-email-g.liakhovetski@gmx.de>
- <CANqRtoTLh2i9s6F_g10+RPnDvA+RkpVYqaYb6-Z=8dvk_YyGYw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <CANqRtoTLh2i9s6F_g10+RPnDvA+RkpVYqaYb6-Z=8dvk_YyGYw@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Samuel Ortiz <sameo@linux.intel.com>
+From: Bastian Hecht <hechtb@googlemail.com>
+Subject: [PATCH] mmc: sh_mobile_sdhi: add a callback for board specific init code
+Date: Fri,  6 Jan 2012 11:39:24 +0100
+Message-ID: <1325846364-13400-1-git-send-email-hechtb@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:34841 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030200Ab2AFKjc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Jan 2012 05:39:32 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, linux-sh@vger.kernel.org, Bastian Hecht <hechtb@gmail.com>
 
-Hi Magnus
-
-Thanks for your review(s)!
-
-On Fri, 6 Jan 2012, Magnus Damm wrote:
-
-> On Wed, Jan 4, 2012 at 11:17 PM, Guennadi Liakhovetski
-> <g.liakhovetski@gmx.de> wrote:
-> > If the platform specified a GPIO number and IRQ trigger polarity fl=
-ags, use
-> > the generic MMC GPIO card hotplug helper.
-> >
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > ---
-> > =A0drivers/mmc/host/tmio_mmc.h =A0 =A0 | =A0 =A04 --
-> > =A0drivers/mmc/host/tmio_mmc_pio.c | =A0 69 +++++++++++++++++------=
-----------------
-> > =A0include/linux/mfd/tmio.h =A0 =A0 =A0 =A0| =A0 19 +++++++---
-> > =A03 files changed, 43 insertions(+), 49 deletions(-)
-> > diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-> > index 0dc9804..4ef9307 100644
-> > --- a/include/linux/mfd/tmio.h
-> > +++ b/include/linux/mfd/tmio.h
-> > @@ -1,8 +1,10 @@
-> > =A0#ifndef MFD_TMIO_H
-> > =A0#define MFD_TMIO_H
-> >
-> > +#include <linux/device.h>
-> > =A0#include <linux/fb.h>
-> > =A0#include <linux/io.h>
-> > +#include <linux/jiffies.h>
-> > =A0#include <linux/platform_device.h>
-> > =A0#include <linux/pm_runtime.h>
-> >
-> > @@ -64,8 +66,8 @@
-> > =A0#define TMIO_MMC_SDIO_IRQ =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 2)
-> > =A0/*
-> > =A0* Some platforms can detect card insertion events with controlle=
-r powered
-> > - * down, in which case they have to call tmio_mmc_cd_wakeup() to p=
-ower up the
-> > - * controller and report the event to the driver.
-> > + * down, using a GPIO IRQ, in which case they have to fill in cd_i=
-rq, cd_gpio,
-> > + * and cd_flags fields of struct tmio_mmc_data.
-> > =A0*/
-> > =A0#define TMIO_MMC_HAS_COLD_CD =A0 =A0 =A0 =A0 =A0 (1 << 3)
-> > =A0/*
-> > @@ -98,18 +100,23 @@ struct tmio_mmc_data {
-> > =A0 =A0 =A0 =A0struct tmio_mmc_dma =A0 =A0 =A0 =A0 =A0 =A0 *dma;
-> > =A0 =A0 =A0 =A0struct device =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 *d=
-ev;
-> > =A0 =A0 =A0 =A0bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0power;
-> > + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0c=
-d_gpio;
-> > + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0c=
-d_irq;
-> > + =A0 =A0 =A0 unsigned long =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 cd_=
-flags;
-> > =A0 =A0 =A0 =A0void (*set_pwr)(struct platform_device *host, int st=
-ate);
-> > =A0 =A0 =A0 =A0void (*set_clk_div)(struct platform_device *host, in=
-t state);
-> > =A0 =A0 =A0 =A0int (*get_cd)(struct platform_device *host);
-> > =A0 =A0 =A0 =A0int (*write16_hook)(struct tmio_mmc_host *host, int =
-addr);
-> > =A0};
->=20
-> This looks much easier than callbacks and notifiers. Thanks!
->=20
-> But why do you need to pass three values here? I expected it to be
-> sufficient with GPIO and perhaps also with trigger flags. Shouldn't
-> gpio_to_irq() give you the IRQ from the GPIO?
-
-Well, it could:-) What about sh7372? sh73a0 does implement it, whereas=20
-sh7372 only returns an error. And - yes, we can fix that one. But this=20
-tells me - there can be other platforms like that, and they might not g=
-et=20
-fixed quickly enough. Should we really refuse to work with them? We cou=
-ld=20
-make this parameter optional: set to to an error code and the cd-gpio w=
-ill=20
-try to use gpio_to_irq(). If it fails - no luck.
-
-> And why on earth would
-> we want to trigger on something else than both edges?
-
-Both edges seems like a logical choice to me too. But - remember the ti=
-me,=20
-when one of sh-mobile platforms didn't implement triggering on both edg=
-es?=20
-Until we've implemented a software workaround, whereby we switch to the=
-=20
-opposite edge after each interrupt? Are you sure there are no such=20
-platforms around left?
-
-> The SoC code may me rather limited in terms of supporting
-> gpio_to_irq() but that needs to be fixed then. On SH-Mobile the PFC
-> code has been updated to allow this, so it's only SoC-specific code
-> missing. Anyone with access to hardware and data sheet can do this,
-> and if there are some issues with this then I'd be happy to help
-> myself.
->=20
-> On the cosmetic side, wouldn't it make sense to have a structure of
-> these values and just pass that along? Otherwise people will mix and
-> match short and ints for the GPIO and it may become rather messy over
-> time.
-
-Short for GPIO? Why would anyone use that and how can that become=20
-messy?:-) In principle - I'm basically fine either way. If you really=20
-prefer a struct here - we can do that too, yes.
-
-Thanks
-Guennadi
+Some boards need a preliminary setup stage to prepare the sdhi
+controller.
 ---
-Guennadi Liakhovetski, Ph.D.
-=46reelance Open-Source Software Developer
-http://www.open-technology.de/
+ drivers/mmc/host/sh_mobile_sdhi.c  |   13 +++++++++++++
+ include/linux/mmc/sh_mobile_sdhi.h |    4 ++++
+ 2 files changed, 17 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 0df69ab..1da31a4 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -109,6 +109,12 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	mmc_data = &priv->mmc_data;
+ 	p->pdata = mmc_data;
+ 
++	if (p->init) {
++		ret = p->init(pdev);
++		if (ret)
++			goto einit;
++	}
++
+ 	snprintf(clk_name, sizeof(clk_name), "sdhi%d", pdev->id);
+ 	priv->clk = clk_get(&pdev->dev, clk_name);
+ 	if (IS_ERR(priv->clk)) {
+@@ -242,6 +248,9 @@ eprobe:
+ #endif
+ 	clk_put(priv->clk);
+ eclkget:
++	if (p->cleanup)
++		p->cleanup(pdev);
++einit:
+ 	kfree(priv);
+ 	return ret;
+ }
+@@ -269,6 +278,10 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
+ 	clk_disable(priv->clk);
+ #endif
+ 	clk_put(priv->clk);
++
++	if (p->cleanup)
++		p->cleanup(pdev);
++
+ 	kfree(priv);
+ 
+ 	return 0;
+diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
+index 86347f6..9cad001 100644
+--- a/include/linux/mmc/sh_mobile_sdhi.h
++++ b/include/linux/mmc/sh_mobile_sdhi.h
+@@ -22,6 +22,10 @@ struct sh_mobile_sdhi_info {
+ 	struct tmio_mmc_data *pdata;
+ 	void (*set_pwr)(struct platform_device *pdev, int state);
+ 	int (*get_cd)(struct platform_device *pdev);
++
++	/* callbacks for board specific setup code */
++	int (*init)(struct platform_device *pdev);
++	void (*cleanup)(struct platform_device *pdev);
+ };
+ 
+ #endif /* LINUX_MMC_SH_MOBILE_SDHI_H */
+-- 
+1.7.5.4
+
