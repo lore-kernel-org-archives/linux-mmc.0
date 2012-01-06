@@ -1,55 +1,89 @@
 From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 09/11] mmc: sh_mobile_sdhi: do not manage PM clocks
- manually on ARM
-Date: Fri, 6 Jan 2012 11:40:04 +0900
-Message-ID: <CANqRtoRqSFMmC4VySM-Aczd7AFxZrC8nzjPwaffa+=3VtWZK0g@mail.gmail.com>
+Subject: Re: [PATCH 06/11] mfd: tmio: remove now unneeded tmio_mmc_cd_wakeup()
+Date: Fri, 6 Jan 2012 11:53:37 +0900
+Message-ID: <CANqRtoTTRWGoBoEOs2BkgKYU_W2gNZPghJj=9KsTTQMbwS3oqQ@mail.gmail.com>
 References: <1325686636-23905-1-git-send-email-g.liakhovetski@gmx.de>
-	<1325686636-23905-10-git-send-email-g.liakhovetski@gmx.de>
+	<1325686636-23905-7-git-send-email-g.liakhovetski@gmx.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:41567 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758246Ab2AFCkG convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2012 21:40:06 -0500
-In-Reply-To: <1325686636-23905-10-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1325686636-23905-7-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-sh-owner@vger.kernel.org
 To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Samuel Ortiz <sameo@linux.intel.com>
-
-Hi Guennadi,
+List-Id: linux-mmc@vger.kernel.org
 
 On Wed, Jan 4, 2012 at 11:17 PM, Guennadi Liakhovetski
 <g.liakhovetski@gmx.de> wrote:
-> On ARM the same clock is used by the PM subsystem and by the driver
-> directly. This leads to the clock staying permanently on, independent=
- of
-> the runtime PM state. This patch makes clock enable and disable calls=
- in
-> the driver SuperH-specific.
+> Now, that all users of tmio_mmc_cd_wakeup() have been converted over =
+to
+> drivers/mmc/core/cd-gpio.c, that function can be removed.
 >
 > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > ---
-> =A0drivers/mmc/host/sh_mobile_sdhi.c | =A0 =A06 ++++++
-> =A01 files changed, 6 insertions(+), 0 deletions(-)
+> =A0include/linux/mfd/tmio.h | =A0 11 -----------
+> =A01 files changed, 0 insertions(+), 11 deletions(-)
+>
+> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> index 4ef9307..08fb7d2 100644
+> --- a/include/linux/mfd/tmio.h
+> +++ b/include/linux/mfd/tmio.h
+> @@ -4,7 +4,6 @@
+> =A0#include <linux/device.h>
+> =A0#include <linux/fb.h>
+> =A0#include <linux/io.h>
+> -#include <linux/jiffies.h>
+> =A0#include <linux/platform_device.h>
+> =A0#include <linux/pm_runtime.h>
+>
+> @@ -110,16 +109,6 @@ struct tmio_mmc_data {
+> =A0};
+>
+> =A0/*
+> - * This function is deprecated and will be removed soon. Please, con=
+vert your
+> - * platform to use drivers/mmc/core/cd-gpio.c
+> - */
+> -static inline void tmio_mmc_cd_wakeup(struct tmio_mmc_data *pdata)
+> -{
+> - =A0 =A0 =A0 if (pdata)
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_detect_change(dev_get_drvdata(dev),=
+ msecs_to_jiffies(100));
+> -}
+> -
+> -/*
 
-Thanks for your patch.
+Ok, I can clearly see the merit of removing unused code. And I do
+appreciate that you clean up the code. Thank you!
 
-=46rom my point of view there is very little difference between SH and
-SH-Mobile ARM, so I don't understand the special treatment. Also, is
-this change really needed for SH with your recent Runtime PM patches?
+The only issue is that we do however have tons of users of the SDHI
+driver (just grep in arch/arm/mach-shmobile and in arch/sh) and many
+of them can use other pins than the SDHI CD function for hotplug
+detection. To support such configurations we need to have some way to
+notify the driver instance about the hotplug change. This patch is
+removing just that.
 
-I believe we need to make use of the clock framework to get the clock
-rate configuration in the SDHI driver. At the same time we want to
-stop the clock as frequently as possible. I believe we should disable
-and enable the clock together with the Runtime PM get/put operations -
-pretty much exactly like our I2C master driver does. The only problem
-is, while the clock is disabled the clock rate may be changed. So we
-need to be able to notify the MMC subsystem about the new clock rate.
+I do realize that you recently posted some generic MMC GPIO hotplug
+patches, and I am happy that you agreed with me that it is better to
+put it in the generic MMC core than pushing it in the SDHI or MMCIF
+driver. So this development seems like a perfect fit for both the SDHI
+driver and the MMCIF driver.
 
-Any ideas on how to make this happen?
+I'd like to see platforms move over to your MMC GPIO hotplug helpers,
+but at the same time I want to keep the existing notification method
+to make a smooth transition. I personally added GPIO IRQ support
+rather recently to SH Mobile ARM, but it is still rather early and we
+do not have many users yet. I have seen customer-specific hardware
+designs using non-GPIO pins for CD handling too, and to support such
+hardware we want to keep flexible notification methods. So with that
+in mind I'd like to keep the options open and allow fully developed
+platforms to use your MMC GPIO hotplug code, but also allow custom
+platforms and boards/SoCs with more limited software support handle
+hotplug notification the old way.
+
+So please don't remove this function at this point. Give us time to mov=
+e over.
 
 Thanks,
 
