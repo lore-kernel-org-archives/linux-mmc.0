@@ -1,74 +1,74 @@
-From: Xie Shaohui-B21989 <B21989@freescale.com>
-Subject: RE: [PATCH][v2] mmc:sdhci: restore the enabled dma when do reset all
-Date: Fri, 6 Jan 2012 07:57:51 +0000
-Message-ID: <ED492CCEAF882048BC2237DE806547C901D7D0@039-SN2MPN1-013.039d.mgd.msft.net>
-References: <1325147580-31281-1-git-send-email-Shaohui.Xie@freescale.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 09/11] mmc: sh_mobile_sdhi: do not manage PM clocks
+ manually on ARM
+Date: Fri, 6 Jan 2012 09:21:09 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1201060917130.16279@axis700.grange>
+References: <1325686636-23905-1-git-send-email-g.liakhovetski@gmx.de>
+ <1325686636-23905-10-git-send-email-g.liakhovetski@gmx.de>
+ <CANqRtoRqSFMmC4VySM-Aczd7AFxZrC8nzjPwaffa+=3VtWZK0g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:26533
-	"EHLO VA3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751974Ab2AFH5x convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 6 Jan 2012 02:57:53 -0500
-In-Reply-To: <1325147580-31281-1-git-send-email-Shaohui.Xie@freescale.com>
-Content-Language: en-US
+Received: from moutng.kundenserver.de ([212.227.126.187]:58401 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752468Ab2AFIVT convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Jan 2012 03:21:19 -0500
+In-Reply-To: <CANqRtoRqSFMmC4VySM-Aczd7AFxZrC8nzjPwaffa+=3VtWZK0g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Xie Shaohui-B21989 <B21989@freescale.com>
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Samuel Ortiz <sameo@linux.intel.com>
 
-Hello, Chris,
+On Fri, 6 Jan 2012, Magnus Damm wrote:
 
-Do you have any concern for this patch?
+> Hi Guennadi,
+>=20
+> On Wed, Jan 4, 2012 at 11:17 PM, Guennadi Liakhovetski
+> <g.liakhovetski@gmx.de> wrote:
+> > On ARM the same clock is used by the PM subsystem and by the driver
+> > directly. This leads to the clock staying permanently on, independe=
+nt of
+> > the runtime PM state. This patch makes clock enable and disable cal=
+ls in
+> > the driver SuperH-specific.
+> >
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > ---
+> > =A0drivers/mmc/host/sh_mobile_sdhi.c | =A0 =A06 ++++++
+> > =A01 files changed, 6 insertions(+), 0 deletions(-)
+>=20
+> Thanks for your patch.
+>=20
+> >From my point of view there is very little difference between SH and
+> SH-Mobile ARM, so I don't understand the special treatment. Also, is
+> this change really needed for SH with your recent Runtime PM patches?
 
+I didn't try SuperH. I seem to remember, there were 2 clocks per SDHI=20
+controller on some platforms, of which one was handled by runtime PM an=
+d=20
+the other one directly. However, a quick look through SDHI users didn't=
+=20
+reveal any such cases, so, maybe I'm confusing SDHI with some other=20
+hardware block. In that case - yes, I'd gladly remove that handling=20
+completely!
 
-Best Regards, 
-Shaohui Xie 
+> I believe we need to make use of the clock framework to get the clock
+> rate configuration in the SDHI driver. At the same time we want to
+> stop the clock as frequently as possible. I believe we should disable
+> and enable the clock together with the Runtime PM get/put operations =
+-
+> pretty much exactly like our I2C master driver does. The only problem
+> is, while the clock is disabled the clock rate may be changed. So we
+> need to be able to notify the MMC subsystem about the new clock rate.
+>=20
+> Any ideas on how to make this happen?
 
->-----Original Message-----
->From: Xie Shaohui-B21989
->Sent: Thursday, December 29, 2011 4:33 PM
->To: linux-mmc@vger.kernel.org
->Cc: linuxppc-dev@lists.ozlabs.org; Xie Shaohui-B21989
->Subject: [PATCH][v2] mmc:sdhci: restore the enabled dma when do reset all
->
->If dma is enabled, it'll be cleared when reset all is performed, this can
->be observed on some platforms, such as P2041 which has a version 2.3
->controller, but platform like P4080 which has a version 2.2 controller,
->does not suffer this, so we will check if the dma is enabled, we should
->restore it after reset all.
->
->Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
->---
->based on http://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git,
->branch 'for-linus'.
->
->changes for v2:
->call the wrapper API instead of access the register directly.
->
-> drivers/mmc/host/sdhci.c |    5 +++++
-> 1 files changed, 5 insertions(+), 0 deletions(-)
->
->diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
->19ed580..cf6a048 100644
->--- a/drivers/mmc/host/sdhci.c
->+++ b/drivers/mmc/host/sdhci.c
->@@ -214,6 +214,11 @@ static void sdhci_reset(struct sdhci_host *host, u8
->mask)
->
-> 	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
-> 		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
->+
->+	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
->+		if ((host->ops->enable_dma) && (mask & SDHCI_RESET_ALL))
->+			host->ops->enable_dma(host);
->+	}
-> }
->
-> static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
->--
->1.6.4
+Huh, if that's really possible... I'll have a look at that.
 
-
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+=46reelance Open-Source Software Developer
+http://www.open-technology.de/
