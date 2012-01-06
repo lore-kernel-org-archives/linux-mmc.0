@@ -1,102 +1,58 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 3/5 v3] ESDHC: Power management for ESDHC
-Date: Fri, 6 Jan 2012 03:31:06 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F11661240@039-SN1MPN1-005.039d.mgd.msft.net>
-References: <1324958792-16742-1-git-send-email-r66093@freescale.com>
-	<m2lipppscs.fsf@bob.laptop.org> <20120103015453.GA3767@pengutronix.de>
- <m2fwfxo7pu.fsf@bob.laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:43497
-	"EHLO VA3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755403Ab2AFDbL convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 Jan 2012 22:31:11 -0500
-In-Reply-To: <m2fwfxo7pu.fsf@bob.laptop.org>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: [PATCH V9 0/2] HS200 Mode support for device and host
+Date: Fri,  6 Jan 2012 09:56:37 +0530
+Message-ID: <1325823999-21770-1-git-send-email-girish.shivananjappa@linaro.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jiang Yutang-B14898 <B14898@freescale.com>
 
-And I have one question,
-This group patches has five, and this version will only include 3/5, 4/5, 5/5.
-Can I repost the 1/5 and 2/5? These two patches has no changes.
+changes in v9:
+	Updated the changes suggested by Chris for kernel coding comaptibility 
+changes in v8:
+	Updated the changes suggested by Philip for bus mode test. 
+changes in v7:
+	Updated with review comments for minor changes in host conditional
+	handling. added the handling for 4 bit bus width. 
+Changes in v6:
+	split the patch into 2 and classified them as a patch for device
+	and host. Modified to include the review comments.
+Changes in v5:
+	Reduced the case statements for better code readability. Removed
+	unused macro definitions. Modified the tuning function prototype
+	and definition to support tuning for both SD and eMMC cards.
+Changes in v4:
+	Rebased onto chris-mmc/mmc-next branch. This patch is successfully
+	applied on commit with id de022ed3fdc14808299b2fa66dbb1ed5ab921912.
+Changes in v3:
+	In the previous commits of chris-mmc/mmc-next branch, the patch with
+	commit id (c0f22a2c92e357e7cb3988b0b13034d70b7461f9) defines caps2 for
+	more capabilities. This patch version deletes the member ext_caps
+	(created in my earlier patch) from struct mmc_host and reuses already
+	accepted caps2 member.
+Changes in v2:
+	Rebased to latest chris-mmc/mmc-next branch. Resolved indentation
+	problems identified in review. This patch has to be applied before
+	the patch released for modifying the printk messages.
+Changes in v1:
+	Case statements in switch that produce same result have been combined
+	to reduce repeated assignments. patch recreated after rebase to chris
+	Balls mmc-next branch.
 
-> -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org]
-> Sent: Tuesday, January 03, 2012 10:12 AM
-> To: Wolfram Sang
-> Cc: Huang Changming-R66093; linux-mmc@vger.kernel.org; Huang Changming-
-> R66093; Jiang Yutang-B14898
-> Subject: Re: [PATCH 3/5 v3] ESDHC: Power management for ESDHC
-> 
-> Hi,
-> 
-> On Mon, Jan 02 2012, Wolfram Sang wrote:
-> >> Wolfram, do you have time to look at this?  Looks like we need to
-> expose
-> >> suspend/resume hooks to -pltfm users for this use case -- I don't
-> think
-> >> any esdhc code should be in sdhci-pltfm.c.  (I don't mind writing the
-> >> patch if you agree that that's the correct solution here.)
-> >
-> > I won't have time to look at it, but what you say sounds reasonable to
-> me.
-> 
-> Thanks, Wolfram.  Jerry, does this patch give you the hook you need to
-> handle this inside the driver instead of sdhci/sdhci-pltfm?
-> 
-> From: Chris Ball <cjb@laptop.org>
-> Subject: [PATCH] mmc: sdhci: Add platform suspend/resume hooks.
-> 
-> Some platforms require saving/restoring registers across suspend/resume;
-> this hook allows them to do that inside their driver.
-> 
-> Signed-off-by: Chris Ball <cjb@laptop.org>
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 384adda..3425c9a 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2351,6 +2351,9 @@ int sdhci_suspend_host(struct sdhci_host *host)
->  {
->  	int ret;
-> 
-> +	if (host->ops->platform_suspend)
-> +		host->ops->platform_suspend(host);
-> +
->  	sdhci_disable_card_detection(host);
-> 
->  	/* Disable tuning since we are suspending */
-> @@ -2391,6 +2394,9 @@ int sdhci_resume_host(struct sdhci_host *host)
->  	ret = mmc_resume_host(host->mmc);
->  	sdhci_enable_card_detection(host);
-> 
-> +	if (host->ops->platform_resume)
-> +		host->ops->platform_resume(host);
-> +
->  	/* Set the re-tuning expiration flag */
->  	if ((host->version >= SDHCI_SPEC_300) && host->tuning_count &&
->  	    (host->tuning_mode == SDHCI_TUNING_MODE_1))
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index a04d4d0..ae05a80 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -274,6 +274,8 @@ struct sdhci_ops {
->  	void	(*platform_reset_exit)(struct sdhci_host *host, u8 mask);
->  	int	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int
-> uhs);
->  	void	(*hw_reset)(struct sdhci_host *host);
-> +	void	(*platform_suspend)(struct sdhci_host *host);
-> +	void	(*platform_resume)(struct sdhci_host *host);
->  };
-> 
->  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+Girish K S (2):
+  mmc: core: HS200 mode support for eMMC 4.5
+  mmc: host: Adds support for eMMC 4.5 HS200 mode
 
-
+ drivers/mmc/core/bus.c     |    3 +-
+ drivers/mmc/core/debugfs.c |    3 +
+ drivers/mmc/core/mmc.c     |  162 +++++++++++++++++++++++++++++++++++++++++---
+ drivers/mmc/core/sd.c      |    3 +-
+ drivers/mmc/core/sdio.c    |    4 +-
+ drivers/mmc/host/sdhci.c   |   45 +++++++++---
+ drivers/mmc/host/sdhci.h   |    1 +
+ include/linux/mmc/card.h   |    3 +
+ include/linux/mmc/host.h   |   11 +++-
+ include/linux/mmc/mmc.h    |   66 ++++++++++++++++++-
+ include/linux/mmc/sdhci.h  |    1 +
+ 11 files changed, 277 insertions(+), 25 deletions(-)
