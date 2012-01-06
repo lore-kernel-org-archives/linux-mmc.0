@@ -1,77 +1,119 @@
-From: Bastian Hecht <hechtb@googlemail.com>
-Subject: [PATCH] mmc: sh_mobile_sdhi: add a callback for board specific init code
-Date: Fri,  6 Jan 2012 11:39:24 +0100
-Message-ID: <1325846364-13400-1-git-send-email-hechtb@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:34841 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030200Ab2AFKjc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Jan 2012 05:39:32 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH] mmc: tmio_mmc: fix card eject during IO with DMA
+Date: Fri, 6 Jan 2012 13:06:51 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1201061302430.16279@axis700.grange>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, linux-sh@vger.kernel.org, Bastian Hecht <hechtb@gmail.com>
+Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>
+List-Id: linux-mmc@vger.kernel.org
 
-Some boards need a preliminary setup stage to prepare the sdhi
-controller.
+When DMA is in use and the card is ejected during IO, DMA transfers have to
+be terminated, otherwise the dmaengine driver fails to operate properly,
+when the card is re-inserted.
+
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c  |   13 +++++++++++++
- include/linux/mmc/sh_mobile_sdhi.h |    4 ++++
- 2 files changed, 17 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 0df69ab..1da31a4 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -109,6 +109,12 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	mmc_data = &priv->mmc_data;
- 	p->pdata = mmc_data;
+This goes on top of all my recent tmio_mmc patches. Even if some of them 
+will require some minor changes, this one, probably, will still have a 
+good chance to apply:-)
+
+ drivers/mmc/host/tmio_mmc.h     |    7 ++++++-
+ drivers/mmc/host/tmio_mmc_dma.c |   12 ++++++++++++
+ drivers/mmc/host/tmio_mmc_pio.c |    6 +++++-
+ 3 files changed, 23 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 62d0d14..d857f5c 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -20,8 +20,8 @@
+ #include <linux/mmc/tmio.h>
+ #include <linux/mutex.h>
+ #include <linux/pagemap.h>
+-#include <linux/spinlock.h>
+ #include <linux/scatterlist.h>
++#include <linux/spinlock.h>
  
-+	if (p->init) {
-+		ret = p->init(pdev);
-+		if (ret)
-+			goto einit;
-+	}
-+
- 	snprintf(clk_name, sizeof(clk_name), "sdhi%d", pdev->id);
- 	priv->clk = clk_get(&pdev->dev, clk_name);
- 	if (IS_ERR(priv->clk)) {
-@@ -242,6 +248,9 @@ eprobe:
- #endif
- 	clk_put(priv->clk);
- eclkget:
-+	if (p->cleanup)
-+		p->cleanup(pdev);
-+einit:
- 	kfree(priv);
- 	return ret;
+ /* Definitions for values the CTRL_SDIO_STATUS register can take. */
+ #define TMIO_SDIO_STAT_IOIRQ	0x0001
+@@ -119,6 +119,7 @@ void tmio_mmc_start_dma(struct tmio_mmc_host *host, struct mmc_data *data);
+ void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable);
+ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdata);
+ void tmio_mmc_release_dma(struct tmio_mmc_host *host);
++void tmio_mmc_abort_dma(struct tmio_mmc_host *host);
+ #else
+ static inline void tmio_mmc_start_dma(struct tmio_mmc_host *host,
+ 			       struct mmc_data *data)
+@@ -139,6 +140,10 @@ static inline void tmio_mmc_request_dma(struct tmio_mmc_host *host,
+ static inline void tmio_mmc_release_dma(struct tmio_mmc_host *host)
+ {
  }
-@@ -269,6 +278,10 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
- 	clk_disable(priv->clk);
++
++static inline void tmio_mmc_abort_dma(struct tmio_mmc_host *host)
++{
++}
  #endif
- 	clk_put(priv->clk);
-+
-+	if (p->cleanup)
-+		p->cleanup(pdev);
-+
- 	kfree(priv);
  
- 	return 0;
-diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-index 86347f6..9cad001 100644
---- a/include/linux/mmc/sh_mobile_sdhi.h
-+++ b/include/linux/mmc/sh_mobile_sdhi.h
-@@ -22,6 +22,10 @@ struct sh_mobile_sdhi_info {
- 	struct tmio_mmc_data *pdata;
- 	void (*set_pwr)(struct platform_device *pdev, int state);
- 	int (*get_cd)(struct platform_device *pdev);
-+
-+	/* callbacks for board specific setup code */
-+	int (*init)(struct platform_device *pdev);
-+	void (*cleanup)(struct platform_device *pdev);
- };
+ #ifdef CONFIG_PM
+diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+index 86f259c..756759b 100644
+--- a/drivers/mmc/host/tmio_mmc_dma.c
++++ b/drivers/mmc/host/tmio_mmc_dma.c
+@@ -34,6 +34,18 @@ void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
+ #endif
+ }
  
- #endif /* LINUX_MMC_SH_MOBILE_SDHI_H */
++void tmio_mmc_abort_dma(struct tmio_mmc_host *host)
++{
++	tmio_mmc_enable_dma(host, false);
++
++	if (host->chan_rx)
++		dmaengine_terminate_all(host->chan_rx);
++	if (host->chan_tx)
++		dmaengine_terminate_all(host->chan_tx);
++
++	tmio_mmc_enable_dma(host, true);
++}
++
+ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
+ {
+ 	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index f68e6f3..7c4378f 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -42,8 +42,8 @@
+ #include <linux/platform_device.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/scatterlist.h>
+-#include <linux/workqueue.h>
+ #include <linux/spinlock.h>
++#include <linux/workqueue.h>
+ 
+ #include "tmio_mmc.h"
+ 
+@@ -245,6 +245,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
+ 	/* Ready for new calls */
+ 	host->mrq = NULL;
+ 
++	tmio_mmc_abort_dma(host);
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
+@@ -271,6 +272,9 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
+ 	host->mrq = NULL;
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
++	if (mrq->cmd->error || (mrq->data && mrq->data->error))
++		tmio_mmc_abort_dma(host);
++
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
 -- 
-1.7.5.4
+1.7.2.5
 
