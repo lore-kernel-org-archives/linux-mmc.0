@@ -1,49 +1,91 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v5] mmc: support BKOPS feature for eMMC
-Date: Sat, 07 Jan 2012 21:21:29 -0500
-Message-ID: <m2pqevvsra.fsf@bob.laptop.org>
-References: <4F04F512.1020909@samsung.com>
-	<CANfBPZ-RV=9qMm95yaN3J8no10ZBMa+sB+tO2qpqOZMVpbx-8g@mail.gmail.com>
-	<17296D9F8FF2234F831FC3DF505A87A90FCB43D7@SHSMSX101.ccr.corp.intel.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH V9 0/2] HS200 Mode support for device and host
+Date: Sun, 8 Jan 2012 11:20:24 +0530
+Message-ID: <CAGxe1ZEXi+WBh34EEX1jifF=3GnddodJGNhA2rLFxHWcmMRP0w@mail.gmail.com>
+References: <1325823999-21770-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57880 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751903Ab2AHCV4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 7 Jan 2012 21:21:56 -0500
-In-Reply-To: <17296D9F8FF2234F831FC3DF505A87A90FCB43D7@SHSMSX101.ccr.corp.intel.com>
-	(Chuanxiao Dong's message of "Sun, 8 Jan 2012 02:18:44 +0000")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1325823999-21770-1-git-send-email-girish.shivananjappa@linaro.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: patches@linaro.org, linux-samsung-soc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: "S, Venkatraman" <svenkatr@ti.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, "per.forlin@stericsson.com" <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-Hi,
+HI Chris,
+Please have a look at this patch series and add it in your next branch
+if everything seems to be Ok
 
-On Sat, Jan 07 2012, Dong, Chuanxiao wrote:
->> In my understanding, the EXT_CSD_BKOPS_EN should be _updated_by_ the
->> host controller to 1 at initialization time, to indicate to the
->> device, as per the spec.
->> Otherwise, the device would decide that the host doesn't support
->> software controlled BKOPS.
+regards
+Girish K S
+
+On 6 January 2012 09:56, Girish K S <girish.shivananjappa@linaro.org> w=
+rote:
+> changes in v9:
+> =A0 =A0 =A0 =A0Updated the changes suggested by Chris for kernel codi=
+ng comaptibility
+> changes in v8:
+> =A0 =A0 =A0 =A0Updated the changes suggested by Philip for bus mode t=
+est.
+> changes in v7:
+> =A0 =A0 =A0 =A0Updated with review comments for minor changes in host=
+ conditional
+> =A0 =A0 =A0 =A0handling. added the handling for 4 bit bus width.
+> Changes in v6:
+> =A0 =A0 =A0 =A0split the patch into 2 and classified them as a patch =
+for device
+> =A0 =A0 =A0 =A0and host. Modified to include the review comments.
+> Changes in v5:
+> =A0 =A0 =A0 =A0Reduced the case statements for better code readabilit=
+y. Removed
+> =A0 =A0 =A0 =A0unused macro definitions. Modified the tuning function=
+ prototype
+> =A0 =A0 =A0 =A0and definition to support tuning for both SD and eMMC =
+cards.
+> Changes in v4:
+> =A0 =A0 =A0 =A0Rebased onto chris-mmc/mmc-next branch. This patch is =
+successfully
+> =A0 =A0 =A0 =A0applied on commit with id de022ed3fdc14808299b2fa66dbb=
+1ed5ab921912.
+> Changes in v3:
+> =A0 =A0 =A0 =A0In the previous commits of chris-mmc/mmc-next branch, =
+the patch with
+> =A0 =A0 =A0 =A0commit id (c0f22a2c92e357e7cb3988b0b13034d70b7461f9) d=
+efines caps2 for
+> =A0 =A0 =A0 =A0more capabilities. This patch version deletes the memb=
+er ext_caps
+> =A0 =A0 =A0 =A0(created in my earlier patch) from struct mmc_host and=
+ reuses already
+> =A0 =A0 =A0 =A0accepted caps2 member.
+> Changes in v2:
+> =A0 =A0 =A0 =A0Rebased to latest chris-mmc/mmc-next branch. Resolved =
+indentation
+> =A0 =A0 =A0 =A0problems identified in review. This patch has to be ap=
+plied before
+> =A0 =A0 =A0 =A0the patch released for modifying the printk messages.
+> Changes in v1:
+> =A0 =A0 =A0 =A0Case statements in switch that produce same result hav=
+e been combined
+> =A0 =A0 =A0 =A0to reduce repeated assignments. patch recreated after =
+rebase to chris
+> =A0 =A0 =A0 =A0Balls mmc-next branch.
 >
-> EXT_CSD_BKOPS_EN is a onetime programmable register, which is not
-> suitable for driver to touch I think. This can be updated by host
-> controller, but should not happened in driver. This register can be
-> configured by some platform firmware or some eMMC FW from vendor. For
-> what driver needs to do, is just to read this onetime programmable and
-> to know whether BKOPS is enabled. It is like hardware reset
-> feature. RST_n_FUNCTION is only a onetime programmable register which
-> can indicate whether hardware reset feature is enabled. Driver just
-> needs to read it out and to know whether hardware reset feature can be
-> used. So I agree with Jaehoon Chung's implementation.
-
-I agree -- we don't touch fuses in the driver.
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> Girish K S (2):
+> =A0mmc: core: HS200 mode support for eMMC 4.5
+> =A0mmc: host: Adds support for eMMC 4.5 HS200 mode
+>
+> =A0drivers/mmc/core/bus.c =A0 =A0 | =A0 =A03 +-
+> =A0drivers/mmc/core/debugfs.c | =A0 =A03 +
+> =A0drivers/mmc/core/mmc.c =A0 =A0 | =A0162 ++++++++++++++++++++++++++=
++++++++++++++++---
+> =A0drivers/mmc/core/sd.c =A0 =A0 =A0| =A0 =A03 +-
+> =A0drivers/mmc/core/sdio.c =A0 =A0| =A0 =A04 +-
+> =A0drivers/mmc/host/sdhci.c =A0 | =A0 45 +++++++++---
+> =A0drivers/mmc/host/sdhci.h =A0 | =A0 =A01 +
+> =A0include/linux/mmc/card.h =A0 | =A0 =A03 +
+> =A0include/linux/mmc/host.h =A0 | =A0 11 +++-
+> =A0include/linux/mmc/mmc.h =A0 =A0| =A0 66 ++++++++++++++++++-
+> =A0include/linux/mmc/sdhci.h =A0| =A0 =A01 +
+> =A011 files changed, 277 insertions(+), 25 deletions(-)
+>
