@@ -1,22 +1,24 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
 Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
  cards
-Date: Mon, 9 Jan 2012 15:27:55 +0100
-Message-ID: <4F0AF96B.4050500@stericsson.com>
+Date: Mon, 9 Jan 2012 15:34:28 +0100
+Message-ID: <4F0AFAF4.1070601@stericsson.com>
 References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="iso-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:43645 "EHLO
-	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755147Ab2AIO2T (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2012 09:28:19 -0500
+Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:55208 "EHLO
+	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754807Ab2AIOfO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2012 09:35:14 -0500
 In-Reply-To: <4F0AF157.7090101@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+
+Sorry, missed one of your comments.
 
 Adrian Hunter wrote:
 > On 09/01/12 15:14, Ulf Hansson wrote:
@@ -48,11 +50,6 @@ Adrian Hunter wrote:
 >> True, but is this a problem!?
 > 
 > Better not to find out.
-
-:-)
-
-Then there is lot of other things around mmc we also should not change.
-
 > 
 >> Anyway, this is the actual issue this patch is trying to solve. If you
 >> remove a card "slowly", a "rescan" work, which the GPIO irq has triggered to
@@ -73,16 +70,6 @@ Then there is lot of other things around mmc we also should not change.
 > MMC_CAP2 for it).  I guess you would still need to debounce the GPIO
 > though.
 > 
-
-Unfortunately that wont help to solve this issue either. That patch will 
-only prevent you from executing a CMD13 if the get_cd function says the 
-card is still there. I kind of micro optimization I think, unless you 
-very often encounters errors in the block layer.
-
-The key in this patch is that a rescan work is triggered to fully verify 
-that the card is still there and if not, it can remove it. I don't think 
-this is such a big matter, but of course this is my own opinion. :-)
-
 >>> You are assuming:
 >>>     1. that a poor quality card will not return errors for a few
 >>>     commands and then resume operation
@@ -104,6 +91,11 @@ this is such a big matter, but of course this is my own opinion. :-)
 > stop responding, for example by power-cycling.  That would be in
 > conflict with your approach because it would power cycle on every single
 > card removal.
+
+This is pure hypothetical and the simple solution to such an idea would 
+just be to do a "power-cycle attempt" before considering scheduling the 
+rescan work in the mmc_detect_card_removed function.
+
 > 
 >>> Both those assumptions may be true, but there is no evidence that they are.
 >>>
