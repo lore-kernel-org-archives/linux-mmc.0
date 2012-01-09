@@ -1,93 +1,49 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V9 2/2] mmc: host: Adds support for eMMC 4.5 HS200 mode
-Date: Sun, 08 Jan 2012 15:37:37 -0500
-Message-ID: <m239bqvsku.fsf@bob.laptop.org>
-References: <1325823999-21770-1-git-send-email-girish.shivananjappa@linaro.org>
-	<1325823999-21770-3-git-send-email-girish.shivananjappa@linaro.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: mmc: dw_mmc: miscaculated the fifo-depth with wrong bit operation
+Date: Mon, 09 Jan 2012 10:06:44 +0900
+Message-ID: <4F0A3DA4.8010909@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1325823999-21770-3-git-send-email-girish.shivananjappa@linaro.org>
-	(Girish K. S.'s message of "Fri, 6 Jan 2012 09:56:39 +0530")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: linux-mmc@vger.kernel.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:27689 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755005Ab2AIBGs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Jan 2012 20:06:48 -0500
+Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LXI00ILJB38ACD0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 09 Jan 2012 10:06:46 +0900 (KST)
+Received: from [165.213.219.108] by mmp1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LXI00J7PB38Z700@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 09 Jan 2012 10:06:45 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
 
-Hi,
+In FIFOTH register, can find "bit[27:16] = FIFO_DEPTH - 1".
+Finally, FIFO_DEPTH = bit[27:16] + 1.
 
-On Thu, Jan 05 2012, Girish K S wrote:
-> @@ -1703,10 +1707,13 @@ static int sdhci_execute_tuning(struct mmc_ho=
-st *mmc)
->  	 * Host Controller needs tuning only in case of SDR104 mode
->  	 * and for SDR50 mode when Use Tuning for SDR50 is set in
->  	 * Capabilities register.
-> +	 * If the Host Controller supports the HS200 mode then tuning
-> +	 * function has to be executed.
->  	 */
->  	if (((ctrl & SDHCI_CTRL_UHS_MASK) =3D=3D SDHCI_CTRL_UHS_SDR104) ||
->  	    (((ctrl & SDHCI_CTRL_UHS_MASK) =3D=3D SDHCI_CTRL_UHS_SDR50) &&
-> -	    (host->flags & SDHCI_SDR50_NEEDS_TUNING)))
-> +	    (host->flags & SDHCI_SDR50_NEEDS_TUNING)) ||
-> +	    (host->flags & SDHCI_HS200_NEEDS_TUNING))
->  		ctrl |=3D SDHCI_CTRL_EXEC_TUNING;
->  	else {
->  		spin_unlock(&host->lock);
+Now, Used the 0x7ff. but 0xfff is right.
 
-Actually, this generates a warning:
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-/home/cjb/git/mmc/drivers/mmc/host/sdhci.c: In function =E2=80=98sdhci_=
-execute_tuning=E2=80=99:
-/home/cjb/git/mmc/drivers/mmc/host/sdhci.c:1716:7: warning: suggest par=
-entheses around =E2=80=98&&=E2=80=99 within =E2=80=98||=E2=80=99 [-Wpar=
-entheses]
-
-=2E. as well as being hard to follow.  Shall we split it up as below in=
-stead?
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 64febf2..5627354 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1694,6 +1694,7 @@ static int sdhci_execute_tuning(struct mmc_host *=
-mmc, u32 opcode)
- 	int tuning_loop_counter =3D MAX_TUNING_LOOP;
- 	unsigned long timeout;
- 	int err =3D 0;
-+	bool requires_tuning_nonuhs;
-=20
- 	host =3D mmc_priv(mmc);
-=20
-@@ -1704,16 +1705,19 @@ static int sdhci_execute_tuning(struct mmc_host=
- *mmc, u32 opcode)
- 	ctrl =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
-=20
- 	/*
--	 * Host Controller needs tuning only in case of SDR104 mode
--	 * and for SDR50 mode when Use Tuning for SDR50 is set in
-+	 * The Host Controller needs tuning only in case of SDR104 mode
-+	 * and for SDR50 mode when Use Tuning for SDR50 is set in the
- 	 * Capabilities register.
--	 * If the Host Controller supports the HS200 mode then tuning
--	 * function has to be executed.
-+	 * If the Host Controller supports the HS200 mode then the
-+	 * tuning function has to be executed.
- 	 */
--	if ((ctrl & SDHCI_CTRL_UHS_MASK =3D=3D SDHCI_CTRL_UHS_SDR104) ||
--	    ((ctrl & SDHCI_CTRL_UHS_MASK =3D=3D SDHCI_CTRL_UHS_SDR50) &&
--	     host->flags & SDHCI_SDR50_NEEDS_TUNING ||
-+	if (((ctrl & SDHCI_CTRL_UHS_MASK) =3D=3D SDHCI_CTRL_UHS_SDR50) &&
-+	    (host->flags & SDHCI_SDR50_NEEDS_TUNING ||
- 	     host->flags & SDHCI_HS200_NEEDS_TUNING))
-+		requires_tuning_nonuhs =3D true;
-+
-+	if (((ctrl & SDHCI_CTRL_UHS_MASK) =3D=3D SDHCI_CTRL_UHS_SDR104) ||
-+	    requires_tuning_nonuhs)
- 		ctrl |=3D SDHCI_CTRL_EXEC_TUNING;
- 	else {
- 		spin_unlock(&host->lock);
-
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 94e22382..0e34279 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1949,7 +1949,7 @@ static int dw_mci_probe(struct platform_device *pdev)
+ 		 * should put it in the platform data.
+ 		 */
+ 		fifo_size = mci_readl(host, FIFOTH);
+-		fifo_size = 1 + ((fifo_size >> 16) & 0x7ff);
++		fifo_size = 1 + ((fifo_size >> 16) & 0xfff);
+ 	} else {
+ 		fifo_size = host->pdata->fifo_depth;
+ 	}
