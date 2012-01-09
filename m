@@ -1,92 +1,123 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 5/5 v4] ESDHC: Fix DMA errors in kernel booting on P1010
-Date: Mon, 9 Jan 2012 02:59:15 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F11662AC5@039-SN1MPN1-005.039d.mgd.msft.net>
-References: <1325827997-27490-1-git-send-email-r66093@freescale.com>
-	<1325827997-27490-2-git-send-email-r66093@freescale.com>
-	<1325827997-27490-3-git-send-email-r66093@freescale.com>
-	<1325827997-27490-4-git-send-email-r66093@freescale.com>
-	<1325827997-27490-5-git-send-email-r66093@freescale.com>
-	<1325827997-27490-6-git-send-email-r66093@freescale.com>
- <m2ehvczxj3.fsf@bob.laptop.org>
+From: Barry Song <Barry.Song@csr.com>
+Subject: [PATCH] mmc: core: move suspend/resume to dev_pm_ops and add hibernation support
+Date: Mon, 9 Jan 2012 14:22:49 +0800
+Message-ID: <1326090169-4942-1-git-send-email-Barry.Song@csr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:55496
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752861Ab2AIC7x convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 8 Jan 2012 21:59:53 -0500
-In-Reply-To: <m2ehvczxj3.fsf@bob.laptop.org>
-Content-Language: en-US
+Received: from cluster-d.mailcontrol.com ([85.115.60.190]:54591 "EHLO
+	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752951Ab2AIGXm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2012 01:23:42 -0500
+Received: from rly45d.srv.mailcontrol.com (localhost.localdomain [127.0.0.1])
+	by rly45d.srv.mailcontrol.com (MailControl) with ESMTP id q096NLw7028102
+	for <linux-mmc@vger.kernel.org>; Mon, 9 Jan 2012 06:23:40 GMT
+Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
+	by rly45d.srv.mailcontrol.com (MailControl) id q096NEka025865
+	for <linux-mmc@vger.kernel.org>; Mon, 9 Jan 2012 06:23:14 GMT
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jain Priyanka-B32167 <B32167@freescale.com>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linux-pm@lists.linux-foundation.org, workgroup.linux@csr.com, Bin Shi <Bin.Shi@csr.com>, Barry Song <Barry.Song@csr.com>
+
+From: Bin Shi <Bin.Shi@csr.com>
+
+This patch moves suspend/resume to dev_pm_ops and add hibernation support.
+It was tested on CSR SiRFprimaII cortex-a9 platform. A sd partition is used
+as swsusp partition.
+
+Signed-off-by: Bin Shi <Bin.Shi@csr.com>
+Signed-off-by: Barry Song <Barry.Song@csr.com>
+---
+ drivers/mmc/core/bus.c |   38 +++++++++++++++++++++++++-------------
+ 1 files changed, 25 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 6be4924..bab50f7 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -122,14 +122,14 @@ static int mmc_bus_remove(struct device *dev)
+ 	return 0;
+ }
+ 
+-static int mmc_bus_suspend(struct device *dev, pm_message_t state)
++static int mmc_bus_suspend(struct device *dev)
+ {
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+ 	int ret = 0;
+ 
+ 	if (dev->driver && drv->suspend)
+-		ret = drv->suspend(card, state);
++		ret = drv->suspend(card, PMSG_SUSPEND);
+ 	return ret;
+ }
+ 
+@@ -144,6 +144,17 @@ static int mmc_bus_resume(struct device *dev)
+ 	return ret;
+ }
+ 
++static int mmc_bus_freeze(struct device *dev)
++{
++	struct mmc_driver *drv = to_mmc_driver(dev->driver);
++	struct mmc_card *card = mmc_dev_to_card(dev);
++	int ret = 0;
++
++	if (dev->driver && drv->suspend)
++		ret = drv->suspend(card, PMSG_FREEZE);
++	return ret;
++}
++
+ #ifdef CONFIG_PM_RUNTIME
+ 
+ static int mmc_runtime_suspend(struct device *dev)
+@@ -165,20 +176,23 @@ static int mmc_runtime_idle(struct device *dev)
+ 	return pm_runtime_suspend(dev);
+ }
+ 
++#else /* !CONFIG_PM_RUNTIME */
++#define mmc_runtime_suspend	NULL
++#define mmc_runtime_resume	NULL
++#define mmc_runtime_idle	NULL
++#endif /* !CONFIG_PM_RUNTIME */
++
+ static const struct dev_pm_ops mmc_bus_pm_ops = {
+ 	.runtime_suspend	= mmc_runtime_suspend,
+ 	.runtime_resume		= mmc_runtime_resume,
+ 	.runtime_idle		= mmc_runtime_idle,
++	.suspend		= mmc_bus_suspend,
++	.resume			= mmc_bus_resume,
++	.freeze			= mmc_bus_freeze,
++	.restore		= mmc_bus_resume,
++	.thaw			= mmc_bus_resume,
+ };
+ 
+-#define MMC_PM_OPS_PTR	(&mmc_bus_pm_ops)
+-
+-#else /* !CONFIG_PM_RUNTIME */
+-
+-#define MMC_PM_OPS_PTR	NULL
+-
+-#endif /* !CONFIG_PM_RUNTIME */
+-
+ static struct bus_type mmc_bus_type = {
+ 	.name		= "mmc",
+ 	.dev_attrs	= mmc_dev_attrs,
+@@ -186,9 +200,7 @@ static struct bus_type mmc_bus_type = {
+ 	.uevent		= mmc_bus_uevent,
+ 	.probe		= mmc_bus_probe,
+ 	.remove		= mmc_bus_remove,
+-	.suspend	= mmc_bus_suspend,
+-	.resume		= mmc_bus_resume,
+-	.pm		= MMC_PM_OPS_PTR,
++	.pm		= &mmc_bus_pm_ops,
+ };
+ 
+ int mmc_register_bus(void)
+-- 
+1.7.1
 
 
 
-> -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org]
-> Sent: Friday, January 06, 2012 11:00 PM
-> To: Huang Changming-R66093
-> Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093; Jain Priyanka-
-> B32167
-> Subject: Re: [PATCH 5/5 v4] ESDHC: Fix DMA errors in kernel booting on
-> P1010
-> 
-> Hi Jerry,
-> 
-> On Fri, Jan 06 2012, r66093@freescale.com wrote:
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
-> > 2db0d5c..d5a2259 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -832,14 +832,29 @@ static void sdhci_prepare_data(struct sdhci_host
-> *host, struct mmc_command *cmd)
-> >  	 * is ADMA.
-> >  	 */
-> >  	if (host->version >= SDHCI_SPEC_200) {
-> > -		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> > -		ctrl &= ~SDHCI_CTRL_DMA_MASK;
-> > -		if ((host->flags & SDHCI_REQ_USE_DMA) &&
-> > -			(host->flags & SDHCI_USE_ADMA))
-> > -			ctrl |= SDHCI_CTRL_ADMA32;
-> > -		else
-> > -			ctrl |= SDHCI_CTRL_SDMA;
-> > -		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> > +		if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD) {
-> > +#define ESDHCI_PROCTL_DMAS_MASK		0x00000300
-> > +#define ESDHCI_PROCTL_ADMA32		0x00000200
-> > +#define ESDHCI_PROCTL_SDMA		0x00000000
-> > +			u32 ctrl;
-> > +			ctrl = sdhci_readl(host, SDHCI_HOST_CONTROL);
-> > +			ctrl &= ~ESDHCI_PROCTL_DMAS_MASK;
-> > +			if ((host->flags & SDHCI_REQ_USE_DMA) &&
-> > +				(host->flags & SDHCI_USE_ADMA))
-> > +				ctrl |= ESDHCI_PROCTL_ADMA32;
-> > +			else
-> > +				ctrl |= ESDHCI_PROCTL_SDMA;
-> > +			sdhci_writel(host, ctrl, SDHCI_HOST_CONTROL);
-> > +		} else {
-> > +			ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> > +			ctrl &= ~SDHCI_CTRL_DMA_MASK;
-> > +			if ((host->flags & SDHCI_REQ_USE_DMA) &&
-> > +				(host->flags & SDHCI_USE_ADMA))
-> > +				ctrl |= SDHCI_CTRL_ADMA32;
-> > +			else
-> > +				ctrl |= SDHCI_CTRL_SDMA;
-> > +			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> > +		}
-> 
-> drivers/mmc/host/sdhci.c must know nothing about ESDHC registers.
-> It's a generic driver.  We can add hooks so that your own driver can run
-> code in the right place instead.
-> 
-Hi, Chris,
-For the PROCTL register, the FSL ESDHC controller has different bit setting.
-So I just redefined the related bit for this register.
-I have thought about it, but I didn't find the better way to implement it.
-If use the hook, but, how to handle the bit setting for SDHCI_POWER_CONTROL?
-
+Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
+More information can be found at www.csr.com. Follow CSR on Twitter at http://twitter.com/CSR_PLC and read our blog at www.csr.com/blog
