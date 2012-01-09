@@ -1,123 +1,80 @@
-From: Barry Song <Barry.Song@csr.com>
-Subject: [PATCH] mmc: core: move suspend/resume to dev_pm_ops and add hibernation support
-Date: Mon, 9 Jan 2012 14:22:49 +0800
-Message-ID: <1326090169-4942-1-git-send-email-Barry.Song@csr.com>
+From: Aaron Lu <aaron.lu@amd.com>
+Subject: Re: typo in Documentation/devices.txt  ?
+Date: Mon, 9 Jan 2012 16:41:05 +0800
+Message-ID: <20120109084103.GA26745@ladygaga>
+References: <31861576.535331325747307853.JavaMail.weblogic@epml02>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cluster-d.mailcontrol.com ([85.115.60.190]:54591 "EHLO
-	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752951Ab2AIGXm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2012 01:23:42 -0500
-Received: from rly45d.srv.mailcontrol.com (localhost.localdomain [127.0.0.1])
-	by rly45d.srv.mailcontrol.com (MailControl) with ESMTP id q096NLw7028102
-	for <linux-mmc@vger.kernel.org>; Mon, 9 Jan 2012 06:23:40 GMT
-Received: from localhost.localdomain (localhost.localdomain [127.0.0.1])
-	by rly45d.srv.mailcontrol.com (MailControl) id q096NEka025865
-	for <linux-mmc@vger.kernel.org>; Mon, 9 Jan 2012 06:23:14 GMT
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:2120 "EHLO
+	TX2EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752232Ab2AIIlN convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2012 03:41:13 -0500
+Content-Disposition: inline
+In-Reply-To: <31861576.535331325747307853.JavaMail.weblogic@epml02>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-pm@lists.linux-foundation.org, workgroup.linux@csr.com, Bin Shi <Bin.Shi@csr.com>, Barry Song <Barry.Song@csr.com>
+To: =?utf-8?B?7ZeI7KKF66eM?= <jongman.heo@samsung.com>
+Cc: linux-mmc@vger.kernel.org
 
-From: Bin Shi <Bin.Shi@csr.com>
+Hi,
 
-This patch moves suspend/resume to dev_pm_ops and add hibernation support.
-It was tested on CSR SiRFprimaII cortex-a9 platform. A sd partition is used
-as swsusp partition.
+On Thu, Jan 05, 2012 at 07:08:27AM +0000, =ED=97=88=EC=A2=85=EB=A7=8C w=
+rote:
+>=20
+> Hi, all..
+>=20
+> Here is description for MMC block devices in Documentation/devices.tx=
+t :
+>=20
+>     179 block       MMC block devices
+>                       0 =3D /dev/mmcblk0      First SD/MMC card
+>                       1 =3D /dev/mmcblk0p1    First partition on firs=
+t MMC card
+>                       8 =3D /dev/mmcblk1      Second SD/MMC card
+>                       ^^^^^^^^^^^^^^^^^^
+>                     The start of next SD/MMC card can be configured w=
+ith
+>                     CONFIG_MMC_BLOCK_MINORS, or overridden at boot/mo=
+dprobe
+>                     time using the mmcblk.perdev_minors option. That =
+would
+>                     bump the offset between each card to be the confi=
+gured
+>                     value instead of the default 8.
+>=20
+>=20
+> Shouldn't  "8 =3D /dev/mmcblk1" be "9 =3D /dev/mmcblk1" ?
 
-Signed-off-by: Bin Shi <Bin.Shi@csr.com>
-Signed-off-by: Barry Song <Barry.Song@csr.com>
----
- drivers/mmc/core/bus.c |   38 +++++++++++++++++++++++++-------------
- 1 files changed, 25 insertions(+), 13 deletions(-)
+No, mmcblk1's minor is 8, mmcblk2's minor is 16, etc...
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 6be4924..bab50f7 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -122,14 +122,14 @@ static int mmc_bus_remove(struct device *dev)
- 	return 0;
- }
- 
--static int mmc_bus_suspend(struct device *dev, pm_message_t state)
-+static int mmc_bus_suspend(struct device *dev)
- {
- 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
- 	struct mmc_card *card = mmc_dev_to_card(dev);
- 	int ret = 0;
- 
- 	if (dev->driver && drv->suspend)
--		ret = drv->suspend(card, state);
-+		ret = drv->suspend(card, PMSG_SUSPEND);
- 	return ret;
- }
- 
-@@ -144,6 +144,17 @@ static int mmc_bus_resume(struct device *dev)
- 	return ret;
- }
- 
-+static int mmc_bus_freeze(struct device *dev)
-+{
-+	struct mmc_driver *drv = to_mmc_driver(dev->driver);
-+	struct mmc_card *card = mmc_dev_to_card(dev);
-+	int ret = 0;
-+
-+	if (dev->driver && drv->suspend)
-+		ret = drv->suspend(card, PMSG_FREEZE);
-+	return ret;
-+}
-+
- #ifdef CONFIG_PM_RUNTIME
- 
- static int mmc_runtime_suspend(struct device *dev)
-@@ -165,20 +176,23 @@ static int mmc_runtime_idle(struct device *dev)
- 	return pm_runtime_suspend(dev);
- }
- 
-+#else /* !CONFIG_PM_RUNTIME */
-+#define mmc_runtime_suspend	NULL
-+#define mmc_runtime_resume	NULL
-+#define mmc_runtime_idle	NULL
-+#endif /* !CONFIG_PM_RUNTIME */
-+
- static const struct dev_pm_ops mmc_bus_pm_ops = {
- 	.runtime_suspend	= mmc_runtime_suspend,
- 	.runtime_resume		= mmc_runtime_resume,
- 	.runtime_idle		= mmc_runtime_idle,
-+	.suspend		= mmc_bus_suspend,
-+	.resume			= mmc_bus_resume,
-+	.freeze			= mmc_bus_freeze,
-+	.restore		= mmc_bus_resume,
-+	.thaw			= mmc_bus_resume,
- };
- 
--#define MMC_PM_OPS_PTR	(&mmc_bus_pm_ops)
--
--#else /* !CONFIG_PM_RUNTIME */
--
--#define MMC_PM_OPS_PTR	NULL
--
--#endif /* !CONFIG_PM_RUNTIME */
--
- static struct bus_type mmc_bus_type = {
- 	.name		= "mmc",
- 	.dev_attrs	= mmc_dev_attrs,
-@@ -186,9 +200,7 @@ static struct bus_type mmc_bus_type = {
- 	.uevent		= mmc_bus_uevent,
- 	.probe		= mmc_bus_probe,
- 	.remove		= mmc_bus_remove,
--	.suspend	= mmc_bus_suspend,
--	.resume		= mmc_bus_resume,
--	.pm		= MMC_PM_OPS_PTR,
-+	.pm		= &mmc_bus_pm_ops,
- };
- 
- int mmc_register_bus(void)
--- 
-1.7.1
+>=20
+> If we have 8 partitions on first MMC card, we need mmcblk0p1 ~ mmcblk=
+0p8 devices, with minor number 1 ~ 8.
+> Am I misunderstanding?
 
+Each mmc block device by default has 8 minors, not 8 partitions. Minor =
+0
+represent the whole disk. So each mmc block device at most has 7
+partitions instead of 8.
 
+See code in function mmc_blk_alloc_req on assigning minor value to the
+whole disk of the block device:
+md->disk->first_minor =3D devidx * perdev_minors;
 
-Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
-More information can be found at www.csr.com. Follow CSR on Twitter at http://twitter.com/CSR_PLC and read our blog at www.csr.com/blog
+And code in function blk_alloc_devt on checking partition number agains=
+t
+disk minors:
+	/* in consecutive minor range? */
+	if (part->partno < disk->minors) {
+		*devt =3D MKDEV(disk->major, disk->first_minor + part->partno);
+		return 0;
+	}
+
+-Aaron
+
+>=20
+> Regards,
+> Jongman Heo.
+
