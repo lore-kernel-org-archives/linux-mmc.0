@@ -1,57 +1,130 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH 10/14] mmc: mmci: Cache MMCICLOCK and MMCIPOWER register
-Date: Mon, 9 Jan 2012 16:12:51 +0100
-Message-ID: <4F0B03F3.4020005@stericsson.com>
-References: <1323106560-5218-1-git-send-email-ulf.hansson@stericsson.com> <1323106560-5218-11-git-send-email-ulf.hansson@stericsson.com> <20120108102533.GA21765@n2100.arm.linux.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Dmitry Shmidt <dimitrysh@google.com>
+Subject: [PATCH V3] mmc: Set suspend/resume bus operations if CONFIG_PM_RUNTIME is used
+Date: Mon, 9 Jan 2012 10:04:22 -0800
+Message-ID: <20120109180858.C5AAB3835D@ushik.mtv.corp.google.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:34788 "EHLO
-	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755625Ab2AIPNR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2012 10:13:17 -0500
-In-Reply-To: <20120108102533.GA21765@n2100.arm.linux.org.uk>
+Received: from mail-gy0-f202.google.com ([209.85.160.202]:34489 "EHLO
+	mail-gy0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932388Ab2AISJA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2012 13:09:00 -0500
+Received: by ghrr15 with SMTP id r15so430819ghr.1
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Jan 2012 10:08:59 -0800 (PST)
+Received: from ushik.mtv.corp.google.com (ushik.mtv.corp.google.com [172.18.102.96])
+	by wpzn4.hot.corp.google.com (Postfix) with ESMTP id 24DCA1E004D
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Jan 2012 10:08:59 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lee Jones <lee.jones@linaro.org>
+To: linux-mmc@vger.kernel.org
 
-Hi again,
+Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+---
+ drivers/mmc/card/block.c |    4 ++--
+ drivers/mmc/core/bus.c   |   27 +++++++++------------------
+ include/linux/mmc/card.h |    2 +-
+ 3 files changed, 12 insertions(+), 21 deletions(-)
 
-Russell King - ARM Linux wrote:
-> On Mon, Dec 05, 2011 at 06:35:56PM +0100, Ulf Hansson wrote:
->> Instead of reading a register value everytime we need to
->> apply a new value for it, maintain a cached copy for it.
->> This also means we are able to skip writes that are not
->> needed.
-> 
-> I'm not sure this is a good idea.  The ARM Primecells require a certain
-> number of bus clocks and MCLK periods between writes to both these
-> registers, and reading them back helps to ensure that we conform to
-> that requirement.  Maintaining a cached copy of them allows faster
-> writes to these registers which could cause that requirement to be
-> violated.
-
-I were just about to update my patch according to your proposal, when I 
-realized the only place were the registers were previously "read before 
-write", were at an SDIO corner case in pio_write.
-
-Earlier the register values were always written, without considering the 
-old value. Thus the impact with this patch is kind of only decreasing 
-the number of writes and affects a corner case for SDIO.
-
-Do you anyway prefer to add a register "read before write" even if it 
-never has been needed before?
-
-> 
-> What you could do is read the register, modify, and check whether the
-> modification has had any effect before writing it back.  That will
-> allow unnecessary writes to still be skipped.
-> 
-
-Sorry for spamming you.
-
-BR
-Ulf Hansson
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1e0e27c..5724ae1 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1676,8 +1676,8 @@ static void mmc_blk_remove(struct mmc_card *card)
+ 	mmc_set_drvdata(card, NULL);
+ }
+ 
+-#ifdef CONFIG_PM
+-static int mmc_blk_suspend(struct mmc_card *card, pm_message_t state)
++#ifdef CONFIG_PM_SLEEP
++static int mmc_blk_suspend(struct mmc_card *card)
+ {
+ 	struct mmc_blk_data *part_md;
+ 	struct mmc_blk_data *md = mmc_get_drvdata(card);
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 6be4924..f325aa6 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -122,18 +122,19 @@ static int mmc_bus_remove(struct device *dev)
+ 	return 0;
+ }
+ 
+-static int mmc_bus_suspend(struct device *dev, pm_message_t state)
++#ifdef CONFIG_PM_SLEEP
++static int mmc_bus_pm_suspend(struct device *dev)
+ {
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+ 	int ret = 0;
+ 
+ 	if (dev->driver && drv->suspend)
+-		ret = drv->suspend(card, state);
++		ret = drv->suspend(card);
+ 	return ret;
+ }
+ 
+-static int mmc_bus_resume(struct device *dev)
++static int mmc_bus_pm_resume(struct device *dev)
+ {
+ 	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+@@ -143,9 +144,9 @@ static int mmc_bus_resume(struct device *dev)
+ 		ret = drv->resume(card);
+ 	return ret;
+ }
++#endif /* CONFIG_PM_SLEEP */
+ 
+ #ifdef CONFIG_PM_RUNTIME
+-
+ static int mmc_runtime_suspend(struct device *dev)
+ {
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+@@ -164,21 +165,13 @@ static int mmc_runtime_idle(struct device *dev)
+ {
+ 	return pm_runtime_suspend(dev);
+ }
++#endif /* CONFIG_PM_RUNTIME */
+ 
+ static const struct dev_pm_ops mmc_bus_pm_ops = {
+-	.runtime_suspend	= mmc_runtime_suspend,
+-	.runtime_resume		= mmc_runtime_resume,
+-	.runtime_idle		= mmc_runtime_idle,
++	SET_SYSTEM_SLEEP_PM_OPS(mmc_bus_pm_suspend, mmc_bus_pm_resume)
++	SET_RUNTIME_PM_OPS(mmc_runtime_suspend, mmc_runtime_resume, mmc_runtime_idle)
+ };
+ 
+-#define MMC_PM_OPS_PTR	(&mmc_bus_pm_ops)
+-
+-#else /* !CONFIG_PM_RUNTIME */
+-
+-#define MMC_PM_OPS_PTR	NULL
+-
+-#endif /* !CONFIG_PM_RUNTIME */
+-
+ static struct bus_type mmc_bus_type = {
+ 	.name		= "mmc",
+ 	.dev_attrs	= mmc_dev_attrs,
+@@ -186,9 +179,7 @@ static struct bus_type mmc_bus_type = {
+ 	.uevent		= mmc_bus_uevent,
+ 	.probe		= mmc_bus_probe,
+ 	.remove		= mmc_bus_remove,
+-	.suspend	= mmc_bus_suspend,
+-	.resume		= mmc_bus_resume,
+-	.pm		= MMC_PM_OPS_PTR,
++	.pm		= &mmc_bus_pm_ops,
+ };
+ 
+ int mmc_register_bus(void)
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index c8ef9bc..80caf1d 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -455,7 +455,7 @@ struct mmc_driver {
+ 	struct device_driver drv;
+ 	int (*probe)(struct mmc_card *);
+ 	void (*remove)(struct mmc_card *);
+-	int (*suspend)(struct mmc_card *, pm_message_t);
++	int (*suspend)(struct mmc_card *);
+ 	int (*resume)(struct mmc_card *);
+ };
+ 
+-- 
+1.7.3.1
 
