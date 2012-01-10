@@ -1,17 +1,17 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
  cards
-Date: Tue, 10 Jan 2012 11:22:37 +0200
-Message-ID: <4F0C035D.7070705@intel.com>
+Date: Tue, 10 Jan 2012 11:33:41 +0200
+Message-ID: <4F0C05F5.4030909@intel.com>
 References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:60697 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:4806 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754337Ab2AJJWh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 Jan 2012 04:22:37 -0500
+	id S1754424Ab2AJJdm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Jan 2012 04:33:42 -0500
 In-Reply-To: <4F0AF96B.4050500@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -59,10 +59,6 @@ On 09/01/12 16:27, Ulf Hansson wrote:
 > :-)
 > 
 > Then there is lot of other things around mmc we also should not change.
-
-Can you give an example of a change in existing functionality?  Isn't
-everything either a bug fix or new functionality?
-
 > 
 >>
 >>> Anyway, this is the actual issue this patch is trying to solve. If you
@@ -89,17 +85,14 @@ everything either a bug fix or new functionality?
 > only prevent you from executing a CMD13 if the get_cd function says the card
 > is still there. I kind of micro optimization I think, unless you very often
 > encounters errors in the block layer.
-
-No, the rescan calls that code, so if get_cd() returns 0 the card will be
-removed irrespective of whether it has been pulled out slowly or not.
-
 > 
 > The key in this patch is that a rescan work is triggered to fully verify
 > that the card is still there and if not, it can remove it. I don't think
 > this is such a big matter, but of course this is my own opinion. :-)
 
-Another issue with your patch is that the card will not be removed unless
-there is subsequent I/O to cause an I/O error and subsequent rescan.
+In that case it needs to be selected by the driver e.g.
+add MMC_CAP2_RESCAN_ON_ERROR
+
 
 > 
 >>>> You are assuming:
@@ -123,14 +116,6 @@ there is subsequent I/O to cause an I/O error and subsequent rescan.
 >> stop responding, for example by power-cycling.  That would be in
 >> conflict with your approach because it would power cycle on every single
 >> card removal.
->
-> This is pure hypothetical and the simple solution to such an idea would
-> just be to do a "power-cycle attempt" before considering scheduling the
-> rescan work in the mmc_detect_card_removed function.
-
-Nevertheless, in your case a power-cycle would be done for every card removal.
-
->
 >>
 >>>> Both those assumptions may be true, but there is no evidence that they are.
 >>>>
