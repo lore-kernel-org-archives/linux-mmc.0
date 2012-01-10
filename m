@@ -1,24 +1,24 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
  cards
-Date: Tue, 10 Jan 2012 14:10:53 +0200
-Message-ID: <4F0C2ACD.4090002@intel.com>
-References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com> <4F0C035D.7070705@intel.com> <4F0C1A1C.8070007@stericsson.com>
+Date: Tue, 10 Jan 2012 14:21:37 +0200
+Message-ID: <4F0C2D51.9060506@intel.com>
+References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com> <4F0C05F5.4030909@intel.com> <4F0C1B19.5010806@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:31037 "EHLO mga02.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:22923 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753451Ab2AJMLB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 Jan 2012 07:11:01 -0500
-In-Reply-To: <4F0C1A1C.8070007@stericsson.com>
+	id S1752134Ab2AJMVj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Jan 2012 07:21:39 -0500
+In-Reply-To: <4F0C1B19.5010806@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@stericsson.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-On 10/01/12 12:59, Ulf Hansson wrote:
+On 10/01/12 13:03, Ulf Hansson wrote:
 > Adrian Hunter wrote:
 >> On 09/01/12 16:27, Ulf Hansson wrote:
 >>> Adrian Hunter wrote:
@@ -63,10 +63,7 @@ On 10/01/12 12:59, Ulf Hansson wrote:
 >>> :-)
 >>>
 >>> Then there is lot of other things around mmc we also should not change.
->>
->> Can you give an example of a change in existing functionality?  Isn't
->> everything either a bug fix or new functionality?
->>
+>>>
 >>>>> Anyway, this is the actual issue this patch is trying to solve. If you
 >>>>> remove a card "slowly", a "rescan" work, which the GPIO irq has
 >>>>> triggered to
@@ -93,48 +90,24 @@ On 10/01/12 12:59, Ulf Hansson wrote:
 >>> only prevent you from executing a CMD13 if the get_cd function says the card
 >>> is still there. I kind of micro optimization I think, unless you very often
 >>> encounters errors in the block layer.
->>
->> No, the rescan calls that code, so if get_cd() returns 0 the card will be
->> removed irrespective of whether it has been pulled out slowly or not.
-> 
-> That is not correct. The rescan uses the get_cd function to find out if
-> it really make sense to try to initialize a new card. It is not used for
-> removing existing cards.
-
-mmc_rescan() first calls host->bus_ops->detect() to see if the card is still
-there.  If the card does not respond then it is removed.  Then mmc_rescan
-attempts to initialize a new card. host->bus_ops->detect() is not used for that.
-
-> 
-> You were referring to "[PATCH 2/4 v4] MMC/SD: Add callback function to
-> detect card". This patch will prevent the bus_ops->alive function to be
-> called if the get_cd function indicates that the card is still there. I
-> can not see how this on it's own will help out to solve the issue my
-> patch is trying to solve.
-
-Yes it will because it is called by mmc_rescan() and used to remove the card
-via host->bus_ops->detect()
-
-> 
->>
+>>>
 >>> The key in this patch is that a rescan work is triggered to fully verify
 >>> that the card is still there and if not, it can remove it. I don't think
 >>> this is such a big matter, but of course this is my own opinion. :-)
 >>
->> Another issue with your patch is that the card will not be removed unless
->> there is subsequent I/O to cause an I/O error and subsequent rescan.
+>> In that case it needs to be selected by the driver e.g.
+>> add MMC_CAP2_RESCAN_ON_ERROR
 >>
 > 
-> This is exactly the problem this patch is trying to solve. Instead of
-> "forever" keeping the card inserted and thus returning errors for every
-> new I/O request, we trigger a rescan to fully remove the card.
+> That could be an option. Maybe better to have it default turned on (ie
+> MMC_CAP2_NO_RESCAN_ON_ERROR) to see if we encounter any problems with crappy
+> cards. Otherwise we will never know. What do you think?
 
-If the user pulls out the card slowly so that the rescan sees the card still
-there, then if there is no I/O there will be no I/O error and the kernel
-will not remove the card - until the user sticks in another card or tries to
-access files that are not there.
+MMC_CAP2_RESCAN_ON_ERROR is better to avoid problems for all the drivers
+that don't need the change e.g. sdhci
 
 > 
+>>
 >>>>>> You are assuming:
 >>>>>>     1. that a poor quality card will not return errors for a few
 >>>>>>     commands and then resume operation
@@ -158,21 +131,7 @@ access files that are not there.
 >>>> stop responding, for example by power-cycling.  That would be in
 >>>> conflict with your approach because it would power cycle on every single
 >>>> card removal.
->>> This is pure hypothetical and the simple solution to such an idea would
->>> just be to do a "power-cycle attempt" before considering scheduling the
->>> rescan work in the mmc_detect_card_removed function.
->>
->> Nevertheless, in your case a power-cycle would be done for every card
->> removal.
-> 
-> Do quite follow, what do you mean by every card removal? We detect that
-> the card has been removed (by using _mmc_detect_card_removed) and only
-> at that time a rescan (power-cycle) is triggered.
-
-
-
-> 
->>
+>>>>
 >>>>>> Both those assumptions may be true, but there is no evidence that they
 >>>>>> are.
 >>>>>>
@@ -264,9 +223,6 @@ access files that are not there.
 >>>
 >>
 >>
-> 
-> BR
-> Ulf Hansson
 > 
 > 
 
