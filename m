@@ -1,209 +1,272 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
  cards
-Date: Tue, 10 Jan 2012 12:03:53 +0100
-Message-ID: <4F0C1B19.5010806@stericsson.com>
-References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com> <4F0C05F5.4030909@intel.com>
+Date: Tue, 10 Jan 2012 14:10:53 +0200
+Message-ID: <4F0C2ACD.4090002@intel.com>
+References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com> <4F0C035D.7070705@intel.com> <4F0C1A1C.8070007@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog109.obsmtp.com ([207.126.144.127]:33678 "EHLO
-	eu1sys200aog109.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752338Ab2AJLEJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2012 06:04:09 -0500
-In-Reply-To: <4F0C05F5.4030909@intel.com>
+Received: from mga02.intel.com ([134.134.136.20]:31037 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753451Ab2AJMLB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Jan 2012 07:11:01 -0500
+In-Reply-To: <4F0C1A1C.8070007@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
+To: Ulf Hansson <ulf.hansson@stericsson.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Adrian Hunter wrote:
-> On 09/01/12 16:27, Ulf Hansson wrote:
->> Adrian Hunter wrote:
->>> On 09/01/12 15:14, Ulf Hansson wrote:
->>>>>> My concern is more about what we actually can trust; either the GPIO irq
->>>>>> which likely is giving more than one irq when inserting/removing a card
->>>>>> since the slot is probably not glitch free, or that a "rescan" runs to
->>>>>> make
->>>>>> sure a CMD13 is accepted from the previously inserted card.
->>>>> Yes, I guess you would need to debounce the GPIO if you wanted to rely
->>>>> on it.
->>>>>
->>>>>> Moreover, the issue this patch tries to solve can not be solved without
->>>>>> doing a "rescan" which must be triggered from the the block layer some
->>>>>> how.
->>>>>> I thought this new function that you previously added
->>>>>> "mmc_detect_card_remove" was the proper place to do this.
+On 10/01/12 12:59, Ulf Hansson wrote:
+> Adrian Hunter wrote:
+>> On 09/01/12 16:27, Ulf Hansson wrote:
+>>> Adrian Hunter wrote:
+>>>> On 09/01/12 15:14, Ulf Hansson wrote:
+>>>>>>> My concern is more about what we actually can trust; either the GPIO irq
+>>>>>>> which likely is giving more than one irq when inserting/removing a card
+>>>>>>> since the slot is probably not glitch free, or that a "rescan" runs to
+>>>>>>> make
+>>>>>>> sure a CMD13 is accepted from the previously inserted card.
+>>>>>> Yes, I guess you would need to debounce the GPIO if you wanted to rely
+>>>>>> on it.
 >>>>>>
->>>>>>>> Let the mmc_detect_card_removed function trigger a new detect
->>>>>>>> work immediately when it discovers that a card has been removed.
->>>>>>> This is changing some long-standing functionality i.e. the card is not
->>>>>>> removed
->>>>>>> without a card detect event.  It is difficult to know whether that
->>>>>>> will be
->>>>>>> very
->>>>>>> bad for poor quality cards,
->>>>>> Doing a mmc_detect (rescan) will in the end just issue a CMD13 to the card
->>>>>> to make sure it is still present, that is already done from the block
->>>>>> layer
->>>>>> after each read/write request. So I can not see that "poor quality cards"
->>>>>> will have any further problem with this patch, but I might miss
->>>>>> something!?
->>>>> The block driver has never caused a card to be removed before.  That is new
->>>>> and it is designed to preserve existing behaviour i.e. do not remove a card
->>>>> without a card detect event.
->>>> True, but is this a problem!?
->>> Better not to find out.
->> :-)
->>
->> Then there is lot of other things around mmc we also should not change.
->>
->>>> Anyway, this is the actual issue this patch is trying to solve. If you
->>>> remove a card "slowly", a "rescan" work, which the GPIO irq has triggered to
->>>> run will run the CMD13 to verify that the card is still there. Since it has
->>>> not completely been removed the CMD13 will succeed and the card will not be
->>>> removed.
->>>>
->>>> Moreover every other new block request will soon start to fail and always
->>>> do; until a new rescan is triggered (which is when you insert a new card or
->>>> do a suspend-resume cycle). In practice I think it is more preferred that
->>>> the card gets removed and it's corresponding block device.
->>> There are other ways to solve that problem.  Apart from my previous
->>> suggestion, there is also the possibility to make use of ->get_cd
->>> instead of CMD13, someone already posted a patch for that
->>> "[PATCH 2/4 v4] MMC/SD: Add callback function to detect card"
->>> but it should probably be selected on a per driver basis (i.e. add a
->>> MMC_CAP2 for it).  I guess you would still need to debounce the GPIO
->>> though.
+>>>>>>> Moreover, the issue this patch tries to solve can not be solved without
+>>>>>>> doing a "rescan" which must be triggered from the the block layer some
+>>>>>>> how.
+>>>>>>> I thought this new function that you previously added
+>>>>>>> "mmc_detect_card_remove" was the proper place to do this.
+>>>>>>>
+>>>>>>>>> Let the mmc_detect_card_removed function trigger a new detect
+>>>>>>>>> work immediately when it discovers that a card has been removed.
+>>>>>>>> This is changing some long-standing functionality i.e. the card is not
+>>>>>>>> removed
+>>>>>>>> without a card detect event.  It is difficult to know whether that
+>>>>>>>> will be
+>>>>>>>> very
+>>>>>>>> bad for poor quality cards,
+>>>>>>> Doing a mmc_detect (rescan) will in the end just issue a CMD13 to the
+>>>>>>> card
+>>>>>>> to make sure it is still present, that is already done from the block
+>>>>>>> layer
+>>>>>>> after each read/write request. So I can not see that "poor quality
+>>>>>>> cards"
+>>>>>>> will have any further problem with this patch, but I might miss
+>>>>>>> something!?
+>>>>>> The block driver has never caused a card to be removed before.  That
+>>>>>> is new
+>>>>>> and it is designed to preserve existing behaviour i.e. do not remove a
+>>>>>> card
+>>>>>> without a card detect event.
+>>>>> True, but is this a problem!?
+>>>> Better not to find out.
+>>> :-)
 >>>
->> Unfortunately that wont help to solve this issue either. That patch will
->> only prevent you from executing a CMD13 if the get_cd function says the card
->> is still there. I kind of micro optimization I think, unless you very often
->> encounters errors in the block layer.
+>>> Then there is lot of other things around mmc we also should not change.
 >>
->> The key in this patch is that a rescan work is triggered to fully verify
->> that the card is still there and if not, it can remove it. I don't think
->> this is such a big matter, but of course this is my own opinion. :-)
-> 
-> In that case it needs to be selected by the driver e.g.
-> add MMC_CAP2_RESCAN_ON_ERROR
-> 
-
-That could be an option. Maybe better to have it default turned on (ie 
-MMC_CAP2_NO_RESCAN_ON_ERROR) to see if we encounter any problems with 
-crappy cards. Otherwise we will never know. What do you think?
-
-> 
->>>>> You are assuming:
->>>>>     1. that a poor quality card will not return errors for a few
->>>>>     commands and then resume operation
->>>> I see your point. I did some tests with a bunch of old crappy cards, both SD
->>>> and MMC which I had in my collection. I have found none of these to trigger
->>>> a undesirable removal of the card.
->>>>
->>>> Of course I have only a subset of all cards, so this can not be fully tested
->>>> for all existing cards.
->>>>
->>>>>     2. that removing a card on error is desirable
->>>> Well, we will just fire of a rescan work to check if the card has been
->>>> removed. If it is still there it will of course not be removed.
->>> Not if it has stopped responding.  Again, this is a change in behaviour.
->>> Previously, a card that stopped responding was not removed.
->>>
->>> Perhaps in the future someone will want to try to recover cards that
->>> stop responding, for example by power-cycling.  That would be in
->>> conflict with your approach because it would power cycle on every single
->>> card removal.
->>>
->>>>> Both those assumptions may be true, but there is no evidence that they are.
+>> Can you give an example of a change in existing functionality?  Isn't
+>> everything either a bug fix or new functionality?
+>>
+>>>>> Anyway, this is the actual issue this patch is trying to solve. If you
+>>>>> remove a card "slowly", a "rescan" work, which the GPIO irq has
+>>>>> triggered to
+>>>>> run will run the CMD13 to verify that the card is still there. Since it
+>>>>> has
+>>>>> not completely been removed the CMD13 will succeed and the card will
+>>>>> not be
+>>>>> removed.
 >>>>>
+>>>>> Moreover every other new block request will soon start to fail and always
+>>>>> do; until a new rescan is triggered (which is when you insert a new
+>>>>> card or
+>>>>> do a suspend-resume cycle). In practice I think it is more preferred that
+>>>>> the card gets removed and it's corresponding block device.
+>>>> There are other ways to solve that problem.  Apart from my previous
+>>>> suggestion, there is also the possibility to make use of ->get_cd
+>>>> instead of CMD13, someone already posted a patch for that
+>>>> "[PATCH 2/4 v4] MMC/SD: Add callback function to detect card"
+>>>> but it should probably be selected on a per driver basis (i.e. add a
+>>>> MMC_CAP2 for it).  I guess you would still need to debounce the GPIO
+>>>> though.
+>>>>
+>>> Unfortunately that wont help to solve this issue either. That patch will
+>>> only prevent you from executing a CMD13 if the get_cd function says the card
+>>> is still there. I kind of micro optimization I think, unless you very often
+>>> encounters errors in the block layer.
+>>
+>> No, the rescan calls that code, so if get_cd() returns 0 the card will be
+>> removed irrespective of whether it has been pulled out slowly or not.
+> 
+> That is not correct. The rescan uses the get_cd function to find out if
+> it really make sense to try to initialize a new card. It is not used for
+> removing existing cards.
+
+mmc_rescan() first calls host->bus_ops->detect() to see if the card is still
+there.  If the card does not respond then it is removed.  Then mmc_rescan
+attempts to initialize a new card. host->bus_ops->detect() is not used for that.
+
+> 
+> You were referring to "[PATCH 2/4 v4] MMC/SD: Add callback function to
+> detect card". This patch will prevent the bus_ops->alive function to be
+> called if the get_cd function indicates that the card is still there. I
+> can not see how this on it's own will help out to solve the issue my
+> patch is trying to solve.
+
+Yes it will because it is called by mmc_rescan() and used to remove the card
+via host->bus_ops->detect()
+
+> 
+>>
+>>> The key in this patch is that a rescan work is triggered to fully verify
+>>> that the card is still there and if not, it can remove it. I don't think
+>>> this is such a big matter, but of course this is my own opinion. :-)
+>>
+>> Another issue with your patch is that the card will not be removed unless
+>> there is subsequent I/O to cause an I/O error and subsequent rescan.
+>>
+> 
+> This is exactly the problem this patch is trying to solve. Instead of
+> "forever" keeping the card inserted and thus returning errors for every
+> new I/O request, we trigger a rescan to fully remove the card.
+
+If the user pulls out the card slowly so that the rescan sees the card still
+there, then if there is no I/O there will be no I/O error and the kernel
+will not remove the card - until the user sticks in another card or tries to
+access files that are not there.
+
+> 
+>>>>>> You are assuming:
+>>>>>>     1. that a poor quality card will not return errors for a few
+>>>>>>     commands and then resume operation
+>>>>> I see your point. I did some tests with a bunch of old crappy cards,
+>>>>> both SD
+>>>>> and MMC which I had in my collection. I have found none of these to
+>>>>> trigger
+>>>>> a undesirable removal of the card.
 >>>>>
->>>>>>>> This will solve the described issue above. Moreover we make sure
->>>>>>>> the detect work is executed as soon as possible, since there is
->>>>>>>> no reason for waiting for a "delayed" detect to happen.
->>>>>>>>
->>>>>>>> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
->>>>>>>> ---
->>>>>>>>   drivers/mmc/core/core.c  |   24 +++++++++++++-----------
->>>>>>>>   include/linux/mmc/host.h |    1 -
->>>>>>>>   2 files changed, 13 insertions(+), 12 deletions(-)
->>>>>>>>
->>>>>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>>>>>> index 4770807..7bc02f4 100644
->>>>>>>> --- a/drivers/mmc/core/core.c
->>>>>>>> +++ b/drivers/mmc/core/core.c
->>>>>>>> @@ -1462,7 +1462,6 @@ void mmc_detect_change(struct mmc_host *host,
->>>>>>>> unsigned long delay)
->>>>>>>>       WARN_ON(host->removed);
->>>>>>>>       spin_unlock_irqrestore(&host->lock, flags);
->>>>>>>>   #endif
->>>>>>>> -    host->detect_change = 1;
->>>>>>>>       mmc_schedule_delayed_work(&host->detect, delay);
->>>>>>>>   }
->>>>>>>>
->>>>>>>> @@ -2077,18 +2076,23 @@ int _mmc_detect_card_removed(struct mmc_host
->>>>>>>> *host)
->>>>>>>>   int mmc_detect_card_removed(struct mmc_host *host)
->>>>>>>>   {
->>>>>>>>       struct mmc_card *card = host->card;
->>>>>>>> +    int ret = 1;
->>>>>>>>
->>>>>>>>       WARN_ON(!host->claimed);
->>>>>>>> -    /*
->>>>>>>> -     * The card will be considered unchanged unless we have been
->>>>>>>> asked to
->>>>>>>> -     * detect a change or host requires polling to provide card
->>>>>>>> detection.
->>>>>>>> -     */
->>>>>>>> -    if (card&&  !host->detect_change&&  !(host->caps&
->>>>>>>> MMC_CAP_NEEDS_POLL))
->>>>>>>> -        return mmc_card_removed(card);
->>>>>>>>
->>>>>>>> -    host->detect_change = 0;
->>>>>>>> +    if (card&&  !mmc_card_removed(card)) {
->>>>>>>> +        if (_mmc_detect_card_removed(host)) {
->>>>>>>> +            /*
->>>>>>>> +             * Make sure a detect work is always executed and also
->>>>>>>> +             * do it as soon as possible.
->>>>>>>> +             */
->>>>>>>> +            cancel_delayed_work(&host->detect);
->>>>>>>> +            mmc_detect_change(host, 0);
->>>>>>>> +        }
->>>>>>>> +        ret = mmc_card_removed(card);
->>>>>>>> +    }
->>>>>>>>
->>>>>>>> -    return _mmc_detect_card_removed(host);
->>>>>>>> +    return ret;
->>>>>>>>   }
->>>>>>>>   EXPORT_SYMBOL(mmc_detect_card_removed);
->>>>>>>>
->>>>>>>> @@ -2112,8 +2116,6 @@ void mmc_rescan(struct work_struct *work)
->>>>>>>>       &&  !(host->caps&  MMC_CAP_NONREMOVABLE))
->>>>>>>>           host->bus_ops->detect(host);
->>>>>>>>
->>>>>>>> -    host->detect_change = 0;
->>>>>>>> -
->>>>>>>>       /*
->>>>>>>>        * Let mmc_bus_put() free the bus/bus_ops if we've found that
->>>>>>>>        * the card is no longer present.
->>>>>>>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->>>>>>>> index 031d865..09fa5e6 100644
->>>>>>>> --- a/include/linux/mmc/host.h
->>>>>>>> +++ b/include/linux/mmc/host.h
->>>>>>>> @@ -305,7 +305,6 @@ struct mmc_host {
->>>>>>>>       int            claim_cnt;    /* "claim" nesting count */
->>>>>>>>
->>>>>>>>       struct delayed_work    detect;
->>>>>>>> -    int            detect_change;    /* card detect flag */
->>>>>>>>       struct mmc_hotplug    hotplug;
->>>>>>>>
->>>>>>>>       const struct mmc_bus_ops *bus_ops;    /* current bus driver */
->>>>>> Br
->>>>>> Ulf Hansson
+>>>>> Of course I have only a subset of all cards, so this can not be fully
+>>>>> tested
+>>>>> for all existing cards.
+>>>>>
+>>>>>>     2. that removing a card on error is desirable
+>>>>> Well, we will just fire of a rescan work to check if the card has been
+>>>>> removed. If it is still there it will of course not be removed.
+>>>> Not if it has stopped responding.  Again, this is a change in behaviour.
+>>>> Previously, a card that stopped responding was not removed.
+>>>>
+>>>> Perhaps in the future someone will want to try to recover cards that
+>>>> stop responding, for example by power-cycling.  That would be in
+>>>> conflict with your approach because it would power cycle on every single
+>>>> card removal.
+>>> This is pure hypothetical and the simple solution to such an idea would
+>>> just be to do a "power-cycle attempt" before considering scheduling the
+>>> rescan work in the mmc_detect_card_removed function.
+>>
+>> Nevertheless, in your case a power-cycle would be done for every card
+>> removal.
+> 
+> Do quite follow, what do you mean by every card removal? We detect that
+> the card has been removed (by using _mmc_detect_card_removed) and only
+> at that time a rescan (power-cycle) is triggered.
+
+
+
+> 
+>>
+>>>>>> Both those assumptions may be true, but there is no evidence that they
+>>>>>> are.
 >>>>>>
+>>>>>>
+>>>>>>>>> This will solve the described issue above. Moreover we make sure
+>>>>>>>>> the detect work is executed as soon as possible, since there is
+>>>>>>>>> no reason for waiting for a "delayed" detect to happen.
+>>>>>>>>>
+>>>>>>>>> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
+>>>>>>>>> ---
+>>>>>>>>>   drivers/mmc/core/core.c  |   24 +++++++++++++-----------
+>>>>>>>>>   include/linux/mmc/host.h |    1 -
+>>>>>>>>>   2 files changed, 13 insertions(+), 12 deletions(-)
+>>>>>>>>>
+>>>>>>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>>>>>>>> index 4770807..7bc02f4 100644
+>>>>>>>>> --- a/drivers/mmc/core/core.c
+>>>>>>>>> +++ b/drivers/mmc/core/core.c
+>>>>>>>>> @@ -1462,7 +1462,6 @@ void mmc_detect_change(struct mmc_host *host,
+>>>>>>>>> unsigned long delay)
+>>>>>>>>>       WARN_ON(host->removed);
+>>>>>>>>>       spin_unlock_irqrestore(&host->lock, flags);
+>>>>>>>>>   #endif
+>>>>>>>>> -    host->detect_change = 1;
+>>>>>>>>>       mmc_schedule_delayed_work(&host->detect, delay);
+>>>>>>>>>   }
+>>>>>>>>>
+>>>>>>>>> @@ -2077,18 +2076,23 @@ int _mmc_detect_card_removed(struct mmc_host
+>>>>>>>>> *host)
+>>>>>>>>>   int mmc_detect_card_removed(struct mmc_host *host)
+>>>>>>>>>   {
+>>>>>>>>>       struct mmc_card *card = host->card;
+>>>>>>>>> +    int ret = 1;
+>>>>>>>>>
+>>>>>>>>>       WARN_ON(!host->claimed);
+>>>>>>>>> -    /*
+>>>>>>>>> -     * The card will be considered unchanged unless we have been
+>>>>>>>>> asked to
+>>>>>>>>> -     * detect a change or host requires polling to provide card
+>>>>>>>>> detection.
+>>>>>>>>> -     */
+>>>>>>>>> -    if (card&&  !host->detect_change&&  !(host->caps&
+>>>>>>>>> MMC_CAP_NEEDS_POLL))
+>>>>>>>>> -        return mmc_card_removed(card);
+>>>>>>>>>
+>>>>>>>>> -    host->detect_change = 0;
+>>>>>>>>> +    if (card&&  !mmc_card_removed(card)) {
+>>>>>>>>> +        if (_mmc_detect_card_removed(host)) {
+>>>>>>>>> +            /*
+>>>>>>>>> +             * Make sure a detect work is always executed and also
+>>>>>>>>> +             * do it as soon as possible.
+>>>>>>>>> +             */
+>>>>>>>>> +            cancel_delayed_work(&host->detect);
+>>>>>>>>> +            mmc_detect_change(host, 0);
+>>>>>>>>> +        }
+>>>>>>>>> +        ret = mmc_card_removed(card);
+>>>>>>>>> +    }
+>>>>>>>>>
+>>>>>>>>> -    return _mmc_detect_card_removed(host);
+>>>>>>>>> +    return ret;
+>>>>>>>>>   }
+>>>>>>>>>   EXPORT_SYMBOL(mmc_detect_card_removed);
+>>>>>>>>>
+>>>>>>>>> @@ -2112,8 +2116,6 @@ void mmc_rescan(struct work_struct *work)
+>>>>>>>>>       &&  !(host->caps&  MMC_CAP_NONREMOVABLE))
+>>>>>>>>>           host->bus_ops->detect(host);
+>>>>>>>>>
+>>>>>>>>> -    host->detect_change = 0;
+>>>>>>>>> -
+>>>>>>>>>       /*
+>>>>>>>>>        * Let mmc_bus_put() free the bus/bus_ops if we've found that
+>>>>>>>>>        * the card is no longer present.
+>>>>>>>>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>>>>>>>>> index 031d865..09fa5e6 100644
+>>>>>>>>> --- a/include/linux/mmc/host.h
+>>>>>>>>> +++ b/include/linux/mmc/host.h
+>>>>>>>>> @@ -305,7 +305,6 @@ struct mmc_host {
+>>>>>>>>>       int            claim_cnt;    /* "claim" nesting count */
+>>>>>>>>>
+>>>>>>>>>       struct delayed_work    detect;
+>>>>>>>>> -    int            detect_change;    /* card detect flag */
+>>>>>>>>>       struct mmc_hotplug    hotplug;
+>>>>>>>>>
+>>>>>>>>>       const struct mmc_bus_ops *bus_ops;    /* current bus driver */
+>>>>>>> Br
+>>>>>>> Ulf Hansson
+>>>>>>>
+>>>>
 >>>
 >>
+>>
+> 
+> BR
+> Ulf Hansson
 > 
 > 
 
