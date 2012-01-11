@@ -1,62 +1,68 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH][v2] mmc:sdhci: restore the enabled dma when do reset all
-Date: Wed, 11 Jan 2012 14:25:34 -0500
-Message-ID: <m2zkdudosx.fsf@bob.laptop.org>
-References: <1325147580-31281-1-git-send-email-Shaohui.Xie@freescale.com>
+Subject: Re: [PATCH] mmc: fix a deadlock between system suspend and MMC block IO
+Date: Wed, 11 Jan 2012 14:30:05 -0500
+Message-ID: <m2vcoidole.fsf@bob.laptop.org>
+References: <Pine.LNX.4.64.1201041527480.30506@axis700.grange>
+	<m2lipnfs9x.fsf@bob.laptop.org>
+	<6C03668EAF45B747AF947A1603D1B300023363E95E@SAUSEXMBP01.amd.com>
+	<m2hb0bfr1r.fsf@bob.laptop.org>
+	<6C03668EAF45B747AF947A1603D1B3000233727D97@SAUSEXMBP01.amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58805 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:35512 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932901Ab2AKTZu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 Jan 2012 14:25:50 -0500
-In-Reply-To: <1325147580-31281-1-git-send-email-Shaohui.Xie@freescale.com>
-	(Shaohui Xie's message of "Thu, 29 Dec 2011 16:33:00 +0800")
+	id S932901Ab2AKTaU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 11 Jan 2012 14:30:20 -0500
+In-Reply-To: <6C03668EAF45B747AF947A1603D1B3000233727D97@SAUSEXMBP01.amd.com>
+	(Arindam Nath's message of "Wed, 11 Jan 2012 02:56:17 -0600")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shaohui Xie <Shaohui.Xie@freescale.com>
-Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
+To: "Nath, Arindam" <Arindam.Nath@amd.com>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Andrei Warkentin <andreiw@vmware.com>
 
-Hi Shaohui,
+Hi,
 
-On Thu, Dec 29 2011, Shaohui Xie wrote:
-> If dma is enabled, it'll be cleared when reset all is performed, this can
-> be observed on some platforms, such as P2041 which has a version 2.3
-> controller, but platform like P4080 which has a version 2.2 controller,
-> does not suffer this, so we will check if the dma is enabled, we should
-> restore it after reset all.
+On Wed, Jan 11 2012, Nath, Arindam wrote:
+> I think we can push this patch now. If someone has any objections, we
+> can discuss later.
 >
-> Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
-> ---
-> based on http://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git,
-> branch 'for-linus'.
->
-> changes for v2:
-> call the wrapper API instead of access the register directly.
->
->  drivers/mmc/host/sdhci.c |    5 +++++
->  1 files changed, 5 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 19ed580..cf6a048 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -214,6 +214,11 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
->  
->  	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
->  		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
-> +
-> +	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
-> +		if ((host->ops->enable_dma) && (mask & SDHCI_RESET_ALL))
-> +			host->ops->enable_dma(host);
-> +	}
->  }
->  
->  static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+> Acked-by: Arindam Nath <arindam.nath@amd.com>
 
-Thanks, I'll merge this for 3.3.
+Thanks, I agree.  Guennadi, I've merged it for 3.3 with the following change:
 
-- Chris.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index f0b464f..bec0bf2 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2175,6 +2175,7 @@ void mmc_stop_host(struct mmc_host *host)
+ 
+ 	mmc_bus_get(host);
+ 	if (host->bus_ops && !host->bus_dead) {
++		/* Calling bus_ops->remove() with a claimed host can deadlock */
+ 		if (host->bus_ops->remove)
+ 			host->bus_ops->remove(host);
+ 
+@@ -2398,7 +2399,9 @@ int mmc_suspend_host(struct mmc_host *host)
+ 			if (err == -ENOSYS || !host->bus_ops->resume) {
+ 				/*
+ 				 * We simply "remove" the card in this case.
+-				 * It will be redetected on resume.
++				 * It will be redetected on resume.  (Calling
++				 * bus_ops->remove() with a claimed host can
++				 * deadlock.)
+ 				 */
+ 				if (host->bus_ops->remove)
+ 					host->bus_ops->remove(host);
+@@ -2491,7 +2494,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+ 		if (!host->bus_ops || host->bus_ops->suspend)
+ 			break;
+ 
+-		/* On 2 occasions above bus_ops->remove() is called unlocked */
++		/* Calling bus_ops->remove() with a claimed host can deadlock */
+ 		if (host->bus_ops->remove)
+ 			host->bus_ops->remove(host);
+ 
 -- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
