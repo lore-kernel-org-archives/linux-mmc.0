@@ -1,92 +1,68 @@
-From: Xie Shaohui-B21989 <B21989@freescale.com>
-Subject: RE: [PATCH][v2] mmc:sdhci: restore the enabled dma when do reset all
-Date: Wed, 11 Jan 2012 09:12:03 +0000
-Message-ID: <ED492CCEAF882048BC2237DE806547C901FD38@039-SN2MPN1-013.039d.mgd.msft.net>
-References: <1325147580-31281-1-git-send-email-Shaohui.Xie@freescale.com>
+From: James Hogan <james.hogan@imgtec.com>
+Subject: Re: mmc: dw_mmc: miscaculated the fifo-depth with wrong bit operation
+Date: Wed, 11 Jan 2012 09:28:21 +0000
+Message-ID: <4F0D5635.50201@imgtec.com>
+References: <4F0A3DA4.8010909@samsung.com> <4F0AB63B.4030202@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:1784
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756937Ab2AKJMF convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 Jan 2012 04:12:05 -0500
-Content-Language: en-US
+Received: from multi.imgtec.com ([194.200.65.239]:1628 "EHLO multi.imgtec.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756590Ab2AKJ2Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 11 Jan 2012 04:28:25 -0500
+In-Reply-To: <4F0AB63B.4030202@imgtec.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Xie Shaohui-B21989 <B21989@freescale.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>
 
-Hello, Chris,
+On 09/01/12 09:41, James Hogan wrote:
+> On 01/09/2012 01:06 AM, Jaehoon Chung wrote:
+>> In FIFOTH register, can find "bit[27:16] = FIFO_DEPTH - 1".
+>> Finally, FIFO_DEPTH = bit[27:16] + 1.
+>>
+>> Now, Used the 0x7ff. but 0xfff is right.
+> 
+> Nice catch. The patch itself looks okay, but I don't think the commit
+> message is very understandable, maybe something like this would be better?:
+> 
+> In FIFOTH register, the RX_WMark field (bits[27:16]) defaults to
+> FIFO_DEPTH - 1. When reading it, bits[26:16] were being used, so fix it
+> to use the mask 0xfff instead of 0x7ff.
+> 
+> Cheers
+> James
 
-May I have your attention to this patch, please?
+Are you happy having your signed-off-by against this identical patch with
+a modified message Jaehoon?
 
+From: Jaehoon Chung <jh80.chung@samsung.com>
 
-Best Regards, 
-Shaohui Xie 
+In FIFOTH register, the RX_WMark field (bits[27:16]) defaults to
+FIFO_DEPTH - 1. When reading it, bits[26:16] were being used, so fix it
+to use the mask 0xfff instead of 0x7ff.
 
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Reviewed-by: James Hogan <james.hogan@imgtec.com>
+---
+ drivers/mmc/host/dw_mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
->-----Original Message-----
->From: Xie Shaohui-B21989
->Sent: Friday, January 06, 2012 3:58 PM
->To: 'cjb@laptop.org'; linux-mmc@vger.kernel.org
->Cc: linuxppc-dev@lists.ozlabs.org; Xie Shaohui-B21989
->Subject: RE: [PATCH][v2] mmc:sdhci: restore the enabled dma when do reset
->all
->
->Hello, Chris,
->
->Do you have any concern for this patch?
->
->
->Best Regards,
->Shaohui Xie
->
->>-----Original Message-----
->>From: Xie Shaohui-B21989
->>Sent: Thursday, December 29, 2011 4:33 PM
->>To: linux-mmc@vger.kernel.org
->>Cc: linuxppc-dev@lists.ozlabs.org; Xie Shaohui-B21989
->>Subject: [PATCH][v2] mmc:sdhci: restore the enabled dma when do reset
->>all
->>
->>If dma is enabled, it'll be cleared when reset all is performed, this
->>can be observed on some platforms, such as P2041 which has a version
->>2.3 controller, but platform like P4080 which has a version 2.2
->>controller, does not suffer this, so we will check if the dma is
->>enabled, we should restore it after reset all.
->>
->>Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
->>---
->>based on http://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git,
->>branch 'for-linus'.
->>
->>changes for v2:
->>call the wrapper API instead of access the register directly.
->>
->> drivers/mmc/host/sdhci.c |    5 +++++
->> 1 files changed, 5 insertions(+), 0 deletions(-)
->>
->>diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
->>19ed580..cf6a048 100644
->>--- a/drivers/mmc/host/sdhci.c
->>+++ b/drivers/mmc/host/sdhci.c
->>@@ -214,6 +214,11 @@ static void sdhci_reset(struct sdhci_host *host,
->>u8
->>mask)
->>
->> 	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
->> 		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
->>+
->>+	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
->>+		if ((host->ops->enable_dma) && (mask & SDHCI_RESET_ALL))
->>+			host->ops->enable_dma(host);
->>+	}
->> }
->>
->> static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
->>--
->>1.6.4
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index cc54808..6ea6185 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2075,7 +2075,7 @@ static int dw_mci_probe(struct platform_device *pdev)
+ 		 * should put it in the platform data.
+ 		 */
+ 		fifo_size = mci_readl(host, FIFOTH);
+-		fifo_size = 1 + ((fifo_size >> 16) & 0x7ff);
++		fifo_size = 1 + ((fifo_size >> 16) & 0xfff);
+ 	} else {
+ 		fifo_size = host->pdata->fifo_depth;
+ 	}
+-- 
+1.7.2.3
 
 
