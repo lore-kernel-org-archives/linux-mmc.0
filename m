@@ -1,127 +1,92 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH] mmc: fix a deadlock between system suspend and MMC
- block IO
-Date: Wed, 11 Jan 2012 02:56:17 -0600
-Message-ID: <6C03668EAF45B747AF947A1603D1B3000233727D97@SAUSEXMBP01.amd.com>
-References: <Pine.LNX.4.64.1201041527480.30506@axis700.grange>
-	<m2lipnfs9x.fsf@bob.laptop.org>
-	<6C03668EAF45B747AF947A1603D1B300023363E95E@SAUSEXMBP01.amd.com>
- <m2hb0bfr1r.fsf@bob.laptop.org>
+From: Xie Shaohui-B21989 <B21989@freescale.com>
+Subject: RE: [PATCH][v2] mmc:sdhci: restore the enabled dma when do reset all
+Date: Wed, 11 Jan 2012 09:12:03 +0000
+Message-ID: <ED492CCEAF882048BC2237DE806547C901FD38@039-SN2MPN1-013.039d.mgd.msft.net>
+References: <1325147580-31281-1-git-send-email-Shaohui.Xie@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:43164
+Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:1784
 	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756117Ab2AKI42 convert rfc822-to-8bit
+	by vger.kernel.org with ESMTP id S1756937Ab2AKJMF convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 Jan 2012 03:56:28 -0500
-In-Reply-To: <m2hb0bfr1r.fsf@bob.laptop.org>
+	Wed, 11 Jan 2012 04:12:05 -0500
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Andrei Warkentin <andreiw@vmware.com>
+To: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Xie Shaohui-B21989 <B21989@freescale.com>
 
-Hi Chris,
+Hello, Chris,
 
-> -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org]
-> Sent: Wednesday, January 04, 2012 8:34 PM
-> To: Nath, Arindam
-> Cc: Guennadi Liakhovetski; linux-mmc@vger.kernel.org; Andrei Warkentin
-> Subject: Re: [PATCH] mmc: fix a deadlock between system suspend and MMC
-> block IO
-> 
-> Hi,
-> 
-> Adding Andrei to CC.  Thanks,
-> 
-> - Chris.
-> 
-> On Wed, Jan 04 2012, Nath, Arindam wrote:
-> > Hi Chris,
-> >
-> >> -----Original Message-----
-> >> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> >> owner@vger.kernel.org] On Behalf Of Chris Ball
-> >> Sent: Wednesday, January 04, 2012 8:07 PM
-> >> To: Guennadi Liakhovetski
-> >> Cc: linux-mmc@vger.kernel.org
-> >> Subject: Re: [PATCH] mmc: fix a deadlock between system suspend and
-> MMC
-> >> block IO
-> >>
-> >> Hi,
-> >>
-> >> On Wed, Jan 04 2012, Guennadi Liakhovetski wrote:
-> >> > Performing MMC block IO with simultaneous STR can lead to a
-> deadlock:
-> >> the
-> >> > mmc_pm_notify() function claims the host and then calls bus
-> .remove()
-> >> > method, which lands in mmc_blk_remove(), which calls
-> >> mmc_blk_remove_req()
-> >> > then it goes to -> mmc_cleanup_queue() -> kthread_stop(), which
-> waits
-> >> for
-> >> > the mmc-block thread to stop. If the mmc-block thread at that time
-> is
-> >> > processing block requests, it will also try to claim the host in
-> >> > mmc_blk_issue_rq() and block there. This patch fixes the problem
-> by
-> >> > calling .remove() before claiming the host.
-> >> >
-> >> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> >> > ---
-> >> >  drivers/mmc/core/core.c |    4 ++--
-> >> >  1 files changed, 2 insertions(+), 2 deletions(-)
-> >> >
-> >> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> >> > index a2aa860..a68f085 100644
-> >> > --- a/drivers/mmc/core/core.c
-> >> > +++ b/drivers/mmc/core/core.c
-> >> > @@ -2476,11 +2476,11 @@ int mmc_pm_notify(struct notifier_block
-> >> *notify_block,
-> >> >  		if (!host->bus_ops || host->bus_ops->suspend)
-> >> >  			break;
-> >> >
-> >> > -		mmc_claim_host(host);
-> >> > -
-> >> > +		/* On 2 occasions above bus_ops->remove() is called
-> >> unlocked */
-> >> >  		if (host->bus_ops->remove)
-> >> >  			host->bus_ops->remove(host);
-> >> >
-> >> > +		mmc_claim_host(host);
-> >> >  		mmc_detach_bus(host);
-> >> >  		mmc_power_off(host);
-> >> >  		mmc_release_host(host);
-> >>
-> >> Thanks.  The commit message explanation is very good, but the
-> comment
-> >> is
-> >> a bit cryptic.  Shall we make it longer?  I think even just:
-> >>
-> >> /* Calling bus_ops->remove() with a claimed host can deadlock */
-> >>
-> >> would be better.
-> >
-> > This patch will actually fix a long standing issue for most of us.
-> But
-> > if I remember correctly, Andrei had some comments on the same patch
-> > some time back. Would it be good to include him for comments?
+May I have your attention to this patch, please?
 
-I think we can push this patch now. If someone has any objections, we can discuss later.
 
-Acked-by: Arindam Nath <arindam.nath@amd.com>
+Best Regards, 
+Shaohui Xie 
 
-Thanks,
-Arindam
 
-> 
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
+>-----Original Message-----
+>From: Xie Shaohui-B21989
+>Sent: Friday, January 06, 2012 3:58 PM
+>To: 'cjb@laptop.org'; linux-mmc@vger.kernel.org
+>Cc: linuxppc-dev@lists.ozlabs.org; Xie Shaohui-B21989
+>Subject: RE: [PATCH][v2] mmc:sdhci: restore the enabled dma when do reset
+>all
+>
+>Hello, Chris,
+>
+>Do you have any concern for this patch?
+>
+>
+>Best Regards,
+>Shaohui Xie
+>
+>>-----Original Message-----
+>>From: Xie Shaohui-B21989
+>>Sent: Thursday, December 29, 2011 4:33 PM
+>>To: linux-mmc@vger.kernel.org
+>>Cc: linuxppc-dev@lists.ozlabs.org; Xie Shaohui-B21989
+>>Subject: [PATCH][v2] mmc:sdhci: restore the enabled dma when do reset
+>>all
+>>
+>>If dma is enabled, it'll be cleared when reset all is performed, this
+>>can be observed on some platforms, such as P2041 which has a version
+>>2.3 controller, but platform like P4080 which has a version 2.2
+>>controller, does not suffer this, so we will check if the dma is
+>>enabled, we should restore it after reset all.
+>>
+>>Signed-off-by: Shaohui Xie <Shaohui.Xie@freescale.com>
+>>---
+>>based on http://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git,
+>>branch 'for-linus'.
+>>
+>>changes for v2:
+>>call the wrapper API instead of access the register directly.
+>>
+>> drivers/mmc/host/sdhci.c |    5 +++++
+>> 1 files changed, 5 insertions(+), 0 deletions(-)
+>>
+>>diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
+>>19ed580..cf6a048 100644
+>>--- a/drivers/mmc/host/sdhci.c
+>>+++ b/drivers/mmc/host/sdhci.c
+>>@@ -214,6 +214,11 @@ static void sdhci_reset(struct sdhci_host *host,
+>>u8
+>>mask)
+>>
+>> 	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
+>> 		sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, ier);
+>>+
+>>+	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+>>+		if ((host->ops->enable_dma) && (mask & SDHCI_RESET_ALL))
+>>+			host->ops->enable_dma(host);
+>>+	}
+>> }
+>>
+>> static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+>>--
+>>1.6.4
 
 
