@@ -1,141 +1,61 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v5] mmc: support BKOPS feature for eMMC
-Date: Wed, 11 Jan 2012 14:32:57 -0500
-Message-ID: <m2r4z6dogm.fsf@bob.laptop.org>
-References: <4F04F512.1020909@samsung.com>
-	<CANfBPZ_b0ypRUrhJH4izFUOJmxg4fh5u1NM5ED6eSiKeVibyAg@mail.gmail.com>
+Subject: Re: [PATCH v3 2/2] mmc: sdhci: Deal with failure case in sdhci_suspend_host
+Date: Wed, 11 Jan 2012 14:39:34 -0500
+Message-ID: <m2mx9udo5l.fsf@bob.laptop.org>
+References: <1325642863-8734-1-git-send-email-aaron.lu@amd.com>
+	<4F0B001C.9010205@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35539 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:38724 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932414Ab2AKTdU convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2012 14:33:20 -0500
-In-Reply-To: <CANfBPZ_b0ypRUrhJH4izFUOJmxg4fh5u1NM5ED6eSiKeVibyAg@mail.gmail.com>
-	(Venkatraman S.'s message of "Wed, 11 Jan 2012 19:01:06 +0530")
+	id S1757862Ab2AKTjp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 11 Jan 2012 14:39:45 -0500
+In-Reply-To: <4F0B001C.9010205@intel.com> (Adrian Hunter's message of "Mon, 09
+	Jan 2012 16:56:28 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, per.forlin@stericsson.com, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Aaron Lu <aaron.lu@amd.com>, linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>
 
 Hi,
 
-On Wed, Jan 11 2012, S, Venkatraman wrote:
-> On Thu, Jan 5, 2012 at 6:25 AM, Jaehoon Chung <jh80.chung@samsung.com=
-> wrote:
->>
->> Enable eMMC background operations (BKOPS) feature.
->>
->> If URGENT_BKOPS is set after a response, note that BKOPS
->> are required. After all I/O requests are finished, run
->> BKOPS if required. Should read/write operations be requested
->> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
->> and then service the request.
->>
->> If you want to enable this feature, set MMC_CAP2_BKOPS.
->>
->> Future considerations
->> =C2=A0* Check BKOPS_LEVEL=3D1 and start BKOPS in a preventive manner=
-=2E
->> =C2=A0* Interrupt ongoing BKOPS before powering off the card.
->> =C2=A0* How get BKOPS_STATUS value.(periodically send ext_csd comman=
-d?)
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> ---
->> Changelog V5:
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- Rebase based on the latest mmc-next.
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- modify codes based-on Chris's comment
->> Changelog V4:
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- Add mmc_read_bkops_status
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- When URGENT_BKOPS(level2-3), didn't use=
- HPI command.
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- In mmc_switch(), use R1B/R1 according t=
-o level.
->> Changelog V3:
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- move the bkops setting's location in mm=
-c_blk_issue_rw_rq
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- modify condition checking
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- bkops_en is assigned ext_csd[EXT_CSD_BK=
-OPS_EN] instead of "1"
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- remove the unused code
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- change pr_debug instead of pr_warn in m=
-mc_send_hpi_cmd
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- Add the Future consideration suggested =
-by Per
->> Changelog V2:
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- Use EXCEPTION_STATUS instead of URGENT_=
-BKOPS
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0- Add function to check Exception_status(=
-for eMMC4.5)
->>
->> =C2=A0drivers/mmc/card/block.c =C2=A0 | =C2=A0 11 +++++
->> =C2=A0drivers/mmc/card/queue.c =C2=A0 | =C2=A0 =C2=A03 +
->> =C2=A0drivers/mmc/core/core.c =C2=A0 =C2=A0| =C2=A0105
->> ++++++++++++++++++++++++++++++++++++++++++++
->> =C2=A0drivers/mmc/core/mmc.c =C2=A0 =C2=A0 | =C2=A0 =C2=A08 +++
->> =C2=A0drivers/mmc/core/mmc_ops.c | =C2=A0 12 +++++-
->> =C2=A0include/linux/mmc/card.h =C2=A0 | =C2=A0 13 +++++
->> =C2=A0include/linux/mmc/core.h =C2=A0 | =C2=A0 =C2=A04 ++
->> =C2=A0include/linux/mmc/host.h =C2=A0 | =C2=A0 =C2=A01 +
->> =C2=A0include/linux/mmc/mmc.h =C2=A0 =C2=A0| =C2=A0 19 ++++++++
->> =C2=A09 files changed, 175 insertions(+), 1 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index 0cad48a..5e3c580 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -1273,6 +1273,17 @@ static int mmc_blk_issue_rw_rq(struct
->> mmc_queue *mq, struct request *rqc)
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0type =3D rq_d=
-ata_dir(req) =3D=3D READ ? MMC_BLK_READ : MMC_BLK_WRITE;
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0mmc_queue_bou=
-nce_post(mq_rq);
->>
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 /*
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0* Check BKO=
-PS urgency from each R1 response
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (mmc_card_mmc(=
-card) &&
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 (brq->cmd.flags =3D=3D MMC_RSP_R1B ||
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0brq->cmd.flags =3D=3D MMC_RSP_R1) &&
+On Mon, Jan 09 2012, Adrian Hunter wrote:
+> On 04/01/12 04:07, Aaron Lu wrote:
+>> V3: Rework on top of Adrian's vmmc patch
+>> 
+>> V2: Error processing code in sdhci_pci_suspend should not be deleted,
+>> it is used to resume hosts which are already successfully suspended for
+>> a multi slot pci device as suggested by Adrian.
+>> 
+>> If there are errors happened in sdhci_suspend_host, handle it so that
+>> when the function returns with an error, the host's behaviour is the
+>> same before this function call, e.g. card detection is enabled and
+>> tuning timer is active, etc.
+>> 
+>> Signed-off-by: Philip Rakity <prakity@marvell.com>
+>> Signed-off-by: Aaron Lu <aaron.lu@amd.com>
+>> Cc: Adrian Hunter <adrian.hunter@intel.com>
 >
-> I tested this patch on my setup and this condition never hit, as othe=
-r
-> flags are also set in cmd.flags
-> It should have been
-> (brq->cmd.flags & MMC_RSP_R1B ||
->  brq->cmd.flags & MMC_RSP_R1)
->
->
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 (brq->cmd.resp[0] & R1_EXCEPTION_EVENT)) {
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 if (mmc_is_exception_event(card,
->> EXT_CSD_URGENT_BKOPS))
->
-> This causes a crash on my test setup. The next req is already given t=
-o
-> the controller (see the mmc_start_req call a few lines above) and a
-> parallel request to read BKOPS_STATUS is interfering with it. This
-> won't work with any host controller driver which implements async_req
-> functions.
->
-> But there is no need to read BKOPS_STATUS at this stage anyway. By
-> checking R1_EXCEPTION_EVENT and the BKOPS bit inside the response, th=
-e
-> need to do BKOPS can be determined (as only a urgen_bkops state would
-> trigger a R1_EXCEPTION_EVENT in the first place)
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Thanks very much for testing!  I'll drop this from my 3.3 queue --
-we can try it again for 3.4.
+Thanks, I'll push for 3.3 with Adrian's ACK and:
 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a8f1f7e..0636e9a 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2348,7 +2348,8 @@ out:
+ 
+ int sdhci_suspend_host(struct sdhci_host *host)
+ {
+-	int ret, has_tuning_timer;
++	int ret;
++	bool has_tuning_timer;
+ 
+ 	sdhci_disable_card_detection(host);
+ 
 - Chris.
---=20
+-- 
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
