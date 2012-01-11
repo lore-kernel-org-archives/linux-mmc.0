@@ -1,65 +1,54 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: mmc: dw_mmc: miscaculated the fifo-depth with wrong bit operation
-Date: Wed, 11 Jan 2012 14:14:37 -0500
-Message-ID: <m28vlef3vm.fsf@bob.laptop.org>
-References: <4F0A3DA4.8010909@samsung.com> <4F0AB63B.4030202@imgtec.com>
-	<4F0D5635.50201@imgtec.com> <4F0D5D6A.9040200@samsung.com>
+Subject: Re: Erasing MMC partition from kernel module, what's best way to do that?
+Date: Wed, 11 Jan 2012 14:19:55 -0500
+Message-ID: <m24nw2f3ms.fsf@bob.laptop.org>
+References: <21845361.155711326104068000.JavaMail.weblogic@epml02>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56665 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:37240 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932901Ab2AKTOw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 Jan 2012 14:14:52 -0500
-In-Reply-To: <4F0D5D6A.9040200@samsung.com> (Jaehoon Chung's message of "Wed,
-	11 Jan 2012 18:59:06 +0900")
+	id S933339Ab2AKTUF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 11 Jan 2012 14:20:05 -0500
+In-Reply-To: <21845361.155711326104068000.JavaMail.weblogic@epml02> (JONGMAN
+	HEO's message of "Mon, 09 Jan 2012 10:14:28 +0000 (GMT)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: James Hogan <james.hogan@imgtec.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>
+To: jongman.heo@samsung.com
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 Hi,
 
-On Wed, Jan 11 2012, Jaehoon Chung wrote:
-> Hi James,
+On Mon, Jan 09 2012, JONGMAN HEO wrote:
+> Hi all,
+> Please excuse me, I have some noob question regarding MMC.
 >
-> Thank you..:)
+> I'd like to erase(discard) certain MMC partition from kernel space
+> (i.e. kernel module).
+> I know this is quite ugly design, but I have no choice but to
+> implement the feature (erasing given MMC partition) within kernel
+> space for other reasons.
 >
-> Best Regards,
-> Jaehoon Chung
+> Assume /dev/mmcblk0p2 needs to be erased.
 >
-> On 01/11/2012 06:28 PM, James Hogan wrote:
+> First, I tried to use BLKDISCARD ioctl. From user space, it works.
+> In kernel space, I had to use ugly code, like set_fs(), filp_open(),
+> etc in order to access "/dev/mmcblk0p2" device.
+> I stuck at sys_ioctl(), which is not exported symbol so that I
+> couldn't use the sys_ioctl() from my module for the BLKDISCARD ioctl.
 >
->> On 09/01/12 09:41, James Hogan wrote:
->>> On 01/09/2012 01:06 AM, Jaehoon Chung wrote:
->>>> In FIFOTH register, can find "bit[27:16] = FIFO_DEPTH - 1".
->>>> Finally, FIFO_DEPTH = bit[27:16] + 1.
->>>>
->>>> Now, Used the 0x7ff. but 0xfff is right.
->>>
->>> Nice catch. The patch itself looks okay, but I don't think the commit
->>> message is very understandable, maybe something like this would be better?:
->>>
->>> In FIFOTH register, the RX_WMark field (bits[27:16]) defaults to
->>> FIFO_DEPTH - 1. When reading it, bits[26:16] were being used, so fix it
->>> to use the mask 0xfff instead of 0x7ff.
->>>
->>> Cheers
->>> James
->> 
->> Are you happy having your signed-off-by against this identical patch with
->> a modified message Jaehoon?
->> 
->> From: Jaehoon Chung <jh80.chung@samsung.com>
->> 
->> In FIFOTH register, the RX_WMark field (bits[27:16]) defaults to
->> FIFO_DEPTH - 1. When reading it, bits[26:16] were being used, so fix it
->> to use the mask 0xfff instead of 0x7ff.
->> 
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Reviewed-by: James Hogan <james.hogan@imgtec.com>
+> Alternatively, I want to make a new exported API to execute the
+> discard request for "/dev/mmcblk0p2" device (like
+> mmc_test_area_erase() in mmc_test.c).
+> Here, it seems that I need to get "struct mmc_card *card" instance,
+> which is a first parameter of mmc_erase().
+>
+> How can I get the "card" instance for current MMC device? Is there any
+> way to do that?
 
-Thanks, merged to mmc-next for 3.3.
+I don't think we'll be interested in helping you with this -- as you
+say, this is a very ugly design, and we already have the proper
+userspace solution.
 
 - Chris.
 -- 
