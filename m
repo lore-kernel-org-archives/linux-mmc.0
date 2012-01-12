@@ -1,92 +1,195 @@
-From: "Nori, Sekhar" <nsekhar@ti.com>
-Subject: RE: [PATCH v2] arm, da8xx, mmc: set second MMC controllers default
- queue
-Date: Thu, 12 Jan 2012 09:19:44 +0000
-Message-ID: <DF0F476B391FA8409C78302C7BA518B63178E65C@DBDE01.ent.ti.com>
-References: <1322991210-20486-1-git-send-email-hs@denx.de>
- <1323327357-23886-1-git-send-email-hs@denx.de> <4F0D4848.4070000@denx.de>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH] MMC-4.5 Data Tag Support
+Date: Thu, 12 Jan 2012 19:58:29 +0530
+Message-ID: <CANfBPZ9gDkHK01bsMjf_CpkA-8s1U3X4WnAxO_=q9XdGODuf7w@mail.gmail.com>
+References: <1324453157-30081-1-git-send-email-saugata.das@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:55565 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751715Ab2ALJTz convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2012 04:19:55 -0500
-In-Reply-To: <4F0D4848.4070000@denx.de>
-Content-Language: en-US
+Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:46669 "EHLO
+	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751556Ab2ALO2w convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 12 Jan 2012 09:28:52 -0500
+Received: by mail-bk0-f51.google.com with SMTP id q10so1343266bka.38
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2012 06:28:50 -0800 (PST)
+In-Reply-To: <1324453157-30081-1-git-send-email-saugata.das@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "hs@denx.de" <hs@denx.de>
-Cc: "juha.kuikka@gmail.com" <juha.kuikka@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>, Ido Yariv <ido@wizery.com>, Wolfgang Denk <wd@denx.de>, Sergei Shtylyov <sshtylyov@mvista.com>
+To: Saugata Das <saugata.das@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-Hi Heiko,
+On Wed, Dec 21, 2011 at 1:09 PM, Saugata Das <saugata.das@stericsson.co=
+m> wrote:
+> From: Saugata Das <saugata.das@linaro.org>
+>
+> MMC-4.5 data tag feature will be used to store the file system meta-d=
+ata in the
+> tagged region of eMMC. This will improve the write and subsequent rea=
+d transfer
+> time for the meta data.
+>
+> Signed-off-by: Saugata Das <saugata.das@linaro.org>
 
-On Wed, Jan 11, 2012 at 13:58:56, Heiko Schocher wrote:
-> Hello,
-> 
-> Heiko Schocher wrote:
-> > The MMC driver allocates channels with EVENTQ_DEFAULT, they
-> > get put into EVENTQ_1, which the second EDMA controller does
-> > not have and hence transfers stall. This is fixed
-> > in commit f23fe857bbea393b4b94fe2218c98d934bd3d4cf
-> > "ARM: davinci: Explicitly set channel controllers' default queues"
-> > from Ido Yariv. This patch sets immediately in edma_probe()
-> > the proper default_queue, so this patch does not really fix
-> > something, it is more a cosmetic change.
-> > 
-> > Signed-off-by: Heiko Schocher <hs@denx.de>
-> > Signed-off-by: juha.kuikka@gmail.com
-> > Reported-by: juha.kuikka@gmail.com
-> > Acked-by: Rajashekhara, Sudhakar <sudhakar.raj@ti.com>
-> > Cc: linux-mmc@vger.kernel.org
-> > Cc: davinci-linux-open-source@linux.davincidsp.com
-> > Cc: Rajashekhara, Sudhakar <sudhakar.raj@ti.com>
-> > Cc: Ido Yariv <ido@wizery.com>
-> > Cc: Sekhar Nori <nsekhar@ti.com>
-> > Cc: Wolfgang Denk <wd@denx.de>
-> > Cc: Sergei Shtylyov <sshtylyov@mvista.com>
-> > 
-> > ---
-> > - changes for v2:
-> >   - add comment from Sergei Shtylyov
-> >     add in commit message the commit's summary in parens.
-> >   - add comment from Ido Yariv:
-> >     changed comment and commit message
-> >   - added Acked-by from Rajashekhara, Sudhakar
-> > 
-> >  arch/arm/mach-davinci/dma.c |   10 ++++++----
-> >  1 files changed, 6 insertions(+), 4 deletions(-)
-> 
-> Ping. Can this patch go into mainline, or are there some more objections?
+I tested this on a device which supports a data tag unit size of 8K.
+Tested-by: Venkatraman S <svenkatr@ti.com>
 
-Hmm, looks like you asking "no need for applying my
-patch" in an earlier e-mail on this topic made me
-discard this.
+Chris,
+  Can this go into 3.3 ?
 
-I had a look and the patch is OK. Except, I think the
-comment can do better without reference to TC1 since
-its not relevant once the code has been fixed. Also,
-the comment is better placed in edma.h where near
-the default_queue member definition since that's where
-folks will look up when setting up the default queue.
-
-So, the comment can simply be:
-
-+		/*
-+		 * Default queue is expected to be a low-priority queue.
-+		 * This way, long transfers on the default queue started
-+		 * by the codec engine will not cause audio defects.
-
-Similarly you can drop references to the MMC/SD issue and the
-fix in the commit text since its not directly relevant to your
-patch.
-
-Can you fix this up so I can apply it? Please note that patches
-for mach-davinci should be pre-fixed with "ARM: davinci: ".
-
-Also Cc linux-arm-kernel@lists.infradead.org on ARM patch submissions.
-
-Thanks,
-Sekhar
-
+> ---
+> =A0drivers/mmc/card/block.c | =A0 17 +++++++++++++++--
+> =A0drivers/mmc/core/mmc.c =A0 | =A0 14 ++++++++++++++
+> =A0include/linux/mmc/card.h | =A0 =A02 ++
+> =A0include/linux/mmc/mmc.h =A0| =A0 =A03 +++
+> =A04 files changed, 34 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index a1cb21f..af3b6c3 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -995,6 +995,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_r=
+eq *mqrq,
+> =A0 =A0 =A0 =A0struct mmc_blk_request *brq =3D &mqrq->brq;
+> =A0 =A0 =A0 =A0struct request *req =3D mqrq->req;
+> =A0 =A0 =A0 =A0struct mmc_blk_data *md =3D mq->data;
+> + =A0 =A0 =A0 bool do_data_tag;
+>
+> =A0 =A0 =A0 =A0/*
+> =A0 =A0 =A0 =A0 * Reliable writes are used to implement Forced Unit A=
+ccess and
+> @@ -1071,6 +1072,16 @@ static void mmc_blk_rw_rq_prep(struct mmc_queu=
+e_req *mqrq,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_apply_rel_rw(brq, card, req);
+>
+> =A0 =A0 =A0 =A0/*
+> + =A0 =A0 =A0 =A0* Data tag is used only during writing meta data to =
+speed
+> + =A0 =A0 =A0 =A0* up write and any subsequent read of this meta data
+> + =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 do_data_tag =3D (card->ext_csd.data_tag_unit_size) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (req->cmd_flags & REQ_META) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (rq_data_dir(req) =3D=3D WRITE) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((brq->data.blocks * brq->data.blksz) >=
+=3D
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_tag_unit_size) ;
+> +
+> + =A0 =A0 =A0 /*
+> =A0 =A0 =A0 =A0 * Pre-defined multi-block transfers are preferable to
+> =A0 =A0 =A0 =A0 * open ended-ones (and necessary for reliable writes)=
+=2E
+> =A0 =A0 =A0 =A0 * However, it is not sufficient to just send CMD23,
+> @@ -1091,10 +1102,12 @@ static void mmc_blk_rw_rq_prep(struct mmc_que=
+ue_req *mqrq,
+>
+> =A0 =A0 =A0 =A0if ((md->flags & MMC_BLK_CMD23) &&
+> =A0 =A0 =A0 =A0 =A0 =A0mmc_op_multi(brq->cmd.opcode) &&
+> - =A0 =A0 =A0 =A0 =A0 (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO=
+_CMD23))) {
+> + =A0 =A0 =A0 =A0 =A0 (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO=
+_CMD23) ||
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 do_data_tag)) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->sbc.opcode =3D MMC_SET_BLOCK_COUN=
+T;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->sbc.arg =3D brq->data.blocks |
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_rel_wr ? (1 << 31) =
+: 0);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_rel_wr ? (1 << 31) =
+: 0) |
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_data_tag ? (1 << 29=
+) : 0);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->sbc.flags =3D MMC_RSP_R1 | MMC_CM=
+D_AC;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->mrq.sbc =3D &brq->sbc;
+> =A0 =A0 =A0 =A0}
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index dbf421a..244049b 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -488,6 +488,20 @@ static int mmc_read_ext_csd(struct mmc_card *car=
+d, u8 *ext_csd)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_CACHE_=
+SIZE + 1] << 8 |
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_CACHE_=
+SIZE + 2] << 16 |
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_CACHE_=
+SIZE + 3] << 24;
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] =3D=
+=3D 1)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_sect=
+or_size =3D 4096;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_sect=
+or_size =3D 512;
+> +
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((ext_csd[EXT_CSD_DATA_TAG_SUPPORT] =
+& 1) &&
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (ext_csd[EXT_CSD_TAG_UN=
+IT_SIZE] <=3D 8)) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_tag_=
+unit_size =3D
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((unsigned int) 1 << ex=
+t_csd[EXT_CSD_TAG_UNIT_SIZE]) *
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (card->ext_csd.data_sec=
+tor_size);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_tag_=
+unit_size =3D 0;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> =A0 =A0 =A0 =A0}
+>
+> =A0out:
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 415f2db..a55668d 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -71,6 +71,8 @@ struct mmc_ext_csd {
+> =A0 =A0 =A0 =A0bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hpi_en; =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* HPI enablebit */
+> =A0 =A0 =A0 =A0bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hpi; =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* HPI support bit */
+> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0hpi_cmd; =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0/* cmd used as HPI */
+> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0data_sector_size; =A0=
+ =A0 =A0 /* 512Bytes or 4KB */
+> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0data_tag_unit_size;=
+ =A0 =A0 /* DATA TAG UNIT size */
+> =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0raw_part=
+ition_support; =A0/* 160 */
+> =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0raw_eras=
+ed_mem_count; =A0 /* 181 */
+> =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0raw_ext_=
+csd_structure; =A0/* 194 */
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 0e71356..e076f7f 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -273,6 +273,7 @@ struct _mmc_csd {
+> =A0#define EXT_CSD_FLUSH_CACHE =A0 =A0 =A0 =A0 =A0 =A032 =A0 =A0 =A0/=
+* W */
+> =A0#define EXT_CSD_CACHE_CTRL =A0 =A0 =A0 =A0 =A0 =A0 33 =A0 =A0 =A0/=
+* R/W */
+> =A0#define EXT_CSD_POWER_OFF_NOTIFICATION 34 =A0 =A0 =A0/* R/W */
+> +#define EXT_CSD_DATA_SECTOR_SIZE =A0 =A0 =A0 61 =A0 =A0 =A0/* R */
+> =A0#define EXT_CSD_GP_SIZE_MULT =A0 =A0 =A0 =A0 =A0 143 =A0 =A0 /* R/=
+W */
+> =A0#define EXT_CSD_PARTITION_ATTRIBUTE =A0 =A0156 =A0 =A0 /* R/W */
+> =A0#define EXT_CSD_PARTITION_SUPPORT =A0 =A0 =A0160 =A0 =A0 /* RO */
+> @@ -313,6 +314,8 @@ struct _mmc_csd {
+> =A0#define EXT_CSD_POWER_OFF_LONG_TIME =A0 =A0247 =A0 =A0 /* RO */
+> =A0#define EXT_CSD_GENERIC_CMD6_TIME =A0 =A0 =A0248 =A0 =A0 /* RO */
+> =A0#define EXT_CSD_CACHE_SIZE =A0 =A0 =A0 =A0 =A0 =A0 249 =A0 =A0 /* =
+RO, 4 bytes */
+> +#define EXT_CSD_TAG_UNIT_SIZE =A0 =A0 =A0 =A0 =A0498 =A0 =A0 /* RO *=
+/
+> +#define EXT_CSD_DATA_TAG_SUPPORT =A0 =A0 =A0 499 =A0 =A0 /* RO */
+> =A0#define EXT_CSD_HPI_FEATURES =A0 =A0 =A0 =A0 =A0 503 =A0 =A0 /* RO=
+ */
+>
+> =A0/*
+> --
+> 1.7.4.3
+>
+> --
