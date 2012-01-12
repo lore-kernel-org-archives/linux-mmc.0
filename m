@@ -1,195 +1,171 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH] MMC-4.5 Data Tag Support
-Date: Thu, 12 Jan 2012 19:58:29 +0530
-Message-ID: <CANfBPZ9gDkHK01bsMjf_CpkA-8s1U3X4WnAxO_=q9XdGODuf7w@mail.gmail.com>
-References: <1324453157-30081-1-git-send-email-saugata.das@stericsson.com>
+From: Manoj Iyer <manoj.iyer@canonical.com>
+Subject: Ricoh SD card reader, error on r/w lots of data.
+Date: Thu, 12 Jan 2012 16:58:44 +0100 (CET)
+Message-ID: <alpine.DEB.2.02.1201121652280.5761@happy>
+References: <OF3E300FC6.0B39449E-ON49257983.000AB8A4-49257983.000D42BE@mta.ricoh.co.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: MULTIPART/MIXED; BOUNDARY="8323329-1580141188-1326383925=:5761"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:46669 "EHLO
-	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751556Ab2ALO2w convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 Jan 2012 09:28:52 -0500
-Received: by mail-bk0-f51.google.com with SMTP id q10so1343266bka.38
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2012 06:28:50 -0800 (PST)
-In-Reply-To: <1324453157-30081-1-git-send-email-saugata.das@stericsson.com>
+Received: from youngberry.canonical.com ([91.189.89.112]:59275 "EHLO
+	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753991Ab2ALP6t (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2012 10:58:49 -0500
+In-Reply-To: <OF3E300FC6.0B39449E-ON49257983.000AB8A4-49257983.000D42BE@mta.ricoh.co.jp>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Saugata Das <saugata.das@stericsson.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: matsumur@nts.ricoh.co.jp, Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-On Wed, Dec 21, 2011 at 1:09 PM, Saugata Das <saugata.das@stericsson.co=
-m> wrote:
-> From: Saugata Das <saugata.das@linaro.org>
->
-> MMC-4.5 data tag feature will be used to store the file system meta-d=
-ata in the
-> tagged region of eMMC. This will improve the write and subsequent rea=
-d transfer
-> time for the meta data.
->
-> Signed-off-by: Saugata Das <saugata.das@linaro.org>
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-I tested this on a device which supports a data tag unit size of 8K.
-Tested-by: Venkatraman S <svenkatr@ti.com>
+--8323329-1580141188-1326383925=:5761
+Content-Type: TEXT/PLAIN; charset=ISO-2022-JP; format=flowed
 
-Chris,
-  Can this go into 3.3 ?
 
-> ---
-> =A0drivers/mmc/card/block.c | =A0 17 +++++++++++++++--
-> =A0drivers/mmc/core/mmc.c =A0 | =A0 14 ++++++++++++++
-> =A0include/linux/mmc/card.h | =A0 =A02 ++
-> =A0include/linux/mmc/mmc.h =A0| =A0 =A03 +++
-> =A04 files changed, 34 insertions(+), 2 deletions(-)
+
+Hi Chris,
+
+Would like to know what your thoughts are on this before I start digging 
+into finding a solution. I increased the current limit_us from 300ms to 
+600ms and I did see much fewer IO errors reported by the driver. I see 
+that we have routines in mmc/card/block.c that does recovery and reset, 
+are these already in the lines of what Matsumuro-san is suggesting?
+
+Thanks a ton
+Manoj
+
+
+On Thu, 12 Jan 2012, matsumur@nts.ricoh.co.jp wrote:
+
+> Hi Manoj Iyer-san,
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index a1cb21f..af3b6c3 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -995,6 +995,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_r=
-eq *mqrq,
-> =A0 =A0 =A0 =A0struct mmc_blk_request *brq =3D &mqrq->brq;
-> =A0 =A0 =A0 =A0struct request *req =3D mqrq->req;
-> =A0 =A0 =A0 =A0struct mmc_blk_data *md =3D mq->data;
-> + =A0 =A0 =A0 bool do_data_tag;
+> Now, The time limit of SDXC is 500ms, but some old SD(ver.1.x) and MMC must
+> be take more larger time.
 >
-> =A0 =A0 =A0 =A0/*
-> =A0 =A0 =A0 =A0 * Reliable writes are used to implement Forced Unit A=
-ccess and
-> @@ -1071,6 +1072,16 @@ static void mmc_blk_rw_rq_prep(struct mmc_queu=
-e_req *mqrq,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_apply_rel_rw(brq, card, req);
+> Regarding Ricoh SD Controller's error, I am not sure what happened.
+> Do you know which timing the error occurred during data transfer ?
+> If the error occurred when the transfer finishes, you can try to issue an
+> abort command. After that, execute the software reset of CMD/DAT Line.  In
+> that case, the driver must retry the data transfer.
 >
-> =A0 =A0 =A0 =A0/*
-> + =A0 =A0 =A0 =A0* Data tag is used only during writing meta data to =
-speed
-> + =A0 =A0 =A0 =A0* up write and any subsequent read of this meta data
-> + =A0 =A0 =A0 =A0*/
-> + =A0 =A0 =A0 do_data_tag =3D (card->ext_csd.data_tag_unit_size) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (req->cmd_flags & REQ_META) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (rq_data_dir(req) =3D=3D WRITE) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((brq->data.blocks * brq->data.blksz) >=
-=3D
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_tag_unit_size) ;
-> +
-> + =A0 =A0 =A0 /*
-> =A0 =A0 =A0 =A0 * Pre-defined multi-block transfers are preferable to
-> =A0 =A0 =A0 =A0 * open ended-ones (and necessary for reliable writes)=
-=2E
-> =A0 =A0 =A0 =A0 * However, it is not sufficient to just send CMD23,
-> @@ -1091,10 +1102,12 @@ static void mmc_blk_rw_rq_prep(struct mmc_que=
-ue_req *mqrq,
+> Thanks,
 >
-> =A0 =A0 =A0 =A0if ((md->flags & MMC_BLK_CMD23) &&
-> =A0 =A0 =A0 =A0 =A0 =A0mmc_op_multi(brq->cmd.opcode) &&
-> - =A0 =A0 =A0 =A0 =A0 (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO=
-_CMD23))) {
-> + =A0 =A0 =A0 =A0 =A0 (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO=
-_CMD23) ||
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 do_data_tag)) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->sbc.opcode =3D MMC_SET_BLOCK_COUN=
-T;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->sbc.arg =3D brq->data.blocks |
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_rel_wr ? (1 << 31) =
-: 0);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_rel_wr ? (1 << 31) =
-: 0) |
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_data_tag ? (1 << 29=
-) : 0);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->sbc.flags =3D MMC_RSP_R1 | MMC_CM=
-D_AC;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brq->mrq.sbc =3D &brq->sbc;
-> =A0 =A0 =A0 =A0}
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index dbf421a..244049b 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -488,6 +488,20 @@ static int mmc_read_ext_csd(struct mmc_card *car=
-d, u8 *ext_csd)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_CACHE_=
-SIZE + 1] << 8 |
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_CACHE_=
-SIZE + 2] << 16 |
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd[EXT_CSD_CACHE_=
-SIZE + 3] << 24;
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] =3D=
-=3D 1)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_sect=
-or_size =3D 4096;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_sect=
-or_size =3D 512;
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((ext_csd[EXT_CSD_DATA_TAG_SUPPORT] =
-& 1) &&
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (ext_csd[EXT_CSD_TAG_UN=
-IT_SIZE] <=3D 8)) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_tag_=
-unit_size =3D
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((unsigned int) 1 << ex=
-t_csd[EXT_CSD_TAG_UNIT_SIZE]) *
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (card->ext_csd.data_sec=
-tor_size);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_tag_=
-unit_size =3D 0;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> =A0 =A0 =A0 =A0}
+> Koji Matsumuro
+> Ricoh Company,Ltd.
 >
-> =A0out:
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 415f2db..a55668d 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -71,6 +71,8 @@ struct mmc_ext_csd {
-> =A0 =A0 =A0 =A0bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hpi_en; =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* HPI enablebit */
-> =A0 =A0 =A0 =A0bool =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0hpi; =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* HPI support bit */
-> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0 =A0 =A0hpi_cmd; =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0/* cmd used as HPI */
-> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0data_sector_size; =A0=
- =A0 =A0 /* 512Bytes or 4KB */
-> + =A0 =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0data_tag_unit_size;=
- =A0 =A0 /* DATA TAG UNIT size */
-> =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0raw_part=
-ition_support; =A0/* 160 */
-> =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0raw_eras=
-ed_mem_count; =A0 /* 181 */
-> =A0 =A0 =A0 =A0u8 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0raw_ext_=
-csd_structure; =A0/* 194 */
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 0e71356..e076f7f 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -273,6 +273,7 @@ struct _mmc_csd {
-> =A0#define EXT_CSD_FLUSH_CACHE =A0 =A0 =A0 =A0 =A0 =A032 =A0 =A0 =A0/=
-* W */
-> =A0#define EXT_CSD_CACHE_CTRL =A0 =A0 =A0 =A0 =A0 =A0 33 =A0 =A0 =A0/=
-* R/W */
-> =A0#define EXT_CSD_POWER_OFF_NOTIFICATION 34 =A0 =A0 =A0/* R/W */
-> +#define EXT_CSD_DATA_SECTOR_SIZE =A0 =A0 =A0 61 =A0 =A0 =A0/* R */
-> =A0#define EXT_CSD_GP_SIZE_MULT =A0 =A0 =A0 =A0 =A0 143 =A0 =A0 /* R/=
-W */
-> =A0#define EXT_CSD_PARTITION_ATTRIBUTE =A0 =A0156 =A0 =A0 /* R/W */
-> =A0#define EXT_CSD_PARTITION_SUPPORT =A0 =A0 =A0160 =A0 =A0 /* RO */
-> @@ -313,6 +314,8 @@ struct _mmc_csd {
-> =A0#define EXT_CSD_POWER_OFF_LONG_TIME =A0 =A0247 =A0 =A0 /* RO */
-> =A0#define EXT_CSD_GENERIC_CMD6_TIME =A0 =A0 =A0248 =A0 =A0 /* RO */
-> =A0#define EXT_CSD_CACHE_SIZE =A0 =A0 =A0 =A0 =A0 =A0 249 =A0 =A0 /* =
-RO, 4 bytes */
-> +#define EXT_CSD_TAG_UNIT_SIZE =A0 =A0 =A0 =A0 =A0498 =A0 =A0 /* RO *=
-/
-> +#define EXT_CSD_DATA_TAG_SUPPORT =A0 =A0 =A0 499 =A0 =A0 /* RO */
-> =A0#define EXT_CSD_HPI_FEATURES =A0 =A0 =A0 =A0 =A0 503 =A0 =A0 /* RO=
- */
 >
-> =A0/*
+>
+>
+>
+>
+>             Manoj Iyer
+>             <manoj.iyer@canon
+>             ical.com>                                                宛先
+>                                        Koji Matsumuro/R/RICOH@RICOH
+>             2012/01/11 22:35                                           cc
+>
+>                                                                      件名
+>                                        Ricoh SD card reader, error on r/w
+>                                        lots of data.
+>
+>
+>
+>
+>
+>
+>
+>
+>
+>
+> Koji Matsumoro San,
+>
+> Ricoh SD/SDHCI/MMC card readers R5C822, e823, 822 etc generate the
+> following error when transferring massive amounts of data.
+>
+> [ 6843.012038] mmcblk0: error -110 transferring data, sector 409666, nr 2,
+> cmd response 0x900, card status 0xc00
+> [ 6843.014440] end_request: I/O error, dev mmcblk0, sector 409666
+> [ 6843.014448] Buffer I/O error on device mmcblk0p2, logical block 131105
+> [ 6843.014453] lost page write due to I/O error on mmcblk0p2
+> [ 6844.371388] mmcblk0: error -110 transferring data, sector 671810, nr 2,
+> cmd response 0x900, card status 0xc00
+>
+> There are a lot of bug reports regarding this error, I am using a 16GB
+> SDHC card, and transferring around 1000 files ranging from sizes 800KB to
+> 1.5MB.
+>
+> Looking at the kernel code, looks like in drivers/mmc/core/core.c,
+> increasing the value of data timeout (limit_us to 500000), reduces the
+> occurrence of these errors, but does not eliminate it. I am guessing the
+> real problem is some place else, increasing time out only masks the real
+> issue. Can you please suggest some options that I can try to see why this
+> error might be occurring ? I tried an external USB generic SD card reader
+> (not Ricoh), to do the same and I do not see these errors, only happens
+> with pci based Ricoh card readers. Can you please point me in the right
+> direction to look...
+>
+> Here is the code where I increased the data  timeout (limit_us to 500000)
+> ...
+> ========== drivers/mmc/core/core.c ==========
+> :
+> :
+> /*
+>          * SD cards also have an upper limit on the timeout.
+>          */
+>         if (mmc_card_sd(card)) {
+>                 unsigned int timeout_us, limit_us;
+>
+>                 timeout_us = data->timeout_ns / 1000;
+>                 if (mmc_host_clk_rate(card->host))
+>                         timeout_us += data->timeout_clks * 1000 /
+>                                 (mmc_host_clk_rate(card->host) / 1000);
+>
+>                 if (data->flags & MMC_DATA_WRITE)
+>                         /*
+>                          * The limit is really 250 ms, but that is
+>                          * insufficient for some crappy cards.
+>                          */
+>                         limit_us = 300000;
+>                 else
+>                         limit_us = 100000;
+>
+>                 /*
+>                  * SDHC cards always use these fixed values.
+>                  */
+>                 if (timeout_us > limit_us || mmc_card_blockaddr(card)) {
+>                         data->timeout_ns = limit_us * 1000;
+>                         data->timeout_clks = 0;
+>                 }
+>         }
+> ===============================================
+>
+>
+> Here is a test case I have been using to reproduce this issue.:
+>
+> * Create 1000 files with sizes 800K ~ 1.5M
+> * create 4 directories on the SD card
+> * copy the 1000 files to each of the 4 directories simultaneously
+> * tail -f /var/log/kern.log
+>
+> After around a minute or so, you will see a lot of errors like what I
+> pasted above.
+>
+> Cheers
 > --
-> 1.7.4.3
+> ====================
+> Manoj Iyer
+> Ubuntu/Canonical
+> Hardware Enablement
+> ====================
 >
-> --
+>
+>
+
+--
+====================
+Manoj Iyer
+Ubuntu/Canonical
+Hardware Enablement
+====================
+--8323329-1580141188-1326383925=:5761--
