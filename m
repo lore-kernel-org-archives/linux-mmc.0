@@ -1,138 +1,212 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v5] mmc: support BKOPS feature for eMMC
-Date: Thu, 12 Jan 2012 11:10:07 +0900
-Message-ID: <4F0E40FF.2040305@samsung.com>
-References: <4F04F512.1020909@samsung.com>
- <CANfBPZ_b0ypRUrhJH4izFUOJmxg4fh5u1NM5ED6eSiKeVibyAg@mail.gmail.com>
- <m2r4z6dogm.fsf@bob.laptop.org>
+From: Zang Roy-R61911 <r61911@freescale.com>
+Subject: RE: [PATCH 5/5 v3] ESDHC: Fix DMA errors in kernel booting on P1010
+Date: Thu, 12 Jan 2012 07:28:44 +0000
+Message-ID: <3E027F8168735B46AC006B1D0C7BB002031F34@039-SN2MPN1-013.039d.mgd.msft.net>
+References: <1324972387-11408-1-git-send-email-r66093@freescale.com>
+ <1324972387-11408-2-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:21212 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752102Ab2ALCKO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2012 21:10:14 -0500
-Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LXN0087OY0ZDF70@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 12 Jan 2012 11:10:12 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LXN00B4LY10YG90@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 12 Jan 2012 11:10:12 +0900 (KST)
-In-reply-to: <m2r4z6dogm.fsf@bob.laptop.org>
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:36212 "EHLO
+	TX2EHSOBE004.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751804Ab2ALH2t convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2012 02:28:49 -0500
+In-Reply-To: <1324972387-11408-2-git-send-email-r66093@freescale.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "S, Venkatraman" <svenkatr@ti.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, per.forlin@stericsson.com, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Huang Changming-R66093 <r66093@freescale.com>, Jain Priyanka-B32167 <B32167@freescale.com>, Chris Ball <cjb@laptop.org>
 
-Hi Chris & Venkat,
+Hi, Jerry
+I think this patch is the same as I post here:
+http://patchwork.ozlabs.org/patch/103184/
 
-Thanks for testing...i will modify insufficiency part about venkat's testing results.
-I will resend the patch-v6 at next week.
+We need to consider the comment from Anton
+http://lists.ozlabs.org/pipermail/linuxppc-dev/2011-August/092402.html
 
-Best Regards,
-Jaehoon Chung
+Thanks.
+Roy
 
-
-On 01/12/2012 04:32 AM, Chris Ball wrote:
-
-> Hi,
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of r66093@freescale.com
+> Sent: Tuesday, December 27, 2011 15:53 PM
+> To: linux-mmc@vger.kernel.org
+> Cc: Huang Changming-R66093; Jain Priyanka-B32167; Chris Ball
+> Subject: [PATCH 5/5 v3] ESDHC: Fix DMA errors in kernel booting on P1010
 > 
-> On Wed, Jan 11 2012, S, Venkatraman wrote:
->> On Thu, Jan 5, 2012 at 6:25 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>
->>> Enable eMMC background operations (BKOPS) feature.
->>>
->>> If URGENT_BKOPS is set after a response, note that BKOPS
->>> are required. After all I/O requests are finished, run
->>> BKOPS if required. Should read/write operations be requested
->>> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
->>> and then service the request.
->>>
->>> If you want to enable this feature, set MMC_CAP2_BKOPS.
->>>
->>> Future considerations
->>>  * Check BKOPS_LEVEL=1 and start BKOPS in a preventive manner.
->>>  * Interrupt ongoing BKOPS before powering off the card.
->>>  * How get BKOPS_STATUS value.(periodically send ext_csd command?)
->>>
->>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->>> ---
->>> Changelog V5:
->>>        - Rebase based on the latest mmc-next.
->>>        - modify codes based-on Chris's comment
->>> Changelog V4:
->>>        - Add mmc_read_bkops_status
->>>        - When URGENT_BKOPS(level2-3), didn't use HPI command.
->>>        - In mmc_switch(), use R1B/R1 according to level.
->>> Changelog V3:
->>>        - move the bkops setting's location in mmc_blk_issue_rw_rq
->>>        - modify condition checking
->>>        - bkops_en is assigned ext_csd[EXT_CSD_BKOPS_EN] instead of "1"
->>>        - remove the unused code
->>>        - change pr_debug instead of pr_warn in mmc_send_hpi_cmd
->>>        - Add the Future consideration suggested by Per
->>> Changelog V2:
->>>        - Use EXCEPTION_STATUS instead of URGENT_BKOPS
->>>        - Add function to check Exception_status(for eMMC4.5)
->>>
->>>  drivers/mmc/card/block.c   |   11 +++++
->>>  drivers/mmc/card/queue.c   |    3 +
->>>  drivers/mmc/core/core.c    |  105
->>> ++++++++++++++++++++++++++++++++++++++++++++
->>>  drivers/mmc/core/mmc.c     |    8 +++
->>>  drivers/mmc/core/mmc_ops.c |   12 +++++-
->>>  include/linux/mmc/card.h   |   13 +++++
->>>  include/linux/mmc/core.h   |    4 ++
->>>  include/linux/mmc/host.h   |    1 +
->>>  include/linux/mmc/mmc.h    |   19 ++++++++
->>>  9 files changed, 175 insertions(+), 1 deletions(-)
->>>
->>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>> index 0cad48a..5e3c580 100644
->>> --- a/drivers/mmc/card/block.c
->>> +++ b/drivers/mmc/card/block.c
->>> @@ -1273,6 +1273,17 @@ static int mmc_blk_issue_rw_rq(struct
->>> mmc_queue *mq, struct request *rqc)
->>>                type = rq_data_dir(req) == READ ? MMC_BLK_READ : MMC_BLK_WRITE;
->>>                mmc_queue_bounce_post(mq_rq);
->>>
->>> +               /*
->>> +                * Check BKOPS urgency from each R1 response
->>> +                */
->>> +               if (mmc_card_mmc(card) &&
->>> +                       (brq->cmd.flags == MMC_RSP_R1B ||
->>> +                        brq->cmd.flags == MMC_RSP_R1) &&
->>
->> I tested this patch on my setup and this condition never hit, as other
->> flags are also set in cmd.flags
->> It should have been
->> (brq->cmd.flags & MMC_RSP_R1B ||
->>  brq->cmd.flags & MMC_RSP_R1)
->>
->>
->>> +                       (brq->cmd.resp[0] & R1_EXCEPTION_EVENT)) {
->>> +                       if (mmc_is_exception_event(card,
->>> EXT_CSD_URGENT_BKOPS))
->>
->> This causes a crash on my test setup. The next req is already given to
->> the controller (see the mmc_start_req call a few lines above) and a
->> parallel request to read BKOPS_STATUS is interfering with it. This
->> won't work with any host controller driver which implements async_req
->> functions.
->>
->> But there is no need to read BKOPS_STATUS at this stage anyway. By
->> checking R1_EXCEPTION_EVENT and the BKOPS bit inside the response, the
->> need to do BKOPS can be determined (as only a urgen_bkops state would
->> trigger a R1_EXCEPTION_EVENT in the first place)
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 > 
-> Thanks very much for testing!  I'll drop this from my 3.3 queue --
-> we can try it again for 3.4.
+> When linux is booted with DMA mode enabled in esdhc module on P1010,
+> there were following errors:
 > 
-> - Chris.
+> mmc0: ADMA error
+> mmc0: error -5 whilst initialising SD card
+> 
+> It is because FSL ESDHC controller has different bit setting for PROCTL
+> register, when kernel sets Power Control Register by method for standard
+> SD Host Specification, it would overwritten FSL ESDHC PROCTL[DMAS];
+> when it set Host Control Registers[DMAS], it sets PROCTL[EMODE] and
+> PROCTL[D3CD]. These operations will set bad bits for PROCTL Register
+> on FSL ESDHC Controller and cause errors, so this patch will make esdhc
+> driver access FSL PROCTL Register according to block guide instead of
+> standard SD Host Specification.
+> 
+> For some FSL chips, such as MPC8536/P2020, PROCTL[VOLT_SEL] and PROCTL[DMAS]
+> bits are reserved and even if they are set to wrong bits there is no error.
+> But considering that all FSL ESDHC Controller register map is not fully
+> compliant to standard SD Host Specification, we put the patch to all of
+> FSL ESDHC Controllers.
+> 
+> Signed-off-by: Priyanka Jain <Priyanka.Jain@freescale.com>
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> CC: Chris Ball <cjb@laptop.org>
+> ---
+> changes for v2:
+> 	- change the property to compatible for quirks
+> changes for v3:
+> 	- fix one compile error
+> 
+>  drivers/mmc/host/sdhci-pltfm.c |    3 ++
+>  drivers/mmc/host/sdhci.c       |   61 ++++++++++++++++++++++++++++++++----
+> ---
+>  include/linux/mmc/sdhci.h      |    2 +
+>  3 files changed, 55 insertions(+), 11 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-
+> pltfm.c
+> index 06f4ab9..f712218 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -86,6 +86,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
+>  		if (of_device_is_compatible(np, "fsl,p1010-esdhc"))
+>  			host->quirks2 |= SDHCI_QUIRK2_RELAX_FREQ;
+> 
+> +		if (of_device_is_compatible(np, "fsl,esdhc"))
+> +			host->quirks2 |= SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD;
+> +
+>  #ifdef CONFIG_PM
+>  		if (of_device_is_compatible(np, "fsl,p1022-esdhc")
+>  			sdhc_pmsaveproctlreg = 1;
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 4b231fa..df2acc0 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -832,14 +832,29 @@ static void sdhci_prepare_data(struct sdhci_host
+> *host, struct mmc_command *cmd)
+>  	 * is ADMA.
+>  	 */
+>  	if (host->version >= SDHCI_SPEC_200) {
+> -		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> -		ctrl &= ~SDHCI_CTRL_DMA_MASK;
+> -		if ((host->flags & SDHCI_REQ_USE_DMA) &&
+> -			(host->flags & SDHCI_USE_ADMA))
+> -			ctrl |= SDHCI_CTRL_ADMA32;
+> -		else
+> -			ctrl |= SDHCI_CTRL_SDMA;
+> -		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +		if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD) {
+> +#define ESDHCI_PROCTL_DMAS_MASK		0x00000300
+> +#define ESDHCI_PROCTL_ADMA32		0x00000200
+> +#define ESDHCI_PROCTL_SDMA		0x00000000
+> +			u32 ctrl;
+> +			ctrl = sdhci_readl(host, SDHCI_HOST_CONTROL);
+> +			ctrl &= ~ESDHCI_PROCTL_DMAS_MASK;
+> +			if ((host->flags & SDHCI_REQ_USE_DMA) &&
+> +				(host->flags & SDHCI_USE_ADMA))
+> +				ctrl |= ESDHCI_PROCTL_ADMA32;
+> +			else
+> +				ctrl |= ESDHCI_PROCTL_SDMA;
+> +			sdhci_writel(host, ctrl, SDHCI_HOST_CONTROL);
+> +		} else {
+> +			ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> +			ctrl &= ~SDHCI_CTRL_DMA_MASK;
+> +			if ((host->flags & SDHCI_REQ_USE_DMA) &&
+> +				(host->flags & SDHCI_USE_ADMA))
+> +				ctrl |= SDHCI_CTRL_ADMA32;
+> +			else
+> +				ctrl |= SDHCI_CTRL_SDMA;
+> +			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +		}
+>  	}
+> 
+>  	if (!(host->flags & SDHCI_REQ_USE_DMA)) {
+> @@ -1175,17 +1190,29 @@ static void sdhci_set_power(struct sdhci_host *host,
+> unsigned short power)
+>  	u8 pwr = 0;
+> 
+>  	if (power != (unsigned short)-1) {
+> +#define	ESDHCI_FSL_POWER_MASK	0x40
+> +#define	ESDHCI_FSL_POWER_180	0x00
+> +#define	ESDHCI_FSL_POWER_300	0x40
+>  		switch (1 << power) {
+>  		case MMC_VDD_165_195:
+> -			pwr = SDHCI_POWER_180;
+> +			if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD)
+> +				pwr = ESDHCI_FSL_POWER_180;
+> +			else
+> +				pwr = SDHCI_POWER_180;
+>  			break;
+>  		case MMC_VDD_29_30:
+>  		case MMC_VDD_30_31:
+> -			pwr = SDHCI_POWER_300;
+> +			if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD)
+> +				pwr = ESDHCI_FSL_POWER_300;
+> +			else
+> +				pwr = SDHCI_POWER_300;
+>  			break;
+>  		case MMC_VDD_32_33:
+>  		case MMC_VDD_33_34:
+> -			pwr = SDHCI_POWER_330;
+> +			if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD)
+> +				pwr = ESDHCI_FSL_POWER_300;
+> +			else
+> +				pwr = SDHCI_POWER_330;
+>  			break;
+>  		default:
+>  			BUG();
+> @@ -1195,6 +1222,18 @@ static void sdhci_set_power(struct sdhci_host *host,
+> unsigned short power)
+>  	if (host->pwr == pwr)
+>  		return;
+> 
+> +	/* Now FSL ESDHC Controller has no Bus Power bit,
+> +	 * and PROCTL[21] bit is for voltage selection */
+> +	if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD) {
+> +		u8 volt = 0;
+> +		volt = sdhci_readb(host, SDHCI_POWER_CONTROL);
+> +		volt &= ~ESDHCI_FSL_POWER_MASK;
+> +		volt |= pwr;
+> +		sdhci_writeb(host, volt, SDHCI_POWER_CONTROL);
+> +
+> +		return;
+> +	}
+> +
+>  	host->pwr = pwr;
+> 
+>  	if (pwr == 0) {
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index f7c1e13..d025134 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -93,6 +93,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_OWN_CARD_DETECTION			(1<<0)
+>  /* Controller operates the cards at reduced frequency */
+>  #define SDHCI_QUIRK2_RELAX_FREQ				(1<<1)
+> +/* Controller has weird bit setting for Protocol Control Register */
+> +#define SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD			(1<<2)
+> 
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
+> --
+> 1.7.5.4
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
