@@ -1,70 +1,47 @@
-From: Dmitry Antipov <dmitry.antipov@linaro.org>
-Subject: [PATCH] mmc: change mmc_delay() to use usleep_range()
-Date: Fri, 13 Jan 2012 19:09:30 +0400
-Message-ID: <1326467370-21026-1-git-send-email-dmitry.antipov@linaro.org>
+From: Aaro Koskinen <aaro.koskinen@nokia.com>
+Subject: Re: [PATCH] mmc: change mmc_delay() to use usleep_range()
+Date: Fri, 13 Jan 2012 23:38:26 +0200 (EET)
+Message-ID: <alpine.DEB.2.00.1201132308530.24003@kernel.research.nokia.com>
+References: <1326467370-21026-1-git-send-email-dmitry.antipov@linaro.org>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:42186 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932215Ab2AMPIu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2012 10:08:50 -0500
+Received: from smtp.nokia.com ([147.243.1.48]:37616 "EHLO mgw-sa02.nokia.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759230Ab2AMVlR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 13 Jan 2012 16:41:17 -0500
+In-Reply-To: <1326467370-21026-1-git-send-email-dmitry.antipov@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: patches@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dmitry Antipov <dmitry.antipov@linaro.org>
+To: Dmitry Antipov <dmitry.antipov@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, patches@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Use the usleep_range() to simplify mmc_delay() and give some more
-accuracy to it - but with an exception of mmc_card_sleepawake():
-since sleep/awake timeout varies in a wide range, different
-delay methods should be used.
+Hi,
 
-Signed-off-by: Dmitry Antipov <dmitry.antipov@linaro.org>
----
- drivers/mmc/core/core.h    |    8 ++------
- drivers/mmc/core/mmc_ops.c |   12 +++++++++---
- 2 files changed, 11 insertions(+), 9 deletions(-)
+On Fri, 13 Jan 2012, Dmitry Antipov wrote:
+> Use the usleep_range() to simplify mmc_delay() and give some more
+> accuracy to it - but with an exception of mmc_card_sleepawake():
+> since sleep/awake timeout varies in a wide range, different
+> delay methods should be used.
+>
+> Signed-off-by: Dmitry Antipov <dmitry.antipov@linaro.org>
 
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 14664f1..a77851e 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -47,12 +47,8 @@ void mmc_power_off(struct mmc_host *host);
- 
- static inline void mmc_delay(unsigned int ms)
- {
--	if (ms < 1000 / HZ) {
--		cond_resched();
--		mdelay(ms);
--	} else {
--		msleep(ms);
--	}
-+	unsigned long us = ms * USEC_PER_MSEC;
-+	usleep_range(us, us + 1000);
- }
- 
- void mmc_rescan(struct work_struct *work);
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 4d41fa9..38d53ac 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -82,9 +82,15 @@ int mmc_card_sleepawake(struct mmc_host *host, int sleep)
- 	 * SEND_STATUS command to poll the status because that command (and most
- 	 * others) is invalid while the card sleeps.
- 	 */
--	if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
--		mmc_delay(DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000));
--
-+	if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY)) {
-+		/* JEDEC MMCA 4.41 specifies the timeout value is in 200ns..838.86ms
-+		   range. Round it up to 1us and use an appropriate delay method. */
-+		unsigned long us = DIV_ROUND_UP(card->ext_csd.sa_timeout, 10);
-+		if (us < 10)
-+			udelay(us);
-+		else
-+			usleep_range(us, us + 100);
-+	}
- 	if (!sleep)
- 		err = mmc_select_card(card);
- 
--- 
-1.7.7.5
+[...]
 
+> +	if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY)) {
+> +		/* JEDEC MMCA 4.41 specifies the timeout value is in 200ns..838.86ms
+> +		   range. Round it up to 1us and use an appropriate delay method. */
+> +		unsigned long us = DIV_ROUND_UP(card->ext_csd.sa_timeout, 10);
+> +		if (us < 10)
+> +			udelay(us);
+> +		else
+> +			usleep_range(us, us + 100);
+> +	}
+
+I think this part of the patch is over-engineered. What difference
+does it make in practice if you round it up to a bigger value so that
+usleep_range() makes always sense? The S/A timeout defines the max time
+the transition can take, it's not wrong to wait a bit longer. Also note
+that udelay() is not accurate so you need to add some margin anyway.
+
+A.
