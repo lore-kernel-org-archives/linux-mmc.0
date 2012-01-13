@@ -1,95 +1,247 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
- cards
-Date: Fri, 13 Jan 2012 14:14:28 +0100
-Message-ID: <4F102E34.6030704@stericsson.com>
-References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com> <4F0C035D.7070705@intel.com> <4F0C1A1C.8070007@stericsson.com> <4F0C2ACD.4090002@intel.com> <4F100196.8010104@stericsson.com> <4F100AE5.3040304@intel.com> <4F10161E.2080107@stericsson.com> <4F101ED5.9090007@intel.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC updates for 3.3-rc1
+Date: Fri, 13 Jan 2012 08:22:07 -0500
+Message-ID: <m2boq7agao.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:42810 "EHLO
-	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753243Ab2AMNPB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2012 08:15:01 -0500
-In-Reply-To: <4F101ED5.9090007@intel.com>
+Received: from void.printf.net ([89.145.121.20]:55234 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751970Ab2AMNWS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 13 Jan 2012 08:22:18 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
->>>> In principles this means the following sequence:
->>>>
->>>> We will rely on that the get_cd function will return 0 (indicating card is
->>>> removed) when the card is "slowly" removed at the point when the rescan
->>>> function is calling it through the bus_ops->detect -->
->>>> _mmc_detect_card_removed function.
->>>>
->>>> This then becomes a race, meaning that the rescan function must be executing
->>>> at the same time the get_cd function will returns 0. Otherwise the rescan
->>>> function will not remove the card.
->>>>
->>>> Thus my conclusion is that "[PATCH 2/4 v4] MMC/SD: Add callback function to
->>>> detect card" will likely improve behavior but is not the safe solution to
->>>> handle "slowly" removed cards.
->>>>
->>>> Again, to be sure, we must let the mmc_detect_card_remove function trigger a
->>>> rescan when _mmc_detect_card_removed has detected that the card is removed.
->>>> This should be safe in all circumstances.
->>> sdhci has no problem because it does this:
->>>
->>>     - the host controller debounces the card detect line
->>>     - the host controller records whether or not the card is present
->>>     - the sdhci driver prevents (errors out) requests when the card is
->>>     not present
->> Debouncing will just be a way of triggering the problem more seldom. Or in
->> worst case, state the card has been removed even if it has not.
-> 
-> If a delay is used with mmc_detect_change, debouncing is not necessary.
-> 
->> Just because you get a GPIO irq on the detect line does not mean the card is
->> removed, debouncing or not. I consider this as pure mechanical switch which
->> likely has glitches and I don't see that we should trust it fully. We only
->> want to trigger a detect work, which is exactly what is done in the patch
->> from Guennadi Liakhovetski "mmc: add a generic GPIO card-detect helper".
-> 
-> The original problem was "slow card removal".  "Unreliable card detect"
-> is a separate problem.  Currently there is polling (MMC_CAP_NEEDS_POLL)
-> for that.  Alternatively there is MMC_CAP2_RESCAN_ON_ERROR as we have discussed.
+Hi Linus,
 
-I do not understand why you mention "Unreliable card detect"? That has 
-nothing to do with this patch.
+Please pull from:
 
-So to conclude the discussion, do you believe that this patch is 
-acceptable as long as we add a CAPS2 option "MMC_CAP2_RESCAN_ON_ERROR", 
-which if not set will prevent the detect work from being scheduled from 
-mmc_detect_card_removed?
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
 
-> 
->> If each host driver that supports GPIO card detect makes use of the
->> card-detect helper and if we accept a version of this patch, I think the
->> situation should be safe in all cases. Moreover GPIO debouncing will never
->> be needed for GPIO card detect for your sdhci driver either.
-> 
-> Safe in all cases, except at least the 3 already given:
-> 	- card is buggy and sometimes fails several commands in a row
-I doubt this will become a real problem. If a card fails several times 
-in a row, upper FS layers wont be happy either. So likely we are screwed 
-anyway. Don't you think?
-> 	- upper layers want to attempt to recover an unresponsive card
-This is not implemented as of right now. I see no problem that my patch 
-will prevent this from being implemented in the future.
-> 	- even in the case of slow removal, the vendor wants the card
-> 	to show as removed immediately whether or not there is any I/O
-That is correct and can not be fully solved unless you use 
-MMC_CAP_NEEDS_POLL. I doubt that one would like to use polling in favor 
-of card detect only to take care of this issue though. So I believe it 
-is more likely you want to trigger a card removal when receiving I/O. 
-Kind of "Better late than never". :-)
+to receive the MMC merge for 3.3.  I've signed an "mmc-merge-for-3.3-rc1"
+tag.  There are no merge conflicts, and the patches have been tested in
+linux-next.  Thanks.
 
 
-By the way, thanks for keeping up the frequency in this quite long 
-discussion.
+The following changes since commit 8d362b0dea1a35bea8d7d281317eb7ccb713edcb:
 
-BR
-Ulf Hansson
+  m68k: remove duplicate asm offset for task thread.info (2011-12-24 21:47:56 +1000)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+for you to fetch changes up to 0db13fc2abbb0b1a8d8efee20dfbd7f3c5d54022:
+
+  mmc: fix a deadlock between system suspend and MMC block IO (2012-01-12 15:17:17 -0500)
+
+----------------------------------------------------------------
+MMC highlights for 3.3:
+
+Core:
+ * Support for the HS200 high-speed eMMC mode.
+ * Support SDIO 3.0 Ultra High Speed cards.
+ * Kill pending block requests immediately if card is removed.
+ * Enable the eMMC feature for locking boot partitions read-only
+   until next power on, exposed via sysfs.
+
+Drivers:
+ * Runtime PM support for Intel Medfield SDIO.
+ * Suspend/resume support for sdhci-spear.
+ * sh-mmcif now processes requests asynchronously.
+
+----------------------------------------------------------------
+Aaron Lu (2):
+      mmc: sdhci: Fix tuning timer incorrect setting when suspending host
+      mmc: sdhci: Deal with failure case in sdhci_suspend_host
+
+Adrian Hunter (7):
+      mmc: allow upper layers to know immediately if card has been removed
+      mmc: sdhci: fix vmmc handling
+      mmc: sdhci: prevent card detection activity for non-removable cards
+      mmc: sdhci-pci: add platform data
+      mmc: sdhci-pci: get gpio numbers from platform data
+      mmc: sdhci-pci: remove SDHCI_QUIRK2_OWN_CARD_DETECTION
+      mmc: sdhci-pci: enable runtime PM for Medfield SDIO
+
+Alexander Elbs (1):
+      mmc: sd: Fix SDR12 timing regression
+
+Axel Lin (2):
+      mmc: convert drivers/mmc/host/* to use module_platform_driver()
+      mmc: sdhci-pci: simplify error handling
+
+Balaji TK (1):
+      mmc: omap: remove clock rate hard coding
+
+Bastian Hecht (1):
+      mmc: tmio_mmc: Hotplug code regrouping
+
+Chris Ball (2):
+      mmc: card: Use manufacturer ID symbols in card quirks.
+      mmc: dw_mmc: Remove unnecessary else clauses
+
+Cong Wang (1):
+      mmc: remove the second argument of k[un]map_atomic()
+
+Girish K S (3):
+      mmc: core: Fix voltage select in DDR mode
+      mmc: core: HS200 mode support for eMMC 4.5
+      mmc: host: Adds support for eMMC 4.5 HS200 mode
+
+Giuseppe CAVALLARO (1):
+      mmc: debugfs: expose the SDCLK frq in sys ios
+
+Guennadi Liakhovetski (8):
+      mmc: sh_mmcif: simplify clock divisor calculation
+      mmc: add a card hotplug handler context
+      mmc: add a generic GPIO card-detect helper
+      mmc: sh_mmcif: process error interrupts first
+      mmc: sh_mmcif: cosmetic clean up
+      mmc: sh_mmcif: process requests asynchronously
+      mmc: sh_mmcif: remove now superfluous sh_mmcif_host::data member
+      mmc: fix a deadlock between system suspend and MMC block IO
+
+Jaehoon Chung (3):
+      mmc: dw_mmc: use dev_pm_ops for dw_mmc controllers
+      mmc: dw_mmc: fixed wrong bit operation for SDMMC_GET_FCNT()
+      mmc: dw_mmc: miscaculated the fifo-depth with wrong bit operation
+
+Jingoo Han (1):
+      mmc: sdhci-s3c: use S3C_SDHCI_CONTROL2 instead of hardcoded offset value
+
+Johan Rudholm (2):
+      mmc: core: check for zero length ioctl data
+      mmc: boot partition ro lock support
+
+Lars-Peter Clausen (1):
+      mmc: Remove redundant spi driver bus initialization
+
+NeilBrown (1):
+      mmc: omap_hsmmc: use threaded irq handler for card-detect.
+
+Per Forlin (2):
+      mmc: mmci: add capabilities2 for MMC_CAP2
+      mmc: mmc_test: align max_seg_size
+
+Philip Rakity (1):
+      mmc: sdio: support SDIO UHS cards
+
+Qiang Liu (1):
+      mmc: sd: Macro name cleanup for high speed dtr
+
+Sangwook Lee (2):
+      mmc: sdhci-s3c: Add pm_caps into SD/MMC host
+      ARM: SAMSUNG: Add pm_caps into platform data
+
+Seungwon Jeon (5):
+      mmc: dw_mmc: Add more capabilities field
+      mmc: dw_mmc: Support predefined mutiple block transfers
+      mmc: core: Add claiming of hosts during mmc_cache_ctrl
+      mmc: dw_mmc: Clear the DDR mode for non-DDR
+      mmc: core: Separate the timeout value for cache-ctrl
+
+Shaohui Xie (1):
+      mmc: sdhci: restore the enabled dma when do reset all
+
+Stefan Nilsson XK (1):
+      mmc: sdio: Fix to support any block size optimally
+
+Stephen Boyd (1):
+      mmc: core: Fixup delayed work clock gating patch
+
+Sujit Reddy Thumma (2):
+      mmc: core: Use delayed work in clock gating framework
+      mmc: card: Kill block requests if card is removed
+
+Todd Poynor (1):
+      mmc: sdhci: Always pass clock request value zero to set_clock host op
+
+Tony Lin (1):
+      mmc: sdhci-esdhc: Change delay after setting clock from 100ms to 1ms
+
+Ulf Hansson (1):
+      mmc: core: Add option to prevent eMMC sleep command
+
+Viresh Kumar (2):
+      mmc: sdhci-spear: Implement suspend/resume
+      mmc: sdhci-spear: Fix compilation error
+
+ Documentation/mmc/mmc-dev-attrs.txt        |   10 +
+ Documentation/mmc/mmc-dev-parts.txt        |   13 +
+ arch/arm/plat-samsung/include/plat/sdhci.h |    1 +
+ arch/arm/plat-samsung/platformdata.c       |    2 +
+ drivers/Makefile                           |    2 +-
+ drivers/mmc/Makefile                       |    3 +-
+ drivers/mmc/card/block.c                   |  247 ++++++++---
+ drivers/mmc/card/mmc_test.c                |    1 +
+ drivers/mmc/card/queue.c                   |    5 +
+ drivers/mmc/core/Makefile                  |    2 +-
+ drivers/mmc/core/bus.c                     |    5 +-
+ drivers/mmc/core/cd-gpio.c                 |   74 +++
+ drivers/mmc/core/core.c                    |   95 +++-
+ drivers/mmc/core/core.h                    |    3 +
+ drivers/mmc/core/debugfs.c                 |    5 +
+ drivers/mmc/core/host.c                    |   53 ++-
+ drivers/mmc/core/mmc.c                     |  203 +++++++-
+ drivers/mmc/core/sd.c                      |   21 +-
+ drivers/mmc/core/sdio.c                    |  342 ++++++++++++-
+ drivers/mmc/core/sdio_io.c                 |    8 +-
+ drivers/mmc/core/sdio_ops.c                |   14 +-
+ drivers/mmc/host/Makefile                  |    1 +
+ drivers/mmc/host/at91_mci.c                |    8 +-
+ drivers/mmc/host/bfin_sdh.c                |   12 +-
+ drivers/mmc/host/cb710-mmc.c               |   13 +-
+ drivers/mmc/host/dw_mmc.c                  |   71 ++-
+ drivers/mmc/host/dw_mmc.h                  |    2 +-
+ drivers/mmc/host/jz4740_mmc.c              |   12 +-
+ drivers/mmc/host/mmc_spi.c                 |    1 -
+ drivers/mmc/host/mmci.c                    |    1 +
+ drivers/mmc/host/msm_sdcc.c                |   19 +-
+ drivers/mmc/host/mxcmmc.c                  |   13 +-
+ drivers/mmc/host/mxs-mmc.c                 |   13 +-
+ drivers/mmc/host/omap_hsmmc.c              |   43 +--
+ drivers/mmc/host/pxamci.c                  |   13 +-
+ drivers/mmc/host/s3cmci.c                  |   13 +-
+ drivers/mmc/host/sdhci-cns3xxx.c           |   12 +-
+ drivers/mmc/host/sdhci-dove.c              |   12 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c         |   12 +-
+ drivers/mmc/host/sdhci-esdhc.h             |    2 +-
+ drivers/mmc/host/sdhci-of-esdhc.c          |   12 +-
+ drivers/mmc/host/sdhci-of-hlwd.c           |   12 +-
+ drivers/mmc/host/sdhci-pci-data.c          |    5 +
+ drivers/mmc/host/sdhci-pci.c               |  181 ++++----
+ drivers/mmc/host/sdhci-pxav2.c             |   12 +-
+ drivers/mmc/host/sdhci-pxav3.c             |   12 +-
+ drivers/mmc/host/sdhci-s3c.c               |   18 +-
+ drivers/mmc/host/sdhci-spear.c             |   51 ++-
+ drivers/mmc/host/sdhci-tegra.c             |   12 +-
+ drivers/mmc/host/sdhci.c                   |  150 ++++--
+ drivers/mmc/host/sdhci.h                   |    1 +
+ drivers/mmc/host/sh_mmcif.c                |  726 ++++++++++++++++++----------
+ drivers/mmc/host/sh_mobile_sdhi.c          |   13 +-
+ drivers/mmc/host/tifm_sd.c                 |   16 +-
+ drivers/mmc/host/tmio_mmc.c                |   14 +-
+ drivers/mmc/host/tmio_mmc.h                |    4 +-
+ drivers/mmc/host/tmio_mmc_pio.c            |   30 +-
+ include/linux/amba/mmci.h                  |    2 +
+ include/linux/mmc/card.h                   |   23 +-
+ include/linux/mmc/cd-gpio.h                |   19 +
+ include/linux/mmc/core.h                   |    2 +
+ include/linux/mmc/dw_mmc.h                 |    1 +
+ include/linux/mmc/host.h                   |   25 +-
+ include/linux/mmc/mmc.h                    |   72 +++-
+ include/linux/mmc/sdhci-pci-data.h         |   18 +
+ include/linux/mmc/sdhci.h                  |    3 +-
+ include/linux/mmc/sdio.h                   |   29 +-
+ 67 files changed, 1995 insertions(+), 850 deletions(-)
+ create mode 100644 drivers/mmc/core/cd-gpio.c
+ create mode 100644 drivers/mmc/host/sdhci-pci-data.c
+ create mode 100644 include/linux/mmc/cd-gpio.h
+ create mode 100644 include/linux/mmc/sdhci-pci-data.h
+
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
