@@ -1,208 +1,101 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
- cards
-Date: Fri, 13 Jan 2012 14:08:53 +0200
-Message-ID: <4F101ED5.9090007@intel.com>
-References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com> <4F0C035D.7070705@intel.com> <4F0C1A1C.8070007@stericsson.com> <4F0C2ACD.4090002@intel.com> <4F100196.8010104@stericsson.com> <4F100AE5.3040304@intel.com> <4F10161E.2080107@stericsson.com>
+From: Anton Vorontsov <cbouatmailru@gmail.com>
+Subject: Re: [PATCH 4/5 v4] ESDHC: Workaround for data crc error on p1010rdb
+Date: Fri, 13 Jan 2012 16:12:31 +0400
+Message-ID: <20120113121231.GE8837@oksana.dev.rtsoft.ru>
+References: <1325827997-27490-1-git-send-email-r66093@freescale.com>
+ <1325827997-27490-2-git-send-email-r66093@freescale.com>
+ <1325827997-27490-3-git-send-email-r66093@freescale.com>
+ <1325827997-27490-4-git-send-email-r66093@freescale.com>
+ <1325827997-27490-5-git-send-email-r66093@freescale.com>
+ <8A2FC72B45BB5A4C9F801431E06AE48F11669381@039-SN1MPN1-005.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:4364 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753150Ab2AMMIy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 13 Jan 2012 07:08:54 -0500
-In-Reply-To: <4F10161E.2080107@stericsson.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:65243 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752868Ab2AMMMf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2012 07:12:35 -0500
+Received: by bkvi17 with SMTP id i17so1980108bkv.19
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2012 04:12:34 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <8A2FC72B45BB5A4C9F801431E06AE48F11669381@039-SN1MPN1-005.039d.mgd.msft.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: Huang Changming-R66093 <r66093@freescale.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 13/01/12 13:31, Ulf Hansson wrote:
-> Adrian Hunter wrote:
->> On 13/01/12 12:04, Ulf Hansson wrote:
->>> Adrian Hunter wrote:
->>>> On 10/01/12 12:59, Ulf Hansson wrote:
->>>>> Adrian Hunter wrote:
->>>>>> On 09/01/12 16:27, Ulf Hansson wrote:
->>>>>>> Adrian Hunter wrote:
->>>>>>>> On 09/01/12 15:14, Ulf Hansson wrote:
->>>>>>>>>>> My concern is more about what we actually can trust; either the
->>>>>>>>>>> GPIO irq
->>>>>>>>>>> which likely is giving more than one irq when inserting/removing a
->>>>>>>>>>> card
->>>>>>>>>>> since the slot is probably not glitch free, or that a "rescan"
->>>>>>>>>>> runs to
->>>>>>>>>>> make
->>>>>>>>>>> sure a CMD13 is accepted from the previously inserted card.
->>>>>>>>>> Yes, I guess you would need to debounce the GPIO if you wanted to
->>>>>>>>>> rely
->>>>>>>>>> on it.
->>>>>>>>>>
->>>>>>>>>>> Moreover, the issue this patch tries to solve can not be solved
->>>>>>>>>>> without
->>>>>>>>>>> doing a "rescan" which must be triggered from the the block layer
->>>>>>>>>>> some
->>>>>>>>>>> how.
->>>>>>>>>>> I thought this new function that you previously added
->>>>>>>>>>> "mmc_detect_card_remove" was the proper place to do this.
->>>>>>>>>>>
->>>>>>>>>>>>> Let the mmc_detect_card_removed function trigger a new detect
->>>>>>>>>>>>> work immediately when it discovers that a card has been removed.
->>>>>>>>>>>> This is changing some long-standing functionality i.e. the card is
->>>>>>>>>>>> not
->>>>>>>>>>>> removed
->>>>>>>>>>>> without a card detect event.  It is difficult to know whether that
->>>>>>>>>>>> will be
->>>>>>>>>>>> very
->>>>>>>>>>>> bad for poor quality cards,
->>>>>>>>>>> Doing a mmc_detect (rescan) will in the end just issue a CMD13 to
->>>>>>>>>>> the
->>>>>>>>>>> card
->>>>>>>>>>> to make sure it is still present, that is already done from the
->>>>>>>>>>> block
->>>>>>>>>>> layer
->>>>>>>>>>> after each read/write request. So I can not see that "poor quality
->>>>>>>>>>> cards"
->>>>>>>>>>> will have any further problem with this patch, but I might miss
->>>>>>>>>>> something!?
->>>>>>>>>> The block driver has never caused a card to be removed before.  That
->>>>>>>>>> is new
->>>>>>>>>> and it is designed to preserve existing behaviour i.e. do not
->>>>>>>>>> remove a
->>>>>>>>>> card
->>>>>>>>>> without a card detect event.
->>>>>>>>> True, but is this a problem!?
->>>>>>>> Better not to find out.
->>>>>>> :-)
->>>>>>>
->>>>>>> Then there is lot of other things around mmc we also should not change.
->>>>>> Can you give an example of a change in existing functionality?  Isn't
->>>>>> everything either a bug fix or new functionality?
->>>>>>
->>>>>>>>> Anyway, this is the actual issue this patch is trying to solve. If you
->>>>>>>>> remove a card "slowly", a "rescan" work, which the GPIO irq has
->>>>>>>>> triggered to
->>>>>>>>> run will run the CMD13 to verify that the card is still there.
->>>>>>>>> Since it
->>>>>>>>> has
->>>>>>>>> not completely been removed the CMD13 will succeed and the card will
->>>>>>>>> not be
->>>>>>>>> removed.
->>>>>>>>>
->>>>>>>>> Moreover every other new block request will soon start to fail and
->>>>>>>>> always
->>>>>>>>> do; until a new rescan is triggered (which is when you insert a new
->>>>>>>>> card or
->>>>>>>>> do a suspend-resume cycle). In practice I think it is more preferred
->>>>>>>>> that
->>>>>>>>> the card gets removed and it's corresponding block device.
->>>>>>>> There are other ways to solve that problem.  Apart from my previous
->>>>>>>> suggestion, there is also the possibility to make use of ->get_cd
->>>>>>>> instead of CMD13, someone already posted a patch for that
->>>>>>>> "[PATCH 2/4 v4] MMC/SD: Add callback function to detect card"
->>>>>>>> but it should probably be selected on a per driver basis (i.e. add a
->>>>>>>> MMC_CAP2 for it).  I guess you would still need to debounce the GPIO
->>>>>>>> though.
->>>>>>>>
->>>>>>> Unfortunately that wont help to solve this issue either. That patch will
->>>>>>> only prevent you from executing a CMD13 if the get_cd function says the
->>>>>>> card
->>>>>>> is still there. I kind of micro optimization I think, unless you very
->>>>>>> often
->>>>>>> encounters errors in the block layer.
->>>>>> No, the rescan calls that code, so if get_cd() returns 0 the card will be
->>>>>> removed irrespective of whether it has been pulled out slowly or not.
->>>>> That is not correct. The rescan uses the get_cd function to find out if
->>>>> it really make sense to try to initialize a new card. It is not used for
->>>>> removing existing cards.
->>>> mmc_rescan() first calls host->bus_ops->detect() to see if the card is
->>>> still
->>>> there.  If the card does not respond then it is removed.  Then mmc_rescan
->>>> attempts to initialize a new card. host->bus_ops->detect() is not used for
->>>> that.
->>>>
->>>>> You were referring to "[PATCH 2/4 v4] MMC/SD: Add callback function to
->>>>> detect card". This patch will prevent the bus_ops->alive function to be
->>>>> called if the get_cd function indicates that the card is still there. I
->>>>> can not see how this on it's own will help out to solve the issue my
->>>>> patch is trying to solve.
->>>> Yes it will because it is called by mmc_rescan() and used to remove the
->>>> card
->>>> via host->bus_ops->detect()
->>>>
->>> In principles this means the following sequence:
->>>
->>> We will rely on that the get_cd function will return 0 (indicating card is
->>> removed) when the card is "slowly" removed at the point when the rescan
->>> function is calling it through the bus_ops->detect -->
->>> _mmc_detect_card_removed function.
->>>
->>> This then becomes a race, meaning that the rescan function must be executing
->>> at the same time the get_cd function will returns 0. Otherwise the rescan
->>> function will not remove the card.
->>>
->>> Thus my conclusion is that "[PATCH 2/4 v4] MMC/SD: Add callback function to
->>> detect card" will likely improve behavior but is not the safe solution to
->>> handle "slowly" removed cards.
->>>
->>> Again, to be sure, we must let the mmc_detect_card_remove function trigger a
->>> rescan when _mmc_detect_card_removed has detected that the card is removed.
->>> This should be safe in all circumstances.
->>
->> sdhci has no problem because it does this:
->>
->>     - the host controller debounces the card detect line
->>     - the host controller records whether or not the card is present
->>     - the sdhci driver prevents (errors out) requests when the card is
->>     not present
+On Fri, Jan 13, 2012 at 02:37:07AM +0000, Huang Changming-R66093 wrote:
+> Hi, Anton,
+> Could you have any comment about this serial patch?
 > 
-> Debouncing will just be a way of triggering the problem more seldom. Or in
-> worst case, state the card has been removed even if it has not.
-
-If a delay is used with mmc_detect_change, debouncing is not necessary.
-
+> Thanks
+> Jerry Huang
 > 
-> Just because you get a GPIO irq on the detect line does not mean the card is
-> removed, debouncing or not. I consider this as pure mechanical switch which
-> likely has glitches and I don't see that we should trust it fully. We only
-> want to trigger a detect work, which is exactly what is done in the patch
-> from Guennadi Liakhovetski "mmc: add a generic GPIO card-detect helper".
+[...]
+> > @@ -56,6 +56,13 @@ static inline void esdhc_set_clock(struct sdhci_host
+> > *host, unsigned int clock)
+> >  	if (clock == 0)
+> >  		goto out;
+> > 
+> > +	if (host->quirks2 & SDHCI_QUIRK2_RELAX_FREQ) {
+> > +		if (clock > 20000000)
+> > +			clock -= 5000000;
+> > +		if (clock > 40000000)
+> > +			clock -= 5000000;
+> > +	}
+> > +
 
-The original problem was "slow card removal".  "Unreliable card detect"
-is a separate problem.  Currently there is polling (MMC_CAP_NEEDS_POLL)
-for that.  Alternatively there is MMC_CAP2_RESCAN_ON_ERROR as we have discussed.
+That's weird. According to the code, you are underclocking a device
+(i.e. the card actually expects higher clocks).
 
+Did you check (with an oscilloscope) what clocks HW actually generates?
+Maybe it just generates higher than expected clocks, then this code
+would be a correct workaround.
+
+Otherwise, if HW generates correct/precise clock, then you probably
+would rather not permit high clocks at all... but then you limit max
+freq to 20 MHz. :-(
+
+Oh well, if the patch works for your HW, I'm fine with it.
+
+Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+
+> >  	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
+> >  		pre_div *= 2;
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-
+> > pltfm.c
+> > index e64f773..841ffc1 100644
+> > --- a/drivers/mmc/host/sdhci-pltfm.c
+> > +++ b/drivers/mmc/host/sdhci-pltfm.c
+> > @@ -79,6 +79,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
+> >  			|| of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
+> >  			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> > 
+> > +		if (of_device_is_compatible(np, "fsl,p1010-esdhc"))
+> > +			host->quirks2 |= SDHCI_QUIRK2_RELAX_FREQ;
+> > +
+> >  		clk = of_get_property(np, "clock-frequency", &size);
+> >  		if (clk && size == sizeof(*clk) && *clk)
+> >  			pltfm_host->clock = be32_to_cpup(clk);
+> > diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> > index e4b6935..f7c1e13 100644
+> > --- a/include/linux/mmc/sdhci.h
+> > +++ b/include/linux/mmc/sdhci.h
+> > @@ -91,6 +91,8 @@ struct sdhci_host {
+> >  	unsigned int quirks2;	/* More deviations from spec. */
+> > 
+> >  #define SDHCI_QUIRK2_OWN_CARD_DETECTION			(1<<0)
+> > +/* Controller operates the cards at reduced frequency */
+> > +#define SDHCI_QUIRK2_RELAX_FREQ				(1<<1)
+> > 
+> >  	int irq;		/* Device IRQ */
+> >  	void __iomem *ioaddr;	/* Mapped address */
+> > --
+> > 1.7.5.4
 > 
-> If each host driver that supports GPIO card detect makes use of the
-> card-detect helper and if we accept a version of this patch, I think the
-> situation should be safe in all cases. Moreover GPIO debouncing will never
-> be needed for GPIO card detect for your sdhci driver either.
-
-Safe in all cases, except at least the 3 already given:
-	- card is buggy and sometimes fails several commands in a row
-	- upper layers want to attempt to recover an unresponsive card
-	- even in the case of slow removal, the vendor wants the card
-	to show as removed immediately whether or not there is any I/O
-
-> 
->>
->> So it should work if you:
->>
->>     - debounce the gpio line
->>     - record whether or not the card is present based on the debounced
->>     gpio line
->>     - either error out requests when the card is not present
->>     or
->>     - use the get_cd patch (still ought to be driver selected)
->>     and implement get_cd based on whether you have recorded the card
->>     present or not
-
-In fact the get_cd approach is flawed.  If a new card has been inserted
-then get_cd will say the old card is present whereas CMD13 would fail for a
-new card because it has not been initialized.
-
->>
->>
 > 
 
+-- 
+Anton Vorontsov
+Email: cbouatmailru@gmail.com
