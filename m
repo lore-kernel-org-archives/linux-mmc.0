@@ -1,129 +1,227 @@
 From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 3/4 v5] SDHCI: add sdhci_get_cd callback to detect the
- card
-Date: Fri, 13 Jan 2012 02:25:18 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F116692DB@039-SN1MPN1-005.039d.mgd.msft.net>
-References: <1323829093-29655-1-git-send-email-r66093@freescale.com>
+Subject: RE: [PATCH 5/5 v3] ESDHC: Fix DMA errors in kernel booting on P1010
+Date: Fri, 13 Jan 2012 02:26:29 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F11669314@039-SN1MPN1-005.039d.mgd.msft.net>
+References: <1324972387-11408-1-git-send-email-r66093@freescale.com>
+ <1324972387-11408-2-git-send-email-r66093@freescale.com>
+ <3E027F8168735B46AC006B1D0C7BB002031F34@039-SN2MPN1-013.039d.mgd.msft.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe005.messaging.microsoft.com ([213.199.154.208]:11559
-	"EHLO AM1EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755806Ab2AMCZ3 convert rfc822-to-8bit
+Received: from am1ehsobe002.messaging.microsoft.com ([213.199.154.205]:44128
+	"EHLO AM1EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755806Ab2AMC0d convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 Jan 2012 21:25:29 -0500
-In-Reply-To: <1323829093-29655-1-git-send-email-r66093@freescale.com>
+	Thu, 12 Jan 2012 21:26:33 -0500
+In-Reply-To: <3E027F8168735B46AC006B1D0C7BB002031F34@039-SN2MPN1-013.039d.mgd.msft.net>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Changming-R66093 <r66093@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>
+To: Zang Roy-R61911 <r61911@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Jain Priyanka-B32167 <B32167@freescale.com>, Chris Ball <cjb@laptop.org>
 
-Hi, Chris,
-Could you have any comment about this patch?
-Can it go into 3.3 or 3.4?
-
-Thanks
-Jerry Huang
+Yes, please ignore this patch.
+Thanks.
 
 > -----Original Message-----
-> From: Huang Changming-R66093
-> Sent: Wednesday, December 14, 2011 10:18 AM
-> To: linux-mmc@vger.kernel.org
-> Cc: Huang Changming-R66093; Chris Ball
-> Subject: [PATCH 3/4 v5] SDHCI: add sdhci_get_cd callback to detect the
-> card
+> From: Zang Roy-R61911
+> Sent: Thursday, January 12, 2012 3:29 PM
+> To: Huang Changming-R66093; linux-mmc@vger.kernel.org
+> Cc: Huang Changming-R66093; Jain Priyanka-B32167; Chris Ball
+> Subject: RE: [PATCH 5/5 v3] ESDHC: Fix DMA errors in kernel booting on
+> P1010
 > 
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> Hi, Jerry
+> I think this patch is the same as I post here:
+> http://patchwork.ozlabs.org/patch/103184/
 > 
-> Add callback function sdhci_get_cd to detect the card.
-> And one new callback added to implement the card detect in sdhci
-> struncture.
-> If special platform has the card detect callback, it will return the card
-> state, the value zero is for absent cardi and one is for present card.
-> If the controller don't support card detect, sdhci_get_cd will return -
-> ENOSYS.
+> We need to consider the comment from Anton
+> http://lists.ozlabs.org/pipermail/linuxppc-dev/2011-August/092402.html
 > 
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> CC: Chris Ball <cjb@laptop.org>
-> ---
-> changes for v2:
-> 	- when controller don't support get_cd, return -ENOSYS
-> 	- add new callback for sdhci to detect the card
-> 	- add the CC
-> changes for v3:
-> 	- use pin_lock only when get_cd defined
-> changes for v4:
-> 	- enalbe the controller clock in platform, instead of core
-> changes for v5:
-> 	- remove the copyright
+> Thanks.
+> Roy
 > 
->  drivers/mmc/host/sdhci.c |   21 ++++++++++++++++++++++
->  drivers/mmc/host/sdhci.h |    2 ++
->  2 files changed, 23 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 6d8eea3..fbe2f46 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1518,6 +1519,26 @@ static int sdhci_get_ro(struct mmc_host *mmc)
->  	return ret;
->  }
-> 
-> +/* Return values for the sdjco_get_cd callback:
-> + *   0 for a absent card
-> + *   1 for a present card
-> + *   -ENOSYS when not supported (equal to NULL callback)
-> + */
-> +static int sdhci_get_cd(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	unsigned long flags;
-> +	int present = -ENOSYS;
-> +
-> +	if (host->ops->get_cd) {
-> +		spin_lock_irqsave(&host->lock, flags);
-> +		present = host->ops->get_cd(host);
-> +		spin_unlock_irqrestore(&host->lock, flags);
-> +	}
-> +
-> +	return present;
-> +}
-> +
->  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int
-> enable)
->  {
->  	if (host->flags & SDHCI_DEVICE_DEAD)
-> @@ -1884,6 +1905,7 @@ static const struct mmc_host_ops sdhci_ops = {
->  	.request	= sdhci_request,
->  	.set_ios	= sdhci_set_ios,
->  	.get_ro		= sdhci_get_ro,
-> +	.get_cd		= sdhci_get_cd,
->  	.hw_reset	= sdhci_hw_reset,
->  	.enable_sdio_irq = sdhci_enable_sdio_irq,
->  	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 0a5b654..82f4d27 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -69,6 +69,7 @@
->  #define  SDHCI_SPACE_AVAILABLE	0x00000400
->  #define  SDHCI_DATA_AVAILABLE	0x00000800
->  #define  SDHCI_CARD_PRESENT	0x00010000
-> +#define  SDHCI_CARD_CDPL	0x00040000
->  #define  SDHCI_WRITE_PROTECT	0x00080000
->  #define  SDHCI_DATA_LVL_MASK	0x00F00000
->  #define   SDHCI_DATA_LVL_SHIFT	20
-> @@ -261,6 +262,7 @@ struct sdhci_ops {
-> 
->  	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
-> 
-> +	int		(*get_cd)(struct sdhci_host *host);
->  	int		(*enable_dma)(struct sdhci_host *host);
->  	unsigned int	(*get_max_clock)(struct sdhci_host *host);
->  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
-> --
-> 1.7.5.4
+> > -----Original Message-----
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > owner@vger.kernel.org] On Behalf Of r66093@freescale.com
+> > Sent: Tuesday, December 27, 2011 15:53 PM
+> > To: linux-mmc@vger.kernel.org
+> > Cc: Huang Changming-R66093; Jain Priyanka-B32167; Chris Ball
+> > Subject: [PATCH 5/5 v3] ESDHC: Fix DMA errors in kernel booting on
+> > P1010
+> >
+> > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> >
+> > When linux is booted with DMA mode enabled in esdhc module on P1010,
+> > there were following errors:
+> >
+> > mmc0: ADMA error
+> > mmc0: error -5 whilst initialising SD card
+> >
+> > It is because FSL ESDHC controller has different bit setting for
+> > PROCTL register, when kernel sets Power Control Register by method for
+> > standard SD Host Specification, it would overwritten FSL ESDHC
+> > PROCTL[DMAS]; when it set Host Control Registers[DMAS], it sets
+> > PROCTL[EMODE] and PROCTL[D3CD]. These operations will set bad bits for
+> > PROCTL Register on FSL ESDHC Controller and cause errors, so this
+> > patch will make esdhc driver access FSL PROCTL Register according to
+> > block guide instead of standard SD Host Specification.
+> >
+> > For some FSL chips, such as MPC8536/P2020, PROCTL[VOLT_SEL] and
+> > PROCTL[DMAS] bits are reserved and even if they are set to wrong bits
+> there is no error.
+> > But considering that all FSL ESDHC Controller register map is not
+> > fully compliant to standard SD Host Specification, we put the patch to
+> > all of FSL ESDHC Controllers.
+> >
+> > Signed-off-by: Priyanka Jain <Priyanka.Jain@freescale.com>
+> > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> > CC: Chris Ball <cjb@laptop.org>
+> > ---
+> > changes for v2:
+> > 	- change the property to compatible for quirks changes for v3:
+> > 	- fix one compile error
+> >
+> >  drivers/mmc/host/sdhci-pltfm.c |    3 ++
+> >  drivers/mmc/host/sdhci.c       |   61
+> ++++++++++++++++++++++++++++++++----
+> > ---
+> >  include/linux/mmc/sdhci.h      |    2 +
+> >  3 files changed, 55 insertions(+), 11 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-
+> > pltfm.c index 06f4ab9..f712218 100644
+> > --- a/drivers/mmc/host/sdhci-pltfm.c
+> > +++ b/drivers/mmc/host/sdhci-pltfm.c
+> > @@ -86,6 +86,9 @@ void sdhci_get_of_property(struct platform_device
+> *pdev)
+> >  		if (of_device_is_compatible(np, "fsl,p1010-esdhc"))
+> >  			host->quirks2 |= SDHCI_QUIRK2_RELAX_FREQ;
+> >
+> > +		if (of_device_is_compatible(np, "fsl,esdhc"))
+> > +			host->quirks2 |= SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD;
+> > +
+> >  #ifdef CONFIG_PM
+> >  		if (of_device_is_compatible(np, "fsl,p1022-esdhc")
+> >  			sdhc_pmsaveproctlreg = 1;
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
+> > 4b231fa..df2acc0 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -832,14 +832,29 @@ static void sdhci_prepare_data(struct sdhci_host
+> > *host, struct mmc_command *cmd)
+> >  	 * is ADMA.
+> >  	 */
+> >  	if (host->version >= SDHCI_SPEC_200) {
+> > -		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> > -		ctrl &= ~SDHCI_CTRL_DMA_MASK;
+> > -		if ((host->flags & SDHCI_REQ_USE_DMA) &&
+> > -			(host->flags & SDHCI_USE_ADMA))
+> > -			ctrl |= SDHCI_CTRL_ADMA32;
+> > -		else
+> > -			ctrl |= SDHCI_CTRL_SDMA;
+> > -		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> > +		if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD) {
+> > +#define ESDHCI_PROCTL_DMAS_MASK		0x00000300
+> > +#define ESDHCI_PROCTL_ADMA32		0x00000200
+> > +#define ESDHCI_PROCTL_SDMA		0x00000000
+> > +			u32 ctrl;
+> > +			ctrl = sdhci_readl(host, SDHCI_HOST_CONTROL);
+> > +			ctrl &= ~ESDHCI_PROCTL_DMAS_MASK;
+> > +			if ((host->flags & SDHCI_REQ_USE_DMA) &&
+> > +				(host->flags & SDHCI_USE_ADMA))
+> > +				ctrl |= ESDHCI_PROCTL_ADMA32;
+> > +			else
+> > +				ctrl |= ESDHCI_PROCTL_SDMA;
+> > +			sdhci_writel(host, ctrl, SDHCI_HOST_CONTROL);
+> > +		} else {
+> > +			ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> > +			ctrl &= ~SDHCI_CTRL_DMA_MASK;
+> > +			if ((host->flags & SDHCI_REQ_USE_DMA) &&
+> > +				(host->flags & SDHCI_USE_ADMA))
+> > +				ctrl |= SDHCI_CTRL_ADMA32;
+> > +			else
+> > +				ctrl |= SDHCI_CTRL_SDMA;
+> > +			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> > +		}
+> >  	}
+> >
+> >  	if (!(host->flags & SDHCI_REQ_USE_DMA)) { @@ -1175,17 +1190,29 @@
+> > static void sdhci_set_power(struct sdhci_host *host, unsigned short
+> > power)
+> >  	u8 pwr = 0;
+> >
+> >  	if (power != (unsigned short)-1) {
+> > +#define	ESDHCI_FSL_POWER_MASK	0x40
+> > +#define	ESDHCI_FSL_POWER_180	0x00
+> > +#define	ESDHCI_FSL_POWER_300	0x40
+> >  		switch (1 << power) {
+> >  		case MMC_VDD_165_195:
+> > -			pwr = SDHCI_POWER_180;
+> > +			if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD)
+> > +				pwr = ESDHCI_FSL_POWER_180;
+> > +			else
+> > +				pwr = SDHCI_POWER_180;
+> >  			break;
+> >  		case MMC_VDD_29_30:
+> >  		case MMC_VDD_30_31:
+> > -			pwr = SDHCI_POWER_300;
+> > +			if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD)
+> > +				pwr = ESDHCI_FSL_POWER_300;
+> > +			else
+> > +				pwr = SDHCI_POWER_300;
+> >  			break;
+> >  		case MMC_VDD_32_33:
+> >  		case MMC_VDD_33_34:
+> > -			pwr = SDHCI_POWER_330;
+> > +			if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD)
+> > +				pwr = ESDHCI_FSL_POWER_300;
+> > +			else
+> > +				pwr = SDHCI_POWER_330;
+> >  			break;
+> >  		default:
+> >  			BUG();
+> > @@ -1195,6 +1222,18 @@ static void sdhci_set_power(struct sdhci_host
+> > *host, unsigned short power)
+> >  	if (host->pwr == pwr)
+> >  		return;
+> >
+> > +	/* Now FSL ESDHC Controller has no Bus Power bit,
+> > +	 * and PROCTL[21] bit is for voltage selection */
+> > +	if (host->quirks2 & SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD) {
+> > +		u8 volt = 0;
+> > +		volt = sdhci_readb(host, SDHCI_POWER_CONTROL);
+> > +		volt &= ~ESDHCI_FSL_POWER_MASK;
+> > +		volt |= pwr;
+> > +		sdhci_writeb(host, volt, SDHCI_POWER_CONTROL);
+> > +
+> > +		return;
+> > +	}
+> > +
+> >  	host->pwr = pwr;
+> >
+> >  	if (pwr == 0) {
+> > diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> > index f7c1e13..d025134 100644
+> > --- a/include/linux/mmc/sdhci.h
+> > +++ b/include/linux/mmc/sdhci.h
+> > @@ -93,6 +93,8 @@ struct sdhci_host {
+> >  #define SDHCI_QUIRK2_OWN_CARD_DETECTION			(1<<0)
+> >  /* Controller operates the cards at reduced frequency */
+> >  #define SDHCI_QUIRK2_RELAX_FREQ				(1<<1)
+> > +/* Controller has weird bit setting for Protocol Control Register */
+> > +#define SDHCI_QUIRK2_QORIQ_PROCTL_WEIRD			(1<<2)
+> >
+> >  	int irq;		/* Device IRQ */
+> >  	void __iomem *ioaddr;	/* Mapped address */
+> > --
+> > 1.7.5.4
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
 
 
