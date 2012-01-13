@@ -1,20 +1,21 @@
 From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 2/5 v2] ESDHC: set the timeout to the max value
-Date: Fri, 13 Jan 2012 02:36:21 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F1166934E@039-SN1MPN1-005.039d.mgd.msft.net>
+Subject: RE: [PATCH 3/5 v4] ESDHC: Power management for ESDHC
+Date: Fri, 13 Jan 2012 02:36:50 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F11669367@039-SN1MPN1-005.039d.mgd.msft.net>
 References: <1325827997-27490-1-git-send-email-r66093@freescale.com>
  <1325827997-27490-2-git-send-email-r66093@freescale.com>
  <1325827997-27490-3-git-send-email-r66093@freescale.com>
+ <1325827997-27490-4-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe001.messaging.microsoft.com ([213.199.154.139]:26425
-	"EHLO DB3EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757177Ab2AMCgZ convert rfc822-to-8bit
+Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:45346
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752817Ab2AMCgz convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 Jan 2012 21:36:25 -0500
-In-Reply-To: <1325827997-27490-3-git-send-email-r66093@freescale.com>
+	Thu, 12 Jan 2012 21:36:55 -0500
+In-Reply-To: <1325827997-27490-4-git-send-email-r66093@freescale.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -31,51 +32,69 @@ Jerry Huang
 > From: Huang Changming-R66093
 > Sent: Friday, January 06, 2012 1:33 PM
 > To: linux-mmc@vger.kernel.org
-> Cc: Huang Changming-R66093; Gao Guanhua-B22826; Xie Xiaobo-R63061; Chris
-> Ball
-> Subject: [PATCH 2/5 v2] ESDHC: set the timeout to the max value
+> Cc: Huang Changming-R66093; Jiang Yutang-B14898; Chris Ball
+> Subject: [PATCH 3/5 v4] ESDHC: Power management for ESDHC
 > 
 > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 > 
-> When access the card on some FSL platform board (e.g p2020, p1010,
-> mpc8536), the following error is reported with the timeout value
-> calculated:
+> For FSL ESDHC controllor, when enter the sleep, the controller will power
+> off,
+> therefore the register will lost its valuse, and driver should save value
+> of
+> register during suspend and used during resume.
 > 
-> mmc0: Got data interrupt 0x00000020 even though no data operation was in
-> progress.
-> mmc0: Got data interrupt 0x00000020 even though no data operation was in
-> progress.
-> 
-> So we skip the calculation of timeout and use the max value to fix it.
-> 
-> Signed-off-by: Gao Guanhua <B22826@freescale.com>
-> Signed-off-by: Xie Xiaobo <X.Xie@freescale.com>
 > Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> Signed-off-by: Jiang Yutang <b14898@freescale.com>
 > CC: Chris Ball <cjb@laptop.org>
 > ---
 > changes for v2:
 > 	- change the property to compatible for quirks
+> changes for v3:
+> 	- fix one compile error
+> changes for v4:
+> 	- use hooks to suspend/resume the special platform
 > 
->  drivers/mmc/host/sdhci-pltfm.c |    5 +++++
->  1 files changed, 5 insertions(+), 0 deletions(-)
+>  drivers/mmc/host/sdhci-of-esdhc.c |   19 +++++++++++++++++++
+>  1 files changed, 19 insertions(+), 0 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-
-> pltfm.c index ba36c36..1c254b1 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -74,6 +74,11 @@ void sdhci_get_of_property(struct platform_device
-> *pdev)
->  		if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
->  			host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-
+> of-esdhc.c
+> index c21be67..385a4ff 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -104,6 +104,21 @@ static int esdhc_of_get_cd(struct sdhci_host *host)
+>  	return present;
+>  }
 > 
-> +		if (of_device_is_compatible(np, "fsl,p2020-esdhc")
-> +			|| of_device_is_compatible(np, "fsl,p1010-esdhc")
-> +			|| of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
-> +			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> +#ifdef CONFIG_PM
+> +static u32 esdhc_proctl;
+> +static void esdhc_of_suspend(struct sdhci_host *host)
+> +{
+> +	esdhc_proctl = sdhci_be32bs_readl(host, SDHCI_HOST_CONTROL);
+> +}
 > +
->  		clk = of_get_property(np, "clock-frequency", &size);
->  		if (clk && size == sizeof(*clk) && *clk)
->  			pltfm_host->clock = be32_to_cpup(clk);
+> +static void esdhc_of_resume(struct sdhci_host *host)
+> +{
+> +	esdhc_of_enable_dma(host);
+> +	sdhci_be32bs_writel(host, esdhc_proctl, SDHCI_HOST_CONTROL);
+> +
+> +}
+> +#endif
+> +
+>  static struct sdhci_ops sdhci_esdhc_ops = {
+>  	.read_l = sdhci_be32bs_readl,
+>  	.read_w = esdhc_readw,
+> @@ -116,6 +131,10 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+>  	.get_max_clock = esdhc_of_get_max_clock,
+>  	.get_min_clock = esdhc_of_get_min_clock,
+>  	.get_cd = esdhc_of_get_cd,
+> +#ifdef CONFIG_PM
+> +	.platform_suspend = esdhc_of_suspend,
+> +	.platform_resume = esdhc_of_resume,
+> +#endif
+>  };
+> 
+>  static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
 > --
 > 1.7.5.4
 
