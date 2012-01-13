@@ -1,33 +1,101 @@
-From: Dmitry Antipov <dmitry.antipov@linaro.org>
-Subject: Re: [PATCH] mmc: use usleep_range() in mmc_delay()
-Date: Fri, 13 Jan 2012 17:51:09 +0400
-Message-ID: <4F1036CD.3090608@linaro.org>
-References: <4EF18310.6080801@linaro.org> <alpine.DEB.2.00.1201131514490.31704@kernel.research.nokia.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
+ cards
+Date: Fri, 13 Jan 2012 15:35:28 +0100
+Message-ID: <4F104130.8030906@stericsson.com>
+References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com> <4F0C035D.7070705@intel.com> <4F0C1A1C.8070007@stericsson.com> <4F0C2ACD.4090002@intel.com> <4F100196.8010104@stericsson.com> <4F100AE5.3040304@intel.com> <4F10161E.2080107@stericsson.com> <4F101ED5.9090007@intel.com> <4F102E34.6030704@stericsson.com> <4F1034F5.1020305@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="iso-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:41625 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753052Ab2AMNuT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2012 08:50:19 -0500
-In-Reply-To: <alpine.DEB.2.00.1201131514490.31704@kernel.research.nokia.com>
+Received: from eu1sys200aog106.obsmtp.com ([207.126.144.121]:45915 "EHLO
+	eu1sys200aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758241Ab2AMOfr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2012 09:35:47 -0500
+In-Reply-To: <4F1034F5.1020305@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaro Koskinen <aaro.koskinen@nokia.com>
-Cc: linaro-dev@lists.linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-On 01/13/2012 05:22 PM, Aaro Koskinen wrote:
+Adrian Hunter wrote:
+> On 13/01/12 15:14, Ulf Hansson wrote:
+>>>>>> In principles this means the following sequence:
+>>>>>>
+>>>>>> We will rely on that the get_cd function will return 0 (indicating card is
+>>>>>> removed) when the card is "slowly" removed at the point when the rescan
+>>>>>> function is calling it through the bus_ops->detect -->
+>>>>>> _mmc_detect_card_removed function.
+>>>>>>
+>>>>>> This then becomes a race, meaning that the rescan function must be
+>>>>>> executing
+>>>>>> at the same time the get_cd function will returns 0. Otherwise the rescan
+>>>>>> function will not remove the card.
+>>>>>>
+>>>>>> Thus my conclusion is that "[PATCH 2/4 v4] MMC/SD: Add callback
+>>>>>> function to
+>>>>>> detect card" will likely improve behavior but is not the safe solution to
+>>>>>> handle "slowly" removed cards.
+>>>>>>
+>>>>>> Again, to be sure, we must let the mmc_detect_card_remove function
+>>>>>> trigger a
+>>>>>> rescan when _mmc_detect_card_removed has detected that the card is
+>>>>>> removed.
+>>>>>> This should be safe in all circumstances.
+>>>>> sdhci has no problem because it does this:
+>>>>>
+>>>>>     - the host controller debounces the card detect line
+>>>>>     - the host controller records whether or not the card is present
+>>>>>     - the sdhci driver prevents (errors out) requests when the card is
+>>>>>     not present
+>>>> Debouncing will just be a way of triggering the problem more seldom. Or in
+>>>> worst case, state the card has been removed even if it has not.
+>>> If a delay is used with mmc_detect_change, debouncing is not necessary.
+>>>
+>>>> Just because you get a GPIO irq on the detect line does not mean the card is
+>>>> removed, debouncing or not. I consider this as pure mechanical switch which
+>>>> likely has glitches and I don't see that we should trust it fully. We only
+>>>> want to trigger a detect work, which is exactly what is done in the patch
+>>>> from Guennadi Liakhovetski "mmc: add a generic GPIO card-detect helper".
+>>> The original problem was "slow card removal".  "Unreliable card detect"
+>>> is a separate problem.  Currently there is polling (MMC_CAP_NEEDS_POLL)
+>>> for that.  Alternatively there is MMC_CAP2_RESCAN_ON_ERROR as we have
+>>> discussed.
+>> I do not understand why you mention "Unreliable card detect"? That has
+>> nothing to do with this patch.
+>>
+>> So to conclude the discussion, do you believe that this patch is acceptable
+>> as long as we add a CAPS2 option "MMC_CAP2_RESCAN_ON_ERROR", which if not
+>> set will prevent the detect work from being scheduled from
+>> mmc_detect_card_removed?
+> 
+> Yes
+> 
 
-> Anyway, I think the change is good. On systems with multiple MMC devices
-> the boot/probe can spend 100-200 ms alone just doing busylooping delays. I
-> think e.g. in mmc_rescan() the code uses frequently mmc_delay(10).
+OK, but.. :-)
 
-I'm worrying about this:
+I were just about to update the patch according to your recommendation 
+when I realized the following:
 
-mmc_delay(DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000))
+Once _mmc_detect_card_removed has set the card state as removed 
+("mmc_card_set_removed"), the card will never be accessible for I/O 
+requests any more, all I/O will "silently" be thrown away in the block 
+layer. This leads to that there should definitely be no reason for _not_ 
+letting a scheduled rescan remove the card as soon as possible. In other 
+words the CAP2 should not be needed.
 
-since I have no ideas about typical values for this timeout.
-If it may be too small (<=10 us), using usleep_range() makes no sense.
+Did I miss something?
 
-Dmitry
+Agree?
+
+
+BR
+Ulf Hansson
+
+
+
+
+
+
+
+
