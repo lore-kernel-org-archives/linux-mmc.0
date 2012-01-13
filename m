@@ -1,185 +1,30 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
- cards
-Date: Fri, 13 Jan 2012 12:43:49 +0200
-Message-ID: <4F100AE5.3040304@intel.com>
-References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com> <4F0C035D.7070705@intel.com> <4F0C1A1C.8070007@stericsson.com> <4F0C2ACD.4090002@intel.com> <4F100196.8010104@stericsson.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] mmc: dw-mmc: add the capability of power-off -notify feature
+Date: Fri, 13 Jan 2012 11:05:31 +0000
+Message-ID: <CAFbHwiTyMXu1DiNYN7AyDsNMsW0HfrDgfsv+VnAgDAj9dEWmQg@mail.gmail.com>
+References: <4F0FEBE4.3070803@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:53921 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756032Ab2AMKnu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 13 Jan 2012 05:43:50 -0500
-In-Reply-To: <4F100196.8010104@stericsson.com>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:48629 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757843Ab2AMLFb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2012 06:05:31 -0500
+Received: by pbdv2 with SMTP id v2so881774pbd.19
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2012 03:05:31 -0800 (PST)
+In-Reply-To: <4F0FEBE4.3070803@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Girish K S <girish.shivananjappa@linaro.org>
 
-On 13/01/12 12:04, Ulf Hansson wrote:
-> Adrian Hunter wrote:
->> On 10/01/12 12:59, Ulf Hansson wrote:
->>> Adrian Hunter wrote:
->>>> On 09/01/12 16:27, Ulf Hansson wrote:
->>>>> Adrian Hunter wrote:
->>>>>> On 09/01/12 15:14, Ulf Hansson wrote:
->>>>>>>>> My concern is more about what we actually can trust; either the
->>>>>>>>> GPIO irq
->>>>>>>>> which likely is giving more than one irq when inserting/removing a
->>>>>>>>> card
->>>>>>>>> since the slot is probably not glitch free, or that a "rescan" runs to
->>>>>>>>> make
->>>>>>>>> sure a CMD13 is accepted from the previously inserted card.
->>>>>>>> Yes, I guess you would need to debounce the GPIO if you wanted to rely
->>>>>>>> on it.
->>>>>>>>
->>>>>>>>> Moreover, the issue this patch tries to solve can not be solved
->>>>>>>>> without
->>>>>>>>> doing a "rescan" which must be triggered from the the block layer some
->>>>>>>>> how.
->>>>>>>>> I thought this new function that you previously added
->>>>>>>>> "mmc_detect_card_remove" was the proper place to do this.
->>>>>>>>>
->>>>>>>>>>> Let the mmc_detect_card_removed function trigger a new detect
->>>>>>>>>>> work immediately when it discovers that a card has been removed.
->>>>>>>>>> This is changing some long-standing functionality i.e. the card is
->>>>>>>>>> not
->>>>>>>>>> removed
->>>>>>>>>> without a card detect event.  It is difficult to know whether that
->>>>>>>>>> will be
->>>>>>>>>> very
->>>>>>>>>> bad for poor quality cards,
->>>>>>>>> Doing a mmc_detect (rescan) will in the end just issue a CMD13 to the
->>>>>>>>> card
->>>>>>>>> to make sure it is still present, that is already done from the block
->>>>>>>>> layer
->>>>>>>>> after each read/write request. So I can not see that "poor quality
->>>>>>>>> cards"
->>>>>>>>> will have any further problem with this patch, but I might miss
->>>>>>>>> something!?
->>>>>>>> The block driver has never caused a card to be removed before.  That
->>>>>>>> is new
->>>>>>>> and it is designed to preserve existing behaviour i.e. do not remove a
->>>>>>>> card
->>>>>>>> without a card detect event.
->>>>>>> True, but is this a problem!?
->>>>>> Better not to find out.
->>>>> :-)
->>>>>
->>>>> Then there is lot of other things around mmc we also should not change.
->>>> Can you give an example of a change in existing functionality?  Isn't
->>>> everything either a bug fix or new functionality?
->>>>
->>>>>>> Anyway, this is the actual issue this patch is trying to solve. If you
->>>>>>> remove a card "slowly", a "rescan" work, which the GPIO irq has
->>>>>>> triggered to
->>>>>>> run will run the CMD13 to verify that the card is still there. Since it
->>>>>>> has
->>>>>>> not completely been removed the CMD13 will succeed and the card will
->>>>>>> not be
->>>>>>> removed.
->>>>>>>
->>>>>>> Moreover every other new block request will soon start to fail and
->>>>>>> always
->>>>>>> do; until a new rescan is triggered (which is when you insert a new
->>>>>>> card or
->>>>>>> do a suspend-resume cycle). In practice I think it is more preferred
->>>>>>> that
->>>>>>> the card gets removed and it's corresponding block device.
->>>>>> There are other ways to solve that problem.  Apart from my previous
->>>>>> suggestion, there is also the possibility to make use of ->get_cd
->>>>>> instead of CMD13, someone already posted a patch for that
->>>>>> "[PATCH 2/4 v4] MMC/SD: Add callback function to detect card"
->>>>>> but it should probably be selected on a per driver basis (i.e. add a
->>>>>> MMC_CAP2 for it).  I guess you would still need to debounce the GPIO
->>>>>> though.
->>>>>>
->>>>> Unfortunately that wont help to solve this issue either. That patch will
->>>>> only prevent you from executing a CMD13 if the get_cd function says the
->>>>> card
->>>>> is still there. I kind of micro optimization I think, unless you very
->>>>> often
->>>>> encounters errors in the block layer.
->>>> No, the rescan calls that code, so if get_cd() returns 0 the card will be
->>>> removed irrespective of whether it has been pulled out slowly or not.
->>> That is not correct. The rescan uses the get_cd function to find out if
->>> it really make sense to try to initialize a new card. It is not used for
->>> removing existing cards.
->>
->> mmc_rescan() first calls host->bus_ops->detect() to see if the card is still
->> there.  If the card does not respond then it is removed.  Then mmc_rescan
->> attempts to initialize a new card. host->bus_ops->detect() is not used for
->> that.
->>
->>> You were referring to "[PATCH 2/4 v4] MMC/SD: Add callback function to
->>> detect card". This patch will prevent the bus_ops->alive function to be
->>> called if the get_cd function indicates that the card is still there. I
->>> can not see how this on it's own will help out to solve the issue my
->>> patch is trying to solve.
->>
->> Yes it will because it is called by mmc_rescan() and used to remove the card
->> via host->bus_ops->detect()
->>
-> 
-> In principles this means the following sequence:
-> 
-> We will rely on that the get_cd function will return 0 (indicating card is
-> removed) when the card is "slowly" removed at the point when the rescan
-> function is calling it through the bus_ops->detect -->
-> _mmc_detect_card_removed function.
-> 
-> This then becomes a race, meaning that the rescan function must be executing
-> at the same time the get_cd function will returns 0. Otherwise the rescan
-> function will not remove the card.
-> 
-> Thus my conclusion is that "[PATCH 2/4 v4] MMC/SD: Add callback function to
-> detect card" will likely improve behavior but is not the safe solution to
-> handle "slowly" removed cards.
-> 
-> Again, to be sure, we must let the mmc_detect_card_remove function trigger a
-> rescan when _mmc_detect_card_removed has detected that the card is removed.
-> This should be safe in all circumstances.
+On Fri, Jan 13, 2012 at 8:31 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> This patch add the capability of power off notify for dw-mmc controller.
+> In order to use Girish's patch(mmc: core: Add Power Off Notify Feature eMMC 4.5)
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin Park@samsung.com>
 
-sdhci has no problem because it does this:
+The patch looks ok but the email address for Kyungmin Park is broken. Otherwise:
 
-	- the host controller debounces the card detect line
-	- the host controller records whether or not the card is present
-	- the sdhci driver prevents (errors out) requests when the card is
-	not present
-
-So it should work if you:
-
-	- debounce the gpio line
-	- record whether or not the card is present based on the debounced
-	gpio line
-	- either error out requests when the card is not present
-	or
-	- use the get_cd patch (still ought to be driver selected)
-	and implement get_cd based on whether you have recorded the card
-	present or not
-
-
-> 
-> 
->>>>> The key in this patch is that a rescan work is triggered to fully verify
->>>>> that the card is still there and if not, it can remove it. I don't think
->>>>> this is such a big matter, but of course this is my own opinion. :-)
->>>> Another issue with your patch is that the card will not be removed unless
->>>> there is subsequent I/O to cause an I/O error and subsequent rescan.
->>>>
->>> This is exactly the problem this patch is trying to solve. Instead of
->>> "forever" keeping the card inserted and thus returning errors for every
->>> new I/O request, we trigger a rescan to fully remove the card.
->>
->> If the user pulls out the card slowly so that the rescan sees the card still
->> there, then if there is no I/O there will be no I/O error and the kernel
->> will not remove the card - until the user sticks in another card or tries to
->> access files that are not there.
->>
-> 
-> Br
-> Ulf Hansson
-> 
-
+Acked-by: Will Newton <will.newton@imgtec.com>
