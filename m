@@ -1,153 +1,70 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
- cards
-Date: Fri, 13 Jan 2012 11:04:06 +0100
-Message-ID: <4F100196.8010104@stericsson.com>
-References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com> <4F0C035D.7070705@intel.com> <4F0C1A1C.8070007@stericsson.com> <4F0C2ACD.4090002@intel.com>
+From: Kyungmin Park <kmpark@infradead.org>
+Subject: Re: [PATCH] MMC-4.5 Data Tag Support
+Date: Fri, 13 Jan 2012 19:10:43 +0900
+Message-ID: <CAH9JG2VQ9K7x8_qD1gXbRNAdOB=SgON9w3EEJ4KP9q_qottA8g@mail.gmail.com>
+References: <1324453157-30081-1-git-send-email-saugata.das@stericsson.com>
+	<CANfBPZ9gDkHK01bsMjf_CpkA-8s1U3X4WnAxO_=q9XdGODuf7w@mail.gmail.com>
+	<m2ehv4bugv.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:55044 "EHLO
-	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757825Ab2AMKEg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2012 05:04:36 -0500
-In-Reply-To: <4F0C2ACD.4090002@intel.com>
+Received: from mail-qw0-f53.google.com ([209.85.216.53]:53539 "EHLO
+	mail-qw0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751658Ab2AMKKo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2012 05:10:44 -0500
+Received: by qadb10 with SMTP id b10so370308qad.19
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2012 02:10:43 -0800 (PST)
+In-Reply-To: <m2ehv4bugv.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: "S, Venkatraman" <svenkatr@ti.com>, Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org, =?UTF-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>
 
-Adrian Hunter wrote:
-> On 10/01/12 12:59, Ulf Hansson wrote:
->> Adrian Hunter wrote:
->>> On 09/01/12 16:27, Ulf Hansson wrote:
->>>> Adrian Hunter wrote:
->>>>> On 09/01/12 15:14, Ulf Hansson wrote:
->>>>>>>> My concern is more about what we actually can trust; either the GPIO irq
->>>>>>>> which likely is giving more than one irq when inserting/removing a card
->>>>>>>> since the slot is probably not glitch free, or that a "rescan" runs to
->>>>>>>> make
->>>>>>>> sure a CMD13 is accepted from the previously inserted card.
->>>>>>> Yes, I guess you would need to debounce the GPIO if you wanted to rely
->>>>>>> on it.
->>>>>>>
->>>>>>>> Moreover, the issue this patch tries to solve can not be solved without
->>>>>>>> doing a "rescan" which must be triggered from the the block layer some
->>>>>>>> how.
->>>>>>>> I thought this new function that you previously added
->>>>>>>> "mmc_detect_card_remove" was the proper place to do this.
->>>>>>>>
->>>>>>>>>> Let the mmc_detect_card_removed function trigger a new detect
->>>>>>>>>> work immediately when it discovers that a card has been removed.
->>>>>>>>> This is changing some long-standing functionality i.e. the card is not
->>>>>>>>> removed
->>>>>>>>> without a card detect event.  It is difficult to know whether that
->>>>>>>>> will be
->>>>>>>>> very
->>>>>>>>> bad for poor quality cards,
->>>>>>>> Doing a mmc_detect (rescan) will in the end just issue a CMD13 to the
->>>>>>>> card
->>>>>>>> to make sure it is still present, that is already done from the block
->>>>>>>> layer
->>>>>>>> after each read/write request. So I can not see that "poor quality
->>>>>>>> cards"
->>>>>>>> will have any further problem with this patch, but I might miss
->>>>>>>> something!?
->>>>>>> The block driver has never caused a card to be removed before.  That
->>>>>>> is new
->>>>>>> and it is designed to preserve existing behaviour i.e. do not remove a
->>>>>>> card
->>>>>>> without a card detect event.
->>>>>> True, but is this a problem!?
->>>>> Better not to find out.
->>>> :-)
->>>>
->>>> Then there is lot of other things around mmc we also should not change.
->>> Can you give an example of a change in existing functionality?  Isn't
->>> everything either a bug fix or new functionality?
+On 1/13/12, Chris Ball <cjb@laptop.org> wrote:
+> Hi,
+>
+> On Thu, Jan 12 2012, S, Venkatraman wrote:
+>> On Wed, Dec 21, 2011 at 1:09 PM, Saugata Das <saugata.das@stericsson.com>
+>> wrote:
+>>> From: Saugata Das <saugata.das@linaro.org>
 >>>
->>>>>> Anyway, this is the actual issue this patch is trying to solve. If you
->>>>>> remove a card "slowly", a "rescan" work, which the GPIO irq has
->>>>>> triggered to
->>>>>> run will run the CMD13 to verify that the card is still there. Since it
->>>>>> has
->>>>>> not completely been removed the CMD13 will succeed and the card will
->>>>>> not be
->>>>>> removed.
->>>>>>
->>>>>> Moreover every other new block request will soon start to fail and always
->>>>>> do; until a new rescan is triggered (which is when you insert a new
->>>>>> card or
->>>>>> do a suspend-resume cycle). In practice I think it is more preferred that
->>>>>> the card gets removed and it's corresponding block device.
->>>>> There are other ways to solve that problem.  Apart from my previous
->>>>> suggestion, there is also the possibility to make use of ->get_cd
->>>>> instead of CMD13, someone already posted a patch for that
->>>>> "[PATCH 2/4 v4] MMC/SD: Add callback function to detect card"
->>>>> but it should probably be selected on a per driver basis (i.e. add a
->>>>> MMC_CAP2 for it).  I guess you would still need to debounce the GPIO
->>>>> though.
->>>>>
->>>> Unfortunately that wont help to solve this issue either. That patch will
->>>> only prevent you from executing a CMD13 if the get_cd function says the card
->>>> is still there. I kind of micro optimization I think, unless you very often
->>>> encounters errors in the block layer.
->>> No, the rescan calls that code, so if get_cd() returns 0 the card will be
->>> removed irrespective of whether it has been pulled out slowly or not.
->> That is not correct. The rescan uses the get_cd function to find out if
->> it really make sense to try to initialize a new card. It is not used for
->> removing existing cards.
-> 
-> mmc_rescan() first calls host->bus_ops->detect() to see if the card is still
-> there.  If the card does not respond then it is removed.  Then mmc_rescan
-> attempts to initialize a new card. host->bus_ops->detect() is not used for that.
-> 
->> You were referring to "[PATCH 2/4 v4] MMC/SD: Add callback function to
->> detect card". This patch will prevent the bus_ops->alive function to be
->> called if the get_cd function indicates that the card is still there. I
->> can not see how this on it's own will help out to solve the issue my
->> patch is trying to solve.
-> 
-> Yes it will because it is called by mmc_rescan() and used to remove the card
-> via host->bus_ops->detect()
-> 
-
-In principles this means the following sequence:
-
-We will rely on that the get_cd function will return 0 (indicating card 
-is removed) when the card is "slowly" removed at the point when the 
-rescan function is calling it through the bus_ops->detect --> 
-_mmc_detect_card_removed function.
-
-This then becomes a race, meaning that the rescan function must be 
-executing at the same time the get_cd function will returns 0. Otherwise 
-the rescan function will not remove the card.
-
-Thus my conclusion is that "[PATCH 2/4 v4] MMC/SD: Add callback function 
-to detect card" will likely improve behavior but is not the safe 
-solution to handle "slowly" removed cards.
-
-Again, to be sure, we must let the mmc_detect_card_remove function 
-trigger a rescan when _mmc_detect_card_removed has detected that the 
-card is removed. This should be safe in all circumstances.
-
-
->>>> The key in this patch is that a rescan work is triggered to fully verify
->>>> that the card is still there and if not, it can remove it. I don't think
->>>> this is such a big matter, but of course this is my own opinion. :-)
->>> Another issue with your patch is that the card will not be removed unless
->>> there is subsequent I/O to cause an I/O error and subsequent rescan.
+>>> MMC-4.5 data tag feature will be used to store the file system
+>>> meta-data in the
+>>> tagged region of eMMC. This will improve the write and subsequent
+>>> read transfer
+>>> time for the meta data.
 >>>
->> This is exactly the problem this patch is trying to solve. Instead of
->> "forever" keeping the card inserted and thus returning errors for every
->> new I/O request, we trigger a rescan to fully remove the card.
-> 
-> If the user pulls out the card slowly so that the rescan sees the card still
-> there, then if there is no I/O there will be no I/O error and the kernel
-> will not remove the card - until the user sticks in another card or tries to
-> access files that are not there.
-> 
+>>> Signed-off-by: Saugata Das <saugata.das@linaro.org>
+>>
+>> I tested this on a device which supports a data tag unit size of 8K.
+>> Tested-by: Venkatraman S <svenkatr@ti.com>
+>
+> Thanks for testing!  I've pushed it to mmc-next.
+>
+>> Chris,
+>>   Can this go into 3.3 ?
+>
+> I think 3.4 would be better after a full round of linux-next testing,
+> since this sounds like it could expose card-dependent quirks that could
+> destroy filesystems.  Better to be safe.
+I'm afraid it that it's really required since some features. data tag,
+context id, and packed command, are not mutual exclusive. so I hope to
+make it select. I mean it's not measured the real performance gain
+and/or other feature. so hope to enable/disable by platform data.
 
-Br
-Ulf Hansson
+How do you think?
+
+Thank you,
+Kyungmin Park
+>
+> Thanks,
+>
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
