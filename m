@@ -1,47 +1,59 @@
-From: Aaro Koskinen <aaro.koskinen@nokia.com>
-Subject: Re: [PATCH] mmc: change mmc_delay() to use usleep_range()
-Date: Fri, 13 Jan 2012 23:38:26 +0200 (EET)
-Message-ID: <alpine.DEB.2.00.1201132308530.24003@kernel.research.nokia.com>
-References: <1326467370-21026-1-git-send-email-dmitry.antipov@linaro.org>
+From: Steven Liu <lingjiujianke@gmail.com>
+Subject: [PATCH] mmc: fix deadlock from mmc core when suspend the device
+Date: Sat, 14 Jan 2012 13:05:08 +0800
+Message-ID: <CADxeRw=_Qx+dcZHJZnq1tAStvsuCWrsARgyxP=aKC0WfLWHZLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.nokia.com ([147.243.1.48]:37616 "EHLO mgw-sa02.nokia.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759230Ab2AMVlR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 13 Jan 2012 16:41:17 -0500
-In-Reply-To: <1326467370-21026-1-git-send-email-dmitry.antipov@linaro.org>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:48586 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750761Ab2ANFFK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Jan 2012 00:05:10 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dmitry Antipov <dmitry.antipov@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, patches@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org, liuqi@thundersoft.com, qinjian@thundersoft.com
+Cc: linux-kernel@vger.kernel.org, Greg KH <greg@kroah.com>
 
-Hi,
+Hi Chris Ball & Greg KH,
 
-On Fri, 13 Jan 2012, Dmitry Antipov wrote:
-> Use the usleep_range() to simplify mmc_delay() and give some more
-> accuracy to it - but with an exception of mmc_card_sleepawake():
-> since sleep/awake timeout varies in a wide range, different
-> delay methods should be used.
->
-> Signed-off-by: Dmitry Antipov <dmitry.antipov@linaro.org>
+This patch can fix the mmc deadlock when suspen the mmc devices.
 
-[...]
+when mmc_pm_notify to do the host->bus_ops->remove, there is deadlock,
+because it was locked at mmc_claim_host, so it modify the mmc_claim_host
+after the host->bus_ops->remove.
+the problem can reproduce at lots of the emmc/sd devices when create
+multi partitions,and I have tested this modify at lots of the platform.
 
-> +	if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY)) {
-> +		/* JEDEC MMCA 4.41 specifies the timeout value is in 200ns..838.86ms
-> +		   range. Round it up to 1us and use an appropriate delay method. */
-> +		unsigned long us = DIV_ROUND_UP(card->ext_csd.sa_timeout, 10);
-> +		if (us < 10)
-> +			udelay(us);
-> +		else
-> +			usleep_range(us, us + 100);
-> +	}
+Can this patch fixed?
 
-I think this part of the patch is over-engineered. What difference
-does it make in practice if you round it up to a bigger value so that
-usleep_range() makes always sense? The S/A timeout defines the max time
-the transition can take, it's not wrong to wait a bit longer. Also note
-that udelay() is not accurate so you need to add some margin anyway.
+Signed-off-by: LiuQi <liuqi@thundersoft.com>
+Signed-off-by: Jack Qin <qinjian@thundersoft.com>
 
-A.
+---
+ drivers/mmc/core/core.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 950b97d..e68a0e8 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2431,11 +2431,10 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+                if (!host->bus_ops || host->bus_ops->suspend)
+                        break;
+
+-               mmc_claim_host(host);
+-
+                if (host->bus_ops->remove)
+                        host->bus_ops->remove(host);
+
++               mmc_claim_host(host);
+                mmc_detach_bus(host);
+                mmc_power_off(host);
+                mmc_release_host(host);
+--
+1.7.7
+
+
+
+
+Thanks
