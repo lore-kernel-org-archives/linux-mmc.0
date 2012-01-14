@@ -1,59 +1,70 @@
-From: Steven Liu <lingjiujianke@gmail.com>
-Subject: [PATCH] mmc: fix deadlock from mmc core when suspend the device
-Date: Sat, 14 Jan 2012 13:05:08 +0800
-Message-ID: <CADxeRw=_Qx+dcZHJZnq1tAStvsuCWrsARgyxP=aKC0WfLWHZLw@mail.gmail.com>
+From: Zang Roy-R61911 <r61911@freescale.com>
+Subject: RE: [PATCH][upstream] eSDHC: fix errors when booting kernel on
+ Freescale eSDHC version 2.3
+Date: Sat, 14 Jan 2012 13:09:05 +0000
+Message-ID: <3E027F8168735B46AC006B1D0C7BB002033D00@039-SN2MPN1-013.039d.mgd.msft.net>
+References: <1326438121-26732-1-git-send-email-tie-fei.zang@freescale.com>
+ <20120113114741.GA8837@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:48586 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750761Ab2ANFFK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Jan 2012 00:05:10 -0500
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:59263 "EHLO
+	TX2EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751129Ab2ANNJJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Jan 2012 08:09:09 -0500
+In-Reply-To: <20120113114741.GA8837@oksana.dev.rtsoft.ru>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org, liuqi@thundersoft.com, qinjian@thundersoft.com
-Cc: linux-kernel@vger.kernel.org, Greg KH <greg@kroah.com>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, Xu Lei-B33228 <B33228@freescale.com>, Huang Changming-R66093 <r66093@freescale.com>, Jain Priyanka-B32167 <B32167@freescale.com>
 
-Hi Chris Ball & Greg KH,
+SGksIENocmlzDQpUaGVuIGNvdWxkIHlvdSBoZWxwIHRvIHVwZGF0ZSBBbnRvbidzIHN0eWxlIGNv
+bW1lbnQgYW5kIGhlbHAgdG8gcGljayB1cCB0aGlzIHBhdGNoPw0KSWYgYSBuZXcgdXBkYXRlIHBh
+dGNoIGlzIG5lZWRlZCwgbGV0IG1lIGtub3cgOi0pDQoNCkFudG9uDQpUaGFua3MgZm9yIGFsbCB0
+aGUgY29tbWVudHMgYW5kIG91ciBwcmV2aW91cyBkaXNjdXNzaW9uLg0KUm95DQoNCj4gLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW50b24gVm9yb250c292IFttYWlsdG86Y2Jv
+dWF0bWFpbHJ1QGdtYWlsLmNvbV0NCj4gU2VudDogRnJpZGF5LCBKYW51YXJ5IDEzLCAyMDEyIDE5
+OjQ4IFBNDQo+IFRvOiBaYW5nIFJveS1SNjE5MTENCj4gQ2M6IGxpbnV4LW1tY0B2Z2VyLmtlcm5l
+bC5vcmc7IGNqYkBsYXB0b3Aub3JnOyBYdSBMZWktQjMzMjI4OyBIdWFuZw0KPiBDaGFuZ21pbmct
+UjY2MDkzOyBKYWluIFByaXlhbmthLUIzMjE2Nw0KPiBTdWJqZWN0OiBSZTogW1BBVENIXVt1cHN0
+cmVhbV0gZVNESEM6IGZpeCBlcnJvcnMgd2hlbiBib290aW5nIGtlcm5lbCBvbg0KPiBGcmVlc2Nh
+bGUgZVNESEMgdmVyc2lvbiAyLjMNCj4gDQo+IE9uIEZyaSwgSmFuIDEzLCAyMDEyIGF0IDAzOjAy
+OjAxUE0gKzA4MDAsIFJveSBaYW5nIHdyb3RlOg0KPiBbLi4uXQ0KPiA+IGRpZmYgLS1naXQgYS9k
+cml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNp
+LQ0KPiBvZi1lc2RoYy5jDQo+ID4gaW5kZXggMDFlNWY2Mi4uMzZjYWFkMyAxMDA2NDQNCj4gPiAt
+LS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gPiArKysgYi9kcml2ZXJz
+L21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMNCj4gPiBAQCAtMzgsNiArMzgsMjIgQEAgc3RhdGlj
+IHU4IGVzZGhjX3JlYWRiKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCBpbnQgcmVnKQ0KPiA+ICAJ
+aW50IGJhc2UgPSByZWcgJiB+MHgzOw0KPiA+ICAJaW50IHNoaWZ0ID0gKHJlZyAmIDB4MykgKiA4
+Ow0KPiA+ICAJdTggcmV0ID0gKGluX2JlMzIoaG9zdC0+aW9hZGRyICsgYmFzZSkgPj4gc2hpZnQp
+ICYgMHhmZjsNCj4gPiArDQo+ID4gKwkvKg0KPiA+ICsJICogIkRNQSBzZWxlY3QiIGxvY2F0ZXMg
+YXQgb2Zmc2V0IDB4MjggaW4gU0Qgc3BlY2lmaWNhdGlvbiwgYnV0IG9uDQo+ID4gKwkgKiBQNTAy
+MCBvciBQMzA0MSwgaXQgbG9jYXRlcyBhdCAweDI5Lg0KPiA+ICsJICovDQo+ID4gKwlpZiAocmVn
+ID09IFNESENJX0hPU1RfQ09OVFJPTCkgew0KPiA+ICsJCXUzMiBkbWFfYml0czsNCj4gDQo+IEp1
+c3QgYSBzbWFsbCBuaXQ6IHBlciBjb2Rpbmcgc3R5bGUsIGhlcmUgc2hvdWxkIGJlIGVtcHR5IGxp
+bmUuDQo+IA0KPiA+ICsJCWRtYV9iaXRzID0gaW5fYmUzMihob3N0LT5pb2FkZHIgKyByZWcpOw0K
+PiA+ICsJCS8qIERNQSBzZWxlY3QgaXMgMjIsMjMgYml0cyBpbiBQcm90b2NvbCBDb250cm9sIFJl
+Z2lzdGVyKi8NCj4gPiArCQlkbWFfYml0cyA9IChkbWFfYml0cyA+PiA1KSAmIFNESENJX0NUUkxf
+RE1BX01BU0s7DQo+ID4gKw0KPiA+ICsJCS8qIGZpeHVwIHRoZSByZXN1bHQgKi8NCj4gPiArCQly
+ZXQgJj0gflNESENJX0NUUkxfRE1BX01BU0s7DQo+ID4gKwkJcmV0IHw9IGRtYV9iaXRzOw0KPiA+
+ICsJfQ0KPiA+ICsNCj4gPiAgCXJldHVybiByZXQ7DQo+ID4gIH0NCj4gPg0KPiA+IEBAIC01Niw2
+ICs3MiwyMCBAQCBzdGF0aWMgdm9pZCBlc2RoY193cml0ZXcoc3RydWN0IHNkaGNpX2hvc3QgKmhv
+c3QsIHUxNg0KPiB2YWwsIGludCByZWcpDQo+ID4NCj4gPiAgc3RhdGljIHZvaWQgZXNkaGNfd3Jp
+dGViKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCB1OCB2YWwsIGludCByZWcpDQo+ID4gIHsNCj4g
+PiArCS8qDQo+ID4gKwkgKiAiRE1BIHNlbGVjdCIgbG9jYXRlcyBhdCBvZmZzZXQgMHgyOCBpbiBT
+RCBzcGVjaWZpY2F0aW9uLCBidXQgb24NCj4gPiArCSAqIFA1MDIwIG9yIFAzMDQxLCBpdCBsb2Nh
+dGVzIGF0IDB4MjkuDQo+ID4gKwkgKi8NCj4gPiArCWlmIChyZWcgPT0gU0RIQ0lfSE9TVF9DT05U
+Uk9MKSB7DQo+ID4gKwkJdTMyIGRtYV9iaXRzOw0KPiANCj4gRGl0dG8uIEVtcHR5IGxpbmUgaGVy
+ZS4NCj4gDQo+ID4gKwkJLyogRE1BIHNlbGVjdCBpcyAyMiwyMyBiaXRzIGluIFByb3RvY29sIENv
+bnRyb2wgUmVnaXN0ZXIqLw0KPiA+ICsJCWRtYV9iaXRzID0gKHZhbCAmIFNESENJX0NUUkxfRE1B
+X01BU0spIDw8IDU7DQo+ID4gKwkJY2xyc2V0Yml0c19iZTMyKGhvc3QtPmlvYWRkciArIHJlZyAs
+IFNESENJX0NUUkxfRE1BX01BU0sgPDwgNSwNCj4gPiArCQkJZG1hX2JpdHMpOw0KPiA+ICsJCXZh
+bCAmPSB+U0RIQ0lfQ1RSTF9ETUFfTUFTSzsNCj4gPiArCQl2YWwgfD0gKGluX2JlMzIoaG9zdC0+
+aW9hZGRyICsgcmVnKSAmIFNESENJX0NUUkxfRE1BX01BU0spOw0KPiANCj4gTm8gbmVlZCBmb3Ig
+dGhlIG91dGVyIHBhcmVudGhlc2VzLg0KPiANCj4gT3RoZXJ3aXNlIHRoZSBwYXRjaCBsb29rcyBw
+ZXJmZWN0Lg0KPiANCj4gQWNrZWQtYnk6IEFudG9uIFZvcm9udHNvdiA8Y2JvdWF0bWFpbHJ1QGdt
+YWlsLmNvbT4NCj4gDQo+IFRoYW5rcyENCj4gDQo+IC0tDQo+IEFudG9uIFZvcm9udHNvdg0KPiBF
+bWFpbDogY2JvdWF0bWFpbHJ1QGdtYWlsLmNvbQ0KDQo=
 
-This patch can fix the mmc deadlock when suspen the mmc devices.
-
-when mmc_pm_notify to do the host->bus_ops->remove, there is deadlock,
-because it was locked at mmc_claim_host, so it modify the mmc_claim_host
-after the host->bus_ops->remove.
-the problem can reproduce at lots of the emmc/sd devices when create
-multi partitions,and I have tested this modify at lots of the platform.
-
-Can this patch fixed?
-
-Signed-off-by: LiuQi <liuqi@thundersoft.com>
-Signed-off-by: Jack Qin <qinjian@thundersoft.com>
-
----
- drivers/mmc/core/core.c |    3 +--
- 1 files changed, 1 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 950b97d..e68a0e8 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2431,11 +2431,10 @@ int mmc_pm_notify(struct notifier_block *notify_block,
-                if (!host->bus_ops || host->bus_ops->suspend)
-                        break;
-
--               mmc_claim_host(host);
--
-                if (host->bus_ops->remove)
-                        host->bus_ops->remove(host);
-
-+               mmc_claim_host(host);
-                mmc_detach_bus(host);
-                mmc_power_off(host);
-                mmc_release_host(host);
---
-1.7.7
-
-
-
-
-Thanks
