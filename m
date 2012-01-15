@@ -1,67 +1,38 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: fix deadlock from mmc core when suspend the device
-Date: Sat, 14 Jan 2012 09:19:44 -0500
-Message-ID: <m2r4z28iyn.fsf@bob.laptop.org>
-References: <CADxeRw=_Qx+dcZHJZnq1tAStvsuCWrsARgyxP=aKC0WfLWHZLw@mail.gmail.com>
+From: matthieu castet <castet.matthieu@free.fr>
+Subject: password protected mmc/sd handling
+Date: Sun, 15 Jan 2012 18:16:12 +0100
+Message-ID: <20120115181612.42883c75@mat-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:45364 "EHLO void.printf.net"
+Received: from smtp6-g21.free.fr ([212.27.42.6]:41011 "EHLO smtp6-g21.free.fr"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751248Ab2ANOUb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 14 Jan 2012 09:20:31 -0500
-In-Reply-To: <CADxeRw=_Qx+dcZHJZnq1tAStvsuCWrsARgyxP=aKC0WfLWHZLw@mail.gmail.com>
-	(Steven Liu's message of "Sat, 14 Jan 2012 13:05:08 +0800")
+	id S1751446Ab2AORQV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 15 Jan 2012 12:16:21 -0500
+Received: from mat-laptop (unknown [81.57.151.96])
+	by smtp6-g21.free.fr (Postfix) with ESMTP id E9C5282501
+	for <linux-mmc@vger.kernel.org>; Sun, 15 Jan 2012 18:16:14 +0100 (CET)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Steven Liu <lingjiujianke@gmail.com>
-Cc: linux-mmc@vger.kernel.org, liuqi@thundersoft.com, qinjian@thundersoft.com, linux-kernel@vger.kernel.org, Greg KH <greg@kroah.com>
+To: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Sat, Jan 14 2012, Steven Liu wrote:
-> Hi Chris Ball & Greg KH,
->
-> This patch can fix the mmc deadlock when suspen the mmc devices.
->
-> when mmc_pm_notify to do the host->bus_ops->remove, there is deadlock,
-> because it was locked at mmc_claim_host, so it modify the mmc_claim_host
-> after the host->bus_ops->remove.
-> the problem can reproduce at lots of the emmc/sd devices when create
-> multi partitions,and I have tested this modify at lots of the platform.
->
-> Can this patch fixed?
->
-> Signed-off-by: LiuQi <liuqi@thundersoft.com>
-> Signed-off-by: Jack Qin <qinjian@thundersoft.com>
->
-> ---
->  drivers/mmc/core/core.c |    3 +--
->  1 files changed, 1 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 950b97d..e68a0e8 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2431,11 +2431,10 @@ int mmc_pm_notify(struct notifier_block *notify_block,
->                 if (!host->bus_ops || host->bus_ops->suspend)
->                         break;
->
-> -               mmc_claim_host(host);
-> -
->                 if (host->bus_ops->remove)
->                         host->bus_ops->remove(host);
->
-> +               mmc_claim_host(host);
->                 mmc_detach_bus(host);
->                 mmc_power_off(host);
->                 mmc_release_host(host);
+some sdcard support password protection. 
+It can be useful on some embedded system (smartphone for example)
+where you don't want other people reading your data if you loose it
+(and you can't use encryption because of extra cpu usage).
 
-Another version of this patch has already gone to Linus, for 3.3-rc1.
+But that doesn't seem supported on linux.
+Is there any technical reason for that (not secure, not supported by
+all cards, ...) ?
 
-Thanks,
+There was an attempt to support it 6 years ago [1], but it wasn't
+merged in the main kernel.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Matthieu
+
+
+
+[1] http://thread.gmane.org/gmane.linux.kernel/373855
