@@ -1,63 +1,83 @@
 From: <r66093@freescale.com>
-Subject: [PATCH 1/4 v3] ESDHC: add PIO mode support
-Date: Mon, 16 Jan 2012 14:13:03 +0800
-Message-ID: <1326694386-28820-2-git-send-email-r66093@freescale.com>
+Subject: [PATCH 3/4 v5] ESDHC: Power management for ESDHC
+Date: Mon, 16 Jan 2012 14:13:05 +0800
+Message-ID: <1326694386-28820-4-git-send-email-r66093@freescale.com>
 References: <1326694386-28820-1-git-send-email-r66093@freescale.com>
+ <1326694386-28820-2-git-send-email-r66093@freescale.com>
+ <1326694386-28820-3-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe005.messaging.microsoft.com ([213.199.154.208]:1610
-	"EHLO AM1EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750728Ab2APGKi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2012 01:10:38 -0500
-In-Reply-To: <1326694386-28820-1-git-send-email-r66093@freescale.com>
+Received: from am1ehsobe006.messaging.microsoft.com ([213.199.154.209]:18558
+	"EHLO AM1EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750728Ab2APGKo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2012 01:10:44 -0500
+In-Reply-To: <1326694386-28820-3-git-send-email-r66093@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Gao Guanhua <B22826@freescale.com>, Chris Ball <cjb@laptop.org>
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Jiang Yutang <b14898@freescale.com>, Chris Ball <cjb@laptop.org>
 
 From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-For some FSL ESDHC controller(e.g. P2020E, Rev1.0), the SDHC can not work on
-DMA mode because of the hardware bug, so we set a broken dma flag and use
-PIO mode.
+For FSL ESDHC controllor, when enter the sleep, the controller will power off,
+therefore the register will lost its valuse, and driver should save value of
+register during suspend and used during resume.
 
-Signed-off-by: Gao Guanhua <B22826@freescale.com>
 Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+Signed-off-by: Jiang Yutang <b14898@freescale.com>
 CC: Chris Ball <cjb@laptop.org>
 Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
 ---
 changes for v2:
 	- change the property to compatible for quirks
 changes for v3:
+	- fix one compile error
+changes for v4:
+	- use hooks to suspend/resume the special platform
+changes for v5:
 	- add the Acked-by
 
- drivers/mmc/host/sdhci-pltfm.c |    5 ++++-
- 1 files changed, 4 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci-of-esdhc.c |   19 +++++++++++++++++++
+ 1 files changed, 19 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 03970bc..67b9ab0 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -2,7 +2,7 @@
-  * sdhci-pltfm.c Support for SDHCI platform devices
-  * Copyright (c) 2009 Intel Corporation
-  *
-- * Copyright (c) 2007 Freescale Semiconductor, Inc.
-+ * Copyright (c) 2007, 2011 Freescale Semiconductor, Inc.
-  * Copyright (c) 2009 MontaVista Software, Inc.
-  *
-  * Authors: Xiaobo Xie <X.Xie@freescale.com>
-@@ -71,6 +71,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 		if (sdhci_of_wp_inverted(np))
- 			host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index c21be67..385a4ff 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -104,6 +104,21 @@ static int esdhc_of_get_cd(struct sdhci_host *host)
+ 	return present;
+ }
  
-+		if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
-+			host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
++#ifdef CONFIG_PM
++static u32 esdhc_proctl;
++static void esdhc_of_suspend(struct sdhci_host *host)
++{
++	esdhc_proctl = sdhci_be32bs_readl(host, SDHCI_HOST_CONTROL);
++}
 +
- 		clk = of_get_property(np, "clock-frequency", &size);
- 		if (clk && size == sizeof(*clk) && *clk)
- 			pltfm_host->clock = be32_to_cpup(clk);
++static void esdhc_of_resume(struct sdhci_host *host)
++{
++	esdhc_of_enable_dma(host);
++	sdhci_be32bs_writel(host, esdhc_proctl, SDHCI_HOST_CONTROL);
++
++}
++#endif
++
+ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.read_l = sdhci_be32bs_readl,
+ 	.read_w = esdhc_readw,
+@@ -116,6 +131,10 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.get_max_clock = esdhc_of_get_max_clock,
+ 	.get_min_clock = esdhc_of_get_min_clock,
+ 	.get_cd = esdhc_of_get_cd,
++#ifdef CONFIG_PM
++	.platform_suspend = esdhc_of_suspend,
++	.platform_resume = esdhc_of_resume,
++#endif
+ };
+ 
+ static struct sdhci_pltfm_data sdhci_esdhc_pdata = {
 -- 
 1.7.5.4
 
