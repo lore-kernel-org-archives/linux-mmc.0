@@ -1,80 +1,36 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [RFC] mmc: core: add the capability for broken voltage
-Date: Mon, 16 Jan 2012 17:49:01 +0900
-Message-ID: <4F13E47D.8040505@samsung.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] mmc: dw-mmc: modify the condition for platdata of blk-setting
+Date: Mon, 16 Jan 2012 10:20:59 +0000
+Message-ID: <CAFbHwiR5yD+_GMK4ZEZ0uV3Gq7Wh-n8fM7M_RrPOX0o_cN4+6g@mail.gmail.com>
+References: <4F138F47.7040709@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:44901 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753603Ab2APItF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2012 03:49:05 -0500
-Received: from epcpsbgm2.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LXV001GDV1O80G0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 16 Jan 2012 17:49:02 +0900 (KST)
-Received: from [165.213.219.108] by mmp2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LXV001SQV5QHG80@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 16 Jan 2012 17:49:02 +0900 (KST)
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:42990 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753805Ab2APKU7 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2012 05:20:59 -0500
+Received: by pbaa10 with SMTP id a10so495203pba.19
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jan 2012 02:20:59 -0800 (PST)
+In-Reply-To: <4F138F47.7040709@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-This patch is added the MMC_CAP2_BROKEN_VOLTAGE.
+On Mon, Jan 16, 2012 at 2:45 AM, Jaehoon Chung <jh80.chung@samsung.com>=
+ wrote:
+> When use the IDMAC, we can also want to use the pdata->blk-setting.
+> So if pdata->blk-setting is unset, use the default value.
+> if not, use the pdata->blk-setting.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+> =A0drivers/mmc/host/dw_mmc.c | =A0 16 ++++++++--------
+> =A01 files changed, 8 insertions(+), 8 deletions(-)
 
-if the voltage didn't satisfy between min_uV and max_uV,
-try to change the voltage in core.c.
-When change the voltage, maybe use the regulator_set_voltage().
+Looks good.
 
-In regulator_set_voltage(), check the below condition.
-
-	/* sanity check */
-	if (!rdev->desc->ops->set_voltage &&
-	    !rdev->desc->ops->set_voltage_sel) {
-		ret = -EINVAL;
-		goto out;
-	}
-
-If Some-board should use the fixed-regulator, always return -EINVAL.
-Then, eMMC didn't initialize always.
-
-So if use the fixed-regulator or etc, we need to add the MMC_CAP2_BROKEN_VOLTAGE.
-
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/core/core.c  |    4 ++++
- include/linux/mmc/host.h |    1 +
- 2 files changed, 5 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index bec0bf2..6848789 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1121,6 +1121,10 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
- 		 * might not allow this operation
- 		 */
- 		voltage = regulator_get_voltage(supply);
-+
-+		if (mmc->caps2 & MMC_CAP2_BROKEN_VOLTAGE)
-+			min_uV = max_uV = voltage;
-+
- 		if (voltage < 0)
- 			result = voltage;
- 		else if (voltage < min_uV || voltage > max_uV)
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index dd13e05..5659aee 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -257,6 +257,7 @@ struct mmc_host {
- #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
- #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
- 				 MMC_CAP2_HS200_1_2V_SDR)
-+#define MMC_CAP2_BROKEN_VOLTAGE	(1 << 7)	/* Use the broken voltage */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 	unsigned int        power_notify_type;
+Acked-by: Will Newton <will.newton@imgtec.com>
