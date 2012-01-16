@@ -1,56 +1,29 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 4/5 v4] ESDHC: Workaround for data crc error on p1010rdb
-Date: Mon, 16 Jan 2012 04:43:47 +0000
-Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F1166B8FF@039-SN1MPN1-005.039d.mgd.msft.net>
-References: <1325827997-27490-1-git-send-email-r66093@freescale.com>
- <1325827997-27490-2-git-send-email-r66093@freescale.com>
- <1325827997-27490-3-git-send-email-r66093@freescale.com>
- <1325827997-27490-4-git-send-email-r66093@freescale.com>
- <1325827997-27490-5-git-send-email-r66093@freescale.com>
- <8A2FC72B45BB5A4C9F801431E06AE48F11669381@039-SN1MPN1-005.039d.mgd.msft.net>
- <20120113121231.GE8837@oksana.dev.rtsoft.ru>
+From: <r66093@freescale.com>
+Subject: [PATCH 0/4] new version workaround for FSL's eSDHC controller
+Date: Mon, 16 Jan 2012 14:13:02 +0800
+Message-ID: <1326694386-28820-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe006.messaging.microsoft.com ([213.199.154.144]:31815
-	"EHLO DB3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753232Ab2APEnw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2012 23:43:52 -0500
-In-Reply-To: <20120113121231.GE8837@oksana.dev.rtsoft.ru>
-Content-Language: en-US
+Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:19717 "EHLO
+	TX2EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750728Ab2APGKe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2012 01:10:34 -0500
+Received: from mail24-tx2 (localhost [127.0.0.1])	by mail24-tx2-R.bigfish.com
+ (Postfix) with ESMTP id 858B8600201	for <linux-mmc@vger.kernel.org>; Mon, 16
+ Jan 2012 06:10:29 +0000 (UTC)
+Received: from TX2EHSMHS021.bigfish.com (unknown [10.9.14.253])	by
+ mail24-tx2.bigfish.com (Postfix) with ESMTP id 6142C40081	for
+ <linux-mmc@vger.kernel.org>; Mon, 16 Jan 2012 06:10:29 +0000 (UTC)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Anton Vorontsov <cbouatmailru@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW50b24gVm9yb250c292
-IFttYWlsdG86Y2JvdWF0bWFpbHJ1QGdtYWlsLmNvbV0NCj4gU2VudDogRnJpZGF5LCBKYW51YXJ5
-IDEzLCAyMDEyIDg6MTMgUE0NCj4gVG86IEh1YW5nIENoYW5nbWluZy1SNjYwOTMNCj4gQ2M6IENo
-cmlzIEJhbGw7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IFtQQVRD
-SCA0LzUgdjRdIEVTREhDOiBXb3JrYXJvdW5kIGZvciBkYXRhIGNyYyBlcnJvciBvbg0KPiBwMTAx
-MHJkYg0KPiANCj4gT24gRnJpLCBKYW4gMTMsIDIwMTIgYXQgMDI6Mzc6MDdBTSArMDAwMCwgSHVh
-bmcgQ2hhbmdtaW5nLVI2NjA5MyB3cm90ZToNCj4gPiBIaSwgQW50b24sDQo+ID4gQ291bGQgeW91
-IGhhdmUgYW55IGNvbW1lbnQgYWJvdXQgdGhpcyBzZXJpYWwgcGF0Y2g/DQo+ID4NCj4gPiBUaGFu
-a3MNCj4gPiBKZXJyeSBIdWFuZw0KPiA+DQo+IFsuLi5dDQo+ID4gPiBAQCAtNTYsNiArNTYsMTMg
-QEAgc3RhdGljIGlubGluZSB2b2lkIGVzZGhjX3NldF9jbG9jayhzdHJ1Y3QNCj4gPiA+IHNkaGNp
-X2hvc3QgKmhvc3QsIHVuc2lnbmVkIGludCBjbG9jaykNCj4gPiA+ICAJaWYgKGNsb2NrID09IDAp
-DQo+ID4gPiAgCQlnb3RvIG91dDsNCj4gPiA+DQo+ID4gPiArCWlmIChob3N0LT5xdWlya3MyICYg
-U0RIQ0lfUVVJUksyX1JFTEFYX0ZSRVEpIHsNCj4gPiA+ICsJCWlmIChjbG9jayA+IDIwMDAwMDAw
-KQ0KPiA+ID4gKwkJCWNsb2NrIC09IDUwMDAwMDA7DQo+ID4gPiArCQlpZiAoY2xvY2sgPiA0MDAw
-MDAwMCkNCj4gPiA+ICsJCQljbG9jayAtPSA1MDAwMDAwOw0KPiA+ID4gKwl9DQo+ID4gPiArDQo+
-IA0KPiBUaGF0J3Mgd2VpcmQuIEFjY29yZGluZyB0byB0aGUgY29kZSwgeW91IGFyZSB1bmRlcmNs
-b2NraW5nIGEgZGV2aWNlIChpLmUuDQo+IHRoZSBjYXJkIGFjdHVhbGx5IGV4cGVjdHMgaGlnaGVy
-IGNsb2NrcykuDQo+IA0KPiBEaWQgeW91IGNoZWNrICh3aXRoIGFuIG9zY2lsbG9zY29wZSkgd2hh
-dCBjbG9ja3MgSFcgYWN0dWFsbHkgZ2VuZXJhdGVzPw0KPiBNYXliZSBpdCBqdXN0IGdlbmVyYXRl
-cyBoaWdoZXIgdGhhbiBleHBlY3RlZCBjbG9ja3MsIHRoZW4gdGhpcyBjb2RlIHdvdWxkDQo+IGJl
-IGEgY29ycmVjdCB3b3JrYXJvdW5kLg0KPiANCj4gT3RoZXJ3aXNlLCBpZiBIVyBnZW5lcmF0ZXMg
-Y29ycmVjdC9wcmVjaXNlIGNsb2NrLCB0aGVuIHlvdSBwcm9iYWJseSB3b3VsZA0KPiByYXRoZXIg
-bm90IHBlcm1pdCBoaWdoIGNsb2NrcyBhdCBhbGwuLi4gYnV0IHRoZW4geW91IGxpbWl0IG1heCBm
-cmVxIHRvIDIwDQo+IE1Iei4gOi0oDQo+IA0KPiBPaCB3ZWxsLCBpZiB0aGUgcGF0Y2ggd29ya3Mg
-Zm9yIHlvdXIgSFcsIEknbSBmaW5lIHdpdGggaXQuDQo+IA0KPiBBY2tlZC1ieTogQW50b24gVm9y
-b250c292IDxjYm91YXRtYWlscnVAZ21haWwuY29tPg0KWWVzLCBpdCBpcyB2ZXJ5IHdlaXJkLg0K
-RHVlIHRvIHRoZSBsaW1pdGF0aW9uIG9mIHNvbWUgRlNMIHBsYXRmb3JtJ3MgZVNESEMgY29udHJv
-bGxlciwgd2UgbXVzdCBkZWNyZWFzZSB0aGUgYnVzIGZyZXF1ZW5jeSBmb3Igc29tZSBTRCBjYXJk
-LCBvdGhlcndpc2UsIHRoZSBjYXJkIGNhbid0IHdvcmsgY29ycmVjdGx5Lg0K
+From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+
+The below new verison patches are the workaround for FSL's eSDHC controller.
+all patches have been acked-by Anton Vorontsov <cbouatmailru@gmail.com>.
+
+Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
