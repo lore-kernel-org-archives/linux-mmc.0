@@ -1,122 +1,63 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
- cards
-Date: Mon, 16 Jan 2012 12:09:27 +0100
-Message-ID: <4F140567.9050300@stericsson.com>
-References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com> <4F0C035D.7070705@intel.com> <4F0C1A1C.8070007@stericsson.com> <4F0C2ACD.4090002@intel.com> <4F100196.8010104@stericsson.com> <4F100AE5.3040304@intel.com> <4F10161E.2080107@stericsson.com> <4F101ED5.9090007@intel.com> <4F102E34.6030704@stericsson.com> <4F1034F5.1020305@intel.com> <4F104130.8030906@stericsson.com> <4F13D59B.2060607@intel.com>
+From: Shubhrajyoti D <shubhrajyoti@ti.com>
+Subject: [PATCH RFC] mmc : omap_hsmmc : Save and restore the sysc across reset
+Date: Mon, 16 Jan 2012 17:03:07 +0530
+Message-ID: <1326713587-26463-1-git-send-email-shubhrajyoti@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:35714 "EHLO
-	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753228Ab2APLJy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2012 06:09:54 -0500
-In-Reply-To: <4F13D59B.2060607@intel.com>
+Received: from comal.ext.ti.com ([198.47.26.152]:53056 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754297Ab2APLdR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 16 Jan 2012 06:33:17 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Shubhrajyoti D <shubhrajyoti@ti.com>, Denis Karpov <ext-denis.2.karpov@nokia.com>
 
-Adrian Hunter wrote:
-> On 13/01/12 16:35, Ulf Hansson wrote:
->> Adrian Hunter wrote:
->>> On 13/01/12 15:14, Ulf Hansson wrote:
->>>>>>>> In principles this means the following sequence:
->>>>>>>>
->>>>>>>> We will rely on that the get_cd function will return 0 (indicating
->>>>>>>> card is
->>>>>>>> removed) when the card is "slowly" removed at the point when the rescan
->>>>>>>> function is calling it through the bus_ops->detect -->
->>>>>>>> _mmc_detect_card_removed function.
->>>>>>>>
->>>>>>>> This then becomes a race, meaning that the rescan function must be
->>>>>>>> executing
->>>>>>>> at the same time the get_cd function will returns 0. Otherwise the
->>>>>>>> rescan
->>>>>>>> function will not remove the card.
->>>>>>>>
->>>>>>>> Thus my conclusion is that "[PATCH 2/4 v4] MMC/SD: Add callback
->>>>>>>> function to
->>>>>>>> detect card" will likely improve behavior but is not the safe
->>>>>>>> solution to
->>>>>>>> handle "slowly" removed cards.
->>>>>>>>
->>>>>>>> Again, to be sure, we must let the mmc_detect_card_remove function
->>>>>>>> trigger a
->>>>>>>> rescan when _mmc_detect_card_removed has detected that the card is
->>>>>>>> removed.
->>>>>>>> This should be safe in all circumstances.
->>>>>>> sdhci has no problem because it does this:
->>>>>>>
->>>>>>>     - the host controller debounces the card detect line
->>>>>>>     - the host controller records whether or not the card is present
->>>>>>>     - the sdhci driver prevents (errors out) requests when the card is
->>>>>>>     not present
->>>>>> Debouncing will just be a way of triggering the problem more seldom. Or in
->>>>>> worst case, state the card has been removed even if it has not.
->>>>> If a delay is used with mmc_detect_change, debouncing is not necessary.
->>>>>
->>>>>> Just because you get a GPIO irq on the detect line does not mean the
->>>>>> card is
->>>>>> removed, debouncing or not. I consider this as pure mechanical switch
->>>>>> which
->>>>>> likely has glitches and I don't see that we should trust it fully. We only
->>>>>> want to trigger a detect work, which is exactly what is done in the patch
->>>>>> from Guennadi Liakhovetski "mmc: add a generic GPIO card-detect helper".
->>>>> The original problem was "slow card removal".  "Unreliable card detect"
->>>>> is a separate problem.  Currently there is polling (MMC_CAP_NEEDS_POLL)
->>>>> for that.  Alternatively there is MMC_CAP2_RESCAN_ON_ERROR as we have
->>>>> discussed.
->>>> I do not understand why you mention "Unreliable card detect"? That has
->>>> nothing to do with this patch.
->>>>
->>>> So to conclude the discussion, do you believe that this patch is acceptable
->>>> as long as we add a CAPS2 option "MMC_CAP2_RESCAN_ON_ERROR", which if not
->>>> set will prevent the detect work from being scheduled from
->>>> mmc_detect_card_removed?
->>> Yes
->>>
->> OK, but.. :-)
->>
->> I were just about to update the patch according to your recommendation when
->> I realized the following:
->>
->> Once _mmc_detect_card_removed has set the card state as removed
->> ("mmc_card_set_removed"), the card will never be accessible for I/O requests
->> any more, all I/O will "silently" be thrown away in the block layer. This
->> leads to that there should definitely be no reason for _not_ letting a
->> scheduled rescan remove the card as soon as possible. In other words the
->> CAP2 should not be needed.
->>
->> Did I miss something?
->>
->> Agree?
-> 
-> No.  mmc_detect_card_removed() will not check/set the card removed
-> unless there has been a call to mmc_detect_change() to set the
-> host->detect_change flag.
+The commit 11dd62:[omap_hsmmc: context save/restore support]
 
-That were before this patch. This patch removes the detect_change flag 
-since it is used as you say to prevent "mmc_detect_card_removed" from 
-calling _mmc_detect_card_removed and thus possibly setting the card 
-state to removed.
+does a reset and restores AUTOIDLE settings.
+This patch saves the register does a reset and restores
+the same configuration.
 
-The use of the detect_flag is a bit strange I think. It means simply 
-that after getting one GPIO cd irq and then an I/O error we will only 
-try at _most_ _one_ time from mmc_detect_card_removed to see if the card 
-really has been removed. If the mmc_detect_card_removed the first time 
-does not detect that the card is removed it will have to wait for the 
-rescan the cover it, which is likely not what we want!?
+Cc: Denis Karpov <ext-denis.2.karpov@nokia.com>
+Signed-off-by: Shubhrajyoti D <shubhrajyoti@ti.com>
+---
+Untested
+ drivers/mmc/host/omap_hsmmc.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
 
-I will see if I can figure out a way of keeping the old scenario in 
-parallel with having MMC_CAP2_RESCAN_ON_ERROR... I will post a new patch.
-
-> 
-> MMC_CAP2_RESCAN_ON_ERROR is definitely needed.
-> 
-> Do not confuse mmc_detect_card_removed() with _mmc_detect_card_removed().
-> The former is called by block.c.  The latter is only called by mmc_rescan()
-> via the ->detect method.
-> 
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index fd0c661..175029d 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -680,7 +680,7 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+ 	struct mmc_ios *ios = &host->mmc->ios;
+ 	struct omap_mmc_platform_data *pdata = host->pdata;
+ 	int context_loss = 0;
+-	u32 hctl, capa;
++	u32 hctl, capa, sysc;
+ 	unsigned long timeout;
+ 
+ 	if (pdata->get_context_loss_count) {
+@@ -700,6 +700,7 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+ 		&& time_before(jiffies, timeout))
+ 		;
+ 
++	sysc = OMAP_HSMMC_READ(host->base, SYSCONFIG);
+ 	/* Do software reset */
+ 	OMAP_HSMMC_WRITE(host->base, SYSCONFIG, SOFTRESET);
+ 	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+@@ -707,8 +708,7 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+ 		&& time_before(jiffies, timeout))
+ 		;
+ 
+-	OMAP_HSMMC_WRITE(host->base, SYSCONFIG,
+-			OMAP_HSMMC_READ(host->base, SYSCONFIG) | AUTOIDLE);
++	OMAP_HSMMC_WRITE(host->base, SYSCONFIG, sysc);
+ 
+ 	if (host->id == OMAP_MMC1_DEVID) {
+ 		if (host->power_mode != MMC_POWER_OFF &&
+-- 
+1.7.1
 
