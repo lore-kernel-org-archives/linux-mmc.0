@@ -1,76 +1,122 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH] MMC-4.5 Data Tag Support
-Date: Mon, 16 Jan 2012 16:07:22 +0530
-Message-ID: <CANfBPZ_s3R9-OmCPgXkOeOEOQK5HztDQ9sUfuKd+HvSsBfHNXg@mail.gmail.com>
-References: <1324453157-30081-1-git-send-email-saugata.das@stericsson.com>
- <CANfBPZ9gDkHK01bsMjf_CpkA-8s1U3X4WnAxO_=q9XdGODuf7w@mail.gmail.com>
- <m2ehv4bugv.fsf@bob.laptop.org> <CAH9JG2VQ9K7x8_qD1gXbRNAdOB=SgON9w3EEJ4KP9q_qottA8g@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] mmc: core: Force a "detect" to handle non-properly removed
+ cards
+Date: Mon, 16 Jan 2012 12:09:27 +0100
+Message-ID: <4F140567.9050300@stericsson.com>
+References: <1325586798-16276-1-git-send-email-ulf.hansson@stericsson.com> <4F04C412.1030604@intel.com> <4F0AC942.4060404@stericsson.com> <4F0AD879.10801@intel.com> <4F0AE82C.10000@stericsson.com> <4F0AF157.7090101@intel.com> <4F0AF96B.4050500@stericsson.com> <4F0C035D.7070705@intel.com> <4F0C1A1C.8070007@stericsson.com> <4F0C2ACD.4090002@intel.com> <4F100196.8010104@stericsson.com> <4F100AE5.3040304@intel.com> <4F10161E.2080107@stericsson.com> <4F101ED5.9090007@intel.com> <4F102E34.6030704@stericsson.com> <4F1034F5.1020305@intel.com> <4F104130.8030906@stericsson.com> <4F13D59B.2060607@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="iso-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog122.obsmtp.com ([74.125.149.147]:46864 "EHLO
-	na3sys009aog122.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751841Ab2APKhq convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 16 Jan 2012 05:37:46 -0500
-Received: by bkbzv3 with SMTP id zv3so1582871bkb.1
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Jan 2012 02:37:43 -0800 (PST)
-In-Reply-To: <CAH9JG2VQ9K7x8_qD1gXbRNAdOB=SgON9w3EEJ4KP9q_qottA8g@mail.gmail.com>
+Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:35714 "EHLO
+	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753228Ab2APLJy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2012 06:09:54 -0500
+In-Reply-To: <4F13D59B.2060607@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kmpark@infradead.org>
-Cc: Chris Ball <cjb@laptop.org>, Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org, =?UTF-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-On Fri, Jan 13, 2012 at 3:40 PM, Kyungmin Park <kmpark@infradead.org> w=
-rote:
-> On 1/13/12, Chris Ball <cjb@laptop.org> wrote:
->> Hi,
->>
->> On Thu, Jan 12 2012, S, Venkatraman wrote:
->>> On Wed, Dec 21, 2011 at 1:09 PM, Saugata Das <saugata.das@stericsso=
-n.com>
->>> wrote:
->>>> From: Saugata Das <saugata.das@linaro.org>
+Adrian Hunter wrote:
+> On 13/01/12 16:35, Ulf Hansson wrote:
+>> Adrian Hunter wrote:
+>>> On 13/01/12 15:14, Ulf Hansson wrote:
+>>>>>>>> In principles this means the following sequence:
+>>>>>>>>
+>>>>>>>> We will rely on that the get_cd function will return 0 (indicating
+>>>>>>>> card is
+>>>>>>>> removed) when the card is "slowly" removed at the point when the rescan
+>>>>>>>> function is calling it through the bus_ops->detect -->
+>>>>>>>> _mmc_detect_card_removed function.
+>>>>>>>>
+>>>>>>>> This then becomes a race, meaning that the rescan function must be
+>>>>>>>> executing
+>>>>>>>> at the same time the get_cd function will returns 0. Otherwise the
+>>>>>>>> rescan
+>>>>>>>> function will not remove the card.
+>>>>>>>>
+>>>>>>>> Thus my conclusion is that "[PATCH 2/4 v4] MMC/SD: Add callback
+>>>>>>>> function to
+>>>>>>>> detect card" will likely improve behavior but is not the safe
+>>>>>>>> solution to
+>>>>>>>> handle "slowly" removed cards.
+>>>>>>>>
+>>>>>>>> Again, to be sure, we must let the mmc_detect_card_remove function
+>>>>>>>> trigger a
+>>>>>>>> rescan when _mmc_detect_card_removed has detected that the card is
+>>>>>>>> removed.
+>>>>>>>> This should be safe in all circumstances.
+>>>>>>> sdhci has no problem because it does this:
+>>>>>>>
+>>>>>>>     - the host controller debounces the card detect line
+>>>>>>>     - the host controller records whether or not the card is present
+>>>>>>>     - the sdhci driver prevents (errors out) requests when the card is
+>>>>>>>     not present
+>>>>>> Debouncing will just be a way of triggering the problem more seldom. Or in
+>>>>>> worst case, state the card has been removed even if it has not.
+>>>>> If a delay is used with mmc_detect_change, debouncing is not necessary.
+>>>>>
+>>>>>> Just because you get a GPIO irq on the detect line does not mean the
+>>>>>> card is
+>>>>>> removed, debouncing or not. I consider this as pure mechanical switch
+>>>>>> which
+>>>>>> likely has glitches and I don't see that we should trust it fully. We only
+>>>>>> want to trigger a detect work, which is exactly what is done in the patch
+>>>>>> from Guennadi Liakhovetski "mmc: add a generic GPIO card-detect helper".
+>>>>> The original problem was "slow card removal".  "Unreliable card detect"
+>>>>> is a separate problem.  Currently there is polling (MMC_CAP_NEEDS_POLL)
+>>>>> for that.  Alternatively there is MMC_CAP2_RESCAN_ON_ERROR as we have
+>>>>> discussed.
+>>>> I do not understand why you mention "Unreliable card detect"? That has
+>>>> nothing to do with this patch.
 >>>>
->>>> MMC-4.5 data tag feature will be used to store the file system
->>>> meta-data in the
->>>> tagged region of eMMC. This will improve the write and subsequent
->>>> read transfer
->>>> time for the meta data.
->>>>
->>>> Signed-off-by: Saugata Das <saugata.das@linaro.org>
+>>>> So to conclude the discussion, do you believe that this patch is acceptable
+>>>> as long as we add a CAPS2 option "MMC_CAP2_RESCAN_ON_ERROR", which if not
+>>>> set will prevent the detect work from being scheduled from
+>>>> mmc_detect_card_removed?
+>>> Yes
 >>>
->>> I tested this on a device which supports a data tag unit size of 8K=
-=2E
->>> Tested-by: Venkatraman S <svenkatr@ti.com>
+>> OK, but.. :-)
 >>
->> Thanks for testing! =A0I've pushed it to mmc-next.
+>> I were just about to update the patch according to your recommendation when
+>> I realized the following:
 >>
->>> Chris,
->>> =A0 Can this go into 3.3 ?
+>> Once _mmc_detect_card_removed has set the card state as removed
+>> ("mmc_card_set_removed"), the card will never be accessible for I/O requests
+>> any more, all I/O will "silently" be thrown away in the block layer. This
+>> leads to that there should definitely be no reason for _not_ letting a
+>> scheduled rescan remove the card as soon as possible. In other words the
+>> CAP2 should not be needed.
 >>
->> I think 3.4 would be better after a full round of linux-next testing=
-,
->> since this sounds like it could expose card-dependent quirks that co=
-uld
->> destroy filesystems. =A0Better to be safe.
-> I'm afraid it that it's really required since some features. data tag=
-,
-> context id, and packed command, are not mutual exclusive. so I hope t=
-o
-> make it select. I mean it's not measured the real performance gain
-> and/or other feature. so hope to enable/disable by platform data.
->
-> How do you think?
->
-> Thank you,
-> Kyungmin Park
+>> Did I miss something?
+>>
+>> Agree?
+> 
+> No.  mmc_detect_card_removed() will not check/set the card removed
+> unless there has been a call to mmc_detect_change() to set the
+> host->detect_change flag.
 
-I don't understand your comment on them not being mutually exclusive.
-As it is, these are core features and they don't belong in platform dat=
-a.
-Can you explain a bit more ?
+That were before this patch. This patch removes the detect_change flag 
+since it is used as you say to prevent "mmc_detect_card_removed" from 
+calling _mmc_detect_card_removed and thus possibly setting the card 
+state to removed.
 
-Thanks,
-Venkat.
+The use of the detect_flag is a bit strange I think. It means simply 
+that after getting one GPIO cd irq and then an I/O error we will only 
+try at _most_ _one_ time from mmc_detect_card_removed to see if the card 
+really has been removed. If the mmc_detect_card_removed the first time 
+does not detect that the card is removed it will have to wait for the 
+rescan the cover it, which is likely not what we want!?
+
+I will see if I can figure out a way of keeping the old scenario in 
+parallel with having MMC_CAP2_RESCAN_ON_ERROR... I will post a new patch.
+
+> 
+> MMC_CAP2_RESCAN_ON_ERROR is definitely needed.
+> 
+> Do not confuse mmc_detect_card_removed() with _mmc_detect_card_removed().
+> The former is called by block.c.  The latter is only called by mmc_rescan()
+> via the ->detect method.
+> 
+
