@@ -1,78 +1,73 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: dw-mmc: modify the condition for platdata of blk-setting
-Date: Mon, 16 Jan 2012 11:45:27 +0900
-Message-ID: <4F138F47.7040709@samsung.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH 2/5 v2] ESDHC: set the timeout to the max value
+Date: Mon, 16 Jan 2012 03:35:30 +0000
+Message-ID: <8A2FC72B45BB5A4C9F801431E06AE48F1166B8B7@039-SN1MPN1-005.039d.mgd.msft.net>
+References: <1325827997-27490-1-git-send-email-r66093@freescale.com>
+ <1325827997-27490-2-git-send-email-r66093@freescale.com>
+ <1325827997-27490-3-git-send-email-r66093@freescale.com>
+ <8A2FC72B45BB5A4C9F801431E06AE48F1166934E@039-SN1MPN1-005.039d.mgd.msft.net>
+ <20120113115445.GC8837@oksana.dev.rtsoft.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:38302 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753150Ab2APCpa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2012 21:45:30 -0500
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LXV00GQZEBPRL10@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 16 Jan 2012 11:45:28 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LXV001U4EBRUQ80@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 16 Jan 2012 11:45:27 +0900 (KST)
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:25960 "EHLO
+	TX2EHSOBE007.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753225Ab2APDfc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2012 22:35:32 -0500
+In-Reply-To: <20120113115445.GC8837@oksana.dev.rtsoft.ru>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Anton Vorontsov <cbouatmailru@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-When use the IDMAC, we can also want to use the pdata->blk-setting.
-So if pdata->blk-setting is unset, use the default value.
-if not, use the pdata->blk-setting.
+VGhhbmtzLCBBbnRvbi4NCg0KSSB3aWxsIHBvc3QgaXQgYWdhaW4uDQoNCj4gLS0tLS1PcmlnaW5h
+bCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW50b24gVm9yb250c292IFttYWlsdG86Y2JvdWF0bWFp
+bHJ1QGdtYWlsLmNvbV0NCj4gU2VudDogRnJpZGF5LCBKYW51YXJ5IDEzLCAyMDEyIDc6NTUgUE0N
+Cj4gVG86IEh1YW5nIENoYW5nbWluZy1SNjYwOTMNCj4gQ2M6IENocmlzIEJhbGw7IGxpbnV4LW1t
+Y0B2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IFtQQVRDSCAyLzUgdjJdIEVTREhDOiBz
+ZXQgdGhlIHRpbWVvdXQgdG8gdGhlIG1heCB2YWx1ZQ0KPiANCj4gT24gRnJpLCBKYW4gMTMsIDIw
+MTIgYXQgMDI6MzY6MjFBTSArMDAwMCwgSHVhbmcgQ2hhbmdtaW5nLVI2NjA5MyB3cm90ZToNCj4g
+PiBIaSwgQW50b24sDQo+ID4gQ291bGQgeW91IGhhdmUgYW55IGNvbW1lbnQgYWJvdXQgdGhpcyBz
+ZXJpYWwgcGF0Y2g/DQo+ID4NCj4gPiBUaGFua3MNCj4gPiBKZXJyeSBIdWFuZw0KPiA+DQo+ID4g
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+ID4gRnJvbTogSHVhbmcgQ2hhbmdtaW5n
+LVI2NjA5Mw0KPiA+ID4gU2VudDogRnJpZGF5LCBKYW51YXJ5IDA2LCAyMDEyIDE6MzMgUE0NCj4g
+PiA+IFRvOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnDQo+ID4gPiBDYzogSHVhbmcgQ2hhbmdt
+aW5nLVI2NjA5MzsgR2FvIEd1YW5odWEtQjIyODI2OyBYaWUgWGlhb2JvLVI2MzA2MTsNCj4gPiA+
+IENocmlzIEJhbGwNCj4gPiA+IFN1YmplY3Q6IFtQQVRDSCAyLzUgdjJdIEVTREhDOiBzZXQgdGhl
+IHRpbWVvdXQgdG8gdGhlIG1heCB2YWx1ZQ0KPiA+ID4NCj4gPiA+IEZyb206IEplcnJ5IEh1YW5n
+IDxDaGFuZy1NaW5nLkh1YW5nQGZyZWVzY2FsZS5jb20+DQo+ID4gPg0KPiA+ID4gV2hlbiBhY2Nl
+c3MgdGhlIGNhcmQgb24gc29tZSBGU0wgcGxhdGZvcm0gYm9hcmQgKGUuZyBwMjAyMCwgcDEwMTAs
+DQo+ID4gPiBtcGM4NTM2KSwgdGhlIGZvbGxvd2luZyBlcnJvciBpcyByZXBvcnRlZCB3aXRoIHRo
+ZSB0aW1lb3V0IHZhbHVlDQo+ID4gPiBjYWxjdWxhdGVkOg0KPiA+ID4NCj4gPiA+IG1tYzA6IEdv
+dCBkYXRhIGludGVycnVwdCAweDAwMDAwMDIwIGV2ZW4gdGhvdWdoIG5vIGRhdGEgb3BlcmF0aW9u
+DQo+ID4gPiB3YXMgaW4gcHJvZ3Jlc3MuDQo+ID4gPiBtbWMwOiBHb3QgZGF0YSBpbnRlcnJ1cHQg
+MHgwMDAwMDAyMCBldmVuIHRob3VnaCBubyBkYXRhIG9wZXJhdGlvbg0KPiA+ID4gd2FzIGluIHBy
+b2dyZXNzLg0KPiA+ID4NCj4gPiA+IFNvIHdlIHNraXAgdGhlIGNhbGN1bGF0aW9uIG9mIHRpbWVv
+dXQgYW5kIHVzZSB0aGUgbWF4IHZhbHVlIHRvIGZpeCBpdC4NCj4gPiA+DQo+ID4gPiBTaWduZWQt
+b2ZmLWJ5OiBHYW8gR3Vhbmh1YSA8QjIyODI2QGZyZWVzY2FsZS5jb20+DQo+ID4gPiBTaWduZWQt
+b2ZmLWJ5OiBYaWUgWGlhb2JvIDxYLlhpZUBmcmVlc2NhbGUuY29tPg0KPiA+ID4gU2lnbmVkLW9m
+Zi1ieTogSmVycnkgSHVhbmcgPENoYW5nLU1pbmcuSHVhbmdAZnJlZXNjYWxlLmNvbT4NCj4gPiA+
+IENDOiBDaHJpcyBCYWxsIDxjamJAbGFwdG9wLm9yZz4NCj4gPiA+IC0tLQ0KPiA+ID4gY2hhbmdl
+cyBmb3IgdjI6DQo+ID4gPiAJLSBjaGFuZ2UgdGhlIHByb3BlcnR5IHRvIGNvbXBhdGlibGUgZm9y
+IHF1aXJrcw0KPiA+ID4NCj4gPiA+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBsdGZtLmMgfCAg
+ICA1ICsrKysrDQo+ID4gPiAgMSBmaWxlcyBjaGFuZ2VkLCA1IGluc2VydGlvbnMoKyksIDAgZGVs
+ZXRpb25zKC0pDQo+ID4gPg0KPiA+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2Ro
+Y2ktcGx0Zm0uYw0KPiA+ID4gYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLSBwbHRmbS5jIGluZGV4
+IGJhMzZjMzYuLjFjMjU0YjEgMTAwNjQ0DQo+ID4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3Nk
+aGNpLXBsdGZtLmMNCj4gPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGx0Zm0uYw0K
+PiA+ID4gQEAgLTc0LDYgKzc0LDExIEBAIHZvaWQgc2RoY2lfZ2V0X29mX3Byb3BlcnR5KHN0cnVj
+dCBwbGF0Zm9ybV9kZXZpY2UNCj4gPiA+ICpwZGV2KQ0KPiA+ID4gIAkJaWYgKG9mX2RldmljZV9p
+c19jb21wYXRpYmxlKG5wLCAiZnNsLHAyMDIwLXJldjEtZXNkaGMiKSkNCj4gPiA+ICAJCQlob3N0
+LT5xdWlya3MgfD0gU0RIQ0lfUVVJUktfQlJPS0VOX0RNQTsNCj4gPiA+DQo+ID4gPiArCQlpZiAo
+b2ZfZGV2aWNlX2lzX2NvbXBhdGlibGUobnAsICJmc2wscDIwMjAtZXNkaGMiKQ0KPiA+ID4gKwkJ
+CXx8IG9mX2RldmljZV9pc19jb21wYXRpYmxlKG5wLCAiZnNsLHAxMDEwLWVzZGhjIikNCj4gPiA+
+ICsJCQl8fCBvZl9kZXZpY2VfaXNfY29tcGF0aWJsZShucCwgImZzbCxtcGM4NTM2LWVzZGhjIikp
+DQo+IA0KPiBBIHdvdWxkIGFkZCBvbmUgbW9yZSB0YWIgb24gdGhlc2UgdHdvIGxpbmVzLg0KPiAN
+Cj4gT3RoZXJ3aXNlLCBsb29rcyBPSy4NCj4gDQo+IEFja2VkLWJ5OiBBbnRvbiBWb3JvbnRzb3Yg
+PGNib3VhdG1haWxydUBnbWFpbC5jb20+DQo+IA0KPiBUaGFua3MsDQo+IA0KPiA+ID4gKwkJCWhv
+c3QtPnF1aXJrcyB8PSBTREhDSV9RVUlSS19CUk9LRU5fVElNRU9VVF9WQUw7DQo+ID4gPiArDQo+
+IA0KPiAtLQ0KPiBBbnRvbiBWb3JvbnRzb3YNCj4gRW1haWw6IGNib3VhdG1haWxydUBnbWFpbC5j
+b20NCg0K
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |   16 ++++++++--------
- 1 files changed, 8 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 0e34279..d458aaa 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1714,13 +1714,6 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	if (host->pdata->quirks & DW_MCI_QUIRK_HIGHSPEED)
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
- 
--#ifdef CONFIG_MMC_DW_IDMAC
--	mmc->max_segs = host->ring_size;
--	mmc->max_blk_size = 65536;
--	mmc->max_blk_count = host->ring_size;
--	mmc->max_seg_size = 0x1000;
--	mmc->max_req_size = mmc->max_seg_size * mmc->max_blk_count;
--#else
- 	if (host->pdata->blk_settings) {
- 		mmc->max_segs = host->pdata->blk_settings->max_segs;
- 		mmc->max_blk_size = host->pdata->blk_settings->max_blk_size;
-@@ -1729,13 +1722,20 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 		mmc->max_seg_size = host->pdata->blk_settings->max_seg_size;
- 	} else {
- 		/* Useful defaults if platform data is unset. */
-+#ifdef CONFIG_MMC_DW_IDMAC
-+		mmc->max_segs = host->ring_size;
-+		mmc->max_blk_size = 65536;
-+		mmc->max_blk_count = host->ring_size;
-+		mmc->max_seg_size = 0x1000;
-+		mmc->max_req_size = mmc->max_seg_size * mmc->max_blk_count;
-+#else
- 		mmc->max_segs = 64;
- 		mmc->max_blk_size = 65536; /* BLKSIZ is 16 bits */
- 		mmc->max_blk_count = 512;
- 		mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
- 		mmc->max_seg_size = mmc->max_req_size;
--	}
- #endif /* CONFIG_MMC_DW_IDMAC */
-+	}
- 
- 	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
- 	if (IS_ERR(host->vmmc)) {
--- 
-1.7.4.1
