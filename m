@@ -1,36 +1,76 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] mmc: dw-mmc: modify the condition for platdata of blk-setting
-Date: Mon, 16 Jan 2012 10:20:59 +0000
-Message-ID: <CAFbHwiR5yD+_GMK4ZEZ0uV3Gq7Wh-n8fM7M_RrPOX0o_cN4+6g@mail.gmail.com>
-References: <4F138F47.7040709@samsung.com>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH] MMC-4.5 Data Tag Support
+Date: Mon, 16 Jan 2012 16:07:22 +0530
+Message-ID: <CANfBPZ_s3R9-OmCPgXkOeOEOQK5HztDQ9sUfuKd+HvSsBfHNXg@mail.gmail.com>
+References: <1324453157-30081-1-git-send-email-saugata.das@stericsson.com>
+ <CANfBPZ9gDkHK01bsMjf_CpkA-8s1U3X4WnAxO_=q9XdGODuf7w@mail.gmail.com>
+ <m2ehv4bugv.fsf@bob.laptop.org> <CAH9JG2VQ9K7x8_qD1gXbRNAdOB=SgON9w3EEJ4KP9q_qottA8g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:42990 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753805Ab2APKU7 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2012 05:20:59 -0500
-Received: by pbaa10 with SMTP id a10so495203pba.19
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Jan 2012 02:20:59 -0800 (PST)
-In-Reply-To: <4F138F47.7040709@samsung.com>
+Received: from na3sys009aog122.obsmtp.com ([74.125.149.147]:46864 "EHLO
+	na3sys009aog122.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751841Ab2APKhq convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 16 Jan 2012 05:37:46 -0500
+Received: by bkbzv3 with SMTP id zv3so1582871bkb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jan 2012 02:37:43 -0800 (PST)
+In-Reply-To: <CAH9JG2VQ9K7x8_qD1gXbRNAdOB=SgON9w3EEJ4KP9q_qottA8g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Kyungmin Park <kmpark@infradead.org>
+Cc: Chris Ball <cjb@laptop.org>, Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org, =?UTF-8?B?7KCV7J6s7ZuI?= <jh80.chung@samsung.com>
 
-On Mon, Jan 16, 2012 at 2:45 AM, Jaehoon Chung <jh80.chung@samsung.com>=
- wrote:
-> When use the IDMAC, we can also want to use the pdata->blk-setting.
-> So if pdata->blk-setting is unset, use the default value.
-> if not, use the pdata->blk-setting.
+On Fri, Jan 13, 2012 at 3:40 PM, Kyungmin Park <kmpark@infradead.org> w=
+rote:
+> On 1/13/12, Chris Ball <cjb@laptop.org> wrote:
+>> Hi,
+>>
+>> On Thu, Jan 12 2012, S, Venkatraman wrote:
+>>> On Wed, Dec 21, 2011 at 1:09 PM, Saugata Das <saugata.das@stericsso=
+n.com>
+>>> wrote:
+>>>> From: Saugata Das <saugata.das@linaro.org>
+>>>>
+>>>> MMC-4.5 data tag feature will be used to store the file system
+>>>> meta-data in the
+>>>> tagged region of eMMC. This will improve the write and subsequent
+>>>> read transfer
+>>>> time for the meta data.
+>>>>
+>>>> Signed-off-by: Saugata Das <saugata.das@linaro.org>
+>>>
+>>> I tested this on a device which supports a data tag unit size of 8K=
+=2E
+>>> Tested-by: Venkatraman S <svenkatr@ti.com>
+>>
+>> Thanks for testing! =A0I've pushed it to mmc-next.
+>>
+>>> Chris,
+>>> =A0 Can this go into 3.3 ?
+>>
+>> I think 3.4 would be better after a full round of linux-next testing=
+,
+>> since this sounds like it could expose card-dependent quirks that co=
+uld
+>> destroy filesystems. =A0Better to be safe.
+> I'm afraid it that it's really required since some features. data tag=
+,
+> context id, and packed command, are not mutual exclusive. so I hope t=
+o
+> make it select. I mean it's not measured the real performance gain
+> and/or other feature. so hope to enable/disable by platform data.
 >
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
-> =A0drivers/mmc/host/dw_mmc.c | =A0 16 ++++++++--------
-> =A01 files changed, 8 insertions(+), 8 deletions(-)
+> How do you think?
+>
+> Thank you,
+> Kyungmin Park
 
-Looks good.
+I don't understand your comment on them not being mutually exclusive.
+As it is, these are core features and they don't belong in platform dat=
+a.
+Can you explain a bit more ?
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+Thanks,
+Venkat.
