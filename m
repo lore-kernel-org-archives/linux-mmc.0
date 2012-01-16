@@ -1,67 +1,65 @@
-From: <r66093@freescale.com>
-Subject: [PATCH 2/4 v3] ESDHC: set the timeout to the max value
-Date: Mon, 16 Jan 2012 14:13:04 +0800
-Message-ID: <1326694386-28820-3-git-send-email-r66093@freescale.com>
-References: <1326694386-28820-1-git-send-email-r66093@freescale.com>
- <1326694386-28820-2-git-send-email-r66093@freescale.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Dmitry Antipov <dmitry.antipov@linaro.org>
+Subject: [PATCH] mmc: change mmc_delay() to use usleep_range()
+Date: Mon, 16 Jan 2012 10:43:20 +0400
+Message-ID: <1326696200-514-1-git-send-email-dmitry.antipov@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe006.messaging.microsoft.com ([213.199.154.209]:18630
-	"EHLO AM1EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750740Ab2APGKx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2012 01:10:53 -0500
-In-Reply-To: <1326694386-28820-2-git-send-email-r66093@freescale.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:46412 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750763Ab2APGmc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2012 01:42:32 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Gao Guanhua <B22826@freescale.com>, Xie Xiaobo <X.Xie@freescale.com>, Chris Ball <cjb@laptop.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: patches@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Dmitry Antipov <dmitry.antipov@linaro.org>
 
-From: Jerry Huang <Chang-Ming.Huang@freescale.com>
-
-When access the card on some FSL platform board (e.g p2020, p1010, mpc8536),
-the following error is reported with the timeout value calculated:
-
-mmc0: Got data interrupt 0x00000020 even though no data operation was
-in progress.
-mmc0: Got data interrupt 0x00000020 even though no data operation was
-in progress.
-
-So we skip the calculation of timeout and use the max value to fix it.
-
-Signed-off-by: Gao Guanhua <B22826@freescale.com>
-Signed-off-by: Xie Xiaobo <X.Xie@freescale.com>
-Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-CC: Chris Ball <cjb@laptop.org>
-Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+Use the usleep_range() to simplify mmc_delay() and give some more
+accuracy to it - but with an exception of mmc_card_sleepawake():
+for the hosts with very small (<100us) sleep/awake timeout, it's
+value is rounded up to 100us so usleep_range() always makes sense.
 ---
-changes for v2:
-	- change the property to compatible for quirks
-changes for v3:
-	- add the Acked-by
+ drivers/mmc/core/core.h    |    8 ++------
+ drivers/mmc/core/mmc_ops.c |    9 ++++++---
+ 2 files changed, 8 insertions(+), 9 deletions(-)
 
- drivers/mmc/host/sdhci-pltfm.c |    7 +++++++
- 1 files changed, 7 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 67b9ab0..04fa130 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -74,6 +74,13 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 		if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
- 			host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 3bdafbc..fbd2cba 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -48,12 +48,8 @@ void mmc_power_off(struct mmc_host *host);
  
-+		if (of_device_is_compatible(np, "fsl,p2020-esdhc")
-+				|| of_device_is_compatible(np,
-+					"fsl,p1010-esdhc")
-+				|| of_device_is_compatible(np,
-+					"fsl,mpc8536-esdhc"))
-+			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-+
- 		clk = of_get_property(np, "clock-frequency", &size);
- 		if (clk && size == sizeof(*clk) && *clk)
- 			pltfm_host->clock = be32_to_cpup(clk);
+ static inline void mmc_delay(unsigned int ms)
+ {
+-	if (ms < 1000 / HZ) {
+-		cond_resched();
+-		mdelay(ms);
+-	} else {
+-		msleep(ms);
+-	}
++	unsigned long us = ms * USEC_PER_MSEC;
++	usleep_range(us, us + 1000);
+ }
+ 
+ void mmc_rescan(struct work_struct *work);
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 4d41fa9..457443a 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -82,9 +82,12 @@ int mmc_card_sleepawake(struct mmc_host *host, int sleep)
+ 	 * SEND_STATUS command to poll the status because that command (and most
+ 	 * others) is invalid while the card sleeps.
+ 	 */
+-	if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
+-		mmc_delay(DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000));
+-
++	if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY)) {
++		/* JEDEC MMCA 4.41 specifies the timeout value is in 200ns..838.86ms
++		   range, which is rounded it up to 100us here. */
++		unsigned long us = DIV_ROUND_UP(card->ext_csd.sa_timeout, 1000);
++		usleep_range(us, us + 100);
++	}
+ 	if (!sleep)
+ 		err = mmc_select_card(card);
+ 
 -- 
-1.7.5.4
-
+1.7.7.5
 
