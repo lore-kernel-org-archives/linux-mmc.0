@@ -1,94 +1,128 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 6/8] mmc: mmci: Fix incorrect handling of HW flow control for SDIO
-Date: Tue, 17 Jan 2012 15:34:25 +0100
-Message-ID: <1326810867-5346-7-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 2/8] mmc: mmci: Decrease current consumption in suspend
+Date: Tue, 17 Jan 2012 15:34:21 +0100
+Message-ID: <1326810867-5346-3-git-send-email-ulf.hansson@stericsson.com>
 References: <1326810867-5346-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:41099 "EHLO
-	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754549Ab2AQOfI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jan 2012 09:35:08 -0500
+Received: from eu1sys200aog120.obsmtp.com ([207.126.144.149]:36658 "EHLO
+	eu1sys200aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754501Ab2AQOex (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jan 2012 09:34:53 -0500
 In-Reply-To: <1326810867-5346-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>, Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>
 
-For data writes smaller than 8 bytes (only SDIO case), HW flow
-control was disabled but never re-enabled again. This meant that
-a following large read request could randomly give buffer overrun
-errors.
+To decrease current consumption in suspend state the
+VCORE regulator, the MCLK and PCLK for the ARM PL18x
+are now disabled.
 
-This patch is based upon a patch from Stefan Nilsson.
+When resuming the resourses are re-enabled and
+register values for MMCICLOCK, MMCIPOWER and MMCIMASK0
+are restored.
 
+Tested-by: Linus Walleij <linus.walleij@linaro.org>
 Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
-Signed-off-by: Stefan Nilsson XK <stefan.xk.nilsson@stericsson.com>
-Signed-off-by: Fredrik Soderstedt <fredrik.soderstedt@stericsson.com>
 Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c |   38 ++++++++++++++++++++------------------
- 1 files changed, 20 insertions(+), 18 deletions(-)
+ drivers/mmc/host/mmci.c |   64 ++++++++++++++++++++++++++++++++++++++++++----
+ 1 files changed, 58 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 3defe69..e7b4500 100644
+index 0de2f3d..cd7e144 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -638,10 +638,28 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 	if (data->flags & MMC_DATA_READ)
- 		datactrl |= MCI_DPSM_DIRECTION;
+@@ -1497,6 +1497,60 @@ static int __devexit mmci_remove(struct amba_device *dev)
+ }
  
--	/* The ST Micro variants has a special bit to enable SDIO */
- 	if (variant->sdio && host->mmc->card)
--		if (mmc_card_sdio(host->mmc->card))
-+		if (mmc_card_sdio(host->mmc->card)) {
+ #ifdef CONFIG_SUSPEND
++static int mmci_save(struct amba_device *dev)
++{
++	struct mmc_host *mmc = amba_get_drvdata(dev);
++	unsigned long flags;
 +
-+			/*
-+			 * The ST Micro variant for SDIO write transfer sizes
-+			 * less then 8 bytes must have clock H/W flow control
-+			 * disabled.
-+			 */
-+			u32 clk;
-+			if ((host->size < 8) && (data->flags & MMC_DATA_WRITE))
-+				clk = host->clk_reg & ~variant->clkreg_enable;
-+			else
-+				clk = host->clk_reg | variant->clkreg_enable;
++	if (mmc) {
++		struct mmci_host *host = mmc_priv(mmc);
 +
-+			mmci_write_clkreg(host, clk);
++		spin_lock_irqsave(&host->lock, flags);
 +
-+			/*
-+			 * The ST Micro variants has a special bit
-+			 * to enable SDIO.
-+			 */
- 			datactrl |= MCI_ST_DPSM_SDIOEN;
-+		}
++		/*
++		 * Make sure we do not get any interrupts when we disabled the
++		 * clock and the regulator and as well make sure to clear the
++		 * registers for clock and power.
++		 */
++		writel(0, host->base + MMCIMASK0);
++		writel(0, host->base + MMCIPOWER);
++		writel(0, host->base + MMCICLOCK);
++
++		spin_unlock_irqrestore(&host->lock, flags);
++
++		clk_unprepare(host->clk);
++		clk_disable(host->clk);
++		amba_vcore_disable(dev);
++	}
++
++	return 0;
++}
++
++static int mmci_restore(struct amba_device *dev)
++{
++	struct mmc_host *mmc = amba_get_drvdata(dev);
++	unsigned long flags;
++
++	if (mmc) {
++		struct mmci_host *host = mmc_priv(mmc);
++
++		amba_vcore_enable(dev);
++		clk_prepare(host->clk);
++		clk_enable(host->clk);
++
++		spin_lock_irqsave(&host->lock, flags);
++
++		/* Restore registers and re-enable interrupts. */
++		writel(host->clk_reg, host->base + MMCICLOCK);
++		writel(host->pwr_reg, host->base + MMCIPOWER);
++		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
++
++		spin_unlock_irqrestore(&host->lock, flags);
++	}
++
++	return 0;
++}
++
+ static int mmci_suspend(struct device *dev)
+ {
+ 	struct amba_device *adev = to_amba_device(dev);
+@@ -1504,12 +1558,11 @@ static int mmci_suspend(struct device *dev)
+ 	int ret = 0;
  
- 	/*
- 	 * Attempt to use DMA operation mode, if this
-@@ -863,22 +881,6 @@ static int mmci_pio_write(struct mmci_host *host, char *buffer, unsigned int rem
- 		count = min(remain, maxcnt);
- 
- 		/*
--		 * The ST Micro variant for SDIO transfer sizes
--		 * less then 8 bytes should have clock H/W flow
--		 * control disabled.
--		 */
--		if (variant->sdio &&
--		    mmc_card_sdio(host->mmc->card)) {
--			u32 clk;
--			if (count < 8)
--				clk = host->clk_reg & ~variant->clkreg_enable;
--			else
--				clk = host->clk_reg | variant->clkreg_enable;
+ 	if (mmc) {
+-		struct mmci_host *host = mmc_priv(mmc);
 -
--			mmci_write_clkreg(host, clk);
--		}
+ 		ret = mmc_suspend_host(mmc);
+ 		if (ret == 0) {
+ 			pm_runtime_get_sync(dev);
+-			writel(0, host->base + MMCIMASK0);
++			mmci_save(adev);
++			amba_pclk_disable(adev);
+ 		}
+ 	}
+ 
+@@ -1523,9 +1576,8 @@ static int mmci_resume(struct device *dev)
+ 	int ret = 0;
+ 
+ 	if (mmc) {
+-		struct mmci_host *host = mmc_priv(mmc);
 -
--		/*
- 		 * SDIO especially may want to send something that is
- 		 * not divisible by 4 (as opposed to card sectors
- 		 * etc), and the FIFO only accept full 32-bit writes.
+-		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
++		amba_pclk_enable(adev);
++		mmci_restore(adev);
+ 		pm_runtime_put(dev);
+ 
+ 		ret = mmc_resume_host(mmc);
 -- 
 1.7.5.4
 
