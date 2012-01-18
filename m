@@ -1,54 +1,43 @@
-From: Viresh Kumar <viresh.kumar@st.com>
-Subject: Re: [PATCH V2 08/12] dmaengine/dw_dmac: Unmap all memory buffers
- after completion of slave transfers
-Date: Wed, 18 Jan 2012 15:24:44 +0530
-Message-ID: <4F1696E4.9070806@st.com>
-References: <cover.1326876464.git.viresh.kumar@st.com>
- <ba53f229f3f594bfe0459b01a9ebb4d9b2c15882.1326876464.git.viresh.kumar@st.com>
- <20120118093620.GC1068@n2100.arm.linux.org.uk>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 0/7] extract a simple dmaengine library from
+	shdma.c
+Date: Wed, 18 Jan 2012 11:22:14 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1201181025280.28782@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20120118093620.GC1068@n2100.arm.linux.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Rajeev KUMAR <rajeev-dlh.kumar@st.com>, Bhupesh SHARMA <bhupesh.sharma@st.com>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "perex@perex.cz" <perex@perex.cz>, Vipin KUMAR <vipin.kumar@st.com>, Mirko GARDI <mirko.gardi@st.com>, Vincenzo FRASCINO <Vincenzo.FRASCINO@st.com>, Pratyush ANAND <pratyush.anand@st.com>, "vinod.koul@intel.com" <vinod.koul@intel.com>, Deepak SIKRI <deepak.sikri@st.com>, "cjb@laptop.org" <cjb@laptop.org>, "hskinnemoen@gmail.com" <hskinnemoen@gmail.com>, Bhavna YADAV <bhavna.yadav@st.com>, Armando VISCONTI <armando.visconti@st.com>, "egtvedt@samfundet.no" <egtvedt@samfundet.no>, Shiraz HASHIM <shiraz.hashim@st.com>, Amit VIRDI <Amit.VIRDI@st.com>, Vipul Kumar SAMAR <vipulkumar.samar@st.com>, "dan.j.williams@intel.com" <dan.j.williams@intel.com>, Ulf HANSSON <ulf.hansson@stericsson.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-k>
+Return-path: <alsa-devel-bounces@alsa-project.org>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+	<mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+	<mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Sender: alsa-devel-bounces@alsa-project.org
+Errors-To: alsa-devel-bounces@alsa-project.org
+To: linux-kernel@vger.kernel.org
+Cc: alsa-devel@alsa-project.org, linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Magnus Damm <magnus.damm@gmail.com>, "Shimoda,
+	Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 1/18/2012 3:06 PM, Russell King - ARM Linux wrote:
-> On Wed, Jan 18, 2012 at 02:41:55PM +0530, Viresh Kumar wrote:
-> NAK.  For reasons stated previously and subsequently ignored.
-> .
-> 
+This patch series has been triggered by a recent series by Shimoda-san
+http://www.spinics.net/lists/linux-sh/index.html#09895
+In a follow up to that thread it has been decided to extract a common 
+library from the current shdma driver to be re-used by other dmaengine 
+drivers. Primarily this library provides a flexible transfer descriptor 
+management for hardware, that does not dupport scatter-gather lists 
+natively. In such cases this library can be used to split transfer 
+requests into smaller chunks, up to the size, supported by the specific 
+hardware, enter them onto a linked list, thack their completion and call 
+user callbacks. This is a first shot, aimed to be used by the SUDMAC 
+driver. Once it is confirmed, that this version can be conveniently used 
+with it, I'll do some cosmetic clean up, notably, add / improve 
+documentation:-)
 
-On 1/18/2012 3:05 PM, Russell King - ARM Linux wrote:
->> > You implemented similar stuff in amba-pl08x :) .
->> > 
->> > if (!plchan->slave)
->> > 	pl08x_unmap_buffers(txd);
-> Take a look at that.  "If *NOT* slave, unmap the buffers".
-
-[Following is picked from current implementation of dw_dmac:]
-
-	if (!dwc->chan.private) {
-		struct device *parent = chan2parent(&dwc->chan);
-		if (!(txd->flags & DMA_COMPL_SKIP_DEST_UNMAP)) {
-
-Sorry, I missed the most straight forward looking code. :(
-Actually, dw_dmac is also doing the same, i.e. unmapping only for
-non-slave transfers.
-
-The same patch is still applicable, after fixing message subject and log.
-I will resend it, with message log fixed, once i get more feedbacks on V2.
-
--- 
-viresh
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
