@@ -1,116 +1,72 @@
 From: Viresh Kumar <viresh.kumar@st.com>
-Subject: [PATCH V2 12/12] dmaengine/dw_dmac: Remove unused fields in struct dw_dma_slave
-Date: Wed, 18 Jan 2012 14:41:59 +0530
-Message-ID: <7396f5349b6056ff588c524d7a8bf4c11120e457.1326876464.git.viresh.kumar@st.com>
+Subject: [PATCH V2 02/12] dmaengine: Add flow controller information to
+ dma_slave_config
+Date: Wed, 18 Jan 2012 14:41:49 +0530
+Message-ID: <5f9ec59562e86536c4123f61891b95590293030f.1326876464.git.viresh.kumar@st.com>
 References: <cover.1326876464.git.viresh.kumar@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <cover.1326876464.git.viresh.kumar@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: vinod.koul@intel.com, dan.j.williams@intel.com
-Cc: cjb@laptop.org, rmk+kernel@arm.linux.org.uk, linus.walleij@linaro.org, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, egtvedt@samfundet.no, hskinnemoen@gmail.com, kernel@pengutronix.de, perex@perex.cz, linux-arm-kernel@lists.infradead.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, viresh.kumar@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
+Cc: rajeev-dlh.kumar@st.com, bhupesh.sharma@st.com, linus.walleij@linaro.org, mirko.gardi@st.com, perex@perex.cz, vipin.kumar@st.com, vipulkumar.samar@st.com, egtvedt@samfundet.no, pratyush.anand@st.com, deepak.sikri@st.com, rmk+kernel@arm.linux.org.uk, cjb@laptop.org, hskinnemoen@gmail.com, bhavna.yadav@st.com, armando.visconti@st.com, shiraz.hashim@st.com, amit.virdi@st.com, vincenzo.frascino@st.com, ulf.hansson@stericsson.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, viresh.linux@gmail.com, kernel@pengutronix.de
 List-Id: linux-mmc@vger.kernel.org
+
+Flow controller is programmable for few controllers and there are few
+intelligent peripherals like, Synopsys JPEG controller, that needs to be a flow
+controller of DMA transfers on dest side.
+
+For this, currently two drivers, pl08x and dw_dmac, support flow controller to
+be passed from platform to these drivers.
+
+Perhaps, this should be a part of struct dma_slave_config. This patch adds
+another field device_fc to this structure. User drivers must pass this as true
+if they want to be flow controller of certain transfers.
 
 Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
 ---
- drivers/dma/dw_dmac_regs.h |   12 ++++++++++++
- include/linux/dw_dmac.h    |   38 --------------------------------------
- 2 files changed, 12 insertions(+), 38 deletions(-)
+ include/linux/dmaengine.h |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/dma/dw_dmac_regs.h b/drivers/dma/dw_dmac_regs.h
-index 2005d30..eec0481 100644
---- a/drivers/dma/dw_dmac_regs.h
-+++ b/drivers/dma/dw_dmac_regs.h
-@@ -13,6 +13,18 @@
+diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
+index 5532bb8..dd1915f 100644
+--- a/include/linux/dmaengine.h
++++ b/include/linux/dmaengine.h
+@@ -25,6 +25,7 @@
+ #include <linux/uio.h>
+ #include <linux/scatterlist.h>
+ #include <linux/bitmap.h>
++#include <linux/types.h>
+ #include <asm/page.h>
  
- #define DW_DMA_MAX_NR_CHANNELS	8
- 
-+/* flow controller */
-+enum dw_dma_fc {
-+	DW_DMA_FC_D_M2M,
-+	DW_DMA_FC_D_M2P,
-+	DW_DMA_FC_D_P2M,
-+	DW_DMA_FC_D_P2P,
-+	DW_DMA_FC_P_P2M,
-+	DW_DMA_FC_SP_P2P,
-+	DW_DMA_FC_P_M2P,
-+	DW_DMA_FC_DP_P2P,
-+};
-+
- /*
-  * Redefine this macro to handle differences between 32- and 64-bit
-  * addressing, big vs. little endian, etc.
-diff --git a/include/linux/dw_dmac.h b/include/linux/dw_dmac.h
-index f2c64f9..2412e02 100644
---- a/include/linux/dw_dmac.h
-+++ b/include/linux/dw_dmac.h
-@@ -31,18 +31,6 @@ struct dw_dma_platform_data {
- 	unsigned char	chan_priority;
- };
- 
--/**
-- * enum dw_dma_slave_width - DMA slave register access width.
-- * @DMA_SLAVE_WIDTH_8BIT: Do 8-bit slave register accesses
-- * @DMA_SLAVE_WIDTH_16BIT: Do 16-bit slave register accesses
-- * @DMA_SLAVE_WIDTH_32BIT: Do 32-bit slave register accesses
-- */
--enum dw_dma_slave_width {
--	DW_DMA_SLAVE_WIDTH_8BIT,
--	DW_DMA_SLAVE_WIDTH_16BIT,
--	DW_DMA_SLAVE_WIDTH_32BIT,
--};
--
- /* bursts size */
- enum dw_dma_msize {
- 	DW_DMA_MSIZE_1,
-@@ -55,47 +43,21 @@ enum dw_dma_msize {
- 	DW_DMA_MSIZE_256,
- };
- 
--/* flow controller */
--enum dw_dma_fc {
--	DW_DMA_FC_D_M2M,
--	DW_DMA_FC_D_M2P,
--	DW_DMA_FC_D_P2M,
--	DW_DMA_FC_D_P2P,
--	DW_DMA_FC_P_P2M,
--	DW_DMA_FC_SP_P2P,
--	DW_DMA_FC_P_M2P,
--	DW_DMA_FC_DP_P2P,
--};
--
  /**
-  * struct dw_dma_slave - Controller-specific information about a slave
+@@ -330,6 +331,9 @@ enum dma_slave_buswidth {
+  * may or may not be applicable on memory sources.
+  * @dst_maxburst: same as src_maxburst but for destination target
+  * mutatis mutandis.
++ * @device_fc: Flow Controller Settings for ccfg register. Only valid for slave
++ * channels. Fill with 'true' if peripheral should be flow controller. Direction
++ * will be selected at Runtime.
   *
-  * @dma_dev: required DMA master device
-- * @tx_reg: physical address of data register used for
-- *	memory-to-peripheral transfers
-- * @rx_reg: physical address of data register used for
-- *	peripheral-to-memory transfers
-- * @reg_width: peripheral register width
-  * @cfg_hi: Platform-specific initializer for the CFG_HI register
-  * @cfg_lo: Platform-specific initializer for the CFG_LO register
-  * @src_master: src master for transfers on allocated channel.
-  * @dst_master: dest master for transfers on allocated channel.
-- * @src_msize: src burst size.
-- * @dst_msize: dest burst size.
-- * @fc: flow controller for DMA transfer
-  */
- struct dw_dma_slave {
- 	struct device		*dma_dev;
--	dma_addr_t		tx_reg;
--	dma_addr_t		rx_reg;
--	enum dw_dma_slave_width	reg_width;
- 	u32			cfg_hi;
- 	u32			cfg_lo;
- 	u8			src_master;
- 	u8			dst_master;
--	u8			src_msize;
--	u8			dst_msize;
--	u8			fc;
+  * This struct is passed in as configuration data to a DMA engine
+  * in order to set up a certain channel for DMA transport at runtime.
+@@ -356,6 +360,7 @@ struct dma_slave_config {
+ 	enum dma_slave_buswidth dst_addr_width;
+ 	u32 src_maxburst;
+ 	u32 dst_maxburst;
++	bool device_fc;
  };
  
- /* Platform-configurable bits in CFG_HI */
+ static inline const char *dma_chan_name(struct dma_chan *chan)
 -- 
 1.7.8.110.g4cb5d
