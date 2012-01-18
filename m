@@ -1,95 +1,116 @@
 From: Viresh Kumar <viresh.kumar@st.com>
-Subject: [PATCH V2 00/12] dmaengine: Pl08x and dw_dmac updates
-Date: Wed, 18 Jan 2012 14:41:47 +0530
-Message-ID: <cover.1326876464.git.viresh.kumar@st.com>
+Subject: [PATCH V2 12/12] dmaengine/dw_dmac: Remove unused fields in struct dw_dma_slave
+Date: Wed, 18 Jan 2012 14:41:59 +0530
+Message-ID: <7396f5349b6056ff588c524d7a8bf4c11120e457.1326876464.git.viresh.kumar@st.com>
+References: <cover.1326876464.git.viresh.kumar@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1326876464.git.viresh.kumar@st.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: vinod.koul@intel.com, dan.j.williams@intel.com
-Cc: rajeev-dlh.kumar@st.com, bhupesh.sharma@st.com, linus.walleij@linaro.org, mirko.gardi@st.com, perex@perex.cz, vipin.kumar@st.com, vipulkumar.samar@st.com, egtvedt@samfundet.no, pratyush.anand@st.com, deepak.sikri@st.com, rmk+kernel@arm.linux.org.uk, cjb@laptop.org, hskinnemoen@gmail.com, bhavna.yadav@st.com, armando.visconti@st.com, shiraz.hashim@st.com, amit.virdi@st.com, vincenzo.frascino@st.com, ulf.hansson@stericsson.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, viresh.linux@gmail.com, kernel@pengutronix.de
+Cc: cjb@laptop.org, rmk+kernel@arm.linux.org.uk, linus.walleij@linaro.org, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, egtvedt@samfundet.no, hskinnemoen@gmail.com, kernel@pengutronix.de, perex@perex.cz, linux-arm-kernel@lists.infradead.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, viresh.kumar@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Vinod/Dan,
+Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
+---
+ drivers/dma/dw_dmac_regs.h |   12 ++++++++++++
+ include/linux/dw_dmac.h    |   38 --------------------------------------
+ 2 files changed, 12 insertions(+), 38 deletions(-)
 
-This patchset does following:
-- Includes earlier patchset sent by Rajeev for cleanly applying this patchset
-- Adds device_fc (device flow control) field in struct DMA_SLAVE_CONFIG
-- Fixes existing users of DMAENGINE for device_fc.
-- Updates pl08x driver according to that
-- Fixes few issues/bugs in dw_dmac driver
-- Adds DMA_SLAVE_CONFIG for dw_dmac driver
-- Fixes existing users of dw_dmac driver
-
-Change History:
-Since V1:
-- used dev_get_platdata() instead of platform_get_drvdata(), as that was
-  incorrect
-- Lots of fixes in: dmaengine/dw_dmac: Add support for DMA_SLAVE_CONFIG
-- Additional patches:
-	- dmaengine/dw_dmac: Add 64 bit access width support for slave xfers on
-	  mem side
-	- Fix other kernel driver for device_fc and dw_dmac changes.
-
-Rebased-on:
-
-commit 3506c0d507144d9b0f19efd5a56d289f70611179
-Author: Tushar Behera <tushar.behera@linaro.org>
-Date:   Tue Dec 6 16:15:54 2011 +0530
-
-    DMA: PL330: Remove pm_runtime_xxx calls from pl330 probe/remove
-    
-
-Rajeev KUMAR (1):
-  dmaengine/dw_dmac: Hibernation support in dw_dmac
-
-Viresh Kumar (11):
-  dmaengine: Add flow controller information to dma_slave_config
-  dmaengine: Pass dma_slave_config .device_fc = NULL for all existing
-    users
-  dmaengine/amba-pl08x: Take flow controller info from DMA_SLAVE_CONFIG
-  dmaengine/dw_dmac: Don't use magic number for total number of
-    channels
-  dmaengine/dw_dmac: Use dev_get_platdata() instead of accessing dev
-    directly
-  dmaengine/dw_dmac: Don't handle block interrupts
-  dmaengine/dw_dmac: Unmap all memory buffers after completion of slave
-    transfers
-  dmaengine/dw_dmac: Add 64 bit access width support for slave xfers on
-    mem side
-  dmaengine/dw_dmac: Add support for DMA_SLAVE_CONFIG
-  dmaengine/dw_dmac: Fix dw_dmac user drivers to adapt to slave_config
-    changes
-  dmaengine/dw_dmac: Remove unused fields in struct dw_dma_slave
-
- arch/avr32/mach-at32ap/at32ap700x.c             |   13 --
- arch/avr32/mach-at32ap/include/mach/atmel-mci.h |    7 -
- drivers/dma/amba-pl08x.c                        |    4 +-
- drivers/dma/dw_dmac.c                           |  232 +++++++++++++++--------
- drivers/dma/dw_dmac_regs.h                      |   15 ++
- drivers/mmc/host/atmel-mci.c                    |   24 ++-
- drivers/mmc/host/mmci.c                         |    2 +
- drivers/mmc/host/mxcmmc.c                       |    2 +
- drivers/spi/spi-dw-mid.c                        |    3 +
- drivers/spi/spi-pl022.c                         |    2 +
- drivers/tty/serial/amba-pl011.c                 |    3 +
- drivers/usb/musb/ux500_dma.c                    |    1 +
- include/linux/amba/pl08x.h                      |    8 +-
- include/linux/dmaengine.h                       |    5 +
- include/linux/dw_dmac.h                         |   38 ----
- sound/atmel/abdac.c                             |   18 ++-
- sound/atmel/ac97c.c                             |   41 ++++-
- sound/soc/imx/imx-pcm-dma-mx2.c                 |    3 +
- 18 files changed, 255 insertions(+), 166 deletions(-)
-
+diff --git a/drivers/dma/dw_dmac_regs.h b/drivers/dma/dw_dmac_regs.h
+index 2005d30..eec0481 100644
+--- a/drivers/dma/dw_dmac_regs.h
++++ b/drivers/dma/dw_dmac_regs.h
+@@ -13,6 +13,18 @@
+ 
+ #define DW_DMA_MAX_NR_CHANNELS	8
+ 
++/* flow controller */
++enum dw_dma_fc {
++	DW_DMA_FC_D_M2M,
++	DW_DMA_FC_D_M2P,
++	DW_DMA_FC_D_P2M,
++	DW_DMA_FC_D_P2P,
++	DW_DMA_FC_P_P2M,
++	DW_DMA_FC_SP_P2P,
++	DW_DMA_FC_P_M2P,
++	DW_DMA_FC_DP_P2P,
++};
++
+ /*
+  * Redefine this macro to handle differences between 32- and 64-bit
+  * addressing, big vs. little endian, etc.
+diff --git a/include/linux/dw_dmac.h b/include/linux/dw_dmac.h
+index f2c64f9..2412e02 100644
+--- a/include/linux/dw_dmac.h
++++ b/include/linux/dw_dmac.h
+@@ -31,18 +31,6 @@ struct dw_dma_platform_data {
+ 	unsigned char	chan_priority;
+ };
+ 
+-/**
+- * enum dw_dma_slave_width - DMA slave register access width.
+- * @DMA_SLAVE_WIDTH_8BIT: Do 8-bit slave register accesses
+- * @DMA_SLAVE_WIDTH_16BIT: Do 16-bit slave register accesses
+- * @DMA_SLAVE_WIDTH_32BIT: Do 32-bit slave register accesses
+- */
+-enum dw_dma_slave_width {
+-	DW_DMA_SLAVE_WIDTH_8BIT,
+-	DW_DMA_SLAVE_WIDTH_16BIT,
+-	DW_DMA_SLAVE_WIDTH_32BIT,
+-};
+-
+ /* bursts size */
+ enum dw_dma_msize {
+ 	DW_DMA_MSIZE_1,
+@@ -55,47 +43,21 @@ enum dw_dma_msize {
+ 	DW_DMA_MSIZE_256,
+ };
+ 
+-/* flow controller */
+-enum dw_dma_fc {
+-	DW_DMA_FC_D_M2M,
+-	DW_DMA_FC_D_M2P,
+-	DW_DMA_FC_D_P2M,
+-	DW_DMA_FC_D_P2P,
+-	DW_DMA_FC_P_P2M,
+-	DW_DMA_FC_SP_P2P,
+-	DW_DMA_FC_P_M2P,
+-	DW_DMA_FC_DP_P2P,
+-};
+-
+ /**
+  * struct dw_dma_slave - Controller-specific information about a slave
+  *
+  * @dma_dev: required DMA master device
+- * @tx_reg: physical address of data register used for
+- *	memory-to-peripheral transfers
+- * @rx_reg: physical address of data register used for
+- *	peripheral-to-memory transfers
+- * @reg_width: peripheral register width
+  * @cfg_hi: Platform-specific initializer for the CFG_HI register
+  * @cfg_lo: Platform-specific initializer for the CFG_LO register
+  * @src_master: src master for transfers on allocated channel.
+  * @dst_master: dest master for transfers on allocated channel.
+- * @src_msize: src burst size.
+- * @dst_msize: dest burst size.
+- * @fc: flow controller for DMA transfer
+  */
+ struct dw_dma_slave {
+ 	struct device		*dma_dev;
+-	dma_addr_t		tx_reg;
+-	dma_addr_t		rx_reg;
+-	enum dw_dma_slave_width	reg_width;
+ 	u32			cfg_hi;
+ 	u32			cfg_lo;
+ 	u8			src_master;
+ 	u8			dst_master;
+-	u8			src_msize;
+-	u8			dst_msize;
+-	u8			fc;
+ };
+ 
+ /* Platform-configurable bits in CFG_HI */
 -- 
 1.7.8.110.g4cb5d
