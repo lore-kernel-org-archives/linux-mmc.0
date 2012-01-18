@@ -1,41 +1,42 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] mmc: sh_mmcif: simplify capability calculation
-Date: Wed, 18 Jan 2012 10:11:56 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1201181010530.28782@axis700.grange>
+From: Viresh Kumar <viresh.kumar@st.com>
+Subject: [PATCH V2 06/12] dmaengine/dw_dmac: Use dev_get_platdata() instead of accessing dev directly
+Date: Wed, 18 Jan 2012 14:41:53 +0530
+Message-ID: <7ee05856ef8235eeb31bea1b5ab2e898037d9ffd.1326876464.git.viresh.kumar@st.com>
+References: <cover.1326876464.git.viresh.kumar@st.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:53300 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756427Ab2ARJMA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2012 04:12:00 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by axis700.grange (Postfix) with ESMTP id EF1E918B04D
-	for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2012 10:11:56 +0100 (CET)
+Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:33163 "EHLO
+	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756833Ab2ARJMv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2012 04:12:51 -0500
+In-Reply-To: <cover.1326876464.git.viresh.kumar@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: vinod.koul@intel.com, dan.j.williams@intel.com
+Cc: cjb@laptop.org, rmk+kernel@arm.linux.org.uk, linus.walleij@linaro.org, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, egtvedt@samfundet.no, hskinnemoen@gmail.com, kernel@pengutronix.de, perex@perex.cz, linux-arm-kernel@lists.infradead.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, viresh.kumar@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Use already defined function dev_get_platdata() instead of accessing
+pdev->dev.data.
+
+Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
 ---
- drivers/mmc/host/sh_mmcif.c |    4 +---
- 1 files changed, 1 insertions(+), 3 deletions(-)
+ drivers/dma/dw_dmac.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index ff8b63e..c4bfbb0 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1307,9 +1307,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 		mmc->f_min = mmc->f_max / 512;
- 	if (pd->ocr)
- 		mmc->ocr_avail = pd->ocr;
--	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
--	if (pd->caps)
--		mmc->caps |= pd->caps;
-+	mmc->caps = MMC_CAP_MMC_HIGHSPEED | pd->caps;
- 	mmc->max_segs = 32;
- 	mmc->max_blk_size = 512;
- 	mmc->max_req_size = PAGE_CACHE_SIZE * mmc->max_segs;
+diff --git a/drivers/dma/dw_dmac.c b/drivers/dma/dw_dmac.c
+index 1577394..f3aecb3 100644
+--- a/drivers/dma/dw_dmac.c
++++ b/drivers/dma/dw_dmac.c
+@@ -1369,7 +1369,7 @@ static int __init dw_probe(struct platform_device *pdev)
+ 	int			err;
+ 	int			i;
+ 
+-	pdata = pdev->dev.platform_data;
++	pdata = dev_get_platdata(&pdev->dev);
+ 	if (!pdata || pdata->nr_channels > DW_DMA_MAX_NR_CHANNELS)
+ 		return -EINVAL;
+ 
 -- 
-1.7.2.5
+1.7.8.110.g4cb5d
 
