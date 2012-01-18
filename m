@@ -1,192 +1,35 @@
-From: Viresh Kumar <viresh.kumar@st.com>
-Subject: [PATCH V2 07/12] dmaengine/dw_dmac: Don't handle block interrupts
-Date: Wed, 18 Jan 2012 14:41:54 +0530
-Message-ID: <50c41dcc65d41022547819f17f8b9b2d5ce38e1a.1326876464.git.viresh.kumar@st.com>
-References: <cover.1326876464.git.viresh.kumar@st.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH V2 08/12] dmaengine/dw_dmac: Unmap all memory buffers
+	after completion of slave transfers
+Date: Wed, 18 Jan 2012 09:36:20 +0000
+Message-ID: <20120118093620.GC1068@n2100.arm.linux.org.uk>
+References: <cover.1326876464.git.viresh.kumar@st.com> <ba53f229f3f594bfe0459b01a9ebb4d9b2c15882.1326876464.git.viresh.kumar@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <cover.1326876464.git.viresh.kumar@st.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: vinod.koul@intel.com, dan.j.williams@intel.com
-Cc: rajeev-dlh.kumar@st.com, bhupesh.sharma@st.com, linus.walleij@linaro.org, mirko.gardi@st.com, perex@perex.cz, vipin.kumar@st.com, vipulkumar.samar@st.com, egtvedt@samfundet.no, pratyush.anand@st.com, deepak.sikri@st.com, rmk+kernel@arm.linux.org.uk, cjb@laptop.org, hskinnemoen@gmail.com, bhavna.yadav@st.com, armando.visconti@st.com, shiraz.hashim@st.com, amit.virdi@st.com, vincenzo.frascino@st.com, ulf.hansson@stericsson.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, viresh.linux@gmail.com, kernel@pengutronix.de
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:40797 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757257Ab2ARJhB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2012 04:37:01 -0500
+Content-Disposition: inline
+In-Reply-To: <ba53f229f3f594bfe0459b01a9ebb4d9b2c15882.1326876464.git.viresh.kumar@st.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Viresh Kumar <viresh.kumar@st.com>
+Cc: vinod.koul@intel.com, dan.j.williams@intel.com, rajeev-dlh.kumar@st.com, bhupesh.sharma@st.com, linus.walleij@linaro.org, mirko.gardi@st.com, perex@perex.cz, vipin.kumar@st.com, vipulkumar.samar@st.com, egtvedt@samfundet.no, pratyush.anand@st.com, deepak.sikri@st.com, cjb@laptop.org, hskinnemoen@gmail.com, bhavna.yadav@st.com, armando.visconti@st.com, shiraz.hashim@st.com, amit.virdi@st.com, vincenzo.frascino@st.com, ulf.hansson@stericsson.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, viresh.linux@gmail.com, kernel@pengutronix.de
 
-Block interrupts give interrupt on completion of every LLI, which is actually
-too much interrupts. This is just not required for current functioning of
-dw_dmac.
+On Wed, Jan 18, 2012 at 02:41:55PM +0530, Viresh Kumar wrote:
+> Currently, after completion of transfer, source address or destination address
+> of only the first LLI descriptor is unmapped. And length passed for unmap is
+> total length of all descriptors in the list. Which means unmapping code assumed
+> that the memory buffers pointed to by the descriptors will be physically
+> contiguous, which might not be the case. It is possible for other drivers to
+> pass sglist to slave_sg(), in which all buffers are scattered throughout the
+> memory.
+> 
+> This patch intends to fix this wrong expectation of dw_dmac. Now, first desc
+> will not contain total length of transfer. But individual descriptors will
+> contain their individual lengths. Finally, we will call unmap for all
+> descriptors.
 
-So, just don't handle them at all.
-
-Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
----
- drivers/dma/dw_dmac.c |   36 ++++++------------------------------
- 1 files changed, 6 insertions(+), 30 deletions(-)
-
-diff --git a/drivers/dma/dw_dmac.c b/drivers/dma/dw_dmac.c
-index f3aecb3..5d7b199 100644
---- a/drivers/dma/dw_dmac.c
-+++ b/drivers/dma/dw_dmac.c
-@@ -192,7 +192,6 @@ static void dwc_initialize(struct dw_dma_chan *dwc)
- 
- 	/* Enable interrupts */
- 	channel_set_bit(dw, MASK.XFER, dwc->mask);
--	channel_set_bit(dw, MASK.BLOCK, dwc->mask);
- 	channel_set_bit(dw, MASK.ERROR, dwc->mask);
- 
- 	dwc->initialized = true;
-@@ -329,12 +328,6 @@ static void dwc_scan_descriptors(struct dw_dma *dw, struct dw_dma_chan *dwc)
- 	unsigned long flags;
- 
- 	spin_lock_irqsave(&dwc->lock, flags);
--	/*
--	 * Clear block interrupt flag before scanning so that we don't
--	 * miss any, and read LLP before RAW_XFER to ensure it is
--	 * valid if we decide to scan the list.
--	 */
--	dma_writel(dw, CLEAR.BLOCK, dwc->mask);
- 	llp = channel_readl(dwc, LLP);
- 	status_xfer = dma_readl(dw, RAW.XFER);
- 
-@@ -470,17 +463,16 @@ EXPORT_SYMBOL(dw_dma_get_dst_addr);
- 
- /* called with dwc->lock held and all DMAC interrupts disabled */
- static void dwc_handle_cyclic(struct dw_dma *dw, struct dw_dma_chan *dwc,
--		u32 status_block, u32 status_err, u32 status_xfer)
-+		u32 status_err, u32 status_xfer)
- {
- 	unsigned long flags;
- 
--	if (status_block & dwc->mask) {
-+	if (dwc->mask) {
- 		void (*callback)(void *param);
- 		void *callback_param;
- 
- 		dev_vdbg(chan2dev(&dwc->chan), "new cyclic period llp 0x%08x\n",
- 				channel_readl(dwc, LLP));
--		dma_writel(dw, CLEAR.BLOCK, dwc->mask);
- 
- 		callback = dwc->cdesc->period_callback;
- 		callback_param = dwc->cdesc->period_callback_param;
-@@ -520,7 +512,6 @@ static void dwc_handle_cyclic(struct dw_dma *dw, struct dw_dma_chan *dwc,
- 		channel_writel(dwc, CTL_LO, 0);
- 		channel_writel(dwc, CTL_HI, 0);
- 
--		dma_writel(dw, CLEAR.BLOCK, dwc->mask);
- 		dma_writel(dw, CLEAR.ERROR, dwc->mask);
- 		dma_writel(dw, CLEAR.XFER, dwc->mask);
- 
-@@ -537,36 +528,29 @@ static void dw_dma_tasklet(unsigned long data)
- {
- 	struct dw_dma *dw = (struct dw_dma *)data;
- 	struct dw_dma_chan *dwc;
--	u32 status_block;
- 	u32 status_xfer;
- 	u32 status_err;
- 	int i;
- 
--	status_block = dma_readl(dw, RAW.BLOCK);
- 	status_xfer = dma_readl(dw, RAW.XFER);
- 	status_err = dma_readl(dw, RAW.ERROR);
- 
--	dev_vdbg(dw->dma.dev, "tasklet: status_block=%x status_err=%x\n",
--			status_block, status_err);
-+	dev_vdbg(dw->dma.dev, "tasklet: status_err=%x\n", status_err);
- 
- 	for (i = 0; i < dw->dma.chancnt; i++) {
- 		dwc = &dw->chan[i];
- 		if (test_bit(DW_DMA_IS_CYCLIC, &dwc->flags))
--			dwc_handle_cyclic(dw, dwc, status_block, status_err,
--					status_xfer);
-+			dwc_handle_cyclic(dw, dwc, status_err, status_xfer);
- 		else if (status_err & (1 << i))
- 			dwc_handle_error(dw, dwc);
--		else if ((status_block | status_xfer) & (1 << i))
-+		else if (status_xfer & (1 << i))
- 			dwc_scan_descriptors(dw, dwc);
- 	}
- 
- 	/*
--	 * Re-enable interrupts. Block Complete interrupts are only
--	 * enabled if the INT_EN bit in the descriptor is set. This
--	 * will trigger a scan before the whole list is done.
-+	 * Re-enable interrupts.
- 	 */
- 	channel_set_bit(dw, MASK.XFER, dw->all_chan_mask);
--	channel_set_bit(dw, MASK.BLOCK, dw->all_chan_mask);
- 	channel_set_bit(dw, MASK.ERROR, dw->all_chan_mask);
- }
- 
-@@ -583,7 +567,6 @@ static irqreturn_t dw_dma_interrupt(int irq, void *dev_id)
- 	 * softirq handler.
- 	 */
- 	channel_clear_bit(dw, MASK.XFER, dw->all_chan_mask);
--	channel_clear_bit(dw, MASK.BLOCK, dw->all_chan_mask);
- 	channel_clear_bit(dw, MASK.ERROR, dw->all_chan_mask);
- 
- 	status = dma_readl(dw, STATUS_INT);
-@@ -594,7 +577,6 @@ static irqreturn_t dw_dma_interrupt(int irq, void *dev_id)
- 
- 		/* Try to recover */
- 		channel_clear_bit(dw, MASK.XFER, (1 << 8) - 1);
--		channel_clear_bit(dw, MASK.BLOCK, (1 << 8) - 1);
- 		channel_clear_bit(dw, MASK.SRC_TRAN, (1 << 8) - 1);
- 		channel_clear_bit(dw, MASK.DST_TRAN, (1 << 8) - 1);
- 		channel_clear_bit(dw, MASK.ERROR, (1 << 8) - 1);
-@@ -1068,7 +1050,6 @@ static void dwc_free_chan_resources(struct dma_chan *chan)
- 
- 	/* Disable interrupts */
- 	channel_clear_bit(dw, MASK.XFER, dwc->mask);
--	channel_clear_bit(dw, MASK.BLOCK, dwc->mask);
- 	channel_clear_bit(dw, MASK.ERROR, dwc->mask);
- 
- 	spin_unlock_irqrestore(&dwc->lock, flags);
-@@ -1120,7 +1101,6 @@ int dw_dma_cyclic_start(struct dma_chan *chan)
- 		return -EBUSY;
- 	}
- 
--	dma_writel(dw, CLEAR.BLOCK, dwc->mask);
- 	dma_writel(dw, CLEAR.ERROR, dwc->mask);
- 	dma_writel(dw, CLEAR.XFER, dwc->mask);
- 
-@@ -1322,7 +1302,6 @@ void dw_dma_cyclic_free(struct dma_chan *chan)
- 	while (dma_readl(dw, CH_EN) & dwc->mask)
- 		cpu_relax();
- 
--	dma_writel(dw, CLEAR.BLOCK, dwc->mask);
- 	dma_writel(dw, CLEAR.ERROR, dwc->mask);
- 	dma_writel(dw, CLEAR.XFER, dwc->mask);
- 
-@@ -1347,7 +1326,6 @@ static void dw_dma_off(struct dw_dma *dw)
- 	dma_writel(dw, CFG, 0);
- 
- 	channel_clear_bit(dw, MASK.XFER, dw->all_chan_mask);
--	channel_clear_bit(dw, MASK.BLOCK, dw->all_chan_mask);
- 	channel_clear_bit(dw, MASK.SRC_TRAN, dw->all_chan_mask);
- 	channel_clear_bit(dw, MASK.DST_TRAN, dw->all_chan_mask);
- 	channel_clear_bit(dw, MASK.ERROR, dw->all_chan_mask);
-@@ -1449,13 +1427,11 @@ static int __init dw_probe(struct platform_device *pdev)
- 
- 	/* Clear/disable all interrupts on all channels. */
- 	dma_writel(dw, CLEAR.XFER, dw->all_chan_mask);
--	dma_writel(dw, CLEAR.BLOCK, dw->all_chan_mask);
- 	dma_writel(dw, CLEAR.SRC_TRAN, dw->all_chan_mask);
- 	dma_writel(dw, CLEAR.DST_TRAN, dw->all_chan_mask);
- 	dma_writel(dw, CLEAR.ERROR, dw->all_chan_mask);
- 
- 	channel_clear_bit(dw, MASK.XFER, dw->all_chan_mask);
--	channel_clear_bit(dw, MASK.BLOCK, dw->all_chan_mask);
- 	channel_clear_bit(dw, MASK.SRC_TRAN, dw->all_chan_mask);
- 	channel_clear_bit(dw, MASK.DST_TRAN, dw->all_chan_mask);
- 	channel_clear_bit(dw, MASK.ERROR, dw->all_chan_mask);
--- 
-1.7.8.110.g4cb5d
+NAK.  For reasons stated previously and subsequently ignored.
