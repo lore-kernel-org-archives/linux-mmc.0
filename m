@@ -1,8 +1,8 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 3/7] mmc: sh_mmcif: remove unneeded struct sh_mmcif_dma,
- prepare for simple DMA
-Date: Wed, 18 Jan 2012 11:22:26 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1201181115420.28782@axis700.grange>
+Subject: [PATCH 4/7] mmc: sh_mobile_sdhi: prepare for conversion to simple
+ DMA
+Date: Wed, 18 Jan 2012 11:22:30 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1201181117170.28782@axis700.grange>
 References: <Pine.LNX.4.64.1201181025280.28782@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
@@ -13,90 +13,29 @@ To: linux-kernel@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Magnus Damm <magnus.damm@gmail.com>, "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Now that all users have been updated to use the embedded in struct
-sh_mmcif_plat_data DMA slave IDs, struct sh_mmcif_dma is no longer needed
-and can be removed. This also makes preparation for simple DMA conversion
-easier.
-
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
+ drivers/mmc/host/sh_mobile_sdhi.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
 
-Notice, that this patch also requires the recent
-http://article.gmane.org/gmane.linux.ports.sh.devel/13337
-to be applied first to avoid breakage
-
- drivers/mmc/host/sh_mmcif.c  |   24 ++++++++++--------------
- include/linux/mmc/sh_mmcif.h |    8 +-------
- 2 files changed, 11 insertions(+), 21 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index c4bfbb0..497e6f4 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -383,31 +383,27 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
- 	host->dma_active = false;
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index bf45359..1f6f67a 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -142,10 +142,10 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		mmc_data->cd_flags = p->cd_flags;
  
- 	/* We can only either use DMA for both Tx and Rx or not use it at all */
--	if (pdata->dma) {
--		dev_warn(&host->pd->dev,
--			 "Update your platform to use embedded DMA slave IDs\n");
--		tx = &pdata->dma->chan_priv_tx;
--		rx = &pdata->dma->chan_priv_rx;
--	} else {
--		tx = &host->dma_slave_tx;
--		tx->slave_id = pdata->slave_id_tx;
--		rx = &host->dma_slave_rx;
--		rx->slave_id = pdata->slave_id_rx;
--	}
--	if (tx->slave_id > 0 && rx->slave_id > 0) {
-+	tx = &host->dma_slave_tx;
-+	tx->simple_slave.slave_id = pdata->slave_id_tx;
-+	rx = &host->dma_slave_rx;
-+	rx->simple_slave.slave_id = pdata->slave_id_rx;
-+
-+	if (tx->simple_slave.slave_id > 0 && rx->simple_slave.slave_id > 0) {
- 		dma_cap_mask_t mask;
- 
- 		dma_cap_zero(mask);
- 		dma_cap_set(DMA_SLAVE, mask);
- 
--		host->chan_tx = dma_request_channel(mask, sh_mmcif_filter, tx);
-+		host->chan_tx = dma_request_channel(mask, sh_mmcif_filter,
-+						    &tx->simple_slave);
- 		dev_dbg(&host->pd->dev, "%s: TX: got channel %p\n", __func__,
- 			host->chan_tx);
- 
- 		if (!host->chan_tx)
- 			return;
- 
--		host->chan_rx = dma_request_channel(mask, sh_mmcif_filter, rx);
-+		host->chan_rx = dma_request_channel(mask, sh_mmcif_filter,
-+						    &rx->simple_slave);
- 		dev_dbg(&host->pd->dev, "%s: RX: got channel %p\n", __func__,
- 			host->chan_rx);
- 
-diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/mmc/sh_mmcif.h
-index 04ff452..b36caa9 100644
---- a/include/linux/mmc/sh_mmcif.h
-+++ b/include/linux/mmc/sh_mmcif.h
-@@ -32,17 +32,11 @@
-  * 1111 : Peripheral clock (sup_pclk set '1')
-  */
- 
--struct sh_mmcif_dma {
--	struct sh_dmae_slave chan_priv_tx;
--	struct sh_dmae_slave chan_priv_rx;
--};
--
- struct sh_mmcif_plat_data {
- 	void (*set_pwr)(struct platform_device *pdev, int state);
- 	void (*down_pwr)(struct platform_device *pdev);
- 	int (*get_cd)(struct platform_device *pdef);
--	struct sh_mmcif_dma	*dma;		/* Deprecated. Instead */
--	unsigned int		slave_id_tx;	/* use embedded slave_id_[tr]x */
-+	unsigned int		slave_id_tx;	/* embedded slave_id_[tr]x */
- 	unsigned int		slave_id_rx;
- 	u8			sup_pclk;	/* 1 :SH7757, 0: SH7724/SH7372 */
- 	unsigned long		caps;
+ 		if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
+-			priv->param_tx.slave_id = p->dma_slave_tx;
+-			priv->param_rx.slave_id = p->dma_slave_rx;
+-			priv->dma_priv.chan_priv_tx = &priv->param_tx;
+-			priv->dma_priv.chan_priv_rx = &priv->param_rx;
++			priv->param_tx.simple_slave.slave_id = p->dma_slave_tx;
++			priv->param_rx.simple_slave.slave_id = p->dma_slave_rx;
++			priv->dma_priv.chan_priv_tx = &priv->param_tx.simple_slave;
++			priv->dma_priv.chan_priv_rx = &priv->param_rx.simple_slave;
+ 			priv->dma_priv.alignment_shift = 1; /* 2-byte alignment */
+ 			mmc_data->dma = &priv->dma_priv;
+ 		}
 -- 
 1.7.2.5
