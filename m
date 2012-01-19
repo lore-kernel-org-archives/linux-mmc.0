@@ -1,33 +1,28 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V2 03/12] dmaengine: Pass dma_slave_config .device_fc =
- NULL for all existing users
-Date: Thu, 19 Jan 2012 18:00:43 +0100
-Message-ID: <CACRpkdYjLyYx-pDLA+FqT+=Vdop4jF4+ex6D6o9udNbN57+=Zg@mail.gmail.com>
+Subject: Re: [PATCH V2 04/12] dmaengine/amba-pl08x: Take flow controller info
+ from DMA_SLAVE_CONFIG
+Date: Thu, 19 Jan 2012 18:01:21 +0100
+Message-ID: <CACRpkdYuiZk7=V2WvNUJX=b_2hv2=eooGUq__Bz_r8b3JMmgew@mail.gmail.com>
 References: <cover.1326876464.git.viresh.kumar@st.com>
- <104f6d8b3c4a2d65dce9eb32364d32eba637c48d.1326876464.git.viresh.kumar@st.com>
+	<0bf6d205db66a2e3b8b669f1afdef39788572814.1326876464.git.viresh.kumar@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <104f6d8b3c4a2d65dce9eb32364d32eba637c48d.1326876464.git.viresh.kumar@st.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Viresh Kumar <viresh.kumar@st.com>
-Cc: rajeev-dlh.kumar@st.com, bhupesh.sharma@st.com, mirko.gardi@st.com, perex@perex.cz, vipin.kumar@st.com, vipulkumar.samar@st.com, egtvedt@samfundet.no, pratyush.anand@st.com, vinod.koul@intel.com, deepak.sikri@st.com, rmk+kernel@arm.linux.org.uk, cjb@laptop.org, hskinnemoen@gmail.com, bhavna.yadav@st.com, armando.visconti@st.com, shiraz.hashim@st.com, amit.virdi@st.com, vincenzo.frascino@st.com, dan.j.williams@intel.com, ulf.hansson@stericsson.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, viresh.linux@gmail.com, kernel@pengutronix.de
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:47867 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756980Ab2ASRBW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2012 12:01:22 -0500
+In-Reply-To: <0bf6d205db66a2e3b8b669f1afdef39788572814.1326876464.git.viresh.kumar@st.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Viresh Kumar <viresh.kumar@st.com>
+Cc: vinod.koul@intel.com, dan.j.williams@intel.com, cjb@laptop.org, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, egtvedt@samfundet.no, hskinnemoen@gmail.com, kernel@pengutronix.de, perex@perex.cz, linux-arm-kernel@lists.infradead.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
 
 On Wed, Jan 18, 2012 at 10:11 AM, Viresh Kumar <viresh.kumar@st.com> wrote:
 
-> .device_fc is added in struct dma_slave_config recently. All user drivers, which
-> want DMA to be the flow controller must pass this field as false. As earlier
-> driver don't look to use this feature, mark it false for now.
+> Flow controller information is passed now from DMA_SLAVE_CONFIG option. This
+> patch makes changes in pl08x driver to use device_fc from it instead of platform
+> data.
 >
 > Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
 
