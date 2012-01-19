@@ -1,78 +1,48 @@
 From: Huang Shijie <b32955@freescale.com>
-Subject: [PATCH 08/10] MXS-MMC : use the new DMA flags
-Date: Thu, 19 Jan 2012 14:16:05 +0800
-Message-ID: <1326953767-24155-9-git-send-email-b32955@freescale.com>
+Subject: [PATCH 03/10] MXS-MMC : change the DMA header file
+Date: Thu, 19 Jan 2012 14:16:00 +0800
+Message-ID: <1326953767-24155-4-git-send-email-b32955@freescale.com>
 References: <1326953767-24155-1-git-send-email-b32955@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe006.messaging.microsoft.com ([213.199.154.144]:35289
-	"EHLO DB3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752546Ab2ASGPg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2012 01:15:36 -0500
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1326953767-24155-1-git-send-email-b32955@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: vinod.koul@intel.com
-Cc: shawn.guo@linaro.org, artem.bityutskiy@intel.com, shijie8@gmail.com, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, w.sang@pengutronix.de, LW@KARO-electronics.de, alsa-devel@alsa-project.org, b29396@freescale.com, Huang Shijie <b32955@freescale.com>
+Cc: alsa-devel@alsa-project.org, artem.bityutskiy@intel.com, b29396@freescale.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, w.sang@pengutronix.de, Huang Shijie <b32955@freescale.com>, linux-mtd@lists.infradead.org, shawn.guo@linaro.org, shijie8@gmail.com, linux-arm-kernel@lists.infradead.org, LW@KARO-electronics.de
+List-Id: linux-mmc@vger.kernel.org
 
-Use the new DMA flags while do not change any logic.
+use the new MXS-DMA header for mxs-mmc driver.
 
 Signed-off-by: Huang Shijie <b32955@freescale.com>
 ---
- drivers/mmc/host/mxs-mmc.c |   10 +++++-----
- 1 files changed, 5 insertions(+), 5 deletions(-)
+ drivers/mmc/host/mxs-mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 1e18970..be8fbbc 100644
+index 382c835..1e18970 100644
 --- a/drivers/mmc/host/mxs-mmc.c
 +++ b/drivers/mmc/host/mxs-mmc.c
-@@ -305,7 +305,7 @@ static irqreturn_t mxs_mmc_irq_handler(int irq, void *dev_id)
- }
+@@ -38,10 +38,10 @@
+ #include <linux/gpio.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/module.h>
++#include <linux/mxs-dma.h>
  
- static struct dma_async_tx_descriptor *mxs_mmc_prep_dma(
--	struct mxs_mmc_host *host, unsigned int append)
-+	struct mxs_mmc_host *host, unsigned long flags)
- {
- 	struct dma_async_tx_descriptor *desc;
- 	struct mmc_data *data = host->data;
-@@ -325,7 +325,7 @@ static struct dma_async_tx_descriptor *mxs_mmc_prep_dma(
- 	}
+ #include <mach/mxs.h>
+ #include <mach/common.h>
+-#include <mach/dma.h>
+ #include <mach/mmc.h>
  
- 	desc = host->dmach->device->device_prep_slave_sg(host->dmach,
--				sgl, sg_len, host->slave_dirn, append);
-+				sgl, sg_len, host->slave_dirn, flags);
- 	if (desc) {
- 		desc->callback = mxs_mmc_dma_irq_callback;
- 		desc->callback_param = host;
-@@ -358,7 +358,7 @@ static void mxs_mmc_bc(struct mxs_mmc_host *host)
- 	host->ssp_pio_words[2] = cmd1;
- 	host->dma_dir = DMA_NONE;
- 	host->slave_dirn = DMA_TRANS_NONE;
--	desc = mxs_mmc_prep_dma(host, 0);
-+	desc = mxs_mmc_prep_dma(host, MXS_DMA_F_WAIT4END);
- 	if (!desc)
- 		goto out;
- 
-@@ -398,7 +398,7 @@ static void mxs_mmc_ac(struct mxs_mmc_host *host)
- 	host->ssp_pio_words[2] = cmd1;
- 	host->dma_dir = DMA_NONE;
- 	host->slave_dirn = DMA_TRANS_NONE;
--	desc = mxs_mmc_prep_dma(host, 0);
-+	desc = mxs_mmc_prep_dma(host, MXS_DMA_F_WAIT4END);
- 	if (!desc)
- 		goto out;
- 
-@@ -526,7 +526,7 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
- 	host->data = data;
- 	host->dma_dir = dma_data_dir;
- 	host->slave_dirn = slave_dirn;
--	desc = mxs_mmc_prep_dma(host, 1);
-+	desc = mxs_mmc_prep_dma(host, MXS_DMA_F_LASTONE);
- 	if (!desc)
- 		goto out;
- 
+ #define DRIVER_NAME	"mxs-mmc"
 -- 
 1.7.0.4
-
-
