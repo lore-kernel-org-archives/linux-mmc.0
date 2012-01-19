@@ -1,100 +1,56 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH v6] mmc: support BKOPS feature for eMMC
-Date: Thu, 19 Jan 2012 21:02:05 +0530
-Message-ID: <CANfBPZ-CUz4nNJFu-L9wSLPFMPCrNAEHdb3NRXCAhgQgJYPeDg@mail.gmail.com>
-References: <4F17AA38.3000901@samsung.com> <4F17EEBF.2060401@intel.com>
- <4F17FF7D.9090909@samsung.com> <4F180202.1030206@intel.com>
+From: Thomas Bechtold <thomasbechtold@jpberlin.de>
+Subject: "mmc_host mmc0: WARNING: IMR=0x00004040" on debug console
+Date: Thu, 19 Jan 2012 17:11:44 +0100
+Message-ID: <1326989504.2687.3.camel@salbei.fritz.box>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:38636 "EHLO
-	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932296Ab2ASPcb convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 19 Jan 2012 10:32:31 -0500
-Received: by bkbzv15 with SMTP id zv15so42304bkb.10
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2012 07:32:26 -0800 (PST)
-In-Reply-To: <4F180202.1030206@intel.com>
+Received: from mail.jpberlin.de ([213.203.238.11]:33433 "EHLO mail.jpberlin.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932484Ab2ASQL5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 19 Jan 2012 11:11:57 -0500
+Received: from hefe.heinlein-support.de (hefe.heinlein-support.de [91.198.250.172])
+	by plasma.jpberlin.de (Postfix) with ESMTP id 6145484108
+	for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2012 17:11:56 +0100 (CET)
+Received: from plasma.jpberlin.de ([91.198.250.140])
+	by hefe.heinlein-support.de (hefe.heinlein-support.de [91.198.250.172]) (amavisd-new, port 10030)
+	with ESMTP id Kav0lnS4LDyz for <linux-mmc@vger.kernel.org>;
+	Thu, 19 Jan 2012 17:11:46 +0100 (CET)
+Received: from [192.168.178.20] (brln-4dba93b5.pool.mediaWays.net [77.186.147.181])
+	(using TLSv1 with cipher DHE-RSA-CAMELLIA256-SHA (256/256 bits))
+	(Client did not present a certificate)
+	(Authenticated sender: thomasbechtold)
+	by plasma.jpberlin.de (Postfix) with ESMTPSA id E1C0E84166
+	for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2012 17:11:45 +0100 (CET)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
+To: linux-mmc@vger.kernel.org
 
-On Thu, Jan 19, 2012 at 5:14 PM, Adrian Hunter <adrian.hunter@intel.com=
-> wrote:
-> On 19/01/12 13:33, Jaehoon Chung wrote:
->> Hi Adrian.
->>
->> On 01/19/2012 07:21 PM, Adrian Hunter wrote:
->>
->>> On 19/01/12 07:29, Jaehoon Chung wrote:
->>>> Enable eMMC background operations (BKOPS) feature.
->>>>
->>>> If URGENT_BKOPS is set after a response, note that BKOPS
->>>> are required. After all I/O requests are finished, run
->>>> BKOPS if required. Should read/write operations be requested
->>>> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
->>>> and then service the request.
->>>
->>> This still does not seem to address my earlier comment which was:
->>>
->>> The main problem with bkops is:
->>>
->>> =A0 =A0 =A0If the status is at level 3 ("critical"), some operation=
-s
->>> =A0 =A0 =A0may extend beyond their original timeouts due to mainten=
-ance
->>> =A0 =A0 =A0operations which cannot be delayed anymore.
->>>
->>> This means:
->>>
->>> =A0 =A0 =A01. at level 3 either bkops are run or the timeout of the=
- next
->>> =A0 =A0 =A0(data?) operation is extended
->>>
->>> =A0 =A0 =A02. at level 3 either the bkops must not be interrupted o=
-r the
->>> =A0 =A0 =A0level must be rechecked after interruption and bkops run=
- again
->>> =A0 =A0 =A0if the level is still 3, or the timeout of the next (dat=
-a?)
->>> =A0 =A0 =A0operation is extended
->>>
->>
->> This patch didn't issue the HPI when bkops-status is level2-3
->> (URGENT_BKOPS case).
->> I didn't understand that must be recheck?? it's case of using HPI..?
->> If HPI didn't issue,though must be recheck bkops status?
->> And level-1 control should be considered for future-work.
->> I will also modify the patch comment..it's confused something.
->
-> 1. Say there are 2 write requests queued and after the first write re=
-quest
-> the bkops level is 3. =A0That means the 2nd write request may timeout=
- because
-> the normal timeout rules do not apply.
->
-> Thus:
-> =A0 =A0 =A0 =A01. at level 3 either bkops are run or the timeout of t=
-he next
-> =A0 =A0 =A0 =A0(data?) operation is extended
->
-> 2. Say you are running bkops because the level was 3 and a write requ=
-est
-> arrives. =A0You use HPI to interrupt the bkops, but the bkops level m=
-ay still
-> be 3, so the write request may timeout. =A0Hence:
->
-> =A0 =A0 =A0 =A02. at level 3 either the bkops must not be interrupted=
- or the
-> =A0 =A0 =A0 =A0level must be rechecked after interruption and bkops r=
-un again
-> =A0 =A0 =A0 =A0if the level is still 3, or the timeout of the next (d=
-ata?)
-> =A0 =A0 =A0 =A0operation is extended
->
+Hi,
 
-A naive question perhaps, but don't the current timeout values include
-sufficient
-buffer to do implicit garbage collection anyways ?
+i updated from kernel 2.6.35.3 (from kernel.org) to kernel 3.2.1 (from 
+kernel.org) on arm (at91stamp9G20) and have a MMC card which can be 
+completly disabled with a hardware switch. The mmc card is then used by 
+another processor without linux. That works very well.
+My question is, why i get always the message "mmc_host mmc0: WARNING: 
+IMR=0x00004040" after i removed the mmc card slot once. That's a new 
+behavior with 3.2.1. I had no message with 2.6.35.3.
+When the mmc slot returns to linux, the message stops and i get:
+
+mmc_host mmc0: WARNING: IMR=0x00004040
+mmc0: host does not support reading read-only switch. assuming write-enable.
+mmc0: new SD card at address b368
+mmcblk0: mmc0:b368 H1697 1.91 GiB
+  mmcblk0: unknown partition table
+
+That's fine.
+
+Should i just ignore the message (or simple patch 
+driver/mmc/host/atmel_mci.c)?
+
+TIA
+
+
+Tom
+
