@@ -1,46 +1,60 @@
-From: Huang Shijie <b32955@freescale.com>
-Subject: Re: [PATCH 06/10] MXS-DMA : add more flags for MXS-DMA
-Date: Thu, 19 Jan 2012 17:31:19 +0800
-Message-ID: <4F17E2E7.2080300@freescale.com>
-References: <1326953767-24155-1-git-send-email-b32955@freescale.com> <1326953767-24155-7-git-send-email-b32955@freescale.com> <20120119090238.GU1068@n2100.arm.linux.org.uk>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 00/10] patch set about the MXS-DMA
+Date: Thu, 19 Jan 2012 10:45:13 +0100
+Message-ID: <20120119094513.GB2630@pengutronix.de>
+References: <1326953767-24155-1-git-send-email-b32955@freescale.com>
+ <20120119091034.GH2247@S2101-09.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20120119090238.GU1068@n2100.arm.linux.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: vinod.koul@intel.com, alsa-devel@alsa-project.org, artem.bityutskiy@intel.com, b29396@freescale.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, w.sang@pengutronix.de, linux-mtd@lists.infradead.org, shawn.guo@linaro.org, shijie8@gmail.com, linux-arm-kernel@lists.infradead.org, LW@KARO-electronics.de
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="i9LlY+UWpKt15+FH"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:34437 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756058Ab2ASJpe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2012 04:45:34 -0500
+Content-Disposition: inline
+In-Reply-To: <20120119091034.GH2247@S2101-09.ap.freescale.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-
-hi,
-> Err, the 'flags' argument to device_prep_slave_sg() is supposed to be
-> from the set of enum dma_ctrl_flags.  What this means is that your
-> MXS_DMA_F_APPEND is equivalent to DMA_PREP_INTERRUPT, and
-> MXS_DMA_F_WAIT4END is equivalent to DMA_CTRL_ACK.
->
-thanks a lot.
-I will reuse the dma_ctrl_flags in the next version.
-> What this does is make your drivers completely dependent on your DMA
-> engine implementation.  That's not a good idea when devices get
-> reused in different SoCs.
->
-Frankly speaking, the APBH-DMA is more coupled with the GPMI  then any 
-other modules.
-In the MX6Q, the GPMI is the ONLY user of APBH-DMA.
-You even can see the NAND_LOCK bit in the DMA command structure which is 
-only used by the GPMI
-NAND controller,.
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: Huang Shijie <b32955@freescale.com>, vinod.koul@intel.com, artem.bityutskiy@intel.com, shijie8@gmail.com, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, LW@KARO-electronics.de, alsa-devel@alsa-project.org, b29396@freescale.com
 
 
-To Shawn & Wolfram:
-    thanks very much for your comments.
+--i9LlY+UWpKt15+FH
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Best Regards
-Huang Shijie
+> > [2] patch 6 ~ patch 10: rewrite the last parameter of mxs_dma_prep_slav=
+e_sg().
+>=20
+> For the sake of bitsec, at least patches #7 and #8 need to be one patch.
+> That said, if I apply the series and then check out the commit at patch
+> #7, you need to all mxs-dma client drivers, mxs-mmc, gpmi do not break.
 
-> If you need to supply extra flags which aren't in the dma_ctrl_flags,
-> at least make sure that they're using different bits.  For bonus points,
-> also have your driver_check_  the DMA engine it's connected to before
-> it passes these flags.
->
+I'd say patch 6-10 should be squashed, simply. My personal preference is
+to change #9 to simply read the register when needed and do not expand
+the struct, but this is a minor thing.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--i9LlY+UWpKt15+FH
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iEYEARECAAYFAk8X5ikACgkQD27XaX1/VRs1iQCfelj5s+udWkk+1mkd1T8lCB82
+3T8An1b3bxZeJWRtXbyP/0da2ymYEMRs
+=PAKK
+-----END PGP SIGNATURE-----
+
+--i9LlY+UWpKt15+FH--
