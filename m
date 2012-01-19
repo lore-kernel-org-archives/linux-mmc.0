@@ -1,92 +1,67 @@
-From: Heiko Schocher <hs@denx.de>
-Subject: [PATCH v3] ARM: davinci: map default_queue to edma channels
-Date: Thu, 19 Jan 2012 08:05:21 +0100
-Message-ID: <1326956721-25158-1-git-send-email-hs@denx.de>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 00/10] patch set about the MXS-DMA
+Date: Thu, 19 Jan 2012 17:10:37 +0800
+Message-ID: <20120119091034.GH2247@S2101-09.ap.freescale.net>
+References: <1326953767-24155-1-git-send-email-b32955@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.9]:54264 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752516Ab2ASHFb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2012 02:05:31 -0500
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:64215 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752873Ab2ASI7L (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2012 03:59:11 -0500
+Content-Disposition: inline
+In-Reply-To: <1326953767-24155-1-git-send-email-b32955@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Heiko Schocher <hs@denx.de>, juha.kuikka@gmail.com, linux-mmc@vger.kernel.org, davinci-linux-open-source@linux.davincidsp.com, "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>, Ido Yariv <ido@wizery.com>, Sekhar Nori <nsekhar@ti.com>, Wolfgang Denk <wd@denx.de>, Sergei Shtylyov <sshtylyov@mvista.com>
+To: Huang Shijie <b32955@freescale.com>
+Cc: vinod.koul@intel.com, artem.bityutskiy@intel.com, shijie8@gmail.com, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, w.sang@pengutronix.de, LW@KARO-electronics.de, alsa-devel@alsa-project.org, b29396@freescale.com
 
-Default queue is expected to be a low-priority queue.
-This way, long transfers on the default queue started
-by the codec engine will not cause audio defects.
+On Thu, Jan 19, 2012 at 02:15:57PM +0800, Huang Shijie wrote:
+> This patch set does two things about the MXS-DMA:
+> [1] patch 1 ~ patch 5: move the mxs dma header to a more common place.
+> 	Beside the mx23/mx28, the APBH-DMA is also used by MX50 and MX6Q.
+> 	So move the mxs dma header file to a more common place, and rename
+> 	it to mxs-dma.h
+> 
+For the sake of bitsec, these 5 patches need to be one.
 
-Signed-off-by: Heiko Schocher <hs@denx.de>
-Signed-off-by: juha.kuikka@gmail.com
-Reported-by: juha.kuikka@gmail.com
-Acked-by: Rajashekhara, Sudhakar <sudhakar.raj@ti.com>
-Cc: linux-mmc@vger.kernel.org
-Cc: davinci-linux-open-source@linux.davincidsp.com
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: Rajashekhara, Sudhakar <sudhakar.raj@ti.com>
-Cc: Ido Yariv <ido@wizery.com>
-Cc: Sekhar Nori <nsekhar@ti.com>
-Cc: Wolfgang Denk <wd@denx.de>
-Cc: Sergei Shtylyov <sshtylyov@mvista.com>
+> [2] patch 6 ~ patch 10: rewrite the last parameter of mxs_dma_prep_slave_sg().
 
----
-- changes for v2:
-  - add comment from Sergei Shtylyov
-    add in commit message the commit's summary in parens.
-  - add comment from Ido Yariv:
-    changed comment and commit message
-  - added Acked-by from Rajashekhara, Sudhakar
-- changes for v3:
-  - add comments from Sekhar Nori <nsekhar@ti.com>:
-    - add linux-arm-kernel@lists.infradead.org to Cc
-    - simplify and move comment to
-      arch/arm/mach-davinci/include/mach/edma.h
-    - rework commit message
-    - as the subject changed v2 can be found for example here:
-      http://linux.davincidsp.com/pipermail/davinci-linux-open-source/2011-December/023606.html
-    - checkpatch shows:
-total: 0 errors, 0 warnings, 24 lines checked
+For the sake of bitsec, at least patches #7 and #8 need to be one patch.
+That said, if I apply the series and then check out the commit at patch
+#7, you need to all mxs-dma client drivers, mxs-mmc, gpmi do not break.
 
-temp/0001-ARM-davinci-map-default_queue-to-edma-channels.patch has no obvious style problems and is ready for submission.
+> 	In the new GPMI version, some hardware behavior changes.
+> 	The WAIT4END bit should be set in the middle one of the ECC READ page DMA chain.
+> 	The DMA chain should be set like this:
+> 
+>           +-----+               +-----+                      +-----+
+>           | cmd | ------------> | cmd | ------------------>  | cmd |
+>           +-----+               +-----+                      +-----+
+>                                    ^                            ^
+>                                    |                            |
+>                                    |                            |
+>                               set WAIT4END here too        set WAIT4END here
+> 
+>          Please read the comment in patch "MXS-DMA : add more flags for MXS-DMA".
+> 
+> Huang Shijie (10):
+>   MXS-DMA : move the mxs-dma.h to a more common place
+>   MXS-DMA : change the header
+>   MXS-MMC : change the DMA header file
+>   MTD/GPMI : change the DMA header file
+>   ASoc : change the DMA header file
+>   MXS-DMA : add more flags for MXS-DMA
+>   MXS-DMA : change the last parameter of mxs_dma_prep_slave_sg()
+>   MXS-MMC : use the new DMA flags
+>   MTD/GPMI : add a new field `gpmi_version`
+>   MTD/GPMI : change the code for new DMA interface
+> 
+Please try to make these subject prefix consistent with the existing
+ones in the tree.  You can get them from 'git log' output.  For example
+"mxs-dma: ..." is better than "MXS-DMA : ...".
 
- arch/arm/mach-davinci/dma.c               |    6 +-----
- arch/arm/mach-davinci/include/mach/edma.h |    5 +++++
- 2 files changed, 6 insertions(+), 5 deletions(-)
-
-diff --git a/arch/arm/mach-davinci/dma.c b/arch/arm/mach-davinci/dma.c
-index da90103..fd33919 100644
---- a/arch/arm/mach-davinci/dma.c
-+++ b/arch/arm/mach-davinci/dma.c
-@@ -1508,12 +1508,8 @@ static int __init edma_probe(struct platform_device *pdev)
- 			goto fail;
- 		}
- 
--		/* Everything lives on transfer controller 1 until otherwise
--		 * specified. This way, long transfers on the low priority queue
--		 * started by the codec engine will not cause audio defects.
--		 */
- 		for (i = 0; i < edma_cc[j]->num_channels; i++)
--			map_dmach_queue(j, i, EVENTQ_1);
-+			map_dmach_queue(j, i, info[j]->default_queue);
- 
- 		queue_tc_mapping = info[j]->queue_tc_mapping;
- 		queue_priority_mapping = info[j]->queue_priority_mapping;
-diff --git a/arch/arm/mach-davinci/include/mach/edma.h b/arch/arm/mach-davinci/include/mach/edma.h
-index 20c77f2..7e84c90 100644
---- a/arch/arm/mach-davinci/include/mach/edma.h
-+++ b/arch/arm/mach-davinci/include/mach/edma.h
-@@ -250,6 +250,11 @@ struct edma_soc_info {
- 	unsigned	n_slot;
- 	unsigned	n_tc;
- 	unsigned	n_cc;
-+	/*
-+	 * Default queue is expected to be a low-priority queue.
-+	 * This way, long transfers on the default queue started
-+	 * by the codec engine will not cause audio defects.
-+	 */
- 	enum dma_event_q	default_queue;
- 
- 	/* Resource reservation for other cores */
 -- 
-1.7.7.5
-
+Regards,
+Shawn
