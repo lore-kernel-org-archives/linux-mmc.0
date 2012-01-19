@@ -1,67 +1,62 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH 1/2] mmc: core: Prevent I/O as soon as possible at card removal
-Date: Thu, 19 Jan 2012 17:39:50 +0100
-Message-ID: <1326991191-12472-2-git-send-email-ulf.hansson@stericsson.com>
+Subject: [PATCH 2/2] mmc: core: Detect card removal on I/O error
+Date: Thu, 19 Jan 2012 17:39:51 +0100
+Message-ID: <1326991191-12472-3-git-send-email-ulf.hansson@stericsson.com>
 References: <1326991191-12472-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:45834 "EHLO
+Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:56722 "EHLO
 	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755323Ab2ASQkV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2012 11:40:21 -0500
+	by vger.kernel.org with ESMTP id S1755317Ab2ASQkS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2012 11:40:18 -0500
 In-Reply-To: <1326991191-12472-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 Cc: Adrian Hunter <adrian.hunter@intel.com>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Once the card has been detected to be removed by the
-mmc_detect_card_removed function, schedule a new detect work
-immediately and without a delay to let a rescan remove the
-card device as soon a possible. This will sooner prevent
-further I/O requests.
+A card can be "slowly" removed which means that when a
+card detect irq has triggered a scheduled detect work to
+handle the card removal, the card will still be present
+in the card slot and thus not removed by the rescan sequence.
+
+To prevent further I/O request for these lingering "removed"
+cards, use MMC_CAP2_DETECT_ON_ERR which will check if card is
+still present from mmc_detect_card_removed function.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
 ---
- drivers/mmc/core/core.c |   16 ++++++++++++++--
- 1 files changed, 14 insertions(+), 2 deletions(-)
+ drivers/mmc/core/core.c  |    3 ++-
+ include/linux/mmc/host.h |    1 +
+ 2 files changed, 3 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index bec0bf2..265dfd8 100644
+index 265dfd8..e5d1c3b 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -2077,6 +2077,7 @@ int _mmc_detect_card_removed(struct mmc_host *host)
- int mmc_detect_card_removed(struct mmc_host *host)
- {
- 	struct mmc_card *card = host->card;
-+	int ret;
- 
- 	WARN_ON(!host->claimed);
- 	/*
-@@ -2086,9 +2087,20 @@ int mmc_detect_card_removed(struct mmc_host *host)
- 	if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
+@@ -2084,7 +2084,8 @@ int mmc_detect_card_removed(struct mmc_host *host)
+ 	 * The card will be considered unchanged unless we have been asked to
+ 	 * detect a change or host requires polling to provide card detection.
+ 	 */
+-	if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
++	if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL)
++	    && !(host->caps2 & MMC_CAP2_DETECT_ON_ERR))
  		return mmc_card_removed(card);
  
--	host->detect_change = 0;
-+	ret = mmc_card_removed(card);
-+	if (!ret) {
-+		ret = _mmc_detect_card_removed(host);
-+		if (ret) {
-+			/*
-+			 * Schedule a detect work as soon as possible to let a
-+			 * rescan handle the card removal.
-+			 */
-+			cancel_delayed_work(&host->detect);
-+			mmc_detect_change(host, 0);
-+		}
-+	}
+ 	ret = mmc_card_removed(card);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index dd13e05..368a2b9 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -257,6 +257,7 @@ struct mmc_host {
+ #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
+ #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
+ 				 MMC_CAP2_HS200_1_2V_SDR)
++#define MMC_CAP2_DETECT_ON_ERR	(1 << 7)	/* On I/O err check card removal */
  
--	return _mmc_detect_card_removed(host);
-+	return ret;
- }
- EXPORT_SYMBOL(mmc_detect_card_removed);
- 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 	unsigned int        power_notify_type;
 -- 
 1.7.5.4
 
