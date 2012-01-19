@@ -1,32 +1,36 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V2 04/12] dmaengine/amba-pl08x: Take flow controller info
- from DMA_SLAVE_CONFIG
-Date: Thu, 19 Jan 2012 18:01:21 +0100
-Message-ID: <CACRpkdYuiZk7=V2WvNUJX=b_2hv2=eooGUq__Bz_r8b3JMmgew@mail.gmail.com>
+Subject: Re: [PATCH V2 08/12] dmaengine/dw_dmac: Unmap all memory buffers
+ after completion of slave transfers
+Date: Thu, 19 Jan 2012 18:36:24 +0100
+Message-ID: <CACRpkdZrPKunfKOF0mqR-9DOZhCFAzwZHJ2gCZRjbC3TuqecvQ@mail.gmail.com>
 References: <cover.1326876464.git.viresh.kumar@st.com>
-	<0bf6d205db66a2e3b8b669f1afdef39788572814.1326876464.git.viresh.kumar@st.com>
+ <ba53f229f3f594bfe0459b01a9ebb4d9b2c15882.1326876464.git.viresh.kumar@st.com>
+ <20120118093620.GC1068@n2100.arm.linux.org.uk>
+ <4F1696E4.9070806@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:47867 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756980Ab2ASRBW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2012 12:01:22 -0500
-In-Reply-To: <0bf6d205db66a2e3b8b669f1afdef39788572814.1326876464.git.viresh.kumar@st.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <4F1696E4.9070806@st.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Viresh Kumar <viresh.kumar@st.com>
-Cc: vinod.koul@intel.com, dan.j.williams@intel.com, cjb@laptop.org, rmk+kernel@arm.linux.org.uk, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, egtvedt@samfundet.no, hskinnemoen@gmail.com, kernel@pengutronix.de, perex@perex.cz, linux-arm-kernel@lists.infradead.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
+Cc: Mirko GARDI <mirko.gardi@st.com>, Bhupesh SHARMA <bhupesh.sharma@st.com>, "perex@perex.cz" <perex@perex.cz>, Vipin KUMAR <vipin.kumar@st.com>, Rajeev KUMAR <rajeev-dlh.kumar@st.com>, Vincenzo FRASCINO <Vincenzo.FRASCINO@st.com>, Pratyush ANAND <pratyush.anand@st.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "vinod.koul@intel.com" <vinod.koul@intel.com>, Deepak SIKRI <deepak.sikri@st.com>, "cjb@laptop.org" <cjb@laptop.org>, "hskinnemoen@gmail.com" <hskinnemoen@gmail.com>, Bhavna YADAV <bhavna.yadav@st.com>, Armando VISCONTI <armando.visconti@st.com>, "egtvedt@samfundet.no" <egtvedt@samfundet.no>, Shiraz HASHIM <shiraz.hashim@st.com>, Amit VIRDI <Amit.VIRDI@st.com>, Vipul Kumar SAMAR <vipulkumar.samar@st.com>, "dan.j.williams@intel.com" <dan.j.williams@intel.com>, Ulf HANSSON <ulf.hansson@stericsson.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kerne>
+List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jan 18, 2012 at 10:11 AM, Viresh Kumar <viresh.kumar@st.com> wrote:
+On Wed, Jan 18, 2012 at 10:54 AM, Viresh Kumar <viresh.kumar@st.com> wrote:
 
-> Flow controller information is passed now from DMA_SLAVE_CONFIG option. This
-> patch makes changes in pl08x driver to use device_fc from it instead of platform
-> data.
->
-> Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
+> Actually, dw_dmac is also doing the same, i.e. unmapping only for
+> non-slave transfers.
 
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+Problem solved :-)
 
-Thanks Viresh,
+Yours,
 Linus Walleij
