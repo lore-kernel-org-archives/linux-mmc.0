@@ -1,57 +1,59 @@
 From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: [PATCH 03/31] ARM: amba: ux500: convert to use amba_device_alloc
-Date: Fri, 20 Jan 2012 09:23:24 +0000
-Message-ID: <E1RoAgu-0005EQ-Fo@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 04/31] ARM: amba: integrator: convert to use
+ amba_device_alloc
+Date: Fri, 20 Jan 2012 09:23:44 +0000
+Message-ID: <E1RoAhE-0005EU-Tt@rmk-PC.arm.linux.org.uk>
 References: <20120120092207.GD1068@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:37425 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752729Ab2ATJYK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2012 04:24:10 -0500
 In-Reply-To: <20120120092207.GD1068@n2100.arm.linux.org.uk>
 Content-Disposition: inline
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-samsung-soc@vger.kernel.org, STEricsson <STEricsson_nomadik_linux@list.st.com>
-Cc: Srinidhi Kasagar <srinidhi.kasagar@stericsson.com>, Linus Walleij <linus.walleij@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-samsung-soc@vger.kernel.org, STEricsson <STEricsson_nomadik_linux@list.st.com>
 
-Convert ux500 to use the new amba_device_alloc APIs.
+Convert Integrator IM/PD-1 to use the new amba_device_alloc APIs.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- arch/arm/mach-ux500/devices-common.c |   12 +++---------
- 1 files changed, 3 insertions(+), 9 deletions(-)
+ arch/arm/mach-integrator/impd1.c |    9 +++------
+ 1 files changed, 3 insertions(+), 6 deletions(-)
 
-diff --git a/arch/arm/mach-ux500/devices-common.c b/arch/arm/mach-ux500/devices-common.c
-index c563e54..e8c34fa 100644
---- a/arch/arm/mach-ux500/devices-common.c
-+++ b/arch/arm/mach-ux500/devices-common.c
-@@ -26,16 +26,10 @@ dbx500_add_amba_device(const char *name, resource_size_t base,
- 	struct amba_device *dev;
- 	int ret;
+diff --git a/arch/arm/mach-integrator/impd1.c b/arch/arm/mach-integrator/impd1.c
+index 8cbb75a..3e538da 100644
+--- a/arch/arm/mach-integrator/impd1.c
++++ b/arch/arm/mach-integrator/impd1.c
+@@ -401,24 +401,21 @@ static int impd1_probe(struct lm_device *dev)
  
--	dev = kzalloc(sizeof *dev, GFP_KERNEL);
-+	dev = amba_device_alloc(name, base, SZ_4K);
- 	if (!dev)
- 		return ERR_PTR(-ENOMEM);
+ 		pc_base = dev->resource.start + idev->offset;
  
--	dev->dev.init_name = name;
--
--	dev->res.start = base;
--	dev->res.end = base + SZ_4K - 1;
--	dev->res.flags = IORESOURCE_MEM;
--
- 	dev->dma_mask = DMA_BIT_MASK(32);
- 	dev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
+-		d = kzalloc(sizeof(struct amba_device), GFP_KERNEL);
++		d = amba_device_alloc(NULL, pc_base, SZ_4K);
+ 		if (!d)
+ 			continue;
  
-@@ -46,9 +40,9 @@ dbx500_add_amba_device(const char *name, resource_size_t base,
+ 		dev_set_name(&d->dev, "lm%x:%5.5lx", dev->id, idev->offset >> 12);
+ 		d->dev.parent	= &dev->dev;
+-		d->res.start	= dev->resource.start + idev->offset;
+-		d->res.end	= d->res.start + SZ_4K - 1;
+-		d->res.flags	= IORESOURCE_MEM;
+ 		d->irq[0]	= dev->irq;
+ 		d->irq[1]	= dev->irq;
+ 		d->periphid	= idev->id;
+ 		d->dev.platform_data = idev->platform_data;
  
- 	dev->dev.platform_data = pdata;
- 
--	ret = amba_device_register(dev, &iomem_resource);
-+	ret = amba_device_add(dev, &iomem_resource);
- 	if (ret) {
--		kfree(dev);
-+		amba_device_put(dev);
- 		return ERR_PTR(ret);
+-		ret = amba_device_register(d, &dev->resource);
++		ret = amba_device_add(d, &dev->resource);
+ 		if (ret) {
+ 			dev_err(&d->dev, "unable to register device: %d\n", ret);
+-			kfree(d);
++			amba_device_put(d);
+ 		}
  	}
  
 -- 
