@@ -1,68 +1,90 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: [PATCH 23/31] ARM: amba: omap2: use common amba device initializers
-Date: Fri, 20 Jan 2012 09:30:10 +0000
-Message-ID: <E1RoAnS-0005Fo-Lr@rmk-PC.arm.linux.org.uk>
+From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Subject: [PATCH 24/31] ARM: amba: ep93xx: use common amba device initializers
+Date: Fri, 20 Jan 2012 09:30:30 +0000
+Message-ID: <E1RoAnm-0005Fu-Pc@rmk-PC.arm.linux.org.uk>
 References: <20120120092207.GD1068@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:32797 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753004Ab2ATJaj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2012 04:30:39 -0500
-In-Reply-To: <20120120092207.GD1068@n2100.arm.linux.org.uk>
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <20120120092207.GD1068-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
 Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, STEricsson <STEricsson_nomadik_linux-nkJGhpqTU55BDgjK7y7TUQ@public.gmane.org>
+Cc: Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, Ryan Mallon <rmallon-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-samsung-soc@vger.kernel.org, STEricsson <STEricsson_nomadik_linux@list.st.com>
-Cc: Tony Lindgren <tony@atomide.com>
 
-Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+Signed-off-by: Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
 ---
- arch/arm/mach-omap2/emu.c |   26 ++------------------------
- 1 files changed, 2 insertions(+), 24 deletions(-)
+ arch/arm/mach-ep93xx/core.c |   46 +++++-------------------------------------
+ 1 files changed, 6 insertions(+), 40 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/emu.c b/arch/arm/mach-omap2/emu.c
-index 9c442e2..ce91aad 100644
---- a/arch/arm/mach-omap2/emu.c
-+++ b/arch/arm/mach-omap2/emu.c
-@@ -30,29 +30,8 @@ MODULE_AUTHOR("Alexander Shishkin");
- #define ETB_BASE	(L4_EMU_34XX_PHYS + 0x1b000)
- #define DAPCTL		(L4_EMU_34XX_PHYS + 0x1d000)
+diff --git a/arch/arm/mach-ep93xx/core.c b/arch/arm/mach-ep93xx/core.c
+index 1a8397a..903edb0 100644
+--- a/arch/arm/mach-ep93xx/core.c
++++ b/arch/arm/mach-ep93xx/core.c
+@@ -279,48 +279,14 @@ static struct amba_pl010_data ep93xx_uart_data = {
+ 	.set_mctrl	= ep93xx_uart_set_mctrl,
+ };
  
--static struct amba_device omap3_etb_device = {
+-static struct amba_device uart1_device = {
 -	.dev		= {
--		.init_name = "etb",
+-		.init_name	= "apb:uart1",
+-		.platform_data	= &ep93xx_uart_data,
 -	},
 -	.res		= {
--		.start	= ETB_BASE,
--		.end	= ETB_BASE + SZ_4K - 1,
+-		.start	= EP93XX_UART1_PHYS_BASE,
+-		.end	= EP93XX_UART1_PHYS_BASE + 0x0fff,
 -		.flags	= IORESOURCE_MEM,
 -	},
--	.periphid	= 0x000bb907,
+-	.irq		= { IRQ_EP93XX_UART1 },
+-	.periphid	= 0x00041010,
 -};
 -
--static struct amba_device omap3_etm_device = {
+-static struct amba_device uart2_device = {
 -	.dev		= {
--		.init_name = "etm",
+-		.init_name	= "apb:uart2",
+-		.platform_data	= &ep93xx_uart_data,
 -	},
 -	.res		= {
--		.start	= ETM_BASE,
--		.end	= ETM_BASE + SZ_4K - 1,
+-		.start	= EP93XX_UART2_PHYS_BASE,
+-		.end	= EP93XX_UART2_PHYS_BASE + 0x0fff,
 -		.flags	= IORESOURCE_MEM,
 -	},
--	.periphid	= 0x102bb921,
+-	.irq		= { IRQ_EP93XX_UART2 },
+-	.periphid	= 0x00041010,
 -};
-+static AMBA_APB_DEVICE(omap3_etb, "etb", 0x000bb907, ETB_BASE, { }, NULL);
-+static AMBA_APB_DEVICE(omap3_etm, "etm", 0x102bb921, ETM_BASE, { }, NULL);
++static AMBA_APB_DEVICE(uart1, "apb:uart1", 0x00041010, EP93XX_UART1_PHYS_BASE,
++	{ IRQ_EP93XX_UART1 }, &ep93xx_uart_data);
  
- static int __init emu_init(void)
- {
-@@ -66,4 +45,3 @@ static int __init emu_init(void)
- }
+-static struct amba_device uart3_device = {
+-	.dev		= {
+-		.init_name	= "apb:uart3",
+-		.platform_data	= &ep93xx_uart_data,
+-	},
+-	.res		= {
+-		.start	= EP93XX_UART3_PHYS_BASE,
+-		.end	= EP93XX_UART3_PHYS_BASE + 0x0fff,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-	.irq		= { IRQ_EP93XX_UART3 },
+-	.periphid	= 0x00041010,
+-};
++static AMBA_APB_DEVICE(uart2, "apb:uart2", 0x00041010, EP93XX_UART2_PHYS_BASE,
++	{ IRQ_EP93XX_UART2 }, &ep93xx_uart_data);
  
- subsys_initcall(emu_init);
--
++static AMBA_APB_DEVICE(uart3, "apb:uart3", 0x00041010, EP93XX_UART3_PHYS_BASE,
++	{ IRQ_EP93XX_UART3 }, &ep93xx_uart_data);
+ 
+ static struct resource ep93xx_rtc_resource[] = {
+ 	{
 -- 
 1.7.4.4
-
