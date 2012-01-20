@@ -1,320 +1,181 @@
 From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: [PATCH 21/31] ARM: amba: realview: get rid of private platform
- amba_device initializer
-Date: Fri, 20 Jan 2012 09:29:30 +0000
-Message-ID: <E1RoAmo-0005Ff-DW@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 22/31] ARM: amba: integrator: use common amba device
+ initializers
+Date: Fri, 20 Jan 2012 09:29:50 +0000
+Message-ID: <E1RoAn8-0005Fk-Hc@rmk-PC.arm.linux.org.uk>
 References: <20120120092207.GD1068@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:32790 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752447Ab2ATJaR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2012 04:30:17 -0500
 In-Reply-To: <20120120092207.GD1068@n2100.arm.linux.org.uk>
 Content-Disposition: inline
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-samsung-soc@vger.kernel.org, STEricsson <STEricsson_nomadik_linux@list.st.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-samsung-soc@vger.kernel.org, STEricsson <STEricsson_nomadik_linux@list.st.com>
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- arch/arm/mach-realview/core.h            |   20 ++++-----------
- arch/arm/mach-realview/realview_eb.c     |   38 +++++++++++++++---------------
- arch/arm/mach-realview/realview_pb1176.c |   38 +++++++++++++++---------------
- arch/arm/mach-realview/realview_pb11mp.c |   38 +++++++++++++++---------------
- arch/arm/mach-realview/realview_pba8.c   |   38 +++++++++++++++---------------
- arch/arm/mach-realview/realview_pbx.c    |   38 +++++++++++++++---------------
- 6 files changed, 100 insertions(+), 110 deletions(-)
+ arch/arm/mach-integrator/core.c          |   70 ++++++------------------------
+ arch/arm/mach-integrator/integrator_cp.c |   49 ++++-----------------
+ 2 files changed, 22 insertions(+), 97 deletions(-)
 
-diff --git a/arch/arm/mach-realview/core.h b/arch/arm/mach-realview/core.h
-index 735b57a..b1c6097 100644
---- a/arch/arm/mach-realview/core.h
-+++ b/arch/arm/mach-realview/core.h
-@@ -28,21 +28,11 @@
- #include <asm/setup.h>
- #include <asm/leds.h>
+diff --git a/arch/arm/mach-integrator/core.c b/arch/arm/mach-integrator/core.c
+index 29baef9..15b87f2 100644
+--- a/arch/arm/mach-integrator/core.c
++++ b/arch/arm/mach-integrator/core.c
+@@ -35,67 +35,23 @@
  
--#define AMBA_DEVICE(name,busid,base,plat)			\
--static struct amba_device name##_device = {			\
--	.dev		= {					\
--		.coherent_dma_mask = ~0,			\
--		.init_name = busid,				\
--		.platform_data = plat,				\
--	},							\
--	.res		= {					\
--		.start	= REALVIEW_##base##_BASE,		\
--		.end	= (REALVIEW_##base##_BASE) + SZ_4K - 1,	\
--		.flags	= IORESOURCE_MEM,			\
--	},							\
--	.dma_mask	= ~0,					\
--	.irq		= base##_IRQ,				\
--}
-+#define APB_DEVICE(name, busid, base, plat)			\
-+static AMBA_APB_DEVICE(name, busid, 0, base, base##_IRQ, plat)
+ static struct amba_pl010_data integrator_uart_data;
+ 
+-static struct amba_device rtc_device = {
+-	.dev		= {
+-		.init_name = "mb:15",
+-	},
+-	.res		= {
+-		.start	= INTEGRATOR_RTC_BASE,
+-		.end	= INTEGRATOR_RTC_BASE + SZ_4K - 1,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-	.irq		= { IRQ_RTCINT },
+-};
++#define INTEGRATOR_RTC_IRQ	{ IRQ_RTCINT }
++#define INTEGRATOR_UART0_IRQ	{ IRQ_UARTINT0 }
++#define INTEGRATOR_UART1_IRQ	{ IRQ_UARTINT1 }
++#define KMI0_IRQ		{ IRQ_KMIINT0 }
++#define KMI1_IRQ		{ IRQ_KMIINT1 }
+ 
+-static struct amba_device uart0_device = {
+-	.dev		= {
+-		.init_name = "mb:16",
+-		.platform_data = &integrator_uart_data,
+-	},
+-	.res		= {
+-		.start	= INTEGRATOR_UART0_BASE,
+-		.end	= INTEGRATOR_UART0_BASE + SZ_4K - 1,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-	.irq		= { IRQ_UARTINT0 },
+-};
++static AMBA_APB_DEVICE(rtc, "mb:15", 0,
++	INTEGRATOR_RTC_BASE, INTEGRATOR_RTC_IRQ, NULL);
+ 
+-static struct amba_device uart1_device = {
+-	.dev		= {
+-		.init_name = "mb:17",
+-		.platform_data = &integrator_uart_data,
+-	},
+-	.res		= {
+-		.start	= INTEGRATOR_UART1_BASE,
+-		.end	= INTEGRATOR_UART1_BASE + SZ_4K - 1,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-	.irq		= { IRQ_UARTINT1 },
+-};
++static AMBA_APB_DEVICE(uart0, "mb:16", 0,
++	INTEGRATOR_UART0_BASE, INTEGRATOR_UART0_IRQ, &integrator_uart_data);
+ 
+-static struct amba_device kmi0_device = {
+-	.dev		= {
+-		.init_name = "mb:18",
+-	},
+-	.res		= {
+-		.start	= KMI0_BASE,
+-		.end	= KMI0_BASE + SZ_4K - 1,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-	.irq		= { IRQ_KMIINT0 },
+-};
++static AMBA_APB_DEVICE(uart1, "mb:17", 0,
++	INTEGRATOR_UART1_BASE, INTEGRATOR_UART1_IRQ, &integrator_uart_data);
+ 
+-static struct amba_device kmi1_device = {
+-	.dev		= {
+-		.init_name = "mb:19",
+-	},
+-	.res		= {
+-		.start	= KMI1_BASE,
+-		.end	= KMI1_BASE + SZ_4K - 1,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-	.irq		= { IRQ_KMIINT1 },
+-};
++static AMBA_APB_DEVICE(kmi0, "mb:18", 0, KMI0_BASE, KMI0_IRQ, NULL);
++static AMBA_APB_DEVICE(kmi1, "mb:19", 0, KMI1_BASE, KMI1_IRQ, NULL);
+ 
+ static struct amba_device *amba_devs[] __initdata = {
+ 	&rtc_device,
+diff --git a/arch/arm/mach-integrator/integrator_cp.c b/arch/arm/mach-integrator/integrator_cp.c
+index ecc08ed..be9ead4 100644
+--- a/arch/arm/mach-integrator/integrator_cp.c
++++ b/arch/arm/mach-integrator/integrator_cp.c
+@@ -347,32 +347,14 @@ static struct mmci_platform_data mmc_data = {
+ 	.gpio_cd	= -1,
+ };
+ 
+-static struct amba_device mmc_device = {
+-	.dev		= {
+-		.init_name = "mb:1c",
+-		.platform_data = &mmc_data,
+-	},
+-	.res		= {
+-		.start	= INTEGRATOR_CP_MMC_BASE,
+-		.end	= INTEGRATOR_CP_MMC_BASE + SZ_4K - 1,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-	.irq		= { IRQ_CP_MMCIINT0, IRQ_CP_MMCIINT1 },
+-	.periphid	= 0,
+-};
++#define INTEGRATOR_CP_MMC_IRQS	{ IRQ_CP_MMCIINT0, IRQ_CP_MMCIINT1 }
++#define INTEGRATOR_CP_AACI_IRQS	{ IRQ_CP_AACIINT }
+ 
+-static struct amba_device aaci_device = {
+-	.dev		= {
+-		.init_name = "mb:1d",
+-	},
+-	.res		= {
+-		.start	= INTEGRATOR_CP_AACI_BASE,
+-		.end	= INTEGRATOR_CP_AACI_BASE + SZ_4K - 1,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-	.irq		= { IRQ_CP_AACIINT },
+-	.periphid	= 0,
+-};
++static AMBA_APB_DEVICE(mmc, "mb:1c", 0, INTEGRATOR_CP_MMC_BASE,
++	INTEGRATOR_CP_MMC_IRQS, &mmc_data);
 +
-+#define AHB_DEVICE(name, busid, base, plat)			\
-+static AMBA_AHB_DEVICE(name, busid, 0, base, base##_IRQ, plat)
++static AMBA_APB_DEVICE(aaci, "mb:1d", 0, INTEGRATOR_CP_AACI_BASE,
++	INTEGRATOR_CP_AACI_IRQS, NULL);
  
- struct machine_desc;
  
-diff --git a/arch/arm/mach-realview/realview_eb.c b/arch/arm/mach-realview/realview_eb.c
-index 5c810e5..fbca43c 100644
---- a/arch/arm/mach-realview/realview_eb.c
-+++ b/arch/arm/mach-realview/realview_eb.c
-@@ -176,27 +176,27 @@ static struct pl022_ssp_controller ssp0_plat_data = {
- #define EB_SSP_IRQ	{ IRQ_EB_SSP }
+ /*
+@@ -425,21 +407,8 @@ static struct clcd_board clcd_data = {
+ 	.remove		= versatile_clcd_remove_dma,
+ };
  
- /* FPGA Primecells */
--AMBA_DEVICE(aaci,  "fpga:aaci",  AACI,     NULL);
--AMBA_DEVICE(mmc0,  "fpga:mmc0",  MMCI0,    &realview_mmc0_plat_data);
--AMBA_DEVICE(kmi0,  "fpga:kmi0",  KMI0,     NULL);
--AMBA_DEVICE(kmi1,  "fpga:kmi1",  KMI1,     NULL);
--AMBA_DEVICE(uart3, "fpga:uart3", EB_UART3, NULL);
-+APB_DEVICE(aaci,  "fpga:aaci",  AACI,     NULL);
-+APB_DEVICE(mmc0,  "fpga:mmc0",  MMCI0,    &realview_mmc0_plat_data);
-+APB_DEVICE(kmi0,  "fpga:kmi0",  KMI0,     NULL);
-+APB_DEVICE(kmi1,  "fpga:kmi1",  KMI1,     NULL);
-+APB_DEVICE(uart3, "fpga:uart3", EB_UART3, NULL);
- 
- /* DevChip Primecells */
--AMBA_DEVICE(smc,   "dev:smc",   EB_SMC,   NULL);
--AMBA_DEVICE(clcd,  "dev:clcd",  EB_CLCD,  &clcd_plat_data);
--AMBA_DEVICE(dmac,  "dev:dmac",  DMAC,     NULL);
--AMBA_DEVICE(sctl,  "dev:sctl",  SCTL,     NULL);
--AMBA_DEVICE(wdog,  "dev:wdog",  EB_WATCHDOG, NULL);
--AMBA_DEVICE(gpio0, "dev:gpio0", EB_GPIO0, &gpio0_plat_data);
--AMBA_DEVICE(gpio1, "dev:gpio1", GPIO1,    &gpio1_plat_data);
--AMBA_DEVICE(gpio2, "dev:gpio2", GPIO2,    &gpio2_plat_data);
--AMBA_DEVICE(rtc,   "dev:rtc",   EB_RTC,   NULL);
--AMBA_DEVICE(sci0,  "dev:sci0",  SCI,      NULL);
--AMBA_DEVICE(uart0, "dev:uart0", EB_UART0, NULL);
--AMBA_DEVICE(uart1, "dev:uart1", EB_UART1, NULL);
--AMBA_DEVICE(uart2, "dev:uart2", EB_UART2, NULL);
--AMBA_DEVICE(ssp0,  "dev:ssp0",  EB_SSP,   &ssp0_plat_data);
-+AHB_DEVICE(smc,   "dev:smc",   EB_SMC,   NULL);
-+AHB_DEVICE(clcd,  "dev:clcd",  EB_CLCD,  &clcd_plat_data);
-+AHB_DEVICE(dmac,  "dev:dmac",  DMAC,     NULL);
-+AHB_DEVICE(sctl,  "dev:sctl",  SCTL,     NULL);
-+APB_DEVICE(wdog,  "dev:wdog",  EB_WATCHDOG, NULL);
-+APB_DEVICE(gpio0, "dev:gpio0", EB_GPIO0, &gpio0_plat_data);
-+APB_DEVICE(gpio1, "dev:gpio1", GPIO1,    &gpio1_plat_data);
-+APB_DEVICE(gpio2, "dev:gpio2", GPIO2,    &gpio2_plat_data);
-+APB_DEVICE(rtc,   "dev:rtc",   EB_RTC,   NULL);
-+APB_DEVICE(sci0,  "dev:sci0",  SCI,      NULL);
-+APB_DEVICE(uart0, "dev:uart0", EB_UART0, NULL);
-+APB_DEVICE(uart1, "dev:uart1", EB_UART1, NULL);
-+APB_DEVICE(uart2, "dev:uart2", EB_UART2, NULL);
-+APB_DEVICE(ssp0,  "dev:ssp0",  EB_SSP,   &ssp0_plat_data);
+-static struct amba_device clcd_device = {
+-	.dev		= {
+-		.init_name = "mb:c0",
+-		.coherent_dma_mask = ~0,
+-		.platform_data = &clcd_data,
+-	},
+-	.res		= {
+-		.start	= INTCP_PA_CLCD_BASE,
+-		.end	= INTCP_PA_CLCD_BASE + SZ_4K - 1,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-	.dma_mask	= ~0,
+-	.irq		= { IRQ_CP_CLCDCINT },
+-	.periphid	= 0,
+-};
++static AMBA_AHB_DEVICE(clcd, "mb:c0", 0, INTCP_PA_CLCD_BASE,
++	{ IRQ_CP_CLCDCINT }, &clcd_data);
  
  static struct amba_device *amba_devs[] __initdata = {
- 	&dmac_device,
-diff --git a/arch/arm/mach-realview/realview_pb1176.c b/arch/arm/mach-realview/realview_pb1176.c
-index 9506de9..1b6e60c 100644
---- a/arch/arm/mach-realview/realview_pb1176.c
-+++ b/arch/arm/mach-realview/realview_pb1176.c
-@@ -155,27 +155,27 @@ static struct pl022_ssp_controller ssp0_plat_data = {
- #define PB1176_SSP_IRQ		{ IRQ_DC1176_SSP }
- 
- /* FPGA Primecells */
--AMBA_DEVICE(aaci,	"fpga:aaci",	AACI,		NULL);
--AMBA_DEVICE(mmc0,	"fpga:mmc0",	MMCI0,		&realview_mmc0_plat_data);
--AMBA_DEVICE(kmi0,	"fpga:kmi0",	KMI0,		NULL);
--AMBA_DEVICE(kmi1,	"fpga:kmi1",	KMI1,		NULL);
--AMBA_DEVICE(uart4,	"fpga:uart4",	PB1176_UART4,	NULL);
-+APB_DEVICE(aaci,	"fpga:aaci",	AACI,		NULL);
-+APB_DEVICE(mmc0,	"fpga:mmc0",	MMCI0,		&realview_mmc0_plat_data);
-+APB_DEVICE(kmi0,	"fpga:kmi0",	KMI0,		NULL);
-+APB_DEVICE(kmi1,	"fpga:kmi1",	KMI1,		NULL);
-+APB_DEVICE(uart4,	"fpga:uart4",	PB1176_UART4,	NULL);
- 
- /* DevChip Primecells */
--AMBA_DEVICE(smc,	"dev:smc",	PB1176_SMC,	NULL);
--AMBA_DEVICE(sctl,	"dev:sctl",	SCTL,		NULL);
--AMBA_DEVICE(wdog,	"dev:wdog",	PB1176_WATCHDOG,	NULL);
--AMBA_DEVICE(gpio0,	"dev:gpio0",	PB1176_GPIO0,	&gpio0_plat_data);
--AMBA_DEVICE(gpio1,	"dev:gpio1",	GPIO1,		&gpio1_plat_data);
--AMBA_DEVICE(gpio2,	"dev:gpio2",	GPIO2,		&gpio2_plat_data);
--AMBA_DEVICE(rtc,	"dev:rtc",	PB1176_RTC,	NULL);
--AMBA_DEVICE(sci0,	"dev:sci0",	SCI,		NULL);
--AMBA_DEVICE(uart0,	"dev:uart0",	PB1176_UART0,	NULL);
--AMBA_DEVICE(uart1,	"dev:uart1",	PB1176_UART1,	NULL);
--AMBA_DEVICE(uart2,	"dev:uart2",	PB1176_UART2,	NULL);
--AMBA_DEVICE(uart3,	"dev:uart3",	PB1176_UART3,	NULL);
--AMBA_DEVICE(ssp0,	"dev:ssp0",	PB1176_SSP,	&ssp0_plat_data);
--AMBA_DEVICE(clcd,	"dev:clcd",	PB1176_CLCD,	&clcd_plat_data);
-+AHB_DEVICE(smc,		"dev:smc",	PB1176_SMC,	NULL);
-+AHB_DEVICE(sctl,	"dev:sctl",	SCTL,		NULL);
-+APB_DEVICE(wdog,	"dev:wdog",	PB1176_WATCHDOG,	NULL);
-+APB_DEVICE(gpio0,	"dev:gpio0",	PB1176_GPIO0,	&gpio0_plat_data);
-+APB_DEVICE(gpio1,	"dev:gpio1",	GPIO1,		&gpio1_plat_data);
-+APB_DEVICE(gpio2,	"dev:gpio2",	GPIO2,		&gpio2_plat_data);
-+APB_DEVICE(rtc,		"dev:rtc",	PB1176_RTC,	NULL);
-+APB_DEVICE(sci0,	"dev:sci0",	SCI,		NULL);
-+APB_DEVICE(uart0,	"dev:uart0",	PB1176_UART0,	NULL);
-+APB_DEVICE(uart1,	"dev:uart1",	PB1176_UART1,	NULL);
-+APB_DEVICE(uart2,	"dev:uart2",	PB1176_UART2,	NULL);
-+APB_DEVICE(uart3,	"dev:uart3",	PB1176_UART3,	NULL);
-+APB_DEVICE(ssp0,	"dev:ssp0",	PB1176_SSP,	&ssp0_plat_data);
-+AHB_DEVICE(clcd,	"dev:clcd",	PB1176_CLCD,	&clcd_plat_data);
- 
- static struct amba_device *amba_devs[] __initdata = {
- 	&uart0_device,
-diff --git a/arch/arm/mach-realview/realview_pb11mp.c b/arch/arm/mach-realview/realview_pb11mp.c
-index cb4f2da..43b82bc 100644
---- a/arch/arm/mach-realview/realview_pb11mp.c
-+++ b/arch/arm/mach-realview/realview_pb11mp.c
-@@ -155,29 +155,29 @@ static struct pl022_ssp_controller ssp0_plat_data = {
- #define PB11MP_SSP_IRQ		{ IRQ_PB11MP_SSP }
- 
- /* FPGA Primecells */
--AMBA_DEVICE(aaci,	"fpga:aaci",	AACI,		NULL);
--AMBA_DEVICE(mmc0,	"fpga:mmc0",	MMCI0,		&realview_mmc0_plat_data);
--AMBA_DEVICE(kmi0,	"fpga:kmi0",	KMI0,		NULL);
--AMBA_DEVICE(kmi1,	"fpga:kmi1",	KMI1,		NULL);
--AMBA_DEVICE(uart3,	"fpga:uart3",	PB11MP_UART3,	NULL);
-+APB_DEVICE(aaci,	"fpga:aaci",	AACI,		NULL);
-+APB_DEVICE(mmc0,	"fpga:mmc0",	MMCI0,		&realview_mmc0_plat_data);
-+APB_DEVICE(kmi0,	"fpga:kmi0",	KMI0,		NULL);
-+APB_DEVICE(kmi1,	"fpga:kmi1",	KMI1,		NULL);
-+APB_DEVICE(uart3,	"fpga:uart3",	PB11MP_UART3,	NULL);
- 
- /* DevChip Primecells */
--AMBA_DEVICE(smc,	"dev:smc",	PB11MP_SMC,	NULL);
--AMBA_DEVICE(sctl,	"dev:sctl",	SCTL,		NULL);
--AMBA_DEVICE(wdog,	"dev:wdog",	PB11MP_WATCHDOG, NULL);
--AMBA_DEVICE(gpio0,	"dev:gpio0",	PB11MP_GPIO0,	&gpio0_plat_data);
--AMBA_DEVICE(gpio1,	"dev:gpio1",	GPIO1,		&gpio1_plat_data);
--AMBA_DEVICE(gpio2,	"dev:gpio2",	GPIO2,		&gpio2_plat_data);
--AMBA_DEVICE(rtc,	"dev:rtc",	PB11MP_RTC,	NULL);
--AMBA_DEVICE(sci0,	"dev:sci0",	SCI,		NULL);
--AMBA_DEVICE(uart0,	"dev:uart0",	PB11MP_UART0,	NULL);
--AMBA_DEVICE(uart1,	"dev:uart1",	PB11MP_UART1,	NULL);
--AMBA_DEVICE(uart2,	"dev:uart2",	PB11MP_UART2,	NULL);
--AMBA_DEVICE(ssp0,	"dev:ssp0",	PB11MP_SSP,	&ssp0_plat_data);
-+AHB_DEVICE(smc,		"dev:smc",	PB11MP_SMC,	NULL);
-+AHB_DEVICE(sctl,	"dev:sctl",	SCTL,		NULL);
-+APB_DEVICE(wdog,	"dev:wdog",	PB11MP_WATCHDOG, NULL);
-+APB_DEVICE(gpio0,	"dev:gpio0",	PB11MP_GPIO0,	&gpio0_plat_data);
-+APB_DEVICE(gpio1,	"dev:gpio1",	GPIO1,		&gpio1_plat_data);
-+APB_DEVICE(gpio2,	"dev:gpio2",	GPIO2,		&gpio2_plat_data);
-+APB_DEVICE(rtc,		"dev:rtc",	PB11MP_RTC,	NULL);
-+APB_DEVICE(sci0,	"dev:sci0",	SCI,		NULL);
-+APB_DEVICE(uart0,	"dev:uart0",	PB11MP_UART0,	NULL);
-+APB_DEVICE(uart1,	"dev:uart1",	PB11MP_UART1,	NULL);
-+APB_DEVICE(uart2,	"dev:uart2",	PB11MP_UART2,	NULL);
-+APB_DEVICE(ssp0,	"dev:ssp0",	PB11MP_SSP,	&ssp0_plat_data);
- 
- /* Primecells on the NEC ISSP chip */
--AMBA_DEVICE(clcd,	"issp:clcd",	PB11MP_CLCD,	&clcd_plat_data);
--AMBA_DEVICE(dmac,	"issp:dmac",	DMAC,		NULL);
-+AHB_DEVICE(clcd,	"issp:clcd",	PB11MP_CLCD,	&clcd_plat_data);
-+AHB_DEVICE(dmac,	"issp:dmac",	DMAC,		NULL);
- 
- static struct amba_device *amba_devs[] __initdata = {
- 	&dmac_device,
-diff --git a/arch/arm/mach-realview/realview_pba8.c b/arch/arm/mach-realview/realview_pba8.c
-index 293de21..5965017 100644
---- a/arch/arm/mach-realview/realview_pba8.c
-+++ b/arch/arm/mach-realview/realview_pba8.c
-@@ -145,29 +145,29 @@ static struct pl022_ssp_controller ssp0_plat_data = {
- #define PBA8_SSP_IRQ		{ IRQ_PBA8_SSP }
- 
- /* FPGA Primecells */
--AMBA_DEVICE(aaci,	"fpga:aaci",	AACI,		NULL);
--AMBA_DEVICE(mmc0,	"fpga:mmc0",	MMCI0,		&realview_mmc0_plat_data);
--AMBA_DEVICE(kmi0,	"fpga:kmi0",	KMI0,		NULL);
--AMBA_DEVICE(kmi1,	"fpga:kmi1",	KMI1,		NULL);
--AMBA_DEVICE(uart3,	"fpga:uart3",	PBA8_UART3,	NULL);
-+APB_DEVICE(aaci,	"fpga:aaci",	AACI,		NULL);
-+APB_DEVICE(mmc0,	"fpga:mmc0",	MMCI0,		&realview_mmc0_plat_data);
-+APB_DEVICE(kmi0,	"fpga:kmi0",	KMI0,		NULL);
-+APB_DEVICE(kmi1,	"fpga:kmi1",	KMI1,		NULL);
-+APB_DEVICE(uart3,	"fpga:uart3",	PBA8_UART3,	NULL);
- 
- /* DevChip Primecells */
--AMBA_DEVICE(smc,	"dev:smc",	PBA8_SMC,	NULL);
--AMBA_DEVICE(sctl,	"dev:sctl",	SCTL,		NULL);
--AMBA_DEVICE(wdog,	"dev:wdog",	PBA8_WATCHDOG, NULL);
--AMBA_DEVICE(gpio0,	"dev:gpio0",	PBA8_GPIO0,	&gpio0_plat_data);
--AMBA_DEVICE(gpio1,	"dev:gpio1",	GPIO1,		&gpio1_plat_data);
--AMBA_DEVICE(gpio2,	"dev:gpio2",	GPIO2,		&gpio2_plat_data);
--AMBA_DEVICE(rtc,	"dev:rtc",	PBA8_RTC,	NULL);
--AMBA_DEVICE(sci0,	"dev:sci0",	SCI,		NULL);
--AMBA_DEVICE(uart0,	"dev:uart0",	PBA8_UART0,	NULL);
--AMBA_DEVICE(uart1,	"dev:uart1",	PBA8_UART1,	NULL);
--AMBA_DEVICE(uart2,	"dev:uart2",	PBA8_UART2,	NULL);
--AMBA_DEVICE(ssp0,	"dev:ssp0",	PBA8_SSP,	&ssp0_plat_data);
-+AHB_DEVICE(smc,		"dev:smc",	PBA8_SMC,	NULL);
-+AHB_DEVICE(sctl,	"dev:sctl",	SCTL,		NULL);
-+APB_DEVICE(wdog,	"dev:wdog",	PBA8_WATCHDOG, NULL);
-+APB_DEVICE(gpio0,	"dev:gpio0",	PBA8_GPIO0,	&gpio0_plat_data);
-+APB_DEVICE(gpio1,	"dev:gpio1",	GPIO1,		&gpio1_plat_data);
-+APB_DEVICE(gpio2,	"dev:gpio2",	GPIO2,		&gpio2_plat_data);
-+APB_DEVICE(rtc,		"dev:rtc",	PBA8_RTC,	NULL);
-+APB_DEVICE(sci0,	"dev:sci0",	SCI,		NULL);
-+APB_DEVICE(uart0,	"dev:uart0",	PBA8_UART0,	NULL);
-+APB_DEVICE(uart1,	"dev:uart1",	PBA8_UART1,	NULL);
-+APB_DEVICE(uart2,	"dev:uart2",	PBA8_UART2,	NULL);
-+APB_DEVICE(ssp0,	"dev:ssp0",	PBA8_SSP,	&ssp0_plat_data);
- 
- /* Primecells on the NEC ISSP chip */
--AMBA_DEVICE(clcd,	"issp:clcd",	PBA8_CLCD,	&clcd_plat_data);
--AMBA_DEVICE(dmac,	"issp:dmac",	DMAC,		NULL);
-+AHB_DEVICE(clcd,	"issp:clcd",	PBA8_CLCD,	&clcd_plat_data);
-+AHB_DEVICE(dmac,	"issp:dmac",	DMAC,		NULL);
- 
- static struct amba_device *amba_devs[] __initdata = {
- 	&dmac_device,
-diff --git a/arch/arm/mach-realview/realview_pbx.c b/arch/arm/mach-realview/realview_pbx.c
-index 8e2a306..1cd9956 100644
---- a/arch/arm/mach-realview/realview_pbx.c
-+++ b/arch/arm/mach-realview/realview_pbx.c
-@@ -167,29 +167,29 @@ static struct pl022_ssp_controller ssp0_plat_data = {
- #define PBX_SSP_IRQ		{ IRQ_PBX_SSP }
- 
- /* FPGA Primecells */
--AMBA_DEVICE(aaci,	"fpga:aaci",	AACI,		NULL);
--AMBA_DEVICE(mmc0,	"fpga:mmc0",	MMCI0,		&realview_mmc0_plat_data);
--AMBA_DEVICE(kmi0,	"fpga:kmi0",	KMI0,		NULL);
--AMBA_DEVICE(kmi1,	"fpga:kmi1",	KMI1,		NULL);
--AMBA_DEVICE(uart3,	"fpga:uart3",	PBX_UART3,	NULL);
-+APB_DEVICE(aaci,	"fpga:aaci",	AACI,		NULL);
-+APB_DEVICE(mmc0,	"fpga:mmc0",	MMCI0,		&realview_mmc0_plat_data);
-+APB_DEVICE(kmi0,	"fpga:kmi0",	KMI0,		NULL);
-+APB_DEVICE(kmi1,	"fpga:kmi1",	KMI1,		NULL);
-+APB_DEVICE(uart3,	"fpga:uart3",	PBX_UART3,	NULL);
- 
- /* DevChip Primecells */
--AMBA_DEVICE(smc,	"dev:smc",	PBX_SMC,	NULL);
--AMBA_DEVICE(sctl,	"dev:sctl",	SCTL,		NULL);
--AMBA_DEVICE(wdog,	"dev:wdog",	PBX_WATCHDOG, 	NULL);
--AMBA_DEVICE(gpio0,	"dev:gpio0",	PBX_GPIO0,	&gpio0_plat_data);
--AMBA_DEVICE(gpio1,	"dev:gpio1",	GPIO1,		&gpio1_plat_data);
--AMBA_DEVICE(gpio2,	"dev:gpio2",	GPIO2,		&gpio2_plat_data);
--AMBA_DEVICE(rtc,	"dev:rtc",	PBX_RTC,	NULL);
--AMBA_DEVICE(sci0,	"dev:sci0",	SCI,		NULL);
--AMBA_DEVICE(uart0,	"dev:uart0",	PBX_UART0,	NULL);
--AMBA_DEVICE(uart1,	"dev:uart1",	PBX_UART1,	NULL);
--AMBA_DEVICE(uart2,	"dev:uart2",	PBX_UART2,	NULL);
--AMBA_DEVICE(ssp0,	"dev:ssp0",	PBX_SSP,	&ssp0_plat_data);
-+AHB_DEVICE(smc,	"dev:smc",	PBX_SMC,	NULL);
-+AHB_DEVICE(sctl,	"dev:sctl",	SCTL,		NULL);
-+APB_DEVICE(wdog,	"dev:wdog",	PBX_WATCHDOG, 	NULL);
-+APB_DEVICE(gpio0,	"dev:gpio0",	PBX_GPIO0,	&gpio0_plat_data);
-+APB_DEVICE(gpio1,	"dev:gpio1",	GPIO1,		&gpio1_plat_data);
-+APB_DEVICE(gpio2,	"dev:gpio2",	GPIO2,		&gpio2_plat_data);
-+APB_DEVICE(rtc,		"dev:rtc",	PBX_RTC,	NULL);
-+APB_DEVICE(sci0,	"dev:sci0",	SCI,		NULL);
-+APB_DEVICE(uart0,	"dev:uart0",	PBX_UART0,	NULL);
-+APB_DEVICE(uart1,	"dev:uart1",	PBX_UART1,	NULL);
-+APB_DEVICE(uart2,	"dev:uart2",	PBX_UART2,	NULL);
-+APB_DEVICE(ssp0,	"dev:ssp0",	PBX_SSP,	&ssp0_plat_data);
- 
- /* Primecells on the NEC ISSP chip */
--AMBA_DEVICE(clcd,	"issp:clcd",	PBX_CLCD,	&clcd_plat_data);
--AMBA_DEVICE(dmac,	"issp:dmac",	DMAC,		NULL);
-+AHB_DEVICE(clcd,	"issp:clcd",	PBX_CLCD,	&clcd_plat_data);
-+AHB_DEVICE(dmac,	"issp:dmac",	DMAC,		NULL);
- 
- static struct amba_device *amba_devs[] __initdata = {
- 	&dmac_device,
+ 	&mmc_device,
 -- 
 1.7.4.4
 
