@@ -1,62 +1,112 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: [PATCH 25/31] ARM: amba: bcmring: use common amba device
- initializers
-Date: Fri, 20 Jan 2012 09:30:50 +0000
-Message-ID: <E1RoAo6-0005Fy-Tb@rmk-PC.arm.linux.org.uk>
-References: <20120120092207.GD1068@n2100.arm.linux.org.uk>
+From: Viresh Kumar <viresh.kumar@st.com>
+Subject: Re: [PATCH 15/31] ARM: amba: spear: get rid of NO_IRQ initializers
+Date: Fri, 20 Jan 2012 15:00:56 +0530
+Message-ID: <4F193450.4010607@st.com>
+References: <20120120092207.GD1068@n2100.arm.linux.org.uk> <E1RoAkr-0005FH-CA@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:32815 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753078Ab2ATJbS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2012 04:31:18 -0500
-In-Reply-To: <20120120092207.GD1068@n2100.arm.linux.org.uk>
-Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <E1RoAkr-0005FH-CA@rmk-PC.arm.linux.org.uk>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, STEricsson_nomadik_linux <STEricsson_nomadik_linux@list.st.com>, Rajeev KUMAR <rajeev-dlh.kumar@st.com>, Shiraz HASHIM <shiraz.hashim@st.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-samsung-soc@vger.kernel.org, STEricsson <STEricsson_nomadik_linux@list.st.com>
-Cc: Jiandong Zheng <jdzheng@broadcom.com>, Scott Branden <sbranden@broadcom.com>
 
-Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
----
- arch/arm/mach-bcmring/core.c |   23 ++---------------------
- 1 files changed, 2 insertions(+), 21 deletions(-)
+On 1/20/2012 2:57 PM, Russell King - ARM Linux wrote:
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> ---
+>  arch/arm/mach-spear3xx/spear300.c |    2 +-
+>  arch/arm/mach-spear3xx/spear3xx.c |    4 ++--
+>  arch/arm/mach-spear6xx/spear6xx.c |   10 +++++-----
+>  3 files changed, 8 insertions(+), 8 deletions(-)
+> 
+> diff --git a/arch/arm/mach-spear3xx/spear300.c b/arch/arm/mach-spear3xx/spear300.c
+> index a5e46b4..6fdeec9 100644
+> --- a/arch/arm/mach-spear3xx/spear300.c
+> +++ b/arch/arm/mach-spear3xx/spear300.c
+> @@ -440,7 +440,7 @@ struct amba_device spear300_gpio1_device = {
+>  		.end = SPEAR300_GPIO_BASE + SZ_4K - 1,
+>  		.flags = IORESOURCE_MEM,
+>  	},
+> -	.irq = {SPEAR300_VIRQ_GPIO1, NO_IRQ},
+> +	.irq = {SPEAR300_VIRQ_GPIO1},
+>  };
+>  
+>  /* spear300 routines */
+> diff --git a/arch/arm/mach-spear3xx/spear3xx.c b/arch/arm/mach-spear3xx/spear3xx.c
+> index 10af45d..bc4f1c6 100644
+> --- a/arch/arm/mach-spear3xx/spear3xx.c
+> +++ b/arch/arm/mach-spear3xx/spear3xx.c
+> @@ -38,7 +38,7 @@ struct amba_device spear3xx_gpio_device = {
+>  		.end = SPEAR3XX_ICM3_GPIO_BASE + SZ_4K - 1,
+>  		.flags = IORESOURCE_MEM,
+>  	},
+> -	.irq = {SPEAR3XX_IRQ_BASIC_GPIO, NO_IRQ},
+> +	.irq = {SPEAR3XX_IRQ_BASIC_GPIO},
+>  };
+>  
+>  /* uart device registration */
+> @@ -51,7 +51,7 @@ struct amba_device spear3xx_uart_device = {
+>  		.end = SPEAR3XX_ICM1_UART_BASE + SZ_4K - 1,
+>  		.flags = IORESOURCE_MEM,
+>  	},
+> -	.irq = {SPEAR3XX_IRQ_UART, NO_IRQ},
+> +	.irq = {SPEAR3XX_IRQ_UART},
+>  };
+>  
+>  /* Do spear3xx familiy common initialization part here */
+> diff --git a/arch/arm/mach-spear6xx/spear6xx.c b/arch/arm/mach-spear6xx/spear6xx.c
+> index e0f6628..b997b1b 100644
+> --- a/arch/arm/mach-spear6xx/spear6xx.c
+> +++ b/arch/arm/mach-spear6xx/spear6xx.c
+> @@ -34,7 +34,7 @@ struct amba_device uart_device[] = {
+>  			.end = SPEAR6XX_ICM1_UART0_BASE + SZ_4K - 1,
+>  			.flags = IORESOURCE_MEM,
+>  		},
+> -		.irq = {IRQ_UART_0, NO_IRQ},
+> +		.irq = {IRQ_UART_0},
+>  	}, {
+>  		.dev = {
+>  			.init_name = "uart1",
+> @@ -44,7 +44,7 @@ struct amba_device uart_device[] = {
+>  			.end = SPEAR6XX_ICM1_UART1_BASE + SZ_4K - 1,
+>  			.flags = IORESOURCE_MEM,
+>  		},
+> -		.irq = {IRQ_UART_1, NO_IRQ},
+> +		.irq = {IRQ_UART_1},
+>  	}
+>  };
+>  
+> @@ -73,7 +73,7 @@ struct amba_device gpio_device[] = {
+>  			.end = SPEAR6XX_CPU_GPIO_BASE + SZ_4K - 1,
+>  			.flags = IORESOURCE_MEM,
+>  		},
+> -		.irq = {IRQ_LOCAL_GPIO, NO_IRQ},
+> +		.irq = {IRQ_LOCAL_GPIO},
+>  	}, {
+>  		.dev = {
+>  			.init_name = "gpio1",
+> @@ -84,7 +84,7 @@ struct amba_device gpio_device[] = {
+>  			.end = SPEAR6XX_ICM3_GPIO_BASE + SZ_4K - 1,
+>  			.flags = IORESOURCE_MEM,
+>  		},
+> -		.irq = {IRQ_BASIC_GPIO, NO_IRQ},
+> +		.irq = {IRQ_BASIC_GPIO},
+>  	}, {
+>  		.dev = {
+>  			.init_name = "gpio2",
+> @@ -95,7 +95,7 @@ struct amba_device gpio_device[] = {
+>  			.end = SPEAR6XX_ICM2_GPIO_BASE + SZ_4K - 1,
+>  			.flags = IORESOURCE_MEM,
+>  		},
+> -		.irq = {IRQ_APPL_GPIO, NO_IRQ},
+> +		.irq = {IRQ_APPL_GPIO},
+>  	}
+>  };
+>  
 
-diff --git a/arch/arm/mach-bcmring/core.c b/arch/arm/mach-bcmring/core.c
-index 6b67b7e..22e4e0a 100644
---- a/arch/arm/mach-bcmring/core.c
-+++ b/arch/arm/mach-bcmring/core.c
-@@ -52,27 +52,8 @@
- #include <mach/csp/chipcHw_inline.h>
- #include <mach/csp/tmrHw_reg.h>
- 
--#define AMBA_DEVICE(name, initname, base, plat, size)       \
--static struct amba_device name##_device = {     \
--   .dev = {                                     \
--      .coherent_dma_mask = ~0,                  \
--      .init_name = initname,                    \
--      .platform_data = plat                     \
--   },                                           \
--   .res = {                                     \
--      .start = MM_ADDR_IO_##base,               \
--		.end = MM_ADDR_IO_##base + (size) - 1,    \
--      .flags = IORESOURCE_MEM                   \
--   },                                           \
--   .dma_mask = ~0,                              \
--   .irq = {                                     \
--      IRQ_##base                                \
--   }                                            \
--}
--
--
--AMBA_DEVICE(uartA, "uarta", UARTA, NULL, SZ_4K);
--AMBA_DEVICE(uartB, "uartb", UARTB, NULL, SZ_4K);
-+static AMBA_APB_DEVICE(uartA, "uarta", MM_ADDR_IO_UARTA, { IRQ_UARTA }, NULL);
-+static AMBA_APB_DEVICE(uartB, "uartb", MM_ADDR_IO_UARTB, { IRQ_UARTB }, NULL);
- 
- static struct clk pll1_clk = {
- 	.name = "PLL1",
+Acked-by: Viresh Kumar <viresh.kumar@st.com>
+
 -- 
-1.7.4.4
-
+viresh
