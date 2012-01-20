@@ -1,33 +1,34 @@
-From: "Giuseppe D'Agostino" <gdagostino79@gmail.com>
-Subject: EXT3-fs warning: maximal mount count reached, running e2fsck is recommended
-Date: Fri, 20 Jan 2012 16:06:54 +0100
-Message-ID: <CALJWcL9aHD0iQ-K4snho=KthB1OGbZ9ujaike7V8knkwZq+qRQ@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH][upstream] eSDHC: fix errors when booting kernel on Freescale eSDHC version 2.3
+Date: Fri, 20 Jan 2012 10:33:23 -0500
+Message-ID: <m2aa5iwfr0.fsf@bob.laptop.org>
+References: <1326438121-26732-1-git-send-email-tie-fei.zang@freescale.com>
+	<20120113114741.GA8837@oksana.dev.rtsoft.ru>
+	<3E027F8168735B46AC006B1D0C7BB002033D00@039-SN2MPN1-013.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-tul01m020-f174.google.com ([209.85.214.174]:37564 "EHLO
-	mail-tul01m020-f174.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753532Ab2ATPGy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2012 10:06:54 -0500
-Received: by obcva7 with SMTP id va7so810582obc.19
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Jan 2012 07:06:54 -0800 (PST)
+Received: from void.printf.net ([89.145.121.20]:49031 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753193Ab2ATPde (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 20 Jan 2012 10:33:34 -0500
+In-Reply-To: <3E027F8168735B46AC006B1D0C7BB002033D00@039-SN2MPN1-013.039d.mgd.msft.net>
+	(Zang Roy-R's message of "Sat, 14 Jan 2012 13:09:05 +0000")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Zang Roy-R61911 <r61911@freescale.com>
+Cc: Anton Vorontsov <cbouatmailru@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xu Lei-B33228 <B33228@freescale.com>, Huang Changming-R66093 <r66093@freescale.com>, Jain Priyanka-B32167 <B32167@freescale.com>
 
-Hi,
+Hi Roy,
 
-after a series of mmc stress test on my device, based on ARM
-architecture, I noted, launching command dmesg, that it's present this
-warnings:
+On Sat, Jan 14 2012, Zang Roy-R61911 wrote:
+> Then could you help to update Anton's style comment and help to pick
+> up this patch?
+> If a new update patch is needed, let me know :-)
 
-EXT3-fs warning: maximal mount count reached, running e2fsck is recommended
+Thanks, pushed to mmc-next for 3.3 with Anton's style change and ACK.
 
-Now, it's normal because, probably, I passed "max mount counts", that
-is 30 for default, but my question is:
-
-For this memory's type which is a right limit before execute e2fsck on
-partition? It's only a formal problem or is necessary, some other
-time, execute an fsck on device?
-
-Regards
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
