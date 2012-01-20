@@ -1,92 +1,66 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v6] mmc: support BKOPS feature for eMMC
-Date: Fri, 20 Jan 2012 09:31:09 +0200
-Message-ID: <4F19183D.6080105@intel.com>
-References: <4F17AA38.3000901@samsung.com> <4F17EEBF.2060401@intel.com> <4F17FF7D.9090909@samsung.com> <4F180202.1030206@intel.com> <CANfBPZ-CUz4nNJFu-L9wSLPFMPCrNAEHdb3NRXCAhgQgJYPeDg@mail.gmail.com>
+From: Huang Shijie <b32955@freescale.com>
+Subject: [PATCH v2 0/2] patch set about the MXS-DMA
+Date: Fri, 20 Jan 2012 15:33:36 +0800
+Message-ID: <1327044818-4464-1-git-send-email-b32955@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:15721 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751743Ab2ATHbJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 20 Jan 2012 02:31:09 -0500
-In-Reply-To: <CANfBPZ-CUz4nNJFu-L9wSLPFMPCrNAEHdb3NRXCAhgQgJYPeDg@mail.gmail.com>
+Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:19052
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751743Ab2ATHcM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2012 02:32:12 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
+To: vinod.koul@intel.com
+Cc: shawn.guo@linaro.org, artem.bityutskiy@intel.com, shijie8@gmail.com, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, w.sang@pengutronix.de, LW@KARO-electronics.de, alsa-devel@alsa-project.org, b29396@freescale.com, Huang Shijie <b32955@freescale.com>
 
-On 19/01/12 17:32, S, Venkatraman wrote:
-> On Thu, Jan 19, 2012 at 5:14 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 19/01/12 13:33, Jaehoon Chung wrote:
->>> Hi Adrian.
->>>
->>> On 01/19/2012 07:21 PM, Adrian Hunter wrote:
->>>
->>>> On 19/01/12 07:29, Jaehoon Chung wrote:
->>>>> Enable eMMC background operations (BKOPS) feature.
->>>>>
->>>>> If URGENT_BKOPS is set after a response, note that BKOPS
->>>>> are required. After all I/O requests are finished, run
->>>>> BKOPS if required. Should read/write operations be requested
->>>>> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
->>>>> and then service the request.
->>>>
->>>> This still does not seem to address my earlier comment which was:
->>>>
->>>> The main problem with bkops is:
->>>>
->>>>      If the status is at level 3 ("critical"), some operations
->>>>      may extend beyond their original timeouts due to maintenance
->>>>      operations which cannot be delayed anymore.
->>>>
->>>> This means:
->>>>
->>>>      1. at level 3 either bkops are run or the timeout of the next
->>>>      (data?) operation is extended
->>>>
->>>>      2. at level 3 either the bkops must not be interrupted or the
->>>>      level must be rechecked after interruption and bkops run again
->>>>      if the level is still 3, or the timeout of the next (data?)
->>>>      operation is extended
->>>>
->>>
->>> This patch didn't issue the HPI when bkops-status is level2-3
->>> (URGENT_BKOPS case).
->>> I didn't understand that must be recheck?? it's case of using HPI..?
->>> If HPI didn't issue,though must be recheck bkops status?
->>> And level-1 control should be considered for future-work.
->>> I will also modify the patch comment..it's confused something.
->>
->> 1. Say there are 2 write requests queued and after the first write request
->> the bkops level is 3.  That means the 2nd write request may timeout because
->> the normal timeout rules do not apply.
->>
->> Thus:
->>        1. at level 3 either bkops are run or the timeout of the next
->>        (data?) operation is extended
->>
->> 2. Say you are running bkops because the level was 3 and a write request
->> arrives.  You use HPI to interrupt the bkops, but the bkops level may still
->> be 3, so the write request may timeout.  Hence:
->>
->>        2. at level 3 either the bkops must not be interrupted or the
->>        level must be rechecked after interruption and bkops run again
->>        if the level is still 3, or the timeout of the next (data?)
->>        operation is extended
->>
-> 
-> A naive question perhaps, but don't the current timeout values include
-> sufficient
-> buffer to do implicit garbage collection anyways ?
+patch 1: move the mxs dma header to a more common place.
+	Beside the mx23/mx28, the apbh-dma is also used by MX50 and MX6Q.
+	So move the mxs dma header file to a more common place, and rename
+	it to mxs-dma.h
 
-Maybe, but the problem is the JEDEC specification says otherwise.  This bit
-is a quote:
+patch 2: rewrite the last parameter of mxs_dma_prep_slave_sg().
+	In the new GPMI version, some hardware behavior changes.
+	The WAIT4END bit should be set in the middle one of the ECC READ page DMA chain.
+	The DMA chain should be set like this:
 
-	If the status is at level 3 ("critical"), some operations
-	may extend beyond their original timeouts due to maintenance
-	operations which cannot be delayed anymore.
+          +-----+               +-----+                      +-----+
+          | cmd | ------------> | cmd | ------------------>  | cmd |
+          +-----+               +-----+                      +-----+
+                                   ^                            ^
+                                   |                            |
+                                   |                            |
+                              set WAIT4END here too        set WAIT4END here
 
-I think level 3 is a very rare case so I would just run bkops and wait for
-it to finish without interruption.
+        So rewrite the last parameter of mxs_dma_prep_slave_sg(), use the
+	dma_ctrl_flags to set the proper DMA bit for DMA Command Structure.
+	And change the relative drivers with the dma_ctrl_flags.
+
+TEST:
+	Tested the mxs-mmc driver and gpmi-nand drive with the two patches
+	in MX28 board.
+
+v1 --> v2:
+	[1] squash the trial patches into single patch.
+	[2] use the dma_ctrl_flags.
+
+Huang Shijie (2):
+  mxs-dma : move the mxs dma.h to a more common place
+  mxs-dma : rewrite the last parameter of mxs_dma_prep_slave_sg()
+
+ drivers/dma/mxs-dma.c                              |   34 +++++++++++++++++---
+ drivers/mmc/host/mxs-mmc.c                         |   12 +++---
+ drivers/mtd/nand/gpmi-nand/gpmi-lib.c              |   28 +++++++++++++---
+ drivers/mtd/nand/gpmi-nand/gpmi-nand.h             |    6 +++-
+ drivers/mtd/nand/gpmi-nand/gpmi-regs.h             |    2 +
+ .../include/mach/dma.h => include/linux/mxs-dma.h  |    0
+ sound/soc/mxs/mxs-pcm.c                            |    2 +-
+ sound/soc/mxs/mxs-pcm.h                            |    2 +-
+ sound/soc/mxs/mxs-saif.c                           |    2 +-
+ 9 files changed, 67 insertions(+), 21 deletions(-)
+ rename arch/arm/mach-mxs/include/mach/dma.h => include/linux/mxs-dma.h (100%)
+
+-- 
+1.7.3.2
+
+
