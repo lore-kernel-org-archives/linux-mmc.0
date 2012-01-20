@@ -1,124 +1,98 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v6] mmc: support BKOPS feature for eMMC
-Date: Fri, 20 Jan 2012 16:50:23 +0900
-Message-ID: <4F191CBF.4080005@samsung.com>
-References: <4F17AA38.3000901@samsung.com> <4F17EEBF.2060401@intel.com>
- <4F17FF7D.9090909@samsung.com> <4F180202.1030206@intel.com>
- <CANfBPZ-CUz4nNJFu-L9wSLPFMPCrNAEHdb3NRXCAhgQgJYPeDg@mail.gmail.com>
- <4F19183D.6080105@intel.com>
+From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Subject: [PATCH 00/31] Clean up amba/primecell bus support
+Date: Fri, 20 Jan 2012 09:22:07 +0000
+Message-ID: <20120120092207.GD1068@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:13828 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750836Ab2ATHu0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2012 02:50:26 -0500
-Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LY300DXC73EW250@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 20 Jan 2012 16:50:25 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LY300IIZ740EK00@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 20 Jan 2012 16:50:24 +0900 (KST)
-In-reply-to: <4F19183D.6080105@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Content-Disposition: inline
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, STEricsson <STEricsson_nomadik_linux-nkJGhpqTU55BDgjK7y7TUQ@public.gmane.org>
+Cc: Viresh Kumar <viresh.kumar-qxv4g6HH51o@public.gmane.org>, Kukjin Kim <kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Linus Walleij <linus.walleij-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Srinidhi Kasagar <srinidhi.kasagar-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>, Ryan Mallon <rmallon-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, Rajeev Kumar <rajeev-dlh.kumar-qxv4g6HH51o@public.gmane.org>, Jiandong Zheng <jdzheng-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "S, Venkatraman" <svenkatr@ti.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-On 01/20/2012 04:31 PM, Adrian Hunter wrote:
+This patch set cleans up the AMBA/Primecell bus support.  Contained
+within this set are:
 
-> On 19/01/12 17:32, S, Venkatraman wrote:
->> On Thu, Jan 19, 2012 at 5:14 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> On 19/01/12 13:33, Jaehoon Chung wrote:
->>>> Hi Adrian.
->>>>
->>>> On 01/19/2012 07:21 PM, Adrian Hunter wrote:
->>>>
->>>>> On 19/01/12 07:29, Jaehoon Chung wrote:
->>>>>> Enable eMMC background operations (BKOPS) feature.
->>>>>>
->>>>>> If URGENT_BKOPS is set after a response, note that BKOPS
->>>>>> are required. After all I/O requests are finished, run
->>>>>> BKOPS if required. Should read/write operations be requested
->>>>>> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
->>>>>> and then service the request.
->>>>>
->>>>> This still does not seem to address my earlier comment which was:
->>>>>
->>>>> The main problem with bkops is:
->>>>>
->>>>>      If the status is at level 3 ("critical"), some operations
->>>>>      may extend beyond their original timeouts due to maintenance
->>>>>      operations which cannot be delayed anymore.
->>>>>
->>>>> This means:
->>>>>
->>>>>      1. at level 3 either bkops are run or the timeout of the next
->>>>>      (data?) operation is extended
->>>>>
->>>>>      2. at level 3 either the bkops must not be interrupted or the
->>>>>      level must be rechecked after interruption and bkops run again
->>>>>      if the level is still 3, or the timeout of the next (data?)
->>>>>      operation is extended
->>>>>
->>>>
->>>> This patch didn't issue the HPI when bkops-status is level2-3
->>>> (URGENT_BKOPS case).
->>>> I didn't understand that must be recheck?? it's case of using HPI..?
->>>> If HPI didn't issue,though must be recheck bkops status?
->>>> And level-1 control should be considered for future-work.
->>>> I will also modify the patch comment..it's confused something.
->>>
->>> 1. Say there are 2 write requests queued and after the first write request
->>> the bkops level is 3.  That means the 2nd write request may timeout because
->>> the normal timeout rules do not apply.
->>>
->>> Thus:
->>>        1. at level 3 either bkops are run or the timeout of the next
->>>        (data?) operation is extended
->>>
->>> 2. Say you are running bkops because the level was 3 and a write request
->>> arrives.  You use HPI to interrupt the bkops, but the bkops level may still
->>> be 3, so the write request may timeout.  Hence:
->>>
->>>        2. at level 3 either the bkops must not be interrupted or the
->>>        level must be rechecked after interruption and bkops run again
->>>        if the level is still 3, or the timeout of the next (data?)
->>>        operation is extended
->>>
->>
->> A naive question perhaps, but don't the current timeout values include
->> sufficient
->> buffer to do implicit garbage collection anyways ?
-> 
-> Maybe, but the problem is the JEDEC specification says otherwise.  This bit
-> is a quote:
-> 
-> 	If the status is at level 3 ("critical"), some operations
-> 	may extend beyond their original timeouts due to maintenance
-> 	operations which cannot be delayed anymore.
-> 
-> I think level 3 is a very rare case so I would just run bkops and wait for
-> it to finish without interruption.
+1. Patches 1-5 - Allocation APIs
+   It seems several places in the kernel want to allocate and register
+   amba_device structures.  Let's make this official, and common code.
+   So we introduce amba_device_alloc(), amba_device_add(), and
+   amba_device_put() APIs, which provide the necessary support safely
+   for this.
 
-Yes..JEDEC spec say those..but I think not bad that wait for bkops-done..
-actually i didn't know how long time run the bkops...
-so i think the use the hpi command..then re-check the bkops-status until clear status.
-(i think the request's priority is higher than any bkops status)
+   Convert the DT, ux500, Integrator/AP and mxs code to use these APIs
+   rather than their private version.
 
-it would be open to interpretation that sentence.
+2. Patches 6-17 - NO_IRQ cleanup
+   Making IRQ number 0 mean 'no irq' for the AMBA drivers and bus layer.
+   We get rid of NO_IRQ initializers in this across various platforms,
+   and make the bus layer warn if '-1' is passed in a device as an IRQ.
+   This prevents new occurances of NO_IRQ initializers for this bus type
+   going by unspotted.
 
-Best Regards,
-Jaehoon Chung
+3. Patches 18-31 - static initializers
+   Provide a standardized set of initializers for statically declared
+   AMBA devices.  We provide two - one for the simpler APB devices,
+   and one for AHB devices.  The major difference between these two is
+   the setting of the DMA mask - APB peripherals do not have DMA
+   capability themselves.
 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+While updating (3), I came across new additions in Spear3xx and the
+Samsung directories which added AMBA devices, which are declared
+globally.  The Spear3xx devices are used in other files, so that's
+fine.
 
+Samsung devices don't seem to be - and that needs fixing (did someone
+not run checkpatch or sparse on these changes?)  Please send fixes.
 
+Acks for these patches are welcome.
+
+ arch/arm/mach-bcmring/core.c                   |   23 +-----
+ arch/arm/mach-ep93xx/core.c                    |   46 ++---------
+ arch/arm/mach-exynos/dma.c                     |   38 ++-------
+ arch/arm/mach-integrator/core.c                |   70 +++-------------
+ arch/arm/mach-integrator/impd1.c               |    9 +--
+ arch/arm/mach-integrator/integrator_cp.c       |   49 ++---------
+ arch/arm/mach-lpc32xx/phy3250.c                |   32 +------
+ arch/arm/mach-mxs/devices.c                    |    8 +-
+ arch/arm/mach-mxs/devices/amba-duart.c         |    2 +-
+ arch/arm/mach-netx/fb.c                        |   13 +---
+ arch/arm/mach-nomadik/board-nhk8815.c          |   17 +---
+ arch/arm/mach-nomadik/cpu-8815.c               |    9 +--
+ arch/arm/mach-omap2/emu.c                      |   26 +------
+ arch/arm/mach-realview/core.h                  |   20 +----
+ arch/arm/mach-realview/realview_eb.c           |   78 +++++++++---------
+ arch/arm/mach-realview/realview_pb1176.c       |   78 +++++++++---------
+ arch/arm/mach-realview/realview_pb11mp.c       |   78 +++++++++---------
+ arch/arm/mach-realview/realview_pba8.c         |   78 +++++++++---------
+ arch/arm/mach-realview/realview_pbx.c          |   78 +++++++++---------
+ arch/arm/mach-s5p64x0/dma.c                    |   22 +----
+ arch/arm/mach-s5pc100/dma.c                    |   38 ++-------
+ arch/arm/mach-s5pv210/dma.c                    |   38 ++-------
+ arch/arm/mach-spear3xx/spear300.c              |   14 +---
+ arch/arm/mach-spear3xx/spear3xx.c              |   27 +-----
+ arch/arm/mach-spear6xx/spear6xx.c              |   10 +-
+ arch/arm/mach-u300/core.c                      |   85 ++++----------------
+ arch/arm/mach-ux500/devices-common.c           |   13 +--
+ arch/arm/mach-versatile/core.c                 |   70 ++++++++--------
+ arch/arm/mach-versatile/core.h                 |   20 +----
+ arch/arm/mach-versatile/versatile_pb.c         |   18 ++--
+ arch/arm/mach-vexpress/core.h                  |   17 ----
+ arch/arm/mach-vexpress/ct-ca9x4.c              |    8 +-
+ arch/arm/mach-vexpress/include/mach/ct-ca9x4.h |    2 +-
+ arch/arm/mach-vexpress/v2m.c                   |   20 ++--
+ drivers/amba/bus.c                             |  105 ++++++++++++++++++------
+ drivers/mmc/host/mmci.c                        |    2 +-
+ drivers/of/platform.c                          |    6 +-
+ include/linux/amba/bus.h                       |   36 ++++++++
+ 38 files changed, 488 insertions(+), 815 deletions(-)
