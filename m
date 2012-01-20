@@ -1,42 +1,31 @@
-From: "Nori, Sekhar" <nsekhar@ti.com>
-Subject: RE: [PATCH v3] ARM: davinci: map default_queue to edma channels
-Date: Fri, 20 Jan 2012 16:46:48 +0000
-Message-ID: <DF0F476B391FA8409C78302C7BA518B6317970CE@DBDE01.ent.ti.com>
-References: <1326956721-25158-1-git-send-email-hs@denx.de>
+From: H Hartley Sweeten <hartleys@visionengravers.com>
+Subject: RE: [PATCH 24/31] ARM: amba: ep93xx: use common amba device
+ initializers
+Date: Fri, 20 Jan 2012 10:56:59 -0600
+Message-ID: <ADE657CA350FB648AAC2C43247A983F001F3F9D0681B@AUSP01VMBX24.collaborationhost.net>
+References: <20120120092207.GD1068@n2100.arm.linux.org.uk>
+ <E1RoAnm-0005Fu-Pc@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:45113 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753940Ab2ATQrF convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2012 11:47:05 -0500
-In-Reply-To: <1326956721-25158-1-git-send-email-hs@denx.de>
+Received: from mail131.messagelabs.com ([216.82.242.99]:18654 "EHLO
+	mail131.messagelabs.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753515Ab2ATQ5h convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2012 11:57:37 -0500
+In-Reply-To: <E1RoAnm-0005Fu-Pc@rmk-PC.arm.linux.org.uk>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiko Schocher <hs@denx.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
-Cc: "juha.kuikka@gmail.com" <juha.kuikka@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>, Ido Yariv <ido@wizery.com>, Wolfgang Denk <wd@denx.de>, Sergei Shtylyov <sshtylyov@mvista.com>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, STEricsson <STEricsson_nomadik_linux@list.st.com>
+Cc: Ryan Mallon <rmallon@gmail.com>
 
-Hi Heiko,
+On Friday, January 20, 2012 2:31 AM, Russell King wrote:
+>
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> ---
+>  arch/arm/mach-ep93xx/core.c |   46 +++++-------------------------------------
+>  1 files changed, 6 insertions(+), 40 deletions(-)
 
-On Thu, Jan 19, 2012 at 12:35:21, Heiko Schocher wrote:
-> Default queue is expected to be a low-priority queue.
-> This way, long transfers on the default queue started
-> by the codec engine will not cause audio defects.
-> 
-> Signed-off-by: Heiko Schocher <hs@denx.de>
+Acked-by: H Hartley Sweeten <hsweeten@visionengravers.com>
 
-> Signed-off-by: juha.kuikka@gmail.com
-> Reported-by: juha.kuikka@gmail.com
-
-Sign-off should include real name, so I changed these
-two lines to:
-
-    Signed-off-by: Juha Kuikka <juha.kuikka@gmail.com>
-    Reported-by: Juha Kuikka <juha.kuikka@gmail.com>
-
-before applying. Let me know if anyone has objections.
-
-Thanks,
-Sekhar
