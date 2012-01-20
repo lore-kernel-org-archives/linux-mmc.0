@@ -1,36 +1,44 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V2 08/12] dmaengine/dw_dmac: Unmap all memory buffers
- after completion of slave transfers
-Date: Thu, 19 Jan 2012 18:36:24 +0100
-Message-ID: <CACRpkdZrPKunfKOF0mqR-9DOZhCFAzwZHJ2gCZRjbC3TuqecvQ@mail.gmail.com>
-References: <cover.1326876464.git.viresh.kumar@st.com>
- <ba53f229f3f594bfe0459b01a9ebb4d9b2c15882.1326876464.git.viresh.kumar@st.com>
- <20120118093620.GC1068@n2100.arm.linux.org.uk>
- <4F1696E4.9070806@st.com>
+From: Huang Shijie <b32955@freescale.com>
+Subject: Re: [PATCH 00/10] patch set about the MXS-DMA
+Date: Fri, 20 Jan 2012 11:29:25 +0800
+Message-ID: <4F18DF95.80700@freescale.com>
+References: <1326953767-24155-1-git-send-email-b32955@freescale.com> <20120119091034.GH2247@S2101-09.ap.freescale.net> <20120119094513.GB2630@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="GB2312"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <4F1696E4.9070806@st.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Viresh Kumar <viresh.kumar@st.com>
-Cc: Mirko GARDI <mirko.gardi@st.com>, Bhupesh SHARMA <bhupesh.sharma@st.com>, "perex@perex.cz" <perex@perex.cz>, Vipin KUMAR <vipin.kumar@st.com>, Rajeev KUMAR <rajeev-dlh.kumar@st.com>, Vincenzo FRASCINO <Vincenzo.FRASCINO@st.com>, Pratyush ANAND <pratyush.anand@st.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "vinod.koul@intel.com" <vinod.koul@intel.com>, Deepak SIKRI <deepak.sikri@st.com>, "cjb@laptop.org" <cjb@laptop.org>, "hskinnemoen@gmail.com" <hskinnemoen@gmail.com>, Bhavna YADAV <bhavna.yadav@st.com>, Armando VISCONTI <armando.visconti@st.com>, "egtvedt@samfundet.no" <egtvedt@samfundet.no>, Shiraz HASHIM <shiraz.hashim@st.com>, Amit VIRDI <Amit.VIRDI@st.com>, Vipul Kumar SAMAR <vipulkumar.samar@st.com>, "dan.j.williams@intel.com" <dan.j.williams@intel.com>, Ulf HANSSON <ulf.hansson@stericsson.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kerne>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:30213
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751111Ab2ATD14 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2012 22:27:56 -0500
+In-Reply-To: <20120119094513.GB2630@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: Shawn Guo <shawn.guo@linaro.org>, vinod.koul@intel.com, artem.bityutskiy@intel.com, shijie8@gmail.com, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, LW@KARO-electronics.de, alsa-devel@alsa-project.org, b29396@freescale.com
 
-On Wed, Jan 18, 2012 at 10:54 AM, Viresh Kumar <viresh.kumar@st.com> wrote:
 
-> Actually, dw_dmac is also doing the same, i.e. unmapping only for
-> non-slave transfers.
+>>> [2] patch 6 ~ patch 10: rewrite the last parameter of mxs_dma_prep_slave_sg().
+>> For the sake of bitsec, at least patches #7 and #8 need to be one patch.
+>> That said, if I apply the series and then check out the commit at patch
+>> #7, you need to all mxs-dma client drivers, mxs-mmc, gpmi do not break.
+> I'd say patch 6-10 should be squashed, simply. My personal preference is
+> to change #9 to simply read the register when needed and do not expand
+It's better to add a new field. i also want to add a new field
+`bch_version`, because different
+BCH version may support different ECC strength. For example, some
+version BCH can support to 24 bit,
+while the latest BCH may support to 40 bit. So the BCH version may
+limits the computing of ECC strength.
 
-Problem solved :-)
+Best Regards
+Huang Shijie
 
-Yours,
-Linus Walleij
+> the struct, but this is a minor thing.
+>
+> Regards,
+>
+>    Wolfram
+>
+
+
