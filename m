@@ -1,34 +1,42 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH][upstream] eSDHC: fix errors when booting kernel on Freescale eSDHC version 2.3
-Date: Fri, 20 Jan 2012 10:33:23 -0500
-Message-ID: <m2aa5iwfr0.fsf@bob.laptop.org>
-References: <1326438121-26732-1-git-send-email-tie-fei.zang@freescale.com>
-	<20120113114741.GA8837@oksana.dev.rtsoft.ru>
-	<3E027F8168735B46AC006B1D0C7BB002033D00@039-SN2MPN1-013.039d.mgd.msft.net>
+From: "Nori, Sekhar" <nsekhar@ti.com>
+Subject: RE: [PATCH v3] ARM: davinci: map default_queue to edma channels
+Date: Fri, 20 Jan 2012 16:46:48 +0000
+Message-ID: <DF0F476B391FA8409C78302C7BA518B6317970CE@DBDE01.ent.ti.com>
+References: <1326956721-25158-1-git-send-email-hs@denx.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:49031 "EHLO void.printf.net"
+Received: from arroyo.ext.ti.com ([192.94.94.40]:45113 "EHLO arroyo.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753193Ab2ATPde (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 20 Jan 2012 10:33:34 -0500
-In-Reply-To: <3E027F8168735B46AC006B1D0C7BB002033D00@039-SN2MPN1-013.039d.mgd.msft.net>
-	(Zang Roy-R's message of "Sat, 14 Jan 2012 13:09:05 +0000")
+	id S1753940Ab2ATQrF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2012 11:47:05 -0500
+In-Reply-To: <1326956721-25158-1-git-send-email-hs@denx.de>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zang Roy-R61911 <r61911@freescale.com>
-Cc: Anton Vorontsov <cbouatmailru@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xu Lei-B33228 <B33228@freescale.com>, Huang Changming-R66093 <r66093@freescale.com>, Jain Priyanka-B32167 <B32167@freescale.com>
+To: Heiko Schocher <hs@denx.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: "juha.kuikka@gmail.com" <juha.kuikka@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>, Ido Yariv <ido@wizery.com>, Wolfgang Denk <wd@denx.de>, Sergei Shtylyov <sshtylyov@mvista.com>
 
-Hi Roy,
+Hi Heiko,
 
-On Sat, Jan 14 2012, Zang Roy-R61911 wrote:
-> Then could you help to update Anton's style comment and help to pick
-> up this patch?
-> If a new update patch is needed, let me know :-)
+On Thu, Jan 19, 2012 at 12:35:21, Heiko Schocher wrote:
+> Default queue is expected to be a low-priority queue.
+> This way, long transfers on the default queue started
+> by the codec engine will not cause audio defects.
+> 
+> Signed-off-by: Heiko Schocher <hs@denx.de>
 
-Thanks, pushed to mmc-next for 3.3 with Anton's style change and ACK.
+> Signed-off-by: juha.kuikka@gmail.com
+> Reported-by: juha.kuikka@gmail.com
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Sign-off should include real name, so I changed these
+two lines to:
+
+    Signed-off-by: Juha Kuikka <juha.kuikka@gmail.com>
+    Reported-by: Juha Kuikka <juha.kuikka@gmail.com>
+
+before applying. Let me know if anyone has objections.
+
+Thanks,
+Sekhar
