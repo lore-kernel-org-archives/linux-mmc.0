@@ -1,115 +1,377 @@
-From: Kukjin Kim <kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: RE: [PATCH 00/31] Clean up amba/primecell bus support
-Date: Sat, 21 Jan 2012 09:59:57 +0900
-Message-ID: <010301ccd7d7$fec781d0$fc568570$%kim@samsung.com>
-References: <20120120092207.GD1068@n2100.arm.linux.org.uk>
+From: =?UTF-8?B?TsOpbWV0aCBNw6FydG9u?= <nm127@freemail.hu>
+Subject: [PATCH] Add Winbond WB528SD Secure Digital (SD) card reader driver
+Date: Sat, 21 Jan 2012 11:52:37 +0100
+Message-ID: <4F1A98F5.3080402@freemail.hu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-reply-to: <20120120092207.GD1068-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
-Content-language: ko
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: 'Russell King - ARM Linux' <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, 'STEricsson' <STEricsson_nomadik_linux-nkJGhpqTU55BDgjK7y7TUQ@public.gmane.org>
-Cc: 'Viresh Kumar' <viresh.kumar-qxv4g6HH51o@public.gmane.org>, 'Rajeev Kumar' <rajeev-dlh.kumar-qxv4g6HH51o@public.gmane.org>, 'Linus Walleij' <linus.walleij-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>, 'Scott Branden' <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, 'Srinidhi Kasagar' <srinidhi.kasagar-0IS4wlFg1OjSUeElwK9/Pw@public.gmane.org>, 'Ryan Mallon' <rmallon-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, 'Rob Herring' <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, 'Hartley Sweeten' <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, 'Jiandong Zheng' <jdzheng-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, 'Chris Ball' <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, 'Sascha Hauer' <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, 'Alessandro Rubini' <rubini-9wsNiZum9E8@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@suse.de>, devel@driverdev.osuosl.org
+Cc: techeng <dzshen@gmail.com>, clyu@citiz.net, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Russell King - ARM Linux wrote:
-> 
-> This patch set cleans up the AMBA/Primecell bus support.  Contained
-> within this set are:
-> 
-> 1. Patches 1-5 - Allocation APIs
->    It seems several places in the kernel want to allocate and register
->    amba_device structures.  Let's make this official, and common code.
->    So we introduce amba_device_alloc(), amba_device_add(), and
->    amba_device_put() APIs, which provide the necessary support safely
->    for this.
-> 
->    Convert the DT, ux500, Integrator/AP and mxs code to use these APIs
->    rather than their private version.
-> 
-> 2. Patches 6-17 - NO_IRQ cleanup
->    Making IRQ number 0 mean 'no irq' for the AMBA drivers and bus layer.
->    We get rid of NO_IRQ initializers in this across various platforms,
->    and make the bus layer warn if '-1' is passed in a device as an IRQ.
->    This prevents new occurances of NO_IRQ initializers for this bus type
->    going by unspotted.
-> 
-> 3. Patches 18-31 - static initializers
->    Provide a standardized set of initializers for statically declared
->    AMBA devices.  We provide two - one for the simpler APB devices,
->    and one for AHB devices.  The major difference between these two is
->    the setting of the DMA mask - APB peripherals do not have DMA
->    capability themselves.
-> 
-> While updating (3), I came across new additions in Spear3xx and the
-> Samsung directories which added AMBA devices, which are declared
-> globally.  The Spear3xx devices are used in other files, so that's
-> fine.
-> 
-> Samsung devices don't seem to be - and that needs fixing (did someone
-> not run checkpatch or sparse on these changes?)  Please send fixes.
-> 
-Yeah, you're right. They in Samsung directories are not used anywhere else. So statically declaration can be used.
-As a note, I always run checkpatch but sparse before applying but unfortunately, checkpatch didn't complain about that.
+=46rom: M=C3=A1rton N=C3=A9meth <nm127@freemail.hu>
 
-Let me check where fixes are needed in Samsung directories then send it.
+This driver version of Winbond WB528SD can detect mechanical card
+presence only. The information is provided through sysfs.
 
-Thanks.
+Signed-off-by: M=C3=A1rton N=C3=A9meth <nm127@freemail.hu>
+Cc: techeng <dzshen@gmail.com>
+---
+ drivers/staging/Kconfig           |    2 +
+ drivers/staging/Makefile          |    1 +
+ drivers/staging/wb528sd/Kconfig   |   16 ++
+ drivers/staging/wb528sd/Makefile  |    1 +
+ drivers/staging/wb528sd/wb528sd.c |  274 +++++++++++++++++++++++++++++=
+++++++++
+ 5 files changed, 294 insertions(+), 0 deletions(-)
+ create mode 100644 drivers/staging/wb528sd/Kconfig
+ create mode 100644 drivers/staging/wb528sd/Makefile
+ create mode 100644 drivers/staging/wb528sd/wb528sd.c
 
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
+diff --git a/drivers/staging/Kconfig b/drivers/staging/Kconfig
+index 21e2f4b..c1ce429 100644
+--- a/drivers/staging/Kconfig
++++ b/drivers/staging/Kconfig
+@@ -132,4 +132,6 @@ source "drivers/staging/omapdrm/Kconfig"
 
-> Acks for these patches are welcome.
-> 
->  arch/arm/mach-bcmring/core.c                   |   23 +-----
->  arch/arm/mach-ep93xx/core.c                    |   46 ++---------
->  arch/arm/mach-exynos/dma.c                     |   38 ++-------
->  arch/arm/mach-integrator/core.c                |   70 +++-------------
->  arch/arm/mach-integrator/impd1.c               |    9 +--
->  arch/arm/mach-integrator/integrator_cp.c       |   49 ++---------
->  arch/arm/mach-lpc32xx/phy3250.c                |   32 +------
->  arch/arm/mach-mxs/devices.c                    |    8 +-
->  arch/arm/mach-mxs/devices/amba-duart.c         |    2 +-
->  arch/arm/mach-netx/fb.c                        |   13 +---
->  arch/arm/mach-nomadik/board-nhk8815.c          |   17 +---
->  arch/arm/mach-nomadik/cpu-8815.c               |    9 +--
->  arch/arm/mach-omap2/emu.c                      |   26 +------
->  arch/arm/mach-realview/core.h                  |   20 +----
->  arch/arm/mach-realview/realview_eb.c           |   78 +++++++++---------
->  arch/arm/mach-realview/realview_pb1176.c       |   78 +++++++++---------
->  arch/arm/mach-realview/realview_pb11mp.c       |   78 +++++++++---------
->  arch/arm/mach-realview/realview_pba8.c         |   78 +++++++++---------
->  arch/arm/mach-realview/realview_pbx.c          |   78 +++++++++---------
->  arch/arm/mach-s5p64x0/dma.c                    |   22 +----
->  arch/arm/mach-s5pc100/dma.c                    |   38 ++-------
->  arch/arm/mach-s5pv210/dma.c                    |   38 ++-------
->  arch/arm/mach-spear3xx/spear300.c              |   14 +---
->  arch/arm/mach-spear3xx/spear3xx.c              |   27 +-----
->  arch/arm/mach-spear6xx/spear6xx.c              |   10 +-
->  arch/arm/mach-u300/core.c                      |   85 ++++----------------
->  arch/arm/mach-ux500/devices-common.c           |   13 +--
->  arch/arm/mach-versatile/core.c                 |   70 ++++++++--------
->  arch/arm/mach-versatile/core.h                 |   20 +----
->  arch/arm/mach-versatile/versatile_pb.c         |   18 ++--
->  arch/arm/mach-vexpress/core.h                  |   17 ----
->  arch/arm/mach-vexpress/ct-ca9x4.c              |    8 +-
->  arch/arm/mach-vexpress/include/mach/ct-ca9x4.h |    2 +-
->  arch/arm/mach-vexpress/v2m.c                   |   20 ++--
->  drivers/amba/bus.c                             |  105 ++++++++++++++++++------
->  drivers/mmc/host/mmci.c                        |    2 +-
->  drivers/of/platform.c                          |    6 +-
->  include/linux/amba/bus.h                       |   36 ++++++++
->  38 files changed, 488 insertions(+), 815 deletions(-)
+ source "drivers/staging/android/Kconfig"
+
++source "drivers/staging/wb528sd/Kconfig"
++
+ endif # STAGING
+diff --git a/drivers/staging/Makefile b/drivers/staging/Makefile
+index 7c5808d..7da8c3b 100644
+--- a/drivers/staging/Makefile
++++ b/drivers/staging/Makefile
+@@ -57,3 +57,4 @@ obj-$(CONFIG_INTEL_MEI)		+=3D mei/
+ obj-$(CONFIG_MFD_NVEC)		+=3D nvec/
+ obj-$(CONFIG_DRM_OMAP)		+=3D omapdrm/
+ obj-$(CONFIG_ANDROID)		+=3D android/
++obj-$(CONFIG_WB528SD)		+=3D wb528sd/
+diff --git a/drivers/staging/wb528sd/Kconfig b/drivers/staging/wb528sd/=
+Kconfig
+new file mode 100644
+index 0000000..b7af426
+--- /dev/null
++++ b/drivers/staging/wb528sd/Kconfig
+@@ -0,0 +1,16 @@
++config WB528SD
++	tristate "Winbond 528SD Secure Digital (SD) card reader"
++	depends on PCI
++	help
++	  The Winbond 528SD Secure Digital (SD) card reader connects to
++	  the PCI bus and can be found in laptop Clevo model D4J, product
++	  code D410J. It can be identified by its PCI ID 1050:8481
++	  (for example by using "lspci" and "lspci -n" commands).
++	  The driver currently only detects whether an SD card is
++	  mechanically inserted in the reader (dummy SD card is also
++	  detected). The information can be fetched in Clevo D410J
++	  with the command
++	  "cat /sys/devices/pci0000:00/0000:00:0e.0/card_present".
++
++	  Currently (Jan 2012) there is a lack of register description
++	  of this device.
+diff --git a/drivers/staging/wb528sd/Makefile b/drivers/staging/wb528sd=
+/Makefile
+new file mode 100644
+index 0000000..758026d
+--- /dev/null
++++ b/drivers/staging/wb528sd/Makefile
+@@ -0,0 +1 @@
++obj-$(CONFIG_WB528SD) +=3D wb528sd.o
+diff --git a/drivers/staging/wb528sd/wb528sd.c b/drivers/staging/wb528s=
+d/wb528sd.c
+new file mode 100644
+index 0000000..7f6380a
+--- /dev/null
++++ b/drivers/staging/wb528sd/wb528sd.c
+@@ -0,0 +1,274 @@
++/*
++ * Winbond 528SD Secure Digital (SD) card reader
++ *
++ * # lspci -d 1050:8481 -vv -xx
++ * 00:0e.0 Mass storage controller: Winbond Electronics Corp Device 84=
+81 (rev 01)
++ *         Subsystem: Winbond Electronics Corp Device 1050
++ *         Control: I/O+ Mem+ BusMaster- SpecCycle- MemWINV+ VGASnoop-=
+ ParErr- Stepping- SERR- FastB2B- DisINTx-
++ *         Status: Cap+ 66MHz- UDF- FastB2B+ ParErr- DEVSEL=3Dmedium >=
+TAbort+ <TAbort- <MAbort- >SERR- <PERR- INTx-
++ *         Interrupt: pin A routed to IRQ 19
++ *         Region 0: Memory at d0001000 (32-bit, non-prefetchable) [si=
+ze=3D4K]
++ *         Region 1: Memory at d0000000 (32-bit, non-prefetchable) [si=
+ze=3D4K]
++ *         Capabilities: [c0] Power Management version 2
++ *                 Flags: PMEClk- DSI- D1+ D2+ AuxCurrent=3D100mA PME(=
+D0-,D1+,D2+,D3hot+,D3cold+)
++ *                 Status: D0 NoSoftRst- PME-Enable- DSel=3D0 DScale=3D=
+0 PME+
++ * 00: 50 10 81 84 13 00 90 0a 01 00 80 01 10 42 80 00
++ * 10: 00 10 00 d0 00 00 00 d0 00 00 00 00 00 00 00 00
++ * 20: 00 00 00 00 00 00 00 00 00 00 00 00 50 10 50 10
++ * 30: 00 00 00 00 c0 00 00 00 00 00 00 00 05 01 08 1a
++ *
++ * There are two memory mapped regions: region 0 and region 1.
++ * Region 0 has a 4KiB address window but it contains only 256 bytes
++ * of registers, the same registers repeats every 256 bytes.
++ * Region 1 truly has a 4KiB address window.
++ *
++ * There is one interrupt associated to this device.
++ *
++ * Region 0 registers:
++ * BASE0+0x00: ?
++ * ...
++ * BASE0+0xFF: ?
++ *
++ * Region 1 registers:
++ * BASE1+0x000: ?
++ * ...
++ * BASE1+0x51C: bit7: ?
++ *              bit6: ?
++ *              bit5: ?
++ *              bit4: ?
++ *              bit3: ?
++ *              bit2: ?
++ *              bit1: ?
++ *              bit0: mechanical card persence (dummy card is also det=
+ected)
++ *                    0: card not present
++ *                    1: card present
++ * ...
++ * BASE1+0xFFF: ?
++ *
++ */
++
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/pci.h>
++#include <linux/interrupt.h>
++#include <linux/device.h>
++
++MODULE_AUTHOR("M=C3=A1rton N=C3=A9meth <nm127@freemail.hu>");
++MODULE_DESCRIPTION("Winbond 528SD Secure Digital (SD) card reader");
++MODULE_LICENSE("GPL");
++
++#define PCI_DEVICE_ID_WINBOND_528SD	0x8481
++
++#define WB528SD_REG_STATUS_51C		0x51C
++#define WB528SD_CARD_PRESENCE_MASK	0x01
++
++#define WB528SD_SIZE_4K		0x1000
++
++struct wb528sd_data {
++	void __iomem *ioaddr0;
++	void __iomem *ioaddr1;
++};
++
++static ssize_t card_present_show(struct device *dev,
++		struct device_attribute *attr, char *buf)
++{
++	struct wb528sd_data *data =3D dev_get_drvdata(dev);
++	unsigned int data51c;
++
++	data51c =3D ioread8(data->ioaddr1 + WB528SD_REG_STATUS_51C);
++
++	return snprintf(buf, PAGE_SIZE, "%u\n",
++		data51c & WB528SD_CARD_PRESENCE_MASK ? 1 : 0);
++}
++static DEVICE_ATTR(card_present, S_IRUGO, card_present_show, NULL);
++
++static irqreturn_t wb528sd_handler(int irq, void *dev_id)
++{
++#if 0
++	struct pci_dev *dev =3D dev_id;
++	struct wb528sd_data *data =3D pci_get_drvdata(dev);
++#endif
++	int ret =3D IRQ_NONE;
++
++	if (0) {
++		/* TODO: find out how to detect if wb528sd is the source
++		 * of the interrupt. Note that the interrupt might be
++		 * shared with other hardware devices.
++		 */
++		ret =3D IRQ_HANDLED;
++	}
++
++	return ret;
++}
++
++#if 0
++static void dump_content(char *name, void __iomem *base, unsigned long=
+ length)
++{
++	unsigned int i;
++	unsigned int data;
++
++	for (i =3D 0; i < length; i +=3D 4) {
++		data =3D ioread32(base + i);
++		printk(KERN_DEBUG "%s+0x%X: 0x%X\n", name, i, data);
++	}
++}
++#endif
++
++static int probe(struct pci_dev *dev, const struct pci_device_id *id)
++{
++	unsigned long addr0_start, addr0_end, addr0_len, addr0_flags;
++	unsigned long addr1_start, addr1_end, addr1_len, addr1_flags;
++	void __iomem *ioaddr0;
++	void __iomem *ioaddr1;
++	int result;
++	u8 irq;
++	struct wb528sd_data *data =3D NULL;
++	int ret;
++
++	addr0_start =3D pci_resource_start(dev, 0);
++	addr0_end =3D pci_resource_end(dev, 0);
++	addr0_len =3D pci_resource_len(dev, 0);
++	addr0_flags =3D pci_resource_flags(dev, 0);
++	printk(KERN_DEBUG "Resource 0: 0x%lX..0x%lX, length=3D0x%lX, flags=3D=
+0x%lX\n",
++		addr0_start, addr0_end, addr0_len, addr0_flags);
++
++	addr1_start =3D pci_resource_start(dev, 1);
++	addr1_end =3D pci_resource_end(dev, 1);
++	addr1_len =3D pci_resource_len(dev, 1);
++	addr1_flags =3D pci_resource_flags(dev, 1);
++	printk(KERN_DEBUG "Resource 1: 0x%lX..0x%lX, length=3D0x%lX, flags=3D=
+0x%lX\n",
++		addr1_start, addr1_end, addr1_len, addr1_flags);
++
++	printk(KERN_DEBUG "dev->irq: IRQ #%u\n", dev->irq);
++
++	result =3D pci_read_config_byte(dev, PCI_INTERRUPT_LINE, &irq);
++	if (!result)
++		printk(KERN_DEBUG "PCI_INTERRUPT_LINE: IRQ #%u\n", irq);
++	else
++		printk(KERN_DEBUG "Can't read PCI_INTERRUPT_LINE\n");
++
++	if (!(addr0_flags & IORESOURCE_MEM)) {
++		dev_err(&dev->dev, "region #0 not an MMIO resource, aborting\n");
++		return -ENODEV;
++	}
++	if (addr0_len !=3D WB528SD_SIZE_4K) {
++		dev_err(&dev->dev, "Invalid PCI mem region size, aborting\n");
++		return -ENODEV;
++	}
++
++	data =3D kzalloc(sizeof(*data), GFP_KERNEL);
++	if (!data) {
++		dev_err(&dev->dev, "%s : kzalloc failed", __func__);
++		return -ENOMEM;
++	}
++
++	printk(KERN_DEBUG "pci_enable_device()\n");
++	result =3D pci_enable_device(dev);
++	if (result) {
++		printk(KERN_DEBUG "Error enabling wb528sd PCI device: %u\n",
++			result);
++		kfree(data);
++		return result;
++	}
++
++	printk(KERN_DEBUG "pci_request_regions()\n");
++	result =3D pci_request_regions(dev, KBUILD_MODNAME);
++	if (result) {
++		printk(KERN_DEBUG "pci_request_regions failed, error %d\n",
++			result);
++		pci_disable_device(dev);
++		kfree(data);
++		return result;
++	}
++
++	ioaddr0 =3D pci_iomap(dev, 0, 0);
++	if (!ioaddr0) {
++		printk(KERN_DEBUG "cannot remap MMIO #0\n");
++		pci_release_regions(dev);
++		pci_disable_device(dev);
++		kfree(data);
++		return result;
++	} else {
++		data->ioaddr0 =3D ioaddr0;
++	}
++
++	ioaddr1 =3D pci_iomap(dev, 1, 0);
++	if (!ioaddr1) {
++		printk(KERN_DEBUG "cannot remap MMIO #1\n");
++		pci_release_regions(dev);
++		pci_disable_device(dev);
++		kfree(data);
++		return result;
++	} else {
++		data->ioaddr1 =3D ioaddr1;
++	}
++
++	printk(KERN_DEBUG "request_irq()\n");
++	result =3D request_irq(dev->irq, wb528sd_handler,
++			     IRQF_SHARED, KBUILD_MODNAME, dev);
++	if (result !=3D 0) {
++		printk(KERN_DEBUG "Error requesting IRQ #%u device: %d\n",
++			dev->irq, result);
++		pci_release_regions(dev);
++		pci_disable_device(dev);
++		kfree(data);
++		return result;
++	}
++
++	/* TODO: enable wb528sd interrupt generation */
++
++	pci_set_drvdata(dev, data);
++
++	ret =3D device_create_file(&dev->dev, &dev_attr_card_present);
++	if (!ret)
++		;
++
++	printk(KERN_DEBUG "done\n");
++
++	return 0;
++}
++
++static void remove(struct pci_dev *dev)
++{
++	struct wb528sd_data *data =3D pci_get_drvdata(dev);
++
++	printk(KERN_DEBUG "%s: remove\n", KBUILD_MODNAME);
++
++	device_remove_file(&dev->dev, &dev_attr_card_present);
++	pci_disable_device(dev);
++	pci_release_regions(dev);
++	if (data) {
++		pci_iounmap(dev, data->ioaddr0);
++		pci_iounmap(dev, data->ioaddr1);
++	}
++	free_irq(dev->irq, dev);
++
++}
++
++static DEFINE_PCI_DEVICE_TABLE(wb528sd_ids) =3D {
++	{ PCI_DEVICE(PCI_VENDOR_ID_WINBOND2, PCI_DEVICE_ID_WINBOND_528SD) },
++	{ 0, },
++};
++MODULE_DEVICE_TABLE(pci, wb528sd_ids);
++
++static struct pci_driver pci_driver =3D {
++	.name =3D "wb528sd",
++	.id_table =3D wb528sd_ids,
++	.probe =3D probe,
++	.remove =3D remove,
++};
++
++static int __init wb528sd_init(void)
++{
++	printk(KERN_DEBUG "%s: init\n", KBUILD_MODNAME);
++	return pci_register_driver(&pci_driver);
++}
++
++static void wb528sd_exit(void)
++{
++	printk(KERN_DEBUG "%s: exit\n", KBUILD_MODNAME);
++	pci_unregister_driver(&pci_driver);
++}
++
++module_init(wb528sd_init);
++module_exit(wb528sd_exit);
+--=20
+1.7.2.5
