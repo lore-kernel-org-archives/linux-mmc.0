@@ -1,57 +1,80 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: Re: [PATCH] mmc: core: Ensure clocks are always enabled before host
- interaction
-Date: Tue, 24 Jan 2012 09:14:51 +0530
-Message-ID: <4F1E2933.8030708@codeaurora.org>
-References: <1323678104-28854-1-git-send-email-sthumma@codeaurora.org> <CACRpkdbZS7TxKSpKR0DV4TC4dOzO_q83U1bd0HonKC2GBDBOgA@mail.gmail.com>
+From: Ido Yariv <ido@wizery.com>
+Subject: [RFC 1/2] mmc: davinci: Eliminate spurious interrupts
+Date: Tue, 24 Jan 2012 13:16:05 +0200
+Message-ID: <1327403766-962-1-git-send-email-ido@wizery.com>
+References: <4F1E9194.90608@mvista.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:11628 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751443Ab2AXDoz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2012 22:44:55 -0500
-In-Reply-To: <CACRpkdbZS7TxKSpKR0DV4TC4dOzO_q83U1bd0HonKC2GBDBOgA@mail.gmail.com>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:49336 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755692Ab2AXLQd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2012 06:16:33 -0500
+Received: by wics10 with SMTP id s10so2850293wic.19
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Jan 2012 03:16:32 -0800 (PST)
+In-Reply-To: <4F1E9194.90608@mvista.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Per Forlin <per.friden@stericsson.com>, linux-mmc@vger.kernel.org, cjb@laptop.org
+To: davinci-linux-open-source@linux.davincidsp.com, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Sekhar Nori <nsekhar@ti.com>
+Cc: Ido Yariv <ido@wizery.com>
 
-Hi Linus Walleij,
+The davinci mmc interrupt handler fills the fifo, as long as the DXRDY
+or DRRDY bits are set in the status register.
 
-On 12/30/2011 7:44 AM, Linus Walleij wrote:
-> On Mon, Dec 12, 2011 at 9:21 AM, Sujit Reddy Thumma
-> <sthumma@codeaurora.org>  wrote:
->
->> Ensure clocks are always enabled before any interaction with the
->> host controller driver. This makes sure that there is no race
->> between host execution and the core layer turning off clocks
->> in different context with clock gating framework.
->>
->> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
->
-> I guess Per F=F6rlin may not be available, but would have preferred t=
-o
-> have his view on this as well, since he knows the semantics of
-> pre/post-req.
+If interrupts fire during this loop, they will be handled by the
+handler, but the interrupt controller will still buffer these. As a
+result, the handler will be called again to serve these needlessly. In
+order to avoid these spurious interrupts, keep interrupts masked while
+filling the fifo.
 
-I have checked the implementation for pre-req and post-req in mmc host=20
-drivers. There is no interaction to the controller or card registers in=
-=20
-these functions, but in future if drivers appeal to configure their=20
-controller in these functions then we must have clocks enabled.
+Signed-off-by: Ido Yariv <ido@wizery.com>
+---
+ drivers/mmc/host/davinci_mmc.c |   33 +++++++++++++++++++++++++++------
+ 1 files changed, 27 insertions(+), 6 deletions(-)
 
-Per, if you are available can you comment on this?
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index 64a8325..9cea66f 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -1009,12 +1009,33 @@ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
+ 	 * by read. So, it is not unbouned loop even in the case of
+ 	 * non-dma.
+ 	 */
+-	while (host->bytes_left && (status & (MMCST0_DXRDY | MMCST0_DRRDY))) {
+-		davinci_fifo_data_trans(host, rw_threshold);
+-		status = readl(host->base + DAVINCI_MMCST0);
+-		if (!status)
+-			break;
+-		qstatus |= status;
++	if (host->bytes_left && (status & (MMCST0_DXRDY | MMCST0_DRRDY))) {
++		unsigned long im_val;
++
++		/*
++		 * If interrupts fire during the following loop, they will be
++		 * handled by the handler, but the PIC will still buffer these.
++		 * As a result, the handler will be called again to serve these
++		 * needlessly. In order to avoid these spurious interrupts,
++		 * keep interrupts masked during the loop.
++		 */
++		im_val = readl(host->base + DAVINCI_MMCIM);
++		writel(0, host->base + DAVINCI_MMCIM);
++
++		do {
++			davinci_fifo_data_trans(host, rw_threshold);
++			status = readl(host->base + DAVINCI_MMCST0);
++			qstatus |= status;
++		} while (host->bytes_left &&
++			 (status & (MMCST0_DXRDY | MMCST0_DRRDY)));
++
++		/*
++		 * If an interrupt is pending, it is assumed it will fire when
++		 * it is unmasked. This assumption is also taken when the MMCIM
++		 * is first set. Otherwise, writing to MMCIM after reading the
++		 * status is race-prone.
++		 */
++		writel(im_val, host->base + DAVINCI_MMCIM);
+ 	}
+ 
+ 	if (qstatus & MMCST0_DATDNE) {
+-- 
+1.7.7.5
 
->
-> However from my PoV it looks nice and clean, and you surely have
-> done some serious testing on things like SDIO so:
-> Acked-by: Linus Walleij<linus.walleij@linaro.org>
-
-Thanks. Tested with SD3.0, eMMC4.4 and SDIO2.0 cards.
-
-
-Thanks,
-Sujit
