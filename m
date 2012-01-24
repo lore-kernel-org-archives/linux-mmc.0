@@ -1,76 +1,103 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 06/11] ARM: mach-shmobile: convert ag5evm to use the generic MMC GPIO hotplug helper
-Date: Tue, 24 Jan 2012 13:01:35 +0100
-Message-ID: <1327406500-7233-7-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 07/11] mmc: tmio_mmc: power status flag doesn't have to be exposed in platform data
+Date: Tue, 24 Jan 2012 13:01:36 +0100
+Message-ID: <1327406500-7233-8-git-send-email-g.liakhovetski@gmx.de>
 References: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:54883 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751978Ab2AXMBr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2012 07:01:47 -0500
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
+
+The controller power status flag does not have to be accessed from the
+hot-plug detection code any more, it can now be removed from the platform
+data and put in the controller private struct.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- arch/arm/mach-shmobile/board-ag5evm.c |   22 ++--------------------
- 1 files changed, 2 insertions(+), 20 deletions(-)
+ drivers/mmc/host/tmio_mmc.h     |    3 +++
+ drivers/mmc/host/tmio_mmc_pio.c |   13 ++++++-------
+ include/linux/mfd/tmio.h        |    1 -
+ 3 files changed, 9 insertions(+), 8 deletions(-)
 
-diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
-index 729eaee..d16a1c4 100644
---- a/arch/arm/mach-shmobile/board-ag5evm.c
-+++ b/arch/arm/mach-shmobile/board-ag5evm.c
-@@ -367,23 +367,13 @@ static struct platform_device mipidsi0_device = {
- };
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index ede2f4e5..edfcfd7 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -49,6 +49,9 @@ struct tmio_mmc_host {
+ 	struct mmc_host         *mmc;
+ 	unsigned int		sdio_irq_enabled;
  
- /* SDHI0 */
--static irqreturn_t ag5evm_sdhi0_gpio_cd(int irq, void *arg)
--{
--	struct device *dev = arg;
--	struct sh_mobile_sdhi_info *info = dev->platform_data;
--	struct tmio_mmc_data *pdata = info->pdata;
--
--	tmio_mmc_cd_wakeup(pdata);
--
--	return IRQ_HANDLED;
--}
--
- static struct sh_mobile_sdhi_info sdhi0_info = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
--	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
-+	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_USE_GPIO_CD,
- 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED,
- 	.tmio_ocr_mask	= MMC_VDD_27_28 | MMC_VDD_28_29,
-+	.cd_gpio	= GPIO_PORT251,
- };
++	/* Controller power state */
++	bool			power;
++
+ 	/* Callbacks for clock / power control */
+ 	void (*set_pwr)(struct platform_device *host, int state);
+ 	void (*set_clk_div)(struct platform_device *host, int state);
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 4a1e89e..eee9f4f 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -758,7 +758,6 @@ fail:
+ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+-	struct tmio_mmc_data *pdata = host->pdata;
+ 	unsigned long flags;
  
- static struct resource sdhi0_resources[] = {
-@@ -580,7 +570,6 @@ static void __init ag5evm_init(void)
- 	lcd_backlight_reset();
+ 	mutex_lock(&host->ios_lock);
+@@ -788,15 +787,15 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	spin_unlock_irqrestore(&host->lock, flags);
  
- 	/* enable SDHI0 on CN15 [SD I/F] */
--	gpio_request(GPIO_FN_SDHICD0, NULL);
- 	gpio_request(GPIO_FN_SDHIWP0, NULL);
- 	gpio_request(GPIO_FN_SDHICMD0, NULL);
- 	gpio_request(GPIO_FN_SDHICLK0, NULL);
-@@ -589,13 +578,6 @@ static void __init ag5evm_init(void)
- 	gpio_request(GPIO_FN_SDHID0_1, NULL);
- 	gpio_request(GPIO_FN_SDHID0_0, NULL);
- 
--	if (!request_irq(intcs_evt2irq(0x3c0), ag5evm_sdhi0_gpio_cd,
--			 IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
--			 "sdhi0 cd", &sdhi0_device.dev))
--		sdhi0_info.tmio_flags |= TMIO_MMC_HAS_COLD_CD;
--	else
--		pr_warn("Unable to setup SDHI0 GPIO IRQ\n");
--
- 	/* enable SDHI1 on CN4 [WLAN I/F] */
- 	gpio_request(GPIO_FN_SDHICLK1, NULL);
- 	gpio_request(GPIO_FN_SDHICMD1_PU, NULL);
+ 	/*
+-	 * pdata->power toggles between false and true in both cases - either
++	 * host->power toggles between false and true in both cases - either
+ 	 * or not the controller can be runtime-suspended during inactivity. But
+ 	 * if the controller has to be kept on, the runtime-pm usage_count is
+ 	 * kept positive, so no suspending actually takes place.
+ 	 */
+ 	if (ios->power_mode == MMC_POWER_ON && ios->clock) {
+-		if (!pdata->power) {
++		if (!host->power) {
+ 			pm_runtime_get_sync(&host->pdev->dev);
+-			pdata->power = true;
++			host->power = true;
+ 		}
+ 		tmio_mmc_set_clock(host, ios->clock);
+ 		/* power up SD bus */
+@@ -807,8 +806,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	} else if (ios->power_mode != MMC_POWER_UP) {
+ 		if (host->set_pwr && ios->power_mode == MMC_POWER_OFF)
+ 			host->set_pwr(host->pdev, 0);
+-		if (pdata->power) {
+-			pdata->power = false;
++		if (host->power) {
++			host->power = false;
+ 			pm_runtime_put(&host->pdev->dev);
+ 		}
+ 		tmio_mmc_clk_stop(host);
+@@ -919,7 +918,7 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 				  pdata->flags & TMIO_MMC_USE_GPIO_CD ||
+ 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
+ 				  mmc->caps & MMC_CAP_NONREMOVABLE);
+-	pdata->power = false;
++	_host->power = false;
+ 	pm_runtime_enable(&pdev->dev);
+ 	ret = pm_runtime_resume(&pdev->dev);
+ 	if (ret < 0)
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 5a197de..f5171db 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -105,7 +105,6 @@ struct tmio_mmc_data {
+ 	u32				ocr_mask;	/* available voltages */
+ 	struct tmio_mmc_dma		*dma;
+ 	struct device			*dev;
+-	bool				power;
+ 	unsigned int			cd_gpio;
+ 	void (*set_pwr)(struct platform_device *host, int state);
+ 	void (*set_clk_div)(struct platform_device *host, int state);
 -- 
 1.7.2.5
 
