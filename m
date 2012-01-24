@@ -1,155 +1,94 @@
-From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+From: Will Deacon <will.deacon@arm.com>
 Subject: Re: [PATCH 21/31] ARM: amba: realview: get rid of private platform
  amba_device initializer
-Date: Tue, 24 Jan 2012 16:23:28 +0000
-Message-ID: <20120124162328.GA8517@n2100.arm.linux.org.uk>
+Date: Tue, 24 Jan 2012 17:26:00 +0000
+Message-ID: <20120124172600.GO19798@mudshark.cambridge.arm.com>
 References: <20120120092207.GD1068@n2100.arm.linux.org.uk>
  <E1RoAmo-0005Ff-DW@rmk-PC.arm.linux.org.uk>
  <20120124160044.GM19798@mudshark.cambridge.arm.com>
+ <20120124162328.GA8517@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20120124160044.GM19798-MRww78TxoiP5vMa5CHWGZ34zcgK1vI+I0E9HWUfgJXw@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, STEricsson <STEricsson_nomadik_linux-nkJGhpqTU55BDgjK7y7TUQ@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20120124162328.GA8517@n2100.arm.linux.org.uk>
+Sender: linux-omap-owner@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, STEricsson <STEricsson_nomadik_linux@list.st.com>
 List-Id: linux-mmc@vger.kernel.org
 
-T24gVHVlLCBKYW4gMjQsIDIwMTIgYXQgMDQ6MDA6NDRQTSArMDAwMCwgV2lsbCBEZWFjb24gd3Jv
-dGU6Cj4gSGkgUnVzc2VsbCwKPiAKPiBPbiBGcmksIEphbiAyMCwgMjAxMiBhdCAwOToyOTozMEFN
-ICswMDAwLCBSdXNzZWxsIEtpbmcgLSBBUk0gTGludXggd3JvdGU6Cj4gPiBTaWduZWQtb2ZmLWJ5
-OiBSdXNzZWxsIEtpbmcgPHJtaytrZXJuZWxAYXJtLmxpbnV4Lm9yZy51az4KPiA+IC0tLQo+ID4g
-IGFyY2gvYXJtL21hY2gtcmVhbHZpZXcvY29yZS5oICAgICAgICAgICAgfCAgIDIwICsrKystLS0t
-LS0tLS0tLQo+ID4gIGFyY2gvYXJtL21hY2gtcmVhbHZpZXcvcmVhbHZpZXdfZWIuYyAgICAgfCAg
-IDM4ICsrKysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0tLQo+ID4gIGFyY2gvYXJtL21hY2gtcmVh
-bHZpZXcvcmVhbHZpZXdfcGIxMTc2LmMgfCAgIDM4ICsrKysrKysrKysrKysrKy0tLS0tLS0tLS0t
-LS0tLQo+ID4gIGFyY2gvYXJtL21hY2gtcmVhbHZpZXcvcmVhbHZpZXdfcGIxMW1wLmMgfCAgIDM4
-ICsrKysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0tLQo+ID4gIGFyY2gvYXJtL21hY2gtcmVhbHZp
-ZXcvcmVhbHZpZXdfcGJhOC5jICAgfCAgIDM4ICsrKysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0t
-LQo+ID4gIGFyY2gvYXJtL21hY2gtcmVhbHZpZXcvcmVhbHZpZXdfcGJ4LmMgICAgfCAgIDM4ICsr
-KysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0tLQo+ID4gIDYgZmlsZXMgY2hhbmdlZCwgMTAwIGlu
-c2VydGlvbnMoKyksIDExMCBkZWxldGlvbnMoLSkKPiAKPiBBZnRlciBhcHBseWluZyB0aGlzIHBh
-dGNoLCBJIGdldCBjb21waWxlLXRpbWUgZXJyb3JzIGluIHJlYWx2aWV3XyouYy4KPiBFLmcuOgo+
-IAo+IGFyY2gvYXJtL21hY2gtcmVhbHZpZXcvcmVhbHZpZXdfcGIxMTc2LmM6MTU4OjE6IGVycm9y
-OiDigJhBQUNJ4oCZIHVuZGVjbGFyZWQgaGVyZSAobm90IGluIGEgZnVuY3Rpb24pCj4gYXJjaC9h
-cm0vbWFjaC1yZWFsdmlldy9yZWFsdmlld19wYjExNzYuYzoxNTk6MTogZXJyb3I6IOKAmE1NQ0kw
-4oCZIHVuZGVjbGFyZWQgaGVyZSAobm90IGluIGEgZnVuY3Rpb24pCj4gYXJjaC9hcm0vbWFjaC1y
-ZWFsdmlldy9yZWFsdmlld19wYjExNzYuYzoxNjA6MTogZXJyb3I6IOKAmEtNSTDigJkgdW5kZWNs
-YXJlZCBoZXJlIChub3QgaW4gYSBmdW5jdGlvbikKPiBhcmNoL2FybS9tYWNoLXJlYWx2aWV3L3Jl
-YWx2aWV3X3BiMTE3Ni5jOjE2MToxOiBlcnJvcjog4oCYS01JMeKAmSB1bmRlY2xhcmVkIGhlcmUg
-KG5vdCBpbiBhIGZ1bmN0aW9uKQo+IGFyY2gvYXJtL21hY2gtcmVhbHZpZXcvcmVhbHZpZXdfcGIx
-MTc2LmM6MTYyOjE6IGVycm9yOiDigJhQQjExNzZfVUFSVDTigJkgdW5kZWNsYXJlZCBoZXJlIChu
-b3QgaW4gYSBmdW5jdGlvbikKPiBhcmNoL2FybS9tYWNoLXJlYWx2aWV3L3JlYWx2aWV3X3BiMTE3
-Ni5jOjE2NToxOiBlcnJvcjog4oCYUEIxMTc2X1NNQ+KAmSB1bmRlY2xhcmVkIGhlcmUgKG5vdCBp
-biBhIGZ1bmN0aW9uKQo+IGFyY2gvYXJtL21hY2gtcmVhbHZpZXcvcmVhbHZpZXdfcGIxMTc2LmM6
-MTY2OjE6IGVycm9yOiDigJhTQ1RM4oCZIHVuZGVjbGFyZWQgaGVyZSAobm90IGluIGEgZnVuY3Rp
-b24pCj4gYXJjaC9hcm0vbWFjaC1yZWFsdmlldy9yZWFsdmlld19wYjExNzYuYzoxNjc6MTogZXJy
-b3I6IOKAmFBCMTE3Nl9XQVRDSERPR+KAmSB1bmRlY2xhcmVkIGhlcmUgKG5vdCBpbiBhIGZ1bmN0
-aW9uKQo+IGFyY2gvYXJtL21hY2gtcmVhbHZpZXcvcmVhbHZpZXdfcGIxMTc2LmM6MTY4OjE6IGVy
-cm9yOiDigJhQQjExNzZfR1BJTzDigJkgdW5kZWNsYXJlZCBoZXJlIChub3QgaW4gYSBmdW5jdGlv
-bikKPiBhcmNoL2FybS9tYWNoLXJlYWx2aWV3L3JlYWx2aWV3X3BiMTE3Ni5jOjE2OToxOiBlcnJv
-cjog4oCYR1BJTzHigJkgdW5kZWNsYXJlZCBoZXJlIChub3QgaW4gYSBmdW5jdGlvbikKPiBhcmNo
-L2FybS9tYWNoLXJlYWx2aWV3L3JlYWx2aWV3X3BiMTE3Ni5jOjE3MDoxOiBlcnJvcjog4oCYR1BJ
-TzLigJkgdW5kZWNsYXJlZCBoZXJlIChub3QgaW4gYSBmdW5jdGlvbikKPiBhcmNoL2FybS9tYWNo
-LXJlYWx2aWV3L3JlYWx2aWV3X3BiMTE3Ni5jOjE3MToxOiBlcnJvcjog4oCYUEIxMTc2X1JUQ+KA
-mSB1bmRlY2xhcmVkIGhlcmUgKG5vdCBpbiBhIGZ1bmN0aW9uKQo+IGFyY2gvYXJtL21hY2gtcmVh
-bHZpZXcvcmVhbHZpZXdfcGIxMTc2LmM6MTcyOjE6IGVycm9yOiDigJhTQ0nigJkgdW5kZWNsYXJl
-ZCBoZXJlIChub3QgaW4gYSBmdW5jdGlvbikKPiBhcmNoL2FybS9tYWNoLXJlYWx2aWV3L3JlYWx2
-aWV3X3BiMTE3Ni5jOjE3MzoxOiBlcnJvcjog4oCYUEIxMTc2X1VBUlQw4oCZIHVuZGVjbGFyZWQg
-aGVyZSAobm90IGluIGEgZnVuY3Rpb24pCj4gYXJjaC9hcm0vbWFjaC1yZWFsdmlldy9yZWFsdmll
-d19wYjExNzYuYzoxNzQ6MTogZXJyb3I6IOKAmFBCMTE3Nl9VQVJUMeKAmSB1bmRlY2xhcmVkIGhl
-cmUgKG5vdCBpbiBhIGZ1bmN0aW9uKQo+IGFyY2gvYXJtL21hY2gtcmVhbHZpZXcvcmVhbHZpZXdf
-cGIxMTc2LmM6MTc1OjE6IGVycm9yOiDigJhQQjExNzZfVUFSVDLigJkgdW5kZWNsYXJlZCBoZXJl
-IChub3QgaW4gYSBmdW5jdGlvbikKPiBhcmNoL2FybS9tYWNoLXJlYWx2aWV3L3JlYWx2aWV3X3Bi
-MTE3Ni5jOjE3NjoxOiBlcnJvcjog4oCYUEIxMTc2X1VBUlQz4oCZIHVuZGVjbGFyZWQgaGVyZSAo
-bm90IGluIGEgZnVuY3Rpb24pCj4gYXJjaC9hcm0vbWFjaC1yZWFsdmlldy9yZWFsdmlld19wYjEx
-NzYuYzoxNzc6MTogZXJyb3I6IOKAmFBCMTE3Nl9TU1DigJkgdW5kZWNsYXJlZCBoZXJlIChub3Qg
-aW4gYSBmdW5jdGlvbikKPiBhcmNoL2FybS9tYWNoLXJlYWx2aWV3L3JlYWx2aWV3X3BiMTE3Ni5j
-OjE3ODoxOiBlcnJvcjog4oCYUEIxMTc2X0NMQ0TigJkgdW5kZWNsYXJlZCBoZXJlIChub3QgaW4g
-YSBmdW5jdGlvbikKPiAKPiA+IGRpZmYgLS1naXQgYS9hcmNoL2FybS9tYWNoLXJlYWx2aWV3L2Nv
-cmUuaCBiL2FyY2gvYXJtL21hY2gtcmVhbHZpZXcvY29yZS5oCj4gPiBpbmRleCA3MzViNTdhLi5i
-MWM2MDk3IDEwMDY0NAo+ID4gLS0tIGEvYXJjaC9hcm0vbWFjaC1yZWFsdmlldy9jb3JlLmgKPiA+
-ICsrKyBiL2FyY2gvYXJtL21hY2gtcmVhbHZpZXcvY29yZS5oCj4gPiBAQCAtMjgsMjEgKzI4LDEx
-IEBACj4gPiAgI2luY2x1ZGUgPGFzbS9zZXR1cC5oPgo+ID4gICNpbmNsdWRlIDxhc20vbGVkcy5o
-Pgo+ID4gCj4gPiAtI2RlZmluZSBBTUJBX0RFVklDRShuYW1lLGJ1c2lkLGJhc2UscGxhdCkgICAg
-ICAgICAgICAgICAgICAgICAgXAo+ID4gLXN0YXRpYyBzdHJ1Y3QgYW1iYV9kZXZpY2UgbmFtZSMj
-X2RldmljZSA9IHsgICAgICAgICAgICAgICAgICAgIFwKPiA+IC0gICAgICAgLmRldiAgICAgICAg
-ICAgID0geyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcCj4gPiAtICAgICAg
-ICAgICAgICAgLmNvaGVyZW50X2RtYV9tYXNrID0gfjAsICAgICAgICAgICAgICAgICAgICAgICAg
-XAo+ID4gLSAgICAgICAgICAgICAgIC5pbml0X25hbWUgPSBidXNpZCwgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgIFwKPiA+IC0gICAgICAgICAgICAgICAucGxhdGZvcm1fZGF0YSA9IHBsYXQs
-ICAgICAgICAgICAgICAgICAgICAgICAgICBcCj4gPiAtICAgICAgIH0sICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXAo+ID4gLSAgICAgICAucmVz
-ICAgICAgICAgICAgPSB7ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFwKPiA+
-IC0gICAgICAgICAgICAgICAuc3RhcnQgID0gUkVBTFZJRVdfIyNiYXNlIyNfQkFTRSwgICAgICAg
-ICAgICAgICBcCj4gPiAtICAgICAgICAgICAgICAgLmVuZCAgICA9IChSRUFMVklFV18jI2Jhc2Uj
-I19CQVNFKSArIFNaXzRLIC0gMSwgXAo+ID4gLSAgICAgICAgICAgICAgIC5mbGFncyAgPSBJT1JF
-U09VUkNFX01FTSwgICAgICAgICAgICAgICAgICAgICAgIFwKPiA+IC0gICAgICAgfSwgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKPiAKPiBXaGlj
-aCBpcyBiZWNhdXNlIHRoZSBvbGQgQU1CQV9ERVZJQ0UgbWFjcm8gbXVuZ2VzIFJFQUxWSUVXXyBh
-bmQgX0JBU0UKPiBhcm91bmQgdGhlIHBlcmlwaGVyYWwgaWRlbnRpZmllci4uLgo+IAo+ID4gKyNk
-ZWZpbmUgQVBCX0RFVklDRShuYW1lLCBidXNpZCwgYmFzZSwgcGxhdCkgICAgICAgICAgICAgICAg
-ICAgIFwKPiA+ICtzdGF0aWMgQU1CQV9BUEJfREVWSUNFKG5hbWUsIGJ1c2lkLCAwLCBiYXNlLCBi
-YXNlIyNfSVJRLCBwbGF0KQo+ID4gKwo+ID4gKyNkZWZpbmUgQUhCX0RFVklDRShuYW1lLCBidXNp
-ZCwgYmFzZSwgcGxhdCkgICAgICAgICAgICAgICAgICAgIFwKPiA+ICtzdGF0aWMgQU1CQV9BSEJf
-REVWSUNFKG5hbWUsIGJ1c2lkLCAwLCBiYXNlLCBiYXNlIyNfSVJRLCBwbGF0KQo+IAo+IC4uLndo
-ZXJlYXMgdGhlIG5ldyBtYWNyb3MganVzdCB1c2UgYmFzZSBkaXJlY3RseS4KPiAKPiBGaXhpbmcg
-dGhlIG1hY3JvIHNvbHZlcyB0aGUgYnVpbGQgcHJvYmxlbToKPiAKPiAKPiBkaWZmIC0tZ2l0IGEv
-YXJjaC9hcm0vbWFjaC1yZWFsdmlldy9jb3JlLmggYi9hcmNoL2FybS9tYWNoLXJlYWx2aWV3L2Nv
-cmUuaAo+IGluZGV4IGIxYzYwOTcuLmY4ZjJjMGEgMTAwNjQ0Cj4gLS0tIGEvYXJjaC9hcm0vbWFj
-aC1yZWFsdmlldy9jb3JlLmgKPiArKysgYi9hcmNoL2FybS9tYWNoLXJlYWx2aWV3L2NvcmUuaAo+
-IEBAIC0yOSwxMCArMjksMTAgQEAKPiAgI2luY2x1ZGUgPGFzbS9sZWRzLmg+Cj4gIAo+ICAjZGVm
-aW5lIEFQQl9ERVZJQ0UobmFtZSwgYnVzaWQsIGJhc2UsIHBsYXQpICAgICAgICAgICAgICAgICAg
-ICBcCj4gLXN0YXRpYyBBTUJBX0FQQl9ERVZJQ0UobmFtZSwgYnVzaWQsIDAsIGJhc2UsIGJhc2Uj
-I19JUlEsIHBsYXQpCj4gK3N0YXRpYyBBTUJBX0FQQl9ERVZJQ0UobmFtZSwgYnVzaWQsIDAsIFJF
-QUxWSUVXXyMjYmFzZSMjX0JBU0UsIGJhc2UjI19JUlEsIHBsYXQpCj4gIAo+ICAjZGVmaW5lIEFI
-Ql9ERVZJQ0UobmFtZSwgYnVzaWQsIGJhc2UsIHBsYXQpICAgICAgICAgICAgICAgICAgICBcCj4g
-LXN0YXRpYyBBTUJBX0FIQl9ERVZJQ0UobmFtZSwgYnVzaWQsIDAsIGJhc2UsIGJhc2UjI19JUlEs
-IHBsYXQpCj4gK3N0YXRpYyBBTUJBX0FIQl9ERVZJQ0UobmFtZSwgYnVzaWQsIDAsIFJFQUxWSUVX
-XyMjYmFzZSMjX0JBU0UsIGJhc2UjI19JUlEsIHBsYXQpCj4gIAo+ICBzdHJ1Y3QgbWFjaGluZV9k
-ZXNjOwo+ICAKPiAKPiBidXQgdGhlbiBJIHNlZSBhIHdhcm5pbmcgZHVyaW5nIGJvb3Q6Cj4gCj4g
-WyAgICAxLjY2OTY1NF0gLS0tLS0tLS0tLS0tWyBjdXQgaGVyZSBdLS0tLS0tLS0tLS0tCj4gWyAg
-ICAxLjY4NDAyMV0gV0FSTklORzogYXQgZHJpdmVycy9hbWJhL2J1cy5jOjUxNCBhbWJhX2Rldmlj
-ZV9hZGQrMHgxYjQvMHgxZDAoKQo+IFsgICAgMS43MDU1ODVdIE1vZHVsZXMgbGlua2VkIGluOgo+
-IFsgICAgMS43MTUxOTVdIFs8YzAwMTNhMDA+XSAodW53aW5kX2JhY2t0cmFjZSsweDAvMHhmYykg
-ZnJvbSBbPGMwM2QxMzUwPl0gKGR1bXBfc3RhY2srMHgyMC8weDI0KQo+IFsgICAgMS43NDEyODhd
-IFs8YzAzZDEzNTA+XSAoZHVtcF9zdGFjaysweDIwLzB4MjQpIGZyb20gWzxjMDAxZjliOD5dICh3
-YXJuX3Nsb3dwYXRoX2NvbW1vbisweDVjLzB4NzQpCj4gWyAgICAxLjc2ODY4OV0gWzxjMDAxZjli
-OD5dICh3YXJuX3Nsb3dwYXRoX2NvbW1vbisweDVjLzB4NzQpIGZyb20gWzxjMDAxZjlmYz5dICh3
-YXJuX3Nsb3dwYXRoX251bGwrMHgyYy8weDM0KQo+IFsgICAgMS43OTgxNjVdIFs8YzAwMWY5ZmM+
-XSAod2Fybl9zbG93cGF0aF9udWxsKzB4MmMvMHgzNCkgZnJvbSBbPGMwMjNkY2Q0Pl0gKGFtYmFf
-ZGV2aWNlX2FkZCsweDFiNC8weDFkMCkKPiBbICAgIDEuODI2ODU3XSBbPGMwMjNkY2Q0Pl0gKGFt
-YmFfZGV2aWNlX2FkZCsweDFiNC8weDFkMCkgZnJvbSBbPGMwMjNkZDg0Pl0gKGFtYmFfZGV2aWNl
-X3JlZ2lzdGVyKzB4OTQvMHhjNCkKPiBbICAgIDEuODU2MTA2XSBbPGMwMjNkZDg0Pl0gKGFtYmFf
-ZGV2aWNlX3JlZ2lzdGVyKzB4OTQvMHhjNCkgZnJvbSBbPGMwNTUxOTM0Pl0gKHJlYWx2aWV3X3Bi
-MTE3Nl9pbml0KzB4NzQvMHhhYykKPiBbICAgIDEuODg2MTIwXSBbPGMwNTUxOTM0Pl0gKHJlYWx2
-aWV3X3BiMTE3Nl9pbml0KzB4NzQvMHhhYykgZnJvbSBbPGMwNTRkNjBjPl0gKGN1c3RvbWl6ZV9t
-YWNoaW5lKzB4MjQvMHgzMCkKPiBbICAgIDEuOTE1MzQwXSBbPGMwNTRkNjBjPl0gKGN1c3RvbWl6
-ZV9tYWNoaW5lKzB4MjQvMHgzMCkgZnJvbSBbPGMwMDA4NzljPl0gKGRvX29uZV9pbml0Y2FsbCsw
-eDQ4LzB4MWEwKQo+IFsgICAgMS45NDM1MDVdIFs8YzAwMDg3OWM+XSAoZG9fb25lX2luaXRjYWxs
-KzB4NDgvMHgxYTApIGZyb20gWzxjMDU0Yjg3MD5dIChrZXJuZWxfaW5pdCsweDgwLzB4MTI4KQo+
-IFsgICAgMS45NzAzNzhdIFs8YzA1NGI4NzA+XSAoa2VybmVsX2luaXQrMHg4MC8weDEyOCkgZnJv
-bSBbPGMwMDBlYTc4Pl0gKGtlcm5lbF90aHJlYWRfZXhpdCsweDAvMHg4KQo+IFsgICAgMS45OTcx
-OTJdIC0tLVsgZW5kIHRyYWNlIDFiNzViMzFhMjcxOWVkMWUgXS0tLQo+IAo+IEkgc3VzcGVjdCB0
-aGF0IGNvbWVzIGZyb20gUEIxMTc2X0dQSU8wX0lSUSBiZWluZyAtMS4KCkl0IHNlZW1zIHlvdSd2
-ZSBhbHNvIHRlc3RlZCB0aGUgY29kZSB3aGljaCBkZXRlY3RzIC0xIElSUXMgdG9vLCB3aGljaApp
-cyBnb29kLiAgUEIxMTc2IG5lZWRzIHRoYXQgR1BJTzBfSVJRIGZpeGluZywgYnV0IEkgc3VzcGVj
-dCBwYXNzaW5nCnplcm8gbWF5IG5vdCBiZSBlbnRpcmVseSBhIGdvb2QgdGhpbmcgZm9yIGl0IGFz
-IHJlcXVlc3RfaXJxKDAsLi4uKQpwcm9iYWJseSBzdWNjZWVkcyB0aGVyZS4gIEkgdGhpbmsgdGhh
-dCBuZWVkcyBmaXhpbmcgYmVmb3JlIHRoaXMgd2FybmluZwpjYW4gZ28gYXdheS4KCkluIHRoZSBt
-ZWFuIHRpbWUsIGl0J3MganVzdCBhIHdhcm5pbmcsIGFuZCBpdHMgc2F5aW5nIHRoZXJlJ3Mgc29t
-ZXRoaW5nCndyb25nIHRoZXJlIHdoaWNoIG5lZWRzIGZpeGluZyBidXQgd2l0aG91dCBhbnl0aGlu
-ZyBjdXJyZW50bHkgYnJva2VuLgpTbyBpdCdzIHdvcmtpbmcgYXMgZGVzaWduZWQuCl9fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmRldmljZXRyZWUtZGlzY3Vz
-cyBtYWlsaW5nIGxpc3QKZGV2aWNldHJlZS1kaXNjdXNzQGxpc3RzLm96bGFicy5vcmcKaHR0cHM6
-Ly9saXN0cy5vemxhYnMub3JnL2xpc3RpbmZvL2RldmljZXRyZWUtZGlzY3Vzcwo=
+On Tue, Jan 24, 2012 at 04:23:28PM +0000, Russell King - ARM Linux wrote:
+> On Tue, Jan 24, 2012 at 04:00:44PM +0000, Will Deacon wrote:
+> > but then I see a warning during boot:
+> > 
+> > [    1.669654] ------------[ cut here ]------------
+> > [    1.684021] WARNING: at drivers/amba/bus.c:514 amba_device_add+0x1b4/0x1d0()
+> > [    1.705585] Modules linked in:
+> > [    1.715195] [<c0013a00>] (unwind_backtrace+0x0/0xfc) from [<c03d1350>] (dump_stack+0x20/0x24)
+> > [    1.741288] [<c03d1350>] (dump_stack+0x20/0x24) from [<c001f9b8>] (warn_slowpath_common+0x5c/0x74)
+> > [    1.768689] [<c001f9b8>] (warn_slowpath_common+0x5c/0x74) from [<c001f9fc>] (warn_slowpath_null+0x2c/0x34)
+> > [    1.798165] [<c001f9fc>] (warn_slowpath_null+0x2c/0x34) from [<c023dcd4>] (amba_device_add+0x1b4/0x1d0)
+> > [    1.826857] [<c023dcd4>] (amba_device_add+0x1b4/0x1d0) from [<c023dd84>] (amba_device_register+0x94/0xc4)
+> > [    1.856106] [<c023dd84>] (amba_device_register+0x94/0xc4) from [<c0551934>] (realview_pb1176_init+0x74/0xac)
+> > [    1.886120] [<c0551934>] (realview_pb1176_init+0x74/0xac) from [<c054d60c>] (customize_machine+0x24/0x30)
+> > [    1.915340] [<c054d60c>] (customize_machine+0x24/0x30) from [<c000879c>] (do_one_initcall+0x48/0x1a0)
+> > [    1.943505] [<c000879c>] (do_one_initcall+0x48/0x1a0) from [<c054b870>] (kernel_init+0x80/0x128)
+> > [    1.970378] [<c054b870>] (kernel_init+0x80/0x128) from [<c000ea78>] (kernel_thread_exit+0x0/0x8)
+> > [    1.997192] ---[ end trace 1b75b31a2719ed1e ]---
+> > 
+> > I suspect that comes from PB1176_GPIO0_IRQ being -1.
+> 
+> It seems you've also tested the code which detects -1 IRQs too, which
+> is good.  PB1176 needs that GPIO0_IRQ fixing, but I suspect passing
+> zero may not be entirely a good thing for it as request_irq(0,...)
+> probably succeeds there.  I think that needs fixing before this warning
+> can go away.
+
+Yup, I actually tested this simply by checking out your devel-3.3 branch, so
+the whole series has been tested on the boards that I've mentioned.
+
+> In the mean time, it's just a warning, and its saying there's something
+> wrong there which needs fixing but without anything currently broken.
+> So it's working as designed.
+
+Right. I took a quick look at the TRM for the PB1176, and I think we do have
+an interrupt for GPIO0, it's just on the other GIC. This patch should do the
+trick, but I'm not sure what I can do to tickle the GPIO stuff anyway:
+
+
+diff --git a/arch/arm/mach-realview/include/mach/irqs-pb1176.h b/arch/arm/mach-realview/include/mach/irqs-pb1176.h
+index 5c3c625..708f841 100644
+--- a/arch/arm/mach-realview/include/mach/irqs-pb1176.h
++++ b/arch/arm/mach-realview/include/mach/irqs-pb1176.h
+@@ -40,6 +40,7 @@
+ #define IRQ_DC1176_L2CC                (IRQ_DC1176_GIC_START + 13)
+ #define IRQ_DC1176_RTC         (IRQ_DC1176_GIC_START + 14)
+ #define IRQ_DC1176_CLCD                (IRQ_DC1176_GIC_START + 15)     /* CLCD controller */
++#define IRQ_DC1176_GPIO0       (IRQ_DC1176_GIC_START + 16)
+ #define IRQ_DC1176_SSP         (IRQ_DC1176_GIC_START + 17)     /* SSP port */
+ #define IRQ_DC1176_UART0       (IRQ_DC1176_GIC_START + 18)     /* UART 0 on development chip */
+ #define IRQ_DC1176_UART1       (IRQ_DC1176_GIC_START + 19)     /* UART 1 on development chip */
+@@ -73,7 +74,6 @@
+ #define IRQ_PB1176_DMAC                (IRQ_PB1176_GIC_START + 24)     /* DMA controller */
+ #define IRQ_PB1176_RTC         (IRQ_PB1176_GIC_START + 25)     /* Real Time Clock */
+ 
+-#define IRQ_PB1176_GPIO0       -1
+ #define IRQ_PB1176_SCTL                -1
+ 
+ #define NR_GIC_PB1176          2
+diff --git a/arch/arm/mach-realview/realview_pb1176.c b/arch/arm/mach-realview/realview_pb1176.c
+index 1b6e60c..b1d7caf 100644
+--- a/arch/arm/mach-realview/realview_pb1176.c
++++ b/arch/arm/mach-realview/realview_pb1176.c
+@@ -143,7 +143,7 @@ static struct pl022_ssp_controller ssp0_plat_data = {
+ #define PB1176_CLCD_IRQ        { IRQ_DC1176_CLCD }
+ #define SCTL_IRQ       { }
+ #define PB1176_WATCHDOG_IRQ    { IRQ_DC1176_WATCHDOG }
+-#define PB1176_GPIO0_IRQ       { IRQ_PB1176_GPIO0 }
++#define PB1176_GPIO0_IRQ       { IRQ_DC1176_GPIO0 }
+ #define GPIO1_IRQ      { IRQ_PB1176_GPIO1 }
+ #define PB1176_RTC_IRQ { IRQ_DC1176_RTC }
+ #define SCI_IRQ                { IRQ_PB1176_SCI }
+
+
+Will
