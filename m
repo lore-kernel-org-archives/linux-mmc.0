@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 02/11] mmc: tmio: calculate the native hotplug condition only once
-Date: Tue, 24 Jan 2012 13:01:31 +0100
-Message-ID: <1327406500-7233-3-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 01/11] mmc: simplify mmc_cd_gpio_request() by removing two parameters
+Date: Tue, 24 Jan 2012 13:01:30 +0100
+Message-ID: <1327406500-7233-2-git-send-email-g.liakhovetski@gmx.de>
 References: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
@@ -10,64 +10,65 @@ To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The condition, whether we have to use the native TMIO card hotplug
-detection interrupt, is rather complex, it is better to only calculate it
-once and store in the private data.
+Calculate the IRQ number, using gpio_to_irq() and use fixed flags: trigger
+on both edges. This makes two out of four arguments of the
+mmc_cd_gpio_request() function redundant.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/tmio_mmc.h     |    1 +
- drivers/mmc/host/tmio_mmc_pio.c |   11 +++++------
- 2 files changed, 6 insertions(+), 6 deletions(-)
+ drivers/mmc/core/cd-gpio.c  |   13 +++++++++----
+ include/linux/mmc/cd-gpio.h |    3 +--
+ 2 files changed, 10 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index f96c536..8531d8d 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -86,6 +86,7 @@ struct tmio_mmc_host {
- 	spinlock_t		lock;		/* protect host private data */
- 	unsigned long		last_req_ts;
- 	struct mutex		ios_lock;	/* protect set_ios() context */
-+	bool			native_hotplug;
- };
+diff --git a/drivers/mmc/core/cd-gpio.c b/drivers/mmc/core/cd-gpio.c
+index 082202ae..29de31e 100644
+--- a/drivers/mmc/core/cd-gpio.c
++++ b/drivers/mmc/core/cd-gpio.c
+@@ -28,13 +28,17 @@ static irqreturn_t mmc_cd_gpio_irqt(int irq, void *dev_id)
+ 	return IRQ_HANDLED;
+ }
  
- int tmio_mmc_host_probe(struct tmio_mmc_host **host,
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 5f9ad74..a5d1052 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -912,6 +912,9 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 	else
- 		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+-int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio,
+-			unsigned int irq, unsigned long flags)
++int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio)
+ {
+ 	size_t len = strlen(dev_name(host->parent)) + 4;
+-	struct mmc_cd_gpio *cd = kmalloc(sizeof(*cd) + len, GFP_KERNEL);
++	struct mmc_cd_gpio *cd;
++	int irq = gpio_to_irq(gpio);
+ 	int ret;
  
-+	_host->native_hotplug = !(pdata->flags & TMIO_MMC_HAS_COLD_CD ||
-+				  mmc->caps & MMC_CAP_NEEDS_POLL ||
-+				  mmc->caps & MMC_CAP_NONREMOVABLE);
- 	pdata->power = false;
- 	pm_runtime_enable(&pdev->dev);
- 	ret = pm_runtime_resume(&pdev->dev);
-@@ -930,9 +933,7 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 	 *  additionally ensure that in case 2) the tmio mmc hardware stays
- 	 *  powered on during runtime for the card detection to work.
- 	 */
--	if (!(pdata->flags & TMIO_MMC_HAS_COLD_CD
--		|| mmc->caps & MMC_CAP_NEEDS_POLL
--		|| mmc->caps & MMC_CAP_NONREMOVABLE))
-+	if (_host->native_hotplug)
- 		pm_runtime_get_noresume(&pdev->dev);
++	if (irq < 0)
++		return irq;
++
++	cd = kmalloc(sizeof(*cd) + len, GFP_KERNEL);
+ 	if (!cd)
+ 		return -ENOMEM;
  
- 	tmio_mmc_clk_stop(_host);
-@@ -988,9 +989,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
- 	 * the controller, the runtime PM is suspended and pdata->power == false,
- 	 * so, our .runtime_resume() will not try to detect a card in the slot.
- 	 */
--	if (host->pdata->flags & TMIO_MMC_HAS_COLD_CD
--		|| host->mmc->caps & MMC_CAP_NEEDS_POLL
--		|| host->mmc->caps & MMC_CAP_NONREMOVABLE)
-+	if (!host->native_hotplug)
- 		pm_runtime_get_sync(&pdev->dev);
+@@ -45,7 +49,8 @@ int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio,
+ 		goto egpioreq;
  
- 	mmc_remove_host(host->mmc);
+ 	ret = request_threaded_irq(irq, NULL, mmc_cd_gpio_irqt,
+-				   flags, cd->label, host);
++				   IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
++				   cd->label, host);
+ 	if (ret < 0)
+ 		goto eirqreq;
+ 
+diff --git a/include/linux/mmc/cd-gpio.h b/include/linux/mmc/cd-gpio.h
+index a8e4697..cefaba0 100644
+--- a/include/linux/mmc/cd-gpio.h
++++ b/include/linux/mmc/cd-gpio.h
+@@ -12,8 +12,7 @@
+ #define MMC_CD_GPIO_H
+ 
+ struct mmc_host;
+-int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio,
+-			unsigned int irq, unsigned long flags);
++int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio);
+ void mmc_cd_gpio_free(struct mmc_host *host);
+ 
+ #endif
 -- 
 1.7.2.5
 
