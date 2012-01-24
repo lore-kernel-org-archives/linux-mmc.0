@@ -1,57 +1,30 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 08/11] mmc: tmio_mmc: remove unused sdio_irq_enabled flag
-Date: Tue, 24 Jan 2012 13:01:37 +0100
-Message-ID: <1327406500-7233-9-git-send-email-g.liakhovetski@gmx.de>
-References: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH 19/31] ARM: amba: vexpress: get rid of private platform
+ amba_device initializer
+Date: Tue, 24 Jan 2012 14:27:47 +0000
+Message-ID: <20120124142747.GJ19798@mudshark.cambridge.arm.com>
+References: <20120120092207.GD1068@n2100.arm.linux.org.uk>
+ <E1RoAmA-0005FX-5m@rmk-PC.arm.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <E1RoAmA-0005FX-5m@rmk-PC.arm.linux.org.uk>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, STEricsson <STEricsson_nomadik_linux@list.st.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The sdio_irq_enabled member of struct tmio_mmc_host is a left-over from the
-previously removed SDIO IRQ workaround. It is no longer needed and can now
-be removed too.
+On Fri, Jan 20, 2012 at 09:28:50AM +0000, Russell King - ARM Linux wrote:
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> ---
+>  arch/arm/mach-vexpress/core.h     |   17 -----------------
+>  arch/arm/mach-vexpress/ct-ca9x4.c |    8 ++++----
+>  arch/arm/mach-vexpress/v2m.c      |   20 ++++++++++----------
+>  3 files changed, 14 insertions(+), 31 deletions(-)
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- drivers/mmc/host/tmio_mmc.h     |    1 -
- drivers/mmc/host/tmio_mmc_pio.c |    2 --
- 2 files changed, 0 insertions(+), 3 deletions(-)
+Looks good to me, and I've boot-tested it on my board as well.
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index edfcfd7..d857f5c 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -47,7 +47,6 @@ struct tmio_mmc_host {
- 	struct mmc_request      *mrq;
- 	struct mmc_data         *data;
- 	struct mmc_host         *mmc;
--	unsigned int		sdio_irq_enabled;
- 
- 	/* Controller power state */
- 	bool			power;
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index eee9f4f..d7955c6 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -127,7 +127,6 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
- 
- 	if (enable) {
--		host->sdio_irq_enabled = 1;
- 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL &
- 					~TMIO_SDIO_STAT_IOIRQ;
- 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
-@@ -136,7 +135,6 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
- 		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
- 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0000);
--		host->sdio_irq_enabled = 0;
- 	}
- }
- 
--- 
-1.7.2.5
+Acked-by: Will Deacon <will.deacon@arm.com>
 
+Will
