@@ -1,58 +1,76 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 04/11] mmc: sh_mobile_sdhi: pass card hotplug GPIO number to TMIO MMC
-Date: Tue, 24 Jan 2012 13:01:33 +0100
-Message-ID: <1327406500-7233-5-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 06/11] ARM: mach-shmobile: convert ag5evm to use the generic MMC GPIO hotplug helper
+Date: Tue, 24 Jan 2012 13:01:35 +0100
+Message-ID: <1327406500-7233-7-git-send-email-g.liakhovetski@gmx.de>
 References: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.187]:54883 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751978Ab2AXMBr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2012 07:01:47 -0500
 In-Reply-To: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
-List-Id: linux-mmc@vger.kernel.org
-
-To use TMIO MMC driver ability to interface to the generic MMC GPIO card
-hotplug detection helper, the SDHI driver has to pass the GPIO number
-from its own platform data.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c  |    3 ++-
- include/linux/mmc/sh_mobile_sdhi.h |    1 +
- 2 files changed, 3 insertions(+), 1 deletions(-)
+ arch/arm/mach-shmobile/board-ag5evm.c |   22 ++--------------------
+ 1 files changed, 2 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 58da3c4..cb279b4 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -129,6 +129,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 			mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
- 		mmc_data->ocr_mask = p->tmio_ocr_mask;
- 		mmc_data->capabilities |= p->tmio_caps;
-+		mmc_data->cd_gpio = p->cd_gpio;
+diff --git a/arch/arm/mach-shmobile/board-ag5evm.c b/arch/arm/mach-shmobile/board-ag5evm.c
+index 729eaee..d16a1c4 100644
+--- a/arch/arm/mach-shmobile/board-ag5evm.c
++++ b/arch/arm/mach-shmobile/board-ag5evm.c
+@@ -367,23 +367,13 @@ static struct platform_device mipidsi0_device = {
+ };
  
- 		if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
- 			priv->param_tx.slave_id = p->dma_slave_tx;
-@@ -211,7 +212,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+ /* SDHI0 */
+-static irqreturn_t ag5evm_sdhi0_gpio_cd(int irq, void *arg)
+-{
+-	struct device *dev = arg;
+-	struct sh_mobile_sdhi_info *info = dev->platform_data;
+-	struct tmio_mmc_data *pdata = info->pdata;
+-
+-	tmio_mmc_cd_wakeup(pdata);
+-
+-	return IRQ_HANDLED;
+-}
+-
+ static struct sh_mobile_sdhi_info sdhi0_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
+-	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
++	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_USE_GPIO_CD,
+ 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED,
+ 	.tmio_ocr_mask	= MMC_VDD_27_28 | MMC_VDD_28_29,
++	.cd_gpio	= GPIO_PORT251,
+ };
  
- 	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
- 		 mmc_hostname(host->mmc), (unsigned long)
--		 (platform_get_resource(pdev,IORESOURCE_MEM, 0)->start),
-+		 (platform_get_resource(pdev, IORESOURCE_MEM, 0)->start),
- 		 mmc_data->hclk / 1000000);
+ static struct resource sdhi0_resources[] = {
+@@ -580,7 +570,6 @@ static void __init ag5evm_init(void)
+ 	lcd_backlight_reset();
  
- 	return ret;
-diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-index 71b8054..082a736 100644
---- a/include/linux/mmc/sh_mobile_sdhi.h
-+++ b/include/linux/mmc/sh_mobile_sdhi.h
-@@ -16,6 +16,7 @@ struct sh_mobile_sdhi_info {
- 	unsigned long tmio_flags;
- 	unsigned long tmio_caps;
- 	u32 tmio_ocr_mask;	/* available MMC voltages */
-+	unsigned int cd_gpio;
- 	struct tmio_mmc_data *pdata;
- 	void (*set_pwr)(struct platform_device *pdev, int state);
- 	int (*get_cd)(struct platform_device *pdev);
+ 	/* enable SDHI0 on CN15 [SD I/F] */
+-	gpio_request(GPIO_FN_SDHICD0, NULL);
+ 	gpio_request(GPIO_FN_SDHIWP0, NULL);
+ 	gpio_request(GPIO_FN_SDHICMD0, NULL);
+ 	gpio_request(GPIO_FN_SDHICLK0, NULL);
+@@ -589,13 +578,6 @@ static void __init ag5evm_init(void)
+ 	gpio_request(GPIO_FN_SDHID0_1, NULL);
+ 	gpio_request(GPIO_FN_SDHID0_0, NULL);
+ 
+-	if (!request_irq(intcs_evt2irq(0x3c0), ag5evm_sdhi0_gpio_cd,
+-			 IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
+-			 "sdhi0 cd", &sdhi0_device.dev))
+-		sdhi0_info.tmio_flags |= TMIO_MMC_HAS_COLD_CD;
+-	else
+-		pr_warn("Unable to setup SDHI0 GPIO IRQ\n");
+-
+ 	/* enable SDHI1 on CN4 [WLAN I/F] */
+ 	gpio_request(GPIO_FN_SDHICLK1, NULL);
+ 	gpio_request(GPIO_FN_SDHICMD1_PU, NULL);
 -- 
 1.7.2.5
 
