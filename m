@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 01/11] mmc: simplify mmc_cd_gpio_request() by removing two parameters
-Date: Tue, 24 Jan 2012 13:01:30 +0100
-Message-ID: <1327406500-7233-2-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 05/11] ARM: mach-shmobile: convert mackerel to use the generic MMC GPIO hotplug helper
+Date: Tue, 24 Jan 2012 13:01:34 +0100
+Message-ID: <1327406500-7233-6-git-send-email-g.liakhovetski@gmx.de>
 References: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
@@ -10,65 +10,69 @@ To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Calculate the IRQ number, using gpio_to_irq() and use fixed flags: trigger
-on both edges. This makes two out of four arguments of the
-mmc_cd_gpio_request() function redundant.
-
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/core/cd-gpio.c  |   13 +++++++++----
- include/linux/mmc/cd-gpio.h |    3 +--
- 2 files changed, 10 insertions(+), 6 deletions(-)
+ arch/arm/mach-shmobile/board-mackerel.c |   22 ++--------------------
+ 1 files changed, 2 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mmc/core/cd-gpio.c b/drivers/mmc/core/cd-gpio.c
-index 082202ae..29de31e 100644
---- a/drivers/mmc/core/cd-gpio.c
-+++ b/drivers/mmc/core/cd-gpio.c
-@@ -28,13 +28,17 @@ static irqreturn_t mmc_cd_gpio_irqt(int irq, void *dev_id)
- 	return IRQ_HANDLED;
+diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
+index 1a955e2..0af2e9b 100644
+--- a/arch/arm/mach-shmobile/board-mackerel.c
++++ b/arch/arm/mach-shmobile/board-mackerel.c
+@@ -1016,21 +1016,12 @@ static int slot_cn7_get_cd(struct platform_device *pdev)
  }
  
--int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio,
--			unsigned int irq, unsigned long flags)
-+int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio)
+ /* SDHI0 */
+-static irqreturn_t mackerel_sdhi0_gpio_cd(int irq, void *arg)
+-{
+-	struct device *dev = arg;
+-	struct sh_mobile_sdhi_info *info = dev->platform_data;
+-	struct tmio_mmc_data *pdata = info->pdata;
+-
+-	tmio_mmc_cd_wakeup(pdata);
+-
+-	return IRQ_HANDLED;
+-}
+-
+ static struct sh_mobile_sdhi_info sdhi0_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
++	.tmio_flags	= TMIO_MMC_USE_GPIO_CD,
+ 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
++	.cd_gpio	= GPIO_PORT172,
+ };
+ 
+ static struct resource sdhi0_resources[] = {
+@@ -1410,7 +1401,6 @@ static void __init mackerel_init(void)
  {
- 	size_t len = strlen(dev_name(host->parent)) + 4;
--	struct mmc_cd_gpio *cd = kmalloc(sizeof(*cd) + len, GFP_KERNEL);
-+	struct mmc_cd_gpio *cd;
-+	int irq = gpio_to_irq(gpio);
- 	int ret;
+ 	u32 srcr4;
+ 	struct clk *clk;
+-	int ret;
  
-+	if (irq < 0)
-+		return irq;
-+
-+	cd = kmalloc(sizeof(*cd) + len, GFP_KERNEL);
- 	if (!cd)
- 		return -ENOMEM;
+ 	sh7372_pinmux_init();
  
-@@ -45,7 +49,8 @@ int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio,
- 		goto egpioreq;
+@@ -1507,7 +1497,6 @@ static void __init mackerel_init(void)
+ 	irq_set_irq_type(IRQ21, IRQ_TYPE_LEVEL_HIGH);
  
- 	ret = request_threaded_irq(irq, NULL, mmc_cd_gpio_irqt,
--				   flags, cd->label, host);
-+				   IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
-+				   cd->label, host);
- 	if (ret < 0)
- 		goto eirqreq;
+ 	/* enable SDHI0 */
+-	gpio_request(GPIO_FN_SDHICD0, NULL);
+ 	gpio_request(GPIO_FN_SDHIWP0, NULL);
+ 	gpio_request(GPIO_FN_SDHICMD0, NULL);
+ 	gpio_request(GPIO_FN_SDHICLK0, NULL);
+@@ -1516,13 +1505,6 @@ static void __init mackerel_init(void)
+ 	gpio_request(GPIO_FN_SDHID0_1, NULL);
+ 	gpio_request(GPIO_FN_SDHID0_0, NULL);
  
-diff --git a/include/linux/mmc/cd-gpio.h b/include/linux/mmc/cd-gpio.h
-index a8e4697..cefaba0 100644
---- a/include/linux/mmc/cd-gpio.h
-+++ b/include/linux/mmc/cd-gpio.h
-@@ -12,8 +12,7 @@
- #define MMC_CD_GPIO_H
- 
- struct mmc_host;
--int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio,
--			unsigned int irq, unsigned long flags);
-+int mmc_cd_gpio_request(struct mmc_host *host, unsigned int gpio);
- void mmc_cd_gpio_free(struct mmc_host *host);
- 
- #endif
+-	ret = request_irq(evt2irq(0x3340), mackerel_sdhi0_gpio_cd,
+-			  IRQF_TRIGGER_FALLING, "sdhi0 cd", &sdhi0_device.dev);
+-	if (!ret)
+-		sdhi0_info.tmio_flags |= TMIO_MMC_HAS_COLD_CD;
+-	else
+-		pr_err("Cannot get IRQ #%d: %d\n", evt2irq(0x3340), ret);
+-
+ #if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
+ 	/* enable SDHI1 */
+ 	gpio_request(GPIO_FN_SDHICMD1, NULL);
 -- 
 1.7.2.5
 
