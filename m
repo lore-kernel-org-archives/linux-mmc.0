@@ -1,60 +1,42 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 0/7 v2] extract a simple dmaengine library from
-	shdma.c
-Date: Thu, 26 Jan 2012 15:56:17 +0100
-Message-ID: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: core: UHS sdio card that fails should not exceed 50MHz
+Date: Thu, 26 Jan 2012 10:02:50 -0500
+Message-ID: <m2ipjyo6at.fsf@bob.laptop.org>
+References: <prakity@marvell.com>
+	<1327589830-2273-1-git-send-email-prakity@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
-	<mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
-	<mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Sender: alsa-devel-bounces@alsa-project.org
-Errors-To: alsa-devel-bounces@alsa-project.org
-To: linux-kernel@vger.kernel.org
-Cc: alsa-devel@alsa-project.org, linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, linux-serial@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:50876 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751720Ab2AZPDA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 26 Jan 2012 10:03:00 -0500
+In-Reply-To: <1327589830-2273-1-git-send-email-prakity@marvell.com>
+	(philipspatches@gmail.com's message of "Thu, 26 Jan 2012 06:57:10
+	-0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: philipspatches@gmail.com
+Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>, Bing Zhao <bzhao@marvell.com>
 
-This is v2 of the simple DMA dmaengine library. It addresses Paul's 
-comments to v1 - thanks, adds some comments.
+Hi,
 
-Guennadi Liakhovetski (7):
-  dmaengine: add a simple dma library
-  dma: shdma: prepare for simple DMA conversion
-  mmc: sh_mmcif: remove unneeded struct sh_mmcif_dma, prepare for
-    simple DMA
-  mmc: sh_mobile_sdhi: prepare for conversion to simple DMA
-  serial: sh-sci: prepare for conversion to simple DMA
-  ASoC: SIU: prepare for conversion to simple DMA
-  dma: shdma: convert to the simple DMA library
+On Thu, Jan 26 2012, philipspatches@gmail.com wrote:
+> From: Philip Rakity <prakity@marvell.com>
+>
+> A UHS sdio card that fails initialization at 1.8v signaling
+> is not in UHS mode.  We cannot use the speed in the the cis
+> to reflect the bus speed as this is the maxiumum value and
+> will not reflect the fact that the host is operating at a
+> lower (non uhs) bus speed.
+>
+> Signed-off-by: Philip Rakity <prakity@marvell.com>
+> Signed-off-by: Bing Zhao <bzhao@marvell.com>
+> Reviewed-by: Aaron Lu <aaron.lu@amd.com>
 
- drivers/dma/Kconfig               |    4 +
- drivers/dma/Makefile              |    1 +
- drivers/dma/dma-simple.c          |  873 ++++++++++++++++++++++++++++
- drivers/dma/shdma.c               | 1138 +++++++++----------------------------
- drivers/dma/shdma.h               |   45 +-
- drivers/mmc/host/sh_mmcif.c       |   24 +-
- drivers/mmc/host/sh_mobile_sdhi.c |    8 +-
- drivers/tty/serial/sh-sci.c       |    8 +-
- include/linux/dma-simple.h        |  124 ++++
- include/linux/mmc/sh_mmcif.h      |    8 +-
- include/linux/sh_dma.h            |   39 +-
- sound/soc/sh/siu_pcm.c            |    8 +-
- 12 files changed, 1334 insertions(+), 946 deletions(-)
- create mode 100644 drivers/dma/dma-simple.c
- create mode 100644 include/linux/dma-simple.h
+Thanks, pushed to mmc-next for 3.3.
 
+- Chris.
 -- 
-1.7.2.5
-
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
