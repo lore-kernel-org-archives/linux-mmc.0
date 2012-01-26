@@ -1,43 +1,54 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 4/7 v2] mmc: sh_mobile_sdhi: prepare for conversion to simple DMA
-Date: Thu, 26 Jan 2012 15:56:21 +0100
-Message-ID: <1327589784-4287-5-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 5/7 v2] serial: sh-sci: prepare for conversion to simple DMA
+Date: Thu, 26 Jan 2012 15:56:22 +0100
+Message-ID: <1327589784-4287-6-git-send-email-g.liakhovetski@gmx.de>
 References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:64387 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752535Ab2AZO4g (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2012 09:56:36 -0500
+Return-path: <linux-serial-owner@vger.kernel.org>
 In-Reply-To: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-serial-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
+List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c |    8 ++++----
+ drivers/tty/serial/sh-sci.c |    8 ++++----
  1 files changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index f91c3aa..2c3a9d3 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -130,10 +130,10 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		mmc_data->cd_gpio = p->cd_gpio;
+diff --git a/drivers/tty/serial/sh-sci.c b/drivers/tty/serial/sh-sci.c
+index 7508579..8b99aac 100644
+--- a/drivers/tty/serial/sh-sci.c
++++ b/drivers/tty/serial/sh-sci.c
+@@ -1574,9 +1574,9 @@ static bool filter(struct dma_chan *chan, void *slave)
+ 	struct sh_dmae_slave *param = slave;
  
- 		if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
--			priv->param_tx.slave_id = p->dma_slave_tx;
--			priv->param_rx.slave_id = p->dma_slave_rx;
--			priv->dma_priv.chan_priv_tx = &priv->param_tx;
--			priv->dma_priv.chan_priv_rx = &priv->param_rx;
-+			priv->param_tx.simple_slave.slave_id = p->dma_slave_tx;
-+			priv->param_rx.simple_slave.slave_id = p->dma_slave_rx;
-+			priv->dma_priv.chan_priv_tx = &priv->param_tx.simple_slave;
-+			priv->dma_priv.chan_priv_rx = &priv->param_rx.simple_slave;
- 			priv->dma_priv.alignment_shift = 1; /* 2-byte alignment */
- 			mmc_data->dma = &priv->dma_priv;
- 		}
+ 	dev_dbg(chan->device->dev, "%s: slave ID %d\n", __func__,
+-		param->slave_id);
++		param->simple_slave.slave_id);
+ 
+-	chan->private = param;
++	chan->private = &param->simple_slave;
+ 	return true;
+ }
+ 
+@@ -1615,7 +1615,7 @@ static void sci_request_dma(struct uart_port *port)
+ 	param = &s->param_tx;
+ 
+ 	/* Slave ID, e.g., SHDMA_SLAVE_SCIF0_TX */
+-	param->slave_id = s->cfg->dma_slave_tx;
++	param->simple_slave.slave_id = s->cfg->dma_slave_tx;
+ 
+ 	s->cookie_tx = -EINVAL;
+ 	chan = dma_request_channel(mask, filter, param);
+@@ -1643,7 +1643,7 @@ static void sci_request_dma(struct uart_port *port)
+ 	param = &s->param_rx;
+ 
+ 	/* Slave ID, e.g., SHDMA_SLAVE_SCIF0_RX */
+-	param->slave_id = s->cfg->dma_slave_rx;
++	param->simple_slave.slave_id = s->cfg->dma_slave_rx;
+ 
+ 	chan = dma_request_channel(mask, filter, param);
+ 	dev_dbg(port->dev, "%s: RX: got channel %p\n", __func__, chan);
 -- 
 1.7.2.5
 
