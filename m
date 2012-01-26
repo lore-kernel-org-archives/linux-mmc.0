@@ -1,224 +1,44 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH v2] mmc: dw_mmc: Add support for pre_req and post_req
-Date: Thu, 26 Jan 2012 16:32:10 +0900
-Message-ID: <000101ccdbfc$9d74c9a0$d85e5ce0$%jun@samsung.com>
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH v3 2/2] mmc: core: Support packed command for eMMC4.5 device
+Date: Thu, 26 Jan 2012 16:39:53 +0900
+Message-ID: <CAKYAXd8mKNGk2e8wo1eG9zB0L876HswMO4JmxAJ85TkouaB1UA@mail.gmail.com>
+References: <002701ccd728$edab9350$c902b9f0$%jun@samsung.com>
+	<CAKLKtzddDXhbT6o8XUsMxad9+_a_StJCQz+eBnfQ+q+xLuJQKg@mail.gmail.com>
+	<CAKYAXd8A70X1gb-NFHVDMXd-aSG6+Y3PWvRTZDMT3-Ze3aF5Yw@mail.gmail.com>
+	<002501ccdb20$c98b2e80$5ca18b80$%jun@samsung.com>
+	<CAKYAXd_jdGfpC9kcYht=qnfaTPwE+YEx1fo89GkpRyWcN6igig@mail.gmail.com>
+	<CAKYAXd-pCS4kRsg0PJp98YRqz_P0CtTKWEWiQJarE_iHqiesYQ@mail.gmail.com>
+	<000c01ccdbf0$71fe58b0$55fb0a10$%jun@samsung.com>
+	<CAKYAXd8zFf7AF5_X-divH51+B=Y2YC1ZjZF00D_=+R6eF8qe9g@mail.gmail.com>
+	<000001ccdbfb$926d90b0$b748b210$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:50269 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751242Ab2AZHcM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2012 02:32:12 -0500
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LYE000OZA95H140@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 26 Jan 2012 16:32:10 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
- 64bit (built Sep  7 2010)) with ESMTPA id <0LYE005O6A9MVL70@mmp1.samsung.com>
- for linux-mmc@vger.kernel.org; Thu, 26 Jan 2012 16:32:10 +0900 (KST)
-Content-language: ko
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:48523 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751688Ab2AZHjz convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2012 02:39:55 -0500
+In-Reply-To: <000001ccdbfb$926d90b0$b748b210$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Saugata Das <saugata.das@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-This patch implements pre_req and post_req in dw_mmc
-to support asynchronous mmc request.
-
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
----
-Changes in v2:
-	Consider system DMA case as well as IDMAC.
-
-NOTE:
-    Performance gains the following.
-    Sequential read and write improve 23% and 5% respectively.
-
- drivers/mmc/host/dw_mmc.c |  129 +++++++++++++++++++++++++++++++++++---------
- 1 files changed, 102 insertions(+), 27 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 0e34279..5c91acb 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -297,14 +297,24 @@ static void dw_mci_stop_dma(struct dw_mci *host)
- }
- 
- #ifdef CONFIG_MMC_DW_IDMAC
-+static int dw_mci_get_dma_dir(struct mmc_data *data)
-+{
-+	if (data->flags & MMC_DATA_WRITE)
-+		return DMA_TO_DEVICE;
-+	else
-+		return DMA_FROM_DEVICE;
-+}
-+
- static void dw_mci_dma_cleanup(struct dw_mci *host)
- {
- 	struct mmc_data *data = host->data;
- 
- 	if (data)
--		dma_unmap_sg(&host->pdev->dev, data->sg, data->sg_len,
--			     ((data->flags & MMC_DATA_WRITE)
--			      ? DMA_TO_DEVICE : DMA_FROM_DEVICE));
-+		if (!data->host_cookie)
-+			dma_unmap_sg(&host->pdev->dev,
-+				     data->sg,
-+				     data->sg_len,
-+				     dw_mci_get_dma_dir(data));
- }
- 
- static void dw_mci_idmac_stop_dma(struct dw_mci *host)
-@@ -420,26 +430,15 @@ static int dw_mci_idmac_init(struct dw_mci *host)
- 	return 0;
- }
- 
--static struct dw_mci_dma_ops dw_mci_idmac_ops = {
--	.init = dw_mci_idmac_init,
--	.start = dw_mci_idmac_start_dma,
--	.stop = dw_mci_idmac_stop_dma,
--	.complete = dw_mci_idmac_complete_dma,
--	.cleanup = dw_mci_dma_cleanup,
--};
--#endif /* CONFIG_MMC_DW_IDMAC */
--
--static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
-+static int dw_mci_pre_dma_transfer(struct dw_mci *host,
-+				   struct mmc_data *data,
-+				   bool next)
- {
- 	struct scatterlist *sg;
--	unsigned int i, direction, sg_len;
--	u32 temp;
--
--	host->using_dma = 0;
-+	unsigned int i, sg_len;
- 
--	/* If we don't have a channel, we can't do DMA */
--	if (!host->use_dma)
--		return -ENODEV;
-+	if (!next && data->host_cookie)
-+		return data->host_cookie;
- 
- 	/*
- 	 * We don't do DMA on "complex" transfers, i.e. with
-@@ -448,6 +447,7 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
- 	 */
- 	if (data->blocks * data->blksz < DW_MCI_DMA_THRESHOLD)
- 		return -EINVAL;
-+
- 	if (data->blksz & 3)
- 		return -EINVAL;
- 
-@@ -456,15 +456,88 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
- 			return -EINVAL;
- 	}
- 
--	host->using_dma = 1;
-+	sg_len = dma_map_sg(&host->pdev->dev,
-+			    data->sg,
-+			    data->sg_len,
-+			    dw_mci_get_dma_dir(data));
-+	if (sg_len == 0)
-+		return -EINVAL;
- 
--	if (data->flags & MMC_DATA_READ)
--		direction = DMA_FROM_DEVICE;
--	else
--		direction = DMA_TO_DEVICE;
-+	if (next)
-+		data->host_cookie = sg_len;
-+
-+	return sg_len;
-+}
-+
-+static struct dw_mci_dma_ops dw_mci_idmac_ops = {
-+	.init = dw_mci_idmac_init,
-+	.start = dw_mci_idmac_start_dma,
-+	.stop = dw_mci_idmac_stop_dma,
-+	.complete = dw_mci_idmac_complete_dma,
-+	.cleanup = dw_mci_dma_cleanup,
-+};
-+#else
-+static int dw_mci_pre_dma_transfer(struct dw_mci *host,
-+				   struct mmc_data *data,
-+				   bool next)
-+{
-+	return -ENOSYS;
-+}
-+#endif /* CONFIG_MMC_DW_IDMAC */
-+
-+static void dw_mci_pre_req(struct mmc_host *mmc,
-+			   struct mmc_request *mrq,
-+			   bool is_first_req)
-+{
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
-+	struct mmc_data *data = mrq->data;
-+
-+	if (!slot->host->use_dma || !data)
-+		return;
-+
-+	if (data->host_cookie) {
-+		data->host_cookie = 0;
-+		return;
-+	}
-+
-+	if (dw_mci_pre_dma_transfer(slot->host, mrq->data, 1) < 0)
-+		data->host_cookie = 0;
-+}
-+
-+static void dw_mci_post_req(struct mmc_host *mmc,
-+			    struct mmc_request *mrq,
-+			    int err)
-+{
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
-+	struct mmc_data *data = mrq->data;
-+
-+	if (!slot->host->use_dma || !data)
-+		return;
-+
-+	if (data->host_cookie)
-+		dma_unmap_sg(&slot->host->pdev->dev,
-+				data->sg,
-+				data->sg_len,
-+				dw_mci_get_dma_dir(data));
-+	data->host_cookie = 0;
-+}
-+
-+static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
-+{
-+	int sg_len;
-+	u32 temp;
- 
--	sg_len = dma_map_sg(&host->pdev->dev, data->sg, data->sg_len,
--			    direction);
-+	host->using_dma = 0;
-+
-+	/* If we don't have a channel, we can't do DMA */
-+	if (!host->use_dma)
-+		return -ENODEV;
-+
-+	sg_len = dw_mci_pre_dma_transfer(host, data, 0);
-+	if (sg_len < 0)
-+		return sg_len;
-+
-+	host->using_dma = 1;
- 
- 	dev_vdbg(&host->pdev->dev,
- 		 "sd sg_cpu: %#lx sg_dma: %#lx sg_len: %d\n",
-@@ -795,6 +868,8 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
- 
- static const struct mmc_host_ops dw_mci_ops = {
- 	.request		= dw_mci_request,
-+	.pre_req		= dw_mci_pre_req,
-+	.post_req		= dw_mci_post_req,
- 	.set_ios		= dw_mci_set_ios,
- 	.get_ro			= dw_mci_get_ro,
- 	.get_cd			= dw_mci_get_cd,
--- 
-1.7.0.4
-
-
+>> > =C2=A0 =C2=A0 =C2=A0 =C2=A0- Add a variable member in mmc_host for=
+ minimum number of packed entries.
+>> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0This value can be overridden by =
+host.
+>> Ah.. Okay~ I clearly understand about two queston.
+>> Totally, Looks good to me.
+>> Thanks for your reply.
+>> And I heard that packed cmd is not good while reading small chunk,
+>> If so, I want to use packed write cmd not read cmd.
+>> Can I use packed only packed write cmd by seperating
+>> MMC_CAP2_PACKED_READ_CMD and MMC_CAP2_PACKED_WRITE_CMD ?
+> Do you think this separate use is common?
+> Let me consider this more.
+It is just my idea on user side. if we can select packed read/write
+set, I believe that we can optmize performance accoding to own's
+environment.
+Thanks.
