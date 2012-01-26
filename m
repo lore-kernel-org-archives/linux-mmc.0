@@ -1,72 +1,64 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 21/31] ARM: amba: realview: get rid of private platform
-	amba_device initializer
-Date: Wed, 25 Jan 2012 11:06:47 +0000
-Message-ID: <20120125110647.GV16726@n2100.arm.linux.org.uk>
-References: <20120120092207.GD1068@n2100.arm.linux.org.uk> <E1RoAmo-0005Ff-DW@rmk-PC.arm.linux.org.uk> <20120124160044.GM19798@mudshark.cambridge.arm.com> <20120124162328.GA8517@n2100.arm.linux.org.uk> <20120124172600.GO19798@mudshark.cambridge.arm.com> <20120124214531.GB8517@n2100.arm.linux.org.uk> <20120125095800.GC21709@mudshark.cambridge.arm.com> <20120125102202.GU16726@n2100.arm.linux.org.uk> <20120125103906.GE21709@mudshark.cambridge.arm.com>
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH v3 2/2] mmc: core: Support packed command for eMMC4.5 device
+Date: Thu, 26 Jan 2012 13:31:42 +0900
+Message-ID: <CAKYAXd-pCS4kRsg0PJp98YRqz_P0CtTKWEWiQJarE_iHqiesYQ@mail.gmail.com>
+References: <002701ccd728$edab9350$c902b9f0$%jun@samsung.com>
+	<CAKLKtzddDXhbT6o8XUsMxad9+_a_StJCQz+eBnfQ+q+xLuJQKg@mail.gmail.com>
+	<CAKYAXd8A70X1gb-NFHVDMXd-aSG6+Y3PWvRTZDMT3-Ze3aF5Yw@mail.gmail.com>
+	<002501ccdb20$c98b2e80$5ca18b80$%jun@samsung.com>
+	<CAKYAXd_jdGfpC9kcYht=qnfaTPwE+YEx1fo89GkpRyWcN6igig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:35056 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751106Ab2AYLHo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2012 06:07:44 -0500
-Content-Disposition: inline
-In-Reply-To: <20120125103906.GE21709@mudshark.cambridge.arm.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:53404 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751682Ab2AZEbo convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2012 23:31:44 -0500
+In-Reply-To: <CAKYAXd_jdGfpC9kcYht=qnfaTPwE+YEx1fo89GkpRyWcN6igig@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Will Deacon <will.deacon@arm.com>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, STEricsson <STEricsson_nomadik_linux@list.st.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Saugata Das <saugata.das@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-On Wed, Jan 25, 2012 at 10:39:06AM +0000, Will Deacon wrote:
-> On Wed, Jan 25, 2012 at 10:22:02AM +0000, Russell King - ARM Linux wrote:
-> > On Wed, Jan 25, 2012 at 09:58:00AM +0000, Will Deacon wrote:
-> > > Sure. Which branch shall I take it against (before or after your amba
-> > > changes)?
-> > 
-> > If it's before them, we can think about putting it in as a fix during
-> > this -rc independently of the rest of the changes.  If it's after,
-> > then it'll probably add a conflict.
-> > 
-> > So, it'll be much easier to have it before, and I'll update what's
-> > necessary in the amba branch.
-> 
-> Okey doke, I've submitted it as 7300/1 against 3.3-rc1.
+2012/1/25 Namjae Jeon <linkinjeon@gmail.com>:
+>>> >> +
+>>> >> +static int mmc_blk_issue_packed_rd(struct mmc_queue *mq,
+>>> >> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 struct mmc_qu=
+eue_req *mq_rq)
+>>> >> +{
+>>> >> + =C2=A0 =C2=A0 =C2=A0 struct mmc_blk_data *md =3D mq->data;
+>>> >> + =C2=A0 =C2=A0 =C2=A0 struct mmc_card *card =3D md->queue.card;
+>>> >> + =C2=A0 =C2=A0 =C2=A0 int status, ret =3D -EIO, retry =3D 2;
+> Hi. Seungwon.
+> First Thansk for your reply.
+> There is one more my review comment.
+> I think that EIO of ret is not needed. there is no case to be skipped
+> if/ese condition in do while loop.
 
-Right, so with the stack of amba patches on top, it looks like this,
-which to me looks sane.  I haven't build-tested it though.
+Hi. Seungwon.
 
-diff --git a/arch/arm/mach-realview/include/mach/irqs-pb1176.h b/arch/arm/mach-realview/include/mach/irqs-pb1176.h
-index 5c3c625..708f841 100644
---- a/arch/arm/mach-realview/include/mach/irqs-pb1176.h
-+++ b/arch/arm/mach-realview/include/mach/irqs-pb1176.h
-@@ -40,6 +40,7 @@
- #define IRQ_DC1176_L2CC		(IRQ_DC1176_GIC_START + 13)
- #define IRQ_DC1176_RTC		(IRQ_DC1176_GIC_START + 14)
- #define IRQ_DC1176_CLCD		(IRQ_DC1176_GIC_START + 15)	/* CLCD controller */
-+#define IRQ_DC1176_GPIO0	(IRQ_DC1176_GIC_START + 16)
- #define IRQ_DC1176_SSP		(IRQ_DC1176_GIC_START + 17)	/* SSP port */
- #define IRQ_DC1176_UART0	(IRQ_DC1176_GIC_START + 18)	/* UART 0 on development chip */
- #define IRQ_DC1176_UART1	(IRQ_DC1176_GIC_START + 19)	/* UART 1 on development chip */
-@@ -73,7 +74,6 @@
- #define IRQ_PB1176_DMAC		(IRQ_PB1176_GIC_START + 24)	/* DMA controller */
- #define IRQ_PB1176_RTC		(IRQ_PB1176_GIC_START + 25)	/* Real Time Clock */
- 
--#define IRQ_PB1176_GPIO0	-1
- #define IRQ_PB1176_SCTL		-1
- 
- #define NR_GIC_PB1176		2
-diff --git a/arch/arm/mach-realview/realview_pb1176.c b/arch/arm/mach-realview/realview_pb1176.c
-index 1b6e60c..b1d7caf 100644
---- a/arch/arm/mach-realview/realview_pb1176.c
-+++ b/arch/arm/mach-realview/realview_pb1176.c
-@@ -143,7 +143,7 @@ static struct pl022_ssp_controller ssp0_plat_data = {
- #define PB1176_CLCD_IRQ	{ IRQ_DC1176_CLCD }
- #define SCTL_IRQ	{ }
- #define PB1176_WATCHDOG_IRQ	{ IRQ_DC1176_WATCHDOG }
--#define PB1176_GPIO0_IRQ	{ IRQ_PB1176_GPIO0 }
-+#define PB1176_GPIO0_IRQ	{ IRQ_DC1176_GPIO0 }
- #define GPIO1_IRQ	{ IRQ_PB1176_GPIO1 }
- #define PB1176_RTC_IRQ	{ IRQ_DC1176_RTC }
- #define SCI_IRQ		{ IRQ_PB1176_SCI }
+  if ((!mmc_host_is_spi(card->host) && rq_data_dir(req) !=3D READ) ||
++                       (mq_mrq->packed_cmd =3D=3D MMC_PACKED_WR_HDR)) =
+{
 
+it seems more better that upper if condition is changed like the below.
+
+if (!mmc_host_is_spi(card->host) && ((rq_data_dir(req) !=3D READ) ||
++                       (mq_mrq->packed_cmd =3D=3D MMC_PACKED_WR_HDR)))=
+ {
+
+
++++ b/drivers/mmc/core/host.c
+@@ -346,6 +346,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct
+device *dev)
+       host->max_blk_size =3D 512;
+       host->max_blk_count =3D PAGE_CACHE_SIZE / 512;
+
++       host->packed_min =3D 2;
++
+       return host;
+
+if packed_min is fixed value without increasing/decreasing,  it seems
+more better to use macro.
+Thanks.
