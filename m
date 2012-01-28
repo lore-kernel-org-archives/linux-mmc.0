@@ -1,201 +1,201 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: Re: [PATCH V4] mmc: Set suspend/resume bus operations if
- CONFIG_PM_RUNTIME is used
-Date: Sat, 28 Jan 2012 22:32:26 +0800
-Message-ID: <CAGsJ_4wJuRH2rmAxpnAMARB6u6+wd0auTzNZoVk7mW4Yg6ucbw@mail.gmail.com>
-References: <20120110181803.0200A3835E@ushik.mtv.corp.google.com>
- <CAGsJ_4wetB3SKDoBg7=qNxEYtOrT8UD59eVwYPKJ+gvb7d3gqQ@mail.gmail.com> <CAH7ZN-yi-q=bX2SpKH1X39mO8Usoe0uSJQmx+k_KjSeHsUPwAA@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH] sh: ecovec: switch SDHI controllers to card polling
+Date: Sat, 28 Jan 2012 19:36:24 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1201281929450.27970@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:33071 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753459Ab2A1Ocs convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 28 Jan 2012 09:32:48 -0500
-Received: by bkas6 with SMTP id s6so2129752bka.19
-        for <linux-mmc@vger.kernel.org>; Sat, 28 Jan 2012 06:32:46 -0800 (PST)
-In-Reply-To: <CAH7ZN-yi-q=bX2SpKH1X39mO8Usoe0uSJQmx+k_KjSeHsUPwAA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dmitry Shmidt <dimitrysh@google.com>
-Cc: linux-mmc@vger.kernel.org, Bin Shi <bin.shi@csr.com>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>
 
-2012/1/12 Dmitry Shmidt <dimitrysh@google.com>
->
-> On Tue, Jan 10, 2012 at 6:44 PM, Barry Song <21cnbao@gmail.com> wrote=
-:
-> > 2012/1/10 Dmitry Shmidt <dimitrysh@google.com>:
-> >> Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
-> >
-> > Hi Dmitry,
-> > after you move mmc_bus_suspend, mmc_bus_resume to dev_pm_ops, while
-> > doing hiberantion by swsusp, suspend/resume will not be called by t=
-he
-> > hibernation flow since it will move to call freeze/thaw/restore. if=
- we
-> > don't stop blk queue for SD while doing hibernation, SD card will h=
-ang
-> > in the processing of restoring system.
-> >
-> > pls note Bin's patch "mmc: core: move suspend/resume to dev_pm_ops =
-and
-> > add hibernation support"
-> > http://www.spinics.net/lists/linux-mmc/msg12007.html
-> > he has done some duplicated job with you except adding swsusp suppo=
-rt.
-> >
-> > -barry
->
-> Hi Barry,
->
-> Definitely I didn't cover hibernation support.
-> Bin's patch resolves the problem I tried to address, so I am ok with
-> his version.
+Polling for card hotplug events is a better option than using SDHI native
+hotplug interrupt, because the latter option forces the controller to stay
+permanently powered up and enabled.
 
-i think maybe merging yours and bin's is better. i'd like to send v4
-with your and bin's sob and think you as the author of the patch.
-at least, SET_SYSTEM_SLEEP_PM_OPS and SET_RUNTIME_PM_OPS are better use=
-d.
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
 
->
-> Thanks,
->
-> Dmitry
->
-> >
-> >> ---
-> >> =C2=A0drivers/mmc/card/block.c | =C2=A0 =C2=A04 ++--
-> >> =C2=A0drivers/mmc/core/bus.c =C2=A0 | =C2=A0 25 ++++++++----------=
--------
-> >> =C2=A0include/linux/mmc/card.h | =C2=A0 =C2=A02 +-
-> >> =C2=A03 files changed, 11 insertions(+), 20 deletions(-)
-> >>
-> >> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> >> index 1e0e27c..5724ae1 100644
-> >> --- a/drivers/mmc/card/block.c
-> >> +++ b/drivers/mmc/card/block.c
-> >> @@ -1676,8 +1676,8 @@ static void mmc_blk_remove(struct mmc_card *=
-card)
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0mmc_set_drvdata(card, NULL);
-> >> =C2=A0}
-> >>
-> >> -#ifdef CONFIG_PM
-> >> -static int mmc_blk_suspend(struct mmc_card *card, pm_message_t st=
-ate)
-> >> +#ifdef CONFIG_PM_SLEEP
-> >> +static int mmc_blk_suspend(struct mmc_card *card)
-> >> =C2=A0{
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct mmc_blk_data *part_md;
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct mmc_blk_data *md =3D mmc_get_drv=
-data(card);
-> >> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> >> index 6be4924..bf8ad29 100644
-> >> --- a/drivers/mmc/core/bus.c
-> >> +++ b/drivers/mmc/core/bus.c
-> >> @@ -122,14 +122,15 @@ static int mmc_bus_remove(struct device *dev=
-)
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0return 0;
-> >> =C2=A0}
-> >>
-> >> -static int mmc_bus_suspend(struct device *dev, pm_message_t state=
-)
-> >> +#ifdef CONFIG_PM_SLEEP
-> >> +static int mmc_bus_suspend(struct device *dev)
-> >> =C2=A0{
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct mmc_driver *drv =3D to_mmc_drive=
-r(dev->driver);
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct mmc_card *card =3D mmc_dev_to_ca=
-rd(dev);
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0int ret =3D 0;
-> >>
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (dev->driver && drv->suspend)
-> >> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D drv->su=
-spend(card, state);
-> >> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 ret =3D drv->su=
-spend(card);
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0return ret;
-> >> =C2=A0}
-> >>
-> >> @@ -143,9 +144,9 @@ static int mmc_bus_resume(struct device *dev)
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0ret =3D drv=
-->resume(card);
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0return ret;
-> >> =C2=A0}
-> >> +#endif /* CONFIG_PM_SLEEP */
-> >>
-> >> =C2=A0#ifdef CONFIG_PM_RUNTIME
-> >> -
-> >> =C2=A0static int mmc_runtime_suspend(struct device *dev)
-> >> =C2=A0{
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct mmc_card *card =3D mmc_dev_to_ca=
-rd(dev);
-> >> @@ -164,21 +165,13 @@ static int mmc_runtime_idle(struct device *d=
-ev)
-> >> =C2=A0{
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0return pm_runtime_suspend(dev);
-> >> =C2=A0}
-> >> +#endif /* CONFIG_PM_RUNTIME */
-> >>
-> >> =C2=A0static const struct dev_pm_ops mmc_bus_pm_ops =3D {
-> >> - =C2=A0 =C2=A0 =C2=A0 .runtime_suspend =C2=A0 =C2=A0 =C2=A0 =C2=A0=
-=3D mmc_runtime_suspend,
-> >> - =C2=A0 =C2=A0 =C2=A0 .runtime_resume =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =3D mmc_runtime_resume,
-> >> - =C2=A0 =C2=A0 =C2=A0 .runtime_idle =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =3D mmc_runtime_idle,
-> >> + =C2=A0 =C2=A0 =C2=A0 SET_SYSTEM_SLEEP_PM_OPS(mmc_bus_suspend, mm=
-c_bus_resume)
-> >> + =C2=A0 =C2=A0 =C2=A0 SET_RUNTIME_PM_OPS(mmc_runtime_suspend, mmc=
-_runtime_resume, mmc_runtime_idle)
-> >> =C2=A0};
-> >>
-> >> -#define MMC_PM_OPS_PTR (&mmc_bus_pm_ops)
-> >> -
-> >> -#else /* !CONFIG_PM_RUNTIME */
-> >> -
-> >> -#define MMC_PM_OPS_PTR NULL
-> >> -
-> >> -#endif /* !CONFIG_PM_RUNTIME */
-> >> -
-> >> =C2=A0static struct bus_type mmc_bus_type =3D {
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0.name =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =3D "mmc",
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0.dev_attrs =C2=A0 =C2=A0 =C2=A0=3D mmc_=
-dev_attrs,
-> >> @@ -186,9 +179,7 @@ static struct bus_type mmc_bus_type =3D {
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0.uevent =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D=
- mmc_bus_uevent,
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0.probe =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
-=3D mmc_bus_probe,
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0.remove =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D=
- mmc_bus_remove,
-> >> - =C2=A0 =C2=A0 =C2=A0 .suspend =C2=A0 =C2=A0 =C2=A0 =C2=A0=3D mmc=
-_bus_suspend,
-> >> - =C2=A0 =C2=A0 =C2=A0 .resume =C2=A0 =C2=A0 =C2=A0 =C2=A0 =3D mmc=
-_bus_resume,
-> >> - =C2=A0 =C2=A0 =C2=A0 .pm =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =3D MMC_PM_OPS_PTR,
-> >> + =C2=A0 =C2=A0 =C2=A0 .pm =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =3D &mmc_bus_pm_ops,
-> >> =C2=A0};
-> >>
-> >> =C2=A0int mmc_register_bus(void)
-> >> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> >> index c8ef9bc..80caf1d 100644
-> >> --- a/include/linux/mmc/card.h
-> >> +++ b/include/linux/mmc/card.h
-> >> @@ -455,7 +455,7 @@ struct mmc_driver {
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct device_driver drv;
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0int (*probe)(struct mmc_card *);
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0void (*remove)(struct mmc_card *);
-> >> - =C2=A0 =C2=A0 =C2=A0 int (*suspend)(struct mmc_card *, pm_messag=
-e_t);
-> >> + =C2=A0 =C2=A0 =C2=A0 int (*suspend)(struct mmc_card *);
-> >> =C2=A0 =C2=A0 =C2=A0 =C2=A0int (*resume)(struct mmc_card *);
-> >> =C2=A0};
-> >>
-> >> --
-> >> 1.7.3.1
+It is a kind of an RFC. We do in general prefer SDHI polling to SDHI 
+native hotplug detection for the above reason, but there might well be 
+other reasons, why this is not a good idea in this specific case. If there 
+are such, I'd love to hear about them.
 
--barry
+ arch/sh/boards/mach-ecovec24/setup.c |  104 ++++++++++++++++++++-------------
+ 1 files changed, 63 insertions(+), 41 deletions(-)
+
+diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
+index 033ef2b..c8d1bbd 100644
+--- a/arch/sh/boards/mach-ecovec24/setup.c
++++ b/arch/sh/boards/mach-ecovec24/setup.c
+@@ -522,11 +522,18 @@ static void sdhi0_set_pwr(struct platform_device *pdev, int state)
+ 	gpio_set_value(GPIO_PTB6, state);
+ }
+ 
++static int sdhi0_get_cd(struct platform_device *pdev)
++{
++	return !gpio_get_value(GPIO_PTY7);
++}
++
+ static struct sh_mobile_sdhi_info sdhi0_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
+ 	.set_pwr	= sdhi0_set_pwr,
+-	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD,
++	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
++			  MMC_CAP_NEEDS_POLL,
++	.get_cd		= sdhi0_get_cd,
+ };
+ 
+ static struct resource sdhi0_resources[] = {
+@@ -559,11 +566,18 @@ static void sdhi1_set_pwr(struct platform_device *pdev, int state)
+ 	gpio_set_value(GPIO_PTB7, state);
+ }
+ 
++static int sdhi1_get_cd(struct platform_device *pdev)
++{
++	return !gpio_get_value(GPIO_PTW7);
++}
++
+ static struct sh_mobile_sdhi_info sdhi1_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI1_TX,
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
+-	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD,
++	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
++			  MMC_CAP_NEEDS_POLL,
+ 	.set_pwr	= sdhi1_set_pwr,
++	.get_cd		= sdhi1_get_cd,
+ };
+ 
+ static struct resource sdhi1_resources[] = {
+@@ -999,6 +1013,7 @@ extern char ecovec24_sdram_leave_end;
+ static int __init arch_setup(void)
+ {
+ 	struct clk *clk;
++	bool cn12_enabled = false;
+ 
+ 	/* register board specific self-refresh code */
+ 	sh_mobile_register_self_refresh(SUSP_SH_STANDBY | SUSP_SH_SF |
+@@ -1199,9 +1214,13 @@ static int __init arch_setup(void)
+ 	gpio_direction_input(GPIO_PTR5);
+ 	gpio_direction_input(GPIO_PTR6);
+ 
++	/* SD-card slot CN11 */
++	/* Card-detect, used on CN11, either with SDHI0 or with SPI */
++	gpio_request(GPIO_PTY7, NULL);
++	gpio_direction_input(GPIO_PTY7);
++
+ #if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
+ 	/* enable SDHI0 on CN11 (needs DS2.4 set to ON) */
+-	gpio_request(GPIO_FN_SDHI0CD,  NULL);
+ 	gpio_request(GPIO_FN_SDHI0WP,  NULL);
+ 	gpio_request(GPIO_FN_SDHI0CMD, NULL);
+ 	gpio_request(GPIO_FN_SDHI0CLK, NULL);
+@@ -1211,23 +1230,6 @@ static int __init arch_setup(void)
+ 	gpio_request(GPIO_FN_SDHI0D0,  NULL);
+ 	gpio_request(GPIO_PTB6, NULL);
+ 	gpio_direction_output(GPIO_PTB6, 0);
+-
+-#if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
+-	/* enable SDHI1 on CN12 (needs DS2.6,7 set to ON,OFF) */
+-	gpio_request(GPIO_FN_SDHI1CD,  NULL);
+-	gpio_request(GPIO_FN_SDHI1WP,  NULL);
+-	gpio_request(GPIO_FN_SDHI1CMD, NULL);
+-	gpio_request(GPIO_FN_SDHI1CLK, NULL);
+-	gpio_request(GPIO_FN_SDHI1D3,  NULL);
+-	gpio_request(GPIO_FN_SDHI1D2,  NULL);
+-	gpio_request(GPIO_FN_SDHI1D1,  NULL);
+-	gpio_request(GPIO_FN_SDHI1D0,  NULL);
+-	gpio_request(GPIO_PTB7, NULL);
+-	gpio_direction_output(GPIO_PTB7, 0);
+-
+-	/* I/O buffer drive ability is high for SDHI1 */
+-	__raw_writew((__raw_readw(IODRIVEA) & ~0x3000) | 0x2000 , IODRIVEA);
+-#endif /* CONFIG_MMC_SH_MMCIF */
+ #else
+ 	/* enable MSIOF0 on CN11 (needs DS2.4 set to OFF) */
+ 	gpio_request(GPIO_FN_MSIOF0_TXD, NULL);
+@@ -1239,12 +1241,51 @@ static int __init arch_setup(void)
+ 	gpio_direction_output(GPIO_PTB6, 0); /* disable power by default */
+ 	gpio_request(GPIO_PTY6, NULL); /* write protect */
+ 	gpio_direction_input(GPIO_PTY6);
+-	gpio_request(GPIO_PTY7, NULL); /* card detect */
+-	gpio_direction_input(GPIO_PTY7);
+ 
+ 	spi_register_board_info(spi_bus, ARRAY_SIZE(spi_bus));
+ #endif
+ 
++	/* MMC/SD-card slot CN12 */
++#if defined(CONFIG_MMC_SH_MMCIF) || defined(CONFIG_MMC_SH_MMCIF_MODULE)
++	/* enable MMCIF (needs DS2.6,7 set to OFF,ON) */
++	gpio_request(GPIO_FN_MMC_D7, NULL);
++	gpio_request(GPIO_FN_MMC_D6, NULL);
++	gpio_request(GPIO_FN_MMC_D5, NULL);
++	gpio_request(GPIO_FN_MMC_D4, NULL);
++	gpio_request(GPIO_FN_MMC_D3, NULL);
++	gpio_request(GPIO_FN_MMC_D2, NULL);
++	gpio_request(GPIO_FN_MMC_D1, NULL);
++	gpio_request(GPIO_FN_MMC_D0, NULL);
++	gpio_request(GPIO_FN_MMC_CLK, NULL);
++	gpio_request(GPIO_FN_MMC_CMD, NULL);
++	gpio_request(GPIO_PTB7, NULL);
++	gpio_direction_output(GPIO_PTB7, 0);
++
++	cn12_enabled = true;
++#elif defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
++	/* enable SDHI1 on CN12 (needs DS2.6,7 set to ON,OFF) */
++	gpio_request(GPIO_FN_SDHI1WP,  NULL);
++	gpio_request(GPIO_FN_SDHI1CMD, NULL);
++	gpio_request(GPIO_FN_SDHI1CLK, NULL);
++	gpio_request(GPIO_FN_SDHI1D3,  NULL);
++	gpio_request(GPIO_FN_SDHI1D2,  NULL);
++	gpio_request(GPIO_FN_SDHI1D1,  NULL);
++	gpio_request(GPIO_FN_SDHI1D0,  NULL);
++	gpio_request(GPIO_PTB7, NULL);
++	gpio_direction_output(GPIO_PTB7, 0);
++
++	/* Card-detect, used on CN12 with SDHI1 */
++	gpio_request(GPIO_PTW7, NULL);
++	gpio_direction_input(GPIO_PTW7);
++
++	cn12_enabled = true;
++#endif
++
++	if (cn12_enabled)
++		/* I/O buffer drive ability is high for CN12 */
++		__raw_writew((__raw_readw(IODRIVEA) & ~0x3000) | 0x2000,
++			     IODRIVEA);
++
+ 	/* enable Video */
+ 	gpio_request(GPIO_PTU2, NULL);
+ 	gpio_direction_output(GPIO_PTU2, 1);
+@@ -1303,25 +1344,6 @@ static int __init arch_setup(void)
+ 	gpio_request(GPIO_PTU5, NULL);
+ 	gpio_direction_output(GPIO_PTU5, 0);
+ 
+-#if defined(CONFIG_MMC_SH_MMCIF) || defined(CONFIG_MMC_SH_MMCIF_MODULE)
+-	/* enable MMCIF (needs DS2.6,7 set to OFF,ON) */
+-	gpio_request(GPIO_FN_MMC_D7, NULL);
+-	gpio_request(GPIO_FN_MMC_D6, NULL);
+-	gpio_request(GPIO_FN_MMC_D5, NULL);
+-	gpio_request(GPIO_FN_MMC_D4, NULL);
+-	gpio_request(GPIO_FN_MMC_D3, NULL);
+-	gpio_request(GPIO_FN_MMC_D2, NULL);
+-	gpio_request(GPIO_FN_MMC_D1, NULL);
+-	gpio_request(GPIO_FN_MMC_D0, NULL);
+-	gpio_request(GPIO_FN_MMC_CLK, NULL);
+-	gpio_request(GPIO_FN_MMC_CMD, NULL);
+-	gpio_request(GPIO_PTB7, NULL);
+-	gpio_direction_output(GPIO_PTB7, 0);
+-
+-	/* I/O buffer drive ability is high for MMCIF */
+-	__raw_writew((__raw_readw(IODRIVEA) & ~0x3000) | 0x2000 , IODRIVEA);
+-#endif
+-
+ 	/* enable I2C device */
+ 	i2c_register_board_info(0, i2c0_devices,
+ 				ARRAY_SIZE(i2c0_devices));
+-- 
+1.7.2.5
+
