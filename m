@@ -1,79 +1,98 @@
-From: Douglas Gilbert <dgilbert@interlog.com>
-Subject: Re: [Bug 39822] SDHC cards no longer recognized on AT91 based board
-Date: Sat, 28 Jan 2012 19:37:22 -0500
-Message-ID: <4F2494C2.1070609@interlog.com>
-References: <bug-39822-26132@https.bugzilla.kernel.org/>	<201107282323.p6SNN9Jk026454@demeter1.kernel.org> <m28vridl10.fsf@bob.laptop.org> <4EA616E4.2060405@interlog.com>
-Reply-To: dgilbert@interlog.com
+From: Barry Song <21cnbao@gmail.com>
+Subject: Re: [PATCH V4] mmc: Set suspend/resume bus operations if
+ CONFIG_PM_RUNTIME is used
+Date: Sun, 29 Jan 2012 11:01:41 +0800
+Message-ID: <CAGsJ_4wCAD+Wb2RhC6bdni99YBFd1gS10mV2bO4aTmqrdkaehA@mail.gmail.com>
+References: <20120110181803.0200A3835E@ushik.mtv.corp.google.com>
+ <CAGsJ_4wetB3SKDoBg7=qNxEYtOrT8UD59eVwYPKJ+gvb7d3gqQ@mail.gmail.com>
+ <CAH7ZN-yi-q=bX2SpKH1X39mO8Usoe0uSJQmx+k_KjSeHsUPwAA@mail.gmail.com> <CAGsJ_4wJuRH2rmAxpnAMARB6u6+wd0auTzNZoVk7mW4Yg6ucbw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.infotech.no ([82.134.31.41]:49853 "EHLO smtp.infotech.no"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751954Ab2A2Ahb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 28 Jan 2012 19:37:31 -0500
-In-Reply-To: <4EA616E4.2060405@interlog.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:37953 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751500Ab2A2DCE convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 28 Jan 2012 22:02:04 -0500
+Received: by bkas6 with SMTP id s6so2356898bka.19
+        for <linux-mmc@vger.kernel.org>; Sat, 28 Jan 2012 19:02:02 -0800 (PST)
+In-Reply-To: <CAGsJ_4wJuRH2rmAxpnAMARB6u6+wd0auTzNZoVk7mW4Yg6ucbw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, ludovic.desroches@atmel.com, akpm@linux-foundation.org
+To: Dmitry Shmidt <dimitrysh@google.com>
+Cc: linux-mmc@vger.kernel.org, Bin Shi <bin.shi@csr.com>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>
 
-On 11-10-24 09:54 PM, Douglas Gilbert wrote:
-> On 11-07-28 07:48 PM, Chris Ball wrote:
->> Hi, thanks for the bug report. Adding linux-mmc@ and some atmel driver
->> folks to CC.
+> 2012/1/12 Dmitry Shmidt <dimitrysh@google.com>
 >>
->> On Thu, Jul 28 2011, bugzilla-daemon@bugzilla.kernel.org wrote:
->>> Prior to 3.0.0 the FoxG20 board (Atmel AT91SAM9G20) could boot and use
->>> both micro SD and SDHC card to contain its root file system. With the
->>> advent of the 3.0.0 kernel the micro SDHC card is unable to mount the
->>> root file system.
->>>
->>> Comparing the relevant part of dmesg for 2.6.38.6 (and it worked on
->>> 2.6.39):
->>> ...
->>> Waiting for root device /dev/mmcblk0p2...
->>> mmc0: host does not support reading read-only switch. assuming write-enable.
->>> at91_mci at91_mci: Timeout waiting end of packet
->>> mmc0: new SDHC card at address 1234
->>> mmcblk0: mmc0:1234 SA04G 3.67 GiB
->>> mmcblk0: p1 p2 p3
->>> ...
->>>
->>> to the same dmesg section for 3.0.0 :
->>> ...
->>> Waiting for root device /dev/mmcblk0p2...
->>> mmc0: error -110 whilst initialising SD card
->>> at91_mci at91_mci: Timeout waiting end of packet
->>> mmc0: error -110 whilst initialising SD card
->>> [no further progress]
->>>
->>> Non "HC" SD cards work as expected in 3.0.0
+>> On Tue, Jan 10, 2012 at 6:44 PM, Barry Song <21cnbao@gmail.com> wrot=
+e:
+>> > 2012/1/10 Dmitry Shmidt <dimitrysh@google.com>:
+>> >> Signed-off-by: Dmitry Shmidt <dimitrysh@google.com>
+
+Acked-by: Barry Song <Baohua.Song@csr.com>
+
+>> >
+>> > Hi Dmitry,
+>> > after you move mmc_bus_suspend, mmc_bus_resume to dev_pm_ops, whil=
+e
+>> > doing hiberantion by swsusp, suspend/resume will not be called by =
+the
+>> > hibernation flow since it will move to call freeze/thaw/restore. i=
+f we
+>> > don't stop blk queue for SD while doing hibernation, SD card will =
+hang
+>> > in the processing of restoring system.
+>> >
+>> > pls note Bin's patch "mmc: core: move suspend/resume to dev_pm_ops=
+ and
+>> > add hibernation support"
+>> > http://www.spinics.net/lists/linux-mmc/msg12007.html
+>> > he has done some duplicated job with you except adding swsusp supp=
+ort.
+>> >
+>> > -barry
 >>
->> If no-one on the CC list has any ideas, would you be interested in
->> trying to bisect this change?
+>> Hi Barry,
 >>
->> Another possibility would be adding printks before all of the -ETIMEDOUT
->> lines in core/* and host/at*, in order to see which one you're hitting
->> (and therefore which operation is causing the initialization to fail).
->> But a full bisection would be more conclusive.
+>> Definitely I didn't cover hibernation support.
+>> Bin's patch resolves the problem I tried to address, so I am ok with
+>> his version.
+
+sorry. as i checked again, yours actually covered hibernation support
+since SET_SYSTEM_SLEEP_PM_OPS is defined as:
+
+#ifdef CONFIG_PM_SLEEP
+#define SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+        .suspend =3D suspend_fn, \
+        .resume =3D resume_fn, \
+        .freeze =3D suspend_fn, \
+        .thaw =3D resume_fn, \
+        .poweroff =3D suspend_fn, \
+        .restore =3D resume_fn,
+#else
+#define SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn)
+#endif
+
+both s2ram and s2disk entries are set in SET_SYSTEM_SLEEP_PM_OPS.  so
+i'd like to ack your patch directly.
+
 >
-> Still broken in lk 3.1.0, same errors in dmesg.
+> i think maybe merging yours and bin's is better. i'd like to send v4
+> with your and bin's sob and think you as the author of the patch.
+> at least, SET_SYSTEM_SLEEP_PM_OPS and SET_RUNTIME_PM_OPS are better u=
+sed.
+>
+>>
+>> Thanks,
+>>
+>> Dmitry
+>>
+>> >
+>> >> ---
+>> >> =C2=A0drivers/mmc/card/block.c | =C2=A0 =C2=A04 ++--
+>> >> =C2=A0drivers/mmc/core/bus.c =C2=A0 | =C2=A0 25 ++++++++---------=
+--------
+>> >> =C2=A0include/linux/mmc/card.h | =C2=A0 =C2=A02 +-
+>> >> =C2=A03 files changed, 11 insertions(+), 20 deletions(-)
 
-Still broken in lk 3.2.0, same errors in dmesg.
-
-The solution (hack) up to lk 3.1.0 has been to take
-linux-2.6.38/drivers/mmc/core/sd.c file and overwrite
-the defective sd.c . That worked in lk 3.0.* and 3.1.* .
-In lk 3.2.0 the old sd.c no longer compiles but
-by adding "#include <linux/stat.h>" is does and thereafter
-that SDHC card can be read again.
-
-My test system is a FoxG20 card which is based on the
-AT91SAM9G20 SOC. The card's BIOS can read the 4 GB
-microSD (HC) card in all cases; the problem is with
-SDHC cards and all drivers/mmc/core/sd.c from and
-including lk 3.0.0
-
-Doug Gilbert
-
+-barry
