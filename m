@@ -1,39 +1,66 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: core: Ensure clocks are always enabled before host interaction
-Date: Mon, 30 Jan 2012 20:33:35 +0100
-Message-ID: <CACRpkdZOAEDTCoU=6=ukgEPj_1Qau8eRxxOx1H4p=310omvFXA@mail.gmail.com>
-References: <1323678104-28854-1-git-send-email-sthumma@codeaurora.org>
-	<CACRpkdbZS7TxKSpKR0DV4TC4dOzO_q83U1bd0HonKC2GBDBOgA@mail.gmail.com>
-	<4F1E2933.8030708@codeaurora.org>
-	<CAFEEs1=SoPvTSoBFybVLVC8ZHi8fuUNy0ZLAjXn2jYV0T5Lv3g@mail.gmail.com>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH 6/6] mmc: sdhci-s3c: Add device tree support
+Date: Mon, 30 Jan 2012 12:01:14 -0700
+Message-ID: <20120130190114.GR28397@ponder.secretlab.ca>
+References: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org>
+ <1320266163-15292-7-git-send-email-thomas.abraham@linaro.org>
+ <201201301051.22396.heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:38893 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752023Ab2A3Tdg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2012 14:33:36 -0500
-Received: by ggnb1 with SMTP id b1so2023844ggn.19
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2012 11:33:35 -0800 (PST)
-In-Reply-To: <CAFEEs1=SoPvTSoBFybVLVC8ZHi8fuUNy0ZLAjXn2jYV0T5Lv3g@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <201201301051.22396.heiko@sntech.de>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Heiko =?iso-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Cc: Thomas Abraham <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
-To: Per Forlin <per.lkml@gmail.com>
-Cc: Sujit Reddy Thumma <sthumma@codeaurora.org>, Per Forlin <per.friden@stericsson.com>, linux-mmc@vger.kernel.org, cjb@laptop.org
 
-On Mon, Jan 30, 2012 at 1:48 PM, Per Forlin <per.lkml@gmail.com> wrote:
+On Mon, Jan 30, 2012 at 10:51:11AM +0100, Heiko St=FCbner wrote:
+> Am Mittwoch, 2. November 2011, 21:36:03 schrieb Thomas Abraham:
+>=20
+> Hi Thomas,
+>=20
+> in patch 1/6:
+> > +static struct platform_device_id sdhci_s3c_driver_ids[] =3D {
+> > +       {
+> > +               .name           =3D "s3c-sdhci",
+> > +               .driver_data    =3D (kernel_ulong_t)NULL,
+> > +       },
+> > +       {
+> > +               .name           =3D "exynos4-sdhci",
+> > +               .driver_data    =3D EXYNOS4_SDHCI_DRV_DATA,
+> > +       },
+> > +};
+> > +MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
+>=20
+>=20
+> and in patch 6/6:
+> > +#ifdef CONFIG_OF
+> > +static const struct of_device_id sdhci_s3c_dt_match[] =3D {
+> > +	{ .compatible =3D "samsung,s3c6410-sdhci", },
+> > +	{ .compatible =3D "samsung,exynos4210-sdhci",
+> > +		.data =3D &exynos4_sdhci_drv_data },
+> > +	{},
+> > +};
+> > +MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
+>=20
+> wouldn't it be better to keep the naming consistent between of and no=
+n-of?
+> I.e. s3c-sdhci vs. s3c6410-sdhci. Since the driver is used for all S3=
+C SoCs=20
+> containing hsmmc controllers I think s3c-sdhci would be preferable he=
+re.
 
-> It makes sense to ensure clocking in pre-req() and post-req()
-> implemented by this patch.
-> My only concern from a throughput point of view is if the clocking
-> adds an overhead, but AFAIK the clocking doesn't add an overhead (that
-> would increase the prepare time).
+History has shown that future devices aren't always compatible with ear=
+lier
+ones.  Compatible strings are expected to be specific to an exact devic=
+e to
+reduce the possibility of new hardware breaking assumptions.
 
-Shouldn't be a concern here since there is already a hysteresis
-window across these calls, so the clock never get disabled on
-back-to-back transfers AFAICT.
+Instead, new hardware can either claim compatibility with older
+compatible strings (the compatible property in the DT is a list), or
+can have the new string added to the match table in the driver;
+whichever option makes the most sense.
 
-> Acked-by: Per Forlin <per.forlin@stericsson.com>
-
-Thanks,
-Linus Walleij
+g.
