@@ -1,78 +1,59 @@
-From: Per Forlin <per.lkml@gmail.com>
-Subject: Re: [PATCH] mmc: core: Ensure clocks are always enabled before host interaction
-Date: Mon, 30 Jan 2012 13:48:43 +0100
-Message-ID: <CAFEEs1=SoPvTSoBFybVLVC8ZHi8fuUNy0ZLAjXn2jYV0T5Lv3g@mail.gmail.com>
-References: <1323678104-28854-1-git-send-email-sthumma@codeaurora.org>
-	<CACRpkdbZS7TxKSpKR0DV4TC4dOzO_q83U1bd0HonKC2GBDBOgA@mail.gmail.com>
-	<4F1E2933.8030708@codeaurora.org>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH 1/1] of_mmc_spi: fix little endian support
+Date: Mon, 30 Jan 2012 06:14:30 -0700
+Message-ID: <20120130131430.GA28397@ponder.secretlab.ca>
+References: <1327896929-16274-1-git-send-email-plagnioj@jcrosoft.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-tul01m020-f174.google.com ([209.85.214.174]:53403 "EHLO
-	mail-tul01m020-f174.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751102Ab2A3Mso convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 30 Jan 2012 07:48:44 -0500
-Received: by obcva7 with SMTP id va7so3856190obc.19
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2012 04:48:43 -0800 (PST)
-In-Reply-To: <4F1E2933.8030708@codeaurora.org>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:61206 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752027Ab2A3NOe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2012 08:14:34 -0500
+Received: by ggnb1 with SMTP id b1so1774063ggn.19
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2012 05:14:34 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <1327896929-16274-1-git-send-email-plagnioj@jcrosoft.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Per Forlin <per.friden@stericsson.com>, linux-mmc@vger.kernel.org, cjb@laptop.org
+To: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-On Tue, Jan 24, 2012 at 4:44 AM, Sujit Reddy Thumma
-<sthumma@codeaurora.org> wrote:
-> Hi Linus Walleij,
->
->
-> On 12/30/2011 7:44 AM, Linus Walleij wrote:
->>
->> On Mon, Dec 12, 2011 at 9:21 AM, Sujit Reddy Thumma
->> <sthumma@codeaurora.org> =A0wrote:
->>
->>> Ensure clocks are always enabled before any interaction with the
->>> host controller driver. This makes sure that there is no race
->>> between host execution and the core layer turning off clocks
->>> in different context with clock gating framework.
->>>
->>> Signed-off-by: Sujit Reddy Thumma<sthumma@codeaurora.org>
->>
->>
->> I guess Per F=F6rlin may not be available, but would have preferred =
-to
->> have his view on this as well, since he knows the semantics of
->> pre/post-req.
->
->
-> I have checked the implementation for pre-req and post-req in mmc hos=
-t
-> drivers. There is no interaction to the controller or card registers =
-in
-> these functions, but in future if drivers appeal to configure their
-> controller in these functions then we must have clocks enabled.
->
-> Per, if you are available can you comment on this?
->
-I just got back from 2 months of leave so I apologize for not being up =
-to date.
+On Mon, Jan 30, 2012 at 05:15:29AM +0100, Jean-Christophe PLAGNIOL-VILLARD wrote:
+> the voltage_ranges is supposed to switch from big endian to little endian
+> 
+> Signed-off-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+> Cc: Grant Likely <grant.likely@secretlab.ca>
+> Cc: linux-mmc@vger.kernel.org
 
-It makes sense to ensure clocking in pre-req() and post-req()
-implemented by this patch.
-My only concern from a throughput point of view is if the clocking
-adds an overhead, but AFAIK the clocking doesn't add an overhead (that
-would increase the prepare time).
+Applied, thanks.
 
-Currently the pre-req() and post-req() only prepares DMA for next
-transfer without interacting with the controller. The intention is to
-increase throughput by minimizing start latency for the next transfer.
-It's perfectly ok to do other useful preparations in these hooks as
-well. The hooks are generic. It should be possible to do clock
-dependent stuff in these hooks too, it's up to the host driver to do
-what's best.
+g.
 
-Acked-by: Per Forlin <per.forlin@stericsson.com>
-
-Thanks,
-Per
+> ---
+>  drivers/mmc/host/of_mmc_spi.c |    5 +++--
+>  1 files changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+> index ab66f24..ede2c64 100644
+> --- a/drivers/mmc/host/of_mmc_spi.c
+> +++ b/drivers/mmc/host/of_mmc_spi.c
+> @@ -109,12 +109,13 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
+>  		goto err_ocr;
+>  	}
+>  
+> +
+>  	for (i = 0; i < num_ranges; i++) {
+>  		const int j = i * 2;
+>  		u32 mask;
+>  
+> -		mask = mmc_vddrange_to_ocrmask(voltage_ranges[j],
+> -					       voltage_ranges[j + 1]);
+> +		mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
+> +					       be32_to_cpu(voltage_ranges[j + 1]));
+>  		if (!mask) {
+>  			ret = -EINVAL;
+>  			dev_err(dev, "OF: voltage-range #%d is invalid\n", i);
+> -- 
+> 1.7.7
+> 
