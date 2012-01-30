@@ -1,46 +1,39 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/1] of_mmc_spi: fix little endian support
-Date: Mon, 30 Jan 2012 10:30:42 -0500
-Message-ID: <m239axcin1.fsf@bob.laptop.org>
-References: <1327896929-16274-1-git-send-email-plagnioj@jcrosoft.com>
-	<20120130131430.GA28397@ponder.secretlab.ca>
-	<CACxGe6vY5Es4S_2Q1KWVyHitOuee8XekarGBuxjuJNDbAQrtHA@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: core: Ensure clocks are always enabled before host interaction
+Date: Mon, 30 Jan 2012 20:33:35 +0100
+Message-ID: <CACRpkdZOAEDTCoU=6=ukgEPj_1Qau8eRxxOx1H4p=310omvFXA@mail.gmail.com>
+References: <1323678104-28854-1-git-send-email-sthumma@codeaurora.org>
+	<CACRpkdbZS7TxKSpKR0DV4TC4dOzO_q83U1bd0HonKC2GBDBOgA@mail.gmail.com>
+	<4F1E2933.8030708@codeaurora.org>
+	<CAFEEs1=SoPvTSoBFybVLVC8ZHi8fuUNy0ZLAjXn2jYV0T5Lv3g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:53600 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753864Ab2A3PbA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 30 Jan 2012 10:31:00 -0500
-In-Reply-To: <CACxGe6vY5Es4S_2Q1KWVyHitOuee8XekarGBuxjuJNDbAQrtHA@mail.gmail.com>
-	(Grant Likely's message of "Mon, 30 Jan 2012 08:18:08 -0700")
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:38893 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752023Ab2A3Tdg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2012 14:33:36 -0500
+Received: by ggnb1 with SMTP id b1so2023844ggn.19
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Jan 2012 11:33:35 -0800 (PST)
+In-Reply-To: <CAFEEs1=SoPvTSoBFybVLVC8ZHi8fuUNy0ZLAjXn2jYV0T5Lv3g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: Per Forlin <per.lkml@gmail.com>
+Cc: Sujit Reddy Thumma <sthumma@codeaurora.org>, Per Forlin <per.friden@stericsson.com>, linux-mmc@vger.kernel.org, cjb@laptop.org
 
-Hi,
+On Mon, Jan 30, 2012 at 1:48 PM, Per Forlin <per.lkml@gmail.com> wrote:
 
-On Mon, Jan 30 2012, Grant Likely wrote:
-> On Mon, Jan 30, 2012 at 6:14 AM, Grant Likely <grant.likely@secretlab.ca> wrote:
->> On Mon, Jan 30, 2012 at 05:15:29AM +0100, Jean-Christophe
->> PLAGNIOL-VILLARD wrote:
->>> the voltage_ranges is supposed to switch from big endian to little endian
->>>
->>> Signed-off-by: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
->>> Cc: Grant Likely <grant.likely@secretlab.ca>
->>> Cc: linux-mmc@vger.kernel.org
->>
->> Applied, thanks.
->
-> Actually, this one should go via Chris' tree since it is part of
-> drivers/mmc.  So I've dropped it from my tree and change that s-o-b of
-> mine to an a-b.
+> It makes sense to ensure clocking in pre-req() and post-req()
+> implemented by this patch.
+> My only concern from a throughput point of view is if the clocking
+> adds an overhead, but AFAIK the clocking doesn't add an overhead (that
+> would increase the prepare time).
 
-Thanks, done that, and removed the extra/incorrect punctuation change
-from the patch.
+Shouldn't be a concern here since there is already a hysteresis
+window across these calls, so the clock never get disabled on
+back-to-back transfers AFAICT.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> Acked-by: Per Forlin <per.forlin@stericsson.com>
+
+Thanks,
+Linus Walleij
