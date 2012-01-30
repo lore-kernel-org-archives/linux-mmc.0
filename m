@@ -1,53 +1,73 @@
-From: Heiko =?iso-8859-15?q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH 6/6] mmc: sdhci-s3c: Add device tree support
-Date: Mon, 30 Jan 2012 10:51:11 +0100
-Message-ID: <201201301051.22396.heiko@sntech.de>
-References: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org> <1320266163-15292-7-git-send-email-thomas.abraham@linaro.org>
+From: Michael Hunold <hunold@linuxtv.org>
+Subject: Re: omap_hsmmc.c and MMC_CAP_SDIO_IRQ
+Date: Mon, 30 Jan 2012 12:16:37 +0100
+Message-ID: <4F267C15.7070704@linuxtv.org>
+References: <4F1EC123.8070103@linuxtv.org> <CAGDS+nnVosHsv4SUcGXCieVQG2cjW=mL7DZ7_W2p+uNhUYfPyw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from h1778886.stratoserver.net ([85.214.133.74]:43210 "EHLO
-	h1778886.stratoserver.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751097Ab2A3Jvo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Jan 2012 04:51:44 -0500
-In-Reply-To: <1320266163-15292-7-git-send-email-thomas.abraham@linaro.org>
+Received: from bar.sig21.net ([80.81.252.164]:55891 "EHLO bar.sig21.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751194Ab2A3LQi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 30 Jan 2012 06:16:38 -0500
+In-Reply-To: <CAGDS+nnVosHsv4SUcGXCieVQG2cjW=mL7DZ7_W2p+uNhUYfPyw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org
+To: Steve Sakoman <sakoman@gmail.com>
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Am Mittwoch, 2. November 2011, 21:36:03 schrieb Thomas Abraham:
+Hello Steve,
 
-Hi Thomas,
+on 01/27/2012 03:09 PM Steve Sakoman said the following:
+> On Tue, Jan 24, 2012 at 6:33 AM, Michael Hunold <hunold@linuxtv.org> wrote:
 
-in patch 1/6:
-> +static struct platform_device_id sdhci_s3c_driver_ids[] = {
-> +       {
-> +               .name           = "s3c-sdhci",
-> +               .driver_data    = (kernel_ulong_t)NULL,
-> +       },
-> +       {
-> +               .name           = "exynos4-sdhci",
-> +               .driver_data    = EXYNOS4_SDHCI_DRV_DATA,
-> +       },
-> +};
-> +MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
+> Your summary below is a pretty accurate description of the current state.
 
+Ok.
 
-and in patch 6/6:
-> +#ifdef CONFIG_OF
-> +static const struct of_device_id sdhci_s3c_dt_match[] = {
-> +	{ .compatible = "samsung,s3c6410-sdhci", },
-> +	{ .compatible = "samsung,exynos4210-sdhci",
-> +		.data = &exynos4_sdhci_drv_data },
-> +	{},
-> +};
-> +MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
+> I've made an attempt at creating a patch for 3.2 that follows David
+> Vrabel's original patch series as closely as possible with the new
+> structure.
+> 
+> Unfortunately it doesn't quite work.  I've only been doing this as a
+> background task so progress is pretty slow.
 
-wouldn't it be better to keep the naming consistent between of and non-of?
-I.e. s3c-sdhci vs. s3c6410-sdhci. Since the driver is used for all S3C SoCs 
-containing hsmmc controllers I think s3c-sdhci would be preferable here.
+I understand, no problem.
 
-Heiko
+> The patch doesn't seem to break support for memory devices (which is
+> good since my rootfs is on an mmc device!) and I do see SDIO
+> interrupts occurring and being handled in the debug log, so it is a
+> good start:
+
+> However the SDIO device does not function properly due to multiple
+> timeout errors, so something is still not quite right.
+
+> Let me know if you would like to help with further development of the
+> patch and I will send you a copy.  It is rough enough and broken
+> enough that it probably isn't yet ready for even an RFC to these
+> lists.
+
+Yes, please send them to me. I will give them a try and let you know the
+results.
+
+As a side node: actually I'm working double tracked. I plan to use it on
+some OMAP-based board like Beagleboard or Pandaboard for a stationary
+system, running any kernel that is needed.
+
+But I'd like to use some spare N900s as well, because I can carry them
+around easily. But these are running ancient 2.6.28.1 kernels. David
+Vrabel mentioned that he originally developed his patches on the N900. I
+sent him a mail using his mail address from csr.com, but I have not
+received a reply yet.
+
+If you or anybody else has every seen his original patches for the N900
+(he did not sent them to any list as far as I know) please let me know
+as well.
+
+> Regards,
+> Steve
+
+CU
+Michael.
+
