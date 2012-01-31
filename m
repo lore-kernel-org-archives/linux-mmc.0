@@ -1,64 +1,78 @@
-From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH 6/6] mmc: sdhci-s3c: Add device tree support
-Date: Tue, 31 Jan 2012 07:13:38 +0100
-Message-ID: <201201310713.39553.heiko@sntech.de>
-References: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org> <201201301051.22396.heiko@sntech.de> <20120130190114.GR28397@ponder.secretlab.ca>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [PATCH 1/7 v2] dmaengine: add a simple dma library
+Date: Tue, 31 Jan 2012 12:11:30 +0530
+Message-ID: <1327992090.1527.116.camel@vkoul-udesk3>
+References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
+	 <1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de>
+	 <1327912346.1527.13.camel@vkoul-udesk3>
+	 <Pine.LNX.4.64.1201300944360.7932@axis700.grange>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <20120130190114.GR28397@ponder.secretlab.ca>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Thomas Abraham <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-serial-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1201300944360.7932@axis700.grange>
+Sender: linux-serial-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Am Montag 30 Januar 2012, 20:01:14 schrieb Grant Likely:
-> On Mon, Jan 30, 2012 at 10:51:11AM +0100, Heiko St=FCbner wrote:
-> > Am Mittwoch, 2. November 2011, 21:36:03 schrieb Thomas Abraham:
-> >=20
-> > Hi Thomas,
-> >=20
-> > in patch 1/6:
-> > > +static struct platform_device_id sdhci_s3c_driver_ids[] =3D {
-> > > +       {
-> > > +               .name           =3D "s3c-sdhci",
-> > > +               .driver_data    =3D (kernel_ulong_t)NULL,
-> > > +       },
-> > > +       {
-> > > +               .name           =3D "exynos4-sdhci",
-> > > +               .driver_data    =3D EXYNOS4_SDHCI_DRV_DATA,
-> > > +       },
-> > > +};
-> > > +MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
-> >=20
-> > and in patch 6/6:
-> > > +#ifdef CONFIG_OF
-> > > +static const struct of_device_id sdhci_s3c_dt_match[] =3D {
-> > > +	{ .compatible =3D "samsung,s3c6410-sdhci", },
-> > > +	{ .compatible =3D "samsung,exynos4210-sdhci",
-> > > +		.data =3D &exynos4_sdhci_drv_data },
-> > > +	{},
-> > > +};
-> > > +MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
-> >=20
-> > wouldn't it be better to keep the naming consistent between of and
-> > non-of? I.e. s3c-sdhci vs. s3c6410-sdhci. Since the driver is used =
-for
-> > all S3C SoCs containing hsmmc controllers I think s3c-sdhci would b=
-e
-> > preferable here.
->=20
-> History has shown that future devices aren't always compatible with e=
-arlier
-> ones.  Compatible strings are expected to be specific to an exact dev=
-ice to
-> reduce the possibility of new hardware breaking assumptions.
->=20
-> Instead, new hardware can either claim compatibility with older
-> compatible strings (the compatible property in the DT is a list), or
-> can have the new string added to the match table in the driver;
-> whichever option makes the most sense.
-ah, ok. Thanks for the explanation and I will keep that in mind.
+On Mon, 2012-01-30 at 10:34 +0100, Guennadi Liakhovetski wrote:
+> > I don't still comprehend the need for a library on top of dmaengine
+> > which gain is just a library between clients and dmacs. Surely we don't
+> > want to write another abstraction on top of one provided?
+> > 
+> > If the question is to handle scatter-gather even if the hardware doesn't
+> > have the capability, then why don't add that in dmaengine itself rather
+> > than one more layer?
+> 
+> Well, yes, adding new abstraction layers is always a decision, that has to 
+> be well justified. In this case it does at least make the life easier for 
+> two sh-mobile drivers: shdma and the new SUDMAC driver.
+> 
+> However, I did name the library in a generic way without reference to sh, 
+> assuming, that it might with time become useful for other architectures 
+> too. The reasons why I prefered to keep it as an optional addition to 
+> dmaengine core, instead of tightly integrating it with it are, that (1) I 
+> did not want to add useless code to drivers, that do not need it, 
+So are we sure that only sh-mobile drivers need this capablity?
+Btw does you hardware only support single transfers and no sg support,
+would this remain the same in future?
+> (2) I am 
+> not sure if and when this library will become useful for other drivers: 
+> apart from sh I am only familiar with one more dmaengine driver: 
+> ipu/ipu_idmac.c, and that one supports scatter-gather lists in a limited 
+> way and has some further peculiarities, that would likely make it a bad 
+> match for the simple DMA library,
+typically the dmacs will support this in some form or other, so your
+point is valid :)
+>  (3) keeping it separate makes its 
+> further development easier.
+> 
+> OTOH, I'm certainly fine with a tighter library integration with the 
+> dmaengine core. I think, it still would be better to keep it in a separate 
+> file and only build it if needed, right? This woult also simplify code 
+> debugging and further development. I can remove the "simple" notation, 
+> which does make it look like an additional abstraction layer, and replace 
+> it with, say, sgsoft (scatter-gather software implementation)?
+that would be more apt :)
+>  A more 
+> interesting question is what to do with struct dma_simple_dev, struct 
+> dma_simple_chan, struct dma_simple_desc, that embed struct dma_device, 
+> struct dma_chan and struct dma_async_tx_descriptor respectively. I don't 
+> think we want to merge all the additions from those wrapping structs back 
+> into their dmaengine counterparts?
+Sure they should be kept separate. I like the wrapping, this keeps it
+simple.
+> 
+> How would you like to do this? Don't you think, it would be good to allow 
+> both: either implement a dmaengine driver directly, exactly as all drivers 
+> are doing now, or use the additional helper library for suitable (simple) 
+> hardware types? I see it similar to I2C, where you either implement an I2C 
+> driver directly, or you use the bitbanging abstraction for simpler 
+> hardware.
+I think it would be good to have both, this can be used by folks who
+don't have sg support available.
 
-Heiko
+-- 
+~Vinod
+
