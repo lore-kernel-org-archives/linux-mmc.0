@@ -1,47 +1,101 @@
-From: "Rajashekhara, Sudhakar" <sudhakar.raj-l0cyMroinI0@public.gmane.org>
-Subject: RE: [RFC 1/2] mmc: davinci: Eliminate spurious interrupts
-Date: Tue, 31 Jan 2012 11:30:51 +0000
-Message-ID: <B6A220404B6BFC4BBD2AB91C54D39DF43176B8CE@DBDE01.ent.ti.com>
-References: <4F1E9194.90608@mvista.com>
-	<1327403766-962-1-git-send-email-ido@wizery.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH 1/2] mmc: core: Prevent I/O as soon as possible at card
+ removal
+Date: Tue, 31 Jan 2012 13:54:02 +0100
+Message-ID: <4F27E46A.6040504@stericsson.com>
+References: <1326991191-12472-1-git-send-email-ulf.hansson@stericsson.com> <1326991191-12472-2-git-send-email-ulf.hansson@stericsson.com> <4F19562F.6010907@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="iso-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <1327403766-962-1-git-send-email-ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>, "davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org" <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "Nori, Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog118.obsmtp.com ([207.126.144.145]:54105 "EHLO
+	eu1sys200aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752243Ab2AaMzR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 07:55:17 -0500
+In-Reply-To: <4F19562F.6010907@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi,
-
-On Tue, Jan 24, 2012 at 16:46:05, Ido Yariv wrote:
-> The davinci mmc interrupt handler fills the fifo, as long as the DXRDY
-> or DRRDY bits are set in the status register.
+Adrian Hunter wrote:
+> On 19/01/12 18:39, Ulf Hansson wrote:
+>> Once the card has been detected to be removed by the
+>> mmc_detect_card_removed function, schedule a new detect work
+>> immediately and without a delay to let a rescan remove the
+>> card device as soon a possible. This will sooner prevent
+>> further I/O requests.
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+>> ---
+>>  drivers/mmc/core/core.c |   16 ++++++++++++++--
+>>  1 files changed, 14 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index bec0bf2..265dfd8 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -2077,6 +2077,7 @@ int _mmc_detect_card_removed(struct mmc_host *host)
+>>  int mmc_detect_card_removed(struct mmc_host *host)
+>>  {
+>>  	struct mmc_card *card = host->card;
+>> +	int ret;
+>>  
+>>  	WARN_ON(!host->claimed);
+>>  	/*
+>> @@ -2086,9 +2087,20 @@ int mmc_detect_card_removed(struct mmc_host *host)
+>>  	if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
+>>  		return mmc_card_removed(card);
+>>  
+>> -	host->detect_change = 0;
 > 
-> If interrupts fire during this loop, they will be handled by the
-> handler, but the interrupt controller will still buffer these. As a
-> result, the handler will be called again to serve these needlessly. In
-> order to avoid these spurious interrupts, keep interrupts masked while
-> filling the fifo.
+> That line should not be removed.  It is not related to your change.
+
+I think it is. Since my patch is trying to make it possible to "prevent 
+I/O as soon as possible..."
+
+Clearing the detect_change flag here will prevent the I/O layer from 
+doing further tests to see if the card is removed by using 
+"mmc_detect_card_removed -> _mmc_detect_card_removed" due to the upper 
+if sentence.
+
+I think this flag should only be cleared from the mmc_rescan function.
+
 > 
-> Signed-off-by: Ido Yariv <ido-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
-> ---
+>> +	ret = mmc_card_removed(card);
+> 
+> Calling mmc_card_removed() is not needed here since
+> _mmc_detect_card_removed() does it anyway.
+> 
+>> +	if (!ret) {
+>> +		ret = _mmc_detect_card_removed(host);
+>> +		if (ret) {
+>> +			/*
+>> +			 * Schedule a detect work as soon as possible to let a
+>> +			 * rescan handle the card removal.
+>> +			 */
+>> +			cancel_delayed_work(&host->detect);
+> 
+> Why cancel the detect work?
 
-Tested this series on OMAP-L138 EVM using SD card. Observed that number of
-interrupts during IO transaction were less compared to earlier and there
-was no drop in performance numbers.
+To "prevent I/O as soon as possible...".
 
-Tested-by: Rajashekhara, Sudhakar <sudhakar.raj-l0cyMroinI0@public.gmane.org>
+The detect work could have been scheduled to be run at several ms later. 
+There is no need to wait for it since we already now that card will be 
+removed when the rescan function will execute.
 
-Regards,
-Sudhakar
+> 
+>> +			mmc_detect_change(host, 0);
+>> +		}
+>> +	}
+>>  
+>> -	return _mmc_detect_card_removed(host);
+>> +	return ret;
+>>  }
+>>  EXPORT_SYMBOL(mmc_detect_card_removed);
+>>  
+> 
+> 
+
+Br
+Ulf Hansson
