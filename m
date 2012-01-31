@@ -1,177 +1,180 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH v3 2/6] arm: exynos4: use 'exynos4-sdhci' as device name for
- sdhci controllers
-Date: Tue, 31 Jan 2012 23:26:12 +0530
-Message-ID: <1328032576-9269-3-git-send-email-thomas.abraham@linaro.org>
+Subject: [PATCH v3 1/6] mmc: sdhci-s3c: Remove usage of clk_type member in
+ platform data
+Date: Tue, 31 Jan 2012 23:26:11 +0530
+Message-ID: <1328032576-9269-2-git-send-email-thomas.abraham@linaro.org>
 References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:32015 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753372Ab2AaRvI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 12:51:08 -0500
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 In-reply-to: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
-Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org, patches@linaro.org
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org, patches@linaro.org, Jeongbae Seo <jeongbae.seo@samsung.com>
+List-Id: linux-mmc@vger.kernel.org
 
-With the addition of platform specific driver data in the sdhci driver
-for exynos4, the device name of sdhci controllers on exynos4 is changed
-accordingly.
+SDHCI controllers on Exynos4 do not include the sdclk divider as per the
+sdhci controller specification. This case can be represented using the
+sdhci quirk SDHCI_QUIRK_NONSTANDARD_CLOCK instead of using an additional
+enum type definition 'clk_types'.
 
-Cc: Kukjin Kim <kgene.kim@samsung.com>
+Hence, usage of clk_type member in platform data is removed and the sdhci
+quirk is used. In addition to that, since this qurik is SoC specific,
+driver data is introduced to represent controllers on SoC's that require
+this quirk.
+
+Cc: Ben Dooks <ben-linux@fluff.org>
+Cc: Jeongbae Seo <jeongbae.seo@samsung.com>
 Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 ---
- arch/arm/mach-exynos/clock.c               |   24 ++++++++++++------------
- arch/arm/mach-exynos/common.c              |    5 +++++
- arch/arm/plat-samsung/include/plat/sdhci.h |   28 ++++++++++++++++++++++++++++
- 3 files changed, 45 insertions(+), 12 deletions(-)
+ drivers/mmc/host/sdhci-s3c.c |   74 +++++++++++++++++++++++++++++++++++++++--
+ 1 files changed, 70 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm/mach-exynos/clock.c b/arch/arm/mach-exynos/clock.c
-index 5a8c42e..f94c99d 100644
---- a/arch/arm/mach-exynos/clock.c
-+++ b/arch/arm/mach-exynos/clock.c
-@@ -496,25 +496,25 @@ static struct clk init_clocks_off[] = {
- 		.ctrlbit	= (1 << 0),
- 	}, {
- 		.name		= "hsmmc",
--		.devname	= "s3c-sdhci.0",
-+		.devname	= "exynos4-sdhci.0",
- 		.parent		= &clk_aclk_133.clk,
- 		.enable		= exynos4_clk_ip_fsys_ctrl,
- 		.ctrlbit	= (1 << 5),
- 	}, {
- 		.name		= "hsmmc",
--		.devname	= "s3c-sdhci.1",
-+		.devname	= "exynos4-sdhci.1",
- 		.parent		= &clk_aclk_133.clk,
- 		.enable		= exynos4_clk_ip_fsys_ctrl,
- 		.ctrlbit	= (1 << 6),
- 	}, {
- 		.name		= "hsmmc",
--		.devname	= "s3c-sdhci.2",
-+		.devname	= "exynos4-sdhci.2",
- 		.parent		= &clk_aclk_133.clk,
- 		.enable		= exynos4_clk_ip_fsys_ctrl,
- 		.ctrlbit	= (1 << 7),
- 	}, {
- 		.name		= "hsmmc",
--		.devname	= "s3c-sdhci.3",
-+		.devname	= "exynos4-sdhci.3",
- 		.parent		= &clk_aclk_133.clk,
- 		.enable		= exynos4_clk_ip_fsys_ctrl,
- 		.ctrlbit	= (1 << 8),
-@@ -1187,7 +1187,7 @@ static struct clksrc_clk clk_sclk_uart3 = {
- static struct clksrc_clk clk_sclk_mmc0 = {
- 	.clk		= {
- 		.name		= "sclk_mmc",
--		.devname	= "s3c-sdhci.0",
-+		.devname	= "exynos4-sdhci.0",
- 		.parent		= &clk_dout_mmc0.clk,
- 		.enable		= exynos4_clksrc_mask_fsys_ctrl,
- 		.ctrlbit	= (1 << 0),
-@@ -1198,7 +1198,7 @@ static struct clksrc_clk clk_sclk_mmc0 = {
- static struct clksrc_clk clk_sclk_mmc1 = {
- 	.clk		= {
- 		.name		= "sclk_mmc",
--		.devname	= "s3c-sdhci.1",
-+		.devname	= "exynos4-sdhci.1",
- 		.parent         = &clk_dout_mmc1.clk,
- 		.enable		= exynos4_clksrc_mask_fsys_ctrl,
- 		.ctrlbit	= (1 << 4),
-@@ -1209,7 +1209,7 @@ static struct clksrc_clk clk_sclk_mmc1 = {
- static struct clksrc_clk clk_sclk_mmc2 = {
- 	.clk		= {
- 		.name		= "sclk_mmc",
--		.devname	= "s3c-sdhci.2",
-+		.devname	= "exynos4-sdhci.2",
- 		.parent         = &clk_dout_mmc2.clk,
- 		.enable		= exynos4_clksrc_mask_fsys_ctrl,
- 		.ctrlbit	= (1 << 8),
-@@ -1220,7 +1220,7 @@ static struct clksrc_clk clk_sclk_mmc2 = {
- static struct clksrc_clk clk_sclk_mmc3 = {
- 	.clk		= {
- 		.name		= "sclk_mmc",
--		.devname	= "s3c-sdhci.3",
-+		.devname	= "exynos4-sdhci.3",
- 		.parent         = &clk_dout_mmc3.clk,
- 		.enable		= exynos4_clksrc_mask_fsys_ctrl,
- 		.ctrlbit	= (1 << 12),
-@@ -1323,10 +1323,10 @@ static struct clk_lookup exynos4_clk_lookup[] = {
- 	CLKDEV_INIT("exynos4210-uart.1", "clk_uart_baud0", &clk_sclk_uart1.clk),
- 	CLKDEV_INIT("exynos4210-uart.2", "clk_uart_baud0", &clk_sclk_uart2.clk),
- 	CLKDEV_INIT("exynos4210-uart.3", "clk_uart_baud0", &clk_sclk_uart3.clk),
--	CLKDEV_INIT("s3c-sdhci.0", "mmc_busclk.2", &clk_sclk_mmc0.clk),
--	CLKDEV_INIT("s3c-sdhci.1", "mmc_busclk.2", &clk_sclk_mmc1.clk),
--	CLKDEV_INIT("s3c-sdhci.2", "mmc_busclk.2", &clk_sclk_mmc2.clk),
--	CLKDEV_INIT("s3c-sdhci.3", "mmc_busclk.2", &clk_sclk_mmc3.clk),
-+	CLKDEV_INIT("exynos4-sdhci.0", "mmc_busclk.2", &clk_sclk_mmc0.clk),
-+	CLKDEV_INIT("exynos4-sdhci.1", "mmc_busclk.2", &clk_sclk_mmc1.clk),
-+	CLKDEV_INIT("exynos4-sdhci.2", "mmc_busclk.2", &clk_sclk_mmc2.clk),
-+	CLKDEV_INIT("exynos4-sdhci.3", "mmc_busclk.2", &clk_sclk_mmc3.clk),
- 	CLKDEV_INIT("dma-pl330.0", "apb_pclk", &clk_pdma0),
- 	CLKDEV_INIT("dma-pl330.1", "apb_pclk", &clk_pdma1),
- 	CLKDEV_INIT("s3c64xx-spi.0", "spi_busclk0", &clk_sclk_spi0.clk),
-diff --git a/arch/arm/mach-exynos/common.c b/arch/arm/mach-exynos/common.c
-index c59e188..ca2f78a 100644
---- a/arch/arm/mach-exynos/common.c
-+++ b/arch/arm/mach-exynos/common.c
-@@ -255,6 +255,11 @@ void __init exynos4_map_io(void)
- 	s3c_fimc_setname(2, "exynos4-fimc");
- 	s3c_fimc_setname(3, "exynos4-fimc");
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 1af756e..e1b685d 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -53,6 +53,18 @@ struct sdhci_s3c {
+ 	struct clk		*clk_bus[MAX_BUS_CLK];
+ };
  
-+	s3c_sdhci_setname(0, "exynos4-sdhci");
-+	s3c_sdhci_setname(1, "exynos4-sdhci");
-+	s3c_sdhci_setname(2, "exynos4-sdhci");
-+	s3c_sdhci_setname(3, "exynos4-sdhci");
++/**
++ * struct sdhci_s3c_driver_data - S3C SDHCI platform specific driver data
++ * @sdhci_quirks: sdhci host specific quirks.
++ *
++ * Specifies platform specific configuration of sdhci controller.
++ * Note: A structure for driver specific platform data is used for future
++ * expansion of its usage.
++ */
++struct sdhci_s3c_drv_data {
++	unsigned int	sdhci_quirks;
++};
 +
- 	/* The I2C bus controllers are directly compatible with s3c2440 */
- 	s3c_i2c0_setname("s3c2440-i2c");
- 	s3c_i2c1_setname("s3c2440-i2c");
-diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/plat-samsung/include/plat/sdhci.h
-index f82f888..e00d35a 100644
---- a/arch/arm/plat-samsung/include/plat/sdhci.h
-+++ b/arch/arm/plat-samsung/include/plat/sdhci.h
-@@ -18,6 +18,8 @@
- #ifndef __PLAT_S3C_SDHCI_H
- #define __PLAT_S3C_SDHCI_H __FILE__
+ static inline struct sdhci_s3c *to_s3c(struct sdhci_host *host)
+ {
+ 	return sdhci_priv(host);
+@@ -132,10 +144,10 @@ static unsigned int sdhci_s3c_consider_clock(struct sdhci_s3c *ourhost,
+ 		return UINT_MAX;
  
-+#include <plat/devs.h>
+ 	/*
+-	 * Clock divider's step is different as 1 from that of host controller
+-	 * when 'clk_type' is S3C_SDHCI_CLK_DIV_EXTERNAL.
++	 * If controller uses a non-standard clock division, find the best clock
++	 * speed possible with selected clock source and skip the division.
+ 	 */
+-	if (ourhost->pdata->clk_type) {
++	if (ourhost->host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
+ 		rate = clk_round_rate(clksrc, wanted);
+ 		return wanted - rate;
+ 	}
+@@ -272,6 +284,8 @@ static unsigned int sdhci_cmu_get_min_clock(struct sdhci_host *host)
+ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_s3c *ourhost = to_s3c(host);
++	unsigned long timeout;
++	u16 clk = 0;
+ 
+ 	/* don't bother if the clock is going off */
+ 	if (clock == 0)
+@@ -282,6 +296,25 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
+ 
+ 	host->clock = clock;
 +
- struct platform_device;
- struct mmc_host;
- struct mmc_card;
-@@ -354,4 +356,30 @@ static inline void exynos4_default_sdhci3(void) { }
- 
- #endif /* CONFIG_EXYNOS4_SETUP_SDHCI */
- 
-+static inline void s3c_sdhci_setname(int id, char *name)
-+{
-+	switch (id) {
-+#ifdef CONFIG_S3C_DEV_HSMMC
-+	case 0:
-+		s3c_device_hsmmc0.name = name;
-+		break;
-+#endif
-+#ifdef CONFIG_S3C_DEV_HSMMC1
-+	case 1:
-+		s3c_device_hsmmc1.name = name;
-+		break;
-+#endif
-+#ifdef CONFIG_S3C_DEV_HSMMC2
-+	case 2:
-+		s3c_device_hsmmc2.name = name;
-+		break;
-+#endif
-+#ifdef CONFIG_S3C_DEV_HSMMC3
-+	case 3:
-+		s3c_device_hsmmc3.name = name;
-+		break;
-+#endif
++	clk = SDHCI_CLOCK_INT_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	/* Wait max 20 ms */
++	timeout = 20;
++	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
++		& SDHCI_CLOCK_INT_STABLE)) {
++		if (timeout == 0) {
++			printk(KERN_ERR "%s: Internal clock never "
++				"stabilised.\n", mmc_hostname(host->mmc));
++			return;
++		}
++		timeout--;
++		mdelay(1);
 +	}
++
++	clk |= SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+ }
+ 
+ /**
+@@ -382,9 +415,17 @@ static void sdhci_s3c_setup_card_detect_gpio(struct sdhci_s3c *sc)
+ 	}
+ }
+ 
++static inline struct sdhci_s3c_drv_data *sdhci_s3c_get_driver_data(
++			struct platform_device *pdev)
++{
++	return (struct sdhci_s3c_drv_data *)
++			platform_get_device_id(pdev)->driver_data;
 +}
 +
- #endif /* __PLAT_S3C_SDHCI_H */
+ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ {
+ 	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
++	struct sdhci_s3c_drv_data *drv_data;
+ 	struct device *dev = &pdev->dev;
+ 	struct sdhci_host *host;
+ 	struct sdhci_s3c *sc;
+@@ -414,6 +455,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 		return PTR_ERR(host);
+ 	}
+ 
++	drv_data = sdhci_s3c_get_driver_data(pdev);
+ 	sc = sdhci_priv(host);
+ 
+ 	sc->host = host;
+@@ -491,6 +533,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	/* Setup quirks for the controller */
+ 	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
+ 	host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
++	if (drv_data)
++		host->quirks |= drv_data->sdhci_quirks;
+ 
+ #ifndef CONFIG_MMC_SDHCI_S3C_DMA
+ 
+@@ -534,7 +578,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	 * If controller does not have internal clock divider,
+ 	 * we can use overriding functions instead of default.
+ 	 */
+-	if (pdata->clk_type) {
++	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
+ 		sdhci_s3c_ops.set_clock = sdhci_cmu_set_clock;
+ 		sdhci_s3c_ops.get_min_clock = sdhci_cmu_get_min_clock;
+ 		sdhci_s3c_ops.get_max_clock = sdhci_cmu_get_max_clock;
+@@ -647,9 +691,31 @@ static const struct dev_pm_ops sdhci_s3c_pmops = {
+ #define SDHCI_S3C_PMOPS NULL
+ #endif
+ 
++#if defined(CONFIG_CPU_EXYNOS4210) || defined(CONFIG_SOC_EXYNOS4212)
++static struct sdhci_s3c_drv_data exynos4_sdhci_drv_data = {
++	.sdhci_quirks = SDHCI_QUIRK_NONSTANDARD_CLOCK,
++};
++#define EXYNOS4_SDHCI_DRV_DATA ((kernel_ulong_t)&exynos4_sdhci_drv_data)
++#else
++#define EXYNOS4_SDHCI_DRV_DATA ((kernel_ulong_t)NULL)
++#endif
++
++static struct platform_device_id sdhci_s3c_driver_ids[] = {
++	{
++		.name		= "s3c-sdhci",
++		.driver_data	= (kernel_ulong_t)NULL,
++	}, {
++		.name		= "exynos4-sdhci",
++		.driver_data	= EXYNOS4_SDHCI_DRV_DATA,
++	},
++	{ }
++};
++MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
++
+ static struct platform_driver sdhci_s3c_driver = {
+ 	.probe		= sdhci_s3c_probe,
+ 	.remove		= __devexit_p(sdhci_s3c_remove),
++	.id_table	= sdhci_s3c_driver_ids,
+ 	.driver		= {
+ 		.owner	= THIS_MODULE,
+ 		.name	= "s3c-sdhci",
 -- 
 1.6.6.rc2
-
