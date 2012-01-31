@@ -1,103 +1,73 @@
 From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH 1/2] mmc: core: Prevent I/O as soon as possible at card
- removal
-Date: Tue, 31 Jan 2012 16:23:23 +0100
-Message-ID: <4F28076B.8090607@stericsson.com>
-References: <1326991191-12472-1-git-send-email-ulf.hansson@stericsson.com> <1326991191-12472-2-git-send-email-ulf.hansson@stericsson.com> <4F19562F.6010907@intel.com> <4F27E46A.6040504@stericsson.com> <4F27F2FF.4080408@intel.com>
+Subject: Re: [PATCH 0/2] Improve handling of card removal
+Date: Tue, 31 Jan 2012 16:40:33 +0100
+Message-ID: <4F280B71.5060901@stericsson.com>
+References: <1326991191-12472-1-git-send-email-ulf.hansson@stericsson.com> <4F19564B.9070501@intel.com> <4F27E5D5.1050906@stericsson.com> <4F27F31B.6020401@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="iso-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:53574 "EHLO
-	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753594Ab2AaPXx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 10:23:53 -0500
-In-Reply-To: <4F27F2FF.4080408@intel.com>
+Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:51969 "EHLO
+	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753506Ab2AaPkt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 10:40:49 -0500
+In-Reply-To: <4F27F31B.6020401@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
 Adrian Hunter wrote:
-> On 31/01/12 14:54, Ulf Hansson wrote:
+> On 31/01/12 15:00, Ulf Hansson wrote:
 >> Adrian Hunter wrote:
 >>> On 19/01/12 18:39, Ulf Hansson wrote:
->>>> Once the card has been detected to be removed by the
->>>> mmc_detect_card_removed function, schedule a new detect work
->>>> immediately and without a delay to let a rescan remove the
->>>> card device as soon a possible. This will sooner prevent
->>>> further I/O requests.
+>>>> These patches is based upon the patch recently pushed to the mmc mailing
+>>>> list:
+>>>> mmc: core: Force a "detect" to handle non-properly removed cards
 >>>>
->>>> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
->>>> ---
->>>>  drivers/mmc/core/core.c |   16 ++++++++++++++--
->>>>  1 files changed, 14 insertions(+), 2 deletions(-)
+>>>> According to Adrian Hunters comment about adding a CAP2 flag to enable
+>>>> this feature has been done.
 >>>>
->>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>> index bec0bf2..265dfd8 100644
->>>> --- a/drivers/mmc/core/core.c
->>>> +++ b/drivers/mmc/core/core.c
->>>> @@ -2077,6 +2077,7 @@ int _mmc_detect_card_removed(struct mmc_host *host)
->>>>  int mmc_detect_card_removed(struct mmc_host *host)
->>>>  {
->>>>      struct mmc_card *card = host->card;
->>>> +    int ret;
->>>>  
->>>>      WARN_ON(!host->claimed);
->>>>      /*
->>>> @@ -2086,9 +2087,20 @@ int mmc_detect_card_removed(struct mmc_host *host)
->>>>      if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
->>>>          return mmc_card_removed(card);
->>>>  
->>>> -    host->detect_change = 0;
->>> That line should not be removed.  It is not related to your change.
->> I think it is. Since my patch is trying to make it possible to "prevent I/O as soon as possible..."
+>>>> Patch 2 depends on patch 1; but patch 1 can also be discussed separately.
+>>> There should only be 1 patch otherwise you are breaking bisectablility for
+>>> people not setting MMC_CAP2_DETECT_ON_ERR
+>> The first patch "Prevent I/O as soon as possible..." does only make sure
+>> that I/O is prevented as soon as possible but still within the timeout for
+>> the scheduled detect work. Once the detect work (mmc_rescan) has run the
+>> "detect_change" flag is preventing any further I/O errors from directly
+>> trying to detect a card removal.
+>>
+>> The second patch introduces the MMC_CAP2_DETECT_ON_ERR, as you suggested.
 > 
-> No, the value of detect_change does not affect the outcome
-> if MMC_CAP2_DETECT_ON_ERR is set i.e.:
-> 
-> 	if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL)
-> 	    && !(host->caps2 & MMC_CAP2_DETECT_ON_ERR))
-> 
-> is always false if (host->caps2 & MMC_CAP2_DETECT_ON_ERR) is true
+> For drivers not using MMC_CAP2_DETECT_ON_ERR, the first patch introduces a
+> change in behaviour and the second patch removes it again.  Anyone doing a
+> git bisect that lands between the patches will see that change in behaviour.
+>  There is no reason for that - just make it one patch.
 
-You are right! But MMC_CAP2_DETECT_ON_ERR is introduced in the second 
-patch, so we should not consider that in this patch I think!?
+The first patch is trying to "Prevent I/O as soon as possible at card 
+removal". It changes some behavior for how we handle card removal, yes. 
+A change I believe you would like to have no matter if the second patch 
+is accepted or not.
+
+The second patch, takes the card removal handling to the next level. If 
+MMC_CAP2_DETECT_ON_ERR is used, card removal will be checked for every 
+I/O error until the card has been detected to be removed. It does not 
+remove the behavior for the first patch it only makes it possible to 
+enable the option of checking for card removal at I/O errors as well.
 
 > 
->> Clearing the detect_change flag here will prevent the I/O layer from doing further tests to see if the card is removed by using "mmc_detect_card_removed -> _mmc_detect_card_removed" due to the upper if sentence.
->>
->> I think this flag should only be cleared from the mmc_rescan function.
->>
->>>> +    ret = mmc_card_removed(card);
->>> Calling mmc_card_removed() is not needed here since
->>> _mmc_detect_card_removed() does it anyway.
->>>
->>>> +    if (!ret) {
->>>> +        ret = _mmc_detect_card_removed(host);
->>>> +        if (ret) {
->>>> +            /*
->>>> +             * Schedule a detect work as soon as possible to let a
->>>> +             * rescan handle the card removal.
->>>> +             */
->>>> +            cancel_delayed_work(&host->detect);
->>> Why cancel the detect work?
->> To "prevent I/O as soon as possible...".
->>
->> The detect work could have been scheduled to be run at several ms later. There is no need to wait for it since we already now that card will be removed when the rescan function will execute.
->>
->>>> +            mmc_detect_change(host, 0);
->>>> +        }
->>>> +    }
->>>>  
->>>> -    return _mmc_detect_card_removed(host);
->>>> +    return ret;
->>>>  }
->>>>  EXPORT_SYMBOL(mmc_detect_card_removed);
->>>>  
+>>>> Ulf Hansson (2):
+>>>>   mmc: core: Prevent I/O as soon as possible at card removal
+>>>>   mmc: core: Detect card removal on I/O error
+>>>>
+>>>>  drivers/mmc/core/core.c  |   19 ++++++++++++++++---
+>>>>  include/linux/mmc/host.h |    1 +
+>>>>  2 files changed, 17 insertions(+), 3 deletions(-)
+>>>>
 >>>
 >> Br
 >> Ulf Hansson
+>>
 >>
 > 
 > --
