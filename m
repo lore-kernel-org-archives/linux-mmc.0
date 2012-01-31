@@ -1,63 +1,105 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 2/2] mmc: sdhci-s3c: support the broken voltage.
-Date: Tue, 31 Jan 2012 15:55:55 +0900
-Message-ID: <4F27907B.10103@samsung.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 1/7 v2] dmaengine: add a simple dma library
+Date: Tue, 31 Jan 2012 09:59:36 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1201310746470.31226@axis700.grange>
+References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
+ <1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de>
+ <1327912346.1527.13.camel@vkoul-udesk3>  <Pine.LNX.4.64.1201300944360.7932@axis700.grange>
+ <1327992090.1527.116.camel@vkoul-udesk3>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:21396 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751105Ab2AaG4U (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 01:56:20 -0500
-Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LYN00BKTHSRNT90@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 31 Jan 2012 15:56:03 +0900 (KST)
-Received: from [165.213.219.108] by mmp2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LYN008E8HXELS20@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 31 Jan 2012 15:56:03 +0900 (KST)
+Received: from moutng.kundenserver.de ([212.227.17.9]:52680 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752159Ab2AaI7l (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 03:59:41 -0500
+In-Reply-To: <1327992090.1527.116.camel@vkoul-udesk3>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, m.szyprowski@samsung.com
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
 
-Samsung-SoC need to add the MMC_CAP2_BROKEN_VOLTAGE.
+Hi Vinod
 
+Thanks for your reply.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+On Tue, 31 Jan 2012, Vinod Koul wrote:
+
+> On Mon, 2012-01-30 at 10:34 +0100, Guennadi Liakhovetski wrote:
+> > > I don't still comprehend the need for a library on top of dmaengine
+> > > which gain is just a library between clients and dmacs. Surely we don't
+> > > want to write another abstraction on top of one provided?
+> > > 
+> > > If the question is to handle scatter-gather even if the hardware doesn't
+> > > have the capability, then why don't add that in dmaengine itself rather
+> > > than one more layer?
+> > 
+> > Well, yes, adding new abstraction layers is always a decision, that has to 
+> > be well justified. In this case it does at least make the life easier for 
+> > two sh-mobile drivers: shdma and the new SUDMAC driver.
+> > 
+> > However, I did name the library in a generic way without reference to sh, 
+> > assuming, that it might with time become useful for other architectures 
+> > too. The reasons why I prefered to keep it as an optional addition to 
+> > dmaengine core, instead of tightly integrating it with it are, that (1) I 
+> > did not want to add useless code to drivers, that do not need it, 
+> So are we sure that only sh-mobile drivers need this capablity?
+
+If I was sure about that, I'd call the library shmobile-dma or something 
+similar:-)
+
+> Btw does you hardware only support single transfers and no sg support,
+
+Well, the controller does have some repeat- and reload-modes, but they are 
+currently not supported by the driver and from the documentation I cannot 
+easily understand, how useful those modes could be to implement SG.
+
+> would this remain the same in future?
+
+Who knows?...
+
+> > (2) I am 
+> > not sure if and when this library will become useful for other drivers: 
+> > apart from sh I am only familiar with one more dmaengine driver: 
+> > ipu/ipu_idmac.c, and that one supports scatter-gather lists in a limited 
+> > way and has some further peculiarities, that would likely make it a bad 
+> > match for the simple DMA library,
+> typically the dmacs will support this in some form or other, so your
+> point is valid :)
+> >  (3) keeping it separate makes its 
+> > further development easier.
+> > 
+> > OTOH, I'm certainly fine with a tighter library integration with the 
+> > dmaengine core. I think, it still would be better to keep it in a separate 
+> > file and only build it if needed, right? This woult also simplify code 
+> > debugging and further development. I can remove the "simple" notation, 
+> > which does make it look like an additional abstraction layer, and replace 
+> > it with, say, sgsoft (scatter-gather software implementation)?
+> that would be more apt :)
+> >  A more 
+> > interesting question is what to do with struct dma_simple_dev, struct 
+> > dma_simple_chan, struct dma_simple_desc, that embed struct dma_device, 
+> > struct dma_chan and struct dma_async_tx_descriptor respectively. I don't 
+> > think we want to merge all the additions from those wrapping structs back 
+> > into their dmaengine counterparts?
+> Sure they should be kept separate. I like the wrapping, this keeps it
+> simple.
+> > 
+> > How would you like to do this? Don't you think, it would be good to allow 
+> > both: either implement a dmaengine driver directly, exactly as all drivers 
+> > are doing now, or use the additional helper library for suitable (simple) 
+> > hardware types? I see it similar to I2C, where you either implement an I2C 
+> > driver directly, or you use the bitbanging abstraction for simpler 
+> > hardware.
+> I think it would be good to have both, this can be used by folks who
+> don't have sg support available.
+
+Ok, so, should I just rename the driver to sgsoft? Is this the only 
+change, that you'd like to see?
+
+Thanks
+Guennadi
 ---
- drivers/mmc/host/sdhci-s3c.c |    7 +++----
- 1 files changed, 3 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index d065e37..e7e2b6b 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -521,9 +521,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
- 		host->mmc->caps = MMC_CAP_NONREMOVABLE;
- 
-+	/* It supports additional host capabilities if needed */
- 	if (pdata->host_caps)
- 		host->mmc->caps |= pdata->host_caps;
- 
-+	host->mmc->caps2 = MMC_CAP2_BROKEN_VOLTAGE;
-+
- 	if (pdata->pm_caps)
- 		host->mmc->pm_caps |= pdata->pm_caps;
- 
-@@ -543,10 +546,6 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		sdhci_s3c_ops.get_max_clock = sdhci_cmu_get_max_clock;
- 	}
- 
--	/* It supports additional host capabilities if needed */
--	if (pdata->host_caps)
--		host->mmc->caps |= pdata->host_caps;
--
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_err(dev, "sdhci_add_host() failed\n");
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
