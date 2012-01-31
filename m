@@ -1,78 +1,85 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [PATCH 1/7 v2] dmaengine: add a simple dma library
-Date: Tue, 31 Jan 2012 12:11:30 +0530
-Message-ID: <1327992090.1527.116.camel@vkoul-udesk3>
-References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
-	 <1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de>
-	 <1327912346.1527.13.camel@vkoul-udesk3>
-	 <Pine.LNX.4.64.1201300944360.7932@axis700.grange>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH 1/2] mmc: core: add the capability for broken voltage.
+Date: Tue, 31 Jan 2012 15:55:53 +0900
+Message-ID: <4F279079.4000302@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-serial-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1201300944360.7932@axis700.grange>
-Sender: linux-serial-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:21229 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752087Ab2AaG4B (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 01:56:01 -0500
+Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LYN00BKTHSRNT90@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 31 Jan 2012 15:56:01 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LYN008EJHXD2PB0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 31 Jan 2012 15:56:01 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, m.szyprowski@samsung.com
 
-On Mon, 2012-01-30 at 10:34 +0100, Guennadi Liakhovetski wrote:
-> > I don't still comprehend the need for a library on top of dmaengine
-> > which gain is just a library between clients and dmacs. Surely we don't
-> > want to write another abstraction on top of one provided?
-> > 
-> > If the question is to handle scatter-gather even if the hardware doesn't
-> > have the capability, then why don't add that in dmaengine itself rather
-> > than one more layer?
-> 
-> Well, yes, adding new abstraction layers is always a decision, that has to 
-> be well justified. In this case it does at least make the life easier for 
-> two sh-mobile drivers: shdma and the new SUDMAC driver.
-> 
-> However, I did name the library in a generic way without reference to sh, 
-> assuming, that it might with time become useful for other architectures 
-> too. The reasons why I prefered to keep it as an optional addition to 
-> dmaengine core, instead of tightly integrating it with it are, that (1) I 
-> did not want to add useless code to drivers, that do not need it, 
-So are we sure that only sh-mobile drivers need this capablity?
-Btw does you hardware only support single transfers and no sg support,
-would this remain the same in future?
-> (2) I am 
-> not sure if and when this library will become useful for other drivers: 
-> apart from sh I am only familiar with one more dmaengine driver: 
-> ipu/ipu_idmac.c, and that one supports scatter-gather lists in a limited 
-> way and has some further peculiarities, that would likely make it a bad 
-> match for the simple DMA library,
-typically the dmacs will support this in some form or other, so your
-point is valid :)
->  (3) keeping it separate makes its 
-> further development easier.
-> 
-> OTOH, I'm certainly fine with a tighter library integration with the 
-> dmaengine core. I think, it still would be better to keep it in a separate 
-> file and only build it if needed, right? This woult also simplify code 
-> debugging and further development. I can remove the "simple" notation, 
-> which does make it look like an additional abstraction layer, and replace 
-> it with, say, sgsoft (scatter-gather software implementation)?
-that would be more apt :)
->  A more 
-> interesting question is what to do with struct dma_simple_dev, struct 
-> dma_simple_chan, struct dma_simple_desc, that embed struct dma_device, 
-> struct dma_chan and struct dma_async_tx_descriptor respectively. I don't 
-> think we want to merge all the additions from those wrapping structs back 
-> into their dmaengine counterparts?
-Sure they should be kept separate. I like the wrapping, this keeps it
-simple.
-> 
-> How would you like to do this? Don't you think, it would be good to allow 
-> both: either implement a dmaengine driver directly, exactly as all drivers 
-> are doing now, or use the additional helper library for suitable (simple) 
-> hardware types? I see it similar to I2C, where you either implement an I2C 
-> driver directly, or you use the bitbanging abstraction for simpler 
-> hardware.
-I think it would be good to have both, this can be used by folks who
-don't have sg support available.
+This patch is added the MMC_CAP2_BROKEN_VOLTAGE.
 
--- 
-~Vinod
+"There is an understood mismatch between the voltage the host controller is
+set to and the voltage supplied to the card by a fixed voltage regulator.
+Teaching the driver to accept the mismatch is overly complicated.  Instead
+just accept the regulator's voltage."
 
+if the voltage didn't satisfy between min_uV and max_uV,
+try to change the voltage in core.c.
+When change the voltage, maybe use the regulator_set_voltage().
+
+In regulator_set_voltage(), check the below condition.
+
+	/* sanity check */
+	if (!rdev->desc->ops->set_voltage &&
+	    !rdev->desc->ops->set_voltage_sel) {
+		ret = -EINVAL;
+		goto out;
+	}
+
+If Some-board should use the fixed-regulator, always return -EINVAL.
+Then, eMMC didn't initialize always.
+
+So if use the fixed-regulator or etc, we need to add the MMC_CAP2_BROKEN_VOLTAGE.
+
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/core.c  |    4 ++++
+ include/linux/mmc/host.h |    1 +
+ 2 files changed, 5 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index bec0bf2..6848789 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1121,6 +1121,10 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ 		 * might not allow this operation
+ 		 */
+ 		voltage = regulator_get_voltage(supply);
++
++		if (mmc->caps2 & MMC_CAP2_BROKEN_VOLTAGE)
++			min_uV = max_uV = voltage;
++
+ 		if (voltage < 0)
+ 			result = voltage;
+ 		else if (voltage < min_uV || voltage > max_uV)
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index dd13e05..5659aee 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -257,6 +257,7 @@ struct mmc_host {
+ #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
+ #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
+ 				 MMC_CAP2_HS200_1_2V_SDR)
++#define MMC_CAP2_BROKEN_VOLTAGE	(1 << 7)	/* Use the broken voltage */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
