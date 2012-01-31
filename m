@@ -1,99 +1,142 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-s3c: support the broken voltage.
-Date: Tue, 31 Jan 2012 20:01:26 +0900
-Message-ID: <4F27CA06.4010701@samsung.com>
-References: <4F27907B.10103@samsung.com>
- <CAGxe1ZGDA8ja=rmo+9fbqarDPzUq9g8706tnqRr0dLJN9a1HnA@mail.gmail.com>
+From: "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH 1/7 v2] dmaengine: add a simple dma library
+Date: Tue, 31 Jan 2012 20:03:25 +0900
+Message-ID: <4F27CA7D.601@renesas.com>
+References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
+ <1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de>
+ <4F22624E.2090201@renesas.com>
+ <Pine.LNX.4.64.1201270946150.32661@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:56948 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752299Ab2AaLBg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 06:01:36 -0500
-Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LYN00GFGT9WQ1Y0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 31 Jan 2012 20:01:35 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LYN00EW6TANK180@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 31 Jan 2012 20:01:35 +0900 (KST)
-In-reply-to: <CAGxe1ZGDA8ja=rmo+9fbqarDPzUq9g8706tnqRr0dLJN9a1HnA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-reply-to: <Pine.LNX.4.64.1201270946150.32661@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, m.szyprowski@samsung.com
 
-On 01/31/2012 07:32 PM, Girish K S wrote:
+Hi Guennadi-san,
 
-> On 31 January 2012 12:25, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Samsung-SoC need to add the MMC_CAP2_BROKEN_VOLTAGE.
->>
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> ---
->>  drivers/mmc/host/sdhci-s3c.c |    7 +++----
->>  1 files changed, 3 insertions(+), 4 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
->> index d065e37..e7e2b6b 100644
->> --- a/drivers/mmc/host/sdhci-s3c.c
->> +++ b/drivers/mmc/host/sdhci-s3c.c
->> @@ -521,9 +521,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->>        if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
->>                host->mmc->caps = MMC_CAP_NONREMOVABLE;
->>
->> +       /* It supports additional host capabilities if needed */
->>        if (pdata->host_caps)
->>                host->mmc->caps |= pdata->host_caps;
->>
->> +       host->mmc->caps2 = MMC_CAP2_BROKEN_VOLTAGE;
+2012/01/27 17:48, Guennadi Liakhovetski wrote:
+> Hi Shimoda-san
 > 
-> Dont you think this should be set in the machine specific platform
-> data structure. If done in the machine specific file
-> only   if (pdata->host_caps2)
->               host->mmc->caps2 |= pdata->host_caps2
-> would be more generic to pull all the caps2 fields
-
-Right..i think also that.
-Actually I sent the second capability patch for Samsung-SoC before...
-Kukjin Kim didn't accept the patch.
-http://www.mail-archive.com/linux-samsung-soc@vger.kernel.org/msg07456.html
-http://www.mail-archive.com/linux-samsung-soc@vger.kernel.org/msg07455.html
-
-I will resend the patch..if he will accept them..
-
-Best Regards,
-Jaehoon Chung
-
+> On Fri, 27 Jan 2012, Shimoda, Yoshihiro wrote:
+[ snip ]
+>>>
+>>> 1. switch from using a tasklet to threaded IRQ, which allowed to
+>>
+>> I tested this driver on 2 environment, but it could not work correctly.
+>>  - renesas_usbhs driver with shdma driver on the mackerel board
+>>  - renesas_usbhs driver with experimental SUDMAC driver
+>>
+>> In this case, should we modify the renesas_usbhs driver?
 > 
->> +
->>        if (pdata->pm_caps)
->>                host->mmc->pm_caps |= pdata->pm_caps;
+> Yes, you do. Please, see the respective version of the shdma patch. It 
+> doesn't request channel IRQs any more directly, instead, it uses a 
+> dma-simple wrapper function. Also operations change a bit.
+
+Thank you for your comment.
+
+I investigaed the issue. I found out the renesas_usbhs driver may
+call tx_submit() in the callback() of the dma-simple finally.
+In this case, the value of power_up in the simple_tx_submit is 0,
+the start_xfer() is not called. And then, even if the ld_queue is
+not empty, the DMA doesn't start.
+
+
+So, if I add codes like the following in the dma-simple.c,
+the renesas_usbhs driver can work correctly without the driver changes.
+If you think the code is good, would you merge it to your code?
+======= chan_irqt() =======
+	simple_chan_ld_cleanup(schan, false);
+
++	spin_lock_irq(&schan->chan_lock);
++	/* Next desc */
++	simple_chan_xfer_ld_queue(schan);
++	spin_unlock_irq(&schan->chan_lock);
+
+	return IRQ_HANDLED;
+==============
+
+Best regards,
+Yoshihiro Shimoda
+
+> Thanks
+> Guennadi
+> 
+>> For reference, if I changed the threaded IRQ to tasklet,
+>> the 2 environment worked correctly:
+>> ==============
+>> diff --git a/drivers/dma/dma-simple.c b/drivers/dma/dma-simple.c
+>> index 49d8f7d..65a5170 100644
+>> --- a/drivers/dma/dma-simple.c
+>> +++ b/drivers/dma/dma-simple.c
+>> @@ -715,16 +715,18 @@ static irqreturn_t chan_irq(int irq, void *dev)
 >>
->> @@ -543,10 +546,6 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->>                sdhci_s3c_ops.get_max_clock = sdhci_cmu_get_max_clock;
->>        }
+>>  	spin_lock(&schan->chan_lock);
 >>
->> -       /* It supports additional host capabilities if needed */
->> -       if (pdata->host_caps)
->> -               host->mmc->caps |= pdata->host_caps;
+>> -	ret = ops->chan_irq(schan, irq) ? IRQ_WAKE_THREAD : IRQ_NONE;
+>> +	ret = ops->chan_irq(schan, irq) ? IRQ_HANDLED : IRQ_NONE;
+>> +	if (ret == IRQ_HANDLED)
+>> +		tasklet_schedule(&schan->tasklet);
+>>
+>>  	spin_unlock(&schan->chan_lock);
+>>
+>>  	return ret;
+>>  }
+>>
+>> -static irqreturn_t chan_irqt(int irq, void *dev)
+>> +static void chan_irqt(unsigned long dev)
+>>  {
+>> -	struct dma_simple_chan *schan = dev;
+>> +	struct dma_simple_chan *schan = (struct dma_simple_chan *)dev;
+>>  	const struct dma_simple_ops *ops =
+>>  		to_simple_dev(schan->dma_chan.device)->ops;
+>>  	struct dma_simple_desc *sdesc;
+>> @@ -744,15 +746,13 @@ static irqreturn_t chan_irqt(int irq, void *dev)
+>>  	spin_unlock_irq(&schan->chan_lock);
+>>
+>>  	simple_chan_ld_cleanup(schan, false);
 >> -
->>        ret = sdhci_add_host(host);
->>        if (ret) {
->>                dev_err(dev, "sdhci_add_host() failed\n");
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> -	return IRQ_HANDLED;
+>>  }
+>>
+>>  int dma_simple_request_irq(struct dma_simple_chan *schan, int irq,
+>>  			   unsigned long flags, const char *name)
+>>  {
+>> -	int ret = request_threaded_irq(irq, chan_irq, chan_irqt,
+>> -				       flags, name, schan);
+>> +	int ret = request_irq(irq, chan_irq, flags, name, schan);
+>> +	tasklet_init(&schan->tasklet, chan_irqt, (unsigned long)schan);
+>>
+>>  	schan->irq = ret < 0 ? ret : irq;
+>>
+>> diff --git a/include/linux/dma-simple.h b/include/linux/dma-simple.h
+>> index 5336674..beb1489 100644
+>> --- a/include/linux/dma-simple.h
+>> +++ b/include/linux/dma-simple.h
+>> @@ -68,6 +68,7 @@ struct dma_simple_chan {
+>>  	int id;				/* Raw id of this channel */
+>>  	int irq;			/* Channel IRQ */
+>>  	enum dma_simple_pm_state pm_state;
+>> +	struct tasklet_struct tasklet;
+>>  };
+>>
+>>  /**
+>> ==============
+>>
+>> Best regards,
+>> Yoshihiro Shimoda
+>>
+> 
+> ---
+> Guennadi Liakhovetski, Ph.D.
+> Freelance Open-Source Software Developer
+> http://www.open-technology.de/
 > 
 
 
+-- 
+Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+EC No.
