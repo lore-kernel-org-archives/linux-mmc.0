@@ -1,39 +1,64 @@
-From: Viresh Kumar <viresh.kumar@st.com>
-Subject: Re: [PATCH V2 08/12] dmaengine/dw_dmac: Unmap all memory buffers
- after completion of slave transfers
-Date: Tue, 31 Jan 2012 11:10:43 +0530
-Message-ID: <4F277EDB.2020405@st.com>
-References: <cover.1326876464.git.viresh.kumar@st.com>
- <ba53f229f3f594bfe0459b01a9ebb4d9b2c15882.1326876464.git.viresh.kumar@st.com>
- <20120118093620.GC1068@n2100.arm.linux.org.uk> <4F1696E4.9070806@st.com>
- <1327982312.1527.61.camel@vkoul-udesk3> <4F27691A.5010503@st.com>
- <1327986775.1527.63.camel@vkoul-udesk3> <4F2779F5.3000701@st.com>
- <1327988176.1527.66.camel@vkoul-udesk3>
+From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH 6/6] mmc: sdhci-s3c: Add device tree support
+Date: Tue, 31 Jan 2012 07:13:38 +0100
+Message-ID: <201201310713.39553.heiko@sntech.de>
+References: <1320266163-15292-1-git-send-email-thomas.abraham@linaro.org> <201201301051.22396.heiko@sntech.de> <20120130190114.GR28397@ponder.secretlab.ca>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1327988176.1527.66.camel@vkoul-udesk3>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: Rajeev KUMAR <rajeev-dlh.kumar@st.com>, Bhupesh SHARMA <bhupesh.sharma@st.com>, "linus.walleij@linaro.org" <linus.walleij@linaro.org>, "perex@perex.cz" <perex@perex.cz>, Vipin KUMAR <vipin.kumar@st.com>, Mirko GARDI <mirko.gardi@st.com>, "egtvedt@samfundet.no" <egtvedt@samfundet.no>, Pratyush ANAND <pratyush.anand@st.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Deepak SIKRI <deepak.sikri@st.com>, "cjb@laptop.org" <cjb@laptop.org>, "hskinnemoen@gmail.com" <hskinnemoen@gmail.com>, Bhavna YADAV <bhavna.yadav@st.com>, Armando VISCONTI <armando.visconti@st.com>, Shiraz HASHIM <shiraz.hashim@st.com>, Amit VIRDI <Amit.VIRDI@st.com>, Vincenzo FRASCINO <Vincenzo.FRASCINO@st.com>, Vipul Kumar SAMAR <vipulkumar.samar@st.com>, "dan.j.williams@intel.com" <dan.j.williams@intel.com>, Ulf HANSSON <ulf.hansson@stericsson.com>, "linux-arm-kernel@lists.infradead.org" <linux->
+Content-Type: Text/Plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <20120130190114.GR28397@ponder.secretlab.ca>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Thomas Abraham <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, ben-linux@fluff.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 1/31/2012 11:06 AM, Vinod Koul wrote:
-> its deprecated :)
-> You should be using dma_slave_config instead to pass the required
-> parameters
+Am Montag 30 Januar 2012, 20:01:14 schrieb Grant Likely:
+> On Mon, Jan 30, 2012 at 10:51:11AM +0100, Heiko St=FCbner wrote:
+> > Am Mittwoch, 2. November 2011, 21:36:03 schrieb Thomas Abraham:
+> >=20
+> > Hi Thomas,
+> >=20
+> > in patch 1/6:
+> > > +static struct platform_device_id sdhci_s3c_driver_ids[] =3D {
+> > > +       {
+> > > +               .name           =3D "s3c-sdhci",
+> > > +               .driver_data    =3D (kernel_ulong_t)NULL,
+> > > +       },
+> > > +       {
+> > > +               .name           =3D "exynos4-sdhci",
+> > > +               .driver_data    =3D EXYNOS4_SDHCI_DRV_DATA,
+> > > +       },
+> > > +};
+> > > +MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
+> >=20
+> > and in patch 6/6:
+> > > +#ifdef CONFIG_OF
+> > > +static const struct of_device_id sdhci_s3c_dt_match[] =3D {
+> > > +	{ .compatible =3D "samsung,s3c6410-sdhci", },
+> > > +	{ .compatible =3D "samsung,exynos4210-sdhci",
+> > > +		.data =3D &exynos4_sdhci_drv_data },
+> > > +	{},
+> > > +};
+> > > +MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
+> >=20
+> > wouldn't it be better to keep the naming consistent between of and
+> > non-of? I.e. s3c-sdhci vs. s3c6410-sdhci. Since the driver is used =
+for
+> > all S3C SoCs containing hsmmc controllers I think s3c-sdhci would b=
+e
+> > preferable here.
+>=20
+> History has shown that future devices aren't always compatible with e=
+arlier
+> ones.  Compatible strings are expected to be specific to an exact dev=
+ice to
+> reduce the possibility of new hardware breaking assumptions.
+>=20
+> Instead, new hardware can either claim compatibility with older
+> compatible strings (the compatible property in the DT is a list), or
+> can have the new string added to the match table in the driver;
+> whichever option makes the most sense.
+ah, ok. Thanks for the explanation and I will keep that in mind.
 
-Aah, i knew it. Silly question.
-I have this in my todo list, will do it as soon as i get some spare time.
-
--- 
-viresh
+Heiko
