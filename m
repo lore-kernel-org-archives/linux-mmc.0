@@ -1,7 +1,7 @@
 From: Viresh Kumar <viresh.kumar@st.com>
-Subject: [PATCH V3 09/12] dmaengine/dw_dmac: Add 64 bit access width support for slave xfers on mem side
-Date: Wed, 1 Feb 2012 16:12:25 +0530
-Message-ID: <85c11ca4e007a3c725724466f98e2159bbb6cf0a.1328091915.git.viresh.kumar@st.com>
+Subject: [PATCH V3 02/12] dmaengine: Add flow controller information to dma_slave_config
+Date: Wed, 1 Feb 2012 16:12:18 +0530
+Message-ID: <f43bb2248168c025402c897f0c67fae19b5404e8.1328091915.git.viresh.kumar@st.com>
 References: <cover.1328091915.git.viresh.kumar@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,51 +12,52 @@ To: vinod.koul@intel.com, dan.j.williams@intel.com
 Cc: cjb@laptop.org, rmk+kernel@arm.linux.org.uk, linus.walleij@linaro.org, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, egtvedt@samfundet.no, hskinnemoen@gmail.com, kernel@pengutronix.de, perex@perex.cz, linux-arm-kernel@lists.infradead.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, viresh.kumar@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
 List-Id: linux-mmc@vger.kernel.org
 
-64 bit transfers are possible on both sides in slave transfers (memory as well
-as peripherals). This patch adds support for it memory side 64 bit transfers.
+Flow controller is programmable for few controllers and there are few
+intelligent peripherals like, Synopsys JPEG controller, that needs to be a flow
+controller of DMA transfers on dest side.
+
+For this, currently two drivers, pl08x and dw_dmac, support flow controller to
+be passed from platform to these drivers.
+
+Perhaps, this should be a part of struct dma_slave_config. This patch adds
+another field device_fc to this structure. User drivers must pass this as true
+if they want to be flow controller of certain transfers.
 
 Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/dma/dw_dmac.c |   20 ++++++++++++++++----
- 1 files changed, 16 insertions(+), 4 deletions(-)
+ include/linux/dmaengine.h |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/dma/dw_dmac.c b/drivers/dma/dw_dmac.c
-index 49d477c..44d8069 100644
---- a/drivers/dma/dw_dmac.c
-+++ b/drivers/dma/dw_dmac.c
-@@ -756,8 +756,14 @@ dwc_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
+diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
+index 5532bb8..edfaac9 100644
+--- a/include/linux/dmaengine.h
++++ b/include/linux/dmaengine.h
+@@ -25,6 +25,7 @@
+ #include <linux/uio.h>
+ #include <linux/scatterlist.h>
+ #include <linux/bitmap.h>
++#include <linux/types.h>
+ #include <asm/page.h>
  
- 			mem = sg_phys(sg);
- 			len = sg_dma_len(sg);
--			mem_width = 2;
--			if (unlikely(mem & 3 || len & 3))
-+
-+			if (!((mem | len) & 7))
-+				mem_width = 3;
-+			else if (!((mem | len) & 3))
-+				mem_width = 2;
-+			else if (!((mem | len) & 1))
-+				mem_width = 1;
-+			else
- 				mem_width = 0;
+ /**
+@@ -330,6 +331,9 @@ enum dma_slave_buswidth {
+  * may or may not be applicable on memory sources.
+  * @dst_maxburst: same as src_maxburst but for destination target
+  * mutatis mutandis.
++ * @device_fc: Flow Controller Settings. Only valid for slave channels. Fill
++ * with 'true' if peripheral should be flow controller. Direction will be
++ * selected at Runtime.
+  *
+  * This struct is passed in as configuration data to a DMA engine
+  * in order to set up a certain channel for DMA transport at runtime.
+@@ -356,6 +360,7 @@ struct dma_slave_config {
+ 	enum dma_slave_buswidth dst_addr_width;
+ 	u32 src_maxburst;
+ 	u32 dst_maxburst;
++	bool device_fc;
+ };
  
- slave_sg_todev_fill_desc:
-@@ -814,8 +820,14 @@ slave_sg_todev_fill_desc:
- 
- 			mem = sg_phys(sg);
- 			len = sg_dma_len(sg);
--			mem_width = 2;
--			if (unlikely(mem & 3 || len & 3))
-+
-+			if (!((mem | len) & 7))
-+				mem_width = 3;
-+			else if (!((mem | len) & 3))
-+				mem_width = 2;
-+			else if (!((mem | len) & 1))
-+				mem_width = 1;
-+			else
- 				mem_width = 0;
- 
- slave_sg_fromdev_fill_desc:
+ static inline const char *dma_chan_name(struct dma_chan *chan)
 -- 
 1.7.8.110.g4cb5d
