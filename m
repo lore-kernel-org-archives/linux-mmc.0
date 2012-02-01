@@ -1,111 +1,102 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH 0/2] Improve handling of card removal
-Date: Wed, 1 Feb 2012 10:44:46 +0100
-Message-ID: <4F29098E.8010402@stericsson.com>
-References: <1326991191-12472-1-git-send-email-ulf.hansson@stericsson.com> <4F19564B.9070501@intel.com> <4F27E5D5.1050906@stericsson.com> <4F27F31B.6020401@intel.com> <4F280B71.5060901@stericsson.com> <4F2907F5.7030706@intel.com>
+From: Viresh Kumar <viresh.kumar@st.com>
+Subject: [PATCH V3 00/12] dmaengine: Pl08x and dw_dmac updates
+Date: Wed, 1 Feb 2012 16:12:16 +0530
+Message-ID: <cover.1328091915.git.viresh.kumar@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:45169 "EHLO
-	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754054Ab2BAJpZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2012 04:45:25 -0500
-In-Reply-To: <4F2907F5.7030706@intel.com>
+Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:48940 "EHLO
+	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756143Ab2BAKwL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2012 05:52:11 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: vinod.koul@intel.com, dan.j.williams@intel.com
+Cc: cjb@laptop.org, rmk+kernel@arm.linux.org.uk, linus.walleij@linaro.org, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, egtvedt@samfundet.no, hskinnemoen@gmail.com, kernel@pengutronix.de, perex@perex.cz, linux-arm-kernel@lists.infradead.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, viresh.kumar@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
 
-Adrian Hunter wrote:
-> On 31/01/12 17:40, Ulf Hansson wrote:
->> Adrian Hunter wrote:
->>> On 31/01/12 15:00, Ulf Hansson wrote:
->>>> Adrian Hunter wrote:
->>>>> On 19/01/12 18:39, Ulf Hansson wrote:
->>>>>> These patches is based upon the patch recently pushed to the mmc mailing
->>>>>> list:
->>>>>> mmc: core: Force a "detect" to handle non-properly removed cards
->>>>>>
->>>>>> According to Adrian Hunters comment about adding a CAP2 flag to enable
->>>>>> this feature has been done.
->>>>>>
->>>>>> Patch 2 depends on patch 1; but patch 1 can also be discussed separately.
->>>>> There should only be 1 patch otherwise you are breaking bisectablility for
->>>>> people not setting MMC_CAP2_DETECT_ON_ERR
->>>> The first patch "Prevent I/O as soon as possible..." does only make sure
->>>> that I/O is prevented as soon as possible but still within the timeout for
->>>> the scheduled detect work. Once the detect work (mmc_rescan) has run the
->>>> "detect_change" flag is preventing any further I/O errors from directly
->>>> trying to detect a card removal.
->>>>
->>>> The second patch introduces the MMC_CAP2_DETECT_ON_ERR, as you suggested.
->>> For drivers not using MMC_CAP2_DETECT_ON_ERR, the first patch introduces a
->>> change in behaviour and the second patch removes it again.  Anyone doing a
->>> git bisect that lands between the patches will see that change in behaviour.
->>>  There is no reason for that - just make it one patch.
->> The first patch is trying to "Prevent I/O as soon as possible at card removal". It changes some behavior for how we handle card removal, yes. A change I believe you would like to have no matter if the second patch is accepted or not.
->>
->> The second patch, takes the card removal handling to the next level. If MMC_CAP2_DETECT_ON_ERR is used, card removal will be checked for every I/O error until the card has been detected to be removed. It does not remove the behavior for the first patch it only makes it possible to enable the option of checking for card removal at I/O errors as well.
-> 
-> Make the patch like this and there is no problem:
-> 
+Hi Vinod/Dan,
 
-OK, I will change the patch(es) according to your proposal and create 
-one instead of two.
+   This patchset does following:
+   - Includes earlier patchset sent by Rajeev for cleanly applying this patchset
+   - Adds device_fc (device flow control) field in struct DMA_SLAVE_CONFIG
+   - Fixes existing users of DMAENGINE for device_fc.
+   - Updates pl08x driver according to that
+   - Fixes few issues/bugs in dw_dmac driver
+   - Adds DMA_SLAVE_CONFIG for dw_dmac driver
+   - Fixes existing users of dw_dmac driver
 
-Thanks.
+Change History:
+Since V2:
+ - fix code comment in 2/12
+ - fix commit log in 8/12
 
-> 
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index bec0bf2..a847311 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2077,18 +2077,30 @@ int _mmc_detect_card_removed(struct mmc_host *host)
->  int mmc_detect_card_removed(struct mmc_host *host)
->  {
->  	struct mmc_card *card = host->card;
-> +	int ret;
-> 
->  	WARN_ON(!host->claimed);
->  	/*
->  	 * The card will be considered unchanged unless we have been asked to
->  	 * detect a change or host requires polling to provide card detection.
->  	 */
-> -	if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
-> +	if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL)
-> +	    && !(host->caps2 & MMC_CAP2_DETECT_ON_ERR))
->  		return mmc_card_removed(card);
-> 
->  	host->detect_change = 0;
-> 
-> -	return _mmc_detect_card_removed(host);
-> +	ret = _mmc_detect_card_removed(host);
-> +	if (ret && (host->caps2 & MMC_CAP2_DETECT_ON_ERR)) {
-> +		/*
-> +		 * Schedule a detect work as soon as possible to let a
-> +		 * rescan handle the card removal.
-> +		 */
-> +		cancel_delayed_work(&host->detect);
-> +		mmc_detect_change(host, 0);
-> +	}
-> +
-> +	return ret;
->  }
->  EXPORT_SYMBOL(mmc_detect_card_removed);
-> 
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index dd13e05..368a2b9 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -257,6 +257,7 @@ struct mmc_host {
->  #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
->  #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
->  				 MMC_CAP2_HS200_1_2V_SDR)
-> +#define MMC_CAP2_DETECT_ON_ERR	(1 << 7)	/* On I/O err check card removal */
-> 
->  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->  	unsigned int        power_notify_type;
-> 
+Since V1:
+   - used dev_get_platdata() instead of platform_get_drvdata(), as
+   that was
+   incorrect
+   - Lots of fixes in: dmaengine/dw_dmac: Add support for
+   DMA_SLAVE_CONFIG
+   - Additional patches:
+   - dmaengine/dw_dmac: Add 64 bit access width support for
+   slave xfers on
+   mem side
+   - Fix other kernel driver for device_fc
+   and dw_dmac changes.
+
+   Rebased-on:
+
+   commit
+   3506c0d507144d9b0f19efd5a56d289f70611179
+   Author: Tushar Behera
+   <tushar.behera@linaro.org>
+   Date:   Tue Dec 6 16:15:54 2011 +0530
+
+   DMA: PL330: Remove pm_runtime_xxx
+   calls from pl330 probe/remove
+
+
+Rajeev KUMAR (1):
+  dmaengine/dw_dmac: Hibernation support in dw_dmac
+
+Viresh Kumar (11):
+  dmaengine: Add flow controller information to dma_slave_config
+  dmaengine: Pass dma_slave_config .device_fc = NULL for all existing
+    users
+  dmaengine/amba-pl08x: Take flow controller info from DMA_SLAVE_CONFIG
+  dmaengine/dw_dmac: Don't use magic number for total number of
+    channels
+  dmaengine/dw_dmac: Use dev_get_platdata() instead of accessing dev
+    directly
+  dmaengine/dw_dmac: Don't handle block interrupts
+  dmaengine/dw_dmac: Unmap all memory buffers after completion of
+    non-slave transfers
+  dmaengine/dw_dmac: Add 64 bit access width support for slave xfers on
+    mem side
+  dmaengine/dw_dmac: Add support for DMA_SLAVE_CONFIG
+  dmaengine/dw_dmac: Fix dw_dmac user drivers to adapt to slave_config
+    changes
+  dmaengine/dw_dmac: Remove unused fields in struct dw_dma_slave
+
+ arch/avr32/mach-at32ap/at32ap700x.c             |   13 --
+ arch/avr32/mach-at32ap/include/mach/atmel-mci.h |    7 -
+ drivers/dma/amba-pl08x.c                        |    4 +-
+ drivers/dma/dw_dmac.c                           |  232 +++++++++++++++--------
+ drivers/dma/dw_dmac_regs.h                      |   15 ++
+ drivers/mmc/host/atmel-mci.c                    |   24 ++-
+ drivers/mmc/host/mmci.c                         |    2 +
+ drivers/mmc/host/mxcmmc.c                       |    2 +
+ drivers/spi/spi-dw-mid.c                        |    3 +
+ drivers/spi/spi-pl022.c                         |    2 +
+ drivers/tty/serial/amba-pl011.c                 |    3 +
+ drivers/usb/musb/ux500_dma.c                    |    1 +
+ include/linux/amba/pl08x.h                      |    8 +-
+ include/linux/dmaengine.h                       |    5 +
+ include/linux/dw_dmac.h                         |   38 ----
+ sound/atmel/abdac.c                             |   18 ++-
+ sound/atmel/ac97c.c                             |   41 ++++-
+ sound/soc/imx/imx-pcm-dma-mx2.c                 |    3 +
+ 18 files changed, 255 insertions(+), 166 deletions(-)
+
+-- 
+1.7.8.110.g4cb5d
 
