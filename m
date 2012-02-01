@@ -1,85 +1,105 @@
-From: Saugata Das <saugata.das@stericsson.com>
-Subject: [PATCH] mmci.c: CMD23 support
-Date: Wed, 1 Feb 2012 09:47:33 +0530
-Message-ID: <1328069853-532-1-git-send-email-saugata.das@stericsson.com>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [PATCH 1/7 v2] dmaengine: add a simple dma library
+Date: Wed, 01 Feb 2012 11:08:46 +0530
+Message-ID: <1328074726.1610.1.camel@vkoul-udesk3>
+References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
+	 <1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de>
+	 <1327912346.1527.13.camel@vkoul-udesk3>
+	 <Pine.LNX.4.64.1201300944360.7932@axis700.grange>
+	 <1327992090.1527.116.camel@vkoul-udesk3>
+	 <Pine.LNX.4.64.1201310746470.31226@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:41136 "EHLO
-	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753110Ab2BAERx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 23:17:53 -0500
-Received: from zeta.dmz-eu.st.com (zeta.dmz-eu.st.com [164.129.230.9])
-	by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 2AE706D
-	for <linux-mmc@vger.kernel.org>; Wed,  1 Feb 2012 04:17:50 +0000 (GMT)
-Received: from relay2.stm.gmessaging.net (unknown [10.230.100.18])
-	by zeta.dmz-eu.st.com (STMicroelectronics) with ESMTP id C3E671318
-	for <linux-mmc@vger.kernel.org>; Wed,  1 Feb 2012 04:17:50 +0000 (GMT)
-Received: from exdcvycastm022.EQ1STM.local (alteon-source-exch [10.230.100.61])
-	(using TLSv1 with cipher RC4-MD5 (128/128 bits))
-	(Client CN "exdcvycastm022", Issuer "exdcvycastm022" (not verified))
-	by relay2.stm.gmessaging.net (Postfix) with ESMTPS id ADD94A8065
-	for <linux-mmc@vger.kernel.org>; Wed,  1 Feb 2012 05:17:48 +0100 (CET)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-serial-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1201310746470.31226@axis700.grange>
+Sender: linux-serial-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-From: Saugata Das <saugata.das@linaro.org>
+On Tue, 2012-01-31 at 09:59 +0100, Guennadi Liakhovetski wrote:
+> Hi Vinod
+> 
+> Thanks for your reply.
+> 
+> On Tue, 31 Jan 2012, Vinod Koul wrote:
+> 
+> > On Mon, 2012-01-30 at 10:34 +0100, Guennadi Liakhovetski wrote:
+> > > > I don't still comprehend the need for a library on top of dmaengine
+> > > > which gain is just a library between clients and dmacs. Surely we don't
+> > > > want to write another abstraction on top of one provided?
+> > > > 
+> > > > If the question is to handle scatter-gather even if the hardware doesn't
+> > > > have the capability, then why don't add that in dmaengine itself rather
+> > > > than one more layer?
+> > > 
+> > > Well, yes, adding new abstraction layers is always a decision, that has to 
+> > > be well justified. In this case it does at least make the life easier for 
+> > > two sh-mobile drivers: shdma and the new SUDMAC driver.
+> > > 
+> > > However, I did name the library in a generic way without reference to sh, 
+> > > assuming, that it might with time become useful for other architectures 
+> > > too. The reasons why I prefered to keep it as an optional addition to 
+> > > dmaengine core, instead of tightly integrating it with it are, that (1) I 
+> > > did not want to add useless code to drivers, that do not need it, 
+> > So are we sure that only sh-mobile drivers need this capablity?
+> 
+> If I was sure about that, I'd call the library shmobile-dma or something 
+> similar:-)
+> 
+> > Btw does you hardware only support single transfers and no sg support,
+> 
+> Well, the controller does have some repeat- and reload-modes, but they are 
+> currently not supported by the driver and from the documentation I cannot 
+> easily understand, how useful those modes could be to implement SG.
+> 
+> > would this remain the same in future?
+> 
+> Who knows?...
+> 
+> > > (2) I am 
+> > > not sure if and when this library will become useful for other drivers: 
+> > > apart from sh I am only familiar with one more dmaengine driver: 
+> > > ipu/ipu_idmac.c, and that one supports scatter-gather lists in a limited 
+> > > way and has some further peculiarities, that would likely make it a bad 
+> > > match for the simple DMA library,
+> > typically the dmacs will support this in some form or other, so your
+> > point is valid :)
+> > >  (3) keeping it separate makes its 
+> > > further development easier.
+> > > 
+> > > OTOH, I'm certainly fine with a tighter library integration with the 
+> > > dmaengine core. I think, it still would be better to keep it in a separate 
+> > > file and only build it if needed, right? This woult also simplify code 
+> > > debugging and further development. I can remove the "simple" notation, 
+> > > which does make it look like an additional abstraction layer, and replace 
+> > > it with, say, sgsoft (scatter-gather software implementation)?
+> > that would be more apt :)
+> > >  A more 
+> > > interesting question is what to do with struct dma_simple_dev, struct 
+> > > dma_simple_chan, struct dma_simple_desc, that embed struct dma_device, 
+> > > struct dma_chan and struct dma_async_tx_descriptor respectively. I don't 
+> > > think we want to merge all the additions from those wrapping structs back 
+> > > into their dmaengine counterparts?
+> > Sure they should be kept separate. I like the wrapping, this keeps it
+> > simple.
+> > > 
+> > > How would you like to do this? Don't you think, it would be good to allow 
+> > > both: either implement a dmaengine driver directly, exactly as all drivers 
+> > > are doing now, or use the additional helper library for suitable (simple) 
+> > > hardware types? I see it similar to I2C, where you either implement an I2C 
+> > > driver directly, or you use the bitbanging abstraction for simpler 
+> > > hardware.
+> > I think it would be good to have both, this can be used by folks who
+> > don't have sg support available.
+> 
+> Ok, so, should I just rename the driver to sgsoft? Is this the only 
+> change, that you'd like to see?
+That would be one :)
+Also, I would review the other patch patches by today/tomorrow, you can
+add any changes in next version as well
 
-Support added for transmission of CMD23 during multi block read or write. In order to activate this feature, MMC_CAP_CMD23 flag needs to be enabled in the capabilities field. Note that CMD23 support is mandatory to support features like reliable write, data tag, context ID, packed command
-
-Signed-off-by: Saugata Das <saugata.das@linaro.org>
----
- drivers/mmc/host/mmci.c |   12 +++++++++---
- 1 files changed, 9 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 8eabf99..21f75da 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -726,7 +726,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 			/* The error clause is handled above, success! */
- 			data->bytes_xfered = data->blksz * data->blocks;
- 
--		if (!data->stop) {
-+		if (!data->stop || host->mrq->sbc) {
- 			mmci_request_end(host, data->mrq);
- 		} else {
- 			mmci_start_command(host, data->stop, 0);
-@@ -739,6 +739,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	     unsigned int status)
- {
- 	void __iomem *base = host->base;
-+	bool sbc = !!(host->mrq->sbc && (host->mrq->sbc == host->cmd));
- 
- 	host->cmd = NULL;
- 
-@@ -753,10 +754,12 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 		cmd->resp[3] = readl(base + MMCIRESPONSE3);
- 	}
- 
--	if (!cmd->data || cmd->error) {
-+	if ((!sbc && !cmd->data) || cmd->error) {
- 		if (host->data)
- 			mmci_stop_data(host);
- 		mmci_request_end(host, cmd->mrq);
-+	} else if (sbc) {
-+		mmci_start_command(host, host->mrq->cmd, 0);
- 	} else if (!(cmd->data->flags & MMC_DATA_READ)) {
- 		mmci_start_data(host, cmd->data);
- 	}
-@@ -998,7 +1001,10 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (mrq->data && mrq->data->flags & MMC_DATA_READ)
- 		mmci_start_data(host, mrq->data);
- 
--	mmci_start_command(host, mrq->cmd, 0);
-+	if (mrq->sbc)
-+		mmci_start_command(host, mrq->sbc, 0);
-+	else
-+		mmci_start_command(host, mrq->cmd, 0);
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
 -- 
-1.7.4.3
+~Vinod
 
