@@ -1,77 +1,162 @@
-From: Huang Shijie <b32955@freescale.com>
-Subject: Re: [PATCH v2 0/2] patch set about the MXS-DMA
-Date: Wed, 1 Feb 2012 10:21:35 +0800
-Message-ID: <4F28A1AF.8040402@freescale.com>
-References: <1327044818-4464-1-git-send-email-b32955@freescale.com>
+From: "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH 1/7 v2] dmaengine: add a simple dma library
+Date: Wed, 01 Feb 2012 11:47:35 +0900
+Message-ID: <4F28A7C7.8060500@renesas.com>
+References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
+ <1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de>
+ <4F22624E.2090201@renesas.com>
+ <Pine.LNX.4.64.1201270946150.32661@axis700.grange> <4F27CA7D.601@renesas.com>
+ <Pine.LNX.4.64.1202010145510.31226@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="GB2312"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:21571 "EHLO
-	TX2EHSOBE005.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752987Ab2BACTx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 21:19:53 -0500
-In-Reply-To: <1327044818-4464-1-git-send-email-b32955@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-serial-owner@vger.kernel.org>
+In-reply-to: <Pine.LNX.4.64.1202010145510.31226@axis700.grange>
+Sender: linux-serial-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Shijie <b32955@freescale.com>
-Cc: vinod.koul@intel.com, shawn.guo@linaro.org, artem.bityutskiy@intel.com, shijie8@gmail.com, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, w.sang@pengutronix.de, LW@KARO-electronics.de, alsa-devel@alsa-project.org, b29396@freescale.com
 
-hi,
-> patch 1: move the mxs dma header to a more common place.
-> 	Beside the mx23/mx28, the apbh-dma is also used by MX50 and MX6Q.
-> 	So move the mxs dma header file to a more common place, and rename
-> 	it to mxs-dma.h
+Hi Guennadi-san,
+
+2012/02/01 9:52, Guennadi Liakhovetski wrote:
+> Hi Shimoda-san
+> 
+> On Tue, 31 Jan 2012, Shimoda, Yoshihiro wrote:
+[ snip ]
+>> I investigaed the issue. I found out the renesas_usbhs driver may
+>> call tx_submit() in the callback()
+> 
+> Well, actually, this is not something, that shdma officially supports ATM. 
+> Originally it was prohibited by the API, but later a correction has been 
+> added to Documentation/dmaengine.txt, explicitly allowing this. So, good, 
+> if this works for you, but watch out for possible issues.
 >
-> patch 2: rewrite the last parameter of mxs_dma_prep_slave_sg().
-> 	In the new GPMI version, some hardware behavior changes.
-> 	The WAIT4END bit should be set in the middle one of the ECC READ page DMA chain.
-> 	The DMA chain should be set like this:
->
->           +-----+               +-----+                      +-----+
->           | cmd | ------------> | cmd | ------------------>  | cmd |
->           +-----+               +-----+                      +-----+
->                                    ^                            ^
->                                    |                            |
->                                    |                            |
->                               set WAIT4END here too        set WAIT4END here
->
->         So rewrite the last parameter of mxs_dma_prep_slave_sg(), use the
-> 	dma_ctrl_flags to set the proper DMA bit for DMA Command Structure.
-> 	And change the relative drivers with the dma_ctrl_flags.
->
-> TEST:
-> 	Tested the mxs-mmc driver and gpmi-nand drive with the two patches
-> 	in MX28 board.
->
-> v1 --> v2:
-> 	[1] squash the trial patches into single patch.
-> 	[2] use the dma_ctrl_flags.
->
-> Huang Shijie (2):
->   mxs-dma : move the mxs dma.h to a more common place
->   mxs-dma : rewrite the last parameter of mxs_dma_prep_slave_sg()
->
->  drivers/dma/mxs-dma.c                              |   34 +++++++++++++++++---
->  drivers/mmc/host/mxs-mmc.c                         |   12 +++---
->  drivers/mtd/nand/gpmi-nand/gpmi-lib.c              |   28 +++++++++++++---
->  drivers/mtd/nand/gpmi-nand/gpmi-nand.h             |    6 +++-
->  drivers/mtd/nand/gpmi-nand/gpmi-regs.h             |    2 +
->  .../include/mach/dma.h => include/linux/mxs-dma.h  |    0
->  sound/soc/mxs/mxs-pcm.c                            |    2 +-
->  sound/soc/mxs/mxs-pcm.h                            |    2 +-
->  sound/soc/mxs/mxs-saif.c                           |    2 +-
->  9 files changed, 67 insertions(+), 21 deletions(-)
->  rename arch/arm/mach-mxs/include/mach/dma.h => include/linux/mxs-dma.h (100%)
->
-ping.
+>> of the dma-simple finally.
+>> In this case, the value of power_up in the simple_tx_submit is 0,
+>> the start_xfer() is not called. And then, even if the ld_queue is
+>> not empty, the DMA doesn't start.
+> 
+> This is correct. As soon as all the transfers, currently queued in the 
+> shdma driver, has been processed and completed, to restart DMA you need to 
+> call dma_async_issue_pending().
+> 
+>> So, if I add codes like the following in the dma-simple.c,
+>> the renesas_usbhs driver can work correctly without the driver changes.
+>> If you think the code is good, would you merge it to your code?
+>> ======= chan_irqt() =======
+>> 	simple_chan_ld_cleanup(schan, false);
+>>
+>> +	spin_lock_irq(&schan->chan_lock);
+>> +	/* Next desc */
+>> +	simple_chan_xfer_ld_queue(schan);
+>> +	spin_unlock_irq(&schan->chan_lock);
+>>
+>> 	return IRQ_HANDLED;
+>> ==============
+> 
+> Therefore, no, this shouldn't be needed.
+
+Thank you very much for your comment.
+I understood it. I will investigate the renesas_usbhs driver more.
+
+Best regards,
+Yoshihiro Shimoda
+
+> Thanks
+> Guennadi
+> 
+>>
+>> Best regards,
+>> Yoshihiro Shimoda
+>>
+>>> Thanks
+>>> Guennadi
+>>>
+>>>> For reference, if I changed the threaded IRQ to tasklet,
+>>>> the 2 environment worked correctly:
+>>>> ==============
+>>>> diff --git a/drivers/dma/dma-simple.c b/drivers/dma/dma-simple.c
+>>>> index 49d8f7d..65a5170 100644
+>>>> --- a/drivers/dma/dma-simple.c
+>>>> +++ b/drivers/dma/dma-simple.c
+>>>> @@ -715,16 +715,18 @@ static irqreturn_t chan_irq(int irq, void *dev)
+>>>>
+>>>>  	spin_lock(&schan->chan_lock);
+>>>>
+>>>> -	ret = ops->chan_irq(schan, irq) ? IRQ_WAKE_THREAD : IRQ_NONE;
+>>>> +	ret = ops->chan_irq(schan, irq) ? IRQ_HANDLED : IRQ_NONE;
+>>>> +	if (ret == IRQ_HANDLED)
+>>>> +		tasklet_schedule(&schan->tasklet);
+>>>>
+>>>>  	spin_unlock(&schan->chan_lock);
+>>>>
+>>>>  	return ret;
+>>>>  }
+>>>>
+>>>> -static irqreturn_t chan_irqt(int irq, void *dev)
+>>>> +static void chan_irqt(unsigned long dev)
+>>>>  {
+>>>> -	struct dma_simple_chan *schan = dev;
+>>>> +	struct dma_simple_chan *schan = (struct dma_simple_chan *)dev;
+>>>>  	const struct dma_simple_ops *ops =
+>>>>  		to_simple_dev(schan->dma_chan.device)->ops;
+>>>>  	struct dma_simple_desc *sdesc;
+>>>> @@ -744,15 +746,13 @@ static irqreturn_t chan_irqt(int irq, void *dev)
+>>>>  	spin_unlock_irq(&schan->chan_lock);
+>>>>
+>>>>  	simple_chan_ld_cleanup(schan, false);
+>>>> -
+>>>> -	return IRQ_HANDLED;
+>>>>  }
+>>>>
+>>>>  int dma_simple_request_irq(struct dma_simple_chan *schan, int irq,
+>>>>  			   unsigned long flags, const char *name)
+>>>>  {
+>>>> -	int ret = request_threaded_irq(irq, chan_irq, chan_irqt,
+>>>> -				       flags, name, schan);
+>>>> +	int ret = request_irq(irq, chan_irq, flags, name, schan);
+>>>> +	tasklet_init(&schan->tasklet, chan_irqt, (unsigned long)schan);
+>>>>
+>>>>  	schan->irq = ret < 0 ? ret : irq;
+>>>>
+>>>> diff --git a/include/linux/dma-simple.h b/include/linux/dma-simple.h
+>>>> index 5336674..beb1489 100644
+>>>> --- a/include/linux/dma-simple.h
+>>>> +++ b/include/linux/dma-simple.h
+>>>> @@ -68,6 +68,7 @@ struct dma_simple_chan {
+>>>>  	int id;				/* Raw id of this channel */
+>>>>  	int irq;			/* Channel IRQ */
+>>>>  	enum dma_simple_pm_state pm_state;
+>>>> +	struct tasklet_struct tasklet;
+>>>>  };
+>>>>
+>>>>  /**
+>>>> ==============
+>>>>
+>>>> Best regards,
+>>>> Yoshihiro Shimoda
+>>>>
+>>>
+>>> ---
+>>> Guennadi Liakhovetski, Ph.D.
+>>> Freelance Open-Source Software Developer
+>>> http://www.open-technology.de/
+>>>
+>>
+>>
+>> -- 
+>> Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+>> EC No.
+>>
+> 
+> ---
+> Guennadi Liakhovetski, Ph.D.
+> Freelance Open-Source Software Developer
+> http://www.open-technology.de/
+> 
 
 
-Could these two patches ok ?
-
-My following patches depend upon them.
-
-
-BR
-Huang Shijie
-
+-- 
+Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+EC No.
