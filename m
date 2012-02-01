@@ -1,105 +1,55 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [PATCH 1/7 v2] dmaengine: add a simple dma library
-Date: Wed, 01 Feb 2012 11:08:46 +0530
-Message-ID: <1328074726.1610.1.camel@vkoul-udesk3>
-References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
-	 <1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de>
-	 <1327912346.1527.13.camel@vkoul-udesk3>
-	 <Pine.LNX.4.64.1201300944360.7932@axis700.grange>
-	 <1327992090.1527.116.camel@vkoul-udesk3>
-	 <Pine.LNX.4.64.1201310746470.31226@axis700.grange>
+From: Heiko Schocher <hs@denx.de>
+Subject: Re: [PATCH v3] ARM: davinci: map default_queue to edma channels
+Date: Wed, 01 Feb 2012 07:40:24 +0100
+Message-ID: <4F28DE58.3040902@denx.de>
+References: <1326956721-25158-1-git-send-email-hs@denx.de>
+ <DF0F476B391FA8409C78302C7BA518B6317970CE@DBDE01.ent.ti.com>
+Reply-To: hs@denx.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-serial-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1201310746470.31226@axis700.grange>
-Sender: linux-serial-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from a.relay.invitel.net ([62.77.203.3]:42210 "EHLO
+	a.relay.invitel.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754074Ab2BAGk2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2012 01:40:28 -0500
+In-reply-to: <DF0F476B391FA8409C78302C7BA518B6317970CE@DBDE01.ent.ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Nori, Sekhar" <nsekhar@ti.com>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "juha.kuikka@gmail.com" <juha.kuikka@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "davinci-linux-open-source@linux.davincidsp.com" <davinci-linux-open-source@linux.davincidsp.com>, "Rajashekhara, Sudhakar" <sudhakar.raj@ti.com>, Ido Yariv <ido@wizery.com>, Wolfgang Denk <wd@denx.de>, Sergei Shtylyov <sshtylyov@mvista.com>
 
-On Tue, 2012-01-31 at 09:59 +0100, Guennadi Liakhovetski wrote:
-> Hi Vinod
-> 
-> Thanks for your reply.
-> 
-> On Tue, 31 Jan 2012, Vinod Koul wrote:
-> 
-> > On Mon, 2012-01-30 at 10:34 +0100, Guennadi Liakhovetski wrote:
-> > > > I don't still comprehend the need for a library on top of dmaengine
-> > > > which gain is just a library between clients and dmacs. Surely we don't
-> > > > want to write another abstraction on top of one provided?
-> > > > 
-> > > > If the question is to handle scatter-gather even if the hardware doesn't
-> > > > have the capability, then why don't add that in dmaengine itself rather
-> > > > than one more layer?
-> > > 
-> > > Well, yes, adding new abstraction layers is always a decision, that has to 
-> > > be well justified. In this case it does at least make the life easier for 
-> > > two sh-mobile drivers: shdma and the new SUDMAC driver.
-> > > 
-> > > However, I did name the library in a generic way without reference to sh, 
-> > > assuming, that it might with time become useful for other architectures 
-> > > too. The reasons why I prefered to keep it as an optional addition to 
-> > > dmaengine core, instead of tightly integrating it with it are, that (1) I 
-> > > did not want to add useless code to drivers, that do not need it, 
-> > So are we sure that only sh-mobile drivers need this capablity?
-> 
-> If I was sure about that, I'd call the library shmobile-dma or something 
-> similar:-)
-> 
-> > Btw does you hardware only support single transfers and no sg support,
-> 
-> Well, the controller does have some repeat- and reload-modes, but they are 
-> currently not supported by the driver and from the documentation I cannot 
-> easily understand, how useful those modes could be to implement SG.
-> 
-> > would this remain the same in future?
-> 
-> Who knows?...
-> 
-> > > (2) I am 
-> > > not sure if and when this library will become useful for other drivers: 
-> > > apart from sh I am only familiar with one more dmaengine driver: 
-> > > ipu/ipu_idmac.c, and that one supports scatter-gather lists in a limited 
-> > > way and has some further peculiarities, that would likely make it a bad 
-> > > match for the simple DMA library,
-> > typically the dmacs will support this in some form or other, so your
-> > point is valid :)
-> > >  (3) keeping it separate makes its 
-> > > further development easier.
-> > > 
-> > > OTOH, I'm certainly fine with a tighter library integration with the 
-> > > dmaengine core. I think, it still would be better to keep it in a separate 
-> > > file and only build it if needed, right? This woult also simplify code 
-> > > debugging and further development. I can remove the "simple" notation, 
-> > > which does make it look like an additional abstraction layer, and replace 
-> > > it with, say, sgsoft (scatter-gather software implementation)?
-> > that would be more apt :)
-> > >  A more 
-> > > interesting question is what to do with struct dma_simple_dev, struct 
-> > > dma_simple_chan, struct dma_simple_desc, that embed struct dma_device, 
-> > > struct dma_chan and struct dma_async_tx_descriptor respectively. I don't 
-> > > think we want to merge all the additions from those wrapping structs back 
-> > > into their dmaengine counterparts?
-> > Sure they should be kept separate. I like the wrapping, this keeps it
-> > simple.
-> > > 
-> > > How would you like to do this? Don't you think, it would be good to allow 
-> > > both: either implement a dmaengine driver directly, exactly as all drivers 
-> > > are doing now, or use the additional helper library for suitable (simple) 
-> > > hardware types? I see it similar to I2C, where you either implement an I2C 
-> > > driver directly, or you use the bitbanging abstraction for simpler 
-> > > hardware.
-> > I think it would be good to have both, this can be used by folks who
-> > don't have sg support available.
-> 
-> Ok, so, should I just rename the driver to sgsoft? Is this the only 
-> change, that you'd like to see?
-That would be one :)
-Also, I would review the other patch patches by today/tomorrow, you can
-add any changes in next version as well
+Hello Nori,
 
+Nori, Sekhar wrote:
+> Hi Heiko,
+> 
+> On Thu, Jan 19, 2012 at 12:35:21, Heiko Schocher wrote:
+>> Default queue is expected to be a low-priority queue.
+>> This way, long transfers on the default queue started
+>> by the codec engine will not cause audio defects.
+>>
+>> Signed-off-by: Heiko Schocher <hs@denx.de>
+> 
+>> Signed-off-by: juha.kuikka@gmail.com
+>> Reported-by: juha.kuikka@gmail.com
+> 
+> Sign-off should include real name, so I changed these
+> two lines to:
+> 
+>     Signed-off-by: Juha Kuikka <juha.kuikka@gmail.com>
+>     Reported-by: Juha Kuikka <juha.kuikka@gmail.com>
+
+Thanks!
+
+> before applying. Let me know if anyone has objections.
+
+I saw no objections, so can this patch go in now?
+
+Thanks!
+
+bye,
+Heiko
 -- 
-~Vinod
-
+DENX Software Engineering GmbH,     MD: Wolfgang Denk & Detlev Zundel
+HRB 165235 Munich, Office: Kirchenstr.5, D-82194 Groebenzell, Germany
