@@ -1,273 +1,188 @@
 From: Viresh Kumar <viresh.kumar@st.com>
-Subject: [PATCH V3 10/12] dmaengine/dw_dmac: Add support for DMA_SLAVE_CONFIG
-Date: Wed, 1 Feb 2012 16:12:26 +0530
-Message-ID: <3671d82ede6627489b4eb6ebec19dd7a46ae256f.1328091915.git.viresh.kumar@st.com>
+Subject: [PATCH V3 03/12] dmaengine: Pass dma_slave_config .device_fc = NULL
+ for all existing users
+Date: Wed, 1 Feb 2012 16:12:19 +0530
+Message-ID: <c973ec53b05899701cd09def1bf872862a1df67d.1328091915.git.viresh.kumar@st.com>
 References: <cover.1328091915.git.viresh.kumar@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <cover.1328091915.git.viresh.kumar@st.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: vinod.koul@intel.com, dan.j.williams@intel.com
-Cc: cjb@laptop.org, rmk+kernel@arm.linux.org.uk, linus.walleij@linaro.org, ulf.hansson@stericsson.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, egtvedt@samfundet.no, hskinnemoen@gmail.com, kernel@pengutronix.de, perex@perex.cz, linux-arm-kernel@lists.infradead.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, viresh.kumar@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
+Cc: rajeev-dlh.kumar@st.com, bhupesh.sharma@st.com, linus.walleij@linaro.org, mirko.gardi@st.com, perex@perex.cz, vipin.kumar@st.com, vipulkumar.samar@st.com, egtvedt@samfundet.no, pratyush.anand@st.com, deepak.sikri@st.com, rmk+kernel@arm.linux.org.uk, cjb@laptop.org, hskinnemoen@gmail.com, bhavna.yadav@st.com, armando.visconti@st.com, shiraz.hashim@st.com, amit.virdi@st.com, vincenzo.frascino@st.com, ulf.hansson@stericsson.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, viresh.linux@gmail.com, kernel@pengutronix.de
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds support for DMA_SLAVE_CONFIG in dwc DMAC controller. Fields in
-struct dw_dma_slave for passing similar data are preserved in this patch untill
-all existing users are fixed.
-
-That will be handled later in this patchset.
+.device_fc is added in struct dma_slave_config recently. All user drivers, which
+want DMA to be the flow controller must pass this field as false. As earlier
+driver don't look to use this feature, mark it false for now.
 
 Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/dma/dw_dmac.c      |  119 +++++++++++++++++++++++++++++++++-----------
- drivers/dma/dw_dmac_regs.h |    3 +
- 2 files changed, 93 insertions(+), 29 deletions(-)
+ drivers/mmc/host/mmci.c         |    2 ++
+ drivers/mmc/host/mxcmmc.c       |    2 ++
+ drivers/spi/spi-dw-mid.c        |    3 +++
+ drivers/spi/spi-pl022.c         |    2 ++
+ drivers/tty/serial/amba-pl011.c |    3 +++
+ drivers/usb/musb/ux500_dma.c    |    1 +
+ sound/soc/imx/imx-pcm-dma-mx2.c |    3 +++
+ 7 files changed, 16 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/dma/dw_dmac.c b/drivers/dma/dw_dmac.c
-index 44d8069..ccfb03b 100644
---- a/drivers/dma/dw_dmac.c
-+++ b/drivers/dma/dw_dmac.c
-@@ -9,6 +9,7 @@
-  * it under the terms of the GNU General Public License version 2 as
-  * published by the Free Software Foundation.
-  */
-+#include <linux/bitops.h>
- #include <linux/clk.h>
- #include <linux/delay.h>
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 0b44d6b..a6b7068 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -30,6 +30,7 @@
+ #include <linux/dma-mapping.h>
+ #include <linux/amba/mmci.h>
+ #include <linux/pm_runtime.h>
++#include <linux/types.h>
+ 
+ #include <asm/div64.h>
+ #include <asm/io.h>
+@@ -370,6 +371,7 @@ static int mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 		.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
+ 		.src_maxburst = variant->fifohalfsize >> 2, /* # of words */
+ 		.dst_maxburst = variant->fifohalfsize >> 2, /* # of words */
++		.device_fc = false,
+ 	};
+ 	struct dma_chan *chan;
+ 	struct dma_device *device;
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index a17bc12..231c75a 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -33,6 +33,7 @@
+ #include <linux/gpio.h>
+ #include <linux/regulator/consumer.h>
  #include <linux/dmaengine.h>
-@@ -33,19 +34,23 @@
-  * which does not support descriptor writeback.
-  */
++#include <linux/types.h>
  
--#define DWC_DEFAULT_CTLLO(private) ({				\
--		struct dw_dma_slave *__slave = (private);	\
--		int dms = __slave ? __slave->dst_master : 0;	\
--		int sms = __slave ? __slave->src_master : 1;	\
--		u8 smsize = __slave ? __slave->src_msize : DW_DMA_MSIZE_16; \
--		u8 dmsize = __slave ? __slave->dst_msize : DW_DMA_MSIZE_16; \
-+#define DWC_DEFAULT_CTLLO(_chan) ({				\
-+		struct dw_dma_slave *__slave = (_chan->private);	\
-+		struct dw_dma_chan *_dwc = to_dw_dma_chan(_chan);	\
-+		struct dma_slave_config	*_sconfig = &_dwc->dma_sconfig;	\
-+		int _dms = __slave ? __slave->dst_master : 0;	\
-+		int _sms = __slave ? __slave->src_master : 1;	\
-+		u8 _smsize = __slave ? _sconfig->src_maxburst :	\
-+			DW_DMA_MSIZE_16;			\
-+		u8 _dmsize = __slave ? _sconfig->dst_maxburst :	\
-+			DW_DMA_MSIZE_16;			\
- 								\
--		(DWC_CTLL_DST_MSIZE(dmsize)			\
--		 | DWC_CTLL_SRC_MSIZE(smsize)			\
-+		(DWC_CTLL_DST_MSIZE(_dmsize)			\
-+		 | DWC_CTLL_SRC_MSIZE(_smsize)			\
- 		 | DWC_CTLL_LLP_D_EN				\
- 		 | DWC_CTLL_LLP_S_EN				\
--		 | DWC_CTLL_DMS(dms)				\
--		 | DWC_CTLL_SMS(sms));				\
-+		 | DWC_CTLL_DMS(_dms)				\
-+		 | DWC_CTLL_SMS(_sms));				\
- 	})
+ #include <asm/dma.h>
+ #include <asm/irq.h>
+@@ -710,6 +711,7 @@ static int mxcmci_setup_dma(struct mmc_host *mmc)
+ 	config->src_addr_width = 4;
+ 	config->dst_maxburst = host->burstlen;
+ 	config->src_maxburst = host->burstlen;
++	config->device_fc = false;
  
- /*
-@@ -664,7 +669,7 @@ dwc_prep_dma_memcpy(struct dma_chan *chan, dma_addr_t dest, dma_addr_t src,
- 	else
- 		src_width = dst_width = 0;
- 
--	ctllo = DWC_DEFAULT_CTLLO(chan->private)
-+	ctllo = DWC_DEFAULT_CTLLO(chan)
- 			| DWC_CTLL_DST_WIDTH(dst_width)
- 			| DWC_CTLL_SRC_WIDTH(src_width)
- 			| DWC_CTLL_DST_INC
-@@ -725,6 +730,7 @@ dwc_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
- {
- 	struct dw_dma_chan	*dwc = to_dw_dma_chan(chan);
- 	struct dw_dma_slave	*dws = chan->private;
-+	struct dma_slave_config	*sconfig = &dwc->dma_sconfig;
- 	struct dw_desc		*prev;
- 	struct dw_desc		*first;
- 	u32			ctllo;
-@@ -739,17 +745,20 @@ dwc_prep_slave_sg(struct dma_chan *chan, struct scatterlist *sgl,
- 	if (unlikely(!dws || !sg_len))
- 		return NULL;
- 
--	reg_width = dws->reg_width;
- 	prev = first = NULL;
- 
- 	switch (direction) {
- 	case DMA_MEM_TO_DEV:
--		ctllo = (DWC_DEFAULT_CTLLO(chan->private)
-+		reg_width = __fls(sconfig->dst_addr_width);
-+		reg = sconfig->dst_addr;
-+		ctllo = (DWC_DEFAULT_CTLLO(chan)
- 				| DWC_CTLL_DST_WIDTH(reg_width)
- 				| DWC_CTLL_DST_FIX
--				| DWC_CTLL_SRC_INC
--				| DWC_CTLL_FC(dws->fc));
--		reg = dws->tx_reg;
-+				| DWC_CTLL_SRC_INC);
-+
-+		ctllo |= sconfig->device_fc ? DWC_CTLL_FC(DW_DMA_FC_P_M2P) :
-+			DWC_CTLL_FC(DW_DMA_FC_D_M2P);
-+
- 		for_each_sg(sgl, sg, sg_len, i) {
- 			struct dw_desc	*desc;
- 			u32		len, dlen, mem;
-@@ -807,13 +816,16 @@ slave_sg_todev_fill_desc:
- 		}
- 		break;
- 	case DMA_DEV_TO_MEM:
--		ctllo = (DWC_DEFAULT_CTLLO(chan->private)
-+		reg_width = __fls(sconfig->src_addr_width);
-+		reg = sconfig->src_addr;
-+		ctllo = (DWC_DEFAULT_CTLLO(chan)
- 				| DWC_CTLL_SRC_WIDTH(reg_width)
- 				| DWC_CTLL_DST_INC
--				| DWC_CTLL_SRC_FIX
--				| DWC_CTLL_FC(dws->fc));
-+				| DWC_CTLL_SRC_FIX);
-+
-+		ctllo |= sconfig->device_fc ? DWC_CTLL_FC(DW_DMA_FC_P_P2M) :
-+			DWC_CTLL_FC(DW_DMA_FC_D_P2M);
- 
--		reg = dws->rx_reg;
- 		for_each_sg(sgl, sg, sg_len, i) {
- 			struct dw_desc	*desc;
- 			u32		len, dlen, mem;
-@@ -889,6 +901,39 @@ err_desc_get:
- 	return NULL;
+ 	return dmaengine_slave_config(host->dma, config);
  }
+diff --git a/drivers/spi/spi-dw-mid.c b/drivers/spi/spi-dw-mid.c
+index 8418eb0..04d6c1b 100644
+--- a/drivers/spi/spi-dw-mid.c
++++ b/drivers/spi/spi-dw-mid.c
+@@ -22,6 +22,7 @@
+ #include <linux/interrupt.h>
+ #include <linux/slab.h>
+ #include <linux/spi/spi.h>
++#include <linux/types.h>
  
-+/*
-+ * Fix sconfig's burst size according to dw_dmac. We need to convert them as:
-+ * 1 -> 0, 4 -> 1, 8 -> 2, 16 -> 3.
-+ *
-+ * NOTE: burst size 2 is not supported by controller.
-+ *
-+ * This can be done by finding least significant bit set: n & (n - 1)
-+ */
-+static inline void convert_burst(u32 *maxburst)
-+{
-+	if (*maxburst > 1)
-+		*maxburst = fls(*maxburst) - 2;
-+	else
-+		*maxburst = 0;
-+}
-+
-+static int
-+set_runtime_config(struct dma_chan *chan, struct dma_slave_config *sconfig)
-+{
-+	struct dw_dma_chan *dwc = to_dw_dma_chan(chan);
-+
-+	/* Check if it is chan is configured for slave transfers */
-+	if (!chan->private)
-+		return -EINVAL;
-+
-+	memcpy(&dwc->dma_sconfig, sconfig, sizeof(*sconfig));
-+
-+	convert_burst(&dwc->dma_sconfig.src_maxburst);
-+	convert_burst(&dwc->dma_sconfig.dst_maxburst);
-+
-+	return 0;
-+}
-+
- static int dwc_control(struct dma_chan *chan, enum dma_ctrl_cmd cmd,
- 		       unsigned long arg)
- {
-@@ -938,8 +983,11 @@ static int dwc_control(struct dma_chan *chan, enum dma_ctrl_cmd cmd,
- 		/* Flush all pending and queued descriptors */
- 		list_for_each_entry_safe(desc, _desc, &list, desc_node)
- 			dwc_descriptor_complete(dwc, desc, false);
--	} else
-+	} else if (cmd == DMA_SLAVE_CONFIG) {
-+		return set_runtime_config(chan, (struct dma_slave_config *)arg);
-+	} else {
- 		return -ENXIO;
-+	}
+ #include "spi-dw.h"
  
- 	return 0;
- }
-@@ -1180,11 +1228,11 @@ struct dw_cyclic_desc *dw_dma_cyclic_prep(struct dma_chan *chan,
- 		enum dma_transfer_direction direction)
- {
- 	struct dw_dma_chan		*dwc = to_dw_dma_chan(chan);
-+	struct dma_slave_config		*sconfig = &dwc->dma_sconfig;
- 	struct dw_cyclic_desc		*cdesc;
- 	struct dw_cyclic_desc		*retval = NULL;
- 	struct dw_desc			*desc;
- 	struct dw_desc			*last = NULL;
--	struct dw_dma_slave		*dws = chan->private;
- 	unsigned long			was_cyclic;
- 	unsigned int			reg_width;
- 	unsigned int			periods;
-@@ -1208,7 +1256,12 @@ struct dw_cyclic_desc *dw_dma_cyclic_prep(struct dma_chan *chan,
+@@ -136,6 +137,7 @@ static int mid_spi_dma_transfer(struct dw_spi *dws, int cs_change)
+ 	txconf.dst_maxburst = LNW_DMA_MSIZE_16;
+ 	txconf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+ 	txconf.dst_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
++	txconf.device_fc = false;
+ 
+ 	txchan->device->device_control(txchan, DMA_SLAVE_CONFIG,
+ 				       (unsigned long) &txconf);
+@@ -158,6 +160,7 @@ static int mid_spi_dma_transfer(struct dw_spi *dws, int cs_change)
+ 	rxconf.src_maxburst = LNW_DMA_MSIZE_16;
+ 	rxconf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+ 	rxconf.src_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
++	rxconf.device_fc = false;
+ 
+ 	rxchan->device->device_control(rxchan, DMA_SLAVE_CONFIG,
+ 				       (unsigned long) &rxconf);
+diff --git a/drivers/spi/spi-pl022.c b/drivers/spi/spi-pl022.c
+index 95400fa..5125c0c 100644
+--- a/drivers/spi/spi-pl022.c
++++ b/drivers/spi/spi-pl022.c
+@@ -905,10 +905,12 @@ static int configure_dma(struct pl022 *pl022)
+ 	struct dma_slave_config rx_conf = {
+ 		.src_addr = SSP_DR(pl022->phybase),
+ 		.direction = DMA_DEV_TO_MEM,
++		.device_fc = false,
+ 	};
+ 	struct dma_slave_config tx_conf = {
+ 		.dst_addr = SSP_DR(pl022->phybase),
+ 		.direction = DMA_MEM_TO_DEV,
++		.device_fc = false,
+ 	};
+ 	unsigned int pages;
+ 	int ret;
+diff --git a/drivers/tty/serial/amba-pl011.c b/drivers/tty/serial/amba-pl011.c
+index e4d5a21..44d050d 100644
+--- a/drivers/tty/serial/amba-pl011.c
++++ b/drivers/tty/serial/amba-pl011.c
+@@ -51,6 +51,7 @@
+ #include <linux/dma-mapping.h>
+ #include <linux/scatterlist.h>
+ #include <linux/delay.h>
++#include <linux/types.h>
+ 
+ #include <asm/io.h>
+ #include <asm/sizes.h>
+@@ -270,6 +271,7 @@ static void pl011_dma_probe_initcall(struct uart_amba_port *uap)
+ 		.dst_addr_width = DMA_SLAVE_BUSWIDTH_1_BYTE,
+ 		.direction = DMA_MEM_TO_DEV,
+ 		.dst_maxburst = uap->fifosize >> 1,
++		.device_fc = false,
+ 	};
+ 	struct dma_chan *chan;
+ 	dma_cap_mask_t mask;
+@@ -303,6 +305,7 @@ static void pl011_dma_probe_initcall(struct uart_amba_port *uap)
+ 			.src_addr_width = DMA_SLAVE_BUSWIDTH_1_BYTE,
+ 			.direction = DMA_DEV_TO_MEM,
+ 			.src_maxburst = uap->fifosize >> 1,
++			.device_fc = false,
+ 		};
+ 
+ 		chan = dma_request_channel(mask, plat->dma_filter, plat->dma_rx_param);
+diff --git a/drivers/usb/musb/ux500_dma.c b/drivers/usb/musb/ux500_dma.c
+index f8fd0dd..7694392 100644
+--- a/drivers/usb/musb/ux500_dma.c
++++ b/drivers/usb/musb/ux500_dma.c
+@@ -143,6 +143,7 @@ static bool ux500_configure_channel(struct dma_channel *channel,
+ 	slave_conf.dst_addr = usb_fifo_addr;
+ 	slave_conf.dst_addr_width = addr_width;
+ 	slave_conf.dst_maxburst = 16;
++	slave_conf.device_fc = false;
+ 
+ 	dma_chan->device->device_control(dma_chan, DMA_SLAVE_CONFIG,
+ 					     (unsigned long) &slave_conf);
+diff --git a/sound/soc/imx/imx-pcm-dma-mx2.c b/sound/soc/imx/imx-pcm-dma-mx2.c
+index 7d28de9..9a0946c 100644
+--- a/sound/soc/imx/imx-pcm-dma-mx2.c
++++ b/sound/soc/imx/imx-pcm-dma-mx2.c
+@@ -21,6 +21,7 @@
+ #include <linux/platform_device.h>
+ #include <linux/slab.h>
+ #include <linux/dmaengine.h>
++#include <linux/types.h>
+ 
+ #include <sound/core.h>
+ #include <sound/initval.h>
+@@ -106,6 +107,8 @@ static int imx_ssi_dma_alloc(struct snd_pcm_substream *substream,
+ 		return 0;
  	}
  
- 	retval = ERR_PTR(-EINVAL);
--	reg_width = dws->reg_width;
++	slave_config.device_fc = false;
 +
-+	if (direction == DMA_MEM_TO_DEV)
-+		reg_width = __ffs(sconfig->dst_addr_width);
-+	else
-+		reg_width = __ffs(sconfig->src_addr_width);
-+
- 	periods = buf_len / period_len;
- 
- 	/* Check for too big/unaligned periods and unaligned DMA buffer. */
-@@ -1241,26 +1294,34 @@ struct dw_cyclic_desc *dw_dma_cyclic_prep(struct dma_chan *chan,
- 
- 		switch (direction) {
- 		case DMA_MEM_TO_DEV:
--			desc->lli.dar = dws->tx_reg;
-+			desc->lli.dar = sconfig->dst_addr;
- 			desc->lli.sar = buf_addr + (period_len * i);
--			desc->lli.ctllo = (DWC_DEFAULT_CTLLO(chan->private)
-+			desc->lli.ctllo = (DWC_DEFAULT_CTLLO(chan)
- 					| DWC_CTLL_DST_WIDTH(reg_width)
- 					| DWC_CTLL_SRC_WIDTH(reg_width)
- 					| DWC_CTLL_DST_FIX
- 					| DWC_CTLL_SRC_INC
--					| DWC_CTLL_FC(dws->fc)
- 					| DWC_CTLL_INT_EN);
-+
-+			desc->lli.ctllo |= sconfig->device_fc ?
-+				DWC_CTLL_FC(DW_DMA_FC_P_M2P) :
-+				DWC_CTLL_FC(DW_DMA_FC_D_M2P);
-+
- 			break;
- 		case DMA_DEV_TO_MEM:
- 			desc->lli.dar = buf_addr + (period_len * i);
--			desc->lli.sar = dws->rx_reg;
--			desc->lli.ctllo = (DWC_DEFAULT_CTLLO(chan->private)
-+			desc->lli.sar = sconfig->src_addr;
-+			desc->lli.ctllo = (DWC_DEFAULT_CTLLO(chan)
- 					| DWC_CTLL_SRC_WIDTH(reg_width)
- 					| DWC_CTLL_DST_WIDTH(reg_width)
- 					| DWC_CTLL_DST_INC
- 					| DWC_CTLL_SRC_FIX
--					| DWC_CTLL_FC(dws->fc)
- 					| DWC_CTLL_INT_EN);
-+
-+			desc->lli.ctllo |= sconfig->device_fc ?
-+				DWC_CTLL_FC(DW_DMA_FC_P_P2M) :
-+				DWC_CTLL_FC(DW_DMA_FC_D_P2M);
-+
- 			break;
- 		default:
- 			break;
-diff --git a/drivers/dma/dw_dmac_regs.h b/drivers/dma/dw_dmac_regs.h
-index 5eef694..2005d30 100644
---- a/drivers/dma/dw_dmac_regs.h
-+++ b/drivers/dma/dw_dmac_regs.h
-@@ -153,6 +153,9 @@ struct dw_dma_chan {
- 	struct dw_cyclic_desc	*cdesc;
- 
- 	unsigned int		descs_allocated;
-+
-+	/* configuration passed via DMA_SLAVE_CONFIG */
-+	struct dma_slave_config dma_sconfig;
- };
- 
- static inline struct dw_dma_chan_regs __iomem *
+ 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
+ 		slave_config.direction = DMA_MEM_TO_DEV;
+ 		slave_config.dst_addr = dma_params->dma_addr;
 -- 
 1.7.8.110.g4cb5d
