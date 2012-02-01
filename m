@@ -1,134 +1,85 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/2] mmc: core: Prevent I/O as soon as possible at card
- removal
-Date: Wed, 01 Feb 2012 12:02:10 +0900
-Message-ID: <4F28AB32.5050608@samsung.com>
-References: <1326991191-12472-1-git-send-email-ulf.hansson@stericsson.com>
- <1326991191-12472-2-git-send-email-ulf.hansson@stericsson.com>
- <4F19562F.6010907@intel.com> <4F27E46A.6040504@stericsson.com>
- <4F27F2FF.4080408@intel.com> <4F28076B.8090607@stericsson.com>
+From: Saugata Das <saugata.das@stericsson.com>
+Subject: [PATCH] mmci.c: CMD23 support
+Date: Wed, 1 Feb 2012 09:47:33 +0530
+Message-ID: <1328069853-532-1-git-send-email-saugata.das@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:65397 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755814Ab2BADCW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 22:02:22 -0500
-Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LYP00DJB1REXSK0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 01 Feb 2012 12:02:20 +0900 (KST)
-Received: from [165.213.219.108] by mmp2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LYP0076N1RV6ZH0@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 01 Feb 2012 12:02:20 +0900 (KST)
-In-reply-to: <4F28076B.8090607@stericsson.com>
+Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:41136 "EHLO
+	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753110Ab2BAERx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2012 23:17:53 -0500
+Received: from zeta.dmz-eu.st.com (zeta.dmz-eu.st.com [164.129.230.9])
+	by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 2AE706D
+	for <linux-mmc@vger.kernel.org>; Wed,  1 Feb 2012 04:17:50 +0000 (GMT)
+Received: from relay2.stm.gmessaging.net (unknown [10.230.100.18])
+	by zeta.dmz-eu.st.com (STMicroelectronics) with ESMTP id C3E671318
+	for <linux-mmc@vger.kernel.org>; Wed,  1 Feb 2012 04:17:50 +0000 (GMT)
+Received: from exdcvycastm022.EQ1STM.local (alteon-source-exch [10.230.100.61])
+	(using TLSv1 with cipher RC4-MD5 (128/128 bits))
+	(Client CN "exdcvycastm022", Issuer "exdcvycastm022" (not verified))
+	by relay2.stm.gmessaging.net (Postfix) with ESMTPS id ADD94A8065
+	for <linux-mmc@vger.kernel.org>; Wed,  1 Feb 2012 05:17:48 +0100 (CET)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: linux-mmc@vger.kernel.org
 
-Hi Ulf.
-On 02/01/2012 12:23 AM, Ulf Hansson wrote:
+From: Saugata Das <saugata.das@linaro.org>
 
-> Adrian Hunter wrote:
->> On 31/01/12 14:54, Ulf Hansson wrote:
->>> Adrian Hunter wrote:
->>>> On 19/01/12 18:39, Ulf Hansson wrote:
->>>>> Once the card has been detected to be removed by the
->>>>> mmc_detect_card_removed function, schedule a new detect work
->>>>> immediately and without a delay to let a rescan remove the
->>>>> card device as soon a possible. This will sooner prevent
->>>>> further I/O requests.
->>>>>
->>>>> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
->>>>> ---
->>>>>  drivers/mmc/core/core.c |   16 ++++++++++++++--
->>>>>  1 files changed, 14 insertions(+), 2 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>>> index bec0bf2..265dfd8 100644
->>>>> --- a/drivers/mmc/core/core.c
->>>>> +++ b/drivers/mmc/core/core.c
->>>>> @@ -2077,6 +2077,7 @@ int _mmc_detect_card_removed(struct mmc_host *host)
->>>>>  int mmc_detect_card_removed(struct mmc_host *host)
->>>>>  {
->>>>>      struct mmc_card *card = host->card;
->>>>> +    int ret;
->>>>>  
->>>>>      WARN_ON(!host->claimed);
->>>>>      /*
->>>>> @@ -2086,9 +2087,20 @@ int mmc_detect_card_removed(struct mmc_host *host)
->>>>>      if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
->>>>>          return mmc_card_removed(card);
->>>>>  
->>>>> -    host->detect_change = 0;
->>>> That line should not be removed.  It is not related to your change.
->>> I think it is. Since my patch is trying to make it possible to "prevent I/O as soon as possible..."
->>
->> No, the value of detect_change does not affect the outcome
->> if MMC_CAP2_DETECT_ON_ERR is set i.e.:
->>
->>     if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL)
->>         && !(host->caps2 & MMC_CAP2_DETECT_ON_ERR))
->>
->> is always false if (host->caps2 & MMC_CAP2_DETECT_ON_ERR) is true
-> 
-> You are right! But MMC_CAP2_DETECT_ON_ERR is introduced in the second patch, so we should not consider that in this patch I think!?
-> 
->>
->>> Clearing the detect_change flag here will prevent the I/O layer from doing further tests to see if the card is removed by using "mmc_detect_card_removed -> _mmc_detect_card_removed" due to the upper if sentence.
->>>
->>> I think this flag should only be cleared from the mmc_rescan function.
->>>
->>>>> +    ret = mmc_card_removed(card);
->>>> Calling mmc_card_removed() is not needed here since
->>>> _mmc_detect_card_removed() does it anyway.
->>>>
->>>>> +    if (!ret) {
->>>>> +        ret = _mmc_detect_card_removed(host);
->>>>> +        if (ret) {
->>>>> +            /*
->>>>> +             * Schedule a detect work as soon as possible to let a
->>>>> +             * rescan handle the card removal.
->>>>> +             */
->>>>> +            cancel_delayed_work(&host->detect);
->>>> Why cancel the detect work?
->>> To "prevent I/O as soon as possible...".
->>>
->>> The detect work could have been scheduled to be run at several ms later. There is no need to wait for it since we already now that card will be removed when the rescan function will execute.
+Support added for transmission of CMD23 during multi block read or write. In order to activate this feature, MMC_CAP_CMD23 flag needs to be enabled in the capabilities field. Note that CMD23 support is mandatory to support features like reliable write, data tag, context ID, packed command
 
-if (cancel_delayed_work(&host->detect))
-	mmc_detect_change(host, 0);
-isn't?
+Signed-off-by: Saugata Das <saugata.das@linaro.org>
+---
+ drivers/mmc/host/mmci.c |   12 +++++++++---
+ 1 files changed, 9 insertions(+), 3 deletions(-)
 
->>>
->>>>> +            mmc_detect_change(host, 0);
->>>>> +        }
->>>>> +    }
->>>>>  
->>>>> -    return _mmc_detect_card_removed(host);
->>>>> +    return ret;
->>>>>  }
->>>>>  EXPORT_SYMBOL(mmc_detect_card_removed);
->>>>>  
->>>>
->>> Br
->>> Ulf Hansson
->>>
->>
->> -- 
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> 
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 8eabf99..21f75da 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -726,7 +726,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
+ 			/* The error clause is handled above, success! */
+ 			data->bytes_xfered = data->blksz * data->blocks;
+ 
+-		if (!data->stop) {
++		if (!data->stop || host->mrq->sbc) {
+ 			mmci_request_end(host, data->mrq);
+ 		} else {
+ 			mmci_start_command(host, data->stop, 0);
+@@ -739,6 +739,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	     unsigned int status)
+ {
+ 	void __iomem *base = host->base;
++	bool sbc = !!(host->mrq->sbc && (host->mrq->sbc == host->cmd));
+ 
+ 	host->cmd = NULL;
+ 
+@@ -753,10 +754,12 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 		cmd->resp[3] = readl(base + MMCIRESPONSE3);
+ 	}
+ 
+-	if (!cmd->data || cmd->error) {
++	if ((!sbc && !cmd->data) || cmd->error) {
+ 		if (host->data)
+ 			mmci_stop_data(host);
+ 		mmci_request_end(host, cmd->mrq);
++	} else if (sbc) {
++		mmci_start_command(host, host->mrq->cmd, 0);
+ 	} else if (!(cmd->data->flags & MMC_DATA_READ)) {
+ 		mmci_start_data(host, cmd->data);
+ 	}
+@@ -998,7 +1001,10 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	if (mrq->data && mrq->data->flags & MMC_DATA_READ)
+ 		mmci_start_data(host, mrq->data);
+ 
+-	mmci_start_command(host, mrq->cmd, 0);
++	if (mrq->sbc)
++		mmci_start_command(host, mrq->sbc, 0);
++	else
++		mmci_start_command(host, mrq->cmd, 0);
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+-- 
+1.7.4.3
 
