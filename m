@@ -1,490 +1,176 @@
-From: Saugata Das <saugata.das@linaro.org>
-Subject: Re: [RFC] MMC-4.5 Context ID
-Date: Fri, 3 Feb 2012 11:18:46 +0530
-Message-ID: <CAKLKtzdSJfrHfP8V=NHKPfY-FrTn7V-HPEeb-sgoQ09b3nx3og@mail.gmail.com>
-References: <1328110021-15199-1-git-send-email-saugata.das@stericsson.com>
-	<CANfBPZ96jSe8rUr2Mvif-F76v0xPP=2Rg7-eOCxP8L3j481WTg@mail.gmail.com>
-	<4F2B4A65.3090405@samsung.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH V2] mmc: core: Detect card removal on I/O error
+Date: Fri, 3 Feb 2012 09:46:20 +0100
+Message-ID: <4F2B9EDC.6050800@stericsson.com>
+References: <1328104100-1880-1-git-send-email-ulf.hansson@stericsson.com>	<CAKYAXd9KtQe3HWg1M3B4CPFzJiuC-Vwpx3wOgG4_zMUA7V=6GA@mail.gmail.com>	<4F29FA3E.3080703@samsung.com>	<CAKYAXd-n7sXAOqAZcuNYaEWFDyxwx2s0v3O+vHfsdrrHmxSqJA@mail.gmail.com>	<4F2A07EA.5020207@samsung.com> <CAKYAXd85ZR+069Q2vXx=qpZ+K+zk+kmi_y=SD9iu6T_-684ENQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:48207 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752965Ab2BCFsr convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2012 00:48:47 -0500
-Received: by wgbdt10 with SMTP id dt10so3432219wgb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Feb 2012 21:48:46 -0800 (PST)
-In-Reply-To: <4F2B4A65.3090405@samsung.com>
+Received: from eu1sys200aog111.obsmtp.com ([207.126.144.131]:41294 "EHLO
+	eu1sys200aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755069Ab2BCIqu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2012 03:46:50 -0500
+In-Reply-To: <CAKYAXd85ZR+069Q2vXx=qpZ+K+zk+kmi_y=SD9iu6T_-684ENQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "S, Venkatraman" <svenkatr@ti.com>, Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Adrian Hunter <adrian.hunter@intel.com>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-On 3 February 2012 08:15, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 02/03/2012 01:08 AM, S, Venkatraman wrote:
->
->> On Wed, Feb 1, 2012 at 8:57 PM, Saugata Das <saugata.das@stericsson.=
-com> wrote:
->>> From: Saugata Das <saugata.das@linaro.org>
->>>
->>> This patch groups the read or write transfers to eMMC in different =
-contexts
->>> based on the block number. Transfers to consecutive blocks are grou=
-ped to a
->>> common context. So several small transfers combine to give performa=
-nce like
->>> a large multi block transfer.
->>>
->>> The patch creates a context of 1MB multiple in non-large unit mode.=
- Reliable
->>> mode is enabled in the context based on whether reliable write is e=
-nabled.
->>>
->>> Signed-off-by: Saugata Das <saugata.das@linaro.org>
->>> ---
->> The patch subject could be better off as "mmc: eMMC4.5 context ID su=
-pport"
+Namjae Jeon wrote:
+> 2012/2/2 Jaehoon Chung <jh80.chung@samsung.com>:
+>> On 02/02/2012 12:36 PM, Namjae Jeon wrote:
 >>
->>> =A0drivers/mmc/card/block.c | =A0263 ++++++++++++++++++++++++++++++=
-++++++++++++----
->>> =A0drivers/mmc/core/mmc.c =A0 | =A0 =A06 +
->>> =A0include/linux/mmc/card.h | =A0 13 +++
->>> =A0include/linux/mmc/core.h | =A0 =A09 ++
->>> =A0include/linux/mmc/host.h | =A0 =A01 +
->>> =A0include/linux/mmc/mmc.h =A0| =A0 =A03 +
->>> =A06 files changed, 275 insertions(+), 20 deletions(-)
->>>
->>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>> index 176b78e..161174a 100644
->>> --- a/drivers/mmc/card/block.c
->>> +++ b/drivers/mmc/card/block.c
->>> @@ -127,6 +127,8 @@ enum mmc_blk_status {
->>> =A0module_param(perdev_minors, int, 0444);
->>> =A0MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per =
-device");
->>>
->>> +static int mmc_blk_issue_rw_rq(struct mmc_queue *, struct request =
-*);
->>> +
->>> =A0static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
->>> =A0{
->>> =A0 =A0 =A0 =A0struct mmc_blk_data *md;
->>> @@ -1071,6 +1073,192 @@ static int mmc_blk_err_check(struct mmc_car=
-d *card,
->>> =A0 =A0 =A0 =A0return MMC_BLK_SUCCESS;
->>> =A0}
->>>
->>> +/*
->>> + * Update the context information in the ext. CSD
->>
->> Mixed case
->>
->>> + */
->>> +static int mmc_context_modify(struct mmc_queue *mq,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struc=
-t mmc_card *card,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsig=
-ned int context_id,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsig=
-ned char context_conf)
->>> +{
->>> + =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0* Wait for any ongoing transfer
->>> + =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 if (card->host->areq)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_blk_issue_rw_rq(mq, NULL);
->>> +
->>> + =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0* CONTEXT_CONF array starts from context id 1
->>> + =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 return mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 EXT_CSD_CONTEXT_CONF =
-+ context_id - 1,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 context_conf,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.generic=
-_cmd6_time);
->>> +}
->>> +
->>> +/*
->>> + * Update timestamp, size and close context if needed
->>> + */
->>> +static int mmc_check_close_context(struct mmc_queue *mq,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struc=
-t mmc_card *card,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsig=
-ned int context_id,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsig=
-ned int status)
->>> +{
->>> + =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0* Check only for valid contexts
->>> + =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 if ((context_id > 0) &&
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (context_id <=3D card->ext_csd.max_co=
-ntext_id) &&
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (card->mmc_context[context_id].valid)=
-) {
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Incase of an error or we are mul=
-tiple of erase block then
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* close the context
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((status) ||
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((card->mmc_context[c=
-ontext_id].size %
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card-=
->ext_csd.lu_size) =3D=3D 0)) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_context_modif=
-y(mq, card, context_id,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 MMC_CONTEXT_CLOSE))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 retur=
-n -1;
->> Should propagate the error code instead of returning -1
->>
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->mmc_context[con=
-text_id].valid =3D 0;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return 0;
->>> + =A0 =A0 =A0 }
->>> + =A0 =A0 =A0 return 0;
->>> +}
->>> +
->>> +/*
->>> + * Update timestamp, size and close context if needed
->>> + */
->>> +static int mmc_force_close_all_write_context(struct mmc_queue *mq,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struc=
-t mmc_card *card)
->>> +{
->>> + =A0 =A0 =A0 int i, ret =3D 0;
->>> + =A0 =A0 =A0 for (i =3D 1; i <=3D card->ext_csd.max_context_id; i+=
-+) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (card->mmc_context[i].direction !=3D=
- MMC_CONTEXT_READ) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D mmc_check_clo=
-se_context(mq, card, i,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 MMC_CONTEXT_FORCE_CLOSE);
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 retur=
-n ret;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->>> + =A0 =A0 =A0 }
->>> + =A0 =A0 =A0 return ret;
->>> +}
->>> +
->>> +/*
->>> + * Search for a context which is in the same direction and
->>> + * continuous in block numbers. If no matching context is
->>> + * found then take up an unused context. If all contexts are
->>> + * used then close the context which is least recently used,
->>> + * close it and the use it for the new transfer
->>> + */
->>> +static int mmc_get_context_id(struct mmc_queue *mq,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struc=
-t mmc_card *card,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsig=
-ned int offset,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsig=
-ned int size,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsig=
-ned int direction,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsig=
-ned int rel_wr)
->>> +{
->>> + =A0 =A0 =A0 int i, free_index =3D -1, lru_index =3D -1, ret_index=
-;
->>> + =A0 =A0 =A0 unsigned int old_timestamp =3D -1;
->>> + =A0 =A0 =A0 unsigned int reliability_mode =3D rel_wr ? (0x01<<5) =
-: 0;
->>> + =A0 =A0 =A0 struct mmc_context *context_ptr =3D &card->mmc_contex=
-t[1];
->>> +
->>> + =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0* For older than 4.5 eMMC, there is no context ID
->>> + =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 if (card->ext_csd.max_context_id =3D=3D 0)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return 0;
->>> +
->>> + =A0 =A0 =A0 if (card->host->caps2 & MMC_CAP2_NO_CONTEXT)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return 0;
->>> +
->>> + =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0* If the request is LU size multiple then avoid
->>> + =A0 =A0 =A0 =A0* using any context
->>> + =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 if ((size % card->ext_csd.lu_size) =3D=3D 0)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return 0;
->>> +
->>> + =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0* Context 0 is unused
->>> + =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 for (i =3D 1; i <=3D card->ext_csd.max_context_id; i+=
-+, context_ptr++) {
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 unsigned int context_start_blk;
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!context_ptr->valid) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (free_index =3D=3D=
- -1)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 free_=
-index =3D i;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 continue;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 context_start_blk =3D context_ptr->of=
-fset -
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 context_ptr->size;
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((context_start_blk <=3D offset) &=
-&
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (context_ptr->offset =
-> offset)) {
->>
->> How would this condition ever match ? The starting offset of the
->> previous request is usually less than the current request or it is
->> more, but not both.
->>
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 int ret =3D mmc_check=
-_close_context(mq, card, i,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 MMC_CONTEXT_FORCE_CLOSE);
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret < 0)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 retur=
-n ret;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (free_index =3D=3D=
- -1)
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 free_=
-index =3D i;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 break;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((lru_index =3D=3D -1) ||
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (context_ptr->timesta=
-mp < old_timestamp)) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 old_timestamp =3D con=
-text_ptr->timestamp;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 lru_index =3D i;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((context_ptr->direction !=3D dire=
-ction) ||
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (context_ptr->offset =
-!=3D offset) ||
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (context_ptr->reliabi=
-lity_mode !=3D
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 relia=
-bility_mode))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 continue;
->>
->> I think the reliability mode match shouldn't matter. If the writes t=
-o
->> the same section of the device, the best of the reliability modes ca=
-n
->> be applied.
->> This section should be moved above the context_start_blk and offset
->> checking code.
->> Why close an ongoing context if the directions don't match eventuall=
-y ?
->>
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 context_ptr->timestamp =3D jiffies;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 context_ptr->offset +=3D size;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 context_ptr->size +=3D size;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return i;
->>> + =A0 =A0 =A0 }
->>> +
->>> + =A0 =A0 =A0 if (free_index !=3D -1) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Open a free context
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_context_modify(mq, card, free=
-_index,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (dire=
-ction & 0x03) | reliability_mode))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -1;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret_index =3D free_index;
->>> + =A0 =A0 =A0 } else if (lru_index !=3D -1) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Close and reopen the LRU context
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_context_modify(mq, card, lru_=
-index, MMC_CONTEXT_CLOSE))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -1;
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (mmc_context_modify(mq, card, lru_=
-index,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (dire=
-ction & 0x03) | reliability_mode))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -1;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret_index =3D lru_index;
->>> + =A0 =A0 =A0 } else
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -1;
->>> +
->>> + =A0 =A0 =A0 context_ptr =3D &card->mmc_context[ret_index];
->>> + =A0 =A0 =A0 context_ptr->offset =3D offset+size;
->>> + =A0 =A0 =A0 context_ptr->size =3D size;
->>> + =A0 =A0 =A0 context_ptr->direction =3D direction;
->>> + =A0 =A0 =A0 context_ptr->timestamp =3D jiffies;
->>> + =A0 =A0 =A0 context_ptr->reliability_mode =3D reliability_mode;
->>> + =A0 =A0 =A0 context_ptr->valid =3D 1;
->>> +
->>> + =A0 =A0 =A0 return ret_index;
->>> +}
->>> +
->>> =A0static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct =
-mmc_card *card,
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 int dis=
-able_multi,
->>> @@ -1080,7 +1268,6 @@ static void mmc_blk_rw_rq_prep(struct mmc_que=
-ue_req *mqrq,
->>> =A0 =A0 =A0 =A0struct mmc_blk_request *brq =3D &mqrq->brq;
->>> =A0 =A0 =A0 =A0struct request *req =3D mqrq->req;
->>> =A0 =A0 =A0 =A0struct mmc_blk_data *md =3D mq->data;
->>> - =A0 =A0 =A0 bool do_data_tag;
->>>
->>> =A0 =A0 =A0 =A0/*
->>> =A0 =A0 =A0 =A0 * Reliable writes are used to implement Forced Unit=
- Access and
->>> @@ -1157,16 +1344,6 @@ static void mmc_blk_rw_rq_prep(struct mmc_qu=
-eue_req *mqrq,
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_apply_rel_rw(brq, card, req);
->>>
->>> =A0 =A0 =A0 =A0/*
->>> - =A0 =A0 =A0 =A0* Data tag is used only during writing meta data t=
-o speed
->>> - =A0 =A0 =A0 =A0* up write and any subsequent read of this meta da=
-ta
->>> - =A0 =A0 =A0 =A0*/
->>> - =A0 =A0 =A0 do_data_tag =3D (card->ext_csd.data_tag_unit_size) &&
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 (req->cmd_flags & REQ_META) &&
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 (rq_data_dir(req) =3D=3D WRITE) &&
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((brq->data.blocks * brq->data.blksz)=
- >=3D
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->ext_csd.data_tag_unit_size);
->>> -
->>> - =A0 =A0 =A0 /*
->>> =A0 =A0 =A0 =A0 * Pre-defined multi-block transfers are preferable =
-to
->>> =A0 =A0 =A0 =A0 * open ended-ones (and necessary for reliable write=
-s).
->>> =A0 =A0 =A0 =A0 * However, it is not sufficient to just send CMD23,
->>> @@ -1184,15 +1361,54 @@ static void mmc_blk_rw_rq_prep(struct mmc_q=
-ueue_req *mqrq,
->>> =A0 =A0 =A0 =A0 * We'll avoid using CMD23-bounded multiblock writes=
- for
->>> =A0 =A0 =A0 =A0 * these, while retaining features like reliable wri=
-tes.
->>> =A0 =A0 =A0 =A0 */
->>> - =A0 =A0 =A0 if ((md->flags & MMC_BLK_CMD23) && mmc_op_multi(brq->=
-cmd.opcode) &&
->>> - =A0 =A0 =A0 =A0 =A0 (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_=
-NO_CMD23) ||
->>> - =A0 =A0 =A0 =A0 =A0 =A0do_data_tag)) {
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 brq->sbc.opcode =3D MMC_SET_BLOCK_COU=
-NT;
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 brq->sbc.arg =3D brq->data.blocks |
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_rel_wr ? (1 << 31=
-) : 0) |
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_data_tag ? (1 << =
-29) : 0);
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 brq->sbc.flags =3D MMC_RSP_R1 | MMC_C=
-MD_AC;
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 brq->mrq.sbc =3D &brq->sbc;
->>> + =A0 =A0 =A0 if ((md->flags & MMC_BLK_CMD23) && mmc_op_multi(brq->=
-cmd.opcode)) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Context ID is used for non-large=
- unit and non-reliable
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* write transfers provided the sta=
-rt block number
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* sequentially follows any of the =
-open contexts
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 int context_id;
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Data tag is used only during wri=
-ting meta data to speed
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* up write and any subsequent read=
- of this meta data
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 bool do_data_tag =3D (card->ext_csd.d=
-ata_tag_unit_size) &&
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (req->cmd_flags & REQ=
-_META) &&
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (rq_data_dir(req) =3D=
-=3D WRITE) &&
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((brq->data.blocks * =
-brq->data.blksz) >=3D
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_ta=
-g_unit_size);
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* During fsync, ensure that data i=
-s committed to storage
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (req->cmd_flags & (REQ_FLUSH | REQ=
-_SYNC))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_force_close_all_w=
-rite_context(mq, card);
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* Context ID is used for non-large=
- unit and non-reliable
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* write transfers provided the sta=
-rt block number
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* sequentially follows any of the =
-open contexts
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 context_id =3D mmc_get_context_id(mq,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 blk_rq_pos(req),
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 brq->data.blocks,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (rq_data_dir(req) =3D=
-=3D WRITE) ? MMC_CONTEXT_WRITE :
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 MMC_C=
-ONTEXT_READ,
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 do_rel_wr);
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 if (do_rel_wr || !(card->quirks & MMC_QUIRK_B=
-LK_NO_CMD23) ||
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 do_data_tag || (conte=
-xt_id > 0)) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 brq->sbc.opcode =3D M=
-MC_SET_BLOCK_COUNT;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 brq->sbc.arg =3D brq-=
->data.blocks |
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_r=
-el_wr ? (1 << 31) : 0) |
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (do_d=
-ata_tag ? (1 << 29) : 0) |
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (((co=
-ntext_id > 0) && (!do_rel_wr)) ?
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 ((context_id & 0x0f) << 25) : 0);
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 brq->sbc.flags =3D MM=
-C_RSP_R1 | MMC_CMD_AC;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 brq->mrq.sbc =3D &brq=
-->sbc;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
->
-> Can Data-tag & context-Id use together?
+>>> 2012/2/2 Jaehoon Chung <jh80.chung@samsung.com>:
+>>>> On 02/02/2012 09:34 AM, Namjae Jeon wrote:
+>>>>
+>>>>> 2012/2/1 Ulf Hansson <ulf.hansson@stericsson.com>:
+>>>>>> To prevent I/O as soon as possible at card removal, a new
+>>>>>> detect work is re-scheduled without a delay to let a rescan
+>>>>>> remove the card device as soon a possible.
+>>>>>>
+>>>>>> Additionally, MMC_CAP2_DETECT_ON_ERR can now be used to handle
+>>>>>> "slowly" removed cards that a scheduled detect work did not
+>>>>>> detect as removed. To prevent further I/O requests for these
+>>>>>> lingering removed cards, check if card has been removed and then
+>>>>>> schedule a detect work to properly remove it.
+>>>>>>
+>>>>>> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+>>>>>> ---
+>>>>>>
+>>>>>> Changes in v2:
+>>>>>>        - Updated according to review comments.
+>>>>>>        - Merging two patches for this feature into one.
+>>>>>>
+>>>>>> ---
+>>>>>>  drivers/mmc/core/core.c  |   19 +++++++++++++++++--
+>>>>>>  include/linux/mmc/host.h |    1 +
+>>>>>>  2 files changed, 18 insertions(+), 2 deletions(-)
+>>>>>>
+>>>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>>>>> index bec0bf2..26d3a66 100644
+>>>>>> --- a/drivers/mmc/core/core.c
+>>>>>> +++ b/drivers/mmc/core/core.c
+>>>>>> @@ -2077,18 +2077,33 @@ int _mmc_detect_card_removed(struct mmc_host *host)
+>>>>>>  int mmc_detect_card_removed(struct mmc_host *host)
+>>>>>>  {
+>>>>>>        struct mmc_card *card = host->card;
+>>>>>> +       int ret;
+>>>>>>
+>>>>>>        WARN_ON(!host->claimed);
+>>>>>>        /*
+>>>>>>         * The card will be considered unchanged unless we have been asked to
+>>>>>>         * detect a change or host requires polling to provide card detection.
+>>>>>>         */
+>>>>>> -       if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
+>>>>>> +       if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL)
+>>>>>> +           && !(host->caps2 & MMC_CAP2_DETECT_ON_ERR))
+>>>>>>                return mmc_card_removed(card);
+>>>>>>
+>>>>>>        host->detect_change = 0;
+>>>>>>
+>>>>>> -       return _mmc_detect_card_removed(host);
+>>>>>> +       ret = mmc_card_removed(card);
+>>>>> Hi. Ulf.
+>>>>> 1. Is there no case that card is null ?
+>>>>> 2. and Eventually mmc_card_removed is once called in any case. can we
+>>>>> change it like this ?
+>>>>>
+>>>>> if (card)
+>>>>>    ret = mmc_card_removed(card);
+>>>>>
+>>>>>    if(!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL)
+>>>>>            && !(host->caps2 & MMC_CAP2_DETECT_ON_ERR))
+>>>>>                   return ret;
+>>>> Hi Mr.Jeon
+>>>> If card is NULL, maybe this code didn't run.
+>>>> Only called this function is called in block.c (for my understanding)
+>>>> before called mmc_detect_card_removed(card->host), check "if (mmc_card_removed(card)".
+>>>> I think that need not to check.
+>>> Hi. Chung.
+>>> I found directly using this function in other file except block.c
+>>> ./core/sdio.c:  err = _mmc_detect_card_removed(host);
+>>> ./core/core.c:  return _mmc_detect_card_removed(host);
+>>> ./core/sd.c:    err = _mmc_detect_card_removed(host);
+>>> ./core/mmc.c:   err = _mmc_detect_card_removed(host);
+>> Sorry..this patch is code in mmc_detect_card_removed(), isn't?
+>> what is your comment related with _mmc_detect_card_removed()?
+> I am confused. sorry, you're right.
+> And Do you agree like below changing patch ?
 
-No. This is a mistake. I will rectify it in next version.
+Good comment. I will update the patch according to your suggestion and 
+send a v3 patch.
 
-But overall, do we agree with this approach of context management
-where we are trying to keep consecutive blocks within same context ?
+>>> But I know to already check null of card(BUG_ON(!host->card)) before
+>>> using _mmc_detect_card_removed.
+>>> So don't need to check card is null now.
+>>> I think that it is better if patch is modified like the below.
+>>> -------------------------------------------------------------------------------------
+>>> ret = mmc_card_removed(card);
+>>>
+>>>   if(!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL)
+>>>           && !(host->caps2 & MMC_CAP2_DETECT_ON_ERR))
+>>>                  return ret;
+>>> -----------------------------------------------------------------------------------------
+>>> Thanks.
+>>>> Best Regards,
+>>>> Jaehoon Chung
+>>>>
+>>>>>> +       if (!ret) {
+>>>>>> +               ret = _mmc_detect_card_removed(host);
+>>>>>> +               if (ret) {
+>>>>>> +                       /*
+>>>>>> +                        * Schedule a detect work as soon as possible to let a
+>>>>>> +                        * rescan handle the card removal.
+>>>>>> +                        */
+>>>>>> +                       cancel_delayed_work(&host->detect);
+>>>>>> +                       mmc_detect_change(host, 0);
+>>>>>> +               }
+>>>>>> +       }
+>>>>>> +
+>>>>>> +       return ret;
+>>>>>>  }
+>>>>>>  EXPORT_SYMBOL(mmc_detect_card_removed);
+>>>>>>
+>>>>>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>>>>>> index dd13e05..368a2b9 100644
+>>>>>> --- a/include/linux/mmc/host.h
+>>>>>> +++ b/include/linux/mmc/host.h
+>>>>>> @@ -257,6 +257,7 @@ struct mmc_host {
+>>>>>>  #define MMC_CAP2_HS200_1_2V_SDR        (1 << 6)        /* can support */
+>>>>>>  #define MMC_CAP2_HS200         (MMC_CAP2_HS200_1_8V_SDR | \
+>>>>>>                                 MMC_CAP2_HS200_1_2V_SDR)
+>>>>>> +#define MMC_CAP2_DETECT_ON_ERR (1 << 7)        /* On I/O err check card removal */
+>>>>>>
+>>>>>>        mmc_pm_flag_t           pm_caps;        /* supported pm features */
+>>>>>>        unsigned int        power_notify_type;
+>>>>>> --
+>>>>>> 1.7.5.4
+>>>>>>
+>>>>>> --
+>>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>>
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
->
-> Best Regards,
-> Jaehoon Chung
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+Br
+Ulf Hansson
