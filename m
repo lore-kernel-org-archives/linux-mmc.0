@@ -1,115 +1,133 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [RESEND PATCH V3] mmc: core: Detect card removal on I/O error
-Date: Fri, 3 Feb 2012 14:23:12 +0100
-Message-ID: <4F2BDFC0.3010201@stericsson.com>
-References: <1328261593-6112-1-git-send-email-ulf.hansson@stericsson.com> <4F2BC790.3090304@intel.com> <4F2BD00C.8040703@stericsson.com> <4F2BD895.2030301@intel.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH/RFC] usb: fix renesas_usbhs to not schedule in atomic context
+Date: Fri, 3 Feb 2012 16:43:20 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1202031623000.6211@axis700.grange>
+References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
+ <1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de> <4F22624E.2090201@renesas.com>
+ <Pine.LNX.4.64.1201270946150.32661@axis700.grange> <4F27CA7D.601@renesas.com>
+ <Pine.LNX.4.64.1202022317560.13860@axis700.grange> <4F2B9F34.60308@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:55260 "EHLO
-	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756196Ab2BCNXd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2012 08:23:33 -0500
-In-Reply-To: <4F2BD895.2030301@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <4F2B9F34.60308@renesas.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>
+Cc: linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, linux-usb@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Adrian Hunter wrote:
-> On 03/02/12 14:16, Ulf Hansson wrote:
->> Adrian Hunter wrote:
->>> On 03/02/12 11:33, Ulf Hansson wrote:
->>>> To prevent I/O as soon as possible at card removal, a new 
->>>> detect work is re-scheduled without a delay to let a rescan 
->>>> remove the card device as soon a possible.
->>>> 
->>>> Additionally, MMC_CAP2_DETECT_ON_ERR can now be used to handle 
->>>> "slowly" removed cards that a scheduled detect work did not 
->>>> detect as removed. To prevent further I/O requests for these 
->>>> lingering removed cards, check if card has been removed and
->>>> then schedule a detect work to properly remove it.
->>>> 
->>>> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com> ---
->>>> 
->>>> Changes in v3: - Check for card is NULL and minor code
->>>> simplifications.
->>>> 
->>>> Changes in v2: - Updated according to review comments. -
->>>> Merging two patches for this feature into one.
->>>> 
->>>> --- drivers/mmc/core/core.c  |   24 +++++++++++++++++++++--- 
->>>> include/linux/mmc/host.h |    1 + 2 files changed, 22
->>>> insertions(+), 3 deletions(-)
->>>> 
->>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c 
->>>> index bec0bf2..9645e8c 100644 --- a/drivers/mmc/core/core.c +++
->>>> b/drivers/mmc/core/core.c @@ -2077,18 +2077,36 @@ int
->>>> _mmc_detect_card_removed(struct mmc_host *host) int
->>>> mmc_detect_card_removed(struct mmc_host *host) { struct
->>>> mmc_card *card = host->card; +    int ret;
->>>> 
->>>> WARN_ON(!host->claimed); + +    if (!card) +        return 1; +
->>>>  +    ret = mmc_card_removed(card); /* * The card will be
->>>> considered unchanged unless we have been asked to * detect a
->>>> change or host requires polling to provide card detection. */ -
->>>> if (card && !host->detect_change && !(host->caps &
->>>> MMC_CAP_NEEDS_POLL)) -        return mmc_card_removed(card); +
->>>> if (!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL)
->>>> && +        !(host->caps2 & MMC_CAP2_DETECT_ON_ERR)) +
->>>> return ret;
->>>> 
->>>> host->detect_change = 0; +    if (!ret) { +        ret =
->>>> _mmc_detect_card_removed(host); +        if (ret) {
->>> Please make this
->>> 
->>> if (ret && (host->caps2 & MMC_CAP2_DETECT_ON_ERR))
->>> 
->>> because if rescan is already running this will needlessly queue 
->>> another one.
->>> 
->> It wont queue another one. It will cancel a work which likely has
->> been scheduled to be executed within several ms later. Then it will
->> re-schedule a new one without any delay since there is no need to
->> wait, when we already know that the card has been removed.
-> 
-> It won't cancel a rescan that is already running (waiting to claim
-> the host for example) but it will queue another one.  Hence the
-> comment.
-> 
+The current renesas_usbhs driver triggers
 
-Do you think this is case that we need to bother about? It should be a
-rare case and in worst case we only schedule a second not needed rescan, 
-which I believe should not be a problem.
+BUG: scheduling while atomic: ksoftirqd/0/3/0x00000102
 
-I discussed this with Jaehoon Chung, previously regarding the return 
-value of cancel_delayed_work(&host->detect). See below copied comments:
+with enabled CONFIG_DEBUG_ATOMIC_SLEEP, by submitting DMA transfers from 
+an atomic (tasklet) context, which is not supported by the shdma dmaengine 
+driver. Fix it by switching to a work. Also simplify some list 
+manipulations.
 
-I change accordingly if you like, please let me know. Again. :-)
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
 
-----------
+Shimoda-san, this is the problem, that you were observing. However, it 
+exists with the present version of shdma just as well as with the new one 
+- on top of the simple DMA library. I marked it an RFC because (1) I only 
+lightly tested it with the gadget device on mackerel with the mass storage 
+gadget, and (2) I am somewhat concerned about races. Currently the work 
+function runs with no locking and there are no usual cancel_work_sync() 
+points in the patch. However, it has also been like this before with the 
+tasklet implementation, which is not much better, and it looks like there 
+are no asynchronous operations on the same packets like timeouts. Only 
+asynchronous events, that I can think about are things like unloading the 
+driver or unplugging the cable, but these have been there before too. It 
+would become worse on SMP, I think. Comments welcome.
 
->>> if (cancel_delayed_work(&host->detect))
->>>>> mmc_detect_change(host, 0); isn't?
->>> 
->>> Good comment. That will mean that patch 2 will have to be updated
->>> as well to something like below.
->>> 
->>> if (cancel_delayed_work(&host->detect) || (host->caps2 & 
->>> MMC_CAP2_DETECT_ON_ERR)) mmc_detect_change(host, 0);
->>> 
->>> What do you think?
->>> 
->>> Could we skip this entirely and leave it as is without checking
->>> the return value of cancel_delayed_work? That will only mean that
->>> in some very rare cases (since rescan is clearing the
->>> detect_change flag) one additional detect work will be triggered
->>> which shall not cause any problems I believe. But I happily
->>> change to what you propose if you prefer!
-> 
-> Right...maybe..don't cause any problems..i also think. It's rare
-> case.  :) Best Regards, Jaehoon Chung
-> 
-
----------------------
+diff --git a/drivers/usb/renesas_usbhs/fifo.c b/drivers/usb/renesas_usbhs/fifo.c
+index 72339bd..4d739ec 100644
+--- a/drivers/usb/renesas_usbhs/fifo.c
++++ b/drivers/usb/renesas_usbhs/fifo.c
+@@ -75,8 +75,7 @@ void usbhs_pkt_push(struct usbhs_pipe *pipe, struct usbhs_pkt *pkt,
+ 		pipe->handler = &usbhsf_null_handler;
+ 	}
+ 
+-	list_del_init(&pkt->node);
+-	list_add_tail(&pkt->node, &pipe->list);
++	list_move_tail(&pkt->node, &pipe->list);
+ 
+ 	/*
+ 	 * each pkt must hold own handler.
+@@ -106,7 +105,7 @@ static struct usbhs_pkt *__usbhsf_pkt_get(struct usbhs_pipe *pipe)
+ 	if (list_empty(&pipe->list))
+ 		return NULL;
+ 
+-	return list_entry(pipe->list.next, struct usbhs_pkt, node);
++	return list_first_entry(&pipe->list, struct usbhs_pkt, node);
+ }
+ 
+ struct usbhs_pkt *usbhs_pkt_pop(struct usbhs_pipe *pipe, struct usbhs_pkt *pkt)
+@@ -762,9 +761,9 @@ static int __usbhsf_dma_map_ctrl(struct usbhs_pkt *pkt, int map)
+ }
+ 
+ static void usbhsf_dma_complete(void *arg);
+-static void usbhsf_dma_prepare_tasklet(unsigned long data)
++static void xfer_work(struct work_struct *work)
+ {
+-	struct usbhs_pkt *pkt = (struct usbhs_pkt *)data;
++	struct usbhs_pkt *pkt = container_of(work, struct usbhs_pkt, work);
+ 	struct usbhs_pipe *pipe = pkt->pipe;
+ 	struct usbhs_fifo *fifo = usbhs_pipe_to_fifo(pipe);
+ 	struct usbhs_priv *priv = usbhs_pipe_to_priv(pipe);
+@@ -844,11 +843,8 @@ static int usbhsf_dma_prepare_push(struct usbhs_pkt *pkt, int *is_done)
+ 
+ 	pkt->trans = len;
+ 
+-	tasklet_init(&fifo->tasklet,
+-		     usbhsf_dma_prepare_tasklet,
+-		     (unsigned long)pkt);
+-
+-	tasklet_schedule(&fifo->tasklet);
++	INIT_WORK(&pkt->work, xfer_work);
++	schedule_work(&pkt->work);
+ 
+ 	return 0;
+ 
+@@ -938,11 +934,8 @@ static int usbhsf_dma_try_pop(struct usbhs_pkt *pkt, int *is_done)
+ 
+ 	pkt->trans = len;
+ 
+-	tasklet_init(&fifo->tasklet,
+-		     usbhsf_dma_prepare_tasklet,
+-		     (unsigned long)pkt);
+-
+-	tasklet_schedule(&fifo->tasklet);
++	INIT_WORK(&pkt->work, xfer_work);
++	schedule_work(&pkt->work);
+ 
+ 	return 0;
+ 
+diff --git a/drivers/usb/renesas_usbhs/fifo.h b/drivers/usb/renesas_usbhs/fifo.h
+index f68609c..c31731a 100644
+--- a/drivers/usb/renesas_usbhs/fifo.h
++++ b/drivers/usb/renesas_usbhs/fifo.h
+@@ -19,6 +19,7 @@
+ 
+ #include <linux/interrupt.h>
+ #include <linux/sh_dma.h>
++#include <linux/workqueue.h>
+ #include <asm/dma.h>
+ #include "pipe.h"
+ 
+@@ -31,7 +32,6 @@ struct usbhs_fifo {
+ 	u32 ctr;	/* xFIFOCTR */
+ 
+ 	struct usbhs_pipe	*pipe;
+-	struct tasklet_struct	tasklet;
+ 
+ 	struct dma_chan		*tx_chan;
+ 	struct dma_chan		*rx_chan;
+@@ -53,6 +53,7 @@ struct usbhs_pkt {
+ 	struct usbhs_pkt_handle *handler;
+ 	void (*done)(struct usbhs_priv *priv,
+ 		     struct usbhs_pkt *pkt);
++	struct work_struct work;
+ 	dma_addr_t dma;
+ 	void *buf;
+ 	int length;
