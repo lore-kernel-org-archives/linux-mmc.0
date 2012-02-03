@@ -1,61 +1,102 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 1/7 v2] dmaengine: add a simple dma library
-Date: Fri, 3 Feb 2012 17:38:07 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1202031736090.6211@axis700.grange>
-References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
- <1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de>
- <1327912346.1527.13.camel@vkoul-udesk3>  <Pine.LNX.4.64.1201300944360.7932@axis700.grange>
-  <1327992090.1527.116.camel@vkoul-udesk3>  <Pine.LNX.4.64.1201310746470.31226@axis700.grange>
- <1328074726.1610.1.camel@vkoul-udesk3>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [PATCH 0/2] mmc: use PM QoS instead of delayed clock gating
+Date: Fri, 3 Feb 2012 20:25:27 +0100
+Message-ID: <201202032025.27814.rjw@sisk.pl>
+References: <Pine.LNX.4.64.1201191631210.12537@axis700.grange> <201202012214.19531.rjw@sisk.pl> <Pine.LNX.4.64.1202031200300.6211@axis700.grange>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:58069 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756875Ab2BCQiP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2012 11:38:15 -0500
-In-Reply-To: <1328074726.1610.1.camel@vkoul-udesk3>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1202031200300.6211@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
 
-Hi Vinod
-
-On Wed, 1 Feb 2012, Vinod Koul wrote:
-
-> On Tue, 2012-01-31 at 09:59 +0100, Guennadi Liakhovetski wrote:
-> > Hi Vinod
+On Friday, February 03, 2012, Guennadi Liakhovetski wrote:
+> On Wed, 1 Feb 2012, Rafael J. Wysocki wrote:
+[...]
+> > > > As for the patches, I'll reply to each of them separately.
+> > > 
+> > > Right, thanks for the review. Basically your comments are the same for 
+> > > both:
+> > > 
+> > > 1. you'd like not just to change the default initial delay to 0, but to 
+> > > prohibit changing it from the userspace completely.
 > > 
-> > Thanks for your reply.
+> > No, I haven't said that. :-)
 > > 
-> > On Tue, 31 Jan 2012, Vinod Koul wrote:
+> > I said that setting the delay to 0 initially in the driver wasn't sufficient
+> > to prevent the delay from being used.
+> 
+> Yes, sure, I realise that.
+> 
+> > If your intention was to use the PM QoS
+> > _along_ with the delay, then you shouldn't advertise that as a regression fix
+> > and I don't see a point setting the delay to 0 initially in the driver in that
+> > case.
+> 
+> Hmm, I'm not sure to follow here. Firstly, I'm not sure why using both 
+> cannot classify as a fix, secondly, do you mean, that when using QoS we 
+> don't have to set the delay to 0? But with the delay left at 200ms PM QoS 
+> doesn't have much left to say?
+> 
+> > > For that we need Chris' opinion and that cannot be done in MMC host drivers
+> > > so far, AFAICS. 
+> > > Actually, I'm not even sure I agree on this: if the user knows about that 
+> > > possibility and consciously adjusts the timeout - why should we prevent 
+> > > them from doing so?
 > > 
-> > > On Mon, 2012-01-30 at 10:34 +0100, Guennadi Liakhovetski wrote:
+> > Well, if you want to keep the delay pretty much as is, then there are two
+> > choices that make sense to me: either you change the delay _globally_ to 0,
+> > which kind of reverts the problematic commit, or you keep the default as is
+> > and don't touch it from the driver.  Changing it initially to 0 in the
+> > driver doesn't really help, because it'll requires user space to act
+> > differently depending on what driver is used at the low level (the default will
+> > differ from one driver to another).
+> 
+> Well, following this logic, we should not change the default in the 
+> driver, and just either ask to revert that commit or rely on user-space to 
+> set the delay to 0.
 
-[snip]
+Yes, I meant that.  There's one more option, actually, which is to set the
+default to 0 globally, at least for 3.3.  That would make us keep the current
+behavior with the possibility to switch to a different delay for whoever wants
+that.
 
-> > > > How would you like to do this? Don't you think, it would be good to allow 
-> > > > both: either implement a dmaengine driver directly, exactly as all drivers 
-> > > > are doing now, or use the additional helper library for suitable (simple) 
-> > > > hardware types? I see it similar to I2C, where you either implement an I2C 
-> > > > driver directly, or you use the bitbanging abstraction for simpler 
-> > > > hardware.
-> > > I think it would be good to have both, this can be used by folks who
-> > > don't have sg support available.
+> > > So far we don't have any user-space interface to 
+> > > change device PM QoS parameters, right?
 > > 
-> > Ok, so, should I just rename the driver to sgsoft? Is this the only 
-> > change, that you'd like to see?
-> That would be one :)
-> Also, I would review the other patch patches by today/tomorrow, you can
-> add any changes in next version as well
+> > That's because people have been opposing interfeces at the struct device
+> > level and the argument has always been "frameworks will add proper interfaces
+> > for PM QoS", while what's happening here is frameworks adding their own power
+> > management features with questionable interfaces _instead_ _of_ PM QoS.
+> > 
+> > I thought you wanted to reverse that trend, but apparently I was wrong. :-)
+> > 
+> > > So, this gives at least some control to the user.
+> > 
+> > How useful it is is rather unknown at the moment, though.
+> > 
+> > > 2. you suggest to separate delay=0 and PM QoS. Can do that of course, but 
+> > > I thought they were related and that gave us a chance to push PM QoS up 
+> > > sooner, rather than later, as a fix. Without it we'd potentially cause the 
+> > > controller and the domain to runtime suspend and resume between all 
+> > > transactions?
+> > 
+> > The problem is that using PM QoS here doesn't fix anything.  Changing the
+> > default delay to 0 kind of does, although I don't like it (for reasons given
+> > above).
+> > 
+> > I also asked why the PM QoS request was added for the parent of the devices
+> > being handled rather than for the device itself.
+> 
+> Do you think we should apply constraints to the mmc host class-device?... 
+> .parent is just a pointer to the actual underlying hardware device, the 
+> platform device in our case.
 
-Do I understand it right, that I'm waiting for your review before 
-submitting the next version?
+OK
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Thanks,
+Rafael
