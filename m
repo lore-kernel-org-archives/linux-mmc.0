@@ -1,61 +1,96 @@
-From: "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [PATCH 1/7 v2] dmaengine: add a simple dma library
-Date: Fri, 03 Feb 2012 17:47:48 +0900
-Message-ID: <4F2B9F34.60308@renesas.com>
-References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
- <1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de>
- <4F22624E.2090201@renesas.com>
- <Pine.LNX.4.64.1201270946150.32661@axis700.grange> <4F27CA7D.601@renesas.com>
- <Pine.LNX.4.64.1202022317560.13860@axis700.grange>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH V3] mmc: core: Detect card removal on I/O error
+Date: Fri, 3 Feb 2012 10:14:03 +0100
+Message-ID: <1328260443-30380-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor1.renesas.com ([210.160.252.171]:52714 "EHLO
-	relmlor1.renesas.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754921Ab2BCIrv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2012 03:47:51 -0500
-In-reply-to: <Pine.LNX.4.64.1202022317560.13860@axis700.grange>
+Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:47942 "EHLO
+	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751604Ab2BCJOy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2012 04:14:54 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi Guennadi-san,
+To prevent I/O as soon as possible at card removal, a new
+detect work is re-scheduled without a delay to let a rescan
+remove the card device as soon a possible.
 
-2012/02/03 7:19, Guennadi Liakhovetski wrote:
-[ snip ]
->>
->> Thank you for your comment.
->>
->> I investigaed the issue. I found out the renesas_usbhs driver may
->> call tx_submit() in the callback() of the dma-simple finally.
-> 
-> Sorry, in my first reply to this your email I misread the renesas_usbhs 
-> for an issue with your new SUDMAC driver. Since this is not the case and 
-> my patch seems to be causing a regression, I'll look at it.
+Additionally, MMC_CAP2_DETECT_ON_ERR can now be used to handle
+"slowly" removed cards that a scheduled detect work did not
+detect as removed. To prevent further I/O requests for these
+lingering removed cards, check if card has been removed and then
+schedule a detect work to properly remove it.
 
-Thank you for the comment.
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+---
 
-I found out that if the "power_up" is 0 in the sample_tx_submit(),
-the pm_state will be changed to "PENDING".
-And then, even if the renesas_usbhs calls dma_async_issue_pending(),
-the dma-simple driver doesn't call the simple_chan_xfer_ld_queue().
-This is because the driver will call the simple_chan_xfer_ld_queue()
-when the pm_state is "ESTABLISHED" only.
+Changes in v3:
+	- Check for card is NULL and minor code simplifications.
 
-So I guess that we have to modify the simple_issue_pending().
+Changes in v2:
+	- Updated according to review comments.
+	- Merging two patches for this feature into one.
 
-Best regards,
-Yoshihiro Shimoda
+---
+ drivers/mmc/core/core.c  |   19 +++++++++++++++++--
+ include/linux/mmc/host.h |    1 +
+ 2 files changed, 18 insertions(+), 2 deletions(-)
 
-> Thanks
-> Guennadi
-> 
-> ---
-> Guennadi Liakhovetski, Ph.D.
-> Freelance Open-Source Software Developer
-> http://www.open-technology.de/
-> 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index bec0bf2..26d3a66 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2077,18 +2077,33 @@ int _mmc_detect_card_removed(struct mmc_host *host)
+ int mmc_detect_card_removed(struct mmc_host *host)
+ {
+ 	struct mmc_card *card = host->card;
++	int ret;
+ 
+ 	WARN_ON(!host->claimed);
+ 	/*
+ 	 * The card will be considered unchanged unless we have been asked to
+ 	 * detect a change or host requires polling to provide card detection.
+ 	 */
+-	if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
++	if (card && !host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL)
++	    && !(host->caps2 & MMC_CAP2_DETECT_ON_ERR))
+ 		return mmc_card_removed(card);
+ 
+ 	host->detect_change = 0;
+ 
+-	return _mmc_detect_card_removed(host);
++	ret = mmc_card_removed(card);
++	if (!ret) {
++		ret = _mmc_detect_card_removed(host);
++		if (ret) {
++			/*
++			 * Schedule a detect work as soon as possible to let a
++			 * rescan handle the card removal.
++			 */
++			cancel_delayed_work(&host->detect);
++			mmc_detect_change(host, 0);
++		}
++	}
++
++	return ret;
+ }
+ EXPORT_SYMBOL(mmc_detect_card_removed);
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index dd13e05..368a2b9 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -257,6 +257,7 @@ struct mmc_host {
+ #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
+ #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
+ 				 MMC_CAP2_HS200_1_2V_SDR)
++#define MMC_CAP2_DETECT_ON_ERR	(1 << 7)	/* On I/O err check card removal */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 	unsigned int        power_notify_type;
 -- 
-Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+1.7.5.4
+
