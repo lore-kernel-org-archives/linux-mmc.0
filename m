@@ -1,60 +1,42 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: "mmc_host mmc0: WARNING: IMR=0x00004040" on debug console
-Date: Sat, 04 Feb 2012 17:54:36 -0500
-Message-ID: <m2ipjm9plf.fsf@bob.laptop.org>
-References: <1326989504.2687.3.camel@salbei.fritz.box>
+Subject: Re: EXT3-fs warning: maximal mount count reached, running e2fsck is recommended
+Date: Sat, 04 Feb 2012 18:02:02 -0500
+Message-ID: <m2ehua9p91.fsf@bob.laptop.org>
+References: <CALJWcL9aHD0iQ-K4snho=KthB1OGbZ9ujaike7V8knkwZq+qRQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35678 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:57662 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750815Ab2BDWy5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 4 Feb 2012 17:54:57 -0500
-In-Reply-To: <1326989504.2687.3.camel@salbei.fritz.box> (Thomas Bechtold's
-	message of "Thu, 19 Jan 2012 17:11:44 +0100")
+	id S1752399Ab2BDXCH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 4 Feb 2012 18:02:07 -0500
+In-Reply-To: <CALJWcL9aHD0iQ-K4snho=KthB1OGbZ9ujaike7V8knkwZq+qRQ@mail.gmail.com>
+	(Giuseppe D'Agostino's message of "Fri, 20 Jan 2012 16:06:54 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Bechtold <thomasbechtold@jpberlin.de>
-Cc: linux-mmc@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Giuseppe D'Agostino <gdagostino79@gmail.com>
+Cc: linux-mmc@vger.kernel.org
 
-Hi, adding some recent atmel-mci.c committers to the thread,
+Hi,
 
-On Thu, Jan 19 2012, Thomas Bechtold wrote:
-> i updated from kernel 2.6.35.3 (from kernel.org) to kernel 3.2.1 (from 
-> kernel.org) on arm (at91stamp9G20) and have a MMC card which can be 
-> completly disabled with a hardware switch. The mmc card is then used by 
-> another processor without linux. That works very well.
-> My question is, why i get always the message "mmc_host mmc0: WARNING: 
-> IMR=0x00004040" after i removed the mmc card slot once. That's a new 
-> behavior with 3.2.1. I had no message with 2.6.35.3.
-> When the mmc slot returns to linux, the message stops and i get:
+On Fri, Jan 20 2012, Giuseppe D'Agostino wrote:
+> after a series of mmc stress test on my device, based on ARM
+> architecture, I noted, launching command dmesg, that it's present this
+> warnings:
 >
-> mmc_host mmc0: WARNING: IMR=0x00004040
-> mmc0: host does not support reading read-only switch. assuming write-enable.
-> mmc0: new SD card at address b368
-> mmcblk0: mmc0:b368 H1697 1.91 GiB
->   mmcblk0: unknown partition table
+> EXT3-fs warning: maximal mount count reached, running e2fsck is recommended
 >
-> That's fine.
+> Now, it's normal because, probably, I passed "max mount counts", that
+> is 30 for default, but my question is:
 >
-> Should i just ignore the message (or simple patch 
-> driver/mmc/host/atmel_mci.c)?
+> For this memory's type which is a right limit before execute e2fsck on
+> partition? It's only a formal problem or is necessary, some other
+> time, execute an fsck on device?
 
-It would be good to leave the warning in for situations that we still
-don't expect, and it looks like IMR=0x00004040 decodes to ATMCI_ENDTX
-and ATMCI_TXBUFE, so you could try something like:
-
-        if (iflags & ~(ATMCI_SDIOIRQA | ATMCI_SDIOIRQB)) {
-                /* Interrupts with ENDTX and TXBUFE set are seen
-                 * with at91stamp9G20 hardware when switching the
-                 * processor that MMC is attached to, so don't warn
-                 * if they are set. 
-                 */
-                if (iflags & ~(ATMCI_ENDTX | ATMCI_TXBUFE)) {
-                        dev_warn(&slot->mmc->class_dev, "WARNING: IMR="
-                                 "0x%08x\n", iflags);
-                }
-        }
+I don't think MMC is particularly different to any other media type in
+this regard.  Running fsck based on mount count is just a heuristic;
+it's not tied to media type.  So, go ahead and run fsck, or not,
+whichever you like.  :)
 
 - Chris.
 -- 
