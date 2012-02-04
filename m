@@ -1,40 +1,46 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v6] mmc:Support of PCI mode for the dw_mmc driver
-Date: Sat, 04 Feb 2012 16:55:07 -0500
-Message-ID: <m27h02b6x0.fsf@bob.laptop.org>
-References: <1326450897-9248-1-git-send-email-shashidharh@vayavyalabs.com>
-	<4F1023D9.5050700@imgtec.com>
+Subject: Re: [PATCH] mmc: dw-mmc: modify the condition for platdata of blk-setting
+Date: Sat, 04 Feb 2012 17:01:52 -0500
+Message-ID: <m239aqb6lr.fsf@bob.laptop.org>
+References: <4F138F47.7040709@samsung.com>
+	<CAFbHwiR5yD+_GMK4ZEZ0uV3Gq7Wh-n8fM7M_RrPOX0o_cN4+6g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39135 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:59635 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754577Ab2BDVz2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 4 Feb 2012 16:55:28 -0500
-In-Reply-To: <4F1023D9.5050700@imgtec.com> (James Hogan's message of "Fri, 13
-	Jan 2012 12:30:17 +0000")
+	id S1751024Ab2BDWB6 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Feb 2012 17:01:58 -0500
+In-Reply-To: <CAFbHwiR5yD+_GMK4ZEZ0uV3Gq7Wh-n8fM7M_RrPOX0o_cN4+6g@mail.gmail.com>
+	(Will Newton's message of "Mon, 16 Jan 2012 10:20:59 +0000")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: James Hogan <james.hogan@imgtec.com>
-Cc: Shashidhar Hiremath <shashidharh@vayavyalabs.com>, Shawn Guo <shawn.guo@linaro.org>, Philip Rakity <prakity@marvell.com>, "Mark F. Brown" <mark.brown314@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Will Newton <will.newton@imgtec.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc@vger.kernel.org
+To: Will Newton <will.newton@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
 Hi,
 
-On Fri, Jan 13 2012, James Hogan wrote:
-> On 13/01/12 10:34, Shashidhar Hiremath wrote:
->> Support of PCI mode for the dw_mmc driver. This Patch adds the
->> support for the scenario where the Synopsys Designware IP
->> is present on the PCI bus. The patch adds the minimal modifications
->> necessary for the driver to work on PCI platform. Also added separate
->> files for PCI and PLATFORM modes of operation.
->> 
->> Signed-off-by: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+On Mon, Jan 16 2012, Will Newton wrote:
+> On Mon, Jan 16, 2012 at 2:45 AM, Jaehoon Chung <jh80.chung@samsung.co=
+m> wrote:
+>> When use the IDMAC, we can also want to use the pdata->blk-setting.
+>> So if pdata->blk-setting is unset, use the default value.
+>> if not, use the pdata->blk-setting.
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>> ---
+>> =C2=A0drivers/mmc/host/dw_mmc.c | =C2=A0 16 ++++++++--------
+>> =C2=A01 files changed, 8 insertions(+), 8 deletions(-)
 >
-> Acked-by: James Hogan <james.hogan@imgtec.com>
+> Looks good.
+>
+> Acked-by: Will Newton <will.newton@imgtec.com>
 
 Thanks, pushed to mmc-next for 3.4.
 
 - Chris.
--- 
+--=20
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
