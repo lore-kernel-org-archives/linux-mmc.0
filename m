@@ -1,35 +1,39 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: TMIO/SDHI and MMCIF fixes for 3.3
-Date: Sat, 04 Feb 2012 21:31:33 -0500
-Message-ID: <m2r4ya6mey.fsf@bob.laptop.org>
-References: <Pine.LNX.4.64.1202011530260.26261@axis700.grange>
+Subject: Re: [RFC] MMC-4.5 Context ID
+Date: Sat, 04 Feb 2012 21:45:18 -0500
+Message-ID: <m2mx8y6ls1.fsf@bob.laptop.org>
+References: <1328110021-15199-1-git-send-email-saugata.das@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39399 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:52862 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753404Ab2BECbi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 4 Feb 2012 21:31:38 -0500
-In-Reply-To: <Pine.LNX.4.64.1202011530260.26261@axis700.grange> (Guennadi
-	Liakhovetski's message of "Wed, 1 Feb 2012 15:34:06 +0100 (CET)")
+	id S1754609Ab2BECp1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 4 Feb 2012 21:45:27 -0500
+In-Reply-To: <1328110021-15199-1-git-send-email-saugata.das@stericsson.com>
+	(Saugata Das's message of "Wed, 1 Feb 2012 20:57:01 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+To: Saugata Das <saugata.das@stericsson.com>
 Cc: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Wed, Feb 01 2012, Guennadi Liakhovetski wrote:
-> Just to make sure, they don't get forgotten: there are 2 patches, that I 
-> sent to the ML earlier, that are bug-fixes and should go into 3.3:
+On Wed, Feb 01 2012, Saugata Das wrote:
+> From: Saugata Das <saugata.das@linaro.org>
 >
-> http://article.gmane.org/gmane.linux.ports.sh.devel/13216
-> http://article.gmane.org/gmane.linux.kernel.mmc/12381
+> This patch groups the read or write transfers to eMMC in different contexts
+> based on the block number. Transfers to consecutive blocks are grouped to a
+> common context. So several small transfers combine to give performance like
+> a large multi block transfer.
 >
-> Please, push with your next MMC fixes pull request. Yes, I did verify 
-> since then, that they apply and work with the mainline kernel too.
+> The patch creates a context of 1MB multiple in non-large unit mode. Reliable
+> mode is enabled in the context based on whether reliable write is enabled.
 
-Thanks for the reminder, both are queued in mmc-next for 3.3 now.
+Do you see any performance changes with this patchset?  If so, can you
+give details?
+
+Thanks,
 
 - Chris.
 -- 
