@@ -1,36 +1,48 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/4] new version workaround for FSL's eSDHC controller
-Date: Sat, 04 Feb 2012 20:18:06 -0500
-Message-ID: <m2bope84dt.fsf@bob.laptop.org>
-References: <1326694386-28820-1-git-send-email-r66093@freescale.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 00/11 v2] mmc: tmio/sdhi: hotplug & PM
+Date: Sun, 5 Feb 2012 02:36:08 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1202050235050.3770@axis700.grange>
+References: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
+ <m2wr82885d.fsf@bob.laptop.org> <Pine.LNX.4.64.1202050147520.3770@axis700.grange>
+ <m2ehua84xf.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54900 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752616Ab2BEBSN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 4 Feb 2012 20:18:13 -0500
-In-Reply-To: <1326694386-28820-1-git-send-email-r66093@freescale.com>
-	(r66093@freescale.com's message of "Mon, 16 Jan 2012 14:13:02 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <m2ehua84xf.fsf@bob.laptop.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: r66093@freescale.com
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Hi,
+On Sat, 4 Feb 2012, Chris Ball wrote:
 
-On Mon, Jan 16 2012, r66093@freescale.com wrote:
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
->
-> The below new verison patches are the workaround for FSL's eSDHC controller.
-> all patches have been acked-by Anton Vorontsov <cbouatmailru@gmail.com>.
->
-> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> Hi,
+> 
+> On Sat, Feb 04 2012, Guennadi Liakhovetski wrote:
+> > Thanks. Actually, it recently occurred to me, that patches 3 and 10 should 
+> > actually be merged into one. So, if you like, I can produce a v3 with that 
+> > taken into account. The result would be exactly the same, I literally 
+> > would just apply #10 on top of #3 and commit the result with the same 
+> > commit description as the v2 of #3.
+> 
+> Sure.
 
-I've pushed patches {1, 2, 3} and will wait for you to resend patch 4
-individually.  Thanks,
+Ok, will do asap.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> > Shall I also rebase v3 on top of mmx-next and fix the failing patch? The 
+> > two ARM patches can be applied separately, but they have to go in after 
+> > this series then. Either way is ok with me, pulling all via mmc has the 
+> > advantage of not having to synchronise the pulls, but then the conflict 
+> > probability rises of course.
+> 
+> I'm happy to take the ARM patches, but I'll need ACKs from the relevant
+> arch maintainers to do that.
+
+Sure, that's what I meant. Sorry for not mentioning explicitly.
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
