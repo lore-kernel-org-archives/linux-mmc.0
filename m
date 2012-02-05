@@ -1,124 +1,34 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci: always reset all during resume
-Date: Sat, 04 Feb 2012 20:09:13 -0500
-Message-ID: <m2d39u84sm.fsf@bob.laptop.org>
-References: <1327926439-23603-1-git-send-email-adrian.hunter@intel.com>
-	<1327926439-23603-3-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH 0/4] new version workaround for FSL's eSDHC controller
+Date: Sat, 04 Feb 2012 20:18:06 -0500
+Message-ID: <m2bope84dt.fsf@bob.laptop.org>
+References: <1326694386-28820-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33445 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:54900 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752846Ab2BEBJW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 4 Feb 2012 20:09:22 -0500
-In-Reply-To: <1327926439-23603-3-git-send-email-adrian.hunter@intel.com>
-	(Adrian Hunter's message of "Mon, 30 Jan 2012 14:27:19 +0200")
+	id S1752616Ab2BEBSN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 4 Feb 2012 20:18:13 -0500
+In-Reply-To: <1326694386-28820-1-git-send-email-r66093@freescale.com>
+	(r66093@freescale.com's message of "Mon, 16 Jan 2012 14:13:02 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>, Aaron Lu <aaron.lu@amd.com>, Nicolas Pitre <nico@fluxnic.net>
+To: r66093@freescale.com
+Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-Hi, adding Nico for review,
+Hi,
 
-On Mon, Jan 30 2012, Adrian Hunter wrote:
-> During suspend the host controller may or may not be powered off.
-> In order to get the same result either way, always perform a
-> software "reset all" when resuming.
+On Mon, Jan 16 2012, r66093@freescale.com wrote:
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Philip Rakity <prakity@marvell.com>
-> Cc: Aaron Lu <aaron.lu@amd.com>
-> ---
->  drivers/mmc/host/sdhci.c |   29 +++++++++++------------------
->  1 files changed, 11 insertions(+), 18 deletions(-)
+> The below new verison patches are the workaround for FSL's eSDHC controller.
+> all patches have been acked-by Anton Vorontsov <cbouatmailru@gmail.com>.
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 8d66706..ef2434c 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -219,31 +219,20 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
->  	}
->  }
->  
-> -static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
-> -
-> -static void sdhci_init(struct sdhci_host *host, int soft)
-> +static void sdhci_init(struct sdhci_host *host)
->  {
-> -	if (soft)
-> -		sdhci_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
-> -	else
-> -		sdhci_reset(host, SDHCI_RESET_ALL);
-> +	sdhci_reset(host, SDHCI_RESET_ALL);
->  
->  	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK,
->  		SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
->  		SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_INDEX |
->  		SDHCI_INT_END_BIT | SDHCI_INT_CRC | SDHCI_INT_TIMEOUT |
->  		SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE);
-> -
-> -	if (soft) {
-> -		/* force clock reconfiguration */
-> -		host->clock = 0;
-> -		sdhci_set_ios(host->mmc, &host->mmc->ios);
-> -	}
->  }
->  
->  static void sdhci_reinit(struct sdhci_host *host)
->  {
-> -	sdhci_init(host, 0);
-> +	sdhci_init(host);
->  	sdhci_enable_card_detection(host);
->  }
->  
-> @@ -2423,8 +2412,12 @@ int sdhci_resume_host(struct sdhci_host *host)
->  	if (ret)
->  		return ret;
->  
-> -	sdhci_init(host, (host->mmc->pm_flags & MMC_PM_KEEP_POWER));
-> -	mmiowb();
-> +	sdhci_init(host);
-> +
-> +	/* Force clock and power re-program */
-> +	host->pwr = 0;
-> +	host->clock = 0;
-> +	sdhci_do_set_ios(host, &host->mmc->ios);
->  
->  	ret = mmc_resume_host(host->mmc);
->  	sdhci_enable_card_detection(host);
-> @@ -2500,7 +2493,7 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
->  			host->ops->enable_dma(host);
->  	}
->  
-> -	sdhci_init(host, 0);
-> +	sdhci_init(host);
->  
->  	/* Force clock and power re-program */
->  	host->pwr = 0;
-> @@ -2980,7 +2973,7 @@ int sdhci_add_host(struct sdhci_host *host)
->  		host->vmmc = NULL;
->  	}
->  
-> -	sdhci_init(host, 0);
-> +	sdhci_init(host);
->  
->  #ifdef CONFIG_MMC_DEBUG
->  	sdhci_dumpregs(host);
+> Signed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
 
-This patch doesn't look correct to me -- yes, the hardware might have
-lost power during suspend, but that's what the common-case of:
-
-        sdhci_init(host, soft=0);
-
-is for.  soft=1 is supposed to indicate that the power stayed up via
-MMC_PM_KEEP_POWER, but you're changing that by setting ->pwr = 0 in the
-soft=1 path.  If I'm using soft=1 because my controller has a wifi SDIO
-card on it, I don't want you to reprogram the power to it on resume.
-Does that make sense?
-
-(Doing a RESET_ALL might also destroy some wanted soft-state.)
-
-Thanks,
+I've pushed patches {1, 2, 3} and will wait for you to resend patch 4
+individually.  Thanks,
 
 - Chris.
 -- 
