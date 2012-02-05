@@ -1,43 +1,122 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 00/11 v2] mmc: tmio/sdhi: hotplug & PM
-Date: Sat, 04 Feb 2012 20:06:20 -0500
-Message-ID: <m2ehua84xf.fsf@bob.laptop.org>
-References: <1327406500-7233-1-git-send-email-g.liakhovetski@gmx.de>
-	<m2wr82885d.fsf@bob.laptop.org>
-	<Pine.LNX.4.64.1202050147520.3770@axis700.grange>
+Subject: Re: [PATCH 2/2] mmc: sdhci: always reset all during resume
+Date: Sat, 04 Feb 2012 20:09:13 -0500
+Message-ID: <m2d39u84sm.fsf@bob.laptop.org>
+References: <1327926439-23603-1-git-send-email-adrian.hunter@intel.com>
+	<1327926439-23603-3-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33415 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:33445 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752616Ab2BEBGe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 4 Feb 2012 20:06:34 -0500
-In-Reply-To: <Pine.LNX.4.64.1202050147520.3770@axis700.grange> (Guennadi
-	Liakhovetski's message of "Sun, 5 Feb 2012 01:56:25 +0100 (CET)")
+	id S1752846Ab2BEBJW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 4 Feb 2012 20:09:22 -0500
+In-Reply-To: <1327926439-23603-3-git-send-email-adrian.hunter@intel.com>
+	(Adrian Hunter's message of "Mon, 30 Jan 2012 14:27:19 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>, Aaron Lu <aaron.lu@amd.com>, Nicolas Pitre <nico@fluxnic.net>
 
-Hi,
+Hi, adding Nico for review,
 
-On Sat, Feb 04 2012, Guennadi Liakhovetski wrote:
-> Thanks. Actually, it recently occurred to me, that patches 3 and 10 should 
-> actually be merged into one. So, if you like, I can produce a v3 with that 
-> taken into account. The result would be exactly the same, I literally 
-> would just apply #10 on top of #3 and commit the result with the same 
-> commit description as the v2 of #3.
+On Mon, Jan 30 2012, Adrian Hunter wrote:
+> During suspend the host controller may or may not be powered off.
+> In order to get the same result either way, always perform a
+> software "reset all" when resuming.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Philip Rakity <prakity@marvell.com>
+> Cc: Aaron Lu <aaron.lu@amd.com>
+> ---
+>  drivers/mmc/host/sdhci.c |   29 +++++++++++------------------
+>  1 files changed, 11 insertions(+), 18 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 8d66706..ef2434c 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -219,31 +219,20 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
+>  	}
+>  }
+>  
+> -static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+> -
+> -static void sdhci_init(struct sdhci_host *host, int soft)
+> +static void sdhci_init(struct sdhci_host *host)
+>  {
+> -	if (soft)
+> -		sdhci_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
+> -	else
+> -		sdhci_reset(host, SDHCI_RESET_ALL);
+> +	sdhci_reset(host, SDHCI_RESET_ALL);
+>  
+>  	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK,
+>  		SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
+>  		SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_INDEX |
+>  		SDHCI_INT_END_BIT | SDHCI_INT_CRC | SDHCI_INT_TIMEOUT |
+>  		SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE);
+> -
+> -	if (soft) {
+> -		/* force clock reconfiguration */
+> -		host->clock = 0;
+> -		sdhci_set_ios(host->mmc, &host->mmc->ios);
+> -	}
+>  }
+>  
+>  static void sdhci_reinit(struct sdhci_host *host)
+>  {
+> -	sdhci_init(host, 0);
+> +	sdhci_init(host);
+>  	sdhci_enable_card_detection(host);
+>  }
+>  
+> @@ -2423,8 +2412,12 @@ int sdhci_resume_host(struct sdhci_host *host)
+>  	if (ret)
+>  		return ret;
+>  
+> -	sdhci_init(host, (host->mmc->pm_flags & MMC_PM_KEEP_POWER));
+> -	mmiowb();
+> +	sdhci_init(host);
+> +
+> +	/* Force clock and power re-program */
+> +	host->pwr = 0;
+> +	host->clock = 0;
+> +	sdhci_do_set_ios(host, &host->mmc->ios);
+>  
+>  	ret = mmc_resume_host(host->mmc);
+>  	sdhci_enable_card_detection(host);
+> @@ -2500,7 +2493,7 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
+>  			host->ops->enable_dma(host);
+>  	}
+>  
+> -	sdhci_init(host, 0);
+> +	sdhci_init(host);
+>  
+>  	/* Force clock and power re-program */
+>  	host->pwr = 0;
+> @@ -2980,7 +2973,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>  		host->vmmc = NULL;
+>  	}
+>  
+> -	sdhci_init(host, 0);
+> +	sdhci_init(host);
+>  
+>  #ifdef CONFIG_MMC_DEBUG
+>  	sdhci_dumpregs(host);
 
-Sure.
+This patch doesn't look correct to me -- yes, the hardware might have
+lost power during suspend, but that's what the common-case of:
 
-> Shall I also rebase v3 on top of mmx-next and fix the failing patch? The 
-> two ARM patches can be applied separately, but they have to go in after 
-> this series then. Either way is ok with me, pulling all via mmc has the 
-> advantage of not having to synchronise the pulls, but then the conflict 
-> probability rises of course.
+        sdhci_init(host, soft=0);
 
-I'm happy to take the ARM patches, but I'll need ACKs from the relevant
-arch maintainers to do that.
+is for.  soft=1 is supposed to indicate that the power stayed up via
+MMC_PM_KEEP_POWER, but you're changing that by setting ->pwr = 0 in the
+soft=1 path.  If I'm using soft=1 because my controller has a wifi SDIO
+card on it, I don't want you to reprogram the power to it on resume.
+Does that make sense?
+
+(Doing a RESET_ALL might also destroy some wanted soft-state.)
 
 Thanks,
 
