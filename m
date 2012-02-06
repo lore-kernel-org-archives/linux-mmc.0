@@ -1,84 +1,121 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 6/7 v2] ASoC: SIU: prepare for conversion to simple DMA
-Date: Mon, 6 Feb 2012 10:11:25 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1202061010300.10363@axis700.grange>
-References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
- <1327589784-4287-7-git-send-email-g.liakhovetski@gmx.de>
- <1328495625.26182.55.camel@vkoul-udesk3>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [RESEND PATCH V3] mmc: core: Detect card removal on I/O error
+Date: Mon, 6 Feb 2012 10:27:49 +0100
+Message-ID: <4F2F9D15.7090000@stericsson.com>
+References: <1328261593-6112-1-git-send-email-ulf.hansson@stericsson.com> <4F2BC790.3090304@intel.com> <4F2BD00C.8040703@stericsson.com> <4F2BD895.2030301@intel.com> <4F2BDFC0.3010201@stericsson.com> <4F2F971E.6030007@intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="iso-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:58461 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753554Ab2BFJLf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Feb 2012 04:11:35 -0500
-In-Reply-To: <1328495625.26182.55.camel@vkoul-udesk3>
+Received: from eu1sys200aog111.obsmtp.com ([207.126.144.131]:52969 "EHLO
+	eu1sys200aog111.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754075Ab2BFJ2z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Feb 2012 04:28:55 -0500
+In-Reply-To: <4F2F971E.6030007@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi Vinod
+Adrian Hunter wrote:
+> On 03/02/12 15:23, Ulf Hansson wrote:
+>> Adrian Hunter wrote:
+>>> On 03/02/12 14:16, Ulf Hansson wrote:
+>>>> Adrian Hunter wrote:
+>>>>> On 03/02/12 11:33, Ulf Hansson wrote:
+>>>>>> To prevent I/O as soon as possible at card removal, a new detect work
+>>>>>> is re-scheduled without a delay to let a rescan remove the card device
+>>>>>> as soon a possible.
+>>>>>>
+>>>>>> Additionally, MMC_CAP2_DETECT_ON_ERR can now be used to handle "slowly"
+>>>>>> removed cards that a scheduled detect work did not detect as removed.
+>>>>>> To prevent further I/O requests for these lingering removed cards,
+>>>>>> check if card has been removed and
+>>>>>> then schedule a detect work to properly remove it.
+>>>>>>
+>>>>>> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com> ---
+>>>>>>
+>>>>>> Changes in v3: - Check for card is NULL and minor code
+>>>>>> simplifications.
+>>>>>>
+>>>>>> Changes in v2: - Updated according to review comments. -
+>>>>>> Merging two patches for this feature into one.
+>>>>>>
+>>>>>> --- drivers/mmc/core/core.c  |   24 +++++++++++++++++++++---
+>>>>>> include/linux/mmc/host.h |    1 + 2 files changed, 22
+>>>>>> insertions(+), 3 deletions(-)
+>>>>>>
+>>>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
+>>>>>> bec0bf2..9645e8c 100644 --- a/drivers/mmc/core/core.c +++
+>>>>>> b/drivers/mmc/core/core.c @@ -2077,18 +2077,36 @@ int
+>>>>>> _mmc_detect_card_removed(struct mmc_host *host) int
+>>>>>> mmc_detect_card_removed(struct mmc_host *host) { struct
+>>>>>> mmc_card *card = host->card; +    int ret;
+>>>>>>
+>>>>>> WARN_ON(!host->claimed); + +    if (!card) +        return 1; +
+>>>>>>  +    ret = mmc_card_removed(card); /* * The card will be
+>>>>>> considered unchanged unless we have been asked to * detect a
+>>>>>> change or host requires polling to provide card detection. */ -
+>>>>>> if (card && !host->detect_change && !(host->caps &
+>>>>>> MMC_CAP_NEEDS_POLL)) -        return mmc_card_removed(card); +
+>>>>>> if (!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL)
+>>>>>> && +        !(host->caps2 & MMC_CAP2_DETECT_ON_ERR)) +
+>>>>>> return ret;
+>>>>>>
+>>>>>> host->detect_change = 0; +    if (!ret) { +        ret =
+>>>>>> _mmc_detect_card_removed(host); +        if (ret) {
+>>>>> Please make this
+>>>>>
+>>>>> if (ret && (host->caps2 & MMC_CAP2_DETECT_ON_ERR))
+>>>>>
+>>>>> because if rescan is already running this will needlessly queue another
+>>>>> one.
+>>>>>
+>>>> It wont queue another one. It will cancel a work which likely has
+>>>> been scheduled to be executed within several ms later. Then it will
+>>>> re-schedule a new one without any delay since there is no need to
+>>>> wait, when we already know that the card has been removed.
+>>> It won't cancel a rescan that is already running (waiting to claim
+>>> the host for example) but it will queue another one.  Hence the
+>>> comment.
+>>>
+>> Do you think this is case that we need to bother about? It should be a
+>> rare case and in worst case we only schedule a second not needed rescan,
+>> which I believe should not be a problem.
+>>
+>> I discussed this with Jaehoon Chung, previously regarding the return value
+>> of cancel_delayed_work(&host->detect). See below copied comments:
+>>
+>> I change accordingly if you like, please let me know. Again. :-)
+> 
+> Yes please.
+> 
 
-On Mon, 6 Feb 2012, Vinod Koul wrote:
+Fixed a v4 patch then. Thanks.
 
-> On Thu, 2012-01-26 at 15:56 +0100, Guennadi Liakhovetski wrote:
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > ---
-> >  sound/soc/sh/siu_pcm.c |    8 ++++----
-> >  1 files changed, 4 insertions(+), 4 deletions(-)
-> > 
-> > diff --git a/sound/soc/sh/siu_pcm.c b/sound/soc/sh/siu_pcm.c
-> > index 0193e59..414bb35 100644
-> > --- a/sound/soc/sh/siu_pcm.c
-> > +++ b/sound/soc/sh/siu_pcm.c
-> > @@ -330,12 +330,12 @@ static bool filter(struct dma_chan *chan, void *slave)
-> >  {
-> >  	struct sh_dmae_slave *param = slave;
-> >  
-> > -	pr_debug("%s: slave ID %d\n", __func__, param->slave_id);
-> > +	pr_debug("%s: slave ID %d\n", __func__, param->simple_slave.slave_id);
-> >  
-> >  	if (unlikely(param->dma_dev != chan->device->dev))
-> >  		return false;
-> >  
-> > -	chan->private = param;
-> > +	chan->private = &param->simple_slave;
-> While at it, Can you fix the sh-mobile driver to NOT use chan->private?
-
-This is an independent change and for it I need my recent RFC PATCH 
-"[PATCH/RFC] dmaengine: add a slave parameter to __dma_request_channel()"
-
-http://marc.info/?l=linux-kernel&m=132811019930675&w=2
-
-Thanks
-Guennadi
-
-> >  	return true;
-> >  }
-> >  
-> > @@ -360,12 +360,12 @@ static int siu_pcm_open(struct snd_pcm_substream *ss)
-> >  	if (ss->stream == SNDRV_PCM_STREAM_PLAYBACK) {
-> >  		siu_stream = &port_info->playback;
-> >  		param = &siu_stream->param;
-> > -		param->slave_id = port ? pdata->dma_slave_tx_b :
-> > +		param->simple_slave.slave_id = port ? pdata->dma_slave_tx_b :
-> >  			pdata->dma_slave_tx_a;
-> >  	} else {
-> >  		siu_stream = &port_info->capture;
-> >  		param = &siu_stream->param;
-> > -		param->slave_id = port ? pdata->dma_slave_rx_b :
-> > +		param->simple_slave.slave_id = port ? pdata->dma_slave_rx_b :
-> >  			pdata->dma_slave_rx_a;
-> >  	}
-> >  
+>> ----------
+>>
+>>>>> if (cancel_delayed_work(&host->detect))
+>>>>>>> mmc_detect_change(host, 0); isn't?
+>>>>> Good comment. That will mean that patch 2 will have to be updated
+>>>>> as well to something like below.
+>>>>>
+>>>>> if (cancel_delayed_work(&host->detect) || (host->caps2 &
+>>>>> MMC_CAP2_DETECT_ON_ERR)) mmc_detect_change(host, 0);
+>>>>>
+>>>>> What do you think?
+>>>>>
+>>>>> Could we skip this entirely and leave it as is without checking
+>>>>> the return value of cancel_delayed_work? That will only mean that
+>>>>> in some very rare cases (since rescan is clearing the
+>>>>> detect_change flag) one additional detect work will be triggered
+>>>>> which shall not cause any problems I believe. But I happily
+>>>>> change to what you propose if you prefer!
+>>> Right...maybe..don't cause any problems..i also think. It's rare
+>>> case.  :) Best Regards, Jaehoon Chung
+>>>
+>> ---------------------
+>>
 > 
 > 
-> -- 
-> ~Vinod
-> 
 
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
