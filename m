@@ -1,66 +1,33 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3 2/2]  mmc: sdhci-s3c: add platform data for the second capability
-Date: Mon, 06 Feb 2012 06:19:33 -0500
-Message-ID: <m239ao5hve.fsf@bob.laptop.org>
-References: <4F2F86DA.6030106@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci: always reset all during resume
+Date: Mon, 06 Feb 2012 15:14:47 +0200
+Message-ID: <4F2FD247.70004@intel.com>
+References: <1327926439-23603-1-git-send-email-adrian.hunter@intel.com> <1327926439-23603-3-git-send-email-adrian.hunter@intel.com> <m2d39u84sm.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <4F2F86DA.6030106@samsung.com> (Jaehoon Chung's message of "Mon,
-	06 Feb 2012 16:52:58 +0900")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, 'kgene kim' <kgene.kim@samsung.com>, Girish K S <girish.shivananjappa@linaro.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([143.182.124.21]:45373 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754837Ab2BFNPt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 Feb 2012 08:15:49 -0500
+In-Reply-To: <m2d39u84sm.fsf@bob.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Philip Rakity <prakity@marvell.com>, Aaron Lu <aaron.lu@amd.com>, Nicolas Pitre <nico@fluxnic.net>
 
-Hi,
+On 05/02/12 03:09, Chris Ball wrote:
+> This patch doesn't look correct to me -- yes, the hardware might have
+> lost power during suspend, but that's what the common-case of:
+> 
+>         sdhci_init(host, soft=0);
+> 
+> is for.  soft=1 is supposed to indicate that the power stayed up via
+> MMC_PM_KEEP_POWER, but you're changing that by setting ->pwr = 0 in the
+> soft=1 path.  If I'm using soft=1 because my controller has a wifi SDIO
+> card on it, I don't want you to reprogram the power to it on resume.
+> Does that make sense?
 
-On Mon, Feb 06 2012, Jaehoon Chung wrote:
-> This patch is added host_caps2 in sdhci-s3c.c
-> It's necessary that use the second capabilities.
-> And removed the duplicated host_caps.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
-> Changelog v3:
-> 	- based-on latest mmc-next tree
-> Changelog v2:
-> 	- remove the duplicated host_caps.
->
->  drivers/mmc/host/sdhci-s3c.c |    6 +++---
->  1 files changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index d065e37..46b9782 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -521,9 +521,6 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->  	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
->  		host->mmc->caps = MMC_CAP_NONREMOVABLE;
->  
-> -	if (pdata->host_caps)
-> -		host->mmc->caps |= pdata->host_caps;
-> -
->  	if (pdata->pm_caps)
->  		host->mmc->pm_caps |= pdata->pm_caps;
->  
-> @@ -547,6 +544,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->  	if (pdata->host_caps)
->  		host->mmc->caps |= pdata->host_caps;
->  
-> +	if (pdata->host_caps2)
-> +		host->mmc->caps2 |= pdata->host_caps2;
-> +
->  	ret = sdhci_add_host(host);
->  	if (ret) {
->  		dev_err(dev, "sdhci_add_host() failed\n");
-
-In case you'd rather merge both of these via the samsung-soc tree:
-
-Acked-by: Chris Ball <cjb@laptop.org>
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Yes, I will send a different patch (to handle the "card is on, but the host
+controller is off" case)
