@@ -1,66 +1,121 @@
-From: "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [PATCH/RFC] usb: fix renesas_usbhs to not schedule
- in atomic context
-Date: Mon, 06 Feb 2012 17:52:33 +0900
-Message-ID: <4F2F94D1.1080308@renesas.com>
-References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
-	<1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de>
-	<4F22624E.2090201@renesas.com>
-	<Pine.LNX.4.64.1201270946150.32661@axis700.grange>
-	<4F27CA7D.601@renesas.com>
-	<Pine.LNX.4.64.1202022317560.13860@axis700.grange>
-	<4F2B9F34.60308@renesas.com>
-	<Pine.LNX.4.64.1202031623000.6211@axis700.grange>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RESEND PATCH V3] mmc: core: Detect card removal on I/O error
+Date: Mon, 06 Feb 2012 11:02:22 +0200
+Message-ID: <4F2F971E.6030007@intel.com>
+References: <1328261593-6112-1-git-send-email-ulf.hansson@stericsson.com> <4F2BC790.3090304@intel.com> <4F2BD00C.8040703@stericsson.com> <4F2BD895.2030301@intel.com> <4F2BDFC0.3010201@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <alsa-devel-bounces@alsa-project.org>
-In-reply-to: <Pine.LNX.4.64.1202031623000.6211@axis700.grange>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
-	<mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
-	<mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Sender: alsa-devel-bounces@alsa-project.org
-Errors-To: alsa-devel-bounces@alsa-project.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: alsa-devel@alsa-project.org, linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Magnus Damm <magnus.damm@gmail.com>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, linux-serial@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:11656 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753135Ab2BFJCT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 Feb 2012 04:02:19 -0500
+In-Reply-To: <4F2BDFC0.3010201@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi Guennadi-san,
+On 03/02/12 15:23, Ulf Hansson wrote:
+> Adrian Hunter wrote:
+>> On 03/02/12 14:16, Ulf Hansson wrote:
+>>> Adrian Hunter wrote:
+>>>> On 03/02/12 11:33, Ulf Hansson wrote:
+>>>>> To prevent I/O as soon as possible at card removal, a new detect work
+>>>>> is re-scheduled without a delay to let a rescan remove the card device
+>>>>> as soon a possible.
+>>>>>
+>>>>> Additionally, MMC_CAP2_DETECT_ON_ERR can now be used to handle "slowly"
+>>>>> removed cards that a scheduled detect work did not detect as removed.
+>>>>> To prevent further I/O requests for these lingering removed cards,
+>>>>> check if card has been removed and
+>>>>> then schedule a detect work to properly remove it.
+>>>>>
+>>>>> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com> ---
+>>>>>
+>>>>> Changes in v3: - Check for card is NULL and minor code
+>>>>> simplifications.
+>>>>>
+>>>>> Changes in v2: - Updated according to review comments. -
+>>>>> Merging two patches for this feature into one.
+>>>>>
+>>>>> --- drivers/mmc/core/core.c  |   24 +++++++++++++++++++++---
+>>>>> include/linux/mmc/host.h |    1 + 2 files changed, 22
+>>>>> insertions(+), 3 deletions(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
+>>>>> bec0bf2..9645e8c 100644 --- a/drivers/mmc/core/core.c +++
+>>>>> b/drivers/mmc/core/core.c @@ -2077,18 +2077,36 @@ int
+>>>>> _mmc_detect_card_removed(struct mmc_host *host) int
+>>>>> mmc_detect_card_removed(struct mmc_host *host) { struct
+>>>>> mmc_card *card = host->card; +    int ret;
+>>>>>
+>>>>> WARN_ON(!host->claimed); + +    if (!card) +        return 1; +
+>>>>>  +    ret = mmc_card_removed(card); /* * The card will be
+>>>>> considered unchanged unless we have been asked to * detect a
+>>>>> change or host requires polling to provide card detection. */ -
+>>>>> if (card && !host->detect_change && !(host->caps &
+>>>>> MMC_CAP_NEEDS_POLL)) -        return mmc_card_removed(card); +
+>>>>> if (!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL)
+>>>>> && +        !(host->caps2 & MMC_CAP2_DETECT_ON_ERR)) +
+>>>>> return ret;
+>>>>>
+>>>>> host->detect_change = 0; +    if (!ret) { +        ret =
+>>>>> _mmc_detect_card_removed(host); +        if (ret) {
+>>>> Please make this
+>>>>
+>>>> if (ret && (host->caps2 & MMC_CAP2_DETECT_ON_ERR))
+>>>>
+>>>> because if rescan is already running this will needlessly queue another
+>>>> one.
+>>>>
+>>> It wont queue another one. It will cancel a work which likely has
+>>> been scheduled to be executed within several ms later. Then it will
+>>> re-schedule a new one without any delay since there is no need to
+>>> wait, when we already know that the card has been removed.
+>>
+>> It won't cancel a rescan that is already running (waiting to claim
+>> the host for example) but it will queue another one.  Hence the
+>> comment.
+>>
+> 
+> Do you think this is case that we need to bother about? It should be a
+> rare case and in worst case we only schedule a second not needed rescan,
+> which I believe should not be a problem.
+> 
+> I discussed this with Jaehoon Chung, previously regarding the return value
+> of cancel_delayed_work(&host->detect). See below copied comments:
+> 
+> I change accordingly if you like, please let me know. Again. :-)
 
-2012/02/04 0:43, Guennadi Liakhovetski wrote:
-> The current renesas_usbhs driver triggers
-> 
-> BUG: scheduling while atomic: ksoftirqd/0/3/0x00000102
-> 
-> with enabled CONFIG_DEBUG_ATOMIC_SLEEP, by submitting DMA transfers from 
-> an atomic (tasklet) context, which is not supported by the shdma dmaengine 
-> driver. Fix it by switching to a work. Also simplify some list 
-> manipulations.
-> 
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
-> 
-> Shimoda-san, this is the problem, that you were observing. However, it 
-> exists with the present version of shdma just as well as with the new one 
-> - on top of the simple DMA library. I marked it an RFC because (1) I only 
-> lightly tested it with the gadget device on mackerel with the mass storage 
-> gadget, and (2) I am somewhat concerned about races. Currently the work 
-> function runs with no locking and there are no usual cancel_work_sync() 
-> points in the patch. However, it has also been like this before with the 
-> tasklet implementation, which is not much better, and it looks like there 
-> are no asynchronous operations on the same packets like timeouts. Only 
-> asynchronous events, that I can think about are things like unloading the 
-> driver or unplugging the cable, but these have been there before too. It 
-> would become worse on SMP, I think. Comments welcome.
+Yes please.
 
-Thank you for the patch and comments.
-I also tested this patch using the g_mass_storage and g_ether.
-About your points, I think so, too.
-So, I will write such a code.
+> 
+> ----------
+> 
+>>>> if (cancel_delayed_work(&host->detect))
+>>>>>> mmc_detect_change(host, 0); isn't?
+>>>>
+>>>> Good comment. That will mean that patch 2 will have to be updated
+>>>> as well to something like below.
+>>>>
+>>>> if (cancel_delayed_work(&host->detect) || (host->caps2 &
+>>>> MMC_CAP2_DETECT_ON_ERR)) mmc_detect_change(host, 0);
+>>>>
+>>>> What do you think?
+>>>>
+>>>> Could we skip this entirely and leave it as is without checking
+>>>> the return value of cancel_delayed_work? That will only mean that
+>>>> in some very rare cases (since rescan is clearing the
+>>>> detect_change flag) one additional detect work will be triggered
+>>>> which shall not cause any problems I believe. But I happily
+>>>> change to what you propose if you prefer!
+>>
+>> Right...maybe..don't cause any problems..i also think. It's rare
+>> case.  :) Best Regards, Jaehoon Chung
+>>
+> 
+> ---------------------
+> 
 
-Best regards,
-Yoshihiro Shimoda
