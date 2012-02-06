@@ -1,105 +1,53 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH/RFC] usb: fix renesas_usbhs to not schedule in atomic
- context
-Date: Mon, 6 Feb 2012 11:11:45 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1202061058430.10363@axis700.grange>
-References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
- <1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de> <4F22624E.2090201@renesas.com>
- <Pine.LNX.4.64.1201270946150.32661@axis700.grange> <4F27CA7D.601@renesas.com>
- <Pine.LNX.4.64.1202022317560.13860@axis700.grange> <4F2B9F34.60308@renesas.com>
- <Pine.LNX.4.64.1202031623000.6211@axis700.grange>
- <20120205145358.GA13762@legolas.emea.dhcp.ti.com>
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: RE: [RFC] mmc: core: add the capability for broken voltage
+Date: Mon, 06 Feb 2012 11:24:52 +0100
+Message-ID: <000001cce4b9$906c6f90$b1454eb0$%szyprowski@samsung.com>
+References: <4F13E47D.8040505@samsung.com> <m2aa4y9o7k.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:49525 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751322Ab2BFKMH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Feb 2012 05:12:07 -0500
-In-Reply-To: <20120205145358.GA13762@legolas.emea.dhcp.ti.com>
+Received: from mailout4.w1.samsung.com ([210.118.77.14]:56634 "EHLO
+	mailout4.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751322Ab2BFKZO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Feb 2012 05:25:14 -0500
+Received: from euspt1 ([210.118.77.14]) by mailout4.w1.samsung.com
+ (Sun Java(tm) System Messaging Server 6.3-8.04 (built Jul 29 2009; 32bit))
+ with ESMTP id <0LYY00A2EVLZ7Q40@mailout4.w1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 06 Feb 2012 10:25:12 +0000 (GMT)
+Received: from linux.samsung.com ([106.116.38.10])
+ by spt1.w1.samsung.com (iPlanet Messaging Server 5.2 Patch 2 (built Jul 14
+ 2004)) with ESMTPA id <0LYY003TQVLZ7Q@spt1.w1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 06 Feb 2012 10:25:11 +0000 (GMT)
+In-reply-to: <m2aa4y9o7k.fsf@bob.laptop.org>
+Content-language: pl
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Felipe Balbi <balbi@ti.com>
-Cc: "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>, linux-kernel@vger.kernel.org, linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-serial@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, linux-usb@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Adrian Hunter' <adrian.hunter@intel.com>
 
-Hi Felipe
+Hello,
 
-On Sun, 5 Feb 2012, Felipe Balbi wrote:
+On Sunday, February 05, 2012 12:25 AM Chris Ball wrote:
 
-> Hi,
+> On Mon, Jan 16 2012, Jaehoon Chung wrote:
+> > This patch is added the MMC_CAP2_BROKEN_VOLTAGE.
+> >
+> > if the voltage didn't satisfy between min_uV and max_uV,
+> > try to change the voltage in core.c.
+> > When change the voltage, maybe use the regulator_set_voltage().
 > 
-> On Fri, Feb 03, 2012 at 04:43:20PM +0100, Guennadi Liakhovetski wrote:
-> > The current renesas_usbhs driver triggers
-> > 
-> > BUG: scheduling while atomic: ksoftirqd/0/3/0x00000102
-> > 
-> > with enabled CONFIG_DEBUG_ATOMIC_SLEEP, by submitting DMA transfers from 
-> > an atomic (tasklet) context, which is not supported by the shdma dmaengine 
-> > driver. Fix it by switching to a work. Also simplify some list 
-> > manipulations.
-> 
-> you are doing much more than what you say.
+> Thanks, pushed to mmc-next for 3.3 with Adrian's ACK.  Marek, does this
+> work for you?
 
-Are those two list macro changes what you refer to as "a lot?" ;-) You're 
-right in principle, they are not directly related to the purpose of this 
-patch, they are just something that occurred to me, while tracking down 
-DMA packets. But yes, it can be extracted to a separate cosmetic patch...
+Yes, it works fine together with a patch from 
+http://thread.gmane.org/gmane.linux.kernel.mmc/12658 
+I also had to set this new capability in device's platform data.
 
-> Also, instead of using a
-> workqueue, have you considered using threaded_irqs ?
-> 
-> (I didn't go over the driver again to see if it makes sense to use
-> threaded_irqs in this case, but doesn't hurt asking)
+Best regards
+-- 
+Marek Szyprowski
+Samsung Poland R&D Center
 
->From a first glance these tasklets are not directly enough related to 
-IRQs, so, doing that is either impossible, or would require a _much_ 
-deeper change to the driver and _this_ would indeed be a much bigger 
-change than just fixing the Oops.
 
-Thanks
-Guennadi
 
-> > Shimoda-san, this is the problem, that you were observing. However, it 
-> > exists with the present version of shdma just as well as with the new one 
-> > - on top of the simple DMA library. I marked it an RFC because (1) I only 
-> > lightly tested it with the gadget device on mackerel with the mass storage 
-> > gadget, and (2) I am somewhat concerned about races. Currently the work 
-> > function runs with no locking and there are no usual cancel_work_sync() 
-> > points in the patch. However, it has also been like this before with the 
-> > tasklet implementation, which is not much better, and it looks like there 
-> > are no asynchronous operations on the same packets like timeouts. Only 
-> > asynchronous events, that I can think about are things like unloading the 
-> > driver or unplugging the cable, but these have been there before too. It 
-> > would become worse on SMP, I think. Comments welcome.
-> > 
-> > diff --git a/drivers/usb/renesas_usbhs/fifo.c b/drivers/usb/renesas_usbhs/fifo.c
-> > index 72339bd..4d739ec 100644
-> > --- a/drivers/usb/renesas_usbhs/fifo.c
-> > +++ b/drivers/usb/renesas_usbhs/fifo.c
-> > @@ -75,8 +75,7 @@ void usbhs_pkt_push(struct usbhs_pipe *pipe, struct usbhs_pkt *pkt,
-> >  		pipe->handler = &usbhsf_null_handler;
-> >  	}
-> >  
-> > -	list_del_init(&pkt->node);
-> > -	list_add_tail(&pkt->node, &pipe->list);
-> > +	list_move_tail(&pkt->node, &pipe->list);
-> >  
-> >  	/*
-> >  	 * each pkt must hold own handler.
-> > @@ -106,7 +105,7 @@ static struct usbhs_pkt *__usbhsf_pkt_get(struct usbhs_pipe *pipe)
-> >  	if (list_empty(&pipe->list))
-> >  		return NULL;
-> >  
-> > -	return list_entry(pipe->list.next, struct usbhs_pkt, node);
-> > +	return list_first_entry(&pipe->list, struct usbhs_pkt, node);
-> 
-> these two hunks are not part of $SUBJECT
-> 
-> -- 
-> balbi
-> 
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
