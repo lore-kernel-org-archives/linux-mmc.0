@@ -1,230 +1,66 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3] mmc: dw_mmc: Add support for pre_req and post_req
-Date: Mon, 06 Feb 2012 17:18:15 +0900
-Message-ID: <4F2F8CC7.3010405@samsung.com>
-References: <000201cce4a4$a5540c20$effc2460$%jun@samsung.com>
+From: "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH/RFC] usb: fix renesas_usbhs to not schedule
+ in atomic context
+Date: Mon, 06 Feb 2012 17:52:33 +0900
+Message-ID: <4F2F94D1.1080308@renesas.com>
+References: <1327589784-4287-1-git-send-email-g.liakhovetski@gmx.de>
+	<1327589784-4287-2-git-send-email-g.liakhovetski@gmx.de>
+	<4F22624E.2090201@renesas.com>
+	<Pine.LNX.4.64.1201270946150.32661@axis700.grange>
+	<4F27CA7D.601@renesas.com>
+	<Pine.LNX.4.64.1202022317560.13860@axis700.grange>
+	<4F2B9F34.60308@renesas.com>
+	<Pine.LNX.4.64.1202031623000.6211@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:11730 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751087Ab2BFISX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Feb 2012 03:18:23 -0500
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LYY001ETPPXZ9T0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 06 Feb 2012 17:18:21 +0900 (KST)
-Received: from [165.213.219.108] by mmp2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LYY00IB7PQLED91@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 06 Feb 2012 17:18:21 +0900 (KST)
-In-reply-to: <000201cce4a4$a5540c20$effc2460$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <alsa-devel-bounces@alsa-project.org>
+In-reply-to: <Pine.LNX.4.64.1202031623000.6211@axis700.grange>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+	<mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+	<mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Sender: alsa-devel-bounces@alsa-project.org
+Errors-To: alsa-devel-bounces@alsa-project.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: alsa-devel@alsa-project.org, linux-sh@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Magnus Damm <magnus.damm@gmail.com>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, linux-serial@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
 
-Looks good to me..
+Hi Guennadi-san,
 
-Acked-by : Jaehoon Chung <jh80.chung@samsung.com>
-
-On 02/06/2012 04:55 PM, Seungwon Jeon wrote:
-
-> This patch implements pre_req and post_req in dw_mmc
-> to support asynchronous mmc request.
+2012/02/04 0:43, Guennadi Liakhovetski wrote:
+> The current renesas_usbhs driver triggers
 > 
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> BUG: scheduling while atomic: ksoftirqd/0/3/0x00000102
+> 
+> with enabled CONFIG_DEBUG_ATOMIC_SLEEP, by submitting DMA transfers from 
+> an atomic (tasklet) context, which is not supported by the shdma dmaengine 
+> driver. Fix it by switching to a work. Also simplify some list 
+> manipulations.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > ---
-> Changes in v3:
-> 	Rebase with latest mmc-next.
-> Changes in v2:
-> 	Consider system DMA case as well as IDMAC.
-> NOTE:
-> 	Performance gains the following.
-> 	Sequential read and write improve 23% and 5% respectively.
 > 
->  drivers/mmc/host/dw_mmc.c |  129 +++++++++++++++++++++++++++++++++++---------
->  1 files changed, 102 insertions(+), 27 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 9188489..dee839e 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -297,14 +297,24 @@ static void dw_mci_stop_dma(struct dw_mci *host)
->  }
->  
->  #ifdef CONFIG_MMC_DW_IDMAC
-> +static int dw_mci_get_dma_dir(struct mmc_data *data)
-> +{
-> +	if (data->flags & MMC_DATA_WRITE)
-> +		return DMA_TO_DEVICE;
-> +	else
-> +		return DMA_FROM_DEVICE;
-> +}
-> +
->  static void dw_mci_dma_cleanup(struct dw_mci *host)
->  {
->  	struct mmc_data *data = host->data;
->  
->  	if (data)
-> -		dma_unmap_sg(&host->dev, data->sg, data->sg_len,
-> -			     ((data->flags & MMC_DATA_WRITE)
-> -			      ? DMA_TO_DEVICE : DMA_FROM_DEVICE));
-> +		if (!data->host_cookie)
-> +			dma_unmap_sg(&host->dev,
-> +				     data->sg,
-> +				     data->sg_len,
-> +				     dw_mci_get_dma_dir(data));
->  }
->  
->  static void dw_mci_idmac_stop_dma(struct dw_mci *host)
-> @@ -420,26 +430,15 @@ static int dw_mci_idmac_init(struct dw_mci *host)
->  	return 0;
->  }
->  
-> -static struct dw_mci_dma_ops dw_mci_idmac_ops = {
-> -	.init = dw_mci_idmac_init,
-> -	.start = dw_mci_idmac_start_dma,
-> -	.stop = dw_mci_idmac_stop_dma,
-> -	.complete = dw_mci_idmac_complete_dma,
-> -	.cleanup = dw_mci_dma_cleanup,
-> -};
-> -#endif /* CONFIG_MMC_DW_IDMAC */
-> -
-> -static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
-> +static int dw_mci_pre_dma_transfer(struct dw_mci *host,
-> +				   struct mmc_data *data,
-> +				   bool next)
->  {
->  	struct scatterlist *sg;
-> -	unsigned int i, direction, sg_len;
-> -	u32 temp;
-> -
-> -	host->using_dma = 0;
-> +	unsigned int i, sg_len;
->  
-> -	/* If we don't have a channel, we can't do DMA */
-> -	if (!host->use_dma)
-> -		return -ENODEV;
-> +	if (!next && data->host_cookie)
-> +		return data->host_cookie;
->  
->  	/*
->  	 * We don't do DMA on "complex" transfers, i.e. with
-> @@ -448,6 +447,7 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
->  	 */
->  	if (data->blocks * data->blksz < DW_MCI_DMA_THRESHOLD)
->  		return -EINVAL;
-> +
->  	if (data->blksz & 3)
->  		return -EINVAL;
->  
-> @@ -456,15 +456,88 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
->  			return -EINVAL;
->  	}
->  
-> -	host->using_dma = 1;
-> +	sg_len = dma_map_sg(&host->dev,
-> +			    data->sg,
-> +			    data->sg_len,
-> +			    dw_mci_get_dma_dir(data));
-> +	if (sg_len == 0)
-> +		return -EINVAL;
->  
-> -	if (data->flags & MMC_DATA_READ)
-> -		direction = DMA_FROM_DEVICE;
-> -	else
-> -		direction = DMA_TO_DEVICE;
-> +	if (next)
-> +		data->host_cookie = sg_len;
-> +
-> +	return sg_len;
-> +}
-> +
-> +static struct dw_mci_dma_ops dw_mci_idmac_ops = {
-> +	.init = dw_mci_idmac_init,
-> +	.start = dw_mci_idmac_start_dma,
-> +	.stop = dw_mci_idmac_stop_dma,
-> +	.complete = dw_mci_idmac_complete_dma,
-> +	.cleanup = dw_mci_dma_cleanup,
-> +};
-> +#else
-> +static int dw_mci_pre_dma_transfer(struct dw_mci *host,
-> +				   struct mmc_data *data,
-> +				   bool next)
-> +{
-> +	return -ENOSYS;
-> +}
-> +#endif /* CONFIG_MMC_DW_IDMAC */
-> +
-> +static void dw_mci_pre_req(struct mmc_host *mmc,
-> +			   struct mmc_request *mrq,
-> +			   bool is_first_req)
-> +{
-> +	struct dw_mci_slot *slot = mmc_priv(mmc);
-> +	struct mmc_data *data = mrq->data;
-> +
-> +	if (!slot->host->use_dma || !data)
-> +		return;
-> +
-> +	if (data->host_cookie) {
-> +		data->host_cookie = 0;
-> +		return;
-> +	}
-> +
-> +	if (dw_mci_pre_dma_transfer(slot->host, mrq->data, 1) < 0)
-> +		data->host_cookie = 0;
-> +}
-> +
-> +static void dw_mci_post_req(struct mmc_host *mmc,
-> +			    struct mmc_request *mrq,
-> +			    int err)
-> +{
-> +	struct dw_mci_slot *slot = mmc_priv(mmc);
-> +	struct mmc_data *data = mrq->data;
-> +
-> +	if (!slot->host->use_dma || !data)
-> +		return;
-> +
-> +	if (data->host_cookie)
-> +		dma_unmap_sg(&slot->host->dev,
-> +			     data->sg,
-> +			     data->sg_len,
-> +			     dw_mci_get_dma_dir(data));
-> +	data->host_cookie = 0;
-> +}
-> +
-> +static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
-> +{
-> +	int sg_len;
-> +	u32 temp;
->  
-> -	sg_len = dma_map_sg(&host->dev, data->sg, data->sg_len,
-> -			    direction);
-> +	host->using_dma = 0;
-> +
-> +	/* If we don't have a channel, we can't do DMA */
-> +	if (!host->use_dma)
-> +		return -ENODEV;
-> +
-> +	sg_len = dw_mci_pre_dma_transfer(host, data, 0);
-> +	if (sg_len < 0)
-> +		return sg_len;
-> +
-> +	host->using_dma = 1;
->  
->  	dev_vdbg(&host->dev,
->  		 "sd sg_cpu: %#lx sg_dma: %#lx sg_len: %d\n",
-> @@ -795,6 +868,8 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
->  
->  static const struct mmc_host_ops dw_mci_ops = {
->  	.request		= dw_mci_request,
-> +	.pre_req		= dw_mci_pre_req,
-> +	.post_req		= dw_mci_post_req,
->  	.set_ios		= dw_mci_set_ios,
->  	.get_ro			= dw_mci_get_ro,
->  	.get_cd			= dw_mci_get_cd,
+> Shimoda-san, this is the problem, that you were observing. However, it 
+> exists with the present version of shdma just as well as with the new one 
+> - on top of the simple DMA library. I marked it an RFC because (1) I only 
+> lightly tested it with the gadget device on mackerel with the mass storage 
+> gadget, and (2) I am somewhat concerned about races. Currently the work 
+> function runs with no locking and there are no usual cancel_work_sync() 
+> points in the patch. However, it has also been like this before with the 
+> tasklet implementation, which is not much better, and it looks like there 
+> are no asynchronous operations on the same packets like timeouts. Only 
+> asynchronous events, that I can think about are things like unloading the 
+> driver or unplugging the cable, but these have been there before too. It 
+> would become worse on SMP, I think. Comments welcome.
 
+Thank you for the patch and comments.
+I also tested this patch using the g_mass_storage and g_ether.
+About your points, I think so, too.
+So, I will write such a code.
 
+Best regards,
+Yoshihiro Shimoda
