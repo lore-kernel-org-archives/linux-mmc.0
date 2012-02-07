@@ -1,139 +1,125 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH 4/4 v5] ESDHC: Workaround for data crc error on p1010rdb
-Date: Tue, 7 Feb 2012 08:03:24 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C01D813@039-SN1MPN1-002.039d.mgd.msft.net>
-References: <1326694386-28820-1-git-send-email-r66093@freescale.com>
-	<1326694386-28820-2-git-send-email-r66093@freescale.com>
-	<1326694386-28820-3-git-send-email-r66093@freescale.com>
-	<1326694386-28820-4-git-send-email-r66093@freescale.com>
-	<1326694386-28820-5-git-send-email-r66093@freescale.com>
- <m2y5si9r3b.fsf@bob.laptop.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: mmc sdhci mmcblk0: error -110 sending status command, retrying
+Date: Tue, 07 Feb 2012 10:32:27 +0200
+Message-ID: <4F30E19B.9020503@intel.com>
+References: <CAAJw_ZsryUFFFRCKdd9sQ7_38hjpVq37b6hhZDX5=qz8x1B+EQ@mail.gmail.com> <m2pqdr2tyq.fsf@bob.laptop.org> <CAAJw_Zv4Hk_kfc33xsVcdi-0_C6tsf_FD3sUx1JPDX_fZZMzeQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe006.messaging.microsoft.com ([213.199.154.144]:55967
-	"EHLO DB3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751413Ab2BGIDq convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Feb 2012 03:03:46 -0500
-In-Reply-To: <m2y5si9r3b.fsf@bob.laptop.org>
-Content-Language: en-US
+Received: from mga02.intel.com ([134.134.136.20]:45859 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754411Ab2BGIc0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Feb 2012 03:32:26 -0500
+In-Reply-To: <CAAJw_Zv4Hk_kfc33xsVcdi-0_C6tsf_FD3sUx1JPDX_fZZMzeQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jain Priyanka-B32167 <B32167@freescale.com>
+To: Jeff Chua <jeff.chua.linux@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Pierre Ossman <pierre@ossman.eu>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, arindam.nath@amd.com, zhangfei.gao@gmail.com
 
-Chris,
-Thanks.
+On 07/02/12 06:37, Jeff Chua wrote:
+> On Tue, Feb 7, 2012 at 11:38 AM, Chris Ball <cjb@laptop.org> wrote:
+>> Hi, adding linux-mmc@ to the thread,
+>>
+>> On Mon, Feb 06 2012, Jeff Chua wrote:
+>>> The SD slot on the Lenovo X220 is doesn't seems to work on
+>>> Linux-3.3.0-rc2. I haven't use SD for a while, so don't know which
+>>> linux version will work on the X220.
+>>>
+>>>
+>>> # cat .config
+>>> CONFIG_MMC=m
+>>> CONFIG_MMC_DEBUG=y
+>>> CONFIG_MMC_CLKGATE=y
+>>> CONFIG_MMC_BLOCK=m
+>>> CONFIG_MMC_BLOCK_MINORS=8
+>>> CONFIG_MMC_BLOCK_BOUNCE=y
+>>> CONFIG_MMC_SDHCI=m
+>>> CONFIG_MMC_SDHCI_PCI=m
+>>> CONFIG_MMC_RICOH_MMC=y
+>>>
+>>>
+>>> # lspcpi -v
+>>>
+>>> 0d:00.0 System peripheral: Ricoh Co Ltd Device e823 (rev 04) (prog-if 01)
+>>>         Subsystem: Lenovo Device 21da
+>>>         Flags: bus master, fast devsel, latency 0, IRQ 16
+>>>         Memory at f1500000 (32-bit, non-prefetchable) [size=256]
+>>>         Capabilities: [50] MSI: Enable- Count=1/1 Maskable- 64bit+
+>>>         Capabilities: [78] Power Management version 3
+>>>         Capabilities: [80] Express Endpoint, MSI 00
+>>>         Kernel driver in use: sdhci-pci
+>>>         Kernel modules: sdhci-pci
+>>>
+>>>
+>>> # dmesg
+>>> sdhci: Secure Digital Host Controller Interface driver
+>>> sdhci: Copyright(c) Pierre Ossman
+>>> sdhci-pci 0000:0d:00.0: SDHCI controller found [1180:e823] (rev 4)
+>>> sdhci-pci 0000:0d:00.0: found 1 slot(s)
+>>> sdhci [sdhci_add_host()]: mmc0: Auto-CMD23 unavailable
+>>> sdhci: =========== REGISTER DUMP (mmc0)===========
+>>> sdhci: Sys addr: 0x00000000 | Version:  0x00000502
+>>> sdhci: Blk size: 0x00000000 | Blk cnt:  0x00000000
+>>> sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+>>> sdhci: Present:  0x01f70000 | Host ctl: 0x00000000
+>>> sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+>>> sdhci: Wake-up:  0x00000000 | Clock:    0x00000000
+>>> sdhci: Timeout:  0x00000000 | Int stat: 0x00000000
+>>> sdhci: Int enab: 0x00ff0003 | Sig enab: 0x00ff0003
+>>> sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
+>>> sdhci: Caps:     0x21e832b2 | Caps_1:   0x00008073
+>>> sdhci: Cmd:      0x00000000 | Max curr: 0x00000040
+>>> sdhci: Host ctl2: 0x00000000
+>>> sdhci: ===========================================
+>>>
+>>> mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
+>>> mmc0:     0 bytes transferred: -84
+>>> mmc0:     (CMD12): -110: 00000000 00000000 00000000 00000000
+>>> mmc0: starting CMD13 arg b3680000 flags 00000195
+>>> sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00018000
+>>> mmc0: req done (CMD13): -110: 00000000 00000000 00000000 00000000
+>>> mmcblk0: error -110 sending status command, retrying
+>>> mmc0: starting CMD13 arg b3680000 flags 00000195
+>>> sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00018000
+>>> mmc0: req done (CMD13): -110: 00000000 00000000 00000000 00000000
+>>> mmcblk0: error -110 sending status command, retrying
+>>> mmc0: starting CMD13 arg b3680000 flags 00000195
+>>> sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+>>> mmc0: req done (CMD13): 0: 00800b00 00000000 00000000 00000000
+>>> mmc0: starting CMD12 arg 00000000 flags 0000049d
+>>> sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000003
+>>> mmc0: req done (CMD12): 0: 00000b00 00000000 00000000 00000000
+>>> mmcblk0: error -110 sending stop command, original cmd response 0x900,
+>>> card status 0x800b00
+>>> mmcblk0: error -84 transferring data, sector 0, nr 32, cmd response
+>>> 0x900, card status 0xb00
+>>> mmcblk0: retrying using single block read
+>>> mmc0: starting CMD17 arg 00000000 flags 000000b5
+>>> mmc0:     blksz 512 blocks 1 flags 00000200 tsac 100 ms nsac 0
+>>> sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+>>> sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000002
+>>> mmc0: req done (CMD17): 0: 00000900 00000000 00000000 00000000
+>>> mmc0:     512 bytes transferred: 0
+>>> mmc0: starting CMD17 arg 00000001 flags 000000b5
+>>> mmc0:     blksz 512 blocks 1 flags 00000200 tsac 100 ms nsac 0
+>>> sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+>>> sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000002
+>>>
+>>>
+>>> Any help will be very much appreciated.
+>>
+>> Could you try another SD card to confirm that it's the controller?
+>> If it is, a bisect (at least between kernel versions) is probably
+>> a good idea.
+> 
+> I've tried another SD but still facing the same problem on the SD
+> slot. The same SD works when plugged in a USB card reader on the X220.
+> 
+> I'll try to bisect later, but don't know which version would work for
+> X220. The X201s has a SD slot, but it's actually a USB card reader and
+> that works, so I will have to find a working version before I can
+> bisect.
 
-I will think about how to handle it and rework it.
-
-> -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org]
-> Sent: Sunday, February 05, 2012 6:22 AM
-> To: Huang Changming-R66093
-> Cc: linux-mmc@vger.kernel.org; Huang Changming-R66093; Jain Priyanka-
-> B32167
-> Subject: Re: [PATCH 4/4 v5] ESDHC: Workaround for data crc error on
-> p1010rdb
-> 
-> Hi Jerry,
-> 
-> On Mon, Jan 16 2012, r66093@freescale.com wrote:
-> > From: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> >
-> > SD card read was failing (data crc error)on some cards at maximum
-> > possible frequency on P1010(CCB frequency set to 400MHz).
-> > Some clock deviations are also observed at this frequency.
-> > Hence reduced the mmc clock freq.
-> >
-> > Signed-off-by: Priyanka Jain <Priyanka.Jain@freescale.com>
-> > Singed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> > CC: Chris Ball <cjb@laptop.org>
-> > Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
-> > ---
-> > changes for v2:
-> > 	- change the property to compatible for quirks changes for v3:
-> > 	- fix one compile error
-> > changes for v4:
-> > 	- use hooks to suspend/resume the special platform changes for v5:
-> > 	- add the Acked-by
-> >
-> >  drivers/mmc/host/sdhci-esdhc.h |    9 ++++++++-
-> >  drivers/mmc/host/sdhci-pltfm.c |    3 +++
-> >  include/linux/mmc/sdhci.h      |    2 ++
-> >  3 files changed, 13 insertions(+), 1 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-esdhc.h
-> > b/drivers/mmc/host/sdhci-esdhc.h index b97b2f5..8e00174 100644
-> > --- a/drivers/mmc/host/sdhci-esdhc.h
-> > +++ b/drivers/mmc/host/sdhci-esdhc.h
-> > @@ -1,7 +1,7 @@
-> >  /*
-> >   * Freescale eSDHC controller driver generics for OF and pltfm.
-> >   *
-> > - * Copyright (c) 2007 Freescale Semiconductor, Inc.
-> > + * Copyright (c) 2007,2011 Freescale Semiconductor, Inc.
-> >   * Copyright (c) 2009 MontaVista Software, Inc.
-> >   * Copyright (c) 2010 Pengutronix e.K.
-> >   *   Author: Wolfram Sang <w.sang@pengutronix.de>
-> > @@ -56,6 +56,13 @@ static inline void esdhc_set_clock(struct sdhci_host
-> *host, unsigned int clock)
-> >  	if (clock == 0)
-> >  		goto out;
-> >
-> > +	if (host->quirks2 & SDHCI_QUIRK2_RELAX_FREQ) {
-> > +		if (clock > 20000000)
-> > +			clock -= 5000000;
-> > +		if (clock > 40000000)
-> > +			clock -= 5000000;
-> > +	}
-> > +
-> >  	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
-> >  		pre_div *= 2;
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pltfm.c
-> > b/drivers/mmc/host/sdhci-pltfm.c index 04fa130..c932316 100644
-> > --- a/drivers/mmc/host/sdhci-pltfm.c
-> > +++ b/drivers/mmc/host/sdhci-pltfm.c
-> > @@ -81,6 +81,9 @@ void sdhci_get_of_property(struct platform_device
-> *pdev)
-> >  					"fsl,mpc8536-esdhc"))
-> >  			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-> >
-> > +		if (of_device_is_compatible(np, "fsl,p1010-esdhc"))
-> > +			host->quirks2 |= SDHCI_QUIRK2_RELAX_FREQ;
-> > +
-> >  		clk = of_get_property(np, "clock-frequency", &size);
-> >  		if (clk && size == sizeof(*clk) && *clk)
-> >  			pltfm_host->clock = be32_to_cpup(clk); diff --git
-> > a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h index
-> > e4b6935..f7c1e13 100644
-> > --- a/include/linux/mmc/sdhci.h
-> > +++ b/include/linux/mmc/sdhci.h
-> > @@ -91,6 +91,8 @@ struct sdhci_host {
-> >  	unsigned int quirks2;	/* More deviations from spec. */
-> >
-> >  #define SDHCI_QUIRK2_OWN_CARD_DETECTION			(1<<0)
-> > +/* Controller operates the cards at reduced frequency */
-> > +#define SDHCI_QUIRK2_RELAX_FREQ				(1<<1)
-> >
-> >  	int irq;		/* Device IRQ */
-> >  	void __iomem *ioaddr;	/* Mapped address */
-> 
-> I don't think this should be implemented as a global SDHCI quirk, because
-> I don't think it's ever going to be used on non-ESDHC hardware.
-> Since you're already handling the clock change in an esdhc-only function,
-> can you just use your "fsl,p1010-esdhc" test to set some driver-local
-> flag to use later, instead of involving sdhci.h?
-> 
-> Thanks.  (No need to resend the other patches, I'll take this one
-> separately when it's been reworked.)
-> 
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-
-
+Looks like Caps_1: 0x00008073 means re-tuning mode 3.  Maybe the tuning is
+not being done correctly.
