@@ -1,31 +1,50 @@
-From: Rajendra Nayak <rnayak@ti.com>
-Subject: Re: [PATCH 0/6] mmc: omap_hsmmc: Clean up use/abuse of pdev->id
-Date: Tue, 07 Feb 2012 07:49:28 -0800
-Message-ID: <4F314808.9070009@ti.com>
-References: <1328367090-10402-1-git-send-email-rnayak@ti.com>
- <CANfBPZ-pD55YgneQSyfs1kKB-DUH8g7TQkKO7O6B95Ydfc8cFg@mail.gmail.com>
+From: Jeff Chua <jeff.chua.linux@gmail.com>
+Subject: Re: mmc sdhci mmcblk0: error -110 sending status command, retrying
+Date: Wed, 8 Feb 2012 00:01:01 +0800
+Message-ID: <CAAJw_ZsHwdvXuw+edXUfyGOSMOu5oUw3zX8nUryxJJiiZXzXKQ@mail.gmail.com>
+References: <CAAJw_ZsryUFFFRCKdd9sQ7_38hjpVq37b6hhZDX5=qz8x1B+EQ@mail.gmail.com>
+	<m2pqdr2tyq.fsf@bob.laptop.org>
+	<CAAJw_Zv4Hk_kfc33xsVcdi-0_C6tsf_FD3sUx1JPDX_fZZMzeQ@mail.gmail.com>
+	<4F30E19B.9020503@intel.com>
+	<CAAJw_Zth+QM8OhMEWweBBek8QNW_9CseHSDuB-LCGrvwuqfV2A@mail.gmail.com>
+	<4F310529.4020101@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CANfBPZ-pD55YgneQSyfs1kKB-DUH8g7TQkKO7O6B95Ydfc8cFg@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: "S, Venkatraman" <svenkatr@ti.com>
-Cc: cjb@laptop.org, linaro-dev@lists.linaro.org, balajitk@ti.com, patches@linaro.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-tul01m020-f174.google.com ([209.85.214.174]:49395 "EHLO
+	mail-tul01m020-f174.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751302Ab2BGQBB convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Feb 2012 11:01:01 -0500
+In-Reply-To: <4F310529.4020101@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, Pierre Ossman <pierre@ossman.eu>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, arindam.nath@amd.com, zhangfei.gao@gmail.com
 
-On Tuesday 07 February 2012 02:02 AM, S, Venkatraman wrote:
-> I gave it a spin on Beagleboard-XM (OMAP3630) with root filesystem
-> on the SD card, and checked again on 4430SDP.
+On Tue, Feb 7, 2012 at 7:04 PM, Adrian Hunter <adrian.hunter@intel.com>=
+ wrote:
+> On 07/02/12 12:40, Jeff Chua wrote:
+>> On Tue, Feb 7, 2012 at 4:32 PM, Adrian Hunter <adrian.hunter@intel.c=
+om> wrote:
+>>
+>>> Looks like Caps_1: 0x00008073 means re-tuning mode 3. =A0Maybe the =
+tuning is
+>>> not being done correctly.
+>>
+>> What I can do to test it?
 >
-> Tested-by: Venkatraman S<svenkatr@ti.com>
+> Tuning may be needed for UHS (ultra high speed).
+> Was there a message like:
+>
+> =A0 =A0 =A0 =A0mmc0: new ultra high speed SDHC card
 
-Great, thanks Venkat.
+Nop. Just this one (I'm using a 16GB microSD that's plugged in via a
+SD card adaptor).
+
+mmc0: new SDHC card at address b368
+
+
+Thanks,
+Jeff
