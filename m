@@ -1,68 +1,31 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 3/4] mmc: sdhci: add quirk for keeping card power during suspend
-Date: Tue,  7 Feb 2012 14:48:54 +0200
-Message-ID: <1328618935-25175-4-git-send-email-adrian.hunter@intel.com>
-References: <1328618935-25175-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:53459 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755910Ab2BGMs6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Feb 2012 07:48:58 -0500
-In-Reply-To: <1328618935-25175-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Rajendra Nayak <rnayak@ti.com>
+Subject: Re: [PATCH 0/6] mmc: omap_hsmmc: Clean up use/abuse of pdev->id
+Date: Tue, 07 Feb 2012 07:49:28 -0800
+Message-ID: <4F314808.9070009@ti.com>
+References: <1328367090-10402-1-git-send-email-rnayak@ti.com>
+ <CANfBPZ-pD55YgneQSyfs1kKB-DUH8g7TQkKO7O6B95Ydfc8cFg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CANfBPZ-pD55YgneQSyfs1kKB-DUH8g7TQkKO7O6B95Ydfc8cFg@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: cjb@laptop.org, linaro-dev@lists.linaro.org, balajitk@ti.com, patches@linaro.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
 
-Add quirk SDHCI_QUIRK2_HOST_OFF_CARD_ON to cater for the
-case when the card keeps power during suspend but the
-host controller does not i.e. the card power is not
-controlled by the host controller.  In that case, the
-controller must be fully reset on resume.
+On Tuesday 07 February 2012 02:02 AM, S, Venkatraman wrote:
+> I gave it a spin on Beagleboard-XM (OMAP3630) with root filesystem
+> on the SD card, and checked again on 4430SDP.
+>
+> Tested-by: Venkatraman S<svenkatr@ti.com>
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c  |   13 +++++++++++--
- include/linux/mmc/sdhci.h |    2 ++
- 2 files changed, 13 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 1f5888b..80cc784 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2426,8 +2426,17 @@ int sdhci_resume_host(struct sdhci_host *host)
- 	if (ret)
- 		return ret;
- 
--	sdhci_init(host, (host->mmc->pm_flags & MMC_PM_KEEP_POWER));
--	mmiowb();
-+	if ((host->mmc->pm_flags & MMC_PM_KEEP_POWER) &&
-+	    (host->quirks2 & SDHCI_QUIRK2_HOST_OFF_CARD_ON)) {
-+		/* Card keeps power but host controller does not */
-+		sdhci_init(host, 0);
-+		host->pwr = 0;
-+		host->clock = 0;
-+		sdhci_do_set_ios(host, &host->mmc->ios);
-+	} else {
-+		sdhci_init(host, (host->mmc->pm_flags & MMC_PM_KEEP_POWER));
-+		mmiowb();
-+	}
- 
- 	ret = mmc_resume_host(host->mmc);
- 	sdhci_enable_card_detection(host);
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index c750f85..e9051e1 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -90,6 +90,8 @@ struct sdhci_host {
- 
- 	unsigned int quirks2;	/* More deviations from spec. */
- 
-+#define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
-+
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
- 
--- 
-1.7.6.4
-
+Great, thanks Venkat.
