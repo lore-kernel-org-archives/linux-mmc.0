@@ -1,82 +1,67 @@
-From: "S, Venkatraman" <svenkatr-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH 6/6] mmc: omap_hsmmc: Don't expect MMC1 to always have
-	vmmc supply
-Date: Wed, 8 Feb 2012 00:04:26 +0530
-Message-ID: <CANfBPZ-jcgQM68NW=eHkhv_ny+4_2woNxnDtiAKw8OBRdnecqg@mail.gmail.com>
-References: <1328367090-10402-1-git-send-email-rnayak@ti.com>
-	<1328367090-10402-7-git-send-email-rnayak@ti.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: mmc sdhci mmcblk0: error -110 sending status command, retrying
+Date: Wed, 08 Feb 2012 08:45:13 +0900
+Message-ID: <4F31B789.9020509@samsung.com>
+References: <CAAJw_ZsryUFFFRCKdd9sQ7_38hjpVq37b6hhZDX5=qz8x1B+EQ@mail.gmail.com>
+ <m2pqdr2tyq.fsf@bob.laptop.org>
+ <CAAJw_Zv4Hk_kfc33xsVcdi-0_C6tsf_FD3sUx1JPDX_fZZMzeQ@mail.gmail.com>
+ <4F30E19B.9020503@intel.com>
+ <CAAJw_Zth+QM8OhMEWweBBek8QNW_9CseHSDuB-LCGrvwuqfV2A@mail.gmail.com>
+ <4F310529.4020101@intel.com>
+ <CAAJw_ZsHwdvXuw+edXUfyGOSMOu5oUw3zX8nUryxJJiiZXzXKQ@mail.gmail.com>
+ <CAAJw_Zup7Wg7FO95Z63e_sniu21gyzdCjcBNgsS0aw6MguDwLw@mail.gmail.com>
+ <CAAJw_Zv6HkLLqEzNKRCfQ7EbMNEVe_hzbW+mHOnDAWLidOhMBQ@mail.gmail.com>
+ <CAAJw_Zs7aET=vdy033bzuHwW==uS8AW78NSvD2L_hjU+Mzp-_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <1328367090-10402-7-git-send-email-rnayak-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:45744 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755861Ab2BGXpZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2012 18:45:25 -0500
+In-reply-to: <CAAJw_Zs7aET=vdy033bzuHwW==uS8AW78NSvD2L_hjU+Mzp-_w@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jeff Chua <jeff.chua.linux@gmail.com>
+Cc: Philip Rakity <prakity@marvell.com>, Chris Ball <cjb@laptop.org>, Pierre Ossman <pierre@ossman.eu>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, arindam.nath@amd.com, zhangfei.gao@gmail.com
 
-On Sat, Feb 4, 2012 at 8:21 PM, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org> wrote:
-> MMC1 is not the only instance that can be used/wired for SD.
-> So remove this assumption from the driver.
->
-> Signed-off-by: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
-> ---
-> =A0drivers/mmc/host/omap_hsmmc.c | =A0 14 --------------
-> =A01 files changed, 0 insertions(+), 14 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 17e264b..97d3065 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -300,7 +300,6 @@ static int omap_hsmmc_set_power(struct device *dev, i=
-nt slot, int power_on,
-> =A0static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
-> =A0{
-> =A0 =A0 =A0 =A0struct regulator *reg;
-> - =A0 =A0 =A0 int ret =3D 0;
-> =A0 =A0 =A0 =A0int ocr_value =3D 0;
->
-> =A0 =A0 =A0 =A0mmc_slot(host).set_power =3D omap_hsmmc_set_power;
-> @@ -308,15 +307,6 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host=
- *host)
-> =A0 =A0 =A0 =A0reg =3D regulator_get(host->dev, "vmmc");
-> =A0 =A0 =A0 =A0if (IS_ERR(reg)) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_dbg(host->dev, "vmmc regulator missing=
-\n");
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 * HACK: until fixed.c regulator is usable,
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 * we don't require a main regulator
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 * for MMC2 or MMC3
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->id =3D=3D OMAP_MMC1_DEVID) {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D PTR_ERR(reg);
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> =A0 =A0 =A0 =A0} else {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->vcc =3D reg;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ocr_value =3D mmc_regulator_get_ocrmask(re=
-g);
-> @@ -358,10 +348,6 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host=
- *host)
-> =A0 =A0 =A0 =A0}
->
-> =A0 =A0 =A0 =A0return 0;
-> -
-> -err:
-> - =A0 =A0 =A0 mmc_slot(host).set_power =3D NULL;
-> - =A0 =A0 =A0 return ret;
-> =A0}
->
-> =A0static void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
+On 02/08/2012 03:33 AM, Jeff Chua wrote:
+
+> On Wed, Feb 8, 2012 at 12:07 AM, Jeff Chua <jeff.chua.linux@gmail.com> wrote:
+> 
+> Help! I was trying Linux-3.0 on the SD and formatted it and now the SD
+> is dead! How can I recover it?
+> 
+> # with the SD plugged into to a USD reader ...
+> 
+> Initializing USB Mass Storage driver...
+> scsi21 : usb-storage 2-1.2:1.0
+> usbcore: registered new interface driver usb-storage
+> USB Mass Storage support registered.
+> scsi 21:0:0:0: Direct-Access              USB Reader       0001 PQ: 0
+> ANSI: 0 CCS
+> sd 21:0:0:0: Attached scsi generic sg1 type 0
+> sd 21:0:0:0: [sdb] Attached SCSI removable disk
+> 
+> #  fdisk /dev/sdb
+> fdisk: unable to open /dev/sdb: No medium found
+> 
+
+Hi Jeff.
+i saw your debug message..i just guess that relate to driver strength select.
+
+Best Regards,
+Jaehoon Chung
+
+> 
+> 
+> Thanks,
+> Jeff
 > --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-Almost all usage of the id field is gone, except for a trivial debug print.
-Would be prudent to get rid of it entirely from struct omap_hsmmc_host.
+
