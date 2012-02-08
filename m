@@ -1,70 +1,45 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: Regarding mmc: queue: let host controllers specify maximum discard
- timeout
-Date: Wed, 08 Feb 2012 09:52:53 +0200
-Message-ID: <4F3229D5.8010906@intel.com>
-References: <CAMKhXhmHvdxsQjm1UzQtqzcPn_mGByW4eJ7XBCBYH63CpPd8pw@mail.gmail.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH v6] ESDHC: Workaround for data crc error on p1010rdb
+Date: Wed, 8 Feb 2012 08:00:27 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C01E623@039-SN1MPN1-002.039d.mgd.msft.net>
+References: <1328671848-15659-1-git-send-email-r66093@freescale.com>
+ <m28vke2d6e.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:63714 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754824Ab2BHHwt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Feb 2012 02:52:49 -0500
-In-Reply-To: <CAMKhXhmHvdxsQjm1UzQtqzcPn_mGByW4eJ7XBCBYH63CpPd8pw@mail.gmail.com>
+Received: from va3ehsobe004.messaging.microsoft.com ([216.32.180.14]:43191
+	"EHLO VA3EHSOBE008.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1754824Ab2BHIAd convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 8 Feb 2012 03:00:33 -0500
+In-Reply-To: <m28vke2d6e.fsf@bob.laptop.org>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shridhar Rasal <shri.rasal@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jain Priyanka-B32167 <B32167@freescale.com>
 
-On 07/02/12 18:33, Shridhar Rasal wrote:
-> I was verifying/testing *make_ext4fs* command on android with wipe option.    
-> */_
-> _/*
-> $] make_ext4fs -w <device-path>
+> > diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> > index c750f85..2418c91 100644
+> > --- a/include/linux/mmc/sdhci.h
+> > +++ b/include/linux/mmc/sdhci.h
+> > @@ -90,6 +90,9 @@ struct sdhci_host {
+> >
+> >  	unsigned int quirks2;	/* More deviations from spec. */
+> >
+> > +/* Controller operates the cards at reduced frequency */
+> > +#define SDHCI_QUIRK2_RELAX_FREQ				(1<<0)
+> > +
+> >  	int irq;		/* Device IRQ */
+> >  	void __iomem *ioaddr;	/* Mapped address */
 > 
-> This is taking long time (2 hrs) with Kernel 3.1 code compared to Kernel
-> 2.39 (1 min)
-> 
-> With more debugging, found that  patch [mmc: queue: let host controllers
-> specify maximum discard timeout] is culprit.
-> 
-> In my case following code is executed and [max_discard] always set to
-> [card->pref_erase] which is always 4096 and set far less than set in through
-> K2.39.
-> 
-> */+	if (mmc_card_mmc(card) && !(card->ext_csd.erase_group_def & 1))
-> +		return card->pref_erase;/*
-> 
-> *I have verified by, hard coding [max_discard] to [UINT_MAX], it take around
-> same time as K2.39.*
-> 
-> 1. Is there any other patch required in controller apart from this.
-> 2. Why are we returning [card->pref_erase] above, can we use some other
-> bigger/SpecFollowed/preferred value?
-> 3. Any other work around?
+> This looks identical to the previous patch version to me?  You're still
+> defining a new quirk in include/linux/mmc/sdhci.h, which is what I don't
+> want you to do for a driver-local quirk.
 
-One possibility is to enable high-capacity erase size.  There is a patch I
-sent very recently that allows the driver to enable it:
+Thank, Chris.
+I understand you, and will send the new version patch according to your suggest.
 
-	http://permalink.gmane.org/gmane.linux.kernel.mmc/12691
+Jerry Huang
 
-Then you also need to set the capability flag e.g. this is for Medfield eMMC:
-
-	http://permalink.gmane.org/gmane.linux.kernel.mmc/12692
-
-If you try that please enable the following debugging message to see what
-the calculation produces:
-
-    pr_debug("%s: calculated max. discard sectors %u for timeout %u ms\n",
-		 mmc_hostname(host), max_discard, host->max_discard_to);
-
-Another alternative is to add a quirk to sdhci.c to set max_discard_to to
-zero e.g. in sdhci_add_host()
-
-	mmc->max_discard_to = (1 << 27) / host->timeout_clk;
-+	if (host->quirks2 & SDHCI_QUIRK2_NO_MAX_DISCARD_TO)
-		mmc->max_discard_to;
-
-Then you would need to define the quirk and set it for your host controller.
