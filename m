@@ -1,88 +1,112 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH v3 2/2]  mmc: sdhci-s3c: add platform data for the
- second capability
-Date: Wed, 8 Feb 2012 03:31:57 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C01E2A7@039-SN1MPN1-002.039d.mgd.msft.net>
-References: <4F2F86DA.6030106@samsung.com> <m239ao5hve.fsf@bob.laptop.org>
+From: <r66093@freescale.com>
+Subject: [PATCH v6] ESDHC: Workaround for data crc error on p1010rdb
+Date: Wed, 8 Feb 2012 11:30:48 +0800
+Message-ID: <1328671848-15659-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <m239ao5hve.fsf@bob.laptop.org>
-Content-Language: en-US
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, 'kgene kim' <kgene.kim@samsung.com>, Girish K S <girish.shivananjappa@linaro.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from am1ehsobe005.messaging.microsoft.com ([213.199.154.208]:26997
+	"EHLO AM1EHSOBE001.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753228Ab2BHDdF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2012 22:33:05 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Jerry Huang <Chang-Ming.Huang@freescale.com>, Priyanka Jain <Priyanka.Jain@freescale.com>, Chris Ball <cjb@laptop.org>
 
-Hi, Chris,
-I have reworked it and send it to the maillist, please review it.
+From: Jerry Huang <Chang-Ming.Huang@freescale.com>
+
+SD card read was failing (data crc error)on some cards at
+maximum possible frequency on P1010(CCB frequency set to 400MHz).
+Some clock deviations are also observed at this frequency.
+Hence reduced the mmc clock freq.
+
+Signed-off-by: Priyanka Jain <Priyanka.Jain@freescale.com>
+Singed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+CC: Chris Ball <cjb@laptop.org>
+Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+---
+changes for v2:
+        - change the property to compatible for quirks
+changes for v3:
+        - fix one compile error
+changes for v4:
+        - use hooks to suspend/resume the special platform
+changes for v5:
+        - add the Acked-by
+changes for v6:
+	- move the workaround codes to special platform from header file
+
+ drivers/mmc/host/sdhci-of-esdhc.c |   18 +++++++++++++++++-
+ drivers/mmc/host/sdhci-pltfm.c    |    3 +++
+ include/linux/mmc/sdhci.h         |    3 +++
+ 3 files changed, 23 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 2ef52f4..a79e6e8 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -114,6 +114,22 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
+ 	return pltfm_host->clock / 256 / 16;
+ }
+ 
++static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	if (clock == 0) {
++		host->clock = clock;
++		return;
++	}
++
++	if (host->quirks2 & SDHCI_QUIRK2_RELAX_FREQ) {
++		if (clock > 20000000)
++			clock -= 5000000;
++		if (clock > 40000000)
++			clock -= 5000000;
++	}
++	esdhc_set_clock(host, clock);
++}
++
+ #ifdef CONFIG_PM
+ static u32 esdhc_proctl;
+ static void esdhc_of_suspend(struct sdhci_host *host)
+@@ -135,7 +151,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.write_l = sdhci_be32bs_writel,
+ 	.write_w = esdhc_writew,
+ 	.write_b = esdhc_writeb,
+-	.set_clock = esdhc_set_clock,
++	.set_clock = esdhc_of_set_clock,
+ 	.enable_dma = esdhc_of_enable_dma,
+ 	.get_max_clock = esdhc_of_get_max_clock,
+ 	.get_min_clock = esdhc_of_get_min_clock,
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index c5c2a48..0705838 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -79,6 +79,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
+ 		    of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
+ 			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+ 
++		if (of_device_is_compatible(np, "fsl,p1010-esdhc"))
++			host->quirks2 |= SDHCI_QUIRK2_RELAX_FREQ;
++
+ 		clk = of_get_property(np, "clock-frequency", &size);
+ 		if (clk && size == sizeof(*clk) && *clk)
+ 			pltfm_host->clock = be32_to_cpup(clk);
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index c750f85..2418c91 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -90,6 +90,9 @@ struct sdhci_host {
+ 
+ 	unsigned int quirks2;	/* More deviations from spec. */
+ 
++/* Controller operates the cards at reduced frequency */
++#define SDHCI_QUIRK2_RELAX_FREQ				(1<<0)
++
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
+ 
+-- 
+1.7.5.4
 
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Chris Ball
-> Sent: Monday, February 06, 2012 7:20 PM
-> To: Jaehoon Chung
-> Cc: linux-mmc; linux-samsung-soc@vger.kernel.org; Kyungmin Park; 'kgene
-> kim'; Girish K S
-> Subject: Re: [PATCH v3 2/2] mmc: sdhci-s3c: add platform data for the
-> second capability
-> 
-> Hi,
-> 
-> On Mon, Feb 06 2012, Jaehoon Chung wrote:
-> > This patch is added host_caps2 in sdhci-s3c.c It's necessary that use
-> > the second capabilities.
-> > And removed the duplicated host_caps.
-> >
-> > Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> > ---
-> > Changelog v3:
-> > 	- based-on latest mmc-next tree
-> > Changelog v2:
-> > 	- remove the duplicated host_caps.
-> >
-> >  drivers/mmc/host/sdhci-s3c.c |    6 +++---
-> >  1 files changed, 3 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-s3c.c
-> > b/drivers/mmc/host/sdhci-s3c.c index d065e37..46b9782 100644
-> > --- a/drivers/mmc/host/sdhci-s3c.c
-> > +++ b/drivers/mmc/host/sdhci-s3c.c
-> > @@ -521,9 +521,6 @@ static int __devinit sdhci_s3c_probe(struct
-> platform_device *pdev)
-> >  	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
-> >  		host->mmc->caps = MMC_CAP_NONREMOVABLE;
-> >
-> > -	if (pdata->host_caps)
-> > -		host->mmc->caps |= pdata->host_caps;
-> > -
-> >  	if (pdata->pm_caps)
-> >  		host->mmc->pm_caps |= pdata->pm_caps;
-> >
-> > @@ -547,6 +544,9 @@ static int __devinit sdhci_s3c_probe(struct
-> platform_device *pdev)
-> >  	if (pdata->host_caps)
-> >  		host->mmc->caps |= pdata->host_caps;
-> >
-> > +	if (pdata->host_caps2)
-> > +		host->mmc->caps2 |= pdata->host_caps2;
-> > +
-> >  	ret = sdhci_add_host(host);
-> >  	if (ret) {
-> >  		dev_err(dev, "sdhci_add_host() failed\n");
-> 
-> In case you'd rather merge both of these via the samsung-soc tree:
-> 
-> Acked-by: Chris Ball <cjb@laptop.org>
-> 
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-> One Laptop Per Child
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
