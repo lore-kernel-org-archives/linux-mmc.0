@@ -1,124 +1,81 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v6] ESDHC: Workaround for data crc error on p1010rdb
-Date: Tue, 07 Feb 2012 22:53:45 -0500
-Message-ID: <m28vke2d6e.fsf@bob.laptop.org>
-References: <1328671848-15659-1-git-send-email-r66093@freescale.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: core: add the debug message for SET_BLOCK_COUNT
+Date: Wed, 08 Feb 2012 16:40:14 +0900
+Message-ID: <4F3226DE.6070208@samsung.com>
+References: <4F30B2E6.60406@samsung.com>
+ <CAKYAXd-_eA7BKsxWK0Pgz_8r+DeZ+xKdYscHA6qhMO25kVyocQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51412 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755597Ab2BHDx6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Feb 2012 22:53:58 -0500
-In-Reply-To: <1328671848-15659-1-git-send-email-r66093@freescale.com>
-	(r66093@freescale.com's message of "Wed, 8 Feb 2012 11:30:48 +0800")
+Received: from mailout2.samsung.com ([203.254.224.25]:33612 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752130Ab2BHHk2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Feb 2012 02:40:28 -0500
+Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LZ200EGYDAVFBT0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 08 Feb 2012 16:40:25 +0900 (KST)
+Received: from [165.213.219.108] by mmp1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LZ200LQKDBCXRC0@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 08 Feb 2012 16:40:24 +0900 (KST)
+In-reply-to: <CAKYAXd-_eA7BKsxWK0Pgz_8r+DeZ+xKdYscHA6qhMO25kVyocQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: r66093@freescale.com
-Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Priyanka Jain <Priyanka.Jain@freescale.com>
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi,
+On 02/07/2012 04:27 PM, Namjae Jeon wrote:
 
-On Tue, Feb 07 2012, r66093@freescale.com wrote:
-> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
->
-> SD card read was failing (data crc error)on some cards at
-> maximum possible frequency on P1010(CCB frequency set to 400MHz).
-> Some clock deviations are also observed at this frequency.
-> Hence reduced the mmc clock freq.
->
-> Signed-off-by: Priyanka Jain <Priyanka.Jain@freescale.com>
-> Singed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
-> CC: Chris Ball <cjb@laptop.org>
-> Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
-> ---
-> changes for v2:
->         - change the property to compatible for quirks
-> changes for v3:
->         - fix one compile error
-> changes for v4:
->         - use hooks to suspend/resume the special platform
-> changes for v5:
->         - add the Acked-by
-> changes for v6:
-> 	- move the workaround codes to special platform from header file
->
->  drivers/mmc/host/sdhci-of-esdhc.c |   18 +++++++++++++++++-
->  drivers/mmc/host/sdhci-pltfm.c    |    3 +++
->  include/linux/mmc/sdhci.h         |    3 +++
->  3 files changed, 23 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 2ef52f4..a79e6e8 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -114,6 +114,22 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
->  	return pltfm_host->clock / 256 / 16;
->  }
->  
-> +static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
-> +{
-> +	if (clock == 0) {
-> +		host->clock = clock;
-> +		return;
-> +	}
-> +
-> +	if (host->quirks2 & SDHCI_QUIRK2_RELAX_FREQ) {
-> +		if (clock > 20000000)
-> +			clock -= 5000000;
-> +		if (clock > 40000000)
-> +			clock -= 5000000;
-> +	}
-> +	esdhc_set_clock(host, clock);
-> +}
-> +
->  #ifdef CONFIG_PM
->  static u32 esdhc_proctl;
->  static void esdhc_of_suspend(struct sdhci_host *host)
-> @@ -135,7 +151,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
->  	.write_l = sdhci_be32bs_writel,
->  	.write_w = esdhc_writew,
->  	.write_b = esdhc_writeb,
-> -	.set_clock = esdhc_set_clock,
-> +	.set_clock = esdhc_of_set_clock,
->  	.enable_dma = esdhc_of_enable_dma,
->  	.get_max_clock = esdhc_of_get_max_clock,
->  	.get_min_clock = esdhc_of_get_min_clock,
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index c5c2a48..0705838 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -79,6 +79,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
->  		    of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
->  			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->  
-> +		if (of_device_is_compatible(np, "fsl,p1010-esdhc"))
-> +			host->quirks2 |= SDHCI_QUIRK2_RELAX_FREQ;
-> +
->  		clk = of_get_property(np, "clock-frequency", &size);
->  		if (clk && size == sizeof(*clk) && *clk)
->  			pltfm_host->clock = be32_to_cpup(clk);
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index c750f85..2418c91 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -90,6 +90,9 @@ struct sdhci_host {
->  
->  	unsigned int quirks2;	/* More deviations from spec. */
->  
-> +/* Controller operates the cards at reduced frequency */
-> +#define SDHCI_QUIRK2_RELAX_FREQ				(1<<0)
-> +
->  	int irq;		/* Device IRQ */
->  	void __iomem *ioaddr;	/* Mapped address */
+> 2012/2/7 Jaehoon Chung <jh80.chung@samsung.com>:
+>> This patch is added just debug message.
+>> Almost features need to use the CMD23.
+>> But we didn't see the debug message for sbc.
+>> If sbc's message can see, should be help for debugging.
+>> (We can check whether use the cmd23 or not)
+> Hi. Jaehoon.
+> how about using CONFIG_MMC_DEBUG around this debug message.
 
-This looks identical to the previous patch version to me?  You're still
-defining a new quirk in include/linux/mmc/sdhci.h, which is what I don't
-want you to do for a driver-local quirk.
+Why using?
 
-Thanks,
+> Thanks.
+> 
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>> ---
+>>  drivers/mmc/core/core.c |    6 ++++++
+>>  1 files changed, 6 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 8a19143..6b72eb8 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -188,6 +188,12 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>>        struct scatterlist *sg;
+>>  #endif
+>>
+>> +       if (mrq->sbc) {
+>> +               pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
+>> +                        mmc_hostname(host), mrq->sbc->opcode,
+>> +                        mrq->sbc->arg, mrq->sbc->flags);
+>> +       }
+>> +
+>>        pr_debug("%s: starting CMD%u arg %08x flags %08x\n",
+>>                 mmc_hostname(host), mrq->cmd->opcode,
+>>                 mrq->cmd->arg, mrq->cmd->flags);
+>> --
+>> 1.7.4.1
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+
