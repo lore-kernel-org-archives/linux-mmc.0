@@ -1,89 +1,122 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH] mmc: core: add the debug message for SET_BLOCK_COUNT
-Date: Wed, 8 Feb 2012 18:13:09 +0900
-Message-ID: <CAKYAXd9Oa77v=ys2dfezHfUTHteB=1QgZT2CjVg3nYNf9aPF-A@mail.gmail.com>
-References: <4F30B2E6.60406@samsung.com>
-	<CAKYAXd-_eA7BKsxWK0Pgz_8r+DeZ+xKdYscHA6qhMO25kVyocQ@mail.gmail.com>
-	<4F3226DE.6070208@samsung.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v7] ESDHC: Workaround for data crc error on p1010rdb
+Date: Wed, 08 Feb 2012 10:07:19 -0500
+Message-ID: <m21uq52wk8.fsf@bob.laptop.org>
+References: <1328688356-17510-1-git-send-email-r66093@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:37683 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751067Ab2BHJNK convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Feb 2012 04:13:10 -0500
-Received: by bkcjm19 with SMTP id jm19so244642bkc.19
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Feb 2012 01:13:09 -0800 (PST)
-In-Reply-To: <4F3226DE.6070208@samsung.com>
+Received: from void.printf.net ([89.145.121.20]:49875 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751421Ab2BHPHb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 8 Feb 2012 10:07:31 -0500
+In-Reply-To: <1328688356-17510-1-git-send-email-r66093@freescale.com>
+	(r66093@freescale.com's message of "Wed, 8 Feb 2012 16:05:56 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: r66093@freescale.com
+Cc: linux-mmc@vger.kernel.org, Jerry Huang <Chang-Ming.Huang@freescale.com>, Priyanka Jain <Priyanka.Jain@freescale.com>
 
-2012/2/8 Jaehoon Chung <jh80.chung@samsung.com>:
-> On 02/07/2012 04:27 PM, Namjae Jeon wrote:
+Hi,
+
+On Wed, Feb 08 2012, r66093@freescale.com wrote:
+> From: Jerry Huang <Chang-Ming.Huang@freescale.com>
 >
->> 2012/2/7 Jaehoon Chung <jh80.chung@samsung.com>:
->>> This patch is added just debug message.
->>> Almost features need to use the CMD23.
->>> But we didn't see the debug message for sbc.
->>> If sbc's message can see, should be help for debugging.
->>> (We can check whether use the cmd23 or not)
->> Hi. Jaehoon.
->> how about using CONFIG_MMC_DEBUG around this debug message.
+> SD card read was failing (data crc error)on some cards at
+> maximum possible frequency on P1010(CCB frequency set to 400MHz).
+> Some clock deviations are also observed at this frequency.
+> Hence reduced the mmc clock freq.
 >
-> Why using?
-It is not need because you used pr_debug. I understand.
-Thanks.
+> Signed-off-by: Priyanka Jain <Priyanka.Jain@freescale.com>
+> Singed-off-by: Jerry Huang <Chang-Ming.Huang@freescale.com>
+> CC: Chris Ball <cjb@laptop.org>
+> Acked-by: Anton Vorontsov <cbouatmailru@gmail.com>
+
+Thanks, just one comment below:
+
+> ---
+> changes for v2:
+> 	- change the property to compatible for quirks
+> changes for v3:
+> 	- fix one compile error
+> changes for v4:
+> 	- use hooks to suspend/resume the special platform
+> changes for v5:
+> 	- add the Acked-by
+> changes for v6:
+> 	- move the workaround codes to special platform from header file
+> changes for v7:
+> 	- don't use quirks to check the platform support
 >
->> Thanks.
->>
->>>
->>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->>> ---
->>> =C2=A0drivers/mmc/core/core.c | =C2=A0 =C2=A06 ++++++
->>> =C2=A01 files changed, 6 insertions(+), 0 deletions(-)
->>>
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> index 8a19143..6b72eb8 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -188,6 +188,12 @@ mmc_start_request(struct mmc_host *host, struc=
-t mmc_request *mrq)
->>> =C2=A0 =C2=A0 =C2=A0 =C2=A0struct scatterlist *sg;
->>> =C2=A0#endif
->>>
->>> + =C2=A0 =C2=A0 =C2=A0 if (mrq->sbc) {
->>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 pr_debug("<%s: s=
-tarting CMD%u arg %08x flags %08x>\n",
->>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0mmc_hostname(host), mrq->sbc->opcode,
->>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0mrq->sbc->arg, mrq->sbc->flags);
->>> + =C2=A0 =C2=A0 =C2=A0 }
->>> +
->>> =C2=A0 =C2=A0 =C2=A0 =C2=A0pr_debug("%s: starting CMD%u arg %08x fl=
-ags %08x\n",
->>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mmc_hostnam=
-e(host), mrq->cmd->opcode,
->>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mrq->cmd->a=
-rg, mrq->cmd->flags);
->>> --
->>> 1.7.4.1
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
-" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.=
-html
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
-tml
->>
+>  drivers/mmc/host/sdhci-of-esdhc.c |   19 ++++++++++++++++++-
+>  1 files changed, 18 insertions(+), 1 deletions(-)
+>  drivers/mmc/host/sdhci-of-esdhc.c |   24 ++++++++++++++++++++++--
+>  1 files changed, 22 insertions(+), 2 deletions(-)
 >
->
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 2ef52f4..acac541 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -1,7 +1,7 @@
+>  /*
+>   * Freescale eSDHC controller driver.
+>   *
+> - * Copyright (c) 2007, 2010 Freescale Semiconductor, Inc.
+> + * Copyright (c) 2007, 2010, 2012 Freescale Semiconductor, Inc.
+>   * Copyright (c) 2009 MontaVista Software, Inc.
+>   *
+>   * Authors: Xiaobo Xie <X.Xie@freescale.com>
+> @@ -14,6 +14,7 @@
+>   */
+>  
+>  #include <linux/io.h>
+> +#include <linux/of.h>
+>  #include <linux/delay.h>
+>  #include <linux/module.h>
+>  #include <linux/mmc/host.h>
+> @@ -114,6 +115,25 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
+>  	return pltfm_host->clock / 256 / 16;
+>  }
+>  
+> +static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+> +{
+> +	/* Workaround to reduce the clock frequency for p1010 esdhc */
+> +	if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
+> +		if (clock == 0) {
+> +			host->clock = clock;
+> +			return;
+> +		}
+
+Is this if (clock == 0) necessary?  You'll be calling esdhc_set_clock()
+immediately afterwards, and it performs the same test.
+
+> +
+> +		if (clock > 20000000)
+> +			clock -= 5000000;
+> +		if (clock > 40000000)
+> +			clock -= 5000000;
+> +	}
+> +
+> +	/* Set the clock */
+> +	esdhc_set_clock(host, clock);
+> +}
+> +
+>  #ifdef CONFIG_PM
+>  static u32 esdhc_proctl;
+>  static void esdhc_of_suspend(struct sdhci_host *host)
+> @@ -135,7 +155,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+>  	.write_l = sdhci_be32bs_writel,
+>  	.write_w = esdhc_writew,
+>  	.write_b = esdhc_writeb,
+> -	.set_clock = esdhc_set_clock,
+> +	.set_clock = esdhc_of_set_clock,
+>  	.enable_dma = esdhc_of_enable_dma,
+>  	.get_max_clock = esdhc_of_get_max_clock,
+>  	.get_min_clock = esdhc_of_get_min_clock,
+
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
