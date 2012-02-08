@@ -1,35 +1,88 @@
-From: Jeff Chua <jeff.chua.linux@gmail.com>
-Subject: Re: mmc sdhci mmcblk0: error -110 sending status command, retrying
-Date: Wed, 8 Feb 2012 09:09:43 +0800
-Message-ID: <CAAJw_ZtnWYxGCm5Vm5CQ1GBLc=GU7AGiQKe_-9LJsbMW+YG-GQ@mail.gmail.com>
-References: <CAAJw_ZsryUFFFRCKdd9sQ7_38hjpVq37b6hhZDX5=qz8x1B+EQ@mail.gmail.com>
-	<m2pqdr2tyq.fsf@bob.laptop.org>
-	<CAAJw_Zv4Hk_kfc33xsVcdi-0_C6tsf_FD3sUx1JPDX_fZZMzeQ@mail.gmail.com>
-	<4F30E19B.9020503@intel.com>
-	<CAAJw_Zth+QM8OhMEWweBBek8QNW_9CseHSDuB-LCGrvwuqfV2A@mail.gmail.com>
-	<4F310529.4020101@intel.com>
-	<CAAJw_ZsHwdvXuw+edXUfyGOSMOu5oUw3zX8nUryxJJiiZXzXKQ@mail.gmail.com>
-	<CAAJw_Zup7Wg7FO95Z63e_sniu21gyzdCjcBNgsS0aw6MguDwLw@mail.gmail.com>
-	<CAAJw_Zv6HkLLqEzNKRCfQ7EbMNEVe_hzbW+mHOnDAWLidOhMBQ@mail.gmail.com>
-	<CAAJw_Zs7aET=vdy033bzuHwW==uS8AW78NSvD2L_hjU+Mzp-_w@mail.gmail.com>
-	<4F31B789.9020509@samsung.com>
+From: Huang Changming-R66093 <r66093@freescale.com>
+Subject: RE: [PATCH v3 2/2]  mmc: sdhci-s3c: add platform data for the
+ second capability
+Date: Wed, 8 Feb 2012 03:31:57 +0000
+Message-ID: <110EED8CC96DFC488B7E717A2027A27C01E2A7@039-SN1MPN1-002.039d.mgd.msft.net>
+References: <4F2F86DA.6030106@samsung.com> <m239ao5hve.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-tul01m020-f174.google.com ([209.85.214.174]:37912 "EHLO
-	mail-tul01m020-f174.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754189Ab2BHBJn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2012 20:09:43 -0500
-In-Reply-To: <4F31B789.9020509@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <m239ao5hve.fsf@bob.laptop.org>
+Content-Language: en-US
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, 'kgene kim' <kgene.kim@samsung.com>, Girish K S <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Philip Rakity <prakity@marvell.com>, Chris Ball <cjb@laptop.org>, Pierre Ossman <pierre@ossman.eu>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, arindam.nath@amd.com, zhangfei.gao@gmail.com
 
-On Wed, Feb 8, 2012 at 7:45 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 02/08/2012 03:33 AM, Jeff Chua wrote:
+Hi, Chris,
+I have reworked it and send it to the maillist, please review it.
 
-I tried a Class6 8GB and after a few inserts, it could read without
-errors. The Class10 seems to be more sensitive to speed.
 
-Jeff
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Chris Ball
+> Sent: Monday, February 06, 2012 7:20 PM
+> To: Jaehoon Chung
+> Cc: linux-mmc; linux-samsung-soc@vger.kernel.org; Kyungmin Park; 'kgene
+> kim'; Girish K S
+> Subject: Re: [PATCH v3 2/2] mmc: sdhci-s3c: add platform data for the
+> second capability
+> 
+> Hi,
+> 
+> On Mon, Feb 06 2012, Jaehoon Chung wrote:
+> > This patch is added host_caps2 in sdhci-s3c.c It's necessary that use
+> > the second capabilities.
+> > And removed the duplicated host_caps.
+> >
+> > Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> > ---
+> > Changelog v3:
+> > 	- based-on latest mmc-next tree
+> > Changelog v2:
+> > 	- remove the duplicated host_caps.
+> >
+> >  drivers/mmc/host/sdhci-s3c.c |    6 +++---
+> >  1 files changed, 3 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-s3c.c
+> > b/drivers/mmc/host/sdhci-s3c.c index d065e37..46b9782 100644
+> > --- a/drivers/mmc/host/sdhci-s3c.c
+> > +++ b/drivers/mmc/host/sdhci-s3c.c
+> > @@ -521,9 +521,6 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
+> >  		host->mmc->caps = MMC_CAP_NONREMOVABLE;
+> >
+> > -	if (pdata->host_caps)
+> > -		host->mmc->caps |= pdata->host_caps;
+> > -
+> >  	if (pdata->pm_caps)
+> >  		host->mmc->pm_caps |= pdata->pm_caps;
+> >
+> > @@ -547,6 +544,9 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  	if (pdata->host_caps)
+> >  		host->mmc->caps |= pdata->host_caps;
+> >
+> > +	if (pdata->host_caps2)
+> > +		host->mmc->caps2 |= pdata->host_caps2;
+> > +
+> >  	ret = sdhci_add_host(host);
+> >  	if (ret) {
+> >  		dev_err(dev, "sdhci_add_host() failed\n");
+> 
+> In case you'd rather merge both of these via the samsung-soc tree:
+> 
+> Acked-by: Chris Ball <cjb@laptop.org>
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
