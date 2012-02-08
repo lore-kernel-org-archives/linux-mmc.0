@@ -1,53 +1,48 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: mmc sdhci mmcblk0: error -110 sending status command, retrying
-Date: Wed, 8 Feb 2012 11:09:26 -0800
-Message-ID: <15D4F59C-7AFA-456E-8A5F-9E11EE9B9717@marvell.com>
-References: <CAAJw_ZsryUFFFRCKdd9sQ7_38hjpVq37b6hhZDX5=qz8x1B+EQ@mail.gmail.com>
- <m2pqdr2tyq.fsf@bob.laptop.org>
- <CAAJw_Zv4Hk_kfc33xsVcdi-0_C6tsf_FD3sUx1JPDX_fZZMzeQ@mail.gmail.com>
- <4F30E19B.9020503@intel.com>
- <CAAJw_Zth+QM8OhMEWweBBek8QNW_9CseHSDuB-LCGrvwuqfV2A@mail.gmail.com>
- <4F310529.4020101@intel.com>
- <CAAJw_ZsHwdvXuw+edXUfyGOSMOu5oUw3zX8nUryxJJiiZXzXKQ@mail.gmail.com>
- <CAAJw_Zup7Wg7FO95Z63e_sniu21gyzdCjcBNgsS0aw6MguDwLw@mail.gmail.com>
- <CAAJw_Zv6HkLLqEzNKRCfQ7EbMNEVe_hzbW+mHOnDAWLidOhMBQ@mail.gmail.com>
- <CAAJw_Zs7aET=vdy033bzuHwW==uS8AW78NSvD2L_hjU+Mzp-_w@mail.gmail.com>
- <4F31B789.9020509@samsung.com>
- <CAAJw_ZtnWYxGCm5Vm5CQ1GBLc=GU7AGiQKe_-9LJsbMW+YG-GQ@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 1/4] mmc: core: add high-capacity erase size capability flag
+Date: Wed, 8 Feb 2012 23:38:47 +0100
+Message-ID: <CACRpkdZPQwO19y-JxY86QQtUri-1uxUHX5V1gkgfGDtNZSXaBQ@mail.gmail.com>
+References: <1328618935-25175-1-git-send-email-adrian.hunter@intel.com>
+	<1328618935-25175-2-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:55108 "EHLO
-	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751621Ab2BHTJv convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Feb 2012 14:09:51 -0500
-In-Reply-To: <CAAJw_ZtnWYxGCm5Vm5CQ1GBLc=GU7AGiQKe_-9LJsbMW+YG-GQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:44455 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751098Ab2BHWis convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Feb 2012 17:38:48 -0500
+Received: by yenm8 with SMTP id m8so570028yen.19
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Feb 2012 14:38:47 -0800 (PST)
+In-Reply-To: <1328618935-25175-2-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jeff Chua <jeff.chua.linux@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Pierre Ossman <pierre@ossman.eu>, lkml <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "arindam.nath@amd.com" <arindam.nath@amd.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
+On Tue, Feb 7, 2012 at 1:48 PM, Adrian Hunter <adrian.hunter@intel.com>=
+ wrote:
 
+> Let drivers specify the use of high-capacity erase size.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+(...)
+> @@ -949,7 +949,8 @@ static int mmc_init_card(struct mmc_host *host, u=
+32 ocr,
+> =A0 =A0 =A0 =A0 * If enhanced_area_en is TRUE, host needs to enable E=
+RASE_GRP_DEF
+> =A0 =A0 =A0 =A0 * bit. =A0This bit will be lost every time after a re=
+set or power off.
+> =A0 =A0 =A0 =A0 */
+> - =A0 =A0 =A0 if (card->ext_csd.enhanced_area_en) {
+> + =A0 =A0 =A0 if (card->ext_csd.enhanced_area_en ||
+> + =A0 =A0 =A0 =A0 =A0 (card->ext_csd.rev >=3D 3 && (host->caps2 & MMC=
+_CAP2_HC_ERASE_SZ))) {
 
-Jeff,
+It looks like there is a bug fix hidden inside this patch, is it not?
+The comparison for card->ext_csd.rev >=3D 3 was not there before,
+and looks like it's fixing something and should go into stable even,
+is that correct?
 
-I think the sdhci.c clock setting code was changed a while ago.   Maybe revert that mod and see what happens.
-
-The card is a 24MHz which is rather slow so I would be surprised if that was it. 
-The other option is the force enable the High Speed bit in the  controller (used when speed is 25MHz or faster).  Will give the system more time (in theory) to work.  
-
-Philip
-
-On Feb 7, 2012, at 5:09 PM, Jeff Chua wrote:
-
-> On Wed, Feb 8, 2012 at 7:45 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> On 02/08/2012 03:33 AM, Jeff Chua wrote:
-> 
-> I tried a Class6 8GB and after a few inserts, it could read without
-> errors. The Class10 seems to be more sensitive to speed.
-> 
-> Jeff
-
+Yours,
+Linus Walleij
