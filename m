@@ -1,63 +1,79 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: Re: [PATCH] mmc: atmel-mci: save and restore sdioirq when soft reset
- is performed
-Date: Thu, 09 Feb 2012 10:05:51 +0100
-Message-ID: <4F338C6F.9030802@atmel.com>
-References: <1328721759-10124-1-git-send-email-ludovic.desroches@atmel.com> <1328784929-24174-1-git-send-email-ludovic.desroches@atmel.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCH v3 2/2]  mmc: sdhci-s3c: add platform data for the second
+ capability
+Date: Thu, 09 Feb 2012 19:23:10 +0900
+Message-ID: <067b01cce714$d2b71dc0$78255940$%kim@samsung.com>
+References: <4F2F86DA.6030106@samsung.com> <m239ao5hve.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:50261 "EHLO
-	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751268Ab2BIJGE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2012 04:06:04 -0500
-In-Reply-To: <1328784929-24174-1-git-send-email-ludovic.desroches@atmel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <m239ao5hve.fsf@bob.laptop.org>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Girish K S' <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ludovic.desroches@atmel.com, cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 02/09/2012 11:55 AM, ludovic.desroches@atmel.com :
-> From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Chris Ball wrote:
 > 
-> Sometimes a software reset is needed. Then some registers are saved and
-> restored but the interrupt mask register is missing. It causes issues
-> with sdio devices whose interrupts are masked after reset.
+> Hi,
 > 
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Hi,
 
-Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
-
-Chris, can you please queue this patch in a "fixes" branch?
-
-Thanks, best regards,
-
-> Cc: stable@vger.kernel.org
-> ---
->  drivers/mmc/host/atmel-mci.c |    3 +++
->  1 files changed, 3 insertions(+), 0 deletions(-)
+> On Mon, Feb 06 2012, Jaehoon Chung wrote:
+> > This patch is added host_caps2 in sdhci-s3c.c
+> > It's necessary that use the second capabilities.
+> > And removed the duplicated host_caps.
+> >
+> > Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> > Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> > ---
+> > Changelog v3:
+> > 	- based-on latest mmc-next tree
+> > Changelog v2:
+> > 	- remove the duplicated host_caps.
+> >
+> >  drivers/mmc/host/sdhci-s3c.c |    6 +++---
+> >  1 files changed, 3 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> > index d065e37..46b9782 100644
+> > --- a/drivers/mmc/host/sdhci-s3c.c
+> > +++ b/drivers/mmc/host/sdhci-s3c.c
+> > @@ -521,9 +521,6 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
+> >  		host->mmc->caps = MMC_CAP_NONREMOVABLE;
+> >
+> > -	if (pdata->host_caps)
+> > -		host->mmc->caps |= pdata->host_caps;
+> > -
+> >  	if (pdata->pm_caps)
+> >  		host->mmc->pm_caps |= pdata->pm_caps;
+> >
+> > @@ -547,6 +544,9 @@ static int __devinit sdhci_s3c_probe(struct
+> platform_device *pdev)
+> >  	if (pdata->host_caps)
+> >  		host->mmc->caps |= pdata->host_caps;
+> >
+> > +	if (pdata->host_caps2)
+> > +		host->mmc->caps2 |= pdata->host_caps2;
+> > +
+> >  	ret = sdhci_add_host(host);
+> >  	if (ret) {
+> >  		dev_err(dev, "sdhci_add_host() failed\n");
 > 
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 09ac13b..dfa5dd9 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -965,11 +965,14 @@ static void atmci_start_request(struct atmel_mci *host,
->  	host->data_status = 0;
->  
->  	if (host->need_reset) {
-> +		iflags = atmci_readl(host, ATMCI_IMR);
-> +		iflags &= (ATMCI_SDIOIRQA | ATMCI_SDIOIRQB);
->  		atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
->  		atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIEN);
->  		atmci_writel(host, ATMCI_MR, host->mode_reg);
->  		if (host->caps.has_cfg_reg)
->  			atmci_writel(host, ATMCI_CFG, host->cfg_reg);
-> +		atmci_writel(host, ATMCI_IER, iflags);
->  		host->need_reset = false;
->  	}
->  	atmci_writel(host, ATMCI_SDCR, slot->sdc_reg);
+> In case you'd rather merge both of these via the samsung-soc tree:
+> 
+> Acked-by: Chris Ball <cjb@laptop.org>
+> 
+OK, will apply this series with Chris' ack in samsung tree.
 
+Thanks.
 
--- 
-Nicolas Ferre
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
