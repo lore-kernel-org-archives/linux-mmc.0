@@ -1,408 +1,45 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Fix PIO mode with support of highmem
-Date: Thu, 09 Feb 2012 14:34:51 +0900
-Message-ID: <4F335AFB.20903@samsung.com>
-References: <000301cce4a4$f917d580$eb478080$%jun@samsung.com>
- <4F3330C3.4070409@samsung.com>
- <000601cce6df$a310bb60$e9323220$%jun@samsung.com>
- <000801cce6ea$e9340ce0$bb9c26a0$%jun@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 1/4] mmc: core: add high-capacity erase size capability
+ flag
+Date: Thu, 09 Feb 2012 09:02:39 +0200
+Message-ID: <4F336F8F.9080809@intel.com>
+References: <1328618935-25175-1-git-send-email-adrian.hunter@intel.com> <1328618935-25175-2-git-send-email-adrian.hunter@intel.com> <CACRpkdZPQwO19y-JxY86QQtUri-1uxUHX5V1gkgfGDtNZSXaBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:23339 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751516Ab2BIFey (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2012 00:34:54 -0500
-Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LZ4000DC25Y74E0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 09 Feb 2012 14:34:53 +0900 (KST)
-Received: from [165.213.219.108] by mmp2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LZ4006AV264F110@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 09 Feb 2012 14:34:52 +0900 (KST)
-In-reply-to: <000801cce6ea$e9340ce0$bb9c26a0$%jun@samsung.com>
+Received: from mga14.intel.com ([143.182.124.37]:43928 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751208Ab2BIHCf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Feb 2012 02:02:35 -0500
+In-Reply-To: <CACRpkdZPQwO19y-JxY86QQtUri-1uxUHX5V1gkgfGDtNZSXaBQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On 02/09/2012 02:23 PM, Seungwon Jeon wrote:
-
-> I found the following file was added recently.
-> "drivers/mmc/host/dw_mmc-pltfm.c"
-> I feel sorry about that, I didn't catch it.
-> This file needs to include "linux/scatterlist.h" with current patch
-> (which is related with "struct sg_mapping_iter"). I'll fix it.
-
-Right..
-If you will resend the patch after fixed, i will test with your patch.
-Maybe looks good to me...
-
-Best Regards,
-Jaehoon Chung
-
+On 09/02/12 00:38, Linus Walleij wrote:
+> On Tue, Feb 7, 2012 at 1:48 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 > 
-> Best regards,
-> Seungwon Jeon
-> 
-> Seungwon Jeon wrote:
->> Hi Jaehoon.
->> Oops, I'll check it.
+>> Let drivers specify the use of high-capacity erase size.
 >>
->> Thanks.
->>
->> Jaehoon Chung wrote:
->>> Hi Seungwon
->>>
->>> This patch didn't build..plz check.
->>>
->>> Best Regards,
->>> Jaehoon Chung
->>>
->>> On 02/06/2012 04:57 PM, Seungwon Jeon wrote:
->>>
->>>> Current PIO mode makes a kernel crash with CONFIG_HIGHMEM.
->>>> High memory pages have a NULL from sg_virt(sg).
->>>> This patch fixes the following problem.
->>>>
->>>> Unable to handle kernel NULL pointer dereference at virtual address 00000000
->>>> pgd = c0004000
->>>> [00000000] *pgd=00000000
->>>> Internal error: Oops: 817 [#1] PREEMPT SMP
->>>> Modules linked in:
->>>> CPU: 0    Not tainted  (3.0.15-01423-gdbf465f #589)
->>>> PC is at dw_mci_pull_data32+0x4c/0x9c
->>>> LR is at dw_mci_read_data_pio+0x54/0x1f0
->>>> pc : [<c0358824>]    lr : [<c035988c>]    psr: 20000193
->>>> sp : c0619d48  ip : c0619d70  fp : c0619d6c
->>>> r10: 00000000  r9 : 00000002  r8 : 00001000
->>>> r7 : 00000200  r6 : 00000000  r5 : e1dd3100  r4 : 00000000
->>>> r3 : 65622023  r2 : 0000007f  r1 : eeb96000  r0 : e1dd3100
->>>> Flags: nzCv  IRQs off  FIQs on  Mode SVC_32  ISA ARM  Segment
->>>> kernel
->>>> Control: 10c5387d  Table: 61e2004a  DAC: 00000015
->>>> Process swapper (pid: 0, stack limit = 0xc06182f0)
->>>> Stack: (0xc0619d48 to 0xc061a000)
->>>> 9d40:                   e1dd3100 e1a4f000 00000000 e1dd3100 e1a4f000 00000200
->>>> 9d60: c0619da4 c0619d70 c035988c c03587e4 c0619d9c e18158f4 e1dd3100 e1dd3100
->>>> 9d80: 00000020 00000000 00000000 00000020 c06e8a84 00000000 c0619e04 c0619da8
->>>> 9da0: c0359b24 c0359844 e18158f4 e1dd3164 e1dd3168 e1dd3150 3d02fc79 e1dd3154
->>>> 9dc0: e1dd3178 00000000 00000020 00000000 e1dd3150 00000000 c10dd7e8 e1a84900
->>>> 9de0: c061e7cc 00000000 00000000 0000008d c06e8a84 c061e780 c0619e4c c0619e08
->>>> 9e00: c00c4738 c0359a34 3d02fc79 00000000 c0619e4c c05a1698 c05a1670 c05a165c
->>>> 9e20: c04de8b0 c061e780 c061e7cc e1a84900 ffffed68 0000008d c0618000 00000000
->>>> 9e40: c0619e6c c0619e50 c00c48b4 c00c46c8 c061e780 c00423ac c061e7cc ffffed68
->>>> 9e60: c0619e8c c0619e70 c00c7358 c00c487c 0000008d ffffee38 c0618000 ffffed68
->>>> 9e80: c0619ea4 c0619e90 c00c4258 c00c72b0 c00423ac ffffee38 c0619ecc c0619ea8
->>>> 9ea0: c004241c c00c4234 ffffffff f8810000 0000006d 00000002 00000001 7fffffff
->>>> 9ec0: c0619f44 c0619ed0 c0048bc0 c00423c4 220ae7a9 00000000 386f0d30 0005d3a4
->>>> 9ee0: c00423ac c10dd0b8 c06f2cd8 c0618000 c0594778 c003a674 7fffffff c0619f44
->>>> 9f00: 386f0d30 c0619f18 c00a6f94 c005be3c 80000013 ffffffff 386f0d30 0005d3a4
->>>> 9f20: 386f0d30 0005d2d1 c10dd0a8 c10dd0b8 c06f2cd8 c0618000 c0619f74 c0619f48
->>>> 9f40: c0345858 c005be00 c00a2440 c0618000 c0618000 c00410d8 c06c1944 c00410fc
->>>> 9f60: c0594778 c003a674 c0619f9c c0619f78 c004a7e8 c03457b4 c0618000 c06c18f8
->>>> 9f80: 00000000 c0039c70 c06c18d4 c003a674 c0619fb4 c0619fa0 c04ceafc c004a714
->>>> 9fa0: c06287b4 c06c18f8 c0619ff4 c0619fb8 c0008b68 c04cea68 c0008578 00000000
->>>> 9fc0: 00000000 c003a674 00000000 10c5387d c0628658 c003aa78 c062f1c4 4000406a
->>>> 9fe0: 413fc090 00000000 00000000 c0619ff8 40008044 c0008858 00000000 00000000
->>>> Backtrace:
->>>> [<c03587d8>] (dw_mci_pull_data32+0x0/0x9c) from [<c035988c>] (dw_mci_read_data_pio+0x54/0x1f0)
->>>>  r6:00000200 r5:e1a4f000 r4:e1dd3100
->>>>  [<c0359838>] (dw_mci_read_data_pio+0x0/0x1f0) from [<c0359b24>] (dw_mci_interrupt+0xfc/0x4a4)
->>>> [<c0359a28>] (dw_mci_interrupt+0x0/0x4a4) from [<c00c4738>] (handle_irq_event_percpu+0x7c/0x1b4)
->>>> [<c00c46bc>] (handle_irq_event_percpu+0x0/0x1b4) from [<c00c48b4>] (handle_irq_event+0x44/0x64)
->>>> [<c00c4870>] (handle_irq_event+0x0/0x64) from [<c00c7358>] (handle_fasteoi_irq+0xb4/0x124)
->>>>  r7:ffffed68 r6:c061e7cc r5:c00423ac r4:c061e780
->>>>  [<c00c72a4>] (handle_fasteoi_irq+0x0/0x124) from [<c00c4258>] (generic_handle_irq+0x30/0x38)
->>>>  r7:ffffed68 r6:c0618000 r5:ffffee38 r4:0000008d
->>>>  [<c00c4228>] (generic_handle_irq+0x0/0x38) from [<c004241c>] (asm_do_IRQ+0x64/0xe0)
->>>>  r5:ffffee38 r4:c00423ac
->>>>  [<c00423b8>] (asm_do_IRQ+0x0/0xe0) from [<c0048bc0>] (__irq_svc+0x80/0x14c)
->>>> Exception stack(0xc0619ed0 to 0xc0619f18)
->>>>
->>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->>>> ---
->>>>  drivers/mmc/host/dw_mmc.c  |  143 +++++++++++++++++++++++---------------------
->>>>  include/linux/mmc/dw_mmc.h |    4 +-
->>>>  2 files changed, 77 insertions(+), 70 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>> index dee839e..22aba57 100644
->>>> --- a/drivers/mmc/host/dw_mmc.c
->>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>> @@ -575,8 +575,14 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
->>>>  		host->dir_status = DW_MCI_SEND_STATUS;
->>>>
->>>>  	if (dw_mci_submit_data_dma(host, data)) {
->>>> +		int flags = SG_MITER_ATOMIC;
->>>> +		if (host->data->flags & MMC_DATA_READ)
->>>> +			flags |= SG_MITER_TO_SG;
->>>> +		else
->>>> +			flags |= SG_MITER_FROM_SG;
->>>> +
->>>> +		sg_miter_start(&host->sg_miter, data->sg, data->sg_len, flags);
->>>>  		host->sg = data->sg;
->>>> -		host->pio_offset = 0;
->>>>  		host->part_buf_start = 0;
->>>>  		host->part_buf_count = 0;
->>>>
->>>> @@ -1047,6 +1053,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->>>>  				 * generates a block interrupt, hence setting
->>>>  				 * the scatter-gather pointer to NULL.
->>>>  				 */
->>>> +				sg_miter_stop(&host->sg_miter);
->>>>  				host->sg = NULL;
->>>>  				ctrl = mci_readl(host, CTRL);
->>>>  				ctrl |= SDMMC_CTRL_FIFO_RESET;
->>>> @@ -1386,54 +1393,44 @@ static void dw_mci_pull_data(struct dw_mci *host, void *buf, int cnt)
->>>>
->>>>  static void dw_mci_read_data_pio(struct dw_mci *host)
->>>>  {
->>>> -	struct scatterlist *sg = host->sg;
->>>> -	void *buf = sg_virt(sg);
->>>> -	unsigned int offset = host->pio_offset;
->>>> +	struct sg_mapping_iter *sg_miter = &host->sg_miter;
->>>> +	void *buf;
->>>> +	unsigned int offset;
->>>>  	struct mmc_data	*data = host->data;
->>>>  	int shift = host->data_shift;
->>>>  	u32 status;
->>>>  	unsigned int nbytes = 0, len;
->>>> +	unsigned int remain, fcnt;
->>>>
->>>>  	do {
->>>> -		len = host->part_buf_count +
->>>> -			(SDMMC_GET_FCNT(mci_readl(host, STATUS)) << shift);
->>>> -		if (offset + len <= sg->length) {
->>>> +		if (!sg_miter_next(sg_miter))
->>>> +			goto done;
->>>> +
->>>> +		host->sg = sg_miter->__sg;
->>>> +		buf = sg_miter->addr;
->>>> +		remain = sg_miter->length;
->>>> +		offset = 0;
->>>> +
->>>> +		do {
->>>> +			fcnt = (SDMMC_GET_FCNT(mci_readl(host, STATUS))
->>>> +					<< shift) + host->part_buf_count;
->>>> +			len = min(remain, fcnt);
->>>> +			if (!len)
->>>> +				break;
->>>>  			dw_mci_pull_data(host, (void *)(buf + offset), len);
->>>> -
->>>>  			offset += len;
->>>>  			nbytes += len;
->>>> -
->>>> -			if (offset == sg->length) {
->>>> -				flush_dcache_page(sg_page(sg));
->>>> -				host->sg = sg = sg_next(sg);
->>>> -				if (!sg)
->>>> -					goto done;
->>>> -
->>>> -				offset = 0;
->>>> -				buf = sg_virt(sg);
->>>> -			}
->>>> -		} else {
->>>> -			unsigned int remaining = sg->length - offset;
->>>> -			dw_mci_pull_data(host, (void *)(buf + offset),
->>>> -					 remaining);
->>>> -			nbytes += remaining;
->>>> -
->>>> -			flush_dcache_page(sg_page(sg));
->>>> -			host->sg = sg = sg_next(sg);
->>>> -			if (!sg)
->>>> -				goto done;
->>>> -
->>>> -			offset = len - remaining;
->>>> -			buf = sg_virt(sg);
->>>> -			dw_mci_pull_data(host, buf, offset);
->>>> -			nbytes += offset;
->>>> -		}
->>>> +			remain -= len;
->>>> +		} while (remain);
->>>> +		sg_miter->consumed = offset;
->>>>
->>>>  		status = mci_readl(host, MINTSTS);
->>>>  		mci_writel(host, RINTSTS, SDMMC_INT_RXDR);
->>>>  		if (status & DW_MCI_DATA_ERROR_FLAGS) {
->>>>  			host->data_status = status;
->>>>  			data->bytes_xfered += nbytes;
->>>> +			sg_miter_stop(sg_miter);
->>>> +			host->sg = NULL;
->>>>  			smp_wmb();
->>>>
->>>>  			set_bit(EVENT_DATA_ERROR, &host->pending_events);
->>>> @@ -1442,65 +1439,66 @@ static void dw_mci_read_data_pio(struct dw_mci *host)
->>>>  			return;
->>>>  		}
->>>>  	} while (status & SDMMC_INT_RXDR); /*if the RXDR is ready read again*/
->>>> -	host->pio_offset = offset;
->>>>  	data->bytes_xfered += nbytes;
->>>> +
->>>> +	if (!remain) {
->>>> +		if (!sg_miter_next(sg_miter))
->>>> +			goto done;
->>>> +		sg_miter->consumed = 0;
->>>> +	}
->>>> +	sg_miter_stop(sg_miter);
->>>>  	return;
->>>>
->>>>  done:
->>>>  	data->bytes_xfered += nbytes;
->>>> +	sg_miter_stop(sg_miter);
->>>> +	host->sg = NULL;
->>>>  	smp_wmb();
->>>>  	set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
->>>>  }
->>>>
->>>>  static void dw_mci_write_data_pio(struct dw_mci *host)
->>>>  {
->>>> -	struct scatterlist *sg = host->sg;
->>>> -	void *buf = sg_virt(sg);
->>>> -	unsigned int offset = host->pio_offset;
->>>> +	struct sg_mapping_iter *sg_miter = &host->sg_miter;
->>>> +	void *buf;
->>>> +	unsigned int offset;
->>>>  	struct mmc_data	*data = host->data;
->>>>  	int shift = host->data_shift;
->>>>  	u32 status;
->>>>  	unsigned int nbytes = 0, len;
->>>> +	unsigned int fifo_depth = host->fifo_depth;
->>>> +	unsigned int remain, fcnt;
->>>>
->>>>  	do {
->>>> -		len = ((host->fifo_depth -
->>>> -			SDMMC_GET_FCNT(mci_readl(host, STATUS))) << shift)
->>>> -			- host->part_buf_count;
->>>> -		if (offset + len <= sg->length) {
->>>> +		if (!sg_miter_next(sg_miter))
->>>> +			goto done;
->>>> +
->>>> +		host->sg = sg_miter->__sg;
->>>> +		buf = sg_miter->addr;
->>>> +		remain = sg_miter->length;
->>>> +		offset = 0;
->>>> +
->>>> +		do {
->>>> +			fcnt = ((fifo_depth -
->>>> +				 SDMMC_GET_FCNT(mci_readl(host, STATUS)))
->>>> +					<< shift) - host->part_buf_count;
->>>> +			len = min(remain, fcnt);
->>>> +			if (!len)
->>>> +				break;
->>>>  			host->push_data(host, (void *)(buf + offset), len);
->>>> -
->>>>  			offset += len;
->>>>  			nbytes += len;
->>>> -			if (offset == sg->length) {
->>>> -				host->sg = sg = sg_next(sg);
->>>> -				if (!sg)
->>>> -					goto done;
->>>> -
->>>> -				offset = 0;
->>>> -				buf = sg_virt(sg);
->>>> -			}
->>>> -		} else {
->>>> -			unsigned int remaining = sg->length - offset;
->>>> -
->>>> -			host->push_data(host, (void *)(buf + offset),
->>>> -					remaining);
->>>> -			nbytes += remaining;
->>>> -
->>>> -			host->sg = sg = sg_next(sg);
->>>> -			if (!sg)
->>>> -				goto done;
->>>> -
->>>> -			offset = len - remaining;
->>>> -			buf = sg_virt(sg);
->>>> -			host->push_data(host, (void *)buf, offset);
->>>> -			nbytes += offset;
->>>> -		}
->>>> +			remain -= len;
->>>> +		} while (remain);
->>>> +		sg_miter->consumed = offset;
->>>>
->>>>  		status = mci_readl(host, MINTSTS);
->>>>  		mci_writel(host, RINTSTS, SDMMC_INT_TXDR);
->>>>  		if (status & DW_MCI_DATA_ERROR_FLAGS) {
->>>>  			host->data_status = status;
->>>>  			data->bytes_xfered += nbytes;
->>>> +			sg_miter_stop(sg_miter);
->>>> +			host->sg = NULL;
->>>>
->>>>  			smp_wmb();
->>>>
->>>> @@ -1510,12 +1508,20 @@ static void dw_mci_write_data_pio(struct dw_mci *host)
->>>>  			return;
->>>>  		}
->>>>  	} while (status & SDMMC_INT_TXDR); /* if TXDR write again */
->>>> -	host->pio_offset = offset;
->>>>  	data->bytes_xfered += nbytes;
->>>> +
->>>> +	if (!remain) {
->>>> +		if (!sg_miter_next(sg_miter))
->>>> +			goto done;
->>>> +		sg_miter->consumed = 0;
->>>> +	}
->>>> +	sg_miter_stop(sg_miter);
->>>>  	return;
->>>>
->>>>  done:
->>>>  	data->bytes_xfered += nbytes;
->>>> +	sg_miter_stop(sg_miter);
->>>> +	host->sg = NULL;
->>>>  	smp_wmb();
->>>>  	set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
->>>>  }
->>>> @@ -1718,6 +1724,7 @@ static void dw_mci_work_routine_card(struct work_struct *work)
->>>>  				 * block interrupt, hence setting the
->>>>  				 * scatter-gather pointer to NULL.
->>>>  				 */
->>>> +				sg_miter_stop(&host->sg_miter);
->>>>  				host->sg = NULL;
->>>>
->>>>  				ctrl = mci_readl(host, CTRL);
->>>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
->>>> index b4c031d..64ccd05 100644
->>>> --- a/include/linux/mmc/dw_mmc.h
->>>> +++ b/include/linux/mmc/dw_mmc.h
->>>> @@ -40,7 +40,7 @@ struct mmc_data;
->>>>   * @lock: Spinlock protecting the queue and associated data.
->>>>   * @regs: Pointer to MMIO registers.
->>>>   * @sg: Scatterlist entry currently being processed by PIO code, if any.
->>>> - * @pio_offset: Offset into the current scatterlist entry.
->>>> + * @sg_miter: PIO mapping scatterlist iterator.
->>>>   * @cur_slot: The slot which is currently using the controller.
->>>>   * @mrq: The request currently being processed on @cur_slot,
->>>>   *	or NULL if the controller is idle.
->>>> @@ -117,7 +117,7 @@ struct dw_mci {
->>>>  	void __iomem		*regs;
->>>>
->>>>  	struct scatterlist	*sg;
->>>> -	unsigned int		pio_offset;
->>>> +	struct sg_mapping_iter	sg_miter;
->>>>
->>>>  	struct dw_mci_slot	*cur_slot;
->>>>  	struct mmc_request	*mrq;
->>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> (...)
+>> @@ -949,7 +949,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>>         * If enhanced_area_en is TRUE, host needs to enable ERASE_GRP_DEF
+>>         * bit.  This bit will be lost every time after a reset or power off.
+>>         */
+>> -       if (card->ext_csd.enhanced_area_en) {
+>> +       if (card->ext_csd.enhanced_area_en ||
+>> +           (card->ext_csd.rev >= 3 && (host->caps2 & MMC_CAP2_HC_ERASE_SZ))) {
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> It looks like there is a bug fix hidden inside this patch, is it not?
+> The comparison for card->ext_csd.rev >= 3 was not there before,
+> and looks like it's fixing something and should go into stable even,
+> is that correct?
 
+No because because enhanced areas were added in v4.4 so
+"card->ext_csd.enhanced_area_en" implies "card->ext_csd.rev >= 4"
 
+High-capacity erase size was added in v4.3 so "card->ext_csd.rev >= 3"
+is parenthesised with "(host->caps2 & MMC_CAP2_HC_ERASE_SZ)"
