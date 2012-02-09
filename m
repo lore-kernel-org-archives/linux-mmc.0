@@ -1,36 +1,31 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH v3] mmc: dw_mmc: Add support for pre_req and post_req
-Date: Thu, 9 Feb 2012 10:31:23 +0000
-Message-ID: <CAFbHwiRq+HqRzDPDy9+WWEa3M4NktW911XVx7ByQJD=qoN-jPA@mail.gmail.com>
-References: <000201cce4a4$a5540c20$effc2460$%jun@samsung.com>
-	<4F2F8CC7.3010405@samsung.com>
+From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Subject: Reason for Cmd 9 giving a timeout Error
+Date: Thu, 9 Feb 2012 18:51:53 +0530
+Message-ID: <CANYdXnqjzkCQPYZXR2DgQOvm5g_x3BTp7VgWhwVvuAXqQxVTPQ@mail.gmail.com>
+References: <CANYdXnpypBuAbTM6XdzESvZNfsgoQsqJaQ2NgHHsm7BGZv7fSQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:52401 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757746Ab2BIKbY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2012 05:31:24 -0500
-Received: by pbcun15 with SMTP id un15so1419819pbc.19
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Feb 2012 02:31:23 -0800 (PST)
-In-Reply-To: <4F2F8CC7.3010405@samsung.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:58916 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752030Ab2BINVy convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2012 08:21:54 -0500
+Received: by yhoo21 with SMTP id o21so797352yho.19
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Feb 2012 05:21:53 -0800 (PST)
+In-Reply-To: <CANYdXnpypBuAbTM6XdzESvZNfsgoQsqJaQ2NgHHsm7BGZv7fSQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>
+To: linux-mmc@vger.kernel.org
+Cc: Uma Bali <uma.bali@freehostcell.com>
 
-On Mon, Feb 6, 2012 at 8:18 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Looks good to me..
->
-> Acked-by : Jaehoon Chung <jh80.chung@samsung.com>
->
-> On 02/06/2012 04:55 PM, Seungwon Jeon wrote:
->
->> This patch implements pre_req and post_req in dw_mmc
->> to support asynchronous mmc request.
->>
->> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+Hi ,
+=C2=A0 I was testing the davinci mmc driver. For some reason, during th=
+e
+enumeration sequence, I keep getting the TIMEOUT interrupt while
+sending CMD 9. Any idea on what could be the reason ?
 
-Looks ok to me too.
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+--
+regards,
+Shashidhar Hiremath
