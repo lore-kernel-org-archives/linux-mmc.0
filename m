@@ -1,71 +1,63 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH] mmc: core: Substitute mmc_flush_cash for mmc_cache_ctrl in
- suspend
-Date: Fri, 10 Feb 2012 12:56:35 +0900
-Message-ID: <000101cce7a7$fc0df6b0$f429e410$%jun@samsung.com>
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: [PATCH 0/6] mmc: omap_hsmmc: Clean up use/abuse of pdev->id
+Date: Fri, 10 Feb 2012 18:57:56 +0530
+Message-ID: <CANrkHUbXHrQ=LowgNq9nt+rnrcE-fTqLuOs2+MeCtodv_H-_Cw@mail.gmail.com>
+References: <1328367090-10402-1-git-send-email-rnayak@ti.com>
+	<CANfBPZ-pD55YgneQSyfs1kKB-DUH8g7TQkKO7O6B95Ydfc8cFg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:57713 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754556Ab2BJD4i (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2012 22:56:38 -0500
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LZ500FY5SA8Z4A0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 10 Feb 2012 12:56:36 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp2.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
- 64bit (built Sep  7 2010)) with ESMTPA id <0LZ5008ESSAC4470@mmp2.samsung.com>
- for linux-mmc@vger.kernel.org; Fri, 10 Feb 2012 12:56:36 +0900 (KST)
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <CANfBPZ-pD55YgneQSyfs1kKB-DUH8g7TQkKO7O6B95Ydfc8cFg@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>, Rajendra Nayak <rnayak@ti.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-dev@lists.linaro.org, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, saugata.das@linaro.org, ygardi@codeaurora.org
 
-After the cache is disabled in suspend, enabling cache can be done by
-mmc_init_card in resume. Currently this call path has been changed. In
-case of sleep mode mmc_init_card isn't called. So mmc_cache_ctrl need to
-be replaced with mmc_flush_cache in suspend.
+On Tue, Feb 7, 2012 at 3:32 PM, S, Venkatraman <svenkatr@ti.com> wrote:
+> On Sat, Feb 4, 2012 at 8:21 PM, Rajendra Nayak <rnayak@ti.com> wrote:
+>> This series mainly cleans up all instances of hardcoding's in
+>> the driver based on pdev->id. This is cleanup leading to the
+>> DT adaptation of omap_hsmmc driver.
+>>
+>> Patches are based on 3.3-rc2 and can be found here
+>> git://gitorious.org/omap-pm/linux.git omap_hsmmc_cleanup
+>>
+>> Tested the patches on my omap4 boards (panda and SDP) but
+>> haven't tested yet on omap3/2 since I did'nt have boards
+>> handy. So any testing on any omap3/2 boards is really
+>> appreciated.
 
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
----
- drivers/mmc/core/core.c |    9 +++++++--
- 1 files changed, 7 insertions(+), 2 deletions(-)
+Tested this series on 2430SDP with FS on SD card
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8a19143..70e25d8 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2329,9 +2329,14 @@ EXPORT_SYMBOL(mmc_card_can_sleep);
-  */
- int mmc_flush_cache(struct mmc_card *card)
- {
--	struct mmc_host *host = card->host;
-+	struct mmc_host *host;
- 	int err = 0;
- 
-+	if (!card)
-+		return err;
-+
-+	host = card->host;
-+
- 	if (!(host->caps2 & MMC_CAP2_CACHE_CTRL))
- 		return err;
- 
-@@ -2401,7 +2406,7 @@ int mmc_suspend_host(struct mmc_host *host)
- 	cancel_delayed_work(&host->detect);
- 	mmc_flush_scheduled_work();
- 	if (mmc_try_claim_host(host)) {
--		err = mmc_cache_ctrl(host, 0);
-+		err = mmc_flush_cache(host->card);
- 		mmc_do_release_host(host);
- 	} else {
- 		err = -EBUSY;
--- 
-1.7.0.4
-
-
+>
+> I gave it a spin on Beagleboard-XM (OMAP3630) with root filesystem
+> on the SD card, and checked again on 4430SDP.
+>
+> Tested-by: Venkatraman S <svenkatr@ti.com>
+>
+>>
+>> regards,
+>> Rajendra
+>>
+>> Balaji T K (3):
+>> =A0mmc: omap_hsmmc: use platform_get_resource_byname for tx/rx DMA
+>> =A0 =A0channels
+>> =A0mmc: omap_hsmmc: remove unused .set_sleep function
+>> =A0mmc: omap_hsmmc: Use OMAP_HSMMC_SUPPORTS_DUAL_VOLT flag to remove
+>> =A0 =A0host->id based hardcoding
+>>
+>> Rajendra Nayak (3):
+>> =A0mmc: omap_hsmmc: Get rid of omap_hsmmc_1_set_power function
+>> =A0mmc: omap_hsmmc: Get rid of omap_hsmmc_4_set_power function
+>> =A0mmc: omap_hsmmc: Don't expect MMC1 to always have vmmc supply
+>>
+>> =A0arch/arm/plat-omap/include/plat/mmc.h | =A0 =A02 -
+>> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 | =A0158 +++-------=
+-----------------------
+>> =A02 files changed, 14 insertions(+), 146 deletions(-)
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
