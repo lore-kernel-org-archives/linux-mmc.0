@@ -1,61 +1,71 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 08/10 v3] mmc: tmio_mmc: remove unused sdio_irq_enabled flag
-Date: Thu,  9 Feb 2012 22:57:14 +0100
-Message-ID: <1328824636-10553-9-git-send-email-g.liakhovetski@gmx.de>
-References: <1328824636-10553-1-git-send-email-g.liakhovetski@gmx.de>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH] mmc: core: Substitute mmc_flush_cash for mmc_cache_ctrl in
+ suspend
+Date: Fri, 10 Feb 2012 12:56:35 +0900
+Message-ID: <000101cce7a7$fc0df6b0$f429e410$%jun@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:56975 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932227Ab2BIV5Z (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2012 16:57:25 -0500
-In-Reply-To: <1328824636-10553-1-git-send-email-g.liakhovetski@gmx.de>
+Received: from mailout4.samsung.com ([203.254.224.34]:57713 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754556Ab2BJD4i (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2012 22:56:38 -0500
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LZ500FY5SA8Z4A0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 10 Feb 2012 12:56:36 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
+ 64bit (built Sep  7 2010)) with ESMTPA id <0LZ5008ESSAC4470@mmp2.samsung.com>
+ for linux-mmc@vger.kernel.org; Fri, 10 Feb 2012 12:56:36 +0900 (KST)
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+Cc: 'Chris Ball' <cjb@laptop.org>, saugata.das@linaro.org, ygardi@codeaurora.org
 
-The sdio_irq_enabled member of struct tmio_mmc_host is a left-over from the
-previously removed SDIO IRQ workaround. It is no longer needed and can now
-be removed too.
+After the cache is disabled in suspend, enabling cache can be done by
+mmc_init_card in resume. Currently this call path has been changed. In
+case of sleep mode mmc_init_card isn't called. So mmc_cache_ctrl need to
+be replaced with mmc_flush_cache in suspend.
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/host/tmio_mmc.h     |    1 -
- drivers/mmc/host/tmio_mmc_pio.c |    2 --
- 2 files changed, 0 insertions(+), 3 deletions(-)
+ drivers/mmc/core/core.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index edfcfd7..d857f5c 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -47,7 +47,6 @@ struct tmio_mmc_host {
- 	struct mmc_request      *mrq;
- 	struct mmc_data         *data;
- 	struct mmc_host         *mmc;
--	unsigned int		sdio_irq_enabled;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 8a19143..70e25d8 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2329,9 +2329,14 @@ EXPORT_SYMBOL(mmc_card_can_sleep);
+  */
+ int mmc_flush_cache(struct mmc_card *card)
+ {
+-	struct mmc_host *host = card->host;
++	struct mmc_host *host;
+ 	int err = 0;
  
- 	/* Controller power state */
- 	bool			power;
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 2deb676..64f6c99 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -127,7 +127,6 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
++	if (!card)
++		return err;
++
++	host = card->host;
++
+ 	if (!(host->caps2 & MMC_CAP2_CACHE_CTRL))
+ 		return err;
  
- 	if (enable) {
--		host->sdio_irq_enabled = 1;
- 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL &
- 					~TMIO_SDIO_STAT_IOIRQ;
- 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
-@@ -136,7 +135,6 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
- 		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
- 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0000);
--		host->sdio_irq_enabled = 0;
- 	}
- }
- 
+@@ -2401,7 +2406,7 @@ int mmc_suspend_host(struct mmc_host *host)
+ 	cancel_delayed_work(&host->detect);
+ 	mmc_flush_scheduled_work();
+ 	if (mmc_try_claim_host(host)) {
+-		err = mmc_cache_ctrl(host, 0);
++		err = mmc_flush_cache(host->card);
+ 		mmc_do_release_host(host);
+ 	} else {
+ 		err = -EBUSY;
 -- 
-1.7.2.5
+1.7.0.4
+
 
