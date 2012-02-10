@@ -1,63 +1,75 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH 0/6] mmc: omap_hsmmc: Clean up use/abuse of pdev->id
-Date: Fri, 10 Feb 2012 18:57:56 +0530
-Message-ID: <CANrkHUbXHrQ=LowgNq9nt+rnrcE-fTqLuOs2+MeCtodv_H-_Cw@mail.gmail.com>
-References: <1328367090-10402-1-git-send-email-rnayak@ti.com>
-	<CANfBPZ-pD55YgneQSyfs1kKB-DUH8g7TQkKO7O6B95Ydfc8cFg@mail.gmail.com>
+From: Jeff Chua <jeff.chua.linux@gmail.com>
+Subject: Re: mmc sdhci mmcblk0: error -110 sending status command, retrying
+Date: Sat, 11 Feb 2012 00:18:03 +0800
+Message-ID: <CAAJw_Zs+Jz9WiJd6254Zkj+Y76w9W3CqZTgGrLYRRsjuxnqTyw@mail.gmail.com>
+References: <CAAJw_ZsryUFFFRCKdd9sQ7_38hjpVq37b6hhZDX5=qz8x1B+EQ@mail.gmail.com>
+	<m2pqdr2tyq.fsf@bob.laptop.org>
+	<CAAJw_Zv4Hk_kfc33xsVcdi-0_C6tsf_FD3sUx1JPDX_fZZMzeQ@mail.gmail.com>
+	<4F30E19B.9020503@intel.com>
+	<CAAJw_Zth+QM8OhMEWweBBek8QNW_9CseHSDuB-LCGrvwuqfV2A@mail.gmail.com>
+	<4F310529.4020101@intel.com>
+	<CAAJw_ZsHwdvXuw+edXUfyGOSMOu5oUw3zX8nUryxJJiiZXzXKQ@mail.gmail.com>
+	<CAAJw_Zup7Wg7FO95Z63e_sniu21gyzdCjcBNgsS0aw6MguDwLw@mail.gmail.com>
+	<CAAJw_Zv6HkLLqEzNKRCfQ7EbMNEVe_hzbW+mHOnDAWLidOhMBQ@mail.gmail.com>
+	<CAAJw_Zs7aET=vdy033bzuHwW==uS8AW78NSvD2L_hjU+Mzp-_w@mail.gmail.com>
+	<4F31B789.9020509@samsung.com>
+	<CAAJw_ZtnWYxGCm5Vm5CQ1GBLc=GU7AGiQKe_-9LJsbMW+YG-GQ@mail.gmail.com>
+	<15D4F59C-7AFA-456E-8A5F-9E11EE9B9717@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <CANfBPZ-pD55YgneQSyfs1kKB-DUH8g7TQkKO7O6B95Ydfc8cFg@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>, Rajendra Nayak <rnayak@ti.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-dev@lists.linaro.org, patches@linaro.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:62614 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754450Ab2BJQSD convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Feb 2012 11:18:03 -0500
+In-Reply-To: <15D4F59C-7AFA-456E-8A5F-9E11EE9B9717@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philip Rakity <prakity@marvell.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Pierre Ossman <pierre@ossman.eu>, lkml <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "arindam.nath@amd.com" <arindam.nath@amd.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>
 
-On Tue, Feb 7, 2012 at 3:32 PM, S, Venkatraman <svenkatr@ti.com> wrote:
-> On Sat, Feb 4, 2012 at 8:21 PM, Rajendra Nayak <rnayak@ti.com> wrote:
->> This series mainly cleans up all instances of hardcoding's in
->> the driver based on pdev->id. This is cleanup leading to the
->> DT adaptation of omap_hsmmc driver.
->>
->> Patches are based on 3.3-rc2 and can be found here
->> git://gitorious.org/omap-pm/linux.git omap_hsmmc_cleanup
->>
->> Tested the patches on my omap4 boards (panda and SDP) but
->> haven't tested yet on omap3/2 since I did'nt have boards
->> handy. So any testing on any omap3/2 boards is really
->> appreciated.
+On Thu, Feb 9, 2012 at 3:09 AM, Philip Rakity <prakity@marvell.com> wro=
+te:
+>
+>
+> Jeff,
+>
+> I think the sdhci.c clock setting code was changed a while ago. =A0 M=
+aybe revert that mod and see what happens.
+>
+> The card is a 24MHz which is rather slow so I would be surprised if t=
+hat was it.
+> The other option is the force enable the High Speed bit in the =A0con=
+troller (used when speed is 25MHz or faster). =A0Will give the system m=
+ore time (in theory) to work.
 
-Tested this series on 2430SDP with FS on SD card
+That's a good point to start looking. I poked around and by setting
+host->ios.clock to 10000000 instead of 25000000, read from a 16GB card
+is no longer giving any error.
 
->
-> I gave it a spin on Beagleboard-XM (OMAP3630) with root filesystem
-> on the SD card, and checked again on 4430SDP.
->
-> Tested-by: Venkatraman S <svenkatr@ti.com>
->
->>
->> regards,
->> Rajendra
->>
->> Balaji T K (3):
->> =A0mmc: omap_hsmmc: use platform_get_resource_byname for tx/rx DMA
->> =A0 =A0channels
->> =A0mmc: omap_hsmmc: remove unused .set_sleep function
->> =A0mmc: omap_hsmmc: Use OMAP_HSMMC_SUPPORTS_DUAL_VOLT flag to remove
->> =A0 =A0host->id based hardcoding
->>
->> Rajendra Nayak (3):
->> =A0mmc: omap_hsmmc: Get rid of omap_hsmmc_1_set_power function
->> =A0mmc: omap_hsmmc: Get rid of omap_hsmmc_4_set_power function
->> =A0mmc: omap_hsmmc: Don't expect MMC1 to always have vmmc supply
->>
->> =A0arch/arm/plat-omap/include/plat/mmc.h | =A0 =A02 -
->> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 | =A0158 +++-------=
------------------------
->> =A02 files changed, 14 insertions(+), 146 deletions(-)
->>
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I still don't dare to do any write. Already burn one 16GB SD and not
+ready to trash another. I asked earlier but haven't got any reply as
+to how to recover an SD that says "No medium found". Any chance of
+recovering it?
+
+Here's what I did. If set too low (1000000) or too high (25000000),
+random errors appeared.
+
+--- linux/drivers/mmc/core/core.c.org   2012-02-10 23:57:49.000000000 +=
+0800
++++ linux/drivers/mmc/core/core.c       2012-02-10 23:53:59.000000000 +=
+0800
+@@ -881,7 +881,7 @@
+        if (hz > host->f_max)
+                hz =3D host->f_max;
+
+-       host->ios.clock =3D hz;
++       host->ios.clock =3D 10000000;
+        mmc_set_ios(host);
+ }
+
+
+
+Thanks,
+Jeff
