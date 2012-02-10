@@ -1,57 +1,89 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH v3 1/2] mxs-dma : move the mxs dma.h to a more common
- place
-Date: Fri, 10 Feb 2012 08:21:35 -0800
-Message-ID: <20120210162134.GA2723@r65073-Latitude-D630>
-References: <1328612075-5825-1-git-send-email-b32955@freescale.com>
- <1328612075-5825-2-git-send-email-b32955@freescale.com>
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: mmc sdhci mmcblk0: error -110 sending status command, retrying
+Date: Fri, 10 Feb 2012 12:28:10 -0800
+Message-ID: <4B11A480-8122-4A0B-A0EE-E1E95477F985@marvell.com>
+References: <CAAJw_ZsryUFFFRCKdd9sQ7_38hjpVq37b6hhZDX5=qz8x1B+EQ@mail.gmail.com>
+ <m2pqdr2tyq.fsf@bob.laptop.org>
+ <CAAJw_Zv4Hk_kfc33xsVcdi-0_C6tsf_FD3sUx1JPDX_fZZMzeQ@mail.gmail.com>
+ <4F30E19B.9020503@intel.com>
+ <CAAJw_Zth+QM8OhMEWweBBek8QNW_9CseHSDuB-LCGrvwuqfV2A@mail.gmail.com>
+ <4F310529.4020101@intel.com>
+ <CAAJw_ZsHwdvXuw+edXUfyGOSMOu5oUw3zX8nUryxJJiiZXzXKQ@mail.gmail.com>
+ <CAAJw_Zup7Wg7FO95Z63e_sniu21gyzdCjcBNgsS0aw6MguDwLw@mail.gmail.com>
+ <CAAJw_Zv6HkLLqEzNKRCfQ7EbMNEVe_hzbW+mHOnDAWLidOhMBQ@mail.gmail.com>
+ <CAAJw_Zs7aET=vdy033bzuHwW==uS8AW78NSvD2L_hjU+Mzp-_w@mail.gmail.com>
+ <4F31B789.9020509@samsung.com>
+ <CAAJw_ZtnWYxGCm5Vm5CQ1GBLc=GU7AGiQKe_-9LJsbMW+YG-GQ@mail.gmail.com>
+ <15D4F59C-7AFA-456E-8A5F-9E11EE9B9717@marvell.com>
+ <CAAJw_Zs+Jz9WiJd6254Zkj+Y76w9W3CqZTgGrLYRRsjuxnqTyw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:56222 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750882Ab2BJQVn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Feb 2012 11:21:43 -0500
-Content-Disposition: inline
-In-Reply-To: <1328612075-5825-2-git-send-email-b32955@freescale.com>
+Received: from na3sys009aog120.obsmtp.com ([74.125.149.140]:36443 "EHLO
+	na3sys009aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752139Ab2BJUeg convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 10 Feb 2012 15:34:36 -0500
+In-Reply-To: <CAAJw_Zs+Jz9WiJd6254Zkj+Y76w9W3CqZTgGrLYRRsjuxnqTyw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Shijie <b32955@freescale.com>
-Cc: vinod.koul@intel.com, artem.bityutskiy@intel.com, shijie8@gmail.com, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, w.sang@pengutronix.de, LW@KARO-electronics.de, alsa-devel@alsa-project.org, b29396@freescale.com
+To: Jeff Chua <jeff.chua.linux@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Pierre Ossman <pierre@ossman.eu>, lkml <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "arindam.nath@amd.com" <arindam.nath@amd.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>
 
-On Tue, Feb 07, 2012 at 06:54:34PM +0800, Huang Shijie wrote:
-> Move the header to a more common place.
-> The mxs dma engine is not only used in mx23/mx28, but also used
-> in mx50/mx6q.  It will also be used in the future chips.
+
+On Feb 10, 2012, at 8:18 AM, Jeff Chua wrote:
+
+> On Thu, Feb 9, 2012 at 3:09 AM, Philip Rakity <prakity@marvell.com> wrote:
+>> 
+>> 
+>> Jeff,
+>> 
+>> I think the sdhci.c clock setting code was changed a while ago.   Maybe revert that mod and see what happens.
+>> 
+>> The card is a 24MHz which is rather slow so I would be surprised if that was it.
+>> The other option is the force enable the High Speed bit in the  controller (used when speed is 25MHz or faster).  Will give the system more time (in theory) to work.
 > 
-> Rename it to mxs-dma.h
+> That's a good point to start looking. I poked around and by setting
+> host->ios.clock to 10000000 instead of 25000000, read from a 16GB card
+> is no longer giving any error.
 > 
-> change mxs-dma driver, mxs-mmc driver, gpmi-nand driver, mxs-saif driver
-> to the new header file.
+> I still don't dare to do any write. Already burn one 16GB SD and not
+> ready to trash another. I asked earlier but haven't got any reply as
+> to how to recover an SD that says "No medium found". Any chance of
+> recovering it?
 > 
-> Signed-off-by: Huang Shijie <b32955@freescale.com>
-> ---
->  drivers/dma/mxs-dma.c                              |    2 +-
->  drivers/mmc/host/mxs-mmc.c                         |    2 +-
->  drivers/mtd/nand/gpmi-nand/gpmi-nand.h             |    2 +-
->  .../include/mach/dma.h => include/linux/mxs-dma.h  |    0
->  sound/soc/mxs/mxs-pcm.c                            |    2 +-
->  sound/soc/mxs/mxs-pcm.h                            |    2 +-
->  sound/soc/mxs/mxs-saif.c                           |    2 +-
->  7 files changed, 6 insertions(+), 6 deletions(-)
->  rename arch/arm/mach-mxs/include/mach/dma.h => include/linux/mxs-dma.h (100%)
+> Here's what I did. If set too low (1000000) or too high (25000000),
+> random errors appeared.
+> 
+> --- linux/drivers/mmc/core/core.c.org   2012-02-10 23:57:49.000000000 +0800
+> +++ linux/drivers/mmc/core/core.c       2012-02-10 23:53:59.000000000 +0800
+> @@ -881,7 +881,7 @@
+>        if (hz > host->f_max)
+>                hz = host->f_max;
+> 
+> -       host->ios.clock = hz;
+> +       host->ios.clock = 10000000;
+>        mmc_set_ios(host);
+> }
+> 
+> 
 
-I suggested you rename it include/linux/fsl/mxs-dma.h [1].  It seems
-you are ignoring the comment.  Can you explain why it's not a
-reasonable suggestion?
+good news.  The other possibility but unlikely is that the timeout is too low for the card.
 
-And Wolfram and Mark told you that you need to Cc subsystem maintainers
-to collect their acks [2].  But you are still not Ccing Mark Brown and
-Chris Ball for sound/soc/ and drivers/mmc changes.  So you are not
-listening.
+There is a quirk for this.
 
-Regards,
-Shawn
+SDHCI_BROKEN_TIMEOUT_VAL
 
-[1] http://article.gmane.org/gmane.linux.kernel.mmc/12301
-[2] http://article.gmane.org/gmane.linux.alsa.devel/93751
+my guess is that you will need to measure the clk pin and see if it matches the frequency being programmed.  (could be less).
+
+a simple hack is to add a printk to set_ios() or set_clock() and print out the clock rate clock register (divider) and see if they match what you should be seeing.
+It is possible the bug is NOT in this area but in the platform code where an incorrect base freq is being setup for the controller.
+
+Philip
+
+> 
+> Thanks,
+> Jeff
+
