@@ -1,56 +1,65 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: core: add the debug message for SET_BLOCK_COUNT
-Date: Sat, 11 Feb 2012 16:06:11 -0500
-Message-ID: <m2r4y1krlo.fsf@bob.laptop.org>
-References: <4F30B2E6.60406@samsung.com>
+Subject: Re: [PATCH v7] ESDHC: Workaround for data crc error on p1010rdb
+Date: Sat, 11 Feb 2012 16:20:25 -0500
+Message-ID: <m2mx8pkqxy.fsf@bob.laptop.org>
+References: <1328688356-17510-1-git-send-email-r66093@freescale.com>
+	<m21uq52wk8.fsf@bob.laptop.org>
+	<110EED8CC96DFC488B7E717A2027A27C01F304@039-SN1MPN1-002.039d.mgd.msft.net>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41878 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:53882 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752573Ab2BKVGS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 11 Feb 2012 16:06:18 -0500
-In-Reply-To: <4F30B2E6.60406@samsung.com> (Jaehoon Chung's message of "Tue, 07
-	Feb 2012 14:13:10 +0900")
+	id S1752618Ab2BKVUe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 11 Feb 2012 16:20:34 -0500
+In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C01F304@039-SN1MPN1-002.039d.mgd.msft.net>
+	(Huang Changming-R's message of "Thu, 9 Feb 2012 02:12:14 +0000")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Huang Changming-R66093 <r66093@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jain Priyanka-B32167 <B32167@freescale.com>
 
 Hi,
 
-On Tue, Feb 07 2012, Jaehoon Chung wrote:
-> This patch is added just debug message.
-> Almost features need to use the CMD23.
-> But we didn't see the debug message for sbc.
-> If sbc's message can see, should be help for debugging.
-> (We can check whether use the cmd23 or not)
+On Wed, Feb 08 2012, Huang Changming-R66093 wrote:
+>> > +static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int
+>> clock)
+>> > +{
+>> > +	/* Workaround to reduce the clock frequency for p1010 esdhc */
+>> > +	if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
+>> > +		if (clock == 0) {
+>> > +			host->clock = clock;
+>> > +			return;
+>> > +		}
+>> 
+>> Is this if (clock == 0) necessary?  You'll be calling esdhc_set_clock()
+>> immediately afterwards, and it performs the same test.
 >
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
->  drivers/mmc/core/core.c |    6 ++++++
->  1 files changed, 6 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 8a19143..6b72eb8 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -188,6 +188,12 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->  	struct scatterlist *sg;
->  #endif
->  
-> +	if (mrq->sbc) {
-> +		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
-> +			 mmc_hostname(host), mrq->sbc->opcode,
-> +			 mrq->sbc->arg, mrq->sbc->flags);
-> +	}
-> +
->  	pr_debug("%s: starting CMD%u arg %08x flags %08x\n",
->  		 mmc_hostname(host), mrq->cmd->opcode,
->  		 mrq->cmd->arg, mrq->cmd->flags);
+> Yes, I perform this test two times.
+> The first time, I test the original value (as the parameter from set_clock)
+> The second time, I test it again, that is because the clock value has
+> been changed or reduced,
+> I think it is necessary to test it again. 
 
-Thanks, pushed to mmc-next for 3.4.
+I don't see how it's necessary to test *if it is zero* again, because
+you're not going to change or reduce it to zero.  You're going to
+subtract 5M/10M from it if it was over 20M/40M, so there is no chance
+of it reaching zero.
+
+This isn't a huge deal, but:  could you walk me through an example of
+where it's necessary to have the first test for 0, because something
+bad would happen if you didn't?  I'm talking about this piece of code:
+
++       if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
++               if (clock == 0) {
++                       host->clock = clock;
++                       return;
++               }
+
+.. which I think will get caught by the same test in esdhc_set_clock()
+when you call that immediately after this test.
+
+Thanks,
 
 - Chris.
 -- 
