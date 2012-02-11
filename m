@@ -1,41 +1,56 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [RFC] MMC-4.5 Context ID
-Date: Sat, 11 Feb 2012 15:57:13 -0500
-Message-ID: <m2vcndks0m.fsf@bob.laptop.org>
-References: <1328110021-15199-1-git-send-email-saugata.das@stericsson.com>
-	<m2mx8y6ls1.fsf@bob.laptop.org>
-	<CAKLKtzeRHVeMemTytmaon0GsZ2GqXwz_M_CX6aTj+xDDgN7HVg@mail.gmail.com>
-	<4F2F649E.2010106@samsung.com>
-	<CAKLKtzcAqJVDTZFYpijicWStr7m76Quv2ic8hRZp+X_Wmd-bFQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: add the debug message for SET_BLOCK_COUNT
+Date: Sat, 11 Feb 2012 16:06:11 -0500
+Message-ID: <m2r4y1krlo.fsf@bob.laptop.org>
+References: <4F30B2E6.60406@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58527 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:41878 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751696Ab2BKU5Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 11 Feb 2012 15:57:25 -0500
-In-Reply-To: <CAKLKtzcAqJVDTZFYpijicWStr7m76Quv2ic8hRZp+X_Wmd-bFQ@mail.gmail.com>
-	(Saugata Das's message of "Mon, 6 Feb 2012 11:04:10 +0530")
+	id S1752573Ab2BKVGS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 11 Feb 2012 16:06:18 -0500
+In-Reply-To: <4F30B2E6.60406@samsung.com> (Jaehoon Chung's message of "Tue, 07
+	Feb 2012 14:13:10 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Saugata Das <saugata.das@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
 Hi,
 
-On Mon, Feb 06 2012, Saugata Das wrote:
-> Thanks for the info. Perhaps the initial MMC-4.5 device samples do not
-> implement this command well. Yes, this feature is good to have in the
-> kernel. I shall wait for some more comments on the proposed
-> implementation before submitting the patch.
+On Tue, Feb 07 2012, Jaehoon Chung wrote:
+> This patch is added just debug message.
+> Almost features need to use the CMD23.
+> But we didn't see the debug message for sbc.
+> If sbc's message can see, should be help for debugging.
+> (We can check whether use the cmd23 or not)
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/core/core.c |    6 ++++++
+>  1 files changed, 6 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 8a19143..6b72eb8 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -188,6 +188,12 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>  	struct scatterlist *sg;
+>  #endif
+>  
+> +	if (mrq->sbc) {
+> +		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
+> +			 mmc_hostname(host), mrq->sbc->opcode,
+> +			 mrq->sbc->arg, mrq->sbc->flags);
+> +	}
+> +
+>  	pr_debug("%s: starting CMD%u arg %08x flags %08x\n",
+>  		 mmc_hostname(host), mrq->cmd->opcode,
+>  		 mrq->cmd->arg, mrq->cmd->flags);
 
-I'm not very excited about merging features that offer no concrete
-benefit, because it just grows the kernel (and list of places where bugs
-can occur) for no benefit.  So, it would be great if we could find a
-device that actually implements these contexts in a way that provides
-a performance benefit, to prove that adding the code is worthwhile.
-
-Thanks,
+Thanks, pushed to mmc-next for 3.4.
 
 - Chris.
 -- 
