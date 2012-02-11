@@ -1,99 +1,74 @@
-From: Huang Shijie <shijie8@gmail.com>
-Subject: Re: [PATCH v3 1/2] mxs-dma : move the mxs dma.h to a more common place
-Date: Sat, 11 Feb 2012 07:36:50 +0800
-Message-ID: <CAMiH66EP6UFDYkguzfSFgysDzVREPZ8P1x29TkYvQ+Cuvz-4hg@mail.gmail.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH v3 1/2] mxs-dma : move the mxs dma.h to a
+ more common place
+Date: Fri, 10 Feb 2012 23:39:36 -0800
+Message-ID: <20120211073934.GE2198@r65073-Latitude-D630>
 References: <1328612075-5825-1-git-send-email-b32955@freescale.com>
 	<1328612075-5825-2-git-send-email-b32955@freescale.com>
 	<20120210162134.GA2723@r65073-Latitude-D630>
+	<CAMiH66EP6UFDYkguzfSFgysDzVREPZ8P1x29TkYvQ+Cuvz-4hg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:59233 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761110Ab2BJXgu convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Feb 2012 18:36:50 -0500
-In-Reply-To: <20120210162134.GA2723@r65073-Latitude-D630>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <alsa-devel-bounces@alsa-project.org>
+Content-Disposition: inline
+In-Reply-To: <CAMiH66EP6UFDYkguzfSFgysDzVREPZ8P1x29TkYvQ+Cuvz-4hg@mail.gmail.com>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+	<mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+	<mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Sender: alsa-devel-bounces@alsa-project.org
+Errors-To: alsa-devel-bounces@alsa-project.org
+To: Huang Shijie <shijie8@gmail.com>
+Cc: alsa-devel@alsa-project.org, vinod.koul@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, w.sang@pengutronix.de, Huang Shijie <b32955@freescale.com>, linux-mtd@lists.infradead.org, artem.bityutskiy@intel.com, b29396@freescale.com, linux-arm-kernel@lists.infradead.org, LW@karo-electronics.de
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Huang Shijie <b32955@freescale.com>, vinod.koul@intel.com, artem.bityutskiy@intel.com, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, w.sang@pengutronix.de, LW@karo-electronics.de, alsa-devel@alsa-project.org, b29396@freescale.com
 
-hi,
-
-On Sat, Feb 11, 2012 at 12:21 AM, Shawn Guo <shawn.guo@linaro.org> wrot=
-e:
-> On Tue, Feb 07, 2012 at 06:54:34PM +0800, Huang Shijie wrote:
->> Move the header to a more common place.
->> The mxs dma engine is not only used in mx23/mx28, but also used
->> in mx50/mx6q. =C2=A0It will also be used in the future chips.
->>
->> Rename it to mxs-dma.h
->>
->> change mxs-dma driver, mxs-mmc driver, gpmi-nand driver, mxs-saif dr=
-iver
->> to the new header file.
->>
->> Signed-off-by: Huang Shijie <b32955@freescale.com>
->> ---
->> =C2=A0drivers/dma/mxs-dma.c =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0| =C2=A0=
- =C2=A02 +-
->> =C2=A0drivers/mmc/host/mxs-mmc.c =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 | =C2=A0 =C2=A02 +-
->> =C2=A0drivers/mtd/nand/gpmi-nand/gpmi-nand.h =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 | =C2=A0 =C2=A02 +-
->> =C2=A0.../include/mach/dma.h =3D> include/linux/mxs-dma.h =C2=A0| =C2=
-=A0 =C2=A00
->> =C2=A0sound/soc/mxs/mxs-pcm.c =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0| =C2=A0 =C2=
-=A02 +-
->> =C2=A0sound/soc/mxs/mxs-pcm.h =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0| =C2=A0 =C2=
-=A02 +-
->> =C2=A0sound/soc/mxs/mxs-saif.c =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 | =C2=A0 =C2=A02 +=
--
->> =C2=A07 files changed, 6 insertions(+), 6 deletions(-)
->> =C2=A0rename arch/arm/mach-mxs/include/mach/dma.h =3D> include/linux=
-/mxs-dma.h (100%)
->
-> I suggested you rename it include/linux/fsl/mxs-dma.h [1]. =C2=A0It s=
-eems
-> you are ignoring the comment. =C2=A0Can you explain why it's not a
-> reasonable suggestion?
-
-=46or gpmi-nand.h is placed in include/linux/mtd/ directory, so i think
-it's better to place the mxs-dma.h
-to similar include/linux/dma/ directory, but the directory does not exi=
-t.
-
-If i place it at include/linux/fsl/mxs-dma.h , i have to create a new
-folder, I am not sure i have the right
-to do so. But i can try it in the next version.
-
-thanks a lot.
-
-
-
->
-> And Wolfram and Mark told you that you need to Cc subsystem maintaine=
-rs
-> to collect their acks [2]. =C2=A0But you are still not Ccing Mark Bro=
-wn and
-> Chris Ball for sound/soc/ and drivers/mmc changes. =C2=A0So you are n=
-ot
-> listening.
-
-ok, i will CC them in next version.  I=E3=80=80really did not know to w=
-hom I=E3=80=80should cc .
-
-BR
-Huang Shijie
-
->
-> Regards,
-> Shawn
->
-> [1] http://article.gmane.org/gmane.linux.kernel.mmc/12301
-> [2] http://article.gmane.org/gmane.linux.alsa.devel/93751
+T24gU2F0LCBGZWIgMTEsIDIwMTIgYXQgMDc6MzY6NTBBTSArMDgwMCwgSHVhbmcgU2hpamllIHdy
+b3RlOgo+IGhpLAo+IAo+IE9uIFNhdCwgRmViIDExLCAyMDEyIGF0IDEyOjIxIEFNLCBTaGF3biBH
+dW8gPHNoYXduLmd1b0BsaW5hcm8ub3JnPiB3cm90ZToKPiA+IE9uIFR1ZSwgRmViIDA3LCAyMDEy
+IGF0IDA2OjU0OjM0UE0gKzA4MDAsIEh1YW5nIFNoaWppZSB3cm90ZToKPiA+PiBNb3ZlIHRoZSBo
+ZWFkZXIgdG8gYSBtb3JlIGNvbW1vbiBwbGFjZS4KPiA+PiBUaGUgbXhzIGRtYSBlbmdpbmUgaXMg
+bm90IG9ubHkgdXNlZCBpbiBteDIzL214MjgsIGJ1dCBhbHNvIHVzZWQKPiA+PiBpbiBteDUwL214
+NnEuIMKgSXQgd2lsbCBhbHNvIGJlIHVzZWQgaW4gdGhlIGZ1dHVyZSBjaGlwcy4KPiA+Pgo+ID4+
+IFJlbmFtZSBpdCB0byBteHMtZG1hLmgKPiA+Pgo+ID4+IGNoYW5nZSBteHMtZG1hIGRyaXZlciwg
+bXhzLW1tYyBkcml2ZXIsIGdwbWktbmFuZCBkcml2ZXIsIG14cy1zYWlmIGRyaXZlcgo+ID4+IHRv
+IHRoZSBuZXcgaGVhZGVyIGZpbGUuCj4gPj4KPiA+PiBTaWduZWQtb2ZmLWJ5OiBIdWFuZyBTaGlq
+aWUgPGIzMjk1NUBmcmVlc2NhbGUuY29tPgo+ID4+IC0tLQo+ID4+IMKgZHJpdmVycy9kbWEvbXhz
+LWRtYS5jIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgfCDCoCDC
+oDIgKy0KPiA+PiDCoGRyaXZlcnMvbW1jL2hvc3QvbXhzLW1tYy5jIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIHwgwqAgwqAyICstCj4gPj4gwqBkcml2ZXJzL210ZC9uYW5kL2dw
+bWktbmFuZC9ncG1pLW5hbmQuaCDCoCDCoCDCoCDCoCDCoCDCoCB8IMKgIMKgMiArLQo+ID4+IMKg
+Li4uL2luY2x1ZGUvbWFjaC9kbWEuaCA9PiBpbmNsdWRlL2xpbnV4L214cy1kbWEuaCDCoHwgwqAg
+wqAwCj4gPj4gwqBzb3VuZC9zb2MvbXhzL214cy1wY20uYyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoHwgwqAgwqAyICstCj4gPj4gwqBzb3VuZC9zb2MvbXhzL214cy1w
+Y20uaCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoHwgwqAgwqAyICst
+Cj4gPj4gwqBzb3VuZC9zb2MvbXhzL214cy1zYWlmLmMgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgfCDCoCDCoDIgKy0KPiA+PiDCoDcgZmlsZXMgY2hhbmdlZCwgNiBpbnNl
+cnRpb25zKCspLCA2IGRlbGV0aW9ucygtKQo+ID4+IMKgcmVuYW1lIGFyY2gvYXJtL21hY2gtbXhz
+L2luY2x1ZGUvbWFjaC9kbWEuaCA9PiBpbmNsdWRlL2xpbnV4L214cy1kbWEuaCAoMTAwJSkKPiA+
+Cj4gPiBJIHN1Z2dlc3RlZCB5b3UgcmVuYW1lIGl0IGluY2x1ZGUvbGludXgvZnNsL214cy1kbWEu
+aCBbMV0uIMKgSXQgc2VlbXMKPiA+IHlvdSBhcmUgaWdub3JpbmcgdGhlIGNvbW1lbnQuIMKgQ2Fu
+IHlvdSBleHBsYWluIHdoeSBpdCdzIG5vdCBhCj4gPiByZWFzb25hYmxlIHN1Z2dlc3Rpb24/Cj4g
+Cj4gRm9yIGdwbWktbmFuZC5oIGlzIHBsYWNlZCBpbiBpbmNsdWRlL2xpbnV4L210ZC8gZGlyZWN0
+b3J5LCBzbyBpIHRoaW5rCj4gaXQncyBiZXR0ZXIgdG8gcGxhY2UgdGhlIG14cy1kbWEuaAo+IHRv
+IHNpbWlsYXIgaW5jbHVkZS9saW51eC9kbWEvIGRpcmVjdG9yeSwgYnV0IHRoZSBkaXJlY3Rvcnkg
+ZG9lcyBub3QgZXhpdC4KPiAKWWVzLCBmcm9tIHN1YnN5c3RlbSBwb2ludCBvZiB2aWV3LCBpdCBt
+YWtlcyBzZW5zZSB0b28uCgo+IElmIGkgcGxhY2UgaXQgYXQgaW5jbHVkZS9saW51eC9mc2wvbXhz
+LWRtYS5oICwgaSBoYXZlIHRvIGNyZWF0ZSBhIG5ldwo+IGZvbGRlciwgSSBhbSBub3Qgc3VyZSBp
+IGhhdmUgdGhlIHJpZ2h0Cj4gdG8gZG8gc28uIEJ1dCBpIGNhbiB0cnkgaXQgaW4gdGhlIG5leHQg
+dmVyc2lvbi4KPiAKU28gZWl0aGVyIHdheSB3b3JrcyBmb3IgbWUuICBCdXQgeW91IG5lZWQgdG8g
+Y3JlYXRlIGEgZm9sZGVyIGFueXdheS4KU28gbGV0J3MgZG8gaXQgdG8gdGVzdCBwZW9wbGUuCgo+
+IHRoYW5rcyBhIGxvdC4KPiAKPiAKPiAKPiA+Cj4gPiBBbmQgV29sZnJhbSBhbmQgTWFyayB0b2xk
+IHlvdSB0aGF0IHlvdSBuZWVkIHRvIENjIHN1YnN5c3RlbSBtYWludGFpbmVycwo+ID4gdG8gY29s
+bGVjdCB0aGVpciBhY2tzIFsyXS4gwqBCdXQgeW91IGFyZSBzdGlsbCBub3QgQ2NpbmcgTWFyayBC
+cm93biBhbmQKPiA+IENocmlzIEJhbGwgZm9yIHNvdW5kL3NvYy8gYW5kIGRyaXZlcnMvbW1jIGNo
+YW5nZXMuIMKgU28geW91IGFyZSBub3QKPiA+IGxpc3RlbmluZy4KPiAKPiBvaywgaSB3aWxsIEND
+IHRoZW0gaW4gbmV4dCB2ZXJzaW9uLiAgSeOAgHJlYWxseSBkaWQgbm90IGtub3cgdG8gd2hvbSBJ
+44CAc2hvdWxkIGNjIC4KPiAKVGhlIGZpbGUgTUFJTlRBSU5FUlMgaXMgY3JlYXRlZCBmb3IgdGhp
+cyBwdXJwb3NlLgoKLS0gClJlZ2FyZHMsClNoYXduCl9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fCkFsc2EtZGV2ZWwgbWFpbGluZyBsaXN0CkFsc2EtZGV2ZWxA
+YWxzYS1wcm9qZWN0Lm9yZwpodHRwOi8vbWFpbG1hbi5hbHNhLXByb2plY3Qub3JnL21haWxtYW4v
+bGlzdGluZm8vYWxzYS1kZXZlbAo=
