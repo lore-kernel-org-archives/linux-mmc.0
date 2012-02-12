@@ -1,39 +1,58 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3 0/6] mmc: sdhci-s3c: Rework platform data and add device tree support
-Date: Sat, 11 Feb 2012 16:37:31 -0500
-Message-ID: <m2aa4pkq5g.fsf@bob.laptop.org>
-References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
-	<003401cce730$baf979a0$30ec6ce0$%kim@samsung.com>
+From: Torne Wuff <torne@wolfpuppy.org.uk>
+Subject: Too large timeout requested for CMD25
+Date: Sun, 12 Feb 2012 13:26:45 +0000
+Message-ID: <CAA4+OU-D3m942qXjO-HNWrccoUKR-nXuu0b0mvJ0Y-G4ibHKVQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35122 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753415Ab2BKViG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 11 Feb 2012 16:38:06 -0500
-In-Reply-To: <003401cce730$baf979a0$30ec6ce0$%kim@samsung.com> (Kukjin Kim's
-	message of "Thu, 09 Feb 2012 22:42:56 +0900")
+Received: from mail-tul01m020-f174.google.com ([209.85.214.174]:43635 "EHLO
+	mail-tul01m020-f174.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752663Ab2BLN0q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Feb 2012 08:26:46 -0500
+Received: by obcva7 with SMTP id va7so5524991obc.19
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Feb 2012 05:26:45 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>
-Cc: 'Thomas Abraham' <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, patches@linaro.org
+To: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Thu, Feb 09 2012, Kukjin Kim wrote:
-> Looks ok to me and I'd like to pick this series in samsung tree with Chris'
-> ack.
->
-> Chris, is it ok? If you need to merge this in your tree, please let me know.
-> I will provide topic branch for it.
->
-> If any problems, please let me know.
+I have a device with an Intel Poulsbo SDHCI controller and an eMMC,
+and I get constant spam of:
 
-I don't have a very strong opinion, but I think it's probably better to
-go via the mmc tree since the patch is so large and hence the chance of
-conflict before merging is high.  Thanks,
+mmc2: Too large timeout requested for CMD25
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+whenever I write to the device. I looked into this and worked out what
+the card's CSD parameters suggest the write timeout should be, and
+unfortunately it's so large it's not only impossible for the SDHCI
+controller to reach, but actually causes an integer overflow during
+the timeout calculation in mmc_set_data_timeout. :)
+
+The TACC specifies a read time of 20ms, and R2W_FACTOR is 128, which
+means it's claiming a write takes two and a half seconds, which is
+then multiplied by ten to get the timeout - but this is a 32-bit
+machine, so data->timeout_ns is an unsigned int and this overflows.
+This looks like a bug in the MMC stack; even if this value is
+ridiculous it seems to be allowed for by the spec, so it should
+probably be taking care to avoid overflow here.
+
+Even with the overflow the value wraps to 4.125 seconds, which is
+still larger than the 48MHz timeout clock will allow, and thus it
+continues to spam the too large timeout warning. I'm sceptical that
+this warning is actually useful; unless I'm missing something, there's
+nothing you can actually *do* about it other than throw the card out
+and get one with saner values in CSD, which is tricky with an eMMC. At
+most it should be sufficient to complain about this when CSD is read,
+instead of during every command?
+
+Is there anything I can sensibly do about this other than convince
+syslog to filter the message out? I don't want to run a patched kernel
+on this device forever. Would a patch to calculate the worst case
+timeout at card detect time and just warn about it once be accepted?
+
+Thanks in advance for any tips (and please leave me in CC as I am not
+subscribed to the list),
+
+--
+Torne Wuff
+torne@wolfpuppy.org.uk
