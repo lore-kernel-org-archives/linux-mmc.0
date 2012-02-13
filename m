@@ -1,64 +1,57 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH v7] ESDHC: Workaround for data crc error on p1010rdb
-Date: Mon, 13 Feb 2012 07:43:52 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C021CB2@039-SN1MPN1-002.039d.mgd.msft.net>
-References: <1328688356-17510-1-git-send-email-r66093@freescale.com>
-	<m21uq52wk8.fsf@bob.laptop.org>
-	<110EED8CC96DFC488B7E717A2027A27C01F304@039-SN1MPN1-002.039d.mgd.msft.net>
-	<m2mx8pkqxy.fsf@bob.laptop.org>
-	<110EED8CC96DFC488B7E717A2027A27C021A89@039-SN1MPN1-002.039d.mgd.msft.net>
-	<m2ty2vjr11.fsf@bob.laptop.org> <m2pqdjjqo2.fsf@bob.laptop.org>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH v5 1/2] mxs-dma : move the mxs dma.h to a more common
+ place
+Date: Mon, 13 Feb 2012 08:33:20 -0800
+Message-ID: <20120213163319.GC3494@opensource.wolfsonmicro.com>
+References: <1329110756-14434-1-git-send-email-b32955@freescale.com>
+ <1329110756-14434-2-git-send-email-b32955@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="f0KYrhQ4vYSV2aJu"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe001.messaging.microsoft.com ([213.199.154.139]:16885
-	"EHLO DB3EHSOBE002.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755243Ab2BMHn5 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Feb 2012 02:43:57 -0500
-In-Reply-To: <m2pqdjjqo2.fsf@bob.laptop.org>
-Content-Language: en-US
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:59942 "EHLO
+	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757091Ab2BMQd0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2012 11:33:26 -0500
+Content-Disposition: inline
+In-Reply-To: <1329110756-14434-2-git-send-email-b32955@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jain Priyanka-B32167 <B32167@freescale.com>
-
-> 
-> On Sun, Feb 12 2012, Chris Ball wrote:
-> > Hi,
-> >
-> > On Sun, Feb 12 2012, Huang Changming-R66093 wrote:
-> >> You are right.
-> >> I want to use the below code in header file "drivers/mmc/host/sdhci-
-> esdhc.h":
-> >> if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) then I
-> >> can avoid the twice test of the clock.
-> >> do you think if it is reasonable?
-> >
-> > Yes, I think that's okay; let's try it.  Thanks,
-> 
-> Actually, I think I'm still missing something.  Why doesn't this work?
-> 
-> +static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int
-> +clock) {
-> +       /* Workaround to reduce the clock frequency for p1010 esdhc */
-> +       if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
-> +               if (clock > 20000000)
-> +                       clock -= 5000000;
-> +               if (clock > 40000000)
-> +                       clock -= 5000000;
-> +       }
-> +
-> +       /* Set the clock */
-> +       esdhc_set_clock(host, clock);
-> +}
-> 
-These codes can work, too.
-I forget the clock will be reduced 5M/10M only when the clock is greater than 20MHz/45MHz.
-So I should not test the clock in this function.
-
-Thanks.
-Jerry Huang
+To: Huang Shijie <b32955@freescale.com>
+Cc: vinod.koul@intel.com, shawn.guo@linaro.org, artem.bityutskiy@intel.com, w.sang@pengutronix.de, LW@KARO-electronics.de, lrg@ti.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org
 
 
+--f0KYrhQ4vYSV2aJu
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+On Mon, Feb 13, 2012 at 01:25:55PM +0800, Huang Shijie wrote:
+> Move the header to a more common place.
+> The mxs dma engine is not only used in mx23/mx28, but also used
+> in mx50/mx6q.  It will also be used in the future chips.
+
+Acked-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+
+--f0KYrhQ4vYSV2aJu
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iQIcBAEBAgAGBQJPOTs+AAoJEBus8iNuMP3dshgP/0oxrWuqvejvhp1kOy6FWPbK
+i2VdoFTU7ordzqj4U2osLcPKSx4vOgbEM+AQLmsebA7n37t17pkA0h2GtdIFYZrZ
+SNJc4sDI6RJYL7E17yE+LzoBwQcaTp1yZxY6oGIfYzcOfZrROOCtVMfyTGt2cB4+
+Lwiarl5HU+frDb/rQ7KsN5qlvKW5/w2xgXIl6EtH63h61nyw9PBVo/8mj8Rhb6Tw
+tQJMmnQpmtbXdpMSVtEWctz3LP+tMUJhY9BIdyIifZ9BmBPaPq3phpj0nid7Zi+l
+zvqjgV708j1aUpZkScRqLMLeAev5vUW4j/AZ0/jcCyt1RYw3k+/3Y2A/kmPF71M5
+cZdrIBjQYwkxYEeM6LeLlkOh28iqXi1cIh/3AO3hQJxezRvqyyFHfNQu/unVLbvZ
+BpZUcDVo8Sie2DeskRha+nBO2hqmy4SpUqRLLOWLLjCfixu1BQ8Y5XshEnHjPpyq
+oUI0iK17OSpDcKC1DezOm4x/St/pTn3GWYNYaO7aiMLu9STAQmPZwLU9D6Rf673B
+idmEdXQq0Xk0Fh38Hu4EzVavYsb1AZbdTYG3KZWgHM0GR70QSXUv9R0kYobt8Dqc
+HLYb9/sSrl5BlT/kIuP3QNY/ZEHrf6w94fVMTk4xgxYSluY6EcVMz+YHpXGU0u+A
+JHvRGx6M7t4h+hYTLQJe
+=EySv
+-----END PGP SIGNATURE-----
+
+--f0KYrhQ4vYSV2aJu--
