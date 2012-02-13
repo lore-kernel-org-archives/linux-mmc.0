@@ -1,56 +1,79 @@
-From: Saugata Das <saugata.das@linaro.org>
-Subject: Re: [RFC] MMC-4.5 Context ID
-Date: Tue, 14 Feb 2012 02:07:35 +0530
-Message-ID: <CAKLKtzdr68J7wF6m9wpCaXh3_XnL6y9tid2g4yzwxVVPgLndGA@mail.gmail.com>
-References: <1328110021-15199-1-git-send-email-saugata.das@stericsson.com>
-	<m2mx8y6ls1.fsf@bob.laptop.org>
-	<CAKLKtzeRHVeMemTytmaon0GsZ2GqXwz_M_CX6aTj+xDDgN7HVg@mail.gmail.com>
-	<4F2F649E.2010106@samsung.com>
-	<CAKLKtzcAqJVDTZFYpijicWStr7m76Quv2ic8hRZp+X_Wmd-bFQ@mail.gmail.com>
-	<m2vcndks0m.fsf@bob.laptop.org>
+From: Don Zickus <dzickus@redhat.com>
+Subject: Re: staging status of rts_pstor and rts5139
+Date: Mon, 13 Feb 2012 15:41:22 -0500
+Message-ID: <20120213204122.GL9751@redhat.com>
+References: <20120213192518.GJ9751@redhat.com>
+ <m2hayujyek.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:45229 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757971Ab2BMUhh convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2012 15:37:37 -0500
-Received: by wgbdt10 with SMTP id dt10so5246907wgb.1
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2012 12:37:35 -0800 (PST)
-In-Reply-To: <m2vcndks0m.fsf@bob.laptop.org>
+Received: from mx1.redhat.com ([209.132.183.28]:34590 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932171Ab2BMUlZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Feb 2012 15:41:25 -0500
+Content-Disposition: inline
+In-Reply-To: <m2hayujyek.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
 
-On 12 February 2012 02:27, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Mon, Feb 06 2012, Saugata Das wrote:
->> Thanks for the info. Perhaps the initial MMC-4.5 device samples do n=
-ot
->> implement this command well. Yes, this feature is good to have in th=
-e
->> kernel. I shall wait for some more comments on the proposed
->> implementation before submitting the patch.
->
-> I'm not very excited about merging features that offer no concrete
-> benefit, because it just grows the kernel (and list of places where b=
-ugs
-> can occur) for no benefit. =A0So, it would be great if we could find =
-a
-> device that actually implements these contexts in a way that provides
-> a performance benefit, to prove that adding the code is worthwhile.
->
+On Mon, Feb 13, 2012 at 03:01:23PM -0500, Chris Ball wrote:
+> Hi Don,
+> 
+> On Mon, Feb 13 2012, Don Zickus wrote:
+> > Hi Chris,
+> >
+> > My name is Don Zickus from Red Hat.  I am working with a vendor that would
+> > like to ship hardware that requires the rts_pstor and rts5139 drivers (two
+> > different hardware platforms).  Before we include them in our RHEL OS, we
+> > would like to figure what is needed to bump those drivers from 'staging'
+> > status to something the linux-mmc community would fully support.  Is there
+> > a lot of work to be done or just some style cleanups?  Or perhaps you
+> > haven't really looked at them yet.
+> 
+> I have had a chance to look at rts_pstor: it's awful, I'm afraid.  It
+> emulates a SCSI device out of the PCI card reader, and it embeds its
+> own copy of an SD stack inside the driver (in sd.c) behind the scenes
+> instead of using the kernel's drivers/mmc stack, which is not acceptable.
+> I don't think there's any future for the driver in mainline until these
+> complaints are changed; it probably shouldn't even be in staging.
+> 
+> So, I think that for it to be merged, it must first be rewritten to be
+> a driver that's a few hundred lines long -- instead of 20,000! -- that
+> (a) uses Linux's SD stack and (b) exposes MMC devices, not SCSI ones.
+> That's a fairly complete rewrite, unfortunately, and would only cover
+> the MMC/SD interface on the hardware -- the same hardware supports
+> memorystick and xD too, which are different standards/subsystems.
+> 
+> I had not looked at rts5139, but just took a quick look and it seems
+> like it's an unmerged duplicate fork of the rts_pstor driver -- another
+> 20k lines, mostly the same as the ones in rts_pstor, of SCSI emulation
+> and bundled SD stack, so all of my comments would apply to it too.
+> 
+> Sorry I don't have better news!  I think your best option for mainline
+> support would be to find a way to offer a long-term loan of systems with
+> this hardware inside to any volunteers from linux-mmc@ who want to work
+> on a replacement driver for it; I asked Dell for the same when I learned
+> they were shipping these devices in laptops, but they don't seem to be
+> able to loan out laptops for more than a couple of weeks.  I did start
+> out on an rts_pstor rewrite, but wasn't able to get it working before
+> my temporary access to the hardware ran out.
+> 
+> (I do wish there were better relationships between the kernel community
+> and people with new hardware that needs support added for it, such that
+> we could just file a request with Red Hat, Lenovo or Dell to get access
+> to shipping hardware with some new chip..)
 
-Completely agree with you. The purpose of proposing this
-implementation under [RFC] was to trigger some discussion on how this
-feature should be implemented.
+Thanks for the quick reply.  I was wondering why the driver seemed so
+large and now it makes sense.  Don't worry about the bad news, it might
+give us leverage. :-)
 
-> Thanks,
->
-> - Chris.
-> --
-> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
-> One Laptop Per Child
+Your point about hardware access makes sense, though I don't expect it to
+come out very favorably, I'll poke some people about how to get better at
+leveraging things for the community.
+
+Thanks for your time!
+
+Cheers,
+Don
