@@ -1,77 +1,56 @@
 From: Saugata Das <saugata.das@linaro.org>
-Subject: Re: [PATCH] mmc: core: Substitute mmc_flush_cash for mmc_cache_ctrl
- in suspend
-Date: Tue, 14 Feb 2012 02:04:04 +0530
-Message-ID: <CAKLKtzd486AB8U7kxqo1_9FebD-MB-Nm2V4zBPHthQGDpPjKAQ@mail.gmail.com>
-References: <000101cce7a7$fc0df6b0$f429e410$%jun@samsung.com>
+Subject: Re: [RFC] MMC-4.5 Context ID
+Date: Tue, 14 Feb 2012 02:07:35 +0530
+Message-ID: <CAKLKtzdr68J7wF6m9wpCaXh3_XnL6y9tid2g4yzwxVVPgLndGA@mail.gmail.com>
+References: <1328110021-15199-1-git-send-email-saugata.das@stericsson.com>
+	<m2mx8y6ls1.fsf@bob.laptop.org>
+	<CAKLKtzeRHVeMemTytmaon0GsZ2GqXwz_M_CX6aTj+xDDgN7HVg@mail.gmail.com>
+	<4F2F649E.2010106@samsung.com>
+	<CAKLKtzcAqJVDTZFYpijicWStr7m76Quv2ic8hRZp+X_Wmd-bFQ@mail.gmail.com>
+	<m2vcndks0m.fsf@bob.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:38272 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755931Ab2BMUeF convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2012 15:34:05 -0500
-Received: by wics10 with SMTP id s10so3727062wic.19
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2012 12:34:04 -0800 (PST)
-In-Reply-To: <000101cce7a7$fc0df6b0$f429e410$%jun@samsung.com>
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:45229 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757971Ab2BMUhh convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2012 15:37:37 -0500
+Received: by wgbdt10 with SMTP id dt10so5246907wgb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2012 12:37:35 -0800 (PST)
+In-Reply-To: <m2vcndks0m.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, ygardi@codeaurora.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org
 
-On 10 February 2012 09:26, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> After the cache is disabled in suspend, enabling cache can be done by
-> mmc_init_card in resume. Currently this call path has been changed. I=
-n
-> case of sleep mode mmc_init_card isn't called. So mmc_cache_ctrl need=
- to
-> be replaced with mmc_flush_cache in suspend.
+On 12 February 2012 02:27, Chris Ball <cjb@laptop.org> wrote:
+> Hi,
 >
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
-> =A0drivers/mmc/core/core.c | =A0 =A09 +++++++--
-> =A01 files changed, 7 insertions(+), 2 deletions(-)
+> On Mon, Feb 06 2012, Saugata Das wrote:
+>> Thanks for the info. Perhaps the initial MMC-4.5 device samples do n=
+ot
+>> implement this command well. Yes, this feature is good to have in th=
+e
+>> kernel. I shall wait for some more comments on the proposed
+>> implementation before submitting the patch.
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 8a19143..70e25d8 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2329,9 +2329,14 @@ EXPORT_SYMBOL(mmc_card_can_sleep);
-> =A0*/
-> =A0int mmc_flush_cache(struct mmc_card *card)
-> =A0{
-> - =A0 =A0 =A0 struct mmc_host *host =3D card->host;
-> + =A0 =A0 =A0 struct mmc_host *host;
-> =A0 =A0 =A0 =A0int err =3D 0;
+> I'm not very excited about merging features that offer no concrete
+> benefit, because it just grows the kernel (and list of places where b=
+ugs
+> can occur) for no benefit. =A0So, it would be great if we could find =
+a
+> device that actually implements these contexts in a way that provides
+> a performance benefit, to prove that adding the code is worthwhile.
 >
-> + =A0 =A0 =A0 if (!card)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return err;
-> +
-> + =A0 =A0 =A0 host =3D card->host;
-> +
-> =A0 =A0 =A0 =A0if (!(host->caps2 & MMC_CAP2_CACHE_CTRL))
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return err;
+
+Completely agree with you. The purpose of proposing this
+implementation under [RFC] was to trigger some discussion on how this
+feature should be implemented.
+
+> Thanks,
 >
-> @@ -2401,7 +2406,7 @@ int mmc_suspend_host(struct mmc_host *host)
-> =A0 =A0 =A0 =A0cancel_delayed_work(&host->detect);
-> =A0 =A0 =A0 =A0mmc_flush_scheduled_work();
-> =A0 =A0 =A0 =A0if (mmc_try_claim_host(host)) {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_cache_ctrl(host, 0);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_flush_cache(host->card);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_do_release_host(host);
-> =A0 =A0 =A0 =A0} else {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D -EBUSY;
+> - Chris.
 > --
-> 1.7.0.4
-
-Thanks for the changes.
-Reviewed-by: Saugata Das <saugata.das@linaro.org>
-
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
