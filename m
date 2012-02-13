@@ -1,79 +1,74 @@
-From: Jeff Chua <jeff.chua.linux@gmail.com>
-Subject: Re: mmc sdhci mmcblk0: error -110 sending status command, retrying
-Date: Mon, 13 Feb 2012 13:20:21 +0800
-Message-ID: <CAAJw_Zu7TitPqM3Oqo0ySci_VQ8xm9YMghiQ1HLY7nwCrcYnVg@mail.gmail.com>
-References: <CAAJw_ZsryUFFFRCKdd9sQ7_38hjpVq37b6hhZDX5=qz8x1B+EQ@mail.gmail.com>
-	<m2pqdr2tyq.fsf@bob.laptop.org>
-	<CAAJw_Zv4Hk_kfc33xsVcdi-0_C6tsf_FD3sUx1JPDX_fZZMzeQ@mail.gmail.com>
-	<4F30E19B.9020503@intel.com>
-	<CAAJw_Zth+QM8OhMEWweBBek8QNW_9CseHSDuB-LCGrvwuqfV2A@mail.gmail.com>
-	<4F310529.4020101@intel.com>
-	<CAAJw_ZsHwdvXuw+edXUfyGOSMOu5oUw3zX8nUryxJJiiZXzXKQ@mail.gmail.com>
-	<CAAJw_Zup7Wg7FO95Z63e_sniu21gyzdCjcBNgsS0aw6MguDwLw@mail.gmail.com>
-	<CAAJw_Zv6HkLLqEzNKRCfQ7EbMNEVe_hzbW+mHOnDAWLidOhMBQ@mail.gmail.com>
-	<CAAJw_Zs7aET=vdy033bzuHwW==uS8AW78NSvD2L_hjU+Mzp-_w@mail.gmail.com>
-	<4F31B789.9020509@samsung.com>
-	<CAAJw_ZtnWYxGCm5Vm5CQ1GBLc=GU7AGiQKe_-9LJsbMW+YG-GQ@mail.gmail.com>
-	<15D4F59C-7AFA-456E-8A5F-9E11EE9B9717@marvell.com>
-	<CAAJw_Zs+Jz9WiJd6254Zkj+Y76w9W3CqZTgGrLYRRsjuxnqTyw@mail.gmail.com>
-	<4B11A480-8122-4A0B-A0EE-E1E95477F985@marvell.com>
-	<CAAJw_Zu=M7R5cyVRmbd3Tz7MipgX_b5J4g5Z4m+SsiHP-3Uxgw@mail.gmail.com>
-	<CAAJw_ZuQaDka+xKfwfvZCkPwfqJNsd6+UC4bfww=_G1XhaS5QA@mail.gmail.com>
-	<CAAJw_Zsxj9VKpnB7fGWnkqRUKG1DahCV6dKyGTfeAybhqn4KUw@mail.gmail.com>
+From: Huang Shijie <b32955@freescale.com>
+Subject: [PATCH v5 0/2] patch set about the MXS-DMA
+Date: Mon, 13 Feb 2012 13:25:54 +0800
+Message-ID: <1329110756-14434-1-git-send-email-b32955@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAAJw_Zsxj9VKpnB7fGWnkqRUKG1DahCV6dKyGTfeAybhqn4KUw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Pierre Ossman <pierre@ossman.eu>, lkml <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "arindam.nath@amd.com" <arindam.nath@amd.com>, "zhangfei.gao@gmail.com" <zhangfei.gao@gmail.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:49908 "EHLO
+	TX2EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750755Ab2BMFYf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2012 00:24:35 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: vinod.koul@intel.com
+Cc: shawn.guo@linaro.org, artem.bityutskiy@intel.com, w.sang@pengutronix.de, LW@KARO-electronics.de, broonie@opensource.wolfsonmicro.com, lrg@ti.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org, Huang Shijie <b32955@freescale.com>
 
-On Mon, Feb 13, 2012 at 1:16 PM, Jeff Chua <jeff.chua.linux@gmail.com> =
-wrote:
-> On Mon, Feb 13, 2012 at 12:41 PM, Jeff Chua <jeff.chua.linux@gmail.co=
-m> wrote:
->> I ran tests for frequency that works dd out 1G of data from 8MHz to
->> 16MHz, and it seems frequency less than 8.4MHz can only transfer at
->> rate of 14.3MB/s and above 8.4MHz, speed goes up to 18.3 MB/s. Above
->> 17MHz, errors encounters.
->>
->> hz1 =A08000000 =A073.5029 s =A014.3 MB/s
->> hz2 =A08000000 =A073.4740 s =A014.3 MB/s
->> hz3 =A08000000 =A073.3982 s =A014.3 MB/s
->> hz1 =A08200000 =A071.9677 s =A014.6 MB/s
->> hz2 =A08200000 =A073.4936 s =A014.3 MB/s
->> hz3 =A08200000 =A073.3462 s =A014.3 MB/s
->> hz1 =A08400000 =A056.6296 s =A018.5 MB/s
->> hz2 =A08400000 =A056.7616 s =A018.5 MB/s
->> hz3 =A08400000 =A056.7926 s =A018.5 MB/s
->> hz1 =A08600000 =A056.6622 s =A018.5 MB/s
->> hz2 =A08600000 =A056.7201 s =A018.5 MB/s
->> hz3 =A08600000 =A056.6476 s =A018.5 MB/s
->> hz1 =A08800000 =A056.8846 s =A018.4 MB/s
->> hz2 =A08800000 =A056.8226 s =A018.5 MB/s
->> hz3 =A08800000 =A056.7070 s =A018.5 MB/s
->
-> I've turned on write, and there's no error writing. But speed is
-> slower than accessing it via USB2 SD card reader. Same SD.
->
+patch 1: move the mxs dma header to a more common place.
+	Beside the mx23/mx28, the apbh-dma is also used by MX50 and MX6Q.
+	So move the mxs dma header file to a more common place, and rename
+	it to mxs-dma.h
 
-Via SD PCI
-18.779 sec =A04.04 %cpu
+patch 2: rewrite the last parameter of mxs_dma_prep_slave_sg().
+	In the new GPMI version, some hardware behavior changes.
+	The WAIT4END bit should be set in the middle one of the ECC READ page DMA chain.
+	The DMA chain should be set like this:
 
-Via USB2.0 Card Reader
-12.205 sec  2.04 %cpu
+          +-----+               +-----+                      +-----+
+          | cmd | ------------> | cmd | ------------------>  | cmd |
+          +-----+               +-----+                      +-----+
+                                   ^                            ^
+                                   |                            |
+                                   |                            |
+                              set WAIT4END here too        set WAIT4END here
 
-Via USB3.0 Card Reader
-11.427 sec  2.01 %cpu
+        So rewrite the last parameter of mxs_dma_prep_slave_sg(), use the
+	dma_ctrl_flags to set the proper DMA bit for DMA Command Structure.
+	And change the relative drivers with the dma_ctrl_flags.
 
+TEST:
+	Tested the mxs-mmc driver and gpmi-nand drive with the two patches
+	in MX28 board.
 
-Shouldn't PCI SD be faster? Same SD used for all tests.
+v4 --> v5:
+	[1] remove GPMI_IS_MX6Q(), make the mxs and mx6q use the same code.
+		
+v3 --> v4:
+	[1] create a new folder include/linux/fsl/ for store the Freescale's
+	    header files.
+	[2] add more CCs.
 
-THanks,
-Jeff
+v2 --> v3:
+	[1] remove field gpmi_version, use GPMI_IS_MX6Q() instead.
+
+v1 --> v2:
+	[1] squash the trial patches into single patch.
+	[2] use the dma_ctrl_flags.
 
 
-Thanks,
-Jeff
+Huang Shijie (2):
+  mxs-dma : move the mxs dma.h to a more common place
+  mxs-dma : rewrite the last parameter of mxs_dma_prep_slave_sg()
+
+ drivers/dma/mxs-dma.c                              |   34 +++++++++++++++++---
+ drivers/mmc/host/mxs-mmc.c                         |   12 +++---
+ drivers/mtd/nand/gpmi-nand/gpmi-lib.c              |   19 +++++++---
+ drivers/mtd/nand/gpmi-nand/gpmi-nand.h             |    2 +-
+ .../mach/dma.h => include/linux/fsl/mxs-dma.h      |    0
+ sound/soc/mxs/mxs-pcm.c                            |    2 +-
+ sound/soc/mxs/mxs-pcm.h                            |    2 +-
+ sound/soc/mxs/mxs-saif.c                           |    2 +-
+ 8 files changed, 52 insertions(+), 21 deletions(-)
+ rename arch/arm/mach-mxs/include/mach/dma.h => include/linux/fsl/mxs-dma.h (100%)
+
+
