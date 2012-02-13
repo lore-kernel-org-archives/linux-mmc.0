@@ -1,31 +1,29 @@
-From: Don Zickus <dzickus@redhat.com>
-Subject: staging status of rts_pstor and rts5139
-Date: Mon, 13 Feb 2012 14:25:18 -0500
-Message-ID: <20120213192518.GJ9751@redhat.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: ANNOUNCE: new "mmc-utils" repository
+Date: Mon, 13 Feb 2012 20:50:41 +0100
+Message-ID: <CACRpkdaa=Rv-o3SZLVbd4wApQZ8mJtrVwGSfLVd6+QNBGk_BZQ@mail.gmail.com>
+References: <m2y5s8j86z.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:16232 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755817Ab2BMTZU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Feb 2012 14:25:20 -0500
-Content-Disposition: inline
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:43873 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755909Ab2BMTum (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2012 14:50:42 -0500
+Received: by ggnh1 with SMTP id h1so2600328ggn.19
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2012 11:50:41 -0800 (PST)
+In-Reply-To: <m2y5s8j86z.fsf@bob.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Johan RUDHOLM <johan.rudholm@stericsson.com>, Giuseppe CAVALLARO <peppe.cavallaro@st.com>, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 
-Hi Chris,
+On Sun, Feb 12, 2012 at 6:03 PM, Chris Ball <cjb@laptop.org> wrote:
 
-My name is Don Zickus from Red Hat.  I am working with a vendor that would
-like to ship hardware that requires the rts_pstor and rts5139 drivers (two
-different hardware platforms).  Before we include them in our RHEL OS, we
-would like to figure what is needed to bump those drivers from 'staging'
-status to something the linux-mmc community would fully support.  Is there
-a lot of work to be done or just some style cleanups?  Or perhaps you
-haven't really looked at them yet.
+> I've created a repository for userspace mmc tools now:
+> git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc-utils.git
 
-Thanks for your time.
+Way to go Chris, this is great stuff!
 
-Cheers,
-Don
+Yours,
+Linus Walleij
