@@ -1,71 +1,77 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: staging status of rts_pstor and rts5139
-Date: Mon, 13 Feb 2012 15:01:23 -0500
-Message-ID: <m2hayujyek.fsf@bob.laptop.org>
-References: <20120213192518.GJ9751@redhat.com>
+From: Saugata Das <saugata.das@linaro.org>
+Subject: Re: [PATCH] mmc: core: Substitute mmc_flush_cash for mmc_cache_ctrl
+ in suspend
+Date: Tue, 14 Feb 2012 02:04:04 +0530
+Message-ID: <CAKLKtzd486AB8U7kxqo1_9FebD-MB-Nm2V4zBPHthQGDpPjKAQ@mail.gmail.com>
+References: <000101cce7a7$fc0df6b0$f429e410$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37532 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757833Ab2BMUBb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Feb 2012 15:01:31 -0500
-In-Reply-To: <20120213192518.GJ9751@redhat.com> (Don Zickus's message of "Mon,
-	13 Feb 2012 14:25:18 -0500")
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:38272 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755931Ab2BMUeF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2012 15:34:05 -0500
+Received: by wics10 with SMTP id s10so3727062wic.19
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2012 12:34:04 -0800 (PST)
+In-Reply-To: <000101cce7a7$fc0df6b0$f429e410$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Don Zickus <dzickus@redhat.com>
-Cc: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, ygardi@codeaurora.org
 
-Hi Don,
-
-On Mon, Feb 13 2012, Don Zickus wrote:
-> Hi Chris,
+On 10 February 2012 09:26, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> After the cache is disabled in suspend, enabling cache can be done by
+> mmc_init_card in resume. Currently this call path has been changed. I=
+n
+> case of sleep mode mmc_init_card isn't called. So mmc_cache_ctrl need=
+ to
+> be replaced with mmc_flush_cache in suspend.
 >
-> My name is Don Zickus from Red Hat.  I am working with a vendor that would
-> like to ship hardware that requires the rts_pstor and rts5139 drivers (two
-> different hardware platforms).  Before we include them in our RHEL OS, we
-> would like to figure what is needed to bump those drivers from 'staging'
-> status to something the linux-mmc community would fully support.  Is there
-> a lot of work to be done or just some style cleanups?  Or perhaps you
-> haven't really looked at them yet.
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+> =A0drivers/mmc/core/core.c | =A0 =A09 +++++++--
+> =A01 files changed, 7 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 8a19143..70e25d8 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2329,9 +2329,14 @@ EXPORT_SYMBOL(mmc_card_can_sleep);
+> =A0*/
+> =A0int mmc_flush_cache(struct mmc_card *card)
+> =A0{
+> - =A0 =A0 =A0 struct mmc_host *host =3D card->host;
+> + =A0 =A0 =A0 struct mmc_host *host;
+> =A0 =A0 =A0 =A0int err =3D 0;
+>
+> + =A0 =A0 =A0 if (!card)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return err;
+> +
+> + =A0 =A0 =A0 host =3D card->host;
+> +
+> =A0 =A0 =A0 =A0if (!(host->caps2 & MMC_CAP2_CACHE_CTRL))
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return err;
+>
+> @@ -2401,7 +2406,7 @@ int mmc_suspend_host(struct mmc_host *host)
+> =A0 =A0 =A0 =A0cancel_delayed_work(&host->detect);
+> =A0 =A0 =A0 =A0mmc_flush_scheduled_work();
+> =A0 =A0 =A0 =A0if (mmc_try_claim_host(host)) {
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_cache_ctrl(host, 0);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_flush_cache(host->card);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_do_release_host(host);
+> =A0 =A0 =A0 =A0} else {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D -EBUSY;
+> --
+> 1.7.0.4
 
-I have had a chance to look at rts_pstor: it's awful, I'm afraid.  It
-emulates a SCSI device out of the PCI card reader, and it embeds its
-own copy of an SD stack inside the driver (in sd.c) behind the scenes
-instead of using the kernel's drivers/mmc stack, which is not acceptable.
-I don't think there's any future for the driver in mainline until these
-complaints are changed; it probably shouldn't even be in staging.
+Thanks for the changes.
+Reviewed-by: Saugata Das <saugata.das@linaro.org>
 
-So, I think that for it to be merged, it must first be rewritten to be
-a driver that's a few hundred lines long -- instead of 20,000! -- that
-(a) uses Linux's SD stack and (b) exposes MMC devices, not SCSI ones.
-That's a fairly complete rewrite, unfortunately, and would only cover
-the MMC/SD interface on the hardware -- the same hardware supports
-memorystick and xD too, which are different standards/subsystems.
-
-I had not looked at rts5139, but just took a quick look and it seems
-like it's an unmerged duplicate fork of the rts_pstor driver -- another
-20k lines, mostly the same as the ones in rts_pstor, of SCSI emulation
-and bundled SD stack, so all of my comments would apply to it too.
-
-Sorry I don't have better news!  I think your best option for mainline
-support would be to find a way to offer a long-term loan of systems with
-this hardware inside to any volunteers from linux-mmc@ who want to work
-on a replacement driver for it; I asked Dell for the same when I learned
-they were shipping these devices in laptops, but they don't seem to be
-able to loan out laptops for more than a couple of weeks.  I did start
-out on an rts_pstor rewrite, but wasn't able to get it working before
-my temporary access to the hardware ran out.
-
-(I do wish there were better relationships between the kernel community
-and people with new hardware that needs support added for it, such that
-we could just file a request with Red Hat, Lenovo or Dell to get access
-to shipping hardware with some new chip..)
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
