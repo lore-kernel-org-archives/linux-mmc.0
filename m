@@ -1,30 +1,37 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: shift with slot-id for CLKENA register
-Date: Tue, 14 Feb 2012 10:30:42 +0000
-Message-ID: <CAFbHwiRACA64DqUoT7QhnWj=DdnQKqBxpE2bNSVLEBj-u5qf=A@mail.gmail.com>
-References: <4F3A1C3F.4060109@samsung.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: ANNOUNCE: new "mmc-utils" repository
+Date: Tue, 14 Feb 2012 06:06:10 -0500
+Message-ID: <m2zkclisil.fsf@bob.laptop.org>
+References: <m2y5s8j86z.fsf@bob.laptop.org>
+	<E2E6AC6BFAD06343BA2D97432459C1B60723E3414C@EXDCVYMBSTM005.EQ1STM.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:59440 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751300Ab2BNKan (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2012 05:30:43 -0500
-Received: by daed14 with SMTP id d14so5280913dae.19
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2012 02:30:42 -0800 (PST)
-In-Reply-To: <4F3A1C3F.4060109@samsung.com>
+Received: from void.printf.net ([89.145.121.20]:58727 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752178Ab2BNLGZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 14 Feb 2012 06:06:25 -0500
+In-Reply-To: <E2E6AC6BFAD06343BA2D97432459C1B60723E3414C@EXDCVYMBSTM005.EQ1STM.local>
+	(Johan RUDHOLM's message of "Tue, 14 Feb 2012 09:04:26 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, James Hogan <james.hogan@imgtec.com>
+To: Johan RUDHOLM <johan.rudholm@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Peppe CAVALLARO <peppe.cavallaro@st.com>, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 
-On Tue, Feb 14, 2012 at 8:33 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> In CLKENA register, can support 16-SD card clocks.
-> If support correctly, must shift with slot-id.
+Hi,
+
+On Tue, Feb 14 2012, Johan RUDHOLM wrote:
+> Thank you for giving the code a home!
 >
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> Hmm... No, this works fine for me without doing anything special. Even
+> when reading/writing from/to the card, it works fine. It is an eMMC,
+> right?
 
-Looks good.
+Ah, great!  I was testing with an SD because I didn't have an eMMC
+nearby, thinking I'd be able to at least check the CSD transfer.
+Thanks, all makes sense.
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
