@@ -1,56 +1,77 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v7] ESDHC: Workaround for data crc error on p1010rdb
-Date: Mon, 13 Feb 2012 15:44:20 -0500
-Message-ID: <m2d39ijwez.fsf@bob.laptop.org>
-References: <1328688356-17510-1-git-send-email-r66093@freescale.com>
-	<m21uq52wk8.fsf@bob.laptop.org>
-	<110EED8CC96DFC488B7E717A2027A27C01F304@039-SN1MPN1-002.039d.mgd.msft.net>
-	<m2mx8pkqxy.fsf@bob.laptop.org>
-	<110EED8CC96DFC488B7E717A2027A27C021A89@039-SN1MPN1-002.039d.mgd.msft.net>
-	<m2ty2vjr11.fsf@bob.laptop.org> <m2pqdjjqo2.fsf@bob.laptop.org>
-	<110EED8CC96DFC488B7E717A2027A27C021CB2@039-SN1MPN1-002.039d.mgd.msft.net>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC] MMC-4.5 Context ID
+Date: Tue, 14 Feb 2012 11:16:40 +0900
+Message-ID: <4F39C408.6020501@samsung.com>
+References: <1328110021-15199-1-git-send-email-saugata.das@stericsson.com>
+ <m2mx8y6ls1.fsf@bob.laptop.org>
+ <CAKLKtzeRHVeMemTytmaon0GsZ2GqXwz_M_CX6aTj+xDDgN7HVg@mail.gmail.com>
+ <4F2F649E.2010106@samsung.com>
+ <CAKLKtzcAqJVDTZFYpijicWStr7m76Quv2ic8hRZp+X_Wmd-bFQ@mail.gmail.com>
+ <m2vcndks0m.fsf@bob.laptop.org>
+ <CAKLKtzdr68J7wF6m9wpCaXh3_XnL6y9tid2g4yzwxVVPgLndGA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58128 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754696Ab2BMUoZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Feb 2012 15:44:25 -0500
-In-Reply-To: <110EED8CC96DFC488B7E717A2027A27C021CB2@039-SN1MPN1-002.039d.mgd.msft.net>
-	(Huang Changming-R's message of "Mon, 13 Feb 2012 07:43:52 +0000")
+Received: from mailout3.samsung.com ([203.254.224.33]:28796 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751515Ab2BNCQm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2012 21:16:42 -0500
+Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LZD00L7H2B84WC0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 14 Feb 2012 11:16:41 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LZD009WX2BS2H50@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 14 Feb 2012 11:16:40 +0900 (KST)
+In-reply-to: <CAKLKtzdr68J7wF6m9wpCaXh3_XnL6y9tid2g4yzwxVVPgLndGA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Changming-R66093 <r66093@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jain Priyanka-B32167 <B32167@freescale.com>
+To: Saugata Das <saugata.das@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org
 
-Hi,
+On 02/14/2012 05:37 AM, Saugata Das wrote:
 
-On Mon, Feb 13 2012, Huang Changming-R66093 wrote:
->> Actually, I think I'm still missing something.  Why doesn't this work?
->> 
->> +static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int
->> +clock) {
->> +       /* Workaround to reduce the clock frequency for p1010 esdhc */
->> +       if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
->> +               if (clock > 20000000)
->> +                       clock -= 5000000;
->> +               if (clock > 40000000)
->> +                       clock -= 5000000;
->> +       }
->> +
->> +       /* Set the clock */
->> +       esdhc_set_clock(host, clock);
->> +}
->> 
-> These codes can work, too.
-> I forget the clock will be reduced 5M/10M only when the clock is
-> greater than 20MHz/45MHz.
-> So I should not test the clock in this function.
+> On 12 February 2012 02:27, Chris Ball <cjb@laptop.org> wrote:
+>> Hi,
+>>
+>> On Mon, Feb 06 2012, Saugata Das wrote:
+>>> Thanks for the info. Perhaps the initial MMC-4.5 device samples do not
+>>> implement this command well. Yes, this feature is good to have in the
+>>> kernel. I shall wait for some more comments on the proposed
+>>> implementation before submitting the patch.
+>>
+>> I'm not very excited about merging features that offer no concrete
+>> benefit, because it just grows the kernel (and list of places where bugs
+>> can occur) for no benefit.  So, it would be great if we could find a
+>> device that actually implements these contexts in a way that provides
+>> a performance benefit, to prove that adding the code is worthwhile.
+>>
+> 
+> Completely agree with you. The purpose of proposing this
+> implementation under [RFC] was to trigger some discussion on how this
+> feature should be implemented.
 
-Great, thanks -- please test and submit a patch with the code above,
-and I'll merge it.
+I agreed, too. i think Saugata's patch isn't completely
+we need the discussion to use this feature
+I will also check what need for this..
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks,
+Jaehoon Chung
+
+> 
+>> Thanks,
+>>
+>> - Chris.
+>> --
+>> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+>> One Laptop Per Child
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+
