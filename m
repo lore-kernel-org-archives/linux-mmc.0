@@ -1,115 +1,48 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [GIT PULL] MMC fixes for 3.3-rc4
-Date: Mon, 13 Feb 2012 23:51:04 -0500
-Message-ID: <m24nuuj9vr.fsf@bob.laptop.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH 0/4] mmc: sdhci-s3c: use the sdhci-pltfm.c and move the header
+ file
+Date: Tue, 14 Feb 2012 14:03:05 +0900
+Message-ID: <4F39EB09.3080702@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51885 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753638Ab2BNEvT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Feb 2012 23:51:19 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, 'kgene kim' <kgene.kim@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Linus,
+This patchset is the purpose for using sdhci-pltfm.c and 
+removing the arch dependency.
+The sdhci-s3c has too heavy arch dependency.
+For example, if work for sdhci-s3c.c at mmc-tree, sometime need to change sdhci.h for Samsung-Soc.
+But now we need to work at both mmc-next tree and Samsung-SoC tree.
+I think this is very inefficient and can conflict to merge.
+So remained at least dependency and moved the header file to mmc folder.
 
-Please pull from:
+And sdhci-s3c changed to use the sdhci-pltfm.c.
+There is no reason that didn't use the sdhci-pltfm.c.
+If we use the sdhci-pltfm.c,we can easily maintain the common part.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+In future, i will work more removing the arch dependency.
 
-to receive MMC fixes for 3.3-rc4.  I've signed an "mmc-fixes-for-3.3-rc4"
-tag.  There are no merge conflicts, and the patches have been tested in
-linux-next.  Thanks.
+This patchset based on mmc-next tree.
 
-The following changes since commit 3ec1e88b33a3bdd852ce8e014052acec7a9da8b5:
+Jaehoon Chung (4):
+  mmc: sdhci-s3c: use the sdhci-pltfm for Samsung-SoC
+  ARM: SAMSUNG: move the header file to driver directory
+  mmc: sdhci-s3c: use the sdhci-s3c.h instead of regs-sdhci.h
+  ARM: SAMSUNG: move the mmc platdata header file to linux/mmc/
 
-  Merge branch 'for-linus' of git://git.kernel.dk/linux-block (2012-02-11 10:07:11 -0800)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-for you to fetch changes up to f9c2a0dc42a6938ff2a80e55ca2bbd1d5581c72e:
-
-  mmc: dw_mmc: Fix PIO mode with support of highmem (2012-02-13 20:39:05 -0500)
-
-----------------------------------------------------------------
-MMC fixes for 3.3-rc4:
- * The most visible fix here is against a regression introduced in 3.3-rc1
-   that ran cards in Ultra High Speed mode even when they failed to initialize
-   in that mode, leading to lower-speed cards failing to mount.
- * A lockdep warning introduced in 3.3-rc1 is fixed.
- * Various other small driver fixes, most notably for a NULL dereference
-   when using highmem with dw_mmc.
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: sdhci-pci: set Medfield SDIO as non-removable
-
-Girish K S (2):
-      mmc: core: Fix low speed mmc card detection failure
-      mmc: core: Fix PowerOff Notify suspend/resume
-
-Guennadi Liakhovetski (2):
-      mmc: tmio_mmc: fix card eject during IO with DMA
-      mmc: sh_mmcif: fix late delayed work initialisation
-
-Jaehoon Chung (1):
-      mmc: core: add the capability for broken voltage
-
-Jean-Christophe PLAGNIOL-VILLARD (1):
-      mmc: of_mmc_spi: fix little endian support
-
-Jerry Huang (2):
-      mmc: esdhc: add PIO mode support
-      mmc: esdhc: set the timeout to the max value
-
-Jurgen Heeks (1):
-      mmc: core: Fix comparison issue in mmc_compare_ext_csds
-
-Ludovic Desroches (1):
-      mmc: atmel-mci: save and restore sdioirq when soft reset is performed
-
-Philip Rakity (1):
-      mmc: core: UHS sdio card that fails should not exceed 50MHz
-
-Rabin Vincent (1):
-      mmc: block: Init ro_lock sysfs attr to fix lockdep warnings
-
-Roy Zang (1):
-      mmc: esdhc: fix errors when booting kernel on Freescale eSDHC version 2.3
-
-Seungwon Jeon (1):
-      mmc: dw_mmc: Fix PIO mode with support of highmem
-
-Sujit Reddy Thumma (1):
-      mmc: core: Ensure clocks are always enabled before host interaction
-
- drivers/mmc/card/block.c          |    1 +
- drivers/mmc/core/core.c           |   49 ++++++++++---
- drivers/mmc/core/host.h           |   21 ------
- drivers/mmc/core/mmc.c            |   26 +++++---
- drivers/mmc/core/sd.c             |   22 +++++-
- drivers/mmc/core/sdio.c           |    7 +-
- drivers/mmc/core/sdio_irq.c       |   10 ++-
- drivers/mmc/host/atmel-mci.c      |    3 +
- drivers/mmc/host/dw_mmc.c         |  144 +++++++++++++++++++------------------
- drivers/mmc/host/of_mmc_spi.c     |    4 +-
- drivers/mmc/host/sdhci-of-esdhc.c |   32 ++++++++
- drivers/mmc/host/sdhci-pci.c      |    2 +-
- drivers/mmc/host/sdhci-pltfm.c    |   10 +++-
- drivers/mmc/host/sh_mmcif.c       |   16 +++--
- drivers/mmc/host/tmio_mmc.h       |    7 ++-
- drivers/mmc/host/tmio_mmc_dma.c   |   12 +++
- drivers/mmc/host/tmio_mmc_pio.c   |    6 ++-
- include/linux/mmc/card.h          |    4 +
- include/linux/mmc/dw_mmc.h        |    6 +-
- include/linux/mmc/host.h          |   20 +++++
- 20 files changed, 269 insertions(+), 133 deletions(-)
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+ arch/arm/mach-exynos/setup-sdhci-gpio.c         |    1 -
+ arch/arm/mach-s5pc100/setup-sdhci-gpio.c        |    1 -
+ arch/arm/mach-s5pv210/setup-sdhci-gpio.c        |    1 -
+ arch/arm/plat-samsung/include/plat/regs-sdhci.h |   87 ---------
+ arch/arm/plat-samsung/include/plat/sdhci.h      |   59 +------
+ drivers/mmc/host/sdhci-s3c.c                    |  230 ++++++++---------------
+ drivers/mmc/host/sdhci-s3c.h                    |   89 +++++++++
+ include/linux/mmc/sdhci-s3c.h                   |   84 ++++++++
+ 8 files changed, 250 insertions(+), 302 deletions(-)
+ delete mode 100644 arch/arm/plat-samsung/include/plat/regs-sdhci.h
+ create mode 100644 drivers/mmc/host/sdhci-s3c.h
+ create mode 100644 include/linux/mmc/sdhci-s3c.h
