@@ -1,74 +1,67 @@
-From: Huang Changming-R66093 <r66093@freescale.com>
-Subject: RE: [PATCH v7] ESDHC: Workaround for data crc error on p1010rdb
-Date: Tue, 14 Feb 2012 06:11:25 +0000
-Message-ID: <110EED8CC96DFC488B7E717A2027A27C022DF3@039-SN1MPN1-002.039d.mgd.msft.net>
-References: <1328688356-17510-1-git-send-email-r66093@freescale.com>
-	<m21uq52wk8.fsf@bob.laptop.org>
-	<110EED8CC96DFC488B7E717A2027A27C01F304@039-SN1MPN1-002.039d.mgd.msft.net>
-	<m2mx8pkqxy.fsf@bob.laptop.org>
-	<110EED8CC96DFC488B7E717A2027A27C021A89@039-SN1MPN1-002.039d.mgd.msft.net>
-	<m2ty2vjr11.fsf@bob.laptop.org> <m2pqdjjqo2.fsf@bob.laptop.org>
-	<110EED8CC96DFC488B7E717A2027A27C021CB2@039-SN1MPN1-002.039d.mgd.msft.net>
- <m2d39ijwez.fsf@bob.laptop.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: mmc_test
+Date: Tue, 14 Feb 2012 09:50:53 +0200
+Message-ID: <4F3A125D.8000603@intel.com>
+References: <CAMKhXh=5eymTCzDPRd0ipxQN5z4ZB2BSoTxwy1C+v7iP8T_BiQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:22231
-	"EHLO DB3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751317Ab2BNGLc convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 14 Feb 2012 01:11:32 -0500
-In-Reply-To: <m2d39ijwez.fsf@bob.laptop.org>
-Content-Language: en-US
+Received: from mga02.intel.com ([134.134.136.20]:36658 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753108Ab2BNHut (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 14 Feb 2012 02:50:49 -0500
+In-Reply-To: <CAMKhXh=5eymTCzDPRd0ipxQN5z4ZB2BSoTxwy1C+v7iP8T_BiQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jain Priyanka-B32167 <B32167@freescale.com>
+To: Shridhar Rasal <shri.rasal@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-
-
-Thanks
-Jerry Huang
-
-
-> -----Original Message-----
-> From: Chris Ball [mailto:cjb@laptop.org]
-> Sent: Tuesday, February 14, 2012 4:44 AM
-> To: Huang Changming-R66093
-> Cc: linux-mmc@vger.kernel.org; Jain Priyanka-B32167
-> Subject: Re: [PATCH v7] ESDHC: Workaround for data crc error on p1010rdb
+On 14/02/12 08:41, Shridhar Rasal wrote:
+> [sorry for spamming you]
 > 
-> Hi,
+> Dear Adrian,
 > 
-> On Mon, Feb 13 2012, Huang Changming-R66093 wrote:
-> >> Actually, I think I'm still missing something.  Why doesn't this work?
-> >>
-> >> +static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int
-> >> +clock) {
-> >> +       /* Workaround to reduce the clock frequency for p1010 esdhc */
-> >> +       if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
-> >> +               if (clock > 20000000)
-> >> +                       clock -= 5000000;
-> >> +               if (clock > 40000000)
-> >> +                       clock -= 5000000;
-> >> +       }
-> >> +
-> >> +       /* Set the clock */
-> >> +       esdhc_set_clock(host, clock); }
-> >>
-> > These codes can work, too.
-> > I forget the clock will be reduced 5M/10M only when the clock is
-> > greater than 20MHz/45MHz.
-> > So I should not test the clock in this function.
+> I am working on K3.1. 
+> I am trying to run mmc_test on my set-up. I have added mmc_test as a driver.
+> But sysfs entries(test/testlist) are getting created only for any of SDIO host.
+
+mmc_test will not work if mmc_block has already been given all the
+MMC devices.
+
+You can always switch between mmc_test and mmc_block by
+unbinding / binding e.g.
+
+
+# ls -al /sys/bus/mmc/drivers/mmcblk
+drwxr-xr-x    2 root     0               0 Jan  1 00:00 .
+drwxr-xr-x    4 root     0               0 Jan  1 00:00 ..
+--w-------    1 root     0            4096 Jan  1 00:01 bind
+lrwxrwxrwx    1 root     0               0 Jan  1 00:01 mmc0:0001 ->
+../../../../devices/platform/mmci-omap-hs.1/mmc_host/mmc0/mmc0:0001
+--w-------    1 root     0            4096 Jan  1 00:01 uevent
+--w-------    1 root     0            4096 Jan  1 00:01 unbind
+
+# echo mmc0:0001 > /sys/bus/mmc/drivers/mmcblk/unbind
+
+# echo mmc0:0001 > /sys/bus/mmc/drivers/mmc_test/bind
+[  128.221313] mmc_test mmc0:0001: Card claimed for testing.
+
+
 > 
-> Great, thanks -- please test and submit a patch with the code above, and
-> I'll merge it.
+> I digged  further and found that,  
+> 1.  mmc_test_probe is invoked only in case of SDIO and not for other hosts.
+> 2.  this is because of from mmc_bus_probe( ), only for SDIO host -
+> mmc_test_probe () invoked and for other hosts - mmc_blk_probe () invoked.
+> 
+> 
+> - What can be reason for this?
+> - Am I missing some patches? 
+> 
+> Also, please let me know, where can I post such mmc related queries.
 
+MMC mailing list:
 
-Thanks, Chris.
-I have sent it again.
+	http://vger.kernel.org/vger-lists.html#linux-mmc
 
-
-Jerry Huang
 
