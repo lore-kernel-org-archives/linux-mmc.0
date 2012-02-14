@@ -1,84 +1,50 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: ANNOUNCE: new "mmc-utils" repository
-Date: Tue, 14 Feb 2012 17:31:16 +0900
-Message-ID: <4F3A1BD4.3010601@samsung.com>
-References: <m2y5s8j86z.fsf@bob.laptop.org> <4F39F785.9070206@samsung.com>
- <E2E6AC6BFAD06343BA2D97432459C1B60723E34159@EXDCVYMBSTM005.EQ1STM.local>
+Subject: [PATCH] mmc: dw_mmc: shift with slot-id for CLKENA register
+Date: Tue, 14 Feb 2012 17:33:03 +0900
+Message-ID: <4F3A1C3F.4060109@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:22826 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756366Ab2BNIbU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2012 03:31:20 -0500
-Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
+Received: from mailout4.samsung.com ([203.254.224.34]:32799 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751300Ab2BNIdF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2012 03:33:05 -0500
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LZD0075TJO4HXU0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 14 Feb 2012 17:31:18 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
+ 2010)) with ESMTP id <0LZD00H9GJR4WXU0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 14 Feb 2012 17:33:04 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LZD00AKXJO5FYG1@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 14 Feb 2012 17:31:17 +0900 (KST)
-In-reply-to: <E2E6AC6BFAD06343BA2D97432459C1B60723E34159@EXDCVYMBSTM005.EQ1STM.local>
+ 2010)) with ESMTPA id <0LZD00E6CJR4XDW0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 14 Feb 2012 17:33:04 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Johan RUDHOLM <johan.rudholm@stericsson.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Peppe CAVALLARO <peppe.cavallaro@st.com>, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
 
-On 02/14/2012 05:07 PM, Johan RUDHOLM wrote:
+In CLKENA register, can support 16-SD card clocks.
+If support correctly, must shift with slot-id.
 
-> Jaehoon Chung wrote:
-> 
->> On 02/13/2012 02:03 AM, Chris Ball wrote:
->>
->>> Hi,
->>>
->>> I've created a repository for userspace mmc tools now:
->>>
->>> git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc-utils.git
->>>
->>> At the moment the only commands supported are Johan Rudholm's extcsd
->>> write-protect commands, exposed as:
->>>
->>>    ./mmc extcsd read /dev/mmcblkX
->>>    ./mmc extcsd write /dev/mmcblkX
->>>
->>> Johan, when I try running these I'm seeing:
->>>
->>> octavius:cjb~/git/mmc-utils % sudo ./mmc extcsd read /dev/mmcblk0
->>> sdhci-pci 0000:0d:00.0: mmc_blk_ioctl_cmd: cmd error -110
->>> ioctl: Connection timed out
->>> Could not read EXT_CSD from /dev/mmcblk0
->>
->> I tested with SD and eMMC.
->> In eMMC case..
->>
->> /opt/home/root # mmc extcsd read /dev/mmcblk0
->> Power ro locking: possible
->> Permanent ro locking: possible
->> ro lock status: not locked
->>
->> But In SD card,
->> s3c-sdhci s3c-sdhci.2: mmc_blk_ioctl_cmd: cmd error -110
->> ioctl: Connection timed out
->> Could not read EXT_CSD from /dev/mmcblk1
->>
->> What differ? Anyway..It's great about mmc-utils.
-> 
-> Yes, this is expected -- SD cards don't have the ext csd register.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
-What kernel version is supported? up to linux-3.3? did you know?
-Best Regards,
-Jaehoon Chung
-
-> 
-> Kind regards, Johan
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 7d6ad6c..f9457e5 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -652,8 +652,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+ 			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+ 
+ 		/* enable clock */
+-		mci_writel(host, CLKENA, SDMMC_CLKEN_ENABLE |
+-			   SDMMC_CLKEN_LOW_PWR);
++		mci_writel(host, CLKENA, ((SDMMC_CLKEN_ENABLE |
++			   SDMMC_CLKEN_LOW_PWR) << slot->id));
+ 
+ 		/* inform CIU */
+ 		mci_send_cmd(slot,
