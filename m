@@ -1,29 +1,51 @@
-From: Olof Johansson <olof@lixom.net>
+From: Paul Gortmaker <paul.gortmaker@windriver.com>
 Subject: Re: [PATCH] sdhci-tegra: fix linux/module.h included twice
-Date: Wed, 15 Feb 2012 10:38:16 -0800
-Message-ID: <CAOesGMixdsMxJXaELs74X9ORHZzQFjAMFW+yZ1YaBHtJe_17bQ@mail.gmail.com>
+Date: Wed, 15 Feb 2012 14:10:37 -0500
+Message-ID: <4F3C032D.7080905@windriver.com>
 References: <1329328466-4627-1-git-send-email-danny.kukawka@bisect.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:56711 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754273Ab2BOSiR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 13:38:17 -0500
+Received: from mail1.windriver.com ([147.11.146.13]:53280 "EHLO
+	mail1.windriver.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753650Ab2BOTL1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 14:11:27 -0500
 In-Reply-To: <1329328466-4627-1-git-send-email-danny.kukawka@bisect.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Danny Kukawka <danny.kukawka@bisect.de>
-Cc: Chris Ball <cjb@laptop.org>, Danny Kukawka <dkukawka@suse.de>, Stephen Warren <swarren@nvidia.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Russell King <rmk+kernel@arm.linux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Danny Kukawka <dkukawka@suse.de>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@nvidia.com>, Russell King <rmk+kernel@arm.linux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wed, Feb 15, 2012 at 9:54 AM, Danny Kukawka <danny.kukawka@bisect.de> wrote:
+On 12-02-15 12:54 PM, Danny Kukawka wrote:
 > Remove double include of linux/module.h.
->
+> 
 > Signed-off-by: Danny Kukawka <danny.kukawka@bisect.de>
 
-Obviously correct, not that Chris needs it but anyway:
+Hi Danny,
 
-Acked-by: Olof Johansson <olof@lixom.net>
+We've already got these covered all in one go.
 
+https://lkml.org/lkml/2012/2/4/134
 
--Olof
+Thanks,
+Paul.
+
+---
+
+> ---
+>  drivers/mmc/host/sdhci-tegra.c |    1 -
+>  1 files changed, 0 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 78a36eb..cb34856 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -23,7 +23,6 @@
+>  #include <linux/gpio.h>
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/host.h>
+> -#include <linux/module.h>
+>  
+>  #include <asm/gpio.h>
+>  
