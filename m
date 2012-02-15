@@ -1,58 +1,36 @@
-From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
-Subject: Re: ANNOUNCE: new "mmc-utils" repository
-Date: Wed, 15 Feb 2012 14:43:13 +0100
-Message-ID: <4F3BB671.9040208@st.com>
-References: <m2y5s8j86z.fsf@bob.laptop.org> <4F3BAB56.80606@st.com> <m2wr7ogqxm.fsf@bob.laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Danny Kukawka <danny.kukawka@bisect.de>
+Subject: [PATCH] sdhci-tegra: fix linux/module.h included twice
+Date: Wed, 15 Feb 2012 18:54:26 +0100
+Message-ID: <1329328466-4627-1-git-send-email-danny.kukawka@bisect.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:48049 "EHLO
-	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756133Ab2BOOJj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 09:09:39 -0500
-In-Reply-To: <m2wr7ogqxm.fsf@bob.laptop.org>
+Received: from wp188.webpack.hosteurope.de ([80.237.132.195]:41575 "EHLO
+	wp188.webpack.hosteurope.de" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753811Ab2BORyi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 12:54:38 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Johan RUDHOLM <johan.rudholm@stericsson.com>, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Cc: Danny Kukawka <dkukawka@suse.de>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@nvidia.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Russell King <rmk+kernel@arm.linux.org.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 2/15/2012 2:35 PM, Chris Ball wrote:
-> Hi,
-> 
-> On Wed, Feb 15 2012, Giuseppe CAVALLARO wrote:
->> Hi Chris
->>
->> On 2/12/2012 6:03 PM, Chris Ball wrote:
->>> Hi,
->>>
->>> I've created a repository for userspace mmc tools now:
->>>
->>> git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc-utils.git
->>>
->>> At the moment the only commands supported are Johan Rudholm's extcsd
->>> write-protect commands, exposed as:
->>>
->>>    ./mmc extcsd read /dev/mmcblkX
->>>    ./mmc extcsd write /dev/mmcblkX
->>
->>
->> Is it worth now trying to add the logic behind the patch (mmc: debugfs:
->> parse ext_csd via debug_fs (v2)) I sent time ago to parse the EXT_CSD?
->> I can do that on mmc-utils if not yet done. Pls let me know.
-> 
-> Yes, please.  (If you look farther down in the same message I did
-> mention adding it!)
-> 
-> I think you can add it all to mmc extcsd read, rather than introducing
-> a new command.
+Remove double include of linux/module.h.
 
-Agree! I'll do that and provide a patch asap.
+Signed-off-by: Danny Kukawka <danny.kukawka@bisect.de>
+---
+ drivers/mmc/host/sdhci-tegra.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
 
-peppe
-
-> 
-> Thanks,
-> 
-> - Chris.
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 78a36eb..cb34856 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -23,7 +23,6 @@
+ #include <linux/gpio.h>
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+-#include <linux/module.h>
+ 
+ #include <asm/gpio.h>
+ 
+-- 
+1.7.8.3
 
