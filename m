@@ -1,43 +1,66 @@
-From: Alex Hornung <alex@alexhornung.com>
-Subject: [PATCH 1/1] mmc_spi - Fix endianess issue with voltage-ranges
-Date: Thu, 16 Feb 2012 00:01:47 +0000
-Message-ID: <1329350507-22528-1-git-send-email-alex@alexhornung.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v4 2/2] mmc: core: Support packed command for eMMC4.5 device
+Date: Thu, 16 Feb 2012 09:09:45 +0900
+Message-ID: <004301ccec3f$4a4e9320$deebb960$%jun@samsung.com>
+References: <000b01ccdc0a$0336abc0$09a40340$%jun@samsung.com>
+ <fd4b8ef9df0d19e20c07923077937231.squirrel@www.codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:34721 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755243Ab2BPACl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 19:02:41 -0500
+Received: from mailout4.samsung.com ([203.254.224.34]:40664 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751172Ab2BPAJr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 19:09:47 -0500
+In-reply-to: <fd4b8ef9df0d19e20c07923077937231.squirrel@www.codeaurora.org>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Alex Hornung <alex@alexhornung.com>
+To: merez@codeaurora.org
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
- * The voltage-ranges values from the device tree were used as-is,
-   without first (potentially) swapping the bytes to the target CPU's
-   endianess.
+Maya Erez <merez@codeaurora.org> wrote:
+> > @@ -1065,12 +1075,60 @@ static int mmc_blk_err_check(struct mmc_card
+> > *card,
+> >  	if (!brq->data.bytes_xfered)
+> >  		return MMC_BLK_RETRY;
+> >
+> > +	if (mq_mrq->packed_cmd != MMC_PACKED_NONE) {
+> > +		if (unlikely(brq->data.blocks << 9 != brq->data.bytes_xfered))
+> > +			return MMC_BLK_PARTIAL;
+> > +		else
+> > +			return MMC_BLK_SUCCESS;
+> > +	}
+> > +
+> >  	if (blk_rq_bytes(req) != brq->data.bytes_xfered)
+> >  		return MMC_BLK_PARTIAL;
+> >
+> >  	return MMC_BLK_SUCCESS;
+> >  }
+> I think it would be best to keep the request length (brq->data.blocks << 9
+> or blk_rq_bytes(req)) in a variable and use it in the original if above.
+> This way you can avoid doubling the exit points from the function.
+In case of packed command, brq->data.blocks contains the sum of blocks for individual request.
+That means blk_rq_bytes(req) doesn't represent all packed length bytes.
+And "brq->data.blocks << 9" is not idential to blk_rq_bytes(req) in non-packed command.
+"brq->data.blocks" is overwritten during request preparation by the following reasons.
+- brq->data.blocks > card->host->max_blk_count
+- disable_multi
+- do_rel_wr
+So "brq->data.blocks << 9" is not good choice for request length  in non-packed command.
 
-Signed-off-by: Alex Hornung <alex@alexhornung.com>
----
- drivers/mmc/host/of_mmc_spi.c |    5 +++--
- 1 files changed, 3 insertions(+), 2 deletions(-)
+Thanks,
+Seungwon Jeon
 
-diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index ab66f24..4bfd3e8 100644
---- a/drivers/mmc/host/of_mmc_spi.c
-+++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -112,9 +112,10 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 	for (i = 0; i < num_ranges; i++) {
- 		const int j = i * 2;
- 		u32 mask;
-+		u32 vdd_min = be32_to_cpu(voltage_ranges[j]);
-+		u32 vdd_max = be32_to_cpu(voltage_ranges[j + 1]);
- 
--		mask = mmc_vddrange_to_ocrmask(voltage_ranges[j],
--					       voltage_ranges[j + 1]);
-+		mask = mmc_vddrange_to_ocrmask(vdd_min, vdd_max);
- 		if (!mask) {
- 			ret = -EINVAL;
- 			dev_err(dev, "OF: voltage-range #%d is invalid\n", i);
--- 
-1.7.3.4
+> Thanks,
+> Maya Erez
+> Consultant for Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
