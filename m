@@ -1,42 +1,44 @@
-From: Huang Shijie <b32955@freescale.com>
-Subject: Re: [PATCH v5 2/2] mxs-dma : rewrite the last parameter of mxs_dma_prep_slave_sg()
-Date: Thu, 16 Feb 2012 10:27:34 +0800
-Message-ID: <4F3C6996.8060205@freescale.com>
-References: <1329110756-14434-1-git-send-email-b32955@freescale.com> <1329110756-14434-3-git-send-email-b32955@freescale.com> <20120215195552.GB2399@r65073-Latitude-D630> <4F3C6466.9000500@freescale.com> <20120216021223.GF30946@r65073-Latitude-D630>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: dw_mmc: fixed compile error when disable CONFIG_MMC_DW_IDMAC
+Date: Thu, 16 Feb 2012 12:40:17 +0900
+Message-ID: <000001ccec5c$b34a5040$19def0c0$%jun@samsung.com>
+References: <4F3C67BA.7040309@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:44104
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753697Ab2BPCZm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 21:25:42 -0500
-In-Reply-To: <20120216021223.GF30946@r65073-Latitude-D630>
+Received: from mailout4.samsung.com ([203.254.224.34]:35793 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756360Ab2BPDkT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 22:40:19 -0500
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LZG00IU8VJ5UGE0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 16 Feb 2012 12:40:17 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
+ 64bit (built Sep  7 2010)) with ESMTPA id <0LZG006GYVJ51800@mmp1.samsung.com>
+ for linux-mmc@vger.kernel.org; Thu, 16 Feb 2012 12:40:17 +0900 (KST)
+In-reply-to: <4F3C67BA.7040309@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: vinod.koul@intel.com, artem.bityutskiy@intel.com, w.sang@pengutronix.de, LW@KARO-electronics.de, broonie@opensource.wolfsonmicro.com, lrg@ti.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>
 
-Hi,
->> Hi Shawn:
->>> I'm trying to give it a test.  But it does not apply on either mainline
->>> or next tree.  You probably had a wrong base for this patch.
->>>
->> thanks for your work.
->>
->> As the previous email said, this patch set bases on :[PATCH v2]
->> mtd/gpmi : add gpmi support for mx6q.
->>
-> Then you are doing something wrong.  This series should be based on
-> mainline, and then you add imx6q support on top of this series.
-sorry for the inconvenience.
-I send the two patches at the same time.
+Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> When disable CONFIG_MMC_DW_IDMAC, can see the compiler error.
+> Because in dw_mci_post_req(), called the dw_mci_get_dma_dir().
+> But that function is in #ifdef CONFIG_MMC_DW_IDMAC.
+> 
+> I think that function is generic function.
+> Not need the CONFIG_MMC_DW_IDMAC.
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 
-The mtd/gpmi patch is just a small patch, I think it will be merged 
-before this patch set.
+I tested it. Looks ok to me.
 
-BR
-Huang Shijie
-
-
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
