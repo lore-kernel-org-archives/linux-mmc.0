@@ -1,55 +1,74 @@
-From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
-Subject: system_nrt_wq, system suspend, and the freezer
-Date: Thu, 16 Feb 2012 09:41:34 -0500 (EST)
-Message-ID: <Pine.LNX.4.44L0.1202160930010.1268-100000@iolanthe.rowland.org>
+From: Jae hoon Chung <jh80.chung@gmail.com>
+Subject: Re: [PATCH 4/4] ARM: SAMSUNG: move the mmc platdata header file to linux/mmc/
+Date: Thu, 16 Feb 2012 23:45:04 +0900
+Message-ID: <CAELcNGR7ooTwaNL9p3=hPkBRiOURckPJPTG0LfUjnW4AEEnMuA@mail.gmail.com>
+References: <4F39EB0D.90905@samsung.com>
+	<4F3CFD00.6020909@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, David Airlie <airlied-cv59FeDIM0c@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Linux-pm mailing list <linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, keyrings-6DNke4IJHB0gsBAKwltoeQ@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:33372 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751627Ab2BPOpG convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2012 09:45:06 -0500
+In-Reply-To: <4F3CFD00.6020909@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kukjin Kim <kgene.kim@samsung.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Folks:
+2012/2/16 Kukjin Kim <kgene.kim@samsung.com>:
+> On 02/14/12 14:03, Jaehoon Chung wrote:
+>>
+>>
+>> Signed-off-by: Jaehoon Chung<jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin-park<kyungmin.park@samsung.com>
+>> ---
+>> =A0arch/arm/plat-samsung/include/plat/sdhci.h | =A0 59 +------------=
+-------
+>> =A0include/linux/mmc/sdhci-s3c.h =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 84
+>> ++++++++++++++++++++++++++++
+>> =A02 files changed, 85 insertions(+), 58 deletions(-)
+>> =A0create mode 100644 include/linux/mmc/sdhci-s3c.h
+>>
+> Hi,
+>
+> I don't agree with this.
+> Basically, the components(struct s3c_sdhci_platdata and some enums) y=
+ou
+> moved here are just for platform data on each board in arch/arm/.
+Hi Mr. Kukjin.
 
-I recently uncovered a bug in the block layer.  It uses a workqueue to
-periodically probe removable drives for media or other state changes,
-and the workqueue it uses is system_nrt_wq.
+I didn't think so. That components are the board specific. right?
+=46or example, dw_mmc.h and  sdhci-spear.h are included the board-data.
+But that didn't locate in arch/arm/. there are linux/mmc/.
 
-The bug is that system_nrt_wq is not freezable, so it keeps on running
-even while the system is in the process of suspending or hibernating.  
-Doing I/O to a suspended drive doesn't work well and in some cases
-causes nasty problems.  Obviously these polls need to stop during a 
-suspend transition.
+I think no problem that move to linux/mmc/.
 
-A search through the kernel shows that system_nrt_wq is also used in a
-few other subsystems:
+But that's right that s3cxxx_setup_sdhci0_cfg_gpio() or
+exynos_setup_sdhciX_cfg_gpio
+located in arch/arm/.
 
-./fs/cifs/cifssmb.c:	queue_work(system_nrt_wq, &rdata->work);
-./fs/cifs/cifssmb.c:	queue_work(system_nrt_wq, &wdata->work);
-./fs/cifs/misc.c:				queue_work(system_nrt_wq,
-./fs/cifs/connect.c:	queue_delayed_work(system_nrt_wq, &server->echo, SMB_ECHO_INTERVAL);
-./fs/cifs/connect.c:	queue_delayed_work(system_nrt_wq, &tcp_ses->echo, SMB_ECHO_INTERVAL);
-./fs/cifs/connect.c:	queue_delayed_work(system_nrt_wq, &cifs_sb->prune_tlinks,
-./fs/cifs/connect.c:	queue_delayed_work(system_nrt_wq, &cifs_sb->prune_tlinks,
+That's platdata but that is also generic platdata.
+That platdata structure didn't change whatever.
 
-./drivers/mmc/core/host.c:		queue_work(system_nrt_wq, &host->clk_gate_work);
+What's problem?
 
-./drivers/gpu/drm/drm_crtc_helper.c:		queue_delayed_work(system_nrt_wq, delayed_work, DRM_OUTPUT_POLL_PERIOD);
-./drivers/gpu/drm/drm_crtc_helper.c:		queue_delayed_work(system_nrt_wq, &dev->mode_config.output_poll_work, DRM_OUTPUT_POLL_PERIOD);
-./drivers/gpu/drm/drm_crtc_helper.c:		queue_delayed_work(system_nrt_wq, &dev->mode_config.output_poll_work, 0);
+Best Regards,
+Jaehoon Chung
 
-./security/keys/gc.c:		queue_work(system_nrt_wq, &key_gc_work);
-./security/keys/gc.c:	queue_work(system_nrt_wq, &key_gc_work);
-./security/keys/gc.c:	queue_work(system_nrt_wq, &key_gc_work);
-./security/keys/gc.c:		queue_work(system_nrt_wq, &key_gc_work);
-./security/keys/key.c:			queue_work(system_nrt_wq, &key_gc_work);
-
-My question to all of you: Should system_nrt_wq be made freezable, or 
-should I create a new workqueue that is both freezable and 
-non-reentrant?  And if I do, which of the usages above should be 
-converted to the new workqueue?
-
-Thanks,
-
-Alan Stern
+>
+> Thanks.
+>
+> Best regards,
+> Kgene.
+> --
+> Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+> SW Solution Development Team, Samsung Electronics Co., Ltd.
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
