@@ -1,32 +1,38 @@
-From: Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: system_nrt_wq, system suspend, and the freezer
-Date: Thu, 16 Feb 2012 11:01:49 -0800
-Message-ID: <20120216190149.GM24986@google.com>
-References: <Pine.LNX.4.44L0.1202160930010.1268-100000@iolanthe.rowland.org>
- <20120216102728.230b99ba@poochiereds.net>
- <20120216162951.GF24986@google.com>
- <20120216135945.3dd3893a@samba.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: ANNOUNCE: new "mmc-utils" repository
+Date: Thu, 16 Feb 2012 15:49:54 -0500
+Message-ID: <m24nuqfqq5.fsf@bob.laptop.org>
+References: <m2y5s8j86z.fsf@bob.laptop.org> <4F39F785.9070206@samsung.com>
+	<E2E6AC6BFAD06343BA2D97432459C1B60723E34159@EXDCVYMBSTM005.EQ1STM.local>
+	<4F3A1BD4.3010601@samsung.com> <m2mx8lihzs.fsf@bob.laptop.org>
+	<E2E6AC6BFAD06343BA2D97432459C1B60723E982CA@EXDCVYMBSTM005.EQ1STM.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20120216135945.3dd3893a-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>
-Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeff Layton <jlayton-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>
-Cc: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, David Airlie <airlied-cv59FeDIM0c@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Linux-pm mailing list <linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, keyrings-6DNke4IJHB0gsBAKwltoeQ@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:57703 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751354Ab2BPUuI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 16 Feb 2012 15:50:08 -0500
+In-Reply-To: <E2E6AC6BFAD06343BA2D97432459C1B60723E982CA@EXDCVYMBSTM005.EQ1STM.local>
+	(Johan RUDHOLM's message of "Tue, 14 Feb 2012 16:31:12 +0100")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Johan RUDHOLM <johan.rudholm@stericsson.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Peppe CAVALLARO <peppe.cavallaro@st.com>, Shashidhar Hiremath <shashidharh@vayavyalabs.com>
 
-Hello, Jeff.
+Hi,
 
-On Thu, Feb 16, 2012 at 01:59:45PM -0500, Jeff Layton wrote:
-> The other problem here is that we really ought to be submitting the
-> write completion handler to a workqueue that has WQ_MEM_RECLAIM set.
-> Since none of the public wq's have that then I guess we'll have to make
-> our own?
+On Tue, Feb 14 2012, Johan RUDHOLM wrote:
+> Actually, to be able to write to the ext csd via the ioctl, "mmc:
+> core: check for zero length ioctl data" is also required. I think this
+> went into 3.3-rc1.
 
-Yeap, if a rescuer should be there, a separate wq is necessary.
+I'm seeing a crash when trying to write to the ext_csd on 3.0, so it
+sounds like we should send this fix to stable@ -- I'll do that shortly.
 
-Thank you.
+Thanks,
 
+- Chris.
 -- 
-tejun
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
