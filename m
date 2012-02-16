@@ -1,39 +1,59 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH v5 2/2] mxs-dma : rewrite the last parameter of
- mxs_dma_prep_slave_sg()
-Date: Wed, 15 Feb 2012 18:12:23 -0800
-Message-ID: <20120216021223.GF30946@r65073-Latitude-D630>
-References: <1329110756-14434-1-git-send-email-b32955@freescale.com>
- <1329110756-14434-3-git-send-email-b32955@freescale.com>
- <20120215195552.GB2399@r65073-Latitude-D630>
- <4F3C6466.9000500@freescale.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: mmc: dw_mmc: fixed compile error when disable CONFIG_MMC_DW_IDMAC
+Date: Thu, 16 Feb 2012 11:19:38 +0900
+Message-ID: <4F3C67BA.7040309@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:34810 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754791Ab2BPCMb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 21:12:31 -0500
-Content-Disposition: inline
-In-Reply-To: <4F3C6466.9000500@freescale.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:28660 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756809Ab2BPCTm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 21:19:42 -0500
+Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LZG0015FRSTK9K0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 16 Feb 2012 11:19:41 +0900 (KST)
+Received: from [165.213.219.108] by mmp1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LZG001VGRSSL460@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 16 Feb 2012 11:19:40 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Shijie <b32955@freescale.com>
-Cc: vinod.koul@intel.com, artem.bityutskiy@intel.com, w.sang@pengutronix.de, LW@KARO-electronics.de, broonie@opensource.wolfsonmicro.com, lrg@ti.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
-On Thu, Feb 16, 2012 at 10:05:26AM +0800, Huang Shijie wrote:
-> Hi Shawn:
-> >I'm trying to give it a test.  But it does not apply on either mainline
-> >or next tree.  You probably had a wrong base for this patch.
-> >
-> thanks for your work.
-> 
-> As the previous email said, this patch set bases on :[PATCH v2]
-> mtd/gpmi : add gpmi support for mx6q.
-> 
-Then you are doing something wrong.  This series should be based on
-mainline, and then you add imx6q support on top of this series.
+When disable CONFIG_MMC_DW_IDMAC, can see the compiler error.
+Because in dw_mci_post_req(), called the dw_mci_get_dma_dir().
+But that function is in #ifdef CONFIG_MMC_DW_IDMAC.
 
--- 
-Regards,
-Shawn
+I think that function is generic function.
+Not need the CONFIG_MMC_DW_IDMAC.
+
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index f9457e5..692c3ba 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -295,7 +295,6 @@ static void dw_mci_stop_dma(struct dw_mci *host)
+ 	}
+ }
+ 
+-#ifdef CONFIG_MMC_DW_IDMAC
+ static int dw_mci_get_dma_dir(struct mmc_data *data)
+ {
+ 	if (data->flags & MMC_DATA_WRITE)
+@@ -304,6 +303,7 @@ static int dw_mci_get_dma_dir(struct mmc_data *data)
+ 		return DMA_FROM_DEVICE;
+ }
+ 
++#ifdef CONFIG_MMC_DW_IDMAC
+ static void dw_mci_dma_cleanup(struct dw_mci *host)
+ {
+ 	struct mmc_data *data = host->data;
