@@ -1,44 +1,80 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: dw_mmc: fixed compile error when disable CONFIG_MMC_DW_IDMAC
-Date: Thu, 16 Feb 2012 12:40:17 +0900
-Message-ID: <000001ccec5c$b34a5040$19def0c0$%jun@samsung.com>
-References: <4F3C67BA.7040309@samsung.com>
+From: Huang Shijie <b32955@freescale.com>
+Subject: [PATCH v6 0/2] patch set about the MXS-DMA
+Date: Thu, 16 Feb 2012 14:17:31 +0800
+Message-ID: <1329373053-19494-1-git-send-email-b32955@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:35793 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756360Ab2BPDkT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 22:40:19 -0500
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LZG00IU8VJ5UGE0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 16 Feb 2012 12:40:17 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
- 64bit (built Sep  7 2010)) with ESMTPA id <0LZG006GYVJ51800@mmp1.samsung.com>
- for linux-mmc@vger.kernel.org; Thu, 16 Feb 2012 12:40:17 +0900 (KST)
-In-reply-to: <4F3C67BA.7040309@samsung.com>
-Content-language: ko
+Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:16968
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753411Ab2BPGPp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2012 01:15:45 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'Will Newton' <will.newton@imgtec.com>, 'James Hogan' <james.hogan@imgtec.com>
+To: vinod.koul@intel.com
+Cc: shawn.guo@linaro.org, artem.bityutskiy@intel.com, w.sang@pengutronix.de, LW@KARO-electronics.de, broonie@opensource.wolfsonmicro.com, lrg@ti.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org, Huang Shijie <b32955@freescale.com>
 
-Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> When disable CONFIG_MMC_DW_IDMAC, can see the compiler error.
-> Because in dw_mci_post_req(), called the dw_mci_get_dma_dir().
-> But that function is in #ifdef CONFIG_MMC_DW_IDMAC.
-> 
-> I think that function is generic function.
-> Not need the CONFIG_MMC_DW_IDMAC.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+patch 1: move the mxs dma header to a more common place.
+	Beside the mx23/mx28, the apbh-dma is also used by MX50 and MX6Q.
+	So move the mxs dma header file to a more common place, and rename
+	it to mxs-dma.h
 
-I tested it. Looks ok to me.
+patch 2: rewrite the last parameter of mxs_dma_prep_slave_sg().
+	In the new GPMI version, some hardware behavior changes.
+	The WAIT4END bit should be set in the middle one of the ECC READ page DMA chain.
+	The DMA chain should be set like this:
 
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+          +-----+               +-----+                      +-----+
+          | cmd | ------------> | cmd | ------------------>  | cmd |
+          +-----+               +-----+                      +-----+
+                                   ^                            ^
+                                   |                            |
+                                   |                            |
+                              set WAIT4END here too        set WAIT4END here
+
+        So rewrite the last parameter of mxs_dma_prep_slave_sg(), use the
+	dma_ctrl_flags to set the proper DMA bit for DMA Command Structure.
+	And change the relative drivers with the dma_ctrl_flags.
+
+TEST:
+	Tested the mxs-mmc driver and gpmi-nand drive with the two patches
+	in MX28 board.
+
+v5 --> v6:
+	[1] create this patch set based on the mainline.
+
+v4 --> v5:
+	[1] remove GPMI_IS_MX6Q(), make the mxs and mx6q use the same code.
+		
+v3 --> v4:
+	[1] create a new folder include/linux/fsl/ for store the Freescale's
+	    header files.
+	[2] add more CCs.
+
+v2 --> v3:
+	[1] remove field gpmi_version, use GPMI_IS_MX6Q() instead.
+
+v1 --> v2:
+	[1] squash the trial patches into single patch.
+	[2] use the dma_ctrl_flags.
+
+
+Huang Shijie (2):
+  mxs-dma : move the mxs dma.h to a more common place
+  mxs-dma : rewrite the last parameter of mxs_dma_prep_slave_sg()
+
+ drivers/dma/mxs-dma.c                              |   34 +++++++++++++++++---
+ drivers/mmc/host/mxs-mmc.c                         |   12 +++---
+ drivers/mtd/nand/gpmi-nand/gpmi-lib.c              |   19 +++++++---
+ drivers/mtd/nand/gpmi-nand/gpmi-nand.h             |    2 +-
+ .../mach/dma.h => include/linux/fsl/mxs-dma.h      |    0
+ sound/soc/mxs/mxs-pcm.c                            |    2 +-
+ sound/soc/mxs/mxs-pcm.h                            |    2 +-
+ sound/soc/mxs/mxs-saif.c                           |    2 +-
+ 8 files changed, 52 insertions(+), 21 deletions(-)
+ rename arch/arm/mach-mxs/include/mach/dma.h => include/linux/fsl/mxs-dma.h (100%)
+
+-- 
+1.7.3.2
+
 
