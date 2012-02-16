@@ -1,152 +1,78 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [stable PATCH] mmc: core: check for zero length ioctl data
-Date: Thu, 16 Feb 2012 15:59:45 -0500
-Message-ID: <m2zkciebpa.fsf@bob.laptop.org>
+From: James Hogan <james@albanarts.com>
+Subject: Re: mmc: dw_mmc: fixed compile error when disable CONFIG_MMC_DW_IDMAC
+Date: Thu, 16 Feb 2012 23:22:11 +0000
+Message-ID: <20120216232211.GA1955@balrog>
+References: <4F3C67BA.7040309@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:40523 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753939Ab2BPU7x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 16 Feb 2012 15:59:53 -0500
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:36025 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753700Ab2BPXWR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2012 18:22:17 -0500
+Received: by eaah12 with SMTP id h12so1101673eaa.19
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Feb 2012 15:22:16 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <4F3C67BA.7040309@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: stable@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
-From: Johan Rudholm <johan.rudholm@stericsson.com>
+On Thu, Feb 16, 2012 at 11:19:38AM +0900, Jaehoon Chung wrote:
+> When disable CONFIG_MMC_DW_IDMAC, can see the compiler error.
+> Because in dw_mci_post_req(), called the dw_mci_get_dma_dir().
+> But that function is in #ifdef CONFIG_MMC_DW_IDMAC.
+> 
+> I think that function is generic function.
+> Not need the CONFIG_MMC_DW_IDMAC.
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 
-If the read or write buffer size associated with the command sent
-through the mmc_blk_ioctl is zero, do not prepare data buffer.
+I've also tested and confirmed that this fixes a compiler error
+introduced in 3ec7699d3bb1b0ee7f6e8588974a209d47fc64b2 ("mmc: dw_mmc:
+Add support for pre_req and post_req"), however that patch also seems to
+have regressed by disabled DMA when not using the internal DMAC. 
 
-This enables a ioctl(2) call to for instance send a MMC_SWITCH to set
-a byte in the ext_csd.
+Specifically dw_mci_pre_dma_transfer() returns -ENOSYS when not using
+internal DMAC, which makes dw_mci_submit_data_dma() now return early:
 
-Signed-off-by: Johan Rudholm <johan.rudholm@stericsson.com>
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
-Upstream commit 4d6144de8ba263eb3691a737c547e5b2fdc45287.
-Please apply to stable for 3.0, 3.1 and 3.2, I've tested that
-it applies cleanly to each.  Fixes a NULL dereference oops via
-ioctl.
++       sg_len = dw_mci_pre_dma_transfer(host, data, 0);
++       if (sg_len < 0)
++               return sg_len;
 
- drivers/mmc/card/block.c |   82 +++++++++++++++++++++++++---------------------
- 1 files changed, 45 insertions(+), 37 deletions(-)
+I think that 3ec7699d3bb1b0ee7f6e8588974a209d47fc64b2 should be
+removed/reverted until it is fixed.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 12096cc..4d29b30 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -336,6 +336,9 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
- 		goto idata_err;
- 	}
- 
-+	if (!idata->buf_bytes)
-+		return idata;
-+
- 	idata->buf = kzalloc(idata->buf_bytes, GFP_KERNEL);
- 	if (!idata->buf) {
- 		err = -ENOMEM;
-@@ -382,25 +385,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	if (IS_ERR(idata))
- 		return PTR_ERR(idata);
- 
--	cmd.opcode = idata->ic.opcode;
--	cmd.arg = idata->ic.arg;
--	cmd.flags = idata->ic.flags;
--
--	data.sg = &sg;
--	data.sg_len = 1;
--	data.blksz = idata->ic.blksz;
--	data.blocks = idata->ic.blocks;
--
--	sg_init_one(data.sg, idata->buf, idata->buf_bytes);
--
--	if (idata->ic.write_flag)
--		data.flags = MMC_DATA_WRITE;
--	else
--		data.flags = MMC_DATA_READ;
--
--	mrq.cmd = &cmd;
--	mrq.data = &data;
--
- 	md = mmc_blk_get(bdev->bd_disk);
- 	if (!md) {
- 		err = -EINVAL;
-@@ -413,6 +397,48 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 		goto cmd_done;
- 	}
- 
-+	cmd.opcode = idata->ic.opcode;
-+	cmd.arg = idata->ic.arg;
-+	cmd.flags = idata->ic.flags;
-+
-+	if (idata->buf_bytes) {
-+		data.sg = &sg;
-+		data.sg_len = 1;
-+		data.blksz = idata->ic.blksz;
-+		data.blocks = idata->ic.blocks;
-+
-+		sg_init_one(data.sg, idata->buf, idata->buf_bytes);
-+
-+		if (idata->ic.write_flag)
-+			data.flags = MMC_DATA_WRITE;
-+		else
-+			data.flags = MMC_DATA_READ;
-+
-+		/* data.flags must already be set before doing this. */
-+		mmc_set_data_timeout(&data, card);
-+
-+		/* Allow overriding the timeout_ns for empirical tuning. */
-+		if (idata->ic.data_timeout_ns)
-+			data.timeout_ns = idata->ic.data_timeout_ns;
-+
-+		if ((cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
-+			/*
-+			 * Pretend this is a data transfer and rely on the
-+			 * host driver to compute timeout.  When all host
-+			 * drivers support cmd.cmd_timeout for R1B, this
-+			 * can be changed to:
-+			 *
-+			 *     mrq.data = NULL;
-+			 *     cmd.cmd_timeout = idata->ic.cmd_timeout_ms;
-+			 */
-+			data.timeout_ns = idata->ic.cmd_timeout_ms * 1000000;
-+		}
-+
-+		mrq.data = &data;
-+	}
-+
-+	mrq.cmd = &cmd;
-+
- 	mmc_claim_host(card->host);
- 
- 	if (idata->ic.is_acmd) {
-@@ -421,24 +447,6 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 			goto cmd_rel_host;
- 	}
- 
--	/* data.flags must already be set before doing this. */
--	mmc_set_data_timeout(&data, card);
--	/* Allow overriding the timeout_ns for empirical tuning. */
--	if (idata->ic.data_timeout_ns)
--		data.timeout_ns = idata->ic.data_timeout_ns;
--
--	if ((cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
--		/*
--		 * Pretend this is a data transfer and rely on the host driver
--		 * to compute timeout.  When all host drivers support
--		 * cmd.cmd_timeout for R1B, this can be changed to:
--		 *
--		 *     mrq.data = NULL;
--		 *     cmd.cmd_timeout = idata->ic.cmd_timeout_ms;
--		 */
--		data.timeout_ns = idata->ic.cmd_timeout_ms * 1000000;
--	}
--
- 	mmc_wait_for_req(card->host, &mrq);
- 
- 	if (cmd.error) {
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Regards
+James
+
+> ---
+>  drivers/mmc/host/dw_mmc.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index f9457e5..692c3ba 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -295,7 +295,6 @@ static void dw_mci_stop_dma(struct dw_mci *host)
+>  	}
+>  }
+>  
+> -#ifdef CONFIG_MMC_DW_IDMAC
+>  static int dw_mci_get_dma_dir(struct mmc_data *data)
+>  {
+>  	if (data->flags & MMC_DATA_WRITE)
+> @@ -304,6 +303,7 @@ static int dw_mci_get_dma_dir(struct mmc_data *data)
+>  		return DMA_FROM_DEVICE;
+>  }
+>  
+> +#ifdef CONFIG_MMC_DW_IDMAC
+>  static void dw_mci_dma_cleanup(struct dw_mci *host)
+>  {
+>  	struct mmc_data *data = host->data;
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
