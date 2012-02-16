@@ -1,33 +1,55 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3 0/6] mmc: sdhci-s3c: Rework platform data and add device tree support
-Date: Thu, 16 Feb 2012 08:08:33 -0500
-Message-ID: <m239abgc32.fsf@bob.laptop.org>
-References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
-	<003401cce730$baf979a0$30ec6ce0$%kim@samsung.com>
-	<m2aa4pkq5g.fsf@bob.laptop.org> <4F3CFEED.6060206@samsung.com>
+From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+Subject: system_nrt_wq, system suspend, and the freezer
+Date: Thu, 16 Feb 2012 09:41:34 -0500 (EST)
+Message-ID: <Pine.LNX.4.44L0.1202160930010.1268-100000@iolanthe.rowland.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <4F3CFEED.6060206@samsung.com> (Kukjin Kim's message of "Thu, 16
-	Feb 2012 22:04:45 +0900")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>
-Cc: 'Thomas Abraham' <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, patches@linaro.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-cifs-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Steve French <sfrench-eUNUBHrolfbYtjvyW6yDsg@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, David Airlie <airlied-cv59FeDIM0c@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Linux-pm mailing list <linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-cifs-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, keyrings-6DNke4IJHB0gsBAKwltoeQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Folks:
 
-On Thu, Feb 16 2012, Kukjin Kim wrote:
-> I mean if I or you create topic branch for this whole series, can be
-> merged into both tree for avoiding conflicts with further working. Of
-> course, the topic branch don't have to rebase after merging into each
-> tree.
->
-> If you're ok on this and my opinion, let me create the topic branch.
+I recently uncovered a bug in the block layer.  It uses a workqueue to
+periodically probe removable drives for media or other state changes,
+and the workqueue it uses is system_nrt_wq.
 
-Okay, sure.  Thanks,
+The bug is that system_nrt_wq is not freezable, so it keeps on running
+even while the system is in the process of suspending or hibernating.  
+Doing I/O to a suspended drive doesn't work well and in some cases
+causes nasty problems.  Obviously these polls need to stop during a 
+suspend transition.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+A search through the kernel shows that system_nrt_wq is also used in a
+few other subsystems:
+
+./fs/cifs/cifssmb.c:	queue_work(system_nrt_wq, &rdata->work);
+./fs/cifs/cifssmb.c:	queue_work(system_nrt_wq, &wdata->work);
+./fs/cifs/misc.c:				queue_work(system_nrt_wq,
+./fs/cifs/connect.c:	queue_delayed_work(system_nrt_wq, &server->echo, SMB_ECHO_INTERVAL);
+./fs/cifs/connect.c:	queue_delayed_work(system_nrt_wq, &tcp_ses->echo, SMB_ECHO_INTERVAL);
+./fs/cifs/connect.c:	queue_delayed_work(system_nrt_wq, &cifs_sb->prune_tlinks,
+./fs/cifs/connect.c:	queue_delayed_work(system_nrt_wq, &cifs_sb->prune_tlinks,
+
+./drivers/mmc/core/host.c:		queue_work(system_nrt_wq, &host->clk_gate_work);
+
+./drivers/gpu/drm/drm_crtc_helper.c:		queue_delayed_work(system_nrt_wq, delayed_work, DRM_OUTPUT_POLL_PERIOD);
+./drivers/gpu/drm/drm_crtc_helper.c:		queue_delayed_work(system_nrt_wq, &dev->mode_config.output_poll_work, DRM_OUTPUT_POLL_PERIOD);
+./drivers/gpu/drm/drm_crtc_helper.c:		queue_delayed_work(system_nrt_wq, &dev->mode_config.output_poll_work, 0);
+
+./security/keys/gc.c:		queue_work(system_nrt_wq, &key_gc_work);
+./security/keys/gc.c:	queue_work(system_nrt_wq, &key_gc_work);
+./security/keys/gc.c:	queue_work(system_nrt_wq, &key_gc_work);
+./security/keys/gc.c:		queue_work(system_nrt_wq, &key_gc_work);
+./security/keys/key.c:			queue_work(system_nrt_wq, &key_gc_work);
+
+My question to all of you: Should system_nrt_wq be made freezable, or 
+should I create a new workqueue that is both freezable and 
+non-reentrant?  And if I do, which of the usages above should be 
+converted to the new workqueue?
+
+Thanks,
+
+Alan Stern
