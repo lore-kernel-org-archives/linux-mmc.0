@@ -1,66 +1,32 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v4 2/2] mmc: core: Support packed command for eMMC4.5 device
-Date: Thu, 16 Feb 2012 09:09:45 +0900
-Message-ID: <004301ccec3f$4a4e9320$deebb960$%jun@samsung.com>
-References: <000b01ccdc0a$0336abc0$09a40340$%jun@samsung.com>
- <fd4b8ef9df0d19e20c07923077937231.squirrel@www.codeaurora.org>
+From: Huang Shijie <b32955@freescale.com>
+Subject: Re: [PATCH v5 2/2] mxs-dma : rewrite the last parameter of mxs_dma_prep_slave_sg()
+Date: Thu, 16 Feb 2012 10:05:26 +0800
+Message-ID: <4F3C6466.9000500@freescale.com>
+References: <1329110756-14434-1-git-send-email-b32955@freescale.com> <1329110756-14434-3-git-send-email-b32955@freescale.com> <20120215195552.GB2399@r65073-Latitude-D630>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:40664 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751172Ab2BPAJr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 19:09:47 -0500
-In-reply-to: <fd4b8ef9df0d19e20c07923077937231.squirrel@www.codeaurora.org>
-Content-language: ko
+Received: from db3ehsobe005.messaging.microsoft.com ([213.199.154.143]:31714
+	"EHLO DB3EHSOBE006.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1756040Ab2BPCDn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2012 21:03:43 -0500
+In-Reply-To: <20120215195552.GB2399@r65073-Latitude-D630>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: vinod.koul@intel.com, artem.bityutskiy@intel.com, w.sang@pengutronix.de, LW@KARO-electronics.de, broonie@opensource.wolfsonmicro.com, lrg@ti.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org
 
-Maya Erez <merez@codeaurora.org> wrote:
-> > @@ -1065,12 +1075,60 @@ static int mmc_blk_err_check(struct mmc_card
-> > *card,
-> >  	if (!brq->data.bytes_xfered)
-> >  		return MMC_BLK_RETRY;
-> >
-> > +	if (mq_mrq->packed_cmd != MMC_PACKED_NONE) {
-> > +		if (unlikely(brq->data.blocks << 9 != brq->data.bytes_xfered))
-> > +			return MMC_BLK_PARTIAL;
-> > +		else
-> > +			return MMC_BLK_SUCCESS;
-> > +	}
-> > +
-> >  	if (blk_rq_bytes(req) != brq->data.bytes_xfered)
-> >  		return MMC_BLK_PARTIAL;
-> >
-> >  	return MMC_BLK_SUCCESS;
-> >  }
-> I think it would be best to keep the request length (brq->data.blocks << 9
-> or blk_rq_bytes(req)) in a variable and use it in the original if above.
-> This way you can avoid doubling the exit points from the function.
-In case of packed command, brq->data.blocks contains the sum of blocks for individual request.
-That means blk_rq_bytes(req) doesn't represent all packed length bytes.
-And "brq->data.blocks << 9" is not idential to blk_rq_bytes(req) in non-packed command.
-"brq->data.blocks" is overwritten during request preparation by the following reasons.
-- brq->data.blocks > card->host->max_blk_count
-- disable_multi
-- do_rel_wr
-So "brq->data.blocks << 9" is not good choice for request length  in non-packed command.
+Hi Shawn:
+> I'm trying to give it a test.  But it does not apply on either mainline
+> or next tree.  You probably had a wrong base for this patch.
+>
+thanks for your work.
 
-Thanks,
-Seungwon Jeon
+As the previous email said, this patch set bases on :[PATCH v2] mtd/gpmi 
+: add gpmi support for mx6q.
 
-> Thanks,
-> Maya Erez
-> Consultant for Qualcomm Innovation Center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+BR
+Huang Shijie
+
 
