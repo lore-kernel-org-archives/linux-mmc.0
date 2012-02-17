@@ -1,72 +1,44 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: core: fix au_size according to sd spec3.0
-Date: Fri, 17 Feb 2012 19:46:04 +0900
-Message-ID: <4F3E2FEC.6030808@samsung.com>
-References: <1329473681-5071-1-git-send-email-hyeonsu.kim@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: [PATCH] mmc sdhci i.MX5: make mmc cards work
+Date: Fri, 17 Feb 2012 11:51:49 +0100
+Message-ID: <1329475909-29047-1-git-send-email-s.hauer@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:58080 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750878Ab2BQKqI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2012 05:46:08 -0500
-Received: from epcpsbgm2.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LZJ00KIS9WVS3L0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 17 Feb 2012 19:46:07 +0900 (KST)
-Received: from [165.213.219.108] by mmp2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LZJ006TG9WUDI90@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 17 Feb 2012 19:46:06 +0900 (KST)
-In-reply-to: <1329473681-5071-1-git-send-email-hyeonsu.kim@samsung.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:58582 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751999Ab2BQKvy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2012 05:51:54 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: hyeonsu.kim@samsung.com
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, kyungmin.park@samsung.com, jh80.chung@samsung.com
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Sascha Hauer <s.hauer@pengutronix.de>
 
-Hi.
-On 02/17/2012 07:14 PM, hyeonsu.kim@samsung.com wrote:
+On i.MX53 we have to write a special SDHCI_CMD_ABORTCMD to the
+SDHCI_TRANSFER_MODE register during a MMC_STOP_TRANSMISSION
+command. This works for SD cards. However, with MMC cards
+the MMC_SET_BLOCK_COUNT command is used instead, but this needs
+the same handling. Fix MMC cards by testing for the
+MMC_SET_BLOCK_COUNT command aswell. Tested on a custom i.MX53
+board with a Transcend MMC+ card and eMMC.
 
-> From: Hyeonsu Kim <hyeonsu.kim@samsung.com>
-> 
-> This "if phrase" is illogical.
-> and SD Spec 3.0 supports au_size from 0 to 0xF.
-> 
-> Signed-off-by: Hyeonsu Kim <hyeonsu.kim@samsung.com>
-> ---
->  drivers/mmc/core/sd.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index c63ad03..cf8bf0e 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -244,7 +244,7 @@ static int mmc_read_ssr(struct mmc_card *card)
->  	 * bitfield positions accordingly.
->  	 */
->  	au = UNSTUFF_BITS(ssr, 428 - 384, 4);
-> -	if (au > 0 || au <= 9) {
-> +	if (au >= 0 && au < 16) {
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
 
-I think "if (au > 0 && au <= 0xf)" is more readable and 
-need to check the sd-spec.
-Because in SD2.0, didn't define from 0xa to 0xf.
-
->  		card->ssr.au = 1 << (au + 4);
-
-Is it right???
-card->ssr.au = 1 << (au + 4) is something wrong.
-If au is 1, card->ssr.au is 32KB. BUt in spec, defined 16KB.
-I think the wrong bit operation. this is more problem.
-
-If my point is right, will send the patch.
-
-Best Regards,
-Jaehoon Chung
-
->  		es = UNSTUFF_BITS(ssr, 408 - 384, 16);
->  		et = UNSTUFF_BITS(ssr, 402 - 384, 6);
-
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index d601e41..cd35dc4 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -269,7 +269,8 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 		imx_data->scratchpad = val;
+ 		return;
+ 	case SDHCI_COMMAND:
+-		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION)
++		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION ||
++			host->cmd->opcode == MMC_SET_BLOCK_COUNT)
+ 			&& (imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT))
+ 			val |= SDHCI_CMD_ABORTCMD;
+ 
+-- 
+1.7.9
 
