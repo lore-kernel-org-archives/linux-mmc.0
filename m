@@ -1,52 +1,72 @@
-From: Hyeonsu@vger.kernel.org, Kim@vger.kernel.org
-Subject: [PATCH] mmc: dw_mmc: remove EVENT_DATA_COMPLETE in idma mode
-Date: Fri, 17 Feb 2012 19:36:22 +0900
-Message-ID: <1329474982-5278-1-git-send-email-hyeonsu.kim@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: core: fix au_size according to sd spec3.0
+Date: Fri, 17 Feb 2012 19:46:04 +0900
+Message-ID: <4F3E2FEC.6030808@samsung.com>
+References: <1329473681-5071-1-git-send-email-hyeonsu.kim@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:45458 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752484Ab2BQKg3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2012 05:36:29 -0500
-Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
+Received: from mailout2.samsung.com ([203.254.224.25]:58080 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750878Ab2BQKqI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2012 05:46:08 -0500
+Received: from epcpsbgm2.samsung.com (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LZJ00J3T9G5SW10@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 17 Feb 2012 19:36:28 +0900 (KST)
-Received: from localhost.localdomain ([165.213.219.99])
- by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
- 64bit (built Sep  7 2010)) with ESMTPA id <0LZJ009B29GRMP80@mmp1.samsung.com>
- for linux-mmc@vger.kernel.org; Fri, 17 Feb 2012 19:36:28 +0900 (KST)
+ 2010)) with ESMTP id <0LZJ00KIS9WVS3L0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 17 Feb 2012 19:46:07 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LZJ006TG9WUDI90@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 17 Feb 2012 19:46:06 +0900 (KST)
+In-reply-to: <1329473681-5071-1-git-send-email-hyeonsu.kim@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: kyungmin.park@samsung.com, jh80.chung@samsung.com, Hyeonsu Kim <hyeonsu.kim@samsung.com>
+To: hyeonsu.kim@samsung.com
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, kyungmin.park@samsung.com, jh80.chung@samsung.com
 
-From: Hyeonsu Kim <hyeonsu.kim@samsung.com>
+Hi.
+On 02/17/2012 07:14 PM, hyeonsu.kim@samsung.com wrote:
 
-Why need to set EVENT_DATA_COMPLETE bit in here?
-I think this is duplication bit-set.
-because The bit is already set when occur SDMMC_INT_DATA_OVER interrupt.
+> From: Hyeonsu Kim <hyeonsu.kim@samsung.com>
+> 
+> This "if phrase" is illogical.
+> and SD Spec 3.0 supports au_size from 0 to 0xF.
+> 
+> Signed-off-by: Hyeonsu Kim <hyeonsu.kim@samsung.com>
+> ---
+>  drivers/mmc/core/sd.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index c63ad03..cf8bf0e 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -244,7 +244,7 @@ static int mmc_read_ssr(struct mmc_card *card)
+>  	 * bitfield positions accordingly.
+>  	 */
+>  	au = UNSTUFF_BITS(ssr, 428 - 384, 4);
+> -	if (au > 0 || au <= 9) {
+> +	if (au >= 0 && au < 16) {
 
-In my case (I use dw_mmc for sd card), the bit brings about data transfer fault.
-So I want to know your idea about the bit-set.
+I think "if (au > 0 && au <= 0xf)" is more readable and 
+need to check the sd-spec.
+Because in SD2.0, didn't define from 0xa to 0xf.
 
-Signed-off-by: Hyeonsu Kim <hyeonsu.kim@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
+>  		card->ssr.au = 1 << (au + 4);
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 0e34279..edc60d1 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1550,7 +1550,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 	if (pending & (SDMMC_IDMAC_INT_TI | SDMMC_IDMAC_INT_RI)) {
- 		mci_writel(host, IDSTS, SDMMC_IDMAC_INT_TI | SDMMC_IDMAC_INT_RI);
- 		mci_writel(host, IDSTS, SDMMC_IDMAC_INT_NI);
--		set_bit(EVENT_DATA_COMPLETE, &host->pending_events);
- 		host->dma_ops->complete(host);
- 	}
- #endif
--- 
-1.7.5.4
+Is it right???
+card->ssr.au = 1 << (au + 4) is something wrong.
+If au is 1, card->ssr.au is 32KB. BUt in spec, defined 16KB.
+I think the wrong bit operation. this is more problem.
+
+If my point is right, will send the patch.
+
+Best Regards,
+Jaehoon Chung
+
+>  		es = UNSTUFF_BITS(ssr, 408 - 384, 16);
+>  		et = UNSTUFF_BITS(ssr, 402 - 384, 6);
+
 
