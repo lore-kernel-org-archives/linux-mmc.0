@@ -1,44 +1,70 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: [PATCH] mmc sdhci i.MX5: make mmc cards work
-Date: Fri, 17 Feb 2012 11:51:49 +0100
-Message-ID: <1329475909-29047-1-git-send-email-s.hauer@pengutronix.de>
+From: Jae hoon Chung <jh80.chung@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: remove EVENT_DATA_COMPLETE in idma mode
+Date: Fri, 17 Feb 2012 22:19:30 +0900
+Message-ID: <CAELcNGRqnS4Ea2sU+NhoYtTD+WRine+R2Nd1RTAh5F+Z+v_RxA@mail.gmail.com>
+References: <1329474982-5278-1-git-send-email-hyeonsu.kim@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:58582 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751999Ab2BQKvy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2012 05:51:54 -0500
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:39299 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750951Ab2BQNTc convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2012 08:19:32 -0500
+Received: by bkcjm19 with SMTP id jm19so3012450bkc.19
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2012 05:19:30 -0800 (PST)
+In-Reply-To: <1329474982-5278-1-git-send-email-hyeonsu.kim@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Sascha Hauer <s.hauer@pengutronix.de>
+To: Hyeonsu Kim <hyeonsu.kim@samsung.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, kyungmin.park@samsung.com, jh80.chung@samsung.com, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>
 
-On i.MX53 we have to write a special SDHCI_CMD_ABORTCMD to the
-SDHCI_TRANSFER_MODE register during a MMC_STOP_TRANSMISSION
-command. This works for SD cards. However, with MMC cards
-the MMC_SET_BLOCK_COUNT command is used instead, but this needs
-the same handling. Fix MMC cards by testing for the
-MMC_SET_BLOCK_COUNT command aswell. Tested on a custom i.MX53
-board with a Transcend MMC+ card and eMMC.
+Hi.
 
-Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
----
- drivers/mmc/host/sdhci-esdhc-imx.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
+I added James and Will to CC.
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index d601e41..cd35dc4 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -269,7 +269,8 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 		imx_data->scratchpad = val;
- 		return;
- 	case SDHCI_COMMAND:
--		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION)
-+		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION ||
-+			host->cmd->opcode == MMC_SET_BLOCK_COUNT)
- 			&& (imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT))
- 			val |= SDHCI_CMD_ABORTCMD;
- 
--- 
-1.7.9
+Best Regards,
+Jaehoon Chung
 
+2012/2/17  <Hyeonsu@vger.kernel.org>:
+> From: Hyeonsu Kim <hyeonsu.kim@samsung.com>
+>
+> Why need to set EVENT_DATA_COMPLETE bit in here?
+> I think this is duplication bit-set.
+> because The bit is already set when occur SDMMC_INT_DATA_OVER interru=
+pt.
+>
+> In my case (I use dw_mmc for sd card), the bit brings about data tran=
+sfer fault.
+> So I want to know your idea about the bit-set.
+>
+> Signed-off-by: Hyeonsu Kim <hyeonsu.kim@samsung.com>
+> ---
+> =A0drivers/mmc/host/dw_mmc.c | =A0 =A01 -
+> =A01 files changed, 0 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 0e34279..edc60d1 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1550,7 +1550,6 @@ static irqreturn_t dw_mci_interrupt(int irq, vo=
+id *dev_id)
+> =A0 =A0 =A0 =A0if (pending & (SDMMC_IDMAC_INT_TI | SDMMC_IDMAC_INT_RI=
+)) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mci_writel(host, IDSTS, SDMMC_IDMAC_IN=
+T_TI | SDMMC_IDMAC_INT_RI);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mci_writel(host, IDSTS, SDMMC_IDMAC_IN=
+T_NI);
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 set_bit(EVENT_DATA_COMPLETE, &host->pen=
+ding_events);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->dma_ops->complete(host);
+> =A0 =A0 =A0 =A0}
+> =A0#endif
+> --
+> 1.7.5.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
