@@ -1,54 +1,50 @@
-From: Daniel Mack <zonque@gmail.com>
-Subject: Re: [PATCH] ARM: OMAP: hsmmc: add max_freq field
-Date: Fri, 17 Feb 2012 14:44:18 +0100
-Message-ID: <CACTFLAMCoKfQbTe2RLTvi1_CH0nKzAOthAwrifNe2+F2sf3uPA@mail.gmail.com>
-References: <1323868927-3738-1-git-send-email-zonque@gmail.com>
-	<CANrkHUY3Zf4a2K5769Z=7Wng339zB6+z_Tgd4mOPChZ1RvZ=Kw@mail.gmail.com>
-	<4EFC6992.4020501@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <4EFC6992.4020501@gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: [PATCH] MAINTAINERS: hand over atmel-mci (sd/mmc interface)
+Date: Fri, 17 Feb 2012 15:49:59 +0100
+Message-ID: <1329490199-18362-1-git-send-email-nicolas.ferre@atmel.com>
+References: <e3d27dde7a46fcd0e440e17e4a66469f6b22697f.1328801500.git.ludovic.desroches@atmel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from newsmtp5.atmel.com ([204.2.163.5]:13209 "EHLO
+	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751589Ab2BQOua (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2012 09:50:30 -0500
+In-Reply-To: <e3d27dde7a46fcd0e440e17e4a66469f6b22697f.1328801500.git.ludovic.desroches@atmel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org, ludovic.desroches@atmel.com
+Cc: plagnioj@jcrosoft.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Nicolas Ferre <nicolas.ferre@atmel.com>
 
-ping? Could anyone care for queueing this please?
+Modify MAINTAINERS entry for Atmel SD/MMC drivers.
+I hand the atmel-mci and at91_mci drivers over to Ludovic.
 
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
+ MAINTAINERS |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
-On Thu, Dec 29, 2011 at 2:22 PM, Daniel Mack <zonque@gmail.com> wrote:
-> On 12/23/2011 04:40 PM, T Krishnamoorthy, Balaji wrote:
->> On Wed, Dec 14, 2011 at 6:52 PM, Daniel Mack <zonque@gmail.com> wrot=
-e:
->>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_=
-hsmmc.c
->>> index 101cd31..8215ef9 100644
->>> --- a/drivers/mmc/host/omap_hsmmc.c
->>> +++ b/drivers/mmc/host/omap_hsmmc.c
->>> @@ -1927,8 +1927,12 @@ static int __init omap_hsmmc_probe(struct pl=
-atform_device *pdev)
->>> =A0 =A0 =A0 =A0if (mmc_slot(host).vcc_aux_disable_is_sleep)
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_slot(host).no_off =3D 1;
->>>
->>> - =A0 =A0 =A0 mmc->f_min =A0 =A0 =A0=3D OMAP_MMC_MIN_CLOCK;
->>> - =A0 =A0 =A0 mmc->f_max =A0 =A0 =A0=3D OMAP_MMC_MAX_CLOCK;
->>> + =A0 =A0 =A0 mmc->f_min =3D OMAP_MMC_MIN_CLOCK;
->>
->> Stray change for f_min ?
->
-> No, this was intended. The indentation doesn't make sense anymore whe=
-n
-> not grouped with the f_max assignment.
->
-> Other than that, what is necessary to get this picked? Tony? :)
->
->
-> Thanks,
-> Daniel
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 55ca0be..16c1b08 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -1311,7 +1311,7 @@ F:	drivers/atm/
+ F:	include/linux/atm*
+ 
+ ATMEL AT91 MCI DRIVER
+-M:	Nicolas Ferre <nicolas.ferre@atmel.com>
++M:	Ludovic Desroches <ludovic.desroches@atmel.com>
+ L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
+ W:	http://www.atmel.com/products/AT91/
+ W:	http://www.at91.com/
+@@ -1319,7 +1319,7 @@ S:	Maintained
+ F:	drivers/mmc/host/at91_mci.c
+ 
+ ATMEL AT91 / AT32 MCI DRIVER
+-M:	Nicolas Ferre <nicolas.ferre@atmel.com>
++M:	Ludovic Desroches <ludovic.desroches@atmel.com>
+ S:	Maintained
+ F:	drivers/mmc/host/atmel-mci.c
+ F:	drivers/mmc/host/atmel-mci-regs.h
+-- 
+1.7.9
+
