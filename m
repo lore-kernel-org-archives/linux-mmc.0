@@ -1,36 +1,27 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [GIT PULL] at91 mmc fixes for 3.3-rc[45]
-Date: Fri, 17 Feb 2012 11:28:59 -0500
-Message-ID: <m24nupe850.fsf@bob.laptop.org>
-References: <4F3E6BFF.9030307@atmel.com>
+From: "Cousson, Benoit" <b-cousson@ti.com>
+Subject: Re: [PATCH] ARM: OMAP: hsmmc: add max_freq field
+Date: Fri, 17 Feb 2012 18:09:28 +0100
+Message-ID: <4F3E89C8.7060006@ti.com>
+References: <1323868927-3738-1-git-send-email-zonque@gmail.com> <CANrkHUY3Zf4a2K5769Z=7Wng339zB6+z_Tgd4mOPChZ1RvZ=Kw@mail.gmail.com> <4EFC6992.4020501@gmail.com> <CACTFLAMCoKfQbTe2RLTvi1_CH0nKzAOthAwrifNe2+F2sf3uPA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37806 "EHLO void.printf.net"
+Received: from comal.ext.ti.com ([198.47.26.152]:53441 "EHLO comal.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752135Ab2BQQ3S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 17 Feb 2012 11:29:18 -0500
-In-Reply-To: <4F3E6BFF.9030307@atmel.com> (Nicolas Ferre's message of "Fri, 17
-	Feb 2012 16:02:23 +0100")
+	id S1751831Ab2BQRJh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 17 Feb 2012 12:09:37 -0500
+In-Reply-To: <CACTFLAMCoKfQbTe2RLTvi1_CH0nKzAOthAwrifNe2+F2sf3uPA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Linux Kernel list <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+To: Daniel Mack <zonque@gmail.com>
+Cc: "T Krishnamoorthy, Balaji" <balajitk@ti.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>
 
-Hi,
+On 2/17/2012 2:44 PM, Daniel Mack wrote:
+> ping? Could anyone care for queueing this please?
 
-On Fri, Feb 17 2012, Nicolas Ferre wrote:
-> This is a couple of patches that fixes a sequence in atmel-mci during 
-> DMA/PDC detection + channel handling.
+There is no OMAP HSMMC dedicated maintainer anymore so I guess you should ping 
+Chris Ball <cjb@laptop.org>.
 
-Pushed to mmc-next, thanks.
-
-> I also add the MAINTAINERS update and hand the SD/MMC drivers over to 
-> Ludovic Desroches who already made great efforts to enhance them.
-
-Okay.  Thanks for your work, Nicolas!
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Regards,
+Benoit
