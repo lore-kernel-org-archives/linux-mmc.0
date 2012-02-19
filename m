@@ -1,100 +1,88 @@
-From: Julia Lawall <Julia.Lawall@lip6.fr>
-Subject: [PATCH] drivers/mmc/host/sdhci-s3c.c: use devm_ functions
-Date: Sat, 18 Feb 2012 21:13:39 +0100
-Message-ID: <1329596019-19822-1-git-send-email-Julia.Lawall@lip6.fr>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mgw2.diku.dk ([130.225.96.92]:37140 "EHLO mgw2.diku.dk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752798Ab2BRUNq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 18 Feb 2012 15:13:46 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Daniel Mack <zonque@gmail.com>
+Subject: [PATCH] ARM: OMAP: hsmmc: add max_freq field
+Date: Sun, 19 Feb 2012 13:20:33 +0100
+Message-ID: <1329654033-19584-1-git-send-email-zonque@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: "Cousson, Benoit" <b-cousson@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Daniel Mack <zonque@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Dooks <ben-linux@fluff.org>
-Cc: kernel-janitors@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-From: Julia Lawall <Julia.Lawall@lip6.fr>
+External circuitry like level shifters may limit the maximum operation
+speed of the hsmmc controller. Add a field to struct omap2_hsmmc_info
+so boards can adjust the setting on demand.
 
-The various devm_ functions allocate memory that is released when a driver
-detaches.  This patch uses these functions for data that is allocated in
-the probe function of a platform device and is only freed in the remove
-function.
-
-By using devm_ioremap, it also removes a potential memory leak, because
-there was no call to iounmap in the probe function.
-
-The call to platform_get_resource was moved just to make it closer to the
-place where its result it used.
-
-Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
-
+Signed-off-by: Daniel Mack <zonque@gmail.com>
+Acked-by: Tony Lindgren <tony@atomide.com>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Cousson, Benoit <b-cousson@ti.com>
 ---
- drivers/mmc/host/sdhci-s3c.c |   26 +++-----------------------
- 1 file changed, 3 insertions(+), 23 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index b19e7d4..10ec7c6 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -402,12 +402,6 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		return irq;
- 	}
- 
--	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	if (!res) {
--		dev_err(dev, "no memory specified\n");
--		return -ENOENT;
--	}
--
- 	host = sdhci_alloc_host(dev, sizeof(struct sdhci_s3c));
- 	if (IS_ERR(host)) {
- 		dev_err(dev, "sdhci_alloc_host() failed\n");
-@@ -464,15 +458,9 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 		goto err_no_busclks;
- 	}
- 
--	sc->ioarea = request_mem_region(res->start, resource_size(res),
--					mmc_hostname(host->mmc));
--	if (!sc->ioarea) {
--		dev_err(dev, "failed to reserve register area\n");
--		ret = -ENXIO;
--		goto err_req_regs;
--	}
-+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 
--	host->ioaddr = ioremap_nocache(res->start, resource_size(res));
-+	host->ioaddr = devm_request_and_ioremap(&pdev->dev, res);
- 	if (!host->ioaddr) {
- 		dev_err(dev, "failed to map registers\n");
- 		ret = -ENXIO;
-@@ -547,7 +535,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_err(dev, "sdhci_add_host() failed\n");
--		goto err_add_host;
-+		goto err_req_regs;
- 	}
- 
- 	/* The following two methods of card detection might call
-@@ -561,10 +549,6 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 
- 	return 0;
- 
-- err_add_host:
--	release_resource(sc->ioarea);
--	kfree(sc->ioarea);
--
-  err_req_regs:
- 	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
- 		if (sc->clk_bus[ptr]) {
-@@ -610,10 +594,6 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
- 	clk_disable(sc->clk_io);
- 	clk_put(sc->clk_io);
- 
--	iounmap(host->ioaddr);
--	release_resource(sc->ioarea);
--	kfree(sc->ioarea);
--
- 	sdhci_free_host(host);
- 	platform_set_drvdata(pdev, NULL);
- 
+This trivial patch is in my queue for some time already, and Tony acked
+on it awhile back. I was told to take Chris Ball in the loop as there
+is currently no OMAP MMC maintainer.
 
+This still applies cleanly to 3.3-rc4. Chris, can you queue this?
+
+ arch/arm/mach-omap2/hsmmc.c   |    1 +
+ arch/arm/mach-omap2/hsmmc.h   |    2 ++
+ drivers/mmc/host/omap_hsmmc.c |    8 ++++++--
+ 3 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index f4a1020..4c7bc36 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -298,6 +298,7 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+ 	mmc->slots[0].caps = c->caps;
+ 	mmc->slots[0].internal_clock = !c->ext_clock;
+ 	mmc->dma_mask = 0xffffffff;
++	mmc->max_freq = c->max_freq;
+ 	if (cpu_is_omap44xx())
+ 		mmc->reg_offset = OMAP4_MMC_REG_OFFSET;
+ 	else
+diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+index f757e78..65a8c12 100644
+--- a/arch/arm/mach-omap2/hsmmc.h
++++ b/arch/arm/mach-omap2/hsmmc.h
+@@ -25,6 +25,8 @@ struct omap2_hsmmc_info {
+ 	char	*name;		/* or NULL for default */
+ 	struct device *dev;	/* returned: pointer to mmc adapter */
+ 	int	ocr_mask;	/* temporary HACK */
++	int	max_freq;	/* maximum clock, if constrained by external
++				 * circuitry, or 0 for default */
+ 	/* Remux (pad configuration) when powering on/off */
+ 	void (*remux)(struct device *dev, int slot, int power_on);
+ 	/* init some special card */
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 101cd31..8215ef9 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1927,8 +1927,12 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (mmc_slot(host).vcc_aux_disable_is_sleep)
+ 		mmc_slot(host).no_off = 1;
+ 
+-	mmc->f_min	= OMAP_MMC_MIN_CLOCK;
+-	mmc->f_max	= OMAP_MMC_MAX_CLOCK;
++	mmc->f_min = OMAP_MMC_MIN_CLOCK;
++
++	if (pdata->max_freq > 0)
++		mmc->f_max = pdata->max_freq;
++	else
++		mmc->f_max = OMAP_MMC_MAX_CLOCK;
+ 
+ 	spin_lock_init(&host->irq_lock);
+ 
+-- 
+1.7.7.4
