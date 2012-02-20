@@ -1,77 +1,42 @@
-From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
-Subject: Re: ANNOUNCE: new "mmc-utils" repository
-Date: Mon, 20 Feb 2012 15:09:36 +0100
-Message-ID: <4F425420.6000809@st.com>
-References: <m2y5s8j86z.fsf@bob.laptop.org> <4F3BAB56.80606@st.com> <m2wr7ogqxm.fsf@bob.laptop.org> <4F3BB671.9040208@st.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: mmc: dw_mmc: fixed compile error when disable CONFIG_MMC_DW_IDMAC
+Date: Mon, 20 Feb 2012 12:04:45 -0500
+Message-ID: <m2hayl5tci.fsf@bob.laptop.org>
+References: <4F3C67BA.7040309@samsung.com> <4F423820.10000@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog106.obsmtp.com ([207.126.144.121]:56871 "EHLO
-	eu1sys200aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752788Ab2BTOJr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Feb 2012 09:09:47 -0500
-In-Reply-To: <4F3BB671.9040208@st.com>
+Received: from void.printf.net ([89.145.121.20]:46230 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752649Ab2BTRE4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 20 Feb 2012 12:04:56 -0500
+In-Reply-To: <4F423820.10000@imgtec.com> (James Hogan's message of "Mon, 20
+	Feb 2012 12:10:08 +0000")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Will Newton <will.newton@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
-On 2/15/2012 2:43 PM, Giuseppe CAVALLARO wrote:
-> On 2/15/2012 2:35 PM, Chris Ball wrote:
->> Hi,
->>
->> On Wed, Feb 15 2012, Giuseppe CAVALLARO wrote:
->>> Hi Chris
->>>
->>> On 2/12/2012 6:03 PM, Chris Ball wrote:
->>>> Hi,
->>>>
->>>> I've created a repository for userspace mmc tools now:
->>>>
->>>> git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc-utils.git
->>>>
->>>> At the moment the only commands supported are Johan Rudholm's extcsd
->>>> write-protect commands, exposed as:
->>>>
->>>>    ./mmc extcsd read /dev/mmcblkX
->>>>    ./mmc extcsd write /dev/mmcblkX
->>>
->>>
->>> Is it worth now trying to add the logic behind the patch (mmc: debugfs:
->>> parse ext_csd via debug_fs (v2)) I sent time ago to parse the EXT_CSD?
->>> I can do that on mmc-utils if not yet done. Pls let me know.
->>
->> Yes, please.  (If you look farther down in the same message I did
->> mention adding it!)
->>
->> I think you can add it all to mmc extcsd read, rather than introducing
->> a new command.
-> 
-> Agree! I'll do that and provide a patch asap.
+Hi,
 
-Hello Chris
+On Mon, Feb 20 2012, James Hogan wrote:
+> On 16/02/12 02:19, Jaehoon Chung wrote:
+>> When disable CONFIG_MMC_DW_IDMAC, can see the compiler error.
+>> Because in dw_mci_post_req(), called the dw_mci_get_dma_dir().
+>> But that function is in #ifdef CONFIG_MMC_DW_IDMAC.
+>> 
+>> I think that function is generic function.
+>> Not need the CONFIG_MMC_DW_IDMAC.
+>> 
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+>
+> Acked-by: James Hogan <james.hogan@imgtec.com>
 
-I've sent the patch to this mailing list.
-I will try to do further improvements starting from this first patch,
-especially to add new parsing conditions for all the register bits (that
-can be done later according to what we actually need to expose and
-parser and what you suggest).
+Thanks, pushed to mmc-next for 3.3.  (And I'll take the second patch to
+fix the no IDMAC regression too.)
 
-Regards
-peppe
-
-> 
-> peppe
-> 
->>
->> Thanks,
->>
->> - Chris.
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
