@@ -1,84 +1,97 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: Fix disableing DMA in Non-IDMAC
-Date: Mon, 20 Feb 2012 11:01:43 +0900
-Message-ID: <001e01ccef73$97aee200$c70ca600$%jun@samsung.com>
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Fix disableing DMA in Non-IDMAC
+Date: Mon, 20 Feb 2012 14:59:22 +0900
+Message-ID: <CAKYAXd-5iTe7CV4=qR+aQggUdubLHEZ3Bnx+y9_88w95k-U83Q@mail.gmail.com>
+References: <001e01ccef73$97aee200$c70ca600$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:31318 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751327Ab2BTCBn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Feb 2012 21:01:43 -0500
-Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LZO00B2G5MR9UH0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 20 Feb 2012 11:01:41 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp2.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
- 64bit (built Sep  7 2010)) with ESMTPA id <0LZO00JU25MT5B00@mmp2.samsung.com>
- for linux-mmc@vger.kernel.org; Mon, 20 Feb 2012 11:01:41 +0900 (KST)
-Content-language: ko
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:65396 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750933Ab2BTF7Y convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Feb 2012 00:59:24 -0500
+Received: by bkcjm19 with SMTP id jm19so4268484bkc.19
+        for <linux-mmc@vger.kernel.org>; Sun, 19 Feb 2012 21:59:23 -0800 (PST)
+In-Reply-To: <001e01ccef73$97aee200$c70ca600$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'linux-mmc' <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, 'James Hogan' <james@albanarts.com>, 'Will Newton' <will.newton@imgtec.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, James Hogan <james@albanarts.com>, Will Newton <will.newton@imgtec.com>
 
-dw_mci_pre_dma_transfer() is valid only if internal DMA. In case of
-using other DMA it returns -ENOSYS. It prevents the DMA operations.
-This patch makes dw_mci_pre_dma_transfer() effective in all DMA case.
-
-Reported-by: James Hogan <james@albanarts.com>
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |   25 +++++++++----------------
- 1 files changed, 9 insertions(+), 16 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 692c3ba..bf3c9b4 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -429,6 +429,15 @@ static int dw_mci_idmac_init(struct dw_mci *host)
- 	return 0;
- }
- 
-+static struct dw_mci_dma_ops dw_mci_idmac_ops = {
-+	.init = dw_mci_idmac_init,
-+	.start = dw_mci_idmac_start_dma,
-+	.stop = dw_mci_idmac_stop_dma,
-+	.complete = dw_mci_idmac_complete_dma,
-+	.cleanup = dw_mci_dma_cleanup,
-+};
-+#endif /* CONFIG_MMC_DW_IDMAC */
-+
- static int dw_mci_pre_dma_transfer(struct dw_mci *host,
- 				   struct mmc_data *data,
- 				   bool next)
-@@ -468,22 +477,6 @@ static int dw_mci_pre_dma_transfer(struct dw_mci *host,
- 	return sg_len;
- }
- 
--static struct dw_mci_dma_ops dw_mci_idmac_ops = {
--	.init = dw_mci_idmac_init,
--	.start = dw_mci_idmac_start_dma,
--	.stop = dw_mci_idmac_stop_dma,
--	.complete = dw_mci_idmac_complete_dma,
--	.cleanup = dw_mci_dma_cleanup,
--};
--#else
--static int dw_mci_pre_dma_transfer(struct dw_mci *host,
--				   struct mmc_data *data,
--				   bool next)
--{
--	return -ENOSYS;
--}
--#endif /* CONFIG_MMC_DW_IDMAC */
--
- static void dw_mci_pre_req(struct mmc_host *mmc,
- 			   struct mmc_request *mrq,
- 			   bool is_first_req)
--- 
-1.7.0.4
-
-
+2012/2/20 Seungwon Jeon <tgih.jun@samsung.com>:
+> dw_mci_pre_dma_transfer() is valid only if internal DMA. In case of
+> using other DMA it returns -ENOSYS. It prevents the DMA operations.
+> This patch makes dw_mci_pre_dma_transfer() effective in all DMA case.
+>
+> Reported-by: James Hogan <james@albanarts.com>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+Hi. Seungwon.
+This patch make sense.
+Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+> ---
+> =C2=A0drivers/mmc/host/dw_mmc.c | =C2=A0 25 +++++++++----------------
+> =C2=A01 files changed, 9 insertions(+), 16 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 692c3ba..bf3c9b4 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -429,6 +429,15 @@ static int dw_mci_idmac_init(struct dw_mci *host=
+)
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0return 0;
+> =C2=A0}
+>
+> +static struct dw_mci_dma_ops dw_mci_idmac_ops =3D {
+> + =C2=A0 =C2=A0 =C2=A0 .init =3D dw_mci_idmac_init,
+> + =C2=A0 =C2=A0 =C2=A0 .start =3D dw_mci_idmac_start_dma,
+> + =C2=A0 =C2=A0 =C2=A0 .stop =3D dw_mci_idmac_stop_dma,
+> + =C2=A0 =C2=A0 =C2=A0 .complete =3D dw_mci_idmac_complete_dma,
+> + =C2=A0 =C2=A0 =C2=A0 .cleanup =3D dw_mci_dma_cleanup,
+> +};
+> +#endif /* CONFIG_MMC_DW_IDMAC */
+> +
+> =C2=A0static int dw_mci_pre_dma_transfer(struct dw_mci *host,
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 struct mmc_data *data=
+,
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 bool next)
+> @@ -468,22 +477,6 @@ static int dw_mci_pre_dma_transfer(struct dw_mci=
+ *host,
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0return sg_len;
+> =C2=A0}
+>
+> -static struct dw_mci_dma_ops dw_mci_idmac_ops =3D {
+> - =C2=A0 =C2=A0 =C2=A0 .init =3D dw_mci_idmac_init,
+> - =C2=A0 =C2=A0 =C2=A0 .start =3D dw_mci_idmac_start_dma,
+> - =C2=A0 =C2=A0 =C2=A0 .stop =3D dw_mci_idmac_stop_dma,
+> - =C2=A0 =C2=A0 =C2=A0 .complete =3D dw_mci_idmac_complete_dma,
+> - =C2=A0 =C2=A0 =C2=A0 .cleanup =3D dw_mci_dma_cleanup,
+> -};
+> -#else
+> -static int dw_mci_pre_dma_transfer(struct dw_mci *host,
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0struct mmc_data *data,
+> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0bool next)
+> -{
+> - =C2=A0 =C2=A0 =C2=A0 return -ENOSYS;
+> -}
+> -#endif /* CONFIG_MMC_DW_IDMAC */
+> -
+> =C2=A0static void dw_mci_pre_req(struct mmc_host *mmc,
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 struct mmc_request *mrq,
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 bool is_first_req)
+> --
+> 1.7.0.4
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
+ml
