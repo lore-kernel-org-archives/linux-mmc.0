@@ -1,81 +1,55 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH] mmc sdhci i.MX5: make mmc cards work
-Date: Mon, 20 Feb 2012 19:41:46 +0100
-Message-ID: <20120220184146.GZ3852@pengutronix.de>
-References: <1329475909-29047-1-git-send-email-s.hauer@pengutronix.de>
- <20120220063132.GA19668@S2101-09.ap.freescale.net>
+From: merez@codeaurora.org
+Subject: Re: [PATCH v4 2/2] mmc: core: Support packed command for eMMC4.5
+     device
+Date: Mon, 20 Feb 2012 13:22:37 -0800 (PST)
+Message-ID: <e62a9b49ee1778129ef1b0adf2e14fc7.squirrel@www.codeaurora.org>
+References: <000b01ccdc0a$0336abc0$09a40340$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:42647 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752121Ab2BTSlt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Feb 2012 13:41:49 -0500
-Content-Disposition: inline
-In-Reply-To: <20120220063132.GA19668@S2101-09.ap.freescale.net>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:50916 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753944Ab2BTVWi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Feb 2012 16:22:38 -0500
+In-Reply-To: <000b01ccdc0a$0336abc0$09a40340$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-On Mon, Feb 20, 2012 at 02:31:36PM +0800, Shawn Guo wrote:
-> I do not have a mmc card to test the patch, but I tested it and
-> confirmed it does not break anything about SD support.
-> 
-> On Fri, Feb 17, 2012 at 11:51:49AM +0100, Sascha Hauer wrote:
-> > On i.MX53 we have to write a special SDHCI_CMD_ABORTCMD to the
-> 
-> Is this i.MX53 only?
+>
+> @@ -1262,21 +1608,32 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+> *mq, struct request *rqc)
+>  	int ret = 1, disable_multi = 0, retry = 0, type;
+>  	enum mmc_blk_status status;
+>  	struct mmc_queue_req *mq_rq;
+> -	struct request *req;
+> +	struct request *req, *prq;
+>  	struct mmc_async_req *areq;
+> +	u8 reqs = 0;
+>
+>  	if (!rqc && !mq->mqrq_prev->req)
+>  		return 0;
+>
+> +	if (rqc)
+> +		reqs = mmc_blk_prep_packed_list(mq, rqc);
+> +
+>  	do {
+>  		if (rqc) {
+> -			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+> +			if (reqs >= card->host->packed_min)
+In case host->packed_min will be set to a value bigger than 2 you will
+loose all the requests that were added to the packed list. If you want to
+support dynamic number of min packed requests you need to move the packed
+list preparation to queue.c where you can issue the fetched requests one
+after another, when (reqs < card->host->packed_min).
+> +				mmc_blk_packed_hdr_wrq_prep(mq->mqrq_cur, card, mq, reqs);
+> +			else
+> +				mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
 
-Don't know. I don't think I have ever explicitely tested MMC cards on
-!i.MX53 boards.
+Thanks,
+Maya Erez
+Consultant for Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
 
-> 
-> > SDHCI_TRANSFER_MODE register during a MMC_STOP_TRANSMISSION
-> > command. This works for SD cards. However, with MMC cards
-> > the MMC_SET_BLOCK_COUNT command is used instead, but this needs
-> > the same handling. Fix MMC cards by testing for the
-> > MMC_SET_BLOCK_COUNT command aswell. Tested on a custom i.MX53
-> > board with a Transcend MMC+ card and eMMC.
-> > 
-> I did not find the similar handling in FSL internal tree, but I think
-> that FSL QA team should have tested it with MMC/eMMC card.
-
-Which kernel did they test this on? The mmc core uses the
-MMC_SET_BLOCK_COUNT command since v3.0-rc1. Earlier kernels
-probably worked.
-
-Sascha
-
-> 
-> Regards,
-> Shawn
-> 
-> > Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
-> > ---
-> >  drivers/mmc/host/sdhci-esdhc-imx.c |    3 ++-
-> >  1 files changed, 2 insertions(+), 1 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > index d601e41..cd35dc4 100644
-> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > @@ -269,7 +269,8 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
-> >  		imx_data->scratchpad = val;
-> >  		return;
-> >  	case SDHCI_COMMAND:
-> > -		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION)
-> > +		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION ||
-> > +			host->cmd->opcode == MMC_SET_BLOCK_COUNT)
-> >  			&& (imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT))
-> >  			val |= SDHCI_CMD_ABORTCMD;
-> >  
-> > -- 
-> > 1.7.9
-> 
-
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
