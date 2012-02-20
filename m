@@ -1,63 +1,65 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH] mmc sdhci i.MX5: make mmc cards work
-Date: Mon, 20 Feb 2012 14:31:36 +0800
-Message-ID: <20120220063132.GA19668@S2101-09.ap.freescale.net>
-References: <1329475909-29047-1-git-send-email-s.hauer@pengutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pw0-f46.google.com ([209.85.160.46]:40263 "EHLO
-	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751765Ab2BTGSW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Feb 2012 01:18:22 -0500
-Received: by pbcun15 with SMTP id un15so5944581pbc.19
-        for <linux-mmc@vger.kernel.org>; Sun, 19 Feb 2012 22:18:22 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <1329475909-29047-1-git-send-email-s.hauer@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Stephen Warren <swarren@nvidia.com>
+Subject: [PATCH 1/2] Documentation/gpio.txt: Explain expected pinctrl interaction
+Date: Sun, 19 Feb 2012 23:27:42 -0700
+Message-ID: <1329719263-18971-1-git-send-email-swarren@nvidia.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>, Linus Walleij <linus.walleij@stericsson.com>, Randy Dunlap <rdunlap@xenotime.net>, Olof Johansson <olof@lixom.net>, Colin Cross <ccross@android.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Stephen Warren <swarren@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Wolfram Sang <w.sang@pengutronix.de>
 
-I do not have a mmc card to test the patch, but I tested it and
-confirmed it does not break anything about SD support.
+Update gpio.txt based on recent discussions regarding interaction with the
+pinctrl subsystem.
 
-On Fri, Feb 17, 2012 at 11:51:49AM +0100, Sascha Hauer wrote:
-> On i.MX53 we have to write a special SDHCI_CMD_ABORTCMD to the
+Previously, gpio_request() was described as explicitly not performing any
+required mux setup operations etc.
 
-Is this i.MX53 only?
+Now, gpio_request() is explicitly as explicitly performing any required mux
+setup operations where possible. In the case it isn't, platform code is
+required to have set up any required muxing or other configuration prior to
+gpio_request() being called, in order to maintain the same semantics.
 
-> SDHCI_TRANSFER_MODE register during a MMC_STOP_TRANSMISSION
-> command. This works for SD cards. However, with MMC cards
-> the MMC_SET_BLOCK_COUNT command is used instead, but this needs
-> the same handling. Fix MMC cards by testing for the
-> MMC_SET_BLOCK_COUNT command aswell. Tested on a custom i.MX53
-> board with a Transcend MMC+ card and eMMC.
-> 
-I did not find the similar handling in FSL internal tree, but I think
-that FSL QA team should have tested it with MMC/eMMC card.
+This is achieved by gpiolib drivers calling e.g. pinctrl_request_gpio() in
+their .request() operation.
 
-Regards,
-Shawn
+Signed-off-by: Stephen Warren <swarren@nvidia.com>
+---
+ Documentation/gpio.txt |   22 +++++++++++++++++++---
+ 1 files changed, 19 insertions(+), 3 deletions(-)
 
-> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c |    3 ++-
->  1 files changed, 2 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index d601e41..cd35dc4 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -269,7 +269,8 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
->  		imx_data->scratchpad = val;
->  		return;
->  	case SDHCI_COMMAND:
-> -		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION)
-> +		if ((host->cmd->opcode == MMC_STOP_TRANSMISSION ||
-> +			host->cmd->opcode == MMC_SET_BLOCK_COUNT)
->  			&& (imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT))
->  			val |= SDHCI_CMD_ABORTCMD;
->  
-> -- 
-> 1.7.9
+diff --git a/Documentation/gpio.txt b/Documentation/gpio.txt
+index 792faa3..3c4a702 100644
+--- a/Documentation/gpio.txt
++++ b/Documentation/gpio.txt
+@@ -271,9 +271,25 @@ Some platforms may also use knowledge about what GPIOs are active for
+ power management, such as by powering down unused chip sectors and, more
+ easily, gating off unused clocks.
+ 
+-Note that requesting a GPIO does NOT cause it to be configured in any
+-way; it just marks that GPIO as in use.  Separate code must handle any
+-pin setup (e.g. controlling which pin the GPIO uses, pullup/pulldown).
++Requesting a GPIO should cause any pin multiplexing hardware to be programmed
++to route the GPIO signal to the appropriate pin. In some cases, this requires
++programming separate pin multiplexing hardware outside the GPIO controller.
++Equally, for GPIOs that use pins known to the pinctrl subsystem, that
++subsystem should be informed of their use. These requirements may be satisfied
++by having a gpiolib driver's .request() operation call pinctrl_request_gpio().
++Similarly, a gpiolib driver's .free() operation may call pinctrl_free_gpio().
++
++Some platforms allow some or all GPIO signals to be routed to different pins.
++Similarly, other aspects of the GPIO or pin may need to be configured, such as
++pullup/pulldown. Platform software should arrange that any such details are
++configured priored to gpio_request() being called for those GPIOs, such that
++GPIO users need not be aware of these details.
++
++gpiolib drivers may need to call additional pinctrl APIs to implement certain
++operations. This would be the case if e.g. GPIO input/output value is
++controlled by a GPIO HW module, whereas GPIO direction is controlled by a
++separate pin controller HW module. Functions pinctrl_gpio_direction_input()
++and pinctrl_gpio_direction_output() may be used to implement this.
+ 
+ Also note that it's your responsibility to have stopped using a GPIO
+ before you free it.
+-- 
+1.7.5.4
+
