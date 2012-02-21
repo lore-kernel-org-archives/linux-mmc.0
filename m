@@ -1,56 +1,77 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc-utils: improve the parsing of the EXT_CSD registers
-Date: Tue, 21 Feb 2012 13:56:10 +0900
-Message-ID: <4F4323EA.6050205@samsung.com>
-References: <1329727529-3120-1-git-send-email-peppe.cavallaro@st.com>
- <m28vjx5rka.fsf@bob.laptop.org> <4F4320DC.6010501@samsung.com>
- <m24nuk6bfw.fsf@bob.laptop.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v4 2/2] mmc: core: Support packed command for eMMC4.5 device
+Date: Tue, 21 Feb 2012 14:35:03 +0900
+Message-ID: <000401ccf05a$9032c130$b0984390$%jun@samsung.com>
+References: <000b01ccdc0a$0336abc0$09a40340$%jun@samsung.com>
+ <e62a9b49ee1778129ef1b0adf2e14fc7.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:44299 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752584Ab2BUE4M (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Feb 2012 23:56:12 -0500
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LZQ00I988CUXS70@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 21 Feb 2012 13:56:11 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LZQ009SH8DM2HA0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 21 Feb 2012 13:56:11 +0900 (KST)
-In-reply-to: <m24nuk6bfw.fsf@bob.laptop.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:20053 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750768Ab2BUFfG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Feb 2012 00:35:06 -0500
+In-reply-to: <e62a9b49ee1778129ef1b0adf2e14fc7.squirrel@www.codeaurora.org>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Giuseppe CAVALLARO <peppe.cavallaro@st.com>, linux-mmc@vger.kernel.org, sebras@gmail.com, linus.walleij@linaro.org, youssef.triki@st.com, Johan RUDHOLM <johan.rudholm@stericsson.com>, Kyungmin Park <kyungmin.park@samsung.com>
+To: merez@codeaurora.org
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-On 02/21/2012 01:46 PM, Chris Ball wrote:
+Maya Erez <merez@codeaurora.org> wrote:
+> > @@ -1262,21 +1608,32 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+> > *mq, struct request *rqc)
+> >  	int ret = 1, disable_multi = 0, retry = 0, type;
+> >  	enum mmc_blk_status status;
+> >  	struct mmc_queue_req *mq_rq;
+> > -	struct request *req;
+> > +	struct request *req, *prq;
+> >  	struct mmc_async_req *areq;
+> > +	u8 reqs = 0;
+> >
+> >  	if (!rqc && !mq->mqrq_prev->req)
+> >  		return 0;
+> >
+> > +	if (rqc)
+> > +		reqs = mmc_blk_prep_packed_list(mq, rqc);
+> > +
+> >  	do {
+> >  		if (rqc) {
+> > -			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+> > +			if (reqs >= card->host->packed_min)
+> In case host->packed_min will be set to a value bigger than 2 you will
+> loose all the requests that were added to the packed list. If you want to
+> support dynamic number of min packed requests you need to move the packed
+> list preparation to queue.c where you can issue the fetched requests one
+> after another, when (reqs < card->host->packed_min).
 
-> Hi,
-> 
-> On Mon, Feb 20 2012, Jaehoon Chung wrote:
->> Write protect is only supported the "power-on".
->> If there is no problem to support "permanent", i will send the patch.
->> Is any problem to support "permanent"?
-> 
-> I think I'd rather not -- we could add a comment to the code that
-> explains that setting the EXT_CSD_BOOT_WP_B_PERM_WP_EN bit instead of
-> EXT_CSD_BOOT_WP_B_PWR_WP_EN is how to achieve this, but I don't think
-> we need to do more than that for such a rare and dangerous use case.
+That's a good point.
+The requests added to the packed list will be remained
+if current number of packed request is less than packed_min.
+In such a case, requests should be put back to request_queue from packed list.
+I think it's a additional and unnecessary work due to packed_min.
+It's not interesting. So I want to revert this regulation of packed_min.
 
-Ok..It's dangerous case..I see. :)
-And I added the output message from eMMC4.5 device in the previous mail.
+And we have discussed the location of mmc_blk_prep_packed_list(block.c or queue.c) several times.
+Packed command is valid only if request type is read/write,
+so it may be a good location to decide in mmc_blk_issue_rw_rq in block.c.
+I guess you want this function to be located in mmc_queue_thread in queue.c, right?
+Is it advantageous? Could you explain for this?
 
-Best Regards,
-Jaehoon Chung
-
+Thanks,
+Seungwon Jeon
+> > +				mmc_blk_packed_hdr_wrq_prep(mq->mqrq_cur, card, mq, reqs);
+> > +			else
+> > +				mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
 > 
 > Thanks,
+> Maya Erez
+> Consultant for Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
 > 
-> - Chris.
-
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
