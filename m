@@ -1,49 +1,78 @@
-From: Jae hoon Chung <jh80.chung@gmail.com>
-Subject: Re: [PATCH v7] mmc: support BKOPS feature for eMMC
-Date: Tue, 21 Feb 2012 23:21:38 +0900
-Message-ID: <CAELcNGTfqtduibsaXTE-a1GRe=9cHEMeEZB5cxtSnG+ufvFFUQ@mail.gmail.com>
-References: <4F190E26.4040909@samsung.com>
-	<CAKLKtzcoOXJoZX7E87u-yfbYMCz26y3KWmqn-dA-UkJ=HiYW7A@mail.gmail.com>
-	<4F3B1D69.8060308@samsung.com>
-	<6c3f05d8d59e75411f3284e8344e0bdd.squirrel@www.codeaurora.org>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH v3 2/2] mmc: card: Adding support for Sanitize in eMMC
+ v4.5
+Date: Tue, 21 Feb 2012 10:04:42 -0800
+Message-ID: <4F43DCBA.5070605@codeaurora.org>
+References: <1329832825-8844-1-git-send-email-ygardi@codeaurora.org> <1329832825-8844-3-git-send-email-ygardi@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:50108 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755448Ab2BUOVm convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Feb 2012 09:21:42 -0500
-Received: by bkcjm19 with SMTP id jm19so5358544bkc.19
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Feb 2012 06:21:40 -0800 (PST)
-In-Reply-To: <6c3f05d8d59e75411f3284e8344e0bdd.squirrel@www.codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1329832825-8844-3-git-send-email-ygardi@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Yaniv Gardi <ygardi@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, axboe@kernel.dk, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Konstantin Dorfman <kdorfman@codeaurora.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Saugata Das <saugata.das@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>
 
-2012/2/21 Konstantin Dorfman <kdorfman@codeaurora.org>:
-> Hello Jaehoon,
-> I'm testing your patch and will post review soon.
-> Have you ever seen urgent BKOPS triggered?
-> I have BUGON() on such event and till now never seen it.
-Hi Konstantin..
-Actually, i didn't urgent BKOPS(level-3), but i have seen the level-2.
-I think that maybe eMMC4.41 is triggered the urgent BKOPS with level-2.
-(Now, i didn't see the spec, tomorrow i will check this.)
-Thanks for testing..and i will wait for your review..
+On 02/21/12 06:00, Yaniv Gardi wrote:
+> @@ -922,6 +918,44 @@ out:
+>  	return err ? 0 : 1;
+>  }
+>  
+> +int mmc_blk_issue_sanitize_rq(struct mmc_queue *mq,
+> +			       struct request *req)
+> +{
+> +	struct mmc_blk_data *md = mq->data;
+> +	struct mmc_card *card = md->queue.card;
+> +	int err = 0;
+> +
+> +	if (!(mmc_can_sanitize(card) && (mq->card->host->caps2 & MMC_CAP2_SANITIZE))) {
+> +		pr_err("%s: SANITIZE is not supported", __func__);
+> +		err = -EOPNOTSUPP;
+> +		goto out;
+> +	}
+> +
+> +	pr_info("%s: SANITIZE is supported", __func__);
 
-Best Regards,
-Jaehoon Chung
->
-> --
-> Konstantin Dorfman
-> Consultant for Qualcomm Innovation Center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+These look like debug printks. Please remove them.
+
+> +
+> +	mmc_sd_card_set_sanitize_in_progress(card);
+> +
+> +	pr_info("%s: issueing SANITIZE command...", __func__);
+> +
+> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +					 EXT_CSD_SANITIZE_START, 1, 0);
+> +
+> +	pr_info("%s: SANITIZE command returned...", __func__);
+> +
+> +	if (err)
+> +		pr_err("%s: mmcblk: mmc_switch() failed. err=%d\n",
+> +		       __func__, err);
+> +
+> +	mmc_sd_card_set_sanitize_completed(card);
+> +
+> +out:
+> +	spin_lock_irq(&md->lock);
+> +	__blk_end_request(req, err, blk_rq_bytes(req));
+> +	spin_unlock_irq(&md->lock);
+> +
+> +	return err ? 0 : 1;
+> +}
+> +
+>  static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
+>  {
+>  	struct mmc_blk_data *md = mq->data;
+> @@ -181,6 +186,11 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+>  	if (mmc_can_erase(card))
+>  		mmc_queue_setup_discard(mq->queue, card);
+>  
+> +	if ((mmc_can_sanitize(card) && (host->caps2 & MMC_CAP2_SANITIZE)))
+> +		mmc_queue_setup_sanitize(mq->queue);
+> +	else
+> +		pr_info("%s - card doesn't support sanitize", __func__);
+
+debug printk again?
+
+Sent by an employee of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
