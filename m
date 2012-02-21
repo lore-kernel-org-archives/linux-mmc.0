@@ -1,82 +1,84 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 1/2] Documentation/gpio.txt: Explain expected pinctrl
-	interaction
-Date: Tue, 21 Feb 2012 11:06:18 +0000
-Message-ID: <20120221110618.GJ22562@n2100.arm.linux.org.uk>
-References: <1329719263-18971-1-git-send-email-swarren@nvidia.com> <20120220073941.GC22562@n2100.arm.linux.org.uk> <CACRpkdbMFN3=XTSg1oE310eTHecrs6XaMz+DCNYJzwOg8JEEiQ@mail.gmail.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: RE: [PATCH v3 0/6] mmc: sdhci-s3c: Rework platform data and add device
+ tree support
+Date: Tue, 21 Feb 2012 20:37:26 +0900
+Message-ID: <00b901ccf08d$2fc18b50$8f44a1f0$%kim@samsung.com>
+References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
+ <003401cce730$baf979a0$30ec6ce0$%kim@samsung.com>
+ <m2aa4pkq5g.fsf@bob.laptop.org> <4F3CFEED.6060206@samsung.com>
+ <m239abgc32.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CACRpkdbMFN3=XTSg1oE310eTHecrs6XaMz+DCNYJzwOg8JEEiQ@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Stephen Warren <swarren@nvidia.com>, Grant Likely <grant.likely@secretlab.ca>, Linus Walleij <linus.walleij@stericsson.com>, Randy Dunlap <rdunlap@xenotime.net>, Olof Johansson <olof@lixom.net>, Colin Cross <ccross@android.com>, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <m239abgc32.fsf@bob.laptop.org>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: 'Thomas Abraham' <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Feb 21, 2012 at 11:41:31AM +0100, Linus Walleij wrote:
-> I remember this case very well and we designed for it, so it should
-> be handled by pin control and GPIO thusly:
+Chris Ball wrote:
 > 
-> Example: use pins 1,2 as I2C, then convert them to GPIO for a while
-> then back again:
+> Hi,
 > 
-> // This call looks up a map containing pins 1,2 and reserve them
-> p = pinctrl_get(dev, "i2c");
-> if (IS_ERR(p))
->   ...
-> pinctrl_enable(p);
-> pinctrl_disable(p);
-> // This will free up the pins again
-> pinctrl_put(p);
-> // So now we can do this...
-> // NB: the GPIO driver calls pinctr_request_gpio() to check
-> // that it can take these pins
-> gpio_request(1, "gpio1"):
-> gpio_request(2, "gpio2");
-> // This will trigger a reset or something
-> gpio_direction_output(1, 1);
-> gpio_direction_output(2, 1);
-> // Release pins again
-> gpio_free(1);
-> gpio_free(2);
-> // Take them back for this function
-> p = pinctrl_get(dev, "i2c");
+Hi,
+
+> On Thu, Feb 16 2012, Kukjin Kim wrote:
+> > I mean if I or you create topic branch for this whole series, can be
+> > merged into both tree for avoiding conflicts with further working. Of
+> > course, the topic branch don't have to rebase after merging into each
+> > tree.
+> >
+> > If you're ok on this and my opinion, let me create the topic branch.
 > 
-> It's a bit kludgy but works and makes sure the pins are only used
-> for one thing at a time.
+> Okay, sure.  Thanks,
+> 
+I created topic branch for this we talked. You can pull that following:
+  git://git.kernel.org/pub/scm/linux/kernel/git/kgene/linux-samsung.git
+v3.4-for-cjb
 
-No.  The case which I'm thinking of is for the Assabet audio, where
-we have the following situation.
+If any problems, please kindly let me know.
 
-We have the SSP bus [TXD,RXD,SFRM,SCLK] which is handled by the SSP core.
-This is connected through a FPGA to a UDA1341 codec.  The UDA1341 codec
-has DI,DO,WS,BCLK signals.  WS (which is effectively the LRCK and therefore
-identifies the left and right channels) is connected through a flip-flop
-in the FPGA which toggles at every SFRM pulse.
+Thanks.
 
-WS is held high for the left sample.  This is the default setting.
-Unfortunately, some FPGA builds out there do not tristate the WS output
-when the codec is powered off.
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
 
-This leads to a high leakage current from the FPGA, into the UDA1341 codec
-and into other devices.
+The following changes since commit d65b4e98d7ea3038b767b70fe8be959b2913f16d:
 
-The solution is to wait for SSP to finish, and while SSP is still enabled,
-switch the pins from the SSP block to the GPIO block and toggle the SFRM
-signal to flip the WS output before removing power.  When starting up,
-with the pins under control of GPIO, power up and them toggle hte SFRM
-signal to restore the WS state before giving it back to the SSP block.
+  Linux 3.3-rc3 (2012-02-08 19:21:53 -0800)
 
-However, here's the thing: SSP must be enabled at the point in time when
-the pins are given or taken away from it, otherwise SFRM is indeterminant.
-We can't allow gpio_request() to fail at the points where we toggle this
-pin - failure is not really an option where causing hardware stress is
-involved.  We can't allow the GPIO block to have the state of these pins
-change state while the pins are given back to the GPIO block before the
-GPIOs have been requested (glitches on the SFRM line will cause the state
-of the FIFO to change.)
+are available in the git repository at:
+  git://git.kernel.org/pub/scm/linux/kernel/git/kgene/linux-samsung.git
+v3.4-for-cjb
 
-Another case where this kind of run-time switching needs to occur is the
-PXA IrDA driver, where the pins need to be switched between their FIR and
-SIR modes.
+Thomas Abraham (6):
+      mmc: sdhci-s3c: Remove usage of clk_type member in platform data
+      ARM: EXYNOS: use 'exynos4-sdhci' as device name for sdhci controllers
+      ARM: SAMSUNG: remove all uses of clk_type member in sdhci platform
+data
+      mmc: sdhci-s3c: derive transfer width host capability from max_width
+in platform data
+      mmc: sdhci-s3c: Keep a copy of platform data and use it
+      mmc: sdhci-s3c: Add device tree support
+
+ .../devicetree/bindings/mmc/samsung-sdhci.txt      |   70 ++++++
+ arch/arm/mach-exynos/clock.c                       |   24 +-
+ arch/arm/mach-exynos/common.c                      |    5 +
+ arch/arm/mach-exynos/mach-armlex4210.c             |    3 -
+ arch/arm/mach-exynos/mach-nuri.c                   |    3 -
+ arch/arm/mach-exynos/mach-origen.c                 |    2 -
+ arch/arm/mach-exynos/mach-smdk4x12.c               |    2 -
+ arch/arm/mach-exynos/mach-smdkv310.c               |    4 -
+ arch/arm/mach-exynos/mach-universal_c210.c         |    2 -
+ arch/arm/plat-samsung/devs.c                       |    4 -
+ arch/arm/plat-samsung/include/plat/sdhci.h         |   35 +++-
+ arch/arm/plat-samsung/platformdata.c               |    2 -
+ drivers/mmc/host/sdhci-s3c.c                       |  235
++++++++++++++++++++-
+ 13 files changed, 341 insertions(+), 50 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
