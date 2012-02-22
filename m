@@ -1,87 +1,216 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 1/2] Documentation/gpio.txt: Explain expected pinctrl interaction
-Date: Wed, 22 Feb 2012 07:01:11 +0100
-Message-ID: <CACRpkdb+Vtyhsxi7L0ttDk_8Ra2-Kfh8H9esD7P_FC_=c4-=Mw@mail.gmail.com>
-References: <1329719263-18971-1-git-send-email-swarren@nvidia.com>
-	<20120220073941.GC22562@n2100.arm.linux.org.uk>
-	<CACRpkdbMFN3=XTSg1oE310eTHecrs6XaMz+DCNYJzwOg8JEEiQ@mail.gmail.com>
-	<20120221110618.GJ22562@n2100.arm.linux.org.uk>
-	<CACRpkdYzRu4VPKPgxuttuvSDCpfHjvBGGq1rFEDExv1PsoLG=w@mail.gmail.com>
-	<74CDBE0F657A3D45AFBB94109FB122FF17BD8BC3A1@HQMAIL01.nvidia.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v3 2/2] mmc: card: Adding support for Sanitize in eMMC v4.5
+Date: Wed, 22 Feb 2012 15:09:02 +0900
+Message-ID: <4F44867E.2040506@samsung.com>
+References: <1329832825-8844-1-git-send-email-ygardi@codeaurora.org>
+ <1329832825-8844-3-git-send-email-ygardi@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:64209 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751031Ab2BVGBL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Feb 2012 01:01:11 -0500
-In-Reply-To: <74CDBE0F657A3D45AFBB94109FB122FF17BD8BC3A1@HQMAIL01.nvidia.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:24421 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750932Ab2BVGJF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Feb 2012 01:09:05 -0500
+In-reply-to: <1329832825-8844-3-git-send-email-ygardi@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@nvidia.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Grant Likely <grant.likely@secretlab.ca>, Linus Walleij <linus.walleij@stericsson.com>, Randy Dunlap <rdunlap@xenotime.net>, Olof Johansson <olof@lixom.net>, Colin Cross <ccross@android.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Yaniv Gardi <ygardi@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, axboe@kernel.dk, open list <linux-kernel@vger.kernel.org>
 
-On Tue, Feb 21, 2012 at 8:14 PM, Stephen Warren <swarren@nvidia.com> wrote:
+On 02/21/2012 11:00 PM, Yaniv Gardi wrote:
 
-> Ignoring WARs like we're discussing, it's typically true that a given pin
-> should either be a special function or a GPIO for any given board. If
-> we do allow a pin to be owned/used by both, then how do we indicate, on
-> a per-board rather than per-SoC basis, which pins we should allow both
-> gpio_request() and pinmux usage?
+> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+> 
+> ---
+>  drivers/mmc/card/block.c |   58 ++++++++++++++++++++++++++++++++++++++-------
+>  drivers/mmc/card/queue.c |   12 ++++++++-
+>  include/linux/mmc/card.h |    7 +++++
+>  include/linux/mmc/host.h |    1 +
+>  4 files changed, 68 insertions(+), 10 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 0c959c9..5be77e6 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -830,6 +830,9 @@ static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+>  	from = blk_rq_pos(req);
+>  	nr = blk_rq_sectors(req);
+>  
+> +	/* 1ST priority is DISCARD.
+> +	   2ND is TRIM
+> +	   3RD is ERASE */
+>  	if (mmc_can_discard(card))
+>  		arg = MMC_DISCARD_ARG;
+>  	else if (mmc_can_trim(card))
+> @@ -868,18 +871,11 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
+>  	unsigned int from, nr, arg;
+>  	int err = 0, type = MMC_BLK_SECDISCARD;
+>  
+> -	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
+> +	if (!(mmc_can_secure_erase_trim(card))) {
+>  		err = -EOPNOTSUPP;
+>  		goto out;
+>  	}
+>  
+> -	/* The sanitize operation is supported at v4.5 only */
+> -	if (mmc_can_sanitize(card)) {
+> -		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> -				EXT_CSD_SANITIZE_START, 1, 0);
+> -		goto out;
+> -	}
+> -
+>  	from = blk_rq_pos(req);
+>  	nr = blk_rq_sectors(req);
+>  
+> @@ -922,6 +918,44 @@ out:
+>  	return err ? 0 : 1;
+>  }
+>  
+> +int mmc_blk_issue_sanitize_rq(struct mmc_queue *mq,
+> +			       struct request *req)
+> +{
+> +	struct mmc_blk_data *md = mq->data;
+> +	struct mmc_card *card = md->queue.card;
+> +	int err = 0;
+> +
+> +	if (!(mmc_can_sanitize(card) && (mq->card->host->caps2 & MMC_CAP2_SANITIZE))) {
 
-I was thinking about making this a property of the physical pin i.e.
-struct pin_desc and not of the board data.
+if (!mmc_can_sanitize(card) && card->host->caps2 & MMC_CAP2_SANITIZE)?
 
-It seems to me like this arbitration has to be very close to the driver,
-since not all or even many controllers will support it (AFAICT).
+> +		pr_err("%s: SANITIZE is not supported", __func__);
+> +		err = -EOPNOTSUPP;
+> +		goto out;
+> +	}
+> +
+> +	pr_info("%s: SANITIZE is supported", __func__);
+> +
+> +	mmc_sd_card_set_sanitize_in_progress(card);
+> +
+> +	pr_info("%s: issueing SANITIZE command...", __func__);
+> +
+> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +					 EXT_CSD_SANITIZE_START, 1, 0);
+> +
+> +	pr_info("%s: SANITIZE command returned...", __func__);
 
-> The following considerations exist:
-> a) On Tegra, a pin group might include 10 pins that are mux'd as a group,
-> hence all owned e.g. by a NAND driver. If a few of those aren't used on a
-> particular board due to the way the NAND is hooked up and the driver
-> configured, do we only allow gpio_request() only on those pins we know the
-> NAND driver isn't actually using, to prevent someone using unexpected
-> pins as GPIO? We'd need a per-GPIO per-board way to represent this if
-> we care about this level of error-checking.
+Too many pr_info()..i think that need not the message..
 
-In this case I would strive not to present unused pins to the functions
-in the first place. But maybe this collides with the new paradigm to
-assign aquire all possible pins on pinctrl_get() time?
+> +
+> +	if (err)
+> +		pr_err("%s: mmcblk: mmc_switch() failed. err=%d\n",
+> +		       __func__, err);
 
-> b) In Linus's snooping example, how do we know the SoC can physically
-> implement enabling a pin as both a GPIO and a special function, such
-> that the gpio_request() for the snooping won't interfere with the mux'd
-> function?
+how about using mmcblkX instead of just mmcblk?
 
-I think on U300 and SA1100 we can flag that in the pin descriptor
-as described above.
+> +
+> +	mmc_sd_card_set_sanitize_completed(card);
+> +
+> +out:
+> +	spin_lock_irq(&md->lock);
+> +	__blk_end_request(req, err, blk_rq_bytes(req));
+> +	spin_unlock_irq(&md->lock);
+> +
+> +	return err ? 0 : 1;
+> +}
+> +
+>  static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
+>  {
+>  	struct mmc_blk_data *md = mq->data;
+> @@ -1379,7 +1413,12 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>  		goto out;
+>  	}
+>  
+> -	if (req && req->cmd_flags & REQ_DISCARD) {
+> +	if (req && req->cmd_flags & REQ_SANITIZE) {
+> +		/* complete ongoing async transfer before issuing discard */
 
-> 2) Extend the pinctrl mapping table to explicitly represent GPIO usage.
+Issuing Sanitize, not discard. typo.
 
-Seems like it could get complicated. Since the only hardwares we have
-that can do this would be fine with having it in their pin descriptor we
-can do it there?
+> +		if (card->host && card->host->areq)
+> +			mmc_blk_issue_rw_rq(mq, NULL);
+> +		ret = mmc_blk_issue_sanitize_rq(mq, req);
+> +	} else if (req && req->cmd_flags & REQ_DISCARD) {
+>  		/* complete ongoing async transfer before issuing discard */
+>  		if (card->host->areq)
+>  			mmc_blk_issue_rw_rq(mq, NULL);
+> @@ -1396,6 +1435,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>  		ret = mmc_blk_issue_rw_rq(mq, req);
+>  	}
+>  
+> +
+>  out:
+>  	if (!req)
+>  		/* release host only when there are no more requests */
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index dcad59c..6946ac1 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -140,10 +140,15 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+>  	/* granularity must not be greater than max. discard */
+>  	if (card->pref_erase > max_discard)
+>  		q->limits.discard_granularity = 0;
+> -	if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))
+> +	if (mmc_can_secure_erase_trim(card))
+>  		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
+>  }
+>  
+> +static void mmc_queue_setup_sanitize(struct request_queue *q)
+> +{
+> +	queue_flag_set_unlocked(QUEUE_FLAG_SANITIZE, q);
+> +}
+> +
+>  /**
+>   * mmc_init_queue - initialise a queue structure.
+>   * @mq: mmc queue
+> @@ -181,6 +186,11 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+>  	if (mmc_can_erase(card))
+>  		mmc_queue_setup_discard(mq->queue, card);
+>  
+> +	if ((mmc_can_sanitize(card) && (host->caps2 & MMC_CAP2_SANITIZE)))
+> +		mmc_queue_setup_sanitize(mq->queue);
+> +	else
+> +		pr_info("%s - card doesn't support sanitize", __func__);
+> +
+>  #ifdef CONFIG_MMC_BLOCK_BOUNCE
+>  	if (host->max_segs == 1) {
+>  		unsigned int bouncesz;
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 9478a6b..0890e9c 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -236,6 +236,9 @@ struct mmc_card {
+>  #define MMC_POWEROFF_SHORT		2
+>  #define MMC_POWEROFF_LONG		3
+>  
+> +/* card is in sanitize progress */
+> +#define MMC_STATE_SANITIZE_IN_PROGRESS (1<<9)
+> +
+>  	unsigned int		erase_size;	/* erase size in sectors */
+>   	unsigned int		erase_shift;	/* if erase unit is power 2 */
+>   	unsigned int		pref_erase;	/* in sectors */
+> @@ -388,6 +391,10 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+>  #define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
+>  #define mmc_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
+>  #define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
+> +#define mmc_sd_card_set_sanitize_in_progress(c) ((c)->state |= \
+> +		MMC_STATE_SANITIZE_IN_PROGRESS)
+> +#define mmc_sd_card_set_sanitize_completed(c) ((c)->state &= \
+> +		~MMC_STATE_SANITIZE_IN_PROGRESS)
+>  #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
+>  #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
+>  
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 9a03d03..93210aa 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -242,6 +242,7 @@ struct mmc_host {
+>  #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
+>  #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff supported */
+>  #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
+> +#define MMC_CAP2_SANITIZE	(1<<4)		/* Support Sanitize */
+>  
+>  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+>  	unsigned int        power_notify_type;
 
-> This is required anyway for HW where there isn't a 1:1 mapping between
-> GPIO ID and pin ID, e.g. 1 pin could be used for two different GPIO
-> signals, e.g. 1 from each of 2 different GPIO HW modules, with different
-> capabilities, or where 1 GPIO could be routed to one of 2 or more pins.
->
-> In other words, make "gpio" an explicit mux function, thus allowing
-> pinctrl_select_state() to directly transition between special function
-> and GPIO usage, rather than having separate pinctrl and GPIO APIs for
-> this. This way would entail dropping my Documentation/gpio.txt patch
-> completely, I think.
->
-> If we do this though, I think we'd want to extend pinctrl to allow muxing
-> on pins too, so that we don't need to create a pin group for every pin to
-> support per-pin GPIO ownership. This would also help out all the HW that
-> already muxes everything per-pin, since they need to create these single-
-> pin groups right now... I somewhat anticpated this in my naming of the
-> mapping table convenience macros in the most recent pinctrl patch I posted
-> to add pin config mapping table entries.
 
-Hm I think Tony also mentioned that he wanted to allow muxing of
-single pins from the mapping sometime so I sort of like the idea.
-
-Linus Walleij
