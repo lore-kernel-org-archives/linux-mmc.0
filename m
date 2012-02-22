@@ -1,33 +1,32 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH v3 0/6] mmc: sdhci-s3c: Rework platform data and add
- device tree support
-Date: Wed, 22 Feb 2012 12:58:23 +0000
-Message-ID: <20120222125823.GA14463@sirena.org.uk>
-References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
- <003401cce730$baf979a0$30ec6ce0$%kim@samsung.com>
- <m2aa4pkq5g.fsf@bob.laptop.org>
- <4F3CFEED.6060206@samsung.com>
- <m239abgc32.fsf@bob.laptop.org>
- <00b901ccf08d$2fc18b50$8f44a1f0$%kim@samsung.com>
- <m2vcn0496y.fsf@bob.laptop.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v7] mmc: support BKOPS feature for eMMC
+Date: Wed, 22 Feb 2012 16:11:30 +0200
+Message-ID: <4F44F792.2000304@intel.com>
+References: <4F190E26.4040909@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cassiel.sirena.org.uk ([80.68.93.111]:54064 "EHLO
-	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751186Ab2BVM6n (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Feb 2012 07:58:43 -0500
-Content-Disposition: inline
-In-Reply-To: <m2vcn0496y.fsf@bob.laptop.org>
+Received: from mga14.intel.com ([143.182.124.37]:47188 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751615Ab2BVOL1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Feb 2012 09:11:27 -0500
+In-Reply-To: <4F190E26.4040909@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Kukjin Kim <kgene.kim@samsung.com>, 'Thomas Abraham' <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, patches@linaro.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-On Tue, Feb 21, 2012 at 08:17:41AM -0500, Chris Ball wrote:
+On 20/01/12 08:48, Jaehoon Chung wrote:
+> Enable eMMC background operations (BKOPS) feature.
+> 
+> If URGENT_BKOPS is set after a response, note that BKOPS
+> are required. After all I/O requests are finished, run
+> BKOPS if required. Should read/write operations be requested
+> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
+> and then service the request.
 
-> Pushed to mmc-next, thanks.  (I'm expecting that you'll do the merge
-> to Linus.)
-
-I've been sending patches adding runtime PM support to this driver for a
-while with no response - are there any issues with those?
+You are leaving bkops running and releasing the host.  Won't
+that cause problems for other entry points to mmc services
+e.g. system suspend (cache control, sleep etc), ioctl, sysfs,
+etc
