@@ -1,70 +1,56 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v7] mmc: support BKOPS feature for eMMC
-Date: Wed, 22 Feb 2012 16:16:22 +0900
-Message-ID: <4F449646.8020908@samsung.com>
-References: <4F190E26.4040909@samsung.com>
- <CAKLKtzcoOXJoZX7E87u-yfbYMCz26y3KWmqn-dA-UkJ=HiYW7A@mail.gmail.com>
- <4F3B1D69.8060308@samsung.com>
- <6c3f05d8d59e75411f3284e8344e0bdd.squirrel@www.codeaurora.org>
- <CAELcNGTfqtduibsaXTE-a1GRe=9cHEMeEZB5cxtSnG+ufvFFUQ@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: core: fix au_size according to sd spec3.0
+Date: Wed, 22 Feb 2012 12:28:12 +0200
+Message-ID: <4F44C33C.3060207@intel.com>
+References: <1329473681-5071-1-git-send-email-hyeonsu.kim@samsung.com> <4F3E2FEC.6030808@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:60086 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751716Ab2BVHQZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Feb 2012 02:16:25 -0500
-Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LZS00CNP9H4CGR0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 22 Feb 2012 16:16:23 +0900 (KST)
-Received: from [165.213.219.108] by mmp2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LZS008QH9JAP0H0@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 22 Feb 2012 16:16:23 +0900 (KST)
-In-reply-to: <CAELcNGTfqtduibsaXTE-a1GRe=9cHEMeEZB5cxtSnG+ufvFFUQ@mail.gmail.com>
+Received: from mga09.intel.com ([134.134.136.24]:33767 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750783Ab2BVK2H (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Feb 2012 05:28:07 -0500
+In-Reply-To: <4F3E2FEC.6030808@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Konstantin Dorfman <kdorfman@codeaurora.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Saugata Das <saugata.das@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: hyeonsu.kim@samsung.com, linux-mmc@vger.kernel.org, cjb@laptop.org, kyungmin.park@samsung.com
 
-Hi Konstantin
-
-I didn't see the level-3, but have seen the level-2.
-URGENT_BKOPS should be triggered when the levels is either 2 or 3.
-So maybe you can see the URGENT_BKOPS with level-2.
-
-Best Regards,
-Jaehoon Chung
-
-On 02/21/2012 11:21 PM, Jae hoon Chung wrote:
-
-> 2012/2/21 Konstantin Dorfman <kdorfman@codeaurora.org>:
->> Hello Jaehoon,
->> I'm testing your patch and will post review soon.
->> Have you ever seen urgent BKOPS triggered?
->> I have BUGON() on such event and till now never seen it.
-> Hi Konstantin..
-> Actually, i didn't urgent BKOPS(level-3), but i have seen the level-2.
-> I think that maybe eMMC4.41 is triggered the urgent BKOPS with level-2.
-> (Now, i didn't see the spec, tomorrow i will check this.)
-> Thanks for testing..and i will wait for your review..
+On 17/02/12 12:46, Jaehoon Chung wrote:
+> Hi.
+> On 02/17/2012 07:14 PM, hyeonsu.kim@samsung.com wrote:
 > 
-> Best Regards,
-> Jaehoon Chung
+>> From: Hyeonsu Kim <hyeonsu.kim@samsung.com>
 >>
->> --
->> Konstantin Dorfman
->> Consultant for Qualcomm Innovation Center, Inc.
->> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+>> This "if phrase" is illogical.
+>> and SD Spec 3.0 supports au_size from 0 to 0xF.
 >>
+>> Signed-off-by: Hyeonsu Kim <hyeonsu.kim@samsung.com>
+>> ---
+>>  drivers/mmc/core/sd.c |    2 +-
+>>  1 files changed, 1 insertions(+), 1 deletions(-)
 >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>> index c63ad03..cf8bf0e 100644
+>> --- a/drivers/mmc/core/sd.c
+>> +++ b/drivers/mmc/core/sd.c
+>> @@ -244,7 +244,7 @@ static int mmc_read_ssr(struct mmc_card *card)
+>>  	 * bitfield positions accordingly.
+>>  	 */
+>>  	au = UNSTUFF_BITS(ssr, 428 - 384, 4);
+>> -	if (au > 0 || au <= 9) {
+>> +	if (au >= 0 && au < 16) {
 > 
+> I think "if (au > 0 && au <= 0xf)" is more readable and 
+> need to check the sd-spec.
+> Because in SD2.0, didn't define from 0xa to 0xf.
+> 
+>>  		card->ssr.au = 1 << (au + 4);
+> 
+> Is it right???
+> card->ssr.au = 1 << (au + 4) is something wrong.
+> If au is 1, card->ssr.au is 32KB. BUt in spec, defined 16KB.
+> I think the wrong bit operation. this is more problem.
 
-
+No it is 16KiB because "au" is in sectors.
