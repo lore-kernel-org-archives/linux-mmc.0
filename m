@@ -1,216 +1,70 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3 2/2] mmc: card: Adding support for Sanitize in eMMC v4.5
-Date: Wed, 22 Feb 2012 15:09:02 +0900
-Message-ID: <4F44867E.2040506@samsung.com>
-References: <1329832825-8844-1-git-send-email-ygardi@codeaurora.org>
- <1329832825-8844-3-git-send-email-ygardi@codeaurora.org>
+Subject: Re: [PATCH v7] mmc: support BKOPS feature for eMMC
+Date: Wed, 22 Feb 2012 16:16:22 +0900
+Message-ID: <4F449646.8020908@samsung.com>
+References: <4F190E26.4040909@samsung.com>
+ <CAKLKtzcoOXJoZX7E87u-yfbYMCz26y3KWmqn-dA-UkJ=HiYW7A@mail.gmail.com>
+ <4F3B1D69.8060308@samsung.com>
+ <6c3f05d8d59e75411f3284e8344e0bdd.squirrel@www.codeaurora.org>
+ <CAELcNGTfqtduibsaXTE-a1GRe=9cHEMeEZB5cxtSnG+ufvFFUQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:24421 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750932Ab2BVGJF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Feb 2012 01:09:05 -0500
-In-reply-to: <1329832825-8844-3-git-send-email-ygardi@codeaurora.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:60086 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751716Ab2BVHQZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Feb 2012 02:16:25 -0500
+Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0LZS00CNP9H4CGR0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 22 Feb 2012 16:16:23 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0LZS008QH9JAP0H0@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 22 Feb 2012 16:16:23 +0900 (KST)
+In-reply-to: <CAELcNGTfqtduibsaXTE-a1GRe=9cHEMeEZB5cxtSnG+ufvFFUQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yaniv Gardi <ygardi@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, axboe@kernel.dk, open list <linux-kernel@vger.kernel.org>
+To: Konstantin Dorfman <kdorfman@codeaurora.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Saugata Das <saugata.das@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>
 
-On 02/21/2012 11:00 PM, Yaniv Gardi wrote:
+Hi Konstantin
 
-> Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+I didn't see the level-3, but have seen the level-2.
+URGENT_BKOPS should be triggered when the levels is either 2 or 3.
+So maybe you can see the URGENT_BKOPS with level-2.
+
+Best Regards,
+Jaehoon Chung
+
+On 02/21/2012 11:21 PM, Jae hoon Chung wrote:
+
+> 2012/2/21 Konstantin Dorfman <kdorfman@codeaurora.org>:
+>> Hello Jaehoon,
+>> I'm testing your patch and will post review soon.
+>> Have you ever seen urgent BKOPS triggered?
+>> I have BUGON() on such event and till now never seen it.
+> Hi Konstantin..
+> Actually, i didn't urgent BKOPS(level-3), but i have seen the level-2.
+> I think that maybe eMMC4.41 is triggered the urgent BKOPS with level-2.
+> (Now, i didn't see the spec, tomorrow i will check this.)
+> Thanks for testing..and i will wait for your review..
 > 
-> ---
->  drivers/mmc/card/block.c |   58 ++++++++++++++++++++++++++++++++++++++-------
->  drivers/mmc/card/queue.c |   12 ++++++++-
->  include/linux/mmc/card.h |    7 +++++
->  include/linux/mmc/host.h |    1 +
->  4 files changed, 68 insertions(+), 10 deletions(-)
+> Best Regards,
+> Jaehoon Chung
+>>
+>> --
+>> Konstantin Dorfman
+>> Consultant for Qualcomm Innovation Center, Inc.
+>> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 0c959c9..5be77e6 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -830,6 +830,9 @@ static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
->  	from = blk_rq_pos(req);
->  	nr = blk_rq_sectors(req);
->  
-> +	/* 1ST priority is DISCARD.
-> +	   2ND is TRIM
-> +	   3RD is ERASE */
->  	if (mmc_can_discard(card))
->  		arg = MMC_DISCARD_ARG;
->  	else if (mmc_can_trim(card))
-> @@ -868,18 +871,11 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
->  	unsigned int from, nr, arg;
->  	int err = 0, type = MMC_BLK_SECDISCARD;
->  
-> -	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
-> +	if (!(mmc_can_secure_erase_trim(card))) {
->  		err = -EOPNOTSUPP;
->  		goto out;
->  	}
->  
-> -	/* The sanitize operation is supported at v4.5 only */
-> -	if (mmc_can_sanitize(card)) {
-> -		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> -				EXT_CSD_SANITIZE_START, 1, 0);
-> -		goto out;
-> -	}
-> -
->  	from = blk_rq_pos(req);
->  	nr = blk_rq_sectors(req);
->  
-> @@ -922,6 +918,44 @@ out:
->  	return err ? 0 : 1;
->  }
->  
-> +int mmc_blk_issue_sanitize_rq(struct mmc_queue *mq,
-> +			       struct request *req)
-> +{
-> +	struct mmc_blk_data *md = mq->data;
-> +	struct mmc_card *card = md->queue.card;
-> +	int err = 0;
-> +
-> +	if (!(mmc_can_sanitize(card) && (mq->card->host->caps2 & MMC_CAP2_SANITIZE))) {
-
-if (!mmc_can_sanitize(card) && card->host->caps2 & MMC_CAP2_SANITIZE)?
-
-> +		pr_err("%s: SANITIZE is not supported", __func__);
-> +		err = -EOPNOTSUPP;
-> +		goto out;
-> +	}
-> +
-> +	pr_info("%s: SANITIZE is supported", __func__);
-> +
-> +	mmc_sd_card_set_sanitize_in_progress(card);
-> +
-> +	pr_info("%s: issueing SANITIZE command...", __func__);
-> +
-> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +					 EXT_CSD_SANITIZE_START, 1, 0);
-> +
-> +	pr_info("%s: SANITIZE command returned...", __func__);
-
-Too many pr_info()..i think that need not the message..
-
-> +
-> +	if (err)
-> +		pr_err("%s: mmcblk: mmc_switch() failed. err=%d\n",
-> +		       __func__, err);
-
-how about using mmcblkX instead of just mmcblk?
-
-> +
-> +	mmc_sd_card_set_sanitize_completed(card);
-> +
-> +out:
-> +	spin_lock_irq(&md->lock);
-> +	__blk_end_request(req, err, blk_rq_bytes(req));
-> +	spin_unlock_irq(&md->lock);
-> +
-> +	return err ? 0 : 1;
-> +}
-> +
->  static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
->  {
->  	struct mmc_blk_data *md = mq->data;
-> @@ -1379,7 +1413,12 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->  		goto out;
->  	}
->  
-> -	if (req && req->cmd_flags & REQ_DISCARD) {
-> +	if (req && req->cmd_flags & REQ_SANITIZE) {
-> +		/* complete ongoing async transfer before issuing discard */
-
-Issuing Sanitize, not discard. typo.
-
-> +		if (card->host && card->host->areq)
-> +			mmc_blk_issue_rw_rq(mq, NULL);
-> +		ret = mmc_blk_issue_sanitize_rq(mq, req);
-> +	} else if (req && req->cmd_flags & REQ_DISCARD) {
->  		/* complete ongoing async transfer before issuing discard */
->  		if (card->host->areq)
->  			mmc_blk_issue_rw_rq(mq, NULL);
-> @@ -1396,6 +1435,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->  		ret = mmc_blk_issue_rw_rq(mq, req);
->  	}
->  
-> +
->  out:
->  	if (!req)
->  		/* release host only when there are no more requests */
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index dcad59c..6946ac1 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -140,10 +140,15 @@ static void mmc_queue_setup_discard(struct request_queue *q,
->  	/* granularity must not be greater than max. discard */
->  	if (card->pref_erase > max_discard)
->  		q->limits.discard_granularity = 0;
-> -	if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))
-> +	if (mmc_can_secure_erase_trim(card))
->  		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
->  }
->  
-> +static void mmc_queue_setup_sanitize(struct request_queue *q)
-> +{
-> +	queue_flag_set_unlocked(QUEUE_FLAG_SANITIZE, q);
-> +}
-> +
->  /**
->   * mmc_init_queue - initialise a queue structure.
->   * @mq: mmc queue
-> @@ -181,6 +186,11 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
->  	if (mmc_can_erase(card))
->  		mmc_queue_setup_discard(mq->queue, card);
->  
-> +	if ((mmc_can_sanitize(card) && (host->caps2 & MMC_CAP2_SANITIZE)))
-> +		mmc_queue_setup_sanitize(mq->queue);
-> +	else
-> +		pr_info("%s - card doesn't support sanitize", __func__);
-> +
->  #ifdef CONFIG_MMC_BLOCK_BOUNCE
->  	if (host->max_segs == 1) {
->  		unsigned int bouncesz;
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 9478a6b..0890e9c 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -236,6 +236,9 @@ struct mmc_card {
->  #define MMC_POWEROFF_SHORT		2
->  #define MMC_POWEROFF_LONG		3
->  
-> +/* card is in sanitize progress */
-> +#define MMC_STATE_SANITIZE_IN_PROGRESS (1<<9)
-> +
->  	unsigned int		erase_size;	/* erase size in sectors */
->   	unsigned int		erase_shift;	/* if erase unit is power 2 */
->   	unsigned int		pref_erase;	/* in sectors */
-> @@ -388,6 +391,10 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
->  #define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
->  #define mmc_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
->  #define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
-> +#define mmc_sd_card_set_sanitize_in_progress(c) ((c)->state |= \
-> +		MMC_STATE_SANITIZE_IN_PROGRESS)
-> +#define mmc_sd_card_set_sanitize_completed(c) ((c)->state &= \
-> +		~MMC_STATE_SANITIZE_IN_PROGRESS)
->  #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
->  #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
->  
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 9a03d03..93210aa 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -242,6 +242,7 @@ struct mmc_host {
->  #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
->  #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff supported */
->  #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
-> +#define MMC_CAP2_SANITIZE	(1<<4)		/* Support Sanitize */
->  
->  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->  	unsigned int        power_notify_type;
 
 
