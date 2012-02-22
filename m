@@ -1,56 +1,57 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: core: fix au_size according to sd spec3.0
-Date: Wed, 22 Feb 2012 12:28:12 +0200
-Message-ID: <4F44C33C.3060207@intel.com>
-References: <1329473681-5071-1-git-send-email-hyeonsu.kim@samsung.com> <4F3E2FEC.6030808@samsung.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH] mmc: tmio_mmc: do not enable card hotplug interrupts, if
+ unused
+Date: Wed, 22 Feb 2012 13:16:09 +0100 (CET)
+Message-ID: <alpine.DEB.2.00.1202221314351.3136@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:33767 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750783Ab2BVK2H (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 22 Feb 2012 05:28:07 -0500
-In-Reply-To: <4F3E2FEC.6030808@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: hyeonsu.kim@samsung.com, linux-mmc@vger.kernel.org, cjb@laptop.org, kyungmin.park@samsung.com
 
-On 17/02/12 12:46, Jaehoon Chung wrote:
-> Hi.
-> On 02/17/2012 07:14 PM, hyeonsu.kim@samsung.com wrote:
-> 
->> From: Hyeonsu Kim <hyeonsu.kim@samsung.com>
->>
->> This "if phrase" is illogical.
->> and SD Spec 3.0 supports au_size from 0 to 0xF.
->>
->> Signed-off-by: Hyeonsu Kim <hyeonsu.kim@samsung.com>
->> ---
->>  drivers/mmc/core/sd.c |    2 +-
->>  1 files changed, 1 insertions(+), 1 deletions(-)
->>
->> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
->> index c63ad03..cf8bf0e 100644
->> --- a/drivers/mmc/core/sd.c
->> +++ b/drivers/mmc/core/sd.c
->> @@ -244,7 +244,7 @@ static int mmc_read_ssr(struct mmc_card *card)
->>  	 * bitfield positions accordingly.
->>  	 */
->>  	au = UNSTUFF_BITS(ssr, 428 - 384, 4);
->> -	if (au > 0 || au <= 9) {
->> +	if (au >= 0 && au < 16) {
-> 
-> I think "if (au > 0 && au <= 0xf)" is more readable and 
-> need to check the sd-spec.
-> Because in SD2.0, didn't define from 0xa to 0xf.
-> 
->>  		card->ssr.au = 1 << (au + 4);
-> 
-> Is it right???
-> card->ssr.au = 1 << (au + 4) is something wrong.
-> If au is 1, card->ssr.au is 32KB. BUt in spec, defined 16KB.
-> I think the wrong bit operation. this is more problem.
+If TMIO MMC is used in polling mode, or the card is non-removable, or
+card-detection is performed, using an external interrupt, there is no
+need to enable controller native card hotplug interrupts.
 
-No it is 16KiB because "au" is in sectors.
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
+ drivers/mmc/host/tmio_mmc_pio.c |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 69b826a..6294c91 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -302,6 +302,7 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
+ {
+ 	struct mmc_data *data = host->data;
+ 	int c = cmd->opcode;
++	u32 irq_mask = TMIO_MASK_CMD;
+ 
+ 	/* Command 12 is handled by hardware */
+ 	if (cmd->opcode == 12 && !cmd->arg) {
+@@ -337,7 +338,9 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
+ 			c |= TRANSFER_READ;
+ 	}
+ 
+-	tmio_mmc_enable_mmc_irqs(host, TMIO_MASK_CMD);
++	if (!host->native_hotplug)
++		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
++	tmio_mmc_enable_mmc_irqs(host, irq_mask);
+ 
+ 	/* Fire off the command */
+ 	sd_ctrl_write32(host, CTL_ARG_REG, cmd->arg);
+@@ -966,6 +969,8 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 		irq_mask |= TMIO_MASK_READOP;
+ 	if (!_host->chan_tx)
+ 		irq_mask |= TMIO_MASK_WRITEOP;
++	if (!_host->native_hotplug)
++		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
+ 
+ 	tmio_mmc_enable_mmc_irqs(_host, irq_mask);
+ 
+-- 
+1.7.2.5
+
