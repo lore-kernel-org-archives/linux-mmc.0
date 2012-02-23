@@ -1,61 +1,83 @@
-From: Rajendra Nayak <rnayak@ti.com>
-Subject: Re: [PATCH v2 0/4] omap hsmmc device tree support
-Date: Thu, 23 Feb 2012 17:43:18 +0530
-Message-ID: <4F462D5E.5010600@ti.com>
-References: <1329998490-27555-1-git-send-email-rnayak@ti.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [RFC] mmc: dw_mmc: Fix the max_blk_count in IDMAC
+Date: Thu, 23 Feb 2012 12:14:24 +0000
+Message-ID: <CAFbHwiT_KTWBLUSDbfMvuK0UEa_RrVqVF5V1WBqm+5c39Rtnqg@mail.gmail.com>
+References: <000301ccf1fc$64e5dbe0$2eb193a0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog120.obsmtp.com ([74.125.149.140]:39900 "HELO
-	na3sys009aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1753400Ab2BWMN0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Feb 2012 07:13:26 -0500
-In-Reply-To: <1329998490-27555-1-git-send-email-rnayak@ti.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:42453 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753400Ab2BWMOZ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Feb 2012 07:14:25 -0500
+Received: by daed14 with SMTP id d14so1210994dae.19
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Feb 2012 04:14:24 -0800 (PST)
+In-Reply-To: <000301ccf1fc$64e5dbe0$2eb193a0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rajendra Nayak <rnayak@ti.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, devicetree-discuss@lists.ozlabs.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, balajitk@ti.com, svenkatr@ti.com, linaro-dev@lists.linaro.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, James Hogan <james.hogan@imgtec.com>
 
-On Thursday 23 February 2012 05:31 PM, Rajendra Nayak wrote:
-> This series adds device tree support for OMAP hsmmc
-> driver. The series is dependent on a couple other series,
-> to add TWL regulator DT support[1] and another to clean
-> the pdev->id usage within the hsmmc driver[2]
+2012/2/23 Seungwon Jeon <tgih.jun@samsung.com>:
+> Hi all,
 >
-> all patches including the dependent series can be
-> found here
-> git://gitorious.org/omap-pm/linux.git for-dt/regulator
+> Even though 1MB is reserved for descriptor table in IDMAC,
+> the dw_mmc host driver is allowed to receive only maximum
+> 128KB block length in one request. This is caused by setting
+> improper max_blk_count. It needs to be e adjusted so that
+> descriptor table is used fully.
+>
+> It is found that the performance is improved with the increased the
+> max_blk_count. In my case, there is 82%(6%) improvement in sequential
+> write(read). Is there anybody who knows the reason about the old sett=
+ing?
+>
+> Best regards,
+> Seungwon Jeon.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+> =A0drivers/mmc/host/dw_mmc.c | =A0 =A04 ++--
+> =A01 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index bf3c9b4..af2b901 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1804,9 +1804,9 @@ static int __init dw_mci_init_slot(struct dw_mc=
+i *host, unsigned int id)
+> =A0#ifdef CONFIG_MMC_DW_IDMAC
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->max_segs =3D host->ring_size;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->max_blk_size =3D 65536;
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_blk_count =3D host->ring_size;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->max_seg_size =3D 0x1000;
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_req_size =3D mmc->max_seg_size=
+ * mmc->max_blk_count;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_req_size =3D mmc->max_seg_size=
+ * host->ring_size;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_blk_count =3D mmc->max_req_siz=
+e / 512;
 
-sorry, the right branch is for-dt/mmc
+I am not sure this is correct, it seems like most drivers calculate
+max_req_size like this:
 
->
-> The series is tested on omap4sdp (both external and emmc),
-> omap4panda amd omap3beagle boards.
->
-> Things to do:
-> -1- Card detect isn't functional and needs twl4030 gpio
-> to be DT converted.
-> -2- pbias cell programming is missing and needs an OMAP
-> control module driver.
->
-> [1] http://marc.info/?l=linux-omap&m=132999699905180&w=2
-> [2] http://marc.info/?l=linux-omap&m=132999646604985&w=2
->
-> Rajendra Nayak (4):
->    mmc: omap_hsmmc: Convert hsmmc driver to use device tree
->    mmc: omap_hsmmc: Avoid a regulator voltage change with dt
->    arm/dts: OMAP4: Add mmc controller nodes and board data
->    arm/dts: OMAP3: Add mmc controller nodes and board data
->
->   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   31 +++++++
->   arch/arm/boot/dts/omap3-beagle.dts                 |    6 ++
->   arch/arm/boot/dts/omap3.dtsi                       |   26 ++++++
->   arch/arm/boot/dts/omap4-panda.dts                  |   10 +++
->   arch/arm/boot/dts/omap4-sdp.dts                    |   16 ++++
->   arch/arm/boot/dts/omap4.dtsi                       |   31 +++++++
->   drivers/mmc/host/omap_hsmmc.c                      |   83 +++++++++++++++++++-
->   7 files changed, 202 insertions(+), 1 deletions(-)
->   create mode 100644 Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->
+mmc->max_req_size =3D mmc->max_blk_size * mmc->max_blk_count;
 
+And indeed in the external DMA case dw_mmc does that too.
+
+It should probably be safe to set max_seg_size to max_req_size too.
+
+> =A0#else
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->max_segs =3D 64;
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->max_blk_size =3D 65536; /* BLKSIZ=
+ is 16 bits */
+> --
+> 1.7.0.4
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
