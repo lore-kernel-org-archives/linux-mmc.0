@@ -1,8 +1,8 @@
 From: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v2 5/6] mmc: omap_hsmmc: Get rid of omap_hsmmc_4_set_power
-	function
-Date: Thu, 23 Feb 2012 16:56:48 +0530
-Message-ID: <1329996409-26861-6-git-send-email-rnayak@ti.com>
+Subject: [PATCH v2 3/6] mmc: omap_hsmmc: Use OMAP_HSMMC_SUPPORTS_DUAL_VOLT
+	flag to remove host->id based hardcoding
+Date: Thu, 23 Feb 2012 16:56:46 +0530
+Message-ID: <1329996409-26861-4-git-send-email-rnayak@ti.com>
 References: <1329996409-26861-1-git-send-email-rnayak@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,58 +22,30 @@ To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0
 Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Now that omap_hsmmc_set_power() already has a check to return 0
-if !host->vcc, it seems like it can be used even on MMC4 instead
-of the dummy omap_hsmmc_4_set_power().
+From: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
 
-This also helps get rid of all the host->id based check to
-populate the right function for on-chip/external level
-shifting and use omap_hsmmc_set_power() for all MMC modules.
+Use OMAP_HSMMC_SUPPORTS_DUAL_VOLT flag instead of host->id
+for identifying SD bus voltage capabilities.
 
+Signed-off-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
 Signed-off-by: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
 Tested-by: Venkatraman S <svenkatr-l0cyMroinI0@public.gmane.org>
-Tested-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
 ---
- drivers/mmc/host/omap_hsmmc.c |   21 +--------------------
- 1 files changed, 1 insertions(+), 20 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index f98c599..17e264b 100644
+index 9955aee..91faf42 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -297,32 +297,13 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	return ret;
- }
+@@ -650,7 +650,7 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+ 	OMAP_HSMMC_WRITE(host->base, SYSCONFIG,
+ 			OMAP_HSMMC_READ(host->base, SYSCONFIG) | AUTOIDLE);
  
--static int omap_hsmmc_4_set_power(struct device *dev, int slot, int power_on,
--					int vdd)
--{
--	return 0;
--}
--
- static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- {
- 	struct regulator *reg;
- 	int ret = 0;
- 	int ocr_value = 0;
- 
--	switch (host->id) {
--	case OMAP_MMC1_DEVID:
--	case OMAP_MMC2_DEVID:
--	case OMAP_MMC3_DEVID:
--	case OMAP_MMC5_DEVID:
--		/* On-chip level shifting via PBIAS0/PBIAS1 */
--		mmc_slot(host).set_power = omap_hsmmc_set_power;
--		break;
--	case OMAP_MMC4_DEVID:
--		mmc_slot(host).set_power = omap_hsmmc_4_set_power;
--	default:
--		pr_err("MMC%d configuration not supported!\n", host->id);
--		return -EINVAL;
--	}
-+	mmc_slot(host).set_power = omap_hsmmc_set_power;
- 
- 	reg = regulator_get(host->dev, "vmmc");
- 	if (IS_ERR(reg)) {
+-	if (host->id == OMAP_MMC1_DEVID) {
++	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
+ 		if (host->power_mode != MMC_POWER_OFF &&
+ 		    (1 << ios->vdd) <= MMC_VDD_23_24)
+ 			hctl = SDVS18;
 -- 
 1.7.1
