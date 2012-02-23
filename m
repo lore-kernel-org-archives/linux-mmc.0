@@ -1,7 +1,7 @@
 From: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v2 4/4] arm/dts: OMAP3: Add mmc controller nodes and board data
-Date: Thu, 23 Feb 2012 17:31:30 +0530
-Message-ID: <1329998490-27555-5-git-send-email-rnayak@ti.com>
+Subject: [PATCH v2 3/4] arm/dts: OMAP4: Add mmc controller nodes and board data
+Date: Thu, 23 Feb 2012 17:31:29 +0530
+Message-ID: <1329998490-27555-4-git-send-email-rnayak@ti.com>
 References: <1329998490-27555-1-git-send-email-rnayak@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,61 +21,103 @@ To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0
 Cc: linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add omap mmc related device tree data for OMAP3.
-Currenly limited to only omap3-beagle board.
+Add omap mmc related device tree data for OMAP4.
+Currenly limited to only omap4-panda and omap4-sdp
+boards.
 
 Signed-off-by: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
 ---
- arch/arm/boot/dts/omap3-beagle.dts |    6 ++++++
- arch/arm/boot/dts/omap3.dtsi       |   26 ++++++++++++++++++++++++++
- 2 files changed, 32 insertions(+), 0 deletions(-)
+ arch/arm/boot/dts/omap4-panda.dts |   10 ++++++++++
+ arch/arm/boot/dts/omap4-sdp.dts   |   16 ++++++++++++++++
+ arch/arm/boot/dts/omap4.dtsi      |   31 +++++++++++++++++++++++++++++++
+ 3 files changed, 57 insertions(+), 0 deletions(-)
 
-diff --git a/arch/arm/boot/dts/omap3-beagle.dts b/arch/arm/boot/dts/omap3-beagle.dts
-index 54556b1..c7b92e6 100644
---- a/arch/arm/boot/dts/omap3-beagle.dts
-+++ b/arch/arm/boot/dts/omap3-beagle.dts
-@@ -53,3 +53,9 @@
- 		reg = <0x50>;
+diff --git a/arch/arm/boot/dts/omap4-panda.dts b/arch/arm/boot/dts/omap4-panda.dts
+index 29646dc..9fe51b9 100644
+--- a/arch/arm/boot/dts/omap4-panda.dts
++++ b/arch/arm/boot/dts/omap4-panda.dts
+@@ -52,3 +52,13 @@
+ &i2c4 {
+ 	clock-frequency = <400000>;
+ };
++
++&mmc1 {
++	vmmc-supply = <&vmmc>;
++	ti,bus-width = <8>;
++};
++
++&mmc5 {
++	ti,non-removable;
++	ti,bus-width = <4>;
++};
+diff --git a/arch/arm/boot/dts/omap4-sdp.dts b/arch/arm/boot/dts/omap4-sdp.dts
+index 01db8b7..2fca7a3 100644
+--- a/arch/arm/boot/dts/omap4-sdp.dts
++++ b/arch/arm/boot/dts/omap4-sdp.dts
+@@ -70,3 +70,19 @@
+ 		reg = <0x1e>;
  	};
  };
 +
 +&mmc1 {
-+	vmmc-supply = <&vmmc1>;
-+	vmmc_aux-supply = <&vsim>;
++	vmmc-supply = <&vmmc>;
 +	ti,bus-width = <8>;
 +};
-diff --git a/arch/arm/boot/dts/omap3.dtsi b/arch/arm/boot/dts/omap3.dtsi
-index ca37ba5..598467c 100644
---- a/arch/arm/boot/dts/omap3.dtsi
-+++ b/arch/arm/boot/dts/omap3.dtsi
-@@ -113,5 +113,31 @@
++
++&mmc2 {
++	vmmc-supply = <&vaux1>;
++	ti,bus-width = <8>;
++	ti,non-removable;
++};
++
++&mmc5 {
++	ti,bus-width = <4>;
++	ti,non-removable;
++};
+diff --git a/arch/arm/boot/dts/omap4.dtsi b/arch/arm/boot/dts/omap4.dtsi
+index 29f4589..9204f60 100644
+--- a/arch/arm/boot/dts/omap4.dtsi
++++ b/arch/arm/boot/dts/omap4.dtsi
+@@ -25,6 +25,11 @@
+ 		serial1 = &uart2;
+ 		serial2 = &uart3;
+ 		serial3 = &uart4;
++		mmc1 = &mmc1;
++		mmc2 = &mmc2;
++		mmc3 = &mmc3;
++		mmc4 = &mmc4;
++		mmc5 = &mmc5;
+ 	};
+ 
+ 	cpus {
+@@ -155,5 +160,31 @@
  			#size-cells = <0>;
- 			ti,hwmods = "i2c3";
+ 			ti,hwmods = "i2c4";
  		};
 +
 +		mmc1: mmc@1 {
-+			compatible = "ti,omap2-hsmmc";
++			compatible = "ti,omap4-hsmmc";
 +			ti,hwmods = "mmc1";
 +			ti,dual-volt;
 +		};
 +
 +		mmc2: mmc@2 {
-+			compatible = "ti,omap2-hsmmc";
++			compatible = "ti,omap4-hsmmc";
 +			ti,hwmods = "mmc2";
 +		};
 +
 +		mmc3: mmc@3 {
-+			compatible = "ti,omap2-hsmmc";
++			compatible = "ti,omap4-hsmmc";
 +			ti,hwmods = "mmc3";
 +		};
 +
 +		mmc4: mmc@4 {
-+			compatible = "ti,omap2-hsmmc";
++			compatible = "ti,omap4-hsmmc";
 +			ti,hwmods = "mmc4";
 +		};
 +
 +		mmc5: mmc@5 {
-+			compatible = "ti,omap2-hsmmc";
++			compatible = "ti,omap4-hsmmc";
 +			ti,hwmods = "mmc5";
 +		};
  	};
