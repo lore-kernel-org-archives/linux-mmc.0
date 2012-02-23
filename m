@@ -1,53 +1,70 @@
-From: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v2 0/6] mmc: omap_hsmmc: Clean up use/abuse of pdev->id
-Date: Thu, 23 Feb 2012 16:56:43 +0530
-Message-ID: <1329996409-26861-1-git-send-email-rnayak@ti.com>
+From: Rajendra Nayak <rnayak@ti.com>
+Subject: [PATCH] mmc: omap_hsmmc: convert all pr_* to dev_*
+Date: Thu, 23 Feb 2012 17:02:20 +0530
+Message-ID: <1329996740-26966-1-git-send-email-rnayak@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:42146 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751188Ab2BWLca (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 23 Feb 2012 06:32:30 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Rajendra Nayak <rnayak@ti.com>
 
-Re-sending as these patches did not make it to the lists due to
+Convert all instances of pr_* prints within the driver
+to instead use dev_* prints.
+
+Reported-by: Russell King <rmk+kernel@arm.linux.org.uk>
+Signed-off-by: Rajendra Nayak <rnayak@ti.com>
+---
+Re-sending as this patch did not make it to the lists due to
 issues with my 'git send-email'
 
-This series mainly cleans up all instances of hardcoding's in
-the driver based on pdev->id. This is cleanup leading to the
-DT adaptation of omap_hsmmc driver.
+ drivers/mmc/host/omap_hsmmc.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
 
-v2 mainly has some minor changes to get rid of a debug print
-which was still using host->id and getting rid of 'id' field
-entirely from omap_hsmmc_host struct.
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index e3eb9d4..35f6dc1 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -302,7 +302,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 			mmc_slot(host).ocr_mask = ocr_value;
+ 		} else {
+ 			if (!(mmc_slot(host).ocr_mask & ocr_value)) {
+-				pr_err("MMC ocrmask %x is not supported\n",
++				dev_err(host->dev, "ocrmask %x is not supported\n",
+ 					mmc_slot(host).ocr_mask);
+ 				mmc_slot(host).ocr_mask = 0;
+ 				return -EINVAL;
+@@ -1132,14 +1132,14 @@ static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
+ 	host->reqs_blocked = 0;
+ 	if (mmc_slot(host).get_cover_state(host->dev, host->slot_id)) {
+ 		if (host->protect_card) {
+-			pr_info("%s: cover is closed, "
++			dev_info(host->dev, "%s: cover is closed, "
+ 					 "card is now accessible\n",
+ 					 mmc_hostname(host->mmc));
+ 			host->protect_card = 0;
+ 		}
+ 	} else {
+ 		if (!host->protect_card) {
+-			pr_info("%s: cover is open, "
++			dev_info(host->dev, "%s: cover is open, "
+ 					 "card is now inaccessible\n",
+ 					 mmc_hostname(host->mmc));
+ 			host->protect_card = 1;
+@@ -1276,7 +1276,7 @@ static int omap_hsmmc_pre_dma_transfer(struct omap_hsmmc_host *host,
+ 
+ 	if (!next && data->host_cookie &&
+ 	    data->host_cookie != host->next_data.cookie) {
+-		pr_warning("[%s] invalid cookie: data->host_cookie %d"
++		dev_warn(host->dev, "[%s] invalid cookie: data->host_cookie %d"
+ 		       " host->next_data.cookie %d\n",
+ 		       __func__, data->host_cookie, host->next_data.cookie);
+ 		data->host_cookie = 0;
+-- 
+1.7.1
 
-The series is tested on OMAP4SDP, OMAP4panda, OMAP3beagle and OMAP2430SDP
-boards.
-
-regards,
-Rajendra
-
-Balaji T K (3):
-  mmc: omap_hsmmc: use platform_get_resource_byname for tx/rx DMA
-    channels
-  mmc: omap_hsmmc: remove unused .set_sleep function
-  mmc: omap_hsmmc: Use OMAP_HSMMC_SUPPORTS_DUAL_VOLT flag to remove
-    host->id based hardcoding
-
-Rajendra Nayak (3):
-  mmc: omap_hsmmc: Get rid of omap_hsmmc_1_set_power function
-  mmc: omap_hsmmc: Get rid of omap_hsmmc_4_set_power function
-  mmc: omap_hsmmc: Don't expect MMC1 to always have vmmc supply
-
- arch/arm/plat-omap/include/plat/mmc.h |    2 -
- drivers/mmc/host/omap_hsmmc.c         |  175 +++------------------------------
- 2 files changed, 16 insertions(+), 161 deletions(-)
