@@ -1,58 +1,57 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v7] mmc: support BKOPS feature for eMMC
-Date: Thu, 23 Feb 2012 11:05:16 +0200
-Message-ID: <4F46014C.6040303@intel.com>
-References: <4F190E26.4040909@samsung.com> <4F44F792.2000304@intel.com> <4F45A293.6060608@samsung.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH] mmc: fix regression: set default clock gating delay to 0
+Date: Thu, 23 Feb 2012 11:22:29 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1202231119030.25586@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:6038 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752779Ab2BWJFN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 23 Feb 2012 04:05:13 -0500
-In-Reply-To: <4F45A293.6060608@samsung.com>
+Received: from moutng.kundenserver.de ([212.227.126.171]:49647 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753086Ab2BWKWh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Feb 2012 05:22:37 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
+To: linux-mmc@vger.kernel.org
+Cc: Magnus Damm <magnus.damm@gmail.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Chris Ball <cjb@laptop.org>, Sujit Reddy Thumma <sthumma@codeaurora.org>
 
-On 23/02/12 04:21, Jaehoon Chung wrote:
-> On 02/22/2012 11:11 PM, Adrian Hunter wrote:
-> 
->> On 20/01/12 08:48, Jaehoon Chung wrote:
->>> Enable eMMC background operations (BKOPS) feature.
->>>
->>> If URGENT_BKOPS is set after a response, note that BKOPS
->>> are required. After all I/O requests are finished, run
->>> BKOPS if required. Should read/write operations be requested
->>> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
->>> and then service the request.
->>
->> You are leaving bkops running and releasing the host.  Won't
->> that cause problems for other entry points to mmc services
->> e.g. system suspend (cache control, sleep etc), ioctl, sysfs,
->> etc
-> 
-> I see. i will complement for your review.
+A recent commit "mmc: core: Use delayed work in clock gating framework"
+introduced a default 200ms delay before clock gating actually takes place.
+This means, that every time an MMC interface becomes idle it first stays
+on for 200ms before gating its clock. This leads to increased power
+consumption and is therefore a clear regression. This patch restores the
+original behaviour by setting the default delay to 0. Users,
+prioritising throughput over power efficiency can still modify the delay
+via sysfs.
 
-Please cc me.
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
 
-> Didn't you have the other comment?
+As discussed in this thread
 
-Well, yes.  I also suggest:
-	- don't use host->lock spin lock at all
-	- claim the host in the caller not in
-	mmc_start_bkops()
+http://thread.gmane.org/gmane.linux.kernel.mmc/12307
 
-But the main issues are design issues not implementation.
-i.e.
-	- always run bkops at level 3 before doing any
-	other requests - that requirement should probably
-	be implemented in core rather than the block driver
-	- do not release the host while bkops are running
+this is one of the ways to fix the regression. Please, push for 3.3.
 
-And a new one:
-	- how do you know that trim/discard/sanitize will not
-	result in a need for bkops?
+ drivers/mmc/core/host.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 30055f2..c3704e2 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -238,10 +238,10 @@ static inline void mmc_host_clk_init(struct mmc_host *host)
+ 	/* Hold MCI clock for 8 cycles by default */
+ 	host->clk_delay = 8;
+ 	/*
+-	 * Default clock gating delay is 200ms.
++	 * Default clock gating delay is 0ms to avoid wasting power.
+ 	 * This value can be tuned by writing into sysfs entry.
+ 	 */
+-	host->clkgate_delay = 200;
++	host->clkgate_delay = 0;
+ 	host->clk_gated = false;
+ 	INIT_DELAYED_WORK(&host->clk_gate_work, mmc_host_clk_gate_work);
+ 	spin_lock_init(&host->clk_lock);
+-- 
+1.7.2.5
 
