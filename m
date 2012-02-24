@@ -1,64 +1,94 @@
-From: Rajendra Nayak <rnayak@ti.com>
-Subject: Re: [PATCH v2 1/4] mmc: omap_hsmmc: Convert hsmmc driver to use device
- tree
-Date: Fri, 24 Feb 2012 18:34:46 +0530
-Message-ID: <4F478AEE.2080909@ti.com>
-References: <1329998490-27555-1-git-send-email-rnayak@ti.com>	<1329998490-27555-2-git-send-email-rnayak@ti.com> <CANrkHUarg5ntUW=S7k20LXuYe+ZNCN-cYJhfvvLKM=X8+Db4fg@mail.gmail.com> <4F4775FF.2090500@ti.com> <4F4787C3.1010507@ti.com> <4F478963.20009@ti.com> <4F478A6C.2060006@ti.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH 1/4] mmc: omap: Enable Auto CMD12
+Date: Fri, 24 Feb 2012 21:14:31 +0530
+Message-ID: <1330098274-12048-2-git-send-email-balajitk@ti.com>
+References: <1330098274-12048-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <4F478A6C.2060006@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: "Cousson, Benoit" <b-cousson@ti.com>
-Cc: "T Krishnamoorthy, Balaji" <balajitk@ti.com>, cjb@laptop.org, linaro-dev@lists.linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:48958 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754205Ab2BXPnk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 24 Feb 2012 10:43:40 -0500
+In-Reply-To: <1330098274-12048-1-git-send-email-balajitk@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
 
-On Friday 24 February 2012 06:32 PM, Cousson, Benoit wrote:
-> On 2/24/2012 1:58 PM, Rajendra Nayak wrote:
->> On Friday 24 February 2012 06:21 PM, Cousson, Benoit wrote:
->>> On 2/24/2012 12:35 PM, Rajendra Nayak wrote:
->>>> On Friday 24 February 2012 05:02 PM, T Krishnamoorthy, Balaji wrote:
->>>>> On Thu, Feb 23, 2012 at 5:31 PM, Rajendra Nayak<rnayak@ti.com> wrote:
-> ...
->>>>>> +Required properties:
->>>>>> +- compatible:
->>>>>> + Should be "ti,omap2-hsmmc", for OMAP2/3 controllers
->>>>>
->>>>> omap_hsmmc is applicable for omap2430 and omap3.
->>>>> omap2420 has non high speed controller mmci-omap -
->>>>> drivers/mmc/host/omap.c
->>>>> May be omap3-hsmmc compatible with omap2430 ?
->>>>
->>>> Agree. I think its best in that case for me to define a
->>>> compatible "ti,omap2430-hsmmc" for omap2430 and "ti,omap3-hsmmc"
->>>> for omap3. Though the IP blocks are same, I cant think of some
->>>> common compatible string without causing confusion.
->>>
->>> It depends, can we detect that using HW revision?
->>
->> We don't need to. The driver does not do anything different for
->> 2430 or omap3.
->
-> I was thinking of OMAP2420 vs OMAP2430. But I'm now wondering if we are
-> using the same driver for the non-HS controller?
+Enable Auto-CMD12 for multi block read/write on HSMMC
+Tested on OMAP4430, OMAP3430 and OMAP2430 SDP
 
-No, we don't. there is a different driver for 2420.
+Signed-off-by: Balaji T K <balajitk@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   17 ++++++++++++++---
+ 1 files changed, 14 insertions(+), 3 deletions(-)
 
->
->>> In that case, there is no need to differentiate again with compatible.
->>
->> Thats perfectly fine. But what *common* compatible string would you
->> use?
->
-> I think that "ti,omap2-hsmmc" is still fine, because OMAP2420 will have
-> "ti,omap2-mmc" and thus we can differentiate the 2 versions.
->
-> Does that make sense?
-
-yup, that makes sense. So I don't need to change anything :-)
-
->
-> Regards,
-> Benoit
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 36e7f5b..f4c7f89 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -82,6 +82,7 @@
+ #define BRR_ENABLE		(1 << 5)
+ #define DTO_ENABLE		(1 << 20)
+ #define INIT_STREAM		(1 << 1)
++#define ACEN_ACMD12		(1 << 2)
+ #define DP_SELECT		(1 << 21)
+ #define DDIR			(1 << 4)
+ #define DMA_EN			0x1
+@@ -123,6 +124,7 @@
+ #define OMAP_MMC_MAX_CLOCK	52000000
+ #define DRIVER_NAME		"omap_hsmmc"
+ 
++#define AUTO_CMD12		(1 << 0)	/* Auto CMD12 support */
+ /*
+  * One controller can have multiple slots, like on some omap boards using
+  * omap.c controller driver. Luckily this is not currently done on any known
+@@ -185,6 +187,7 @@ struct omap_hsmmc_host {
+ 	int			reqs_blocked;
+ 	int			use_reg;
+ 	int			req_in_progress;
++	unsigned int		flags;
+ 	struct omap_hsmmc_next	next_data;
+ 
+ 	struct	omap_mmc_platform_data	*pdata;
+@@ -886,6 +889,8 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
+ 		cmdtype = 0x3;
+ 
+ 	cmdreg = (cmd->opcode << 24) | (resptype << 16) | (cmdtype << 22);
++	if ((host->flags & AUTO_CMD12) && mmc_op_multi(cmd->opcode))
++		cmdreg |= ACEN_ACMD12;
+ 
+ 	if (data) {
+ 		cmdreg |= DP_SELECT | MSBS | BCE;
+@@ -957,11 +962,16 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
+ 	else
+ 		data->bytes_xfered = 0;
+ 
+-	if (!data->stop) {
++	if (data->stop && ((!(host->flags & AUTO_CMD12)) || data->error))
++		omap_hsmmc_start_command(host, data->stop, NULL);
++	else {
++		if (data->stop)
++			data->stop->resp[0] = OMAP_HSMMC_READ(host->base,
++							RSP76);
+ 		omap_hsmmc_request_done(host, data->mrq);
+-		return;
+ 	}
+-	omap_hsmmc_start_command(host, data->stop, NULL);
++
++	return;
+ }
+ 
+ /*
+@@ -1899,6 +1909,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+ 	host->mapbase	= res->start;
+ 	host->base	= ioremap(host->mapbase, SZ_4K);
+ 	host->power_mode = MMC_POWER_OFF;
++	host->flags	= AUTO_CMD12;
+ 	host->next_data.cookie = 1;
+ 
+ 	platform_set_drvdata(pdev, host);
+-- 
+1.7.0.4
 
