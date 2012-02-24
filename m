@@ -1,85 +1,87 @@
-From: "T Krishnamoorthy, Balaji" <balajitk-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v2 1/4] mmc: omap_hsmmc: Convert hsmmc driver to use
-	device tree
-Date: Fri, 24 Feb 2012 17:02:07 +0530
-Message-ID: <CANrkHUarg5ntUW=S7k20LXuYe+ZNCN-cYJhfvvLKM=X8+Db4fg@mail.gmail.com>
-References: <1329998490-27555-1-git-send-email-rnayak@ti.com>
-	<1329998490-27555-2-git-send-email-rnayak@ti.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [RFC] mmc: dw_mmc: Fix the max_blk_count in IDMAC
+Date: Fri, 24 Feb 2012 11:34:53 +0000
+Message-ID: <CAFbHwiRagAH7Hp6V6367CRfAxCBtC26OO19tAhCe6jUtAxb4Jw@mail.gmail.com>
+References: <000301ccf1fc$64e5dbe0$2eb193a0$%jun@samsung.com>
+	<CAFbHwiT_KTWBLUSDbfMvuK0UEa_RrVqVF5V1WBqm+5c39Rtnqg@mail.gmail.com>
+	<000c01ccf287$0868bb90$193a32b0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <1329998490-27555-2-git-send-email-rnayak-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pw0-f46.google.com ([209.85.160.46]:63979 "EHLO
+	mail-pw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751604Ab2BXLex convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Feb 2012 06:34:53 -0500
+Received: by pbcun15 with SMTP id un15so2555702pbc.19
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Feb 2012 03:34:53 -0800 (PST)
+In-Reply-To: <000c01ccf287$0868bb90$193a32b0$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, James Hogan <james.hogan@imgtec.com>
 
-On Thu, Feb 23, 2012 at 5:31 PM, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org> wrote:
-> Define dt bindings for the ti-omap-hsmmc, and adapt
-> the driver to extract data (which was earlier passed as
-> platform_data) from device tree.
+On Thu, Feb 23, 2012 at 11:58 PM, Seungwon Jeon <tgih.jun@samsung.com> =
+wrote:
+> Will Newton <will.newton@gmail.com> wrote:
+>> 2012/2/23 Seungwon Jeon <tgih.jun@samsung.com>:
+>> > Hi all,
+>> >
+>> > Even though 1MB is reserved for descriptor table in IDMAC,
+>> > the dw_mmc host driver is allowed to receive only maximum
+>> > 128KB block length in one request. This is caused by setting
+>> > improper max_blk_count. It needs to be e adjusted so that
+>> > descriptor table is used fully.
+>> >
+>> > It is found that the performance is improved with the increased th=
+e
+>> > max_blk_count. In my case, there is 82%(6%) improvement in sequent=
+ial
+>> > write(read). Is there anybody who knows the reason about the old s=
+etting?
+>> >
+>> > Best regards,
+>> > Seungwon Jeon.
+>> >
+>> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> > ---
+>> > =A0drivers/mmc/host/dw_mmc.c | =A0 =A04 ++--
+>> > =A01 files changed, 2 insertions(+), 2 deletions(-)
+>> >
+>> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> > index bf3c9b4..af2b901 100644
+>> > --- a/drivers/mmc/host/dw_mmc.c
+>> > +++ b/drivers/mmc/host/dw_mmc.c
+>> > @@ -1804,9 +1804,9 @@ static int __init dw_mci_init_slot(struct dw=
+_mci *host, unsigned int id)
+>> > =A0#ifdef CONFIG_MMC_DW_IDMAC
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->max_segs =3D host->ring_size;
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->max_blk_size =3D 65536;
+>> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_blk_count =3D host->ring_si=
+ze;
+>> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->max_seg_size =3D 0x1000;
+>> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_req_size =3D mmc->max_seg_s=
+ize * mmc->max_blk_count;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_req_size =3D mmc->max_seg_s=
+ize * host->ring_size;
+>> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_blk_count =3D mmc->max_req_=
+size / 512;
+>>
+>> I am not sure this is correct, it seems like most drivers calculate
+>> max_req_size like this:
+>>
+>> mmc->max_req_size =3D mmc->max_blk_size * mmc->max_blk_count;
 >
-> Signed-off-by: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
-> ---
-> =A0.../devicetree/bindings/mmc/ti-omap-hsmmc.txt =A0 =A0 =A0| =A0 31 ++++=
-+++++
-> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0| =A0 68 ++++++++++++++++++++
-> =A02 files changed, 99 insertions(+), 0 deletions(-)
-> =A0create mode 100644 Documentation/devicetree/bindings/mmc/ti-omap-hsmmc=
-.txt
->
-> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Do=
-cumentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> new file mode 100644
-> index 0000000..e4fa8f0
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> @@ -0,0 +1,31 @@
-> +* TI Highspeed MMC host controller for OMAP
-> +
-> +The Highspeed MMC Host Controller on TI OMAP family
-> +provides an interface for MMC, SD, and SDIO types of memory cards.
-> +
-> +Required properties:
-> +- compatible:
-> + Should be "ti,omap2-hsmmc", for OMAP2/3 controllers
+> Could you explain the following origin code in dw_mmc?
+> We need to change like most other drivers?
+> =A0mmc->max_req_size =3D mmc->max_seg_size * mmc->max_blk_count;
 
-omap_hsmmc is applicable for omap2430 and omap3.
-omap2420 has non high speed controller mmci-omap - drivers/mmc/host/omap.c
-May be omap3-hsmmc compatible with omap2430 ?
+All the other drivers seem to set max_req_size based on blk_size and
+blk_count not seg_size so the current code looks like it may be wrong.
 
-> + Should be "ti,omap4-hsmmc", for OMAP4 controllers
-> +- ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
-> +- reg : should contain hsmmc registers location and length
-> +
-> +Optional properties:
-> +ti,dual-volt: boolean, supports dual voltage cards
-> +<supply-name>-supply: phandle to the regulator device tree node
-> +"supply-name" examples are "vmmc", "vmmc_aux" etc
-> +ti,bus-width: Number of data lines, default assumed is 1 if the property=
- is missing.
-> +cd-gpios: GPIOs for card detection
-> +wp-gpios: GPIOs for write protection
-> +ti,non-removable: non-removable slot (like eMMC)
-> +
-> +Example:
-> + =A0 =A0 =A0 mmc1: mmc@0x4809c000 {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 compatible =3D "ti,omap4-hsmmc";
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D <0x4809c000 0x400>;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,hwmods =3D "mmc1";
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,dual-volt;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,bus-width =3D <4>;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 vmmc-supply =3D <&vmmc>; /* phandle to regu=
-lator node */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,non-removable;
-> + =A0 =A0 =A0 };
+> =A0- mmc->max_blk_count is set as host->ring_size.
+> =A0- max_seg_size seems to represent max_blk_size.
+
+I believe max_seg_size should be set to a higher value as it appears
+to be only relevant for IOMMU-based drivers, possibly the same as
+max_req_size.
