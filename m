@@ -1,40 +1,56 @@
-From: Stephen Warren <swarren@nvidia.com>
-Subject: sdmmc controllers without vmmc regulator
-Date: Fri, 24 Feb 2012 13:35:08 -0800
-Message-ID: <74CDBE0F657A3D45AFBB94109FB122FF17BD8BCD8C@HQMAIL01.nvidia.com>
+From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: What should the SDHCI regulator control?
+Date: Fri, 24 Feb 2012 14:49:43 -0800
+Message-ID: <74CDBE0F657A3D45AFBB94109FB122FF17BD8BCDEE@HQMAIL01.nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Mark Brown (broonie@opensource.wolfsonmicro.com)" <broonie@opensource.wolfsonmicro.com>, "Liam Girdwood (lrg@ti.com)" <lrg@ti.com>, Chris Ball <cjb@laptop.org>
-Cc: Marek Szyprowski <m.szyprowski@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org" <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-sdhci_add_host() calls regulator_get(..., "vmmc"), which under device-
-tree calls of_get_regulator(), which contains:
+Chris,
 
-	regnode = of_parse_phandle(dev->of_node, prop_name, 0);
+A question about regulators for SD cards:
 
-	if (!regnode) {
-		dev_warn(dev, "%s property in node %s references invalid phandle",
-				prop_name, dev->of_node->full_name);
-		return NULL;
-	}
+We have a few boards, with some slightly different setups:
 
-Thus if the vmmc-supply property is missing, because a board has no
-regulator for a particular SD controller (power is always on), then
-the warning is printed.
+Setup 1: (Harmony, Seaboard, Ventana, AC100)
 
-Can we eliminate this warning in of_get_regulator(), and let clients
-Control whether they warn when a regulator isn't found, if they think
-one is mandatory? I think I'd prefer this option; it's consistent with
-the non-DT path in regulator_dev_lookup().
+Power to SD is fixed at 3.3V
 
-Or, should I set up dummy regulators in device tree to cover this case,
-such that an SD controller's vmmc-supply always points at a valid phandle.
-In which case, I'd have to add DT support to the dummy regulator.
+There is a GPIO to enable power, which gates the SD connector's VDD pin
+and the pullups on DAT/CMD lines.
+
+Setup 2 (Cardhu):
+
+There is a regulator in a PMU/PMIC which can supply a variable voltage,
+which is fed to the SoC's SD controller (presumably affects the IO pad
+voltage), and the pullups on the DAT/CMD lines.
+
+There is a fixed 3.3V supply, with a GPIO to enable/disable it, which
+is fed only to the SD connector's VDD pin.
+
+Question 1: In case 2,
+
+Is the card always supposed to receive 3.3V here; is an SD card supposed
+to contain its own internal regulator to generate e.g. a 1.85V IO voltage
+rather than being supplied with the lower voltage?
+
+Question 2: In general,
+
+So, there's always a GPIO to gate power to the SD connector, but any
+variable voltage is not fed the the SD card itself, only the SoC. Also,
+the GPIO sometimes affects the CMD/DAT pullups, whereas sometimes they're
+affected by the variable regulator.
+
+Is the regulator returned by the regulator_get() call in sdhci_add_host()
+supposed to control the GPIO (or should the GPIO always be switched on?)
+or should it control the variable regulator that affects only the SoC,
+or both at once, or ...?
 
 Thanks.
 
