@@ -1,68 +1,85 @@
-From: Will Deacon <will.deacon@arm.com>
-Subject: [PATCH] mmc: mmci: reduce max_blk_count to avoid overflowing max_req_size
-Date: Fri, 24 Feb 2012 11:25:21 +0000
-Message-ID: <1330082721-6021-1-git-send-email-will.deacon@arm.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:55727 "EHLO
-	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751979Ab2BXLZ3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Feb 2012 06:25:29 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: "T Krishnamoorthy, Balaji" <balajitk-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v2 1/4] mmc: omap_hsmmc: Convert hsmmc driver to use
+	device tree
+Date: Fri, 24 Feb 2012 17:02:07 +0530
+Message-ID: <CANrkHUarg5ntUW=S7k20LXuYe+ZNCN-cYJhfvvLKM=X8+Db4fg@mail.gmail.com>
+References: <1329998490-27555-1-git-send-email-rnayak@ti.com>
+	<1329998490-27555-2-git-send-email-rnayak@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+In-Reply-To: <1329998490-27555-2-git-send-email-rnayak-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
+List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
+Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
+Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Will Deacon <will.deacon@arm.com>, Pierre Ossman <drzeus@drzeus.cx>, Chris Ball <cjb@laptop.org>
 
-On a system with large pages (64k in my case), the following BUG is
-triggered in MMC core:
+On Thu, Feb 23, 2012 at 5:31 PM, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org> wrote:
+> Define dt bindings for the ti-omap-hsmmc, and adapt
+> the driver to extract data (which was earlier passed as
+> platform_data) from device tree.
+>
+> Signed-off-by: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
+> ---
+> =A0.../devicetree/bindings/mmc/ti-omap-hsmmc.txt =A0 =A0 =A0| =A0 31 ++++=
++++++
+> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0| =A0 68 ++++++++++++++++++++
+> =A02 files changed, 99 insertions(+), 0 deletions(-)
+> =A0create mode 100644 Documentation/devicetree/bindings/mmc/ti-omap-hsmmc=
+.txt
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Do=
+cumentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> new file mode 100644
+> index 0000000..e4fa8f0
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> @@ -0,0 +1,31 @@
+> +* TI Highspeed MMC host controller for OMAP
+> +
+> +The Highspeed MMC Host Controller on TI OMAP family
+> +provides an interface for MMC, SD, and SDIO types of memory cards.
+> +
+> +Required properties:
+> +- compatible:
+> + Should be "ti,omap2-hsmmc", for OMAP2/3 controllers
 
-[    2.338023] BUG: failure at drivers/mmc/core/core.c:221/mmc_start_request()!
-[    2.338102] Kernel panic - not syncing: BUG!
-[    2.338155] Call trace:
-[    2.338228] [<ffffffc00008635c>] dump_backtrace+0x0/0x120
-[    2.338317] [<ffffffc0003365ec>] dump_stack+0x14/0x1c
-[    2.338403] [<ffffffc000336990>] panic+0xbc/0x1f0
-[    2.338498] [<ffffffc00027a494>] mmc_start_request+0x154/0x184
-[    2.338600] [<ffffffc00027abdc>] mmc_start_req+0x110/0x140
-[    2.338701] [<ffffffc00028604c>] mmc_blk_issue_rw_rq+0x7c/0x39c
-[    2.338804] [<ffffffc00028652c>] mmc_blk_issue_rq+0x1c0/0x468
-[    2.338905] [<ffffffc000287564>] mmc_queue_thread+0x68/0x118
-[    2.338995] [<ffffffc0000bc308>] kthread+0x84/0x8c
+omap_hsmmc is applicable for omap2430 and omap3.
+omap2420 has non high speed controller mmci-omap - drivers/mmc/host/omap.c
+May be omap3-hsmmc compatible with omap2430 ?
 
-This is because of a 64k request with a max_req_size of 64k-1 bytes.
-
-The following patch fixes the problem by limiting the max_blk_count
-such that max_blk_count * max_blk_size == max_req_size. I couldn't
-pursuade the compiler to emit a shift instead of a div without encoding
-the shift explicitly.
-
-Cc: Pierre Ossman <drzeus@drzeus.cx>
-Cc: Chris Ball <cjb@laptop.org>
-Signed-off-by: Will Deacon <will.deacon@arm.com>
----
- drivers/mmc/host/mmci.c |    7 ++++---
- 1 files changed, 4 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 0d955ff..11e589c 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1271,12 +1271,13 @@ static int __devinit mmci_probe(struct amba_device *dev,
- 	/*
- 	 * Block size can be up to 2048 bytes, but must be a power of two.
- 	 */
--	mmc->max_blk_size = 2048;
-+	mmc->max_blk_size = 1 << 11;
- 
- 	/*
--	 * No limit on the number of blocks transferred.
-+	 * Limit the number of blocks transferred so that we don't overflow
-+	 * the maximum request size.
- 	 */
--	mmc->max_blk_count = mmc->max_req_size;
-+	mmc->max_blk_count = mmc->max_req_size >> 11;
- 
- 	spin_lock_init(&host->lock);
- 
--- 
-1.7.4.1
-
+> + Should be "ti,omap4-hsmmc", for OMAP4 controllers
+> +- ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
+> +- reg : should contain hsmmc registers location and length
+> +
+> +Optional properties:
+> +ti,dual-volt: boolean, supports dual voltage cards
+> +<supply-name>-supply: phandle to the regulator device tree node
+> +"supply-name" examples are "vmmc", "vmmc_aux" etc
+> +ti,bus-width: Number of data lines, default assumed is 1 if the property=
+ is missing.
+> +cd-gpios: GPIOs for card detection
+> +wp-gpios: GPIOs for write protection
+> +ti,non-removable: non-removable slot (like eMMC)
+> +
+> +Example:
+> + =A0 =A0 =A0 mmc1: mmc@0x4809c000 {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 compatible =3D "ti,omap4-hsmmc";
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 reg =3D <0x4809c000 0x400>;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,hwmods =3D "mmc1";
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,dual-volt;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,bus-width =3D <4>;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 vmmc-supply =3D <&vmmc>; /* phandle to regu=
+lator node */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,non-removable;
+> + =A0 =A0 =A0 };
