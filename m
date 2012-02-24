@@ -1,120 +1,80 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH v2 3/4] arm/dts: OMAP4: Add mmc controller nodes and board data
-Date: Fri, 24 Feb 2012 16:29:17 +0530
-Message-ID: <CANrkHUbUMHjUwW0-O4t0QLhDgnPTAWhRMGNbKcHa+SMODouCDA@mail.gmail.com>
+From: "Cousson, Benoit" <b-cousson-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v2 4/4] arm/dts: OMAP3: Add mmc controller nodes and board
+	data
+Date: Fri, 24 Feb 2012 12:23:05 +0100
+Message-ID: <4F477319.7080409@ti.com>
 References: <1329998490-27555-1-git-send-email-rnayak@ti.com>
-	<1329998490-27555-4-git-send-email-rnayak@ti.com>
-	<CANrkHUaP7cV_vSKQYZkeF-aS5CEi2CAp3_9aDJKCVOX-67oNPg@mail.gmail.com>
-	<4F4765EC.1000102@ti.com>
+	<1329998490-27555-5-git-send-email-rnayak@ti.com>
+	<20120223185718.GZ18185@atomide.com> <4F470B71.1020308@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog118.obsmtp.com ([74.125.149.244]:55428 "EHLO
-	na3sys009aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751653Ab2BXK7U convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 24 Feb 2012 05:59:20 -0500
-Received: by lagr15 with SMTP id r15so1049238lag.16
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Feb 2012 02:59:17 -0800 (PST)
-In-Reply-To: <4F4765EC.1000102@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+In-Reply-To: <4F470B71.1020308-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
+List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
+Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
+Cc: linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rajendra Nayak <rnayak@ti.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, devicetree-discuss@lists.ozlabs.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, svenkatr@ti.com, linaro-dev@lists.linaro.org
 
-On Fri, Feb 24, 2012 at 3:56 PM, Rajendra Nayak <rnayak@ti.com> wrote:
-> On Friday 24 February 2012 03:46 PM, T Krishnamoorthy, Balaji wrote:
->>>
->>> diff --git a/arch/arm/boot/dts/omap4.dtsi b/arch/arm/boot/dts/omap4=
-=2Edtsi
->>> index 29f4589..9204f60 100644
->>> --- a/arch/arm/boot/dts/omap4.dtsi
->>> +++ b/arch/arm/boot/dts/omap4.dtsi
->>> @@ -25,6 +25,11 @@
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0serial1 =3D&uart2;
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0serial2 =3D&uart3;
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0serial3 =3D&uart4;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc1 =3D&mmc1;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc2 =3D&mmc2;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc3 =3D&mmc3;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc4 =3D&mmc4;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc5 =3D&mmc5;
->>> =A0 =A0 =A0 =A0};
->>>
->>> =A0 =A0 =A0 =A0cpus {
->>> @@ -155,5 +160,31 @@
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0#size-cells =3D<0>;
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ti,hwmods =3D "i2c4"=
-;
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0};
+On 2/24/2012 5:00 AM, Rajendra Nayak wrote:
+> On Friday 24 February 2012 12:27 AM, Tony Lindgren wrote:
+>>> --- a/arch/arm/boot/dts/omap3.dtsi
+>>> +++ b/arch/arm/boot/dts/omap3.dtsi
+>>> @@ -113,5 +113,31 @@
+>>> #size-cells =<0>;
+>>> ti,hwmods = "i2c3";
+>>> };
 >>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc1: mmc@1 {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 compatible =3D "ti,om=
-ap4-hsmmc";
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,hwmods =3D "mmc1";
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,dual-volt;
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 };
+>>> + mmc1: mmc@1 {
+>>> + compatible = "ti,omap2-hsmmc";
+>>> + ti,hwmods = "mmc1";
+>>> + ti,dual-volt;
+>>> + };
 >>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc2: mmc@2 {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 compatible =3D "ti,om=
-ap4-hsmmc";
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,hwmods =3D "mmc2";
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 };
+>>> + mmc2: mmc@2 {
+>>> + compatible = "ti,omap2-hsmmc";
+>>> + ti,hwmods = "mmc2";
+>>> + };
+>>> +
+>>> + mmc3: mmc@3 {
+>>> + compatible = "ti,omap2-hsmmc";
+>>> + ti,hwmods = "mmc3";
+>>> + };
+>>> +
+>>> + mmc4: mmc@4 {
+>>> + compatible = "ti,omap2-hsmmc";
+>>> + ti,hwmods = "mmc4";
+>>> + };
+>>> +
+>>> + mmc5: mmc@5 {
+>>> + compatible = "ti,omap2-hsmmc";
+>>> + ti,hwmods = "mmc5";
+>>> + };
+>>> };
+>>> };
 >>
->>
->> Hi Rajendra,
->> Is there a way to control the device registration order,
->> eMMC connected to mmc2 needs to be registered as /dev/mmcblk0p ...
->> irrespective of whether SD card is mount or not on mmc1 card slot.
->> So that bootargs would not have to be modified when filesystem is on=
- eMMC.
+>> These all should all be "ti,omap3-hsmmc" I guess?
 >
->
-> I don't know if we can, but even if we could, we take care of the sam=
-e
-> bootargs working on two boards (say sdp and panda) *if* on sdp I have=
- my
-> filesystem on eMMC and on panda I have it on external card.
-> What happens if I want to use my filesystem on both boards on externa=
-l
-> card?
+> Well, I defined the binding such that both omap2 and omap3
+> can use the same compatible "ti,omap2-hsmmc" since there is
+> no difference in the way they are defined or handled. If thats
+> confusing, I can have separate compatibles.
+> Btw, I guess we do the same with a few other re-used IPs as well,
+> I just checked and mcpsi does the same.
 
-While booting if SD card is present in the card slot, SD is detected
-as /dev/mmcblk0
-and eMMC as /dev/mmcblk1
-If SD card is not present, then eMMC is detected as /dev/mmcblk0
-When filesystem is in eMMC then bootargs has to switch between mmcblk0
-or mmcblk1
-depending on whether SD is present or not.
+Yes, the goal is mainly to identify the IP version, so since OMAP3 is 
+using OMAP2 IP, I do not think there is a need to add a new compatible 
+string for OMAP3. The should only be documented in the binding potentially.
+The advantage is that that will avoid adding an extra compatible string 
+in the driver as well whereas there is no change in the IP.
 
-By changing the device order, eMMC will always be mmcblk0 independent
-of SD card status.
-
->
->
->>
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc3: mmc@3 {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 compatible =3D "ti,om=
-ap4-hsmmc";
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,hwmods =3D "mmc3";
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 };
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc4: mmc@4 {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 compatible =3D "ti,om=
-ap4-hsmmc";
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,hwmods =3D "mmc4";
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 };
->>> +
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc5: mmc@5 {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 compatible =3D "ti,om=
-ap4-hsmmc";
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ti,hwmods =3D "mmc5";
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 };
->>> =A0 =A0 =A0 =A0};
->>> =A0};
->>> --
->>> 1.7.1
->>>
->
+Regards,
+Benoit
