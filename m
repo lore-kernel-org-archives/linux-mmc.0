@@ -1,95 +1,355 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v7] mmc: support BKOPS feature for eMMC
-Date: Fri, 24 Feb 2012 17:38:37 +0900
-Message-ID: <4F474C8D.4020307@samsung.com>
-References: <4F190E26.4040909@samsung.com> <4F44F792.2000304@intel.com>
- <4F45A293.6060608@samsung.com> <4F46014C.6040303@intel.com>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH 2/4] ARM: SAMSUNG: move the header file to driver directory
+Date: Fri, 24 Feb 2012 14:40:44 +0530
+Message-ID: <CAJuYYwQfSJn4z-1O6WsQf74Cg6heZx1yUSg+EQFJfZi3pubWkA@mail.gmail.com>
+References: <4F39EB0B.5030205@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:10310 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755968Ab2BXIio (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Feb 2012 03:38:44 -0500
-Received: from epcpsbgm2.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0LZW00L1F2OI06A0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 24 Feb 2012 17:38:42 +0900 (KST)
-Received: from [165.213.219.108] by mmp2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0LZW00IZJ2OI9Q90@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 24 Feb 2012 17:38:42 +0900 (KST)
-In-reply-to: <4F46014C.6040303@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <4F39EB0B.5030205@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, kgene kim <kgene.kim@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-On 02/23/2012 06:05 PM, Adrian Hunter wrote:
+Dear Mr. Chung,
 
-> On 23/02/12 04:21, Jaehoon Chung wrote:
->> On 02/22/2012 11:11 PM, Adrian Hunter wrote:
->>
->>> On 20/01/12 08:48, Jaehoon Chung wrote:
->>>> Enable eMMC background operations (BKOPS) feature.
->>>>
->>>> If URGENT_BKOPS is set after a response, note that BKOPS
->>>> are required. After all I/O requests are finished, run
->>>> BKOPS if required. Should read/write operations be requested
->>>> during BKOPS, first issue HPI to interrupt the ongoing BKOPS
->>>> and then service the request.
->>>
->>> You are leaving bkops running and releasing the host.  Won't
->>> that cause problems for other entry points to mmc services
->>> e.g. system suspend (cache control, sleep etc), ioctl, sysfs,
->>> etc
->>
->> I see. i will complement for your review.
-> 
-> Please cc me.
+On 14 February 2012 10:33, Jaehoon Chung <jh80.chung@samsung.com> wrote=
+:
+> The header-file is moved to drivers/mmc/host from plat.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+> =A0arch/arm/mach-exynos/setup-sdhci-gpio.c =A0 =A0 =A0 =A0 | =A0 =A01=
+ -
+> =A0arch/arm/mach-s5pc100/setup-sdhci-gpio.c =A0 =A0 =A0 =A0| =A0 =A01=
+ -
+> =A0arch/arm/mach-s5pv210/setup-sdhci-gpio.c =A0 =A0 =A0 =A0| =A0 =A01=
+ -
+> =A0arch/arm/plat-samsung/include/plat/regs-sdhci.h | =A0 87 ---------=
+-------------
+> =A0drivers/mmc/host/sdhci-s3c.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+| =A0 89 +++++++++++++++++++++++
+> =A05 files changed, 89 insertions(+), 90 deletions(-)
+> =A0delete mode 100644 arch/arm/plat-samsung/include/plat/regs-sdhci.h
+> =A0create mode 100644 drivers/mmc/host/sdhci-s3c.h
+>
+> diff --git a/arch/arm/mach-exynos/setup-sdhci-gpio.c b/arch/arm/mach-=
+exynos/setup-sdhci-gpio.c
+> index e8d08bf..cda3714 100644
+> --- a/arch/arm/mach-exynos/setup-sdhci-gpio.c
+> +++ b/arch/arm/mach-exynos/setup-sdhci-gpio.c
+> @@ -20,7 +20,6 @@
+> =A0#include <linux/mmc/card.h>
+>
+> =A0#include <plat/gpio-cfg.h>
+> -#include <plat/regs-sdhci.h>
+> =A0#include <plat/sdhci.h>
+>
+> =A0void exynos4_setup_sdhci0_cfg_gpio(struct platform_device *dev, in=
+t width)
+> diff --git a/arch/arm/mach-s5pc100/setup-sdhci-gpio.c b/arch/arm/mach=
+-s5pc100/setup-sdhci-gpio.c
+> index 03c02d0..6010c03 100644
+> --- a/arch/arm/mach-s5pc100/setup-sdhci-gpio.c
+> +++ b/arch/arm/mach-s5pc100/setup-sdhci-gpio.c
+> @@ -19,7 +19,6 @@
+> =A0#include <linux/mmc/card.h>
+>
+> =A0#include <plat/gpio-cfg.h>
+> -#include <plat/regs-sdhci.h>
+> =A0#include <plat/sdhci.h>
+>
+> =A0void s5pc100_setup_sdhci0_cfg_gpio(struct platform_device *dev, in=
+t width)
+> diff --git a/arch/arm/mach-s5pv210/setup-sdhci-gpio.c b/arch/arm/mach=
+-s5pv210/setup-sdhci-gpio.c
+> index 3e3ac05..0512ada 100644
+> --- a/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
+> +++ b/arch/arm/mach-s5pv210/setup-sdhci-gpio.c
+> @@ -20,7 +20,6 @@
+> =A0#include <linux/mmc/card.h>
+>
+> =A0#include <plat/gpio-cfg.h>
+> -#include <plat/regs-sdhci.h>
+> =A0#include <plat/sdhci.h>
+>
+> =A0void s5pv210_setup_sdhci0_cfg_gpio(struct platform_device *dev, in=
+t width)
+> diff --git a/arch/arm/plat-samsung/include/plat/regs-sdhci.h b/arch/a=
+rm/plat-samsung/include/plat/regs-sdhci.h
+> deleted file mode 100644
+> index e34049a..0000000
+> --- a/arch/arm/plat-samsung/include/plat/regs-sdhci.h
+> +++ /dev/null
+> @@ -1,87 +0,0 @@
+> -/* linux/arch/arm/plat-s3c/include/plat/regs-sdhci.h
+> - *
+> - * Copyright 2008 Openmoko, Inc.
+> - * Copyright 2008 Simtec Electronics
+> - * =A0 =A0 http://armlinux.simtec.co.uk/
+> - * =A0 =A0 Ben Dooks <ben@simtec.co.uk>
+> - *
+> - * S3C Platform - SDHCI (HSMMC) register definitions
+> - *
+> - * This program is free software; you can redistribute it and/or mod=
+ify
+> - * it under the terms of the GNU General Public License version 2 as
+> - * published by the Free Software Foundation.
+> -*/
+> -
+> -#ifndef __PLAT_S3C_SDHCI_REGS_H
+> -#define __PLAT_S3C_SDHCI_REGS_H __FILE__
+> -
+> -#define S3C_SDHCI_CONTROL2 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (=
+0x80)
+> -#define S3C_SDHCI_CONTROL3 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (=
+0x84)
+> -#define S3C64XX_SDHCI_CONTROL4 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (0x8C=
+)
+> -
+> -#define S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR =A0 =A0 =A0(1 << 31)
+> -#define S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0(1 << 30)
+> -#define S3C_SDHCI_CTRL2_CDINVRXD3 =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 2=
+9)
+> -#define S3C_SDHCI_CTRL2_SLCARDOUT =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 2=
+8)
+> -
+> -#define S3C_SDHCI_CTRL2_FLTCLKSEL_MASK =A0 =A0 =A0 =A0 (0xf << 24)
+> -#define S3C_SDHCI_CTRL2_FLTCLKSEL_SHIFT =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0(24)
+> -#define S3C_SDHCI_CTRL2_FLTCLKSEL(_x) =A0 =A0 =A0 =A0 =A0((_x) << 24=
+)
+> -
+> -#define S3C_SDHCI_CTRL2_LVLDAT_MASK =A0 =A0 =A0 =A0 =A0 =A0(0xff << =
+16)
+> -#define S3C_SDHCI_CTRL2_LVLDAT_SHIFT =A0 =A0 =A0 =A0 =A0 (16)
+> -#define S3C_SDHCI_CTRL2_LVLDAT(_x) =A0 =A0 =A0 =A0 =A0 =A0 ((_x) << =
+16)
+> -
+> -#define S3C_SDHCI_CTRL2_ENFBCLKTX =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 1=
+5)
+> -#define S3C_SDHCI_CTRL2_ENFBCLKRX =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 1=
+4)
+> -#define S3C_SDHCI_CTRL2_SDCDSEL =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0(1 << 13)
+> -#define S3C_SDHCI_CTRL2_SDSIGPC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0(1 << 12)
+> -#define S3C_SDHCI_CTRL2_ENBUSYCHKTXSTART =A0 =A0 =A0 (1 << 11)
+> -
+> -#define S3C_SDHCI_CTRL2_DFCNT_MASK =A0 =A0 =A0 =A0 =A0 =A0 (0x3 << 9=
+)
+> -#define S3C_SDHCI_CTRL2_DFCNT_SHIFT =A0 =A0 =A0 =A0 =A0 =A0(9)
+> -#define S3C_SDHCI_CTRL2_DFCNT_NONE =A0 =A0 =A0 =A0 =A0 =A0 (0x0 << 9=
+)
+> -#define S3C_SDHCI_CTRL2_DFCNT_4SDCLK =A0 =A0 =A0 =A0 =A0 (0x1 << 9)
+> -#define S3C_SDHCI_CTRL2_DFCNT_16SDCLK =A0 =A0 =A0 =A0 =A0(0x2 << 9)
+> -#define S3C_SDHCI_CTRL2_DFCNT_64SDCLK =A0 =A0 =A0 =A0 =A0(0x3 << 9)
+> -
+> -#define S3C_SDHCI_CTRL2_ENCLKOUTHOLD =A0 =A0 =A0 =A0 =A0 (1 << 8)
+> -#define S3C_SDHCI_CTRL2_RWAITMODE =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 7=
+)
+> -#define S3C_SDHCI_CTRL2_DISBUFRD =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 << 6=
+)
+> -#define S3C_SDHCI_CTRL2_SELBASECLK_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0(0x3 << 4)
+> -#define S3C_SDHCI_CTRL2_SELBASECLK_SHIFT =A0 =A0 =A0 (4)
+> -#define S3C_SDHCI_CTRL2_PWRSYNC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0(1 << 3)
+> -#define S3C_SDHCI_CTRL2_ENCLKOUTMSKCON =A0 =A0 =A0 =A0 (1 << 1)
+> -#define S3C_SDHCI_CTRL2_HWINITFIN =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 0=
+)
+> -
+> -#define S3C_SDHCI_CTRL3_FCSEL3 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 <<=
+ 31)
+> -#define S3C_SDHCI_CTRL3_FCSEL2 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 <<=
+ 23)
+> -#define S3C_SDHCI_CTRL3_FCSEL1 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 <<=
+ 15)
+> -#define S3C_SDHCI_CTRL3_FCSEL0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 <<=
+ 7)
+> -
+> -#define S3C_SDHCI_CTRL3_FIA3_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x7f <=
+< 24)
+> -#define S3C_SDHCI_CTRL3_FIA3_SHIFT =A0 =A0 =A0 =A0 =A0 =A0 (24)
+> -#define S3C_SDHCI_CTRL3_FIA3(_x) =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((_x) <=
+< 24)
+> -
+> -#define S3C_SDHCI_CTRL3_FIA2_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x7f <=
+< 16)
+> -#define S3C_SDHCI_CTRL3_FIA2_SHIFT =A0 =A0 =A0 =A0 =A0 =A0 (16)
+> -#define S3C_SDHCI_CTRL3_FIA2(_x) =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((_x) <=
+< 16)
+> -
+> -#define S3C_SDHCI_CTRL3_FIA1_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x7f <=
+< 8)
+> -#define S3C_SDHCI_CTRL3_FIA1_SHIFT =A0 =A0 =A0 =A0 =A0 =A0 (8)
+> -#define S3C_SDHCI_CTRL3_FIA1(_x) =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((_x) <=
+< 8)
+> -
+> -#define S3C_SDHCI_CTRL3_FIA0_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x7f <=
+< 0)
+> -#define S3C_SDHCI_CTRL3_FIA0_SHIFT =A0 =A0 =A0 =A0 =A0 =A0 (0)
+> -#define S3C_SDHCI_CTRL3_FIA0(_x) =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((_x) <=
+< 0)
+> -
+> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_MASK =A0 =A0 =A0(0x3 << 16)
+> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_SHIFT =A0 =A0 (16)
+> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_2mA =A0 =A0 =A0 (0x0 << 16)
+> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_4mA =A0 =A0 =A0 (0x1 << 16)
+> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_7mA =A0 =A0 =A0 (0x2 << 16)
+> -#define S3C64XX_SDHCI_CONTROL4_DRIVE_9mA =A0 =A0 =A0 (0x3 << 16)
+> -
+> -#define S3C64XX_SDHCI_CONTROL4_BUSY =A0 =A0 =A0 =A0 =A0 =A0(1)
+> -
+> -#endif /* __PLAT_S3C_SDHCI_REGS_H */
+> diff --git a/drivers/mmc/host/sdhci-s3c.h b/drivers/mmc/host/sdhci-s3=
+c.h
+> new file mode 100644
+> index 0000000..e233b15
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-s3c.h
+> @@ -0,0 +1,89 @@
+> +/*
+> + * SDHCI Samsung controller driver generics for OF and pltfm.
+> + *
+> + * Copyright 2008 Openmoko, Inc.
+> + * Copyright 2008 Simtec Electronics
+> + * =A0 =A0 http://armlinux.simtec.co.uk/
+> + * =A0 =A0 Ben Dooks <ben@simtec.co.uk>
+> + *
+> + * S3C Platform - SDHCI (HSMMC) register definitions
+> + *
+> + * This program is free software; you can redistribute it and/or mod=
+ify
+> + * it under the terms of the GNU General Public License as published=
+ by
+> + * the Free Software Foundation; either version 2 of the License.
+> + */
+> +
+> +#ifndef __DRIVERS_MMC_S3C_SDHCI_H
+> +#define __DRIVERS_MMC_S3C_SDHCI_H
+> +
+> +#define S3C_SDHCI_CONTROL2 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (=
+0x80)
+> +#define S3C_SDHCI_CONTROL3 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (=
+0x84)
+> +#define S3C_SDHCI_CONTROL4 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (=
+0x8C)
+> +
+> +#define S3C_SDHCI_CTRL2_ENSTAASYNCCLR =A0 =A0 =A0 =A0 =A0(1 << 31)
+> +#define S3C_SDHCI_CTRL2_ENCMDCNFMSK =A0 =A0 =A0 =A0 =A0 =A0(1 << 30)
+> +#define S3C_SDHCI_CTRL2_CDINVRXD3 =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 2=
+9)
+> +#define S3C_SDHCI_CTRL2_SLCARDOUT =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 2=
+8)
+> +
+> +#define S3C_SDHCI_CTRL2_FLTCLKSEL_MASK =A0 =A0 =A0 =A0 (0xf << 24)
+> +#define S3C_SDHCI_CTRL2_FLTCLKSEL_SHIFT =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0(24)
+> +#define S3C_SDHCI_CTRL2_FLTCLKSEL(_x) =A0 =A0 =A0 =A0 =A0((_x) << 24=
+)
+> +
+> +#define S3C_SDHCI_CTRL2_LVLDAT_MASK =A0 =A0 =A0 =A0 =A0 =A0(0xff << =
+16)
+> +#define S3C_SDHCI_CTRL2_LVLDAT_SHIFT =A0 =A0 =A0 =A0 =A0 (16)
+> +#define S3C_SDHCI_CTRL2_LVLDAT(_x) =A0 =A0 =A0 =A0 =A0 =A0 ((_x) << =
+16)
+> +
+> +#define S3C_SDHCI_CTRL2_ENFBCLKTX =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 1=
+5)
+> +#define S3C_SDHCI_CTRL2_ENFBCLKRX =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 1=
+4)
+> +#define S3C_SDHCI_CTRL2_SDCDSEL =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0(1 << 13)
+> +#define S3C_SDHCI_CTRL2_SDSIGPC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0(1 << 12)
+> +#define S3C_SDHCI_CTRL2_ENBUSYCHKTXSTART =A0 =A0 =A0 (1 << 11)
+> +
+> +#define S3C_SDHCI_CTRL2_DFCNT_MASK =A0 =A0 =A0 =A0 =A0 =A0 (0x3 << 9=
+)
+> +#define S3C_SDHCI_CTRL2_DFCNT_SHIFT =A0 =A0 =A0 =A0 =A0 =A0(9)
+> +#define S3C_SDHCI_CTRL2_DFCNT_NONE =A0 =A0 =A0 =A0 =A0 =A0 (0x0 << 9=
+)
+> +#define S3C_SDHCI_CTRL2_DFCNT_4SDCLK =A0 =A0 =A0 =A0 =A0 (0x1 << 9)
+> +#define S3C_SDHCI_CTRL2_DFCNT_16SDCLK =A0 =A0 =A0 =A0 =A0(0x2 << 9)
+> +#define S3C_SDHCI_CTRL2_DFCNT_64SDCLK =A0 =A0 =A0 =A0 =A0(0x3 << 9)
+> +
+> +#define S3C_SDHCI_CTRL2_ENCLKOUTHOLD =A0 =A0 =A0 =A0 =A0 (1 << 8)
+> +#define S3C_SDHCI_CTRL2_RWAITMODE =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 7=
+)
+> +#define S3C_SDHCI_CTRL2_DISBUFRD =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 << 6=
+)
+> +#define S3C_SDHCI_CTRL2_SELBASECLK_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0(0x3 << 4)
+> +#define S3C_SDHCI_CTRL2_SELBASECLK_SHIFT =A0 =A0 =A0 (4)
+> +#define S3C_SDHCI_CTRL2_PWRSYNC =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0(1 << 3)
+> +#define S3C_SDHCI_CTRL2_ENCLKOUTMSKCON =A0 =A0 =A0 =A0 (1 << 1)
+> +#define S3C_SDHCI_CTRL2_HWINITFIN =A0 =A0 =A0 =A0 =A0 =A0 =A0(1 << 0=
+)
+> +
+> +#define S3C_SDHCI_CTRL3_FCSEL3 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 <<=
+ 31)
+> +#define S3C_SDHCI_CTRL3_FCSEL2 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 <<=
+ 23)
+> +#define S3C_SDHCI_CTRL3_FCSEL1 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 <<=
+ 15)
+> +#define S3C_SDHCI_CTRL3_FCSEL0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 <<=
+ 7)
+> +
+> +#define S3C_SDHCI_CTRL3_FIA3_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x7f <=
+< 24)
+> +#define S3C_SDHCI_CTRL3_FIA3_SHIFT =A0 =A0 =A0 =A0 =A0 =A0 (24)
+> +#define S3C_SDHCI_CTRL3_FIA3(_x) =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((_x) <=
+< 24)
+> +
+> +#define S3C_SDHCI_CTRL3_FIA2_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x7f <=
+< 16)
+> +#define S3C_SDHCI_CTRL3_FIA2_SHIFT =A0 =A0 =A0 =A0 =A0 =A0 (16)
+> +#define S3C_SDHCI_CTRL3_FIA2(_x) =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((_x) <=
+< 16)
+> +
+> +#define S3C_SDHCI_CTRL3_FIA1_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x7f <=
+< 8)
+> +#define S3C_SDHCI_CTRL3_FIA1_SHIFT =A0 =A0 =A0 =A0 =A0 =A0 (8)
+> +#define S3C_SDHCI_CTRL3_FIA1(_x) =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((_x) <=
+< 8)
+> +
+> +#define S3C_SDHCI_CTRL3_FIA0_MASK =A0 =A0 =A0 =A0 =A0 =A0 =A0(0x7f <=
+< 0)
+> +#define S3C_SDHCI_CTRL3_FIA0_SHIFT =A0 =A0 =A0 =A0 =A0 =A0 (0)
+> +#define S3C_SDHCI_CTRL3_FIA0(_x) =A0 =A0 =A0 =A0 =A0 =A0 =A0 ((_x) <=
+< 0)
+> +
+> +#define S3C_SDHCI_CONTROL4_DRIVE_MASK =A0 =A0 =A0 =A0 =A0(0x3 << 16)
+> +#define S3C_SDHCI_CONTROL4_DRIVE_SHIFT =A0 =A0 =A0 =A0 (16)
+> +#define S3C_SDHCI_CONTROL4_DRIVE_2mA =A0 =A0 =A0 =A0 =A0 (0x0 << 16)
+> +#define S3C_SDHCI_CONTROL4_DRIVE_4mA =A0 =A0 =A0 =A0 =A0 (0x1 << 16)
+> +#define S3C_SDHCI_CONTROL4_DRIVE_7mA =A0 =A0 =A0 =A0 =A0 (0x2 << 16)
+> +#define S3C_SDHCI_CONTROL4_DRIVE_9mA =A0 =A0 =A0 =A0 =A0 (0x3 << 16)
 
-Sure..
+The CONTROL4 register is available from s3c6410 onwards. The sdhci
+controller in s3c24xx (such as s3c2416) do not have the CONTROL4
+register. I understand that renaming S3C64XX... to S3C should be fine
+but the information that it is applicable from S3C64XX onwards only is
+lost. Is this rename mandatory? I do not have any preference here, but
+I guess we could just leave it as S3C64XX.
 
-> 
->> Didn't you have the other comment?
-> 
-> Well, yes.  I also suggest:
-> 	- don't use host->lock spin lock at all
-> 	- claim the host in the caller not in
-> 	mmc_start_bkops()
-> 
-> But the main issues are design issues not implementation.
-> i.e.
-> 	- always run bkops at level 3 before doing any
-> 	other requests - that requirement should probably
-> 	be implemented in core rather than the block driver
+Thanks,
+Thomas.
 
-In core..it's reasonable..i will try that.
-
-> 	- do not release the host while bkops are running
-
-Right..don't release the host. i will consider.
-
-> 
-> And a new one:
-> 	- how do you know that trim/discard/sanitize will not
-> 	result in a need for bkops?
-
-Well, i didn't consider that case.
-but i think that need to control them.
-
-Thanks for comments.
-
-Best Regards,
-Jaehoon Chung
-
-> 
+> +
+> +#define S3C_SDHCI_CONTROL4_BUSY =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0(1)
+> +
+> +#endif /* __DRIVERS_MMC_S3C_SDHCI_H */
+> +
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> To unsubscribe from this list: send the line "unsubscribe linux-samsu=
+ng-soc" in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
