@@ -1,189 +1,255 @@
-From: Yaniv Gardi <ygardi@codeaurora.org>
-Subject: [PATCH v4 2/2] mmc: card: Adding support for Sanitize in eMMC v4.5
-Date: Sun, 26 Feb 2012 13:03:05 +0200
-Message-ID: <1330254185-2428-3-git-send-email-ygardi@codeaurora.org>
-References: <1330254185-2428-1-git-send-email-ygardi@codeaurora.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1330254185-2428-1-git-send-email-ygardi@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: axboe@kernel.dk, ygardi@codeaurora.org, linux-arm-msm@vger.kernel.org, open list <linux-kernel@vger.kernel.org>
+From: Daniel Palmer <me@danielpalmer.co.uk>
+Subject: atmel-mci causing oops?
+Date: Mon, 27 Feb 2012 09:49:23 +0900
+Message-ID: <201202270949.23934.me@danielpalmer.co.uk>
+Mime-Version: 1.0
+Content-Type: Text/Plain;
+  charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from tomato.cardboardbox.org.uk ([174.143.157.65]:48111 "EHLO
+	tomato.cardboardbox.org.uk" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753778Ab2B0BLu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Feb 2012 20:11:50 -0500
+Received: from p8024-ipngn100202sizuokaden.shizuoka.ocn.ne.jp ([180.24.231.24] helo=mirmachina.localnet)
+	by tomato.cardboardbox.org.uk with esmtpsa (TLS1.0:DHE_RSA_AES_256_CBC_SHA1:32)
+	(Exim 4.77)
+	(envelope-from <me@danielpalmer.co.uk>)
+	id 1S1odI-0008En-Lw
+	for linux-mmc@vger.kernel.org; Mon, 27 Feb 2012 00:40:05 +0000
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
+Hi all,
 
----
- drivers/mmc/card/block.c |   52 ++++++++++++++++++++++++++++++++++++++--------
- drivers/mmc/card/queue.c |   10 ++++++++-
- include/linux/mmc/card.h |    7 ++++++
- include/linux/mmc/host.h |    1 +
- 4 files changed, 60 insertions(+), 10 deletions(-)
+Looking for some ideas here.. 
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 0c959c9..d76b20e 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -830,6 +830,9 @@ static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
- 	from = blk_rq_pos(req);
- 	nr = blk_rq_sectors(req);
- 
-+	/* 1ST priority is DISCARD.
-+	   2ND is TRIM
-+	   3RD is ERASE */
- 	if (mmc_can_discard(card))
- 		arg = MMC_DISCARD_ARG;
- 	else if (mmc_can_trim(card))
-@@ -868,18 +871,11 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- 	unsigned int from, nr, arg;
- 	int err = 0, type = MMC_BLK_SECDISCARD;
- 
--	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
-+	if (!(mmc_can_secure_erase_trim(card))) {
- 		err = -EOPNOTSUPP;
- 		goto out;
- 	}
- 
--	/* The sanitize operation is supported at v4.5 only */
--	if (mmc_can_sanitize(card)) {
--		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--				EXT_CSD_SANITIZE_START, 1, 0);
--		goto out;
--	}
--
- 	from = blk_rq_pos(req);
- 	nr = blk_rq_sectors(req);
- 
-@@ -922,6 +918,38 @@ out:
- 	return err ? 0 : 1;
- }
- 
-+int mmc_blk_issue_sanitize_rq(struct mmc_queue *mq,
-+			       struct request *req)
-+{
-+	struct mmc_blk_data *md = mq->data;
-+	struct mmc_card *card = md->queue.card;
-+	int err = 0;
-+
-+	if (!(mmc_can_sanitize(card) && (mq->card->host->caps2 & MMC_CAP2_SANITIZE))) {
-+		pr_err("%s: SANITIZE is not supported", __func__);
-+		err = -EOPNOTSUPP;
-+		goto out;
-+	}
-+
-+	mmc_sd_card_set_sanitize_in_progress(card);
-+
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					 EXT_CSD_SANITIZE_START, 1, 0);
-+
-+	if (err)
-+		pr_err("%s: mmc%d: mmc_switch() failed. err=%d\n",
-+		       __func__, card->host->index, err);
-+
-+	mmc_sd_card_set_sanitize_completed(card);
-+
-+out:
-+	spin_lock_irq(&md->lock);
-+	__blk_end_request(req, err, blk_rq_bytes(req));
-+	spin_unlock_irq(&md->lock);
-+
-+	return err ? 0 : 1;
-+}
-+
- static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
- {
- 	struct mmc_blk_data *md = mq->data;
-@@ -1379,7 +1407,12 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 		goto out;
- 	}
- 
--	if (req && req->cmd_flags & REQ_DISCARD) {
-+	if (req && req->cmd_flags & REQ_SANITIZE) {
-+		/* complete ongoing async transfer before issuing sanitize */
-+		if (card->host && card->host->areq)
-+			mmc_blk_issue_rw_rq(mq, NULL);
-+		ret = mmc_blk_issue_sanitize_rq(mq, req);
-+	} else if (req && req->cmd_flags & REQ_DISCARD) {
- 		/* complete ongoing async transfer before issuing discard */
- 		if (card->host->areq)
- 			mmc_blk_issue_rw_rq(mq, NULL);
-@@ -1396,6 +1429,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 		ret = mmc_blk_issue_rw_rq(mq, req);
- 	}
- 
-+
- out:
- 	if (!req)
- 		/* release host only when there are no more requests */
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index dcad59c..ad6605d 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -140,10 +140,15 @@ static void mmc_queue_setup_discard(struct request_queue *q,
- 	/* granularity must not be greater than max. discard */
- 	if (card->pref_erase > max_discard)
- 		q->limits.discard_granularity = 0;
--	if (mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))
-+	if (mmc_can_secure_erase_trim(card))
- 		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
- }
- 
-+static void mmc_queue_setup_sanitize(struct request_queue *q)
-+{
-+	queue_flag_set_unlocked(QUEUE_FLAG_SANITIZE, q);
-+}
-+
- /**
-  * mmc_init_queue - initialise a queue structure.
-  * @mq: mmc queue
-@@ -181,6 +186,9 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	if (mmc_can_erase(card))
- 		mmc_queue_setup_discard(mq->queue, card);
- 
-+	if ((mmc_can_sanitize(card) && (host->caps2 & MMC_CAP2_SANITIZE)))
-+		mmc_queue_setup_sanitize(mq->queue);
-+
- #ifdef CONFIG_MMC_BLOCK_BOUNCE
- 	if (host->max_segs == 1) {
- 		unsigned int bouncesz;
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 9478a6b..0890e9c 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -236,6 +236,9 @@ struct mmc_card {
- #define MMC_POWEROFF_SHORT		2
- #define MMC_POWEROFF_LONG		3
- 
-+/* card is in sanitize progress */
-+#define MMC_STATE_SANITIZE_IN_PROGRESS (1<<9)
-+
- 	unsigned int		erase_size;	/* erase size in sectors */
-  	unsigned int		erase_shift;	/* if erase unit is power 2 */
-  	unsigned int		pref_erase;	/* in sectors */
-@@ -388,6 +391,10 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
- #define mmc_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
- #define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
-+#define mmc_sd_card_set_sanitize_in_progress(c) ((c)->state |= \
-+		MMC_STATE_SANITIZE_IN_PROGRESS)
-+#define mmc_sd_card_set_sanitize_completed(c) ((c)->state &= \
-+		~MMC_STATE_SANITIZE_IN_PROGRESS)
- #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
- #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 9a03d03..93210aa 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -242,6 +242,7 @@ struct mmc_host {
- #define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
- #define MMC_CAP2_POWEROFF_NOTIFY (1 << 2)	/* Notify poweroff supported */
- #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
-+#define MMC_CAP2_SANITIZE	(1<<4)		/* Support Sanitize */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 	unsigned int        power_notify_type;
--- 
-1.7.6
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum
+I don't seem to be able to get a better output of the oops (I have debugging 
+info etc turned on in the config :/). Anyhow, I have 3.1 running with a SAM9G45 
+based board and I'm trying to get 3.3rc5 running. The only differences from 
+mainline are a board file with the devices for the board and some memory stuff 
+because of it's two separate chunks of memory. This all worked fine in 3.1.
+
+The oops happens here:
+include/linux/scatterlist.h:99
+
+and the leaf register points to:
+drivers/mmc/host/atmel-mci.c:1802
+
+The only difference I can really see now is that atmel-mci seems to be using 
+PIO but with 3.1 it was apparently using DMA.
+
+The complete output from boot is attached below. Please CC me as I'm not on 
+the list.
+
+Cheers,
+
+Daniel
+
+
+-- pico-SAM9G45 Bootstrap 3.0.1 --
+-- AT91SAM9G45-EK
+-- Compiled: Oct 17 2011 22:42:24 --
+-I- RTC Config: rcen: 0 osc32en: 1 osc32byp: 0 oscsel: 1
+-I- RTC Config: rcen: 0 osc32en: 1 osc32byp: 0 oscsel: 1
+-I- Setting: MCK = 133MHz
+-I- Init DDRAM
+-I- Init second bank SDRAM
+-I- Loading to 0x20000000
+-I- MEDSdcard init
+-I- DMAD_Initialize channel 0  
+-I- Card Type 1, CSD_STRUCTURE 0
+-I- SD/MMC TRANS SPEED 25000 KBit/s
+-I- SD 4-BITS BUS
+-I- CMD6(1) arg 0x80FFFF01
+-I- SD HS Enable
+-I- SD/MMC TRANS SPEED 50000 KBit/s
+-I- SD/MMC card initialization successful
+-I- Card size: 1886 MB
+-I- Copy "linux.bin" from SdCard to 0x20000000
+-I- load: 20008000 jump: 20008000
+-I- Loading to 0x20007fc0 with size 0x0014f4b0
+-I- MEDSdcard init
+-I- DMAD_Initialize channel 0  
+-I- Card Type 1, CSD_STRUCTURE 0
+-I- SD/MMC TRANS SPEED 25000 KBit/s
+-I- SD 4-BITS BUS
+-I- CMD6(1) arg 0x80FFFF01
+-I- SD HS Enable
+-I- SD/MMC TRANS SPEED 50000 KBit/s
+-I- SD/MMC card initialization successful
+-I- Card size: 1886 MB
+-I- Copy "linux.bin" from SdCard to 0x20007fc0
+-I- Modified jump to 0x20008000
+Uncompressing Linux... done, booting the kernel.
+[    0.000000] Booting Linux on physical CPU 0
+[    0.000000] Linux version 3.3.0-rc5dgp-8be930a+ (jenkins@ein) (gcc version 
+4.6.2 (Debian 4.6.2-15) ) #3 Sun Feb 26 23:59:14 JST 2012
+[    0.000000] CPU: ARM926EJ-S [41069265] revision 5 (ARMv5TEJ), cr=00053177
+[    0.000000] CPU: VIVT data cache, VIVT instruction cache
+[    0.000000] Machine: Mini Box picoSAM9 G45 Board
+[    0.000000] Memory policy: ECC disabled, Data cache writeback
+[    0.000000] AT91: Detected soc type: at91sam9g45
+[    0.000000] AT91: Detected soc subtype: Unknown
+[    0.000000] AT91: sram at 0x300000 of 0x10000 mapped at 0xfef68000
+[    0.000000] Clocks: CPU 400 MHz, master 133 MHz, main 12.000 MHz
+[    0.000000] gpiochip_add: registered GPIOs 0 to 31 on device: pioA
+[    0.000000] gpiochip_add: registered GPIOs 32 to 63 on device: pioB
+[    0.000000] gpiochip_add: registered GPIOs 64 to 95 on device: pioC
+[    0.000000] gpiochip_add: registered GPIOs 96 to 127 on device: pioD
+[    0.000000] gpiochip_add: registered GPIOs 128 to 159 on device: pioE
+[    0.000000] Built 1 zonelists in Zone order, mobility grouping on.  Total 
+pages: 62368
+[    0.000000] Kernel command line: mem=128M@0x20000000 mem=128M@0x70000000 
+console=ttyS0,115200 console=tty0 root=/dev/mmcblk0p2 rw rootdelay=1 
+rootwait=1
+[    0.000000] PID hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.000000] Dentry cache hash table entries: 32768 (order: 5, 131072 bytes)
+[    0.000000] Inode-cache hash table entries: 16384 (order: 4, 65536 bytes)
+[    0.000000] Memory: 128MB 128MB = 256MB total
+[    0.000000] Memory: 256844k/256844k available, 5300k reserved, 0K highmem
+[    0.000000] Virtual kernel memory layout:
+[    0.000000]     vector  : 0xffff0000 - 0xffff1000   (   4 kB)
+[    0.000000]     fixmap  : 0xfff00000 - 0xfffe0000   ( 896 kB)
+[    0.000000]     vmalloc : 0xd0800000 - 0xff000000   ( 744 MB)
+[    0.000000]     lowmem  : 0xc0000000 - 0xd0000000   ( 256 MB)
+[    0.000000]     modules : 0xbf000000 - 0xc0000000   (  16 MB)
+[    0.000000]       .text : 0xc0008000 - 0xc025ac44   (2380 kB)
+[    0.000000]       .init : 0xc025b000 - 0xc0275000   ( 104 kB)
+[    0.000000]       .data : 0xc0276000 - 0xc0292a40   ( 115 kB)
+[    0.000000]        .bss : 0xc0292a64 - 0xc02a598c   (  76 kB)
+[    0.000000] NR_IRQS:192
+[    0.000000] AT91: 160 gpio irqs in 5 banks
+[    0.000000] Console: colour dummy device 80x30
+[    0.000000] console [tty0] enabled
+[    0.000000] Calibrating delay loop... 199.06 BogoMIPS (lpj=995328)
+[    0.070000] pid_max: default: 32768 minimum: 301
+[    0.070000] Mount-cache hash table entries: 512
+[    0.070000] CPU: Testing write buffer coherency: ok
+[    0.080000] Setting up static identity map for 0x201fa8c0 - 0x201fa8fc
+[    0.140000] NET: Registered protocol family 16
+[    0.210000] AT91: Power Management
+[    0.210000] AT91: Starting after power-restored wakeup
+[    0.280000] bio: create slab <bio-0> at 0
+[    0.310000] Switching to clocksource tcb_clksrc
+[    0.480000] NET: Registered protocol family 2
+[    0.480000] IP route cache hash table entries: 2048 (order: 1, 8192 bytes)
+[    0.490000] TCP established hash table entries: 8192 (order: 4, 65536 
+bytes)
+[    0.490000] TCP bind hash table entries: 8192 (order: 3, 32768 bytes)
+[    0.490000] TCP: Hash tables configured (established 8192 bind 8192)
+[    0.490000] TCP reno registered
+[    0.490000] UDP hash table entries: 256 (order: 0, 4096 bytes)
+[    0.490000] UDP-Lite hash table entries: 256 (order: 0, 4096 bytes)
+[    0.510000] msgmni has been set to 501
+[    0.510000] io scheduler noop registered
+[    0.510000] io scheduler cfq registered (default)
+[    0.530000] atmel_lcdfb atmel_lcdfb.0: 255KiB frame buffer at 76f80000 
+(mapped at ffdc0000)
+[    0.880000] Console: switching to colour frame buffer device 60x34
+[    1.060000] atmel_lcdfb atmel_lcdfb.0: fb0: Atmel LCDC at 0x00500000 
+(mapped at d0806000), irq 23
+[    1.060000] atmel_usart.0: ttyS0 at MMIO 0xffffee00 (irq = 1) is a 
+ATMEL_SERIAL
+[    1.420000] console [ttyS0] enabled
+[    1.430000] atmel_usart.1: ttyS1 at MMIO 0xfff8c000 (irq = 7) is a 
+ATMEL_SERIAL
+[    1.440000] atmel_usart.2: ttyS2 at MMIO 0xfff90000 (irq = 8) is a 
+ATMEL_SERIAL
+[    1.460000] atmel_usart.3: ttyS3 at MMIO 0xfff94000 (irq = 9) is a 
+ATMEL_SERIAL
+[    1.480000] atmel_spi atmel_spi.0: Atmel SPI Controller at 0xfffa4000 (irq 
+14)
+[    1.500000] atmel_spi atmel_spi.1: Atmel SPI Controller at 0xfffa8000 (irq 
+15)
+[    1.510000] atmel_tsadcc atmel_tsadcc: Master clock is set at: 133333333 Hz
+[    1.530000] atmel_tsadcc atmel_tsadcc: Prescaler is set at: 221
+[    1.540000] input: atmel touch screen controller as 
+/devices/platform/atmel_tsadcc/input/input0
+[    1.560000] rtc-at91sam9 at91_rtt.0: rtc core: registered at91_rtt as rtc0
+[    1.580000] cpuidle: using governor ladder
+[    1.590000] cpuidle: using governor menu
+[    1.610000] TCP cubic registered
+[    1.620000] Registering the dns_resolver key type
+[    1.630000] VFP support v0.3: not present
+[    1.640000] rtc-at91sam9 at91_rtt.0: setting system clock to 2012-02-26 
+23:44:40 UTC (1330299880)
+[    1.660000] atmel_mci atmel_mci.0: version: 0x410
+[    1.660000] atmel_mci atmel_mci.0: using DMA
+[    1.670000] atmel_mci atmel_mci.0: DMA not available, using PIO
+[    1.680000] atmel_mci atmel_mci.0: Atmel MCI controller at 0xfff80000 irq 
+11, 1 slots
+[    1.700000] atmel_mci atmel_mci.1: version: 0x410
+[    1.710000] atmel_mci atmel_mci.1: using DMA
+[    1.710000] atmel_mci atmel_mci.1: DMA not available, using PIO
+[    1.730000] atmel_mci atmel_mci.1: Atmel MCI controller at 0xfffd0000 irq 
+29, 1 slots
+[    1.740000] Waiting 1sec before mounting root device...
+[    1.790000] Unable to handle kernel NULL pointer dereference at virtual 
+address 00000004
+[    1.790000] pgd = c0004000
+[    1.790000] [00000004] *pgd=00000000
+[    1.790000] Internal error: Oops - BUG: 5 [#1]
+[    1.790000] Modules linked in:
+[    1.790000] CPU: 0    Not tainted  (3.3.0-rc5dgp-8be930a+ #3)
+[    1.790000] pc : [<c01794fc>]    lr : [<c0179b38>]    psr: 20000093
+[    1.790000] sp : cf8c7d34  ip : 00010200  fp : c0600020
+[    1.790000] r10: c02822c4  r9 : c029e908  r8 : c0600006
+[    1.790000] r7 : 00000000  r6 : 04000024  r5 : 00000000  r4 : ce995f40
+[    1.790000] r3 : c02978e0  r2 : c027f8a8  r1 : c0000000  r0 : ce995f40
+[    1.790000] Flags: nzCv  IRQs off  FIQs on  Mode SVC_32  ISA ARM  Segment 
+kernel
+[    1.790000] Control: 0005317f  Table: 20004000  DAC: 00000017
+[    1.790000] Process kworker/u:0 (pid: 5, stack limit = 0xcf8c6270)
+[    1.790000] Stack: (0xcf8c7d34 to 0xcf8c8000)
+[    1.790000] 7d20:                                              ce995f40 
+04000024 04000024
+[    1.790000] 7d40: 00000000 c0600006 c029de4c c02822c4 c0600020 c0179b38 
+c02812c0 ce995f78
+[    1.790000] 7d60: cf8c1d90 ce86c8a0 0000000b 00000000 00000000 0000000b 
+c029de4c c02822c4
+[    1.790000] 7d80: 00000001 c004cb38 00060000 c02822c4 0000000b 00000000 
+cf8c7e0c 00000000
+[    1.790000] 7da0: c016d514 ce997df4 00000012 c004cc8c c02822c4 c004e778 
+c02896a8 c004c528
+[    1.790000] 7dc0: 000000c0 c000e6ac c0179f48 60000013 fefff000 c000dab8 
+00000000 00000000
+[    1.790000] 7de0: 0005104d 00000001 ce997c00 ce995f40 cf8c7eb4 00000040 
+00000000 c016d514
+[    1.790000] 7e00: ce997df4 00000012 00000002 cf8c7e20 c0179de0 c0179f48 
+60000013 ffffffff
+[    1.790000] 7e20: cf8c7eb4 ce997c00 cf8c7ec4 c016b910 cf8c7eb4 ce997c00 
+cf8c7e84 c016ba50
+[    1.790000] 7e40: 0000000d ce9c3c00 0000000d c01726a0 ce978fe0 0000000d 
+00000000 00000000
+[    1.790000] 7e60: 00000000 00000000 00000000 000001b5 00000000 ffffff8d 
+00000000 cf8c7e84
+[    1.790000] 7e80: cf8c7eb4 05f5e100 00000000 00000040 00000001 ffffff8d 
+00000200 00000000
+[    1.790000] 7ea0: 00000000 cf8c7eb4 00000001 cf8c7ed4 00000000 00000000 
+cf8c7e54 cf8c7e84
+[    1.790000] 7ec0: 00000000 00000000 cf8c7ec8 cf8c7ec8 c016b844 87654321 
+c04b0f32 00000660
+[    1.790000] 7ee0: 00000040 00000000 00000008 ce86c660 ce9c3c00 00000000 
+ce9c3c00 c0171530
+[    1.790000] 7f00: ce997c00 ce9c3c00 00000000 c01719dc 00000000 ce997c00 
+cf8c7f24 c0171b14
+[    1.790000] 7f20: 000000e1 03534453 55303247 80a108b4 6700abed 80ff8000 
+ce997c00 00000000
+[    1.790000] 7f40: c020e800 00061a80 c020e80c c0171dac 00061a80 00ff8000 
+c016d514 ce997c00
+[    1.790000] 7f60: ce997c00 c016d0c0 ce997df4 c016d6b0 cf802ce0 cf16de00 
+cf8c6000 00000000
+[    1.790000] 7f80: 00000000 c002d694 ce997df4 cf802ce0 c0298aac c0298aa8 
+c0280d0c cf8c6000
+[    1.790000] 7fa0: 00000000 cf802cf0 00000000 c002e100 00000000 cf88df38 
+cf802ce0 c002dfc0
+[    1.790000] 7fc0: 00000013 00000000 00000000 c00315fc 00000000 00000000 
+cf802ce0 00000000
+[    1.790000] 7fe0: cf8c7fe0 cf8c7fe0 cf88df38 c0031578 c000e7a4 c000e7a4 
+aaaaaaaa aaaaaaaa
+[    1.790000] Function entered at [<c01794fc>] from [<0000000b>]
+[    1.790000] Code: e92d4ff0 e59f9378 e5905004 e5991000 (e5952004) 
+[    1.790000] ---[ end trace 0cf742e69e15cd43 ]---
+[    1.790000] Kernel panic - not syncing: Fatal exception in interrupt
