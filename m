@@ -1,61 +1,177 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: atmel-mci causing oops?
-Date: Mon, 27 Feb 2012 12:28:16 +0900
-Message-ID: <003801ccf4ff$d821bfb0$88653f10$%jun@samsung.com>
-References: <201202270949.23934.me@danielpalmer.co.uk>
- <003401ccf4ef$67e3b880$37ab2980$%jun@samsung.com>
- <201202271057.28579.me@danielpalmer.co.uk>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH v2 4/4] ARM: SAMSUNG: move the mmc platdata header file to
+ linux/mmc/
+Date: Mon, 27 Feb 2012 16:58:12 +0900
+Message-ID: <4F4B3794.1010401@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:45687 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753367Ab2B0D2S (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Feb 2012 22:28:18 -0500
-Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0M0100H8Q8B4ABI0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 27 Feb 2012 12:28:16 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp2.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
- 64bit (built Sep  7 2010)) with ESMTPA id <0M0100AZQ8B4YJC0@mmp2.samsung.com>
- for linux-mmc@vger.kernel.org; Mon, 27 Feb 2012 12:28:16 +0900 (KST)
-In-reply-to: <201202271057.28579.me@danielpalmer.co.uk>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, 'kgene kim' <kgene.kim@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Daniel Palmer' <me@danielpalmer.co.uk>
-Cc: linux-mmc@vger.kernel.org
 
-Daniel Palmer <me@danielpalmer.co.uk> wrote:
-> On Monday, February 27, 2012 10:30:35 AM Seungwon Jeon wrote:
-> > Hi.
-> >
-> > CONFIG_HIGHMEM is enabled in 3.3rc5?
-> > I think your problem is similar to the following commit.
-> > "mmc: dw_mmc: Fix PIO mode with support of highmem"(fc66a7bb13806c0)
-> >
-> 
-> Hi,
-> 
-> Thank you for your input. CONFIG_HIGHMEM isn't enabled, but CONFIG_SPARSEMEM
-> is (The SAM9G45 has two banks of RAM with a hole in the middle). Could that be
-> an issue? Without it I can only access 128MB of 256MB of RAM, but I can test
-> if it works.
-I'm not sure.
-Is there any trace information of kernel?
 
-Thanks,
-Seungwon Jeon.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ arch/arm/plat-samsung/include/plat/sdhci.h |   53 +-----------------
+ include/linux/mmc/sdhci-s3c.h              |   84 ++++++++++++++++++++++++++++
+ 2 files changed, 85 insertions(+), 52 deletions(-)
+ create mode 100644 include/linux/mmc/sdhci-s3c.h
 
-> 
-> Cheers,
-> 
-> Daniel
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+diff --git a/arch/arm/plat-samsung/include/plat/sdhci.h b/arch/arm/plat-samsung/include/plat/sdhci.h
+index 95a6e19..f2d4f60 100644
+--- a/arch/arm/plat-samsung/include/plat/sdhci.h
++++ b/arch/arm/plat-samsung/include/plat/sdhci.h
+@@ -19,58 +19,7 @@
+ #define __PLAT_S3C_SDHCI_H __FILE__
+ 
+ #include <plat/devs.h>
+-
+-struct platform_device;
+-struct mmc_host;
+-struct mmc_card;
+-struct mmc_ios;
+-
+-enum cd_types {
+-	S3C_SDHCI_CD_INTERNAL,	/* use mmc internal CD line */
+-	S3C_SDHCI_CD_EXTERNAL,	/* use external callback */
+-	S3C_SDHCI_CD_GPIO,	/* use external gpio pin for CD line */
+-	S3C_SDHCI_CD_NONE,	/* no CD line, use polling to detect card */
+-	S3C_SDHCI_CD_PERMANENT,	/* no CD line, card permanently wired to host */
+-};
+-
+-/**
+- * struct s3c_sdhci_platdata() - Platform device data for Samsung SDHCI
+- * @max_width: The maximum number of data bits supported.
+- * @host_caps: Standard MMC host capabilities bit field.
+- * @cd_type: Type of Card Detection method (see cd_types enum above)
+- * @ext_cd_init: Initialize external card detect subsystem. Called on
+- *		 sdhci-s3c driver probe when cd_type == S3C_SDHCI_CD_EXTERNAL.
+- *		 notify_func argument is a callback to the sdhci-s3c driver
+- *		 that triggers the card detection event. Callback arguments:
+- *		 dev is pointer to platform device of the host controller,
+- *		 state is new state of the card (0 - removed, 1 - inserted).
+- * @ext_cd_cleanup: Cleanup external card detect subsystem. Called on
+- *		 sdhci-s3c driver remove when cd_type == S3C_SDHCI_CD_EXTERNAL.
+- *		 notify_func argument is the same callback as for ext_cd_init.
+- * @ext_cd_gpio: gpio pin used for external CD line, valid only if
+- *		 cd_type == S3C_SDHCI_CD_GPIO
+- * @ext_cd_gpio_invert: invert values for external CD gpio line
+- * @cfg_gpio: Configure the GPIO for a specific card bit-width
+- *
+- * Initialisation data specific to either the machine or the platform
+- * for the device driver to use or call-back when configuring gpio or
+- * card speed information.
+-*/
+-struct s3c_sdhci_platdata {
+-	unsigned int	max_width;
+-	unsigned int	host_caps;
+-	unsigned int	pm_caps;
+-	enum cd_types	cd_type;
+-
+-	int		ext_cd_gpio;
+-	bool		ext_cd_gpio_invert;
+-	int	(*ext_cd_init)(void (*notify_func)(struct platform_device *,
+-						   int state));
+-	int	(*ext_cd_cleanup)(void (*notify_func)(struct platform_device *,
+-						      int state));
+-
+-	void	(*cfg_gpio)(struct platform_device *dev, int width);
+-};
++#include <linux/mmc/sdhci-s3c.h>
+ 
+ /* s3c_sdhci_set_platdata() - common helper for setting SDHCI platform data
+  * @pd: The default platform data for this device.
+diff --git a/include/linux/mmc/sdhci-s3c.h b/include/linux/mmc/sdhci-s3c.h
+new file mode 100644
+index 0000000..7dafaa4
+--- /dev/null
++++ b/include/linux/mmc/sdhci-s3c.h
+@@ -0,0 +1,84 @@
++/*
++ * include/linux/mmc/sdhci-s3c.h
++ *
++ * SDHCI declarations specific to Samsung platform
++ * Copyright (c) 2011 Samsung Electronics Co., Ltd.
++ *		http://www.samsung.com
++ *
++ * Copyright 2008 Openmoko, Inc.
++ * Copyright 2008 Simtec Electronics
++ *	http://armlinux.simtec.co.uk/
++ *	Ben Dooks <ben@simtec.co.uk>
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++#ifndef LINUX_MMC_SDHCI_S3C_H
++#define LINUX_MMC_SDHCI_S3C_H
++
++#include <linux/platform_device.h>
++
++struct platform_device;
++struct mmc_host;
++struct mmc_card;
++struct mmc_ios;
++enum cd_types {
++	S3C_SDHCI_CD_INTERNAL,	/* use mmc internal CD line */
++	S3C_SDHCI_CD_EXTERNAL,	/* use external callback */
++	S3C_SDHCI_CD_GPIO,	/* use external gpio pin for CD line */
++	S3C_SDHCI_CD_NONE,	/* no CD line, use polling to detect card */
++	S3C_SDHCI_CD_PERMANENT,	/* no CD line, card permanently wired to host */
++};
++
++enum clk_types {
++	S3C_SDHCI_CLK_DIV_INTERNAL,	/* use mmc internal clock divider */
++	S3C_SDHCI_CLK_DIV_EXTERNAL,	/* use external clock divider */
++};
++
++/**
++ * struct s3c_sdhci_platdata() - Platform device data for Samsung SDHCI
++ * @max_width: The maximum number of data bits supported.
++ * @host_caps: Standard MMC host capabilities bit field.
++ * @cd_type: Type of Card Detection method (see cd_types enum above)
++ * @clk_type: Type of clock divider method (see clk_types enum above)
++ * @ext_cd_init: Initialize external card detect subsystem. Called on
++ *		 sdhci-s3c driver probe when cd_type == S3C_SDHCI_CD_EXTERNAL.
++ *		 notify_func argument is a callback to the sdhci-s3c driver
++ *		 that triggers the card detection event. Callback arguments:
++ *		 dev is pointer to platform device of the host controller,
++ *		 state is new state of the card (0 - removed, 1 - inserted).
++ * @ext_cd_cleanup: Cleanup external card detect subsystem. Called on
++ *		 sdhci-s3c driver remove when cd_type == S3C_SDHCI_CD_EXTERNAL.
++ *		 notify_func argument is the same callback as for ext_cd_init.
++ * @ext_cd_gpio: gpio pin used for external CD line, valid only if
++ *		 cd_type == S3C_SDHCI_CD_GPIO
++ * @ext_cd_gpio_invert: invert values for external CD gpio line
++ * @cfg_gpio: Configure the GPIO for a specific card bit-width
++ *
++ * Initialisation data specific to either the machine or the platform
++ * for the device driver to use or call-back when configuring gpio or
++ * card speed information.
++*/
++struct s3c_sdhci_platdata {
++	unsigned int	max_width;
++	unsigned int	host_caps;
++	unsigned int	host_caps2;
++	unsigned int	pm_caps;
++	enum cd_types	cd_type;
++	enum clk_types	clk_type;
++
++	char		**clocks;	/* set of clock sources */
++
++	int		ext_cd_gpio;
++	bool		ext_cd_gpio_invert;
++	int	(*ext_cd_init)(void (*notify_func)(struct platform_device *,
++						   int state));
++	int	(*ext_cd_cleanup)(void (*notify_func)(struct platform_device *,
++						      int state));
++
++	void	(*cfg_gpio)(struct platform_device *dev, int width);
++};
++
++#endif /* LINUX_MMC_SDHCI_S3C_H */
