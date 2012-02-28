@@ -1,51 +1,31 @@
-From: Huang Shijie <shijie8@gmail.com>
-Subject: Re: [PATCH v6 0/2] patch set about the MXS-DMA
-Date: Wed, 29 Feb 2012 08:13:15 -0500
-Message-ID: <CAMiH66HmV+58w36DGCt+e=ihTrYUwXf1Cur+678YX2GKcB1-jA@mail.gmail.com>
-References: <1329373053-19494-1-git-send-email-b32955@freescale.com>
-	<4F4D9725.3090100@freescale.com>
-	<1330502098.3545.78.camel@sauron.fi.intel.com>
-	<4F4DE0E5.8070808@freescale.com>
-	<1330516974.3545.104.camel@sauron.fi.intel.com>
+From: Karthik <sesanth@gmail.com>
+Subject: SD/MMC driver erase
+Date: Tue, 28 Feb 2012 03:49:35 +0000 (UTC)
+Message-ID: <loom.20120228T044658-134@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:34844 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932610Ab2B2NNQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Feb 2012 08:13:16 -0500
-In-Reply-To: <1330516974.3545.104.camel@sauron.fi.intel.com>
+Received: from plane.gmane.org ([80.91.229.3]:43901 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756086Ab2B2OuI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Feb 2012 09:50:08 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1S2kqy-0004rT-4V
+	for linux-mmc@vger.kernel.org; Wed, 29 Feb 2012 15:50:04 +0100
+Received: from gw1.soctronics.com ([202.153.34.27])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Feb 2012 15:50:04 +0100
+Received: from sesanth by gw1.soctronics.com with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Feb 2012 15:50:04 +0100
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Bityutskiy, Artem" <artem.bityutskiy@intel.com>
-Cc: Huang Shijie <b32955@freescale.com>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "cjb@laptop.org" <cjb@laptop.org>, "Koul, Vinod" <vinod.koul@intel.com>, "broonie@opensource.wolfsonmicro.com" <broonie@opensource.wolfsonmicro.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "w.sang@pengutronix.de" <w.sang@pengutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>, "shawn.guo@linaro.org" <shawn.guo@linaro.org>, "lrg@ti.com" <lrg@ti.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "LW@KARO-electronics.de" <LW@karo-electronics.de>
+To: linux-mmc@vger.kernel.org
 
-Hi Artem:
+why the erase operation is not implemented in SD/MMC driver 
+in linux?
 
-On Wed, Feb 29, 2012 at 7:00 AM, Bityutskiy, Artem
-<artem.bityutskiy@intel.com> wrote:
-> On Wed, 2012-02-29 at 16:25 +0800, Huang Shijie wrote:
->> Hi Artem:
->> > On Wed, 2012-02-29 at 11:10 +0800, Huang Shijie wrote:
->> >> Hi:
->> >>
->> >> ping.
->> > Is this patch-set independent or requires something like gpma patches?
->> >
->> This patch set is independent, and it does not depend upon any other
->> patches.
->
-> Pushed both to l2-mtd.git tree, thanks. I am worried that it touches
-> other subsystems like dma, sound, and mmc and there are no acks for
-> those. Would be nice to get them somehow.
->
 
-I ever thought Vinod could accept this patch set.
-
-To Vinod & Chris:
-      Could you give the ack to the first patch?
-
-Does the second patch need  extra acks beside Shawn's?
-
-BR
-Huang Shijie
