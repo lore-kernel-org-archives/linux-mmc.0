@@ -1,88 +1,129 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] mmc: sh_mobile_sdhi: support modular mmc-core with non-standard
- hotplug
-Date: Mon, 27 Feb 2012 15:12:10 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1202271454270.32434@axis700.grange>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [RFC] mmc: dw_mmc: Fix the max_blk_count in IDMAC
+Date: Tue, 28 Feb 2012 11:05:51 +0900
+Message-ID: <000101ccf5bd$7f17ec00$7d47c400$%jun@samsung.com>
+References: <000301ccf1fc$64e5dbe0$2eb193a0$%jun@samsung.com>
+ <CAFbHwiT_KTWBLUSDbfMvuK0UEa_RrVqVF5V1WBqm+5c39Rtnqg@mail.gmail.com>
+ <000c01ccf287$0868bb90$193a32b0$%jun@samsung.com>
+ <CAFbHwiRagAH7Hp6V6367CRfAxCBtC26OO19tAhCe6jUtAxb4Jw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:57885 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751948Ab2B0OMN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2012 09:12:13 -0500
+Received: from mailout1.samsung.com ([203.254.224.24]:58314 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753512Ab2B1CFx convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2012 21:05:53 -0500
+Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0M0200EP5Z571D40@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 28 Feb 2012 11:05:52 +0900 (KST)
+Received: from DOTGIHJUN01 ([12.23.118.161])
+ by mmp2.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
+ 64bit (built Sep  7 2010)) with ESMTPA id <0M0200DDKZ5RR380@mmp2.samsung.com>
+ for linux-mmc@vger.kernel.org; Tue, 28 Feb 2012 11:05:51 +0900 (KST)
+In-reply-to: <CAFbHwiRagAH7Hp6V6367CRfAxCBtC26OO19tAhCe6jUtAxb4Jw@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+To: 'Will Newton' <will.newton@gmail.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, 'James Hogan' <james.hogan@imgtec.com>
 
-Currently if a platform wants to implement a non-standard card-detection
-method, it would need to call tmio_mmc_cd_wakeup(), which is an inline
-function, calling mmc_detect_change(). For this the platform would have
-to link mmc_core statically into the kernel, losing the ability to build
-it as a module. This patch adds a callback to the sh_mobile_sdhi driver,
-which eliminates this dependency.
+Will Newton <will.newton@gmail.com> wrote:
+> On Thu, Feb 23, 2012 at 11:58 PM, Seungwon Jeon <tgih.jun@samsung.com=
+> wrote:
+> > Will Newton <will.newton@gmail.com> wrote:
+> >> 2012/2/23 Seungwon Jeon <tgih.jun@samsung.com>:
+> >> > Hi all,
+> >> >
+> >> > Even though 1MB is reserved for descriptor table in IDMAC,
+> >> > the dw_mmc host driver is allowed to receive only maximum
+> >> > 128KB block length in one request. This is caused by setting
+> >> > improper max_blk_count. It needs to be e adjusted so that
+> >> > descriptor table is used fully.
+> >> >
+> >> > It is found that the performance is improved with the increased =
+the
+> >> > max_blk_count. In my case, there is 82%(6%) improvement in seque=
+ntial
+> >> > write(read). Is there anybody who knows the reason about the old=
+ setting?
+> >> >
+> >> > Best regards,
+> >> > Seungwon Jeon.
+> >> >
+> >> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> >> > ---
+> >> > =A0drivers/mmc/host/dw_mmc.c | =A0 =A04 ++--
+> >> > =A01 files changed, 2 insertions(+), 2 deletions(-)
+> >> >
+> >> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc=
+=2Ec
+> >> > index bf3c9b4..af2b901 100644
+> >> > --- a/drivers/mmc/host/dw_mmc.c
+> >> > +++ b/drivers/mmc/host/dw_mmc.c
+> >> > @@ -1804,9 +1804,9 @@ static int __init dw_mci_init_slot(struct =
+dw_mci *host, unsigned int id)
+> >> > =A0#ifdef CONFIG_MMC_DW_IDMAC
+> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->max_segs =3D host->ring_size=
+;
+> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->max_blk_size =3D 65536;
+> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_blk_count =3D host->ring_=
+size;
+> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->max_seg_size =3D 0x1000;
+> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_req_size =3D mmc->max_seg=
+_size * mmc->max_blk_count;
+> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_req_size =3D mmc->max_seg=
+_size * host->ring_size;
+> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->max_blk_count =3D mmc->max_re=
+q_size / 512;
+> >>
+> >> I am not sure this is correct, it seems like most drivers calculat=
+e
+> >> max_req_size like this:
+> >>
+> >> mmc->max_req_size =3D mmc->max_blk_size * mmc->max_blk_count;
+> >
+> > Could you explain the following origin code in dw_mmc?
+> > We need to change like most other drivers?
+> > =A0mmc->max_req_size =3D mmc->max_seg_size * mmc->max_blk_count;
+>=20
+> All the other drivers seem to set max_req_size based on blk_size and
+> blk_count not seg_size so the current code looks like it may be wrong=
+=2E
+Then, How can determine the blk_count?
+max_req_size is a limitation which should be submitted to mmc stack.
+dw_mmc can transfer the data as max_req_size with the DMA descriptors.
+So I think max_seg_size and ring_size are good information for max_req_=
+size in IDMAC
+and current setting of mmc->max_req_size is fine.
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- drivers/mmc/host/sh_mobile_sdhi.c  |   12 +++++++++++-
- include/linux/mmc/sh_mobile_sdhi.h |    7 ++++++-
- 2 files changed, 17 insertions(+), 2 deletions(-)
+>=20
+> > =A0- mmc->max_blk_count is set as host->ring_size.
+> > =A0- max_seg_size seems to represent max_blk_size.
+>=20
+> I believe max_seg_size should be set to a higher value as it appears
+> to be only relevant for IOMMU-based drivers, possibly the same as
+> max_req_size.
+As we can refer kernel/block, several segments of max_seg_size make up
+a request ,which has hardware sectors in the usual 512b unit.
+Max hardware sectors can be offered to block layer like the following i=
+n drivers/mmc/card/queue.c.
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index dd288d6..e916d87 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -100,6 +100,16 @@ static int sh_mobile_sdhi_write16_hook(struct tmio_mmc_host *host, int addr)
- 	return 0;
- }
- 
-+static void sh_mobile_sdhi_cd_wakeup(const struct platform_device *pdev)
-+{
-+	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
-+	tmio_mmc_cd_wakeup(p->pdata);
-+}
-+
-+static const struct sh_mobile_sdhi_ops sdhi_ops = {
-+	.cd_wakeup = sh_mobile_sdhi_cd_wakeup,
-+};
-+
- static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- {
- 	struct sh_mobile_sdhi *priv;
-@@ -121,7 +131,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	p->pdata = mmc_data;
- 
- 	if (p->init) {
--		ret = p->init(pdev);
-+		ret = p->init(pdev, &sdhi_ops);
- 		if (ret)
- 			goto einit;
- 	}
-diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-index 686b85b..eb13fdd 100644
---- a/include/linux/mmc/sh_mobile_sdhi.h
-+++ b/include/linux/mmc/sh_mobile_sdhi.h
-@@ -10,6 +10,10 @@ struct tmio_mmc_data;
- #define SH_MOBILE_SDHI_IRQ_SDCARD	"sdcard"
- #define SH_MOBILE_SDHI_IRQ_SDIO		"sdio"
- 
-+struct sh_mobile_sdhi_ops {
-+	void (*cd_wakeup)(const struct platform_device *pdev);
-+};
-+
- struct sh_mobile_sdhi_info {
- 	int dma_slave_tx;
- 	int dma_slave_rx;
-@@ -22,7 +26,8 @@ struct sh_mobile_sdhi_info {
- 	int (*get_cd)(struct platform_device *pdev);
- 
- 	/* callbacks for board specific setup code */
--	int (*init)(struct platform_device *pdev);
-+	int (*init)(struct platform_device *pdev,
-+		    const struct sh_mobile_sdhi_ops *ops);
- 	void (*cleanup)(struct platform_device *pdev);
- };
- 
--- 
-1.7.2.5
+	blk_queue_max_hw_sectors(mq->queue, min(host->max_blk_count, host->max=
+_req_size / 512));
+
+That means "host->max_blk_count" or "host->max_req_size / 512" decides =
+the max request size.
+So we need to set the proper max-blk_count. This RFC patch is intended =
+for that.
+
+Thanks,
+Seungwon Jeon.
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
