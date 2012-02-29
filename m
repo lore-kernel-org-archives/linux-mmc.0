@@ -1,41 +1,51 @@
-From: "Manjunathappa, Prakash" <prakash.pm@ti.com>
-Subject: RE: [PATCH V2 1/1] mmc: start removing enable / disable API
-Date: Wed, 29 Feb 2012 12:01:23 +0000
-Message-ID: <A73F36158E33644199EB82C5EC81C7BC3176DB55@DBDE01.ent.ti.com>
+From: Huang Shijie <shijie8@gmail.com>
+Subject: Re: [PATCH v6 0/2] patch set about the MXS-DMA
+Date: Wed, 29 Feb 2012 08:13:15 -0500
+Message-ID: <CAMiH66HmV+58w36DGCt+e=ihTrYUwXf1Cur+678YX2GKcB1-jA@mail.gmail.com>
+References: <1329373053-19494-1-git-send-email-b32955@freescale.com>
+	<4F4D9725.3090100@freescale.com>
+	<1330502098.3545.78.camel@sauron.fi.intel.com>
+	<4F4DE0E5.8070808@freescale.com>
+	<1330516974.3545.104.camel@sauron.fi.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Language: en-US
-Sender: linux-omap-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Chris Ball <cjb@laptop.org>
-Cc: "Hilman, Kevin" <khilman@ti.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "Nori, Sekhar" <nsekhar@ti.com>, "Nayak, Rajendra" <rnayak@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:34844 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932610Ab2B2NNQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Feb 2012 08:13:16 -0500
+In-Reply-To: <1330516974.3545.104.camel@sauron.fi.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Bityutskiy, Artem" <artem.bityutskiy@intel.com>
+Cc: Huang Shijie <b32955@freescale.com>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "cjb@laptop.org" <cjb@laptop.org>, "Koul, Vinod" <vinod.koul@intel.com>, "broonie@opensource.wolfsonmicro.com" <broonie@opensource.wolfsonmicro.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "w.sang@pengutronix.de" <w.sang@pengutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>, "shawn.guo@linaro.org" <shawn.guo@linaro.org>, "lrg@ti.com" <lrg@ti.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "LW@KARO-electronics.de" <LW@karo-electronics.de>
 
-Hi,
+Hi Artem:
 
-On Wed, Feb 29, 2012 at 12:47:21, Adrian Hunter wrote:
-> Most parts of the enable / disable API are no longer used and
-> can be removed.
-> 
-> Cc: Rajendra Nayak <rnayak@ti.com>
-> Cc: Venkatraman S <svenkatr@ti.com>
-> Cc: Kukjin Kim <kgene.kim@samsung.com>
-> Cc: Thomas Abraham <thomas.abraham@linaro.org>
-> Cc: Kyungmin Park <kyungmin.park@samsung.com>
-> Cc: Sekhar Nori <nsekhar@ti.com>
-> Cc: Kevin Hilman <khilman@ti.com>
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
+On Wed, Feb 29, 2012 at 7:00 AM, Bityutskiy, Artem
+<artem.bityutskiy@intel.com> wrote:
+> On Wed, 2012-02-29 at 16:25 +0800, Huang Shijie wrote:
+>> Hi Artem:
+>> > On Wed, 2012-02-29 at 11:10 +0800, Huang Shijie wrote:
+>> >> Hi:
+>> >>
+>> >> ping.
+>> > Is this patch-set independent or requires something like gpma patches?
+>> >
+>> This patch set is independent, and it does not depend upon any other
+>> patches.
+>
+> Pushed both to l2-mtd.git tree, thanks. I am worried that it touches
+> other subsystems like dma, sound, and mmc and there are no acks for
+> those. Would be nice to get them somehow.
+>
 
-Tested this on OMAP-L138 EVM using SD card
-1) Card gets detected and able mount partitions.
-2) Able to read/write to mounted partitions.
-3) Able to perform above steps after suspend/resume cycle.
+I ever thought Vinod could accept this patch set.
 
-Tested-by: Manjunathappa, Prakash <prakash.pm@ti.com>
+To Vinod & Chris:
+      Could you give the ack to the first patch?
 
-Thanks,
-Prakash
+Does the second patch need  extra acks beside Shawn's?
 
-
+BR
+Huang Shijie
