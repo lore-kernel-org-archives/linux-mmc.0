@@ -1,85 +1,84 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5   
-        device
-Date: Wed, 29 Feb 2012 10:10:59 -0800 (PST)
-Message-ID: <4934441a17d25c3249556f7bf281b1be.squirrel@www.codeaurora.org>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH] mmc: mmci: reduce max_blk_count to avoid overflowing
+ max_req_size
+Date: Wed, 29 Feb 2012 18:41:54 +0000
+Message-ID: <20120229184154.GN2983@mudshark.cambridge.arm.com>
+References: <1330082721-6021-1-git-send-email-will.deacon@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:44072 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965366Ab2B2SLE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Feb 2012 13:11:04 -0500
+Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:51272 "EHLO
+	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S965939Ab2B2SmQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Feb 2012 13:42:16 -0500
+Content-Disposition: inline
+In-Reply-To: <1330082721-6021-1-git-send-email-will.deacon@arm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org, 'Maya Erez' <merez@codeaurora.org>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Pierre Ossman <pierre@ossman.eu>, Chris Ball <cjb@laptop.org>
 
-> This patch supports packed command of eMMC4.5 device.
-> Several reads(or writes) can be grouped in packed command
-> and all data of the individual commands can be sent in a
-> single transfer on the bus.
->
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+[adding Pierre with the correct email address]
+
+On Fri, Feb 24, 2012 at 11:25:21AM +0000, Will Deacon wrote:
+> On a system with large pages (64k in my case), the following BUG is
+> triggered in MMC core:
+> 
+> [    2.338023] BUG: failure at drivers/mmc/core/core.c:221/mmc_start_request()!
+> [    2.338102] Kernel panic - not syncing: BUG!
+> [    2.338155] Call trace:
+> [    2.338228] [<ffffffc00008635c>] dump_backtrace+0x0/0x120
+> [    2.338317] [<ffffffc0003365ec>] dump_stack+0x14/0x1c
+> [    2.338403] [<ffffffc000336990>] panic+0xbc/0x1f0
+> [    2.338498] [<ffffffc00027a494>] mmc_start_request+0x154/0x184
+> [    2.338600] [<ffffffc00027abdc>] mmc_start_req+0x110/0x140
+> [    2.338701] [<ffffffc00028604c>] mmc_blk_issue_rw_rq+0x7c/0x39c
+> [    2.338804] [<ffffffc00028652c>] mmc_blk_issue_rq+0x1c0/0x468
+> [    2.338905] [<ffffffc000287564>] mmc_queue_thread+0x68/0x118
+> [    2.338995] [<ffffffc0000bc308>] kthread+0x84/0x8c
+> 
+> This is because of a 64k request with a max_req_size of 64k-1 bytes.
+> 
+> The following patch fixes the problem by limiting the max_blk_count
+> such that max_blk_count * max_blk_size == max_req_size. I couldn't
+> pursuade the compiler to emit a shift instead of a div without encoding
+> the shift explicitly.
+> 
+> Cc: Pierre Ossman <drzeus@drzeus.cx>
+> Cc: Chris Ball <cjb@laptop.org>
+> Signed-off-by: Will Deacon <will.deacon@arm.com>
 > ---
->  drivers/mmc/card/block.c   |  496
-> +++++++++++++++++++++++++++++++++++++++++--
->  drivers/mmc/card/queue.c   |   48 ++++-
->  drivers/mmc/card/queue.h   |   13 ++
->  drivers/mmc/core/mmc_ops.c |    1 +
->  include/linux/mmc/core.h   |    4 +
->  5 files changed, 535 insertions(+), 27 deletions(-)
->
-Hi,
+>  drivers/mmc/host/mmci.c |    7 ++++---
+>  1 files changed, 4 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 0d955ff..11e589c 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -1271,12 +1271,13 @@ static int __devinit mmci_probe(struct amba_device *dev,
+>  	/*
+>  	 * Block size can be up to 2048 bytes, but must be a power of two.
+>  	 */
+> -	mmc->max_blk_size = 2048;
+> +	mmc->max_blk_size = 1 << 11;
+>  
+>  	/*
+> -	 * No limit on the number of blocks transferred.
+> +	 * Limit the number of blocks transferred so that we don't overflow
+> +	 * the maximum request size.
+>  	 */
+> -	mmc->max_blk_count = mmc->max_req_size;
+> +	mmc->max_blk_count = mmc->max_req_size >> 11;
+>  
+>  	spin_lock_init(&host->lock);
+>  
+> -- 
+> 1.7.4.1
 
-We ran performance tests on the packed commands patch. We found out that
-enabling the read packing didn't improve the performance in any of the
-scenarios we ran (see the detailed results below).
-Therefore, we suggest to move the read packing code to a different patch
-and approve only the write packing code for now. The read packing adds
-complexity to the code and we don't see a point in adding it while the
-intention is to disable it.
+Any thoughts on this? I'm by no means an MMC expert, so I'm open to
+suggestions if there's a more suitable fix.
 
-Test results:
+Cheers,
 
-Long read operation:
-----------------------
-no-packing: 39.5 MB/s
-packed commands patch (both READ and WRITE packing are enabled): 39.5 MB/s
-packed commands patch + enabling only READ packing: 39.5 MB/s
-
-Several parallel read operations (sum of all the read throughputs):
----------------------------
-no-packing: 42.6 MB/s
-packed commands patch(both READ and WRITE packing are enabled): 38 MB/s
-packed commands patch + enabling only READ packing: 38.2 MB/s
-
-Parallel long read and long write operations (read throughput):
------------------------------------------------------------------
-no-packing: 23.8 MB/s
-packed commands patch (both READ and WRITE packing are enabled): 12.6 MB/s
-packed commands patch + enabling only READ packing: 12.5 MB/s
-
-Parallel short read and long write operations (read throughput):
------------------------------------------------------------------
-no-packing: 22.9 MB/s
-packed commands patch (both READ and WRITE packing are enabled): 8.4 MB/s
-packed commands patch + enabling only READ packing: 8.6 MB/s
-
-Several Parallel short read and short write operations (sum of all the
-read throughputs):
---------------------------------------------------------------------------
-no-packing: 41.6 MB/s
-packed commands patch (both READ and WRITE packing are enabled): 35 MB/s
-packed commands patch + enabling only READ packing: 36 MB/s
-
-Thanks,
-Maya Erez
-Consultant for Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-
-
-
-
+Will
 
