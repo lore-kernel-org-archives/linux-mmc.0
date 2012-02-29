@@ -1,89 +1,57 @@
-From: Huang Shijie <b32955@freescale.com>
-Subject: Re: [PATCH v6 0/2] patch set about the MXS-DMA
-Date: Wed, 29 Feb 2012 11:10:29 +0800
-Message-ID: <4F4D9725.3090100@freescale.com>
-References: <1329373053-19494-1-git-send-email-b32955@freescale.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="GB2312"
-Content-Transfer-Encoding: 7bit
+From: Chanho Park <chanho61.park@samsung.com>
+Subject: [PATCH] mmc: core: remove waiting time when clkgate_delay is set
+Date: Wed, 29 Feb 2012 14:52:49 +0900
+Message-ID: <1330494769-7558-1-git-send-email-chanho61.park@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:49693
-	"EHLO VA3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755220Ab2B2DIQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Feb 2012 22:08:16 -0500
-In-Reply-To: <1329373053-19494-1-git-send-email-b32955@freescale.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:33854 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965657Ab2B2FxN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Feb 2012 00:53:13 -0500
+Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0M0500GHQ4BGIDM0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 29 Feb 2012 14:53:11 +0900 (KST)
+Received: from localhost.localdomain ([10.254.103.63])
+ by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
+ 64bit (built Sep  7 2010)) with ESMTPA id <0M05001OB4CJNQJ0@mmp1.samsung.com>
+ for linux-mmc@vger.kernel.org; Wed, 29 Feb 2012 14:53:10 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Shijie <b32955@freescale.com>
-Cc: vinod.koul@intel.com, shawn.guo@linaro.org, artem.bityutskiy@intel.com, w.sang@pengutronix.de, LW@KARO-electronics.de, broonie@opensource.wolfsonmicro.com, lrg@ti.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, Chanho Park <chanho61.park@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi:
+Since recent commit("mmc: core: Use delayed work in clock gating
+framework":597dd9d79cfbbb1), we always wait "unnecessary" default
+clock delay(8 cycles). Actually, we don't need it if clkgate_delay
+(unit:ms) is set because we already wait sufficient time to change
+the clock due to delayed_workqueue.
+This patch removes duplicated waiting time when clkgate_delay is set.
 
-ping.
+Signed-off-by: Chanho Park <chanho61.park@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/core/host.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
 
-Any comment about this patch set?
-
-thanks
-Huang Shijie
-> patch 1: move the mxs dma header to a more common place.
-> 	Beside the mx23/mx28, the apbh-dma is also used by MX50 and MX6Q.
-> 	So move the mxs dma header file to a more common place, and rename
-> 	it to mxs-dma.h
->
-> patch 2: rewrite the last parameter of mxs_dma_prep_slave_sg().
-> 	In the new GPMI version, some hardware behavior changes.
-> 	The WAIT4END bit should be set in the middle one of the ECC READ page DMA chain.
-> 	The DMA chain should be set like this:
->
->           +-----+               +-----+                      +-----+
->           | cmd | ------------> | cmd | ------------------>  | cmd |
->           +-----+               +-----+                      +-----+
->                                    ^                            ^
->                                    |                            |
->                                    |                            |
->                               set WAIT4END here too        set WAIT4END here
->
->         So rewrite the last parameter of mxs_dma_prep_slave_sg(), use the
-> 	dma_ctrl_flags to set the proper DMA bit for DMA Command Structure.
-> 	And change the relative drivers with the dma_ctrl_flags.
->
-> TEST:
-> 	Tested the mxs-mmc driver and gpmi-nand drive with the two patches
-> 	in MX28 board.
->
-> v5 --> v6:
-> 	[1] create this patch set based on the mainline.
->
-> v4 --> v5:
-> 	[1] remove GPMI_IS_MX6Q(), make the mxs and mx6q use the same code.
-> 		
-> v3 --> v4:
-> 	[1] create a new folder include/linux/fsl/ for store the Freescale's
-> 	    header files.
-> 	[2] add more CCs.
->
-> v2 --> v3:
-> 	[1] remove field gpmi_version, use GPMI_IS_MX6Q() instead.
->
-> v1 --> v2:
-> 	[1] squash the trial patches into single patch.
-> 	[2] use the dma_ctrl_flags.
->
->
-> Huang Shijie (2):
->   mxs-dma : move the mxs dma.h to a more common place
->   mxs-dma : rewrite the last parameter of mxs_dma_prep_slave_sg()
->
->  drivers/dma/mxs-dma.c                              |   34 +++++++++++++++++---
->  drivers/mmc/host/mxs-mmc.c                         |   12 +++---
->  drivers/mtd/nand/gpmi-nand/gpmi-lib.c              |   19 +++++++---
->  drivers/mtd/nand/gpmi-nand/gpmi-nand.h             |    2 +-
->  .../mach/dma.h => include/linux/fsl/mxs-dma.h      |    0
->  sound/soc/mxs/mxs-pcm.c                            |    2 +-
->  sound/soc/mxs/mxs-pcm.h                            |    2 +-
->  sound/soc/mxs/mxs-saif.c                           |    2 +-
->  8 files changed, 52 insertions(+), 21 deletions(-)
->  rename arch/arm/mach-mxs/include/mach/dma.h => include/linux/fsl/mxs-dma.h (100%)
->
-
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index c3704e2..d710ce0 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -109,8 +109,11 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
+ 	 */
+ 	if (!host->clk_requests) {
+ 		spin_unlock_irqrestore(&host->clk_lock, flags);
+-		tick_ns = DIV_ROUND_UP(1000000000, freq);
+-		ndelay(host->clk_delay * tick_ns);
++		/* wait only when clk_gate_delay is 0*/
++		if (!host->clkgate_delay) {
++			tick_ns = DIV_ROUND_UP(1000000000, freq);
++			ndelay(host->clk_delay * tick_ns);
++		}
+ 	} else {
+ 		/* New users appeared while waiting for this work */
+ 		spin_unlock_irqrestore(&host->clk_lock, flags);
+-- 
+1.7.5.4
 
