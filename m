@@ -1,57 +1,76 @@
-From: Chanho Park <chanho61.park@samsung.com>
-Subject: [PATCH] mmc: core: remove waiting time when clkgate_delay is set
-Date: Wed, 29 Feb 2012 14:52:49 +0900
-Message-ID: <1330494769-7558-1-git-send-email-chanho61.park@samsung.com>
+From: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Subject: Re: [PATCH] mmc: start removing enable / disable API
+Date: Wed, 29 Feb 2012 11:58:45 +0530
+Message-ID: <4F4DC59D.70903@codeaurora.org>
+References: <1330080561-7256-1-git-send-email-adrian.hunter@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:33854 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965657Ab2B2FxN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Feb 2012 00:53:13 -0500
-Received: from epcpsbgm1.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0M0500GHQ4BGIDM0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 29 Feb 2012 14:53:11 +0900 (KST)
-Received: from localhost.localdomain ([10.254.103.63])
- by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
- 64bit (built Sep  7 2010)) with ESMTPA id <0M05001OB4CJNQJ0@mmp1.samsung.com>
- for linux-mmc@vger.kernel.org; Wed, 29 Feb 2012 14:53:10 +0900 (KST)
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:25633 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752501Ab2B2G2v (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Feb 2012 01:28:51 -0500
+In-Reply-To: <1330080561-7256-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, Chanho Park <chanho61.park@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, Rajendra Nayak <rnayak@ti.com>, Venkatraman S <svenkatr@ti.com>, Kukjin Kim <kgene.kim@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Sekhar Nori <nsekhar@ti.com>, Kevin Hilman <khilman@ti.com>
 
-Since recent commit("mmc: core: Use delayed work in clock gating
-framework":597dd9d79cfbbb1), we always wait "unnecessary" default
-clock delay(8 cycles). Actually, we don't need it if clkgate_delay
-(unit:ms) is set because we already wait sufficient time to change
-the clock due to delayed_workqueue.
-This patch removes duplicated waiting time when clkgate_delay is set.
+Hi Adrian,
 
-Signed-off-by: Chanho Park <chanho61.park@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/core/host.c |    7 +++++--
- 1 files changed, 5 insertions(+), 2 deletions(-)
+On 2/24/2012 4:19 PM, Adrian Hunter wrote:
+> Most parts of the enable / disable API are no longer used and
+> can be removed.
+>
+> Cc: Rajendra Nayak<rnayak@ti.com>
+> Cc: Venkatraman S<svenkatr@ti.com>
+> Cc: Kukjin Kim<kgene.kim@samsung.com>
+> Cc: Thomas Abraham<thomas.abraham@linaro.org>
+> Cc: Kyungmin Park<kyungmin.park@samsung.com>
+> Cc: Sekhar Nori<nsekhar@ti.com>
+> Cc: Kevin Hilman<khilman@ti.com>
+> Signed-off-by: Adrian Hunter<adrian.hunter@intel.com>
+> ---
+>   arch/arm/mach-exynos/mach-nuri.c           |    5 +-
+>   arch/arm/mach-exynos/mach-universal_c210.c |    9 +-
+>   drivers/mmc/core/core.c                    |  185 ++--------------------------
+>   drivers/mmc/core/host.c                    |    1 -
+>   drivers/mmc/core/host.h                    |    1 -
+>   drivers/mmc/host/davinci_mmc.c             |    4 -
+>   drivers/mmc/host/omap_hsmmc.c              |   15 +--
+>   include/linux/mmc/core.h                   |    1 -
+>   include/linux/mmc/host.h                   |   46 +-------
+>   9 files changed, 25 insertions(+), 242 deletions(-)
+>
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index c3704e2..d710ce0 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -109,8 +109,11 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
- 	 */
- 	if (!host->clk_requests) {
- 		spin_unlock_irqrestore(&host->clk_lock, flags);
--		tick_ns = DIV_ROUND_UP(1000000000, freq);
--		ndelay(host->clk_delay * tick_ns);
-+		/* wait only when clk_gate_delay is 0*/
-+		if (!host->clkgate_delay) {
-+			tick_ns = DIV_ROUND_UP(1000000000, freq);
-+			ndelay(host->clk_delay * tick_ns);
-+		}
- 	} else {
- 		/* New users appeared while waiting for this work */
- 		spin_unlock_irqrestore(&host->clk_lock, flags);
--- 
-1.7.5.4
+> -	if (host->caps&  MMC_CAP_DISABLE)
+> -		cancel_delayed_work(&host->disable);
+>   	cancel_delayed_work_sync(&host->detect);
+>   	mmc_flush_scheduled_work();
+>
+> @@ -2402,13 +2245,11 @@ int mmc_suspend_host(struct mmc_host *host)
+>   {
+>   	int err = 0;
+>
+> -	if (host->caps&  MMC_CAP_DISABLE)
+> -		cancel_delayed_work(&host->disable);
+>   	cancel_delayed_work(&host->detect);
+>   	mmc_flush_scheduled_work();
+>   	if (mmc_try_claim_host(host)) {
+>   		err = mmc_cache_ctrl(host, 0);
+> -		mmc_do_release_host(host);
+> +		mmc_release_host(host);
 
+mmc_try_claim_host does not call host->ops->enable(), but 
+mmc_release_host call host->ops->disable(), is there any reason for 
+this? For example: If host controller disable method internally calls 
+clk_disable() then that would cause reference count warnings.
+
+>   	} else {
+>   		err = -EBUSY;
+>   	}
+> @@ -2429,7 +2270,7 @@ int mmc_suspend_host(struct mmc_host *host)
+
+Thanks,
+Sujit
