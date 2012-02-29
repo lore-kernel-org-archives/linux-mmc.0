@@ -1,269 +1,89 @@
-From: Dongjin Kim <dongjin.kim@agreeyamobility.net>
-Subject: Re: mmc: dw_mmc: release hardware lock error
-Date: Tue, 28 Feb 2012 10:09:38 +0000 (UTC)
-Message-ID: <jii951$qg3$1@dough.gmane.org>
-References: <loom.20120228T060529-421@post.gmane.org>
-	<4F4C7745.9090202@samsung.com> <loom.20120228T083128-699@post.gmane.org>
-	<4F4C85C8.8000808@samsung.com>
+From: Huang Shijie <b32955@freescale.com>
+Subject: Re: [PATCH v6 0/2] patch set about the MXS-DMA
+Date: Wed, 29 Feb 2012 11:10:29 +0800
+Message-ID: <4F4D9725.3090100@freescale.com>
+References: <1329373053-19494-1-git-send-email-b32955@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="GB2312"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:38213 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752255Ab2B1KJx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 28 Feb 2012 05:09:53 -0500
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1S2K0F-0007aC-Il
-	for linux-mmc@vger.kernel.org; Tue, 28 Feb 2012 11:09:51 +0100
-Received: from 210.113.108.23 ([210.113.108.23])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Feb 2012 11:09:51 +0100
-Received: from dongjin.kim by 210.113.108.23 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Feb 2012 11:09:51 +0100
+Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:49693
+	"EHLO VA3EHSOBE003.bigfish.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1755220Ab2B2DIQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Feb 2012 22:08:16 -0500
+In-Reply-To: <1329373053-19494-1-git-send-email-b32955@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Huang Shijie <b32955@freescale.com>
+Cc: vinod.koul@intel.com, shawn.guo@linaro.org, artem.bityutskiy@intel.com, w.sang@pengutronix.de, LW@KARO-electronics.de, broonie@opensource.wolfsonmicro.com, lrg@ti.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org, linux-kernel@vger.kernel.org
 
-Hi Jaehoon,
+Hi:
 
-Sorry for the inconvenience, here is the patch line-wrapping fixed.
+ping.
 
--------------------->8-------------------->8--------------------
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 2f7f5ee..05ccee8 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -520,15 +520,33 @@ static void mci_send_cmd(struct dw_mci_slot *slot,
- 	struct dw_mci *host = slot->host;
- 	unsigned long timeout = jiffies + msecs_to_jiffies(500);
- 	unsigned int cmd_status = 0;
-+	u32 ctrl;
- 
-+resend:
- 	mci_writel(host, CMDARG, arg);
- 	wmb();
- 	mci_writel(host, CMD, SDMMC_CMD_START | cmd);
-+
- 	while (time_before(jiffies, timeout)) {
- 		cmd_status = mci_readl(host, CMD);
- 		if (!(cmd_status & SDMMC_CMD_START))
- 			return;
-+
-+		if (host->cmd_status & SDMMC_INT_HLE) {
-+			dev_err(&slot->mmc->class_dev,
-+			"Hardware locked error (cmd %#x arg %#x)\n",
-+			cmd, arg);
-+
-+			ctrl = mci_readl(host, CTRL);
-+			ctrl |= SDMMC_CTRL_RESET;
-+			mci_writel(host, CTRL, ctrl);
-+
-+			host->cmd_status &= ~SDMMC_INT_HLE;
-+
-+			goto resend;
-+		}
- 	}
-+
- 	dev_err(&slot->mmc->class_dev,
- 		"Timeout sending command (cmd %#x arg %#x status %#x)\n",
- 		cmd, arg, cmd_status);
-@@ -1429,6 +1447,12 @@ static irqreturn_t dw_mci_interrupt(int irq, void
- 		if (!pending)
- 			break;
- 
-+		if (pending & SDMMC_INT_HLE) {
-+			mci_writel(host, RINTSTS, SDMMC_INT_HLE);
-+			host->cmd_status = status;
-+			smp_wmb();
-+		}
-+
- 		if (pending & DW_MCI_CMD_ERROR_FLAGS) {
- 			mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
- 			host->cmd_status = status;
--------------------->8-------------------->8--------------------
+Any comment about this patch set?
 
-On Tue, 28 Feb 2012 16:44:08 +0900, Jaehoon Chung wrote:
-
-> Hi Dongjin.
-> 
-> This patch is corrupt due to line-wrapping.
-> 
-> Best Regards,
-> Jaehoon Chung
-> 
-> On 02/28/2012 04:31 PM, Dongjin Kim wrote:
-> 
->> Jaehoon Chung <jh80.chung <at> samsung.com> writes:
->> 
->> 
->>> On 02/28/2012 02:32 PM, Dongjin Kim wrote:
->>>
->>>> Hello,
->>>>
->>>> I encountered the problem that my hardware is frozen while switching
->>>> clock
->> from
->>>> 400kHz to others. This is caused that hardware locked error was
->>>> triggered
->> when
->>>> CMD register was written and interrupt was pended. Tested IP version
->>>> is
->> 2.10a
->>>>
->>>>
->>> Hi Dongjin.
->>>
->>> It seems like this problem. Can you check this patch?
->>> http://www.spinics.net/lists/linux-mmc/msg09895.html
->>>
->>> Best Regards,
->>> Jaehoon Chung
->>>
->> Hi Jaehoon,
->> 
->> Thank you for your feedback.
->> I had tested the patch from the link but the result is same on my
->> hardware.
->> 
->> This is the log message what I had before, the hardware hanged after
->> this log when mmc card is inserted.
->> 
->> [   62.450000] end_request: I/O error, dev mmcblk0, sector 7585 [  
->> 62.460000] mmcblk0: error -123 sending read/write command, response
->> 0x0, card status 0x0
->> [   62.470000] end_request: I/O error, dev mmcblk0, sector 7586 [  
->> 62.470000] mmcblk0: error -123 sending read/write command, response
->> 0x0, card status 0x0
->> [   62.480000] end_request: I/O error, dev mmcblk0, sector 7587 [  
->> 62.490000] mmcblk0: error -123 sending read/write command, response
->> 0x0, card status 0x0
->> [   62.490000] end_request: I/O error, dev mmcblk0, sector 7588 [  
->> 62.500000] mmcblk0: error -123 sending read/write command, response
->> 0x0, card status 0x0
->> [   62.510000] end_request: I/O error, dev mmcblk0, sector 7589 [  
->> 62.510000] Buffer I/O error on device mmcblk0p1, logical block 940 [  
->> 63.770000] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req
->> 400000Hz, actual 403225HZ div = 62)
->> [   64.270000] mmc_host mmc1: Timeout sending command (cmd 0x202000 arg
->> 0x0 status 0x80202000)
->> 
->> In normal case, the log message have to go through as below and usually
->> it is, except on certain case.
->> 
->> [   80.620000] mmcblk0: error -123 sending read/write command, response
->> 0x0, card status 0x0
->> [   80.620000] mmcblk0: error -123 requesting status [   80.620000]
->> end_request: I/O error, dev mmcblk0, sector 7614 [   82.930000]
->> mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req 400000Hz,
->> actual 403225HZ div = 62)
->> [   83.730000] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req
->> 50000000Hz, actual 25000000HZ div = 1) [   83.750000] mmc1: new high
->> speed SD card at address 0007 [   83.760000] mmcblk0: mmc1:0007 SD02G
->> 1.84 GiB [   83.780000]  mmcblk0: p1
->> 
->> Below is the log message with my change to reset the bit, Hardware
->> Locked Error. This error is not happening always, I was testing the
->> driver removing mmc card without unmount.
->> 
->> [  118.310000] end_request: I/O error, dev mmcblk1, sector 1108 [ 
->> 118.310000] mmcblk1: error -123 sending read/write command, response
->> 0x0, card status 0x0
->> [  118.310000] end_request: I/O error, dev mmcblk1, sector 1109 [ 
->> 124.190000] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req
->> 400000Hz, actual 403225HZ div = 62)
->> [  124.690000] mmc_host mmc1: Timeout sending command (cmd 0x202000 arg
->> 0x0 status 0x80202000)
->> [  124.690000] mmc_host mmc1: Hardware locked error (cmd 0x202000 arg
->> 0x0) [  125.550000] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz
->> (slot req 50000000Hz, actual 25000000HZ div = 1) [  125.560000] mmc1:
->> new high speed SD card at address 0007 [  125.560000] mmcblk0:
->> mmc1:0007 SD02G 1.84 GiB [  125.570000]  mmcblk0: p1
->> 
->> Cheers,
->> Dongjin.
->> 
->>>> Cheers,
->>>> Dongjin.
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>> index 2f7f5ee..05ccee8 100644
->>>> --- a/drivers/mmc/host/dw_mmc.c
->>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>> @@ -520,15 +520,33 @@ static void mci_send_cmd(struct dw_mci_slot
->>>> *slot, u32 cmd, u32 arg)
->>>>  	struct dw_mci *host = slot->host;
->>>>  	unsigned long timeout = jiffies + msecs_to_jiffies(500); unsigned
->>>>  	int cmd_status = 0;
->>>> +	u32 ctrl;
->>>>  
->>>> +resend:
->>>>  	mci_writel(host, CMDARG, arg);
->>>>  	wmb();
->>>>  	mci_writel(host, CMD, SDMMC_CMD_START | cmd);
->>>> +
->>>>  	while (time_before(jiffies, timeout)) {
->>>>  		cmd_status = mci_readl(host, CMD);
->>>>  		if (!(cmd_status & SDMMC_CMD_START))
->>>>  			return;
->>>> +
->>>> +		if (host->cmd_status & SDMMC_INT_HLE) { +		
->>>> dev_err(&slot->mmc->class_dev,
->>>> +				"Hardware locked error (cmd %#x arg %#x)
-\n", +				cmd, arg);
->>>> +
->>>> +			ctrl = mci_readl(host, CTRL);
->>>> +			ctrl |= SDMMC_CTRL_RESET;
->>>> +			mci_writel(host, CTRL, ctrl);
->>>> +
->>>> +			host->cmd_status &= ~SDMMC_INT_HLE; +
->>>> +			goto resend;
->>>> +		}
->>>>  	}
->>>> +
->>>>  	dev_err(&slot->mmc->class_dev,
->>>>  		"Timeout sending command (cmd %#x arg %#x status %#x)\n", 
-cmd,
->>>>  		arg, cmd_status);
->>>> @@ -1429,6 +1447,12 @@ static irqreturn_t dw_mci_interrupt(int irq,
->>>> void *dev_id)
->>>>  		if (!pending)
->>>>  			break;
->>>>  
->>>> +		if (pending & SDMMC_INT_HLE) {
->>>> +			mci_writel(host, RINTSTS, SDMMC_INT_HLE); 
-+			host->cmd_status =
->>>> status;
->>>> +			smp_wmb();
->>>> +		}
->>>> +
->>>>  		if (pending & DW_MCI_CMD_ERROR_FLAGS) {
->>>>  			mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
->>>>  			host->cmd_status = status;
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
->>>> in the body of a message to majordomo <at> vger.kernel.org More
->>>> majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"
->>> in the body of a message to majordomo <at> vger.kernel.org More
->>> majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>>
->> 
->> 
->> 
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org More majordomo info
->> at  http://vger.kernel.org/majordomo-info.html
->>
+thanks
+Huang Shijie
+> patch 1: move the mxs dma header to a more common place.
+> 	Beside the mx23/mx28, the apbh-dma is also used by MX50 and MX6Q.
+> 	So move the mxs dma header file to a more common place, and rename
+> 	it to mxs-dma.h
+>
+> patch 2: rewrite the last parameter of mxs_dma_prep_slave_sg().
+> 	In the new GPMI version, some hardware behavior changes.
+> 	The WAIT4END bit should be set in the middle one of the ECC READ page DMA chain.
+> 	The DMA chain should be set like this:
+>
+>           +-----+               +-----+                      +-----+
+>           | cmd | ------------> | cmd | ------------------>  | cmd |
+>           +-----+               +-----+                      +-----+
+>                                    ^                            ^
+>                                    |                            |
+>                                    |                            |
+>                               set WAIT4END here too        set WAIT4END here
+>
+>         So rewrite the last parameter of mxs_dma_prep_slave_sg(), use the
+> 	dma_ctrl_flags to set the proper DMA bit for DMA Command Structure.
+> 	And change the relative drivers with the dma_ctrl_flags.
+>
+> TEST:
+> 	Tested the mxs-mmc driver and gpmi-nand drive with the two patches
+> 	in MX28 board.
+>
+> v5 --> v6:
+> 	[1] create this patch set based on the mainline.
+>
+> v4 --> v5:
+> 	[1] remove GPMI_IS_MX6Q(), make the mxs and mx6q use the same code.
+> 		
+> v3 --> v4:
+> 	[1] create a new folder include/linux/fsl/ for store the Freescale's
+> 	    header files.
+> 	[2] add more CCs.
+>
+> v2 --> v3:
+> 	[1] remove field gpmi_version, use GPMI_IS_MX6Q() instead.
+>
+> v1 --> v2:
+> 	[1] squash the trial patches into single patch.
+> 	[2] use the dma_ctrl_flags.
+>
+>
+> Huang Shijie (2):
+>   mxs-dma : move the mxs dma.h to a more common place
+>   mxs-dma : rewrite the last parameter of mxs_dma_prep_slave_sg()
+>
+>  drivers/dma/mxs-dma.c                              |   34 +++++++++++++++++---
+>  drivers/mmc/host/mxs-mmc.c                         |   12 +++---
+>  drivers/mtd/nand/gpmi-nand/gpmi-lib.c              |   19 +++++++---
+>  drivers/mtd/nand/gpmi-nand/gpmi-nand.h             |    2 +-
+>  .../mach/dma.h => include/linux/fsl/mxs-dma.h      |    0
+>  sound/soc/mxs/mxs-pcm.c                            |    2 +-
+>  sound/soc/mxs/mxs-pcm.h                            |    2 +-
+>  sound/soc/mxs/mxs-saif.c                           |    2 +-
+>  8 files changed, 52 insertions(+), 21 deletions(-)
+>  rename arch/arm/mach-mxs/include/mach/dma.h => include/linux/fsl/mxs-dma.h (100%)
+>
 
 
