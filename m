@@ -1,63 +1,113 @@
-From: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Subject: Re: [PATCH] mmc: core: remove waiting time when clkgate_delay is
- set
-Date: Thu, 01 Mar 2012 12:04:04 +0530
-Message-ID: <4F4F185C.7090503@codeaurora.org>
-References: <1330494769-7558-1-git-send-email-chanho61.park@samsung.com>
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5 device
+Date: Thu, 1 Mar 2012 16:47:18 +0900
+Message-ID: <CAKYAXd_6OqQJ78mPJp11gRvGwwg88S_n_Auu=_HdP_ZXzCKrDg@mail.gmail.com>
+References: <4934441a17d25c3249556f7bf281b1be.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:19510 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757907Ab2CAGeI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Mar 2012 01:34:08 -0500
-In-Reply-To: <1330494769-7558-1-git-send-email-chanho61.park@samsung.com>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:40756 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756583Ab2CAHrT convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Mar 2012 02:47:19 -0500
+In-Reply-To: <4934441a17d25c3249556f7bf281b1be.squirrel@www.codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chanho Park <chanho61.park@samsung.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>
+To: merez@codeaurora.org
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-On 2/29/2012 11:22 AM, Chanho Park wrote:
-> Since recent commit("mmc: core: Use delayed work in clock gating
-> framework":597dd9d79cfbbb1), we always wait "unnecessary" default
-> clock delay(8 cycles). Actually, we don't need it if clkgate_delay
-> (unit:ms) is set because we already wait sufficient time to change
-> the clock due to delayed_workqueue.
-> This patch removes duplicated waiting time when clkgate_delay is set.
+Hi. merez.
+
+Would you share random read speed with us ?
+
+And Write speed also..
+
+Thanks.
+
+2012/3/1  <merez@codeaurora.org>:
+>> This patch supports packed command of eMMC4.5 device.
+>> Several reads(or writes) can be grouped in packed command
+>> and all data of the individual commands can be sent in a
+>> single transfer on the bus.
+>>
+>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> ---
+>> =C2=A0drivers/mmc/card/block.c =C2=A0 | =C2=A0496
+>> +++++++++++++++++++++++++++++++++++++++++--
+>> =C2=A0drivers/mmc/card/queue.c =C2=A0 | =C2=A0 48 ++++-
+>> =C2=A0drivers/mmc/card/queue.h =C2=A0 | =C2=A0 13 ++
+>> =C2=A0drivers/mmc/core/mmc_ops.c | =C2=A0 =C2=A01 +
+>> =C2=A0include/linux/mmc/core.h =C2=A0 | =C2=A0 =C2=A04 +
+>> =C2=A05 files changed, 535 insertions(+), 27 deletions(-)
+>>
+> Hi,
 >
-> Signed-off-by: Chanho Park<chanho61.park@samsung.com>
-> Signed-off-by: Kyungmin Park<kyungmin.park@samsung.com>
-> ---
->   drivers/mmc/core/host.c |    7 +++++--
->   1 files changed, 5 insertions(+), 2 deletions(-)
+> We ran performance tests on the packed commands patch. We found out t=
+hat
+> enabling the read packing didn't improve the performance in any of th=
+e
+> scenarios we ran (see the detailed results below).
+> Therefore, we suggest to move the read packing code to a different pa=
+tch
+> and approve only the write packing code for now. The read packing add=
+s
+> complexity to the code and we don't see a point in adding it while th=
+e
+> intention is to disable it.
 >
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index c3704e2..d710ce0 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -109,8 +109,11 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
->   	 */
->   	if (!host->clk_requests) {
->   		spin_unlock_irqrestore(&host->clk_lock, flags);
-> -		tick_ns = DIV_ROUND_UP(1000000000, freq);
-> -		ndelay(host->clk_delay * tick_ns);
-> +		/* wait only when clk_gate_delay is 0*/
-
-Actually, we should check whether the clkgate_delay is giving sufficient 
-clock cycles instead of just >0 value. But since min. f_min in freq. 
-table is 100KHz (8CLK cyles is ~80us) and clkgate_delay can only 
-specified in milliseconds as of now, I think this should be fine.
-
-> +		if (!host->clkgate_delay) {
-> +			tick_ns = DIV_ROUND_UP(1000000000, freq);
-> +			ndelay(host->clk_delay * tick_ns);
-> +		}
->   	} else {
->   		/* New users appeared while waiting for this work */
->   		spin_unlock_irqrestore(&host->clk_lock, flags);
-
-Reviewed-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
-
-Thanks,
-Sujit
+> Test results:
+>
+> Long read operation:
+> ----------------------
+> no-packing: 39.5 MB/s
+> packed commands patch (both READ and WRITE packing are enabled): 39.5=
+ MB/s
+> packed commands patch + enabling only READ packing: 39.5 MB/s
+>
+> Several parallel read operations (sum of all the read throughputs):
+> ---------------------------
+> no-packing: 42.6 MB/s
+> packed commands patch(both READ and WRITE packing are enabled): 38 MB=
+/s
+> packed commands patch + enabling only READ packing: 38.2 MB/s
+>
+> Parallel long read and long write operations (read throughput):
+> -----------------------------------------------------------------
+> no-packing: 23.8 MB/s
+> packed commands patch (both READ and WRITE packing are enabled): 12.6=
+ MB/s
+> packed commands patch + enabling only READ packing: 12.5 MB/s
+>
+> Parallel short read and long write operations (read throughput):
+> -----------------------------------------------------------------
+> no-packing: 22.9 MB/s
+> packed commands patch (both READ and WRITE packing are enabled): 8.4 =
+MB/s
+> packed commands patch + enabling only READ packing: 8.6 MB/s
+>
+> Several Parallel short read and short write operations (sum of all th=
+e
+> read throughputs):
+> ---------------------------------------------------------------------=
+-----
+> no-packing: 41.6 MB/s
+> packed commands patch (both READ and WRITE packing are enabled): 35 M=
+B/s
+> packed commands patch + enabling only READ packing: 36 MB/s
+>
+> Thanks,
+> Maya Erez
+> Consultant for Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+>
+>
+>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.ht=
+ml
