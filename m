@@ -1,41 +1,63 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: atmel-mci causing oops?
-Date: Wed, 29 Feb 2012 22:44:55 +0100
-Message-ID: <4F4E9C57.9020502@atmel.com>
-References: <20120229173115.GA23529@ldesroches-Latitude-E6320> <m2linlo83r.fsf@bob.laptop.org>
+From: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Subject: Re: [PATCH] mmc: core: remove waiting time when clkgate_delay is
+ set
+Date: Thu, 01 Mar 2012 12:04:04 +0530
+Message-ID: <4F4F185C.7090503@codeaurora.org>
+References: <1330494769-7558-1-git-send-email-chanho61.park@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:49193 "EHLO
-	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755239Ab2B2VpZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Feb 2012 16:45:25 -0500
-In-Reply-To: <m2linlo83r.fsf@bob.laptop.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:19510 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757907Ab2CAGeI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Mar 2012 01:34:08 -0500
+In-Reply-To: <1330494769-7558-1-git-send-email-chanho61.park@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc@vger.kernel.org, "Ferre, Nicolas" <nicolas.ferre@atmel.com>, plagnioj@jcrosoft.com, me@danielpalmer.co.uk, linux-arm-kernel@lists.infradead.org
+To: Chanho Park <chanho61.park@samsung.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Chris,
-
-On 02/29/2012 06:35 PM, Chris Ball wrote:
-> Hi Ludovic,
+On 2/29/2012 11:22 AM, Chanho Park wrote:
+> Since recent commit("mmc: core: Use delayed work in clock gating
+> framework":597dd9d79cfbbb1), we always wait "unnecessary" default
+> clock delay(8 cycles). Actually, we don't need it if clkgate_delay
+> (unit:ms) is set because we already wait sufficient time to change
+> the clock due to delayed_workqueue.
+> This patch removes duplicated waiting time when clkgate_delay is set.
 >
-> On Wed, Feb 29 2012, Ludovic Desroches wrote:
->> You can find the two patches into the mmc-next tree of Chris:
->> http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commit;h=43df92914ea0623893bcb801791d5d2be2f5e015
->> http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commit;h=9cfa4030ea90f2fc204532975a824b987433f6dd
->>
->> By the way, Chris, is it possible to put these patches as a fix for 3.3
->> kernel? Without them we will have this oops each time someone would use
->> mmc without a DMA Controller or if it is impossible to get a dma channel.
-> Will do, thanks.  Should they go to 3.2-stable, too?
+> Signed-off-by: Chanho Park<chanho61.park@samsung.com>
+> Signed-off-by: Kyungmin Park<kyungmin.park@samsung.com>
+> ---
+>   drivers/mmc/core/host.c |    7 +++++--
+>   1 files changed, 5 insertions(+), 2 deletions(-)
 >
-> - Chris.
-You're right 3.2 kernel is also concerned so they can go to 3.2-stable.
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index c3704e2..d710ce0 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -109,8 +109,11 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
+>   	 */
+>   	if (!host->clk_requests) {
+>   		spin_unlock_irqrestore(&host->clk_lock, flags);
+> -		tick_ns = DIV_ROUND_UP(1000000000, freq);
+> -		ndelay(host->clk_delay * tick_ns);
+> +		/* wait only when clk_gate_delay is 0*/
 
-Thanks.
+Actually, we should check whether the clkgate_delay is giving sufficient 
+clock cycles instead of just >0 value. But since min. f_min in freq. 
+table is 100KHz (8CLK cyles is ~80us) and clkgate_delay can only 
+specified in milliseconds as of now, I think this should be fine.
 
-Ludovic
+> +		if (!host->clkgate_delay) {
+> +			tick_ns = DIV_ROUND_UP(1000000000, freq);
+> +			ndelay(host->clk_delay * tick_ns);
+> +		}
+>   	} else {
+>   		/* New users appeared while waiting for this work */
+>   		spin_unlock_irqrestore(&host->clk_lock, flags);
 
+Reviewed-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+
+Thanks,
+Sujit
