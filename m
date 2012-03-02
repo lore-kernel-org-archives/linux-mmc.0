@@ -1,93 +1,86 @@
-From: Rajendra Nayak <rnayak@ti.com>
-Subject: Re: [PATCH 0/4] Start getting rid of pdata callbacks with gpio_find_by_chip_name()
-Date: Fri, 02 Mar 2012 14:36:54 +0530
-Message-ID: <4F508DAE.9000005@ti.com>
-References: <20120301185044.29210.44521.stgit@kaulin.local>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH] ARM: OMAP: hsmmc: add max_freq field
+Date: Fri, 2 Mar 2012 14:44:00 +0530
+Message-ID: <CANfBPZ-aezGCxSc5rUdU8fHxhPMQ5qx1D6zAtmwGyoBDz3YKtA@mail.gmail.com>
+References: <1323868927-3738-1-git-send-email-zonque@gmail.com>
+ <CANrkHUY3Zf4a2K5769Z=7Wng339zB6+z_Tgd4mOPChZ1RvZ=Kw@mail.gmail.com>
+ <4EFC6992.4020501@gmail.com> <CACTFLAMCoKfQbTe2RLTvi1_CH0nKzAOthAwrifNe2+F2sf3uPA@mail.gmail.com>
+ <20120302001121.GE18901@atomide.com> <CANfBPZ8Oypwqq2p3rcNpp5M8+XPHDmUxMRw2J5Jw5DdAKQj8cw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog123.obsmtp.com ([74.125.149.149]:35446 "EHLO
-	na3sys009aog123.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S965439Ab2CBJHC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 04:07:02 -0500
-Received: by ghbf1 with SMTP id f1so767216ghb.23
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Mar 2012 01:07:00 -0800 (PST)
-In-Reply-To: <20120301185044.29210.44521.stgit@kaulin.local>
+Received: from na3sys009aob106.obsmtp.com ([74.125.149.76]:46520 "EHLO
+	na3sys009aog106.obsmtp.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1757826Ab2CBJOY convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 2 Mar 2012 04:14:24 -0500
+Received: by bkcjg9 with SMTP id jg9so1594323bkc.32
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Mar 2012 01:14:20 -0800 (PST)
+In-Reply-To: <CANfBPZ8Oypwqq2p3rcNpp5M8+XPHDmUxMRw2J5Jw5DdAKQj8cw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Tony Lindgren <tony@atomide.com>, Chris Ball <cjb@laptop.org>
+Cc: Daniel Mack <zonque@gmail.com>, Rajendra Nayak <rnayak@ti.com>, "T Krishnamoorthy, Balaji" <balajitk@ti.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 
-Hi Tony,
-
-On Friday 02 March 2012 12:25 AM, Tony Lindgren wrote:
-> Hi all,
+On Fri, Mar 2, 2012 at 12:41 PM, S, Venkatraman <svenkatr@ti.com> wrote=
+:
+> +Chris queues all MMC patches including omap_hsmmc.
+> Ping ?
 >
-> This series adds gpio_find_by_name() that allows finding
-> GPIOs on specific gpio_chips. As the GPIO numbers can be
-> dynamic, it's hard to find the GPIO numbers from drivers
-> using them directly.
->
-> So far we've dealt with this using platform specific callbacks,
-> but that is messy. This series removes the needs for these
-> callbacks for omap hsmmc driver. Further callbacks can be
-> removed people are OK with adding gpio_find_by_name().
->
-> This series is based on the omap fixes-non-critical that's
-> needed for the arch/arm/mach-omap2 parts of this series.
+Just realized that it's already queued in mmc-next
+http://git.kernel.org/?p=3Dlinux/kernel/git/cjb/mmc.git;a=3Dcommitdiff;=
+h=3D25d6ba8171995230b3757c78c7470fa76a931b98
 
-I tested these on my beagle/panda/omap4sdp and they seem to
-work fine, also fixing the broken panda card detect (due to
-missing card_detect_irq in the board file). There are still
-issues however when I build twl4030-gpio as a module, which I
-already commented on, and the fact that the init sequence now
-works by luck :)
-The other issue also is that the multiple insmod/rmmod test
-suggested by Russell still fails, since the second time around
-the gpio_requests in the board callback fail because they are
-not freed when you do a module unload/unbind.
-That would need this patch from me to add the .teardown
-hooks
-http://marc.info/?l=linux-omap&m=133007767831297&w=2
-
-regards,
-Rajendra
 
 >
-> Regards,
->
-> Tony
->
-> ---
->
-> Tony Lindgren (4):
->        gpiolib: Add gpiochip_find_by_name() and gpio_find_by_chip_name()
->        mmc: omap_hsmmc: Use gpio_find_by_chip_name() for omap_hsmmc_gpio_init()
->        mmc: omap_hsmmc: Use GPIO offset for external GPIO chips
->        mmc: omap_hsmmc: Simplify init for twl6030 MMC card detect
->
->
->   arch/arm/mach-omap2/board-3430sdp.c          |   13 +-
->   arch/arm/mach-omap2/board-4430sdp.c          |   45 --------
->   arch/arm/mach-omap2/board-cm-t35.c           |    8 -
->   arch/arm/mach-omap2/board-devkit8000.c       |    7 -
->   arch/arm/mach-omap2/board-igep0020.c         |    8 -
->   arch/arm/mach-omap2/board-omap3beagle.c      |    9 +-
->   arch/arm/mach-omap2/board-omap3evm.c         |    8 -
->   arch/arm/mach-omap2/board-omap3pandora.c     |   13 +-
->   arch/arm/mach-omap2/board-omap3stalker.c     |    8 -
->   arch/arm/mach-omap2/board-omap3touchbook.c   |    7 -
->   arch/arm/mach-omap2/board-omap4panda.c       |   52 ----------
->   arch/arm/mach-omap2/board-zoom-peripherals.c |    7 -
->   arch/arm/mach-omap2/hsmmc.c                  |    3 +
->   arch/arm/mach-omap2/hsmmc.h                  |    5 +
->   arch/arm/plat-omap/include/plat/mmc.h        |    3 +
->   drivers/gpio/gpio-twl4030.c                  |    2
->   drivers/gpio/gpiolib.c                       |   47 +++++++++
->   drivers/mfd/twl6030-irq.c                    |   33 +++---
->   drivers/mmc/host/omap_hsmmc.c                |  140 +++++++++++++++++++-------
->   include/asm-generic/gpio.h                   |    3 -
->   20 files changed, 204 insertions(+), 217 deletions(-)
->
-
+> On Fri, Mar 2, 2012 at 5:41 AM, Tony Lindgren <tony@atomide.com> wrot=
+e:
+>> Hi,
+>>
+>> * Daniel Mack <zonque@gmail.com> [120217 05:13]:
+>>> ping? Could anyone care for queueing this please?
+>>
+>> I suggest Rajendra queue up omap_hsmmc.c patches as he's already
+>> patching it.
+>>
+>> Regards,
+>>
+>> Tony
+>>
+>>
+>>> On Thu, Dec 29, 2011 at 2:22 PM, Daniel Mack <zonque@gmail.com> wro=
+te:
+>>> > On 12/23/2011 04:40 PM, T Krishnamoorthy, Balaji wrote:
+>>> >> On Wed, Dec 14, 2011 at 6:52 PM, Daniel Mack <zonque@gmail.com> =
+wrote:
+>>> >>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/o=
+map_hsmmc.c
+>>> >>> index 101cd31..8215ef9 100644
+>>> >>> --- a/drivers/mmc/host/omap_hsmmc.c
+>>> >>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>>> >>> @@ -1927,8 +1927,12 @@ static int __init omap_hsmmc_probe(struc=
+t platform_device *pdev)
+>>> >>> =A0 =A0 =A0 =A0if (mmc_slot(host).vcc_aux_disable_is_sleep)
+>>> >>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_slot(host).no_off =3D 1;
+>>> >>>
+>>> >>> - =A0 =A0 =A0 mmc->f_min =A0 =A0 =A0=3D OMAP_MMC_MIN_CLOCK;
+>>> >>> - =A0 =A0 =A0 mmc->f_max =A0 =A0 =A0=3D OMAP_MMC_MAX_CLOCK;
+>>> >>> + =A0 =A0 =A0 mmc->f_min =3D OMAP_MMC_MIN_CLOCK;
+>>> >>
+>>> >> Stray change for f_min ?
+>>> >
+>>> > No, this was intended. The indentation doesn't make sense anymore=
+ when
+>>> > not grouped with the f_max assignment.
+>>> >
+>>> > Other than that, what is necessary to get this picked? Tony? :)
+>>> >
+>>> >
+>>> > Thanks,
+>>> > Daniel
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
