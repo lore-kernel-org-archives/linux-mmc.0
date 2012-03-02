@@ -1,38 +1,44 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3 0/6] mmc: sdhci-s3c: Rework platform data and add device tree support
-Date: Fri, 02 Mar 2012 15:40:05 -0500
-Message-ID: <m2ty26n3dm.fsf@bob.laptop.org>
-References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
-	<003401cce730$baf979a0$30ec6ce0$%kim@samsung.com>
-	<m2aa4pkq5g.fsf@bob.laptop.org> <4F3CFEED.6060206@samsung.com>
-	<m239abgc32.fsf@bob.laptop.org>
-	<00b901ccf08d$2fc18b50$8f44a1f0$%kim@samsung.com>
-	<m2vcn0496y.fsf@bob.laptop.org> <20120222125823.GA14463@sirena.org.uk>
+Subject: Re: [PATCH v6 0/2] patch set about the MXS-DMA
+Date: Fri, 02 Mar 2012 15:50:25 -0500
+Message-ID: <m2mx7yn2we.fsf@bob.laptop.org>
+References: <1329373053-19494-1-git-send-email-b32955@freescale.com>
+	<4F4D9725.3090100@freescale.com>
+	<1330502098.3545.78.camel@sauron.fi.intel.com>
+	<4F4DE0E5.8070808@freescale.com>
+	<1330516974.3545.104.camel@sauron.fi.intel.com>
+	<CAMiH66HmV+58w36DGCt+e=ihTrYUwXf1Cur+678YX2GKcB1-jA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <20120222125823.GA14463@sirena.org.uk> (Mark Brown's message of
-	"Wed, 22 Feb 2012 12:58:23 +0000")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Kukjin Kim <kgene.kim@samsung.com>, 'Thomas Abraham' <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, patches@linaro.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:32808 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759094Ab2CBUuy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 2 Mar 2012 15:50:54 -0500
+In-Reply-To: <CAMiH66HmV+58w36DGCt+e=ihTrYUwXf1Cur+678YX2GKcB1-jA@mail.gmail.com>
+	(Huang Shijie's message of "Wed, 29 Feb 2012 08:13:15 -0500")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Huang Shijie <shijie8@gmail.com>
+Cc: "Bityutskiy, Artem" <artem.bityutskiy@intel.com>, Huang Shijie <b32955@freescale.com>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "Koul, Vinod" <vinod.koul@intel.com>, "broonie@opensource.wolfsonmicro.com" <broonie@opensource.wolfsonmicro.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "w.sang@pengutronix.de" <w.sang@pengutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>, "shawn.guo@linaro.org" <shawn.guo@linaro.org>, "lrg@ti.com" <lrg@ti.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "LW@KARO-electronics.de" <LW@karo-electronics.de>
 
 Hi,
 
-On Wed, Feb 22 2012, Mark Brown wrote:
-> On Tue, Feb 21, 2012 at 08:17:41AM -0500, Chris Ball wrote:
+On Wed, Feb 29 2012, Huang Shijie wrote:
+>> Pushed both to l2-mtd.git tree, thanks. I am worried that it touches
+>> other subsystems like dma, sound, and mmc and there are no acks for
+>> those. Would be nice to get them somehow.
 >
->> Pushed to mmc-next, thanks.  (I'm expecting that you'll do the merge
->> to Linus.)
+> I ever thought Vinod could accept this patch set.
 >
-> I've been sending patches adding runtime PM support to this driver for a
-> while with no response - are there any issues with those?
+> To Vinod & Chris:
+>       Could you give the ack to the first patch?
 
-I don't have s3c hardware, so I've been waiting for a Tested-by or ACK
-from someone who does -- Kukjin, any objection if I take this into
-mmc-next with a plan to merge it, to provoke some testing?  Is it
-possible for you to test/review the patch?
+Yes -- for the first patch:
+
+Acked-by: Chris Ball <cjb@laptop.org>
+
+(I think Shawn's ACK is sufficient for the second patch.)
 
 Thanks,
 
