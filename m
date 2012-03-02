@@ -1,46 +1,65 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v6 0/2] patch set about the MXS-DMA
-Date: Fri, 02 Mar 2012 15:50:25 -0500
-Message-ID: <m2mx7yn2we.fsf@bob.laptop.org>
-References: <1329373053-19494-1-git-send-email-b32955@freescale.com>
-	<4F4D9725.3090100@freescale.com>
-	<1330502098.3545.78.camel@sauron.fi.intel.com>
-	<4F4DE0E5.8070808@freescale.com>
-	<1330516974.3545.104.camel@sauron.fi.intel.com>
-	<CAMiH66HmV+58w36DGCt+e=ihTrYUwXf1Cur+678YX2GKcB1-jA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: fix regression: set default clock gating delay to 0
+Date: Fri, 02 Mar 2012 15:55:08 -0500
+Message-ID: <m2ipimn2oj.fsf@bob.laptop.org>
+References: <Pine.LNX.4.64.1202231119030.25586@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:32808 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:48605 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759094Ab2CBUuy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 2 Mar 2012 15:50:54 -0500
-In-Reply-To: <CAMiH66HmV+58w36DGCt+e=ihTrYUwXf1Cur+678YX2GKcB1-jA@mail.gmail.com>
-	(Huang Shijie's message of "Wed, 29 Feb 2012 08:13:15 -0500")
+	id S1750745Ab2CBUzW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 2 Mar 2012 15:55:22 -0500
+In-Reply-To: <Pine.LNX.4.64.1202231119030.25586@axis700.grange> (Guennadi
+	Liakhovetski's message of "Thu, 23 Feb 2012 11:22:29 +0100 (CET)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Huang Shijie <shijie8@gmail.com>
-Cc: "Bityutskiy, Artem" <artem.bityutskiy@intel.com>, Huang Shijie <b32955@freescale.com>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "Koul, Vinod" <vinod.koul@intel.com>, "broonie@opensource.wolfsonmicro.com" <broonie@opensource.wolfsonmicro.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "w.sang@pengutronix.de" <w.sang@pengutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>, "shawn.guo@linaro.org" <shawn.guo@linaro.org>, "lrg@ti.com" <lrg@ti.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "LW@KARO-electronics.de" <LW@karo-electronics.de>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Sujit Reddy Thumma <sthumma@codeaurora.org>
 
 Hi,
 
-On Wed, Feb 29 2012, Huang Shijie wrote:
->> Pushed both to l2-mtd.git tree, thanks. I am worried that it touches
->> other subsystems like dma, sound, and mmc and there are no acks for
->> those. Would be nice to get them somehow.
+On Thu, Feb 23 2012, Guennadi Liakhovetski wrote:
+> A recent commit "mmc: core: Use delayed work in clock gating framework"
+> introduced a default 200ms delay before clock gating actually takes place.
+> This means, that every time an MMC interface becomes idle it first stays
+> on for 200ms before gating its clock. This leads to increased power
+> consumption and is therefore a clear regression. This patch restores the
+> original behaviour by setting the default delay to 0. Users,
+> prioritising throughput over power efficiency can still modify the delay
+> via sysfs.
 >
-> I ever thought Vinod could accept this patch set.
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
 >
-> To Vinod & Chris:
->       Could you give the ack to the first patch?
+> As discussed in this thread
+>
+> http://thread.gmane.org/gmane.linux.kernel.mmc/12307
+>
+> this is one of the ways to fix the regression. Please, push for 3.3.
+>
+>  drivers/mmc/core/host.c |    4 ++--
+>  1 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 30055f2..c3704e2 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -238,10 +238,10 @@ static inline void mmc_host_clk_init(struct mmc_host *host)
+>  	/* Hold MCI clock for 8 cycles by default */
+>  	host->clk_delay = 8;
+>  	/*
+> -	 * Default clock gating delay is 200ms.
+> +	 * Default clock gating delay is 0ms to avoid wasting power.
+>  	 * This value can be tuned by writing into sysfs entry.
+>  	 */
+> -	host->clkgate_delay = 200;
+> +	host->clkgate_delay = 0;
+>  	host->clk_gated = false;
+>  	INIT_DELAYED_WORK(&host->clk_gate_work, mmc_host_clk_gate_work);
+>  	spin_lock_init(&host->clk_lock);
 
-Yes -- for the first patch:
-
-Acked-by: Chris Ball <cjb@laptop.org>
-
-(I think Shawn's ACK is sufficient for the second patch.)
-
-Thanks,
+Thanks, will push this to 3.3 this week.
 
 - Chris.
 -- 
