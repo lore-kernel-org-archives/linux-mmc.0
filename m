@@ -1,186 +1,131 @@
-From: merez@codeaurora.org
-Subject: Re: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5
-     device
-Date: Fri, 2 Mar 2012 06:26:39 -0800 (PST)
-Message-ID: <6669559e86c1d13b27e941ff2acf89d2.squirrel@www.codeaurora.org>
-References: <4934441a17d25c3249556f7bf281b1be.squirrel@www.codeaurora.org>
-    <CAKYAXd_6OqQJ78mPJp11gRvGwwg88S_n_Auu=_HdP_ZXzCKrDg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [RESEND PATCH] mmc: core: Fixup suspend/resume issues for UHS-I
+ cards
+Date: Fri, 2 Mar 2012 15:29:46 +0100
+Message-ID: <4F50D95A.8000600@stericsson.com>
+References: <1330616897-12032-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:52366 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965451Ab2CBO0k (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 09:26:40 -0500
-In-Reply-To: <CAKYAXd_6OqQJ78mPJp11gRvGwwg88S_n_Auu=_HdP_ZXzCKrDg@mail.gmail.com>
+Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:49258 "EHLO
+	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S964854Ab2CBOaN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 09:30:13 -0500
+In-Reply-To: <1330616897-12032-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: merez@codeaurora.org, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+Cc: Ulf HANSSON <ulf.hansson@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
 Hi,
 
-Our tests showed that the write packing improved the performance of the
-write sequential operations:
+The reason for the RESEND was due to a missed removal of a "gerrit 
+change id". The patch has not change as such.
 
-Long write operation:
-----------------------
-no-packing: 15.8 MB/s
-packed commands patch (both READ and WRITE packing are enabled): 23.3 M=
-B/s
+Br
+Ulf Hansson
 
-Several parallel write operations (sum of all the write throughputs):
----------------------------
-no-packing: 17.1 MB/s
-packed commands patch(both READ and WRITE packing are enabled): 25 MB/s
-
-Parallel long read and long write operations (write throughput):
------------------------------------------------------------------
-no-packing: 12.2 MB/s
-packed commands patch (both READ and WRITE packing are enabled): 16.3 M=
-B/s
-
-Parallel short read and long write operations (write throughput):
------------------------------------------------------------------
-no-packing: 15.4 MB/s
-packed commands patch (both READ and WRITE packing are enabled): 16.4 M=
-B/s
-
-Several Parallel short read and short write operations (sum of all the
-write throughputs):
------------------------------------------------------------------------=
----
-no-packing: 12.5 MB/s
-packed commands patch (both READ and WRITE packing are enabled): 15.5 M=
-B/s
-
-
-Random read and random write:
-------------------------------
-I checked the random read and random write IOPs by using the IOZONE
-application. There was a slight degradation in the read results due to =
-the
-packing and no improvements in the write results.
-
-The results are:
-
-IOZONE file size of 100M:
-no-packing: random read: 4675, random write: 729
-packed commands patch (both READ and WRITE packing are enabled): random
-read: 4557 random write: 723
-
-IOZONE file size of 256M:
-no-packing: random read: 4632, random write: 744
-packed commands patch (both READ and WRITE packing are enabled): random
-read: 4498, random write: 742
-
-Thanks,
-Maya Erez
-Consultant for Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-
-> Hi. merez.
+On 03/01/2012 04:48 PM, Ulf HANSSON wrote:
+> Even if cards supports 1.8V I/O voltage those should anyway be
+> initialized at 3.3V I/O according to (e)MMC, SD and SDIO specs.
+> Some eMMC and embedded SDIO devices are able to be initialized
+> at 1.8V as well, but it is better to be safe.
 >
-> Would you share random read speed with us ?
+> Do note that initialization in this context means that the card
+> has been completely powered off, otherwise the card will remain
+> at the last I/O voltage level that were negotitiated.
 >
-> And Write speed also..
+> Due to the above being taken care of the suspend/resume issues
+> for UHS-I SD-cards has been fixed.
 >
-> Thanks.
+> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
+> ---
+>   drivers/mmc/core/core.c |    3 +++
+>   drivers/mmc/core/mmc.c  |    3 +++
+>   drivers/mmc/core/sd.c   |    8 +++-----
+>   drivers/mmc/core/sdio.c |    9 +++++++++
+>   4 files changed, 18 insertions(+), 5 deletions(-)
 >
-> 2012/3/1  <merez@codeaurora.org>:
->>> This patch supports packed command of eMMC4.5 device.
->>> Several reads(or writes) can be grouped in packed command
->>> and all data of the individual commands can be sent in a
->>> single transfer on the bus.
->>>
->>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->>> ---
->>> =C2=A0drivers/mmc/card/block.c =C2=A0 | =C2=A0496
->>> +++++++++++++++++++++++++++++++++++++++++--
->>> =C2=A0drivers/mmc/card/queue.c =C2=A0 | =C2=A0 48 ++++-
->>> =C2=A0drivers/mmc/card/queue.h =C2=A0 | =C2=A0 13 ++
->>> =C2=A0drivers/mmc/core/mmc_ops.c | =C2=A0 =C2=A01 +
->>> =C2=A0include/linux/mmc/core.h =C2=A0 | =C2=A0 =C2=A04 +
->>> =C2=A05 files changed, 535 insertions(+), 27 deletions(-)
->>>
->> Hi,
->>
->> We ran performance tests on the packed commands patch. We found out =
-that
->> enabling the read packing didn't improve the performance in any of t=
-he
->> scenarios we ran (see the detailed results below).
->> Therefore, we suggest to move the read packing code to a different p=
-atch
->> and approve only the write packing code for now. The read packing ad=
-ds
->> complexity to the code and we don't see a point in adding it while t=
-he
->> intention is to disable it.
->>
->> Test results:
->>
->> Long read operation:
->> ----------------------
->> no-packing: 39.5 MB/s
->> packed commands patch (both READ and WRITE packing are enabled): 39.=
-5
->> MB/s
->> packed commands patch + enabling only READ packing: 39.5 MB/s
->>
->> Several parallel read operations (sum of all the read throughputs):
->> ---------------------------
->> no-packing: 42.6 MB/s
->> packed commands patch(both READ and WRITE packing are enabled): 38 M=
-B/s
->> packed commands patch + enabling only READ packing: 38.2 MB/s
->>
->> Parallel long read and long write operations (read throughput):
->> -----------------------------------------------------------------
->> no-packing: 23.8 MB/s
->> packed commands patch (both READ and WRITE packing are enabled): 12.=
-6
->> MB/s
->> packed commands patch + enabling only READ packing: 12.5 MB/s
->>
->> Parallel short read and long write operations (read throughput):
->> -----------------------------------------------------------------
->> no-packing: 22.9 MB/s
->> packed commands patch (both READ and WRITE packing are enabled): 8.4
->> MB/s
->> packed commands patch + enabling only READ packing: 8.6 MB/s
->>
->> Several Parallel short read and short write operations (sum of all t=
-he
->> read throughputs):
->> --------------------------------------------------------------------=
-------
->> no-packing: 41.6 MB/s
->> packed commands patch (both READ and WRITE packing are enabled): 35 =
-MB/s
->> packed commands patch + enabling only READ packing: 36 MB/s
->>
->> Thanks,
->> Maya Erez
->> Consultant for Qualcomm Innovation Center, Inc.
->> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
->>
->>
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
-tml
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 0b317f0..faa0af1 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2074,6 +2074,9 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+>   	 */
+>   	mmc_hw_reset_for_init(host);
 >
-
+> +	/* Initialization should be done at 3.3 V I/O voltage. */
+> +	mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
+> +
+>   	/*
+>   	 * sdio_reset sends CMD52 to reset card.  Since we do not know
+>   	 * if the card is being re-initialized, just send it.  CMD52
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 6b13776..6defddd 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -830,6 +830,9 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>   	if (!mmc_host_is_spi(host))
+>   		mmc_set_bus_mode(host, MMC_BUSMODE_OPENDRAIN);
+>
+> +	/* Initialization should be done at 3.3 V I/O voltage. */
+> +	mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
+> +
+>   	/*
+>   	 * Since we're changing the OCR value, we seem to
+>   	 * need to tell some cards to go back to the idle
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 5017f93..c272c686 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -911,6 +911,9 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>   	BUG_ON(!host);
+>   	WARN_ON(!host->claimed);
+>
+> +	/* The initialization should be done at 3.3 V I/O voltage. */
+> +	mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
+> +
+>   	err = mmc_sd_get_cid(host, ocr, cid,&rocr);
+>   	if (err)
+>   		return err;
+> @@ -1156,11 +1159,6 @@ int mmc_attach_sd(struct mmc_host *host)
+>   	BUG_ON(!host);
+>   	WARN_ON(!host->claimed);
+>
+> -	/* Make sure we are at 3.3V signalling voltage */
+> -	err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, false);
+> -	if (err)
+> -		return err;
+> -
+>   	/* Disable preset value enable if already set since last time */
+>   	if (host->ops->enable_preset_value) {
+>   		mmc_host_clk_hold(host);
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 12cde6e..dac2e23 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -585,6 +585,10 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+>   	 * Inform the card of the voltage
+>   	 */
+>   	if (!powered_resume) {
+> +
+> +		/* The initialization should be done at 3.3 V I/O voltage. */
+> +		mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
+> +
+>   		err = mmc_send_io_op_cond(host, host->ocr,&ocr);
+>   		if (err)
+>   			goto err;
+> @@ -996,6 +1000,11 @@ static int mmc_sdio_power_restore(struct mmc_host *host)
+>   	 * With these steps taken, mmc_select_voltage() is also required to
+>   	 * restore the correct voltage setting of the card.
+>   	 */
+> +
+> +	if (!mmc_card_keep_power(host))
+> +		/* The initialization should be done at 3.3 V I/O voltage. */
+> +		mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
+> +
+>   	sdio_reset(host);
+>   	mmc_go_idle(host);
+>   	mmc_send_if_cond(host, host->ocr_avail);
 
