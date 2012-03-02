@@ -1,360 +1,324 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 1/4] mmc: sdhci-s3c: use the sdhci-pltfm for Samsung-SoC
-Date: Fri, 02 Mar 2012 14:07:58 +0900
-Message-ID: <4F5055AE.8090904@samsung.com>
-References: <4F4B3798.2000003@samsung.com>
- <001701ccf6ab$fd136910$f73a3b30$%jun@samsung.com>
- <4F500D3D.2000902@samsung.com>
- <004601ccf81a$545645c0$fd02d140$%jun@samsung.com>
- <4F50358C.5060206@samsung.com>
- <004a01ccf82f$b51a68e0$1f4f3aa0$%jun@samsung.com>
+From: Rajendra Nayak <rnayak@ti.com>
+Subject: Re: [PATCH 2/4] mmc: omap_hsmmc: Use gpio_find_by_chip_name() for
+ omap_hsmmc_gpio_init()
+Date: Fri, 02 Mar 2012 11:24:56 +0530
+Message-ID: <4F5060B0.7010703@ti.com>
+References: <20120301185044.29210.44521.stgit@kaulin.local> <20120301185528.29210.85854.stgit@kaulin.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <004a01ccf82f$b51a68e0$1f4f3aa0$%jun@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Kyungmin Park' <kyungmin.park@samsung.com>, 'kgene kim' <kgene.kim@samsung.com>, 'Thomas Abraham' <thomas.abraham@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog114.obsmtp.com ([74.125.149.211]:44024 "EHLO
+	na3sys009aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756152Ab2CBFzF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 00:55:05 -0500
+Received: by yhpp61 with SMTP id p61so758735yhp.11
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Mar 2012 21:55:04 -0800 (PST)
+In-Reply-To: <20120301185528.29210.85854.stgit@kaulin.local>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: linuxkernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
->>>>>>  		sc->clk_bus[ptr] = clk;
+On Friday 02 March 2012 12:25 AM, Tony Lindgren wrote:
+> Use gpio_find_by_chip_name() to find the GPIO pins as they can
+> be dynamically allocated on various gpio_chips.
+>
+> Note that we don't want to touch the platform data as it can
+> now specify the GPIO offset on a named gpio_chip.
+>
+> This removes the need to use callbacks to set the GPIO pins
+> in platform data.
 
->>>>>> @@ -613,7 +609,10 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->>>>>>  		 * save current clock index to know which clock bus
->>>>>>  		 * is used later in overriding functions.
->>>>>>  		 */
->>>>>> -		sc->cur_clk = ptr;
->>>>>> +		if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
->>>>>> +			pltfm_host->clk = clk;
->>>>>> +		else
->>>>> We need to keep below?
->>>>> According to two commits, this seems to be relevant to SDHCI_QUIRK_NONSTANDARD_CLOCK.
->>>>>   mmc: sdhci-s3c: Support controllers with no internal clock divider(253e0a7c3dc4b)
->>>>>   mmc: sdhci-s3c: Remove usage of clk_type member in platform data(b77d777eeb0a086)
->>>>
->>>> Right, it's related with them.
->>>> I want to remove the sc->cur_clk.But in c110 case, it seems to need them.
->>>> In c110, clk_src is used the one of four.
->>>> If you want to remove the quirks, i will use only sc->cur_clk.
->>>> How about this?
->>> I mean "sc->cur_clk = ptr" can be removed here.
->>
->> I think that can remove "sc->cur_clk = ptr" at first time.
->> But in sdhci_s3c_set_clock(), it's used for selecting the new clock sources.
->> (If my understanding is wrong, i will also check this.)
-> 
-> As we know, ptr indicates the index of clock candidates if not SDHCI_QUIRK_NONSTANDARD_CLOCK.
-> cur_clk is just updated during loop and finally it will be finished by last ptr.
-> I wonder if this is a selected index.
+While one of the reasons for those callbacks was to set the GPIO
+pins in platform data, I guess the other and more important one
+was to make sure the init sequencing between twl4030-gpio and the
+mmc device depending on it was done rightly. Doesn't this patch now
+leave the sequencing to work by luck (in the absence of something
+like deferred probe being in place) like is the case of twl6030 and
+mmc init sequence on OMAP4 already?
 
-You're right. i have considered too much about this.
-It can be removed. Then it needs not to use SDHCI_QUIRK_NONSTANDARD_CLOCK.
+regards,
+Rajendra
 
-Best Regards,
-Jaehoon Chung
+>
+> Cc: Chris Ball<cjb@laptop.org>
+> Cc: Grant Likely<grant.likely@secretlab.ca>
+> Cc: Rajendra Nayak<rnayak@ti.com>
+> Signed-off-by: Tony Lindgren<tony@atomide.com>
+> ---
+>   arch/arm/mach-omap2/hsmmc.c           |    3 +
+>   arch/arm/mach-omap2/hsmmc.h           |    5 ++
+>   arch/arm/plat-omap/include/plat/mmc.h |    3 +
+>   drivers/gpio/gpio-twl4030.c           |    2 +
+>   drivers/mmc/host/omap_hsmmc.c         |  109 +++++++++++++++++++++------------
+>   5 files changed, 82 insertions(+), 40 deletions(-)
+>
+> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+> index a97876d..dda88f7 100644
+> --- a/arch/arm/mach-omap2/hsmmc.c
+> +++ b/arch/arm/mach-omap2/hsmmc.c
+> @@ -323,7 +323,10 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+>
+>   	mmc->get_context_loss_count = hsmmc_get_context_loss;
+>
+> +	mmc->slots[0].gpiochip_cd = c->gpiochip_cd;
+>   	mmc->slots[0].switch_pin = c->gpio_cd;
+> +
+> +	mmc->slots[0].gpiochip_wp = c->gpiochip_wp;
+>   	mmc->slots[0].gpio_wp = c->gpio_wp;
+>
+>   	mmc->slots[0].remux = c->remux;
+> diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+> index 07831cc..ffbb78d 100644
+> --- a/arch/arm/mach-omap2/hsmmc.h
+> +++ b/arch/arm/mach-omap2/hsmmc.h
+> @@ -22,8 +22,13 @@ struct omap2_hsmmc_info {
+>   	bool	no_off_init;	/* no power off when not in MMC sleep state */
+>   	bool	vcc_aux_disable_is_sleep; /* Regulator off remapped to sleep */
+>   	bool	deferred;	/* mmc needs a deferred probe */
+> +
+> +	char	*gpiochip_cd;	/* Optional gpiochip for gpio_cd */
+>   	int	gpio_cd;	/* or -EINVAL */
+> +
+> +	char	*gpiochip_wp;	/* Optional gpiochip for gpio_wp */
+>   	int	gpio_wp;	/* or -EINVAL */
+> +
+>   	char	*name;		/* or NULL for default */
+>   	struct platform_device *pdev;	/* mmc controller instance */
+>   	int	ocr_mask;	/* temporary HACK */
+> diff --git a/arch/arm/plat-omap/include/plat/mmc.h b/arch/arm/plat-omap/include/plat/mmc.h
+> index f75946c..cbfbdc3 100644
+> --- a/arch/arm/plat-omap/include/plat/mmc.h
+> +++ b/arch/arm/plat-omap/include/plat/mmc.h
+> @@ -130,7 +130,10 @@ struct omap_mmc_platform_data {
+>   #define HSMMC_HAS_UPDATED_RESET	(1<<  1)
+>   		unsigned features;
+>
+> +		char *gpiochip_cd;		/* optional gpiochip for card detect */
+>   		int switch_pin;			/* gpio (card detect) */
+> +
+> +		char *gpiochip_wp;		/* optional gpiochip for write protect */
+>   		int gpio_wp;			/* gpio (write protect) */
+>
+>   		int (*set_bus_mode)(struct device *dev, int slot, int bus_mode);
+> diff --git a/drivers/gpio/gpio-twl4030.c b/drivers/gpio/gpio-twl4030.c
+> index b8b4f22..d0f266c 100644
+> --- a/drivers/gpio/gpio-twl4030.c
+> +++ b/drivers/gpio/gpio-twl4030.c
+> @@ -391,6 +391,7 @@ static int __devinit gpio_twl4030_debounce(u32 debounce, u8 mmc_cd)
+>   }
+>
+>   static int gpio_twl4030_remove(struct platform_device *pdev);
+> +static struct platform_driver gpio_twl4030_driver;
+>
+>   static int __devinit gpio_twl4030_probe(struct platform_device *pdev)
+>   {
+> @@ -430,6 +431,7 @@ no_irqs:
+>   				pdata->debounce, pdata->mmc_cd,
+>   				ret);
+>
+> +	twl_gpiochip.label = gpio_twl4030_driver.driver.name;
+>   	twl_gpiochip.base = pdata->gpio_base;
+>   	twl_gpiochip.ngpio = TWL4030_GPIO_MAX;
+>   	twl_gpiochip.dev =&pdev->dev;
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index fd0c661..1aa2420 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -176,6 +176,8 @@ struct omap_hsmmc_host {
+>   	int			use_dma, dma_ch;
+>   	int			dma_line_tx, dma_line_rx;
+>   	int			slot_id;
+> +	int			gpio_cd;
+> +	int			gpio_wp;
+>   	int			got_dbclk;
+>   	int			response_busy;
+>   	int			context_loss;
+> @@ -192,26 +194,29 @@ struct omap_hsmmc_host {
+>
+>   static int omap_hsmmc_card_detect(struct device *dev, int slot)
+>   {
+> -	struct omap_mmc_platform_data *mmc = dev->platform_data;
+> +	struct omap_hsmmc_host *host =
+> +		platform_get_drvdata(to_platform_device(dev));
+>
+>   	/* NOTE: assumes card detect signal is active-low */
+> -	return !gpio_get_value_cansleep(mmc->slots[0].switch_pin);
+> +	return !gpio_get_value_cansleep(host->gpio_cd);
+>   }
+>
+>   static int omap_hsmmc_get_wp(struct device *dev, int slot)
+>   {
+> -	struct omap_mmc_platform_data *mmc = dev->platform_data;
+> +	struct omap_hsmmc_host *host =
+> +		platform_get_drvdata(to_platform_device(dev));
+>
+>   	/* NOTE: assumes write protect signal is active-high */
+> -	return gpio_get_value_cansleep(mmc->slots[0].gpio_wp);
+> +	return gpio_get_value_cansleep(host->gpio_wp);
+>   }
+>
+>   static int omap_hsmmc_get_cover_state(struct device *dev, int slot)
+>   {
+> -	struct omap_mmc_platform_data *mmc = dev->platform_data;
+> +	struct omap_hsmmc_host *host =
+> +		platform_get_drvdata(to_platform_device(dev));
+>
+>   	/* NOTE: assumes card detect signal is active-low */
+> -	return !gpio_get_value_cansleep(mmc->slots[0].switch_pin);
+> +	return !gpio_get_value_cansleep(host->gpio_cd);
+>   }
+>
+>   #ifdef CONFIG_PM
+> @@ -497,55 +502,80 @@ static inline int omap_hsmmc_have_reg(void)
+>
+>   #endif
+>
+> -static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
+> +static int omap_hsmmc_gpio_init(struct omap_hsmmc_host *host)
+>   {
+> -	int ret;
+> -
+> -	if (gpio_is_valid(pdata->slots[0].switch_pin)) {
+> -		if (pdata->slots[0].cover)
+> -			pdata->slots[0].get_cover_state =
+> +	struct omap_mmc_platform_data *pdata = host->pdata;
+> +	struct omap_mmc_slot_data *slot =&pdata->slots[0];
+> +	int gpio, ret;
+> +
+> +	gpio = slot->switch_pin;
+> +	if (slot->gpiochip_cd)
+> +		gpio = gpio_find_by_chip_name(slot->gpiochip_cd, gpio);
+> +	if (gpio_is_valid(gpio)) {
+> +		if (slot->cover)
+> +			slot->get_cover_state =
+>   					omap_hsmmc_get_cover_state;
+>   		else
+> -			pdata->slots[0].card_detect = omap_hsmmc_card_detect;
+> -		pdata->slots[0].card_detect_irq =
+> -				gpio_to_irq(pdata->slots[0].switch_pin);
+> -		ret = gpio_request(pdata->slots[0].switch_pin, "mmc_cd");
+> +			slot->card_detect = omap_hsmmc_card_detect;
+> +		slot->card_detect_irq =
+> +				gpio_to_irq(gpio);
+> +		ret = gpio_request(gpio, "mmc_cd");
+>   		if (ret)
+>   			return ret;
+> -		ret = gpio_direction_input(pdata->slots[0].switch_pin);
+> +		ret = gpio_direction_input(gpio);
+>   		if (ret)
+>   			goto err_free_sp;
+> -	} else
+> -		pdata->slots[0].switch_pin = -EINVAL;
+> +		host->gpio_cd = gpio;
+> +	} else {
+> +		if (slot->gpiochip_cd) {
+> +			pr_warning("MMC %s card detect GPIO chip %s unavailable\n",
+> +				slot->name, slot->gpiochip_cd);
+> +			ret = -ENODEV;
+> +			goto err_free_sp;
+> +		}
+> +		host->gpio_cd = -EINVAL;
+> +	}
+>
+> -	if (gpio_is_valid(pdata->slots[0].gpio_wp)) {
+> -		pdata->slots[0].get_ro = omap_hsmmc_get_wp;
+> -		ret = gpio_request(pdata->slots[0].gpio_wp, "mmc_wp");
+> +	gpio = slot->gpio_wp;
+> +	if (slot->gpiochip_wp)
+> +		gpio = gpio_find_by_chip_name(slot->gpiochip_wp, gpio);
+> +	if (gpio_is_valid(gpio)) {
+> +		slot->get_ro = omap_hsmmc_get_wp;
+> +		ret = gpio_request(gpio, "mmc_wp");
+>   		if (ret)
+>   			goto err_free_cd;
+> -		ret = gpio_direction_input(pdata->slots[0].gpio_wp);
+> +		ret = gpio_direction_input(gpio);
+>   		if (ret)
+>   			goto err_free_wp;
+> -	} else
+> -		pdata->slots[0].gpio_wp = -EINVAL;
+> +		host->gpio_wp = gpio;
+> +	} else {
+> +		if (slot->gpiochip_wp) {
+> +			pr_warning("MMC %s write protect GPIO chip %s unavailable\n",
+> +				slot->name, slot->gpiochip_wp);
+> +			ret = -ENODEV;
+> +			goto err_free_wp;
+> +		}
+> +		host->gpio_wp = -EINVAL;
+> +	}
+>
+>   	return 0;
+>
+>   err_free_wp:
+> -	gpio_free(pdata->slots[0].gpio_wp);
+> +	if (gpio_is_valid(host->gpio_wp))
+> +		gpio_free(host->gpio_wp);
+>   err_free_cd:
+> -	if (gpio_is_valid(pdata->slots[0].switch_pin))
+> +	if (gpio_is_valid(host->gpio_cd))
+>   err_free_sp:
+> -		gpio_free(pdata->slots[0].switch_pin);
+> +		gpio_free(host->gpio_cd);
+>   	return ret;
+>   }
+>
+> -static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
+> +static void omap_hsmmc_gpio_free(struct omap_hsmmc_host *host)
+>   {
+> -	if (gpio_is_valid(pdata->slots[0].gpio_wp))
+> -		gpio_free(pdata->slots[0].gpio_wp);
+> -	if (gpio_is_valid(pdata->slots[0].switch_pin))
+> -		gpio_free(pdata->slots[0].switch_pin);
+> +	if (gpio_is_valid(host->gpio_wp))
+> +		gpio_free(host->gpio_wp);
+> +	if (gpio_is_valid(host->gpio_cd))
+> +		gpio_free(host->gpio_cd);
+>   }
+>
+>   /*
+> @@ -1876,10 +1906,6 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+>   	if (res == NULL)
+>   		return -EBUSY;
+>
+> -	ret = omap_hsmmc_gpio_init(pdata);
+> -	if (ret)
+> -		goto err;
+> -
+>   	mmc = mmc_alloc_host(sizeof(struct omap_hsmmc_host),&pdev->dev);
+>   	if (!mmc) {
+>   		ret = -ENOMEM;
+> @@ -1903,6 +1929,10 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+>
+>   	platform_set_drvdata(pdev, host);
+>
+> +	ret = omap_hsmmc_gpio_init(host);
+> +	if (ret)
+> +		goto err1;
+> +
+>   	mmc->ops	=&omap_hsmmc_ops;
+>
+>   	/*
+> @@ -2093,8 +2123,7 @@ err1:
+>   	platform_set_drvdata(pdev, NULL);
+>   	mmc_free_host(mmc);
+>   err_alloc:
+> -	omap_hsmmc_gpio_free(pdata);
+> -err:
+> +	omap_hsmmc_gpio_free(host);
+>   	release_mem_region(res->start, resource_size(res));
+>   	return ret;
+>   }
+> @@ -2125,7 +2154,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+>
+>   		mmc_free_host(host->mmc);
+>   		iounmap(host->base);
+> -		omap_hsmmc_gpio_free(pdev->dev.platform_data);
+> +		omap_hsmmc_gpio_free(host);
+>   	}
+>
+>   	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>
 
-> 
-> Thanks,
-> Seungwon Jeon.
->>
->> Best Regards,
->> Jaehoon Chung
->>
->>> And about quirks..., I think compatibility should be considered.
->>>
->>> Thanks,
->>> Seungwon Jeon.
->>>>
->>>> And any comment?
->>>>
->>>> Best Regards,
->>>> Jaehoon Chung
->>>>
->>>>>
->>>>> Thanks,
->>>>> Seungwon Jeon.
->>>>>
->>>>>> +			sc->cur_clk = ptr;
->>>>>>
->>>>>>  		clk_enable(clk);
->>>>>>
->>>>>> @@ -627,63 +626,25 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->>>>>>  		goto err_no_busclks;
->>>>>>  	}
->>>>>>
->>>>>> -	sc->ioarea = request_mem_region(res->start, resource_size(res),
->>>>>> -					mmc_hostname(host->mmc));
->>>>>> -	if (!sc->ioarea) {
->>>>>> -		dev_err(dev, "failed to reserve register area\n");
->>>>>> -		ret = -ENXIO;
->>>>>> -		goto err_req_regs;
->>>>>> -	}
->>>>>> -
->>>>>> -	host->ioaddr = ioremap_nocache(res->start, resource_size(res));
->>>>>> -	if (!host->ioaddr) {
->>>>>> -		dev_err(dev, "failed to map registers\n");
->>>>>> -		ret = -ENXIO;
->>>>>> -		goto err_req_regs;
->>>>>> -	}
->>>>>> -
->>>>>>  	/* Ensure we have minimal gpio selected CMD/CLK/Detect */
->>>>>> -	if (pdata->cfg_gpio)
->>>>>> -		pdata->cfg_gpio(pdev, pdata->max_width);
->>>>>> -
->>>>>> -	host->hw_name = "samsung-hsmmc";
->>>>>> -	host->ops = &sdhci_s3c_ops;
->>>>>> -	host->quirks = 0;
->>>>>> -	host->irq = irq;
->>>>>> -
->>>>>> -	/* Setup quirks for the controller */
->>>>>> -	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
->>>>>> -	host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
->>>>>> -	if (drv_data)
->>>>>> -		host->quirks |= drv_data->sdhci_quirks;
->>>>>> +	if (sc->pdata->cfg_gpio)
->>>>>> +		sc->pdata->cfg_gpio(pdev, sc->pdata->max_width);
->>>>>>
->>>>>>  #ifndef CONFIG_MMC_SDHCI_S3C_DMA
->>>>>> -
->>>>>>  	/* we currently see overruns on errors, so disable the SDMA
->>>>>>  	 * support as well. */
->>>>>>  	host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
->>>>>>
->>>>>>  #endif /* CONFIG_MMC_SDHCI_S3C_DMA */
->>>>>>
->>>>>> -	/* It seems we do not get an DATA transfer complete on non-busy
->>>>>> -	 * transfers, not sure if this is a problem with this specific
->>>>>> -	 * SDHCI block, or a missing configuration that needs to be set. */
->>>>>> -	host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ;
->>>>>> -
->>>>>> -	/* This host supports the Auto CMD12 */
->>>>>> -	host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
->>>>>> -
->>>>>> -	/* Samsung SoCs need BROKEN_ADMA_ZEROLEN_DESC */
->>>>>> -	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC;
->>>>>> -
->>>>>> -	if (pdata->cd_type == S3C_SDHCI_CD_NONE ||
->>>>>> -	    pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
->>>>>> +	if (sc->pdata->cd_type == S3C_SDHCI_CD_NONE ||
->>>>>> +	    sc->pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
->>>>>>  		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->>>>>>
->>>>>> -	if (pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
->>>>>> +	if (sc->pdata->cd_type == S3C_SDHCI_CD_PERMANENT)
->>>>>>  		host->mmc->caps = MMC_CAP_NONREMOVABLE;
->>>>>>
->>>>>> -	switch (pdata->max_width) {
->>>>>> +	switch (sc->pdata->max_width) {
->>>>>>  	case 8:
->>>>>>  		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
->>>>>>  	case 4:
->>>>>> @@ -691,17 +652,12 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->>>>>>  		break;
->>>>>>  	}
->>>>>>
->>>>>> -	if (pdata->host_caps)
->>>>>> -		host->mmc->caps |= pdata->host_caps;
->>>>>> -
->>>>>> -	if (pdata->pm_caps)
->>>>>> -		host->mmc->pm_caps |= pdata->pm_caps;
->>>>>> -
->>>>>> -	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
->>>>>> -			 SDHCI_QUIRK_32BIT_DMA_SIZE);
->>>>>> +	/* It supports additional host capabilities if needed */
->>>>>> +	if (sc->pdata->host_caps)
->>>>>> +		host->mmc->caps |= sc->pdata->host_caps;
->>>>>>
->>>>>> -	/* HSMMC on Samsung SoCs uses SDCLK as timeout clock */
->>>>>> -	host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
->>>>>> +	if (sc->pdata->pm_caps)
->>>>>> +		host->mmc->pm_caps |= sc->pdata->pm_caps;
->>>>>>
->>>>>>  	/*
->>>>>>  	 * If controller does not have internal clock divider,
->>>>>> @@ -713,10 +669,6 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->>>>>>  		sdhci_s3c_ops.get_max_clock = sdhci_cmu_get_max_clock;
->>>>>>  	}
->>>>>>
->>>>>> -	/* It supports additional host capabilities if needed */
->>>>>> -	if (pdata->host_caps)
->>>>>> -		host->mmc->caps |= pdata->host_caps;
->>>>>> -
->>>>>>  	ret = sdhci_add_host(host);
->>>>>>  	if (ret) {
->>>>>>  		dev_err(dev, "sdhci_add_host() failed\n");
->>>>>> @@ -726,38 +678,35 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->>>>>>  	/* The following two methods of card detection might call
->>>>>>  	   sdhci_s3c_notify_change() immediately, so they can be called
->>>>>>  	   only after sdhci_add_host(). Setup errors are ignored. */
->>>>>> -	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_init)
->>>>>> -		pdata->ext_cd_init(&sdhci_s3c_notify_change);
->>>>>> -	if (pdata->cd_type == S3C_SDHCI_CD_GPIO &&
->>>>>> -	    gpio_is_valid(pdata->ext_cd_gpio))
->>>>>> +	if (sc->pdata->cd_type == S3C_SDHCI_CD_EXTERNAL &&
->>>>>> +			sc->pdata->ext_cd_init)
->>>>>> +		sc->pdata->ext_cd_init(&sdhci_s3c_notify_change);
->>>>>> +	if (sc->pdata->cd_type == S3C_SDHCI_CD_GPIO &&
->>>>>> +	    gpio_is_valid(sc->pdata->ext_cd_gpio))
->>>>>>  		sdhci_s3c_setup_card_detect_gpio(sc);
->>>>>>
->>>>>>  	return 0;
->>>>>>
->>>>>> - err_add_host:
->>>>>> -	release_resource(sc->ioarea);
->>>>>> -	kfree(sc->ioarea);
->>>>>> -
->>>>>> - err_req_regs:
->>>>>> +err_add_host:
->>>>>>  	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
->>>>>>  		if (sc->clk_bus[ptr]) {
->>>>>>  			clk_disable(sc->clk_bus[ptr]);
->>>>>>  			clk_put(sc->clk_bus[ptr]);
->>>>>>  		}
->>>>>>  	}
->>>>>> -
->>>>>> - err_no_busclks:
->>>>>> +err_no_busclks:
->>>>>>  	clk_disable(sc->clk_io);
->>>>>>  	clk_put(sc->clk_io);
->>>>>>
->>>>>> - err_io_clk:
->>>>>> +err_io_clk:
->>>>>>  	for (ptr = 0; ptr < NUM_GPIOS(sc->pdata->max_width); ptr++)
->>>>>>  		gpio_free(sc->gpios[ptr]);
->>>>>> -	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL)
->>>>>> +	if (sc->pdata->cd_type == S3C_SDHCI_CD_INTERNAL)
->>>>>>  		gpio_free(sc->ext_cd_gpio);
->>>>>>
->>>>>> - err_pdata:
->>>>>> -	sdhci_free_host(host);
->>>>>> +err_alloc_host:
->>>>>> +	sdhci_pltfm_free(pdev);
->>>>>> +	dev_err(&pdev->dev, "%s failed %d\n", __func__, ret);
->>>>>>
->>>>>>  	return ret;
->>>>>>  }
->>>>>> @@ -765,12 +714,13 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->>>>>>  static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
->>>>>>  {
->>>>>>  	struct sdhci_host *host =  platform_get_drvdata(pdev);
->>>>>> -	struct sdhci_s3c *sc = sdhci_priv(host);
->>>>>> -	struct s3c_sdhci_platdata *pdata = sc->pdata;
->>>>>> -	int ptr;
->>>>>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>>>> +	struct sdhci_s3c *sc = pltfm_host->priv;
->>>>>> +	int ptr, ret;
->>>>>>
->>>>>> -	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
->>>>>> -		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
->>>>>> +	if (sc->pdata->cd_type == S3C_SDHCI_CD_EXTERNAL &&
->>>>>> +			sc->pdata->ext_cd_cleanup)
->>>>>> +		sc->pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
->>>>>>
->>>>>>  	if (sc->ext_cd_irq)
->>>>>>  		free_irq(sc->ext_cd_irq, sc);
->>>>>> @@ -778,9 +728,9 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
->>>>>>  	if (gpio_is_valid(sc->ext_cd_gpio))
->>>>>>  		gpio_free(sc->ext_cd_gpio);
->>>>>>
->>>>>> -	sdhci_remove_host(host, 1);
->>>>>> +	ret = sdhci_pltfm_unregister(pdev);
->>>>>>
->>>>>> -	for (ptr = 0; ptr < 3; ptr++) {
->>>>>> +	for (ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
->>>>>>  		if (sc->clk_bus[ptr]) {
->>>>>>  			clk_disable(sc->clk_bus[ptr]);
->>>>>>  			clk_put(sc->clk_bus[ptr]);
->>>>>> @@ -789,48 +739,14 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
->>>>>>  	clk_disable(sc->clk_io);
->>>>>>  	clk_put(sc->clk_io);
->>>>>>
->>>>>> -	iounmap(host->ioaddr);
->>>>>> -	release_resource(sc->ioarea);
->>>>>> -	kfree(sc->ioarea);
->>>>>> -
->>>>>>  	if (pdev->dev.of_node) {
->>>>>>  		for (ptr = 0; ptr < NUM_GPIOS(sc->pdata->max_width); ptr++)
->>>>>>  			gpio_free(sc->gpios[ptr]);
->>>>>>  	}
->>>>>>
->>>>>> -	sdhci_free_host(host);
->>>>>> -	platform_set_drvdata(pdev, NULL);
->>>>>> -
->>>>>> -	return 0;
->>>>>> -}
->>>>>> -
->>>>>> -#ifdef CONFIG_PM
->>>>>> -
->>>>>> -static int sdhci_s3c_suspend(struct device *dev)
->>>>>> -{
->>>>>> -	struct sdhci_host *host = dev_get_drvdata(dev);
->>>>>> -
->>>>>> -	return sdhci_suspend_host(host);
->>>>>> -}
->>>>>> -
->>>>>> -static int sdhci_s3c_resume(struct device *dev)
->>>>>> -{
->>>>>> -	struct sdhci_host *host = dev_get_drvdata(dev);
->>>>>> -
->>>>>> -	return sdhci_resume_host(host);
->>>>>> +	return ret;
->>>>>>  }
->>>>>>
->>>>>> -static const struct dev_pm_ops sdhci_s3c_pmops = {
->>>>>> -	.suspend	= sdhci_s3c_suspend,
->>>>>> -	.resume		= sdhci_s3c_resume,
->>>>>> -};
->>>>>> -
->>>>>> -#define SDHCI_S3C_PMOPS (&sdhci_s3c_pmops)
->>>>>> -
->>>>>> -#else
->>>>>> -#define SDHCI_S3C_PMOPS NULL
->>>>>> -#endif
->>>>>> -
->>>>>>  #if defined(CONFIG_CPU_EXYNOS4210) || defined(CONFIG_SOC_EXYNOS4212)
->>>>>>  static struct sdhci_s3c_drv_data exynos4_sdhci_drv_data = {
->>>>>>  	.sdhci_quirks = SDHCI_QUIRK_NONSTANDARD_CLOCK,
->>>>>> @@ -870,7 +786,7 @@ static struct platform_driver sdhci_s3c_driver = {
->>>>>>  		.owner	= THIS_MODULE,
->>>>>>  		.name	= "s3c-sdhci",
->>>>>>  		.of_match_table = of_match_ptr(sdhci_s3c_dt_match),
->>>>>> -		.pm	= SDHCI_S3C_PMOPS,
->>>>>> +		.pm	= SDHCI_PLTFM_PMOPS,
->>>>>>  	},
->>>>>>  };
->>>>>>
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
