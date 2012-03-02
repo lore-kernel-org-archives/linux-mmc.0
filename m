@@ -1,102 +1,70 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5 device
-Date: Fri, 02 Mar 2012 09:09:05 +0900
-Message-ID: <004301ccf808$ae796580$0b6c3080$%jun@samsung.com>
-References: <4934441a17d25c3249556f7bf281b1be.squirrel@www.codeaurora.org>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH] ARM: OMAP: hsmmc: add max_freq field
+Date: Thu, 1 Mar 2012 16:11:21 -0800
+Message-ID: <20120302001121.GE18901@atomide.com>
+References: <1323868927-3738-1-git-send-email-zonque@gmail.com>
+ <CANrkHUY3Zf4a2K5769Z=7Wng339zB6+z_Tgd4mOPChZ1RvZ=Kw@mail.gmail.com>
+ <4EFC6992.4020501@gmail.com>
+ <CACTFLAMCoKfQbTe2RLTvi1_CH0nKzAOthAwrifNe2+F2sf3uPA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:46954 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755602Ab2CBAJN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Mar 2012 19:09:13 -0500
-In-reply-to: <4934441a17d25c3249556f7bf281b1be.squirrel@www.codeaurora.org>
-Content-language: ko
+Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:12448 "EHLO
+	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754650Ab2CBAL0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Mar 2012 19:11:26 -0500
+Content-Disposition: inline
+In-Reply-To: <CACTFLAMCoKfQbTe2RLTvi1_CH0nKzAOthAwrifNe2+F2sf3uPA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
+To: Daniel Mack <zonque@gmail.com>, Rajendra Nayak <rnayak@ti.com>
+Cc: "T Krishnamoorthy, Balaji" <balajitk@ti.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 
 Hi,
 
-Maya Erez <merez@codeaurora.org> wrote:
-> > This patch supports packed command of eMMC4.5 device.
-> > Several reads(or writes) can be grouped in packed command
-> > and all data of the individual commands can be sent in a
-> > single transfer on the bus.
+* Daniel Mack <zonque@gmail.com> [120217 05:13]:
+> ping? Could anyone care for queueing this please?
+=20
+I suggest Rajendra queue up omap_hsmmc.c patches as he's already
+patching it.
+
+Regards,
+
+Tony
+
+=20
+> On Thu, Dec 29, 2011 at 2:22 PM, Daniel Mack <zonque@gmail.com> wrote=
+:
+> > On 12/23/2011 04:40 PM, T Krishnamoorthy, Balaji wrote:
+> >> On Wed, Dec 14, 2011 at 6:52 PM, Daniel Mack <zonque@gmail.com> wr=
+ote:
+> >>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/oma=
+p_hsmmc.c
+> >>> index 101cd31..8215ef9 100644
+> >>> --- a/drivers/mmc/host/omap_hsmmc.c
+> >>> +++ b/drivers/mmc/host/omap_hsmmc.c
+> >>> @@ -1927,8 +1927,12 @@ static int __init omap_hsmmc_probe(struct =
+platform_device *pdev)
+> >>> =C2=A0 =C2=A0 =C2=A0 =C2=A0if (mmc_slot(host).vcc_aux_disable_is_=
+sleep)
+> >>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0mmc_slot(h=
+ost).no_off =3D 1;
+> >>>
+> >>> - =C2=A0 =C2=A0 =C2=A0 mmc->f_min =C2=A0 =C2=A0 =C2=A0=3D OMAP_MM=
+C_MIN_CLOCK;
+> >>> - =C2=A0 =C2=A0 =C2=A0 mmc->f_max =C2=A0 =C2=A0 =C2=A0=3D OMAP_MM=
+C_MAX_CLOCK;
+> >>> + =C2=A0 =C2=A0 =C2=A0 mmc->f_min =3D OMAP_MMC_MIN_CLOCK;
+> >>
+> >> Stray change for f_min ?
 > >
-> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> > ---
-> >  drivers/mmc/card/block.c   |  496
-> > +++++++++++++++++++++++++++++++++++++++++--
-> >  drivers/mmc/card/queue.c   |   48 ++++-
-> >  drivers/mmc/card/queue.h   |   13 ++
-> >  drivers/mmc/core/mmc_ops.c |    1 +
-> >  include/linux/mmc/core.h   |    4 +
-> >  5 files changed, 535 insertions(+), 27 deletions(-)
+> > No, this was intended. The indentation doesn't make sense anymore w=
+hen
+> > not grouped with the f_max assignment.
 > >
-> Hi,
-> 
-> We ran performance tests on the packed commands patch. We found out that
-> enabling the read packing didn't improve the performance in any of the
-> scenarios we ran (see the detailed results below).
-> Therefore, we suggest to move the read packing code to a different patch
-> and approve only the write packing code for now. The read packing adds
-> complexity to the code and we don't see a point in adding it while the
-> intention is to disable it.
-> 
-Thank you for test.
-What is your test tool?
-Is there any improvement point we can discuss for packed read?
-
-Thanks,
-Seungwon Jeon.
-
-> Test results:
-> 
-> Long read operation:
-> ----------------------
-> no-packing: 39.5 MB/s
-> packed commands patch (both READ and WRITE packing are enabled): 39.5 MB/s
-> packed commands patch + enabling only READ packing: 39.5 MB/s
-> 
-> Several parallel read operations (sum of all the read throughputs):
-> ---------------------------
-> no-packing: 42.6 MB/s
-> packed commands patch(both READ and WRITE packing are enabled): 38 MB/s
-> packed commands patch + enabling only READ packing: 38.2 MB/s
-> 
-> Parallel long read and long write operations (read throughput):
-> -----------------------------------------------------------------
-> no-packing: 23.8 MB/s
-> packed commands patch (both READ and WRITE packing are enabled): 12.6 MB/s
-> packed commands patch + enabling only READ packing: 12.5 MB/s
-> 
-> Parallel short read and long write operations (read throughput):
-> -----------------------------------------------------------------
-> no-packing: 22.9 MB/s
-> packed commands patch (both READ and WRITE packing are enabled): 8.4 MB/s
-> packed commands patch + enabling only READ packing: 8.6 MB/s
-> 
-> Several Parallel short read and short write operations (sum of all the
-> read throughputs):
-> --------------------------------------------------------------------------
-> no-packing: 41.6 MB/s
-> packed commands patch (both READ and WRITE packing are enabled): 35 MB/s
-> packed commands patch + enabling only READ packing: 36 MB/s
-> 
-> Thanks,
-> Maya Erez
-> Consultant for Qualcomm Innovation Center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-> 
-> 
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+> > Other than that, what is necessary to get this picked? Tony? :)
+> >
+> >
+> > Thanks,
+> > Daniel
