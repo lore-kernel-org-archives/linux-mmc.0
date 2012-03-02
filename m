@@ -1,148 +1,91 @@
-From: =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>
-Subject: Re: [PATCH] mmc: core: Clean up after mmc_pre_req if card was removed
-Date: Fri, 2 Mar 2012 16:29:42 +0100
-Message-ID: <4F50E766.9030802@stericsson.com>
-References: <1330616671-11952-1-git-send-email-ulf.hansson@stericsson.com> <4F508493.2000107@samsung.com> <4F508A24.50707@stericsson.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 1/4] gpiolib: Add gpiochip_find_by_name() and
+ gpio_find_by_chip_name()
+Date: Fri, 2 Mar 2012 09:03:27 -0800
+Message-ID: <20120302170327.GF18901@atomide.com>
+References: <20120301185044.29210.44521.stgit@kaulin.local>
+ <20120301185524.29210.60381.stgit@kaulin.local>
+ <20120302075804.F28DB3E2DB4@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:37406 "EHLO
-	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1030227Ab2CBPaQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 10:30:16 -0500
-In-Reply-To: <4F508A24.50707@stericsson.com>
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:43878 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751203Ab2CBRDb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 12:03:31 -0500
+Content-Disposition: inline
+In-Reply-To: <20120302075804.F28DB3E2DB4@localhost>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf HANSSON <ulf.hansson@stericsson.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>, Arnd Bergmann <arnd@arndb.de>, Rajendra Nayak <rnayak@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 03/02/2012 09:51 AM, Ulf HANSSON wrote:
-> Hi Jaehoon,
+Hi,
+
+Correcting a typo in the LKML address..
+
+* Grant Likely <grant.likely@secretlab.ca> [120302 01:00]:
+> On Thu, 01 Mar 2012 10:55:24 -0800, Tony Lindgren <tony@atomide.com> wrote:
+> > Currently there is no way for drivers to request a GPIO on a particular
+> > gpio chip. This makes it hard to support multiple GPIO controllers
+> > with dynamic GPIO and interrupt numbering, such as with CONFIG_SPARSE_IRQ.
+> > 
+> > Make it easier for device drivers to find GPIOs on a specific gpio_chip
+> > by adding two functions: gpiochip_find_by_name() and gpio_find_by_chip_name().
+> > 
+> > Note that as gpiochip_find() is already exported, we may as well
+> > export gpiochip_find_by_name() too.
 > 
-> I did not know this. Which host driver are you using? I would very much 
-> appreciate of you could debug and share some result.
+> How is the device going to know the name of the gpio controller?  I
+> don't particularly like interfaces that find devices by-names since
+> I don't think device names can be relied to be stable when devices
+> are instantiated from device tree data.
+
+The gpio_chip name + gpio offset is coming from pdata until things
+are converted over to use DT.
+
+For DT, this should not be needed, this is needed for removing callbacks
+in pdata so we can clean up some drivers and keep them working with
+both pdata and DT until things are converted over to DT.
+
+> > +static int match_name(struct gpio_chip *chip, void *data)
 > 
-> Thanks!
+> Even though this is a static, please keep the prefix to avoid
+> namespace conflicts.  gpiochip_match_name()
 > 
-> BR
-> Ulf Hansson
+> > +{
+> > +	const char *name = data;
 > 
-> On 03/02/2012 09:28 AM, Jaehoon Chung wrote:
->> Hi Ulf.
->>
->> I tested with this patch.
->> But in my environment, this patch didn't work fine before.
->> 1) When remove/insert, didn't entered the suspend.
->> 2) When removed during something write,
->> [   50.755067] FAT-fs (mmcblk1p1): Directory bread(block 8254) failed
->> [   50.761235] FAT-fs (mmcblk1p1): Directory bread(block 8255) failed
->> then at next-time, didn't detect sd-card.
->>
->> Did you know this?
->> If you want more information, i will debug, and share the result.
->>
->> Best Regards,
->> Jaehoon Chung
->>
->> On 03/02/2012 12:44 AM, Ulf Hansson wrote:
->>
->>> Make sure mmc_start_req cancel the prepared job, if the request
->>> was prevented to be started due to the card has been removed.
->>>
->>> This bug was introduced in commit:
->>> mmc: allow upper layers to know immediately if card has been removed
->>>
->>> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
->>> ---
->>>   drivers/mmc/core/core.c |   35 +++++++++++++++--------------------
->>>   1 files changed, 15 insertions(+), 20 deletions(-)
->>>
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> index 0b317f0..9e562ab 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -249,16 +249,17 @@ static void mmc_wait_done(struct mmc_request *mrq)
->>>   	complete(&mrq->completion);
->>>   }
->>>
->>> -static void __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
->>> +static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
->>>   {
->>>   	init_completion(&mrq->completion);
->>>   	mrq->done = mmc_wait_done;
->>>   	if (mmc_card_removed(host->card)) {
->>>   		mrq->cmd->error = -ENOMEDIUM;
->>>   		complete(&mrq->completion);
->>> -		return;
->>> +		return -ENOMEDIUM;
->>>   	}
->>>   	mmc_start_request(host, mrq);
->>> +	return 0;
->>>   }
->>>
->>>   static void mmc_wait_for_req_done(struct mmc_host *host,
->>> @@ -342,6 +343,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
->>>   				    struct mmc_async_req *areq, int *error)
->>>   {
->>>   	int err = 0;
->>> +	int start_err = 0;
->>>   	struct mmc_async_req *data = host->areq;
->>>
->>>   	/* Prepare a new request */
->>> @@ -351,30 +353,23 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
->>>   	if (host->areq) {
->>>   		mmc_wait_for_req_done(host, host->areq->mrq);
->>>   		err = host->areq->err_check(host->card, host->areq);
->>> -		if (err) {
->>> -			/* post process the completed failed request */
->>> -			mmc_post_req(host, host->areq->mrq, 0);
->>> -			if (areq)
->>> -				/*
->>> -				 * Cancel the new prepared request, because
->>> -				 * it can't run until the failed
->>> -				 * request has been properly handled.
->>> -				 */
->>> -				mmc_post_req(host, areq->mrq, -EINVAL);
->>> -
->>> -			host->areq = NULL;
->>> -			goto out;
->>> -		}
->>>   	}
->>>
->>> -	if (areq)
->>> -		__mmc_start_req(host, areq->mrq);
->>> +	if (!err&&  areq)
->>> +		start_err = __mmc_start_req(host, areq->mrq);
->>>
->>>   	if (host->areq)
->>>   		mmc_post_req(host, host->areq->mrq, 0);
->>>
->>> -	host->areq = areq;
->>> - out:
->>> +	if (err || start_err) {
->>> +		if (areq)
->>> +			/* The prepared request was not started, cancel it. */
->>> +			mmc_post_req(host, areq->mrq, -EINVAL);
->>> +		host->areq = NULL;
-There seems to be an issue when setting host->areq=NULL when __mmc_start_req fails. host->areq == NULL indicates there are no ongoing transfers.
-host->areq is used in block.c to check if there are pending requests. 
+> This is unnecessary; the void* can be passed directly to sysfs_streq...
+> but why is sysfs_streq being used here instead of strcmp?  This is 
+> not sysfs related code.
 
-This seem to work:
-...
-if (err || start_err) {
-	if (areq)
-		/* The prepared request was not started, cancel it. */
-		mmc_post_req(host, areq->mrq, -EINVAL);
-}
+That comes from the bus code, will take a look.
+ 
+> > +
+> > +	return sysfs_streq(name, chip->label);
+> > +}
+> > +
+> > +/**
+> > + * gpiochip_find_by_name() - iterator for locating a gpio_chip by name
+> > + * @name: name of the gpio_chip
+> > + *
+> > + * Similar to bus_find_device_by_name. It returns a reference to the
+> > + * first gpio_chip with matching name. It ignores NULL and empty names.
+> > + * If you need to do something more complex, then use gpiochip_find.
+> > + */
+> > +struct gpio_chip *gpiochip_find_by_name(const char *name)
+> > +{
+> > +	if (!name || !strcmp(name, ""))
+> > +		return NULL;
+> > +
+> > +	return gpiochip_find((void *)name, match_name);
+> 
+> Nasty cast.  Can the signature for gpiochip_find be changed to accept
+> a (const void *)?
 
-if (err)
-	host->areq = NULL;
-else
-	host->areq = areq;
-...
+I think so, this too comes from the bus code.
 
-This issue will be addressed in version 2. How to resolve it is not decided yet. 
+Regards,
 
-Feel free to comment,
-Per
+Tony 
