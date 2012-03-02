@@ -1,112 +1,68 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 1/4] gpiolib: Add gpiochip_find_by_name() and
- gpio_find_by_chip_name()
-Date: Fri, 2 Mar 2012 11:06:15 -0800
-Message-ID: <20120302190614.GO18901@atomide.com>
-References: <20120301185044.29210.44521.stgit@kaulin.local>
- <20120301185524.29210.60381.stgit@kaulin.local>
- <20120302075804.F28DB3E2DB4@localhost>
- <20120302170327.GF18901@atomide.com>
- <20120302180848.GM18901@atomide.com>
- <20120302184833.C296A3E1C63@localhost>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc sdhci i.MX5: make mmc cards work
+Date: Fri, 02 Mar 2012 15:34:17 -0500
+Message-ID: <m2y5rin3na.fsf@bob.laptop.org>
+References: <1329475909-29047-1-git-send-email-s.hauer@pengutronix.de>
+	<20120220063132.GA19668@S2101-09.ap.freescale.net>
+	<20120220184146.GZ3852@pengutronix.de>
+	<CAAQ0ZWTRQaiLjd+LoRG6V3gPKJTq-buiGk2FdO_eivqhqyFhRw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:60576 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759084Ab2CBTGT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 14:06:19 -0500
-Content-Disposition: inline
-In-Reply-To: <20120302184833.C296A3E1C63@localhost>
+Received: from void.printf.net ([89.145.121.20]:44558 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756622Ab2CBUe0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 2 Mar 2012 15:34:26 -0500
+In-Reply-To: <CAAQ0ZWTRQaiLjd+LoRG6V3gPKJTq-buiGk2FdO_eivqhqyFhRw@mail.gmail.com>
+	(Shawn Guo's message of "Tue, 21 Feb 2012 11:03:12 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>, Arnd Bergmann <arnd@arndb.de>, Rajendra Nayak <rnayak@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>
 
-* Grant Likely <grant.likely@secretlab.ca> [120302 10:16]:
-> On Fri, 2 Mar 2012 10:08:48 -0800, Tony Lindgren <tony@atomide.com> wrote:
-> > * Tony Lindgren <tony@atomide.com> [120302 08:31]:
-> > > * Grant Likely <grant.likely@secretlab.ca> [120302 01:00]:
-> > > > On Thu, 01 Mar 2012 10:55:24 -0800, Tony Lindgren <tony@atomide.com> wrote:
-> > > > > +
-> > > > > +/**
-> > > > > + * gpiochip_find_by_name() - iterator for locating a gpio_chip by name
-> > > > > + * @name: name of the gpio_chip
-> > > > > + *
-> > > > > + * Similar to bus_find_device_by_name. It returns a reference to the
-> > > > > + * first gpio_chip with matching name. It ignores NULL and empty names.
-> > > > > + * If you need to do something more complex, then use gpiochip_find.
-> > > > > + */
-> > > > > +struct gpio_chip *gpiochip_find_by_name(const char *name)
-> > > > > +{
-> > > > > +	if (!name || !strcmp(name, ""))
-> > > > > +		return NULL;
-> > > > > +
-> > > > > +	return gpiochip_find((void *)name, match_name);
-> > > > 
-> > > > Nasty cast.  Can the signature for gpiochip_find be changed to accept
-> > > > a (const void *)?
-> > > 
-> > > I think so, this too comes from the bus code.
-> > 
-> > Looks like it can't be const as of_node_to_gpiochip uses it with
-> > a struct device_node * that for of_get_named_gpio_flags comes from
-> > of_parse_phandle_with_args.
-> 
-> Really? It sees to work fine here:
+Hi,
 
-Hmm right you are. I must have missed adding the const to
-of_gpiochip_is_match, that's good news :)
+On Mon, Feb 20 2012, Shawn Guo wrote:
+> On 21 February 2012 02:41, Sascha Hauer <s.hauer@pengutronix.de> wrote:
+>> On Mon, Feb 20, 2012 at 02:31:36PM +0800, Shawn Guo wrote:
+>>> I do not have a mmc card to test the patch, but I tested it and
+>>> confirmed it does not break anything about SD support.
+>>>
+>>> On Fri, Feb 17, 2012 at 11:51:49AM +0100, Sascha Hauer wrote:
+>>> > On i.MX53 we have to write a special SDHCI_CMD_ABORTCMD to the
+>>>
+>>> Is this i.MX53 only?
+>>
+>> Don't know. I don't think I have ever explicitely tested MMC cards on
+>> !i.MX53 boards.
+>>
+>>>
+>>> > SDHCI_TRANSFER_MODE register during a MMC_STOP_TRANSMISSION
+>>> > command. This works for SD cards. However, with MMC cards
+>>> > the MMC_SET_BLOCK_COUNT command is used instead, but this needs
+>>> > the same handling. Fix MMC cards by testing for the
+>>> > MMC_SET_BLOCK_COUNT command aswell. Tested on a custom i.MX53
+>>> > board with a Transcend MMC+ card and eMMC.
+>>> >
+>>> I did not find the similar handling in FSL internal tree, but I think
+>>> that FSL QA team should have tested it with MMC/eMMC card.
+>>
+>> Which kernel did they test this on? The mmc core uses the
+>> MMC_SET_BLOCK_COUNT command since v3.0-rc1. Earlier kernels
+>> probably worked.
+>>
+> FSL internal tree was recently upgraded to v3.0, and I just knew from
+> QA team that they tested the new tree with a Sandisk eMMC card and it
+> worked, but have not found a Transcend card to test.  Since you are
+> fixing a problem you are actually seeing and the patch does not break
+> anything with my testing, so
+>
+> Acked-by: Shawn Guo <shawn.guo@linaro.org>
 
-Want to do that as a separate patch or want me to fold it in?
+Thanks, pushed to mmc-next for 3.3.  It sounds like you'd like this to
+go to 3.{0,1,2}-stable, too?
 
-Tony
- 
-> ---
-> 
-> diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
-> index d773540..e633a2a 100644
-> --- a/drivers/gpio/gpiolib.c
-> +++ b/drivers/gpio/gpiolib.c
-> @@ -1152,8 +1152,9 @@ EXPORT_SYMBOL_GPL(gpiochip_remove);
->   * non-zero, this function will return to the caller and not iterate over any
->   * more gpio_chips.
->   */
-> -struct gpio_chip *gpiochip_find(void *data,
-> -				int (*match)(struct gpio_chip *chip, void *data))
-> +struct gpio_chip *gpiochip_find(const void *data,
-> +				int (*match)(struct gpio_chip *chip,
-> +					     const void *data))
->  {
->  	struct gpio_chip *chip = NULL;
->  	unsigned long flags;
-> diff --git a/drivers/of/gpio.c b/drivers/of/gpio.c
-> index e034b38..bba8121 100644
-> --- a/drivers/of/gpio.c
-> +++ b/drivers/of/gpio.c
-> @@ -229,7 +229,7 @@ void of_gpiochip_remove(struct gpio_chip *chip)
->  }
->  
->  /* Private function for resolving node pointer to gpio_chip */
-> -static int of_gpiochip_is_match(struct gpio_chip *chip, void *data)
-> +static int of_gpiochip_is_match(struct gpio_chip *chip, const void *data)
->  {
->  	return chip->of_node == data;
->  }
-> diff --git a/include/asm-generic/gpio.h b/include/asm-generic/gpio.h
-> index 1ff4e22..5f52690 100644
-> --- a/include/asm-generic/gpio.h
-> +++ b/include/asm-generic/gpio.h
-> @@ -142,9 +142,9 @@ extern int __must_check gpiochip_reserve(int start, int ngpio);
->  /* add/remove chips */
->  extern int gpiochip_add(struct gpio_chip *chip);
->  extern int __must_check gpiochip_remove(struct gpio_chip *chip);
-> -extern struct gpio_chip *gpiochip_find(void *data,
-> +extern struct gpio_chip *gpiochip_find(const void *data,
->  					int (*match)(struct gpio_chip *chip,
-> -						     void *data));
-> +						     const void *data));
->  
->  
->  /* Always use the library code for GPIO management calls,
-> 
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
