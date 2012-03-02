@@ -1,131 +1,148 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [RESEND PATCH] mmc: core: Fixup suspend/resume issues for UHS-I
- cards
-Date: Fri, 2 Mar 2012 15:29:46 +0100
-Message-ID: <4F50D95A.8000600@stericsson.com>
-References: <1330616897-12032-1-git-send-email-ulf.hansson@stericsson.com>
+From: =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>
+Subject: Re: [PATCH] mmc: core: Clean up after mmc_pre_req if card was removed
+Date: Fri, 2 Mar 2012 16:29:42 +0100
+Message-ID: <4F50E766.9030802@stericsson.com>
+References: <1330616671-11952-1-git-send-email-ulf.hansson@stericsson.com> <4F508493.2000107@samsung.com> <4F508A24.50707@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:49258 "EHLO
-	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S964854Ab2CBOaN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 09:30:13 -0500
-In-Reply-To: <1330616897-12032-1-git-send-email-ulf.hansson@stericsson.com>
+Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:37406 "EHLO
+	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1030227Ab2CBPaQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 10:30:16 -0500
+In-Reply-To: <4F508A24.50707@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
-Cc: Ulf HANSSON <ulf.hansson@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: Ulf HANSSON <ulf.hansson@stericsson.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi,
+On 03/02/2012 09:51 AM, Ulf HANSSON wrote:
+> Hi Jaehoon,
+> 
+> I did not know this. Which host driver are you using? I would very much 
+> appreciate of you could debug and share some result.
+> 
+> Thanks!
+> 
+> BR
+> Ulf Hansson
+> 
+> On 03/02/2012 09:28 AM, Jaehoon Chung wrote:
+>> Hi Ulf.
+>>
+>> I tested with this patch.
+>> But in my environment, this patch didn't work fine before.
+>> 1) When remove/insert, didn't entered the suspend.
+>> 2) When removed during something write,
+>> [   50.755067] FAT-fs (mmcblk1p1): Directory bread(block 8254) failed
+>> [   50.761235] FAT-fs (mmcblk1p1): Directory bread(block 8255) failed
+>> then at next-time, didn't detect sd-card.
+>>
+>> Did you know this?
+>> If you want more information, i will debug, and share the result.
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>> On 03/02/2012 12:44 AM, Ulf Hansson wrote:
+>>
+>>> Make sure mmc_start_req cancel the prepared job, if the request
+>>> was prevented to be started due to the card has been removed.
+>>>
+>>> This bug was introduced in commit:
+>>> mmc: allow upper layers to know immediately if card has been removed
+>>>
+>>> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
+>>> ---
+>>>   drivers/mmc/core/core.c |   35 +++++++++++++++--------------------
+>>>   1 files changed, 15 insertions(+), 20 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>> index 0b317f0..9e562ab 100644
+>>> --- a/drivers/mmc/core/core.c
+>>> +++ b/drivers/mmc/core/core.c
+>>> @@ -249,16 +249,17 @@ static void mmc_wait_done(struct mmc_request *mrq)
+>>>   	complete(&mrq->completion);
+>>>   }
+>>>
+>>> -static void __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+>>> +static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+>>>   {
+>>>   	init_completion(&mrq->completion);
+>>>   	mrq->done = mmc_wait_done;
+>>>   	if (mmc_card_removed(host->card)) {
+>>>   		mrq->cmd->error = -ENOMEDIUM;
+>>>   		complete(&mrq->completion);
+>>> -		return;
+>>> +		return -ENOMEDIUM;
+>>>   	}
+>>>   	mmc_start_request(host, mrq);
+>>> +	return 0;
+>>>   }
+>>>
+>>>   static void mmc_wait_for_req_done(struct mmc_host *host,
+>>> @@ -342,6 +343,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>>>   				    struct mmc_async_req *areq, int *error)
+>>>   {
+>>>   	int err = 0;
+>>> +	int start_err = 0;
+>>>   	struct mmc_async_req *data = host->areq;
+>>>
+>>>   	/* Prepare a new request */
+>>> @@ -351,30 +353,23 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>>>   	if (host->areq) {
+>>>   		mmc_wait_for_req_done(host, host->areq->mrq);
+>>>   		err = host->areq->err_check(host->card, host->areq);
+>>> -		if (err) {
+>>> -			/* post process the completed failed request */
+>>> -			mmc_post_req(host, host->areq->mrq, 0);
+>>> -			if (areq)
+>>> -				/*
+>>> -				 * Cancel the new prepared request, because
+>>> -				 * it can't run until the failed
+>>> -				 * request has been properly handled.
+>>> -				 */
+>>> -				mmc_post_req(host, areq->mrq, -EINVAL);
+>>> -
+>>> -			host->areq = NULL;
+>>> -			goto out;
+>>> -		}
+>>>   	}
+>>>
+>>> -	if (areq)
+>>> -		__mmc_start_req(host, areq->mrq);
+>>> +	if (!err&&  areq)
+>>> +		start_err = __mmc_start_req(host, areq->mrq);
+>>>
+>>>   	if (host->areq)
+>>>   		mmc_post_req(host, host->areq->mrq, 0);
+>>>
+>>> -	host->areq = areq;
+>>> - out:
+>>> +	if (err || start_err) {
+>>> +		if (areq)
+>>> +			/* The prepared request was not started, cancel it. */
+>>> +			mmc_post_req(host, areq->mrq, -EINVAL);
+>>> +		host->areq = NULL;
+There seems to be an issue when setting host->areq=NULL when __mmc_start_req fails. host->areq == NULL indicates there are no ongoing transfers.
+host->areq is used in block.c to check if there are pending requests. 
 
-The reason for the RESEND was due to a missed removal of a "gerrit 
-change id". The patch has not change as such.
+This seem to work:
+...
+if (err || start_err) {
+	if (areq)
+		/* The prepared request was not started, cancel it. */
+		mmc_post_req(host, areq->mrq, -EINVAL);
+}
 
-Br
-Ulf Hansson
+if (err)
+	host->areq = NULL;
+else
+	host->areq = areq;
+...
 
-On 03/01/2012 04:48 PM, Ulf HANSSON wrote:
-> Even if cards supports 1.8V I/O voltage those should anyway be
-> initialized at 3.3V I/O according to (e)MMC, SD and SDIO specs.
-> Some eMMC and embedded SDIO devices are able to be initialized
-> at 1.8V as well, but it is better to be safe.
->
-> Do note that initialization in this context means that the card
-> has been completely powered off, otherwise the card will remain
-> at the last I/O voltage level that were negotitiated.
->
-> Due to the above being taken care of the suspend/resume issues
-> for UHS-I SD-cards has been fixed.
->
-> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
-> ---
->   drivers/mmc/core/core.c |    3 +++
->   drivers/mmc/core/mmc.c  |    3 +++
->   drivers/mmc/core/sd.c   |    8 +++-----
->   drivers/mmc/core/sdio.c |    9 +++++++++
->   4 files changed, 18 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 0b317f0..faa0af1 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2074,6 +2074,9 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
->   	 */
->   	mmc_hw_reset_for_init(host);
->
-> +	/* Initialization should be done at 3.3 V I/O voltage. */
-> +	mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
-> +
->   	/*
->   	 * sdio_reset sends CMD52 to reset card.  Since we do not know
->   	 * if the card is being re-initialized, just send it.  CMD52
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 6b13776..6defddd 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -830,6 +830,9 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->   	if (!mmc_host_is_spi(host))
->   		mmc_set_bus_mode(host, MMC_BUSMODE_OPENDRAIN);
->
-> +	/* Initialization should be done at 3.3 V I/O voltage. */
-> +	mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
-> +
->   	/*
->   	 * Since we're changing the OCR value, we seem to
->   	 * need to tell some cards to go back to the idle
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 5017f93..c272c686 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -911,6 +911,9 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
->   	BUG_ON(!host);
->   	WARN_ON(!host->claimed);
->
-> +	/* The initialization should be done at 3.3 V I/O voltage. */
-> +	mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
-> +
->   	err = mmc_sd_get_cid(host, ocr, cid,&rocr);
->   	if (err)
->   		return err;
-> @@ -1156,11 +1159,6 @@ int mmc_attach_sd(struct mmc_host *host)
->   	BUG_ON(!host);
->   	WARN_ON(!host->claimed);
->
-> -	/* Make sure we are at 3.3V signalling voltage */
-> -	err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, false);
-> -	if (err)
-> -		return err;
-> -
->   	/* Disable preset value enable if already set since last time */
->   	if (host->ops->enable_preset_value) {
->   		mmc_host_clk_hold(host);
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index 12cde6e..dac2e23 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -585,6 +585,10 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
->   	 * Inform the card of the voltage
->   	 */
->   	if (!powered_resume) {
-> +
-> +		/* The initialization should be done at 3.3 V I/O voltage. */
-> +		mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
-> +
->   		err = mmc_send_io_op_cond(host, host->ocr,&ocr);
->   		if (err)
->   			goto err;
-> @@ -996,6 +1000,11 @@ static int mmc_sdio_power_restore(struct mmc_host *host)
->   	 * With these steps taken, mmc_select_voltage() is also required to
->   	 * restore the correct voltage setting of the card.
->   	 */
-> +
-> +	if (!mmc_card_keep_power(host))
-> +		/* The initialization should be done at 3.3 V I/O voltage. */
-> +		mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, 0);
-> +
->   	sdio_reset(host);
->   	mmc_go_idle(host);
->   	mmc_send_if_cond(host, host->ocr_avail);
+This issue will be addressed in version 2. How to resolve it is not decided yet. 
 
+Feel free to comment,
+Per
