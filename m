@@ -1,86 +1,135 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH] ARM: OMAP: hsmmc: add max_freq field
-Date: Fri, 2 Mar 2012 14:44:00 +0530
-Message-ID: <CANfBPZ-aezGCxSc5rUdU8fHxhPMQ5qx1D6zAtmwGyoBDz3YKtA@mail.gmail.com>
-References: <1323868927-3738-1-git-send-email-zonque@gmail.com>
- <CANrkHUY3Zf4a2K5769Z=7Wng339zB6+z_Tgd4mOPChZ1RvZ=Kw@mail.gmail.com>
- <4EFC6992.4020501@gmail.com> <CACTFLAMCoKfQbTe2RLTvi1_CH0nKzAOthAwrifNe2+F2sf3uPA@mail.gmail.com>
- <20120302001121.GE18901@atomide.com> <CANfBPZ8Oypwqq2p3rcNpp5M8+XPHDmUxMRw2J5Jw5DdAKQj8cw@mail.gmail.com>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH 1/4] gpiolib: Add gpiochip_find_by_name() and gpio_find_by_chip_name()
+Date: Fri, 02 Mar 2012 00:58:04 -0700
+Message-ID: <20120302075804.F28DB3E2DB4@localhost>
+References: <20120301185044.29210.44521.stgit@kaulin.local> <20120301185524.29210.60381.stgit@kaulin.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aob106.obsmtp.com ([74.125.149.76]:46520 "EHLO
-	na3sys009aog106.obsmtp.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1757826Ab2CBJOY convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 2 Mar 2012 04:14:24 -0500
-Received: by bkcjg9 with SMTP id jg9so1594323bkc.32
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Mar 2012 01:14:20 -0800 (PST)
-In-Reply-To: <CANfBPZ8Oypwqq2p3rcNpp5M8+XPHDmUxMRw2J5Jw5DdAKQj8cw@mail.gmail.com>
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:34437 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756362Ab2CBJcE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 04:32:04 -0500
+Received: by mail-pz0-f46.google.com with SMTP id r28so1796222daj.19
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Mar 2012 01:32:03 -0800 (PST)
+In-Reply-To: <20120301185524.29210.60381.stgit@kaulin.local>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Chris Ball <cjb@laptop.org>
-Cc: Daniel Mack <zonque@gmail.com>, Rajendra Nayak <rnayak@ti.com>, "T Krishnamoorthy, Balaji" <balajitk@ti.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>, linuxkernel@vger.kernel.org
+Cc: Linus Walleij <linus.walleij@stericsson.com>, Arnd Bergmann <arnd@arndb.de>, Rajendra Nayak <rnayak@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Fri, Mar 2, 2012 at 12:41 PM, S, Venkatraman <svenkatr@ti.com> wrote=
-:
-> +Chris queues all MMC patches including omap_hsmmc.
-> Ping ?
->
-Just realized that it's already queued in mmc-next
-http://git.kernel.org/?p=3Dlinux/kernel/git/cjb/mmc.git;a=3Dcommitdiff;=
-h=3D25d6ba8171995230b3757c78c7470fa76a931b98
+On Thu, 01 Mar 2012 10:55:24 -0800, Tony Lindgren <tony@atomide.com> wrote:
+> Currently there is no way for drivers to request a GPIO on a particular
+> gpio chip. This makes it hard to support multiple GPIO controllers
+> with dynamic GPIO and interrupt numbering, such as with CONFIG_SPARSE_IRQ.
+> 
+> Make it easier for device drivers to find GPIOs on a specific gpio_chip
+> by adding two functions: gpiochip_find_by_name() and gpio_find_by_chip_name().
+> 
+> Note that as gpiochip_find() is already exported, we may as well
+> export gpiochip_find_by_name() too.
 
+How is the device going to know the name of the gpio controller?  I
+don't particularly like interfaces that find devices by-names since
+I don't think device names can be relied to be stable when devices
+are instantiated from device tree data.
 
->
-> On Fri, Mar 2, 2012 at 5:41 AM, Tony Lindgren <tony@atomide.com> wrot=
-e:
->> Hi,
->>
->> * Daniel Mack <zonque@gmail.com> [120217 05:13]:
->>> ping? Could anyone care for queueing this please?
->>
->> I suggest Rajendra queue up omap_hsmmc.c patches as he's already
->> patching it.
->>
->> Regards,
->>
->> Tony
->>
->>
->>> On Thu, Dec 29, 2011 at 2:22 PM, Daniel Mack <zonque@gmail.com> wro=
-te:
->>> > On 12/23/2011 04:40 PM, T Krishnamoorthy, Balaji wrote:
->>> >> On Wed, Dec 14, 2011 at 6:52 PM, Daniel Mack <zonque@gmail.com> =
-wrote:
->>> >>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/o=
-map_hsmmc.c
->>> >>> index 101cd31..8215ef9 100644
->>> >>> --- a/drivers/mmc/host/omap_hsmmc.c
->>> >>> +++ b/drivers/mmc/host/omap_hsmmc.c
->>> >>> @@ -1927,8 +1927,12 @@ static int __init omap_hsmmc_probe(struc=
-t platform_device *pdev)
->>> >>> =A0 =A0 =A0 =A0if (mmc_slot(host).vcc_aux_disable_is_sleep)
->>> >>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_slot(host).no_off =3D 1;
->>> >>>
->>> >>> - =A0 =A0 =A0 mmc->f_min =A0 =A0 =A0=3D OMAP_MMC_MIN_CLOCK;
->>> >>> - =A0 =A0 =A0 mmc->f_max =A0 =A0 =A0=3D OMAP_MMC_MAX_CLOCK;
->>> >>> + =A0 =A0 =A0 mmc->f_min =3D OMAP_MMC_MIN_CLOCK;
->>> >>
->>> >> Stray change for f_min ?
->>> >
->>> > No, this was intended. The indentation doesn't make sense anymore=
- when
->>> > not grouped with the f_max assignment.
->>> >
->>> > Other than that, what is necessary to get this picked? Tony? :)
->>> >
->>> >
->>> > Thanks,
->>> > Daniel
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> 
+> Cc: Grant Likely <grant.likely@secretlab.ca>
+> Cc: Linus Walleij <linus.walleij@stericsson.com>
+> Cc: Arnd Bergmann <arnd@arndb.de>
+> Cc: Rajendra Nayak <rnayak@ti.com>
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
+> ---
+>  drivers/gpio/gpiolib.c     |   47 ++++++++++++++++++++++++++++++++++++++++++++
+>  include/asm-generic/gpio.h |    3 ++-
+>  2 files changed, 49 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
+> index 17fdf4b..0e5bf55 100644
+> --- a/drivers/gpio/gpiolib.c
+> +++ b/drivers/gpio/gpiolib.c
+> @@ -1173,6 +1173,53 @@ struct gpio_chip *gpiochip_find(void *data,
+>  }
+>  EXPORT_SYMBOL_GPL(gpiochip_find);
+>  
+> +static int match_name(struct gpio_chip *chip, void *data)
+
+Even though this is a static, please keep the prefix to avoid
+namespace conflicts.  gpiochip_match_name()
+
+> +{
+> +	const char *name = data;
+
+This is unnecessary; the void* can be passed directly to sysfs_streq...
+but why is sysfs_streq being used here instead of strcmp?  This is 
+not sysfs related code.
+
+> +
+> +	return sysfs_streq(name, chip->label);
+> +}
+> +
+> +/**
+> + * gpiochip_find_by_name() - iterator for locating a gpio_chip by name
+> + * @name: name of the gpio_chip
+> + *
+> + * Similar to bus_find_device_by_name. It returns a reference to the
+> + * first gpio_chip with matching name. It ignores NULL and empty names.
+> + * If you need to do something more complex, then use gpiochip_find.
+> + */
+> +struct gpio_chip *gpiochip_find_by_name(const char *name)
+> +{
+> +	if (!name || !strcmp(name, ""))
+> +		return NULL;
+> +
+> +	return gpiochip_find((void *)name, match_name);
+
+Nasty cast.  Can the signature for gpiochip_find be changed to accept
+a (const void *)?
+
+> +}
+> +EXPORT_SYMBOL_GPL(gpiochip_find_by_name);
+> +
+> +/**
+> + * gpio_find_by_chip_name() - find a gpio on a specific gpio_chip
+> + * @chip_name: name of the gpio_chip
+> + * @gpio_offset: offset of the gpio on the gpio_chip
+> + *
+> + * Note that gpiochip_find_by_name returns the first matching
+> + * gpio_chip name. For more complex matching, see gpio_find.
+> + */
+> +int gpio_find_by_chip_name(const char *chip_name, unsigned gpio_offset)
+> +{
+> +	struct gpio_chip *chip;
+> +	int gpio, res;
+> +
+> +	chip = gpiochip_find_by_name(chip_name);
+> +	if (!chip)
+> +		return -ENODEV;
+> +
+> +	gpio = chip->base + gpio_offset;
+> +
+> +	return gpio;
+> +}
+> +EXPORT_SYMBOL_GPL(gpio_find_by_chip_name);
+> +
+>  /* These "optional" allocation calls help prevent drivers from stomping
+>   * on each other, and help provide better diagnostics in debugfs.
+>   * They're called even less than the "set direction" calls.
+> diff --git a/include/asm-generic/gpio.h b/include/asm-generic/gpio.h
+> index 1ff4e22..d7a2100 100644
+> --- a/include/asm-generic/gpio.h
+> +++ b/include/asm-generic/gpio.h
+> @@ -145,7 +145,8 @@ extern int __must_check gpiochip_remove(struct gpio_chip *chip);
+>  extern struct gpio_chip *gpiochip_find(void *data,
+>  					int (*match)(struct gpio_chip *chip,
+>  						     void *data));
+> -
+> +extern struct gpio_chip *gpiochip_find_by_name(const char *name);
+> +extern int gpio_find_by_chip_name(const char *chip_name, unsigned gpio_offset);
+>  
+>  /* Always use the library code for GPIO management calls,
+>   * or when sleeping may be involved.
+> 
+
+-- 
+email sent from notmuch.vim plugin
