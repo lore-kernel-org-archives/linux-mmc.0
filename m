@@ -1,53 +1,69 @@
 From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 2/4] mmc: omap_hsmmc: Use gpio_find_by_chip_name() for
- omap_hsmmc_gpio_init()
-Date: Fri, 2 Mar 2012 09:08:30 -0800
-Message-ID: <20120302170830.GH18901@atomide.com>
+Subject: Re: [PATCH 3/4] mmc: omap_hsmmc: Use GPIO offset for external GPIO
+ chips
+Date: Fri, 2 Mar 2012 09:16:46 -0800
+Message-ID: <20120302171646.GI18901@atomide.com>
 References: <20120301185044.29210.44521.stgit@kaulin.local>
- <20120301185528.29210.85854.stgit@kaulin.local>
- <4F5075EE.1050902@ti.com>
+ <20120301185532.29210.32421.stgit@kaulin.local>
+ <4F50628C.9080706@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-01-ewr.mailhop.org ([204.13.248.71]:27018 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755994Ab2CBRId (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 12:08:33 -0500
+Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4F5075EE.1050902@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <4F50628C.9080706@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
 To: Rajendra Nayak <rnayak@ti.com>
-Cc: linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
-* Rajendra Nayak <rnayak@ti.com> [120301 22:54]:
+* Rajendra Nayak <rnayak@ti.com> [120301 21:31]:
 > On Friday 02 March 2012 12:25 AM, Tony Lindgren wrote:
-> >+		if (slot->gpiochip_cd) {
-> >+			pr_warning("MMC %s card detect GPIO chip %s unavailable\n",
-> >+				slot->name, slot->gpiochip_cd);
-> >+			ret = -ENODEV;
-> >+			goto err_free_sp;
+> >--- a/arch/arm/mach-omap2/board-3430sdp.c
+> >+++ b/arch/arm/mach-omap2/board-3430sdp.c
+> >@@ -231,14 +231,16 @@ static struct omap2_hsmmc_info mmc[] = {
+> >  		 * so the SIM card isn't used; else 4 bits.
+> >  		 */
+> >  		.caps		= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA,
+> >+		.gpiochip_cd	= "twl4030_gpio",
+> >+		.gpio_cd	= 0,	/* mmc0_cd offset in twl4030 */
+> >  		.gpio_wp	= 4,
+> >-		.deferred	= true,
 > 
-> This should just return -ENODEV, nothing really to free here.
+> Shouldn't this patch completely get rid of all the 'deferred'
+> infrastructure that was put in place, including the
+> omap_hsmmc_late_init() function, since there is no need for it
+> anymore?
+
+Yes, that was needed as a fix so unfortunately there's a little
+bit going back and forth. But now we can get rid of other stuff
+too in addition to deferred omap_hsmmc_late_init(), we can remove
+init and cleanup callbacks for hsmmc. I'll do another patch for
+that.
+
+> >--- a/arch/arm/mach-omap2/board-omap3pandora.c
+> >+++ b/arch/arm/mach-omap2/board-omap3pandora.c
+> >@@ -270,19 +270,19 @@ static struct omap2_hsmmc_info omap3pandora_mmc[] = {
+> >  	{
+> >  		.mmc		= 1,
+> >  		.caps		= MMC_CAP_4_BIT_DATA,
+> >-		.gpio_cd	= -EINVAL,
+> >+		.gpiochip_cd	= "twl4030_gpio",
+> >+		.gpio_cd	= 0,	/* mmc0_cd offset in twl4030 */
+> >  		.gpio_wp	= 126,
+> >  		.ext_clock	= 0,
+> >-		.deferred	= true,
+> >  	},
+> >  	{
+> >  		.mmc		= 2,
+> >  		.caps		= MMC_CAP_4_BIT_DATA,
+> >-		.gpio_cd	= -EINVAL,
+> >+		.gpiochip_cd	= "twl4030_gpio",
+> >+		.gpio_cd	= 0,	/* mmc0_cd offset in twl4030 */
+> 
+> This one should be gpio_cd = 1,
 
 Thanks, will correct.
- 
-> >@@ -2093,8 +2123,7 @@ err1:
-> >  	platform_set_drvdata(pdev, NULL);
-> >  	mmc_free_host(mmc);
-> >  err_alloc:
-> >-	omap_hsmmc_gpio_free(pdata);
-> >-err:
-> >+	omap_hsmmc_gpio_free(host);
-> 
-> This error handling needs to be fixed up. In case
-> omap_hsmmc_gpio_init() fails, which already frees up
-> any requested gpios, omap_hsmmc_gpio_free() again tries
-> freeing gpios.
-
-Hmm that sounds like a separate patch that should be a fixed
-before this series?
 
 Regards,
 
-Tony
+Tony 
