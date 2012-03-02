@@ -1,211 +1,133 @@
-From: Rajendra Nayak <rnayak@ti.com>
-Subject: Re: [PATCH 2/4] mmc: omap_hsmmc: Use gpio_find_by_chip_name() for
- omap_hsmmc_gpio_init()
-Date: Fri, 02 Mar 2012 12:55:34 +0530
-Message-ID: <4F5075EE.1050902@ti.com>
-References: <20120301185044.29210.44521.stgit@kaulin.local> <20120301185528.29210.85854.stgit@kaulin.local>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: core: Clean up after mmc_pre_req if card was removed
+Date: Fri, 02 Mar 2012 17:28:03 +0900
+Message-ID: <4F508493.2000107@samsung.com>
+References: <1330616671-11952-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20120301185528.29210.85854.stgit@kaulin.local>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:30333 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754838Ab2CBI2H (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 03:28:07 -0500
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0M09004630SOPC80@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 02 Mar 2012 17:28:04 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0M0900AEJ0UROI30@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 02 Mar 2012 17:28:04 +0900 (KST)
+In-reply-to: <1330616671-11952-1-git-send-email-ulf.hansson@stericsson.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-On Friday 02 March 2012 12:25 AM, Tony Lindgren wrote:
-> Use gpio_find_by_chip_name() to find the GPIO pins as they can
-> be dynamically allocated on various gpio_chips.
->
-> Note that we don't want to touch the platform data as it can
-> now specify the GPIO offset on a named gpio_chip.
->
-> This removes the need to use callbacks to set the GPIO pins
-> in platform data.
->
-> Cc: Chris Ball<cjb@laptop.org>
-> Cc: Grant Likely<grant.likely@secretlab.ca>
-> Cc: Rajendra Nayak<rnayak@ti.com>
-> Signed-off-by: Tony Lindgren<tony@atomide.com>
+Hi Ulf.
+
+I tested with this patch.
+But in my environment, this patch didn't work fine before.
+1) When remove/insert, didn't entered the suspend.
+2) When removed during something write,
+[   50.755067] FAT-fs (mmcblk1p1): Directory bread(block 8254) failed
+[   50.761235] FAT-fs (mmcblk1p1): Directory bread(block 8255) failed
+then at next-time, didn't detect sd-card.
+
+Did you know this?
+If you want more information, i will debug, and share the result.
+
+Best Regards,
+Jaehoon Chung
+
+On 03/02/2012 12:44 AM, Ulf Hansson wrote:
+
+> Make sure mmc_start_req cancel the prepared job, if the request
+> was prevented to be started due to the card has been removed.
+> 
+> This bug was introduced in commit:
+> mmc: allow upper layers to know immediately if card has been removed
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
 > ---
-
-some more comments based on my testing with twl4030-gpio
-built as a module..
-
->   arch/arm/mach-omap2/hsmmc.c           |    3 +
->   arch/arm/mach-omap2/hsmmc.h           |    5 ++
->   arch/arm/plat-omap/include/plat/mmc.h |    3 +
->   drivers/gpio/gpio-twl4030.c           |    2 +
->   drivers/mmc/host/omap_hsmmc.c         |  109 +++++++++++++++++++++------------
->   5 files changed, 82 insertions(+), 40 deletions(-)
->
-> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-> index a97876d..dda88f7 100644
-> --- a/arch/arm/mach-omap2/hsmmc.c
-> +++ b/arch/arm/mach-omap2/hsmmc.c
-> @@ -323,7 +323,10 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
-
-> @@ -497,55 +502,80 @@ static inline int omap_hsmmc_have_reg(void)
->
->   #endif
->
-> -static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
-> +static int omap_hsmmc_gpio_init(struct omap_hsmmc_host *host)
->   {
-> -	int ret;
+>  drivers/mmc/core/core.c |   35 +++++++++++++++--------------------
+>  1 files changed, 15 insertions(+), 20 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 0b317f0..9e562ab 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -249,16 +249,17 @@ static void mmc_wait_done(struct mmc_request *mrq)
+>  	complete(&mrq->completion);
+>  }
+>  
+> -static void __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+> +static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+>  {
+>  	init_completion(&mrq->completion);
+>  	mrq->done = mmc_wait_done;
+>  	if (mmc_card_removed(host->card)) {
+>  		mrq->cmd->error = -ENOMEDIUM;
+>  		complete(&mrq->completion);
+> -		return;
+> +		return -ENOMEDIUM;
+>  	}
+>  	mmc_start_request(host, mrq);
+> +	return 0;
+>  }
+>  
+>  static void mmc_wait_for_req_done(struct mmc_host *host,
+> @@ -342,6 +343,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>  				    struct mmc_async_req *areq, int *error)
+>  {
+>  	int err = 0;
+> +	int start_err = 0;
+>  	struct mmc_async_req *data = host->areq;
+>  
+>  	/* Prepare a new request */
+> @@ -351,30 +353,23 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>  	if (host->areq) {
+>  		mmc_wait_for_req_done(host, host->areq->mrq);
+>  		err = host->areq->err_check(host->card, host->areq);
+> -		if (err) {
+> -			/* post process the completed failed request */
+> -			mmc_post_req(host, host->areq->mrq, 0);
+> -			if (areq)
+> -				/*
+> -				 * Cancel the new prepared request, because
+> -				 * it can't run until the failed
+> -				 * request has been properly handled.
+> -				 */
+> -				mmc_post_req(host, areq->mrq, -EINVAL);
 > -
-> -	if (gpio_is_valid(pdata->slots[0].switch_pin)) {
-> -		if (pdata->slots[0].cover)
-> -			pdata->slots[0].get_cover_state =
-> +	struct omap_mmc_platform_data *pdata = host->pdata;
-> +	struct omap_mmc_slot_data *slot =&pdata->slots[0];
-> +	int gpio, ret;
-> +
-> +	gpio = slot->switch_pin;
-> +	if (slot->gpiochip_cd)
-> +		gpio = gpio_find_by_chip_name(slot->gpiochip_cd, gpio);
-> +	if (gpio_is_valid(gpio)) {
-> +		if (slot->cover)
-> +			slot->get_cover_state =
->   					omap_hsmmc_get_cover_state;
->   		else
-> -			pdata->slots[0].card_detect = omap_hsmmc_card_detect;
-> -		pdata->slots[0].card_detect_irq =
-> -				gpio_to_irq(pdata->slots[0].switch_pin);
-> -		ret = gpio_request(pdata->slots[0].switch_pin, "mmc_cd");
-> +			slot->card_detect = omap_hsmmc_card_detect;
-> +		slot->card_detect_irq =
-> +				gpio_to_irq(gpio);
-> +		ret = gpio_request(gpio, "mmc_cd");
->   		if (ret)
->   			return ret;
-> -		ret = gpio_direction_input(pdata->slots[0].switch_pin);
-> +		ret = gpio_direction_input(gpio);
->   		if (ret)
->   			goto err_free_sp;
-> -	} else
-> -		pdata->slots[0].switch_pin = -EINVAL;
-> +		host->gpio_cd = gpio;
+> -			host->areq = NULL;
+> -			goto out;
+> -		}
+>  	}
+>  
+> -	if (areq)
+> -		__mmc_start_req(host, areq->mrq);
+> +	if (!err && areq)
+> +		start_err = __mmc_start_req(host, areq->mrq);
+>  
+>  	if (host->areq)
+>  		mmc_post_req(host, host->areq->mrq, 0);
+>  
+> -	host->areq = areq;
+> - out:
+> +	if (err || start_err) {
+> +		if (areq)
+> +			/* The prepared request was not started, cancel it. */
+> +			mmc_post_req(host, areq->mrq, -EINVAL);
+> +		host->areq = NULL;
 > +	} else {
-> +		if (slot->gpiochip_cd) {
-> +			pr_warning("MMC %s card detect GPIO chip %s unavailable\n",
-> +				slot->name, slot->gpiochip_cd);
-> +			ret = -ENODEV;
-> +			goto err_free_sp;
-
-This should just return -ENODEV, nothing really to free here.
-
-> +		}
-> +		host->gpio_cd = -EINVAL;
+> +		host->areq = areq;
 > +	}
->
-> -	if (gpio_is_valid(pdata->slots[0].gpio_wp)) {
-> -		pdata->slots[0].get_ro = omap_hsmmc_get_wp;
-> -		ret = gpio_request(pdata->slots[0].gpio_wp, "mmc_wp");
-> +	gpio = slot->gpio_wp;
-> +	if (slot->gpiochip_wp)
-> +		gpio = gpio_find_by_chip_name(slot->gpiochip_wp, gpio);
-> +	if (gpio_is_valid(gpio)) {
-> +		slot->get_ro = omap_hsmmc_get_wp;
-> +		ret = gpio_request(gpio, "mmc_wp");
->   		if (ret)
->   			goto err_free_cd;
-> -		ret = gpio_direction_input(pdata->slots[0].gpio_wp);
-> +		ret = gpio_direction_input(gpio);
->   		if (ret)
->   			goto err_free_wp;
-> -	} else
-> -		pdata->slots[0].gpio_wp = -EINVAL;
-> +		host->gpio_wp = gpio;
-> +	} else {
-> +		if (slot->gpiochip_wp) {
-> +			pr_warning("MMC %s write protect GPIO chip %s unavailable\n",
-> +				slot->name, slot->gpiochip_wp);
-> +			ret = -ENODEV;
-> +			goto err_free_wp;
-> +		}
-> +		host->gpio_wp = -EINVAL;
-> +	}
->
->   	return 0;
->
->   err_free_wp:
-> -	gpio_free(pdata->slots[0].gpio_wp);
-> +	if (gpio_is_valid(host->gpio_wp))
-> +		gpio_free(host->gpio_wp);
->   err_free_cd:
-> -	if (gpio_is_valid(pdata->slots[0].switch_pin))
-> +	if (gpio_is_valid(host->gpio_cd))
->   err_free_sp:
-> -		gpio_free(pdata->slots[0].switch_pin);
-> +		gpio_free(host->gpio_cd);
->   	return ret;
->   }
->
-> -static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
-> +static void omap_hsmmc_gpio_free(struct omap_hsmmc_host *host)
->   {
-> -	if (gpio_is_valid(pdata->slots[0].gpio_wp))
-> -		gpio_free(pdata->slots[0].gpio_wp);
-> -	if (gpio_is_valid(pdata->slots[0].switch_pin))
-> -		gpio_free(pdata->slots[0].switch_pin);
-> +	if (gpio_is_valid(host->gpio_wp))
-> +		gpio_free(host->gpio_wp);
-> +	if (gpio_is_valid(host->gpio_cd))
-> +		gpio_free(host->gpio_cd);
->   }
->
->   /*
-> @@ -1876,10 +1906,6 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
->   	if (res == NULL)
->   		return -EBUSY;
->
-> -	ret = omap_hsmmc_gpio_init(pdata);
-> -	if (ret)
-> -		goto err;
-> -
->   	mmc = mmc_alloc_host(sizeof(struct omap_hsmmc_host),&pdev->dev);
->   	if (!mmc) {
->   		ret = -ENOMEM;
-> @@ -1903,6 +1929,10 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
->
->   	platform_set_drvdata(pdev, host);
->
-> +	ret = omap_hsmmc_gpio_init(host);
-> +	if (ret)
-> +		goto err1;
 > +
->   	mmc->ops	=&omap_hsmmc_ops;
->
->   	/*
-> @@ -2093,8 +2123,7 @@ err1:
->   	platform_set_drvdata(pdev, NULL);
->   	mmc_free_host(mmc);
->   err_alloc:
-> -	omap_hsmmc_gpio_free(pdata);
-> -err:
-> +	omap_hsmmc_gpio_free(host);
+>  	if (error)
+>  		*error = err;
+>  	return data;
 
-This error handling needs to be fixed up. In case
-omap_hsmmc_gpio_init() fails, which already frees up
-any requested gpios, omap_hsmmc_gpio_free() again tries
-freeing gpios.
-
-regards,
-Rajendra
-
->   	release_mem_region(res->start, resource_size(res));
->   	return ret;
->   }
-> @@ -2125,7 +2154,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
->
->   		mmc_free_host(host->mmc);
->   		iounmap(host->base);
-> -		omap_hsmmc_gpio_free(pdev->dev.platform_data);
-> +		omap_hsmmc_gpio_free(host);
->   	}
->
->   	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->
 
