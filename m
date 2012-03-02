@@ -1,77 +1,53 @@
 From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 0/4] Start getting rid of pdata callbacks with
+Subject: Re: [PATCH 1/4] gpiolib: Add gpiochip_find_by_name() and
  gpio_find_by_chip_name()
-Date: Fri, 2 Mar 2012 09:30:18 -0800
-Message-ID: <20120302173017.GK18901@atomide.com>
+Date: Fri, 2 Mar 2012 10:08:48 -0800
+Message-ID: <20120302180848.GM18901@atomide.com>
 References: <20120301185044.29210.44521.stgit@kaulin.local>
- <4F508DAE.9000005@ti.com>
+ <20120301185524.29210.60381.stgit@kaulin.local>
+ <20120302075804.F28DB3E2DB4@localhost>
+ <20120302170327.GF18901@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:35997 "EHLO
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:45102 "EHLO
 	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756329Ab2CBRaV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 12:30:21 -0500
+	with ESMTP id S1757274Ab2CBSIw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Mar 2012 13:08:52 -0500
 Content-Disposition: inline
-In-Reply-To: <4F508DAE.9000005@ti.com>
+In-Reply-To: <20120302170327.GF18901@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rajendra Nayak <rnayak@ti.com>
-Cc: linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>, Arnd Bergmann <arnd@arndb.de>, Rajendra Nayak <rnayak@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-* Rajendra Nayak <rnayak@ti.com> [120302 00:35]:
-> Hi Tony,
+* Tony Lindgren <tony@atomide.com> [120302 08:31]:
+> * Grant Likely <grant.likely@secretlab.ca> [120302 01:00]:
+> > On Thu, 01 Mar 2012 10:55:24 -0800, Tony Lindgren <tony@atomide.com> wrote:
+> > > +
+> > > +/**
+> > > + * gpiochip_find_by_name() - iterator for locating a gpio_chip by name
+> > > + * @name: name of the gpio_chip
+> > > + *
+> > > + * Similar to bus_find_device_by_name. It returns a reference to the
+> > > + * first gpio_chip with matching name. It ignores NULL and empty names.
+> > > + * If you need to do something more complex, then use gpiochip_find.
+> > > + */
+> > > +struct gpio_chip *gpiochip_find_by_name(const char *name)
+> > > +{
+> > > +	if (!name || !strcmp(name, ""))
+> > > +		return NULL;
+> > > +
+> > > +	return gpiochip_find((void *)name, match_name);
+> > 
+> > Nasty cast.  Can the signature for gpiochip_find be changed to accept
+> > a (const void *)?
 > 
-> On Friday 02 March 2012 12:25 AM, Tony Lindgren wrote:
-> >Hi all,
-> >
-> >This series adds gpio_find_by_name() that allows finding
-> >GPIOs on specific gpio_chips. As the GPIO numbers can be
-> >dynamic, it's hard to find the GPIO numbers from drivers
-> >using them directly.
-> >
-> >So far we've dealt with this using platform specific callbacks,
-> >but that is messy. This series removes the needs for these
-> >callbacks for omap hsmmc driver. Further callbacks can be
-> >removed people are OK with adding gpio_find_by_name().
-> >
-> >This series is based on the omap fixes-non-critical that's
-> >needed for the arch/arm/mach-omap2 parts of this series.
-> 
-> I tested these on my beagle/panda/omap4sdp and they seem to
-> work fine, also fixing the broken panda card detect (due to
-> missing card_detect_irq in the board file). There are still
-> issues however when I build twl4030-gpio as a module, which I
-> already commented on, and the fact that the init sequence now
-> works by luck :)
+> I think so, this too comes from the bus code.
 
-Hmm it should not be luck based, loading omap_hsmmc module
-should fail with a sensible error if the configured card detect
-or write protect is not available.
-
-I guess this is with twl6030 non-gpio based card detect?
-
-If so, I'll add something to pass the twl6030 card detect from
-pdata so we can fail with a sensible error in that case too.
-
-Also, sounds like twl as module and mmc built in case won't
-work without deferred probe. But at least there is a sensible
-error for that. And maybe we can prevent that in Kconfig.
-
-> The other issue also is that the multiple insmod/rmmod test
-> suggested by Russell still fails, since the second time around
-> the gpio_requests in the board callback fail because they are
-> not freed when you do a module unload/unbind.
-> That would need this patch from me to add the .teardown
-> hooks
-> http://marc.info/?l=linux-omap&m=133007767831297&w=2
-
-Yes let's add the teardown patch as a fix for now, but let's
-plan on getting rid of the twl_setup callback function
-completely.
-
-With these patches LCD and WLAN too can request the twl gpios
-directly from the driver based on gpio_chip + gpio offset.
+Looks like it can't be const as of_node_to_gpiochip uses it with
+a struct device_node * that for of_get_named_gpio_flags comes from
+of_parse_phandle_with_args.
 
 Regards,
 
