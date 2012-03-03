@@ -1,47 +1,94 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: Re: [PATCH v3 0/6] mmc: sdhci-s3c: Rework platform data and add device
- tree support
-Date: Sat, 03 Mar 2012 09:44:44 +0900
-Message-ID: <4F51697C.40408@samsung.com>
-References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>	<003401cce730$baf979a0$30ec6ce0$%kim@samsung.com>	<m2aa4pkq5g.fsf@bob.laptop.org> <4F3CFEED.6060206@samsung.com>	<m239abgc32.fsf@bob.laptop.org>	<00b901ccf08d$2fc18b50$8f44a1f0$%kim@samsung.com>	<m2vcn0496y.fsf@bob.laptop.org> <20120222125823.GA14463@sirena.org.uk> <m2ty26n3dm.fsf@bob.laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: [PATCH 2/2] mmc: sdhci-s3c: Enable runtime power management
+Date: Sat,  3 Mar 2012 00:46:42 +0000
+Message-ID: <1330735602-22409-2-git-send-email-broonie@opensource.wolfsonmicro.com>
+References: <4F51697C.40408@samsung.com>
+ <1330735602-22409-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <m2ty26n3dm.fsf@bob.laptop.org>
+In-Reply-To: <1330735602-22409-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Kukjin Kim <kgene.kim@samsung.com>, 'Thomas Abraham' <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, patches@linaro.org
+To: Kukjin Kim <kgene.kim@samsung.com>, Chris Ball <cjb@laptop.org>
+Cc: linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 03/03/12 05:40, Chris Ball wrote:
-> Hi,
->
-> On Wed, Feb 22 2012, Mark Brown wrote:
->> On Tue, Feb 21, 2012 at 08:17:41AM -0500, Chris Ball wrote:
->>
->>> Pushed to mmc-next, thanks.  (I'm expecting that you'll do the merge
->>> to Linus.)
->>
->> I've been sending patches adding runtime PM support to this driver for a
->> while with no response - are there any issues with those?
->
-> I don't have s3c hardware, so I've been waiting for a Tested-by or ACK
-> from someone who does -- Kukjin, any objection if I take this into
-> mmc-next with a plan to merge it, to provoke some testing?  Is it
-> possible for you to test/review the patch?
->
-Hi Chris,
+Since most of the work is already done by the core we just need to add
+runtime suspend methods and tell the PM core that runtime PM is enabled
+for this device.
 
-Maybe I lost Mark's runtime PM supporting patches. I couldn't find it in 
-my mail box. Sorry for that :(
+Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |   28 ++++++++++++++++++++++++++++
+ 1 files changed, 28 insertions(+), 0 deletions(-)
 
-Mark, could you please send it to me again?
-
-Thanks.
-
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 46152d6..6926ac9 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -23,6 +23,7 @@
+ #include <linux/of.h>
+ #include <linux/of_gpio.h>
+ #include <linux/pm.h>
++#include <linux/pm_runtime.h>
+ 
+ #include <linux/mmc/host.h>
+ 
+@@ -721,6 +722,11 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 	if (pdata->host_caps2)
+ 		host->mmc->caps2 |= pdata->host_caps2;
+ 
++	pm_runtime_enable(&pdev->dev);
++	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
++	pm_runtime_use_autosuspend(&pdev->dev);
++	pm_suspend_ignore_children(&pdev->dev, 1);
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(dev, "sdhci_add_host() failed\n");
+@@ -740,6 +746,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+ 
+  err_add_host:
+ 	release_resource(sc->ioarea);
++	pm_runtime_forbid(&pdev->dev);
++	pm_runtime_get_noresume(&pdev->dev);
+ 	kfree(sc->ioarea);
+ 
+  err_req_regs:
+@@ -784,6 +792,8 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+ 
+ 	sdhci_remove_host(host, 1);
+ 
++	pm_runtime_disable(&pdev->dev);
++
+ 	for (ptr = 0; ptr < 3; ptr++) {
+ 		if (sc->clk_bus[ptr]) {
+ 			clk_disable(sc->clk_bus[ptr]);
+@@ -824,9 +834,27 @@ static int sdhci_s3c_resume(struct device *dev)
+ }
+ #endif
+ 
++#ifdef CONFIG_PM_RUNTIME
++static int sdhci_s3c_runtime_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++
++	return sdhci_runtime_suspend_host(host);
++}
++
++static int sdhci_s3c_runtime_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++
++	return sdhci_runtime_resume_host(host);
++}
++#endif
++
+ #ifdef CONFIG_PM
+ static const struct dev_pm_ops sdhci_s3c_pmops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(sdhci_s3c_suspend, sdhci_s3c_resume)
++	SET_RUNTIME_PM_OPS(sdhci_s3c_runtime_suspend, sdhci_s3c_runtime_resume,
++			   NULL)
+ };
+ 
+ #define SDHCI_S3C_PMOPS (&sdhci_s3c_pmops)
+-- 
+1.7.9.1
