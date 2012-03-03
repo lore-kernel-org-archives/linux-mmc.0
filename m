@@ -1,62 +1,47 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: core: remove waiting time when clkgate_delay is set
-Date: Fri, 02 Mar 2012 16:12:19 -0500
-Message-ID: <m2aa3yn1vw.fsf@bob.laptop.org>
-References: <1330494769-7558-1-git-send-email-chanho61.park@samsung.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: Re: [PATCH v3 0/6] mmc: sdhci-s3c: Rework platform data and add device
+ tree support
+Date: Sat, 03 Mar 2012 09:44:44 +0900
+Message-ID: <4F51697C.40408@samsung.com>
+References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>	<003401cce730$baf979a0$30ec6ce0$%kim@samsung.com>	<m2aa4pkq5g.fsf@bob.laptop.org> <4F3CFEED.6060206@samsung.com>	<m239abgc32.fsf@bob.laptop.org>	<00b901ccf08d$2fc18b50$8f44a1f0$%kim@samsung.com>	<m2vcn0496y.fsf@bob.laptop.org> <20120222125823.GA14463@sirena.org.uk> <m2ty26n3dm.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:44892 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758267Ab2CBVM0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 2 Mar 2012 16:12:26 -0500
-In-Reply-To: <1330494769-7558-1-git-send-email-chanho61.park@samsung.com>
-	(Chanho Park's message of "Wed, 29 Feb 2012 14:52:49 +0900")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <m2ty26n3dm.fsf@bob.laptop.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Kukjin Kim <kgene.kim@samsung.com>, 'Thomas Abraham' <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chanho Park <chanho61.park@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Hi,
-
-On Wed, Feb 29 2012, Chanho Park wrote:
-> Since recent commit("mmc: core: Use delayed work in clock gating
-> framework":597dd9d79cfbbb1), we always wait "unnecessary" default
-> clock delay(8 cycles). Actually, we don't need it if clkgate_delay
-> (unit:ms) is set because we already wait sufficient time to change
-> the clock due to delayed_workqueue.
-> This patch removes duplicated waiting time when clkgate_delay is set.
+On 03/03/12 05:40, Chris Ball wrote:
+> Hi,
 >
-> Signed-off-by: Chanho Park <chanho61.park@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
->  drivers/mmc/core/host.c |    7 +++++--
->  1 files changed, 5 insertions(+), 2 deletions(-)
+> On Wed, Feb 22 2012, Mark Brown wrote:
+>> On Tue, Feb 21, 2012 at 08:17:41AM -0500, Chris Ball wrote:
+>>
+>>> Pushed to mmc-next, thanks.  (I'm expecting that you'll do the merge
+>>> to Linus.)
+>>
+>> I've been sending patches adding runtime PM support to this driver for a
+>> while with no response - are there any issues with those?
 >
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index c3704e2..d710ce0 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -109,8 +109,11 @@ static void mmc_host_clk_gate_delayed(struct mmc_host *host)
->  	 */
->  	if (!host->clk_requests) {
->  		spin_unlock_irqrestore(&host->clk_lock, flags);
-> -		tick_ns = DIV_ROUND_UP(1000000000, freq);
-> -		ndelay(host->clk_delay * tick_ns);
-> +		/* wait only when clk_gate_delay is 0*/
-> +		if (!host->clkgate_delay) {
-> +			tick_ns = DIV_ROUND_UP(1000000000, freq);
-> +			ndelay(host->clk_delay * tick_ns);
-> +		}
->  	} else {
->  		/* New users appeared while waiting for this work */
->  		spin_unlock_irqrestore(&host->clk_lock, flags);
+> I don't have s3c hardware, so I've been waiting for a Tested-by or ACK
+> from someone who does -- Kukjin, any objection if I take this into
+> mmc-next with a plan to merge it, to provoke some testing?  Is it
+> possible for you to test/review the patch?
+>
+Hi Chris,
 
-Have you seen Guennadi's patch?
+Maybe I lost Mark's runtime PM supporting patches. I couldn't find it in 
+my mail box. Sorry for that :(
 
-http://git.kernel.org/?p=linux/kernel/git/cjb/mmc.git;a=commitdiff;h=63871af54a0f0053de6534afe8da101b988b86b6
+Mark, could you please send it to me again?
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
