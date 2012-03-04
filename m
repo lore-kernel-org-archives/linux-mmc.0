@@ -1,23 +1,41 @@
-From: Saugata Das <saugata.das@linaro.org>
+From: Namjae Jeon <linkinjeon@gmail.com>
 Subject: Re: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5 device
-Date: Sun, 4 Mar 2012 13:39:16 +0530
-Message-ID: <CAKLKtzc68sa2df_vUquYdie0WpbckU0nci7rDc+rsESJ7YCLXw@mail.gmail.com>
+Date: Sun, 4 Mar 2012 17:25:06 +0900
+Message-ID: <CAKYAXd8HMrdB9mzgsz5XmMxkDE+gMce+CTEDFU4J67nusNtLOg@mail.gmail.com>
 References: <4934441a17d25c3249556f7bf281b1be.squirrel@www.codeaurora.org>
 	<CAKYAXd_6OqQJ78mPJp11gRvGwwg88S_n_Auu=_HdP_ZXzCKrDg@mail.gmail.com>
 	<6669559e86c1d13b27e941ff2acf89d2.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bk0-f46.google.com ([209.85.214.46]:64081 "EHLO
+	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750892Ab2CDIZI convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Mar 2012 03:25:08 -0500
 In-Reply-To: <6669559e86c1d13b27e941ff2acf89d2.squirrel@www.codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: merez@codeaurora.org
-Cc: Namjae Jeon <linkinjeon@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: merez@codeaurora.org
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-Hi Merez
+Hi. Merez.
 
-On 2 March 2012 19:56,  <merez@codeaurora.org> wrote:
+Thanks a lot about your performance measurement.
+
+I think that your measurement is enough and correct and the firmware
+of mmc vender should be optimized or change properly rather than
+modifying the current patch.
+
+And currently we can use only write packed cmd by my suggestion.
+
+I would like to add my reviewd-by tag in updated patches also.
+
+Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+
+Thanks.
+
+2012/3/2  <merez@codeaurora.org>:
 > Hi,
 >
 > Our tests showed that the write packing improved the performance of t=
@@ -57,9 +75,6 @@ e
 > packed commands patch (both READ and WRITE packing are enabled): 15.5=
  MB/s
 >
-
-How did you perform the above tests ?
-
 >
 > Random read and random write:
 > ------------------------------
@@ -95,7 +110,7 @@ om
 >>
 >> Thanks.
 >>
->> 2012/3/1 =A0<merez@codeaurora.org>:
+>> 2012/3/1 =C2=A0<merez@codeaurora.org>:
 >>>> This patch supports packed command of eMMC4.5 device.
 >>>> Several reads(or writes) can be grouped in packed command
 >>>> and all data of the individual commands can be sent in a
@@ -103,13 +118,13 @@ om
 >>>>
 >>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 >>>> ---
->>>> =A0drivers/mmc/card/block.c =A0 | =A0496
+>>>> =C2=A0drivers/mmc/card/block.c =C2=A0 | =C2=A0496
 >>>> +++++++++++++++++++++++++++++++++++++++++--
->>>> =A0drivers/mmc/card/queue.c =A0 | =A0 48 ++++-
->>>> =A0drivers/mmc/card/queue.h =A0 | =A0 13 ++
->>>> =A0drivers/mmc/core/mmc_ops.c | =A0 =A01 +
->>>> =A0include/linux/mmc/core.h =A0 | =A0 =A04 +
->>>> =A05 files changed, 535 insertions(+), 27 deletions(-)
+>>>> =C2=A0drivers/mmc/card/queue.c =C2=A0 | =C2=A0 48 ++++-
+>>>> =C2=A0drivers/mmc/card/queue.h =C2=A0 | =C2=A0 13 ++
+>>>> =C2=A0drivers/mmc/core/mmc_ops.c | =C2=A0 =C2=A01 +
+>>>> =C2=A0include/linux/mmc/core.h =C2=A0 | =C2=A0 =C2=A04 +
+>>>> =C2=A05 files changed, 535 insertions(+), 27 deletions(-)
 >>>>
 >>> Hi,
 >>>
@@ -182,18 +197,14 @@ the
 >>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
 " in
 >>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
-l
+>>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.=
+html
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
  in
 >> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>> More majordomo info at =C2=A0http://vger.kernel.org/majordomo-info.h=
+tml
 >>
 >
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
