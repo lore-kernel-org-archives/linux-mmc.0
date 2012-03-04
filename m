@@ -1,51 +1,63 @@
 From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH 1/3] MMC / PM: Make it possible to use PM QoS latency constraints
-Date: Sun, 4 Mar 2012 20:47:13 +0100
-Message-ID: <201203042047.13702.rjw@sisk.pl>
-References: <201203040101.53177.rjw@sisk.pl> <201203040102.39253.rjw@sisk.pl> <CACRpkdb-1vh6VmK95AsFuLT-3CG-gdXO-NixPiiHm8o5AtgPCQ@mail.gmail.com>
+Subject: Re: [PATCH 0/3] MMC / PM: Make it possible to use PM QoS latency constraints
+Date: Sun, 4 Mar 2012 20:53:19 +0100
+Message-ID: <201203042053.19314.rjw@sisk.pl>
+References: <201203040101.53177.rjw@sisk.pl>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
-  charset="iso-8859-1"
+  charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:54380 "EHLO ogre.sisk.pl"
+Received: from ogre.sisk.pl ([217.79.144.158]:54398 "EHLO ogre.sisk.pl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754336Ab2CDTnJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 4 Mar 2012 14:43:09 -0500
-In-Reply-To: <CACRpkdb-1vh6VmK95AsFuLT-3CG-gdXO-NixPiiHm8o5AtgPCQ@mail.gmail.com>
+	id S1754336Ab2CDTxJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 4 Mar 2012 14:53:09 -0500
+In-Reply-To: <201203040101.53177.rjw@sisk.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Linux PM list <linux-pm@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On Sunday, March 04, 2012, Linus Walleij wrote:
-> On Sun, Mar 4, 2012 at 1:02 AM, Rafael J. Wysocki <rjw@sisk.pl> wrote:
+Hi all,
+
+On Sunday, March 04, 2012, Rafael J. Wysocki wrote:
+> Hi all,
 > 
-> > A runtime suspend of an MMC controller belonging to a power domain
-> > or, in a more complicated scenario, a runtime suspend of another
-> > device in the same power domain, may cause power to be removed from
-> > the entire domain.  In that case, the amount of time necessary to
-> > runtime-resume the MMC controller is often substantially greater
-> > than the time needed to enable its clock.  That may hurt performance
-> > in some situations, because user data may need to wait for the
-> > controller to become operational, so we should make it possible to
-> > prevent that from happening.
-> >
-> > For this reason, introduce a new sysfs attribute for MMC hosts,
-> > pm_latency_limit_ms, allowing user space to specify the upper bound
-> > of the time necessary to bring the host up after it has been
-> > runtime-suspended.  However, make it appear ony for the hosts whose
-> > drivers declare support for PM QoS by populating the pm_qos_req
-> > member of struct mmc_host before registering the host.
-> >
-> > Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
+> The goal of this patchset is to allow user space to control the
+> responsiveness of the MMC stack related to runtime power management.
 > 
-> Overall I've already ACKed this I think, looking good...
-> Acked-by: Linus Walleij <linus.walleij@linaro.org>
+> Namely, on systems that contain power domains, the time necessary
+> to bring an MMC host up after it has been runtime-suspended may
+> depend not only on the MMC core and host driver, but also on the platform
+> and other devices in the same power domain(s) that contain(s) the MMC
+> host.  Although that obviously may influence the MMC performance,
+> currently, there is no way to control it through the MMC subsystem.
+> Moreover, the only available way to control it at all is by using PM QoS
+> latency requests, so it is necessary to add some kind of support for that
+> to MMC.
+> 
+> Patch [1/3] adds PM QoS-related fields to struct mmc_host and introduces
+> a new sysfs attribute for MMC hosts, pm_latency_limit_ms, allowing user
+> space to influence the MMC host's runtime PM via PM QoS.  Whether or not
+> this attribute will be created (and PM QoS will be used for the given host)
+> depends on the host driver, so host drivers that don't (plan) to support
+> PM QoS don't need to do anything about that.
+> 
+> Patches [2/3] and [3/3] add the corresponding host driver bits to the
+> tmio_mmc and sh_mmcif drivers, respectively.
 
-Thanks!
+After posting the patches I noticed that the changelog of patch [1/3] and
+the documentation of the new sysfs attribute were not 100% accurate, because
+the PM QoS request really applies to the time between a resume request and
+the moment the device is operational again and not the time from runtime
+suspend (the latter would imply some kind of autoresume mechanism, which isn't
+there).
 
-I have a new version, though, (will be sent in a while), but hopefully
-your ACK will still apply. :-)
+I also thought it would be cleaner to allocate the val and attr fields along
+with the request, because in the previous version of the patchset they weren't
+used when req was NULL, resulting in (a little) wasted memory.
 
+Updated patches follow.
+
+Thanks,
 Rafael
