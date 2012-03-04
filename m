@@ -1,194 +1,199 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: [PATCH 1/3] MMC / PM: Make it possible to use PM QoS latency constraints
-Date: Sun, 4 Mar 2012 01:02:39 +0100
-Message-ID: <201203040102.39253.rjw@sisk.pl>
-References: <201203040101.53177.rjw@sisk.pl>
+From: Saugata Das <saugata.das@linaro.org>
+Subject: Re: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5 device
+Date: Sun, 4 Mar 2012 13:39:16 +0530
+Message-ID: <CAKLKtzc68sa2df_vUquYdie0WpbckU0nci7rDc+rsESJ7YCLXw@mail.gmail.com>
+References: <4934441a17d25c3249556f7bf281b1be.squirrel@www.codeaurora.org>
+	<CAKYAXd_6OqQJ78mPJp11gRvGwwg88S_n_Auu=_HdP_ZXzCKrDg@mail.gmail.com>
+	<6669559e86c1d13b27e941ff2acf89d2.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:53875 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752797Ab2CDAA5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 3 Mar 2012 19:00:57 -0500
-In-Reply-To: <201203040101.53177.rjw@sisk.pl>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <6669559e86c1d13b27e941ff2acf89d2.squirrel@www.codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: merez@codeaurora.org
+Cc: Namjae Jeon <linkinjeon@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Linux PM list <linux-pm@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
 
-From: Rafael J. Wysocki <rjw@sisk.pl>
+Hi Merez
 
-A runtime suspend of an MMC controller belonging to a power domain
-or, in a more complicated scenario, a runtime suspend of another
-device in the same power domain, may cause power to be removed from
-the entire domain.  In that case, the amount of time necessary to
-runtime-resume the MMC controller is often substantially greater
-than the time needed to enable its clock.  That may hurt performance
-in some situations, because user data may need to wait for the
-controller to become operational, so we should make it possible to
-prevent that from happening.
+On 2 March 2012 19:56,  <merez@codeaurora.org> wrote:
+> Hi,
+>
+> Our tests showed that the write packing improved the performance of t=
+he
+> write sequential operations:
+>
+> Long write operation:
+> ----------------------
+> no-packing: 15.8 MB/s
+> packed commands patch (both READ and WRITE packing are enabled): 23.3=
+ MB/s
+>
+> Several parallel write operations (sum of all the write throughputs):
+> ---------------------------
+> no-packing: 17.1 MB/s
+> packed commands patch(both READ and WRITE packing are enabled): 25 MB=
+/s
+>
+> Parallel long read and long write operations (write throughput):
+> -----------------------------------------------------------------
+> no-packing: 12.2 MB/s
+> packed commands patch (both READ and WRITE packing are enabled): 16.3=
+ MB/s
+>
+> Parallel short read and long write operations (write throughput):
+> -----------------------------------------------------------------
+> no-packing: 15.4 MB/s
+> packed commands patch (both READ and WRITE packing are enabled): 16.4=
+ MB/s
+>
+> Several Parallel short read and short write operations (sum of all th=
+e
+> write throughputs):
+> ---------------------------------------------------------------------=
+-----
+> no-packing: 12.5 MB/s
+> packed commands patch (both READ and WRITE packing are enabled): 15.5=
+ MB/s
+>
 
-For this reason, introduce a new sysfs attribute for MMC hosts,
-pm_latency_limit_ms, allowing user space to specify the upper bound
-of the time necessary to bring the host up after it has been
-runtime-suspended.  However, make it appear ony for the hosts whose
-drivers declare support for PM QoS by populating the pm_qos_req
-member of struct mmc_host before registering the host.
+How did you perform the above tests ?
 
-Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
----
- Documentation/mmc/mmc-dev-attrs.txt |   22 +++++++++++
- drivers/mmc/core/host.c             |   67 ++++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h            |    5 ++
- 3 files changed, 94 insertions(+)
-
-Index: linux/drivers/mmc/core/host.c
-===================================================================
---- linux.orig/drivers/mmc/core/host.c
-+++ linux/drivers/mmc/core/host.c
-@@ -293,6 +293,68 @@ static inline void mmc_host_clk_sysfs_in
- 
- #endif
- 
-+static ssize_t pm_qos_val_show(struct device *dev,
-+		struct device_attribute *attr, char *buf)
-+{
-+	struct mmc_host *host = cls_dev_to_mmc_host(dev);
-+	return snprintf(buf, PAGE_SIZE, "%d\n", host->pm_qos_val);
-+}
-+
-+static ssize_t pm_qos_val_store(struct device *dev,
-+		struct device_attribute *attr, const char *buf, size_t count)
-+{
-+	struct mmc_host *host = cls_dev_to_mmc_host(dev);
-+	s32 value;
-+	int ret;
-+
-+	if (kstrtos32(buf, 0, &value))
-+		return -EINVAL;
-+
-+	if (value < 0)
-+		return -EINVAL;
-+
-+	host->pm_qos_val = value;
-+	ret = dev_pm_qos_update_request(host->pm_qos_req, host->pm_qos_val);
-+	return ret < 0 ? ret : count;
-+}
-+
-+static void mmc_host_pm_qos_init(struct mmc_host *host)
-+{
-+	int ret;
-+
-+	if (!host->pm_qos_req)
-+		return;
-+
-+	ret = dev_pm_qos_add_request(host->parent, host->pm_qos_req,
-+				     host->pm_qos_val);
-+	if (ret < 0) {
-+		dev_err(host->parent, "Unable to use PM QoS: %d\n", ret);
-+		return;
-+	}
-+
-+	host->pm_qos_val_attr.show = pm_qos_val_show;
-+	host->pm_qos_val_attr.store = pm_qos_val_store;
-+	sysfs_attr_init(&host->pm_qos_val_attr.attr);
-+	host->pm_qos_val_attr.attr.name = "pm_latency_limit_ms";
-+	host->pm_qos_val_attr.attr.mode = S_IRUGO | S_IWUSR;
-+	if (device_create_file(&host->class_dev, &host->pm_qos_val_attr)) {
-+		pr_err("%s: Failed to create PM latency limit sysfs entry\n",
-+				mmc_hostname(host));
-+		host->pm_qos_val_attr.attr.name = NULL;
-+	}
-+}
-+
-+static void mmc_host_pm_qos_exit(struct mmc_host *host)
-+{
-+	if (!host->pm_qos_req)
-+		return;
-+
-+	if (host->pm_qos_val_attr.attr.name)
-+		device_remove_file(&host->class_dev, &host->pm_qos_val_attr);
-+
-+	dev_pm_qos_remove_request(host->pm_qos_req);
-+}
-+
- /**
-  *	mmc_alloc_host - initialise the per-host structure.
-  *	@extra: sizeof private data structure
-@@ -381,6 +443,8 @@ int mmc_add_host(struct mmc_host *host)
- #endif
- 	mmc_host_clk_sysfs_init(host);
- 
-+	mmc_host_pm_qos_init(host);
-+
- 	mmc_start_host(host);
- 	register_pm_notifier(&host->pm_notify);
- 
-@@ -400,8 +464,11 @@ EXPORT_SYMBOL(mmc_add_host);
- void mmc_remove_host(struct mmc_host *host)
- {
- 	unregister_pm_notifier(&host->pm_notify);
-+
- 	mmc_stop_host(host);
- 
-+	mmc_host_pm_qos_exit(host);
-+
- #ifdef CONFIG_DEBUG_FS
- 	mmc_remove_host_debugfs(host);
- #endif
-Index: linux/include/linux/mmc/host.h
-===================================================================
---- linux.orig/include/linux/mmc/host.h
-+++ linux/include/linux/mmc/host.h
-@@ -13,6 +13,7 @@
- #include <linux/leds.h>
- #include <linux/sched.h>
- #include <linux/fault-inject.h>
-+#include <linux/pm_qos.h>
- 
- #include <linux/mmc/core.h>
- #include <linux/mmc/pm.h>
-@@ -191,6 +192,10 @@ struct mmc_host {
- 	u32			ocr_avail_mmc;	/* MMC-specific OCR */
- 	struct notifier_block	pm_notify;
- 
-+	struct dev_pm_qos_request	*pm_qos_req;
-+	s32				pm_qos_val;
-+	struct device_attribute		pm_qos_val_attr;
-+
- #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
- #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
- #define MMC_VDD_21_22		0x00000200	/* VDD voltage 2.1 ~ 2.2 */
-Index: linux/Documentation/mmc/mmc-dev-attrs.txt
-===================================================================
---- linux.orig/Documentation/mmc/mmc-dev-attrs.txt
-+++ linux/Documentation/mmc/mmc-dev-attrs.txt
-@@ -74,3 +74,25 @@ This attribute appears only if CONFIG_MM
- 	clkgate_delay	Tune the clock gating delay with desired value in milliseconds.
- 
- echo <desired delay> > /sys/class/mmc_host/mmcX/clkgate_delay
-+
-+MMC PM QoS Support
-+==================
-+
-+If the MMC host driver supports PM QoS, it should populate the pm_qos_req member
-+of struct mmc_host before registering the host.  In that case, read and write
-+access if provided to the following attribute:
-+
-+	pm_latency_limit_ms	Specify the upper bound of the time necessary
-+				to bring the host up after it has been
-+				runtime-suspended (in milliseconds).
-+
-+echo <desired latency limit> > /sys/class/mmc_host/mmcX/pm_latency_limit_ms
-+
-+The precise meaning of this attribute is "whenever the host is runtime-suspended,
-+make sure that it will be possible to bring it up within the given time" (e.g.
-+if the limit is set to 10 ms, it should always be possible to make the host
-+operational at most 10 ms after it has been runtime-suspended).  Note, however,
-+that if the limit is set too small, the only physically possible way to respect
-+it may be to keep the host permanently operational (i.e. never suspend it).
-+
-+If 0 is written to pm_latency_limit_ms, it means that there is no limit.
-
+>
+> Random read and random write:
+> ------------------------------
+> I checked the random read and random write IOPs by using the IOZONE
+> application. There was a slight degradation in the read results due t=
+o the
+> packing and no improvements in the write results.
+>
+> The results are:
+>
+> IOZONE file size of 100M:
+> no-packing: random read: 4675, random write: 729
+> packed commands patch (both READ and WRITE packing are enabled): rand=
+om
+> read: 4557 random write: 723
+>
+> IOZONE file size of 256M:
+> no-packing: random read: 4632, random write: 744
+> packed commands patch (both READ and WRITE packing are enabled): rand=
+om
+> read: 4498, random write: 742
+>
+> Thanks,
+> Maya Erez
+> Consultant for Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+>
+>> Hi. merez.
+>>
+>> Would you share random read speed with us ?
+>>
+>> And Write speed also..
+>>
+>> Thanks.
+>>
+>> 2012/3/1 =A0<merez@codeaurora.org>:
+>>>> This patch supports packed command of eMMC4.5 device.
+>>>> Several reads(or writes) can be grouped in packed command
+>>>> and all data of the individual commands can be sent in a
+>>>> single transfer on the bus.
+>>>>
+>>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>>>> ---
+>>>> =A0drivers/mmc/card/block.c =A0 | =A0496
+>>>> +++++++++++++++++++++++++++++++++++++++++--
+>>>> =A0drivers/mmc/card/queue.c =A0 | =A0 48 ++++-
+>>>> =A0drivers/mmc/card/queue.h =A0 | =A0 13 ++
+>>>> =A0drivers/mmc/core/mmc_ops.c | =A0 =A01 +
+>>>> =A0include/linux/mmc/core.h =A0 | =A0 =A04 +
+>>>> =A05 files changed, 535 insertions(+), 27 deletions(-)
+>>>>
+>>> Hi,
+>>>
+>>> We ran performance tests on the packed commands patch. We found out=
+ that
+>>> enabling the read packing didn't improve the performance in any of =
+the
+>>> scenarios we ran (see the detailed results below).
+>>> Therefore, we suggest to move the read packing code to a different =
+patch
+>>> and approve only the write packing code for now. The read packing a=
+dds
+>>> complexity to the code and we don't see a point in adding it while =
+the
+>>> intention is to disable it.
+>>>
+>>> Test results:
+>>>
+>>> Long read operation:
+>>> ----------------------
+>>> no-packing: 39.5 MB/s
+>>> packed commands patch (both READ and WRITE packing are enabled): 39=
+=2E5
+>>> MB/s
+>>> packed commands patch + enabling only READ packing: 39.5 MB/s
+>>>
+>>> Several parallel read operations (sum of all the read throughputs):
+>>> ---------------------------
+>>> no-packing: 42.6 MB/s
+>>> packed commands patch(both READ and WRITE packing are enabled): 38 =
+MB/s
+>>> packed commands patch + enabling only READ packing: 38.2 MB/s
+>>>
+>>> Parallel long read and long write operations (read throughput):
+>>> -----------------------------------------------------------------
+>>> no-packing: 23.8 MB/s
+>>> packed commands patch (both READ and WRITE packing are enabled): 12=
+=2E6
+>>> MB/s
+>>> packed commands patch + enabling only READ packing: 12.5 MB/s
+>>>
+>>> Parallel short read and long write operations (read throughput):
+>>> -----------------------------------------------------------------
+>>> no-packing: 22.9 MB/s
+>>> packed commands patch (both READ and WRITE packing are enabled): 8.=
+4
+>>> MB/s
+>>> packed commands patch + enabling only READ packing: 8.6 MB/s
+>>>
+>>> Several Parallel short read and short write operations (sum of all =
+the
+>>> read throughputs):
+>>> -------------------------------------------------------------------=
+-------
+>>> no-packing: 41.6 MB/s
+>>> packed commands patch (both READ and WRITE packing are enabled): 35=
+ MB/s
+>>> packed commands patch + enabling only READ packing: 36 MB/s
+>>>
+>>> Thanks,
+>>> Maya Erez
+>>> Consultant for Qualcomm Innovation Center, Inc.
+>>> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+>>>
+>>>
+>>>
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
+" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
+l
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>>
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
