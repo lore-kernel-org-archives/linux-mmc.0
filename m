@@ -1,66 +1,112 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-s3c: Enable runtime power management
-Date: Mon, 5 Mar 2012 11:52:10 +0000
-Message-ID: <20120305115209.GA3224@opensource.wolfsonmicro.com>
-References: <4F51697C.40408@samsung.com>
- <1330735602-22409-1-git-send-email-broonie@opensource.wolfsonmicro.com>
- <1330735602-22409-2-git-send-email-broonie@opensource.wolfsonmicro.com>
- <4F549A0A.5020402@samsung.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH V2] mmc: core: Clean up after mmc_pre_req if card was removed
+Date: Mon, 5 Mar 2012 15:52:43 +0100
+Message-ID: <1330959163-21796-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="Kj7319i9nmIyA2yE"
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4F549A0A.5020402@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Kukjin Kim <kgene.kim@samsung.com>, Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog103.obsmtp.com ([207.126.144.115]:38944 "EHLO
+	eu1sys200aog103.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932078Ab2CEOxE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Mar 2012 09:53:04 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
+Make sure mmc_start_req cancel the prepared job, if the request
+was prevented to be started due to the card has been removed.
 
---Kj7319i9nmIyA2yE
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+This bug was introduced in commit:
+mmc: allow upper layers to know immediately if card has been removed
 
-On Mon, Mar 05, 2012 at 07:48:42PM +0900, Jaehoon Chung wrote:
-> On 03/03/2012 09:46 AM, Mark Brown wrote:
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+Reviewed-by: Per Forlin <per.forlin@stericsson.com>
+---
 
-> > +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+Changes in v2:
+	- Maintain handling of host->areq (host->areq must not be NULL when
+	"start_err"), to make sure the block layer is able to respond to all
+	of the started requests.
 
-> Could you explain why use 50ms?=20
+---
+ drivers/mmc/core/core.c |   35 +++++++++++++++--------------------
+ 1 files changed, 15 insertions(+), 20 deletions(-)
 
-It's essentially a random number, some other devices use the same one.
-We're just trying to avoid suspending between back to back requests.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index faa0af1..56b7a24 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -249,16 +249,17 @@ static void mmc_wait_done(struct mmc_request *mrq)
+ 	complete(&mrq->completion);
+ }
+ 
+-static void __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
++static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
+ 	init_completion(&mrq->completion);
+ 	mrq->done = mmc_wait_done;
+ 	if (mmc_card_removed(host->card)) {
+ 		mrq->cmd->error = -ENOMEDIUM;
+ 		complete(&mrq->completion);
+-		return;
++		return -ENOMEDIUM;
+ 	}
+ 	mmc_start_request(host, mrq);
++	return 0;
+ }
+ 
+ static void mmc_wait_for_req_done(struct mmc_host *host,
+@@ -342,6 +343,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+ 				    struct mmc_async_req *areq, int *error)
+ {
+ 	int err = 0;
++	int start_err = 0;
+ 	struct mmc_async_req *data = host->areq;
+ 
+ 	/* Prepare a new request */
+@@ -351,30 +353,23 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+ 	if (host->areq) {
+ 		mmc_wait_for_req_done(host, host->areq->mrq);
+ 		err = host->areq->err_check(host->card, host->areq);
+-		if (err) {
+-			/* post process the completed failed request */
+-			mmc_post_req(host, host->areq->mrq, 0);
+-			if (areq)
+-				/*
+-				 * Cancel the new prepared request, because
+-				 * it can't run until the failed
+-				 * request has been properly handled.
+-				 */
+-				mmc_post_req(host, areq->mrq, -EINVAL);
+-
+-			host->areq = NULL;
+-			goto out;
+-		}
+ 	}
+ 
+-	if (areq)
+-		__mmc_start_req(host, areq->mrq);
++	if (!err && areq)
++		start_err = __mmc_start_req(host, areq->mrq);
+ 
+ 	if (host->areq)
+ 		mmc_post_req(host, host->areq->mrq, 0);
+ 
+-	host->areq = areq;
+- out:
++	 /* Cancel a prepared request if it was not started. */
++	if ((err || start_err) && areq)
++			mmc_post_req(host, areq->mrq, -EINVAL);
++
++	if (err)
++		host->areq = NULL;
++	else
++		host->areq = areq;
++
+ 	if (error)
+ 		*error = err;
+ 	return data;
+-- 
+1.7.9
 
-> > +	pm_runtime_use_autosuspend(&pdev->dev);
-> > +	pm_suspend_ignore_children(&pdev->dev, 1);
-
-> Is there reason that ignore_children use to set the true?
-
-So that we can suspend the host without having to have the MMC card
-suspended (the host suspend is not visible to the card).
-
---Kj7319i9nmIyA2yE
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iQIcBAEBAgAGBQJPVKjjAAoJEBus8iNuMP3dbGoP/0fZTUx4TUYy1CWx7iUBJo/f
-zHQF7Kd+M3HtDItN9hEpprg/ICvqClcJtkXwcOj1vMBIDoQbVoJLSV89eC/7uBRg
-eHEOKQU0lq2AtVKM+fuwG8ci//qHMjjai24ZbDXH50hWWq0qAOc0WFNfdTacq9/y
-ozXZO9+8yRiBX+dQLJptoYWrOGZFZ7ozhir1hU8MZbJ/ogYP9rUKsF15YBhgcO7u
-2s1e5QvsOPvTWZoiUREkR+4QtKkiLiUBB+gy3SZzcYMu92XQdGsYar/2jsfIo3+t
-9WxrJ+hl6sf3l3a6NMK6joWsdX/UWSU6maRP1KFYqVGPKmoKbMJCQSR4uHGIpxZ1
-bp9X64bUnpEiuEr2blCjGRtqH8OCgxJKu2DYRkGKXIwCIIwdUb3lEQmmc0Zy/nUs
-Vcr7Rnyh7kU3Av+FE9tmuZShVk5qlmtCxu+X7z6my4AR9VDNZHw21S1Y3K6zE8Lf
-mnOFhr1ezDK6IIMrcIu6cEm0N4IHdDYldN1JJgW78mivbJlnFrycxNr5nm8e73Ml
-nR0ChgSc8Xs3oaIXd5YheKfanLCRed0zs/AH/MNUTkPrijAvtgf20GomcHu7IMr9
-viiS9NYE+HPpK7wlj9sBfZCG8d1qCPIikT98qlsnROrQtrKBIdDAO8L7/ZmUFCot
-ggJobFOKUzElQKu5/v81
-=9h6J
------END PGP SIGNATURE-----
-
---Kj7319i9nmIyA2yE--
