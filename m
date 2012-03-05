@@ -1,82 +1,112 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH 4/4] mmc: omap_hsmmc: Simplify init for twl6030 MMC card detect
-Date: Mon, 5 Mar 2012 15:55:56 +0530
-Message-ID: <CANrkHUZysOnHKKUuLm0Vbo1KsNp0yUd=udjGvQ43=gTTXbWeCw@mail.gmail.com>
-References: <20120301185044.29210.44521.stgit@kaulin.local>
-	<20120301185535.29210.71546.stgit@kaulin.local>
-	<4F50643B.9050500@ti.com>
-	<20120302172251.GJ18901@atomide.com>
-	<4F548457.5050205@ti.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-s3c: Enable runtime power management
+Date: Mon, 05 Mar 2012 19:48:42 +0900
+Message-ID: <4F549A0A.5020402@samsung.com>
+References: <4F51697C.40408@samsung.com>
+ <1330735602-22409-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+ <1330735602-22409-2-git-send-email-broonie@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog126.obsmtp.com ([74.125.149.155]:45313 "EHLO
-	na3sys009aog126.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756476Ab2CEKZ5 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 5 Mar 2012 05:25:57 -0500
-Received: by mail-lpp01m010-f50.google.com with SMTP id m13so5822943lah.23
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Mar 2012 02:25:56 -0800 (PST)
-In-Reply-To: <4F548457.5050205@ti.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:44579 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756480Ab2CEKsu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Mar 2012 05:48:50 -0500
+In-reply-to: <1330735602-22409-2-git-send-email-broonie@opensource.wolfsonmicro.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rajendra Nayak <rnayak@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, Samuel Ortiz <sameo@linux.intel.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Venkatraman S <svenkatr@ti.com>
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Kukjin Kim <kgene.kim@samsung.com>, Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-On Mon, Mar 5, 2012 at 2:46 PM, Rajendra Nayak <rnayak@ti.com> wrote:
-> On Friday 02 March 2012 10:52 PM, Tony Lindgren wrote:
->>
->> BTW, with -rc5, looks like re-inserting omap_hsmmc on omap4 fails
->> to detect any cards, and then fails to unload. This works on omap3
->> just fine. Any ideas why that would be?
->
->
-> Yeah, looks like thats broken. I am not sure whats going wrong though=
-=2E
-> I just enabled CONFIG_MMC_DEBUG and saw these logs below.
->
-> Venkat/Balaji, care to look at this one?
->
+Hi Mark,
 
-Let me check this
+On 03/03/2012 09:46 AM, Mark Brown wrote:
 
-> # insmod omap_hsmmc.ko
-> [ =A0 43.358398] omap_hsmmc omap_hsmmc.0: context was not lost
-> [ =A0 43.364105] omap_hsmmc omap_hsmmc.0: enabled
-> [ =A0 44.434661] mmc0: clock 0Hz busmode 1 powermode 0 cs 0 Vdd 0 wid=
-th 0
-> timing 0
-> [ =A0 44.442352] omap_hsmmc omap_hsmmc.0: Set clock to 0Hz
-> [ =A0 44.474365] omap_hsmmc omap_hsmmc.0: disabled
-> [ =A0 44.482208] omap_hsmmc omap_hsmmc.4: context was not lost
-> [ =A0 44.482208] omap_hsmmc omap_hsmmc.4: enabled
-> [ =A0 44.546600] omap_hsmmc omap_hsmmc.0: context was not lost
-> [ =A0 44.552276] omap_hsmmc omap_hsmmc.0: enabled
-> [ =A0 44.552276] mmc0: mmc_rescan_try_freq: trying to init card at 40=
-0000 Hz
-> [ =A0 44.563720] mmc0: clock 0Hz busmode 2 powermode 1 cs 0 Vdd 18 wi=
-dth 0
-> timing 0
-> [ =A0 44.572174] omap_hsmmc omap_hsmmc.0: Set clock to 0Hz
-> [ =A0 44.613800] mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd =
-18 width
-> 0 timing 0
-> [ =A0 44.621887] omap_hsmmc omap_hsmmc.0: Set clock to 400000Hz
-> [ =A0 44.735290] mmc0: starting CMD52 arg 00000c00 flags 00000195
-> [ =A0 44.741271] omap_hsmmc omap_hsmmc.0: mmc0: CMD52, argument 0x000=
-00c00
-> [ =A0 45.560241] mmc1: clock 0Hz busmode 1 powermode 0 cs 0 Vdd 0 wid=
-th 0
-> timing 0
-> [ =A0 45.567871] omap_hsmmc omap_hsmmc.4: Set clock to 0Hz
-> [ =A0 45.591491] omap_hsmmc omap_hsmmc.4: disabled
-> #
-> #
-> # rmmod omap_hsmmc
-> [ =A0607.302307] omap_hsmmc omap_hsmmc.4: context was not lost
-> [ =A0607.308044] omap_hsmmc omap_hsmmc.4: enabled
-> [ =A0607.312591] omap_hsmmc omap_hsmmc.4: disabled
-> [ =A0607.317199] omap_hsmmc omap_hsmmc.4: context was not lost
-> [ =A0607.322875] omap_hsmmc omap_hsmmc.4: enabled
->
+> Since most of the work is already done by the core we just need to add
+> runtime suspend methods and tell the PM core that runtime PM is enabled
+> for this device.
+> 
+> Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+> ---
+>  drivers/mmc/host/sdhci-s3c.c |   28 ++++++++++++++++++++++++++++
+>  1 files changed, 28 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 46152d6..6926ac9 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -23,6 +23,7 @@
+>  #include <linux/of.h>
+>  #include <linux/of_gpio.h>
+>  #include <linux/pm.h>
+> +#include <linux/pm_runtime.h>
+>  
+>  #include <linux/mmc/host.h>
+>  
+> @@ -721,6 +722,11 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+>  	if (pdata->host_caps2)
+>  		host->mmc->caps2 |= pdata->host_caps2;
+>  
+> +	pm_runtime_enable(&pdev->dev);
+> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+
+Could you explain why use 50ms? 
+
+> +	pm_runtime_use_autosuspend(&pdev->dev);
+> +	pm_suspend_ignore_children(&pdev->dev, 1);
+
+Is there reason that ignore_children use to set the true?
+
+> +
+>  	ret = sdhci_add_host(host);
+>  	if (ret) {
+>  		dev_err(dev, "sdhci_add_host() failed\n");
+> @@ -740,6 +746,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
+>  
+>   err_add_host:
+>  	release_resource(sc->ioarea);
+> +	pm_runtime_forbid(&pdev->dev);
+> +	pm_runtime_get_noresume(&pdev->dev);
+>  	kfree(sc->ioarea);
+>  
+>   err_req_regs:
+> @@ -784,6 +792,8 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+>  
+>  	sdhci_remove_host(host, 1);
+>  
+> +	pm_runtime_disable(&pdev->dev);
+> +
+>  	for (ptr = 0; ptr < 3; ptr++) {
+>  		if (sc->clk_bus[ptr]) {
+>  			clk_disable(sc->clk_bus[ptr]);
+> @@ -824,9 +834,27 @@ static int sdhci_s3c_resume(struct device *dev)
+>  }
+>  #endif
+>  
+> +#ifdef CONFIG_PM_RUNTIME
+> +static int sdhci_s3c_runtime_suspend(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +
+> +	return sdhci_runtime_suspend_host(host);
+> +}
+> +
+> +static int sdhci_s3c_runtime_resume(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +
+> +	return sdhci_runtime_resume_host(host);
+> +}
+> +#endif
+> +
+>  #ifdef CONFIG_PM
+>  static const struct dev_pm_ops sdhci_s3c_pmops = {
+>  	SET_SYSTEM_SLEEP_PM_OPS(sdhci_s3c_suspend, sdhci_s3c_resume)
+> +	SET_RUNTIME_PM_OPS(sdhci_s3c_runtime_suspend, sdhci_s3c_runtime_resume,
+> +			   NULL)
+>  };
+>  
+>  #define SDHCI_S3C_PMOPS (&sdhci_s3c_pmops)
+
+
