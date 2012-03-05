@@ -1,36 +1,46 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: sdhci-esdhc-imx: could not set regulator OCR (-22)
-Date: Mon, 5 Mar 2012 16:10:13 -0300
-Message-ID: <CAOMZO5CYu82TkaNEMVMAVe82-Zu-T=hydi8GKS1_wgGNNWmkcw@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: [PATCH] mmc: omap_hsmmc: Fix Unbalanced pm_runtime_enable warning
+Date: Mon, 5 Mar 2012 15:42:41 -0800
+Message-ID: <20120305234240.GQ12083@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f46.google.com ([74.125.83.46]:48365 "EHLO
-	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757133Ab2CETKP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Mar 2012 14:10:15 -0500
-Received: by eekc41 with SMTP id c41so1614878eek.19
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Mar 2012 11:10:13 -0800 (PST)
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:53091 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757453Ab2CEXmp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Mar 2012 18:42:45 -0500
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Sascha Hauer <kernel@pengutronix.de>
+To: Kevin Hilman <khilman@ti.com>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-Hi,
+mmc: omap_hsmmc: Fix Unbalanced pm_runtime_enable warning
 
-On a mx51babbage board running linux-next I get:
+Otherwise we can get following warning when re-loading the
+omap_hsmmc driver module when gpio_twl4030 module is not
+loaded:
 
-sdhci: Secure Digital Host Controller Interface driver
-sdhci: Copyright(c) Pierre Ossman
-sdhci-pltfm: SDHCI platform and OF driver helper
-sdhci-esdhc-imx51.0 supply vmmc not found, using dummy regulator
-mmc0: SDHCI controller on sdhci-esdhc-imx51.0 [sdhci-esdhc-imx51.0] using DMA
-mmc0: mmc_rescan_try_freq: trying to init card at 400000 Hz
-sdhci-esdhc-imx sdhci-esdhc-imx51.0: could not set regulator OCR (-22)
-sdhci-esdhc-imx51.1 supply vmmc not found, using dummy regulator
+omap_hsmmc omap_hsmmc.0: Unbalanced pm_runtime_enable!
+omap_hsmmc omap_hsmmc.0: Unable to grab MMC CD IRQ
+omap_hsmmc: probe of omap_hsmmc.0 failed with error -22
 
-Before I start investigating I would like to check whether these
-regulator message errors have been fixed by some recent patches?
+Signed-off-by: Tony Lindgren <tony@atomide.com>
 
-Thanks,
+---
 
-Fabio Estevam
+Kevin, maybe take a look and see if this is correct and
+fits into your PM branches?
+
+Tony
+
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2146,6 +2146,7 @@ err_irq_cd_init:
+ err_irq:
+ 	pm_runtime_mark_last_busy(host->dev);
+ 	pm_runtime_put_autosuspend(host->dev);
++	pm_runtime_disable(host->dev);
+ 	clk_put(host->fclk);
+ 	if (host->got_dbclk) {
+ 		clk_disable(host->dbclk);
