@@ -1,83 +1,64 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] ARM: SAMSUNG: change the name from s3c-sdhci to
- exynos4-sdhci
-Date: Tue, 06 Mar 2012 11:29:38 +0900
-Message-ID: <4F557692.8090102@samsung.com>
-References: <4F45D343.6020409@samsung.com>
- <CAJuYYwTh8tVdA0X-TLEU-9O_M0_PmJR=i3WYAQXsaRcPF3MbJA@mail.gmail.com>
+Subject: Re: sdhci-esdhc-imx: could not set regulator OCR (-22)
+Date: Tue, 06 Mar 2012 14:30:01 +0900
+Message-ID: <4F55A0D9.4020408@samsung.com>
+References: <CAOMZO5CYu82TkaNEMVMAVe82-Zu-T=hydi8GKS1_wgGNNWmkcw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <CAJuYYwTh8tVdA0X-TLEU-9O_M0_PmJR=i3WYAQXsaRcPF3MbJA@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-samsung-soc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, kgene kim <kgene.kim@samsung.com>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:25000 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751139Ab2CFFaF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Mar 2012 00:30:05 -0500
+Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0M0G00A1K79WZO00@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 06 Mar 2012 14:30:03 +0900 (KST)
+Received: from [165.213.219.108] by mmp1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0M0G00EBM7A2ULH0@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 06 Mar 2012 14:30:03 +0900 (KST)
+In-reply-to: <CAOMZO5CYu82TkaNEMVMAVe82-Zu-T=hydi8GKS1_wgGNNWmkcw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Fabio Estevam <festevam@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Sascha Hauer <kernel@pengutronix.de>
 
-Hi Kukjin.
+Hi.
 
-Is it merged?
+It seems like my case.
+http://www.spinics.net/lists/linux-mmc/msg12130.html
 
-Best Regards,
+Thanks,
 Jaehoon Chung
 
-On 02/24/2012 06:56 PM, Thomas Abraham wrote:
+On 03/06/2012 04:10 AM, Fabio Estevam wrote:
 
-> On 23 February 2012 11:18, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Thomas Arbrahams's patchset have changed the device name in sdhci-s3c.c
->> (mmc: sdhci-s3c: Rework platform data and add device tree support)
->> But didn't change the regulator_consumer name.
->> So maybe didn't initialize the mmc/sd card for exynos4.
->>
->> This patch is fixed that (based-on linux-samsung for-next branch)
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: kyungmin Park <kyungmin.park@samsung.com>
->> ---
->>  arch/arm/mach-exynos/mach-nuri.c           |    4 ++--
->>  arch/arm/mach-exynos/mach-universal_c210.c |    2 +-
->>  2 files changed, 3 insertions(+), 3 deletions(-)
->>
->> diff --git a/arch/arm/mach-exynos/mach-nuri.c b/arch/arm/mach-exynos/mach-nuri.c
->> index a6b9162..251dd7a 100644
->> --- a/arch/arm/mach-exynos/mach-nuri.c
->> +++ b/arch/arm/mach-exynos/mach-nuri.c
->> @@ -116,7 +116,7 @@ static struct s3c_sdhci_platdata nuri_hsmmc0_data __initdata = {
->>  };
->>
->>  static struct regulator_consumer_supply emmc_supplies[] = {
->> -       REGULATOR_SUPPLY("vmmc", "s3c-sdhci.0"),
->> +       REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.0"),
->>        REGULATOR_SUPPLY("vmmc", "dw_mmc"),
->>  };
->>
->> @@ -415,7 +415,7 @@ static struct regulator_consumer_supply __initdata max8997_ldo12_[] = {
->>        REGULATOR_SUPPLY("vddio", "6-003c"), /* HDC802 */
->>  };
->>  static struct regulator_consumer_supply __initdata max8997_ldo13_[] = {
->> -       REGULATOR_SUPPLY("vmmc", "s3c-sdhci.2"), /* TFLASH */
->> +       REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.2"), /* TFLASH */
->>  };
->>  static struct regulator_consumer_supply __initdata max8997_ldo14_[] = {
->>        REGULATOR_SUPPLY("inmotor", "max8997-haptic"),
->> diff --git a/arch/arm/mach-exynos/mach-universal_c210.c b/arch/arm/mach-exynos/mach-universal_c210.c
->> index 6017a21..320cb1d 100644
->> --- a/arch/arm/mach-exynos/mach-universal_c210.c
->> +++ b/arch/arm/mach-exynos/mach-universal_c210.c
->> @@ -749,7 +749,7 @@ static struct s3c_sdhci_platdata universal_hsmmc0_data __initdata = {
->>  };
->>
->>  static struct regulator_consumer_supply mmc0_supplies[] = {
->> -       REGULATOR_SUPPLY("vmmc", "s3c-sdhci.0"),
->> +       REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.0"),
->>  };
->>
->>  static struct regulator_init_data mmc0_fixed_voltage_init_data = {
+> Hi,
 > 
-> Reviewed-by: Thomas Abraham <thomas.abraham@linaro.org>
+> On a mx51babbage board running linux-next I get:
+> 
+> sdhci: Secure Digital Host Controller Interface driver
+> sdhci: Copyright(c) Pierre Ossman
+> sdhci-pltfm: SDHCI platform and OF driver helper
+> sdhci-esdhc-imx51.0 supply vmmc not found, using dummy regulator
+> mmc0: SDHCI controller on sdhci-esdhc-imx51.0 [sdhci-esdhc-imx51.0] using DMA
+> mmc0: mmc_rescan_try_freq: trying to init card at 400000 Hz
+> sdhci-esdhc-imx sdhci-esdhc-imx51.0: could not set regulator OCR (-22)
+> sdhci-esdhc-imx51.1 supply vmmc not found, using dummy regulator
+> 
+> Before I start investigating I would like to check whether these
+> regulator message errors have been fixed by some recent patches?
+> 
+> Thanks,
+> 
+> Fabio Estevam
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
+
+
