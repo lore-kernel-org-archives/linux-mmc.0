@@ -1,49 +1,67 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH 0/3] MMC / PM: Make it possible to use PM QoS latency constraints
-Date: Tue, 6 Mar 2012 22:47:21 +0100
-Message-ID: <201203062247.21596.rjw@sisk.pl>
-References: <201203040101.53177.rjw@sisk.pl> <4F55E73C.10907@intel.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 2/3] tmio_mmc / PM: Use PM QoS requests, v2
+Date: Tue, 6 Mar 2012 23:33:28 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1203062332190.9300@axis700.grange>
+References: <201203040101.53177.rjw@sisk.pl> <201203042056.20707.rjw@sisk.pl>
+ <Pine.LNX.4.64.1203061038050.9300@axis700.grange> <201203062207.38583.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:58633 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754781Ab2CFVnN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 6 Mar 2012 16:43:13 -0500
-In-Reply-To: <4F55E73C.10907@intel.com>
+Received: from moutng.kundenserver.de ([212.227.17.10]:56732 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932377Ab2CFWeE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Mar 2012 17:34:04 -0500
+In-Reply-To: <201203062207.38583.rjw@sisk.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On Tuesday, March 06, 2012, Adrian Hunter wrote:
-> On 04/03/12 02:01, Rafael J. Wysocki wrote:
-> > Hi all,
+On Tue, 6 Mar 2012, Rafael J. Wysocki wrote:
+
+> On Tuesday, March 06, 2012, Guennadi Liakhovetski wrote:
+> > On Sun, 4 Mar 2012, Rafael J. Wysocki wrote:
 > > 
-> > The goal of this patchset is to allow user space to control the
-> > responsiveness of the MMC stack related to runtime power management.
+> > > From: Rafael J. Wysocki <rjw@sisk.pl>
+> > > 
+> > > Make tmio_mmc populate the pm_qos member of struct mmc_host, to
+> > > let the core know that it should create the pm_latency_limit_ms
+> > > host attribute for it, and set the default value of that attribute
+> > > to 100 ms.
+> > > 
+> > > Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
+> > > ---
+> > >  drivers/mmc/host/tmio_mmc_pio.c |    8 ++++++++
+> > >  1 file changed, 8 insertions(+)
+> > > 
+> > > Index: linux/drivers/mmc/host/tmio_mmc_pio.c
+> > > ===================================================================
+> > > --- linux.orig/drivers/mmc/host/tmio_mmc_pio.c
+> > > +++ linux/drivers/mmc/host/tmio_mmc_pio.c
+> > > @@ -918,6 +918,12 @@ int __devinit tmio_mmc_host_probe(struct
+> > >  	if (ret < 0)
+> > >  		goto pm_disable;
+> > >  
+> > > +	mmc->pm_qos = kzalloc(sizeof(*mmc->pm_qos), GFP_KERNEL);
+> > 
+> > Why don't you just add pm_qos to struct tmio_mmc_host?
 > 
-> I wonder why this is build into mmc and not just a generic runtime pm
-> facility. e.g.
+> Because the core has to see it.
+
+Yes, I understand that. So, you just assign a pointer to it to 
+mmc->pm_qos, just avoiding an extra allocation / freeing / error handling.
+
+> > > +	if (mmc->pm_qos)
+> > > +		mmc->pm_qos->val = 100;
+> > 
+> > 100ms... that seems way too long for me, wouldn't that allow the 
+> > runtime-pm to power down and up the domain on each request?...
 > 
-> 	/* Set maximum resume latency target to 100ms */
-> 	pm_runtime_set_max_latency(dev, 100);
+> That should be 100 us, sorry for the confusion.
 
-That actually is
-
- 	dev_pm_qos_add_request(dev, req, 100);
-
-where req is used as a handle for your request (it may be used, for
-example, to remove the request or update it).
-
-> And then runtime pm will create sysfs attributes etc
-
-Well, there may be an interface for drivers analogous to
-device_wakeup_enable()/device_wakeup_disable() allowing them
-to add/remove a sysfs attribute for user space to control
-a single PM QoS constraint.  That even sounds like a good idea. :-)
-
-Thanks,
-Rafael
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
