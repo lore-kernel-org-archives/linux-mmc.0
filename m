@@ -1,61 +1,98 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 3/3] sh_mmcif / PM: Use PM QoS requests, v2
-Date: Tue, 6 Mar 2012 10:40:57 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1203061040130.9300@axis700.grange>
-References: <201203040101.53177.rjw@sisk.pl> <201203042053.19314.rjw@sisk.pl>
- <201203042056.57012.rjw@sisk.pl>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: Re: [PATCH] ARM: SAMSUNG: change the name from s3c-sdhci to
+ exynos4-sdhci
+Date: Tue, 06 Mar 2012 01:51:27 -0800
+Message-ID: <4F55DE1F.9010405@samsung.com>
+References: <4F45D343.6020409@samsung.com>
+ <CAJuYYwTh8tVdA0X-TLEU-9O_M0_PmJR=i3WYAQXsaRcPF3MbJA@mail.gmail.com>
+ <4F557692.8090102@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:62936 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751844Ab2CFJlB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Mar 2012 04:41:01 -0500
-In-Reply-To: <201203042056.57012.rjw@sisk.pl>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <4F557692.8090102@samsung.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: linux-arm-kernel-bounces@lists.infradead.org
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-samsung-soc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, kgene kim <kgene.kim@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On Sun, 4 Mar 2012, Rafael J. Wysocki wrote:
+On 03/05/12 18:29, Jaehoon Chung wrote:
+> Hi Kukjin.
+>
+> Is it merged?
+>
+> Best Regards,
+> Jaehoon Chung
+>
+> On 02/24/2012 06:56 PM, Thomas Abraham wrote:
+>
+>> On 23 February 2012 11:18, Jaehoon Chung<jh80.chung@samsung.com>  wrote:
+>>> Thomas Arbrahams's patchset have changed the device name in sdhci-s3c.c
+>>> (mmc: sdhci-s3c: Rework platform data and add device tree support)
+>>> But didn't change the regulator_consumer name.
+>>> So maybe didn't initialize the mmc/sd card for exynos4.
+>>>
+>>> This patch is fixed that (based-on linux-samsung for-next branch)
+>>>
+>>> Signed-off-by: Jaehoon Chung<jh80.chung@samsung.com>
+>>> Signed-off-by: kyungmin Park<kyungmin.park@samsung.com>
+>>> ---
+>>>   arch/arm/mach-exynos/mach-nuri.c           |    4 ++--
+>>>   arch/arm/mach-exynos/mach-universal_c210.c |    2 +-
+>>>   2 files changed, 3 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/arch/arm/mach-exynos/mach-nuri.c b/arch/arm/mach-exynos/mach-nuri.c
+>>> index a6b9162..251dd7a 100644
+>>> --- a/arch/arm/mach-exynos/mach-nuri.c
+>>> +++ b/arch/arm/mach-exynos/mach-nuri.c
+>>> @@ -116,7 +116,7 @@ static struct s3c_sdhci_platdata nuri_hsmmc0_data __initdata = {
+>>>   };
+>>>
+>>>   static struct regulator_consumer_supply emmc_supplies[] = {
+>>> -       REGULATOR_SUPPLY("vmmc", "s3c-sdhci.0"),
+>>> +       REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.0"),
+>>>         REGULATOR_SUPPLY("vmmc", "dw_mmc"),
+>>>   };
+>>>
+>>> @@ -415,7 +415,7 @@ static struct regulator_consumer_supply __initdata max8997_ldo12_[] = {
+>>>         REGULATOR_SUPPLY("vddio", "6-003c"), /* HDC802 */
+>>>   };
+>>>   static struct regulator_consumer_supply __initdata max8997_ldo13_[] = {
+>>> -       REGULATOR_SUPPLY("vmmc", "s3c-sdhci.2"), /* TFLASH */
+>>> +       REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.2"), /* TFLASH */
+>>>   };
+>>>   static struct regulator_consumer_supply __initdata max8997_ldo14_[] = {
+>>>         REGULATOR_SUPPLY("inmotor", "max8997-haptic"),
+>>> diff --git a/arch/arm/mach-exynos/mach-universal_c210.c b/arch/arm/mach-exynos/mach-universal_c210.c
+>>> index 6017a21..320cb1d 100644
+>>> --- a/arch/arm/mach-exynos/mach-universal_c210.c
+>>> +++ b/arch/arm/mach-exynos/mach-universal_c210.c
+>>> @@ -749,7 +749,7 @@ static struct s3c_sdhci_platdata universal_hsmmc0_data __initdata = {
+>>>   };
+>>>
+>>>   static struct regulator_consumer_supply mmc0_supplies[] = {
+>>> -       REGULATOR_SUPPLY("vmmc", "s3c-sdhci.0"),
+>>> +       REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.0"),
+>>>   };
+>>>
+>>>   static struct regulator_init_data mmc0_fixed_voltage_init_data = {
+>>
+>> Reviewed-by: Thomas Abraham<thomas.abraham@linaro.org>
 
-> From: Rafael J. Wysocki <rjw@sisk.pl>
-> 
-> Make sh_mmcif populate the pm_qos member of struct mmc_host, to
-> let the core know that it should create the pm_latency_limit_ms
-> host attribute for it, and set the default value of that attribute
-> to 100 ms.
-> 
-> Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
-> ---
->  drivers/mmc/host/sh_mmcif.c |   10 ++++++++++
->  1 file changed, 10 insertions(+)
-> 
-> Index: linux/drivers/mmc/host/sh_mmcif.c
-> ===================================================================
-> --- linux.orig/drivers/mmc/host/sh_mmcif.c
-> +++ linux/drivers/mmc/host/sh_mmcif.c
-> @@ -57,6 +57,7 @@
->  #include <linux/pagemap.h>
->  #include <linux/platform_device.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/slab.h>
->  #include <linux/spinlock.h>
->  #include <linux/module.h>
->  
-> @@ -1327,6 +1328,12 @@ static int __devinit sh_mmcif_probe(stru
->  	if (ret < 0)
->  		goto clean_up2;
->  
-> +	mmc->pm_qos = kzalloc(sizeof(*mmc->pm_qos), GFP_KERNEL);
-> +	if (mmc->pm_qos)
-> +		mmc->pm_qos->val = 100;
+Looks OK, will apply.
 
-Same comments as for tmio_mmc: embed pm_qos and reduce the value?
+Thanks.
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
