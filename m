@@ -1,38 +1,33 @@
-From: "Torne (Richard Coles)" <torne@google.com>
-Subject: [PATCH] MMC: sdhci: remove too large timeout warning
-Date: Tue,  6 Mar 2012 10:27:28 +0000
-Message-ID: <1331029648-29175-1-git-send-email-torne@google.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 0/3] MMC / PM: Make it possible to use PM QoS latency
+ constraints
+Date: Tue, 06 Mar 2012 12:30:20 +0200
+Message-ID: <4F55E73C.10907@intel.com>
+References: <201203040101.53177.rjw@sisk.pl>
 Mime-Version: 1.0
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "Torne (Richard Coles)" <torne@google.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:51107 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758536Ab2CFKaO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 6 Mar 2012 05:30:14 -0500
+In-Reply-To: <201203040101.53177.rjw@sisk.pl>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
 
-From: "Torne (Richard Coles)" <torne@google.com>
+On 04/03/12 02:01, Rafael J. Wysocki wrote:
+> Hi all,
+> 
+> The goal of this patchset is to allow user space to control the
+> responsiveness of the MMC stack related to runtime power management.
 
-Some MMC cards specify timeouts that are larger than the highest
-possible timeout in the host controller. sdhci is the only host
-controller driver which complains about this; remove the warning to
-match the behaviour of the other drivers.
+I wonder why this is build into mmc and not just a generic runtime pm
+facility. e.g.
 
-Signed-off-by: Torne (Richard Coles) <torne@google.com>
----
- drivers/mmc/host/sdhci.c |    2 --
- 1 files changed, 0 insertions(+), 2 deletions(-)
+	/* Set maximum resume latency target to 100ms */
+	pm_runtime_set_max_latency(dev, 100);
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 8d66706..85d4d05 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -680,8 +680,6 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 	}
- 
- 	if (count >= 0xF) {
--		pr_warning("%s: Too large timeout requested for CMD%d!\n",
--		       mmc_hostname(host->mmc), cmd->opcode);
- 		count = 0xE;
- 	}
- 
--- 
-1.7.7.3
+And then runtime pm will create sysfs attributes etc
