@@ -1,103 +1,123 @@
-From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: [PATCH v2 1/1] mmc: core: hs200 fixes
-Date: Tue,  6 Mar 2012 17:59:12 +0530
-Message-ID: <1331036952-18211-1-git-send-email-subhashj@codeaurora.org>
+From: "Maupin, Chase" <chase.maupin@ti.com>
+Subject: RE: [PATCH] mmc: omap_hsmmc: set dto to 14 for all devices
+Date: Tue, 6 Mar 2012 12:54:34 +0000
+Message-ID: <7D46E86EC0A8354091174257B2FED1012F050F72@DLEE12.ent.ti.com>
+References: <1330622780-1909-1-git-send-email-Chase.Maupin@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:16413 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030546Ab2CFM3s (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Mar 2012 07:29:48 -0500
+Received: from bear.ext.ti.com ([192.94.94.41]:39045 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751772Ab2CFMyg convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Mar 2012 07:54:36 -0500
+In-Reply-To: <1330622780-1909-1-git-send-email-Chase.Maupin@ti.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, girish.shivananjappa@linaro.org, cjb@laptop.org, Subhash Jadavani <subhashj@codeaurora.org>
+To: "Maupin, Chase" <chase.maupin@ti.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-This patch fixes following issues when HS200 is enabled:
+Ping on this patch.  I have not seen any response on the list but if I have missed something please let me know.
 
-1. If executing_tuning() host ops is called without mmc_host_clk_hold(),
-   card clocks might get turned off (if MMC_CLK_GATING is enabled)
-   while execute_tuning() is in progress. So this patch makes sure
-   that execute_tuning() is called with mmc_host_clk_hold().
+> -----Original Message-----
+> From: Maupin, Chase
+> Sent: Thursday, March 01, 2012 11:26 AM
+> To: linux-omap@vger.kernel.org; linux-mmc@vger.kernel.org
+> Cc: Maupin, Chase
+> Subject: [PATCH] mmc: omap_hsmmc: set dto to 14 for all devices
+> 
+> * With certain SD cards timeouts like the following have been seen
+>   due to an improper calculation of the dto value:
+>     mmcblk0: error -110 transferring data, sector 4126233, nr 8,
+>     card status 0xc00
+> * By removing the dto calculation and setting the timeout value
+>   to the maximum specified by the SD card specification part A2
+>   section 2.2.15 these timeouts can be avoided.
+> * This change has been used by beagleboard users as well as the
+>   Texas Instruments SDK without a negative impact.
+> * There are multiple discussion threads about this but the most
+>   relevant ones are:
+>     * http://talk.maemo.org/showthread.php?p=1000707#post1000707
+>     * http://www.mail-archive.com/linux-
+> omap@vger.kernel.org/msg42213.html
+> * Original proposal for this fix was done by Sukumar Ghoral of
+>   Texas Instruments
+> 
+> * Tested using a Texas Instruments AM335x EVM
+> 
+> Signed-off-by: Chase Maupin <Chase.Maupin@ti.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |   30 +++++------------------------
+> -
+>  1 files changed, 5 insertions(+), 25 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c
+> b/drivers/mmc/host/omap_hsmmc.c
+> index fd0c661..afd7292 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1481,11 +1481,8 @@ static int
+> omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host,
+>  	return 0;
+>  }
+> 
+> -static void set_data_timeout(struct omap_hsmmc_host *host,
+> -			     unsigned int timeout_ns,
+> -			     unsigned int timeout_clks)
+> +static void set_data_timeout(struct omap_hsmmc_host *host)
+>  {
+> -	unsigned int timeout, cycle_ns;
+>  	uint32_t reg, clkd, dto = 0;
+> 
+>  	reg = OMAP_HSMMC_READ(host->base, SYSCTL);
+> @@ -1493,25 +1490,8 @@ static void set_data_timeout(struct
+> omap_hsmmc_host *host,
+>  	if (clkd == 0)
+>  		clkd = 1;
+> 
+> -	cycle_ns = 1000000000 / (clk_get_rate(host->fclk) / clkd);
+> -	timeout = timeout_ns / cycle_ns;
+> -	timeout += timeout_clks;
+> -	if (timeout) {
+> -		while ((timeout & 0x80000000) == 0) {
+> -			dto += 1;
+> -			timeout <<= 1;
+> -		}
+> -		dto = 31 - dto;
+> -		timeout <<= 1;
+> -		if (timeout && dto)
+> -			dto += 1;
+> -		if (dto >= 13)
+> -			dto -= 13;
+> -		else
+> -			dto = 0;
+> -		if (dto > 14)
+> -			dto = 14;
+> -	}
+> +    /* Use the maximum timeout value allowed in the standard of 14
+> or 0xE */
+> +	dto = 14;
+> 
+>  	reg &= ~DTO_MASK;
+>  	reg |= dto << DTO_SHIFT;
+> @@ -1534,13 +1514,13 @@ omap_hsmmc_prepare_data(struct
+> omap_hsmmc_host *host, struct mmc_request *req)
+>  		 * busy signal.
+>  		 */
+>  		if (req->cmd->flags & MMC_RSP_BUSY)
+> -			set_data_timeout(host, 100000000U, 0);
+> +			set_data_timeout(host);
+>  		return 0;
+>  	}
+> 
+>  	OMAP_HSMMC_WRITE(host->base, BLK, (req->data->blksz)
+>  					| (req->data->blocks << 16));
+> -	set_data_timeout(host, req->data->timeout_ns, req->data-
+> >timeout_clks);
+> +	set_data_timeout(host);
+> 
+>  	if (host->use_dma) {
+>  		ret = omap_hsmmc_start_dma_transfer(host, req);
+> --
+> 1.7.0.4
 
-2. If host timing mode is set to HS200 mode, there should not be
-   any communication with the card until execute_tuning() is completed.
-   But there is a chance that CMD6 might be sent to enable set HPI_EN
-   (of HPI_MGMT field in EXT_CSD) before execute_tuning() is called.
-   So this patch moves this operation after execute_tuning() is completed.
-
-Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
----
- drivers/mmc/core/mmc.c |   38 +++++++++++++++++++++-----------------
- 1 files changed, 21 insertions(+), 17 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a480663..d36d2c4 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1030,22 +1030,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	}
- 
- 	/*
--	 * Enable HPI feature (if supported)
--	 */
--	if (card->ext_csd.hpi) {
--		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--			EXT_CSD_HPI_MGMT, 1, 0);
--		if (err && err != -EBADMSG)
--			goto free_card;
--		if (err) {
--			pr_warning("%s: Enabling HPI failed\n",
--				   mmc_hostname(card->host));
--			err = 0;
--		} else
--			card->ext_csd.hpi_en = 1;
--	}
--
--	/*
- 	 * Compute bus speed.
- 	 */
- 	max_dtr = (unsigned int)-1;
-@@ -1094,9 +1078,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		 * 4. execute tuning for HS200
- 		 */
- 		if ((host->caps2 & MMC_CAP2_HS200) &&
--		    card->host->ops->execute_tuning)
-+		    card->host->ops->execute_tuning) {
-+			mmc_host_clk_hold(card->host);
- 			err = card->host->ops->execute_tuning(card->host,
- 				MMC_SEND_TUNING_BLOCK_HS200);
-+			mmc_host_clk_release(card->host);
-+		}
- 		if (err) {
- 			pr_warning("%s: tuning execution failed\n",
- 				   mmc_hostname(card->host));
-@@ -1216,6 +1203,23 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	}
- 
- 	/*
-+	 * Enable HPI feature (if supported)
-+	 */
-+	if (card->ext_csd.hpi) {
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+				EXT_CSD_HPI_MGMT, 1,
-+				card->ext_csd.generic_cmd6_time);
-+		if (err && err != -EBADMSG)
-+			goto free_card;
-+		if (err) {
-+			pr_warning("%s: Enabling HPI failed\n",
-+				   mmc_hostname(card->host));
-+			err = 0;
-+		} else
-+			card->ext_csd.hpi_en = 1;
-+	}
-+
-+	/*
- 	 * If cache size is higher than 0, this indicates
- 	 * the existence of cache and it can be turned on.
- 	 */
--- 
-1.7.1.1
-
---
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
