@@ -1,64 +1,60 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: sdhci-esdhc-imx: could not set regulator OCR (-22)
-Date: Tue, 06 Mar 2012 14:30:01 +0900
-Message-ID: <4F55A0D9.4020408@samsung.com>
-References: <CAOMZO5CYu82TkaNEMVMAVe82-Zu-T=hydi8GKS1_wgGNNWmkcw@mail.gmail.com>
+Subject: [PATCH v3 0/4] mmc: sdhci-s3c: use the sdhci-pltfm.c and move the
+ header file
+Date: Tue, 06 Mar 2012 15:17:20 +0900
+Message-ID: <4F55ABF0.1060801@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:25000 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751139Ab2CFFaF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Mar 2012 00:30:05 -0500
-Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0M0G00A1K79WZO00@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 06 Mar 2012 14:30:03 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0M0G00EBM7A2ULH0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 06 Mar 2012 14:30:03 +0900 (KST)
-In-reply-to: <CAOMZO5CYu82TkaNEMVMAVe82-Zu-T=hydi8GKS1_wgGNNWmkcw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, 'kgene kim' <kgene.kim@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Sascha Hauer <kernel@pengutronix.de>
 
-Hi.
+This patchset is the purpose for using sdhci-pltfm.c and 
+removing the arch dependency.
+The sdhci-s3c has too heavy arch dependency.
+For example, if work for sdhci-s3c.c at mmc-tree, sometime need to change sdhci.h for Samsung-Soc.
+But now we need to work at both mmc-next tree and Samsung-SoC tree.
+I think this is very inefficient and can conflict to merge.
+So remained at least dependency and moved the header file to mmc folder.
 
-It seems like my case.
-http://www.spinics.net/lists/linux-mmc/msg12130.html
+And sdhci-s3c changed to use the sdhci-pltfm.c.
+There is no reason that didn't use the sdhci-pltfm.c.
+If we use the sdhci-pltfm.c,we can easily maintain the common part.
 
-Thanks,
-Jaehoon Chung
+In future, i will work more removing the arch dependency.
 
-On 03/06/2012 04:10 AM, Fabio Estevam wrote:
+This patchset based on mmc-next tree.
 
-> Hi,
-> 
-> On a mx51babbage board running linux-next I get:
-> 
-> sdhci: Secure Digital Host Controller Interface driver
-> sdhci: Copyright(c) Pierre Ossman
-> sdhci-pltfm: SDHCI platform and OF driver helper
-> sdhci-esdhc-imx51.0 supply vmmc not found, using dummy regulator
-> mmc0: SDHCI controller on sdhci-esdhc-imx51.0 [sdhci-esdhc-imx51.0] using DMA
-> mmc0: mmc_rescan_try_freq: trying to init card at 400000 Hz
-> sdhci-esdhc-imx sdhci-esdhc-imx51.0: could not set regulator OCR (-22)
-> sdhci-esdhc-imx51.1 supply vmmc not found, using dummy regulator
-> 
-> Before I start investigating I would like to check whether these
-> regulator message errors have been fixed by some recent patches?
-> 
-> Thanks,
-> 
-> Fabio Estevam
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Changelog v3:
+	- Modify mmc/host/Makefile for sdhci-s3c.c
+	- remove unnecessary code
+
+Changelog V2:
+	- modified driver/mmc/host/Kconfig
+	- Add the comments for s3c64xx
+	- based-on latest mmc-tree. 
 
 
+Jaehoon Chung (4):
+  mmc: sdhci-s3c: use the sdhci-pltfm for Samsung-SoC
+  ARM: SAMSUNG: move the sdhci header file to driver directory
+  mmc: sdhci-s3c: use the sdhci-s3c.h instead of regs-sdhci.h
+  ARM: SAMSUNG: move the mmc platdata header file into linux/mmc/
+
+ arch/arm/mach-exynos/setup-sdhci-gpio.c         |    1 -
+ arch/arm/mach-s5pc100/setup-sdhci-gpio.c        |    1 -
+ arch/arm/mach-s5pv210/setup-sdhci-gpio.c        |    1 -
+ arch/arm/plat-samsung/include/plat/regs-sdhci.h |   87 --------
+ arch/arm/plat-samsung/include/plat/sdhci.h      |   53 +-----
+ drivers/mmc/host/Kconfig                        |   20 +-
+ drivers/mmc/host/Makefile                       |    2 +-
+ drivers/mmc/host/sdhci-s3c.c                    |  265 ++++++++---------------
+ drivers/mmc/host/sdhci-s3c.h                    |   89 ++++++++
+ include/linux/mmc/sdhci-s3c.h                   |   84 +++++++
+ 10 files changed, 273 insertions(+), 330 deletions(-)
+ delete mode 100644 arch/arm/plat-samsung/include/plat/regs-sdhci.h
+ create mode 100644 drivers/mmc/host/sdhci-s3c.h
+ create mode 100644 include/linux/mmc/sdhci-s3c.h
