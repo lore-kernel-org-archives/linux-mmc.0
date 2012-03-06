@@ -1,98 +1,141 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: Re: [PATCH] ARM: SAMSUNG: change the name from s3c-sdhci to
- exynos4-sdhci
-Date: Tue, 06 Mar 2012 01:51:27 -0800
-Message-ID: <4F55DE1F.9010405@samsung.com>
-References: <4F45D343.6020409@samsung.com>
- <CAJuYYwTh8tVdA0X-TLEU-9O_M0_PmJR=i3WYAQXsaRcPF3MbJA@mail.gmail.com>
- <4F557692.8090102@samsung.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH v1 1/1] mmc: core: hs200 fixes
+Date: Tue, 6 Mar 2012 15:30:04 +0530
+Message-ID: <CAGxe1ZFrUPWyYXQJgG6rjVmEA39c38U5gNQ1oSpaFV7dRQ+hfQ@mail.gmail.com>
+References: <1331018695-13150-1-git-send-email-subhashj@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <4F557692.8090102@samsung.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-samsung-soc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, kgene kim <kgene.kim@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:44564 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758536Ab2CFKAF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Mar 2012 05:00:05 -0500
+Received: by qcqw6 with SMTP id w6so2287245qcq.19
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Mar 2012 02:00:04 -0800 (PST)
+In-Reply-To: <1331018695-13150-1-git-send-email-subhashj@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, cjb@laptop.org
 
-On 03/05/12 18:29, Jaehoon Chung wrote:
-> Hi Kukjin.
+On 6 March 2012 12:54, Subhash Jadavani <subhashj@codeaurora.org> wrote=
+:
+> This patch fixes following issues when HS200 is enabled:
 >
-> Is it merged?
+> 1. If executing_tuning() host ops is called without mmc_host_clk_hold=
+(),
+> =A0 card clocks might get turned off (if MMC_CLK_GATING is enabled)
+> =A0 while execute_tuning() is in progress. So this patch makes sure
+> =A0 that execute_tuning() is called with mmc_host_clk_hold().
 >
-> Best Regards,
-> Jaehoon Chung
+> 2. If host timing mode is set to HS200 mode, there should not be
+> =A0 any communication with the card until execute_tuning() is complet=
+ed.
+> =A0 But there is a chance that CMD6 might be sent to enable set HPI_E=
+N
+> =A0 (of HPI_MGMT field in EXT_CSD) before execute_tuning() is called.
+> =A0 So this patch moves this operation after execute_tuning() is comp=
+leted.
 >
-> On 02/24/2012 06:56 PM, Thomas Abraham wrote:
+> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> ---
+> =A0drivers/mmc/core/mmc.c | =A0 37 ++++++++++++++++++++--------------=
+---
+> =A01 files changed, 20 insertions(+), 17 deletions(-)
 >
->> On 23 February 2012 11:18, Jaehoon Chung<jh80.chung@samsung.com>  wrote:
->>> Thomas Arbrahams's patchset have changed the device name in sdhci-s3c.c
->>> (mmc: sdhci-s3c: Rework platform data and add device tree support)
->>> But didn't change the regulator_consumer name.
->>> So maybe didn't initialize the mmc/sd card for exynos4.
->>>
->>> This patch is fixed that (based-on linux-samsung for-next branch)
->>>
->>> Signed-off-by: Jaehoon Chung<jh80.chung@samsung.com>
->>> Signed-off-by: kyungmin Park<kyungmin.park@samsung.com>
->>> ---
->>>   arch/arm/mach-exynos/mach-nuri.c           |    4 ++--
->>>   arch/arm/mach-exynos/mach-universal_c210.c |    2 +-
->>>   2 files changed, 3 insertions(+), 3 deletions(-)
->>>
->>> diff --git a/arch/arm/mach-exynos/mach-nuri.c b/arch/arm/mach-exynos/mach-nuri.c
->>> index a6b9162..251dd7a 100644
->>> --- a/arch/arm/mach-exynos/mach-nuri.c
->>> +++ b/arch/arm/mach-exynos/mach-nuri.c
->>> @@ -116,7 +116,7 @@ static struct s3c_sdhci_platdata nuri_hsmmc0_data __initdata = {
->>>   };
->>>
->>>   static struct regulator_consumer_supply emmc_supplies[] = {
->>> -       REGULATOR_SUPPLY("vmmc", "s3c-sdhci.0"),
->>> +       REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.0"),
->>>         REGULATOR_SUPPLY("vmmc", "dw_mmc"),
->>>   };
->>>
->>> @@ -415,7 +415,7 @@ static struct regulator_consumer_supply __initdata max8997_ldo12_[] = {
->>>         REGULATOR_SUPPLY("vddio", "6-003c"), /* HDC802 */
->>>   };
->>>   static struct regulator_consumer_supply __initdata max8997_ldo13_[] = {
->>> -       REGULATOR_SUPPLY("vmmc", "s3c-sdhci.2"), /* TFLASH */
->>> +       REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.2"), /* TFLASH */
->>>   };
->>>   static struct regulator_consumer_supply __initdata max8997_ldo14_[] = {
->>>         REGULATOR_SUPPLY("inmotor", "max8997-haptic"),
->>> diff --git a/arch/arm/mach-exynos/mach-universal_c210.c b/arch/arm/mach-exynos/mach-universal_c210.c
->>> index 6017a21..320cb1d 100644
->>> --- a/arch/arm/mach-exynos/mach-universal_c210.c
->>> +++ b/arch/arm/mach-exynos/mach-universal_c210.c
->>> @@ -749,7 +749,7 @@ static struct s3c_sdhci_platdata universal_hsmmc0_data __initdata = {
->>>   };
->>>
->>>   static struct regulator_consumer_supply mmc0_supplies[] = {
->>> -       REGULATOR_SUPPLY("vmmc", "s3c-sdhci.0"),
->>> +       REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.0"),
->>>   };
->>>
->>>   static struct regulator_init_data mmc0_fixed_voltage_init_data = {
->>
->> Reviewed-by: Thomas Abraham<thomas.abraham@linaro.org>
-
-Looks OK, will apply.
-
-Thanks.
-
-Best regards,
-Kgene.
---
-Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
-SW Solution Development Team, Samsung Electronics Co., Ltd.
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index a480663..08574ae 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1030,22 +1030,6 @@ static int mmc_init_card(struct mmc_host *host=
+, u32 ocr,
+> =A0 =A0 =A0 =A0}
+>
+> =A0 =A0 =A0 =A0/*
+> - =A0 =A0 =A0 =A0* Enable HPI feature (if supported)
+> - =A0 =A0 =A0 =A0*/
+> - =A0 =A0 =A0 if (card->ext_csd.hpi) {
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_SE=
+T_NORMAL,
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 EXT_CSD_HPI_MGMT, 1, 0)=
+;
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err && err !=3D -EBADMSG)
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto free_card;
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("%s: Enablin=
+g HPI failed\n",
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+mmc_hostname(card->host));
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D 0;
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.hpi_en =3D=
+ 1;
+> - =A0 =A0 =A0 }
+> -
+> - =A0 =A0 =A0 /*
+> =A0 =A0 =A0 =A0 * Compute bus speed.
+> =A0 =A0 =A0 =A0 */
+> =A0 =A0 =A0 =A0max_dtr =3D (unsigned int)-1;
+> @@ -1094,9 +1078,12 @@ static int mmc_init_card(struct mmc_host *host=
+, u32 ocr,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * 4. execute tuning for HS200
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if ((host->caps2 & MMC_CAP2_HS200) &&
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->host->ops->execute_tuning=
+)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->host->ops->execute_tuning=
+) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_host_clk_hold(card-=
+>host);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D card->host->op=
+s->execute_tuning(card->host,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0MMC_SE=
+ND_TUNING_BLOCK_HS200);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_host_clk_release(ca=
+rd->host);
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pr_warning("%s: tuning=
+ execution failed\n",
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 m=
+mc_hostname(card->host));
+> @@ -1216,6 +1203,22 @@ static int mmc_init_card(struct mmc_host *host=
+, u32 ocr,
+> =A0 =A0 =A0 =A0}
+>
+> =A0 =A0 =A0 =A0/*
+> + =A0 =A0 =A0 =A0* Enable HPI feature (if supported)
+> + =A0 =A0 =A0 =A0*/
+> + =A0 =A0 =A0 if (card->ext_csd.hpi) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_SE=
+T_NORMAL,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 EXT_CSD_HPI_MGMT, 1, 0)=
+;
+i think timeout value should be generic timeout value. Rest all looks f=
+ine.
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err && err !=3D -EBADMSG)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto free_card;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("%s: Enablin=
+g HPI failed\n",
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+mmc_hostname(card->host));
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D 0;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 } else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.hpi_en =3D=
+ 1;
+> + =A0 =A0 =A0 }
+> +
+> + =A0 =A0 =A0 /*
+> =A0 =A0 =A0 =A0 * If cache size is higher than 0, this indicates
+> =A0 =A0 =A0 =A0 * the existence of cache and it can be turned on.
+> =A0 =A0 =A0 =A0 */
+> --
+> 1.7.1.1
+>
+> --
+> Sent by a consultant of the Qualcomm Innovation Center, Inc.
+> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora F=
+orum.
+>
