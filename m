@@ -1,100 +1,156 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: core: Substitute mmc_flush_cash for mmc_cache_ctrl in
- suspend
-Date: Wed, 07 Mar 2012 12:49:46 +0900
-Message-ID: <000b01ccfc15$570e27c0$052a7740$%jun@samsung.com>
-References: <000101cce7a7$fc0df6b0$f429e410$%jun@samsung.com>
- <CAKLKtzd486AB8U7kxqo1_9FebD-MB-Nm2V4zBPHthQGDpPjKAQ@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH V2] mmc: core: Clean up after mmc_pre_req if card was
+ removed
+Date: Wed, 07 Mar 2012 14:24:14 +0900
+Message-ID: <4F56F0FE.4020606@samsung.com>
+References: <1330959163-21796-1-git-send-email-ulf.hansson@stericsson.com>
+ <4F563AC1.5020708@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:45527 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759366Ab2CGDtt convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Mar 2012 22:49:49 -0500
-Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
+Received: from mailout4.samsung.com ([203.254.224.34]:33372 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1749667Ab2CGFYU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Mar 2012 00:24:20 -0500
+Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0M0H00EYPXAU07J0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 07 Mar 2012 12:49:47 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp1.samsung.com (Oracle Communications Messaging Exchange Server 7u4-19.01
- 64bit (built Sep  7 2010)) with ESMTPA id <0M0H00L6IXAZRHJ0@mmp1.samsung.com>
- for linux-mmc@vger.kernel.org; Wed, 07 Mar 2012 12:49:47 +0900 (KST)
-In-reply-to: <CAKLKtzd486AB8U7kxqo1_9FebD-MB-Nm2V4zBPHthQGDpPjKAQ@mail.gmail.com>
-Content-language: ko
+ 2010)) with ESMTP id <0M0I0026H1O4OJO0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 07 Mar 2012 14:24:19 +0900 (KST)
+Received: from [165.213.219.108] by mmp1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0M0I004PL1OHF7A0@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 07 Mar 2012 14:24:18 +0900 (KST)
+In-reply-to: <4F563AC1.5020708@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Saugata Das' <saugata.das@linaro.org>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, ygardi@codeaurora.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Saugata Das <saugata.das@linaro.org>:
-> On 10 February 2012 09:26, Seungwon Jeon <tgih.jun@samsung.com> wrote=
-:
-> > After the cache is disabled in suspend, enabling cache can be done =
-by
-> > mmc_init_card in resume. Currently this call path has been changed.=
- In
-> > case of sleep mode mmc_init_card isn't called. So mmc_cache_ctrl ne=
-ed to
-> > be replaced with mmc_flush_cache in suspend.
-> >
-> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> > ---
-> > =A0drivers/mmc/core/core.c | =A0 =A09 +++++++--
-> > =A01 files changed, 7 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index 8a19143..70e25d8 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -2329,9 +2329,14 @@ EXPORT_SYMBOL(mmc_card_can_sleep);
-> > =A0*/
-> > =A0int mmc_flush_cache(struct mmc_card *card)
-> > =A0{
-> > - =A0 =A0 =A0 struct mmc_host *host =3D card->host;
-> > + =A0 =A0 =A0 struct mmc_host *host;
-> > =A0 =A0 =A0 =A0int err =3D 0;
-> >
-> > + =A0 =A0 =A0 if (!card)
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 return err;
-> > +
-> > + =A0 =A0 =A0 host =3D card->host;
-> > +
-> > =A0 =A0 =A0 =A0if (!(host->caps2 & MMC_CAP2_CACHE_CTRL))
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return err;
-> >
-> > @@ -2401,7 +2406,7 @@ int mmc_suspend_host(struct mmc_host *host)
-> > =A0 =A0 =A0 =A0cancel_delayed_work(&host->detect);
-> > =A0 =A0 =A0 =A0mmc_flush_scheduled_work();
-> > =A0 =A0 =A0 =A0if (mmc_try_claim_host(host)) {
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_cache_ctrl(host, 0);
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_flush_cache(host->card);
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_do_release_host(host);
-> > =A0 =A0 =A0 =A0} else {
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D -EBUSY;
-> > --
-> > 1.7.0.4
->=20
-> Thanks for the changes.
-> Reviewed-by: Saugata Das <saugata.das@linaro.org>
->=20
-Is there more opinions?
+Hi Ulf.
 
-Thanks,
-Seungwon Jeon.
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc=
-" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
-l
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
+I tested with patch-v2, i didn't found the other problem.
+It looks good.
+
+Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+Best Regards,
+Jaehoon Chung
+
+On 03/07/2012 01:26 AM, Ulf Hansson wrote:
+
+> Hi Jaehoon,
+> 
+> I would be very interested to hear if you still encounter any problems with this V2 patch? If you are able to do a test it would be highly appreciated. :-)
+> 
+> Just for reference, I were able to reproduce problems similar to what you have for the V1 patch.
+> 
+> Thanks!
+> 
+> Best regards
+> Ulf Hansson
+> 
+> 
+> On 03/05/2012 03:52 PM, Ulf HANSSON wrote:
+>> Make sure mmc_start_req cancel the prepared job, if the request
+>> was prevented to be started due to the card has been removed.
+>>
+>> This bug was introduced in commit:
+>> mmc: allow upper layers to know immediately if card has been removed
+>>
+>> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
+>> Reviewed-by: Per Forlin<per.forlin@stericsson.com>
+>> ---
+>>
+>> Changes in v2:
+>>     - Maintain handling of host->areq (host->areq must not be NULL when
+>>     "start_err"), to make sure the block layer is able to respond to all
+>>     of the started requests.
+>>
+>> ---
+>>   drivers/mmc/core/core.c |   35 +++++++++++++++--------------------
+>>   1 files changed, 15 insertions(+), 20 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index faa0af1..56b7a24 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -249,16 +249,17 @@ static void mmc_wait_done(struct mmc_request *mrq)
+>>       complete(&mrq->completion);
+>>   }
+>>
+>> -static void __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+>> +static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+>>   {
+>>       init_completion(&mrq->completion);
+>>       mrq->done = mmc_wait_done;
+>>       if (mmc_card_removed(host->card)) {
+>>           mrq->cmd->error = -ENOMEDIUM;
+>>           complete(&mrq->completion);
+>> -        return;
+>> +        return -ENOMEDIUM;
+>>       }
+>>       mmc_start_request(host, mrq);
+>> +    return 0;
+>>   }
+>>
+>>   static void mmc_wait_for_req_done(struct mmc_host *host,
+>> @@ -342,6 +343,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>>                       struct mmc_async_req *areq, int *error)
+>>   {
+>>       int err = 0;
+>> +    int start_err = 0;
+>>       struct mmc_async_req *data = host->areq;
+>>
+>>       /* Prepare a new request */
+>> @@ -351,30 +353,23 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>>       if (host->areq) {
+>>           mmc_wait_for_req_done(host, host->areq->mrq);
+>>           err = host->areq->err_check(host->card, host->areq);
+>> -        if (err) {
+>> -            /* post process the completed failed request */
+>> -            mmc_post_req(host, host->areq->mrq, 0);
+>> -            if (areq)
+>> -                /*
+>> -                 * Cancel the new prepared request, because
+>> -                 * it can't run until the failed
+>> -                 * request has been properly handled.
+>> -                 */
+>> -                mmc_post_req(host, areq->mrq, -EINVAL);
+>> -
+>> -            host->areq = NULL;
+>> -            goto out;
+>> -        }
+>>       }
+>>
+>> -    if (areq)
+>> -        __mmc_start_req(host, areq->mrq);
+>> +    if (!err&&  areq)
+>> +        start_err = __mmc_start_req(host, areq->mrq);
+>>
+>>       if (host->areq)
+>>           mmc_post_req(host, host->areq->mrq, 0);
+>>
+>> -    host->areq = areq;
+>> - out:
+>> +     /* Cancel a prepared request if it was not started. */
+>> +    if ((err || start_err)&&  areq)
+>> +            mmc_post_req(host, areq->mrq, -EINVAL);
+>> +
+>> +    if (err)
+>> +        host->areq = NULL;
+>> +    else
+>> +        host->areq = areq;
+>> +
+>>       if (error)
+>>           *error = err;
+>>       return data;
+> 
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
 
