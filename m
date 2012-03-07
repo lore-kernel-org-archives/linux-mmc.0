@@ -1,54 +1,80 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 4/4] mmc: omap_hsmmc: Simplify init for twl6030 MMC
- card detect
-Date: Wed, 7 Mar 2012 09:31:52 -0800
-Message-ID: <20120307173152.GG12083@atomide.com>
-References: <20120301185044.29210.44521.stgit@kaulin.local>
- <20120301185535.29210.71546.stgit@kaulin.local>
- <4F50643B.9050500@ti.com>
- <20120302172251.GJ18901@atomide.com>
- <4F548457.5050205@ti.com>
- <CANrkHUZysOnHKKUuLm0Vbo1KsNp0yUd=udjGvQ43=gTTXbWeCw@mail.gmail.com>
- <CANrkHUaYDpv=p0p81oKWCoewyjheyZYkCqvZY7_ZQxWi_=8YFw@mail.gmail.com>
- <m2lincifj9.fsf@bob.laptop.org>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH v3 0/4] mmc: sdhci-s3c: use the sdhci-pltfm.c and move
+ the header file
+Date: Wed, 7 Mar 2012 18:48:44 +0000
+Message-ID: <20120307184843.GW3107@opensource.wolfsonmicro.com>
+References: <4F55ABF0.1060801@samsung.com>
+ <20120306130054.GA9890@sirena.org.uk>
+ <201203061415.18836.heiko@sntech.de>
+ <CAELcNGS6UynrJPRk1KtEJT3Rm6Jb5_scLm4KKca+dJ1ZYDOVbg@mail.gmail.com>
+ <20120306163052.GX19635@opensource.wolfsonmicro.com>
+ <4F56D003.5070406@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:60129 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758219Ab2CGRb6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Mar 2012 12:31:58 -0500
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="je0mZywpqEo4t1RU"
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <m2lincifj9.fsf@bob.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <4F56D003.5070406@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Heiko =?iso-8859-1?Q?St=FCbner?= <heiko@sntech.de>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, kgene kim <kgene.kim@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "T Krishnamoorthy, Balaji" <balajitk@ti.com>, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Samuel Ortiz <sameo@linux.intel.com>, Rajendra Nayak <rnayak@ti.com>
 
-* Chris Ball <cjb@laptop.org> [120307 07:11]:
-> Hi Balaji,
-> 
-> On Wed, Mar 07 2012, T Krishnamoorthy, Balaji wrote:
-> > OMAP4 and OMAP3 HSMMC IP registers differ by 0x100 offset.
-> > Addng the offset to platform_device resource structure
-> > increments the start address for every insmod operation.
-> > MMC command fails on re-insertion as module due incorrect register base.
-> > Fix this by updating the ioremap base address only.
-> >
-> > Signed-off-by: Balaji T K <balajitk@ti.com>
-> 
-> Is this a regression, or has it never worked in mainline?
 
-"Features that never worked originally" so this can wait for the
-merge window. It happens on re-inserting of the card.
- 
-> > Note:  eMMC detection is still failing on resertion due to card vcc
-> > power off on rmmod
-> 
-> And this?
+--je0mZywpqEo4t1RU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-That sounds like a separate issue that needs to be fixed.
+On Wed, Mar 07, 2012 at 12:03:31PM +0900, Jaehoon Chung wrote:
+> On 03/07/2012 01:30 AM, Mark Brown wrote:
 
-Regards,
+> > The same IP is present and used with the same driver on other Samsung
+> > SoCs.
 
-Tony
+> I know that used with the same driver on other Samsung-SoCs(S3C64XX/S3C24=
+XX..etc)
+> I just only used the interface in sdhci-pltfm.c. Nothing difference..
+> Why do you think that will break the other SoC?
+
+> Header file(/plat/regs-sdhci.h) also is only used in sdhci-s3c.c.
+> And the least portion is moved into /linux/mmc/.=20
+> Then included "linux/mmc/sdhci-s3c.h" in plat/sdhci.h.
+
+> What's difference?=20
+> If you can explain the more detail, i can understand.
+> But sorry, now i didn't accept your opinion.
+
+To be honest I didn't read the series, the diffstat looks so obviously
+problematic as you're touching the setup-gpio- files for only a subset
+of Samsung architectures - there's been quite regular issues with
+updates for newer SoCs breaking support for s3c64xx.
+
+I also notice that this will conflict with the series I've previously
+posted for runtime PM support which would push us even further back from
+being able to use the lower power WFI modes in mainline :(  Though
+hopefully that'll be easier to fix.
+
+--je0mZywpqEo4t1RU
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iQIcBAEBAgAGBQJPV6x6AAoJEBus8iNuMP3dMKsP/3N8KSQV3RpSYeyhHcNuTcxj
+rLoilLbpulvuBu5gw8sJmL4fFMshTfKgp9wwRsiH1kAaYJ7A5iKUHZCt2K9PRSef
+Qnf5UTfTif/ItPY1w/zz9lBfXr0x39IlrtDHPHSaw9VhbCAXrw1/C27rogM79C/W
+tidU9TAT/iXH8VrteW0B/OfaCSXq7PygDcgH2uE+s98+vV1ikotzK2LQLPY3mrZr
+YJ1o95TDZ10QKZu6RAAiEqP/LdC9qsDWuYTyR4oV94JGtf83S4UJMckItL5e1kTU
+T4gZNffMrJsLmy3MaIaT6ot3I+/Vjnbr7GNmzERmd/QHFC4Ppg4npqtENAz6vnT1
+1oNevMxhQ4bdOPW47VszZ9BYgsSzeGn3Jg7wcHVrzPYdV4/9ZXd+BwFPlPqbRvDK
+xQlMny4bOtdPHoO/+aaLuJjVNuwy5LSKPbAEUN2SGwU700TTqcaN0kBFt58zHmLm
+P240+YRwvMbDR3OJwdQggl8svvPNGi8/t+T9s20xrz53eSAH+JZ4bjWCn1sHwNud
+NXdNP4Q7oEpTPETOQ2FndukwA5ioUc5diIqKgyFG7jIXyV9ihz0Hh5kucP61FoW4
+XiqTuy9XYzcgEdEkCx4U5TIKkmxz+12CrV0P2N/dI6uAnGROVt5y/r2X1M3xA8kr
+1h9MAtxL1mSBd7yc2pTJ
+=ChaI
+-----END PGP SIGNATURE-----
+
+--je0mZywpqEo4t1RU--
