@@ -1,156 +1,49 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH V2] mmc: core: Clean up after mmc_pre_req if card was
- removed
-Date: Wed, 07 Mar 2012 14:24:14 +0900
-Message-ID: <4F56F0FE.4020606@samsung.com>
-References: <1330959163-21796-1-git-send-email-ulf.hansson@stericsson.com>
- <4F563AC1.5020708@stericsson.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 0/3] MMC / PM: Make it possible to use PM QoS latency
+ constraints
+Date: Wed, 07 Mar 2012 09:06:59 +0200
+Message-ID: <4F570913.8030805@intel.com>
+References: <201203040101.53177.rjw@sisk.pl> <4F55E73C.10907@intel.com> <201203062247.21596.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:33372 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1749667Ab2CGFYU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Mar 2012 00:24:20 -0500
-Received: from epcpsbgm2.samsung.com (mailout4.samsung.com [203.254.224.34])
- by mailout4.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0M0I0026H1O4OJO0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 07 Mar 2012 14:24:19 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0M0I004PL1OHF7A0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 07 Mar 2012 14:24:18 +0900 (KST)
-In-reply-to: <4F563AC1.5020708@stericsson.com>
+Received: from mga01.intel.com ([192.55.52.88]:30695 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751646Ab2CGHGw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 7 Mar 2012 02:06:52 -0500
+In-Reply-To: <201203062247.21596.rjw@sisk.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Hi Ulf.
+On 06/03/12 23:47, Rafael J. Wysocki wrote:
+> On Tuesday, March 06, 2012, Adrian Hunter wrote:
+>> On 04/03/12 02:01, Rafael J. Wysocki wrote:
+>>> Hi all,
+>>>
+>>> The goal of this patchset is to allow user space to control the
+>>> responsiveness of the MMC stack related to runtime power management.
+>>
+>> I wonder why this is build into mmc and not just a generic runtime pm
+>> facility. e.g.
+>>
+>> 	/* Set maximum resume latency target to 100ms */
+>> 	pm_runtime_set_max_latency(dev, 100);
+> 
+> That actually is
+> 
+>  	dev_pm_qos_add_request(dev, req, 100);
+> 
+> where req is used as a handle for your request (it may be used, for
+> example, to remove the request or update it).
+> 
+>> And then runtime pm will create sysfs attributes etc
+> 
+> Well, there may be an interface for drivers analogous to
+> device_wakeup_enable()/device_wakeup_disable() allowing them
+> to add/remove a sysfs attribute for user space to control
+> a single PM QoS constraint.  That even sounds like a good idea. :-)
 
-I tested with patch-v2, i didn't found the other problem.
-It looks good.
-
-Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-Best Regards,
-Jaehoon Chung
-
-On 03/07/2012 01:26 AM, Ulf Hansson wrote:
-
-> Hi Jaehoon,
-> 
-> I would be very interested to hear if you still encounter any problems with this V2 patch? If you are able to do a test it would be highly appreciated. :-)
-> 
-> Just for reference, I were able to reproduce problems similar to what you have for the V1 patch.
-> 
-> Thanks!
-> 
-> Best regards
-> Ulf Hansson
-> 
-> 
-> On 03/05/2012 03:52 PM, Ulf HANSSON wrote:
->> Make sure mmc_start_req cancel the prepared job, if the request
->> was prevented to be started due to the card has been removed.
->>
->> This bug was introduced in commit:
->> mmc: allow upper layers to know immediately if card has been removed
->>
->> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
->> Reviewed-by: Per Forlin<per.forlin@stericsson.com>
->> ---
->>
->> Changes in v2:
->>     - Maintain handling of host->areq (host->areq must not be NULL when
->>     "start_err"), to make sure the block layer is able to respond to all
->>     of the started requests.
->>
->> ---
->>   drivers/mmc/core/core.c |   35 +++++++++++++++--------------------
->>   1 files changed, 15 insertions(+), 20 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index faa0af1..56b7a24 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -249,16 +249,17 @@ static void mmc_wait_done(struct mmc_request *mrq)
->>       complete(&mrq->completion);
->>   }
->>
->> -static void __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
->> +static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
->>   {
->>       init_completion(&mrq->completion);
->>       mrq->done = mmc_wait_done;
->>       if (mmc_card_removed(host->card)) {
->>           mrq->cmd->error = -ENOMEDIUM;
->>           complete(&mrq->completion);
->> -        return;
->> +        return -ENOMEDIUM;
->>       }
->>       mmc_start_request(host, mrq);
->> +    return 0;
->>   }
->>
->>   static void mmc_wait_for_req_done(struct mmc_host *host,
->> @@ -342,6 +343,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
->>                       struct mmc_async_req *areq, int *error)
->>   {
->>       int err = 0;
->> +    int start_err = 0;
->>       struct mmc_async_req *data = host->areq;
->>
->>       /* Prepare a new request */
->> @@ -351,30 +353,23 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
->>       if (host->areq) {
->>           mmc_wait_for_req_done(host, host->areq->mrq);
->>           err = host->areq->err_check(host->card, host->areq);
->> -        if (err) {
->> -            /* post process the completed failed request */
->> -            mmc_post_req(host, host->areq->mrq, 0);
->> -            if (areq)
->> -                /*
->> -                 * Cancel the new prepared request, because
->> -                 * it can't run until the failed
->> -                 * request has been properly handled.
->> -                 */
->> -                mmc_post_req(host, areq->mrq, -EINVAL);
->> -
->> -            host->areq = NULL;
->> -            goto out;
->> -        }
->>       }
->>
->> -    if (areq)
->> -        __mmc_start_req(host, areq->mrq);
->> +    if (!err&&  areq)
->> +        start_err = __mmc_start_req(host, areq->mrq);
->>
->>       if (host->areq)
->>           mmc_post_req(host, host->areq->mrq, 0);
->>
->> -    host->areq = areq;
->> - out:
->> +     /* Cancel a prepared request if it was not started. */
->> +    if ((err || start_err)&&  areq)
->> +            mmc_post_req(host, areq->mrq, -EINVAL);
->> +
->> +    if (err)
->> +        host->areq = NULL;
->> +    else
->> +        host->areq = areq;
->> +
->>       if (error)
->>           *error = err;
->>       return data;
-> 
-> -- 
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
+Does that mean you are going to change your patch?
