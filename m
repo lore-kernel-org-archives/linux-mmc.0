@@ -1,62 +1,57 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5 device
-Date: Wed, 07 Mar 2012 09:17:24 +0900
-Message-ID: <000001ccfbf7$ac3e7510$04bb5f30$%jun@samsung.com>
-References: <4934441a17d25c3249556f7bf281b1be.squirrel@www.codeaurora.org>
- <CAKYAXd_6OqQJ78mPJp11gRvGwwg88S_n_Auu=_HdP_ZXzCKrDg@mail.gmail.com>
- <6669559e86c1d13b27e941ff2acf89d2.squirrel@www.codeaurora.org>
- <CAKYAXd8HMrdB9mzgsz5XmMxkDE+gMce+CTEDFU4J67nusNtLOg@mail.gmail.com>
- <cf2950fbeb4c500534be670cdd8cf85d.squirrel@www.codeaurora.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v3 0/4] mmc: sdhci-s3c: use the sdhci-pltfm.c and move the
+ header file
+Date: Wed, 07 Mar 2012 12:03:31 +0900
+Message-ID: <4F56D003.5070406@samsung.com>
+References: <4F55ABF0.1060801@samsung.com>
+ <20120306130054.GA9890@sirena.org.uk> <201203061415.18836.heiko@sntech.de>
+ <CAELcNGS6UynrJPRk1KtEJT3Rm6Jb5_scLm4KKca+dJ1ZYDOVbg@mail.gmail.com>
+ <20120306163052.GX19635@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:38650 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932670Ab2CGAR0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Mar 2012 19:17:26 -0500
-In-reply-to: <cf2950fbeb4c500534be670cdd8cf85d.squirrel@www.codeaurora.org>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <20120306163052.GX19635@opensource.wolfsonmicro.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, kgene kim <kgene.kim@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org, 'Namjae Jeon' <linkinjeon@gmail.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-Maya Erez <merez@codeaurora.org> wrote:
-> > Hi. Merez.
-> >
-> > Thanks a lot about your performance measurement.
-> >
-> > I think that your measurement is enough and correct and the firmware
-> > of mmc vender should be optimized or change properly rather than
-> > modifying the current patch.
-> >
-> > And currently we can use only write packed cmd by my suggestion.
-> >
-> > I would like to add my reviewd-by tag in updated patches also.
-> >
-> > Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
-> >
-> > Thanks.
-> 
-> I tend to disagree. Adding a massive amount of code that would be disabled
-> can be risky. In case this code will not be in use it will not be properly
-> tested and its reliability will be uncertain.
-> 
-If you found something to be correct, please let me know that.
-It would be rightly appreciated.
+On 03/07/2012 01:30 AM, Mark Brown wrote:
 
-Best regards,
-Seungwon Jeon.
+> On Tue, Mar 06, 2012 at 11:40:08PM +0900, Jae hoon Chung wrote:
+>> 2012/3/6 Heiko St=FCbner <heiko@sntech.de>:
+>>> Am Dienstag, 6. M=E4rz 2012, 14:00:54 schrieb Mark Brown:
+>=20
+>>>> This series will break S3C64xx, you've not touched it at all in th=
+e
+>>>> update but it uses the same SDHCI controller.
+>=20
+>>> This problem will probably also surface for the S3C2416 which also =
+uses the
+>>> same SDHCI controller.
+>=20
+>> i didn't know why will break  on them. Could you explain to me?
+>> Are there codes which affect S3C64XX and S3C24XX?
+>> If i miss out something, let me know.
+>=20
+> The same IP is present and used with the same driver on other Samsung
+> SoCs.
 
-> Thanks,
-> Maya Erez
-> Consultant for Qualcomm Innovation Center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi Mark.
 
+I know that used with the same driver on other Samsung-SoCs(S3C64XX/S3C=
+24XX..etc)
+I just only used the interface in sdhci-pltfm.c. Nothing difference..
+Why do you think that will break the other SoC?
+
+Header file(/plat/regs-sdhci.h) also is only used in sdhci-s3c.c.
+And the least portion is moved into /linux/mmc/.=20
+Then included "linux/mmc/sdhci-s3c.h" in plat/sdhci.h.
+
+What's difference?=20
+If you can explain the more detail, i can understand.
+But sorry, now i didn't accept your opinion.
+
+Best Regards,
+Jaehoon Chung
