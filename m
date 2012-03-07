@@ -1,85 +1,105 @@
-From: Rajendra Nayak <rnayak@ti.com>
-Subject: Re: [PATCH v2 0/6] mmc: omap_hsmmc: Clean up use/abuse of pdev->id
-Date: Wed, 07 Mar 2012 15:28:06 +0530
-Message-ID: <4F57312E.4080104@ti.com>
-References: <1329996409-26861-1-git-send-email-rnayak@ti.com> <4F476228.7060607@ti.com> <4F54714E.6080805@ti.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: Re: [PATCH] ARM: SAMSUNG: change the name from s3c-sdhci to exynos4-sdhci
+Date: Wed, 07 Mar 2012 05:19:47 -0800
+Message-ID: <4F576073.6010001@samsung.com>
+References: <4F45D343.6020409@samsung.com> <CAJuYYwTh8tVdA0X-TLEU-9O_M0_PmJR=i3WYAQXsaRcPF3MbJA@mail.gmail.com> <4F557692.8090102@samsung.com> <4F55DE1F.9010405@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <4F54714E.6080805@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: cjb@laptop.org
-Cc: Rajendra Nayak <rnayak@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, balajitk@ti.com, svenkatr@ti.com, linux-arm-kernel@lists.infradead.org, linaro-dev@lists.linaro.org, patches@linaro.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-tul01m020-f174.google.com ([209.85.214.174]:41358 "EHLO
+	mail-tul01m020-f174.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755616Ab2CGNTv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Mar 2012 08:19:51 -0500
+In-Reply-To: <4F55DE1F.9010405@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kukjin Kim <kgene.kim@samsung.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, linux-samsung-soc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, linux-arm-kernel@lists.infradead.org, Marek Szyprowski <m.szyprowski@samsung.com>
 
-On Monday 05 March 2012 01:24 PM, Rajendra Nayak wrote:
-> On Friday 24 February 2012 03:40 PM, Rajendra Nayak wrote:
->> Chris,
+On 03/06/12 01:51, Kukjin Kim wrote:
+> On 03/05/12 18:29, Jaehoon Chung wrote:
+>> Hi Kukjin.
 >>
->> On Thursday 23 February 2012 04:56 PM, Rajendra Nayak wrote:
->>> Re-sending as these patches did not make it to the lists due to
->>> issues with my 'git send-email'
+>> Is it merged?
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>> On 02/24/2012 06:56 PM, Thomas Abraham wrote:
+>>
+>>> On 23 February 2012 11:18, Jaehoon Chung<jh80.chung@samsung.com> wrote:
+>>>> Thomas Arbrahams's patchset have changed the device name in sdhci-s3c.c
+>>>> (mmc: sdhci-s3c: Rework platform data and add device tree support)
+>>>> But didn't change the regulator_consumer name.
+>>>> So maybe didn't initialize the mmc/sd card for exynos4.
+>>>>
+>>>> This patch is fixed that (based-on linux-samsung for-next branch)
+>>>>
+>>>> Signed-off-by: Jaehoon Chung<jh80.chung@samsung.com>
+>>>> Signed-off-by: kyungmin Park<kyungmin.park@samsung.com>
+>>>> ---
+>>>> arch/arm/mach-exynos/mach-nuri.c | 4 ++--
+>>>> arch/arm/mach-exynos/mach-universal_c210.c | 2 +-
+>>>> 2 files changed, 3 insertions(+), 3 deletions(-)
+>>>>
+>>>> diff --git a/arch/arm/mach-exynos/mach-nuri.c
+>>>> b/arch/arm/mach-exynos/mach-nuri.c
+>>>> index a6b9162..251dd7a 100644
+>>>> --- a/arch/arm/mach-exynos/mach-nuri.c
+>>>> +++ b/arch/arm/mach-exynos/mach-nuri.c
+>>>> @@ -116,7 +116,7 @@ static struct s3c_sdhci_platdata
+>>>> nuri_hsmmc0_data __initdata = {
+>>>> };
+>>>>
+>>>> static struct regulator_consumer_supply emmc_supplies[] = {
+>>>> - REGULATOR_SUPPLY("vmmc", "s3c-sdhci.0"),
+>>>> + REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.0"),
+>>>> REGULATOR_SUPPLY("vmmc", "dw_mmc"),
+>>>> };
+>>>>
+>>>> @@ -415,7 +415,7 @@ static struct regulator_consumer_supply
+>>>> __initdata max8997_ldo12_[] = {
+>>>> REGULATOR_SUPPLY("vddio", "6-003c"), /* HDC802 */
+>>>> };
+>>>> static struct regulator_consumer_supply __initdata max8997_ldo13_[] = {
+>>>> - REGULATOR_SUPPLY("vmmc", "s3c-sdhci.2"), /* TFLASH */
+>>>> + REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.2"), /* TFLASH */
+>>>> };
+>>>> static struct regulator_consumer_supply __initdata max8997_ldo14_[] = {
+>>>> REGULATOR_SUPPLY("inmotor", "max8997-haptic"),
+>>>> diff --git a/arch/arm/mach-exynos/mach-universal_c210.c
+>>>> b/arch/arm/mach-exynos/mach-universal_c210.c
+>>>> index 6017a21..320cb1d 100644
+>>>> --- a/arch/arm/mach-exynos/mach-universal_c210.c
+>>>> +++ b/arch/arm/mach-exynos/mach-universal_c210.c
+>>>> @@ -749,7 +749,7 @@ static struct s3c_sdhci_platdata
+>>>> universal_hsmmc0_data __initdata = {
+>>>> };
+>>>>
+>>>> static struct regulator_consumer_supply mmc0_supplies[] = {
+>>>> - REGULATOR_SUPPLY("vmmc", "s3c-sdhci.0"),
+>>>> + REGULATOR_SUPPLY("vmmc", "exynos4-sdhci.0"),
+>>>> };
+>>>>
+>>>> static struct regulator_init_data mmc0_fixed_voltage_init_data = {
 >>>
->>> This series mainly cleans up all instances of hardcoding's in
->>> the driver based on pdev->id. This is cleanup leading to the
->>> DT adaptation of omap_hsmmc driver.
->>>
->>> v2 mainly has some minor changes to get rid of a debug print
->>> which was still using host->id and getting rid of 'id' field
->>> entirely from omap_hsmmc_host struct.
->>>
->>> The series is tested on OMAP4SDP, OMAP4panda, OMAP3beagle and
->>> OMAP2430SDP
->>> boards.
->>
->> This series is reviewed/tested and acked by Balaji and Venkat.
->> Care to pull this in for 3.4?
->>
->> I have one other cleanup patch on top of this series to make all
->> remaining pr_* prints in the driver to dev_* [1].
->> It would be great if you could pick that up as well.
->>
->> These patches are cleanups leading to the DT conversion of omap_hsmmc
->> driver.
+>>> Reviewed-by: Thomas Abraham<thomas.abraham@linaro.org>
 >
-> Chris, Ping. I am basing my DT support patches on top of these cleanups.
-> Would be great if you can have a look and pull them in.
-
-Chris, just realized the last two requests from me to get this merged
-weren't addressed to you directly, but instead you were copied.
-Resending with you in 'To', hope this lands in your inbox :)
-
-regards,
-Rajendra
-
->
->>
->> regards,
->> Rajendra
->>
->> [1] http://marc.info/?l=linux-mmc&m=132999677405098&w=3
->>
->>>
->>> regards,
->>> Rajendra
->>>
->>> Balaji T K (3):
->>> mmc: omap_hsmmc: use platform_get_resource_byname for tx/rx DMA
->>> channels
->>> mmc: omap_hsmmc: remove unused .set_sleep function
->>> mmc: omap_hsmmc: Use OMAP_HSMMC_SUPPORTS_DUAL_VOLT flag to remove
->>> host->id based hardcoding
->>>
->>> Rajendra Nayak (3):
->>> mmc: omap_hsmmc: Get rid of omap_hsmmc_1_set_power function
->>> mmc: omap_hsmmc: Get rid of omap_hsmmc_4_set_power function
->>> mmc: omap_hsmmc: Don't expect MMC1 to always have vmmc supply
->>>
->>> arch/arm/plat-omap/include/plat/mmc.h | 2 -
->>> drivers/mmc/host/omap_hsmmc.c | 175 +++------------------------------
->>> 2 files changed, 16 insertions(+), 161 deletions(-)
->>>
->>
+> Looks OK, will apply.
 >
 
+(Cc'ed Marek)
+
+Hi Kyungmin, Marek and Jaehoon,
+
+As you know, same patches have been submitted duplicated and this should 
+be fixed. Which one would be better to send upstream?
+
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
