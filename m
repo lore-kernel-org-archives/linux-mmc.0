@@ -1,61 +1,62 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH 2/3] tmio_mmc / PM: Use PM QoS requests, v2
-Date: Wed, 7 Mar 2012 00:41:05 +0100
-Message-ID: <201203070041.05773.rjw@sisk.pl>
-References: <201203040101.53177.rjw@sisk.pl> <201203062207.38583.rjw@sisk.pl> <Pine.LNX.4.64.1203062332190.9300@axis700.grange>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5 device
+Date: Wed, 07 Mar 2012 09:17:24 +0900
+Message-ID: <000001ccfbf7$ac3e7510$04bb5f30$%jun@samsung.com>
+References: <4934441a17d25c3249556f7bf281b1be.squirrel@www.codeaurora.org>
+ <CAKYAXd_6OqQJ78mPJp11gRvGwwg88S_n_Auu=_HdP_ZXzCKrDg@mail.gmail.com>
+ <6669559e86c1d13b27e941ff2acf89d2.squirrel@www.codeaurora.org>
+ <CAKYAXd8HMrdB9mzgsz5XmMxkDE+gMce+CTEDFU4J67nusNtLOg@mail.gmail.com>
+ <cf2950fbeb4c500534be670cdd8cf85d.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:58790 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756654Ab2CFXg7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 6 Mar 2012 18:36:59 -0500
-In-Reply-To: <Pine.LNX.4.64.1203062332190.9300@axis700.grange>
+Received: from mailout4.samsung.com ([203.254.224.34]:38650 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932670Ab2CGAR0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Mar 2012 19:17:26 -0500
+In-reply-to: <cf2950fbeb4c500534be670cdd8cf85d.squirrel@www.codeaurora.org>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>
+To: merez@codeaurora.org, 'Namjae Jeon' <linkinjeon@gmail.com>
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-On Tuesday, March 06, 2012, Guennadi Liakhovetski wrote:
-> On Tue, 6 Mar 2012, Rafael J. Wysocki wrote:
+Maya Erez <merez@codeaurora.org> wrote:
+> > Hi. Merez.
+> >
+> > Thanks a lot about your performance measurement.
+> >
+> > I think that your measurement is enough and correct and the firmware
+> > of mmc vender should be optimized or change properly rather than
+> > modifying the current patch.
+> >
+> > And currently we can use only write packed cmd by my suggestion.
+> >
+> > I would like to add my reviewd-by tag in updated patches also.
+> >
+> > Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+> >
+> > Thanks.
 > 
-> > On Tuesday, March 06, 2012, Guennadi Liakhovetski wrote:
-> > > On Sun, 4 Mar 2012, Rafael J. Wysocki wrote:
-> > > 
-> > > > From: Rafael J. Wysocki <rjw@sisk.pl>
-> > > > 
-> > > > Make tmio_mmc populate the pm_qos member of struct mmc_host, to
-> > > > let the core know that it should create the pm_latency_limit_ms
-> > > > host attribute for it, and set the default value of that attribute
-> > > > to 100 ms.
-> > > > 
-> > > > Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
-> > > > ---
-> > > >  drivers/mmc/host/tmio_mmc_pio.c |    8 ++++++++
-> > > >  1 file changed, 8 insertions(+)
-> > > > 
-> > > > Index: linux/drivers/mmc/host/tmio_mmc_pio.c
-> > > > ===================================================================
-> > > > --- linux.orig/drivers/mmc/host/tmio_mmc_pio.c
-> > > > +++ linux/drivers/mmc/host/tmio_mmc_pio.c
-> > > > @@ -918,6 +918,12 @@ int __devinit tmio_mmc_host_probe(struct
-> > > >  	if (ret < 0)
-> > > >  		goto pm_disable;
-> > > >  
-> > > > +	mmc->pm_qos = kzalloc(sizeof(*mmc->pm_qos), GFP_KERNEL);
-> > > 
-> > > Why don't you just add pm_qos to struct tmio_mmc_host?
-> > 
-> > Because the core has to see it.
+> I tend to disagree. Adding a massive amount of code that would be disabled
+> can be risky. In case this code will not be in use it will not be properly
+> tested and its reliability will be uncertain.
 > 
-> Yes, I understand that. So, you just assign a pointer to it to 
-> mmc->pm_qos, just avoiding an extra allocation / freeing / error handling.
+If you found something to be correct, please let me know that.
+It would be rightly appreciated.
 
-Well, I think this is a very minor point.
+Best regards,
+Seungwon Jeon.
 
-I'm going to move the sysfs attribute creation to the PM core anyway.
+> Thanks,
+> Maya Erez
+> Consultant for Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Thanks,
-Rafael
