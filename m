@@ -1,84 +1,62 @@
 From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [PATCH 1/3] PM / QoS: Make it possible to expose PM QoS latency constraints
-Date: Thu, 8 Mar 2012 23:37:23 +0100
-Message-ID: <201203082337.23821.rjw@sisk.pl>
-References: <201203040101.53177.rjw@sisk.pl> <201203082227.50138.rjw@sisk.pl> <87haxyaguz.fsf@ti.com>
+Subject: [Update][PATCH 2/3] tmio_mmc / PM: Use PM QoS latency constraint
+Date: Fri, 9 Mar 2012 00:03:06 +0100
+Message-ID: <201203090003.07156.rjw@sisk.pl>
+References: <201203040101.53177.rjw@sisk.pl> <201203080027.27435.rjw@sisk.pl> <201203090000.17664.rjw@sisk.pl>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
-  charset="iso-8859-1"
+  charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:34526 "EHLO ogre.sisk.pl"
+Received: from ogre.sisk.pl ([217.79.144.158]:34608 "EHLO ogre.sisk.pl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753889Ab2CHWdR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 8 Mar 2012 17:33:17 -0500
-In-Reply-To: <87haxyaguz.fsf@ti.com>
+	id S1752456Ab2CHXAb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 8 Mar 2012 18:00:31 -0500
+In-Reply-To: <201203090000.17664.rjw@sisk.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Hilman <khilman@ti.com>
-Cc: Linux PM list <linux-pm@vger.kernel.org>, Linux MMC list <linux-mmc@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>
+To: Linux PM list <linux-pm@vger.kernel.org>
+Cc: Linux MMC list <linux-mmc@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Kevin Hilman <khilman@ti.com>
 
-On Thursday, March 08, 2012, Kevin Hilman wrote:
-> "Rafael J. Wysocki" <rjw@sisk.pl> writes:
-> 
-> > On Thursday, March 08, 2012, Kevin Hilman wrote:
-> >> "Rafael J. Wysocki" <rjw@sisk.pl> writes:
-> >> 
-> >> > From: Rafael J. Wysocki <rjw@sisk.pl>
-> >> >
-> >> > A runtime suspend of a device (e.g. an MMC controller) belonging to
-> >> > a power domain or, in a more complicated scenario, a runtime suspend
-> >> > of another device in the same power domain, may cause power to be
-> >> > removed from the entire domain.  In that case, the amount of time
-> >> > necessary to runtime-resume the given device (e.g. the MMC
-> >> > controller) is often substantially greater than the time needed to
-> >> > run its driver's runtime resume callback.  That may hurt performance
-> >> > in some situations, because user data may need to wait for the
-> >> > device to become operational, so we should make it possible to
-> >> > prevent that from happening.
-> >> >
-> >> > For this reason, introduce a new sysfs attribute for devices,
-> >> > power/pm_qos_latency_us, allowing user space to specify the upper
-> >> 
-> >> If we're expecting to have more of these knobs, maybe having a pm_qos
-> >> subdir under power will keep down the clutter in /sys/devices/.../power.
-> >> This knob would then be /sys/devices/.../power/pm_qos/pm_qos_latency_us.
-> >
-> > I'm not sure how difficult it is to create a subdir in sysfs under something
-> > that is not a kobject.
-> >
-> > Besides, this follows the convention already used by wakeup and runtime PM
-> > attributes that don't have their own subdirs (although there may be a number
-> > of them in each category).
-> 
-> OK
-> 
-> >> I think 'latency' alone is a bit too vague (wakeup latency?  interrupt
-> >> latency?  I think wakeup latency is clearer.  Another possibility is
-> >> resume latency, IMO, that will lead to confusion about whether this
-> >> field also affects system suspend/resume.
-> >
-> > I think "wakeup latency" will lead to more confusion because of the
-> > wakeup-related attributes.  
-> 
-> What confusion?  All of those are related to device wakeups from some
-> low power state, and so is this proposed latency attribute.  So I don't
-> understand the potential confusion.
+From: Rafael J. Wysocki <rjw@sisk.pl>
 
-The word "wakeup" may refer to many different things, as well as the word
-"resume". :-)
+Make tmio_mmc call dev_pm_qos_expose_latency_limit() to expose
+the PM QoS latency limit to user space and specify the initial
+value of it as 100 microseconds.
 
-> > I'll go for "resume_latency" if you don't mind. :-)
-> 
-> Most people think of resume as coming back from system PM.  If this is
-> called resume_latency, I would expect confusion about why setting this
-> attribute has no effect on how fast their system returns from system
-> suspend.
+Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
+---
+ drivers/mmc/host/tmio_mmc_pio.c |    5 +++++
+ 1 file changed, 5 insertions(+)
 
-I'll make it depend on CONFIG_PM_RUNTIME _and_ write in the documentation
-that this attribute has no effect on system-wide suspend/resume.  That should
-be sufficient for the majority of people and if it's not for someone, well,
-I guess that's really a problem of that person. :-)
+Index: linux/drivers/mmc/host/tmio_mmc_pio.c
+===================================================================
+--- linux.orig/drivers/mmc/host/tmio_mmc_pio.c
++++ linux/drivers/mmc/host/tmio_mmc_pio.c
+@@ -39,6 +39,7 @@
+ #include <linux/module.h>
+ #include <linux/pagemap.h>
+ #include <linux/platform_device.h>
++#include <linux/pm_qos.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/scatterlist.h>
+ #include <linux/spinlock.h>
+@@ -955,6 +956,8 @@ int __devinit tmio_mmc_host_probe(struct
+ 
+ 	mmc_add_host(mmc);
+ 
++	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
++
+ 	/* Unmask the IRQs we want to know about */
+ 	if (!_host->chan_rx)
+ 		irq_mask |= TMIO_MASK_READOP;
+@@ -993,6 +996,8 @@ void tmio_mmc_host_remove(struct tmio_mm
+ 		|| host->mmc->caps & MMC_CAP_NONREMOVABLE)
+ 		pm_runtime_get_sync(&pdev->dev);
+ 
++	dev_pm_qos_hide_latency_limit(&pdev->dev);
++
+ 	mmc_remove_host(host->mmc);
+ 	cancel_work_sync(&host->done);
+ 	cancel_delayed_work_sync(&host->delayed_reset_work);
 
-Thanks,
-Rafael
