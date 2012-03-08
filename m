@@ -1,17 +1,17 @@
 From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: [Update][PATCH 1/3] PM / QoS: Make it possible to expose PM QoS latency constraints
-Date: Fri, 9 Mar 2012 00:01:06 +0100
-Message-ID: <201203090001.06683.rjw@sisk.pl>
+Subject: [Update][PATCH 3/3] sh_mmcif / PM: Use PM QoS latency constraint
+Date: Fri, 9 Mar 2012 00:03:52 +0100
+Message-ID: <201203090003.52635.rjw@sisk.pl>
 References: <201203040101.53177.rjw@sisk.pl> <201203080027.27435.rjw@sisk.pl> <201203090000.17664.rjw@sisk.pl>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
   charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:34614 "EHLO ogre.sisk.pl"
+Received: from ogre.sisk.pl ([217.79.144.158]:34582 "EHLO ogre.sisk.pl"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756658Ab2CHXAd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 8 Mar 2012 18:00:33 -0500
+	id S1752456Ab2CHXAa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 8 Mar 2012 18:00:30 -0500
 In-Reply-To: <201203090000.17664.rjw@sisk.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -20,275 +20,43 @@ Cc: Linux MMC list <linux-mmc@vger.kernel.org>, Guennadi Liakhovetski <g.liakhov
 
 From: Rafael J. Wysocki <rjw@sisk.pl>
 
-A runtime suspend of a device (e.g. an MMC controller) belonging to
-a power domain or, in a more complicated scenario, a runtime suspend
-of another device in the same power domain, may cause power to be
-removed from the entire domain.  In that case, the amount of time
-necessary to runtime-resume the given device (e.g. the MMC
-controller) is often substantially greater than the time needed to
-run its driver's runtime resume callback.  That may hurt performance
-in some situations, because user data may need to wait for the
-device to become operational, so we should make it possible to
-prevent that from happening.
-
-For this reason, introduce a new sysfs attribute for devices,
-power/pm_qos_resume_latency_us, allowing user space to specify the
-upper bound of the time necessary to bring the (runtime-suspended)
-device up after the resume of it has been requested.  However, make
-that attribute appear only for the devices whose drivers declare
-support for it by calling the (new) dev_pm_qos_expose_latency_limit()
-helper function with the appropriate initial value of the attribute.
+Make sh_mmcif call dev_pm_qos_expose_latency_limit() to expose
+the PM QoS latency limit to user space and specify the initial
+value of it as 100 microseconds.
 
 Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
-Reviewed-by: Kevin Hilman <khilman@ti.com>
-Reviewed-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
 ---
- Documentation/ABI/testing/sysfs-devices-power |   18 +++++++
- drivers/base/power/power.h                    |    4 +
- drivers/base/power/qos.c                      |   62 ++++++++++++++++++++++++++
- drivers/base/power/sysfs.c                    |   47 +++++++++++++++++++
- include/linux/pm.h                            |    1 
- include/linux/pm_qos.h                        |    9 +++
- 6 files changed, 141 insertions(+)
+ drivers/mmc/host/sh_mmcif.c |    5 +++++
+ 1 file changed, 5 insertions(+)
 
-Index: linux/include/linux/pm.h
+Index: linux/drivers/mmc/host/sh_mmcif.c
 ===================================================================
---- linux.orig/include/linux/pm.h
-+++ linux/include/linux/pm.h
-@@ -546,6 +546,7 @@ struct dev_pm_info {
- 	unsigned long		accounting_timestamp;
- 	ktime_t			suspend_time;
- 	s64			max_time_suspended_ns;
-+	struct dev_pm_qos_request *pq_req;
- #endif
- 	struct pm_subsys_data	*subsys_data;  /* Owned by the subsystem. */
- 	struct pm_qos_constraints *constraints;
-Index: linux/drivers/base/power/sysfs.c
-===================================================================
---- linux.orig/drivers/base/power/sysfs.c
-+++ linux/drivers/base/power/sysfs.c
-@@ -5,6 +5,7 @@
- #include <linux/device.h>
- #include <linux/string.h>
- #include <linux/export.h>
+--- linux.orig/drivers/mmc/host/sh_mmcif.c
++++ linux/drivers/mmc/host/sh_mmcif.c
+@@ -56,6 +56,7 @@
+ #include <linux/mmc/sh_mmcif.h>
+ #include <linux/pagemap.h>
+ #include <linux/platform_device.h>
 +#include <linux/pm_qos.h>
  #include <linux/pm_runtime.h>
- #include <linux/atomic.h>
- #include <linux/jiffies.h>
-@@ -217,6 +218,31 @@ static ssize_t autosuspend_delay_ms_stor
- static DEVICE_ATTR(autosuspend_delay_ms, 0644, autosuspend_delay_ms_show,
- 		autosuspend_delay_ms_store);
+ #include <linux/spinlock.h>
+ #include <linux/module.h>
+@@ -1346,6 +1347,8 @@ static int __devinit sh_mmcif_probe(stru
+ 	if (ret < 0)
+ 		goto clean_up5;
  
-+static ssize_t pm_qos_latency_show(struct device *dev,
-+				   struct device_attribute *attr, char *buf)
-+{
-+	return sprintf(buf, "%d\n", dev->power.pq_req->node.prio);
-+}
++	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
 +
-+static ssize_t pm_qos_latency_store(struct device *dev,
-+				    struct device_attribute *attr,
-+				    const char *buf, size_t n)
-+{
-+	s32 value;
-+	int ret;
-+
-+	if (kstrtos32(buf, 0, &value))
-+		return -EINVAL;
-+
-+	if (value < 0)
-+		return -EINVAL;
-+
-+	ret = dev_pm_qos_update_request(dev->power.pq_req, value);
-+	return ret < 0 ? ret : n;
-+}
-+
-+static DEVICE_ATTR(pm_qos_resume_latency_us, 0644,
-+		   pm_qos_latency_show, pm_qos_latency_store);
- #endif /* CONFIG_PM_RUNTIME */
+ 	dev_info(&pdev->dev, "driver version %s\n", DRIVER_VERSION);
+ 	dev_dbg(&pdev->dev, "chip ver H'%04x\n",
+ 		sh_mmcif_readl(host->addr, MMCIF_CE_VERSION) & 0x0000ffff);
+@@ -1376,6 +1379,8 @@ static int __devexit sh_mmcif_remove(str
+ 	host->dying = true;
+ 	pm_runtime_get_sync(&pdev->dev);
  
- #ifdef CONFIG_PM_SLEEP
-@@ -510,6 +536,17 @@ static struct attribute_group pm_runtime
- 	.attrs	= runtime_attrs,
- };
++	dev_pm_qos_hide_latency_limit(&pdev->dev);
++
+ 	mmc_remove_host(host->mmc);
+ 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
  
-+static struct attribute *pm_qos_attrs[] = {
-+#ifdef CONFIG_PM_RUNTIME
-+	&dev_attr_pm_qos_resume_latency_us.attr,
-+#endif /* CONFIG_PM_RUNTIME */
-+	NULL,
-+};
-+static struct attribute_group pm_qos_attr_group = {
-+	.name	= power_group_name,
-+	.attrs	= pm_qos_attrs,
-+};
-+
- int dpm_sysfs_add(struct device *dev)
- {
- 	int rc;
-@@ -550,6 +587,16 @@ void wakeup_sysfs_remove(struct device *
- 	sysfs_unmerge_group(&dev->kobj, &pm_wakeup_attr_group);
- }
- 
-+int pm_qos_sysfs_add(struct device *dev)
-+{
-+	return sysfs_merge_group(&dev->kobj, &pm_qos_attr_group);
-+}
-+
-+void pm_qos_sysfs_remove(struct device *dev)
-+{
-+	sysfs_unmerge_group(&dev->kobj, &pm_qos_attr_group);
-+}
-+
- void rpm_sysfs_remove(struct device *dev)
- {
- 	sysfs_unmerge_group(&dev->kobj, &pm_runtime_attr_group);
-Index: linux/drivers/base/power/power.h
-===================================================================
---- linux.orig/drivers/base/power/power.h
-+++ linux/drivers/base/power/power.h
-@@ -71,6 +71,8 @@ extern void dpm_sysfs_remove(struct devi
- extern void rpm_sysfs_remove(struct device *dev);
- extern int wakeup_sysfs_add(struct device *dev);
- extern void wakeup_sysfs_remove(struct device *dev);
-+extern int pm_qos_sysfs_add(struct device *dev);
-+extern void pm_qos_sysfs_remove(struct device *dev);
- 
- #else /* CONFIG_PM */
- 
-@@ -79,5 +81,7 @@ static inline void dpm_sysfs_remove(stru
- static inline void rpm_sysfs_remove(struct device *dev) {}
- static inline int wakeup_sysfs_add(struct device *dev) { return 0; }
- static inline void wakeup_sysfs_remove(struct device *dev) {}
-+static inline int pm_qos_sysfs_add(struct device *dev) { return 0; }
-+static inline void pm_qos_sysfs_remove(struct device *dev) {}
- 
- #endif
-Index: linux/drivers/base/power/qos.c
-===================================================================
---- linux.orig/drivers/base/power/qos.c
-+++ linux/drivers/base/power/qos.c
-@@ -41,6 +41,7 @@
- #include <linux/mutex.h>
- #include <linux/export.h>
- 
-+#include "power.h"
- 
- static DEFINE_MUTEX(dev_pm_qos_mtx);
- 
-@@ -166,6 +167,12 @@ void dev_pm_qos_constraints_destroy(stru
- 	struct dev_pm_qos_request *req, *tmp;
- 	struct pm_qos_constraints *c;
- 
-+	/*
-+	 * If the device's PM QoS resume latency limit has been exposed to user
-+	 * space, it has to be hidden at this point.
-+	 */
-+	dev_pm_qos_hide_latency_limit(dev);
-+
- 	mutex_lock(&dev_pm_qos_mtx);
- 
- 	dev->power.power_state = PMSG_INVALID;
-@@ -445,3 +452,58 @@ int dev_pm_qos_add_ancestor_request(stru
- 	return error;
- }
- EXPORT_SYMBOL_GPL(dev_pm_qos_add_ancestor_request);
-+
-+#ifdef CONFIG_PM_RUNTIME
-+static void __dev_pm_qos_drop_user_request(struct device *dev)
-+{
-+	dev_pm_qos_remove_request(dev->power.pq_req);
-+	dev->power.pq_req = 0;
-+}
-+
-+/**
-+ * dev_pm_qos_expose_latency_limit - Expose PM QoS latency limit to user space.
-+ * @dev: Device whose PM QoS latency limit is to be exposed to user space.
-+ * @value: Initial value of the latency limit.
-+ */
-+int dev_pm_qos_expose_latency_limit(struct device *dev, s32 value)
-+{
-+	struct dev_pm_qos_request *req;
-+	int ret;
-+
-+	if (!device_is_registered(dev) || value < 0)
-+		return -EINVAL;
-+
-+	if (dev->power.pq_req)
-+		return -EEXIST;
-+
-+	req = kzalloc(sizeof(*req), GFP_KERNEL);
-+	if (!req)
-+		return -ENOMEM;
-+
-+	ret = dev_pm_qos_add_request(dev, req, value);
-+	if (ret < 0)
-+		return ret;
-+
-+	dev->power.pq_req = req;
-+	ret = pm_qos_sysfs_add(dev);
-+	if (ret)
-+		__dev_pm_qos_drop_user_request(dev);
-+
-+	return ret;
-+}
-+EXPORT_SYMBOL_GPL(dev_pm_qos_expose_latency_limit);
-+
-+/**
-+ * dev_pm_qos_hide_latency_limit - Hide PM QoS latency limit from user space.
-+ * @dev: Device whose PM QoS latency limit is to be hidden from user space.
-+ */
-+void dev_pm_qos_hide_latency_limit(struct device *dev)
-+{
-+	if (dev->power.pq_req) {
-+		pm_qos_sysfs_remove(dev);
-+		__dev_pm_qos_drop_user_request(dev);
-+	}
-+}
-+EXPORT_SYMBOL_GPL(dev_pm_qos_hide_latency_limit);
-+#endif /* CONFIG_PM_RUNTIME */
-+
-Index: linux/include/linux/pm_qos.h
-===================================================================
---- linux.orig/include/linux/pm_qos.h
-+++ linux/include/linux/pm_qos.h
-@@ -137,4 +137,13 @@ static inline int dev_pm_qos_add_ancesto
- 			{ return 0; }
- #endif
- 
-+#ifdef CONFIG_PM_RUNTIME
-+int dev_pm_qos_expose_latency_limit(struct device *dev, s32 value);
-+void dev_pm_qos_hide_latency_limit(struct device *dev);
-+#else
-+static inline int dev_pm_qos_expose_latency_limit(struct device *dev, s32 value)
-+			{ return 0; }
-+static inline void dev_pm_qos_hide_latency_limit(struct device *dev) {}
-+#endif
-+
- #endif
-Index: linux/Documentation/ABI/testing/sysfs-devices-power
-===================================================================
---- linux.orig/Documentation/ABI/testing/sysfs-devices-power
-+++ linux/Documentation/ABI/testing/sysfs-devices-power
-@@ -175,3 +175,21 @@ Description:
- 
- 		Not all drivers support this attribute.  If it isn't supported,
- 		attempts to read or write it will yield I/O errors.
-+
-+What:		/sys/devices/.../power/pm_qos_latency_us
-+Date:		March 2012
-+Contact:	Rafael J. Wysocki <rjw@sisk.pl>
-+Description:
-+		The /sys/devices/.../power/pm_qos_resume_latency_us attribute
-+		contains the PM QoS resume latency limit for the given device,
-+		which is the maximum allowed time it can take to resume the
-+		device, after it has been suspended at run time, from a resume
-+		request to the moment the device will be ready to process I/O,
-+		in microseconds.  If it is equal to 0, however, this means that
-+		the PM QoS resume latency may be arbitrary.
-+
-+		Not all drivers support this attribute.  If it isn't supported,
-+		it is not present.
-+
-+		This attribute has no effect on system-wide suspend/resume and
-+		hibernation.
 
