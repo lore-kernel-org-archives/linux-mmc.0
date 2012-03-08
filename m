@@ -1,50 +1,158 @@
-From: Rajendra Nayak <rnayak@ti.com>
-Subject: Re: [PATCH v2 0/6] mmc: omap_hsmmc: Clean up use/abuse of pdev->id
-Date: Thu, 08 Mar 2012 17:18:36 +0530
-Message-ID: <4F589C94.9010601@ti.com>
-References: <1329996409-26861-1-git-send-email-rnayak@ti.com>	<4F476228.7060607@ti.com> <4F54714E.6080805@ti.com>	<4F57312E.4080104@ti.com> <m2pqcoihhu.fsf@bob.laptop.org>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH V2] mmc: core: Clean up after mmc_pre_req if card was
+ removed
+Date: Thu, 8 Mar 2012 13:15:16 +0100
+Message-ID: <4F58A2D4.8090406@stericsson.com>
+References: <1330959163-21796-1-git-send-email-ulf.hansson@stericsson.com> <4F563AC1.5020708@stericsson.com> <4F56F0FE.4020606@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog107.obsmtp.com ([74.125.149.197]:44574 "EHLO
-	na3sys009aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757172Ab2CHLsp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Mar 2012 06:48:45 -0500
-Received: by yenl1 with SMTP id l1so114623yen.38
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Mar 2012 03:48:44 -0800 (PST)
-In-Reply-To: <m2pqcoihhu.fsf@bob.laptop.org>
+Received: from eu1sys200aog102.obsmtp.com ([207.126.144.113]:35258 "EHLO
+	eu1sys200aog102.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756370Ab2CHMPm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Mar 2012 07:15:42 -0500
+In-Reply-To: <4F56F0FE.4020606@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, balajitk@ti.com, svenkatr@ti.com, linux-arm-kernel@lists.infradead.org, linaro-dev@lists.linaro.org, patches@linaro.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hi Chris,
+Hi Jaehoon,
 
-On Wednesday 07 March 2012 08:29 PM, Chris Ball wrote:
-> Hi Rajendra,
+Thanks a lot for your assistance; great to hear that the problem was solved.
+
+Thanks!
+
+Br
+Uffe
+
+On 03/07/2012 06:24 AM, Jaehoon Chung wrote:
+> Hi Ulf.
 >
-> On Wed, Mar 07 2012, Rajendra Nayak wrote:
->>> Chris, Ping. I am basing my DT support patches on top of these cleanups.
->>> Would be great if you can have a look and pull them in.
+> I tested with patch-v2, i didn't found the other problem.
+> It looks good.
+>
+> Tested-by: Jaehoon Chung<jh80.chung@samsung.com>
+>
+> Best Regards,
+> Jaehoon Chung
+>
+> On 03/07/2012 01:26 AM, Ulf Hansson wrote:
+>
+>> Hi Jaehoon,
 >>
->> Chris, just realized the last two requests from me to get this merged
->> weren't addressed to you directly, but instead you were copied.
->> Resending with you in 'To', hope this lands in your inbox :)
+>> I would be very interested to hear if you still encounter any problems with this V2 patch? If you are able to do a test it would be highly appreciated. :-)
+>>
+>> Just for reference, I were able to reproduce problems similar to what you have for the V1 patch.
+>>
+>> Thanks!
+>>
+>> Best regards
+>> Ulf Hansson
+>>
+>>
+>> On 03/05/2012 03:52 PM, Ulf HANSSON wrote:
+>>> Make sure mmc_start_req cancel the prepared job, if the request
+>>> was prevented to be started due to the card has been removed.
+>>>
+>>> This bug was introduced in commit:
+>>> mmc: allow upper layers to know immediately if card has been removed
+>>>
+>>> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
+>>> Reviewed-by: Per Forlin<per.forlin@stericsson.com>
+>>> ---
+>>>
+>>> Changes in v2:
+>>>      - Maintain handling of host->areq (host->areq must not be NULL when
+>>>      "start_err"), to make sure the block layer is able to respond to all
+>>>      of the started requests.
+>>>
+>>> ---
+>>>    drivers/mmc/core/core.c |   35 +++++++++++++++--------------------
+>>>    1 files changed, 15 insertions(+), 20 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>> index faa0af1..56b7a24 100644
+>>> --- a/drivers/mmc/core/core.c
+>>> +++ b/drivers/mmc/core/core.c
+>>> @@ -249,16 +249,17 @@ static void mmc_wait_done(struct mmc_request *mrq)
+>>>        complete(&mrq->completion);
+>>>    }
+>>>
+>>> -static void __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+>>> +static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+>>>    {
+>>>        init_completion(&mrq->completion);
+>>>        mrq->done = mmc_wait_done;
+>>>        if (mmc_card_removed(host->card)) {
+>>>            mrq->cmd->error = -ENOMEDIUM;
+>>>            complete(&mrq->completion);
+>>> -        return;
+>>> +        return -ENOMEDIUM;
+>>>        }
+>>>        mmc_start_request(host, mrq);
+>>> +    return 0;
+>>>    }
+>>>
+>>>    static void mmc_wait_for_req_done(struct mmc_host *host,
+>>> @@ -342,6 +343,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>>>                        struct mmc_async_req *areq, int *error)
+>>>    {
+>>>        int err = 0;
+>>> +    int start_err = 0;
+>>>        struct mmc_async_req *data = host->areq;
+>>>
+>>>        /* Prepare a new request */
+>>> @@ -351,30 +353,23 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+>>>        if (host->areq) {
+>>>            mmc_wait_for_req_done(host, host->areq->mrq);
+>>>            err = host->areq->err_check(host->card, host->areq);
+>>> -        if (err) {
+>>> -            /* post process the completed failed request */
+>>> -            mmc_post_req(host, host->areq->mrq, 0);
+>>> -            if (areq)
+>>> -                /*
+>>> -                 * Cancel the new prepared request, because
+>>> -                 * it can't run until the failed
+>>> -                 * request has been properly handled.
+>>> -                 */
+>>> -                mmc_post_req(host, areq->mrq, -EINVAL);
+>>> -
+>>> -            host->areq = NULL;
+>>> -            goto out;
+>>> -        }
+>>>        }
+>>>
+>>> -    if (areq)
+>>> -        __mmc_start_req(host, areq->mrq);
+>>> +    if (!err&&   areq)
+>>> +        start_err = __mmc_start_req(host, areq->mrq);
+>>>
+>>>        if (host->areq)
+>>>            mmc_post_req(host, host->areq->mrq, 0);
+>>>
+>>> -    host->areq = areq;
+>>> - out:
+>>> +     /* Cancel a prepared request if it was not started. */
+>>> +    if ((err || start_err)&&   areq)
+>>> +            mmc_post_req(host, areq->mrq, -EINVAL);
+>>> +
+>>> +    if (err)
+>>> +        host->areq = NULL;
+>>> +    else
+>>> +        host->areq = areq;
+>>> +
+>>>        if (error)
+>>>            *error = err;
+>>>        return data;
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 >
-> Sorry for the delay, thanks for the ping; I've pushed these to mmc-next
-> for 3.4 now.
-
-There's just one other cleanup patch here [1] to convert all pr_* prints
-in the driver to dev_*. Would be great if you can pick that as well.
-
-Thanks,
-Rajendra
-
-[1] http://marc.info/?l=linux-mmc&m=132999677405098&w=3
-
 >
-> Thanks,
 >
-> - Chris.
 
