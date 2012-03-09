@@ -1,58 +1,158 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Fix Unbalanced pm_runtime_enable warning
-Date: Thu, 08 Mar 2012 23:43:25 -0500
-Message-ID: <m2ty1ypeoi.fsf@bob.laptop.org>
-References: <20120305234240.GQ12083@atomide.com> <87obsaio93.fsf@ti.com>
-	<4F58FB25.8020602@ti.com>
+Subject: Re: [PATCH v2 1/1] mmc: core: hs200 fixes
+Date: Thu, 08 Mar 2012 23:46:05 -0500
+Message-ID: <m2pqcmpek2.fsf@bob.laptop.org>
+References: <1331036952-18211-1-git-send-email-subhashj@codeaurora.org>
+	<CAGxe1ZGxxLV8=w32Ka3aoTmwCkrK2yNNLj+W=mgqZG+epab56w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54652 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756586Ab2CIEn3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 8 Mar 2012 23:43:29 -0500
-In-Reply-To: <4F58FB25.8020602@ti.com> (Kevin Hilman's message of "Thu, 08 Mar
-	2012 10:32:05 -0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAGxe1ZGxxLV8=w32Ka3aoTmwCkrK2yNNLj+W=mgqZG+epab56w@mail.gmail.com>
+	(Girish K. S.'s message of "Tue, 6 Mar 2012 18:37:31 +0530")
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>
+Cc: Subhash Jadavani <subhashj@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Hilman <khilman@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
 Hi,
 
-On Thu, Mar 08 2012, Kevin Hilman wrote:
->> Tony Lindgren<tony@atomide.com>  writes:
+On Tue, Mar 06 2012, Girish K S wrote:
+> On 6 March 2012 17:59, Subhash Jadavani <subhashj@codeaurora.org> wro=
+te:
+>> This patch fixes following issues when HS200 is enabled:
 >>
->>> mmc: omap_hsmmc: Fix Unbalanced pm_runtime_enable warning
->>>
->>> Otherwise we can get following warning when re-loading the
->>> omap_hsmmc driver module when gpio_twl4030 module is not
->>> loaded:
->>>
->>> omap_hsmmc omap_hsmmc.0: Unbalanced pm_runtime_enable!
->>> omap_hsmmc omap_hsmmc.0: Unable to grab MMC CD IRQ
->>> omap_hsmmc: probe of omap_hsmmc.0 failed with error -22
->>>
->>> Signed-off-by: Tony Lindgren<tony@atomide.com>
->>> ---
->>>
->>> Kevin, maybe take a look and see if this is correct and
->>> fits into your PM branches?
+>> 1. If executing_tuning() host ops is called without mmc_host_clk_hol=
+d(),
+>> =C2=A0 card clocks might get turned off (if MMC_CLK_GATING is enable=
+d)
+>> =C2=A0 while execute_tuning() is in progress. So this patch makes su=
+re
+>> =C2=A0 that execute_tuning() is called with mmc_host_clk_hold().
 >>
->> Looks right to me:
+>> 2. If host timing mode is set to HS200 mode, there should not be
+>> =C2=A0 any communication with the card until execute_tuning() is com=
+pleted.
+>> =C2=A0 But there is a chance that CMD6 might be sent to enable set H=
+PI_EN
+>> =C2=A0 (of HPI_MGMT field in EXT_CSD) before execute_tuning() is cal=
+led.
+>> =C2=A0 So this patch moves this operation after execute_tuning() is =
+completed.
 >>
->> Acked-by: Kevin Hilman<khilman@ti.com>
+>> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+>> ---
+>> =C2=A0drivers/mmc/core/mmc.c | =C2=A0 38 +++++++++++++++++++++------=
+-----------
+>> =C2=A01 files changed, 21 insertions(+), 17 deletions(-)
 >>
->> But this is a fix to the driver itself, so Chris should queue this in
->> mmc-next.
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index a480663..d36d2c4 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1030,22 +1030,6 @@ static int mmc_init_card(struct mmc_host
+>> *host, u32 ocr,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0}
 >>
->> Chris, can you take this one?
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0/*
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0* Enable HPI feature (if supported)
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
+>> - =C2=A0 =C2=A0 =C2=A0 if (card->ext_csd.hpi) {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 err =3D mmc_switc=
+h(card, EXT_CSD_CMD_SET_NORMAL,
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 EXT_CSD_HPI_MGMT, 1, 0);
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (err && err !=3D=
+ -EBADMSG)
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 goto free_card;
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (err) {
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 pr_warning("%s: Enabling HPI failed\n",
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0mmc_hostname(card->=
+host));
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 err =3D 0;
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 } else
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 card->ext_csd.hpi_en =3D 1;
+>> - =C2=A0 =C2=A0 =C2=A0 }
+>> -
+>> - =C2=A0 =C2=A0 =C2=A0 /*
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 * Compute bus speed.
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 */
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0max_dtr =3D (unsigned int)-1;
+>> @@ -1094,9 +1078,12 @@ static int mmc_init_card(struct mmc_host
+>> *host, u32 ocr,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 * 4. execute=
+ tuning for HS200
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 */
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0if ((host->ca=
+ps2 & MMC_CAP2_HS200) &&
+>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 car=
+d->host->ops->execute_tuning)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 car=
+d->host->ops->execute_tuning) {
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 mmc_host_clk_hold(card->host);
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0err =3D card->host->ops->execute_tuning(card->host,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0MMC_SEND_TUNING_BLOCK_HS200);
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 mmc_host_clk_release(card->host);
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 }
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0if (err) {
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0pr_warning("%s: tuning execution failed\n",
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mmc_hostname(card->ho=
+st));
+>> @@ -1216,6 +1203,23 @@ static int mmc_init_card(struct mmc_host
+>> *host, u32 ocr,
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0}
+>>
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0/*
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0* Enable HPI feature (if supported)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
+>> + =C2=A0 =C2=A0 =C2=A0 if (card->ext_csd.hpi) {
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 err =3D mmc_switc=
+h(card, EXT_CSD_CMD_SET_NORMAL,
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 EXT_CSD_HPI_MGMT, 1,
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 card->ext_csd.generic_cmd6_time)=
+;
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (err && err !=3D=
+ -EBADMSG)
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 goto free_card;
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (err) {
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 pr_warning("%s: Enabling HPI failed\n",
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0mmc_hostname(card->=
+host));
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 err =3D 0;
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 } else
+>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 card->ext_csd.hpi_en =3D 1;
+>> + =C2=A0 =C2=A0 =C2=A0 }
+>> +
+>> + =C2=A0 =C2=A0 =C2=A0 /*
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 * If cache size is higher than 0, this i=
+ndicates
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 * the existence of cache and it can be t=
+urned on.
+>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 */
 >
-> just checking on this to be sure it can make it for v3.4.
+> Reviewed-By: girish.shivananjappa@linaro.org
 
-Thanks, I've pushed this to mmc-next for 3.4 now.
+Thanks, pushed to mmc-next for 3.4.
 
 - Chris.
--- 
+--=20
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
