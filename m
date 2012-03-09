@@ -1,61 +1,40 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc/spear: add pm callbacks to support hibernation
-Date: Thu, 08 Mar 2012 23:31:28 -0500
-Message-ID: <m2boo6qtsv.fsf@bob.laptop.org>
-References: <452d8982fec5f41a3761a9e7b9bbe35e2f92c2a3.1330063674.git.viresh.kumar@st.com>
+Subject: Re: [PATCH V2 1/1] mmc: start removing enable / disable API
+Date: Thu, 08 Mar 2012 23:35:21 -0500
+Message-ID: <m27gyuqtme.fsf@bob.laptop.org>
+References: <1330499841-6879-1-git-send-email-adrian.hunter@intel.com>
+	<1330499841-6879-2-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:55650 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:34539 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757437Ab2CIEbe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 8 Mar 2012 23:31:34 -0500
-In-Reply-To: <452d8982fec5f41a3761a9e7b9bbe35e2f92c2a3.1330063674.git.viresh.kumar@st.com>
-	(Viresh Kumar's message of "Fri, 24 Feb 2012 11:55:35 +0530")
+	id S1755934Ab2CIEfe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 8 Mar 2012 23:35:34 -0500
+In-Reply-To: <1330499841-6879-2-git-send-email-adrian.hunter@intel.com>
+	(Adrian Hunter's message of "Wed, 29 Feb 2012 09:17:21 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Viresh Kumar <viresh.kumar@st.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, armando.visconti@st.com, shiraz.hashim@st.com, vipin.kumar@st.com, rajeev-dlh.kumar@st.com, deepak.sikri@st.com, vipulkumar.samar@st.com, amit.virdi@st.com, pratyush.anand@st.com, bhupesh.sharma@st.com, viresh.linux@gmail.com, bhavna.yadav@st.com, vincenzo.frascino@st.com, mirko.gardi@st.com
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, Rajendra Nayak <rnayak@ti.com>, Venkatraman S <svenkatr@ti.com>, Kukjin Kim <kgene.kim@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Kyungmin Park <kyungmin.park@samsung.com>, Sekhar Nori <nsekhar@ti.com>, Kevin Hilman <khilman@ti.com>
 
-Hi Viresh,
+Hi Adrian,
 
-On Fri, Feb 24 2012, Viresh Kumar wrote:
-> From: Shiraz Hashim <shiraz.hashim@st.com>
+On Wed, Feb 29 2012, Adrian Hunter wrote:
+> Most parts of the enable / disable API are no longer used and
+> can be removed.
 >
-> Signed-off-by: Shiraz Hashim <shiraz.hashim@st.com>
-> ---
->  drivers/mmc/host/sdhci-spear.c |    9 ++-------
->  1 files changed, 2 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-> index b7f8b33..6dfa82e 100644
-> --- a/drivers/mmc/host/sdhci-spear.c
-> +++ b/drivers/mmc/host/sdhci-spear.c
-> @@ -300,20 +300,15 @@ static int sdhci_resume(struct device *dev)
->  
->  	return sdhci_resume_host(host);
->  }
-> -
-> -const struct dev_pm_ops sdhci_pm_ops = {
-> -	.suspend	= sdhci_suspend,
-> -	.resume		= sdhci_resume,
-> -};
->  #endif
->  
-> +static SIMPLE_DEV_PM_OPS(sdhci_pm_ops, sdhci_suspend, sdhci_resume);
-> +
->  static struct platform_driver sdhci_driver = {
->  	.driver = {
->  		.name	= "sdhci",
->  		.owner	= THIS_MODULE,
-> -#ifdef CONFIG_PM
->  		.pm	= &sdhci_pm_ops,
-> -#endif
->  	},
->  	.probe		= sdhci_probe,
->  	.remove		= __devexit_p(sdhci_remove),
+> Cc: Rajendra Nayak <rnayak@ti.com>
+> Cc: Venkatraman S <svenkatr@ti.com>
+> Cc: Kukjin Kim <kgene.kim@samsung.com>
+> Cc: Thomas Abraham <thomas.abraham@linaro.org>
+> Cc: Kyungmin Park <kyungmin.park@samsung.com>
+> Cc: Sekhar Nori <nsekhar@ti.com>
+> Cc: Kevin Hilman <khilman@ti.com>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Thanks, pushed to mmc-next for 3.4.
+Thanks very much, pushed to mmc-next for 3.4 (with Tested-by from
+Venkatraman and Jaehoon).
 
 - Chris.
 -- 
