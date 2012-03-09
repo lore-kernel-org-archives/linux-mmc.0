@@ -1,54 +1,82 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-s3c: Enable runtime power management
-Date: Fri, 9 Mar 2012 12:26:06 +0000
-Message-ID: <20120309122606.GN3273@opensource.wolfsonmicro.com>
-References: <4F51697C.40408@samsung.com>
- <1330735602-22409-1-git-send-email-broonie@opensource.wolfsonmicro.com>
- <1330735602-22409-2-git-send-email-broonie@opensource.wolfsonmicro.com>
- <m2vcmenyxh.fsf@bob.laptop.org>
+From: "Maupin, Chase" <chase.maupin@ti.com>
+Subject: RE: [PATCH] mmc: omap_hsmmc: set dto to 14 for all devices
+Date: Fri, 9 Mar 2012 13:06:07 +0000
+Message-ID: <7D46E86EC0A8354091174257B2FED1012F06FAEF@DLEE12.ent.ti.com>
+References: <1330622780-1909-1-git-send-email-Chase.Maupin@ti.com>
+ <m2399iqtgf.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="8MZM6zh5Bb05FW+3"
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <m2vcmenyxh.fsf@bob.laptop.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from devils.ext.ti.com ([198.47.26.153]:53256 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754144Ab2CINGW convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Mar 2012 08:06:22 -0500
+In-Reply-To: <m2399iqtgf.fsf@bob.laptop.org>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Thursday, March 08, 2012 10:39 PM
+> To: Maupin, Chase
+> Cc: linux-omap@vger.kernel.org; linux-mmc@vger.kernel.org
+> Subject: Re: [PATCH] mmc: omap_hsmmc: set dto to 14 for all devices
+> 
+> Hi Chase,
+> 
+> On Thu, Mar 01 2012, Chase Maupin wrote:
+> > * With certain SD cards timeouts like the following have been
+> seen
+> >   due to an improper calculation of the dto value:
+> >     mmcblk0: error -110 transferring data, sector 4126233, nr 8,
+> >     card status 0xc00
+> > * By removing the dto calculation and setting the timeout value
+> >   to the maximum specified by the SD card specification part A2
+> >   section 2.2.15 these timeouts can be avoided.
+> > * This change has been used by beagleboard users as well as the
+> >   Texas Instruments SDK without a negative impact.
+> > * There are multiple discussion threads about this but the most
+> >   relevant ones are:
+> >     * http://talk.maemo.org/showthread.php?p=1000707#post1000707
+> >     * http://www.mail-archive.com/linux-
+> omap@vger.kernel.org/msg42213.html
+> > * Original proposal for this fix was done by Sukumar Ghoral of
+> >   Texas Instruments
+> >
+> > * Tested using a Texas Instruments AM335x EVM
+> >
+> > Signed-off-by: Chase Maupin <Chase.Maupin@ti.com>
+> 
+> Thanks, I've pushed this to mmc-next for 3.4.  (With a trivial
+> indentation fix, below.)
 
---8MZM6zh5Bb05FW+3
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Thank you Chris.
 
-On Fri, Mar 09, 2012 at 12:08:58AM -0500, Chris Ball wrote:
-
-> The reworked patch is below, please let me know if it looks incorrect:
-
-That looks about right, I'll find out soon enough if it doesn't work in
--next as my main development system has the rootfs on this device :)
-
---8MZM6zh5Bb05FW+3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iQIcBAEBAgAGBQJPWfbWAAoJEBus8iNuMP3dgaMP/36RK3J/MdsvJtD/icnFMY1c
-rsqt1c6rCR6auNtC80vSLVm/TNl6c53DRShjRTu+GIprSLBjXVU/F0RNY2rAaKQf
-zVe66Na6qzODXAueWfl7aFWkXVacqPz6tooD7iEnZMvs+3gXpJT5ZQ5AbIU28zaQ
-5tcwYwHD3+XHND4LXMPXo6vAq7mudrbl1l+VEEUwHgmT6de9KybKqnfHRzO9lce9
-OFabwNfSNiG5fRnJ5cdq+pHJBg3vQ8WwMFpfYM9Nur0mumOO086CS0YQUXw5r6ET
-Y47vnaY2MJOFaFDav13g3lep+aSuT83+YvP/sEOe5ciipnHXNaKJ7itGM2vRrk4G
-zy6O6BfW/RrjRaz4CaSrAG6ltCK6/k2sg/3jej4bHPXS8WHle8EHRZg7XIzoAiv7
-GbV+G080QxWPijEpaUJX1H93Yky24cL9WDVRJ/WUbkztJr13qCGW78S++DGweepR
-QmZ6/gBJvYIs69qwr6KBPMGyIQxeWxL3oq+XsCj1rzYJqnJX2QfiLZJW1L3GrZuA
-DXauRFYFviYwuHdO/Pc4J5WsK85g+M7ZCflA3Owjj9jkXp5BBZQZZMK5Potqo/hm
-B15KYvPHRAtzbmO6652y9wHfgDuF1nQyYG50tqFUzmjgr4G/rc7gNvPX4kfDkmsZ
-Oy0aca0iwVcJr1SaFbew
-=eVkt
------END PGP SIGNATURE-----
-
---8MZM6zh5Bb05FW+3--
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c
+> b/drivers/mmc/host/omap_hsmmc.c
+> index 82b400793..9d4ce1c 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1360,7 +1360,7 @@ static void set_data_timeout(struct
+> omap_hsmmc_host *host)
+>  	if (clkd == 0)
+>  		clkd = 1;
+> 
+> -    /* Use the maximum timeout value allowed in the standard of 14
+> or 0xE */
+> +	/* Use the maximum timeout value allowed in the standard of
+> 14 or 0xE */
+>  	dto = 14;
+> 
+>  	reg &= ~DTO_MASK;
+> 
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
