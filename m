@@ -1,102 +1,105 @@
-From: Kevin Hilman <khilman@ti.com>
-Subject: Re: [PATCH 1/3] PM / QoS: Make it possible to expose PM QoS latency constraints
-Date: Thu, 08 Mar 2012 17:02:18 -0800
-Message-ID: <87lina7fj9.fsf@ti.com>
-References: <201203040101.53177.rjw@sisk.pl> <201203082337.23821.rjw@sisk.pl>
-	<87zkbq8ywo.fsf@ti.com> <201203090030.41190.rjw@sisk.pl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog117.obsmtp.com ([74.125.149.242]:32821 "EHLO
-	na3sys009aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754110Ab2CIBCR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Mar 2012 20:02:17 -0500
-Received: by iaeh11 with SMTP id h11so1680826iae.29
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Mar 2012 17:02:16 -0800 (PST)
-In-Reply-To: <201203090030.41190.rjw@sisk.pl> (Rafael J. Wysocki's message of
-	"Fri, 9 Mar 2012 00:30:40 +0100")
-Sender: linux-mmc-owner@vger.kernel.org
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH 1/4] gpiolib: Add gpiochip_find_by_name() and gpio_find_by_chip_name()
+Date: Thu, 08 Mar 2012 18:05:55 -0700
+Message-ID: <20120309010555.8DE213E0901@localhost>
+References: <20120301185044.29210.44521.stgit@kaulin.local> <20120301185524.29210.60381.stgit@kaulin.local> <20120302075804.F28DB3E2DB4@localhost> <20120302170327.GF18901@atomide.com> <20120302180848.GM18901@atomide.com> <20120302184833.C296A3E1C63@localhost> <20120302190614.GO18901@atomide.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20120302190614.GO18901@atomide.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@stericsson.com>, Arnd Bergmann <arnd@arndb.de>, Rajendra Nayak <rnayak@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Linux PM list <linux-pm@vger.kernel.org>, Linux MMC list <linux-mmc@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-"Rafael J. Wysocki" <rjw@sisk.pl> writes:
+On Fri, 2 Mar 2012 11:06:15 -0800, Tony Lindgren <tony@atomide.com> wrote:
+> * Grant Likely <grant.likely@secretlab.ca> [120302 10:16]:
+> > On Fri, 2 Mar 2012 10:08:48 -0800, Tony Lindgren <tony@atomide.com> wrote:
+> > > * Tony Lindgren <tony@atomide.com> [120302 08:31]:
+> > > > * Grant Likely <grant.likely@secretlab.ca> [120302 01:00]:
+> > > > > On Thu, 01 Mar 2012 10:55:24 -0800, Tony Lindgren <tony@atomide.com> wrote:
+> > > > > > +
+> > > > > > +/**
+> > > > > > + * gpiochip_find_by_name() - iterator for locating a gpio_chip by name
+> > > > > > + * @name: name of the gpio_chip
+> > > > > > + *
+> > > > > > + * Similar to bus_find_device_by_name. It returns a reference to the
+> > > > > > + * first gpio_chip with matching name. It ignores NULL and empty names.
+> > > > > > + * If you need to do something more complex, then use gpiochip_find.
+> > > > > > + */
+> > > > > > +struct gpio_chip *gpiochip_find_by_name(const char *name)
+> > > > > > +{
+> > > > > > +	if (!name || !strcmp(name, ""))
+> > > > > > +		return NULL;
+> > > > > > +
+> > > > > > +	return gpiochip_find((void *)name, match_name);
+> > > > > 
+> > > > > Nasty cast.  Can the signature for gpiochip_find be changed to accept
+> > > > > a (const void *)?
+> > > > 
+> > > > I think so, this too comes from the bus code.
+> > > 
+> > > Looks like it can't be const as of_node_to_gpiochip uses it with
+> > > a struct device_node * that for of_get_named_gpio_flags comes from
+> > > of_parse_phandle_with_args.
+> > 
+> > Really? It sees to work fine here:
+> 
+> Hmm right you are. I must have missed adding the const to
+> of_gpiochip_is_match, that's good news :)
+> 
+> Want to do that as a separate patch or want me to fold it in?
 
-> On Friday, March 09, 2012, Kevin Hilman wrote:
->> "Rafael J. Wysocki" <rjw@sisk.pl> writes:
->> 
->> > On Thursday, March 08, 2012, Kevin Hilman wrote:
->> >> "Rafael J. Wysocki" <rjw@sisk.pl> writes:
->> >> 
->> >> > On Thursday, March 08, 2012, Kevin Hilman wrote:
->> >> >> "Rafael J. Wysocki" <rjw@sisk.pl> writes:
->> >> >> 
->> >> >> > From: Rafael J. Wysocki <rjw@sisk.pl>
->> >> >> >
->> >> >> > A runtime suspend of a device (e.g. an MMC controller) belonging to
->> >> >> > a power domain or, in a more complicated scenario, a runtime suspend
->> >> >> > of another device in the same power domain, may cause power to be
->> >> >> > removed from the entire domain.  In that case, the amount of time
->> >> >> > necessary to runtime-resume the given device (e.g. the MMC
->> >> >> > controller) is often substantially greater than the time needed to
->> >> >> > run its driver's runtime resume callback.  That may hurt performance
->> >> >> > in some situations, because user data may need to wait for the
->> >> >> > device to become operational, so we should make it possible to
->> >> >> > prevent that from happening.
->> >> >> >
->> >> >> > For this reason, introduce a new sysfs attribute for devices,
->> >> >> > power/pm_qos_latency_us, allowing user space to specify the upper
->> >> >> 
->> >> >> If we're expecting to have more of these knobs, maybe having a pm_qos
->> >> >> subdir under power will keep down the clutter in /sys/devices/.../power.
->> >> >> This knob would then be /sys/devices/.../power/pm_qos/pm_qos_latency_us.
->> >> >
->> >> > I'm not sure how difficult it is to create a subdir in sysfs under something
->> >> > that is not a kobject.
->> >> >
->> >> > Besides, this follows the convention already used by wakeup and runtime PM
->> >> > attributes that don't have their own subdirs (although there may be a number
->> >> > of them in each category).
->> >> 
->> >> OK
->> >> 
->> >> >> I think 'latency' alone is a bit too vague (wakeup latency?  interrupt
->> >> >> latency?  I think wakeup latency is clearer.  Another possibility is
->> >> >> resume latency, IMO, that will lead to confusion about whether this
->> >> >> field also affects system suspend/resume.
->> >> >
->> >> > I think "wakeup latency" will lead to more confusion because of the
->> >> > wakeup-related attributes.  
->> >> 
->> >> What confusion?  All of those are related to device wakeups from some
->> >> low power state, and so is this proposed latency attribute.  So I don't
->> >> understand the potential confusion.
->> >
->> > The word "wakeup" may refer to many different things, as well as the word
->> > "resume". :-)
->> 
->> Yes, but what's the confusion in this case?
->> 
->> IMO, The existing /sys/devices/.../power/wakeup* meaning is the same
->> meaning as as for the wakeup latency in this patch,
->
-> No, it is not.  They refer to system wakeup. :-)
+I've got it as a separate commit in my gpio/next branch.
 
-OK, now I'm confused (again).  I thought those could be used for runtime
-PM wakeups also.  At least I was planning on using them for any kind of
-wakeup.
+g.
 
->> so I don't understand where the confusion would be.
->
-> See above. ;-)
+> > ---
+> > 
+> > diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
+> > index d773540..e633a2a 100644
+> > --- a/drivers/gpio/gpiolib.c
+> > +++ b/drivers/gpio/gpiolib.c
+> > @@ -1152,8 +1152,9 @@ EXPORT_SYMBOL_GPL(gpiochip_remove);
+> >   * non-zero, this function will return to the caller and not iterate over any
+> >   * more gpio_chips.
+> >   */
+> > -struct gpio_chip *gpiochip_find(void *data,
+> > -				int (*match)(struct gpio_chip *chip, void *data))
+> > +struct gpio_chip *gpiochip_find(const void *data,
+> > +				int (*match)(struct gpio_chip *chip,
+> > +					     const void *data))
+> >  {
+> >  	struct gpio_chip *chip = NULL;
+> >  	unsigned long flags;
+> > diff --git a/drivers/of/gpio.c b/drivers/of/gpio.c
+> > index e034b38..bba8121 100644
+> > --- a/drivers/of/gpio.c
+> > +++ b/drivers/of/gpio.c
+> > @@ -229,7 +229,7 @@ void of_gpiochip_remove(struct gpio_chip *chip)
+> >  }
+> >  
+> >  /* Private function for resolving node pointer to gpio_chip */
+> > -static int of_gpiochip_is_match(struct gpio_chip *chip, void *data)
+> > +static int of_gpiochip_is_match(struct gpio_chip *chip, const void *data)
+> >  {
+> >  	return chip->of_node == data;
+> >  }
+> > diff --git a/include/asm-generic/gpio.h b/include/asm-generic/gpio.h
+> > index 1ff4e22..5f52690 100644
+> > --- a/include/asm-generic/gpio.h
+> > +++ b/include/asm-generic/gpio.h
+> > @@ -142,9 +142,9 @@ extern int __must_check gpiochip_reserve(int start, int ngpio);
+> >  /* add/remove chips */
+> >  extern int gpiochip_add(struct gpio_chip *chip);
+> >  extern int __must_check gpiochip_remove(struct gpio_chip *chip);
+> > -extern struct gpio_chip *gpiochip_find(void *data,
+> > +extern struct gpio_chip *gpiochip_find(const void *data,
+> >  					int (*match)(struct gpio_chip *chip,
+> > -						     void *data));
+> > +						     const void *data));
+> >  
+> >  
+> >  /* Always use the library code for GPIO management calls,
+> > 
 
-Sheesh, this is getting ugly.
-
-So wakeup*  attributes refer to system resume and resume* attribues
-refer to runtime PM.
-
-Yuck.
-
-Kevin
-
-
+-- 
+email sent from notmuch.vim plugin
