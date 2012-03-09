@@ -1,66 +1,44 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: core: add the warning message when card didn't support HPI
-Date: Fri, 09 Mar 2012 08:12:05 -0500
-Message-ID: <m2r4x1or4q.fsf@bob.laptop.org>
-References: <4F59BE26.8070705@samsung.com>
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: [PATCH] drivers: mmc: sdhci-s3c: fix broken compilation for non-Exynos
+ SoCs
+Date: Fri, 09 Mar 2012 14:44:27 +0100
+Message-ID: <1331300667-22566-1-git-send-email-m.szyprowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: TEXT/PLAIN
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:58757 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750933Ab2CINML (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 9 Mar 2012 08:12:11 -0500
-In-Reply-To: <4F59BE26.8070705@samsung.com> (Jaehoon Chung's message of "Fri,
-	09 Mar 2012 17:24:06 +0900")
+Received: from mailout4.w1.samsung.com ([210.118.77.14]:64057 "EHLO
+	mailout4.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932376Ab2CINoi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Mar 2012 08:44:38 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Marek Szyprowski <m.szyprowski@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>
 
-Hi,
+exynos4_sdhci_drv_data structure is not available on non-Exynos builds,
+that's why EXYNOS4_SDHCI_DRV_DATA macro has been introduced. This patch
+fixes commit 67819656 'mmc: sdhci-s3c: Add device tree support' to use
+that macro. This fixes broken build for pre-Exynos SoCs.
 
-On Fri, Mar 09 2012, Jaehoon Chung wrote:
-> Though card didn't support HPI,someone could use the send_hpi_cmd().
-> Then maybe didn't work fine.
-> Because card->ext_csd.hpi_cmd didn't set.
-> So if card didn't support hpi, return the waring message.
->
-> And CMD12's flags is MMC_RSP_R1B.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
->  drivers/mmc/core/mmc_ops.c |    8 +++++++-
->  1 files changed, 7 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 4d41fa9..395f944 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -556,9 +556,15 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
->  	unsigned int flags;
->  	int err;
->  
-> +	if (!card->ext_csd.hpi) {
-> +		pr_waring("%s: Card didn't support HPI command\n",
+Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-This isn't going to compile.  Please compile test patches before sending
-them.
-
-> +				mmc_hostname(card->host));
-> +		return -EINVAL;
-> +	}
-> +
->  	opcode = card->ext_csd.hpi_cmd;
->  	if (opcode == MMC_STOP_TRANSMISSION)
-> -		flags = MMC_RSP_R1 | MMC_CMD_AC;
-> +		flags = MMC_RSP_R1B | MMC_CMD_AC;
->  	else if (opcode == MMC_SEND_STATUS)
->  		flags = MMC_RSP_R1 | MMC_CMD_AC;
-
-Thanks,
-
-- Chris.
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index ea0767e..984601e 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -859,7 +859,7 @@ MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
+ static const struct of_device_id sdhci_s3c_dt_match[] = {
+ 	{ .compatible = "samsung,s3c6410-sdhci", },
+ 	{ .compatible = "samsung,exynos4210-sdhci",
+-		.data = &exynos4_sdhci_drv_data },
++		.data = EXYNOS4_SDHCI_DRV_DATA },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.1.569.g6f426
+
