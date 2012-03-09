@@ -1,96 +1,143 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH v2] mmc: sh_mobile_sdhi: support modular mmc-core with
- non-standard hotplug
-Date: Fri, 9 Mar 2012 10:16:00 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1203091012150.7852@axis700.grange>
-References: <Pine.LNX.4.64.1202271454270.32434@axis700.grange>
+From: Rajendra Nayak <rnayak@ti.com>
+Subject: Re: [PATCH v2 1/4] mmc: omap_hsmmc: Convert hsmmc driver to use device
+ tree
+Date: Fri, 09 Mar 2012 14:51:06 +0530
+Message-ID: <4F59CB82.9050607@ti.com>
+References: <1329998490-27555-1-git-send-email-rnayak@ti.com> <1329998490-27555-2-git-send-email-rnayak@ti.com> <20120309054213.9E69C3E0901@localhost>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1202271454270.32434@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog118.obsmtp.com ([74.125.149.244]:39617 "EHLO
+	na3sys009aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751014Ab2CIJVQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Mar 2012 04:21:16 -0500
+Received: by yenm8 with SMTP id m8so874866yen.0
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Mar 2012 01:21:14 -0800 (PST)
+In-Reply-To: <20120309054213.9E69C3E0901@localhost>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, devicetree-discuss@lists.ozlabs.org, linux-omap@vger.kernel.org, linaro-dev@lists.linaro.org, balajitk@ti.com, linux-arm-kernel@lists.infradead.org
 
-Currently if a platform wants to implement a non-standard card-detection
-method, it would need to call tmio_mmc_cd_wakeup(), which is an inline
-function, calling mmc_detect_change(). For this the platform would have
-to link mmc_core statically into the kernel, losing the ability to build
-it as a module. This patch adds a callback to the sh_mobile_sdhi driver,
-which eliminates this dependency.
+Hi Grant,
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
+On Friday 09 March 2012 11:12 AM, Grant Likely wrote:
+> On Thu, 23 Feb 2012 17:31:27 +0530, Rajendra Nayak<rnayak@ti.com>  wrote:
+>> Define dt bindings for the ti-omap-hsmmc, and adapt
+>> the driver to extract data (which was earlier passed as
+>> platform_data) from device tree.
+>>
+>> Signed-off-by: Rajendra Nayak<rnayak@ti.com>
+>> ---
+>>   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   31 +++++++++
+>>   drivers/mmc/host/omap_hsmmc.c                      |   68 ++++++++++++++++++++
+>>   2 files changed, 99 insertions(+), 0 deletions(-)
+>>   create mode 100644 Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>> new file mode 100644
+>> index 0000000..e4fa8f0
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>> @@ -0,0 +1,31 @@
+>> +* TI Highspeed MMC host controller for OMAP
+>> +
+>> +The Highspeed MMC Host Controller on TI OMAP family
+>> +provides an interface for MMC, SD, and SDIO types of memory cards.
+>> +
+>> +Required properties:
+>> +- compatible:
+>> + Should be "ti,omap2-hsmmc", for OMAP2/3 controllers
+>> + Should be "ti,omap4-hsmmc", for OMAP4 controllers
+>> +- ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
+>> +- reg : should contain hsmmc registers location and length
+>> +
+>> +Optional properties:
+>> +ti,dual-volt: boolean, supports dual voltage cards
+>> +<supply-name>-supply: phandle to the regulator device tree node
+>> +"supply-name" examples are "vmmc", "vmmc_aux" etc
+>> +ti,bus-width: Number of data lines, default assumed is 1 if the property is missing.
+>> +cd-gpios: GPIOs for card detection
+>> +wp-gpios: GPIOs for write protection
+>> +ti,non-removable: non-removable slot (like eMMC)
+>
+> Binding looks okay.  A couple comments below...
+>
+> [...]
+>> +static const struct of_device_id omap_mmc_of_match[];
+>
+> If you move the omap_mmc_of_match[] table up to here then there is no
+> need for the forward declaration.
+>
+>> +
+>>   static int __init omap_hsmmc_probe(struct platform_device *pdev)
+>>   {
+>>   	struct omap_mmc_platform_data *pdata = pdev->dev.platform_data;
+>> @@ -1725,6 +1768,14 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+>>   	struct omap_hsmmc_host *host = NULL;
+>>   	struct resource *res;
+>>   	int ret, irq;
+>> +	const struct of_device_id *match;
+>> +
+>> +	match = of_match_device(omap_mmc_of_match,&pdev->dev);
+>> +	if (match) {
+>> +		pdata = of_get_hsmmc_pdata(&pdev->dev);
+>> +		if (match->data)
+>> +			pdata->reg_offset = *(u16 *)match->data;
+>
+> Blech on the ugly cast.  It is slightly safer to do thusly:
+>
+> 	u16 *offsetp = match->data;
+> 	pdata->reg_offset = *offsetp
 
-v2:
+thanks for the review. I'll repost with these changes.
 
-1. remove a call to tmio_mmc_cd_wakeup(), call mmc_detect_change() 
-   directly instead
-2. document the new struct sh_mobile_sdhi_ops
+regards,
+Rajendra
 
- drivers/mmc/host/sh_mobile_sdhi.c  |   11 ++++++++++-
- include/linux/mmc/sh_mobile_sdhi.h |   11 ++++++++++-
- 2 files changed, 20 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index dd288d6..8352054 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -100,6 +100,15 @@ static int sh_mobile_sdhi_write16_hook(struct tmio_mmc_host *host, int addr)
- 	return 0;
- }
- 
-+static void sh_mobile_sdhi_cd_wakeup(const struct platform_device *pdev)
-+{
-+	mmc_detect_change(dev_get_drvdata(&pdev->dev), msecs_to_jiffies(100));
-+}
-+
-+static const struct sh_mobile_sdhi_ops sdhi_ops = {
-+	.cd_wakeup = sh_mobile_sdhi_cd_wakeup,
-+};
-+
- static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- {
- 	struct sh_mobile_sdhi *priv;
-@@ -121,7 +130,7 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	p->pdata = mmc_data;
- 
- 	if (p->init) {
--		ret = p->init(pdev);
-+		ret = p->init(pdev, &sdhi_ops);
- 		if (ret)
- 			goto einit;
- 	}
-diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-index 686b85b..e94e620 100644
---- a/include/linux/mmc/sh_mobile_sdhi.h
-+++ b/include/linux/mmc/sh_mobile_sdhi.h
-@@ -10,6 +10,14 @@ struct tmio_mmc_data;
- #define SH_MOBILE_SDHI_IRQ_SDCARD	"sdcard"
- #define SH_MOBILE_SDHI_IRQ_SDIO		"sdio"
- 
-+/**
-+ * struct sh_mobile_sdhi_ops - SDHI driver callbacks
-+ * @cd_wakeup:		trigger a card-detection run
-+ */
-+struct sh_mobile_sdhi_ops {
-+	void (*cd_wakeup)(const struct platform_device *pdev);
-+};
-+
- struct sh_mobile_sdhi_info {
- 	int dma_slave_tx;
- 	int dma_slave_rx;
-@@ -22,7 +30,8 @@ struct sh_mobile_sdhi_info {
- 	int (*get_cd)(struct platform_device *pdev);
- 
- 	/* callbacks for board specific setup code */
--	int (*init)(struct platform_device *pdev);
-+	int (*init)(struct platform_device *pdev,
-+		    const struct sh_mobile_sdhi_ops *ops);
- 	void (*cleanup)(struct platform_device *pdev);
- };
- 
--- 
-1.7.2.5
+>
+>> +	}
+>>
+>>   	if (pdata == NULL) {
+>>   		dev_err(&pdev->dev, "Platform Data is missing\n");
+>> @@ -2120,12 +2171,29 @@ static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
+>>   	.runtime_resume = omap_hsmmc_runtime_resume,
+>>   };
+>>
+>> +#if defined(CONFIG_OF)
+>> +static u16 omap4_reg_offset = 0x100;
+>> +
+>> +static const struct of_device_id omap_mmc_of_match[] = {
+>> +	{
+>> +		.compatible = "ti,omap2-hsmmc",
+>> +	},
+>> +	{
+>> +		.compatible = "ti,omap4-hsmmc",
+>> +		.data =&omap4_reg_offset,
+>> +	},
+>> +	{},
+>> +}
+>> +MODULE_DEVICE_TABLE(of, omap_mmc_of_match);
+>> +#endif
+>> +
+>>   static struct platform_driver omap_hsmmc_driver = {
+>>   	.remove		= omap_hsmmc_remove,
+>>   	.driver		= {
+>>   		.name = DRIVER_NAME,
+>>   		.owner = THIS_MODULE,
+>>   		.pm =&omap_hsmmc_dev_pm_ops,
+>> +		.of_match_table = of_match_ptr(omap_mmc_of_match),
+>>   	},
+>>   };
+>>
+>> --
+>> 1.7.1
+>>
+>>
+>> _______________________________________________
+>> linaro-dev mailing list
+>> linaro-dev@lists.linaro.org
+>> http://lists.linaro.org/mailman/listinfo/linaro-dev
+>
 
