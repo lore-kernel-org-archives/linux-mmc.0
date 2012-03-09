@@ -1,53 +1,44 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH RESEND] mmc: sh_mmcif: fix MMC_GEN_CMD setting
-Date: Thu, 08 Mar 2012 23:47:29 -0500
-Message-ID: <m2linapehq.fsf@bob.laptop.org>
-References: <4F571E36.4050509@renesas.com>
+From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 0/6] mmc: omap_hsmmc: Clean up use/abuse of pdev->id
+Date: Thu, 08 Mar 2012 23:53:35 -0500
+Message-ID: <m2boo6pe7k.fsf@bob.laptop.org>
+References: <1329996409-26861-1-git-send-email-rnayak@ti.com>
+	<4F476228.7060607@ti.com> <4F54714E.6080805@ti.com>
+	<4F57312E.4080104@ti.com> <m2pqcoihhu.fsf@bob.laptop.org>
+	<4F589C94.9010601@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <4F571E36.4050509@renesas.com> (Yoshihiro Shimoda's message of
-	"Wed, 07 Mar 2012 17:37:10 +0900")
-Sender: linux-sh-owner@vger.kernel.org
-To: "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>
-Cc: linux-mmc@vger.kernel.org, SH-Linux <linux-sh@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+In-Reply-To: <4F589C94.9010601-l0cyMroinI0@public.gmane.org> (Rajendra Nayak's message of "Thu, 08
+	Mar 2012 17:18:36 +0530")
+List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
+List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
+List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
+	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
+Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
+Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Wed, Mar 07 2012, Shimoda, Yoshihiro wrote:
-> The MMC_GEN_CMD (CMD56) doesn't need to check busy signal.
-> So, the patch fixes the setting.
+On Thu, Mar 08 2012, Rajendra Nayak wrote:
+> There's just one other cleanup patch here [1] to convert all pr_* prints
+> in the driver to dev_*. Would be great if you can pick that as well.
 >
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> ---
->  drivers/mmc/host/sh_mmcif.c |    2 --
->  1 files changed, 0 insertions(+), 2 deletions(-)
+> Thanks,
+> Rajendra
 >
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 4a2c5b2..e8b70e3 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -745,7 +745,6 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
->  	case MMC_SET_WRITE_PROT:
->  	case MMC_CLR_WRITE_PROT:
->  	case MMC_ERASE:
-> -	case MMC_GEN_CMD:
->  		tmp |= CMD_SET_RBSY;
->  		break;
->  	}
-> @@ -828,7 +827,6 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
->  	case MMC_SET_WRITE_PROT:
->  	case MMC_CLR_WRITE_PROT:
->  	case MMC_ERASE:
-> -	case MMC_GEN_CMD:
->  		mask = MASK_START_CMD | MASK_MRBSYE;
->  		break;
->  	default:
+> [1] http://marc.info/?l=linux-mmc&m=132999677405098&w=3
 
-Thanks, pushed to mmc-next for 3.4.
+Thanks, I've pushed this to mmc-next for 3.4 now too.
 
 - Chris.
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
 One Laptop Per Child
