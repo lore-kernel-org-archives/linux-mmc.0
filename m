@@ -1,188 +1,126 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-s3c: Enable runtime power management
-Date: Fri, 09 Mar 2012 00:08:58 -0500
-Message-ID: <m2vcmenyxh.fsf@bob.laptop.org>
-References: <4F51697C.40408@samsung.com>
-	<1330735602-22409-1-git-send-email-broonie@opensource.wolfsonmicro.com>
-	<1330735602-22409-2-git-send-email-broonie@opensource.wolfsonmicro.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1330735602-22409-2-git-send-email-broonie@opensource.wolfsonmicro.com>
-	(Mark Brown's message of "Sat, 3 Mar 2012 00:46:42 +0000")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Cc: Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH v2 1/4] mmc: omap_hsmmc: Convert hsmmc driver to use device tree
+Date: Thu, 08 Mar 2012 22:42:13 -0700
+Message-ID: <20120309054213.9E69C3E0901@localhost>
+References: <1329998490-27555-1-git-send-email-rnayak@ti.com> <1329998490-27555-2-git-send-email-rnayak@ti.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1329998490-27555-2-git-send-email-rnayak@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, devicetree-discuss@lists.ozlabs.org
+Cc: linux-omap@vger.kernel.org, linaro-dev@lists.linaro.org, balajitk@ti.com, Rajendra Nayak <rnayak@ti.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Fri, Mar 02 2012, Mark Brown wrote:
-> Since most of the work is already done by the core we just need to add
-> runtime suspend methods and tell the PM core that runtime PM is enabled
-> for this device.
->
-> Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+On Thu, 23 Feb 2012 17:31:27 +0530, Rajendra Nayak <rnayak@ti.com> wrote:
+> Define dt bindings for the ti-omap-hsmmc, and adapt
+> the driver to extract data (which was earlier passed as
+> platform_data) from device tree.
+> 
+> Signed-off-by: Rajendra Nayak <rnayak@ti.com>
 > ---
->  drivers/mmc/host/sdhci-s3c.c |   28 ++++++++++++++++++++++++++++
->  1 files changed, 28 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 46152d6..6926ac9 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -23,6 +23,7 @@
->  #include <linux/of.h>
->  #include <linux/of_gpio.h>
->  #include <linux/pm.h>
-> +#include <linux/pm_runtime.h>
->  
->  #include <linux/mmc/host.h>
->  
-> @@ -721,6 +722,11 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->  	if (pdata->host_caps2)
->  		host->mmc->caps2 |= pdata->host_caps2;
->  
-> +	pm_runtime_enable(&pdev->dev);
-> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +	pm_runtime_use_autosuspend(&pdev->dev);
-> +	pm_suspend_ignore_children(&pdev->dev, 1);
+>  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   31 +++++++++
+>  drivers/mmc/host/omap_hsmmc.c                      |   68 ++++++++++++++++++++
+>  2 files changed, 99 insertions(+), 0 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> new file mode 100644
+> index 0000000..e4fa8f0
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> @@ -0,0 +1,31 @@
+> +* TI Highspeed MMC host controller for OMAP
 > +
->  	ret = sdhci_add_host(host);
->  	if (ret) {
->  		dev_err(dev, "sdhci_add_host() failed\n");
-> @@ -740,6 +746,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
->  
->   err_add_host:
->  	release_resource(sc->ioarea);
-> +	pm_runtime_forbid(&pdev->dev);
-> +	pm_runtime_get_noresume(&pdev->dev);
->  	kfree(sc->ioarea);
->  
->   err_req_regs:
-> @@ -784,6 +792,8 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
->  
->  	sdhci_remove_host(host, 1);
->  
-> +	pm_runtime_disable(&pdev->dev);
+> +The Highspeed MMC Host Controller on TI OMAP family
+> +provides an interface for MMC, SD, and SDIO types of memory cards.
 > +
->  	for (ptr = 0; ptr < 3; ptr++) {
->  		if (sc->clk_bus[ptr]) {
->  			clk_disable(sc->clk_bus[ptr]);
-> @@ -824,9 +834,27 @@ static int sdhci_s3c_resume(struct device *dev)
->  }
->  #endif
+> +Required properties:
+> +- compatible:
+> + Should be "ti,omap2-hsmmc", for OMAP2/3 controllers
+> + Should be "ti,omap4-hsmmc", for OMAP4 controllers
+> +- ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
+> +- reg : should contain hsmmc registers location and length
+> +
+> +Optional properties:
+> +ti,dual-volt: boolean, supports dual voltage cards
+> +<supply-name>-supply: phandle to the regulator device tree node
+> +"supply-name" examples are "vmmc", "vmmc_aux" etc
+> +ti,bus-width: Number of data lines, default assumed is 1 if the property is missing.
+> +cd-gpios: GPIOs for card detection
+> +wp-gpios: GPIOs for write protection
+> +ti,non-removable: non-removable slot (like eMMC)
+
+Binding looks okay.  A couple comments below...
+
+[...]
+> +static const struct of_device_id omap_mmc_of_match[];
+
+If you move the omap_mmc_of_match[] table up to here then there is no
+need for the forward declaration.
+
+> +
+>  static int __init omap_hsmmc_probe(struct platform_device *pdev)
+>  {
+>  	struct omap_mmc_platform_data *pdata = pdev->dev.platform_data;
+> @@ -1725,6 +1768,14 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+>  	struct omap_hsmmc_host *host = NULL;
+>  	struct resource *res;
+>  	int ret, irq;
+> +	const struct of_device_id *match;
+> +
+> +	match = of_match_device(omap_mmc_of_match, &pdev->dev);
+> +	if (match) {
+> +		pdata = of_get_hsmmc_pdata(&pdev->dev);
+> +		if (match->data)
+> +			pdata->reg_offset = *(u16 *)match->data;
+
+Blech on the ugly cast.  It is slightly safer to do thusly:
+
+	u16 *offsetp = match->data;
+	pdata->reg_offset = *offsetp
+
+> +	}
 >  
-> +#ifdef CONFIG_PM_RUNTIME
-> +static int sdhci_s3c_runtime_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +
-> +	return sdhci_runtime_suspend_host(host);
-> +}
-> +
-> +static int sdhci_s3c_runtime_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +
-> +	return sdhci_runtime_resume_host(host);
-> +}
-> +#endif
-> +
->  #ifdef CONFIG_PM
->  static const struct dev_pm_ops sdhci_s3c_pmops = {
->  	SET_SYSTEM_SLEEP_PM_OPS(sdhci_s3c_suspend, sdhci_s3c_resume)
-> +	SET_RUNTIME_PM_OPS(sdhci_s3c_runtime_suspend, sdhci_s3c_runtime_resume,
-> +			   NULL)
+>  	if (pdata == NULL) {
+>  		dev_err(&pdev->dev, "Platform Data is missing\n");
+> @@ -2120,12 +2171,29 @@ static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
+>  	.runtime_resume = omap_hsmmc_runtime_resume,
 >  };
 >  
->  #define SDHCI_S3C_PMOPS (&sdhci_s3c_pmops)
+> +#if defined(CONFIG_OF)
+> +static u16 omap4_reg_offset = 0x100;
+> +
+> +static const struct of_device_id omap_mmc_of_match[] = {
+> +	{
+> +		.compatible = "ti,omap2-hsmmc",
+> +	},
+> +	{
+> +		.compatible = "ti,omap4-hsmmc",
+> +		.data = &omap4_reg_offset,
+> +	},
+> +	{},
+> +}
+> +MODULE_DEVICE_TABLE(of, omap_mmc_of_match);
+> +#endif
+> +
+>  static struct platform_driver omap_hsmmc_driver = {
+>  	.remove		= omap_hsmmc_remove,
+>  	.driver		= {
+>  		.name = DRIVER_NAME,
+>  		.owner = THIS_MODULE,
+>  		.pm = &omap_hsmmc_dev_pm_ops,
+> +		.of_match_table = of_match_ptr(omap_mmc_of_match),
+>  	},
+>  };
+>  
+> -- 
+> 1.7.1
+> 
+> 
+> _______________________________________________
+> linaro-dev mailing list
+> linaro-dev@lists.linaro.org
+> http://lists.linaro.org/mailman/listinfo/linaro-dev
 
-I had to rework this patch to avoid a conflict with Julia Lawall's patch
-"mmc: sdhci-s3c: use devm_ functions": https://lkml.org/lkml/2012/2/18/76
-
-The reworked patch is below, please let me know if it looks incorrect:
-
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: [PATCH] mmc: sdhci-s3c: Enable runtime power management
-
-Since most of the work is already done by the core we just need to add
-runtime suspend methods and tell the PM core that runtime PM is enabled
-for this device.
-
-Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Chris Ball <cjb@laptop.org>
----
- drivers/mmc/host/sdhci-s3c.c |   28 ++++++++++++++++++++++++++++
- 1 files changed, 28 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 9683322..312aaf4 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -23,6 +23,7 @@
- #include <linux/of.h>
- #include <linux/of_gpio.h>
- #include <linux/pm.h>
-+#include <linux/pm_runtime.h>
- 
- #include <linux/mmc/host.h>
- 
-@@ -705,9 +706,16 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
- 	if (pdata->host_caps)
- 		host->mmc->caps |= pdata->host_caps;
- 
-+	pm_runtime_enable(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+	pm_suspend_ignore_children(&pdev->dev, 1);
-+
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_err(dev, "sdhci_add_host() failed\n");
-+		pm_runtime_forbid(&pdev->dev);
-+		pm_runtime_get_noresume(&pdev->dev);
- 		goto err_req_regs;
- 	}
- 
-@@ -764,6 +772,8 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
- 
- 	sdhci_remove_host(host, 1);
- 
-+	pm_runtime_disable(&pdev->dev);
-+
- 	for (ptr = 0; ptr < 3; ptr++) {
- 		if (sc->clk_bus[ptr]) {
- 			clk_disable(sc->clk_bus[ptr]);
-@@ -800,9 +810,27 @@ static int sdhci_s3c_resume(struct device *dev)
- }
- #endif
- 
-+#ifdef CONFIG_PM_RUNTIME
-+static int sdhci_s3c_runtime_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+
-+	return sdhci_runtime_suspend_host(host);
-+}
-+
-+static int sdhci_s3c_runtime_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+
-+	return sdhci_runtime_resume_host(host);
-+}
-+#endif
-+
- #ifdef CONFIG_PM
- static const struct dev_pm_ops sdhci_s3c_pmops = {
- 	SET_SYSTEM_SLEEP_PM_OPS(sdhci_s3c_suspend, sdhci_s3c_resume)
-+	SET_RUNTIME_PM_OPS(sdhci_s3c_runtime_suspend, sdhci_s3c_runtime_resume,
-+			   NULL)
- };
- 
- #define SDHCI_S3C_PMOPS (&sdhci_s3c_pmops)
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Grant Likely, B.Sc, P.Eng.
+Secret Lab Technologies,Ltd.
