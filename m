@@ -1,87 +1,35 @@
-From: Jae hoon Chung <jh80.chung@gmail.com>
-Subject: Re: [PATCH] mmc: core: add the warning message when card didn't
- support HPI
-Date: Sat, 10 Mar 2012 01:33:15 +0900
-Message-ID: <CAELcNGQNzYAE8HAfM74=+Db8BKRscRXz-wgXn_DPmGiO0QFeRg@mail.gmail.com>
-References: <4F59BE26.8070705@samsung.com>
-	<m2r4x1or4q.fsf@bob.laptop.org>
+From: Kevin Hilman <khilman@ti.com>
+Subject: Re: [PATCH 1/3] PM / QoS: Make it possible to expose PM QoS latency constraints
+Date: Fri, 09 Mar 2012 09:10:58 -0800
+Message-ID: <87pqcl4s4d.fsf@ti.com>
+References: <Pine.LNX.4.44L0.1203091015290.1527-100000@iolanthe.rowland.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:44861 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757566Ab2CIQdQ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Mar 2012 11:33:16 -0500
-Received: by bkcik5 with SMTP id ik5so1286093bkc.19
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Mar 2012 08:33:15 -0800 (PST)
-In-Reply-To: <m2r4x1or4q.fsf@bob.laptop.org>
+Received: from na3sys009aog133.obsmtp.com ([74.125.149.82]:54100 "EHLO
+	psmtp.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1758213Ab2CIRK5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 9 Mar 2012 12:10:57 -0500
+Received: by mail-iy0-f180.google.com with SMTP id e36so3746288iag.39
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Mar 2012 09:10:56 -0800 (PST)
+In-Reply-To: <Pine.LNX.4.44L0.1203091015290.1527-100000@iolanthe.rowland.org>
+	(Alan Stern's message of "Fri, 9 Mar 2012 10:17:32 -0500 (EST)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Alan Stern <stern@rowland.harvard.edu>
+Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, Linux PM list <linux-pm@vger.kernel.org>, Linux MMC list <linux-mmc@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-Hi Chris.
+Alan Stern <stern@rowland.harvard.edu> writes:
 
-Sorry..i will resend the patch after fixed.
+[...]
 
-Best Regards,
-Jaehoon Chung
+> How about calling it "runtime latency"?  Or "runtime wakeup latency" in 
+> case people think there might be some other sort of latency associated 
+> with runtime power management.
 
-2012/3/9 Chris Ball <cjb@laptop.org>:
-> Hi,
->
-> On Fri, Mar 09 2012, Jaehoon Chung wrote:
->> Though card didn't support HPI,someone could use the send_hpi_cmd().
->> Then maybe didn't work fine.
->> Because card->ext_csd.hpi_cmd didn't set.
->> So if card didn't support hpi, return the waring message.
->>
->> And CMD12's flags is MMC_RSP_R1B.
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
->> ---
->> =A0drivers/mmc/core/mmc_ops.c | =A0 =A08 +++++++-
->> =A01 files changed, 7 insertions(+), 1 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
->> index 4d41fa9..395f944 100644
->> --- a/drivers/mmc/core/mmc_ops.c
->> +++ b/drivers/mmc/core/mmc_ops.c
->> @@ -556,9 +556,15 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32=
- *status)
->> =A0 =A0 =A0 unsigned int flags;
->> =A0 =A0 =A0 int err;
->>
->> + =A0 =A0 if (!card->ext_csd.hpi) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 pr_waring("%s: Card didn't support HPI com=
-mand\n",
->
-> This isn't going to compile. =A0Please compile test patches before se=
-nding
-> them.
->
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hostna=
-me(card->host));
->> + =A0 =A0 =A0 =A0 =A0 =A0 return -EINVAL;
->> + =A0 =A0 }
->> +
->> =A0 =A0 =A0 opcode =3D card->ext_csd.hpi_cmd;
->> =A0 =A0 =A0 if (opcode =3D=3D MMC_STOP_TRANSMISSION)
->> - =A0 =A0 =A0 =A0 =A0 =A0 flags =3D MMC_RSP_R1 | MMC_CMD_AC;
->> + =A0 =A0 =A0 =A0 =A0 =A0 flags =3D MMC_RSP_R1B | MMC_CMD_AC;
->> =A0 =A0 =A0 else if (opcode =3D=3D MMC_SEND_STATUS)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 flags =3D MMC_RSP_R1 | MMC_CMD_AC;
->
-> Thanks,
->
-> - Chris.
-> --
-> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
-> One Laptop Per Child
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+Either is better than just latency, but I would vote for runtime wakeup
+latency.
+
+Kevin
+
+
