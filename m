@@ -1,67 +1,54 @@
 From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH v3 0/4] mmc: sdhci-s3c: use the sdhci-pltfm.c and move
- the header file
-Date: Fri, 9 Mar 2012 11:48:49 +0000
-Message-ID: <20120309114845.GB3273@opensource.wolfsonmicro.com>
-References: <4F55ABF0.1060801@samsung.com>
- <20120306130054.GA9890@sirena.org.uk>
- <201203061415.18836.heiko@sntech.de>
- <CAELcNGS6UynrJPRk1KtEJT3Rm6Jb5_scLm4KKca+dJ1ZYDOVbg@mail.gmail.com>
- <20120306163052.GX19635@opensource.wolfsonmicro.com>
- <4F56D003.5070406@samsung.com>
- <20120307184843.GW3107@opensource.wolfsonmicro.com>
- <4F584539.9080007@samsung.com>
- <20120308110105.GD3638@opensource.wolfsonmicro.com>
- <4F596296.60103@samsung.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-s3c: Enable runtime power management
+Date: Fri, 9 Mar 2012 12:26:06 +0000
+Message-ID: <20120309122606.GN3273@opensource.wolfsonmicro.com>
+References: <4F51697C.40408@samsung.com>
+ <1330735602-22409-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+ <1330735602-22409-2-git-send-email-broonie@opensource.wolfsonmicro.com>
+ <m2vcmenyxh.fsf@bob.laptop.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="IrhDeMKUP4DT/M7F"
+	protocol="application/pgp-signature"; boundary="8MZM6zh5Bb05FW+3"
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <4F596296.60103@samsung.com>
+In-Reply-To: <m2vcmenyxh.fsf@bob.laptop.org>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Heiko =?iso-8859-1?Q?St=FCbner?= <heiko@sntech.de>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, kgene kim <kgene.kim@samsung.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---IrhDeMKUP4DT/M7F
+--8MZM6zh5Bb05FW+3
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
-On Fri, Mar 09, 2012 at 10:53:26AM +0900, Jaehoon Chung wrote:
-> On 03/08/2012 08:01 PM, Mark Brown wrote:
+On Fri, Mar 09, 2012 at 12:08:58AM -0500, Chris Ball wrote:
 
-> > It should be fine, like I say I didn't really read the patches in enough
-> > detail as the diffstat set off alarm bells.
+> The reworked patch is below, please let me know if it looks incorrect:
 
-> If you have any opinions, let me know.
-> I believe that these patches can be maintain more efficiently for eMMC
+That looks about right, I'll find out soon enough if it doesn't work in
+-next as my main development system has the rootfs on this device :)
 
-Like I said I think it's fine.  If it helps:
-
-Reviwed-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
-
---IrhDeMKUP4DT/M7F
+--8MZM6zh5Bb05FW+3
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iQIcBAEBAgAGBQJPWe4XAAoJEBus8iNuMP3dNUsQAITRTIIxMgO+PROjUoitvSr6
-axUynjZpRwt4Hm0/XYx2ZyqwtB0dObXe2xvjHCchnl/1HdeN8NH+0uTuWYeOB8tt
-tLKYRANqZAidf84CwLOxtOADOts6IlnlAn6KE60dYQ+5hJv4SbGaaLqDSkFHxB1l
-ZPvtzMjH6sS/rK0QXaxuEE2V+ru7tN0xsvV6l5/k1nXD+R5Ni1IwxCUfu+QXqUzD
-vWMMXiVypXp1CfELntIL5aNf6lUUW1m3qNNXJ7/79b7R7/T0DqShSeVHiifMm+pS
-jf/ns4+Y4YhFUghk47KyR8hDErOOc7KaMN7BVancQhTKc6iovVqpb+0NRlftSgSO
-u683LMMUMuBuHOFF6ehh3YMxfghO4qmxQkBgxRXI5e3nUmJ/atZjtdwFQuRS+clI
-VkAiFLUXu8KOCw1HgG1GlhC25gTfHD4vUzT+wcCb3h9t6TLiEYbS9Vpdx0Dbb6Wg
-oWLBgAnkTmF3uERs08nhD/fOJFRgSuGD0zdT9kqzqezM4W6qBSEuudV7YqClHqXw
-dEp3o1nrIET7u7TYJb3vYD+vOf7tLMXweRNjTn24BK81Zcpo/FimcWReI8g/KAas
-KZfefALTePVUQxmFcrinkWQb4WIUXCO6FoCNPgI+8XHDpwU0UtGANkjHTxgj+74B
-2vKMIRf487f0GmkGTi7l
-=PTNl
+iQIcBAEBAgAGBQJPWfbWAAoJEBus8iNuMP3dgaMP/36RK3J/MdsvJtD/icnFMY1c
+rsqt1c6rCR6auNtC80vSLVm/TNl6c53DRShjRTu+GIprSLBjXVU/F0RNY2rAaKQf
+zVe66Na6qzODXAueWfl7aFWkXVacqPz6tooD7iEnZMvs+3gXpJT5ZQ5AbIU28zaQ
+5tcwYwHD3+XHND4LXMPXo6vAq7mudrbl1l+VEEUwHgmT6de9KybKqnfHRzO9lce9
+OFabwNfSNiG5fRnJ5cdq+pHJBg3vQ8WwMFpfYM9Nur0mumOO086CS0YQUXw5r6ET
+Y47vnaY2MJOFaFDav13g3lep+aSuT83+YvP/sEOe5ciipnHXNaKJ7itGM2vRrk4G
+zy6O6BfW/RrjRaz4CaSrAG6ltCK6/k2sg/3jej4bHPXS8WHle8EHRZg7XIzoAiv7
+GbV+G080QxWPijEpaUJX1H93Yky24cL9WDVRJ/WUbkztJr13qCGW78S++DGweepR
+QmZ6/gBJvYIs69qwr6KBPMGyIQxeWxL3oq+XsCj1rzYJqnJX2QfiLZJW1L3GrZuA
+DXauRFYFviYwuHdO/Pc4J5WsK85g+M7ZCflA3Owjj9jkXp5BBZQZZMK5Potqo/hm
+B15KYvPHRAtzbmO6652y9wHfgDuF1nQyYG50tqFUzmjgr4G/rc7gNvPX4kfDkmsZ
+Oy0aca0iwVcJr1SaFbew
+=eVkt
 -----END PGP SIGNATURE-----
 
---IrhDeMKUP4DT/M7F--
+--8MZM6zh5Bb05FW+3--
