@@ -1,143 +1,90 @@
 From: Rajendra Nayak <rnayak@ti.com>
-Subject: Re: [PATCH v2 1/4] mmc: omap_hsmmc: Convert hsmmc driver to use device
- tree
-Date: Fri, 09 Mar 2012 14:51:06 +0530
-Message-ID: <4F59CB82.9050607@ti.com>
-References: <1329998490-27555-1-git-send-email-rnayak@ti.com> <1329998490-27555-2-git-send-email-rnayak@ti.com> <20120309054213.9E69C3E0901@localhost>
+Subject: Re: [PATCH v2 4/4] arm/dts: OMAP3: Add mmc controller nodes and board
+ data
+Date: Fri, 09 Mar 2012 14:56:07 +0530
+Message-ID: <4F59CCAF.1090806@ti.com>
+References: <1329998490-27555-1-git-send-email-rnayak@ti.com> <1329998490-27555-5-git-send-email-rnayak@ti.com> <20120223185718.GZ18185@atomide.com> <4F470B71.1020308@ti.com> <20120224184859.GN18185@atomide.com> <20120309054608.647473E0901@localhost>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog118.obsmtp.com ([74.125.149.244]:39617 "EHLO
-	na3sys009aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751014Ab2CIJVQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Mar 2012 04:21:16 -0500
-Received: by yenm8 with SMTP id m8so874866yen.0
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Mar 2012 01:21:14 -0800 (PST)
-In-Reply-To: <20120309054213.9E69C3E0901@localhost>
+Received: from na3sys009aog138.obsmtp.com ([74.125.149.19]:44273 "EHLO
+	psmtp.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751014Ab2CIJ0Q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 9 Mar 2012 04:26:16 -0500
+Received: by mail-gx0-f172.google.com with SMTP id i1so931895ggm.17
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Mar 2012 01:26:15 -0800 (PST)
+In-Reply-To: <20120309054608.647473E0901@localhost>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Grant Likely <grant.likely@secretlab.ca>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, devicetree-discuss@lists.ozlabs.org, linux-omap@vger.kernel.org, linaro-dev@lists.linaro.org, balajitk@ti.com, linux-arm-kernel@lists.infradead.org
+Cc: Tony Lindgren <tony@atomide.com>, linux-omap@vger.kernel.org, linaro-dev@lists.linaro.org, balajitk@ti.com, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
 
-Hi Grant,
-
-On Friday 09 March 2012 11:12 AM, Grant Likely wrote:
-> On Thu, 23 Feb 2012 17:31:27 +0530, Rajendra Nayak<rnayak@ti.com>  wrote:
->> Define dt bindings for the ti-omap-hsmmc, and adapt
->> the driver to extract data (which was earlier passed as
->> platform_data) from device tree.
+On Friday 09 March 2012 11:16 AM, Grant Likely wrote:
+> On Fri, 24 Feb 2012 10:49:00 -0800, Tony Lindgren<tony@atomide.com>  wrote:
+>> * Rajendra Nayak<rnayak@ti.com>  [120223 19:29]:
+>>> On Friday 24 February 2012 12:27 AM, Tony Lindgren wrote:
+>>>>> --- a/arch/arm/boot/dts/omap3.dtsi
+>>>>> +++ b/arch/arm/boot/dts/omap3.dtsi
+>>>>> @@ -113,5 +113,31 @@
+>>>>>   			#size-cells =<0>;
+>>>>>   			ti,hwmods = "i2c3";
+>>>>>   		};
+>>>>> +
+>>>>> +		mmc1: mmc@1 {
+>>>>> +			compatible = "ti,omap2-hsmmc";
+>>>>> +			ti,hwmods = "mmc1";
+>>>>> +			ti,dual-volt;
+>>>>> +		};
+>>>>> +
+>>>>> +		mmc2: mmc@2 {
+>>>>> +			compatible = "ti,omap2-hsmmc";
+>>>>> +			ti,hwmods = "mmc2";
+>>>>> +		};
+>>>>> +
+>>>>> +		mmc3: mmc@3 {
+>>>>> +			compatible = "ti,omap2-hsmmc";
+>>>>> +			ti,hwmods = "mmc3";
+>>>>> +		};
+>>>>> +
+>>>>> +		mmc4: mmc@4 {
+>>>>> +			compatible = "ti,omap2-hsmmc";
+>>>>> +			ti,hwmods = "mmc4";
+>>>>> +		};
+>>>>> +
+>>>>> +		mmc5: mmc@5 {
+>>>>> +			compatible = "ti,omap2-hsmmc";
+>>>>> +			ti,hwmods = "mmc5";
+>>>>> +		};
+>>>>>   	};
+>>>>>   };
+>>>>
+>>>> These all should all be "ti,omap3-hsmmc" I guess?
+>>>
+>>> Well, I defined the binding such that both omap2 and omap3
+>>> can use the same compatible "ti,omap2-hsmmc" since there is
+>>> no difference in the way they are defined or handled. If thats
+>>> confusing, I can have separate compatibles.
+>>> Btw, I guess we do the same with a few other re-used IPs as well,
+>>> I just checked and mcpsi does the same.
 >>
->> Signed-off-by: Rajendra Nayak<rnayak@ti.com>
->> ---
->>   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   31 +++++++++
->>   drivers/mmc/host/omap_hsmmc.c                      |   68 ++++++++++++++++++++
->>   2 files changed, 99 insertions(+), 0 deletions(-)
->>   create mode 100644 Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->> new file mode 100644
->> index 0000000..e4fa8f0
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->> @@ -0,0 +1,31 @@
->> +* TI Highspeed MMC host controller for OMAP
->> +
->> +The Highspeed MMC Host Controller on TI OMAP family
->> +provides an interface for MMC, SD, and SDIO types of memory cards.
->> +
->> +Required properties:
->> +- compatible:
->> + Should be "ti,omap2-hsmmc", for OMAP2/3 controllers
->> + Should be "ti,omap4-hsmmc", for OMAP4 controllers
->> +- ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
->> +- reg : should contain hsmmc registers location and length
->> +
->> +Optional properties:
->> +ti,dual-volt: boolean, supports dual voltage cards
->> +<supply-name>-supply: phandle to the regulator device tree node
->> +"supply-name" examples are "vmmc", "vmmc_aux" etc
->> +ti,bus-width: Number of data lines, default assumed is 1 if the property is missing.
->> +cd-gpios: GPIOs for card detection
->> +wp-gpios: GPIOs for write protection
->> +ti,non-removable: non-removable slot (like eMMC)
+>> Yeah let's use separate compatibles to avoid confusion.
+>> For omap2 we also have the ti,omap2-mmc in addition to
+>> ti,omap2-hsmmc..
 >
-> Binding looks okay.  A couple comments below...
+> Yes, absolutely use separate compatible values.  It is always important
+> to be specific as to the silicon implementing the IP.  The omap3 instance
+> can also carry the omap2 string in its compatible list:
 >
-> [...]
->> +static const struct of_device_id omap_mmc_of_match[];
->
-> If you move the omap_mmc_of_match[] table up to here then there is no
-> need for the forward declaration.
->
->> +
->>   static int __init omap_hsmmc_probe(struct platform_device *pdev)
->>   {
->>   	struct omap_mmc_platform_data *pdata = pdev->dev.platform_data;
->> @@ -1725,6 +1768,14 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
->>   	struct omap_hsmmc_host *host = NULL;
->>   	struct resource *res;
->>   	int ret, irq;
->> +	const struct of_device_id *match;
->> +
->> +	match = of_match_device(omap_mmc_of_match,&pdev->dev);
->> +	if (match) {
->> +		pdata = of_get_hsmmc_pdata(&pdev->dev);
->> +		if (match->data)
->> +			pdata->reg_offset = *(u16 *)match->data;
->
-> Blech on the ugly cast.  It is slightly safer to do thusly:
->
-> 	u16 *offsetp = match->data;
-> 	pdata->reg_offset = *offsetp
+> 	compatible = "ti,omap3-hsmmc", "ti,omap2-hsmmc";
 
-thanks for the review. I'll repost with these changes.
+Sure, will repost with seperate compatible strings. Also missed adding
+the 'status = "disable";' for unused mmc blocks in the board .dts file
+causing unused mmc modules to get probed too. Will fix that as well.
 
-regards,
+thanks,
 Rajendra
 
 >
->> +	}
->>
->>   	if (pdata == NULL) {
->>   		dev_err(&pdev->dev, "Platform Data is missing\n");
->> @@ -2120,12 +2171,29 @@ static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
->>   	.runtime_resume = omap_hsmmc_runtime_resume,
->>   };
->>
->> +#if defined(CONFIG_OF)
->> +static u16 omap4_reg_offset = 0x100;
->> +
->> +static const struct of_device_id omap_mmc_of_match[] = {
->> +	{
->> +		.compatible = "ti,omap2-hsmmc",
->> +	},
->> +	{
->> +		.compatible = "ti,omap4-hsmmc",
->> +		.data =&omap4_reg_offset,
->> +	},
->> +	{},
->> +}
->> +MODULE_DEVICE_TABLE(of, omap_mmc_of_match);
->> +#endif
->> +
->>   static struct platform_driver omap_hsmmc_driver = {
->>   	.remove		= omap_hsmmc_remove,
->>   	.driver		= {
->>   		.name = DRIVER_NAME,
->>   		.owner = THIS_MODULE,
->>   		.pm =&omap_hsmmc_dev_pm_ops,
->> +		.of_match_table = of_match_ptr(omap_mmc_of_match),
->>   	},
->>   };
->>
->> --
->> 1.7.1
->>
->>
->> _______________________________________________
->> linaro-dev mailing list
->> linaro-dev@lists.linaro.org
->> http://lists.linaro.org/mailman/listinfo/linaro-dev
->
+> g.
 
