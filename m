@@ -1,44 +1,70 @@
-From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 0/6] mmc: omap_hsmmc: Clean up use/abuse of pdev->id
-Date: Thu, 08 Mar 2012 23:53:35 -0500
-Message-ID: <m2boo6pe7k.fsf@bob.laptop.org>
-References: <1329996409-26861-1-git-send-email-rnayak@ti.com>
-	<4F476228.7060607@ti.com> <4F54714E.6080805@ti.com>
-	<4F57312E.4080104@ti.com> <m2pqcoihhu.fsf@bob.laptop.org>
-	<4F589C94.9010601@ti.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/2] mmc: sdhci-s3c: Use CONFIG_PM_SLEEP to ifdef system suspend
+Date: Thu, 08 Mar 2012 23:56:10 -0500
+Message-ID: <m27gyupe39.fsf@bob.laptop.org>
+References: <4F51697C.40408@samsung.com>
+	<1330735602-22409-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <4F589C94.9010601-l0cyMroinI0@public.gmane.org> (Rajendra Nayak's message of "Thu, 08
-	Mar 2012 17:18:36 +0530")
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1330735602-22409-1-git-send-email-broonie@opensource.wolfsonmicro.com>
+	(Mark Brown's message of "Sat, 3 Mar 2012 00:46:41 +0000")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Mark,
 
-On Thu, Mar 08 2012, Rajendra Nayak wrote:
-> There's just one other cleanup patch here [1] to convert all pr_* prints
-> in the driver to dev_*. Would be great if you can pick that as well.
+On Fri, Mar 02 2012, Mark Brown wrote:
+> This matches current best practice as one can have runtime PM enabled
+> without system sleep and CONFIG_PM is defined for both.
 >
-> Thanks,
-> Rajendra
+> Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+> ---
+>  drivers/mmc/host/sdhci-s3c.c |    9 +++++----
+>  1 files changed, 5 insertions(+), 4 deletions(-)
 >
-> [1] http://marc.info/?l=linux-mmc&m=132999677405098&w=3
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index ea0767e..46152d6 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -22,6 +22,7 @@
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+>  #include <linux/of_gpio.h>
+> +#include <linux/pm.h>
+>  
+>  #include <linux/mmc/host.h>
+>  
+> @@ -807,8 +808,7 @@ static int __devexit sdhci_s3c_remove(struct platform_device *pdev)
+>  	return 0;
+>  }
+>  
+> -#ifdef CONFIG_PM
+> -
+> +#ifdef CONFIG_PM_SLEEP
+>  static int sdhci_s3c_suspend(struct device *dev)
+>  {
+>  	struct sdhci_host *host = dev_get_drvdata(dev);
+> @@ -822,10 +822,11 @@ static int sdhci_s3c_resume(struct device *dev)
+>  
+>  	return sdhci_resume_host(host);
+>  }
+> +#endif
+>  
+> +#ifdef CONFIG_PM
+>  static const struct dev_pm_ops sdhci_s3c_pmops = {
+> -	.suspend	= sdhci_s3c_suspend,
+> -	.resume		= sdhci_s3c_resume,
+> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_s3c_suspend, sdhci_s3c_resume)
+>  };
+>  
+>  #define SDHCI_S3C_PMOPS (&sdhci_s3c_pmops)
 
-Thanks, I've pushed this to mmc-next for 3.4 now too.
+Thanks, pushed to mmc-next for 3.4 with Jaehoon's ACK.
 
 - Chris.
 -- 
-Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
 One Laptop Per Child
