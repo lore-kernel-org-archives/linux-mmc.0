@@ -1,37 +1,28 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] drivers/mmc/host/sdhci-s3c.c: use devm_ functions
-Date: Thu, 08 Mar 2012 23:27:41 -0500
-Message-ID: <m2k42uqtz6.fsf@bob.laptop.org>
-References: <1329596019-19822-1-git-send-email-Julia.Lawall@lip6.fr>
+Subject: Re: [PATCH] mmc: tmio_mmc: do not enable card hotplug interrupts, if unused
+Date: Thu, 08 Mar 2012 23:29:10 -0500
+Message-ID: <m2fwdiqtwp.fsf@bob.laptop.org>
+References: <alpine.DEB.2.00.1202221314351.3136@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1329596019-19822-1-git-send-email-Julia.Lawall@lip6.fr> (Julia
-	Lawall's message of "Sat, 18 Feb 2012 21:13:39 +0100")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Julia Lawall <Julia.Lawall@lip6.fr>
-Cc: Ben Dooks <ben-linux@fluff.org>, kernel-janitors@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <alpine.DEB.2.00.1202221314351.3136@axis700.grange> (Guennadi
+	Liakhovetski's message of "Wed, 22 Feb 2012 13:16:09 +0100 (CET)")
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Julia,
+Hi Guennadi,
 
-On Sat, Feb 18 2012, Julia Lawall wrote:
-> From: Julia Lawall <Julia.Lawall@lip6.fr>
+On Wed, Feb 22 2012, Guennadi Liakhovetski wrote:
+> If TMIO MMC is used in polling mode, or the card is non-removable, or
+> card-detection is performed, using an external interrupt, there is no
+> need to enable controller native card hotplug interrupts.
 >
-> The various devm_ functions allocate memory that is released when a driver
-> detaches.  This patch uses these functions for data that is allocated in
-> the probe function of a platform device and is only freed in the remove
-> function.
->
-> By using devm_ioremap, it also removes a potential memory leak, because
-> there was no call to iounmap in the probe function.
->
-> The call to platform_get_resource was moved just to make it closer to the
-> place where its result it used.
->
-> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Thanks very much, pushed to mmc-next for 3.4.
+Thanks, pushed to mmc-next for 3.4.
 
 - Chris.
 -- 
