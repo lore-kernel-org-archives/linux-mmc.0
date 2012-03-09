@@ -1,32 +1,60 @@
-From: Paul Walmsley <paul@pwsan.com>
-Subject: Re: [PATCH v2 4/4] arm/dts: OMAP3: Add mmc controller nodes and
- board data
-Date: Thu, 8 Mar 2012 23:51:05 -0700 (MST)
-Message-ID: <alpine.DEB.2.00.1203082348200.26656@utopia.booyaka.com>
-References: <1329998490-27555-1-git-send-email-rnayak@ti.com> <1329998490-27555-5-git-send-email-rnayak@ti.com> <20120223185718.GZ18185@atomide.com> <4F470B71.1020308@ti.com> <20120224184859.GN18185@atomide.com> <20120309054608.647473E0901@localhost>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: core: add the warning message when card didn't support HPI
+Date: Fri, 09 Mar 2012 17:24:06 +0900
+Message-ID: <4F59BE26.8070705@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from utopia.booyaka.com ([72.9.107.138]:51966 "EHLO
-	utopia.booyaka.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752295Ab2CIGvG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Mar 2012 01:51:06 -0500
-In-Reply-To: <20120309054608.647473E0901@localhost>
+Received: from mailout2.samsung.com ([203.254.224.25]:36997 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753099Ab2CIIYN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Mar 2012 03:24:13 -0500
+Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0M0L00HKLZC67850@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 09 Mar 2012 17:24:08 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0M0L00104ZC89A80@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 09 Mar 2012 17:24:08 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Rajendra Nayak <rnayak@ti.com>, Grant Likely <grant.likely@secretlab.ca>
-Cc: linux-omap@vger.kernel.org, linaro-dev@lists.linaro.org, balajitk@ti.com, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On Thu, 8 Mar 2012, Grant Likely wrote:
+Though card didn't support HPI,someone could use the send_hpi_cmd().
+Then maybe didn't work fine.
+Because card->ext_csd.hpi_cmd didn't set.
+So if card didn't support hpi, return the waring message.
 
-> Yes, absolutely use separate compatible values.  It is always important
-> to be specific as to the silicon implementing the IP.
+And CMD12's flags is MMC_RSP_R1B.
 
-In that case, it is probably best to use the full chip name in the 
-compatible string, e.g., omap2420 or omap2430 rather than just "omap2".  
-Particularly in the case of "OMAP3," which is a largely meaningless group 
-these days with AM33xx, OMAP34xx, OMAP36xx, and AM3517, many of which are 
-quite different from each other...
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+---
+ drivers/mmc/core/mmc_ops.c |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
 
-
-- Paul
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 4d41fa9..395f944 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -556,9 +556,15 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
+ 	unsigned int flags;
+ 	int err;
+ 
++	if (!card->ext_csd.hpi) {
++		pr_waring("%s: Card didn't support HPI command\n",
++				mmc_hostname(card->host));
++		return -EINVAL;
++	}
++
+ 	opcode = card->ext_csd.hpi_cmd;
+ 	if (opcode == MMC_STOP_TRANSMISSION)
+-		flags = MMC_RSP_R1 | MMC_CMD_AC;
++		flags = MMC_RSP_R1B | MMC_CMD_AC;
+ 	else if (opcode == MMC_SEND_STATUS)
+ 		flags = MMC_RSP_R1 | MMC_CMD_AC;
+ 
