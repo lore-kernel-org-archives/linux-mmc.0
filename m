@@ -1,98 +1,75 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [Update][PATCH 0/3] PM: Make it possible to expose PM QoS latency constraints
-Date: Sat, 10 Mar 2012 22:14:59 +0100
-Message-ID: <201203102214.59615.rjw@sisk.pl>
-References: <201203040101.53177.rjw@sisk.pl> <201203080027.27435.rjw@sisk.pl> <201203090000.17664.rjw@sisk.pl>
+From: "Konstantin Dorfman" <kdorfman@codeaurora.org>
+Subject: Re: [PATCH v7] mmc: support BKOPS feature for eMMC
+Date: Sun, 11 Mar 2012 18:06:52 +0200 (IST)
+Message-ID: <c498ff8b542c601db641988c35ae120c.squirrel@www.codeaurora.org>
+References: <4F190E26.4040909@samsung.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:37400 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751428Ab2CJVKw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 10 Mar 2012 16:10:52 -0500
-In-Reply-To: <201203090000.17664.rjw@sisk.pl>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:24730 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752914Ab2CKQGx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Mar 2012 12:06:53 -0400
+In-Reply-To: <4F190E26.4040909@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linux PM list <linux-pm@vger.kernel.org>
-Cc: Linux MMC list <linux-mmc@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Kevin Hilman <khilman@ti.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-On Friday, March 09, 2012, Rafael J. Wysocki wrote:
-> Hi all,
-> 
-> On Thursday, March 08, 2012, Rafael J. Wysocki wrote:
-> > On Sunday, March 04, 2012, Rafael J. Wysocki wrote:
-> > > On Sunday, March 04, 2012, Rafael J. Wysocki wrote:
-> > > > 
-> > > > The goal of this patchset is to allow user space to control the
-> > > > responsiveness of the MMC stack related to runtime power management.
-> > > > 
-> > > > Namely, on systems that contain power domains, the time necessary
-> > > > to bring an MMC host up after it has been runtime-suspended may
-> > > > depend not only on the MMC core and host driver, but also on the platform
-> > > > and other devices in the same power domain(s) that contain(s) the MMC
-> > > > host.  Although that obviously may influence the MMC performance,
-> > > > currently, there is no way to control it through the MMC subsystem.
-> > > > Moreover, the only available way to control it at all is by using PM QoS
-> > > > latency requests, so it is necessary to add some kind of support for that
-> > > > to MMC.
-> > > > 
-> > > > Patch [1/3] adds PM QoS-related fields to struct mmc_host and introduces
-> > > > a new sysfs attribute for MMC hosts, pm_latency_limit_ms, allowing user
-> > > > space to influence the MMC host's runtime PM via PM QoS.  Whether or not
-> > > > this attribute will be created (and PM QoS will be used for the given host)
-> > > > depends on the host driver, so host drivers that don't (plan) to support
-> > > > PM QoS don't need to do anything about that.
-> > > > 
-> > > > Patches [2/3] and [3/3] add the corresponding host driver bits to the
-> > > > tmio_mmc and sh_mmcif drivers, respectively.
-> > > 
-> > > After posting the patches I noticed that the changelog of patch [1/3] and
-> > > the documentation of the new sysfs attribute were not 100% accurate, because
-> > > the PM QoS request really applies to the time between a resume request and
-> > > the moment the device is operational again and not the time from runtime
-> > > suspend (the latter would imply some kind of autoresume mechanism, which isn't
-> > > there).
-> > > 
-> > > I also thought it would be cleaner to allocate the val and attr fields along
-> > > with the request, because in the previous version of the patchset they weren't
-> > > used when req was NULL, resulting in (a little) wasted memory.
-> > > 
-> > > Updated patches follow.
-> > 
-> > Taking the feedback so far into account, I decided to move the exposing of the
-> > PM QoS latency limit from the MMC layer to the PM core sysfs code, so that
-> > every driver (not only MMC host drivers) can use it.
-> > 
-> > New patches follow, details are in the changelogs:
-> > 
-> > [1/3] - Make it possible to expose PM QoS latency constraints
-> > [2/3] - Make tmio_mmc use the new interface.
-> > [3/3] - Make sh_mmcif use the new interface.
-> 
-> Taking the latest feedback into account I reworked patch [1/3] in the
-> following way:
-> 
-> - The new attribute is now called pm_qos_resume_latency_us.
+Hello Jaehoon,
 
-It seems that the name of the new attribute has been agreed on, so I wonder
-if anyone still has any problems with patches [1/3]?  If not and if there is
-v3.3-rc7, I'd like to include them into my v3.4 material.
+On Fri, January 20, 2012 8:48 am, Jaehoon Chung wrote:
+...
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 4d41fa9..109d0f0 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -392,13 +392,22 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
+> index, u8 value,
+>  		  (index << 16) |
+>  		  (value << 8) |
+>  		  set;
+> -	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +	cmd.flags = MMC_CMD_AC;
+> +	if (index == EXT_CSD_BKOPS_START &&
+> +	    card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
+> +		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+> +	else
+> +		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
 
-> - It depends on CONFIG_PM_RUNTIME and the documentation says it doesn't has an
->   effect on system-wide suspend/resume.
-> - The new attribute is hidden automatically by dev_pm_qos_constraints_destroy()
->   if still exposed at this point, so the drivers that exposed it don't have to
->   hide it explicitly on removal (although they still can do that).
-> 
-> However, I still think that it is appropriate for the MMC drivers to hide it
-> on _their_ removal, because otherwise the device would be left with the
-> meaningless attribute after that point.  So, I haven't modified patches [2-3/3],
-> but they follow for completness.
-> 
-> I've added the Reviewed-by tags from Kevin and Mark to patch [1/3], becuase
-> the changes made generally follow their suggestions.
+It is not good to use conditional on 'index', because this function
+(mmc_switch)
+is generic and in case you want functionality like here "in some cases cmd
+ should not wait for PROG_DONE" it is better to use different approach:
 
-Thanks,
-Rafael
+1. Use internal function with additional parameter wait_for_prog_done:
+
+int __mmc_switch(struct mmc_card *card, u8 set, u8 index,
+                 unsigned int timeout_ms, u8 wait_for_prog_done)
+{
+...
+    if(wait_for_prog_done)
+      cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+    else
+      cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+...
+}
+
+2. implement mmc_switch through __mmc_switch()
+   int mmc_switch(struct mmc_card *card, u8 set, u8 index,
+                                   unsigned int timeout_ms)
+   {
+     return __mmc_switch(card, set, index, timeout_ms, 0);
+   }
+3. when you need to start bkops, use: __mmc_switch(card, set, index,
+timeout_ms, 1);
+
+Does it make sense?
+
+-- 
+Konstantin Dorfman
+Consultant for Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+
+
