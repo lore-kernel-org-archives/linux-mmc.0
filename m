@@ -1,74 +1,80 @@
-From: "Konstantin Dorfman" <kdorfman@codeaurora.org>
-Subject: Re: [PATCH v7] mmc: support BKOPS feature for eMMC
-Date: Sun, 11 Mar 2012 18:06:52 +0200 (IST)
-Message-ID: <c498ff8b542c601db641988c35ae120c.squirrel@www.codeaurora.org>
-References: <4F190E26.4040909@samsung.com>
+From: merez@codeaurora.org
+Subject: RE: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5
+     device
+Date: Sun, 11 Mar 2012 14:36:54 -0700 (PDT)
+Message-ID: <dbfd894b689405f525e17aa5373a2602.squirrel@www.codeaurora.org>
+References: <4934441a17d25c3249556f7bf281b1be.squirrel@www.codeaurora.org>
+    <CAKYAXd_6OqQJ78mPJp11gRvGwwg88S_n_Auu=_HdP_ZXzCKrDg@mail.gmail.com>
+    <6669559e86c1d13b27e941ff2acf89d2.squirrel@www.codeaurora.org>
+    <CAKYAXd8HMrdB9mzgsz5XmMxkDE+gMce+CTEDFU4J67nusNtLOg@mail.gmail.com>
+    <cf2950fbeb4c500534be670cdd8cf85d.squirrel@www.codeaurora.org>
+    <000001ccfbf7$ac3e7510$04bb5f30$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:24730 "EHLO
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:52015 "EHLO
 	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752914Ab2CKQGx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Mar 2012 12:06:53 -0400
-In-Reply-To: <4F190E26.4040909@samsung.com>
+	with ESMTP id S1752518Ab2CKVgy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Mar 2012 17:36:54 -0400
+In-Reply-To: <000001ccfbf7$ac3e7510$04bb5f30$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Konstantin Dorfman <kdorfman@codeaurora.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: merez@codeaurora.org, 'Namjae Jeon' <linkinjeon@gmail.com>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-Hello Jaehoon,
+> Maya Erez <merez@codeaurora.org> wrote:
+>> > Hi. Merez.
+>> >
+>> > Thanks a lot about your performance measurement.
+>> >
+>> > I think that your measurement is enough and correct and the firmwa=
+re
+>> > of mmc vender should be optimized or change properly rather than
+>> > modifying the current patch.
+>> >
+>> > And currently we can use only write packed cmd by my suggestion.
+>> >
+>> > I would like to add my reviewd-by tag in updated patches also.
+>> >
+>> > Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+>> >
+>> > Thanks.
+>>
+>> I tend to disagree. Adding a massive amount of code that would be
+>> disabled
+>> can be risky. In case this code will not be in use it will not be
+>> properly
+>> tested and its reliability will be uncertain.
+>>
+> If you found something to be correct, please let me know that.
+> It would be rightly appreciated.
+>
+> Best regards,
+> Seungwon Jeon.
+Hi Jeon,
 
-On Fri, January 20, 2012 8:48 am, Jaehoon Chung wrote:
-...
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 4d41fa9..109d0f0 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -392,13 +392,22 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
-> index, u8 value,
->  		  (index << 16) |
->  		  (value << 8) |
->  		  set;
-> -	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-> +	cmd.flags = MMC_CMD_AC;
-> +	if (index == EXT_CSD_BKOPS_START &&
-> +	    card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
-> +		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
-> +	else
-> +		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+The write packing code looks good to me.
+However, the separation of read and write packing to different patches =
+is
+very important to us.
+As I specified before, we decided to enable only the write packing. We
+plan to thoroughly test the write packing (edge cases and error handlin=
+g)
+and will not test the read packing. Therefore we would like to have the
+ability to get only the write packing code.
+In my previous comment I talked about the risk of mainlining  a =93dead=
+=94
+code. Every feature that is integrated is considered to be fully tested
+and in the future it might be enabled, assuming that is was already
+tested.
+Can you please specify how you tested the read and write packing? Did y=
+ou
+perform edge cases and error handling tests? Do you have test code that
+can be shared?
 
-It is not good to use conditional on 'index', because this function
-(mmc_switch)
-is generic and in case you want functionality like here "in some cases cmd
- should not wait for PROG_DONE" it is better to use different approach:
-
-1. Use internal function with additional parameter wait_for_prog_done:
-
-int __mmc_switch(struct mmc_card *card, u8 set, u8 index,
-                 unsigned int timeout_ms, u8 wait_for_prog_done)
-{
-...
-    if(wait_for_prog_done)
-      cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
-    else
-      cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
-...
-}
-
-2. implement mmc_switch through __mmc_switch()
-   int mmc_switch(struct mmc_card *card, u8 set, u8 index,
-                                   unsigned int timeout_ms)
-   {
-     return __mmc_switch(card, set, index, timeout_ms, 0);
-   }
-3. when you need to start bkops, use: __mmc_switch(card, set, index,
-timeout_ms, 1);
-
-Does it make sense?
-
--- 
-Konstantin Dorfman
+Thanks,
+Maya Erez
 Consultant for Qualcomm Innovation Center, Inc.
 Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
 
