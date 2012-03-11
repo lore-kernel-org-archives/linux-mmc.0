@@ -1,109 +1,76 @@
-From: Ido Yariv <ido@wizery.com>
-Subject: [PATCH REPOST 2/2] mmc: davinci: Poll status for small size transfers
-Date: Sun, 11 Mar 2012 23:39:59 +0200
-Message-ID: <1331501999-13144-2-git-send-email-ido@wizery.com>
-References: <B6A220404B6BFC4BBD2AB91C54D39DF43176B8CE@DBDE01.ent.ti.com>
- <1331501999-13144-1-git-send-email-ido@wizery.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH v2] mmc: core: add the warning message when card didn't support
+ HPI
+Date: Mon, 12 Mar 2012 08:57:27 +0900
+Message-ID: <4F5D3BE7.3080601@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:41771 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753217Ab2CKVkP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Mar 2012 17:40:15 -0400
-Received: by wejx9 with SMTP id x9so2665034wej.19
-        for <linux-mmc@vger.kernel.org>; Sun, 11 Mar 2012 14:40:14 -0700 (PDT)
-In-Reply-To: <1331501999-13144-1-git-send-email-ido@wizery.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:43149 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754351Ab2CKX53 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Mar 2012 19:57:29 -0400
+Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTP id <0M0Q004UAVVLN2B0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 12 Mar 2012 08:57:27 +0900 (KST)
+Received: from [165.213.219.108] by mmp1.samsung.com
+ (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
+ 2010)) with ESMTPA id <0M0Q00G3JVVRHU20@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 12 Mar 2012 08:57:27 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Sekhar Nori <nsekhar@ti.com>, linux-mmc@vger.kernel.org, davinci-linux-open-source@linux.davincidsp.com
-Cc: Ido Yariv <ido@wizery.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-For small size non-dma sdio transactions, it is sometimes better to poll
-the mmc host and avoid interrupts altogether. Polling lowers the number
-of interrupts and context switches. Tests have shown that for small
-transactions, only a few polling iterations are needed, so this is worth
-while.
+Though card didn't support HPI,someone could use the send_hpi_cmd().
+Then maybe didn't work fine.
+Because card->ext_csd.hpi_cmd didn't set.
+So if card didn't support hpi, return the waring message.
 
-Signed-off-by: Ido Yariv <ido@wizery.com>
-Tested-by: Rajashekhara, Sudhakar <sudhakar.raj@ti.com>
+And CMD12's flags is MMC_RSP_R1B.
+
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 ---
- drivers/mmc/host/davinci_mmc.c |   29 ++++++++++++++++++++++++++++-
- 1 files changed, 28 insertions(+), 1 deletions(-)
+Changelog v2:
+	- Fixed typo and removed the flags variable.
 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 9cea66f..fb1368a 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -160,6 +160,16 @@ module_param(rw_threshold, uint, S_IRUGO);
- MODULE_PARM_DESC(rw_threshold,
- 		"Read/Write threshold. Default = 32");
+ drivers/mmc/core/mmc_ops.c |   12 ++++++++----
+ 1 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 4d41fa9..30f45be 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -553,18 +553,22 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
+ {
+ 	struct mmc_command cmd = {0};
+ 	unsigned int opcode;
+-	unsigned int flags;
+ 	int err;
  
-+static unsigned poll_threshold = 128;
-+module_param(poll_threshold, uint, S_IRUGO);
-+MODULE_PARM_DESC(poll_threshold,
-+		 "Polling transaction size threshold. Default = 128");
-+
-+static unsigned poll_loopcount = 32;
-+module_param(poll_loopcount, uint, S_IRUGO);
-+MODULE_PARM_DESC(poll_loopcount,
-+		 "Maximum polling loop count. Default = 32");
-+
- static unsigned __initdata use_dma = 1;
- module_param(use_dma, uint, 0);
- MODULE_PARM_DESC(use_dma, "Whether to use DMA or not. Default = 1");
-@@ -193,6 +203,7 @@ struct mmc_davinci_host {
- 	bool use_dma;
- 	bool do_dma;
- 	bool sdio_int;
-+	bool active_request;
- 
- 	/* Scatterlist DMA uses one or more parameter RAM entries:
- 	 * the main one (associated with rxdma or txdma) plus zero or
-@@ -219,6 +230,7 @@ struct mmc_davinci_host {
- #endif
- };
- 
-+static irqreturn_t mmc_davinci_irq(int irq, void *dev_id);
- 
- /* PIO only */
- static void mmc_davinci_sg_to_buf(struct mmc_davinci_host *host)
-@@ -376,7 +388,20 @@ static void mmc_davinci_start_command(struct mmc_davinci_host *host,
- 
- 	writel(cmd->arg, host->base + DAVINCI_MMCARGHL);
- 	writel(cmd_reg,  host->base + DAVINCI_MMCCMD);
--	writel(im_val, host->base + DAVINCI_MMCIM);
-+
-+	host->active_request = true;
-+
-+	if (!host->do_dma && host->bytes_left <= poll_threshold) {
-+		u32 count = poll_loopcount;
-+
-+		while (host->active_request && count--) {
-+			mmc_davinci_irq(0, host);
-+			cpu_relax();
-+		}
++	if (!card->ext_csd.hpi) {
++		pr_warning("%s: Card didn't support HPI command\n",
++				mmc_hostname(card->host));
++		return -EINVAL;
 +	}
 +
-+	if (host->active_request)
-+		writel(im_val, host->base + DAVINCI_MMCIM);
- }
+ 	opcode = card->ext_csd.hpi_cmd;
+ 	if (opcode == MMC_STOP_TRANSMISSION)
+-		flags = MMC_RSP_R1 | MMC_CMD_AC;
++		cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
+ 	else if (opcode == MMC_SEND_STATUS)
+-		flags = MMC_RSP_R1 | MMC_CMD_AC;
++		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
  
- /*----------------------------------------------------------------------*/
-@@ -915,6 +940,7 @@ mmc_davinci_xfer_done(struct mmc_davinci_host *host, struct mmc_data *data)
- 	if (!data->stop || (host->cmd && host->cmd->error)) {
- 		mmc_request_done(host->mmc, data->mrq);
- 		writel(0, host->base + DAVINCI_MMCIM);
-+		host->active_request = false;
- 	} else
- 		mmc_davinci_start_command(host, data->stop);
- }
-@@ -942,6 +968,7 @@ static void mmc_davinci_cmd_done(struct mmc_davinci_host *host,
- 			cmd->mrq->cmd->retries = 0;
- 		mmc_request_done(host->mmc, cmd->mrq);
- 		writel(0, host->base + DAVINCI_MMCIM);
-+		host->active_request = false;
- 	}
- }
+ 	cmd.opcode = opcode;
+ 	cmd.arg = card->rca << 16 | 1;
+-	cmd.flags = flags;
+ 	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
  
+ 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
 -- 
-1.7.7.6
-
+1.7.4.1
