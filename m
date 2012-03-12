@@ -1,90 +1,65 @@
-From: joancarles <joancarles@fqingenieria.es>
-Subject: Re: [MX25][MMC] mmc esdhc failure in 3.3-rc5
-Date: Mon, 12 Mar 2012 15:50:03 +0100
-Message-ID: <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
-References: <5e57eb999780335721212bb8d411406f@mail.fqingenieria.es>
- <20120312132423.GC2459@pengutronix.de>
+From: Rajendra Nayak <rnayak@ti.com>
+Subject: [PATCH v2 0/4] omap hsmmc device tree support
+Date: Mon, 12 Mar 2012 20:32:36 +0530
+Message-ID: <1331564560-23276-1-git-send-email-rnayak@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from llsa731-a03.servidoresdns.net ([82.223.190.25]:59701 "EHLO
-	llsa987-a03.servidoresdns.net" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751535Ab2CLOuO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Mar 2012 10:50:14 -0400
-In-Reply-To: <20120312132423.GC2459@pengutronix.de>
+Received: from bear.ext.ti.com ([192.94.94.41]:53872 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755660Ab2CLPDW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 12 Mar 2012 11:03:22 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <w.sang@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, shawn.guo@linaro.org, Hong-Xing.Zhu@freescale.com
+To: robherring2@gmail.com, grant.likely@secretlab.ca, cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, balajitk@ti.com, svenkatr@ti.com, linaro-dev@lists.linaro.org, Rajendra Nayak <rnayak@ti.com>
 
-Hi
+The series adds device tree support for OMAP hsmmc
+driver.
 
-On Mon, 12 Mar 2012 14:24:23 +0100, Wolfram Sang wrote:
->> What could have changed between 2.6.39.3 and 3.3-rc5 to trigger this
->> behaviour? A quick look at
->>
->> git diff v2.6.39 drivers/mmc/host/sdhci-esdhc-imx.c
->
-> I'd recommend:
->
-> git log v2.6.39.. drivers/mmc/host/sdhci-esdhc-imx.c
+Changes in V2:
+-1- Minor fixes based on comments from Grant.
+-2- Added a seperate compatible for omap3.
+-3- Added a new binding "ti,needs-special-reset"
+to handle some mmc modules which need special
+softreset sequence.
+-4- Updated board dts files with "status = disable;"
+for unused mmc modules.
 
-I have been staring at those commits, however with very little domain 
-knowledge it's a shot in the dark.
+Rob,
+I retained your ack on patch 1 despite the additional
+binding that I added to handle the special softreset
+sequence. Let me know if you have any issues with it.
 
-> and look at those commits. You should also include the people who did
-> those commits in CC when writing mails, otherwise they probably won't
-> notice. Richard Zhu and Shawn Guo are from Freescale, and have more
-> knowledge about the ESDHC cores.
+Chris.
+Patch 1 and Patch 2 apply cleanly on mmc-next and can
+be taken in from the mmc tree after relevent acks from
+DT folks.
+Patch 3 and Patch 4 which update dts files, I plan to
+push via linux-omap/Tony's tree.
 
-Done now, thanks. Richard, Shawn, any pointers as to where to start 
-looking on this one? Since the i.MX25 eSDHC has four data lines, one 
-clock and one command line hard-wired, there is really nothing from a 
-hardware point of view that could influence this different behaviour 
-between the 2.6.39 and the 3.3-rc7 kernels.
+The series is tested on omap4sdp (both external and emmc),
+omap4panda amd omap3beagle boards.
 
-Again, booting the same hardware with a 2.6.39.3 kernel using the 
-standard mx25 initialisation routine:
+Things to do:
+-1- Card detect isn't functional and needs twl4030 gpio
+to be DT converted.
+-2- pbias cell programming is missing and needs an OMAP
+control module driver.
 
-imx25_add_sdhci_esdhc_imx(0, NULL);
+Rajendra Nayak (4):
+  mmc: omap_hsmmc: Convert hsmmc driver to use device tree
+  mmc: omap_hsmmc: Avoid a regulator voltage change with dt
+  arm/dts: OMAP4: Add mmc controller nodes and board data
+  arm/dts: OMAP3: Add mmc controller nodes and board data
 
-works as intended. I can mount the sd card and I can write/remove files 
-from it, independent of the file system (VFAT, ext2 have been tested). 
-Leaving the sd card inside the slot, and rebooting the device with a 
-linux kernel 3.3-rc7 fails, as described earlier. On any 3.3-rc kernels, 
-and probably earlier versions as well, it fails with the cited error 
-messages earlier in this thread:
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   33 +++++++
+ arch/arm/boot/dts/omap3-beagle.dts                 |   14 +++
+ arch/arm/boot/dts/omap3.dtsi                       |   16 ++++
+ arch/arm/boot/dts/omap4-panda.dts                  |   22 +++++
+ arch/arm/boot/dts/omap4-sdp.dts                    |   24 ++++++
+ arch/arm/boot/dts/omap4.dtsi                       |   31 +++++++
+ drivers/mmc/host/omap_hsmmc.c                      |   88 +++++++++++++++++++-
+ 7 files changed, 227 insertions(+), 1 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
 
-http://marc.info/?l=linux-mmc&m=133103397222503&w=3
-
-Changing it to a pdata init as shown below does not change anything 
-with
-regard to the failure:
-
-imx25_add_sdhci_esdhc_imx(0, &noah_esdhc_pdata);
-static const struct esdhc_platform_data noah_esdhc_pdata __initconst = 
-{
-         .wp_gpio = -EINVAL,
-         .cd_gpio = -EINVAL,
-         .wp_type = ESDHC_WP_NONE,
-         .cd_type = ESDHC_CD_NONE,
-};
-
-> Wild guessing, 97e4ba6a5ea903a221d87bcabdaf01efb0a609a5 looks like 
-> the
-> most likely candidate, but I may be totally wrong.
-
-I extracted it as follows:
-
-git format-patch -1 97e4ba6a5ea90
-patch -R -p1 < 0001-mmc-sdhci-esdhc-imx-Enable-ADMA2.patch
-
-compiled and booted and it has no influence on my specific misbehaviour 
-of the esdhc driver. So, this can be barred as a possible candidate, I 
-reckon.
-
-Thanks and best regards
--- 
-Joan C. Abelaira
