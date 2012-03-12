@@ -1,55 +1,68 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [Update][PATCH 1/3] PM / QoS: Make it possible to expose PM QoS
- latency constraints
-Date: Mon, 12 Mar 2012 20:32:26 +0100
-Message-ID: <CACRpkdYo65VhM+ZAHLy=xQyQqTMnkExAE3WuTre1gH7ye9Q-DQ@mail.gmail.com>
-References: <201203040101.53177.rjw@sisk.pl>
-	<201203080027.27435.rjw@sisk.pl>
-	<201203090000.17664.rjw@sisk.pl>
-	<201203090001.06683.rjw@sisk.pl>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [MX25][MMC] mmc esdhc failure in 3.3-rc5
+Date: Mon, 12 Mar 2012 22:45:45 +0100
+Message-ID: <20120312214545.GC28087@pengutronix.de>
+References: <5e57eb999780335721212bb8d411406f@mail.fqingenieria.es>
+ <20120312132423.GC2459@pengutronix.de>
+ <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="nmemrqcdn5VTmUEE"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:49339 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756714Ab2CLTc1 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Mar 2012 15:32:27 -0400
-Received: by ghrr11 with SMTP id r11so2950067ghr.19
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Mar 2012 12:32:26 -0700 (PDT)
-In-Reply-To: <201203090001.06683.rjw@sisk.pl>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:60138 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754249Ab2CLVps (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Mar 2012 17:45:48 -0400
+Content-Disposition: inline
+In-Reply-To: <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@sisk.pl>
-Cc: Linux PM list <linux-pm@vger.kernel.org>, Linux MMC list <linux-mmc@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Kevin Hilman <khilman@ti.com>
+To: joancarles <joancarles@fqingenieria.es>
+Cc: linux-mmc@vger.kernel.org, shawn.guo@linaro.org, Hong-Xing.Zhu@freescale.com
 
-On Fri, Mar 9, 2012 at 12:01 AM, Rafael J. Wysocki <rjw@sisk.pl> wrote:
 
-> A runtime suspend of a device (e.g. an MMC controller) belonging to
-> a power domain or, in a more complicated scenario, a runtime suspend
-> of another device in the same power domain, may cause power to be
-> removed from the entire domain. =A0In that case, the amount of time
-> necessary to runtime-resume the given device (e.g. the MMC
-> controller) is often substantially greater than the time needed to
-> run its driver's runtime resume callback. =A0That may hurt performanc=
-e
-> in some situations, because user data may need to wait for the
-> device to become operational, so we should make it possible to
-> prevent that from happening.
->
-> For this reason, introduce a new sysfs attribute for devices,
-> power/pm_qos_resume_latency_us, allowing user space to specify the
-> upper bound of the time necessary to bring the (runtime-suspended)
-> device up after the resume of it has been requested. =A0However, make
-> that attribute appear only for the devices whose drivers declare
-> support for it by calling the (new) dev_pm_qos_expose_latency_limit()
-> helper function with the appropriate initial value of the attribute.
->
-> Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
-> Reviewed-by: Kevin Hilman <khilman@ti.com>
-> Reviewed-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+--nmemrqcdn5VTmUEE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
+On Mon, Mar 12, 2012 at 03:50:03PM +0100, joancarles wrote:
 
-Yours,
-Linus Walleij
+> >>What could have changed between 2.6.39.3 and 3.3-rc5 to trigger this
+> >>behaviour? A quick look at
+> >>
+> >>git diff v2.6.39 drivers/mmc/host/sdhci-esdhc-imx.c
+> >
+> >I'd recommend:
+> >
+> >git log v2.6.39.. drivers/mmc/host/sdhci-esdhc-imx.c
+>=20
+> I have been staring at those commits, however with very little
+> domain knowledge it's a shot in the dark.
+
+Have you tried copying sdhci-esdhc-imx.c from 2.6.39 to the current kernel
+(might need some build fixes)? If that doesn't work, there might be somethi=
+ng
+wrong in the sdhci-driver itself, and not the esdhc-extension.
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--nmemrqcdn5VTmUEE
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iEYEARECAAYFAk9ebokACgkQD27XaX1/VRssJQCgmMZHf4c+FyqhDE0wPUinD+rM
++DAAnia1XY0uXnqCVkbeeFvjo8b2Ku1o
+=QvSi
+-----END PGP SIGNATURE-----
+
+--nmemrqcdn5VTmUEE--
