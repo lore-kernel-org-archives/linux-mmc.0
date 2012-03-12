@@ -1,76 +1,90 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH v2] mmc: core: add the warning message when card didn't support
- HPI
-Date: Mon, 12 Mar 2012 08:57:27 +0900
-Message-ID: <4F5D3BE7.3080601@samsung.com>
+Subject: Re: [PATCH v7] mmc: support BKOPS feature for eMMC
+Date: Mon, 12 Mar 2012 09:01:49 +0900
+Message-ID: <4F5D3CED.5010003@samsung.com>
+References: <4F190E26.4040909@samsung.com>
+ <c498ff8b542c601db641988c35ae120c.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:43149 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754351Ab2CKX53 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Mar 2012 19:57:29 -0400
-Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
+Received: from mailout2.samsung.com ([203.254.224.25]:19288 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754342Ab2CLABv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Mar 2012 20:01:51 -0400
+Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
+ by mailout2.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0M0Q004UAVVLN2B0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 12 Mar 2012 08:57:27 +0900 (KST)
+ 2010)) with ESMTP id <0M0Q00DULW30ZC40@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 12 Mar 2012 09:01:50 +0900 (KST)
 Received: from [165.213.219.108] by mmp1.samsung.com
  (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0M0Q00G3JVVRHU20@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 12 Mar 2012 08:57:27 +0900 (KST)
+ 2010)) with ESMTPA id <0M0Q00GD6W31HU30@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 12 Mar 2012 09:01:50 +0900 (KST)
+In-reply-to: <c498ff8b542c601db641988c35ae120c.squirrel@www.codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>
+To: Konstantin Dorfman <kdorfman@codeaurora.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>
 
-Though card didn't support HPI,someone could use the send_hpi_cmd().
-Then maybe didn't work fine.
-Because card->ext_csd.hpi_cmd didn't set.
-So if card didn't support hpi, return the waring message.
+On 03/12/2012 01:06 AM, Konstantin Dorfman wrote:
 
-And CMD12's flags is MMC_RSP_R1B.
+> Hello Jaehoon,
+> 
+> On Fri, January 20, 2012 8:48 am, Jaehoon Chung wrote:
+> ...
+>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>> index 4d41fa9..109d0f0 100644
+>> --- a/drivers/mmc/core/mmc_ops.c
+>> +++ b/drivers/mmc/core/mmc_ops.c
+>> @@ -392,13 +392,22 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
+>> index, u8 value,
+>>  		  (index << 16) |
+>>  		  (value << 8) |
+>>  		  set;
+>> -	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>> +	cmd.flags = MMC_CMD_AC;
+>> +	if (index == EXT_CSD_BKOPS_START &&
+>> +	    card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
+>> +		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+>> +	else
+>> +		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+> 
+> It is not good to use conditional on 'index', because this function
+> (mmc_switch)
+> is generic and in case you want functionality like here "in some cases cmd
+>  should not wait for PROG_DONE" it is better to use different approach:
+> 
+> 1. Use internal function with additional parameter wait_for_prog_done:
+> 
+> int __mmc_switch(struct mmc_card *card, u8 set, u8 index,
+>                  unsigned int timeout_ms, u8 wait_for_prog_done)
+> {
+> ...
+>     if(wait_for_prog_done)
+>       cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+>     else
+>       cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+> ...
+> }
+> 
+> 2. implement mmc_switch through __mmc_switch()
+>    int mmc_switch(struct mmc_card *card, u8 set, u8 index,
+>                                    unsigned int timeout_ms)
+>    {
+>      return __mmc_switch(card, set, index, timeout_ms, 0);
+>    }
+> 3. when you need to start bkops, use: __mmc_switch(card, set, index,
+> timeout_ms, 1);
+> 
+> Does it make sense?
+> 
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
-Changelog v2:
-	- Fixed typo and removed the flags variable.
+Hi Konstantin.
 
- drivers/mmc/core/mmc_ops.c |   12 ++++++++----
- 1 files changed, 8 insertions(+), 4 deletions(-)
+Your opinion is right. i will fix them.
+Thanks for comments.
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 4d41fa9..30f45be 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -553,18 +553,22 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
- {
- 	struct mmc_command cmd = {0};
- 	unsigned int opcode;
--	unsigned int flags;
- 	int err;
- 
-+	if (!card->ext_csd.hpi) {
-+		pr_warning("%s: Card didn't support HPI command\n",
-+				mmc_hostname(card->host));
-+		return -EINVAL;
-+	}
-+
- 	opcode = card->ext_csd.hpi_cmd;
- 	if (opcode == MMC_STOP_TRANSMISSION)
--		flags = MMC_RSP_R1 | MMC_CMD_AC;
-+		cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
- 	else if (opcode == MMC_SEND_STATUS)
--		flags = MMC_RSP_R1 | MMC_CMD_AC;
-+		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
- 
- 	cmd.opcode = opcode;
- 	cmd.arg = card->rca << 16 | 1;
--	cmd.flags = flags;
- 	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
- 
- 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
--- 
-1.7.4.1
+Best Regards,
+Jaehoon Chung
+
