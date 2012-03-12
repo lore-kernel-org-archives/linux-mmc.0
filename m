@@ -1,51 +1,62 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] drivers: mmc: sdhci-s3c: fix broken compilation for
- non-Exynos SoCs
-Date: Mon, 12 Mar 2012 09:12:05 +0900
-Message-ID: <4F5D3F55.10102@samsung.com>
-References: <1331300667-22566-1-git-send-email-m.szyprowski@samsung.com>
+From: Michael Hunold <hunold@linuxtv.org>
+Subject: iMX53 and MMC_CAP_SDIO_IRQ
+Date: Mon, 12 Mar 2012 09:45:07 +0100
+Message-ID: <4F5DB793.3080904@linuxtv.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:27310 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754375Ab2CLAMT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Mar 2012 20:12:19 -0400
-In-reply-to: <1331300667-22566-1-git-send-email-m.szyprowski@samsung.com>
+Received: from bar.sig21.net ([80.81.252.164]:48482 "EHLO bar.sig21.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751571Ab2CLIpT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 12 Mar 2012 04:45:19 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
 
-Looks fine to me.
+Hi,
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+I am using a Freescale iMX53 Quick Start Board. The uSD card that comes
+with the device contains a Linux kernel labeled "Linux version
+2.6.35.3-01129-g691c08a-dirty".
 
-On 03/09/2012 10:44 PM, Marek Szyprowski wrote:
+After some digging I found out that this corresponds to the
+"imx_2.6.35_11.09.01" tag in the Freescale Linux kernel that can be
+found at http://opensource.freescale.com/pub/scm/imx/linux-2.6-imx.git
 
-> exynos4_sdhci_drv_data structure is not available on non-Exynos builds,
-> that's why EXYNOS4_SDHCI_DRV_DATA macro has been introduced. This patch
-> fixes commit 67819656 'mmc: sdhci-s3c: Add device tree support' to use
-> that macro. This fixes broken build for pre-Exynos SoCs.
-> 
-> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-> ---
->  drivers/mmc/host/sdhci-s3c.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index ea0767e..984601e 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -859,7 +859,7 @@ MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
->  static const struct of_device_id sdhci_s3c_dt_match[] = {
->  	{ .compatible = "samsung,s3c6410-sdhci", },
->  	{ .compatible = "samsung,exynos4210-sdhci",
-> -		.data = &exynos4_sdhci_drv_data },
-> +		.data = EXYNOS4_SDHCI_DRV_DATA },
->  	{},
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
+I am experimenting with an SDIO card and that one works fine using that
+kernel. So far, so good.
 
+Now I have tried to use a vanilla Git Linux kernel (3.3.0-rc6+) with
+mixed results.
 
+The card is recognised correctly and mostly initialised, up to the point
+where an apparently an interrupt from the card is expected to happen.
+Because the SDHCI driver supports "real" interrupts (via
+MMC_CAP_SDIO_IRQ) the SDIO IRQ thread goes to sleep, but is never woken
+up in my case.
+
+After about 2.5 seconds, I receive an error -110 (timeout) and the
+initialisation is aborted.
+
+So my question is: is anybody using an iMX53 (or any other hardware
+using the SDHCI driver) together with "real" interrupts (via
+MMC_CAP_SDIO_IRQ), not polled interrupts?
+
+The main problem is that the ancient Freescale 2.6.35 kernel is using
+the "mx_sdhci" driver, while in 3.3.0-rc6+ the generic "sdhci" driver is
+used, so it's not possible to simply compare the changes between the two
+versions. :-(
+
+Does anybody know the difference between the "mx_sdhci" from Freescale
+2.6.35 kernel and the the "sdhci" driver in 3.3.0-rc6+?
+
+Probably this is a question for the Freescale people: why was the
+"mx_sdhci" necessary at all and why is it not necessary any more?
+
+Any help, hints and historical informations are highly appreciated,
+before I start to look deeper into this problem.
+
+CU
+Michael.
