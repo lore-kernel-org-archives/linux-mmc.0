@@ -1,54 +1,85 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH v1 3/5] ARM: imx28evk: add mmc dt support
-Date: Tue, 13 Mar 2012 17:52:14 +0100
-Message-ID: <20120313165214.GO26642@pengutronix.de>
-References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
- <1331628428-24017-4-git-send-email-b29396@freescale.com>
- <4F5F5C22.1080506@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4F5F5C22.1080506@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robherring2@gmail.com>
-Cc: Dong Aisheng <b29396@freescale.com>, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, vinod.koul@linux.intel.com, rob.herring@calxeda.com, grant.likely@secretlab.ca, rdunlap@xenotime.net, kernel@pengutronix.de, cjb@laptop.org, shawn.guo@freescale.com
+From: Alexander Stein <alexander.stein@systec-electronic.com>
+Subject: [PATCH 3/3] mmc: sdhci-pci: allow 8-bit bus width for Intel PCH
+Date: Tue, 13 Mar 2012 18:16:42 +0100
+Message-ID: <1331659002-13743-3-git-send-email-alexander.stein@systec-electronic.com>
+References: <1331659002-13743-1-git-send-email-alexander.stein@systec-electronic.com>
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <1331659002-13743-1-git-send-email-alexander.stein@systec-electronic.com>
+Sender: linux-pci-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Jesse Barnes <jbarnes@virtuousgeek.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, Alexander Stein <alexander.stein@systec-electronic.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Mar 13, 2012 at 09:39:30AM -0500, Rob Herring wrote:
-> On 03/13/2012 03:47 AM, Dong Aisheng wrote:
-> > From: Dong Aisheng <dong.aisheng@linaro.org>
-> > 
-> > Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
-> > ---
-> >  arch/arm/boot/dts/imx28-evk.dts |   14 ++++++++++++++
-> >  arch/arm/boot/dts/imx28.dtsi    |   33 +++++++++++++++++++++++++++++++++
-> >  arch/arm/mach-mxs/imx28-dt.c    |    2 ++
-> >  3 files changed, 49 insertions(+), 0 deletions(-)
-> 
-> snip
-> 
-> > diff --git a/arch/arm/mach-mxs/imx28-dt.c b/arch/arm/mach-mxs/imx28-dt.c
-> > index 78d1129..429b88e 100644
-> > --- a/arch/arm/mach-mxs/imx28-dt.c
-> > +++ b/arch/arm/mach-mxs/imx28-dt.c
-> > @@ -23,6 +23,8 @@ static const struct of_dev_auxdata imx28_auxdata_lookup[] __initconst = {
-> >  	OF_DEV_AUXDATA("arm,pl011", MX28_DUART_BASE_ADDR, "duart", NULL),
-> >  	OF_DEV_AUXDATA("fsl,imx28-fec", MX28_ENET_MAC0_BASE_ADDR, "imx28-fec.0", NULL),
-> >  	OF_DEV_AUXDATA("fsl,imx28-fec", MX28_ENET_MAC1_BASE_ADDR, "imx28-fec.1", NULL),
-> > +	OF_DEV_AUXDATA("fsl,imx28-mmc", MX28_SSP0_BASE_ADDR, "mxs-mmc.0", NULL),
-> > +	OF_DEV_AUXDATA("fsl,imx28-mmc", MX28_SSP1_BASE_ADDR, "mxs-mmc.1", NULL),
-> 
-> Why is this needed?
+Signed-off-by: Alexander Stein <alexander.stein@systec-electronic.com>
+---
+ drivers/mmc/host/sdhci-pci.c |   27 +++++++++++++++++++++++++++
+ include/linux/pci_ids.h      |    2 ++
+ 2 files changed, 29 insertions(+), 0 deletions(-)
 
-These are needed for the drivers which have still the mxs-mmc.* names
-to find their clocks. Alternatively we could also add the appropriate
-clocks to the clock file. Don't know if that's better though.
-
-Sascha
-
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 9382f27..0218cb2 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -172,6 +172,12 @@ static int mrst_hc_probe(struct sdhci_pci_chip *chip)
+ 	return 0;
+ }
+ 
++static int pch_hc_probe_slot(struct sdhci_pci_slot *slot)
++{
++	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA;
++	return 0;
++}
++
+ #ifdef CONFIG_PM_RUNTIME
+ 
+ static irqreturn_t sdhci_pci_sd_cd(int irq, void *dev_id)
+@@ -281,6 +287,11 @@ static const struct sdhci_pci_fixes sdhci_intel_mfd_emmc = {
+ 	.probe_slot	= mfd_emmc_probe_slot,
+ };
+ 
++static const struct sdhci_pci_fixes sdhci_intel_pch_sdio = {
++	.quirks		= SDHCI_QUIRK_BROKEN_ADMA,
++	.probe_slot	= pch_hc_probe_slot,
++};
++
+ /* O2Micro extra registers */
+ #define O2_SD_LOCK_WP		0xD3
+ #define O2_SD_MULTI_VCC3V	0xEE
+@@ -817,6 +828,22 @@ static const struct pci_device_id pci_ids[] __devinitdata = {
+ 	},
+ 
+ 	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_PCH_SDIO0,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_pch_sdio,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_PCH_SDIO1,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_pch_sdio,
++	},
++
++	{
+ 		.vendor		= PCI_VENDOR_ID_O2,
+ 		.device		= PCI_DEVICE_ID_O2_8120,
+ 		.subvendor	= PCI_ANY_ID,
+diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
+index 31d77af..28cd019 100644
+--- a/include/linux/pci_ids.h
++++ b/include/linux/pci_ids.h
+@@ -2800,6 +2800,8 @@
+ #define PCI_DEVICE_ID_INTEL_82454NX     0x84cb
+ #define PCI_DEVICE_ID_INTEL_84460GX	0x84ea
+ #define PCI_DEVICE_ID_INTEL_IXP4XX	0x8500
++#define PCI_DEVICE_ID_INTEL_PCH_SDIO0	0x8809
++#define PCI_DEVICE_ID_INTEL_PCH_SDIO1	0x880a
+ #define PCI_DEVICE_ID_INTEL_IXP2800	0x9004
+ #define PCI_DEVICE_ID_INTEL_S21152BB	0xb152
+ 
 -- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+1.7.3.4
