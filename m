@@ -1,85 +1,54 @@
-From: "T Krishnamoorthy, Balaji" <balajitk-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v2 0/4] omap hsmmc device tree support
-Date: Tue, 13 Mar 2012 21:13:30 +0530
-Message-ID: <CANrkHUb3Aypm7H44-6efiEoka_WO20hW1vMy-wBV1RzkRPt_UQ@mail.gmail.com>
-References: <1331564560-23276-1-git-send-email-rnayak@ti.com>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH v1 3/5] ARM: imx28evk: add mmc dt support
+Date: Tue, 13 Mar 2012 17:52:14 +0100
+Message-ID: <20120313165214.GO26642@pengutronix.de>
+References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
+ <1331628428-24017-4-git-send-email-b29396@freescale.com>
+ <4F5F5C22.1080506@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-In-Reply-To: <1331564560-23276-1-git-send-email-rnayak-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://lists.linaro.org/mailman/options/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linaro.org/pipermail/linaro-dev>
-List-Post: <mailto:linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
-List-Help: <mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.linaro.org/mailman/listinfo/linaro-dev>,
-	<mailto:linaro-dev-request-cunTk1MwBs8s++Sfvej+rw@public.gmane.org?subject=subscribe>
-Sender: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-Errors-To: linaro-dev-bounces-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
-To: Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Cc: linaro-dev-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <4F5F5C22.1080506@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Rob Herring <robherring2@gmail.com>
+Cc: Dong Aisheng <b29396@freescale.com>, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, vinod.koul@linux.intel.com, rob.herring@calxeda.com, grant.likely@secretlab.ca, rdunlap@xenotime.net, kernel@pengutronix.de, cjb@laptop.org, shawn.guo@freescale.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Mar 12, 2012 at 8:32 PM, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org> wrote:
-> The series adds device tree support for OMAP hsmmc
-> driver.
->
-> Changes in V2:
-> -1- Minor fixes based on comments from Grant.
-> -2- Added a seperate compatible for omap3.
-> -3- Added a new binding "ti,needs-special-reset"
-> to handle some mmc modules which need special
-> softreset sequence.
-> -4- Updated board dts files with "status =3D disable;"
-> for unused mmc modules.
->
-> Rob,
-> I retained your ack on patch 1 despite the additional
-> binding that I added to handle the special softreset
-> sequence. Let me know if you have any issues with it.
->
-> Chris.
-> Patch 1 and Patch 2 apply cleanly on mmc-next and can
-> be taken in from the mmc tree after relevent acks from
-> DT folks.
-> Patch 3 and Patch 4 which update dts files, I plan to
-> push via linux-omap/Tony's tree.
-Hi Rajendra,
+On Tue, Mar 13, 2012 at 09:39:30AM -0500, Rob Herring wrote:
+> On 03/13/2012 03:47 AM, Dong Aisheng wrote:
+> > From: Dong Aisheng <dong.aisheng@linaro.org>
+> > 
+> > Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
+> > ---
+> >  arch/arm/boot/dts/imx28-evk.dts |   14 ++++++++++++++
+> >  arch/arm/boot/dts/imx28.dtsi    |   33 +++++++++++++++++++++++++++++++++
+> >  arch/arm/mach-mxs/imx28-dt.c    |    2 ++
+> >  3 files changed, 49 insertions(+), 0 deletions(-)
+> 
+> snip
+> 
+> > diff --git a/arch/arm/mach-mxs/imx28-dt.c b/arch/arm/mach-mxs/imx28-dt.c
+> > index 78d1129..429b88e 100644
+> > --- a/arch/arm/mach-mxs/imx28-dt.c
+> > +++ b/arch/arm/mach-mxs/imx28-dt.c
+> > @@ -23,6 +23,8 @@ static const struct of_dev_auxdata imx28_auxdata_lookup[] __initconst = {
+> >  	OF_DEV_AUXDATA("arm,pl011", MX28_DUART_BASE_ADDR, "duart", NULL),
+> >  	OF_DEV_AUXDATA("fsl,imx28-fec", MX28_ENET_MAC0_BASE_ADDR, "imx28-fec.0", NULL),
+> >  	OF_DEV_AUXDATA("fsl,imx28-fec", MX28_ENET_MAC1_BASE_ADDR, "imx28-fec.1", NULL),
+> > +	OF_DEV_AUXDATA("fsl,imx28-mmc", MX28_SSP0_BASE_ADDR, "mxs-mmc.0", NULL),
+> > +	OF_DEV_AUXDATA("fsl,imx28-mmc", MX28_SSP1_BASE_ADDR, "mxs-mmc.1", NULL),
+> 
+> Why is this needed?
 
-Tested this series on omap4sdp, so feel free to add
-Tested-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+These are needed for the drivers which have still the mxs-mmc.* names
+to find their clocks. Alternatively we could also add the appropriate
+clocks to the clock file. Don't know if that's better though.
 
->
-> The series is tested on omap4sdp (both external and emmc),
-> omap4panda amd omap3beagle boards.
->
-> Things to do:
-> -1- Card detect isn't functional and needs twl4030 gpio
-> to be DT converted.
-> -2- pbias cell programming is missing and needs an OMAP
-> control module driver.
->
-> Rajendra Nayak (4):
-> =A0mmc: omap_hsmmc: Convert hsmmc driver to use device tree
-> =A0mmc: omap_hsmmc: Avoid a regulator voltage change with dt
-> =A0arm/dts: OMAP4: Add mmc controller nodes and board data
-> =A0arm/dts: OMAP3: Add mmc controller nodes and board data
->
-> =A0.../devicetree/bindings/mmc/ti-omap-hsmmc.txt =A0 =A0 =A0| =A0 33 ++++=
-+++
-> =A0arch/arm/boot/dts/omap3-beagle.dts =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =
-=A0 14 +++
-> =A0arch/arm/boot/dts/omap3.dtsi =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 | =A0 16 ++++
-> =A0arch/arm/boot/dts/omap4-panda.dts =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|=
- =A0 22 +++++
-> =A0arch/arm/boot/dts/omap4-sdp.dts =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0| =A0 24 ++++++
-> =A0arch/arm/boot/dts/omap4.dtsi =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 | =A0 31 +++++++
-> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0| =A0 88 +++++++++++++++++++-
-> =A07 files changed, 227 insertions(+), 1 deletions(-)
-> =A0create mode 100644 Documentation/devicetree/bindings/mmc/ti-omap-hsmmc=
-.txt
+Sascha
+
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
