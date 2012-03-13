@@ -1,51 +1,242 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: [Update][PATCH 1/3] PM / QoS: Make it possible to expose PM QoS latency constraints
-Date: Tue, 13 Mar 2012 01:02:59 +0100
-Message-ID: <201203130102.59390.rjw@sisk.pl>
-References: <201203040101.53177.rjw@sisk.pl> <201203090001.06683.rjw@sisk.pl> <CACRpkdYo65VhM+ZAHLy=xQyQqTMnkExAE3WuTre1gH7ye9Q-DQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+From: Paul Gortmaker <paul.gortmaker@windriver.com>
+Subject: [34-longterm 146/196] mmc: fix all hangs related to mmc/sd card insert/removal during suspend/resume
+Date: Mon, 12 Mar 2012 20:20:59 -0400
+Message-ID: <1331598109-31424-101-git-send-email-paul.gortmaker@windriver.com>
+References: <1331597724-31358-1-git-send-email-paul.gortmaker@windriver.com>
+ <1331598109-31424-1-git-send-email-paul.gortmaker@windriver.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:40528 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751788Ab2CLX6t (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 12 Mar 2012 19:58:49 -0400
-In-Reply-To: <CACRpkdYo65VhM+ZAHLy=xQyQqTMnkExAE3WuTre1gH7ye9Q-DQ@mail.gmail.com>
+Received: from mail.windriver.com ([147.11.1.11]:48547 "EHLO
+	mail.windriver.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759052Ab2CMAYO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Mar 2012 20:24:14 -0400
+In-Reply-To: <1331598109-31424-1-git-send-email-paul.gortmaker@windriver.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Linux PM list <linux-pm@vger.kernel.org>, Linux MMC list <linux-mmc@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Magnus Damm <magnus.damm@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Kevin Hilman <khilman@ti.com>
+To: stable@kernel.org, linux-kernel@vger.kernel.org
+Cc: stable-review@kernel.org, Maxim Levitsky <maximlevitsky@gmail.com>, David Brownell <david-b@pacbell.net>, Alan Stern <stern@rowland.harvard.edu>, linux-mmc@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Linus Torvalds <torvalds@linux-foundation.org>, Paul Gortmaker <paul.gortmaker@windriver.com>
 
-On Monday, March 12, 2012, Linus Walleij wrote:
-> On Fri, Mar 9, 2012 at 12:01 AM, Rafael J. Wysocki <rjw@sisk.pl> wrote:
-> 
-> > A runtime suspend of a device (e.g. an MMC controller) belonging to
-> > a power domain or, in a more complicated scenario, a runtime suspend
-> > of another device in the same power domain, may cause power to be
-> > removed from the entire domain.  In that case, the amount of time
-> > necessary to runtime-resume the given device (e.g. the MMC
-> > controller) is often substantially greater than the time needed to
-> > run its driver's runtime resume callback.  That may hurt performance
-> > in some situations, because user data may need to wait for the
-> > device to become operational, so we should make it possible to
-> > prevent that from happening.
-> >
-> > For this reason, introduce a new sysfs attribute for devices,
-> > power/pm_qos_resume_latency_us, allowing user space to specify the
-> > upper bound of the time necessary to bring the (runtime-suspended)
-> > device up after the resume of it has been requested.  However, make
-> > that attribute appear only for the devices whose drivers declare
-> > support for it by calling the (new) dev_pm_qos_expose_latency_limit()
-> > helper function with the appropriate initial value of the attribute.
-> >
-> > Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
-> > Reviewed-by: Kevin Hilman <khilman@ti.com>
-> > Reviewed-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
-> 
-> Acked-by: Linus Walleij <linus.walleij@linaro.org>
+From: Maxim Levitsky <maximlevitsky@gmail.com>
 
-Thanks!
+                   -------------------
+    This is a commit scheduled for the next v2.6.34 longterm release.
+    If you see a problem with using this for longterm, please comment.
+                   -------------------
 
-Rafael
+commit 4c2ef25fe0b847d2ae818f74758ddb0be1c27d8e upstream.
+
+If you don't use CONFIG_MMC_UNSAFE_RESUME, as soon as you attempt to
+suspend, the card will be removed, therefore this patch doesn't change the
+behavior of this option.
+
+However the removal will be done by pm notifier, which runs while
+userspace is still not frozen and thus can freely use del_gendisk, without
+the risk of deadlock which would happen otherwise.
+
+Card detect workqueue is now disabled while userspace is frozen, Therefore
+if you do use CONFIG_MMC_UNSAFE_RESUME, and remove the card during
+suspend, the removal will be detected as soon as userspace is unfrozen,
+again at the moment it is safe to call del_gendisk.
+
+Tested with and without CONFIG_MMC_UNSAFE_RESUME with suspend and hibernate.
+
+[akpm@linux-foundation.org: clean up function prototype]
+[akpm@linux-foundation.org: fix CONFIG_PM-n linkage, small cleanups]
+[akpm@linux-foundation.org: coding-style fixes]
+Signed-off-by: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: David Brownell <david-b@pacbell.net>
+Cc: Alan Stern <stern@rowland.harvard.edu>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+Signed-off-by: Paul Gortmaker <paul.gortmaker@windriver.com>
+---
+ drivers/mmc/core/core.c  |   83 +++++++++++++++++++++++++++++++---------------
+ drivers/mmc/core/host.c  |    4 +++
+ include/linux/mmc/host.h |    3 ++
+ 3 files changed, 64 insertions(+), 26 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 3168ebd..3e22f98 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1057,6 +1057,17 @@ void mmc_rescan(struct work_struct *work)
+ 		container_of(work, struct mmc_host, detect.work);
+ 	u32 ocr;
+ 	int err;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (host->rescan_disable) {
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
++	}
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
+ 
+ 	mmc_bus_get(host);
+ 
+@@ -1267,19 +1278,6 @@ int mmc_suspend_host(struct mmc_host *host, pm_message_t state)
+ 	if (host->bus_ops && !host->bus_dead) {
+ 		if (host->bus_ops->suspend)
+ 			err = host->bus_ops->suspend(host);
+-		if (err == -ENOSYS || !host->bus_ops->resume) {
+-			/*
+-			 * We simply "remove" the card in this case.
+-			 * It will be redetected on resume.
+-			 */
+-			if (host->bus_ops->remove)
+-				host->bus_ops->remove(host);
+-			mmc_claim_host(host);
+-			mmc_detach_bus(host);
+-			mmc_release_host(host);
+-			host->pm_flags = 0;
+-			err = 0;
+-		}
+ 	}
+ 	mmc_bus_put(host);
+ 
+@@ -1311,28 +1309,61 @@ int mmc_resume_host(struct mmc_host *host)
+ 			printk(KERN_WARNING "%s: error %d during resume "
+ 					    "(card was removed?)\n",
+ 					    mmc_hostname(host), err);
+-			if (host->bus_ops->remove)
+-				host->bus_ops->remove(host);
+-			mmc_claim_host(host);
+-			mmc_detach_bus(host);
+-			mmc_release_host(host);
+-			/* no need to bother upper layers */
+ 			err = 0;
+ 		}
+ 	}
+ 	mmc_bus_put(host);
+ 
+-	/*
+-	 * We add a slight delay here so that resume can progress
+-	 * in parallel.
+-	 */
+-	mmc_detect_change(host, 1);
+-
+ 	return err;
+ }
+-
+ EXPORT_SYMBOL(mmc_resume_host);
+ 
++/* Do the card removal on suspend if card is assumed removeable
++ * Do that in pm notifier while userspace isn't yet frozen, so we will be able
++   to sync the card.
++*/
++int mmc_pm_notify(struct notifier_block *notify_block,
++					unsigned long mode, void *unused)
++{
++	struct mmc_host *host = container_of(
++		notify_block, struct mmc_host, pm_notify);
++	unsigned long flags;
++
++
++	switch (mode) {
++	case PM_HIBERNATION_PREPARE:
++	case PM_SUSPEND_PREPARE:
++
++		spin_lock_irqsave(&host->lock, flags);
++		host->rescan_disable = 1;
++		spin_unlock_irqrestore(&host->lock, flags);
++		cancel_delayed_work_sync(&host->detect);
++
++		if (!host->bus_ops || host->bus_ops->suspend)
++			break;
++
++		mmc_claim_host(host);
++
++		if (host->bus_ops->remove)
++			host->bus_ops->remove(host);
++
++		mmc_detach_bus(host);
++		mmc_release_host(host);
++		host->pm_flags = 0;
++		break;
++
++	case PM_POST_SUSPEND:
++	case PM_POST_HIBERNATION:
++
++		spin_lock_irqsave(&host->lock, flags);
++		host->rescan_disable = 0;
++		spin_unlock_irqrestore(&host->lock, flags);
++		mmc_detect_change(host, 0);
++
++	}
++
++	return 0;
++}
+ #endif
+ 
+ static int __init mmc_init(void)
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 4735390..0efe631 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -17,6 +17,7 @@
+ #include <linux/pagemap.h>
+ #include <linux/leds.h>
+ #include <linux/slab.h>
++#include <linux/suspend.h>
+ 
+ #include <linux/mmc/host.h>
+ 
+@@ -85,6 +86,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	init_waitqueue_head(&host->wq);
+ 	INIT_DELAYED_WORK(&host->detect, mmc_rescan);
+ 	INIT_DELAYED_WORK_DEFERRABLE(&host->disable, mmc_host_deeper_disable);
++	host->pm_notify.notifier_call = mmc_pm_notify;
+ 
+ 	/*
+ 	 * By default, hosts do not support SGIO or large requests.
+@@ -133,6 +135,7 @@ int mmc_add_host(struct mmc_host *host)
+ #endif
+ 
+ 	mmc_start_host(host);
++	register_pm_notifier(&host->pm_notify);
+ 
+ 	return 0;
+ }
+@@ -149,6 +152,7 @@ EXPORT_SYMBOL(mmc_add_host);
+  */
+ void mmc_remove_host(struct mmc_host *host)
+ {
++	unregister_pm_notifier(&host->pm_notify);
+ 	mmc_stop_host(host);
+ 
+ #ifdef CONFIG_DEBUG_FS
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 43eaf5c..18d9eb3 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -121,6 +121,7 @@ struct mmc_host {
+ 	unsigned int		f_min;
+ 	unsigned int		f_max;
+ 	u32			ocr_avail;
++	struct notifier_block	pm_notify;
+ 
+ #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
+ #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
+@@ -180,6 +181,7 @@ struct mmc_host {
+ 
+ 	/* Only used with MMC_CAP_DISABLE */
+ 	int			enabled;	/* host is enabled */
++	int			rescan_disable;	/* disable card detection */
+ 	int			nesting_cnt;	/* "enable" nesting count */
+ 	int			en_dis_recurs;	/* detect recursion */
+ 	unsigned int		disable_delay;	/* disable delay in msecs */
+@@ -254,6 +256,7 @@ int mmc_card_can_sleep(struct mmc_host *host);
+ int mmc_host_enable(struct mmc_host *host);
+ int mmc_host_disable(struct mmc_host *host);
+ int mmc_host_lazy_disable(struct mmc_host *host);
++int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
+ 
+ static inline void mmc_set_disable_delay(struct mmc_host *host,
+ 					 unsigned int disable_delay)
+-- 
+1.7.9.3
+
