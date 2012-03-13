@@ -1,56 +1,48 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/4] mmc: add a cap and a quirk
-Date: Tue, 13 Mar 2012 05:35:13 -0400
-Message-ID: <m21uowj12m.fsf@bob.laptop.org>
-References: <1328618935-25175-1-git-send-email-adrian.hunter@intel.com>
-	<4F5EEBFD.2070606@intel.com>
+From: joancarles <joancarles@fqingenieria.es>
+Subject: Re: [MX25][MMC] mmc esdhc failure in 3.3-rc5
+Date: Tue, 13 Mar 2012 12:20:12 +0100
+Message-ID: <cab1626d3e00da738d95a7c4a9db0457@mail.fqingenieria.es>
+References: <5e57eb999780335721212bb8d411406f@mail.fqingenieria.es>
+ <20120312132423.GC2459@pengutronix.de>
+ <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
+ <20120312214545.GC28087@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35948 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1760169Ab2CMJfV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Mar 2012 05:35:21 -0400
-In-Reply-To: <4F5EEBFD.2070606@intel.com> (Adrian Hunter's message of "Tue, 13
-	Mar 2012 08:41:01 +0200")
+Received: from llsd478-a03.servidoresdns.net ([82.223.190.30]:41930 "EHLO
+	llsb708-a03.servidoresdns.net" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751363Ab2CMLUS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Mar 2012 07:20:18 -0400
+In-Reply-To: <20120312214545.GC28087@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@stericsson.com>, linus walleij <linus.walleij@linaro.org>
+To: Wolfram Sang <w.sang@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, shawn.guo@linaro.org, Hong-Xing.Zhu@freescale.com
 
-Hi Adrian,
-
-On Tue, Mar 13 2012, Adrian Hunter wrote:
-> On 07/02/12 14:48, Adrian Hunter wrote:
->> Hi
->> 
->> Here are patches for Medfield to allow the use of high-capacity erase size
->> and to allow the SDIO host controller to be off when the card is kept on
->> during suspend - replacing the earlier patch "mmc: sdhci: always reset all
->> during resume"
->> 
->> 
->> Adrian Hunter (4):
->>       mmc: core: add high-capacity erase size capability flag
->>       mmc: sdhci-pci: select HC erase size for Medfield eMMC
->>       mmc: sdhci: add quirk for keeping card power during suspend
->>       mmc: sdhci-pci: add SDHCI_QUIRK2_HOST_OFF_CARD_ON for Medfield SDIO
->> 
->>  drivers/mmc/core/mmc.c       |    3 ++-
->>  drivers/mmc/host/sdhci-pci.c |    8 +++++++-
->>  drivers/mmc/host/sdhci.c     |   13 +++++++++++--
->>  include/linux/mmc/host.h     |    1 +
->>  include/linux/mmc/sdhci.h    |    2 ++
->>  5 files changed, 23 insertions(+), 4 deletions(-)
+>> >I'd recommend:
+>> >
+>> >git log v2.6.39.. drivers/mmc/host/sdhci-esdhc-imx.c
+>>
+>> I have been staring at those commits, however with very little
+>> domain knowledge it's a shot in the dark.
 >
-> Chris can you take these?
->
-> MMC_CAP2_HC_ERASE_SZ needs to move to bit9 but otherwise they apply.
+> Have you tried copying sdhci-esdhc-imx.c from 2.6.39 to the current 
+> kernel
+> (might need some build fixes)? If that doesn't work, there might be 
+> something
+> wrong in the sdhci-driver itself, and not the esdhc-extension.
 
-Thanks for the reminder, moved MMC_CAP2_HC_ERASE_SZ to bit9 and pushed
-to mmc-next for 3.4.
+I have now, and it results in a bigger mess than I believe is worth 
+pursuing for.
 
-- Chris.
+Therefore, I will create a stashing tree next to linux.git with our 
+device specific changes (minimal setup for the PCB to boot up) that 
+should theoretically apply to any kernel tree between 2.6.x and 3.3-rcX 
+to subsequently bisect the biest.
+
+Thanks for your help and best regards
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Joan C. Abelaira
+
