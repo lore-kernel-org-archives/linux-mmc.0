@@ -1,44 +1,59 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 0/4] mmc: add a cap and a quirk
-Date: Tue, 13 Mar 2012 08:41:01 +0200
-Message-ID: <4F5EEBFD.2070606@intel.com>
-References: <1328618935-25175-1-git-send-email-adrian.hunter@intel.com>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: [PATCH v1 0/5] dt: add basic imx28 support
+Date: Tue, 13 Mar 2012 16:47:03 +0800
+Message-ID: <1331628428-24017-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:59180 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751121Ab2CMGkw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 Mar 2012 02:40:52 -0400
-In-Reply-To: <1328618935-25175-1-git-send-email-adrian.hunter@intel.com>
+Received: from am1ehsobe003.messaging.microsoft.com ([213.199.154.206]:59242
+	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756113Ab2CMIpH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Mar 2012 04:45:07 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@stericsson.com>, linus walleij <linus.walleij@linaro.org>
+To: devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: s.hauer@pengutronix.de, shawn.guo@freescale.com, kernel@pengutronix.de, grant.likely@secretlab.ca, rob.herring@calxeda.com, cjb@laptop.org, rdunlap@xenotime.net, vinod.koul@linux.intel.com
 
-On 07/02/12 14:48, Adrian Hunter wrote:
-> Hi
-> 
-> Here are patches for Medfield to allow the use of high-capacity erase size
-> and to allow the SDIO host controller to be off when the card is kept on
-> during suspend - replacing the earlier patch "mmc: sdhci: always reset all
-> during resume"
-> 
-> 
-> Adrian Hunter (4):
->       mmc: core: add high-capacity erase size capability flag
->       mmc: sdhci-pci: select HC erase size for Medfield eMMC
->       mmc: sdhci: add quirk for keeping card power during suspend
->       mmc: sdhci-pci: add SDHCI_QUIRK2_HOST_OFF_CARD_ON for Medfield SDIO
-> 
->  drivers/mmc/core/mmc.c       |    3 ++-
->  drivers/mmc/host/sdhci-pci.c |    8 +++++++-
->  drivers/mmc/host/sdhci.c     |   13 +++++++++++--
->  include/linux/mmc/host.h     |    1 +
->  include/linux/mmc/sdhci.h    |    2 ++
->  5 files changed, 23 insertions(+), 4 deletions(-)
+This patch series adds basic imx28 dt support including fec, mmc and dma.
 
-Chris can you take these?
+Tested on mx28evk.
 
-MMC_CAP2_HC_ERASE_SZ needs to move to bit9 but otherwise they apply.
+TODO:
+Convert the remaining devices to support dt.
+mxs-auart, mxs-gpio, i2c, flexcan, saif, rtc, pwm, fb.
+
+Dong Aisheng (5):
+  ARM: imx28: add basic dt support
+  mmc: mxs-mmc: add dt probe support
+  ARM: imx28evk: add mmc dt support
+  dma: mxs-dma: add dt probe support
+  ARM: mxs: add mxs dma dt support
+
+ Documentation/devicetree/bindings/arm/fsl.txt      |    4 +
+ .../devicetree/bindings/dma/fsl-mxs-dma.txt        |   17 +++
+ .../devicetree/bindings/mmc/fsl-mxs-mmc.txt        |   23 ++++
+ arch/arm/boot/dts/imx28-evk.dts                    |   45 +++++++
+ arch/arm/boot/dts/imx28.dtsi                       |  131 ++++++++++++++++++++
+ arch/arm/mach-mxs/Kconfig                          |    9 ++
+ arch/arm/mach-mxs/Makefile                         |    1 +
+ arch/arm/mach-mxs/devices-mx23.h                   |    2 +
+ arch/arm/mach-mxs/devices-mx28.h                   |    2 +
+ arch/arm/mach-mxs/devices/platform-dma.c           |    3 +-
+ arch/arm/mach-mxs/imx28-dt.c                       |   71 +++++++++++
+ arch/arm/mach-mxs/include/mach/devices-common.h    |    3 +
+ arch/arm/mach-mxs/mach-apx4devkit.c                |    1 +
+ arch/arm/mach-mxs/mach-m28evk.c                    |    1 +
+ arch/arm/mach-mxs/mach-mx23evk.c                   |    1 +
+ arch/arm/mach-mxs/mach-mx28evk.c                   |    1 +
+ arch/arm/mach-mxs/mach-stmp378x_devb.c             |    1 +
+ arch/arm/mach-mxs/mach-tx28.c                      |    1 +
+ drivers/dma/mxs-dma.c                              |   44 +++++--
+ drivers/mmc/host/mxs-mmc.c                         |   82 ++++++++++++-
+ 20 files changed, 424 insertions(+), 19 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/dma/fsl-mxs-dma.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt
+ create mode 100644 arch/arm/boot/dts/imx28-evk.dts
+ create mode 100644 arch/arm/boot/dts/imx28.dtsi
+ create mode 100644 arch/arm/mach-mxs/imx28-dt.c
+
+
