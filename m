@@ -1,75 +1,44 @@
-From: Zhu Richard-R65037 <r65037@freescale.com>
-Subject: RE: [MX25][MMC] mmc esdhc failure in 3.3-rc5
-Date: Tue, 13 Mar 2012 05:55:29 +0000
-Message-ID: <0E83723C55F66F43A6041464FE31119D099A34@039-SN2MPN1-011.039d.mgd.msft.net>
-References: <5e57eb999780335721212bb8d411406f@mail.fqingenieria.es>
- <20120312132423.GC2459@pengutronix.de>
- <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 0/4] mmc: add a cap and a quirk
+Date: Tue, 13 Mar 2012 08:41:01 +0200
+Message-ID: <4F5EEBFD.2070606@intel.com>
+References: <1328618935-25175-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe002.messaging.microsoft.com ([213.199.154.140]:59596
-	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759674Ab2CMFzl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Mar 2012 01:55:41 -0400
-In-Reply-To: <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
-Content-Language: en-US
+Received: from mga03.intel.com ([143.182.124.21]:59180 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751121Ab2CMGkw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 13 Mar 2012 02:40:52 -0400
+In-Reply-To: <1328618935-25175-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: joancarles <joancarles@fqingenieria.es>, Wolfram Sang <w.sang@pengutronix.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "shawn.guo@linaro.org" <shawn.guo@linaro.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@stericsson.com>, linus walleij <linus.walleij@linaro.org>
 
-SGk6DQotMTEwIGlzIHRoZSB0aW1lb3V0IHByb2JsZW0uDQpZb3UgY2FuIGR1bXAgdGhlIGVzZGhj
-IHJlZ2lzdGVycyBpZiB5b3Ugd2FudCB0byBkZWJ1ZyBpbnRvIHRoaXMgaXNzdWUgd2hlbiB0aGlz
-IHRpbWVvdXQgcHJvYmxlbSBvY2N1cnJlZC4NClRoZSByZWdpc3RlciBkdW1wIGNhbiBoZWxwIHRv
-IGZpZ3VyZSBvdXQgd2hhdCdzIHdyb25nIG9uIHRoZSBidXMuDQoNCkJlc3QgUmVnYXJkcw0KUmlj
-aGFyZCBaaHUNCg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogam9hbmNhcmxl
-cyBbbWFpbHRvOmpvYW5jYXJsZXNAZnFpbmdlbmllcmlhLmVzXSANClNlbnQ6IDIwMTLlubQz5pyI
-MTLml6UgMjI6NTANClRvOiBXb2xmcmFtIFNhbmcNCkNjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwu
-b3JnOyBzaGF3bi5ndW9AbGluYXJvLm9yZzsgWmh1IFJpY2hhcmQtUjY1MDM3DQpTdWJqZWN0OiBS
-ZTogW01YMjVdW01NQ10gbW1jIGVzZGhjIGZhaWx1cmUgaW4gMy4zLXJjNQ0KDQpIaQ0KDQpPbiBN
-b24sIDEyIE1hciAyMDEyIDE0OjI0OjIzICswMTAwLCBXb2xmcmFtIFNhbmcgd3JvdGU6DQo+PiBX
-aGF0IGNvdWxkIGhhdmUgY2hhbmdlZCBiZXR3ZWVuIDIuNi4zOS4zIGFuZCAzLjMtcmM1IHRvIHRy
-aWdnZXIgdGhpcyANCj4+IGJlaGF2aW91cj8gQSBxdWljayBsb29rIGF0DQo+Pg0KPj4gZ2l0IGRp
-ZmYgdjIuNi4zOSBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLWVzZGhjLWlteC5jDQo+DQo+IEknZCBy
-ZWNvbW1lbmQ6DQo+DQo+IGdpdCBsb2cgdjIuNi4zOS4uIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kt
-ZXNkaGMtaW14LmMNCg0KSSBoYXZlIGJlZW4gc3RhcmluZyBhdCB0aG9zZSBjb21taXRzLCBob3dl
-dmVyIHdpdGggdmVyeSBsaXR0bGUgZG9tYWluIGtub3dsZWRnZSBpdCdzIGEgc2hvdCBpbiB0aGUg
-ZGFyay4NCg0KPiBhbmQgbG9vayBhdCB0aG9zZSBjb21taXRzLiBZb3Ugc2hvdWxkIGFsc28gaW5j
-bHVkZSB0aGUgcGVvcGxlIHdobyBkaWQgDQo+IHRob3NlIGNvbW1pdHMgaW4gQ0Mgd2hlbiB3cml0
-aW5nIG1haWxzLCBvdGhlcndpc2UgdGhleSBwcm9iYWJseSB3b24ndCANCj4gbm90aWNlLiBSaWNo
-YXJkIFpodSBhbmQgU2hhd24gR3VvIGFyZSBmcm9tIEZyZWVzY2FsZSwgYW5kIGhhdmUgbW9yZSAN
-Cj4ga25vd2xlZGdlIGFib3V0IHRoZSBFU0RIQyBjb3Jlcy4NCg0KRG9uZSBub3csIHRoYW5rcy4g
-UmljaGFyZCwgU2hhd24sIGFueSBwb2ludGVycyBhcyB0byB3aGVyZSB0byBzdGFydCBsb29raW5n
-IG9uIHRoaXMgb25lPyBTaW5jZSB0aGUgaS5NWDI1IGVTREhDIGhhcyBmb3VyIGRhdGEgbGluZXMs
-IG9uZSBjbG9jayBhbmQgb25lIGNvbW1hbmQgbGluZSBoYXJkLXdpcmVkLCB0aGVyZSBpcyByZWFs
-bHkgbm90aGluZyBmcm9tIGEgaGFyZHdhcmUgcG9pbnQgb2YgdmlldyB0aGF0IGNvdWxkIGluZmx1
-ZW5jZSB0aGlzIGRpZmZlcmVudCBiZWhhdmlvdXIgYmV0d2VlbiB0aGUgMi42LjM5IGFuZCB0aGUg
-My4zLXJjNyBrZXJuZWxzLg0KDQpBZ2FpbiwgYm9vdGluZyB0aGUgc2FtZSBoYXJkd2FyZSB3aXRo
-IGEgMi42LjM5LjMga2VybmVsIHVzaW5nIHRoZSBzdGFuZGFyZCBteDI1IGluaXRpYWxpc2F0aW9u
-IHJvdXRpbmU6DQoNCmlteDI1X2FkZF9zZGhjaV9lc2RoY19pbXgoMCwgTlVMTCk7DQoNCndvcmtz
-IGFzIGludGVuZGVkLiBJIGNhbiBtb3VudCB0aGUgc2QgY2FyZCBhbmQgSSBjYW4gd3JpdGUvcmVt
-b3ZlIGZpbGVzIGZyb20gaXQsIGluZGVwZW5kZW50IG9mIHRoZSBmaWxlIHN5c3RlbSAoVkZBVCwg
-ZXh0MiBoYXZlIGJlZW4gdGVzdGVkKS4gDQpMZWF2aW5nIHRoZSBzZCBjYXJkIGluc2lkZSB0aGUg
-c2xvdCwgYW5kIHJlYm9vdGluZyB0aGUgZGV2aWNlIHdpdGggYSBsaW51eCBrZXJuZWwgMy4zLXJj
-NyBmYWlscywgYXMgZGVzY3JpYmVkIGVhcmxpZXIuIE9uIGFueSAzLjMtcmMga2VybmVscywgYW5k
-IHByb2JhYmx5IGVhcmxpZXIgdmVyc2lvbnMgYXMgd2VsbCwgaXQgZmFpbHMgd2l0aCB0aGUgY2l0
-ZWQgZXJyb3IgbWVzc2FnZXMgZWFybGllciBpbiB0aGlzIHRocmVhZDoNCg0KaHR0cDovL21hcmMu
-aW5mby8/bD1saW51eC1tbWMmbT0xMzMxMDMzOTcyMjI1MDMmdz0zDQoNCkNoYW5naW5nIGl0IHRv
-IGEgcGRhdGEgaW5pdCBhcyBzaG93biBiZWxvdyBkb2VzIG5vdCBjaGFuZ2UgYW55dGhpbmcgd2l0
-aCByZWdhcmQgdG8gdGhlIGZhaWx1cmU6DQoNCmlteDI1X2FkZF9zZGhjaV9lc2RoY19pbXgoMCwg
-Jm5vYWhfZXNkaGNfcGRhdGEpOyBzdGF0aWMgY29uc3Qgc3RydWN0IGVzZGhjX3BsYXRmb3JtX2Rh
-dGEgbm9haF9lc2RoY19wZGF0YSBfX2luaXRjb25zdCA9IHsNCiAgICAgICAgIC53cF9ncGlvID0g
-LUVJTlZBTCwNCiAgICAgICAgIC5jZF9ncGlvID0gLUVJTlZBTCwNCiAgICAgICAgIC53cF90eXBl
-ID0gRVNESENfV1BfTk9ORSwNCiAgICAgICAgIC5jZF90eXBlID0gRVNESENfQ0RfTk9ORSwNCn07
-DQoNCj4gV2lsZCBndWVzc2luZywgOTdlNGJhNmE1ZWE5MDNhMjIxZDg3YmNhYmRhZjAxZWZiMGE2
-MDlhNSBsb29rcyBsaWtlIHRoZSANCj4gbW9zdCBsaWtlbHkgY2FuZGlkYXRlLCBidXQgSSBtYXkg
-YmUgdG90YWxseSB3cm9uZy4NCg0KSSBleHRyYWN0ZWQgaXQgYXMgZm9sbG93czoNCg0KZ2l0IGZv
-cm1hdC1wYXRjaCAtMSA5N2U0YmE2YTVlYTkwDQpwYXRjaCAtUiAtcDEgPCAwMDAxLW1tYy1zZGhj
-aS1lc2RoYy1pbXgtRW5hYmxlLUFETUEyLnBhdGNoDQoNCmNvbXBpbGVkIGFuZCBib290ZWQgYW5k
-IGl0IGhhcyBubyBpbmZsdWVuY2Ugb24gbXkgc3BlY2lmaWMgbWlzYmVoYXZpb3VyIG9mIHRoZSBl
-c2RoYyBkcml2ZXIuIFNvLCB0aGlzIGNhbiBiZSBiYXJyZWQgYXMgYSBwb3NzaWJsZSBjYW5kaWRh
-dGUsIEkgcmVja29uLg0KDQpUaGFua3MgYW5kIGJlc3QgcmVnYXJkcw0KLS0NCkpvYW4gQy4gQWJl
-bGFpcmENCg0K
+On 07/02/12 14:48, Adrian Hunter wrote:
+> Hi
+> 
+> Here are patches for Medfield to allow the use of high-capacity erase size
+> and to allow the SDIO host controller to be off when the card is kept on
+> during suspend - replacing the earlier patch "mmc: sdhci: always reset all
+> during resume"
+> 
+> 
+> Adrian Hunter (4):
+>       mmc: core: add high-capacity erase size capability flag
+>       mmc: sdhci-pci: select HC erase size for Medfield eMMC
+>       mmc: sdhci: add quirk for keeping card power during suspend
+>       mmc: sdhci-pci: add SDHCI_QUIRK2_HOST_OFF_CARD_ON for Medfield SDIO
+> 
+>  drivers/mmc/core/mmc.c       |    3 ++-
+>  drivers/mmc/host/sdhci-pci.c |    8 +++++++-
+>  drivers/mmc/host/sdhci.c     |   13 +++++++++++--
+>  include/linux/mmc/host.h     |    1 +
+>  include/linux/mmc/sdhci.h    |    2 ++
+>  5 files changed, 23 insertions(+), 4 deletions(-)
 
+Chris can you take these?
+
+MMC_CAP2_HC_ERASE_SZ needs to move to bit9 but otherwise they apply.
