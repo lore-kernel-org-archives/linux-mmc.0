@@ -1,149 +1,75 @@
-From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH v1 2/5] mmc: mxs-mmc: add dt probe support
-Date: Wed, 14 Mar 2012 09:52:52 +0100
-Message-ID: <20120314085252.GK18320@game.jcrosoft.org>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: Re: [PATCH v1 3/5] ARM: imx28evk: add mmc dt support
+Date: Wed, 14 Mar 2012 09:54:47 +0100
+Message-ID: <20120314085447.GL18320@game.jcrosoft.org>
 References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
- <1331628428-24017-3-git-send-email-b29396@freescale.com>
- <20120314072343.GG18320@game.jcrosoft.org>
- <20120314080939.GA1180@shlinux2.ap.freescale.net>
+ <1331628428-24017-4-git-send-email-b29396@freescale.com>
+ <4F5F5C22.1080506@gmail.com>
+ <20120313165214.GO26642@pengutronix.de>
+ <4F5F879E.4030407@gmail.com>
+ <20120314073035.GI18320@game.jcrosoft.org>
+ <20120314082024.GB1180@shlinux2.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from 4.mo2.mail-out.ovh.net ([87.98.172.75]:43586 "EHLO
+	mo2.mail-out.ovh.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S932416Ab2CNJHY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 05:07:24 -0400
+Received: from mail621.ha.ovh.net (b6.ovh.net [213.186.33.56])
+	by mo2.mail-out.ovh.net (Postfix) with SMTP id 7ED45DC62A5
+	for <linux-mmc@vger.kernel.org>; Wed, 14 Mar 2012 10:10:40 +0100 (CET)
 Content-Disposition: inline
-In-Reply-To: <20120314080939.GA1180-Fb7DQEYuewWctlrPMvKcciBecyulp+rMXqFh9Ls21Oc@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Dong Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Cc: "vinod.koul-VuQAYsv1563Yd54FQh9/CA@public.gmane.org" <vinod.koul-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org" <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, "rdunlap-/UHa2rfvQTnk1uMJSBkQmQ@public.gmane.org" <rdunlap-/UHa2rfvQTnk1uMJSBkQmQ@public.gmane.org>, "kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org" <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org" <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org" <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20120314082024.GB1180@shlinux2.ap.freescale.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <aisheng.dong@freescale.com>
+Cc: Rob Herring <robherring2@gmail.com>, Sascha Hauer <s.hauer@pengutronix.de>, Dong Aisheng-B29396 <B29396@freescale.com>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 16:09 Wed 14 Mar     , Dong Aisheng wrote:
-> On Wed, Mar 14, 2012 at 03:23:43PM +0800, Jean-Christophe PLAGNIOL-VILLARD wrote:
-> > On 16:47 Tue 13 Mar     , Dong Aisheng wrote:
-> > > From: Dong Aisheng <dong.aisheng-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On 16:20 Wed 14 Mar     , Dong Aisheng wrote:
+> On Wed, Mar 14, 2012 at 03:30:35PM +0800, Jean-Christophe PLAGNIOL-VILLARD wrote:
+> > On 12:45 Tue 13 Mar     , Rob Herring wrote:
+> > > On 03/13/2012 11:52 AM, Sascha Hauer wrote:
+> > > > On Tue, Mar 13, 2012 at 09:39:30AM -0500, Rob Herring wrote:
+> > > >> On 03/13/2012 03:47 AM, Dong Aisheng wrote:
+> > > >>> From: Dong Aisheng <dong.aisheng@linaro.org>
+> > > >>>
+> > > >>> Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
+> > > >>> ---
+> > > >>>  arch/arm/boot/dts/imx28-evk.dts |   14 ++++++++++++++
+> > > >>>  arch/arm/boot/dts/imx28.dtsi    |   33 +++++++++++++++++++++++++++++++++
+> > > >>>  arch/arm/mach-mxs/imx28-dt.c    |    2 ++
+> > > >>>  3 files changed, 49 insertions(+), 0 deletions(-)
+> > > >>
+> > > >> snip
+> > > >>
+> > > >>> diff --git a/arch/arm/mach-mxs/imx28-dt.c b/arch/arm/mach-mxs/imx28-dt.c
+> > > >>> index 78d1129..429b88e 100644
+> > > >>> --- a/arch/arm/mach-mxs/imx28-dt.c
+> > > >>> +++ b/arch/arm/mach-mxs/imx28-dt.c
+> > > >>> @@ -23,6 +23,8 @@ static const struct of_dev_auxdata imx28_auxdata_lookup[] __initconst = {
+> > > >>>  	OF_DEV_AUXDATA("arm,pl011", MX28_DUART_BASE_ADDR, "duart", NULL),
+> > > >>>  	OF_DEV_AUXDATA("fsl,imx28-fec", MX28_ENET_MAC0_BASE_ADDR, "imx28-fec.0", NULL),
+> > > >>>  	OF_DEV_AUXDATA("fsl,imx28-fec", MX28_ENET_MAC1_BASE_ADDR, "imx28-fec.1", NULL),
+> > > >>> +	OF_DEV_AUXDATA("fsl,imx28-mmc", MX28_SSP0_BASE_ADDR, "mxs-mmc.0", NULL),
+> > > >>> +	OF_DEV_AUXDATA("fsl,imx28-mmc", MX28_SSP1_BASE_ADDR, "mxs-mmc.1", NULL),
+> > > >>
+> > > >> Why is this needed?
+> > > > 
+> > > > These are needed for the drivers which have still the mxs-mmc.* names
+> > > > to find their clocks. Alternatively we could also add the appropriate
+> > > > clocks to the clock file. Don't know if that's better though.
 > > > 
-> > > Signed-off-by: Dong Aisheng <dong.aisheng-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > > 
-> > > ---
-> > > The patch is still using a private way for dma part binding
-> > > since the common dma binding is still under discussion.
-> > > http://www.spinics.net/lists/linux-omap/msg65528.html
-> > > 
-> > > Will update to use common dma binding when it hits mainline.
-> > > ---
-> > >  .../devicetree/bindings/mmc/fsl-mxs-mmc.txt        |   23 ++++++
-> > >  drivers/mmc/host/mxs-mmc.c                         |   82 +++++++++++++++++++-
-> > >  2 files changed, 102 insertions(+), 3 deletions(-)
-> > > 
-> > > diff --git a/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt b/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt
-> > > new file mode 100644
-> > > index 0000000..adc1142
-> > > --- /dev/null
-> > > +++ b/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt
-> > > @@ -0,0 +1,23 @@
-> > > +* FREESCALE MXS MMC peripheral
-> > > +
-> > > +Required properties:
-> > > +- compatible : Should be "fsl,<chip>-mmc"
-> > > +- reg : Should contain registers location and length
-> > > +- interrupts : Should contain interrupt.
-> > > +  The format is <irq_err irq_dma>.
-> > > +- dma_channel: Should contain the dma channel it uses
-> > > +
-> > > +Optional properties:
-> > > +- wp-gpios : Specify GPIOs for write protection
-> > > +- slot-4bit: Specify 4 bit mode support
-> > > +- slot-8bit: Specify 8 bit and 4 bit mode support
-> > > +
-> > > +Examples:
-> > > +mmc1: ssp@80010000 {
-> > > +	compatible = "fsl,imx28-mmc";
-> > > +	reg = <0x80010000 2000>;
-> > > +	/* <irq_err irq_dma> */
-> > > +	interrupts = <96 82>;
-> > > +	dma_channel = <0>;
-> > > +	slot-8bit;
-> > > +};
-> > > diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> > > index 382c835..6cf2d17 100644
-> > > --- a/drivers/mmc/host/mxs-mmc.c
-> > > +++ b/drivers/mmc/host/mxs-mmc.c
-> > > @@ -38,6 +38,10 @@
-> > >  #include <linux/gpio.h>
-> > >  #include <linux/regulator/consumer.h>
-> > >  #include <linux/module.h>
-> > > +#include <linux/of.h>
-> > > +#include <linux/of_device.h>
-> > > +#include <linux/of_gpio.h>
-> > > +#include <linux/slab.h>
-> > >  
-> > >  #include <mach/mxs.h>
-> > >  #include <mach/common.h>
-> > > @@ -673,17 +677,79 @@ static bool mxs_mmc_dma_filter(struct dma_chan *chan, void *param)
-> > >  	return true;
-> > >  }
-> > >  
-> > > +#ifdef CONFIG_OF
-> > > +static struct resource * __devinit mxs_mmc_get_of_dmares(
-> > > +				struct platform_device *pdev)
-> > > +{
-> > > +	struct device_node *np = pdev->dev.of_node;
-> > > +	struct resource *dmares;
-> > > +	int ret;
-> > > +
-> > > +	if (!np)
-> > > +		return NULL;
-> > > +
-> > > +	dmares = kzalloc(sizeof(*dmares), GFP_KERNEL);
-> > > +	dmares->flags = IORESOURCE_DMA;
-> > > +	ret = of_property_read_u32(np, "dma_channel", &dmares->start);
-> > > +	if (ret) {
-> > > +		dev_err(&pdev->dev, "unable to get dmares from dt\n");
-> > > +		return NULL;
-> > > +	}
-> > > +	dmares->end = dmares->start;
-> > > +
-> > > +	return dmares;
-> > > +}
-> > > +
-> > > +static int __devinit mxs_mmc_get_of_property(struct platform_device *pdev,
-> > > +				struct mxs_mmc_platform_data **ppdata)
-> > > +{
-> > > +	struct device_node *np = pdev->dev.of_node;
-> > > +	struct mxs_mmc_platform_data *pdata = *ppdata;
-> > > +
-> > > +	if (!np)
-> > > +		return -ENODEV;
-> > > +
-> > > +	pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
-> > > +
-> > > +	if (of_get_property(np, "slot-8bit", NULL))
-> > > +		pdata->flags |= SLOTF_8_BIT_CAPABLE;
-> > > +
-> > > +	if (of_get_property(np, "slot-4bit", NULL))
-> > > +		pdata->flags |= SLOTF_4_BIT_CAPABLE;
-> > it will conflit if both binding are set use a number instead
+> > > Ah, yes I should have known that... If clk lookup is all that's needed,
+> > > I'd suggest adding the necessary clk lookups either here or in the clock
+> > > code. Not much difference, but at least it removes the use of
+> > > *_BASE_ADDR defines.
+> > Agreed we do this on AT91
 > > 
-> Hmm, i did not see conflict, can you explain more?
-> The "slot-8bit" includes the support for 4bit.(see binding doc)
-> Even user define them two property in dt by mistake, it does not cause conflict.
-> See:
-> if (pdata) {
-> 	if (pdata->flags & SLOTF_8_BIT_CAPABLE)
-> 		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
-> 	if (pdata->flags & SLOTF_4_BIT_CAPABLE)
-> 		mmc->caps |= MMC_CAP_4_BIT_DATA;
-> }
-
-this is mmc specifc sohould have a generic binding
+> I'm willing to do like that.
+> But i'm new to this, can you help point our where the code i can reference
+> in Rob suggested way?
+mach-at91
 
 Best Regards,
 J.
