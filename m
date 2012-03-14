@@ -1,46 +1,123 @@
-From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: Re: [PATCH v1 0/5] dt: add basic imx28 support
-Date: Wed, 14 Mar 2012 15:34:55 +0800
-Message-ID: <20120314073454.GD8494@shlinux2.ap.freescale.net>
+From: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+Subject: Re: [PATCH v1 2/5] mmc: mxs-mmc: add dt probe support
+Date: Wed, 14 Mar 2012 08:23:43 +0100
+Message-ID: <20120314072343.GG18320@game.jcrosoft.org>
 References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
- <201203140701.07111.marek.vasut@gmail.com>
+ <1331628428-24017-3-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe001.messaging.microsoft.com ([213.199.154.139]:16681
-	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752886Ab2CNHdh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 03:33:37 -0400
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <201203140701.07111.marek.vasut@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1331628428-24017-3-git-send-email-b29396@freescale.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, vinod.koul@linux.intel.com, s.hauer@pengutronix.de, rob.herring@calxeda.com, rdunlap@xenotime.net, kernel@pengutronix.de, cjb@laptop.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marek Vasut <marek.vasut@gmail.com>
-Cc: linux-arm-kernel@lists.infradead.org, Dong Aisheng <b29396@freescale.com>, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, vinod.koul@linux.intel.com, s.hauer@pengutronix.de, rob.herring@calxeda.com, grant.likely@secretlab.ca, rdunlap@xenotime.net, kernel@pengutronix.de, cjb@laptop.org, shawn.guo@freescale.com
 
-On Wed, Mar 14, 2012 at 07:01:06AM +0100, Marek Vasut wrote:
-> Dear Dong Aisheng,
+On 16:47 Tue 13 Mar     , Dong Aisheng wrote:
+> From: Dong Aisheng <dong.aisheng@linaro.org>
 > 
-> > This patch series adds basic imx28 dt support including fec, mmc and dma.
-> > 
-> > Tested on mx28evk.
-> > 
-> > TODO:
-> > Convert the remaining devices to support dt.
-> > mxs-auart, mxs-gpio, i2c, flexcan, saif, rtc, pwm, fb.
-> > 
-> > Dong Aisheng (5):
-> >   ARM: imx28: add basic dt support
-> >   mmc: mxs-mmc: add dt probe support
-> >   ARM: imx28evk: add mmc dt support
-> >   dma: mxs-dma: add dt probe support
-> >   ARM: mxs: add mxs dma dt support
-> > 
-> Can you keep me in Cc on new versions of these patches? Thanks!
+> Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
 > 
-Of course yes.
-Thanks for your review.
+> ---
+> The patch is still using a private way for dma part binding
+> since the common dma binding is still under discussion.
+> http://www.spinics.net/lists/linux-omap/msg65528.html
+> 
+> Will update to use common dma binding when it hits mainline.
+> ---
+>  .../devicetree/bindings/mmc/fsl-mxs-mmc.txt        |   23 ++++++
+>  drivers/mmc/host/mxs-mmc.c                         |   82 +++++++++++++++++++-
+>  2 files changed, 102 insertions(+), 3 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt b/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt
+> new file mode 100644
+> index 0000000..adc1142
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt
+> @@ -0,0 +1,23 @@
+> +* FREESCALE MXS MMC peripheral
+> +
+> +Required properties:
+> +- compatible : Should be "fsl,<chip>-mmc"
+> +- reg : Should contain registers location and length
+> +- interrupts : Should contain interrupt.
+> +  The format is <irq_err irq_dma>.
+> +- dma_channel: Should contain the dma channel it uses
+> +
+> +Optional properties:
+> +- wp-gpios : Specify GPIOs for write protection
+> +- slot-4bit: Specify 4 bit mode support
+> +- slot-8bit: Specify 8 bit and 4 bit mode support
+> +
+> +Examples:
+> +mmc1: ssp@80010000 {
+> +	compatible = "fsl,imx28-mmc";
+> +	reg = <0x80010000 2000>;
+> +	/* <irq_err irq_dma> */
+> +	interrupts = <96 82>;
+> +	dma_channel = <0>;
+> +	slot-8bit;
+> +};
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index 382c835..6cf2d17 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -38,6 +38,10 @@
+>  #include <linux/gpio.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/module.h>
+> +#include <linux/of.h>
+> +#include <linux/of_device.h>
+> +#include <linux/of_gpio.h>
+> +#include <linux/slab.h>
+>  
+>  #include <mach/mxs.h>
+>  #include <mach/common.h>
+> @@ -673,17 +677,79 @@ static bool mxs_mmc_dma_filter(struct dma_chan *chan, void *param)
+>  	return true;
+>  }
+>  
+> +#ifdef CONFIG_OF
+> +static struct resource * __devinit mxs_mmc_get_of_dmares(
+> +				struct platform_device *pdev)
+> +{
+> +	struct device_node *np = pdev->dev.of_node;
+> +	struct resource *dmares;
+> +	int ret;
+> +
+> +	if (!np)
+> +		return NULL;
+> +
+> +	dmares = kzalloc(sizeof(*dmares), GFP_KERNEL);
+> +	dmares->flags = IORESOURCE_DMA;
+> +	ret = of_property_read_u32(np, "dma_channel", &dmares->start);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "unable to get dmares from dt\n");
+> +		return NULL;
+> +	}
+> +	dmares->end = dmares->start;
+> +
+> +	return dmares;
+> +}
+> +
+> +static int __devinit mxs_mmc_get_of_property(struct platform_device *pdev,
+> +				struct mxs_mmc_platform_data **ppdata)
+> +{
+> +	struct device_node *np = pdev->dev.of_node;
+> +	struct mxs_mmc_platform_data *pdata = *ppdata;
+> +
+> +	if (!np)
+> +		return -ENODEV;
+> +
+> +	pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
+> +
+> +	if (of_get_property(np, "slot-8bit", NULL))
+> +		pdata->flags |= SLOTF_8_BIT_CAPABLE;
+> +
+> +	if (of_get_property(np, "slot-4bit", NULL))
+> +		pdata->flags |= SLOTF_4_BIT_CAPABLE;
+it will conflit if both binding are set use a number instead
 
-Regards
-Dong Aisheng
-
+Best Regards,
+J.
