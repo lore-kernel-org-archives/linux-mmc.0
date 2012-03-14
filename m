@@ -1,141 +1,184 @@
-From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: Re: [PATCH v1 2/5] mmc: mxs-mmc: add dt probe support
-Date: Wed, 14 Mar 2012 16:09:40 +0800
-Message-ID: <20120314080939.GA1180@shlinux2.ap.freescale.net>
-References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
- <1331628428-24017-3-git-send-email-b29396@freescale.com>
- <20120314072343.GG18320@game.jcrosoft.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 2/3] mmc: sdhci: check interrupt flags in ISR again
+Date: Wed, 14 Mar 2012 10:13:34 +0200
+Message-ID: <4F60532E.4070103@intel.com>
+References: <1331659002-13743-1-git-send-email-alexander.stein@systec-electronic.com> <1331659002-13743-2-git-send-email-alexander.stein@systec-electronic.com> <4F604B16.606@intel.com> <1994979.AaWWmIIAYQ@ws-stein>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe004.messaging.microsoft.com ([216.32.180.14]:18252
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1758956Ab2CNIHt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 04:07:49 -0400
-Content-Disposition: inline
-In-Reply-To: <20120314072343.GG18320@game.jcrosoft.org>
+Received: from mga01.intel.com ([192.55.52.88]:60778 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758815Ab2CNIN0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 14 Mar 2012 04:13:26 -0400
+In-Reply-To: <1994979.AaWWmIIAYQ@ws-stein>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-Cc: Dong Aisheng-B29396 <B29396@freescale.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>
+To: Alexander Stein <alexander.stein@systec-electronic.com>
+Cc: Chris Ball <cjb@laptop.org>, Jesse Barnes <jbarnes@virtuousgeek.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org
 
-On Wed, Mar 14, 2012 at 03:23:43PM +0800, Jean-Christophe PLAGNIOL-VILLARD wrote:
-> On 16:47 Tue 13 Mar     , Dong Aisheng wrote:
-> > From: Dong Aisheng <dong.aisheng@linaro.org>
-> > 
-> > Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
-> > 
-> > ---
-> > The patch is still using a private way for dma part binding
-> > since the common dma binding is still under discussion.
-> > http://www.spinics.net/lists/linux-omap/msg65528.html
-> > 
-> > Will update to use common dma binding when it hits mainline.
-> > ---
-> >  .../devicetree/bindings/mmc/fsl-mxs-mmc.txt        |   23 ++++++
-> >  drivers/mmc/host/mxs-mmc.c                         |   82 +++++++++++++++++++-
-> >  2 files changed, 102 insertions(+), 3 deletions(-)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt b/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt
-> > new file mode 100644
-> > index 0000000..adc1142
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt
-> > @@ -0,0 +1,23 @@
-> > +* FREESCALE MXS MMC peripheral
-> > +
-> > +Required properties:
-> > +- compatible : Should be "fsl,<chip>-mmc"
-> > +- reg : Should contain registers location and length
-> > +- interrupts : Should contain interrupt.
-> > +  The format is <irq_err irq_dma>.
-> > +- dma_channel: Should contain the dma channel it uses
-> > +
-> > +Optional properties:
-> > +- wp-gpios : Specify GPIOs for write protection
-> > +- slot-4bit: Specify 4 bit mode support
-> > +- slot-8bit: Specify 8 bit and 4 bit mode support
-> > +
-> > +Examples:
-> > +mmc1: ssp@80010000 {
-> > +	compatible = "fsl,imx28-mmc";
-> > +	reg = <0x80010000 2000>;
-> > +	/* <irq_err irq_dma> */
-> > +	interrupts = <96 82>;
-> > +	dma_channel = <0>;
-> > +	slot-8bit;
-> > +};
-> > diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> > index 382c835..6cf2d17 100644
-> > --- a/drivers/mmc/host/mxs-mmc.c
-> > +++ b/drivers/mmc/host/mxs-mmc.c
-> > @@ -38,6 +38,10 @@
-> >  #include <linux/gpio.h>
-> >  #include <linux/regulator/consumer.h>
-> >  #include <linux/module.h>
-> > +#include <linux/of.h>
-> > +#include <linux/of_device.h>
-> > +#include <linux/of_gpio.h>
-> > +#include <linux/slab.h>
-> >  
-> >  #include <mach/mxs.h>
-> >  #include <mach/common.h>
-> > @@ -673,17 +677,79 @@ static bool mxs_mmc_dma_filter(struct dma_chan *chan, void *param)
-> >  	return true;
-> >  }
-> >  
-> > +#ifdef CONFIG_OF
-> > +static struct resource * __devinit mxs_mmc_get_of_dmares(
-> > +				struct platform_device *pdev)
-> > +{
-> > +	struct device_node *np = pdev->dev.of_node;
-> > +	struct resource *dmares;
-> > +	int ret;
-> > +
-> > +	if (!np)
-> > +		return NULL;
-> > +
-> > +	dmares = kzalloc(sizeof(*dmares), GFP_KERNEL);
-> > +	dmares->flags = IORESOURCE_DMA;
-> > +	ret = of_property_read_u32(np, "dma_channel", &dmares->start);
-> > +	if (ret) {
-> > +		dev_err(&pdev->dev, "unable to get dmares from dt\n");
-> > +		return NULL;
-> > +	}
-> > +	dmares->end = dmares->start;
-> > +
-> > +	return dmares;
-> > +}
-> > +
-> > +static int __devinit mxs_mmc_get_of_property(struct platform_device *pdev,
-> > +				struct mxs_mmc_platform_data **ppdata)
-> > +{
-> > +	struct device_node *np = pdev->dev.of_node;
-> > +	struct mxs_mmc_platform_data *pdata = *ppdata;
-> > +
-> > +	if (!np)
-> > +		return -ENODEV;
-> > +
-> > +	pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
-> > +
-> > +	if (of_get_property(np, "slot-8bit", NULL))
-> > +		pdata->flags |= SLOTF_8_BIT_CAPABLE;
-> > +
-> > +	if (of_get_property(np, "slot-4bit", NULL))
-> > +		pdata->flags |= SLOTF_4_BIT_CAPABLE;
-> it will conflit if both binding are set use a number instead
-> 
-Hmm, i did not see conflict, can you explain more?
-The "slot-8bit" includes the support for 4bit.(see binding doc)
-Even user define them two property in dt by mistake, it does not cause conflict.
-See:
-if (pdata) {
-	if (pdata->flags & SLOTF_8_BIT_CAPABLE)
-		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
-	if (pdata->flags & SLOTF_4_BIT_CAPABLE)
-		mmc->caps |= MMC_CAP_4_BIT_DATA;
-}
+On 14/03/12 09:53, Alexander Stein wrote:
+> Hello,
+>=20
+> Am Mittwoch, 14. M=E4rz 2012, 09:39:02 schrieb Adrian Hunter:
+>> On 13/03/12 19:16, Alexander Stein wrote:
+>>> When using MSI it is possible that a new MSI is sent while an earli=
+er
+>>> MSI is currently handled. In this case SDHCI_INT_STATUS only contai=
+ns
+>>> SDHCI_INT_RESPONSE and the ISR would not be called again. But at th=
+e end
+>>> of the ISR SDHCI_INT_DATA_END is now also pending which would be
+>>> ignored.
+>>>
+>>> Fix this by rereading the interrupt flags in the ISR until no inter=
+rupt
+>>> we care is pending.
+>>>
+>>> Signed-off-by: Alexander Stein <alexander.stein@systec-electronic.c=
+om>
+>> [...]
+>>> @@ -2336,6 +2338,14 @@ static irqreturn_t sdhci_irq(int irq, void
+>>> *dev_id)>=20
+>>>  		sdhci_writel(host, SDHCI_INT_BUS_POWER, SDHCI_INT_STATUS);
+>>>  =09
+>>>  	}
+>>>
+>>> +	intmask_unhandled =3D intmask;
+>>> +
+>>> +	intmask =3D sdhci_readl(host, SDHCI_INT_STATUS);
+>>> +
+>>> +	/* Do interrupt handling again if we got new flags */
+>>> +	if (intmask & ~intmask_unhandled)
+>>> +		goto again;
+>>> +
+>>>
+>>>  	intmask &=3D ~SDHCI_INT_BUS_POWER;
+>>>  =09
+>>>  	if (intmask & SDHCI_INT_CARD_INT)
+>>
+>> Why not just replace mmiowb() i.e.
+>>
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 8d66706..da8a101 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -2353,7 +2353,9 @@ static irqreturn_t sdhci_irq(int irq, void *de=
+v_id)
+>>
+>>         result =3D IRQ_HANDLED;
+>>
+>> -       mmiowb();
+>> +       intmask =3D sdhci_readl(host, SDHCI_INT_STATUS);
+>> +       if (intmask)
+>> +               goto again;
+>>  out:
+>>         spin_unlock(&host->lock);
+>>
+>=20
+> Well, I chose this way to only printk the error once. With your sugge=
+stion it=20
+> might be printed in each loop, dunno how often/fast these IRQ stats a=
+re set=20
+> again after clearing. This would end in an endless loop if error flag=
+s are set=20
+> again fast enough, but see below.
+> But in general I like this approach.
+>=20
+>> But maybe it would be safer limiting the number of loops i.e.
+>>
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 8d66706..d88247d 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -2268,7 +2268,7 @@ static irqreturn_t sdhci_irq(int irq, void *de=
+v_id)
+>>         irqreturn_t result;
+>>         struct sdhci_host *host =3D dev_id;
+>>         u32 intmask;
+>> -       int cardint =3D 0;
+>> +       int cardint =3D 0, max_loops =3D 16;
+>>
+>>         spin_lock(&host->lock);
+>>
+>> @@ -2353,7 +2353,9 @@ static irqreturn_t sdhci_irq(int irq, void *de=
+v_id)
+>>
+>>         result =3D IRQ_HANDLED;
+>>
+>> -       mmiowb();
+>> +       intmask =3D sdhci_readl(host, SDHCI_INT_STATUS);
+>> +       if (intmask && --max_loops)
+>> +               goto again;
+>>  out:
+>>         spin_unlock(&host->lock);
+>=20
+> The actual problem I saw was a CMD6 command with an R1b response wher=
+e the IRQ=20
+> for the 'not busy' event was sent during ISR for the response. So I t=
+hink=20
+> normally this should only occur once.
+> Regarding error flags I masked the unhandled flags out in order to pr=
+int an=20
+> error only once, even if they might be set again in the next loop. Wi=
+th a=20
+> simple check on intmask they might occur up to 16 times in the kernel=
+ log.
+> IMHO it makes no sense to repeatedly print errors about interrupt fla=
+gs we=20
+> don't handle.
+>=20
+> Suggestions to get a more clean way?
 
-Regards
-Dong Aisheng
+I don't know about clean, but there is this:
 
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 8d66706..e0909da 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2267,8 +2267,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_i=
+d)
+ {
+        irqreturn_t result;
+        struct sdhci_host *host =3D dev_id;
+-       u32 intmask;
+-       int cardint =3D 0;
++       u32 intmask, unexpected =3D 0;
++       int cardint =3D 0, max_loops =3D 16;
+
+        spin_lock(&host->lock);
+
+@@ -2344,19 +2344,24 @@ static irqreturn_t sdhci_irq(int irq, void *dev=
+_id)
+        intmask &=3D ~SDHCI_INT_CARD_INT;
+
+        if (intmask) {
+-               pr_err("%s: Unexpected interrupt 0x%08x.\n",
+-                       mmc_hostname(host->mmc), intmask);
+-               sdhci_dumpregs(host);
+-
++               unexpected |=3D intmask;
+                sdhci_writel(host, intmask, SDHCI_INT_STATUS);
+        }
+
+        result =3D IRQ_HANDLED;
+
+-       mmiowb();
++       intmask =3D sdhci_readl(host, SDHCI_INT_STATUS);
++       if (intmask && --max_loops)
++               goto again;
+ out:
+        spin_unlock(&host->lock);
+
++       if (unexpected) {
++               pr_err("%s: Unexpected interrupt 0x%08x.\n",
++                       mmc_hostname(host->mmc), unexpected);
++               sdhci_dumpregs(host);
++       }
++
+        /*
+         * We have to delay this as it calls back into the driver.
+         */
