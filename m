@@ -1,135 +1,31 @@
-From: "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>
-Subject: Re: [PATCH v1 1/5] ARM: imx28: add basic dt support
-Date: Wed, 14 Mar 2012 15:16:43 +0100
-Message-ID: <20120314141643.GP3852@pengutronix.de>
-References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
- <1331628428-24017-2-git-send-email-b29396@freescale.com>
- <20120313172351.97C5E3E053B@localhost>
- <20120314124512.GG1180@shlinux2.ap.freescale.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20120314124512.GG1180@shlinux2.ap.freescale.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dong Aisheng <aisheng.dong@freescale.com>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Dong Aisheng-B29396 <B29396@freescale.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Guo Shawn-R65073 <r65073@freescale.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "cjb@laptop.org" <cjb@laptop.org>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: [PATCH 0/5] MMC: mmci: Provide bindings for Device Tree
+Date: Wed, 14 Mar 2012 14:19:58 +0000
+Message-ID: <1331734803-17954-1-git-send-email-lee.jones@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:51832 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752358Ab2CNOUI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 10:20:08 -0400
+Received: by wejx9 with SMTP id x9so1729015wej.19
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Mar 2012 07:20:07 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: cjb@laptop.org, arnd@arndb.de, niklas.hernaeus@linaro.org, linux-mmc@vger.kernel.org
 
-On Wed, Mar 14, 2012 at 08:45:23PM +0800, Dong Aisheng wrote:
-> On Wed, Mar 14, 2012 at 01:23:51AM +0800, Grant Likely wrote:
-> > On Tue, 13 Mar 2012 16:47:04 +0800, Dong Aisheng <b29396@freescale.com> wrote:
-> > > From: Dong Aisheng <dong.aisheng@linaro.org>
-> > > 
-> > > This patch includes basic dt support which can boot via nfs rootfs.
-> > > 
-> > > Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
-> > > ---
-> > >  Documentation/devicetree/bindings/arm/fsl.txt |    4 +
-> > >  arch/arm/boot/dts/imx28-evk.dts               |   31 +++++++++
-> > >  arch/arm/boot/dts/imx28.dtsi                  |   88 +++++++++++++++++++++++++
-> > >  arch/arm/mach-mxs/Kconfig                     |    9 +++
-> > >  arch/arm/mach-mxs/Makefile                    |    1 +
-> > >  arch/arm/mach-mxs/imx28-dt.c                  |   67 +++++++++++++++++++
-> > >  6 files changed, 200 insertions(+), 0 deletions(-)
-> > > 
-> > > diff --git a/Documentation/devicetree/bindings/arm/fsl.txt b/Documentation/devicetree/bindings/arm/fsl.txt
-> > > index 54bddda..9f21faf 100644
-> > > --- a/Documentation/devicetree/bindings/arm/fsl.txt
-> > > +++ b/Documentation/devicetree/bindings/arm/fsl.txt
-> > > @@ -1,6 +1,10 @@
-> > >  Freescale i.MX Platforms Device Tree Bindings
-> > >  -----------------------------------------------
-> > >  
-> > > +i.MX28 Evaluation Kit
-> > > +Required root node properties:
-> > > +    - compatible = "fsl,imx28-evk", "fsl,imx28";
-> > > +
-> > >  i.MX51 Babbage Board
-> > >  Required root node properties:
-> > >      - compatible = "fsl,imx51-babbage", "fsl,imx51";
-> > > diff --git a/arch/arm/boot/dts/imx28-evk.dts b/arch/arm/boot/dts/imx28-evk.dts
-> > > new file mode 100644
-> > > index 0000000..9758dc4
-> > > --- /dev/null
-> > > +++ b/arch/arm/boot/dts/imx28-evk.dts
-> > > @@ -0,0 +1,31 @@
-> > > +/*
-> > > + * Copyright 2012 Freescale Semiconductor, Inc.
-> > > + *
-> > > + * The code contained herein is licensed under the GNU General Public
-> > > + * License. You may obtain a copy of the GNU General Public License
-> > > + * Version 2 or later at the following locations:
-> > > + *
-> > > + * http://www.opensource.org/licenses/gpl-license.html
-> > > + * http://www.gnu.org/copyleft/gpl.html
-> > > + */
-> > > +
-> > > +/dts-v1/;
-> > > +/include/ "imx28.dtsi"
-> > > +
-> > > +/ {
-> > > +	model = "Freescale i.MX28 Evaluation Kit";
-> > > +	compatible = "fsl,imx28-evk", "fsl,imx28";
-> > > +
-> > > +	memory {
-> > > +		device_type = "memory";
-> > > +		reg = <0x40000000 0x08000000>;
-> > > +	};
-> > > +
-> > > +	ahb@80080000 {
-> > > +		fec@800f0000 {
-> > > +			phy-mode = "rmii";
-> > > +			local-mac-address = [00 04 9F 01 7D 5B];
-> > 
-> > Generally a bad idea to put a specific mac address into the device tree.
-> > Better to fill it with zeros.  Otherwise all the dev boards will end up using
-> > the same value.
-> > 
-> Yes, this issue also exists on other platfroms like mx6q.
-> One way is to dynamically get mac address by reading otp register as non-dt does
-> like:
-> static int __init mx28evk_fec_get_mac(void)
-> {
->         int i;
->         u32 val;
->         const u32 *ocotp = mxs_get_ocotp();
-> 
->         if (!ocotp)
->                 return -ETIMEDOUT;
-> 
->         /*
->          * OCOTP only stores the last 4 octets for each mac address,
->          * so hard-code Freescale OUI (00:04:9f) here.
->          */
->         for (i = 0; i < 2; i++) {
->                 val = ocotp[i];
->                 mx28_fec_pdata[i].mac[0] = 0x00;
->                 mx28_fec_pdata[i].mac[1] = 0x04;
->                 mx28_fec_pdata[i].mac[2] = 0x9f;
->                 mx28_fec_pdata[i].mac[3] = (val >> 16) & 0xff;
->                 mx28_fec_pdata[i].mac[4] = (val >> 8) & 0xff;
->                 mx28_fec_pdata[i].mac[5] = (val >> 0) & 0xff;
->         }
-> 
->         return 0;
-> }
-> 
-> But it seems this needs pass mac address to fec driver via platforom data which is
-> not friendly to dt.
-> 
-> Another way may be changing fec driver to get the fixed part of mac address(first
-> two bytes) from device tree and read the left dynamical part from otp which i'm not
-> sure is better enough.
-> 
-> BTW, filling with zeros seems not work since it's invalid mac address.
+This patch-set splits out ux500 and ARM specific variants from mmci
+core code, applies generic bindings for use by all variants, then 
+enables the ux500 variant for use with Device Tree.
 
-Yes, that's the idea of using this value...
+ Documentation/devicetree/bindings/mmc/mmci.txt |   27 +++
+ arch/arm/boot/dts/db8500.dtsi                  |    6 +-
+ arch/arm/boot/dts/snowball.dts                 |   30 +++-
+ arch/arm/mach-ux500/board-mop500.c             |    3 +-
+ drivers/mmc/host/Makefile                      |    2 +-
+ drivers/mmc/host/mmci-arm.c                    |   65 ++++++
+ drivers/mmc/host/mmci-ux500.c                  |  260 ++++++++++++++++++++++++
+ drivers/mmc/host/mmci.c                        |  194 +++++-------------
+ drivers/mmc/host/mmci.h                        |   37 ++++
+ 9 files changed, 473 insertions(+), 151 deletions(-)
 
-Sascha
-
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
