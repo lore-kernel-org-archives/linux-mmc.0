@@ -1,100 +1,181 @@
-From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: Re: [PATCH v1 2/5] mmc: mxs-mmc: add dt probe support
-Date: Wed, 14 Mar 2012 14:42:25 +0800
-Message-ID: <20120314064224.GA25735@shlinux2.ap.freescale.net>
-References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
- <1331628428-24017-3-git-send-email-b29396@freescale.com>
- <20120313174238.CE9133E053B@localhost>
+From: Marek Vasut <marek.vasut@gmail.com>
+Subject: Re: [PATCH v1 1/5] ARM: imx28: add basic dt support
+Date: Wed, 14 Mar 2012 07:51:30 +0100
+Message-ID: <201203140751.30747.marek.vasut@gmail.com>
+References: <1331628428-24017-1-git-send-email-b29396@freescale.com> <4F5F5B3F.2000303@gmail.com> <20120314062354.GA8494@shlinux2.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: Text/Plain;
+  charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:13539
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751785Ab2CNGkd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 02:40:33 -0400
-Content-Disposition: inline
-In-Reply-To: <20120313174238.CE9133E053B@localhost>
+Received: from mail-we0-f174.google.com ([74.125.82.174]:36519 "EHLO
+	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752261Ab2CNGve (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 02:51:34 -0400
+In-Reply-To: <20120314062354.GA8494@shlinux2.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Dong Aisheng-B29396 <B29396@freescale.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, Guo Shawn-R65073 <r65073@freescale.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "cjb@laptop.org" <cjb@laptop.org>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>
+To: linux-arm-kernel@lists.infradead.org
+Cc: Dong Aisheng <aisheng.dong@freescale.com>, Rob Herring <robherring2@gmail.com>, vinod.koul@linux.intel.com, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, rdunlap@xenotime.net, shawn.guo@freescale.com, kernel@pengutronix.de, cjb@laptop.org, Dong Aisheng <b29396@freescale.com>, s.hauer@pengutronix.de
 
-On Wed, Mar 14, 2012 at 01:42:38AM +0800, Grant Likely wrote:
-> On Tue, 13 Mar 2012 16:47:05 +0800, Dong Aisheng <b29396@freescale.com> wrote:
-> > From: Dong Aisheng <dong.aisheng@linaro.org>
+Dear Dong Aisheng,
+
+> On Tue, Mar 13, 2012 at 09:35:43AM -0500, Rob Herring wrote:
+> > On 03/13/2012 03:47 AM, Dong Aisheng wrote:
+> > > From: Dong Aisheng <dong.aisheng@linaro.org>
+> > > 
+> > > This patch includes basic dt support which can boot via nfs rootfs.
+> > > 
+> > > Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
+> > > ---
+> > > 
+> > >  Documentation/devicetree/bindings/arm/fsl.txt |    4 +
+> > >  arch/arm/boot/dts/imx28-evk.dts               |   31 +++++++++
+> > >  arch/arm/boot/dts/imx28.dtsi                  |   88
+> > >  +++++++++++++++++++++++++ arch/arm/mach-mxs/Kconfig                  
+> > >    |    9 +++
+> > >  arch/arm/mach-mxs/Makefile                    |    1 +
+> > >  arch/arm/mach-mxs/imx28-dt.c                  |   67
+> > >  +++++++++++++++++++ 6 files changed, 200 insertions(+), 0
+> > >  deletions(-)
+> 
+> ....
+> 
+> > > +				interrupts = <47>;
+> > > +			};
+> > > +		};
+> > > +	};
+> > > +
+> > > +	ahb@80080000 {
+> > > +		compatible = "simple-bus";
+> > > +		#address-cells = <1>;
+> > > +		#size-cells = <1>;
+> > > +		reg = <0x80080000 0x80000>;
+> > > +		ranges;
+> > > +
+> > > +		fec@800f0000 {
+> > > +			compatible = "fsl,imx28-fec";
+> > > +			reg = <0x800f0000 0x4000>;
 > > 
-> > Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
+> > This too IIRC.
+> 
+> The size is 16KB/0x4000 in iMX28 spec. :)
+
+Agreed, the memory map is slightly non-standard.
+
+> 
+> > > +			interrupts = <101>;
+> > > +			status = "disabled";
+> > > +		};
+> > > +
+> > > +		fec@800f4000 {
+> > > +			compatible = "fsl,imx28-fec";
+> > > +			reg = <0x800f4000 0x4000>;
+> > > +			interrupts = <102>;
+> > > +			status = "disabled";
+> > > +		};
+> > > +
+> > > +	};
+> > > +};
+> > > diff --git a/arch/arm/mach-mxs/Kconfig b/arch/arm/mach-mxs/Kconfig
+> > > index c57f996..6ab66af 100644
+> > > --- a/arch/arm/mach-mxs/Kconfig
+> > > +++ b/arch/arm/mach-mxs/Kconfig
+> > > @@ -17,6 +17,15 @@ config SOC_IMX28
+> > > 
+> > >  comment "MXS platforms:"
+> > > 
+> > > +config MACH_IMX28_DT
 > > 
-> > ---
-> > The patch is still using a private way for dma part binding
-> > since the common dma binding is still under discussion.
-> > http://www.spinics.net/lists/linux-omap/msg65528.html
+> > Perhaps this should be more generic like MACH_MXS_DT to eventually
+> > support MX23 as well?
+> 
+> I just did like the imx ways.
+> But yes if we see the need when do imx23 dt support.
+
+Let's do it all in one swipe, there's not so much difference between these two 
+chips.
+> 
+> > > +	bool "Support i.MX28 platforms from device tree"
+> > > +	select SOC_IMX28
+> > > +	select USE_OF
+> > > +	select MACH_MX28EVK
 > > 
-> > Will update to use common dma binding when it hits mainline.
-> > ---
-> >  .../devicetree/bindings/mmc/fsl-mxs-mmc.txt        |   23 ++++++
-> >  drivers/mmc/host/mxs-mmc.c                         |   82 +++++++++++++++++++-
-> >  2 files changed, 102 insertions(+), 3 deletions(-)
+> > This should not be selected here.
+> 
+> Like other imx soc dt board files, the imx28-dt.c may need to use some bits
+> like pinmux in mx28evk.c board file.
+> 
+> Yes, currently i can remove it since it is using uboot pinmux setting.
+> But when add other devices support which is not covered in u-boot like
+> flexcan, i may need to use non-dt board's pinmux setting.
+> So maybe we can keep it first and remove it when totally not dependent
+> on non-dt files.
+
+I'd be all in for the "decremental approach" -- keep in whatever is needed and 
+remove is as it becomes redundant.
+
+> 
+> > > + * The code contained herein is licensed under the GNU General Public
+> > > + * License. You may obtain a copy of the GNU General Public License
+> > > + * Version 2 or later at the following locations:
+> > > + *
+> > > + * http://www.opensource.org/licenses/gpl-license.html
+> > > + * http://www.gnu.org/copyleft/gpl.html
+> > > + */
+> > > +
+> > > +#include <linux/init.h>
+> > > +#include <linux/irqdomain.h>
+> > > +#include <linux/of_irq.h>
+> > > +#include <linux/of_platform.h>
+> > > +#include <asm/mach/arch.h>
+> > > +#include <asm/mach/time.h>
+> > > +#include <mach/common.h>
+> > > +#include <mach/mx28.h>
+> > > +
+> > > +static const struct of_dev_auxdata imx28_auxdata_lookup[] __initconst
+> > > = { +	OF_DEV_AUXDATA("arm,pl011", MX28_DUART_BASE_ADDR, "duart",
+> > > NULL), +	OF_DEV_AUXDATA("fsl,imx28-fec", MX28_ENET_MAC0_BASE_ADDR,
+> > > "imx28-fec.0", NULL), +	OF_DEV_AUXDATA("fsl,imx28-fec",
+> > > MX28_ENET_MAC1_BASE_ADDR, "imx28-fec.1", NULL),
 > > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt b/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt
-> > new file mode 100644
-> > index 0000000..adc1142
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/fsl-mxs-mmc.txt
-> > @@ -0,0 +1,23 @@
-> > +* FREESCALE MXS MMC peripheral
-> > +
-> > +Required properties:
-> > +- compatible : Should be "fsl,<chip>-mmc"
-> > +- reg : Should contain registers location and length
-> > +- interrupts : Should contain interrupt.
-> > +  The format is <irq_err irq_dma>.
-> > +- dma_channel: Should contain the dma channel it uses
+> > Why do you need the old names?
 > 
-> Don't use '_' in property names.
+> To keep align with the old clocks.
+> See arch/arm/mach-mxs/clock-mx28.c:
+> _REGISTER_CLOCK("imx28-fec.0", NULL, fec_clk)
+> _REGISTER_CLOCK("imx28-fec.1", NULL, fec_clk)
+> Is there any better way to avoid this?
 > 
-Yes, my mistake.
+> > > +	{ /* sentinel */ }
+> > > +};
+> > > +
+> > > +static void __init imx28_init(void)
+> > > +{
+> > > +	of_platform_populate(NULL, of_default_bus_match_table,
+> > > +			     imx28_auxdata_lookup, NULL);
+> > > +}
+> > > +
+> > > +static const struct of_device_id icoll_of_match[] __initconst = {
+> > > +	{ .compatible = "fsl,imx28-icoll", },
+> > > +	{},
+> > > +};
+> > > +
+> > > +static void __init imx28_dt_init_irq(void)
+> > > +{
+> > > +	irq_domain_generate_simple(icoll_of_match, MX28_ICOLL_BASE_ADDR, 0);
+> > 
+> > Please do "proper" domain support for the interrupt controller and use
+> > of_irq_init.
+> 
+> Ok, i will see it.
+> 
+> For others, will fix them all.
+> Thanks for the review.
+> 
+> Regards
+> Dong Aisheng
 
-> The is a generic dma binding being drafted that uses a phandle to the dma
-> controller and the ability to encode channel numbers.  You may want to take
-> a look at it.
-> 
-I will look at it.
-Thanks for the reminder.
 
-...
-> > +	dmares->flags = IORESOURCE_DMA;
-> > +	ret = of_property_read_u32(np, "dma_channel", &dmares->start);
-> > +	if (ret) {
-> > +		dev_err(&pdev->dev, "unable to get dmares from dt\n");
-> > +		return NULL;
-> > +	}
-> > +	dmares->end = dmares->start;
-> > +
-> > +	return dmares;
-> > +}
-> > +
-> > +static int __devinit mxs_mmc_get_of_property(struct platform_device *pdev,
-> > +				struct mxs_mmc_platform_data **ppdata)
-> > +{
-> > +	struct device_node *np = pdev->dev.of_node;
-> > +	struct mxs_mmc_platform_data *pdata = *ppdata;
-> > +
-> > +	if (!np)
-> > +		return -ENODEV;
-> > +
-> > +	pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
-> 
-> Ditto
-> 
-Got it.
-
-> Fix up those comments and you can add my:
-> 
-> Acked-by: Grant Likely <grant.likely@secretlab.ca>
-> 
-Thanks.
-
-Regards
-Dong Aisheng
-
+Best regards,
+Marek Vasut
