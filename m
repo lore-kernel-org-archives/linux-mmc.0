@@ -1,71 +1,133 @@
-From: Marek Vasut <marek.vasut@gmail.com>
-Subject: Re: [PATCH v1 2/5] mmc: mxs-mmc: add dt probe support
-Date: Wed, 14 Mar 2012 12:17:19 +0100
-Message-ID: <201203141217.19842.marek.vasut@gmail.com>
+From: Dong Aisheng <aisheng.dong@freescale.com>
+Subject: Re: [PATCH v1 1/5] ARM: imx28: add basic dt support
+Date: Wed, 14 Mar 2012 20:45:23 +0800
+Message-ID: <20120314124512.GG1180@shlinux2.ap.freescale.net>
 References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
- <201203140809.22676.marek.vasut@gmail.com>
- <20120314072603.GC8494@shlinux2.ap.freescale.net>
+ <1331628428-24017-2-git-send-email-b29396@freescale.com>
+ <20120313172351.97C5E3E053B@localhost>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20120314072603.GC8494@shlinux2.ap.freescale.net>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Dong Aisheng <aisheng.dong@freescale.com>
-Cc: Guo Shawn-R65073 <r65073@freescale.com>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, Dong Aisheng-B29396 <B29396@freescale.com>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:45118
+	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1760877Ab2CNMno (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 08:43:44 -0400
+Content-Disposition: inline
+In-Reply-To: <20120313172351.97C5E3E053B@localhost>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Grant Likely <grant.likely@secretlab.ca>
+Cc: Dong Aisheng-B29396 <B29396@freescale.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, Guo Shawn-R65073 <r65073@freescale.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "cjb@laptop.org" <cjb@laptop.org>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>
 
-Dear Dong Aisheng,
-
-> On Wed, Mar 14, 2012 at 08:09:22AM +0100, Marek Vasut wrote:
-> > Dear Dong Aisheng,
+On Wed, Mar 14, 2012 at 01:23:51AM +0800, Grant Likely wrote:
+> On Tue, 13 Mar 2012 16:47:04 +0800, Dong Aisheng <b29396@freescale.com> wrote:
+> > From: Dong Aisheng <dong.aisheng@linaro.org>
 > > 
-> > > On Wed, Mar 14, 2012 at 01:58:25PM +0800, Marek Vasut wrote:
-> > > > Dear Dong Aisheng,
-> > > > 
-> > > > > Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
-> > > 
-> > > ........
-> > > 
-> > > > > +static const struct of_device_id mxs_mmc_dt_ids[] = {
-> > > > > +	{ .compatible = "fsl,imx23-mmc", .data = NULL, },
-> > > > > +	{ .compatible = "fsl,imx28-mmc", .data = NULL, },
-> > > > 
-> > > > Do you really need two distinct ones here?
-> > > 
-> > > Hmm, my original purpose is to put soc difference data in .data
-> > > to remove cpu_is_* function calls in the driver later.
-> > > Do you think if any issue?
+> > This patch includes basic dt support which can boot via nfs rootfs.
 > > 
-> > Well, what's the difference between the interfaces on mx233 and mx28? Is
-> > it something that can't be encoded otherwise? I think they're not so
-> > different.
+> > Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
+> > ---
+> >  Documentation/devicetree/bindings/arm/fsl.txt |    4 +
+> >  arch/arm/boot/dts/imx28-evk.dts               |   31 +++++++++
+> >  arch/arm/boot/dts/imx28.dtsi                  |   88 +++++++++++++++++++++++++
+> >  arch/arm/mach-mxs/Kconfig                     |    9 +++
+> >  arch/arm/mach-mxs/Makefile                    |    1 +
+> >  arch/arm/mach-mxs/imx28-dt.c                  |   67 +++++++++++++++++++
+> >  6 files changed, 200 insertions(+), 0 deletions(-)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/arm/fsl.txt b/Documentation/devicetree/bindings/arm/fsl.txt
+> > index 54bddda..9f21faf 100644
+> > --- a/Documentation/devicetree/bindings/arm/fsl.txt
+> > +++ b/Documentation/devicetree/bindings/arm/fsl.txt
+> > @@ -1,6 +1,10 @@
+> >  Freescale i.MX Platforms Device Tree Bindings
+> >  -----------------------------------------------
+> >  
+> > +i.MX28 Evaluation Kit
+> > +Required root node properties:
+> > +    - compatible = "fsl,imx28-evk", "fsl,imx28";
+> > +
+> >  i.MX51 Babbage Board
+> >  Required root node properties:
+> >      - compatible = "fsl,imx51-babbage", "fsl,imx51";
+> > diff --git a/arch/arm/boot/dts/imx28-evk.dts b/arch/arm/boot/dts/imx28-evk.dts
+> > new file mode 100644
+> > index 0000000..9758dc4
+> > --- /dev/null
+> > +++ b/arch/arm/boot/dts/imx28-evk.dts
+> > @@ -0,0 +1,31 @@
+> > +/*
+> > + * Copyright 2012 Freescale Semiconductor, Inc.
+> > + *
+> > + * The code contained herein is licensed under the GNU General Public
+> > + * License. You may obtain a copy of the GNU General Public License
+> > + * Version 2 or later at the following locations:
+> > + *
+> > + * http://www.opensource.org/licenses/gpl-license.html
+> > + * http://www.gnu.org/copyleft/gpl.html
+> > + */
+> > +
+> > +/dts-v1/;
+> > +/include/ "imx28.dtsi"
+> > +
+> > +/ {
+> > +	model = "Freescale i.MX28 Evaluation Kit";
+> > +	compatible = "fsl,imx28-evk", "fsl,imx28";
+> > +
+> > +	memory {
+> > +		device_type = "memory";
+> > +		reg = <0x40000000 0x08000000>;
+> > +	};
+> > +
+> > +	ahb@80080000 {
+> > +		fec@800f0000 {
+> > +			phy-mode = "rmii";
+> > +			local-mac-address = [00 04 9F 01 7D 5B];
 > 
-> Not much difference except the one register offset and ip version.
-> See:
-> #define SSP_VERSION_LATEST      4
-> #define ssp_is_old()            (host->version < SSP_VERSION_LATEST)
-> ..
-> #define HW_SSP_VERSION (cpu_is_mx23() ? 0x110 : 0x130)
-> The ip version can be handled in driver, but for offset...
-> it depends on cpu_is_* macro.
-> Putting the HW_SSP_VERSION offset difference in .data can eliminate the
-> need of cpu_is_*.
+> Generally a bad idea to put a specific mac address into the device tree.
+> Better to fill it with zeros.  Otherwise all the dev boards will end up using
+> the same value.
 > 
-> Despite of that, since they're two devices,
-> i guess it's ok to put two compatible string there, right?
-> Or you thought just put one as below?
-> { .compatible = "fsl,mxs-mmc", .data = NULL, },
-> 
-No, I understand now /wrt the register layout.
+Yes, this issue also exists on other platfroms like mx6q.
+One way is to dynamically get mac address by reading otp register as non-dt does
+like:
+static int __init mx28evk_fec_get_mac(void)
+{
+        int i;
+        u32 val;
+        const u32 *ocotp = mxs_get_ocotp();
 
-Best regards,
-Marek Vasut
+        if (!ocotp)
+                return -ETIMEDOUT;
+
+        /*
+         * OCOTP only stores the last 4 octets for each mac address,
+         * so hard-code Freescale OUI (00:04:9f) here.
+         */
+        for (i = 0; i < 2; i++) {
+                val = ocotp[i];
+                mx28_fec_pdata[i].mac[0] = 0x00;
+                mx28_fec_pdata[i].mac[1] = 0x04;
+                mx28_fec_pdata[i].mac[2] = 0x9f;
+                mx28_fec_pdata[i].mac[3] = (val >> 16) & 0xff;
+                mx28_fec_pdata[i].mac[4] = (val >> 8) & 0xff;
+                mx28_fec_pdata[i].mac[5] = (val >> 0) & 0xff;
+        }
+
+        return 0;
+}
+
+But it seems this needs pass mac address to fec driver via platforom data which is
+not friendly to dt.
+
+Another way may be changing fec driver to get the fixed part of mac address(first
+two bytes) from device tree and read the left dynamical part from otp which i'm not
+sure is better enough.
+
+BTW, filling with zeros seems not work since it's invalid mac address.
+
+Regards
+Dong Aisheng
+
+
+
