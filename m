@@ -1,325 +1,215 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: [PATCH 4/5] MMC: mmci: Enable Device Tree support for ux500 variants
-Date: Wed, 14 Mar 2012 14:20:02 +0000
-Message-ID: <1331734803-17954-5-git-send-email-lee.jones@linaro.org>
-References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:51832 "EHLO
-	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030524Ab2CNOUP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 10:20:15 -0400
-Received: by mail-we0-f174.google.com with SMTP id x9so1729015wej.19
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Mar 2012 07:20:14 -0700 (PDT)
-In-Reply-To: <1331734803-17954-1-git-send-email-lee.jones@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] mmc: core: Fix PowerOff Notify suspend/resume
+Date: Wed, 14 Mar 2012 16:23:52 +0100
+Message-ID: <4F60B808.4010803@stericsson.com>
+References: <1328004843-16094-1-git-send-email-girish.shivananjappa@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1328004843-16094-1-git-send-email-girish.shivananjappa@linaro.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Girish K S <girish.shivananjappa@linaro.org>, Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "saugata.das@linaro.org" <saugata.das@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: cjb@laptop.org, arnd@arndb.de, niklas.hernaeus@linaro.org, linux-mmc@vger.kernel.org, Lee Jones <lee.jones@linaro.org>
 
-Provide a means to collect attributes specific to ST-Ericsson's
-ux500 variant series. This patch registers itself as the AMBA
-driver to be called during the probe process. Once all
-attributes and ux500 specifics are are collected the normal
-mmci core probe is called.
+Hi Girish and Chris,
 
-Signed-off-by: Lee Jones <lee.jones@linaro.org>
----
- arch/arm/boot/dts/db8500.dtsi      |    6 +-
- arch/arm/boot/dts/snowball.dts     |   30 ++++++-
- arch/arm/mach-ux500/board-mop500.c |    3 +-
- drivers/mmc/host/mmci-ux500.c      |  171 +++++++++++++++++++++++++++++++++++-
- 4 files changed, 201 insertions(+), 9 deletions(-)
+I noticed that this has been pushed for 3.3, I think we need to make a 
+revert of it asap if possible.
 
-diff --git a/arch/arm/boot/dts/db8500.dtsi b/arch/arm/boot/dts/db8500.dtsi
-index a9866a3..fd3d818 100644
---- a/arch/arm/boot/dts/db8500.dtsi
-+++ b/arch/arm/boot/dts/db8500.dtsi
-@@ -238,13 +238,13 @@
- 		sdi@80126000 {
- 			compatible = "arm,pl18x", "arm,primecell";
- 			reg = <0x80126000 0x1000>;
--			interrupts = <60>;
-+			interrupts = <0 60 0x4>;
- 			status = "disabled";
- 		};
- 		sdi@80118000 {
- 			compatible = "arm,pl18x", "arm,primecell";
- 			reg = <0x80118000 0x1000>;
--			interrupts = <50>;
-+			interrupts = <0 50 0x4>;
- 			status = "disabled";
- 		};
- 		sdi@80005000 {
-@@ -262,7 +262,7 @@
- 		sdi@80114000 {
- 			compatible = "arm,pl18x", "arm,primecell";
- 			reg = <0x80114000 0x1000>;
--			interrupts = <99>;
-+			interrupts = <0 99 0x4>;
- 			status = "disabled";
- 		};
- 		sdi@80008000 {
-diff --git a/arch/arm/boot/dts/snowball.dts b/arch/arm/boot/dts/snowball.dts
-index 359c6d6..164200d 100644
---- a/arch/arm/boot/dts/snowball.dts
-+++ b/arch/arm/boot/dts/snowball.dts
-@@ -87,13 +87,37 @@
- 			};
- 		};
- 
-+		// External Micro SD slot
- 		sdi@80126000 {
--			status = "enabled";
--			cd-gpios = <&gpio6 26>;
-+			arm,primecell-periphid = <0x10480180>;
-+			#gpio-cells = <1>;
-+			gpio-en   = <217>; // <&gpio6 25>;
-+			gpio-vsel = <228>; // <&gpio7 4>;
-+			cd-gpios  = <218>; // <&gpio6 26>;
-+			cd-invert;
-+
-+			ocr_mask = <0x00020000>;
-+			clock_frequency = <50000000>;
-+			rx_src_dev_type = <29>;
-+			tx_dst_dev_type = <29>;
-+			mmc_cap_4_bit_data;
-+			mmc_cap_mmc_highspeed;
-+
-+			status = "okay";
- 		};
- 
-+		// On-board eMMC
- 		sdi@80114000 {
--			status = "enabled";
-+			arm,primecell-periphid = <0x10480180>;
-+			ocr_mask = <0x00020000>;
-+		        clock_frequency = <50000000>;
-+			mmc_cap_4_bit_data;
-+			mmc_cap_8_bit_data;
-+			mmc_cap_mmc_highspeed;
-+			rx_src_dev_type = <42>;
-+			tx_dst_dev_type = <42>;
-+
-+			status = "okay";
- 		};
- 
- 		uart@80120000 {
-diff --git a/arch/arm/mach-ux500/board-mop500.c b/arch/arm/mach-ux500/board-mop500.c
-index d0799d5..60c23c5 100644
---- a/arch/arm/mach-ux500/board-mop500.c
-+++ b/arch/arm/mach-ux500/board-mop500.c
-@@ -750,6 +750,8 @@ struct of_dev_auxdata u8500_auxdata_lookup[] __initdata = {
- 	OF_DEV_AUXDATA("arm,pl011", 0x80121000, "uart1", &uart1_plat),
- 	OF_DEV_AUXDATA("arm,pl011", 0x80007000, "uart2", &uart2_plat),
- 	OF_DEV_AUXDATA("arm,pl022", 0x80002000, "ssp0",  &ssp0_plat),
-+	OF_DEV_AUXDATA("arm,pl18x", 0x80126000, "sdi0", NULL),
-+	OF_DEV_AUXDATA("arm,pl18x", 0x80114000, "sdi4", NULL),
- 	{},
- };
- 
-@@ -789,7 +791,6 @@ static void __init u8500_init_machine(void)
- 		platform_add_devices(snowball_platform_devs,
- 				ARRAY_SIZE(snowball_platform_devs));
- 
--		snowball_sdi_init(parent);
- 	} else if (of_machine_is_compatible("st-ericsson,hrefv60+")) {
- 		/*
- 		 * The HREFv60 board removed a GPIO expander and routed
-diff --git a/drivers/mmc/host/mmci-ux500.c b/drivers/mmc/host/mmci-ux500.c
-index 82e60f9..75435e4 100644
---- a/drivers/mmc/host/mmci-ux500.c
-+++ b/drivers/mmc/host/mmci-ux500.c
-@@ -1,5 +1,11 @@
- #include <linux/kernel.h>
- #include <linux/module.h>
-+#include <linux/slab.h>
-+#include <linux/of_gpio.h>
-+
-+#include <plat/ste_dma40.h>
-+
-+#include "mmci.h"
- 
- /* MMCIPOWER bits */
- #define MCI_DATA2DIREN		(1 << 2)
-@@ -37,6 +43,167 @@ static struct variant_data variant_ux500v2 = {
- 	.blksz_datactrl16	= true,
- };
- 
-+struct mmci_ux500_platform_data {
-+	struct mmci_platform_data pdata;
-+	int gpio_en;
-+	int gpio_vsel;
-+};
-+
-+static u32 mmci_ux500_vdd_handler(struct device *dev, unsigned int vdd,
-+				   unsigned char power_mode)
-+{
-+	struct mmci_ux500_platform_data *pdata =
-+		container_of(dev->platform_data, struct mmci_ux500_platform_data, pdata);
-+
-+	switch (power_mode) {
-+	case MMC_POWER_UP:
-+	case MMC_POWER_ON:
-+		/*
-+		 * Level shifter voltage should depend on vdd to when deciding
-+		 * on either 1.8V or 2.9V. Once the decision has been made the
-+		 * level shifter must be disabled and re-enabled with a changed
-+		 * select signal in order to switch the voltage. Since there is
-+		 * no framework support yet for indicating 1.8V in vdd, use the
-+		 * default 2.9V.
-+		 */
-+		if (pdata->gpio_vsel)
-+			gpio_direction_output(pdata->gpio_vsel, 0);
-+		if (pdata->gpio_en)
-+			gpio_direction_output(pdata->gpio_en, 1);
-+		break;
-+	case MMC_POWER_OFF:
-+		if (pdata->gpio_vsel)
-+			gpio_direction_output(pdata->gpio_vsel, 0);
-+		if (pdata->gpio_en)
-+			gpio_direction_output(pdata->gpio_en, 0);
-+		break;
-+	}
-+
-+	return MCI_FBCLKEN | MCI_CMDDIREN | MCI_DATA0DIREN |
-+	       MCI_DATA2DIREN | MCI_DATA31DIREN;
-+}
-+
-+static int __devinit mmci_ux500_probe(struct amba_device *dev,
-+				const struct amba_id *id)
-+{
-+	struct mmci_ux500_platform_data *ux500_pdata;
-+	struct mmci_platform_data *pdata = dev->dev.platform_data;
-+	struct device_node *np = dev->dev.of_node;
-+	struct stedma40_chan_cfg *dma_tx_param;
-+	struct stedma40_chan_cfg *dma_rx_param;
-+	int val, ret = -EINVAL;
-+
-+	/* Check if we have already been populated by platform code. */
-+	if (pdata)
-+		return mmci_probe(dev, id);
-+
-+#ifdef CONFIG_OF
-+	if (!np) {
-+		pr_warning("No platform data or Device Tree found\n");
-+		return -EINVAL;
-+	}
-+
-+	ux500_pdata = kzalloc(sizeof(struct mmci_ux500_platform_data), GFP_KERNEL);
-+	if (!ux500_pdata)
-+		return -ENOMEM;
-+
-+	dma_tx_param = kzalloc(sizeof(struct stedma40_chan_cfg), GFP_KERNEL);
-+	if (!dma_tx_param) {
-+		ret = -ENOMEM;
-+		goto out1;
-+	}
-+
-+	dma_rx_param = kzalloc(sizeof(struct stedma40_chan_cfg), GFP_KERNEL);
-+	if (!dma_rx_param) {
-+		ret = -ENOMEM;
-+		goto out2;
-+	}
-+
-+	/* ST-Ericsson/Micro specific DMA attributes. */
-+	ux500_pdata->gpio_vsel = 0;
-+	ux500_pdata->gpio_en = 0;
-+
-+	of_property_read_u32(np, "gpio-en", &ux500_pdata->gpio_en);
-+	of_property_read_u32(np, "gpio-vsel", &ux500_pdata->gpio_vsel);
-+
-+	if (ux500_pdata->gpio_vsel && ux500_pdata->gpio_en) {
-+		ret  = gpio_request(ux500_pdata->gpio_en, "level shifter enable");
-+		if (ret) {
-+			pr_warning("GPIO request for level shifter enable failed.\n");
-+			goto out3;
-+		}
-+
-+		ret = gpio_request(ux500_pdata->gpio_vsel, "level shifter 1v8-3v select");
-+		if (ret) {
-+			pr_warning("GPIO request for level shifter select failed.\n");
-+			goto out3;
-+		}
-+
-+		/* Select the default 2.9V and enable level shifter */
-+		gpio_direction_output(ux500_pdata->gpio_vsel, 0);
-+		gpio_direction_output(ux500_pdata->gpio_en, 1);
-+
-+		ux500_pdata->pdata.vdd_handler = mmci_ux500_vdd_handler;
-+	}
-+
-+	ux500_pdata->pdata.dma_filter  = stedma40_filter;
-+
-+	/* Mode. */
-+	dma_tx_param->mode = STEDMA40_MODE_LOGICAL;
-+	dma_rx_param->mode = STEDMA40_MODE_LOGICAL;
-+
-+	/* Direction. */
-+	dma_tx_param->dir = STEDMA40_MEM_TO_PERIPH;
-+	dma_rx_param->dir = STEDMA40_PERIPH_TO_MEM;
-+
-+	/* Device type. */
-+	dma_tx_param->src_dev_type = STEDMA40_DEV_DST_MEMORY;
-+
-+	if (!of_property_read_u32(np, "tx_dst_dev_type", &val))
-+		dma_tx_param->dst_dev_type = val;
-+
-+	dma_rx_param->dst_dev_type = STEDMA40_DEV_DST_MEMORY;
-+
-+	if (!of_property_read_u32(np, "rx_src_dev_type", &val))
-+		dma_rx_param->src_dev_type = val;
-+
-+	/* Data width. */
-+	dma_tx_param->src_info.data_width = STEDMA40_WORD_WIDTH;
-+	dma_tx_param->dst_info.data_width = STEDMA40_WORD_WIDTH;
-+	dma_rx_param->src_info.data_width = STEDMA40_WORD_WIDTH;
-+	dma_rx_param->dst_info.data_width = STEDMA40_WORD_WIDTH;
-+
-+	ux500_pdata->pdata.dma_tx_param = dma_tx_param;
-+	ux500_pdata->pdata.dma_rx_param = dma_rx_param;
-+
-+	dev->dev.platform_data = &ux500_pdata->pdata;
-+
-+	return mmci_probe(dev, id);
-+
-+out3:
-+	kfree(dma_rx_param);
-+out2:
-+	kfree(dma_tx_param);
-+out1:
-+	kfree(ux500_pdata);
-+#endif /* CONFIG_OF */
-+
-+	return ret;
-+}
-+
-+static int __devexit mmci_ux500_remove(struct amba_device *dev)
-+{
-+	struct mmci_ux500_platform_data *pdata =
-+		container_of(dev->dev.platform_data, struct mmci_ux500_platform_data, pdata);
-+
-+	kfree(pdata->pdata.dma_tx_param);
-+	kfree(pdata->pdata.dma_tx_param);
-+
-+	mmci_remove(dev);
-+
-+	return 0;
-+}
-+
- static struct amba_id mmci_ux500_ids[] = {
- 	/* ST Micro variants */
- 	{
-@@ -68,8 +235,8 @@ static struct amba_driver mmci_ux500_driver = {
- 	.drv		= {
- 		.name	= DRIVER_NAME,
- 	},
--	.probe		= mmci_probe,
--	.remove		= __devexit_p(mmci_remove),
-+	.probe		= mmci_ux500_probe,
-+	.remove		= __devexit_p(mmci_ux500_remove),
- 	.suspend	= mmci_suspend,
- 	.resume		= mmci_resume,
- 	.id_table	= mmci_ux500_ids,
--- 
-1.7.5.4
+I were unfortunately not able to review this patch earlier but it has 
+issues I believe. It will break suspend/resume for eMMC devices 
+supporting the SLEEP command and not the "poweroff notify" from eMMC 4.5.
 
+Please see my comments below.
+
+On 01/31/2012 11:14 AM, Girish K S wrote:
+> Modified the mmc_poweroff to resume before sending the
+> poweroff notification command. In sleep mode only AWAKE
+> and RESET commands are allowed, so before sending the
+> poweroff notification command resume from sleep mode and
+> then send the notification command.
+>
+> POwerOff Notify is tested on a Synopsis Designware Host
+> Controller(eMMC 4.5). The suspend to RAM and resume works fine.
+>
+> This patch is successfully applied on the Chris's mmc-next
+> branch
+>
+> cc: Chris Ball<cjb@laptop.org>
+> Signed-off-by: Girish K S<girish.shivananjappa@linaro.org>
+> Tested-by: Girish K S<girish.shivananjappa@linaro.org>
+> ---
+>   drivers/mmc/core/core.c  |   28 ++++++++++++++++++++--------
+>   drivers/mmc/core/mmc.c   |   17 ++++++++++++-----
+>   include/linux/mmc/card.h |    4 ++++
+>   3 files changed, 36 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index bec0bf2..14ec575 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1239,7 +1239,8 @@ static void mmc_poweroff_notify(struct mmc_host *host)
+>   	int err = 0;
+>
+>   	card = host->card;
+> -
+> +	mmc_claim_host(host);
+> +
+>   	/*
+>   	 * Send power notify command only if card
+>   	 * is mmc and notify state is powered ON
+> @@ -1269,6 +1270,7 @@ static void mmc_poweroff_notify(struct mmc_host *host)
+>   		/* Set the card state to no notification after the poweroff */
+>   		card->poweroff_notify_state = MMC_NO_POWER_NOTIFICATION;
+>   	}
+> +	mmc_release_host(host);
+>   }
+>
+>   /*
+> @@ -1327,12 +1329,28 @@ static void mmc_power_up(struct mmc_host *host)
+>
+>   void mmc_power_off(struct mmc_host *host)
+>   {
+> +	int err = 0;
+>   	mmc_host_clk_hold(host);
+>
+>   	host->ios.clock = 0;
+>   	host->ios.vdd = 0;
+>
+> -	mmc_poweroff_notify(host);
+> +	/*
+> +	 * For eMMC 4.5 device send AWAKE command before
+> +	 * POWER_OFF_NOTIFY command, because in sleep state
+> +	 * eMMC 4.5 devices respond to only RESET and AWAKE cmd
+> +	 */
+> +	if (host->card&&  mmc_card_is_sleep(host->card)&&
+> +	    host->bus_ops->resume) {
+> +		err = host->bus_ops->resume(host);
+
+This is just plain wrong. First we may have suspended the host from 
+mmc_suspend_host then we enter this funtion (mmc_power_off) to cut the 
+power to the card. Why do we even want to resume if we just did suspend?
+
+Moreover, this will actually mean that for mmc devices which are 
+supporting SLEEP but not the new eMMC 4.5 feature poweroff_notify will 
+leave this function in a resumed state (in other words, not in SLEEP 
+state) which is not OK.
+
+> +
+> +		if (!err)
+> +			mmc_poweroff_notify(host);
+> +		else
+> +			pr_warning("%s: error %d during resume "
+> +				   "(continue with poweroff sequence)\n",
+> +				   mmc_hostname(host), err);
+> +	}
+>
+>   	/*
+>   	 * Reset ocr mask to be the highest possible voltage supported for
+> @@ -2386,12 +2404,6 @@ int mmc_suspend_host(struct mmc_host *host)
+>   		 */
+>   		if (mmc_try_claim_host(host)) {
+>   			if (host->bus_ops->suspend) {
+> -				/*
+> -				 * For eMMC 4.5 device send notify command
+> -				 * before sleep, because in sleep state eMMC 4.5
+> -				 * devices respond to only RESET and AWAKE cmd
+> -				 */
+> -				mmc_poweroff_notify(host);
+>   				err = host->bus_ops->suspend(host);
+>   			}
+>   			mmc_do_release_host(host);
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 2bc586b..c3f09a2 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1330,11 +1330,13 @@ static int mmc_suspend(struct mmc_host *host)
+>   	BUG_ON(!host->card);
+>
+>   	mmc_claim_host(host);
+> -	if (mmc_card_can_sleep(host))
+> +	if (mmc_card_can_sleep(host)) {
+>   		err = mmc_card_sleep(host);
+> -	else if (!mmc_host_is_spi(host))
+> +		if (!err)
+> +			mmc_card_set_sleep(host->card);
+
+I suggest to move this inside the mmc_card_sleep function instead.
+
+> +	} else if (!mmc_host_is_spi(host))
+>   		mmc_deselect_cards(host);
+> -	host->card->state&= ~MMC_STATE_HIGHSPEED;
+> +	host->card->state&= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
+
+What has MMC_STATE_HIGHSPEED_200 with this patch to do?
+
+>   	mmc_release_host(host);
+>
+>   	return err;
+> @@ -1354,7 +1356,11 @@ static int mmc_resume(struct mmc_host *host)
+>   	BUG_ON(!host->card);
+>
+>   	mmc_claim_host(host);
+> -	err = mmc_init_card(host, host->ocr, host->card);
+> +	if (mmc_card_is_sleep(host->card)) {
+> +		err = mmc_card_awake(host);
+> +		mmc_card_clr_sleep(host->card);
+
+I suggest to move this inside the mmc_card_sleep function instead.
+
+> +	} else
+> +		err = mmc_init_card(host, host->ocr, host->card);
+>   	mmc_release_host(host);
+>
+>   	return err;
+> @@ -1364,7 +1370,8 @@ static int mmc_power_restore(struct mmc_host *host)
+>   {
+>   	int ret;
+>
+> -	host->card->state&= ~MMC_STATE_HIGHSPEED;
+> +	host->card->state&= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
+
+What has MMC_STATE_HIGHSPEED_200 with this patch to do?
+
+> +	mmc_card_clr_sleep(host->card);
+
+Why do we have clear the sleep state here?
+
+>   	mmc_claim_host(host);
+>   	ret = mmc_init_card(host, host->ocr, host->card);
+>   	mmc_release_host(host);
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index f9a0663..1a1ca71 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -219,6 +219,7 @@ struct mmc_card {
+>   #define MMC_CARD_SDXC		(1<<6)		/* card is SDXC */
+>   #define MMC_CARD_REMOVED	(1<<7)		/* card has been removed */
+>   #define MMC_STATE_HIGHSPEED_200	(1<<8)		/* card is in HS200 mode */
+> +#define MMC_STATE_SLEEP		(1<<9)		/* card is in sleep state */
+>   	unsigned int		quirks; 	/* card quirks */
+>   #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
+>   #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
+> @@ -384,6 +385,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+>   #define mmc_sd_card_uhs(c)	((c)->state&  MMC_STATE_ULTRAHIGHSPEED)
+>   #define mmc_card_ext_capacity(c) ((c)->state&  MMC_CARD_SDXC)
+>   #define mmc_card_removed(c)	((c)&&  ((c)->state&  MMC_CARD_REMOVED))
+> +#define mmc_card_is_sleep(c)	((c)->state&  MMC_STATE_SLEEP)
+>
+>   #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
+>   #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+> @@ -395,7 +397,9 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+>   #define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
+>   #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
+>   #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
+> +#define mmc_card_set_sleep(c)	((c)->state |= MMC_STATE_SLEEP)
+>
+> +#define mmc_card_clr_sleep(c)	((c)->state&= ~MMC_STATE_SLEEP)
+>   /*
+>    * Quirk add/remove for MMC products.
+>    */
+
+Best regards
+Ulf Hansson
