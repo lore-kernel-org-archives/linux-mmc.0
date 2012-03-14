@@ -1,92 +1,38 @@
 From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: Re: [PATCH v1 4/5] dma: mxs-dma: add dt probe support
-Date: Wed, 14 Mar 2012 16:23:52 +0800
-Message-ID: <20120314082352.GC1180@shlinux2.ap.freescale.net>
+Subject: Re: [PATCH v1 5/5] ARM: mxs: add mxs dma dt support
+Date: Wed, 14 Mar 2012 16:30:47 +0800
+Message-ID: <20120314083046.GD1180@shlinux2.ap.freescale.net>
 References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
- <1331628428-24017-5-git-send-email-b29396@freescale.com>
- <4F604EBD.7060400@freescale.com>
+ <1331628428-24017-6-git-send-email-b29396@freescale.com>
+ <4F604F9F.1070801@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:28694
+Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:5772
 	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751804Ab2CNIWE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 04:22:04 -0400
+	by vger.kernel.org with ESMTP id S932159Ab2CNI24 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 04:28:56 -0400
 Content-Disposition: inline
-In-Reply-To: <4F604EBD.7060400@freescale.com>
+In-Reply-To: <4F604F9F.1070801@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Huang Shijie-B32955 <B32955@freescale.com>
 Cc: Dong Aisheng-B29396 <B29396@freescale.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, Guo Shawn-R65073 <r65073@freescale.com>
 
-On Wed, Mar 14, 2012 at 03:54:37PM +0800, Huang Shijie-B32955 wrote:
-> Hi Aisheng:
-> > From: Dong Aisheng<dong.aisheng@linaro.org>
-> >
-> > Signed-off-by: Dong Aisheng<dong.aisheng@linaro.org>
-> > ---
-> >   .../devicetree/bindings/dma/fsl-mxs-dma.txt        |   17 ++++++++
-> >   drivers/dma/mxs-dma.c                              |   44 +++++++++++++------
-> >   2 files changed, 47 insertions(+), 14 deletions(-)
-> >
-> > diff --git a/Documentation/devicetree/bindings/dma/fsl-mxs-dma.txt b/Documentation/devicetree/bindings/dma/fsl-mxs-dma.txt
-> > new file mode 100644
-> > index 0000000..cfa1730
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/dma/fsl-mxs-dma.txt
-> > @@ -0,0 +1,17 @@
-> > +* Freescale MXS DMA
+On Wed, Mar 14, 2012 at 03:58:23PM +0800, Huang Shijie-B32955 wrote:
+> Hi,
+> > +			dma-apbh@80004000 {
+> > +				compatible = "fsl,mxs-dma-apbh";
+> > +				reg =<0x80004000 2000>;
+> > +			};
 > > +
-> > +Required properties:
-> > +- compatible : Should be "fsl,mxs-dma-apbh" or "fsl,mxs-dma-apbx"
-> > +- reg : Should contain registers location and length
-> > +
-> > +Examples:
-> > +
-> > +dma-apbh@80004000 {
-> > +	compatible = "fsl,mxs-dma-apbh";
-> > +	reg =<0x80004000 2000>;
-> > +};
-> > +
-> > +dma-apbx@80024000 {
-> > +	compatible = "fsl,mxs-dma-apbx";
-> > +	reg =<0x80024000 2000>;
-> > +};
-> > diff --git a/drivers/dma/mxs-dma.c b/drivers/dma/mxs-dma.c
-> > index b06cd4c..45e8d46 100644
-> > --- a/drivers/dma/mxs-dma.c
-> > +++ b/drivers/dma/mxs-dma.c
-> > @@ -22,6 +22,9 @@
-> >   #include<linux/platform_device.h>
-> >   #include<linux/dmaengine.h>
-> >   #include<linux/delay.h>
-> > +#include<linux/module.h>
-> > +#include<linux/of.h>
-> > +#include<linux/of_device.h>
-> >
-> >   #include<asm/irq.h>
-> >   #include<mach/mxs.h>
-> > @@ -130,6 +133,25 @@ struct mxs_dma_engine {
-> >   	struct mxs_dma_chan		mxs_chans[MXS_DMA_CHANNELS];
-> >   };
-> >
-> > +static struct platform_device_id mxs_dma_type[] = {
-> > +	{
-> > +		.name = "mxs-dma-apbh",
-> > +		.driver_data = MXS_DMA_APBH,
-> > +	}, {
-> > +		.name = "mxs-dma-apbx",
-> > +		.driver_data = MXS_DMA_APBX,
-> > +	}, {
-> > +		/* end of list */
-> > +	}
-> > +};
-> > +
-> I think you should use the platform_device_id to distinguish different 
-> archs.
-> In the mx6q,  you will meet some compiler error for the macro cpu_is_mx23().
+> Why you do not add the `interrupt` for the it?
+> the gpmi-nand needs to parse the interrupt out.
 > 
-Yes, i will remove cpu_is_*() in mxs-mmc driver by using device id.
+The non-dt way also does not have interrupt resource for dma device.
+It seems the channel interrupt resource is handled in each client device.
+I'm not familiar with gpmi-nand, but I guess you may need to handle
+it in gpmi driver, just like mxs-mmc driver.
 
 Regards
 Dong Aisheng
