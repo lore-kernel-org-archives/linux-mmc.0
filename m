@@ -1,41 +1,43 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 5/5] MMC: mmci: Add required documentation for Device
- Tree bindings
-Date: Thu, 15 Mar 2012 17:35:08 +0000
-Message-ID: <20120315173508.GE15988@n2100.arm.linux.org.uk>
-References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org>
- <1331734803-17954-6-git-send-email-lee.jones@linaro.org>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH 2/5] MMC: mmci: Seperate ARM variants from generic code
+Date: Thu, 15 Mar 2012 17:36:04 +0000
+Message-ID: <4F622884.6060807@linaro.org>
+References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org> <1331734803-17954-3-git-send-email-lee.jones@linaro.org> <20120315173256.GD15988@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1331734803-17954-6-git-send-email-lee.jones@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: niklas.hernaeus@linaro.org, cjb@laptop.org, linux-mmc@vger.kernel.org, arnd@arndb.de, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:51218 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1031022Ab2CORgG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 13:36:06 -0400
+Received: by eaaq12 with SMTP id q12so1773106eaa.19
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Mar 2012 10:36:05 -0700 (PDT)
+In-Reply-To: <20120315173256.GD15988@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-arm-kernel@lists.infradead.org, niklas.hernaeus@linaro.org, cjb@laptop.org, linux-mmc@vger.kernel.org, arnd@arndb.de
 
-On Wed, Mar 14, 2012 at 02:20:03PM +0000, Lee Jones wrote:
-> +ux500 variant specific properties:
-> +- gpio-en                : contains the level-shifter enable gpio
-> +- gpio-vsel              : contains the level-shifter voltage select gpio
-> +- tx_dst_dev_type        : contains the tx destination device (DMA) 
-> +- rx_src_dev_type        : contains the rx source device (DMA)
+On 15/03/12 17:32, Russell King - ARM Linux wrote:
+> On Wed, Mar 14, 2012 at 02:20:00PM +0000, Lee Jones wrote:
+>> This is a step in the right direction for future Device
+>> Tree support. It will allow variant specific attributes
+>> to be collected from a Device Tree without overloading
+>> the MMCI core. It will also provide additional future
+>> variants a cleaner way to add support.
+>=20
+> NAK.  You can't have two driver structures with the same name.  The n=
+ames
+> are sysfs object names.
 
-So what about the DMA support being proposed elsewhere?
+Well spotted.
 
-This sounds like we're inventing one DMA solution for one bit of the tree
-and another DMA solution for another bit.  This is madness.
+I've already changed this in v2. :)
 
-Note that ARM boards like Versatile also have DMA support, even though
-most of those platforms are diabolically crippled to the point of it being
-useless.  I believe it works on a few select boards...
+--=20
+Lee Jones
+Linaro ST-Ericsson Landing Team Lead
+M: +44 77 88 633 515
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
