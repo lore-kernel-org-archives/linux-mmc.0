@@ -1,7 +1,7 @@
-From: Dong Aisheng <aisheng.dong@freescale.com>
+From: =?utf-8?Q?Lothar_Wa=C3=9Fmann?= <LW-bxm8fMRDkQLDiMYJYoSAnRvVK+yQ3ZXh@public.gmane.org>
 Subject: Re: [PATCH v1 1/5] ARM: imx28: add basic dt support
-Date: Thu, 15 Mar 2012 18:59:28 +0800
-Message-ID: <20120315105927.GE13022@shlinux2.ap.freescale.net>
+Date: Thu, 15 Mar 2012 12:22:04 +0100
+Message-ID: <20321.53468.310199.875966@ipc1.ka-ro>
 References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
  <1331628428-24017-2-git-send-email-b29396@freescale.com>
  <20120313172351.97C5E3E053B@localhost>
@@ -9,63 +9,73 @@ References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
  <20120314141643.GP3852@pengutronix.de>
  <20120315030206.GB13022@shlinux2.ap.freescale.net>
  <20321.37353.63115.664975@ipc1.ka-ro>
+ <20120315105927.GE13022@shlinux2.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe006.messaging.microsoft.com ([213.199.154.209]:22041
-	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756159Ab2COK6I convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 15 Mar 2012 06:58:08 -0400
-Content-Disposition: inline
-In-Reply-To: <20321.37353.63115.664975@ipc1.ka-ro>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <20120315105927.GE13022-Fb7DQEYuewWctlrPMvKcciBecyulp+rMXqFh9Ls21Oc@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+To: Dong Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Cc: "vinod.koul-VuQAYsv1563Yd54FQh9/CA@public.gmane.org" <vinod.koul-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org" <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org" <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Guo Shawn-R65073 <r65073-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "rdunlap-/UHa2rfvQTnk1uMJSBkQmQ@public.gmane.org" <rdunlap-/UHa2rfvQTnk1uMJSBkQmQ@public.gmane.org>, "kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org" <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org" <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Lothar =?iso-8859-1?Q?Wa=DFmann?= <LW@KARO-electronics.de>
-Cc: Dong Aisheng-B29396 <B29396@freescale.com>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, Guo Shawn-R65073 <r65073@freescale.com>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Thu, Mar 15, 2012 at 02:53:29PM +0800, Lothar Wa=DFmann wrote:
-> Hi,
->=20
-> Dong Aisheng writes:
-> > On Wed, Mar 14, 2012 at 10:16:43PM +0800, s.hauer@pengutronix.de wr=
-ote:
-> > > On Wed, Mar 14, 2012 at 08:45:23PM +0800, Dong Aisheng wrote:
-> > > > On Wed, Mar 14, 2012 at 01:23:51AM +0800, Grant Likely wrote:
-> [...]
-> > > > But it seems this needs pass mac address to fec driver via plat=
-forom data which is
-> > > > not friendly to dt.
-> > > >=20
-> > > > Another way may be changing fec driver to get the fixed part of=
- mac address(first
-> > > > two bytes) from device tree and read the left dynamical part fr=
-om otp which i'm not
-> > > > sure is better enough.
-> > > >=20
-> > > > BTW, filling with zeros seems not work since it's invalid mac a=
-ddress.
-> > >=20
-> > > Yes, that's the idea of using this value...
-> > >=20
-> > But comparing to use an invalid value, why not just do not define t=
-hat
-> > local-mac-address property?
-> >=20
-> Because a MAC address is by definition a GLOBALLY UNIQUE IDENTIFIER
-> which is contrary to coding a "valid" default value for it somewhere!
-> The owner of a certain MAC address range (OUI) is responsible for
-> ensuring the uniqueness. Thus only they may assign a specific MAC
-> address to a specific device.
->=20
-Yes, you're correct.
-So i propose to read the MAC address from MX28 OTP in fec driver instea=
-d of
-define it in device tree in my last mail.
-http://www.spinics.net/lists/arm-kernel/msg165040.html
-Do you have any comment on that way?
-
-Regards
-Dong Aisheng
-
+SGksCgpEb25nIEFpc2hlbmcgd3JpdGVzOgo+IE9uIFRodSwgTWFyIDE1LCAyMDEyIGF0IDAyOjUz
+OjI5UE0gKzA4MDAsIExvdGhhciBXYcOfbWFubiB3cm90ZToKPiA+IEhpLAo+ID4gCj4gPiBEb25n
+IEFpc2hlbmcgd3JpdGVzOgo+ID4gPiBPbiBXZWQsIE1hciAxNCwgMjAxMiBhdCAxMDoxNjo0M1BN
+ICswODAwLCBzLmhhdWVyQHBlbmd1dHJvbml4LmRlIHdyb3RlOgo+ID4gPiA+IE9uIFdlZCwgTWFy
+IDE0LCAyMDEyIGF0IDA4OjQ1OjIzUE0gKzA4MDAsIERvbmcgQWlzaGVuZyB3cm90ZToKPiA+ID4g
+PiA+IE9uIFdlZCwgTWFyIDE0LCAyMDEyIGF0IDAxOjIzOjUxQU0gKzA4MDAsIEdyYW50IExpa2Vs
+eSB3cm90ZToKPiA+IFsuLi5dCj4gPiA+ID4gPiBCdXQgaXQgc2VlbXMgdGhpcyBuZWVkcyBwYXNz
+IG1hYyBhZGRyZXNzIHRvIGZlYyBkcml2ZXIgdmlhIHBsYXRmb3JvbSBkYXRhIHdoaWNoIGlzCj4g
+PiA+ID4gPiBub3QgZnJpZW5kbHkgdG8gZHQuCj4gPiA+ID4gPiAKPiA+ID4gPiA+IEFub3RoZXIg
+d2F5IG1heSBiZSBjaGFuZ2luZyBmZWMgZHJpdmVyIHRvIGdldCB0aGUgZml4ZWQgcGFydCBvZiBt
+YWMgYWRkcmVzcyhmaXJzdAo+ID4gPiA+ID4gdHdvIGJ5dGVzKSBmcm9tIGRldmljZSB0cmVlIGFu
+ZCByZWFkIHRoZSBsZWZ0IGR5bmFtaWNhbCBwYXJ0IGZyb20gb3RwIHdoaWNoIGknbSBub3QKPiA+
+ID4gPiA+IHN1cmUgaXMgYmV0dGVyIGVub3VnaC4KPiA+ID4gPiA+IAo+ID4gPiA+ID4gQlRXLCBm
+aWxsaW5nIHdpdGggemVyb3Mgc2VlbXMgbm90IHdvcmsgc2luY2UgaXQncyBpbnZhbGlkIG1hYyBh
+ZGRyZXNzLgo+ID4gPiA+IAo+ID4gPiA+IFllcywgdGhhdCdzIHRoZSBpZGVhIG9mIHVzaW5nIHRo
+aXMgdmFsdWUuLi4KPiA+ID4gPiAKPiA+ID4gQnV0IGNvbXBhcmluZyB0byB1c2UgYW4gaW52YWxp
+ZCB2YWx1ZSwgd2h5IG5vdCBqdXN0IGRvIG5vdCBkZWZpbmUgdGhhdAo+ID4gPiBsb2NhbC1tYWMt
+YWRkcmVzcyBwcm9wZXJ0eT8KPiA+ID4gCj4gPiBCZWNhdXNlIGEgTUFDIGFkZHJlc3MgaXMgYnkg
+ZGVmaW5pdGlvbiBhIEdMT0JBTExZIFVOSVFVRSBJREVOVElGSUVSCj4gPiB3aGljaCBpcyBjb250
+cmFyeSB0byBjb2RpbmcgYSAidmFsaWQiIGRlZmF1bHQgdmFsdWUgZm9yIGl0IHNvbWV3aGVyZSEK
+PiA+IFRoZSBvd25lciBvZiBhIGNlcnRhaW4gTUFDIGFkZHJlc3MgcmFuZ2UgKE9VSSkgaXMgcmVz
+cG9uc2libGUgZm9yCj4gPiBlbnN1cmluZyB0aGUgdW5pcXVlbmVzcy4gVGh1cyBvbmx5IHRoZXkg
+bWF5IGFzc2lnbiBhIHNwZWNpZmljIE1BQwo+ID4gYWRkcmVzcyB0byBhIHNwZWNpZmljIGRldmlj
+ZS4KPiA+IAo+IFllcywgeW91J3JlIGNvcnJlY3QuCj4gU28gaSBwcm9wb3NlIHRvIHJlYWQgdGhl
+IE1BQyBhZGRyZXNzIGZyb20gTVgyOCBPVFAgaW4gZmVjIGRyaXZlciBpbnN0ZWFkIG9mCj4gZGVm
+aW5lIGl0IGluIGRldmljZSB0cmVlIGluIG15IGxhc3QgbWFpbC4KPiBodHRwOi8vd3d3LnNwaW5p
+Y3MubmV0L2xpc3RzL2FybS1rZXJuZWwvbXNnMTY1MDQwLmh0bWwKPiBEbyB5b3UgaGF2ZSBhbnkg
+Y29tbWVudCBvbiB0aGF0IHdheT8KPiAKVGhhdCBwYXRjaCBzZXRzIHRoZSBPVUkgdG8gdGhlIEZy
+ZWVzY2FsZSBvd25lZCBNQUMgcmFuZ2UuIFRodXMgb25seQpGcmVlc2NhbGUgcHJvZHVjdHMgbWF5
+IGJlIGFibGUgdG8gdXNlIHRoZSBkcml2ZXIuCgpBbnl3YXkgdGhlcmUgaXMgbm8gZGVmaW5pdGUg
+c3BlYyBob3cgdGhlIE1BQyBhZGRyZXNzKGVzKSBhcmUgc3RvcmVkCmluIHRoZSBmdXNlIG1hcC4g
+VGh1cyByZWFkaW5nIHRoZSBNQUMgZnJvbSB0aGVyZSBpcyBtb3JlIG9yIGxlc3MKcGxhdGZvcm0g
+c3BlY2lmaWMuCgpDdXJyZW50bHkgSSdtIHNldHRpbmcgdXAgdGhlIE1BQyBhZGRyZXNzIGZvciBv
+dXIgVFgyOCBmcm9tIHRoZSBmdXNlcwppbiB0aGUgcGxhdGZvcm0gY29kZSBwYXNzZWQgdmlhIHBs
+YXRmb3JtX2RhdGEsIGJ1dCB0aGF0IHdpbGwgb2J2aW91c2x5Cm5vdCB3b3JrIHdpdGggRFQuCgpU
+aGUgY29ycmVjdCB3YXkgd291bGQgcHJvYmFibHkgYmUgdG8gcGFzcyB0aGUgTUFDIGZyb20gdGhl
+IGJvb3Rsb2FkZXIKdmlhIGEgRFQgYmxvYi4gQnV0IHRoYXQgd291bGQgcmVxdWlyZSBhbGwgYm9v
+dGxvYWRlcnMgdG8gYmUgdXBkYXRlZApmaXJzdCB0byBzdXBwb3J0IERUUy4gOigKCkFuIGludGVy
+bWVkaWF0ZSBzb2x1dGlvbiBjb3VsZCBiZSB1c2luZyBPRl9ERVZfQVVYREFUQSB0byBwYXNzIGEK
+cGxhdGZvcm1fZGF0YSBzdHJ1Y3QgdGhhdCBtYXkgY29udGFpbiBhIE1BQyBhZGRyZXNzIHNldCB1
+cCBieSB0aGUKcGxhdGZvcm0gY29kZS4KCgpMb3RoYXIgV2HDn21hbm4KLS0gCl9fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCgpLYS1SbyBl
+bGVjdHJvbmljcyBHbWJIIHwgUGFzY2Fsc3RyYcOfZSAyMiB8IEQgLSA1MjA3NiBBYWNoZW4KUGhv
+bmU6ICs0OSAyNDA4IDE0MDItMCB8IEZheDogKzQ5IDI0MDggMTQwMi0xMApHZXNjaMOkZnRzZsO8
+aHJlcjogTWF0dGhpYXMgS2F1c3NlbgpIYW5kZWxzcmVnaXN0ZXJlaW50cmFnOiBBbXRzZ2VyaWNo
+dCBBYWNoZW4sIEhSQiA0OTk2Cgp3d3cua2Fyby1lbGVjdHJvbmljcy5kZSB8IGluZm9Aa2Fyby1l
+bGVjdHJvbmljcy5kZQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fXwpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fXwpkZXZpY2V0cmVlLWRpc2N1c3MgbWFpbGluZyBsaXN0CmRldmljZXRyZWUtZGlzY3Vz
+c0BsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3psYWJzLm9yZy9saXN0aW5mby9kZXZp
+Y2V0cmVlLWRpc2N1c3MK
