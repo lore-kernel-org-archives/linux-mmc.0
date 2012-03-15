@@ -1,74 +1,31 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 5/5] MMC: mmci: Add required documentation for Device Tree bindings
-Date: Thu, 15 Mar 2012 17:53:25 +0000
-Message-ID: <201203151753.25774.arnd@arndb.de>
-References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org> <1331734803-17954-6-git-send-email-lee.jones@linaro.org>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 2/5] MMC: mmci: Seperate ARM variants from generic code
+Date: Thu, 15 Mar 2012 17:54:43 +0000
+Message-ID: <20120315175443.GG15988@n2100.arm.linux.org.uk>
+References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org> <4F622884.6060807@linaro.org> <20120315173714.GF15988@n2100.arm.linux.org.uk> <201203151746.56678.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:54575 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1031933Ab2CORxm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 13:53:42 -0400
-In-Reply-To: <1331734803-17954-6-git-send-email-lee.jones@linaro.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:41565 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161079Ab2CORy6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 13:54:58 -0400
+Content-Disposition: inline
+In-Reply-To: <201203151746.56678.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, niklas.hernaeus@linaro.org, linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Lee Jones <lee.jones@linaro.org>, linux-arm-kernel@lists.infradead.org, niklas.hernaeus@linaro.org, cjb@laptop.org, linux-mmc@vger.kernel.org
 
-On Wednesday 14 March 2012, Lee Jones wrote:
+On Thu, Mar 15, 2012 at 05:46:56PM +0000, Arnd Bergmann wrote:
+> Can you elaborate? I suggested the split in order to keep the ux500
+> specific parts local to one file. With the device tree conversion,
+> we really want to have them out of the platform code, but sticking them
+> into the main driver seems wrong, too.
 
-Some more comments about the individual properties
-
-> +Required properties:
-> +- compatible             : contains "arm,pl18x", "arm,primecell".
-
-Better use the exact number for 'x' here.
-
-> +- reg                    : contains pl18x registers and length.
-> +- interrupts             : contains the device IRQ(s).
-
-You should document what the first and second interrupts are,
-respectively, if there is more than one.
-
-> +- arm,primecell-periphid : contains the PrimeCell Peripheral ID.
-
-This one should be optional.
-
-> +
-> +Optional properties:
-> +- ocr_mask               : contains the regulator oscillator mask
-
-Not sure about this one. If it's for the regulators, we should be
-using the regulator bindings.
-
-> +- wp-gpios               : contains any write protect (ro) gpios
-> +- cd-gpios               : contains any card detection gpios
-> +- cd-invert              : indicates whether the cd gpio is inverted 
-> +- clock_frequency        : contains the maximum operating frequency
-
-The name should be 'clock-frequency', not 'clock_frequency'.
-
-> +- mmc_cap_4_bit_data     : indicates whether device is 4 bit capable
-> +- mmc_cap_8_bit_data     : indicates whether device is 8 bit capable
-> +- mmc_cap_mmc_highspeed  : indicates whether MMC is high speed capable
-> +- mmc_cap_sd_highspeed   : indicates whether SD is high speed capable
-
-I would strongly recommend using the same naming as sdhci here. I think
-tegra has set a precedent.
-
-> +ux500 variant specific properties:
-> +- gpio-en                : contains the level-shifter enable gpio
-> +- gpio-vsel              : contains the level-shifter voltage select gpio
-
-I think these need to be 'en-gpios' and 'vsel-gpios', in order for the
-gpio binding to work.
-
-> +- tx_dst_dev_type        : contains the tx destination device (DMA) 
-> +- rx_src_dev_type        : contains the rx source device (DMA)
-
-As Russell commented already, these should not be here.
-
-	Arnd
+You're talking about the data structures which describe what quirks to
+apply for the ux500 parts, rather than the actual quirks themselves.
+That's not a particularly clever thing to do because it separates out
+the selection of the works from the rest of the driver, which means
+simply searching for the flags to find out what's applied for what has
+to span several files.
