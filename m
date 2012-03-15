@@ -1,49 +1,91 @@
-From: Pawel Moll <pawel.moll@arm.com>
-Subject: Re: [PATCH] mmc: mmci: assume maintainership
-Date: Thu, 15 Mar 2012 14:52:26 +0000
-Message-ID: <1331823146.2066.5.camel@hornet.cambridge.arm.com>
-References: <1331821836-14641-1-git-send-email-linus.walleij@stericsson.com>
+From: Felipe Balbi <balbi@ti.com>
+Subject: Re: [PATCH RESEND 1/8] mmc: omap: Enable Auto CMD12
+Date: Thu, 15 Mar 2012 16:54:03 +0200
+Message-ID: <20120315145402.GP28447@arwen.pp.htv.fi>
+References: <y>
+ <1331822022-26714-1-git-send-email-svenkatr@ti.com>
+ <1331822022-26714-2-git-send-email-svenkatr@ti.com>
+Reply-To: balbi@ti.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="CKf/2jVYos1l2hij"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from service87.mimecast.com ([91.220.42.44]:58228 "EHLO
-	service87.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757788Ab2COOwy convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 10:52:54 -0400
-In-Reply-To: <1331821836-14641-1-git-send-email-linus.walleij@stericsson.com>
+Received: from na3sys009aog133.obsmtp.com ([74.125.149.82]:40581 "EHLO
+	psmtp.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1030463Ab2COOyR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 15 Mar 2012 10:54:17 -0400
+Received: by lbbgn12 with SMTP id gn12so1881025lbb.24
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Mar 2012 07:54:13 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1331822022-26714-2-git-send-email-svenkatr@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@stericsson.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>
+To: Venkatraman S <svenkatr@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balajitk@ti.com, balbi@ti.com
 
-On Thu, 2012-03-15 at 14:30 +0000, Linus Walleij wrote:
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 3321d75..3f280f6 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -630,7 +630,8 @@ F:	drivers/input/serio/ambakmi.*
->  F:	include/linux/amba/kmi.h
+
+--CKf/2jVYos1l2hij
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+
+On Thu, Mar 15, 2012 at 08:03:35PM +0530, Venkatraman S wrote:
+> From: Balaji T K <balajitk@ti.com>
+> @@ -766,6 +769,8 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host=
+, struct mmc_command *cmd,
+>  		cmdtype =3D 0x3;
 > =20
->  ARM PRIMECELL MMCI PL180/1 DRIVER
-> -S:	Orphan
+>  	cmdreg =3D (cmd->opcode << 24) | (resptype << 16) | (cmdtype << 22);
+> +	if ((host->flags & AUTO_CMD12) && mmc_op_multi(cmd->opcode))
 
-You probably meant
+This should have braces too.
 
-+S:	Maintained
-
-> +M:	Linus Walleij <linus.walleij@linaro.org>
-> +L:	linux-mmc@vger.kernel.org
->  F:	drivers/mmc/host/mmci.*
+> @@ -837,11 +842,16 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, =
+struct mmc_data *data)
+>  	else
+>  		data->bytes_xfered =3D 0;
 > =20
->  ARM PRIMECELL BUS SUPPORT
+> -	if (!data->stop) {
+> +	if (data->stop && ((!(host->flags & AUTO_CMD12)) || data->error))
+> +		omap_hsmmc_start_command(host, data->stop, NULL);
+> +	else {
+> +		if (data->stop)
+> +			data->stop->resp[0] =3D OMAP_HSMMC_READ(host->base,
+> +							RSP76);
+>  		omap_hsmmc_request_done(host, data->mrq);
+> -		return;
+>  	}
+> -	omap_hsmmc_start_command(host, data->stop, NULL);
+> +
+> +	return;
 
-By all means!
+return is unnecessary.
 
-Acked-by: Pawel Moll <pawel.moll@arm.com>
+--=20
+balbi
 
-Cheers!
+--CKf/2jVYos1l2hij
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-Pawe=C5=82
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
 
+iQIcBAEBAgAGBQJPYgKKAAoJEIaOsuA1yqRE9uMP/0y4VpsET+tvqrgsKPKLu+EH
+HEBQTrZm3sldz7fs/vAaXG7po76zBGi9UP8KGbHO4qwOda+XPFXKgt1dlSuYumrx
+i/Ldw/4bdqW70PL3rgaOhd2ExEOHmAh9dE+eg17SB+t2ME5U/dwO8bGwWa+O9e+q
+8clXvY+RQpg22MMy6GfQCCGCb+B/UUmMVvty2jzMwNw35MbniRK5sukTbtL8nOm4
+icRxbz7NYDCScUkOeHFpi8FCxvz9vPcjS4bcCbVM39lEZW0uVVyi5yUQxcyCbdeu
+CyiniKQguy2F+RDs19Cz1wi7YdrtFvL2tOISx6mDpjP1SvEVsfTJn5fj0KzcCsLb
+IjNGyjrbCAh3oklkrEzEdTymfOvbl07Mb57DsQ00qY0g4oiYTn6hwebpEyaRHoFa
+74mY/PKE8B3D3o0JOLKOM1xjxh5fPInNZeW8pdHjIASgObgAh2NtbrKXsur42C4v
+PZ1r0Syjg6XwDKez65RhwAOD29KOiYeXbKXhzC9cXYXMf0QplqOMpB8kCE/GosIU
+wHxSJEWqXN4k+Nc631O90P6dxxg8Sfc9UwFBncJ6WBOcSNnQajDBrwRLVWtiDkDt
+0DZmxGSBPfqTlSFoGs42ccFJv0w1nMZa244HsL1mhxc6UYKqzS0XiYq3Ggi0YfUy
+5kCcQhvLPJkZWoFAHP6U
+=qhs0
+-----END PGP SIGNATURE-----
 
+--CKf/2jVYos1l2hij--
