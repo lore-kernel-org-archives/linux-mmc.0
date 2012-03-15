@@ -1,59 +1,61 @@
-From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH RESEND 7/8] mmc: host: omap_hsmmc: convert to module_platform_driver
-Date: Thu, 15 Mar 2012 20:03:41 +0530
-Message-ID: <1331822022-26714-8-git-send-email-svenkatr@ti.com>
-References: <y>
- <1331822022-26714-1-git-send-email-svenkatr@ti.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] mmc: mmci: assume maintainership
+Date: Thu, 15 Mar 2012 15:36:01 +0100
+Message-ID: <4F61FE51.9090804@stericsson.com>
+References: <1331821836-14641-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:53693 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761337Ab2COOe4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 10:34:56 -0400
-In-Reply-To: <1331822022-26714-1-git-send-email-svenkatr@ti.com>
+Received: from eu1sys200aog120.obsmtp.com ([207.126.144.149]:33201 "EHLO
+	eu1sys200aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1761437Ab2COOhN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 10:37:13 -0400
+In-Reply-To: <1331821836-14641-1-git-send-email-linus.walleij@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: cjb@laptop.org, balajitk@ti.com, balbi@ti.com
+To: Linus WALLEIJ <linus.walleij@stericsson.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Russell King <rmk+kernel@arm.linux.org.uk>
 
-From: Felipe Balbi <balbi@ti.com>
+Hi Linus,
 
-this will delete some boilerplate code, no functional
-changes.
+Great initiative! Of course you get my Ack.
 
-Signed-off-by: Felipe Balbi <balbi@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |   16 +---------------
- 1 file changed, 1 insertion(+), 15 deletions(-)
+Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 67cb63e..4476b26 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2200,21 +2200,7 @@ static struct platform_driver omap_hsmmc_driver = {
- 	},
- };
- 
--static int __init omap_hsmmc_init(void)
--{
--	/* Register the MMC driver */
--	return platform_driver_register(&omap_hsmmc_driver);
--}
--
--static void __exit omap_hsmmc_cleanup(void)
--{
--	/* Unregister MMC driver */
--	platform_driver_unregister(&omap_hsmmc_driver);
--}
--
--module_init(omap_hsmmc_init);
--module_exit(omap_hsmmc_cleanup);
--
-+module_platform_driver(omap_hsmmc_driver);
- MODULE_DESCRIPTION("OMAP High Speed Multimedia Card driver");
- MODULE_LICENSE("GPL");
- MODULE_ALIAS("platform:" DRIVER_NAME);
--- 
-1.7.10.rc0.41.gfa678
+Br
+Ulf Hansson
+
+On 03/15/2012 03:30 PM, Linus WALLEIJ wrote:
+> From: Linus Walleij<linus.walleij@linaro.org>
+>
+> So since this driver is crucial for us (as in ST-Ericsson)
+> to have actively maintained, and since it is marked orphaned
+> I will assume maintainership for it starting with the 3.5
+> integration cycle. The idea is to collect patches and send
+> either patch sets of pull requests to Chris.
+>
+> Cc: Ulf Hansson<ulf.hansson@stericsson.com>
+> Cc: Per Forlin<per.forlin@stericsson.com>
+> Cc: Pawel Moll<pawel.moll@arm.com>
+> Cc: Russell King<rmk+kernel@arm.linux.org.uk>
+> Signed-off-by: Linus Walleij<linus.walleij@linaro.org>
+> ---
+>   MAINTAINERS |    3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 3321d75..3f280f6 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -630,7 +630,8 @@ F:	drivers/input/serio/ambakmi.*
+>   F:	include/linux/amba/kmi.h
+>
+>   ARM PRIMECELL MMCI PL180/1 DRIVER
+> -S:	Orphan
+> +M:	Linus Walleij<linus.walleij@linaro.org>
+> +L:	linux-mmc@vger.kernel.org
+>   F:	drivers/mmc/host/mmci.*
+>
+>   ARM PRIMECELL BUS SUPPORT
 
