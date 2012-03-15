@@ -1,7 +1,7 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH RESEND 1/8] mmc: omap: Enable Auto CMD12
-Date: Thu, 15 Mar 2012 20:03:35 +0530
-Message-ID: <1331822022-26714-2-git-send-email-svenkatr@ti.com>
+Subject: [PATCH RESEND 3/8] mmc: omap: use runtime put sync in probe error patch
+Date: Thu, 15 Mar 2012 20:03:37 +0530
+Message-ID: <1331822022-26714-4-git-send-email-svenkatr@ti.com>
 References: <y>
  <1331822022-26714-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
@@ -15,79 +15,29 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Balaji T K <balajitk@ti.com>
 
-Enable Auto-CMD12 for multi block read/write on HSMMC
-Tested on OMAP4430, OMAP3430 and OMAP2430 SDP
+pm_runtime_put_sync instead of autosuspend pm runtime API
+because iounmap(host->base) follows immediately.
 
+Reported-by: Rajendra Nayak <rnayak@ti.com>
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   17 ++++++++++++++---
- 1 file changed, 14 insertions(+), 3 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |    3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index f29e1a2..b1e9be7 100644
+index db8af43..0f8d34b 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -85,6 +85,7 @@
- #define BRR_ENABLE		(1 << 5)
- #define DTO_ENABLE		(1 << 20)
- #define INIT_STREAM		(1 << 1)
-+#define ACEN_ACMD12		(1 << 2)
- #define DP_SELECT		(1 << 21)
- #define DDIR			(1 << 4)
- #define DMA_EN			0x1
-@@ -115,6 +116,7 @@
- #define OMAP_MMC_MAX_CLOCK	52000000
- #define DRIVER_NAME		"omap_hsmmc"
- 
-+#define AUTO_CMD12		(1 << 0)	/* Auto CMD12 support */
- /*
-  * One controller can have multiple slots, like on some omap boards using
-  * omap.c controller driver. Luckily this is not currently done on any known
-@@ -175,6 +177,7 @@ struct omap_hsmmc_host {
- 	int			reqs_blocked;
- 	int			use_reg;
- 	int			req_in_progress;
-+	unsigned int		flags;
- 	struct omap_hsmmc_next	next_data;
- 
- 	struct	omap_mmc_platform_data	*pdata;
-@@ -766,6 +769,8 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
- 		cmdtype = 0x3;
- 
- 	cmdreg = (cmd->opcode << 24) | (resptype << 16) | (cmdtype << 22);
-+	if ((host->flags & AUTO_CMD12) && mmc_op_multi(cmd->opcode))
-+		cmdreg |= ACEN_ACMD12;
- 
- 	if (data) {
- 		cmdreg |= DP_SELECT | MSBS | BCE;
-@@ -837,11 +842,16 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
- 	else
- 		data->bytes_xfered = 0;
- 
--	if (!data->stop) {
-+	if (data->stop && ((!(host->flags & AUTO_CMD12)) || data->error))
-+		omap_hsmmc_start_command(host, data->stop, NULL);
-+	else {
-+		if (data->stop)
-+			data->stop->resp[0] = OMAP_HSMMC_READ(host->base,
-+							RSP76);
- 		omap_hsmmc_request_done(host, data->mrq);
--		return;
- 	}
--	omap_hsmmc_start_command(host, data->stop, NULL);
-+
-+	return;
- }
- 
- /*
-@@ -1826,6 +1836,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
- 	host->mapbase	= res->start;
- 	host->base	= ioremap(host->mapbase, SZ_4K);
- 	host->power_mode = MMC_POWER_OFF;
-+	host->flags	= AUTO_CMD12;
- 	host->next_data.cookie = 1;
- 
- 	platform_set_drvdata(pdev, host);
+@@ -2014,8 +2014,7 @@ err_reg:
+ err_irq_cd_init:
+ 	free_irq(host->irq, host);
+ err_irq:
+-	pm_runtime_mark_last_busy(host->dev);
+-	pm_runtime_put_autosuspend(host->dev);
++	pm_runtime_put_sync(host->dev);
+ 	pm_runtime_disable(host->dev);
+ 	clk_put(host->fclk);
+ 	if (host->got_dbclk) {
 -- 
 1.7.10.rc0.41.gfa678
 
