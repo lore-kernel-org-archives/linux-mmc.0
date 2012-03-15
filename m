@@ -1,68 +1,69 @@
 From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH RESEND 1/8] mmc: omap: Enable Auto CMD12
-Date: Thu, 15 Mar 2012 16:57:51 +0200
-Message-ID: <20120315145750.GQ28447@arwen.pp.htv.fi>
+Subject: Re: [PATCH RESEND 3/8] mmc: omap: use runtime put sync in probe
+ error patch
+Date: Thu, 15 Mar 2012 16:58:53 +0200
+Message-ID: <20120315145853.GR28447@arwen.pp.htv.fi>
 References: <y>
  <1331822022-26714-1-git-send-email-svenkatr@ti.com>
- <1331822022-26714-2-git-send-email-svenkatr@ti.com>
+ <1331822022-26714-4-git-send-email-svenkatr@ti.com>
 Reply-To: balbi@ti.com
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="90KBcPA0h13nTGdQ"
+	protocol="application/pgp-signature"; boundary="chReQkDOePndSGWY"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog121.obsmtp.com ([74.125.149.145]:53845 "EHLO
-	na3sys009aog121.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932396Ab2COO6C (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 10:58:02 -0400
-Received: by mail-lpp01m010-f49.google.com with SMTP id y4so3043799lag.36
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Mar 2012 07:58:01 -0700 (PDT)
+Received: from na3sys009aog119.obsmtp.com ([74.125.149.246]:34097 "EHLO
+	na3sys009aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S965152Ab2COO7D (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 10:59:03 -0400
+Received: by mail-lpp01m010-f44.google.com with SMTP id j5so2432526lag.3
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Mar 2012 07:59:01 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <1331822022-26714-2-git-send-email-svenkatr@ti.com>
+In-Reply-To: <1331822022-26714-4-git-send-email-svenkatr@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Venkatraman S <svenkatr@ti.com>
 Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balajitk@ti.com, balbi@ti.com
 
 
---90KBcPA0h13nTGdQ
+--chReQkDOePndSGWY
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Mar 15, 2012 at 08:03:35PM +0530, Venkatraman S wrote:
+On Thu, Mar 15, 2012 at 08:03:37PM +0530, Venkatraman S wrote:
 > From: Balaji T K <balajitk@ti.com>
 >=20
-> Enable Auto-CMD12 for multi block read/write on HSMMC
-> Tested on OMAP4430, OMAP3430 and OMAP2430 SDP
+> pm_runtime_put_sync instead of autosuspend pm runtime API
+> because iounmap(host->base) follows immediately.
 >=20
+> Reported-by: Rajendra Nayak <rnayak@ti.com>
 > Signed-off-by: Balaji T K <balajitk@ti.com>
 
-BTW, since patches are flowing through you now, they should have your
-SoB line.
+should this one go to stable too ?
 
 --=20
 balbi
 
---90KBcPA0h13nTGdQ
+--chReQkDOePndSGWY
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iQIcBAEBAgAGBQJPYgNuAAoJEIaOsuA1yqREB/cP/2e+IZdPjyCEvur9PauACBdj
-8yaPz6eFBtp0teX2ATuzKVzkQrUHHoc7qig9kvN9mrc/XAxfNHLXuUE1RBTv2Yc6
-gNXwaHr/hvYdfXP72PFSEQvyTd/XK0mPUY2VpyOHvvq4KcZLn+tlguD2gdgOWaH6
-T87Q0aPoM6DQe8rnFMo9sEXjC796gJR8OqI31GOm1/91nG/TsbKqI9JDrtVTcepT
-ukp0pVmTNVdB1OftDH/ZTV8pAqY5ddHedQZe/zqCom+ANSiV+9zjsquBuZptEC1c
-0JTLqAYEKuTVwk21gonILrqmThVib8z7Eq29C9hTaT0JmPm65Oqtcd8BZUc/RZZ2
-pHFs3ox+L1Tx9XJ4EkFOks4kJ65/chCZAWL0E0qBPcQ69gakCIFXbUbYf0wi2Swb
-/d1PYr56ne+GbJ/IJen9244/UihBcDNeVKzTCF9QeKjPhXqx88DhygXa2l7jpsr7
-UKUdqJuhfhS6k2iT8siW8lkfiYzz+tQGR6q1s7F4Pe3xAlDuWCHUMcqZUSerZ3Zx
-2Qw1LLxmSXxXqnghoPI8NRWkouoy0nPF23zeK5r8gvmQxmMKlPDxnvjKuHyRyO1Q
-Qy76yVCYBLxl2Uo03C9XkFJ9K+ZJKzVQYDit8yLGNoV3UNI0CemHLLtBao+wGQXD
-zvQMOyrSQ9NQcyp1uths
-=XGFy
+iQIcBAEBAgAGBQJPYgOtAAoJEIaOsuA1yqREOygP/2l/gSRbQboxuyM0mwFPcdHF
+f13Ta6aaIGFeBZD8Mn4btVkqE00tgfdtMvpj3CFQdg4pB3lGGacEMIFIV+OGhoZ/
+pIoyw0RVYrehYrZJ1MdZIj33hTcZO8vJZDr6SoeMyFRt7/ZoMJkit1a+nQeD2Yak
+4OvejWJ/DkrVJ2IwiyyMFTOLSh+FTO/TOT9K2/1dFmbRtStgJ5Ov46E0zd4m6hkR
+n3EJcwStmWV3xNTvhEw5KYQtb9EPDHV+oUdwsThPxDqmuYBEHPDtppPTob5/UX3b
+5WtXzAd479+7PzuIuTHjtyRDuAzbfdkhITZ/+cr5KjMTWheOzIiVJtnyu82Eate5
+WnAUOO0vZEIdz5Pu/l7d+nsU9fKhZ7LgrLjBiaqBg1sBERROQ5Up4IxdPE/MoDst
+BYKu703/HZyski1eW5nsZLdNDxmEpzRZj4uQH1RfwOgWgZzkzbBhwx8lVjxWs413
+DzpH3SbHntB51F1pC/MBU2DFFUzicfeKyssZH7WLN50K+wk85BYIJnzwR0LS5wHX
+c/jqTGOYe/azhYEV/86zkJzgPqTEyHdmwwY+g0zznrP2wIYTeD+RWV8hr53/EA6l
+GuWm4BDbw+8Swn6H61svGbjlexLZHjZxXklavtPSSPlQN4hiRvw7k8ivTxkdr01b
+66h5A3guBgqDWjY5DV9t
+=misb
 -----END PGP SIGNATURE-----
 
---90KBcPA0h13nTGdQ--
+--chReQkDOePndSGWY--
