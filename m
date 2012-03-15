@@ -1,56 +1,87 @@
-From: =?ISO-8859-1?Q?Per_F=F6rlin?= <per.forlin@stericsson.com>
-Subject: Re: [PATCH] mmc: mmci: assume maintainership
-Date: Thu, 15 Mar 2012 15:36:54 +0100
-Message-ID: <4F61FE86.90007@stericsson.com>
-References: <1331821836-14641-1-git-send-email-linus.walleij@stericsson.com>
+From: Per Forlin <per.forlin@stericsson.com>
+Subject: Re: [PATCH 3/5] MMC: mmci: Add generic Device Tree bindings to mmci
+ core code
+Date: Thu, 15 Mar 2012 16:12:21 +0100
+Message-ID: <CAFEEs1mQr4hDC6RuvchfWe7HNq67Eh2bPtwyWN-tukw32-V0rg@mail.gmail.com>
+References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org>
+	<1331734803-17954-4-git-send-email-lee.jones@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog110.obsmtp.com ([207.126.144.129]:51388 "EHLO
-	eu1sys200aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1030571Ab2COPHG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 11:07:06 -0400
-In-Reply-To: <1331821836-14641-1-git-send-email-linus.walleij@stericsson.com>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:34577 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964859Ab2COPMV convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 11:12:21 -0400
+Received: by gghe5 with SMTP id e5so3142523ggh.19
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Mar 2012 08:12:21 -0700 (PDT)
+In-Reply-To: <1331734803-17954-4-git-send-email-lee.jones@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus WALLEIJ <linus.walleij@stericsson.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf HANSSON <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Russell King <rmk+kernel@arm.linux.org.uk>
+To: Lee Jones <lee.jones@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, arnd@arndb.de, niklas.hernaeus@linaro.org, linux-mmc@vger.kernel.org
 
-On 03/15/2012 03:30 PM, Linus WALLEIJ wrote:
-> From: Linus Walleij <linus.walleij@linaro.org>
-> 
-> So since this driver is crucial for us (as in ST-Ericsson)
-> to have actively maintained, and since it is marked orphaned
-> I will assume maintainership for it starting with the 3.5
-> integration cycle. The idea is to collect patches and send
-> either patch sets of pull requests to Chris.
-> 
-> Cc: Ulf Hansson <ulf.hansson@stericsson.com>
-> Cc: Per Forlin <per.forlin@stericsson.com>
-> Cc: Pawel Moll <pawel.moll@arm.com>
-> Cc: Russell King <rmk+kernel@arm.linux.org.uk>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+On Wed, Mar 14, 2012 at 3:20 PM, Lee Jones <lee.jones@linaro.org> wrote=
+:
+> This adds the necessary bindings for collection of shared
+> attributes used in the mmci driver.
+>
+> Signed-off-by: Lee Jones <lee.jones@linaro.org>
 > ---
->  MAINTAINERS |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 3321d75..3f280f6 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -630,7 +630,8 @@ F:	drivers/input/serio/ambakmi.*
->  F:	include/linux/amba/kmi.h
->  
->  ARM PRIMECELL MMCI PL180/1 DRIVER
-> -S:	Orphan
-> +M:	Linus Walleij <linus.walleij@linaro.org>
-> +L:	linux-mmc@vger.kernel.org
->  F:	drivers/mmc/host/mmci.*
->  
->  ARM PRIMECELL BUS SUPPORT
+> =A0drivers/mmc/host/mmci.c | =A0 43 +++++++++++++++++++++++++++++++++=
+++++++++++
+> =A01 files changed, 43 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 23b41a5..9132ca8 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -30,6 +30,7 @@
+> =A0#include <linux/dma-mapping.h>
+> =A0#include <linux/amba/mmci.h>
+> =A0#include <linux/pm_runtime.h>
+> +#include <linux/of_gpio.h>
+>
+> =A0#include <asm/div64.h>
+> =A0#include <asm/io.h>
+> @@ -1056,11 +1057,47 @@ static const struct mmc_host_ops mmci_ops =3D=
+ {
+> =A0 =A0 =A0 =A0.get_cd =A0 =A0 =A0 =A0 =3D mmci_get_cd,
+> =A0};
+>
+> +#ifdef CONFIG_OF
+> +static void mmci_dt_populate_generic_pdata(struct device_node *np,
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 struct mmci_platform_data *pdata)
+> +{
+> + =A0 =A0 =A0 const void *prop;
+> + =A0 =A0 =A0 int len;
+> +
+> + =A0 =A0 =A0 of_property_read_u32(np, "wp-gpios", &pdata->gpio_wp);
+> + =A0 =A0 =A0 if (!pdata->gpio_wp)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->gpio_wp =3D -1;
+> +
+> + =A0 =A0 =A0 of_property_read_u32(np, "cd-gpios", &pdata->gpio_cd);
+> + =A0 =A0 =A0 if (!pdata->gpio_cd)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->gpio_cd =3D -1;
+> +
+> + =A0 =A0 =A0 if (of_get_property(np, "cd-invert", NULL))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->cd_invert =3D true;
+> + =A0 =A0 =A0 else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pdata->cd_invert =3D false;
+> +
+> + =A0 =A0 =A0 of_property_read_u32(np, "clock_frequency", &pdata->f_m=
+ax);
+> + =A0 =A0 =A0 if (!pdata->f_max)
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("%s has no 'clock_frequency'=
+ property\n", np->full_name);
+> +
+> + =A0 =A0 =A0 if (of_get_property(np, "mmc_cap_4_bit_data", NULL))
+I have no previous experience with DT. Could you please bring some
+light on this.
+Is it really necessary to represent each bit in the CAP with a string?
+To add CAP_ERASE for instance I need to change the code here and
+update the DT, right?
 
-Acked-by: Per Forlin <per.forlin@stericsson.com>
-
-Thanks,
+BR
 Per
