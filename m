@@ -1,21 +1,21 @@
 From: Felipe Balbi <balbi@ti.com>
 Subject: Re: [PATCH RESEND 1/8] mmc: omap: Enable Auto CMD12
-Date: Thu, 15 Mar 2012 16:54:03 +0200
-Message-ID: <20120315145402.GP28447@arwen.pp.htv.fi>
+Date: Thu, 15 Mar 2012 16:57:51 +0200
+Message-ID: <20120315145750.GQ28447@arwen.pp.htv.fi>
 References: <y>
  <1331822022-26714-1-git-send-email-svenkatr@ti.com>
  <1331822022-26714-2-git-send-email-svenkatr@ti.com>
 Reply-To: balbi@ti.com
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="CKf/2jVYos1l2hij"
+	protocol="application/pgp-signature"; boundary="90KBcPA0h13nTGdQ"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog133.obsmtp.com ([74.125.149.82]:40581 "EHLO
-	psmtp.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1030463Ab2COOyR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 15 Mar 2012 10:54:17 -0400
-Received: by lbbgn12 with SMTP id gn12so1881025lbb.24
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Mar 2012 07:54:13 -0700 (PDT)
+Received: from na3sys009aog121.obsmtp.com ([74.125.149.145]:53845 "EHLO
+	na3sys009aog121.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932396Ab2COO6C (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 10:58:02 -0400
+Received: by mail-lpp01m010-f49.google.com with SMTP id y4so3043799lag.36
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Mar 2012 07:58:01 -0700 (PDT)
 Content-Disposition: inline
 In-Reply-To: <1331822022-26714-2-git-send-email-svenkatr@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -24,68 +24,45 @@ To: Venkatraman S <svenkatr@ti.com>
 Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balajitk@ti.com, balbi@ti.com
 
 
---CKf/2jVYos1l2hij
+--90KBcPA0h13nTGdQ
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
-
 On Thu, Mar 15, 2012 at 08:03:35PM +0530, Venkatraman S wrote:
 > From: Balaji T K <balajitk@ti.com>
-> @@ -766,6 +769,8 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host=
-, struct mmc_command *cmd,
->  		cmdtype =3D 0x3;
-> =20
->  	cmdreg =3D (cmd->opcode << 24) | (resptype << 16) | (cmdtype << 22);
-> +	if ((host->flags & AUTO_CMD12) && mmc_op_multi(cmd->opcode))
+>=20
+> Enable Auto-CMD12 for multi block read/write on HSMMC
+> Tested on OMAP4430, OMAP3430 and OMAP2430 SDP
+>=20
+> Signed-off-by: Balaji T K <balajitk@ti.com>
 
-This should have braces too.
-
-> @@ -837,11 +842,16 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, =
-struct mmc_data *data)
->  	else
->  		data->bytes_xfered =3D 0;
-> =20
-> -	if (!data->stop) {
-> +	if (data->stop && ((!(host->flags & AUTO_CMD12)) || data->error))
-> +		omap_hsmmc_start_command(host, data->stop, NULL);
-> +	else {
-> +		if (data->stop)
-> +			data->stop->resp[0] =3D OMAP_HSMMC_READ(host->base,
-> +							RSP76);
->  		omap_hsmmc_request_done(host, data->mrq);
-> -		return;
->  	}
-> -	omap_hsmmc_start_command(host, data->stop, NULL);
-> +
-> +	return;
-
-return is unnecessary.
+BTW, since patches are flowing through you now, they should have your
+SoB line.
 
 --=20
 balbi
 
---CKf/2jVYos1l2hij
+--90KBcPA0h13nTGdQ
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iQIcBAEBAgAGBQJPYgKKAAoJEIaOsuA1yqRE9uMP/0y4VpsET+tvqrgsKPKLu+EH
-HEBQTrZm3sldz7fs/vAaXG7po76zBGi9UP8KGbHO4qwOda+XPFXKgt1dlSuYumrx
-i/Ldw/4bdqW70PL3rgaOhd2ExEOHmAh9dE+eg17SB+t2ME5U/dwO8bGwWa+O9e+q
-8clXvY+RQpg22MMy6GfQCCGCb+B/UUmMVvty2jzMwNw35MbniRK5sukTbtL8nOm4
-icRxbz7NYDCScUkOeHFpi8FCxvz9vPcjS4bcCbVM39lEZW0uVVyi5yUQxcyCbdeu
-CyiniKQguy2F+RDs19Cz1wi7YdrtFvL2tOISx6mDpjP1SvEVsfTJn5fj0KzcCsLb
-IjNGyjrbCAh3oklkrEzEdTymfOvbl07Mb57DsQ00qY0g4oiYTn6hwebpEyaRHoFa
-74mY/PKE8B3D3o0JOLKOM1xjxh5fPInNZeW8pdHjIASgObgAh2NtbrKXsur42C4v
-PZ1r0Syjg6XwDKez65RhwAOD29KOiYeXbKXhzC9cXYXMf0QplqOMpB8kCE/GosIU
-wHxSJEWqXN4k+Nc631O90P6dxxg8Sfc9UwFBncJ6WBOcSNnQajDBrwRLVWtiDkDt
-0DZmxGSBPfqTlSFoGs42ccFJv0w1nMZa244HsL1mhxc6UYKqzS0XiYq3Ggi0YfUy
-5kCcQhvLPJkZWoFAHP6U
-=qhs0
+iQIcBAEBAgAGBQJPYgNuAAoJEIaOsuA1yqREB/cP/2e+IZdPjyCEvur9PauACBdj
+8yaPz6eFBtp0teX2ATuzKVzkQrUHHoc7qig9kvN9mrc/XAxfNHLXuUE1RBTv2Yc6
+gNXwaHr/hvYdfXP72PFSEQvyTd/XK0mPUY2VpyOHvvq4KcZLn+tlguD2gdgOWaH6
+T87Q0aPoM6DQe8rnFMo9sEXjC796gJR8OqI31GOm1/91nG/TsbKqI9JDrtVTcepT
+ukp0pVmTNVdB1OftDH/ZTV8pAqY5ddHedQZe/zqCom+ANSiV+9zjsquBuZptEC1c
+0JTLqAYEKuTVwk21gonILrqmThVib8z7Eq29C9hTaT0JmPm65Oqtcd8BZUc/RZZ2
+pHFs3ox+L1Tx9XJ4EkFOks4kJ65/chCZAWL0E0qBPcQ69gakCIFXbUbYf0wi2Swb
+/d1PYr56ne+GbJ/IJen9244/UihBcDNeVKzTCF9QeKjPhXqx88DhygXa2l7jpsr7
+UKUdqJuhfhS6k2iT8siW8lkfiYzz+tQGR6q1s7F4Pe3xAlDuWCHUMcqZUSerZ3Zx
+2Qw1LLxmSXxXqnghoPI8NRWkouoy0nPF23zeK5r8gvmQxmMKlPDxnvjKuHyRyO1Q
+Qy76yVCYBLxl2Uo03C9XkFJ9K+ZJKzVQYDit8yLGNoV3UNI0CemHLLtBao+wGQXD
+zvQMOyrSQ9NQcyp1uths
+=XGFy
 -----END PGP SIGNATURE-----
 
---CKf/2jVYos1l2hij--
+--90KBcPA0h13nTGdQ--
