@@ -1,57 +1,59 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH RESEND 8/8] mmc: omap4: hsmmc: fix module re-insertion
-Date: Thu, 15 Mar 2012 20:03:42 +0530
-Message-ID: <1331822022-26714-9-git-send-email-svenkatr@ti.com>
+Subject: [PATCH RESEND 7/8] mmc: host: omap_hsmmc: convert to module_platform_driver
+Date: Thu, 15 Mar 2012 20:03:41 +0530
+Message-ID: <1331822022-26714-8-git-send-email-svenkatr@ti.com>
 References: <y>
  <1331822022-26714-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:53284 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1761104Ab2COOfA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 15 Mar 2012 10:35:00 -0400
+Received: from devils.ext.ti.com ([198.47.26.153]:53693 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761337Ab2COOe4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 10:34:56 -0400
 In-Reply-To: <1331822022-26714-1-git-send-email-svenkatr@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 Cc: cjb@laptop.org, balajitk@ti.com, balbi@ti.com
 
-From: Balaji T K <balajitk@ti.com>
+From: Felipe Balbi <balbi@ti.com>
 
-OMAP4 and OMAP3 HSMMC IP registers differ by 0x100 offset.
-Addng the offset to platform_device resource structure
-increments the start address for every insmod operation.
-MMC command fails on re-insertion as module due to incorrect register base.
-Fix this by updating the ioremap base address only.
+this will delete some boilerplate code, no functional
+changes.
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
+Signed-off-by: Felipe Balbi <balbi@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |    4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   16 +---------------
+ 1 file changed, 1 insertion(+), 15 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 4476b26..f324cf4 100644
+index 67cb63e..4476b26 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1813,8 +1813,6 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 	if (res == NULL || irq < 0)
- 		return -ENXIO;
+@@ -2200,21 +2200,7 @@ static struct platform_driver omap_hsmmc_driver = {
+ 	},
+ };
  
--	res->start += pdata->reg_offset;
--	res->end += pdata->reg_offset;
- 	res = request_mem_region(res->start, resource_size(res), pdev->name);
- 	if (res == NULL)
- 		return -EBUSY;
-@@ -1838,7 +1836,7 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 	host->dma_ch	= -1;
- 	host->irq	= irq;
- 	host->slot_id	= 0;
--	host->mapbase	= res->start;
-+	host->mapbase	= res->start + pdata->reg_offset;
- 	host->base	= ioremap(host->mapbase, SZ_4K);
- 	host->power_mode = MMC_POWER_OFF;
- 	host->flags	= AUTO_CMD12;
+-static int __init omap_hsmmc_init(void)
+-{
+-	/* Register the MMC driver */
+-	return platform_driver_register(&omap_hsmmc_driver);
+-}
+-
+-static void __exit omap_hsmmc_cleanup(void)
+-{
+-	/* Unregister MMC driver */
+-	platform_driver_unregister(&omap_hsmmc_driver);
+-}
+-
+-module_init(omap_hsmmc_init);
+-module_exit(omap_hsmmc_cleanup);
+-
++module_platform_driver(omap_hsmmc_driver);
+ MODULE_DESCRIPTION("OMAP High Speed Multimedia Card driver");
+ MODULE_LICENSE("GPL");
+ MODULE_ALIAS("platform:" DRIVER_NAME);
 -- 
 1.7.10.rc0.41.gfa678
 
