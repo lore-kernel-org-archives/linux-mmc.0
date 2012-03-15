@@ -1,94 +1,65 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH RESEND 8/8] mmc: omap4: hsmmc: fix module re-insertion
-Date: Thu, 15 Mar 2012 17:04:28 +0200
-Message-ID: <20120315150426.GT28447@arwen.pp.htv.fi>
-References: <y>
- <1331822022-26714-1-git-send-email-svenkatr@ti.com>
- <1331822022-26714-9-git-send-email-svenkatr@ti.com>
-Reply-To: balbi@ti.com
+From: Per Forlin <per.forlin@stericsson.com>
+Subject: Re: [PATCH 0/5] MMC: mmci: Provide bindings for Device Tree
+Date: Thu, 15 Mar 2012 16:06:40 +0100
+Message-ID: <CAFEEs1kz+QT_4Yc6byS4se0EMZvqA5hp5CvLvvtNgC++AJboxA@mail.gmail.com>
+References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="80Ds8Z/hZmemMosa"
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1331822022-26714-9-git-send-email-svenkatr@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balajitk@ti.com, balbi@ti.com
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:53505 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030576Ab2COPGk convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 11:06:40 -0400
+Received: by gghe5 with SMTP id e5so3135952ggh.19
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Mar 2012 08:06:40 -0700 (PDT)
+In-Reply-To: <1331734803-17954-1-git-send-email-lee.jones@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-
-
---80Ds8Z/hZmemMosa
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+To: Lee Jones <lee.jones@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, arnd@arndb.de, niklas.hernaeus@linaro.org, linux-mmc@vger.kernel.org
 
 Hi,
 
-On Thu, Mar 15, 2012 at 08:03:42PM +0530, Venkatraman S wrote:
-> From: Balaji T K <balajitk@ti.com>
->=20
-> OMAP4 and OMAP3 HSMMC IP registers differ by 0x100 offset.
-> Addng the offset to platform_device resource structure
-> increments the start address for every insmod operation.
-> MMC command fails on re-insertion as module due to incorrect register bas=
-e.
-> Fix this by updating the ioremap base address only.
->=20
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |    4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 4476b26..f324cf4 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1813,8 +1813,6 @@ static int __devinit omap_hsmmc_probe(struct platfo=
-rm_device *pdev)
->  	if (res =3D=3D NULL || irq < 0)
->  		return -ENXIO;
-> =20
-> -	res->start +=3D pdata->reg_offset;
-> -	res->end +=3D pdata->reg_offset;
->  	res =3D request_mem_region(res->start, resource_size(res), pdev->name);
->  	if (res =3D=3D NULL)
->  		return -EBUSY;
-> @@ -1838,7 +1836,7 @@ static int __devinit omap_hsmmc_probe(struct platfo=
-rm_device *pdev)
->  	host->dma_ch	=3D -1;
->  	host->irq	=3D irq;
->  	host->slot_id	=3D 0;
-> -	host->mapbase	=3D res->start;
-> +	host->mapbase	=3D res->start + pdata->reg_offset;
+I would like to see what the minimal required change is to support DT
+for mmci without factorization.
+1. Minimal change in mmci.
+2. Add mmci_dt.c which contains the DT-populate code.
 
-could this be done with a revision check at some point so we drop the
-pdata requirement ? Not part of $SUBJECT though, because you're just
-moving the increment.
+The factorization could be done as step 2 I think.
 
---=20
-balbi
+What do you say?
 
---80Ds8Z/hZmemMosa
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+BR
+Per
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iQIcBAEBAgAGBQJPYgT6AAoJEIaOsuA1yqREq+cP/1z078gnRX+M+EYz+tfbZjuE
-rKSVWyS3ulcIa03SL83bWNgB5rf/Vo9U5lfAEBBJZuNNg5kUR5GtYctEMeYAMWtq
-ICI0Db4/5BbYyhvPs8K6Hbgj4ne1I/M+kSmk2qgBrh0j6Ak52NfBg0XTZlNa4j2e
-ny3oVIPZGjGVkVmptMDInJstK9nngoiXvnyMVRP7aW+f38OY3bmXHyztNs7DVPui
-uPyWgMXGNEntGMOU3oJaqDmvYy6KIdwk7MYNhmEXhKniz/w2i6xS5uH22LWnLoCa
-ZZjcIL+JFx67RxXObFA/1mIb/2c92wg0BtLJ5x4MFGUsY83tgsaXfHEvlHi4XYSP
-9+T9FyEo5+/oQyJfJ25eIbjqxZVlBmfIe4B6oGARQg+5Weq3P7HwzE5qV/pZKJn/
-IQ6SDk6vtjBPuRb1cyhghFgAl1gODECZQ3tGc1tXeuYurbd9HYCuhSRG0Y7+7QN3
-yt8SDXR5gMsr2d8U2P2gyQ3Bj7pp2AV7HADBV+YdNAqScx6x16n9Qa4MeZ7j2JIt
-b2NKQS2ElcWycyfGxrttqQpibRxMejc/dg1oNtAcr4MrHR7GkGFtPJjMTPhsXY86
-GJur0fcfdpbjeS1obRugLYmDDNIQEZWbprdnRQM0WSLx1dqXEROFCKkxdQyHcR7S
-k8VKhnANnO5FcDPX/kdV
-=h5Mu
------END PGP SIGNATURE-----
-
---80Ds8Z/hZmemMosa--
+On Wed, Mar 14, 2012 at 3:19 PM, Lee Jones <lee.jones@linaro.org> wrote=
+:
+> This patch-set splits out ux500 and ARM specific variants from mmci
+> core code, applies generic bindings for use by all variants, then
+> enables the ux500 variant for use with Device Tree.
+>
+> =A0Documentation/devicetree/bindings/mmc/mmci.txt | =A0 27 +++
+> =A0arch/arm/boot/dts/db8500.dtsi =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|=
+ =A0 =A06 +-
+> =A0arch/arm/boot/dts/snowball.dts =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0=
+ 30 +++-
+> =A0arch/arm/mach-ux500/board-mop500.c =A0 =A0 =A0 =A0 =A0 =A0 | =A0 =A0=
+3 +-
+> =A0drivers/mmc/host/Makefile =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0| =A0 =A02 +-
+> =A0drivers/mmc/host/mmci-arm.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+| =A0 65 ++++++
+> =A0drivers/mmc/host/mmci-ux500.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0|=
+ =A0260 ++++++++++++++++++++++++
+> =A0drivers/mmc/host/mmci.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0| =A0194 +++++-------------
+> =A0drivers/mmc/host/mmci.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0| =A0 37 ++++
+> =A09 files changed, 473 insertions(+), 151 deletions(-)
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
