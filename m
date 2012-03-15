@@ -1,68 +1,67 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH 0/5] MMC: mmci: Provide bindings for Device Tree
-Date: Thu, 15 Mar 2012 15:44:21 +0000
-Message-ID: <4F620E55.4000701@linaro.org>
-References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org> <CAFEEs1kz+QT_4Yc6byS4se0EMZvqA5hp5CvLvvtNgC++AJboxA@mail.gmail.com> <4F6209DA.1080809@linaro.org> <201203151532.44363.arnd@arndb.de>
+From: Russell King <rmk@arm.linux.org.uk>
+Subject: Re: [PATCH] mmc: mmci: assume maintainership
+Date: Thu, 15 Mar 2012 17:30:47 +0000
+Message-ID: <20120315173047.GB17243@flint.arm.linux.org.uk>
+References: <1331821836-14641-1-git-send-email-linus.walleij@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:50907 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030466Ab2COPo7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 11:44:59 -0400
-Received: by bkcik5 with SMTP id ik5so2225947bkc.19
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Mar 2012 08:44:57 -0700 (PDT)
-In-Reply-To: <201203151532.44363.arnd@arndb.de>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:39324 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932396Ab2CORbA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Mar 2012 13:31:00 -0400
+Content-Disposition: inline
+In-Reply-To: <1331821836-14641-1-git-send-email-linus.walleij@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Per Forlin <per.forlin@stericsson.com>, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, niklas.hernaeus@linaro.org, linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Pawel Moll <pawel.moll@arm.com>
 
-On 15/03/12 15:32, Arnd Bergmann wrote:
-> On Thursday 15 March 2012, Lee Jones wrote:
->>> I would like to see what the minimal required change is to support =
-DT
->>> for mmci without factorization.
->>> 1. Minimal change in mmci.
->>> 2. Add mmci_dt.c which contains the DT-populate code.
->>>
->>> The factorization could be done as step 2 I think.
->>>
->>> What do you say?
->>
->> I'm wondering what the difference is as the work has already been do=
-ne.
->>
->> It was Arnd's suggestion to separate out the two types of variants, =
-and
->> I'm quite fond of the new (fully featured) layout.
->=20
-> Right, I usually prefer cleanups or other refactoring to be done firs=
-t, and
-> then features added on top.
->=20
-> You could in theory add have just patches 3/4/5 all applied without
-> the refactoring, but that I would be worried that this causes depende=
-ncies
-> between the mmci driver and ux500 specific functionality like the
-> stedma40_filter function.
+On Thu, Mar 15, 2012 at 03:30:36PM +0100, Linus Walleij wrote:
+> From: Linus Walleij <linus.walleij@linaro.org>
+> 
+> So since this driver is crucial for us (as in ST-Ericsson)
+> to have actively maintained, and since it is marked orphaned
+> I will assume maintainership for it starting with the 3.5
+> integration cycle. The idea is to collect patches and send
+> either patch sets of pull requests to Chris.
 
-It's a possibility that we may have run into that even with this new
-layout. Remember you suggested that the u300 variant may be better off
-going into the ARM variant's file, but I wasn't quite sure, as it was a=
-n
-ST product. Well the afore mentioned function may still cause us some
-trouble. I am in the mists of some regression testing now. I'll report
-back when I know more.
+Actually, I still want to be involved because I'm far from convinced with
+some of the patches coming from Ulf are correct for ARMs implementation.
+That's why I'm purposely not applying the MMCI patches in the patch system
+in a particularly fast manner - I want there to be a decent amount of
+testing between each set of patches.
 
-Kind regards,
-Lee
+For example, the next patch in the series to be applied is:
 
+"mmc: mmci: Decrease current consumption in suspend"
 
---=20
-Lee Jones
-Linaro ST-Ericsson Landing Team Lead
-M: +44 77 88 633 515
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
+and as I've explained before, it does this by saving the MMCI power and
+clock registers and clearing them.  This has the effect of stopping the
+clock, and in the case of ARMs hardware, removing power from the card.
+Therefore, the card will require full bring up, including reassigning
+the card address for MMC cards on resume, and simply starting the next
+command will not be possible.
+
+As I've already tried to explain, on the normal power management suspend
+callback, these registers should _already_ have been placed into their
+"card not present" state, so saving and zeroing them has no useful effect.
+
+Moreover, saving and restoring them across suspend is wrong because on
+ARM hardware there's a sequence of power-off, power-up, power-on which
+needs to be gone through to restore power.
+
+So, I've queued up the 10 patches which I'm happy to take for v3.4, and
+that's all I'm taking for v3.4 until I can find the strength to have
+another discussion with Ulf over this issue.
+
+As there's an interdependence between the various patches, I can't apply
+any of the later patches even if I wanted to without these "power saving"
+patches.
+
+So, it's not really unmaintained or orphaned...
+
+-- 
+Russell King
+ Linux kernel    2.6 ARM Linux   - http://www.arm.linux.org.uk/
+ maintainer of:
