@@ -1,68 +1,94 @@
 From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH RESEND 4/8] mmc: omap: context save after enabling
- runtime pm
-Date: Thu, 15 Mar 2012 16:59:14 +0200
-Message-ID: <20120315145912.GS28447@arwen.pp.htv.fi>
+Subject: Re: [PATCH RESEND 8/8] mmc: omap4: hsmmc: fix module re-insertion
+Date: Thu, 15 Mar 2012 17:04:28 +0200
+Message-ID: <20120315150426.GT28447@arwen.pp.htv.fi>
 References: <y>
  <1331822022-26714-1-git-send-email-svenkatr@ti.com>
- <1331822022-26714-5-git-send-email-svenkatr@ti.com>
+ <1331822022-26714-9-git-send-email-svenkatr@ti.com>
 Reply-To: balbi@ti.com
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="E1BPhOSoTthPQdPL"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog132.obsmtp.com ([74.125.149.250]:41945 "EHLO
-	psmtp.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S965121Ab2COO7Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 15 Mar 2012 10:59:25 -0400
-Received: by mail-lpp01m010-f41.google.com with SMTP id z14so3446605lag.14
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Mar 2012 07:59:23 -0700 (PDT)
+	protocol="application/pgp-signature"; boundary="80Ds8Z/hZmemMosa"
+Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1331822022-26714-5-git-send-email-svenkatr@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <1331822022-26714-9-git-send-email-svenkatr@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
 To: Venkatraman S <svenkatr@ti.com>
 Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balajitk@ti.com, balbi@ti.com
+List-Id: linux-mmc@vger.kernel.org
 
 
---E1BPhOSoTthPQdPL
+--80Ds8Z/hZmemMosa
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Mar 15, 2012 at 08:03:38PM +0530, Venkatraman S wrote:
+Hi,
+
+On Thu, Mar 15, 2012 at 08:03:42PM +0530, Venkatraman S wrote:
 > From: Balaji T K <balajitk@ti.com>
 >=20
-> call context save api after enabling runtime pm
-> to make sure register access in context save api happens with clk enabled.
+> OMAP4 and OMAP3 HSMMC IP registers differ by 0x100 offset.
+> Addng the offset to platform_device resource structure
+> increments the start address for every insmod operation.
+> MMC command fails on re-insertion as module due to incorrect register bas=
+e.
+> Fix this by updating the ioremap base address only.
 >=20
 > Signed-off-by: Balaji T K <balajitk@ti.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |    4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 4476b26..f324cf4 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1813,8 +1813,6 @@ static int __devinit omap_hsmmc_probe(struct platfo=
+rm_device *pdev)
+>  	if (res =3D=3D NULL || irq < 0)
+>  		return -ENXIO;
+> =20
+> -	res->start +=3D pdata->reg_offset;
+> -	res->end +=3D pdata->reg_offset;
+>  	res =3D request_mem_region(res->start, resource_size(res), pdev->name);
+>  	if (res =3D=3D NULL)
+>  		return -EBUSY;
+> @@ -1838,7 +1836,7 @@ static int __devinit omap_hsmmc_probe(struct platfo=
+rm_device *pdev)
+>  	host->dma_ch	=3D -1;
+>  	host->irq	=3D irq;
+>  	host->slot_id	=3D 0;
+> -	host->mapbase	=3D res->start;
+> +	host->mapbase	=3D res->start + pdata->reg_offset;
 
-Cc stable ?
+could this be done with a revision check at some point so we drop the
+pdata requirement ? Not part of $SUBJECT though, because you're just
+moving the increment.
 
 --=20
 balbi
 
---E1BPhOSoTthPQdPL
+--80Ds8Z/hZmemMosa
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iQIcBAEBAgAGBQJPYgPAAAoJEIaOsuA1yqRETEkP/ir33xo8BcNgGkp7u5d4/3nG
-cPRssYCEcCKaQPh1h2XzjBQk4g6JYBy5pVOk0CLDyuUI6JEv7oPBDdXhYEjXS8/z
-f3MDayv/7uAhPe/FwEFbq9BuV/qMchbeXDI8j0MOZCkqYINFYC2xawGPwl2wyW5s
-Fak9iaskPEZSF1XeOg/K4q0L7rnr2V1vGvYOVoVs6bySy2vci+ffB1vMISFaKYh+
-bMoQN3e7y9fLTAo3GNWDA00cJNqNpP6v8/pzEt+v8IfLMgihv9BtDhGpfYQ6okdl
-/sJsltpS/fsuML706AjWkruLq363+1ZfuIKbBnPZVS+0z2ShzdWiP+jE5kPetyMx
-e0FL//LkUcqUHOahsUFC6y9xbM6Pzg3YlHfjh2BjqLlojEUTygSx4g6NHOk+tKMp
-4rP3DrrzP5arjNA1fBjSCGMMGElIF3tFOD85gbkb88T5jhqS+34F7HyRZYeCOoRU
-r4uwkw4rcwzxiIWyRzMxEZLm8GfSiPzTIIhxkp11CPGXnTBhacG1tYHxx8/X7iqF
-Jskvdg06HvlpvSvqRiL/3GI7xIrpHUAhGifKJ66f9IXNH4rNLI4EPGdw0UO0Z8Q/
-Kuhvn35q3UmRKuLGN7rAHkyxvqpUm3Fj1Y8zwTy7X3IpdK8+Eeb94WR9GKTxkHF3
-Ih6FGHaLziATeJT2xPZv
-=p43e
+iQIcBAEBAgAGBQJPYgT6AAoJEIaOsuA1yqREq+cP/1z078gnRX+M+EYz+tfbZjuE
+rKSVWyS3ulcIa03SL83bWNgB5rf/Vo9U5lfAEBBJZuNNg5kUR5GtYctEMeYAMWtq
+ICI0Db4/5BbYyhvPs8K6Hbgj4ne1I/M+kSmk2qgBrh0j6Ak52NfBg0XTZlNa4j2e
+ny3oVIPZGjGVkVmptMDInJstK9nngoiXvnyMVRP7aW+f38OY3bmXHyztNs7DVPui
+uPyWgMXGNEntGMOU3oJaqDmvYy6KIdwk7MYNhmEXhKniz/w2i6xS5uH22LWnLoCa
+ZZjcIL+JFx67RxXObFA/1mIb/2c92wg0BtLJ5x4MFGUsY83tgsaXfHEvlHi4XYSP
+9+T9FyEo5+/oQyJfJ25eIbjqxZVlBmfIe4B6oGARQg+5Weq3P7HwzE5qV/pZKJn/
+IQ6SDk6vtjBPuRb1cyhghFgAl1gODECZQ3tGc1tXeuYurbd9HYCuhSRG0Y7+7QN3
+yt8SDXR5gMsr2d8U2P2gyQ3Bj7pp2AV7HADBV+YdNAqScx6x16n9Qa4MeZ7j2JIt
+b2NKQS2ElcWycyfGxrttqQpibRxMejc/dg1oNtAcr4MrHR7GkGFtPJjMTPhsXY86
+GJur0fcfdpbjeS1obRugLYmDDNIQEZWbprdnRQM0WSLx1dqXEROFCKkxdQyHcR7S
+k8VKhnANnO5FcDPX/kdV
+=h5Mu
 -----END PGP SIGNATURE-----
 
---E1BPhOSoTthPQdPL--
+--80Ds8Z/hZmemMosa--
