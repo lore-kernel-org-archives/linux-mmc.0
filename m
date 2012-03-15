@@ -1,154 +1,139 @@
 From: Dong Aisheng <aisheng.dong@freescale.com>
 Subject: Re: [PATCH v1 1/5] ARM: imx28: add basic dt support
-Date: Thu, 15 Mar 2012 10:57:09 +0800
-Message-ID: <20120315025707.GA13022@shlinux2.ap.freescale.net>
+Date: Thu, 15 Mar 2012 11:02:07 +0800
+Message-ID: <20120315030206.GB13022@shlinux2.ap.freescale.net>
 References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
  <1331628428-24017-2-git-send-email-b29396@freescale.com>
- <4F5F5B3F.2000303@gmail.com>
- <20120314062354.GA8494@shlinux2.ap.freescale.net>
- <4F60979E.3060704@gmail.com>
+ <20120313172351.97C5E3E053B@localhost>
+ <20120314124512.GG1180@shlinux2.ap.freescale.net>
+ <20120314141643.GP3852@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:26215
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752733Ab2COCze (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 22:55:34 -0400
+Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:40063 "EHLO
+	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752818Ab2CODAb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Mar 2012 23:00:31 -0400
 Content-Disposition: inline
-In-Reply-To: <4F60979E.3060704@gmail.com>
+In-Reply-To: <20120314141643.GP3852@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robherring2@gmail.com>
-Cc: Dong Aisheng-B29396 <B29396@freescale.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, Guo Shawn-R65073 <r65073@freescale.com>
+To: "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>
+Cc: Dong Aisheng-B29396 <B29396@freescale.com>, Grant Likely <grant.likely@secretlab.ca>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Guo Shawn-R65073 <r65073@freescale.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "cjb@laptop.org" <cjb@laptop.org>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>
 
-On Wed, Mar 14, 2012 at 09:05:34PM +0800, Rob Herring wrote:
-> On 03/14/2012 01:23 AM, Dong Aisheng wrote:
-> > On Tue, Mar 13, 2012 at 09:35:43AM -0500, Rob Herring wrote:
-> >> On 03/13/2012 03:47 AM, Dong Aisheng wrote:
-> >>> From: Dong Aisheng <dong.aisheng@linaro.org>
-> >>>
-> >>> This patch includes basic dt support which can boot via nfs rootfs.
-> >>>
-> >>> Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
-> >>> ---
-> >>>  Documentation/devicetree/bindings/arm/fsl.txt |    4 +
-> >>>  arch/arm/boot/dts/imx28-evk.dts               |   31 +++++++++
-> >>>  arch/arm/boot/dts/imx28.dtsi                  |   88 +++++++++++++++++++++++++
-> >>>  arch/arm/mach-mxs/Kconfig                     |    9 +++
-> >>>  arch/arm/mach-mxs/Makefile                    |    1 +
-> >>>  arch/arm/mach-mxs/imx28-dt.c                  |   67 +++++++++++++++++++
-> >>>  6 files changed, 200 insertions(+), 0 deletions(-)
-> > ....
-> >>> +				interrupts = <47>;
-> >>> +			};
-> >>> +		};
-> >>> +	};
-> >>> +
-> >>> +	ahb@80080000 {
-> >>> +		compatible = "simple-bus";
-> >>> +		#address-cells = <1>;
-> >>> +		#size-cells = <1>;
-> >>> +		reg = <0x80080000 0x80000>;
-> >>> +		ranges;
-> >>> +
-> >>> +		fec@800f0000 {
-> >>> +			compatible = "fsl,imx28-fec";
-> >>> +			reg = <0x800f0000 0x4000>;
-> >>
-> >> This too IIRC.
-> >>
-> > The size is 16KB/0x4000 in iMX28 spec. :)
-> 
-> Yes, but the module only uses <4KB. You waste virtual memory space by
-> mapping all the unused area. It's not really an issue when you have
-> <512MB of RAM, but does become an issue.
-> 
-Yes, it seems an issue of spec.
-And all other places are using the same size.
-The simplest way now may be just keep align with spec first.
-
-> >>> +			interrupts = <101>;
-> >>> +			status = "disabled";
-> >>> +		};
-> >>> +
-> >>> +		fec@800f4000 {
-> >>> +			compatible = "fsl,imx28-fec";
-> >>> +			reg = <0x800f4000 0x4000>;
-> >>> +			interrupts = <102>;
-> >>> +			status = "disabled";
-> >>> +		};
-> >>> +
-> >>> +	};
-> >>> +};
-> >>> diff --git a/arch/arm/mach-mxs/Kconfig b/arch/arm/mach-mxs/Kconfig
-> >>> index c57f996..6ab66af 100644
-> >>> --- a/arch/arm/mach-mxs/Kconfig
-> >>> +++ b/arch/arm/mach-mxs/Kconfig
-> >>> @@ -17,6 +17,15 @@ config SOC_IMX28
-> >>>  
-> >>>  comment "MXS platforms:"
-> >>>  
-> >>> +config MACH_IMX28_DT
-> >>
-> >> Perhaps this should be more generic like MACH_MXS_DT to eventually
-> >> support MX23 as well?
-> >>
-> > I just did like the imx ways.
-> > But yes if we see the need when do imx23 dt support.
+On Wed, Mar 14, 2012 at 10:16:43PM +0800, s.hauer@pengutronix.de wrote:
+> On Wed, Mar 14, 2012 at 08:45:23PM +0800, Dong Aisheng wrote:
+> > On Wed, Mar 14, 2012 at 01:23:51AM +0800, Grant Likely wrote:
+> > > On Tue, 13 Mar 2012 16:47:04 +0800, Dong Aisheng <b29396@freescale.com> wrote:
+> > > > From: Dong Aisheng <dong.aisheng@linaro.org>
+> > > > 
+> > > > This patch includes basic dt support which can boot via nfs rootfs.
+> > > > 
+> > > > Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
+> > > > ---
+> > > >  Documentation/devicetree/bindings/arm/fsl.txt |    4 +
+> > > >  arch/arm/boot/dts/imx28-evk.dts               |   31 +++++++++
+> > > >  arch/arm/boot/dts/imx28.dtsi                  |   88 +++++++++++++++++++++++++
+> > > >  arch/arm/mach-mxs/Kconfig                     |    9 +++
+> > > >  arch/arm/mach-mxs/Makefile                    |    1 +
+> > > >  arch/arm/mach-mxs/imx28-dt.c                  |   67 +++++++++++++++++++
+> > > >  6 files changed, 200 insertions(+), 0 deletions(-)
+> > > > 
+> > > > diff --git a/Documentation/devicetree/bindings/arm/fsl.txt b/Documentation/devicetree/bindings/arm/fsl.txt
+> > > > index 54bddda..9f21faf 100644
+> > > > --- a/Documentation/devicetree/bindings/arm/fsl.txt
+> > > > +++ b/Documentation/devicetree/bindings/arm/fsl.txt
+> > > > @@ -1,6 +1,10 @@
+> > > >  Freescale i.MX Platforms Device Tree Bindings
+> > > >  -----------------------------------------------
+> > > >  
+> > > > +i.MX28 Evaluation Kit
+> > > > +Required root node properties:
+> > > > +    - compatible = "fsl,imx28-evk", "fsl,imx28";
+> > > > +
+> > > >  i.MX51 Babbage Board
+> > > >  Required root node properties:
+> > > >      - compatible = "fsl,imx51-babbage", "fsl,imx51";
+> > > > diff --git a/arch/arm/boot/dts/imx28-evk.dts b/arch/arm/boot/dts/imx28-evk.dts
+> > > > new file mode 100644
+> > > > index 0000000..9758dc4
+> > > > --- /dev/null
+> > > > +++ b/arch/arm/boot/dts/imx28-evk.dts
+> > > > @@ -0,0 +1,31 @@
+> > > > +/*
+> > > > + * Copyright 2012 Freescale Semiconductor, Inc.
+> > > > + *
+> > > > + * The code contained herein is licensed under the GNU General Public
+> > > > + * License. You may obtain a copy of the GNU General Public License
+> > > > + * Version 2 or later at the following locations:
+> > > > + *
+> > > > + * http://www.opensource.org/licenses/gpl-license.html
+> > > > + * http://www.gnu.org/copyleft/gpl.html
+> > > > + */
+> > > > +
+> > > > +/dts-v1/;
+> > > > +/include/ "imx28.dtsi"
+> > > > +
+> > > > +/ {
+> > > > +	model = "Freescale i.MX28 Evaluation Kit";
+> > > > +	compatible = "fsl,imx28-evk", "fsl,imx28";
+> > > > +
+> > > > +	memory {
+> > > > +		device_type = "memory";
+> > > > +		reg = <0x40000000 0x08000000>;
+> > > > +	};
+> > > > +
+> > > > +	ahb@80080000 {
+> > > > +		fec@800f0000 {
+> > > > +			phy-mode = "rmii";
+> > > > +			local-mac-address = [00 04 9F 01 7D 5B];
+> > > 
+> > > Generally a bad idea to put a specific mac address into the device tree.
+> > > Better to fill it with zeros.  Otherwise all the dev boards will end up using
+> > > the same value.
+> > > 
+> > Yes, this issue also exists on other platfroms like mx6q.
+> > One way is to dynamically get mac address by reading otp register as non-dt does
+> > like:
+> > static int __init mx28evk_fec_get_mac(void)
+> > {
+> >         int i;
+> >         u32 val;
+> >         const u32 *ocotp = mxs_get_ocotp();
 > > 
-> >>> +	bool "Support i.MX28 platforms from device tree"
-> >>> +	select SOC_IMX28
-> >>> +	select USE_OF
-> >>> +	select MACH_MX28EVK
-> >>
-> >> This should not be selected here.
-> >>
-> > Like other imx soc dt board files, the imx28-dt.c may need to use some bits
-> > like pinmux in mx28evk.c board file.
+> >         if (!ocotp)
+> >                 return -ETIMEDOUT;
 > > 
-> > Yes, currently i can remove it since it is using uboot pinmux setting.
-> > But when add other devices support which is not covered in u-boot like flexcan,
-> > i may need to use non-dt board's pinmux setting.
-> > So maybe we can keep it first and remove it when totally not dependent
-> > on non-dt files.
+> >         /*
+> >          * OCOTP only stores the last 4 octets for each mac address,
+> >          * so hard-code Freescale OUI (00:04:9f) here.
+> >          */
+> >         for (i = 0; i < 2; i++) {
+> >                 val = ocotp[i];
+> >                 mx28_fec_pdata[i].mac[0] = 0x00;
+> >                 mx28_fec_pdata[i].mac[1] = 0x04;
+> >                 mx28_fec_pdata[i].mac[2] = 0x9f;
+> >                 mx28_fec_pdata[i].mac[3] = (val >> 16) & 0xff;
+> >                 mx28_fec_pdata[i].mac[4] = (val >> 8) & 0xff;
+> >                 mx28_fec_pdata[i].mac[5] = (val >> 0) & 0xff;
+> >         }
+> > 
+> >         return 0;
+> > }
+> > 
+> > But it seems this needs pass mac address to fec driver via platforom data which is
+> > not friendly to dt.
+> > 
+> > Another way may be changing fec driver to get the fixed part of mac address(first
+> > two bytes) from device tree and read the left dynamical part from otp which i'm not
+> > sure is better enough.
+> > 
+> > BTW, filling with zeros seems not work since it's invalid mac address.
 > 
-> Okay either way, but my vote would be add it as needed.
+> Yes, that's the idea of using this value...
 > 
-Your vote is ok to me.
-
-> >>> + * The code contained herein is licensed under the GNU General Public
-> >>> + * License. You may obtain a copy of the GNU General Public License
-> >>> + * Version 2 or later at the following locations:
-> >>> + *
-> >>> + * http://www.opensource.org/licenses/gpl-license.html
-> >>> + * http://www.gnu.org/copyleft/gpl.html
-> >>> + */
-> >>> +
-> >>> +#include <linux/init.h>
-> >>> +#include <linux/irqdomain.h>
-> >>> +#include <linux/of_irq.h>
-> >>> +#include <linux/of_platform.h>
-> >>> +#include <asm/mach/arch.h>
-> >>> +#include <asm/mach/time.h>
-> >>> +#include <mach/common.h>
-> >>> +#include <mach/mx28.h>
-> >>> +
-> >>> +static const struct of_dev_auxdata imx28_auxdata_lookup[] __initconst = {
-> >>> +	OF_DEV_AUXDATA("arm,pl011", MX28_DUART_BASE_ADDR, "duart", NULL),
-> >>> +	OF_DEV_AUXDATA("fsl,imx28-fec", MX28_ENET_MAC0_BASE_ADDR, "imx28-fec.0", NULL),
-> >>> +	OF_DEV_AUXDATA("fsl,imx28-fec", MX28_ENET_MAC1_BASE_ADDR, "imx28-fec.1", NULL),
-> >>
-> >> Why do you need the old names?
-> >>
-> > To keep align with the old clocks.
-> > See arch/arm/mach-mxs/clock-mx28.c:
-> > _REGISTER_CLOCK("imx28-fec.0", NULL, fec_clk)
-> > _REGISTER_CLOCK("imx28-fec.1", NULL, fec_clk)
-> > Is there any better way to avoid this?
-> 
-> Yes, you can add more clock look-ups with the DT name.
-> 
-Got it.
+But comparing to use an invalid value, why not just do not define that
+local-mac-address property?
 
 Regards
 Dong Aisheng
