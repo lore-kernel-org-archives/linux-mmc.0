@@ -1,76 +1,58 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH RESEND 4/8] mmc: omap: context save after enabling runtime pm
-Date: Fri, 16 Mar 2012 19:02:38 +0530
-Message-ID: <CANrkHUaNXE0ZK_pDzJTk8yUJHSqm4xzGAvmQs1GX2y9WEU+wpQ@mail.gmail.com>
-References: <1331822022-26714-1-git-send-email-svenkatr@ti.com>
-	<1331822022-26714-5-git-send-email-svenkatr@ti.com>
-	<4F6206EA.9060104@ti.com>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: [PATCH 0/8][git pull] mmc: omap: Assorted fixes for 3.4 merge window
+Date: Fri, 16 Mar 2012 19:08:56 +0530
+Message-ID: <1331905144-31655-1-git-send-email-svenkatr@ti.com>
+References: <y>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <4F6206EA.9060104@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Shubhrajyoti <shubhrajyoti@ti.com>
-Cc: Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balbi@ti.com
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:41738 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755805Ab2CPNjt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 16 Mar 2012 09:39:49 -0400
+In-Reply-To: <y>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: cjb@laptop.org, balajitk@ti.com, balbi@ti.com, Venkatraman S <svenkatr@ti.com>
 
-On Thu, Mar 15, 2012 at 8:42 PM, Shubhrajyoti <shubhrajyoti@ti.com> wro=
-te:
-> On Thursday 15 March 2012 08:03 PM, Venkatraman S wrote:
->> From: Balaji T K <balajitk@ti.com>
->>
->> call context save api after enabling runtime pm
->> to make sure register access in context save api
-> If I am not mistaken =A0the api =A0would
-> store the number of power state changes and accesses no registers.
->
-> Am I missing something?
+Chris,
+   Here are a group of fixes posted by Felipe and Balaji for the
+OMAP hsmmc driver in the past few days. 
+   I've rebased them to the lastest mmc-next and posted them
+here again. These have also been tested on OMAP4 development platform.
 
-Yes, as of now no registers are accessed in context store. However
-this patch is needed if registers are accessed in context save api.
+Please feel to apply directly or pull if that's convenient.
 
->
->> =A0happens with clk enabled.
->>
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->> ---
->> =A0drivers/mmc/host/omap_hsmmc.c | =A0 =A04 ++--
->> =A01 file changed, 2 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_h=
-smmc.c
->> index 0f8d34b..9fa2f39 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -1871,8 +1871,6 @@ static int __init omap_hsmmc_probe(struct plat=
-form_device *pdev)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err1;
->> =A0 =A0 =A0 }
->>
->> - =A0 =A0 omap_hsmmc_context_save(host);
->> -
->> =A0 =A0 =A0 if (host->pdata->controller_flags & OMAP_HSMMC_BROKEN_MU=
-LTIBLOCK_READ) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_info(&pdev->dev, "multiblock reads d=
-isabled due to 35xx erratum 2.1.1.128; MMC read performance may suffer\=
-n");
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps2 |=3D MMC_CAP2_NO_MULTI_READ;
->> @@ -1883,6 +1881,8 @@ static int __init omap_hsmmc_probe(struct plat=
-form_device *pdev)
->> =A0 =A0 =A0 pm_runtime_set_autosuspend_delay(host->dev, MMC_AUTOSUSP=
-END_DELAY);
->> =A0 =A0 =A0 pm_runtime_use_autosuspend(host->dev);
->>
->> + =A0 =A0 omap_hsmmc_context_save(host);
->> +
->> =A0 =A0 =A0 if (cpu_is_omap2430()) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->dbclk =3D clk_get(&pdev->dev, "mmc=
-hsdb_fck");
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Changes since yesterday (v1):-
+	Fixed formatting issues as suggested by Felipe
+	Marked some patches for stable.
+
+The following changes since commit 5f0390f10c0e9c9c504cdbf4af802252628a2490:
+
+  mmc: omap_hsmmc: Avoid a regulator voltage change with dt (2012-03-14 11:33:20 -0400)
+
+are available in the git repository at:
+
+  git://github.com/svenkatr/linux.git omap-mmc-pending-for-3.4
+
+for you to fetch changes up to 8d54766b608915035b47616ea564e4e9b4dda29c:
+
+  mmc: omap4: hsmmc: fix module re-insertion (2012-03-16 11:38:41 +0530)
+
+----------------------------------------------------------------
+Balaji T K (5):
+      mmc: omap: Enable Auto CMD12
+      mmc: omap: add DDR support to omap_hsmmc
+      mmc: omap: use runtime put sync in probe error patch
+      mmc: omap: context save after enabling runtime pm
+      mmc: omap4: hsmmc: fix module re-insertion
+
+Felipe Balbi (3):
+      mmc: host: omap_hsmmc: trivial cleanups
+      mmc: host: omap_hsmmc: make it behave well as a module
+      mmc: host: omap_hsmmc: convert to module_platform_driver
+
+ drivers/mmc/host/omap_hsmmc.c |  202 ++++++++++++++++++++++------------------------
+ 1 file changed, 97 insertions(+), 105 deletions(-)
+
