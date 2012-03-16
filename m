@@ -1,91 +1,122 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 0/5] MMC: mmci: Provide bindings for Device Tree
-Date: Thu, 15 Mar 2012 20:58:30 +0000
-Message-ID: <201203152058.31398.arnd@arndb.de>
-References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org>
- <201203151532.44363.arnd@arndb.de>
- <CAFEEs1=TJaCYmaWd7zd28NsV8ubZBpBn7p=Mi7vGtmV_vpfh1w@mail.gmail.com>
+From: Dong Aisheng <aisheng.dong@freescale.com>
+Subject: Re: [PATCH v1 1/5] ARM: imx28: add basic dt support
+Date: Fri, 16 Mar 2012 11:01:35 +0800
+Message-ID: <20120316030134.GA5161@shlinux2.ap.freescale.net>
+References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
+ <1331628428-24017-2-git-send-email-b29396@freescale.com>
+ <20120313172351.97C5E3E053B@localhost>
+ <20120314124512.GG1180@shlinux2.ap.freescale.net>
+ <20120314141643.GP3852@pengutronix.de>
+ <20120315030206.GB13022@shlinux2.ap.freescale.net>
+ <20321.37353.63115.664975@ipc1.ka-ro>
+ <20120315105927.GE13022@shlinux2.ap.freescale.net>
+ <20321.53468.310199.875966@ipc1.ka-ro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAFEEs1=TJaCYmaWd7zd28NsV8ubZBpBn7p=Mi7vGtmV_vpfh1w@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: linux-arm-kernel-bounces@lists.infradead.org
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Per Forlin <per.forlin@stericsson.com>
-Cc: niklas.hernaeus@linaro.org, linux-mmc@vger.kernel.org, cjb@laptop.org, Lee Jones <lee.jones@linaro.org>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:51854
+	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751226Ab2CPDBH convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 15 Mar 2012 23:01:07 -0400
+Content-Disposition: inline
+In-Reply-To: <20321.53468.310199.875966@ipc1.ka-ro>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Lothar =?iso-8859-1?Q?Wa=DFmann?= <LW@KARO-electronics.de>
+Cc: Dong Aisheng-B29396 <B29396@freescale.com>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, Guo Shawn-R65073 <r65073@freescale.com>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Thursday 15 March 2012, Per Forlin wrote:
-> On Thu, Mar 15, 2012 at 4:32 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> > On Thursday 15 March 2012, Lee Jones wrote:
-> >> > I would like to see what the minimal required change is to support DT
-> >> > for mmci without factorization.
-> >> > 1. Minimal change in mmci.
-> >> > 2. Add mmci_dt.c which contains the DT-populate code.
-> >> >
-> >> > The factorization could be done as step 2 I think.
-> >> >
-> >> > What do you say?
-> >>
-> >> I'm wondering what the difference is as the work has already been done.
-> >>
-> >> It was Arnd's suggestion to separate out the two types of variants, and
-> >> I'm quite fond of the new (fully featured) layout.
-> >
-> > Right, I usually prefer cleanups or other refactoring to be done first, and
-> > then features added on top.
-> >
-> > You could in theory add have just patches 3/4/5 all applied without
-> > the refactoring, but that I would be worried that this causes dependencies
-> > between the mmci driver and ux500 specific functionality like the
-> > stedma40_filter function.
-> >
-> About DT
-> I think I need to catch up on the DT-design a bit. I will try to catch
-> up on the DT-implementation and maybe then the refactorization will
-> make sense to me :)
-> 
-> Board specific data in mmci-driver
-> The stedma40 filter function is not really specific for ux500. ux500
-> use stedma40 but it should be possible to replace this DMA.IP with
-> some other DMA-controller. This is board specific configuration. You
-> should not need to change the mmci-driver just because the dma-driver
-> has changed, right?
-> Or will the board-configuration now be placed in mmci-ux500?
+On Thu, Mar 15, 2012 at 07:22:04PM +0800, Lothar Wa=DFmann wrote:
+> Hi,
+>=20
+> Dong Aisheng writes:
+> > On Thu, Mar 15, 2012 at 02:53:29PM +0800, Lothar Wa=DFmann wrote:
+> > > Hi,
+> > >=20
+> > > Dong Aisheng writes:
+> > > > On Wed, Mar 14, 2012 at 10:16:43PM +0800, s.hauer@pengutronix.d=
+e wrote:
+> > > > > On Wed, Mar 14, 2012 at 08:45:23PM +0800, Dong Aisheng wrote:
+> > > > > > On Wed, Mar 14, 2012 at 01:23:51AM +0800, Grant Likely wrot=
+e:
+> > > [...]
+> > > > > > But it seems this needs pass mac address to fec driver via =
+platforom data which is
+> > > > > > not friendly to dt.
+> > > > > >=20
+> > > > > > Another way may be changing fec driver to get the fixed par=
+t of mac address(first
+> > > > > > two bytes) from device tree and read the left dynamical par=
+t from otp which i'm not
+> > > > > > sure is better enough.
+> > > > > >=20
+> > > > > > BTW, filling with zeros seems not work since it's invalid m=
+ac address.
+> > > > >=20
+> > > > > Yes, that's the idea of using this value...
+> > > > >=20
+> > > > But comparing to use an invalid value, why not just do not defi=
+ne that
+> > > > local-mac-address property?
+> > > >=20
+> > > Because a MAC address is by definition a GLOBALLY UNIQUE IDENTIFI=
+ER
+> > > which is contrary to coding a "valid" default value for it somewh=
+ere!
+> > > The owner of a certain MAC address range (OUI) is responsible for
+> > > ensuring the uniqueness. Thus only they may assign a specific MAC
+> > > address to a specific device.
+> > >=20
+> > Yes, you're correct.
+> > So i propose to read the MAC address from MX28 OTP in fec driver in=
+stead of
+> > define it in device tree in my last mail.
+> > http://www.spinics.net/lists/arm-kernel/msg165040.html
+> > Do you have any comment on that way?
+> >=20
+> That patch sets the OUI to the Freescale owned MAC range. Thus only
+> Freescale products may be able to use the driver.
+>=20
+No.
+My proposal is only set the fixed part(first two octets) in board dts f=
+ile,
+each board knows it's value, and read the left 4 octets from OCOTP dyna=
+mically.
+Obviously the freeescale board dts file is only for FSL platforms.
+Other platforms can define their fix part of MAC address in their dts f=
+ile.
 
-Right, the DMA configuration does not really belong in there, but
-the voltage setup might (unless we convert that to the regulator
-setup).
+> Anyway there is no definite spec how the MAC address(es) are stored
+> in the fuse map. Thus reading the MAC from there is more or less
+> platform specific.
+>=20
+It's just provide one more option since there are customers storing the=
+ MAC
+in the fuse map.
 
-> Common DT populate code for all mmc host drivers
-> Some parts of the DT-population is common for all the host driver, for
-> instance setting the CAP and CAP2. This code should be moved to a
-> common place to be used by other host drivers as well.
+> Currently I'm setting up the MAC address for our TX28 from the fuses
+> in the platform code passed via platform_data, but that will obviousl=
+y
+> not work with DT.
+>=20
+Non-dt can also use my proposal, then you only need to pass the fixed p=
+art of
+MAC via platfrom data, the left will be read by fec driver.
 
-Good idea, yes. We should also have a generic mmc binding document
-that describes how to set flags like 8-bit mode. We already have
-two conflicting variants in .dts files and we should make sure
-we bring everybody back together here.
+> The correct way would probably be to pass the MAC from the bootloader
+> via a DT blob. But that would require all bootloaders to be updated
+> first to support DTS. :(
+>=20
+But uboot will face the same problem that can not define a valid MAC
+in dts, did i undertand correctly?
 
-> About refactoring
-> There are numbers of patches stashed up for MMCI waiting for verdict
-> here http://git.kernel.org/?p=linux/kernel/git/linusw/linux-stericsson.git;a=shortlog;h=refs/heads/mmci.
-> If doing a refactorization please rebase it on top of these patches.
-> This needs to be done carefully, there may be more to considerations
-> than just DT. Maybe the timing is better to do this for 4.5, just
-> after 4.4 is closed. Then we can make sure that all new patches are
-> made on top of the refactorized base.
+> An intermediate solution could be using OF_DEV_AUXDATA to pass a
+> platform_data struct that may contain a MAC address set up by the
+> platform code.
+>=20
+Yes, it's a way but i'm afraid will not get accepted by dt people.
 
-Yes, thanks for the info. Doing this for 3.4 is definitely out of the
-question then, and hopefully we can use the new dma bindings when it's
-done for 3.5
+Regards
+Dong Aisheng
 
-	Arnd
