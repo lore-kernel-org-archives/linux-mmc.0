@@ -1,93 +1,92 @@
-From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: Re: [PATCH v1 1/5] ARM: imx28: add basic dt support
-Date: Fri, 16 Mar 2012 16:22:44 +0800
-Message-ID: <20120316082243.GA13065@shlinux2.ap.freescale.net>
-References: <1331628428-24017-2-git-send-email-b29396@freescale.com>
- <20120313172351.97C5E3E053B@localhost>
- <20120314124512.GG1180@shlinux2.ap.freescale.net>
- <20120314141643.GP3852@pengutronix.de>
- <20120315030206.GB13022@shlinux2.ap.freescale.net>
- <20321.37353.63115.664975@ipc1.ka-ro>
- <20120315105927.GE13022@shlinux2.ap.freescale.net>
- <20321.53468.310199.875966@ipc1.ka-ro>
- <20120316030134.GA5161@shlinux2.ap.freescale.net>
- <20322.61501.432329.124466@ipc1.ka-ro>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] mmc: mmci: assume maintainership
+Date: Fri, 16 Mar 2012 09:48:07 +0100
+Message-ID: <4F62FE47.8020709@stericsson.com>
+References: <1331821836-14641-1-git-send-email-linus.walleij@stericsson.com> <20120315173047.GB17243@flint.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:58728
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S965186Ab2CPIVg convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 16 Mar 2012 04:21:36 -0400
-Content-Disposition: inline
-In-Reply-To: <20322.61501.432329.124466@ipc1.ka-ro>
+Received: from eu1sys200aog119.obsmtp.com ([207.126.144.147]:60152 "EHLO
+	eu1sys200aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757310Ab2CPIsj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Mar 2012 04:48:39 -0400
+In-Reply-To: <20120315173047.GB17243@flint.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lothar =?iso-8859-1?Q?Wa=DFmann?= <LW@KARO-electronics.de>
-Cc: Dong Aisheng-B29396 <B29396@freescale.com>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, Guo Shawn-R65073 <r65073@freescale.com>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Russell King <rmk@arm.linux.org.uk>
+Cc: Linus WALLEIJ <linus.walleij@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Pawel Moll <pawel.moll@arm.com>
 
-On Fri, Mar 16, 2012 at 03:48:13PM +0800, Lothar Wa=DFmann wrote:
-> Hi,
->=20
-> Dong Aisheng writes:
-> > On Thu, Mar 15, 2012 at 07:22:04PM +0800, Lothar Wa=DFmann wrote:
-> [...]
-> > My proposal is only set the fixed part(first two octets) in board d=
-ts file,
-> > each board knows it's value, and read the left 4 octets from OCOTP =
-dynamically.
-> >
-> The OUI part is three bytes, not two! But anyway, since there is no
-> definition on how the MAC has to be stored in OCOTP there is no way
-> for the driver to know how to interpret the data it may read from
-> there.
->=20
-I may miss this, i will double check it.
-Thanks for the info. :-)
+Hi Russell,
 
-> > > Anyway there is no definite spec how the MAC address(es) are stor=
-ed
-> > > in the fuse map. Thus reading the MAC from there is more or less
-> > > platform specific.
-> > >=20
-> > It's just provide one more option since there are customers storing=
- the MAC
-> > in the fuse map.
-> >=20
-> How would the driver know, whether and how the customer has stored th=
-e
-> MAC address in OCOTP? E.g. on our TX28 modules the FULL MAC is stored
-> in the CUSTOM registers in OCOTP.
->=20
-> > > Currently I'm setting up the MAC address for our TX28 from the fu=
-ses
-> > > in the platform code passed via platform_data, but that will obvi=
-ously
-> > > not work with DT.
-> > >=20
-> > Non-dt can also use my proposal, then you only need to pass the fix=
-ed part of
-> > MAC via platfrom data, the left will be read by fec driver.
-> >=20
-> Reading the MAC from fuses is platform sepcific. The driver cannot
-> know how the MAC is stored there and needs to rely on platform
-> specific code to do this.
->=20
-> > > The correct way would probably be to pass the MAC from the bootlo=
-ader
-> > > via a DT blob. But that would require all bootloaders to be updat=
-ed
-> > > first to support DTS. :(
-> > >=20
-> > But uboot will face the same problem that can not define a valid MA=
-C
-> > in dts, did i undertand correctly?
-> >=20
-> That's why I said "would require all bootloaders to be updated first
-> to support DTS".
+On 03/15/2012 06:30 PM, Russell King wrote:
+> On Thu, Mar 15, 2012 at 03:30:36PM +0100, Linus Walleij wrote:
+>> From: Linus Walleij<linus.walleij@linaro.org>
+>>
+>> So since this driver is crucial for us (as in ST-Ericsson)
+>> to have actively maintained, and since it is marked orphaned
+>> I will assume maintainership for it starting with the 3.5
+>> integration cycle. The idea is to collect patches and send
+>> either patch sets of pull requests to Chris.
+>
+> Actually, I still want to be involved because I'm far from convinced with
+> some of the patches coming from Ulf are correct for ARMs implementation.
+> That's why I'm purposely not applying the MMCI patches in the patch system
+> in a particularly fast manner - I want there to be a decent amount of
+> testing between each set of patches.
+>
 
-Regards
-Dong Aisheng
+Without going into too much details about the patches I will just say 
+that I have very much appreciated your review comments on my patches 
+historical. That has definitely improved the quality and I have gained 
+even more knowledge. Thanks a lot!
+
+Although, right know I would vote for having a more active maintainer 
+for MMCI; please no offense Russell, I realize that your are fully 
+occupied with a lot of other cool stuff. I think Linus could play a 
+great role in this; especially since he also will be able to test 
+patches on many different ARM boards.
+
+
+> For example, the next patch in the series to be applied is:
+>
+> "mmc: mmci: Decrease current consumption in suspend"
+>
+> and as I've explained before, it does this by saving the MMCI power and
+> clock registers and clearing them.  This has the effect of stopping the
+> clock, and in the case of ARMs hardware, removing power from the card.
+> Therefore, the card will require full bring up, including reassigning
+> the card address for MMC cards on resume, and simply starting the next
+> command will not be possible.
+>
+> As I've already tried to explain, on the normal power management suspend
+> callback, these registers should _already_ have been placed into their
+> "card not present" state, so saving and zeroing them has no useful effect.
+>
+> Moreover, saving and restoring them across suspend is wrong because on
+> ARM hardware there's a sequence of power-off, power-up, power-on which
+> needs to be gone through to restore power.
+>
+> So, I've queued up the 10 patches which I'm happy to take for v3.4, and
+> that's all I'm taking for v3.4 until I can find the strength to have
+> another discussion with Ulf over this issue.
+
+I have yet not gained your full confidence, but I will continue to work 
+on it. :-)
+
+Regarding the around 10 patches; since it lately has been very responses 
+to my patches for MMCI, I have hesitated to send more patches. 
+Internally at STE kernel git, we have around additional 10 patches... 
+bugfixes, cleanups and new features (UHS support, DDR support).
+
+>
+> As there's an interdependence between the various patches, I can't apply
+> any of the later patches even if I wanted to without these "power saving"
+> patches.
+>
+> So, it's not really unmaintained or orphaned...
+>
+
+Kind regards
+Ulf Hansson
 
