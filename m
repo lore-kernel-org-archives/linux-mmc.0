@@ -1,7 +1,7 @@
 From: Dong Aisheng <aisheng.dong@freescale.com>
 Subject: Re: [PATCH v1 1/5] ARM: imx28: add basic dt support
-Date: Fri, 16 Mar 2012 11:01:35 +0800
-Message-ID: <20120316030134.GA5161@shlinux2.ap.freescale.net>
+Date: Fri, 16 Mar 2012 11:05:21 +0800
+Message-ID: <20120316030521.GB5161@shlinux2.ap.freescale.net>
 References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
  <1331628428-24017-2-git-send-email-b29396@freescale.com>
  <20120313172351.97C5E3E053B@localhost>
@@ -10,27 +10,25 @@ References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
  <20120315030206.GB13022@shlinux2.ap.freescale.net>
  <20321.37353.63115.664975@ipc1.ka-ro>
  <20120315105927.GE13022@shlinux2.ap.freescale.net>
- <20321.53468.310199.875966@ipc1.ka-ro>
+ <20120315112419.GA3852@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from db3ehsobe003.messaging.microsoft.com ([213.199.154.141]:51854
-	"EHLO db3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751226Ab2CPDBH convert rfc822-to-8bit
+Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:4428
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753797Ab2CPDD7 convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 15 Mar 2012 23:01:07 -0400
+	Thu, 15 Mar 2012 23:03:59 -0400
 Content-Disposition: inline
-In-Reply-To: <20321.53468.310199.875966@ipc1.ka-ro>
+In-Reply-To: <20120315112419.GA3852@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lothar =?iso-8859-1?Q?Wa=DFmann?= <LW@KARO-electronics.de>
-Cc: Dong Aisheng-B29396 <B29396@freescale.com>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, Guo Shawn-R65073 <r65073@freescale.com>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>
+Cc: Dong Aisheng-B29396 <B29396@freescale.com>, Lothar =?iso-8859-1?Q?Wa=DFmann?= <LW@KARO-electronics.de>, Guo Shawn-R65073 <r65073@freescale.com>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Grant Likely <grant.likely@secretlab.ca>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Thu, Mar 15, 2012 at 07:22:04PM +0800, Lothar Wa=DFmann wrote:
-> Hi,
->=20
-> Dong Aisheng writes:
+On Thu, Mar 15, 2012 at 07:24:19PM +0800, s.hauer@pengutronix.de wrote:
+> On Thu, Mar 15, 2012 at 06:59:28PM +0800, Dong Aisheng wrote:
 > > On Thu, Mar 15, 2012 at 02:53:29PM +0800, Lothar Wa=DFmann wrote:
 > > > Hi,
 > > >=20
@@ -74,48 +72,19 @@ stead of
 > > define it in device tree in my last mail.
 > > http://www.spinics.net/lists/arm-kernel/msg165040.html
 > > Do you have any comment on that way?
-> >=20
-> That patch sets the OUI to the Freescale owned MAC range. Thus only
-> Freescale products may be able to use the driver.
 >=20
-No.
-My proposal is only set the fixed part(first two octets) in board dts f=
-ile,
-each board knows it's value, and read the left 4 octets from OCOTP dyna=
-mically.
-Obviously the freeescale board dts file is only for FSL platforms.
-Other platforms can define their fix part of MAC address in their dts f=
-ile.
+> Yes, you could do that. Otherwise it's perfectly fine to pass the MAC
+> address in the device tree, it's just not ok to put specific values
+> into the kernel source. You could leave the values blank and let the
+Yes, correct.
 
-> Anyway there is no definite spec how the MAC address(es) are stored
-> in the fuse map. Thus reading the MAC from there is more or less
-> platform specific.
+> bootloader fill them in. Or you could fill in valid values before you
+> compile the devicetree, but be prepared for surprises once you have
+> two boards in your network and use the devicetree for both.
 >=20
-It's just provide one more option since there are customers storing the=
- MAC
-in the fuse map.
 
-> Currently I'm setting up the MAC address for our TX28 from the fuses
-> in the platform code passed via platform_data, but that will obviousl=
-y
-> not work with DT.
->=20
-Non-dt can also use my proposal, then you only need to pass the fixed p=
-art of
-MAC via platfrom data, the left will be read by fec driver.
-
-> The correct way would probably be to pass the MAC from the bootloader
-> via a DT blob. But that would require all bootloaders to be updated
-> first to support DTS. :(
->=20
-But uboot will face the same problem that can not define a valid MAC
-in dts, did i undertand correctly?
-
-> An intermediate solution could be using OF_DEV_AUXDATA to pass a
-> platform_data struct that may contain a MAC address set up by the
-> platform code.
->=20
-Yes, it's a way but i'm afraid will not get accepted by dt people.
+Thanks for the info.
+I will submit that patch for discussion.
 
 Regards
 Dong Aisheng
