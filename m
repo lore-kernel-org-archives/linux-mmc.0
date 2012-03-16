@@ -1,40 +1,56 @@
-From: Russell King <rmk@arm.linux.org.uk>
-Subject: Re: [PATCH] mmc: mmci: assume maintainership
-Date: Fri, 16 Mar 2012 08:53:07 +0000
-Message-ID: <20120316085307.GC17243@flint.arm.linux.org.uk>
-References: <1331821836-14641-1-git-send-email-linus.walleij@stericsson.com> <20120315173047.GB17243@flint.arm.linux.org.uk> <4F62FE47.8020709@stericsson.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 0/5] MMC: mmci: Provide bindings for Device Tree
+Date: Fri, 16 Mar 2012 10:01:34 +0100
+Message-ID: <CACRpkdbyVXA+GxRtVL+JGPorp0ULJmeUEUZPxVxOT8W1-WmeMw@mail.gmail.com>
+References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org>
+	<201203151532.44363.arnd@arndb.de>
+	<CAFEEs1=TJaCYmaWd7zd28NsV8ubZBpBn7p=Mi7vGtmV_vpfh1w@mail.gmail.com>
+	<201203152058.31398.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:56059 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1422635Ab2CPIxk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Mar 2012 04:53:40 -0400
-Content-Disposition: inline
-In-Reply-To: <4F62FE47.8020709@stericsson.com>
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:45712 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755956Ab2CPJBf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Mar 2012 05:01:35 -0400
+Received: by yhmm54 with SMTP id m54so4004822yhm.19
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Mar 2012 02:01:35 -0700 (PDT)
+In-Reply-To: <201203152058.31398.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Linus WALLEIJ <linus.walleij@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Pawel Moll <pawel.moll@arm.com>
+To: Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Per Forlin <per.forlin@stericsson.com>, niklas.hernaeus@linaro.org, linux-mmc@vger.kernel.org, cjb@laptop.org, Lee Jones <lee.jones@linaro.org>, linux-arm-kernel@lists.infradead.org
 
-On Fri, Mar 16, 2012 at 09:48:07AM +0100, Ulf Hansson wrote:
-> Although, right know I would vote for having a more active maintainer  
-> for MMCI; please no offense Russell, I realize that your are fully  
-> occupied with a lot of other cool stuff. I think Linus could play a  
-> great role in this; especially since he also will be able to test  
-> patches on many different ARM boards.
+On Thu, Mar 15, 2012 at 9:58 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> [Per]
+>> The stedma40 filter function is not really specific for ux500. ux500
+>> use stedma40 but it should be possible to replace this DMA.IP with
+>> some other DMA-controller. This is board specific configuration. You
+>> should not need to change the mmci-driver just because the dma-driver
+>> has changed, right?
+>> Or will the board-configuration now be placed in mmci-ux500?
+>
+> Right, the DMA configuration does not really belong in there, but
+> the voltage setup might (unless we convert that to the regulator
+> setup).
 
-No, I explained why I haven't applied your other patches, and I explained
-at the time my concerns with your patches which zero out and restore the
-power and clock registers.  I repeated those concerns several times but
-the issue never got resolved.
+The voltage to power the card is already using the regulator
+framework with the MMC-specific helpers in the MMCI driver.
 
-So that gives me no other option than to slow down applying your patches.
-It's not that I'm not being responsive.  It's that I'm purposely being
-slow over these changes because comments on the patches don't seem to be
-hitting home.
+But I guess you're after modelling the levelshifter as a regulator?
 
--- 
-Russell King
- Linux kernel    2.6 ARM Linux   - http://www.arm.linux.org.uk/
- maintainer of:
+Basically the level shifter is a separate device has two voltage
+inputs A and B (from other regulators) that is controlled by a
+simple GPIO to select voltage A or B to drive the signals to
+the card.
+
+That could probably be modelled as a regulator with two
+volategs for sure, but then we should maybe create a more
+generic "struct level_shifter_regulator" (or whatever) for the
+concept as a whole.
+
+Let's page Mark about what to do with levelshifters and whether
+they are regulators of sorts in his book.
+
+Yours,
+Linus Walleij
