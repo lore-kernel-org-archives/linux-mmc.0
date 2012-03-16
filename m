@@ -1,44 +1,61 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 00/10 v3] mmc: tmio/sdhi: hotplug & PM
-Date: Fri, 16 Mar 2012 07:55:35 -0400
-Message-ID: <87obrwbw08.fsf@laptop.org>
-References: <1328824636-10553-1-git-send-email-g.liakhovetski@gmx.de>
-	<m2obs6qugn.fsf@bob.laptop.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 0/5] MMC: mmci: Provide bindings for Device Tree
+Date: Fri, 16 Mar 2012 12:36:35 +0000
+Message-ID: <201203161236.36088.arnd@arndb.de>
+References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org> <201203152058.31398.arnd@arndb.de> <CACRpkdbyVXA+GxRtVL+JGPorp0ULJmeUEUZPxVxOT8W1-WmeMw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <m2obs6qugn.fsf@bob.laptop.org> (Chris Ball's message of "Thu, 08
-	Mar 2012 23:17:12 -0500")
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.187]:60193 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750838Ab2CPMgj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Mar 2012 08:36:39 -0400
+In-Reply-To: <CACRpkdbyVXA+GxRtVL+JGPorp0ULJmeUEUZPxVxOT8W1-WmeMw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>, Per Forlin <per.forlin@stericsson.com>, niklas.hernaeus@linaro.org, linux-mmc@vger.kernel.org, cjb@laptop.org, Lee Jones <lee.jones@linaro.org>, linux-arm-kernel@lists.infradead.org
 
-Hi,
+On Friday 16 March 2012, Linus Walleij wrote:
+> On Thu, Mar 15, 2012 at 9:58 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> > [Per]
+> >> The stedma40 filter function is not really specific for ux500. ux500
+> >> use stedma40 but it should be possible to replace this DMA.IP with
+> >> some other DMA-controller. This is board specific configuration. You
+> >> should not need to change the mmci-driver just because the dma-driver
+> >> has changed, right?
+> >> Or will the board-configuration now be placed in mmci-ux500?
+> >
+> > Right, the DMA configuration does not really belong in there, but
+> > the voltage setup might (unless we convert that to the regulator
+> > setup).
+> 
+> The voltage to power the card is already using the regulator
+> framework with the MMC-specific helpers in the MMCI driver.
+> 
+> But I guess you're after modelling the levelshifter as a regulator?
+> 
+> Basically the level shifter is a separate device has two voltage
+> inputs A and B (from other regulators) that is controlled by a
+> simple GPIO to select voltage A or B to drive the signals to
+> the card.
+> 
+> That could probably be modelled as a regulator with two
+> volategs for sure, but then we should maybe create a more
+> generic "struct level_shifter_regulator" (or whatever) for the
+> concept as a whole.
 
-On Thu, Mar 08 2012, Chris Ball wrote:
->> Guennadi Liakhovetski (10):
->>   mmc: simplify mmc_cd_gpio_request() by removing two parameters
->>   mmc: tmio: calculate the native hotplug condition only once
->>   mmc: tmio_mmc: support the generic MMC GPIO card hotplug helper
->>   mmc: sh_mobile_sdhi: pass card hotplug GPIO number to TMIO MMC
->>   ARM: mach-shmobile: convert mackerel to use the generic MMC GPIO
->>     hotplug helper
->>   ARM: mach-shmobile: convert ag5evm to use the generic MMC GPIO
->>     hotplug helper
->>   mmc: tmio_mmc: power status flag doesn't have to be exposed in
->>     platform data
->>   mmc: tmio_mmc: remove unused sdio_irq_enabled flag
->>   mmc: sh_mobile_sdhi: do not manage PM clocks manually
->>   mmc: tmio: cosmetic: prettify the tmio_mmc_set_ios() function
->
-> Looks like you didn't get any ACKs for these, and the ARM patches no
-> longer apply -- would you like me to take all but the two ARM patches
-> and leave those to you?  (Does that result in working systems?)
+Ok, thanks for the explanation.
 
-I've applied all of these except 5/6 to mmc-next for 3.4 now, thanks.
+> Let's page Mark about what to do with levelshifters and whether
+> they are regulators of sorts in his book.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+It does sound appealing, especially because this one could be
+done completely generically by defining a regulator that has
+a bunch of other regulators as well as a set of gpio lines as
+inputs and one output that can be used in other devices. We
+would probably only use this one together with device tree then.
+
+	Arnd
