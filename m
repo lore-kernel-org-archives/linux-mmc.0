@@ -1,54 +1,44 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH] mmc: sh_mmcif: simplify bitmask macros
-Date: Fri, 16 Mar 2012 12:49:04 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1203161247360.13465@axis700.grange>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 00/10 v3] mmc: tmio/sdhi: hotplug & PM
+Date: Fri, 16 Mar 2012 07:55:35 -0400
+Message-ID: <87obrwbw08.fsf@laptop.org>
+References: <1328824636-10553-1-git-send-email-g.liakhovetski@gmx.de>
+	<m2obs6qugn.fsf@bob.laptop.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <m2obs6qugn.fsf@bob.laptop.org> (Chris Ball's message of "Thu, 08
+	Mar 2012 23:17:12 -0500")
 Sender: linux-sh-owner@vger.kernel.org
-To: linux-sh@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Purely cosmetic readability improvement, no functional change.
+Hi,
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- include/linux/mmc/sh_mmcif.h |   21 +++++++++------------
- 1 files changed, 9 insertions(+), 12 deletions(-)
+On Thu, Mar 08 2012, Chris Ball wrote:
+>> Guennadi Liakhovetski (10):
+>>   mmc: simplify mmc_cd_gpio_request() by removing two parameters
+>>   mmc: tmio: calculate the native hotplug condition only once
+>>   mmc: tmio_mmc: support the generic MMC GPIO card hotplug helper
+>>   mmc: sh_mobile_sdhi: pass card hotplug GPIO number to TMIO MMC
+>>   ARM: mach-shmobile: convert mackerel to use the generic MMC GPIO
+>>     hotplug helper
+>>   ARM: mach-shmobile: convert ag5evm to use the generic MMC GPIO
+>>     hotplug helper
+>>   mmc: tmio_mmc: power status flag doesn't have to be exposed in
+>>     platform data
+>>   mmc: tmio_mmc: remove unused sdio_irq_enabled flag
+>>   mmc: sh_mobile_sdhi: do not manage PM clocks manually
+>>   mmc: tmio: cosmetic: prettify the tmio_mmc_set_ios() function
+>
+> Looks like you didn't get any ACKs for these, and the ARM patches no
+> longer apply -- would you like me to take all but the two ARM patches
+> and leave those to you?  (Does that result in working systems?)
 
-diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/mmc/sh_mmcif.h
-index b36caa9..c37956c 100644
---- a/include/linux/mmc/sh_mmcif.h
-+++ b/include/linux/mmc/sh_mmcif.h
-@@ -71,18 +71,15 @@ struct sh_mmcif_plat_data {
- 
- /* CE_CLK_CTRL */
- #define CLK_ENABLE		(1 << 24) /* 1: output mmc clock */
--#define CLK_CLEAR		((1 << 19) | (1 << 18) | (1 << 17) | (1 << 16))
--#define CLK_SUP_PCLK		((1 << 19) | (1 << 18) | (1 << 17) | (1 << 16))
--#define CLKDIV_4		(1<<16) /* mmc clock frequency.
--					 * n: bus clock/(2^(n+1)) */
--#define CLKDIV_256		(7<<16) /* mmc clock frequency. (see above) */
--#define SRSPTO_256		((1 << 13) | (0 << 12)) /* resp timeout */
--#define SRBSYTO_29		((1 << 11) | (1 << 10) |	\
--				 (1 << 9) | (1 << 8)) /* resp busy timeout */
--#define SRWDTO_29		((1 << 7) | (1 << 6) |		\
--				 (1 << 5) | (1 << 4)) /* read/write timeout */
--#define SCCSTO_29		((1 << 3) | (1 << 2) |		\
--				 (1 << 1) | (1 << 0)) /* ccs timeout */
-+#define CLK_CLEAR		(0xf << 16)
-+#define CLK_SUP_PCLK		(0xf << 16)
-+#define CLKDIV_4		(1 << 16) /* mmc clock frequency.
-+					   * n: bus clock/(2^(n+1)) */
-+#define CLKDIV_256		(7 << 16) /* mmc clock frequency. (see above) */
-+#define SRSPTO_256		(2 << 12) /* resp timeout */
-+#define SRBSYTO_29		(0xf << 8) /* resp busy timeout */
-+#define SRWDTO_29		(0xf << 4) /* read/write timeout */
-+#define SCCSTO_29		(0xf << 0) /* ccs timeout */
- 
- /* CE_VERSION */
- #define SOFT_RST_ON		(1 << 31)
+I've applied all of these except 5/6 to mmc-next for 3.4 now, thanks.
+
+- Chris.
 -- 
-1.7.2.5
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
