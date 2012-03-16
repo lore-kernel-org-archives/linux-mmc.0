@@ -1,41 +1,40 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH v1 1/5] ARM: imx28: add basic dt support
-Date: Fri, 16 Mar 2012 16:49:54 +0800
-Message-ID: <20120316084952.GG7758@S2101-09.ap.freescale.net>
-References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
- <1331628428-24017-2-git-send-email-b29396@freescale.com>
- <20120313172351.97C5E3E053B@localhost>
- <20120314124512.GG1180@shlinux2.ap.freescale.net>
- <20120314141643.GP3852@pengutronix.de>
- <20120315030206.GB13022@shlinux2.ap.freescale.net>
- <20321.37353.63115.664975@ipc1.ka-ro>
- <20120315105927.GE13022@shlinux2.ap.freescale.net>
- <20321.53468.310199.875966@ipc1.ka-ro>
+From: Russell King <rmk@arm.linux.org.uk>
+Subject: Re: [PATCH] mmc: mmci: assume maintainership
+Date: Fri, 16 Mar 2012 08:53:07 +0000
+Message-ID: <20120316085307.GC17243@flint.arm.linux.org.uk>
+References: <1331821836-14641-1-git-send-email-linus.walleij@stericsson.com> <20120315173047.GB17243@flint.arm.linux.org.uk> <4F62FE47.8020709@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:49236 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758556Ab2CPItZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Mar 2012 04:49:25 -0400
-Received: by iagz16 with SMTP id z16so5145453iag.19
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Mar 2012 01:49:24 -0700 (PDT)
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:56059 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1422635Ab2CPIxk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Mar 2012 04:53:40 -0400
 Content-Disposition: inline
-In-Reply-To: <20321.53468.310199.875966@ipc1.ka-ro>
+In-Reply-To: <4F62FE47.8020709@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lothar =?iso-8859-1?Q?Wa=DFmann?= <LW@KARO-electronics.de>
-Cc: Dong Aisheng <aisheng.dong@freescale.com>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Guo Shawn-R65073 <r65073@freescale.com>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: Linus WALLEIJ <linus.walleij@stericsson.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Per FORLIN <per.forlin@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Pawel Moll <pawel.moll@arm.com>
 
-On Thu, Mar 15, 2012 at 12:22:04PM +0100, Lothar Wa=DFmann wrote:
-=2E..
-> An intermediate solution could be using OF_DEV_AUXDATA to pass a
-> platform_data struct that may contain a MAC address set up by the
-> platform code.
->=20
-+1
+On Fri, Mar 16, 2012 at 09:48:07AM +0100, Ulf Hansson wrote:
+> Although, right know I would vote for having a more active maintainer  
+> for MMCI; please no offense Russell, I realize that your are fully  
+> occupied with a lot of other cool stuff. I think Linus could play a  
+> great role in this; especially since he also will be able to test  
+> patches on many different ARM boards.
 
---=20
-Regards,
-Shawn
+No, I explained why I haven't applied your other patches, and I explained
+at the time my concerns with your patches which zero out and restore the
+power and clock registers.  I repeated those concerns several times but
+the issue never got resolved.
+
+So that gives me no other option than to slow down applying your patches.
+It's not that I'm not being responsive.  It's that I'm purposely being
+slow over these changes because comments on the patches don't seem to be
+hitting home.
+
+-- 
+Russell King
+ Linux kernel    2.6 ARM Linux   - http://www.arm.linux.org.uk/
+ maintainer of:
