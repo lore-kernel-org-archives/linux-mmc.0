@@ -1,186 +1,207 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH v2 1/8] mmc: omap: Enable Auto CMD12
-Date: Fri, 16 Mar 2012 19:56:58 +0530
-Message-ID: <CANfBPZ_XHj0G8KbFzWJZGsRLnNHawAreQUmwwskMB4xpMxGmnQ@mail.gmail.com>
-References: <1331905144-31655-1-git-send-email-svenkatr@ti.com>
- <1331905144-31655-2-git-send-email-svenkatr@ti.com> <20120316135113.GM24651@arwen.pp.htv.fi>
+From: joancarles <joancarles@fqingenieria.es>
+Subject: RE: [MX25][MMC] mmc esdhc failure in 3.3-rc5
+Date: Fri, 16 Mar 2012 16:03:24 +0100
+Message-ID: <a06e68c3687c7390e15950bc20831fd4@mail.fqingenieria.es>
+References: <5e57eb999780335721212bb8d411406f@mail.fqingenieria.es>
+ <20120312132423.GC2459@pengutronix.de>
+ <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
+ <0E83723C55F66F43A6041464FE31119D099A34@039-SN2MPN1-011.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog128.obsmtp.com ([74.125.149.141]:49425 "HELO
-	na3sys009amx257.postini.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with SMTP id S965200Ab2CPO1U convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 16 Mar 2012 10:27:20 -0400
-Received: by mail-bk0-f47.google.com with SMTP id jg15so4387219bkc.34
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Mar 2012 07:27:18 -0700 (PDT)
-In-Reply-To: <20120316135113.GM24651@arwen.pp.htv.fi>
+Received: from llsa736-a03.servidoresdns.net ([82.223.190.27]:39739 "EHLO
+	llsa736-a03.servidoresdns.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1031130Ab2CPPDa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Mar 2012 11:03:30 -0400
+In-Reply-To: <0E83723C55F66F43A6041464FE31119D099A34@039-SN2MPN1-011.039d.mgd.msft.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: balbi@ti.com
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, cjb@laptop.org, balajitk@ti.com
+To: Zhu Richard-R65037 <r65037@freescale.com>
+Cc: Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org, shawn.guo@linaro.org
 
-On Fri, Mar 16, 2012 at 7:21 PM, Felipe Balbi <balbi@ti.com> wrote:
-> On Fri, Mar 16, 2012 at 07:08:57PM +0530, Venkatraman S wrote:
->> From: Balaji T K <balajitk@ti.com>
->>
->> Enable Auto-CMD12 for multi block read/write on HSMMC
->> Tested on OMAP4430, OMAP3430 and OMAP2430 SDP
->>
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->> Signed-off-by: Venkatraman S <svenkatr@ti.com>
->> ---
->> =A0drivers/mmc/host/omap_hsmmc.c | =A0 16 +++++++++++++---
->> =A01 file changed, 13 insertions(+), 3 deletions(-)
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_h=
-smmc.c
->> index f29e1a2..a9ffd70 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -85,6 +85,7 @@
->> =A0#define BRR_ENABLE =A0 =A0 =A0 =A0 =A0 (1 << 5)
->> =A0#define DTO_ENABLE =A0 =A0 =A0 =A0 =A0 (1 << 20)
->> =A0#define INIT_STREAM =A0 =A0 =A0 =A0 =A0(1 << 1)
->> +#define ACEN_ACMD12 =A0 =A0 =A0 =A0 =A0(1 << 2)
->> =A0#define DP_SELECT =A0 =A0 =A0 =A0 =A0 =A0(1 << 21)
->> =A0#define DDIR =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (1 << 4)
->> =A0#define DMA_EN =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 0x1
->> @@ -115,6 +116,7 @@
->> =A0#define OMAP_MMC_MAX_CLOCK =A0 52000000
->> =A0#define DRIVER_NAME =A0 =A0 =A0 =A0 =A0"omap_hsmmc"
->>
->> +#define AUTO_CMD12 =A0 =A0 =A0 =A0 =A0 (1 << 0) =A0 =A0 =A0 =A0/* A=
-uto CMD12 support */
->> =A0/*
->> =A0 * One controller can have multiple slots, like on some omap boar=
-ds using
->> =A0 * omap.c controller driver. Luckily this is not currently done o=
-n any known
->> @@ -175,6 +177,7 @@ struct omap_hsmmc_host {
->> =A0 =A0 =A0 int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 reqs_blocked=
-;
->> =A0 =A0 =A0 int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 use_reg;
->> =A0 =A0 =A0 int =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 req_in_progr=
-ess;
->> + =A0 =A0 unsigned int =A0 =A0 =A0 =A0 =A0 =A0flags;
->> =A0 =A0 =A0 struct omap_hsmmc_next =A0next_data;
->>
->> =A0 =A0 =A0 struct =A0omap_mmc_platform_data =A0*pdata;
->> @@ -766,6 +769,8 @@ omap_hsmmc_start_command(struct omap_hsmmc_host =
-*host, struct mmc_command *cmd,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 cmdtype =3D 0x3;
->>
->> =A0 =A0 =A0 cmdreg =3D (cmd->opcode << 24) | (resptype << 16) | (cmd=
-type << 22);
->> + =A0 =A0 if ((host->flags & AUTO_CMD12) && mmc_op_multi(cmd->opcode=
-))
->> + =A0 =A0 =A0 =A0 =A0 =A0 cmdreg |=3D ACEN_ACMD12;
->>
->> =A0 =A0 =A0 if (data) {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 cmdreg |=3D DP_SELECT | MSBS | BCE;
->> @@ -837,11 +842,15 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *h=
-ost, struct mmc_data *data)
->> =A0 =A0 =A0 else
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 data->bytes_xfered =3D 0;
->>
->> - =A0 =A0 if (!data->stop) {
->> + =A0 =A0 if (data->stop && ((!(host->flags & AUTO_CMD12)) || data->=
-error)) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 omap_hsmmc_start_command(host, data->stop,=
- NULL);
->> + =A0 =A0 }
->> + =A0 =A0 else {
+Hi
+
+Thank you for your reply. I has taken me a while to figure out what you 
+meant, but I believe I have added a sdhci_dumpregs(host) to the place 
+where CMD24 is issued with a -110 return error.
+
+> Hi:
+> -110 is the timeout problem.
+> You can dump the esdhc registers if you want to debug into this issue
+> when this timeout problem occurred.
+> The register dump can help to figure out what's wrong on the bus.
+
+I have no familiarity with the SDHC drivers, so there's nothing useful 
+for me in the output as of this moment:
+
+[ 1080.818765] sdhci: ===========================================
+[ 1080.818830] mmc0: req done (CMD17): 0: 00000900 00000000 00000000 
+00000000
+[ 1080.818862] mmc0:     512 bytes transferred: 0
+[ 1080.819395] mmc0: starting CMD24 arg 00008800 flags 000000b5
+[ 1080.819444] mmc0:     blksz 512 blocks 1 flags 00000100 tsac 300 ms 
+nsac 0
+[ 1080.819544] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000009
+[ 1080.819595] sdhci [sdhci_data_irq()]: mmc0: DMA base 0x82547c00, 
+transferred 0x038400 bytes, next 0x82580000
+[ 1080.819630] sdhci: =========== REGISTER DUMP (mmc0)===========
+[ 1080.819658] sdhci: Sys addr: 0x82547e00 | Version:  0x00000000
+[ 1080.819683] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+[ 1080.819707] sdhci: Argument: 0x00008800 | Trn mode: 0x00000003
+[ 1080.819732] sdhci: Present:  0xfe880006 | Host ctl: 0x00000023
+[ 1080.819756] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[ 1080.819780] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[ 1080.819804] sdhci: Timeout:  0x0000000c | Int stat: 0x00100002
+[ 1080.819830] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+[ 1080.819854] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+[ 1080.819879] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+[ 1080.819904] sdhci: Cmd:      0x0000183a | Max curr: 0x00000000
+[ 1080.819926] sdhci: Host ctl2: 0x00000000
+[ 1080.819942] sdhci: ===========================================
+[ 1080.819985] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00100002
+[ 1080.820048] mmc0: req done (CMD24): 0: 00000900 00000000 00000000 
+00000000
+[ 1080.820082] mmc0:     0 bytes transferred: -110
+[ 1080.820134] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1080.820201] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.820259] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+00000000
+[ 1080.820330] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1080.820391] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.820445] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+00000000
+[ 1080.820504] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1080.820572] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.820627] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+00000000
+[ 1080.820785] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1080.820879] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.820946] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+00000000
+[ 1080.821021] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1080.821085] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.821140] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+00000000
+[ 1080.821197] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1080.821255] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.821308] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+00000000
+[ 1080.824944] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1080.825041] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.825112] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+00000000
+[ 1080.825186] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1080.825248] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.825302] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+00000000
+[ 1080.825364] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1080.825432] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.825485] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+00000000
+[ 1080.825640] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1080.825736] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.825803] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 
+00000000
+[ 1080.825883] mmcblk0: error -110 transferring data, sector 68, nr 1, 
+cmd response 0x900, card status 0x0
+[ 1080.849435] mmc0: starting CMD55 arg 00020000 flags 00000095
+[ 1080.849531] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.849596] mmc0: req done (CMD55): 0: 00000920 00000000 00000000 
+00000000
+[ 1080.850319] mmc0: starting CMD22 arg 00000000 flags 000000b5
+[ 1080.850367] mmc0:     blksz 4 blocks 1 flags 00000200 tsac 100 ms 
+nsac 0
+[ 1080.850468] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.850523] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x0020000a
+[ 1080.850591] mmc0: req done (CMD22): 0: 00000920 00000000 00000000 
+00000000
+[ 1080.850624] mmc0:     0 bytes transferred: -84
+[ 1080.851339] end_request: I/O error, dev mmcblk0, sector 68
+[ 1080.856881] Buffer I/O error on device mmcblk0p1, logical block 6
+[ 1080.862998] lost page write due to I/O error on mmcblk0p1
+[ 1080.897203] mmc0: starting CMD17 arg 00008800 flags 000000b5
+[ 1080.897250] mmc0:     blksz 512 blocks 1 flags 00000200 tsac 100 ms 
+nsac 0
+[ 1080.897350] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.898143] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x0020000a
+[ 1080.898241] mmc0: req done (CMD17): 0: 00000900 00000000 00000000 
+00000000
+[ 1080.898276] mmc0:     0 bytes transferred: -84
+[ 1080.898949] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1080.899134] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1080.899204] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 
+00000000
+[ 1080.899284] mmcblk0: error -84 transferring data, sector 68, nr 1, 
+cmd response 0x900, card status 0x0
+[ 1080.908738] end_request: I/O error, dev mmcblk0, sector 68
+[ 1080.914465] FAT-fs (mmcblk0p1): FAT read failed (blocknr 6)
+[ 1085.809683] mmc0: starting CMD24 arg 00045e00 flags 000000b5
+[ 1085.809731] mmc0:     blksz 512 blocks 1 flags 00000100 tsac 300 ms 
+nsac 0
+[ 1085.809831] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000009
+[ 1085.809880] sdhci [sdhci_data_irq()]: mmc0: DMA base 0x82548200, 
+transferred 0x037e00 bytes, next 0x82580000
+[ 1085.809914] sdhci: =========== REGISTER DUMP (mmc0)===========
+[ 1085.809941] sdhci: Sys addr: 0x82548400 | Version:  0x00000000
+[ 1085.809967] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+[ 1085.809992] sdhci: Argument: 0x00045e00 | Trn mode: 0x00000003
+[ 1085.810017] sdhci: Present:  0xff880000 | Host ctl: 0x00000021
+[ 1085.810042] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[ 1085.810067] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[ 1085.810093] sdhci: Timeout:  0x0000000c | Int stat: 0x00200002
+[ 1085.810119] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+[ 1085.810143] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+[ 1085.810169] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+[ 1085.810193] sdhci: Cmd:      0x0000183a | Max curr: 0x00000000
+[ 1085.810214] sdhci: Host ctl2: 0x00000000
+[ 1085.810232] sdhci: ===========================================
+[ 1085.810275] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00200002
+[ 1085.810340] mmc0: req done (CMD24): 0: 00000900 00000000 00000000 
+00000000
+[ 1085.810373] mmc0:     0 bytes transferred: -84
+[ 1085.810427] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1085.810489] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1085.810543] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 
+00000000
+[ 1085.810616] mmc0: starting CMD13 arg 00020000 flags 00000195
+[ 1085.810690] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1085.810747] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 
+00000000
+[ 1085.810838] mmcblk0: error -84 transferring data, sector 559, nr 1, 
+cmd response 0x900, card status 0x0
+[ 1085.834557] mmc0: starting CMD55 arg 00020000 flags 00000095
+[ 1085.834651] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1085.834722] mmc0: req done (CMD55): 0: 00000920 00000000 00000000 
+00000000
+[ 1085.834802] mmc0: starting CMD22 arg 00000000 flags 000000b5
+[ 1085.834839] mmc0:     blksz 4 blocks 1 flags 00000200 tsac 100 ms 
+nsac 0
+[ 1085.834915] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[ 1085.834986] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x0020000a
+[ 1085.835056] mmc0: req done (CMD22): 0: 00000920 00000000 00000000 
+00000000
+
+What else can I provide you with? The MMC/SDHC/eSDHC driver framework 
+is a huge piece of software, so I don't really know where to start 
+looking. Electrically, there seems nothing really wrong with the signal 
+of the clock; the only thing that looks a wee bit suspicious is that the 
+MX25 clock for the SDHC is currently offering a 33MHz signal (as 
+gathered from the oscilloscope).
+
+>> and look at those commits. You should also include the people who 
+>> did
+>> those commits in CC when writing mails, otherwise they probably 
+>> won't
+>> notice. Richard Zhu and Shawn Guo are from Freescale, and have more
+>> knowledge about the ESDHC cores.
 >
-> while adding the braces, you broke the coding style. Please fix.
->
+> Done now, thanks. Richard, Shawn, any pointers as to where to start
+> looking on this one? Since the i.MX25 eSDHC has four data lines, one
+> clock and one command line hard-wired, there is really nothing from a
+> hardware point of view that could influence this different behaviour
+> between the 2.6.39 and the 3.3-rc7 kernels.
 
-Oops - now fixed (and pushed out).
-
-=46rom 00ae42358249e879698029201e3cbb9ea155305e Mon Sep 17 00:00:00 200=
-1
-=46rom: Balaji T K <balajitk@ti.com>
-Date: Fri, 24 Feb 2012 21:14:31 +0530
-Subject: [PATCH] mmc: omap: Enable Auto CMD12
-
-Enable Auto-CMD12 for multi block read/write on HSMMC
-Tested on OMAP4430, OMAP3430 and OMAP2430 SDP
-
-Signed-off-by: Balaji T K <balajitk@ti.com>
-Signed-off-by: Venkatraman S <svenkatr@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |   15 ++++++++++++---
- 1 file changed, 12 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmm=
-c.c
-index f29e1a2..729ac72 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -85,6 +85,7 @@
- #define BRR_ENABLE		(1 << 5)
- #define DTO_ENABLE		(1 << 20)
- #define INIT_STREAM		(1 << 1)
-+#define ACEN_ACMD12		(1 << 2)
- #define DP_SELECT		(1 << 21)
- #define DDIR			(1 << 4)
- #define DMA_EN			0x1
-@@ -115,6 +116,7 @@
- #define OMAP_MMC_MAX_CLOCK	52000000
- #define DRIVER_NAME		"omap_hsmmc"
-
-+#define AUTO_CMD12		(1 << 0)	/* Auto CMD12 support */
- /*
-  * One controller can have multiple slots, like on some omap boards us=
-ing
-  * omap.c controller driver. Luckily this is not currently done on any=
- known
-@@ -175,6 +177,7 @@ struct omap_hsmmc_host {
- 	int			reqs_blocked;
- 	int			use_reg;
- 	int			req_in_progress;
-+	unsigned int		flags;
- 	struct omap_hsmmc_next	next_data;
-
- 	struct	omap_mmc_platform_data	*pdata;
-@@ -766,6 +769,8 @@ omap_hsmmc_start_command(struct omap_hsmmc_host
-*host, struct mmc_command *cmd,
- 		cmdtype =3D 0x3;
-
- 	cmdreg =3D (cmd->opcode << 24) | (resptype << 16) | (cmdtype << 22);
-+	if ((host->flags & AUTO_CMD12) && mmc_op_multi(cmd->opcode))
-+		cmdreg |=3D ACEN_ACMD12;
-
- 	if (data) {
- 		cmdreg |=3D DP_SELECT | MSBS | BCE;
-@@ -837,11 +842,14 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host
-*host, struct mmc_data *data)
- 	else
- 		data->bytes_xfered =3D 0;
-
--	if (!data->stop) {
-+	if (data->stop && ((!(host->flags & AUTO_CMD12)) || data->error)) {
-+		omap_hsmmc_start_command(host, data->stop, NULL);
-+	} else {
-+		if (data->stop)
-+			data->stop->resp[0] =3D OMAP_HSMMC_READ(host->base,
-+							RSP76);
- 		omap_hsmmc_request_done(host, data->mrq);
--		return;
- 	}
--	omap_hsmmc_start_command(host, data->stop, NULL);
- }
-
- /*
-@@ -1826,6 +1834,7 @@ static int __init omap_hsmmc_probe(struct
-platform_device *pdev)
- 	host->mapbase	=3D res->start;
- 	host->base	=3D ioremap(host->mapbase, SZ_4K);
- 	host->power_mode =3D MMC_POWER_OFF;
-+	host->flags	=3D AUTO_CMD12;
- 	host->next_data.cookie =3D 1;
-
- 	platform_set_drvdata(pdev, host);
---=20
-1.7.10.rc0.41.gfa678
+-- 
+Joan C. Abelaira
