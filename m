@@ -1,46 +1,39 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] drivers: mmc: sdhci-s3c: fix broken compilation for non-Exynos SoCs
-Date: Thu, 15 Mar 2012 23:29:43 -0400
-Message-ID: <877gylcjfc.fsf@laptop.org>
-References: <1331300667-22566-1-git-send-email-m.szyprowski@samsung.com>
+Subject: Re: [PATCH REPOST 1/2] mmc: davinci: Eliminate spurious interrupts
+Date: Thu, 15 Mar 2012 23:32:42 -0400
+Message-ID: <873999cjad.fsf@laptop.org>
+References: <B6A220404B6BFC4BBD2AB91C54D39DF43176B8CE@DBDE01.ent.ti.com>
+	<1331501999-13144-1-git-send-email-ido@wizery.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1331300667-22566-1-git-send-email-m.szyprowski@samsung.com>
-	(Marek Szyprowski's message of "Fri, 09 Mar 2012 14:44:27 +0100")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:46496 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S965275Ab2CPDcg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 15 Mar 2012 23:32:36 -0400
+In-Reply-To: <1331501999-13144-1-git-send-email-ido@wizery.com> (Ido Yariv's
+	message of "Sun, 11 Mar 2012 23:39:58 +0200")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ido Yariv <ido@wizery.com>
+Cc: Sekhar Nori <nsekhar@ti.com>, linux-mmc@vger.kernel.org, davinci-linux-open-source@linux.davincidsp.com
 
-Hi Marek,
+Hi,
 
-On Fri, Mar 09 2012, Marek Szyprowski wrote:
-> exynos4_sdhci_drv_data structure is not available on non-Exynos builds,
-> that's why EXYNOS4_SDHCI_DRV_DATA macro has been introduced. This patch
-> fixes commit 67819656 'mmc: sdhci-s3c: Add device tree support' to use
-> that macro. This fixes broken build for pre-Exynos SoCs.
+On Sun, Mar 11 2012, Ido Yariv wrote:
+> The davinci mmc interrupt handler fills the fifo, as long as the DXRDY
+> or DRRDY bits are set in the status register.
 >
-> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
-> ---
->  drivers/mmc/host/sdhci-s3c.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
+> If interrupts fire during this loop, they will be handled by the
+> handler, but the interrupt controller will still buffer these. As a
+> result, the handler will be called again to serve these needlessly. In
+> order to avoid these spurious interrupts, keep interrupts masked while
+> filling the fifo.
 >
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index ea0767e..984601e 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -859,7 +859,7 @@ MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
->  static const struct of_device_id sdhci_s3c_dt_match[] = {
->  	{ .compatible = "samsung,s3c6410-sdhci", },
->  	{ .compatible = "samsung,exynos4210-sdhci",
-> -		.data = &exynos4_sdhci_drv_data },
-> +		.data = EXYNOS4_SDHCI_DRV_DATA },
->  	{},
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_s3c_dt_match);
+> Signed-off-by: Ido Yariv <ido@wizery.com>
+> Tested-by: Rajashekhara, Sudhakar <sudhakar.raj@ti.com>
 
-Thanks, pushed to mmc-next for 3.4 with Jaehoon's ACK.
+Thanks, I've pushed both of these two patches to mmc-next for 3.4 now.
 
 - Chris.
 -- 
