@@ -1,87 +1,68 @@
 From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 0/5] MMC: mmci: Provide bindings for Device Tree
-Date: Sat, 17 Mar 2012 21:26:53 +0000
-Message-ID: <20120317212652.GD3315@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH 2/5] MMC: mmci: Seperate ARM variants from generic code
+Date: Sat, 17 Mar 2012 21:30:23 +0000
+Message-ID: <20120317213022.GE3315@opensource.wolfsonmicro.com>
 References: <1331734803-17954-1-git-send-email-lee.jones@linaro.org>
- <201203152058.31398.arnd@arndb.de>
- <CACRpkdbyVXA+GxRtVL+JGPorp0ULJmeUEUZPxVxOT8W1-WmeMw@mail.gmail.com>
- <201203161236.36088.arnd@arndb.de>
+ <201203151823.32882.arnd@arndb.de>
+ <20120315203037.GA2311@n2100.arm.linux.org.uk>
+ <201203161248.15490.arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="UoPmpPX/dBe4BELn"
+	protocol="application/pgp-signature"; boundary="Dzs2zDY0zgkG72+7"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:43795 "EHLO
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:43809 "EHLO
 	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754921Ab2CQV05 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Mar 2012 17:26:57 -0400
+	by vger.kernel.org with ESMTP id S1754921Ab2CQVa0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Mar 2012 17:30:26 -0400
 Content-Disposition: inline
-In-Reply-To: <201203161236.36088.arnd@arndb.de>
+In-Reply-To: <201203161248.15490.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Arnd Bergmann <arnd@arndb.de>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Per Forlin <per.forlin@stericsson.com>, niklas.hernaeus@linaro.org, linux-mmc@vger.kernel.org, cjb@laptop.org, Lee Jones <lee.jones@linaro.org>, linux-arm-kernel@lists.infradead.org
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Lee Jones <lee.jones@linaro.org>, linux-arm-kernel@lists.infradead.org, niklas.hernaeus@linaro.org, cjb@laptop.org, linux-mmc@vger.kernel.org
 
 
---UoPmpPX/dBe4BELn
+--Dzs2zDY0zgkG72+7
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
-On Fri, Mar 16, 2012 at 12:36:35PM +0000, Arnd Bergmann wrote:
-> On Friday 16 March 2012, Linus Walleij wrote:
-> > On Thu, Mar 15, 2012 at 9:58 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+On Fri, Mar 16, 2012 at 12:48:15PM +0000, Arnd Bergmann wrote:
+> On Thursday 15 March 2012, Russell King - ARM Linux wrote:
 
-> > But I guess you're after modelling the levelshifter as a regulator?
+> > We _do_ need a solution for GPIO-controlled voltage regulators, as these
+> > are actually quite common - see the various soc-common using PCMCIA
+> > drivers.
 
-> > Basically the level shifter is a separate device has two voltage
-> > inputs A and B (from other regulators) that is controlled by a
-> > simple GPIO to select voltage A or B to drive the signals to
-> > the card.
+> > So I think actually a bit more thought is required here, and there's a
+> > need to use some of the facilities such as regulator which are now present
+> > that weren't when the driver was originally written some 9 years ago.
 
-> > That could probably be modelled as a regulator with two
-> > volategs for sure, but then we should maybe create a more
-> > generic "struct level_shifter_regulator" (or whatever) for the
-> > concept as a whole.
+> Ok. Let's see what Mark has to say about this.
 
-> Ok, thanks for the explanation.
+There's the gpio-regulator driver in mainline which should be able to
+support a fairly wide range of these simple regulators, and also the
+fixed voltage regulator for extremely simple cases.
 
-I'm not sure I'd bother defining a special regulator type for this if it
-is done using regulators - given that it's likely to just be a GPIO
-rather than a specific driver I'm not sure it's worth worrying about how
-exactly the hardware is implemented.
-
-> > Let's page Mark about what to do with levelshifters and whether
-> > they are regulators of sorts in his book.
-
-> It does sound appealing, especially because this one could be
-> done completely generically by defining a regulator that has
-> a bunch of other regulators as well as a set of gpio lines as
-> inputs and one output that can be used in other devices. We
-> would probably only use this one together with device tree then.
-
-It seems sensible to me - probably the existing gpio-regulator driver
-can do the job, though it's not unreasonable to expect that we'll want
-to support switching between variable voltage supplies at some point.
-
---UoPmpPX/dBe4BELn
+--Dzs2zDY0zgkG72+7
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iQIcBAEBAgAGBQJPZQFnAAoJEBus8iNuMP3dH2QP/jlFcGcMlmij+7XS83YKRo8S
-rUr+JzLCXXhwG1qUZMIBykH5zu7uLZeHHClrworViHOu3jewk/DV+9Z+WHjdWjvy
-Pf8K21xJxEaaREkAA8dyYy8jvCX8FrtherqNgoPFMfltAFPzO9YyVe9bKEUNpsNJ
-ZEs52uU9wuaWbfhg4pN0sAhL9smH3owRxqfubWkJe1uQg1hPk1VX8v55ggO8kdiB
-FG0w6E7cgrTJkXCF3bIaqazPIj5UCP37rYU49gOi4Nsy9Nl4/SQvufJt2x0DJDoC
-a6T+Ucmj0kKIM1PUKFNbEAxcCk2qq8NndRqWfPZRv24a4PJJMPgYkZ4pLvQNEjHQ
-DZqLE7/GyzKwgHzHIvZzBuJGFW7qLBbioziUipsHPhRSYWbwQ8fzkJCTyC8lZh5R
-n5thwrMyWzveECbLsO04dXYYgHd0vjltdo07vz1IAl6upUNPdUUsZzVJEkNnZFZe
-v/65alEkwhXHLQnIVqYe8HP6tD4ijcdUDqMcqiSdFcCssDjAd1+yndUvL2Zg0FY1
-gTsX6ksdKpI59BvYXcC9a34uIeRq61ReVM2UZefaMS+/klE2bWte5K7eaZrkV63s
-ssLxtOug6bsOdFs9dqxhmyszWKsF9cUvOklu5yYb7qeQfN2ppn00vgGnIIG/VpbN
-Morrawkbo11id15sKSAh
-=gFnw
+iQIcBAEBAgAGBQJPZQI/AAoJEBus8iNuMP3dTS4P/22Z1wFzVwClvFC+piJGqNP0
+zppDqp7luGW0hSwOVwicnij5NSMdyMo9DyYFPIrBeF/RIzsY6y/nc/mp4bTuIsIA
+b/W8JICfQfFa8kk2DzsD7yGVPPSsSRneHZyxNPkhNtZAI/EIdz33PADBgGyRl7ch
+TA3RNaoezlbYkBqOnmq6Goy06YaWdlQgBwTVAT0BogME/r8j9nUMdaZ9Dn8vwKTM
+bZ9KsyQTdVS5ssGwnbugMzsV2XhZZ/7/bCxDz9+ADOhbvTN7UuZZP1nvauBUmBTr
+xDA/H+aNSq7lO+KiuVULjAnzU9KyNlbjEUN27RNQvja4d7f8ovG73jjuZlki47cz
+6HQt0tk3IvIAEPIgy6Vwi6KMA84swOoKD7KG9kVFUtO1/L/t5sGQfWZ1G7XGYNFI
+jMOkjnLIjYouMoCOjt09FTDyIoYkIEBrE3j93mWNtv3Ak3BWjN9mHEk17QKs2biO
+7i7DlgErsEIQ1PFcG2XEBgLwiLJtriZ5ni1Vh+VI6wJA/DvnwfJctXLDDGIWm4UN
+dDQ7vjNme1MHAm23ENulScgl2grTKiYziwke5YsTQn+qzIXIwqQztrBMpQ2q1RFu
+gT+yHnb7z5fQh1uhzM1FnWz4BlVoOYmK1YakVbZ9KTpTaq9o6jx8o0M1NhqYAyf+
+TDXbpzAmMsGHfkxC/xvO
+=QH6C
 -----END PGP SIGNATURE-----
 
---UoPmpPX/dBe4BELn--
+--Dzs2zDY0zgkG72+7--
