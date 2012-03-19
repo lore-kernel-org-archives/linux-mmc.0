@@ -1,53 +1,24 @@
-From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
-Subject: RE: [PATCH v2 5/8] mmc: host: omap_hsmmc: trivial cleanups
-Date: Mon, 19 Mar 2012 05:57:00 +0000
-Message-ID: <1BAFE6F6C881BF42822005164F1491C3317F5456@DBDE01.ent.ti.com>
-References: <y> <1331905144-31655-1-git-send-email-svenkatr@ti.com>
- <1331905144-31655-6-git-send-email-svenkatr@ti.com>
+From: "Mr. Richard Tang" <tagnrichard@yahoo.com.hk>
+Subject: MAIL 18.03.2012
+Date: Mon, 19 Mar 2012 07:13:19 +0100
+Message-ID: <201203190613.q2J6DS0m028721@mail.ucla.edu>
+Reply-To: tangricad@yahoo.co.jp
 Mime-Version: 1.0
-Content-Type: text/plain; charset="Windows-1252"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1331905144-31655-6-git-send-email-svenkatr@ti.com>
-Content-Language: en-US
-Sender: linux-omap-owner@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "Krishnamoorthy, Balaji T" <balajitk@ti.com>, "Balbi, Felipe" <balbi@ti.com>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from out-23.smtp.ucla.edu ([169.232.47.174]:40328 "EHLO
+	out-23.smtp.ucla.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932147Ab2CSGVR convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Mar 2012 02:21:17 -0400
+Content-Description: Mail message body
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Recipients <tagnrichard@yahoo.com.hk>
 
-On Fri, Mar 16, 2012 at 19:09:01, S, Venkatraman wrote:
-> From: Felipe Balbi <balbi@ti.com>
-> 
-> a bunch of non-functional cleanups to the omap_hsmmc
-> driver.
-> 
-> It basically decreases indentation level, drop unneeded
+Mail From Tang.
 
-s/unneeded/unneeded. Better to use unnecessary
+I work with the hang seng Bank Hong Kong.I have a business proposition for you involving a trade in my bank which I know we will be of mutual benefit to both of us, If interested mail me at:tangricad@yahoo.co.jp
 
-> dereferences and drop unneded accesses to the platform_device
-
-Same as above
-
-> structure.
-> 
-> Signed-off-by: Felipe Balbi <balbi@ti.com>
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> ---
-
-..snip..
-..snip..
-
->  }
-> -- 
-> 1.7.10.rc0.41.gfa678
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
-
-Regards, 
-Gururaja
+Regards,
+Richard Tang.
