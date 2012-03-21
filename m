@@ -1,49 +1,30 @@
-From: Sergei Shtylyov <sshtylyov@mvista.com>
-Subject: Re: [PATCH 1/3] mmc: atmel-mci: correct data timeout computation
-Date: Wed, 21 Mar 2012 19:26:04 +0300
-Message-ID: <4F6A011C.3000900@mvista.com>
-References: <1332344483-3915-1-git-send-email-ludovic.desroches@atmel.com> <1332344483-3915-2-git-send-email-ludovic.desroches@atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: ludovic.desroches@atmel.com
+Subject: [PATCH 0/4] atmel-mci device tree support
+Date: Wed, 21 Mar 2012 19:03:10 +0100
+Message-ID: <1332352994-20983-1-git-send-email-ludovic.desroches@atmel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f46.google.com ([209.85.214.46]:47477 "EHLO
-	mail-bk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759141Ab2CUP1I (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Mar 2012 11:27:08 -0400
-Received: by bkcik5 with SMTP id ik5so1003839bkc.19
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Mar 2012 08:27:07 -0700 (PDT)
-In-Reply-To: <1332344483-3915-2-git-send-email-ludovic.desroches@atmel.com>
+Received: from newsmtp5.atmel.com ([204.2.163.5]:10669 "EHLO
+	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754428Ab2CUQEM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Mar 2012 12:04:12 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ludovic.desroches@atmel.com
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, plagnioj@jcrosoft.com, nicolas.ferre@atmel.com
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: nicolas.ferre@atmel.com, ludovic.desroches@atmel.com, plagnioj@jcrosoft.com
 
-Hello.
+Hi,
 
-On 03/21/2012 06:41 PM, ludovic.desroches@atmel.com wrote:
+This patch-set adds device tree support for atmel-mci.
 
-> From: Ludovic Desroches<ludovic.desroches@atmel.com>
+Regards
 
-> The HSMCI operates at a rate of up to Master Clock divided by two.
+Ludovic
 
-> Signed-off-by: Ludovic Desroches<ludovic.desroches@atmel.com>
-> ---
->   drivers/mmc/host/atmel-mci.c |    2 +-
->   1 files changed, 1 insertions(+), 1 deletions(-)
+ .../devicetree/bindings/mmc/atmel-hsmci.txt        |   55 +++++++++++++++
+ arch/arm/boot/dts/at91sam9g25ek.dts                |   16 ++++
+ arch/arm/boot/dts/at91sam9x5.dtsi                  |   14 ++++
+ arch/arm/mach-at91/at91sam9x5.c                    |    2 +
+ drivers/mmc/host/atmel-mci.c                       |   74 +++++++++++++++++++-
+ 5 files changed, 158 insertions(+), 3 deletions(-)
+ 
 
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index e4449a5..e161452 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -480,7 +480,7 @@ err:
->   static inline unsigned int atmci_ns_to_clocks(struct atmel_mci *host,
->   					unsigned int ns)
->   {
-> -	return (ns * (host->bus_hz / 1000000) + 999) / 1000;
-> +	return (ns * ((host->bus_hz/2) / 1000000) + 999) / 1000;
-
-    Why don't you keep the notation by addign spaces around '/'?
-    BTW, could use DIV_ROUND_UP() here.
-
-WBR, Sergei
