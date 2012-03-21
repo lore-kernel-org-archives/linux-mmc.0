@@ -1,145 +1,55 @@
-From: =?utf-8?Q?Lothar_Wa=C3=9Fmann?= <LW@KARO-electronics.de>
-Subject: Re: [PATCH v1 1/5] ARM: imx28: add basic dt support
-Date: Tue, 20 Mar 2012 14:17:48 +0100
-Message-ID: <20328.33660.472382.117901@ipc1.ka-ro>
-References: <1331628428-24017-1-git-send-email-b29396@freescale.com>
-	<1331628428-24017-2-git-send-email-b29396@freescale.com>
-	<20120313172351.97C5E3E053B@localhost>
-	<20120314124512.GG1180@shlinux2.ap.freescale.net>
-	<20120314141643.GP3852@pengutronix.de>
-	<20120315030206.GB13022@shlinux2.ap.freescale.net>
-	<20321.37353.63115.664975@ipc1.ka-ro>
-	<20120315105927.GE13022@shlinux2.ap.freescale.net>
-	<20321.53468.310199.875966@ipc1.ka-ro>
-	<20120316030134.GA5161@shlinux2.ap.freescale.net>
-	<20120318184749.BB15D3E07BF@localhost>
-	<20326.55337.249575.289067@ipc1.ka-ro>
-	<20120319150601.B783A3E05A5@localhost>
-	<20327.25470.723875.916422@ipc1.ka-ro>
-	<20120319220224.ABF5A3E0A04@localhost>
-	<CAA+hA=R8hLZMyRASRim28MNzX4jyE3nsaJ3DPzgxDtUmqtH62w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Simon Horman <horms@verge.net.au>
+Subject: [PATCH 2/2] mmc: sh_mmcif: mmc->f_max should be half of the bus clock
+Date: Wed, 21 Mar 2012 18:02:29 +0900
+Message-ID: <1332320549-28584-3-git-send-email-horms@verge.net.au>
+References: <1332320549-28584-1-git-send-email-horms@verge.net.au>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.karo-electronics.de ([81.173.242.67]:63196 "EHLO
-	mail.karo-electronics.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753228Ab2CTNSK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Mar 2012 09:18:10 -0400
-In-Reply-To: <CAA+hA=R8hLZMyRASRim28MNzX4jyE3nsaJ3DPzgxDtUmqtH62w@mail.gmail.com>
+Received: from kirsty.vergenet.net ([202.4.237.240]:41244 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756723Ab2CUJCl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Mar 2012 05:02:41 -0400
+In-Reply-To: <1332320549-28584-1-git-send-email-horms@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: Grant Likely <grant.likely@secretlab.ca>, Dong Aisheng <aisheng.dong@freescale.com>, "vinod.koul@linux.intel.com" <vinod.koul@linux.intel.com>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Guo Shawn-R65073 <r65073@freescale.com>, "rdunlap@xenotime.net" <rdunlap@xenotime.net>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "cjb@laptop.org" <cjb@laptop.org>, Dong Aisheng-B29396 <B29396@freescale.com>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>, Cao Minh Hiep <hiepcm@gmail.com>
 
-Hi,
+mmc->f_max should be half of the bus clock.
+And now that mmc->f_max is not equal to the bus clock the
+latter should be used directly to calculate mmc->f_min.
 
-Dong Aisheng writes:
-> On Mon, Mar 19, 2012 at 3:02 PM, Grant Likely <grant.likely@secretlab=
-=2Eca> wrote:
-> > On Mon, 19 Mar 2012 17:49:02 +0100, Lothar Wa=C3=9Fmann <LW@KARO-el=
-ectronics.de> wrote:
-> >> Hi,
-> >>
-> >> Grant Likely writes:
-> >> > On Mon, 19 Mar 2012 07:54:33 +0100, Lothar Wa=C3=9Fmann <LW@KARO=
--electronics.de> wrote:
-> >> > > Grant Likely writes:
-> >> > > > On Fri, 16 Mar 2012 11:01:35 +0800, Dong Aisheng <aisheng.do=
-ng@freescale.com> wrote:
-> >> > > > > On Thu, Mar 15, 2012 at 07:22:04PM +0800, Lothar Wa=C3=9Fm=
-ann wrote:
-> >> > > > > > Dong Aisheng writes:
-> >> > > > > > > On Thu, Mar 15, 2012 at 02:53:29PM +0800, Lothar Wa=C3=
-=9Fmann wrote:
-> >> > > > > > Anyway there is no definite spec how the MAC address(es)=
- are stored
-> >> > > > > > in the fuse map. Thus reading the MAC from there is more=
- or less
-> >> > > > > > platform specific.
-> >> > > > > >
-> >> > > > > It's just provide one more option since there are customer=
-s storing the MAC
-> >> > > > > in the fuse map.
-> >> > > >
-> >> > > > That should be straight forward to support; have a property =
-that
-> >> > > > specifies the method used for fetching/calculating the MAC.
-> >> > > >
-> >> > > Executable code stored inside a DT blob? ;)
-> >> >
-> >> > I know you're joking here, but I'm going to answer seriously
-> >> > anyway... Absolutely not. =C2=A0What I'm suggesting is a propert=
-y that
-> >> > specifies the method used to determine the mac address. =C2=A0So=
-mething
-> >> > like (off the top of my head):
-> >> >
-> >> > =C2=A0 =C2=A0 local-mac-address =3D [01 02 03 00 00 00];
-> >> > =C2=A0 =C2=A0 local-mac-mask =3D [0xff 0xff 0xff 0 0 0];
-> >> > =C2=A0 =C2=A0 mac-encoding =3D "append-serial-number";
-> >> >
-> >> That still does not specify where the remaining part of the MAC is
-> >> stored and how it should be retrieved.
-> >
-> > I'm suggesting that you define a string that means something specif=
-ic;
-> > that hopefully can be shared by multiple platforms. =C2=A0For examp=
-le,
-> > "append-serial-number" might mean start with the values selected by
-> > AND of local-mac-address and local-mac-mask, and OR in the board's
-> > serial number. =C2=A0You would need to define something that worked=
- if this
-> > was the solution you used.
-> >
-> I'm intend to Grant's this suggestion.
-> This can be shared by all other imx platforms which stores mac addres=
-s in
-> fuse map and this is commonly used by customer.
-> Then we do not need keep writing repeat code for different platforms
-> via platform
-> data.
->=20
-> For Lothar's question, we can add a property fuse_mac_offset to indic=
-ate
-> read mac from fuse map and where to read it.
->
-That's not really enough. The format (big-endian vs. little-endian)
-may also differ. But it's not really necessary, if the solution with
-prom_update_property() works, since then platform code has full
-control over the MAC.
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Tested-by: Cao Minh Hiep <hiepcm@gmail.com>
+Signed-off-by: Simon Horman <horms@verge.net.au>
+---
+ drivers/mmc/host/sh_mmcif.c |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
 
-> For how many bytes to read, we can calculate it from the local-mac-ma=
-sk.
-> For example, local-mac-mask =3D [0xff 0xff 0xff 0 0 0], we can get th=
-e size
-> as 3 bypes.
->=20
-> Then we have three properties:
-> local-mac-address =3D [01 02 03 00 00 00];
-> local-mac-mask =3D [0xff 0xff 0xff 0 0 0];
-> fuse_mac_offset =3D <1>;
->=20
-> In fec driver, the final mac address can be got by:
-> local-mac-address & local-mac-mask | (read_fuse(1) & 0xffffff)
->=20
-> Lathar,
-> Do you think if this is ok?
->
-No. IMO the FEC driver itself should not read any fuses.
-Reading fuses is a SoC specific thing and the FEC driver should not
-depend on the idiosyncrasies of some SoC wrt. anything else but the
-implementation of the FEC itself.
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 5014bc4..1410baa 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -1297,14 +1297,14 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 	spin_lock_init(&host->lock);
+ 
+ 	mmc->ops = &sh_mmcif_ops;
+-	mmc->f_max = host->clk;
++	mmc->f_max = host->clk / 2;
+ 	/* close to 400KHz */
+-	if (mmc->f_max < 51200000)
+-		mmc->f_min = mmc->f_max / 128;
+-	else if (mmc->f_max < 102400000)
+-		mmc->f_min = mmc->f_max / 256;
++	if (host->clk < 51200000)
++		mmc->f_min = host->clk / 128;
++	else if (host->clk < 102400000)
++		mmc->f_min = host->clk / 256;
+ 	else
+-		mmc->f_min = mmc->f_max / 512;
++		mmc->f_min = host->clk / 512;
+ 	if (pd->ocr)
+ 		mmc->ocr_avail = pd->ocr;
+ 	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
+-- 
+1.7.6.3
 
-
-Lothar Wa=C3=9Fmann
---=20
-___________________________________________________________
-
-Ka-Ro electronics GmbH | Pascalstra=C3=9Fe 22 | D - 52076 Aachen
-Phone: +49 2408 1402-0 | Fax: +49 2408 1402-10
-Gesch=C3=A4ftsf=C3=BChrer: Matthias Kaussen
-Handelsregistereintrag: Amtsgericht Aachen, HRB 4996
-
-www.karo-electronics.de | info@karo-electronics.de
-___________________________________________________________
