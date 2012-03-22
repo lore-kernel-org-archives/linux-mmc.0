@@ -1,55 +1,59 @@
-From: "Linus Walleij" <linus.walleij@linaro.org>
-Subject: [PATCH] mmc: fix card block compile warnings
-Date: Thu, 22 Mar 2012 08:35:09 +0100
-Message-ID: <1332401709-25513-1-git-send-email-linus.walleij@linaro.org>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH 1/3] mmc: atmel-mci: correct data timeout computation
+Date: Thu, 22 Mar 2012 09:57:37 +0100
+Message-ID: <20120322085736.GM11834@ldesroches-Latitude-E6320>
+References: <1332344483-3915-1-git-send-email-ludovic.desroches@atmel.com>
+ <1332344483-3915-2-git-send-email-ludovic.desroches@atmel.com>
+ <4F6A011C.3000900@mvista.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.df.lth.se ([194.47.250.12]:53353 "EHLO mail.df.lth.se"
+Received: from newsmtp5.atmel.com ([204.2.163.5]:4508 "EHLO sjogate2.atmel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754020Ab2CVHlT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 Mar 2012 03:41:19 -0400
+	id S964786Ab2CVI5x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 22 Mar 2012 04:57:53 -0400
+Content-Disposition: inline
+In-Reply-To: <4F6A011C.3000900@mvista.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
-Cc: Linus Walleij <linus.walleij@linaro.org>
+To: Sergei Shtylyov <sshtylyov@mvista.com>
+Cc: ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, plagnioj@jcrosoft.com, nicolas.ferre@atmel.com
 
-I'm pretty tired of seeing these in my kernel compiles:
-drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_issue_secdiscard=
-_rq=E2=80=99:
-drivers/mmc/card/block.c:911:18: warning: =E2=80=98arg=E2=80=99 may be =
-used uninitialized in this function [-Wuninitialized]
-drivers/mmc/card/block.c:910:6: warning: =E2=80=98nr=E2=80=99 may be us=
-ed uninitialized in this function [-Wuninitialized]
-drivers/mmc/card/block.c:910:6: warning: =E2=80=98from=E2=80=99 may be =
-used uninitialized in this function [-Wuninitialized]
+Hello Sergei,
 
-This patch marks the variables explicitly uninitialized as
-seems to be the intention, I can assure myself they are not
-actually uninitialized at use time by just reading the code.
+On Wed, Mar 21, 2012 at 07:26:04PM +0300, Sergei Shtylyov wrote:
+> Hello.
+> 
+> On 03/21/2012 06:41 PM, ludovic.desroches@atmel.com wrote:
+> 
+> >From: Ludovic Desroches<ludovic.desroches@atmel.com>
+> 
+> >The HSMCI operates at a rate of up to Master Clock divided by two.
+> 
+> >Signed-off-by: Ludovic Desroches<ludovic.desroches@atmel.com>
+> >---
+> >  drivers/mmc/host/atmel-mci.c |    2 +-
+> >  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> >diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> >index e4449a5..e161452 100644
+> >--- a/drivers/mmc/host/atmel-mci.c
+> >+++ b/drivers/mmc/host/atmel-mci.c
+> >@@ -480,7 +480,7 @@ err:
+> >  static inline unsigned int atmci_ns_to_clocks(struct atmel_mci *host,
+> >  					unsigned int ns)
+> >  {
+> >-	return (ns * (host->bus_hz / 1000000) + 999) / 1000;
+> >+	return (ns * ((host->bus_hz/2) / 1000000) + 999) / 1000;
+> 
+>    Why don't you keep the notation by addign spaces around '/'?
+>    BTW, could use DIV_ROUND_UP() here.
+> 
 
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/card/block.c |    4 +++-
- 1 files changed, 3 insertions(+), 1 deletions(-)
+Thanks for your comments. BTW I have realized (when testing values return using
+DIV_ROUND_UP) that I may have another issue with this timeout calculation.
+I will send a new patch.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index c6a383d..214ae68 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -874,7 +874,9 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_q=
-ueue *mq,
- {
- 	struct mmc_blk_data *md =3D mq->data;
- 	struct mmc_card *card =3D md->queue.card;
--	unsigned int from, nr, arg;
-+	unsigned int uninitialized_var(from);
-+	unsigned int uninitialized_var(nr);
-+	unsigned int uninitialized_var(arg);
- 	int err =3D 0, type =3D MMC_BLK_SECDISCARD;
-=20
- 	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
---=20
-1.7.7.6
+Regards
 
+Ludovic
