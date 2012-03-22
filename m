@@ -1,67 +1,81 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH] mmc: fix card block compile warnings
-Date: Thu, 22 Mar 2012 11:58:03 +0100
-Message-ID: <4F6B05BB.3080109@stericsson.com>
-References: <1332401709-25513-1-git-send-email-linus.walleij@linaro.org>
+From: "Bedia, Vaibhav" <vaibhav.bedia@ti.com>
+Subject: RE: Occasional crashes in suspend-resume with MMC transactions
+Date: Thu, 22 Mar 2012 13:20:53 +0000
+Message-ID: <B5906170F1614E41A8A28DE3B8D12143317FF773@DBDE01.ent.ti.com>
+References: <B5906170F1614E41A8A28DE3B8D12143317FDFBB@DBDE01.ent.ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog115.obsmtp.com ([207.126.144.139]:59838 "EHLO
-	eu1sys200aog115.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753474Ab2CVK7A (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Mar 2012 06:59:00 -0400
-In-Reply-To: <1332401709-25513-1-git-send-email-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <B5906170F1614E41A8A28DE3B8D12143317FDFBB@DBDE01.ent.ti.com>
+Content-Language: en-US
+Sender: linux-omap-owner@vger.kernel.org
+To: "Bedia, Vaibhav" <vaibhav.bedia@ti.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: "cjb@laptop.org" <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 03/22/2012 08:35 AM, Linus Walleij wrote:
-> I'm pretty tired of seeing these in my kernel compiles:
-> drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_issue_secdisca=
-rd_rq=E2=80=99:
-> drivers/mmc/card/block.c:911:18: warning: =E2=80=98arg=E2=80=99 may b=
-e used uninitialized in this function [-Wuninitialized]
-> drivers/mmc/card/block.c:910:6: warning: =E2=80=98nr=E2=80=99 may be =
-used uninitialized in this function [-Wuninitialized]
-> drivers/mmc/card/block.c:910:6: warning: =E2=80=98from=E2=80=99 may b=
-e used uninitialized in this function [-Wuninitialized]
->
-> This patch marks the variables explicitly uninitialized as
-> seems to be the intention, I can assure myself they are not
-> actually uninitialized at use time by just reading the code.
->
-> Signed-off-by: Linus Walleij<linus.walleij@linaro.org>
-> ---
->   drivers/mmc/card/block.c |    4 +++-
->   1 files changed, 3 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index c6a383d..214ae68 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -874,7 +874,9 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc=
-_queue *mq,
->   {
->   	struct mmc_blk_data *md =3D mq->data;
->   	struct mmc_card *card =3D md->queue.card;
-> -	unsigned int from, nr, arg;
-> +	unsigned int uninitialized_var(from);
-> +	unsigned int uninitialized_var(nr);
-> +	unsigned int uninitialized_var(arg);
->   	int err =3D 0, type =3D MMC_BLK_SECDISCARD;
->
->   	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) =
-{
+On Thu, Mar 22, 2012 at 09:53:23, Bedia, Vaibhav wrote:
+> Hi,
+> 
+> I am trying to do suspend-resume test with a file copy on MMC/SD going on
+> in the background. The test involves simply copying a 450MB file on an ext3
+> partition to the same partition under a different name.
+> 
+> This is on an AM335x board which uses the omap_hsmmc driver. 
+> The kernel is v3.2 and I have also applied the following patch 
+> 
 
-Is not the problem only related to the arg variable?
+[...]
 
-What about:
-	unsigned int from, nr, arg =3D 0;
+I found that whenever this issue crops up, mmc_host_suspend() is not able to claim the host
+And returns -EBUSY. omap_hsmmc driver does not pass on this error code to the PM core and
+hence the suspend process continues. When the driver is made to return -EBUSY, the suspend
+process gets aborted and the user can try suspending again. I am not sure whether this sort
+of suspend failure is acceptable or the driver is doing something wrong. The following
+workaround is what I came up with. Do this look a reasonable thing to do?
 
-Yours!
+---
 
-Ulf Hansson
+>From a4040dd1869b351a5fa29dacd08facf6e24df609 Mon Sep 17 00:00:00 2001
+From: Vaibhav Bedia <vaibhav.bedia@ti.com>
+Date: Thu, 22 Mar 2012 17:14:49 +0530
+Subject: [PATCH 1/1] mmc: omap_hsmmc: Pass on the suspend failure to the PM core
 
+In some cases mmc_host_suspend() is not able to claim the
+host and proceed with the suspend process. The core returns
+-EBUSY to the host controller driver. Unfortunately, the
+host controller driver does not pass on this information
+to the PM core and hence the system suspend process continues.
+
+In these cases the MMC core gets to an unexpected state
+during resume and multiple issues related to MMC crop up.
+1. Host controller driver starts accessing the device registers
+before the clocks are enabled which leads to a prefetch abort.
+2. A file copy thread which was launched before suspend gets
+stuck due to the host not being reclaimed during resume.
+
+To avoid such problems pass on the -EBUSY status to the PM core
+from the host controller driver. With this change, MMC core
+suspend might still fail but it does not end up making the
+system unusable. Suspend gets aborted and the user can try
+suspending the system again.
+
+Signed-off-by: Vaibhav Bedia <vaibhav.bedia@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 3d8dbbb..1f938d9 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2238,6 +2238,7 @@ static int omap_hsmmc_suspend(struct device *dev)
+                                        dev_dbg(mmc_dev(host->mmc),
+                                                "Unmask interrupt failed\n");
+                        }
++                       ret = -EBUSY;
+                        goto err;
+                }
+
+--
+1.7.0.4
