@@ -1,59 +1,97 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH 1/3] mmc: atmel-mci: correct data timeout computation
-Date: Thu, 22 Mar 2012 09:57:37 +0100
-Message-ID: <20120322085736.GM11834@ldesroches-Latitude-E6320>
-References: <1332344483-3915-1-git-send-email-ludovic.desroches@atmel.com>
- <1332344483-3915-2-git-send-email-ludovic.desroches@atmel.com>
- <4F6A011C.3000900@mvista.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: [PATCH] mmc: block: Remove use of mmc_blk_set_blksize
+Date: Thu, 22 Mar 2012 11:47:26 +0100
+Message-ID: <1332413246-27953-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:4508 "EHLO sjogate2.atmel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S964786Ab2CVI5x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 Mar 2012 04:57:53 -0400
-Content-Disposition: inline
-In-Reply-To: <4F6A011C.3000900@mvista.com>
+Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:39515 "EHLO
+	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751309Ab2CVKs4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Mar 2012 06:48:56 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sergei Shtylyov <sshtylyov@mvista.com>
-Cc: ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, plagnioj@jcrosoft.com, nicolas.ferre@atmel.com
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Subhash Jadavani <subhashj@codeaurora.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Hello Sergei,
+According to the specifications for SD and (e)MMC default
+blocksize (named BLOCKLEN in Spec.) must always be 512
+bytes. Since we hardcoded to always use 512 bytes, we do
+not explicitly have to set it. Future improvements should
+potentially make it possible to use a greater blocksize
+than 512 bytes, but until then let's skip this.
 
-On Wed, Mar 21, 2012 at 07:26:04PM +0300, Sergei Shtylyov wrote:
-> Hello.
-> 
-> On 03/21/2012 06:41 PM, ludovic.desroches@atmel.com wrote:
-> 
-> >From: Ludovic Desroches<ludovic.desroches@atmel.com>
-> 
-> >The HSMCI operates at a rate of up to Master Clock divided by two.
-> 
-> >Signed-off-by: Ludovic Desroches<ludovic.desroches@atmel.com>
-> >---
-> >  drivers/mmc/host/atmel-mci.c |    2 +-
-> >  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> >diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> >index e4449a5..e161452 100644
-> >--- a/drivers/mmc/host/atmel-mci.c
-> >+++ b/drivers/mmc/host/atmel-mci.c
-> >@@ -480,7 +480,7 @@ err:
-> >  static inline unsigned int atmci_ns_to_clocks(struct atmel_mci *host,
-> >  					unsigned int ns)
-> >  {
-> >-	return (ns * (host->bus_hz / 1000000) + 999) / 1000;
-> >+	return (ns * ((host->bus_hz/2) / 1000000) + 999) / 1000;
-> 
->    Why don't you keep the notation by addign spaces around '/'?
->    BTW, could use DIV_ROUND_UP() here.
-> 
+Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
+---
+ drivers/mmc/card/block.c |   27 +--------------------------
+ 1 files changed, 1 insertions(+), 26 deletions(-)
 
-Thanks for your comments. BTW I have realized (when testing values return using
-DIV_ROUND_UP) that I may have another issue with this timeout calculation.
-I will send a new patch.
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index a7c75d8..ce171c6 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1624,24 +1624,6 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+ 	return ret;
+ }
+ 
+-static int
+-mmc_blk_set_blksize(struct mmc_blk_data *md, struct mmc_card *card)
+-{
+-	int err;
+-
+-	mmc_claim_host(card->host);
+-	err = mmc_set_blocklen(card, 512);
+-	mmc_release_host(card->host);
+-
+-	if (err) {
+-		pr_err("%s: unable to set block size to 512: %d\n",
+-			md->disk->disk_name, err);
+-		return -EINVAL;
+-	}
+-
+-	return 0;
+-}
+-
+ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+ {
+ 	struct mmc_card *card;
+@@ -1769,7 +1751,6 @@ static const struct mmc_fixup blk_fixups[] =
+ static int mmc_blk_probe(struct mmc_card *card)
+ {
+ 	struct mmc_blk_data *md, *part_md;
+-	int err;
+ 	char cap_str[10];
+ 
+ 	/*
+@@ -1782,10 +1763,6 @@ static int mmc_blk_probe(struct mmc_card *card)
+ 	if (IS_ERR(md))
+ 		return PTR_ERR(md);
+ 
+-	err = mmc_blk_set_blksize(md, card);
+-	if (err)
+-		goto out;
+-
+ 	string_get_size((u64)get_capacity(md->disk) << 9, STRING_UNITS_2,
+ 			cap_str, sizeof(cap_str));
+ 	pr_info("%s: %s %s %s %s\n",
+@@ -1810,7 +1787,7 @@ static int mmc_blk_probe(struct mmc_card *card)
+  out:
+ 	mmc_blk_remove_parts(card, md);
+ 	mmc_blk_remove_req(md);
+-	return err;
++	return 0;
+ }
+ 
+ static void mmc_blk_remove(struct mmc_card *card)
+@@ -1846,8 +1823,6 @@ static int mmc_blk_resume(struct mmc_card *card)
+ 	struct mmc_blk_data *md = mmc_get_drvdata(card);
+ 
+ 	if (md) {
+-		mmc_blk_set_blksize(md, card);
+-
+ 		/*
+ 		 * Resume involves the card going into idle state,
+ 		 * so current partition is always the main one.
+-- 
+1.7.9
 
-Regards
-
-Ludovic
