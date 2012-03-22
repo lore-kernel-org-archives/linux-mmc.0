@@ -1,17 +1,17 @@
 From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: Re: [PATCH 3/4] arm: at91: dt: sam9x5 add mci support
-Date: Thu, 22 Mar 2012 15:52:13 +0100
-Message-ID: <4F6B3C9D.60300@atmel.com>
-References: <1332352994-20983-1-git-send-email-ludovic.desroches@atmel.com> <1332352994-20983-4-git-send-email-ludovic.desroches@atmel.com>
+Subject: Re: [PATCH 4/4] arm: at91: dt: sam9g25ek add mci support
+Date: Thu, 22 Mar 2012 15:53:01 +0100
+Message-ID: <4F6B3CCD.7070105@atmel.com>
+References: <1332352994-20983-1-git-send-email-ludovic.desroches@atmel.com> <1332352994-20983-5-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:25291 "EHLO
+Received: from newsmtp5.atmel.com ([204.2.163.5]:45817 "EHLO
 	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754320Ab2CVOwW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Mar 2012 10:52:22 -0400
-In-Reply-To: <1332352994-20983-4-git-send-email-ludovic.desroches@atmel.com>
+	with ESMTP id S1752512Ab2CVOxK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Mar 2012 10:53:10 -0400
+In-Reply-To: <1332352994-20983-5-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ludovic.desroches@atmel.com
@@ -25,34 +25,36 @@ On 03/21/2012 07:03 PM, ludovic.desroches@atmel.com :
 Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 
 > ---
->  arch/arm/boot/dts/at91sam9x5.dtsi |   14 ++++++++++++++
->  1 files changed, 14 insertions(+), 0 deletions(-)
+>  arch/arm/boot/dts/at91sam9g25ek.dts |   16 ++++++++++++++++
+>  1 files changed, 16 insertions(+), 0 deletions(-)
 > 
-> diff --git a/arch/arm/boot/dts/at91sam9x5.dtsi b/arch/arm/boot/dts/at91sam9x5.dtsi
-> index c111001..5846f99 100644
-> --- a/arch/arm/boot/dts/at91sam9x5.dtsi
-> +++ b/arch/arm/boot/dts/at91sam9x5.dtsi
-> @@ -191,6 +191,20 @@
->  				interrupts = <27 4>;
->  				status = "disabled";
+> diff --git a/arch/arm/boot/dts/at91sam9g25ek.dts b/arch/arm/boot/dts/at91sam9g25ek.dts
+> index 7a13d09..960de2b 100644
+> --- a/arch/arm/boot/dts/at91sam9g25ek.dts
+> +++ b/arch/arm/boot/dts/at91sam9g25ek.dts
+> @@ -32,6 +32,22 @@
+>  				phy-mode = "rmii";
+>  				status = "okay";
 >  			};
 > +
 > +			mmc0: mmc@f0008000 {
-> +				compatible = "atmel,hsmci";
-> +				reg = <0xf0008000 0x600>;
-> +				interrupts = <12 4>;
-> +				status = "disabled";
+> +				status = "okay";
+> +				slot@0 {
+> +					bus-width = <4>;
+> +					cd-gpios = <&pioD 15 0>;
+> +				};
 > +			};
 > +
 > +			mmc1: mmc@f000c000 {
-> +				compatible = "atmel,hsmci";
-> +				reg = <0xf000c000 0x600>;
-> +				interrupts = <26 4>;
-> +				status = "disabled";
+> +				status = "okay";
+> +				slot@0 {
+> +					bus-width = <4>;
+> +					cd-gpios = <&pioD 14 0>;
+> +				};
 > +			};
 >  		};
 >  
->  		nand0: nand@40000000 {
+>  		usb0: ohci@00600000 {
 
 
 -- 
