@@ -1,29 +1,80 @@
-From: Rabin Vincent <rabin@rab.in>
-Subject: Re: [PATCH] mmc: fix card block compile warnings
-Date: Fri, 23 Mar 2012 11:16:58 +0530
-Message-ID: <CAH+eYFBvY0yJXKmDgRyKzS8ez8Q9OUkcOe2oebVdh+0xNbXqXQ@mail.gmail.com>
-References: <1332401709-25513-1-git-send-email-linus.walleij@linaro.org>
- <4F6B05BB.3080109@stericsson.com> <CACRpkda7icH2E+394Aj0tkAoZG+2xMUOnd1KxnO=4Xz6TtvQEQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:41140 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752941Ab2CWFrj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Mar 2012 01:47:39 -0400
-Received: by iagz16 with SMTP id z16so4171486iag.19
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Mar 2012 22:47:38 -0700 (PDT)
-In-Reply-To: <CACRpkda7icH2E+394Aj0tkAoZG+2xMUOnd1KxnO=4Xz6TtvQEQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: [PATCH v1 1/1] mmc: bus: print bus speed mode of UHS-I card
+Date: Fri, 23 Mar 2012 11:26:36 +0530
+Message-ID: <1332482196-22572-1-git-send-email-subhashj@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, arindam.nath@amd.com, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@stericsson.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thu, Mar 22, 2012 at 23:32, Linus Walleij <linus.walleij@linaro.org> wrote:
-> By reading the code you can easily see that the variables aren't
-> actually used uninitialized, it's juts GCC that is unable to
-> follow the code path and determine that they are initialized in
-> all paths.
+When UHS-I card is detected also print the bus speed mode
+in which UHS-I card will be running.
 
-If the mmc_switch(..SANITIZE_START..) returns -EIO and mmc_blk_reset()
-returns 0, then the variables _are_ used uninitialized.
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+---
+ drivers/mmc/core/bus.c |   26 +++++++++++++++++++++++++-
+ 1 files changed, 25 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 5d011a3..0517a91 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -267,6 +267,7 @@ int mmc_add_card(struct mmc_card *card)
+ {
+ 	int ret;
+ 	const char *type;
++	const char *uhs_bus_speed_mode = "";
+ 
+ 	dev_set_name(&card->dev, "%s:%04x", mmc_hostname(card->host), card->rca);
+ 
+@@ -296,6 +297,28 @@ int mmc_add_card(struct mmc_card *card)
+ 		break;
+ 	}
+ 
++	if (mmc_sd_card_uhs(card)) {
++		switch (card->sd_bus_speed) {
++		case UHS_SDR104_BUS_SPEED:
++			uhs_bus_speed_mode = "SDR104 ";
++			break;
++		case UHS_SDR50_BUS_SPEED:
++			uhs_bus_speed_mode = "SDR50 ";
++			break;
++		case UHS_DDR50_BUS_SPEED:
++			uhs_bus_speed_mode = "DDR50 ";
++			break;
++		case UHS_SDR25_BUS_SPEED:
++			uhs_bus_speed_mode = "SDR25 ";
++			break;
++		case UHS_SDR12_BUS_SPEED:
++			uhs_bus_speed_mode = "SDR12 ";
++			break;
++		default:
++			uhs_bus_speed_mode = "";
++			break;
++		}
++	}
+ 	if (mmc_host_is_spi(card->host)) {
+ 		pr_info("%s: new %s%s%s card on SPI\n",
+ 			mmc_hostname(card->host),
+@@ -303,12 +326,13 @@ int mmc_add_card(struct mmc_card *card)
+ 			mmc_card_ddr_mode(card) ? "DDR " : "",
+ 			type);
+ 	} else {
+-		pr_info("%s: new %s%s%s%s card at address %04x\n",
++		pr_info("%s: new %s%s%s%s%s card at address %04x\n",
+ 			mmc_hostname(card->host),
+ 			mmc_card_uhs(card) ? "ultra high speed " :
+ 			(mmc_card_highspeed(card) ? "high speed " : ""),
+ 			(mmc_card_hs200(card) ? "HS200 " : ""),
+ 			mmc_card_ddr_mode(card) ? "DDR " : "",
++			uhs_bus_speed_mode,
+ 			type, card->rca);
+ 	}
+ 
+-- 
+1.7.1.1
+
+--
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
