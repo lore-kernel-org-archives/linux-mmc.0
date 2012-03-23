@@ -1,83 +1,167 @@
-From: "Linus Walleij" <linus.walleij@linaro.org>
-Subject: [PATCH] mmc: card: move variable initialization earlier
-Date: Fri, 23 Mar 2012 10:32:26 +0100
-Message-ID: <1332495146-16312-1-git-send-email-linus.walleij@linaro.org>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH 1/4] mmc: atmel-mci: add device tree support
+Date: Fri, 23 Mar 2012 11:38:01 +0100
+Message-ID: <20120323103801.GH3473@ldesroches-Latitude-E6320>
+References: <1332352994-20983-1-git-send-email-ludovic.desroches@atmel.com>
+ <1332352994-20983-2-git-send-email-ludovic.desroches@atmel.com>
+ <4F6B3C48.90002@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.df.lth.se ([194.47.250.12]:58932 "EHLO mail.df.lth.se"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755413Ab2CWJcf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 23 Mar 2012 05:32:35 -0400
+Received: from newsmtp5.atmel.com ([204.2.163.5]:54631 "EHLO
+	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754961Ab2CWKig (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Mar 2012 06:38:36 -0400
+Content-Disposition: inline
+In-Reply-To: <4F6B3C48.90002@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Rabin Vincent <rabin@rab.in>
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, plagnioj@jcrosoft.com, devicetree-discuss <devicetree-discuss@lists.ozlabs.org>
 
-I was pretty tired of seeing these in my kernel compiles:
+On Thu, Mar 22, 2012 at 03:50:48PM +0100, Nicolas Ferre wrote:
+> On 03/21/2012 07:03 PM, ludovic.desroches@atmel.com :
 
-drivers/mmc/card/block.c: In function =E2=80=98mmc_blk_issue_secdiscard=
-_rq=E2=80=99:
-drivers/mmc/card/block.c:911:18: warning: =E2=80=98arg=E2=80=99 may be =
-used uninitialized in this function [-Wuninitialized]
-drivers/mmc/card/block.c:910:6: warning: =E2=80=98nr=E2=80=99 may be us=
-ed uninitialized in this function [-Wuninitialized]
-drivers/mmc/card/block.c:910:6: warning: =E2=80=98from=E2=80=99 may be =
-used uninitialized in this function [-Wuninitialized]
+[...]
 
-The problem stems from the code path in
-mmc_blk_issue_secdiscard_rq() where mmc_switch()
-with EXT_CSD_SANITIZE_START may return -EIO and fall back
-to using the default trim operations instead. At this point
-the variables needed for the fallback will be uninitialized.
+> > diff --git a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt b/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
+> > new file mode 100644
+> > index 0000000..657f9de
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
+> > @@ -0,0 +1,55 @@
+> > +* Atmel High Speed MultiMedia Card Interface
+> > +
+> > +This controller on atmel products provides an interface for MMC, SD and SDIO
+> > +types of memory cards.
+> > +
+> > +1) MCI node
+> > +
+> > +Required properties:
+> > +- compatible: no blank "atmel,hsmci"
+> > +- reg: should contain HSMCI registers location and length
+> > +- interrupts: should contain HSMCI interrupt number
+> > +- at least one slot node
+> > +
+> > +The node contains child nodes for each slot that the platform uses
+> > +
+> > +Example MCI node:
+> > +
+> > +mmc0: mmc@f0008000 {
+> > +	compatible = "atmel,hsmci";
+> > +	reg = <0xf0008000 0x600>;
+> > +	interrupts = <12 4>;
+> > +
+> > +	[ child node definitions...]
+> > +};
+> > +
+> > +2) slot nodes
+> > +
+> > +Optional properties:
+> > +- bus-width: number of data lines connected to the controller
+> > +- cd-gpios: specify GPIOs for card detection
+> > +- cd-invert: invert the value of external card detect gpio line
+> > +- wp-gpios: specify GPIOs for write protection
+> > +
+> > +Example slot node:
+> > +
+> > +slot@0 {
+> > +	bus-width = <4>;
+> > +	cd-gpios = <&pioD 15 0>
+> > +	cd-invert;
+> > +};
+> > +
+> > +Example full MCI node:
+> > +mmc0: mmc@f0008000 {
+> > +	compatible = "atmel,hsmci";
+> > +	reg = <0xf0008000 0x600>;
+> > +	interrupts = <12 4>;
+> > +	slot@0 {
+> > +		bus-width = <4>;
+> > +		cd-gpios = <&pioD 15 0>
+> > +		cd-invert;
+> > +	};
+> > +	slot@1 {
+> > +		bus-width = <4>;
+> > +	};
+> > +};
 
-Cc: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Rabin Vincent <rabin@rab.in>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
-I don't know if this is the actual intention - maybe we
-should just fail the call entirely if the sanitize command
-fails?
----
- drivers/mmc/card/block.c |   15 ++++++++-------
- 1 files changed, 8 insertions(+), 7 deletions(-)
+[...]
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index c6a383d..2741d93 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -877,6 +877,14 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_=
-queue *mq,
- 	unsigned int from, nr, arg;
- 	int err =3D 0, type =3D MMC_BLK_SECDISCARD;
-=20
-+	from =3D blk_rq_pos(req);
-+	nr =3D blk_rq_sectors(req);
-+
-+	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
-+		arg =3D MMC_SECURE_TRIM1_ARG;
-+	else
-+		arg =3D MMC_SECURE_ERASE_ARG;
-+
- 	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
- 		err =3D -EOPNOTSUPP;
- 		goto out;
-@@ -889,13 +897,6 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_=
-queue *mq,
- 		goto out;
- 	}
-=20
--	from =3D blk_rq_pos(req);
--	nr =3D blk_rq_sectors(req);
--
--	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
--		arg =3D MMC_SECURE_TRIM1_ARG;
--	else
--		arg =3D MMC_SECURE_ERASE_ARG;
- retry:
- 	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
- 		err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
---=20
-1.7.7.6
+> > +static void __init
+> > +atmci_get_of_slots(struct device *dev, struct mci_platform_data *pdata)
+> > +{
+> > +	struct device_node *np = dev->of_node;
+> > +	struct device_node *cnp;
+> > +	unsigned int slot_nb = 0;
+> > +
+> > +	if (!np)
+> > +		return;
+> > +
+> > +	for_each_child_of_node(np, cnp) {
+> > +		if (slot_nb > (ATMCI_MAX_NR_SLOTS-1)) {
+> > +			dev_warn(dev, "can't have more than %d slots\n",
+> > +			         ATMCI_MAX_NR_SLOTS);
+> > +			break;
+> > +		}
+> > +		if (of_property_read_u32(cnp, "bus-width",
+> > +		                         &pdata->slot[slot_nb].bus_width))
+> > +			pdata->slot[slot_nb].bus_width = 1;
+> > +
+> > +		pdata->slot[slot_nb].detect_pin =
+> > +			of_get_named_gpio(cnp, "cd-gpios", 0);
+> > +
+> > +		if (of_find_property(cnp, "cd-invert", NULL))
+> > +			pdata->slot[slot_nb].detect_is_active_high = true;
+> > +
+> > +		pdata->slot[slot_nb].wp_pin =
+> > +			of_get_named_gpio(cnp, "wp-gpios", 0);
+> > +
+> > +		slot_nb++;
+> > +	}
+> > +}
 
+In fact this part of code is not correct. Each mci can have two slots: slot0
+and slot1. If someone wants to use only slot1, I will fill only pdata->slot[0]
+that is incorrect because later in the driver there is:
+
+if (pdata->slot[0].bus_width) {
+	ret = atmci_init_slot(host, &pdata->slot[0], 
+			0, ATMCI_SDCSEL_SLOT_A, ATMCI_SDIOIRQA);
+	if (!ret)
+		nr_slots++;
+}
+if (pdata->slot[1].bus_width) {
+	ret = atmci_init_slot(host, &pdata->slot[1],
+			1, ATMCI_SDCSEL_SLOT_B, ATMCI_SDIOIRQB);
+	if (!ret)
+		nr_slots++;
+}
+
+So what is the best solution to solve this issue?
+
+- Adding a property slot id? I would like to use only existing bindings hoping 
+we can have a generic binding for mmc.
+
+- Using aliases?
+aliases {
+	slot0 = &mmc-slot0;
+}
+
+mmc0: mmc@f0008000 {
+	compatible = "atmel,hsmci";
+	reg = <0xf0008000 0x600>;
+	interrupts = <12 4>;              
+	mmc-slot0: slot@0 {
+	};                                                                
+	status = "disabled";
+};
+
+- Using reg property as an index?
+
+
+Thanks for your help.
+
+Regards
+
+Ludovic
