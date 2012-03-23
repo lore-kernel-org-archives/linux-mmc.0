@@ -1,167 +1,123 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH 1/4] mmc: atmel-mci: add device tree support
-Date: Fri, 23 Mar 2012 11:38:01 +0100
-Message-ID: <20120323103801.GH3473@ldesroches-Latitude-E6320>
-References: <1332352994-20983-1-git-send-email-ludovic.desroches@atmel.com>
- <1332352994-20983-2-git-send-email-ludovic.desroches@atmel.com>
- <4F6B3C48.90002@atmel.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH] mmc: block: Remove use of mmc_blk_set_blksize
+Date: Fri, 23 Mar 2012 11:38:48 +0100
+Message-ID: <4F6C52B8.2070608@stericsson.com>
+References: <1332413246-27953-1-git-send-email-ulf.hansson@stericsson.com> <4F6C2874.3080505@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:54631 "EHLO
-	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754961Ab2CWKig (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Mar 2012 06:38:36 -0400
-Content-Disposition: inline
-In-Reply-To: <4F6B3C48.90002@atmel.com>
+Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:42313 "EHLO
+	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755773Ab2CWKjQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Mar 2012 06:39:16 -0400
+In-Reply-To: <4F6C2874.3080505@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>
-Cc: ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, plagnioj@jcrosoft.com, devicetree-discuss <devicetree-discuss@lists.ozlabs.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Subhash Jadavani <subhashj@codeaurora.org>, Per FORLIN <per.forlin@stericsson.com>, Johan RUDHOLM <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-On Thu, Mar 22, 2012 at 03:50:48PM +0100, Nicolas Ferre wrote:
-> On 03/21/2012 07:03 PM, ludovic.desroches@atmel.com :
+On 03/23/2012 08:38 AM, Jaehoon Chung wrote:
+> Hi Ulf.
+>
+> Just one question.
+> mmc_blk_probe() is always returned 0?
 
-[...]
+The idea was to not change behavior. Previously "err" was _only_ set to 
+the return value of the mmc_blk_set_blksize.
 
-> > diff --git a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt b/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
-> > new file mode 100644
-> > index 0000000..657f9de
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
-> > @@ -0,0 +1,55 @@
-> > +* Atmel High Speed MultiMedia Card Interface
-> > +
-> > +This controller on atmel products provides an interface for MMC, SD and SDIO
-> > +types of memory cards.
-> > +
-> > +1) MCI node
-> > +
-> > +Required properties:
-> > +- compatible: no blank "atmel,hsmci"
-> > +- reg: should contain HSMCI registers location and length
-> > +- interrupts: should contain HSMCI interrupt number
-> > +- at least one slot node
-> > +
-> > +The node contains child nodes for each slot that the platform uses
-> > +
-> > +Example MCI node:
-> > +
-> > +mmc0: mmc@f0008000 {
-> > +	compatible = "atmel,hsmci";
-> > +	reg = <0xf0008000 0x600>;
-> > +	interrupts = <12 4>;
-> > +
-> > +	[ child node definitions...]
-> > +};
-> > +
-> > +2) slot nodes
-> > +
-> > +Optional properties:
-> > +- bus-width: number of data lines connected to the controller
-> > +- cd-gpios: specify GPIOs for card detection
-> > +- cd-invert: invert the value of external card detect gpio line
-> > +- wp-gpios: specify GPIOs for write protection
-> > +
-> > +Example slot node:
-> > +
-> > +slot@0 {
-> > +	bus-width = <4>;
-> > +	cd-gpios = <&pioD 15 0>
-> > +	cd-invert;
-> > +};
-> > +
-> > +Example full MCI node:
-> > +mmc0: mmc@f0008000 {
-> > +	compatible = "atmel,hsmci";
-> > +	reg = <0xf0008000 0x600>;
-> > +	interrupts = <12 4>;
-> > +	slot@0 {
-> > +		bus-width = <4>;
-> > +		cd-gpios = <&pioD 15 0>
-> > +		cd-invert;
-> > +	};
-> > +	slot@1 {
-> > +		bus-width = <4>;
-> > +	};
-> > +};
+Still mmc_blk_alloc_parts and mmc_add_disk, may fail but err is never 
+updated, as before. Maybe we should look into that, but if a change is 
+needed I suggest a separate patch for that.
 
-[...]
+Kind regards
+Ulf Hansson
 
-> > +static void __init
-> > +atmci_get_of_slots(struct device *dev, struct mci_platform_data *pdata)
-> > +{
-> > +	struct device_node *np = dev->of_node;
-> > +	struct device_node *cnp;
-> > +	unsigned int slot_nb = 0;
-> > +
-> > +	if (!np)
-> > +		return;
-> > +
-> > +	for_each_child_of_node(np, cnp) {
-> > +		if (slot_nb > (ATMCI_MAX_NR_SLOTS-1)) {
-> > +			dev_warn(dev, "can't have more than %d slots\n",
-> > +			         ATMCI_MAX_NR_SLOTS);
-> > +			break;
-> > +		}
-> > +		if (of_property_read_u32(cnp, "bus-width",
-> > +		                         &pdata->slot[slot_nb].bus_width))
-> > +			pdata->slot[slot_nb].bus_width = 1;
-> > +
-> > +		pdata->slot[slot_nb].detect_pin =
-> > +			of_get_named_gpio(cnp, "cd-gpios", 0);
-> > +
-> > +		if (of_find_property(cnp, "cd-invert", NULL))
-> > +			pdata->slot[slot_nb].detect_is_active_high = true;
-> > +
-> > +		pdata->slot[slot_nb].wp_pin =
-> > +			of_get_named_gpio(cnp, "wp-gpios", 0);
-> > +
-> > +		slot_nb++;
-> > +	}
-> > +}
+>
+> Best Regards,
+> Jaehoon Chung
+>
+> On 03/22/2012 07:47 PM, Ulf Hansson wrote:
+>
+>> According to the specifications for SD and (e)MMC default
+>> blocksize (named BLOCKLEN in Spec.) must always be 512
+>> bytes. Since we hardcoded to always use 512 bytes, we do
+>> not explicitly have to set it. Future improvements should
+>> potentially make it possible to use a greater blocksize
+>> than 512 bytes, but until then let's skip this.
+>>
+>> Signed-off-by: Ulf Hansson<ulf.hansson@stericsson.com>
+>> ---
+>>   drivers/mmc/card/block.c |   27 +--------------------------
+>>   1 files changed, 1 insertions(+), 26 deletions(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index a7c75d8..ce171c6 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -1624,24 +1624,6 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+>>   	return ret;
+>>   }
+>>
+>> -static int
+>> -mmc_blk_set_blksize(struct mmc_blk_data *md, struct mmc_card *card)
+>> -{
+>> -	int err;
+>> -
+>> -	mmc_claim_host(card->host);
+>> -	err = mmc_set_blocklen(card, 512);
+>> -	mmc_release_host(card->host);
+>> -
+>> -	if (err) {
+>> -		pr_err("%s: unable to set block size to 512: %d\n",
+>> -			md->disk->disk_name, err);
+>> -		return -EINVAL;
+>> -	}
+>> -
+>> -	return 0;
+>> -}
+>> -
+>>   static void mmc_blk_remove_req(struct mmc_blk_data *md)
+>>   {
+>>   	struct mmc_card *card;
+>> @@ -1769,7 +1751,6 @@ static const struct mmc_fixup blk_fixups[] =
+>>   static int mmc_blk_probe(struct mmc_card *card)
+>>   {
+>>   	struct mmc_blk_data *md, *part_md;
+>> -	int err;
+>>   	char cap_str[10];
+>>
+>>   	/*
+>> @@ -1782,10 +1763,6 @@ static int mmc_blk_probe(struct mmc_card *card)
+>>   	if (IS_ERR(md))
+>>   		return PTR_ERR(md);
+>>
+>> -	err = mmc_blk_set_blksize(md, card);
+>> -	if (err)
+>> -		goto out;
+>> -
+>>   	string_get_size((u64)get_capacity(md->disk)<<  9, STRING_UNITS_2,
+>>   			cap_str, sizeof(cap_str));
+>>   	pr_info("%s: %s %s %s %s\n",
+>> @@ -1810,7 +1787,7 @@ static int mmc_blk_probe(struct mmc_card *card)
+>>    out:
+>>   	mmc_blk_remove_parts(card, md);
+>>   	mmc_blk_remove_req(md);
+>> -	return err;
+>> +	return 0;
+>>   }
+>>
+>>   static void mmc_blk_remove(struct mmc_card *card)
+>> @@ -1846,8 +1823,6 @@ static int mmc_blk_resume(struct mmc_card *card)
+>>   	struct mmc_blk_data *md = mmc_get_drvdata(card);
+>>
+>>   	if (md) {
+>> -		mmc_blk_set_blksize(md, card);
+>> -
+>>   		/*
+>>   		 * Resume involves the card going into idle state,
+>>   		 * so current partition is always the main one.
+>
+>
+>
 
-In fact this part of code is not correct. Each mci can have two slots: slot0
-and slot1. If someone wants to use only slot1, I will fill only pdata->slot[0]
-that is incorrect because later in the driver there is:
-
-if (pdata->slot[0].bus_width) {
-	ret = atmci_init_slot(host, &pdata->slot[0], 
-			0, ATMCI_SDCSEL_SLOT_A, ATMCI_SDIOIRQA);
-	if (!ret)
-		nr_slots++;
-}
-if (pdata->slot[1].bus_width) {
-	ret = atmci_init_slot(host, &pdata->slot[1],
-			1, ATMCI_SDCSEL_SLOT_B, ATMCI_SDIOIRQB);
-	if (!ret)
-		nr_slots++;
-}
-
-So what is the best solution to solve this issue?
-
-- Adding a property slot id? I would like to use only existing bindings hoping 
-we can have a generic binding for mmc.
-
-- Using aliases?
-aliases {
-	slot0 = &mmc-slot0;
-}
-
-mmc0: mmc@f0008000 {
-	compatible = "atmel,hsmci";
-	reg = <0xf0008000 0x600>;
-	interrupts = <12 4>;              
-	mmc-slot0: slot@0 {
-	};                                                                
-	status = "disabled";
-};
-
-- Using reg property as an index?
-
-
-Thanks for your help.
-
-Regards
-
-Ludovic
