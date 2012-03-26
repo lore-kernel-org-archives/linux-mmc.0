@@ -1,162 +1,102 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: [PATCH] PM / SDIO: Use empty system suspend/resume callbacks at the bus level (was: Re: Recent ...)
-Date: Mon, 26 Mar 2012 00:29:24 +0200
-Message-ID: <201203260029.24826.rjw@sisk.pl>
-References: <20120325203849.7a908e32@notabene.brown> <201203252325.37478.rjw@sisk.pl> <20120326084515.0fd3ee7f@notabene.brown>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH 1/2] mmc: sh_mmcif: double clock speed
+Date: Mon, 26 Mar 2012 11:21:54 +0900
+Message-ID: <20120326022154.GB6860@verge.net.au>
+References: <1332320549-28584-1-git-send-email-horms@verge.net.au>
+ <1332320549-28584-2-git-send-email-horms@verge.net.au>
+ <Pine.LNX.4.64.1203241845060.19427@axis700.grange>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-2"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ogre.sisk.pl ([217.79.144.158]:34772 "EHLO ogre.sisk.pl"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932162Ab2CYWZI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 25 Mar 2012 18:25:08 -0400
-In-Reply-To: <20120326084515.0fd3ee7f@notabene.brown>
+Received: from kirsty.vergenet.net ([202.4.237.240]:37423 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755442Ab2CZCV6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Mar 2012 22:21:58 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1203241845060.19427@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: lkml <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Linux PM mailing list <linux-pm@vger.kernel.org>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>, Cao Minh Hiep <hiepcm@gmail.com>
 
-On Sunday, March 25, 2012, NeilBrown wrote:
-> On Sun, 25 Mar 2012 23:25:37 +0200 "Rafael J. Wysocki" <rjw@sisk.pl> wrote:
+On Sat, Mar 24, 2012 at 06:56:16PM +0100, Guennadi Liakhovetski wrote:
+> Hi Simon
 > 
-> > On Sunday, March 25, 2012, Rafael J. Wysocki wrote:
-> > > Hi,
-> > > 
-> > > On Sunday, March 25, 2012, NeilBrown wrote:
-> > > > 
-> > > > Hi Rafael,
-> > > > 
-> > > >  Your recent patch:
-> > > >    commit 35cd133c
-> > > >    PM: Run the driver callback directly if the subsystem one is not there
-> > > > 
-> > > >  breaks suspend for my libertas wifi and probably other SDIO devices.
-> > > 
-> > > Well, the patch is not recent.  The _commit_ is more than three months old
-> > > and the patch has been around since the last November (at least).
-> > > 
-> > > >  SDIO (and possible MMC in general) has a protocol where the suspend
-> > > >  method can return -ENOSYS and this means "There is no point in suspending,
-> > > >  just turn me off".
-> > > >
-> > > >  The device itself "mmc1:0001" (I think) doesn't have any bus etc 'suspend'
-> > > >  function so the new code call the device's suspend function which returns
-> > > >  ENOSYS and the suspend fails.
-> > > > 
-> > > >  The previous code ignores the device as there is no bus suspend, and when it
-> > > >  gets to suspend the ancestor - which for me is omap_hsmmc.1, it calls the
-> > > >  device suspend function catches the ENOSYS, and turns it off.
-> > > 
-> > > Well, I can only call that a blatant abuse of the PM infrastructure.
-> > > 
-> > > >  I suspect just reverting it isn't the right long term solution, however I
-> > > >  can confirm that it works for me for now.
-> > > 
-> > > It's not a solution at all, because there's code that depends on it already in
-> > > the tree and the fact that it works for you doesn't mean it won't break other
-> > > systems.  So no, it's not an option.
-> > > 
-> > > >  I'm happy to try any alternate fixes you would like to suggest (but I cannot
-> > > >  promise how quickly I will get the testing done).
-> > > > 
-> > > >  (I'm testing with 3.3)
-> > > 
-> > > The only fix I can think of is to rework SDIO to stop abusing the PM callbacks.
-> > > I'll have a look at that next week, although I can't promise anything any time
-> > > soon, because I'm heading to San Francisco on Saturday.
+> On Wed, 21 Mar 2012, Simon Horman wrote:
+> 
+> > This corrects an off-by one error when calculating the clock divisor.
+> > The code previously assumed that for example a divisor of 2 is
+> > set using a value of 0001 (the inverse of 1/2), a divisor of 4 is
+> > set using a value of 0010 (the inverse of 1/4) etc.. However, the correct
+> > values are 0000, 0001, etc...
 > > 
-> > Well, this is kind of a long shot, but I wonder if the patch below makes
-> > any difference?
+> > The use of DIV_ROUND_UP() was suggested by Guennadi Liakhovetski to avoid
+> > understating the divisor by one in the case where the host clock is not a
+> > binary power of the MMCIF clock.
 > 
-> Hi Rafael,
->  thanks for looking into this so quickly.
+> The patch looks good, but the commit message is not quite right. Cases of 
+> host->clk / clk != 2^n are handled by using fls(x - 1) instead of fls(x) - 
+> 1, as you initially suggested. DIV_ROUND_UP() is needed for divisions with 
+> a residue. E.g., for host clock 13MHz, target clock 3MHz you want a 
+> divisor of 5, resulting in 2 << 16, not 4, resulting in 1 << 16. With this 
+> fixed
 > 
-> I removed the revert and applied this patch instead and can confirm that
-> suspend completes now (and resume works and the wifi works after resume).
+> Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+
+Hi Guennadi, how about this?:
+
+Correct an off-by one error when calculating the clock divisor in cases
+where the host clock is a power of two of the target clock.  Previously the
+divisor was one greater than the correct value in these cases leading to
+the clock being set at half the desired speed.
+
+Thanks to Guennadi Liakhovetski for working with me on
+the logic for this change.
+
+> > The use of DIV_ROUND_UP() was suggested by Guennadi Liakhovetski to avoid
+> > understating the divisor by one in the case where the host clock is not a
+> > binary power of the MMCIF clock.
 > 
-> Further, this patch fits with my (fairly shallow) understanding of the
-> problem.
+> The patch looks good, but the commit message is not quite right. Cases of 
+> host->clk / clk != 2^n are handled by using fls(x - 1) instead of fls(x) - 
+> 1, as you initially suggested. DIV_ROUND_UP() is needed for divisions with 
+> a residue. E.g., for host clock 13MHz, target clock 3MHz you want a 
+> divisor of 5, resulting in 2 << 16, not 4, resulting in 1 << 16. With this 
+> fixed
 > 
-> Thanks!
+> Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Thanks for the confirmation.
-
-Below it goes again with a changelog and tags.
-
-I don't really think that SDIO does the right thing here overall, but that's
-all I can do to address the problem timely.
-
-Thanks,
-Rafael
-
----
-From: Rafael J. Wysocki <rjw@sisk.pl>
-Subject: PM / SDIO: Use empty system suspend/resume callbacks at the bus level
-
-Neil Brown reports that commit 35cd133c
-
-   PM: Run the driver callback directly if the subsystem one is not there
-
-breaks suspend for his libertas wifi, because SDIO has a protocol
-where the suspend method can return -ENOSYS and this means "There is
-no point in suspending, just turn me off".  Moreover, the suspend
-methods provided by SDIO drivers are not supposed to be called by
-the PM core or bus-level suspend routines (which aren't presend for
-SDIO).  Instead, when the SDIO core gets to suspend the device's
-ancestor, it calls the device driver's suspend function, catches the
-ENOSYS, and turns the device off.
-
-The commit above breaks the SDIO core's assumption that the device
-drivers' callbacks won't be executed if it doesn't provide any
-bus-level callbacks.  If fact, however, this assumption has never
-been really satisfied, because device class or device type suspend
-might very well use the driver's callback even without that commit.
-
-The simplest way to address this problem is to make the SDIO core
-tell the PM core to ignore driver callbacks, for example by providing
-no-operation suspend/resume callbacks at the bus level for it,
-which is implemented by this change.
-
-Reported-and-tested-by: Neil Brown <neilb@suse.de>
-Signed-off-by: Rafael J. Wysocki <rjw@sisk.pl>
----
- drivers/mmc/core/sdio_bus.c |   12 +++++++++---
- 1 file changed, 9 insertions(+), 3 deletions(-)
-
-Index: linux/drivers/mmc/core/sdio_bus.c
-===================================================================
---- linux.orig/drivers/mmc/core/sdio_bus.c
-+++ linux/drivers/mmc/core/sdio_bus.c
-@@ -192,9 +192,15 @@ static int sdio_bus_remove(struct device
- 	return ret;
- }
- 
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
-+
-+static int pm_no_operation(struct device *dev)
-+{
-+	return 0;
-+}
- 
- static const struct dev_pm_ops sdio_bus_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(pm_no_operation, pm_no_operation)
- 	SET_RUNTIME_PM_OPS(
- 		pm_generic_runtime_suspend,
- 		pm_generic_runtime_resume,
-@@ -204,11 +210,11 @@ static const struct dev_pm_ops sdio_bus_
- 
- #define SDIO_PM_OPS_PTR	(&sdio_bus_pm_ops)
- 
--#else /* !CONFIG_PM_RUNTIME */
-+#else /* !CONFIG_PM */
- 
- #define SDIO_PM_OPS_PTR	NULL
- 
--#endif /* !CONFIG_PM_RUNTIME */
-+#endif /* !CONFIG_PM */
- 
- static struct bus_type sdio_bus_type = {
- 	.name		= "sdio",
+> Thanks
+> Guennadi
+> 
+> > 
+> > Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > Tested-by: Cao Minh Hiep <hiepcm@gmail.com>
+> > Signed-off-by: Simon Horman <horms@verge.net.au>
+> > ---
+> >  drivers/mmc/host/sh_mmcif.c |    3 ++-
+> >  1 files changed, 2 insertions(+), 1 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> > index 8057bf3..5014bc4 100644
+> > --- a/drivers/mmc/host/sh_mmcif.c
+> > +++ b/drivers/mmc/host/sh_mmcif.c
+> > @@ -453,7 +453,8 @@ static void sh_mmcif_clock_control(struct sh_mmcif_host *host, unsigned int clk)
+> >  		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_SUP_PCLK);
+> >  	else
+> >  		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR &
+> > -				((fls(host->clk / clk) - 1) << 16));
+> > +				((fls(DIV_ROUND_UP(host->clk,
+> > +						   clk) - 1) - 1) << 16));
+> >  
+> >  	sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_ENABLE);
+> >  }
+> > -- 
+> > 1.7.6.3
+> > 
+> 
+> ---
+> Guennadi Liakhovetski, Ph.D.
+> Freelance Open-Source Software Developer
+> http://www.open-technology.de/
+> 
