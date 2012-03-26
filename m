@@ -1,113 +1,138 @@
-From: Yusuke Goda <yusuke.goda.sx@renesas.com>
-Subject: Re: [PATCH 2/2] mmc: sh_mmcif: mmc->f_max should be half of the bus
- clock
-Date: Mon, 26 Mar 2012 15:04:28 +0900
-Message-ID: <4F7006EC.4040007@renesas.com>
-References: <1332320549-28584-1-git-send-email-horms@verge.net.au>
- <1332320549-28584-3-git-send-email-horms@verge.net.au>
- <Pine.LNX.4.64.1203241904150.19427@axis700.grange>
- <20120325223033.GA6860@verge.net.au> <4F70027A.9020203@renesas.com>
- <20120326055256.GE2347@verge.net.au>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH v1 1/1] mmc: bus: print bus speed mode of UHS-I card
+Date: Mon, 26 Mar 2012 11:46:28 +0530
+Message-ID: <000401cd0b17$fcf7bd20$f6e73760$@codeaurora.org>
+References: <1332482196-22572-1-git-send-email-subhashj@codeaurora.org> <20120326031723.GA22292@ladygaga>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+	charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor4.renesas.com ([210.160.252.174]:48165 "EHLO
-	relmlor4.renesas.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753376Ab2CZGEr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Mar 2012 02:04:47 -0400
-Received: from relmlir3.idc.renesas.com ([10.200.68.153])
- by relmlor4.idc.renesas.com ( SJSMS)
- with ESMTP id <0M1H00HEPA7LJE60@relmlor4.idc.renesas.com> for
- linux-mmc@vger.kernel.org; Mon, 26 Mar 2012 15:04:34 +0900 (JST)
-Received: from relmlac4.idc.renesas.com ([10.200.69.24])
- by relmlir3.idc.renesas.com ( SJSMS)
- with ESMTP id <0M1H00AEPA7L3OG0@relmlir3.idc.renesas.com> for
- linux-mmc@vger.kernel.org; Mon, 26 Mar 2012 15:04:33 +0900 (JST)
-In-reply-to: <20120326055256.GE2347@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20120326031723.GA22292@ladygaga>
+Content-Language: en-us
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: 'Aaron Lu' <aaron.lu@amd.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, arindam.nath@amd.com
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Paul Mundt <lethal@linux-sh.org>, Cao Minh Hiep <hiepcm@gmail.com>
 
-Hi Simon-san
 
-(2012/03/26 14:52), Simon Horman wrote:
-> On Mon, Mar 26, 2012 at 02:45:30PM +0900, Yusuke Goda wrote:
->> Hi Simon-san, Guennadi-san
->>
->> (2012/03/26 7:30), Simon Horman wrote:
->>> On Sat, Mar 24, 2012 at 07:06:31PM +0100, Guennadi Liakhovetski wrote:
->>>> On Wed, 21 Mar 2012, Simon Horman wrote:
->>>>
->>>>> mmc->f_max should be half of the bus clock.
->>>>> And now that mmc->f_max is not equal to the bus clock the
->>>>> latter should be used directly to calculate mmc->f_min.
->>>>
->>>> The patch seems correct as it stands, however, looking at it - does anyone 
->>>> understands why that "close to 400kHz" comment and such a complicated 
->>>> calculation? Shouldn't it be just host->clk / 512 always? Maybe this 
->>>> should be a separate patch, so, for this one
->>>>
->>>> Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
->>>
->>> Hi Guennadi,
->>>
->>> that code seems to date back to the original driver submission
->>> made by Goda-san. I have CCed him as perhaps he recalls why
->>> the code is like it is.
->> I thought to get closer to 400kHz if possible.
->> Probably even host->clk / 512 does not have any problem.
+
+> -----Original Message-----
+> From: linux-arm-msm-owner@vger.kernel.org [mailto:linux-arm-msm-
+> owner@vger.kernel.org] On Behalf Of Aaron Lu
+> Sent: Monday, March 26, 2012 8:47 AM
+> To: Subhash Jadavani
+> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org;
+> arindam.nath@amd.com
+> Subject: Re: [PATCH v1 1/1] mmc: bus: print bus speed mode of UHS-I card
 > 
-> Sorry for my ignorance, is ~400kHz desirable for some reason?
-Initialization time becomes short.
+> Hi Subhash,
+> 
+> On Fri, Mar 23, 2012 at 11:26:36AM +0530, Subhash Jadavani wrote:
+> > When UHS-I card is detected also print the bus speed mode in which
+> > UHS-I card will be running.
+> 
+> The patch looks correct to me, except that I' m not sure if this is
+needed.
+> /sys/kernel/debug/mmc/ios also has such info.
 
-Thanks
-Goda
+Thanks for pointing it out.
+Actually we are already printing the HS200/DDR (for eMMC) bus speed mode
+along with card detected print. So why not bus speed mode for UHS-I cards.
+It really gives good impression to user what this card is capable of doing
+by just looking at this print.
+Correct we can this information from /sys/kernel/debug/mmc/ios but this
+needs extra effort than just looking at the kernel logs.
 
+Also note that mmc_ios_show() function is currently not updated to print the
+UHS-I bus speed modes in user readable format. We need to fix this as well
+probably as separate patch.
 
->>>>> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
->>>>> Tested-by: Cao Minh Hiep <hiepcm@gmail.com>
->>>>> Signed-off-by: Simon Horman <horms@verge.net.au>
->>>>> ---
->>>>>  drivers/mmc/host/sh_mmcif.c |   12 ++++++------
->>>>>  1 files changed, 6 insertions(+), 6 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
->>>>> index 5014bc4..1410baa 100644
->>>>> --- a/drivers/mmc/host/sh_mmcif.c
->>>>> +++ b/drivers/mmc/host/sh_mmcif.c
->>>>> @@ -1297,14 +1297,14 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
->>>>>  	spin_lock_init(&host->lock);
->>>>>  
->>>>>  	mmc->ops = &sh_mmcif_ops;
->>>>> -	mmc->f_max = host->clk;
->>>>> +	mmc->f_max = host->clk / 2;
->>>>>  	/* close to 400KHz */
->>>>> -	if (mmc->f_max < 51200000)
->>>>> -		mmc->f_min = mmc->f_max / 128;
->>>>> -	else if (mmc->f_max < 102400000)
->>>>> -		mmc->f_min = mmc->f_max / 256;
->>>>> +	if (host->clk < 51200000)
->>>>> +		mmc->f_min = host->clk / 128;
->>>>> +	else if (host->clk < 102400000)
->>>>> +		mmc->f_min = host->clk / 256;
->>>>>  	else
->>>>> -		mmc->f_min = mmc->f_max / 512;
->>>>> +		mmc->f_min = host->clk / 512;
->>>>>  	if (pd->ocr)
->>>>>  		mmc->ocr_avail = pd->ocr;
->>>>>  	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
->>>>> -- 
->>>>> 1.7.6.3
->>>>>
->>>>
->>>> ---
->>>> Guennadi Liakhovetski, Ph.D.
->>>> Freelance Open-Source Software Developer
->>>> http://www.open-technology.de/
->>>>
->>>
->>>
->>
+Regards,
+Subhash
 
+> 
+> -Aaron
+> 
+> >
+> > Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> > ---
+> >  drivers/mmc/core/bus.c |   26 +++++++++++++++++++++++++-
+> >  1 files changed, 25 insertions(+), 1 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c index
+> > 5d011a3..0517a91 100644
+> > --- a/drivers/mmc/core/bus.c
+> > +++ b/drivers/mmc/core/bus.c
+> > @@ -267,6 +267,7 @@ int mmc_add_card(struct mmc_card *card)  {
+> >  	int ret;
+> >  	const char *type;
+> > +	const char *uhs_bus_speed_mode = "";
+> >
+> >  	dev_set_name(&card->dev, "%s:%04x", mmc_hostname(card-
+> >host),
+> > card->rca);
+> >
+> > @@ -296,6 +297,28 @@ int mmc_add_card(struct mmc_card *card)
+> >  		break;
+> >  	}
+> >
+> > +	if (mmc_sd_card_uhs(card)) {
+> > +		switch (card->sd_bus_speed) {
+> > +		case UHS_SDR104_BUS_SPEED:
+> > +			uhs_bus_speed_mode = "SDR104 ";
+> > +			break;
+> > +		case UHS_SDR50_BUS_SPEED:
+> > +			uhs_bus_speed_mode = "SDR50 ";
+> > +			break;
+> > +		case UHS_DDR50_BUS_SPEED:
+> > +			uhs_bus_speed_mode = "DDR50 ";
+> > +			break;
+> > +		case UHS_SDR25_BUS_SPEED:
+> > +			uhs_bus_speed_mode = "SDR25 ";
+> > +			break;
+> > +		case UHS_SDR12_BUS_SPEED:
+> > +			uhs_bus_speed_mode = "SDR12 ";
+> > +			break;
+> > +		default:
+> > +			uhs_bus_speed_mode = "";
+> > +			break;
+> > +		}
+> > +	}
+> >  	if (mmc_host_is_spi(card->host)) {
+> >  		pr_info("%s: new %s%s%s card on SPI\n",
+> >  			mmc_hostname(card->host),
+> > @@ -303,12 +326,13 @@ int mmc_add_card(struct mmc_card *card)
+> >  			mmc_card_ddr_mode(card) ? "DDR " : "",
+> >  			type);
+> >  	} else {
+> > -		pr_info("%s: new %s%s%s%s card at address %04x\n",
+> > +		pr_info("%s: new %s%s%s%s%s card at address %04x\n",
+> >  			mmc_hostname(card->host),
+> >  			mmc_card_uhs(card) ? "ultra high speed " :
+> >  			(mmc_card_highspeed(card) ? "high speed " : ""),
+> >  			(mmc_card_hs200(card) ? "HS200 " : ""),
+> >  			mmc_card_ddr_mode(card) ? "DDR " : "",
+> > +			uhs_bus_speed_mode,
+> >  			type, card->rca);
+> >  	}
+> >
+> > --
+> > 1.7.1.1
+> >
+> > --
+> > Sent by a consultant of the Qualcomm Innovation Center, Inc.
+> > The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
+> Forum.
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> > in the body of a message to majordomo@vger.kernel.org More
+> majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
+> >
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-arm-msm"
+in
+> the body of a message to majordomo@vger.kernel.org More majordomo
+> info at  http://vger.kernel.org/majordomo-info.html
