@@ -1,14 +1,14 @@
 From: Viresh Kumar <viresh.kumar@st.com>
-Subject: [PATCH 2/3] mmc/sdhci-spear: Use devm_* derivatives
-Date: Tue, 27 Mar 2012 08:40:35 +0530
-Message-ID: <c12200e3f3dbedf9c01fdf6766d27d2ed61c727b.1332817654.git.viresh.kumar@st.com>
+Subject: [PATCH 3/3] mmc: sdhci-spear: add device tree bindings
+Date: Tue, 27 Mar 2012 08:40:36 +0530
+Message-ID: <7ff0c6ac151a5d88293fb8ec261c130c2c875f33.1332817654.git.viresh.kumar@st.com>
 References: <841301f38cfc2d1170378306f1640d7653652505.1332817654.git.viresh.kumar@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog107.obsmtp.com ([207.126.144.123]:36484 "EHLO
-	eu1sys200aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756910Ab2C0D1r (ORCPT
+Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:46529 "EHLO
+	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755541Ab2C0D1r (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Mar 2012 23:27:47 -0400
 In-Reply-To: <841301f38cfc2d1170378306f1640d7653652505.1332817654.git.viresh.kumar@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -16,214 +16,160 @@ List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org
 Cc: spear-devel@list.st.com, viresh.linux@gmail.com, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, sr@denx.de, Viresh Kumar <viresh.kumar@st.com>
 
-This patch replaces normal calls to resource allocation routines with devm_*()
-derivative of those routines. This removes the need to free those resources
-inside the driver.
+This adds simple DT bindings for SDHCI SPEAr controller.
 
 Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
 ---
- drivers/mmc/host/sdhci-spear.c |   80 ++++++++++++++--------------------------
- 1 file changed, 27 insertions(+), 53 deletions(-)
+ .../devicetree/bindings/mmc/sdhci-spear.txt        |   29 ++++++++
+ drivers/mmc/host/sdhci-spear.c                     |   71 +++++++++++++++++++-
+ 2 files changed, 98 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-spear.txt
 
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-spear.txt b/Documentation/devicetree/bindings/mmc/sdhci-spear.txt
+new file mode 100644
+index 0000000..4edc11a
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/sdhci-spear.txt
+@@ -0,0 +1,29 @@
++* SPEAr SDHCI Controller
++
++Required properties:
++- compatible : "st,spear300-sdhci"
++- reg : Address range of the sdhci registers
++- interrupt-parent: Should be the phandle for the interrupt controller
++  that services interrupts for this device
++- interrupt: Should contain the sdhci interrupt number
++
++Optional Properties:
++- power-gpio: specifies the power gpio pin with flags: active low:1, active
++  high:0
++- int-gpio: card detect interrupt gpio, with zero flags.
++
++  If your board don't support these gpios then don't pass the entry.
++
++- power_always_enb: power should be on before inserting the card and so can't be
++  switched off. Only valid when power gpio is supported.
++
++Example:
++
++	sdhci@fc000000 {
++		compatible = "st,spear300-sdhci";
++		reg = <0xfc000000 0x1000>;
++
++		power-gpio = <&gpio0 5 0>
++		int-gpio = <&gpio0 6 0>
++		power_always_enb;
++	};
 diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 15191c1..1fe32df 100644
+index 1fe32df..62c9730 100644
 --- a/drivers/mmc/host/sdhci-spear.c
 +++ b/drivers/mmc/host/sdhci-spear.c
-@@ -82,18 +82,18 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
- 		goto err;
- 	}
- 
--	if (!request_mem_region(iomem->start, resource_size(iomem),
--				"spear-sdhci")) {
-+	if (!devm_request_mem_region(&pdev->dev, iomem->start,
-+				resource_size(iomem), "spear-sdhci")) {
- 		ret = -EBUSY;
- 		dev_dbg(&pdev->dev, "cannot request region\n");
- 		goto err;
- 	}
- 
--	sdhci = kzalloc(sizeof(*sdhci), GFP_KERNEL);
-+	sdhci = devm_kzalloc(&pdev->dev, sizeof(*sdhci), GFP_KERNEL);
- 	if (!sdhci) {
- 		ret = -ENOMEM;
- 		dev_dbg(&pdev->dev, "cannot allocate memory for sdhci\n");
--		goto err_kzalloc;
-+		goto err;
- 	}
- 
- 	/* clk enable */
-@@ -101,13 +101,13 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
- 	if (IS_ERR(sdhci->clk)) {
- 		ret = PTR_ERR(sdhci->clk);
- 		dev_dbg(&pdev->dev, "Error getting clock\n");
--		goto err_clk_get;
-+		goto err;
- 	}
- 
- 	ret = clk_enable(sdhci->clk);
- 	if (ret) {
- 		dev_dbg(&pdev->dev, "Error enabling clock\n");
--		goto err_clk_enb;
-+		goto put_clk;
- 	}
- 
- 	/* overwrite platform_data */
-@@ -122,7 +122,7 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
- 	if (IS_ERR(host)) {
- 		ret = PTR_ERR(host);
- 		dev_dbg(&pdev->dev, "error allocating host\n");
--		goto err_alloc_host;
-+		goto disable_clk;
- 	}
- 
- 	host->hw_name = "sdhci";
-@@ -130,17 +130,18 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
- 	host->irq = platform_get_irq(pdev, 0);
- 	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
- 
--	host->ioaddr = ioremap(iomem->start, resource_size(iomem));
-+	host->ioaddr = devm_ioremap(&pdev->dev, iomem->start,
-+			resource_size(iomem));
- 	if (!host->ioaddr) {
- 		ret = -ENOMEM;
- 		dev_dbg(&pdev->dev, "failed to remap registers\n");
--		goto err_ioremap;
-+		goto free_host;
- 	}
- 
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_dbg(&pdev->dev, "error adding host\n");
--		goto err_add_host;
-+		goto free_host;
- 	}
- 
- 	platform_set_drvdata(pdev, host);
-@@ -159,11 +160,12 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
- 	if (sdhci->data->card_power_gpio >= 0) {
- 		int val = 0;
- 
--		ret = gpio_request(sdhci->data->card_power_gpio, "sdhci");
-+		ret = devm_gpio_request(&pdev->dev,
-+				sdhci->data->card_power_gpio, "sdhci");
- 		if (ret < 0) {
- 			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
- 					sdhci->data->card_power_gpio);
--			goto err_pgpio_request;
-+			goto set_drvdata;
- 		}
- 
- 		if (sdhci->data->power_always_enb)
-@@ -175,60 +177,48 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
- 		if (ret) {
- 			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
- 					sdhci->data->card_power_gpio);
--			goto err_pgpio_direction;
-+			goto set_drvdata;
- 		}
- 	}
- 
- 	if (sdhci->data->card_int_gpio >= 0) {
--		ret = gpio_request(sdhci->data->card_int_gpio, "sdhci");
-+		ret = devm_gpio_request(&pdev->dev, sdhci->data->card_int_gpio,
-+				"sdhci");
- 		if (ret < 0) {
- 			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
- 					sdhci->data->card_int_gpio);
--			goto err_igpio_request;
-+			goto set_drvdata;
- 		}
- 
- 		ret = gpio_direction_input(sdhci->data->card_int_gpio);
- 		if (ret) {
- 			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
- 					sdhci->data->card_int_gpio);
--			goto err_igpio_direction;
-+			goto set_drvdata;
- 		}
--		ret = request_irq(gpio_to_irq(sdhci->data->card_int_gpio),
-+		ret = devm_request_irq(&pdev->dev,
-+				gpio_to_irq(sdhci->data->card_int_gpio),
- 				sdhci_gpio_irq, IRQF_TRIGGER_LOW,
- 				mmc_hostname(host->mmc), pdev);
- 		if (ret) {
- 			dev_dbg(&pdev->dev, "gpio request irq fail: %d\n",
- 					sdhci->data->card_int_gpio);
--			goto err_igpio_request_irq;
-+			goto set_drvdata;
- 		}
- 
- 	}
- 
- 	return 0;
- 
--err_igpio_request_irq:
--err_igpio_direction:
--	if (sdhci->data->card_int_gpio >= 0)
--		gpio_free(sdhci->data->card_int_gpio);
--err_igpio_request:
--err_pgpio_direction:
--	if (sdhci->data->card_power_gpio >= 0)
--		gpio_free(sdhci->data->card_power_gpio);
--err_pgpio_request:
-+set_drvdata:
- 	platform_set_drvdata(pdev, NULL);
- 	sdhci_remove_host(host, 1);
--err_add_host:
--	iounmap(host->ioaddr);
--err_ioremap:
-+free_host:
- 	sdhci_free_host(host);
--err_alloc_host:
-+disable_clk:
- 	clk_disable(sdhci->clk);
--err_clk_enb:
-+put_clk:
- 	clk_put(sdhci->clk);
--err_clk_get:
--	kfree(sdhci);
--err_kzalloc:
--	release_mem_region(iomem->start, resource_size(iomem));
- err:
- 	dev_err(&pdev->dev, "spear-sdhci probe failed: %d\n", ret);
- 	return ret;
-@@ -237,35 +227,19 @@ err:
- static int __devexit sdhci_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
--	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	struct spear_sdhci *sdhci = dev_get_platdata(&pdev->dev);
--	int dead;
-+	int dead = 0;
- 	u32 scratch;
- 
--	if (sdhci->data) {
--		if (sdhci->data->card_int_gpio >= 0) {
--			free_irq(gpio_to_irq(sdhci->data->card_int_gpio), pdev);
--			gpio_free(sdhci->data->card_int_gpio);
--		}
--
--		if (sdhci->data->card_power_gpio >= 0)
--			gpio_free(sdhci->data->card_power_gpio);
--	}
--
- 	platform_set_drvdata(pdev, NULL);
--	dead = 0;
- 	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
- 	if (scratch == (u32)-1)
- 		dead = 1;
- 
- 	sdhci_remove_host(host, dead);
--	iounmap(host->ioaddr);
- 	sdhci_free_host(host);
- 	clk_disable(sdhci->clk);
- 	clk_put(sdhci->clk);
--	kfree(sdhci);
--	if (iomem)
--		release_mem_region(iomem->start, resource_size(iomem));
- 
- 	return 0;
+@@ -20,6 +20,8 @@
+ #include <linux/module.h>
+ #include <linux/interrupt.h>
+ #include <linux/irq.h>
++#include <linux/of.h>
++#include <linux/of_gpio.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm.h>
+ #include <linux/slab.h>
+@@ -68,8 +70,56 @@ static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
+ 	return IRQ_HANDLED;
  }
+ 
++#ifdef CONFIG_OF
++static struct sdhci_plat_data * __devinit
++sdhci_probe_config_dt(struct platform_device *pdev)
++{
++	struct device_node *np = pdev->dev.of_node;
++	struct sdhci_plat_data *pdata = NULL;
++	enum of_gpio_flags flags;
++	int pgpio, igpio;
++
++	pgpio = of_get_named_gpio_flags(np, "power-gpio", 0, &flags);
++	if (!gpio_is_valid(pgpio))
++		pgpio = -1;
++
++	igpio = of_get_named_gpio(np, "int-gpio", 0);
++	if (!gpio_is_valid(igpio))
++		igpio = -1;
++
++	/* If pdata is required */
++	if ((pgpio != -1) || (igpio != -1)) {
++		pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
++		if (!pdata) {
++			dev_err(&pdev->dev, "DT: kzalloc failed\n");
++			return ERR_PTR(-ENOMEM);
++		}
++	}
++
++	/* if power gpio is supported */
++	if (pgpio != -1) {
++		pdata->power_active_high = (flags != OF_GPIO_ACTIVE_LOW);
++
++		if (of_property_read_bool(np, "power_always_enb"))
++			pdata->power_always_enb = true;
++	}
++
++	pdata->card_power_gpio = pgpio;
++	pdata->card_int_gpio = igpio;
++
++	return pdata;
++}
++#else
++static struct sdhci_plat_data * __devinit
++sdhci_probe_config_dt(struct platform_device *pdev)
++{
++	return ERR_PTR(-ENOSYS);
++}
++#endif
++
+ static int __devinit sdhci_probe(struct platform_device *pdev)
+ {
++	struct device_node *np = pdev->dev.of_node;
+ 	struct sdhci_host *host;
+ 	struct resource *iomem;
+ 	struct spear_sdhci *sdhci;
+@@ -110,8 +160,16 @@ static int __devinit sdhci_probe(struct platform_device *pdev)
+ 		goto put_clk;
+ 	}
+ 
+-	/* overwrite platform_data */
+-	sdhci->data = dev_get_platdata(&pdev->dev);
++	if (np) {
++		sdhci->data = sdhci_probe_config_dt(pdev);
++		if (IS_ERR(sdhci->data)) {
++			dev_err(&pdev->dev, "DT: Failed to get pdata\n");
++			return -ENODEV;
++		}
++	} else {
++		sdhci->data = dev_get_platdata(&pdev->dev);
++	}
++
+ 	pdev->dev.platform_data = sdhci;
+ 
+ 	if (pdev->dev.parent)
+@@ -276,11 +334,20 @@ static int sdhci_resume(struct device *dev)
+ 
+ static SIMPLE_DEV_PM_OPS(sdhci_pm_ops, sdhci_suspend, sdhci_resume);
+ 
++#ifdef CONFIG_OF
++static const struct of_device_id sdhci_spear_id_table[] = {
++	{ .compatible = "st,spear300-sdhci" },
++	{}
++};
++MODULE_DEVICE_TABLE(of, sdhci_spear_id_table);
++#endif
++
+ static struct platform_driver sdhci_driver = {
+ 	.driver = {
+ 		.name	= "sdhci",
+ 		.owner	= THIS_MODULE,
+ 		.pm	= &sdhci_pm_ops,
++		.of_match_table = of_match_ptr(sdhci_spear_id_table),
+ 	},
+ 	.probe		= sdhci_probe,
+ 	.remove		= __devexit_p(sdhci_remove),
 -- 
 1.7.10.rc2.10.gb47606
 
