@@ -1,67 +1,55 @@
-From: joancarles <joancarles@fqingenieria.es>
-Subject: Re: [MX25][MMC] mmc esdhc failure in 3.3
-Date: Tue, 27 Mar 2012 12:56:31 +0200
-Message-ID: <137e8b8e079af62aea2fd4d363be6273@mail.fqingenieria.es>
+From: Zhu Richard-R65037 <r65037@freescale.com>
+Subject: RE: [MX25][MMC] mmc esdhc failure in 3.3
+Date: Tue, 27 Mar 2012 13:03:08 +0000
+Message-ID: <0E83723C55F66F43A6041464FE31119D0A26D3@039-SN2MPN1-011.039d.mgd.msft.net>
 References: <5e57eb999780335721212bb8d411406f@mail.fqingenieria.es>
- <20120312132423.GC2459@pengutronix.de>
- <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
- <0E83723C55F66F43A6041464FE31119D099A34@039-SN2MPN1-011.039d.mgd.msft.net>
- <a06e68c3687c7390e15950bc20831fd4@mail.fqingenieria.es>
- <85b807b77d73328485781d6fa1568e46@mail.fqingenieria.es>
- <20120327101259.73525f9d@eb-e6520>
- <ac05d6e5c1ce4bf9cfc5c28d235f866f@mail.fqingenieria.es>
- <20120327090148.GB6790@pengutronix.de> <20120327110615.3bfaf969@eb-e6520>
- <7f2ae9e3800848e140461a0506808fb4@mail.fqingenieria.es>
- <20120327114048.6af2e178@eb-e6520>
+	<20120312132423.GC2459@pengutronix.de>
+	<9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
+	<0E83723C55F66F43A6041464FE31119D099A34@039-SN2MPN1-011.039d.mgd.msft.net>
+	<a06e68c3687c7390e15950bc20831fd4@mail.fqingenieria.es>
+	<85b807b77d73328485781d6fa1568e46@mail.fqingenieria.es>
+	<20120327101259.73525f9d@eb-e6520>
+	<ac05d6e5c1ce4bf9cfc5c28d235f866f@mail.fqingenieria.es>
+ <20120327105819.00d89783@eb-e6520>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from llsa731-a03.servidoresdns.net ([82.223.190.25]:32866 "EHLO
-	llsa987-a03.servidoresdns.net" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1750707Ab2C0K4k (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Mar 2012 06:56:40 -0400
-In-Reply-To: <20120327114048.6af2e178@eb-e6520>
+Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:15794
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750760Ab2C0NDR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Mar 2012 09:03:17 -0400
+In-Reply-To: <20120327105819.00d89783@eb-e6520>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?Q?Eric_B=C3=A9nard?= <eric@eukrea.com>
-Cc: Wolfram Sang <w.sang@pengutronix.de>, Zhu Richard-R65037 <r65037@freescale.com>, shawn.guo@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: =?gb2312?B?RXJpYyBCqKZuYXJk?= <eric@eukrea.com>, joancarles <joancarles@fqingenieria.es>
+Cc: "shawn.guo@linaro.org" <shawn.guo@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wolfram Sang <w.sang@pengutronix.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi
-
->> Might be unrelated, however I have been keeping my eyes on the fix 
->> of
->> ENGcm07207 quirk introduced with 16a790bcc. According to the
->> IMX25CE.pdf, to abort data transfers on the AHB, software can reset 
->> the
->> eSDHC by writing 1 to SYSCTL[24] (RSTA), which currently is not done
->> with SDHCI_QUIRK_NO_MULTIBLOCK. It sets the max_blk_count to 1 
->> instead
->> of 65535. Not sure if this is also limiting the speed.
->>
-> I tried to increase max_blk_count and it breaks after a few tests.
-
-I will redo your tests in a jiffy, however the latency issues worry me 
-a wee bit.
-
-> Using an oscilloscope it seems we have a big latency between each
-> transfer which could explain the low throughput, I didn't have the
-> time to look deeper at this problem.
-
-The latency we can see here in the oscilloscope is tremendous between 
-two CMD24: 8ms! What is causing this? It is certainly unrelated to the 
-MULTIBLOCK feature. Having a clock at 33.25MHz, our maximal read, as 
-confirmed by dd is:
-
-33.25[MHz] * 4[bits data] / 8[bits/Byte] * 30 [us write] / 8000 [us 
-sleep] =~ 60KB/s
-
-So, what's keeping the driver 8ms from sending the data??? Any pointers 
-on where I could twiddle some bits in the driver? Where do I start 
-looking?
-
-Cheers
--- 
-Joan C. Abelaira
+SGkgRXJpYzoNCkknbSBvbiBteSBidXNpbmVzcyB0cmlwIG91dCBvZiBteSBGU0wgb2ZmaWNlLCBj
+YW4ndCByZXByb2R1Y2UgdGhpcyBpc3N1ZSBvbiBpLk1YMjUgYm9hcmQgbm93Lg0KU29ycnkgYWJv
+dXQgdGhhdC4NCg0KQmVzdCBSZWdhcmRzDQpSaWNoYXJkIFpodQ0KDQotLS0tLU9yaWdpbmFsIE1l
+c3NhZ2UtLS0tLQ0KRnJvbTogRXJpYyBCqKZuYXJkIFttYWlsdG86ZXJpY0BldWtyZWEuY29tXSAN
+ClNlbnQ6IDIwMTLE6jPUwjI3yNUgMzo1OA0KVG86IGpvYW5jYXJsZXMNCkNjOiBaaHUgUmljaGFy
+ZC1SNjUwMzc7IHNoYXduLmd1b0BsaW5hcm8ub3JnOyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3Jn
+OyBXb2xmcmFtIFNhbmc7IGxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZw0KU3Vi
+amVjdDogUmU6IFtNWDI1XVtNTUNdIG1tYyBlc2RoYyBmYWlsdXJlIGluIDMuMw0KDQpIaSBKb2Fu
+IENhcmxlcywNCg0KTGUgVHVlLCAyNyBNYXIgMjAxMiAxMDo0Njo0NSArMDIwMCwNCmpvYW5jYXJs
+ZXMgPGpvYW5jYXJsZXNAZnFpbmdlbmllcmlhLmVzPiBhIKimY3JpdCA6DQo+ID4+IFRoaXMgaXMg
+c3RpbGwgcHJlc2VudCwgYW5kIHdlIGhhdmUgYWJzb2x1dGVseSBubyBpZGVhIHdoZXJlIHRvIA0K
+PiA+PiBjb250aW51ZSBzZWFyY2hpbmcgZm9yIHRoZSBzb2x1dGlvbiBvZiB0aGUgcHJvYmxlbS4g
+QW55IHBvaW50ZXJzPyANCj4gPj4gQW55IGdpdCB0cmVlcyBvZiBtbWMgZHJpdmVyIGNoYW5nZXMg
+d2UgY291bGQgdHJ5PyBBbnlib2R5IGVsc2Ugd2l0aCANCj4gPj4gYSBNWDI1IHRoYXQgaGFzIHRo
+aXMgaXNzdWU/DQo+ID4+DQo+ID4gZG9lcyB0aGF0IGF0dGFjaGVkIHBhdGNoIGZpeCB5b3VyIHBy
+b2JsZW0gPw0KPiANCj4gWUVTLCBpbmRlZWQgaXQgZG9lcyB0byBhIGNlcnRhaW4gZGVncmVlLiBU
+aGUgdGltZW91dCBlcnJvcnMgZG8gbm90IA0KPiBvY2N1ciBhbnltb3JlIGFuZCBJIGNhbiBzdWNj
+ZXNzZnVsbHkgcGVyZm9ybSBtYW55IGZzLT5vcHMsIHN1Y2ggYXMgDQo+IFJFQUQsIFdSSVRFLCBV
+TkxJTksgLi4uIC4gU28gdGhhbmsgeW91IHZlcnkgbXVjaCBmb3IgdGhpcyBpbnNpZ2h0IA0KPiB0
+aHJvdWdoIHlvdXIgcGF0Y2ghDQo+IA0KPiBUaGUgc3BlZWQgb2YgdGhlIGNhcmQgaXMgZXhjcnVj
+aWF0aW5nbHkgc2xvdywgaG93ZXZlci4gV2Ugcm91Z2hseSBnZXQgDQo+IGJldHdlZW4gMzRLQi9z
+IGFuZCA2NEtCL3MgZnJvbSBhIGRkIGlmPS9kZXYvemVybyB3cml0ZSB0byBhbnkgb2YgdGhlIA0K
+PiBmb2xsb3dpbmcgcGFydGl0aW9uczoNCj4gDQpJIGhhdmUgdGhlIHNhbWUgc3BlZWQgcHJvYmxl
+bSBoZXJlIG9uIGkuTVgyNSBidXQgc3RpbGwgaGF2ZW4ndCBmb3VuZCB0aGUgcmVhc29uLg0KU2hh
+d24sIFJpY2hhcmQgOiBkbyB5b3UgaGF2ZSBhbiBpZGVhIG9mIHdoeSB0aGUgZVNESEMgaXMgc28g
+c2xvdyBvbg0KaS5NWDI1ID8NCg0KVGhhbmtzLA0KRXJpYw0KDQo=
 
