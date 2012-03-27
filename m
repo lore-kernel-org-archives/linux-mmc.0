@@ -1,85 +1,96 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 2/2] mmc: sh_mmcif: mmc->f_max should be half of the bus
- clock
-Date: Tue, 27 Mar 2012 09:53:33 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1203270948200.27382@axis700.grange>
-References: <1332320549-28584-1-git-send-email-horms@verge.net.au>
- <1332320549-28584-3-git-send-email-horms@verge.net.au>
- <Pine.LNX.4.64.1203241904150.19427@axis700.grange> <20120325223033.GA6860@verge.net.au>
- <4F70027A.9020203@renesas.com> <20120326055256.GE2347@verge.net.au>
- <CANqRtoSrg5Niezq5tLA+a3j9PUoTGoBUBtEBazjEKbCFXHhX1g@mail.gmail.com>
- <Pine.LNX.4.64.1203260855140.17487@axis700.grange>
+From: joancarles <joancarles@fqingenieria.es>
+Subject: RE: [MX25][MMC] mmc esdhc failure in 3.3
+Date: Tue, 27 Mar 2012 09:59:48 +0200
+Message-ID: <e96253f3ad8c336db8ff86c3b9ab57e1@mail.fqingenieria.es>
+References: <5e57eb999780335721212bb8d411406f@mail.fqingenieria.es>
+ <20120312132423.GC2459@pengutronix.de>
+ <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
+ <0E83723C55F66F43A6041464FE31119D099A34@039-SN2MPN1-011.039d.mgd.msft.net>
+ <a06e68c3687c7390e15950bc20831fd4@mail.fqingenieria.es>
+ <85b807b77d73328485781d6fa1568e46@mail.fqingenieria.es>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:58914 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752581Ab2C0HyD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Mar 2012 03:54:03 -0400
-In-Reply-To: <Pine.LNX.4.64.1203260855140.17487@axis700.grange>
+Received: from llsa731-a03.servidoresdns.net ([82.223.190.25]:56211 "EHLO
+	llsa731-a03.servidoresdns.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753772Ab2C0H74 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Mar 2012 03:59:56 -0400
+In-Reply-To: <85b807b77d73328485781d6fa1568e46@mail.fqingenieria.es>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: Simon Horman <horms@verge.net.au>, Yusuke Goda <yusuke.goda.sx@renesas.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Cao Minh Hiep <hiepcm@gmail.com>
+To: joancarles <joancarles@fqingenieria.es>
+Cc: Zhu Richard-R65037 <r65037@freescale.com>, Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org, shawn.guo@linaro.org, linux-arm-kernel@lists.infradead.org
 
-On Mon, 26 Mar 2012, Guennadi Liakhovetski wrote:
+ADDENDUM:
 
-> On Mon, 26 Mar 2012, Magnus Damm wrote:
-> 
-> > On Mon, Mar 26, 2012 at 2:52 PM, Simon Horman <horms@verge.net.au> wrote:
-> > > On Mon, Mar 26, 2012 at 02:45:30PM +0900, Yusuke Goda wrote:
-> > >> Hi Simon-san, Guennadi-san
-> > >>
-> > >> (2012/03/26 7:30), Simon Horman wrote:
-> > >> > On Sat, Mar 24, 2012 at 07:06:31PM +0100, Guennadi Liakhovetski wrote:
-> > >> >> On Wed, 21 Mar 2012, Simon Horman wrote:
-> > >> >>
-> > >> >>> mmc->f_max should be half of the bus clock.
-> > >> >>> And now that mmc->f_max is not equal to the bus clock the
-> > >> >>> latter should be used directly to calculate mmc->f_min.
-> > >> >>
-> > >> >> The patch seems correct as it stands, however, looking at it - does anyone
-> > >> >> understands why that "close to 400kHz" comment and such a complicated
-> > >> >> calculation? Shouldn't it be just host->clk / 512 always? Maybe this
-> > >> >> should be a separate patch, so, for this one
-> > >> >>
-> > >> >> Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > >> >
-> > >> > Hi Guennadi,
-> > >> >
-> > >> > that code seems to date back to the original driver submission
-> > >> > made by Goda-san. I have CCed him as perhaps he recalls why
-> > >> > the code is like it is.
-> > >> I thought to get closer to 400kHz if possible.
-> > >> Probably even host->clk / 512 does not have any problem.
-> > >
-> > > Sorry for my ignorance, is ~400kHz desirable for some reason?
-> > 
-> > The 400kHz frequency is used during initialization of the SD card.
-> > Simply put, the SD frequency starts low out low and is then changed to
-> > something higher depending on the capability of the memory card and
-> > the host controller. Please have a look at the simplified SD
-> > specification for more details.
-> 
-> I see, so, we want something like
-> 
-> 	shift = fls(host->clk / 400000 - 1);
-> 	mmc->f_min = host->clk >> shift;
-> 
-> eventually with some rounding, depending on our preferences.
+On Tue, 27 Mar 2012 09:32:36 +0200, joancarles wrote:
+> G'day
+>
+> This is still present, and we have absolutely no idea where to
+> continue searching for the solution of the problem. Any pointers? Any
+> git trees of mmc driver changes we could try? Anybody else with a 
+> MX25
+> that has this issue?
 
-As you see in the email header, that last email was sent about 24 hours 
-ago, it just got stuck on my mail server due to some local problem... 
-After the recent discussions on this topic, this mail is outdated and 
-should be disregarded. I certainly agree to using clk / 512 
-unconditionally for all host frequencies, which also was my original 
-suggestion in
+Enabling CONFIG_MMC_CLKGATE, I have managed to create an oops simply be 
+trying to remove a file:
 
-http://article.gmane.org/gmane.linux.kernel.mmc/13556
+[  192.821592] mmcblk0: error -110 transferring data, sector 559, nr 1, 
+cmd response 0x900, card status 0x0
+[  192.846928] mmc0: starting CMD55 arg 00020000 flags 00000095
+[  192.846991] mmc0: clock 50000000Hz busmode 2 powermode 2 cs 0 Vdd 17 
+width 2 timing 2
+[  192.847048] sdhci-esdhc-imx sdhci-esdhc-imx25.0: desired SD clock: 
+50000000, actual: 33250000
+[  192.848090] mmc0: ungated MCI clock
+[  192.848159] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[  192.848221] mmc0: req done (CMD55): 0: 00000920 00000000 00000000 
+00000000
+[  192.848353] mmc0: clock 0Hz busmode 2 powermode 2 cs 0 Vdd 17 width 
+2 timing 2
+[  192.848400] mmc0: gated MCI clock
+[  192.848458] Division by zero in kernel.
+[  192.852384] [<c00141f0>] (unwind_backtrace+0x0/0x130) from 
+[<c01c0bb4>] (Ldiv0+0x8/0x10)
+[  192.867389] [<c01c0bb4>] (Ldiv0+0x8/0x10) from [<c029b288>] 
+(mmc_sd_num_wr_blocks+0x148/0x230)
+[  192.876924] [<c029b288>] (mmc_sd_num_wr_blocks+0x148/0x230) from 
+[<c029c900>] (mmc_blk_issue_rw_rq+0x3fc/0x4ac)
+[  192.887944] [<c029c900>] (mmc_blk_issue_rw_rq+0x3fc/0x4ac) from 
+[<c029cbe8>] (mmc_blk_issue_rq+0x238/0x514)
+[  192.898606] [<c029cbe8>] (mmc_blk_issue_rq+0x238/0x514) from 
+[<c029d3b8>] (mmc_queue_thread+0x58/0x144)
+[  192.908879] [<c029d3b8>] (mmc_queue_thread+0x58/0x144) from 
+[<c0038b44>] (kthread+0x84/0x90)
+[  192.918477] [<c0038b44>] (kthread+0x84/0x90) from [<c000f9a0>] 
+(kernel_thread_exit+0x0/0x8)
+[  192.927654] mmc0: starting CMD22 arg 00000000 flags 000000b5
+[  192.927700] mmc0:     blksz 4 blocks 1 flags 00000200 tsac 100 ms 
+nsac 0
+[  192.927752] mmc0: clock 50000000Hz busmode 2 powermode 2 cs 0 Vdd 17 
+width 2 timing 2
+[  192.927810] sdhci-esdhc-imx sdhci-esdhc-imx25.0: desired SD clock: 
+50000000, actual: 33250000
+[  192.928852] mmc0: ungated MCI clock
+[  192.928940] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+[  192.928991] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x0000000a
+[  192.929031] sdhci [sdhci_data_irq()]: mmc0: DMA base 0x839a3040, 
+transferred 0x05cfc0 bytes, next 0x83a00000
+[  192.929094] mmc0: req done (CMD22): 0: 00000920 00000000 00000000 
+00000000
+[  192.929126] mmc0:     4 bytes transferred: 0
+[  192.929242] mmc0: clock 0Hz busmode 2 powermode 2 cs 0 Vdd 17 width 
+2 timing 2
+[  192.929288] mmc0: gated MCI clock
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+Maybe this helps. The file, in fact, has been removed, as far as I can 
+see. Also, how come, the actual clock differs so much from the desired 
+clock of 50MHz? As commented before, we do actually see the 33.25MHz 
+clock in the oscilloscope.
+
+Best regards
+-- 
+Joan C. Abelaira
+
