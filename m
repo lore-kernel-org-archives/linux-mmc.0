@@ -1,86 +1,124 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 2/2] mmc: sh_mmcif: mmc->f_max should be half of the bus
- clock
-Date: Tue, 27 Mar 2012 17:14:05 +0900
-Message-ID: <20120327081404.GC30752@verge.net.au>
-References: <1332320549-28584-1-git-send-email-horms@verge.net.au>
- <1332320549-28584-3-git-send-email-horms@verge.net.au>
- <Pine.LNX.4.64.1203241904150.19427@axis700.grange>
- <20120325223033.GA6860@verge.net.au>
- <4F70027A.9020203@renesas.com>
- <20120326055256.GE2347@verge.net.au>
- <CANqRtoSrg5Niezq5tLA+a3j9PUoTGoBUBtEBazjEKbCFXHhX1g@mail.gmail.com>
- <Pine.LNX.4.64.1203260855140.17487@axis700.grange>
- <Pine.LNX.4.64.1203270948200.27382@axis700.grange>
+From: joancarles <joancarles@fqingenieria.es>
+Subject: Re: [MX25][MMC] mmc esdhc failure in 3.3
+Date: Tue, 27 Mar 2012 10:46:45 +0200
+Message-ID: <ac05d6e5c1ce4bf9cfc5c28d235f866f@mail.fqingenieria.es>
+References: <5e57eb999780335721212bb8d411406f@mail.fqingenieria.es>
+ <20120312132423.GC2459@pengutronix.de>
+ <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
+ <0E83723C55F66F43A6041464FE31119D099A34@039-SN2MPN1-011.039d.mgd.msft.net>
+ <a06e68c3687c7390e15950bc20831fd4@mail.fqingenieria.es>
+ <85b807b77d73328485781d6fa1568e46@mail.fqingenieria.es>
+ <20120327101259.73525f9d@eb-e6520>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:45199 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751956Ab2C0IOI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Mar 2012 04:14:08 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1203270948200.27382@axis700.grange>
+Received: from llsa736-a03.servidoresdns.net ([82.223.190.27]:44207 "EHLO
+	llsa735-a03.servidoresdns.net" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753558Ab2C0Iqy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Mar 2012 04:46:54 -0400
+In-Reply-To: <20120327101259.73525f9d@eb-e6520>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Magnus Damm <magnus.damm@gmail.com>, Yusuke Goda <yusuke.goda.sx@renesas.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Cao Minh Hiep <hiepcm@gmail.com>
+To: =?UTF-8?Q?Eric_B=C3=A9nard?= <eric@eukrea.com>
+Cc: Zhu Richard-R65037 <r65037@freescale.com>, shawn.guo@linaro.org, linux-mmc@vger.kernel.org, Wolfram Sang <w.sang@pengutronix.de>, linux-arm-kernel@lists.infradead.org
 
-On Tue, Mar 27, 2012 at 09:53:33AM +0200, Guennadi Liakhovetski wrote:
-> On Mon, 26 Mar 2012, Guennadi Liakhovetski wrote:
-> 
-> > On Mon, 26 Mar 2012, Magnus Damm wrote:
-> > 
-> > > On Mon, Mar 26, 2012 at 2:52 PM, Simon Horman <horms@verge.net.au> wrote:
-> > > > On Mon, Mar 26, 2012 at 02:45:30PM +0900, Yusuke Goda wrote:
-> > > >> Hi Simon-san, Guennadi-san
-> > > >>
-> > > >> (2012/03/26 7:30), Simon Horman wrote:
-> > > >> > On Sat, Mar 24, 2012 at 07:06:31PM +0100, Guennadi Liakhovetski wrote:
-> > > >> >> On Wed, 21 Mar 2012, Simon Horman wrote:
-> > > >> >>
-> > > >> >>> mmc->f_max should be half of the bus clock.
-> > > >> >>> And now that mmc->f_max is not equal to the bus clock the
-> > > >> >>> latter should be used directly to calculate mmc->f_min.
-> > > >> >>
-> > > >> >> The patch seems correct as it stands, however, looking at it - does anyone
-> > > >> >> understands why that "close to 400kHz" comment and such a complicated
-> > > >> >> calculation? Shouldn't it be just host->clk / 512 always? Maybe this
-> > > >> >> should be a separate patch, so, for this one
-> > > >> >>
-> > > >> >> Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > > >> >
-> > > >> > Hi Guennadi,
-> > > >> >
-> > > >> > that code seems to date back to the original driver submission
-> > > >> > made by Goda-san. I have CCed him as perhaps he recalls why
-> > > >> > the code is like it is.
-> > > >> I thought to get closer to 400kHz if possible.
-> > > >> Probably even host->clk / 512 does not have any problem.
-> > > >
-> > > > Sorry for my ignorance, is ~400kHz desirable for some reason?
-> > > 
-> > > The 400kHz frequency is used during initialization of the SD card.
-> > > Simply put, the SD frequency starts low out low and is then changed to
-> > > something higher depending on the capability of the memory card and
-> > > the host controller. Please have a look at the simplified SD
-> > > specification for more details.
-> > 
-> > I see, so, we want something like
-> > 
-> > 	shift = fls(host->clk / 400000 - 1);
-> > 	mmc->f_min = host->clk >> shift;
-> > 
-> > eventually with some rounding, depending on our preferences.
-> 
-> As you see in the email header, that last email was sent about 24 hours 
-> ago, it just got stuck on my mail server due to some local problem... 
-> After the recent discussions on this topic, this mail is outdated and 
-> should be disregarded. I certainly agree to using clk / 512 
-> unconditionally for all host frequencies, which also was my original 
-> suggestion in
-> 
-> http://article.gmane.org/gmane.linux.kernel.mmc/13556
+Hi Eric
 
-Indeed it was your suggestion and a good one too.
+>> G'day
+>>
+>> This is still present, and we have absolutely no idea where to 
+>> continue
+>> searching for the solution of the problem. Any pointers? Any git 
+>> trees
+>> of mmc driver changes we could try? Anybody else with a MX25 that 
+>> has
+>> this issue?
+>>
+> does that attached patch fix your problem ?
 
+YES, indeed it does to a certain degree. The timeout errors do not 
+occur anymore and I can successfully perform many fs->ops, such as READ, 
+WRITE, UNLINK ... . So thank you very much for this insight through your 
+patch!
+
+The speed of the card is excruciatingly slow, however. We roughly get 
+between 34KB/s and 64KB/s from a dd if=/dev/zero write to any of the 
+following partitions:
+
+root@mx25-noah:~$> grep mmc /proc/mounts
+/dev/mmcblk0p2 /media/card-ext3 ext3 
+rw,sync,relatime,user_xattr,barrier=1,nodelalloc,data=ordered 0 0
+/dev/mmcblk0p1 /media/card vfat 
+rw,sync,relatime,fmask=0022,dmask=0022,codepage=cp437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 
+0 0
+root@mx25-noah:~$> df -kh | grep mmc
+/dev/mmcblk0p2            1.7G    133.1M      1.5G   8% 
+/media/card-ext3
+/dev/mmcblk0p1          123.6M      2.7M    120.9M   2% /media/card
+root@mx25-noah:~$> dd if=/dev/zero of=/media/card/test-10M bs=1024K 
+count=10
+10+0 records in
+10+0 records out
+10485760 bytes (10.0MB) copied, 296.004564 seconds, 34.6KB/s
+root@mx25-noah:~$> dd if=/dev/zero of=/media/card-ext3/test-10M 
+bs=1024K count=10
+10+0 records in
+10+0 records out
+10485760 bytes (10.0MB) copied, 158.207481 seconds, 64.7KB/s
+
+What's going on here, why is it so slow?
+
+root@mx25-noah:~$> dmesg | grep -A1 CMD24
+[  635.195042] mmc0: starting CMD24 arg 0e5c1600 flags 000000b5
+[  635.195081] mmc0:     blksz 512 blocks 1 flags 00000100 tsac 300 ms 
+nsac 0
+--
+[  635.199831] mmc0: req done (CMD24): 0: 00000900 00000000 00000000 
+00000000
+[  635.199866] mmc0:     512 bytes transferred: 0
+--
+[  635.200212] mmc0: starting CMD24 arg 0e5c1800 flags 000000b5
+[  635.200251] mmc0:     blksz 512 blocks 1 flags 00000100 tsac 300 ms 
+nsac 0
+--
+[  635.206516] mmc0: req done (CMD24): 0: 00000900 00000000 00000000 
+00000000
+[  635.206549] mmc0:     512 bytes transferred: 0
+--
+[  635.206892] mmc0: starting CMD24 arg 0e5c1a00 flags 000000b5
+[  635.206932] mmc0:     blksz 512 blocks 1 flags 00000100 tsac 300 ms 
+nsac 0
+--
+[  635.211763] mmc0: req done (CMD24): 0: 00000900 00000000 00000000 
+00000000
+[  635.211796] mmc0:     512 bytes transferred: 0
+--
+[  635.212409] mmc0: starting CMD24 arg 0e5c1c00 flags 000000b5
+[  635.212449] mmc0:     blksz 512 blocks 1 flags 00000100 tsac 300 ms 
+nsac 0
+
+Also, debugfs values don't make sense to me:
+
+root@mx25-noah:/sys/kernel/debug/mmc0$> cat clock
+50000000
+root@mx25-noah:/sys/kernel/debug/mmc0$> cat ios
+clock:		50000000 Hz
+vdd:		17 (2.9 ~ 3.0 V)
+bus mode:	2 (push-pull)
+chip select:	0 (don't care)
+power mode:	2 (on)
+bus width:	2 (4 bits)
+timing spec:	2 (sd high-speed)
+root@mx25-noah:/sys/kernel/debug/mmc0$> cat mmc0\:0002/stat
+state   status
+root@mx25-noah:/sys/kernel/debug/mmc0$> cat mmc0\:0002/state
+0x00000005
+root@mx25-noah:/sys/kernel/debug/mmc0$> cat mmc0\:0002/status
+00000900
+
+Best regards and thank you so much for this real improvement of our 
+situation here.
+-- 
+Joan C. Abelaira
