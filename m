@@ -1,73 +1,223 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 2/2] mmc: sh_mmcif: mmc->f_max should be half of the bus
- clock
-Date: Mon, 26 Mar 2012 09:04:07 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1203260855140.17487@axis700.grange>
-References: <1332320549-28584-1-git-send-email-horms@verge.net.au>
- <1332320549-28584-3-git-send-email-horms@verge.net.au>
- <Pine.LNX.4.64.1203241904150.19427@axis700.grange> <20120325223033.GA6860@verge.net.au>
- <4F70027A.9020203@renesas.com> <20120326055256.GE2347@verge.net.au>
- <CANqRtoSrg5Niezq5tLA+a3j9PUoTGoBUBtEBazjEKbCFXHhX1g@mail.gmail.com>
+From: joancarles <joancarles@fqingenieria.es>
+Subject: RE: [MX25][MMC] mmc esdhc failure in 3.3
+Date: Tue, 27 Mar 2012 09:32:36 +0200
+Message-ID: <85b807b77d73328485781d6fa1568e46@mail.fqingenieria.es>
+References: <5e57eb999780335721212bb8d411406f@mail.fqingenieria.es>
+ <20120312132423.GC2459@pengutronix.de>
+ <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
+ <0E83723C55F66F43A6041464FE31119D099A34@039-SN2MPN1-011.039d.mgd.msft.net>
+ <a06e68c3687c7390e15950bc20831fd4@mail.fqingenieria.es>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:59647 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756733Ab2C0HRf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Mar 2012 03:17:35 -0400
-In-Reply-To: <CANqRtoSrg5Niezq5tLA+a3j9PUoTGoBUBtEBazjEKbCFXHhX1g@mail.gmail.com>
+Received: from llsf237-a03.servidoresdns.net ([82.223.190.24]:34549 "EHLO
+	llsf237-a03.servidoresdns.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755240Ab2C0Hcp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Mar 2012 03:32:45 -0400
+In-Reply-To: <a06e68c3687c7390e15950bc20831fd4@mail.fqingenieria.es>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: Simon Horman <horms@verge.net.au>, Yusuke Goda <yusuke.goda.sx@renesas.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, Cao Minh Hiep <hiepcm@gmail.com>
+To: joancarles <joancarles@fqingenieria.es>
+Cc: Zhu Richard-R65037 <r65037@freescale.com>, Wolfram Sang <w.sang@pengutronix.de>, linux-mmc@vger.kernel.org, shawn.guo@linaro.org, linux-arm-kernel@lists.infradead.org
 
-On Mon, 26 Mar 2012, Magnus Damm wrote:
+G'day
 
-> On Mon, Mar 26, 2012 at 2:52 PM, Simon Horman <horms@verge.net.au> wrote:
-> > On Mon, Mar 26, 2012 at 02:45:30PM +0900, Yusuke Goda wrote:
-> >> Hi Simon-san, Guennadi-san
-> >>
-> >> (2012/03/26 7:30), Simon Horman wrote:
-> >> > On Sat, Mar 24, 2012 at 07:06:31PM +0100, Guennadi Liakhovetski wrote:
-> >> >> On Wed, 21 Mar 2012, Simon Horman wrote:
-> >> >>
-> >> >>> mmc->f_max should be half of the bus clock.
-> >> >>> And now that mmc->f_max is not equal to the bus clock the
-> >> >>> latter should be used directly to calculate mmc->f_min.
-> >> >>
-> >> >> The patch seems correct as it stands, however, looking at it - does anyone
-> >> >> understands why that "close to 400kHz" comment and such a complicated
-> >> >> calculation? Shouldn't it be just host->clk / 512 always? Maybe this
-> >> >> should be a separate patch, so, for this one
-> >> >>
-> >> >> Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> >> >
-> >> > Hi Guennadi,
-> >> >
-> >> > that code seems to date back to the original driver submission
-> >> > made by Goda-san. I have CCed him as perhaps he recalls why
-> >> > the code is like it is.
-> >> I thought to get closer to 400kHz if possible.
-> >> Probably even host->clk / 512 does not have any problem.
-> >
-> > Sorry for my ignorance, is ~400kHz desirable for some reason?
-> 
-> The 400kHz frequency is used during initialization of the SD card.
-> Simply put, the SD frequency starts low out low and is then changed to
-> something higher depending on the capability of the memory card and
-> the host controller. Please have a look at the simplified SD
-> specification for more details.
+This is still present, and we have absolutely no idea where to continue 
+searching for the solution of the problem. Any pointers? Any git trees 
+of mmc driver changes we could try? Anybody else with a MX25 that has 
+this issue?
 
-I see, so, we want something like
+>> Hi:
+>> -110 is the timeout problem.
+>> You can dump the esdhc registers if you want to debug into this 
+>> issue
+>> when this timeout problem occurred.
+>> The register dump can help to figure out what's wrong on the bus.
+>
+> I have no familiarity with the SDHC drivers, so there's nothing
+> useful for me in the output as of this moment:
+>
+> [ 1080.818765] sdhci: ===========================================
+> [ 1080.818830] mmc0: req done (CMD17): 0: 00000900 00000000 00000000 
+> 00000000
+> [ 1080.818862] mmc0:     512 bytes transferred: 0
+> [ 1080.819395] mmc0: starting CMD24 arg 00008800 flags 000000b5
+> [ 1080.819444] mmc0:     blksz 512 blocks 1 flags 00000100 tsac 300 
+> ms nsac 0
+> [ 1080.819544] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000009
+> [ 1080.819595] sdhci [sdhci_data_irq()]: mmc0: DMA base 0x82547c00,
+> transferred 0x038400 bytes, next 0x82580000
+> [ 1080.819630] sdhci: =========== REGISTER DUMP (mmc0)===========
+> [ 1080.819658] sdhci: Sys addr: 0x82547e00 | Version:  0x00000000
+> [ 1080.819683] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+> [ 1080.819707] sdhci: Argument: 0x00008800 | Trn mode: 0x00000003
+> [ 1080.819732] sdhci: Present:  0xfe880006 | Host ctl: 0x00000023
+> [ 1080.819756] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+> [ 1080.819780] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+> [ 1080.819804] sdhci: Timeout:  0x0000000c | Int stat: 0x00100002
+> [ 1080.819830] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+> [ 1080.819854] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+> [ 1080.819879] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+> [ 1080.819904] sdhci: Cmd:      0x0000183a | Max curr: 0x00000000
+> [ 1080.819926] sdhci: Host ctl2: 0x00000000
+> [ 1080.819942] sdhci: ===========================================
+> [ 1080.819985] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00100002
+> [ 1080.820048] mmc0: req done (CMD24): 0: 00000900 00000000 00000000 
+> 00000000
+> [ 1080.820082] mmc0:     0 bytes transferred: -110
+> [ 1080.820134] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1080.820201] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.820259] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+> 00000000
+> [ 1080.820330] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1080.820391] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.820445] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+> 00000000
+> [ 1080.820504] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1080.820572] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.820627] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+> 00000000
+> [ 1080.820785] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1080.820879] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.820946] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+> 00000000
+> [ 1080.821021] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1080.821085] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.821140] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+> 00000000
+> [ 1080.821197] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1080.821255] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.821308] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+> 00000000
+> [ 1080.824944] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1080.825041] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.825112] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+> 00000000
+> [ 1080.825186] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1080.825248] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.825302] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+> 00000000
+> [ 1080.825364] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1080.825432] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.825485] mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 
+> 00000000
+> [ 1080.825640] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1080.825736] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.825803] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 
+> 00000000
+> [ 1080.825883] mmcblk0: error -110 transferring data, sector 68, nr
+> 1, cmd response 0x900, card status 0x0
+> [ 1080.849435] mmc0: starting CMD55 arg 00020000 flags 00000095
+> [ 1080.849531] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.849596] mmc0: req done (CMD55): 0: 00000920 00000000 00000000 
+> 00000000
+> [ 1080.850319] mmc0: starting CMD22 arg 00000000 flags 000000b5
+> [ 1080.850367] mmc0:     blksz 4 blocks 1 flags 00000200 tsac 100 ms 
+> nsac 0
+> [ 1080.850468] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.850523] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x0020000a
+> [ 1080.850591] mmc0: req done (CMD22): 0: 00000920 00000000 00000000 
+> 00000000
+> [ 1080.850624] mmc0:     0 bytes transferred: -84
+> [ 1080.851339] end_request: I/O error, dev mmcblk0, sector 68
+> [ 1080.856881] Buffer I/O error on device mmcblk0p1, logical block 6
+> [ 1080.862998] lost page write due to I/O error on mmcblk0p1
+> [ 1080.897203] mmc0: starting CMD17 arg 00008800 flags 000000b5
+> [ 1080.897250] mmc0:     blksz 512 blocks 1 flags 00000200 tsac 100 
+> ms nsac 0
+> [ 1080.897350] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.898143] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x0020000a
+> [ 1080.898241] mmc0: req done (CMD17): 0: 00000900 00000000 00000000 
+> 00000000
+> [ 1080.898276] mmc0:     0 bytes transferred: -84
+> [ 1080.898949] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1080.899134] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1080.899204] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 
+> 00000000
+> [ 1080.899284] mmcblk0: error -84 transferring data, sector 68, nr 1,
+> cmd response 0x900, card status 0x0
+> [ 1080.908738] end_request: I/O error, dev mmcblk0, sector 68
+> [ 1080.914465] FAT-fs (mmcblk0p1): FAT read failed (blocknr 6)
+> [ 1085.809683] mmc0: starting CMD24 arg 00045e00 flags 000000b5
+> [ 1085.809731] mmc0:     blksz 512 blocks 1 flags 00000100 tsac 300 
+> ms nsac 0
+> [ 1085.809831] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000009
+> [ 1085.809880] sdhci [sdhci_data_irq()]: mmc0: DMA base 0x82548200,
+> transferred 0x037e00 bytes, next 0x82580000
+> [ 1085.809914] sdhci: =========== REGISTER DUMP (mmc0)===========
+> [ 1085.809941] sdhci: Sys addr: 0x82548400 | Version:  0x00000000
+> [ 1085.809967] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+> [ 1085.809992] sdhci: Argument: 0x00045e00 | Trn mode: 0x00000003
+> [ 1085.810017] sdhci: Present:  0xff880000 | Host ctl: 0x00000021
+> [ 1085.810042] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+> [ 1085.810067] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+> [ 1085.810093] sdhci: Timeout:  0x0000000c | Int stat: 0x00200002
+> [ 1085.810119] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+> [ 1085.810143] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+> [ 1085.810169] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+> [ 1085.810193] sdhci: Cmd:      0x0000183a | Max curr: 0x00000000
+> [ 1085.810214] sdhci: Host ctl2: 0x00000000
+> [ 1085.810232] sdhci: ===========================================
+> [ 1085.810275] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00200002
+> [ 1085.810340] mmc0: req done (CMD24): 0: 00000900 00000000 00000000 
+> 00000000
+> [ 1085.810373] mmc0:     0 bytes transferred: -84
+> [ 1085.810427] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1085.810489] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1085.810543] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 
+> 00000000
+> [ 1085.810616] mmc0: starting CMD13 arg 00020000 flags 00000195
+> [ 1085.810690] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1085.810747] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 
+> 00000000
+> [ 1085.810838] mmcblk0: error -84 transferring data, sector 559, nr
+> 1, cmd response 0x900, card status 0x0
+> [ 1085.834557] mmc0: starting CMD55 arg 00020000 flags 00000095
+> [ 1085.834651] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1085.834722] mmc0: req done (CMD55): 0: 00000920 00000000 00000000 
+> 00000000
+> [ 1085.834802] mmc0: starting CMD22 arg 00000000 flags 000000b5
+> [ 1085.834839] mmc0:     blksz 4 blocks 1 flags 00000200 tsac 100 ms 
+> nsac 0
+> [ 1085.834915] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x00000001
+> [ 1085.834986] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 
+> 0x0020000a
+> [ 1085.835056] mmc0: req done (CMD22): 0: 00000920 00000000 00000000 
+> 00000000
+>
+> What else can I provide you with? The MMC/SDHC/eSDHC driver framework
+> is a huge piece of software, so I don't really know where to start
+> looking. Electrically, there seems nothing really wrong with the
+> signal of the clock; the only thing that looks a wee bit suspicious 
+> is
+> that the MX25 clock for the SDHC is currently offering a 33MHz signal
+> (as gathered from the oscilloscope).
 
-	shift = fls(host->clk / 400000 - 1);
-	mmc->f_min = host->clk >> shift;
-
-eventually with some rounding, depending on our preferences.
-
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+-- 
+Joan C. Abelaira
