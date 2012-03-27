@@ -1,7 +1,7 @@
 From: Arnd Bergmann <arnd@arndb.de>
 Subject: Re: [PATCH v3 6/6] mmc: sdhci-s3c: Add device tree support
-Date: Tue, 27 Mar 2012 16:15:43 +0000
-Message-ID: <201203271615.43394.arnd@arndb.de>
+Date: Tue, 27 Mar 2012 16:19:13 +0000
+Message-ID: <201203271619.13320.arnd@arndb.de>
 References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org> <1328032576-9269-7-git-send-email-thomas.abraham@linaro.org>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
