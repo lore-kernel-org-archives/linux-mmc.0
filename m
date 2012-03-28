@@ -1,107 +1,232 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [Patch v1]mmc:core: correct mmc_erase_timeout calculation
-Date: Wed, 28 Mar 2012 09:22:43 +0000
-Message-ID: <17296D9F8FF2234F831FC3DF505A87A90FD83C48@SHSMSX102.ccr.corp.intel.com>
-References: <20120328082933.GA27568@intel.com>
- <CAKYAXd8ec31WM2SBP3wMaAqKj60D2+hZ7nGTgv63_Jbh+KHanA@mail.gmail.com>
+From: joancarles <joancarles@fqingenieria.es>
+Subject: Re: [MX25][MMC] mmc esdhc failure in 3.3
+Date: Wed, 28 Mar 2012 11:26:50 +0200
+Message-ID: <c4306c7d39eac8f1751957eefe20a6c2@mail.fqingenieria.es>
+References: <5e57eb999780335721212bb8d411406f@mail.fqingenieria.es>
+ <20120312132423.GC2459@pengutronix.de>
+ <9018463dfcd3c9e9a311aeed42b758bf@mail.fqingenieria.es>
+ <0E83723C55F66F43A6041464FE31119D099A34@039-SN2MPN1-011.039d.mgd.msft.net>
+ <a06e68c3687c7390e15950bc20831fd4@mail.fqingenieria.es>
+ <85b807b77d73328485781d6fa1568e46@mail.fqingenieria.es>
+ <20120327101259.73525f9d@eb-e6520>
+ <ac05d6e5c1ce4bf9cfc5c28d235f866f@mail.fqingenieria.es>
+ <20120327090148.GB6790@pengutronix.de> <20120327110615.3bfaf969@eb-e6520>
+ <7f2ae9e3800848e140461a0506808fb4@mail.fqingenieria.es>
+ <20120327114048.6af2e178@eb-e6520>
+ <137e8b8e079af62aea2fd4d363be6273@mail.fqingenieria.es>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:54477 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757723Ab2C1JWr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 28 Mar 2012 05:22:47 -0400
-In-Reply-To: <CAKYAXd8ec31WM2SBP3wMaAqKj60D2+hZ7nGTgv63_Jbh+KHanA@mail.gmail.com>
-Content-Language: en-US
+Received: from llsa736-a03.servidoresdns.net ([82.223.190.27]:55065 "EHLO
+	llsa736-a03.servidoresdns.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932187Ab2C1J1A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Mar 2012 05:27:00 -0400
+In-Reply-To: <137e8b8e079af62aea2fd4d363be6273@mail.fqingenieria.es>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
+To: joancarles <joancarles@fqingenieria.es>
+Cc: =?UTF-8?Q?Eric_B=C3=A9nard?= <eric@eukrea.com>, Wolfram Sang <w.sang@pengutronix.de>, Zhu Richard-R65037 <r65037@freescale.com>, shawn.guo@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-V2hhdCBJIGFtIGNoZWNraW5nIHdpdGggaXMgZU1NQzQuNDEgc3BlYywgbm90IGVNTUM0LjUgc3Bl
-Yy4NCkZvcndhcmQgeW91IHRoZSBsaW5rOiB3d3cuamVkZWMub3JnL3NpdGVzL2RlZmF1bHQvZmls
-ZXMvZG9jcy9KRVNEODQtQTQ0MS5wZGYNCg0KVGhhbmtzDQpDaHVhbnhpYW8NCg0KPiAtLS0tLU9y
-aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBOYW1qYWUgSmVvbiBbbWFpbHRvOmxpbmtpbmpl
-b25AZ21haWwuY29tXQ0KPiBTZW50OiBXZWRuZXNkYXksIE1hcmNoIDI4LCAyMDEyIDU6MTcgUE0N
-Cj4gVG86IERvbmcsIENodWFueGlhbw0KPiBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsg
-Y2piQGxhcHRvcC5vcmc7IEh1bnRlciwgQWRyaWFuDQo+IFN1YmplY3Q6IFJlOiBbUGF0Y2ggdjFd
-bW1jOmNvcmU6IGNvcnJlY3QgbW1jX2VyYXNlX3RpbWVvdXQgY2FsY3VsYXRpb24NCj4gDQo+IEhp
-LiBDaHVhbnhpYW8uDQo+IFdvdWxkIHlvdSBzaGFyZSB5b3VyIHNwZWNpZmljYXRpb24gd2l0aCBt
-ZSA/DQo+IFdoZW4gSSBjaGVjayB0aGUgbGF0ZXN0IGVtbWMgNC41IHNwZWMsIEkgY2FuIG5vdCBm
-aW5kIGl0Lg0KPiBUaGFua3MuDQo+IA0KPiAyMDEyLzMvMjggQ2h1YW54aWFvIERvbmcgPGNodWFu
-eGlhby5kb25nQGludGVsLmNvbT46DQo+ID4gQWNjb3JkaW5nIHRvIEpFREVDIDcuOC4yLCBtbWNf
-ZXJhc2VfdGltZW91dCBjYWxjdWxhdGlvbiBzaG91bGQgYmUgZm9sbG93Og0KPiA+IDEuIFNlY3Vy
-ZSBlcmFzZSB0aW1lb3V0ID0gMzAwbXMgKiBFUkFTRV9USU1FT1VUX01VTFQgKiBTRUNfRVJBU0Vf
-TVVMVA0KPiA+IDIuIFNlY3VyZSB0cmltIHRpbWVvdXQgPSAzMDBtcyAqIEVSQVNFX1RJTUVPVVRf
-TVVMVCAqIFNFQ19UUklNX01VTFQgMy4NCj4gPiBUcmltIHRpbWVvdXQgPSAzMDBtcyAqIFRSSU1f
-TVVMVCA0LiBFcmFzZSB0aW1lb3V0Og0KPiA+IMKgIGEuIGlmIEVSQVNFX0dST1VQX0RFRiBpcyB0
-cnVlOiBFcmFzZSB0aW1lb3V0ID0gMzAwbXMgKg0KPiA+IEVSQVNFX1RJTUVPVVRfTVVMVA0KPiA+
-IMKgIGIuIGlmIEVSQVNFX0dST1VQX0RFRiBpcyBmYWxzZTogRXJhc2UgdGltZW91dCA9IHdyaXRl
-IGJsb2NrIGRlbGF5DQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBDaHVhbnhpYW8gRG9uZyA8Y2h1
-YW54aWFvLmRvbmdAaW50ZWwuY29tPg0KPiA+IC0tLQ0KPiA+IMKgZHJpdmVycy9tbWMvY29yZS9j
-b3JlLmMgfCDCoCA0Mg0KPiA+ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0t
-LS0tLQ0KPiA+IMKgMSBmaWxlcyBjaGFuZ2VkLCAyOSBpbnNlcnRpb25zKCspLCAxMyBkZWxldGlv
-bnMoLSkNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYyBiL2Ry
-aXZlcnMvbW1jL2NvcmUvY29yZS5jIGluZGV4DQo+ID4gMTRmMjYyZS4uZDlkNmQxYyAxMDA2NDQN
-Cj4gPiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1j
-L2NvcmUvY29yZS5jDQo+ID4gQEAgLTE0MDUsMTIgKzE0MDUsMzYgQEAgc3RhdGljIHVuc2lnbmVk
-IGludA0KPiA+IG1tY19tbWNfZXJhc2VfdGltZW91dChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsDQo+
-ID4gwqB7DQo+ID4gwqAgwqAgwqAgwqB1bnNpZ25lZCBpbnQgZXJhc2VfdGltZW91dDsNCj4gPg0K
-PiA+IC0gwqAgwqAgwqAgaWYgKGNhcmQtPmV4dF9jc2QuZXJhc2VfZ3JvdXBfZGVmICYgMSkgew0K
-PiA+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgLyogSGlnaCBDYXBhY2l0eSBFcmFzZSBHcm91cCBT
-aXplIHVzZXMgSEMgdGltZW91dHMgKi8NCj4gPiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChh
-cmcgPT0gTU1DX1RSSU1fQVJHKQ0KPiA+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgZXJhc2VfdGltZW91dCA9IGNhcmQtPmV4dF9jc2QudHJpbV90aW1lb3V0Ow0KPiA+ICsgwqAg
-wqAgwqAgLyoNCj4gPiArIMKgIMKgIMKgIMKgKiBKRURFQyA3LjguMg0KPiA+ICsgwqAgwqAgwqAg
-wqAqDQo+ID4gKyDCoCDCoCDCoCDCoCogMS4gU2VjdXJlIGVyYXNlL3RyaW0gdGltZW91dCBpcyBj
-YWxjdWxhdGVkIGFic2VkIG9uIEVyYXNlDQo+ID4gKyBUaW1lb3V0DQo+ID4gKyDCoCDCoCDCoCDC
-oCogYW5kIGFkZGl0aW9uYWwgU0VDX0VSQVNFX01VTFQvU0VDX1RSSU1fTVVMVC4NCj4gPiArIMKg
-IMKgIMKgIMKgKiBTbyBzZWN1cmUgZXJhc2UvdHJpbSB0aW1lb3V0ID0gRVJBU0UgVGltZW91dCAq
-DQo+ID4gKyBTRUNfRVJBU0VfTVVMVC8NCj4gPiArIMKgIMKgIMKgIMKgKiBTRUNfVFJJTV9NVUxU
-Lg0KPiA+ICsgwqAgwqAgwqAgwqAqIEVSQVNFIFRpbWVvdXQgPSAzMDBtcyAqIEVSQVNFX1RJTUVP
-VVRfTVVMVA0KPiA+ICsgwqAgwqAgwqAgwqAqDQo+ID4gKyDCoCDCoCDCoCDCoCogMi4gdHJpbSB0
-aW1lb3V0IGlzIGNhbGN1bGF0ZWQgYmFzZWQgb24gdGhlIFRSSU1fTVVMVCBmYWN0b3IuDQo+ID4g
-KyDCoCDCoCDCoCDCoCogU28gdHJpbSB0aW1lb3V0ID0gMzAwbXMgKiBUUklNX01VTFQNCj4gPiAr
-IMKgIMKgIMKgIMKgKg0KPiA+ICsgwqAgwqAgwqAgwqAqIDMuIGVyYXNlIHRpbWVvdXQgY2FsY3Vs
-YXRpb246DQo+ID4gKyDCoCDCoCDCoCDCoCogwqAgwqAgwqBhLiBpZiBFUkFTRV9HUk9VUF9ERUYg
-aXMgZW5hYmxlZCwgRVJBU0VfVElNRU9VVF9NVUxUDQo+ID4gKyBzaG91bGQgYmUNCj4gPiArIMKg
-IMKgIMKgIMKgKiDCoCDCoCDCoHVzZWQgdG8gY2FsY3VsYXRlIGVyYXNlIHRpbWVvdXQsIHNvOg0K
-PiA+ICsgwqAgwqAgwqAgwqAqIMKgIMKgIMKgZXJhc2UgdGltZW91dCA9IDMwMCAqIEVSQVNFX1RJ
-TUVPVVRfTVVMVA0KPiA+ICsgwqAgwqAgwqAgwqAqIMKgIMKgIMKgYi4gaWYgRVJBU0VfR1JPVVBf
-REVGIGlzIGRpYWJsZWQsIHRoZSBkdXJhdGlvbiBvZiBhbg0KPiA+ICsgZXJhc2UNCj4gPiArIMKg
-IMKgIMKgIMKgKiDCoCDCoCDCoGNvbW1hbmQgd2lsbCBiZSB0aGUgbnVtYmVyIG9mIEVyYXNlIGJs
-b2NrcyB0byBiZQ0KPiA+ICsgZXJhc2VkDQo+ID4gKyDCoCDCoCDCoCDCoCogwqAgwqAgwqBtdWx0
-aXBsaWVkIGJ5IHRoZSBibG9jayB3cml0ZSBkZWxheS4NCj4gPiArIMKgIMKgIMKgIMKgKi8NCj4g
-PiArIMKgIMKgIMKgIGlmIChhcmcgJiBNTUNfU0VDVVJFX0FSR1MpIHsNCj4gPiArIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIGVyYXNlX3RpbWVvdXQgPSBjYXJkLT5leHRfY3NkLmhjX2VyYXNlX3RpbWVv
-dXQ7DQo+ID4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAoYXJnID09IE1NQ19TRUNVUkVfRVJB
-U0VfQVJHKQ0KPiA+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXJhc2VfdGlt
-ZW91dCAqPSBjYXJkLT5leHRfY3NkLnNlY19lcmFzZV9tdWx0Ow0KPiA+IMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgZWxzZQ0KPiA+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXJh
-c2VfdGltZW91dCA9DQo+ID4gY2FyZC0+ZXh0X2NzZC5oY19lcmFzZV90aW1lb3V0Ow0KPiA+ICsg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXJhc2VfdGltZW91dCAqPSBjYXJkLT5l
-eHRfY3NkLnNlY190cmltX211bHQ7DQo+ID4gKyDCoCDCoCDCoCB9IGVsc2UgaWYgKGFyZyAmIE1N
-Q19UUklNX0FSR1MpIHsNCj4gPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGVyYXNlX3RpbWVvdXQg
-PSBjYXJkLT5leHRfY3NkLnRyaW1fdGltZW91dDsNCj4gPiArIMKgIMKgIMKgIH0gZWxzZSBpZiAo
-Y2FyZC0+ZXh0X2NzZC5lcmFzZV9ncm91cF9kZWYgJiAxKSB7DQo+ID4gKyDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCBlcmFzZV90aW1lb3V0ID0gY2FyZC0+ZXh0X2NzZC5oY19lcmFzZV90aW1lb3V0Ow0K
-PiA+IMKgIMKgIMKgIMKgfSBlbHNlIHsNCj4gPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoC8qIENT
-RCBFcmFzZSBHcm91cCBTaXplIHVzZXMgd3JpdGUgdGltZW91dCAqLw0KPiA+IMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgdW5zaWduZWQgaW50IG11bHQgPSAoMTAgPDwgY2FyZC0+Y3NkLnIyd19mYWN0
-b3IpOyBAQA0KPiA+IC0xNDQxLDE0ICsxNDY1LDYgQEAgc3RhdGljIHVuc2lnbmVkIGludCBtbWNf
-bW1jX2VyYXNlX3RpbWVvdXQoc3RydWN0DQo+ID4gbW1jX2NhcmQgKmNhcmQsDQo+ID4gwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBlcmFzZV90aW1lb3V0ID0gMTsNCj4gPiDCoCDC
-oCDCoCDCoH0NCj4gPg0KPiA+IC0gwqAgwqAgwqAgLyogTXVsdGlwbGllciBmb3Igc2VjdXJlIG9w
-ZXJhdGlvbnMgKi8NCj4gPiAtIMKgIMKgIMKgIGlmIChhcmcgJiBNTUNfU0VDVVJFX0FSR1MpIHsN
-Cj4gPiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGlmIChhcmcgPT0gTU1DX1NFQ1VSRV9FUkFTRV9B
-UkcpDQo+ID4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBlcmFzZV90aW1lb3V0
-ICo9IGNhcmQtPmV4dF9jc2Quc2VjX2VyYXNlX211bHQ7DQo+ID4gLSDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCBlbHNlDQo+ID4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBlcmFzZV90
-aW1lb3V0ICo9IGNhcmQtPmV4dF9jc2Quc2VjX3RyaW1fbXVsdDsNCj4gPiAtIMKgIMKgIMKgIH0N
-Cj4gPiAtDQo+ID4gwqAgwqAgwqAgwqBlcmFzZV90aW1lb3V0ICo9IHF0eTsNCj4gPg0KPiA+IMKg
-IMKgIMKgIMKgLyoNCj4gPiAtLQ0KPiA+IDEuNy4xDQo+ID4NCj4gPiAtLQ0KPiA+IFRvIHVuc3Vi
-c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1t
-bWMiDQo+ID4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5l
-bC5vcmcgTW9yZSBtYWpvcmRvbW8NCj4gPiBpbmZvIGF0IMKgaHR0cDovL3ZnZXIua2VybmVsLm9y
-Zy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+ADDENDUM:
+
+>> I tried to increase max_blk_count and it breaks after a few tests.
+>
+> I will redo your tests in a jiffy, however the latency issues worry
+> me a wee bit.
+
+Increasing max_blk_count did not help really, however I am not sure if 
+setting it unconditionally to 65535 was the only change I had to make.
+
+> So, what's keeping the driver 8ms from sending the data??? Any
+> pointers on where I could twiddle some bits in the driver? Where do I
+> start looking?
+
+Using the following setup, I tried to get some more information:
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c 
+b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 0be4e20..4896f24 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -467,8 +467,7 @@ static int __devinit sdhci_esdhc_imx_probe(struct 
+platform_device *pdev)
+         clk_enable(clk);
+         pltfm_host->clk = clk;
+
+-       if (!is_imx25_esdhc(imx_data))
+-               host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
++       host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+
+         if (is_imx25_esdhc(imx_data) || is_imx35_esdhc(imx_data))
+                 /* Fix errata ENGcm07207 present on i.MX25 and i.MX35 
+*/
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 8d66706..0b60d14 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -713,6 +713,8 @@ static void sdhci_prepare_data(struct sdhci_host 
+*host, struct mmc_command *cmd)
+                 sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
+         }
+
++       sdhci_dumpregs(host);
++
+         if (!data)
+                 return;
+
+echo 'file core.c line 193 +p' > 
+/sys/kernel/debug/dynamic_debug/control
+echo 'file core.c line 158 +p' > 
+/sys/kernel/debug/dynamic_debug/control
+echo 'file sdhci.c line 72-115 +p' > 
+/sys/kernel/debug/dynamic_debug/control
+mount /media/card
+dd if=/dev/urandom of=/media/card/file-4K bs=4K count=1
+
+[  119.895460] mmc0: starting CMD24 arg 00045e00 flags 000000b5
+[  119.895531] sdhci: =========== REGISTER DUMP (mmc0)===========
+[  119.895570] sdhci: Sys addr: 0x82480000 | Version:  0x00000000
+[  119.895602] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+[  119.895633] sdhci: Argument: 0x00049c00 | Trn mode: 0x00000013
+[  119.895664] sdhci: Present:  0xff880000 | Host ctl: 0x00000023
+[  119.895693] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[  119.895724] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[  119.895754] sdhci: Timeout:  0x0000000e | Int stat: 0x00000000
+[  119.895787] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+[  119.895819] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+[  119.895852] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+[  119.895883] sdhci: Cmd:      0x0000113a | Max curr: 0x00000000
+[  119.895911] sdhci: Host ctl2: 0x00000000
+[  119.895936] sdhci: ===========================================
+[  119.900527] mmc0: starting CMD13 arg 00020000 flags 00000195
+[  119.900585] sdhci: =========== REGISTER DUMP (mmc0)===========
+[  119.900624] sdhci: Sys addr: 0x82452400 | Version:  0x00000000
+[  119.900655] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+[  119.900687] sdhci: Argument: 0x00045e00 | Trn mode: 0x00000003
+[  119.900718] sdhci: Present:  0xff880000 | Host ctl: 0x00000023
+[  119.900746] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[  119.900776] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[  119.900807] sdhci: Timeout:  0x0000000e | Int stat: 0x00000000
+[  119.900840] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+[  119.900869] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+[  119.900902] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+[  119.900933] sdhci: Cmd:      0x0000183a | Max curr: 0x00000000
+[  119.900962] sdhci: Host ctl2: 0x00000000
+[  119.900985] sdhci: ===========================================
+[  119.901357] mmc0: starting CMD17 arg 00009000 flags 000000b5
+[  119.901419] sdhci: =========== REGISTER DUMP (mmc0)===========
+[  119.901458] sdhci: Sys addr: 0x82452400 | Version:  0x00000000
+[  119.901490] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+[  119.901520] sdhci: Argument: 0x00020000 | Trn mode: 0x00000003
+[  119.901551] sdhci: Present:  0xff880000 | Host ctl: 0x00000023
+[  119.901579] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[  119.901610] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[  119.901641] sdhci: Timeout:  0x0000000e | Int stat: 0x00000000
+[  119.901673] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+[  119.901703] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+[  119.901735] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+[  119.901765] sdhci: Cmd:      0x00000d1a | Max curr: 0x00000000
+[  119.901793] sdhci: Host ctl2: 0x00000000
+[  119.901816] sdhci: ===========================================
+[  119.908072] mmc0: starting CMD17 arg 00009200 flags 000000b5
+[  119.908141] sdhci: =========== REGISTER DUMP (mmc0)===========
+[  119.908179] sdhci: Sys addr: 0x82480000 | Version:  0x00000000
+[  119.908212] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+[  119.908243] sdhci: Argument: 0x00009000 | Trn mode: 0x00000013
+[  119.908274] sdhci: Present:  0xff880000 | Host ctl: 0x00000023
+[  119.908304] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[  119.908335] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[  119.908367] sdhci: Timeout:  0x0000000e | Int stat: 0x00000000
+[  119.908400] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+[  119.908432] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+[  119.908464] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+[  119.908495] sdhci: Cmd:      0x0000113a | Max curr: 0x00000000
+[  119.908524] sdhci: Host ctl2: 0x00000000
+[  119.908547] sdhci: ===========================================
+[  119.910858] mmc0: starting CMD17 arg 00009400 flags 000000b5
+[  119.910929] sdhci: =========== REGISTER DUMP (mmc0)===========
+[  119.910969] sdhci: Sys addr: 0x82480000 | Version:  0x00000000
+[  119.911002] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+[  119.911034] sdhci: Argument: 0x00009200 | Trn mode: 0x00000013
+[  119.911065] sdhci: Present:  0xff880000 | Host ctl: 0x00000023
+[  119.911095] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[  119.911126] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[  119.911157] sdhci: Timeout:  0x0000000e | Int stat: 0x00000000
+[  119.911191] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+[  119.911223] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+[  119.911255] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+[  119.911286] sdhci: Cmd:      0x0000113a | Max curr: 0x00000000
+[  119.911314] sdhci: Host ctl2: 0x00000000
+[  119.911338] sdhci: ===========================================
+[  119.913935] mmc0: starting CMD24 arg 00009000 flags 000000b5
+[  119.914004] sdhci: =========== REGISTER DUMP (mmc0)===========
+[  119.914042] sdhci: Sys addr: 0x82480000 | Version:  0x00000000
+[  119.914073] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+[  119.914105] sdhci: Argument: 0x00009400 | Trn mode: 0x00000013
+[  119.914135] sdhci: Present:  0xff880000 | Host ctl: 0x00000023
+[  119.914164] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[  119.914194] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[  119.914224] sdhci: Timeout:  0x0000000e | Int stat: 0x00000000
+[  119.914257] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+[  119.914288] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+[  119.914321] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+[  119.914352] sdhci: Cmd:      0x0000113a | Max curr: 0x00000000
+[  119.914380] sdhci: Host ctl2: 0x00000000
+[  119.914404] sdhci: ===========================================
+[  119.921304] mmc0: starting CMD13 arg 00020000 flags 00000195
+[  119.921368] sdhci: =========== REGISTER DUMP (mmc0)===========
+[  119.921407] sdhci: Sys addr: 0x82403600 | Version:  0x00000000
+[  119.921440] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+[  119.921472] sdhci: Argument: 0x00009000 | Trn mode: 0x00000003
+[  119.921503] sdhci: Present:  0xff880000 | Host ctl: 0x00000023
+[  119.921532] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[  119.921564] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[  119.921594] sdhci: Timeout:  0x0000000e | Int stat: 0x00000000
+[  119.921626] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+[  119.921658] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+[  119.921689] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+[  119.921720] sdhci: Cmd:      0x0000183a | Max curr: 0x00000000
+[  119.921747] sdhci: Host ctl2: 0x00000000
+[  119.921770] sdhci: ===========================================
+[  119.921889] mmc0: starting CMD24 arg 00009200 flags 000000b5
+[  119.921941] sdhci: =========== REGISTER DUMP (mmc0)===========
+[  119.921976] sdhci: Sys addr: 0x82403600 | Version:  0x00000000
+[  119.922007] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+[  119.922038] sdhci: Argument: 0x00020000 | Trn mode: 0x00000003
+[  119.922070] sdhci: Present:  0xff880000 | Host ctl: 0x00000023
+[  119.922098] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[  119.922129] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[  119.922161] sdhci: Timeout:  0x0000000e | Int stat: 0x00000000
+[  119.922193] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+[  119.922223] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+[  119.922256] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+[  119.922287] sdhci: Cmd:      0x00000d1a | Max curr: 0x00000000
+[  119.922315] sdhci: Host ctl2: 0x00000000
+[  119.922338] sdhci: ===========================================
+[  119.927417] mmc0: starting CMD13 arg 00020000 flags 00000195
+[  119.927481] sdhci: =========== REGISTER DUMP (mmc0)===========
+[  119.927523] sdhci: Sys addr: 0x82403800 | Version:  0x00000000
+[  119.927554] sdhci: Blk size: 0x00000200 | Blk cnt:  0x00000000
+[  119.927586] sdhci: Argument: 0x00009200 | Trn mode: 0x00000003
+[  119.927616] sdhci: Present:  0xff880000 | Host ctl: 0x00000023
+[  119.927645] sdhci: Power:    0x00000000 | Blk gap:  0x00000000
+[  119.927675] sdhci: Wake-up:  0x00000000 | Clock:    0x00000107
+[  119.927707] sdhci: Timeout:  0x0000000e | Int stat: 0x00000000
+[  119.927740] sdhci: Int enab: 0x107f000b | Sig enab: 0x107f000b
+[  119.927772] sdhci: AC12 err: 0x00000000 | Slot int: 0x00001001
+[  119.927804] sdhci: Caps:     0x07eb0000 | Caps_1:   0x04100410
+[  119.927835] sdhci: Cmd:      0x0000183a | Max curr: 0x00000000
+[  119.927864] sdhci: Host ctl2: 0x00000000
+
+[CMD24/CMD13 changes go on like this ...]
+
+Anybody with more insights? Why is the interval between two CMD24 more 
+or less in the range of 6ms and the CMD13 follows in varying intervals 
+between 1ms to 4ms? What's keeping the driver from bursting CMD24 and 
+successive CMD13 requests?
+
+Thanks and best regards
+-- 
+Joan C. Abelaira
