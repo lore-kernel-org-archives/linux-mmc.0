@@ -1,67 +1,53 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 3/3] mmc: sh_mmcif: Simplify calculation of mmc->f_min
-Date: Wed, 28 Mar 2012 11:26:48 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1203281125560.4583@axis700.grange>
-References: <1332925271-23860-1-git-send-email-horms@verge.net.au>
- <1332925271-23860-4-git-send-email-horms@verge.net.au>
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: Re: [PATCH v3 0/6] mmc: sdhci-s3c: Rework platform data and add
+ device tree support
+Date: Wed, 28 Mar 2012 10:54:50 +0100
+Message-ID: <20120328095450.GA23005@sirena.org.uk>
+References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
+ <003401cce730$baf979a0$30ec6ce0$%kim@samsung.com>
+ <m2aa4pkq5g.fsf@bob.laptop.org>
+ <4F3CFEED.6060206@samsung.com>
+ <m239abgc32.fsf@bob.laptop.org>
+ <00b901ccf08d$2fc18b50$8f44a1f0$%kim@samsung.com>
+ <m2vcn0496y.fsf@bob.laptop.org>
+ <87k426vy9r.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:55502 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932187Ab2C1J1H (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Mar 2012 05:27:07 -0400
-In-Reply-To: <1332925271-23860-4-git-send-email-horms@verge.net.au>
+Received: from cassiel.sirena.org.uk ([80.68.93.111]:45010 "EHLO
+	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752168Ab2C1JzE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Mar 2012 05:55:04 -0400
+Content-Disposition: inline
+In-Reply-To: <87k426vy9r.fsf@laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnus.damm@gmail.com>, Cao Minh Hiep <hiepcm@gmail.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc@vger.kernel.org, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, 'Thomas Abraham' <thomas.abraham@linaro.org>, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org
 
-On Wed, 28 Mar 2012, Simon Horman wrote:
+On Tue, Mar 27, 2012 at 11:50:24AM -0400, Chris Ball wrote:
+> On Tue, Feb 21 2012, Chris Ball wrote:
+> > On Tue, Feb 21 2012, Kukjin Kim wrote:
 
-> There is no need to tune mmc->f_min to a value near 400kHz as the MMC core
-> begins testing frequencies at 400kHz regardless of the value of mmc->f_min.
-> 
-> As suggested by Guennadi Liakhovetski.
-> 
-> Cc: Magnus Damm <magnus.damm@gmail.com>
-> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> Tested-by: Cao Minh Hiep <hiepcm@gmail.com>
-> Signed-off-by: Simon Horman <horms@verge.net.au>
+> >> I created topic branch for this we talked. You can pull that following:
+> >>   git://git.kernel.org/pub/scm/linux/kernel/git/kgene/linux-samsung.git
+> >> v3.4-for-cjb
 
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> >> If any problems, please kindly let me know.
 
-Thanks
-Guennadi
+> > Pushed to mmc-next, thanks.  (I'm expecting that you'll do the merge
+> > to Linus.)
 
-> ---
->  drivers/mmc/host/sh_mmcif.c |    8 +-------
->  1 files changed, 1 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 1410baa..f23b9bd 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -1298,13 +1298,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
->  
->  	mmc->ops = &sh_mmcif_ops;
->  	mmc->f_max = host->clk / 2;
-> -	/* close to 400KHz */
-> -	if (host->clk < 51200000)
-> -		mmc->f_min = host->clk / 128;
-> -	else if (host->clk < 102400000)
-> -		mmc->f_min = host->clk / 256;
-> -	else
-> -		mmc->f_min = host->clk / 512;
-> +	mmc->f_min = host->clk / 512;
->  	if (pd->ocr)
->  		mmc->ocr_avail = pd->ocr;
->  	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
-> -- 
-> 1.7.6.3
-> 
+> I was expecting you to merge these patches, but they aren't in the
+> arm-soc tree and haven't been sent to Linus, and we're in the last few
+> days of the merge window.
 
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+> As a result I'm dropping this tree -- and all of the patches that I
+> have on top of it -- from mmc-next so that I can get a pull request
+> out.  This means that I'm dropping:
+
+If they're already in your tree why not just send them to Linus?  Given
+that everything's in git I don't understand why you'd need Kukjin to
+push them separately or what the benefit of that would be?
+
+This is all extremely frustrating fromm the contributor point of view.
