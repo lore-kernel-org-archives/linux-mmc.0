@@ -1,54 +1,51 @@
 From: ludovic.desroches@atmel.com
-Subject: [PATCH v2 3/3] arm: at91: dt: sam9g25ek add mci support
-Date: Wed, 28 Mar 2012 12:05:50 +0200
-Message-ID: <1332929150-14240-4-git-send-email-ludovic.desroches@atmel.com>
-References: <1332929150-14240-1-git-send-email-ludovic.desroches@atmel.com>
+Subject: [PATCH v2 1/3] mmc: atmel-mci: correct data timeout computation
+Date: Wed, 28 Mar 2012 12:28:33 +0200
+Message-ID: <1332930513-14893-1-git-send-email-ludovic.desroches@atmel.com>
+References: <1332344483-3915-2-git-send-email-ludovic.desroches@atmel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from newsmtp5.atmel.com ([204.2.163.5]:10620 "EHLO
+Received: from newsmtp5.atmel.com ([204.2.163.5]:62674 "EHLO
 	sjogate2.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751248Ab2C1IIQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Mar 2012 04:08:16 -0400
-In-Reply-To: <1332929150-14240-1-git-send-email-ludovic.desroches@atmel.com>
+	with ESMTP id S1752856Ab2C1Ia5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Mar 2012 04:30:57 -0400
+In-Reply-To: <1332344483-3915-2-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: nicolas.ferre@atmel.com, ludovic.desroches@atmel.com, plagnioj@jcrosoft.com, devicetree-discuss@lists.ozlabs.org
+Cc: nicolas.ferre@atmel.com
 
 From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-Acked-by: Nicolas Ferre <nicolas.ferre@atmel.com>
----
- arch/arm/boot/dts/at91sam9g25ek.dts |   16 ++++++++++++++++
- 1 files changed, 16 insertions(+), 0 deletions(-)
+The HSMCI operates at a rate of up to Master Clock divided by two.
+Moreover previous calculation can cause overflows and so wrong
+timeouts.
 
-diff --git a/arch/arm/boot/dts/at91sam9g25ek.dts b/arch/arm/boot/dts/at91sam9g25ek.dts
-index 7a13d09..960de2b 100644
---- a/arch/arm/boot/dts/at91sam9g25ek.dts
-+++ b/arch/arm/boot/dts/at91sam9g25ek.dts
-@@ -32,6 +32,22 @@
- 				phy-mode = "rmii";
- 				status = "okay";
- 			};
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: stable <stable@vger.kernel.org>
+---
+ drivers/mmc/host/atmel-mci.c |    9 ++++++++-
+ 1 files changed, 8 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index e4449a5..3a57964 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -480,7 +480,14 @@ err:
+ static inline unsigned int atmci_ns_to_clocks(struct atmel_mci *host,
+ 					unsigned int ns)
+ {
+-	return (ns * (host->bus_hz / 1000000) + 999) / 1000;
++	/*
++	 * It is easier here to use us instead of ns for the timeout,
++	 * it prevents from overflows during calculation.
++	 */
++	unsigned int us = DIV_ROUND_UP(ns, 1000);
 +
-+			mmc0: mmc@f0008000 {
-+				status = "okay";
-+				slot@0 {
-+					bus-width = <4>;
-+					cd-gpios = <&pioD 15 0>;
-+				};
-+			};
-+
-+			mmc1: mmc@f000c000 {
-+				status = "okay";
-+				slot@0 {
-+					bus-width = <4>;
-+					cd-gpios = <&pioD 14 0>;
-+				};
-+			};
- 		};
++	/* Maximum clock frequency is host->bus_hz/2 */
++	return us * (DIV_ROUND_UP(host->bus_hz, 2000000));
+ }
  
- 		usb0: ohci@00600000 {
+ static void atmci_set_timeout(struct atmel_mci *host,
 -- 
 1.7.5.4
 
