@@ -1,81 +1,32 @@
-From: Jongman Heo <jongman.heo@samsung.com>
-Subject: Re: mmc_blk_ioctl_cmd: cmd error -110,
- when I try set writeprotect to user data area
-Date: Wed, 28 Mar 2012 04:07:31 +0000 (GMT)
-Message-ID: <31643330.133551332907651626.JavaMail.weblogic@epml07>
-Reply-To: jongman.heo@samsung.com
+From: Paul Mundt <lethal@linux-sh.org>
+Subject: Re: [PATCH] sh: ecovec: switch SDHI controllers to card polling
+Date: Wed, 28 Mar 2012 15:27:53 +0900
+Message-ID: <20120328062753.GU26543@linux-sh.org>
+References: <Pine.LNX.4.64.1201281929450.27970@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:45526 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750696Ab2C1EHk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Mar 2012 00:07:40 -0400
-Received: from epcpsbge6.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0M1K00343U4EPIG0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 28 Mar 2012 13:07:39 +0900 (KST)
-MIME-version: 1.0
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1201281929450.27970@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Jongman Heo <jongman.heo@samsung.com>
 
-PiAtLS0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0tLQ0KPiBTZW5kZXIgOiBKb25nbWFuIEhl
-bzxqb25nbWFuLmhlb0BzYW1zdW5nLmNvbT4gUzUvU2VuaW9yIEVuZ2luZWVyL1NUQiBTL1cgUiZE
-IExhYi4vU2Ftc3VuZyBFbGVjdHJvbmljcw0KPiBEYXRlIDogMjAxMi0wMy0yMCAxMTowNyAoR01U
-KzA5OjAwKQ0KPiBUaXRsZSA6IG1tY19ibGtfaW9jdGxfY21kOiBjbWQgZXJyb3IgLTExMCwgd2hl
-biBJIHRyeSBzZXQgd3JpdGVwcm90ZWN0IHRvIHVzZXIgZGF0YSBhcmVhDQo+IA0KPiANCj4gSGks
-IGFsbCwNCj4gDQo+IEknbSBzZWVpbmcgd2VpcmQgaXNzdWUgd2l0aCBNTUMgaW9jdGwuDQo+IA0K
-PiBJJ3ZlIG1vZGlmaWVkIG1tYy11dGlsIHBhY2thZ2UgYSBiaXQsIHRvIHNldCB3cml0ZS1wcm90
-ZWN0aW9uIHRvIHVzZXIgZGF0YSBhcmVhLCB1c2luZyBmb2xsb3dpbmcgYXJndW1lbnQuDQo+IA0K
-PiAgICAgaWRhdGEud3JpdGVfZmxhZyA9IDE7DQo+ICAgICBpZGF0YS5vcGNvZGUgPSAyODsgLy8g
-TU1DX1NFVF9XUklURV9QUk9UDQo+ICAgICBpZGF0YS5hcmcgPSAuLi4gIC8vIDUxMkIgc2VjdG9y
-IGFkZHJlc3MNCj4gICAgIC4uLg0KPiAgICAgaWRhdGEuZmxhZ3MgPSBNTUNfUlNQX1IxQiB8IE1N
-Q19DTURfQUM7ICAgDQo+ICAgICAvLyBBcyBJIHJlbWVtYmVyLCAiTU1DX1JTUF9TUElfUjFCIHwg
-TU1DX1JTUF9SMUIgfCBNTUNfQ01EX0FDIiBzaG93cyBubyBkaWZmZXJlbmNlLg0KPiANCj4gSWYg
-SSBleGVjdXRlIHRoZSBwcm9ncmFtLCBpdCByZXR1cm5zICJpb2N0bDogQ29ubmVjdGlvbiB0aW1l
-ZCBvdXQiIGVycm9yLCBhbmQgZG1lc2cgc2hvd3MgZm9sbG93aW5nLg0KPiANCj4gICAgIFsgICA2
-Ny4yNTI3MTBdIHNkaGNpLXBjaSAwMDAwOjAxOjFiLjA6IG1tY19ibGtfaW9jdGxfY21kOiBjbWQg
-ZXJyb3IgLTExMA0KPiANCj4gDQo+IEJ1dCBpZiBJIHJ1biAiZmRpc2sgLWwgL2Rldi9tbWNibGsw
-IiBjb21tYW5kIGJlZm9yZSB0aGUgZXhlY3V0aW9uLCBpdCB3b3Jrcy4uLiBubyBlcnJvciBvY2N1
-cnMgYW5kIHdyaXRlIHByb3RlY3Rpb24gd29ya3MuLg0KPiANCj4gSGF2ZSB5b3Ugc2VlbiBzaW1p
-bGFyIGlzc3VlIGxpa2UgdGhpcz8gZmRpc2sgY29tbWFuZCBhZmZlY3RzIE1NQyBmbGFzaCBzdGF0
-dXM/DQo+IEZZSSwgSSdtIHVzaW5nIDIuNi4zNSBrZXJuZWwgKE1NQyBpb2N0bCBjb21tYW5kIHN1
-cHBvcnQgYW5kIHNvbWUgZmVhdHVyZXMgYXJlIGJhY2twb3J0ZWQpLg0KPiANCj4gDQoNClRvZGF5
-LCBJJ3ZlIHRyaWVkIHRvIHNvbHZlIHRoaXMgaXNzdWUgYWdhaW4sIGFuZCBJIGZvdW5kIHRoZSBy
-b290IGNhdXNlLg0KDQpNeSBlTU1DIGZsYXNoIGhhcyB0d28gYm9vdCBwYXJ0aXRpb25zIGJ5IGRl
-ZmF1bHQuIA0KUGFydGl0aW9uIHRhYmxlIHByb2JpbmcgZGlkIGFjY2VzcyB0aGUgZU1NQyBib290
-IHBhcnRpdGlvbnMgYXQgdGhlIGVuZCwgd2hpY2ggbGVhZHMgdG8gY2hhbmdlIEVYVF9DU0RfUEFS
-VF9DT05GSUcgdmFsdWUgdG8gMHgxIChib290IHBhcnRpdGlvbiAwKSwgbm90IDB4MCAoVXNlciBB
-cmVhKS4NCg0KSWYgSSBldmVyIGFjY2VzcyBhbnkgdXNlciBhcmVhIG9mIGVNTUMgKC9kZXYvbW1j
-YmxrMHAxIH4gL2Rldi9tbWNibGswLzEyKSwgUEFSVElUSU9OX0FDQ0VTUyB2YWx1ZSBvZiBQQVJU
-SVRJT05fQ09ORklHIGNoYW5nZXMgdG8gMHgwLCBhbmQgbXkgd3JpdGUtcHJvdGVjdGlvbiBpb2N0
-bCBmb3IgdXNlciBhcmVhIHdvcmtzLiAoUHJldmlvdXNseSwgZmRpc2sgY29tbWFuZCBkaWQgdGhl
-IGpvYi4uKQ0KDQpGWUksIEkndmUgdXNlZCBORlMgYm9vdCBlbnZpcm9ubWVudCwgYW5kIHRoZXJl
-IHdhcyBubyBhY2Nlc3Mgb3BlcmF0aW9uIG9uIGVNTUMgdXNlciBhcmVhIGJlZm9yZSBteSBpb2N0
-bCBjb21tYW5kLg0KDQpPYnZpb3VzbHksIGNvbW1pdCA0MWUyYTQ4OSAoIm1tYzogRW5zdXJlIGxp
-bnV4IHN0YXJ0cyBpbiBlTU1DIHVzZXIgcGFydGl0aW9uIikgZG9lcyBub3QgaGVscCB0byBzb2x2
-ZSBteSBpc3N1ZS4NCkJ1dCBJIHRoaW5rIG15IGlzc3VlIGNhbiBiZSBzb2x2ZWQgYXQgdXNlciBz
-cGFjZSBsZXZlbCwgVGhhbmtzLg0KDQpSZXN1bHQgZnJvbSBleHRjc2QgcmVhZCBjb21tYW5kIG9m
-IG1tYy11dGlsLCByaWdodCBhZnRlciBib290IDoNCi4vbW1jLXV0aWwgZXh0Y3NkIHJlYWQgL2Rl
-di9tbWNibGswDQpbc25pcF0NCkJvb3QgY29uZmlndXJhdGlvbiBieXRlcyBbUEFSVElUSU9OX0NP
-TkZJRzogMHgwMV0NCiBOb3QgYm9vdCBlbmFibGUNCiBSL1cgQm9vdCBQYXJ0aXRpb24gMQ0KW3Nu
-aXBdDQoNCmRtZXNnIHNob3dzIHRoYXQgZU1NQyBib290IHBhcnRpdGlvbnMgYXJlIGFjY2Vzc2Vk
-IGF0IHRoZSBlbmQgb2YgcGFydGl0aW9uIHByb2JpbmcuDQo9PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0NClsgICAgMS43MjkxNDhd
-IG1tYzA6IG5ldyBNTUMgY2FyZCBhdCBhZGRyZXNzIDAwMDENClsgICAgMS43MzM5MjRdIG1tY2Js
-azA6IG1tYzA6MDAwMSBNNEcxRkIgMy42NCBHaUINClsgICAgMS43Mzg1NTRdIG1tY2JsazBib290
-MDogbW1jMDowMDAxIE00RzFGQiBwYXJ0aXRpb24gMSAxLjAwIE1pQg0KWyAgICAxLjc0NDU2OV0g
-bW1jYmxrMGJvb3QxOiBtbWMwOjAwMDEgTTRHMUZCIHBhcnRpdGlvbiAyIDEuMDAgTWlCDQpbICAg
-IDEuNzUwODE1XSAgbW1jYmxrMDoNClsgICAgMS43NTQ1MDNdICBwMSBwMiBwMyBwNCA8DQpbICAg
-IDEuNzU4NTQ3XSAgcDUNClsgICAgMS43NjE2MTRdICBwNg0KWyAgICAxLjc2NDY5OF0gIHA3DQpb
-ICAgIDEuNzY3NDk3XSAgcDgNClsgICAgMS43NzAyOTddICBwOQ0KWyAgICAxLjc3MzM3N10gIHAx
-MA0KWyAgICAxLjc3NjU0NF0gIHAxMQ0KWyAgICAxLjc3OTcxM10gIHAxMiA+DQpbICAgIDEuNzg0
-MjI0XSAgbW1jYmxrMGJvb3QxOg0KWyAgICAxLjc4ODE5Nl0gIHVua25vd24gcGFydGl0aW9uIHRh
-YmxlDQpbICAgIDEuNzkyMjc4XSAgbW1jYmxrMGJvb3QwOg0KWyAgICAxLjc5NjMyMV0gIHVua25v
-d24gcGFydGl0aW9uIHRhYmxlDQo=
-
-
+On Sat, Jan 28, 2012 at 07:36:24PM +0100, Guennadi Liakhovetski wrote:
+> Polling for card hotplug events is a better option than using SDHI native
+> hotplug interrupt, because the latter option forces the controller to stay
+> permanently powered up and enabled.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> ---
+> 
+> It is a kind of an RFC. We do in general prefer SDHI polling to SDHI 
+> native hotplug detection for the above reason, but there might well be 
+> other reasons, why this is not a good idea in this specific case. If there 
+> are such, I'd love to hear about them.
+> 
+I've not heard any more about this one way or the other, so should I
+assume you still want it applied? At least we can revert it if one of
+these cases pops up, and in the interim it's always preferable to lean
+towards better power management for a default.
