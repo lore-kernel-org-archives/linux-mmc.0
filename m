@@ -1,132 +1,77 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [Patch v1]mmc:core: correct mmc_erase_timeout calculation
-Date: Thu, 29 Mar 2012 02:50:15 +0000
-Message-ID: <17296D9F8FF2234F831FC3DF505A87A90FD86BA2@SHSMSX102.ccr.corp.intel.com>
-References: <20120328082933.GA27568@intel.com>
-	<CAKYAXd8ec31WM2SBP3wMaAqKj60D2+hZ7nGTgv63_Jbh+KHanA@mail.gmail.com>
-	<17296D9F8FF2234F831FC3DF505A87A90FD83C48@SHSMSX102.ccr.corp.intel.com>
- <CAKYAXd9N3sc_0Euzyf6tph8uNT=C7uyMkPVuO-dxq8JMGNRL_w@mail.gmail.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: Re: [PATCH v3 0/6] mmc: sdhci-s3c: Rework platform data and add device
+ tree support
+Date: Wed, 28 Mar 2012 20:15:35 -0700
+Message-ID: <4F73D3D7.1010202@samsung.com>
+References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org> <003401cce730$baf979a0$30ec6ce0$%kim@samsung.com> <m2aa4pkq5g.fsf@bob.laptop.org> <4F3CFEED.6060206@samsung.com> <m239abgc32.fsf@bob.laptop.org> <00b901ccf08d$2fc18b50$8f44a1f0$%kim@samsung.com> <m2vcn0496y.fsf@bob.laptop.org> <87k426vy9r.fsf@laptop.org> <20120328095450.GA23005@sirena.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:2944 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752457Ab2C2Cw6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 28 Mar 2012 22:52:58 -0400
-In-Reply-To: <CAKYAXd9N3sc_0Euzyf6tph8uNT=C7uyMkPVuO-dxq8JMGNRL_w@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <20120328095450.GA23005@sirena.org.uk>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: Chris Ball <cjb@laptop.org>, Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc@vger.kernel.org, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, 'Thomas Abraham' <thomas.abraham@linaro.org>, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org, 'Olof Johansson' <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBOYW1qYWUgSmVvbiBbbWFpbHRv
-Omxpbmtpbmplb25AZ21haWwuY29tXQ0KPiBTZW50OiBXZWRuZXNkYXksIE1hcmNoIDI4LCAyMDEy
-IDg6MzYgUE0NCj4gVG86IERvbmcsIENodWFueGlhbw0KPiBDYzogbGludXgtbW1jQHZnZXIua2Vy
-bmVsLm9yZzsgY2piQGxhcHRvcC5vcmc7IEh1bnRlciwgQWRyaWFuDQo+IFN1YmplY3Q6IFJlOiBb
-UGF0Y2ggdjFdbW1jOmNvcmU6IGNvcnJlY3QgbW1jX2VyYXNlX3RpbWVvdXQgY2FsY3VsYXRpb24N
-Cj4gDQo+IElmIEVSQVNFX0dST1VQX0RFRiBpcyBkaXNhYmxlIHdpdGggc2VjdXJlIGVyYXNlLCBl
-cmFzZSB0aW1lb3V0IGlzIGNhbGN1bGF0ZWQgd2l0aA0KPiAzMDBtcyAqIEVSQVNFX1RJTUVPVVRf
-TVVMVC4gSXMgaXQgcmlnaHQgPw0KDQpNeSB1bmRlcnN0YW5kaW5nIGFib3V0IHRoZSBKRVNEODQt
-QTQ0MSBpcyBkaWZmZXJlbnQgd2l0aCBjdXJyZW50IG1tY19tbWNfZXJhc2VfdGltZW91dCBpbXBs
-ZW1lbnRlZC4gRnJvbSB0aGUgRVhUX0NTRFsyMzBdLCBzZWVtcyBubyBtYXR0ZXIgRVJBU0VfR1JP
-VVBfREVGIGlzIGVuYWJsZWQgb3Igbm90LCBzZWN1cmUgZXJhc2UgdGltZW91dCBpcyBjYWxjdWxh
-dGVkIGFzIDMwMG1zICogRVJBU0VfVElNRU9VVF9NVUxUICogU0VDVVJFX0VSQVNFX01VTFQuIFRo
-YXQgaXMgd2h5IEkgc3VibWl0dGVkIHRoaXMgcGF0Y2guDQoNCkRvZXMgc29tZW9uZSBlbHNlIGNh
-biBjb3JyZWN0IG1lIGlmIG15IHVuZGVyc3RhbmRpbmcgYWJvdXQgdGhlIGVyYXNlIHRpbWVvdXQg
-Y2FsY3VsYXRpb24gaXMgd3Jvbmc/DQoNClRoYW5rcw0KQ2h1YW54aWFvDQoNCj4gDQo+IFRoYW5r
-cy4NCj4gDQo+IDIwMTIvMy8yOCBEb25nLCBDaHVhbnhpYW8gPGNodWFueGlhby5kb25nQGludGVs
-LmNvbT46DQo+ID4gV2hhdCBJIGFtIGNoZWNraW5nIHdpdGggaXMgZU1NQzQuNDEgc3BlYywgbm90
-IGVNTUM0LjUgc3BlYy4NCj4gPiBGb3J3YXJkIHlvdSB0aGUgbGluazoNCj4gPiB3d3cuamVkZWMu
-b3JnL3NpdGVzL2RlZmF1bHQvZmlsZXMvZG9jcy9KRVNEODQtQTQ0MS5wZGYNCj4gPg0KPiA+IFRo
-YW5rcw0KPiA+IENodWFueGlhbw0KPiA+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQo+ID4+IEZyb206IE5hbWphZSBKZW9uIFttYWlsdG86bGlua2luamVvbkBnbWFpbC5jb21dDQo+
-ID4+IFNlbnQ6IFdlZG5lc2RheSwgTWFyY2ggMjgsIDIwMTIgNToxNyBQTQ0KPiA+PiBUbzogRG9u
-ZywgQ2h1YW54aWFvDQo+ID4+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBjamJAbGFw
-dG9wLm9yZzsgSHVudGVyLCBBZHJpYW4NCj4gPj4gU3ViamVjdDogUmU6IFtQYXRjaCB2MV1tbWM6
-Y29yZTogY29ycmVjdCBtbWNfZXJhc2VfdGltZW91dA0KPiA+PiBjYWxjdWxhdGlvbg0KPiA+Pg0K
-PiA+PiBIaS4gQ2h1YW54aWFvLg0KPiA+PiBXb3VsZCB5b3Ugc2hhcmUgeW91ciBzcGVjaWZpY2F0
-aW9uIHdpdGggbWUgPw0KPiA+PiBXaGVuIEkgY2hlY2sgdGhlIGxhdGVzdCBlbW1jIDQuNSBzcGVj
-LCBJIGNhbiBub3QgZmluZCBpdC4NCj4gPj4gVGhhbmtzLg0KPiA+Pg0KPiA+PiAyMDEyLzMvMjgg
-Q2h1YW54aWFvIERvbmcgPGNodWFueGlhby5kb25nQGludGVsLmNvbT46DQo+ID4+ID4gQWNjb3Jk
-aW5nIHRvIEpFREVDIDcuOC4yLCBtbWNfZXJhc2VfdGltZW91dCBjYWxjdWxhdGlvbiBzaG91bGQg
-YmUgZm9sbG93Og0KPiA+PiA+IDEuIFNlY3VyZSBlcmFzZSB0aW1lb3V0ID0gMzAwbXMgKiBFUkFT
-RV9USU1FT1VUX01VTFQgKg0KPiA+PiA+IFNFQ19FUkFTRV9NVUxUIDIuIFNlY3VyZSB0cmltIHRp
-bWVvdXQgPSAzMDBtcyAqIEVSQVNFX1RJTUVPVVRfTVVMVCAqDQo+IFNFQ19UUklNX01VTFQgMy4N
-Cj4gPj4gPiBUcmltIHRpbWVvdXQgPSAzMDBtcyAqIFRSSU1fTVVMVCA0LiBFcmFzZSB0aW1lb3V0
-Og0KPiA+PiA+IMKgIGEuIGlmIEVSQVNFX0dST1VQX0RFRiBpcyB0cnVlOiBFcmFzZSB0aW1lb3V0
-ID0gMzAwbXMgKg0KPiA+PiA+IEVSQVNFX1RJTUVPVVRfTVVMVA0KPiA+PiA+IMKgIGIuIGlmIEVS
-QVNFX0dST1VQX0RFRiBpcyBmYWxzZTogRXJhc2UgdGltZW91dCA9IHdyaXRlIGJsb2NrIGRlbGF5
-DQo+ID4+ID4NCj4gPj4gPiBTaWduZWQtb2ZmLWJ5OiBDaHVhbnhpYW8gRG9uZyA8Y2h1YW54aWFv
-LmRvbmdAaW50ZWwuY29tPg0KPiA+PiA+IC0tLQ0KPiA+PiA+IMKgZHJpdmVycy9tbWMvY29yZS9j
-b3JlLmMgfCDCoCA0Mg0KPiA+PiA+ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrLS0tLS0t
-LS0tLS0tLQ0KPiA+PiA+IMKgMSBmaWxlcyBjaGFuZ2VkLCAyOSBpbnNlcnRpb25zKCspLCAxMyBk
-ZWxldGlvbnMoLSkNCj4gPj4gPg0KPiA+PiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3Jl
-L2NvcmUuYyBiL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+ID4+ID4gaW5kZXggMTRmMjYyZS4u
-ZDlkNmQxYyAxMDA2NDQNCj4gPj4gPiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYw0KPiA+
-PiA+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+ID4+ID4gQEAgLTE0MDUsMTIgKzE0
-MDUsMzYgQEAgc3RhdGljIHVuc2lnbmVkIGludA0KPiA+PiA+IG1tY19tbWNfZXJhc2VfdGltZW91
-dChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsDQo+ID4+ID4gwqB7DQo+ID4+ID4gwqAgwqAgwqAgwqB1
-bnNpZ25lZCBpbnQgZXJhc2VfdGltZW91dDsNCj4gPj4gPg0KPiA+PiA+IC0gwqAgwqAgwqAgaWYg
-KGNhcmQtPmV4dF9jc2QuZXJhc2VfZ3JvdXBfZGVmICYgMSkgew0KPiA+PiA+IC0gwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgLyogSGlnaCBDYXBhY2l0eSBFcmFzZSBHcm91cCBTaXplIHVzZXMgSEMgdGlt
-ZW91dHMNCj4gPj4gPiAqLw0KPiA+PiA+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgaWYgKGFyZyA9
-PSBNTUNfVFJJTV9BUkcpDQo+ID4+ID4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCBlcmFzZV90aW1lb3V0ID0gY2FyZC0+ZXh0X2NzZC50cmltX3RpbWVvdXQ7DQo+ID4+ID4gKyDC
-oCDCoCDCoCAvKg0KPiA+PiA+ICsgwqAgwqAgwqAgwqAqIEpFREVDIDcuOC4yDQo+ID4+ID4gKyDC
-oCDCoCDCoCDCoCoNCj4gPj4gPiArIMKgIMKgIMKgIMKgKiAxLiBTZWN1cmUgZXJhc2UvdHJpbSB0
-aW1lb3V0IGlzIGNhbGN1bGF0ZWQgYWJzZWQgb24NCj4gPj4gPiArIEVyYXNlIFRpbWVvdXQNCj4g
-Pj4gPiArIMKgIMKgIMKgIMKgKiBhbmQgYWRkaXRpb25hbCBTRUNfRVJBU0VfTVVMVC9TRUNfVFJJ
-TV9NVUxULg0KPiA+PiA+ICsgwqAgwqAgwqAgwqAqIFNvIHNlY3VyZSBlcmFzZS90cmltIHRpbWVv
-dXQgPSBFUkFTRSBUaW1lb3V0ICoNCj4gPj4gPiArIFNFQ19FUkFTRV9NVUxULw0KPiA+PiA+ICsg
-wqAgwqAgwqAgwqAqIFNFQ19UUklNX01VTFQuDQo+ID4+ID4gKyDCoCDCoCDCoCDCoCogRVJBU0Ug
-VGltZW91dCA9IDMwMG1zICogRVJBU0VfVElNRU9VVF9NVUxUDQo+ID4+ID4gKyDCoCDCoCDCoCDC
-oCoNCj4gPj4gPiArIMKgIMKgIMKgIMKgKiAyLiB0cmltIHRpbWVvdXQgaXMgY2FsY3VsYXRlZCBi
-YXNlZCBvbiB0aGUgVFJJTV9NVUxUIGZhY3Rvci4NCj4gPj4gPiArIMKgIMKgIMKgIMKgKiBTbyB0
-cmltIHRpbWVvdXQgPSAzMDBtcyAqIFRSSU1fTVVMVA0KPiA+PiA+ICsgwqAgwqAgwqAgwqAqDQo+
-ID4+ID4gKyDCoCDCoCDCoCDCoCogMy4gZXJhc2UgdGltZW91dCBjYWxjdWxhdGlvbjoNCj4gPj4g
-PiArIMKgIMKgIMKgIMKgKiDCoCDCoCDCoGEuIGlmIEVSQVNFX0dST1VQX0RFRiBpcyBlbmFibGVk
-LA0KPiA+PiA+ICsgRVJBU0VfVElNRU9VVF9NVUxUIHNob3VsZCBiZQ0KPiA+PiA+ICsgwqAgwqAg
-wqAgwqAqIMKgIMKgIMKgdXNlZCB0byBjYWxjdWxhdGUgZXJhc2UgdGltZW91dCwgc286DQo+ID4+
-ID4gKyDCoCDCoCDCoCDCoCogwqAgwqAgwqBlcmFzZSB0aW1lb3V0ID0gMzAwICogRVJBU0VfVElN
-RU9VVF9NVUxUDQo+ID4+ID4gKyDCoCDCoCDCoCDCoCogwqAgwqAgwqBiLiBpZiBFUkFTRV9HUk9V
-UF9ERUYgaXMgZGlhYmxlZCwgdGhlIGR1cmF0aW9uIG9mDQo+ID4+ID4gKyBhbiBlcmFzZQ0KPiA+
-PiA+ICsgwqAgwqAgwqAgwqAqIMKgIMKgIMKgY29tbWFuZCB3aWxsIGJlIHRoZSBudW1iZXIgb2Yg
-RXJhc2UgYmxvY2tzIHRvIGJlDQo+ID4+ID4gKyBlcmFzZWQNCj4gPj4gPiArIMKgIMKgIMKgIMKg
-KiDCoCDCoCDCoG11bHRpcGxpZWQgYnkgdGhlIGJsb2NrIHdyaXRlIGRlbGF5Lg0KPiA+PiA+ICsg
-wqAgwqAgwqAgwqAqLw0KPiA+PiA+ICsgwqAgwqAgwqAgaWYgKGFyZyAmIE1NQ19TRUNVUkVfQVJH
-Uykgew0KPiA+PiA+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXJhc2VfdGltZW91dCA9IGNhcmQt
-PmV4dF9jc2QuaGNfZXJhc2VfdGltZW91dDsNCj4gPj4gPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IGlmIChhcmcgPT0gTU1DX1NFQ1VSRV9FUkFTRV9BUkcpDQo+ID4+ID4gKyDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCBlcmFzZV90aW1lb3V0ICo9DQo+ID4+ID4gKyBjYXJkLT5leHRf
-Y3NkLnNlY19lcmFzZV9tdWx0Ow0KPiA+PiA+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZWxzZQ0K
-PiA+PiA+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXJhc2VfdGltZW91dCA9
-DQo+ID4+ID4gY2FyZC0+ZXh0X2NzZC5oY19lcmFzZV90aW1lb3V0Ow0KPiA+PiA+ICsgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXJhc2VfdGltZW91dCAqPQ0KPiA+PiA+ICsgY2Fy
-ZC0+ZXh0X2NzZC5zZWNfdHJpbV9tdWx0Ow0KPiA+PiA+ICsgwqAgwqAgwqAgfSBlbHNlIGlmIChh
-cmcgJiBNTUNfVFJJTV9BUkdTKSB7DQo+ID4+ID4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCBlcmFz
-ZV90aW1lb3V0ID0gY2FyZC0+ZXh0X2NzZC50cmltX3RpbWVvdXQ7DQo+ID4+ID4gKyDCoCDCoCDC
-oCB9IGVsc2UgaWYgKGNhcmQtPmV4dF9jc2QuZXJhc2VfZ3JvdXBfZGVmICYgMSkgew0KPiA+PiA+
-ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXJhc2VfdGltZW91dCA9IGNhcmQtPmV4dF9jc2QuaGNf
-ZXJhc2VfdGltZW91dDsNCj4gPj4gPiDCoCDCoCDCoCDCoH0gZWxzZSB7DQo+ID4+ID4gwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAvKiBDU0QgRXJhc2UgR3JvdXAgU2l6ZSB1c2VzIHdyaXRlIHRpbWVv
-dXQgKi8NCj4gPj4gPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoHVuc2lnbmVkIGludCBtdWx0ID0g
-KDEwIDw8IGNhcmQtPmNzZC5yMndfZmFjdG9yKTsgQEANCj4gPj4gPiAtMTQ0MSwxNCArMTQ2NSw2
-IEBAIHN0YXRpYyB1bnNpZ25lZCBpbnQNCj4gPj4gPiBtbWNfbW1jX2VyYXNlX3RpbWVvdXQoc3Ry
-dWN0IG1tY19jYXJkICpjYXJkLA0KPiA+PiA+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgZXJhc2VfdGltZW91dCA9IDE7DQo+ID4+ID4gwqAgwqAgwqAgwqB9DQo+ID4+ID4NCj4g
-Pj4gPiAtIMKgIMKgIMKgIC8qIE11bHRpcGxpZXIgZm9yIHNlY3VyZSBvcGVyYXRpb25zICovDQo+
-ID4+ID4gLSDCoCDCoCDCoCBpZiAoYXJnICYgTU1DX1NFQ1VSRV9BUkdTKSB7DQo+ID4+ID4gLSDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAoYXJnID09IE1NQ19TRUNVUkVfRVJBU0VfQVJHKQ0KPiA+
-PiA+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZXJhc2VfdGltZW91dCAqPQ0K
-PiA+PiA+IGNhcmQtPmV4dF9jc2Quc2VjX2VyYXNlX211bHQ7DQo+ID4+ID4gLSDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCBlbHNlDQo+ID4+ID4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCBlcmFzZV90aW1lb3V0ICo9DQo+ID4+ID4gY2FyZC0+ZXh0X2NzZC5zZWNfdHJpbV9tdWx0Ow0K
-PiA+PiA+IC0gwqAgwqAgwqAgfQ0KPiA+PiA+IC0NCj4gPj4gPiDCoCDCoCDCoCDCoGVyYXNlX3Rp
-bWVvdXQgKj0gcXR5Ow0KPiA+PiA+DQo+ID4+ID4gwqAgwqAgwqAgwqAvKg0KPiA+PiA+IC0tDQo+
-ID4+ID4gMS43LjENCj4gPj4gPg0KPiA+PiA+IC0tDQo+ID4+ID4gVG8gdW5zdWJzY3JpYmUgZnJv
-bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyINCj4gPj4g
-PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBN
-b3JlDQo+ID4+ID4gbWFqb3Jkb21vIGluZm8gYXQgwqBodHRwOi8vdmdlci5rZXJuZWwub3JnL21h
-am9yZG9tby1pbmZvLmh0bWwNCg==
+On 03/28/12 02:54, Mark Brown wrote:
+> On Tue, Mar 27, 2012 at 11:50:24AM -0400, Chris Ball wrote:
+>> On Tue, Feb 21 2012, Chris Ball wrote:
+>>> On Tue, Feb 21 2012, Kukjin Kim wrote:
+>
+>>>> I created topic branch for this we talked. You can pull that following:
+>>>>    git://git.kernel.org/pub/scm/linux/kernel/git/kgene/linux-samsung.git
+>>>> v3.4-for-cjb
+>
+>>>> If any problems, please kindly let me know.
+>
+>>> Pushed to mmc-next, thanks.  (I'm expecting that you'll do the merge
+>>> to Linus.)
+>
+>> I was expecting you to merge these patches, but they aren't in the
+>> arm-soc tree and haven't been sent to Linus,
+
+(Cc'ed Olof and Arnd)
+
+Chris, Yeah, it is not in arm-soc tree now. Because I sent a pull 
+request of samsung-mmc which is including this v3.4-for-cjb but Olof 
+wanted to merge only arch/arm/ part for samsung mmc because they are not 
+unrelated to the branch, v3.4-for-cjb sent to you. Since I thought the 
+branch would be sent to upstream via your tree and you were included in 
+the mailing loop, I agreed. So there is no it in arm-soc.
+
+>> and we're in the last few
+>> days of the merge window.
+>
+Yeah...it means not closed yet ;)
+
+>> As a result I'm dropping this tree -- and all of the patches that I
+>> have on top of it -- from mmc-next so that I can get a pull request
+>> out.  This means that I'm dropping:
+>
+Hmm, I think, if you're ok, you can send a second pull request to Linus 
+for it and actually, it is in linux-next for a long time via mmc and 
+samsung tree.
+
+Note, please don't rebase it because its resolution for conflicts is in 
+linux-next and I think Linus will use it when happens conflicts...Or I 
+can provide new tree on top of latest mainline. But I'm not sure about 
+latter.
+
+> If they're already in your tree why not just send them to Linus?  Given
+> that everything's in git I don't understand why you'd need Kukjin to
+> push them separately or what the benefit of that would be?
+>
+Yes, I already agreed its merging in the mmc tree :)
+
+> This is all extremely frustrating fromm the contributor point of view.
+
+If any my effort is required, feel free to contact me.
+
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
