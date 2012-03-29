@@ -1,253 +1,132 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
+From: Philip Rakity <prakity@marvell.com>
 Subject: Re: [Patch v1]mmc:core: correct mmc_erase_timeout calculation
-Date: Thu, 29 Mar 2012 12:51:57 +0900
-Message-ID: <CAKYAXd8mnpfwvwq1wNU28B7PiCjmBAMB8FdyWjkXxELVJMnBbw@mail.gmail.com>
+Date: Wed, 28 Mar 2012 21:46:15 -0700
+Message-ID: <EC79C95D-7994-46E5-AFB7-A33B372A1A37@marvell.com>
 References: <20120328082933.GA27568@intel.com>
-	<CAKYAXd8ec31WM2SBP3wMaAqKj60D2+hZ7nGTgv63_Jbh+KHanA@mail.gmail.com>
-	<17296D9F8FF2234F831FC3DF505A87A90FD83C48@SHSMSX102.ccr.corp.intel.com>
-	<CAKYAXd9N3sc_0Euzyf6tph8uNT=C7uyMkPVuO-dxq8JMGNRL_w@mail.gmail.com>
-	<17296D9F8FF2234F831FC3DF505A87A90FD86BA2@SHSMSX102.ccr.corp.intel.com>
-	<CAKYAXd_4dDTbTHT3myztMMgw0Qi4oZh2G00DSGk04+HzQ_rqTw@mail.gmail.com>
-	<17296D9F8FF2234F831FC3DF505A87A90FD87D0A@SHSMSX102.ccr.corp.intel.com>
+ <CAKYAXd8ec31WM2SBP3wMaAqKj60D2+hZ7nGTgv63_Jbh+KHanA@mail.gmail.com>
+ <17296D9F8FF2234F831FC3DF505A87A90FD83C48@SHSMSX102.ccr.corp.intel.com>
+ <CAKYAXd9N3sc_0Euzyf6tph8uNT=C7uyMkPVuO-dxq8JMGNRL_w@mail.gmail.com>
+ <17296D9F8FF2234F831FC3DF505A87A90FD86BA2@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:43776 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751898Ab2C2Dv5 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Mar 2012 23:51:57 -0400
-Received: by iagz16 with SMTP id z16so2428742iag.19
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Mar 2012 20:51:57 -0700 (PDT)
-In-Reply-To: <17296D9F8FF2234F831FC3DF505A87A90FD87D0A@SHSMSX102.ccr.corp.intel.com>
+Received: from na3sys009aog130.obsmtp.com ([74.125.149.143]:47158 "EHLO
+	na3sys009amx259.postini.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1750712Ab2C2Eql (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Mar 2012 00:46:41 -0400
+In-Reply-To: <17296D9F8FF2234F831FC3DF505A87A90FD86BA2@SHSMSX102.ccr.corp.intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
+Cc: Namjae Jeon <linkinjeon@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
 
-Actually, Specfication is described to be misunderstood easily.
-
-Nice day.
-
-2012/3/29 Dong, Chuanxiao <chuanxiao.dong@intel.com>:
->
->> -----Original Message-----
->> From: Namjae Jeon [mailto:linkinjeon@gmail.com]
->> Sent: Thursday, March 29, 2012 11:30 AM
->> To: Dong, Chuanxiao
->> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; Hunter, Adrian
->> Subject: Re: [Patch v1]mmc:core: correct mmc_erase_timeout calculati=
-on
->>
->> I think that write block delay * SECURE_ERASE_MULT is right in case =
-of secure
->> erase + ERASE_GROUP_DEF disable.
-> Thanks Namjae, seems I misunderstand the meaning of "Erase Timeout". =
-It just means a timeout value for erase operation.
->
->>
->> See the specification contents on 4.4.1.
->> Erase / Secure Erase
->> The duration of an erase command will be (order of magnitude) the nu=
-mber of
->> Erase blocks to be erased multiplied by the block write delay. If ER=
-ASE_GROUP_DEF
->> (EXT_CSD byte
->> [175]) is enabled,
->> ERASE_TIMEOUT_MULT should be used to calculate the duration.
->> Secure Erase timeout is calculated based on the Erase Timeout and ad=
-ditional
->> SEC_ERASE_MULT factor (EXT_CSD byte [230]).
->>
->> Thanks.
->>
->> 2012/3/29 Dong, Chuanxiao <chuanxiao.dong@intel.com>:
->> >> -----Original Message-----
->> >> From: Namjae Jeon [mailto:linkinjeon@gmail.com]
->> >> Sent: Wednesday, March 28, 2012 8:36 PM
->> >> To: Dong, Chuanxiao
->> >> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; Hunter, Adrian
->> >> Subject: Re: [Patch v1]mmc:core: correct mmc_erase_timeout
->> >> calculation
->> >>
->> >> If ERASE_GROUP_DEF is disable with secure erase, erase timeout is
->> >> calculated with 300ms * ERASE_TIMEOUT_MULT. Is it right ?
->> >
->> > My understanding about the JESD84-A441 is different with current
->> mmc_mmc_erase_timeout implemented. From the EXT_CSD[230], seems no
->> matter ERASE_GROUP_DEF is enabled or not, secure erase timeout is ca=
-lculated as
->> 300ms * ERASE_TIMEOUT_MULT * SECURE_ERASE_MULT. That is why I submit=
-ted
->> this patch.
->> >
->> > Does someone else can correct me if my understanding about the era=
-se timeout
->> calculation is wrong?
->> >
->> > Thanks
->> > Chuanxiao
->> >
->> >>
->> >> Thanks.
->> >>
->> >> 2012/3/28 Dong, Chuanxiao <chuanxiao.dong@intel.com>:
->> >> > What I am checking with is eMMC4.41 spec, not eMMC4.5 spec.
->> >> > Forward you the link:
->> >> > www.jedec.org/sites/default/files/docs/JESD84-A441.pdf
->> >> >
->> >> > Thanks
->> >> > Chuanxiao
->> >> >
->> >> >> -----Original Message-----
->> >> >> From: Namjae Jeon [mailto:linkinjeon@gmail.com]
->> >> >> Sent: Wednesday, March 28, 2012 5:17 PM
->> >> >> To: Dong, Chuanxiao
->> >> >> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; Hunter, Adrian
->> >> >> Subject: Re: [Patch v1]mmc:core: correct mmc_erase_timeout
->> >> >> calculation
->> >> >>
->> >> >> Hi. Chuanxiao.
->> >> >> Would you share your specification with me ?
->> >> >> When I check the latest emmc 4.5 spec, I can not find it.
->> >> >> Thanks.
->> >> >>
->> >> >> 2012/3/28 Chuanxiao Dong <chuanxiao.dong@intel.com>:
->> >> >> > According to JEDEC 7.8.2, mmc_erase_timeout calculation shou=
-ld be
->> follow:
->> >> >> > 1. Secure erase timeout =3D 300ms * ERASE_TIMEOUT_MULT *
->> >> >> > SEC_ERASE_MULT 2. Secure trim timeout =3D 300ms *
->> >> >> > ERASE_TIMEOUT_MULT *
->> >> SEC_TRIM_MULT 3.
->> >> >> > Trim timeout =3D 300ms * TRIM_MULT 4. Erase timeout:
->> >> >> > =C2=A0 a. if ERASE_GROUP_DEF is true: Erase timeout =3D 300m=
-s *
->> >> >> > ERASE_TIMEOUT_MULT
->> >> >> > =C2=A0 b. if ERASE_GROUP_DEF is false: Erase timeout =3D wri=
-te block
->> >> >> > delay
->> >> >> >
->> >> >> > Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
->> >> >> > ---
->> >> >> > =C2=A0drivers/mmc/core/core.c | =C2=A0 42
->> >> >> > +++++++++++++++++++++++++++++-------------
->> >> >> > =C2=A01 files changed, 29 insertions(+), 13 deletions(-)
->> >> >> >
->> >> >> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core=
-=2Ec
->> >> >> > index 14f262e..d9d6d1c 100644
->> >> >> > --- a/drivers/mmc/core/core.c
->> >> >> > +++ b/drivers/mmc/core/core.c
->> >> >> > @@ -1405,12 +1405,36 @@ static unsigned int
->> >> >> > mmc_mmc_erase_timeout(struct mmc_card *card,
->> >> >> > =C2=A0{
->> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned int erase_timeout;
->> >> >> >
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 if (card->ext_csd.erase_group_def & 1=
-) {
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 /* High C=
-apacity Erase Group Size uses HC
->> >> >> > timeouts */
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (arg =3D=
-=3D MMC_TRIM_ARG)
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 erase_timeout =3D
->> >> >> > card->ext_csd.trim_timeout;
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 /*
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* JEDEC 7.8.2
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0*
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* 1. Secure erase/trim timeout =
-is calculated absed on
->> >> >> > + Erase Timeout
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* and additional SEC_ERASE_MULT=
-/SEC_TRIM_MULT.
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* So secure erase/trim timeout =
-=3D ERASE Timeout *
->> >> >> > + SEC_ERASE_MULT/
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* SEC_TRIM_MULT.
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* ERASE Timeout =3D 300ms * ERA=
-SE_TIMEOUT_MULT
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0*
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* 2. trim timeout is calculated=
- based on the TRIM_MULT factor.
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* So trim timeout =3D 300ms * T=
-RIM_MULT
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0*
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* 3. erase timeout calculation:
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0a. if ERA=
-SE_GROUP_DEF is enabled,
->> >> >> > + ERASE_TIMEOUT_MULT should be
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0used to c=
-alculate erase timeout, so:
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0erase tim=
-eout =3D 300 * ERASE_TIMEOUT_MULT
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0b. if ERA=
-SE_GROUP_DEF is diabled, the duration
->> >> >> > + of an erase
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0command w=
-ill be the number of Erase blocks to be
->> >> >> > + erased
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0multiplie=
-d by the block write delay.
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 if (arg & MMC_SECURE_ARGS) {
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 erase_tim=
-eout =3D card->ext_csd.hc_erase_timeout;
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (arg =3D=
-=3D MMC_SECURE_ERASE_ARG)
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 erase_timeout *=3D
->> >> >> > + card->ext_csd.sec_erase_mult;
->> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0else
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 erase_timeout =3D
->> >> >> > card->ext_csd.hc_erase_timeout;
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 erase_timeout *=3D
->> >> >> > + card->ext_csd.sec_trim_mult;
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 } else if (arg & MMC_TRIM_ARGS) {
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 erase_tim=
-eout =3D card->ext_csd.trim_timeout;
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 } else if (card->ext_csd.erase_group_=
-def & 1) {
->> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 erase_tim=
-eout =3D card->ext_csd.hc_erase_timeout;
->> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0} else {
->> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0/* CS=
-D Erase Group Size uses write timeout */
->> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0unsig=
-ned int mult =3D (10 << card->csd.r2w_factor);
->> >> >> > @@
->> >> >> > -1441,14 +1465,6 @@ static unsigned int
->> >> >> > mmc_mmc_erase_timeout(struct mmc_card *card,
->> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
- =C2=A0 =C2=A0 =C2=A0erase_timeout =3D 1;
->> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0}
->> >> >> >
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 /* Multiplier for secure operations *=
-/
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 if (arg & MMC_SECURE_ARGS) {
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (arg =3D=
-=3D MMC_SECURE_ERASE_ARG)
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 erase_timeout *=3D
->> >> >> > card->ext_csd.sec_erase_mult;
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 else
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0 =C2=A0 erase_timeout *=3D
->> >> >> > card->ext_csd.sec_trim_mult;
->> >> >> > - =C2=A0 =C2=A0 =C2=A0 }
->> >> >> > -
->> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0erase_timeout *=3D qty;
->> >> >> >
->> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0/*
->> >> >> > --
->> >> >> > 1.7.1
->> >> >> >
->> >> >> > --
->> >> >> > To unsubscribe from this list: send the line "unsubscribe li=
-nux-mmc"
->> >> >> > in the body of a message to majordomo@vger.kernel.org More
->> >> >> > majordomo info at =C2=A0http://vger.kernel.org/majordomo-inf=
-o.html
+DQoNCk9uIE1hciAyOCwgMjAxMiwgYXQgNzo1MCBQTSwgRG9uZywgQ2h1YW54aWFvIHdyb3RlOg0K
+DQo+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPj4gRnJvbTogTmFtamFlIEplb24gW21h
+aWx0bzpsaW5raW5qZW9uQGdtYWlsLmNvbV0NCj4+IFNlbnQ6IFdlZG5lc2RheSwgTWFyY2ggMjgs
+IDIwMTIgODozNiBQTQ0KPj4gVG86IERvbmcsIENodWFueGlhbw0KPj4gQ2M6IGxpbnV4LW1tY0B2
+Z2VyLmtlcm5lbC5vcmc7IGNqYkBsYXB0b3Aub3JnOyBIdW50ZXIsIEFkcmlhbg0KPj4gU3ViamVj
+dDogUmU6IFtQYXRjaCB2MV1tbWM6Y29yZTogY29ycmVjdCBtbWNfZXJhc2VfdGltZW91dCBjYWxj
+dWxhdGlvbg0KPj4gDQo+PiBJZiBFUkFTRV9HUk9VUF9ERUYgaXMgZGlzYWJsZSB3aXRoIHNlY3Vy
+ZSBlcmFzZSwgZXJhc2UgdGltZW91dCBpcyBjYWxjdWxhdGVkIHdpdGgNCj4+IDMwMG1zICogRVJB
+U0VfVElNRU9VVF9NVUxULiBJcyBpdCByaWdodCA/DQo+IA0KPiBNeSB1bmRlcnN0YW5kaW5nIGFi
+b3V0IHRoZSBKRVNEODQtQTQ0MSBpcyBkaWZmZXJlbnQgd2l0aCBjdXJyZW50IG1tY19tbWNfZXJh
+c2VfdGltZW91dCBpbXBsZW1lbnRlZC4gRnJvbSB0aGUgRVhUX0NTRFsyMzBdLCBzZWVtcyBubyBt
+YXR0ZXIgRVJBU0VfR1JPVVBfREVGIGlzIGVuYWJsZWQgb3Igbm90LCBzZWN1cmUgZXJhc2UgdGlt
+ZW91dCBpcyBjYWxjdWxhdGVkIGFzIDMwMG1zICogRVJBU0VfVElNRU9VVF9NVUxUICogU0VDVVJF
+X0VSQVNFX01VTFQuIFRoYXQgaXMgd2h5IEkgc3VibWl0dGVkIHRoaXMgcGF0Y2guDQo+IA0KDQpU
+aGlzIGlzIHdoYXQgaXMgaW4gdGhlIGRyYWZ0IDQuNTEgc3BlYw0KDQo+IERvZXMgc29tZW9uZSBl
+bHNlIGNhbiBjb3JyZWN0IG1lIGlmIG15IHVuZGVyc3RhbmRpbmcgYWJvdXQgdGhlIGVyYXNlIHRp
+bWVvdXQgY2FsY3VsYXRpb24gaXMgd3Jvbmc/DQo+IA0KPiBUaGFua3MNCj4gQ2h1YW54aWFvDQo+
+IA0KPj4gDQo+PiBUaGFua3MuDQo+PiANCj4+IDIwMTIvMy8yOCBEb25nLCBDaHVhbnhpYW8gPGNo
+dWFueGlhby5kb25nQGludGVsLmNvbT46DQo+Pj4gV2hhdCBJIGFtIGNoZWNraW5nIHdpdGggaXMg
+ZU1NQzQuNDEgc3BlYywgbm90IGVNTUM0LjUgc3BlYy4NCj4+PiBGb3J3YXJkIHlvdSB0aGUgbGlu
+azoNCj4+PiB3d3cuamVkZWMub3JnL3NpdGVzL2RlZmF1bHQvZmlsZXMvZG9jcy9KRVNEODQtQTQ0
+MS5wZGYNCj4+PiANCj4+PiBUaGFua3MNCj4+PiBDaHVhbnhpYW8NCj4+PiANCj4+Pj4gLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+Pj4gRnJvbTogTmFtamFlIEplb24gW21haWx0bzpsaW5r
+aW5qZW9uQGdtYWlsLmNvbV0NCj4+Pj4gU2VudDogV2VkbmVzZGF5LCBNYXJjaCAyOCwgMjAxMiA1
+OjE3IFBNDQo+Pj4+IFRvOiBEb25nLCBDaHVhbnhpYW8NCj4+Pj4gQ2M6IGxpbnV4LW1tY0B2Z2Vy
+Lmtlcm5lbC5vcmc7IGNqYkBsYXB0b3Aub3JnOyBIdW50ZXIsIEFkcmlhbg0KPj4+PiBTdWJqZWN0
+OiBSZTogW1BhdGNoIHYxXW1tYzpjb3JlOiBjb3JyZWN0IG1tY19lcmFzZV90aW1lb3V0DQo+Pj4+
+IGNhbGN1bGF0aW9uDQo+Pj4+IA0KPj4+PiBIaS4gQ2h1YW54aWFvLg0KPj4+PiBXb3VsZCB5b3Ug
+c2hhcmUgeW91ciBzcGVjaWZpY2F0aW9uIHdpdGggbWUgPw0KPj4+PiBXaGVuIEkgY2hlY2sgdGhl
+IGxhdGVzdCBlbW1jIDQuNSBzcGVjLCBJIGNhbiBub3QgZmluZCBpdC4NCj4+Pj4gVGhhbmtzLg0K
+Pj4+PiANCj4+Pj4gMjAxMi8zLzI4IENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRl
+bC5jb20+Og0KPj4+Pj4gQWNjb3JkaW5nIHRvIEpFREVDIDcuOC4yLCBtbWNfZXJhc2VfdGltZW91
+dCBjYWxjdWxhdGlvbiBzaG91bGQgYmUgZm9sbG93Og0KPj4+Pj4gMS4gU2VjdXJlIGVyYXNlIHRp
+bWVvdXQgPSAzMDBtcyAqIEVSQVNFX1RJTUVPVVRfTVVMVCAqDQo+Pj4+PiBTRUNfRVJBU0VfTVVM
+VCAyLiBTZWN1cmUgdHJpbSB0aW1lb3V0ID0gMzAwbXMgKiBFUkFTRV9USU1FT1VUX01VTFQgKg0K
+Pj4gU0VDX1RSSU1fTVVMVCAzLg0KPj4+Pj4gVHJpbSB0aW1lb3V0ID0gMzAwbXMgKiBUUklNX01V
+TFQgNC4gRXJhc2UgdGltZW91dDoNCj4+Pj4+ICAgYS4gaWYgRVJBU0VfR1JPVVBfREVGIGlzIHRy
+dWU6IEVyYXNlIHRpbWVvdXQgPSAzMDBtcyAqDQo+Pj4+PiBFUkFTRV9USU1FT1VUX01VTFQNCj4+
+Pj4+ICAgYi4gaWYgRVJBU0VfR1JPVVBfREVGIGlzIGZhbHNlOiBFcmFzZSB0aW1lb3V0ID0gd3Jp
+dGUgYmxvY2sgZGVsYXkNCj4+Pj4+IA0KPj4+Pj4gU2lnbmVkLW9mZi1ieTogQ2h1YW54aWFvIERv
+bmcgPGNodWFueGlhby5kb25nQGludGVsLmNvbT4NCj4+Pj4+IC0tLQ0KPj4+Pj4gIGRyaXZlcnMv
+bW1jL2NvcmUvY29yZS5jIHwgICA0Mg0KPj4+Pj4gKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KystLS0tLS0tLS0tLS0tDQo+Pj4+PiAgMSBmaWxlcyBjaGFuZ2VkLCAyOSBpbnNlcnRpb25zKCsp
+LCAxMyBkZWxldGlvbnMoLSkNCj4+Pj4+IA0KPj4+Pj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1j
+L2NvcmUvY29yZS5jIGIvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMNCj4+Pj4+IGluZGV4IDE0ZjI2
+MmUuLmQ5ZDZkMWMgMTAwNjQ0DQo+Pj4+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYw0K
+Pj4+Pj4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMNCj4+Pj4+IEBAIC0xNDA1LDEyICsx
+NDA1LDM2IEBAIHN0YXRpYyB1bnNpZ25lZCBpbnQNCj4+Pj4+IG1tY19tbWNfZXJhc2VfdGltZW91
+dChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsDQo+Pj4+PiAgew0KPj4+Pj4gICAgICAgIHVuc2lnbmVk
+IGludCBlcmFzZV90aW1lb3V0Ow0KPj4+Pj4gDQo+Pj4+PiAtICAgICAgIGlmIChjYXJkLT5leHRf
+Y3NkLmVyYXNlX2dyb3VwX2RlZiAmIDEpIHsNCj4+Pj4+IC0gICAgICAgICAgICAgICAvKiBIaWdo
+IENhcGFjaXR5IEVyYXNlIEdyb3VwIFNpemUgdXNlcyBIQyB0aW1lb3V0cw0KPj4+Pj4gKi8NCj4+
+Pj4+IC0gICAgICAgICAgICAgICBpZiAoYXJnID09IE1NQ19UUklNX0FSRykNCj4+Pj4+IC0gICAg
+ICAgICAgICAgICAgICAgICAgIGVyYXNlX3RpbWVvdXQgPSBjYXJkLT5leHRfY3NkLnRyaW1fdGlt
+ZW91dDsNCj4+Pj4+ICsgICAgICAgLyoNCj4+Pj4+ICsgICAgICAgICogSkVERUMgNy44LjINCj4+
+Pj4+ICsgICAgICAgICoNCj4+Pj4+ICsgICAgICAgICogMS4gU2VjdXJlIGVyYXNlL3RyaW0gdGlt
+ZW91dCBpcyBjYWxjdWxhdGVkIGFic2VkIG9uDQo+Pj4+PiArIEVyYXNlIFRpbWVvdXQNCj4+Pj4+
+ICsgICAgICAgICogYW5kIGFkZGl0aW9uYWwgU0VDX0VSQVNFX01VTFQvU0VDX1RSSU1fTVVMVC4N
+Cj4+Pj4+ICsgICAgICAgICogU28gc2VjdXJlIGVyYXNlL3RyaW0gdGltZW91dCA9IEVSQVNFIFRp
+bWVvdXQgKg0KPj4+Pj4gKyBTRUNfRVJBU0VfTVVMVC8NCj4+Pj4+ICsgICAgICAgICogU0VDX1RS
+SU1fTVVMVC4NCj4+Pj4+ICsgICAgICAgICogRVJBU0UgVGltZW91dCA9IDMwMG1zICogRVJBU0Vf
+VElNRU9VVF9NVUxUDQo+Pj4+PiArICAgICAgICAqDQo+Pj4+PiArICAgICAgICAqIDIuIHRyaW0g
+dGltZW91dCBpcyBjYWxjdWxhdGVkIGJhc2VkIG9uIHRoZSBUUklNX01VTFQgZmFjdG9yLg0KPj4+
+Pj4gKyAgICAgICAgKiBTbyB0cmltIHRpbWVvdXQgPSAzMDBtcyAqIFRSSU1fTVVMVA0KPj4+Pj4g
+KyAgICAgICAgKg0KPj4+Pj4gKyAgICAgICAgKiAzLiBlcmFzZSB0aW1lb3V0IGNhbGN1bGF0aW9u
+Og0KPj4+Pj4gKyAgICAgICAgKiAgICAgIGEuIGlmIEVSQVNFX0dST1VQX0RFRiBpcyBlbmFibGVk
+LA0KPj4+Pj4gKyBFUkFTRV9USU1FT1VUX01VTFQgc2hvdWxkIGJlDQo+Pj4+PiArICAgICAgICAq
+ICAgICAgdXNlZCB0byBjYWxjdWxhdGUgZXJhc2UgdGltZW91dCwgc286DQo+Pj4+PiArICAgICAg
+ICAqICAgICAgZXJhc2UgdGltZW91dCA9IDMwMCAqIEVSQVNFX1RJTUVPVVRfTVVMVA0KPj4+Pj4g
+KyAgICAgICAgKiAgICAgIGIuIGlmIEVSQVNFX0dST1VQX0RFRiBpcyBkaWFibGVkLCB0aGUgZHVy
+YXRpb24gb2YNCj4+Pj4+ICsgYW4gZXJhc2UNCj4+Pj4+ICsgICAgICAgICogICAgICBjb21tYW5k
+IHdpbGwgYmUgdGhlIG51bWJlciBvZiBFcmFzZSBibG9ja3MgdG8gYmUNCj4+Pj4+ICsgZXJhc2Vk
+DQo+Pj4+PiArICAgICAgICAqICAgICAgbXVsdGlwbGllZCBieSB0aGUgYmxvY2sgd3JpdGUgZGVs
+YXkuDQo+Pj4+PiArICAgICAgICAqLw0KPj4+Pj4gKyAgICAgICBpZiAoYXJnICYgTU1DX1NFQ1VS
+RV9BUkdTKSB7DQo+Pj4+PiArICAgICAgICAgICAgICAgZXJhc2VfdGltZW91dCA9IGNhcmQtPmV4
+dF9jc2QuaGNfZXJhc2VfdGltZW91dDsNCj4+Pj4+ICsgICAgICAgICAgICAgICBpZiAoYXJnID09
+IE1NQ19TRUNVUkVfRVJBU0VfQVJHKQ0KPj4+Pj4gKyAgICAgICAgICAgICAgICAgICAgICAgZXJh
+c2VfdGltZW91dCAqPQ0KPj4+Pj4gKyBjYXJkLT5leHRfY3NkLnNlY19lcmFzZV9tdWx0Ow0KPj4+
+Pj4gICAgICAgICAgICAgICAgZWxzZQ0KPj4+Pj4gLSAgICAgICAgICAgICAgICAgICAgICAgZXJh
+c2VfdGltZW91dCA9DQo+Pj4+PiBjYXJkLT5leHRfY3NkLmhjX2VyYXNlX3RpbWVvdXQ7DQo+Pj4+
+PiArICAgICAgICAgICAgICAgICAgICAgICBlcmFzZV90aW1lb3V0ICo9DQo+Pj4+PiArIGNhcmQt
+PmV4dF9jc2Quc2VjX3RyaW1fbXVsdDsNCj4+Pj4+ICsgICAgICAgfSBlbHNlIGlmIChhcmcgJiBN
+TUNfVFJJTV9BUkdTKSB7DQo+Pj4+PiArICAgICAgICAgICAgICAgZXJhc2VfdGltZW91dCA9IGNh
+cmQtPmV4dF9jc2QudHJpbV90aW1lb3V0Ow0KPj4+Pj4gKyAgICAgICB9IGVsc2UgaWYgKGNhcmQt
+PmV4dF9jc2QuZXJhc2VfZ3JvdXBfZGVmICYgMSkgew0KPj4+Pj4gKyAgICAgICAgICAgICAgIGVy
+YXNlX3RpbWVvdXQgPSBjYXJkLT5leHRfY3NkLmhjX2VyYXNlX3RpbWVvdXQ7DQo+Pj4+PiAgICAg
+ICAgfSBlbHNlIHsNCj4+Pj4+ICAgICAgICAgICAgICAgIC8qIENTRCBFcmFzZSBHcm91cCBTaXpl
+IHVzZXMgd3JpdGUgdGltZW91dCAqLw0KPj4+Pj4gICAgICAgICAgICAgICAgdW5zaWduZWQgaW50
+IG11bHQgPSAoMTAgPDwgY2FyZC0+Y3NkLnIyd19mYWN0b3IpOyBAQA0KPj4+Pj4gLTE0NDEsMTQg
+KzE0NjUsNiBAQCBzdGF0aWMgdW5zaWduZWQgaW50DQo+Pj4+PiBtbWNfbW1jX2VyYXNlX3RpbWVv
+dXQoc3RydWN0IG1tY19jYXJkICpjYXJkLA0KPj4+Pj4gICAgICAgICAgICAgICAgICAgICAgICBl
+cmFzZV90aW1lb3V0ID0gMTsNCj4+Pj4+ICAgICAgICB9DQo+Pj4+PiANCj4+Pj4+IC0gICAgICAg
+LyogTXVsdGlwbGllciBmb3Igc2VjdXJlIG9wZXJhdGlvbnMgKi8NCj4+Pj4+IC0gICAgICAgaWYg
+KGFyZyAmIE1NQ19TRUNVUkVfQVJHUykgew0KPj4+Pj4gLSAgICAgICAgICAgICAgIGlmIChhcmcg
+PT0gTU1DX1NFQ1VSRV9FUkFTRV9BUkcpDQo+Pj4+PiAtICAgICAgICAgICAgICAgICAgICAgICBl
+cmFzZV90aW1lb3V0ICo9DQo+Pj4+PiBjYXJkLT5leHRfY3NkLnNlY19lcmFzZV9tdWx0Ow0KPj4+
+Pj4gLSAgICAgICAgICAgICAgIGVsc2UNCj4+Pj4+IC0gICAgICAgICAgICAgICAgICAgICAgIGVy
+YXNlX3RpbWVvdXQgKj0NCj4+Pj4+IGNhcmQtPmV4dF9jc2Quc2VjX3RyaW1fbXVsdDsNCj4+Pj4+
+IC0gICAgICAgfQ0KPj4+Pj4gLQ0KPj4+Pj4gICAgICAgIGVyYXNlX3RpbWVvdXQgKj0gcXR5Ow0K
+Pj4+Pj4gDQo+Pj4+PiAgICAgICAgLyoNCj4+Pj4+IC0tDQo+Pj4+PiAxLjcuMQ0KPj4+Pj4gDQo+
+Pj4+PiAtLQ0KPj4+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxp
+bmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyINCj4+Pj4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2Fn
+ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4+Pj4+IG1ham9yZG9tbyBpbmZv
+IGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4gBO+/vXsu
+bu+/vSvvv73vv73vv73vv73vv73vv73vv70rJe+/ve+/vWx6d23vv73vv71i77+966ey77+977+9
+cu+/ve+/vXpY77+977+9Ge+/vXIp77+977+977+9dyofamfvv73vv73vv70e77+977+977+977+9
+77+93aJqL++/ve+/ve+/vXrvv73elu+/ve+/vTLvv73eme+/ve+/ve+/vSbvv70p36Hvv71h77+9
+77+9f++/ve+/vR7vv71H77+977+977+9aO+/vQ/vv71qOit277+977+977+9d++/vdmlDQoNCg==
