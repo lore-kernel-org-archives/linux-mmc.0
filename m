@@ -1,202 +1,253 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: [GIT PULL] MMC updates for 3.4-rc1
-Date: Wed, 28 Mar 2012 23:47:19 -0400
-Message-ID: <87iphot6ew.fsf@laptop.org>
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: Re: [Patch v1]mmc:core: correct mmc_erase_timeout calculation
+Date: Thu, 29 Mar 2012 12:51:57 +0900
+Message-ID: <CAKYAXd8mnpfwvwq1wNU28B7PiCjmBAMB8FdyWjkXxELVJMnBbw@mail.gmail.com>
+References: <20120328082933.GA27568@intel.com>
+	<CAKYAXd8ec31WM2SBP3wMaAqKj60D2+hZ7nGTgv63_Jbh+KHanA@mail.gmail.com>
+	<17296D9F8FF2234F831FC3DF505A87A90FD83C48@SHSMSX102.ccr.corp.intel.com>
+	<CAKYAXd9N3sc_0Euzyf6tph8uNT=C7uyMkPVuO-dxq8JMGNRL_w@mail.gmail.com>
+	<17296D9F8FF2234F831FC3DF505A87A90FD86BA2@SHSMSX102.ccr.corp.intel.com>
+	<CAKYAXd_4dDTbTHT3myztMMgw0Qi4oZh2G00DSGk04+HzQ_rqTw@mail.gmail.com>
+	<17296D9F8FF2234F831FC3DF505A87A90FD87D0A@SHSMSX102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54265 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751558Ab2C2Dtg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 28 Mar 2012 23:49:36 -0400
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:43776 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751898Ab2C2Dv5 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Mar 2012 23:51:57 -0400
+Received: by iagz16 with SMTP id z16so2428742iag.19
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Mar 2012 20:51:57 -0700 (PDT)
+In-Reply-To: <17296D9F8FF2234F831FC3DF505A87A90FD87D0A@SHSMSX102.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
 
-Hi Linus,
+Actually, Specfication is described to be misunderstood easily.
 
-Please pull from:
+Nice day.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-to receive the MMC merge for 3.4.  I've signed an "mmc-merge-for-3.4-rc1"
-tag.  There are no merge conflicts, and the patches have all been tested
-in linux-next.  Thanks.
-
-
-The following changes since commit e2a0883e4071237d09b604a342c28b96b44a04b3:
-
-  Merge branch 'for-linus' of git://git.kernel.org/pub/scm/linux/kernel/git/viro/vfs (2012-03-21 13:36:41 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
-
-for you to fetch changes up to 135111cc5595c6a24dd826d503e2d2bae92da1c4:
-
-  mmc: sh_mmcif: simplify bitmask macros (2012-03-27 12:20:20 -0400)
-
-----------------------------------------------------------------
-MMC highlights for 3.4:
-Core:
- * Support for MMC 4.5 Data Tag feature -- we tag REQ_META, so devices
-   that support Data Tag will provide increased throughput for metadata.
- * Faster detection of card removal on I/O errors.
-
-Drivers:
- * dw_mmc now supports eMMC Power Off Notify, has PCI support, and
-   implements pre_req and post_req for asynchronous requests.
- * omap_hsmmc now supports device tree.
- * esdhc now has power management support.
- * sdhci-tegra now supports Tegra30 devices.
- * sdhci-spear now supports hibernation.
- * tmio_mmc now supports using a GPIO for card detection.
- * Intel PCH now supports 8-bit bus transfers.
-
-----------------------------------------------------------------
-Adrian Hunter (5):
-      mmc: start removing enable / disable API
-      mmc: core: add high-capacity erase size capability flag
-      mmc: sdhci-pci: select HC erase size for Medfield eMMC
-      mmc: sdhci: add quirk for keeping card power during suspend
-      mmc: sdhci-pci: add SDHCI_QUIRK2_HOST_OFF_CARD_ON for Medfield SDIO
-
-Alexander Stein (3):
-      mmc: sdhci-pci: Add MSI support
-      mmc: sdhci: check interrupt flags in ISR again
-      mmc: sdhci-pci: allow 8-bit bus width for Intel PCH
-
-Balaji T K (3):
-      mmc: omap_hsmmc: use platform_get_resource_byname for tx/rx DMA channels
-      mmc: omap_hsmmc: remove unused .set_sleep function
-      mmc: omap_hsmmc: Use OMAP_HSMMC_SUPPORTS_DUAL_VOLT flag to remove host->id based hardcoding
-
-Bastian Hecht (1):
-      mmc: sh_mobile_sdhi: add a callback for board specific init code
-
-Chris Ball (1):
-      mmc: sdhci: Add platform suspend/resume hooks.
-
-Daniel Mack (1):
-      ARM: OMAP: hsmmc: add max_freq field
-
-Guennadi Liakhovetski (11):
-      mmc: tmio_mmc: do not enable card hotplug interrupts, if unused
-      mmc: simplify mmc_cd_gpio_request() by removing two parameters
-      mmc: tmio: calculate the native hotplug condition only once
-      mmc: tmio_mmc: support the generic MMC GPIO card hotplug helper
-      mmc: sh_mobile_sdhi: pass card hotplug GPIO number to TMIO MMC
-      mmc: tmio_mmc: power status flag doesn't have to be exposed in platform data
-      mmc: tmio_mmc: remove unused sdio_irq_enabled flag
-      mmc: sh_mobile_sdhi: do not manage PM clocks manually
-      mmc: tmio: cosmetic: prettify the tmio_mmc_set_ios() function
-      mmc: sh_mobile_sdhi: support modular mmc-core with non-standard hotplug
-      mmc: sh_mmcif: simplify bitmask macros
-
-Ido Yariv (2):
-      mmc: davinci: Eliminate spurious interrupts
-      mmc: davinci: Poll status for small size transfers
-
-Jaehoon Chung (6):
-      mmc: dw_mmc: add support for eMMC Power Off Notify feature
-      mmc: dw_mmc: Override blk_settings with platdata on IDMAC
-      mmc: core: add a debug message for SET_BLOCK_COUNT
-      mmc: dw_mmc: shift with slot-id for CLKENA register
-      mmc: dw_mmc: fix compile error when CONFIG_MMC_DW_IDMAC is disabled
-      mmc: core: warn when card doesn't support HPI
-
-Jerry Huang (2):
-      mmc: esdhc: Implement power management for ESDHC
-      mmc: esdhc: Workaround for data crc error on p1010rdb
-
-Ludovic Desroches (1):
-      mmc: atmel-mci: fix typo
-
-Rajendra Nayak (6):
-      mmc: omap_hsmmc: Get rid of omap_hsmmc_1_set_power function
-      mmc: omap_hsmmc: Get rid of omap_hsmmc_4_set_power function
-      mmc: omap_hsmmc: Don't expect MMC1 to always have vmmc supply
-      mmc: omap_hsmmc: convert all pr_* to dev_*
-      mmc: omap_hsmmc: Convert hsmmc driver to use device tree
-      mmc: omap_hsmmc: Avoid a regulator voltage change with dt
-
-Saugata Das (1):
-      mmc: MMC-4.5 Data Tag Support
-
-Seungwon Jeon (2):
-      mmc: dw_mmc: Add support for pre_req and post_req
-      mmc: dw_mmc: Regression fix for non-IDMAC DMA
-
-Shashidhar Hiremath (1):
-      mmc: Support of PCI mode in the dw_mmc driver
-
-Shimoda, Yoshihiro (1):
-      mmc: sh_mmcif: fix MMC_GEN_CMD setting
-
-Shiraz Hashim (1):
-      mmc: sdhci-spear: add pm callbacks to support hibernation
-
-Stephen Warren (1):
-      mmc: sdhci-tegra: Explicitly support Tegra30
-
-Subhash Jadavani (1):
-      mmc: core: hs200 fixes
-
-Tony Lindgren (1):
-      mmc: omap_hsmmc: Fix "Unbalanced pm_runtime_enable!" warning
-
-Ulf Hansson (2):
-      mmc: core: Detect card removal on I/O error
-      mmc: core: Clean up after mmc_pre_req if card was removed
-
- .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   33 +++
- arch/arm/mach-exynos/mach-nuri.c                   |    5 +-
- arch/arm/mach-exynos/mach-universal_c210.c         |    9 +-
- arch/arm/mach-omap2/hsmmc.c                        |    1 +
- arch/arm/mach-omap2/hsmmc.h                        |    2 +
- arch/arm/plat-omap/include/plat/mmc.h              |    2 -
- drivers/mmc/card/block.c                           |   21 +-
- drivers/mmc/core/cd-gpio.c                         |   13 +-
- drivers/mmc/core/core.c                            |  252 ++++-------------
- drivers/mmc/core/host.c                            |    1 -
- drivers/mmc/core/host.h                            |    1 -
- drivers/mmc/core/mmc.c                             |   55 +++--
- drivers/mmc/core/mmc_ops.c                         |   12 +-
- drivers/mmc/host/Kconfig                           |   25 ++
- drivers/mmc/host/Makefile                          |    2 +
- drivers/mmc/host/atmel-mci.c                       |    2 +-
- drivers/mmc/host/davinci_mmc.c                     |   66 ++++-
- drivers/mmc/host/dw_mmc-pci.c                      |  158 +++++++++++
- drivers/mmc/host/dw_mmc-pltfm.c                    |  134 +++++++++
- drivers/mmc/host/dw_mmc.c                          |  280 ++++++++++---------
- drivers/mmc/host/dw_mmc.h                          |    7 +
- drivers/mmc/host/omap_hsmmc.c                      |  293 ++++++++------------
- drivers/mmc/host/sdhci-of-esdhc.c                  |   37 +++-
- drivers/mmc/host/sdhci-pci.c                       |   47 +++-
- drivers/mmc/host/sdhci-spear.c                     |    9 +-
- drivers/mmc/host/sdhci-tegra.c                     |  100 ++++++-
- drivers/mmc/host/sdhci.c                           |   38 ++-
- drivers/mmc/host/sdhci.h                           |    2 +
- drivers/mmc/host/sh_mmcif.c                        |    2 -
- drivers/mmc/host/sh_mobile_sdhi.c                  |   29 ++-
- drivers/mmc/host/tmio_mmc.h                        |    9 +-
- drivers/mmc/host/tmio_mmc_pio.c                    |  108 ++++----
- include/linux/mfd/tmio.h                           |   26 ++-
- include/linux/mmc/card.h                           |    2 +
- include/linux/mmc/cd-gpio.h                        |    3 +-
- include/linux/mmc/core.h                           |    1 -
- include/linux/mmc/dw_mmc.h                         |    8 +-
- include/linux/mmc/host.h                           |   48 +---
- include/linux/mmc/mmc.h                            |    3 +
- include/linux/mmc/sdhci.h                          |    2 +
- include/linux/mmc/sh_mmcif.h                       |   21 +-
- include/linux/mmc/sh_mobile_sdhi.h                 |   14 +
- 42 files changed, 1161 insertions(+), 722 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
- create mode 100644 drivers/mmc/host/dw_mmc-pci.c
- create mode 100644 drivers/mmc/host/dw_mmc-pltfm.c
-
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+2012/3/29 Dong, Chuanxiao <chuanxiao.dong@intel.com>:
+>
+>> -----Original Message-----
+>> From: Namjae Jeon [mailto:linkinjeon@gmail.com]
+>> Sent: Thursday, March 29, 2012 11:30 AM
+>> To: Dong, Chuanxiao
+>> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; Hunter, Adrian
+>> Subject: Re: [Patch v1]mmc:core: correct mmc_erase_timeout calculati=
+on
+>>
+>> I think that write block delay * SECURE_ERASE_MULT is right in case =
+of secure
+>> erase + ERASE_GROUP_DEF disable.
+> Thanks Namjae, seems I misunderstand the meaning of "Erase Timeout". =
+It just means a timeout value for erase operation.
+>
+>>
+>> See the specification contents on 4.4.1.
+>> Erase / Secure Erase
+>> The duration of an erase command will be (order of magnitude) the nu=
+mber of
+>> Erase blocks to be erased multiplied by the block write delay. If ER=
+ASE_GROUP_DEF
+>> (EXT_CSD byte
+>> [175]) is enabled,
+>> ERASE_TIMEOUT_MULT should be used to calculate the duration.
+>> Secure Erase timeout is calculated based on the Erase Timeout and ad=
+ditional
+>> SEC_ERASE_MULT factor (EXT_CSD byte [230]).
+>>
+>> Thanks.
+>>
+>> 2012/3/29 Dong, Chuanxiao <chuanxiao.dong@intel.com>:
+>> >> -----Original Message-----
+>> >> From: Namjae Jeon [mailto:linkinjeon@gmail.com]
+>> >> Sent: Wednesday, March 28, 2012 8:36 PM
+>> >> To: Dong, Chuanxiao
+>> >> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; Hunter, Adrian
+>> >> Subject: Re: [Patch v1]mmc:core: correct mmc_erase_timeout
+>> >> calculation
+>> >>
+>> >> If ERASE_GROUP_DEF is disable with secure erase, erase timeout is
+>> >> calculated with 300ms * ERASE_TIMEOUT_MULT. Is it right ?
+>> >
+>> > My understanding about the JESD84-A441 is different with current
+>> mmc_mmc_erase_timeout implemented. From the EXT_CSD[230], seems no
+>> matter ERASE_GROUP_DEF is enabled or not, secure erase timeout is ca=
+lculated as
+>> 300ms * ERASE_TIMEOUT_MULT * SECURE_ERASE_MULT. That is why I submit=
+ted
+>> this patch.
+>> >
+>> > Does someone else can correct me if my understanding about the era=
+se timeout
+>> calculation is wrong?
+>> >
+>> > Thanks
+>> > Chuanxiao
+>> >
+>> >>
+>> >> Thanks.
+>> >>
+>> >> 2012/3/28 Dong, Chuanxiao <chuanxiao.dong@intel.com>:
+>> >> > What I am checking with is eMMC4.41 spec, not eMMC4.5 spec.
+>> >> > Forward you the link:
+>> >> > www.jedec.org/sites/default/files/docs/JESD84-A441.pdf
+>> >> >
+>> >> > Thanks
+>> >> > Chuanxiao
+>> >> >
+>> >> >> -----Original Message-----
+>> >> >> From: Namjae Jeon [mailto:linkinjeon@gmail.com]
+>> >> >> Sent: Wednesday, March 28, 2012 5:17 PM
+>> >> >> To: Dong, Chuanxiao
+>> >> >> Cc: linux-mmc@vger.kernel.org; cjb@laptop.org; Hunter, Adrian
+>> >> >> Subject: Re: [Patch v1]mmc:core: correct mmc_erase_timeout
+>> >> >> calculation
+>> >> >>
+>> >> >> Hi. Chuanxiao.
+>> >> >> Would you share your specification with me ?
+>> >> >> When I check the latest emmc 4.5 spec, I can not find it.
+>> >> >> Thanks.
+>> >> >>
+>> >> >> 2012/3/28 Chuanxiao Dong <chuanxiao.dong@intel.com>:
+>> >> >> > According to JEDEC 7.8.2, mmc_erase_timeout calculation shou=
+ld be
+>> follow:
+>> >> >> > 1. Secure erase timeout =3D 300ms * ERASE_TIMEOUT_MULT *
+>> >> >> > SEC_ERASE_MULT 2. Secure trim timeout =3D 300ms *
+>> >> >> > ERASE_TIMEOUT_MULT *
+>> >> SEC_TRIM_MULT 3.
+>> >> >> > Trim timeout =3D 300ms * TRIM_MULT 4. Erase timeout:
+>> >> >> > =C2=A0 a. if ERASE_GROUP_DEF is true: Erase timeout =3D 300m=
+s *
+>> >> >> > ERASE_TIMEOUT_MULT
+>> >> >> > =C2=A0 b. if ERASE_GROUP_DEF is false: Erase timeout =3D wri=
+te block
+>> >> >> > delay
+>> >> >> >
+>> >> >> > Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+>> >> >> > ---
+>> >> >> > =C2=A0drivers/mmc/core/core.c | =C2=A0 42
+>> >> >> > +++++++++++++++++++++++++++++-------------
+>> >> >> > =C2=A01 files changed, 29 insertions(+), 13 deletions(-)
+>> >> >> >
+>> >> >> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core=
+=2Ec
+>> >> >> > index 14f262e..d9d6d1c 100644
+>> >> >> > --- a/drivers/mmc/core/core.c
+>> >> >> > +++ b/drivers/mmc/core/core.c
+>> >> >> > @@ -1405,12 +1405,36 @@ static unsigned int
+>> >> >> > mmc_mmc_erase_timeout(struct mmc_card *card,
+>> >> >> > =C2=A0{
+>> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0unsigned int erase_timeout;
+>> >> >> >
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 if (card->ext_csd.erase_group_def & 1=
+) {
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 /* High C=
+apacity Erase Group Size uses HC
+>> >> >> > timeouts */
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (arg =3D=
+=3D MMC_TRIM_ARG)
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 erase_timeout =3D
+>> >> >> > card->ext_csd.trim_timeout;
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 /*
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* JEDEC 7.8.2
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0*
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* 1. Secure erase/trim timeout =
+is calculated absed on
+>> >> >> > + Erase Timeout
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* and additional SEC_ERASE_MULT=
+/SEC_TRIM_MULT.
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* So secure erase/trim timeout =
+=3D ERASE Timeout *
+>> >> >> > + SEC_ERASE_MULT/
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* SEC_TRIM_MULT.
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* ERASE Timeout =3D 300ms * ERA=
+SE_TIMEOUT_MULT
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0*
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* 2. trim timeout is calculated=
+ based on the TRIM_MULT factor.
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* So trim timeout =3D 300ms * T=
+RIM_MULT
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0*
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* 3. erase timeout calculation:
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0a. if ERA=
+SE_GROUP_DEF is enabled,
+>> >> >> > + ERASE_TIMEOUT_MULT should be
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0used to c=
+alculate erase timeout, so:
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0erase tim=
+eout =3D 300 * ERASE_TIMEOUT_MULT
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0b. if ERA=
+SE_GROUP_DEF is diabled, the duration
+>> >> >> > + of an erase
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0command w=
+ill be the number of Erase blocks to be
+>> >> >> > + erased
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0* =C2=A0 =C2=A0 =C2=A0multiplie=
+d by the block write delay.
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0*/
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 if (arg & MMC_SECURE_ARGS) {
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 erase_tim=
+eout =3D card->ext_csd.hc_erase_timeout;
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (arg =3D=
+=3D MMC_SECURE_ERASE_ARG)
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 erase_timeout *=3D
+>> >> >> > + card->ext_csd.sec_erase_mult;
+>> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0else
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 erase_timeout =3D
+>> >> >> > card->ext_csd.hc_erase_timeout;
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 erase_timeout *=3D
+>> >> >> > + card->ext_csd.sec_trim_mult;
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 } else if (arg & MMC_TRIM_ARGS) {
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 erase_tim=
+eout =3D card->ext_csd.trim_timeout;
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 } else if (card->ext_csd.erase_group_=
+def & 1) {
+>> >> >> > + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 erase_tim=
+eout =3D card->ext_csd.hc_erase_timeout;
+>> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0} else {
+>> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0/* CS=
+D Erase Group Size uses write timeout */
+>> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0unsig=
+ned int mult =3D (10 << card->csd.r2w_factor);
+>> >> >> > @@
+>> >> >> > -1441,14 +1465,6 @@ static unsigned int
+>> >> >> > mmc_mmc_erase_timeout(struct mmc_card *card,
+>> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ =C2=A0 =C2=A0 =C2=A0erase_timeout =3D 1;
+>> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0}
+>> >> >> >
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 /* Multiplier for secure operations *=
+/
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 if (arg & MMC_SECURE_ARGS) {
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (arg =3D=
+=3D MMC_SECURE_ERASE_ARG)
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 erase_timeout *=3D
+>> >> >> > card->ext_csd.sec_erase_mult;
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 else
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 erase_timeout *=3D
+>> >> >> > card->ext_csd.sec_trim_mult;
+>> >> >> > - =C2=A0 =C2=A0 =C2=A0 }
+>> >> >> > -
+>> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0erase_timeout *=3D qty;
+>> >> >> >
+>> >> >> > =C2=A0 =C2=A0 =C2=A0 =C2=A0/*
+>> >> >> > --
+>> >> >> > 1.7.1
+>> >> >> >
+>> >> >> > --
+>> >> >> > To unsubscribe from this list: send the line "unsubscribe li=
+nux-mmc"
+>> >> >> > in the body of a message to majordomo@vger.kernel.org More
+>> >> >> > majordomo info at =C2=A0http://vger.kernel.org/majordomo-inf=
+o.html
