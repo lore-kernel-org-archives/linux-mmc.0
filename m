@@ -1,111 +1,145 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v3 6/6] mmc: sdhci-s3c: Add device tree support
-Date: Fri, 30 Mar 2012 18:45:07 +0000
-Message-ID: <201203301845.07534.arnd@arndb.de>
-References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org> <201203301136.05038.arnd@arndb.de> <4F75D5C0.5050307@wwwdotorg.org>
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: Re: SDIO single irq optimization - Spurious interrupt notification
+ to function driver
+Date: Fri, 30 Mar 2012 15:05:25 -0400 (EDT)
+Message-ID: <alpine.LFD.2.02.1203301437460.24151@xanadu.home>
+References: <4F753D28.6020300@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <4F75D5C0.5050307@wwwdotorg.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Viresh Kumar <viresh.kumar@st.com>, "cjb@laptop.org" <cjb@laptop.org>, "patches@linaro.org" <patches@linaro.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Anton Vorontsov <anton.vorontsov@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "ben-linux@fluff.org" <ben-linux@fluff.org>, "kgene.kim@samsung.com" <kgene.kim@samsung.com>, Lee Jones <lee.jones@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Grant Likely <grant.likely@secretlab.ca>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:57106 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760138Ab2C3TFa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Mar 2012 15:05:30 -0400
+Received: by qcqw6 with SMTP id w6so556432qcq.19
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Mar 2012 12:05:29 -0700 (PDT)
+In-Reply-To: <4F753D28.6020300@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sujit Reddy Thumma <sthumma@codeaurora.org>, Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, per.forlin@linaro.org
 
-On Friday 30 March 2012, Stephen Warren wrote:
-> That property looks very reasonable.
-> 
-> Question: This would be a non-backwards-compatible change to the binding
-> definition. How should this be handled? In the past, I believe it's been
-> stated that new kernels need to run against old device trees, and hence
-> once a DT binding was defined and in use, it couldn't change except in a
-> backwards-compatible way. However, more recently, Grant has said that
-> his opinion is that (some or all?) bindings are currently considered
-> experimental and subject to change. And besides, the .dts files are
-> contained in the kernel tree at present... Some generally stated and
-> agreed upon policy here might be useful.
+On Fri, 30 Mar 2012, Sujit Reddy Thumma wrote:
 
-I tried to leave the ones that look like they've been around for a while
-backwards compatible (gpio, esdhc), while changing the relatively new
-ones without backwards compatibility code.
+> Hi,
+> 
+> While I was debugging an issue where the sdio function driver panics upon
+> receiving a spurious interrupt notification which is similar to the one found
+> on libertas sdio http://permalink.gmane.org/gmane.linux.kernel.mmc/8338
+> 
+> I can confirm that my hardware not buggy and is not generating any interrupts
+> during initialization and CCCR_INTx is all zero's.
 
-> > +Optional properties:
-> > +- cd-gpios : Specify GPIOs for card detection, see gpio binding
-> > +- wp-gpios : Specify GPIOs for write protection, see gpio binding
-> 
-> > +- cd-inverted: when present, polarity on the wp gpio line is inverted
-> > +- wp-inverted: when present, polarity on the wp gpio line is inverted
-> 
-> I'm not sure about those two: Some of the GPIO bindings have flags in
-> the GPIO specifier (Tegra, ARM PL061, gpio.txt mentions the possibility
-> of polarity being in the specifier), and bit 0 of the flags is used to
-> indicate inversion. I think that either we should rely on GPIO
-> specifiers having such flags and remove these xxx-inverted properties
-> from the MMC binding, or remove that flag bit from the GPIO bindings.
+Irrespective of whatever issue this optimization is uncovering, you 
+should _never_ panic when receiving a spurious interrupt notification.  
+This is just basic hardware driver programming practice to gracefully 
+deal with unexpected hardware state.  In this case, you should simply 
+notice that your function has no pending work and just return.  You 
+probably know this already but this is still worth mentioning again.
 
-Maybe the GPIO maintainer can comment on this. My understanding is
-that not all gpio controllers support this in their bindings. If they
-do, I agree that we can remove the extra properties here.
-
-> Note that anything using of_gpio_simple_xlate() is going to end up using
-> the GPIO flag definitions from <linux/of_gpio.h> in their GPIO
-> specifier, and there a number of active users of this feature; grep for
-> OF_GPIO_ACTIVE_LOW.
+> After some analysis, I found that there is a notification of interrupt to
+> function handler by sdio_irq_thread() even though there is no interrupt. The
+> sequence is as follows.
 > 
-> The rather begs the question why of_get_named_gpio() exists; surely
-> of_get_named_gpio_flags() should always be used so that consumers know
-> whether the GPIO value should be inverted, or are the GPIO flags
-> supposed to be processed by the OF/GPIO core or GPIO driver somehow, and
-> act transparently to GPIO consumers?
+> sdio_claim_host();
 > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt b/Documentation/devicetree/bindings/mmc/nvidia-sdhci.txt
+> sdio_claim_irq():
+> 	...
+> 	sdio_card_irq_get() -> kthread_run(sdio_irq_thread) ->
+> wake_up_sdio_irq_thread
+> 	sdio_single_irq_set() -> card->sdio_single_irq = func = sdio_func[i];
+> 	...
+> 
+> sdio_release_host();
+> 
+> Since we woke up sdio_irq_thread(), while this thread get a chance to run:
 > ...
-> > -- interrupts : Should contain SD/MMC interrupt
-> > +- interrupt  : Should contain SD/MMC interrupt
-> 
-> Isn't that usually pluralized, so interrupts?
-
-Right, my mistake.
-
-> > +- bus-width : Number of data lines, can be <1>, <4>, or <8>
-> 
-> For the device-specific binding documentation, rather than repeating the
-> core bindings, shouldn't we say something like:
-> 
-> This binding is based on the core MMC bindings documented in mmc.txt.
-> This file only documents additions or changes to those bindings.
-> 
-> ... and then remove any of the common properties from the individual files?
-
-yes, good idea.
-
-> > diff --git a/arch/arm/boot/dts/tegra-cardhu.dts b/arch/arm/boot/dts/tegra-cardhu.dts
+> __mmc_claim_host()
+> process_sdio_pending_irqs() -> since sdio_single_irq is non NULL the
+> func->handler is directly called without checking pending interrupt bit
+> CCCR_INTx.
+> mmc_release_host()
 > ...
-> > @@ -66,5 +67,6 @@
-> >  
-> >       sdhci@78000400 {
-> >               support-8bit;
-> > +             bus-width = <8>;
-> >       };
-> >  };
 > 
-> Ah OK, so the first phase is to add all the new standardize properties,
-> then later remove all the legacy properties once the drivers have been
-> updated.
-> 
-> You've missed additions of "non-removable", but I can add them later. or
-> provide you an incremental patch or something.
-> 
-> > diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> 
-> This doesn't seem to decode cd-inverted, or do anything with the
-> bus-width property value that it reads. Was that intentional?
+> Irrespective of the function driver state, sdio driver should not call
+> func->handler() if it is not real interrupt. I knew that function handler
+> should be able to handle these interrupts gracefully. But it is just not the
+> right thing for sdio driver to generate spurious interrupts.
 
-For now, I was trying to get the binding document right. I suppose as a follow-up,
-we can actually add a common helper function to decode these attributes and set
-the right flag in the mmc device, but that is not urgent. Right now, I mainly
-want to make sure we gain no new users that have conflicting bindings.
+I agree with you.  There is no point calling interrupt handlers 
+spuriously if we can.  The patch below should fix that.  But that 
+doesn't mean that your driver is not buggy as well.  In other words, the 
+patch below is no excuse for you not to fix your code too!
 
-	Arnd
+----- >8
+Subject: [PATCH] mmc: sdio: avoid spurious calls to interrupt handlers
+
+Commit 06e8935feb "optimized SDIO IRQ handling for single irq" 
+introduced some spurious calls to SDIO function interrupt handlers,
+such as when the SDIO IRQ thread is started, or the safety check 
+performed upon a system resume.  Let's add a flag to perform the
+optimization only when a real interrupt is signaled by the host
+driver and we know there is no point confirming it.
+
+Reported-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Signed-off-by: Nicolas Pitre <nico@linaro.org>
+Cc: stable@kernel.org
+
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index f573e7f9f7..3d8ceb4084 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -28,18 +28,20 @@
+ 
+ #include "sdio_ops.h"
+ 
+-static int process_sdio_pending_irqs(struct mmc_card *card)
++static int process_sdio_pending_irqs(struct mmc_host *host)
+ {
++	struct mmc_card *card = host->card;
+ 	int i, ret, count;
+ 	unsigned char pending;
+ 	struct sdio_func *func;
+ 
+ 	/*
+ 	 * Optimization, if there is only 1 function interrupt registered
+-	 * call irq handler directly
++	 * and we know an IRQ was signaled then call irq handler directly.
++	 * Otherwise do the full probe.
+ 	 */
+ 	func = card->sdio_single_irq;
+-	if (func) {
++	if (func && host->sdio_irq_pending) {
+ 		func->irq_handler(func);
+ 		return 1;
+ 	}
+@@ -116,7 +118,8 @@ static int sdio_irq_thread(void *_host)
+ 		ret = __mmc_claim_host(host, &host->sdio_irq_thread_abort);
+ 		if (ret)
+ 			break;
+-		ret = process_sdio_pending_irqs(host->card);
++		ret = process_sdio_pending_irqs(host);
++		host->sdio_irq_pending = false;
+ 		mmc_release_host(host);
+ 
+ 		/*
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index ee2b0363c0..557aa4cd66 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -323,6 +323,7 @@ struct mmc_host {
+ 
+ 	unsigned int		sdio_irqs;
+ 	struct task_struct	*sdio_irq_thread;
++	bool			sdio_irq_pending;
+ 	atomic_t		sdio_irq_thread_abort;
+ 
+ 	mmc_pm_flag_t		pm_flags;	/* requested pm features */
+@@ -378,6 +379,7 @@ extern int mmc_cache_ctrl(struct mmc_host *, u8);
+ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+ {
+ 	host->ops->enable_sdio_irq(host, 0);
++	host->sdio_irq_pending = true;
+ 	wake_up_process(host->sdio_irq_thread);
+ }
+ 
