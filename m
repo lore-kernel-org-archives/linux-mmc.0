@@ -1,35 +1,71 @@
-From: Viresh Kumar <viresh.kumar@st.com>
-Subject: Re: [PATCH v3 6/6] mmc: sdhci-s3c: Add device tree support
-Date: Fri, 30 Mar 2012 12:03:53 +0530
-Message-ID: <4F7553D1.4030008@st.com>
-References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org> <1328032576-9269-7-git-send-email-thomas.abraham@linaro.org> <201203271619.13320.arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-15"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog106.obsmtp.com ([207.126.144.121]:52386 "EHLO
-	eu1sys200aog106.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754525Ab2C3Gfr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Mar 2012 02:35:47 -0400
-In-Reply-To: <201203271619.13320.arnd@arndb.de>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: [PATCH v2 1/1] mmc: bus: print bus speed mode of UHS-I card
+Date: Fri, 30 Mar 2012 12:10:18 +0530
+Message-ID: <1333089618-20627-1-git-send-email-subhashj@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, aaron.lu@amd.com, arindam.nath@amd.com, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>, "cjb@laptop.org" <cjb@laptop.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Lee Jones <lee.jones@linaro.org>, Rajendra Nayak <rnayak@ti.com>, Stephen Warren <swarren@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "kgene.kim@samsung.com" <kgene.kim@samsung.com>, "ben-linux@fluff.org" <ben-linux@fluff.org>, "patches@linaro.org" <patches@linaro.org>
 
-On 3/27/2012 9:49 PM, Arnd Bergmann wrote:
-> These bindings came up in a discussion IRC today. I think it's rather bad that
-> we can't agree on a common way to name the properties for mmc. We have
-> bindings being proposed or already included from Anton, Stephen, Shawn,
-> Rajendra, Viresh, Lee and Thomas. Almost all of them define GPIO pins
-> for card detect and write protect, as well properties to define the bus
-> width and high-speed modes, but we seem to have almost as many different
-> definitions of these as we have drivers.
-> 
-> Can we please come up with a common binding for these?
+When UHS-I card is detected also print the bus speed mode
+in which UHS-I card will be running.
 
-Is there any progress on this? Sorry i wasn't following all mails.
-How should i progress for sdhci-spear?
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+---
+ drivers/mmc/core/bus.c |   17 +++++++++++++++--
+ 1 files changed, 15 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 5d011a3..3f60606 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -267,6 +267,15 @@ int mmc_add_card(struct mmc_card *card)
+ {
+ 	int ret;
+ 	const char *type;
++	const char *uhs_bus_speed_mode = "";
++	static const char *const uhs_speeds[] = {
++		[UHS_SDR12_BUS_SPEED] = "SDR12 ",
++		[UHS_SDR25_BUS_SPEED] = "SDR25 ",
++		[UHS_SDR50_BUS_SPEED] = "SDR50 ",
++		[UHS_SDR104_BUS_SPEED] = "SDR104 ",
++		[UHS_DDR50_BUS_SPEED] = "DDR50 ",
++	};
++
+ 
+ 	dev_set_name(&card->dev, "%s:%04x", mmc_hostname(card->host), card->rca);
+ 
+@@ -296,6 +305,10 @@ int mmc_add_card(struct mmc_card *card)
+ 		break;
+ 	}
+ 
++	if (mmc_sd_card_uhs(card) &&
++		(card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
++		uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
++
+ 	if (mmc_host_is_spi(card->host)) {
+ 		pr_info("%s: new %s%s%s card on SPI\n",
+ 			mmc_hostname(card->host),
+@@ -303,13 +316,13 @@ int mmc_add_card(struct mmc_card *card)
+ 			mmc_card_ddr_mode(card) ? "DDR " : "",
+ 			type);
+ 	} else {
+-		pr_info("%s: new %s%s%s%s card at address %04x\n",
++		pr_info("%s: new %s%s%s%s%s card at address %04x\n",
+ 			mmc_hostname(card->host),
+ 			mmc_card_uhs(card) ? "ultra high speed " :
+ 			(mmc_card_highspeed(card) ? "high speed " : ""),
+ 			(mmc_card_hs200(card) ? "HS200 " : ""),
+ 			mmc_card_ddr_mode(card) ? "DDR " : "",
+-			type, card->rca);
++			uhs_bus_speed_mode, type, card->rca);
+ 	}
+ 
+ #ifdef CONFIG_DEBUG_FS
 -- 
-viresh
+1.7.1.1
+
+--
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
