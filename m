@@ -1,59 +1,26 @@
-From: Alex Dubov <oakad@yahoo.com>
-Subject: Re: Possible issue with tifm_7xx1 and interrupt latency
-Date: Sat, 31 Mar 2012 06:49:27 -0700 (PDT)
-Message-ID: <1333201767.36239.YahooMailNeo@web121005.mail.ne1.yahoo.com>
-References: <20120330113915.GE9075@marvin.atrad.com.au>
-Reply-To: Alex Dubov <oakad@yahoo.com>
+From: "jin mong" <jjgoldaraz@madrid.uned.es>
+Subject: (unknown)
+Date: Sat, 31 Mar 2012 16:44:59 +0200
+Message-ID: <3a94b2e2c543be25d22e6fcf2a1cd522.squirrel@correo.uned.es>
+Reply-To: jinmong22@yahoo.co.jp
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20120330113915.GE9075@marvin.atrad.com.au>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jonathan Woithe <jwoithe@just42.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp-out-cinco.uned.es ([62.204.192.119]:47787 "EHLO
+	smtp-out-cinco.uned.es" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757449Ab2CaOpU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 31 Mar 2012 10:45:20 -0400
+Subject: 
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+Greetings Partner,
 
+This is my second time of sending you this notice. I have finally found
+you as an approved heir to the inheritance of the deposited funds with
+same surname of the deceased depositor.
 
+Jin Mong
+Email: jinmong22@yahoo.co.jp
 
-
------ Original Message -----
-> From: Jonathan Woithe <jwoithe@just42.net>
->=20
-> Although somewhat circumstancial, during the debugging of a FFADO iss=
-ue with
-> a user it seemed possible that the tifm_7xx1 module may have been swi=
-tching
-> interrupts off for long periods of time.=A0 For a full history of the=
- problem
-> please refer to
->=20
-> =A0 http://subversion.ffado.org/ticket/250
->=20
-> Unfortunately the original reporter no longer has access to the hardw=
-are
-> concerned and the report itself dates from 2 years ago (I kept forget=
-ting
-> to report it).=A0 However, it may be useful none-the-less.
-
-Unfortunately, I don't have access to that hardware either.
-
-However, there are really only few operations in that driver between "i=
-rqsave"
-and "irqrestore", unless PIO mode is used (which may, ostensibly, cause=
- this
-sort of interrupt delays). On the other hand, PIO mode there is purely =
-intended
-for troubleshooting purposes and can only be enabled through special mo=
-dule
-parameter by an adventurous user.
-
->=20
-> Please CC me any replies.
->=20
-> Thanks
-> =A0 jonathan
-
-Regards,
-Alex
