@@ -1,80 +1,58 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 1/1] mmc: bus: print bus speed mode of UHS-I card
-Date: Sun, 01 Apr 2012 00:29:19 -0400
-Message-ID: <87sjgokrc0.fsf@laptop.org>
-References: <1333089618-20627-1-git-send-email-subhashj@codeaurora.org>
+From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 07/11] gpio: tegra: Hide tegra_gpio_enable/disable()
+Date: Sun, 01 Apr 2012 00:32:32 -0400
+Message-ID: <87mx6wkr6n.fsf@laptop.org>
+References: <1333148404-17691-1-git-send-email-swarren@wwwdotorg.org>
+	<1333148404-17691-8-git-send-email-swarren@wwwdotorg.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1333089618-20627-1-git-send-email-subhashj@codeaurora.org>
-	(Subhash Jadavani's message of "Fri, 30 Mar 2012 12:10:18 +0530")
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, aaron.lu@amd.com, arindam.nath@amd.com
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1333148404-17691-8-git-send-email-swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+	(Stephen Warren's message of "Fri, 30 Mar 2012 17:00:00 -0600")
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Cc: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Stephen,
 
-On Fri, Mar 30 2012, Subhash Jadavani wrote:
-> When UHS-I card is detected also print the bus speed mode
-> in which UHS-I card will be running.
+On Fri, Mar 30 2012, Stephen Warren wrote:
+> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 >
-> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> Recent pinctrl discussions concluded that gpiolib APIs should in fact do
+> whatever is required to mux a GPIO onto pins, by calling pinctrl APIs if
+> required. This change implements this for the Tegra GPIO driver, and removes
+> calls to the Tegra-specific APIs from drivers and board files.
+>
+> Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+> Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 > ---
->  drivers/mmc/core/bus.c |   17 +++++++++++++++--
->  1 files changed, 15 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index 5d011a3..3f60606 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -267,6 +267,15 @@ int mmc_add_card(struct mmc_card *card)
->  {
->  	int ret;
->  	const char *type;
-> +	const char *uhs_bus_speed_mode = "";
-> +	static const char *const uhs_speeds[] = {
-> +		[UHS_SDR12_BUS_SPEED] = "SDR12 ",
-> +		[UHS_SDR25_BUS_SPEED] = "SDR25 ",
-> +		[UHS_SDR50_BUS_SPEED] = "SDR50 ",
-> +		[UHS_SDR104_BUS_SPEED] = "SDR104 ",
-> +		[UHS_DDR50_BUS_SPEED] = "DDR50 ",
-> +	};
-> +
->  
->  	dev_set_name(&card->dev, "%s:%04x", mmc_hostname(card->host), card->rca);
->  
-> @@ -296,6 +305,10 @@ int mmc_add_card(struct mmc_card *card)
->  		break;
->  	}
->  
-> +	if (mmc_sd_card_uhs(card) &&
-> +		(card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
-> +		uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
-> +
->  	if (mmc_host_is_spi(card->host)) {
->  		pr_info("%s: new %s%s%s card on SPI\n",
->  			mmc_hostname(card->host),
-> @@ -303,13 +316,13 @@ int mmc_add_card(struct mmc_card *card)
->  			mmc_card_ddr_mode(card) ? "DDR " : "",
->  			type);
->  	} else {
-> -		pr_info("%s: new %s%s%s%s card at address %04x\n",
-> +		pr_info("%s: new %s%s%s%s%s card at address %04x\n",
->  			mmc_hostname(card->host),
->  			mmc_card_uhs(card) ? "ultra high speed " :
->  			(mmc_card_highspeed(card) ? "high speed " : ""),
->  			(mmc_card_hs200(card) ? "HS200 " : ""),
->  			mmc_card_ddr_mode(card) ? "DDR " : "",
-> -			type, card->rca);
-> +			uhs_bus_speed_mode, type, card->rca);
->  	}
->  
->  #ifdef CONFIG_DEBUG_FS
+> v2: Adjusted per changes to latest version of Documentation/gpio.txt.
+> Fixed tegra_board_pinmux_bus_notify() to still check the device name,
+> so it waits for the pinmux device to be registered, not just /any/ device.
+> ---
+>  arch/arm/mach-tegra/board-dt-tegra20.c        |    1 -
+>  arch/arm/mach-tegra/board-harmony-pinmux.c    |   17 -----------
+>  arch/arm/mach-tegra/board-paz00-pinmux.c      |   14 ---------
+>  arch/arm/mach-tegra/board-pinmux.c            |   33 +++--------------------
+>  arch/arm/mach-tegra/board-pinmux.h            |    5 ---
+>  arch/arm/mach-tegra/board-seaboard-pinmux.c   |   32 ----------------------
+>  arch/arm/mach-tegra/board-seaboard.c          |    1 -
+>  arch/arm/mach-tegra/board-trimslice-pinmux.c  |   12 --------
+>  arch/arm/mach-tegra/include/mach/gpio-tegra.h |    9 ------
+>  arch/arm/mach-tegra/usb_phy.c                 |    1 -
+>  drivers/gpio/gpio-tegra.c                     |   36 ++++++++++++------------
 
-Thanks, pushed to mmc-next for 3.5 with Aaron's ACK.
+For this hunk:
+
+>  drivers/mmc/host/sdhci-tegra.c                |   24 +++-------------
+
+Acked-by: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+
+Thanks,
 
 - Chris.
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
 One Laptop Per Child
