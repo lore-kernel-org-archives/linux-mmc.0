@@ -1,76 +1,78 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci-pci: add quirks for broken MSI on O2Micro controllers
-Date: Sun, 01 Apr 2012 00:25:37 -0400
-Message-ID: <87wr60kri6.fsf@laptop.org>
-References: <1333040704-2179-1-git-send-email-manuel.lauss@googlemail.com>
+Subject: Re: [PATCH v2 1/1] mmc: bus: print bus speed mode of UHS-I card
+Date: Sun, 01 Apr 2012 00:29:19 -0400
+Message-ID: <87sjgokrc0.fsf@laptop.org>
+References: <1333089618-20627-1-git-send-email-subhashj@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35465 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750816Ab2DAEZc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 1 Apr 2012 00:25:32 -0400
-In-Reply-To: <1333040704-2179-1-git-send-email-manuel.lauss@googlemail.com>
-	(Manuel Lauss's message of "Thu, 29 Mar 2012 19:05:04 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1333089618-20627-1-git-send-email-subhashj@codeaurora.org>
+	(Subhash Jadavani's message of "Fri, 30 Mar 2012 12:10:18 +0530")
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, aaron.lu@amd.com, arindam.nath@amd.com
 List-Id: linux-mmc@vger.kernel.org
-To: Manuel Lauss <manuel.lauss@googlemail.com>
-Cc: linux-mmc@vger.kernel.org, Alexander Stein <alexander.stein@systec-electronic.com>
 
-Hi Manuel,
+Hi,
 
-On Thu, Mar 29 2012, Manuel Lauss wrote:
-> MSI on my O2Micro OZ600 SD card reader is broken.  This patch adds a quirk
-> to disable MSI on these controllers.
+On Fri, Mar 30 2012, Subhash Jadavani wrote:
+> When UHS-I card is detected also print the bus speed mode
+> in which UHS-I card will be running.
 >
-> Signed-off-by: Manuel Lauss <manuel.lauss@googlemail.com>
+> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
 > ---
->  drivers/mmc/host/sdhci-pci.c |    4 +++-
->  include/linux/mmc/sdhci.h    |    2 ++
->  2 files changed, 5 insertions(+), 1 deletions(-)
+>  drivers/mmc/core/bus.c |   17 +++++++++++++++--
+>  1 files changed, 15 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index fbbebe2..9303f7f 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -561,6 +561,7 @@ static int jmicron_resume(struct sdhci_pci_chip *chip)
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index 5d011a3..3f60606 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -267,6 +267,15 @@ int mmc_add_card(struct mmc_card *card)
+>  {
+>  	int ret;
+>  	const char *type;
+> +	const char *uhs_bus_speed_mode = "";
+> +	static const char *const uhs_speeds[] = {
+> +		[UHS_SDR12_BUS_SPEED] = "SDR12 ",
+> +		[UHS_SDR25_BUS_SPEED] = "SDR25 ",
+> +		[UHS_SDR50_BUS_SPEED] = "SDR50 ",
+> +		[UHS_SDR104_BUS_SPEED] = "SDR104 ",
+> +		[UHS_DDR50_BUS_SPEED] = "DDR50 ",
+> +	};
+> +
 >  
->  static const struct sdhci_pci_fixes sdhci_o2 = {
->  	.probe		= o2_probe,
-> +	.quirks2	= SDHCI_QUIRK2_BROKEN_MSI,
->  };
+>  	dev_set_name(&card->dev, "%s:%04x", mmc_hostname(card->host), card->rca);
 >  
->  static const struct sdhci_pci_fixes sdhci_jmicron = {
-> @@ -1418,7 +1419,8 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
+> @@ -296,6 +305,10 @@ int mmc_add_card(struct mmc_card *card)
+>  		break;
+>  	}
 >  
->  	slots = chip->num_slots;	/* Quirk may have changed this */
+> +	if (mmc_sd_card_uhs(card) &&
+> +		(card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
+> +		uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
+> +
+>  	if (mmc_host_is_spi(card->host)) {
+>  		pr_info("%s: new %s%s%s card on SPI\n",
+>  			mmc_hostname(card->host),
+> @@ -303,13 +316,13 @@ int mmc_add_card(struct mmc_card *card)
+>  			mmc_card_ddr_mode(card) ? "DDR " : "",
+>  			type);
+>  	} else {
+> -		pr_info("%s: new %s%s%s%s card at address %04x\n",
+> +		pr_info("%s: new %s%s%s%s%s card at address %04x\n",
+>  			mmc_hostname(card->host),
+>  			mmc_card_uhs(card) ? "ultra high speed " :
+>  			(mmc_card_highspeed(card) ? "high speed " : ""),
+>  			(mmc_card_hs200(card) ? "HS200 " : ""),
+>  			mmc_card_ddr_mode(card) ? "DDR " : "",
+> -			type, card->rca);
+> +			uhs_bus_speed_mode, type, card->rca);
+>  	}
 >  
-> -	pci_enable_msi(pdev);
-> +	if (!(chip->quirks2 & SDHCI_QUIRK2_BROKEN_MSI))
-> +		pci_enable_msi(pdev);
+>  #ifdef CONFIG_DEBUG_FS
 
-Please wrap the call to pci_disable_msi() too.  (It looks like
-this isn't strictly necessary, but not doing so makes the reader
-wonder whether you made a mistake preparing your patch.)
-
->  
->  	for (i = 0; i < slots; i++) {
->  		slot = sdhci_pci_probe_slot(pdev, chip, first_bar, i);
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index e9051e1..9752fe4 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -91,6 +91,8 @@ struct sdhci_host {
->  	unsigned int quirks2;	/* More deviations from spec. */
->  
->  #define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
-> +/* broken MSI Interrupts */
-> +#define SDHCI_QUIRK2_BROKEN_MSI				(1<<1)
->  
->  	int irq;		/* Device IRQ */
->  	void __iomem *ioaddr;	/* Mapped address */
-
-Thanks,
+Thanks, pushed to mmc-next for 3.5 with Aaron's ACK.
 
 - Chris.
 -- 
