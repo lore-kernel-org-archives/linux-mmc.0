@@ -1,45 +1,85 @@
-From: Mark Brown <broonie-yzvPICuk2AATkU/dhu1WVueM+bqZidxxQQ4Iyu8u01E@public.gmane.org>
-Subject: Re: [PATCH v3 6/6] mmc: sdhci-s3c: Add device tree support
-Date: Sun, 1 Apr 2012 12:29:49 +0100
-Message-ID: <20120401112949.GA19107@sirena.org.uk>
-References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
- <201203301136.05038.arnd@arndb.de> <4F75D5C0.5050307@wwwdotorg.org>
- <201203301845.07534.arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <201203301845.07534.arnd-r2nGTMty4D4@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Viresh Kumar <viresh.kumar-qxv4g6HH51o@public.gmane.org>, "linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org" <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Anton Vorontsov <anton.vorontsov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org" <kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org" <ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org>, "cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org" <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+From: Manuel Lauss <manuel.lauss@googlemail.com>
+Subject: [PATCH v2] mmc: sdhci-pci: add quirk for broken MSI on O2Micro ctrls.
+Date: Sun,  1 Apr 2012 14:46:12 +0200
+Message-ID: <1333284372-4256-1-git-send-email-manuel.lauss@googlemail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:46481 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751948Ab2DAMqS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 1 Apr 2012 08:46:18 -0400
+Received: by wgbdr13 with SMTP id dr13so1883829wgb.1
+        for <linux-mmc@vger.kernel.org>; Sun, 01 Apr 2012 05:46:17 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Manuel Lauss <manuel.lauss@googlemail.com>
 
-On Fri, Mar 30, 2012 at 06:45:07PM +0000, Arnd Bergmann wrote:
-> On Friday 30 March 2012, Stephen Warren wrote:
+MSI on my O2Micro OZ600 SD card reader is broken.  This patch adds a quirk
+to disable MSI on these controllers.
 
-> > > +- cd-inverted: when present, polarity on the wp gpio line is inverted
-> > > +- wp-inverted: when present, polarity on the wp gpio line is inverted
+Signed-off-by: Manuel Lauss <manuel.lauss@googlemail.com>
+---
+v2: also wrap pci_disable_msi() calls as requested by Chris Ball.
 
-> > I'm not sure about those two: Some of the GPIO bindings have flags in
-> > the GPIO specifier (Tegra, ARM PL061, gpio.txt mentions the possibility
-> > of polarity being in the specifier), and bit 0 of the flags is used to
-> > indicate inversion. I think that either we should rely on GPIO
-> > specifiers having such flags and remove these xxx-inverted properties
-> > from the MMC binding, or remove that flag bit from the GPIO bindings.
+ drivers/mmc/host/sdhci-pci.c |   10 +++++++---
+ include/linux/mmc/sdhci.h    |    2 ++
+ 2 files changed, 9 insertions(+), 3 deletions(-)
 
-> Maybe the GPIO maintainer can comment on this. My understanding is
-> that not all gpio controllers support this in their bindings. If they
-> do, I agree that we can remove the extra properties here.
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index fbbebe2..5439b18 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -561,6 +561,7 @@ static int jmicron_resume(struct sdhci_pci_chip *chip)
+ 
+ static const struct sdhci_pci_fixes sdhci_o2 = {
+ 	.probe		= o2_probe,
++	.quirks2	= SDHCI_QUIRK2_BROKEN_MSI,
+ };
+ 
+ static const struct sdhci_pci_fixes sdhci_jmicron = {
+@@ -1418,7 +1419,8 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
+ 
+ 	slots = chip->num_slots;	/* Quirk may have changed this */
+ 
+-	pci_enable_msi(pdev);
++	if (!(chip->quirks2 & SDHCI_QUIRK2_BROKEN_MSI))
++		pci_enable_msi(pdev);
+ 
+ 	for (i = 0; i < slots; i++) {
+ 		slot = sdhci_pci_probe_slot(pdev, chip, first_bar, i);
+@@ -1438,7 +1440,8 @@ static int __devinit sdhci_pci_probe(struct pci_dev *pdev,
+ 	return 0;
+ 
+ free:
+-	pci_disable_msi(pdev);
++	if (!(chip->quirks2 & SDHCI_QUIRK2_BROKEN_MSI))
++		pci_disable_msi(pdev);
+ 
+ 	pci_set_drvdata(pdev, NULL);
+ 	kfree(chip);
+@@ -1462,7 +1465,8 @@ static void __devexit sdhci_pci_remove(struct pci_dev *pdev)
+ 		for (i = 0; i < chip->num_slots; i++)
+ 			sdhci_pci_remove_slot(chip->slots[i]);
+ 
+-		pci_disable_msi(pdev);
++		if (!(chip->quirks2 & SDHCI_QUIRK2_BROKEN_MSI))
++			pci_disable_msi(pdev);
+ 
+ 		pci_set_drvdata(pdev, NULL);
+ 		kfree(chip);
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index e9051e1..9752fe4 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -91,6 +91,8 @@ struct sdhci_host {
+ 	unsigned int quirks2;	/* More deviations from spec. */
+ 
+ #define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
++/* broken MSI Interrupts */
++#define SDHCI_QUIRK2_BROKEN_MSI				(1<<1)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
+-- 
+1.7.8.5
 
-Surely it'd be better to fix this at the GPIO controller end rather than
-having a patchwork of approaches?
