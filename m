@@ -1,84 +1,55 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [RFC] MMC-4.5 Power OFF Notify rework
-Date: Mon, 2 Apr 2012 17:56:21 +0200
-Message-ID: <CACRpkdY1-n_pa+Da6uQFGFPPk1HP0FeyM=WiYOm4S6Yni3492g@mail.gmail.com>
-References: <1333101747-3200-1-git-send-email-girish.shivananjappa@linaro.org>
-	<CACRpkdYY1v_6rfPwDgSw+ncYy3iz8BGEHucHJmag+Vyuu7uk7w@mail.gmail.com>
-	<CAKLKtzeaOFbjFdB_n0bHXOyFVMpPWw-sJLObfXTs-xE9TXc7cA@mail.gmail.com>
+From: Rik van Riel <riel@redhat.com>
+Subject: Re: swap on eMMC and other flash
+Date: Mon, 02 Apr 2012 12:51:49 -0400
+Message-ID: <4F79D925.7070900@redhat.com>
+References: <201203301744.16762.arnd@arndb.de> <201203301850.22784.arnd@arndb.de> <alpine.LSU.2.00.1203311230490.10965@eggly.anvils> <26E7A31274623843B0E8CF86148BFE326FB55F8B@NTXAVZMBX04.azit.micron.com> <alpine.LSU.2.00.1204020754180.1847@eggly.anvils>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:44669 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751568Ab2DBP4W convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Apr 2012 11:56:22 -0400
-Received: by yenl12 with SMTP id l12so1270082yen.19
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Apr 2012 08:56:22 -0700 (PDT)
-In-Reply-To: <CAKLKtzeaOFbjFdB_n0bHXOyFVMpPWw-sJLObfXTs-xE9TXc7cA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <alpine.LSU.2.00.1204020754180.1847@eggly.anvils>
+Sender: owner-linux-mm@kvack.org
+To: Hugh Dickins <hughd@google.com>
+Cc: "Luca Porzio (lporzio)" <lporzio@micron.com>, Arnd Bergmann <arnd@arndb.de>, "linaro-kernel@lists.linaro.org" <linaro-kernel@lists.linaro.org>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Alex Lemberg <alex.lemberg@sandisk.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Saugata Das <saugata.das@linaro.org>, Venkatraman S <venkat@linaro.org>, Yejin Moon <yejin.moon@samsung.com>, Hyojin Jeong <syr.jeong@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kernel-team@android.com" <kernel-team@android.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Saugata Das <saugata.das@linaro.org>
-Cc: Girish K S <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org, patches@linaro.org, ulf.hansson@stericsson.com
 
-On Mon, Apr 2, 2012 at 10:47 AM, Saugata Das <saugata.das@linaro.org> w=
-rote:
-
->>> + =A0 =A0 =A0 host->power_notify_type =3D MMC_HOST_PW_NOTIFY_LONG;
+On 04/02/2012 10:58 AM, Hugh Dickins wrote:
+> On Mon, 2 Apr 2012, Luca Porzio (lporzio) wrote:
 >>
->> This looks new, can you explain in the code as comments
->> or in the commit message when SHORT and LONG notifications are
->> used and why?
+>> Great topics. As per one of Rik original points:
 >>
->
-> The mmc_poweroff_notify with MMC_HOST_PW_NOTIFY_LONG will take longer
-> time =A0to complete than MMC_HOST_PW_NOTIFY_SHORT. So, the idea is th=
-at
-> if we use mmc_poweroff_notify on suspend path, then we should use
-> MMC_HOST_PW_NOTIFY_SHORT and if we use mmc_poweroff_notify from the
-> shutdown path, then we should use MMC_HOST_PW_NOTIFY_LONG.
->
-> We will add this in the description.
-
-OK sounds good.
-
->>> @@ -1338,12 +1338,18 @@ static int mmc_suspend(struct mmc_host *hos=
-t)
->>> =A0 =A0 =A0 =A0BUG_ON(!host->card);
+>>> 4) skip writeout of zero-filled pages - this can be a big help
+>>>      for KVM virtual machines running Windows, since Windows zeroes
+>>>      out free pages;   simply discarding a zero-filled page is not
+>>>      at all simple in the current VM, where we would have to iterate
+>>>      over all the ptes to free the swap entry before being able to
+>>>      free the swap cache page (I am not sure how that locking would
+>>>      even work)
 >>>
->>> =A0 =A0 =A0 =A0mmc_claim_host(host);
->>> - =A0 =A0 =A0 if (mmc_card_can_sleep(host)) {
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_card_sleep(host);
->>> + =A0 =A0 =A0 if (host->caps2 & MMC_CAP2_POWER_OFF_VCCQ_DURING_SUSP=
-END) {
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_poweroff_notify(host);
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (!err)
->>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_set_sleep(ho=
-st->card);
->>> - =A0 =A0 =A0 } else if (!mmc_host_is_spi(host))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
->>> + =A0 =A0 =A0 }
->>> +
->>> + =A0 =A0 =A0 if (mmc_card_can_sleep(host))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_card_sleep(host);
->>> + =A0 =A0 =A0 else if (!mmc_host_is_spi(host))
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_deselect_cards(host);
+>>>      with the extra layer of indirection, the locking for this scheme
+>>>      can be trivial - either the faulting process gets the old page,
+>>>      or it gets a new one, either way it'll be zero filled
+>>>
 >>
->> Are you sure you should not deselect the card on an SPI host also if
->> you power off? (I'm just confused, better to ask...)
->>
+>> Since it's KVMs realm here, can't KSM simply solve the zero-filled pages problem avoiding unnecessary burden for the Swap subsystem?
 >
-> eMMC does not support SPI mode. So, the POWER OFF NOTIFY, which is an
-> eMMC feature, can not be used on SPI mode. The above code (which you
-> are referring) puts the eMMC to low power "standby" state with
-> mmc_deselect_cards if sleep is not allowed. This logic has not been
-> modified by the POWER OFF NOTIFY patch.
+> I would expect that KSM already does largely handle this, yes.
+> But it's also quite possible that I'm missing Rik's point.
 
-OK I would add a small comment above the else if (!mmc_host_is_spi(host=
-))
-such as /* SPI mode is only used external cards */ or so, it helsps whe=
-n
-reading the code.
+Indeed, KSM handles it already.
 
-Yours,
-Linus Walleij
+However, it may be worthwhile for non-KVM users of transparent
+huge pages to discard zero-filled parts of pages (allocated by
+the kernel to the process, but not used memory).
+
+Not just because it takes up swap space (writing to swap is
+easy, space is cheap), but because not swapping that memory
+back in later (because it is not used) will prevent us from
+re-building the transparent huge page...
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
