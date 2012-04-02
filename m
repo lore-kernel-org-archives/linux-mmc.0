@@ -1,72 +1,52 @@
-From: Alan Cooper <alcooperx@gmail.com>
-Subject: Re: [PATCH] mmc: Prevent 1.8V switch for SD hosts that don't support
- UHS modes.
-Date: Mon, 2 Apr 2012 14:29:18 -0400
-Message-ID: <CAOGqxeWdOjkSTa2N5GwCvGb02zge+66_CT=0u7upznoWVfUCcw@mail.gmail.com>
-References: <1331927657-2849-1-git-send-email-acooper@gmail.com>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: Re: [PATCH v3 0/6] mmc: sdhci-s3c: Rework platform data and add device
+ tree support
+Date: Mon, 02 Apr 2012 12:08:23 -0700
+Message-ID: <4F79F927.5060707@samsung.com>
+References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org> <003401cce730$baf979a0$30ec6ce0$%kim@samsung.com> <m2aa4pkq5g.fsf@bob.laptop.org> <4F3CFEED.6060206@samsung.com> <m239abgc32.fsf@bob.laptop.org> <00b901ccf08d$2fc18b50$8f44a1f0$%kim@samsung.com> <m2vcn0496y.fsf@bob.laptop.org> <87k426vy9r.fsf@laptop.org> <20120328095450.GA23005@sirena.org.uk> <4F73D3D7.1010202@samsung.com> <87zkawmf08.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:51458 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753574Ab2DBS3T convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Apr 2012 14:29:19 -0400
-Received: by vcqp1 with SMTP id p1so1863823vcq.19
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Apr 2012 11:29:19 -0700 (PDT)
-In-Reply-To: <1331927657-2849-1-git-send-email-acooper@gmail.com>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:64607 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751295Ab2DBTI0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Apr 2012 15:08:26 -0400
+In-Reply-To: <87zkawmf08.fsf@laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Kukjin Kim <kgene.kim@samsung.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, linux-samsung-soc@vger.kernel.org, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, 'Thomas Abraham' <thomas.abraham@linaro.org>, ben-linux@fluff.org, linux-arm-kernel@lists.infradead.org, 'Olof Johansson' <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>
 
-Still hoping for comments on the patch.
+Chris Ball wrote:
+> Hi Kukjin,
+>
+Hi,
 
-Thanks
-Al
+Sorry for late response.
 
-On Fri, Mar 16, 2012 at 3:54 PM, Al Cooper <acooper@gmail.com> wrote:
-> The driver should not try to switch to 1.8V when the SD 3.0 host
-> controller does not have any UHS capabilities bits set (SDR50, DDR50
-> or SDR104). See page 72 of "SD Specifications Part A2 SD Host
-> Controller Simplified Specification Version 3.00" under
-> "1.8V Signaling Enable". Instead of setting SDR12 and SDR25 in the ho=
-st
-> capabilities data structure for all V3.0 host controllers, only set t=
-hem
-> if SDR104, SDR50 or DDR50 is set in the host capabilities register. T=
-his
-> will prevent the switch to 1.8V later.
+[...]
+
 >
-> Signed-off-by: Al Cooper <acooper@gmail.com>
-> ---
-> =A0drivers/mmc/host/sdhci.c | =A0 =A05 +++--
-> =A01 files changed, 3 insertions(+), 2 deletions(-)
+> I can't send the tree as it is to Linus now, because Arnd has asked us
+> to hold off on these device tree bindings and work with the unified
+> bindings he's proposing instead.  (Rebasing to drop that patch will
+> introduce new conflicts.)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 8d66706..cdf900e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2762,8 +2762,9 @@ int sdhci_add_host(struct sdhci_host *host)
-> =A0 =A0 =A0 =A0 =A0 =A0mmc_card_is_removable(mmc))
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_NEEDS_POLL;
+OK, I see.
+
+> I'm going to send Mark Brown's two patches to Linus now, even though it
+> will cause a conflict in -next.  The rest (other than the device tree
+> bindings) are mergable after -rc1, because they're fixes, so we'll
+> eventually get everything except DT in to 3.4.  I think you should
+> just drop this patchset from your tree in linux-next entirely now.
 >
-> - =A0 =A0 =A0 /* UHS-I mode(s) supported by the host controller. */
-> - =A0 =A0 =A0 if (host->version >=3D SDHCI_SPEC_300)
-> + =A0 =A0 =A0 /* Any UHS-I mode in caps implies SDR12 and SDR25 suppo=
-rt. */
-> + =A0 =A0 =A0 if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR=
-50 |
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0SDHCI_SUPPORT_DDR50))
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_UHS_SDR12 | MMC=
-_CAP_UHS_SDR25;
->
-> =A0 =A0 =A0 =A0/* SDR104 supports also implies SDR50 support */
-> --
-> 1.7.6
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+Yep, I dropped it in my -next.
+
+Thanks.
+
+Best regards,
+Kgene.
+--
+Kukjin Kim <kgene.kim@samsung.com>, Senior Engineer,
+SW Solution Development Team, Samsung Electronics Co., Ltd.
