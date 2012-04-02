@@ -1,47 +1,35 @@
-From: "Luca Porzio (lporzio)" <lporzio@micron.com>
-Subject: RE: swap on eMMC and other flash
-Date: Mon, 2 Apr 2012 12:52:04 +0000
-Message-ID: <26E7A31274623843B0E8CF86148BFE326FB55F8B@NTXAVZMBX04.azit.micron.com>
-References: <201203301744.16762.arnd@arndb.de>
- <201203301850.22784.arnd@arndb.de>
- <alpine.LSU.2.00.1203311230490.10965@eggly.anvils>
+From: Hugh Dickins <hughd@google.com>
+Subject: Re: swap on eMMC and other flash
+Date: Mon, 2 Apr 2012 07:41:56 -0700 (PDT)
+Message-ID: <alpine.LSU.2.00.1204020734560.1847@eggly.anvils>
+References: <201203301744.16762.arnd@arndb.de> <201203301850.22784.arnd@arndb.de> <alpine.LSU.2.00.1203311230490.10965@eggly.anvils> <201204021145.43222.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <alpine.LSU.2.00.1203311230490.10965@eggly.anvils>
-Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Hugh Dickins <hughd@google.com>, Arnd Bergmann <arnd@arndb.de>
-Cc: Rik van Riel <riel@redhat.com>, "linaro-kernel@lists.linaro.org" <linaro-kernel@lists.linaro.org>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Alex Lemberg <alex.lemberg@sandisk.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Saugata Das <saugata.das@linaro.org>, Venkatraman S <venkat@linaro.org>, Yejin Moon <yejin.moon@samsung.com>, Hyojin Jeong <syr.jeong@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kernel-team@android.com" <kernel-team@android.com>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:54382 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751291Ab2DBOmc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Apr 2012 10:42:32 -0400
+Received: by iagz16 with SMTP id z16so4185487iag.19
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Apr 2012 07:42:31 -0700 (PDT)
+In-Reply-To: <201204021145.43222.arnd@arndb.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linaro-kernel@lists.linaro.org, Rik van Riel <riel@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, linux-mm@kvack.org, Hyojin Jeong <syr.jeong@samsung.com>, kernel-team@android.com, Yejin Moon <yejin.moon@samsung.com>
 
-Hugh,
+On Mon, 2 Apr 2012, Arnd Bergmann wrote:
+> 
+> Another option would be batched discard as we do it for file systems:
+> occasionally stop writing to swap space and scanning for areas that
+> have become available since the last discard, then send discard
+> commands for those.
 
-Great topics. As per one of Rik original points:
+I'm not sure whether you've missed "swapon --discard", which switches
+on discard_swap_cluster() just before we allocate from a new cluster;
+or whether you're musing that it's no use to you because you want to
+repurpose the swap cluster to match erase block: I'm mentioning it in
+case you missed that it's already there (but few use it, since even
+done at that scale it's often more trouble than it's worth).
 
-> 4) skip writeout of zero-filled pages - this can be a big help
->     for KVM virtual machines running Windows, since Windows zeroes
->     out free pages;   simply discarding a zero-filled page is not
->     at all simple in the current VM, where we would have to iterate
->     over all the ptes to free the swap entry before being able to
->     free the swap cache page (I am not sure how that locking would
->     even work)
->=20
->     with the extra layer of indirection, the locking for this scheme
->     can be trivial - either the faulting process gets the old page,
->     or it gets a new one, either way it'll be zero filled
->=20
-
-Since it's KVMs realm here, can't KSM simply solve the zero-filled pages pr=
-oblem avoiding unnecessary burden for the Swap subsystem?
-
-Cheers,=20
-   Luca
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Hugh
