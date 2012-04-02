@@ -1,121 +1,43 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: swap on eMMC and other flash
-Date: Mon, 2 Apr 2012 11:45:42 +0000
-Message-ID: <201204021145.43222.arnd@arndb.de>
-References: <201203301744.16762.arnd@arndb.de> <201203301850.22784.arnd@arndb.de> <alpine.LSU.2.00.1203311230490.10965@eggly.anvils>
+From: "Luca Porzio (lporzio)" <lporzio@micron.com>
+Subject: RE: swap on eMMC and other flash
+Date: Mon, 2 Apr 2012 12:52:04 +0000
+Message-ID: <26E7A31274623843B0E8CF86148BFE326FB55F8B@NTXAVZMBX04.azit.micron.com>
+References: <201203301744.16762.arnd@arndb.de>
+ <201203301850.22784.arnd@arndb.de>
+ <alpine.LSU.2.00.1203311230490.10965@eggly.anvils>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <owner-linux-mm@kvack.org>
 In-Reply-To: <alpine.LSU.2.00.1203311230490.10965@eggly.anvils>
+Content-Language: en-US
 Sender: owner-linux-mm@kvack.org
-To: linaro-kernel@lists.linaro.org
-Cc: Hugh Dickins <hughd@google.com>, Rik van Riel <riel@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, linux-mm@kvack.org, Hyojin Jeong <syr.jeong@samsung.com>, kernel-team@android.com, Yejin Moon <yejin.moon@samsung.com>
+To: Hugh Dickins <hughd@google.com>, Arnd Bergmann <arnd@arndb.de>
+Cc: Rik van Riel <riel@redhat.com>, "linaro-kernel@lists.linaro.org" <linaro-kernel@lists.linaro.org>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Alex Lemberg <alex.lemberg@sandisk.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Saugata Das <saugata.das@linaro.org>, Venkatraman S <venkat@linaro.org>, Yejin Moon <yejin.moon@samsung.com>, Hyojin Jeong <syr.jeong@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kernel-team@android.com" <kernel-team@android.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Saturday 31 March 2012, Hugh Dickins wrote:
-> On Fri, 30 Mar 2012, Arnd Bergmann wrote:
-> > On Friday 30 March 2012, Arnd Bergmann wrote:
+Hugh,
 
-> My suspicion is that we suffer a lot from the "distance" between when
-> we allocate swap space (add_to_swap getting the swp_entry_t to replace
-> ptes by) and when we finally decide to write out a page (swap_writepage):
-> intervening decisions can jumble the sequence badly.
-> 
-> I've not investigated to confirm that, but certainly it was the case two
-> or three years ago, that we got much better behaviour in swapping shmem
-> to flash, when we stopped giving it a second pass round the lru, which
-> used to come in between the allocation and the writeout.
-> 
-> I believe that you'll want to start by implementing something like what
-> Rik set out a year ago in the mail appended below.  Adding another layer
-> of indirection isn't always a pure win, and I think none of us have taken
-> it any further since then; but sooner or later we shall need to, and your
-> flash case might be just the prod needed.
+Great topics. As per one of Rik original points:
 
-Thanks a lot for that pointer, that certainly sounds interesting. I guess
-we should first do some investigations into in what order the pages normally
-get writting out to flash. If they are not strictly in sequence order, the
-other improvements I suggested would be less effective as well.
+> 4) skip writeout of zero-filled pages - this can be a big help
+>     for KVM virtual machines running Windows, since Windows zeroes
+>     out free pages;   simply discarding a zero-filled page is not
+>     at all simple in the current VM, where we would have to iterate
+>     over all the ptes to free the swap entry before being able to
+>     free the swap cache page (I am not sure how that locking would
+>     even work)
+>=20
+>     with the extra layer of indirection, the locking for this scheme
+>     can be trivial - either the faulting process gets the old page,
+>     or it gets a new one, either way it'll be zero filled
+>=20
 
-Note that I'm not at all worried about reading pages back in from flash
-out of order, that tends to be harmless because reads are much rarer than
-writes on swap, and because only random writes require garbage collection
-inside of the flash (forcing up to 500ms delays on a single write
-occasionally), while reads are always uniformly fast.
+Since it's KVMs realm here, can't KSM simply solve the zero-filled pages pr=
+oblem avoiding unnecessary burden for the Swap subsystem?
 
-> >  2) Make variable sized swap clusters. Right now, the swap space is
-> >  organized in clusters of 256 pages (1MB), which is less than the typical
-> >  erase block size of 4 or 8 MB. We should try to make the swap cluster
-> >  aligned to erase blocks and have the size match to avoid garbage collection
-> >  in the drive. The cluster size would typically be set by mkswap as a new
-> >  option and interpreted at swapon time.
-> 
-> That gets to sound more flash-specific, and I feel less enthusiastic
-> about doing things in bigger and bigger lumps.  But if it really proves
-> to be of benefit, it's easy enough to let you.
-> 
-> Decide the cluster size at mkswap time, or at swapon time, or by
-> /sys/block/sda/queue parameters?  Perhaps a /sys parameter should give
-> the size, but a swapon flag decide whether to participate or not.  Perhaps.
-
-I was think of mkswap time, because the erase block size is specific to
-the storage hardware and there is no reason to ever change it run time,
-and we cannot always easily probe the value from looking at hardware
-registers (USB doesn't have the data, in SD cards it's usually wrong,
-and in eMMC it's sometimes wrong). I should also mention that it's not
-always power-of-two, some drives that use TLC flash have three times
-the erase block size of the equivalent SLC flash, e.g. 3 MB or 6 MB.
-
-I don't think that's a problem, but I might be missing something here.
-I have also encoutered a few older drives that use some completely
-random erase block size, but they are very rare.
-
-Also, I'm unsure what the largest cluster size would be that we can
-realistically support. 8 MB sounds fairly large already, especially
-on systems that have less than 1 GB of RAM, as most of the ARM machines
-today do. For shingle based hard drives, we would get a very similar
-behavior as for flash media, but the chunks would be even larger,
-on the order of 64 MB. If we can make those work, it would no longer
-be specific to flash, but also a lot harder to do.
-
-> >  3) As Luca points out, some eMMC media would benefit significantly from
-> >  having discard requests issued for every page that gets freed from
-> >  the swap cache, rather than at the time just before we reuse a swap
-> >  cluster. This would probably have to become a configurable option
-> >  as well, to avoid the overhead of sending the discard requests on
-> >  media that don't benefit from this.
-> 
-> I'm surprised, I wouldn't have contemplated a discard per page;
-> but if you have cases where it can be proved of benefit, fine.
-> I know nothing at all of eMMC.
-
-My understanding is that some devices can arbitrarily map between
-physical flash pages (typically 4, 8, or 16kb) and logical sector
-numbers, instead of remapping on the much larger erase block
-granularity. In those cases, it makes sense to free up as many
-pages as possible on the drive, in order to give the hardware more
-room for reorganizing itself and doing background defragmentation
-of its free space.
-
-> Though as things stand, that swap_lock spinlock makes it difficult
-> to find a good safe moment to issue a discard (you want the spinlock
-> to keep it safe, but you don't want to issue "I/O" while holding a
-> spinlock).  Perhaps that difficulty can be overcome in a satisfactory
-> way, in the course of restructuring swap allocation as Rik set out
-> (Rik suggests freeing on swapin, that should make it very easy).
-
-Luca was suggesting to use the disk->fops->swap_slot_free_notify
-callback from  swap_entry_free(), which is currently only used
-in zram, but you're right, that would not work.
-
-Another option would be batched discard as we do it for file systems:
-occasionally stop writing to swap space and scanning for areas that
-have become available since the last discard, then send discard
-commands for those.
-
-	Arnd
+Cheers,=20
+   Luca
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
