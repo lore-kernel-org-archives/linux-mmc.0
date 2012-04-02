@@ -1,301 +1,125 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [PATCH V2] mmc: core: Add host capability check for power class
-Date: Mon, 2 Apr 2012 16:24:42 +0530
-Message-ID: <000a01cd10bf$0456ae80$0d040b80$@codeaurora.org>
-References: <1323921517-31241-1-git-send-email-girish.shivananjappa@linaro.org>	<CAKLKtzc4HDmqStQhn_J6GZxdZ0vE_vb7=+xq+oEHqp6QxYDxsg@mail.gmail.com>	<CAGxe1ZEAj1PASOxQHNm=DNOSt2MWMvCQdWu4hKFnYoaLmnLShg@mail.gmail.com>	<CAKLKtzfPC_+SnsaJ0YjWj6rpKeUdxhAxRxec=fDb_J5N1YRrkg@mail.gmail.com>	<000401cd0cd3$4a6be470$df43ad50$@codeaurora.org> <CAKLKtzeZFQoWFLRE67tyw06FoDpoaTRWpSDzii8qTEBHSHxJTg@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: swap on eMMC and other flash
+Date: Mon, 2 Apr 2012 11:45:42 +0000
+Message-ID: <201204021145.43222.arnd@arndb.de>
+References: <201203301744.16762.arnd@arndb.de> <201203301850.22784.arnd@arndb.de> <alpine.LSU.2.00.1203311230490.10965@eggly.anvils>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:58583 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752321Ab2DBKyr convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Apr 2012 06:54:47 -0400
-In-Reply-To: <CAKLKtzeZFQoWFLRE67tyw06FoDpoaTRWpSDzii8qTEBHSHxJTg@mail.gmail.com>
-Content-Language: en-us
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <alpine.LSU.2.00.1203311230490.10965@eggly.anvils>
+Sender: owner-linux-mm@kvack.org
+To: linaro-kernel@lists.linaro.org
+Cc: Hugh Dickins <hughd@google.com>, Rik van Riel <riel@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, linux-mm@kvack.org, Hyojin Jeong <syr.jeong@samsung.com>, kernel-team@android.com, Yejin Moon <yejin.moon@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Saugata Das' <saugata.das@linaro.org>
-Cc: 'Girish K S' <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org, patches@linaro.org, linux-samsung-soc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>
 
+On Saturday 31 March 2012, Hugh Dickins wrote:
+> On Fri, 30 Mar 2012, Arnd Bergmann wrote:
+> > On Friday 30 March 2012, Arnd Bergmann wrote:
 
+> My suspicion is that we suffer a lot from the "distance" between when
+> we allocate swap space (add_to_swap getting the swp_entry_t to replace
+> ptes by) and when we finally decide to write out a page (swap_writepage):
+> intervening decisions can jumble the sequence badly.
+> 
+> I've not investigated to confirm that, but certainly it was the case two
+> or three years ago, that we got much better behaviour in swapping shmem
+> to flash, when we stopped giving it a second pass round the lru, which
+> used to come in between the allocation and the writeout.
+> 
+> I believe that you'll want to start by implementing something like what
+> Rik set out a year ago in the mail appended below.  Adding another layer
+> of indirection isn't always a pure win, and I think none of us have taken
+> it any further since then; but sooner or later we shall need to, and your
+> flash case might be just the prod needed.
 
-> -----Original Message-----
-> From: Saugata Das [mailto:saugata.das@linaro.org]
-> Sent: Monday, April 02, 2012 1:20 PM
-> To: Subhash Jadavani
-> Cc: Girish K S; linux-mmc@vger.kernel.org; patches@linaro.org; linux-
-> samsung-soc@vger.kernel.org; Chris Ball
-> Subject: Re: [PATCH V2] mmc: core: Add host capability check for powe=
-r
-class
->=20
-> On 28 March 2012 16:39, Subhash Jadavani <subhashj@codeaurora.org>
-> wrote:
-> >
-> >
-> >> -----Original Message-----
-> >> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> >> owner@vger.kernel.org] On Behalf Of Saugata Das
-> >> Sent: Thursday, December 15, 2011 6:35 PM
-> >> To: Girish K S
-> >> Cc: linux-mmc@vger.kernel.org; patches@linaro.org; linux-samsung-
-> >> soc@vger.kernel.org; subhashj@codeaurora.org; Chris Ball
-> >> Subject: Re: [PATCH V2] mmc: core: Add host capability check for
-> >> power
-> > class
-> >>
-> >> On 15 December 2011 16:22, Girish K S
-> >> <girish.shivananjappa@linaro.org>
-> >> wrote:
-> >> > On 15 December 2011 15:34, Saugata Das <saugata.das@linaro.org>
-> wrote:
-> >> >> On 15 December 2011 09:28, Girish K S
-> >> >> <girish.shivananjappa@linaro.org>
-> >> wrote:
-> >> >>> This patch adds a check whether the host supports maximum curr=
-ent
-> >> >>> value obtained from the device's extended csd register for a
-> >> >>> selected interface voltage and frequency.
-> >> >>>
-> >> >>> cc: Chris Ball <cjb@laptop.org>
-> >> >>> Signed-off-by: Girish K S <girish.shivananjappa@linaro.org>
-> >> >>> ---
-> >> >>> Changes in v2:
-> >> >>> =A0 =A0 =A0 =A0deleted a unnecessary if else condition identif=
-ied by
-> >> >>> subhash J Changes in v1:
-> >> >>> =A0 =A0 =A0 reduced the number of comparisons as per Hein's su=
-ggestion
-> >> >>>
-> >> >>> =A0drivers/mmc/core/mmc.c =A0 | =A0 19 +++++++++++++++++++
-> >> >>> =A0include/linux/mmc/card.h | =A0 =A04 ++++
-> >> >>> =A02 files changed, 23 insertions(+), 0 deletions(-)
-> >> >>>
-> >> >>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> >> >>> index
-> >> >>> 006e932..b9ef777 100644
-> >> >>> --- a/drivers/mmc/core/mmc.c
-> >> >>> +++ b/drivers/mmc/core/mmc.c
-> >> >>> @@ -688,6 +688,25 @@ static int mmc_select_powerclass(struct
-> >> >>> mmc_card *card,
-> >> >>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pwrclass_val =3D (pwrclass_val =
-&
-> >> >>> EXT_CSD_PWR_CL_4BIT_MASK) >>
-> >> >>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-EXT_CSD_PWR_CL_4BIT_SHIFT;
-> >> >>>
-> >> >>> + =A0 =A0 =A0 if (pwrclass_val >=3D MMC_MAX_CURRENT_800)
-> >> >>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT=
-_800;
-> >> >>> + =A0 =A0 =A0 else if (pwrclass_val >=3D MMC_MAX_CURRENT_600)
-> >> >>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT=
-_600;
-> >> >>> + =A0 =A0 =A0 else if (pwrclass_val >=3D MMC_MAX_CURRENT_400)
-> >> >>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT=
-_400;
-> >> >>> + =A0 =A0 =A0 else
-> >> >>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT=
-_200;
-> >> >>> +
-> >> >>> + =A0 =A0 =A0 if ((pwrclass_val =3D=3D MMC_MAX_CURRENT_800) &&
-> >> >>> + =A0 =A0 =A0 =A0 =A0 !(card->host->caps & MMC_CAP_MAX_CURRENT=
-_800))
-> >> >>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT=
-_600;
-> >> >>> + =A0 =A0 =A0 if ((pwrclass_val =3D=3D MMC_MAX_CURRENT_600) &&
-> >> >>> + =A0 =A0 =A0 =A0 =A0 !(card->host->caps & MMC_CAP_MAX_CURRENT=
-_600))
-> >> >>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT=
-_400;
-> >> >>> + =A0 =A0 =A0 if ((pwrclass_val =3D=3D MMC_MAX_CURRENT_400) &&
-> >> >>> + =A0 =A0 =A0 =A0 =A0 !(card->host->caps & MMC_CAP_MAX_CURRENT=
-_400))
-> >> >>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pwrclass_val =3D MMC_MAX_CURRENT=
-_200;
-> >> >>> +
-> >> >>> =A0 =A0 =A0 =A0/* If the power class is different from the def=
-ault value
-> >> >>> */
-> >> >>> =A0 =A0 =A0 =A0if (pwrclass_val > 0) {
-> >> >>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(card, EXT_CS=
-D_CMD_SET_NORMAL,
-> >> >>
-> >> >> It is not allowed to set the POWER_CLASS with any value other t=
-han
-> >> >> what is mentioned in the PWR_CL_ff_vvv or PWR_CL_DDR_ff_vvv =A0=
-for
-> >> the
-> >> >> corresponding frequency, voltage. That is, if PWR_CL_200_195 is=
- 14
-> >> >> and we want to operate at HS200 then the only value allowed for
-> >> >> POWER_CLASS is 14. So, we need to check the PWR_CL numbers and
-> >> choose
-> >> >> the operating mode (HS200/DDR50/..) based on the platform
-> >> >> capability to support the current consumption and set the
-> >> >> corresponding POWER_CLASS value.
-> >> >>
-> >> >> Please refer to section 6.6.5 of the 4.5 spec.
-> >> >
-> >> > The upstreamed code reads the extended csd value based on the
-> >> > already set voltage level and frequency of host. So it will get =
-the
-> >> > required power class value which can be set directly. Is my
-> >> > understanding correct?
-> >> >
-> >>
-> >> It is not enough to just check the voltage level and frequency.
-> >> Consider this example, host has capability to support
-> >> MMC_CAP_MAX_CURRENT_400, the PWR_CL_DDR_52_360 has the value
-> 9
-> >> (400mA) and PWR_CL_200_360 has the value 14 (800mA). Then even
-> though
-> >> the host might be capable to run 200MHz clock and 3.6V, it can onl=
-y
-> >> enable DDR at 52MHz and set 9 in POWER_CLASS.
-> >>
-> >> I think, in mmc_select_powerclass, we need to loop through the pow=
-er
-> >> classes of all supported modes of transfer (HS200, DDR52, ... ) an=
-d
-> >> choose
-> > the
-> >> mode which gives maximum bandwidth but falls within host capabilit=
-y
-> >> of current consumption. Then set this to POWER_CLASS byte and also
-> >> use the same information when setting HS_TIMING in mmc_init_card.
-> >
-> > Hi Saugata,
-> >
-> > Does the spec mandates you to set the power class to what is needed=
- by
-> > frequency/voltage combination? I can't see that mentioned anywhere
-> > explicitly in eMMC4.5 spec (if it is mentioned in spec, please let =
-me
-> > know section and line number). It may be still possible to set the
-> > power class lower than what is needed by frequency/voltage
-> > combination. Say for example, 8-bit HS200 (200MHz) with high voltag=
-e
-> > cards may specify power class
-> > (PWR_CL_200_3_6) value of 14 (800 mA) but that doesn't mean if you
-> > want the card to work in 8-bit HS200 mode, its POWER_CLASS value mu=
-st
-> be 14 (800mA).
-> > If host's VDD regulator is only capable of say 600mA then it may st=
-ill
-> > set the POWER_CLASS to 12 (600 mA) which should be the indication t=
-o
-> > card that host power supply is capable of sourcing only 600mA and I
-> > would assume card will make sure that it doesn't draw anything more=
- than
-> that.
->=20
-> Please refer to section 6.6.5 of MMC-4.5. It says that the valid valu=
-es
-are
-> defined in the PWR_CL_ff_vvv and PWR_CL_DDR_ff_vvv. We are allowed to
-> set only that value, depending on the mode, to POWER_CLASS.
-> Any other value will result in SWITCH_ERROR.
+Thanks a lot for that pointer, that certainly sounds interesting. I guess
+we should first do some investigations into in what order the pages normally
+get writting out to flash. If they are not strictly in sequence order, the
+other improvements I suggested would be less effective as well.
 
-Thanks for the details. Just curious, do you have any cards where you h=
-ave
-seen such SWITCH_ERROR while setting the power class?
+Note that I'm not at all worried about reading pages back in from flash
+out of order, that tends to be harmless because reads are much rarer than
+writes on swap, and because only random writes require garbage collection
+inside of the flash (forcing up to 500ms delays on a single write
+occasionally), while reads are always uniformly fast.
 
->=20
->=20
-> >
-> > Hi Girish,
-> >
-> > I see couple of other issues with your original power_class selecti=
-on
-patch.
-> > 1. mmc_select_powerclass() function considers 2.7v to 3.2v VDD rang=
-e
-> > as invalid. That's not correct. Valid high voltage range is from 2.=
-7v to
-3.6v.
-> > Is there a specific reason you have skipped the 2.7v to 3.2v VDD
-> > range? If not, I should post following change:
-> >
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -626,6 +626,11 @@ static int mmc_select_powerclass(struct mmc_ca=
-rd
-> > *card,
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0else if (host->ios.clock <=3D 200000=
-000)
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0index =3D EXT_CSD_PW=
-R_CL_200_195;
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
-> > + =A0 =A0 =A0 case MMC_VDD_27_28:
-> > + =A0 =A0 =A0 case MMC_VDD_28_29:
-> > + =A0 =A0 =A0 case MMC_VDD_29_30:
-> > + =A0 =A0 =A0 case MMC_VDD_30_31:
-> > + =A0 =A0 =A0 case MMC_VDD_31_32:
-> > =A0 =A0 =A0 =A0case MMC_VDD_32_33:
-> > =A0 =A0 =A0 =A0case MMC_VDD_33_34:
-> > =A0 =A0 =A0 =A0case MMC_VDD_34_35:
-> >
-> > 2. =A0Currently in mmc_init_card(), power class selection is done i=
-f
-> > it's normal (DS or HS) or DDR or HS200 card.
-> > =A0 =A0If power class selection fails (mmc_select_powerclass() retu=
-rns
-> > error) for DS/HS/DDR cards, we are just printing the error and goin=
-g
-> > ahead with the rest of the initialization where as if power class
-> > selection fails for HS200 cards, we are simply aborting the
-> > =A0 =A0initialization and mark it as failed.
-> >
-> > =A0 There are my points:
-> > =A0 =A0 =A0 1. =A0Power class failure must be treated in same manne=
-r for
-> > DS/HS/DDR/HS200 cards
-> > =A0 =A0 =A0 2. =A0If you agree on first point then we need to decid=
-e whether
-> > power class selection failure is fatal enough to abort the MMC
-> > initialization? or we can just print the warning and go ahead with
-> > rest of the initialization in same bus speed mode?
-> >
-> > Regards,
-> > Subhash
-> >
-> >>
-> >> >>
-> >> >>
-> >> >>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card=
-=2Eh
-> >> >>> index 9478a6b..c5e031a 100644
-> >> >>> --- a/include/linux/mmc/card.h
-> >> >>> +++ b/include/linux/mmc/card.h
-> >> >>> @@ -195,6 +195,10 @@ struct mmc_part {
-> >> >>> =A0#define MMC_BLK_DATA_AREA_GP =A0 (1<<2)
-> >> >>> =A0};
-> >> >>>
-> >> >>> +#define MMC_MAX_CURRENT_200 =A0 =A0(0) #define
-> MMC_MAX_CURRENT_400
-> >> >>> +(7) #define MMC_MAX_CURRENT_600 =A0 =A0(11) #define
-> >> MMC_MAX_CURRENT_800
-> >> >>> +(13)
-> >> >>> =A0/*
-> >> >>> =A0* MMC device
-> >> >>> =A0*/
-> >> >>> --
-> >> >>> 1.7.1
-> >> >>>
-> >> >>> --
-> >> >>> To unsubscribe from this list: send the line "unsubscribe
-linux-mmc"
-> >> >>> in the body of a message to majordomo@vger.kernel.org More
-> >> majordomo
-> >> >>> info at =A0http://vger.kernel.org/majordomo-info.html
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe linux-mm=
-c"
-> >> in
-> > the
-> >> body of a message to majordomo@vger.kernel.org More majordomo info
-> at
-> >> http://vger.kernel.org/majordomo-info.html
-> >
+> >  2) Make variable sized swap clusters. Right now, the swap space is
+> >  organized in clusters of 256 pages (1MB), which is less than the typical
+> >  erase block size of 4 or 8 MB. We should try to make the swap cluster
+> >  aligned to erase blocks and have the size match to avoid garbage collection
+> >  in the drive. The cluster size would typically be set by mkswap as a new
+> >  option and interpreted at swapon time.
+> 
+> That gets to sound more flash-specific, and I feel less enthusiastic
+> about doing things in bigger and bigger lumps.  But if it really proves
+> to be of benefit, it's easy enough to let you.
+> 
+> Decide the cluster size at mkswap time, or at swapon time, or by
+> /sys/block/sda/queue parameters?  Perhaps a /sys parameter should give
+> the size, but a swapon flag decide whether to participate or not.  Perhaps.
 
+I was think of mkswap time, because the erase block size is specific to
+the storage hardware and there is no reason to ever change it run time,
+and we cannot always easily probe the value from looking at hardware
+registers (USB doesn't have the data, in SD cards it's usually wrong,
+and in eMMC it's sometimes wrong). I should also mention that it's not
+always power-of-two, some drives that use TLC flash have three times
+the erase block size of the equivalent SLC flash, e.g. 3 MB or 6 MB.
+
+I don't think that's a problem, but I might be missing something here.
+I have also encoutered a few older drives that use some completely
+random erase block size, but they are very rare.
+
+Also, I'm unsure what the largest cluster size would be that we can
+realistically support. 8 MB sounds fairly large already, especially
+on systems that have less than 1 GB of RAM, as most of the ARM machines
+today do. For shingle based hard drives, we would get a very similar
+behavior as for flash media, but the chunks would be even larger,
+on the order of 64 MB. If we can make those work, it would no longer
+be specific to flash, but also a lot harder to do.
+
+> >  3) As Luca points out, some eMMC media would benefit significantly from
+> >  having discard requests issued for every page that gets freed from
+> >  the swap cache, rather than at the time just before we reuse a swap
+> >  cluster. This would probably have to become a configurable option
+> >  as well, to avoid the overhead of sending the discard requests on
+> >  media that don't benefit from this.
+> 
+> I'm surprised, I wouldn't have contemplated a discard per page;
+> but if you have cases where it can be proved of benefit, fine.
+> I know nothing at all of eMMC.
+
+My understanding is that some devices can arbitrarily map between
+physical flash pages (typically 4, 8, or 16kb) and logical sector
+numbers, instead of remapping on the much larger erase block
+granularity. In those cases, it makes sense to free up as many
+pages as possible on the drive, in order to give the hardware more
+room for reorganizing itself and doing background defragmentation
+of its free space.
+
+> Though as things stand, that swap_lock spinlock makes it difficult
+> to find a good safe moment to issue a discard (you want the spinlock
+> to keep it safe, but you don't want to issue "I/O" while holding a
+> spinlock).  Perhaps that difficulty can be overcome in a satisfactory
+> way, in the course of restructuring swap allocation as Rik set out
+> (Rik suggests freeing on swapin, that should make it very easy).
+
+Luca was suggesting to use the disk->fops->swap_slot_free_notify
+callback from  swap_entry_free(), which is currently only used
+in zram, but you're right, that would not work.
+
+Another option would be batched discard as we do it for file systems:
+occasionally stop writing to swap space and scanning for areas that
+have become available since the last discard, then send discard
+commands for those.
+
+	Arnd
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
