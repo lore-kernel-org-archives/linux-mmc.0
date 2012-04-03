@@ -1,40 +1,51 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: card: move variable initialization earlier
-Date: Tue, 3 Apr 2012 12:57:11 +0200
-Message-ID: <CACRpkdbfHoQisGL4Mb905dfQDKZCaSYiG54PSK3DW7yb9Wx0DQ@mail.gmail.com>
-References: <1332495146-16312-1-git-send-email-linus.walleij@linaro.org>
-	<8762dkm6wc.fsf@laptop.org>
-	<4F7AB768.8020702@intel.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v1 1/1] mmc: core: fix power class selection
+Date: Tue, 03 Apr 2012 07:32:14 -0400
+Message-ID: <87fwclhwzl.fsf@laptop.org>
+References: <1333436158-4762-1-git-send-email-subhashj@codeaurora.org>
+	<CAGxe1ZHZ2jvZzAzRch9-yMS2pXqo0C2VaFgSv4-ENTFbUhA=2w@mail.gmail.com>
+	<CAKYAXd_9AwrBpbVoZxPN6JNcg1SQP6pemJ4gAY4gZQKRQexqmg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:36404 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751458Ab2DCK5M convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Apr 2012 06:57:12 -0400
-Received: by yenl12 with SMTP id l12so1649559yen.19
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Apr 2012 03:57:11 -0700 (PDT)
-In-Reply-To: <4F7AB768.8020702@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAKYAXd_9AwrBpbVoZxPN6JNcg1SQP6pemJ4gAY4gZQKRQexqmg@mail.gmail.com>
+	(Namjae Jeon's message of "Tue, 3 Apr 2012 17:06:35 +0900")
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: Subhash Jadavani <subhashj@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@stericsson.com>, Rabin Vincent <rabin@rab.in>, Kyungmin Park <kyungmin.park@samsung.com>, Kyungmin Park <kmpark@infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On Tue, Apr 3, 2012 at 10:40 AM, Adrian Hunter <adrian.hunter@intel.com=
-> wrote:
+Hi,
 
->> I think you (Adrian) introduced this "goto out->goto retry" logic in
->> upstream commit 67716327eec7e9 -- please could you take a look here?
+On Tue, Apr 03 2012, Namjae Jeon wrote:
+> 2012/4/3 Girish K S <girish.shivananjappa@linaro.org>:
+>> On 3 April 2012 15:55, Subhash Jadavani <subhashj@codeaurora.org> wr=
+ote:
+>>> mmc_select_powerclass() function returns error if eMMC
+>>> VDD level supported by host is between 2.7v to 3.2v.
+>>>
+>>> According to eMMC specification, valid voltage for high
+>>> voltage cards is 2.7v to 3.6v. This patch ensures that
+>>> 2.7v to 3.6v VDD range is treated as valid range.
+>>>
+>>> Also, failure to set the power class shouldn't be treated
+>>> as fatal error because even if setting the power class
+>>> fails, card can still work in default power class.
+>>> If mmc_select_powerclass() returns error, just print
+>>> the warning message and go ahead with rest of the card
+>>> initialization.
+>>>
+>>> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+>> looks good to me
+>> Acked By: =C2=A0Girish K S <girish.shivananjappa@linaro.org>
 >
-> The sanitize logic looks wrong to me. =A0I would expect it to look
-> like this:
+> I double checked with specification. this patch make good sense.
+> Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
 
-Hm it looks like that compile warning opens a can of worms.
-Can you cook a patch we can test? Would be much appreciated.
+Thanks, pushed to mmc-next for 3.4.
 
-Not that I have any eMMC 4.5 card, but I think some others on CC have..=
-=2E
-
-Yours,
-Linus Walleij
+- Chris.
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
