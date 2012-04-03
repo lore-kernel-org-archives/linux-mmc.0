@@ -1,60 +1,303 @@
-From: Zach Pfeffer <zach.pfeffer@linaro.org>
-Subject: Re: swap on eMMC and other flash
-Date: Tue, 3 Apr 2012 13:17:30 -0500
-Message-ID: <CAJN=5gD-_Us6XpZWBWm72c5byytLLYmwW-FeA+a48YxZeWeMtw@mail.gmail.com>
-References: <201203301744.16762.arnd@arndb.de>
-	<201203301850.22784.arnd@arndb.de>
-	<CAJN=5gDBQJc_KXUadqtzmxPqPF71PDcToGo_T-agNey9eN2MQA@mail.gmail.com>
-	<201203310924.19708.arnd@arndb.de>
+From: Saugata Das <saugata.das@linaro.org>
+Subject: Re: [PATCH v1 1/1] mmc: core: fix power class selection
+Date: Wed, 4 Apr 2012 00:18:45 +0530
+Message-ID: <CAKLKtzdeFYi5VBL5EMJ5HgKOehzTtVoFBia0pWrSG3Egif0iFg@mail.gmail.com>
+References: <1333436158-4762-1-git-send-email-subhashj@codeaurora.org>
+	<CAKLKtzew2g7bXR3Xdz448cs8O_jQHp0ybG1r1VBUTXcoh2BDwA@mail.gmail.com>
+	<000501cd11b1$75766770$60633650$@codeaurora.org>
+	<CAKLKtzeYhQtfPLTvO--5cOg6h90t6OpiRmgPKu3cP7AfKBNnMQ@mail.gmail.com>
+	<000401cd11b9$1940c6f0$4bc254d0$@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <201203310924.19708.arnd@arndb.de>
-Sender: owner-linux-mm@kvack.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linaro-kernel@lists.linaro.org, linux-mm@kvack.org, Alex Lemberg <alex.lemberg@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel@vger.kernel.org, Hyojin Jeong <syr.jeong@samsung.com>, "Luca Porzio (lporzio)" <lporzio@micron.com>, kernel-team@android.com, Yejin Moon <yejin.moon@samsung.com>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <000401cd11b9$1940c6f0$4bc254d0$@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, girish.shivananjappa@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 31 March 2012 04:24, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Friday 30 March 2012, Zach Pfeffer wrote:
->> Last I read Transparent Huge Pages are still paged in and out a page
->> at a time, is this or was this ever the case? If it is the case should
->> the paging system be extended to support THP which would take care of
->> the big block issues with flash media?
+On 3 April 2012 22:14, Subhash Jadavani <subhashj@codeaurora.org> wrote=
+:
+>
+>
+>> -----Original Message-----
+>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+>> owner@vger.kernel.org] On Behalf Of Saugata Das
+>> Sent: Tuesday, April 03, 2012 9:48 PM
+>> To: Subhash Jadavani
+>> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org;
+>> girish.shivananjappa@linaro.org
+>> Subject: Re: [PATCH v1 1/1] mmc: core: fix power class selection
 >>
+>> On 3 April 2012 21:20, Subhash Jadavani <subhashj@codeaurora.org> wr=
+ote:
+>> >
+>> >
+>> >> -----Original Message-----
+>> >> From: Saugata Das [mailto:saugata.das@linaro.org]
+>> >> Sent: Tuesday, April 03, 2012 8:55 PM
+>> >> To: Subhash Jadavani
+>> >> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org;
+>> >> girish.shivananjappa@linaro.org
+>> >> Subject: Re: [PATCH v1 1/1] mmc: core: fix power class selection
+>> >>
+>> >> On 3 April 2012 12:25, Subhash Jadavani <subhashj@codeaurora.org>
+>> wrote:
+>> >> > mmc_select_powerclass() function returns error if eMMC VDD leve=
+l
+>> >> > supported by host is between 2.7v to 3.2v.
+>> >> >
+>> >> > According to eMMC specification, valid voltage for high voltage
+>> >> > cards is 2.7v to 3.6v. This patch ensures that 2.7v to 3.6v VDD
+>> >> > range is treated as valid range.
+>> >> >
+>> >> > Also, failure to set the power class shouldn't be treated as fa=
+tal
+>> >> > error because even if setting the power class fails, card can s=
+till
+>> >> > work in default power class.
+>> >> > If mmc_select_powerclass() returns error, just print the warnin=
+g
+>> >> > message and go ahead with rest of the card initialization.
+>> >> >
+>> >>
+>> >> Have you checked why mmc_select_powerclass returned error ? Today=
+,
+>> in
+>> >> the mmc_select_powerclass, it is just setting the value of power
+>> >> class,
+>> > which
+>> >> the eMMC expects. So, it should not fail.
+>> >>
+>> >> Another point is that, today mmc_select_powerclass is assuming th=
+at
+>> >> host can support the maximum possible power classes and it does n=
+ot
+>> >> check host controllers capability in driving higher current (mA).=
+ But
+>> >> I think in
+>> > future we
+>> >> need to add this check for host controller ability and return err=
+or
+>> >> from mmc_select_powerclass so that mmc_init_card can choose the n=
+ext
+>> >> speed
+>> >
+>> > Agreed with this point.
+>> >
+>> >> mode. From that perspective, the approach to ignore the error ret=
+urn
+>> >> from mmc_select_powerclass looks wrong.
+>> >
+>> > My patch was just intended to fix the issue existing power class
+>> > implementation. As commit text says:
+>> > =A0 =A0 =A0 =A0- don't consider 2.7v to 3.2v as invalid range
+>> > =A0 =A0 =A0 =A0- We are already ignoring the error returned by
+>> > mmc_set_power_class() function for DS/HS/DDR cards. So this patch =
+has
+>> > extended that to HS200 cards.
+>> >
+>> > So as far as this patch is concerned, I don't see anything wrong h=
+ere.
+>> >
+>> > As you have mentioned, currently we are not taking the host contro=
+ller
+>> > capability into account (as it doesn't exist as of now) so we shou=
+ld
+>> > not see
+>> > mmc_select_powerclass() fail any time.
+>>
+>> This is actually the main concern. The fail of mmc_select_powerclass=
+ is
+>> something to be checked and not ignored since it should not fail und=
+er the
+>> current implementation.
 >
-> I don't think we ever want to get /that/ big. As I mentioned, going
-> beyond 64kb does not improve throughput on most flash media. However,
-> paging out 16MB causes a very noticeable delay of up to a few seconds
-> on slow drives, which would be inacceptable to users.
+> Yes, this makes sense. With current implementation, mmc_select_powerc=
+lass()
+> should never really fail which means failure should be treated as fat=
+al and
+> we should really skip the card initialization.
+> This patch is already pushed to mmc-next. So I will post another patc=
+h (by
+> next week as I will be on vacation in this week) to skip the card
+> initialization if mmc_select_powerclass fails.
 >
-> Also, that would only deal with the rare case where the data you
-> want to page out is actually in huge pages, not the common case.
+> Is this ok?
 
-What I had in mind was being able to swap out big contiguous buffers
-used by media and graphics engines in one go. This would allow devices
-to support multiple engines without needing to reserve contiguous
-memory for each device. They would instead share the contiguous
-memory. Only one multimedia engine could run at a time, but that would
-be an okay limitation given certain application domains (low end smart
-phones).
+It is OK. Thanks,
 
 >
-> =A0 =A0 =A0 =A0Arnd
-
-
-
---=20
-Zach Pfeffer
-Android Platform Team Lead, Linaro Platform Teams
-Linaro.org | Open source software for ARM SoCs
-Follow Linaro: http://www.facebook.com/pages/Linaro
-http://twitter.com/#!/linaroorg - http://www.linaro.org/linaro-blog
-
+> Regards,
+> Subhash
+>
+>>
+>>
+>> > But yes, next thing should be to take into account the host curren=
+t
+>> > sourcing capability before deciding which bus speed mode to choose=
+=2E
+>> > But that may be a big change and should be as separate patch. Giri=
+sh
+>> > had already posted one patch for this which needs to be extended t=
+o
+>> achieve this.
+>> >
+>> > Regards,
+>> > Subhash
+>> >
+>> >>
+>> >>
+>> >> > Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+>> >> > ---
+>> >> > =A0drivers/mmc/core/mmc.c | =A0 30 +++++++++++++++++-----------=
 --
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+>> >> > =A01 files changed, 17 insertions(+), 13 deletions(-)
+>> >> >
+>> >> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c in=
+dex
+>> >> > 02914d6..54df5ad 100644
+>> >> > --- a/drivers/mmc/core/mmc.c
+>> >> > +++ b/drivers/mmc/core/mmc.c
+>> >> > @@ -695,6 +695,11 @@ static int mmc_select_powerclass(struct
+>> >> > mmc_card *card,
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0else if (host->ios.clock <=3D 20=
+0000000)
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0index =3D EXT_CS=
+D_PWR_CL_200_195;
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
+>> >> > + =A0 =A0 =A0 case MMC_VDD_27_28:
+>> >> > + =A0 =A0 =A0 case MMC_VDD_28_29:
+>> >> > + =A0 =A0 =A0 case MMC_VDD_29_30:
+>> >> > + =A0 =A0 =A0 case MMC_VDD_30_31:
+>> >> > + =A0 =A0 =A0 case MMC_VDD_31_32:
+>> >> > =A0 =A0 =A0 =A0case MMC_VDD_32_33:
+>> >> > =A0 =A0 =A0 =A0case MMC_VDD_33_34:
+>> >> > =A0 =A0 =A0 =A0case MMC_VDD_34_35:
+>> >> > @@ -1111,11 +1116,10 @@ static int mmc_init_card(struct mmc_hos=
+t
+>> >> > *host, u32 ocr,
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd_bits =3D (bus_width =3D=3D=
+ MMC_BUS_WIDTH_8) ?
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+EXT_CSD_BUS_WIDTH_8 :
+>> >> > EXT_CSD_BUS_WIDTH_4;
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_powerclass(ca=
+rd, ext_csd_bits,
+>> >> > ext_csd);
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("%s: power=
+ class selection to bus
+>> >> > width %d failed\n",
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 m=
+mc_hostname(card->host), 1 <<
+>> >> > bus_width);
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err;
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("%s: p=
+ower class selection to
+>> >> > + bus
+>> > width %d"
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0" failed\n",
+>> >> > + mmc_hostname(card->host),
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A01 << bus_width);
+>> >> > =A0 =A0 =A0 =A0}
+>> >> >
+>> >> > =A0 =A0 =A0 =A0/*
+>> >> > @@ -1147,10 +1151,10 @@ static int mmc_init_card(struct mmc_hos=
+t
+>> >> > *host, u32 ocr,
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_sele=
+ct_powerclass(card,
+>> >> > ext_csd_bits[idx][0],
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd);
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 p=
+r_err("%s: power class selection to
+> "
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0"bus width %d failed\n",
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0mmc_hostname(card->host),
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A01 << bus_width);
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 p=
+r_warning("%s: power class
+>> >> > + selection to
+>> > "
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0"bus width %d failed\n",
+>> >> > +
+>> >> > + mmc_hostname(card->host),
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A01 << bus_width);
+>> >> >
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_swit=
+ch(card,
+>> >> > EXT_CSD_CMD_SET_NORMAL,
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 EXT_CSD_BUS_WIDTH, @@
+>> >> > -1178,10
+>> >> > +1182,10 @@ static int mmc_init_card(struct mmc_host *host, u32
+>> >> > +ocr,
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_sele=
+ct_powerclass(card,
+>> >> > ext_csd_bits[idx][1],
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd);
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 p=
+r_err("%s: power class selection to
+> "
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0"bus width %d ddr %d
+>> >> > failed\n",
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0mmc_hostname(card->host),
+>> >> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A01 << bus_width, ddr);
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 p=
+r_warning("%s: power class
+>> >> > + selection to
+>> > "
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A0"bus width %d ddr %d
+>> >> > + failed\n",
+>> >> > +
+>> >> > + mmc_hostname(card->host),
+>> >> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 =A01 << bus_width, ddr);
+>> >> >
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_swit=
+ch(card,
+>> >> > EXT_CSD_CMD_SET_NORMAL,
+>> >> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0 EXT_CSD_BUS_WIDTH,
+>> >> > --
+>> >> > 1.7.1.1
+>> >> >
+>> >> > --
+>> >> > Sent by a consultant of the Qualcomm Innovation Center, Inc.
+>> >> > The Qualcomm Innovation Center, Inc. is a member of the Code Au=
+rora
+>> >> Forum.
+>> >> > --
+>> >> > To unsubscribe from this list: send the line "unsubscribe linux=
+-mmc"
+>> >> > in the body of a message to majordomo@vger.kernel.org More
+>> >> majordomo
+>> >> > info at =A0http://vger.kernel.org/majordomo-info.html
+>> >
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+> the
+>> body of a message to majordomo@vger.kernel.org More majordomo info a=
+t
+>> http://vger.kernel.org/majordomo-info.html
+>
