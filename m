@@ -1,90 +1,52 @@
 From: "Luca Porzio (lporzio)" <lporzio@micron.com>
-Subject: RE: [PATCH] mmc: card: move variable initialization earlier
-Date: Tue, 3 Apr 2012 16:55:54 +0000
-Message-ID: <26E7A31274623843B0E8CF86148BFE326FB57128@NTXAVZMBX04.azit.micron.com>
-References: <1332495146-16312-1-git-send-email-linus.walleij@linaro.org>
- <8762dkm6wc.fsf@laptop.org> <4F7AB768.8020702@intel.com>
+Subject: RE: [PATCH v1 1/1] mmc: core: fix power class selection
+Date: Tue, 3 Apr 2012 17:06:29 +0000
+Message-ID: <26E7A31274623843B0E8CF86148BFE326FB57152@NTXAVZMBX04.azit.micron.com>
+References: <1333436158-4762-1-git-send-email-subhashj@codeaurora.org>
+	<CAKLKtzew2g7bXR3Xdz448cs8O_jQHp0ybG1r1VBUTXcoh2BDwA@mail.gmail.com>
+	<000501cd11b1$75766770$60633650$@codeaurora.org>
+ <CAKLKtzeYhQtfPLTvO--5cOg6h90t6OpiRmgPKu3cP7AfKBNnMQ@mail.gmail.com>
+ <000401cd11b9$1940c6f0$4bc254d0$@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from masquerade.micron.com ([137.201.242.130]:12368 "EHLO
-	masquerade.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754831Ab2DCQ4a (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Apr 2012 12:56:30 -0400
-In-Reply-To: <4F7AB768.8020702@intel.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <000401cd11b9$1940c6f0$4bc254d0$@codeaurora.org>
 Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Subhash Jadavani <subhashj@codeaurora.org>, 'Saugata Das' <saugata.das@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "girish.shivananjappa@linaro.org" <girish.shivananjappa@linaro.org>, "Danilo Caraccio (dcaracci)" <dcaracci@micron.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Chris Ball <cjb@laptop.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Rabin Vincent <rabin@rab.in>, Kyungmin Park <kyungmin.park@samsung.com>, Kyungmin Park <kmpark@infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-SGkgQWRyaWFuLA0KDQo+IFRoZSBzYW5pdGl6ZSBsb2dpYyBsb29rcyB3cm9uZyB0byBtZS4gIEkg
-d291bGQgZXhwZWN0IGl0IHRvIGxvb2sNCj4gbGlrZSB0aGlzOg0KPiANCj4gDQo+IGRpZmYgLS1n
-aXQgYS9kcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMgYi9kcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMN
-Cj4gaW5kZXggYjE4MDk2NS4uZjVlMDUzNCAxMDA2NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvY2Fy
-ZC9ibG9jay5jDQo+ICsrKyBiL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYw0KPiBAQCAtODgxLDE3
-ICs4ODEsMTIgQEAgc3RhdGljIGludCBtbWNfYmxrX2lzc3VlX3NlY2Rpc2NhcmRfcnEoc3RydWN0
-IG1tY19xdWV1ZQ0KPiAqbXEsDQo+ICAJCWdvdG8gb3V0Ow0KPiAgCX0NCj4gDQo+IC0JLyogVGhl
-IHNhbml0aXplIG9wZXJhdGlvbiBpcyBzdXBwb3J0ZWQgYXQgdjQuNSBvbmx5ICovDQo+IC0JaWYg
-KG1tY19jYW5fc2FuaXRpemUoY2FyZCkpIHsNCj4gLQkJZXJyID0gbW1jX3N3aXRjaChjYXJkLCBF
-WFRfQ1NEX0NNRF9TRVRfTk9STUFMLA0KPiAtCQkJCUVYVF9DU0RfU0FOSVRJWkVfU1RBUlQsIDEs
-IDApOw0KPiAtCQlnb3RvIG91dDsNCj4gLQl9DQo+IC0NCj4gIAlmcm9tID0gYmxrX3JxX3Bvcyhy
-ZXEpOw0KPiAgCW5yID0gYmxrX3JxX3NlY3RvcnMocmVxKTsNCj4gDQo+IC0JaWYgKG1tY19jYW5f
-dHJpbShjYXJkKSAmJiAhbW1jX2VyYXNlX2dyb3VwX2FsaWduZWQoY2FyZCwgZnJvbSwgbnIpKQ0K
-PiArCWlmIChtbWNfY2FuX3Nhbml0aXplKGNhcmQpKQ0KPiArCQlhcmcgPSBNTUNfRElTQ0FSRF9B
-Ukc7DQoNClRoZSBzYW5pdGl6ZSBhbmQgZGlzY2FyZCBhcmUgbm90IGNvdXBsZWQgZnVuY3Rpb25h
-bGl0aWVzLg0KRGlzY2FyZCBpcyBhIGhpbnQgZm9yIHBlcmZvcm1hbmNlIG1lYW50IHRvIHJlcGxh
-Y2UgdHJpbSBhbmQgZXJhc2UgDQp3aGVyZSBwZXJmb3JtYW5jZSBtYXR0ZXJzLg0KU2FuaXRpemUg
-aXMgYSBzZWN1cml0eSBvcGVyYXRpb24gbWVhbnQgdG8gY2xlYXIgYWxsIHVubWFwcGVkIGNvbnRl
-bnRzLg0KSmVkZWMgNC41IHNwZWMgZG9lcyBub3QgZ3VhcmFudGVlIHRoYXQgYSBkaXNjYXJkZWQg
-c2VjdG9yIHdpbGwgYmUgc2FuaXRpemVkLg0KDQpUaGlzIHBhdGNoLCBpZiBhcHBsaWVkLCB3aWxs
-IGV4cG9zZSB0aGUga2VybmVsIHRvIGEgcG90ZW50aWFsIHNlY3VyaXR5IA0KcmlzayAocmV0cmll
-dmUgb2xkIGNvbnRlbnRzIG5vdCB3aXBlZCBieSBhIHNhbml0aXplKQ0KDQo+ICsJZWxzZSBpZiAo
-bW1jX2Nhbl90cmltKGNhcmQpICYmICFtbWNfZXJhc2VfZ3JvdXBfYWxpZ25lZChjYXJkLCBmcm9t
-LCBucikpDQo+ICAJCWFyZyA9IE1NQ19TRUNVUkVfVFJJTTFfQVJHOw0KPiAgCWVsc2UNCj4gIAkJ
-YXJnID0gTU1DX1NFQ1VSRV9FUkFTRV9BUkc7DQo+IEBAIC05MTgsNiArOTEzLDEyIEBAIHJldHJ5
-Og0KPiAgCQl9DQo+ICAJCWVyciA9IG1tY19lcmFzZShjYXJkLCBmcm9tLCBuciwgTU1DX1NFQ1VS
-RV9UUklNMl9BUkcpOw0KPiAgCX0NCj4gKw0KPiArCS8qIFRoZSBzYW5pdGl6ZSBvcGVyYXRpb24g
-aXMgc3VwcG9ydGVkIGF0IHY0LjUgb25seSAqLw0KPiArCWlmICghZXJyICYmIG1tY19jYW5fc2Fu
-aXRpemUoY2FyZCkpIHsNCj4gKwkJZXJyID0gbW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NEX0NNRF9T
-RVRfTk9STUFMLA0KPiArCQkJCUVYVF9DU0RfU0FOSVRJWkVfU1RBUlQsIDEsIDApOw0KPiArCX0N
-Cj4gIG91dDoNCj4gIAlpZiAoZXJyID09IC1FSU8gJiYgIW1tY19ibGtfcmVzZXQobWQsIGNhcmQt
-Pmhvc3QsIHR5cGUpKQ0KPiAgCQlnb3RvIHJldHJ5Ow0KPiANCj4gDQo+IA0KPiBBbHNvIHRoZSB0
-aW1lb3V0IGZvciBlTU1DIHY0LjUgRElTQ0FSRCBsb29rcyB3cm9uZy4gIEl0IHNob3VsZCBiZQ0K
-PiB0aGUgc2FtZSBhcyBUUklNOg0KPiANCj4gDQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9j
-b3JlL2NvcmUuYyBiL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+IGluZGV4IDE0ZjI2MmUuLjAw
-ZmQ3ZGIgMTAwNjQ0DQo+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+ICsrKyBiL2Ry
-aXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+IEBAIC0xNDA3LDcgKzE0MDcsNyBAQCBzdGF0aWMgdW5z
-aWduZWQgaW50IG1tY19tbWNfZXJhc2VfdGltZW91dChzdHJ1Y3QNCj4gbW1jX2NhcmQgKmNhcmQs
-DQo+IA0KPiAgCWlmIChjYXJkLT5leHRfY3NkLmVyYXNlX2dyb3VwX2RlZiAmIDEpIHsNCj4gIAkJ
-LyogSGlnaCBDYXBhY2l0eSBFcmFzZSBHcm91cCBTaXplIHVzZXMgSEMgdGltZW91dHMgKi8NCj4g
-LQkJaWYgKGFyZyA9PSBNTUNfVFJJTV9BUkcpDQo+ICsJCWlmIChhcmcgPT0gTU1DX1RSSU1fQVJH
-IHx8IGFyZyA9PSBNTUNfRElTQ0FSRF9BUkcpDQo+ICAJCQllcmFzZV90aW1lb3V0ID0gY2FyZC0+
-ZXh0X2NzZC50cmltX3RpbWVvdXQ7DQo+ICAJCWVsc2UNCj4gIAkJCWVyYXNlX3RpbWVvdXQgPSBj
-YXJkLT5leHRfY3NkLmhjX2VyYXNlX3RpbWVvdXQ7DQo+IA0KPg0KDQpBbHRob3VnaCBJIHN1c3Bl
-Y3QgdGhhdCB0aGUgZGlzY2FyZCBjbWQgd2lsbCBiZSBtdWNoIGZhc3RlciB0aGFuIHRoZQ0KVHJp
-bSBvbiBtb3N0IGRldmljZXMsIHRoZXJlIGlzIG5vIHN1Y2ggaW5mbyBhdmFpbGFibGUgYXMgb2Yg
-dG9kYXkgaW4gZXh0IGNzZC4NCkFzIHN1Y2ggSSBhZ3JlZSB3aXRoIEFkcmlhbiwgZGlzY2FyZCB0
-aW1lb3V0IGlzIG5lYXJlciB0byB0cmltIHRoYW4gZXJhc2UuDQogDQo+IA0KPiBJbiBhZGRpdGlv
-biBlTU1DIHY0LjUgc2VlbXMgdG8gaW5kaWNhdGUgdGhlIHVzZSBvZiB0aGUgdHJpbSB0aW1lb3V0
-DQo+IGlycmVzcGVjdGl2ZSBvZiB0aGUgc2V0dGluZyBvZiBlcmFzZV9ncm91cF9kZWYsIHNvIG1h
-eWJlIGl0IHNob3VsZCBiZQ0KPiBsaWtlIHRoaXM6DQo+IA0KPiANCj4gDQo+IGRpZmYgLS1naXQg
-YS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYyBiL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+IGlu
-ZGV4IDE0ZjI2MmUuLjQ2OTFhMjMgMTAwNjQ0DQo+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvY29y
-ZS5jDQo+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+IEBAIC0xNDA1LDcgKzE0MDUs
-MTAgQEAgc3RhdGljIHVuc2lnbmVkIGludCBtbWNfbW1jX2VyYXNlX3RpbWVvdXQoc3RydWN0DQo+
-IG1tY19jYXJkICpjYXJkLA0KPiAgew0KPiAgCXVuc2lnbmVkIGludCBlcmFzZV90aW1lb3V0Ow0K
-PiANCj4gLQlpZiAoY2FyZC0+ZXh0X2NzZC5lcmFzZV9ncm91cF9kZWYgJiAxKSB7DQo+ICsJaWYg
-KGFyZyA9PSBNTUNfRElTQ0FSRF9BUkcgfHwNCj4gKwkgICAgKGFyZyA9PSBNTUNfVFJJTV9BUkcg
-JiYgY2FyZC0+ZXh0X2NzZC5yZXYgPj0gNikpIHsNCj4gKwkJZXJhc2VfdGltZW91dCA9IGNhcmQt
-PmV4dF9jc2QudHJpbV90aW1lb3V0Ow0KPiArCX0gZWxzZSBpZiAoY2FyZC0+ZXh0X2NzZC5lcmFz
-ZV9ncm91cF9kZWYgJiAxKSB7DQo+ICAJCS8qIEhpZ2ggQ2FwYWNpdHkgRXJhc2UgR3JvdXAgU2l6
-ZSB1c2VzIEhDIHRpbWVvdXRzICovDQo+ICAJCWlmIChhcmcgPT0gTU1DX1RSSU1fQVJHKQ0KPiAg
-CQkJZXJhc2VfdGltZW91dCA9IGNhcmQtPmV4dF9jc2QudHJpbV90aW1lb3V0Ow0KPiANCj4gDQo+
-IA0KPiANCj4gQWx0ZXJuYXRpdmVseSwgbWF5YmUgaXQgd291bGQgYmUgYmV0dGVyIHRvIHN3aXRj
-aCB0byBIQyBlcmFzZSBzaXplIGZvciBhbGwNCj4gZU1NQyB2NC41IGNhcmRzPw0KPiAtLQ0KPiBU
-byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUg
-bGludXgtbW1jIiBpbg0KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIu
-a2VybmVsLm9yZw0KPiBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwu
-b3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
+Hi,
+
+> 
+> Yes, this makes sense. With current implementation, mmc_select_powerclass()
+> should never really fail which means failure should be treated as fatal and
+> we should really skip the card initialization.
+> This patch is already pushed to mmc-next. So I will post another patch (by
+> next week as I will be on vacation in this week) to skip the card
+> initialization if mmc_select_powerclass fails.
+> 
+> Is this ok?
+> 
+> Regards,
+> Subhash
+> 
+
+There was an error in the public JEDEC eMMC 4.5 version: PWR_CL_200_360 = EXT_CSD[237] 
+is wrongly defined because HS200 can be supported only @1.2V or 1.8V. New Jedec spec 
+revision might fix this.
+
+I and Danilo did a quick check in the power class selection routines and it looks 
+like the power class is set according to the OCR parsing.
+The OCR parsing to check the supported voltage range does not totally cover 
+the device capabilities because Vccq = 1.2V support is not encoded in the register.
+
+If the above is true, this implies that indexes EXT_CSD_PWR_CL_200_360 will lead to an error.
+
+DEVICE_TYPE = EXT_CSD[196] is more useful because it provides information on the 
+Speed Rate and Voltage Range supported by the device.
+
+Cheers,
+    Luca
