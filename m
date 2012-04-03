@@ -1,77 +1,101 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: Prevent 1.8V switch for SD hosts that don't support UHS modes.
-Date: Mon, 02 Apr 2012 20:42:27 -0400
-Message-ID: <87r4w5ir2k.fsf@laptop.org>
-References: <1331927657-2849-1-git-send-email-acooper@gmail.com>
-	<CAOGqxeWdOjkSTa2N5GwCvGb02zge+66_CT=0u7upznoWVfUCcw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: [PATCH v1 1/1] mmc: core: fix power class selection
+Date: Tue,  3 Apr 2012 12:25:58 +0530
+Message-ID: <1333436158-4762-1-git-send-email-subhashj@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:48359 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751691Ab2DCAmW convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Apr 2012 20:42:22 -0400
-In-Reply-To: <CAOGqxeWdOjkSTa2N5GwCvGb02zge+66_CT=0u7upznoWVfUCcw@mail.gmail.com>
-	(Alan Cooper's message of "Mon, 2 Apr 2012 14:29:18 -0400")
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:10562 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751825Ab2DCG40 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Apr 2012 02:56:26 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Cooper <alcooperx@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Girish K S <girish.shivananjappa@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, "Nath, Arindam" <Arindam.Nath@amd.com>, Philip Rakity <prakity@marvell.com>
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, girish.shivananjappa@linaro.org, Subhash Jadavani <subhashj@codeaurora.org>
 
-Hi Al,
+mmc_select_powerclass() function returns error if eMMC
+VDD level supported by host is between 2.7v to 3.2v.
 
-On Mon, Apr 02 2012, Alan Cooper wrote:
-> Still hoping for comments on the patch.
+According to eMMC specification, valid voltage for high
+voltage cards is 2.7v to 3.6v. This patch ensures that
+2.7v to 3.6v VDD range is treated as valid range.
 
-Thanks for the reminder; adding a few potential reviewers to CC:.
+Also, failure to set the power class shouldn't be treated
+as fatal error because even if setting the power class
+fails, card can still work in default power class.
+If mmc_select_powerclass() returns error, just print
+the warning message and go ahead with rest of the card
+initialization.
 
-- Chris.
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+---
+ drivers/mmc/core/mmc.c |   30 +++++++++++++++++-------------
+ 1 files changed, 17 insertions(+), 13 deletions(-)
 
-> On Fri, Mar 16, 2012 at 3:54 PM, Al Cooper <acooper@gmail.com> wrote:
->> The driver should not try to switch to 1.8V when the SD 3.0 host
->> controller does not have any UHS capabilities bits set (SDR50, DDR50
->> or SDR104). See page 72 of "SD Specifications Part A2 SD Host
->> Controller Simplified Specification Version 3.00" under
->> "1.8V Signaling Enable". Instead of setting SDR12 and SDR25 in the h=
-ost
->> capabilities data structure for all V3.0 host controllers, only set =
-them
->> if SDR104, SDR50 or DDR50 is set in the host capabilities register. =
-This
->> will prevent the switch to 1.8V later.
->>
->> Signed-off-by: Al Cooper <acooper@gmail.com>
->> ---
->> =C2=A0drivers/mmc/host/sdhci.c | =C2=A0 =C2=A05 +++--
->> =C2=A01 files changed, 3 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 8d66706..cdf900e 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2762,8 +2762,9 @@ int sdhci_add_host(struct sdhci_host *host)
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0mmc_card_is_removable(mmc))
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0mmc->caps |=3D=
- MMC_CAP_NEEDS_POLL;
->>
->> - =C2=A0 =C2=A0 =C2=A0 /* UHS-I mode(s) supported by the host contro=
-ller. */
->> - =C2=A0 =C2=A0 =C2=A0 if (host->version >=3D SDHCI_SPEC_300)
->> + =C2=A0 =C2=A0 =C2=A0 /* Any UHS-I mode in caps implies SDR12 and S=
-DR25 support. */
->> + =C2=A0 =C2=A0 =C2=A0 if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_S=
-UPPORT_SDR50 |
->> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 =C2=A0SDHCI_SUPPORT_DDR50))
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0mmc->caps |=3D=
- MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
->>
->> =C2=A0 =C2=A0 =C2=A0 =C2=A0/* SDR104 supports also implies SDR50 sup=
-port */
->> --
->> 1.7.6
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 02914d6..54df5ad 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -695,6 +695,11 @@ static int mmc_select_powerclass(struct mmc_card *card,
+ 		else if (host->ios.clock <= 200000000)
+ 			index = EXT_CSD_PWR_CL_200_195;
+ 		break;
++	case MMC_VDD_27_28:
++	case MMC_VDD_28_29:
++	case MMC_VDD_29_30:
++	case MMC_VDD_30_31:
++	case MMC_VDD_31_32:
+ 	case MMC_VDD_32_33:
+ 	case MMC_VDD_33_34:
+ 	case MMC_VDD_34_35:
+@@ -1111,11 +1116,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
+ 				EXT_CSD_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
+ 		err = mmc_select_powerclass(card, ext_csd_bits, ext_csd);
+-		if (err) {
+-			pr_err("%s: power class selection to bus width %d failed\n",
+-				mmc_hostname(card->host), 1 << bus_width);
+-			goto err;
+-		}
++		if (err)
++			pr_warning("%s: power class selection to bus width %d"
++				   " failed\n", mmc_hostname(card->host),
++				   1 << bus_width);
+ 	}
+ 
+ 	/*
+@@ -1147,10 +1151,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			err = mmc_select_powerclass(card, ext_csd_bits[idx][0],
+ 						    ext_csd);
+ 			if (err)
+-				pr_err("%s: power class selection to "
+-				       "bus width %d failed\n",
+-				       mmc_hostname(card->host),
+-				       1 << bus_width);
++				pr_warning("%s: power class selection to "
++					   "bus width %d failed\n",
++					   mmc_hostname(card->host),
++					   1 << bus_width);
+ 
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 					 EXT_CSD_BUS_WIDTH,
+@@ -1178,10 +1182,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			err = mmc_select_powerclass(card, ext_csd_bits[idx][1],
+ 						    ext_csd);
+ 			if (err)
+-				pr_err("%s: power class selection to "
+-				       "bus width %d ddr %d failed\n",
+-				       mmc_hostname(card->host),
+-				       1 << bus_width, ddr);
++				pr_warning("%s: power class selection to "
++					   "bus width %d ddr %d failed\n",
++					   mmc_hostname(card->host),
++					   1 << bus_width, ddr);
+ 
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 					 EXT_CSD_BUS_WIDTH,
+-- 
+1.7.1.1
 
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+--
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
