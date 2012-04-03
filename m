@@ -1,221 +1,139 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [PATCH v1 1/1] mmc: core: fix power class selection
-Date: Tue, 3 Apr 2012 21:20:10 +0530
-Message-ID: <000501cd11b1$75766770$60633650$@codeaurora.org>
-References: <1333436158-4762-1-git-send-email-subhashj@codeaurora.org> <CAKLKtzew2g7bXR3Xdz448cs8O_jQHp0ybG1r1VBUTXcoh2BDwA@mail.gmail.com>
+From: Hanspeter Spalinger <hanfi@spahan.ch>
+Subject: [REGRESSION][3.4-rc1] mmc0: Timeout waiting for hardware interrupt.
+Date: Tue, 03 Apr 2012 17:58:46 +0200
+Message-ID: <4F7B1E36.1030509@spahan.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAKLKtzew2g7bXR3Xdz448cs8O_jQHp0ybG1r1VBUTXcoh2BDwA@mail.gmail.com>
-Content-Language: en-us
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: 'Saugata Das' <saugata.das@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, girish.shivananjappa@linaro.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig270CF25D3D554DA0DA208469"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.spahan.ch ([88.198.81.77]:60647 "EHLO mail.spahan.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753082Ab2DCQH2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 Apr 2012 12:07:28 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>
+
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig270CF25D3D554DA0DA208469
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi,
+My Laptop (HP Elitebook 8560p) started throw
+" mmc0: Timeout waiting for hardware interrupt." at updating from
+3.3-rc7 to 3.4-rc1 and is no longer able to mount my SD-card.
+
+I bisected this and found the culprit to be:
+e6039832bed9a9b967796d7021f17f25b625b616 is the first bad commit
+commit e6039832bed9a9b967796d7021f17f25b625b616
+Author: Alexander Stein <alexander.stein@systec-electronic.com>
+Date:   Tue Mar 13 18:16:40 2012 +0100
+
+    mmc: sdhci-pci: Add MSI support
+
+    Signed-off-by: Alexander Stein <alexander.stein@systec-electronic.com=
+>
+    Signed-off-by: Chris Ball <cjb@laptop.org>
+
+:040000 040000 f8c9958a7d3c6b3aa2f42055d8606e7aac7da8f2
+4879d38f9aa4bd526bd561de36833190fa616d36 M	drivers
+
+Kernel information:
+$ more /proc/version
+Linux version 3.3.0+ (root@lisa) (gcc version 4.6.2 (Gentoo 4.6.2 p1.4,
+pie-0.5.0) ) #17 SMP PREEMPT Tue
+ Apr 3 17:15:37 CEST 2012
+$ scripts/ver_linux
+Linux lisa 3.3.0+ #17 SMP PREEMPT Tue Apr 3 17:15:37 CEST 2012 x86_64
+Intel(R) Core(TM) i7-2760QM CPU @ 2.40GHz GenuineIntel GNU/Linux
+
+Gnu C                  4.6.2
+Gnu make               3.82
+binutils               2.21.1
+util-linux             2.20.1
+mount                  support
+module-init-tools      3.16
+e2fsprogs              1.42
+PPP                    2.4.5
+Linux C Library        2.13
+Dynamic linker (ldd)   2.13
+Procps                 3.2.8
+Net-tools              1.60_p20110409135728
+Kbd                    1.15.3wip
+Sh-utils               8.14
+wireless-tools         29
+Modules Loaded         ipv6 uvcvideo videobuf2_core videodev
+v4l2_compat_ioctl32 videobuf2_vmalloc videobuf2_memops tpm_infineon arc4
+xhci_hcd 8250_pci snd_hda_codec_hdmi radeon fbcon tileblit font bitblit
+softcursor ttm drm_kms_helper iwlwifi drm ehci_hcd fb snd_hda_codec_idt
+mousedev tpm_tis tpm 8250_pnp hp_wmi video usbcore fbdev mac80211
+i2c_algo_bit i2c_core firewire_ohci snd_hda_intel firewire_core
+cfbcopyarea cfg80211 snd_hda_codec 8250 sparse_keymap hp_accel cfbimgblt
+snd_pcm rfkill serial_core wmi lis3lv02d psmouse intel_agp intel_gtt
+agpgart e1000e tpm_bios backlight cfbfillrect usb_common coretemp
+snd_timer evdev hwmon input_polldev serio_raw snd sr_mod sg cdrom
+soundcore snd_page_alloc crc32c_intel ghash_clmulni_intel sha256_generic
+sd_mod ahci libahci
+
+Hardware information:
+$ lspci -v (cutted to the JMicron device in use)
+24:00.0 FireWire (IEEE 1394): JMicron Technology Corp. IEEE 1394 Host
+Controller (rev 30) (prog-if 10 [O
+HCI])
+	Subsystem: Hewlett-Packard Company Device 1618
+	Flags: bus master, fast devsel, latency 0, IRQ 18
+	Memory at d4200000 (32-bit, non-prefetchable) [size=3D2K]
+	Memory at d4205000 (32-bit, non-prefetchable) [size=3D256]
+	Capabilities: [44] Power Management version 3
+	Capabilities: [80] Express Endpoint, MSI 00
+	Capabilities: [94] MSI: Enable- Count=3D1/1 Maskable- 64bit-
+	Kernel driver in use: firewire_ohci
+	Kernel modules: firewire-ohci
+
+24:00.1 System peripheral: JMicron Technology Corp. SD/MMC Host
+Controller (rev 30)
+	Subsystem: Hewlett-Packard Company Device 1618
+	Flags: bus master, fast devsel, latency 0, IRQ 47
+	Memory at d4204000 (32-bit, non-prefetchable) [size=3D256]
+	Expansion ROM at d4700000 [disabled] [size=3D32K]
+	Capabilities: [a4] Power Management version 3
+	Capabilities: [80] Express Endpoint, MSI 00
+	Capabilities: [94] MSI: Enable+ Count=3D1/1 Maskable- 64bit-
+	Kernel driver in use: sdhci-pci
+
+24:00.2 SD Host controller: JMicron Technology Corp. Standard SD Host
+Controller (rev 30) (prog-if 01)
+	Subsystem: Hewlett-Packard Company Device 1618
+	Flags: fast devsel, IRQ 18
+	Memory at d4203000 (32-bit, non-prefetchable) [size=3D256]
+	Capabilities: [a4] Power Management version 3
+	Capabilities: [80] Express Endpoint, MSI 00
+	Capabilities: [94] MSI: Enable- Count=3D1/1 Maskable- 64bit-
 
 
+I posted the full dmesg output at http://pastebin.com/DFPZigKq
+Please cc me, as i am not on the mailing list.
+If you need more information, let me know.
 
-> -----Original Message-----
-> From: Saugata Das [mailto:saugata.das@linaro.org]
-> Sent: Tuesday, April 03, 2012 8:55 PM
-> To: Subhash Jadavani
-> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org;
-> girish.shivananjappa@linaro.org
-> Subject: Re: [PATCH v1 1/1] mmc: core: fix power class selection
->=20
-> On 3 April 2012 12:25, Subhash Jadavani <subhashj@codeaurora.org> wro=
-te:
-> > mmc_select_powerclass() function returns error if eMMC VDD level
-> > supported by host is between 2.7v to 3.2v.
-> >
-> > According to eMMC specification, valid voltage for high voltage car=
-ds
-> > is 2.7v to 3.6v. This patch ensures that 2.7v to 3.6v VDD range is
-> > treated as valid range.
-> >
-> > Also, failure to set the power class shouldn't be treated as fatal
-> > error because even if setting the power class fails, card can still
-> > work in default power class.
-> > If mmc_select_powerclass() returns error, just print the warning
-> > message and go ahead with rest of the card initialization.
-> >
->=20
-> Have you checked why mmc_select_powerclass returned error ? Today, in
-> the mmc_select_powerclass, it is just setting the value of power clas=
-s,
-which
-> the eMMC expects. So, it should not fail.
->=20
-> Another point is that, today mmc_select_powerclass is assuming that h=
-ost
-> can support the maximum possible power classes and it does not check =
-host
-> controllers capability in driving higher current (mA). But I think in
-future we
-> need to add this check for host controller ability and return error f=
-rom
-> mmc_select_powerclass so that mmc_init_card can choose the next speed
+Greetings
+Hanspeter Spalinger
 
-Agreed with this point.
 
-> mode. From that perspective, the approach to ignore the error return =
-from
-> mmc_select_powerclass looks wrong.
+--------------enig270CF25D3D554DA0DA208469
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-My patch was just intended to fix the issue existing power class
-implementation. As commit text says:
-	- don't consider 2.7v to 3.2v as invalid range
-	- We are already ignoring the error returned by
-mmc_set_power_class() function for DS/HS/DDR cards. So this patch has
-extended that to HS200 cards.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.17 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
 
-So as far as this patch is concerned, I don't see anything wrong here.
+iEYEARECAAYFAk97HjYACgkQjLvx8ViUjYKKUgCfbLs6WC8vJbW+DMG3fqCZqyym
+WjEAnjHQ5Oibv0LpL6cQkmAJpUSYnWus
+=snN/
+-----END PGP SIGNATURE-----
 
-As you have mentioned, currently we are not taking the host controller
-capability into account (as it doesn't exist as of now) so we should no=
-t see
-mmc_select_powerclass() fail any time.
-But yes, next thing should be to take into account the host current sou=
-rcing
-capability before deciding which bus speed mode to choose. But that may=
- be a
-big change and should be as separate patch. Girish had already posted o=
-ne
-patch for this which needs to be extended to achieve this.
-
-Regards,
-Subhash
-
->=20
->=20
-> > Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
-> > ---
-> > =A0drivers/mmc/core/mmc.c | =A0 30 +++++++++++++++++-------------
-> > =A01 files changed, 17 insertions(+), 13 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
-> > 02914d6..54df5ad 100644
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -695,6 +695,11 @@ static int mmc_select_powerclass(struct mmc_ca=
-rd
-> > *card,
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0else if (host->ios.clock <=3D 200000=
-000)
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0index =3D EXT_CSD_PW=
-R_CL_200_195;
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
-> > + =A0 =A0 =A0 case MMC_VDD_27_28:
-> > + =A0 =A0 =A0 case MMC_VDD_28_29:
-> > + =A0 =A0 =A0 case MMC_VDD_29_30:
-> > + =A0 =A0 =A0 case MMC_VDD_30_31:
-> > + =A0 =A0 =A0 case MMC_VDD_31_32:
-> > =A0 =A0 =A0 =A0case MMC_VDD_32_33:
-> > =A0 =A0 =A0 =A0case MMC_VDD_33_34:
-> > =A0 =A0 =A0 =A0case MMC_VDD_34_35:
-> > @@ -1111,11 +1116,10 @@ static int mmc_init_card(struct mmc_host
-> > *host, u32 ocr,
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd_bits =3D (bus_width =3D=3D M=
-MC_BUS_WIDTH_8) ?
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_=
-CSD_BUS_WIDTH_8 :
-> > EXT_CSD_BUS_WIDTH_4;
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_powerclass(card, =
-ext_csd_bits,
-> > ext_csd);
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("%s: power cla=
-ss selection to bus width
-> > %d failed\n",
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_h=
-ostname(card->host), 1 <<
-> > bus_width);
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err;
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("%s: power=
- class selection to bus
-width %d"
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-" failed\n",
-> > + mmc_hostname(card->host),
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-1 << bus_width);
-> > =A0 =A0 =A0 =A0}
-> >
-> > =A0 =A0 =A0 =A0/*
-> > @@ -1147,10 +1151,10 @@ static int mmc_init_card(struct mmc_host
-> > *host, u32 ocr,
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_p=
-owerclass(card,
-> > ext_csd_bits[idx][0],
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd);
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_er=
-r("%s: power class selection to "
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0"bus width %d failed\n",
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0mmc_hostname(card->host),
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A01 << bus_width);
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_wa=
-rning("%s: power class selection to
-"
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0"bus width %d failed\n",
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0mmc_hostname(card->host),
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A01 << bus_width);
-> >
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(c=
-ard, EXT_CSD_CMD_SET_NORMAL,
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 EXT_CSD_BUS_WIDTH, @@ -1178,10
-> > +1182,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr=
-,
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_p=
-owerclass(card,
-> > ext_csd_bits[idx][1],
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd);
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_er=
-r("%s: power class selection to "
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0"bus width %d ddr %d failed\n",
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0mmc_hostname(card->host),
-> > - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A01 << bus_width, ddr);
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_wa=
-rning("%s: power class selection to
-"
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0"bus width %d ddr %d
-> > + failed\n",
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0mmc_hostname(card->host),
-> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A01 << bus_width, ddr);
-> >
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(c=
-ard, EXT_CSD_CMD_SET_NORMAL,
-> > =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 EXT_CSD_BUS_WIDTH,
-> > --
-> > 1.7.1.1
-> >
-> > --
-> > Sent by a consultant of the Qualcomm Innovation Center, Inc.
-> > The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
-> Forum.
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc=
-"
-> > in the body of a message to majordomo@vger.kernel.org More
-> majordomo
-> > info at =A0http://vger.kernel.org/majordomo-info.html
+--------------enig270CF25D3D554DA0DA208469--
