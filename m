@@ -1,37 +1,41 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: PATCH:  mmc: sdhci-dove: Fix compile error for 3.3.1
-Date: Wed, 04 Apr 2012 12:30:53 -0400
-Message-ID: <87ty0za282.fsf@laptop.org>
-References: <4F7C738F.20405@i100.no>
+From: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
+Subject: Re: [PATCH 07/11] gpio: tegra: Hide tegra_gpio_enable/disable()
+Date: Wed, 4 Apr 2012 11:01:06 -0700
+Message-ID: <20120404180106.GG29919@quad.lixom.net>
+References: <1333148404-17691-1-git-send-email-swarren@wwwdotorg.org>
+ <1333148404-17691-8-git-send-email-swarren@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43416 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756890Ab2DDQbD convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Apr 2012 12:31:03 -0400
-In-Reply-To: <4F7C738F.20405@i100.no> ("Alf =?utf-8?Q?H=C3=B8gemark=22's?=
- message of "Wed, 04
-	Apr 2012 18:15:11 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1333148404-17691-8-git-send-email-swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Cc: Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alf =?utf-8?Q?H=C3=B8gemark?= <alf@i100.no>
-Cc: linux-mmc@vger.kernel.org, trivial@kernel.org
 
-Hi Alf,
+On Fri, Mar 30, 2012 at 05:00:00PM -0600, Stephen Warren wrote:
+> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> 
+> Recent pinctrl discussions concluded that gpiolib APIs should in fact do
+> whatever is required to mux a GPIO onto pins, by calling pinctrl APIs if
+> required. This change implements this for the Tegra GPIO driver, and removes
+> calls to the Tegra-specific APIs from drivers and board files.
+> 
+> Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+> Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> ---
+> v2: Adjusted per changes to latest version of Documentation/gpio.txt.
+> Fixed tegra_board_pinmux_bus_notify() to still check the device name,
+> so it waits for the pinmux device to be registered, not just /any/ device.
 
-On Wed, Apr 04 2012, Alf H=C3=B8gemark wrote:
-> From: Alf Hogemark <alf <at> i100.no>
->
-> This patch fixes a compile error in drivers/mmc/host/sdhci-dove.c by =
-including the linux/module.h file.
->
-> Signed-off-by: Alf Hogemark <alf <at> i100.no>
+Acked-by: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
 
-Thanks, pushed to mmc-next for 3.4 with a stable@ tag.
+I'm quite glad to see this happen. Erik had the intention to keep pin setup
+separate from gpio drivers, but in the end it just results in duplicate setup
+of the same stuff in different places. In hindsight this does seem quite a bit
+cleaner.
 
-- Chris.
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+
+-Olof
