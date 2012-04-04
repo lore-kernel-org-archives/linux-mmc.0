@@ -1,67 +1,100 @@
-From: "Nath, Arindam" <Arindam.Nath@amd.com>
-Subject: RE: [PATCH] mmc: Prevent 1.8V switch for SD hosts that don't
+From: Philip Rakity <prakity@marvell.com>
+Subject: Re: [PATCH] mmc: Prevent 1.8V switch for SD hosts that don't
  support UHS modes.
-Date: Wed, 4 Apr 2012 03:46:22 +0000
-Message-ID: <B0C59D0E4E9BA24EB5E08604F8E228540423DF0E@sausexdag03.amd.com>
+Date: Tue, 3 Apr 2012 20:58:12 -0700
+Message-ID: <0CC34BD4-748D-464A-A57B-C36565B9289E@marvell.com>
 References: <1331927657-2849-1-git-send-email-acooper@gmail.com>
-	<CAOGqxeWdOjkSTa2N5GwCvGb02zge+66_CT=0u7upznoWVfUCcw@mail.gmail.com>
+ <CAOGqxeWdOjkSTa2N5GwCvGb02zge+66_CT=0u7upznoWVfUCcw@mail.gmail.com>
  <87r4w5ir2k.fsf@laptop.org>
+ <B0C59D0E4E9BA24EB5E08604F8E228540423DF0E@sausexdag03.amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:22021
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755621Ab2DDDq1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Apr 2012 23:46:27 -0400
-In-Reply-To: <87r4w5ir2k.fsf@laptop.org>
+Received: from na3sys009aog121.obsmtp.com ([74.125.149.145]:60489 "EHLO
+	na3sys009aog121.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751088Ab2DDD7E convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 Apr 2012 23:59:04 -0400
+In-Reply-To: <B0C59D0E4E9BA24EB5E08604F8E228540423DF0E@sausexdag03.amd.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Alan Cooper <alcooperx@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Girish K S <girish.shivananjappa@linaro.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Philip Rakity <prakity@marvell.com>
+To: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Alan Cooper <alcooperx@gmail.com>, Girish K S <girish.shivananjappa@linaro.org>, "Nath, Arindam" <Arindam.Nath@amd.com>, Ulf Hansson <ulf.hansson@stericsson.com>
 
-SGksDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBDaHJpcyBCYWxs
-IFttYWlsdG86Y2piQGxhcHRvcC5vcmddDQo+IFNlbnQ6IFR1ZXNkYXksIEFwcmlsIDAzLCAyMDEy
-IDY6MTIgQU0NCj4gVG86IEFsYW4gQ29vcGVyDQo+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwu
-b3JnOyBHaXJpc2ggSyBTOyBVbGYgSGFuc3NvbjsgTmF0aCwgQXJpbmRhbTsNCj4gUGhpbGlwIFJh
-a2l0eQ0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBtbWM6IFByZXZlbnQgMS44ViBzd2l0Y2ggZm9y
-IFNEIGhvc3RzIHRoYXQgZG9uJ3QNCj4gc3VwcG9ydCBVSFMgbW9kZXMuDQo+IA0KPiBIaSBBbCwN
-Cj4gDQo+IE9uIE1vbiwgQXByIDAyIDIwMTIsIEFsYW4gQ29vcGVyIHdyb3RlOg0KPiA+IFN0aWxs
-IGhvcGluZyBmb3IgY29tbWVudHMgb24gdGhlIHBhdGNoLg0KPiANCj4gVGhhbmtzIGZvciB0aGUg
-cmVtaW5kZXI7IGFkZGluZyBhIGZldyBwb3RlbnRpYWwgcmV2aWV3ZXJzIHRvIENDOi4NCg0KQWNr
-ZWQtYnk6IEFyaW5kYW0gTmF0aCA8YXJpbmRhbS5uYXRoQGFtZC5jb20+DQoNClJlZ2FyZHMsDQpB
-cmluZGFtDQoNCj4gDQo+IC0gQ2hyaXMuDQo+IA0KPiA+IE9uIEZyaSwgTWFyIDE2LCAyMDEyIGF0
-IDM6NTQgUE0sIEFsIENvb3BlciA8YWNvb3BlckBnbWFpbC5jb20+IHdyb3RlOg0KPiA+PiBUaGUg
-ZHJpdmVyIHNob3VsZCBub3QgdHJ5IHRvIHN3aXRjaCB0byAxLjhWIHdoZW4gdGhlIFNEIDMuMCBo
-b3N0DQo+ID4+IGNvbnRyb2xsZXIgZG9lcyBub3QgaGF2ZSBhbnkgVUhTIGNhcGFiaWxpdGllcyBi
-aXRzIHNldCAoU0RSNTAsIEREUjUwDQo+ID4+IG9yIFNEUjEwNCkuIFNlZSBwYWdlIDcyIG9mICJT
-RCBTcGVjaWZpY2F0aW9ucyBQYXJ0IEEyIFNEIEhvc3QNCj4gPj4gQ29udHJvbGxlciBTaW1wbGlm
-aWVkIFNwZWNpZmljYXRpb24gVmVyc2lvbiAzLjAwIiB1bmRlcg0KPiA+PiAiMS44ViBTaWduYWxp
-bmcgRW5hYmxlIi4gSW5zdGVhZCBvZiBzZXR0aW5nIFNEUjEyIGFuZCBTRFIyNSBpbiB0aGUNCj4g
-aG9zdA0KPiA+PiBjYXBhYmlsaXRpZXMgZGF0YSBzdHJ1Y3R1cmUgZm9yIGFsbCBWMy4wIGhvc3Qg
-Y29udHJvbGxlcnMsIG9ubHkgc2V0DQo+IHRoZW0NCj4gPj4gaWYgU0RSMTA0LCBTRFI1MCBvciBE
-RFI1MCBpcyBzZXQgaW4gdGhlIGhvc3QgY2FwYWJpbGl0aWVzIHJlZ2lzdGVyLg0KPiBUaGlzDQo+
-ID4+IHdpbGwgcHJldmVudCB0aGUgc3dpdGNoIHRvIDEuOFYgbGF0ZXIuDQo+ID4+DQo+ID4+IFNp
-Z25lZC1vZmYtYnk6IEFsIENvb3BlciA8YWNvb3BlckBnbWFpbC5jb20+DQo+ID4+IC0tLQ0KPiA+
-PiDCoGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyB8IMKgIMKgNSArKystLQ0KPiA+PiDCoDEgZmls
-ZXMgY2hhbmdlZCwgMyBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQ0KPiA+Pg0KPiA+PiBk
-aWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jIGIvZHJpdmVycy9tbWMvaG9zdC9z
-ZGhjaS5jDQo+ID4+IGluZGV4IDhkNjY3MDYuLmNkZjkwMGUgMTAwNjQ0DQo+ID4+IC0tLSBhL2Ry
-aXZlcnMvbW1jL2hvc3Qvc2RoY2kuYw0KPiA+PiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNp
-LmMNCj4gPj4gQEAgLTI3NjIsOCArMjc2Miw5IEBAIGludCBzZGhjaV9hZGRfaG9zdChzdHJ1Y3Qg
-c2RoY2lfaG9zdCAqaG9zdCkNCj4gPj4gwqAgwqAgwqAgwqAgwqAgwqBtbWNfY2FyZF9pc19yZW1v
-dmFibGUobW1jKSkNCj4gPj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBtbWMtPmNhcHMgfD0gTU1D
-X0NBUF9ORUVEU19QT0xMOw0KPiA+Pg0KPiA+PiAtIMKgIMKgIMKgIC8qIFVIUy1JIG1vZGUocykg
-c3VwcG9ydGVkIGJ5IHRoZSBob3N0IGNvbnRyb2xsZXIuICovDQo+ID4+IC0gwqAgwqAgwqAgaWYg
-KGhvc3QtPnZlcnNpb24gPj0gU0RIQ0lfU1BFQ18zMDApDQo+ID4+ICsgwqAgwqAgwqAgLyogQW55
-IFVIUy1JIG1vZGUgaW4gY2FwcyBpbXBsaWVzIFNEUjEyIGFuZCBTRFIyNSBzdXBwb3J0Lg0KPiAq
-Lw0KPiA+PiArIMKgIMKgIMKgIGlmIChjYXBzWzFdICYgKFNESENJX1NVUFBPUlRfU0RSMTA0IHwg
-U0RIQ0lfU1VQUE9SVF9TRFI1MCB8DQo+ID4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqBTREhDSV9TVVBQT1JUX0REUjUwKSkNCj4gPj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBt
-bWMtPmNhcHMgfD0gTU1DX0NBUF9VSFNfU0RSMTIgfCBNTUNfQ0FQX1VIU19TRFIyNTsNCj4gPj4N
-Cj4gPj4gwqAgwqAgwqAgwqAvKiBTRFIxMDQgc3VwcG9ydHMgYWxzbyBpbXBsaWVzIFNEUjUwIHN1
-cHBvcnQgKi8NCj4gPj4gLS0NCj4gPj4gMS43LjYNCj4gDQo+IC0tDQo+IENocmlzIEJhbGwgICA8
-Y2piQGxhcHRvcC5vcmc+ICAgPGh0dHA6Ly9wcmludGYubmV0Lz4NCj4gT25lIExhcHRvcCBQZXIg
-Q2hpbGQNCg0K
+
+Acked-by: Philip Rakity <prakity@marvell.com>
+
+On Apr 3, 2012, at 8:46 PM, Nath, Arindam wrote:
+
+> Hi,
+> 
+> 
+>> -----Original Message-----
+>> From: Chris Ball [mailto:cjb@laptop.org]
+>> Sent: Tuesday, April 03, 2012 6:12 AM
+>> To: Alan Cooper
+>> Cc: linux-mmc@vger.kernel.org; Girish K S; Ulf Hansson; Nath, Arindam;
+>> Philip Rakity
+>> Subject: Re: [PATCH] mmc: Prevent 1.8V switch for SD hosts that don't
+>> support UHS modes.
+>> 
+>> Hi Al,
+>> 
+>> On Mon, Apr 02 2012, Alan Cooper wrote:
+>>> Still hoping for comments on the patch.
+>> 
+>> Thanks for the reminder; adding a few potential reviewers to CC:.
+> 
+> Acked-by: Arindam Nath <arindam.nath@amd.com>
+> 
+> Regards,
+> Arindam
+> 
+>> 
+>> - Chris.
+>> 
+>>> On Fri, Mar 16, 2012 at 3:54 PM, Al Cooper <acooper@gmail.com> wrote:
+>>>> The driver should not try to switch to 1.8V when the SD 3.0 host
+>>>> controller does not have any UHS capabilities bits set (SDR50, DDR50
+>>>> or SDR104). See page 72 of "SD Specifications Part A2 SD Host
+>>>> Controller Simplified Specification Version 3.00" under
+>>>> "1.8V Signaling Enable". Instead of setting SDR12 and SDR25 in the
+>> host
+>>>> capabilities data structure for all V3.0 host controllers, only set
+>> them
+>>>> if SDR104, SDR50 or DDR50 is set in the host capabilities register.
+>> This
+>>>> will prevent the switch to 1.8V later.
+>>>> 
+>>>> Signed-off-by: Al Cooper <acooper@gmail.com>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci.c |    5 +++--
+>>>>  1 files changed, 3 insertions(+), 2 deletions(-)
+>>>> 
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index 8d66706..cdf900e 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -2762,8 +2762,9 @@ int sdhci_add_host(struct sdhci_host *host)
+>>>>            mmc_card_is_removable(mmc))
+>>>>                mmc->caps |= MMC_CAP_NEEDS_POLL;
+>>>> 
+>>>> -       /* UHS-I mode(s) supported by the host controller. */
+>>>> -       if (host->version >= SDHCI_SPEC_300)
+>>>> +       /* Any UHS-I mode in caps implies SDR12 and SDR25 support.
+>> */
+>>>> +       if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+>>>> +                      SDHCI_SUPPORT_DDR50))
+>>>>                mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
+>>>> 
+>>>>        /* SDR104 supports also implies SDR50 support */
+>>>> --
+>>>> 1.7.6
+>> 
+>> --
+>> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+>> One Laptop Per Child
+> 
 
