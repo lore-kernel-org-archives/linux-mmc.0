@@ -1,116 +1,152 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH] mmc: Prevent 1.8V switch for SD hosts that don't support
- UHS modes.
-Date: Wed, 4 Apr 2012 13:31:11 +0900
-Message-ID: <CAGxe1ZFVg69i6AnW7eiOG4RkvddEysqynkMx+HhsKnyA7bLaEw@mail.gmail.com>
-References: <1331927657-2849-1-git-send-email-acooper@gmail.com>
-	<CAOGqxeWdOjkSTa2N5GwCvGb02zge+66_CT=0u7upznoWVfUCcw@mail.gmail.com>
-	<87r4w5ir2k.fsf@laptop.org>
-	<B0C59D0E4E9BA24EB5E08604F8E228540423DF0E@sausexdag03.amd.com>
-	<0CC34BD4-748D-464A-A57B-C36565B9289E@marvell.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: card: move variable initialization earlier
+Date: Wed, 04 Apr 2012 09:20:02 +0300
+Message-ID: <4F7BE812.50403@intel.com>
+References: <1332495146-16312-1-git-send-email-linus.walleij@linaro.org> <8762dkm6wc.fsf@laptop.org> <4F7AB768.8020702@intel.com> <26E7A31274623843B0E8CF86148BFE326FB57128@NTXAVZMBX04.azit.micron.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:38449 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751082Ab2DDEbM convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Apr 2012 00:31:12 -0400
-Received: by qadc11 with SMTP id c11so114101qad.19
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Apr 2012 21:31:11 -0700 (PDT)
-In-Reply-To: <0CC34BD4-748D-464A-A57B-C36565B9289E@marvell.com>
+Received: from mga11.intel.com ([192.55.52.93]:19482 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751594Ab2DDGTv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 4 Apr 2012 02:19:51 -0400
+In-Reply-To: <26E7A31274623843B0E8CF86148BFE326FB57128@NTXAVZMBX04.azit.micron.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@marvell.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alan Cooper <alcooperx@gmail.com>, "Nath, Arindam" <Arindam.Nath@amd.com>, Ulf Hansson <ulf.hansson@stericsson.com>
+To: "Luca Porzio (lporzio)" <lporzio@micron.com>
+Cc: Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@stericsson.com>, Rabin Vincent <rabin@rab.in>, Kyungmin Park <kyungmin.park@samsung.com>, Kyungmin Park <kmpark@infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 4 April 2012 12:58, Philip Rakity <prakity@marvell.com> wrote:
->
-> Acked-by: Philip Rakity <prakity@marvell.com>
->
-> On Apr 3, 2012, at 8:46 PM, Nath, Arindam wrote:
->
->> Hi,
+On 03/04/12 19:55, Luca Porzio (lporzio) wrote:
+> Hi Adrian,
+> 
+>> The sanitize logic looks wrong to me.  I would expect it to look
+>> like this:
 >>
 >>
->>> -----Original Message-----
->>> From: Chris Ball [mailto:cjb@laptop.org]
->>> Sent: Tuesday, April 03, 2012 6:12 AM
->>> To: Alan Cooper
->>> Cc: linux-mmc@vger.kernel.org; Girish K S; Ulf Hansson; Nath, Arind=
-am;
->>> Philip Rakity
->>> Subject: Re: [PATCH] mmc: Prevent 1.8V switch for SD hosts that don=
-'t
->>> support UHS modes.
->>>
->>> Hi Al,
->>>
->>> On Mon, Apr 02 2012, Alan Cooper wrote:
->>>> Still hoping for comments on the patch.
->>>
->>> Thanks for the reminder; adding a few potential reviewers to CC:.
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index b180965..f5e0534 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -881,17 +881,12 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue
+>> *mq,
+>>  		goto out;
+>>  	}
 >>
->> Acked-by: Arindam Nath <arindam.nath@amd.com>
+>> -	/* The sanitize operation is supported at v4.5 only */
+>> -	if (mmc_can_sanitize(card)) {
+>> -		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> -				EXT_CSD_SANITIZE_START, 1, 0);
+>> -		goto out;
+>> -	}
+>> -
+>>  	from = blk_rq_pos(req);
+>>  	nr = blk_rq_sectors(req);
 >>
->> Regards,
->> Arindam
+>> -	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
+>> +	if (mmc_can_sanitize(card))
+>> +		arg = MMC_DISCARD_ARG;
+> 
+> The sanitize and discard are not coupled functionalities.
+> Discard is a hint for performance meant to replace trim and erase 
+> where performance matters.
+> Sanitize is a security operation meant to clear all unmapped contents.
+> Jedec 4.5 spec does not guarantee that a discarded sector will be sanitized.
+
+True, it is a bit vague on that point, although you might infer it from:
+
+	The Sanitize operation is a feature, in addition to TRIM and Erase
+	that is used to remove data from the device.
+
+which does not mention Discard.
+
+Presumably, some cards do make the guarantee e.g. Samsung since they
+submitted the original Discard/Sanitize patches.
+
+> This patch, if applied, will expose the kernel to a potential security 
+> risk (retrieve old contents not wiped by a sanitize)
+
+Well, the kernel is already exposed.  Current code does not even do a
+Discard if Sanitize is supported.
+
+> 
+>> +	else if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
+>>  		arg = MMC_SECURE_TRIM1_ARG;
+>>  	else
+>>  		arg = MMC_SECURE_ERASE_ARG;
+>> @@ -918,6 +913,12 @@ retry:
+>>  		}
+>>  		err = mmc_erase(card, from, nr, MMC_SECURE_TRIM2_ARG);
+>>  	}
+>> +
+>> +	/* The sanitize operation is supported at v4.5 only */
+>> +	if (!err && mmc_can_sanitize(card)) {
+>> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +				EXT_CSD_SANITIZE_START, 1, 0);
+>> +	}
+>>  out:
+>>  	if (err == -EIO && !mmc_blk_reset(md, card->host, type))
+>>  		goto retry;
 >>
->>>
->>> - Chris.
->>>
->>>> On Fri, Mar 16, 2012 at 3:54 PM, Al Cooper <acooper@gmail.com> wro=
-te:
->>>>> The driver should not try to switch to 1.8V when the SD 3.0 host
->>>>> controller does not have any UHS capabilities bits set (SDR50, DD=
-R50
->>>>> or SDR104). See page 72 of "SD Specifications Part A2 SD Host
->>>>> Controller Simplified Specification Version 3.00" under
->>>>> "1.8V Signaling Enable". Instead of setting SDR12 and SDR25 in th=
-e
->>> host
->>>>> capabilities data structure for all V3.0 host controllers, only s=
-et
->>> them
->>>>> if SDR104, SDR50 or DDR50 is set in the host capabilities registe=
-r.
->>> This
->>>>> will prevent the switch to 1.8V later.
->>>>>
->>>>> Signed-off-by: Al Cooper <acooper@gmail.com>
->>>>> ---
->>>>> =A0drivers/mmc/host/sdhci.c | =A0 =A05 +++--
->>>>> =A01 files changed, 3 insertions(+), 2 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>>> index 8d66706..cdf900e 100644
->>>>> --- a/drivers/mmc/host/sdhci.c
->>>>> +++ b/drivers/mmc/host/sdhci.c
->>>>> @@ -2762,8 +2762,9 @@ int sdhci_add_host(struct sdhci_host *host)
->>>>> =A0 =A0 =A0 =A0 =A0 =A0mmc_card_is_removable(mmc))
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_NEEDS_POLL;
->>>>>
->>>>> - =A0 =A0 =A0 /* UHS-I mode(s) supported by the host controller. =
-*/
->>>>> - =A0 =A0 =A0 if (host->version >=3D SDHCI_SPEC_300)
->>>>> + =A0 =A0 =A0 /* Any UHS-I mode in caps implies SDR12 and SDR25 s=
-upport.
->>> */
->>>>> + =A0 =A0 =A0 if (caps[1] & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT=
-_SDR50 |
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0SDHCI_SUPPORT_DDR50)=
-)
->>>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc->caps |=3D MMC_CAP_UHS_SDR12 |=
- MMC_CAP_UHS_SDR25;
->>>>>
->>>>> =A0 =A0 =A0 =A0/* SDR104 supports also implies SDR50 support */
-Cross checked with spec.
-Acked By: Girish K S <girish.shivananjappa@linaro.org>
->>>>> --
->>>>> 1.7.6
->>>
->>> --
->>> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
->>> One Laptop Per Child
 >>
->
+>>
+>> Also the timeout for eMMC v4.5 DISCARD looks wrong.  It should be
+>> the same as TRIM:
+>>
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 14f262e..00fd7db 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1407,7 +1407,7 @@ static unsigned int mmc_mmc_erase_timeout(struct
+>> mmc_card *card,
+>>
+>>  	if (card->ext_csd.erase_group_def & 1) {
+>>  		/* High Capacity Erase Group Size uses HC timeouts */
+>> -		if (arg == MMC_TRIM_ARG)
+>> +		if (arg == MMC_TRIM_ARG || arg == MMC_DISCARD_ARG)
+>>  			erase_timeout = card->ext_csd.trim_timeout;
+>>  		else
+>>  			erase_timeout = card->ext_csd.hc_erase_timeout;
+>>
+>>
+> 
+> Although I suspect that the discard cmd will be much faster than the
+> Trim on most devices, there is no such info available as of today in ext csd.
+> As such I agree with Adrian, discard timeout is nearer to trim than erase.
+>  
+>>
+>> In addition eMMC v4.5 seems to indicate the use of the trim timeout
+>> irrespective of the setting of erase_group_def, so maybe it should be
+>> like this:
+>>
+>>
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 14f262e..4691a23 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1405,7 +1405,10 @@ static unsigned int mmc_mmc_erase_timeout(struct
+>> mmc_card *card,
+>>  {
+>>  	unsigned int erase_timeout;
+>>
+>> -	if (card->ext_csd.erase_group_def & 1) {
+>> +	if (arg == MMC_DISCARD_ARG ||
+>> +	    (arg == MMC_TRIM_ARG && card->ext_csd.rev >= 6)) {
+>> +		erase_timeout = card->ext_csd.trim_timeout;
+>> +	} else if (card->ext_csd.erase_group_def & 1) {
+>>  		/* High Capacity Erase Group Size uses HC timeouts */
+>>  		if (arg == MMC_TRIM_ARG)
+>>  			erase_timeout = card->ext_csd.trim_timeout;
+>>
+>>
+>>
+>>
+>> Alternatively, maybe it would be better to switch to HC erase size for all
+>> eMMC v4.5 cards?
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
