@@ -1,142 +1,373 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 2/2] mmc: fixes for eMMC v4.5 sanitize operation
-Date: Thu,  5 Apr 2012 14:45:48 +0300
-Message-ID: <1333626348-11170-3-git-send-email-adrian.hunter@intel.com>
-References: <1333626348-11170-1-git-send-email-adrian.hunter@intel.com>
+From: Saugata Das <saugata.das@linaro.org>
+Subject: Re: [RFC] MMC-4.5 Power OFF Notify rework
+Date: Thu, 5 Apr 2012 19:30:19 +0530
+Message-ID: <CAKLKtzd=xYEnFZW3ys_HL0FMHNXMuTE_YxnK5bLb2A84dxGpJg@mail.gmail.com>
+References: <1333101747-3200-1-git-send-email-girish.shivananjappa@linaro.org>
+	<4F7C317C.1040203@stericsson.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:53497 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751588Ab2DELpv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 Apr 2012 07:45:51 -0400
-In-Reply-To: <1333626348-11170-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:56801 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752193Ab2DEOAU convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Apr 2012 10:00:20 -0400
+Received: by yenl12 with SMTP id l12so684144yen.19
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Apr 2012 07:00:19 -0700 (PDT)
+In-Reply-To: <4F7C317C.1040203@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, "Luca Porzio (lporzio)" <lporzio@micron.com>, Kyungmin Park <kyungmin.park@samsung.com>, Kyungmin Park <kmpark@infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, stable@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: Girish K S <girish.shivananjappa@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>
 
-eMMC v4.5 sanitize operation erases all copies of unmapped
-data.  However trim or erase operations must be used first
-to unmap the required sectors.  That was not being done.
+On 4 April 2012 17:03, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
+> On 03/30/2012 12:02 PM, Girish K S wrote:
+>>
+>> This is a rework of the existing POWER OFF NOTIFY patch. The current
+>> problem
+>> with the patch comes from the ambiguity on the usage of POWER OFF NO=
+TIFY
+>> together with SLEEP and misunderstanding on the usage of MMC_POWER_O=
+=46F
+>> power_mode from mmc_set_ios in different host controller drivers.
+>>
+>> This new patch works around this problem by adding a new host CAP,
+>> MMC_CAP2_POWER_OFF_VCCQ_DURING_SUSPEND, which when set sends a
+>> POWER OFF NOTIFY from mmc_suspend instead of SLEEP. It is expected t=
+hat
+>> host
+>> controller drivers will set this CAP, if they switch off both Vcc an=
+d Vccq
+>> from MMC_POWER_OFF condition within mmc_set_ios. However, note that =
+there
+>> is no harm in sending MMC_POWER_NOTIFY even if Vccq is not switched =
+off.
+>>
+>> This patch also sends POWER OFF NOTIFY from power management routine=
+s
+>> (e.g.
+>> mmc_power_save_host, mmc_pm_notify/PM_SUSPEND_PREPARE, mmc_stop_host=
+),
+>> which
+>> does reinitialization of the eMMC on the return path of the power
+>> management
+>> routines (e.g. mmc_power_restore_host, mmc_pm_notify/PM_POST_RESTORE=
+,
+>> mmc_start_host).
+>>
+>> Signed-off-by: Saugata Das<saugata.das@linaro.org>
+>> Signed-off-by: Girish K S<girish.shivananjappa@linaro.org>
+>> ---
+>> =A0drivers/mmc/core/core.c =A0| =A0 36 ++++++++++++++---------------=
+-------
+>> =A0drivers/mmc/core/core.h =A0| =A0 =A01 +
+>> =A0drivers/mmc/core/mmc.c =A0 | =A0 20 +++++++++++++-------
+>> =A0include/linux/mmc/host.h | =A0 =A01 +
+>> =A04 files changed, 29 insertions(+), 29 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 14f262e..dc85ee1 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1096,12 +1096,12 @@ void mmc_set_driver_type(struct mmc_host *ho=
+st,
+>> unsigned int drv_type)
+>> =A0 =A0 =A0 =A0mmc_host_clk_release(host);
+>> =A0}
+>>
+>> -static void mmc_poweroff_notify(struct mmc_host *host)
+>> +int mmc_poweroff_notify(struct mmc_host *host)
+>
+>
+> A more generic comment; why is not this function implemented as a bus=
+_ops
+> function, similar how sleep for mmc is done? That would be more prefe=
+rred I
+> think.
+>
 
-Fixes apply to linux 3.2 on.
+I have nothing for or against the idea. We just wanted to limit the
+changes in the patch. In this patch lets focus on the functional
+aspects of the power off notify and we can work on moving this
+function to bus_ops in a separate patch later.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Cc: <stable@vger.kernel.org>
----
- drivers/mmc/card/block.c |   54 ++++++++++++++++++++++++++++++++-------------
- drivers/mmc/core/core.c  |    2 +
- 2 files changed, 40 insertions(+), 16 deletions(-)
+>
+>> =A0{
+>> =A0 =A0 =A0 =A0struct mmc_card *card;
+>> =A0 =A0 =A0 =A0unsigned int timeout;
+>> =A0 =A0 =A0 =A0unsigned int notify_type =3D EXT_CSD_NO_POWER_NOTIFIC=
+ATION;
+>> - =A0 =A0 =A0 int err =3D 0;
+>> + =A0 =A0 =A0 int err =3D -EINVAL;
+>>
+>> =A0 =A0 =A0 =A0card =3D host->card;
+>> =A0 =A0 =A0 =A0mmc_claim_host(host);
+>> @@ -1136,6 +1136,7 @@ static void mmc_poweroff_notify(struct mmc_hos=
+t
+>> *host)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->poweroff_notify_state =3D MMC_N=
+O_POWER_NOTIFICATION;
+>> =A0 =A0 =A0 =A0}
+>> =A0 =A0 =A0 =A0mmc_release_host(host);
+>> + =A0 =A0 =A0 return err;
+>> =A0}
+>>
+>> =A0/*
+>> @@ -1194,30 +1195,12 @@ static void mmc_power_up(struct mmc_host *ho=
+st)
+>>
+>> =A0void mmc_power_off(struct mmc_host *host)
+>> =A0{
+>> - =A0 =A0 =A0 int err =3D 0;
+>> =A0 =A0 =A0 =A0mmc_host_clk_hold(host);
+>>
+>> =A0 =A0 =A0 =A0host->ios.clock =3D 0;
+>> =A0 =A0 =A0 =A0host->ios.vdd =3D 0;
+>>
+>> =A0 =A0 =A0 =A0/*
+>> - =A0 =A0 =A0 =A0* For eMMC 4.5 device send AWAKE command before
+>> - =A0 =A0 =A0 =A0* POWER_OFF_NOTIFY command, because in sleep state
+>> - =A0 =A0 =A0 =A0* eMMC 4.5 devices respond to only RESET and AWAKE =
+cmd
+>> - =A0 =A0 =A0 =A0*/
+>> - =A0 =A0 =A0 if (host->card&& =A0mmc_card_is_sleep(host->card)&&
+>> - =A0 =A0 =A0 =A0 =A0 host->bus_ops->resume) {
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D host->bus_ops->resume(host);
+>> -
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!err)
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_poweroff_notify(ho=
+st);
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 else
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("%s: error =
+%d during resume "
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+"(continue with poweroff sequence)\n",
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+mmc_hostname(host), err);
+>> - =A0 =A0 =A0 }
+>> -
+>> - =A0 =A0 =A0 /*
+>> =A0 =A0 =A0 =A0 * Reset ocr mask to be the highest possible voltage =
+supported for
+>> =A0 =A0 =A0 =A0 * this mmc host. This value will be used at next pow=
+er up.
+>> =A0 =A0 =A0 =A0 */
+>> @@ -2076,6 +2059,7 @@ void mmc_stop_host(struct mmc_host *host)
+>> =A0 =A0 =A0 =A0host->pm_flags =3D 0;
+>>
+>> =A0 =A0 =A0 =A0mmc_bus_get(host);
+>> + =A0 =A0 =A0 mmc_poweroff_notify(host);
+>
+>
+> We must not do mmc_poweroff_notify, without knowing we have a card at=
+tached
+> through the bus_ops.
+>
+>> =A0 =A0 =A0 =A0if (host->bus_ops&& =A0!host->bus_dead) {
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Calling bus_ops->remove() with a c=
+laimed host can
+>> deadlock */
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (host->bus_ops->remove)
+>> @@ -2112,7 +2096,8 @@ int mmc_power_save_host(struct mmc_host *host)
+>>
+>> =A0 =A0 =A0 =A0if (host->bus_ops->power_save)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ret =3D host->bus_ops->power_save(hos=
+t);
+>> -
+>> + =A0 =A0 =A0 host->power_notify_type =3D MMC_HOST_PW_NOTIFY_SHORT;
+>> + =A0 =A0 =A0 mmc_poweroff_notify(host);
+>
+>
+> Same comment as above.
+>
+> Moreover, mmc_power_save_host is not working for eMMC cards supportin=
+g the
+> SLEEP command (violating the eMMC spec for how VCC is cut). So, I am =
+not
+> sure we should introduce the poweroff_notify for the mmc_power_save_h=
+ost
+> right now. Better to fix SLEEP first, if needed at all.
+>
+> Additionally, this function is only used for SDIO if runtime PM is en=
+abled
+> at the moment.
+>
+>
+>> =A0 =A0 =A0 =A0mmc_bus_put(host);
+>>
+>> =A0 =A0 =A0 =A0mmc_power_off(host);
+>> @@ -2135,7 +2120,7 @@ int mmc_power_restore_host(struct mmc_host *ho=
+st)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_bus_put(host);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return -EINVAL;
+>> =A0 =A0 =A0 =A0}
+>> -
+>> + =A0 =A0 =A0 host->power_notify_type =3D MMC_HOST_PW_NOTIFY_LONG;
+>
+>
+> Similar comments as for mmc_power_save_host
+>
+>> =A0 =A0 =A0 =A0mmc_power_up(host);
+>> =A0 =A0 =A0 =A0ret =3D host->bus_ops->power_restore(host);
+>>
+>> @@ -2157,6 +2142,9 @@ int mmc_card_awake(struct mmc_host *host)
+>> =A0 =A0 =A0 =A0if (host->bus_ops&& =A0!host->bus_dead&& =A0host->bus=
+_ops->awake)
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D host->bus_ops->awake(host);
+>>
+>> + =A0 =A0 =A0 if (!err)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_clr_sleep(host->card);
+>> +
+>
+>
+> This code must be handled from withing the bus_ops function instead, =
+or you
+> need to move it inside the "if" above, since the awake bus_ops only e=
+xist
+> for (e)MMC. Moreover, you do not want to set the sleep state unless t=
+he
+> sleep cmd really has been executed.
+>
+>> =A0 =A0 =A0 =A0mmc_bus_put(host);
+>>
+>> =A0 =A0 =A0 =A0return err;
+>> @@ -2175,6 +2163,9 @@ int mmc_card_sleep(struct mmc_host *host)
+>> =A0 =A0 =A0 =A0if (host->bus_ops&& =A0!host->bus_dead&& =A0host->bus=
+_ops->sleep)
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D host->bus_ops->sleep(host);
+>>
+>> + =A0 =A0 =A0 if (!err)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_set_sleep(host->card);
+>> +
+>
+>
+> I think this code should be handled from withing the bus_ops function
+> instead, or you need to move it inside the "if" above, since the awak=
+e
+> bus_ops only exist for (e)MMC.
+>
+>
+>> =A0 =A0 =A0 =A0mmc_bus_put(host);
+>>
+>> =A0 =A0 =A0 =A0return err;
+>> @@ -2393,6 +2384,7 @@ int mmc_pm_notify(struct notifier_block
+>> *notify_block,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->bus_ops->remove=
+(host);
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_claim_host(host);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_poweroff_notify(host);
+>
+>
+> This wont work if the card has been removed from the bus_ops->remove =
+above.
+>
+>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_detach_bus(host);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_power_off(host);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_release_host(host);
+>> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+>> index 3bdafbc..0bdc0fd 100644
+>> --- a/drivers/mmc/core/core.h
+>> +++ b/drivers/mmc/core/core.h
+>> @@ -45,6 +45,7 @@ int mmc_set_signal_voltage(struct mmc_host *host, =
+int
+>> signal_voltage,
+>> =A0void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+>> =A0void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_=
+type);
+>> =A0void mmc_power_off(struct mmc_host *host);
+>> +int mmc_poweroff_notify(struct mmc_host *host);
+>>
+>> =A0static inline void mmc_delay(unsigned int ms)
+>> =A0{
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 02914d6..885ad61 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1338,12 +1338,18 @@ static int mmc_suspend(struct mmc_host *host=
+)
+>> =A0 =A0 =A0 =A0BUG_ON(!host->card);
+>>
+>> =A0 =A0 =A0 =A0mmc_claim_host(host);
+>> - =A0 =A0 =A0 if (mmc_card_can_sleep(host)) {
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_card_sleep(host);
+>> + =A0 =A0 =A0 if (host->caps2& =A0MMC_CAP2_POWER_OFF_VCCQ_DURING_SUS=
+PEND) {
+>
+> 1. missing whitespace after caps2
+> 2. Can't we have an mmc_card_can_poweroff_notify to check instead, wh=
+ich
+> also considering this new cap together with the card features.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index b180965..4232bc4 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -873,7 +873,7 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- {
- 	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
--	unsigned int from, nr, arg;
-+	unsigned int from, nr, arg, trim_arg, erase_arg;
- 	int err = 0, type = MMC_BLK_SECDISCARD;
- 
- 	if (!(mmc_can_secure_erase_trim(card) || mmc_can_sanitize(card))) {
-@@ -881,20 +881,26 @@ static int mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- 		goto out;
- 	}
- 
-+	from = blk_rq_pos(req);
-+	nr = blk_rq_sectors(req);
-+
- 	/* The sanitize operation is supported at v4.5 only */
- 	if (mmc_can_sanitize(card)) {
--		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--				EXT_CSD_SANITIZE_START, 1, 0);
--		goto out;
-+		erase_arg = MMC_ERASE_ARG;
-+		trim_arg = MMC_TRIM_ARG;
-+	} else {
-+		erase_arg = MMC_SECURE_ERASE_ARG;
-+		trim_arg = MMC_SECURE_TRIM1_ARG;
- 	}
- 
--	from = blk_rq_pos(req);
--	nr = blk_rq_sectors(req);
--
--	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
--		arg = MMC_SECURE_TRIM1_ARG;
--	else
--		arg = MMC_SECURE_ERASE_ARG;
-+	if (mmc_erase_group_aligned(card, from, nr))
-+		arg = erase_arg;
-+	else if (mmc_can_trim(card))
-+		arg = trim_arg;
-+	else {
-+		err = -EINVAL;
-+		goto out;
-+	}
- retry:
- 	if (card->quirks & MMC_QUIRK_INAND_CMD38) {
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-@@ -904,25 +910,41 @@ retry:
- 				 INAND_CMD38_ARG_SECERASE,
- 				 0);
- 		if (err)
--			goto out;
-+			goto out_retry;
- 	}
-+
- 	err = mmc_erase(card, from, nr, arg);
--	if (!err && arg == MMC_SECURE_TRIM1_ARG) {
-+	if (err == -EIO)
-+		goto out_retry;
-+	if (err)
-+		goto out;
-+
-+	if (arg == MMC_SECURE_TRIM1_ARG) {
- 		if (card->quirks & MMC_QUIRK_INAND_CMD38) {
- 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 					 INAND_CMD38_ARG_EXT_CSD,
- 					 INAND_CMD38_ARG_SECTRIM2,
- 					 0);
- 			if (err)
--				goto out;
-+				goto out_retry;
- 		}
-+
- 		err = mmc_erase(card, from, nr, MMC_SECURE_TRIM2_ARG);
-+		if (err == -EIO)
-+			goto out_retry;
-+		if (err)
-+			goto out;
- 	}
--out:
--	if (err == -EIO && !mmc_blk_reset(md, card->host, type))
-+
-+	if (mmc_can_sanitize(card))
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+				 EXT_CSD_SANITIZE_START, 1, 0);
-+out_retry:
-+	if (err && !mmc_blk_reset(md, card->host, type))
- 		goto retry;
- 	if (!err)
- 		mmc_blk_reset_success(md, type);
-+out:
- 	spin_lock_irq(&md->lock);
- 	__blk_end_request(req, err, blk_rq_bytes(req));
- 	spin_unlock_irq(&md->lock);
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8a9f286..50eb323 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1698,6 +1698,8 @@ EXPORT_SYMBOL(mmc_can_discard);
- 
- int mmc_can_sanitize(struct mmc_card *card)
- {
-+	if (!mmc_can_trim(card) && !mmc_can_erase(card))
-+		return 0;
- 	if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_SANITIZE)
- 		return 1;
- 	return 0;
--- 
-1.7.6.5
+The test of capability of the device is done inside the function
+mmc_poweroff_notify, which is invoked from different places. It is not
+needed to have additional capability check within this "if" condition.
 
+>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_poweroff_notify(host);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (!err)
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_set_sleep(hos=
+t->card);
+>> - =A0 =A0 =A0 } else if (!mmc_host_is_spi(host))
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
+>
+> Suggest to remove the goto and just have another if-else, as we alrea=
+dy have
+> for sleep.
+>>
+>> + =A0 =A0 =A0 }
+>> +
+>> + =A0 =A0 =A0 if (mmc_card_can_sleep(host))
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_card_sleep(host);
+>> + =A0 =A0 =A0 else if (!mmc_host_is_spi(host))
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_deselect_cards(host);
+>> +
+>> +out:
+>> =A0 =A0 =A0 =A0host->card->state&=3D ~(MMC_STATE_HIGHSPEED |
+>> MMC_STATE_HIGHSPEED_200);
+>>
+>> =A0 =A0 =A0 =A0mmc_release_host(host);
+>>
+>> @@ -1364,11 +1370,11 @@ static int mmc_resume(struct mmc_host *host)
+>> =A0 =A0 =A0 =A0BUG_ON(!host->card);
+>>
+>> =A0 =A0 =A0 =A0mmc_claim_host(host);
+>> - =A0 =A0 =A0 if (mmc_card_is_sleep(host->card)) {
+>> + =A0 =A0 =A0 if (mmc_card_is_sleep(host->card))
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_card_awake(host);
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_card_clr_sleep(host->card);
+>> - =A0 =A0 =A0 } else
+>> + =A0 =A0 =A0 else
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_init_card(host, host->ocr=
+, host->card);
+>> +
+>> =A0 =A0 =A0 =A0mmc_release_host(host);
+>>
+>> =A0 =A0 =A0 =A0return err;
+>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>> index 33a4d08..3749a42 100644
+>> --- a/include/linux/mmc/host.h
+>> +++ b/include/linux/mmc/host.h
+>> @@ -237,6 +237,7 @@ struct mmc_host {
+>> =A0#define MMC_CAP2_BROKEN_VOLTAGE =A0 =A0 =A0 (1<< =A07) =A0 =A0 =A0=
+ =A0/* Use the broken
+>> voltage */
+>> =A0#define MMC_CAP2_DETECT_ON_ERR =A0 =A0 =A0 =A0(1<< =A08) =A0 =A0 =
+=A0 =A0/* On I/O err check
+>> card removal */
+>> =A0#define MMC_CAP2_HC_ERASE_SZ =A0(1<< =A09) =A0 =A0 =A0 =A0/* High=
+-capacity erase size
+>> */
+>> +#define MMC_CAP2_POWER_OFF_VCCQ_DURING_SUSPEND (1<< =A010)
+>>
+>> =A0 =A0 =A0 =A0mmc_pm_flag_t =A0 =A0 =A0 =A0 =A0 pm_caps; =A0 =A0 =A0=
+ =A0/* supported pm features */
+>> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0power_notify_type;
+>
+>
+> Kind regards
+> Ulf Hansson
