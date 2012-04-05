@@ -1,55 +1,67 @@
 From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: set dto to 14 for all devices
-Date: Thu, 5 Apr 2012 15:08:48 -0700
-Message-ID: <20120405220848.GF3785@atomide.com>
-References: <1330622780-1909-1-git-send-email-Chase.Maupin@ti.com>
- <m2399iqtgf.fsf@bob.laptop.org>
- <alpine.DEB.2.00.1203120435200.11332@utopia.booyaka.com>
- <87bonxcjrh.fsf@laptop.org>
+Subject: Re: [PATCH] mmc: omap4: hsmmc: fix module re-insertion
+Date: Thu, 5 Apr 2012 15:11:37 -0700
+Message-ID: <20120405221136.GG3785@atomide.com>
+References: <1331222320-31370-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:57552 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756009Ab2DEWIz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Apr 2012 18:08:55 -0400
+Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <87bonxcjrh.fsf@laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1331222320-31370-1-git-send-email-balajitk@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Paul Walmsley <paul@pwsan.com>, Chase Maupin <Chase.Maupin@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, sakoman@gmail.com
 
-* Chris Ball <cjb@laptop.org> [120315 20:26]:
-> Hi Paul,
+Chris,
+
+* Balaji T K <balajitk@ti.com> [120308 07:27]:
+> OMAP4 and OMAP3 HSMMC IP registers differ by 0x100 offset.
+> Addng the offset to platform_device resource structure
+> increments the start address for every insmod operation.
+> MMC command fails on re-insertion as module due to incorrect register base.
+> Fix this by updating the ioremap base address only.
+
+Any news on getting this fix merged during the -rc cycle?
+
+This is pretty important fix for anybody wanting to reload
+the omap_hsmmc.ko module..
+
+Regards,
+
+Tony
+ 
+> Signed-off-by: Balaji T K <balajitk@ti.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |    4 +---
+>  1 files changed, 1 insertions(+), 3 deletions(-)
 > 
-> On Mon, Mar 12 2012, Paul Walmsley wrote:
-> > I don't think this is the right fix.  Steve Sakoman and I discussed this a 
-> > few months ago -- we did some debugging and Steve observed the timeouts on 
-> > multiple block writes (0x19):
-> > [...]
-> > So perhaps something like the following patch instead?  Unfortunately, I 
-> > don't have one of these crappy SD cards as far as I know, so I can't 
-> > really test it.
-> >
-> >
-> > - Paul
-> >
-> > From: Paul Walmsley <paul@pwsan.com>
-> > Date: Mon, 12 Mar 2012 04:46:29 -0600
-> > Subject: [PATCH] mmc: use really long write timeout to deal with crappy cards
-> >
-> > Several people have noticed that crappy SD cards take much longer to
-> > complete multiple block writes than the 300ms that Linux specifies.
-> > Try to work around this by using a three second write timeout instead.
-> >
-> > <insert Chase's patch description here>
-> >
-> > Not-yet-signed-off-by: Paul Walmsley <paul@pwsan.com>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index e550170..102425c 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1741,8 +1741,6 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+>  	if (res == NULL || irq < 0)
+>  		return -ENXIO;
+>  
+> -	res->start += pdata->reg_offset;
+> -	res->end += pdata->reg_offset;
+>  	res = request_mem_region(res->start, resource_size(res), pdev->name);
+>  	if (res == NULL)
+>  		return -EBUSY;
+> @@ -1766,7 +1764,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
+>  	host->dma_ch	= -1;
+>  	host->irq	= irq;
+>  	host->slot_id	= 0;
+> -	host->mapbase	= res->start;
+> +	host->mapbase	= res->start + pdata->reg_offset;
+>  	host->base	= ioremap(host->mapbase, SZ_4K);
+>  	host->power_mode = MMC_POWER_OFF;
+>  	host->next_data.cookie = 1;
+> -- 
+> 1.7.0.4
 > 
-> Sounds like a good idea -- want to send a signed-off patch for this?
-
-This seems like the right fix to me too. Works on my pandaboard es and
-some random card that produces I/O errors without this.
-
-Tested-by: Tony Lindgren <tony@atomide.com>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
