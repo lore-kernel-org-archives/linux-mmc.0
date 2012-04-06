@@ -1,88 +1,141 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: swap on eMMC and other flash
-Date: Fri, 6 Apr 2012 16:16:11 +0000
-Message-ID: <201204061616.11716.arnd@arndb.de>
-References: <201203301744.16762.arnd@arndb.de> <CAEwNFnA2GeOayw2sJ_KXv4qOdC50_Nt2KoK796YmQF+YV1GiEA@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: [GIT PULL] MMC fixes for 3.4-rc2
+Date: Fri, 06 Apr 2012 15:35:34 -0400
+Message-ID: <87mx6o3b7d.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <CAEwNFnA2GeOayw2sJ_KXv4qOdC50_Nt2KoK796YmQF+YV1GiEA@mail.gmail.com>
-Sender: owner-linux-mm@kvack.org
-To: Minchan Kim <minchan@kernel.org>
-Cc: linaro-kernel@lists.linaro.org, android-kernel@googlegroups.com, linux-mm@kvack.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, Alex Lemberg <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, Saugata Das <saugata.das@linaro.org>, Venkatraman S <venkat@linaro.org>, Yejin Moon <yejin.moon@samsung.com>, Hyojin Jeong <syr.jeong@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:47891 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755017Ab2DFTfs convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Apr 2012 15:35:48 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Friday 06 April 2012, Minchan Kim wrote:
-> On Sat, Mar 31, 2012 at 2:44 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> 
-> > We've had a discussion in the Linaro storage team (Saugata, Venkat and me,
-> > with Luca joining in on the discussion) about swapping to flash based media
-> > such as eMMC. This is a summary of what we found and what we think should
-> > be done. If people agree that this is a good idea, we can start working
-> > on it.
-> >
-> > The basic problem is that Linux without swap is sort of crippled and some
-> > things either don't work at all (hibernate) or not as efficient as they
-> > should (e.g. tmpfs). At the same time, the swap code seems to be rather
-> > inappropriate for the algorithms used in most flash media today, causing
-> > system performance to suffer drastically, and wearing out the flash
-> > hardware
-> > much faster than necessary. In order to change that, we would be
-> > implementing the following changes:
-> >
-> > 1) Try to swap out multiple pages at once, in a single write request. My
-> > reading of the current code is that we always send pages one by one to
-> > the swap device, while most flash devices have an optimum write size of
-> > 32 or 64 kb and some require an alignment of more than a page. Ideally
-> > we would try to write an aligned 64 kb block all the time. Writing aligned
-> > 64 kb chunks often gives us ten times the throughput of linear 4kb writes,
-> > and going beyond 64 kb usually does not give any better performance.
-> >
-> 
-> It does make sense.
-> I think we can batch will-be-swapped-out pages in shrink_page_list if they
-> are located by contiguous swap slots.
+Hi Linus,
 
-But would that guarantee that all writes are the same size? While writing
-larger chunks would generally be helpful, in order to guarantee that we
-the drive doesn't do any garbage collection, we would have to do all writes
-in aligned chunks. It would probably be enough to do this in 8kb or
-16kb units for most devices over the next few years, but implementing it
-for 64kb should be the same amount of work and will get us a little bit
-further.
+Please pull from:
 
-I'm not sure what we would do when there are less than 64kb available
-for pageout on the inactive list. The two choices I can think of are
-either not writing anything, or wasting the swap slots and filling
-up the data with zeroes.
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
 
-> > 2) Make variable sized swap clusters. Right now, the swap space is
-> > organized in clusters of 256 pages (1MB), which is less than the typical
-> > erase block size of 4 or 8 MB. We should try to make the swap cluster
-> > aligned to erase blocks and have the size match to avoid garbage collection
-> > in the drive. The cluster size would typically be set by mkswap as a new
-> > option and interpreted at swapon time.
-> >
-> 
-> If we can find such big contiguous swap slots easily, it would be good.
-> But I am not sure how often we can get such big slots. And maybe we have to
-> improve search method for getting such big empty cluster.
+to receive MMC fixes for 3.4-rc2.  I've signed an "mmc-fixes-for-3.4-rc=
+2"
+tag.  There are no merge conflicts, and the patches have been tested in
+linux-next.  Thanks.
 
-As long as there are clusters available, we should try to find them. When
-free space is too fragmented to find any unused cluster, we can pick one
-that has very little data in it, so that we reduce the time it takes to
-GC that erase block in the drive. While we could theoretically do active
-garbage collection of swap data in the kernel, it won't get more efficient
-than the GC inside of the drive. If we do this, it unfortunately means that
-we can't just send a discard for the entire erase block.
+The following changes since commit dd775ae2549217d3ae09363e3edb305d0fa1=
+9928:
 
-	Arnd
+  Linux 3.4-rc1 (2012-03-31 16:24:09 -0700)
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-linus
+
+for you to fetch changes up to 3bdc9ba892d6a294d16e9e6e0c4041926aa3d58c=
+:
+
+  mmc: use really long write timeout to deal with crappy cards (2012-04=
+-05 20:32:34 -0400)
+
+----------------------------------------------------------------
+MMC fixes for 3.4-rc2:
+ The major fixes here are:
+  * Disable use of MSI in sdhci-pci, which caused multiple chipsets to
+    stop working in 3.4-rc1.  I'll wait to turn this on again until we
+    have a chipset whitelist for it.
+  * Fix a libertas SDIO powered-resume regression introduced in 3.3;
+    thanks to Neil Brown and Rafael Wysocki for this fix.
+  * Fix module reloading on omap_hsmmc.
+  * Stop trusting the spec/card's specified maximum data timeout length=
+,
+    and use three seconds instead.  Previously we used 300ms.
+
+ Also cleanups and fixes for s3c, atmel, sh_mmcif and omap_hsmmc.
+
+----------------------------------------------------------------
+Al Cooper (1):
+      mmc: Prevent 1.8V switch for SD hosts that don't support UHS mode=
+s.
+
+Alf H=C3=B8gemark (1):
+      mmc: sdhci-dove: Fix compile error by including module.h
+
+Balaji T K (3):
+      mmc: omap_hsmmc: use runtime put sync in probe error patch
+      mmc: omap_hsmmc: context save after enabling runtime pm
+      mmc: omap_hsmmc: fix module re-insertion
+
+Chris Ball (2):
+      Revert "mmc: sdhci-pci: add quirks for broken MSI on O2Micro cont=
+rollers"
+      Revert "mmc: sdhci-pci: Add MSI support"
+
+=46elipe Balbi (3):
+      mmc: omap_hsmmc: trivial cleanups
+      mmc: omap_hsmmc: make it behave well as a module
+      mmc: omap_hsmmc: convert to module_platform_driver
+
+Julia Lawall (1):
+      mmc: sdhci-s3c: use devm_ functions
+
+Ludovic Desroches (3):
+      mmc: atmel-mci: correct data timeout computation
+      mmc: atmel-mci: r/w proof capability only available since v2xx
+      mmc: atmel-mci: add support for odd clock dividers
+
+Manuel Lauss (1):
+      mmc: sdhci-pci: add quirks for broken MSI on O2Micro controllers
+
+Mark Brown (2):
+      mmc: sdhci-s3c: Use CONFIG_PM_SLEEP to ifdef system suspend
+      mmc: sdhci-s3c: Enable runtime power management
+
+Paul Walmsley (1):
+      mmc: use really long write timeout to deal with crappy cards
+
+Rafael J. Wysocki (1):
+      mmc: sdio: Use empty system suspend/resume callbacks at the bus l=
+evel
+
+Simon Horman (3):
+      mmc: sh_mmcif: double clock speed
+      mmc: sh_mmcif: mmc->f_max should be half of the bus clock
+      mmc: sh_mmcif: Simplify calculation of mmc->f_min
+
+Subhash Jadavani (2):
+      mmc: bus: print bus speed mode of UHS-I card
+      mmc: core: fix power class selection
+
+Thomas Abraham (3):
+      mmc: sdhci-s3c: Remove usage of clk_type member in platform data
+      mmc: sdhci-s3c: derive transfer width host cap from max_width in =
+platdata
+      mmc: sdhci-s3c: Keep a copy of platform data and use it
+
+Ulf Hansson (1):
+      mmc: block: Remove use of mmc_blk_set_blksize
+
+ drivers/mmc/card/block.c          |   27 +------
+ drivers/mmc/core/bus.c            |   17 +++-
+ drivers/mmc/core/core.c           |   10 ++-
+ drivers/mmc/core/mmc.c            |   30 ++++---
+ drivers/mmc/core/sdio_bus.c       |   12 ++-
+ drivers/mmc/host/atmel-mci-regs.h |    1 +
+ drivers/mmc/host/atmel-mci.c      |   55 ++++++++----
+ drivers/mmc/host/omap_hsmmc.c     |  181 ++++++++++++++++-------------=
+--------
+ drivers/mmc/host/sdhci-dove.c     |    1 +
+ drivers/mmc/host/sdhci-pci.c      |    6 --
+ drivers/mmc/host/sdhci-s3c.c      |  159 +++++++++++++++++++++++++----=
+---
+ drivers/mmc/host/sdhci.c          |    5 +-
+ drivers/mmc/host/sh_mmcif.c       |   13 +--
+ 13 files changed, 299 insertions(+), 218 deletions(-)
+
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
