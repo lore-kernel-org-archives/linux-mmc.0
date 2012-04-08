@@ -1,58 +1,36 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [GIT PULL] MMC fixes for 3.4-rc2
-Date: Fri, 06 Apr 2012 20:51:31 -0400
-Message-ID: <87haww2wks.fsf@laptop.org>
-References: <87mx6o3b7d.fsf@laptop.org>
-	<CA+55aFxSARUvsOGX6s5MoH+i_Pw6kU=Qt3Z1Ei_1xvJWFcx8kQ@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 06/10 v3] ARM: mach-shmobile: convert ag5evm to use the
+ generic MMC GPIO hotplug helper
+Date: Sun, 8 Apr 2012 13:33:08 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1204081328100.29005@axis700.grange>
+References: <1328824636-10553-1-git-send-email-g.liakhovetski@gmx.de>
+ <1328824636-10553-7-git-send-email-g.liakhovetski@gmx.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CA+55aFxSARUvsOGX6s5MoH+i_Pw6kU=Qt3Z1Ei_1xvJWFcx8kQ@mail.gmail.com>
-	(Linus Torvalds's message of "Fri, 6 Apr 2012 17:22:10 -0700")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.8]:49289 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751439Ab2DHLdc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Apr 2012 07:33:32 -0400
+In-Reply-To: <1328824636-10553-7-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Paul Mundt <lethal@linux-sh.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, "Rafael J. Wysocki" <rjw@sisk.pl>
 
-Hi Linus,
+Now that MMC patches from this series are in the mainline, also 
+architecture patches can and should be applied. These are patches 5 and 6 
+from this series:
 
-On Fri, Apr 06 2012, Linus Torvalds wrote:
-> On Fri, Apr 6, 2012 at 12:35 PM, Chris Ball <cjb@laptop.org> wrote:
->>
->> Please pull from:
->>
->> =C2=A0git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git for-=
-linus
->>
->> to receive MMC fixes for 3.4-rc2. =C2=A0I've signed an "mmc-fixes-fo=
-r-3.4-rc2"
->> tag.
->
-> Please just ask my to pull the tag directly, don't say "please pull
-> this branch", and then add "oh, but there's this tag also".
->
-> I already did the "cut-and-paste" for the pull, and then I realized
-> that I'm not seeing the message that your email implied was there, an=
-d
-> then I noticed that you talked about the tag separately.
->
-> That just messes everything up. Don't even bother mentioning the
-> worthless branch. The tag has everything the branch has, _and_ the
-> message.
->
-> So just ask me to pull it, with a
->
->   Please pull from
->
->   git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
-> mmc-fixes-for-3.4-rc2
->
-> rather than make it unnecessarily more complicated and error-prone.
+http://article.gmane.org/gmane.linux.kernel.mmc/12748
+http://article.gmane.org/gmane.linux.ports.sh.devel/13535
 
-I see, sorry.  I'll send just the tag from now on.
+Would be good to have them in 3.4 since they fix modular MMC builds on 
+ag5evm and mackerel.
 
-- Chris.
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
