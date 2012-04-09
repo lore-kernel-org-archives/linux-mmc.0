@@ -1,50 +1,95 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH 0/4] mmc: omap_hsmmc: Additional cleanups / features
-Date: Mon, 9 Apr 2012 12:08:31 +0530
-Message-ID: <1333953515-31925-1-git-send-email-svenkatr@ti.com>
+Subject: [PATCH RESEND 1/4] mmc: omap_hsmmc: Enable Auto CMD12
+Date: Mon, 9 Apr 2012 12:08:32 +0530
+Message-ID: <1333953515-31925-2-git-send-email-svenkatr@ti.com>
+References: <1333953515-31925-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: cjb@laptop.org, Venkatraman S <svenkatr@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:53139 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752393Ab2DIGjI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 9 Apr 2012 02:39:08 -0400
+In-Reply-To: <1333953515-31925-1-git-send-email-svenkatr@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: cjb@laptop.org, Balaji T K <balajitk@ti.com>, Venkatraman S <svenkatr@ti.com>
 
-Hi Chris,
-  As discussed previously [1], I've rebased the previous 2 patches
-that you decided to queue for 3.5, plus 2 additional cleanups.
+From: Balaji T K <balajitk@ti.com>
 
-Best regards,
-Venkat.
+Enable Auto-CMD12 for multi block read/write on HSMMC
+Tested on OMAP4430, OMAP3430 and OMAP2430 SDP
 
-[1] http://marc.info/?l=linux-mmc&m=133336030703924&w=2
+Signed-off-by: Balaji T K <balajitk@ti.com>
+Signed-off-by: Venkatraman S <svenkatr@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
 
-The following changes since commit 3bdc9ba892d6a294d16e9e6e0c4041926aa3d58c:
-
-  mmc: use really long write timeout to deal with crappy cards (2012-04-05 20:32:34 -0400)
-
-are available in the git repository at:
-
-  git://github.com/svenkatr/linux.git mmc-omap_hsmmc-next
-
-for you to fetch changes up to 11c6cb1453f55b21e50fd891b3981a98a572d314:
-
-  mmc: omap_hsmmc: Cleanup use of cpu_is_* for debounce_clock (2012-04-09 11:58:22 +0530)
-
-----------------------------------------------------------------
-Balaji T K (2):
-      mmc: omap_hsmmc: Enable Auto CMD12
-      mmc: omap_hsmmc: add DDR support to omap_hsmmc
-
-Rajendra Nayak (1):
-      mmc: omap_hsmmc: Cleanup use of cpu_is_* for debounce_clock
-
-Venkatraman S (1):
-      mmc: omap_hsmmc: use spinlock IRQ safe variant
-
- drivers/mmc/host/omap_hsmmc.c |   78 +++++++++++++++++++++++++-------------------
- 1 file changed, 45 insertions(+), 33 deletions(-)
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 5c2b1c1..1fcacb6 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -85,6 +85,7 @@
+ #define BRR_ENABLE		(1 << 5)
+ #define DTO_ENABLE		(1 << 20)
+ #define INIT_STREAM		(1 << 1)
++#define ACEN_ACMD12		(1 << 2)
+ #define DP_SELECT		(1 << 21)
+ #define DDIR			(1 << 4)
+ #define DMA_EN			0x1
+@@ -115,6 +116,7 @@
+ #define OMAP_MMC_MAX_CLOCK	52000000
+ #define DRIVER_NAME		"omap_hsmmc"
+ 
++#define AUTO_CMD12		(1 << 0)	/* Auto CMD12 support */
+ /*
+  * One controller can have multiple slots, like on some omap boards using
+  * omap.c controller driver. Luckily this is not currently done on any known
+@@ -175,6 +177,7 @@ struct omap_hsmmc_host {
+ 	int			reqs_blocked;
+ 	int			use_reg;
+ 	int			req_in_progress;
++	unsigned int		flags;
+ 	struct omap_hsmmc_next	next_data;
+ 
+ 	struct	omap_mmc_platform_data	*pdata;
+@@ -766,6 +769,8 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
+ 		cmdtype = 0x3;
+ 
+ 	cmdreg = (cmd->opcode << 24) | (resptype << 16) | (cmdtype << 22);
++	if ((host->flags & AUTO_CMD12) && mmc_op_multi(cmd->opcode))
++		cmdreg |= ACEN_ACMD12;
+ 
+ 	if (data) {
+ 		cmdreg |= DP_SELECT | MSBS | BCE;
+@@ -837,11 +842,14 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
+ 	else
+ 		data->bytes_xfered = 0;
+ 
+-	if (!data->stop) {
++	if (data->stop && ((!(host->flags & AUTO_CMD12)) || data->error)) {
++		omap_hsmmc_start_command(host, data->stop, NULL);
++	} else {
++		if (data->stop)
++			data->stop->resp[0] = OMAP_HSMMC_READ(host->base,
++							RSP76);
+ 		omap_hsmmc_request_done(host, data->mrq);
+-		return;
+ 	}
+-	omap_hsmmc_start_command(host, data->stop, NULL);
+ }
+ 
+ /*
+@@ -1844,6 +1852,7 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
+ 	host->mapbase	= res->start + pdata->reg_offset;
+ 	host->base	= ioremap(host->mapbase, SZ_4K);
+ 	host->power_mode = MMC_POWER_OFF;
++	host->flags	= AUTO_CMD12;
+ 	host->next_data.cookie = 1;
+ 
+ 	platform_set_drvdata(pdev, host);
 -- 
 1.7.10.rc2
 
