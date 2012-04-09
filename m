@@ -1,108 +1,50 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH v1 1/1] mmc: core: skip card initialization if power class
- selection fails
-Date: Mon, 9 Apr 2012 23:35:11 +0900
-Message-ID: <CAKYAXd_F1ZpR3uYFM9fQUnFKRULKw8o3UO7Zw29MG5BsRuXCew@mail.gmail.com>
-References: <1333976419-2018-1-git-send-email-subhashj@codeaurora.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v3 6/6] mmc: sdhci-s3c: Add device tree support
+Date: Mon, 09 Apr 2012 10:48:07 -0400
+Message-ID: <87pqbhx8pk.fsf@laptop.org>
+References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
+	<201203271619.13320.arnd@arndb.de> <4F7553D1.4030008@st.com>
+	<201203301136.05038.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:36190 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752544Ab2DIOfN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 10:35:13 -0400
-Received: by iagz16 with SMTP id z16so5941940iag.19
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Apr 2012 07:35:11 -0700 (PDT)
-In-Reply-To: <1333976419-2018-1-git-send-email-subhashj@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <201203301136.05038.arnd@arndb.de> (Arnd Bergmann's message of
+	"Fri, 30 Mar 2012 11:36:04 +0000")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Viresh Kumar <viresh.kumar@st.com>, Thomas Abraham <thomas.abraham@linaro.org>, Lee Jones <lee.jones@linaro.org>, Rajendra Nayak <rnayak@ti.com>, Stephen Warren <swarren@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "kgene.kim@samsung.com" <kgene.kim@samsung.com>, "ben-linux@fluff.org" <ben-linux@fluff.org>, "patches@linaro.org" <patches@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, saugata.das@linaro.org
 
-SGkgU3ViaGFzaC4KVGhlcmUgYXJlIGR1cGxpY2F0ZSBwcmludGtzIGluIHRocmVlIHBsYWNlcy4g
-SXMgdGhlcmUgbm8gd2F5IHRvIGF2b2lkCmR1cGxpY2F0ZSBwcmludGtzID8KClRoYW5rcy4KCjIw
-MTIvNC85IFN1Ymhhc2ggSmFkYXZhbmkgPHN1Ymhhc2hqQGNvZGVhdXJvcmEub3JnPjoKPiBXaXRo
-IGN1cnJlbnQgaW1wbGVtZW50YXRpb24gb2YgcG93ZXIgY2xhc3Mgc2VsZWN0aW9uLAo+IG1tY19z
-ZWxlY3RfcG93ZXJjbGFzcygpIHNob3VsZCBuZXZlciBmYWlsLiBTbyB0cmVhdCBhbnkgZXJyb3IK
-PiByZXR1cm5lZCBieSB0aGlzIGZ1bmN0aW9uIGFzIHNlcmlvdXMgZW5vdWdoIHRvIHNraXAgdGhl
-IGNhcmQKPiBpbml0aWFsaXphdGlvbi4KPgo+IFNpZ25lZC1vZmYtYnk6IFN1Ymhhc2ggSmFkYXZh
-bmkgPHN1Ymhhc2hqQGNvZGVhdXJvcmEub3JnPgo+IC0tLQo+IMKgZHJpdmVycy9tbWMvY29yZS9t
-bWMuYyB8IMKgIDM0ICsrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLS0tLS0KPiDCoDEgZmls
-ZXMgY2hhbmdlZCwgMjAgaW5zZXJ0aW9ucygrKSwgMTQgZGVsZXRpb25zKC0pCj4KPiBkaWZmIC0t
-Z2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKPiBp
-bmRleCA1NGRmNWFkLi5kNWZmMTkyIDEwMDY0NAo+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1j
-LmMKPiArKysgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jCj4gQEAgLTExMTYsMTAgKzExMTYsMTIg
-QEAgc3RhdGljIGludCBtbWNfaW5pdF9jYXJkKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwgdTMyIG9j
-ciwKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGV4dF9jc2RfYml0cyA9IChidXNfd2lkdGggPT0g
-TU1DX0JVU19XSURUSF84KSA/Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqBFWFRfQ1NEX0JVU19XSURUSF84IDogRVhUX0NTRF9CVVNfV0lEVEhfNDsKPiDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoGVyciA9IG1tY19zZWxlY3RfcG93ZXJjbGFzcyhjYXJkLCBl
-eHRfY3NkX2JpdHMsIGV4dF9jc2QpOwo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgaWYgKGVycikK
-PiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHByX3dhcm5pbmcoIiVzOiBwb3dl
-ciBjbGFzcyBzZWxlY3Rpb24gdG8gYnVzIHdpZHRoICVkIgo+IC0gwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAiIGZhaWxlZFxuIiwgbW1jX2hvc3RuYW1l
-KGNhcmQtPmhvc3QpLAo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAxIDw8IGJ1c193aWR0aCk7Cj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAo
-ZXJyKSB7Cj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBwcl9lcnIoIiVzOiBw
-b3dlciBjbGFzcyBzZWxlY3Rpb24gdG8gYnVzIHdpZHRoICVkIgo+ICsgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAiIGZhaWxlZFxuIiwgbW1jX2hvc3RuYW1lKGNh
-cmQtPmhvc3QpLAo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAxIDw8IGJ1c193aWR0aCk7Cj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBn
-b3RvIGVycjsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIH0KPiDCoCDCoCDCoCDCoH0KPgo+IMKg
-IMKgIMKgIMKgLyoKPiBAQCAtMTE1MCwxMSArMTE1MiwxMyBAQCBzdGF0aWMgaW50IG1tY19pbml0
-X2NhcmQoc3RydWN0IG1tY19ob3N0ICpob3N0LCB1MzIgb2NyLAo+IMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZGRyID0gMDsgLyogbm8gRERSIGZvciAxLWJp
-dCB3aWR0aCAqLwo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZXJyID0gbW1j
-X3NlbGVjdF9wb3dlcmNsYXNzKGNhcmQsIGV4dF9jc2RfYml0c1tpZHhdWzBdLAo+IMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgZXh0X2NzZCk7Cj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCBpZiAoZXJyKQo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgcHJfd2FybmluZygiJXM6IHBvd2VyIGNsYXNzIHNlbGVjdGlvbiB0byAiCj4gLSDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCJi
-dXMgd2lkdGggJWQgZmFpbGVkXG4iLAo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCks
-Cj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoDEgPDwgYnVzX3dpZHRoKTsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIGlmIChlcnIpIHsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIHByX2VycigiJXM6IHBvd2VyIGNsYXNzIHNlbGVjdGlvbiB0byAiCj4gKyDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCJidXMg
-d2lkdGggJWQgZmFpbGVkXG4iLAo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCksCj4gKyDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoDEgPDwg
-YnVzX3dpZHRoKTsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIGdvdG8gZXJyOwo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgfQo+Cj4g
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBlcnIgPSBtbWNfc3dpdGNoKGNhcmQs
-IEVYVF9DU0RfQ01EX1NFVF9OT1JNQUwsCj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgRVhUX0NTRF9CVVNfV0lEVEgsCj4gQEAgLTEx
-ODEsMTEgKzExODUsMTMgQEAgc3RhdGljIGludCBtbWNfaW5pdF9jYXJkKHN0cnVjdCBtbWNfaG9z
-dCAqaG9zdCwgdTMyIG9jciwKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGlmICghZXJyICYmIGRk
-cikgewo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZXJyID0gbW1jX3NlbGVj
-dF9wb3dlcmNsYXNzKGNhcmQsIGV4dF9jc2RfYml0c1tpZHhdWzFdLAo+IMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgZXh0X2NzZCk7Cj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAo
-ZXJyKQo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcHJf
-d2FybmluZygiJXM6IHBvd2VyIGNsYXNzIHNlbGVjdGlvbiB0byAiCj4gLSDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCJidXMgd2lk
-dGggJWQgZGRyICVkIGZhaWxlZFxuIiwKPiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgbW1jX2hvc3RuYW1lKGNhcmQtPmhvc3Qp
-LAo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAxIDw8IGJ1c193aWR0aCwgZGRyKTsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIGlmIChlcnIpIHsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIHByX2VycigiJXM6IHBvd2VyIGNsYXNzIHNlbGVjdGlvbiB0byAiCj4g
-KyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCJidXMgd2lkdGggJWQgZGRyICVkIGZhaWxlZFxuIiwKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgbW1jX2hvc3RuYW1lKGNhcmQtPmhv
-c3QpLAo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAxIDw8IGJ1c193aWR0aCwgZGRyKTsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIGdvdG8gZXJyOwo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgfQo+Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBlcnIg
-PSBtbWNfc3dpdGNoKGNhcmQsIEVYVF9DU0RfQ01EX1NFVF9OT1JNQUwsCj4gwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgRVhUX0NTRF9C
-VVNfV0lEVEgsCj4gLS0KPiAxLjcuMS4xCj4KPiAtLQo+IFNlbnQgYnkgYSBjb25zdWx0YW50IG9m
-IHRoZSBRdWFsY29tbSBJbm5vdmF0aW9uIENlbnRlciwgSW5jLgo+IFRoZSBRdWFsY29tbSBJbm5v
-dmF0aW9uIENlbnRlciwgSW5jLiBpcyBhIG1lbWJlciBvZiB0aGUgQ29kZSBBdXJvcmEgRm9ydW0u
-Cj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
-dWJzY3JpYmUgbGludXgtbW1jIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
-bW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCDCoGh0dHA6Ly92Z2Vy
-Lmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo=
+Hi Arnd,
+
+On Fri, Mar 30 2012, Arnd Bergmann wrote:
+> On Friday 30 March 2012, Viresh Kumar wrote:
+>> On 3/27/2012 9:49 PM, Arnd Bergmann wrote:
+>> > These bindings came up in a discussion IRC today. I think it's rather bad that
+>> > we can't agree on a common way to name the properties for mmc. We have
+>> > bindings being proposed or already included from Anton, Stephen, Shawn,
+>> > Rajendra, Viresh, Lee and Thomas. Almost all of them define GPIO pins
+>> > for card detect and write protect, as well properties to define the bus
+>> > width and high-speed modes, but we seem to have almost as many different
+>> > definitions of these as we have drivers.
+>> > 
+>> > Can we please come up with a common binding for these?
+>> 
+>> Is there any progress on this? Sorry i wasn't following all mails.
+>> How should i progress for sdhci-spear?
+>
+> No progress so far. I would suggest we apply the patch below to unify
+> the bindings we have. I tried to minimize the impact by picking the most
+> common version for each property, but if we know about devices that would
+> get broken by this, we may have to be more careful.
+>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+
+Thanks very much for doing this -- I'll be happy to take the patch in
+mmc-next once you get time to post a v2 covering Stephen Warren's review
+comments (and adding "max-frequency" to the document, I guess).
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
