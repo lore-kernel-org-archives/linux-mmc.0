@@ -1,137 +1,166 @@
-From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH 4/4] mmc: omap_hsmmc: Cleanup use of cpu_is_* for debounce_clock
-Date: Mon, 9 Apr 2012 12:08:35 +0530
-Message-ID: <1333953515-31925-5-git-send-email-svenkatr@ti.com>
-References: <1333953515-31925-1-git-send-email-svenkatr@ti.com>
+From: =?utf-8?B?7KCV7Zqo7KeE?= <syr.jeong@samsung.com>
+Subject: RE: swap on eMMC and other flash
+Date: Mon, 09 Apr 2012 16:37:53 +0900
+Message-ID: <006f01cd1623$ac4a2860$04de7920$%jeong@samsung.com>
+References: <201203301744.16762.arnd@arndb.de>
+ <201204021145.43222.arnd@arndb.de>
+ <alpine.LSU.2.00.1204020734560.1847@eggly.anvils>
+ <201204021455.25029.arnd@arndb.de>
+ <D70D75BB1A02CA42A3E28AA542D282303A0661B561@MILMBMIPV3.sdcorp.global.sandisk.com>
+ <4F8245EA.6000600@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:35619 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753226Ab2DIGjP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 02:39:15 -0400
-In-Reply-To: <1333953515-31925-1-git-send-email-svenkatr@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <owner-linux-mm@kvack.org>
+In-reply-to: <4F8245EA.6000600@kernel.org>
+Content-language: ko
+Sender: owner-linux-mm@kvack.org
+To: 'Minchan Kim' <minchan@kernel.org>, 'Alex Lemberg' <Alex.Lemberg@sandisk.com>
+Cc: 'Arnd Bergmann' <arnd@arndb.de>, linaro-kernel@lists.linaro.org, 'Rik van Riel' <riel@redhat.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "'Luca Porzio (lporzio)'" <lporzio@micron.com>, linux-mm@kvack.org, kernel-team@android.com, 'Yejin Moon' <yejin.moon@samsung.com>, 'Hugh Dickins' <hughd@google.com>, 'Yaniv Iarovici' <Yaniv.Iarovici@sandisk.com>, cpgs@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: cjb@laptop.org, Rajendra Nayak <rnayak@ti.com>, Venkatraman S <svenkatr@ti.com>
 
-From: Rajendra Nayak <rnayak@ti.com>
+Hi Minchan
 
-There really does not seem to be a need to use cpu_is_*
-check for getting the debounce clock as clkdev is
-perfectly capable of handling situations when certain
-clocks are only available on select platforms.
+How are you doing?
 
-Also get rid of the 'got_dbclk' flag and instead use the
-dbclk clock pointer to know if a valid debounce clock
-exists for the platform.
+Regarding time to issue Discard/Trim :
+eMMC point of view, I believe that the immediate Discard/Trim CMD after =
+deleting/freezing a SWAP cluster is always better for all of general =
+eMMC implementation.
 
-Signed-off-by: Rajendra Nayak <rnayak@ti.com>
-Signed-off-by: Venkatraman S <svenkatr@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |   39 +++++++++++++++++----------------------
- 1 file changed, 17 insertions(+), 22 deletions(-)
+Regarding swap page size:
+Actually, I can't guarantee the optimal size of different eMMC in the =
+industry, because it depends on NAND page size an firmware =
+implementation inside eMMC. In case of SAMSUNG eMMC, 8KB page size and =
+512KB block size(erase unit) is current implementation.
+I think that the multiple of 8KB page size align with 512KB is good for =
+SAMSUNG eMMC.
+If swap system use 512KB page and issue Discard/Trim align with 512KB, =
+eMMC make best performance as of today. However, large page size in swap =
+partition may not best way in Linux system level.
+I'm not sure that the best page size between Swap system and eMMC =
+device.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index e8f296d..ea8afcb 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -170,7 +170,6 @@ struct omap_hsmmc_host {
- 	int			use_dma, dma_ch;
- 	int			dma_line_tx, dma_line_rx;
- 	int			slot_id;
--	int			got_dbclk;
- 	int			response_busy;
- 	int			context_loss;
- 	int			vdd;
-@@ -1097,7 +1096,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
- 
- 	/* Disable the clocks */
- 	pm_runtime_put_sync(host->dev);
--	if (host->got_dbclk)
-+	if (host->dbclk)
- 		clk_disable(host->dbclk);
- 
- 	/* Turn the power off */
-@@ -1108,7 +1107,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
- 		ret = mmc_slot(host).set_power(host->dev, host->slot_id, 1,
- 					       vdd);
- 	pm_runtime_get_sync(host->dev);
--	if (host->got_dbclk)
-+	if (host->dbclk)
- 		clk_enable(host->dbclk);
- 
- 	if (ret != 0)
-@@ -1902,21 +1901,17 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 
- 	omap_hsmmc_context_save(host);
- 
--	if (cpu_is_omap2430()) {
--		host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
--		/*
--		 * MMC can still work without debounce clock.
--		 */
--		if (IS_ERR(host->dbclk))
--			dev_warn(mmc_dev(host->mmc),
--				"Failed to get debounce clock\n");
--		else
--			host->got_dbclk = 1;
--
--		if (host->got_dbclk)
--			if (clk_enable(host->dbclk) != 0)
--				dev_dbg(mmc_dev(host->mmc), "Enabling debounce"
--							" clk failed\n");
-+	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
-+	/*
-+	 * MMC can still work without debounce clock.
-+	 */
-+	if (IS_ERR(host->dbclk)) {
-+		dev_warn(mmc_dev(host->mmc), "Failed to get debounce clk\n");
-+		host->dbclk = NULL;
-+	} else if (clk_enable(host->dbclk) != 0) {
-+		dev_warn(mmc_dev(host->mmc), "Failed to enable debounce clk\n");
-+		clk_put(host->dbclk);
-+		host->dbclk = NULL;
- 	}
- 
- 	/* Since we do only SG emulation, we can have as many segs
-@@ -2036,7 +2031,7 @@ err_irq:
- 	pm_runtime_put_sync(host->dev);
- 	pm_runtime_disable(host->dev);
- 	clk_put(host->fclk);
--	if (host->got_dbclk) {
-+	if (host->dbclk) {
- 		clk_disable(host->dbclk);
- 		clk_put(host->dbclk);
- 	}
-@@ -2069,7 +2064,7 @@ static int __devexit omap_hsmmc_remove(struct platform_device *pdev)
- 	pm_runtime_put_sync(host->dev);
- 	pm_runtime_disable(host->dev);
- 	clk_put(host->fclk);
--	if (host->got_dbclk) {
-+	if (host->dbclk) {
- 		clk_disable(host->dbclk);
- 		clk_put(host->dbclk);
- 	}
-@@ -2127,7 +2122,7 @@ static int omap_hsmmc_suspend(struct device *dev)
- 				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
- 	}
- 
--	if (host->got_dbclk)
-+	if (host->dbclk)
- 		clk_disable(host->dbclk);
- err:
- 	pm_runtime_put_sync(host->dev);
-@@ -2148,7 +2143,7 @@ static int omap_hsmmc_resume(struct device *dev)
- 
- 	pm_runtime_get_sync(host->dev);
- 
--	if (host->got_dbclk)
-+	if (host->dbclk)
- 		clk_enable(host->dbclk);
- 
- 	if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER))
--- 
-1.7.10.rc2
+Best Regards
+Hyojin
+-----Original Message-----
+From: Minchan Kim [mailto:minchan@kernel.org]=20
+Sent: Monday, April 09, 2012 11:14 AM
+To: Alex Lemberg
+Cc: Arnd Bergmann; linaro-kernel@lists.linaro.org; Rik van Riel; =
+linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; Luca Porzio =
+(lporzio); linux-mm@kvack.org; Hyojin Jeong; kernel-team@android.com; =
+Yejin Moon; Hugh Dickins; Yaniv Iarovici
+Subject: Re: swap on eMMC and other flash
 
+2012-04-08 =EC=98=A4=ED=9B=84 10:50, Alex Lemberg =EC=93=B4 =EA=B8=80:
+
+> Hi Arnd,
+>=20
+> Regarding time to issue discard/TRIM commands:
+> It would be advised to issue the discard command immediately after =
+deleting/freeing a SWAP cluster (i.e. as soon as it becomes available).
+
+
+Is it still good with page size, not cluster size?
+
+>=20
+> Regarding SWAP page size:
+> Working with as large as SWAP pages as possible would be recommended =
+(preferably 64KB). Also, writing in a sequential manner as much as =
+possible while swapping large quantities of data is also advisable.
+>=20
+> SWAP pages and corresponding transactions should be aligned to the =
+SWAP page size (i.e. 64KB above), the alignment should correspond to the =
+physical storage "LBA 0", i.e. to the first LBA of the storage device =
+(and not to a logical/physical partition).
+>=20
+
+
+
+I have a curiosity on above comment is valid on Samsung and other eMMC.
+Hyojin, Could you answer?
+
+
+> Thanks,
+> Alex
+>=20
+>> -----Original Message-----
+>> From: Arnd Bergmann [mailto:arnd@arndb.de]
+>> Sent: Monday, April 02, 2012 5:55 PM
+>> To: Hugh Dickins
+>> Cc: linaro-kernel@lists.linaro.org; Rik van Riel; linux-=20
+>> mmc@vger.kernel.org; Alex Lemberg; linux-kernel@vger.kernel.org; Luca =
+
+>> Porzio (lporzio); linux-mm@kvack.org; Hyojin Jeong; kernel-=20
+>> team@android.com; Yejin Moon
+>> Subject: Re: swap on eMMC and other flash
+>>
+>> On Monday 02 April 2012, Hugh Dickins wrote:
+>>> On Mon, 2 Apr 2012, Arnd Bergmann wrote:
+>>>>
+>>>> Another option would be batched discard as we do it for file
+>> systems:
+>>>> occasionally stop writing to swap space and scanning for areas that =
+
+>>>> have become available since the last discard, then send discard=20
+>>>> commands for those.
+>>>
+>>> I'm not sure whether you've missed "swapon --discard", which=20
+>>> switches on discard_swap_cluster() just before we allocate from a=20
+>>> new cluster; or whether you're musing that it's no use to you=20
+>>> because you want to repurpose the swap cluster to match erase block: =
+
+>>> I'm mentioning it in case you missed that it's already there (but=20
+>>> few use it, since even done at that scale it's often more trouble =
+than it's worth).
+>>
+>> I actually argued that discard_swap_cluster is exactly the right=20
+>> thing to do, especially when clusters match erase blocks on the less=20
+>> capable devices like SD cards.
+>>
+>> Luca was arguing that on some hardware there is no point in ever=20
+>> submitting a discard just before we start reusing space, because at=20
+>> that point it the hardware already discards the old data by=20
+>> overwriting the logical addresses with new blocks, while issuing a=20
+>> discard on all blocks as soon as they become available would make a=20
+>> bigger difference. I would be interested in hearing from Hyojin Jeong =
+
+>> and Alex Lemberg what they think is the best time to issue a discard, =
+
+>> because they would know about other hardware than Luca.
+>>
+>>       Arnd
+>=20
+> PLEASE NOTE: The information contained in this electronic mail message =
+is intended only for the use of the designated recipient(s) named above. =
+If the reader of this message is not the intended recipient, you are =
+hereby notified that you have received this message in error and that =
+any review, dissemination, distribution, or copying of this message is =
+strictly prohibited. If you have received this communication in error, =
+please notify the sender by telephone or e-mail (as shown above) =
+immediately and destroy any and all copies of this message in your =
+possession (whether hard copies or electronically stored copies).
+>=20
+> --
+> To unsubscribe, send a message with 'unsubscribe linux-mm' in the body =
+
+> to majordomo@kvack.org.  For more info on Linux MM,
+> see: http://www.linux-mm.org/ .
+> Fight unfair telecom internet charges in Canada: sign=20
+> http://stopthemeter.ca/ Don't email: <a href=3Dilto:"dont@kvack.org">=20
+> email@kvack.org </a>
+>=20
+
+
+
+--
+Kind regards,
+Minchan Kim
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
