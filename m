@@ -1,56 +1,180 @@
-From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 07/11] gpio: tegra: Hide tegra_gpio_enable/disable()
-Date: Sun, 08 Apr 2012 21:09:08 -0400
-Message-ID: <87mx6l1zkb.fsf@laptop.org>
-References: <1333148404-17691-1-git-send-email-swarren@wwwdotorg.org>
-	<1333148404-17691-8-git-send-email-swarren@wwwdotorg.org>
+From: Minchan Kim <minchan@kernel.org>
+Subject: Re: swap on eMMC and other flash
+Date: Mon, 09 Apr 2012 11:06:55 +0900
+Message-ID: <4F82443F.9000804@kernel.org>
+References: <201203301744.16762.arnd@arndb.de> <CAEwNFnA2GeOayw2sJ_KXv4qOdC50_Nt2KoK796YmQF+YV1GiEA@mail.gmail.com> <201204061616.11716.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1333148404-17691-8-git-send-email-swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-	(Stephen Warren's message of "Fri, 30 Mar 2012 17:00:00 -0600")
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <201204061616.11716.arnd@arndb.de>
+Sender: owner-linux-mm@kvack.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linaro-kernel@lists.linaro.org, android-kernel@googlegroups.com, linux-mm@kvack.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, Alex Lemberg <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, Saugata Das <saugata.das@linaro.org>, Venkatraman S <venkat@linaro.org>, Yejin Moon <yejin.moon@samsung.com>, Hyojin Jeong <syr.jeong@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+2012-04-07 =EC=98=A4=EC=A0=84 1:16, Arnd Bergmann =EC=93=B4 =EA=B8=80:
 
-On Fri, Mar 30 2012, Stephen Warren wrote:
-> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
->
-> Recent pinctrl discussions concluded that gpiolib APIs should in fact do
-> whatever is required to mux a GPIO onto pins, by calling pinctrl APIs if
-> required. This change implements this for the Tegra GPIO driver, and removes
-> calls to the Tegra-specific APIs from drivers and board files.
->
-> Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-> Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> ---
-> v2: Adjusted per changes to latest version of Documentation/gpio.txt.
-> Fixed tegra_board_pinmux_bus_notify() to still check the device name,
-> so it waits for the pinmux device to be registered, not just /any/ device.
-> ---
->  arch/arm/mach-tegra/board-dt-tegra20.c        |    1 -
->  arch/arm/mach-tegra/board-harmony-pinmux.c    |   17 -----------
->  arch/arm/mach-tegra/board-paz00-pinmux.c      |   14 ---------
->  arch/arm/mach-tegra/board-pinmux.c            |   33 +++--------------------
->  arch/arm/mach-tegra/board-pinmux.h            |    5 ---
->  arch/arm/mach-tegra/board-seaboard-pinmux.c   |   32 ----------------------
->  arch/arm/mach-tegra/board-seaboard.c          |    1 -
->  arch/arm/mach-tegra/board-trimslice-pinmux.c  |   12 --------
->  arch/arm/mach-tegra/include/mach/gpio-tegra.h |    9 ------
->  arch/arm/mach-tegra/usb_phy.c                 |    1 -
->  drivers/gpio/gpio-tegra.c                     |   36 ++++++++++++------------
->  drivers/mmc/host/sdhci-tegra.c                |   24 +++-------------
->  12 files changed, 27 insertions(+), 158 deletions(-)
+> On Friday 06 April 2012, Minchan Kim wrote:
+>> On Sat, Mar 31, 2012 at 2:44 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+>>
+>>> We've had a discussion in the Linaro storage team (Saugata, Venkat an=
+d me,
+>>> with Luca joining in on the discussion) about swapping to flash based=
+ media
+>>> such as eMMC. This is a summary of what we found and what we think sh=
+ould
+>>> be done. If people agree that this is a good idea, we can start worki=
+ng
+>>> on it.
+>>>
+>>> The basic problem is that Linux without swap is sort of crippled and =
+some
+>>> things either don't work at all (hibernate) or not as efficient as th=
+ey
+>>> should (e.g. tmpfs). At the same time, the swap code seems to be rath=
+er
+>>> inappropriate for the algorithms used in most flash media today, caus=
+ing
+>>> system performance to suffer drastically, and wearing out the flash
+>>> hardware
+>>> much faster than necessary. In order to change that, we would be
+>>> implementing the following changes:
+>>>
+>>> 1) Try to swap out multiple pages at once, in a single write request.=
+ My
+>>> reading of the current code is that we always send pages one by one t=
+o
+>>> the swap device, while most flash devices have an optimum write size =
+of
+>>> 32 or 64 kb and some require an alignment of more than a page. Ideall=
+y
+>>> we would try to write an aligned 64 kb block all the time. Writing al=
+igned
+>>> 64 kb chunks often gives us ten times the throughput of linear 4kb wr=
+ites,
+>>> and going beyond 64 kb usually does not give any better performance.
+>>>
+>>
+>> It does make sense.
+>> I think we can batch will-be-swapped-out pages in shrink_page_list if =
+they
+>> are located by contiguous swap slots.
+>=20
+> But would that guarantee that all writes are the same size? While writi=
+ng
 
-For the MMC change:
 
-Acked-by: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Of course, not.
 
-- Chris.
--- 
-Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
-One Laptop Per Child
+> larger chunks would generally be helpful, in order to guarantee that we
+> the drive doesn't do any garbage collection, we would have to do all wr=
+ites
+
+
+And we should guarantee for avoiding unnecessary swapout, even OOM killin=
+g.
+
+> in aligned chunks. It would probably be enough to do this in 8kb or
+> 16kb units for most devices over the next few years, but implementing i=
+t
+> for 64kb should be the same amount of work and will get us a little bit
+> further.
+
+
+I understand it's best for writing 64K in your statement.
+What the 8K, 16K? Could you elaborate relation between 8K, 16K and 64K?
+
+>=20
+> I'm not sure what we would do when there are less than 64kb available
+> for pageout on the inactive list. The two choices I can think of are
+> either not writing anything, or wasting the swap slots and filling
+
+
+No wrtite will cause unnecessary many pages to swap out by next prioirty
+of scanning and we can't gaurantee how long we wait to queue up to 64KB
+in anon pages. It might take longer than GC time so we need some deadline=
+.
+
+
+> up the data with zeroes.
+
+
+Zero padding would be a good solution but I have a concern on WAP so we
+need smart policy.
+
+To be honest, I think swapout is normally asynchonous operation so that
+it should not affect system latency rather than swap read which is
+synchronous operation. So if system is low memory pressure, we can queue
+swap out pages up to 64KB and then batch write-out in empty cluster. If
+we don't have any empty cluster in low memory pressure, we should write
+out it in partial cluster. Maybe it doesn't affect system latency
+severely in low memory pressure.
+
+If system memory pressure is high(and It shoud be not frequent),
+swap-out B/W would be more important. So we can reserve some clusters
+for it and I think we can use page padding you mentioned in this case
+for reducing latency if we can queue it up to 64KB within threshold time.
+
+Swap-read is also important. We have to investigate fragmentation of
+swap slots because we disable swap readahead in non-rotation device. It
+can make lots of hole in swap cluster and it makes to find empty
+cluster. So for it, it might be better than enable swap-read in
+non-rotation devices, too.
+
+
+>=20
+>>> 2) Make variable sized swap clusters. Right now, the swap space is
+>>> organized in clusters of 256 pages (1MB), which is less than the typi=
+cal
+>>> erase block size of 4 or 8 MB. We should try to make the swap cluster
+>>> aligned to erase blocks and have the size match to avoid garbage coll=
+ection
+>>> in the drive. The cluster size would typically be set by mkswap as a =
+new
+>>> option and interpreted at swapon time.
+>>>
+>>
+>> If we can find such big contiguous swap slots easily, it would be good=
+.
+>> But I am not sure how often we can get such big slots. And maybe we ha=
+ve to
+>> improve search method for getting such big empty cluster.
+>=20
+> As long as there are clusters available, we should try to find them. Wh=
+en
+> free space is too fragmented to find any unused cluster, we can pick on=
+e
+> that has very little data in it, so that we reduce the time it takes to
+> GC that erase block in the drive. While we could theoretically do activ=
+e
+> garbage collection of swap data in the kernel, it won't get more effici=
+ent
+> than the GC inside of the drive. If we do this, it unfortunately means =
+that
+> we can't just send a discard for the entire erase block.
+
+
+Might need some compaction during idle time but WAP concern raises again.=
+ :(
+
+>=20
+> 	Arnd
+>=20
+> --
+> To unsubscribe, send a message with 'unsubscribe linux-mm' in
+> the body to majordomo@kvack.org.  For more info on Linux MM,
+> see: http://www.linux-mm.org/ .
+> Fight unfair telecom internet charges in Canada: sign http://stopthemet=
+er.ca/
+> Don't email: <a href=3Dmailto:"dont@kvack.org"> email@kvack.org </a>
+>=20
+
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter=
+.ca/
+Don't email: <a href=3Dmailto:"dont@kvack.org"> email@kvack.org </a>
