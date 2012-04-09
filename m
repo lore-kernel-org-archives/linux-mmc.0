@@ -1,204 +1,32 @@
-From: Minchan Kim <minchan@kernel.org>
-Subject: Re: swap on eMMC and other flash
-Date: Mon, 09 Apr 2012 17:11:32 +0900
-Message-ID: <4F8299B4.5090909@kernel.org>
-References: <201203301744.16762.arnd@arndb.de> <201204021145.43222.arnd@arndb.de> <alpine.LSU.2.00.1204020734560.1847@eggly.anvils> <201204021455.25029.arnd@arndb.de> <D70D75BB1A02CA42A3E28AA542D282303A0661B561@MILMBMIPV3.sdcorp.global.sandisk.com> <4F8245EA.6000600@kernel.org> <006f01cd1623$ac4a2860$04de7920$%jeong@samsung.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 0/4] mmc: omap_hsmmc: Additional cleanups / features
+Date: Mon, 09 Apr 2012 08:08:25 -0400
+Message-ID: <878vi5yuo6.fsf@laptop.org>
+References: <1333953515-31925-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <006f01cd1623$ac4a2860$04de7920$%jeong@samsung.com>
-Sender: owner-linux-mm@kvack.org
-To: =?UTF-8?B?7KCV7Zqo7KeE?= <syr.jeong@samsung.com>
-Cc: 'Alex Lemberg' <Alex.Lemberg@sandisk.com>, 'Arnd Bergmann' <arnd@arndb.de>, linaro-kernel@lists.linaro.org, 'Rik van Riel' <riel@redhat.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "'Luca Porzio (lporzio)'" <lporzio@micron.com>, linux-mm@kvack.org, kernel-team@android.com, 'Yejin Moon' <yejin.moon@samsung.com>, 'Hugh Dickins' <hughd@google.com>, 'Yaniv Iarovici' <Yaniv.Iarovici@sandisk.com>, cpgs@samsung.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:60119 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751620Ab2DIMIv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 9 Apr 2012 08:08:51 -0400
+In-Reply-To: <1333953515-31925-1-git-send-email-svenkatr@ti.com> (Venkatraman
+	S.'s message of "Mon, 9 Apr 2012 12:08:31 +0530")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Venkatraman S <svenkatr@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 
-2012-04-09 =EC=98=A4=ED=9B=84 4:37, =EC=A0=95=ED=9A=A8=EC=A7=84 =EC=93=B4=
- =EA=B8=80:
+Hi Venkat,
 
-> Hi Minchan
->=20
-> How are you doing?
->=20
+On Mon, Apr 09 2012, Venkatraman S wrote:
+> Hi Chris,
+>   As discussed previously [1], I've rebased the previous 2 patches
+> that you decided to queue for 3.5, plus 2 additional cleanups.
 
+Thanks very much -- pushed out to mmc-next for 3.5.
 
-Pretty good :)
-
-> Regarding time to issue Discard/Trim :
-> eMMC point of view, I believe that the immediate Discard/Trim CMD after=
- deleting/freezing a SWAP cluster is always better for all of general eMM=
-C implementation.
-
-
-The point of question is that discard of page size is good or not?
-Luca and Arnd said some device would have a benefit when we send discard
-command to eMMC as soon as linux free _a swap page_, not batched cluster
-size. But AFAIK, Samsung eMMC isn't useful by per-page discard and most
-of eMMC are not good in case of per page discard, I guess. Becauase FTL
-doesn't support full-page mapping in such small device. So I'm not sure
-we have to implement per-page discard even code is rather complicated
-for few devices.
-
->=20
-> Regarding swap page size:
-> Actually, I can't guarantee the optimal size of different eMMC in the i=
-ndustry, because it depends on NAND page size an firmware implementation =
-inside eMMC. In case of SAMSUNG eMMC, 8KB page size and 512KB block size(=
-erase unit) is current implementation.
-> I think that the multiple of 8KB page size align with 512KB is good for=
- SAMSUNG eMMC.
-> If swap system use 512KB page and issue Discard/Trim align with 512KB, =
-eMMC make best performance as of today. However, large page size in swap =
-partition may not best way in Linux system level.
-> I'm not sure that the best page size between Swap system and eMMC devic=
-e.
-
-
-The variety is one of challenges for removing GC generally. ;-(.
-I don't like manual setting through /sys/block/xxx because it requires
-that user have to know nand page size and erase block size but it's not
-easy to know to normal user.
-Arnd. What's your plan to support various flash storages effectively?
-
-
-
->=20
-> Best Regards
-> Hyojin
-> -----Original Message-----
-> From: Minchan Kim [mailto:minchan@kernel.org]=20
-> Sent: Monday, April 09, 2012 11:14 AM
-> To: Alex Lemberg
-> Cc: Arnd Bergmann; linaro-kernel@lists.linaro.org; Rik van Riel; linux-=
-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; Luca Porzio (lporzio);=
- linux-mm@kvack.org; Hyojin Jeong; kernel-team@android.com; Yejin Moon; H=
-ugh Dickins; Yaniv Iarovici
-> Subject: Re: swap on eMMC and other flash
->=20
-> 2012-04-08 =EC=98=A4=ED=9B=84 10:50, Alex Lemberg =EC=93=B4 =EA=B8=80:
->=20
->> Hi Arnd,
->>
->> Regarding time to issue discard/TRIM commands:
->> It would be advised to issue the discard command immediately after del=
-eting/freeing a SWAP cluster (i.e. as soon as it becomes available).
->=20
->=20
-> Is it still good with page size, not cluster size?
->=20
->>
->> Regarding SWAP page size:
->> Working with as large as SWAP pages as possible would be recommended (=
-preferably 64KB). Also, writing in a sequential manner as much as possibl=
-e while swapping large quantities of data is also advisable.
->>
->> SWAP pages and corresponding transactions should be aligned to the SWA=
-P page size (i.e. 64KB above), the alignment should correspond to the phy=
-sical storage "LBA 0", i.e. to the first LBA of the storage device (and n=
-ot to a logical/physical partition).
->>
->=20
->=20
->=20
-> I have a curiosity on above comment is valid on Samsung and other eMMC.
-> Hyojin, Could you answer?
->=20
->=20
->> Thanks,
->> Alex
->>
->>> -----Original Message-----
->>> From: Arnd Bergmann [mailto:arnd@arndb.de]
->>> Sent: Monday, April 02, 2012 5:55 PM
->>> To: Hugh Dickins
->>> Cc: linaro-kernel@lists.linaro.org; Rik van Riel; linux-=20
->>> mmc@vger.kernel.org; Alex Lemberg; linux-kernel@vger.kernel.org; Luca=
-=20
->>> Porzio (lporzio); linux-mm@kvack.org; Hyojin Jeong; kernel-=20
->>> team@android.com; Yejin Moon
->>> Subject: Re: swap on eMMC and other flash
->>>
->>> On Monday 02 April 2012, Hugh Dickins wrote:
->>>> On Mon, 2 Apr 2012, Arnd Bergmann wrote:
->>>>>
->>>>> Another option would be batched discard as we do it for file
->>> systems:
->>>>> occasionally stop writing to swap space and scanning for areas that=
-=20
->>>>> have become available since the last discard, then send discard=20
->>>>> commands for those.
->>>>
->>>> I'm not sure whether you've missed "swapon --discard", which=20
->>>> switches on discard_swap_cluster() just before we allocate from a=20
->>>> new cluster; or whether you're musing that it's no use to you=20
->>>> because you want to repurpose the swap cluster to match erase block:=
-=20
->>>> I'm mentioning it in case you missed that it's already there (but=20
->>>> few use it, since even done at that scale it's often more trouble th=
-an it's worth).
->>>
->>> I actually argued that discard_swap_cluster is exactly the right=20
->>> thing to do, especially when clusters match erase blocks on the less=20
->>> capable devices like SD cards.
->>>
->>> Luca was arguing that on some hardware there is no point in ever=20
->>> submitting a discard just before we start reusing space, because at=20
->>> that point it the hardware already discards the old data by=20
->>> overwriting the logical addresses with new blocks, while issuing a=20
->>> discard on all blocks as soon as they become available would make a=20
->>> bigger difference. I would be interested in hearing from Hyojin Jeong=
-=20
->>> and Alex Lemberg what they think is the best time to issue a discard,=
-=20
->>> because they would know about other hardware than Luca.
->>>
->>>       Arnd
->>
->> PLEASE NOTE: The information contained in this electronic mail message=
- is intended only for the use of the designated recipient(s) named above.=
- If the reader of this message is not the intended recipient, you are her=
-eby notified that you have received this message in error and that any re=
-view, dissemination, distribution, or copying of this message is strictly=
- prohibited. If you have received this communication in error, please not=
-ify the sender by telephone or e-mail (as shown above) immediately and de=
-stroy any and all copies of this message in your possession (whether hard=
- copies or electronically stored copies).
->>
->> --
->> To unsubscribe, send a message with 'unsubscribe linux-mm' in the body=
-=20
->> to majordomo@kvack.org.  For more info on Linux MM,
->> see: http://www.linux-mm.org/ .
->> Fight unfair telecom internet charges in Canada: sign=20
->> http://stopthemeter.ca/ Don't email: <a href=3Dilto:"dont@kvack.org">=20
->> email@kvack.org </a>
->>
->=20
->=20
->=20
-> --
-> Kind regards,
-> Minchan Kim
->=20
-> --
-> To unsubscribe, send a message with 'unsubscribe linux-mm' in
-> the body to majordomo@kvack.org.  For more info on Linux MM,
-> see: http://www.linux-mm.org/ .
-> Fight unfair telecom internet charges in Canada: sign http://stopthemet=
-er.ca/
-> Don't email: <a href=3Dilto:"dont@kvack.org"> email@kvack.org </a>
->=20
-
-
-
---=20
-Kind regards,
-Minchan Kim
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter=
-.ca/
-Don't email: <a href=3Dmailto:"dont@kvack.org"> email@kvack.org </a>
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
