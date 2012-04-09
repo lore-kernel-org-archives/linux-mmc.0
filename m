@@ -1,96 +1,56 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: swap on eMMC and other flash
-Date: Sun, 8 Apr 2012 06:50:16 -0700
-Message-ID: <D70D75BB1A02CA42A3E28AA542D282303A0661B561@MILMBMIPV3.sdcorp.global.sandisk.com>
-References: <201203301744.16762.arnd@arndb.de>
- <201204021145.43222.arnd@arndb.de>
- <alpine.LSU.2.00.1204020734560.1847@eggly.anvils>
- <201204021455.25029.arnd@arndb.de>
+From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 07/11] gpio: tegra: Hide tegra_gpio_enable/disable()
+Date: Sun, 08 Apr 2012 21:09:08 -0400
+Message-ID: <87mx6l1zkb.fsf@laptop.org>
+References: <1333148404-17691-1-git-send-email-swarren@wwwdotorg.org>
+	<1333148404-17691-8-git-send-email-swarren@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <201204021455.25029.arnd@arndb.de>
-Content-Language: en-US
-Sender: owner-linux-mm@kvack.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: "linaro-kernel@lists.linaro.org" <linaro-kernel@lists.linaro.org>, Rik van Riel <riel@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Luca Porzio (lporzio)" <lporzio@micron.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Hyojin Jeong <syr.jeong@samsung.com>, "kernel-team@android.com" <kernel-team@android.com>, Yejin Moon <yejin.moon@samsung.com>, Hugh Dickins <hughd@google.com>, Yaniv Iarovici <Yaniv.Iarovici@sandisk.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1333148404-17691-8-git-send-email-swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+	(Stephen Warren's message of "Fri, 30 Mar 2012 17:00:00 -0600")
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Cc: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Arnd,
+Hi,
 
-Regarding time to issue discard/TRIM commands:
-It would be advised to issue the discard command immediately after deleting=
-/freeing a SWAP cluster (i.e. as soon as it becomes available).
-
-Regarding SWAP page size:
-Working with as large as SWAP pages as possible would be recommended (prefe=
-rably 64KB). Also, writing in a sequential manner as much as possible while=
- swapping large quantities of data is also advisable.
-
-SWAP pages and corresponding transactions should be aligned to the SWAP pag=
-e size (i.e. 64KB above), the alignment should correspond to the physical s=
-torage "LBA 0", i.e. to the first LBA of the storage device (and not to a l=
-ogical/physical partition).
-
-Thanks,
-Alex
-
-> -----Original Message-----
-> From: Arnd Bergmann [mailto:arnd@arndb.de]
-> Sent: Monday, April 02, 2012 5:55 PM
-> To: Hugh Dickins
-> Cc: linaro-kernel@lists.linaro.org; Rik van Riel; linux-
-> mmc@vger.kernel.org; Alex Lemberg; linux-kernel@vger.kernel.org; Luca
-> Porzio (lporzio); linux-mm@kvack.org; Hyojin Jeong; kernel-
-> team@android.com; Yejin Moon
-> Subject: Re: swap on eMMC and other flash
+On Fri, Mar 30 2012, Stephen Warren wrote:
+> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 >
-> On Monday 02 April 2012, Hugh Dickins wrote:
-> > On Mon, 2 Apr 2012, Arnd Bergmann wrote:
-> > >
-> > > Another option would be batched discard as we do it for file
-> systems:
-> > > occasionally stop writing to swap space and scanning for areas that
-> > > have become available since the last discard, then send discard
-> > > commands for those.
-> >
-> > I'm not sure whether you've missed "swapon --discard", which switches
-> > on discard_swap_cluster() just before we allocate from a new cluster;
-> > or whether you're musing that it's no use to you because you want to
-> > repurpose the swap cluster to match erase block: I'm mentioning it in
-> > case you missed that it's already there (but few use it, since even
-> > done at that scale it's often more trouble than it's worth).
+> Recent pinctrl discussions concluded that gpiolib APIs should in fact do
+> whatever is required to mux a GPIO onto pins, by calling pinctrl APIs if
+> required. This change implements this for the Tegra GPIO driver, and removes
+> calls to the Tegra-specific APIs from drivers and board files.
 >
-> I actually argued that discard_swap_cluster is exactly the right thing
-> to do, especially when clusters match erase blocks on the less capable
-> devices like SD cards.
->
-> Luca was arguing that on some hardware there is no point in ever
-> submitting a discard just before we start reusing space, because
-> at that point it the hardware already discards the old data by
-> overwriting the logical addresses with new blocks, while
-> issuing a discard on all blocks as soon as they become available
-> would make a bigger difference. I would be interested in hearing
-> from Hyojin Jeong and Alex Lemberg what they think is the best
-> time to issue a discard, because they would know about other hardware
-> than Luca.
->
->       Arnd
+> Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+> Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> ---
+> v2: Adjusted per changes to latest version of Documentation/gpio.txt.
+> Fixed tegra_board_pinmux_bus_notify() to still check the device name,
+> so it waits for the pinmux device to be registered, not just /any/ device.
+> ---
+>  arch/arm/mach-tegra/board-dt-tegra20.c        |    1 -
+>  arch/arm/mach-tegra/board-harmony-pinmux.c    |   17 -----------
+>  arch/arm/mach-tegra/board-paz00-pinmux.c      |   14 ---------
+>  arch/arm/mach-tegra/board-pinmux.c            |   33 +++--------------------
+>  arch/arm/mach-tegra/board-pinmux.h            |    5 ---
+>  arch/arm/mach-tegra/board-seaboard-pinmux.c   |   32 ----------------------
+>  arch/arm/mach-tegra/board-seaboard.c          |    1 -
+>  arch/arm/mach-tegra/board-trimslice-pinmux.c  |   12 --------
+>  arch/arm/mach-tegra/include/mach/gpio-tegra.h |    9 ------
+>  arch/arm/mach-tegra/usb_phy.c                 |    1 -
+>  drivers/gpio/gpio-tegra.c                     |   36 ++++++++++++------------
+>  drivers/mmc/host/sdhci-tegra.c                |   24 +++-------------
+>  12 files changed, 27 insertions(+), 158 deletions(-)
 
-PLEASE NOTE: The information contained in this electronic mail message is i=
-ntended only for the use of the designated recipient(s) named above. If the=
- reader of this message is not the intended recipient, you are hereby notif=
-ied that you have received this message in error and that any review, disse=
-mination, distribution, or copying of this message is strictly prohibited. =
-If you have received this communication in error, please notify the sender =
-by telephone or e-mail (as shown above) immediately and destroy any and all=
- copies of this message in your possession (whether hard copies or electron=
-ically stored copies).
+For the MMC change:
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Acked-by: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+
+- Chris.
+-- 
+Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
+One Laptop Per Child
