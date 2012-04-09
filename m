@@ -1,50 +1,32 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3 6/6] mmc: sdhci-s3c: Add device tree support
-Date: Mon, 09 Apr 2012 10:48:07 -0400
-Message-ID: <87pqbhx8pk.fsf@laptop.org>
-References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
-	<201203271619.13320.arnd@arndb.de> <4F7553D1.4030008@st.com>
-	<201203301136.05038.arnd@arndb.de>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 0/2] mmc: fixes for eMMC v4.5 discard / sanitize operations
+Date: Mon, 9 Apr 2012 19:44:01 +0200
+Message-ID: <CACRpkdYM1XF=mng-JG2a5TYTrpYJAyw6LpjjMJ+K2SHzf643Fw@mail.gmail.com>
+References: <1333626348-11170-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <201203301136.05038.arnd@arndb.de> (Arnd Bergmann's message of
-	"Fri, 30 Mar 2012 11:36:04 +0000")
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Viresh Kumar <viresh.kumar@st.com>, Thomas Abraham <thomas.abraham@linaro.org>, Lee Jones <lee.jones@linaro.org>, Rajendra Nayak <rnayak@ti.com>, Stephen Warren <swarren@nvidia.com>, Shawn Guo <shawn.guo@linaro.org>, Anton Vorontsov <anton.vorontsov@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "kgene.kim@samsung.com" <kgene.kim@samsung.com>, "ben-linux@fluff.org" <ben-linux@fluff.org>, "patches@linaro.org" <patches@linaro.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:60957 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753710Ab2DIRoC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 13:44:02 -0400
+Received: by yenl12 with SMTP id l12so1930763yen.19
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Apr 2012 10:44:01 -0700 (PDT)
+In-Reply-To: <1333626348-11170-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, Kyungmin Park <kyungmin.park@samsung.com>, Kyungmin Park <kmpark@infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi Arnd,
+On Thu, Apr 5, 2012 at 1:45 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-On Fri, Mar 30 2012, Arnd Bergmann wrote:
-> On Friday 30 March 2012, Viresh Kumar wrote:
->> On 3/27/2012 9:49 PM, Arnd Bergmann wrote:
->> > These bindings came up in a discussion IRC today. I think it's rather bad that
->> > we can't agree on a common way to name the properties for mmc. We have
->> > bindings being proposed or already included from Anton, Stephen, Shawn,
->> > Rajendra, Viresh, Lee and Thomas. Almost all of them define GPIO pins
->> > for card detect and write protect, as well properties to define the bus
->> > width and high-speed modes, but we seem to have almost as many different
->> > definitions of these as we have drivers.
->> > 
->> > Can we please come up with a common binding for these?
->> 
->> Is there any progress on this? Sorry i wasn't following all mails.
->> How should i progress for sdhci-spear?
->
-> No progress so far. I would suggest we apply the patch below to unify
-> the bindings we have. I tried to minimize the impact by picking the most
-> common version for each property, but if we know about devices that would
-> get broken by this, we may have to be more careful.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Here are patches in response to the thread
+> "mmc: card: move variable initialization earlier"
 
-Thanks very much for doing this -- I'll be happy to take the patch in
-mmc-next once you get time to post a v2 covering Stephen Warren's review
-comments (and adding "max-frequency" to the document, I guess).
+Sweet, thanks for looking into this Adrian!
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+I have no MMC 4.5 device either but FWIW:
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
+
+Thanks,
+Linus Walleij
