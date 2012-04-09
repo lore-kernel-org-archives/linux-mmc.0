@@ -1,204 +1,75 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: swap on eMMC and other flash
-Date: Mon, 9 Apr 2012 12:35:48 +0000
-Message-ID: <201204091235.48750.arnd@arndb.de>
-References: <201203301744.16762.arnd@arndb.de> <201204061616.11716.arnd@arndb.de> <4F82443F.9000804@kernel.org>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH v1 1/1] mmc: core: fix power class selection
+Date: Mon, 9 Apr 2012 18:16:16 +0530
+Message-ID: <000301cd164e$c3c12e50$4b438af0$@codeaurora.org>
+References: <1333436158-4762-1-git-send-email-subhashj@codeaurora.org>	<CAKLKtzew2g7bXR3Xdz448cs8O_jQHp0ybG1r1VBUTXcoh2BDwA@mail.gmail.com>	<000501cd11b1$75766770$60633650$@codeaurora.org> <CAKLKtzeYhQtfPLTvO--5cOg6h90t6OpiRmgPKu3cP7AfKBNnMQ@mail.gmail.com> <000401cd11b9$1940c6f0$4bc254d0$@codeaurora.org> <26E7A31274623843B0E8CF86148BFE326FB57152@NTXAVZMBX04.azit.micron.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:54494 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753526Ab2DIMfx convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 08:35:53 -0400
-In-Reply-To: <4F82443F.9000804@kernel.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <26E7A31274623843B0E8CF86148BFE326FB57152@NTXAVZMBX04.azit.micron.com>
+Content-Language: en-us
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: "'Luca Porzio (lporzio)'" <lporzio@micron.com>, 'Saugata Das' <saugata.das@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, girish.shivananjappa@linaro.org, "'Danilo Caraccio (dcaracci)'" <dcaracci@micron.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Minchan Kim <minchan@kernel.org>
-Cc: linaro-kernel@lists.linaro.org, android-kernel@googlegroups.com, linux-mm@kvack.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, Alex Lemberg <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, Saugata Das <saugata.das@linaro.org>, Venkatraman S <venkat@linaro.org>, Yejin Moon <yejin.moon@samsung.com>, Hyojin Jeong <syr.jeong@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Monday 09 April 2012, Minchan Kim wrote:
-> 2012-04-07 =EC=98=A4=EC=A0=84 1:16, Arnd Bergmann =EC=93=B4 =EA=B8=80=
-:
->=20
-> > larger chunks would generally be helpful, in order to guarantee tha=
-t we
-> > the drive doesn't do any garbage collection, we would have to do al=
-l writes
->=20
->=20
-> And we should guarantee for avoiding unnecessary swapout, even OOM ki=
-lling.
->=20
-> > in aligned chunks. It would probably be enough to do this in 8kb or
-> > 16kb units for most devices over the next few years, but implementi=
-ng it
-> > for 64kb should be the same amount of work and will get us a little=
- bit
-> > further.
->=20
->=20
-> I understand it's best for writing 64K in your statement.
-> What the 8K, 16K? Could you elaborate relation between 8K, 16K and 64=
-K?
+Hi Porzio,
 
-=46rom my measurements, there are three sizes that are relevant here:
+> -----Original Message-----
+> From: Luca Porzio (lporzio) [mailto:lporzio@micron.com]
+> Sent: Tuesday, April 03, 2012 10:36 PM
+> To: Subhash Jadavani; 'Saugata Das'
+> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org;
+> girish.shivananjappa@linaro.org; Danilo Caraccio (dcaracci)
+> Subject: RE: [PATCH v1 1/1] mmc: core: fix power class selection
+> 
+> Hi,
+> 
+> >
+> > Yes, this makes sense. With current implementation,
+> > mmc_select_powerclass() should never really fail which means failure
+> > should be treated as fatal and we should really skip the card
+initialization.
+> > This patch is already pushed to mmc-next. So I will post another patch
+> > (by next week as I will be on vacation in this week) to skip the card
+> > initialization if mmc_select_powerclass fails.
+> >
+> > Is this ok?
+> >
+> > Regards,
+> > Subhash
+> >
+> 
+> There was an error in the public JEDEC eMMC 4.5 version: PWR_CL_200_360 =
+> EXT_CSD[237] is wrongly defined because HS200 can be supported only @1.2V
+> or 1.8V. New Jedec spec revision might fix this.
+> 
+> I and Danilo did a quick check in the power class selection routines and
+it looks
+> like the power class is set according to the OCR parsing.
+> The OCR parsing to check the supported voltage range does not totally
+cover
+> the device capabilities because Vccq = 1.2V support is not encoded in the
+> register.
 
-1. The underlying page size of the flash: This used to be less than 4kb=
-,
-which is fine when paging out 4kb mmu pages, as long as the partition i=
-s
-aligned. Today, most devices use 8kb pages and the number is increasing
-over time, meaning we will see more 16kb page devices in the future and
-presumably larger sizes after that. Writes that are not naturally align=
-ed
-multiples of the page size tend to be a significant problem for the
-controller to deal with: in order to guarantee that a 4kb write makes i=
-t
-into permanent storage, the device has to write 8kb and the next 4kb
-write has to go into another 8kb page because each page can only be
-written once before the block is erased. At a later point, all the part=
-ial
-pages get rewritten into a new erase block, a process that can take
-hundreds of miliseconds and that we absolutely want to prevent from
-happening, as it can block all other I/O to the device. Writing all
-(flash) pages in an erase block sequentially usually avoids this, as
-long as you don't write to many different erase blocks at the same time=
-=2E
-Note that the page size depends on how the controller combines differen=
-t
-planes and channels.
+According to my understanding, "vvv" in "PWR_CL_ff_vvv" (or
+"PWR_CL_DDR_ff_vvv") indicates is VDD voltage not the VCCQ voltage. So we
+shouldn't bother about what is the vccq level to decide which particular
+field to read for power class. Please correct me if this understanding is
+wrong.
 
-2. The super-page size of the flash: When you have multiple channels
-between the controller and the individual flash chips, you can write
-multiple pages simultaneously, which means that e.g. sending 32kb of
-data to the device takes roughly the same amount of time as writing a
-single 8kb page. Writing less than the super-page size when there is
-more data waiting to get written out is a waste of time, although the
-effects are much less drastic as writing data that is not aligned to
-pages because it does not require garbage collection.
+Regards,
+Subhash
 
-3. optimum write size: While writing larger amounts of data in a single
-request is usually faster than writing less, almost all devices
-I've seen have a sharp cut-off where increasing the size of the write
-does not actually help any more because of a bottleneck somewhere
-in the stack. Writing more than 64kb almost never improves performance
-and sometimes reduces performance.
-
-=46rom the I've done, a typical profile could look like
-
-Size	Throughput
-1KB	200KB/s
-2KB	450KB/s
-4KB	1MB/s
-8KB	4MB/s		<=3D=3D page size
-16KB	8MB/s
-32KB	16MB/s		<=3D=3D superpage size
-64KB	18MB/s		<=3D=3D optimum size
-128KB	17MB/s
-=2E..
-8MB	18MB/s		<=3D=3D erase block size
-
-> > I'm not sure what we would do when there are less than 64kb availab=
-le
-> > for pageout on the inactive list. The two choices I can think of ar=
-e
-> > either not writing anything, or wasting the swap slots and filling
->=20
->=20
-> No wrtite will cause unnecessary many pages to swap out by next prioi=
-rty
-> of scanning and we can't gaurantee how long we wait to queue up to 64=
-KB
-> in anon pages. It might take longer than GC time so we need some dead=
-line.
->=20
->=20
-> > up the data with zeroes.
->=20
->=20
-> Zero padding would be a good solution but I have a concern on WAP so =
-we
-> need smart policy.
->=20
-> To be honest, I think swapout is normally asynchonous operation so th=
-at
-> it should not affect system latency rather than swap read which is
-> synchronous operation. So if system is low memory pressure, we can qu=
-eue
-> swap out pages up to 64KB and then batch write-out in empty cluster. =
-If
-> we don't have any empty cluster in low memory pressure, we should wri=
-te
-> out it in partial cluster. Maybe it doesn't affect system latency
-> severely in low memory pressure.
-
-The main thing that can affect system latency is garbage collection
-that blocks any other reads or writes for an extended amount of time.
-If we can avoid that, we've got the 95% solution.
-
-Note that eMMC-4.5 provides a high-priority interrupt mechamism that
-lets us interrupt the a write that has hit the garbage collection
-path, so we can send a more important read request to the device.
-This will not work on other devices though and the patches for this
-are still under discussion.
-
-> If system memory pressure is high(and It shoud be not frequent),
-> swap-out B/W would be more important. So we can reserve some clusters
-> for it and I think we can use page padding you mentioned in this case
-> for reducing latency if we can queue it up to 64KB within threshold t=
-ime.
->=20
-> Swap-read is also important. We have to investigate fragmentation of
-> swap slots because we disable swap readahead in non-rotation device. =
-It
-> can make lots of hole in swap cluster and it makes to find empty
-> cluster. So for it, it might be better than enable swap-read in
-> non-rotation devices, too.
-
-Yes, reading in up to 64kb or at least a superpage would also help here=
-,
-although there is no problem reading in a single cpu page, it will stil=
-l
-take no more time than reading in a superpage.
-
-> >>> 2) Make variable sized swap clusters. Right now, the swap space i=
-s
-> >>> organized in clusters of 256 pages (1MB), which is less than the =
-typical
-> >>> erase block size of 4 or 8 MB. We should try to make the swap clu=
-ster
-> >>> aligned to erase blocks and have the size match to avoid garbage =
-collection
-> >>> in the drive. The cluster size would typically be set by mkswap a=
-s a new
-> >>> option and interpreted at swapon time.
-> >>>
-> >>
-> >> If we can find such big contiguous swap slots easily, it would be =
-good.
-> >> But I am not sure how often we can get such big slots. And maybe w=
-e have to
-> >> improve search method for getting such big empty cluster.
-> >=20
-> > As long as there are clusters available, we should try to find them=
-=2E When
-> > free space is too fragmented to find any unused cluster, we can pic=
-k one
-> > that has very little data in it, so that we reduce the time it take=
-s to
-> > GC that erase block in the drive. While we could theoretically do a=
-ctive
-> > garbage collection of swap data in the kernel, it won't get more ef=
-ficient
-> > than the GC inside of the drive. If we do this, it unfortunately me=
-ans that
-> > we can't just send a discard for the entire erase block.
->=20
->=20
-> Might need some compaction during idle time but WAP concern raises ag=
-ain. :(
-
-Sorry for my ignorance, but what does WAP stand for?
-
-	Arnd
+> 
+> If the above is true, this implies that indexes EXT_CSD_PWR_CL_200_360
+will
+> lead to an error.
+> 
+> DEVICE_TYPE = EXT_CSD[196] is more useful because it provides information
+> on the Speed Rate and Voltage Range supported by the device.
+> 
+> Cheers,
+>     Luca
