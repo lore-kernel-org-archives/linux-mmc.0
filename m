@@ -1,180 +1,126 @@
 From: Minchan Kim <minchan@kernel.org>
 Subject: Re: swap on eMMC and other flash
-Date: Mon, 09 Apr 2012 11:06:55 +0900
-Message-ID: <4F82443F.9000804@kernel.org>
-References: <201203301744.16762.arnd@arndb.de> <CAEwNFnA2GeOayw2sJ_KXv4qOdC50_Nt2KoK796YmQF+YV1GiEA@mail.gmail.com> <201204061616.11716.arnd@arndb.de>
+Date: Mon, 09 Apr 2012 11:14:02 +0900
+Message-ID: <4F8245EA.6000600@kernel.org>
+References: <201203301744.16762.arnd@arndb.de> <201204021145.43222.arnd@arndb.de> <alpine.LSU.2.00.1204020734560.1847@eggly.anvils> <201204021455.25029.arnd@arndb.de> <D70D75BB1A02CA42A3E28AA542D282303A0661B561@MILMBMIPV3.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <201204061616.11716.arnd@arndb.de>
-Sender: owner-linux-mm@kvack.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linaro-kernel@lists.linaro.org, android-kernel@googlegroups.com, linux-mm@kvack.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, Alex Lemberg <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, Saugata Das <saugata.das@linaro.org>, Venkatraman S <venkat@linaro.org>, Yejin Moon <yejin.moon@samsung.com>, Hyojin Jeong <syr.jeong@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from LGEMRELSE7Q.lge.com ([156.147.1.151]:56585 "EHLO
+	LGEMRELSE7Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752982Ab2DICLo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Apr 2012 22:11:44 -0400
+In-Reply-To: <D70D75BB1A02CA42A3E28AA542D282303A0661B561@MILMBMIPV3.sdcorp.global.sandisk.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, "linaro-kernel@lists.linaro.org" <linaro-kernel@lists.linaro.org>, Rik van Riel <riel@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Luca Porzio (lporzio)" <lporzio@micron.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Hyojin Jeong <syr.jeong@samsung.com>, "kernel-team@android.com" <kernel-team@android.com>, Yejin Moon <yejin.moon@samsung.com>, Hugh Dickins <hughd@google.com>, Yaniv Iarovici <Yaniv.Iarovici@sandisk.com>
 
-2012-04-07 =EC=98=A4=EC=A0=84 1:16, Arnd Bergmann =EC=93=B4 =EA=B8=80:
+2012-04-08 =EC=98=A4=ED=9B=84 10:50, Alex Lemberg =EC=93=B4 =EA=B8=80:
 
-> On Friday 06 April 2012, Minchan Kim wrote:
->> On Sat, Mar 31, 2012 at 2:44 AM, Arnd Bergmann <arnd@arndb.de> wrote:
->>
->>> We've had a discussion in the Linaro storage team (Saugata, Venkat an=
-d me,
->>> with Luca joining in on the discussion) about swapping to flash based=
- media
->>> such as eMMC. This is a summary of what we found and what we think sh=
-ould
->>> be done. If people agree that this is a good idea, we can start worki=
-ng
->>> on it.
->>>
->>> The basic problem is that Linux without swap is sort of crippled and =
-some
->>> things either don't work at all (hibernate) or not as efficient as th=
-ey
->>> should (e.g. tmpfs). At the same time, the swap code seems to be rath=
-er
->>> inappropriate for the algorithms used in most flash media today, caus=
-ing
->>> system performance to suffer drastically, and wearing out the flash
->>> hardware
->>> much faster than necessary. In order to change that, we would be
->>> implementing the following changes:
->>>
->>> 1) Try to swap out multiple pages at once, in a single write request.=
- My
->>> reading of the current code is that we always send pages one by one t=
-o
->>> the swap device, while most flash devices have an optimum write size =
-of
->>> 32 or 64 kb and some require an alignment of more than a page. Ideall=
-y
->>> we would try to write an aligned 64 kb block all the time. Writing al=
-igned
->>> 64 kb chunks often gives us ten times the throughput of linear 4kb wr=
-ites,
->>> and going beyond 64 kb usually does not give any better performance.
->>>
->>
->> It does make sense.
->> I think we can batch will-be-swapped-out pages in shrink_page_list if =
-they
->> are located by contiguous swap slots.
+> Hi Arnd,
 >=20
-> But would that guarantee that all writes are the same size? While writi=
-ng
+> Regarding time to issue discard/TRIM commands:
+> It would be advised to issue the discard command immediately after de=
+leting/freeing a SWAP cluster (i.e. as soon as it becomes available).
 
 
-Of course, not.
+Is it still good with page size, not cluster size?
 
-> larger chunks would generally be helpful, in order to guarantee that we
-> the drive doesn't do any garbage collection, we would have to do all wr=
-ites
+>=20
+> Regarding SWAP page size:
+> Working with as large as SWAP pages as possible would be recommended =
+(preferably 64KB). Also, writing in a sequential manner as much as poss=
+ible while swapping large quantities of data is also advisable.
+>=20
+> SWAP pages and corresponding transactions should be aligned to the SW=
+AP page size (i.e. 64KB above), the alignment should correspond to the =
+physical storage "LBA 0", i.e. to the first LBA of the storage device (=
+and not to a logical/physical partition).
+>=20
 
 
-And we should guarantee for avoiding unnecessary swapout, even OOM killin=
-g.
 
-> in aligned chunks. It would probably be enough to do this in 8kb or
-> 16kb units for most devices over the next few years, but implementing i=
+I have a curiosity on above comment is valid on Samsung and other eMMC.
+Hyojin, Could you answer?
+
+
+> Thanks,
+> Alex
+>=20
+>> -----Original Message-----
+>> From: Arnd Bergmann [mailto:arnd@arndb.de]
+>> Sent: Monday, April 02, 2012 5:55 PM
+>> To: Hugh Dickins
+>> Cc: linaro-kernel@lists.linaro.org; Rik van Riel; linux-
+>> mmc@vger.kernel.org; Alex Lemberg; linux-kernel@vger.kernel.org; Luc=
+a
+>> Porzio (lporzio); linux-mm@kvack.org; Hyojin Jeong; kernel-
+>> team@android.com; Yejin Moon
+>> Subject: Re: swap on eMMC and other flash
+>>
+>> On Monday 02 April 2012, Hugh Dickins wrote:
+>>> On Mon, 2 Apr 2012, Arnd Bergmann wrote:
+>>>>
+>>>> Another option would be batched discard as we do it for file
+>> systems:
+>>>> occasionally stop writing to swap space and scanning for areas tha=
 t
-> for 64kb should be the same amount of work and will get us a little bit
-> further.
-
-
-I understand it's best for writing 64K in your statement.
-What the 8K, 16K? Could you elaborate relation between 8K, 16K and 64K?
-
->=20
-> I'm not sure what we would do when there are less than 64kb available
-> for pageout on the inactive list. The two choices I can think of are
-> either not writing anything, or wasting the swap slots and filling
-
-
-No wrtite will cause unnecessary many pages to swap out by next prioirty
-of scanning and we can't gaurantee how long we wait to queue up to 64KB
-in anon pages. It might take longer than GC time so we need some deadline=
-.
-
-
-> up the data with zeroes.
-
-
-Zero padding would be a good solution but I have a concern on WAP so we
-need smart policy.
-
-To be honest, I think swapout is normally asynchonous operation so that
-it should not affect system latency rather than swap read which is
-synchronous operation. So if system is low memory pressure, we can queue
-swap out pages up to 64KB and then batch write-out in empty cluster. If
-we don't have any empty cluster in low memory pressure, we should write
-out it in partial cluster. Maybe it doesn't affect system latency
-severely in low memory pressure.
-
-If system memory pressure is high(and It shoud be not frequent),
-swap-out B/W would be more important. So we can reserve some clusters
-for it and I think we can use page padding you mentioned in this case
-for reducing latency if we can queue it up to 64KB within threshold time.
-
-Swap-read is also important. We have to investigate fragmentation of
-swap slots because we disable swap readahead in non-rotation device. It
-can make lots of hole in swap cluster and it makes to find empty
-cluster. So for it, it might be better than enable swap-read in
-non-rotation devices, too.
-
-
->=20
->>> 2) Make variable sized swap clusters. Right now, the swap space is
->>> organized in clusters of 256 pages (1MB), which is less than the typi=
-cal
->>> erase block size of 4 or 8 MB. We should try to make the swap cluster
->>> aligned to erase blocks and have the size match to avoid garbage coll=
-ection
->>> in the drive. The cluster size would typically be set by mkswap as a =
-new
->>> option and interpreted at swapon time.
+>>>> have become available since the last discard, then send discard
+>>>> commands for those.
 >>>
+>>> I'm not sure whether you've missed "swapon --discard", which switch=
+es
+>>> on discard_swap_cluster() just before we allocate from a new cluste=
+r;
+>>> or whether you're musing that it's no use to you because you want t=
+o
+>>> repurpose the swap cluster to match erase block: I'm mentioning it =
+in
+>>> case you missed that it's already there (but few use it, since even
+>>> done at that scale it's often more trouble than it's worth).
 >>
->> If we can find such big contiguous swap slots easily, it would be good=
-.
->> But I am not sure how often we can get such big slots. And maybe we ha=
-ve to
->> improve search method for getting such big empty cluster.
->=20
-> As long as there are clusters available, we should try to find them. Wh=
-en
-> free space is too fragmented to find any unused cluster, we can pick on=
+>> I actually argued that discard_swap_cluster is exactly the right thi=
+ng
+>> to do, especially when clusters match erase blocks on the less capab=
+le
+>> devices like SD cards.
+>>
+>> Luca was arguing that on some hardware there is no point in ever
+>> submitting a discard just before we start reusing space, because
+>> at that point it the hardware already discards the old data by
+>> overwriting the logical addresses with new blocks, while
+>> issuing a discard on all blocks as soon as they become available
+>> would make a bigger difference. I would be interested in hearing
+>> from Hyojin Jeong and Alex Lemberg what they think is the best
+>> time to issue a discard, because they would know about other hardwar=
 e
-> that has very little data in it, so that we reduce the time it takes to
-> GC that erase block in the drive. While we could theoretically do activ=
-e
-> garbage collection of swap data in the kernel, it won't get more effici=
-ent
-> than the GC inside of the drive. If we do this, it unfortunately means =
-that
-> we can't just send a discard for the entire erase block.
-
-
-Might need some compaction during idle time but WAP concern raises again.=
- :(
-
+>> than Luca.
+>>
+>>       Arnd
 >=20
-> 	Arnd
+> PLEASE NOTE: The information contained in this electronic mail messag=
+e is intended only for the use of the designated recipient(s) named abo=
+ve. If the reader of this message is not the intended recipient, you ar=
+e hereby notified that you have received this message in error and that=
+ any review, dissemination, distribution, or copying of this message is=
+ strictly prohibited. If you have received this communication in error,=
+ please notify the sender by telephone or e-mail (as shown above) immed=
+iately and destroy any and all copies of this message in your possessio=
+n (whether hard copies or electronically stored copies).
 >=20
 > --
 > To unsubscribe, send a message with 'unsubscribe linux-mm' in
 > the body to majordomo@kvack.org.  For more info on Linux MM,
 > see: http://www.linux-mm.org/ .
-> Fight unfair telecom internet charges in Canada: sign http://stopthemet=
-er.ca/
-> Don't email: <a href=3Dmailto:"dont@kvack.org"> email@kvack.org </a>
+> Fight unfair telecom internet charges in Canada: sign http://stopthem=
+eter.ca/
+> Don't email: <a href=3Dilto:"dont@kvack.org"> email@kvack.org </a>
 >=20
 
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter=
-.ca/
-Don't email: <a href=3Dmailto:"dont@kvack.org"> email@kvack.org </a>
+
+--=20
+Kind regards,
+Minchan Kim
