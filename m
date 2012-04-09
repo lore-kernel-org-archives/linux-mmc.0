@@ -1,75 +1,64 @@
-From: "Subhash Jadavani" <subhashj@codeaurora.org>
-Subject: RE: [PATCH v1 1/1] mmc: core: fix power class selection
-Date: Mon, 9 Apr 2012 18:16:16 +0530
-Message-ID: <000301cd164e$c3c12e50$4b438af0$@codeaurora.org>
-References: <1333436158-4762-1-git-send-email-subhashj@codeaurora.org>	<CAKLKtzew2g7bXR3Xdz448cs8O_jQHp0ybG1r1VBUTXcoh2BDwA@mail.gmail.com>	<000501cd11b1$75766770$60633650$@codeaurora.org> <CAKLKtzeYhQtfPLTvO--5cOg6h90t6OpiRmgPKu3cP7AfKBNnMQ@mail.gmail.com> <000401cd11b9$1940c6f0$4bc254d0$@codeaurora.org> <26E7A31274623843B0E8CF86148BFE326FB57152@NTXAVZMBX04.azit.micron.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: swap on eMMC and other flash
+Date: Mon, 9 Apr 2012 12:50:44 +0000
+Message-ID: <201204091250.45034.arnd@arndb.de>
+References: <201203301744.16762.arnd@arndb.de> <201204021455.25029.arnd@arndb.de> <02cc01cd12c1$769421e0$63bc65a0$%jeong@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <26E7A31274623843B0E8CF86148BFE326FB57152@NTXAVZMBX04.azit.micron.com>
-Content-Language: en-us
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: "'Luca Porzio (lporzio)'" <lporzio@micron.com>, 'Saugata Das' <saugata.das@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, girish.shivananjappa@linaro.org, "'Danilo Caraccio (dcaracci)'" <dcaracci@micron.com>
+Content-Type: Text/Plain; charset=euc-kr
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.9]:55670 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755216Ab2DIMvJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 08:51:09 -0400
+In-Reply-To: <02cc01cd12c1$769421e0$63bc65a0$%jeong@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?euc-kr?q?=C1=A4=C8=BF=C1=F8?= <syr.jeong@samsung.com>
+Cc: 'Hugh Dickins' <hughd@google.com>, cpgs@samsung.com, linaro-kernel@lists.linaro.org, 'Rik van Riel' <riel@redhat.com>, linux-mmc@vger.kernel.org, 'Alex Lemberg' <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, "'Luca Porzio (lporzio)'" <lporzio@micron.com>, linux-mm@kvack.org, kernel-team@android.com, 'Yejin Moon' <yejin.moon@samsung.com>
 
-Hi Porzio,
+On Thursday 05 April 2012, =C1=A4=C8=BF=C1=F8 wrote:
 
-> -----Original Message-----
-> From: Luca Porzio (lporzio) [mailto:lporzio@micron.com]
-> Sent: Tuesday, April 03, 2012 10:36 PM
-> To: Subhash Jadavani; 'Saugata Das'
-> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org;
-> girish.shivananjappa@linaro.org; Danilo Caraccio (dcaracci)
-> Subject: RE: [PATCH v1 1/1] mmc: core: fix power class selection
-> 
-> Hi,
-> 
-> >
-> > Yes, this makes sense. With current implementation,
-> > mmc_select_powerclass() should never really fail which means failure
-> > should be treated as fatal and we should really skip the card
-initialization.
-> > This patch is already pushed to mmc-next. So I will post another patch
-> > (by next week as I will be on vacation in this week) to skip the card
-> > initialization if mmc_select_powerclass fails.
-> >
-> > Is this ok?
-> >
-> > Regards,
-> > Subhash
-> >
-> 
-> There was an error in the public JEDEC eMMC 4.5 version: PWR_CL_200_360 =
-> EXT_CSD[237] is wrongly defined because HS200 can be supported only @1.2V
-> or 1.8V. New Jedec spec revision might fix this.
-> 
-> I and Danilo did a quick check in the power class selection routines and
-it looks
-> like the power class is set according to the OCR parsing.
-> The OCR parsing to check the supported voltage range does not totally
-cover
-> the device capabilities because Vccq = 1.2V support is not encoded in the
-> register.
+> I'm not sure that how Linux manage swap area.
+> If there are difference of information for invalid data between host =
+and
+> eMMC device, discard to eMMC is good for performance of IO. It is as =
+same
+> as general case of discard of user partition which is formatted with
+> filesystem.
+> As your e-mail mentioned, overwriting the logical address is the anot=
+her
+> way to send info of invalid data address just for the overwrite area,
+> however it is not a best way for eMMC to manage physical NAND array. =
+In
+> this case, eMMC have to trim physical NAND array, and do write operat=
+ion at
+> the same time. It needs more latency.
+> If host send discard with invalid data address info in advance, eMMC =
+can
+> find beat way to manage physical NAND page before host usage(write
+> operation).
+> I'm not sure it is the right comments of your concern.
+> If you need more info, please let me know
 
-According to my understanding, "vvv" in "PWR_CL_ff_vvv" (or
-"PWR_CL_DDR_ff_vvv") indicates is VDD voltage not the VCCQ voltage. So we
-shouldn't bother about what is the vccq level to decide which particular
-field to read for power class. Please correct me if this understanding is
-wrong.
+One specific property of the linux swap code is that we write relativel=
+y
+large clusters (1 MB today) sequentially and only reuse them once all
+of the data in them has become invalid. Part of my suggestion was to
+increase that size to the erase block size of the underlying storage,
+e.g. 8MB for typical eMMC. Right now, we send a discard command
+just before reusing a swap cluster, for the entire cluster.
 
-Regards,
-Subhash
+In my interpretation, this already means a typical device will never to=
+ a
+garbage collection of that erase block because we never overwrite the
+erase block partially.
 
-> 
-> If the above is true, this implies that indexes EXT_CSD_PWR_CL_200_360
-will
-> lead to an error.
-> 
-> DEVICE_TYPE = EXT_CSD[196] is more useful because it provides information
-> on the Speed Rate and Voltage Range supported by the device.
-> 
-> Cheers,
->     Luca
+Luca suggested that we could send the discard command as soon as an
+individual 4kb page is freed, which would let the device reuse the
+physical erase block as soon as all the pages in that erase block have
+been freed over time, but my interpretation is that while this can
+help for global wear levelling, it does not help avoid any garbage
+collection.
+
+	Arnd
