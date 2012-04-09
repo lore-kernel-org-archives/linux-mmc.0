@@ -1,89 +1,47 @@
-From: Subhash Jadavani <subhashj@codeaurora.org>
-Subject: [PATCH v1 1/1] mmc: core: skip card initialization if power class selection fails
-Date: Mon,  9 Apr 2012 18:30:19 +0530
-Message-ID: <1333976419-2018-1-git-send-email-subhashj@codeaurora.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: swap on eMMC and other flash
+Date: Mon, 9 Apr 2012 13:00:34 +0000
+Message-ID: <201204091300.34304.arnd@arndb.de>
+References: <201203301744.16762.arnd@arndb.de> <006f01cd1623$ac4a2860$04de7920$%jeong@samsung.com> <4F8299B4.5090909@kernel.org>
+Mime-Version: 1.0
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:21598 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751701Ab2DINAa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 09:00:30 -0400
+Received: from moutng.kundenserver.de ([212.227.126.186]:50818 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751701Ab2DINAj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 09:00:39 -0400
+In-Reply-To: <4F8299B4.5090909@kernel.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: saugata.das@linaro.org, Subhash Jadavani <subhashj@codeaurora.org>
+To: Minchan Kim <minchan@kernel.org>
+Cc: =?utf-8?q?=EC=A0=95=ED=9A=A8=EC=A7=84?= <syr.jeong@samsung.com>, 'Alex Lemberg' <Alex.Lemberg@sandisk.com>, linaro-kernel@lists.linaro.org, 'Rik van Riel' <riel@redhat.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "'Luca Porzio (lporzio)'" <lporzio@micron.com>, linux-mm@kvack.org, kernel-team@android.com, 'Yejin Moon' <yejin.moon@samsung.com>, 'Hugh Dickins' <hughd@google.com>, 'Yaniv Iarovici' <Yaniv.Iarovici@sandisk.com>, cpgs@samsung.com
 
-With current implementation of power class selection,
-mmc_select_powerclass() should never fail. So treat any error
-returned by this function as serious enough to skip the card
-initialization.
+On Monday 09 April 2012, Minchan Kim wrote:
+> > 
+> > Regarding swap page size:
+> > Actually, I can't guarantee the optimal size of different eMMC in the industry, because it depends on NAND page size an firmware implementation inside eMMC. In case of SAMSUNG eMMC, 8KB page size and 512KB block size(erase unit) is current implementation.
+> > I think that the multiple of 8KB page size align with 512KB is good for SAMSUNG eMMC.
+> > If swap system use 512KB page and issue Discard/Trim align with 512KB, eMMC make best performance as of today. However, large page size in swap partition may not best way in Linux system level.
+> > I'm not sure that the best page size between Swap system and eMMC device.
+> 
+> 
+> The variety is one of challenges for removing GC generally. ;-(.
+> I don't like manual setting through /sys/block/xxx because it requires
+> that user have to know nand page size and erase block size but it's not
+> easy to know to normal user.
+> Arnd. What's your plan to support various flash storages effectively?
 
-Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
----
- drivers/mmc/core/mmc.c |   34 ++++++++++++++++++++--------------
- 1 files changed, 20 insertions(+), 14 deletions(-)
+My preference would be to build the logic to detect the sizes into mkfs
+and mkswap and encode them in the superblock in new fields. I don't think
+we can trust any data that a device reports right now because operating
+systems have ignored it in the past and either someone has forgotten to
+update the fields after moving to new technology (eMMC), or the data can
+not be encoded correctly according to the spec (SD, USB).
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 54df5ad..d5ff192 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1116,10 +1116,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
- 				EXT_CSD_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
- 		err = mmc_select_powerclass(card, ext_csd_bits, ext_csd);
--		if (err)
--			pr_warning("%s: power class selection to bus width %d"
--				   " failed\n", mmc_hostname(card->host),
--				   1 << bus_width);
-+		if (err) {
-+			pr_err("%s: power class selection to bus width %d"
-+			       " failed\n", mmc_hostname(card->host),
-+			       1 << bus_width);
-+			goto err;
-+		}
- 	}
- 
- 	/*
-@@ -1150,11 +1152,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 				ddr = 0; /* no DDR for 1-bit width */
- 			err = mmc_select_powerclass(card, ext_csd_bits[idx][0],
- 						    ext_csd);
--			if (err)
--				pr_warning("%s: power class selection to "
--					   "bus width %d failed\n",
--					   mmc_hostname(card->host),
--					   1 << bus_width);
-+			if (err) {
-+				pr_err("%s: power class selection to "
-+				       "bus width %d failed\n",
-+				       mmc_hostname(card->host),
-+				       1 << bus_width);
-+				goto err;
-+			}
- 
- 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 					 EXT_CSD_BUS_WIDTH,
-@@ -1181,11 +1185,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		if (!err && ddr) {
- 			err = mmc_select_powerclass(card, ext_csd_bits[idx][1],
- 						    ext_csd);
--			if (err)
--				pr_warning("%s: power class selection to "
--					   "bus width %d ddr %d failed\n",
--					   mmc_hostname(card->host),
--					   1 << bus_width, ddr);
-+			if (err) {
-+				pr_err("%s: power class selection to "
-+				       "bus width %d ddr %d failed\n",
-+				       mmc_hostname(card->host),
-+				       1 << bus_width, ddr);
-+				goto err;
-+			}
- 
- 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 					 EXT_CSD_BUS_WIDTH,
--- 
-1.7.1.1
+System builders for embedded systems can then make sure that they get
+it right for the hardware they use, and we can try our best to help
+that process.
 
---
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+	Ard
