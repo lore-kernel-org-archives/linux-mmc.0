@@ -1,47 +1,108 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: swap on eMMC and other flash
-Date: Mon, 9 Apr 2012 13:00:34 +0000
-Message-ID: <201204091300.34304.arnd@arndb.de>
-References: <201203301744.16762.arnd@arndb.de> <006f01cd1623$ac4a2860$04de7920$%jeong@samsung.com> <4F8299B4.5090909@kernel.org>
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH v1 1/1] mmc: core: skip card initialization if power class
+ selection fails
+Date: Mon, 9 Apr 2012 23:35:11 +0900
+Message-ID: <CAKYAXd_F1ZpR3uYFM9fQUnFKRULKw8o3UO7Zw29MG5BsRuXCew@mail.gmail.com>
+References: <1333976419-2018-1-git-send-email-subhashj@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:50818 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751701Ab2DINAj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 09:00:39 -0400
-In-Reply-To: <4F8299B4.5090909@kernel.org>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:36190 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752544Ab2DIOfN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 10:35:13 -0400
+Received: by iagz16 with SMTP id z16so5941940iag.19
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Apr 2012 07:35:11 -0700 (PDT)
+In-Reply-To: <1333976419-2018-1-git-send-email-subhashj@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Minchan Kim <minchan@kernel.org>
-Cc: =?utf-8?q?=EC=A0=95=ED=9A=A8=EC=A7=84?= <syr.jeong@samsung.com>, 'Alex Lemberg' <Alex.Lemberg@sandisk.com>, linaro-kernel@lists.linaro.org, 'Rik van Riel' <riel@redhat.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "'Luca Porzio (lporzio)'" <lporzio@micron.com>, linux-mm@kvack.org, kernel-team@android.com, 'Yejin Moon' <yejin.moon@samsung.com>, 'Hugh Dickins' <hughd@google.com>, 'Yaniv Iarovici' <Yaniv.Iarovici@sandisk.com>, cpgs@samsung.com
+To: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, saugata.das@linaro.org
 
-On Monday 09 April 2012, Minchan Kim wrote:
-> > 
-> > Regarding swap page size:
-> > Actually, I can't guarantee the optimal size of different eMMC in the industry, because it depends on NAND page size an firmware implementation inside eMMC. In case of SAMSUNG eMMC, 8KB page size and 512KB block size(erase unit) is current implementation.
-> > I think that the multiple of 8KB page size align with 512KB is good for SAMSUNG eMMC.
-> > If swap system use 512KB page and issue Discard/Trim align with 512KB, eMMC make best performance as of today. However, large page size in swap partition may not best way in Linux system level.
-> > I'm not sure that the best page size between Swap system and eMMC device.
-> 
-> 
-> The variety is one of challenges for removing GC generally. ;-(.
-> I don't like manual setting through /sys/block/xxx because it requires
-> that user have to know nand page size and erase block size but it's not
-> easy to know to normal user.
-> Arnd. What's your plan to support various flash storages effectively?
-
-My preference would be to build the logic to detect the sizes into mkfs
-and mkswap and encode them in the superblock in new fields. I don't think
-we can trust any data that a device reports right now because operating
-systems have ignored it in the past and either someone has forgotten to
-update the fields after moving to new technology (eMMC), or the data can
-not be encoded correctly according to the spec (SD, USB).
-
-System builders for embedded systems can then make sure that they get
-it right for the hardware they use, and we can try our best to help
-that process.
-
-	Ard
+SGkgU3ViaGFzaC4KVGhlcmUgYXJlIGR1cGxpY2F0ZSBwcmludGtzIGluIHRocmVlIHBsYWNlcy4g
+SXMgdGhlcmUgbm8gd2F5IHRvIGF2b2lkCmR1cGxpY2F0ZSBwcmludGtzID8KClRoYW5rcy4KCjIw
+MTIvNC85IFN1Ymhhc2ggSmFkYXZhbmkgPHN1Ymhhc2hqQGNvZGVhdXJvcmEub3JnPjoKPiBXaXRo
+IGN1cnJlbnQgaW1wbGVtZW50YXRpb24gb2YgcG93ZXIgY2xhc3Mgc2VsZWN0aW9uLAo+IG1tY19z
+ZWxlY3RfcG93ZXJjbGFzcygpIHNob3VsZCBuZXZlciBmYWlsLiBTbyB0cmVhdCBhbnkgZXJyb3IK
+PiByZXR1cm5lZCBieSB0aGlzIGZ1bmN0aW9uIGFzIHNlcmlvdXMgZW5vdWdoIHRvIHNraXAgdGhl
+IGNhcmQKPiBpbml0aWFsaXphdGlvbi4KPgo+IFNpZ25lZC1vZmYtYnk6IFN1Ymhhc2ggSmFkYXZh
+bmkgPHN1Ymhhc2hqQGNvZGVhdXJvcmEub3JnPgo+IC0tLQo+IMKgZHJpdmVycy9tbWMvY29yZS9t
+bWMuYyB8IMKgIDM0ICsrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLS0tLS0KPiDCoDEgZmls
+ZXMgY2hhbmdlZCwgMjAgaW5zZXJ0aW9ucygrKSwgMTQgZGVsZXRpb25zKC0pCj4KPiBkaWZmIC0t
+Z2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKPiBp
+bmRleCA1NGRmNWFkLi5kNWZmMTkyIDEwMDY0NAo+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1j
+LmMKPiArKysgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jCj4gQEAgLTExMTYsMTAgKzExMTYsMTIg
+QEAgc3RhdGljIGludCBtbWNfaW5pdF9jYXJkKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwgdTMyIG9j
+ciwKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGV4dF9jc2RfYml0cyA9IChidXNfd2lkdGggPT0g
+TU1DX0JVU19XSURUSF84KSA/Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqBFWFRfQ1NEX0JVU19XSURUSF84IDogRVhUX0NTRF9CVVNfV0lEVEhfNDsKPiDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoGVyciA9IG1tY19zZWxlY3RfcG93ZXJjbGFzcyhjYXJkLCBl
+eHRfY3NkX2JpdHMsIGV4dF9jc2QpOwo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgaWYgKGVycikK
+PiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHByX3dhcm5pbmcoIiVzOiBwb3dl
+ciBjbGFzcyBzZWxlY3Rpb24gdG8gYnVzIHdpZHRoICVkIgo+IC0gwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAiIGZhaWxlZFxuIiwgbW1jX2hvc3RuYW1l
+KGNhcmQtPmhvc3QpLAo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAxIDw8IGJ1c193aWR0aCk7Cj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAo
+ZXJyKSB7Cj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBwcl9lcnIoIiVzOiBw
+b3dlciBjbGFzcyBzZWxlY3Rpb24gdG8gYnVzIHdpZHRoICVkIgo+ICsgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAiIGZhaWxlZFxuIiwgbW1jX2hvc3RuYW1lKGNh
+cmQtPmhvc3QpLAo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAxIDw8IGJ1c193aWR0aCk7Cj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBn
+b3RvIGVycjsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIH0KPiDCoCDCoCDCoCDCoH0KPgo+IMKg
+IMKgIMKgIMKgLyoKPiBAQCAtMTE1MCwxMSArMTE1MiwxMyBAQCBzdGF0aWMgaW50IG1tY19pbml0
+X2NhcmQoc3RydWN0IG1tY19ob3N0ICpob3N0LCB1MzIgb2NyLAo+IMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZGRyID0gMDsgLyogbm8gRERSIGZvciAxLWJp
+dCB3aWR0aCAqLwo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZXJyID0gbW1j
+X3NlbGVjdF9wb3dlcmNsYXNzKGNhcmQsIGV4dF9jc2RfYml0c1tpZHhdWzBdLAo+IMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgZXh0X2NzZCk7Cj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCBpZiAoZXJyKQo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgcHJfd2FybmluZygiJXM6IHBvd2VyIGNsYXNzIHNlbGVjdGlvbiB0byAiCj4gLSDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCJi
+dXMgd2lkdGggJWQgZmFpbGVkXG4iLAo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCks
+Cj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoDEgPDwgYnVzX3dpZHRoKTsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIGlmIChlcnIpIHsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIHByX2VycigiJXM6IHBvd2VyIGNsYXNzIHNlbGVjdGlvbiB0byAiCj4gKyDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCJidXMg
+d2lkdGggJWQgZmFpbGVkXG4iLAo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCksCj4gKyDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoDEgPDwg
+YnVzX3dpZHRoKTsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIGdvdG8gZXJyOwo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgfQo+Cj4g
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBlcnIgPSBtbWNfc3dpdGNoKGNhcmQs
+IEVYVF9DU0RfQ01EX1NFVF9OT1JNQUwsCj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgRVhUX0NTRF9CVVNfV0lEVEgsCj4gQEAgLTEx
+ODEsMTEgKzExODUsMTMgQEAgc3RhdGljIGludCBtbWNfaW5pdF9jYXJkKHN0cnVjdCBtbWNfaG9z
+dCAqaG9zdCwgdTMyIG9jciwKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGlmICghZXJyICYmIGRk
+cikgewo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZXJyID0gbW1jX3NlbGVj
+dF9wb3dlcmNsYXNzKGNhcmQsIGV4dF9jc2RfYml0c1tpZHhdWzFdLAo+IMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgZXh0X2NzZCk7Cj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAo
+ZXJyKQo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcHJf
+d2FybmluZygiJXM6IHBvd2VyIGNsYXNzIHNlbGVjdGlvbiB0byAiCj4gLSDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCJidXMgd2lk
+dGggJWQgZGRyICVkIGZhaWxlZFxuIiwKPiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgbW1jX2hvc3RuYW1lKGNhcmQtPmhvc3Qp
+LAo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAxIDw8IGJ1c193aWR0aCwgZGRyKTsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIGlmIChlcnIpIHsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIHByX2VycigiJXM6IHBvd2VyIGNsYXNzIHNlbGVjdGlvbiB0byAiCj4g
+KyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCJidXMgd2lkdGggJWQgZGRyICVkIGZhaWxlZFxuIiwKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgbW1jX2hvc3RuYW1lKGNhcmQtPmhv
+c3QpLAo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAxIDw8IGJ1c193aWR0aCwgZGRyKTsKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIGdvdG8gZXJyOwo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgfQo+Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBlcnIg
+PSBtbWNfc3dpdGNoKGNhcmQsIEVYVF9DU0RfQ01EX1NFVF9OT1JNQUwsCj4gwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgRVhUX0NTRF9C
+VVNfV0lEVEgsCj4gLS0KPiAxLjcuMS4xCj4KPiAtLQo+IFNlbnQgYnkgYSBjb25zdWx0YW50IG9m
+IHRoZSBRdWFsY29tbSBJbm5vdmF0aW9uIENlbnRlciwgSW5jLgo+IFRoZSBRdWFsY29tbSBJbm5v
+dmF0aW9uIENlbnRlciwgSW5jLiBpcyBhIG1lbWJlciBvZiB0aGUgQ29kZSBBdXJvcmEgRm9ydW0u
+Cj4gLS0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5z
+dWJzY3JpYmUgbGludXgtbW1jIiBpbgo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRv
+bW9Admdlci5rZXJuZWwub3JnCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCDCoGh0dHA6Ly92Z2Vy
+Lmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAo=
