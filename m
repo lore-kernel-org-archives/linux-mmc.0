@@ -1,46 +1,50 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [GIT PULL] MMC fixes for 3.4-rc2
-Date: Mon, 09 Apr 2012 01:55:56 -0400
-Message-ID: <87d37hzbwz.fsf@laptop.org>
-References: <87mx6o3b7d.fsf@laptop.org>
-	<1BAFE6F6C881BF42822005164F1491C331827827@DBDE01.ent.ti.com>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: [PATCH 0/4] mmc: omap_hsmmc: Additional cleanups / features
+Date: Mon, 9 Apr 2012 12:08:31 +0530
+Message-ID: <1333953515-31925-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:42417 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751168Ab2DIF4M (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 9 Apr 2012 01:56:12 -0400
-In-Reply-To: <1BAFE6F6C881BF42822005164F1491C331827827@DBDE01.ent.ti.com>
-	(Gururaja Hebbar's message of "Mon, 9 Apr 2012 05:36:18 +0000")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: cjb@laptop.org, Venkatraman S <svenkatr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "chuanxiao.dong@intel.com" <chuanxiao.dong@intel.com>, "rjw@sisk.pl" <rjw@sisk.pl>
 
-Hi,
+Hi Chris,
+  As discussed previously [1], I've rebased the previous 2 patches
+that you decided to queue for 3.5, plus 2 additional cleanups.
 
-On Mon, Apr 09 2012, Hebbar, Gururaja wrote:
-> Hi,
->
-> Is the pull already completed?
+Best regards,
+Venkat.
 
-Yes, and -rc2 has already been released.
+[1] http://marc.info/?l=linux-mmc&m=133336030703924&w=2
 
-> If not can you add the recent mmc suspend/resume fix patch .
->
-> http://www.spinics.net/lists/linux-pm/msg27090.html
->
-> This is actually a fix (for bug) in mmc/sd suspend/resume path.
-> This fixed a hard-to-find MMC suspend/resume while cp in progress race 
-> condition reported at below link. It was on AM335x Platform.
->
-> http://www.mail-archive.com/linux-omap@vger.kernel.org/msg65425.html
+The following changes since commit 3bdc9ba892d6a294d16e9e6e0c4041926aa3d58c:
 
-Okay, thanks for testing.  I'll send the fix to Linus once it's finished
-review and further testing.
+  mmc: use really long write timeout to deal with crappy cards (2012-04-05 20:32:34 -0400)
 
-- Chris.
+are available in the git repository at:
+
+  git://github.com/svenkatr/linux.git mmc-omap_hsmmc-next
+
+for you to fetch changes up to 11c6cb1453f55b21e50fd891b3981a98a572d314:
+
+  mmc: omap_hsmmc: Cleanup use of cpu_is_* for debounce_clock (2012-04-09 11:58:22 +0530)
+
+----------------------------------------------------------------
+Balaji T K (2):
+      mmc: omap_hsmmc: Enable Auto CMD12
+      mmc: omap_hsmmc: add DDR support to omap_hsmmc
+
+Rajendra Nayak (1):
+      mmc: omap_hsmmc: Cleanup use of cpu_is_* for debounce_clock
+
+Venkatraman S (1):
+      mmc: omap_hsmmc: use spinlock IRQ safe variant
+
+ drivers/mmc/host/omap_hsmmc.c |   78 +++++++++++++++++++++++++-------------------
+ 1 file changed, 45 insertions(+), 33 deletions(-)
+
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.10.rc2
+
