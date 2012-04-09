@@ -1,44 +1,89 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: swap on eMMC and other flash
-Date: Mon, 9 Apr 2012 12:54:39 +0000
-Message-ID: <201204091254.39380.arnd@arndb.de>
-References: <201203301744.16762.arnd@arndb.de> <4F8245EA.6000600@kernel.org> <006f01cd1623$ac4a2860$04de7920$%jeong@samsung.com>
-Mime-Version: 1.0
-Content-Type: Text/Plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: [PATCH v1 1/1] mmc: core: skip card initialization if power class selection fails
+Date: Mon,  9 Apr 2012 18:30:19 +0530
+Message-ID: <1333976419-2018-1-git-send-email-subhashj@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:56157 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754230Ab2DIMyq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 08:54:46 -0400
-In-Reply-To: <006f01cd1623$ac4a2860$04de7920$%jeong@samsung.com>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:21598 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751701Ab2DINAa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 09:00:30 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?utf-8?q?=EC=A0=95=ED=9A=A8=EC=A7=84?= <syr.jeong@samsung.com>
-Cc: 'Minchan Kim' <minchan@kernel.org>, 'Alex Lemberg' <Alex.Lemberg@sandisk.com>, linaro-kernel@lists.linaro.org, 'Rik van Riel' <riel@redhat.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "'Luca Porzio (lporzio)'" <lporzio@micron.com>, linux-mm@kvack.org, kernel-team@android.com, 'Yejin Moon' <yejin.moon@samsung.com>, 'Hugh Dickins' <hughd@google.com>, 'Yaniv Iarovici' <Yaniv.Iarovici@sandisk.com>, cpgs@samsung.com
+To: linux-mmc@vger.kernel.org
+Cc: saugata.das@linaro.org, Subhash Jadavani <subhashj@codeaurora.org>
 
-On Monday 09 April 2012, =EC=A0=95=ED=9A=A8=EC=A7=84 wrote:
-> If swap system use 512KB page and issue Discard/Trim align with 512KB=
-, eMMC make best
-> performance as of today. However, large page size in swap partition m=
-ay not best way
-> in Linux system level.
-> I'm not sure that the best page size between Swap system and eMMC dev=
-ice.
+With current implementation of power class selection,
+mmc_select_powerclass() should never fail. So treat any error
+returned by this function as serious enough to skip the card
+initialization.
 
-Can you explain the significance of the 512KB size? I've seen devices r=
-eport 512KB
-erase size, although measurements clearly showed an erase block size of=
- 8MB and I
-do not understand this discprepancy.
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+---
+ drivers/mmc/core/mmc.c |   34 ++++++++++++++++++++--------------
+ 1 files changed, 20 insertions(+), 14 deletions(-)
 
-Right now, we always send discards of 1MB clusters to the device, which=
- does what
-you want, although I'm not sure if those clusters are naturally aligned=
- to the start
-of the partition. Obviously this also requires aligning the start of th=
-e partition
-to the erase block size, but most devices should already get that right=
- nowadays.
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 54df5ad..d5ff192 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1116,10 +1116,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
+ 				EXT_CSD_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
+ 		err = mmc_select_powerclass(card, ext_csd_bits, ext_csd);
+-		if (err)
+-			pr_warning("%s: power class selection to bus width %d"
+-				   " failed\n", mmc_hostname(card->host),
+-				   1 << bus_width);
++		if (err) {
++			pr_err("%s: power class selection to bus width %d"
++			       " failed\n", mmc_hostname(card->host),
++			       1 << bus_width);
++			goto err;
++		}
+ 	}
+ 
+ 	/*
+@@ -1150,11 +1152,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 				ddr = 0; /* no DDR for 1-bit width */
+ 			err = mmc_select_powerclass(card, ext_csd_bits[idx][0],
+ 						    ext_csd);
+-			if (err)
+-				pr_warning("%s: power class selection to "
+-					   "bus width %d failed\n",
+-					   mmc_hostname(card->host),
+-					   1 << bus_width);
++			if (err) {
++				pr_err("%s: power class selection to "
++				       "bus width %d failed\n",
++				       mmc_hostname(card->host),
++				       1 << bus_width);
++				goto err;
++			}
+ 
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 					 EXT_CSD_BUS_WIDTH,
+@@ -1181,11 +1185,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		if (!err && ddr) {
+ 			err = mmc_select_powerclass(card, ext_csd_bits[idx][1],
+ 						    ext_csd);
+-			if (err)
+-				pr_warning("%s: power class selection to "
+-					   "bus width %d ddr %d failed\n",
+-					   mmc_hostname(card->host),
+-					   1 << bus_width, ddr);
++			if (err) {
++				pr_err("%s: power class selection to "
++				       "bus width %d ddr %d failed\n",
++				       mmc_hostname(card->host),
++				       1 << bus_width, ddr);
++				goto err;
++			}
+ 
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 					 EXT_CSD_BUS_WIDTH,
+-- 
+1.7.1.1
 
-	Arnd
+--
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
