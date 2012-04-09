@@ -1,72 +1,48 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 0/2] mmc: fixes for eMMC v4.5 discard / sanitize operations
-Date: Mon, 09 Apr 2012 14:08:43 +0900
-Message-ID: <4F826EDB.3000007@samsung.com>
-References: <1333626348-11170-1-git-send-email-adrian.hunter@intel.com>
+From: "Hebbar, Gururaja" <gururaja.hebbar@ti.com>
+Subject: RE: [PATCH V2]mmc: remove MMC bus legacy suspend/resume method
+Date: Mon, 9 Apr 2012 05:22:14 +0000
+Message-ID: <1BAFE6F6C881BF42822005164F1491C33182780B@DBDE01.ent.ti.com>
+References: <20120405075118.GA29395@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:40632 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751051Ab2DIFIq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 01:08:46 -0400
-Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTP id <0M2700I034YG8AL0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 09 Apr 2012 14:08:45 +0900 (KST)
-Received: from [165.213.219.108] by mmp2.samsung.com
- (Oracle Communications Messaging Exchange Server 7u4-19.01 64bit (built Sep  7
- 2010)) with ESMTPA id <0M2700FUQ4YKYJ10@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 09 Apr 2012 14:08:45 +0900 (KST)
-In-reply-to: <1333626348-11170-1-git-send-email-adrian.hunter@intel.com>
+Received: from comal.ext.ti.com ([198.47.26.152]:34478 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751096Ab2DIFWY convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 01:22:24 -0400
+In-Reply-To: <20120405075118.GA29395@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, "Luca Porzio (lporzio)" <lporzio@micron.com>, Kyungmin Park <kyungmin.park@samsung.com>, Kyungmin Park <kmpark@infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-pm@lists.linux-foundation.org" <linux-pm@lists.linux-foundation.org>
+Cc: "rjw@sisk.pl" <rjw@sisk.pl>
 
-Hi Adrian.
-
-This patch is make sense.
-It looks fine to me. 
-I tested with eMMC4.5 and triggered the secdiscard/discard with ioctl.
-(But i didn't have the iNAND.)
-
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-Best Regards,
-Jaehoon Chung
-
-On 04/05/2012 08:45 PM, Adrian Hunter wrote:
-
-> Hi
+On Thu, Apr 05, 2012 at 13:21:18, Chuanxiao Dong wrote:
+> MMC bus is using legacy suspend/resume method, which is not compatible if
+> runtime pm callbacks are used. In this scenario, MMC bus suspend/resume
+> callbacks cannot be called when system entering S3. So change to use the new
+> defined dev_pm_ops for system sleeping mode
 > 
-> Here are patches in response to the thread
-> "mmc: card: move variable initialization earlier"
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> ---
+> Changes in v2:
+> 	use SET_SYSTEM_SLEEP_PM_OPS to define sleep callbacks as Rafael
+> 	suggested
 > 
-> The patches have not been tested on eMMC v4.5
-> because I do not have one.  Consequently, these
-> patches need an ack or tested-by someone who has
-> one that supports discard and sanitize.
-> 
-> 
-> Adrian Hunter (2):
->       mmc: fixes for eMMC v4.5 discard operation
->       mmc: fixes for eMMC v4.5 sanitize operation
-> 
->  drivers/mmc/card/block.c |   54 ++++++++++++++++++++++++++++++++-------------
->  drivers/mmc/card/queue.c |    2 +-
->  drivers/mmc/core/core.c  |    9 +++++--
->  3 files changed, 45 insertions(+), 20 deletions(-)
-> 
-> 
-> Regards
-> Adrian
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  drivers/mmc/card/block.c |    2 +-
+>  drivers/mmc/core/bus.c   |   26 ++++++++++++--------------
+>  include/linux/mmc/card.h |    2 +-
+>  3 files changed, 14 insertions(+), 16 deletions(-)
 > 
 
+Tested on AM335x Platform. Solves major issue/crash reported at 
+http://www.mail-archive.com/linux-omap@vger.kernel.org/msg65425.html
 
+Tested-by: Hebbar, Gururaja <gururaja.hebbar@ti.com>
+
+..snip..
+
+
+Regards, 
+Gururaja
