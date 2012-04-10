@@ -1,52 +1,67 @@
-From: Viresh Kumar <viresh.kumar@st.com>
-Subject: Re: [PATCH] mmc: pxamci: Use DIV_ROUND_UP at appropriate places
-Date: Tue, 10 Apr 2012 09:14:00 +0530
-Message-ID: <4F83AC80.1070204@st.com>
-References: <1334023210.16328.3.camel@phoenix>
+From: Sascha Silbe <sascha-ml-reply-to-2012-2@silbe.org>
+Subject: Re: [PATCH] mmc: sdhci: refine non-removable card checking for card detection
+Date: Tue, 10 Apr 2012 10:05:04 +0200
+Message-ID: <1334044850-sup-1149@twin.sascha.silbe.org>
+References: <20120409231420.B54649D401E@zog.reactivated.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; protocol="application/pgp-signature"; boundary="=-1334045118-975119-11988-1068-3-="
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog116.obsmtp.com ([207.126.144.141]:53430 "EHLO
-	eu1sys200aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753391Ab2DJDpu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 23:45:50 -0400
-In-Reply-To: <1334023210.16328.3.camel@phoenix>
+Received: from setoy.chost.de ([217.160.209.225]:42567 "EHLO smtp.chost.de"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751995Ab2DJIMD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Apr 2012 04:12:03 -0400
+In-reply-to: <20120409231420.B54649D401E@zog.reactivated.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@gmail.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Anton Vorontsov <cbouatmailru@gmail.com>, David Brown <davidb@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Daniel Drake <dsd@laptop.org>
+Cc: cjb <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 4/10/2012 7:30 AM, Axel Lin wrote:
-> Signed-off-by: Axel Lin <axel.lin@gmail.com>
-> ---
->  drivers/mmc/host/pxamci.c |    4 ++--
->  1 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-> index cb2dc0e..4b89e73 100644
-> --- a/drivers/mmc/host/pxamci.c
-> +++ b/drivers/mmc/host/pxamci.c
-> @@ -190,7 +190,7 @@ static void pxamci_setup_data(struct pxamci_host *host, struct mmc_data *data)
->  	clks = (unsigned long long)data->timeout_ns * host->clkrate;
->  	do_div(clks, 1000000000UL);
->  	timeout = (unsigned int)clks + (data->timeout_clks << host->clkrt);
-> -	writel((timeout + 255) / 256, host->base + MMC_RDTO);
-> +	writel(DIV_ROUND_UP(timeout, 256), host->base + MMC_RDTO);
->  
->  	if (data->flags & MMC_DATA_READ) {
->  		host->dma_dir = DMA_FROM_DEVICE;
-> @@ -636,7 +636,7 @@ static int pxamci_probe(struct platform_device *pdev)
->  	/*
->  	 * Calculate minimum clock rate, rounding up.
->  	 */
-> -	mmc->f_min = (host->clkrate + 63) / 64;
-> +	mmc->f_min = DIV_ROUND_UP(host->clkrate, 64);
->  	mmc->f_max = (mmc_has_26MHz()) ? 26000000 : host->clkrate;
->  
->  	pxamci_init_ocr(host);
 
-Reviewed-by: Viresh Kumar <viresh.kumar@st.com>
+--=-1334045118-975119-11988-1068-3-=
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
--- 
-viresh
+Excerpts from Daniel Drake's message of 2012-04-10 01:14:20 +0200:
+
+> In the OLPC XO case, we need CONFIG_MMC_UNSAFE_RESUME because our root
+> filesystem is stored on SD, but we also have external SD card slots
+> where we want automatic card detection.
+> =
+
+> Refine the check to only apply to hosts marked as MMC_CAP_NONREMOVABLE,=
+
+> which is defined to mean that the card is *really* nonremovable. This
+> could be revisited in future if we find a way to improve
+> CONFIG_MMC_UNSAFE_RESUME semantics.
+
+What exactly is the behaviour after this patch? Will systems running
+from SD cards attached to a host controller that's _not_ marked as
+MMC_CAP_NONREMOVABLE (e.g. the external SD card slot on XOs) work again?
+Or does it only fix running off internal SD cards (which are marked
+MMC_CAP_NONREMOVABLE)?
+
+Sascha
+
+-- =
+
+http://sascha.silbe.org/
+http://www.infra-silbe.de/
+
+--=-1334045118-975119-11988-1068-3-=
+Content-Disposition: attachment; filename="signature.asc"
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.17 (GNU/Linux)
+
+iQEcBAEBCgAGBQJPg+m3AAoJELpz82VMF3DaAdQH/1eEm3aHZgVPBDEgNBRTU8IH
+pMHghEyBhmdovKRxQnxUIwEKk5UFbwrFepB4W26F0P15lJAPRjJShnQP9YeL8h67
+8lIhdXc/q/l70qItUevmM1p6JnpfrIDBf9Ofr5+99Gl8R7uJ/mQR0XFS0YT7T73j
+su4LyXV1+oBkkFlKP2/AhkSqRcrtAYq4Mr7emmlwokAdt5Y4OdFiFtmvCQA3gCso
+9Fg9yC/GkLRdU7yqEz2xp8b3+HRJSAqo3iZzviGbRBPNMtbm173XlEFTpwCDJyFY
+1DvOmNm2yGXYVIs+NE68d5moPGwuUhlQUhRngqGZmjMyEooZ3sZRx6KYJXUtpGA=
+=4qup
+-----END PGP SIGNATURE-----
+
+--=-1334045118-975119-11988-1068-3-=--
