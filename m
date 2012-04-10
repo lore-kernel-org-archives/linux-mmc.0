@@ -1,49 +1,54 @@
-From: Viswanath Puttagunta <vishp@ti.com>
-Subject: [PATCH] mmc: omap: Add fclk frequency to debufs
-Date: Tue, 10 Apr 2012 11:26:36 -0500
-Message-ID: <1334075196-26493-1-git-send-email-vishp@ti.com>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH v1 1/1] mmc: core: skip card initialization if power class selection fails
+Date: Tue, 10 Apr 2012 23:26:15 +0530
+Message-ID: <000001cd1743$3f165bd0$bd431370$@codeaurora.org>
+References: <1333976419-2018-1-git-send-email-subhashj@codeaurora.org>	<CAKYAXd_F1ZpR3uYFM9fQUnFKRULKw8o3UO7Zw29MG5BsRuXCew@mail.gmail.com> <87ehrvwu3y.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:50912 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751409Ab2DJQ0j (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 Apr 2012 12:26:39 -0400
-Received: from dlelxv30.itg.ti.com ([172.17.2.17])
-	by arroyo.ext.ti.com (8.13.7/8.13.7) with ESMTP id q3AGQdqu010557
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Apr 2012 11:26:39 -0500
-Received: from DLEE74.ent.ti.com (dlee74.ent.ti.com [157.170.170.8])
-	by dlelxv30.itg.ti.com (8.13.8/8.13.8) with ESMTP id q3AGQdgd004330
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Apr 2012 11:26:39 -0500
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:3373 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754455Ab2DJR4Z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Apr 2012 13:56:25 -0400
+In-Reply-To: <87ehrvwu3y.fsf@laptop.org>
+Content-Language: en-us
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linux MMC Mainling List <linux-mmc@vger.kernel.org>
-Cc: T Krishnamoorthy Balaji <balajitk@ti.com>, Venkatraman S <svenkatr@ti.com>, Viswanath Puttagunta <vishp@ti.com>
+To: 'Chris Ball' <cjb@laptop.org>, 'Namjae Jeon' <linkinjeon@gmail.com>
+Cc: linux-mmc@vger.kernel.org, saugata.das@linaro.org
 
-Add mmc functional clock frequency to list of
-internal state variables to display for debug.
 
-Signed-off-by: Viswanath Puttagunta <vishp@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |    5 +++--
- 1 files changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 5c2b1c1..ee1f2d8 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1668,8 +1668,9 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- 	if (host->pdata->get_context_loss_count)
- 		context_loss = host->pdata->get_context_loss_count(host->dev);
- 
--	seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n\nregs:\n",
--			mmc->index, host->context_loss, context_loss);
-+	seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n fclk:\t\t%lu Hz\n\nregs:\n",
-+			mmc->index, host->context_loss, context_loss,
-+					   clk_get_rate(host->fclk));
- 
- 	if (host->suspended) {
- 		seq_printf(s, "host suspended, can't read registers\n");
--- 
-1.7.4.1
+> -----Original Message-----
+> From: Chris Ball [mailto:cjb@laptop.org]
+> Sent: Tuesday, April 10, 2012 7:46 PM
+> To: Namjae Jeon
+> Cc: Subhash Jadavani; linux-mmc@vger.kernel.org; saugata.das@linaro.org
+> Subject: Re: [PATCH v1 1/1] mmc: core: skip card initialization if power
+class
+> selection fails
+> 
+> Hi,
+> 
+> On Mon, Apr 09 2012, Namjae Jeon wrote:
+> > Hi Subhash.
+> > There are duplicate printks in three places. Is there no way to avoid
+> > duplicate printks ?
+> 
+> The printk can go just before the final "return err" in
+mmc_select_powerclass().
+Yes. will fix it and post another patch.
+
+Thanks,
+Subhash
+
+> 
+> Thanks,
+> 
+> - Chris.
+> --
+> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+> One Laptop Per Child
 
