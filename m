@@ -1,50 +1,33 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: swap on eMMC and other flash
-Date: Tue, 10 Apr 2012 08:40:11 +0000
-Message-ID: <201204100840.11763.arnd@arndb.de>
-References: <201203301744.16762.arnd@arndb.de> <201204091300.34304.arnd@arndb.de> <4F838870.9030407@kernel.org>
+From: Viresh Kumar <viresh.kumar@st.com>
+Subject: Re: [PATCH 1/3] mmc/sdhci-spear: No need to check 'pdev == NULL'
+ in probe
+Date: Tue, 10 Apr 2012 15:06:32 +0530
+Message-ID: <4F83FF20.9010701@st.com>
+References: <841301f38cfc2d1170378306f1640d7653652505.1332817654.git.viresh.kumar@st.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <4F838870.9030407@kernel.org>
-Sender: owner-linux-mm@kvack.org
-To: Minchan Kim <minchan@kernel.org>
-Cc: =?utf-8?q?=EC=A0=95=ED=9A=A8=EC=A7=84?= <syr.jeong@samsung.com>, 'Alex Lemberg' <Alex.Lemberg@sandisk.com>, linaro-kernel@lists.linaro.org, 'Rik van Riel' <riel@redhat.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "'Luca Porzio (lporzio)'" <lporzio@micron.com>, linux-mm@kvack.org, kernel-team@android.com, 'Yejin Moon' <yejin.moon@samsung.com>, 'Hugh Dickins' <hughd@google.com>, 'Yaniv Iarovici' <Yaniv.Iarovici@sandisk.com>, cpgs@samsung.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:39769 "EHLO
+	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752915Ab2DJJiQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Apr 2012 05:38:16 -0400
+In-Reply-To: <841301f38cfc2d1170378306f1640d7653652505.1332817654.git.viresh.kumar@st.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "cjb@laptop.org" <cjb@laptop.org>
+Cc: spear-devel <spear-devel@list.st.com>, "viresh.linux@gmail.com" <viresh.linux@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "sr@denx.de" <sr@denx.de>
 
-On Tuesday 10 April 2012, Minchan Kim wrote:
-> I think it's not good approach.
-> How long does it take to know such parameters?
-> I guess it's not short so that mkfs/mkswap would be very long
-> dramatically. If needed, let's maintain it as another tool.
+On 3/27/2012 8:40 AM, Viresh KUMAR wrote:
+> pdev is guaranteed to be valid in probe. And so check is not required to check
+> if it is non-NULL. Remove it.
+> 
+> Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
 
-I haven't come up with a way that is both fast and reliable.
-A very fast method is to time short read requests across potential
-erase block boundaries and see which ones are faster than others,
-this works on about 3 out of 4 devices. 
+Hi Chris,
 
-For the other devices, I currently use a fairly manual process that
-times a lot of write requests and can take a long time.
+Can you atleast apply first two patches of this set. Will rework patch 3/3 after
+DT support is finalized by arnd.
 
-> If storage vendors break such fields, it doesn't work well on linux
-> which is very popular on mobile world today and user will not use such
-> vendor devices and company will be gone. Let's give such pressure to
-> them and make vendor keep in promise.
-
-This could work for eMMC, yes.
-
-The SD card standard makes it impossible to write the correct value for
-most devices, it only supports power-of-two values up to 4MB for SDHC,
-and larger values (I believe 8, 12, 16, 24, ... 64) for SDXC, but a lot
-of SDHC cards nowadays use 1.5, 3, 6 or 8 MB erase blocks.
-
-	Arnd
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+-- 
+viresh
