@@ -1,32 +1,45 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Fix switch from DMA to PIO
-Date: Tue, 10 Apr 2012 10:54:22 +0100
-Message-ID: <CAFbHwiRAE0G9Yr5Af5cUGsAxw8VNFu0s_NWQ6T3NsLZwGX_Y0Q@mail.gmail.com>
-References: <000601cd16b4$5a409a40$0ec1cec0$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Subject: [PATCH] mmc: sdhci: Log what timeout was set if the timeout is too large
+Date: Tue, 10 Apr 2012 11:36:03 +0100
+Message-ID: <1334054163-25459-1-git-send-email-broonie@opensource.wolfsonmicro.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:58756 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753562Ab2DJJyX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Apr 2012 05:54:23 -0400
-Received: by pbcun15 with SMTP id un15so6020070pbc.19
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Apr 2012 02:54:22 -0700 (PDT)
-In-Reply-To: <000601cd16b4$5a409a40$0ec1cec0$%jun@samsung.com>
+Received: from opensource.wolfsonmicro.com ([80.75.67.52]:53792 "EHLO
+	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753807Ab2DJKgH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Apr 2012 06:36:07 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-On Tue, Apr 10, 2012 at 1:53 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> When dw_mci_pre_dma_transfer returns failure in some reasons,
-> dw_mci_submit_data will prepare to switch the PIO mode from DMA.
-> After switching to PIO mode, DMA(IDMAC in particular) is still
-> enabled. This makes the corruption in handling interrupt and
-> the driver lock-up.
->
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+Rather than just logging that we came up with an excessively large timeout
+say what the timeout was, this may provide some clues as to what the issue
+is.
 
-This looks ok to me.
+Signed-off-by: Mark Brown <broonie@opensource.wolfsonmicro.com>
+---
 
-Acked-by: Will Newton <will.newton@imgtec.com>
+I'm seeing reams of these from my s3c64xx based system, looks like it's
+always coming out with a timeout of 0xf which is only just out of range.
+
+ drivers/mmc/host/sdhci.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9aa77f3..8407a0b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -680,8 +680,8 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ 	}
+ 
+ 	if (count >= 0xF) {
+-		pr_warning("%s: Too large timeout requested for CMD%d!\n",
+-		       mmc_hostname(host->mmc), cmd->opcode);
++		pr_warning("%s: Too large timeout %x requested for CMD%d!\n",
++			   mmc_hostname(host->mmc), count, cmd->opcode);
+ 		count = 0xE;
+ 	}
+ 
+-- 
+1.7.9.1
+
