@@ -1,226 +1,86 @@
 From: Minchan Kim <minchan@kernel.org>
 Subject: Re: swap on eMMC and other flash
-Date: Tue, 10 Apr 2012 09:57:40 +0900
-Message-ID: <4F838584.1020002@kernel.org>
-References: <201203301744.16762.arnd@arndb.de> <201204061616.11716.arnd@arndb.de> <4F82443F.9000804@kernel.org> <201204091235.48750.arnd@arndb.de>
+Date: Tue, 10 Apr 2012 10:10:08 +0900
+Message-ID: <4F838870.9030407@kernel.org>
+References: <201203301744.16762.arnd@arndb.de> <006f01cd1623$ac4a2860$04de7920$%jeong@samsung.com> <4F8299B4.5090909@kernel.org> <201204091300.34304.arnd@arndb.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <201204091235.48750.arnd@arndb.de>
-Sender: owner-linux-mm@kvack.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linaro-kernel@lists.linaro.org, android-kernel@googlegroups.com, linux-mm@kvack.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, Alex Lemberg <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, Saugata Das <saugata.das@linaro.org>, Venkatraman S <venkat@linaro.org>, Yejin Moon <yejin.moon@samsung.com>, Hyojin Jeong <syr.jeong@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from LGEMRELSE6Q.lge.com ([156.147.1.121]:58480 "EHLO
+	LGEMRELSE6Q.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754643Ab2DJBHw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Apr 2012 21:07:52 -0400
+In-Reply-To: <201204091300.34304.arnd@arndb.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: =?UTF-8?B?7KCV7Zqo7KeE?= <syr.jeong@samsung.com>, 'Alex Lemberg' <Alex.Lemberg@sandisk.com>, linaro-kernel@lists.linaro.org, 'Rik van Riel' <riel@redhat.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "'Luca Porzio (lporzio)'" <lporzio@micron.com>, linux-mm@kvack.org, kernel-team@android.com, 'Yejin Moon' <yejin.moon@samsung.com>, 'Hugh Dickins' <hughd@google.com>, 'Yaniv Iarovici' <Yaniv.Iarovici@sandisk.com>, cpgs@samsung.com
 
-2012-04-09 =EC=98=A4=ED=9B=84 9:35, Arnd Bergmann =EC=93=B4 =EA=B8=80:
+2012-04-09 =EC=98=A4=ED=9B=84 10:00, Arnd Bergmann =EC=93=B4 =EA=B8=80:
 
 > On Monday 09 April 2012, Minchan Kim wrote:
->> 2012-04-07 =EC=98=A4=EC=A0=84 1:16, Arnd Bergmann =EC=93=B4 =EA=B8=80:
->>
->>> larger chunks would generally be helpful, in order to guarantee that =
-we
->>> the drive doesn't do any garbage collection, we would have to do all =
-writes
->>
->>
->> And we should guarantee for avoiding unnecessary swapout, even OOM kil=
-ling.
->>
->>> in aligned chunks. It would probably be enough to do this in 8kb or
->>> 16kb units for most devices over the next few years, but implementing=
- it
->>> for 64kb should be the same amount of work and will get us a little b=
-it
->>> further.
+>>>
+>>> Regarding swap page size:
+>>> Actually, I can't guarantee the optimal size of different eMMC in t=
+he industry, because it depends on NAND page size an firmware implement=
+ation inside eMMC. In case of SAMSUNG eMMC, 8KB page size and 512KB blo=
+ck size(erase unit) is current implementation.
+>>> I think that the multiple of 8KB page size align with 512KB is good=
+ for SAMSUNG eMMC.
+>>> If swap system use 512KB page and issue Discard/Trim align with 512=
+KB, eMMC make best performance as of today. However, large page size in=
+ swap partition may not best way in Linux system level.
+>>> I'm not sure that the best page size between Swap system and eMMC d=
+evice.
 >>
 >>
->> I understand it's best for writing 64K in your statement.
->> What the 8K, 16K? Could you elaborate relation between 8K, 16K and 64K=
+>> The variety is one of challenges for removing GC generally. ;-(.
+>> I don't like manual setting through /sys/block/xxx because it requir=
+es
+>> that user have to know nand page size and erase block size but it's =
+not
+>> easy to know to normal user.
+>> Arnd. What's your plan to support various flash storages effectively=
 ?
 >=20
-> From my measurements, there are three sizes that are relevant here:
->=20
-> 1. The underlying page size of the flash: This used to be less than 4kb=
-,
-> which is fine when paging out 4kb mmu pages, as long as the partition i=
-s
-> aligned. Today, most devices use 8kb pages and the number is increasing
-> over time, meaning we will see more 16kb page devices in the future and
-> presumably larger sizes after that. Writes that are not naturally align=
-ed
-> multiples of the page size tend to be a significant problem for the
-> controller to deal with: in order to guarantee that a 4kb write makes i=
-t
-> into permanent storage, the device has to write 8kb and the next 4kb
-> write has to go into another 8kb page because each page can only be
-> written once before the block is erased. At a later point, all the part=
-ial
-> pages get rewritten into a new erase block, a process that can take
-> hundreds of miliseconds and that we absolutely want to prevent from
-> happening, as it can block all other I/O to the device. Writing all
-> (flash) pages in an erase block sequentially usually avoids this, as
-> long as you don't write to many different erase blocks at the same time=
-.
-> Note that the page size depends on how the controller combines differen=
-t
-> planes and channels.
->=20
-> 2. The super-page size of the flash: When you have multiple channels
-> between the controller and the individual flash chips, you can write
-> multiple pages simultaneously, which means that e.g. sending 32kb of
-> data to the device takes roughly the same amount of time as writing a
-> single 8kb page. Writing less than the super-page size when there is
-> more data waiting to get written out is a waste of time, although the
-> effects are much less drastic as writing data that is not aligned to
-> pages because it does not require garbage collection.
->=20
-> 3. optimum write size: While writing larger amounts of data in a single
-> request is usually faster than writing less, almost all devices
-> I've seen have a sharp cut-off where increasing the size of the write
-> does not actually help any more because of a bottleneck somewhere
-> in the stack. Writing more than 64kb almost never improves performance
-> and sometimes reduces performance.
-
-
-For our understanding, you mean we have to do aligned-write as follows
-if possible?
-
-"Nand internal page size write(8K, 16K)" < "Super-page size write(32K)
-which considers parallel working with number of channel and plane" <
-some sequential big write (64K)
-
->=20
-> From the I've done, a typical profile could look like
->=20
-> Size	Throughput
-> 1KB	200KB/s
-> 2KB	450KB/s
-> 4KB	1MB/s
-> 8KB	4MB/s		<=3D=3D page size
-> 16KB	8MB/s
-> 32KB	16MB/s		<=3D=3D superpage size
-> 64KB	18MB/s		<=3D=3D optimum size
-> 128KB	17MB/s
-> ...
-> 8MB	18MB/s		<=3D=3D erase block size
->=20
->>> I'm not sure what we would do when there are less than 64kb available
->>> for pageout on the inactive list. The two choices I can think of are
->>> either not writing anything, or wasting the swap slots and filling
->>
->>
->> No wrtite will cause unnecessary many pages to swap out by next prioir=
-ty
->> of scanning and we can't gaurantee how long we wait to queue up to 64K=
-B
->> in anon pages. It might take longer than GC time so we need some deadl=
-ine.
->>
->>
->>> up the data with zeroes.
->>
->>
->> Zero padding would be a good solution but I have a concern on WAP so w=
-e
->> need smart policy.
->>
->> To be honest, I think swapout is normally asynchonous operation so tha=
-t
->> it should not affect system latency rather than swap read which is
->> synchronous operation. So if system is low memory pressure, we can que=
-ue
->> swap out pages up to 64KB and then batch write-out in empty cluster. I=
-f
->> we don't have any empty cluster in low memory pressure, we should writ=
-e
->> out it in partial cluster. Maybe it doesn't affect system latency
->> severely in low memory pressure.
->=20
-> The main thing that can affect system latency is garbage collection
-> that blocks any other reads or writes for an extended amount of time.
-> If we can avoid that, we've got the 95% solution.
-
-
-I see.
-
->=20
-> Note that eMMC-4.5 provides a high-priority interrupt mechamism that
-> lets us interrupt the a write that has hit the garbage collection
-> path, so we can send a more important read request to the device.
-> This will not work on other devices though and the patches for this
-> are still under discussion.
-
-
-Nice feature but I think swap system doesn't need to consider such
-feature. I should be handled by I/O subsystem like I/O scheduler.
-
->=20
->> If system memory pressure is high(and It shoud be not frequent),
->> swap-out B/W would be more important. So we can reserve some clusters
->> for it and I think we can use page padding you mentioned in this case
->> for reducing latency if we can queue it up to 64KB within threshold ti=
-me.
->>
->> Swap-read is also important. We have to investigate fragmentation of
->> swap slots because we disable swap readahead in non-rotation device. I=
-t
->> can make lots of hole in swap cluster and it makes to find empty
->> cluster. So for it, it might be better than enable swap-read in
->> non-rotation devices, too.
->=20
-> Yes, reading in up to 64kb or at least a superpage would also help here=
-,
-> although there is no problem reading in a single cpu page, it will stil=
-l
-> take no more time than reading in a superpage.
->=20
->>>>> 2) Make variable sized swap clusters. Right now, the swap space is
->>>>> organized in clusters of 256 pages (1MB), which is less than the ty=
-pical
->>>>> erase block size of 4 or 8 MB. We should try to make the swap clust=
-er
->>>>> aligned to erase blocks and have the size match to avoid garbage co=
-llection
->>>>> in the drive. The cluster size would typically be set by mkswap as =
-a new
->>>>> option and interpreted at swapon time.
->>>>>
->>>>
->>>> If we can find such big contiguous swap slots easily, it would be go=
-od.
->>>> But I am not sure how often we can get such big slots. And maybe we =
-have to
->>>> improve search method for getting such big empty cluster.
->>>
->>> As long as there are clusters available, we should try to find them. =
-When
->>> free space is too fragmented to find any unused cluster, we can pick =
-one
->>> that has very little data in it, so that we reduce the time it takes =
+> My preference would be to build the logic to detect the sizes into mk=
+fs
+> and mkswap and encode them in the superblock in new fields. I don't t=
+hink
+> we can trust any data that a device reports right now because operati=
+ng
+> systems have ignored it in the past and either someone has forgotten =
 to
->>> GC that erase block in the drive. While we could theoretically do act=
-ive
->>> garbage collection of swap data in the kernel, it won't get more effi=
-cient
->>> than the GC inside of the drive. If we do this, it unfortunately mean=
-s that
->>> we can't just send a discard for the entire erase block.
->>
->>
->> Might need some compaction during idle time but WAP concern raises aga=
-in. :(
->=20
-> Sorry for my ignorance, but what does WAP stand for?
+> update the fields after moving to new technology (eMMC), or the data =
+can
+> not be encoded correctly according to the spec (SD, USB).
 
 
-I should have written more general term. I means write amplication but
-WAF(Write Amplication Factor) is more popular. :(
+I think it's not good approach.
+How long does it take to know such parameters?
+I guess it's not short so that mkfs/mkswap would be very long
+dramatically. If needed, let's maintain it as another tool.
+
+If storage vendors break such fields, it doesn't work well on linux
+which is very popular on mobile world today and user will not use such
+vendor devices and company will be gone. Let's give such pressure to
+them and make vendor keep in promise.
+
 
 >=20
-> 	Arnd
+> System builders for embedded systems can then make sure that they get
+> it right for the hardware they use, and we can try our best to help
+> that process.
+
+
+
+
+>=20
+> 	Ard
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >=20
@@ -230,11 +90,3 @@ WAF(Write Amplication Factor) is more popular. :(
 --=20
 Kind regards,
 Minchan Kim
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter=
-.ca/
-Don't email: <a href=3Dmailto:"dont@kvack.org"> email@kvack.org </a>
