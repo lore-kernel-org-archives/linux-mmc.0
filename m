@@ -1,33 +1,32 @@
-From: Viresh Kumar <viresh.kumar@st.com>
-Subject: Re: [PATCH 1/3] mmc/sdhci-spear: No need to check 'pdev == NULL'
- in probe
-Date: Tue, 10 Apr 2012 15:06:32 +0530
-Message-ID: <4F83FF20.9010701@st.com>
-References: <841301f38cfc2d1170378306f1640d7653652505.1332817654.git.viresh.kumar@st.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Fix switch from DMA to PIO
+Date: Tue, 10 Apr 2012 10:54:22 +0100
+Message-ID: <CAFbHwiRAE0G9Yr5Af5cUGsAxw8VNFu0s_NWQ6T3NsLZwGX_Y0Q@mail.gmail.com>
+References: <000601cd16b4$5a409a40$0ec1cec0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:39769 "EHLO
-	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752915Ab2DJJiQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Apr 2012 05:38:16 -0400
-In-Reply-To: <841301f38cfc2d1170378306f1640d7653652505.1332817654.git.viresh.kumar@st.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:58756 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753562Ab2DJJyX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Apr 2012 05:54:23 -0400
+Received: by pbcun15 with SMTP id un15so6020070pbc.19
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Apr 2012 02:54:22 -0700 (PDT)
+In-Reply-To: <000601cd16b4$5a409a40$0ec1cec0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "cjb@laptop.org" <cjb@laptop.org>
-Cc: spear-devel <spear-devel@list.st.com>, "viresh.linux@gmail.com" <viresh.linux@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "sr@denx.de" <sr@denx.de>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>
 
-On 3/27/2012 8:40 AM, Viresh KUMAR wrote:
-> pdev is guaranteed to be valid in probe. And so check is not required to check
-> if it is non-NULL. Remove it.
-> 
-> Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
+On Tue, Apr 10, 2012 at 1:53 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> When dw_mci_pre_dma_transfer returns failure in some reasons,
+> dw_mci_submit_data will prepare to switch the PIO mode from DMA.
+> After switching to PIO mode, DMA(IDMAC in particular) is still
+> enabled. This makes the corruption in handling interrupt and
+> the driver lock-up.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-Hi Chris,
+This looks ok to me.
 
-Can you atleast apply first two patches of this set. Will rework patch 3/3 after
-DT support is finalized by arnd.
-
--- 
-viresh
+Acked-by: Will Newton <will.newton@imgtec.com>
