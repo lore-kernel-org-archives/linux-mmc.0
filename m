@@ -1,96 +1,84 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH v2 1/1] mmc: core: skip card initialization if power class
- selection fails
-Date: Wed, 11 Apr 2012 22:54:34 +0900
-Message-ID: <CAKYAXd9YVKjiwfOOYJ8_FYiCLQOoU-8stewPiNJBoyb_OxBW7g@mail.gmail.com>
-References: <1334144122-20647-1-git-send-email-subhashj@codeaurora.org>
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Get rid of of_have_populated_dt() usage
+Date: Wed, 11 Apr 2012 19:35:02 +0530
+Message-ID: <CANrkHUb2qu-f-MtfPhedFib7fJ+NxNvdKwBxObfGRoypxh0pkA@mail.gmail.com>
+References: <1334138593-9692-1-git-send-email-rnayak@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:45753 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751508Ab2DKNyf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Apr 2012 09:54:35 -0400
-In-Reply-To: <1334144122-20647-1-git-send-email-subhashj@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1334138593-9692-1-git-send-email-rnayak@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Rajendra Nayak <rnayak@ti.com>
+Cc: cjb@laptop.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, b-cousson@ti.com, Rob Herring <rob.herring@calxeda.com>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 
-SGkuIFN1Ymhhc2guCkhhdmUgeW91IGNvbnNpZGVyZWQgcmV0dXJuIC1FSU5WQUwgaW4gc3dpdGNo
-ID8KQW5kIGxvb2tzIGNvbXBsZXggbW9yZS4uIGhvdyBhYm91dCBnZXR0aW5nIGJ1c193aWR0aCBh
-bmQgZGRyIHZhbHVlCmZyb20gYXJndW1lbnQgPwoKVGhhbmtzLgoyMDEyLzQvMTEgU3ViaGFzaCBK
-YWRhdmFuaSA8c3ViaGFzaGpAY29kZWF1cm9yYS5vcmc+Ogo+IFdpdGggY3VycmVudCBpbXBsZW1l
-bnRhdGlvbiBvZiBwb3dlciBjbGFzcyBzZWxlY3Rpb24sCj4gbW1jX3NlbGVjdF9wb3dlcmNsYXNz
-KCkgc2hvdWxkIG5ldmVyIGZhaWwuIFNvIHRyZWF0IGFueSBlcnJvcgo+IHJldHVybmVkIGJ5IHRo
-aXMgZnVuY3Rpb24gYXMgc2VyaW91cyBlbm91Z2ggdG8gc2tpcCB0aGUgY2FyZAo+IGluaXRpYWxp
-emF0aW9uLgo+Cj4gU2lnbmVkLW9mZi1ieTogU3ViaGFzaCBKYWRhdmFuaSA8c3ViaGFzaGpAY29k
-ZWF1cm9yYS5vcmc+Cj4gLS0tCj4gwqBkcml2ZXJzL21tYy9jb3JlL21tYy5jIHwgwqAgMjYgKysr
-KysrKysrKysrKysrLS0tLS0tLS0tLS0KPiDCoDEgZmlsZXMgY2hhbmdlZCwgMTUgaW5zZXJ0aW9u
-cygrKSwgMTEgZGVsZXRpb25zKC0pCj4KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9t
-bWMuYyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKPiBpbmRleCBmMzRhZmJkLi41ZjlkOThlIDEw
-MDY0NAo+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKPiArKysgYi9kcml2ZXJzL21tYy9j
-b3JlL21tYy5jCj4gQEAgLTcyMiw2ICs3MjIsMTggQEAgc3RhdGljIGludCBtbWNfc2VsZWN0X3Bv
-d2VyY2xhc3Moc3RydWN0IG1tY19jYXJkICpjYXJkLAo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIGNhcmQtPmV4dF9jc2QuZ2VuZXJpY19jbWQ2X3RpbWUp
-Owo+IMKgIMKgIMKgIMKgfQo+Cj4gKyDCoCDCoCDCoCBpZiAoZXJyKSB7Cj4gKyDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCBpbnQgd2lkdGggPSA0Owo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgaW50IGRk
-ciA9IChidXNfd2lkdGggPD0gRVhUX0NTRF9CVVNfV0lEVEhfOCkgPyAwIDogMTsKPiArCj4gKyDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAoKGJ1c193aWR0aCA9PSBFWFRfQ1NEX0JVU19XSURUSF84
-KSB8fAo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgKGJ1c193aWR0aCA9PSBFWFRfQ1NE
-X0REUl9CVVNfV0lEVEhfOCkpCj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCB3
-aWR0aCA9IDg7Cj4gKwo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcHJfZXJyKCIlczogcG93ZXIg
-Y2xhc3Mgc2VsZWN0aW9uIHRvIGJ1cyB3aWR0aCAlZCBkZHIgJWQiCj4gKyDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCIgZmFpbGVkXG4iLCBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCks
-IHdpZHRoLCBkZHIpOwo+ICsgwqAgwqAgwqAgfQo+ICsKPiDCoCDCoCDCoCDCoHJldHVybiBlcnI7
-Cj4gwqB9Cj4KPiBAQCAtMTExNSw5ICsxMTI3LDcgQEAgc3RhdGljIGludCBtbWNfaW5pdF9jYXJk
-KHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwgdTMyIG9jciwKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoEVYVF9DU0RfQlVTX1dJRFRIXzggOiBFWFRfQ1NEX0JV
-U19XSURUSF80Owo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZXJyID0gbW1jX3NlbGVjdF9wb3dl
-cmNsYXNzKGNhcmQsIGV4dF9jc2RfYml0cywgZXh0X2NzZCk7Cj4gwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqBpZiAoZXJyKQo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcHJfd2Fy
-bmluZygiJXM6IHBvd2VyIGNsYXNzIHNlbGVjdGlvbiB0byBidXMgd2lkdGggJWQiCj4gLSDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCIgZmFpbGVkXG4i
-LCBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCksCj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoDEgPDwgYnVzX3dpZHRoKTsKPiArIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIGdvdG8gZXJyOwo+IMKgIMKgIMKgIMKgfQo+Cj4gwqAgwqAg
-wqAgwqAvKgo+IEBAIC0xMTQ5LDEwICsxMTU5LDcgQEAgc3RhdGljIGludCBtbWNfaW5pdF9jYXJk
-KHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwgdTMyIG9jciwKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoGVyciA9IG1tY19zZWxlY3RfcG93ZXJjbGFzcyhjYXJkLCBleHRfY3NkX2Jp
-dHNbaWR4XVswXSwKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGV4dF9jc2QpOwo+IMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgaWYgKGVycikKPiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHByX3dhcm5pbmcoIiVzOiBwb3dlciBjbGFzcyBzZWxl
-Y3Rpb24gdG8gIgo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAiYnVzIHdpZHRoICVkIGZhaWxlZFxuIiwKPiAtIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgbW1j
-X2hvc3RuYW1lKGNhcmQtPmhvc3QpLAo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAxIDw8IGJ1c193aWR0aCk7Cj4gKyDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBnb3RvIGVycjsKPgo+IMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZXJyID0gbW1jX3N3aXRjaChjYXJkLCBF
-WFRfQ1NEX0NNRF9TRVRfTk9STUFMLAo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIEVYVF9DU0RfQlVTX1dJRFRILAo+IEBAIC0xMTgw
-LDEwICsxMTg3LDcgQEAgc3RhdGljIGludCBtbWNfaW5pdF9jYXJkKHN0cnVjdCBtbWNfaG9zdCAq
-aG9zdCwgdTMyIG9jciwKPiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGVyciA9
-IG1tY19zZWxlY3RfcG93ZXJjbGFzcyhjYXJkLCBleHRfY3NkX2JpdHNbaWR4XVsxXSwKPiDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoGV4dF9jc2QpOwo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgaWYgKGVycikKPiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIHByX3dhcm5pbmcoIiVzOiBwb3dlciBjbGFzcyBzZWxlY3Rpb24gdG8gIgo+IC0gwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAiYnVzIHdpZHRoICVkIGRkciAlZCBmYWlsZWRcbiIsCj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoG1tY19ob3N0bmFtZShj
-YXJkLT5ob3N0KSwKPiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgMSA8PCBidXNfd2lkdGgsIGRkcik7Cj4gKyDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBnb3RvIGVycjsKPgo+IMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZXJyID0gbW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NE
-X0NNRF9TRVRfTk9STUFMLAo+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIEVYVF9DU0RfQlVTX1dJRFRILAo+IC0tCj4gMS43LjEuMQo+
-Cj4gLS0KPiBTZW50IGJ5IGEgY29uc3VsdGFudCBvZiB0aGUgUXVhbGNvbW0gSW5ub3ZhdGlvbiBD
-ZW50ZXIsIEluYy4KPiBUaGUgUXVhbGNvbW0gSW5ub3ZhdGlvbiBDZW50ZXIsIEluYy4gaXMgYSBt
-ZW1iZXIgb2YgdGhlIENvZGUgQXVyb3JhIEZvcnVtLgo+IC0tCj4gVG8gdW5zdWJzY3JpYmUgZnJv
-bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyIgaW4KPiB0
-aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+IE1vcmUg
-bWFqb3Jkb21vIGluZm8gYXQgwqBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZv
-Lmh0bWwK
+On Wed, Apr 11, 2012 at 3:33 PM, Rajendra Nayak <rnayak@ti.com> wrote:
+> of_have_populated_dt() is not expected to be used in drivers but
+> instead only in early platform init code.
+> Drivers on the other hand should rely on dev->of_node or of_match_dev=
+ice().
+> Besides usage of of_have_populated_dt() also throws up build error as=
+ below
+> which was reported by Balaji TK, when omap_hsmmc is built as a module=
+=2E
+>
+> ERROR: "allnodes" [drivers/mmc/host/omap_hsmmc.ko] undefined!
+> make[1]: *** [__modpost] Error 1
+> make: *** [modules] Error 2
+>
+> So get rid of all of_have_populated_dt() usage in omap_hsmmc driver a=
+nd
+> instead use dev->of_node to make the same dicisions as earlier.
+
+Looks good to me
+Reviewed-by: Balaji T K <balajitk@ti.com>
+
+>
+> Signed-off-by: Rajendra Nayak <rnayak@ti.com>
+> Reported-by: Benoit Cousson <b-cousson@ti.com>
+> Cc: Balaji TK <balajitk@ti.com>
+> Cc: Rob Herring <rob.herring@calxeda.com>
+> Cc: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+> ---
+> =A0drivers/mmc/host/omap_hsmmc.c | =A0 =A04 ++--
+> =A01 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
+mmc.c
+> index ecc9521..4254b6f 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -252,7 +252,7 @@ static int omap_hsmmc_set_power(struct device *de=
+v, int slot, int power_on,
+> =A0 =A0 =A0 =A0 * the pbias cell programming support is still missing=
+ when
+> =A0 =A0 =A0 =A0 * booting with Device tree
+> =A0 =A0 =A0 =A0 */
+> - =A0 =A0 =A0 if (of_have_populated_dt() && !vdd)
+> + =A0 =A0 =A0 if (dev->of_node && !vdd)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return 0;
+>
+> =A0 =A0 =A0 =A0if (mmc_slot(host).before_set_reg)
+> @@ -1564,7 +1564,7 @@ static void omap_hsmmc_set_ios(struct mmc_host =
+*mmc, struct mmc_ios *ios)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * can't be allowed wh=
+en booting with device
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * tree.
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (!of_have_populated_dt(=
+))) {
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 !host->dev->of_node) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/*
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * The=
+ mmc_select_voltage fn of the core does
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * not=
+ seem to set the power_mode to
+> --
+> 1.7.1
+>
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
