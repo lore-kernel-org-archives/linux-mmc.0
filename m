@@ -1,66 +1,43 @@
-From: Rob Herring <robherring2@gmail.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Get rid of of_have_populated_dt() usage
-Date: Wed, 11 Apr 2012 07:10:21 -0500
-Message-ID: <4F8574AD.5040306@gmail.com>
-References: <1334138593-9692-1-git-send-email-rnayak@ti.com>
+From: Ulf Hansson <ulf.hansson@stericsson.com>
+Subject: Re: [PATCH V4]mmc: remove MMC bus legacy suspend/resume method
+Date: Wed, 11 Apr 2012 15:41:57 +0200
+Message-ID: <4F858A25.20302@stericsson.com>
+References: <20120411115438.GA303@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1334138593-9692-1-git-send-email-rnayak@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Rajendra Nayak <rnayak@ti.com>
-Cc: cjb@laptop.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, Rob Herring <rob.herring@calxeda.com>, linux-omap@vger.kernel.org, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, Balaji TK <balajitk@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog104.obsmtp.com ([207.126.144.117]:36274 "EHLO
+	eu1sys200aog104.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754797Ab2DKNmY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Apr 2012 09:42:24 -0400
+In-Reply-To: <20120411115438.GA303@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-pm@lists.linux-foundation.org" <linux-pm@lists.linux-foundation.org>, "cjb@laptop.org" <cjb@laptop.org>
 
-On 04/11/2012 05:03 AM, Rajendra Nayak wrote:
-> of_have_populated_dt() is not expected to be used in drivers but
-> instead only in early platform init code.
-> Drivers on the other hand should rely on dev->of_node or of_match_device().
-> Besides usage of of_have_populated_dt() also throws up build error as below
-> which was reported by Balaji TK, when omap_hsmmc is built as a module.
-> 
-> ERROR: "allnodes" [drivers/mmc/host/omap_hsmmc.ko] undefined!
-> make[1]: *** [__modpost] Error 1
-> make: *** [modules] Error 2
-> 
-> So get rid of all of_have_populated_dt() usage in omap_hsmmc driver and
-> instead use dev->of_node to make the same dicisions as earlier.
-> 
-> Signed-off-by: Rajendra Nayak <rnayak@ti.com>
-> Reported-by: Benoit Cousson <b-cousson@ti.com>
-> Cc: Balaji TK <balajitk@ti.com>
-> Cc: Rob Herring <rob.herring@calxeda.com>
-
-Ack
-
-Rob
-
-> Cc: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+On 04/11/2012 01:54 PM, Chuanxiao Dong wrote:
+> MMC bus is using legacy suspend/resume method, which is not compatible if
+> runtime pm callbacks are used. In this scenario, MMC bus suspend/resume
+> callbacks cannot be called when system entering S3. So change to use the new
+> defined dev_pm_ops for system sleeping mode
+>
+> Signed-off-by: Chuanxiao Dong<chuanxiao.dong@intel.com>
 > ---
->  drivers/mmc/host/omap_hsmmc.c |    4 ++--
->  1 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index ecc9521..4254b6f 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -252,7 +252,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
->  	 * the pbias cell programming support is still missing when
->  	 * booting with Device tree
->  	 */
-> -	if (of_have_populated_dt() && !vdd)
-> +	if (dev->of_node && !vdd)
->  		return 0;
->  
->  	if (mmc_slot(host).before_set_reg)
-> @@ -1564,7 +1564,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  			 * can't be allowed when booting with device
->  			 * tree.
->  			 */
-> -			(!of_have_populated_dt())) {
-> +			!host->dev->of_node) {
->  				/*
->  				 * The mmc_select_voltage fn of the core does
->  				 * not seem to set the power_mode to
+> Changes in v2:
+> 	use SET_SYSTEM_SLEEP_PM_OPS to define sleep callbacks as Rafael
+> 	suggested
+>
+> Changes in v3:
+> 	remove NULL pointer define for runtime callbacks when PM_RUNTIME is not
+> 	selected, as Ulf Hansson suggested
+>
+> Changes in v4:
+> 	fix the warning when disable CONFIG_PM_RUNTIME
+>
 
+Looks good to me! Acked-by: Ulf Hansson <ulf.hansson@stericsson.com>
+
+Kind regards
+Ulf Hansson
