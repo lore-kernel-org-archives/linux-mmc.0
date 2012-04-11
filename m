@@ -1,67 +1,54 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: swap on eMMC and other flash
-Date: Wed, 11 Apr 2012 13:28:39 +0300
-Message-ID: <4F855CD7.1000902@intel.com>
-References: <201203301744.16762.arnd@arndb.de> <201203301850.22784.arnd@arndb.de> <4F7C3CE2.5070803@intel.com> <201204041247.53289.arnd@arndb.de>
+From: Rajendra Nayak <rnayak@ti.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Get rid of of_have_populated_dt() usage
+Date: Wed, 11 Apr 2012 15:59:55 +0530
+Message-ID: <4F855D23.2090803@ti.com>
+References: <1334138593-9692-1-git-send-email-rnayak@ti.com> <20120411100956.GT12064@arwen.pp.htv.fi> <4F855BDC.9070103@ti.com> <20120411102632.GY12064@arwen.pp.htv.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <201204041247.53289.arnd@arndb.de>
-Sender: owner-linux-mm@kvack.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linaro-kernel@lists.linaro.org, linux-mm@kvack.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, Alex Lemberg <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, Saugata Das <saugata.das@linaro.org>, Venkatraman S <venkat@linaro.org>, Yejin Moon <yejin.moon@samsung.com>, Hyojin Jeong <syr.jeong@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel-team@android.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog118.obsmtp.com ([74.125.149.244]:45384 "EHLO
+	na3sys009aog118.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756297Ab2DKKaG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Apr 2012 06:30:06 -0400
+Received: by obbuo13 with SMTP id uo13so1183937obb.20
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Apr 2012 03:30:04 -0700 (PDT)
+In-Reply-To: <20120411102632.GY12064@arwen.pp.htv.fi>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: balbi@ti.com
+Cc: cjb@laptop.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, b-cousson@ti.com, Balaji TK <balajitk@ti.com>, Rob Herring <rob.herring@calxeda.com>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>
 
-On 04/04/12 15:47, Arnd Bergmann wrote:
-> On Wednesday 04 April 2012, Adrian Hunter wrote:
->> On 30/03/12 21:50, Arnd Bergmann wrote:
->>> (sorry for the duplicated email, this corrects the address of the android
->>> kernel team, please reply here)
+On Wednesday 11 April 2012 03:56 PM, Felipe Balbi wrote:
+> On Wed, Apr 11, 2012 at 03:54:28PM +0530, Rajendra Nayak wrote:
+>> On Wednesday 11 April 2012 03:39 PM, Felipe Balbi wrote:
+>>> On Wed, Apr 11, 2012 at 03:33:13PM +0530, Rajendra Nayak wrote:
+>>>> @@ -1564,7 +1564,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>>   			 * can't be allowed when booting with device
+>>>>   			 * tree.
+>>>>   			 */
+>>>> -			(!of_have_populated_dt())) {
+>>>> +			!host->dev->of_node) {
 >>>
->>> On Friday 30 March 2012, Arnd Bergmann wrote:
+>>> won't compile
 >>>
->>>  We've had a discussion in the Linaro storage team (Saugata, Venkat and me,
->>>  with Luca joining in on the discussion) about swapping to flash based media
->>>  such as eMMC. This is a summary of what we found and what we think should
->>>  be done. If people agree that this is a good idea, we can start working
->>>  on it.
->>
->> There is mtdswap.
-> 
-> Ah, very interesting. I wasn't aware of that. Obviously we can't directly
-> use it on block devices that have their own garbage collection and wear
-> leveling built into them, but it's interesting to see how this was solved
-> before.
-> 
-> While we could build something similar that remaps blocks between an
-> eMMC device and the logical swap space that is used by the mm code,
-> my feeling is that it would be easier to modify the swap code itself
-> to do the right thing.
-> 
->> Also the old Nokia N900 had swap to eMMC.
->>
->> The last I heard was that swap was considered to be simply too slow on hand
->> held devices.
-> 
-> That's the part that we want to solve here. It has nothing to do with
-> handheld devices, but more with specific incompatibilities of the
-> block allocation in the swap code vs. what an eMMC device expects
-> to see for fast operation. If you write data in the wrong order on
-> flash devices, you get long delays that you don't get when you do
-> it the right way. The same problem exists for file systems, and is
-> being addressed there as well.
-> 
->> As systems adopt more RAM, isn't there a decreasing demand for swap?
-> 
-> No. You would never be able to make hibernate work, no matter how much
-> RAM you add ;-)
+>> why? compiles fine for me.
+>
+> aren't you missing the opening parenthesis ? Or is there a something not
+> shown in the context ?
+>
+Its the missing context thats confusing :-)
 
-Have you considered making hibernate work without swap?
+This is how the code looks in the file after the patch.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+                if ((OMAP_HSMMC_READ(host->base, HCTL) & SDVSDET) &&
+                         (ios->vdd == DUAL_VOLT_OCR_BIT) &&
+                         /*
+                          * With pbias cell programming missing, this
+                          * can't be allowed when booting with device
+                          * tree.
+                          */
+                         !host->dev->of_node) {
+
+
+
