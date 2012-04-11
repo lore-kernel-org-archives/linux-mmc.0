@@ -1,95 +1,84 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Get rid of of_have_populated_dt() usage
-Date: Wed, 11 Apr 2012 13:31:46 +0300
-Message-ID: <20120411103145.GA12064@arwen.pp.htv.fi>
-References: <1334138593-9692-1-git-send-email-rnayak@ti.com>
- <20120411100956.GT12064@arwen.pp.htv.fi>
- <4F855BDC.9070103@ti.com>
- <20120411102632.GY12064@arwen.pp.htv.fi>
- <4F855D23.2090803@ti.com>
-Reply-To: balbi@ti.com
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="fKtH0JUtvN5p2ETH"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog119.obsmtp.com ([74.125.149.246]:32985 "EHLO
-	na3sys009aog119.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756306Ab2DKKcf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Apr 2012 06:32:35 -0400
-Received: by lagj5 with SMTP id j5so618003lag.31
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Apr 2012 03:32:33 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <4F855D23.2090803@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Subhash Jadavani <subhashj@codeaurora.org>
+Subject: [PATCH v2 1/1] mmc: core: skip card initialization if power class selection fails
+Date: Wed, 11 Apr 2012 17:05:22 +0530
+Message-ID: <1334144122-20647-1-git-send-email-subhashj@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Rajendra Nayak <rnayak@ti.com>
-Cc: balbi@ti.com, cjb@laptop.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, b-cousson@ti.com, Balaji TK <balajitk@ti.com>, Rob Herring <rob.herring@calxeda.com>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>
 
+With current implementation of power class selection,
+mmc_select_powerclass() should never fail. So treat any error
+returned by this function as serious enough to skip the card
+initialization.
 
---fKtH0JUtvN5p2ETH
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+---
+ drivers/mmc/core/mmc.c |   26 +++++++++++++++-----------
+ 1 files changed, 15 insertions(+), 11 deletions(-)
 
-On Wed, Apr 11, 2012 at 03:59:55PM +0530, Rajendra Nayak wrote:
-> On Wednesday 11 April 2012 03:56 PM, Felipe Balbi wrote:
-> >On Wed, Apr 11, 2012 at 03:54:28PM +0530, Rajendra Nayak wrote:
-> >>On Wednesday 11 April 2012 03:39 PM, Felipe Balbi wrote:
-> >>>On Wed, Apr 11, 2012 at 03:33:13PM +0530, Rajendra Nayak wrote:
-> >>>>@@ -1564,7 +1564,7 @@ static void omap_hsmmc_set_ios(struct mmc_host =
-*mmc, struct mmc_ios *ios)
-> >>>>  			 * can't be allowed when booting with device
-> >>>>  			 * tree.
-> >>>>  			 */
-> >>>>-			(!of_have_populated_dt())) {
-> >>>>+			!host->dev->of_node) {
-> >>>
-> >>>won't compile
-> >>>
-> >>why? compiles fine for me.
-> >
-> >aren't you missing the opening parenthesis ? Or is there a something not
-> >shown in the context ?
-> >
-> Its the missing context thats confusing :-)
->=20
-> This is how the code looks in the file after the patch.
->=20
->                if ((OMAP_HSMMC_READ(host->base, HCTL) & SDVSDET) &&
->                         (ios->vdd =3D=3D DUAL_VOLT_OCR_BIT) &&
->                         /*
->                          * With pbias cell programming missing, this
->                          * can't be allowed when booting with device
->                          * tree.
->                          */
->                         !host->dev->of_node) {
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index f34afbd..5f9d98e 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -722,6 +722,18 @@ static int mmc_select_powerclass(struct mmc_card *card,
+ 				 card->ext_csd.generic_cmd6_time);
+ 	}
+ 
++	if (err) {
++		int width = 4;
++		int ddr = (bus_width <= EXT_CSD_BUS_WIDTH_8) ? 0 : 1;
++
++		if ((bus_width == EXT_CSD_BUS_WIDTH_8) ||
++		    (bus_width == EXT_CSD_DDR_BUS_WIDTH_8))
++			width = 8;
++
++		pr_err("%s: power class selection to bus width %d ddr %d"
++		       " failed\n", mmc_hostname(card->host), width, ddr);
++	}
++
+ 	return err;
+ }
+ 
+@@ -1115,9 +1127,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 				EXT_CSD_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
+ 		err = mmc_select_powerclass(card, ext_csd_bits, ext_csd);
+ 		if (err)
+-			pr_warning("%s: power class selection to bus width %d"
+-				   " failed\n", mmc_hostname(card->host),
+-				   1 << bus_width);
++			goto err;
+ 	}
+ 
+ 	/*
+@@ -1149,10 +1159,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			err = mmc_select_powerclass(card, ext_csd_bits[idx][0],
+ 						    ext_csd);
+ 			if (err)
+-				pr_warning("%s: power class selection to "
+-					   "bus width %d failed\n",
+-					   mmc_hostname(card->host),
+-					   1 << bus_width);
++				goto err;
+ 
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 					 EXT_CSD_BUS_WIDTH,
+@@ -1180,10 +1187,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			err = mmc_select_powerclass(card, ext_csd_bits[idx][1],
+ 						    ext_csd);
+ 			if (err)
+-				pr_warning("%s: power class selection to "
+-					   "bus width %d ddr %d failed\n",
+-					   mmc_hostname(card->host),
+-					   1 << bus_width, ddr);
++				goto err;
+ 
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 					 EXT_CSD_BUS_WIDTH,
+-- 
+1.7.1.1
 
-ok, my bad then. Should've looked at the source code. Sorry for the
-noise.
-
---=20
-balbi
-
---fKtH0JUtvN5p2ETH
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJPhV2RAAoJEIaOsuA1yqREDsQQAINS1PjgP4JSwNre03muMrF4
-NPEe+5EJa582ebc/1NVaevNMMaXgsi8++8UT2LV7PSzxh3zDQGlDNcg624nLs570
-dHAoLQAcnv/qwNSpR1CzxIFrpD0QvwilVGQdxftkJ5Ks/1KyNdFpRwpyopiCbZO5
-owe7ES4dVzLF843S25UcGhPoI1eFnRtRJrWCA03MVOXD0OJOOOJF7i8hWXyy9/U5
-4gl/SgvLFtHxyY9fQJwKoI/S6tkmEypDZu4S+IqdhuNhNjSvZeytZqBjeYbm04jc
-qYSi5qa/iRRMyHy/DOVq7Z7wWDh6AuxzGml7GkvFYpyZSR+gXkfWgpkgcw1J6u4H
-1hXKkLKT494XWf8/J/Vp88eYeUmR10Opakai+AvgqYUCUDo6cqKIG7wFUKhXF2bh
-G2Y9QyF1ap6Rt1iX30vDApup4yGUKofRH7n3iAh1TfD59gTugaHUybBRGEtEH59l
-PqMTNmL0IqTT+Rb37RFmFKcLii5mmcl1nghOapSfgo4ouVhU+J9mlZVdYWllQ54h
-eQtumm68QQdAS5OtNYYfKbPOkCfDzcvW+7/HpPzvIsmfHPUeTpHkoP+brILHVlG2
-8/3QVYyo8sV9cq6dzinXfvGGP+0d+8+40pF12CiHT1ME44YMTNStTphz9DzKlP2V
-aIrdbPEkL/MN8T/qhPKl
-=IWj0
------END PGP SIGNATURE-----
-
---fKtH0JUtvN5p2ETH--
+--
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
