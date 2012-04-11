@@ -1,141 +1,66 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH v2 1/1] mmc: core: skip card initialization if power class
- selection fails
-Date: Wed, 11 Apr 2012 17:37:25 +0530
-Message-ID: <CAGxe1ZF0R0=6YKqCPNSaT_dekwg-J9WVSePpb5WDTThyCv6sPQ@mail.gmail.com>
-References: <1334144122-20647-1-git-send-email-subhashj@codeaurora.org>
+From: Rob Herring <robherring2@gmail.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Get rid of of_have_populated_dt() usage
+Date: Wed, 11 Apr 2012 07:10:21 -0500
+Message-ID: <4F8574AD.5040306@gmail.com>
+References: <1334138593-9692-1-git-send-email-rnayak@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f42.google.com ([209.85.216.42]:40882 "EHLO
-	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751667Ab2DKMH0 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Apr 2012 08:07:26 -0400
-Received: by qafi31 with SMTP id i31so4422178qaf.1
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Apr 2012 05:07:25 -0700 (PDT)
-In-Reply-To: <1334144122-20647-1-git-send-email-subhashj@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1334138593-9692-1-git-send-email-rnayak@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Rajendra Nayak <rnayak@ti.com>
+Cc: cjb@laptop.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, Rob Herring <rob.herring@calxeda.com>, linux-omap@vger.kernel.org, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, Balaji TK <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Subhash Jadavani <subhashj@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 
-On 11 April 2012 17:05, Subhash Jadavani <subhashj@codeaurora.org> wrot=
-e:
-> With current implementation of power class selection,
-> mmc_select_powerclass() should never fail. So treat any error
-> returned by this function as serious enough to skip the card
-> initialization.
->
-> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+On 04/11/2012 05:03 AM, Rajendra Nayak wrote:
+> of_have_populated_dt() is not expected to be used in drivers but
+> instead only in early platform init code.
+> Drivers on the other hand should rely on dev->of_node or of_match_device().
+> Besides usage of of_have_populated_dt() also throws up build error as below
+> which was reported by Balaji TK, when omap_hsmmc is built as a module.
+> 
+> ERROR: "allnodes" [drivers/mmc/host/omap_hsmmc.ko] undefined!
+> make[1]: *** [__modpost] Error 1
+> make: *** [modules] Error 2
+> 
+> So get rid of all of_have_populated_dt() usage in omap_hsmmc driver and
+> instead use dev->of_node to make the same dicisions as earlier.
+> 
+> Signed-off-by: Rajendra Nayak <rnayak@ti.com>
+> Reported-by: Benoit Cousson <b-cousson@ti.com>
+> Cc: Balaji TK <balajitk@ti.com>
+> Cc: Rob Herring <rob.herring@calxeda.com>
+
+Ack
+
+Rob
+
+> Cc: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
 > ---
-> =A0drivers/mmc/core/mmc.c | =A0 26 +++++++++++++++-----------
-> =A01 files changed, 15 insertions(+), 11 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index f34afbd..5f9d98e 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -722,6 +722,18 @@ static int mmc_select_powerclass(struct mmc_card=
- *card,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card-=
->ext_csd.generic_cmd6_time);
-> =A0 =A0 =A0 =A0}
->
-> + =A0 =A0 =A0 if (err) {
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 int width =3D 4;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 int ddr =3D (bus_width <=3D EXT_CSD_BUS=
-_WIDTH_8) ? 0 : 1;
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((bus_width =3D=3D EXT_CSD_BUS_WIDTH=
-_8) ||
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (bus_width =3D=3D EXT_CSD_DDR_B=
-US_WIDTH_8))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 width =3D 8;
-> +
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("%s: power class selection to bu=
-s width %d ddr %d"
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0" failed\n", mmc_hostnam=
-e(card->host), width, ddr);
-> + =A0 =A0 =A0 }
-> +
-> =A0 =A0 =A0 =A0return err;
-> =A0}
->
-> @@ -1115,9 +1127,7 @@ static int mmc_init_card(struct mmc_host *host,=
- u32 ocr,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_CS=
-D_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_powerclass(card, ex=
-t_csd_bits, ext_csd);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("%s: power c=
-lass selection to bus width %d"
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-" failed\n", mmc_hostname(card->host),
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-1 << bus_width);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err;
-> =A0 =A0 =A0 =A0}
->
-> =A0 =A0 =A0 =A0/*
-> @@ -1149,10 +1159,7 @@ static int mmc_init_card(struct mmc_host *host=
-, u32 ocr,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_pow=
-erclass(card, ext_csd_bits[idx][0],
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warn=
-ing("%s: power class selection to "
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0"bus width %d failed\n",
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0mmc_hostname(card->host),
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A01 << bus_width);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto er=
-r;
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(car=
-d, EXT_CSD_CMD_SET_NORMAL,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 EXT_CSD_BUS_WIDTH,
-> @@ -1180,10 +1187,7 @@ static int mmc_init_card(struct mmc_host *host=
-, u32 ocr,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_pow=
-erclass(card, ext_csd_bits[idx][1],
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warn=
-ing("%s: power class selection to "
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0"bus width %d ddr %d failed\n",
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0mmc_hostname(card->host),
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A01 << bus_width, ddr);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto er=
-r;
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(car=
-d, EXT_CSD_CMD_SET_NORMAL,
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 EXT_CSD_BUS_WIDTH,
+>  drivers/mmc/host/omap_hsmmc.c |    4 ++--
+>  1 files changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index ecc9521..4254b6f 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -252,7 +252,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+>  	 * the pbias cell programming support is still missing when
+>  	 * booting with Device tree
+>  	 */
+> -	if (of_have_populated_dt() && !vdd)
+> +	if (dev->of_node && !vdd)
+>  		return 0;
+>  
+>  	if (mmc_slot(host).before_set_reg)
+> @@ -1564,7 +1564,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  			 * can't be allowed when booting with device
+>  			 * tree.
+>  			 */
+> -			(!of_have_populated_dt())) {
+> +			!host->dev->of_node) {
+>  				/*
+>  				 * The mmc_select_voltage fn of the core does
+>  				 * not seem to set the power_mode to
 
-Looks Good
-Acked By: Girish K S <girish.shivananjappa@linaro.org>
-
-> --
-> 1.7.1.1
->
-> --
-> Sent by a consultant of the Qualcomm Innovation Center, Inc.
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora F=
-orum.
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
