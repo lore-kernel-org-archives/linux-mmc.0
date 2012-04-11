@@ -1,59 +1,27 @@
-From: Will Newton <will.newton@gmail.com>
-Subject: Re: [PATCH] mmc: remove linux/blkdev.h include from host drivers
-Date: Wed, 11 Apr 2012 11:11:57 +0100
-Message-ID: <CAFbHwiQrq30HO2X4KG1u5J2+dT2dEcZAd0gXEXm7nc7jjm--wg@mail.gmail.com>
-References: <1334084783-3572-1-git-send-email-mad_soft@inbox.ru>
+From: Rajendra Nayak <rnayak@ti.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Get rid of of_have_populated_dt() usage
+Date: Wed, 11 Apr 2012 15:54:28 +0530
+Message-ID: <4F855BDC.9070103@ti.com>
+References: <1334138593-9692-1-git-send-email-rnayak@ti.com> <20120411100956.GT12064@arwen.pp.htv.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f52.google.com ([209.85.210.52]:61539 "EHLO
-	mail-pz0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754834Ab2DKKMF convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Apr 2012 06:12:05 -0400
-In-Reply-To: <1334084783-3572-1-git-send-email-mad_soft@inbox.ru>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20120411100956.GT12064@arwen.pp.htv.fi>
+Sender: linux-omap-owner@vger.kernel.org
+To: balbi@ti.com
+Cc: cjb@laptop.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, b-cousson@ti.com, Balaji TK <balajitk@ti.com>, Rob Herring <rob.herring@calxeda.com>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Dmitry Artamonow <mad_soft@inbox.ru>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-kernel@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>, Pavel Pisa <ppisa@pikron.com>, Sascha Hauer <s.hauer@pengutronix.de>, Will Newton <will.newton@imgtec.com>
 
-On Tue, Apr 10, 2012 at 8:06 PM, Dmitry Artamonow <mad_soft@inbox.ru> w=
-rote:
-> None of mmc host drivers using linux/blkdev.h header
-> really need anything from it. The slight exception is
-> atmel-mci, which uses blkdev.h only because it indirectly
-> pulls asm/cacheflush.h
+On Wednesday 11 April 2012 03:39 PM, Felipe Balbi wrote:
+> On Wed, Apr 11, 2012 at 03:33:13PM +0530, Rajendra Nayak wrote:
+>> @@ -1564,7 +1564,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>   			 * can't be allowed when booting with device
+>>   			 * tree.
+>>   			 */
+>> -			(!of_have_populated_dt())) {
+>> +			!host->dev->of_node) {
 >
-> So remove any inclusion of blkdev.h - it should also fix
-> build errors of dw_mmc and atmel-mci drivers when
-> CONFIG_BLOCK is disabled, like following:
-> ------------------------------------------------------
-> In file included from drivers/mmc/host/dw_mmc.c:14:0:
-> include/linux/blkdev.h:1408:42: warning: =91struct task_struct=92 dec=
-lared inside parameter list [enabled by default]
-> include/linux/blkdev.h:1408:42: warning: its scope is only this defin=
-ition or declaration, which is probably not what you want [enabled by d=
-efault]
-> include/linux/blkdev.h:1412:51: warning: =91struct task_struct=92 dec=
-lared inside parameter list [enabled by default]
-> include/linux/blkdev.h:1417:1: error: unknown type name =91bool=92
-> include/linux/blkdev.h:1417:48: warning: =91struct task_struct=92 dec=
-lared inside parameter list [enabled by default]
-> include/linux/blkdev.h: In function =91blk_needs_flush_plug=92:
-> include/linux/blkdev.h:1419:9: error: =91false=92 undeclared (first u=
-se in this function)
-> include/linux/blkdev.h:1419:9: note: each undeclared identifier is re=
-ported only once for each function it appears in
-> make[1]: *** [drivers/mmc/host/dw_mmc.o] Error 1
-> make: *** [drivers/mmc/host/dw_mmc.o] Error 2
-> ------------------------------------------------------
+> won't compile
 >
-> Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
-> Cc: Pavel Pisa <ppisa@pikron.com>
-> Cc: Sascha Hauer <s.hauer@pengutronix.de>
-> Cc: Will Newton <will.newton@imgtec.com>
-> Signed-off-by: Dmitry Artamonow <mad_soft@inbox.ru>
-
-=46or the dw_mmc part:
-
-Acked-by: Will Newton <will.newton@imgtec.com>
+why? compiles fine for me.
