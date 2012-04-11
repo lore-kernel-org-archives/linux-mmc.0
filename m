@@ -1,46 +1,40 @@
 From: Philippe De Swert <philippedeswert@gmail.com>
-Subject: [PATCH 1/2] mmc: Avoid null pointer dereference
-Date: Wed, 11 Apr 2012 23:31:45 +0300
-Message-ID: <1334176305-6183-1-git-send-email-philippedeswert@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:35690 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754919Ab2DKUcP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Apr 2012 16:32:15 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 2/2] mmc: Remove dead code
+Date: Wed, 11 Apr 2012 23:32:05 +0300
+Message-ID: <1334176325-6221-1-git-send-email-philippedeswert@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: philippedeswert@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, john.calixto@modsystems.com, prakity@marvell.com, cjb@laptop.org
+List-Id: linux-mmc@vger.kernel.org
 
-After the null check on md the code jumped to cmd_done, which then
-will dereference md in mmc_blk_put. This patch avoids the possible
-null pointer dereference in that case.
+bus_width is passed to the function and when 0 (MMC_BUS_WIDTH_1)
+will cause the function to return. So in in the second test it 
+definitly is different from 0, and the third test is redundant.
 
 Signed-off-by: Philippe De Swert <philippedeswert@gmail.com>
 ---
- drivers/mmc/card/block.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/core/mmc.c |    6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index b180965..4bed186 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -384,7 +384,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	md = mmc_blk_get(bdev->bd_disk);
- 	if (!md) {
- 		err = -EINVAL;
--		goto cmd_done;
-+		goto cmd_err;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 54df5ad..4a1bf8f 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -556,14 +556,10 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
+ 	err = mmc_get_ext_csd(card, &bw_ext_csd);
+ 
+ 	if (err || bw_ext_csd == NULL) {
+-		if (bus_width != MMC_BUS_WIDTH_1)
+-			err = -EINVAL;
++		err = -EINVAL;
+ 		goto out;
  	}
  
- 	card = md->queue.card;
-@@ -483,6 +483,7 @@ cmd_rel_host:
- 
- cmd_done:
- 	mmc_blk_put(md);
-+cmd_err:
- 	kfree(idata->buf);
- 	kfree(idata);
- 	return err;
+-	if (bus_width == MMC_BUS_WIDTH_1)
+-		goto out;
+-
+ 	/* only compare read only fields */
+ 	err = !((card->ext_csd.raw_partition_support ==
+ 			bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
 -- 
 1.7.9.5
-
