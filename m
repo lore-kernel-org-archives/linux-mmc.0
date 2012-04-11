@@ -1,69 +1,67 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Get rid of of_have_populated_dt() usage
-Date: Wed, 11 Apr 2012 13:26:33 +0300
-Message-ID: <20120411102632.GY12064@arwen.pp.htv.fi>
-References: <1334138593-9692-1-git-send-email-rnayak@ti.com>
- <20120411100956.GT12064@arwen.pp.htv.fi>
- <4F855BDC.9070103@ti.com>
-Reply-To: balbi@ti.com
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: swap on eMMC and other flash
+Date: Wed, 11 Apr 2012 13:28:39 +0300
+Message-ID: <4F855CD7.1000902@intel.com>
+References: <201203301744.16762.arnd@arndb.de> <201203301850.22784.arnd@arndb.de> <4F7C3CE2.5070803@intel.com> <201204041247.53289.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="c6YcJYqqMhegfX14"
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4F855BDC.9070103@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Rajendra Nayak <rnayak@ti.com>
-Cc: balbi@ti.com, cjb@laptop.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, b-cousson@ti.com, Balaji TK <balajitk@ti.com>, Rob Herring <rob.herring@calxeda.com>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <201204041247.53289.arnd@arndb.de>
+Sender: owner-linux-mm@kvack.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linaro-kernel@lists.linaro.org, linux-mm@kvack.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, Alex Lemberg <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, Saugata Das <saugata.das@linaro.org>, Venkatraman S <venkat@linaro.org>, Yejin Moon <yejin.moon@samsung.com>, Hyojin Jeong <syr.jeong@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, kernel-team@android.com
 List-Id: linux-mmc@vger.kernel.org
 
+On 04/04/12 15:47, Arnd Bergmann wrote:
+> On Wednesday 04 April 2012, Adrian Hunter wrote:
+>> On 30/03/12 21:50, Arnd Bergmann wrote:
+>>> (sorry for the duplicated email, this corrects the address of the android
+>>> kernel team, please reply here)
+>>>
+>>> On Friday 30 March 2012, Arnd Bergmann wrote:
+>>>
+>>>  We've had a discussion in the Linaro storage team (Saugata, Venkat and me,
+>>>  with Luca joining in on the discussion) about swapping to flash based media
+>>>  such as eMMC. This is a summary of what we found and what we think should
+>>>  be done. If people agree that this is a good idea, we can start working
+>>>  on it.
+>>
+>> There is mtdswap.
+> 
+> Ah, very interesting. I wasn't aware of that. Obviously we can't directly
+> use it on block devices that have their own garbage collection and wear
+> leveling built into them, but it's interesting to see how this was solved
+> before.
+> 
+> While we could build something similar that remaps blocks between an
+> eMMC device and the logical swap space that is used by the mm code,
+> my feeling is that it would be easier to modify the swap code itself
+> to do the right thing.
+> 
+>> Also the old Nokia N900 had swap to eMMC.
+>>
+>> The last I heard was that swap was considered to be simply too slow on hand
+>> held devices.
+> 
+> That's the part that we want to solve here. It has nothing to do with
+> handheld devices, but more with specific incompatibilities of the
+> block allocation in the swap code vs. what an eMMC device expects
+> to see for fast operation. If you write data in the wrong order on
+> flash devices, you get long delays that you don't get when you do
+> it the right way. The same problem exists for file systems, and is
+> being addressed there as well.
+> 
+>> As systems adopt more RAM, isn't there a decreasing demand for swap?
+> 
+> No. You would never be able to make hibernate work, no matter how much
+> RAM you add ;-)
 
---c6YcJYqqMhegfX14
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Have you considered making hibernate work without swap?
 
-On Wed, Apr 11, 2012 at 03:54:28PM +0530, Rajendra Nayak wrote:
-> On Wednesday 11 April 2012 03:39 PM, Felipe Balbi wrote:
-> >On Wed, Apr 11, 2012 at 03:33:13PM +0530, Rajendra Nayak wrote:
-> >>@@ -1564,7 +1564,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *m=
-mc, struct mmc_ios *ios)
-> >>  			 * can't be allowed when booting with device
-> >>  			 * tree.
-> >>  			 */
-> >>-			(!of_have_populated_dt())) {
-> >>+			!host->dev->of_node) {
-> >
-> >won't compile
-> >
-> why? compiles fine for me.
-
-aren't you missing the opening parenthesis ? Or is there a something not
-shown in the context ?
-
---=20
-balbi
-
---c6YcJYqqMhegfX14
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJPhVxYAAoJEIaOsuA1yqRE2wkP/2aMmXwlmR8+I6bX3ix9PpdK
-2aAy4jyQ2UMycHNUXkKj2YDyOpqAQdhSQN5Iy13o09OSC1/oFlvJsZgiZAClv6zU
-6AxsLqRf6IYVNXRVVKtB/gXXUjVwANCRg/R5ulTs+QmIAH80WueRH+vCI1jHGJSE
-SPDgPnrdEYszBnmGlM9XLeXA849QrUkAdFgtUaBWt0ak6qy4PrjS2/S6+YtZLvwl
-9JU03uKfqqFOWsBD+Wswdg8ssAz9RAwrwKWW40bYmGEP7Ct14mZJq7C1IA71Hdk5
-laoQMBFWIJMjE+3O5BQyzBOehOsJmYJX4NXDLvKhDAm763ITqQ7ltldKoS0iQi1M
-FAX1/Em08x2aZxpOPza45M6BhdutKE4kvmWt5POgWWERDlOn9chBRk5PaPH2XFsw
-i/cA7w7QjUmx0mtY8WnUhUfmExgipFbn3bUcngMQz9xnsspfQy9FDrNL04W92KCz
-rOSYd3RP35RmJ+4TJAs2wrrFFEunP0NbbRvRD02Z87K/ZOJIDoxNGx+gvjl9timI
-cw80OtsE8LZNpLPv6KdMaT5bEw6Crih0Tj8W4P8kWj51H3f7Th5Q7VBkNE90KRdb
-RDsbTDXigh4fKk2BhIFtMPMa4qGISlSxgEKdkZndBYm6dZV6KCEkf+i2WQYFQUGK
-bhcjmOniJR2wkCZMNuLb
-=h4wZ
------END PGP SIGNATURE-----
-
---c6YcJYqqMhegfX14--
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
