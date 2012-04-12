@@ -1,102 +1,123 @@
-From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH v2 1/1] mmc: core: skip card initialization if power class
- selection fails
-Date: Thu, 12 Apr 2012 14:03:17 +0900
-Message-ID: <CAKYAXd8sx=u9LqOndGe1Xu7U6xWPv87hv31Zko7U7eSuJJtUnw@mail.gmail.com>
-References: <1334144122-20647-1-git-send-email-subhashj@codeaurora.org>
-	<CAKYAXd9YVKjiwfOOYJ8_FYiCLQOoU-8stewPiNJBoyb_OxBW7g@mail.gmail.com>
-	<CAGxe1ZEtDPP5aDMJgz8Pib=4F0UDboKVQW0G34h8dt38-iNspA@mail.gmail.com>
+From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
+Subject: Re: [PATCH v2] mmc: core: eMMC in Sleep mode before suspend
+Date: Thu, 12 Apr 2012 12:52:47 +0530
+Message-ID: <CANrkHUbD6hP3BN0zE8W2T5kH+WzM9ZqUqTeG2YqZBFVS3bZDLw@mail.gmail.com>
+References: <1315499919-804-1-git-send-email-balajitk@ti.com>
+	<87wr5lr30z.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAGxe1ZEtDPP5aDMJgz8Pib=4F0UDboKVQW0G34h8dt38-iNspA@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: Subhash Jadavani <subhashj@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from na3sys009aog108.obsmtp.com ([74.125.149.199]:58976 "EHLO
+	na3sys009aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752051Ab2DLHWu convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 12 Apr 2012 03:22:50 -0400
+Received: by lagr15 with SMTP id r15so2592238lag.16
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Apr 2012 00:22:47 -0700 (PDT)
+In-Reply-To: <87wr5lr30z.fsf@laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, subhashj@codeaurora.org, adrian.hunter@intel.com, Venkatraman S <svenkatr@ti.com>, Jarkko Lavinen <jarkko.lavinen@nokia.com>
 
-MjAxMi80LzEyIEdpcmlzaCBLIFMgPGdpcmlzaC5zaGl2YW5hbmphcHBhQGxpbmFyby5vcmc+Ogo+
-IE9uIDExIEFwcmlsIDIwMTIgMTk6MjQsIE5hbWphZSBKZW9uIDxsaW5raW5qZW9uQGdtYWlsLmNv
-bT4gd3JvdGU6Cj4+IEhpLiBTdWJoYXNoLgpIaS4KPj4gSGF2ZSB5b3UgY29uc2lkZXJlZCByZXR1
-cm4gLUVJTlZBTCBpbiBzd2l0Y2ggPwo+IFRoYXQgaXMgY2FzZSB3aGljaCBzaG91bGQgbmV2ZXIg
-ZW50ZXIuCldvdWxkIHlvdSBleHBsYWluIG1vcmUgd2h5IGVudGVyaW5nIG5ldmVyIGluIGNhc2U/
-Cj4+IEFuZCBsb29rcyBjb21wbGV4IG1vcmUuLiBob3cgYWJvdXQgZ2V0dGluZyBidXNfd2lkdGgg
-YW5kIGRkciB2YWx1ZQo+PiBmcm9tIGFyZ3VtZW50ID8KPiBidXNfd2lkdGggaXMgYWxyZWFkeSBh
-IGFyZ3VtZW50IG9mIG1tY19zZWxlY3RfcG93ZXJjbGFzcy4KYnVzX3dpZHRoIEkgcG9pbnQgaXMg
-d2lkdGggZm9yIHByaW50ay4KClRoYW5rcy4KPj4KPj4gVGhhbmtzLgo+PiAyMDEyLzQvMTEgU3Vi
-aGFzaCBKYWRhdmFuaSA8c3ViaGFzaGpAY29kZWF1cm9yYS5vcmc+Ogo+Pj4gV2l0aCBjdXJyZW50
-IGltcGxlbWVudGF0aW9uIG9mIHBvd2VyIGNsYXNzIHNlbGVjdGlvbiwKPj4+IG1tY19zZWxlY3Rf
-cG93ZXJjbGFzcygpIHNob3VsZCBuZXZlciBmYWlsLiBTbyB0cmVhdCBhbnkgZXJyb3IKPj4+IHJl
-dHVybmVkIGJ5IHRoaXMgZnVuY3Rpb24gYXMgc2VyaW91cyBlbm91Z2ggdG8gc2tpcCB0aGUgY2Fy
-ZAo+Pj4gaW5pdGlhbGl6YXRpb24uCj4+Pgo+Pj4gU2lnbmVkLW9mZi1ieTogU3ViaGFzaCBKYWRh
-dmFuaSA8c3ViaGFzaGpAY29kZWF1cm9yYS5vcmc+Cj4+PiAtLS0KPj4+IMKgZHJpdmVycy9tbWMv
-Y29yZS9tbWMuYyB8IMKgIDI2ICsrKysrKysrKysrKysrKy0tLS0tLS0tLS0tCj4+PiDCoDEgZmls
-ZXMgY2hhbmdlZCwgMTUgaW5zZXJ0aW9ucygrKSwgMTEgZGVsZXRpb25zKC0pCj4+Pgo+Pj4gZGlm
-ZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5j
-Cj4+PiBpbmRleCBmMzRhZmJkLi41ZjlkOThlIDEwMDY0NAo+Pj4gLS0tIGEvZHJpdmVycy9tbWMv
-Y29yZS9tbWMuYwo+Pj4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYwo+Pj4gQEAgLTcyMiw2
-ICs3MjIsMTggQEAgc3RhdGljIGludCBtbWNfc2VsZWN0X3Bvd2VyY2xhc3Moc3RydWN0IG1tY19j
-YXJkICpjYXJkLAo+Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgY2FyZC0+ZXh0X2NzZC5nZW5lcmljX2NtZDZfdGltZSk7Cj4+PiDCoCDCoCDCoCDCoH0K
-Pj4+Cj4+PiArIMKgIMKgIMKgIGlmIChlcnIpIHsKPj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-aW50IHdpZHRoID0gNDsKPj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgaW50IGRkciA9IChidXNf
-d2lkdGggPD0gRVhUX0NTRF9CVVNfV0lEVEhfOCkgPyAwIDogMTsKPj4+ICsKPj4+ICsgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgaWYgKChidXNfd2lkdGggPT0gRVhUX0NTRF9CVVNfV0lEVEhfOCkgfHwK
-Pj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgKGJ1c193aWR0aCA9PSBFWFRfQ1NEX0RE
-Ul9CVVNfV0lEVEhfOCkpCj4+PiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIHdp
-ZHRoID0gODsKPj4+ICsKPj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgcHJfZXJyKCIlczogcG93
-ZXIgY2xhc3Mgc2VsZWN0aW9uIHRvIGJ1cyB3aWR0aCAlZCBkZHIgJWQiCj4+PiArIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIiBmYWlsZWRcbiIsIG1tY19ob3N0bmFtZShjYXJkLT5o
-b3N0KSwgd2lkdGgsIGRkcik7Cj4+PiArIMKgIMKgIMKgIH0KPj4+ICsKPj4+IMKgIMKgIMKgIMKg
-cmV0dXJuIGVycjsKPj4+IMKgfQo+Pj4KPj4+IEBAIC0xMTE1LDkgKzExMjcsNyBAQCBzdGF0aWMg
-aW50IG1tY19pbml0X2NhcmQoc3RydWN0IG1tY19ob3N0ICpob3N0LCB1MzIgb2NyLAo+Pj4gwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBFWFRfQ1NEX0JVU19X
-SURUSF84IDogRVhUX0NTRF9CVVNfV0lEVEhfNDsKPj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-ZXJyID0gbW1jX3NlbGVjdF9wb3dlcmNsYXNzKGNhcmQsIGV4dF9jc2RfYml0cywgZXh0X2NzZCk7
-Cj4+PiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGlmIChlcnIpCj4+PiAtIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIHByX3dhcm5pbmcoIiVzOiBwb3dlciBjbGFzcyBzZWxlY3Rpb24g
-dG8gYnVzIHdpZHRoICVkIgo+Pj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCIgZmFpbGVkXG4iLCBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCksCj4+
-PiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgMSA8
-PCBidXNfd2lkdGgpOwo+Pj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBnb3Rv
-IGVycjsKPj4+IMKgIMKgIMKgIMKgfQo+Pj4KPj4+IMKgIMKgIMKgIMKgLyoKPj4+IEBAIC0xMTQ5
-LDEwICsxMTU5LDcgQEAgc3RhdGljIGludCBtbWNfaW5pdF9jYXJkKHN0cnVjdCBtbWNfaG9zdCAq
-aG9zdCwgdTMyIG9jciwKPj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgZXJy
-ID0gbW1jX3NlbGVjdF9wb3dlcmNsYXNzKGNhcmQsIGV4dF9jc2RfYml0c1tpZHhdWzBdLAo+Pj4g
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqBleHRfY3NkKTsKPj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgaWYgKGVycikKPj4+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgcHJfd2FybmluZygiJXM6IHBvd2VyIGNsYXNzIHNlbGVjdGlvbiB0byAi
-Cj4+PiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgImJ1cyB3aWR0aCAlZCBmYWlsZWRcbiIsCj4+PiAtIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgbW1jX2hvc3Ru
-YW1lKGNhcmQtPmhvc3QpLAo+Pj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoDEgPDwgYnVzX3dpZHRoKTsKPj4+ICsgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgZ290byBlcnI7Cj4+Pgo+Pj4g
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBlcnIgPSBtbWNfc3dpdGNoKGNhcmQs
-IEVYVF9DU0RfQ01EX1NFVF9OT1JNQUwsCj4+PiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBFWFRfQ1NEX0JVU19XSURUSCwKPj4+IEBA
-IC0xMTgwLDEwICsxMTg3LDcgQEAgc3RhdGljIGludCBtbWNfaW5pdF9jYXJkKHN0cnVjdCBtbWNf
-aG9zdCAqaG9zdCwgdTMyIG9jciwKPj4+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgZXJyID0gbW1jX3NlbGVjdF9wb3dlcmNsYXNzKGNhcmQsIGV4dF9jc2RfYml0c1tpZHhdWzFd
-LAo+Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBleHRfY3NkKTsKPj4+IMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgaWYgKGVycikKPj4+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgcHJfd2FybmluZygiJXM6IHBvd2VyIGNsYXNzIHNlbGVjdGlv
-biB0byAiCj4+PiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
-IMKgIMKgIMKgIMKgIMKgIMKgImJ1cyB3aWR0aCAlZCBkZHIgJWQgZmFpbGVkXG4iLAo+Pj4gLSDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
-oCDCoG1tY19ob3N0bmFtZShjYXJkLT5ob3N0KSwKPj4+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAxIDw8IGJ1c193aWR0aCwg
-ZGRyKTsKPj4+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
-Z290byBlcnI7Cj4+Pgo+Pj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBlcnIg
-PSBtbWNfc3dpdGNoKGNhcmQsIEVYVF9DU0RfQ01EX1NFVF9OT1JNQUwsCj4+PiDCoCDCoCDCoCDC
-oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBFWFRfQ1NE
-X0JVU19XSURUSCwKPj4+IC0tCj4+PiAxLjcuMS4xCj4+Pgo+Pj4gLS0KPj4+IFNlbnQgYnkgYSBj
-b25zdWx0YW50IG9mIHRoZSBRdWFsY29tbSBJbm5vdmF0aW9uIENlbnRlciwgSW5jLgo+Pj4gVGhl
-IFF1YWxjb21tIElubm92YXRpb24gQ2VudGVyLCBJbmMuIGlzIGEgbWVtYmVyIG9mIHRoZSBDb2Rl
-IEF1cm9yYSBGb3J1bS4KPj4+IC0tCj4+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDog
-c2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbgo+Pj4gdGhlIGJvZHkgb2Yg
-YSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcKPj4+IE1vcmUgbWFqb3Jkb21v
-IGluZm8gYXQgwqBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwK
+On Thu, Apr 12, 2012 at 9:54 AM, Chris Ball <cjb@laptop.org> wrote:
+> Hi,
+>
+> On Thu, Sep 08 2011, Balaji T K wrote:
+>> Put MMC to sleep if it supports SLEEP/AWAKE (CMD5)
+>> in the mmc suspend so that Vcc (NAND core) can be cut
+>> to minimize power consumption.
+>> eMMC put into SLEEP can respond to CMD0 or H/W reset or CMD5.
+>> Current implemention on resume from suspend relies on CMD0 in
+>> mmc_init_card to get out of SLEEP mode.
+>>
+>> Signed-off-by: Balaji T K <balajitk@ti.com>
+>> Acked-by: Venkatraman S <svenkatr@ti.com>
+>
+> I've just tried this on an eMMC 4.41 device (Sandisk SEM04G) with
+> sdhci-pxav3, and it resulted in a crash on the way into suspend:
+>
+> [ =A0 18.379192] PM: Syncing filesystems ... done.
+> [ =A0 18.423866] Freezing user space processes ... (elapsed 0.01 seco=
+nds) done.
+> [ =A0 18.446542] Freezing remaining freezable tasks ... (elapsed 0.01=
+ seconds) done.
+> [ =A0 18.549586] PM: Device sdhci-pxav3.2 failed to suspend: error -1=
+10
+> [ =A0 18.583808] PM: Some devices failed to suspend
+> [ =A0 22.141284] mmcblk0: error -110 sending status command, retrying
+> [ =A0 22.153150] mmcblk0: error -110 sending status command, retrying
+> [ =A0 22.164708] mmcblk0: error -110 sending status command, aborting
+> [ =A0 22.176097] end_request: I/O error, dev mmcblk0, sector 4430104
+> [..]
+>
+> Digging down, the -110 is coming from:
+>
+> int mmc_card_sleepawake(struct mmc_host *host, int sleep)
+> {
+> =A0 =A0 =A0 =A0struct mmc_command cmd =3D {0};
+> =A0 =A0 =A0 =A0struct mmc_card *card =3D host->card;
+> =A0 =A0 =A0 =A0int err;
+>
+> =A0 =A0 =A0 =A0if (sleep)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_deselect_cards(host);
+>
+> =A0 =A0 =A0 =A0cmd.opcode =3D MMC_SLEEP_AWAKE;
+> =A0 =A0 =A0 =A0cmd.arg =3D card->rca << 16;
+> =A0 =A0 =A0 =A0if (sleep)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0cmd.arg |=3D 1 << 15;
+>
+> =A0 =A0 =A0 =A0cmd.flags =3D MMC_RSP_R1B | MMC_CMD_AC;
+> =A0 =A0 =A0 =A0err =3D mmc_wait_for_cmd(host, &cmd, 0);
+> =A0 =A0 =A0 =A0if (err)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return err;
+> =A0 =A0 =A0 =A0[..]
+>
+> Has anyone tried sleepawake on an SEM04G before?
+>
+Hi Chris,
+
+I tried eMMC 4.41 device (Sandisk SEM08G) with
+omap4, both CMD5 sleep/awake is successful
+
+mmc_card_sleepawake (host, 1)
+[   20.094451] mmc0: starting CMD7 arg 00000000 flags 00000000
+[   20.103576] omap_hsmmc omap_hsmmc.1: mmc0: CMD7, argument 0x00000000
+[   20.103576] omap_hsmmc omap_hsmmc.1: IRQ Status is 1
+[   20.110229] mmc0: req done (CMD7): 0: 00000000 00000000 00000000 000=
+00000
+[   20.122528] mmc0: starting CMD5 arg 00018000 flags 0000001d
+[   20.128356] omap_hsmmc omap_hsmmc.1: mmc0: CMD5, argument 0x00018000
+[   20.135040] omap_hsmmc omap_hsmmc.1: IRQ Status is 1
+[   20.140228] omap_hsmmc omap_hsmmc.1: IRQ Status is 2
+[   20.140228] mmc0: req done (CMD5): 0: 00000600 00000000 00000000 000=
+00000
+[   20.152526] mmc0: clock 0Hz busmode 1 powermode 0 cs 0 Vdd 0 width 0=
+ timing 0
+
+mmc_card_sleepawake (host, 0)
+[   32.875762] mmc0: starting CMD5 arg 00010000 flags 0000001d
+[   32.881591] omap_hsmmc omap_hsmmc.1: mmc0: CMD5, argument 0x00010000
+[   32.888549] omap_hsmmc omap_hsmmc.1: IRQ Status is 1
+[   32.893737] omap_hsmmc omap_hsmmc.1: IRQ Status is 2
+[   32.898925] mmc0: req done (CMD5): 0: 00001400 00000000 00000000 000=
+00000
+[   32.906066] mmc0: starting CMD7 arg 00010000 flags 00000015
+[   32.911895] omap_hsmmc omap_hsmmc.1: mmc0: CMD7, argument 0x00010000
+[   32.918884] omap_hsmmc omap_hsmmc.1: IRQ Status is 1
+[   32.918884] mmc0: req done (CMD7): 0: 00000700 00000000 00000000 000=
+00000
+[   32.931182] omap_hsmmc omap_hsmmc.1: disabled
+
+> It seems likely (I haven't tested yet, but will do) that the card
+> actually went into sleep successfully and is waiting for an AWAKE
+> command, even though mmc_wait_for_cmd() returned a timeout.
+> If so, any suggestions on how to handle that case?
+>
+> Thanks,
+>
+> - Chris.
+> --
+> Chris Ball =A0 <cjb@laptop.org> =A0 <http://printf.net/>
+> One Laptop Per Child
