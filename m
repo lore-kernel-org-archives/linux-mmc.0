@@ -1,53 +1,27 @@
-From: Philip Rakity <prakity@marvell.com>
+From: Namjae Jeon <linkinjeon@gmail.com>
 Subject: Re: [PATCH 2/2] mmc: Remove dead code
-Date: Wed, 11 Apr 2012 13:56:39 -0700
-Message-ID: <5D6E9FAF-376B-44A8-89DC-691AC5187FB6@marvell.com>
+Date: Thu, 12 Apr 2012 10:39:12 +0900
+Message-ID: <CAKYAXd8Uor+AM2vf8ZEUsNKef=QbMnExGe47o1m9YMxzQ9ZokQ@mail.gmail.com>
 References: <1334176325-6221-1-git-send-email-philippedeswert@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:57104 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756734Ab2DLBjN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Apr 2012 21:39:13 -0400
 In-Reply-To: <1334176325-6221-1-git-send-email-philippedeswert@gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Philippe De Swert <philippedeswert@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "john.calixto@modsystems.com" <john.calixto@modsystems.com>, "cjb@laptop.org" <cjb@laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Philippe De Swert <philippedeswert@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, john.calixto@modsystems.com, prakity@marvell.com, cjb@laptop.org
 
-
-Acked-by: Philip Rakity <prakity@marvell.com>
-
-On Apr 11, 2012, at 1:32 PM, Philippe De Swert wrote:
-
+2012/4/12 Philippe De Swert <philippedeswert@gmail.com>:
 > bus_width is passed to the function and when 0 (MMC_BUS_WIDTH_1)
-> will cause the function to return. So in in the second test it 
+> will cause the function to return. So in in the second test it
 > definitly is different from 0, and the third test is redundant.
-> 
+>
 > Signed-off-by: Philippe De Swert <philippedeswert@gmail.com>
 > ---
-> drivers/mmc/core/mmc.c |    6 +-----
-> 1 file changed, 1 insertion(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 54df5ad..4a1bf8f 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -556,14 +556,10 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
-> 	err = mmc_get_ext_csd(card, &bw_ext_csd);
-> 
-> 	if (err || bw_ext_csd == NULL) {
-> -		if (bus_width != MMC_BUS_WIDTH_1)
-> -			err = -EINVAL;
-> +		err = -EINVAL;
-> 		goto out;
-> 	}
-> 
-> -	if (bus_width == MMC_BUS_WIDTH_1)
-> -		goto out;
-> -
-> 	/* only compare read only fields */
-> 	err = !((card->ext_csd.raw_partition_support ==
-> 			bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
-> -- 
-> 1.7.9.5
-> 
+Looks good to me.
+Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
