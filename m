@@ -1,140 +1,52 @@
-From: Girish K S <girish.shivananjappa@linaro.org>
-Subject: Re: [PATCH v2 1/1] mmc: core: skip card initialization if power class
- selection fails
-Date: Thu, 12 Apr 2012 09:58:23 +0530
-Message-ID: <CAGxe1ZEtDPP5aDMJgz8Pib=4F0UDboKVQW0G34h8dt38-iNspA@mail.gmail.com>
-References: <1334144122-20647-1-git-send-email-subhashj@codeaurora.org>
-	<CAKYAXd9YVKjiwfOOYJ8_FYiCLQOoU-8stewPiNJBoyb_OxBW7g@mail.gmail.com>
+From: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Subject: Re: [PATCH 1/1] [PATCH v4 1/1] mmc: Support of DUAL BUFFER DESC[ring]
+ mode for dw_mmc
+Date: Thu, 12 Apr 2012 10:31:29 +0530
+Message-ID: <CANYdXnpLtivMRTxTDRfsGfJLCusgCSAi3jsuGNc8E3sUThWKkQ@mail.gmail.com>
+References: <1317123568-5203-1-git-send-email-shashidharh@vayavyalabs.com>
+	<4E8BBD76.9020001@samsung.com>
+	<CANYdXnpe0prpdJcYpi3yVqCecugwZ1999c2u2u6ffjXjSeCDnw@mail.gmail.com>
+	<m2obwt8ju2.fsf@bob.laptop.org>
+	<CAFbHwiSahkGOd4EfYiKY-T9Segn9Nn4qSMA591SFRmMmKY67VQ@mail.gmail.com>
+	<CANYdXnqviDqYb9Rq0O-48P6f+v6NSg8j8-H7XYU+ccNx_P17zw@mail.gmail.com>
+	<CANYdXnpdHVWFbXnSR2wGVOF4zKMxxmEMTfC+1x10NCpvmPNXDQ@mail.gmail.com>
+	<20111119013435.GA19582@balrog>
+	<CANYdXnq6EhLx43uaBDVfZ8NcQMLoPiPHFKawyWUcvqo6oM0zDg@mail.gmail.com>
+	<CANYdXnrm48Me+cCqL4pDroLdkrtyZhX7OGvVYcAXcKON3sHQhA@mail.gmail.com>
+	<CAFbHwiR0WKYQ4FVZCDB9RNscxwHraOh77SWPcrbKmmrApxacig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAKYAXd9YVKjiwfOOYJ8_FYiCLQOoU-8stewPiNJBoyb_OxBW7g@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: Subhash Jadavani <subhashj@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:39711 "EHLO
+	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753354Ab2DLFBa convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Apr 2012 01:01:30 -0400
+Received: by iagz16 with SMTP id z16so2276422iag.19
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Apr 2012 22:01:29 -0700 (PDT)
+In-Reply-To: <CAFbHwiR0WKYQ4FVZCDB9RNscxwHraOh77SWPcrbKmmrApxacig@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Will Newton <will.newton@gmail.com>
+Cc: James Hogan <james@albanarts.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <w.sang@pengutronix.de>, Philip Rakity <prakity@marvell.com>, Zhangfei Gao <zhangfei.gao@marvell.com>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>, Matt Fleming <matt@console-pimps.org>, linux-mmc@vger.kernel.org, Sandeep Pendharkar <sandeep@vayavyalabs.com>, Rayagond Kokatanur <rayagond@vayavyalabs.com>
 
-On 11 April 2012 19:24, Namjae Jeon <linkinjeon@gmail.com> wrote:
-> Hi. Subhash.
-> Have you considered return -EINVAL in switch ?
-That is case which should never enter.
-> And looks complex more.. how about getting bus_width and ddr value
-> from argument ?
-bus_width is already a argument of mmc_select_powerclass.
+Hi Chris,
+  Any updates on when this patch can be pushed ?
+
+On Thu, Jan 19, 2012 at 3:59 PM, Will Newton <will.newton@gmail.com> wr=
+ote:
+> On Tue, Jan 17, 2012 at 1:46 PM, Shashidhar Hiremath
+> <shashidharh@vayavyalabs.com> wrote:
+>> Hi ,
+>> =C2=A0Any update on this patch ?
 >
-> Thanks.
-> 2012/4/11 Subhash Jadavani <subhashj@codeaurora.org>:
->> With current implementation of power class selection,
->> mmc_select_powerclass() should never fail. So treat any error
->> returned by this function as serious enough to skip the card
->> initialization.
->>
->> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
->> ---
->> =A0drivers/mmc/core/mmc.c | =A0 26 +++++++++++++++-----------
->> =A01 files changed, 15 insertions(+), 11 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index f34afbd..5f9d98e 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -722,6 +722,18 @@ static int mmc_select_powerclass(struct mmc_car=
-d *card,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card=
-->ext_csd.generic_cmd6_time);
->> =A0 =A0 =A0 =A0}
->>
->> + =A0 =A0 =A0 if (err) {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 int width =3D 4;
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 int ddr =3D (bus_width <=3D EXT_CSD_BU=
-S_WIDTH_8) ? 0 : 1;
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((bus_width =3D=3D EXT_CSD_BUS_WIDT=
-H_8) ||
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (bus_width =3D=3D EXT_CSD_DDR_=
-BUS_WIDTH_8))
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 width =3D 8;
->> +
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("%s: power class selection to b=
-us width %d ddr %d"
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0" failed\n", mmc_hostna=
-me(card->host), width, ddr);
->> + =A0 =A0 =A0 }
->> +
->> =A0 =A0 =A0 =A0return err;
->> =A0}
->>
->> @@ -1115,9 +1127,7 @@ static int mmc_init_card(struct mmc_host *host=
-, u32 ocr,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_C=
-SD_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_powerclass(card, e=
-xt_csd_bits, ext_csd);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("%s: power =
-class selection to bus width %d"
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-" failed\n", mmc_hostname(card->host),
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-1 << bus_width);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err;
->> =A0 =A0 =A0 =A0}
->>
->> =A0 =A0 =A0 =A0/*
->> @@ -1149,10 +1159,7 @@ static int mmc_init_card(struct mmc_host *hos=
-t, u32 ocr,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_po=
-werclass(card, ext_csd_bits[idx][0],
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_war=
-ning("%s: power class selection to "
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0"bus width %d failed\n",
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0mmc_hostname(card->host),
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A01 << bus_width);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto e=
-rr;
->>
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(ca=
-rd, EXT_CSD_CMD_SET_NORMAL,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 EXT_CSD_BUS_WIDTH,
->> @@ -1180,10 +1187,7 @@ static int mmc_init_card(struct mmc_host *hos=
-t, u32 ocr,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_po=
-werclass(card, ext_csd_bits[idx][1],
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd);
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_war=
-ning("%s: power class selection to "
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0"bus width %d ddr %d failed\n",
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0mmc_hostname(card->host),
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A01 << bus_width, ddr);
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto e=
-rr;
->>
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(ca=
-rd, EXT_CSD_CMD_SET_NORMAL,
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 EXT_CSD_BUS_WIDTH,
->> --
->> 1.7.1.1
->>
->> --
->> Sent by a consultant of the Qualcomm Innovation Center, Inc.
->> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora =
-=46orum.
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> I'm happy to see it merged based on those numbers. It might be worth
+> adding the numbers to the commit message for future reference though?
+>
+> Acked-by: Will Newton <will.newton@imgtec.com>
+
+
+
+--=20
+regards,
+Shashidhar Hiremath
