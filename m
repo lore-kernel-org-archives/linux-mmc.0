@@ -1,81 +1,140 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: core: eMMC in Sleep mode before suspend
-Date: Thu, 12 Apr 2012 00:24:12 -0400
-Message-ID: <87wr5lr30z.fsf@laptop.org>
-References: <1315499919-804-1-git-send-email-balajitk@ti.com>
+From: Girish K S <girish.shivananjappa@linaro.org>
+Subject: Re: [PATCH v2 1/1] mmc: core: skip card initialization if power class
+ selection fails
+Date: Thu, 12 Apr 2012 09:58:23 +0530
+Message-ID: <CAGxe1ZEtDPP5aDMJgz8Pib=4F0UDboKVQW0G34h8dt38-iNspA@mail.gmail.com>
+References: <1334144122-20647-1-git-send-email-subhashj@codeaurora.org>
+	<CAKYAXd9YVKjiwfOOYJ8_FYiCLQOoU-8stewPiNJBoyb_OxBW7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:49815 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752752Ab2DLEYT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 Apr 2012 00:24:19 -0400
-In-Reply-To: <1315499919-804-1-git-send-email-balajitk@ti.com> (Balaji T. K.'s
-	message of "Thu, 8 Sep 2011 22:08:39 +0530")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAKYAXd9YVKjiwfOOYJ8_FYiCLQOoU-8stewPiNJBoyb_OxBW7g@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: Subhash Jadavani <subhashj@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-mmc@vger.kernel.org, subhashj@codeaurora.org, adrian.hunter@intel.com, Venkatraman S <svenkatr@ti.com>, Jarkko Lavinen <jarkko.lavinen@nokia.com>
 
-Hi,
-
-On Thu, Sep 08 2011, Balaji T K wrote:
-> Put MMC to sleep if it supports SLEEP/AWAKE (CMD5)
-> in the mmc suspend so that Vcc (NAND core) can be cut
-> to minimize power consumption.
-> eMMC put into SLEEP can respond to CMD0 or H/W reset or CMD5.
-> Current implemention on resume from suspend relies on CMD0 in
-> mmc_init_card to get out of SLEEP mode.
+On 11 April 2012 19:24, Namjae Jeon <linkinjeon@gmail.com> wrote:
+> Hi. Subhash.
+> Have you considered return -EINVAL in switch ?
+That is case which should never enter.
+> And looks complex more.. how about getting bus_width and ddr value
+> from argument ?
+bus_width is already a argument of mmc_select_powerclass.
 >
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> Acked-by: Venkatraman S <svenkatr@ti.com>
-
-I've just tried this on an eMMC 4.41 device (Sandisk SEM04G) with
-sdhci-pxav3, and it resulted in a crash on the way into suspend:
-
-[   18.379192] PM: Syncing filesystems ... done.
-[   18.423866] Freezing user space processes ... (elapsed 0.01 seconds) done.
-[   18.446542] Freezing remaining freezable tasks ... (elapsed 0.01 seconds) done.
-[   18.549586] PM: Device sdhci-pxav3.2 failed to suspend: error -110
-[   18.583808] PM: Some devices failed to suspend
-[   22.141284] mmcblk0: error -110 sending status command, retrying
-[   22.153150] mmcblk0: error -110 sending status command, retrying
-[   22.164708] mmcblk0: error -110 sending status command, aborting
-[   22.176097] end_request: I/O error, dev mmcblk0, sector 4430104
-[..]
-
-Digging down, the -110 is coming from:
-
-int mmc_card_sleepawake(struct mmc_host *host, int sleep)
-{
-        struct mmc_command cmd = {0};
-        struct mmc_card *card = host->card;
-        int err;
-
-        if (sleep)
-                mmc_deselect_cards(host);
-
-        cmd.opcode = MMC_SLEEP_AWAKE;
-        cmd.arg = card->rca << 16;
-        if (sleep)
-                cmd.arg |= 1 << 15;
-
-        cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
-        err = mmc_wait_for_cmd(host, &cmd, 0);
-        if (err)
-                return err;
-        [..]
-
-Has anyone tried sleepawake on an SEM04G before?
-
-It seems likely (I haven't tested yet, but will do) that the card
-actually went into sleep successfully and is waiting for an AWAKE
-command, even though mmc_wait_for_cmd() returned a timeout.
-If so, any suggestions on how to handle that case?
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+> Thanks.
+> 2012/4/11 Subhash Jadavani <subhashj@codeaurora.org>:
+>> With current implementation of power class selection,
+>> mmc_select_powerclass() should never fail. So treat any error
+>> returned by this function as serious enough to skip the card
+>> initialization.
+>>
+>> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+>> ---
+>> =A0drivers/mmc/core/mmc.c | =A0 26 +++++++++++++++-----------
+>> =A01 files changed, 15 insertions(+), 11 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index f34afbd..5f9d98e 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -722,6 +722,18 @@ static int mmc_select_powerclass(struct mmc_car=
+d *card,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card=
+->ext_csd.generic_cmd6_time);
+>> =A0 =A0 =A0 =A0}
+>>
+>> + =A0 =A0 =A0 if (err) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 int width =3D 4;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 int ddr =3D (bus_width <=3D EXT_CSD_BU=
+S_WIDTH_8) ? 0 : 1;
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if ((bus_width =3D=3D EXT_CSD_BUS_WIDT=
+H_8) ||
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 (bus_width =3D=3D EXT_CSD_DDR_=
+BUS_WIDTH_8))
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 width =3D 8;
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_err("%s: power class selection to b=
+us width %d ddr %d"
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0" failed\n", mmc_hostna=
+me(card->host), width, ddr);
+>> + =A0 =A0 =A0 }
+>> +
+>> =A0 =A0 =A0 =A0return err;
+>> =A0}
+>>
+>> @@ -1115,9 +1127,7 @@ static int mmc_init_card(struct mmc_host *host=
+, u32 ocr,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0EXT_C=
+SD_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_powerclass(card, e=
+xt_csd_bits, ext_csd);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_warning("%s: power =
+class selection to bus width %d"
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+" failed\n", mmc_hostname(card->host),
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+1 << bus_width);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err;
+>> =A0 =A0 =A0 =A0}
+>>
+>> =A0 =A0 =A0 =A0/*
+>> @@ -1149,10 +1159,7 @@ static int mmc_init_card(struct mmc_host *hos=
+t, u32 ocr,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_po=
+werclass(card, ext_csd_bits[idx][0],
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_war=
+ning("%s: power class selection to "
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0"bus width %d failed\n",
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0mmc_hostname(card->host),
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A01 << bus_width);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto e=
+rr;
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(ca=
+rd, EXT_CSD_CMD_SET_NORMAL,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 EXT_CSD_BUS_WIDTH,
+>> @@ -1180,10 +1187,7 @@ static int mmc_init_card(struct mmc_host *hos=
+t, u32 ocr,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_select_po=
+werclass(card, ext_csd_bits[idx][1],
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ext_csd);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (err)
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_war=
+ning("%s: power class selection to "
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0"bus width %d ddr %d failed\n",
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A0mmc_hostname(card->host),
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 =A01 << bus_width, ddr);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto e=
+rr;
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_switch(ca=
+rd, EXT_CSD_CMD_SET_NORMAL,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 EXT_CSD_BUS_WIDTH,
+>> --
+>> 1.7.1.1
+>>
+>> --
+>> Sent by a consultant of the Qualcomm Innovation Center, Inc.
+>> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora =
+=46orum.
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
