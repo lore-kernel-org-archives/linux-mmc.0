@@ -1,91 +1,100 @@
-From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH 4/4] mmc: core: Send HPI only till it is successful
-Date: Fri, 13 Apr 2012 17:54:14 +0530
-Message-ID: <1334319854-5989-5-git-send-email-svenkatr@ti.com>
-References: <1334319854-5989-1-git-send-email-svenkatr@ti.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: outstanding ARM patches
+Date: Fri, 13 Apr 2012 14:46:08 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1204131439000.16773@axis700.grange>
+References: <1328824636-10553-1-git-send-email-g.liakhovetski@gmx.de>
+ <1328824636-10553-7-git-send-email-g.liakhovetski@gmx.de>
+ <Pine.LNX.4.64.1204081328100.29005@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:55578 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753535Ab2DMMZ2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 13 Apr 2012 08:25:28 -0400
-In-Reply-To: <1334319854-5989-1-git-send-email-svenkatr@ti.com>
+Received: from moutng.kundenserver.de ([212.227.126.187]:53809 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752283Ab2DMMqT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Apr 2012 08:46:19 -0400
+In-Reply-To: <Pine.LNX.4.64.1204081328100.29005@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org
-Cc: Venkatraman S <svenkatr@ti.com>
+To: Linux Media Mailing List <linux-media@vger.kernel.org>, linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>
 
-Try to send HPI only a fixed number of times till it is
-successful. One successful transfer is enough - but wait
-till the card comes out of transfer state.
-Return an error if the card was not in programming state to
-begin with - so that the caller knows that HPI was not sent.
+Hi
 
-Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Signed-off-by: Venkatraman S <svenkatr@ti.com>
+Just confirming, that the 3 outstanding ARM patches, that I mentioned in 
+recent emails:
+
+http://article.gmane.org/gmane.linux.kernel.mmc/12748
+http://article.gmane.org/gmane.linux.ports.sh.devel/13535
+http://article.gmane.org/gmane.linux.ports.sh.devel/13975
+
+still apply to the current Linus' tree, though, the former 2 with a fuzz, 
+if needed, I can provide a version, that applies cleanly. Compile-tested.
+
+Thanks
+Guennadi
+
+On Sun, 8 Apr 2012, Guennadi Liakhovetski wrote:
+
+> On Wed, 14 Mar 2012, Guennadi Liakhovetski wrote:
+> 
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > ---
+> > 
+> > This patch we can push some time after the first one in this series gets 
+> > in, no breakage is caused.
+> 
+> Patch 1/2 from this series is now in the mainline, so, also this patch can 
+> be applied now. Not sure whether this qualifies as a fix (in the sense, 
+> that the default maximum sizes of 2560x1920, used without this patch are 
+> wrong for sh7372). Please, either push for 3.4 or queue for 3.5 
+> accordingly.
+...
+> >  arch/arm/mach-shmobile/board-ap4evb.c   |    2 ++
+> >  arch/arm/mach-shmobile/board-mackerel.c |    2 ++
+> >  2 files changed, 4 insertions(+), 0 deletions(-)
+> > 
+> > diff --git a/arch/arm/mach-shmobile/board-ap4evb.c b/arch/arm/mach-shmobile/board-ap4evb.c
+> > index aab0a34..f67aa03 100644
+> > --- a/arch/arm/mach-shmobile/board-ap4evb.c
+> > +++ b/arch/arm/mach-shmobile/board-ap4evb.c
+> > @@ -1009,6 +1009,8 @@ static struct sh_mobile_ceu_companion csi2 = {
+> >  
+> >  static struct sh_mobile_ceu_info sh_mobile_ceu_info = {
+> >  	.flags = SH_CEU_FLAG_USE_8BIT_BUS,
+> > +	.max_width = 8188,
+> > +	.max_height = 8188,
+> >  	.csi2 = &csi2,
+> >  };
+> >  
+> > diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
+> > index 9b42fbd..f790772 100644
+> > --- a/arch/arm/mach-shmobile/board-mackerel.c
+> > +++ b/arch/arm/mach-shmobile/board-mackerel.c
+> > @@ -1270,6 +1270,8 @@ static void mackerel_camera_del(struct soc_camera_device *icd)
+> >  
+> >  static struct sh_mobile_ceu_info sh_mobile_ceu_info = {
+> >  	.flags = SH_CEU_FLAG_USE_8BIT_BUS,
+> > +	.max_width = 8188,
+> > +	.max_height = 8188,
+> >  };
+> >  
+> >  static struct resource ceu_resources[] = {
+> > -- 
+> > 1.7.2.5
+
+On Sun, 8 Apr 2012, Guennadi Liakhovetski wrote:
+
+> Now that MMC patches from this series are in the mainline, also 
+> architecture patches can and should be applied. These are patches 5 and 6 
+> from this series:
+> 
+> http://article.gmane.org/gmane.linux.kernel.mmc/12748
+> http://article.gmane.org/gmane.linux.ports.sh.devel/13535
+> 
+> Would be good to have them in 3.4 since they fix modular MMC builds on 
+> ag5evm and mackerel.
+
 ---
- drivers/mmc/core/core.c |   34 ++++++++++++++++++----------------
- 1 file changed, 18 insertions(+), 16 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index e541efb..ceabef5 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -401,7 +401,7 @@ EXPORT_SYMBOL(mmc_wait_for_req);
-  */
- int mmc_interrupt_hpi(struct mmc_card *card)
- {
--	int err;
-+	int err, i;
- 	u32 status;
- 
- 	BUG_ON(!card);
-@@ -421,27 +421,29 @@ int mmc_interrupt_hpi(struct mmc_card *card)
- 	/*
- 	 * If the card status is in PRG-state, we can send the HPI command.
- 	 */
-+	err = -EINVAL;
- 	if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
--		do {
--			/*
--			 * We don't know when the HPI command will finish
--			 * processing, so we need to resend HPI until out
--			 * of prg-state, and keep checking the card status
--			 * with SEND_STATUS.  If a timeout error occurs when
--			 * sending the HPI command, we are already out of
--			 * prg-state.
--			 */
-+		/* To prevent an infinite lockout, try to send HPI
-+		 * a fixed number of times and bailout if it can't
-+		 * succeed.
-+		 */
-+		for (i = 0; i < 10 && err != 0 ; i++)
- 			err = mmc_send_hpi_cmd(card, &status);
--			if (err)
-+		/* Once HPI was sent successfully, the card is
-+		 * supposed to be back to transfer state.
-+		 */
-+		do {
-+			if (err) {
- 				pr_debug("%s: abort HPI (%d error)\n",
- 					 mmc_hostname(card->host), err);
--
--			err = mmc_send_status(card, &status);
--			if (err)
- 				break;
-+			}
-+			err = mmc_send_status(card, &status);
- 		} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
--	} else
--		pr_debug("%s: Left prg-state\n", mmc_hostname(card->host));
-+	} else {
-+		pr_debug("%s: Can't send HPI. State=%d\n",
-+			mmc_hostname(card->host), R1_CURRENT_STATE(status));
-+	}
- 
- out:
- 	mmc_release_host(card->host);
--- 
-1.7.10.rc2
-
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
