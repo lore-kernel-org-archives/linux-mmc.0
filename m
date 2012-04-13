@@ -1,49 +1,63 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: omap_hsmmc: set dto to 14 for all devices
-Date: Thu, 12 Apr 2012 14:19:23 -0400
-Message-ID: <87ehrsrexg.fsf@laptop.org>
-References: <1330622780-1909-1-git-send-email-Chase.Maupin@ti.com>
-	<m2399iqtgf.fsf@bob.laptop.org>
-	<alpine.DEB.2.00.1203120435200.11332@utopia.booyaka.com>
-	<87bonxcjrh.fsf@laptop.org> <20120405220848.GF3785@atomide.com>
-	<87obr57rmh.fsf@laptop.org>
-	<alpine.DEB.2.00.1204051743360.10302@utopia.booyaka.com>
-	<87k41t7n13.fsf@laptop.org> <4F86A461.4010006@linaro.org>
-	<alpine.DEB.2.00.1204121130370.29473@utopia.booyaka.com>
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Subject: [PATCH]mmc: core: not to --qty when calculate timeout for
+ SECURE_ERASE
+Date: Fri, 13 Apr 2012 12:19:34 +0800
+Message-ID: <20120413041934.GA30513@intel.com>
+Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50634 "EHLO void.printf.net"
+Received: from mga02.intel.com ([134.134.136.20]:6990 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932923Ab2DLSTV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 Apr 2012 14:19:21 -0400
-In-Reply-To: <alpine.DEB.2.00.1204121130370.29473@utopia.booyaka.com> (Paul
-	Walmsley's message of "Thu, 12 Apr 2012 11:56:06 -0600 (MDT)")
+	id S1751007Ab2DMEZD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 13 Apr 2012 00:25:03 -0400
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Walmsley <paul@pwsan.com>
-Cc: Tushar Behera <tushar.behera@linaro.org>, Tony Lindgren <tony@atomide.com>, Chase Maupin <Chase.Maupin@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, sakoman@gmail.com
+To: linux-mmc@vger.kernel.org
+Cc: adrian.hunter@intel.com, cjb@laptop.org
 
-Hi,
+--qty when calculating erase timeout for trim/erase & secure trim/erase
+can prevent the erase range crossing qty+1 erase groups, which made
+the final timeout value is too large for the host.
 
-On Thu, Apr 12 2012, Paul Walmsley wrote:
->> With this patch, I continuously get following message on my console.
->> (Tested on Origen board, based on EXYNOS4210).
->> 
->> mmc0: Too large timeout requested for CMD25!
->> 
->> So, with this change, should we update sdhci_calc_timeout() also?
->
-> Looks like most of the host drivers that range-check the timeout value 
-> silently clamp it at the hardware-supported maximum value:
+When operate SECURE_ERASE, driver needs the erase range is aligned with
+erase size, otherwise do nothing and return an error. That is to say
+it is not necessary for SECURE_ERASE to --qty since it will never cross
+an erase group.
 
-If I understand correctly, the only problem here is the presence of the
-warning, so I'm leaning towards just removing it (which we've already
-had another request for) or making it pr_debug() instead.  Sound okay?
+Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+---
+ drivers/mmc/core/core.c |    9 ++++++++-
+ 1 files changed, 8 insertions(+), 1 deletions(-)
 
-Thanks,
-
-- Chris.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index e541efb..b5a393a 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1761,7 +1761,7 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+ 	if (!qty)
+ 		return 0;
+ 
+-	if (qty == 1)
++	if (qty == 1 && arg != MMC_SECURE_ERASE_ARG)
+ 		return 1;
+ 
+ 	/* Convert qty to sectors */
+@@ -1772,6 +1772,13 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+ 	else
+ 		max_discard = --qty * card->erase_size;
+ 
++	/*
++	 * since SECURE_ERASE is erase group aligned, otherwise
++	 * it cannot be erased in secure purpose, needn't --qty
++	 */
++	if (arg == MMC_SECURE_ERASE_ARG)
++		max_discard += card->erase_size;
++
+ 	return max_discard;
+ }
+ 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.1
+
