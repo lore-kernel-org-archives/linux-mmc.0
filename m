@@ -1,100 +1,89 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: outstanding ARM patches
-Date: Fri, 13 Apr 2012 14:46:08 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1204131439000.16773@axis700.grange>
-References: <1328824636-10553-1-git-send-email-g.liakhovetski@gmx.de>
- <1328824636-10553-7-git-send-email-g.liakhovetski@gmx.de>
- <Pine.LNX.4.64.1204081328100.29005@axis700.grange>
+From: Namjae Jeon <linkinjeon@gmail.com>
+Subject: Re: [PATCH 4/4] mmc: core: Send HPI only till it is successful
+Date: Fri, 13 Apr 2012 23:39:46 +0900
+Message-ID: <CAKYAXd_R5RfyP_-hW6LRbdEaVHbJOS+RdQC6-t3tqCcBUS4HGw@mail.gmail.com>
+References: <1334319854-5989-1-git-send-email-svenkatr@ti.com>
+	<1334319854-5989-5-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:53809 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752283Ab2DMMqT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Apr 2012 08:46:19 -0400
-In-Reply-To: <Pine.LNX.4.64.1204081328100.29005@axis700.grange>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:39180 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752133Ab2DMOjs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Apr 2012 10:39:48 -0400
+Received: by wibhq7 with SMTP id hq7so3090149wib.1
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Apr 2012 07:39:47 -0700 (PDT)
+In-Reply-To: <1334319854-5989-5-git-send-email-svenkatr@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linux Media Mailing List <linux-media@vger.kernel.org>, linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>
+To: Venkatraman S <svenkatr@ti.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org
 
-Hi
-
-Just confirming, that the 3 outstanding ARM patches, that I mentioned in 
-recent emails:
-
-http://article.gmane.org/gmane.linux.kernel.mmc/12748
-http://article.gmane.org/gmane.linux.ports.sh.devel/13535
-http://article.gmane.org/gmane.linux.ports.sh.devel/13975
-
-still apply to the current Linus' tree, though, the former 2 with a fuzz, 
-if needed, I can provide a version, that applies cleanly. Compile-tested.
-
-Thanks
-Guennadi
-
-On Sun, 8 Apr 2012, Guennadi Liakhovetski wrote:
-
-> On Wed, 14 Mar 2012, Guennadi Liakhovetski wrote:
-> 
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > ---
-> > 
-> > This patch we can push some time after the first one in this series gets 
-> > in, no breakage is caused.
-> 
-> Patch 1/2 from this series is now in the mainline, so, also this patch can 
-> be applied now. Not sure whether this qualifies as a fix (in the sense, 
-> that the default maximum sizes of 2560x1920, used without this patch are 
-> wrong for sh7372). Please, either push for 3.4 or queue for 3.5 
-> accordingly.
-...
-> >  arch/arm/mach-shmobile/board-ap4evb.c   |    2 ++
-> >  arch/arm/mach-shmobile/board-mackerel.c |    2 ++
-> >  2 files changed, 4 insertions(+), 0 deletions(-)
-> > 
-> > diff --git a/arch/arm/mach-shmobile/board-ap4evb.c b/arch/arm/mach-shmobile/board-ap4evb.c
-> > index aab0a34..f67aa03 100644
-> > --- a/arch/arm/mach-shmobile/board-ap4evb.c
-> > +++ b/arch/arm/mach-shmobile/board-ap4evb.c
-> > @@ -1009,6 +1009,8 @@ static struct sh_mobile_ceu_companion csi2 = {
-> >  
-> >  static struct sh_mobile_ceu_info sh_mobile_ceu_info = {
-> >  	.flags = SH_CEU_FLAG_USE_8BIT_BUS,
-> > +	.max_width = 8188,
-> > +	.max_height = 8188,
-> >  	.csi2 = &csi2,
-> >  };
-> >  
-> > diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
-> > index 9b42fbd..f790772 100644
-> > --- a/arch/arm/mach-shmobile/board-mackerel.c
-> > +++ b/arch/arm/mach-shmobile/board-mackerel.c
-> > @@ -1270,6 +1270,8 @@ static void mackerel_camera_del(struct soc_camera_device *icd)
-> >  
-> >  static struct sh_mobile_ceu_info sh_mobile_ceu_info = {
-> >  	.flags = SH_CEU_FLAG_USE_8BIT_BUS,
-> > +	.max_width = 8188,
-> > +	.max_height = 8188,
-> >  };
-> >  
-> >  static struct resource ceu_resources[] = {
-> > -- 
-> > 1.7.2.5
-
-On Sun, 8 Apr 2012, Guennadi Liakhovetski wrote:
-
-> Now that MMC patches from this series are in the mainline, also 
-> architecture patches can and should be applied. These are patches 5 and 6 
-> from this series:
-> 
-> http://article.gmane.org/gmane.linux.kernel.mmc/12748
-> http://article.gmane.org/gmane.linux.ports.sh.devel/13535
-> 
-> Would be good to have them in 3.4 since they fix modular MMC builds on 
-> ag5evm and mackerel.
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+SGkuIFZlbmthdHJhbWFuLgoKWW91IGZpeGVkIDEwIHRpbWVzLiB3aHkgaXMgaXQgMTAgdGltZXMg
+PwphbmQgY2hlY2tpbmcgZXJyIGZyb20gbW1jX3NlbmRfc3RhdHVzIGlzIG5vdCBuZWVkZWQgPyBp
+cyBpdCAgYWxzbwppbmZpbml0ZSBjYXNlID8KClRoYW5rcy4KCjIwMTIvNC8xMyBWZW5rYXRyYW1h
+biBTIDxzdmVua2F0ckB0aS5jb20+Ogo+IFRyeSB0byBzZW5kIEhQSSBvbmx5IGEgZml4ZWQgbnVt
+YmVyIG9mIHRpbWVzIHRpbGwgaXQgaXMKPiBzdWNjZXNzZnVsLiBPbmUgc3VjY2Vzc2Z1bCB0cmFu
+c2ZlciBpcyBlbm91Z2ggLSBidXQgd2FpdAo+IHRpbGwgdGhlIGNhcmQgY29tZXMgb3V0IG9mIHRy
+YW5zZmVyIHN0YXRlLgo+IFJldHVybiBhbiBlcnJvciBpZiB0aGUgY2FyZCB3YXMgbm90IGluIHBy
+b2dyYW1taW5nIHN0YXRlIHRvCj4gYmVnaW4gd2l0aCAtIHNvIHRoYXQgdGhlIGNhbGxlciBrbm93
+cyB0aGF0IEhQSSB3YXMgbm90IHNlbnQuCj4KPiBSZXBvcnRlZC1ieTogQWxleCBMZW1iZXJnIDxB
+bGV4LkxlbWJlcmdAc2FuZGlzay5jb20+Cj4gU2lnbmVkLW9mZi1ieTogVmVua2F0cmFtYW4gUyA8
+c3ZlbmthdHJAdGkuY29tPgo+IC0tLQo+IMKgZHJpdmVycy9tbWMvY29yZS9jb3JlLmMgfCDCoCAz
+NCArKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0tLS0tCj4gwqAxIGZpbGUgY2hhbmdlZCwg
+MTggaW5zZXJ0aW9ucygrKSwgMTYgZGVsZXRpb25zKC0pCj4KPiBkaWZmIC0tZ2l0IGEvZHJpdmVy
+cy9tbWMvY29yZS9jb3JlLmMgYi9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYwo+IGluZGV4IGU1NDFl
+ZmIuLmNlYWJlZjUgMTAwNjQ0Cj4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMKPiArKysg
+Yi9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYwo+IEBAIC00MDEsNyArNDAxLDcgQEAgRVhQT1JUX1NZ
+TUJPTChtbWNfd2FpdF9mb3JfcmVxKTsKPiDCoCovCj4gwqBpbnQgbW1jX2ludGVycnVwdF9ocGko
+c3RydWN0IG1tY19jYXJkICpjYXJkKQo+IMKgewo+IC0gwqAgwqAgwqAgaW50IGVycjsKPiArIMKg
+IMKgIMKgIGludCBlcnIsIGk7Cj4gwqAgwqAgwqAgwqB1MzIgc3RhdHVzOwo+Cj4gwqAgwqAgwqAg
+wqBCVUdfT04oIWNhcmQpOwo+IEBAIC00MjEsMjcgKzQyMSwyOSBAQCBpbnQgbW1jX2ludGVycnVw
+dF9ocGkoc3RydWN0IG1tY19jYXJkICpjYXJkKQo+IMKgIMKgIMKgIMKgLyoKPiDCoCDCoCDCoCDC
+oCAqIElmIHRoZSBjYXJkIHN0YXR1cyBpcyBpbiBQUkctc3RhdGUsIHdlIGNhbiBzZW5kIHRoZSBI
+UEkgY29tbWFuZC4KPiDCoCDCoCDCoCDCoCAqLwo+ICsgwqAgwqAgwqAgZXJyID0gLUVJTlZBTDsK
+PiDCoCDCoCDCoCDCoGlmIChSMV9DVVJSRU5UX1NUQVRFKHN0YXR1cykgPT0gUjFfU1RBVEVfUFJH
+KSB7Cj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCBkbyB7Cj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCAvKgo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAq
+IFdlIGRvbid0IGtub3cgd2hlbiB0aGUgSFBJIGNvbW1hbmQgd2lsbCBmaW5pc2gKPiAtIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgKiBwcm9jZXNzaW5nLCBzbyB3ZSBuZWVkIHRv
+IHJlc2VuZCBIUEkgdW50aWwgb3V0Cj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCogb2YgcHJnLXN0YXRlLCBhbmQga2VlcCBjaGVja2luZyB0aGUgY2FyZCBzdGF0dXMKPiAt
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgKiB3aXRoIFNFTkRfU1RBVFVTLiDC
+oElmIGEgdGltZW91dCBlcnJvciBvY2N1cnMgd2hlbgo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAqIHNlbmRpbmcgdGhlIEhQSSBjb21tYW5kLCB3ZSBhcmUgYWxyZWFkeSBv
+dXQgb2YKPiAtIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgKiBwcmctc3RhdGUu
+Cj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCovCj4gKyDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCAvKiBUbyBwcmV2ZW50IGFuIGluZmluaXRlIGxvY2tvdXQsIHRyeSB0byBzZW5k
+IEhQSQo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAqIGEgZml4ZWQgbnVtYmVyIG9mIHRpbWVz
+IGFuZCBiYWlsb3V0IGlmIGl0IGNhbid0Cj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCogc3Vj
+Y2VlZC4KPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgKi8KPiArIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIGZvciAoaSA9IDA7IGkgPCAxMCAmJiBlcnIgIT0gMCA7IGkrKykKPiDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoGVyciA9IG1tY19zZW5kX2hwaV9jbWQoY2FyZCwgJnN0YXR1
+cyk7Cj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAoZXJyKQo+ICsgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgLyogT25jZSBIUEkgd2FzIHNlbnQgc3VjY2Vzc2Z1bGx5LCB0aGUg
+Y2FyZCBpcwo+ICsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAqIHN1cHBvc2VkIHRvIGJlIGJhY2sg
+dG8gdHJhbnNmZXIgc3RhdGUuCj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCovCj4gKyDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCBkbyB7Cj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCBpZiAoZXJyKSB7Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqBwcl9kZWJ1ZygiJXM6IGFib3J0IEhQSSAoJWQgZXJyb3IpXG4iLAo+IMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIG1tY19ob3N0
+bmFtZShjYXJkLT5ob3N0KSwgZXJyKTsKPiAtCj4gLSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCBlcnIgPSBtbWNfc2VuZF9zdGF0dXMoY2FyZCwgJnN0YXR1cyk7Cj4gLSDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBpZiAoZXJyKQo+IMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgYnJlYWs7Cj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCB9Cj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBlcnIg
+PSBtbWNfc2VuZF9zdGF0dXMoY2FyZCwgJnN0YXR1cyk7Cj4gwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqB9IHdoaWxlIChSMV9DVVJSRU5UX1NUQVRFKHN0YXR1cykgPT0gUjFfU1RBVEVfUFJHKTsKPiAt
+IMKgIMKgIMKgIH0gZWxzZQo+IC0gwqAgwqAgwqAgwqAgwqAgwqAgwqAgcHJfZGVidWcoIiVzOiBM
+ZWZ0IHByZy1zdGF0ZVxuIiwgbW1jX2hvc3RuYW1lKGNhcmQtPmhvc3QpKTsKPiArIMKgIMKgIMKg
+IH0gZWxzZSB7Cj4gKyDCoCDCoCDCoCDCoCDCoCDCoCDCoCBwcl9kZWJ1ZygiJXM6IENhbid0IHNl
+bmQgSFBJLiBTdGF0ZT0lZFxuIiwKPiArIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IG1tY19ob3N0bmFtZShjYXJkLT5ob3N0KSwgUjFfQ1VSUkVOVF9TVEFURShzdGF0dXMpKTsKPiAr
+IMKgIMKgIMKgIH0KPgo+IMKgb3V0Ogo+IMKgIMKgIMKgIMKgbW1jX3JlbGVhc2VfaG9zdChjYXJk
+LT5ob3N0KTsKPiAtLQo+IDEuNy4xMC5yYzIKPgo+IC0tCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0
+aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyIgaW4KPiB0aGUg
+Ym9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZwo+IE1vcmUgbWFq
+b3Jkb21vIGluZm8gYXQgwqBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0
+bWwK
