@@ -1,38 +1,88 @@
-From: Marc Dietrich <marvin24@gmx.de>
-Subject: emmc power select failure
-Date: Fri, 13 Apr 2012 19:59:29 +0200
-Message-ID: <1721770.czJDhHnFDk@ax5200p>
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: [PATCH] mmc: sdio: avoid spurious calls to interrupt handlers
+Date: Fri, 13 Apr 2012 16:43:30 -0400 (EDT)
+Message-ID: <alpine.LFD.2.02.1204131639510.16314@xanadu.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.22]:59920 "HELO
-	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1752808Ab2DMSAD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Apr 2012 14:00:03 -0400
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:53753 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755981Ab2DMUne (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Apr 2012 16:43:34 -0400
+Received: by qcro28 with SMTP id o28so2151434qcr.19
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Apr 2012 13:43:33 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Hi,
 
-I'm running linux-next on a tegra-sdhci host which has a Toshiba 
-THGBM2G6D2FBAI9 eMMC connected. During boot I get a "mmc1: power class 
-selection to bus width 8 failed" warning. 
+Commit 06e8935feb "optimized SDIO IRQ handling for single irq" 
+introduced some spurious calls to SDIO function interrupt handlers,
+such as when the SDIO IRQ thread is started, or the safety check 
+performed upon a system resume.  Let's add a flag to perform the
+optimization only when a real interrupt is signaled by the host
+driver and we know there is no point confirming it.
 
-/sys/kernel/debug/mmc1# cat ios 
-clock:          48000000 Hz
-actual clock:   48000000 Hz
-vdd:            20 (3.2 ~ 3.3 V)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     2 (on)
-bus width:      3 (8 bits)
-timing spec:    1 (mmc high-speed)
+Reported-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Signed-off-by: Nicolas Pitre <nico@linaro.org>
+Cc: stable@kernel.org
 
-Any hints?
-
-Thanks!
-
-Marc
-
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index f573e7f9f7..3d8ceb4084 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -28,18 +28,20 @@
+ 
+ #include "sdio_ops.h"
+ 
+-static int process_sdio_pending_irqs(struct mmc_card *card)
++static int process_sdio_pending_irqs(struct mmc_host *host)
+ {
++	struct mmc_card *card = host->card;
+ 	int i, ret, count;
+ 	unsigned char pending;
+ 	struct sdio_func *func;
+ 
+ 	/*
+ 	 * Optimization, if there is only 1 function interrupt registered
+-	 * call irq handler directly
++	 * and we know an IRQ was signaled then call irq handler directly.
++	 * Otherwise do the full probe.
+ 	 */
+ 	func = card->sdio_single_irq;
+-	if (func) {
++	if (func && host->sdio_irq_pending) {
+ 		func->irq_handler(func);
+ 		return 1;
+ 	}
+@@ -116,7 +118,8 @@ static int sdio_irq_thread(void *_host)
+ 		ret = __mmc_claim_host(host, &host->sdio_irq_thread_abort);
+ 		if (ret)
+ 			break;
+-		ret = process_sdio_pending_irqs(host->card);
++		ret = process_sdio_pending_irqs(host);
++		host->sdio_irq_pending = false;
+ 		mmc_release_host(host);
+ 
+ 		/*
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index ee2b0363c0..557aa4cd66 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -323,6 +323,7 @@ struct mmc_host {
+ 
+ 	unsigned int		sdio_irqs;
+ 	struct task_struct	*sdio_irq_thread;
++	bool			sdio_irq_pending;
+ 	atomic_t		sdio_irq_thread_abort;
+ 
+ 	mmc_pm_flag_t		pm_flags;	/* requested pm features */
+@@ -378,6 +379,7 @@ extern int mmc_cache_ctrl(struct mmc_host *, u8);
+ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+ {
+ 	host->ops->enable_sdio_irq(host, 0);
++	host->sdio_irq_pending = true;
+ 	wake_up_process(host->sdio_irq_thread);
+ }
+ 
