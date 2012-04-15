@@ -1,34 +1,121 @@
-From: Paul Walmsley <paul@pwsan.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: set dto to 14 for all devices
-Date: Sat, 14 Apr 2012 03:38:26 -0600 (MDT)
-Message-ID: <alpine.DEB.2.00.1204140337300.29048@utopia.booyaka.com>
-References: <1330622780-1909-1-git-send-email-Chase.Maupin@ti.com> <m2399iqtgf.fsf@bob.laptop.org> <alpine.DEB.2.00.1203120435200.11332@utopia.booyaka.com> <87bonxcjrh.fsf@laptop.org> <20120405220848.GF3785@atomide.com> <87obr57rmh.fsf@laptop.org>
- <alpine.DEB.2.00.1204051743360.10302@utopia.booyaka.com> <87k41t7n13.fsf@laptop.org> <4F86A461.4010006@linaro.org> <alpine.DEB.2.00.1204121130370.29473@utopia.booyaka.com> <87ehrsrexg.fsf@laptop.org>
+From: "Sujit Reddy Thumma" <sthumma@codeaurora.org>
+Subject: Re: [PATCH] mmc: sdio: avoid spurious calls to interrupt handlers
+Date: Sun, 15 Apr 2012 01:00:17 -0700 (PDT)
+Message-ID: <ffff015ed637538bd14b61b8507586ed.squirrel@www.codeaurora.org>
+References: <alpine.LFD.2.02.1204131639510.16314@xanadu.home>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from utopia.booyaka.com ([72.9.107.138]:42944 "EHLO
-	utopia.booyaka.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751211Ab2DNJi1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Apr 2012 05:38:27 -0400
-In-Reply-To: <87ehrsrexg.fsf@laptop.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:56308 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751127Ab2DOIAS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Apr 2012 04:00:18 -0400
+In-Reply-To: <alpine.LFD.2.02.1204131639510.16314@xanadu.home>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Tushar Behera <tushar.behera@linaro.org>, Tony Lindgren <tony@atomide.com>, Chase Maupin <Chase.Maupin@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, sakoman@gmail.com
+To: Nicolas Pitre <nicolas.pitre@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Hi Chris,
+Hi Nicolas,
 
-On Thu, 12 Apr 2012, Chris Ball wrote:
+>
+> Commit 06e8935feb "optimized SDIO IRQ handling for single irq"
+> introduced some spurious calls to SDIO function interrupt handlers,
+> such as when the SDIO IRQ thread is started, or the safety check
+> performed upon a system resume.  Let's add a flag to perform the
+> optimization only when a real interrupt is signaled by the host
+> driver and we know there is no point confirming it.
+>
 
-> If I understand correctly, the only problem here is the presence of the
-> warning, so I'm leaning towards just removing it (which we've already
-> had another request for) or making it pr_debug() instead.  Sound okay?
+Thanks for putting up formal patch.
 
-Sounds okay to me.
+> Reported-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+> Signed-off-by: Nicolas Pitre <nico@linaro.org>
+> Cc: stable@kernel.org
+>
+> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+> index f573e7f9f7..3d8ceb4084 100644
+> --- a/drivers/mmc/core/sdio_irq.c
+> +++ b/drivers/mmc/core/sdio_irq.c
+> @@ -28,18 +28,20 @@
+>
+>  #include "sdio_ops.h"
+>
+> -static int process_sdio_pending_irqs(struct mmc_card *card)
+> +static int process_sdio_pending_irqs(struct mmc_host *host)
+>  {
+> +	struct mmc_card *card = host->card;
+>  	int i, ret, count;
+>  	unsigned char pending;
+>  	struct sdio_func *func;
+>
+>  	/*
+>  	 * Optimization, if there is only 1 function interrupt registered
+> -	 * call irq handler directly
+> +	 * and we know an IRQ was signaled then call irq handler directly.
+> +	 * Otherwise do the full probe.
+>  	 */
+>  	func = card->sdio_single_irq;
+> -	if (func) {
+> +	if (func && host->sdio_irq_pending) {
+>  		func->irq_handler(func);
+>  		return 1;
+>  	}
+> @@ -116,7 +118,8 @@ static int sdio_irq_thread(void *_host)
+>  		ret = __mmc_claim_host(host, &host->sdio_irq_thread_abort);
+>  		if (ret)
+>  			break;
+> -		ret = process_sdio_pending_irqs(host->card);
+> +		ret = process_sdio_pending_irqs(host);
+> +		host->sdio_irq_pending = false;
+>  		mmc_release_host(host);
+>
+>  		/*
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index ee2b0363c0..557aa4cd66 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -323,6 +323,7 @@ struct mmc_host {
+>
+>  	unsigned int		sdio_irqs;
+>  	struct task_struct	*sdio_irq_thread;
+> +	bool			sdio_irq_pending;
+>  	atomic_t		sdio_irq_thread_abort;
+>
+>  	mmc_pm_flag_t		pm_flags;	/* requested pm features */
+> @@ -378,6 +379,7 @@ extern int mmc_cache_ctrl(struct mmc_host *, u8);
+>  static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+>  {
+>  	host->ops->enable_sdio_irq(host, 0);
+> +	host->sdio_irq_pending = true;
+>  	wake_up_process(host->sdio_irq_thread);
+>  }
 
-We'll probably also need to take a look at the drivers that don't 
-range-check their timeouts.
+In this case probably we need to add the following:
+@@ -946,8 +946,11 @@ static int mmc_sdio_resume(struct mmc_host *host)
+                }
+        }
+
+-       if (!err && host->sdio_irqs)
+-               mmc_signal_sdio_irq(host);
++       if (!err && host->sdio_irqs) {
++               host->ops->enable_sdio_irq(host, 0);
++               wake_up_process(host->sdio_irq_thread);
++       }
+
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
 
-- Paul
+-- 
+Thanks & Regards,
+Sujit Reddy Thumma
+
+Consultant for Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum.
+
