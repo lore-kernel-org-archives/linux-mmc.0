@@ -1,108 +1,55 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: swap on eMMC and other flash
-Date: Mon, 16 Apr 2012 18:59:32 +0000
-Message-ID: <201204161859.32436.arnd@arndb.de>
-References: <201203301744.16762.arnd@arndb.de> <201204111557.14153.arnd@arndb.de> <CAKL-ytsXbe4=u94PjqvhZo=ZLiChQ0FmZC84GNrFHa0N1mDjFw@mail.gmail.com>
+From: Daniel Drake <dsd@laptop.org>
+Subject: "Prevent too long response times for suspend" breaks libertas_sdio
+Date: Mon, 16 Apr 2012 14:25:02 -0600
+Message-ID: <CAMLZHHTTD-jbSrwW9JA_KGxfXj4_WwwC=0KV4PCDHGr25VQ+yQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <CAKL-ytsXbe4=u94PjqvhZo=ZLiChQ0FmZC84GNrFHa0N1mDjFw@mail.gmail.com>
-Sender: owner-linux-mm@kvack.org
-To: Stephan Uphoff <ups@google.com>
-Cc: Minchan Kim <minchan@kernel.org>, linaro-kernel@lists.linaro.org, android-kernel@googlegroups.com, linux-mm@kvack.org, "Luca Porzio (lporzio)" <lporzio@micron.com>, Alex Lemberg <alex.lemberg@sandisk.com>, linux-kernel@vger.kernel.org, Saugata Das <saugata.das@linaro.org>, Venkatraman S <venkat@linaro.org>, Yejin Moon <yejin.moon@samsung.com>, Hyojin Jeong <syr.jeong@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pz0-f52.google.com ([209.85.210.52]:35917 "EHLO
+	mail-pz0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755413Ab2DPUZC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Apr 2012 16:25:02 -0400
+Received: by dake40 with SMTP id e40so7372191dak.11
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Apr 2012 13:25:02 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@stericsson.com
 
-On Monday 16 April 2012, Stephan Uphoff wrote:
-> opportunity to plant a few ideas.
-> 
-> In contrast to rotational disks read/write operation overhead and
-> costs are not symmetric.
-> While random reads are much faster on flash - the number of write
-> operations is limited by wearout and garbage collection overhead.
-> To further improve swapping on eMMC or similar flash media I believe
-> that the following issues need to be addressed:
-> 
-> 1) Limit average write bandwidth to eMMC to a configurable level to
-> guarantee a minimum device lifetime
-> 2) Aim for a low write amplification factor to maximize useable write bandwidth
-> 3) Strongly favor read over write operations
-> 
-> Lowering write amplification (2) has been discussed in this email
-> thread - and the only observation I would like to add is that
-> over-provisioning the internal swap space compared to the exported
-> swap space significantly can guarantee a lower write amplification
-> factor with the indirection and GC techniques discussed.
+Hi,
 
-Yes, good point.
+This commit breaks libertas_sdio suspend:
 
-> I believe the swap functionality is currently optimized for storage
-> media where read and write costs are nearly identical.
-> As this is not the case on flash I propose splitting the anonymous
-> inactive queue (at least conceptually) - keeping clean anonymous pages
-> with swap slots on a separate queue as the cost of swapping them
-> out/in is only an inexpensive read operation. A variable similar to
-> swapiness (or a more dynamic algorithmn) could determine the
-> preference for swapping out clean pages or dirty pages. ( A similar
-> argument could be made for splitting up the file inactive queue )
+commit b6ad726e3fe69e1ff3c3b2ad272ba3e4c376cd6a
+Author: Ulf Hansson <ulf.hansson@stericsson.com>
+Date:   Thu Oct 13 16:03:58 2011 +0200
 
-I'm not sure I understand yet how this would be different from swappiness.
+    mmc: core: Prevent too long response times for suspend
 
-> The problem of limiting the average write bandwidth reminds me of
-> enforcing cpu utilization limits on interactive workloads.
-> Just as with cpu workloads - using the resources to the limit produces
-> poor interactivity.
-> When interactivity suffers too much I believe the only sane response
-> for an interactive device is to limit usage of the swap device and
-> transition into a low memory situation - and if needed - either
-> allowing userspace to reduce memory usage or invoking the OOM killer.
-> As a result low memory situations could not only be encountered on new
-> memory allocations but also on workload changes that increase the
-> number of dirty pages.
+    While trying to suspend the mmc host there could still be
+    ongoing requests that we need to wait for. At the same time
+    a device driver must respond to a suspend request rather quickly.
 
-While swap is just a special case for anonymous memory in writeback
-rather than file backed pages, I think what you want here is a tuning
-knob that decides whether we should discard a clean page or write back
-a dirty page under memory pressure. I have to say that I don't know
-whether we already have such a knob or whether we already treat them
-differently, but it is certainly a valid observation that on hard
-drives, discarding a clean page that is likely going to be needed
-again has about the same overhead as writing back a dirty page
-(i.e. one seek operation), while on flash the former would be much
-cheaper than the latter.
+This patch causes the device to be claimed while the driver's suspend
+method is called. This seems questionable to me. It should be up to
+the driver to deal with or cancel any pending requests in the
+interests of suspend performance. Even if they take a while to
+complete, it might be best to let them complete rather than discard
+the user's data.
 
-> A wild idea to avoid some writes altogether is to see if
-> de-duplication techniques can be used to (partially?) match pages
-> previously written so swap.
+In this case in the suspend handler we have to communicate with the
+card. In libertas_sdio we do the communication in a workqueue
+(because, outside of the suspend routine, sometime we need to initiate
+communication from atomic context), but that seems like an
+implementation detail that shouldn't be trampled upon by the higher
+layers.
 
-Interesting! We already have KSM (kernel samepage merging) to do
-the same thing in memory, but I don't know how that works
-during swapout. It might already be there, waiting to get switched
-on, or might not be possible until we implemnt an extra remapping
-layer in swap as has been proposed. It's certainly worth remembering
-this as we work on the design for that remapping layer.
+This method of punishing "badly-behaved" drivers (for some definition
+of the phrase) is also quite harsh. Maybe its just my incompetence but
+it took me a couple of hours to track down why my driver was suddenly
+hanging with no warning message during its suspend routine.
 
-> In case of unencrypted swap  (or encrypted swap with a static key)
-> swap pages on eMMC could even be re-used across multiple reboots.
-> A simple version would just compare dirty pages with data in their
-> swap slots as I suspect (but really don't know) that some user space
-> algorithms (garbage collection?) dirty a page just temporarily -
-> eventually reverting it to the previous content.
+Can we revisit this?
 
-I think that would incur overhead for indexing the pages in swap space
-in a persistent way, something that by itself would contribute to
-write amplification because for every swapout, we would have to write
-both the page and the index (eventually), and that index would likely
-be a random write.
-
-Thanks for your thoughts!
-
-	Arnd
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Thanks,
+Daniel
