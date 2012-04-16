@@ -1,55 +1,114 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: "Prevent too long response times for suspend" breaks libertas_sdio
-Date: Mon, 16 Apr 2012 14:25:02 -0600
-Message-ID: <CAMLZHHTTD-jbSrwW9JA_KGxfXj4_WwwC=0KV4PCDHGr25VQ+yQ@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: outstanding ARM patches
+Date: Mon, 16 Apr 2012 23:08:58 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1204162303080.29915@axis700.grange>
+References: <1328824636-10553-1-git-send-email-g.liakhovetski@gmx.de>
+ <Pine.LNX.4.64.1204081328100.29005@axis700.grange>
+ <Pine.LNX.4.64.1204131439000.16773@axis700.grange> <201204161824.03746.rjw@sisk.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f52.google.com ([209.85.210.52]:35917 "EHLO
-	mail-pz0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755413Ab2DPUZC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Apr 2012 16:25:02 -0400
-Received: by dake40 with SMTP id e40so7372191dak.11
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Apr 2012 13:25:02 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-media-owner@vger.kernel.org>
+In-Reply-To: <201204161824.03746.rjw@sisk.pl>
+Sender: linux-media-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@sisk.pl>
+Cc: Linux Media Mailing List <linux-media@vger.kernel.org>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@stericsson.com
 
-Hi,
+On Mon, 16 Apr 2012, Rafael J. Wysocki wrote:
 
-This commit breaks libertas_sdio suspend:
+> On Friday, April 13, 2012, Guennadi Liakhovetski wrote:
+> > Hi
+> > 
+> > Just confirming, that the 3 outstanding ARM patches, that I mentioned in 
+> > recent emails:
+> > 
+> > http://article.gmane.org/gmane.linux.kernel.mmc/12748
+> > http://article.gmane.org/gmane.linux.ports.sh.devel/13535
+> > http://article.gmane.org/gmane.linux.ports.sh.devel/13975
+> > 
+> > still apply to the current Linus' tree, though, the former 2 with a fuzz, 
+> > if needed, I can provide a version, that applies cleanly. Compile-tested.
+> 
+> Can you please repost them in one series on top of v3.2-rc3?
 
-commit b6ad726e3fe69e1ff3c3b2ad272ba3e4c376cd6a
-Author: Ulf Hansson <ulf.hansson@stericsson.com>
-Date:   Thu Oct 13 16:03:58 2011 +0200
+Sure, this is not really a series, but for your convenience I'll post them 
+in reply to this mail. I'll also drop all recepients from the cc-list 
+except linux-sh to not bother others.
 
-    mmc: core: Prevent too long response times for suspend
+Thanks
+Guennadi
 
-    While trying to suspend the mmc host there could still be
-    ongoing requests that we need to wait for. At the same time
-    a device driver must respond to a suspend request rather quickly.
+> Rafael
+> 
+>  
+> > On Sun, 8 Apr 2012, Guennadi Liakhovetski wrote:
+> > 
+> > > On Wed, 14 Mar 2012, Guennadi Liakhovetski wrote:
+> > > 
+> > > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > > > ---
+> > > > 
+> > > > This patch we can push some time after the first one in this series gets 
+> > > > in, no breakage is caused.
+> > > 
+> > > Patch 1/2 from this series is now in the mainline, so, also this patch can 
+> > > be applied now. Not sure whether this qualifies as a fix (in the sense, 
+> > > that the default maximum sizes of 2560x1920, used without this patch are 
+> > > wrong for sh7372). Please, either push for 3.4 or queue for 3.5 
+> > > accordingly.
+> > ...
+> > > >  arch/arm/mach-shmobile/board-ap4evb.c   |    2 ++
+> > > >  arch/arm/mach-shmobile/board-mackerel.c |    2 ++
+> > > >  2 files changed, 4 insertions(+), 0 deletions(-)
+> > > > 
+> > > > diff --git a/arch/arm/mach-shmobile/board-ap4evb.c b/arch/arm/mach-shmobile/board-ap4evb.c
+> > > > index aab0a34..f67aa03 100644
+> > > > --- a/arch/arm/mach-shmobile/board-ap4evb.c
+> > > > +++ b/arch/arm/mach-shmobile/board-ap4evb.c
+> > > > @@ -1009,6 +1009,8 @@ static struct sh_mobile_ceu_companion csi2 = {
+> > > >  
+> > > >  static struct sh_mobile_ceu_info sh_mobile_ceu_info = {
+> > > >  	.flags = SH_CEU_FLAG_USE_8BIT_BUS,
+> > > > +	.max_width = 8188,
+> > > > +	.max_height = 8188,
+> > > >  	.csi2 = &csi2,
+> > > >  };
+> > > >  
+> > > > diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
+> > > > index 9b42fbd..f790772 100644
+> > > > --- a/arch/arm/mach-shmobile/board-mackerel.c
+> > > > +++ b/arch/arm/mach-shmobile/board-mackerel.c
+> > > > @@ -1270,6 +1270,8 @@ static void mackerel_camera_del(struct soc_camera_device *icd)
+> > > >  
+> > > >  static struct sh_mobile_ceu_info sh_mobile_ceu_info = {
+> > > >  	.flags = SH_CEU_FLAG_USE_8BIT_BUS,
+> > > > +	.max_width = 8188,
+> > > > +	.max_height = 8188,
+> > > >  };
+> > > >  
+> > > >  static struct resource ceu_resources[] = {
+> > 
+> > On Sun, 8 Apr 2012, Guennadi Liakhovetski wrote:
+> > 
+> > > Now that MMC patches from this series are in the mainline, also 
+> > > architecture patches can and should be applied. These are patches 5 and 6 
+> > > from this series:
+> > > 
+> > > http://article.gmane.org/gmane.linux.kernel.mmc/12748
+> > > http://article.gmane.org/gmane.linux.ports.sh.devel/13535
+> > > 
+> > > Would be good to have them in 3.4 since they fix modular MMC builds on 
+> > > ag5evm and mackerel.
+> > 
+> > ---
+> > Guennadi Liakhovetski, Ph.D.
+> > Freelance Open-Source Software Developer
+> > http://www.open-technology.de/
+> > 
+> > 
+> 
 
-This patch causes the device to be claimed while the driver's suspend
-method is called. This seems questionable to me. It should be up to
-the driver to deal with or cancel any pending requests in the
-interests of suspend performance. Even if they take a while to
-complete, it might be best to let them complete rather than discard
-the user's data.
-
-In this case in the suspend handler we have to communicate with the
-card. In libertas_sdio we do the communication in a workqueue
-(because, outside of the suspend routine, sometime we need to initiate
-communication from atomic context), but that seems like an
-implementation detail that shouldn't be trampled upon by the higher
-layers.
-
-This method of punishing "badly-behaved" drivers (for some definition
-of the phrase) is also quite harsh. Maybe its just my incompetence but
-it took me a couple of hours to track down why my driver was suddenly
-hanging with no warning message during its suspend routine.
-
-Can we revisit this?
-
-Thanks,
-Daniel
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
