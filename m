@@ -1,100 +1,48 @@
-From: "Rafael J. Wysocki" <rjw@sisk.pl>
-Subject: Re: outstanding ARM patches
-Date: Mon, 16 Apr 2012 18:24:03 +0200
-Message-ID: <201204161824.03746.rjw@sisk.pl>
-References: <1328824636-10553-1-git-send-email-g.liakhovetski@gmx.de> <Pine.LNX.4.64.1204081328100.29005@axis700.grange> <Pine.LNX.4.64.1204131439000.16773@axis700.grange>
+From: Marc Dietrich <marvin24@gmx.de>
+Subject: Re: emmc power select failure
+Date: Mon, 16 Apr 2012 18:44:17 +0200
+Message-ID: <4147205.OrxOj4sBaM@ax5200p>
+References: <1721770.czJDhHnFDk@ax5200p> <CANYdXnpBgpgOFv_rSg+tGTE_vppbV6XO66h5eyr9X2LUFk4T_A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1204131439000.16773@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Linux Media Mailing List <linux-media@vger.kernel.org>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout-de.gmx.net ([213.165.64.23]:53601 "HELO
+	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1753875Ab2DPQoe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Apr 2012 12:44:34 -0400
+In-Reply-To: <CANYdXnpBgpgOFv_rSg+tGTE_vppbV6XO66h5eyr9X2LUFk4T_A@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shashidhar Hiremath <shashidharh@vayavyalabs.com>
+Cc: linux-mmc@vger.kernel.org
 
-On Friday, April 13, 2012, Guennadi Liakhovetski wrote:
-> Hi
-> 
-> Just confirming, that the 3 outstanding ARM patches, that I mentioned in 
-> recent emails:
-> 
-> http://article.gmane.org/gmane.linux.kernel.mmc/12748
-> http://article.gmane.org/gmane.linux.ports.sh.devel/13535
-> http://article.gmane.org/gmane.linux.ports.sh.devel/13975
-> 
-> still apply to the current Linus' tree, though, the former 2 with a fuzz, 
-> if needed, I can provide a version, that applies cleanly. Compile-tested.
+On Monday 16 April 2012 15:25:55 Shashidhar Hiremath wrote:
+> Hi,
+>   is the 8bit bus width supported by the hardware ?
 
-Can you please repost them in one series on top of v3.2-rc3?
+yes. I works with just fine with a chromeos 3.0 kernel and 3.1 kernel (from nv-
+tegra.nvidia.com).
 
-Rafael
+Marc
 
- 
-> On Sun, 8 Apr 2012, Guennadi Liakhovetski wrote:
 > 
-> > On Wed, 14 Mar 2012, Guennadi Liakhovetski wrote:
+> On Fri, Apr 13, 2012 at 11:29 PM, Marc Dietrich <marvin24@gmx.de> wrote:
+> > Hi,
 > > 
-> > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > > ---
-> > > 
-> > > This patch we can push some time after the first one in this series gets 
-> > > in, no breakage is caused.
+> > I'm running linux-next on a tegra-sdhci host which has a Toshiba
+> > THGBM2G6D2FBAI9 eMMC connected. During boot I get a "mmc1: power class
+> > selection to bus width 8 failed" warning.
 > > 
-> > Patch 1/2 from this series is now in the mainline, so, also this patch can 
-> > be applied now. Not sure whether this qualifies as a fix (in the sense, 
-> > that the default maximum sizes of 2560x1920, used without this patch are 
-> > wrong for sh7372). Please, either push for 3.4 or queue for 3.5 
-> > accordingly.
-> ...
-> > >  arch/arm/mach-shmobile/board-ap4evb.c   |    2 ++
-> > >  arch/arm/mach-shmobile/board-mackerel.c |    2 ++
-> > >  2 files changed, 4 insertions(+), 0 deletions(-)
-> > > 
-> > > diff --git a/arch/arm/mach-shmobile/board-ap4evb.c b/arch/arm/mach-shmobile/board-ap4evb.c
-> > > index aab0a34..f67aa03 100644
-> > > --- a/arch/arm/mach-shmobile/board-ap4evb.c
-> > > +++ b/arch/arm/mach-shmobile/board-ap4evb.c
-> > > @@ -1009,6 +1009,8 @@ static struct sh_mobile_ceu_companion csi2 = {
-> > >  
-> > >  static struct sh_mobile_ceu_info sh_mobile_ceu_info = {
-> > >  	.flags = SH_CEU_FLAG_USE_8BIT_BUS,
-> > > +	.max_width = 8188,
-> > > +	.max_height = 8188,
-> > >  	.csi2 = &csi2,
-> > >  };
-> > >  
-> > > diff --git a/arch/arm/mach-shmobile/board-mackerel.c b/arch/arm/mach-shmobile/board-mackerel.c
-> > > index 9b42fbd..f790772 100644
-> > > --- a/arch/arm/mach-shmobile/board-mackerel.c
-> > > +++ b/arch/arm/mach-shmobile/board-mackerel.c
-> > > @@ -1270,6 +1270,8 @@ static void mackerel_camera_del(struct soc_camera_device *icd)
-> > >  
-> > >  static struct sh_mobile_ceu_info sh_mobile_ceu_info = {
-> > >  	.flags = SH_CEU_FLAG_USE_8BIT_BUS,
-> > > +	.max_width = 8188,
-> > > +	.max_height = 8188,
-> > >  };
-> > >  
-> > >  static struct resource ceu_resources[] = {
-> 
-> On Sun, 8 Apr 2012, Guennadi Liakhovetski wrote:
-> 
-> > Now that MMC patches from this series are in the mainline, also 
-> > architecture patches can and should be applied. These are patches 5 and 6 
-> > from this series:
+> > /sys/kernel/debug/mmc1# cat ios
+> > clock:          48000000 Hz
+> > actual clock:   48000000 Hz
+> > vdd:            20 (3.2 ~ 3.3 V)
+> > bus mode:       2 (push-pull)
+> > chip select:    0 (don't care)
+> > power mode:     2 (on)
+> > bus width:      3 (8 bits)
+> > timing spec:    1 (mmc high-speed)
 > > 
-> > http://article.gmane.org/gmane.linux.kernel.mmc/12748
-> > http://article.gmane.org/gmane.linux.ports.sh.devel/13535
-> > 
-> > Would be good to have them in 3.4 since they fix modular MMC builds on 
-> > ag5evm and mackerel.
-> 
-> ---
-> Guennadi Liakhovetski, Ph.D.
-> Freelance Open-Source Software Developer
-> http://www.open-technology.de/
-> 
-> 
+> > Any hints?
 
