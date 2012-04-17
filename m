@@ -1,106 +1,40 @@
-From: Nicolas Pitre <nicolas.pitre@linaro.org>
-Subject: [PATCH v2] mmc: sdio: avoid spurious calls to interrupt handlers
-Date: Mon, 16 Apr 2012 19:16:54 -0400 (EDT)
-Message-ID: <alpine.LFD.2.02.1204161913120.16314@xanadu.home>
-References: <alpine.LFD.2.02.1204131639510.16314@xanadu.home>
+From: H Hartley Sweeten <hartleys@visionengravers.com>
+Subject: [PATCH] mmc: cd-gpio.c: Include header to pickup exported symbol prototypes
+Date: Mon, 16 Apr 2012 18:24:26 -0700
+Message-ID: <201204161824.26879.hartleys@visionengravers.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:36729 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754764Ab2DPXQ5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Apr 2012 19:16:57 -0400
-Received: by qadc11 with SMTP id c11so19225qad.19
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Apr 2012 16:16:56 -0700 (PDT)
-In-Reply-To: <alpine.LFD.2.02.1204131639510.16314@xanadu.home>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linux Kernel <linux-kernel@vger.kernel.org>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, g.liakhovetski@gmx.de
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Sujit Reddy Thumma <sthumma@codeaurora.org>
 
-Commit 06e8935feb "optimized SDIO IRQ handling for single irq"
-introduced some spurious calls to SDIO function interrupt handlers,
-such as when the SDIO IRQ thread is started, or the safety check
-performed upon a system resume.  Let's add a flag to perform the
-optimization only when a real interrupt is signaled by the host
-driver and we know there is no point confirming it.
+Include the linux/mmc/cd-gpio.h header to pickup the prototypes
+for the two exported symbols.
 
-Reported-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Signed-off-by: Nicolas Pitre <nico@linaro.org>
-Cc: stable@kernel.org
+This quiets the sparse warnings:
+
+warning: symbol 'mmc_cd_gpio_request' was not declared. Should it be static?
+warning: symbol 'mmc_cd_gpio_free' was not declared. Should it be static?
+
+Signed-off-by: H Hartley Sweeten <hsweeten@visionengravers.com>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+
 ---
 
-V2: avoid using mmc_signal_sdio_irq() from mmc_sdio_resume(().
-
-
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 2c7c83f832..13d0e95380 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -947,7 +947,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	}
- 
- 	if (!err && host->sdio_irqs)
--		mmc_signal_sdio_irq(host);
-+		wake_up_process(host->sdio_irq_thread);
- 	mmc_release_host(host);
- 
- 	/*
-diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-index f573e7f9f7..3d8ceb4084 100644
---- a/drivers/mmc/core/sdio_irq.c
-+++ b/drivers/mmc/core/sdio_irq.c
-@@ -28,18 +28,20 @@
- 
- #include "sdio_ops.h"
- 
--static int process_sdio_pending_irqs(struct mmc_card *card)
-+static int process_sdio_pending_irqs(struct mmc_host *host)
- {
-+	struct mmc_card *card = host->card;
- 	int i, ret, count;
- 	unsigned char pending;
- 	struct sdio_func *func;
- 
- 	/*
- 	 * Optimization, if there is only 1 function interrupt registered
--	 * call irq handler directly
-+	 * and we know an IRQ was signaled then call irq handler directly.
-+	 * Otherwise do the full probe.
- 	 */
- 	func = card->sdio_single_irq;
--	if (func) {
-+	if (func && host->sdio_irq_pending) {
- 		func->irq_handler(func);
- 		return 1;
- 	}
-@@ -116,7 +118,8 @@ static int sdio_irq_thread(void *_host)
- 		ret = __mmc_claim_host(host, &host->sdio_irq_thread_abort);
- 		if (ret)
- 			break;
--		ret = process_sdio_pending_irqs(host->card);
-+		ret = process_sdio_pending_irqs(host);
-+		host->sdio_irq_pending = false;
- 		mmc_release_host(host);
- 
- 		/*
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index cbde4b7e67..0707d228d7 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -297,6 +297,7 @@ struct mmc_host {
- 
- 	unsigned int		sdio_irqs;
- 	struct task_struct	*sdio_irq_thread;
-+	bool			sdio_irq_pending;
- 	atomic_t		sdio_irq_thread_abort;
- 
- 	mmc_pm_flag_t		pm_flags;	/* requested pm features */
-@@ -352,6 +353,7 @@ extern int mmc_cache_ctrl(struct mmc_host *, u8);
- static inline void mmc_signal_sdio_irq(struct mmc_host *host)
- {
- 	host->ops->enable_sdio_irq(host, 0);
-+	host->sdio_irq_pending = true;
- 	wake_up_process(host->sdio_irq_thread);
- }
+diff --git a/drivers/mmc/core/cd-gpio.c b/drivers/mmc/core/cd-gpio.c
+index 29de31e..da7c3f9 100644
+--- a/drivers/mmc/core/cd-gpio.c
++++ b/drivers/mmc/core/cd-gpio.c
+@@ -13,6 +13,7 @@
+ #include <linux/interrupt.h>
+ #include <linux/jiffies.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/cd-gpio.h>
+ #include <linux/module.h>
+ #include <linux/slab.h>
  
