@@ -1,35 +1,47 @@
-From: Daniel Drake <dsd@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci: refine non-removable card checking for card detection
-Date: Tue, 17 Apr 2012 08:48:56 -0600
-Message-ID: <CAMLZHHSnzQH_ncwtyi2vyzS8H2DBDxvtHKofitGnwUf5ya+xmQ@mail.gmail.com>
-References: <20120409231420.B54649D401E@zog.reactivated.net>
-	<1334044850-sup-1149@twin.sascha.silbe.org>
+From: H Hartley Sweeten <hartleys@visionengravers.com>
+Subject: [PATCH v2] mmc: cd-gpio.c: Include header to pickup exported symbol prototypes
+Date: Tue, 17 Apr 2012 13:03:38 -0700
+Message-ID: <201204171303.39744.hartleys@visionengravers.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:53356 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751221Ab2DQOs5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Apr 2012 10:48:57 -0400
-Received: by vbbff1 with SMTP id ff1so4199398vbb.19
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Apr 2012 07:48:56 -0700 (PDT)
-In-Reply-To: <1334044850-sup-1149@twin.sascha.silbe.org>
+Received: from mail209.messagelabs.com ([216.82.255.3]:9178 "EHLO
+	mail209.messagelabs.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750874Ab2DQUD7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Apr 2012 16:03:59 -0400
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Silbe <silbe@activitycentral.com>
-Cc: cjb <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Linux Kernel <linux-kernel@vger.kernel.org>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, g.liakhovetski@gmx.de, svenkatr@ti.com
 
-Hi,
+Include the linux/mmc/cd-gpio.h header to pickup the prototypes
+for the two exported symbols.
 
-On Tue, Apr 10, 2012 at 2:05 AM, Sascha Silbe <silbe@activitycentral.com> wrote:
-> What exactly is the behaviour after this patch? Will systems running
-> from SD cards attached to a host controller that's _not_ marked as
-> MMC_CAP_NONREMOVABLE (e.g. the external SD card slot on XOs) work again?
-> Or does it only fix running off internal SD cards (which are marked
-> MMC_CAP_NONREMOVABLE)?
+This quiets the sparse warnings:
 
-Not sure which issue you are referring to but it must be different.
-This patch only affects cards that are inserted after boot and it
-doesn't change the behaviour w.r.t MMC_CAP_NONREMOVABLE.
+warning: symbol 'mmc_cd_gpio_request' was not declared. Should it be static?
+warning: symbol 'mmc_cd_gpio_free' was not declared. Should it be static?
 
-Daniel
+Signed-off-by: H Hartley Sweeten <hsweeten@visionengravers.com>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Acked-by: Venkatraman S <svenkatr@ti.com>
+
+---
+
+v2: add new header alphabetically
+
+diff --git a/drivers/mmc/core/cd-gpio.c b/drivers/mmc/core/cd-gpio.c
+index 29de31e..2c14be7 100644
+--- a/drivers/mmc/core/cd-gpio.c
++++ b/drivers/mmc/core/cd-gpio.c
+@@ -12,6 +12,7 @@
+ #include <linux/gpio.h>
+ #include <linux/interrupt.h>
+ #include <linux/jiffies.h>
++#include <linux/mmc/cd-gpio.h>
+ #include <linux/mmc/host.h>
+ #include <linux/module.h>
+ #include <linux/slab.h>
