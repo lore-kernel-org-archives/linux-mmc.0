@@ -1,46 +1,70 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: [RFC 0/8] DMA engine conversion for omap_hsmmc
-Date: Wed, 18 Apr 2012 11:09:54 +0100
-Message-ID: <20120418100954.GK25053@n2100.arm.linux.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+Subject: [PATCH 1/8] ARM: OMAP: fix DMA vs memory ordering
+Date: Wed, 18 Apr 2012 11:10:35 +0100
+Message-ID: <E1SKRqN-0004b4-Me@rmk-PC.arm.linux.org.uk>
+References: <20120418100954.GK25053@n2100.arm.linux.org.uk>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from caramon.arm.linux.org.uk ([78.32.30.218]:41586 "EHLO
+	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751528Ab2DRKKw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 06:10:52 -0400
+In-Reply-To: <20120418100954.GK25053@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Tony Lindgren <tony@atomide.com>
 
-This series is the preliminary conversion of OMAPs private DMA API to
-DMAengine.  It focuses on the OMAP HSMMC driver, as I believe that is
-the only DMA-capable driver which is used on the platforms I have
-available (3430LDP and 4430SDP).
+Using coherent DMA memory with the OMAP DMA engine results in
+unpredictable behaviour due to memory ordering issues; as things stand,
+there is no guarantee that data written to coherent DMA memory will be
+visible to the DMA hardware.
 
-For the OMAP DMAengine driver, there's a few short-comings:
+This is because the OMAP dma_write() accessor contains no barriers,
+necessary on ARMv6 and above.  The effect of this can be seen in comments
+in the OMAP serial driver, which incorrectly talks about cache flushing
+for the coherent DMA stuff.
 
-1. pause/resume support is not implemented; it's not clear whether the
-   OMAP hardware is capable of supporting this sanely.
+Rather than adding barriers to the accessors, add it in the DMA support
+code just before we enable DMA, and just after we disable DMA.  This
+avoids having barriers for every DMA register access.
 
-2. status function does not return DMA residue.
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+---
+ arch/arm/plat-omap/dma.c |   14 ++++++++++++++
+ 1 files changed, 14 insertions(+), 0 deletions(-)
 
-3. DMAengine holds on to physical DMA channels while the driver maintains
-   a reference to the virtual DMA engine channel.  This is not an issue
-   with drivers; drivers should be able to hold a DMA channel for their
-   lifetime.  DMAengine code could be improved to dynamically allocate
-   physical channels, but this should happen when more drivers have been
-   converted.
+diff --git a/arch/arm/plat-omap/dma.c b/arch/arm/plat-omap/dma.c
+index ecdb3da..c58d896 100644
+--- a/arch/arm/plat-omap/dma.c
++++ b/arch/arm/plat-omap/dma.c
+@@ -916,6 +916,13 @@ void omap_start_dma(int lch)
+ 			l |= OMAP_DMA_CCR_BUFFERING_DISABLE;
+ 	l |= OMAP_DMA_CCR_EN;
+ 
++	/*
++	 * As dma_write() uses IO accessors which are weakly ordered, there
++	 * is no guarantee that data in coherent DMA memory will be visible
++	 * to the DMA device.  Add a memory barrier here to ensure that any
++	 * such data is visible prior to enabling DMA.
++	 */
++	mb();
+ 	p->dma_write(l, CCR, lch);
+ 
+ 	dma_chan[lch].flags |= OMAP_DMA_ACTIVE;
+@@ -965,6 +972,13 @@ void omap_stop_dma(int lch)
+ 		p->dma_write(l, CCR, lch);
+ 	}
+ 
++	/*
++	 * Ensure that data transferred by DMA is visible to any access
++	 * after DMA has been disabled.  This is important for coherent
++	 * DMA regions.
++	 */
++	mb();
++
+ 	if (!omap_dma_in_1510_mode() && dma_chan[lch].next_lch != -1) {
+ 		int next_lch, cur_lch = lch;
+ 		char dma_chan_link_map[dma_lch_count];
+-- 
+1.7.4.4
 
-I took the approach with omap_hsmmc to add DMAengine support to the driver
-along side the existing DMA support, so that I had a stage where I could
-switch between the two implementations for comparisons - and also to allow
-me to run with read using DMAengine support, and write using the private
-API.  This allowed a progressive switch over to using DMAengine, and
-allowed debugging without destroying the contents of the MMC card.
-
-A point about DMAengine and DMA API for anyone who contemplates converting
-other drivers: the struct device to be used for mapping/unmapping/coherent
-memory is the DMAengine's device structure (channel->device->dev) not the
-peripheral (eg, MMC) device structure.  It's the DMAengine which is
-performing the DMA to memory, not the peripheral device.  The peripheral
-device is merely receiving the data from the DMAengine, and does not care
-where that data has come from.  So, dma masks for peripheral devices are
-meaningless (and wrong.)
