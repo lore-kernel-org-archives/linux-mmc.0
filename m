@@ -1,7 +1,7 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [RFC PATCH 05/11] mmc: Add BKOPS field offsets
-Date: Wed, 18 Apr 2012 11:55:26 +0530
-Message-ID: <1334730332-22244-6-git-send-email-svenkatr@ti.com>
+Subject: [RFC PATCH 04/11] block: Expedite DMPG and SWAPIN requests ahead of the queue
+Date: Wed, 18 Apr 2012 11:55:25 +0530
+Message-ID: <1334730332-22244-5-git-send-email-svenkatr@ti.com>
 References: <1334730332-22244-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -9,26 +9,56 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1334730332-22244-1-git-send-email-svenkatr@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: arnd.bergmann@linaro.org, cjb@laptop.org, alex.limberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, Venkatraman S <svenkatr@ti.com>
+Cc: arnd.bergmann@linaro.org, cjb@laptop.org, alex.limberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, Alex Lemberg <alex.lemberg@sandisk.com>, Venkatraman S <svenkatr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
+From: Ilan Smith <ilan.smith@sandisk.com>
+
+When expedite_swapin and expedite_dmpg are set, move the
+requests ahead of the queue.
+
+Signed-off-by: Ilan Smith <ilan.smith@sandisk.com>
+Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
 Signed-off-by: Venkatraman S <svenkatr@ti.com>
 ---
- include/linux/mmc/mmc.h |    2 ++
- 1 file changed, 2 insertions(+)
+ block/blk-core.c |   18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index b822a2c..ec2f195 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -280,6 +280,8 @@ struct _mmc_csd {
- #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
- #define EXT_CSD_HPI_MGMT		161	/* R/W */
- #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
-+#define EXT_CSD_BKOPS_EN		163	/* R/W */
-+#define EXT_CSD_BKOPS_START		164	/* W */
- #define EXT_CSD_SANITIZE_START		165     /* W */
- #define EXT_CSD_WR_REL_PARAM		166	/* RO */
- #define EXT_CSD_BOOT_WP			173	/* R/W */
+diff --git a/block/blk-core.c b/block/blk-core.c
+index 3a78b00..0b54ee9 100644
+--- a/block/blk-core.c
++++ b/block/blk-core.c
+@@ -1305,6 +1305,12 @@ void init_request_from_bio(struct request *req, struct bio *bio)
+ 	if (bio->bi_rw & REQ_RAHEAD)
+ 		req->cmd_flags |= REQ_FAILFAST_MASK;
+ 
++	if (bio_swapin(bio) && blk_queue_exp_swapin(req->q))
++		req->cmd_flags |= REQ_RW_SWAPIN;
++
++	if (bio_dmpg(bio) && blk_queue_exp_dmpg(req->q))
++		req->cmd_flags |= REQ_RW_DMPG;
++
+ 	req->errors = 0;
+ 	req->__sector = bio->bi_sector;
+ 	req->ioprio = bio_prio(bio);
+@@ -1332,6 +1338,18 @@ void blk_queue_bio(struct request_queue *q, struct bio *bio)
+ 		goto get_rq;
+ 	}
+ 
++	if (bio_swapin(bio) && blk_queue_exp_swapin(q)) {
++		spin_lock_irq(q->queue_lock);
++		where = ELEVATOR_INSERT_FRONT;
++		goto get_rq;
++	}
++
++	if (bio_dmpg(bio) && blk_queue_exp_dmpg(q)) {
++		spin_lock_irq(q->queue_lock);
++		where = ELEVATOR_INSERT_FRONT;
++		goto get_rq;
++	}
++
+ 	/*
+ 	 * Check if we can merge with the plugged list before grabbing
+ 	 * any locks.
 -- 
 1.7.10.rc2
