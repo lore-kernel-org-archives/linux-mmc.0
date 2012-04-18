@@ -1,7 +1,7 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [RFC PATCH 09/11] mmc: block: Detect HPI support in card and host controller
-Date: Wed, 18 Apr 2012 11:55:30 +0530
-Message-ID: <1334730332-22244-10-git-send-email-svenkatr@ti.com>
+Subject: [RFC PATCH 08/11] mmc: core: Add MMC abort interface
+Date: Wed, 18 Apr 2012 11:55:29 +0530
+Message-ID: <1334730332-22244-9-git-send-email-svenkatr@ti.com>
 References: <1334730332-22244-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,45 +12,49 @@ To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 Cc: arnd.bergmann@linaro.org, cjb@laptop.org, alex.limberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, Venkatraman S <svenkatr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-If both the card and host controller support HPI related
-operations, set a flag in MMC queue to remember it.
+HPI (and possibly other) procedures require that an ongoing
+mmc request issued to a controller be aborted in the middle
+of a transaction. Define a abort interface function to the
+controller so that individual host controllers can safely
+abort a request, stop the dma and cleanup their statemachine
+etc. The implementation is controller dependant
 
 Signed-off-by: Venkatraman S <svenkatr@ti.com>
 ---
- drivers/mmc/card/block.c |   12 ++++++++----
- 1 file changed, 8 insertions(+), 4 deletions(-)
+ drivers/mmc/core/core.c  |    8 ++++++++
+ include/linux/mmc/host.h |    1 +
+ 2 files changed, 9 insertions(+)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index dabec55..11833e4 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -88,6 +88,7 @@ struct mmc_blk_data {
- 	unsigned int	flags;
- #define MMC_BLK_CMD23	(1 << 0)	/* Can do SET_BLOCK_COUNT for multiblock */
- #define MMC_BLK_REL_WR	(1 << 1)	/* MMC Reliable write support */
-+#define MMC_HPI_SUPPORT	(1 << 2)
- 
- 	unsigned int	usage;
- 	unsigned int	read_only;
-@@ -1548,12 +1549,15 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 			md->flags |= MMC_BLK_CMD23;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 6cefa01..1963305 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -328,6 +328,14 @@ static void mmc_post_req(struct mmc_host *host, struct mmc_request *mrq,
  	}
+ }
  
--	if (mmc_card_mmc(card) &&
--	    md->flags & MMC_BLK_CMD23 &&
-+	if (mmc_card_mmc(card)) {
-+		if (md->flags & MMC_BLK_CMD23 &&
- 	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
- 	     card->ext_csd.rel_sectors)) {
--		md->flags |= MMC_BLK_REL_WR;
--		blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
-+			md->flags |= MMC_BLK_REL_WR;
-+			blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
-+		}
-+		if (card->host->ops->abort_req && card->ext_csd.hpi_en)
-+			md->flags |= MMC_HPI_SUPPORT;
- 	}
- 
- 	return md;
++static int mmc_abort_req(struct mmc_host *host, struct mmc_request *req)
++{
++	if (host->ops->abort_req)
++		return host->ops->abort_req(host, req);
++
++	return -ENOSYS;
++}
++
+ /**
+  *	mmc_start_req - start a non-blocking request
+  *	@host: MMC host to start command
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index cbde4b7..826e34d 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -98,6 +98,7 @@ struct mmc_host_ops {
+ 			    int err);
+ 	void	(*pre_req)(struct mmc_host *host, struct mmc_request *req,
+ 			   bool is_first_req);
++	int	(*abort_req)(struct mmc_host *host, struct mmc_request *req);
+ 	void	(*request)(struct mmc_host *host, struct mmc_request *req);
+ 	/*
+ 	 * Avoid calling these three functions too often or in a "fast path",
 -- 
 1.7.10.rc2
