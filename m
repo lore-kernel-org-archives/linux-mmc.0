@@ -1,69 +1,63 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 8/8] ARM: omap_hsmmc: remove platform data dma_mask and
-	initialization
-Date: Wed, 18 Apr 2012 20:42:24 +0100
-Message-ID: <20120418194224.GS25053@n2100.arm.linux.org.uk>
-References: <20120418100954.GK25053@n2100.arm.linux.org.uk> <E1SKRsg-0004bX-4w@rmk-PC.arm.linux.org.uk> <CANrkHUajRzoCp7K8L3cJArWN3xdqpft8L4k-o4gFTRTo8nmhmg@mail.gmail.com> <20120418152956.GP25053@n2100.arm.linux.org.uk> <CANrkHUYvKdBUZh9UmWcE30ywAAiqhN-KcnSAE2T56WJLFPX1gA@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 6/8] mmc: omap_hsmmc: add DMA engine support
+Date: Wed, 18 Apr 2012 12:53:18 -0700
+Message-ID: <20120418195318.GN21106@atomide.com>
+References: <20120418100954.GK25053@n2100.arm.linux.org.uk>
+ <E1SKRs1-0004bP-HH@rmk-PC.arm.linux.org.uk>
+ <20120418181112.GK21106@atomide.com>
+ <20120418190923.GQ25053@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CANrkHUYvKdBUZh9UmWcE30ywAAiqhN-KcnSAE2T56WJLFPX1gA@mail.gmail.com>
+In-Reply-To: <20120418190923.GQ25053@n2100.arm.linux.org.uk>
 Sender: linux-omap-owner@vger.kernel.org
-To: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Apr 18, 2012 at 09:05:56PM +0530, T Krishnamoorthy, Balaji wrot=
-e:
-> On Wed, Apr 18, 2012 at 8:59 PM, Russell King - ARM Linux
-> <linux@arm.linux.org.uk> wrote:
-> > On Wed, Apr 18, 2012 at 08:53:32PM +0530, T Krishnamoorthy, Balaji =
-wrote:
-> >> Hi,
-> >>
-> >> drivers/mmc/host/omap.c is also using dma_mask should that also be=
- removed
-> >
-> > Does this driver make use of this platform data?
-> >
-> > If so, it needs converting to DMA engine _before_ this patch (which=
- is
-> > one reason why its a good idea to do these changes as separate patc=
-hes...
-> > as I've done.) =A0It means stuff like this can be slotted in as nec=
-essary
-> > in the patch order.
-> >
-> > I'm told that driver is OMAP2 only - I don't have any OMAP2 platfor=
-ms to
-> > be able to test it on (I only have OMAP3 and OMAP4.)
->=20
-> Yes, this driver is for omap2420 and omap1 devices.
+* Russell King - ARM Linux <linux@arm.linux.org.uk> [120418 12:12]:
+> On Wed, Apr 18, 2012 at 11:11:12AM -0700, Tony Lindgren wrote:
+> > * Russell King <rmk+kernel@arm.linux.org.uk> [120418 03:15]:
+> > > Add DMA engine support to the OMAP HSMMC driver.  This supplements the
+> > > private DMA API implementation contained within this driver, and the
+> > > driver can be switched at build time between using DMA engine and the
+> > > private DMA API.
+> > 
+> > Glad to see this happening!
+> > 
+> > No luck here though, after a quick test I'm getting the following with MMC
+> > not working:
+> 
+> Did you enable OMAP DMA engine support?
 
-Looking at this driver, there seems to be some interaction between how
-the DMA is programmed for each part of the scatterlist, and how the
-MMC interface is programmed, specifically:
+Heh that's it :) Yup it works now after adding:
 
-        frame =3D data->blksz;
-        if (cpu_is_omap15xx() && frame > 32)
-                frame =3D 32;
-        else if (frame > 64)
-                frame =3D 64;
-        frame >>=3D 1;
-        if (!(data->flags & MMC_DATA_WRITE)) {
-                buf =3D 0x800f | ((frame - 1) << 8);
-        } else {
-                buf =3D 0x0f80 | ((frame - 1) << 0);
-        }
-        OMAP_MMC_WRITE(host, BUF, buf);
+CONFIG_DMADEVICES=y
+CONFIG_DMA_OMAP=y
 
-Does this register have to be written on every scatterlist entry, or ca=
-n
-it be written once at the start of request processing?
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+How about just continue on PIO if DMA reques fails:
+
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1921,16 +1921,12 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
+ 	dma_cap_set(DMA_SLAVE, mask);
+ 
+ 	host->rx_chan = dma_request_channel(mask, omap_dma_filter_fn, &rx_req);
+-	if (!host->rx_chan) {
+-		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
+-		goto err_irq;
+-	}
++	if (!host->rx_chan)
++		dev_info(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
+ 
+ 	host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &tx_req);
+-	if (!host->tx_chan) {
+-		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
+-		goto err_irq;
+-	}
++	if (!host->tx_chan)
++		dev_info(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
+ 
+ 	/* Request IRQ for MMC operations */
+ 	ret = request_irq(host->irq, omap_hsmmc_irq, 0,
