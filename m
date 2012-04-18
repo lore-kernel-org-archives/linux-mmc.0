@@ -1,54 +1,163 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] dw-mmc: prevent the Null pointer dereference for dma_ops
-Date: Wed, 18 Apr 2012 15:42:31 +0900
-Message-ID: <4F8E6257.5010603@samsung.com>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH v1 1/1] mmc: block: replace __blk_end_request() with blk_end_request()
+Date: Wed, 18 Apr 2012 13:06:36 +0530
+Message-ID: <000501cd1d35$fe0dec90$fa29c5b0$@codeaurora.org>
+References: <1334082412-2821-1-git-send-email-subhashj@codeaurora.org>	<87pqbfv3e1.fsf@laptop.org>	<000201cd174a$f3019b80$d904d280$@codeaurora.org>	<000301cd1d22$57444d40$05cce7c0$@codeaurora.org> <CAKYAXd9QfEEJLQGG6PJgnNyyXP4D2Sa-PqhiZ=dDdQv50z76+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:19727 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751062Ab2DRGmt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 02:42:49 -0400
-Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
- by mailout1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M2N009XJXATHBB0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 18 Apr 2012 15:42:47 +0900 (KST)
-Received: from [165.213.219.108] by mmp2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M2N000NUXBBM260@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 18 Apr 2012 15:42:47 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAKYAXd9QfEEJLQGG6PJgnNyyXP4D2Sa-PqhiZ=dDdQv50z76+A@mail.gmail.com>
+Content-Language: en-us
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: 'Namjae Jeon' <linkinjeon@gmail.com>
+Cc: 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Now, dma_ops is assumed that use the IDMAC.
-But if dma_ops is assigned the pdata->dma_ops,
-We didn't ensure that callback function is defined.
+Hi Namjae,
 
-If anything of callback didn't define, then should be run the PIO mode.
+> -----Original Message-----
+> From: Namjae Jeon [mailto:linkinjeon@gmail.com]
+> Sent: Wednesday, April 18, 2012 11:12 AM
+> To: Subhash Jadavani
+> Cc: Chris Ball; linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org
+> Subject: Re: [PATCH v1 1/1] mmc: block: replace __blk_end_request() with
+> blk_end_request()
+> 
+> Hi. Subhash.
+> 
+> Would you share which option you used in LMDD, iozone test ?
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
+Following are the commands. Page cache is flushed before next iteration. Original numbers shared were average of almost 10 iterations.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index f3b0fcd..bab9ead 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1881,7 +1881,8 @@ static void dw_mci_init_dma(struct dw_mci *host)
- 	if (!host->dma_ops)
- 		goto no_dma;
- 
--	if (host->dma_ops->init) {
-+	if (host->dma_ops->init && host->dma_ops->start &&
-+			host->dma_ops->stop && host->dma_ops->cleanup) {
- 		if (host->dma_ops->init(host)) {
- 			dev_err(&host->dev, "%s: Unable to initialize "
- 				"DMA Controller.\n", __func__);
--- 
-1.7.4.1
+LMDD:
+	100MB file read/write:
+		write:
+			lmdd if=internal of=/data/datafile bs=128k count=800 flush=1 sync=1
+		read:
+			lmdd if=/data/datafile of=internal bs=128k flush=1 sync=1
+
+IOZONE:
+	100MB file read/write:
+		Write:
+			iozone -i0 -s100m -r128k -e -w -f /data/datafile -U /data/
+		Read:
+			iozone -i1 -s100m -r128k -e -f /data/datafile -U /data/
+
+Regards,
+Subhash
+
+> 
+> Thanks.
+> 
+> 2012/4/18 Subhash Jadavani <subhashj@codeaurora.org>:
+> > Hi Chris,
+> >
+> >> -----Original Message-----
+> >> From: linux-arm-msm-owner@vger.kernel.org [mailto:linux-arm-msm-
+> >> owner@vger.kernel.org] On Behalf Of Subhash Jadavani
+> >> Sent: Wednesday, April 11, 2012 12:22 AM
+> >> To: 'Chris Ball'
+> >> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org
+> >> Subject: RE: [PATCH v1 1/1] mmc: block: replace __blk_end_request()
+> >> with
+> >> blk_end_request()
+> >>
+> >>
+> >>
+> >> > -----Original Message-----
+> >> > From: Chris Ball [mailto:cjb@laptop.org]
+> >> > Sent: Wednesday, April 11, 2012 12:08 AM
+> >> > To: Subhash Jadavani
+> >> > Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org
+> >> > Subject: Re: [PATCH v1 1/1] mmc: block: replace __blk_end_request()
+> >> > with
+> >> > blk_end_request()
+> >> >
+> >> > Hi,
+> >> >
+> >> > On Tue, Apr 10 2012, Subhash Jadavani wrote:
+> >> > > This patch replaces all __blk_end_request() calls with
+> >> > > blk_end_request() and __blk_end_request_all() calls with
+> >> > > blk_end_request_all().
+> >> > >
+> >> > > Testing done: 20 process concurrent read/write on sd card and eMMC.
+> >> > > Ran this test for almost a day on multicore system and no errors
+> >> > > observed.
+> >> >
+> >> > Is there a measurable improvement in throughput or latency that you
+> >> > can
+> >> show
+> >> > data for?
+> >>
+> >> This change was not meant for improving MMC throughput; it's
+> >> basically
+> > about
+> >> becoming fair to other threads/interrupts in the system. By holding
+> >> spin
+> > lock
+> >> and interrupts disabled for longer duration, we won't allow other
+> >> threads/interrupts to run at all.
+> >> Actually slight performance degradation at file system level can be
+> > expected as
+> >> we are not holding the spin lock during blk_update_bidi_request()
+> >> which
+> > means
+> >> our mmcqd thread may get preempted for other high priority thread or
+> >> any interrupt in the system.
+> >>
+> >>
+> >> These are performance numbers (100MB file write) with eMMC running in
+> >> DDR
+> >> mode:
+> >>
+> >> Without this patch:
+> >>       Name of the Test        Value   Unit
+> >>       LMDD Read Test  53.79   MBPS
+> >>       LMDD Write Test 18.86   MBPS
+> >>       IOZONE  Read Test       51.65   MBPS
+> >>       IOZONE  Write Test      24.36   MBPS
+> >>
+> >> With this patch:
+> >>
+> >>       Name of the Test        Value   Unit
+> >>       LMDD Read Test  52.94   MBPS
+> >>       LMDD Write Test 16.70   MBPS
+> >>       IOZONE  Read Test       52.08   MBPS
+> >>       IOZONE  Write Test      23.29   MBPS
+> >>
+> >> Read numbers are fine. Write numbers are bit down (especially LMDD
+> >> write), may be because write requests normally have large transfer
+> >> size and which means there are chances that while mmcq is executing
+> >> blk_update_bidi_request(), it may get interrupted by interrupts or
+> >> other
+> > high
+> >> priority thread.
+> >
+> > Any thoughts/suggestions on this patch and numbers?
+> >
+> > Regards,
+> > Subhash
+> >>
+> >> Regards,
+> >> Subhash
+> >>
+> >> >
+> >> > Thanks,
+> >> >
+> >> > - Chris.
+> >> > --
+> >> > Chris Ball   <cjb@laptop.org>   <http://printf.net/> One Laptop Per
+> >> > Child
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe linux-arm-msm"
+> > in the
+> >> body of a message to majordomo@vger.kernel.org More majordomo info at
+> >> http://vger.kernel.org/majordomo-info.html
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at  http://vger.kernel.org/majordomo-info.html
