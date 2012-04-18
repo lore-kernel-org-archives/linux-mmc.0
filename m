@@ -1,55 +1,39 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 1/3] mmc: omap_hsmmc: release correct resource
-Date: Wed, 18 Apr 2012 10:58:47 +0100
-Message-ID: <20120418095847.GJ25053@n2100.arm.linux.org.uk>
-References: <y> <1334742553-11060-1-git-send-email-svenkatr@ti.com>
+From: Will Newton <will.newton@gmail.com>
+Subject: Re: [PATCH] dw-mmc: prevent the Null pointer dereference for dma_ops
+Date: Wed, 18 Apr 2012 11:02:11 +0100
+Message-ID: <CAFbHwiQ5Q8qaog2ZPSs-HkoAnnGTofBFb4tM=XVo_vAYPkts2A@mail.gmail.com>
+References: <4F8E6257.5010603@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:43627 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751425Ab2DRJ7J (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 05:59:09 -0400
-Content-Disposition: inline
-In-Reply-To: <1334742553-11060-1-git-send-email-svenkatr@ti.com>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:57630 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751968Ab2DRKCL convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 06:02:11 -0400
+Received: by pbcun15 with SMTP id un15so8752789pbc.19
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Apr 2012 03:02:11 -0700 (PDT)
+In-Reply-To: <4F8E6257.5010603@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On Wed, Apr 18, 2012 at 03:19:11PM +0530, Venkatraman S wrote:
-> From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-
-Please correct this to "Russell King <rmk+kernel@arm.linux.org.uk>"
-
-> 
-> res can be one of several resources, as this variable is re-used several
-> times during probe.  This can cause the wrong resource parameters to be
-> passed to release_mem_region().
-> 
-> Get the original memory resource before calling release_mem_region().
-> 
-> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+On Wed, Apr 18, 2012 at 7:42 AM, Jaehoon Chung <jh80.chung@samsung.com>=
+ wrote:
+> Now, dma_ops is assumed that use the IDMAC.
+> But if dma_ops is assigned the pdata->dma_ops,
+> We didn't ensure that callback function is defined.
+>
+> If anything of callback didn't define, then should be run the PIO mod=
+e.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 > ---
->  drivers/mmc/host/omap_hsmmc.c |    4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 4254b6f..d15b149 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2042,7 +2042,9 @@ err1:
->  err_alloc:
->  	omap_hsmmc_gpio_free(pdata);
->  err:
-> -	release_mem_region(res->start, resource_size(res));
-> +	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +	if (res)
-> +		release_mem_region(res->start, resource_size(res));
->  	return ret;
->  }
->  
-> -- 
-> 1.7.10.rc2
-> 
+> =A0drivers/mmc/host/dw_mmc.c | =A0 =A03 ++-
+> =A01 files changed, 2 insertions(+), 1 deletions(-)
+
+This looks ok.
+
+Acked-by: Will Newton <will.newton@imgtec.com>
