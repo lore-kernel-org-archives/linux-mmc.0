@@ -1,62 +1,64 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [RFC PATCH 06/11] mmc: core: Helper function for finding preemptible command
-Date: Wed, 18 Apr 2012 11:55:27 +0530
-Message-ID: <1334730332-22244-7-git-send-email-svenkatr@ti.com>
+Subject: [RFC PATCH 10/11] mmc: core: Utility function for mmc preemption sequence
+Date: Wed, 18 Apr 2012 11:55:31 +0530
+Message-ID: <1334730332-22244-11-git-send-email-svenkatr@ti.com>
 References: <1334730332-22244-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:42925 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751460Ab2DRG0J (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 02:26:09 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1334730332-22244-1-git-send-email-svenkatr@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 Cc: arnd.bergmann@linaro.org, cjb@laptop.org, alex.limberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, Venkatraman S <svenkatr@ti.com>
+List-Id: linux-mmc@vger.kernel.org
 
-According to Table 30 in eMMC spec, only some commands
-can be preempted by HPI. Provide a helper function for
-the HPI procedure to identify if the command is
-preemptible.
+Add a routine to invoke hpi command after invoking host
+controller abort.
 
 Signed-off-by: Venkatraman S <svenkatr@ti.com>
 ---
- include/linux/mmc/core.h |   13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/mmc/core/core.c  |   15 +++++++++++++++
+ include/linux/mmc/core.h |    2 ++
+ 2 files changed, 17 insertions(+)
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 1963305..7230a26 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -467,6 +467,21 @@ out:
+ }
+ EXPORT_SYMBOL(mmc_interrupt_hpi);
+ 
++int mmc_preempt_foreground_request(struct mmc_card *card,
++	struct mmc_request *req)
++{
++	int ret;
++
++	ret = mmc_abort_req(card->host, req);
++	if (ret)
++		pr_err("%s: Host Abort failed %d\n",
++			mmc_hostname(card->host), ret);
++	else
++		ret = mmc_interrupt_hpi(card);
++	return ret;
++}
++EXPORT_SYMBOL(mmc_preempt_foreground_request);
++
+ /**
+  *	mmc_wait_for_cmd - start a command and wait for completion
+  *	@host: MMC host to start command
 diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 1b431c7..680e256 100644
+index d86144e..e2d55c6 100644
 --- a/include/linux/mmc/core.h
 +++ b/include/linux/mmc/core.h
-@@ -10,6 +10,7 @@
- 
- #include <linux/interrupt.h>
- #include <linux/completion.h>
-+#include <linux/mmc/mmc.h>
- 
- struct request;
- struct mmc_data;
-@@ -192,6 +193,18 @@ static inline void mmc_claim_host(struct mmc_host *host)
- 	__mmc_claim_host(host, NULL);
- }
- 
-+static inline bool mmc_is_preemptible_command(struct mmc_command *cmd)
-+{
-+	if ((cmd->opcode == MMC_SWITCH && (cmd->arg == EXT_CSD_BKOPS_START ||
-+		cmd->arg == EXT_CSD_SANITIZE_START ||
-+		cmd->arg == EXT_CSD_FLUSH_CACHE))
-+		|| (cmd->opcode == MMC_ERASE)
-+		|| (cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK)
-+		|| (cmd->opcode == MMC_WRITE_BLOCK))
-+		return true;
-+	return false;
-+}
-+
- extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
- 
- #endif /* LINUX_MMC_CORE_H */
+@@ -144,6 +144,8 @@ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+ extern int mmc_interrupt_hpi(struct mmc_card *);
+ extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
+ extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
++extern int mmc_preempt_foreground_request(struct mmc_card *card,
++	struct mmc_request *req);
+ extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
+ extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+ 	struct mmc_command *, int);
 -- 
 1.7.10.rc2
-
