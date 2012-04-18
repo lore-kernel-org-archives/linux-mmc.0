@@ -1,70 +1,88 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 1/8] ARM: OMAP: fix DMA vs memory ordering
-Date: Wed, 18 Apr 2012 11:10:35 +0100
-Message-ID: <E1SKRqN-0004b4-Me@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 2/8] dmaengine: amba-pl08x: ensure physical channels are
+ properly held
+Date: Wed, 18 Apr 2012 11:10:55 +0100
+Message-ID: <E1SKRqh-0004b8-RH@rmk-PC.arm.linux.org.uk>
 References: <20120418100954.GK25053@n2100.arm.linux.org.uk>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from caramon.arm.linux.org.uk ([78.32.30.218]:41586 "EHLO
-	caramon.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751528Ab2DRKKw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 06:10:52 -0400
+Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <20120418100954.GK25053@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-omap-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Tony Lindgren <tony@atomide.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Dan Williams <dan.j.williams@intel.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Using coherent DMA memory with the OMAP DMA engine results in
-unpredictable behaviour due to memory ordering issues; as things stand,
-there is no guarantee that data written to coherent DMA memory will be
-visible to the DMA hardware.
-
-This is because the OMAP dma_write() accessor contains no barriers,
-necessary on ARMv6 and above.  The effect of this can be seen in comments
-in the OMAP serial driver, which incorrectly talks about cache flushing
-for the coherent DMA stuff.
-
-Rather than adding barriers to the accessors, add it in the DMA support
-code just before we enable DMA, and just after we disable DMA.  This
-avoids having barriers for every DMA register access.
+Ensure that physical channels are held while there are descriptors for
+them to process.  This is needed when we split the pending queue into
+separate pending and issued queues.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- arch/arm/plat-omap/dma.c |   14 ++++++++++++++
- 1 files changed, 14 insertions(+), 0 deletions(-)
+ drivers/dma/amba-pl08x.c |   10 ++++++----
+ 1 files changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm/plat-omap/dma.c b/arch/arm/plat-omap/dma.c
-index ecdb3da..c58d896 100644
---- a/arch/arm/plat-omap/dma.c
-+++ b/arch/arm/plat-omap/dma.c
-@@ -916,6 +916,13 @@ void omap_start_dma(int lch)
- 			l |= OMAP_DMA_CCR_BUFFERING_DISABLE;
- 	l |= OMAP_DMA_CCR_EN;
+diff --git a/drivers/dma/amba-pl08x.c b/drivers/dma/amba-pl08x.c
+index c301a8e..2e74cca 100644
+--- a/drivers/dma/amba-pl08x.c
++++ b/drivers/dma/amba-pl08x.c
+@@ -855,6 +855,8 @@ static int prep_phy_channel(struct pl08x_dma_chan *plchan,
+ 	struct pl08x_phy_chan *ch;
+ 	int ret;
  
-+	/*
-+	 * As dma_write() uses IO accessors which are weakly ordered, there
-+	 * is no guarantee that data in coherent DMA memory will be visible
-+	 * to the DMA device.  Add a memory barrier here to ensure that any
-+	 * such data is visible prior to enabling DMA.
-+	 */
-+	mb();
- 	p->dma_write(l, CCR, lch);
++	plchan->phychan_hold++;
++
+ 	/* Check if we already have a channel */
+ 	if (plchan->phychan) {
+ 		ch = plchan->phychan;
+@@ -863,6 +865,7 @@ static int prep_phy_channel(struct pl08x_dma_chan *plchan,
  
- 	dma_chan[lch].flags |= OMAP_DMA_ACTIVE;
-@@ -965,6 +972,13 @@ void omap_stop_dma(int lch)
- 		p->dma_write(l, CCR, lch);
+ 	ch = pl08x_get_phy_channel(pl08x, plchan);
+ 	if (!ch) {
++		plchan->phychan_hold--;
+ 		/* No physical channel available, cope with it */
+ 		dev_dbg(&pl08x->adev->dev, "no physical channel available for xfer on %s\n", plchan->name);
+ 		return -EBUSY;
+@@ -876,6 +879,7 @@ static int prep_phy_channel(struct pl08x_dma_chan *plchan,
+ 	if (plchan->slave && pl08x->pd->get_signal) {
+ 		ret = pl08x->pd->get_signal(plchan);
+ 		if (ret < 0) {
++			plchan->phychan_hold--;
+ 			dev_dbg(&pl08x->adev->dev,
+ 				"unable to use physical channel %d for transfer on %s due to platform restrictions\n",
+ 				ch->id, plchan->name);
+@@ -899,8 +903,6 @@ static int prep_phy_channel(struct pl08x_dma_chan *plchan,
+ 	else if (txd->direction == DMA_DEV_TO_MEM)
+ 		txd->ccfg |= ch->signal << PL080_CONFIG_SRC_SEL_SHIFT;
+ 
+-	plchan->phychan_hold++;
+-
+ 	return 0;
+ }
+ 
+@@ -938,8 +940,6 @@ static dma_cookie_t pl08x_tx_submit(struct dma_async_tx_descriptor *tx)
+ 		/* Do this memcpy whenever there is a channel ready */
+ 		plchan->state = PL08X_CHAN_WAITING;
+ 		plchan->waiting = txd;
+-	} else {
+-		plchan->phychan_hold--;
  	}
  
-+	/*
-+	 * Ensure that data transferred by DMA is visible to any access
-+	 * after DMA has been disabled.  This is important for coherent
-+	 * DMA regions.
-+	 */
-+	mb();
-+
- 	if (!omap_dma_in_1510_mode() && dma_chan[lch].next_lch != -1) {
- 		int next_lch, cur_lch = lch;
- 		char dma_chan_link_map[dma_lch_count];
+ 	spin_unlock_irqrestore(&plchan->lock, flags);
+@@ -1428,6 +1428,7 @@ static int pl08x_control(struct dma_chan *chan, enum dma_ctrl_cmd cmd,
+ 			 * Mark physical channel as free and free any slave
+ 			 * signal
+ 			 */
++			plchan->phychan_hold = 0;
+ 			release_phy_channel(plchan);
+ 		}
+ 		/* Dequeue jobs and free LLIs */
+@@ -1529,6 +1530,7 @@ static void pl08x_tasklet(unsigned long data)
+ 	if (txd) {
+ 		/* Update last completed */
+ 		dma_cookie_complete(&txd->tx);
++		plchan->phychan_hold--;
+ 	}
+ 
+ 	/* If a new descriptor is queued, set it up plchan->at is NULL here */
 -- 
 1.7.4.4
 
