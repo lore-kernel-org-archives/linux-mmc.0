@@ -1,48 +1,154 @@
-From: =?UTF-8?q?Eric=20B=C3=A9nard?= <eric@eukrea.com>
-Subject: [PATCH] mmc: unbreak sdhci-esdhc-imx on i.MX25
-Date: Wed, 18 Apr 2012 02:30:20 +0200
-Message-ID: <1334709020-31088-1-git-send-email-eric@eukrea.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2] mmc: core: Fix the HPI execution sequence
+Date: Wed, 18 Apr 2012 10:40:40 +0900
+Message-ID: <4F8E1B98.1050803@samsung.com>
+References: <1334670334-18050-1-git-send-email-svenkatr@ti.com>
+ <CAKYAXd96A6yzaz-59y+79sgRaQuT3MpRBZKStJM4HQN3L-=h5A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp3-g21.free.fr ([212.27.42.3]:59138 "EHLO smtp3-g21.free.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752357Ab2DRAal (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 17 Apr 2012 20:30:41 -0400
+Received: from mailout4.samsung.com ([203.254.224.34]:8787 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751708Ab2DRBk6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Apr 2012 21:40:58 -0400
+Received: from epcpsbgm1.samsung.com (mailout4.samsung.com [203.254.224.34])
+ by mailout4.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M2N00MQUJC58690@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 18 Apr 2012 10:40:57 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M2N00BFWJC81F20@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 18 Apr 2012 10:40:56 +0900 (KST)
+In-reply-to: <CAKYAXd96A6yzaz-59y+79sgRaQuT3MpRBZKStJM4HQN3L-=h5A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: shawn.guo@linaro.org, w.sang@pengutronix.de, cjb@laptop.org, s.hauer@pengutronix.de, =?UTF-8?q?Eric=20B=C3=A9nard?= <eric@eukrea.com>
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-this was broken by me in 37865fe91582582a6f6c00652f6a2b1ff71f8a78
-"mmc: sdhci-esdhc-imx: fix timeout on i.MX's sdhc" where more
-extensive tests would have shown that read or write of data
-to the card were failing (even if the partition table was
-correctly read).
+On 04/18/2012 09:20 AM, Namjae Jeon wrote:
 
-Signed-off-by: Eric B=C3=A9nard <eric@eukrea.com>
-Acked-by: Wolfram Sang <w.sang@pengutronix.de>
----
- drivers/mmc/host/sdhci-esdhc-imx.c |    3 +--
- 1 files changed, 1 insertions(+), 2 deletions(-)
+> 2012/4/17 Venkatraman S <svenkatr@ti.com>:
+>> mmc_execute_hpi should send the HPI command only
+>> once, only if the card is in PRG state.
+>>
+>> According to eMMC spec, the command's completion time is
+>> not dependent on OUT_OF_INTERRUPT_TIME. Only the transition
+>> out of PRG STATE is guarded by OUT_OF_INTERRUPT_TIME - which is
+>> defined to begin at the end of sending the command itself.
+> Hi. Venkatraman.
+> I can not find this words. " the command's completion time is not
+> dependent on OUT_OF_INTERRUPT_TIME" .
+> Would you inform me which page and which part you checked in specification ?
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhc=
-i-esdhc-imx.c
-index 6193a0d..8abdaf6 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -467,8 +467,7 @@ static int __devinit sdhci_esdhc_imx_probe(struct p=
-latform_device *pdev)
- 	clk_prepare_enable(clk);
- 	pltfm_host->clk =3D clk;
-=20
--	if (!is_imx25_esdhc(imx_data))
--		host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-+	host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-=20
- 	if (is_imx25_esdhc(imx_data) || is_imx35_esdhc(imx_data))
- 		/* Fix errata ENGcm07207 present on i.MX25 and i.MX35 */
---=20
-1.7.7.6
+Well, i know that timeout value is used the OUT_OF_INTERRUPT_TIME, when interrupted by HPI.
+It's my misunderstanding?
+
+Best Regards,
+Jaehoon Chung
+
+> 
+> Thanks.
+>>
+>> Specify the default timeout for the actual sending of HPI
+>> command, and then use OUT_OF_INTERRUPT_TIME to wait for
+>> the transition out of PRG state.
+>>
+>> Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
+>> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+>> CC: Namjae Jeon <linkinjeon@gmail.com>
+>> CC: Jae hoon Chung <jh80.chung@gmail.com>
+>> CC: Chris Ball <cjb@laptop.org>
+>> ---
+>> Changes since v1:
+>>        Skip looping over send_status indefinitely
+>>        Correct the interpretation of OUT_OF_INTERRUPT_TIME
+>>
+>>  drivers/mmc/core/core.c    |   45 ++++++++++++++++++++++++--------------------
+>>  drivers/mmc/core/mmc_ops.c |    2 +-
+>>  2 files changed, 26 insertions(+), 21 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index e541efb..027c579 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -403,6 +403,7 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+>>  {
+>>        int err;
+>>        u32 status;
+>> +       unsigned long starttime;
+>>
+>>        BUG_ON(!card);
+>>
+>> @@ -421,27 +422,31 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+>>        /*
+>>         * If the card status is in PRG-state, we can send the HPI command.
+>>         */
+>> -       if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
+>> -               do {
+>> -                       /*
+>> -                        * We don't know when the HPI command will finish
+>> -                        * processing, so we need to resend HPI until out
+>> -                        * of prg-state, and keep checking the card status
+>> -                        * with SEND_STATUS.  If a timeout error occurs when
+>> -                        * sending the HPI command, we are already out of
+>> -                        * prg-state.
+>> -                        */
+>> -                       err = mmc_send_hpi_cmd(card, &status);
+>> -                       if (err)
+>> -                               pr_debug("%s: abort HPI (%d error)\n",
+>> -                                        mmc_hostname(card->host), err);
+>> +       if (R1_CURRENT_STATE(status) != R1_STATE_PRG) {
+>> +               pr_debug("%s: Can't send HPI: Card state=%d\n",
+>> +                       mmc_hostname(card->host), R1_CURRENT_STATE(status));
+>> +               err = -EINVAL;
+>> +               goto out;
+>> +       }
+>> +
+>> +       starttime = jiffies;
+>> +       err = mmc_send_hpi_cmd(card, &status);
+>> +       if (err) {
+>> +               pr_debug("%s:HPI could not be sent.err=%d)\n",
+>> +                       mmc_hostname(card->host), err);
+>> +               goto out;
+>> +       }
+>> +
+>> +       do {
+>> +               err = mmc_send_status(card, &status);
+>> +
+>> +               if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
+>> +                       goto out;
+>> +               if (jiffies_to_msecs(jiffies - starttime) >
+>> +                       card->ext_csd.out_of_int_time)
+>> +                       err = -ETIMEDOUT;
+>> +       } while (!err);
+>>
+>> -                       err = mmc_send_status(card, &status);
+>> -                       if (err)
+>> -                               break;
+>> -               } while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+>> -       } else
+>> -               pr_debug("%s: Left prg-state\n", mmc_hostname(card->host));
+>>
+>>  out:
+>>        mmc_release_host(card->host);
+>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>> index 69370f4..f2235d6 100644
+>> --- a/drivers/mmc/core/mmc_ops.c
+>> +++ b/drivers/mmc/core/mmc_ops.c
+>> @@ -569,7 +569,7 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
+>>
+>>        cmd.opcode = opcode;
+>>        cmd.arg = card->rca << 16 | 1;
+>> -       cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
+>> +       cmd.cmd_timeout_ms = 0;
+>>
+>>        err = mmc_wait_for_cmd(card->host, &cmd, 0);
+>>        if (err) {
+>> --
+>> 1.7.10.rc2
+>>
+> 
+
 
