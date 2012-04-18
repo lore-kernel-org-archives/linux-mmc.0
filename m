@@ -1,85 +1,54 @@
-From: Venkatraman S <svenkatr@ti.com>
-Subject: [RFC PATCH 01/11] fs: Add demand paging markers to filesystem
-Date: Wed, 18 Apr 2012 11:55:22 +0530
-Message-ID: <1334730332-22244-2-git-send-email-svenkatr@ti.com>
-References: <1334730332-22244-1-git-send-email-svenkatr@ti.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] dw-mmc: prevent the Null pointer dereference for dma_ops
+Date: Wed, 18 Apr 2012 15:42:31 +0900
+Message-ID: <4F8E6257.5010603@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:35518 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750781Ab2DRGZ6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 18 Apr 2012 02:25:58 -0400
-In-Reply-To: <1334730332-22244-1-git-send-email-svenkatr@ti.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:19727 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751062Ab2DRGmt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 02:42:49 -0400
+Received: from epcpsbgm2.samsung.com (mailout1.samsung.com [203.254.224.24])
+ by mailout1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M2N009XJXATHBB0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 18 Apr 2012 15:42:47 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M2N000NUXBBM260@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 18 Apr 2012 15:42:47 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: arnd.bergmann@linaro.org, cjb@laptop.org, alex.limberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, Alex Lemberg <alex.lemberg@sandisk.com>, Venkatraman S <svenkatr@ti.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@imgtec.com>, James Hogan <james.hogan@imgtec.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-From: Ilan Smith <ilan.smith@sandisk.com>
+Now, dma_ops is assumed that use the IDMAC.
+But if dma_ops is assigned the pdata->dma_ops,
+We didn't ensure that callback function is defined.
 
-Add attribute to identify demand paging requests.
-Mark readpages with demand paging attribute.
+If anything of callback didn't define, then should be run the PIO mode.
 
-Signed-off-by: Ilan Smith <ilan.smith@sandisk.com>
-Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
-Signed-off-by: Venkatraman S <svenkatr@ti.com>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 ---
- fs/mpage.c                |    2 ++
- include/linux/bio.h       |    7 +++++++
- include/linux/blk_types.h |    2 ++
- 3 files changed, 11 insertions(+)
+ drivers/mmc/host/dw_mmc.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
 
-diff --git a/fs/mpage.c b/fs/mpage.c
-index 0face1c..8b144f5 100644
---- a/fs/mpage.c
-+++ b/fs/mpage.c
-@@ -386,6 +386,8 @@ mpage_readpages(struct address_space *mapping, struct list_head *pages,
- 					&last_block_in_bio, &map_bh,
- 					&first_logical_block,
- 					get_block);
-+			if (bio)
-+				bio->bi_rw |= REQ_RW_DMPG;
- 		}
- 		page_cache_release(page);
- 	}
-diff --git a/include/linux/bio.h b/include/linux/bio.h
-index 4d94eb8..264e0ef 100644
---- a/include/linux/bio.h
-+++ b/include/linux/bio.h
-@@ -57,6 +57,13 @@
- 	(bio)->bi_rw |= ((unsigned long) (prio) << BIO_PRIO_SHIFT);	\
- } while (0)
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index f3b0fcd..bab9ead 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1881,7 +1881,8 @@ static void dw_mci_init_dma(struct dw_mci *host)
+ 	if (!host->dma_ops)
+ 		goto no_dma;
  
-+static inline bool bio_rw_flagged(struct bio *bio, unsigned long flag)
-+{
-+	return ((bio->bi_rw & flag)  != 0);
-+}
-+
-+#define bio_dmpg(bio)	bio_rw_flagged(bio, REQ_RW_DMPG)
-+
- /*
-  * various member access, note that bio_data should of course not be used
-  * on highmem page vectors
-diff --git a/include/linux/blk_types.h b/include/linux/blk_types.h
-index 4053cbd..87feb80 100644
---- a/include/linux/blk_types.h
-+++ b/include/linux/blk_types.h
-@@ -150,6 +150,7 @@ enum rq_flag_bits {
- 	__REQ_FLUSH_SEQ,	/* request for flush sequence */
- 	__REQ_IO_STAT,		/* account I/O stat */
- 	__REQ_MIXED_MERGE,	/* merge of different types, fail separately */
-+	__REQ_RW_DMPG,
- 	__REQ_NR_BITS,		/* stops here */
- };
- 
-@@ -191,5 +192,6 @@ enum rq_flag_bits {
- #define REQ_IO_STAT		(1 << __REQ_IO_STAT)
- #define REQ_MIXED_MERGE		(1 << __REQ_MIXED_MERGE)
- #define REQ_SECURE		(1 << __REQ_SECURE)
-+#define REQ_RW_DMPG		(1 << __REQ_RW_DMPG)
- 
- #endif /* __LINUX_BLK_TYPES_H */
+-	if (host->dma_ops->init) {
++	if (host->dma_ops->init && host->dma_ops->start &&
++			host->dma_ops->stop && host->dma_ops->cleanup) {
+ 		if (host->dma_ops->init(host)) {
+ 			dev_err(&host->dev, "%s: Unable to initialize "
+ 				"DMA Controller.\n", __func__);
 -- 
-1.7.10.rc2
-
+1.7.4.1
