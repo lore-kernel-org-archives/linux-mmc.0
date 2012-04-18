@@ -1,28 +1,46 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH 1/3] mmc: omap_hsmmc: release correct resource
-Date: Wed, 18 Apr 2012 15:56:07 +0530
-Message-ID: <CANfBPZ8i2Ts9=O9ZSw4iCw75fjV573Hb7gCWEf+WVqofd3y=Sw@mail.gmail.com>
-References: <1334742553-11060-1-git-send-email-svenkatr@ti.com> <20120418095847.GJ25053@n2100.arm.linux.org.uk>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 1/8] ARM: OMAP: fix DMA vs memory ordering
+Date: Wed, 18 Apr 2012 11:26:39 +0100
+Message-ID: <20120418102639.GN25053@n2100.arm.linux.org.uk>
+References: <20120418100954.GK25053@n2100.arm.linux.org.uk> <E1SKRqN-0004b4-Me@rmk-PC.arm.linux.org.uk> <20120418101519.GU13842@arwen.pp.htv.fi> <20120418101733.GL25053@n2100.arm.linux.org.uk> <20120418101854.GV13842@arwen.pp.htv.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:52506 "EHLO
-	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751501Ab2DRK0a (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 06:26:30 -0400
-Received: by bkuw11 with SMTP id w11so6758920bku.23
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Apr 2012 03:26:27 -0700 (PDT)
-In-Reply-To: <20120418095847.GJ25053@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20120418101854.GV13842@arwen.pp.htv.fi>
+Sender: linux-omap-owner@vger.kernel.org
+To: Felipe Balbi <balbi@ti.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 
-On Wed, Apr 18, 2012 at 3:28 PM, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Wed, Apr 18, 2012 at 03:19:11PM +0530, Venkatraman S wrote:
->> From: Russell King - ARM Linux <linux@arm.linux.org.uk>
->
-> Please correct this to "Russell King <rmk+kernel@arm.linux.org.uk>"
->
-Ok.
+On Wed, Apr 18, 2012 at 01:18:55PM +0300, Felipe Balbi wrote:
+> On Wed, Apr 18, 2012 at 11:17:33AM +0100, Russell King - ARM Linux wrote:
+> > Has anyone seen a problem (other than me when trying to get DMA engine
+> > working with omap-serial transmit paths) ?
+> 
+> probably not since omap-serial isn't using DMA anyway. Nevermind
+
+... which is a good thing because the driver is rather broken for DMA
+support (take a look at what the set_termios() method does, and consider
+what happens if that function is called when there's DMA activity
+outstanding.)
+
+I've come to the conclusion that it's not worth the effort to try to
+convert omap-serial to DMAengine support.  Firstly, DMA support requires
+hardware assisted flow control to work - which it currently doesn't for
+many many reasons.  Not only because of wrong defines, but also because
+the programming examples in the OMAP4430 TRM is wrong.  You'd do much
+better going to the TI16C752B data sheet and seeing how the original IP
+was described.  Why TI didn't include a copy of that in the TRM...
+
+Secondly, the problem I mention above wrt set_termios(), with the flow
+control fixed, results in a nice race condition causing the TX DMA to
+write into registers other than the FIFO data register, corrupting the
+UART configuration and halting system boot.
+
+(I have a series of patches to fix the flow control issues, and this
+requires some work outside of the omap-serial driver to achieve that.
+I'll post those patches when they're fully ready.  At the moment, it's
+probably better to rip out all the hardware assisted flow control code
+from omap-serial so that we fall back on the standard software driven
+flow control.)
