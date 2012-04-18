@@ -1,47 +1,30 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [PATCH 8/8] ARM: omap_hsmmc: remove platform data dma_mask and initialization
-Date: Wed, 18 Apr 2012 21:05:56 +0530
-Message-ID: <CANrkHUYvKdBUZh9UmWcE30ywAAiqhN-KcnSAE2T56WJLFPX1gA@mail.gmail.com>
-References: <20120418100954.GK25053@n2100.arm.linux.org.uk>
-	<E1SKRsg-0004bX-4w@rmk-PC.arm.linux.org.uk>
-	<CANrkHUajRzoCp7K8L3cJArWN3xdqpft8L4k-o4gFTRTo8nmhmg@mail.gmail.com>
-	<20120418152956.GP25053@n2100.arm.linux.org.uk>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCH V1] mmc: tegra: support SDHCI SPEC 300
+Date: Wed, 18 Apr 2012 10:52:33 -0600
+Message-ID: <4F8EF151.8050808@wwwdotorg.org>
+References: <1334755082-26818-1-git-send-email-pkunapuli@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20120418152956.GP25053@n2100.arm.linux.org.uk>
-Sender: linux-omap-owner@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:37793 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752955Ab2DRQwi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 12:52:38 -0400
+In-Reply-To: <1334755082-26818-1-git-send-email-pkunapuli@nvidia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pavan Kunapuli <pkunapuli@nvidia.com>
+Cc: cjb@laptop.org, swarren@nvidia.com, paul.gortmaker@windriver.com, olof@lixom.net, rmk+kernel@arm.linux.org.uk, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wed, Apr 18, 2012 at 8:59 PM, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Wed, Apr 18, 2012 at 08:53:32PM +0530, T Krishnamoorthy, Balaji wr=
-ote:
->> Hi,
->>
->> drivers/mmc/host/omap.c is also using dma_mask should that also be r=
-emoved
->
-> Does this driver make use of this platform data?
->
-> If so, it needs converting to DMA engine _before_ this patch (which i=
-s
-> one reason why its a good idea to do these changes as separate patche=
-s...
-> as I've done.) =A0It means stuff like this can be slotted in as neces=
-sary
-> in the patch order.
->
-> I'm told that driver is OMAP2 only - I don't have any OMAP2 platforms=
- to
-> be able to test it on (I only have OMAP3 and OMAP4.)
+On 04/18/2012 07:18 AM, Pavan Kunapuli wrote:
+> Tegra3 SDHOST controller doesn't advertise
+> v3.00 support by default. This support has to
+> be enabled by configuring a vendor register in
+> the tegra3 sd host address space.
+> 
+> Signed-off-by: Pavan Kunapuli <pkunapuli@nvidia.com>
 
-Yes, this driver is for omap2420 and omap1 devices.
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+FWIW,
+
+Acked-by: Stephen Warren <swarren@wwwdotorg.org>
