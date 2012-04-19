@@ -1,77 +1,116 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/3] mmc: omap_hsmmc: Add fclk frequency to debufs
-Date: Thu, 19 Apr 2012 00:36:21 -0400
-Message-ID: <873980l4my.fsf@laptop.org>
-References: <1334742553-11060-1-git-send-email-svenkatr@ti.com>
-	<1334742553-11060-2-git-send-email-svenkatr@ti.com>
-	<87obqolh7d.fsf@laptop.org>
-	<CANfBPZ9iQRsaqDkcxNcu9BePZQhTGYc50pSUYNVdt00Ab5Tsrw@mail.gmail.com>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: [PATCH v2] mmc: core: Fix the HPI execution sequence
+Date: Thu, 19 Apr 2012 10:13:15 +0530
+Message-ID: <1334810595-20316-1-git-send-email-svenkatr@ti.com>
+References: <1334760358-17568-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:40536 "EHLO void.printf.net"
+Received: from comal.ext.ti.com ([198.47.26.152]:40006 "EHLO comal.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1749667Ab2DSEgJ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Apr 2012 00:36:09 -0400
-In-Reply-To: <CANfBPZ9iQRsaqDkcxNcu9BePZQhTGYc50pSUYNVdt00Ab5Tsrw@mail.gmail.com>
-	(Venkatraman S.'s message of "Thu, 19 Apr 2012 09:55:52 +0530")
+	id S1750850Ab2DSEnr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 19 Apr 2012 00:43:47 -0400
+In-Reply-To: <1334760358-17568-1-git-send-email-svenkatr@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Viswanath Puttagunta <vishp@ti.com>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>
 
-Hi,
+mmc_execute_hpi should send the HPI command only
+once, only if the card is in PRG state.
 
-On Thu, Apr 19 2012, S, Venkatraman wrote:
->>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_=
-hsmmc.c
->>> index d15b149..d046ba2 100644
->>> --- a/drivers/mmc/host/omap_hsmmc.c
->>> +++ b/drivers/mmc/host/omap_hsmmc.c
->>> @@ -1683,8 +1683,9 @@ static int omap_hsmmc_regs_show(struct seq_fi=
-le *s, void *data)
->>> =C2=A0 =C2=A0 =C2=A0 if (host->pdata->get_context_loss_count)
->>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 context_loss =3D h=
-ost->pdata->get_context_loss_count(host->dev);
->>>
->>> - =C2=A0 =C2=A0 seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n\nregs:\n=
-",
->>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
-=A0 mmc->index, host->context_loss, context_loss);
->>> + =C2=A0 =C2=A0 seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n fclk:\t\=
-t%lu Hz\n\nregs:\n",
->>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mmc->index, host->conte=
-xt_loss, context_loss,
->>
->> Minor nit, but it looks like this line breaks indentation.
->
-> It does ? I thought I actually fixed the indentation of the original
-> patch by removing a tabstop, as it was going
-> too far into the right.
-> checkpatch.pl doesn't complain about it.
+According to eMMC spec, the command's completion time is
+not dependent on OUT_OF_INTERRUPT_TIME. Only the transition
+out of PRG STATE is guarded by OUT_OF_INTERRUPT_TIME - which is
+defined to begin at the end of sending the command itself.
 
-After applying it, omap_hsmmc.c looks like this here:
+Specify the default timeout for the actual sending of HPI
+command, and then use OUT_OF_INTERRUPT_TIME to wait for
+the transition out of PRG state.
 
-        seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n fclk:\t\t%lu Hz\n\nr=
-egs:\n",
-                mmc->index, host->context_loss, context_loss,
-                        clk_get_rate(host->fclk));
+Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Signed-off-by: Venkatraman S <svenkatr@ti.com>
+---
+	v1->v2:	Fix formatting inside debug prints
+ drivers/mmc/core/core.c    |   44 ++++++++++++++++++++++++--------------------
+ drivers/mmc/core/mmc_ops.c |    1 -
+ 2 files changed, 24 insertions(+), 21 deletions(-)
 
-(That's with tabs converted to spaces for e-mail.)
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index e541efb..d57c8f3 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -403,6 +403,7 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+ {
+ 	int err;
+ 	u32 status;
++	unsigned long starttime;
+ 
+ 	BUG_ON(!card);
+ 
+@@ -421,27 +422,30 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+ 	/*
+ 	 * If the card status is in PRG-state, we can send the HPI command.
+ 	 */
+-	if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
+-		do {
+-			/*
+-			 * We don't know when the HPI command will finish
+-			 * processing, so we need to resend HPI until out
+-			 * of prg-state, and keep checking the card status
+-			 * with SEND_STATUS.  If a timeout error occurs when
+-			 * sending the HPI command, we are already out of
+-			 * prg-state.
+-			 */
+-			err = mmc_send_hpi_cmd(card, &status);
+-			if (err)
+-				pr_debug("%s: abort HPI (%d error)\n",
+-					 mmc_hostname(card->host), err);
++	if (R1_CURRENT_STATE(status) != R1_STATE_PRG) {
++		pr_debug("%s: Can't send HPI: Card state=%d\n",
++			mmc_hostname(card->host), R1_CURRENT_STATE(status));
++		err = -EINVAL;
++		goto out;
++	}
+ 
+-			err = mmc_send_status(card, &status);
+-			if (err)
+-				break;
+-		} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+-	} else
+-		pr_debug("%s: Left prg-state\n", mmc_hostname(card->host));
++	starttime = jiffies;
++	err = mmc_send_hpi_cmd(card, &status);
++	if (err) {
++		pr_debug("%s:HPI could not be sent. err=%d\n",
++			mmc_hostname(card->host), err);
++		goto out;
++	}
++
++	do {
++		err = mmc_send_status(card, &status);
++
++		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
++			break;
++		if (jiffies_to_msecs(jiffies - starttime) >=
++			card->ext_csd.out_of_int_time)
++			err = -ETIMEDOUT;
++	} while (!err);
+ 
+ out:
+ 	mmc_release_host(card->host);
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 69370f4..0ed2cc5 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -569,7 +569,6 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
+ 
+ 	cmd.opcode = opcode;
+ 	cmd.arg = card->rca << 16 | 1;
+-	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
+ 
+ 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+ 	if (err) {
+-- 
+1.7.10.rc2
 
-So you're right that the original lines are indented a character too fa=
-r
-to the right, but after your patch there are different indentations use=
-d
-for lines 2 and 3 above, so that's worse than it was before.
-
-All of the seq_printf() calls in omap_hsmmc.c have the same indentation
-one space too far to the right.  I guess we should just stick with it.
-
-Thanks,
-
-- Chris.
---=20
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
