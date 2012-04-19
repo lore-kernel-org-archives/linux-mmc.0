@@ -1,119 +1,39 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH] mmc: core: Do not pre-claim host in suspend
-Date: Thu, 19 Apr 2012 11:55:25 +0200
-Message-ID: <1334829325-3464-1-git-send-email-ulf.hansson@stericsson.com>
+From: Vitaly Wool <vitalywool@gmail.com>
+Subject: Re: [PATCH] mmc: core: Do not pre-claim host in suspend
+Date: Thu, 19 Apr 2012 12:02:51 +0200
+Message-ID: <CAMJBoFNO7aKge9BqawRJdr=k_HxOOaeoPaif1sed_vN7kSF35g@mail.gmail.com>
+References: <1334829325-3464-1-git-send-email-ulf.hansson@stericsson.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog107.obsmtp.com ([207.126.144.123]:37383 "EHLO
-	eu1sys200aog107.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753058Ab2DSJzv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Apr 2012 05:55:51 -0400
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:37372 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752717Ab2DSKCw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Apr 2012 06:02:52 -0400
+Received: by obbta14 with SMTP id ta14so7877412obb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Apr 2012 03:02:52 -0700 (PDT)
+In-Reply-To: <1334829325-3464-1-git-send-email-ulf.hansson@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Daniel Drake <dsd@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
+To: Ulf Hansson <ulf.hansson@stericsson.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Daniel Drake <dsd@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-Since SDIO drivers may want to do some SDIO operations
-in their suspend callback functions, we must not keep
-the host claimed when calling them.
+Hi Ulf,
 
-Daniel Drake reported that libertas_sdio encountered
-a deadlock in it's suspend function.
+On Thu, Apr 19, 2012 at 11:55 AM, Ulf Hansson
+<ulf.hansson@stericsson.com> wrote:
+> Since SDIO drivers may want to do some SDIO operations
+> in their suspend callback functions, we must not keep
+> the host claimed when calling them.
+>
+> Daniel Drake reported that libertas_sdio encountered
+> a deadlock in it's suspend function.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@stericsson.com>
----
- drivers/mmc/core/core.c |   55 +++++++++++++++++-----------------------------
- 1 files changed, 20 insertions(+), 35 deletions(-)
+I think it looks like a hack. Can you provide a better description of
+where this deadlock actually happens?
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index e541efb..ba821fe 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2238,6 +2238,7 @@ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
- 			mmc_card_is_removable(host))
- 		return err;
- 
-+	mmc_claim_host(host);
- 	if (card && mmc_card_mmc(card) &&
- 			(card->ext_csd.cache_size > 0)) {
- 		enable = !!enable;
-@@ -2255,6 +2256,7 @@ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
- 				card->ext_csd.cache_ctrl = enable;
- 		}
- 	}
-+	mmc_release_host(host);
- 
- 	return err;
- }
-@@ -2272,49 +2274,32 @@ int mmc_suspend_host(struct mmc_host *host)
- 
- 	cancel_delayed_work(&host->detect);
- 	mmc_flush_scheduled_work();
--	if (mmc_try_claim_host(host)) {
--		err = mmc_cache_ctrl(host, 0);
--		mmc_release_host(host);
--	} else {
--		err = -EBUSY;
--	}
- 
-+	err = mmc_cache_ctrl(host, 0);
- 	if (err)
- 		goto out;
- 
- 	mmc_bus_get(host);
- 	if (host->bus_ops && !host->bus_dead) {
- 
--		/*
--		 * A long response time is not acceptable for device drivers
--		 * when doing suspend. Prevent mmc_claim_host in the suspend
--		 * sequence, to potentially wait "forever" by trying to
--		 * pre-claim the host.
--		 */
--		if (mmc_try_claim_host(host)) {
--			if (host->bus_ops->suspend) {
--				err = host->bus_ops->suspend(host);
--			}
--			mmc_release_host(host);
-+		if (host->bus_ops->suspend)
-+			err = host->bus_ops->suspend(host);
- 
--			if (err == -ENOSYS || !host->bus_ops->resume) {
--				/*
--				 * We simply "remove" the card in this case.
--				 * It will be redetected on resume.  (Calling
--				 * bus_ops->remove() with a claimed host can
--				 * deadlock.)
--				 */
--				if (host->bus_ops->remove)
--					host->bus_ops->remove(host);
--				mmc_claim_host(host);
--				mmc_detach_bus(host);
--				mmc_power_off(host);
--				mmc_release_host(host);
--				host->pm_flags = 0;
--				err = 0;
--			}
--		} else {
--			err = -EBUSY;
-+		if (err == -ENOSYS || !host->bus_ops->resume) {
-+			/*
-+			 * We simply "remove" the card in this case.
-+			 * It will be redetected on resume.  (Calling
-+			 * bus_ops->remove() with a claimed host can
-+			 * deadlock.)
-+			 */
-+			if (host->bus_ops->remove)
-+				host->bus_ops->remove(host);
-+			mmc_claim_host(host);
-+			mmc_detach_bus(host);
-+			mmc_power_off(host);
-+			mmc_release_host(host);
-+			host->pm_flags = 0;
-+			err = 0;
- 		}
- 	}
- 	mmc_bus_put(host);
--- 
-1.7.9
+If libertas_sdio claims host as a part of its suspend operation from a
+context different from the suspend context, isn't it libertas_sdio
+that has to be fixed?
 
+Vitaly
