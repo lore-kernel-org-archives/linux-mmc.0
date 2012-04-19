@@ -1,116 +1,50 @@
-From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH v2] mmc: core: Fix the HPI execution sequence
-Date: Thu, 19 Apr 2012 20:08:45 +0530
-Message-ID: <1334846325-29834-1-git-send-email-svenkatr@ti.com>
-References: <1334810595-20316-1-git-send-email-svenkatr@ti.com>
+From: Daniel Drake <dsd@laptop.org>
+Subject: Re: [PATCH] mmc: core: Do not pre-claim host in suspend
+Date: Thu, 19 Apr 2012 09:48:36 -0600
+Message-ID: <CAMLZHHQVrog2srUhOjH5T3bQN4DjjP04x0ko3Bv9CXYyo_8i9Q@mail.gmail.com>
+References: <1334829325-3464-1-git-send-email-ulf.hansson@stericsson.com>
+	<CAMJBoFNO7aKge9BqawRJdr=k_HxOOaeoPaif1sed_vN7kSF35g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:43943 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755258Ab2DSOjF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 19 Apr 2012 10:39:05 -0400
-In-Reply-To: <1334810595-20316-1-git-send-email-svenkatr@ti.com>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:49539 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754001Ab2DSPsh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Apr 2012 11:48:37 -0400
+Received: by vbbff1 with SMTP id ff1so5781536vbb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Apr 2012 08:48:36 -0700 (PDT)
+In-Reply-To: <CAMJBoFNO7aKge9BqawRJdr=k_HxOOaeoPaif1sed_vN7kSF35g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>
+To: Vitaly Wool <vitalywool@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@stericsson.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Per Forlin <per.forlin@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>
 
-mmc_execute_hpi should send the HPI command only
-once, only if the card is in PRG state.
+On Thu, Apr 19, 2012 at 4:02 AM, Vitaly Wool <vitalywool@gmail.com> wrote:
+> I think it looks like a hack. Can you provide a better description of
+> where this deadlock actually happens?
+>
+> If libertas_sdio claims host as a part of its suspend operation from a
+> context different from the suspend context, isn't it libertas_sdio
+> that has to be fixed?
 
-According to eMMC spec, the command's completion time is
-not dependent on OUT_OF_INTERRUPT_TIME. Only the transition
-out of PRG STATE is guarded by OUT_OF_INTERRUPT_TIME - which is
-defined to begin at the end of sending the command itself.
+libertas_sdio performs work in a workqueue during the suspend routine.
+It doesn't take long, but it is essential.
 
-Specify the default timeout for the actual sending of HPI
-command, and then use OUT_OF_INTERRUPT_TIME to wait for
-the transition out of PRG state.
+Technically it would be possible to do the same work from the suspend
+thread without changing context. However, implementation-wise this is
+quite difficult. We cannot simply blast commands off to the card
+directly, we have to obey various rules and keep things in sync. This
+is done with an abstraction layer in the driver which is also shared
+with equivalent devices that connect over USB, SPI, etc. Sometimes we
+send commands from atomic context, or asynchronously, so thats why we
+do things in a workqueue.
 
-Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Signed-off-by: Venkatraman S <svenkatr@ti.com>
----
-	v1->v2:	Fix formatting inside debug prints
- drivers/mmc/core/core.c    |   44 ++++++++++++++++++++++++--------------------
- drivers/mmc/core/mmc_ops.c |    1 -
- 2 files changed, 24 insertions(+), 21 deletions(-)
+Breaking this abstraction for the suspend corner-case would be a pain,
+and I don't agree with the strange requirement that SDIO drivers can't
+communicate from other contexts in the suspend routine. My thoughts
+are here: http://article.gmane.org/gmane.linux.kernel.mmc/13899
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index e541efb..d57c8f3 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -403,6 +403,7 @@ int mmc_interrupt_hpi(struct mmc_card *card)
- {
- 	int err;
- 	u32 status;
-+	unsigned long starttime;
- 
- 	BUG_ON(!card);
- 
-@@ -421,27 +422,30 @@ int mmc_interrupt_hpi(struct mmc_card *card)
- 	/*
- 	 * If the card status is in PRG-state, we can send the HPI command.
- 	 */
--	if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
--		do {
--			/*
--			 * We don't know when the HPI command will finish
--			 * processing, so we need to resend HPI until out
--			 * of prg-state, and keep checking the card status
--			 * with SEND_STATUS.  If a timeout error occurs when
--			 * sending the HPI command, we are already out of
--			 * prg-state.
--			 */
--			err = mmc_send_hpi_cmd(card, &status);
--			if (err)
--				pr_debug("%s: abort HPI (%d error)\n",
--					 mmc_hostname(card->host), err);
-+	if (R1_CURRENT_STATE(status) != R1_STATE_PRG) {
-+		pr_debug("%s: Can't send HPI: Card state=%d\n",
-+			mmc_hostname(card->host), R1_CURRENT_STATE(status));
-+		err = -EINVAL;
-+		goto out;
-+	}
- 
--			err = mmc_send_status(card, &status);
--			if (err)
--				break;
--		} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
--	} else
--		pr_debug("%s: Left prg-state\n", mmc_hostname(card->host));
-+	starttime = jiffies;
-+	err = mmc_send_hpi_cmd(card, &status);
-+	if (err) {
-+		pr_debug("%s: HPI could not be sent. err=%d\n",
-+			mmc_hostname(card->host), err);
-+		goto out;
-+	}
-+
-+	do {
-+		err = mmc_send_status(card, &status);
-+
-+		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
-+			break;
-+		if (jiffies_to_msecs(jiffies - starttime) >=
-+			card->ext_csd.out_of_int_time)
-+			err = -ETIMEDOUT;
-+	} while (!err);
- 
- out:
- 	mmc_release_host(card->host);
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 69370f4..0ed2cc5 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -569,7 +569,6 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
- 
- 	cmd.opcode = opcode;
- 	cmd.arg = card->rca << 16 | 1;
--	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
- 
- 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
- 	if (err) {
--- 
-1.7.10.rc2
+Ulf, you have understood the problem correctly and your patch solves
+the issue. Thanks for the fast response.
 
+Daniel
