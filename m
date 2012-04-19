@@ -1,60 +1,50 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/3] mmc: omap_hsmmc: Add fclk frequency to debufs
-Date: Wed, 18 Apr 2012 20:04:54 -0400
-Message-ID: <87obqolh7d.fsf@laptop.org>
-References: <1334742553-11060-1-git-send-email-svenkatr@ti.com>
-	<1334742553-11060-2-git-send-email-svenkatr@ti.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH] mmc: unbreak sdhci-esdhc-imx on i.MX25
+Date: Thu, 19 Apr 2012 02:05:22 +0200
+Message-ID: <20120419000522.GB20515@pengutronix.de>
+References: <1334709020-31088-1-git-send-email-eric@eukrea.com>
+ <87wr5clhed.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="yEPQxsgoJgBvi8ip"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:35829 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751605Ab2DSAEo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 18 Apr 2012 20:04:44 -0400
-In-Reply-To: <1334742553-11060-2-git-send-email-svenkatr@ti.com> (Venkatraman
-	S.'s message of "Wed, 18 Apr 2012 15:19:12 +0530")
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:60040 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752186Ab2DSAFY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 20:05:24 -0400
+Content-Disposition: inline
+In-Reply-To: <87wr5clhed.fsf@laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Viswanath Puttagunta <vishp@ti.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Eric =?iso-8859-15?Q?B=E9nard?= <eric@eukrea.com>, linux-mmc@vger.kernel.org, shawn.guo@linaro.org, s.hauer@pengutronix.de
 
-Hi,
 
-On Wed, Apr 18 2012, Venkatraman S wrote:
-> From: Viswanath Puttagunta <vishp@ti.com>
->
-> Add mmc functional clock frequency to list of
-> internal state variables to display for debug.
->
-> Signed-off-by: Viswanath Puttagunta <vishp@ti.com>
-> Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |    5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index d15b149..d046ba2 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1683,8 +1683,9 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
->  	if (host->pdata->get_context_loss_count)
->  		context_loss = host->pdata->get_context_loss_count(host->dev);
->  
-> -	seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n\nregs:\n",
-> -			mmc->index, host->context_loss, context_loss);
-> +	seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n fclk:\t\t%lu Hz\n\nregs:\n",
-> +		mmc->index, host->context_loss, context_loss,
+--yEPQxsgoJgBvi8ip
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Minor nit, but it looks like this line breaks indentation.
+On Wed, Apr 18, 2012 at 08:00:42PM -0400, Chris Ball wrote:
 
-> +			clk_get_rate(host->fclk));
->  
->  	if (host->suspended) {
->  		seq_printf(s, "host suspended, can't read registers\n");
+> Thanks, pushed to mmc-next for 3.4.
 
-Thanks,
+If not done already, I think a stable-tag would make sense.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--yEPQxsgoJgBvi8ip
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iEYEARECAAYFAk+PVsIACgkQD27XaX1/VRuePwCfUha+pZjRYF2L9NTx9jbecw2v
+uMIAoIZDz5F1Um38GL0wjenVQvL0ebPQ
+=/QER
+-----END PGP SIGNATURE-----
+
+--yEPQxsgoJgBvi8ip--
