@@ -1,100 +1,77 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH 4/4] mmc: core: Send HPI only till it is successful
-Date: Thu, 19 Apr 2012 10:03:04 +0530
-Message-ID: <CANfBPZ9AxVQXrtyHJw27Hp7WPZk8vkWbaBLMYEzhamt3FRDbng@mail.gmail.com>
-References: <1334319854-5989-1-git-send-email-svenkatr@ti.com>
- <1334319854-5989-5-git-send-email-svenkatr@ti.com> <877gxcl4z7.fsf@laptop.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 2/3] mmc: omap_hsmmc: Add fclk frequency to debufs
+Date: Thu, 19 Apr 2012 00:36:21 -0400
+Message-ID: <873980l4my.fsf@laptop.org>
+References: <1334742553-11060-1-git-send-email-svenkatr@ti.com>
+	<1334742553-11060-2-git-send-email-svenkatr@ti.com>
+	<87obqolh7d.fsf@laptop.org>
+	<CANfBPZ9iQRsaqDkcxNcu9BePZQhTGYc50pSUYNVdt00Ab5Tsrw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog122.obsmtp.com ([74.125.149.147]:53145 "EHLO
-	na3sys009aog122.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750765Ab2DSEd1 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 19 Apr 2012 00:33:27 -0400
-Received: by bkcjc3 with SMTP id jc3so8240636bkc.13
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Apr 2012 21:33:24 -0700 (PDT)
-In-Reply-To: <877gxcl4z7.fsf@laptop.org>
+Received: from void.printf.net ([89.145.121.20]:40536 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1749667Ab2DSEgJ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Apr 2012 00:36:09 -0400
+In-Reply-To: <CANfBPZ9iQRsaqDkcxNcu9BePZQhTGYc50pSUYNVdt00Ab5Tsrw@mail.gmail.com>
+	(Venkatraman S.'s message of "Thu, 19 Apr 2012 09:55:52 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: "S, Venkatraman" <svenkatr@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Viswanath Puttagunta <vishp@ti.com>
 
-On Thu, Apr 19, 2012 at 9:59 AM, Chris Ball <cjb@laptop.org> wrote:
-> Hi,
->
-> On Fri, Apr 13 2012, Venkatraman S wrote:
->> Try to send HPI only a fixed number of times till it is
->> successful. One successful transfer is enough - but wait
->> till the card comes out of transfer state.
->> Return an error if the card was not in programming state to
->> begin with - so that the caller knows that HPI was not sent.
+Hi,
+
+On Thu, Apr 19 2012, S, Venkatraman wrote:
+>>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_=
+hsmmc.c
+>>> index d15b149..d046ba2 100644
+>>> --- a/drivers/mmc/host/omap_hsmmc.c
+>>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>>> @@ -1683,8 +1683,9 @@ static int omap_hsmmc_regs_show(struct seq_fi=
+le *s, void *data)
+>>> =C2=A0 =C2=A0 =C2=A0 if (host->pdata->get_context_loss_count)
+>>> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 context_loss =3D h=
+ost->pdata->get_context_loss_count(host->dev);
+>>>
+>>> - =C2=A0 =C2=A0 seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n\nregs:\n=
+",
+>>> - =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 mmc->index, host->context_loss, context_loss);
+>>> + =C2=A0 =C2=A0 seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n fclk:\t\=
+t%lu Hz\n\nregs:\n",
+>>> + =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 mmc->index, host->conte=
+xt_loss, context_loss,
 >>
->> Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
->> Signed-off-by: Venkatraman S <svenkatr@ti.com>
->> ---
->> =A0drivers/mmc/core/core.c | =A0 34 ++++++++++++++++++--------------=
---
->> =A01 file changed, 18 insertions(+), 16 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index e541efb..ceabef5 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -401,7 +401,7 @@ EXPORT_SYMBOL(mmc_wait_for_req);
->> =A0 */
->> =A0int mmc_interrupt_hpi(struct mmc_card *card)
->> =A0{
->> - =A0 =A0 int err;
->> + =A0 =A0 int err, i;
->> =A0 =A0 =A0 u32 status;
->>
->> =A0 =A0 =A0 BUG_ON(!card);
->> @@ -421,27 +421,29 @@ int mmc_interrupt_hpi(struct mmc_card *card)
->> =A0 =A0 =A0 /*
->> =A0 =A0 =A0 =A0* If the card status is in PRG-state, we can send the=
- HPI command.
->> =A0 =A0 =A0 =A0*/
->> + =A0 =A0 err =3D -EINVAL;
->> =A0 =A0 =A0 if (R1_CURRENT_STATE(status) =3D=3D R1_STATE_PRG) {
->> - =A0 =A0 =A0 =A0 =A0 =A0 do {
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* We don't know when th=
-e HPI command will finish
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* processing, so we nee=
-d to resend HPI until out
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* of prg-state, and kee=
-p checking the card status
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* with SEND_STATUS. =A0=
-If a timeout error occurs when
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* sending the HPI comma=
-nd, we are already out of
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* prg-state.
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 =A0 =A0 =A0 /* To prevent an infinite lockout, try to =
-send HPI
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* a fixed number of times and bailout i=
-f it can't
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* succeed.
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->> + =A0 =A0 =A0 =A0 =A0 =A0 for (i =3D 0; i < 10 && err !=3D 0 ; i++)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_send_hpi_cmd=
-(card, &status);
->> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
->> + =A0 =A0 =A0 =A0 =A0 =A0 /* Once HPI was sent successfully, the car=
-d is
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0* supposed to be back to transfer state=
-=2E
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>> Minor nit, but it looks like this line breaks indentation.
 >
-> Minor nit: for consistency, please always use:
->
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/*
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 * Kernel-style comment blocks.
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 */
->
-> .. even though they waste the first line. =A0:)
->
-Thanks - I'll be more careful - but that comment is not present on the
-last version I posted.
+> It does ? I thought I actually fixed the indentation of the original
+> patch by removing a tabstop, as it was going
+> too far into the right.
+> checkpatch.pl doesn't complain about it.
+
+After applying it, omap_hsmmc.c looks like this here:
+
+        seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n fclk:\t\t%lu Hz\n\nr=
+egs:\n",
+                mmc->index, host->context_loss, context_loss,
+                        clk_get_rate(host->fclk));
+
+(That's with tabs converted to spaces for e-mail.)
+
+So you're right that the original lines are indented a character too fa=
+r
+to the right, but after your patch there are different indentations use=
+d
+for lines 2 and 3 above, so that's worse than it was before.
+
+All of the seq_printf() calls in omap_hsmmc.c have the same indentation
+one space too far to the right.  I guess we should just stick with it.
+
+Thanks,
+
+- Chris.
+--=20
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
