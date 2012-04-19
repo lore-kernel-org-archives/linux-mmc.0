@@ -1,267 +1,129 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 8/8] ARM: omap_hsmmc: remove platform data dma_mask and
- initialization
-Date: Wed, 18 Apr 2012 18:39:14 -0700
-Message-ID: <20120419013914.GV21106@atomide.com>
-References: <E1SKRsg-0004bX-4w@rmk-PC.arm.linux.org.uk>
- <CANrkHUajRzoCp7K8L3cJArWN3xdqpft8L4k-o4gFTRTo8nmhmg@mail.gmail.com>
- <20120418152956.GP25053@n2100.arm.linux.org.uk>
- <CANrkHUYvKdBUZh9UmWcE30ywAAiqhN-KcnSAE2T56WJLFPX1gA@mail.gmail.com>
- <20120418194224.GS25053@n2100.arm.linux.org.uk>
- <20120418200214.GP21106@atomide.com>
- <20120418202447.GT25053@n2100.arm.linux.org.uk>
- <20120418210142.GR21106@atomide.com>
- <20120418211606.GU25053@n2100.arm.linux.org.uk>
- <20120418213642.GV25053@n2100.arm.linux.org.uk>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: core: Fix the HPI execution sequence
+Date: Thu, 19 Apr 2012 10:52:36 +0900
+Message-ID: <4F8F6FE4.5010303@samsung.com>
+References: <1334670334-18050-1-git-send-email-svenkatr@ti.com>
+ <1334760358-17568-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:36611 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750943Ab2DSBjS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 21:39:18 -0400
-Content-Disposition: inline
-In-Reply-To: <20120418213642.GV25053@n2100.arm.linux.org.uk>
+Received: from mailout3.samsung.com ([203.254.224.33]:38242 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750943Ab2DSBwz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Apr 2012 21:52:55 -0400
+Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M2P00BFLEJER9H0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 19 Apr 2012 10:52:54 +0900 (KST)
+Received: from [165.213.219.108] by mmp2.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M2P00605EK5PH60@mmp2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 19 Apr 2012 10:52:54 +0900 (KST)
+In-reply-to: <1334760358-17568-1-git-send-email-svenkatr@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, "T Krishnamoorthy, Balaji" <balajitk@ti.com>, linux-arm-kernel@lists.infradead.org
+To: Venkatraman S <svenkatr@ti.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, linkinjeon@gmail.com, jh80.chung@samsung.com
 
-* Russell King - ARM Linux <linux@arm.linux.org.uk> [120418 14:40]:
-> On Wed, Apr 18, 2012 at 10:16:06PM +0100, Russell King - ARM Linux wrote:
-> > I don't think it has to in this case, though I am thinking that we
-> > may have to adjust the frame size for other peripherals.
-> > 
-> > In the case of the OMAP1 MMC driver, let me pull out that chunk of code
-> > again:
-> > 
-> >         frame = data->blksz;
-> >         if (cpu_is_omap15xx() && frame > 32)
-> >                 frame = 32;
-> >         else if (frame > 64)
-> >                 frame = 64;
-> >         frame >>= 1;
-> >         if (!(data->flags & MMC_DATA_WRITE)) {
-> >                 buf = 0x800f | ((frame - 1) << 8);
-> >         } else {
-> >                 buf = 0x0f80 | ((frame - 1) << 0);
-> >         }
-> >         OMAP_MMC_WRITE(host, BUF, buf);
-> > 
-> > Nothing there depends on the size of an individual scatterlist entry -
-> > the dependencies for the frame size are the smaller of the FIFO size
-> > and the data block size.  I believe we can cope with that quite well on
-> > a per-transfer basis, and I _think_ we can get away with writing this
-> > BUF register just once per transfer (similar to what happens for PIO
-> > transfers.)
-> > 
-> > However, this is going to be rather hit and miss for me - all I can do
-> > is create a patch and check that it builds.  I have no way (that I know
-> > of) to test this change as I don't have any OMAP1 nor OMAP2 hardware.
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+On 04/18/2012 11:45 PM, Venkatraman S wrote:
+
+> mmc_execute_hpi should send the HPI command only
+> once, only if the card is in PRG state.
 > 
-> Right, so from a purely theoretical standpoint, here's the OMAP1 driver
-> converted, and build-tested only.  Modulo a few warnings and patch 8,
-> you should be able to convert between DMA engine and the original DMA
-> engine implementation by changing the definition at the top.
+> According to eMMC spec, the command's completion time is
+> not dependent on OUT_OF_INTERRUPT_TIME. Only the transition
+> out of PRG STATE is guarded by OUT_OF_INTERRUPT_TIME - which is
+> defined to begin at the end of sending the command itself.
 > 
-> I have to stress: this is untested, it may eat your MMC/SD cards.  Test
-> it carefully and test it well.
+> Specify the default timeout for the actual sending of HPI
+> command, and then use OUT_OF_INTERRUPT_TIME to wait for
+> the transition out of PRG state.
+> 
+> Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> ---
+>  drivers/mmc/core/core.c    |   44 ++++++++++++++++++++++++--------------------
+>  drivers/mmc/core/mmc_ops.c |    1 -
+>  2 files changed, 24 insertions(+), 21 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index e541efb..4e696e6 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -403,6 +403,7 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+>  {
+>  	int err;
+>  	u32 status;
+> +	unsigned long starttime;
+>  
+>  	BUG_ON(!card);
+>  
+> @@ -421,27 +422,30 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+>  	/*
+>  	 * If the card status is in PRG-state, we can send the HPI command.
+>  	 */
+> -	if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
+> -		do {
+> -			/*
+> -			 * We don't know when the HPI command will finish
+> -			 * processing, so we need to resend HPI until out
+> -			 * of prg-state, and keep checking the card status
+> -			 * with SEND_STATUS.  If a timeout error occurs when
+> -			 * sending the HPI command, we are already out of
+> -			 * prg-state.
+> -			 */
+> -			err = mmc_send_hpi_cmd(card, &status);
+> -			if (err)
+> -				pr_debug("%s: abort HPI (%d error)\n",
+> -					 mmc_hostname(card->host), err);
+> +	if (R1_CURRENT_STATE(status) != R1_STATE_PRG) {
+> +		pr_debug("%s: Can't send HPI: Card state=%d\n",
+> +			mmc_hostname(card->host), R1_CURRENT_STATE(status));
+> +		err = -EINVAL;
+> +		goto out;
+> +	}
+>  
+> -			err = mmc_send_status(card, &status);
+> -			if (err)
+> -				break;
+> -		} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+> -	} else
+> -		pr_debug("%s: Left prg-state\n", mmc_hostname(card->host));
+> +	starttime = jiffies;
+> +	err = mmc_send_hpi_cmd(card, &status);
+> +	if (err) {
+> +		pr_debug("%s:HPI could not be sent.err=%d)\n",
+> +			mmc_hostname(card->host), err);
+> +		goto out;
+> +	}
+> +
+> +	do {
+> +		err = mmc_send_status(card, &status);
+> +
+> +		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
+> +			break;
+> +		if (jiffies_to_msecs(jiffies - starttime) >=
+> +			card->ext_csd.out_of_int_time)
+> +			err = -ETIMEDOUT;
+> +	} while (!err);
+>  
+>  out:
+>  	mmc_release_host(card->host);
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 69370f4..0ed2cc5 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -569,7 +569,6 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
+>  
+>  	cmd.opcode = opcode;
+>  	cmd.arg = card->rca << 16 | 1;
+> -	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
+>  
+>  	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+>  	if (err) {
 
-Cool, you almost got it. Got it working for n800 and 770 with the following
-patch. Only extremely light testing done now so careful with this patch too..
 
-Had to hack in support for the src_port and dst_port that's needed for
-omap_set_dma_src/dest_params on omap1. For that I just used existing
-struct omap_dma_channel_params to pass src_port and dst_port to
-omap_dma_filter_fn. Got any better ideas for doing that?
-
-Regards,
-
-Tony
-
-
-diff --git a/arch/arm/plat-omap/include/plat/dma.h b/arch/arm/plat-omap/include/plat/dma.h
-index dc562a5..1f65d8e 100644
---- a/arch/arm/plat-omap/include/plat/dma.h
-+++ b/arch/arm/plat-omap/include/plat/dma.h
-@@ -401,6 +401,8 @@ struct omap_dma_channel_params {
- 	unsigned char read_prio;/* read priority */
- 	unsigned char write_prio;/* write priority */
- 
-+	unsigned dma_sig;
-+
- #ifndef CONFIG_ARCH_OMAP1
- 	enum omap_dma_burst_mode burst_mode; /* Burst mode 4/8/16 words */
- #endif
-diff --git a/drivers/dma/omap-dma.c b/drivers/dma/omap-dma.c
-index 5b12f74..b2f8c62 100644
---- a/drivers/dma/omap-dma.c
-+++ b/drivers/dma/omap-dma.c
-@@ -36,6 +36,9 @@ struct omap_chan {
- 	int dma_ch;
- 	struct omap_desc *desc;
- 	unsigned sgidx;
-+
-+	uint8_t src_port;	/* OMAP_DMA_PORT_xxx, omap1 only */
-+	uint8_t dst_port;	/* OMAP_DMA_PORT_xxx, omap1 only */
- };
- 
- struct omap_sg {
-@@ -83,10 +86,10 @@ static void omap_dma_start_sg(struct omap_chan *c, struct omap_desc *d,
- 	struct omap_sg *sg = d->sg + idx;
- 
- 	if (d->dir == DMA_DEV_TO_MEM)
--		omap_set_dma_dest_params(c->dma_ch, 0, OMAP_DMA_AMODE_POST_INC,
-+		omap_set_dma_dest_params(c->dma_ch, c->dst_port, OMAP_DMA_AMODE_POST_INC,
- 				sg->addr, 0, 0);
- 	else
--		omap_set_dma_src_params(c->dma_ch, 0, OMAP_DMA_AMODE_POST_INC,
-+		omap_set_dma_src_params(c->dma_ch, c->src_port, OMAP_DMA_AMODE_POST_INC,
- 				sg->addr, 0, 0);
- 
- 	omap_set_dma_transfer_params(c->dma_ch, d->es, sg->en, sg->fn,
-@@ -111,10 +114,10 @@ static void omap_dma_start_desc(struct omap_chan *c)
- 	c->sgidx = 0;
- 
- 	if (d->dir == DMA_DEV_TO_MEM)
--		omap_set_dma_src_params(c->dma_ch, 0, OMAP_DMA_AMODE_CONSTANT,
-+		omap_set_dma_src_params(c->dma_ch, c->src_port, OMAP_DMA_AMODE_CONSTANT,
- 			d->dev_addr, 0, 0);
- 	else
--		omap_set_dma_dest_params(c->dma_ch, 0, OMAP_DMA_AMODE_CONSTANT,
-+		omap_set_dma_dest_params(c->dma_ch, c->dst_port, OMAP_DMA_AMODE_CONSTANT,
- 			d->dev_addr, 0, 0);
- 
- 	omap_dma_start_sg(c, d, 0);
-@@ -475,11 +478,17 @@ static struct platform_driver omap_dma_driver = {
- 
- bool omap_dma_filter_fn(struct dma_chan *chan, void *param)
- {
-+	struct omap_dma_channel_params *p = param;
-+
- 	if (chan->device->dev->driver == &omap_dma_driver.driver) {
- 		struct omap_chan *c = to_omap_dma_chan(chan);
--		unsigned req = *(unsigned *)param;
-+		unsigned req = p->dma_sig;
- 
--		return req == c->dma_sig;
-+		if (req == c->dma_sig) {
-+			c->src_port = p->src_port;
-+			c->dst_port = p->dst_port;
-+			return true;
-+		}
- 	}
- 	return false;
- }
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index a77c72e..284e602 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -1531,7 +1531,7 @@ static int __init mmc_omap_probe(struct platform_device *pdev)
- 	struct mmc_omap_host *host = NULL;
- 	struct resource *res;
- 	dma_cap_mask_t mask;
--	unsigned sig;
-+	struct omap_dma_channel_params p;
- 	int i, ret = 0;
- 	int irq;
- 
-@@ -1616,34 +1616,49 @@ static int __init mmc_omap_probe(struct platform_device *pdev)
- #ifdef USE_DMA_ENGINE
- 	host->dma_tx_burst = -1;
- 	host->dma_rx_burst = -1;
--
--	sig = host->id == 0 ? OMAP_DMA_MMC_TX : OMAP_DMA_MMC2_TX;
--	host->dma_tx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
-+	if (cpu_is_omap24xx()) {
-+		p.dma_sig = host->id == 0 ? OMAP24XX_DMA_MMC1_TX : OMAP24XX_DMA_MMC2_TX;
-+		p.src_port = 0;
-+		p.dst_port = 0;
-+	} else {
-+		p.dma_sig = host->id == 0 ? OMAP_DMA_MMC_TX : OMAP_DMA_MMC2_TX;
-+		p.src_port = OMAP_DMA_PORT_EMIFF;
-+		p.dst_port = OMAP_DMA_PORT_TIPB;
-+	}
-+	host->dma_tx = dma_request_channel(mask, omap_dma_filter_fn, &p);
- #if 0
- 	if (!host->dma_tx) {
--		def_err(host->dev, "unable to obtain TX DMA engine channel %u\n",
-+		dev_err(host->dev, "unable to obtain TX DMA engine channel %u\n",
- 			sig);
- 		goto err_dma;
- 	}
- #else
- 	if (!host->dma_tx)
- 		dev_warn(host->dev, "unable to obtain TX DMA engine channel %u\n",
--			sig);
-+			p.dma_sig);
- #endif
- #endif
- #ifdef USE_DMA_ENGINE
--	sig = host->id == 0 ? OMAP_DMA_MMC_RX : OMAP_DMA_MMC2_RX;
--	host->dma_rx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
-+	if (cpu_is_omap24xx()) {
-+		p.dma_sig = host->id == 0 ? OMAP24XX_DMA_MMC1_RX :  OMAP24XX_DMA_MMC2_RX;
-+		p.src_port = 0;
-+		p.dst_port = 0;
-+	} else {
-+		p.dma_sig = host->id == 0 ? OMAP_DMA_MMC_RX : OMAP_DMA_MMC2_RX;
-+		p.src_port = OMAP_DMA_PORT_TIPB;
-+		p.dst_port = OMAP_DMA_PORT_EMIFF;
-+	}
-+	host->dma_rx = dma_request_channel(mask, omap_dma_filter_fn, &p);
- #if 0
- 	if (!host->dma_rx) {
- 		dev_err(host->dev, "unable to obtain RX DMA engine channel %u\n",
--			sig);
-+			p.dma_sig);
- 		goto err_dma;
- 	}
- #else
- 	if (!host->dma_rx)
- 		dev_warn(host->dev, "unable to obtain RX DMA engine channel %u\n",
--			sig);
-+			p.dma_sig);
- #endif
- #endif
- 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index fa85efe..f373791 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -42,6 +42,7 @@
- #include <plat/board.h>
- #include <plat/mmc.h>
- #include <plat/cpu.h>
-+#include <plat/dma.h>
- 
- /* OMAP HSMMC Host Controller Registers */
- #define OMAP_HSMMC_SYSCONFIG	0x0010
-@@ -1772,6 +1773,7 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 	const struct of_device_id *match;
- 	dma_cap_mask_t mask;
- 	unsigned tx_req, rx_req;
-+	struct omap_dma_channel_params p;
- 
- 	match = of_match_device(of_match_ptr(omap_mmc_of_match), &pdev->dev);
- 	if (match) {
-@@ -1920,13 +1922,17 @@ static int __devinit omap_hsmmc_probe(struct platform_device *pdev)
- 	dma_cap_zero(mask);
- 	dma_cap_set(DMA_SLAVE, mask);
- 
--	host->rx_chan = dma_request_channel(mask, omap_dma_filter_fn, &rx_req);
-+	p.dma_sig = rx_req;
-+	p.src_port = 0;
-+	p.dst_port = 0;
-+	host->rx_chan = dma_request_channel(mask, omap_dma_filter_fn, &p);
- 	if (!host->rx_chan) {
- 		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
- 		goto err_irq;
- 	}
- 
--	host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &tx_req);
-+	p.dma_sig = tx_req;
-+	host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &p);
- 	if (!host->tx_chan) {
- 		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
- 		goto err_irq;
