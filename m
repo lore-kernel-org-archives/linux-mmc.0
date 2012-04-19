@@ -1,140 +1,93 @@
-From: Stefan Bader <stefan.bader@canonical.com>
-Subject: The minor heck of using mmcblk and ext4
-Date: Thu, 19 Apr 2012 18:37:45 +0200
-Message-ID: <4F903F59.6040302@canonical.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc-utils: add the way to enable boot-partition
+Date: Thu, 19 Apr 2012 13:19:20 -0400
+Message-ID: <87aa27k5bb.fsf@laptop.org>
+References: <1334825917-2146-1-git-send-email-peppe.cavallaro@st.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
- protocol="application/pgp-signature";
- boundary="------------enig77B85B6E0C16457DBAA2F574"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from youngberry.canonical.com ([91.189.89.112]:56076 "EHLO
-	youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754093Ab2DSQhu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Apr 2012 12:37:50 -0400
+Received: from void.printf.net ([89.145.121.20]:54505 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754242Ab2DSRTI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 19 Apr 2012 13:19:08 -0400
+In-Reply-To: <1334825917-2146-1-git-send-email-peppe.cavallaro@st.com>
+	(Giuseppe CAVALLARO's message of "Thu, 19 Apr 2012 10:58:37 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ubuntu Kernel Team <kernel-team@lists.ubuntu.com>, linux-ext4@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+To: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Cc: linux-mmc@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig77B85B6E0C16457DBAA2F574
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: quoted-printable
+Hi Giuseppe,
 
-This had been a bug[1] which I saw when playing around with my Aspire One=
- (which
-features a mmc driven card reader) and ext4.
+On Thu, Apr 19 2012, Giuseppe CAVALLARO wrote:
+> This adds a new option to enable the boot from eMMC
+> by writing to the 179 ext_csd register.
+>
+> The example below shows as to enable the mmcblk0boot0
+> partition and also set/reset the ACK bit).
+>
+> $ ./mmc booten 1 1 /dev/mmcblk0boot0
+> $ ./mmc extcsd read /dev/mmcblk0boot0 | grep PARTITION_CON
+> Boot configuration bytes [PARTITION_CONFIG: 0x49]
+>
+> Reported-by: Youssef TRIKI <youssef.triki@st.com>
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 
-The problem is inherited from the way the mmc driver handles cards on sus=
-pend.
-So when using a mmcblk device and suspending it is like ejecting the card=
- on
-suspend.
+Looks good, thanks -- do you mind if I make the following changes for
+readability (and are they correct)?  I can update the commit message too:
 
-The problem gets worse when actually using a filesystem on that device. A=
-nd
-there is a difference between having the fs mounted by udisk under /media=
- or
-having done the mount manually. I suspect that udisk either adds its own =
-hooks
-into udev events or has some sort of watch on the mount point. At least e=
-jecting
-the card manually or suspending will usually also an unmount of the fs. T=
-his
-becomes a bit of a problem when the fs is in use (the simplest form being=
- to
-open a shell and changing the current directory into the fs on the card).=
- In
-that case the entry in /proc/mounts is gone but some fs structures remain=
-=2E
+diff --git a/mmc.c b/mmc.c
+index c295885..6927b70 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -66,8 +66,8 @@ static struct Command commands[] = {
+ 	  NULL
+ 	},
+ 	{ do_write_boot_en, -3,
+-	  "booten", "<boot_partition> " "<ack> " "<device>\n"
+-		"Enable the boot partition for the <device>.",
++	  "bootpart enable", "<boot_partition> " "<send_ack> " "<device>\n"
++		"Enable the boot partition for the <device>.\nTo receive acknowledgment of boot from the card set <send_ack>\nto 1, else set it to 0.",
+ 	  NULL
+ 	},
+ 	{ 0, 0, 0, 0 }
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index f588b17..2ab4185 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -174,13 +174,18 @@ int do_write_boot_en(int nargs, char **argv)
+ 	__u8 value = 0;
+ 	int fd, ret;
+ 	char *device;
+-	int boot_area, ack;
++	int boot_area, send_ack;
+ 
+-	CHECK(nargs != 4, "Usage: mmc booten <partition_number> "
+-			  "<ack> </path/to/mmcblkX>\n", exit(1));
++	CHECK(nargs != 4, "Usage: mmc bootpart enable <partition_number> "
++			  "<send_ack> </path/to/mmcblkX>\n", exit(1));
+ 
++	/*
++	 * If <send_ack> is 1, the device will send acknowledgment
++	 * pattern "010" to the host when boot operation begins.
++	 * If <send_ack> is 0, it won't.
++	 */
+ 	boot_area = strtol(argv[1], NULL, 10);
+-	ack = strtol(argv[2], NULL, 10);
++	send_ack = strtol(argv[2], NULL, 10);
+ 	device = argv[3];
+ 
+ 	fd = open(device, O_RDWR);
+@@ -214,7 +219,7 @@ int do_write_boot_en(int nargs, char **argv)
+ 		fprintf(stderr, "Cannot enable the boot area\n");
+ 		exit(1);
+ 	}
+-	if (ack)
++	if (send_ack)
+ 		value |= EXT_CSD_PART_CONFIG_ACC_ACK;
+ 	else
+ 		value &= ~EXT_CSD_PART_CONFIG_ACC_ACK;
 
-And here one specialty of ext4 strikes: it creates some entries under
-/proc/fs/ext4/mmcblk*, /proc/fs/jbd2/mmcblk* and /sys/fs/ext4/mmcblk* (an=
-d some
-internal kobj) which remain dangling together with the structures. So whe=
-n
-resuming the user is presented with:
-
-  a) a scary dialog box telling that mount has failed because of (fuzzy r=
-eason
-     including missing superblocks) which is even more scary because ther=
-e has
-     been a bug in the past which turned this into reality (good bye data=
-).
-  b) three WARN messages (including stack trace) to tell about the duplic=
-ate
-     objects.
-
-Clearly anything that had a file (or directory node) open will be screwed=
- and
-receive IO errors when trying any access. So the obvious mount failure ju=
-st
-makes it very clear that this is a bad place to be in. Or is the expectat=
-ion
-that users of the old mount should just be getting IO errors and the new =
-mount
-is supposed to succeed?
-
-I reached a bit my limits of knowledge here (hence the longish email). Sh=
-ould
-ext4 be expected to find out its backing device is gone and then at least=
- remove
-the sysfs and procfs entries related to that? And even if so, how? Or is =
-it
-better the way it is, so at least the fact that the block device went awa=
-y is
-clearly visible? I am pretty sure any filesystem has the same first half =
-of the
-issue (maybe dangling open files) but just don't have anything that preve=
-nts
-them from being remounted.
-
-There also is a relatively simple way to handle it (when one is aware and=
- knows
-about it). The mmc core can be instructed to treat cards as non-removable=
-
-(mmc_core.removable=3D0) which has its own dangers. I thought that still =
-on resume
-there is a check for the card being the same. I just don't know how relia=
-ble (or
-how unique the identification is) that is. So while this allows to suspen=
-d and
-resume without headaches it potentially can cause some more when the card=
- is
-replaced without that being detected.
-
-So long story, sort of short question: is there anything that can/should =
-be done
-or is it just something that cannot be done any better way?
-
-Thanks,
-Stefan
-
-[1] https://bugs.launchpad.net/ubuntu/+source/linux/+bug/913860
-
-
---------------enig77B85B6E0C16457DBAA2F574
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org/
-
-iQIcBAEBCgAGBQJPkD9ZAAoJEOhnXe7L7s6jqWEP/2kr5y23+7QJ41c6fJan+co9
-9XEwDLwqig9+XAS/Ln13/74jecwdJW0JqtSTaJxFBkhm6RATzlaoZDDVkAjcXWNI
-kMGylNxLqclEgInKwde3rB+seP2p59dEFwQDjodbwxSCcoCGt534y0uPF6mVb3wP
-LSrGtrtF26KWZBISaES1wmp3zPCOCEHXtxh/E2Ndw9khebnYgkeXJCClwxixXFVm
-tdCiA3haR5KiaKNkbrS4yW5uNvK1N+E6XMolnAa3nQ2NXt9OWgnCsJKGCEzxl0i4
-4SeCAaQ/XjulTibl4slT42zuCv81cEg4vibRpLoKI5aDw/jyYe6d0UowvGcsp8HC
-XuxbC+EAOOdHpvv64B9a2N/PE/+MqiLQIB5omVxDAJHFRsCQK7emAeBXNIpAXnkO
-ItC73NtaRgUKNgx6IBrspEijVIm3nBWhu1XPbQrK/hXXlSInpd0XffyhRRJDFZYw
-FJmJePrh8FatOgUH1+oLC1WQqMMr7rYNnY/LHYiWwa2RPlwIWUaZlriLPwwFr8eX
-YeSVaH59cwaj4xIr6srJfKSl2Zyx3h33V2kkajEEtD3mKhyDN3oF7JZb6bfyPQWI
-0ctTf6lQT8F9okRabW1HKcM4KVo4DE1kw9yNnlprL8Apc+nn+dJbqebT952jeb8s
-q1TsJ7wfapw4ORPgCuy1
-=T1Cz
------END PGP SIGNATURE-----
-
---------------enig77B85B6E0C16457DBAA2F574--
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
