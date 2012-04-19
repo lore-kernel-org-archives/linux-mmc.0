@@ -1,7 +1,8 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 2/3] mmc: sh_mmcif: fix clock management
-Date: Fri, 20 Apr 2012 00:09:16 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1204192357030.2110@axis700.grange>
+Subject: [PATCH 1/3] mmc: sh_mmcif: simplify and use meaningful label names
+ in error-handling
+Date: Fri, 20 Apr 2012 00:09:12 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1204192356380.2110@axis700.grange>
 References: <Pine.LNX.4.64.1201101604130.530@axis700.grange>
  <Pine.LNX.4.64.1202022256580.13860@axis700.grange>
  <CANqRtoQ7o=_9uRa3F=4pkNvDWS2g2wZU6oBipttfGuFv4irpzA@mail.gmail.com>
@@ -18,156 +19,122 @@ To: Magnus Damm <magnus.damm@gmail.com>
 Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Regardless, whether the MMC bus clock is the same, as the PM clock on this
-specific interface, it has to be managed separately. Its proper management
-should also include enabling and disabling of the clock, whenever the
-interface is becoming active or going idle respectively.
+A check for NULL platform data can be conveniently made in the very
+beginning of probing. Replace numbered error-handling labels in .probe()
+with meaningful names to make any future reorganisation simpler.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mmcif.c |   44 +++++++++++++++++++++---------------------
- 1 files changed, 22 insertions(+), 22 deletions(-)
+ drivers/mmc/host/sh_mmcif.c |   41 ++++++++++++++++++++---------------------
+ 1 files changed, 20 insertions(+), 21 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index f8ac0bd..0441140 100644
+index bba9742..f8ac0bd 100644
 --- a/drivers/mmc/host/sh_mmcif.c
 +++ b/drivers/mmc/host/sh_mmcif.c
-@@ -948,6 +948,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		}
- 		if (host->power) {
- 			pm_runtime_put(&host->pd->dev);
-+			clk_disable(host->hclk);
- 			host->power = false;
- 			if (p->down_pwr && ios->power_mode == MMC_POWER_OFF)
- 				p->down_pwr(host->pd);
-@@ -960,6 +961,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		if (!host->power) {
- 			if (p->set_pwr)
- 				p->set_pwr(host->pd, ios->power_mode);
-+			clk_enable(host->hclk);
- 			pm_runtime_get_sync(&host->pd->dev);
- 			host->power = true;
- 			sh_mmcif_sync_reset(host);
-@@ -1283,21 +1285,11 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 	host->addr	= reg;
- 	host->timeout	= 1000;
+@@ -1247,10 +1247,15 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 	int ret = 0, irq[2];
+ 	struct mmc_host *mmc;
+ 	struct sh_mmcif_host *host;
+-	struct sh_mmcif_plat_data *pd;
++	struct sh_mmcif_plat_data *pd = pdev->dev.platform_data;
+ 	struct resource *res;
+ 	void __iomem *reg;
  
--	host->hclk = clk_get(&pdev->dev, NULL);
--	if (IS_ERR(host->hclk)) {
--		ret = PTR_ERR(host->hclk);
--		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
--		goto eclkget;
--	}
--	clk_enable(host->hclk);
--	host->clk = clk_get_rate(host->hclk);
- 	host->pd = pdev;
- 
- 	spin_lock_init(&host->lock);
- 
- 	mmc->ops = &sh_mmcif_ops;
--	mmc->f_max = host->clk / 2;
--	mmc->f_min = host->clk / 512;
- 	if (pd->ocr)
- 		mmc->ocr_avail = pd->ocr;
- 	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
-@@ -1309,18 +1301,29 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 	mmc->max_blk_count = mmc->max_req_size / mmc->max_blk_size;
- 	mmc->max_seg_size = mmc->max_req_size;
- 
--	sh_mmcif_sync_reset(host);
- 	platform_set_drvdata(pdev, host);
- 
- 	pm_runtime_enable(&pdev->dev);
- 	host->power = false;
- 
-+	host->hclk = clk_get(&pdev->dev, NULL);
-+	if (IS_ERR(host->hclk)) {
-+		ret = PTR_ERR(host->hclk);
-+		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
-+		goto eclkget;
++	if (!pd) {
++		dev_err(&pdev->dev, "sh_mmcif plat data error.\n");
++		return -ENXIO;
 +	}
-+	clk_enable(host->hclk);
-+	host->clk = clk_get_rate(host->hclk);
-+	mmc->f_max = host->clk / 2;
-+	mmc->f_min = host->clk / 512;
 +
+ 	irq[0] = platform_get_irq(pdev, 0);
+ 	irq[1] = platform_get_irq(pdev, 1);
+ 	if (irq[0] < 0 || irq[1] < 0) {
+@@ -1267,16 +1272,11 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 		dev_err(&pdev->dev, "ioremap error.\n");
+ 		return -ENOMEM;
+ 	}
+-	pd = pdev->dev.platform_data;
+-	if (!pd) {
+-		dev_err(&pdev->dev, "sh_mmcif plat data error.\n");
+-		ret = -ENXIO;
+-		goto clean_up;
+-	}
++
+ 	mmc = mmc_alloc_host(sizeof(struct sh_mmcif_host), &pdev->dev);
+ 	if (!mmc) {
+ 		ret = -ENOMEM;
+-		goto clean_up;
++		goto ealloch;
+ 	}
+ 	host		= mmc_priv(mmc);
+ 	host->mmc	= mmc;
+@@ -1287,7 +1287,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 	if (IS_ERR(host->hclk)) {
+ 		ret = PTR_ERR(host->hclk);
+ 		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
+-		goto clean_up1;
++		goto eclkget;
+ 	}
+ 	clk_enable(host->hclk);
+ 	host->clk = clk_get_rate(host->hclk);
+@@ -1317,7 +1317,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 
  	ret = pm_runtime_resume(&pdev->dev);
  	if (ret < 0)
- 		goto eresume;
+-		goto clean_up2;
++		goto eresume;
  
  	INIT_DELAYED_WORK(&host->timeout_work, mmcif_timeout_work);
  
-+	sh_mmcif_sync_reset(host);
- 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
- 
+@@ -1326,17 +1326,17 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
  	ret = request_threaded_irq(irq[0], sh_mmcif_intr, sh_mmcif_irqt, 0, "sh_mmc:error", host);
-@@ -1334,6 +1337,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 		goto ereqirq1;
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "request_irq error (sh_mmc:error)\n");
+-		goto clean_up3;
++		goto ereqirq0;
+ 	}
+ 	ret = request_threaded_irq(irq[1], sh_mmcif_intr, sh_mmcif_irqt, 0, "sh_mmc:int", host);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "request_irq error (sh_mmc:int)\n");
+-		goto clean_up4;
++		goto ereqirq1;
  	}
  
-+	clk_disable(host->hclk);
  	ret = mmc_add_host(mmc);
  	if (ret < 0)
- 		goto emmcaddh;
-@@ -1352,9 +1356,10 @@ ereqirq1:
- ereqirq0:
+-		goto clean_up5;
++		goto emmcaddh;
+ 
+ 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
+ 
+@@ -1345,20 +1345,19 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 		sh_mmcif_readl(host->addr, MMCIF_CE_VERSION) & 0x0000ffff);
+ 	return ret;
+ 
+-clean_up5:
++emmcaddh:
+ 	free_irq(irq[1], host);
+-clean_up4:
++ereqirq1:
+ 	free_irq(irq[0], host);
+-clean_up3:
++ereqirq0:
  	pm_runtime_suspend(&pdev->dev);
- eresume:
--	pm_runtime_disable(&pdev->dev);
- 	clk_disable(host->hclk);
-+	clk_put(host->hclk);
- eclkget:
-+	pm_runtime_disable(&pdev->dev);
- 	mmc_free_host(mmc);
- ealloch:
- 	iounmap(reg);
-@@ -1367,6 +1372,7 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
- 	int irq[2];
- 
- 	host->dying = true;
-+	clk_enable(host->hclk);
- 	pm_runtime_get_sync(&pdev->dev);
- 
- 	dev_pm_qos_hide_latency_limit(&pdev->dev);
-@@ -1392,9 +1398,9 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, NULL);
- 
--	clk_disable(host->hclk);
- 	mmc_free_host(host->mmc);
- 	pm_runtime_put_sync(&pdev->dev);
-+	clk_disable(host->hclk);
+-clean_up2:
++eresume:
  	pm_runtime_disable(&pdev->dev);
- 
- 	return 0;
-@@ -1403,24 +1409,18 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
- #ifdef CONFIG_PM
- static int sh_mmcif_suspend(struct device *dev)
- {
--	struct platform_device *pdev = to_platform_device(dev);
--	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
-+	struct sh_mmcif_host *host = dev_get_drvdata(dev);
- 	int ret = mmc_suspend_host(host->mmc);
- 
--	if (!ret) {
-+	if (!ret)
- 		sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
--		clk_disable(host->hclk);
--	}
- 
+ 	clk_disable(host->hclk);
+-clean_up1:
++eclkget:
+ 	mmc_free_host(mmc);
+-clean_up:
+-	if (reg)
+-		iounmap(reg);
++ealloch:
++	iounmap(reg);
  	return ret;
  }
  
- static int sh_mmcif_resume(struct device *dev)
- {
--	struct platform_device *pdev = to_platform_device(dev);
--	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
--
--	clk_enable(host->hclk);
-+	struct sh_mmcif_host *host = dev_get_drvdata(dev);
- 
- 	return mmc_resume_host(host->mmc);
- }
 -- 
 1.7.2.5
 
