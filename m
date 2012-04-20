@@ -1,70 +1,102 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 3/3] mmc: sh_mmcif: re-read the clock frequency upon re-enabling
-Date: Fri, 20 Apr 2012 00:09:20 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1204192357250.2110@axis700.grange>
-References: <Pine.LNX.4.64.1201101604130.530@axis700.grange>
- <Pine.LNX.4.64.1202022256580.13860@axis700.grange>
- <CANqRtoQ7o=_9uRa3F=4pkNvDWS2g2wZU6oBipttfGuFv4irpzA@mail.gmail.com>
- <Pine.LNX.4.64.1202031156020.6211@axis700.grange>
- <Pine.LNX.4.64.1204191215430.2110@axis700.grange>
- <CANqRtoTq1e7_g82FGZS3S8yb0j7MgCYNhiH7E=a+nHkTWiOgLQ@mail.gmail.com>
- <Pine.LNX.4.64.1204192351190.2110@axis700.grange>
+From: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+Subject: Re: [PATCH] mmc-utils: add the way to enable boot-partition
+Date: Fri, 20 Apr 2012 06:36:42 +0200
+Message-ID: <4F90E7DA.4010703@st.com>
+References: <1334825917-2146-1-git-send-email-peppe.cavallaro@st.com> <87aa27k5bb.fsf@laptop.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1204192351190.2110@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: "Rafael J. Wysocki" <rjw@sisk.pl>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eu1sys200aog101.obsmtp.com ([207.126.144.111]:58977 "EHLO
+	eu1sys200aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751103Ab2DTEik (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Apr 2012 00:38:40 -0400
+In-Reply-To: <87aa27k5bb.fsf@laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Once the clock is disabled by a driver, nothing prevents it from being 
-reconfigured by another user. Drivers, that save power by disabling the 
-clock when not in use must re-read its frequency every time they re-enable 
-it.
+Hi Chris
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- drivers/mmc/host/sh_mmcif.c |   12 +++++++++---
- 1 files changed, 9 insertions(+), 3 deletions(-)
+On 4/19/2012 7:19 PM, Chris Ball wrote:
+> Hi Giuseppe,
+> 
+> On Thu, Apr 19 2012, Giuseppe CAVALLARO wrote:
+>> This adds a new option to enable the boot from eMMC
+>> by writing to the 179 ext_csd register.
+>>
+>> The example below shows as to enable the mmcblk0boot0
+>> partition and also set/reset the ACK bit).
+>>
+>> $ ./mmc booten 1 1 /dev/mmcblk0boot0
+>> $ ./mmc extcsd read /dev/mmcblk0boot0 | grep PARTITION_CON
+>> Boot configuration bytes [PARTITION_CONFIG: 0x49]
+>>
+>> Reported-by: Youssef TRIKI <youssef.triki@st.com>
+>> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> 
+> Looks good, thanks -- do you mind if I make the following changes for
+> readability (and are they correct)?  I can update the commit message too:
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 0441140..ed59392 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -916,6 +916,13 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	sh_mmcif_start_cmd(host, mrq);
- }
- 
-+static void sh_mmcif_clk_update(struct sh_mmcif_host *host)
-+{
-+	host->clk = clk_get_rate(host->hclk);
-+	host->mmc->f_max = host->clk / 2;
-+	host->mmc->f_min = host->clk / 512;
-+}
-+
- static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sh_mmcif_host *host = mmc_priv(mmc);
-@@ -962,6 +969,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			if (p->set_pwr)
- 				p->set_pwr(host->pd, ios->power_mode);
- 			clk_enable(host->hclk);
-+			sh_mmcif_clk_update(host);
- 			pm_runtime_get_sync(&host->pd->dev);
- 			host->power = true;
- 			sh_mmcif_sync_reset(host);
-@@ -1313,9 +1321,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 		goto eclkget;
- 	}
- 	clk_enable(host->hclk);
--	host->clk = clk_get_rate(host->hclk);
--	mmc->f_max = host->clk / 2;
--	mmc->f_min = host->clk / 512;
-+	sh_mmcif_clk_update(host);
- 
- 	ret = pm_runtime_resume(&pdev->dev);
- 	if (ret < 0)
--- 
-1.7.2.5
+your changes are fine for me
+
+thanks a lot
+
+Regards
+Peppe
+
+> 
+> diff --git a/mmc.c b/mmc.c
+> index c295885..6927b70 100644
+> --- a/mmc.c
+> +++ b/mmc.c
+> @@ -66,8 +66,8 @@ static struct Command commands[] = {
+>  	  NULL
+>  	},
+>  	{ do_write_boot_en, -3,
+> -	  "booten", "<boot_partition> " "<ack> " "<device>\n"
+> -		"Enable the boot partition for the <device>.",
+> +	  "bootpart enable", "<boot_partition> " "<send_ack> " "<device>\n"
+> +		"Enable the boot partition for the <device>.\nTo receive acknowledgment of boot from the card set <send_ack>\nto 1, else set it to 0.",
+>  	  NULL
+>  	},
+>  	{ 0, 0, 0, 0 }
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index f588b17..2ab4185 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -174,13 +174,18 @@ int do_write_boot_en(int nargs, char **argv)
+>  	__u8 value = 0;
+>  	int fd, ret;
+>  	char *device;
+> -	int boot_area, ack;
+> +	int boot_area, send_ack;
+>  
+> -	CHECK(nargs != 4, "Usage: mmc booten <partition_number> "
+> -			  "<ack> </path/to/mmcblkX>\n", exit(1));
+> +	CHECK(nargs != 4, "Usage: mmc bootpart enable <partition_number> "
+> +			  "<send_ack> </path/to/mmcblkX>\n", exit(1));
+>  
+> +	/*
+> +	 * If <send_ack> is 1, the device will send acknowledgment
+> +	 * pattern "010" to the host when boot operation begins.
+> +	 * If <send_ack> is 0, it won't.
+> +	 */
+>  	boot_area = strtol(argv[1], NULL, 10);
+> -	ack = strtol(argv[2], NULL, 10);
+> +	send_ack = strtol(argv[2], NULL, 10);
+>  	device = argv[3];
+>  
+>  	fd = open(device, O_RDWR);
+> @@ -214,7 +219,7 @@ int do_write_boot_en(int nargs, char **argv)
+>  		fprintf(stderr, "Cannot enable the boot area\n");
+>  		exit(1);
+>  	}
+> -	if (ack)
+> +	if (send_ack)
+>  		value |= EXT_CSD_PART_CONFIG_ACC_ACK;
+>  	else
+>  		value &= ~EXT_CSD_PART_CONFIG_ACC_ACK;
+> 
 
