@@ -1,44 +1,38 @@
-From: Steve Sakoman <sakoman@gmail.com>
-Subject: Possible to trigger card insert/remove event from user space?
-Date: Fri, 20 Apr 2012 10:57:49 -0700
-Message-ID: <CAGDS+n=Vp1TSBYo0KdzSRSW5=bC0pzLsg62S=FaEH9T0uxyjcw@mail.gmail.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH/RFC 5/5] sh: ecovec: switch MMC power control to regulator
+Date: Fri, 20 Apr 2012 21:56:13 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1204202155160.3974@axis700.grange>
+References: <Pine.LNX.4.64.1204201835230.3974@axis700.grange>
+ <Pine.LNX.4.64.1204201850180.3974@axis700.grange>
+ <20120420170744.GC3080@opensource.wolfsonmicro.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:37581 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754804Ab2DTR5t (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Apr 2012 13:57:49 -0400
-Received: by qadc11 with SMTP id c11so484617qad.19
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Apr 2012 10:57:49 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20120420170744.GC3080@opensource.wolfsonmicro.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Mark Brown <broonie@opensource.wolfsonmicro.com>
+Cc: linux-mmc@vger.kernel.org, Liam Girdwood <lrg@ti.com>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-I am working with a system that has a wifi module connected via SDIO
-(8686 using the libertas_sdio driver).
+(this patch should have been 5/5, as you have guessed:-))
 
-This is a hard connection, not socketed -- the hw is soldered to the board.
+On Fri, 20 Apr 2012, Mark Brown wrote:
 
-To reduce power I would like to be able to unload the driver module
-and power down the wifi hw (via a GPIO control), then sometime later
-power up the hw and resume normal operation.
+> On Fri, Apr 20, 2012 at 06:59:41PM +0200, Guennadi Liakhovetski wrote:
+> 
+> > +static struct gpio_regulator_state mmcif_power_states[] = {
+> > +	{ .value = 3300000, .gpios = 0 },
+> > +};
+> 
+> It doesn't make much odds but if you've only got one voltage the fixed
+> voltage regulator is a little more idiomatic here (there's some overlap
+> as they've been evolving separately.  No harm in gpio-regulator though.
 
-Sadly this doesn't work -- when I power up the module and manually
-load the libertas_sdio module the driver throws -110 timeout errors.
+Indeed, that would have been even easier, thanks for the suggestion, Mark!
 
-I rebuilt my kernel with a CD GPIO enabled for the mmc port the module
-is connected to and in turn connected that GPIO to another one that I
-can toggle from user space.
-
-Toggling the CD GPIO after powering back up does indeed work properly
--- the module is detected, the driver loaded, and proper function
-restored.
-
-So the next step is to get rid of the silly two GPIO external hardware
-hack.  Is it possible to trigger a card insertion/removal event via
-some standard API?
-
-Best regards,
-
-Steve
+Regards
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
