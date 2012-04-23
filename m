@@ -1,58 +1,72 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH]mmc: core: check PM_SLEEP for mmc_bus_suspend/resume callbacks
-Date: Mon, 23 Apr 2012 08:11:47 -0400
-Message-ID: <87fwbufy0s.fsf@laptop.org>
-References: <20120423071802.GA14743@intel.com>
+From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
+Subject: Re: [RFC 0/8] DMA engine conversion
+Date: Mon, 23 Apr 2012 18:02:52 +0530
+Message-ID: <CAMQu2gyQ3928VQ9Q9Y0mNiacB+br2oGezGCvhLXikbOTi-JR3Q@mail.gmail.com>
+References: <20120418100954.GK25053@n2100.arm.linux.org.uk> <20120423114615.GB25053@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:53443 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753518Ab2DWMLc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 23 Apr 2012 08:11:32 -0400
-In-Reply-To: <20120423071802.GA14743@intel.com> (Chuanxiao Dong's message of
-	"Mon, 23 Apr 2012 15:18:02 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20120423114615.GB25053@n2100.arm.linux.org.uk>
+Sender: linux-omap-owner@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc@vger.kernel.org, andrew@lunn.ch
 
-Hi,
-
-On Mon, Apr 23 2012, Chuanxiao Dong wrote:
-> If PM_SLEEP is not enabled, mmc.c will give warnning since mmc_bus_suspend/
-> mmc_bus_resume functions are defined but not used. This patch can fix this
-> warnning.
+On Mon, Apr 23, 2012 at 5:16 PM, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
+> Here's a patch which converts the SPI driver to use dma engine suppor=
+t.
+> It's more or less a mechanical replacement in this driver. =A0Tested =
+on
+> OMAP4430SDP ethernet (which basically means that udhcpc works.)
 >
-> Found-by: Andrew Lunn <andrew@lunn.ch>
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> ---
->  drivers/mmc/core/bus.c |    2 ++
->  1 files changed, 2 insertions(+), 0 deletions(-)
+> One thing to note: the old DMA code programmed the DMA hardware for a=
+n
+> element count of N and frame size of 1, with element sync. =A0The DMA
+> engine code will program the DMA hardware for an element count of 1 a=
+nd
+> a frame size of N, with frame sync. =A0This appears to work - but at =
+the
+> moment I've not looked to see if there's any implications of this.
 >
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index c60cee9..9b68933 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -122,6 +122,7 @@ static int mmc_bus_remove(struct device *dev)
->  	return 0;
->  }
->  
-> +#ifdef CONFIG_PM_SLEEP
->  static int mmc_bus_suspend(struct device *dev)
->  {
->  	struct mmc_driver *drv = to_mmc_driver(dev->driver);
-> @@ -143,6 +144,7 @@ static int mmc_bus_resume(struct device *dev)
->  		ret = drv->resume(card);
->  	return ret;
->  }
-> +#endif
->  
->  #ifdef CONFIG_PM_RUNTIME
+> You can enable/disable the DMA engine code for the TX or RX side by
+> tweaking the two definitions at the top of the file if you want to do
+> comparisons.
+>
+> Comments? =A0If none, I'll see about committing this into the patch s=
+et,
+> adding the removal of the private DMA code, and sending it out more
+> "officially" with the next round of RFC for this set.
+>
+Element sync vs Frame sync change seems to be fine thought it's
+bit puzzling that why it was not that way first place.
 
-Thanks, pushed to mmc-next for 3.5.
+> Modulo the element vs frame sync issue, I think folk can see that the
+> conversion process is fairly straight forward - it's more or less:
+> 1. add struct dma_chan * pointer to the private structure.
+> 2. add allocation/freeing functions for the DMA engine channels.
+> 3. convert the callbacks to match the DMA engine callback prototype.
+> 4. add code to set the DMA engine channel configuration appropriately
+> =A0 (avoiding any unnecessary calls) via dmaengine_slave_config().
+> 5. add code to queue the transfer via dmaengine_prep_slave_sg() and
+> =A0 dmaengine_submit().
+> 6. omap_start_dma() becomes dma_async_issue_pending().
+>
+> =A0drivers/spi/spi-omap2-mcspi.c | =A0186 +++++++++++++++++++++++++++=
+++++++-------
+> =A01 files changed, 153 insertions(+), 33 deletions(-)
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+The patch seems to be fine to me.
+
+Am looping Shubro in case he has any comment on "why element sync was u=
+sed ?"
+and also to test the patch with more peripherals connected over SPI.
+
+Regards
+Santosh
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
