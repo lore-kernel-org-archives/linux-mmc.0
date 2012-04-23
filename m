@@ -1,39 +1,50 @@
-From: Shubhrajyoti <shubhrajyoti@ti.com>
-Subject: Re: [RFC 0/8] DMA engine conversion
-Date: Mon, 23 Apr 2012 20:57:20 +0530
-Message-ID: <4F9574D8.1000104@ti.com>
-References: <20120418100954.GK25053@n2100.arm.linux.org.uk> <20120423114615.GB25053@n2100.arm.linux.org.uk> <CAMQu2gyQ3928VQ9Q9Y0mNiacB+br2oGezGCvhLXikbOTi-JR3Q@mail.gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: [RFC 00/12] OMAP DMA engine conversion
+Date: Mon, 23 Apr 2012 17:04:10 +0100
+Message-ID: <20120423160409.GE24299@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <CAMQu2gyQ3928VQ9Q9Y0mNiacB+br2oGezGCvhLXikbOTi-JR3Q@mail.gmail.com>
+Content-Disposition: inline
 Sender: linux-omap-owner@vger.kernel.org
-To: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Monday 23 April 2012 06:02 PM, Shilimkar, Santosh wrote:
->> conversion process is fairly straight forward - it's more or less:
->> > 1. add struct dma_chan * pointer to the private structure.
->> > 2. add allocation/freeing functions for the DMA engine channels.
->> > 3. convert the callbacks to match the DMA engine callback prototype.
->> > 4. add code to set the DMA engine channel configuration appropriately
->> >   (avoiding any unnecessary calls) via dmaengine_slave_config().
->> > 5. add code to queue the transfer via dmaengine_prep_slave_sg() and
->> >   dmaengine_submit().
->> > 6. omap_start_dma() becomes dma_async_issue_pending().
->> >
->> >  drivers/spi/spi-omap2-mcspi.c |  186 +++++++++++++++++++++++++++++++++-------
->> >  1 files changed, 153 insertions(+), 33 deletions(-)
-> The patch seems to be fine to me.
->
-> Am looping Shubro in case he has any comment on "why element sync was used ?"
-> and also to test the patch with more peripherals connected over SPI.
->
-> Regards
-> Santosh
-Tested on omap4 ethernet and omap3 touchscreen
-also did a spidev test.
+For the full text, please see 
 
-Tested-by: Shubhrajyoti <shubhrajyoti@ti.com <mailto:shubhrajyoti@ti.com>>
+http://lists.arm.linux.org.uk/lurker/message/20120418.100954.7fa7acf8.en.html
+
+This version contains updates for some of the comments received from the
+previous round, and adds the OMAP1/2 MMC and SPI drivers to the conversion.
+
+I've also added a note to feature-removal noting that the existing APIs
+will be removed around 2013 - I'm planning January for that at the
+moment.  Having drivers around which are unconverted blocks further work
+on the DMA engine conversion, so it's actually important that we get
+as many drivers converted as soon as possible.
+
+Anything which isn't converted will probably have its DMA code removed,
+or if that results in the driver not being usable, the driver itself
+will be removed.
+
+This series is still in RFC mode...
+
+ Documentation/feature-removal-schedule.txt |   11 +
+ arch/arm/mach-omap1/board-h2-mmc.c         |    1 -
+ arch/arm/mach-omap1/board-h3-mmc.c         |    1 -
+ arch/arm/mach-omap1/board-nokia770.c       |    1 -
+ arch/arm/mach-omap2/board-n8x0.c           |    1 -
+ arch/arm/mach-omap2/hsmmc.c                |    1 -
+ arch/arm/plat-omap/dma.c                   |   14 +
+ arch/arm/plat-omap/include/plat/mmc.h      |    2 -
+ drivers/dma/Kconfig                        |   10 +
+ drivers/dma/Makefile                       |    2 +
+ drivers/dma/omap-dma.c                     |  521 ++++++++++++++++++++++++++++
+ drivers/dma/sa11x0-dma.c                   |  249 ++++---------
+ drivers/dma/virt-dma.c                     |   99 ++++++
+ drivers/dma/virt-dma.h                     |  138 ++++++++
+ drivers/mmc/host/omap.c                    |  369 +++++++++-----------
+ drivers/mmc/host/omap_hsmmc.c              |  206 ++++++------
+ drivers/spi/spi-omap2-mcspi.c              |  228 +++++++------
+ 17 files changed, 1268 insertions(+), 586 deletions(-)
+
