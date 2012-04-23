@@ -1,61 +1,39 @@
-From: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
-Subject: Re: [PATCH 1/8] ARM: OMAP: fix DMA vs memory ordering
-Date: Mon, 23 Apr 2012 20:05:23 +0530
-Message-ID: <CAMQu2gxU+uhCLqPte7qtUJ_FPZ464+zzKLtriHoEZ_MxaA+8kw@mail.gmail.com>
-References: <20120418100954.GK25053@n2100.arm.linux.org.uk>
- <E1SKRqN-0004b4-Me@rmk-PC.arm.linux.org.uk> <20120420222230.GH21106@atomide.com>
- <20120423141924.GB24299@n2100.arm.linux.org.uk> <20120423142745.GB3739@atomide.com>
+From: Shubhrajyoti <shubhrajyoti@ti.com>
+Subject: Re: [RFC 0/8] DMA engine conversion
+Date: Mon, 23 Apr 2012 20:57:20 +0530
+Message-ID: <4F9574D8.1000104@ti.com>
+References: <20120418100954.GK25053@n2100.arm.linux.org.uk> <20120423114615.GB25053@n2100.arm.linux.org.uk> <CAMQu2gyQ3928VQ9Q9Y0mNiacB+br2oGezGCvhLXikbOTi-JR3Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog113.obsmtp.com ([74.125.149.209]:52270 "EHLO
-	na3sys009aog113.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755469Ab2DWOfq convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 23 Apr 2012 10:35:46 -0400
-Received: by qadc11 with SMTP id c11so1433238qad.19
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Apr 2012 07:35:44 -0700 (PDT)
-In-Reply-To: <20120423142745.GB3739@atomide.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <CAMQu2gyQ3928VQ9Q9Y0mNiacB+br2oGezGCvhLXikbOTi-JR3Q@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: "Shilimkar, Santosh" <santosh.shilimkar@ti.com>
 Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Apr 23, 2012 at 7:57 PM, Tony Lindgren <tony@atomide.com> wrote=
-:
-> * Russell King - ARM Linux <linux@arm.linux.org.uk> [120423 07:22]:
->> On Fri, Apr 20, 2012 at 03:22:33PM -0700, Tony Lindgren wrote:
->> > * Russell King <rmk+kernel@arm.linux.org.uk> [120418 03:14]:
->> > > Using coherent DMA memory with the OMAP DMA engine results in
->> > > unpredictable behaviour due to memory ordering issues; as things=
- stand,
->> > > there is no guarantee that data written to coherent DMA memory w=
-ill be
->> > > visible to the DMA hardware.
->> > >
->> > > This is because the OMAP dma_write() accessor contains no barrie=
-rs,
->> > > necessary on ARMv6 and above. =A0The effect of this can be seen =
-in comments
->> > > in the OMAP serial driver, which incorrectly talks about cache f=
-lushing
->> > > for the coherent DMA stuff.
->> > >
->> > > Rather than adding barriers to the accessors, add it in the DMA =
-support
->> > > code just before we enable DMA, and just after we disable DMA. =A0=
-This
->> > > avoids having barriers for every DMA register access.
->> > >
->> > > Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+On Monday 23 April 2012 06:02 PM, Shilimkar, Santosh wrote:
+>> conversion process is fairly straight forward - it's more or less:
+>> > 1. add struct dma_chan * pointer to the private structure.
+>> > 2. add allocation/freeing functions for the DMA engine channels.
+>> > 3. convert the callbacks to match the DMA engine callback prototype.
+>> > 4. add code to set the DMA engine channel configuration appropriately
+>> >   (avoiding any unnecessary calls) via dmaengine_slave_config().
+>> > 5. add code to queue the transfer via dmaengine_prep_slave_sg() and
+>> >   dmaengine_submit().
+>> > 6. omap_start_dma() becomes dma_async_issue_pending().
 >> >
->> > Acked-by: Tony Lindgren <tony@atomide.com>
->>
->> Would you like me to push this upstream on my next -rc push (with a
->> stable tag?)
+>> >  drivers/spi/spi-omap2-mcspi.c |  186 +++++++++++++++++++++++++++++++++-------
+>> >  1 files changed, 153 insertions(+), 33 deletions(-)
+> The patch seems to be fine to me.
 >
-> Yes sounds good to me.
+> Am looping Shubro in case he has any comment on "why element sync was used ?"
+> and also to test the patch with more peripherals connected over SPI.
 >
-=46WIW,
-Acked-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
+> Regards
+> Santosh
+Tested on omap4 ethernet and omap3 touchscreen
+also did a spidev test.
+
+Tested-by: Shubhrajyoti <shubhrajyoti@ti.com <mailto:shubhrajyoti@ti.com>>
