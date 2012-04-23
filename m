@@ -1,55 +1,37 @@
 From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 8/8] ARM: omap_hsmmc: remove platform data dma_mask and
-	initialization
-Date: Mon, 23 Apr 2012 15:14:15 +0100
-Message-ID: <20120423141415.GA24299@n2100.arm.linux.org.uk>
-References: <20120418210142.GR21106@atomide.com> <20120418211606.GU25053@n2100.arm.linux.org.uk> <20120418213642.GV25053@n2100.arm.linux.org.uk> <20120419013914.GV21106@atomide.com> <20120419174332.GY25053@n2100.arm.linux.org.uk> <20120419180741.GX21106@atomide.com> <20120420151034.GA24205@n2100.arm.linux.org.uk> <20120420152623.GA21106@atomide.com> <20120420153743.GB24205@n2100.arm.linux.org.uk> <20120420164957.GC21106@atomide.com>
+Subject: Re: [PATCH 1/8] ARM: OMAP: fix DMA vs memory ordering
+Date: Mon, 23 Apr 2012 15:19:24 +0100
+Message-ID: <20120423141924.GB24299@n2100.arm.linux.org.uk>
+References: <20120418100954.GK25053@n2100.arm.linux.org.uk> <E1SKRqN-0004b4-Me@rmk-PC.arm.linux.org.uk> <20120420222230.GH21106@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20120420164957.GC21106@atomide.com>
+In-Reply-To: <20120420222230.GH21106@atomide.com>
 Sender: linux-omap-owner@vger.kernel.org
 To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, "T Krishnamoorthy, Balaji" <balajitk@ti.com>, linux-arm-kernel@lists.infradead.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Apr 20, 2012 at 09:50:00AM -0700, Tony Lindgren wrote:
-> Then something like this is still needed on top of your original mmc driver
-> patch for omap2420:
+On Fri, Apr 20, 2012 at 03:22:33PM -0700, Tony Lindgren wrote:
+> * Russell King <rmk+kernel@arm.linux.org.uk> [120418 03:14]:
+> > Using coherent DMA memory with the OMAP DMA engine results in
+> > unpredictable behaviour due to memory ordering issues; as things stand,
+> > there is no guarantee that data written to coherent DMA memory will be
+> > visible to the DMA hardware.
+> > 
+> > This is because the OMAP dma_write() accessor contains no barriers,
+> > necessary on ARMv6 and above.  The effect of this can be seen in comments
+> > in the OMAP serial driver, which incorrectly talks about cache flushing
+> > for the coherent DMA stuff.
+> > 
+> > Rather than adding barriers to the accessors, add it in the DMA support
+> > code just before we enable DMA, and just after we disable DMA.  This
+> > avoids having barriers for every DMA register access.
+> > 
+> > Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 > 
-> --- a/drivers/mmc/host/omap.c
-> +++ b/drivers/mmc/host/omap.c
-> @@ -1617,11 +1617,14 @@ static int __init mmc_omap_probe(struct platform_device *pdev)
->  	host->dma_tx_burst = -1;
->  	host->dma_rx_burst = -1;
->  
-> -	sig = host->id == 0 ? OMAP_DMA_MMC_TX : OMAP_DMA_MMC2_TX;
-> +	if (cpu_is_omap24xx())
-> +		sig = host->id == 0 ? OMAP24XX_DMA_MMC1_TX :  OMAP24XX_DMA_MMC2_TX;
-> +	else
-> +		sig = host->id == 0 ? OMAP_DMA_MMC_TX : OMAP_DMA_MMC2_TX;
->  	host->dma_tx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
->  #if 0
->  	if (!host->dma_tx) {
-> -		def_err(host->dev, "unable to obtain TX DMA engine channel %u\n",
-> +		dev_err(host->dev, "unable to obtain TX DMA engine channel %u\n",
->  			sig);
->  		goto err_dma;
->  	}
-> @@ -1632,7 +1635,10 @@ static int __init mmc_omap_probe(struct platform_device *pdev)
->  #endif
->  #endif
->  #ifdef USE_DMA_ENGINE
-> -	sig = host->id == 0 ? OMAP_DMA_MMC_RX : OMAP_DMA_MMC2_RX;
-> +	if (cpu_is_omap24xx())
-> +		sig = host->id == 0 ? OMAP24XX_DMA_MMC1_RX :  OMAP24XX_DMA_MMC2_RX;
-> +	else
-> +		sig = host->id == 0 ? OMAP_DMA_MMC_RX : OMAP_DMA_MMC2_RX;
->  	host->dma_rx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
->  #if 0
->  	if (!host->dma_rx) {
+> Acked-by: Tony Lindgren <tony@atomide.com>
 
-Is there any chance this DMA signal information could be moved into
-platform resources, like omap_hsmmc has done?  I could then get rid
-of the plat/dma.h dependence from this driver.
+Would you like me to push this upstream on my next -rc push (with a
+stable tag?)
