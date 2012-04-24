@@ -1,42 +1,53 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 06/12] mmc: omap_hsmmc: remove private DMA API
-	implementation
-Date: Tue, 24 Apr 2012 23:05:30 +0100
-Message-ID: <20120424220530.GA6290@n2100.arm.linux.org.uk>
-References: <20120423160409.GE24299@n2100.arm.linux.org.uk> <E1SMLmF-0002WO-Ch@rmk-PC.arm.linux.org.uk> <CANOLnOM29Mn2BTydX=C5FEu6evkS5W8eL87RwNmppJWuVLGjAQ@mail.gmail.com>
+From: Grazvydas Ignotas <notasas@gmail.com>
+Subject: Re: [RFC 00/12] OMAP DMA engine conversion
+Date: Wed, 25 Apr 2012 01:47:21 +0300
+Message-ID: <CANOLnOOf0znGBSSQp5B3U+1q2OJBXnB_1T0aiuma_rJZDZA08Q@mail.gmail.com>
+References: <20120423160409.GE24299@n2100.arm.linux.org.uk>
+	<20120424103858.GC25053@n2100.arm.linux.org.uk>
+	<20120424165147.GP3739@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-13
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CANOLnOM29Mn2BTydX=C5FEu6evkS5W8eL87RwNmppJWuVLGjAQ@mail.gmail.com>
+In-Reply-To: <20120424165147.GP3739@atomide.com>
 Sender: linux-omap-owner@vger.kernel.org
-To: Grazvydas Ignotas <notasas@gmail.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+To: Tony Lindgren <tony@atomide.com>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Apr 25, 2012 at 12:51:09AM +0300, Grazvydas Ignotas wrote:
-> On Mon, Apr 23, 2012 at 7:06 PM, Russell King
-> <rmk+kernel@arm.linux.org.uk> wrote:
-> > Remove the private DMA API implementation from omap_hsmmc, making it
-> > use entirely the DMA engine API.
-> >
-> > Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
-> 
-> Since the driver becomes useless without DMA_ENGINE, we probably want
-> a 'depends on'?
+On Tue, Apr 24, 2012 at 7:51 PM, Tony Lindgren <tony@atomide.com> wrote=
+:
+> * Russell King - ARM Linux <linux@arm.linux.org.uk> [120424 03:42]:
+>> Here's another patch - for the OMAP NAND driver.
+>>
+>> One thing this doesn't do is configure up the source/destination bur=
+sts,
+>> which the old code did:
+>>
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_set_dma_dest_bu=
+rst_mode(info->dma_ch,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 OMAP_DMA_DATA_BURST_16);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 omap_set_dma_src_bur=
+st_mode(info->dma_ch,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 =A0 OMAP_DMA_DATA_BURST_16);
+>
+> Grazvydas, care to give this patch a go?
 
-I think it's possible to use tweak this to use PIO should DMA_ENGINE
-not be available - though first we need to sort out all the filter
-functions and how we select the DMA channels.  That's pretty much an
-open question (which was brought up in my original set of patches)
-and remains to these ones.
+Tested-by: Grazvydas Ignotas <notasas@gmail.com>
+for:
+- SD card connected over transceiver to MMC2
+- touchscreen connected over SPI
+- NAND on GPMC in DMA mode
+Seems to be working just as they did before, except that I'm not sure
+SPI was crossing PIO threshold.
 
-How we did this with the AMBA Primecell drivers was to pass in the
-filter function and filter argument from platform code, allowing the
-primecell drivers to be used with any DMA engine.  That doesn't work
-with DT though...
 
-At the moment, I don't have an answer for this, because of the DT
-implications here.  So, the issue is rather stuck, and as a result
-I'm just sticking the "extern" declarations for the filter function
-into drivers that have been converted.
+--=20
+Gra=FEvydas
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
