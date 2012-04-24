@@ -1,205 +1,145 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 7/7] sh: ecovec: switch MMC power control to regulators
-Date: Tue, 24 Apr 2012 18:41:47 +0200
-Message-ID: <1335285707-22707-8-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 5/7] mmc: tmio: add regulator support
+Date: Tue, 24 Apr 2012 18:41:45 +0200
+Message-ID: <1335285707-22707-6-git-send-email-g.liakhovetski@gmx.de>
 References: <1335285707-22707-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:55536 "EHLO
+Received: from moutng.kundenserver.de ([212.227.17.9]:51538 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755655Ab2DXQlx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Apr 2012 12:41:53 -0400
+	with ESMTP id S1755782Ab2DXQly (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Apr 2012 12:41:54 -0400
 In-Reply-To: <1335285707-22707-1-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Liam Girdwood <lrg@ti.com>
 
-Power on the CN11 and CN12 SD/MMC slots on ecovec is controlled by GPIOs,
-which makes it possible to use the fixed voltage regulator driver to switch
-card power on and off.
+Currently the TMIO MMC driver derives the OCR mask from the platform data
+and uses a platform callback to turn card power on and off. This patch adds
+regulator support to the driver.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: Magnus Damm <magnus.damm@gmail.com>
 Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
 Cc: Liam Girdwood <lrg@ti.com>
 ---
- arch/sh/boards/mach-ecovec24/setup.c |   85 ++++++++++++++++++++++++---------
- 1 files changed, 62 insertions(+), 23 deletions(-)
+ drivers/mmc/host/tmio_mmc.h     |    2 +
+ drivers/mmc/host/tmio_mmc_pio.c |   44 +++++++++++++++++++++++++++++++-------
+ 2 files changed, 38 insertions(+), 8 deletions(-)
 
-diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
-index a2f70e6..0822931 100644
---- a/arch/sh/boards/mach-ecovec24/setup.c
-+++ b/arch/sh/boards/mach-ecovec24/setup.c
-@@ -19,6 +19,9 @@
- #include <linux/interrupt.h>
- #include <linux/io.h>
- #include <linux/delay.h>
-+#include <linux/regulator/driver.h>
-+#include <linux/regulator/fixed.h>
-+#include <linux/regulator/machine.h>
- #include <linux/usb/r8a66597.h>
- #include <linux/usb/renesas_usbhs.h>
- #include <linux/i2c.h>
-@@ -515,12 +518,66 @@ static struct i2c_board_info ts_i2c_clients = {
- 	.irq		= IRQ0,
- };
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index d857f5c..12c0108 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -55,6 +55,8 @@ struct tmio_mmc_host {
+ 	void (*set_pwr)(struct platform_device *host, int state);
+ 	void (*set_clk_div)(struct platform_device *host, int state);
  
-+static struct regulator_consumer_supply cn12_power_consumers[] =
++	struct regulator	*vdd;
++
+ 	/* pio related stuff */
+ 	struct scatterlist      *sg_ptr;
+ 	struct scatterlist      *sg_orig;
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 579f990..61d4274 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -42,6 +42,7 @@
+ #include <linux/platform_device.h>
+ #include <linux/pm_qos.h>
+ #include <linux/pm_runtime.h>
++#include <linux/regulator/consumer.h>
+ #include <linux/scatterlist.h>
+ #include <linux/spinlock.h>
+ #include <linux/workqueue.h>
+@@ -767,6 +768,16 @@ static int tmio_mmc_clk_update(struct mmc_host *mmc)
+ 	return ret;
+ }
+ 
++static void tmio_mmc_set_power(struct tmio_mmc_host *host, bool on)
 +{
-+	REGULATOR_SUPPLY("MMC Vdd", "sh_mmcif.0"),
-+	REGULATOR_SUPPLY("SD Vdd", "sh_mobile_sdhi.1"),
-+};
++	if (host->vdd)
++		/* Errors ignored... */
++		mmc_regulator_set_ocr(host->mmc, host->vdd,
++				      on ? host->mmc->ios.vdd : 0);
++	else if (host->set_pwr)
++		host->set_pwr(host->pdev, on);
++}
 +
-+static struct regulator_init_data cn12_power_init_data = {
-+	.constraints = {
-+		.valid_ops_mask = REGULATOR_CHANGE_STATUS,
-+	},
-+	.num_consumer_supplies  = ARRAY_SIZE(cn12_power_consumers),
-+	.consumer_supplies      = cn12_power_consumers,
-+};
-+
-+static struct fixed_voltage_config cn12_power_info = {
-+	.supply_name = "CN12 SD/MMC Vdd",
-+	.microvolts = 3300000,
-+	.gpio = GPIO_PTB7,
-+	.enable_high = 1,
-+	.init_data = &cn12_power_init_data,
-+};
-+
-+static struct platform_device cn12_power = {
-+	.name = "reg-fixed-voltage",
-+	.id   = 0,
-+	.dev  = {
-+		.platform_data = &cn12_power_info,
-+	},
-+};
-+
- #if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
- /* SDHI0 */
--static void sdhi0_set_pwr(struct platform_device *pdev, int state)
-+static struct regulator_consumer_supply sdhi0_power_consumers[] =
- {
--	gpio_set_value(GPIO_PTB6, state);
--}
-+	REGULATOR_SUPPLY("SD Vdd", "sh_mobile_sdhi.0"),
-+};
-+
-+static struct regulator_init_data sdhi0_power_init_data = {
-+	.constraints = {
-+		.valid_ops_mask = REGULATOR_CHANGE_STATUS,
-+	},
-+	.num_consumer_supplies  = ARRAY_SIZE(sdhi0_power_consumers),
-+	.consumer_supplies      = sdhi0_power_consumers,
-+};
-+
-+static struct fixed_voltage_config sdhi0_power_info = {
-+	.supply_name = "CN11 SD/MMC Vdd",
-+	.microvolts = 3300000,
-+	.gpio = GPIO_PTB6,
-+	.enable_high = 1,
-+	.init_data = &sdhi0_power_init_data,
-+};
-+
-+static struct platform_device sdhi0_power = {
-+	.name = "reg-fixed-voltage",
-+	.id   = 1,
-+	.dev  = {
-+		.platform_data = &sdhi0_power_info,
-+	},
-+};
- 
- static int sdhi0_get_cd(struct platform_device *pdev)
- {
-@@ -530,7 +587,6 @@ static int sdhi0_get_cd(struct platform_device *pdev)
- static struct sh_mobile_sdhi_info sdhi0_info = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
--	.set_pwr	= sdhi0_set_pwr,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
- 			  MMC_CAP_NEEDS_POLL,
- 	.get_cd		= sdhi0_get_cd,
-@@ -561,11 +617,6 @@ static struct platform_device sdhi0_device = {
- 
- #if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
- /* SDHI1 */
--static void sdhi1_set_pwr(struct platform_device *pdev, int state)
--{
--	gpio_set_value(GPIO_PTB7, state);
--}
--
- static int sdhi1_get_cd(struct platform_device *pdev)
- {
- 	return !gpio_get_value(GPIO_PTW7);
-@@ -576,7 +627,6 @@ static struct sh_mobile_sdhi_info sdhi1_info = {
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
- 			  MMC_CAP_NEEDS_POLL,
--	.set_pwr	= sdhi1_set_pwr,
- 	.get_cd		= sdhi1_get_cd,
+ /* Set MMC clock / power.
+  * Note: This controller uses a simple divider scheme therefore it cannot
+  * run a MMC card at full speed (20MHz). The max clock is 24MHz on SD, but as
+@@ -819,13 +830,12 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		}
+ 		tmio_mmc_set_clock(host, ios->clock);
+ 		/* power up SD bus */
+-		if (host->set_pwr)
+-			host->set_pwr(host->pdev, 1);
++		tmio_mmc_set_power(host, true);
+ 		/* start bus clock */
+ 		tmio_mmc_clk_start(host);
+ 	} else if (ios->power_mode != MMC_POWER_UP) {
+-		if (host->set_pwr && ios->power_mode == MMC_POWER_OFF)
+-			host->set_pwr(host->pdev, 0);
++		if (ios->power_mode == MMC_POWER_OFF)
++			tmio_mmc_set_power(host, false);
+ 		tmio_mmc_clk_stop(host);
+ 		if (host->power) {
+ 			struct tmio_mmc_data *pdata = host->pdata;
+@@ -885,6 +895,25 @@ static const struct mmc_host_ops tmio_mmc_ops = {
+ 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
  };
  
-@@ -872,11 +922,6 @@ static struct platform_device vou_device = {
++static void tmio_mmc_init_ocr(struct tmio_mmc_host *host)
++{
++	struct tmio_mmc_data *pdata = host->pdata;
++	struct mmc_host *mmc = host->mmc;
++
++	host->vdd = regulator_get(mmc_dev(mmc), "SD Vdd");
++	if (IS_ERR(host->vdd)) {
++		host->vdd = NULL;
++	} else {
++		mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vdd);
++		if (pdata->ocr_mask || host->set_pwr)
++			dev_warn(mmc_dev(mmc),
++				"Platform OCR mask / .set_pwr() are ignored\n");
++	}
++
++	if (!host->vdd)
++		mmc->ocr_avail = pdata->ocr_mask ? : MMC_VDD_32_33 | MMC_VDD_33_34;
++}
++
+ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 				  struct platform_device *pdev,
+ 				  struct tmio_mmc_data *pdata)
+@@ -930,10 +959,7 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 		mmc->max_segs;
+ 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+ 	mmc->max_seg_size = mmc->max_req_size;
+-	if (pdata->ocr_mask)
+-		mmc->ocr_avail = pdata->ocr_mask;
+-	else
+-		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
++	tmio_mmc_init_ocr(_host);
  
- #if defined(CONFIG_MMC_SH_MMCIF) || defined(CONFIG_MMC_SH_MMCIF_MODULE)
- /* SH_MMCIF */
--static void mmcif_set_pwr(struct platform_device *pdev, int state)
--{
--	gpio_set_value(GPIO_PTB7, state);
--}
--
- static struct resource sh_mmcif_resources[] = {
- 	[0] = {
- 		.name	= "SH_MMCIF",
-@@ -897,12 +942,10 @@ static struct resource sh_mmcif_resources[] = {
- };
+ 	_host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
+ 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
+@@ -1019,6 +1045,7 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
  
- static struct sh_mmcif_plat_data sh_mmcif_plat = {
--	.set_pwr	= mmcif_set_pwr,
- 	.sup_pclk	= 0, /* SH7724: Max Pclk/2 */
- 	.caps		= MMC_CAP_4_BIT_DATA |
- 			  MMC_CAP_8_BIT_DATA |
- 			  MMC_CAP_NEEDS_POLL,
--	.ocr		= MMC_VDD_32_33 | MMC_VDD_33_34,
- };
+ pm_disable:
+ 	pm_runtime_disable(&pdev->dev);
++	regulator_put(_host->vdd);
+ 	iounmap(_host->ctl);
+ host_free:
+ 	mmc_free_host(mmc);
+@@ -1052,6 +1079,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
  
- static struct platform_device sh_mmcif_device = {
-@@ -927,7 +970,9 @@ static struct platform_device *ecovec_devices[] __initdata = {
- 	&ceu0_device,
- 	&ceu1_device,
- 	&keysc_device,
-+	&cn12_power,
- #if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
-+	&sdhi0_power,
- 	&sdhi0_device,
- #if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
- 	&sdhi1_device,
-@@ -1224,8 +1269,6 @@ static int __init arch_setup(void)
- 	gpio_request(GPIO_FN_SDHI0D2,  NULL);
- 	gpio_request(GPIO_FN_SDHI0D1,  NULL);
- 	gpio_request(GPIO_FN_SDHI0D0,  NULL);
--	gpio_request(GPIO_PTB6, NULL);
--	gpio_direction_output(GPIO_PTB6, 0);
- #else
- 	/* enable MSIOF0 on CN11 (needs DS2.4 set to OFF) */
- 	gpio_request(GPIO_FN_MSIOF0_TXD, NULL);
-@@ -1254,8 +1297,6 @@ static int __init arch_setup(void)
- 	gpio_request(GPIO_FN_MMC_D0, NULL);
- 	gpio_request(GPIO_FN_MMC_CLK, NULL);
- 	gpio_request(GPIO_FN_MMC_CMD, NULL);
--	gpio_request(GPIO_PTB7, NULL);
--	gpio_direction_output(GPIO_PTB7, 0);
+ 	pm_runtime_put_sync(&pdev->dev);
+ 	pm_runtime_disable(&pdev->dev);
++	regulator_put(host->vdd);
  
- 	cn12_enabled = true;
- #elif defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
-@@ -1267,8 +1308,6 @@ static int __init arch_setup(void)
- 	gpio_request(GPIO_FN_SDHI1D2,  NULL);
- 	gpio_request(GPIO_FN_SDHI1D1,  NULL);
- 	gpio_request(GPIO_FN_SDHI1D0,  NULL);
--	gpio_request(GPIO_PTB7, NULL);
--	gpio_direction_output(GPIO_PTB7, 0);
- 
- 	/* Card-detect, used on CN12 with SDHI1 */
- 	gpio_request(GPIO_PTW7, NULL);
+ 	iounmap(host->ctl);
+ 	mmc_free_host(mmc);
 -- 
 1.7.2.5
 
