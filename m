@@ -1,66 +1,52 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH/RFC] sh: ecovec: switch MMC power control to regulator
-Date: Tue, 24 Apr 2012 13:14:25 +0100
-Message-ID: <20120424121424.GA13747@opensource.wolfsonmicro.com>
-References: <Pine.LNX.4.64.1204201835230.3974@axis700.grange>
- <Pine.LNX.4.64.1204201850180.3974@axis700.grange>
- <20120420170744.GC3080@opensource.wolfsonmicro.com>
- <Pine.LNX.4.64.1204241342590.21239@axis700.grange>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH] mmc: cd-gpio: allow NULL context in mmc_cd_gpio_free()
+Date: Tue, 24 Apr 2012 17:56:29 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1204241746530.21239@axis700.grange>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="6TrnltStXW4iwmi0"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from opensource.wolfsonmicro.com ([80.75.67.52]:35798 "EHLO
-	opensource.wolfsonmicro.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750931Ab2DXMOa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Apr 2012 08:14:30 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1204241342590.21239@axis700.grange>
+Received: from moutng.kundenserver.de ([212.227.126.171]:49917 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755825Ab2DXP4c (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Apr 2012 11:56:32 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, Liam Girdwood <lrg@ti.com>, Magnus Damm <magnus.damm@gmail.com>, linux-sh@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>
 
+Do not Oops, even if mmc_cd_gpio_free() is mistakenly called on a
+driver-cleanup path, even though a previous call to mmc_cd_gpio_request()
+failed.
 
---6TrnltStXW4iwmi0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
 
-On Tue, Apr 24, 2012 at 01:46:09PM +0200, Guennadi Liakhovetski wrote:
+Hi Chris
 
-> One more question in this respect: I see, that most other MMC drivers use=
-=20
-> "vmmc" as supply name. How important is it for all MMC drivers to use the=
-=20
-> same name? Shall I use it for MMCIF and TMIO-MMC too?
+Unfortunately, as I submitted the final version of the original cd-gpio 
+patch http://article.gmane.org/gmane.linux.kernel.mmc/12013 I forgot, that 
+I'd already sent a v2 and hadn't incremented the version to v3. And that 
+version contained the below fix, that went lost because of the wrong 
+version number. So, please, push this incremental fix for 3.4, because 
+otherwise some error-paths of the tmio-mmc driver can Oops.
 
-The only thing from a regulator API point of view is that the name
-should be something that users can easily match up with the schematic -
-the general advice is that it should correspond to the name given in the
-chip datasheet as that can be tied in with relative ease, though so long
-as it's clear it doesn't *really* matter.
+ drivers/mmc/core/cd-gpio.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
 
---6TrnltStXW4iwmi0
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+diff --git a/drivers/mmc/core/cd-gpio.c b/drivers/mmc/core/cd-gpio.c
+index 29de31e..56b854d 100644
+--- a/drivers/mmc/core/cd-gpio.c
++++ b/drivers/mmc/core/cd-gpio.c
+@@ -72,6 +72,9 @@ void mmc_cd_gpio_free(struct mmc_host *host)
+ {
+ 	struct mmc_cd_gpio *cd = host->hotplug.handler_priv;
+ 
++	if (!cd)
++		return;
++
+ 	free_irq(host->hotplug.irq, host);
+ 	gpio_free(cd->gpio);
+ 	kfree(cd);
+-- 
+1.7.2.5
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJPlpj8AAoJEBus8iNuMP3dk1IP/3/FL9PoV+S30/G35AuVreKS
-hx9B4gJobxmvUZxDfLoBCb/YQE1BR3+UAlJCYQSpZerTRg8Y6ObNa5J7ErWWPlgT
-4wBmrBiHvGePYhnOi9U8zv2FMyTdG5qvEPhMTjT+YoCojaKweZlJPsj2q0FN0I9b
-CjUtimCMPOrwClOHhnTiGftsqOcd1BAsLfj0tV14tml9aE6Cp+jMxUOXwuKsp2R5
-aslu3c/y498OLgEbuH3YPid8FKh5RBo50WwyRDdUiLcgiOws+wslmKdZqw/lzSk8
-+KDFYXJapt9U1IAU1H3iu+e/Nnx85S862bTU3oTlDtISIfVOJnOgrU5ZuUi7eJmj
-IIxSi7/0EJ1FBqk3wMjdGXqEzlBwKze1Ry6Drzakn6i8rgbU1B+db44J1+ZM7sMm
-jUjwpF9O0QCySA0UUvPxVqfq0vBJJ5UdY9QWkyJgoiS99OMjqytwUzrP0vdEDb0e
-dXHGsP3gjWMbMVXhT9F3lRxzQXHq2mk5wWuDADdGPb28JjOEN6OPMcdNr7DNwImm
-EkDrtZtFuRFrut4pgjetCd1sc9R62T3PE0K8uHerH0M+MAphbqrk3M2zKG/xsygk
-y8ywNbEhQ8vTtOLcd9/yKgQ0JnVnkqGRouz0T6n0wsGJ/QeK7ao/Rsuf5SP2L5om
-WxrFm02hsDSgRosTW3LA
-=/1gf
------END PGP SIGNATURE-----
-
---6TrnltStXW4iwmi0--
