@@ -1,47 +1,73 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH/RFC 0/7] mmc: tmio: regulator support, clock management, convert ecovec
-Date: Tue, 24 Apr 2012 18:41:40 +0200
-Message-ID: <1335285707-22707-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org
+Subject: [PATCH 4/7] mmc: sdhi: implement tmio-mmc clock enable-update and disable callbacks
+Date: Tue, 24 Apr 2012 18:41:44 +0200
+Message-ID: <1335285707-22707-5-git-send-email-g.liakhovetski@gmx.de>
+References: <1335285707-22707-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.187]:64266 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755824Ab2DXQlv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Apr 2012 12:41:51 -0400
+In-Reply-To: <1335285707-22707-1-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-This patch series adds clock management callbacks to the TMIO MMC driver,
-fixes clock management on SDHI systems, updates clock frequency every time
-the clock is re-enabled, adds regulator support to TMIO MMC and converts
-the sh7724 ecovec system to use regulators with both MMCIF and SDHI/TMIO
-controllers.
+Instead of delivering one static clock frequency value, read from the
+hardware during probing, enable the tmio-mmc driver to re-read the
+frequency dynamically.
 
-These patches continue my earlier series "mmc: sh_mmcif: add regulator
-support," "mmc: sh-mmcif: clock management updates." The last patch in this
-series also supersedes the earlier patch "[PATCH/RFC] sh: ecovec: switch
-MMC power control to regulator."
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Magnus Damm <magnus.damm@gmail.com>
+---
+ drivers/mmc/host/sh_mobile_sdhi.c |   24 +++++++++++++++++++++++-
+ 1 files changed, 23 insertions(+), 1 deletions(-)
 
-I think, my clock management updates might cause some comments and require
-some updates, so, I'm labelling this whole series as RFC too.
-
-Guennadi Liakhovetski (7):
-  mmc: tmio: stop interface clock before runtime PM suspending
-  mmc: tmio: don't needlessly enable interrupts during probing
-  mmc: tmio: add callbacks to enable-update and disable the interface
-    clock
-  mmc: sdhi: implement tmio-mmc clock enable-update and disable
-    callbacks
-  mmc: tmio: add regulator support
-  mmc: sdhi: do not install dummy callbacks
-  sh: ecovec: switch MMC power control to regulators
-
- arch/sh/boards/mach-ecovec24/setup.c |   85 ++++++++++++++++++++--------
- drivers/mmc/host/sh_mobile_sdhi.c    |   38 ++++++++++---
- drivers/mmc/host/tmio_mmc.h          |    2 +
- drivers/mmc/host/tmio_mmc_pio.c      |  102 ++++++++++++++++++++++++++-------
- include/linux/mfd/tmio.h             |    3 +
- 5 files changed, 176 insertions(+), 54 deletions(-)
-
-Thanks
-Guennadi
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 5ac656e..a746ae8 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -39,6 +39,27 @@ struct sh_mobile_sdhi {
+ 	struct tmio_mmc_dma dma_priv;
+ };
+ 
++static int sh_mobile_sdhi_clk_enable(struct platform_device *pdev, unsigned int *f)
++{
++	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
++	int ret = clk_enable(priv->clk);
++	if (ret < 0)
++		return ret;
++
++	*f = clk_get_rate(priv->clk);
++	return 0;
++}
++
++static void sh_mobile_sdhi_clk_disable(struct platform_device *pdev)
++{
++	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct sh_mobile_sdhi *priv = container_of(host->pdata, struct sh_mobile_sdhi, mmc_data);
++	clk_disable(priv->clk);
++}
++
+ static void sh_mobile_sdhi_set_pwr(struct platform_device *pdev, int state)
+ {
+ 	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+@@ -130,9 +151,10 @@ static int __devinit sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eclkget;
+ 	}
+ 
+-	mmc_data->hclk = clk_get_rate(priv->clk);
+ 	mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
+ 	mmc_data->get_cd = sh_mobile_sdhi_get_cd;
++	mmc_data->clk_enable = sh_mobile_sdhi_clk_enable;
++	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
+ 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
+ 	if (p) {
+ 		mmc_data->flags = p->tmio_flags;
 -- 
 1.7.2.5
 
