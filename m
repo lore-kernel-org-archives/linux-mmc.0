@@ -1,47 +1,64 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: cd-gpio: allow NULL context in mmc_cd_gpio_free()
-Date: Tue, 24 Apr 2012 12:22:21 -0400
-Message-ID: <8762cpcd6q.fsf@laptop.org>
-References: <Pine.LNX.4.64.1204241746530.21239@axis700.grange>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:38861 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755773Ab2DXQWC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 24 Apr 2012 12:22:02 -0400
-In-Reply-To: <Pine.LNX.4.64.1204241746530.21239@axis700.grange> (Guennadi
-	Liakhovetski's message of "Tue, 24 Apr 2012 17:56:29 +0200 (CEST)")
-Sender: linux-mmc-owner@vger.kernel.org
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 2/7] mmc: tmio: don't needlessly enable interrupts during probing
+Date: Tue, 24 Apr 2012 18:41:42 +0200
+Message-ID: <1335285707-22707-3-git-send-email-g.liakhovetski@gmx.de>
+References: <1335285707-22707-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1335285707-22707-1-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org
 
-Hi Guennadi,
+We don't have to force-enable MMC interrupts in our .probe() method,
+mmc_add_host() will trigger card detection, that will enable all the
+necessary interrupts.
 
-On Tue, Apr 24 2012, Guennadi Liakhovetski wrote:
-> Do not Oops, even if mmc_cd_gpio_free() is mistakenly called on a
-> driver-cleanup path, even though a previous call to mmc_cd_gpio_request()
-> failed.
->
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> ---
->
-> Hi Chris
->
-> Unfortunately, as I submitted the final version of the original cd-gpio 
-> patch http://article.gmane.org/gmane.linux.kernel.mmc/12013 I forgot, that 
-> I'd already sent a v2 and hadn't incremented the version to v3. And that 
-> version contained the below fix, that went lost because of the wrong 
-> version number. So, please, push this incremental fix for 3.4, because 
-> otherwise some error-paths of the tmio-mmc driver can Oops.
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Magnus Damm <magnus.damm@gmail.com>
+---
+ drivers/mmc/host/tmio_mmc_pio.c |   21 +++++++++++----------
+ 1 files changed, 11 insertions(+), 10 deletions(-)
 
-Sorry about that, I should have noticed this as well.
-
-Pushed to mmc-next for 3.4 with a stable@ tag for 3.3.  (It's helpful if
-you can add the stable@ tag yourself when submitting.)
-
-- Chris.
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 0d2643b..8cd3637 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -948,6 +948,17 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 
+ 	_host->sdcard_irq_mask = sd_ctrl_read32(_host, CTL_IRQ_MASK);
+ 	tmio_mmc_disable_mmc_irqs(_host, TMIO_MASK_ALL);
++
++	/* Unmask the IRQs we want to know about */
++	if (!_host->chan_rx)
++		irq_mask |= TMIO_MASK_READOP;
++	if (!_host->chan_tx)
++		irq_mask |= TMIO_MASK_WRITEOP;
++	if (!_host->native_hotplug)
++		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
++
++	_host->sdcard_irq_mask &= ~irq_mask;
++
+ 	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+ 		tmio_mmc_enable_sdio_irq(mmc, 0);
+ 
+@@ -965,16 +976,6 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 
+ 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
+ 
+-	/* Unmask the IRQs we want to know about */
+-	if (!_host->chan_rx)
+-		irq_mask |= TMIO_MASK_READOP;
+-	if (!_host->chan_tx)
+-		irq_mask |= TMIO_MASK_WRITEOP;
+-	if (!_host->native_hotplug)
+-		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
+-
+-	tmio_mmc_enable_mmc_irqs(_host, irq_mask);
+-
+ 	if (pdata->flags & TMIO_MMC_USE_GPIO_CD) {
+ 		ret = mmc_cd_gpio_request(mmc, pdata->cd_gpio);
+ 		if (ret < 0) {
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.2.5
+
