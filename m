@@ -1,99 +1,39 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 2/2] mmc: core: fix the signaling 1.8V for HS200
-Date: Wed, 25 Apr 2012 14:15:52 +0900
-Message-ID: <003f01cd22a2$7c082f90$74188eb0$%jun@samsung.com>
-References: <003001cd2131$07773760$1665a620$%jun@samsung.com>
- <4F966071.8080309@codeaurora.org>
+From: Yong Li <sdliyong@gmail.com>
+Subject: patch to disable reliable write if no CMD23 support
+Date: Wed, 25 Apr 2012 13:27:50 +0800
+Message-ID: <CADO9-pcOFfvisYd4eRHobu+QiwLkiXotNOQ+zwySEi1btm9ZtA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:39945 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753590Ab2DYFPy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Apr 2012 01:15:54 -0400
-Received: from epcpsbgm1.samsung.com (mailout2.samsung.com [203.254.224.25])
- by mailout2.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M3000ABDRY9M8B0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 25 Apr 2012 14:15:52 +0900 (KST)
-Received: from DOTGIHJUN01 ([12.23.118.161])
- by mmp2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTPA id <0M30000TZRYG0W90@mmp2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 25 Apr 2012 14:15:52 +0900 (KST)
-In-reply-to: <4F966071.8080309@codeaurora.org>
-Content-language: ko
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:53659 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754065Ab2DYF2N (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Apr 2012 01:28:13 -0400
+Received: by obbta14 with SMTP id ta14so2192411obb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Apr 2012 22:28:12 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Subhash Jadavani' <subhashj@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Girish K S' <girish.shivananjappa@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org
 
-Subhash Jadavani <subhashj@codeaurora.org> wrote:
-> Hi Seungwon,
-> 
-> On 4/23/2012 2:41 PM, Seungwon Jeon wrote:
-> > Currently only 1.2V is treated for HS200 mode. If the host has
-> > only 1.8V I/O capability not 1.2V, mmc_set_signal_voltage can't
-> > be called for 1.8V HS200. EXT_CSD_CARD_TYPE_SDR_1_8V needs to be
-> > considered.
-> Commit text looks confusing to me. In this change, you are trying to set
-> the 1.8V I/O voltage only if there is an error setting the 1.2v I/O? Can
-> you please clarify more?
-This patch's purpose is to support 1.8V I/O. Origin considers only 1.2V I/O case.
-If the host has only 1.8V capability and card type is HS200 1.8V, there is no way to 1.8V I/O.
+Hi All,
 
-Assuming that card is type of HS200 1.2V and host has 1.2V capability,
-the 1.2 I/O voltage will be tried. If it succeeds in 1.2V I/O ,
-we don't need to trying the 1.8V I/O voltage though 1.8V I/O is possible.
-But the 1.8V I/O may be tried in case of 1.2V I/O failure, so error condition is needed.
+Please check the below patch, For some eMMC, we disable the CMD23 for
+performance, and it will disable the reliable write too
 
-And error is initialized by -EINVAL at the first time.
-Thus, if card and host only are capable of 1.8V I/O, we can try to set the 1.8V I/O
-regardless of 1.2V I/O result.
+index dabec55..ea491d1 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1113,7 +1113,8 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+        bool do_rel_wr = ((req->cmd_flags & REQ_FUA) ||
+                          (req->cmd_flags & REQ_META)) &&
+                (rq_data_dir(req) == WRITE) &&
+-               (md->flags & MMC_BLK_REL_WR);
++               (md->flags & MMC_BLK_REL_WR) &&
++               !(card->quirks & MMC_QUIRK_BLK_NO_CMD23);
 
-Best regards,
-Seungwon Jeon.
+        memset(brq, 0, sizeof(struct mmc_blk_request));
+        brq->mrq.cmd = &brq->cmd;
 
-> >
-> > Signed-off-by: Seungwon Jeon<tgih.jun@samsung.com>
-> > ---
-> >   drivers/mmc/core/mmc.c |   12 +++++++-----
-> >   1 files changed, 7 insertions(+), 5 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> > index ebb9522..71eb320 100644
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -732,7 +732,7 @@ static int mmc_select_powerclass(struct mmc_card *card,
-> >    */
-> >   static int mmc_select_hs200(struct mmc_card *card)
-> >   {
-> > -	int idx, err = 0;
-> > +	int idx, err = -EINVAL;
-> >   	struct mmc_host *host;
-> >   	static unsigned ext_csd_bits[] = {
-> >   		EXT_CSD_BUS_WIDTH_4,
-> > @@ -748,10 +748,12 @@ static int mmc_select_hs200(struct mmc_card *card)
-> >   	host = card->host;
-> >
-> >   	if (card->ext_csd.card_type&  EXT_CSD_CARD_TYPE_SDR_1_2V&&
-> > -	    host->caps2&  MMC_CAP2_HS200_1_2V_SDR)
-> > -		if (mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120, 0))
-> > -			err = mmc_set_signal_voltage(host,
-> > -						     MMC_SIGNAL_VOLTAGE_180, 0);
-> > +			host->caps2&  MMC_CAP2_HS200_1_2V_SDR)
-> > +		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120, 0);
-> > +
-> > +	if (err&&  card->ext_csd.card_type&  EXT_CSD_CARD_TYPE_SDR_1_8V&&
-> > +			host->caps2&  MMC_CAP2_HS200_1_8V_SDR)
-> > +		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180, 0);
-> >
-> >   	/* If fails try again during next card power cycle */
-> >   	if (err)
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+Thanks,
+Yong Li
