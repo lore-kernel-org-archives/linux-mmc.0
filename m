@@ -1,52 +1,46 @@
-From: Panagiotis Papadakos <papadako@ics.forth.gr>
-Subject: SONY CR21Z MMC problem
-Date: Wed, 25 Apr 2012 14:31:23 +0300
-Message-ID: <17808456.kG7zSea45C@cray-7>
+From: "Subhash Jadavani" <subhashj@codeaurora.org>
+Subject: RE: [PATCH v3 1/1] mmc: core: skip card initialization if power class selection fails
+Date: Wed, 25 Apr 2012 18:25:47 +0530
+Message-ID: <000601cd22e2$be450500$3acf0f00$@codeaurora.org>
+References: <1334239567-22285-1-git-send-email-subhashj@codeaurora.org> <CAKYAXd-HfDL1AXJ=X-+iTjqCcVTF=1=J-RBBNU05r9P+om_6bQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgate-4.ics.forth.gr ([139.91.1.7]:31085 "EHLO
-	mailgate-4.ics.forth.gr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758589Ab2DYLot (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Apr 2012 07:44:49 -0400
-Received: from av1.ics.forth.gr (smtp-out.ics.forth.gr. [139.91.1.71])
-	by mailgate-4.ics.forth.gr (8.14.5/ICS-FORTH/V10-1.9-GATE-OUT) with ESMTP id q3PBVTJ8044177
-	for <linux-mmc@vger.kernel.org>; Wed, 25 Apr 2012 14:31:31 +0300 (EEST)
-Received: from cray-7.localnet (athedsl-4471500.home.otenet.gr [94.71.122.188])
-	(authenticated bits=0)
-	by enigma.ics.forth.gr (8.14.3//ICS-FORTH/V10.3.0C-EXTNULL-SSL-SASL) with ESMTP id q3PBVSev011550
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <linux-mmc@vger.kernel.org>; Wed, 25 Apr 2012 14:31:29 +0300
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+	charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAKYAXd-HfDL1AXJ=X-+iTjqCcVTF=1=J-RBBNU05r9P+om_6bQ@mail.gmail.com>
+Content-language: en-us
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: 'Namjae Jeon' <linkinjeon@gmail.com>, 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-Hello.
+Hi Chris,
 
-I am using the latest git kernel code and I can't get my MMC work
-with the tifm_7xx1 module.
+Is this patch looks ok?
 
-lspci -vv reports:
+Regards,
+Subhash
 
-08:07.2 Mass storage controller: Texas Instruments 5-in-1 Multimedia Card 
-Reader (SD/MMC/MS/MS PRO/xD)
-        Subsystem: Sony Corporation Device 9015
-        Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- 
-Stepping- SERR+ FastB2B- DisINTx-
-        Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=medium >TAbort- 
-<TAbort- <MAbort- >SERR- <PERR- INTx-
-        Latency: 57 (1750ns min, 1000ns max), Cache Line Size: 64 bytes
-        Interrupt: pin A routed to IRQ 20
-        Region 0: Memory at fc101000 (32-bit, non-prefetchable) [size=4K]
-        Capabilities: [44] Power Management version 2
-                Flags: PMEClk- DSI- D1+ D2+ AuxCurrent=0mA 
-PME(D0+,D1+,D2+,D3hot+,D3cold-)
-                Status: D0 NoSoftRst- PME-Enable- DSel=0 DScale=0 PME-
-        Kernel driver in use: tifm_7xx1
-        Kernel modules: tifm_7xx1
-
-Can anybody help?
-
-Thank you in advance.
-
+> -----Original Message-----
+> From: linux-arm-msm-owner@vger.kernel.org [mailto:linux-arm-msm-
+> owner@vger.kernel.org] On Behalf Of Namjae Jeon
+> Sent: Friday, April 13, 2012 8:12 PM
+> To: Subhash Jadavani; Chris Ball
+> Cc: linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org
+> Subject: Re: [PATCH v3 1/1] mmc: core: skip card initialization if power class
+> selection fails
+> 
+> 2012/4/12 Subhash Jadavani <subhashj@codeaurora.org>:
+> > With current implementation of power class selection,
+> > mmc_select_powerclass() should never fail. So treat any error returned
+> > by this function as serious enough to skip the card initialization.
+> >
+> > Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> Looks good to me.
+> Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+> > ---
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-arm-msm" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
