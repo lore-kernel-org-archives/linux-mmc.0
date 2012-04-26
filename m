@@ -1,64 +1,124 @@
-From: Mark Brown <broonie@opensource.wolfsonmicro.com>
-Subject: Re: [PATCH 5/7] mmc: tmio: add regulator support
-Date: Thu, 26 Apr 2012 13:11:51 +0100
-Message-ID: <20120426121150.GJ3207@opensource.wolfsonmicro.com>
-References: <1335285707-22707-1-git-send-email-g.liakhovetski@gmx.de>
- <1335285707-22707-6-git-send-email-g.liakhovetski@gmx.de>
+From: merez@codeaurora.org
+Subject: Re: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5   
+             device
+Date: Thu, 26 Apr 2012 05:21:16 -0700 (PDT)
+Message-ID: <49230ae96550a05ad57cc55c38f31136.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="n8884J15jRwcBTvu"
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1335285707-22707-6-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Liam Girdwood <lrg@ti.com>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:9670 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753504Ab2DZMV0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Apr 2012 08:21:26 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org, 'Maya Erez' <merez@codeaurora.org>
+
+Hi Jeon,
+
+Any update for splitting between the read and write packing?
+I also have a few more comments:
+
+> +static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request
+*req)
+> +{
+> +	struct request_queue *q = mq->queue;
+> +	struct mmc_card *card = mq->card;
+> +	struct request *cur = req, *next = NULL;
+> +	struct mmc_blk_data *md = mq->data;
+> +	bool en_rel_wr = card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN;
++	unsigned int req_sectors = 0, phys_segments = 0;
+> +	unsigned int max_blk_count, max_phys_segs;
+> +	u8 put_back = 0;
+> +	u8 max_packed_rw = 0;
+> +	u8 reqs = 0;
+> +
+> +	mq->mqrq_cur->packed_num = MMC_PACKED_N_ZERO;
+> +
+> +	if (!(md->flags & MMC_BLK_CMD23) ||
+> +			!card->ext_csd.packed_event_en)
+> +		goto no_packed;
+> +
+> +	if ((rq_data_dir(cur) == READ) &&
+> +			(card->host->caps2 & MMC_CAP2_PACKED_RD))
+> +		max_packed_rw = card->ext_csd.max_packed_reads;
+> +	else if ((rq_data_dir(cur) == WRITE) &&
+> +			(card->host->caps2 & MMC_CAP2_PACKED_WR))
+> +		max_packed_rw = card->ext_csd.max_packed_writes;
+> +
+> +	if (max_packed_rw == 0)
+> +		goto no_packed;
+> +
+> +	if (mmc_req_rel_wr(cur) &&
+> +			(md->flags & MMC_BLK_REL_WR) &&
+> +			!en_rel_wr) {
+> +		goto no_packed;
+> +	}
+> +
+> +	max_blk_count = min(card->host->max_blk_count,
+> +			card->host->max_req_size >> 9);
+> +	if (unlikely(max_blk_count > 0xffff))
+> +		max_blk_count = 0xffff;
+> +
+> +	max_phys_segs = queue_max_segments(q);
+> +	req_sectors += blk_rq_sectors(cur);
+> +	phys_segments += req->nr_phys_segments;
+It would be best to change req to cur. This is the only place you use req,
+in all other places you refer to cur.
+
+> @@ -1291,10 +1657,42 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+*mq, struct request *rqc)
+>  			 * A block was successfully transferred.
+>  			 */
+>  			mmc_blk_reset_success(md, type);
+> -			spin_lock_irq(&md->lock);
+> -			ret = __blk_end_request(req, 0,
+> +
+> +			if (mq_rq->packed_cmd != MMC_PACKED_NONE) {
+> +				int idx = mq_rq->packed_fail_idx, i = 0;
+> +				ret = 0;
+> +				while (!list_empty(&mq_rq->packed_list)) {
+> +					prq = list_entry_rq(
+> +						mq_rq->packed_list.next);
+> +					if (idx == i) {
+> +						/* retry from error index */
+> +						mq_rq->packed_num -= idx;
+> +						mq_rq->req = prq;
+> +						ret = 1;
+> +						break;
+> +					}
+> +					list_del_init(&prq->queuelist);
+> +					spin_lock_irq(&md->lock);
+> +					__blk_end_request(prq, 0,
+> +							blk_rq_bytes(prq));
+> +					spin_unlock_irq(&md->lock);
+> +					i++;
+> +				}
+> +				if (mq_rq->packed_num == MMC_PACKED_N_SINGLE) {
+> +					prq = list_entry_rq(
+> +						mq_rq->packed_list.next);
+You already get the prq inside the while. There is no need to do it again.
 
 
---n8884J15jRwcBTvu
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> @@ -1329,6 +1727,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+*mq,
+> struct request *rqc)
+>  				break;
+>  			if (err == -ENODEV)
+>  				goto cmd_abort;
+> +			if (mq_rq->packed_cmd != MMC_PACKED_NONE)
+> +				break;
+This can cause an endless loop in case of MMC_BLK_DATA_ERR. The same
+packed command will be sent over and over again without a beaking point.
 
-On Tue, Apr 24, 2012 at 06:41:45PM +0200, Guennadi Liakhovetski wrote:
+Thanks,
+Maya Erez
+Consultant for Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
 
-> +	host->vdd =3D regulator_get(mmc_dev(mmc), "SD Vdd");
-> +	if (IS_ERR(host->vdd)) {
-> +		host->vdd =3D NULL;
-> +	} else {
 
-This silently ignoring errors really isn't good practice :(
 
-> @@ -1052,6 +1079,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *hos=
-t)
-> =20
->  	pm_runtime_put_sync(&pdev->dev);
->  	pm_runtime_disable(&pdev->dev);
-> +	regulator_put(host->vdd);
 
-devm_regulator_get() is there now.
 
---n8884J15jRwcBTvu
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJPmTt5AAoJEBus8iNuMP3dOAEP/2TpHFZ4qWRRxwVDDJx9LXrf
-iyewmSvTOu9aJe+RmPhibFJ4TvVXQeRv9QJkV/Nj9E+ofiFdULo4c1tIoyuGEaTp
-BvSnuc79CDwiGcHDbsFGKycHSBVolpi3NYGjvAioecOwhSnDUL4nvdmbZyQuNpPJ
-BC4ydJQsHuVWgLMIojOimeREnnqHYcaypyFnVBfk7rPzoWqn0LzIq2nQZUZwY4rr
-eGGVEEqtaoOUPLYtjp4r6niTHVeW0d3K+u+CkUuDU8c237ekvR03ISmSpbCvx2vV
-iJjoD2TajZXCxmJFYlXQZ3bdvDvYg5ufSDwMfdjxI9J1yNoam+F4kS/53l3uW//t
-7nBusWmH4Dfq+fE2xng/yjwLmu5EXvNVLKkoofd4vHihWt/ra089bl+34tjz50vL
-MHYgR55/Pih6PSdYGen35VN3PZ0DRHWGTcpiA20qSlXXkvbQHn6FAsQGzAt8j7u0
-NZfWQqbRw2eeZCx+gUxoG+Wc9xD59Pr8j3K+GcNsfJD2xkQf7TnZ0oMyB3wsJYYT
-OnH+cd/uE87eZ3s91uB4fXbmgohjazXTxDZ7PNXf5eikaVLBMjG9uXWVLmfemCgJ
-GO4JBBYK0hfVOapOeZAArdXDm2BOpKpzLbo+a1dTTQ50rLYheVGWsBcQYgeOK08l
-Fdmc52OBQyTNXbol9Fuy
-=7ckQ
------END PGP SIGNATURE-----
-
---n8884J15jRwcBTvu--
