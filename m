@@ -1,30 +1,73 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 2/8] dmaengine: amba-pl08x: ensure physical channels
-	are properly held
-Date: Fri, 27 Apr 2012 22:41:28 +0100
-Message-ID: <20120427214128.GH28062@n2100.arm.linux.org.uk>
-References: <20120418100954.GK25053@n2100.arm.linux.org.uk> <E1SKRqh-0004b8-RH@rmk-PC.arm.linux.org.uk> <20120418101938.GM25053@n2100.arm.linux.org.uk> <CACRpkdY8rJYQhUwtW1mtmnY8WB7T7mowefqOmiJdCZ1iS5E89A@mail.gmail.com>
+From: Dmitry Shmidt <dimitrysh@android.com>
+Subject: dw_mmc: New sdio CMD53 starts with non-empty FIFO
+Date: Fri, 27 Apr 2012 17:35:41 -0700
+Message-ID: <CALzehA0GkpxLqfPLUr0+Y=JfWAzq4B-0oJ4Ap9gVo3-vSTp1NA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CACRpkdY8rJYQhUwtW1mtmnY8WB7T7mowefqOmiJdCZ1iS5E89A@mail.gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Dan Williams <dan.j.williams@intel.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:56200 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757665Ab2D1Afn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Apr 2012 20:35:43 -0400
+Received: by lbbgf7 with SMTP id gf7so895065lbb.19
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Apr 2012 17:35:41 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Will Newton <will.newton@imgtec.com>
 
-On Fri, Apr 27, 2012 at 10:38:08PM +0200, Linus Walleij wrote:
-> On Wed, Apr 18, 2012 at 12:19 PM, Russell King - ARM Linux
-> <linux@arm.linux.org.uk> wrote:
-> 
-> > Oops, this patch wasn't supposed to be part of this set...
-> 
-> ...however it gives me the impression that you have a patch set cooking
-> to also switch PL08x over to the virtual channel mechanism which is
-> really appetizing to see :-)
+Hi,
 
-Actually, that doesn't exist yet.
+I am working with dw_mmc controller. Kernel 3.4-rc3. Sdio wlan device
+in UHS_SDR50 mode.
+What I see that sometimes next sdio CMD53 starts before FIFO is empty
+and then controller goes insane and
+sdio request will be blocked forever.
 
-This was a patch I'd had floating around, but I don't think its needed
-in any way - I mis-analysed the code and created the patch...
+And it looks like DW_MCI_QUIRK_IDMAC_DTO quirk is helping this problem
+to disappear.
+
+My question is that this quirk actually adds SDMMC_INT_DATA_OVER to
+pending status and in this case
+reading from device it taking care of. Is it the only case? Writing
+can not be interrupted in same way?
+
+For the test I adding the next code to dw_mmc.c
+(DW_MCI_QUIRK_IDMAC_DTO was not set):
+
+@@ -687,11 +721,19 @@ static void __dw_mci_start_request(struct dw_mci *host,
+        struct mmc_request *mrq;
+        struct mmc_data *data;
+        u32 cmdflags;
++#define FIFO_SIZE(x)   (((x) & 0x3FFE0000) >> 17)
++       u32 temp;
+
+        mrq = slot->mrq;
+        if (host->pdata->select_slot)
+                host->pdata->select_slot(slot->id);
+
++       do {
++               temp = mci_readl(host, STATUS);
++               if (!(temp & BIT(2))) {
++                       printk("%s: FIFO is not empty: 0x%x\n",
+__func__, FIFO_SIZE(temp));
++               }
++       } while (!(temp & BIT(2)));
++
+
+-----------------------------------------------------------------------------------------------
+[  215.785000] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot
+req 98040Hz, actual 98039HZ div = 255)
+[  215.800000] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot
+req 50000000Hz, actual 50000000HZ div = 0)
+...
+[  215.865000] __dw_mci_start_request: FIFO is not empty: 0xf
+<<<<<<<< !!!!!!!!!!!!!!!!
+------------------------------------------------------------------------------------------------
+
+My other question is why do we need to use pio transfer in this case
+if DMA controller will finish the job if we will give it a chance?
+
+Thanks,
+
+Dmitry
