@@ -1,36 +1,143 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 07/12] mmc: omap: add DMA engine support
-Date: Sat, 28 Apr 2012 17:37:16 +0100
-Message-ID: <20120428163716.GI28062@n2100.arm.linux.org.uk>
-References: <20120423160409.GE24299@n2100.arm.linux.org.uk> <E1SMLmZ-0002WS-Rd@rmk-PC.arm.linux.org.uk> <20120424001330.GD3739@atomide.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5 device
+Date: Mon, 30 Apr 2012 09:31:09 +0900
+Message-ID: <001601cd2668$8a074940$9e15dbc0$%jun@samsung.com>
+References: <49230ae96550a05ad57cc55c38f31136.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20120424001330.GD3739@atomide.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Chris Ball <cjb@laptop.org>
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:49342 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754172Ab2D3AbL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Apr 2012 20:31:11 -0400
+In-reply-to: <49230ae96550a05ad57cc55c38f31136.squirrel@www.codeaurora.org>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: merez@codeaurora.org
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-On Mon, Apr 23, 2012 at 05:13:30PM -0700, Tony Lindgren wrote:
-> * Russell King <rmk+kernel@arm.linux.org.uk> [120423 09:11]:
-> > Add DMA engine support to the OMAP driver.  This supplements the
-> > private DMA API implementation contained within this driver, and the
-> > driver can be switched at build time between using DMA engine and the
-> > private DMA API.
-> 
-> Below is what's needed to use DMA request lines from platform data.
-> Note also the release_mem_region change that we'll now need for
-> this one also (but not as a fix).
-> 
-> I've posted a cleanup patch series to mostly remove plat-omap/devices.c
-> that takes care of passing the DMA request lines in platform data.
-> That series should get merged before the driver changes for this
-> driver to keep DMA working.
+Hi Maya,
 
-Okay, how do we want to handle this patch?  I don't think there's any
-urgency for this patch at the present time, so I'm quite happy for this
-to be delayed after the next merge window after we have the pre-requisits
-for it in place.  (And trying to get it in earlier is only going to give
-us git tree dependencies to deal with.)
+Maya Erez <merez@codeaurora.org> wrote:
+> 
+> Hi Jeon,
+> 
+> Any update for splitting between the read and write packing?
+I'll work soon.
+> I also have a few more comments:
+> 
+> > +static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request
+> *req)
+> > +{
+> > +	struct request_queue *q = mq->queue;
+> > +	struct mmc_card *card = mq->card;
+> > +	struct request *cur = req, *next = NULL;
+> > +	struct mmc_blk_data *md = mq->data;
+> > +	bool en_rel_wr = card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN;
+> +	unsigned int req_sectors = 0, phys_segments = 0;
+> > +	unsigned int max_blk_count, max_phys_segs;
+> > +	u8 put_back = 0;
+> > +	u8 max_packed_rw = 0;
+> > +	u8 reqs = 0;
+> > +
+> > +	mq->mqrq_cur->packed_num = MMC_PACKED_N_ZERO;
+> > +
+> > +	if (!(md->flags & MMC_BLK_CMD23) ||
+> > +			!card->ext_csd.packed_event_en)
+> > +		goto no_packed;
+> > +
+> > +	if ((rq_data_dir(cur) == READ) &&
+> > +			(card->host->caps2 & MMC_CAP2_PACKED_RD))
+> > +		max_packed_rw = card->ext_csd.max_packed_reads;
+> > +	else if ((rq_data_dir(cur) == WRITE) &&
+> > +			(card->host->caps2 & MMC_CAP2_PACKED_WR))
+> > +		max_packed_rw = card->ext_csd.max_packed_writes;
+> > +
+> > +	if (max_packed_rw == 0)
+> > +		goto no_packed;
+> > +
+> > +	if (mmc_req_rel_wr(cur) &&
+> > +			(md->flags & MMC_BLK_REL_WR) &&
+> > +			!en_rel_wr) {
+> > +		goto no_packed;
+> > +	}
+> > +
+> > +	max_blk_count = min(card->host->max_blk_count,
+> > +			card->host->max_req_size >> 9);
+> > +	if (unlikely(max_blk_count > 0xffff))
+> > +		max_blk_count = 0xffff;
+> > +
+> > +	max_phys_segs = queue_max_segments(q);
+> > +	req_sectors += blk_rq_sectors(cur);
+> > +	phys_segments += req->nr_phys_segments;
+> It would be best to change req to cur. This is the only place you use req,
+> in all other places you refer to cur.
+Good point.
+> 
+> > @@ -1291,10 +1657,42 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+> *mq, struct request *rqc)
+> >  			 * A block was successfully transferred.
+> >  			 */
+> >  			mmc_blk_reset_success(md, type);
+> > -			spin_lock_irq(&md->lock);
+> > -			ret = __blk_end_request(req, 0,
+> > +
+> > +			if (mq_rq->packed_cmd != MMC_PACKED_NONE) {
+> > +				int idx = mq_rq->packed_fail_idx, i = 0;
+> > +				ret = 0;
+> > +				while (!list_empty(&mq_rq->packed_list)) {
+> > +					prq = list_entry_rq(
+> > +						mq_rq->packed_list.next);
+> > +					if (idx == i) {
+> > +						/* retry from error index */
+> > +						mq_rq->packed_num -= idx;
+> > +						mq_rq->req = prq;
+> > +						ret = 1;
+> > +						break;
+> > +					}
+> > +					list_del_init(&prq->queuelist);
+> > +					spin_lock_irq(&md->lock);
+> > +					__blk_end_request(prq, 0,
+> > +							blk_rq_bytes(prq));
+> > +					spin_unlock_irq(&md->lock);
+> > +					i++;
+> > +				}
+> > +				if (mq_rq->packed_num == MMC_PACKED_N_SINGLE) {
+> > +					prq = list_entry_rq(
+> > +						mq_rq->packed_list.next);
+> You already get the prq inside the while. There is no need to do it again.
+Right, but if while loop isn't taken, then prq can be used uninitialized.
+Though that case wouldn't happen actually, we don't want to see the compiling error.
+> 
+> 
+> > @@ -1329,6 +1727,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue
+> *mq,
+> > struct request *rqc)
+> >  				break;
+> >  			if (err == -ENODEV)
+> >  				goto cmd_abort;
+> > +			if (mq_rq->packed_cmd != MMC_PACKED_NONE)
+> > +				break;
+> This can cause an endless loop in case of MMC_BLK_DATA_ERR. The same
+> packed command will be sent over and over again without a beaking point.
+Yes. It may be possible in case of twice MMC_BLK_DATA_ERR.
+
+Thanks
+Seungwon Jeon.
+> 
+> Thanks,
+> Maya Erez
+> Consultant for Qualcomm Innovation Center, Inc.
+> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+> 
+> 
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
