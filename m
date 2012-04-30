@@ -1,23 +1,23 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
+From: Subhash Jadavani <subhashj@codeaurora.org>
 Subject: Re: [PATCH V2] MMC-4.5 Power OFF Notify rework
-Date: Mon, 30 Apr 2012 10:39:29 +0200
-Message-ID: <4F9E4FC1.3010505@stericsson.com>
+Date: Mon, 30 Apr 2012 18:39:10 +0530
+Message-ID: <4F9E8EF6.80605@codeaurora.org>
 References: <1335766496-15966-1-git-send-email-girish.shivananjappa@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog108.obsmtp.com ([207.126.144.125]:51073 "EHLO
-	eu1sys200aog108.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754871Ab2D3Ijl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Apr 2012 04:39:41 -0400
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:57478 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752882Ab2D3NJQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Apr 2012 09:09:16 -0400
 In-Reply-To: <1335766496-15966-1-git-send-email-girish.shivananjappa@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, "saugata.das@linaro.org" <saugata.das@linaro.org>
+Cc: linux-mmc@vger.kernel.org, patches@linaro.org, ulf.hansson@stericsson.com, saugata.das@linaro.org
 
-On 04/30/2012 08:14 AM, Girish K S wrote:
+On 4/30/2012 11:44 AM, Girish K S wrote:
 > This is a rework of the existing POWER OFF NOTIFY patch. The current problem
 > with the patch comes from the ambiguity on the usage of POWER OFF NOTIFY
 > together with SLEEP and misunderstanding on the usage of MMC_POWER_OFF
@@ -29,6 +29,11 @@ On 04/30/2012 08:14 AM, Girish K S wrote:
 > controller drivers will set this CAP, if they switch off both Vcc and Vccq
 > from MMC_POWER_OFF condition within mmc_set_ios. However, note that there
 > is no harm in sending MMC_POWER_NOTIFY even if Vccq is not switched off.
+What the specification mandates? Does it expect the host to turn off 
+both VCC and VCCQ rails after power off notification (short/long)? What 
+if we send the power off notification (short/long) but still don't turn 
+off either VCCQ or VCC or both?
+
 >
 > This patch also sends POWER OFF NOTIFY from power management routines (e.g.
 > mmc_power_save_host, mmc_pm_notify/PM_SUSPEND_PREPARE, mmc_stop_host), which
@@ -179,6 +184,7 @@ On 04/30/2012 08:14 AM, Girish K S wrote:
 >   	}
 > -
 > +	host->power_notify_type = MMC_HOST_PW_NOTIFY_LONG;
+why are we setting the notify_type to NOTIFY_LONG here? Isn't this a resume?
 >   	mmc_power_up(host);
 >   	ret = host->bus_ops->power_restore(host);
 >
@@ -217,6 +223,9 @@ On 04/30/2012 08:14 AM, Girish K S wrote:
 > +			if (err)
 > +				pr_info("%s: error [%x] in poweroff notify\n",
 > +					mmc_hostname(host), err);
+err is printed in hex format? shouldn't it be %d ? Also can we move this 
+message printing with in poweroff_notify() function before returning 
+from it?
 > +		}
 >
 >   		/* Calling bus_ops->remove() with a claimed host can deadlock */
@@ -226,6 +235,7 @@ On 04/30/2012 08:14 AM, Girish K S wrote:
 >   		mmc_power_off(host);
 >   		mmc_release_host(host);
 > +
+why is this extra line space added?
 >   		host->pm_flags = 0;
 >   		break;
 >
@@ -258,6 +268,17 @@ On 04/30/2012 08:14 AM, Girish K S wrote:
 > +
 > +	card = host->card;
 > +	mmc_claim_host(host);
+Shouldn't we really claim_host() when we are about to send command to 
+card? Currently claim_host() is called even if card=NULL or 
+poweroff_notify_state is already short/long.
+Actually if possible we should force the caller of this function to 
+check if it's MMC card or not and they should only call this function if 
+it's MMC card.
+
+Basically if this function is called with card=NULL or card_type!=MMC, 
+this function should not return an error because caller of this function 
+is printing pr_info() message in case of an error.
+
 > +
 > +	/*
 > +	 * Send power notify command only if card
@@ -267,13 +288,23 @@ On 04/30/2012 08:14 AM, Girish K S wrote:
 > +	    (card->poweroff_notify_state == MMC_POWERED_ON)) {
 > +
 > +		if (host->power_notify_type == MMC_HOST_PW_NOTIFY_SHORT) {
+shouldn't the name should be "poweroff_notify_type" to be consisten with 
+other variables like "poweroff_notify_state"? even 
+MMC_HOST_PW_NOTIFY_SHORT should be named as MMC_HOST_PW_OFF_NOTIFY_SHORT?
 > +			notify_type = EXT_CSD_POWER_OFF_SHORT;
 > +			timeout = card->ext_csd.generic_cmd6_time;
 > +			card->poweroff_notify_state = MMC_POWEROFF_SHORT;
 > +		} else {
 > +			notify_type = EXT_CSD_POWER_OFF_LONG;
 > +			timeout = card->ext_csd.power_off_longtime;
-> +			card->poweroff_notify_state = MMC_POWEROFF_LONG;
+> +			card->poweroff_notify_state = MMC_POWEROFF_LONG;.
+I don't see need of these 2 extra states (MMC_POWEROFF_SHORT and 
+MMC_POWEROFF_SHORT).
+MMC_POWERED_ON and MMC_NO_POWER_NOTIFICATION should be enough.
+
+Basically if state is MMC_POWERED_ON, we can send the short/long power 
+off notification. And if state is MMC_NO_POWER_NOTIFICATION, we can't 
+send the short/long power off notification.
 > +		}
 > +
 > +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
@@ -287,6 +318,11 @@ On 04/30/2012 08:14 AM, Girish K S wrote:
 > +
 > +		/* Set the card state to no notification after the poweroff */
 > +		card->poweroff_notify_state = MMC_NO_POWER_NOTIFICATION;
+poweroff_notify_state should be set to MMC_NO_POWER_NOTIFICATION only 
+if  mmc_switch() command is successful or else it's state should remain 
+MMC_POWERED_ON.
+Also, Shouldn't we set the poweroff_notify_state to 
+MMC_NO_POWER_NOTIFICTION in mmc_init_card() if mmc_switch() returns error?
 > +	}
 > +	mmc_release_host(host);
 > +
@@ -312,13 +348,8 @@ On 04/30/2012 08:14 AM, Girish K S wrote:
 > +	if ((host->card)&&  mmc_card_mmc(host->card)&&
 > +		(host->caps2&  MMC_CAP2_POWER_OFF_VCCQ_DURING_SUSPEND)) {
 > +		err = mmc_poweroff_notify(host);
-This still wont work. What if the card supports sleep but not 
-poweroff_notify. At the same time the host is able to cut VCCQ.
-Then the poweroff_notify will be issued and fail. Instead sleep should 
-be issued.
-
-Again, a "mmc_card_can_poweroff_notify" would be useful here.
-
+can't we invoke the power_off_notify bus ops instead of calling 
+mmc_poweroff_notify() directly ?
 > +	} else {
 > +		mmc_claim_host(host);
 > +		if (mmc_card_can_sleep(host))
@@ -378,5 +409,3 @@ Again, a "mmc_card_can_poweroff_notify" would be useful here.
 >   	mmc_pm_flag_t		pm_caps;	/* supported pm features */
 >   	unsigned int        power_notify_type;
 
-Kind regards
-Ulf Hansson
