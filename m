@@ -1,27 +1,28 @@
 From: Saugata Das <saugata.das@linaro.org>
 Subject: Re: [PATCH V2] MMC-4.5 Power OFF Notify rework
-Date: Mon, 30 Apr 2012 23:16:56 +0530
-Message-ID: <CAKLKtzeDb9Un2nqYVuB76jyOAJNbve5qrWgZ7HCTASCpWXUt=w@mail.gmail.com>
+Date: Mon, 30 Apr 2012 23:44:19 +0530
+Message-ID: <CAKLKtzedefZE6-vnirTNP3TqE4y6X2+Ctw+fduWebiE7ROaKfA@mail.gmail.com>
 References: <1335766496-15966-1-git-send-email-girish.shivananjappa@linaro.org>
-	<4F9E4FC1.3010505@stericsson.com>
+	<4F9E8EF6.80605@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:54017 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752968Ab2D3Rq5 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Apr 2012 13:46:57 -0400
-Received: by yhmm54 with SMTP id m54so1568758yhm.19
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Apr 2012 10:46:56 -0700 (PDT)
-In-Reply-To: <4F9E4FC1.3010505@stericsson.com>
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:47617 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756227Ab2D3SOU convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Apr 2012 14:14:20 -0400
+Received: by ghrr11 with SMTP id r11so1594516ghr.19
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Apr 2012 11:14:19 -0700 (PDT)
+In-Reply-To: <4F9E8EF6.80605@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@stericsson.com>
-Cc: Girish K S <girish.shivananjappa@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>
+To: Subhash Jadavani <subhashj@codeaurora.org>
+Cc: Girish K S <girish.shivananjappa@linaro.org>, linux-mmc@vger.kernel.org, patches@linaro.org, ulf.hansson@stericsson.com
 
-On 30 April 2012 14:09, Ulf Hansson <ulf.hansson@stericsson.com> wrote:
-> On 04/30/2012 08:14 AM, Girish K S wrote:
+On 30 April 2012 18:39, Subhash Jadavani <subhashj@codeaurora.org> wrot=
+e:
+> On 4/30/2012 11:44 AM, Girish K S wrote:
 >>
 >> This is a rework of the existing POWER OFF NOTIFY patch. The current
 >> problem
@@ -42,6 +43,20 @@ d Vccq
 there
 >> is no harm in sending MMC_POWER_NOTIFY even if Vccq is not switched =
 off.
+>
+> What the specification mandates? Does it expect the host to turn off =
+both
+> VCC and VCCQ rails after power off notification (short/long)? What if=
+ we
+> send the power off notification (short/long) but still don't turn off=
+ either
+> VCCQ or VCC or both?
+>
+
+The specification does not say that the power OFF notify has to be
+followed by switching off Vcc and Vccq. We however reinitialize eMMC
+before using it again.
+
 >>
 >> This patch also sends POWER OFF NOTIFY from power management routine=
 s
@@ -251,6 +266,10 @@ st)
 >> =A0 =A0 =A0 =A0}
 >> -
 >> + =A0 =A0 =A0 host->power_notify_type =3D MMC_HOST_PW_NOTIFY_LONG;
+>
+> why are we setting the notify_type to NOTIFY_LONG here? Isn't this a =
+resume?
+>>
 >> =A0 =A0 =A0 =A0mmc_power_up(host);
 >> =A0 =A0 =A0 =A0ret =3D host->bus_ops->power_restore(host);
 >>
@@ -303,6 +322,13 @@ o("%s: error [%x] in poweroff
 >> notify\n",
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
  =A0 =A0 mmc_hostname(host), err);
+>
+> err is printed in hex format? shouldn't it be %d ? Also can we move t=
+his
+> message printing with in poweroff_notify() function before returning =
+from
+> it?
+>
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
 >>
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0/* Calling bus_ops->remove() with a c=
@@ -315,6 +341,9 @@ laimed host can
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_power_off(host);
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0mmc_release_host(host);
 >> +
+>
+> why is this extra line space added?
+>
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0host->pm_flags =3D 0;
 >> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0break;
 >>
@@ -350,6 +379,25 @@ TION;
 >> +
 >> + =A0 =A0 =A0 card =3D host->card;
 >> + =A0 =A0 =A0 mmc_claim_host(host);
+>
+> Shouldn't we really claim_host() when we are about to send command to=
+ card?
+> Currently claim_host() is called even if card=3DNULL or poweroff_noti=
+fy_state
+> is already short/long.
+> Actually if possible we should force the caller of this function to c=
+heck if
+> it's MMC card or not and they should only call this function if it's =
+MMC
+> card.
+>
+> Basically if this function is called with card=3DNULL or card_type!=3D=
+MMC, this
+> function should not return an error because caller of this function i=
+s
+> printing pr_info() message in case of an error.
+>
+>
 >> +
 >> + =A0 =A0 =A0 /*
 >> + =A0 =A0 =A0 =A0* Send power notify command only if card
@@ -361,6 +409,13 @@ D_ON)) {
 >> +
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (host->power_notify_type =3D=3D MMC=
 _HOST_PW_NOTIFY_SHORT) {
+>
+> shouldn't the name should be "poweroff_notify_type" to be consisten w=
+ith
+> other variables like "poweroff_notify_state"? even MMC_HOST_PW_NOTIFY=
+_SHORT
+> should be named as MMC_HOST_PW_OFF_NOTIFY_SHORT?
+>>
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 notify_type =3D EXT_CS=
 D_POWER_OFF_SHORT;
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timeout =3D card->ext_=
@@ -373,7 +428,18 @@ D_POWER_OFF_LONG;
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 timeout =3D card->ext_=
 csd.power_off_longtime;
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->poweroff_notify_=
-state =3D MMC_POWEROFF_LONG;
+state =3D MMC_POWEROFF_LONG;.
+>
+> I don't see need of these 2 extra states (MMC_POWEROFF_SHORT and
+> MMC_POWEROFF_SHORT).
+> MMC_POWERED_ON and MMC_NO_POWER_NOTIFICATION should be enough.
+>
+> Basically if state is MMC_POWERED_ON, we can send the short/long powe=
+r off
+> notification. And if state is MMC_NO_POWER_NOTIFICATION, we can't sen=
+d the
+> short/long power off notification.
+>>
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
 >> +
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_switch(card, EXT_CSD_CMD_S=
@@ -398,6 +464,16 @@ on after the
 >> poweroff */
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->poweroff_notify_state =3D MMC_NO=
 _POWER_NOTIFICATION;
+>
+> poweroff_notify_state should be set to MMC_NO_POWER_NOTIFICATION only=
+ if
+> =A0mmc_switch() command is successful or else it's state should remai=
+n
+> MMC_POWERED_ON.
+> Also, Shouldn't we set the poweroff_notify_state to MMC_NO_POWER_NOTI=
+=46ICTION
+> in mmc_init_card() if mmc_switch() returns error?
+>>
 >> + =A0 =A0 =A0 }
 >> + =A0 =A0 =A0 mmc_release_host(host);
 >> +
@@ -422,27 +498,15 @@ t->card);
 >> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_deselect_cards(host);
 >> - =A0 =A0 =A0 host->card->state&=3D ~(MMC_STATE_HIGHSPEED |
 >> MMC_STATE_HIGHSPEED_200);
->>
 >> - =A0 =A0 =A0 mmc_release_host(host);
+>>
 >> + =A0 =A0 =A0 if ((host->card)&& =A0mmc_card_mmc(host->card)&&
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 (host->caps2& =A0MMC_CAP2_POWER_OFF_VC=
 CQ_DURING_SUSPEND)) {
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_poweroff_notify(host);
 >
-> This still wont work. What if the card supports sleep but not
-> poweroff_notify. At the same time the host is able to cut VCCQ.
-> Then the poweroff_notify will be issued and fail. Instead sleep shoul=
-d be
-> issued.
->
-> Again, a "mmc_card_can_poweroff_notify" would be useful here.
->
-
-The host needs to set =A0MMC_CAP2_POWER_OFF_VCCQ_DURING_SUSPEND only if
-it is MMC-4.5 card (power Off notify is mandatory feature) and host
-can switch off VCCQ during suspend.
-
-
+> can't we invoke the power_off_notify bus ops instead of calling
+> mmc_poweroff_notify() directly ?
 >
 >> + =A0 =A0 =A0 } else {
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_claim_host(host);
@@ -516,5 +580,3 @@ t);
 >> =A0 =A0 =A0 =A0unsigned int =A0 =A0 =A0 =A0power_notify_type;
 >
 >
-> Kind regards
-> Ulf Hansson
