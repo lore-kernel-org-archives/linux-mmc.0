@@ -1,44 +1,105 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/3] mmc/sdhci-spear: No need to check 'pdev == NULL' in probe
-Date: Tue, 01 May 2012 10:33:09 -0400
-Message-ID: <87y5pchsyi.fsf@laptop.org>
-References: <841301f38cfc2d1170378306f1640d7653652505.1332817654.git.viresh.kumar@st.com>
-	<4F83FF20.9010701@st.com> <4F9FA372.3060807@st.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH] mmc: dw_mmc: make multiple instances of dw_mci_card_workqueue
+Date: Tue,  1 May 2012 14:57:36 -0700
+Message-ID: <1335909456-14020-1-git-send-email-thomas.abraham@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39768 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753268Ab2EAOdR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 1 May 2012 10:33:17 -0400
-In-Reply-To: <4F9FA372.3060807@st.com> (Viresh Kumar's message of "Tue, 1 May
-	2012 14:18:50 +0530")
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:63449 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751689Ab2EAV76 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 May 2012 17:59:58 -0400
+Received: by pbbrp8 with SMTP id rp8so37678pbb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 01 May 2012 14:59:57 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Viresh Kumar <viresh.kumar@st.com>
-Cc: spear-devel <spear-devel@list.st.com>, "viresh.linux@gmail.com" <viresh.linux@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "sr@denx.de" <sr@denx.de>
+To: linux-mmc@vger.kernel.org
+Cc: linux-samsung-soc@vger.kernel.org, cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, will.newton@gmail.com, jh80.chung@samsung.com, tgih.jun@samsung.com, dianders@google.com
 
-Hi Viresh,
+The variable 'dw_mci_card_workqueue' is a global variable shared between
+multiple instances of the dw_mmc host controller. Due to this, data
+corruption has been noticed when multiple instances of dw_mmc controllers
+are actively reading/writing the media. Fix this by adding a instance
+of 'struct workqueue_struct' for each host instance and removing the
+global 'dw_mci_card_workqueue' instance.
 
-On Tue, May 01 2012, Viresh Kumar wrote:
-> On 4/10/2012 3:06 PM, Viresh KUMAR wrote:
->> On 3/27/2012 8:40 AM, Viresh KUMAR wrote:
->>> > pdev is guaranteed to be valid in probe. And so check is not required to check
->>> > if it is non-NULL. Remove it.
->>> > 
->>> > Signed-off-by: Viresh Kumar <viresh.kumar@st.com>
->> Hi Chris,
->> 
->> Can you atleast apply first two patches of this set. Will rework patch 3/3 after
->> DT support is finalized by arnd.
->
-> Chris,
->
-> Can you please apply these?
+Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+---
+ drivers/mmc/host/dw_mmc.c  |   14 ++++++--------
+ include/linux/mmc/dw_mmc.h |    1 +
+ 2 files changed, 7 insertions(+), 8 deletions(-)
 
-Sorry for the delay -- I've pushed patches 1 and 2 to mmc-next for 3.5 now.
-
-- Chris.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index ab3fc46..1532357 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -100,8 +100,6 @@ struct dw_mci_slot {
+ 	int			last_detect_state;
+ };
+ 
+-static struct workqueue_struct *dw_mci_card_workqueue;
+-
+ #if defined(CONFIG_DEBUG_FS)
+ static int dw_mci_req_show(struct seq_file *s, void *v)
+ {
+@@ -1605,7 +1603,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 
+ 		if (pending & SDMMC_INT_CD) {
+ 			mci_writel(host, RINTSTS, SDMMC_INT_CD);
+-			queue_work(dw_mci_card_workqueue, &host->card_work);
++			queue_work(host->card_workqueue, &host->card_work);
+ 		}
+ 
+ 		/* Handle SDIO Interrupts */
+@@ -1844,7 +1842,7 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	 * Card may have been plugged in prior to boot so we
+ 	 * need to run the detect tasklet
+ 	 */
+-	queue_work(dw_mci_card_workqueue, &host->card_work);
++	queue_work(host->card_workqueue, &host->card_work);
+ 
+ 	return 0;
+ }
+@@ -2021,9 +2019,9 @@ int dw_mci_probe(struct dw_mci *host)
+ 	mci_writel(host, CLKSRC, 0);
+ 
+ 	tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
+-	dw_mci_card_workqueue = alloc_workqueue("dw-mci-card",
++	host->card_workqueue = alloc_workqueue("dw-mci-card",
+ 			WQ_MEM_RECLAIM | WQ_NON_REENTRANT, 1);
+-	if (!dw_mci_card_workqueue)
++	if (!host->card_workqueue)
+ 		goto err_dmaunmap;
+ 	INIT_WORK(&host->card_work, dw_mci_work_routine_card);
+ 	ret = request_irq(host->irq, dw_mci_interrupt, host->irq_flags, "dw-mci", host);
+@@ -2085,7 +2083,7 @@ err_init_slot:
+ 	free_irq(host->irq, host);
+ 
+ err_workqueue:
+-	destroy_workqueue(dw_mci_card_workqueue);
++	destroy_workqueue(host->card_workqueue);
+ 
+ err_dmaunmap:
+ 	if (host->use_dma && host->dma_ops->exit)
+@@ -2119,7 +2117,7 @@ void dw_mci_remove(struct dw_mci *host)
+ 	mci_writel(host, CLKSRC, 0);
+ 
+ 	free_irq(host->irq, host);
+-	destroy_workqueue(dw_mci_card_workqueue);
++	destroy_workqueue(host->card_workqueue);
+ 	dma_free_coherent(&host->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
+ 
+ 	if (host->use_dma && host->dma_ops->exit)
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 8f66e28..7a7ebd3 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -125,6 +125,7 @@ struct dw_mci {
+ 	struct mmc_request	*mrq;
+ 	struct mmc_command	*cmd;
+ 	struct mmc_data		*data;
++	struct workqueue_struct	*card_workqueue;
+ 
+ 	/* DMA interface members*/
+ 	int			use_dma;
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
-One Laptop Per Child
+1.7.5.4
+
