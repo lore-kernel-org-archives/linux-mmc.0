@@ -1,116 +1,130 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
-Subject: [PATCH 1/7] mmc: dw_mmc: lookup for optional biu and ciu clocks
-Date: Tue,  1 May 2012 22:07:40 -0700
-Message-ID: <1335935266-25289-2-git-send-email-thomas.abraham@linaro.org>
+Subject: [PATCH 5/7] ARM: Samsung: Add support for MSHC controller clocks
+Date: Tue,  1 May 2012 22:07:44 -0700
+Message-ID: <1335935266-25289-6-git-send-email-thomas.abraham@linaro.org>
 References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 In-Reply-To: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
 Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-Some platforms allow for clock gating and control of bus interface unit clock
-and card interface unit clock. Add support for clock lookup of optional biu
-and ciu clocks for clock gating and clock speed determination.
+Add clock instances for bus interface unit clock and card interface unit
+clock of the all four MSHC controller instances.
 
 Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
 Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
 ---
- drivers/mmc/host/dw_mmc.c  |   35 +++++++++++++++++++++++++++++++----
- include/linux/mmc/dw_mmc.h |    4 ++++
- 2 files changed, 35 insertions(+), 4 deletions(-)
+ arch/arm/mach-exynos/clock-exynos5.c |   45 ++++++++++++----------------------
+ 1 files changed, 16 insertions(+), 29 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1532357..036846f 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1938,19 +1938,35 @@ int dw_mci_probe(struct dw_mci *host)
- 		return -ENODEV;
- 	}
+diff --git a/arch/arm/mach-exynos/clock-exynos5.c b/arch/arm/mach-exynos/clock-exynos5.c
+index 7c0f810..4e17131 100644
+--- a/arch/arm/mach-exynos/clock-exynos5.c
++++ b/arch/arm/mach-exynos/clock-exynos5.c
+@@ -524,35 +524,30 @@ static struct clk exynos5_init_clocks_off[] = {
+ 		.enable		= exynos5_clk_ip_peris_ctrl,
+ 		.ctrlbit	= (1 << 19),
+ 	}, {
+-		.name		= "hsmmc",
+-		.devname	= "exynos4-sdhci.0",
++		.name		= "biu",
++		.devname	= "dw_mmc.0",
+ 		.parent		= &exynos5_clk_aclk_200.clk,
+ 		.enable		= exynos5_clk_ip_fsys_ctrl,
+ 		.ctrlbit	= (1 << 12),
+ 	}, {
+-		.name		= "hsmmc",
+-		.devname	= "exynos4-sdhci.1",
++		.name		= "biu",
++		.devname	= "dw_mmc.1",
+ 		.parent		= &exynos5_clk_aclk_200.clk,
+ 		.enable		= exynos5_clk_ip_fsys_ctrl,
+ 		.ctrlbit	= (1 << 13),
+ 	}, {
+-		.name		= "hsmmc",
+-		.devname	= "exynos4-sdhci.2",
++		.name		= "biu",
++		.devname	= "dw_mmc.2",
+ 		.parent		= &exynos5_clk_aclk_200.clk,
+ 		.enable		= exynos5_clk_ip_fsys_ctrl,
+ 		.ctrlbit	= (1 << 14),
+ 	}, {
+-		.name		= "hsmmc",
+-		.devname	= "exynos4-sdhci.3",
++		.name		= "biu",
++		.devname	= "dw_mmc.3",
+ 		.parent		= &exynos5_clk_aclk_200.clk,
+ 		.enable		= exynos5_clk_ip_fsys_ctrl,
+ 		.ctrlbit	= (1 << 15),
+ 	}, {
+-		.name		= "dwmci",
+-		.parent		= &exynos5_clk_aclk_200.clk,
+-		.enable		= exynos5_clk_ip_fsys_ctrl,
+-		.ctrlbit	= (1 << 16),
+-	}, {
+ 		.name		= "sata",
+ 		.devname	= "ahci",
+ 		.enable		= exynos5_clk_ip_fsys_ctrl,
+@@ -882,8 +877,8 @@ static struct clksrc_clk exynos5_clk_sclk_uart3 = {
  
--	if (!host->pdata->bus_hz) {
-+	host->biu_clk = clk_get(&host->dev, "biu");
-+	if (IS_ERR(host->biu_clk))
-+		dev_info(&host->dev, "biu clock not available\n");
-+	else
-+		clk_enable(host->biu_clk);
-+
-+	host->ciu_clk = clk_get(&host->dev, "ciu");
-+	if (IS_ERR(host->ciu_clk))
-+		dev_info(&host->dev, "ciu clock not available\n");
-+	else
-+		clk_enable(host->ciu_clk);
-+
-+	if (IS_ERR(host->ciu_clk))
-+		host->bus_hz = host->pdata->bus_hz;
-+	else
-+		host->bus_hz = clk_get_rate(host->ciu_clk);
-+
-+	if (!host->bus_hz) {
- 		dev_err(&host->dev,
- 			"Platform data must supply bus speed\n");
--		return -ENODEV;
-+		ret = -ENODEV;
-+		goto err_clk;
- 	}
+ static struct clksrc_clk exynos5_clk_sclk_mmc0 = {
+ 	.clk	= {
+-		.name		= "sclk_mmc",
+-		.devname	= "exynos4-sdhci.0",
++		.name		= "ciu",
++		.devname	= "dw_mmc.0",
+ 		.parent		= &exynos5_clk_dout_mmc0.clk,
+ 		.enable		= exynos5_clksrc_mask_fsys_ctrl,
+ 		.ctrlbit	= (1 << 0),
+@@ -893,8 +888,8 @@ static struct clksrc_clk exynos5_clk_sclk_mmc0 = {
  
--	host->bus_hz = host->pdata->bus_hz;
- 	host->quirks = host->pdata->quirks;
+ static struct clksrc_clk exynos5_clk_sclk_mmc1 = {
+ 	.clk	= {
+-		.name		= "sclk_mmc",
+-		.devname	= "exynos4-sdhci.1",
++		.name		= "ciu",
++		.devname	= "dw_mmc.1",
+ 		.parent		= &exynos5_clk_dout_mmc1.clk,
+ 		.enable		= exynos5_clksrc_mask_fsys_ctrl,
+ 		.ctrlbit	= (1 << 4),
+@@ -904,8 +899,8 @@ static struct clksrc_clk exynos5_clk_sclk_mmc1 = {
  
- 	spin_lock_init(&host->lock);
- 	INIT_LIST_HEAD(&host->queue);
+ static struct clksrc_clk exynos5_clk_sclk_mmc2 = {
+ 	.clk	= {
+-		.name		= "sclk_mmc",
+-		.devname	= "exynos4-sdhci.2",
++		.name		= "ciu",
++		.devname	= "dw_mmc.2",
+ 		.parent		= &exynos5_clk_dout_mmc2.clk,
+ 		.enable		= exynos5_clksrc_mask_fsys_ctrl,
+ 		.ctrlbit	= (1 << 8),
+@@ -915,8 +910,8 @@ static struct clksrc_clk exynos5_clk_sclk_mmc2 = {
  
--
- 	host->dma_ops = host->pdata->dma_ops;
- 	dw_mci_init_dma(host);
- 
-@@ -2095,6 +2111,13 @@ err_dmaunmap:
- 		regulator_disable(host->vmmc);
- 		regulator_put(host->vmmc);
- 	}
-+	kfree(host);
-+
-+err_clk:
-+	clk_disable(host->ciu_clk);
-+	clk_disable(host->biu_clk);
-+	clk_put(host->ciu_clk);
-+	clk_put(host->biu_clk);
- 	return ret;
- }
- EXPORT_SYMBOL(dw_mci_probe);
-@@ -2128,6 +2151,10 @@ void dw_mci_remove(struct dw_mci *host)
- 		regulator_put(host->vmmc);
- 	}
- 
-+	clk_disable(host->ciu_clk);
-+	clk_disable(host->biu_clk);
-+	clk_put(host->ciu_clk);
-+	clk_put(host->biu_clk);
- }
- EXPORT_SYMBOL(dw_mci_remove);
- 
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 7a7ebd3..fa9a139 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -78,6 +78,8 @@ struct mmc_data;
-  * @data_offset: Set the offset of DATA register according to VERID.
-  * @dev: Device associated with the MMC controller.
-  * @pdata: Platform data associated with the MMC controller.
-+ * @biu_clk: Pointer to bus interface unit clock instance.
-+ * @ciu_clk: Pointer to card interface unit clock instance.
-  * @slot: Slots sharing this MMC controller.
-  * @fifo_depth: depth of FIFO.
-  * @data_shift: log2 of FIFO item size.
-@@ -158,6 +160,8 @@ struct dw_mci {
- 	u16			data_offset;
- 	struct device		dev;
- 	struct dw_mci_board	*pdata;
-+	struct clk		*biu_clk;
-+	struct clk		*ciu_clk;
- 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
- 
- 	/* FIFO push and pull */
+ static struct clksrc_clk exynos5_clk_sclk_mmc3 = {
+ 	.clk	= {
+-		.name		= "sclk_mmc",
+-		.devname	= "exynos4-sdhci.3",
++		.name		= "ciu",
++		.devname	= "dw_mmc.3",
+ 		.parent		= &exynos5_clk_dout_mmc3.clk,
+ 		.enable		= exynos5_clksrc_mask_fsys_ctrl,
+ 		.ctrlbit	= (1 << 12),
+@@ -927,14 +922,6 @@ static struct clksrc_clk exynos5_clk_sclk_mmc3 = {
+ static struct clksrc_clk exynos5_clksrcs[] = {
+ 	{
+ 		.clk	= {
+-			.name		= "sclk_dwmci",
+-			.parent		= &exynos5_clk_dout_mmc4.clk,
+-			.enable		= exynos5_clksrc_mask_fsys_ctrl,
+-			.ctrlbit	= (1 << 16),
+-		},
+-		.reg_div = { .reg = EXYNOS5_CLKDIV_FSYS3, .shift = 8, .size = 8 },
+-	}, {
+-		.clk	= {
+ 			.name		= "sclk_fimd",
+ 			.devname	= "s3cfb.1",
+ 			.enable		= exynos5_clksrc_mask_disp1_0_ctrl,
 -- 
 1.7.5.4
