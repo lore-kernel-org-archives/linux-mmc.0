@@ -1,150 +1,167 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH 3/3] mmc: sdhci-imx-esdhc: convert to use pinctrl subsystem
-Date: Wed, 2 May 2012 19:31:22 +0800
-Message-ID: <1335958282-3068-3-git-send-email-b29396@freescale.com>
-References: <1335958282-3068-1-git-send-email-b29396@freescale.com>
+From: James Hogan <james@albanarts.com>
+Subject: Re: [PATCH 1/7] mmc: dw_mmc: lookup for optional biu and ciu clocks
+Date: Wed, 2 May 2012 15:53:53 +0100
+Message-ID: <CAAG0J9-NDM9wLKpq04ofPkvFqiWxjmP84ojsP9Hfs0SJ_0FaXg@mail.gmail.com>
+References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
+	<1335935266-25289-2-git-send-email-thomas.abraham@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:13769
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752655Ab2EBLXT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 May 2012 07:23:19 -0400
-In-Reply-To: <1335958282-3068-1-git-send-email-b29396@freescale.com>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:42441 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753779Ab2EBOxz convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 May 2012 10:53:55 -0400
+Received: by wgbdr13 with SMTP id dr13so742320wgb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 02 May 2012 07:53:54 -0700 (PDT)
+In-Reply-To: <1335935266-25289-2-git-send-email-thomas.abraham@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: devicetree-discuss@lists.ozlabs.org, linus.walleij@stericsson.com, swarren@wwwdotorg.org, s.hauer@pengutronix.de, shawn.guo@freescale.com, kernel@pengutronix.de, grant.likely@secretlab.ca, rob.herring@calxeda.com, cjb@laptop.org, w.sang@pengutronix.de, linux-mmc@vger.kernel.org
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
 
-From: Dong Aisheng <dong.aisheng@linaro.org>
+Hi
 
-Acked-by: Stephen Warren <swarren@wwwdotorg.org>
-Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
----
-ChangeLog v4->v5:
- *split arch/arm/mach-imx/* changes into a separate patch
-ChangeLog v3->v4:
- * call provide dummies in imx*_soc_init().
-ChangeLog v2->v3:
- * patch name updated.
-   v1 name is ARM: imx6q: switch to use pinctrl driver
- * using pinctrl dummy state to avoid breaking other platforms to use this
-   driver.
-ChangeLog v1->v2:
- * using updated binding
----
- arch/arm/boot/dts/imx6q-arm2.dts   |    4 ++++
- arch/arm/boot/dts/imx6q.dtsi       |   32 ++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-esdhc-imx.c |    9 +++++++++
- 3 files changed, 45 insertions(+), 0 deletions(-)
+On 2 May 2012 06:07, Thomas Abraham <thomas.abraham@linaro.org> wrote:
+> Some platforms allow for clock gating and control of bus interface un=
+it clock
+> and card interface unit clock. Add support for clock lookup of option=
+al biu
+> and ciu clocks for clock gating and clock speed determination.
+>
+> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
+> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+> ---
+> =A0drivers/mmc/host/dw_mmc.c =A0| =A0 35 ++++++++++++++++++++++++++++=
++++----
+> =A0include/linux/mmc/dw_mmc.h | =A0 =A04 ++++
+> =A02 files changed, 35 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 1532357..036846f 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1938,19 +1938,35 @@ int dw_mci_probe(struct dw_mci *host)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return -ENODEV;
+> =A0 =A0 =A0 =A0}
+>
+> - =A0 =A0 =A0 if (!host->pdata->bus_hz) {
+> + =A0 =A0 =A0 host->biu_clk =3D clk_get(&host->dev, "biu");
 
-diff --git a/arch/arm/boot/dts/imx6q-arm2.dts b/arch/arm/boot/dts/imx6q-arm2.dts
-index ce1c823..34dd9cd 100644
---- a/arch/arm/boot/dts/imx6q-arm2.dts
-+++ b/arch/arm/boot/dts/imx6q-arm2.dts
-@@ -37,12 +37,16 @@
- 				cd-gpios = <&gpio6 11 0>;
- 				wp-gpios = <&gpio6 14 0>;
- 				vmmc-supply = <&reg_3p3v>;
-+				pinctrl-names = "default";
-+				pinctrl-0 = <&pinctrl_usdhc3_1>;
- 				status = "okay";
- 			};
- 
- 			usdhc@0219c000 { /* uSDHC4 */
- 				fsl,card-wired;
- 				vmmc-supply = <&reg_3p3v>;
-+				pinctrl-names = "default";
-+				pinctrl-0 = <&pinctrl_usdhc4_1>;
- 				status = "okay";
- 			};
- 
-diff --git a/arch/arm/boot/dts/imx6q.dtsi b/arch/arm/boot/dts/imx6q.dtsi
-index 4905f51..a89f294 100644
---- a/arch/arm/boot/dts/imx6q.dtsi
-+++ b/arch/arm/boot/dts/imx6q.dtsi
-@@ -386,7 +386,39 @@
- 			};
- 
- 			iomuxc@020e0000 {
-+				compatible = "fsl,imx6q-iomuxc";
- 				reg = <0x020e0000 0x4000>;
-+
-+				/* shared pinctrl settings */
-+				usdhc3 {
-+					pinctrl_usdhc3_1: usdhc3grp-1 {
-+						fsl,pins = <1273 0x17059	/* MX6Q_PAD_SD3_CMD__USDHC3_CMD */
-+							    1281 0x10059	/* MX6Q_PAD_SD3_CLK__USDHC3_CLK	*/
-+							    1289 0x17059	/* MX6Q_PAD_SD3_DAT0__USDHC3_DAT0 */
-+							    1297 0x17059	/* MX6Q_PAD_SD3_DAT1__USDHC3_DAT1 */
-+							    1305 0x17059	/* MX6Q_PAD_SD3_DAT2__USDHC3_DAT2 */
-+							    1312 0x17059	/* MX6Q_PAD_SD3_DAT3__USDHC3_DAT3 */
-+							    1265 0x17059	/* MX6Q_PAD_SD3_DAT4__USDHC3_DAT4 */
-+							    1257 0x17059	/* MX6Q_PAD_SD3_DAT5__USDHC3_DAT5 */
-+							    1249 0x17059	/* MX6Q_PAD_SD3_DAT6__USDHC3_DAT6 */
-+							    1241 0x17059>;	/* MX6Q_PAD_SD3_DAT7__USDHC3_DAT7 */
-+					};
-+				};
-+
-+				usdhc4 {
-+					pinctrl_usdhc4_1: usdhc4grp-1 {
-+						fsl,pins = <1386 0x17059	/* MX6Q_PAD_SD4_CMD__USDHC4_CMD */
-+							    1392 0x10059	/* MX6Q_PAD_SD4_CLK__USDHC4_CLK	*/
-+							    1462 0x17059	/* MX6Q_PAD_SD4_DAT0__USDHC4_DAT0 */
-+							    1470 0x17059	/* MX6Q_PAD_SD4_DAT1__USDHC4_DAT1 */
-+							    1478 0x17059	/* MX6Q_PAD_SD4_DAT2__USDHC4_DAT2 */
-+							    1486 0x17059	/* MX6Q_PAD_SD4_DAT3__USDHC4_DAT3 */
-+							    1493 0x17059	/* MX6Q_PAD_SD4_DAT4__USDHC4_DAT4 */
-+							    1501 0x17059	/* MX6Q_PAD_SD4_DAT5__USDHC4_DAT5 */
-+							    1509 0x17059	/* MX6Q_PAD_SD4_DAT6__USDHC4_DAT6 */
-+							    1517 0x17059>;	/* MX6Q_PAD_SD4_DAT7__USDHC4_DAT7 */
-+					};
-+				};
- 			};
- 
- 			dcic@020e4000 { /* DCIC1 */
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 6193a0d..039bc19 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -24,6 +24,7 @@
- #include <linux/of.h>
- #include <linux/of_device.h>
- #include <linux/of_gpio.h>
-+#include <linux/pinctrl/consumer.h>
- #include <mach/esdhc.h>
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
-@@ -68,6 +69,7 @@ struct pltfm_imx_data {
- 	int flags;
- 	u32 scratchpad;
- 	enum imx_esdhc_type devtype;
-+	struct pinctrl *pinctrl;
- 	struct esdhc_platform_data boarddata;
- };
- 
-@@ -467,6 +469,12 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 	clk_prepare_enable(clk);
- 	pltfm_host->clk = clk;
- 
-+	imx_data->pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
-+	if (IS_ERR(imx_data->pinctrl)) {
-+		err = PTR_ERR(imx_data->pinctrl);
-+		goto pin_err;
-+	}
-+
- 	if (!is_imx25_esdhc(imx_data))
- 		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
- 
-@@ -559,6 +567,7 @@ no_card_detect_irq:
- 		gpio_free(boarddata->wp_gpio);
- no_card_detect_pin:
- no_board_data:
-+pin_err:
- 	clk_disable_unprepare(pltfm_host->clk);
- 	clk_put(pltfm_host->clk);
- err_clk_get:
--- 
-1.7.0.4
+These clock names sound quite platform specific (what if they're
+called something else on another platform, or another platform has
+separate ones for different instantiations of the block?). Perhaps the
+clk names should get passed in through platform data. I haven't looked
+how other drivers handle that though.
+
+> + =A0 =A0 =A0 if (IS_ERR(host->biu_clk))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_info(&host->dev, "biu clock not ava=
+ilable\n");
+
+In this case, should it set host->biu_clk to NULL or are clk_disable
+and clk_put guaranteed to handle an IS_ERR value?
+
+> + =A0 =A0 =A0 else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 clk_enable(host->biu_clk);
+> +
+> + =A0 =A0 =A0 host->ciu_clk =3D clk_get(&host->dev, "ciu");
+> + =A0 =A0 =A0 if (IS_ERR(host->ciu_clk))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_info(&host->dev, "ciu clock not ava=
+ilable\n");
+
+same here
+
+> + =A0 =A0 =A0 else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 clk_enable(host->ciu_clk);
+> +
+> + =A0 =A0 =A0 if (IS_ERR(host->ciu_clk))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->bus_hz =3D host->pdata->bus_hz;
+> + =A0 =A0 =A0 else
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->bus_hz =3D clk_get_rate(host->ciu=
+_clk);
+> +
+> + =A0 =A0 =A0 if (!host->bus_hz) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_err(&host->dev,
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0"Platform data must su=
+pply bus speed\n");
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENODEV;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -ENODEV;
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_clk;
+> =A0 =A0 =A0 =A0}
+>
+> - =A0 =A0 =A0 host->bus_hz =3D host->pdata->bus_hz;
+> =A0 =A0 =A0 =A0host->quirks =3D host->pdata->quirks;
+>
+> =A0 =A0 =A0 =A0spin_lock_init(&host->lock);
+> =A0 =A0 =A0 =A0INIT_LIST_HEAD(&host->queue);
+>
+> -
+> =A0 =A0 =A0 =A0host->dma_ops =3D host->pdata->dma_ops;
+> =A0 =A0 =A0 =A0dw_mci_init_dma(host);
+>
+> @@ -2095,6 +2111,13 @@ err_dmaunmap:
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0regulator_disable(host->vmmc);
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0regulator_put(host->vmmc);
+> =A0 =A0 =A0 =A0}
+> + =A0 =A0 =A0 kfree(host);
+
+what's this about?
+
+> +
+> +err_clk:
+> + =A0 =A0 =A0 clk_disable(host->ciu_clk);
+> + =A0 =A0 =A0 clk_disable(host->biu_clk);
+> + =A0 =A0 =A0 clk_put(host->ciu_clk);
+> + =A0 =A0 =A0 clk_put(host->biu_clk);
+> =A0 =A0 =A0 =A0return ret;
+> =A0}
+> =A0EXPORT_SYMBOL(dw_mci_probe);
+> @@ -2128,6 +2151,10 @@ void dw_mci_remove(struct dw_mci *host)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0regulator_put(host->vmmc);
+> =A0 =A0 =A0 =A0}
+>
+> + =A0 =A0 =A0 clk_disable(host->ciu_clk);
+> + =A0 =A0 =A0 clk_disable(host->biu_clk);
+> + =A0 =A0 =A0 clk_put(host->ciu_clk);
+> + =A0 =A0 =A0 clk_put(host->biu_clk);
+> =A0}
+> =A0EXPORT_SYMBOL(dw_mci_remove);
+>
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 7a7ebd3..fa9a139 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -78,6 +78,8 @@ struct mmc_data;
+> =A0* @data_offset: Set the offset of DATA register according to VERID=
+=2E
+> =A0* @dev: Device associated with the MMC controller.
+> =A0* @pdata: Platform data associated with the MMC controller.
+> + * @biu_clk: Pointer to bus interface unit clock instance.
+> + * @ciu_clk: Pointer to card interface unit clock instance.
+> =A0* @slot: Slots sharing this MMC controller.
+> =A0* @fifo_depth: depth of FIFO.
+> =A0* @data_shift: log2 of FIFO item size.
+> @@ -158,6 +160,8 @@ struct dw_mci {
+> =A0 =A0 =A0 =A0u16 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 data_offse=
+t;
+> =A0 =A0 =A0 =A0struct device =A0 =A0 =A0 =A0 =A0 dev;
+> =A0 =A0 =A0 =A0struct dw_mci_board =A0 =A0 *pdata;
+> + =A0 =A0 =A0 struct clk =A0 =A0 =A0 =A0 =A0 =A0 =A0*biu_clk;
+> + =A0 =A0 =A0 struct clk =A0 =A0 =A0 =A0 =A0 =A0 =A0*ciu_clk;
+> =A0 =A0 =A0 =A0struct dw_mci_slot =A0 =A0 =A0*slot[MAX_MCI_SLOTS];
+>
+> =A0 =A0 =A0 =A0/* FIFO push and pull */
+> --
+> 1.7.5.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kerne=
+l" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at =A0http://www.tux.org/lkml/
 
 
+
+--=20
+James Hogan
