@@ -1,112 +1,116 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: make multiple instances of
- dw_mci_card_workqueue
-Date: Wed, 02 May 2012 12:07:59 +0900
-Message-ID: <4FA0A50F.4020400@samsung.com>
-References: <1335909456-14020-1-git-send-email-thomas.abraham@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:52010 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758177Ab2EBDIG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 May 2012 23:08:06 -0400
-In-reply-to: <1335909456-14020-1-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH 1/7] mmc: dw_mmc: lookup for optional biu and ciu clocks
+Date: Tue,  1 May 2012 22:07:40 -0700
+Message-ID: <1335935266-25289-2-git-send-email-thomas.abraham@linaro.org>
+References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, kgene.kim@samsung.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, will.newton@gmail.com, jh80.chung@samsung.com, tgih.jun@samsung.com, dianders@google.com
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Some platforms allow for clock gating and control of bus interface unit clock
+and card interface unit clock. Add support for clock lookup of optional biu
+and ciu clocks for clock gating and clock speed determination.
 
-On 05/02/2012 06:57 AM, Thomas Abraham wrote:
+Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
+Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+---
+ drivers/mmc/host/dw_mmc.c  |   35 +++++++++++++++++++++++++++++++----
+ include/linux/mmc/dw_mmc.h |    4 ++++
+ 2 files changed, 35 insertions(+), 4 deletions(-)
 
-> The variable 'dw_mci_card_workqueue' is a global variable shared between
-> multiple instances of the dw_mmc host controller. Due to this, data
-> corruption has been noticed when multiple instances of dw_mmc controllers
-> are actively reading/writing the media. Fix this by adding a instance
-> of 'struct workqueue_struct' for each host instance and removing the
-> global 'dw_mci_card_workqueue' instance.
-> 
-> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
-> ---
->  drivers/mmc/host/dw_mmc.c  |   14 ++++++--------
->  include/linux/mmc/dw_mmc.h |    1 +
->  2 files changed, 7 insertions(+), 8 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index ab3fc46..1532357 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -100,8 +100,6 @@ struct dw_mci_slot {
->  	int			last_detect_state;
->  };
->  
-> -static struct workqueue_struct *dw_mci_card_workqueue;
-> -
->  #if defined(CONFIG_DEBUG_FS)
->  static int dw_mci_req_show(struct seq_file *s, void *v)
->  {
-> @@ -1605,7 +1603,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->  
->  		if (pending & SDMMC_INT_CD) {
->  			mci_writel(host, RINTSTS, SDMMC_INT_CD);
-> -			queue_work(dw_mci_card_workqueue, &host->card_work);
-> +			queue_work(host->card_workqueue, &host->card_work);
->  		}
->  
->  		/* Handle SDIO Interrupts */
-> @@ -1844,7 +1842,7 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  	 * Card may have been plugged in prior to boot so we
->  	 * need to run the detect tasklet
->  	 */
-> -	queue_work(dw_mci_card_workqueue, &host->card_work);
-> +	queue_work(host->card_workqueue, &host->card_work);
->  
->  	return 0;
->  }
-> @@ -2021,9 +2019,9 @@ int dw_mci_probe(struct dw_mci *host)
->  	mci_writel(host, CLKSRC, 0);
->  
->  	tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
-> -	dw_mci_card_workqueue = alloc_workqueue("dw-mci-card",
-> +	host->card_workqueue = alloc_workqueue("dw-mci-card",
->  			WQ_MEM_RECLAIM | WQ_NON_REENTRANT, 1);
-> -	if (!dw_mci_card_workqueue)
-> +	if (!host->card_workqueue)
->  		goto err_dmaunmap;
->  	INIT_WORK(&host->card_work, dw_mci_work_routine_card);
->  	ret = request_irq(host->irq, dw_mci_interrupt, host->irq_flags, "dw-mci", host);
-> @@ -2085,7 +2083,7 @@ err_init_slot:
->  	free_irq(host->irq, host);
->  
->  err_workqueue:
-> -	destroy_workqueue(dw_mci_card_workqueue);
-> +	destroy_workqueue(host->card_workqueue);
->  
->  err_dmaunmap:
->  	if (host->use_dma && host->dma_ops->exit)
-> @@ -2119,7 +2117,7 @@ void dw_mci_remove(struct dw_mci *host)
->  	mci_writel(host, CLKSRC, 0);
->  
->  	free_irq(host->irq, host);
-> -	destroy_workqueue(dw_mci_card_workqueue);
-> +	destroy_workqueue(host->card_workqueue);
->  	dma_free_coherent(&host->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
->  
->  	if (host->use_dma && host->dma_ops->exit)
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 8f66e28..7a7ebd3 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -125,6 +125,7 @@ struct dw_mci {
->  	struct mmc_request	*mrq;
->  	struct mmc_command	*cmd;
->  	struct mmc_data		*data;
-> +	struct workqueue_struct	*card_workqueue;
->  
->  	/* DMA interface members*/
->  	int			use_dma;
-
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 1532357..036846f 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1938,19 +1938,35 @@ int dw_mci_probe(struct dw_mci *host)
+ 		return -ENODEV;
+ 	}
+ 
+-	if (!host->pdata->bus_hz) {
++	host->biu_clk = clk_get(&host->dev, "biu");
++	if (IS_ERR(host->biu_clk))
++		dev_info(&host->dev, "biu clock not available\n");
++	else
++		clk_enable(host->biu_clk);
++
++	host->ciu_clk = clk_get(&host->dev, "ciu");
++	if (IS_ERR(host->ciu_clk))
++		dev_info(&host->dev, "ciu clock not available\n");
++	else
++		clk_enable(host->ciu_clk);
++
++	if (IS_ERR(host->ciu_clk))
++		host->bus_hz = host->pdata->bus_hz;
++	else
++		host->bus_hz = clk_get_rate(host->ciu_clk);
++
++	if (!host->bus_hz) {
+ 		dev_err(&host->dev,
+ 			"Platform data must supply bus speed\n");
+-		return -ENODEV;
++		ret = -ENODEV;
++		goto err_clk;
+ 	}
+ 
+-	host->bus_hz = host->pdata->bus_hz;
+ 	host->quirks = host->pdata->quirks;
+ 
+ 	spin_lock_init(&host->lock);
+ 	INIT_LIST_HEAD(&host->queue);
+ 
+-
+ 	host->dma_ops = host->pdata->dma_ops;
+ 	dw_mci_init_dma(host);
+ 
+@@ -2095,6 +2111,13 @@ err_dmaunmap:
+ 		regulator_disable(host->vmmc);
+ 		regulator_put(host->vmmc);
+ 	}
++	kfree(host);
++
++err_clk:
++	clk_disable(host->ciu_clk);
++	clk_disable(host->biu_clk);
++	clk_put(host->ciu_clk);
++	clk_put(host->biu_clk);
+ 	return ret;
+ }
+ EXPORT_SYMBOL(dw_mci_probe);
+@@ -2128,6 +2151,10 @@ void dw_mci_remove(struct dw_mci *host)
+ 		regulator_put(host->vmmc);
+ 	}
+ 
++	clk_disable(host->ciu_clk);
++	clk_disable(host->biu_clk);
++	clk_put(host->ciu_clk);
++	clk_put(host->biu_clk);
+ }
+ EXPORT_SYMBOL(dw_mci_remove);
+ 
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 7a7ebd3..fa9a139 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -78,6 +78,8 @@ struct mmc_data;
+  * @data_offset: Set the offset of DATA register according to VERID.
+  * @dev: Device associated with the MMC controller.
+  * @pdata: Platform data associated with the MMC controller.
++ * @biu_clk: Pointer to bus interface unit clock instance.
++ * @ciu_clk: Pointer to card interface unit clock instance.
+  * @slot: Slots sharing this MMC controller.
+  * @fifo_depth: depth of FIFO.
+  * @data_shift: log2 of FIFO item size.
+@@ -158,6 +160,8 @@ struct dw_mci {
+ 	u16			data_offset;
+ 	struct device		dev;
+ 	struct dw_mci_board	*pdata;
++	struct clk		*biu_clk;
++	struct clk		*ciu_clk;
+ 	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
+ 
+ 	/* FIFO push and pull */
+-- 
+1.7.5.4
