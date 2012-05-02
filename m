@@ -1,61 +1,49 @@
-From: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 0/7] mmc: dw_mmc: add support for device tree based
- instantiation
-Date: Tue,  1 May 2012 22:07:39 -0700
-Message-ID: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Cc: linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: [PATCH 6/7] ARM: Exynos5: Add AUXDATA support for MSHC controllers
+Date: Tue,  1 May 2012 22:07:45 -0700
+Message-ID: <1335935266-25289-7-git-send-email-thomas.abraham@linaro.org>
+References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:38486 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755318Ab2EBFMX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 May 2012 01:12:23 -0400
+Received: by mail-pb0-f46.google.com with SMTP id rp8so536775pbb.19
+        for <linux-mmc@vger.kernel.org>; Tue, 01 May 2012 22:12:23 -0700 (PDT)
+In-Reply-To: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
 
-This patch series adds device tree support for Synopsis Designware Mobile
-Storage Host Controller.
+Add entries if MSHC controllers in AUXDATA table for correct device name
+initialization.
 
-The first patch adds clock lookup in the driver and this is optional. Platforms
-that do not need any clock gating and control for the dw_mmc controllers will
-not be affected with this change. The second patch adds a quirk to notify the
-controller about the absence of the write protect line.
+Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
+Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+---
+ arch/arm/mach-exynos/mach-exynos5-dt.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
 
-The third patch adds device tree support and fourth patch adds Samsung
-Exynos5250 specific controlller extentions to the driver. The rest of the
-patches in the series enable support for dw_mmc support on the Samsing
-Exynos5250 based platforms.
-
-This patchset has been derived from Samsung internal patches prepared by
-Abhilash Kesavan <a.kesavan-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>.
-
-Thomas Abraham (7):
-  mmc: dw_mmc: lookup for optional biu and ciu clocks
-  mmc: dw_mmc: add quirk to indicate missing write protect line
-  mmc: dw_mmc: add device tree support
-  mmc: dw_mmc: add samsung exynos5250 specific extentions
-  ARM: Samsung: Add support for MSHC controller clocks
-  ARM: Exynos5: Add AUXDATA support for MSHC controllers
-  ARM: dts: Add nodes for dw_mmc controllers for Samsung Exynos5250 platforms
-
- .../devicetree/bindings/mmc/synposis-dw-mshc.txt   |  116 +++++++++
- arch/arm/boot/dts/exynos5250-smdk5250.dts          |   50 ++++-
- arch/arm/boot/dts/exynos5250.dtsi                  |   24 ++
- arch/arm/mach-exynos/clock-exynos5.c               |   45 ++---
- arch/arm/mach-exynos/mach-exynos5-dt.c             |    8 +
- drivers/mmc/host/dw_mmc-pltfm.c                    |   32 +++
- drivers/mmc/host/dw_mmc.c                          |  252 +++++++++++++++++++-
- drivers/mmc/host/dw_mmc.h                          |   23 ++
- include/linux/mmc/dw_mmc.h                         |   15 +-
- 9 files changed, 521 insertions(+), 44 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
-
+diff --git a/arch/arm/mach-exynos/mach-exynos5-dt.c b/arch/arm/mach-exynos/mach-exynos5-dt.c
+index 00e25fc..4a060f1 100644
+--- a/arch/arm/mach-exynos/mach-exynos5-dt.c
++++ b/arch/arm/mach-exynos/mach-exynos5-dt.c
+@@ -72,6 +72,14 @@ static const struct of_dev_auxdata exynos5250_auxdata_lookup[] __initconst = {
+ 				"s3c2440-i2c.0", NULL),
+ 	OF_DEV_AUXDATA("samsung,s3c2440-i2c", EXYNOS5_PA_IIC(1),
+ 				"s3c2440-i2c.1", NULL),
++	OF_DEV_AUXDATA("synopsis,dw-mshc-exynos5250", 0x12200000,
++				"dw_mmc.0", NULL),
++	OF_DEV_AUXDATA("synopsis,dw-mshc-exynos5250", 0x12210000,
++				"dw_mmc.1", NULL),
++	OF_DEV_AUXDATA("synopsis,dw-mshc-exynos5250", 0x12220000,
++				"dw_mmc.2", NULL),
++	OF_DEV_AUXDATA("synopsis,dw-mshc-exynos5250", 0x12230000,
++				"dw_mmc.3", NULL),
+ 	OF_DEV_AUXDATA("arm,pl330", EXYNOS5_PA_PDMA0, "dma-pl330.0", NULL),
+ 	OF_DEV_AUXDATA("arm,pl330", EXYNOS5_PA_PDMA1, "dma-pl330.1", NULL),
+ 	OF_DEV_AUXDATA("arm,pl330", EXYNOS5_PA_MDMA1, "dma-pl330.2", NULL),
 -- 
 1.7.5.4
+
