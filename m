@@ -1,62 +1,78 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH 4/7] mmc: dw_mmc: add samsung exynos5250 specific extentions
-Date: Wed, 2 May 2012 11:10:45 -0700
-Message-ID: <CAOesGMiJrfCgLHmBix1WUrpF-0D9tG5r6xi-3zsiM7KQjkO=ug@mail.gmail.com>
-References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
-	<1335935266-25289-5-git-send-email-thomas.abraham@linaro.org>
+From: merez@codeaurora.org
+Subject: RE: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5
+     device
+Date: Wed, 2 May 2012 11:35:28 -0700 (PDT)
+Message-ID: <6c62e1bf619db82fb165dce5c6f383c4.squirrel@www.codeaurora.org>
+References: <49230ae96550a05ad57cc55c38f31136.squirrel@www.codeaurora.org>
+    <001601cd2668$8a074940$9e15dbc0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1335935266-25289-5-git-send-email-thomas.abraham@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Thomas Abraham <thomas.abraham@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, patches@linaro.org, linux-kernel@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, kgene.kim@samsung.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:60943 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755606Ab2EBSf3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 May 2012 14:35:29 -0400
+In-Reply-To: <001601cd2668$8a074940$9e15dbc0$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
-Hi,
+>> > @@ -1291,10 +1657,42 @@ static int mmc_blk_issue_rw_rq(struct
+>> mmc_queue
+>> *mq, struct request *rqc)
+>> >  			 * A block was successfully transferred.
+>> >  			 */
+>> >  			mmc_blk_reset_success(md, type);
+>> > -			spin_lock_irq(&md->lock);
+>> > -			ret = __blk_end_request(req, 0,
+>> > +
+>> > +			if (mq_rq->packed_cmd != MMC_PACKED_NONE) {
+>> > +				int idx = mq_rq->packed_fail_idx, i = 0;
+>> > +				ret = 0;
+>> > +				while (!list_empty(&mq_rq->packed_list)) {
+>> > +					prq = list_entry_rq(
+>> > +						mq_rq->packed_list.next);
+>> > +					if (idx == i) {
+>> > +						/* retry from error index */
+>> > +						mq_rq->packed_num -= idx;
+>> > +						mq_rq->req = prq;
+>> > +						ret = 1;
+>> > +						break;
+>> > +					}
+>> > +					list_del_init(&prq->queuelist);
+>> > +					spin_lock_irq(&md->lock);
+>> > +					__blk_end_request(prq, 0,
+>> > +							blk_rq_bytes(prq));
+>> > +					spin_unlock_irq(&md->lock);
+>> > +					i++;
+>> > +				}
+>> > +				if (mq_rq->packed_num == MMC_PACKED_N_SINGLE) {
+>> > +					prq = list_entry_rq(
+>> > +						mq_rq->packed_list.next);
+>> You already get the prq inside the while. There is no need to do it
+>> again.
+> Right, but if while loop isn't taken, then prq can be used uninitialized.
+> Though that case wouldn't happen actually, we don't want to see the
+> compiling error.
 
-On Tue, May 1, 2012 at 10:07 PM, Thomas Abraham
-<thomas.abraham@linaro.org> wrote:
-> The instantiation of the Synopsis Designware controller on Exynos5250
-> include extension for SDR and DDR specific tx/rx phase shift timing
-> and CIU internal divider. In addition to that, the option to skip the
-> command hold stage is also introduced. Add support for these Exynos52=
-50
-> specfic extenstions.
->
-> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
-> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
-> ---
-> =A0.../devicetree/bindings/mmc/synposis-dw-mshc.txt =A0 | =A0 33 ++++=
-+++++++++++++++-
-> =A0drivers/mmc/host/dw_mmc-pltfm.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0| =A0 =A08 +++++
-> =A0drivers/mmc/host/dw_mmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0| =A0 32 ++++++++++++++++++-
-> =A0drivers/mmc/host/dw_mmc.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0| =A0 13 ++++++++
-> =A0include/linux/mmc/dw_mmc.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 | =A0 =A06 +++
-> =A05 files changed, 89 insertions(+), 3 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.t=
-xt b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
-> index c1ed70e..465fc31 100644
-> --- a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
-> @@ -7,6 +7,8 @@ Required Properties:
->
-> =A0* compatible: should be one of the following
-> =A0 =A0 =A0 =A0- synopsis,dw-mshc: for controllers compliant with syn=
-opsis dw-mshc.
-> + =A0 =A0 =A0 - synopsis,dw-mshc-exynos5250: for controllers with Sam=
-sung
-> + =A0 =A0 =A0 =A0 Exynos5250 specific extentions.
+The loop must be taken since we are inside the case of packed commands so
+the list can't be empty.
 
-It makes more sense to use your own manufacturer prefix here:
+If the compiler complained, you can set prq to be the first request before
+entering the loop instead of setting it again in the if that follows the
+loop. It will probably be more understood.
+If you decide to leave it as is, I would also add the following to the if:
++                                                mq_rq->req = prq;
++                                                ret = 1;
+Otherwise it seems like there could be a bug in cases where the loop is
+not taken (since prq is the only one that is set) and the code is less
+understood.
 
-samsung,exynos5250-dw-mshc
+Thanks,
+Maya Erez
+Consultant for Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
 
 
--Olof
