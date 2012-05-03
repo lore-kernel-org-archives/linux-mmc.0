@@ -1,78 +1,124 @@
-From: merez@codeaurora.org
-Subject: RE: [PATCH v5 2/2] mmc: core: Support packed command for eMMC4.5
-     device
-Date: Wed, 2 May 2012 11:35:28 -0700 (PDT)
-Message-ID: <6c62e1bf619db82fb165dce5c6f383c4.squirrel@www.codeaurora.org>
-References: <49230ae96550a05ad57cc55c38f31136.squirrel@www.codeaurora.org>
-    <001601cd2668$8a074940$9e15dbc0$%jun@samsung.com>
+From: Venkatraman S <svenkatr@ti.com>
+Subject: [PATCHv2 00/16] [FS, MM, block, MMC]: eMMC High Priority Interrupt Feature
+Date: Thu, 3 May 2012 19:52:59 +0530
+Message-ID: <1336054995-22988-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:60943 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755606Ab2EBSf3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 May 2012 14:35:29 -0400
-In-Reply-To: <001601cd2668$8a074940$9e15dbc0$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <owner-linux-mm@kvack.org>
+Sender: owner-linux-mm@kvack.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, arnd.bergmann@linaro.org, alex.lemberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, rmk+kernel@arm.linux.org.uk, Venkatraman S <svenkatr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: merez@codeaurora.org, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, linux-kernel@vger.kernel.org
 
->> > @@ -1291,10 +1657,42 @@ static int mmc_blk_issue_rw_rq(struct
->> mmc_queue
->> *mq, struct request *rqc)
->> >  			 * A block was successfully transferred.
->> >  			 */
->> >  			mmc_blk_reset_success(md, type);
->> > -			spin_lock_irq(&md->lock);
->> > -			ret = __blk_end_request(req, 0,
->> > +
->> > +			if (mq_rq->packed_cmd != MMC_PACKED_NONE) {
->> > +				int idx = mq_rq->packed_fail_idx, i = 0;
->> > +				ret = 0;
->> > +				while (!list_empty(&mq_rq->packed_list)) {
->> > +					prq = list_entry_rq(
->> > +						mq_rq->packed_list.next);
->> > +					if (idx == i) {
->> > +						/* retry from error index */
->> > +						mq_rq->packed_num -= idx;
->> > +						mq_rq->req = prq;
->> > +						ret = 1;
->> > +						break;
->> > +					}
->> > +					list_del_init(&prq->queuelist);
->> > +					spin_lock_irq(&md->lock);
->> > +					__blk_end_request(prq, 0,
->> > +							blk_rq_bytes(prq));
->> > +					spin_unlock_irq(&md->lock);
->> > +					i++;
->> > +				}
->> > +				if (mq_rq->packed_num == MMC_PACKED_N_SINGLE) {
->> > +					prq = list_entry_rq(
->> > +						mq_rq->packed_list.next);
->> You already get the prq inside the while. There is no need to do it
->> again.
-> Right, but if while loop isn't taken, then prq can be used uninitialized.
-> Though that case wouldn't happen actually, we don't want to see the
-> compiling error.
+Standard eMMC (Embedded MultiMedia Card) specification expects to execute
+one request at a time. If some requests are more important than others, they
+can't be aborted while the flash procedure is in progress.
 
-The loop must be taken since we are inside the case of packed commands so
-the list can't be empty.
+New versions of the eMMC standard (4.41 and above) specfies a feature 
+called High Priority Interrupt (HPI). This enables an ongoing transaction
+to be aborted using a special command (HPI command) so that the card is ready
+to receive new commands immediately. Then the new request can be submitted
+to the card, and optionally the interrupted command can be resumed again.
 
-If the compiler complained, you can set prq to be the first request before
-entering the loop instead of setting it again in the if that follows the
-loop. It will probably be more understood.
-If you decide to leave it as is, I would also add the following to the if:
-+                                                mq_rq->req = prq;
-+                                                ret = 1;
-Otherwise it seems like there could be a bug in cases where the loop is
-not taken (since prq is the only one that is set) and the code is less
-understood.
+Some restrictions exist on when and how the command can be used. For example,
+only write and write-like commands (ERASE) can be preempted, and the urgent
+request must be a read.
 
-Thanks,
-Maya Erez
-Consultant for Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+In order to support this in software,
+a) At the top level, some policy decisions have to be made on what is
+worth preempting for.
+	This implementation uses the demand paging requests and swap
+read requests as potential reads worth preempting an ongoing long write.
+	This is expected to provide improved responsiveness for smarphones
+with multitasking capabilities - example would be launch a email application
+while a video capture session (which causes long writes) is ongoing.
+b) At the block handler, the higher priority request should be queued
+  ahead of the pending requests in the elevator
+c) At the MMC block and core level, transactions have to executed to 
+enforce the rules of the MMC spec and make a reasonable tradeoff if the
+ongoing command is really worth preempting. (For example, is it too close
+to completing already ?).
+	The current implementation uses a fixed time logic. If 10ms has
+already elapsed since the first request was submitted, then a new high
+priority request would not cause a HPI, as it is expected that the first
+request would finish soon. Further work is needed to dynamically tune
+this value (maybe through sysfs) or automatically determine based on
+average write times of previous requests.
+d) At the lowest level (MMC host controllers), support interface to 
+provide a transition path for ongoing transactions to be aborted and the
+controller to be ready to receive next command.
 
+	More information about this feature can be found at
+Jedec Specification:-
+	http://www.jedec.org/standards-documents/docs/jesd84-a441
+Presentation on eMMC4.41 features:-
+	http://www.jedec.org/sites/default/files/Victor_Tsai.pdf
 
+Acknowledgements:-	
+	In no particular order, thanks to Arnd Bergmann and  Saugata Das
+from Linaro, Ilan Smith and Alex Lemberg from Sandisk, Luca Porzio from Micron
+Technologies, Yejin Moon, Jae Hoon Chung from Samsung and others.
+
+----
+v1 -> v2:-
+	* Convert threshold for hpi usage to a tuning parameter (sysfs)
+	* Add Documentation/ABI for all sysfs entries
+	* Add implementation of abort for OMAP controller
+	* Rebased to 3.4-rc4 + mmc-next
+
+	This patch series depends on a few other related cleanups
+in MMC driver. All the patches and the dependent series can be
+pulled from 
+	git://github.com/svenkatr/linux.git my/mmc/3.4/foreground-hpiv2
+
+----------------------------------------------------------------
+Ilan Smith (3):
+      FS: Added demand paging markers to filesystem
+      MM: Added page swapping markers to memory management
+      block: treat DMPG and SWAPIN requests as special
+
+Venkatraman S (13):
+      block: add queue attributes to manage dpmg and swapin requests
+      block: add sysfs attributes for runtime control of dpmg and swapin
+      block: Documentation: add sysfs ABI for expedite_dmpg and expedite_swapin
+      mmc: core: helper function for finding preemptible command
+      mmc: core: add preemptibility tracking fields to mmc command
+      mmc: core: Add MMC abort interface
+      mmc: block: Detect HPI support in card and host controller
+      mmc: core: Implement foreground request preemption procedure
+      mmc: sysfs: Add sysfs entry for tuning preempt_time_threshold
+      mmc: Documentation: Add sysfs ABI for hpi_time_threshold
+      mmc: block: Implement HPI invocation and handling logic.
+      mmc: Update preempted request with CORRECTLY_PRG_SECTORS_NUM info
+      mmc: omap_hsmmc: Implement abort_req host_ops
+
+ Documentation/ABI/testing/sysfs-block       |   12 ++
+ Documentation/ABI/testing/sysfs-devices-mmc |   12 ++
+ block/blk-core.c                            |   18 +++
+ block/blk-sysfs.c                           |   16 +++
+ block/elevator.c                            |   14 ++-
+ drivers/mmc/card/block.c                    |  143 ++++++++++++++++++++--
+ drivers/mmc/card/queue.h                    |    1 +
+ drivers/mmc/core/core.c                     |   67 ++++++++++
+ drivers/mmc/core/mmc.c                      |   25 ++++
+ drivers/mmc/host/omap_hsmmc.c               |   55 ++++++++-
+ fs/mpage.c                                  |    2 +
+ include/linux/bio.h                         |    8 ++
+ include/linux/blk_types.h                   |    4 +
+ include/linux/blkdev.h                      |    8 ++
+ include/linux/mmc/card.h                    |    1 +
+ include/linux/mmc/core.h                    |   19 +++
+ include/linux/mmc/host.h                    |    1 +
+ include/linux/mmc/mmc.h                     |    4 +
+ mm/page_io.c                                |    3 +-
+ 19 files changed, 395 insertions(+), 18 deletions(-)
+
+-- 
+1.7.10.rc2
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
