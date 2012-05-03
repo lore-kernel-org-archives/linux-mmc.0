@@ -1,178 +1,202 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 00/29] mmc: mmcif and tmio regulator and OF support
-Date: Thu,  3 May 2012 17:05:29 +0200
-Message-ID: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 29/29] sh: ecovec: switch MMC power control to regulators
+Date: Thu,  3 May 2012 17:05:58 +0200
+Message-ID: <1336057558-11031-30-git-send-email-g.liakhovetski@gmx.de>
+References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi
+Power on the CN11 and CN12 SD/MMC slots on ecovec is controlled by GPIOs,
+which makes it possible to use the fixed voltage regulator driver to switch
+card power on and off.
 
-I was not directly sure, what was the better way to send these out - as 
-one seriess or as several. I would actually prefer several, but there are 
-many dependencies. So, maybe best would be to try to review and address 
-any issues on the MLs, only posting new versions of affected patches, and 
-eventually provide a branch to pull from.
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Paul Mundt <lethal@linux-sh.org>
+---
 
-Now to contents:
+Optional, mainly FYI
 
-1. prerequisites: goes on top of
+ arch/sh/boards/mach-ecovec24/setup.c |   85 ++++++++++++++++++++++++---------
+ 1 files changed, 62 insertions(+), 23 deletions(-)
 
-[PATCH 4/6] mmc: sdhi: don't use connection IDs to obtain a clock reference
-[PATCH 5/6] mmc: mmcif: don't use connection IDs to obtain a clock reference
-
-http://thread.gmane.org/gmane.linux.ports.sh.devel/14425
-
-[PATCH 0/3] mmc: sh-mmcif: clock management updates         
-[PATCH 1/3] mmc: sh_mmcif: simplify and use meaningful label names in error-handling
-[PATCH 2/3] mmc: sh_mmcif: fix clock management             
-[PATCH 3/3] mmc: sh_mmcif: re-read the clock frequency upon re-enabling
-
-http://thread.gmane.org/gmane.linux.ports.sh.devel/14448
-
-(the following two patches should already be in the MMC tree)
-
-[PATCH] mmc: cd-gpio.c: Include header to pickup exported symbol prototypes
-
-http://www.spinics.net/lists/linux-mmc/msg13823.html
-
-[PATCH] mmc: cd-gpio: allow NULL context in mmc_cd_gpio_free()
-
-http://thread.gmane.org/gmane.linux.kernel.mmc/14103
-
-2. supersede: this series supersedes my earlier patches:
-
-[PATCH/RFC 0/7] mmc: tmio: regulator support, clock management, convert ecovec
-[PATCH 1/7] mmc: tmio: stop interface clock before runtime PM suspending
-[PATCH 2/7] mmc: tmio: don't needlessly enable interrupts during probing
-[PATCH 3/7] mmc: tmio: add callbacks to enable-update and disable the interface clock
-[PATCH 4/7] mmc: sdhi: implement tmio-mmc clock enable-update and disable callbacks
-[PATCH 5/7] mmc: tmio: add regulator support
-[PATCH 6/7] mmc: sdhi: do not install dummy callbacks
-[PATCH 7/7] sh: ecovec: switch MMC power control to regulators
-
-http://thread.gmane.org/gmane.linux.ports.sh.devel/14539
-
-[PATCH 0/5] mmc: sh_mmcif: add regulator support
-[PATCH 1/5] mmc: sh_mmcif: remove redundant .down_pwr() callback
-[PATCH 2/5] sh: ecovec: remove unused .down_pwr() MMCIF callback
-[PATCH 3/5] mmc: sh_mmcif: remove unused .down_pwr() callback
-[PATCH 4/5] mmc: sh_mmcif: add regulator support
-[PATCH/RFC 5/5] sh: ecovec: switch MMC power control to regulator
-
-http://thread.gmane.org/gmane.linux.ports.sh.devel/14469
-
-3. regulators: this series includes a bug-fix:
-
-[PATCH 04/31] regulator: fix devm_regulator_put() to call regulator_put() explicitly
-
-a cosmetic improvement:
-
-[PATCH 05/31] regulator: use IS_ERR_OR_NULL() instead of open-coding
-
-and a feature addition to the regulators framework.
-
-4. mmc: this is where most of the patches fall into. This series includes 
-additions and enhancements to the cd-gpio helper, which from now on is 
-going to be called "slot-gpio;" a new file drivers/mmc/core/of.c with only 
-two functions, so, if preferred, it can be merged into core.c; and 
-numerous features, enhancements and improvements to the MMCIF and 
-SDHI/TMIO drivers.
-
-The of.c addition is actually pretty important, because it defines an 
-external interface: it defines mmc properties, that all mmc host drivers 
-will now be able to use, instead of adding new proprietary ones. Drivers, 
-that already have OF support cannot stop supporting their interfaces. 
-Since we do not want to rewrite .dts filesand break binary compatibility 
-with existing platforms, these properties have to be carefully designed.
-
-mmc regulator support: thanks to Mark Brown for comments. This version 
-adds a generic mmc function to obtain a "vmmc" regulator for a specific 
-mmc interface and now uses the device-managed version of regulator_get().
-
-5. sh patches: 
-
-[PATCH 02/29] sh: ecovec: remove unused .down_pwr() MMCIF callback
-
-If we get an ack for this one, we can pull it together with other 
-mmc-related patches via the mmc tree. If not, the following patch
-
-[PATCH 03/29] mmc: sh_mmcif: remove unused .down_pwr() callback
-
-will have to wait until [PATCH 02/29] makes it in.
-
-One more
-
-[PATCH 29/29] sh: ecovec: switch MMC power control to regulators
-
-is optional and mostly is offered as an example of how regulators 
-can be used with sh_mmcif and sh_mobile_sdhi.
-
-Thanks
-Guennadi
-
-Guennadi Liakhovetski (29):
-  mmc: sh_mmcif: remove redundant .down_pwr() callback
-  sh: ecovec: remove unused .down_pwr() MMCIF callback
-  mmc: sh_mmcif: remove unused .down_pwr() callback
-  regulator: fix devm_regulator_put() to call regulator_put()
-    explicitly
-  regulator: use IS_ERR_OR_NULL() instead of open-coding
-  regulator: export a function to check if regulator can change status
-  mmc: add a function to get a regulator, supplying card's Vdd
-  mmc: sh_mmcif: add regulator support
-  mmc: tmio: stop interface clock before runtime PM suspending
-  mmc: tmio: don't needlessly enable interrupts during probing
-  mmc: tmio: add callbacks to enable-update and disable the interface
-    clock
-  mmc: sdhi: implement tmio-mmc clock enable-update and disable
-    callbacks
-  mmc: tmio: add regulator support
-  mmc: sdhi: do not install dummy callbacks
-  mmc: extend and rename cd-gpio helpers to handle more slot GPIO
-    functions
-  mmc: tmio: use MMC opcode defines instead of numbers
-  mmc: use a more generic name for slot function types and fields
-  mmc: tmio: remove a duplicated comment line
-  mmc: add two capability flags for CD and WP signal polarity
-  mmc: add CD GPIO polling support to slot functions
-  mmc: convert slot functions to managed allocation
-  mmc: add WP pin handler to slot functions
-  mmc: tmio: use generic GPIO CD and WP handlers
-  mmc: add a simple generic OF parser
-  mmc: tmio: add OF support
-  mmc: sdhi: add OF support, make platform data optional
-  mmc: mmcif: add OF support
-  mmc: mmcif: add support for generic GPIO CD polling
-  sh: ecovec: switch MMC power control to regulators
-
- arch/sh/boards/mach-ecovec24/setup.c |   91 ++++++++++++------
- drivers/mmc/core/Makefile            |    4 +-
- drivers/mmc/core/cd-gpio.c           |   83 ----------------
- drivers/mmc/core/core.c              |   27 +++++
- drivers/mmc/core/host.c              |    4 +
- drivers/mmc/core/of.c                |   91 ++++++++++++++++++
- drivers/mmc/core/slot-gpio.c         |  175 ++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sh_mmcif.c          |   83 ++++++++++++++---
- drivers/mmc/host/sh_mobile_sdhi.c    |   56 ++++++++---
- drivers/mmc/host/tmio_mmc.h          |    2 +
- drivers/mmc/host/tmio_mmc_pio.c      |  159 +++++++++++++++++++++++++------
- drivers/regulator/core.c             |   20 ++++-
- include/linux/mfd/tmio.h             |    3 +
- include/linux/mmc/cd-gpio.h          |   18 ----
- include/linux/mmc/host.h             |   39 +++++++-
- include/linux/mmc/sh_mmcif.h         |    1 -
- include/linux/mmc/slot-gpio.h        |   24 +++++
- include/linux/regulator/consumer.h   |    7 ++
- 18 files changed, 694 insertions(+), 193 deletions(-)
- delete mode 100644 drivers/mmc/core/cd-gpio.c
- create mode 100644 drivers/mmc/core/of.c
- create mode 100644 drivers/mmc/core/slot-gpio.c
- delete mode 100644 include/linux/mmc/cd-gpio.h
- create mode 100644 include/linux/mmc/slot-gpio.h
-
+diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
+index a2f70e6..0822931 100644
+--- a/arch/sh/boards/mach-ecovec24/setup.c
++++ b/arch/sh/boards/mach-ecovec24/setup.c
+@@ -19,6 +19,9 @@
+ #include <linux/interrupt.h>
+ #include <linux/io.h>
+ #include <linux/delay.h>
++#include <linux/regulator/driver.h>
++#include <linux/regulator/fixed.h>
++#include <linux/regulator/machine.h>
+ #include <linux/usb/r8a66597.h>
+ #include <linux/usb/renesas_usbhs.h>
+ #include <linux/i2c.h>
+@@ -515,12 +518,66 @@ static struct i2c_board_info ts_i2c_clients = {
+ 	.irq		= IRQ0,
+ };
+ 
++static struct regulator_consumer_supply cn12_power_consumers[] =
++{
++	REGULATOR_SUPPLY("vmmc", "sh_mmcif.0"),
++	REGULATOR_SUPPLY("vmmc", "sh_mobile_sdhi.1"),
++};
++
++static struct regulator_init_data cn12_power_init_data = {
++	.constraints = {
++		.valid_ops_mask = REGULATOR_CHANGE_STATUS,
++	},
++	.num_consumer_supplies  = ARRAY_SIZE(cn12_power_consumers),
++	.consumer_supplies      = cn12_power_consumers,
++};
++
++static struct fixed_voltage_config cn12_power_info = {
++	.supply_name = "CN12 SD/MMC Vdd",
++	.microvolts = 3300000,
++	.gpio = GPIO_PTB7,
++	.enable_high = 1,
++	.init_data = &cn12_power_init_data,
++};
++
++static struct platform_device cn12_power = {
++	.name = "reg-fixed-voltage",
++	.id   = 0,
++	.dev  = {
++		.platform_data = &cn12_power_info,
++	},
++};
++
+ #if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
+ /* SDHI0 */
+-static void sdhi0_set_pwr(struct platform_device *pdev, int state)
++static struct regulator_consumer_supply sdhi0_power_consumers[] =
+ {
+-	gpio_set_value(GPIO_PTB6, state);
+-}
++	REGULATOR_SUPPLY("vmmc", "sh_mobile_sdhi.0"),
++};
++
++static struct regulator_init_data sdhi0_power_init_data = {
++	.constraints = {
++		.valid_ops_mask = REGULATOR_CHANGE_STATUS,
++	},
++	.num_consumer_supplies  = ARRAY_SIZE(sdhi0_power_consumers),
++	.consumer_supplies      = sdhi0_power_consumers,
++};
++
++static struct fixed_voltage_config sdhi0_power_info = {
++	.supply_name = "CN11 SD/MMC Vdd",
++	.microvolts = 3300000,
++	.gpio = GPIO_PTB6,
++	.enable_high = 1,
++	.init_data = &sdhi0_power_init_data,
++};
++
++static struct platform_device sdhi0_power = {
++	.name = "reg-fixed-voltage",
++	.id   = 1,
++	.dev  = {
++		.platform_data = &sdhi0_power_info,
++	},
++};
+ 
+ static int sdhi0_get_cd(struct platform_device *pdev)
+ {
+@@ -530,7 +587,6 @@ static int sdhi0_get_cd(struct platform_device *pdev)
+ static struct sh_mobile_sdhi_info sdhi0_info = {
+ 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
+-	.set_pwr	= sdhi0_set_pwr,
+ 	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
+ 			  MMC_CAP_NEEDS_POLL,
+ 	.get_cd		= sdhi0_get_cd,
+@@ -561,11 +617,6 @@ static struct platform_device sdhi0_device = {
+ 
+ #if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
+ /* SDHI1 */
+-static void sdhi1_set_pwr(struct platform_device *pdev, int state)
+-{
+-	gpio_set_value(GPIO_PTB7, state);
+-}
+-
+ static int sdhi1_get_cd(struct platform_device *pdev)
+ {
+ 	return !gpio_get_value(GPIO_PTW7);
+@@ -576,7 +627,6 @@ static struct sh_mobile_sdhi_info sdhi1_info = {
+ 	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
+ 	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
+ 			  MMC_CAP_NEEDS_POLL,
+-	.set_pwr	= sdhi1_set_pwr,
+ 	.get_cd		= sdhi1_get_cd,
+ };
+ 
+@@ -872,11 +922,6 @@ static struct platform_device vou_device = {
+ 
+ #if defined(CONFIG_MMC_SH_MMCIF) || defined(CONFIG_MMC_SH_MMCIF_MODULE)
+ /* SH_MMCIF */
+-static void mmcif_set_pwr(struct platform_device *pdev, int state)
+-{
+-	gpio_set_value(GPIO_PTB7, state);
+-}
+-
+ static struct resource sh_mmcif_resources[] = {
+ 	[0] = {
+ 		.name	= "SH_MMCIF",
+@@ -897,12 +942,10 @@ static struct resource sh_mmcif_resources[] = {
+ };
+ 
+ static struct sh_mmcif_plat_data sh_mmcif_plat = {
+-	.set_pwr	= mmcif_set_pwr,
+ 	.sup_pclk	= 0, /* SH7724: Max Pclk/2 */
+ 	.caps		= MMC_CAP_4_BIT_DATA |
+ 			  MMC_CAP_8_BIT_DATA |
+ 			  MMC_CAP_NEEDS_POLL,
+-	.ocr		= MMC_VDD_32_33 | MMC_VDD_33_34,
+ };
+ 
+ static struct platform_device sh_mmcif_device = {
+@@ -927,7 +970,9 @@ static struct platform_device *ecovec_devices[] __initdata = {
+ 	&ceu0_device,
+ 	&ceu1_device,
+ 	&keysc_device,
++	&cn12_power,
+ #if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
++	&sdhi0_power,
+ 	&sdhi0_device,
+ #if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
+ 	&sdhi1_device,
+@@ -1224,8 +1269,6 @@ static int __init arch_setup(void)
+ 	gpio_request(GPIO_FN_SDHI0D2,  NULL);
+ 	gpio_request(GPIO_FN_SDHI0D1,  NULL);
+ 	gpio_request(GPIO_FN_SDHI0D0,  NULL);
+-	gpio_request(GPIO_PTB6, NULL);
+-	gpio_direction_output(GPIO_PTB6, 0);
+ #else
+ 	/* enable MSIOF0 on CN11 (needs DS2.4 set to OFF) */
+ 	gpio_request(GPIO_FN_MSIOF0_TXD, NULL);
+@@ -1254,8 +1297,6 @@ static int __init arch_setup(void)
+ 	gpio_request(GPIO_FN_MMC_D0, NULL);
+ 	gpio_request(GPIO_FN_MMC_CLK, NULL);
+ 	gpio_request(GPIO_FN_MMC_CMD, NULL);
+-	gpio_request(GPIO_PTB7, NULL);
+-	gpio_direction_output(GPIO_PTB7, 0);
+ 
+ 	cn12_enabled = true;
+ #elif defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
+@@ -1267,8 +1308,6 @@ static int __init arch_setup(void)
+ 	gpio_request(GPIO_FN_SDHI1D2,  NULL);
+ 	gpio_request(GPIO_FN_SDHI1D1,  NULL);
+ 	gpio_request(GPIO_FN_SDHI1D0,  NULL);
+-	gpio_request(GPIO_PTB7, NULL);
+-	gpio_direction_output(GPIO_PTB7, 0);
+ 
+ 	/* Card-detect, used on CN12 with SDHI1 */
+ 	gpio_request(GPIO_PTW7, NULL);
 -- 
 1.7.2.5
 
