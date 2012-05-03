@@ -1,50 +1,39 @@
-From: Jeff Moyer <jmoyer@redhat.com>
-Subject: Re: [PATCH v2 06/16] block: treat DMPG and SWAPIN requests as special
-Date: Thu, 03 May 2012 10:38:10 -0400
-Message-ID: <x49fwbhl48d.fsf@segfault.boston.devel.redhat.com>
-References: <1336054995-22988-1-git-send-email-svenkatr@ti.com>
-	<1336054995-22988-7-git-send-email-svenkatr@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1336054995-22988-7-git-send-email-svenkatr@ti.com> (Venkatraman
-	S.'s message of "Thu, 3 May 2012 19:53:05 +0530")
-Sender: owner-linux-mm@kvack.org
-To: Venkatraman S <svenkatr@ti.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, arnd.bergmann@linaro.org, alex.lemberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, rmk+kernel@arm.linux.org.uk
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: [PATCH 03/29] mmc: sh_mmcif: remove unused .down_pwr() callback
+Date: Thu,  3 May 2012 17:05:32 +0200
+Message-ID: <1336057558-11031-4-git-send-email-g.liakhovetski@gmx.de>
+References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Venkatraman S <svenkatr@ti.com> writes:
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+---
 
-> From: Ilan Smith <ilan.smith@sandisk.com>
->
-> When exp_swapin and exp_dmpg are set, treat read requests
-> marked with DMPG and SWAPIN as high priority and move to
-> the front of the queue.
->
-[...]
-> +	if (bio_swapin(bio) && blk_queue_exp_swapin(q)) {
-> +		spin_lock_irq(q->queue_lock);
-> +		where = ELEVATOR_INSERT_FLUSH;
-> +		goto get_rq;
-> +	}
-> +
-> +	if (bio_dmpg(bio) && blk_queue_exp_dmpg(q)) {
-> +		spin_lock_irq(q->queue_lock);
-> +		where = ELEVATOR_INSERT_FLUSH;
-> +		goto get_rq;
+Please, hold this patch back, until
 
-Is ELEVATOR_INSERT_FRONT not good enough?  It seems wrong to use _FLUSH,
-here.  If the semantics of ELEVATOR_INSERT_FLUSH are really what is
-required, then perhaps we need to have another think about the naming of
-these flags.
+[PATCH 02/29] sh: ecovec: remove unused .down_pwr() MMCIF callback
 
-Cheers,
-Jeff
+is committed.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+ include/linux/mmc/sh_mmcif.h |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/mmc/sh_mmcif.h
+index 05f0e3d..cb84340 100644
+--- a/include/linux/mmc/sh_mmcif.h
++++ b/include/linux/mmc/sh_mmcif.h
+@@ -39,7 +39,6 @@ struct sh_mmcif_dma {
+ 
+ struct sh_mmcif_plat_data {
+ 	void (*set_pwr)(struct platform_device *pdev, int state);
+-	void (*down_pwr)(struct platform_device *pdev);
+ 	int (*get_cd)(struct platform_device *pdef);
+ 	struct sh_mmcif_dma	*dma;		/* Deprecated. Instead */
+ 	unsigned int		slave_id_tx;	/* use embedded slave_id_[tr]x */
+-- 
+1.7.2.5
+
