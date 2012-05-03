@@ -1,160 +1,178 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 27/29] mmc: mmcif: add OF support
-Date: Thu,  3 May 2012 17:05:56 +0200
-Message-ID: <1336057558-11031-28-git-send-email-g.liakhovetski@gmx.de>
-References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 00/29] mmc: mmcif and tmio regulator and OF support
+Date: Thu,  3 May 2012 17:05:29 +0200
+Message-ID: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>
+Cc: linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add generic MMC OF parsing support to the sh-mmcif driver.
+Hi
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Grant Likely <grant.likely@secretlab.ca>
----
- drivers/mmc/host/sh_mmcif.c |   33 +++++++++++++++++++++++++++------
- 1 files changed, 27 insertions(+), 6 deletions(-)
+I was not directly sure, what was the better way to send these out - as 
+one seriess or as several. I would actually prefer several, but there are 
+many dependencies. So, maybe best would be to try to review and address 
+any issues on the MLs, only posting new versions of affected patches, and 
+eventually provide a branch to pull from.
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index f6d0b11..4fdedcf 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -54,6 +54,7 @@
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/sdio.h>
- #include <linux/mmc/sh_mmcif.h>
-+#include <linux/of.h>
- #include <linux/pagemap.h>
- #include <linux/platform_device.h>
- #include <linux/pm_qos.h>
-@@ -387,6 +388,9 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
- 	struct sh_dmae_slave *tx, *rx;
- 	host->dma_active = false;
- 
-+	if (!pdata)
-+		return;
-+
- 	/* We can only either use DMA for both Tx and Rx or not use it at all */
- 	if (pdata->dma) {
- 		dev_warn(&host->pd->dev,
-@@ -447,13 +451,14 @@ static void sh_mmcif_release_dma(struct sh_mmcif_host *host)
- static void sh_mmcif_clock_control(struct sh_mmcif_host *host, unsigned int clk)
- {
- 	struct sh_mmcif_plat_data *p = host->pd->dev.platform_data;
-+	bool sup_pclk = p ? p->sup_pclk : false;
- 
- 	sh_mmcif_bitclr(host, MMCIF_CE_CLK_CTRL, CLK_ENABLE);
- 	sh_mmcif_bitclr(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR);
- 
- 	if (!clk)
- 		return;
--	if (p->sup_pclk && clk == host->clk)
-+	if (sup_pclk && clk == host->clk)
- 		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_SUP_PCLK);
- 	else
- 		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR &
-@@ -937,7 +942,7 @@ static void sh_mmcif_set_power(struct sh_mmcif_host *host, struct mmc_ios *ios)
- 		/* Errors ignored... */
- 		mmc_regulator_set_ocr(host->mmc, host->vdd,
- 				      ios->power_mode ? ios->vdd : 0);
--	else if (pd->set_pwr)
-+	else if (pd && pd->set_pwr)
- 		pd->set_pwr(host->pd, ios->power_mode != MMC_POWER_OFF);
- }
- 
-@@ -1002,7 +1007,7 @@ static int sh_mmcif_get_cd(struct mmc_host *mmc)
- 	struct sh_mmcif_host *host = mmc_priv(mmc);
- 	struct sh_mmcif_plat_data *p = host->pd->dev.platform_data;
- 
--	if (!p->get_cd)
-+	if (!p || !p->get_cd)
- 		return -ENOSYS;
- 	else
- 		return p->get_cd(host->pd);
-@@ -1275,6 +1280,9 @@ static void sh_mmcif_init_ocr(struct sh_mmcif_host *host)
- 
- 	host->vdd = mmc_regulator_get_vmmc(mmc);
- 
-+	if (!pd)
-+		return;
-+
- 	if ((mmc->ocr_avail && pd->ocr) || (host->vdd && pd->set_pwr))
- 		dev_warn(mmc_dev(mmc),
- 			 "Platform OCR mask / .set_pwr() are ignored\n");
-@@ -1288,6 +1296,7 @@ static void sh_mmcif_init_ocr(struct sh_mmcif_host *host)
- 
- static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- {
-+	struct device_node *node = pdev->dev.of_node;
- 	int ret = 0, irq[2];
- 	struct mmc_host *mmc;
- 	struct sh_mmcif_host *host;
-@@ -1295,7 +1304,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 	struct resource *res;
- 	void __iomem *reg;
- 
--	if (!pd) {
-+	if (!pd && !of_device_is_available(node)) {
- 		dev_err(&pdev->dev, "sh_mmcif plat data error.\n");
- 		return -ENXIO;
- 	}
-@@ -1331,11 +1340,13 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
- 
- 	spin_lock_init(&host->lock);
- 
-+	mmc_of_get(mmc);
-+
- 	mmc->ops = &sh_mmcif_ops;
- 	sh_mmcif_init_ocr(host);
- 
--	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
--	if (pd->caps)
-+	mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
-+	if (pd && pd->caps)
- 		mmc->caps |= pd->caps;
- 	mmc->max_segs = 32;
- 	mmc->max_blk_size = 512;
-@@ -1400,6 +1411,7 @@ eresume:
- 	clk_put(host->hclk);
- eclkget:
- 	pm_runtime_disable(&pdev->dev);
-+	mmc_of_put(mmc);
- 	mmc_free_host(mmc);
- ealloch:
- 	iounmap(reg);
-@@ -1412,6 +1424,7 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
- 	int irq[2];
- 
- 	host->dying = true;
-+	mmc_of_put(host->mmc);
- 	clk_enable(host->hclk);
- 	pm_runtime_get_sync(&pdev->dev);
- 
-@@ -1469,6 +1482,12 @@ static int sh_mmcif_resume(struct device *dev)
- #define sh_mmcif_resume		NULL
- #endif	/* CONFIG_PM */
- 
-+static const struct of_device_id mmcif_of_match[] = {
-+	{ .compatible = "renesas,sh-mmcif" },
-+	{ }
-+};
-+MODULE_DEVICE_TABLE(of, mmcif_of_match);
-+
- static const struct dev_pm_ops sh_mmcif_dev_pm_ops = {
- 	.suspend = sh_mmcif_suspend,
- 	.resume = sh_mmcif_resume,
-@@ -1480,6 +1499,8 @@ static struct platform_driver sh_mmcif_driver = {
- 	.driver		= {
- 		.name	= DRIVER_NAME,
- 		.pm	= &sh_mmcif_dev_pm_ops,
-+		.owner	= THIS_MODULE,
-+		.of_match_table = mmcif_of_match,
- 	},
- };
- 
+Now to contents:
+
+1. prerequisites: goes on top of
+
+[PATCH 4/6] mmc: sdhi: don't use connection IDs to obtain a clock reference
+[PATCH 5/6] mmc: mmcif: don't use connection IDs to obtain a clock reference
+
+http://thread.gmane.org/gmane.linux.ports.sh.devel/14425
+
+[PATCH 0/3] mmc: sh-mmcif: clock management updates         
+[PATCH 1/3] mmc: sh_mmcif: simplify and use meaningful label names in error-handling
+[PATCH 2/3] mmc: sh_mmcif: fix clock management             
+[PATCH 3/3] mmc: sh_mmcif: re-read the clock frequency upon re-enabling
+
+http://thread.gmane.org/gmane.linux.ports.sh.devel/14448
+
+(the following two patches should already be in the MMC tree)
+
+[PATCH] mmc: cd-gpio.c: Include header to pickup exported symbol prototypes
+
+http://www.spinics.net/lists/linux-mmc/msg13823.html
+
+[PATCH] mmc: cd-gpio: allow NULL context in mmc_cd_gpio_free()
+
+http://thread.gmane.org/gmane.linux.kernel.mmc/14103
+
+2. supersede: this series supersedes my earlier patches:
+
+[PATCH/RFC 0/7] mmc: tmio: regulator support, clock management, convert ecovec
+[PATCH 1/7] mmc: tmio: stop interface clock before runtime PM suspending
+[PATCH 2/7] mmc: tmio: don't needlessly enable interrupts during probing
+[PATCH 3/7] mmc: tmio: add callbacks to enable-update and disable the interface clock
+[PATCH 4/7] mmc: sdhi: implement tmio-mmc clock enable-update and disable callbacks
+[PATCH 5/7] mmc: tmio: add regulator support
+[PATCH 6/7] mmc: sdhi: do not install dummy callbacks
+[PATCH 7/7] sh: ecovec: switch MMC power control to regulators
+
+http://thread.gmane.org/gmane.linux.ports.sh.devel/14539
+
+[PATCH 0/5] mmc: sh_mmcif: add regulator support
+[PATCH 1/5] mmc: sh_mmcif: remove redundant .down_pwr() callback
+[PATCH 2/5] sh: ecovec: remove unused .down_pwr() MMCIF callback
+[PATCH 3/5] mmc: sh_mmcif: remove unused .down_pwr() callback
+[PATCH 4/5] mmc: sh_mmcif: add regulator support
+[PATCH/RFC 5/5] sh: ecovec: switch MMC power control to regulator
+
+http://thread.gmane.org/gmane.linux.ports.sh.devel/14469
+
+3. regulators: this series includes a bug-fix:
+
+[PATCH 04/31] regulator: fix devm_regulator_put() to call regulator_put() explicitly
+
+a cosmetic improvement:
+
+[PATCH 05/31] regulator: use IS_ERR_OR_NULL() instead of open-coding
+
+and a feature addition to the regulators framework.
+
+4. mmc: this is where most of the patches fall into. This series includes 
+additions and enhancements to the cd-gpio helper, which from now on is 
+going to be called "slot-gpio;" a new file drivers/mmc/core/of.c with only 
+two functions, so, if preferred, it can be merged into core.c; and 
+numerous features, enhancements and improvements to the MMCIF and 
+SDHI/TMIO drivers.
+
+The of.c addition is actually pretty important, because it defines an 
+external interface: it defines mmc properties, that all mmc host drivers 
+will now be able to use, instead of adding new proprietary ones. Drivers, 
+that already have OF support cannot stop supporting their interfaces. 
+Since we do not want to rewrite .dts filesand break binary compatibility 
+with existing platforms, these properties have to be carefully designed.
+
+mmc regulator support: thanks to Mark Brown for comments. This version 
+adds a generic mmc function to obtain a "vmmc" regulator for a specific 
+mmc interface and now uses the device-managed version of regulator_get().
+
+5. sh patches: 
+
+[PATCH 02/29] sh: ecovec: remove unused .down_pwr() MMCIF callback
+
+If we get an ack for this one, we can pull it together with other 
+mmc-related patches via the mmc tree. If not, the following patch
+
+[PATCH 03/29] mmc: sh_mmcif: remove unused .down_pwr() callback
+
+will have to wait until [PATCH 02/29] makes it in.
+
+One more
+
+[PATCH 29/29] sh: ecovec: switch MMC power control to regulators
+
+is optional and mostly is offered as an example of how regulators 
+can be used with sh_mmcif and sh_mobile_sdhi.
+
+Thanks
+Guennadi
+
+Guennadi Liakhovetski (29):
+  mmc: sh_mmcif: remove redundant .down_pwr() callback
+  sh: ecovec: remove unused .down_pwr() MMCIF callback
+  mmc: sh_mmcif: remove unused .down_pwr() callback
+  regulator: fix devm_regulator_put() to call regulator_put()
+    explicitly
+  regulator: use IS_ERR_OR_NULL() instead of open-coding
+  regulator: export a function to check if regulator can change status
+  mmc: add a function to get a regulator, supplying card's Vdd
+  mmc: sh_mmcif: add regulator support
+  mmc: tmio: stop interface clock before runtime PM suspending
+  mmc: tmio: don't needlessly enable interrupts during probing
+  mmc: tmio: add callbacks to enable-update and disable the interface
+    clock
+  mmc: sdhi: implement tmio-mmc clock enable-update and disable
+    callbacks
+  mmc: tmio: add regulator support
+  mmc: sdhi: do not install dummy callbacks
+  mmc: extend and rename cd-gpio helpers to handle more slot GPIO
+    functions
+  mmc: tmio: use MMC opcode defines instead of numbers
+  mmc: use a more generic name for slot function types and fields
+  mmc: tmio: remove a duplicated comment line
+  mmc: add two capability flags for CD and WP signal polarity
+  mmc: add CD GPIO polling support to slot functions
+  mmc: convert slot functions to managed allocation
+  mmc: add WP pin handler to slot functions
+  mmc: tmio: use generic GPIO CD and WP handlers
+  mmc: add a simple generic OF parser
+  mmc: tmio: add OF support
+  mmc: sdhi: add OF support, make platform data optional
+  mmc: mmcif: add OF support
+  mmc: mmcif: add support for generic GPIO CD polling
+  sh: ecovec: switch MMC power control to regulators
+
+ arch/sh/boards/mach-ecovec24/setup.c |   91 ++++++++++++------
+ drivers/mmc/core/Makefile            |    4 +-
+ drivers/mmc/core/cd-gpio.c           |   83 ----------------
+ drivers/mmc/core/core.c              |   27 +++++
+ drivers/mmc/core/host.c              |    4 +
+ drivers/mmc/core/of.c                |   91 ++++++++++++++++++
+ drivers/mmc/core/slot-gpio.c         |  175 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sh_mmcif.c          |   83 ++++++++++++++---
+ drivers/mmc/host/sh_mobile_sdhi.c    |   56 ++++++++---
+ drivers/mmc/host/tmio_mmc.h          |    2 +
+ drivers/mmc/host/tmio_mmc_pio.c      |  159 +++++++++++++++++++++++++------
+ drivers/regulator/core.c             |   20 ++++-
+ include/linux/mfd/tmio.h             |    3 +
+ include/linux/mmc/cd-gpio.h          |   18 ----
+ include/linux/mmc/host.h             |   39 +++++++-
+ include/linux/mmc/sh_mmcif.h         |    1 -
+ include/linux/mmc/slot-gpio.h        |   24 +++++
+ include/linux/regulator/consumer.h   |    7 ++
+ 18 files changed, 694 insertions(+), 193 deletions(-)
+ delete mode 100644 drivers/mmc/core/cd-gpio.c
+ create mode 100644 drivers/mmc/core/of.c
+ create mode 100644 drivers/mmc/core/slot-gpio.c
+ delete mode 100644 include/linux/mmc/cd-gpio.h
+ create mode 100644 include/linux/mmc/slot-gpio.h
+
 -- 
 1.7.2.5
 
