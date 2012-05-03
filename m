@@ -1,163 +1,160 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 24/29] mmc: add a simple generic OF parser
-Date: Thu,  3 May 2012 17:05:53 +0200
-Message-ID: <1336057558-11031-25-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 27/29] mmc: mmcif: add OF support
+Date: Thu,  3 May 2012 17:05:56 +0200
+Message-ID: <1336057558-11031-28-git-send-email-g.liakhovetski@gmx.de>
 References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:54202 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756703Ab2ECPGF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 May 2012 11:06:05 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>
+List-Id: linux-mmc@vger.kernel.org
 
-Many MMC host drivers already use OF data to obtain their platform-specific
-configuration. Each of them is doing this in its special way, whereas many
-parameters are identical and can easily be generalised. This patch adds
-such a generic parser. So far it only adds and handles very few basic
-properties. New ones can be added in the future as required.
+Add generic MMC OF parsing support to the sh-mmcif driver.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: Grant Likely <grant.likely@secretlab.ca>
 ---
- drivers/mmc/core/Makefile |    2 +
- drivers/mmc/core/of.c     |   91 +++++++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h  |   12 ++++++
- 3 files changed, 105 insertions(+), 0 deletions(-)
- create mode 100644 drivers/mmc/core/of.c
+ drivers/mmc/host/sh_mmcif.c |   33 +++++++++++++++++++++++++++------
+ 1 files changed, 27 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 38ed210..aa7727e 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -9,4 +9,6 @@ mmc_core-y			:= core.o bus.o host.o \
- 				   sdio_cis.o sdio_io.o sdio_irq.o \
- 				   quirks.o slot-gpio.o
- 
-+mmc_core-$(CONFIG_OF)		+= of.o
-+
- mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
-diff --git a/drivers/mmc/core/of.c b/drivers/mmc/core/of.c
-new file mode 100644
-index 0000000..2fba115
---- /dev/null
-+++ b/drivers/mmc/core/of.c
-@@ -0,0 +1,91 @@
-+/*
-+ * Generic MMC OF parser
-+ *
-+ * Copyright (C) 2012, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
-+
-+#include <linux/device.h>
-+#include <linux/err.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/slot-gpio.h>
-+#include <linux/module.h>
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index f6d0b11..4fdedcf 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -54,6 +54,7 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/sdio.h>
+ #include <linux/mmc/sh_mmcif.h>
 +#include <linux/of.h>
-+#include <linux/of_gpio.h>
-+
-+/*
-+ * Implementation-specific capabilities, that the controller driver usually
-+ * cannot autodetect and has to receive from an external source, e.g., from
-+ * platform data or from OF are:
-+ *
-+ * MMC_CAP_4_BIT_DATA: depends on the board layout: how many data lines are
-+ *			connected
-+ * MMC_CAP_8_BIT_DATA: ditto
-+ * MMC_CAP2_INVERTED_CD: card-detect active-low (0 == card present)
-+ * MMC_CAP2_INVERTED_RO: write-protect active-low (0 == read-only)
-+ *	Some features might be supplied as GPIO bindings:
-+ * MMC_CAP_SDIO_IRQ: depends, whether an SDIO IRQ line is connected
-+ * MMC_CAP_NEEDS_POLL: is a card-detect pin connected?
-+ * MMC_CAP_NONREMOVABLE: can also be a board feature, also, some media-types
-+ *			(eMMC?) are intrinsicly non-removable
-+ *	Others can be retrieved from regulators:
-+ * MMC_CAP_POWER_OFF_CARD
-+ */
-+
-+void mmc_of_get(struct mmc_host *mmc)
-+{
-+	struct device *dev = mmc_dev(mmc);
-+	struct device_node *node = dev->of_node;
-+	enum of_gpio_flags flags;
-+	unsigned int gpio;
-+	int ret;
-+
-+	if (!node || !of_device_is_available(node))
+ #include <linux/pagemap.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_qos.h>
+@@ -387,6 +388,9 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
+ 	struct sh_dmae_slave *tx, *rx;
+ 	host->dma_active = false;
+ 
++	if (!pdata)
 +		return;
 +
-+	if (of_get_property(node, "mmc,4_bit_data", NULL))
-+		mmc->caps |= MMC_CAP_4_BIT_DATA;
-+	if (of_get_property(node, "mmc,8_bit_data", NULL))
-+		mmc->caps |= MMC_CAP_8_BIT_DATA;
-+	if (of_get_property(node, "mmc,sdio_irq", NULL))
-+		mmc->caps |= MMC_CAP_SDIO_IRQ;
-+	if (of_get_property(node, "mmc,nonremovable", NULL))
-+		mmc->caps |= MMC_CAP_NONREMOVABLE;
-+	if (of_get_property(node, "mmc,needs_poll", NULL))
-+		mmc->caps |= MMC_CAP_NEEDS_POLL;
-+	if (of_get_property(node, "mmc,inverted_cd", NULL))
-+		mmc->caps2 |= MMC_CAP2_INVERTED_CD;
-+	if (of_get_property(node, "mmc,inverted_ro", NULL))
-+		mmc->caps2 |= MMC_CAP2_INVERTED_RO;
-+
-+	/*
-+	 * Both mmc_gpio_request_cd() and mmc_gpio_request_ro() check for
-+	 * gpio_valid(), so, no need to check for error
-+	 */
-+
-+	gpio = of_get_named_gpio_flags(node, "cd-gpios", 0, &flags);
-+	ret = mmc_gpio_request_cd(mmc, gpio);
-+	if (ret < 0)
-+		dev_warn(mmc->parent, "Failed to obtain CD GPIO: %d\n", ret);
-+
-+	gpio = of_get_named_gpio_flags(node, "ro-gpios", 0, &flags);
-+	ret = mmc_gpio_request_ro(mmc, gpio);
-+	if (ret < 0)
-+		dev_warn(mmc->parent, "Failed to obtain RO GPIO: %d\n", ret);
-+}
-+EXPORT_SYMBOL(mmc_of_get);
-+
-+void mmc_of_put(struct mmc_host *mmc)
-+{
-+	struct device_node *node = mmc_dev(mmc)->of_node;
-+
-+	if (!node || !of_device_is_available(node))
-+		return;
-+
-+	mmc_gpio_free_ro(mmc);
-+	mmc_gpio_free_cd(mmc);
-+}
-+EXPORT_SYMBOL(mmc_of_put);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index f8157a9..94b3805 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -450,4 +450,16 @@ static inline unsigned int mmc_host_clk_rate(struct mmc_host *host)
- 	return host->ios.clock;
+ 	/* We can only either use DMA for both Tx and Rx or not use it at all */
+ 	if (pdata->dma) {
+ 		dev_warn(&host->pd->dev,
+@@ -447,13 +451,14 @@ static void sh_mmcif_release_dma(struct sh_mmcif_host *host)
+ static void sh_mmcif_clock_control(struct sh_mmcif_host *host, unsigned int clk)
+ {
+ 	struct sh_mmcif_plat_data *p = host->pd->dev.platform_data;
++	bool sup_pclk = p ? p->sup_pclk : false;
+ 
+ 	sh_mmcif_bitclr(host, MMCIF_CE_CLK_CTRL, CLK_ENABLE);
+ 	sh_mmcif_bitclr(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR);
+ 
+ 	if (!clk)
+ 		return;
+-	if (p->sup_pclk && clk == host->clk)
++	if (sup_pclk && clk == host->clk)
+ 		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_SUP_PCLK);
+ 	else
+ 		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR &
+@@ -937,7 +942,7 @@ static void sh_mmcif_set_power(struct sh_mmcif_host *host, struct mmc_ios *ios)
+ 		/* Errors ignored... */
+ 		mmc_regulator_set_ocr(host->mmc, host->vdd,
+ 				      ios->power_mode ? ios->vdd : 0);
+-	else if (pd->set_pwr)
++	else if (pd && pd->set_pwr)
+ 		pd->set_pwr(host->pd, ios->power_mode != MMC_POWER_OFF);
  }
- #endif
+ 
+@@ -1002,7 +1007,7 @@ static int sh_mmcif_get_cd(struct mmc_host *mmc)
+ 	struct sh_mmcif_host *host = mmc_priv(mmc);
+ 	struct sh_mmcif_plat_data *p = host->pd->dev.platform_data;
+ 
+-	if (!p->get_cd)
++	if (!p || !p->get_cd)
+ 		return -ENOSYS;
+ 	else
+ 		return p->get_cd(host->pd);
+@@ -1275,6 +1280,9 @@ static void sh_mmcif_init_ocr(struct sh_mmcif_host *host)
+ 
+ 	host->vdd = mmc_regulator_get_vmmc(mmc);
+ 
++	if (!pd)
++		return;
 +
-+#ifdef CONFIG_OF
-+void mmc_of_get(struct mmc_host *mmc);
-+void mmc_of_put(struct mmc_host *mmc);
-+#else
-+static inline void mmc_of_get(struct mmc_host *mmc)
-+{
-+}
-+static inline void mmc_of_put(struct mmc_host *mmc)
-+{
-+}
-+#endif
- #endif /* LINUX_MMC_HOST_H */
+ 	if ((mmc->ocr_avail && pd->ocr) || (host->vdd && pd->set_pwr))
+ 		dev_warn(mmc_dev(mmc),
+ 			 "Platform OCR mask / .set_pwr() are ignored\n");
+@@ -1288,6 +1296,7 @@ static void sh_mmcif_init_ocr(struct sh_mmcif_host *host)
+ 
+ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ {
++	struct device_node *node = pdev->dev.of_node;
+ 	int ret = 0, irq[2];
+ 	struct mmc_host *mmc;
+ 	struct sh_mmcif_host *host;
+@@ -1295,7 +1304,7 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 	struct resource *res;
+ 	void __iomem *reg;
+ 
+-	if (!pd) {
++	if (!pd && !of_device_is_available(node)) {
+ 		dev_err(&pdev->dev, "sh_mmcif plat data error.\n");
+ 		return -ENXIO;
+ 	}
+@@ -1331,11 +1340,13 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 
+ 	spin_lock_init(&host->lock);
+ 
++	mmc_of_get(mmc);
++
+ 	mmc->ops = &sh_mmcif_ops;
+ 	sh_mmcif_init_ocr(host);
+ 
+-	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
+-	if (pd->caps)
++	mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
++	if (pd && pd->caps)
+ 		mmc->caps |= pd->caps;
+ 	mmc->max_segs = 32;
+ 	mmc->max_blk_size = 512;
+@@ -1400,6 +1411,7 @@ eresume:
+ 	clk_put(host->hclk);
+ eclkget:
+ 	pm_runtime_disable(&pdev->dev);
++	mmc_of_put(mmc);
+ 	mmc_free_host(mmc);
+ ealloch:
+ 	iounmap(reg);
+@@ -1412,6 +1424,7 @@ static int __devexit sh_mmcif_remove(struct platform_device *pdev)
+ 	int irq[2];
+ 
+ 	host->dying = true;
++	mmc_of_put(host->mmc);
+ 	clk_enable(host->hclk);
+ 	pm_runtime_get_sync(&pdev->dev);
+ 
+@@ -1469,6 +1482,12 @@ static int sh_mmcif_resume(struct device *dev)
+ #define sh_mmcif_resume		NULL
+ #endif	/* CONFIG_PM */
+ 
++static const struct of_device_id mmcif_of_match[] = {
++	{ .compatible = "renesas,sh-mmcif" },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, mmcif_of_match);
++
+ static const struct dev_pm_ops sh_mmcif_dev_pm_ops = {
+ 	.suspend = sh_mmcif_suspend,
+ 	.resume = sh_mmcif_resume,
+@@ -1480,6 +1499,8 @@ static struct platform_driver sh_mmcif_driver = {
+ 	.driver		= {
+ 		.name	= DRIVER_NAME,
+ 		.pm	= &sh_mmcif_dev_pm_ops,
++		.owner	= THIS_MODULE,
++		.of_match_table = mmcif_of_match,
+ 	},
+ };
+ 
 -- 
 1.7.2.5
 
