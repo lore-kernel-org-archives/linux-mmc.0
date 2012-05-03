@@ -1,123 +1,139 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 20/29] mmc: add CD GPIO polling support to slot functions
-Date: Thu,  3 May 2012 17:05:49 +0200
-Message-ID: <1336057558-11031-21-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 08/29] mmc: sh_mmcif: add regulator support
+Date: Thu,  3 May 2012 17:05:37 +0200
+Message-ID: <1336057558-11031-9-git-send-email-g.liakhovetski@gmx.de>
 References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:65339 "EHLO
+Received: from moutng.kundenserver.de ([212.227.126.187]:53919 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757400Ab2ECPGD (ORCPT
+	with ESMTP id S1757405Ab2ECPGD (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 May 2012 11:06:03 -0400
 In-Reply-To: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>
 
-A simple extension of mmc slot functions add support for CD GPIO polling
-for cases, where the GPIO cannot produce interrupts or this is for some
-reason not desired.
+Add regulator support to the sh_mmcif driver, but also preserve the current
+power-callback.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
 ---
- drivers/mmc/core/slot-gpio.c  |   42 +++++++++++++++++++++++++++++-----------
- include/linux/mmc/slot-gpio.h |    2 +
- 2 files changed, 32 insertions(+), 12 deletions(-)
+ drivers/mmc/host/sh_mmcif.c |   48 ++++++++++++++++++++++++++++++++++++------
+ 1 files changed, 41 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 11a8ef1..1491fd8 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -29,6 +29,18 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
- 	return IRQ_HANDLED;
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 19c7576..f6d0b11 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -58,6 +58,7 @@
+ #include <linux/platform_device.h>
+ #include <linux/pm_qos.h>
+ #include <linux/pm_runtime.h>
++#include <linux/regulator/consumer.h>
+ #include <linux/spinlock.h>
+ #include <linux/module.h>
+ 
+@@ -231,6 +232,8 @@ struct sh_mmcif_host {
+ 	bool power;
+ 	bool card_present;
+ 
++	struct regulator	*vdd;
++
+ 	/* DMA support */
+ 	struct dma_chan		*chan_rx;
+ 	struct dma_chan		*chan_tx;
+@@ -923,10 +926,24 @@ static void sh_mmcif_clk_update(struct sh_mmcif_host *host)
+ 	host->mmc->f_min = host->clk / 512;
  }
  
-+int mmc_gpio_get_cd(struct mmc_host *host)
++static void sh_mmcif_set_power(struct sh_mmcif_host *host, struct mmc_ios *ios)
 +{
-+	struct mmc_gpio *ctx = host->slot.handler_priv;
++	struct sh_mmcif_plat_data *pd = host->pd->dev.platform_data;
 +
-+	if (!ctx || !gpio_is_valid(ctx->cd_gpio))
-+		return -ENOSYS;
++	if (!(host->mmc->caps & MMC_CAP_POWER_OFF_CARD))
++		return;
 +
-+	return !gpio_get_value_cansleep(ctx->cd_gpio) ^
-+		!(host->caps2 & MMC_CAP2_INVERTED_CD);
++	if (host->vdd)
++		/* Errors ignored... */
++		mmc_regulator_set_ocr(host->mmc, host->vdd,
++				      ios->power_mode ? ios->vdd : 0);
++	else if (pd->set_pwr)
++		pd->set_pwr(host->pd, ios->power_mode != MMC_POWER_OFF);
 +}
-+EXPORT_SYMBOL(mmc_gpio_get_cd);
 +
- int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
+ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  {
- 	size_t len = strlen(dev_name(host->parent)) + 4;
-@@ -36,9 +48,6 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
- 	int irq = gpio_to_irq(gpio);
- 	int ret;
+ 	struct sh_mmcif_host *host = mmc_priv(mmc);
+-	struct sh_mmcif_plat_data *p = host->pd->dev.platform_data;
+ 	unsigned long flags;
  
--	if (irq < 0)
--		return irq;
--
- 	ctx = kmalloc(sizeof(*ctx) + len, GFP_KERNEL);
- 	if (!ctx)
- 		return -ENOMEM;
-@@ -49,20 +58,25 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio)
- 	if (ret < 0)
- 		goto egpioreq;
- 
--	ret = request_threaded_irq(irq, NULL, mmc_gpio_cd_irqt,
--				   IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
--				   ctx->cd_label, host);
--	if (ret < 0)
--		goto eirqreq;
-+	/*
-+	 * Even if gpio_to_irq() returns a valid IRQ number, the platform might
-+	 * still prefer to poll, e.g., because that IRQ number is already used
-+	 * by another unit and cannot be shared.
-+	 */
-+	if (host->caps & MMC_CAP_NEEDS_POLL || irq < 0) {
-+		host->caps |= MMC_CAP_NEEDS_POLL;
-+		host->slot.cd_irq = -EINVAL;
-+	} else if (!request_threaded_irq(irq, NULL, mmc_gpio_cd_irqt,
-+				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
-+				ctx->cd_label, host)) {
-+		host->slot.cd_irq = irq;
-+	}
- 
- 	ctx->cd_gpio = gpio;
--	host->slot.cd_irq = irq;
- 	host->slot.handler_priv = ctx;
- 
- 	return 0;
- 
--eirqreq:
--	gpio_free(gpio);
- egpioreq:
- 	kfree(ctx);
- 	return ret;
-@@ -76,8 +90,12 @@ void mmc_gpio_free_cd(struct mmc_host *host)
- 	if (!ctx)
+ 	spin_lock_irqsave(&host->lock, flags);
+@@ -944,6 +961,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			sh_mmcif_request_dma(host, host->pd->dev.platform_data);
+ 			host->card_present = true;
+ 		}
++		sh_mmcif_set_power(host, ios);
+ 	} else if (ios->power_mode == MMC_POWER_OFF || !ios->clock) {
+ 		/* clock stop */
+ 		sh_mmcif_clock_control(host, 0);
+@@ -957,8 +975,8 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			pm_runtime_put(&host->pd->dev);
+ 			clk_disable(host->hclk);
+ 			host->power = false;
+-			if (p->set_pwr && ios->power_mode == MMC_POWER_OFF)
+-				p->set_pwr(host->pd, 0);
++			if (ios->power_mode == MMC_POWER_OFF)
++				sh_mmcif_set_power(host, ios);
+ 		}
+ 		host->state = STATE_IDLE;
  		return;
+@@ -966,8 +984,6 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  
--	free_irq(host->slot.cd_irq, host);
-+	if (host->slot.cd_irq >= 0) {
-+		free_irq(host->slot.cd_irq, host);
-+		host->slot.cd_irq = -EINVAL;
-+	}
- 	gpio_free(ctx->cd_gpio);
-+	host->slot.handler_priv = NULL;
- 	kfree(ctx);
+ 	if (ios->clock) {
+ 		if (!host->power) {
+-			if (p->set_pwr)
+-				p->set_pwr(host->pd, ios->power_mode);
+ 			clk_enable(host->hclk);
+ 			sh_mmcif_clk_update(host);
+ 			pm_runtime_get_sync(&host->pd->dev);
+@@ -1252,6 +1268,24 @@ static void mmcif_timeout_work(struct work_struct *work)
+ 	mmc_request_done(host->mmc, mrq);
  }
- EXPORT_SYMBOL(mmc_gpio_free_cd);
-diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
-index edfaa32..1a977d7 100644
---- a/include/linux/mmc/slot-gpio.h
-+++ b/include/linux/mmc/slot-gpio.h
-@@ -12,6 +12,8 @@
- #define MMC_SLOT_GPIO_H
  
- struct mmc_host;
++static void sh_mmcif_init_ocr(struct sh_mmcif_host *host)
++{
++	struct sh_mmcif_plat_data *pd = host->pd->dev.platform_data;
++	struct mmc_host *mmc = host->mmc;
 +
-+int mmc_gpio_get_cd(struct mmc_host *host);
- int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio);
- void mmc_gpio_free_cd(struct mmc_host *host);
++	host->vdd = mmc_regulator_get_vmmc(mmc);
++
++	if ((mmc->ocr_avail && pd->ocr) || (host->vdd && pd->set_pwr))
++		dev_warn(mmc_dev(mmc),
++			 "Platform OCR mask / .set_pwr() are ignored\n");
++
++	if (pd->set_pwr)
++		mmc->caps |= MMC_CAP_POWER_OFF_CARD;
++
++	if (!mmc->ocr_avail)
++		mmc->ocr_avail = pd->ocr;
++}
++
+ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ {
+ 	int ret = 0, irq[2];
+@@ -1298,8 +1332,8 @@ static int __devinit sh_mmcif_probe(struct platform_device *pdev)
+ 	spin_lock_init(&host->lock);
  
+ 	mmc->ops = &sh_mmcif_ops;
+-	if (pd->ocr)
+-		mmc->ocr_avail = pd->ocr;
++	sh_mmcif_init_ocr(host);
++
+ 	mmc->caps = MMC_CAP_MMC_HIGHSPEED;
+ 	if (pd->caps)
+ 		mmc->caps |= pd->caps;
 -- 
 1.7.2.5
 
