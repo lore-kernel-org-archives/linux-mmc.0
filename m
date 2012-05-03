@@ -1,48 +1,63 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 02/29] sh: ecovec: remove unused .down_pwr() MMCIF callback
-Date: Thu,  3 May 2012 17:05:31 +0200
-Message-ID: <1336057558-11031-3-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 10/29] mmc: tmio: don't needlessly enable interrupts during probing
+Date: Thu,  3 May 2012 17:05:39 +0200
+Message-ID: <1336057558-11031-11-git-send-email-g.liakhovetski@gmx.de>
 References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
 Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Paul Mundt <lethal@linux-sh.org>
+Cc: linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-.down_pwr() on ecovec was equivalent to .set_pwr(0). Now that .down_pwr()
-is no longer used by the driver, it can be removed.
+We don't have to force-enable MMC interrupts in our .probe() method,
+mmc_add_host() will trigger card detection, that will enable all the
+necessary interrupts.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Paul Mundt <lethal@linux-sh.org>
 ---
- arch/sh/boards/mach-ecovec24/setup.c |    6 ------
- 1 files changed, 0 insertions(+), 6 deletions(-)
+ drivers/mmc/host/tmio_mmc_pio.c |   21 +++++++++++----------
+ 1 files changed, 11 insertions(+), 10 deletions(-)
 
-diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
-index d12fe9d..a2f70e6 100644
---- a/arch/sh/boards/mach-ecovec24/setup.c
-+++ b/arch/sh/boards/mach-ecovec24/setup.c
-@@ -877,11 +877,6 @@ static void mmcif_set_pwr(struct platform_device *pdev, int state)
- 	gpio_set_value(GPIO_PTB7, state);
- }
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 0d2643b..8cd3637 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -948,6 +948,17 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
  
--static void mmcif_down_pwr(struct platform_device *pdev)
--{
--	gpio_set_value(GPIO_PTB7, 0);
--}
+ 	_host->sdcard_irq_mask = sd_ctrl_read32(_host, CTL_IRQ_MASK);
+ 	tmio_mmc_disable_mmc_irqs(_host, TMIO_MASK_ALL);
++
++	/* Unmask the IRQs we want to know about */
++	if (!_host->chan_rx)
++		irq_mask |= TMIO_MASK_READOP;
++	if (!_host->chan_tx)
++		irq_mask |= TMIO_MASK_WRITEOP;
++	if (!_host->native_hotplug)
++		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
++
++	_host->sdcard_irq_mask &= ~irq_mask;
++
+ 	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+ 		tmio_mmc_enable_sdio_irq(mmc, 0);
+ 
+@@ -965,16 +976,6 @@ int __devinit tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 
+ 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
+ 
+-	/* Unmask the IRQs we want to know about */
+-	if (!_host->chan_rx)
+-		irq_mask |= TMIO_MASK_READOP;
+-	if (!_host->chan_tx)
+-		irq_mask |= TMIO_MASK_WRITEOP;
+-	if (!_host->native_hotplug)
+-		irq_mask &= ~(TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
 -
- static struct resource sh_mmcif_resources[] = {
- 	[0] = {
- 		.name	= "SH_MMCIF",
-@@ -903,7 +898,6 @@ static struct resource sh_mmcif_resources[] = {
- 
- static struct sh_mmcif_plat_data sh_mmcif_plat = {
- 	.set_pwr	= mmcif_set_pwr,
--	.down_pwr	= mmcif_down_pwr,
- 	.sup_pclk	= 0, /* SH7724: Max Pclk/2 */
- 	.caps		= MMC_CAP_4_BIT_DATA |
- 			  MMC_CAP_8_BIT_DATA |
+-	tmio_mmc_enable_mmc_irqs(_host, irq_mask);
+-
+ 	if (pdata->flags & TMIO_MMC_USE_GPIO_CD) {
+ 		ret = mmc_cd_gpio_request(mmc, pdata->cd_gpio);
+ 		if (ret < 0) {
 -- 
 1.7.2.5
 
