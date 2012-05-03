@@ -1,93 +1,78 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 07/29] mmc: add a function to get a regulator, supplying card's Vdd
-Date: Thu,  3 May 2012 17:05:36 +0200
-Message-ID: <1336057558-11031-8-git-send-email-g.liakhovetski@gmx.de>
+Subject: [PATCH 06/29] regulator: export a function to check if regulator can change status
+Date: Thu,  3 May 2012 17:05:35 +0200
+Message-ID: <1336057558-11031-7-git-send-email-g.liakhovetski@gmx.de>
 References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:63230 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757346Ab2ECPGD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 May 2012 11:06:03 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Mark Brown <broonie@opensource.wolfsonmicro.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Add a function to get a regulator, supplying card's Vdd on a specific host.
-If such a regulator is found, the function checks, whether a valid OCR mask
-can be obtained from this regulator, and whether it can switch card's power
-on and off.
+Some consumers, e.g., the mmc subsystem, can benefit from an ability to
+check, whether a regulator can switch power on and off.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
 ---
- drivers/mmc/core/core.c  |   27 +++++++++++++++++++++++++++
- include/linux/mmc/host.h |    6 ++++++
- 2 files changed, 33 insertions(+), 0 deletions(-)
+ drivers/regulator/core.c           |   17 +++++++++++++++++
+ include/linux/regulator/consumer.h |    7 +++++++
+ 2 files changed, 24 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 7474c47..ccb5c8a 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1012,6 +1012,33 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+index a57defb..ec4cc0b 100644
+--- a/drivers/regulator/core.c
++++ b/drivers/regulator/core.c
+@@ -1447,6 +1447,23 @@ static int _regulator_can_change_status(struct regulator_dev *rdev)
+ 		return 0;
  }
- EXPORT_SYMBOL(mmc_regulator_set_ocr);
  
-+struct regulator *mmc_regulator_get_vmmc(struct mmc_host *mmc)
++bool regulator_can_change_status(struct regulator *regulator)
 +{
-+	struct device *dev = mmc_dev(mmc);
-+	struct regulator *supply = devm_regulator_get(dev, "vmmc");
++	struct regulator_dev *rdev;
 +	int ret;
 +
-+	if (IS_ERR(supply))
-+		return NULL;
++	if (IS_ERR_OR_NULL(regulator))
++		return false;
 +
-+	ret = mmc_regulator_get_ocrmask(supply);
-+	if (ret > 0)
-+		mmc->ocr_avail = ret;
++	rdev = regulator->rdev;
++	mutex_lock(&rdev->mutex);
++	ret = _regulator_can_change_status(rdev);
++	mutex_unlock(&rdev->mutex);
 +
-+	if (regulator_can_change_status(supply)) {
-+		mmc->caps |= MMC_CAP_POWER_OFF_CARD;
-+		return supply;
-+	}
-+
-+	devm_regulator_put(supply);
-+
-+	if (ret <= 0)
-+		dev_warn(dev, "Ignoring useless (dummy?) regulator\n");
-+
-+	return NULL;
++	return ret && !rdev->constraints->always_on;
 +}
-+EXPORT_SYMBOL(mmc_regulator_get_vmmc);
++EXPORT_SYMBOL_GPL(regulator_can_change_status);
 +
- #endif /* CONFIG_REGULATOR */
+ /* locks held by regulator_enable() */
+ static int _regulator_enable(struct regulator_dev *rdev)
+ {
+diff --git a/include/linux/regulator/consumer.h b/include/linux/regulator/consumer.h
+index 4ed1b30..a15a476 100644
+--- a/include/linux/regulator/consumer.h
++++ b/include/linux/regulator/consumer.h
+@@ -177,6 +177,8 @@ int regulator_set_mode(struct regulator *regulator, unsigned int mode);
+ unsigned int regulator_get_mode(struct regulator *regulator);
+ int regulator_set_optimum_mode(struct regulator *regulator, int load_uA);
  
- /*
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index cbde4b7..bcf5562 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -362,6 +362,7 @@ int mmc_regulator_get_ocrmask(struct regulator *supply);
- int mmc_regulator_set_ocr(struct mmc_host *mmc,
- 			struct regulator *supply,
- 			unsigned short vdd_bit);
-+struct regulator *mmc_regulator_get_vmmc(struct mmc_host *mmc);
- #else
- static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
- {
-@@ -374,6 +375,11 @@ static inline int mmc_regulator_set_ocr(struct mmc_host *mmc,
- {
- 	return 0;
- }
++bool regulator_can_change_status(struct regulator *regulator);
 +
-+static inline struct regulator *mmc_regulator_get_vmmc(struct mmc_host *mmc)
+ /* regulator notifier block */
+ int regulator_register_notifier(struct regulator *regulator,
+ 			      struct notifier_block *nb);
+@@ -344,6 +346,11 @@ static inline void regulator_set_drvdata(struct regulator *regulator,
+ {
+ }
+ 
++static inline bool regulator_can_change_status(struct regulator *regulator)
 +{
-+	return NULL;
++	return false;
 +}
++
  #endif
  
- int mmc_card_awake(struct mmc_host *host);
+ #endif
 -- 
 1.7.2.5
 
