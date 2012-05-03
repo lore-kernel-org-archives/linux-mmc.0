@@ -1,7 +1,7 @@
 From: Venkatraman S <svenkatr@ti.com>
-Subject: [PATCH v2 05/16] block: Documentation: add sysfs ABI for expedite_dmpg and expedite_swapin
-Date: Thu, 3 May 2012 19:53:04 +0530
-Message-ID: <1336054995-22988-6-git-send-email-svenkatr@ti.com>
+Subject: [PATCH v2 09/16] mmc: core: Add MMC abort interface
+Date: Thu, 3 May 2012 19:53:08 +0530
+Message-ID: <1336054995-22988-10-git-send-email-svenkatr@ti.com>
 References: <1336054995-22988-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,34 +12,50 @@ To: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-mm@kvack.org, linux-fsdevel
 Cc: linux-kernel@vger.kernel.org, arnd.bergmann@linaro.org, alex.lemberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, rmk+kernel@arm.linux.org.uk, Venkatraman S <svenkatr@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add description on the usage of expedite_dmpg and
-expedite_swapin.
+HPI (and possibly other) procedures require that an ongoing
+mmc request issued to a controller be aborted in the middle
+of a transaction. Define a abort interface function to the
+controller so that individual host controllers can safely
+abort a request, stop the dma and cleanup their statemachine
+etc. The implementation is controller dependant
 
 Signed-off-by: Venkatraman S <svenkatr@ti.com>
 ---
- Documentation/ABI/testing/sysfs-block |   12 ++++++++++++
- 1 file changed, 12 insertions(+)
+ drivers/mmc/core/core.c  |    8 ++++++++
+ include/linux/mmc/host.h |    1 +
+ 2 files changed, 9 insertions(+)
 
-diff --git a/Documentation/ABI/testing/sysfs-block b/Documentation/ABI/testing/sysfs-block
-index c1eb41c..0fb9fef 100644
---- a/Documentation/ABI/testing/sysfs-block
-+++ b/Documentation/ABI/testing/sysfs-block
-@@ -206,3 +206,15 @@ Description:
- 		when a discarded area is read the discard_zeroes_data
- 		parameter will be set to one. Otherwise it will be 0 and
- 		the result of reading a discarded area is undefined.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index b4152ca..3f0e927 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -328,6 +328,14 @@ static void mmc_post_req(struct mmc_host *host, struct mmc_request *mrq,
+ 	}
+ }
+ 
++static int mmc_abort_req(struct mmc_host *host, struct mmc_request *req)
++{
++	if (host->ops->abort_req)
++		return host->ops->abort_req(host, req);
 +
-+What:		/sys/block/<disk>/queue/expedite_demandpaging
-+What:		/sys/block/<disk>/queue/expedite_swapin
-+Date:		April 2012
-+Contact:	Venkatraman S <svenkatr@ti.com>
-+Description:
-+		For latency improvements, some storage devices could
-+		provide a mechanism for servicing demand paging and
-+		swapin requests in a high priority manner. Setting
-+		these flags to 1 would get the requests marked with
-+		REQ_RW_DMPG or REQ_RW_SWAPIN to be moved to the front
-+		of elevator queue.
++	return -ENOSYS;
++}
++
+ /**
+  *	mmc_start_req - start a non-blocking request
+  *	@host: MMC host to start command
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 0707d22..d700703 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -98,6 +98,7 @@ struct mmc_host_ops {
+ 			    int err);
+ 	void	(*pre_req)(struct mmc_host *host, struct mmc_request *req,
+ 			   bool is_first_req);
++	int	(*abort_req)(struct mmc_host *host, struct mmc_request *req);
+ 	void	(*request)(struct mmc_host *host, struct mmc_request *req);
+ 	/*
+ 	 * Avoid calling these three functions too often or in a "fast path",
 -- 
 1.7.10.rc2
 
