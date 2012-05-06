@@ -1,36 +1,67 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 1/3] ARM: imx: enable pinctrl dummy states
-Date: Sun, 6 May 2012 21:51:40 +0800
-Message-ID: <20120506135138.GC19389@S2101-09.ap.freescale.net>
-References: <1335958282-3068-1-git-send-email-b29396@freescale.com>
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2 01/16] FS: Added demand paging markers to filesystem
+Date: Mon, 7 May 2012 09:31:17 +1000
+Message-ID: <20120506233117.GU5091@dastard>
+References: <1336054995-22988-1-git-send-email-svenkatr@ti.com>
+ <1336054995-22988-2-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:54018 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751517Ab2EFNve (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 May 2012 09:51:34 -0400
-Received: by pbbrp8 with SMTP id rp8so5663904pbb.19
-        for <linux-mmc@vger.kernel.org>; Sun, 06 May 2012 06:51:34 -0700 (PDT)
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <1335958282-3068-1-git-send-email-b29396@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1336054995-22988-2-git-send-email-svenkatr@ti.com>
+Sender: owner-linux-mm@kvack.org
+To: Venkatraman S <svenkatr@ti.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, arnd.bergmann@linaro.org, alex.lemberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, rmk+kernel@arm.linux.org.uk
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, linus.walleij@stericsson.com, swarren@wwwdotorg.org, s.hauer@pengutronix.de, shawn.guo@freescale.com, kernel@pengutronix.de, grant.likely@secretlab.ca, rob.herring@calxeda.com, cjb@laptop.org, w.sang@pengutronix.de, linux-mmc@vger.kernel.org
 
-On Wed, May 02, 2012 at 07:31:20PM +0800, Dong Aisheng wrote:
-> From: Dong Aisheng <dong.aisheng@linaro.org>
+On Thu, May 03, 2012 at 07:53:00PM +0530, Venkatraman S wrote:
+> From: Ilan Smith <ilan.smith@sandisk.com>
 > 
-> Enable pinctrl dummy states for imx platforms without pinctrl
-> support.
+> Add attribute to identify demand paging requests.
+> Mark readpages with demand paging attribute.
 > 
-> Acked-by: Stephen Warren <swarren@wwwdotorg.org>
-> Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
+> Signed-off-by: Ilan Smith <ilan.smith@sandisk.com>
+> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> ---
+>  fs/mpage.c                |    2 ++
+>  include/linux/bio.h       |    7 +++++++
+>  include/linux/blk_types.h |    2 ++
+>  3 files changed, 11 insertions(+)
+> 
+> diff --git a/fs/mpage.c b/fs/mpage.c
+> index 0face1c..8b144f5 100644
+> --- a/fs/mpage.c
+> +++ b/fs/mpage.c
+> @@ -386,6 +386,8 @@ mpage_readpages(struct address_space *mapping, struct list_head *pages,
+>  					&last_block_in_bio, &map_bh,
+>  					&first_logical_block,
+>  					get_block);
+> +			if (bio)
+> +				bio->bi_rw |= REQ_RW_DMPG;
 
-I queued the series and will have it send together with other imx
-and mxs driver patches that adopt pinctrl API.
+Have you thought about the potential for DOSing a machine
+with this? That is, user data reads can now preempt writes of any
+kind, effectively stalling writeback and memory reclaim which will
+lead to OOM situations. Or, alternatively, journal flushing will get
+stalled and no new modifications can take place until the read
+stream stops.
 
+This really seems like functionality that belongs in an IO
+scheduler so that write starvation can be avoided, not in high-level
+data read paths where we have no clue about anything else going on
+in the IO subsystem....
+
+Cheers,
+
+Dave.
 -- 
-Regards,
-Shawn
+Dave Chinner
+david@fromorbit.com
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
