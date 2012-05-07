@@ -1,157 +1,61 @@
 From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH 05/10] mmc: mxs-mmc: use devm_* helper to make cleanup simpler
-Date: Mon,  7 May 2012 22:43:07 +0800
-Message-ID: <1336401793-13753-6-git-send-email-shawn.guo@linaro.org>
+Subject: [PATCH 06/10] mmc: mxs-mmc: have dma_channel than dma_res in mxs_mmc_host
+Date: Mon,  7 May 2012 22:43:08 +0800
+Message-ID: <1336401793-13753-7-git-send-email-shawn.guo@linaro.org>
 References: <1336401793-13753-1-git-send-email-shawn.guo@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-pz0-f46.google.com ([209.85.210.46]:46809 "EHLO
 	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756940Ab2EGOnj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 May 2012 10:43:39 -0400
+	with ESMTP id S1756817Ab2EGOnr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 May 2012 10:43:47 -0400
 Received: by mail-pz0-f46.google.com with SMTP id y13so1335513dad.19
-        for <linux-mmc@vger.kernel.org>; Mon, 07 May 2012 07:43:39 -0700 (PDT)
+        for <linux-mmc@vger.kernel.org>; Mon, 07 May 2012 07:43:47 -0700 (PDT)
 In-Reply-To: <1336401793-13753-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc: Chris Ball <cjb@laptop.org>, Dong Aisheng <dong.aisheng@linaro.org>, Marek Vasut <marex@denx.de>, Shawn Guo <shawn.guo@linaro.org>
 
-Use devm_request_and_ioremap and devm_request_irq helpers to clean up
-the code a little bit.
+It replaces dma_res with dma_channel in struct mxs_mmc_host, so that
+the device tree support will be a little easier, since dma channel
+can not be retrieved from "struct resource *dma_res".
 
 Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
 ---
- drivers/mmc/host/mxs-mmc.c |   40 +++++++++-------------------------------
- 1 files changed, 9 insertions(+), 31 deletions(-)
+ drivers/mmc/host/mxs-mmc.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index c70c7c7..1a8ba314 100644
+index 1a8ba314..e905721 100644
 --- a/drivers/mmc/host/mxs-mmc.c
 +++ b/drivers/mmc/host/mxs-mmc.c
-@@ -146,8 +146,6 @@ struct mxs_mmc_host {
+@@ -146,7 +146,7 @@ struct mxs_mmc_host {
  	struct mmc_data			*data;
  
  	void __iomem			*base;
--	int				irq;
--	struct resource			*res;
- 	struct resource			*dma_res;
+-	struct resource			*dma_res;
++	int				dma_channel;
  	struct clk			*clk;
  	unsigned int			clk_rate;
-@@ -695,7 +693,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- {
- 	struct mxs_mmc_host *host;
- 	struct mmc_host *mmc;
--	struct resource *iores, *dmares, *r;
-+	struct resource *iores, *dmares;
- 	struct mxs_mmc_platform_data *pdata;
- 	struct pinctrl *pinctrl;
- 	int ret = 0, irq_err, irq_dma;
-@@ -708,28 +706,20 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	if (!iores || !dmares || irq_err < 0 || irq_dma < 0)
- 		return -EINVAL;
  
--	r = request_mem_region(iores->start, resource_size(iores), pdev->name);
--	if (!r)
--		return -EBUSY;
--
- 	mmc = mmc_alloc_host(sizeof(struct mxs_mmc_host), &pdev->dev);
--	if (!mmc) {
--		ret = -ENOMEM;
--		goto out_release_mem;
--	}
-+	if (!mmc)
-+		return -ENOMEM;
+@@ -668,7 +668,7 @@ static bool mxs_mmc_dma_filter(struct dma_chan *chan, void *param)
+ 	if (!mxs_dma_is_apbh(chan))
+ 		return false;
  
- 	host = mmc_priv(mmc);
--	host->base = ioremap(r->start, resource_size(r));
-+	host->base = devm_request_and_ioremap(&pdev->dev, iores);
- 	if (!host->base) {
--		ret = -ENOMEM;
-+		ret = -EADDRNOTAVAIL;
- 		goto out_mmc_free;
- 	}
+-	if (chan->chan_id != host->dma_res->start)
++	if (chan->chan_id != host->dma_channel)
+ 		return false;
+ 
+ 	chan->private = &host->dma_data;
+@@ -719,7 +719,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
  
  	host->devid = pdev->id_entry->driver_data;
  	host->mmc = mmc;
--	host->res = r;
- 	host->dma_res = dmares;
--	host->irq = irq_err;
+-	host->dma_res = dmares;
++	host->dma_channel = dmares->start;
  	host->sdio_irq_en = 0;
  
  	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
-@@ -741,7 +731,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	host->clk = clk_get(&pdev->dev, NULL);
- 	if (IS_ERR(host->clk)) {
- 		ret = PTR_ERR(host->clk);
--		goto out_iounmap;
-+		goto out_mmc_free;
- 	}
- 	clk_prepare_enable(host->clk);
- 
-@@ -782,7 +772,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, mmc);
- 
--	ret = request_irq(host->irq, mxs_mmc_irq_handler, 0, DRIVER_NAME, host);
-+	ret = devm_request_irq(&pdev->dev, irq_err, mxs_mmc_irq_handler, 0,
-+			       DRIVER_NAME, host);
- 	if (ret)
- 		goto out_free_dma;
- 
-@@ -790,26 +781,20 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 
- 	ret = mmc_add_host(mmc);
- 	if (ret)
--		goto out_free_irq;
-+		goto out_free_dma;
- 
- 	dev_info(mmc_dev(host->mmc), "initialized\n");
- 
- 	return 0;
- 
--out_free_irq:
--	free_irq(host->irq, host);
- out_free_dma:
- 	if (host->dmach)
- 		dma_release_channel(host->dmach);
- out_clk_put:
- 	clk_disable_unprepare(host->clk);
- 	clk_put(host->clk);
--out_iounmap:
--	iounmap(host->base);
- out_mmc_free:
- 	mmc_free_host(mmc);
--out_release_mem:
--	release_mem_region(iores->start, resource_size(iores));
- 	return ret;
- }
- 
-@@ -817,12 +802,9 @@ static int mxs_mmc_remove(struct platform_device *pdev)
- {
- 	struct mmc_host *mmc = platform_get_drvdata(pdev);
- 	struct mxs_mmc_host *host = mmc_priv(mmc);
--	struct resource *res = host->res;
- 
- 	mmc_remove_host(mmc);
- 
--	free_irq(host->irq, host);
--
- 	platform_set_drvdata(pdev, NULL);
- 
- 	if (host->dmach)
-@@ -831,12 +813,8 @@ static int mxs_mmc_remove(struct platform_device *pdev)
- 	clk_disable_unprepare(host->clk);
- 	clk_put(host->clk);
- 
--	iounmap(host->base);
--
- 	mmc_free_host(mmc);
- 
--	release_mem_region(res->start, resource_size(res));
--
- 	return 0;
- }
- 
 -- 
 1.7.5.4
 
