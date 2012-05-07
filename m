@@ -1,118 +1,103 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH 10/10] ARM: dts: enable mmc for imx28-evk
-Date: Mon,  7 May 2012 22:43:12 +0800
-Message-ID: <1336401793-13753-11-git-send-email-shawn.guo@linaro.org>
-References: <1336401793-13753-1-git-send-email-shawn.guo@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:46809 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756467Ab2EGOoX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 May 2012 10:44:23 -0400
-Received: by mail-pz0-f46.google.com with SMTP id y13so1335513dad.19
-        for <linux-mmc@vger.kernel.org>; Mon, 07 May 2012 07:44:23 -0700 (PDT)
-In-Reply-To: <1336401793-13753-1-git-send-email-shawn.guo@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH v2 01/16] FS: Added demand paging markers to filesystem
+Date: Mon, 7 May 2012 22:16:30 +0530
+Message-ID: <CANfBPZ_2JeWUu7ti97CVc=ODeEi65ke9EKV6Uje0JHcCM8gYqQ@mail.gmail.com>
+References: <1336054995-22988-1-git-send-email-svenkatr@ti.com>
+ <1336054995-22988-2-git-send-email-svenkatr@ti.com> <20120506233117.GU5091@dastard>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20120506233117.GU5091@dastard>
+Sender: owner-linux-mm@kvack.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, arnd.bergmann@linaro.org, alex.lemberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, rmk+kernel@arm.linux.org.uk
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Chris Ball <cjb@laptop.org>, Dong Aisheng <dong.aisheng@linaro.org>, Marek Vasut <marex@denx.de>, Shawn Guo <shawn.guo@linaro.org>
 
-Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
----
- arch/arm/boot/dts/imx28-evk.dts |   19 +++++++++++++++++++
- arch/arm/boot/dts/imx28.dtsi    |   25 +++++++++++++++++++++++++
- 2 files changed, 44 insertions(+), 0 deletions(-)
+Mon, May 7, 2012 at 5:01 AM, Dave Chinner <david@fromorbit.com> wrote:
+> On Thu, May 03, 2012 at 07:53:00PM +0530, Venkatraman S wrote:
+>> From: Ilan Smith <ilan.smith@sandisk.com>
+>>
+>> Add attribute to identify demand paging requests.
+>> Mark readpages with demand paging attribute.
+>>
+>> Signed-off-by: Ilan Smith <ilan.smith@sandisk.com>
+>> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+>> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+>> ---
+>> =A0fs/mpage.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A02 ++
+>> =A0include/linux/bio.h =A0 =A0 =A0 | =A0 =A07 +++++++
+>> =A0include/linux/blk_types.h | =A0 =A02 ++
+>> =A03 files changed, 11 insertions(+)
+>>
+>> diff --git a/fs/mpage.c b/fs/mpage.c
+>> index 0face1c..8b144f5 100644
+>> --- a/fs/mpage.c
+>> +++ b/fs/mpage.c
+>> @@ -386,6 +386,8 @@ mpage_readpages(struct address_space *mapping, struc=
+t list_head *pages,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 &last_block_in_bio, &map_bh,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 &first_logical_block,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 get_block);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (bio)
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 bio->bi_rw |=
+=3D REQ_RW_DMPG;
+>
+> Have you thought about the potential for DOSing a machine
+> with this? That is, user data reads can now preempt writes of any
+> kind, effectively stalling writeback and memory reclaim which will
+> lead to OOM situations. Or, alternatively, journal flushing will get
+> stalled and no new modifications can take place until the read
+> stream stops.
 
-diff --git a/arch/arm/boot/dts/imx28-evk.dts b/arch/arm/boot/dts/imx28-evk.dts
-index 5aee8ed..6ca10f2 100644
---- a/arch/arm/boot/dts/imx28-evk.dts
-+++ b/arch/arm/boot/dts/imx28-evk.dts
-@@ -21,6 +21,25 @@
- 	};
- 
- 	apb@80000000 {
-+		apbh@80000000 {
-+			ssp0: ssp@80010000 {
-+				compatible = "fsl,imx28-mmc";
-+				pinctrl-names = "default";
-+				pinctrl-0 = <&mmc0_8bit_pins_a
-+					&mmc0_cd_cfg &mmc0_sck_cfg>;
-+				fsl,bus-width = <8>;
-+				wp-gpios = <&gpio2 12 0>;
-+				status = "okay";
-+			};
-+
-+			ssp1: ssp@80012000 {
-+				compatible = "fsl,imx28-mmc";
-+				fsl,bus-width = <8>;
-+				wp-gpios = <&gpio0 28 0>;
-+				status = "okay";
-+			};
-+		};
-+
- 		apbx@80040000 {
- 			duart: serial@80074000 {
- 				pinctrl-names = "default";
-diff --git a/arch/arm/boot/dts/imx28.dtsi b/arch/arm/boot/dts/imx28.dtsi
-index 1abd9b3..8596bdf 100644
---- a/arch/arm/boot/dts/imx28.dtsi
-+++ b/arch/arm/boot/dts/imx28.dtsi
-@@ -81,24 +81,28 @@
- 			ssp0: ssp@80010000 {
- 				reg = <0x80010000 2000>;
- 				interrupts = <96 82>;
-+				fsl,ssp-dma-channel = <0>;
- 				status = "disabled";
- 			};
- 
- 			ssp1: ssp@80012000 {
- 				reg = <0x80012000 2000>;
- 				interrupts = <97 83>;
-+				fsl,ssp-dma-channel = <1>;
- 				status = "disabled";
- 			};
- 
- 			ssp2: ssp@80014000 {
- 				reg = <0x80014000 2000>;
- 				interrupts = <98 84>;
-+				fsl,ssp-dma-channel = <2>;
- 				status = "disabled";
- 			};
- 
- 			ssp3: ssp@80016000 {
- 				reg = <0x80016000 2000>;
- 				interrupts = <99 85>;
-+				fsl,ssp-dma-channel = <3>;
- 				status = "disabled";
- 			};
- 
-@@ -179,6 +183,27 @@
- 					fsl,voltage = <1>;
- 					fsl,pull-up = <1>;
- 				};
-+
-+				mmc0_8bit_pins_a: mmc0-8bit@0 {
-+					reg = <0>;
-+					fsl,pinmux-ids = <0x2000 0x2010 0x2020
-+						0x2030 0x2040 0x2050 0x2060
-+						0x2070 0x2080 0x2090 0x20a0>;
-+					fsl,drive-strength = <1>;
-+					fsl,voltage = <1>;
-+					fsl,pull-up = <1>;
-+				};
-+
-+				mmc0_cd_cfg: mmc0-cd-cfg {
-+					fsl,pinmux-ids = <0x2090>;
-+					fsl,pull-up = <0>;
-+				};
-+
-+				mmc0_sck_cfg: mmc0-sck-cfg {
-+					fsl,pinmux-ids = <0x20a0>;
-+					fsl,drive-strength = <2>;
-+					fsl,pull-up = <0>;
-+				};
- 			};
- 
- 			digctl@8001c000 {
--- 
-1.7.5.4
+This feature doesn't fiddle with the I/O scheduler's ability to balance
+read vs write requests or handling requests from various process queues (CF=
+Q).
 
+Also, for block devices which don't implement the ability to preempt (and e=
+ven
+for older versions of MMC devices which don't implement this feature),
+the behaviour
+falls back to waiting for write requests to complete before issuing the rea=
+d.
+
+In low end flash devices, some requests might take too long than normal
+due to background device maintenance (i.e flash erase / reclaim procedure)
+kicking in in the context of an ongoing write, stalling them by several
+orders of magnitude.
+
+This implementation (See 14/16) does have several
+checks and timers to see that it's not triggered very often.
+In my tests, where I usually have a generous preemption time window, the ab=
+ort
+happens < 0.1% of the time.
+
+
+>
+> This really seems like functionality that belongs in an IO
+> scheduler so that write starvation can be avoided, not in high-level
+> data read paths where we have no clue about anything else going on
+> in the IO subsystem....
+
+Indeed, the feature is built mostly in the low level device driver and
+minor changes in the elevator. Changes above the block layer are only
+about setting
+attributes and transparent to their operation.
+
+>
+> Cheers,
+>
+> Dave.
+> --
+> Dave Chinner
+> david@fromorbit.com
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
