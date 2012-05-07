@@ -1,204 +1,240 @@
 From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH 02/10] mmc: mxs-mmc: let ssp_is_old take host as parameter
-Date: Mon,  7 May 2012 22:43:04 +0800
-Message-ID: <1336401793-13753-3-git-send-email-shawn.guo@linaro.org>
+Subject: [PATCH 03/10] mmc: mxs-mmc: get rid of the use of cpu_is_xxx
+Date: Mon,  7 May 2012 22:43:05 +0800
+Message-ID: <1336401793-13753-4-git-send-email-shawn.guo@linaro.org>
 References: <1336401793-13753-1-git-send-email-shawn.guo@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:65054 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756467Ab2EGOnR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 May 2012 10:43:17 -0400
-Received: by pbbrp8 with SMTP id rp8so6754216pbb.19
-        for <linux-mmc@vger.kernel.org>; Mon, 07 May 2012 07:43:16 -0700 (PDT)
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:46809 "EHLO
+	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756467Ab2EGOnY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 May 2012 10:43:24 -0400
+Received: by mail-pz0-f46.google.com with SMTP id y13so1335513dad.19
+        for <linux-mmc@vger.kernel.org>; Mon, 07 May 2012 07:43:24 -0700 (PDT)
 In-Reply-To: <1336401793-13753-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc: Chris Ball <cjb@laptop.org>, Dong Aisheng <dong.aisheng@linaro.org>, Marek Vasut <marex@denx.de>, Shawn Guo <shawn.guo@linaro.org>
 
-Let macro ssp_is_old take host as parameter to make the code easy
-to read.
+The register HW_SSP_VERSION is broken for ssp version detection,
+as the address of the register is different between imx23 and imx28.
+Let's use platform_device_id to detect the device, so that the use
+of cpu_is_xxx can be removed.
 
 Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
 ---
- drivers/mmc/host/mxs-mmc.c |   59 ++++++++++++++++++++++---------------------
- 1 files changed, 30 insertions(+), 29 deletions(-)
+ arch/arm/mach-mxs/devices/platform-mxs-mmc.c    |   21 ++++++++-------
+ arch/arm/mach-mxs/include/mach/devices-common.h |    1 +
+ drivers/clk/mxs/clk-imx23.c                     |    4 +-
+ drivers/clk/mxs/clk-imx28.c                     |    8 +++---
+ drivers/mmc/host/mxs-mmc.c                      |   32 +++++++++++++++-------
+ 5 files changed, 40 insertions(+), 26 deletions(-)
 
+diff --git a/arch/arm/mach-mxs/devices/platform-mxs-mmc.c b/arch/arm/mach-mxs/devices/platform-mxs-mmc.c
+index bef9d92..b33c9d0 100644
+--- a/arch/arm/mach-mxs/devices/platform-mxs-mmc.c
++++ b/arch/arm/mach-mxs/devices/platform-mxs-mmc.c
+@@ -17,8 +17,9 @@
+ #include <mach/mx28.h>
+ #include <mach/devices-common.h>
+ 
+-#define mxs_mxs_mmc_data_entry_single(soc, _id, hwid)			\
++#define mxs_mxs_mmc_data_entry_single(soc, _devid, _id, hwid)		\
+ 	{								\
++		.devid = _devid,					\
+ 		.id = _id,						\
+ 		.iobase = soc ## _SSP ## hwid ## _BASE_ADDR,		\
+ 		.dma = soc ## _DMA_SSP ## hwid,				\
+@@ -26,23 +27,23 @@
+ 		.irq_dma = soc ## _INT_SSP ## hwid ## _DMA,		\
+ 	}
+ 
+-#define mxs_mxs_mmc_data_entry(soc, _id, hwid)				\
+-	[_id] = mxs_mxs_mmc_data_entry_single(soc, _id, hwid)
++#define mxs_mxs_mmc_data_entry(soc, _devid, _id, hwid)			\
++	[_id] = mxs_mxs_mmc_data_entry_single(soc, _devid, _id, hwid)
+ 
+ 
+ #ifdef CONFIG_SOC_IMX23
+ const struct mxs_mxs_mmc_data mx23_mxs_mmc_data[] __initconst = {
+-	mxs_mxs_mmc_data_entry(MX23, 0, 1),
+-	mxs_mxs_mmc_data_entry(MX23, 1, 2),
++	mxs_mxs_mmc_data_entry(MX23, "imx23-mmc", 0, 1),
++	mxs_mxs_mmc_data_entry(MX23, "imx23-mmc", 1, 2),
+ };
+ #endif
+ 
+ #ifdef CONFIG_SOC_IMX28
+ const struct mxs_mxs_mmc_data mx28_mxs_mmc_data[] __initconst = {
+-	mxs_mxs_mmc_data_entry(MX28, 0, 0),
+-	mxs_mxs_mmc_data_entry(MX28, 1, 1),
+-	mxs_mxs_mmc_data_entry(MX28, 2, 2),
+-	mxs_mxs_mmc_data_entry(MX28, 3, 3),
++	mxs_mxs_mmc_data_entry(MX28, "imx28-mmc", 0, 0),
++	mxs_mxs_mmc_data_entry(MX28, "imx28-mmc", 1, 1),
++	mxs_mxs_mmc_data_entry(MX28, "imx28-mmc", 2, 2),
++	mxs_mxs_mmc_data_entry(MX28, "imx28-mmc", 3, 3),
+ };
+ #endif
+ 
+@@ -70,6 +71,6 @@ struct platform_device *__init mxs_add_mxs_mmc(
+ 		},
+ 	};
+ 
+-	return mxs_add_platform_device("mxs-mmc", data->id,
++	return mxs_add_platform_device(data->devid, data->id,
+ 			res, ARRAY_SIZE(res), pdata, sizeof(*pdata));
+ }
+diff --git a/arch/arm/mach-mxs/include/mach/devices-common.h b/arch/arm/mach-mxs/include/mach/devices-common.h
+index f2e3839..2b37689 100644
+--- a/arch/arm/mach-mxs/include/mach/devices-common.h
++++ b/arch/arm/mach-mxs/include/mach/devices-common.h
+@@ -89,6 +89,7 @@ struct platform_device * __init mxs_add_mxs_i2c(
+ /* mmc */
+ #include <mach/mmc.h>
+ struct mxs_mxs_mmc_data {
++	const char *devid;
+ 	int id;
+ 	resource_size_t iobase;
+ 	resource_size_t dma;
+diff --git a/drivers/clk/mxs/clk-imx23.c b/drivers/clk/mxs/clk-imx23.c
+index 96562f5..f7be225 100644
+--- a/drivers/clk/mxs/clk-imx23.c
++++ b/drivers/clk/mxs/clk-imx23.c
+@@ -93,8 +93,8 @@ static struct clk_lookup xbus_lookups[] __initdata = {
+ };
+ 
+ static struct clk_lookup ssp_lookups[] __initdata = {
+-	{ .dev_id = "mxs-mmc.0", },
+-	{ .dev_id = "mxs-mmc.1", },
++	{ .dev_id = "imx23-mmc.0", },
++	{ .dev_id = "imx23-mmc.1", },
+ 	{ .dev_id = "80010000.ssp", },
+ 	{ .dev_id = "80034000.ssp", },
+ };
+diff --git a/drivers/clk/mxs/clk-imx28.c b/drivers/clk/mxs/clk-imx28.c
+index e18cac9..cadc801 100644
+--- a/drivers/clk/mxs/clk-imx28.c
++++ b/drivers/clk/mxs/clk-imx28.c
+@@ -139,22 +139,22 @@ static struct clk_lookup xbus_lookups[] __initdata = {
+ };
+ 
+ static struct clk_lookup ssp0_lookups[] __initdata = {
+-	{ .dev_id = "mxs-mmc.0", },
++	{ .dev_id = "imx28-mmc.0", },
+ 	{ .dev_id = "80010000.ssp", },
+ };
+ 
+ static struct clk_lookup ssp1_lookups[] __initdata = {
+-	{ .dev_id = "mxs-mmc.1", },
++	{ .dev_id = "imx28-mmc.1", },
+ 	{ .dev_id = "80012000.ssp", },
+ };
+ 
+ static struct clk_lookup ssp2_lookups[] __initdata = {
+-	{ .dev_id = "mxs-mmc.2", },
++	{ .dev_id = "imx28-mmc.2", },
+ 	{ .dev_id = "80014000.ssp", },
+ };
+ 
+ static struct clk_lookup ssp3_lookups[] __initdata = {
+-	{ .dev_id = "mxs-mmc.3", },
++	{ .dev_id = "imx28-mmc.3", },
+ 	{ .dev_id = "80016000.ssp", },
+ };
+ 
 diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 2ea5361..13907e4 100644
+index 13907e4..54bbb8b 100644
 --- a/drivers/mmc/host/mxs-mmc.c
 +++ b/drivers/mmc/host/mxs-mmc.c
-@@ -51,7 +51,7 @@
+@@ -42,7 +42,6 @@
+ #include <linux/pinctrl/consumer.h>
+ #include <linux/stmp_device.h>
+ 
+-#include <mach/mxs.h>
+ #include <mach/mmc.h>
+ 
+ #define DRIVER_NAME	"mxs-mmc"
+@@ -50,8 +49,7 @@
+ /* card detect polling timeout */
  #define MXS_MMC_DETECT_TIMEOUT			(HZ/2)
  
- #define SSP_VERSION_LATEST	4
--#define ssp_is_old()		(host->version < SSP_VERSION_LATEST)
-+#define ssp_is_old(host)	(host->version < SSP_VERSION_LATEST)
+-#define SSP_VERSION_LATEST	4
+-#define ssp_is_old(host)	(host->version < SSP_VERSION_LATEST)
++#define ssp_is_old(host)	(host->devid == IMX23_MMC)
  
  /* SSP registers */
  #define HW_SSP_CTRL0				0x000
-@@ -86,14 +86,14 @@
- #define  BM_SSP_BLOCK_SIZE_BLOCK_COUNT		(0xffffff << 4)
- #define  BP_SSP_BLOCK_SIZE_BLOCK_SIZE		(0)
- #define  BM_SSP_BLOCK_SIZE_BLOCK_SIZE		(0xf)
--#define HW_SSP_TIMING				(ssp_is_old() ? 0x050 : 0x070)
-+#define HW_SSP_TIMING(h)			(ssp_is_old(h) ? 0x050 : 0x070)
- #define  BP_SSP_TIMING_TIMEOUT			(16)
- #define  BM_SSP_TIMING_TIMEOUT			(0xffff << 16)
- #define  BP_SSP_TIMING_CLOCK_DIVIDE		(8)
- #define  BM_SSP_TIMING_CLOCK_DIVIDE		(0xff << 8)
- #define  BP_SSP_TIMING_CLOCK_RATE		(0)
- #define  BM_SSP_TIMING_CLOCK_RATE		(0xff)
--#define HW_SSP_CTRL1				(ssp_is_old() ? 0x060 : 0x080)
-+#define HW_SSP_CTRL1(h)				(ssp_is_old(h) ? 0x060 : 0x080)
- #define  BM_SSP_CTRL1_SDIO_IRQ			(1 << 31)
- #define  BM_SSP_CTRL1_SDIO_IRQ_EN		(1 << 30)
- #define  BM_SSP_CTRL1_RESP_ERR_IRQ		(1 << 29)
-@@ -116,11 +116,11 @@
- #define  BM_SSP_CTRL1_WORD_LENGTH		(0xf << 4)
- #define  BP_SSP_CTRL1_SSP_MODE			(0)
- #define  BM_SSP_CTRL1_SSP_MODE			(0xf)
--#define HW_SSP_SDRESP0				(ssp_is_old() ? 0x080 : 0x0a0)
--#define HW_SSP_SDRESP1				(ssp_is_old() ? 0x090 : 0x0b0)
--#define HW_SSP_SDRESP2				(ssp_is_old() ? 0x0a0 : 0x0c0)
--#define HW_SSP_SDRESP3				(ssp_is_old() ? 0x0b0 : 0x0d0)
--#define HW_SSP_STATUS				(ssp_is_old() ? 0x0c0 : 0x100)
-+#define HW_SSP_SDRESP0(h)			(ssp_is_old(h) ? 0x080 : 0x0a0)
-+#define HW_SSP_SDRESP1(h)			(ssp_is_old(h) ? 0x090 : 0x0b0)
-+#define HW_SSP_SDRESP2(h)			(ssp_is_old(h) ? 0x0a0 : 0x0c0)
-+#define HW_SSP_SDRESP3(h)			(ssp_is_old(h) ? 0x0b0 : 0x0d0)
-+#define HW_SSP_STATUS(h)			(ssp_is_old(h) ? 0x0c0 : 0x100)
+@@ -123,8 +121,6 @@
+ #define HW_SSP_STATUS(h)			(ssp_is_old(h) ? 0x0c0 : 0x100)
  #define  BM_SSP_STATUS_CARD_DETECT		(1 << 28)
  #define  BM_SSP_STATUS_SDIO_IRQ			(1 << 17)
- #define HW_SSP_VERSION				(cpu_is_mx23() ? 0x110 : 0x130)
-@@ -183,7 +183,7 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+-#define HW_SSP_VERSION				(cpu_is_mx23() ? 0x110 : 0x130)
+-#define  BP_SSP_VERSION_MAJOR			(24)
+ 
+ #define BF_SSP(value, field)	(((value) << BP_SSP_##field) & BM_SSP_##field)
+ 
+@@ -139,6 +135,11 @@
+ 
+ #define SSP_PIO_NUM	3
+ 
++enum mxs_mmc_id {
++	IMX23_MMC,
++	IMX28_MMC,
++};
++
+ struct mxs_mmc_host {
+ 	struct mmc_host			*mmc;
+ 	struct mmc_request		*mrq;
+@@ -158,7 +159,7 @@ struct mxs_mmc_host {
+ 	enum dma_transfer_direction	slave_dirn;
+ 	u32				ssp_pio_words[SSP_PIO_NUM];
+ 
+-	unsigned int			version;
++	enum mxs_mmc_id			devid;
+ 	unsigned char			bus_width;
+ 	spinlock_t			lock;
+ 	int				sdio_irq_en;
+@@ -678,6 +679,19 @@ static bool mxs_mmc_dma_filter(struct dma_chan *chan, void *param)
+ 	return true;
+ }
+ 
++static struct platform_device_id mxs_mmc_ids[] = {
++	{
++		.name = "imx23-mmc",
++		.driver_data = IMX23_MMC,
++	}, {
++		.name = "imx28-mmc",
++		.driver_data = IMX28_MMC,
++	}, {
++		/* sentinel */
++	}
++};
++MODULE_DEVICE_TABLE(platform, mxs_mmc_ids);
++
+ static int mxs_mmc_probe(struct platform_device *pdev)
  {
- 	struct mxs_mmc_host *host = mmc_priv(mmc);
- 
--	return !(readl(host->base + HW_SSP_STATUS) &
-+	return !(readl(host->base + HW_SSP_STATUS(host)) &
- 		 BM_SSP_STATUS_CARD_DETECT);
- }
- 
-@@ -207,7 +207,7 @@ static void mxs_mmc_reset(struct mxs_mmc_host *host)
- 	writel(BF_SSP(0xffff, TIMING_TIMEOUT) |
- 	       BF_SSP(2, TIMING_CLOCK_DIVIDE) |
- 	       BF_SSP(0, TIMING_CLOCK_RATE),
--	       host->base + HW_SSP_TIMING);
-+	       host->base + HW_SSP_TIMING(host));
- 
- 	if (host->sdio_irq_en) {
- 		ctrl0 |= BM_SSP_CTRL0_SDIO_IRQ_CHECK;
-@@ -215,7 +215,7 @@ static void mxs_mmc_reset(struct mxs_mmc_host *host)
+ 	struct mxs_mmc_host *host;
+@@ -712,10 +726,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+ 		goto out_mmc_free;
  	}
  
- 	writel(ctrl0, host->base + HW_SSP_CTRL0);
--	writel(ctrl1, host->base + HW_SSP_CTRL1);
-+	writel(ctrl1, host->base + HW_SSP_CTRL1(host));
- }
- 
- static void mxs_mmc_start_cmd(struct mxs_mmc_host *host,
-@@ -229,12 +229,12 @@ static void mxs_mmc_request_done(struct mxs_mmc_host *host)
- 
- 	if (mmc_resp_type(cmd) & MMC_RSP_PRESENT) {
- 		if (mmc_resp_type(cmd) & MMC_RSP_136) {
--			cmd->resp[3] = readl(host->base + HW_SSP_SDRESP0);
--			cmd->resp[2] = readl(host->base + HW_SSP_SDRESP1);
--			cmd->resp[1] = readl(host->base + HW_SSP_SDRESP2);
--			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP3);
-+			cmd->resp[3] = readl(host->base + HW_SSP_SDRESP0(host));
-+			cmd->resp[2] = readl(host->base + HW_SSP_SDRESP1(host));
-+			cmd->resp[1] = readl(host->base + HW_SSP_SDRESP2(host));
-+			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP3(host));
- 		} else {
--			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP0);
-+			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP0(host));
- 		}
- 	}
- 
-@@ -277,11 +277,11 @@ static irqreturn_t mxs_mmc_irq_handler(int irq, void *dev_id)
- 
- 	spin_lock(&host->lock);
- 
--	stat = readl(host->base + HW_SSP_CTRL1);
-+	stat = readl(host->base + HW_SSP_CTRL1(host));
- 	writel(stat & MXS_MMC_IRQ_BITS,
--	       host->base + HW_SSP_CTRL1 + STMP_OFFSET_REG_CLR);
-+	       host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_CLR);
- 
--	if ((stat & BM_SSP_CTRL1_SDIO_IRQ) && (stat & BM_SSP_CTRL1_SDIO_IRQ_EN))
-+	if ((sta & BM_SSP_CTRL1_SDIO_IRQ) && (stat & BM_SSP_CTRL1_SDIO_IRQ_EN))
- 		mmc_signal_sdio_irq(host->mmc);
- 
- 	spin_unlock(&host->lock);
-@@ -485,7 +485,7 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
- 		blocks = 1;
- 
- 	/* xfer count, block size and count need to be set differently */
--	if (ssp_is_old()) {
-+	if (ssp_is_old(host)) {
- 		ctrl0 |= BF_SSP(data_size, CTRL0_XFER_COUNT);
- 		cmd0 |= BF_SSP(log2_blksz, CMD0_BLOCK_SIZE) |
- 			BF_SSP(blocks - 1, CMD0_BLOCK_COUNT);
-@@ -509,10 +509,10 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
- 
- 	/* set the timeout count */
- 	timeout = mxs_ns_to_ssp_ticks(host->clk_rate, data->timeout_ns);
--	val = readl(host->base + HW_SSP_TIMING);
-+	val = readl(host->base + HW_SSP_TIMING(host));
- 	val &= ~(BM_SSP_TIMING_TIMEOUT);
- 	val |= BF_SSP(timeout, TIMING_TIMEOUT);
--	writel(val, host->base + HW_SSP_TIMING);
-+	writel(val, host->base + HW_SSP_TIMING(host));
- 
- 	/* pio */
- 	host->ssp_pio_words[0] = ctrl0;
-@@ -598,11 +598,11 @@ static void mxs_mmc_set_clk_rate(struct mxs_mmc_host *host, unsigned int rate)
- 
- 	ssp_sck = ssp_clk / clock_divide / (1 + clock_rate);
- 
--	val = readl(host->base + HW_SSP_TIMING);
-+	val = readl(host->base + HW_SSP_TIMING(host));
- 	val &= ~(BM_SSP_TIMING_CLOCK_DIVIDE | BM_SSP_TIMING_CLOCK_RATE);
- 	val |= BF_SSP(clock_divide, TIMING_CLOCK_DIVIDE);
- 	val |= BF_SSP(clock_rate, TIMING_CLOCK_RATE);
--	writel(val, host->base + HW_SSP_TIMING);
-+	writel(val, host->base + HW_SSP_TIMING(host));
- 
- 	host->clk_rate = ssp_sck;
- 
-@@ -639,16 +639,17 @@ static void mxs_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 		writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
- 		       host->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
- 		writel(BM_SSP_CTRL1_SDIO_IRQ_EN,
--		       host->base + HW_SSP_CTRL1 + STMP_OFFSET_REG_SET);
-+		       host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_SET);
- 
--		if (readl(host->base + HW_SSP_STATUS) & BM_SSP_STATUS_SDIO_IRQ)
-+		if (readl(host->base + HW_SSP_STATUS(host)) &
-+				BM_SSP_STATUS_SDIO_IRQ)
- 			mmc_signal_sdio_irq(host->mmc);
- 
- 	} else {
- 		writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
- 		       host->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);
- 		writel(BM_SSP_CTRL1_SDIO_IRQ_EN,
--		       host->base + HW_SSP_CTRL1 + STMP_OFFSET_REG_CLR);
-+		       host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_CLR);
- 	}
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
-@@ -765,8 +766,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 
- 	mmc->max_segs = 52;
- 	mmc->max_blk_size = 1 << 0xf;
--	mmc->max_blk_count = (ssp_is_old()) ? 0xff : 0xffffff;
--	mmc->max_req_size = (ssp_is_old()) ? 0xffff : 0xffffffff;
-+	mmc->max_blk_count = (ssp_is_old(host)) ? 0xff : 0xffffff;
-+	mmc->max_req_size = (ssp_is_old(host)) ? 0xffff : 0xffffffff;
- 	mmc->max_seg_size = dma_get_max_seg_size(host->dmach->device->dev);
- 
- 	platform_set_drvdata(pdev, mmc);
+-	/* only major verion does matter */
+-	host->version = readl(host->base + HW_SSP_VERSION) >>
+-			BP_SSP_VERSION_MAJOR;
+-
++	host->devid = pdev->id_entry->driver_data;
+ 	host->mmc = mmc;
+ 	host->res = r;
+ 	host->dma_res = dmares;
+@@ -866,6 +877,7 @@ static const struct dev_pm_ops mxs_mmc_pm_ops = {
+ static struct platform_driver mxs_mmc_driver = {
+ 	.probe		= mxs_mmc_probe,
+ 	.remove		= mxs_mmc_remove,
++	.id_table	= mxs_mmc_ids,
+ 	.driver		= {
+ 		.name	= DRIVER_NAME,
+ 		.owner	= THIS_MODULE,
 -- 
 1.7.5.4
 
