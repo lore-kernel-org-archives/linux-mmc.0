@@ -1,18 +1,18 @@
 From: Marek Vasut <marex@denx.de>
-Subject: Re: [PATCH 06/10] mmc: mxs-mmc: have dma_channel than dma_res in mxs_mmc_host
-Date: Tue, 8 May 2012 01:51:44 +0200
-Message-ID: <201205080151.44883.marex@denx.de>
-References: <1336401793-13753-1-git-send-email-shawn.guo@linaro.org> <1336401793-13753-7-git-send-email-shawn.guo@linaro.org>
+Subject: Re: [PATCH 02/10] mmc: mxs-mmc: let ssp_is_old take host as parameter
+Date: Tue, 8 May 2012 01:43:49 +0200
+Message-ID: <201205080143.49806.marex@denx.de>
+References: <1336401793-13753-1-git-send-email-shawn.guo@linaro.org> <1336401793-13753-3-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
   charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.10]:57873 "EHLO
+Received: from mail-out.m-online.net ([212.18.0.9]:40245 "EHLO
 	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757947Ab2EGX6f (ORCPT
+	with ESMTP id S1757806Ab2EGX6f (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 May 2012 19:58:35 -0400
-In-Reply-To: <1336401793-13753-7-git-send-email-shawn.guo@linaro.org>
+In-Reply-To: <1336401793-13753-3-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shawn Guo <shawn.guo@linaro.org>
@@ -20,49 +20,204 @@ Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball 
 
 Dear Shawn Guo,
 
-> It replaces dma_res with dma_channel in struct mxs_mmc_host, so that
-> the device tree support will be a little easier, since dma channel
-> can not be retrieved from "struct resource *dma_res".
+> Let macro ssp_is_old take host as parameter to make the code easy
+> to read.
 > 
 > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-
-Acked-by: Marek Vasut <marex@denx.de>
-
 > ---
->  drivers/mmc/host/mxs-mmc.c |    6 +++---
->  1 files changed, 3 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/mxs-mmc.c |   59
+> ++++++++++++++++++++++--------------------- 1 files changed, 30
+> insertions(+), 29 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 1a8ba314..e905721 100644
+> index 2ea5361..13907e4 100644
 > --- a/drivers/mmc/host/mxs-mmc.c
 > +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -146,7 +146,7 @@ struct mxs_mmc_host {
->  	struct mmc_data			*data;
+> @@ -51,7 +51,7 @@
+>  #define MXS_MMC_DETECT_TIMEOUT			(HZ/2)
 > 
->  	void __iomem			*base;
-> -	struct resource			*dma_res;
-> +	int				dma_channel;
->  	struct clk			*clk;
->  	unsigned int			clk_rate;
-> 
-> @@ -668,7 +668,7 @@ static bool mxs_mmc_dma_filter(struct dma_chan *chan,
-> void *param) if (!mxs_dma_is_apbh(chan))
->  		return false;
-> 
-> -	if (chan->chan_id != host->dma_res->start)
-> +	if (chan->chan_id != host->dma_channel)
->  		return false;
-> 
->  	chan->private = &host->dma_data;
-> @@ -719,7 +719,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
-> 
->  	host->devid = pdev->id_entry->driver_data;
->  	host->mmc = mmc;
-> -	host->dma_res = dmares;
-> +	host->dma_channel = dmares->start;
->  	host->sdio_irq_en = 0;
-> 
->  	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
+>  #define SSP_VERSION_LATEST	4
+> -#define ssp_is_old()		(host->version < SSP_VERSION_LATEST)
+> +#define ssp_is_old(host)	(host->version < SSP_VERSION_LATEST)
 
-Best regards,
-Marek Vasut
+(host)->version ... to make the macro safer.
+
+> 
+>  /* SSP registers */
+>  #define HW_SSP_CTRL0				0x000
+> @@ -86,14 +86,14 @@
+>  #define  BM_SSP_BLOCK_SIZE_BLOCK_COUNT		(0xffffff << 4)
+>  #define  BP_SSP_BLOCK_SIZE_BLOCK_SIZE		(0)
+>  #define  BM_SSP_BLOCK_SIZE_BLOCK_SIZE		(0xf)
+> -#define HW_SSP_TIMING				(ssp_is_old() ? 0x050 : 
+0x070)
+> +#define HW_SSP_TIMING(h)			(ssp_is_old(h) ? 0x050 : 0x070)
+>  #define  BP_SSP_TIMING_TIMEOUT			(16)
+>  #define  BM_SSP_TIMING_TIMEOUT			(0xffff << 16)
+>  #define  BP_SSP_TIMING_CLOCK_DIVIDE		(8)
+>  #define  BM_SSP_TIMING_CLOCK_DIVIDE		(0xff << 8)
+>  #define  BP_SSP_TIMING_CLOCK_RATE		(0)
+>  #define  BM_SSP_TIMING_CLOCK_RATE		(0xff)
+> -#define HW_SSP_CTRL1				(ssp_is_old() ? 0x060 : 0x080)
+> +#define HW_SSP_CTRL1(h)				(ssp_is_old(h) ? 0x060 : 
+0x080)
+>  #define  BM_SSP_CTRL1_SDIO_IRQ			(1 << 31)
+>  #define  BM_SSP_CTRL1_SDIO_IRQ_EN		(1 << 30)
+>  #define  BM_SSP_CTRL1_RESP_ERR_IRQ		(1 << 29)
+> @@ -116,11 +116,11 @@
+>  #define  BM_SSP_CTRL1_WORD_LENGTH		(0xf << 4)
+>  #define  BP_SSP_CTRL1_SSP_MODE			(0)
+>  #define  BM_SSP_CTRL1_SSP_MODE			(0xf)
+> -#define HW_SSP_SDRESP0				(ssp_is_old() ? 0x080 : 
+0x0a0)
+> -#define HW_SSP_SDRESP1				(ssp_is_old() ? 0x090 : 
+0x0b0)
+> -#define HW_SSP_SDRESP2				(ssp_is_old() ? 0x0a0 : 
+0x0c0)
+> -#define HW_SSP_SDRESP3				(ssp_is_old() ? 0x0b0 : 
+0x0d0)
+> -#define HW_SSP_STATUS				(ssp_is_old() ? 0x0c0 : 
+0x100)
+> +#define HW_SSP_SDRESP0(h)			(ssp_is_old(h) ? 0x080 : 0x0a0)
+> +#define HW_SSP_SDRESP1(h)			(ssp_is_old(h) ? 0x090 : 0x0b0)
+> +#define HW_SSP_SDRESP2(h)			(ssp_is_old(h) ? 0x0a0 : 0x0c0)
+> +#define HW_SSP_SDRESP3(h)			(ssp_is_old(h) ? 0x0b0 : 0x0d0)
+> +#define HW_SSP_STATUS(h)			(ssp_is_old(h) ? 0x0c0 : 0x100)
+>  #define  BM_SSP_STATUS_CARD_DETECT		(1 << 28)
+>  #define  BM_SSP_STATUS_SDIO_IRQ			(1 << 17)
+>  #define HW_SSP_VERSION				(cpu_is_mx23() ? 0x110 : 
+0x130)
+> @@ -183,7 +183,7 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+>  {
+>  	struct mxs_mmc_host *host = mmc_priv(mmc);
+> 
+> -	return !(readl(host->base + HW_SSP_STATUS) &
+> +	return !(readl(host->base + HW_SSP_STATUS(host)) &
+>  		 BM_SSP_STATUS_CARD_DETECT);
+>  }
+> 
+> @@ -207,7 +207,7 @@ static void mxs_mmc_reset(struct mxs_mmc_host *host)
+>  	writel(BF_SSP(0xffff, TIMING_TIMEOUT) |
+>  	       BF_SSP(2, TIMING_CLOCK_DIVIDE) |
+>  	       BF_SSP(0, TIMING_CLOCK_RATE),
+> -	       host->base + HW_SSP_TIMING);
+> +	       host->base + HW_SSP_TIMING(host));
+> 
+>  	if (host->sdio_irq_en) {
+>  		ctrl0 |= BM_SSP_CTRL0_SDIO_IRQ_CHECK;
+> @@ -215,7 +215,7 @@ static void mxs_mmc_reset(struct mxs_mmc_host *host)
+>  	}
+> 
+>  	writel(ctrl0, host->base + HW_SSP_CTRL0);
+> -	writel(ctrl1, host->base + HW_SSP_CTRL1);
+> +	writel(ctrl1, host->base + HW_SSP_CTRL1(host));
+>  }
+> 
+>  static void mxs_mmc_start_cmd(struct mxs_mmc_host *host,
+> @@ -229,12 +229,12 @@ static void mxs_mmc_request_done(struct mxs_mmc_host
+> *host)
+> 
+>  	if (mmc_resp_type(cmd) & MMC_RSP_PRESENT) {
+>  		if (mmc_resp_type(cmd) & MMC_RSP_136) {
+> -			cmd->resp[3] = readl(host->base + HW_SSP_SDRESP0);
+> -			cmd->resp[2] = readl(host->base + HW_SSP_SDRESP1);
+> -			cmd->resp[1] = readl(host->base + HW_SSP_SDRESP2);
+> -			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP3);
+> +			cmd->resp[3] = readl(host->base + HW_SSP_SDRESP0(host));
+> +			cmd->resp[2] = readl(host->base + HW_SSP_SDRESP1(host));
+> +			cmd->resp[1] = readl(host->base + HW_SSP_SDRESP2(host));
+> +			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP3(host));
+>  		} else {
+> -			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP0);
+> +			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP0(host));
+>  		}
+>  	}
+> 
+> @@ -277,11 +277,11 @@ static irqreturn_t mxs_mmc_irq_handler(int irq, void
+> *dev_id)
+> 
+>  	spin_lock(&host->lock);
+> 
+> -	stat = readl(host->base + HW_SSP_CTRL1);
+> +	stat = readl(host->base + HW_SSP_CTRL1(host));
+>  	writel(stat & MXS_MMC_IRQ_BITS,
+> -	       host->base + HW_SSP_CTRL1 + STMP_OFFSET_REG_CLR);
+> +	       host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_CLR);
+> 
+> -	if ((stat & BM_SSP_CTRL1_SDIO_IRQ) && (stat & BM_SSP_CTRL1_SDIO_IRQ_EN))
+> +	if ((sta & BM_SSP_CTRL1_SDIO_IRQ) && (stat & BM_SSP_CTRL1_SDIO_IRQ_EN))
+
+^ s/sta/stat/ ... did you try compiling this at all ? :-)
+
+>  		mmc_signal_sdio_irq(host->mmc);
+> 
+>  	spin_unlock(&host->lock);
+> @@ -485,7 +485,7 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
+>  		blocks = 1;
+> 
+>  	/* xfer count, block size and count need to be set differently */
+> -	if (ssp_is_old()) {
+> +	if (ssp_is_old(host)) {
+>  		ctrl0 |= BF_SSP(data_size, CTRL0_XFER_COUNT);
+>  		cmd0 |= BF_SSP(log2_blksz, CMD0_BLOCK_SIZE) |
+>  			BF_SSP(blocks - 1, CMD0_BLOCK_COUNT);
+> @@ -509,10 +509,10 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
+> 
+>  	/* set the timeout count */
+>  	timeout = mxs_ns_to_ssp_ticks(host->clk_rate, data->timeout_ns);
+> -	val = readl(host->base + HW_SSP_TIMING);
+> +	val = readl(host->base + HW_SSP_TIMING(host));
+>  	val &= ~(BM_SSP_TIMING_TIMEOUT);
+>  	val |= BF_SSP(timeout, TIMING_TIMEOUT);
+> -	writel(val, host->base + HW_SSP_TIMING);
+> +	writel(val, host->base + HW_SSP_TIMING(host));
+> 
+>  	/* pio */
+>  	host->ssp_pio_words[0] = ctrl0;
+> @@ -598,11 +598,11 @@ static void mxs_mmc_set_clk_rate(struct mxs_mmc_host
+> *host, unsigned int rate)
+> 
+>  	ssp_sck = ssp_clk / clock_divide / (1 + clock_rate);
+> 
+> -	val = readl(host->base + HW_SSP_TIMING);
+> +	val = readl(host->base + HW_SSP_TIMING(host));
+>  	val &= ~(BM_SSP_TIMING_CLOCK_DIVIDE | BM_SSP_TIMING_CLOCK_RATE);
+>  	val |= BF_SSP(clock_divide, TIMING_CLOCK_DIVIDE);
+>  	val |= BF_SSP(clock_rate, TIMING_CLOCK_RATE);
+> -	writel(val, host->base + HW_SSP_TIMING);
+> +	writel(val, host->base + HW_SSP_TIMING(host));
+> 
+>  	host->clk_rate = ssp_sck;
+> 
+> @@ -639,16 +639,17 @@ static void mxs_mmc_enable_sdio_irq(struct mmc_host
+> *mmc, int enable) writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
+>  		       host->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
+>  		writel(BM_SSP_CTRL1_SDIO_IRQ_EN,
+> -		       host->base + HW_SSP_CTRL1 + STMP_OFFSET_REG_SET);
+> +		       host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_SET);
+> 
+> -		if (readl(host->base + HW_SSP_STATUS) & BM_SSP_STATUS_SDIO_IRQ)
+> +		if (readl(host->base + HW_SSP_STATUS(host)) &
+> +				BM_SSP_STATUS_SDIO_IRQ)
+>  			mmc_signal_sdio_irq(host->mmc);
+> 
+>  	} else {
+>  		writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
+>  		       host->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);
+>  		writel(BM_SSP_CTRL1_SDIO_IRQ_EN,
+> -		       host->base + HW_SSP_CTRL1 + STMP_OFFSET_REG_CLR);
+> +		       host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_CLR);
+>  	}
+> 
+>  	spin_unlock_irqrestore(&host->lock, flags);
+> @@ -765,8 +766,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+> 
+>  	mmc->max_segs = 52;
+>  	mmc->max_blk_size = 1 << 0xf;
+> -	mmc->max_blk_count = (ssp_is_old()) ? 0xff : 0xffffff;
+> -	mmc->max_req_size = (ssp_is_old()) ? 0xffff : 0xffffffff;
+> +	mmc->max_blk_count = (ssp_is_old(host)) ? 0xff : 0xffffff;
+> +	mmc->max_req_size = (ssp_is_old(host)) ? 0xffff : 0xffffffff;
+>  	mmc->max_seg_size = dma_get_max_seg_size(host->dmach->device->dev);
+> 
+>  	platform_set_drvdata(pdev, mmc);
