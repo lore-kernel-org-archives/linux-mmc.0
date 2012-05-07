@@ -1,61 +1,67 @@
 From: Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH 06/10] mmc: mxs-mmc: have dma_channel than dma_res in mxs_mmc_host
-Date: Mon,  7 May 2012 22:43:08 +0800
-Message-ID: <1336401793-13753-7-git-send-email-shawn.guo@linaro.org>
+Subject: [PATCH 07/10] mmc: mxs-mmc: copy wp_gpio in struct mxs_mmc_host
+Date: Mon,  7 May 2012 22:43:09 +0800
+Message-ID: <1336401793-13753-8-git-send-email-shawn.guo@linaro.org>
 References: <1336401793-13753-1-git-send-email-shawn.guo@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-pz0-f46.google.com ([209.85.210.46]:46809 "EHLO
 	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756817Ab2EGOnr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 May 2012 10:43:47 -0400
+	with ESMTP id S1756955Ab2EGOnz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 May 2012 10:43:55 -0400
 Received: by mail-pz0-f46.google.com with SMTP id y13so1335513dad.19
-        for <linux-mmc@vger.kernel.org>; Mon, 07 May 2012 07:43:47 -0700 (PDT)
+        for <linux-mmc@vger.kernel.org>; Mon, 07 May 2012 07:43:55 -0700 (PDT)
 In-Reply-To: <1336401793-13753-1-git-send-email-shawn.guo@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc: Chris Ball <cjb@laptop.org>, Dong Aisheng <dong.aisheng@linaro.org>, Marek Vasut <marex@denx.de>, Shawn Guo <shawn.guo@linaro.org>
 
-It replaces dma_res with dma_channel in struct mxs_mmc_host, so that
-the device tree support will be a little easier, since dma channel
-can not be retrieved from "struct resource *dma_res".
+It has wp_gpio copied in struct mxs_mmc_host from platform_data,
+so that the use of platform_data can be limited in probe function,
+which will ease the device tree probe.
 
 Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
 ---
- drivers/mmc/host/mxs-mmc.c |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/host/mxs-mmc.c |   11 ++++-------
+ 1 files changed, 4 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 1a8ba314..e905721 100644
+index e905721..66f792a 100644
 --- a/drivers/mmc/host/mxs-mmc.c
 +++ b/drivers/mmc/host/mxs-mmc.c
-@@ -146,7 +146,7 @@ struct mxs_mmc_host {
- 	struct mmc_data			*data;
+@@ -160,21 +160,17 @@ struct mxs_mmc_host {
+ 	unsigned char			bus_width;
+ 	spinlock_t			lock;
+ 	int				sdio_irq_en;
++	int				wp_gpio;
+ };
  
- 	void __iomem			*base;
--	struct resource			*dma_res;
-+	int				dma_channel;
- 	struct clk			*clk;
- 	unsigned int			clk_rate;
+ static int mxs_mmc_get_ro(struct mmc_host *mmc)
+ {
+ 	struct mxs_mmc_host *host = mmc_priv(mmc);
+-	struct mxs_mmc_platform_data *pdata =
+-		mmc_dev(host->mmc)->platform_data;
  
-@@ -668,7 +668,7 @@ static bool mxs_mmc_dma_filter(struct dma_chan *chan, void *param)
- 	if (!mxs_dma_is_apbh(chan))
- 		return false;
+-	if (!pdata)
+-		return -EFAULT;
+-
+-	if (!gpio_is_valid(pdata->wp_gpio))
++	if (!gpio_is_valid(host->wp_gpio))
+ 		return -EINVAL;
  
--	if (chan->chan_id != host->dma_res->start)
-+	if (chan->chan_id != host->dma_channel)
- 		return false;
+-	return gpio_get_value(pdata->wp_gpio);
++	return gpio_get_value(host->wp_gpio);
+ }
  
- 	chan->private = &host->dma_data;
-@@ -719,7 +719,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+@@ -758,6 +754,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+ 			mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
+ 		if (pdata->flags & SLOTF_4_BIT_CAPABLE)
+ 			mmc->caps |= MMC_CAP_4_BIT_DATA;
++		host->wp_gpio = pdata->wp_gpio;
+ 	}
  
- 	host->devid = pdev->id_entry->driver_data;
- 	host->mmc = mmc;
--	host->dma_res = dmares;
-+	host->dma_channel = dmares->start;
- 	host->sdio_irq_en = 0;
- 
- 	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
+ 	mmc->f_min = 400000;
 -- 
 1.7.5.4
 
