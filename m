@@ -1,223 +1,240 @@
-From: Marek Vasut <marex@denx.de>
-Subject: Re: [PATCH 02/10] mmc: mxs-mmc: let ssp_is_old take host as parameter
-Date: Tue, 8 May 2012 01:43:49 +0200
-Message-ID: <201205080143.49806.marex@denx.de>
-References: <1336401793-13753-1-git-send-email-shawn.guo@linaro.org> <1336401793-13753-3-git-send-email-shawn.guo@linaro.org>
+From: mani <manishrma@gmail.com>
+Subject: Re: [PATCH v2 01/16] FS: Added demand paging markers to filesystem
+Date: Tue, 8 May 2012 11:58:06 +0530
+Message-ID: <CAB+TZU8FNWuHrf6Hqnjs5fwH8yMJgd=CLPB0iUkrs2a-fgehtQ@mail.gmail.com>
+References: <1336054995-22988-1-git-send-email-svenkatr@ti.com>
+ <1336054995-22988-2-git-send-email-svenkatr@ti.com> <20120506233117.GU5091@dastard>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.9]:40245 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757806Ab2EGX6f (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 May 2012 19:58:35 -0400
-In-Reply-To: <1336401793-13753-3-git-send-email-shawn.guo@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/alternative; boundary=20cf3079b7fc8a3fec04bf807ef7
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20120506233117.GU5091@dastard>
+Sender: owner-linux-mm@kvack.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, arnd.bergmann@linaro.org, alex.lemberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, rmk+kernel@arm.linux.org.uk
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Dong Aisheng <dong.aisheng@linaro.org>
 
-Dear Shawn Guo,
+--20cf3079b7fc8a3fec04bf807ef7
+Content-Type: text/plain; charset=ISO-8859-1
 
-> Let macro ssp_is_old take host as parameter to make the code easy
-> to read.
-> 
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> ---
->  drivers/mmc/host/mxs-mmc.c |   59
-> ++++++++++++++++++++++--------------------- 1 files changed, 30
-> insertions(+), 29 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 2ea5361..13907e4 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -51,7 +51,7 @@
->  #define MXS_MMC_DETECT_TIMEOUT			(HZ/2)
-> 
->  #define SSP_VERSION_LATEST	4
-> -#define ssp_is_old()		(host->version < SSP_VERSION_LATEST)
-> +#define ssp_is_old(host)	(host->version < SSP_VERSION_LATEST)
+How about adding the AS_DMPG flag in the file -> address_space when getting
+a filemap_fault()
+so that we can treat the page fault pages as the high priority pages over
+normal read requests.
+How about changing below lines for the support of the pages those are
+requested for the page fault ?
 
-(host)->version ... to make the macro safer.
 
-> 
->  /* SSP registers */
->  #define HW_SSP_CTRL0				0x000
-> @@ -86,14 +86,14 @@
->  #define  BM_SSP_BLOCK_SIZE_BLOCK_COUNT		(0xffffff << 4)
->  #define  BP_SSP_BLOCK_SIZE_BLOCK_SIZE		(0)
->  #define  BM_SSP_BLOCK_SIZE_BLOCK_SIZE		(0xf)
-> -#define HW_SSP_TIMING				(ssp_is_old() ? 0x050 : 
-0x070)
-> +#define HW_SSP_TIMING(h)			(ssp_is_old(h) ? 0x050 : 0x070)
->  #define  BP_SSP_TIMING_TIMEOUT			(16)
->  #define  BM_SSP_TIMING_TIMEOUT			(0xffff << 16)
->  #define  BP_SSP_TIMING_CLOCK_DIVIDE		(8)
->  #define  BM_SSP_TIMING_CLOCK_DIVIDE		(0xff << 8)
->  #define  BP_SSP_TIMING_CLOCK_RATE		(0)
->  #define  BM_SSP_TIMING_CLOCK_RATE		(0xff)
-> -#define HW_SSP_CTRL1				(ssp_is_old() ? 0x060 : 0x080)
-> +#define HW_SSP_CTRL1(h)				(ssp_is_old(h) ? 0x060 : 
-0x080)
->  #define  BM_SSP_CTRL1_SDIO_IRQ			(1 << 31)
->  #define  BM_SSP_CTRL1_SDIO_IRQ_EN		(1 << 30)
->  #define  BM_SSP_CTRL1_RESP_ERR_IRQ		(1 << 29)
-> @@ -116,11 +116,11 @@
->  #define  BM_SSP_CTRL1_WORD_LENGTH		(0xf << 4)
->  #define  BP_SSP_CTRL1_SSP_MODE			(0)
->  #define  BM_SSP_CTRL1_SSP_MODE			(0xf)
-> -#define HW_SSP_SDRESP0				(ssp_is_old() ? 0x080 : 
-0x0a0)
-> -#define HW_SSP_SDRESP1				(ssp_is_old() ? 0x090 : 
-0x0b0)
-> -#define HW_SSP_SDRESP2				(ssp_is_old() ? 0x0a0 : 
-0x0c0)
-> -#define HW_SSP_SDRESP3				(ssp_is_old() ? 0x0b0 : 
-0x0d0)
-> -#define HW_SSP_STATUS				(ssp_is_old() ? 0x0c0 : 
-0x100)
-> +#define HW_SSP_SDRESP0(h)			(ssp_is_old(h) ? 0x080 : 0x0a0)
-> +#define HW_SSP_SDRESP1(h)			(ssp_is_old(h) ? 0x090 : 0x0b0)
-> +#define HW_SSP_SDRESP2(h)			(ssp_is_old(h) ? 0x0a0 : 0x0c0)
-> +#define HW_SSP_SDRESP3(h)			(ssp_is_old(h) ? 0x0b0 : 0x0d0)
-> +#define HW_SSP_STATUS(h)			(ssp_is_old(h) ? 0x0c0 : 0x100)
->  #define  BM_SSP_STATUS_CARD_DETECT		(1 << 28)
->  #define  BM_SSP_STATUS_SDIO_IRQ			(1 << 17)
->  #define HW_SSP_VERSION				(cpu_is_mx23() ? 0x110 : 
-0x130)
-> @@ -183,7 +183,7 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
->  {
->  	struct mxs_mmc_host *host = mmc_priv(mmc);
-> 
-> -	return !(readl(host->base + HW_SSP_STATUS) &
-> +	return !(readl(host->base + HW_SSP_STATUS(host)) &
->  		 BM_SSP_STATUS_CARD_DETECT);
->  }
-> 
-> @@ -207,7 +207,7 @@ static void mxs_mmc_reset(struct mxs_mmc_host *host)
->  	writel(BF_SSP(0xffff, TIMING_TIMEOUT) |
->  	       BF_SSP(2, TIMING_CLOCK_DIVIDE) |
->  	       BF_SSP(0, TIMING_CLOCK_RATE),
-> -	       host->base + HW_SSP_TIMING);
-> +	       host->base + HW_SSP_TIMING(host));
-> 
->  	if (host->sdio_irq_en) {
->  		ctrl0 |= BM_SSP_CTRL0_SDIO_IRQ_CHECK;
-> @@ -215,7 +215,7 @@ static void mxs_mmc_reset(struct mxs_mmc_host *host)
->  	}
-> 
->  	writel(ctrl0, host->base + HW_SSP_CTRL0);
-> -	writel(ctrl1, host->base + HW_SSP_CTRL1);
-> +	writel(ctrl1, host->base + HW_SSP_CTRL1(host));
->  }
-> 
->  static void mxs_mmc_start_cmd(struct mxs_mmc_host *host,
-> @@ -229,12 +229,12 @@ static void mxs_mmc_request_done(struct mxs_mmc_host
-> *host)
-> 
->  	if (mmc_resp_type(cmd) & MMC_RSP_PRESENT) {
->  		if (mmc_resp_type(cmd) & MMC_RSP_136) {
-> -			cmd->resp[3] = readl(host->base + HW_SSP_SDRESP0);
-> -			cmd->resp[2] = readl(host->base + HW_SSP_SDRESP1);
-> -			cmd->resp[1] = readl(host->base + HW_SSP_SDRESP2);
-> -			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP3);
-> +			cmd->resp[3] = readl(host->base + HW_SSP_SDRESP0(host));
-> +			cmd->resp[2] = readl(host->base + HW_SSP_SDRESP1(host));
-> +			cmd->resp[1] = readl(host->base + HW_SSP_SDRESP2(host));
-> +			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP3(host));
->  		} else {
-> -			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP0);
-> +			cmd->resp[0] = readl(host->base + HW_SSP_SDRESP0(host));
->  		}
->  	}
-> 
-> @@ -277,11 +277,11 @@ static irqreturn_t mxs_mmc_irq_handler(int irq, void
-> *dev_id)
-> 
->  	spin_lock(&host->lock);
-> 
-> -	stat = readl(host->base + HW_SSP_CTRL1);
-> +	stat = readl(host->base + HW_SSP_CTRL1(host));
->  	writel(stat & MXS_MMC_IRQ_BITS,
-> -	       host->base + HW_SSP_CTRL1 + STMP_OFFSET_REG_CLR);
-> +	       host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_CLR);
-> 
-> -	if ((stat & BM_SSP_CTRL1_SDIO_IRQ) && (stat & BM_SSP_CTRL1_SDIO_IRQ_EN))
-> +	if ((sta & BM_SSP_CTRL1_SDIO_IRQ) && (stat & BM_SSP_CTRL1_SDIO_IRQ_EN))
+--- a/fs/mpage.c 2012-05-04 12:59:12.000000000 +0530
++++ b/fs/mpage.c 2012-05-07 13:13:49.000000000 +0530
+@@ -408,6 +408,8 @@ mpage_readpages(struct address_space *ma
+                    &last_block_in_bio, &map_bh,
+                    &first_logical_block,
+                    get_block);
++           if(test_bit(AS_DMPG, &mapping->flags) && bio)
++                 bio->bi_rw |= REQ_RW_DMPG
+        }
+        page_cache_release(page);
+    }
+--- a/include/linux/pagemap.h    2012-05-04 12:57:35.000000000 +0530
++++ b/include/linux/pagemap.h    2012-05-07 13:15:24.000000000 +0530
+@@ -27,6 +27,7 @@ enum mapping_flags {
+ #if defined (CONFIG_BD_CACHE_ENABLED)
+    AS_DIRECT  =   __GFP_BITS_SHIFT + 4,  /* DIRECT_IO specified on file op
+*/
+ #endif
++   AS_DMPG  =   __GFP_BITS_SHIFT + 5,  /* DEMAND PAGE specified on file op
+*/
+ };
 
-^ s/sta/stat/ ... did you try compiling this at all ? :-)
+ static inline void mapping_set_error(struct address_space *mapping, int
+error)
 
->  		mmc_signal_sdio_irq(host->mmc);
-> 
->  	spin_unlock(&host->lock);
-> @@ -485,7 +485,7 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
->  		blocks = 1;
-> 
->  	/* xfer count, block size and count need to be set differently */
-> -	if (ssp_is_old()) {
-> +	if (ssp_is_old(host)) {
->  		ctrl0 |= BF_SSP(data_size, CTRL0_XFER_COUNT);
->  		cmd0 |= BF_SSP(log2_blksz, CMD0_BLOCK_SIZE) |
->  			BF_SSP(blocks - 1, CMD0_BLOCK_COUNT);
-> @@ -509,10 +509,10 @@ static void mxs_mmc_adtc(struct mxs_mmc_host *host)
-> 
->  	/* set the timeout count */
->  	timeout = mxs_ns_to_ssp_ticks(host->clk_rate, data->timeout_ns);
-> -	val = readl(host->base + HW_SSP_TIMING);
-> +	val = readl(host->base + HW_SSP_TIMING(host));
->  	val &= ~(BM_SSP_TIMING_TIMEOUT);
->  	val |= BF_SSP(timeout, TIMING_TIMEOUT);
-> -	writel(val, host->base + HW_SSP_TIMING);
-> +	writel(val, host->base + HW_SSP_TIMING(host));
-> 
->  	/* pio */
->  	host->ssp_pio_words[0] = ctrl0;
-> @@ -598,11 +598,11 @@ static void mxs_mmc_set_clk_rate(struct mxs_mmc_host
-> *host, unsigned int rate)
-> 
->  	ssp_sck = ssp_clk / clock_divide / (1 + clock_rate);
-> 
-> -	val = readl(host->base + HW_SSP_TIMING);
-> +	val = readl(host->base + HW_SSP_TIMING(host));
->  	val &= ~(BM_SSP_TIMING_CLOCK_DIVIDE | BM_SSP_TIMING_CLOCK_RATE);
->  	val |= BF_SSP(clock_divide, TIMING_CLOCK_DIVIDE);
->  	val |= BF_SSP(clock_rate, TIMING_CLOCK_RATE);
-> -	writel(val, host->base + HW_SSP_TIMING);
-> +	writel(val, host->base + HW_SSP_TIMING(host));
-> 
->  	host->clk_rate = ssp_sck;
-> 
-> @@ -639,16 +639,17 @@ static void mxs_mmc_enable_sdio_irq(struct mmc_host
-> *mmc, int enable) writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
->  		       host->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_SET);
->  		writel(BM_SSP_CTRL1_SDIO_IRQ_EN,
-> -		       host->base + HW_SSP_CTRL1 + STMP_OFFSET_REG_SET);
-> +		       host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_SET);
-> 
-> -		if (readl(host->base + HW_SSP_STATUS) & BM_SSP_STATUS_SDIO_IRQ)
-> +		if (readl(host->base + HW_SSP_STATUS(host)) &
-> +				BM_SSP_STATUS_SDIO_IRQ)
->  			mmc_signal_sdio_irq(host->mmc);
-> 
->  	} else {
->  		writel(BM_SSP_CTRL0_SDIO_IRQ_CHECK,
->  		       host->base + HW_SSP_CTRL0 + STMP_OFFSET_REG_CLR);
->  		writel(BM_SSP_CTRL1_SDIO_IRQ_EN,
-> -		       host->base + HW_SSP_CTRL1 + STMP_OFFSET_REG_CLR);
-> +		       host->base + HW_SSP_CTRL1(host) + STMP_OFFSET_REG_CLR);
->  	}
-> 
->  	spin_unlock_irqrestore(&host->lock, flags);
-> @@ -765,8 +766,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
-> 
->  	mmc->max_segs = 52;
->  	mmc->max_blk_size = 1 << 0xf;
-> -	mmc->max_blk_count = (ssp_is_old()) ? 0xff : 0xffffff;
-> -	mmc->max_req_size = (ssp_is_old()) ? 0xffff : 0xffffffff;
-> +	mmc->max_blk_count = (ssp_is_old(host)) ? 0xff : 0xffffff;
-> +	mmc->max_req_size = (ssp_is_old(host)) ? 0xffff : 0xffffffff;
->  	mmc->max_seg_size = dma_get_max_seg_size(host->dmach->device->dev);
-> 
->  	platform_set_drvdata(pdev, mmc);
+--- a/mm/filemap.c   2012-05-04 12:58:49.000000000 +0530
++++ b/mm/filemap.c   2012-05-07 13:15:03.000000000 +0530
+@@ -1646,6 +1646,7 @@ int filemap_fault(struct vm_area_struct
+    if (offset >= size)
+        return VM_FAULT_SIGBUS;
+
++   set_bit(AS_DMPG, &file->f_mapping->flags);
+    /*
+     * Do we have something in the page cache already?
+     */
+
+Will these changes have any adverse effect ?
+
+Thanks & Regards
+Manish
+
+On Mon, May 7, 2012 at 5:01 AM, Dave Chinner <david@fromorbit.com> wrote:
+
+> On Thu, May 03, 2012 at 07:53:00PM +0530, Venkatraman S wrote:
+> > From: Ilan Smith <ilan.smith@sandisk.com>
+> >
+> > Add attribute to identify demand paging requests.
+> > Mark readpages with demand paging attribute.
+> >
+> > Signed-off-by: Ilan Smith <ilan.smith@sandisk.com>
+> > Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+> > Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> > ---
+> >  fs/mpage.c                |    2 ++
+> >  include/linux/bio.h       |    7 +++++++
+> >  include/linux/blk_types.h |    2 ++
+> >  3 files changed, 11 insertions(+)
+> >
+> > diff --git a/fs/mpage.c b/fs/mpage.c
+> > index 0face1c..8b144f5 100644
+> > --- a/fs/mpage.c
+> > +++ b/fs/mpage.c
+> > @@ -386,6 +386,8 @@ mpage_readpages(struct address_space *mapping,
+> struct list_head *pages,
+> >                                       &last_block_in_bio, &map_bh,
+> >                                       &first_logical_block,
+> >                                       get_block);
+> > +                     if (bio)
+> > +                             bio->bi_rw |= REQ_RW_DMPG;
+>
+> Have you thought about the potential for DOSing a machine
+> with this? That is, user data reads can now preempt writes of any
+> kind, effectively stalling writeback and memory reclaim which will
+> lead to OOM situations. Or, alternatively, journal flushing will get
+> stalled and no new modifications can take place until the read
+> stream stops.
+>
+> This really seems like functionality that belongs in an IO
+> scheduler so that write starvation can be avoided, not in high-level
+> data read paths where we have no clue about anything else going on
+> in the IO subsystem....
+>
+> Cheers,
+>
+> Dave.
+> --
+> Dave Chinner
+> david@fromorbit.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+--20cf3079b7fc8a3fec04bf807ef7
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+How about adding the AS_DMPG flag in the file -&gt; address_space when gett=
+ing a filemap_fault() <br>so that we can treat the page fault pages as the =
+high priority pages over normal read requests.<br>How about changing below =
+lines for the support of the pages those are requested for the page fault ?=
+<br>
+
+<br><br>--- a/fs/mpage.c 2012-05-04 12:59:12.000000000 +0530<br>+++ b/fs/mp=
+age.c 2012-05-07 13:13:49.000000000 +0530<br>@@ -408,6 +408,8 @@ mpage_read=
+pages(struct address_space *ma<br>=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0 &amp;last_block_in_bio, &amp;map_bh,<br>
+
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 &amp;first_logica=
+l_block,<br>=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 get_b=
+lock);<br>+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 if(test_bit(AS_DMPG, &amp;mapping=
+-&gt;flags) &amp;&amp; bio)<br>+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0 bio-&gt;bi_rw |=3D REQ_RW_DMPG<br>=A0=A0=A0=A0=A0=A0=A0 }<br>
+
+=A0=A0=A0=A0=A0=A0=A0 page_cache_release(page);<br>=A0=A0=A0 }<br>--- a/inc=
+lude/linux/pagemap.h=A0=A0=A0 2012-05-04 12:57:35.000000000 +0530<br>+++ b/=
+include/linux/pagemap.h=A0=A0=A0 2012-05-07 13:15:24.000000000 +0530<br>@@ =
+-27,6 +27,7 @@ enum mapping_flags {<br>
+
+=A0#if defined (CONFIG_BD_CACHE_ENABLED)<br>=A0=A0=A0 AS_DIRECT=A0 =3D=A0=
+=A0 __GFP_BITS_SHIFT + 4,=A0 /* DIRECT_IO specified on file op */<br>=A0#en=
+dif<br>+=A0=A0 AS_DMPG=A0 =3D=A0=A0 __GFP_BITS_SHIFT + 5,=A0 /* DEMAND PAGE=
+ specified on file op */<br>=A0};<br>
+
+=A0<br>=A0static inline void mapping_set_error(struct address_space *mappin=
+g, int error)<br><br>--- a/mm/filemap.c=A0=A0 2012-05-04 12:58:49.000000000=
+ +0530<br>+++ b/mm/filemap.c=A0=A0 2012-05-07 13:15:03.000000000 +0530<br>@=
+@ -1646,6 +1646,7 @@ int filemap_fault(struct vm_area_struct <br>
+
+=A0=A0=A0 if (offset &gt;=3D size)<br>=A0=A0=A0=A0=A0=A0=A0 return VM_FAULT=
+_SIGBUS;<br>=A0<br>+=A0=A0 set_bit(AS_DMPG, &amp;file-&gt;f_mapping-&gt;fla=
+gs);<br>=A0=A0=A0 /*<br>=A0=A0=A0=A0 * Do we have something in the page cac=
+he already?<br>=A0=A0=A0=A0 */<br>=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0 <br>
+
+Will these changes have any adverse effect ? <br><br>Thanks &amp; Regards<b=
+r>Manish<br><br><div class=3D"gmail_quote">On Mon, May 7, 2012 at 5:01 AM, =
+Dave Chinner <span dir=3D"ltr">&lt;<a href=3D"mailto:david@fromorbit.com" t=
+arget=3D"_blank">david@fromorbit.com</a>&gt;</span> wrote:<br>
+
+<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
+x #ccc solid;padding-left:1ex"><div class=3D"im">On Thu, May 03, 2012 at 07=
+:53:00PM +0530, Venkatraman S wrote:<br>
+&gt; From: Ilan Smith &lt;<a href=3D"mailto:ilan.smith@sandisk.com">ilan.sm=
+ith@sandisk.com</a>&gt;<br>
+&gt;<br>
+&gt; Add attribute to identify demand paging requests.<br>
+&gt; Mark readpages with demand paging attribute.<br>
+&gt;<br>
+&gt; Signed-off-by: Ilan Smith &lt;<a href=3D"mailto:ilan.smith@sandisk.com=
+">ilan.smith@sandisk.com</a>&gt;<br>
+&gt; Signed-off-by: Alex Lemberg &lt;<a href=3D"mailto:alex.lemberg@sandisk=
+.com">alex.lemberg@sandisk.com</a>&gt;<br>
+&gt; Signed-off-by: Venkatraman S &lt;<a href=3D"mailto:svenkatr@ti.com">sv=
+enkatr@ti.com</a>&gt;<br>
+&gt; ---<br>
+&gt; =A0fs/mpage.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A02 ++<br>
+&gt; =A0include/linux/bio.h =A0 =A0 =A0 | =A0 =A07 +++++++<br>
+&gt; =A0include/linux/blk_types.h | =A0 =A02 ++<br>
+&gt; =A03 files changed, 11 insertions(+)<br>
+&gt;<br>
+&gt; diff --git a/fs/mpage.c b/fs/mpage.c<br>
+&gt; index 0face1c..8b144f5 100644<br>
+&gt; --- a/fs/mpage.c<br>
+&gt; +++ b/fs/mpage.c<br>
+&gt; @@ -386,6 +386,8 @@ mpage_readpages(struct address_space *mapping, str=
+uct list_head *pages,<br>
+&gt; =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 &amp;last_block_in_bio, &amp;map_bh,<br>
+&gt; =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 &amp;first_logical_block,<br>
+&gt; =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
+=A0 =A0 get_block);<br>
+&gt; + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (bio)<br>
+&gt; + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 bio-&gt;bi_r=
+w |=3D REQ_RW_DMPG;<br>
+<br>
+</div>Have you thought about the potential for DOSing a machine<br>
+with this? That is, user data reads can now preempt writes of any<br>
+kind, effectively stalling writeback and memory reclaim which will<br>
+lead to OOM situations. Or, alternatively, journal flushing will get<br>
+stalled and no new modifications can take place until the read<br>
+stream stops.<br>
+<br>
+This really seems like functionality that belongs in an IO<br>
+scheduler so that write starvation can be avoided, not in high-level<br>
+data read paths where we have no clue about anything else going on<br>
+in the IO subsystem....<br>
+<br>
+Cheers,<br>
+<br>
+Dave.<br>
+<span class=3D"HOEnZb"><font color=3D"#888888">--<br>
+Dave Chinner<br>
+<a href=3D"mailto:david@fromorbit.com">david@fromorbit.com</a><br>
+</font></span><div class=3D"HOEnZb"><div class=3D"h5">--<br>
+To unsubscribe from this list: send the line &quot;unsubscribe linux-mmc&qu=
+ot; in<br>
+the body of a message to <a href=3D"mailto:majordomo@vger.kernel.org">major=
+domo@vger.kernel.org</a><br>
+More majordomo info at =A0<a href=3D"http://vger.kernel.org/majordomo-info.=
+html" target=3D"_blank">http://vger.kernel.org/majordomo-info.html</a><br>
+</div></div></blockquote></div><br>
+
+--20cf3079b7fc8a3fec04bf807ef7--
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
