@@ -1,65 +1,62 @@
 From: kdorfman@codeaurora.org
-Subject: Re: [PATCH v2] mmc: core: Fix the HPI execution sequence
-Date: Wed, 9 May 2012 06:17:02 -0700 (PDT)
-Message-ID: <edaffb8a034e4ed87b2f7c63d759c1d2.squirrel@www.codeaurora.org>
-References: <1334670334-18050-1-git-send-email-svenkatr@ti.com>
+Subject: Re: [PATCH 4/4] mmc: core: Send HPI only till it is successful
+Date: Wed, 9 May 2012 06:22:39 -0700 (PDT)
+Message-ID: <5d18897df577fa24297975f3421088c8.squirrel@www.codeaurora.org>
+References: <1334319854-5989-1-git-send-email-svenkatr@ti.com>
+    <1334319854-5989-5-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:36712 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759392Ab2EINRD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 May 2012 09:17:03 -0400
-In-Reply-To: <1334670334-18050-1-git-send-email-svenkatr@ti.com>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:27073 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757560Ab2EINWj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 May 2012 09:22:39 -0400
+In-Reply-To: <1334319854-5989-5-git-send-email-svenkatr@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Namjae Jeon <linkinjeon@gmail.com>, Jae hoon Chung <jh80.chung@gmail.com>, Chris Ball <cjb@laptop.org>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>
 
-> mmc_execute_hpi should send the HPI command only
-> once, only if the card is in PRG state.
->
-> According to eMMC spec, the command's completion time is
-> not dependent on OUT_OF_INTERRUPT_TIME. Only the transition
-> out of PRG STATE is guarded by OUT_OF_INTERRUPT_TIME - which is
-> defined to begin at the end of sending the command itself.
->
-> Specify the default timeout for the actual sending of HPI
-> command, and then use OUT_OF_INTERRUPT_TIME to wait for
-> the transition out of PRG state.
+Hi,
+I see 2 fixes for existing mmc_interrupt_hpi() function:
+-  [PATCH 4/4] mmc: core: Send HPI only till it is successful"
+-  [PATCH v2] mmc: core: Fix the HPI execution sequence
+
+They are exclusive. Can you explain how final solution will look like?
+Thanks,
+Kostya
+
+> Try to send HPI only a fixed number of times till it is
+> successful. One successful transfer is enough - but wait
+> till the card comes out of transfer state.
+> Return an error if the card was not in programming state to
+> begin with - so that the caller knows that HPI was not sent.
 >
 > Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
 > Signed-off-by: Venkatraman S <svenkatr@ti.com>
-> CC: Namjae Jeon <linkinjeon@gmail.com>
-> CC: Jae hoon Chung <jh80.chung@gmail.com>
-> CC: Chris Ball <cjb@laptop.org>
 > ---
-> Changes since v1:
-> 	Skip looping over send_status indefinitely
-> 	Correct the interpretation of OUT_OF_INTERRUPT_TIME
->
->  drivers/mmc/core/core.c    |   45
-> ++++++++++++++++++++++++--------------------
->  drivers/mmc/core/mmc_ops.c |    2 +-
->  2 files changed, 26 insertions(+), 21 deletions(-)
+>  drivers/mmc/core/core.c |   34 ++++++++++++++++++----------------
+>  1 file changed, 18 insertions(+), 16 deletions(-)
 >
 > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index e541efb..027c579 100644
+> index e541efb..ceabef5 100644
 > --- a/drivers/mmc/core/core.c
 > +++ b/drivers/mmc/core/core.c
-> @@ -403,6 +403,7 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+> @@ -401,7 +401,7 @@ EXPORT_SYMBOL(mmc_wait_for_req);
+>   */
+>  int mmc_interrupt_hpi(struct mmc_card *card)
 >  {
->  	int err;
+> -	int err;
+> +	int err, i;
 >  	u32 status;
-> +	unsigned long starttime;
 >
 >  	BUG_ON(!card);
->
-> @@ -421,27 +422,31 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+> @@ -421,27 +421,29 @@ int mmc_interrupt_hpi(struct mmc_card *card)
 >  	/*
 >  	 * If the card status is in PRG-state, we can send the HPI command.
 >  	 */
-> -	if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
+> +	err = -EINVAL;
+>  	if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
 > -		do {
 > -			/*
 > -			 * We don't know when the HPI command will finish
@@ -69,65 +66,36 @@ Cc: linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Namjae Jeon <lin
 > -			 * sending the HPI command, we are already out of
 > -			 * prg-state.
 > -			 */
-> -			err = mmc_send_hpi_cmd(card, &status);
+> +		/* To prevent an infinite lockout, try to send HPI
+> +		 * a fixed number of times and bailout if it can't
+> +		 * succeed.
+> +		 */
+> +		for (i = 0; i < 10 && err != 0 ; i++)
+>  			err = mmc_send_hpi_cmd(card, &status);
 > -			if (err)
-> -				pr_debug("%s: abort HPI (%d error)\n",
-> -					 mmc_hostname(card->host), err);
-> +	if (R1_CURRENT_STATE(status) != R1_STATE_PRG) {
-> +		pr_debug("%s: Can't send HPI: Card state=%d\n",
-> +			mmc_hostname(card->host), R1_CURRENT_STATE(status));
-> +		err = -EINVAL;
-> +		goto out;
-> +	}
-You can't return error here, because the card status may be:
-0 = Idle 1 = Ready 2 = Ident 3 = Stby 4 = Tran 5 = Data 6 = Rcv 7 = Prg 8
-= Dis 9 = Btst 10
-Not every value is error here: the card state may be Idle/Ready and then
-you do not need to return error.
-
-
-> +
-> +	starttime = jiffies;
-> +	err = mmc_send_hpi_cmd(card, &status);
-> +	if (err) {
-> +		pr_debug("%s:HPI could not be sent.err=%d)\n",
-> +			mmc_hostname(card->host), err);
-> +		goto out;
-> +	}
-> +
-> +	do {
-> +		err = mmc_send_status(card, &status);
-> +
-> +		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
-> +			goto out;
-> +		if (jiffies_to_msecs(jiffies - starttime) >
-> +			card->ext_csd.out_of_int_time)
-> +			err = -ETIMEDOUT;
-> +	} while (!err);
->
+> +		/* Once HPI was sent successfully, the card is
+> +		 * supposed to be back to transfer state.
+> +		 */
+> +		do {
+> +			if (err) {
+>  				pr_debug("%s: abort HPI (%d error)\n",
+>  					 mmc_hostname(card->host), err);
+> -
 > -			err = mmc_send_status(card, &status);
 > -			if (err)
-> -				break;
-> -		} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+>  				break;
+> +			}
+> +			err = mmc_send_status(card, &status);
+>  		} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
 > -	} else
 > -		pr_debug("%s: Left prg-state\n", mmc_hostname(card->host));
+> +	} else {
+> +		pr_debug("%s: Can't send HPI. State=%d\n",
+> +			mmc_hostname(card->host), R1_CURRENT_STATE(status));
+> +	}
 >
 >  out:
 >  	mmc_release_host(card->host);
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 69370f4..f2235d6 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -569,7 +569,7 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32
-> *status)
->
->  	cmd.opcode = opcode;
->  	cmd.arg = card->rca << 16 | 1;
-> -	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
-> +	cmd.cmd_timeout_ms = 0;
->
->  	err = mmc_wait_for_cmd(card->host, &cmd, 0);
->  	if (err) {
 > --
 > 1.7.10.rc2
 >
@@ -136,10 +104,6 @@ you do not need to return error.
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-Thanks,
-Kostya
-Consultant for Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
 
 
 
