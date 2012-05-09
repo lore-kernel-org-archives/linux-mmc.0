@@ -1,48 +1,42 @@
-From: Arnd Bergmann <arnd.bergmann@linaro.org>
-Subject: Re: [PATCH v2 14/16] mmc: block: Implement HPI invocation and handling logic.
-Date: Wed, 9 May 2012 14:01:11 +0000
-Message-ID: <201205091401.11894.arnd.bergmann@linaro.org>
-References: <1336054995-22988-1-git-send-email-svenkatr@ti.com> <1336054995-22988-15-git-send-email-svenkatr@ti.com> <3f7a217a08fd2c508576cbac8d26b017.squirrel@www.codeaurora.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2 0/2] mmc: core: fix the HS200 mode
+Date: Wed, 09 May 2012 10:04:46 -0400
+Message-ID: <87fwb9o3gh.fsf@laptop.org>
+References: <004a01cd22b3$6e343ce0$4a9cb6a0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <3f7a217a08fd2c508576cbac8d26b017.squirrel@www.codeaurora.org>
-Sender: owner-linux-mm@kvack.org
-To: kdorfman@codeaurora.org
-Cc: Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, alex.lemberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, rmk+kernel@arm.linux.org.uk
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:47126 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757984Ab2EIOEp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 9 May 2012 10:04:45 -0400
+In-Reply-To: <004a01cd22b3$6e343ce0$4a9cb6a0$%jun@samsung.com> (Seungwon
+	Jeon's message of "Wed, 25 Apr 2012 16:17:10 +0900")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, 'Subhash Jadavani' <subhashj@codeaurora.org>, 'Girish K S' <girish.shivananjappa@linaro.org>
 
-On Wednesday 09 May 2012, kdorfman@codeaurora.org wrote:
-> > +static bool mmc_can_do_foreground_hpi(struct mmc_queue *mq,
-> > +                     struct request *req, unsigned int thpi)
-> > +{
-> > +
-> > +     /*
-> > +      * If some time has elapsed since the issuing of previous write
-> > +      * command, or if the size of the request was too small, there's
-> > +      * no point in preempting it. Check if it's worthwhile to preempt
-> > +      */
-> > +     int time_elapsed = jiffies_to_msecs(jiffies -
-> > +                     mq->mqrq_cur->mmc_active.mrq->cmd->started_time);
-> > +
-> > +     if (time_elapsed <= thpi)
-> > +                     return true;
-> Some host controllers (or DMA) has possibility to get the byte count of
-> current transaction. It may be implemented as host api (similar to abort
-> ops). Then you have more accurate estimation of worthiness.
+Hi,
 
-I'm rather sure that the byte count is not relevant here: it's not
-the actual write that is taking so long, it's the garbage collection
-that the device does internally before the write actually gets done.
-The data transfer is much faster than the time we are waiting for here.
+On Wed, Apr 25 2012, Seungwon Jeon wrote:
+> Includes fixes for eMMC related with HS200.
+>
+> Changes in v2:
+>     - PATCH 1/2: Combine both the if conditions (from Subhash Jadavani)
+>
+> Seungwon Jeon (2):
+>       mmc: core: fix the decision of mmc card-type
+>       mmc: core: fix the signalling 1.8V for HS200
+>
+>  drivers/mmc/core/mmc.c   |   93 +++++++++++++++++++--------------------------
+>  include/linux/mmc/card.h |    4 ++
+>  include/linux/mmc/mmc.h  |   60 -----------------------------
+>  3 files changed, 43 insertions(+), 114 deletions(-)
 
-	Arnd
+Thanks, both pushed to mmc-next for 3.5.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
