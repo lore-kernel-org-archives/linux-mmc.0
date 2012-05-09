@@ -1,93 +1,27 @@
-From: Philip Rakity <prakity@marvell.com>
-Subject: Re: [PATCH 4/4] mmc: core: Send HPI only till it is successful
-Date: Wed, 9 May 2012 07:50:10 -0700
-Message-ID: <1EB04A4B-3A25-43B6-9A7C-A0563F6BC553@marvell.com>
-References: <1334319854-5989-1-git-send-email-svenkatr@ti.com>
- <1334319854-5989-5-git-send-email-svenkatr@ti.com>
- <CAKYAXd_R5RfyP_-hW6LRbdEaVHbJOS+RdQC6-t3tqCcBUS4HGw@mail.gmail.com>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v2 01/16] FS: Added demand paging markers to filesystem
+Date: Wed, 9 May 2012 11:03:43 -0400
+Message-ID: <20120509150343.GB14916@infradead.org>
+References: <1336054995-22988-1-git-send-email-svenkatr@ti.com>
+ <CANfBPZ_2JeWUu7ti97CVc=ODeEi65ke9EKV6Uje0JHcCM8gYqQ@mail.gmail.com>
+ <20120509003348.GM5091@dastard>
+ <201205091359.40554.arnd.bergmann@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog121.obsmtp.com ([74.125.149.145]:39798 "EHLO
-	na3sys009aog121.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755190Ab2EIOu0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 May 2012 10:50:26 -0400
-In-Reply-To: <CAKYAXd_R5RfyP_-hW6LRbdEaVHbJOS+RdQC6-t3tqCcBUS4HGw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <201205091359.40554.arnd.bergmann@linaro.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd.bergmann@linaro.org>
+Cc: Dave Chinner <david@fromorbit.com>, "S, Venkatraman" <svenkatr@ti.com>, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, alex.lemberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, rmk+kernel@arm.linux.org.uk
 List-Id: linux-mmc@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: Venkatraman S <svenkatr@ti.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-DQpPbiBBcHIgMTMsIDIwMTIsIGF0IDc6MzkgQU0sIE5hbWphZSBKZW9uIHdyb3RlOg0KDQo+IEhp
-LiBWZW5rYXRyYW1hbi4NCj4gDQo+IFlvdSBmaXhlZCAxMCB0aW1lcy4gd2h5IGlzIGl0IDEwIHRp
-bWVzID8NCj4gYW5kIGNoZWNraW5nIGVyciBmcm9tIG1tY19zZW5kX3N0YXR1cyBpcyBub3QgbmVl
-ZGVkID8gaXMgaXQgIGFsc28NCj4gaW5maW5pdGUgY2FzZSA/DQo+IA0KPiBUaGFua3MuDQo+IA0K
-PiAyMDEyLzQvMTMgVmVua2F0cmFtYW4gUyA8c3ZlbmthdHJAdGkuY29tPjoNCj4+IFRyeSB0byBz
-ZW5kIEhQSSBvbmx5IGEgZml4ZWQgbnVtYmVyIG9mIHRpbWVzIHRpbGwgaXQgaXMNCj4+IHN1Y2Nl
-c3NmdWwuIE9uZSBzdWNjZXNzZnVsIHRyYW5zZmVyIGlzIGVub3VnaCAtIGJ1dCB3YWl0DQo+PiB0
-aWxsIHRoZSBjYXJkIGNvbWVzIG91dCBvZiB0cmFuc2ZlciBzdGF0ZS4NCj4+IFJldHVybiBhbiBl
-cnJvciBpZiB0aGUgY2FyZCB3YXMgbm90IGluIHByb2dyYW1taW5nIHN0YXRlIHRvDQo+PiBiZWdp
-biB3aXRoIC0gc28gdGhhdCB0aGUgY2FsbGVyIGtub3dzIHRoYXQgSFBJIHdhcyBub3Qgc2VudC4N
-Cj4+IA0KPj4gUmVwb3J0ZWQtYnk6IEFsZXggTGVtYmVyZyA8QWxleC5MZW1iZXJnQHNhbmRpc2su
-Y29tPg0KPj4gU2lnbmVkLW9mZi1ieTogVmVua2F0cmFtYW4gUyA8c3ZlbmthdHJAdGkuY29tPg0K
-Pj4gLS0tDQo+PiAgZHJpdmVycy9tbWMvY29yZS9jb3JlLmMgfCAgIDM0ICsrKysrKysrKysrKysr
-KysrKy0tLS0tLS0tLS0tLS0tLS0NCj4+ICAxIGZpbGUgY2hhbmdlZCwgMTggaW5zZXJ0aW9ucygr
-KSwgMTYgZGVsZXRpb25zKC0pDQo+PiANCj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3Jl
-L2NvcmUuYyBiL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+PiBpbmRleCBlNTQxZWZiLi5jZWFi
-ZWY1IDEwMDY0NA0KPj4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMNCj4+ICsrKyBiL2Ry
-aXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+PiBAQCAtNDAxLDcgKzQwMSw3IEBAIEVYUE9SVF9TWU1C
-T0wobW1jX3dhaXRfZm9yX3JlcSk7DQo+PiAgKi8NCj4+ICBpbnQgbW1jX2ludGVycnVwdF9ocGko
-c3RydWN0IG1tY19jYXJkICpjYXJkKQ0KPj4gIHsNCj4+IC0gICAgICAgaW50IGVycjsNCj4+ICsg
-ICAgICAgaW50IGVyciwgaTsNCj4+ICAgICAgICB1MzIgc3RhdHVzOw0KPj4gDQo+PiAgICAgICAg
-QlVHX09OKCFjYXJkKTsNCj4+IEBAIC00MjEsMjcgKzQyMSwyOSBAQCBpbnQgbW1jX2ludGVycnVw
-dF9ocGkoc3RydWN0IG1tY19jYXJkICpjYXJkKQ0KPj4gICAgICAgIC8qDQo+PiAgICAgICAgICog
-SWYgdGhlIGNhcmQgc3RhdHVzIGlzIGluIFBSRy1zdGF0ZSwgd2UgY2FuIHNlbmQgdGhlIEhQSSBj
-b21tYW5kLg0KPj4gICAgICAgICAqLw0KPj4gKyAgICAgICBlcnIgPSAtRUlOVkFMOw0KPj4gICAg
-ICAgIGlmIChSMV9DVVJSRU5UX1NUQVRFKHN0YXR1cykgPT0gUjFfU1RBVEVfUFJHKSB7DQo+PiAt
-ICAgICAgICAgICAgICAgZG8gew0KPj4gLSAgICAgICAgICAgICAgICAgICAgICAgLyoNCj4+IC0g
-ICAgICAgICAgICAgICAgICAgICAgICAqIFdlIGRvbid0IGtub3cgd2hlbiB0aGUgSFBJIGNvbW1h
-bmQgd2lsbCBmaW5pc2gNCj4+IC0gICAgICAgICAgICAgICAgICAgICAgICAqIHByb2Nlc3Npbmcs
-IHNvIHdlIG5lZWQgdG8gcmVzZW5kIEhQSSB1bnRpbCBvdXQNCj4+IC0gICAgICAgICAgICAgICAg
-ICAgICAgICAqIG9mIHByZy1zdGF0ZSwgYW5kIGtlZXAgY2hlY2tpbmcgdGhlIGNhcmQgc3RhdHVz
-DQo+PiAtICAgICAgICAgICAgICAgICAgICAgICAgKiB3aXRoIFNFTkRfU1RBVFVTLiAgSWYgYSB0
-aW1lb3V0IGVycm9yIG9jY3VycyB3aGVuDQo+PiAtICAgICAgICAgICAgICAgICAgICAgICAgKiBz
-ZW5kaW5nIHRoZSBIUEkgY29tbWFuZCwgd2UgYXJlIGFscmVhZHkgb3V0IG9mDQo+PiAtICAgICAg
-ICAgICAgICAgICAgICAgICAgKiBwcmctc3RhdGUuDQo+PiAtICAgICAgICAgICAgICAgICAgICAg
-ICAgKi8NCj4+ICsgICAgICAgICAgICAgICAvKiBUbyBwcmV2ZW50IGFuIGluZmluaXRlIGxvY2tv
-dXQsIHRyeSB0byBzZW5kIEhQSQ0KPj4gKyAgICAgICAgICAgICAgICAqIGEgZml4ZWQgbnVtYmVy
-IG9mIHRpbWVzIGFuZCBiYWlsb3V0IGlmIGl0IGNhbid0DQo+PiArICAgICAgICAgICAgICAgICog
-c3VjY2VlZC4NCj4+ICsgICAgICAgICAgICAgICAgKi8NCj4+ICsgICAgICAgICAgICAgICBmb3Ig
-KGkgPSAwOyBpIDwgMTAgJiYgZXJyICE9IDAgOyBpKyspDQoNCg0Kd291bGQgaXQgbWFrZSBtb3Jl
-IHNlbnNlIHRvIGNoZWNrIHRpbWUgYXMgd2VsbCBhcyByZXRyeSBjb3VudCA/DQp3b3JyeSB0aGF0
-IGNvdW50IG1heSBiZSB0b28gc2hvcnQgb3IgYmVoYXZpb3IgaXMgZGVwZW5kZW50IG9uIGNhcmQg
-bWFudWZhY3R1cmVyLg0KDQoNCj4+ICAgICAgICAgICAgICAgICAgICAgICAgZXJyID0gbW1jX3Nl
-bmRfaHBpX2NtZChjYXJkLCAmc3RhdHVzKTsNCj4+IC0gICAgICAgICAgICAgICAgICAgICAgIGlm
-IChlcnIpDQo+PiArICAgICAgICAgICAgICAgLyogT25jZSBIUEkgd2FzIHNlbnQgc3VjY2Vzc2Z1
-bGx5LCB0aGUgY2FyZCBpcw0KPj4gKyAgICAgICAgICAgICAgICAqIHN1cHBvc2VkIHRvIGJlIGJh
-Y2sgdG8gdHJhbnNmZXIgc3RhdGUuDQo+PiArICAgICAgICAgICAgICAgICovDQo+PiArICAgICAg
-ICAgICAgICAgZG8gew0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgaWYgKGVycikgew0KPj4g
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHByX2RlYnVnKCIlczogYWJvcnQgSFBJICgl
-ZCBlcnJvcilcbiIsDQo+PiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-bW1jX2hvc3RuYW1lKGNhcmQtPmhvc3QpLCBlcnIpOw0KPj4gLQ0KPj4gLSAgICAgICAgICAgICAg
-ICAgICAgICAgZXJyID0gbW1jX3NlbmRfc3RhdHVzKGNhcmQsICZzdGF0dXMpOw0KPj4gLSAgICAg
-ICAgICAgICAgICAgICAgICAgaWYgKGVycikNCj4+ICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICBicmVhazsNCj4+ICsgICAgICAgICAgICAgICAgICAgICAgIH0NCj4+ICsgICAgICAgICAg
-ICAgICAgICAgICAgIGVyciA9IG1tY19zZW5kX3N0YXR1cyhjYXJkLCAmc3RhdHVzKTsNCj4+ICAg
-ICAgICAgICAgICAgIH0gd2hpbGUgKFIxX0NVUlJFTlRfU1RBVEUoc3RhdHVzKSA9PSBSMV9TVEFU
-RV9QUkcpOw0KPj4gLSAgICAgICB9IGVsc2UNCj4+IC0gICAgICAgICAgICAgICBwcl9kZWJ1Zygi
-JXM6IExlZnQgcHJnLXN0YXRlXG4iLCBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCkpOw0KPj4gKyAg
-ICAgICB9IGVsc2Ugew0KPj4gKyAgICAgICAgICAgICAgIHByX2RlYnVnKCIlczogQ2FuJ3Qgc2Vu
-ZCBIUEkuIFN0YXRlPSVkXG4iLA0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3Ru
-YW1lKGNhcmQtPmhvc3QpLCBSMV9DVVJSRU5UX1NUQVRFKHN0YXR1cykpOw0KPj4gKyAgICAgICB9
-DQo+PiANCj4+ICBvdXQ6DQo+PiAgICAgICAgbW1jX3JlbGVhc2VfaG9zdChjYXJkLT5ob3N0KTsN
-Cj4+IC0tDQo+PiAxLjcuMTAucmMyDQo+PiANCj4+IC0tDQo+PiBUbyB1bnN1YnNjcmliZSBmcm9t
-IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbg0KPj4g
-dGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4+IE1v
-cmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWlu
-Zm8uaHRtbA0KPiBO77+977+977+977+977+9cu+/ve+/vXnvv73vv73vv71i77+9WO+/ve+/vcen
-du+/vV7vv70p3rp7Lm7vv70r77+977+977+977+9e++/ve+/vWci77+977+9Xm7vv71y77+977+9
-77+9eu+/vRrvv73vv71o77+977+977+977+9Ju+/ve+/vR7vv71H77+977+977+9aO+/vQMo77+9
-6ZqO77+93aJqIu+/ve+/vRrvv70bbe+/ve+/ve+/ve+/ve+/vXrvv73elu+/ve+/ve+/vWbvv73v
-v73vv71o77+977+977+9fu+/vW3vv70NCg0K
+On Wed, May 09, 2012 at 01:59:40PM +0000, Arnd Bergmann wrote:
+> My feeling is that we should just treat every (REQ_SYNC | REQ_READ)
+> request the same and let them interrupt long-running writes,
+> independent of whether it's REQ_META or demand paging.
+
+It's funny that the CFQ scheduler used to boost metadata reads that
+have REQ_META set - in fact it still does for those filesystems using
+the now split out REQ_PRIO.
+
