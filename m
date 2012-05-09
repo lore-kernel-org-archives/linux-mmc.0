@@ -1,64 +1,39 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCH v2 14/16] mmc: block: Implement HPI invocation and
- handling logic.
-Date: Wed, 9 May 2012 19:36:57 +0530
-Message-ID: <CANfBPZ-ZAJjDcy6cR7q+n7SKGc+2dMYfFREg-6ovh+E1eNbGWg@mail.gmail.com>
-References: <1336054995-22988-1-git-send-email-svenkatr@ti.com>
- <1336054995-22988-15-git-send-email-svenkatr@ti.com> <3f7a217a08fd2c508576cbac8d26b017.squirrel@www.codeaurora.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v3 1/1] mmc: core: skip card initialization if power class selection fails
+Date: Wed, 09 May 2012 10:07:47 -0400
+Message-ID: <87bolxo3bg.fsf@laptop.org>
+References: <1334239567-22285-1-git-send-email-subhashj@codeaurora.org>
+	<CAKYAXd-HfDL1AXJ=X-+iTjqCcVTF=1=J-RBBNU05r9P+om_6bQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <3f7a217a08fd2c508576cbac8d26b017.squirrel@www.codeaurora.org>
-Sender: owner-linux-mm@kvack.org
-To: kdorfman@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, arnd.bergmann@linaro.org, alex.lemberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, rmk+kernel@arm.linux.org.uk
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:50884 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758710Ab2EIOHj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 9 May 2012 10:07:39 -0400
+In-Reply-To: <CAKYAXd-HfDL1AXJ=X-+iTjqCcVTF=1=J-RBBNU05r9P+om_6bQ@mail.gmail.com>
+	(Namjae Jeon's message of "Fri, 13 Apr 2012 23:41:56 +0900")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Namjae Jeon <linkinjeon@gmail.com>
+Cc: Subhash Jadavani <subhashj@codeaurora.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 
-On Wed, May 9, 2012 at 2:05 PM,  <kdorfman@codeaurora.org> wrote:
->
->> +static bool mmc_can_do_foreground_hpi(struct mmc_queue *mq,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct request *req, unsigned =
-int thpi)
->> +{
->> +
->> + =A0 =A0 /*
->> + =A0 =A0 =A0* If some time has elapsed since the issuing of previous wr=
-ite
->> + =A0 =A0 =A0* command, or if the size of the request was too small, the=
-re's
->> + =A0 =A0 =A0* no point in preempting it. Check if it's worthwhile to pr=
-eempt
->> + =A0 =A0 =A0*/
->> + =A0 =A0 int time_elapsed =3D jiffies_to_msecs(jiffies -
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mq->mqrq_cur->mmc_active.mrq->=
-cmd->started_time);
->> +
->> + =A0 =A0 if (time_elapsed <=3D thpi)
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 return true;
-> Some host controllers (or DMA) has possibility to get the byte count of
-> current transaction. It may be implemented as host api (similar to abort
-> ops). Then you have more accurate estimation of worthiness.
->
+Hi,
 
-Byte count returned by DMA or the HC doesn't mean that the data has
-actually been
-burnt into the device (due to internal buffering). This is one of the
-reasons for
-defining the CORRECTLY_PRG_SECTORS_NUM register in the standard which
-can be queried to find how much was correctly written.
- Unfortunately it can only be queried after the abort has been issued.
+On Fri, Apr 13 2012, Namjae Jeon wrote:
+> 2012/4/12 Subhash Jadavani <subhashj@codeaurora.org>:
+>> With current implementation of power class selection,
+>> mmc_select_powerclass() should never fail. So treat any error
+>> returned by this function as serious enough to skip the card
+>> initialization.
+>>
+>> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> Looks good to me.
+> Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
 
->> +
->> + =A0 =A0 return false;
->> +}
->
-> Thanks, Kostya
->
+Thanks, pushed to mmc-next for 3.5.
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
