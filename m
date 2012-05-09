@@ -1,88 +1,147 @@
-From: "T Krishnamoorthy, Balaji" <balajitk@ti.com>
-Subject: Re: [RFC 00/12] OMAP DMA engine conversion
-Date: Wed, 9 May 2012 17:55:20 +0530
-Message-ID: <CANrkHUZBPMtAqS4TwwykrOwwvH6J2WeU5cWEx_Hr66UdZdOqJA@mail.gmail.com>
-References: <20120423160409.GE24299@n2100.arm.linux.org.uk>
+From: kdorfman@codeaurora.org
+Subject: Re: [PATCH v2] mmc: core: Fix the HPI execution sequence
+Date: Wed, 9 May 2012 06:17:02 -0700 (PDT)
+Message-ID: <edaffb8a034e4ed87b2f7c63d759c1d2.squirrel@www.codeaurora.org>
+References: <1334670334-18050-1-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from na3sys009aog110.obsmtp.com ([74.125.149.203]:53070 "EHLO
-	na3sys009aog110.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1758682Ab2EIMZX convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 9 May 2012 08:25:23 -0400
-Received: by lagv3 with SMTP id v3so260876lag.27
-        for <linux-mmc@vger.kernel.org>; Wed, 09 May 2012 05:25:20 -0700 (PDT)
-In-Reply-To: <20120423160409.GE24299@n2100.arm.linux.org.uk>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:36712 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759392Ab2EINRD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 May 2012 09:17:03 -0400
+In-Reply-To: <1334670334-18050-1-git-send-email-svenkatr@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Venkatraman S <svenkatr@ti.com>, Namjae Jeon <linkinjeon@gmail.com>, Jae hoon Chung <jh80.chung@gmail.com>, Chris Ball <cjb@laptop.org>
 
-On Mon, Apr 23, 2012 at 9:34 PM, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> For the full text, please see
+> mmc_execute_hpi should send the HPI command only
+> once, only if the card is in PRG state.
 >
-> http://lists.arm.linux.org.uk/lurker/message/20120418.100954.7fa7acf8=
-=2Een.html
+> According to eMMC spec, the command's completion time is
+> not dependent on OUT_OF_INTERRUPT_TIME. Only the transition
+> out of PRG STATE is guarded by OUT_OF_INTERRUPT_TIME - which is
+> defined to begin at the end of sending the command itself.
 >
-> This version contains updates for some of the comments received from =
-the
-> previous round, and adds the OMAP1/2 MMC and SPI drivers to the conve=
-rsion.
+> Specify the default timeout for the actual sending of HPI
+> command, and then use OUT_OF_INTERRUPT_TIME to wait for
+> the transition out of PRG state.
+>
+> Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> CC: Namjae Jeon <linkinjeon@gmail.com>
+> CC: Jae hoon Chung <jh80.chung@gmail.com>
+> CC: Chris Ball <cjb@laptop.org>
+> ---
+> Changes since v1:
+> 	Skip looping over send_status indefinitely
+> 	Correct the interpretation of OUT_OF_INTERRUPT_TIME
+>
+>  drivers/mmc/core/core.c    |   45
+> ++++++++++++++++++++++++--------------------
+>  drivers/mmc/core/mmc_ops.c |    2 +-
+>  2 files changed, 26 insertions(+), 21 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index e541efb..027c579 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -403,6 +403,7 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+>  {
+>  	int err;
+>  	u32 status;
+> +	unsigned long starttime;
+>
+>  	BUG_ON(!card);
+>
+> @@ -421,27 +422,31 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+>  	/*
+>  	 * If the card status is in PRG-state, we can send the HPI command.
+>  	 */
+> -	if (R1_CURRENT_STATE(status) == R1_STATE_PRG) {
+> -		do {
+> -			/*
+> -			 * We don't know when the HPI command will finish
+> -			 * processing, so we need to resend HPI until out
+> -			 * of prg-state, and keep checking the card status
+> -			 * with SEND_STATUS.  If a timeout error occurs when
+> -			 * sending the HPI command, we are already out of
+> -			 * prg-state.
+> -			 */
+> -			err = mmc_send_hpi_cmd(card, &status);
+> -			if (err)
+> -				pr_debug("%s: abort HPI (%d error)\n",
+> -					 mmc_hostname(card->host), err);
+> +	if (R1_CURRENT_STATE(status) != R1_STATE_PRG) {
+> +		pr_debug("%s: Can't send HPI: Card state=%d\n",
+> +			mmc_hostname(card->host), R1_CURRENT_STATE(status));
+> +		err = -EINVAL;
+> +		goto out;
+> +	}
+You can't return error here, because the card status may be:
+0 = Idle 1 = Ready 2 = Ident 3 = Stby 4 = Tran 5 = Data 6 = Rcv 7 = Prg 8
+= Dis 9 = Btst 10
+Not every value is error here: the card state may be Idle/Ready and then
+you do not need to return error.
 
-Tested eMMC, SD on omap4 Blaze
-Tested-by: Balaji T K <balajitk@ti.com>
 
+> +
+> +	starttime = jiffies;
+> +	err = mmc_send_hpi_cmd(card, &status);
+> +	if (err) {
+> +		pr_debug("%s:HPI could not be sent.err=%d)\n",
+> +			mmc_hostname(card->host), err);
+> +		goto out;
+> +	}
+> +
+> +	do {
+> +		err = mmc_send_status(card, &status);
+> +
+> +		if (!err && R1_CURRENT_STATE(status) == R1_STATE_TRAN)
+> +			goto out;
+> +		if (jiffies_to_msecs(jiffies - starttime) >
+> +			card->ext_csd.out_of_int_time)
+> +			err = -ETIMEDOUT;
+> +	} while (!err);
 >
-> I've also added a note to feature-removal noting that the existing AP=
-Is
-> will be removed around 2013 - I'm planning January for that at the
-> moment. =A0Having drivers around which are unconverted blocks further=
- work
-> on the DMA engine conversion, so it's actually important that we get
-> as many drivers converted as soon as possible.
+> -			err = mmc_send_status(card, &status);
+> -			if (err)
+> -				break;
+> -		} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+> -	} else
+> -		pr_debug("%s: Left prg-state\n", mmc_hostname(card->host));
 >
-> Anything which isn't converted will probably have its DMA code remove=
-d,
-> or if that results in the driver not being usable, the driver itself
-> will be removed.
+>  out:
+>  	mmc_release_host(card->host);
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 69370f4..f2235d6 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -569,7 +569,7 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32
+> *status)
 >
-> This series is still in RFC mode...
+>  	cmd.opcode = opcode;
+>  	cmd.arg = card->rca << 16 | 1;
+> -	cmd.cmd_timeout_ms = card->ext_csd.out_of_int_time;
+> +	cmd.cmd_timeout_ms = 0;
 >
-> =A0Documentation/feature-removal-schedule.txt | =A0 11 +
-> =A0arch/arm/mach-omap1/board-h2-mmc.c =A0 =A0 =A0 =A0 | =A0 =A01 -
-> =A0arch/arm/mach-omap1/board-h3-mmc.c =A0 =A0 =A0 =A0 | =A0 =A01 -
-> =A0arch/arm/mach-omap1/board-nokia770.c =A0 =A0 =A0 | =A0 =A01 -
-> =A0arch/arm/mach-omap2/board-n8x0.c =A0 =A0 =A0 =A0 =A0 | =A0 =A01 -
-> =A0arch/arm/mach-omap2/hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0 =A0=
-1 -
-> =A0arch/arm/plat-omap/dma.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0=
- 14 +
-> =A0arch/arm/plat-omap/include/plat/mmc.h =A0 =A0 =A0| =A0 =A02 -
-> =A0drivers/dma/Kconfig =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
-| =A0 10 +
-> =A0drivers/dma/Makefile =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 |=
- =A0 =A02 +
-> =A0drivers/dma/omap-dma.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0=
-521 ++++++++++++++++++++++++++++
-> =A0drivers/dma/sa11x0-dma.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0=
-249 ++++---------
-> =A0drivers/dma/virt-dma.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0=
- 99 ++++++
-> =A0drivers/dma/virt-dma.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 | =A0=
-138 ++++++++
-> =A0drivers/mmc/host/omap.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0=
-369 +++++++++-----------
-> =A0drivers/mmc/host/omap_hsmmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0206 =
-++++++------
-> =A0drivers/spi/spi-omap2-mcspi.c =A0 =A0 =A0 =A0 =A0 =A0 =A0| =A0228 =
-+++++++------
-> =A017 files changed, 1268 insertions(+), 586 deletions(-)
+>  	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+>  	if (err) {
+> --
+> 1.7.10.rc2
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+Thanks,
+Kostya
+Consultant for Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+
+
+
+
+
