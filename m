@@ -1,102 +1,65 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: [PATCH] mmc: core: Prevent eMMC VCC supply to be cut from late init
-Date: Wed, 9 May 2012 16:15:26 +0200
-Message-ID: <1336572926-21013-1-git-send-email-ulf.hansson@stericsson.com>
+From: Saugata Das <saugata.das@stericsson.com>
+Subject: [RFC 1/2] [MMC-4.5] Disable emulation
+Date: Wed, 9 May 2012 20:18:20 +0530
+Message-ID: <1336574901-26579-1-git-send-email-saugata.das@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog114.obsmtp.com ([207.126.144.137]:55103 "EHLO
-	eu1sys200aog114.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1759423Ab2EIOQ5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 May 2012 10:16:57 -0400
+Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:41969 "EHLO
+	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755190Ab2EIOse (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 May 2012 10:48:34 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Per Forlin <per.forlin@stericsson.com>, Ulf Hansson <ulf.hansson@stericsson.com>, Johan Rudholm <johan.rudholm@stericsson.com>, Lee Jones <lee.jones@linaro.org>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Jasi Brar <jassisinghbrar@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: patches@linaro.org, saugata.das@linaro.org
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Saugata Das <saugata.das@linaro.org>
 
-For eMMC cards that has been initialized from a bootloader,
-the VCC voltage supply must not be cut in an uncontrolled
-manner, without first sending SLEEP or POWEROFF_NOTIFY.
+This patch adds the support for large sector size of 4KB by disabling emulation.
+This patch passes eMMC DATA_SECTOR_SIZE as the logical block size during
+mmc_blk_alloc_req.
 
-The regulator_init_complete late initcall, may cut the VCC
-regulator if it's reference counter is zero. To be able to
-prevent the regulator from being cut, mmc_start_host, which
-should execute at device init and thus before late init,
-calls mmc_power_up. Then the host driver is able to increase
-the reference to the regulator.
+In order to use this patch for 4KB sector size, ensure that USE_NATIVE_SECTOR
+is enabled, partition table is 4KB sector size aligned and file system block
+size is 4KB.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Saugata Das <saugata.das@linaro.org>
 ---
- drivers/mmc/core/core.c |   18 +++++++++++++++---
- 1 files changed, 15 insertions(+), 3 deletions(-)
+ drivers/mmc/card/block.c |    6 +++++-
+ drivers/mmc/core/mmc.c   |    2 ++
+ 2 files changed, 7 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index ba821fe..0b6141d 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -42,6 +42,7 @@
- #include "sdio_ops.h"
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index a7c75d8..0e54118e 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1517,7 +1517,11 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
+ 		 "mmcblk%d%s", md->name_idx, subname ? subname : "");
  
- static struct workqueue_struct *workqueue;
-+static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+-	blk_queue_logical_block_size(md->queue.queue, 512);
++	if (mmc_card_mmc(card))
++		blk_queue_logical_block_size(md->queue.queue,
++			card->ext_csd.data_sector_size);
++	else
++		blk_queue_logical_block_size(md->queue.queue, 512);
+ 	set_capacity(md->disk, size);
  
- /*
-  * Enabling software CRCs on the data blocks can be a significant (30%)
-@@ -1157,6 +1158,9 @@ static void mmc_power_up(struct mmc_host *host)
- {
- 	int bit;
+ 	if (mmc_host_cmd23(card->host)) {
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 02914d6..8dcbe995 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -533,6 +533,8 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		} else {
+ 			card->ext_csd.data_tag_unit_size = 0;
+ 		}
++	} else {
++		card->ext_csd.data_sector_size = 512;
+ 	}
  
-+	if (host->ios.power_mode == MMC_POWER_ON)
-+		return;
-+
- 	mmc_host_clk_hold(host);
- 
- 	/* If ocr is set, we use it */
-@@ -1199,6 +1203,10 @@ static void mmc_power_up(struct mmc_host *host)
- void mmc_power_off(struct mmc_host *host)
- {
- 	int err = 0;
-+
-+	if (host->ios.power_mode == MMC_POWER_OFF)
-+		return;
-+
- 	mmc_host_clk_hold(host);
- 
- 	host->ios.clock = 0;
-@@ -2005,7 +2013,6 @@ EXPORT_SYMBOL(mmc_detect_card_removed);
- 
- void mmc_rescan(struct work_struct *work)
- {
--	static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
- 	struct mmc_host *host =
- 		container_of(work, struct mmc_host, detect.work);
- 	int i;
-@@ -2044,8 +2051,12 @@ void mmc_rescan(struct work_struct *work)
- 	 */
- 	mmc_bus_put(host);
- 
--	if (host->ops->get_cd && host->ops->get_cd(host) == 0)
-+	if (host->ops->get_cd && host->ops->get_cd(host) == 0) {
-+		mmc_claim_host(host);
-+		mmc_power_off(host);
-+		mmc_release_host(host);
- 		goto out;
-+	}
- 
- 	mmc_claim_host(host);
- 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
-@@ -2063,7 +2074,8 @@ void mmc_rescan(struct work_struct *work)
- 
- void mmc_start_host(struct mmc_host *host)
- {
--	mmc_power_off(host);
-+	host->f_init = max(freqs[0], host->f_min);
-+	mmc_power_up(host);
- 	mmc_detect_change(host, 0);
- }
- 
+ out:
 -- 
-1.7.9
+1.7.4.3
 
