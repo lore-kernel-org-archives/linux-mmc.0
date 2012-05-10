@@ -1,44 +1,56 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/2] mmc: Avoid null pointer dereference
-Date: Wed, 09 May 2012 20:54:51 -0400
-Message-ID: <873978n9d0.fsf@laptop.org>
-References: <1334176305-6183-1-git-send-email-philippedeswert@gmail.com>
-	<CAKYAXd8Ofmg+kzUgr26CngaNgcw-MXJ91cS4R+BcMLY7yPxjNw@mail.gmail.com>
-	<CAKYAXd9roe8he2bGKiurCsxS3+U5otqQqRXzpB8fVPWak2ow_Q@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: Remove dead code
+Date: Wed, 09 May 2012 20:55:33 -0400
+Message-ID: <87y5p0lure.fsf@laptop.org>
+References: <1334176325-6221-1-git-send-email-philippedeswert@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:60874 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:60882 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756907Ab2EJAyn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 9 May 2012 20:54:43 -0400
-In-Reply-To: <CAKYAXd9roe8he2bGKiurCsxS3+U5otqQqRXzpB8fVPWak2ow_Q@mail.gmail.com>
-	(Namjae Jeon's message of "Thu, 10 May 2012 09:43:06 +0900")
+	id S1756907Ab2EJAzp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 9 May 2012 20:55:45 -0400
+In-Reply-To: <1334176325-6221-1-git-send-email-philippedeswert@gmail.com>
+	(Philippe De Swert's message of "Wed, 11 Apr 2012 23:32:05 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Namjae Jeon <linkinjeon@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Philippe De Swert <philippedeswert@gmail.com>
+To: Philippe De Swert <philippedeswert@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, john.calixto@modsystems.com, prakity@marvell.com
 
 Hi,
 
-On Wed, May 09 2012, Namjae Jeon wrote:
-> Hi. Chris.
+On Wed, Apr 11 2012, Philippe De Swert wrote:
+> bus_width is passed to the function and when 0 (MMC_BUS_WIDTH_1)
+> will cause the function to return. So in in the second test it 
+> definitly is different from 0, and the third test is redundant.
 >
-> Would you check this patch ?
+> Signed-off-by: Philippe De Swert <philippedeswert@gmail.com>
+> ---
+>  drivers/mmc/core/mmc.c |    6 +-----
+>  1 file changed, 1 insertion(+), 5 deletions(-)
 >
-> Thanks.
->
-> 2012/4/12, Namjae Jeon <linkinjeon@gmail.com>:
->> 2012/4/12 Philippe De Swert <philippedeswert@gmail.com>:
->>> After the null check on md the code jumped to cmd_done, which then
->>> will dereference md in mmc_blk_put. This patch avoids the possible
->>> null pointer dereference in that case.
->>>
->>> Signed-off-by: Philippe De Swert <philippedeswert@gmail.com>
->> This patch is good also.
->> Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 54df5ad..4a1bf8f 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -556,14 +556,10 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
+>  	err = mmc_get_ext_csd(card, &bw_ext_csd);
+>  
+>  	if (err || bw_ext_csd == NULL) {
+> -		if (bus_width != MMC_BUS_WIDTH_1)
+> -			err = -EINVAL;
+> +		err = -EINVAL;
+>  		goto out;
+>  	}
+>  
+> -	if (bus_width == MMC_BUS_WIDTH_1)
+> -		goto out;
+> -
+>  	/* only compare read only fields */
+>  	err = !((card->ext_csd.raw_partition_support ==
+>  			bw_ext_csd[EXT_CSD_PARTITION_SUPPORT]) &&
 
-Thanks for the reminder -- pushed to mmc-next for 3.5.
+Thanks, pushed for mmc-next for 3.5.
 
 - Chris.
 -- 
