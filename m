@@ -1,78 +1,83 @@
-From: Thomas Abraham <thomas.abraham@linaro.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
 Subject: Re: [PATCH 4/7] mmc: dw_mmc: add samsung exynos5250 specific extentions
-Date: Thu, 10 May 2012 16:25:59 +0530
-Message-ID: <CAJuYYwQsOpDWzsNnnJuNYvD+ag6qO5bTOBt52AYV7V2u9bv9bQ@mail.gmail.com>
+Date: Thu, 10 May 2012 20:17:23 +0900
+Message-ID: <4FABA3C3.9070300@samsung.com>
 References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
-	<1335935266-25289-5-git-send-email-thomas.abraham@linaro.org>
-	<CAOesGMiJrfCgLHmBix1WUrpF-0D9tG5r6xi-3zsiM7KQjkO=ug@mail.gmail.com>
+ <1335935266-25289-5-git-send-email-thomas.abraham@linaro.org>
+ <CAH9JG2XBinh=XAVnt3EnWrEqeTKz34d9yB6wfiuF-J-Se_Q__Q@mail.gmail.com>
+ <4FA0E706.8060700@samsung.com>
+ <CAJuYYwS=qExrAjG1kgd=tPYL0pQeP+7xE1SuMaP+do-Eg3D7eQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:60192 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932170Ab2EJKz7 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 May 2012 06:55:59 -0400
-Received: by vbbff1 with SMTP id ff1so1355109vbb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 10 May 2012 03:55:59 -0700 (PDT)
-In-Reply-To: <CAOesGMiJrfCgLHmBix1WUrpF-0D9tG5r6xi-3zsiM7KQjkO=ug@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <CAJuYYwS=qExrAjG1kgd=tPYL0pQeP+7xE1SuMaP+do-Eg3D7eQ@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Thomas Abraham <thomas.abraham@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kmpark@infradead.org>, linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, patches@linaro.org, linux-kernel@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, kgene.kim@samsung.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, patches@linaro.org, linux-kernel@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, kgene.kim@samsung.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
 
-On 2 May 2012 23:40, Olof Johansson <olof@lixom.net> wrote:
-> Hi,
->
-> On Tue, May 1, 2012 at 10:07 PM, Thomas Abraham
-> <thomas.abraham@linaro.org> wrote:
->> The instantiation of the Synopsis Designware controller on Exynos525=
-0
->> include extension for SDR and DDR specific tx/rx phase shift timing
->> and CIU internal divider. In addition to that, the option to skip th=
-e
->> command hold stage is also introduced. Add support for these Exynos5=
-250
->> specfic extenstions.
+On 05/10/2012 07:55 PM, Thomas Abraham wrote:
+
+> On 2 May 2012 13:19, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> On 05/02/2012 04:01 PM, Kyungmin Park wrote:
 >>
->> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
->> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
->> ---
->> =A0.../devicetree/bindings/mmc/synposis-dw-mshc.txt =A0 | =A0 33 +++=
-++++++++++++++++-
->> =A0drivers/mmc/host/dw_mmc-pltfm.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0| =A0 =A08 +++++
->> =A0drivers/mmc/host/dw_mmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0| =A0 32 ++++++++++++++++++-
->> =A0drivers/mmc/host/dw_mmc.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0| =A0 13 ++++++++
->> =A0include/linux/mmc/dw_mmc.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 | =A0 =A06 +++
->> =A05 files changed, 89 insertions(+), 3 deletions(-)
+>>> Hi,
+>>>
+>>> On 5/2/12, Thomas Abraham <thomas.abraham@linaro.org> wrote:
+>>>> The instantiation of the Synopsis Designware controller on Exynos5250
+>>>> include extension for SDR and DDR specific tx/rx phase shift timing
+>>>> and CIU internal divider. In addition to that, the option to skip the
+>>>> command hold stage is also introduced. Add support for these Exynos5250
+>>>> specfic extenstions.
+> 
+> [...]
+> 
+>>>> @@ -265,6 +266,10 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc,
+>>>> struct mmc_command *cmd)
+>>>>                      cmdr |= SDMMC_CMD_DAT_WR;
+>>>>      }
+>>>>
+>>>> +    if (slot->host->drv_data->ctrl_type == DW_MCI_TYPE_EXYNOS5250)
+>>>> +            if (SDMMC_CLKSEL_GET_SELCLK_DRV(mci_readl(slot->host, CLKSEL)))
+>>>> +                    cmdr |= SDMMC_USE_HOLD_REG;
+>>> Some other board, custom SOC also can use this HOLD register. So it's
+>>> not EXYNOS5250 specific one. I think we introduce the more generic
+>>> quirks for this instead of SOC specific.
 >>
->> diff --git a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.=
-txt b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
->> index c1ed70e..465fc31 100644
->> --- a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
->> @@ -7,6 +7,8 @@ Required Properties:
+>> One more, I think that also need to check the IMPLEMENT_HOLD_REG bit in HCON register.
+>> It has dependency with that.
+> 
+> The above code is specific to Exynos5250 and hence it is not required
+> to check the IMPLEMENT_HOLD_REG bit in HCON register. On Exynos5250,
+> the hold register is implemented and available.
+
+Right, the above code is specific for Exynos5250.
+But HOLD_REG should be used in other SoC. it's not only Exynos5250 specific.
+I want more generic code than specific code for Exynos5250.
+
+Best Regards,
+Jaehoon Chung
+
+> 
+> 
+>> As Mr.Park is mentioned, this register is clock phasing.
+>> In spec, card is enumerated in SDR12 or SDR25 mode, the application must program the use_hold_reg.
+> 
+> Exynos5250 hardware manual specifies additional restrictions on the
+> use of hold register. The above code checks for those restrictions and
+> programs the USE_HOLD_REG accordingly. Please let me know if there is
+> any condition that is not handled by the above code.
+> 
+> Thanks,
+> Thomas.
+> 
 >>
->> =A0* compatible: should be one of the following
->> =A0 =A0 =A0 =A0- synopsis,dw-mshc: for controllers compliant with sy=
-nopsis dw-mshc.
->> + =A0 =A0 =A0 - synopsis,dw-mshc-exynos5250: for controllers with Sa=
-msung
->> + =A0 =A0 =A0 =A0 Exynos5250 specific extentions.
->
-> It makes more sense to use your own manufacturer prefix here:
->
-> samsung,exynos5250-dw-mshc
->
-
-Ok. I will modify the compatible value as you have suggested.
-
-Thanks,
-Thomas.
-
->
-> -Olof
+>> Best Regards,
+>> Jaehoon Chung
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
