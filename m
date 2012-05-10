@@ -1,72 +1,130 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 24/29] mmc: add a simple generic OF parser
-Date: Thu, 10 May 2012 16:51:52 +0900
-Message-ID: <CANqRtoQU0100YToWrD1WmSOzDBOth8tyoy1nYSyPPF=uBcbXJg@mail.gmail.com>
-References: <1336057558-11031-1-git-send-email-g.liakhovetski@gmx.de>
-	<1336057558-11031-25-git-send-email-g.liakhovetski@gmx.de>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH 1/7] mmc: dw_mmc: lookup for optional biu and ciu clocks
+Date: Thu, 10 May 2012 14:41:07 +0530
+Message-ID: <CAJuYYwSn9kMEW8nPiPe9o+OHR0D00oBNNfuFq6ZaXw1jwx+oeA@mail.gmail.com>
+References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
+	<1335935266-25289-2-git-send-email-thomas.abraham@linaro.org>
+	<CAFbHwiTZOOP1HwZQPPKBei3aGhbBjFyJ4QLJ+Ea465L6r6vEYg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1336057558-11031-25-git-send-email-g.liakhovetski@gmx.de>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Grant Likely <grant.likely@secretlab.ca>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAFbHwiTZOOP1HwZQPPKBei3aGhbBjFyJ4QLJ+Ea465L6r6vEYg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Will Newton <will.newton@gmail.com>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, May 4, 2012 at 12:05 AM, Guennadi Liakhovetski
-<g.liakhovetski@gmx.de> wrote:
-> Many MMC host drivers already use OF data to obtain their platform-sp=
-ecific
-> configuration. Each of them is doing this in its special way, whereas=
- many
-> parameters are identical and can easily be generalised. This patch ad=
-ds
-> such a generic parser. So far it only adds and handles very few basic
-> properties. New ones can be added in the future as required.
+On 2 May 2012 14:47, Will Newton <will.newton@gmail.com> wrote:
+> On Wed, May 2, 2012 at 6:07 AM, Thomas Abraham
+> <thomas.abraham@linaro.org> wrote:
+>> Some platforms allow for clock gating and control of bus interface u=
+nit clock
+>> and card interface unit clock. Add support for clock lookup of optio=
+nal biu
+>> and ciu clocks for clock gating and clock speed determination.
+>>
+>> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
+>> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+>> ---
+>> =A0drivers/mmc/host/dw_mmc.c =A0| =A0 35 +++++++++++++++++++++++++++=
+++++----
+>> =A0include/linux/mmc/dw_mmc.h | =A0 =A04 ++++
+>> =A02 files changed, 35 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 1532357..036846f 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -1938,19 +1938,35 @@ int dw_mci_probe(struct dw_mci *host)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return -ENODEV;
+>> =A0 =A0 =A0 =A0}
+>>
+>> - =A0 =A0 =A0 if (!host->pdata->bus_hz) {
+>> + =A0 =A0 =A0 host->biu_clk =3D clk_get(&host->dev, "biu");
+>> + =A0 =A0 =A0 if (IS_ERR(host->biu_clk))
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_info(&host->dev, "biu clock not av=
+ailable\n");
+>> + =A0 =A0 =A0 else
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 clk_enable(host->biu_clk);
+>> +
+>> + =A0 =A0 =A0 host->ciu_clk =3D clk_get(&host->dev, "ciu");
+>> + =A0 =A0 =A0 if (IS_ERR(host->ciu_clk))
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_info(&host->dev, "ciu clock not av=
+ailable\n");
 >
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> Cc: Grant Likely <grant.likely@secretlab.ca>
+> Should these printks be at debug level? I'm not 100% sure either way
+> but it could be a little noisy on systems that do not use these
+> clocks.
 
-I usually don't say things this loud, but here it is: NAK!
+Right. I will change dev_info to dev_dbg.
 
-To begin with: this is not what we agreed on earlier. I asked you to
-only implement a small subset to begin with. This so we don't end up
-supporting a bunch of DT flags forever.
+>
+>> + =A0 =A0 =A0 else
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 clk_enable(host->ciu_clk);
+>> +
+>> + =A0 =A0 =A0 if (IS_ERR(host->ciu_clk))
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->bus_hz =3D host->pdata->bus_hz;
+>> + =A0 =A0 =A0 else
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 host->bus_hz =3D clk_get_rate(host->ci=
+u_clk);
+>> +
+>> + =A0 =A0 =A0 if (!host->bus_hz) {
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0dev_err(&host->dev,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0"Platform data must s=
+upply bus speed\n");
+>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 return -ENODEV;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D -ENODEV;
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto err_clk;
+>> =A0 =A0 =A0 =A0}
+>>
+>> - =A0 =A0 =A0 host->bus_hz =3D host->pdata->bus_hz;
+>> =A0 =A0 =A0 =A0host->quirks =3D host->pdata->quirks;
+>>
+>> =A0 =A0 =A0 =A0spin_lock_init(&host->lock);
+>> =A0 =A0 =A0 =A0INIT_LIST_HEAD(&host->queue);
+>>
+>> -
+>> =A0 =A0 =A0 =A0host->dma_ops =3D host->pdata->dma_ops;
+>> =A0 =A0 =A0 =A0dw_mci_init_dma(host);
+>>
+>> @@ -2095,6 +2111,13 @@ err_dmaunmap:
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0regulator_disable(host->vmmc);
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0regulator_put(host->vmmc);
+>> =A0 =A0 =A0 =A0}
+>> + =A0 =A0 =A0 kfree(host);
+>> +
+>> +err_clk:
+>> + =A0 =A0 =A0 clk_disable(host->ciu_clk);
+>> + =A0 =A0 =A0 clk_disable(host->biu_clk);
+>> + =A0 =A0 =A0 clk_put(host->ciu_clk);
+>> + =A0 =A0 =A0 clk_put(host->biu_clk);
+>
+> Are these calls safe, or do we need to check IS_ERR as above?
 
-In general it's a good idea to make something generic, but I think now
-is too early for our drivers on SH and SH-Mobile ARM. We need to
-experiment more with PINCTRL as well as GPIO bindings via DT. When we
-have done that I think we should revisit.
+The clk_disable is safe on Samsung platforms but it cannot be assumed
+for other platforms. So, the IS_ERR check will be added before
+clk_disable. clk_put will not need the IS_ERR check. Thanks for
+pointing this out.
 
-Please see below for my reasons:
+>
+>> =A0 =A0 =A0 =A0return ret;
+>> =A0}
+>> =A0EXPORT_SYMBOL(dw_mci_probe);
+>> @@ -2128,6 +2151,10 @@ void dw_mci_remove(struct dw_mci *host)
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0regulator_put(host->vmmc);
+>> =A0 =A0 =A0 =A0}
+>>
+>> + =A0 =A0 =A0 clk_disable(host->ciu_clk);
+>> + =A0 =A0 =A0 clk_disable(host->biu_clk);
+>> + =A0 =A0 =A0 clk_put(host->ciu_clk);
+>> + =A0 =A0 =A0 clk_put(host->biu_clk);
+>
+> Likewise.
 
-> + =A0 =A0 =A0 if (of_get_property(node, "mmc,4_bit_data", NULL))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_4_BIT_DATA;
-> + =A0 =A0 =A0 if (of_get_property(node, "mmc,8_bit_data", NULL))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc->caps |=3D MMC_CAP_8_BIT_DATA;
+Yes, will be fixed.
 
-I suspect that these overlap with PINCTRL. I don't want to add support
-for potentially duplicated functionality.
+Thanks,
+Thomas.
 
-> + =A0 =A0 =A0 gpio =3D of_get_named_gpio_flags(node, "cd-gpios", 0, &=
-flags);
-> + =A0 =A0 =A0 ret =3D mmc_gpio_request_cd(mmc, gpio);
-> + =A0 =A0 =A0 if (ret < 0)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_warn(mmc->parent, "Failed to obtain=
- CD GPIO: %d\n", ret);
-> +
-> + =A0 =A0 =A0 gpio =3D of_get_named_gpio_flags(node, "ro-gpios", 0, &=
-flags);
-> + =A0 =A0 =A0 ret =3D mmc_gpio_request_ro(mmc, gpio);
-> + =A0 =A0 =A0 if (ret < 0)
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 dev_warn(mmc->parent, "Failed to obtain=
- RO GPIO: %d\n", ret);
-> +}
-
-We want to have stable DT bindings for GPIO and PINCTRL before we let
-this loose with DT.
-
-So please ignore this patch for now. Thanks for your efforts anyway.
-
-/ magnus
+[...]
