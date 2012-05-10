@@ -1,81 +1,78 @@
-From: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 4/7] mmc: dw_mmc: add samsung exynos5250 specific
- extentions
-Date: Thu, 10 May 2012 16:25:15 +0530
-Message-ID: <CAJuYYwS=qExrAjG1kgd=tPYL0pQeP+7xE1SuMaP+do-Eg3D7eQ@mail.gmail.com>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH 4/7] mmc: dw_mmc: add samsung exynos5250 specific extentions
+Date: Thu, 10 May 2012 16:25:59 +0530
+Message-ID: <CAJuYYwQsOpDWzsNnnJuNYvD+ag6qO5bTOBt52AYV7V2u9bv9bQ@mail.gmail.com>
 References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
- <1335935266-25289-5-git-send-email-thomas.abraham@linaro.org>
- <CAH9JG2XBinh=XAVnt3EnWrEqeTKz34d9yB6wfiuF-J-Se_Q__Q@mail.gmail.com>
- <4FA0E706.8060700@samsung.com>
+	<1335935266-25289-5-git-send-email-thomas.abraham@linaro.org>
+	<CAOesGMiJrfCgLHmBix1WUrpF-0D9tG5r6xi-3zsiM7KQjkO=ug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <4FA0E706.8060700-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kyungmin Park <kmpark-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:60192 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932170Ab2EJKz7 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 May 2012 06:55:59 -0400
+Received: by vbbff1 with SMTP id ff1so1355109vbb.19
+        for <linux-mmc@vger.kernel.org>; Thu, 10 May 2012 03:55:59 -0700 (PDT)
+In-Reply-To: <CAOesGMiJrfCgLHmBix1WUrpF-0D9tG5r6xi-3zsiM7KQjkO=ug@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Olof Johansson <olof@lixom.net>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, patches@linaro.org, linux-kernel@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, kgene.kim@samsung.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
 
-On 2 May 2012 13:19, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> wrote:
-> On 05/02/2012 04:01 PM, Kyungmin Park wrote:
+On 2 May 2012 23:40, Olof Johansson <olof@lixom.net> wrote:
+> Hi,
 >
->> Hi,
+> On Tue, May 1, 2012 at 10:07 PM, Thomas Abraham
+> <thomas.abraham@linaro.org> wrote:
+>> The instantiation of the Synopsis Designware controller on Exynos525=
+0
+>> include extension for SDR and DDR specific tx/rx phase shift timing
+>> and CIU internal divider. In addition to that, the option to skip th=
+e
+>> command hold stage is also introduced. Add support for these Exynos5=
+250
+>> specfic extenstions.
 >>
->> On 5/2/12, Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>> The instantiation of the Synopsis Designware controller on Exynos5250
->>> include extension for SDR and DDR specific tx/rx phase shift timing
->>> and CIU internal divider. In addition to that, the option to skip the
->>> command hold stage is also introduced. Add support for these Exynos5250
->>> specfic extenstions.
-
-[...]
-
->>> @@ -265,6 +266,10 @@ static u32 dw_mci_prepare_command(struct mmc_host =
-*mmc,
->>> struct mmc_command *cmd)
->>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0cmdr |=3D SDMMC_CMD_DAT_WR;
->>> =A0 =A0 =A0}
->>>
->>> + =A0 =A0if (slot->host->drv_data->ctrl_type =3D=3D DW_MCI_TYPE_EXYNOS5=
-250)
->>> + =A0 =A0 =A0 =A0 =A0 =A0if (SDMMC_CLKSEL_GET_SELCLK_DRV(mci_readl(slot=
-->host, CLKSEL)))
->>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0cmdr |=3D SDMMC_USE_HOLD_REG;
->> Some other board, custom SOC also can use this HOLD register. So it's
->> not EXYNOS5250 specific one. I think we introduce the more generic
->> quirks for this instead of SOC specific.
+>> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
+>> Signed-off-by: Thomas Abraham <thomas.abraham@linaro.org>
+>> ---
+>> =A0.../devicetree/bindings/mmc/synposis-dw-mshc.txt =A0 | =A0 33 +++=
+++++++++++++++++-
+>> =A0drivers/mmc/host/dw_mmc-pltfm.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0| =A0 =A08 +++++
+>> =A0drivers/mmc/host/dw_mmc.c =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0| =A0 32 ++++++++++++++++++-
+>> =A0drivers/mmc/host/dw_mmc.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0| =A0 13 ++++++++
+>> =A0include/linux/mmc/dw_mmc.h =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 | =A0 =A06 +++
+>> =A05 files changed, 89 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.=
+txt b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+>> index c1ed70e..465fc31 100644
+>> --- a/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/synposis-dw-mshc.txt
+>> @@ -7,6 +7,8 @@ Required Properties:
+>>
+>> =A0* compatible: should be one of the following
+>> =A0 =A0 =A0 =A0- synopsis,dw-mshc: for controllers compliant with sy=
+nopsis dw-mshc.
+>> + =A0 =A0 =A0 - synopsis,dw-mshc-exynos5250: for controllers with Sa=
+msung
+>> + =A0 =A0 =A0 =A0 Exynos5250 specific extentions.
 >
-> One more, I think that also need to check the IMPLEMENT_HOLD_REG bit in H=
-CON register.
-> It has dependency with that.
+> It makes more sense to use your own manufacturer prefix here:
+>
+> samsung,exynos5250-dw-mshc
+>
 
-The above code is specific to Exynos5250 and hence it is not required
-to check the IMPLEMENT_HOLD_REG bit in HCON register. On Exynos5250,
-the hold register is implemented and available.
-
-
-> As Mr.Park is mentioned, this register is clock phasing.
-> In spec, card is enumerated in SDR12 or SDR25 mode, the application must =
-program the use_hold_reg.
-
-Exynos5250 hardware manual specifies additional restrictions on the
-use of hold register. The above code checks for those restrictions and
-programs the USE_HOLD_REG accordingly. Please let me know if there is
-any condition that is not handled by the above code.
+Ok. I will modify the compatible value as you have suggested.
 
 Thanks,
 Thomas.
 
 >
-> Best Regards,
-> Jaehoon Chung
->
+> -Olof
