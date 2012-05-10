@@ -1,94 +1,60 @@
 From: Thomas Abraham <thomas.abraham@linaro.org>
 Subject: Re: [PATCH 3/7] mmc: dw_mmc: add device tree support
-Date: Thu, 10 May 2012 15:42:47 +0530
-Message-ID: <CAJuYYwRNUoiwJL5ADgSTAEyt0yx8bhwwz-BWSC+fSrN=xXh5Kw@mail.gmail.com>
+Date: Thu, 10 May 2012 15:45:43 +0530
+Message-ID: <CAJuYYwSmiPNrFhd9xr2AkAbRfJm_gP9ym+AXyy9jyPG3FnFuhA@mail.gmail.com>
 References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
 	<1335935266-25289-4-git-send-email-thomas.abraham@linaro.org>
-	<CAH9JG2XJk+CJNFiZu0C-TK_aj2gRPP5czUvTzEeDBXNejR6qvA@mail.gmail.com>
-	<CAJuYYwQqPEDP3ygkjOjeAwUr--M13KSB7JdYm8Tiok5BvJbruw@mail.gmail.com>
-	<CAH9JG2W-KFH9bDkq14-KayJ30Q3Uj04mWUEXr7AdVa6CFbi6eA@mail.gmail.com>
+	<CAOesGMh_0dShqe+kSB1Xgn9bpLv0j+b9QP+vN9N57XHP1geSHg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f46.google.com ([209.85.212.46]:46848 "EHLO
-	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757136Ab2EJKMs convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 May 2012 06:12:48 -0400
-Received: by vbbff1 with SMTP id ff1so1319830vbb.19
-        for <linux-mmc@vger.kernel.org>; Thu, 10 May 2012 03:12:48 -0700 (PDT)
-In-Reply-To: <CAH9JG2W-KFH9bDkq14-KayJ30Q3Uj04mWUEXr7AdVa6CFbi6eA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAOesGMh_0dShqe+kSB1Xgn9bpLv0j+b9QP+vN9N57XHP1geSHg@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Olof Johansson <olof@lixom.net>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, grant.likely@secretlab.ca, rob.herring@calxeda.com, linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kyungmin Park <kmpark@infradead.org>
-Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, patches@linaro.org, linux-kernel@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, kgene.kim@samsung.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
 
-On 10 May 2012 15:29, Kyungmin Park <kmpark@infradead.org> wrote:
-> On 5/10/12, Thomas Abraham <thomas.abraham@linaro.org> wrote:
->> Dear Mr. Park,
->>
->> On 2 May 2012 12:25, Kyungmin Park <kmpark@infradead.org> wrote:
->>> Hi,
+Hi Olof,
+
+On 2 May 2012 23:37, Olof Johansson <olof@lixom.net> wrote:
+> Hi,
 
 [...]
 
->>> I googled the "Synopsis Designware Mobile Storage Host Controller" =
-and
->>> Synopsis released it as this name. but still I like the 'dw-mmc'
->>> instead of'dw-mshc'.
->>
->> Ok. Synopsis abbreviates this controller as MSHC in their datasheets
->> available online. Since device tree is more about describing the
->> hardware, using MSHC as the abbreviation will help with correlating
->> hardware specs with the dts file. So I would prefer to continue usin=
-g
->> mshc as the abbreviation.
+>> +# Slots: The slot specific information are contained within child-n=
+odes with
+>> + =A0each child-node representing a supported slot. There should be =
+atleast one
+>> + =A0child node representing a card slot. The name of the slot child=
+ node should
+>> + =A0be 'slot{n}' where n is the unique number of the slot connnecte=
+d to the
+>> + =A0controller. The following are optional properties which can be =
+included in
+>> + =A0the slot child node.
 >
-> Then why author of this file uses "dw-mmc" instead of "dw-mshc"? and
-> it uses 'dw_mci' prefix at functions. I just worried and don't want t=
-o
-> give confusion to users who uses this device.
-
-The device tree source files are independent of any OS specific
-implementations. The linux driver for this controller uses dw-mmc and
-dw_mci but drivers of this controller for other operating systems
-could choose use other names. Since Synopsis calls this controller as
-mshc, the dts file would be closer to hardware specs if 'mshc' is used
-to describe the controller.
-
-[...]
-
->>>> +/* Variations in the dw_mci controller */
->>>> +#define DW_MCI_TYPE_SYNOPSIS =A0 =A0 =A0 =A0 0
->>>> +#define DW_MCI_TYPE_EXYNOS5250 =A0 =A0 =A0 =A0 =A0 =A0 =A0 1 /* S=
-amsung Exynos5250
->>>> Extensions */
->>> Um. it's not good idea to add specific SOC version. And as you know=
-,
->>> exynos4 series has this controller.
->>
->> There are some differences between the Exynos4 and Exynos5 mshc
->> controllers. For instance, the DIVRATIO field in the CLKSEL register
->> is available only in Exynos5 and there are 8 phase shift values in
->> Exynos5 when compared to 4 phase shift values in Exynos4. Likewise,
->> there are some other differences. So to handle these specific
->> implementations, we need to define types (or variants) of the
->> controller. Using SoC names for the type would help in readability o=
-f
->> the different types of implementations that are defined. So I would
->> prefer to continue using SoC names for this.
+> Since we're talking slots / cards on a bus, I think the addressing
+> model would be useful here. So in the main controller node:
+> =A0 =A0#address-cells =3D <1>;
+> =A0 =A0#size-cells =3D <0>;
 >
-> You mean if it supports the exynos4, then it should be add exynos4 ty=
-pe?
+> And then each slot would need a reg property and possibly unit addres=
+s:
+>
+> =A0 slot {
+> =A0 =A0 =A0 =A0reg =3D <0>;
+> =A0 =A0 =A0 =A0...
+> =A0 };
+>
+> (unit addresses on the slots are only needed if they can't be
+> disambiguated by name, so not needed if you only have one slot).
 >
 
-If the existing driver requires any Exynos4 specific extensions to
-operate the controller correctly on Exynos4, then yes we should add a
-Exynos4 type. The Exynos4 and Exynos5 implementations of this
-controller vary in certain aspects and so we might need a Exynos4 type
-as well.
+Is the addressing model as described above needed in this case? The
+address for a slot is not used by the controller driver code and is
+just a virtual number. It would be sufficient to represent the nodes
+representing the slots with a unique name.
 
 Thanks,
 Thomas.
-
-[...]
