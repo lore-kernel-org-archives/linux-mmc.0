@@ -1,42 +1,83 @@
 From: Dirk Behme <dirk.behme@de.bosch.com>
-Subject: [PATCH 0/4] mmc: sdhci-esdhc-imx: i.MX6 update
-Date: Thu, 10 May 2012 11:33:15 +0200
-Message-ID: <1336642399-4543-1-git-send-email-dirk.behme@de.bosch.com>
+Subject: [PATCH 4/4] mmc: sdhci-esdhc-imx: Workaround for SD dat1 glitch causes system panic
+Date: Thu, 10 May 2012 11:33:19 +0200
+Message-ID: <1336642399-4543-5-git-send-email-dirk.behme@de.bosch.com>
+References: <1336642399-4543-1-git-send-email-dirk.behme@de.bosch.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from imta21.fe.bosch.de ([139.15.243.226]:51592 "EHLO
-	imta21.fe.bosch.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757900Ab2EJJkZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 May 2012 05:40:25 -0400
+Received: from imta22.fe.bosch.de ([139.15.243.26]:51657 "EHLO
+	imta22.fe.bosch.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932083Ab2EJJmP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 May 2012 05:42:15 -0400
 Received: from smtp2-v.fe.bosch.de (imta23.fe.bosch.de [139.15.243.227])
-	by imta21.fe.bosch.de (Postfix) with ESMTP id 43CFE2803F6
-	for <linux-mmc@vger.kernel.org>; Thu, 10 May 2012 11:30:38 +0200 (CEST)
-Received: from vsmta11.fe.internet.bosch.com (unknown [10.4.98.30])
-	by imta23.fe.bosch.de (Postfix) with ESMTP id E3EEF28C0200
-	for <linux-mmc@vger.kernel.org>; Thu, 10 May 2012 11:29:51 +0200 (CEST)
+	by imta22.fe.bosch.de (Postfix) with ESMTP id 112C03FE8AD5
+	for <linux-mmc@vger.kernel.org>; Thu, 10 May 2012 11:37:48 +0200 (CEST)
+Received: from vsmta14.fe.internet.bosch.com (unknown [10.4.98.30])
+	by imta23.fe.bosch.de (Postfix) with ESMTP id 624E528C0172
+	for <linux-mmc@vger.kernel.org>; Thu, 10 May 2012 11:30:05 +0200 (CEST)
 Received: from localhost (vsgw3.fe.internet.bosch.com [10.4.98.16])
-	by vsmta11.fe.internet.bosch.com (Postfix) with SMTP id AB7B743C0783
-	for <linux-mmc@vger.kernel.org>; Thu, 10 May 2012 11:33:27 +0200 (CEST)
+	by vsmta14.fe.internet.bosch.com (Postfix) with SMTP id 2D9861B40323
+	for <linux-mmc@vger.kernel.org>; Thu, 10 May 2012 11:33:41 +0200 (CEST)
+In-Reply-To: <1336642399-4543-1-git-send-email-dirk.behme@de.bosch.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Dirk Behme <dirk.behme@de.bosch.com>, Tony Lin <tony.lin@freescale.com>, RichardZhu <richard.zhu@linaro.org>, Philipp Ahmann <pahmann@de.adit-jv.com>, Eric Miao <eric.miao@linaro.org>
+Cc: RichardZhu <richard.zhu@linaro.org>, Tony Lin <tony.lin@freescale.com>
 
-We need the following 4 patches to get SDHCI working on the i.MX6.
+From: RichardZhu <richard.zhu@linaro.org>
 
-The first two patches add 8 bit and 1.8V support. Patches 3 + 4 are
-workarounds for i.MX6 1.0 silicon hardware issues.
+Some SD cards insertions will cause a glitch on SD dat1
+which is also a card interrupt signal. Thus the wrongly
+generated card interrupt will make system panic because
+there's no registered sdio interrupt handler.
+This patch fixes this issue.
 
-These patches are tested on the i.MX6 SabreLite board with kernel
-3.4-rc6.
+Note: This is a workaround for i.MX6 version 1.0 silicon. It's
+      fixed in hardware in version 1.1 silicon.
 
-Please note that I'm not the author of these patches. And I'm no MMC
-expert. So we will try to work on these patches, but might fail if
-some deeper MMC knowledge might be necessary. Any help would be 
-appreciated, then ;)
+Signed-off-by: Tony Lin <tony.lin@freescale.com>
+Signed-off-by: RichardZhu <richard.zhu@linaro.org>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |   18 +++++++++++++++++-
+ 1 files changed, 17 insertions(+), 1 deletions(-)
 
-CC: Tony Lin <tony.lin@freescale.com>
-CC: RichardZhu <richard.zhu@linaro.org>
-CC: Philipp Ahmann <pahmann@de.adit-jv.com>
-CC: Eric Miao <eric.miao@linaro.org>
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index a13e75b..50a72a4 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -486,6 +486,7 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	struct clk *clk;
+ 	int err;
+ 	struct pltfm_imx_data *imx_data;
++	u32 reg;
+ 
+ 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata);
+ 	if (IS_ERR(host))
+@@ -513,7 +514,22 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	clk_prepare_enable(clk);
+ 	pltfm_host->clk = clk;
+ 
+-	host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
++	/* disable card interrupt enable bit, and clear status bit
++	 * the default value of this enable bit is 1, but it should
++	 * be 0 regarding to standard host controller spec 2.1.3.
++	 * if this bit is 1, it may cause some problems.
++	 * there's dat1 glitch when some cards inserting into the slot,
++	 * thus wrongly generate a card interrupt that will cause
++	 * system panic because it lacks of sdio handler
++	 * following code will solve the problem.
++	 */
++	reg = sdhci_readl(host, SDHCI_INT_ENABLE);
++	reg &= ~SDHCI_INT_CARD_INT;
++	sdhci_writel(host, reg, SDHCI_INT_ENABLE);
++	sdhci_writel(host, SDHCI_INT_CARD_INT, SDHCI_INT_STATUS);
++
++	if (!is_imx25_esdhc(imx_data))
++		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+ 
+ 	if (is_imx25_esdhc(imx_data) || is_imx35_esdhc(imx_data))
+ 		/* Fix errata ENGcm07207 present on i.MX25 and i.MX35 */
+-- 
+1.7.0.4
+
