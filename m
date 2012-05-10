@@ -1,35 +1,38 @@
 From: Namjae Jeon <linkinjeon@gmail.com>
-Subject: Re: [PATCH 1/2] mmc: Avoid null pointer dereference
-Date: Thu, 10 May 2012 09:43:06 +0900
-Message-ID: <CAKYAXd9roe8he2bGKiurCsxS3+U5otqQqRXzpB8fVPWak2ow_Q@mail.gmail.com>
-References: <1334176305-6183-1-git-send-email-philippedeswert@gmail.com>
-	<CAKYAXd8Ofmg+kzUgr26CngaNgcw-MXJ91cS4R+BcMLY7yPxjNw@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: Remove dead code
+Date: Thu, 10 May 2012 09:48:05 +0900
+Message-ID: <CAKYAXd_fmECB8MJGtUd3b2GbkHGuLvf2=u-6EjMB=ndBjKjg0Q@mail.gmail.com>
+References: <1334176325-6221-1-git-send-email-philippedeswert@gmail.com>
+	<CAKYAXd8Uor+AM2vf8ZEUsNKef=QbMnExGe47o1m9YMxzQ9ZokQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:40773 "EHLO
+Received: from mail-we0-f174.google.com ([74.125.82.174]:44533 "EHLO
 	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754960Ab2EJAnI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 May 2012 20:43:08 -0400
-In-Reply-To: <CAKYAXd8Ofmg+kzUgr26CngaNgcw-MXJ91cS4R+BcMLY7yPxjNw@mail.gmail.com>
+	with ESMTP id S1754507Ab2EJAsG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 May 2012 20:48:06 -0400
+Received: by werb10 with SMTP id b10so577245wer.19
+        for <linux-mmc@vger.kernel.org>; Wed, 09 May 2012 17:48:05 -0700 (PDT)
+In-Reply-To: <CAKYAXd8Uor+AM2vf8ZEUsNKef=QbMnExGe47o1m9YMxzQ9ZokQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Philippe De Swert <philippedeswert@gmail.com>
+To: cjb@laptop.org
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Philippe De Swert <philippedeswert@gmail.com>
 
 Hi. Chris.
 
-Would you check this patch ?
+Would you check this patch also ?
 
 Thanks.
 
 2012/4/12, Namjae Jeon <linkinjeon@gmail.com>:
 > 2012/4/12 Philippe De Swert <philippedeswert@gmail.com>:
->> After the null check on md the code jumped to cmd_done, which then
->> will dereference md in mmc_blk_put. This patch avoids the possible
->> null pointer dereference in that case.
+>> bus_width is passed to the function and when 0 (MMC_BUS_WIDTH_1)
+>> will cause the function to return. So in in the second test it
+>> definitly is different from 0, and the third test is redundant.
 >>
 >> Signed-off-by: Philippe De Swert <philippedeswert@gmail.com>
-> This patch is good also.
+>> ---
+> Looks good to me.
 > Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
 >
