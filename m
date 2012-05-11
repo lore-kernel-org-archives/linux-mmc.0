@@ -1,87 +1,76 @@
-From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: Re: [PATCH 3/3] mmc: sdhci-imx-esdhc: convert to use pinctrl
- subsystem
-Date: Fri, 11 May 2012 16:01:15 +0800
-Message-ID: <20120511080114.GO6622@shlinux2.ap.freescale.net>
-References: <1335958282-3068-1-git-send-email-b29396@freescale.com>
- <1335958282-3068-3-git-send-email-b29396@freescale.com>
- <20120511073653.GX17875@S2101-09.ap.freescale.net>
+From: kdorfman@codeaurora.org
+Subject: Re: [PATCH v8] mmc: support BKOPS feature for eMMC
+Date: Fri, 11 May 2012 03:06:25 -0700 (PDT)
+Message-ID: <f1721920d901fef295b27350f6f1ea13.squirrel@www.codeaurora.org>
+References: <4FABC495.8060708@samsung.com>
+    <aa38953dd272014cd1c4d014ce9d15bd.squirrel@www.codeaurora.org>
+    <4FACA5D2.3050706@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:56146 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751670Ab2EKHzV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 May 2012 03:55:21 -0400
-Content-Disposition: inline
-In-Reply-To: <20120511073653.GX17875@S2101-09.ap.freescale.net>
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:64444 "EHLO
+	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932416Ab2EKKG0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 May 2012 06:06:26 -0400
+In-Reply-To: <4FACA5D2.3050706@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Dong Aisheng-B29396 <B29396@freescale.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "linus.walleij@stericsson.com" <linus.walleij@stericsson.com>, "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, Guo Shawn-R65073 <r65073@freescale.com>, "kernel@pengutronix.de" <kernel@pengutronix.de>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "cjb@laptop.org" <cjb@laptop.org>, "w.sang@pengutronix.de" <w.sang@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: kdorfman@codeaurora.org, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On Fri, May 11, 2012 at 03:36:56PM +0800, Shawn Guo wrote:
-> On Wed, May 02, 2012 at 07:31:22PM +0800, Dong Aisheng wrote:
-> > From: Dong Aisheng <dong.aisheng@linaro.org>
-> > 
-> > Acked-by: Stephen Warren <swarren@wwwdotorg.org>
-> > Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
-> > ---
-> > ChangeLog v4->v5:
-> >  *split arch/arm/mach-imx/* changes into a separate patch
-> > ChangeLog v3->v4:
-> >  * call provide dummies in imx*_soc_init().
-> > ChangeLog v2->v3:
-> >  * patch name updated.
-> >    v1 name is ARM: imx6q: switch to use pinctrl driver
-> >  * using pinctrl dummy state to avoid breaking other platforms to use this
-> >    driver.
-> > ChangeLog v1->v2:
-> >  * using updated binding
-> > ---
-> >  arch/arm/boot/dts/imx6q-arm2.dts   |    4 ++++
-> >  arch/arm/boot/dts/imx6q.dtsi       |   32 ++++++++++++++++++++++++++++++++
-> >  drivers/mmc/host/sdhci-esdhc-imx.c |    9 +++++++++
-> >  3 files changed, 45 insertions(+), 0 deletions(-)
-> 
-> Since we now have dummy state enabled for imx6q as well, I just split
-> the patches into following two for better separation, with first one
-> on my imx/pinctrl/for-3.5 and the second one on imx/dt/for-3.5 branch
-> respectively.
-> 
-> commit e62d8b8fe73518d1875371a2ee9c5fdd31eba6f8
-> Author: Dong Aisheng <dong.aisheng@linaro.org>
-> Date:   Fri May 11 14:56:01 2012 +0800
-> 
->     mmc: sdhci-imx-esdhc: adopt pinctrl support
-> 
->     Cc: linux-mmc@vger.kernel.org
->     Cc: Chris Ball <cjb@laptop.org>
->     Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
->     Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
->     Acked-by: Stephen Warren <swarren@wwwdotorg.org>
-> 
->  drivers/mmc/host/sdhci-esdhc-imx.c |    9 +++++++++
->  1 files changed, 9 insertions(+), 0 deletions(-)
-> 
-> commit 551fd208f204780bac1ca5bce1748ba7a6f7ee6e
-> Author: Dong Aisheng <dong.aisheng@linaro.org>
-> Date:   Fri May 11 14:58:00 2012 +0800
-> 
->     ARM: dts: imx6q-arm2: add pinctrl state for usdhc
-> 
->     Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
->     Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> 
->  arch/arm/boot/dts/imx6q-arm2.dts |    4 ++++
->  arch/arm/boot/dts/imx6q.dtsi     |   32 ++++++++++++++++++++++++++++++++
->  2 files changed, 36 insertions(+), 0 deletions(-)
-> 
-> Please have a check to see if everything is correct.
-> 
-Looks good to me.
-Just go ahead.
+> Hi Konstantin.
+>
+> On 05/10/2012 11:46 PM, kdorfman@codeaurora.org wrote:
+>
+>> Hi Jaehoon,
+>> I see 2 issues with new patch:
+>> 1. New code starts BKOPS always with waiting for BUSY. (see comment
+>> below
+>> in the code)
+>> 2. Runtime suspend (mmc_suspend_host) do not checks that BKOPS is in
+>> progress,
+>> this means, that CMD5 (slee) will fail.
+>
+> You're right. it needs to check in progress.
+> I will add them.
+OK, I will send you patch for runtime suspend flow (it is good to do righ
+before calling ops->suspend callback in mmc_suspend_host() function.
+>
+>>
+>>
+>> In your previous patch (v7) was code:
+>>
+>> -	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>> +	cmd.flags = MMC_CMD_AC;
+>> +	if (index == EXT_CSD_BKOPS_START &&
+>> +	    card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
+>> +		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+>> +	else
+>> +		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+>>
+>> When level of raw_bkops_status is not critical, the host controller
+>> flags
+>> used
+>> without waiting for BUSY line release. This means, that mmc queue thread
+>> will continue
+>> to fetch requests while BKOPS still running on the card.
+>> Without this code, BKOPS will always be blocking till BKOPS done and
+>> using
+>> HPI for interrupt BKOPS on
+>> new request is not need.
+>> Why you removed this code?
+>
+> You're right. it's my mistake. Actually i modified to use with
+> __mmc_switch().
+> As I remember, maybe you mentioned this point. right?
+> So i tried to use based on your review. it's missing in this patch.
+>
+yes
 
-Regards
-Dong Aisheng
+> Thank you for your comment. any other comments?
+> If you have others, let me know, plz.
+I will check the patch and update you about it.
+
+Thanks,
+Kostya
 
