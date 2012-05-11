@@ -1,163 +1,85 @@
-From: kdorfman@codeaurora.org
-Subject: Re: [PATCH v2] mmc: core: Fix the HPI execution sequence
-Date: Thu, 10 May 2012 08:08:11 -0700 (PDT)
-Message-ID: <d67058e8294cdb61447f0a32a431e5d7.squirrel@www.codeaurora.org>
-References: <1334670334-18050-1-git-send-email-svenkatr@ti.com>
-    <edaffb8a034e4ed87b2f7c63d759c1d2.squirrel@www.codeaurora.org>
-    <CANfBPZ_+K0y8zKJcyqzThrc=w+ea54C0m9voqHoaoCUfpA8QAA@mail.gmail.com>
-    <143f1a4dd9fcd3b243bfc484242481b6.squirrel@www.codeaurora.org>
-    <CANfBPZ-PDNuNhG0HubLdtaoYa4HPkjPyYcHJ0re-80kDmYLZqQ@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v8] mmc: support BKOPS feature for eMMC
+Date: Fri, 11 May 2012 14:38:26 +0900
+Message-ID: <4FACA5D2.3050706@samsung.com>
+References: <4FABC495.8060708@samsung.com>
+ <aa38953dd272014cd1c4d014ce9d15bd.squirrel@www.codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:23015 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756666Ab2EJPIL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 May 2012 11:08:11 -0400
-In-Reply-To: <CANfBPZ-PDNuNhG0HubLdtaoYa4HPkjPyYcHJ0re-80kDmYLZqQ@mail.gmail.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:40453 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755344Ab2EKFiv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 May 2012 01:38:51 -0400
+Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
+ by mailout3.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0M3U00KMHFO3O320@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 11 May 2012 14:38:50 +0900 (KST)
+Received: from [165.213.219.108] by mmp1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0M3U000ULFOPOMB0@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 11 May 2012 14:38:50 +0900 (KST)
+In-reply-to: <aa38953dd272014cd1c4d014ce9d15bd.squirrel@www.codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "S, Venkatraman" <svenkatr@ti.com>
-Cc: kdorfman@codeaurora.org, linux-mmc@vger.kernel.org, Namjae Jeon <linkinjeon@gmail.com>, Jae hoon Chung <jh80.chung@gmail.com>, Chris Ball <cjb@laptop.org>
+To: kdorfman@codeaurora.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hello,
+Hi Konstantin.
 
-2 comments (see inside):
-1. About card state before sending HPI
-2. About waiting after sending HPI
+On 05/10/2012 11:46 PM, kdorfman@codeaurora.org wrote:
 
-> On Wed, May 9, 2012 at 7:36 PM,  <kdorfman@codeaurora.org> wrote:
->>> On Wed, May 9, 2012 at 6:47 PM, =A0<kdorfman@codeaurora.org> wrote:
->>
->>>>> @@ -403,6 +403,7 @@ int mmc_interrupt_hpi(struct mmc_card *card)
->>>>> =A0{
->>>>> =A0 =A0 =A0 int err;
->>>>> =A0 =A0 =A0 u32 status;
->>>>> + =A0 =A0 unsigned long starttime;
->>>>>
->>>>> =A0 =A0 =A0 BUG_ON(!card);
->>>>>
->>>>> @@ -421,27 +422,31 @@ int mmc_interrupt_hpi(struct mmc_card *card=
-)
->>>>> =A0 =A0 =A0 /*
->>>>> =A0 =A0 =A0 =A0* If the card status is in PRG-state, we can send =
-the HPI
->>>>> command.
->>>>> =A0 =A0 =A0 =A0*/
->>>>> - =A0 =A0 if (R1_CURRENT_STATE(status) =3D=3D R1_STATE_PRG) {
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 do {
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* We don't know when=
- the HPI command will
->>>>> finish
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* processing, so we =
-need to resend HPI until
->>>>> out
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* of prg-state, and =
-keep checking the card
->>>>> status
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* with SEND_STATUS. =
-=A0If a timeout error occurs
->>>>> when
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* sending the HPI co=
-mmand, we are already out
->>>>> of
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* prg-state.
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_send_hpi_cm=
-d(card, &status);
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_debu=
-g("%s: abort HPI (%d error)\n",
->>>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0mmc_hostname(card->host),
->>>>> err);
->>>>> + =A0 =A0 if (R1_CURRENT_STATE(status) !=3D R1_STATE_PRG) {
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 pr_debug("%s: Can't send HPI: Card stat=
-e=3D%d\n",
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hostname(card->host=
-),
->>>>> R1_CURRENT_STATE(status));
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 err =3D -EINVAL;
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 goto out;
->>>>> + =A0 =A0 }
->>>> You can't return error here, because the card status may be:
->>>> 0 =3D Idle 1 =3D Ready 2 =3D Ident 3 =3D Stby 4 =3D Tran 5 =3D Dat=
-a 6 =3D Rcv 7 =3D
->>>> Prg
->>>> 8
->>>> =3D Dis 9 =3D Btst 10
->>>> Not every value is error here: the card state may be Idle/Ready an=
-d
->>>> then
->>>> you do not need to return error.
->>>>
->>> Depends. When the intent is to send HPI command, and the current st=
-ate
->>> is such that it can't be sent,
->>> then a error has to be returned, right ?
->>> OTOH, if the API was "mmc_get_to_transfer_state()", then it would m=
-ake
->>> sense to not return an error.
+> Hi Jaehoon,
+> I see 2 issues with new patch:
+> 1. New code starts BKOPS always with waiting for BUSY. (see comment below
+> in the code)
+> 2. Runtime suspend (mmc_suspend_host) do not checks that BKOPS is in
+> progress,
+> this means, that CMD5 (slee) will fail.
 
-It does't matter what caller flow is, when current operation finished, =
-the
-card may be in IDLE state
-you do not need to send HPI and it is not error, because it is like to
-have successful HPI done.
-Probably not only IDLE state is like this (I think of standby state).
+You're right. it needs to check in progress.
+I will add them.
 
-> It's a completely different issue that I had informed Saugata, who is
-> doing the rework on
-> power off notify and sleep command sequence.
-> Essentially, the card shouldn't be put to sleep once BKOPS_START has
-> been issued,
-> and we should need to interrupt with HPI only when a higher layer
-> request needs to be serviced.
+> 
+> 
+> In your previous patch (v7) was code:
+> 
+> -	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +	cmd.flags = MMC_CMD_AC;
+> +	if (index == EXT_CSD_BKOPS_START &&
+> +	    card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
+> +		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+> +	else
+> +		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+> 
+> When level of raw_bkops_status is not critical, the host controller flags
+> used
+> without waiting for BUSY line release. This means, that mmc queue thread
+> will continue
+> to fetch requests while BKOPS still running on the card.
+> Without this code, BKOPS will always be blocking till BKOPS done and using
+> HPI for interrupt BKOPS on
+> new request is not need.
+> Why you removed this code?
 
-Once BKOPS started, it will trigger IDLE timer for 5 sec, but BKOPS may
-take more time.
-This means that card will enter sleep again and CMD5 will fail.
+You're right. it's my mistake. Actually i modified to use with __mmc_switch().
+As I remember, maybe you mentioned this point. right?
+So i tried to use based on your review. it's missing in this patch.
 
-> I don't know whether you are interested in handling only urgent BKOPS
-> or periodic BKOPS,
-> but we can discuss the design on a separate thread.
+Thank you for your comment. any other comments?
+If you have others, let me know, plz.
 
-Let's do this discussion on newly published thread: "[PATCH v8] mmc:
-support BKOPS feature for eMMC"
+Best Regards,
+Jaehoon Chung
 
->
->>>
->>>
->>>>> +
->>>>> + =A0 =A0 starttime =3D jiffies;
->>>>> + =A0 =A0 err =3D mmc_send_hpi_cmd(card, &status);
->>>>> + =A0 =A0 if (err) {
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 pr_debug("%s:HPI could not be sent.err=3D=
-%d)\n",
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hostname(card->host=
-), err);
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 goto out;
->>>>> + =A0 =A0 }
->>>>> +
->>>>> + =A0 =A0 do {
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_send_status(card, &status);
->>>>> +
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 if (!err && R1_CURRENT_STATE(status) =3D=
-=3D R1_STATE_TRAN)
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 goto out;
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 if (jiffies_to_msecs(jiffies - starttim=
-e) >
->>>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.out_of_in=
-t_time)
-I think we need to add some margin time to the out_of_int_time here.
-Because card clock is different from
-jiffies.
-
-Thanks,
-Kostya
-Consultant for Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
 
