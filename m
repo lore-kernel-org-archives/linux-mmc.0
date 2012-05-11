@@ -1,76 +1,150 @@
-From: kdorfman@codeaurora.org
-Subject: Re: [PATCH v8] mmc: support BKOPS feature for eMMC
-Date: Fri, 11 May 2012 03:06:25 -0700 (PDT)
-Message-ID: <f1721920d901fef295b27350f6f1ea13.squirrel@www.codeaurora.org>
-References: <4FABC495.8060708@samsung.com>
-    <aa38953dd272014cd1c4d014ce9d15bd.squirrel@www.codeaurora.org>
-    <4FACA5D2.3050706@samsung.com>
+From: "S, Venkatraman" <svenkatr@ti.com>
+Subject: Re: [PATCH 4/4] mmc: core: Send HPI only till it is successful
+Date: Fri, 11 May 2012 15:37:50 +0530
+Message-ID: <CANfBPZ_vybwCsbKdc_gmujw-8XCM6NmedgdvnQ8swXg3yG7t3Q@mail.gmail.com>
+References: <1334319854-5989-1-git-send-email-svenkatr@ti.com>
+ <1334319854-5989-5-git-send-email-svenkatr@ti.com> <CAKYAXd_R5RfyP_-hW6LRbdEaVHbJOS+RdQC6-t3tqCcBUS4HGw@mail.gmail.com>
+ <1EB04A4B-3A25-43B6-9A7C-A0563F6BC553@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:64444 "EHLO
-	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932416Ab2EKKG0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 May 2012 06:06:26 -0400
-In-Reply-To: <4FACA5D2.3050706@samsung.com>
+Received: from na3sys009aog120.obsmtp.com ([74.125.149.140]:37598 "EHLO
+	na3sys009aog120.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932317Ab2EKKIM convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 11 May 2012 06:08:12 -0400
+Received: by vbbez10 with SMTP id ez10so2542088vbb.3
+        for <linux-mmc@vger.kernel.org>; Fri, 11 May 2012 03:08:10 -0700 (PDT)
+In-Reply-To: <1EB04A4B-3A25-43B6-9A7C-A0563F6BC553@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: kdorfman@codeaurora.org, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Philip Rakity <prakity@marvell.com>
+Cc: Namjae Jeon <linkinjeon@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-> Hi Konstantin.
+On Wed, May 9, 2012 at 8:20 PM, Philip Rakity <prakity@marvell.com> wro=
+te:
 >
-> On 05/10/2012 11:46 PM, kdorfman@codeaurora.org wrote:
+> On Apr 13, 2012, at 7:39 AM, Namjae Jeon wrote:
 >
->> Hi Jaehoon,
->> I see 2 issues with new patch:
->> 1. New code starts BKOPS always with waiting for BUSY. (see comment
->> below
->> in the code)
->> 2. Runtime suspend (mmc_suspend_host) do not checks that BKOPS is in
->> progress,
->> this means, that CMD5 (slee) will fail.
->
-> You're right. it needs to check in progress.
-> I will add them.
-OK, I will send you patch for runtime suspend flow (it is good to do righ
-before calling ops->suspend callback in mmc_suspend_host() function.
->
+>> Hi. Venkatraman.
 >>
+>> You fixed 10 times. why is it 10 times ?
+>> and checking err from mmc_send_status is not needed ? is it =A0also
+>> infinite case ?
 >>
->> In your previous patch (v7) was code:
+>> Thanks.
 >>
->> -	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
->> +	cmd.flags = MMC_CMD_AC;
->> +	if (index == EXT_CSD_BKOPS_START &&
->> +	    card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
->> +		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
->> +	else
->> +		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
->>
->> When level of raw_bkops_status is not critical, the host controller
->> flags
->> used
->> without waiting for BUSY line release. This means, that mmc queue thread
->> will continue
->> to fetch requests while BKOPS still running on the card.
->> Without this code, BKOPS will always be blocking till BKOPS done and
->> using
->> HPI for interrupt BKOPS on
->> new request is not need.
->> Why you removed this code?
+>> 2012/4/13 Venkatraman S <svenkatr@ti.com>:
+>>> Try to send HPI only a fixed number of times till it is
+>>> successful. One successful transfer is enough - but wait
+>>> till the card comes out of transfer state.
+>>> Return an error if the card was not in programming state to
+>>> begin with - so that the caller knows that HPI was not sent.
+>>>
+>>> Reported-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
+>>> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+>>> ---
+>>> =A0drivers/mmc/core/core.c | =A0 34 ++++++++++++++++++-------------=
+---
+>>> =A01 file changed, 18 insertions(+), 16 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>> index e541efb..ceabef5 100644
+>>> --- a/drivers/mmc/core/core.c
+>>> +++ b/drivers/mmc/core/core.c
+>>> @@ -401,7 +401,7 @@ EXPORT_SYMBOL(mmc_wait_for_req);
+>>> =A0*/
+>>> =A0int mmc_interrupt_hpi(struct mmc_card *card)
+>>> =A0{
+>>> - =A0 =A0 =A0 int err;
+>>> + =A0 =A0 =A0 int err, i;
+>>> =A0 =A0 =A0 =A0u32 status;
+>>>
+>>> =A0 =A0 =A0 =A0BUG_ON(!card);
+>>> @@ -421,27 +421,29 @@ int mmc_interrupt_hpi(struct mmc_card *card)
+>>> =A0 =A0 =A0 =A0/*
+>>> =A0 =A0 =A0 =A0 * If the card status is in PRG-state, we can send t=
+he HPI command.
+>>> =A0 =A0 =A0 =A0 */
+>>> + =A0 =A0 =A0 err =3D -EINVAL;
+>>> =A0 =A0 =A0 =A0if (R1_CURRENT_STATE(status) =3D=3D R1_STATE_PRG) {
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 do {
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 /*
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* We don't know wh=
+en the HPI command will finish
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* processing, so w=
+e need to resend HPI until out
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* of prg-state, an=
+d keep checking the card status
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* with SEND_STATUS=
+=2E =A0If a timeout error occurs when
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* sending the HPI =
+command, we are already out of
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* prg-state.
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* To prevent an infinite lockout, tr=
+y to send HPI
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* a fixed number of times and bail=
+out if it can't
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* succeed.
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 for (i =3D 0; i < 10 && err !=3D 0 ; =
+i++)
 >
-> You're right. it's my mistake. Actually i modified to use with
-> __mmc_switch().
-> As I remember, maybe you mentioned this point. right?
-> So i tried to use based on your review. it's missing in this patch.
 >
-yes
+> would it make more sense to check time as well as retry count ?
+> worry that count may be too short or behavior is dependent on card ma=
+nufacturer.
+>
+This patch is discarded. Let me know if you have some comments on the
+follow up patch with
+the subject "mmc: fix HPI execution sequence"
 
-> Thank you for your comment. any other comments?
-> If you have others, let me know, plz.
-I will check the patch and update you about it.
-
-Thanks,
-Kostya
-
+>
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0err =3D mmc_send_hpi=
+_cmd(card, &status);
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* Once HPI was sent successfully, th=
+e card is
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0* supposed to be back to transfer =
+state.
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0*/
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 do {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err) {
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0pr_d=
+ebug("%s: abort HPI (%d error)\n",
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0 =A0 =A0 mmc_hostname(card->host), err);
+>>> -
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_send_stat=
+us(card, &status);
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (err)
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0brea=
+k;
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 err =3D mmc_send_stat=
+us(card, &status);
+>>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0} while (R1_CURRENT_STATE(status) =3D=
+=3D R1_STATE_PRG);
+>>> - =A0 =A0 =A0 } else
+>>> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_debug("%s: Left prg-state\n", mmc_=
+hostname(card->host));
+>>> + =A0 =A0 =A0 } else {
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 pr_debug("%s: Can't send HPI. State=3D=
+%d\n",
+>>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 mmc_hostname(card->ho=
+st), R1_CURRENT_STATE(status));
+>>> + =A0 =A0 =A0 }
+>>>
+>>> =A0out:
+>>> =A0 =A0 =A0 =A0mmc_release_host(card->host);
+>>> --
+>>> 1.7.10.rc2
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
+" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at =A0http://vger.kernel.org/majordomo-info.htm=
+l
