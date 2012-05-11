@@ -1,85 +1,84 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v8] mmc: support BKOPS feature for eMMC
-Date: Fri, 11 May 2012 14:38:26 +0900
-Message-ID: <4FACA5D2.3050706@samsung.com>
-References: <4FABC495.8060708@samsung.com>
- <aa38953dd272014cd1c4d014ce9d15bd.squirrel@www.codeaurora.org>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 3/3] mmc: sdhci-imx-esdhc: convert to use pinctrl
+ subsystem
+Date: Fri, 11 May 2012 15:36:56 +0800
+Message-ID: <20120511073653.GX17875@S2101-09.ap.freescale.net>
+References: <1335958282-3068-1-git-send-email-b29396@freescale.com>
+ <1335958282-3068-3-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:40453 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755344Ab2EKFiv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 May 2012 01:38:51 -0400
-Received: from epcpsbgm1.samsung.com (mailout3.samsung.com [203.254.224.33])
- by mailout3.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0M3U00KMHFO3O320@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 11 May 2012 14:38:50 +0900 (KST)
-Received: from [165.213.219.108] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0M3U000ULFOPOMB0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 11 May 2012 14:38:50 +0900 (KST)
-In-reply-to: <aa38953dd272014cd1c4d014ce9d15bd.squirrel@www.codeaurora.org>
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:34503 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752557Ab2EKHg4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 May 2012 03:36:56 -0400
+Received: by pbbrp8 with SMTP id rp8so2955263pbb.19
+        for <linux-mmc@vger.kernel.org>; Fri, 11 May 2012 00:36:55 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1335958282-3068-3-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: kdorfman@codeaurora.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Hanumath Prasad <hanumath.prasad@stericsson.com>, Per FORLIN <per.forlin@stericsson.com>, Sebastian Rasmussen <sebras@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "svenkatr@ti.com" <svenkatr@ti.com>, Saugata Das <saugata.das@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-arm-kernel@lists.infradead.org, devicetree-discuss@lists.ozlabs.org, linus.walleij@stericsson.com, swarren@wwwdotorg.org, s.hauer@pengutronix.de, shawn.guo@freescale.com, kernel@pengutronix.de, grant.likely@secretlab.ca, rob.herring@calxeda.com, cjb@laptop.org, w.sang@pengutronix.de, linux-mmc@vger.kernel.org
 
-Hi Konstantin.
-
-On 05/10/2012 11:46 PM, kdorfman@codeaurora.org wrote:
-
-> Hi Jaehoon,
-> I see 2 issues with new patch:
-> 1. New code starts BKOPS always with waiting for BUSY. (see comment below
-> in the code)
-> 2. Runtime suspend (mmc_suspend_host) do not checks that BKOPS is in
-> progress,
-> this means, that CMD5 (slee) will fail.
-
-You're right. it needs to check in progress.
-I will add them.
-
+On Wed, May 02, 2012 at 07:31:22PM +0800, Dong Aisheng wrote:
+> From: Dong Aisheng <dong.aisheng@linaro.org>
 > 
-> 
-> In your previous patch (v7) was code:
-> 
-> -	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-> +	cmd.flags = MMC_CMD_AC;
-> +	if (index == EXT_CSD_BKOPS_START &&
-> +	    card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
-> +		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
-> +	else
-> +		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
-> 
-> When level of raw_bkops_status is not critical, the host controller flags
-> used
-> without waiting for BUSY line release. This means, that mmc queue thread
-> will continue
-> to fetch requests while BKOPS still running on the card.
-> Without this code, BKOPS will always be blocking till BKOPS done and using
-> HPI for interrupt BKOPS on
-> new request is not need.
-> Why you removed this code?
+> Acked-by: Stephen Warren <swarren@wwwdotorg.org>
+> Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
+> ---
+> ChangeLog v4->v5:
+>  *split arch/arm/mach-imx/* changes into a separate patch
+> ChangeLog v3->v4:
+>  * call provide dummies in imx*_soc_init().
+> ChangeLog v2->v3:
+>  * patch name updated.
+>    v1 name is ARM: imx6q: switch to use pinctrl driver
+>  * using pinctrl dummy state to avoid breaking other platforms to use this
+>    driver.
+> ChangeLog v1->v2:
+>  * using updated binding
+> ---
+>  arch/arm/boot/dts/imx6q-arm2.dts   |    4 ++++
+>  arch/arm/boot/dts/imx6q.dtsi       |   32 ++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-esdhc-imx.c |    9 +++++++++
+>  3 files changed, 45 insertions(+), 0 deletions(-)
 
-You're right. it's my mistake. Actually i modified to use with __mmc_switch().
-As I remember, maybe you mentioned this point. right?
-So i tried to use based on your review. it's missing in this patch.
+Since we now have dummy state enabled for imx6q as well, I just split
+the patches into following two for better separation, with first one
+on my imx/pinctrl/for-3.5 and the second one on imx/dt/for-3.5 branch
+respectively.
 
-Thank you for your comment. any other comments?
-If you have others, let me know, plz.
+commit e62d8b8fe73518d1875371a2ee9c5fdd31eba6f8
+Author: Dong Aisheng <dong.aisheng@linaro.org>
+Date:   Fri May 11 14:56:01 2012 +0800
 
-Best Regards,
-Jaehoon Chung
+    mmc: sdhci-imx-esdhc: adopt pinctrl support
 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+    Cc: linux-mmc@vger.kernel.org
+    Cc: Chris Ball <cjb@laptop.org>
+    Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
+    Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+    Acked-by: Stephen Warren <swarren@wwwdotorg.org>
 
+ drivers/mmc/host/sdhci-esdhc-imx.c |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
 
+commit 551fd208f204780bac1ca5bce1748ba7a6f7ee6e
+Author: Dong Aisheng <dong.aisheng@linaro.org>
+Date:   Fri May 11 14:58:00 2012 +0800
+
+    ARM: dts: imx6q-arm2: add pinctrl state for usdhc
+
+    Signed-off-by: Dong Aisheng <dong.aisheng@linaro.org>
+    Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+
+ arch/arm/boot/dts/imx6q-arm2.dts |    4 ++++
+ arch/arm/boot/dts/imx6q.dtsi     |   32 ++++++++++++++++++++++++++++++++
+ 2 files changed, 36 insertions(+), 0 deletions(-)
+
+Please have a check to see if everything is correct.
+
+-- 
+Regards,
+Shawn
