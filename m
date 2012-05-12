@@ -1,137 +1,45 @@
-From: "S, Venkatraman" <svenkatr@ti.com>
-Subject: Re: [PATCHv2 00/16] [FS, MM, block, MMC]: eMMC High Priority
- Interrupt Feature
-Date: Sat, 12 May 2012 00:48:57 +0530
-Message-ID: <CANfBPZ9jHfX6tyrOx=9E+L+Z0JzXMqjMYK++Q53C4TJFSujoGg@mail.gmail.com>
-References: <1336054995-22988-1-git-send-email-svenkatr@ti.com>
- <4FA8CF5E.1070202@kernel.org> <CANfBPZ-d-0FqY8Gruv+KDNoL3+FoQ68JEnxya5PydhY80x8yhA@mail.gmail.com>
- <4FA9BE10.1030007@kernel.org>
+From: Thomas Abraham <thomas.abraham@linaro.org>
+Subject: Re: [PATCH 3/7] mmc: dw_mmc: add device tree support
+Date: Sat, 12 May 2012 12:31:28 +0530
+Message-ID: <CAJuYYwQj7gzZ9piJAJLcf7SiyJnQ6nZ63-X9ieQ-FCj6TNhQPQ@mail.gmail.com>
+References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
+	<1335935266-25289-4-git-send-email-thomas.abraham@linaro.org>
+	<Pine.LNX.4.64.1205040047280.18111@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <4FA9BE10.1030007@kernel.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: Minchan Kim <minchan@kernel.org>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, arnd.bergmann@linaro.org, alex.lemberg@sandisk.com, ilan.smith@sandisk.com, lporzio@micron.com, rmk+kernel@arm.linux.org.uk
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vb0-f46.google.com ([209.85.212.46]:42655 "EHLO
+	mail-vb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752344Ab2ELHB3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 May 2012 03:01:29 -0400
+Received: by vbbff1 with SMTP id ff1so3451531vbb.19
+        for <linux-mmc@vger.kernel.org>; Sat, 12 May 2012 00:01:28 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1205040047280.18111@axis700.grange>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, devicetree-discuss@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, patches@linaro.org, linux-kernel@vger.kernel.org, rob.herring@calxeda.com, grant.likely@secretlab.ca, kgene.kim@samsung.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
 
-On Wed, May 9, 2012 at 6:15 AM, Minchan Kim <minchan@kernel.org> wrote:
-> On 05/09/2012 01:31 AM, S, Venkatraman wrote:
+On 4 May 2012 04:18, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
 >
->> On Tue, May 8, 2012 at 1:16 PM, Minchan Kim <minchan@kernel.org> wro=
-te:
->>> On 05/03/2012 11:22 PM, Venkatraman S wrote:
->>>
->>>> Standard eMMC (Embedded MultiMedia Card) specification expects to =
-execute
->>>> one request at a time. If some requests are more important than ot=
-hers, they
->>>> can't be aborted while the flash procedure is in progress.
->>>>
->>>> New versions of the eMMC standard (4.41 and above) specfies a feat=
-ure
->>>> called High Priority Interrupt (HPI). This enables an ongoing tran=
-saction
->>>> to be aborted using a special command (HPI command) so that the ca=
-rd is ready
->>>> to receive new commands immediately. Then the new request can be s=
-ubmitted
->>>> to the card, and optionally the interrupted command can be resumed=
- again.
->>>>
->>>> Some restrictions exist on when and how the command can be used. F=
-or example,
->>>> only write and write-like commands (ERASE) can be preempted, and t=
-he urgent
->>>> request must be a read.
->>>>
->>>> In order to support this in software,
->>>> a) At the top level, some policy decisions have to be made on what=
- is
->>>> worth preempting for.
->>>> =A0 =A0 =A0 This implementation uses the demand paging requests an=
-d swap
->>>> read requests as potential reads worth preempting an ongoing long =
-write.
->>>> =A0 =A0 =A0 This is expected to provide improved responsiveness fo=
-r smarphones
->>>> with multitasking capabilities - example would be launch a email a=
-pplication
->>>> while a video capture session (which causes long writes) is ongoin=
-g.
->>>
->>>
->>> Do you have a number to prove it's really big effective?
->>
->> What type of benchmarks would be appropriate to post ?
->> As you know, the response time of a card would vary depending on
->> whether the flash device
->> has enough empty blocks to write into and doesn't have to resort to =
-GC during
->> write requests.
->> Macro benchmarks like iozone etc would be inappropriate here, as the=
-y won't show
->> the latency effects of individual write requests hung up doing page
->> reclaim, which happens
->> once in a while.
+> What do you think about this patch
 >
+> http://www.spinics.net/lists/linux-sh/msg11259.html
 >
-> We don't have such special benchmark so you need time to think how to=
- prove it.
-> IMHO, you can use run-many-x-apps.sh which checks elapsed time to act=
-ivate programs
-> by posting by Wu long time ago.
->
-> http://www.spinics.net/lists/linux-mm/msg09653.html
->
-> Of course, your eMMC is used above 80~90% for triggering GC stress an=
-d
-> your memory should be used up by dirty pages to happen reclaim.
->
->
->>>
->>> What I have a concern is when we got low memory situation.
->>> Then, writing speed for page reclaim is important for response.
->>> If we allow read preempt write and write is delay, it means read pa=
-th takes longer time to
->>> get a empty buffer pages in reclaim. In such case, it couldn't be g=
-ood.
->>>
->>
->> I agree. But when writes are delayed anyway as it exceeds
->> hpi_time_threshold (the window
->> available for invoking HPI), it means that the device is in GC mode
->> and either read or write
->> could be equally delayed. =A0Note that even in case of interrupting =
-a
->> write, a single block write
->> (which usually is too short to be interrupted, as designed) is
->> sufficient for doing a page reclaim,
->> and further write requests (including multiblock) would not be subje=
-ct
->> to HPI, as they will
->> complete within the average time.
->
->
-> My point is that it would be better for read to not preempt write-for=
--page_reclaim.
-> And we can identify it by PG_reclaim. You can get the idea.
->
-> Anyway, HPI is only feature of a device of many storages and you are =
-requiring modification
-> of generic layers although it's not big. So for getting justification=
- and attracting many
-> core guys(MM,FS,BLOCK), you should provide data at least.
->
-Hi Kim,
- Apologies for a delayed response. I am studying your suggestions and
-will get back with
-some changes and also some profiling data.
-Regards,
-Venkat.
---
-To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> and about using mmc-generic OF properties instead of creating yet another
+> copy of proprietary ones?
+
+Hi Guennadi,
+
+This patch does not intend to add any custom mmc properties. I checked
+your patch (in the link mentioned above) and most of the bindings are
+similar to what you have come up with except for the "ro-gpios" for
+which I have used "wp-gpios". But this is following what Arnd had
+proposed here: http://www.spinics.net/lists/linux-mmc/msg13564.html.
+
+Regarding the MMC_CAP_4_BIT_DATA and MMC_CAP_8_BIT_DATA in your patch,
+these can be derived from the bus width information that the driver
+receives.
+
+Thanks,
+Thomas.
