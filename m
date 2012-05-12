@@ -1,89 +1,109 @@
-From: Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 3/7] mmc: dw_mmc: add device tree support
-Date: Sat, 12 May 2012 14:13:07 +0530
-Message-ID: <CAJuYYwTQ6M0uTLQ_1M9HdcBpaYd2vws36Xx0fJFmwfJ-LSVJAA@mail.gmail.com>
-References: <1335935266-25289-1-git-send-email-thomas.abraham@linaro.org>
- <1335935266-25289-4-git-send-email-thomas.abraham@linaro.org>
- <CAOesGMh_0dShqe+kSB1Xgn9bpLv0j+b9QP+vN9N57XHP1geSHg@mail.gmail.com>
- <CAJuYYwSmiPNrFhd9xr2AkAbRfJm_gP9ym+AXyy9jyPG3FnFuhA@mail.gmail.com>
- <CAOesGMiXfODM=hDp9EP3uQOk041XCvPFfTzDwfkvBWeGWLdCgg@mail.gmail.com>
+From: Wolfram Sang <w.sang@pengutronix.de>
+Subject: Re: [PATCH 4/4] mmc: sdhci-esdhc-imx: Workaround for SD dat1 glitch
+ causes system panic
+Date: Sat, 12 May 2012 12:20:41 +0200
+Message-ID: <20120512102041.GA20673@pengutronix.de>
+References: <1336642399-4543-1-git-send-email-dirk.behme@de.bosch.com>
+ <1336642399-4543-5-git-send-email-dirk.behme@de.bosch.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <CAOesGMiXfODM=hDp9EP3uQOk041XCvPFfTzDwfkvBWeGWLdCgg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
-Cc: linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="k+w/mQv8wyuph6w0"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:34004 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751761Ab2ELKUn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 May 2012 06:20:43 -0400
+Content-Disposition: inline
+In-Reply-To: <1336642399-4543-5-git-send-email-dirk.behme@de.bosch.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dirk Behme <dirk.behme@de.bosch.com>
+Cc: linux-mmc@vger.kernel.org, RichardZhu <richard.zhu@linaro.org>, Tony Lin <tony.lin@freescale.com>
 
-On 12 May 2012 12:37, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org> wrote:
-> Hi,
->
-> On Thu, May 10, 2012 at 3:15 AM, Thomas Abraham
-> <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> Hi Olof,
->>
->> On 2 May 2012 23:37, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org> wrote:
->>> Hi,
->>
->> [...]
->>
->>>> +# Slots: The slot specific information are contained within child-nod=
-es with
->>>> + =A0each child-node representing a supported slot. There should be at=
-least one
->>>> + =A0child node representing a card slot. The name of the slot child n=
-ode should
->>>> + =A0be 'slot{n}' where n is the unique number of the slot connnected =
-to the
->>>> + =A0controller. The following are optional properties which can be in=
-cluded in
->>>> + =A0the slot child node.
->>>
->>> Since we're talking slots / cards on a bus, I think the addressing
->>> model would be useful here. So in the main controller node:
->>> =A0 =A0#address-cells =3D <1>;
->>> =A0 =A0#size-cells =3D <0>;
->>>
->>> And then each slot would need a reg property and possibly unit address:
->>>
->>> =A0 slot {
->>> =A0 =A0 =A0 =A0reg =3D <0>;
->>> =A0 =A0 =A0 =A0...
->>> =A0 };
->>>
->>> (unit addresses on the slots are only needed if they can't be
->>> disambiguated by name, so not needed if you only have one slot).
->>>
->>
->> Is the addressing model as described above needed in this case? The
->> address for a slot is not used by the controller driver code and is
->> just a virtual number. It would be sufficient to represent the nodes
->> representing the slots with a unique name.
->
-> The driver has the concept of slot IDs (slot->id struct member), and
-> the hardware definitely enumerates them.
->
-> So, I think it makes sense to give a chance to enumerate the slots in
-> the device tree. Otherwise, how do you know which one is which on
-> hardware? It also opens up the flexibility to have the same name for
-> both slots if it makes sense to describe a board that way.
 
-Thanks Olof. Yes, I missed the usage of the id number in the driver. I
-will add the slot addressing as you have suggested and repost.
+--k+w/mQv8wyuph6w0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thanks,
-Thomas.
+On Thu, May 10, 2012 at 11:33:19AM +0200, Dirk Behme wrote:
+> From: RichardZhu <richard.zhu@linaro.org>
+>=20
+> Some SD cards insertions will cause a glitch on SD dat1
+> which is also a card interrupt signal. Thus the wrongly
+> generated card interrupt will make system panic because
+> there's no registered sdio interrupt handler.
+> This patch fixes this issue.
+>=20
+> Note: This is a workaround for i.MX6 version 1.0 silicon. It's
+>       fixed in hardware in version 1.1 silicon.
+>=20
+> Signed-off-by: Tony Lin <tony.lin@freescale.com>
+> Signed-off-by: RichardZhu <richard.zhu@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c |   18 +++++++++++++++++-
+>  1 files changed, 17 insertions(+), 1 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-=
+esdhc-imx.c
+> index a13e75b..50a72a4 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -486,6 +486,7 @@ static int __devinit sdhci_esdhc_imx_probe(struct pla=
+tform_device *pdev)
+>  	struct clk *clk;
+>  	int err;
+>  	struct pltfm_imx_data *imx_data;
+> +	u32 reg;
+> =20
+>  	host =3D sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata);
+>  	if (IS_ERR(host))
+> @@ -513,7 +514,22 @@ static int __devinit sdhci_esdhc_imx_probe(struct pl=
+atform_device *pdev)
+>  	clk_prepare_enable(clk);
+>  	pltfm_host->clk =3D clk;
+> =20
+> -	host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> +	/* disable card interrupt enable bit, and clear status bit
+> +	 * the default value of this enable bit is 1, but it should
+> +	 * be 0 regarding to standard host controller spec 2.1.3.
+> +	 * if this bit is 1, it may cause some problems.
 
->
->
-> -Olof
+Very minor: "the following problem"?
+
+> +	 * there's dat1 glitch when some cards inserting into the slot,
+> +	 * thus wrongly generate a card interrupt that will cause
+> +	 * system panic because it lacks of sdio handler
+> +	 * following code will solve the problem.
+> +	 */
+> +	reg =3D sdhci_readl(host, SDHCI_INT_ENABLE);
+> +	reg &=3D ~SDHCI_INT_CARD_INT;
+> +	sdhci_writel(host, reg, SDHCI_INT_ENABLE);
+> +	sdhci_writel(host, SDHCI_INT_CARD_INT, SDHCI_INT_STATUS);
+> +
+> +	if (!is_imx25_esdhc(imx_data))
+> +		host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+
+NACK on the last two lines. Wrong rebase conflict resolution?
+
+Regards,
+
+   Wolfram
+
+--=20
+Pengutronix e.K.                           | Wolfram Sang                |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+
+--k+w/mQv8wyuph6w0
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iEYEARECAAYFAk+uOXkACgkQD27XaX1/VRvdVwCfRF5XLE+Zp9cfNkQ7anzgPZrW
+WF8AoLdsV7PPGFV95Ix+fRdsXFil2p6B
+=bixg
+-----END PGP SIGNATURE-----
+
+--k+w/mQv8wyuph6w0--
