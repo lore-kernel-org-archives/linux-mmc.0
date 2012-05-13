@@ -1,48 +1,47 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+From: Chris Ball <cjb@laptop.org>
 Subject: Re: [PATCH v2] mmc: dt: Consolidate DT bindings
-Date: Sun, 13 May 2012 19:46:32 +0000
-Message-ID: <201205131946.33109.arnd@arndb.de>
+Date: Sun, 13 May 2012 16:10:43 -0400
+Message-ID: <87pqa7suyk.fsf@laptop.org>
 References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org>
- <4F75D5C0.5050307@wwwdotorg.org> <871umou38f.fsf_-_@laptop.org>
+	<4F75D5C0.5050307@wwwdotorg.org> <871umou38f.fsf_-_@laptop.org>
+	<201205131946.33109.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <871umou38f.fsf_-_-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Viresh Kumar <viresh.kumar-qxv4g6HH51o@public.gmane.org>, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, Anton Vorontsov <anton.vorontsov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <201205131946.33109.arnd@arndb.de> (Arnd Bergmann's message of
+	"Sun, 13 May 2012 19:46:32 +0000")
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Viresh Kumar <viresh.kumar@st.com>, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, rob.herring@calxeda.com, Anton Vorontsov <anton.vorontsov@linaro.org>, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, kgene.kim@samsung.com, Lee Jones <lee.jones@linaro.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Sunday 13 May 2012, Chris Ball wrote:
-> On Fri, Mar 30 2012, Stephen Warren wrote:
-> >> No progress so far. I would suggest we apply the patch below to unify
-> >> the bindings we have. I tried to minimize the impact by picking the most
-> >> common version for each property, but if we know about devices that would
-> >> get broken by this, we may have to be more careful.
-> >> 
-> >> Signed-off-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-> 
-> Here's a version of your MMC DT bindings patch that responds to Stephen
-> Warren's review comments, refreshed against latest linux-next -- I'd
-> like to get this merged for v3.5.  Since it touches many .dts files,
-> should it go via arm-soc?  Thanks.
+Hi Arnd,
 
-Hi Chris,
+On Sun, May 13 2012, Arnd Bergmann wrote:
+> I've verified that there are no conflicts with anything we have in
+> arm-soc right now, so I think it should just go through your
+> tree.
 
-Sorry for not getting to this sooner myself and many thanks for your
-taking it on!
+Ah, I based the patch on latest linux-next.  That's why there aren't
+conflicts against arm-soc, but there are conflicts (in the omap and
+tegra dts changes) between the patch and Linus master/mmc-next:
 
-I've verified that there are no conflicts with anything we have in
-arm-soc right now, so I think it should just go through your
-tree.
+Applying: mmc: dt: Consolidate DT bindings
+error: patch failed: arch/arm/boot/dts/omap3-beagle.dts:57
+error: patch failed: arch/arm/boot/dts/omap4-panda.dts:55
+error: patch failed: arch/arm/boot/dts/omap4-sdp.dts:94
+error: patch failed: arch/arm/boot/dts/tegra-cardhu.dts:141
+error: patch failed: arch/arm/boot/dts/tegra-harmony.dts:335
+error: patch failed: arch/arm/boot/dts/tegra-ventana.dts:338
+Patch failed at 0001 mmc: dt: Consolidate DT bindings
 
-	Arnd
+So I think merging via arm-soc is the only way to get it to Linus
+without conflicts.  (Alternatively I can take it in mmc-next and
+Linus can handle the conflicts.)
+
+Thanks!
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
