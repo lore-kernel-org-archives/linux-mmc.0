@@ -1,83 +1,47 @@
-From: "Torne (Richard Coles)" <torne@google.com>
-Subject: [PATCH] MMC: core: cap MMC card timeouts at 2 seconds.
-Date: Mon, 14 May 2012 16:51:28 +0100
-Message-ID: <1337010688-30459-1-git-send-email-torne@google.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f74.google.com ([74.125.83.74]:43975 "EHLO
-	mail-ee0-f74.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752009Ab2ENPwL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 May 2012 11:52:11 -0400
-Received: by eeit10 with SMTP id t10so265255eei.1
-        for <linux-mmc@vger.kernel.org>; Mon, 14 May 2012 08:52:10 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2] mmc: dt: Consolidate DT bindings
+Date: Mon, 14 May 2012 19:53:45 +0000
+Message-ID: <201205141953.45616.arnd@arndb.de>
+References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org> <201205131946.33109.arnd@arndb.de> <87pqa7suyk.fsf@laptop.org>
+Mime-Version: 1.0
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <87pqa7suyk.fsf@laptop.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Viresh Kumar <viresh.kumar@st.com>, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, rob.herring@calxeda.com, Anton Vorontsov <anton.vorontsov@linaro.org>, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, kgene.kim@samsung.com, Lee Jones <lee.jones@linaro.org>, linux-arm-kernel@lists.infradead.org, Olof Johansson <olof@lixom.net>
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linus.walleij@linaro.org, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "Torne (Richard Coles)" <torne@google.com>
 
-From: "Torne (Richard Coles)" <torne@google.com>
+On Sunday 13 May 2012, Chris Ball wrote:
+> Hi Arnd,
+> 
+> On Sun, May 13 2012, Arnd Bergmann wrote:
+> > I've verified that there are no conflicts with anything we have in
+> > arm-soc right now, so I think it should just go through your
+> > tree.
+> 
+> Ah, I based the patch on latest linux-next.  That's why there aren't
+> conflicts against arm-soc, but there are conflicts (in the omap and
+> tegra dts changes) between the patch and Linus master/mmc-next:
+> 
+> Applying: mmc: dt: Consolidate DT bindings
+> error: patch failed: arch/arm/boot/dts/omap3-beagle.dts:57
+> error: patch failed: arch/arm/boot/dts/omap4-panda.dts:55
+> error: patch failed: arch/arm/boot/dts/omap4-sdp.dts:94
+> error: patch failed: arch/arm/boot/dts/tegra-cardhu.dts:141
+> error: patch failed: arch/arm/boot/dts/tegra-harmony.dts:335
+> error: patch failed: arch/arm/boot/dts/tegra-ventana.dts:338
+> Patch failed at 0001 mmc: dt: Consolidate DT bindings
+> 
+> So I think merging via arm-soc is the only way to get it to Linus
+> without conflicts.  (Alternatively I can take it in mmc-next and
+> Linus can handle the conflicts.)
 
-MMC CSD info can specify very large, ridiculous timeouts, big enough to
-overflow timeout_ns on 32-bit machines. This can result in the card
-timing out on every operation because the wrapped timeout value is far
-too small.
+I've created a drivers/mmc branch with this patch and its direct dependencies
+now and pulled that into the next/drivers branch of arm-soc
 
-Fix the overflow by calculating the timeout in microseconds first and
-capping the result at 2 seconds.  Cards specifying longer timeouts are
-almost certainly insane, and host controllers generally cannot support
-timeouts that long in any case.
+Thanks,
 
-2 seconds should be plenty of time for any card to actually function;
-the timeout calculation code is already using 1 second as a "worst case"
-timeout for cards running in SPI mode.
-
-Signed-off-by: Torne (Richard Coles) <torne@google.com>
----
- drivers/mmc/core/core.c |   18 ++++++++++++++----
- 1 files changed, 14 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index ba821fe..368452e 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -488,7 +488,7 @@ EXPORT_SYMBOL(mmc_wait_for_cmd);
-  */
- void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
- {
--	unsigned int mult;
-+	unsigned int mult, timeout_us;
- 
- 	/*
- 	 * SDIO cards only define an upper 1 s limit on access.
-@@ -511,16 +511,26 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
- 	if (data->flags & MMC_DATA_WRITE)
- 		mult <<= card->csd.r2w_factor;
- 
--	data->timeout_ns = card->csd.tacc_ns * mult;
-+	/*
-+	 * The timeout in nanoseconds may overflow, so calculate it in
-+	 * microseconds first. Cap it at two seconds both to avoid the overflow
-+	 * and also because host controllers cannot generally generate timeouts
-+	 * that long anyway.
-+	 */
-+	timeout_us = (card->csd.tacc_ns / 1000) * mult;
-+	if (timeout_us < 2000000)
-+		data->timeout_ns = card->csd.tacc_ns * mult;
-+	else
-+		data->timeout_ns = 2000000000;
-+
- 	data->timeout_clks = card->csd.tacc_clks * mult;
- 
- 	/*
- 	 * SD cards also have an upper limit on the timeout.
- 	 */
- 	if (mmc_card_sd(card)) {
--		unsigned int timeout_us, limit_us;
-+		unsigned int limit_us;
- 
--		timeout_us = data->timeout_ns / 1000;
- 		if (mmc_host_clk_rate(card->host))
- 			timeout_us += data->timeout_clks * 1000 /
- 				(mmc_host_clk_rate(card->host) / 1000);
--- 
-1.7.7.3
-
+	Arnd
