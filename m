@@ -1,87 +1,66 @@
-From: Dirk Behme <dirk.behme@de.bosch.com>
-Subject: [PATCH 4/4 v2] mmc: sdhci-esdhc-imx: Workaround for SD dat1 glitch causes system panic
-Date: Mon, 14 May 2012 10:05:59 +0200
-Message-ID: <1336982759-3627-1-git-send-email-dirk.behme@de.bosch.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: yongd <yongd@marvell.com>
+Subject: [PATCH] mmc:sdio:guarantee setting card data bus width as 4-bit
+Date: Mon, 14 May 2012 16:35:10 +0800
+Message-ID: <1336984510-9723-1-git-send-email-yongd@marvell.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from imta21.fe.bosch.de ([139.15.243.226]:15994 "EHLO
-	imta21.fe.bosch.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752402Ab2ENIHG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 May 2012 04:07:06 -0400
-Received: from smtp2-v.fe.bosch.de (imta24.fe.bosch.de [139.15.243.27])
-	by imta21.fe.bosch.de (Postfix) with ESMTP id 6579A28039D
-	for <linux-mmc@vger.kernel.org>; Mon, 14 May 2012 10:00:31 +0200 (CEST)
-Received: from vsmta12.fe.internet.bosch.com (unknown [10.4.98.30])
-	by imta24.fe.bosch.de (Postfix) with ESMTP id 17704B0022A
-	for <linux-mmc@vger.kernel.org>; Mon, 14 May 2012 09:59:47 +0200 (CEST)
-Received: from localhost (vsgw2.fe.internet.bosch.com [10.4.98.13])
-	by vsmta12.fe.internet.bosch.com (Postfix) with SMTP id 93A9B1AC05D0
-	for <linux-mmc@vger.kernel.org>; Mon, 14 May 2012 10:06:18 +0200 (CEST)
+Received: from na3sys009aog116.obsmtp.com ([74.125.149.240]:60572 "HELO
+	na3sys009aog116.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751499Ab2ENIfm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 May 2012 04:35:42 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: RichardZhu <richard.zhu@linaro.org>, Tony Lin <tony.lin@freescale.com>, Wolfram Sang <w.sang@pengutronix.de>, Philipp Ahmann <pahmann@de.adit-jv.com>
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: prakity@marvell.com, ohad@wizery.com, linus.walleij@linaro.org, ulf.hansson@stericsson.com, linux-kernel@vger.kernel.org, yongd <yongd@marvell.com>
 
-From: RichardZhu <richard.zhu@linaro.org>
+  SDIO_CCCR_IF[1:0] in SDIO card is used for card data bus width
+setting as below,
+     00b: 1-bit bus
+     01b: Reserved
+     10b: 4-bit bus
+     11b: 8-bit bus(only for embedded SDIO)
+  And sdio_enable_wide is for setting data bus width as 4-bit. But
+currently, it 1stly read the register, 2ndly OR' 1b with SDIO_CCCR_IF[1],
+and then write it back.
+  As we can see, such way is based on such assumption that the
+SDIO_CCCR_IF[0] is always 0. Apparently, this is not right.
 
-Some SD cards insertions will cause a glitch on SD dat1
-which is also a card interrupt signal. Thus the wrongly
-generated card interrupt will make system panic because
-there's no registered sdio interrupt handler.
-This patch fixes this issue.
-
-Note: This is a workaround for i.MX6 version 1.0 silicon. It's
-      fixed in hardware in version 1.1 silicon.
-
-Signed-off-by: Tony Lin <tony.lin@freescale.com>
-Signed-off-by: RichardZhu <richard.zhu@linaro.org>
-CC: Wolfram Sang <w.sang@pengutronix.de>
-CC: Philipp Ahmann <pahmann@de.adit-jv.com>
+Signed-off-by: yongd <yongd@marvell.com>
 ---
-v2: * Update the comment with "the following problem"
-    * Remove merge error "if (!is_imx25_esdhc(imx_data))"
+ drivers/mmc/core/sdio.c  |    6 ++++++
+ include/linux/mmc/sdio.h |    2 ++
+ 2 files changed, 8 insertions(+)
 
-Note: Patches 1 - 3 of this series are not changed and therefore not re-sent.
-      They are still unchanged:
-      http://marc.info/?l=linux-mmc&m=133664296609699&w=3
-
- drivers/mmc/host/sdhci-esdhc-imx.c |   15 +++++++++++++++
- 1 files changed, 15 insertions(+), 0 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index a13e75b..f2e17e1 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -486,6 +486,7 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 	struct clk *clk;
- 	int err;
- 	struct pltfm_imx_data *imx_data;
-+	u32 reg;
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 13d0e95..6b6f902 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -218,6 +218,12 @@ static int sdio_enable_wide(struct mmc_card *card)
+ 	if (ret)
+ 		return ret;
  
- 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata);
- 	if (IS_ERR(host))
-@@ -513,6 +514,20 @@ static int __devinit sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 	clk_prepare_enable(clk);
- 	pltfm_host->clk = clk;
- 
-+	/* disable card interrupt enable bit, and clear status bit
-+	 * the default value of this enable bit is 1, but it should
-+	 * be 0 regarding to standard host controller spec 2.1.3.
-+	 * if this bit is 1, it may cause the following problem.
-+	 * there's dat1 glitch when some cards inserting into the slot,
-+	 * thus wrongly generate a card interrupt that will cause
-+	 * system panic because it lacks of sdio handler
-+	 * following code will solve the problem.
-+	 */
-+	reg = sdhci_readl(host, SDHCI_INT_ENABLE);
-+	reg &= ~SDHCI_INT_CARD_INT;
-+	sdhci_writel(host, reg, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, SDHCI_INT_CARD_INT, SDHCI_INT_STATUS);
++	if ((ctrl & SDIO_BUS_WIDTH_MASK)
++				== SDIO_BUS_WIDTH_RESERVED)
++		printk(KERN_WARNING"SDIO_CCCR_IF is invalid: %d\n", ctrl);
 +
- 	host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
++	/* set as 4-bit bus width */
++	ctrl &= ~SDIO_BUS_WIDTH_MASK;
+ 	ctrl |= SDIO_BUS_WIDTH_4BIT;
  
- 	if (is_imx25_esdhc(imx_data) || is_imx35_esdhc(imx_data))
+ 	ret = mmc_io_rw_direct(card, 1, 0, SDIO_CCCR_IF, ctrl, NULL);
+diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
+index c9fe66c..17446d3 100644
+--- a/include/linux/mmc/sdio.h
++++ b/include/linux/mmc/sdio.h
+@@ -98,7 +98,9 @@
+ 
+ #define SDIO_CCCR_IF		0x07	/* bus interface controls */
+ 
++#define  SDIO_BUS_WIDTH_MASK	0x03	/* data bus width setting */
+ #define  SDIO_BUS_WIDTH_1BIT	0x00
++#define  SDIO_BUS_WIDTH_RESERVED 0x01
+ #define  SDIO_BUS_WIDTH_4BIT	0x02
+ #define  SDIO_BUS_ECSI		0x20	/* Enable continuous SPI interrupt */
+ #define  SDIO_BUS_SCSI		0x40	/* Support continuous SPI interrupt */
 -- 
-1.7.0.4
+1.7.9.5
 
