@@ -1,21 +1,21 @@
 From: mani <manishrma@gmail.com>
 Subject: Re: [PATCHv2 00/16] [FS, MM, block, MMC]: eMMC High Priority
  Interrupt Feature
-Date: Mon, 14 May 2012 13:13:07 +0530
-Message-ID: <CAB+TZU-r6aYn8WRZjZ0DojxMTMoc5MSx7c93W0pAad1coscPwQ@mail.gmail.com>
+Date: Mon, 14 May 2012 13:23:53 +0530
+Message-ID: <CAB+TZU8jm_snfQoHRs_qpV_S7-g3Q9Ze2r1RjCYSftMxK6=Z6Q@mail.gmail.com>
 References: <1336054995-22988-1-git-send-email-svenkatr@ti.com>
  <4FA8CF5E.1070202@kernel.org> <CANfBPZ-d-0FqY8Gruv+KDNoL3+FoQ68JEnxya5PydhY80x8yhA@mail.gmail.com>
- <4FA9BE10.1030007@kernel.org>
+ <4FA9BE10.1030007@kernel.org> <CAB+TZU-r6aYn8WRZjZ0DojxMTMoc5MSx7c93W0pAad1coscPwQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/alternative; boundary=20cf307cfe7aebe59904bffa3d26
+Content-Type: multipart/alternative; boundary=20cf307cfe7a610c2404bffa64b2
 Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <4FA9BE10.1030007@kernel.org>
+In-Reply-To: <CAB+TZU-r6aYn8WRZjZ0DojxMTMoc5MSx7c93W0pAad1coscPwQ@mail.gmail.com>
 Sender: owner-linux-mm@kvack.org
 To: Minchan Kim <minchan@kernel.org>
-Cc: linux-mmc@vger.kernel.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, svenkatr@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
---20cf307cfe7aebe59904bffa3d26
+--20cf307cfe7a610c2404bffa64b2
 Content-Type: text/plain; charset=ISO-8859-1
 
 Dear Kim,
@@ -45,35 +45,25 @@ Please correct me if i am wrong.
 Thanks & Regards
 Manish
 
---20cf307cfe7aebe59904bffa3d26
+--20cf307cfe7a610c2404bffa64b2
 Content-Type: text/html; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
 
-Dear Kim, <br><br>I have a query here .. <br><div class=3D"gmail_quote"><bl=
-ockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #=
-ccc solid;padding-left:1ex"><div class=3D"im">
+Dear Kim, <br><br>I have a query here .. <br><div class="im"><div class="gmail_quote"><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><div>
 <br>
-</div>My point is that it would be better for read to not preempt write-for=
--page_reclaim.<br>
+</div>My point is that it would be better for read to not preempt write-for-page_reclaim.<br>
 And we can identify it by PG_reclaim. You can get the idea.<br>
-<br></blockquote></div>I think If there is no page available then no read w=
-ill proceed. <br>When read request comes it reclaim the pages (starts the w=
-rite if syncable pages ) and get back after reclaiming the pages. <br>
+<br></blockquote></div></div>I think If there is no page available then no read will proceed. <br>When read request comes it reclaim the pages (starts the write if syncable pages ) and get back after reclaiming the pages. <br>
 
-Only then a read request will come to the MMC subsystem. <br>And i think th=
-e reclaim algorithm will reclaim some substantial amount of pages at a time=
- instead of a single page. <br>So if we get few pages during the reclamatio=
-n so there will be no problem in halting the another write ops for proceedi=
-ng the reads ? <br>
 
-<br>Can we think of a scenario when we are reclaiming the pages and write o=
-ps is going on where as a high priority read for the interrupt handler is p=
-ending ?<br><br>Please correct me if i am wrong.<br><br>Thanks &amp; Regard=
-s<br>
+Only then a read request will come to the MMC subsystem. <br>And i think the reclaim algorithm will reclaim some substantial amount of pages at a time instead of a single page. <br>So
+ if we get few pages during the reclamation so there will be no problem 
+in halting the another write ops for proceeding the reads ? <br>
+<br>Can we think of a scenario when we are reclaiming the pages and 
+write ops is going on where as a high priority read for the interrupt 
+handler is pending ?<br><br>Please correct me if i am wrong.<br><br>Thanks &amp; Regards<br>
+Manish
 
-Manish <br>
-
---20cf307cfe7aebe59904bffa3d26--
+--20cf307cfe7a610c2404bffa64b2--
 
 --
 To unsubscribe, send a message with 'unsubscribe linux-mm' in
