@@ -1,113 +1,157 @@
 From: Saugata Das <saugata.das@linaro.org>
-Subject: Re: [RFC 1/2] [MMC-4.5] Disable emulation
-Date: Mon, 14 May 2012 20:21:51 +0530
-Message-ID: <CAKLKtzfihpmU4Xhwj_u5oYkYo4Ra5twaPB3-WvVkzxF3EAVYAA@mail.gmail.com>
+Subject: Re: [RFC 2/2] [MMC-4.5] [MMC UTIL] Disable emulation
+Date: Mon, 14 May 2012 20:39:15 +0530
+Message-ID: <CAKLKtzdcNe_8nT+1GfE3xRDZLnXOtO_fBn317c70+Kw2eVsZGw@mail.gmail.com>
 References: <1336574901-26579-1-git-send-email-saugata.das@stericsson.com>
-	<4FB0DD88.2050005@codeaurora.org>
+	<1336574901-26579-2-git-send-email-saugata.das@stericsson.com>
+	<4FB0E38B.2060301@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:34858 "EHLO
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:49740 "EHLO
 	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752402Ab2ENOvw convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 May 2012 10:51:52 -0400
-Received: by qcro28 with SMTP id o28so3362501qcr.19
-        for <linux-mmc@vger.kernel.org>; Mon, 14 May 2012 07:51:52 -0700 (PDT)
-In-Reply-To: <4FB0DD88.2050005@codeaurora.org>
+	with ESMTP id S1755780Ab2ENPJQ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 May 2012 11:09:16 -0400
+Received: by qcro28 with SMTP id o28so3381125qcr.19
+        for <linux-mmc@vger.kernel.org>; Mon, 14 May 2012 08:09:15 -0700 (PDT)
+In-Reply-To: <4FB0E38B.2060301@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Subhash Jadavani <subhashj@codeaurora.org>
 Cc: Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org, patches@linaro.org
 
-On 14 May 2012 15:55, Subhash Jadavani <subhashj@codeaurora.org> wrote:
+On 14 May 2012 16:20, Subhash Jadavani <subhashj@codeaurora.org> wrote:
 > On 5/9/2012 8:18 PM, Saugata Das wrote:
 >>
 >> From: Saugata Das<saugata.das@linaro.org>
 >>
->> This patch adds the support for large sector size of 4KB by disablin=
-g
->> emulation.
->> This patch passes eMMC DATA_SECTOR_SIZE as the logical block size du=
-ring
->> mmc_blk_alloc_req.
->>
->> In order to use this patch for 4KB sector size, ensure that
->> USE_NATIVE_SECTOR
->> is enabled, partition table is 4KB sector size aligned and file syst=
-em
->> block
->> size is 4KB.
+>> In this patch, we add utility to disable emulation mode in the eMMC-=
+4.5.
+>> This is done to increase the data sector size to 4KB.
 >>
 >> Signed-off-by: Saugata Das<saugata.das@linaro.org>
 >> ---
->> =A0drivers/mmc/card/block.c | =A0 =A06 +++++-
->> =A0drivers/mmc/core/mmc.c =A0 | =A0 =A02 ++
->> =A02 files changed, 7 insertions(+), 1 deletions(-)
+>> =A0mmc.c =A0 =A0 =A0| =A0 =A06 ++++++
+>> =A0mmc.h =A0 =A0 =A0| =A0 =A02 ++
+>> =A0mmc_cmds.c | =A0 42 ++++++++++++++++++++++++++++++++++++++++++
+>> =A0mmc_cmds.h | =A0 =A01 +
+>> =A04 files changed, 51 insertions(+), 0 deletions(-)
 >>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index a7c75d8..0e54118e 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -1517,7 +1517,11 @@ static struct mmc_blk_data
->> *mmc_blk_alloc_req(struct mmc_card *card,
->> =A0 =A0 =A0 =A0snprintf(md->disk->disk_name, sizeof(md->disk->disk_n=
-ame),
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "mmcblk%d%s", md->name_idx, subname =
-? subname : "");
+>> diff --git a/mmc.c b/mmc.c
+>> index c27fc24..43b95aa 100644
+>> --- a/mmc.c
+>> +++ b/mmc.c
+>> @@ -65,6 +65,12 @@ static struct Command commands[] =3D {
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0"Set the eMMC writeprotect status of<=
+device>.",
+>> =A0 =A0 =A0 =A0 =A0NULL
+>> =A0 =A0 =A0 =A0},
+>> + =A0 =A0 =A0 { do_disable_emulation, -1,
+>> + =A0 =A0 =A0 =A0 "disable emulation", "<device>\n"
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 "Set the eMMC data sector size to 4KB =
+by disabling
+>> emulation<device>.",
+>> + =A0 =A0 =A0 =A0 NULL
+>> + =A0 =A0 =A0 },
+>> +
+>> =A0 =A0 =A0 =A0{ 0, 0, 0, 0 }
+>> =A0};
 >>
->> - =A0 =A0 =A0 blk_queue_logical_block_size(md->queue.queue, 512);
->> + =A0 =A0 =A0 if (mmc_card_mmc(card))
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 blk_queue_logical_block_size(md->queue=
-=2Equeue,
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_sec=
-tor_size);
->
-> Shouldn't we also set the physical block size to NATIVE_SECTOR_SIZE v=
-alue?
->
-
-The physical block size gets set from blk_queue_logical_block_size
-
-> Other question,
-> Did you find any eMMC device which 4K native sector size? If yes, ple=
-ase
-> share the test results.
->
-
-I have not yet seen the eMMC device implementing 4KB sector. But MMC
-vendors are promising this feature, so I prepared this patch. So far,
-I have tested by setting "data_sector_size" to 4KB (doing a hack in
-mmc_read_ext_csd), configuring file system to have 4KB block size and
-mounting it.
-
-> Other than that, this patch looks good to me.
->
-> Regards,
-> Subhash
->
->> + =A0 =A0 =A0 else
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 blk_queue_logical_block_size(md->queue=
-=2Equeue, 512);
->> =A0 =A0 =A0 =A0set_capacity(md->disk, size);
+>> diff --git a/mmc.h b/mmc.h
+>> index 3af36f1..a2050fa 100644
+>> --- a/mmc.h
+>> +++ b/mmc.h
+>> @@ -35,6 +35,8 @@
+>> =A0#define EXT_CSD_PART_SWITCH_TIME =A0 =A0 =A0199
+>> =A0#define EXT_CSD_BOOT_CFG =A0 =A0 =A0 =A0 =A0 =A0 =A0179
+>> =A0#define EXT_CSD_BOOT_WP =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ 173
+>> +#define EXT_CSD_NATIVE_SECTOR_SIZE =A0 =A0 63 /* R */
+>> +#define EXT_CSD_NATIVE_SECTOR =A062 /* R/W */
 >>
->> =A0 =A0 =A0 =A0if (mmc_host_cmd23(card->host)) {
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 02914d6..8dcbe995 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -533,6 +533,8 @@ static int mmc_read_ext_csd(struct mmc_card *car=
-d, u8
->> *ext_csd)
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0} else {
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0card->ext_csd.data_ta=
-g_unit_size =3D 0;
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0}
+>> =A0/*
+>> =A0 * EXT_CSD field definitions
+>> diff --git a/mmc_cmds.c b/mmc_cmds.c
+>> index 4562cef..2713ccd 100644
+>> --- a/mmc_cmds.c
+>> +++ b/mmc_cmds.c
+>> @@ -168,6 +168,48 @@ int do_writeprotect_set(int nargs, char **argv)
+>> =A0 =A0 =A0 =A0return ret;
+>> =A0}
+>>
+>> +
+>> +int do_disable_emulation(int nargs, char **argv)
+>> +{
+>> + =A0 =A0 =A0 __u8 ext_csd[512], native_sector_size;
+>> + =A0 =A0 =A0 int fd, ret;
+>> + =A0 =A0 =A0 char *device;
+>> +
+>> + =A0 =A0 =A0 CHECK(nargs !=3D 2, "Usage: mmc</path/to/mmcblkX>\n", =
+exit(1));
+>> +
+>> + =A0 =A0 =A0 device =3D argv[1];
+>> +
+>> + =A0 =A0 =A0 fd =3D open(device, O_RDWR);
+>> + =A0 =A0 =A0 if (fd< =A00) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 perror("open");
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 exit(1);
+>> + =A0 =A0 =A0 }
+>> +
+>> + =A0 =A0 =A0 ret =3D read_extcsd(fd, ext_csd);
+>> + =A0 =A0 =A0 if (ret) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 fprintf(stderr, "Could not read EXT_CS=
+D from %s\n",
+>> device);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 exit(1);
+>> + =A0 =A0 =A0 }
+>> +
+>> + =A0 =A0 =A0 native_sector_size =3D ext_csd[EXT_CSD_NATIVE_SECTOR_S=
+IZE];
+>> +
+>> + =A0 =A0 =A0 if (native_sector_size) {
+>
+> Before setting the use_native_sector field, can you also check if
+> NATIVE_SECTOR_SIZE and DATA_SECTOR_SIZE fields are different. If they=
+ are
+> same then there is no need to set the USE_NATIVE_SECTOR size field.
+>
+
+Ok
+
+>
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D write_extcsd_value(fd, EXT_CSD=
+_NATIVE_SECTOR, 1);
+>> +
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret) {
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 fprintf(stderr, "Could=
+ not write 0x%02x to "
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "EXT_C=
+SD[%d] in %s\n",
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 1, EXT=
+_CSD_BOOT_WP, device);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 exit(1);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
 >> + =A0 =A0 =A0 } else {
->> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 card->ext_csd.data_sector_size =3D 512=
-;
->> =A0 =A0 =A0 =A0}
->>
->> =A0out:
+>> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 printf("MMC does not support 4KB nativ=
+e sector\n");
+>> + =A0 =A0 =A0 }
+>> +
+>> + =A0 =A0 =A0 return ret;
+>> +}
+>> +
+>> +
+>> =A0int do_read_extcsd(int nargs, char **argv)
+>> =A0{
+>> =A0 =A0 =A0 =A0__u8 ext_csd[512], ext_csd_rev, reg;
+>> diff --git a/mmc_cmds.h b/mmc_cmds.h
+>> index 66e9acb..dd107d5 100644
+>> --- a/mmc_cmds.h
+>> +++ b/mmc_cmds.h
+>> @@ -19,3 +19,4 @@ int do_read_extcsd(int nargs, char **argv);
+>> =A0int do_write_extcsd(int nargs, char **argv);
+>> =A0int do_writeprotect_get(int nargs, char **argv);
+>> =A0int do_writeprotect_set(int nargs, char **argv);
+>> +int do_disable_emulation(int nargs, char **argv);
 >
 >
