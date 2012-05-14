@@ -1,71 +1,83 @@
-From: Ulf Hansson <ulf.hansson@stericsson.com>
-Subject: Re: [PATCH v3 2/2] mmc4.5: host: poweroff notify rework
-Date: Mon, 14 May 2012 09:20:37 +0200
-Message-ID: <4FB0B245.7000206@stericsson.com>
-References: <1336398084-23203-1-git-send-email-girish.shivananjappa@linaro.org> <1336398084-23203-2-git-send-email-girish.shivananjappa@linaro.org>
+From: mani <manishrma@gmail.com>
+Subject: Re: [PATCHv2 00/16] [FS, MM, block, MMC]: eMMC High Priority
+ Interrupt Feature
+Date: Mon, 14 May 2012 13:13:07 +0530
+Message-ID: <CAB+TZU-r6aYn8WRZjZ0DojxMTMoc5MSx7c93W0pAad1coscPwQ@mail.gmail.com>
+References: <1336054995-22988-1-git-send-email-svenkatr@ti.com>
+ <4FA8CF5E.1070202@kernel.org> <CANfBPZ-d-0FqY8Gruv+KDNoL3+FoQ68JEnxya5PydhY80x8yhA@mail.gmail.com>
+ <4FA9BE10.1030007@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eu1sys200aog117.obsmtp.com ([207.126.144.143]:59965 "EHLO
-	eu1sys200aog117.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754569Ab2ENHUs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 May 2012 03:20:48 -0400
-In-Reply-To: <1336398084-23203-2-git-send-email-girish.shivananjappa@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/alternative; boundary=20cf307cfe7aebe59904bffa3d26
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <4FA9BE10.1030007@kernel.org>
+Sender: owner-linux-mm@kvack.org
+To: Minchan Kim <minchan@kernel.org>
+Cc: linux-mmc@vger.kernel.org, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Girish K S <girish.shivananjappa@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, "saugata.das@linaro.org" <saugata.das@linaro.org>
 
-Hi Girish,
+--20cf307cfe7aebe59904bffa3d26
+Content-Type: text/plain; charset=ISO-8859-1
 
-In patch 1/2 you break the compilation of these host drivers. In this 
-patch 2/2 you fix it again. I would prefer you include these fixes in 
-the same patch instead of splitting them into two pieces.
+Dear Kim,
 
-Kind regards
-Ulf Hansson
+I have a query here ..
 
-On 05/07/2012 03:41 PM, Girish K S wrote:
-> This patch changes the structure member name to maintain consistency
-> of name for the poweroff notify feature
 >
-> Signed-off-by: Girish K S<girish.shivananjappa@linaro.org>
-> ---
->   drivers/mmc/host/dw_mmc.c |    4 ++--
->   drivers/mmc/host/sdhci.c  |    4 ++--
->   2 files changed, 4 insertions(+), 4 deletions(-)
+> My point is that it would be better for read to not preempt
+> write-for-page_reclaim.
+> And we can identify it by PG_reclaim. You can get the idea.
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index ab3fc46..09ac734 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1791,9 +1791,9 @@ static int __init dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->   		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
->
->   	if (mmc->caps2&  MMC_CAP2_POWEROFF_NOTIFY)
-> -		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_SHORT;
-> +		mmc->poweroff_notify_type = MMC_HOST_PW_OFF_NOTIFY_SHORT;
->   	else
-> -		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
-> +		mmc->poweroff_notify_type = MMC_HOST_PW_OFF_NOTIFY_NONE;
->
->   	if (host->pdata->blk_settings) {
->   		mmc->max_segs = host->pdata->blk_settings->max_segs;
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index e626732..958e5fe 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2817,9 +2817,9 @@ int sdhci_add_host(struct sdhci_host *host)
->   	 * set notify to short power off notify timeout value.
->   	 */
->   	if (mmc->caps2&  MMC_CAP2_POWEROFF_NOTIFY)
-> -		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_SHORT;
-> +		mmc->poweroff_notify_type = MMC_HOST_PW_OFF_NOTIFY_SHORT;
->   	else
-> -		mmc->power_notify_type = MMC_HOST_PW_NOTIFY_NONE;
-> +		mmc->poweroff_notify_type = MMC_HOST_PW_OFF_NOTIFY_NONE;
->
->   	/* Initial value for re-tuning timer count */
->   	host->tuning_count = (caps[1]&  SDHCI_RETUNING_TIMER_COUNT_MASK)>>
+> I think If there is no page available then no read will proceed.
+When read request comes it reclaim the pages (starts the write if syncable
+pages ) and get back after reclaiming the pages.
+Only then a read request will come to the MMC subsystem.
+And i think the reclaim algorithm will reclaim some substantial amount of
+pages at a time instead of a single page.
+So if we get few pages during the reclamation so there will be no problem
+in halting the another write ops for proceeding the reads ?
 
+Can we think of a scenario when we are reclaiming the pages and write ops
+is going on where as a high priority read for the interrupt handler is
+pending ?
+
+Please correct me if i am wrong.
+
+Thanks & Regards
+Manish
+
+--20cf307cfe7aebe59904bffa3d26
+Content-Type: text/html; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Dear Kim, <br><br>I have a query here .. <br><div class=3D"gmail_quote"><bl=
+ockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #=
+ccc solid;padding-left:1ex"><div class=3D"im">
+<br>
+</div>My point is that it would be better for read to not preempt write-for=
+-page_reclaim.<br>
+And we can identify it by PG_reclaim. You can get the idea.<br>
+<br></blockquote></div>I think If there is no page available then no read w=
+ill proceed. <br>When read request comes it reclaim the pages (starts the w=
+rite if syncable pages ) and get back after reclaiming the pages. <br>
+
+Only then a read request will come to the MMC subsystem. <br>And i think th=
+e reclaim algorithm will reclaim some substantial amount of pages at a time=
+ instead of a single page. <br>So if we get few pages during the reclamatio=
+n so there will be no problem in halting the another write ops for proceedi=
+ng the reads ? <br>
+
+<br>Can we think of a scenario when we are reclaiming the pages and write o=
+ps is going on where as a high priority read for the interrupt handler is p=
+ending ?<br><br>Please correct me if i am wrong.<br><br>Thanks &amp; Regard=
+s<br>
+
+Manish <br>
+
+--20cf307cfe7aebe59904bffa3d26--
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
