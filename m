@@ -1,16 +1,16 @@
 From: Subhash Jadavani <subhashj@codeaurora.org>
 Subject: Re: [RFC 2/2] [MMC-4.5] [MMC UTIL] Disable emulation
-Date: Mon, 14 May 2012 16:09:51 +0530
-Message-ID: <4FB0E0F7.3010601@codeaurora.org>
+Date: Mon, 14 May 2012 16:20:51 +0530
+Message-ID: <4FB0E38B.2060301@codeaurora.org>
 References: <1336574901-26579-1-git-send-email-saugata.das@stericsson.com> <1336574901-26579-2-git-send-email-saugata.das@stericsson.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine02.qualcomm.com ([199.106.114.251]:27356 "EHLO
+Received: from wolverine02.qualcomm.com ([199.106.114.251]:11622 "EHLO
 	wolverine02.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753787Ab2ENKjz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 May 2012 06:39:55 -0400
+	with ESMTP id S1755331Ab2ENKuz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 May 2012 06:50:55 -0400
 In-Reply-To: <1336574901-26579-2-git-send-email-saugata.das@stericsson.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -40,8 +40,6 @@ On 5/9/2012 8:18 PM, Saugata Das wrote:
 >   	  NULL
 >   	},
 > +	{ do_disable_emulation, -1,
-can we add good name? which emulation we are disabling? It's 512B 
-emulation mode, we are disabling.
 > +	  "disable emulation", "<device>\n"
 > +		"Set the eMMC data sector size to 4KB by disabling emulation<device>.",
 > +	  NULL
@@ -60,7 +58,6 @@ emulation mode, we are disabling.
 >   #define EXT_CSD_BOOT_WP			173
 > +#define EXT_CSD_NATIVE_SECTOR_SIZE	63 /* R */
 > +#define EXT_CSD_NATIVE_SECTOR	62 /* R/W */
-Can we name this as EXT_CSD_USE_NATIVE_SECTOR?
 >
 >   /*
 >    * EXT_CSD field definitions
@@ -98,10 +95,11 @@ Can we name this as EXT_CSD_USE_NATIVE_SECTOR?
 > +	native_sector_size = ext_csd[EXT_CSD_NATIVE_SECTOR_SIZE];
 > +
 > +	if (native_sector_size) {
+Before setting the use_native_sector field, can you also check if 
+NATIVE_SECTOR_SIZE and DATA_SECTOR_SIZE fields are different. If they 
+are same then there is no need to set the USE_NATIVE_SECTOR size field.
+
 > +		ret = write_extcsd_value(fd, EXT_CSD_NATIVE_SECTOR, 1);
-Just curious, how are we going to power cycle the device after setting 
-the USE_NATIVE_SECTOR? because DATA_SECTOR_SIZE won't be changed to 4K 
-until we explicitly power cycle after setting this field.
 > +
 > +		if (ret) {
 > +			fprintf(stderr, "Could not write 0x%02x to "
