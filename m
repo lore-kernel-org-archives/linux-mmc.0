@@ -1,27 +1,27 @@
 From: Saugata Das <saugata.das@linaro.org>
 Subject: Re: [RFC 2/2] [MMC-4.5] [MMC UTIL] Disable emulation
-Date: Mon, 14 May 2012 20:39:15 +0530
-Message-ID: <CAKLKtzdcNe_8nT+1GfE3xRDZLnXOtO_fBn317c70+Kw2eVsZGw@mail.gmail.com>
+Date: Mon, 14 May 2012 20:55:30 +0530
+Message-ID: <CAKLKtzedRuxtCbfFswe1efaOXD_26OKdPkCMVNFMHJMdnC3-Qw@mail.gmail.com>
 References: <1336574901-26579-1-git-send-email-saugata.das@stericsson.com>
 	<1336574901-26579-2-git-send-email-saugata.das@stericsson.com>
-	<4FB0E38B.2060301@codeaurora.org>
+	<4FB0E0F7.3010601@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:49740 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755780Ab2ENPJQ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 May 2012 11:09:16 -0400
-Received: by qcro28 with SMTP id o28so3381125qcr.19
-        for <linux-mmc@vger.kernel.org>; Mon, 14 May 2012 08:09:15 -0700 (PDT)
-In-Reply-To: <4FB0E38B.2060301@codeaurora.org>
+Received: from mail-qa0-f49.google.com ([209.85.216.49]:59437 "EHLO
+	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756892Ab2ENPZb convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 May 2012 11:25:31 -0400
+Received: by qabj40 with SMTP id j40so4812132qab.1
+        for <linux-mmc@vger.kernel.org>; Mon, 14 May 2012 08:25:30 -0700 (PDT)
+In-Reply-To: <4FB0E0F7.3010601@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Subhash Jadavani <subhashj@codeaurora.org>
 Cc: Saugata Das <saugata.das@stericsson.com>, linux-mmc@vger.kernel.org, patches@linaro.org
 
-On 14 May 2012 16:20, Subhash Jadavani <subhashj@codeaurora.org> wrote:
+On 14 May 2012 16:09, Subhash Jadavani <subhashj@codeaurora.org> wrote:
 > On 5/9/2012 8:18 PM, Saugata Das wrote:
 >>
 >> From: Saugata Das<saugata.das@linaro.org>
@@ -48,6 +48,14 @@ device>.",
 >> =A0 =A0 =A0 =A0 =A0NULL
 >> =A0 =A0 =A0 =A0},
 >> + =A0 =A0 =A0 { do_disable_emulation, -1,
+>
+> can we add good name? which emulation we are disabling? It's 512B emu=
+lation
+> mode, we are disabling.
+>
+
+Ok
+
 >> + =A0 =A0 =A0 =A0 "disable emulation", "<device>\n"
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 "Set the eMMC data sector size to 4KB =
 by disabling
@@ -69,6 +77,12 @@ by disabling
  173
 >> +#define EXT_CSD_NATIVE_SECTOR_SIZE =A0 =A0 63 /* R */
 >> +#define EXT_CSD_NATIVE_SECTOR =A062 /* R/W */
+>
+> Can we name this as EXT_CSD_USE_NATIVE_SECTOR?
+>
+
+Ok
+
 >>
 >> =A0/*
 >> =A0 * EXT_CSD field definitions
@@ -110,18 +124,19 @@ D from %s\n",
 IZE];
 >> +
 >> + =A0 =A0 =A0 if (native_sector_size) {
->
-> Before setting the use_native_sector field, can you also check if
-> NATIVE_SECTOR_SIZE and DATA_SECTOR_SIZE fields are different. If they=
- are
-> same then there is no need to set the USE_NATIVE_SECTOR size field.
->
-
-Ok
-
->
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 ret =3D write_extcsd_value(fd, EXT_CSD=
 _NATIVE_SECTOR, 1);
+>
+> Just curious, how are we going to power cycle the device after settin=
+g the
+> USE_NATIVE_SECTOR? because DATA_SECTOR_SIZE won't be changed to 4K un=
+til we
+> explicitly power cycle after setting this field.
+>
+
+I will add a "printf" instructing the user to power cycle the eMMC at
+the end of the switch.
+
 >> +
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (ret) {
 >> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 fprintf(stderr, "Could=
