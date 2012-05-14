@@ -1,47 +1,45 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v2] mmc: dt: Consolidate DT bindings
-Date: Mon, 14 May 2012 19:53:45 +0000
-Message-ID: <201205141953.45616.arnd@arndb.de>
-References: <1328032576-9269-1-git-send-email-thomas.abraham@linaro.org> <201205131946.33109.arnd@arndb.de> <87pqa7suyk.fsf@laptop.org>
+From: "Al Cooper" <acooper@gmail.com>
+Subject: [PATCH] mmc: Limit MMC speed to 25MHz if HIGHSPEED CAPS bit is
+ not set.
+Date: Mon, 14 May 2012 16:11:54 -0400
+Message-ID: <1337026314-14003-1-git-send-email-acooper@gmail.com>
+References: <y>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <87pqa7suyk.fsf@laptop.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, Viresh Kumar <viresh.kumar@st.com>, patches@linaro.org, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, rob.herring@calxeda.com, Anton Vorontsov <anton.vorontsov@linaro.org>, linux-samsung-soc@vger.kernel.org, ben-linux@fluff.org, kgene.kim@samsung.com, Lee Jones <lee.jones@linaro.org>, linux-arm-kernel@lists.infradead.org, Olof Johansson <olof@lixom.net>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mms2.broadcom.com ([216.31.210.18]:3302 "EHLO mms2.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932341Ab2ENUNq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 May 2012 16:13:46 -0400
+In-Reply-To: <y>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org, cernekee@gmail.com
+Cc: Al Cooper <acooper@gmail.com>
 
-On Sunday 13 May 2012, Chris Ball wrote:
-> Hi Arnd,
-> 
-> On Sun, May 13 2012, Arnd Bergmann wrote:
-> > I've verified that there are no conflicts with anything we have in
-> > arm-soc right now, so I think it should just go through your
-> > tree.
-> 
-> Ah, I based the patch on latest linux-next.  That's why there aren't
-> conflicts against arm-soc, but there are conflicts (in the omap and
-> tegra dts changes) between the patch and Linus master/mmc-next:
-> 
-> Applying: mmc: dt: Consolidate DT bindings
-> error: patch failed: arch/arm/boot/dts/omap3-beagle.dts:57
-> error: patch failed: arch/arm/boot/dts/omap4-panda.dts:55
-> error: patch failed: arch/arm/boot/dts/omap4-sdp.dts:94
-> error: patch failed: arch/arm/boot/dts/tegra-cardhu.dts:141
-> error: patch failed: arch/arm/boot/dts/tegra-harmony.dts:335
-> error: patch failed: arch/arm/boot/dts/tegra-ventana.dts:338
-> Patch failed at 0001 mmc: dt: Consolidate DT bindings
-> 
-> So I think merging via arm-soc is the only way to get it to Linus
-> without conflicts.  (Alternatively I can take it in mmc-next and
-> Linus can handle the conflicts.)
+If the HIGHSPEED capabilities bit is not set, limit the MMC clock
+speed to 25MHz.
 
-I've created a drivers/mmc branch with this patch and its direct dependencies
-now and pulled that into the next/drivers branch of arm-soc
+Signed-off-by: Al Cooper <acooper@gmail.com>
+---
+ drivers/mmc/core/mmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Thanks,
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 54df5ad..912c893 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1045,7 +1045,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 				mmc_card_set_hs200(card);
+ 				mmc_set_timing(card->host,
+ 					       MMC_TIMING_MMC_HS200);
+-			} else {
++			} else if (host->caps & MMC_CAP_MMC_HIGHSPEED) {
+ 				mmc_card_set_highspeed(card);
+ 				mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+ 			}
+-- 
+1.7.6
 
-	Arnd
+
